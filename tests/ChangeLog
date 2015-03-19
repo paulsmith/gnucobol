@@ -1,7 +1,12 @@
 
+2015-03-19  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.src/syn_functions.at : (new) moved testsuite entries for
+	  FUNCTIONs to their own test definition (origin: syn_misc.at)
+
 2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* testsuite.src/syn_screen.at : Added first testsuite entries for
+	* testsuite.src/syn_screen.at : (new) Added first testsuite entries for
 	  SCREEN section
 
 2014-09-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
