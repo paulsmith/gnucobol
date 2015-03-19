@@ -1,4 +1,10 @@
 
+2015-02-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobgetopt.c (cob_getopt_long_long): List all ambiguous possibilities,
+	  applied patch of Ulrich Drepper (see glibc's BZ #7101 - 2011-05-15)
+	* cobgetopt.c: removed \n from msgids, converted all backtick to apostrophe
+
 2015-02-26  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: fixed buffer overflow in screen section ACCEPT

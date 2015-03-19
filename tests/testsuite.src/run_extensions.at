@@ -2894,7 +2894,7 @@ AT_DATA([prog5.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog --version --verbose -jkl], [0], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
-AT_CHECK([$COBCRUN prog2 --ver --vers], [0], [], [prog2: option `--ver' is ambiguous
+AT_CHECK([$COBCRUN prog2 --ver --vers], [0], [], [prog2: option '--ver' is ambiguous; possibilities: '--version' '--verbose'
 ])
 AT_CHECK([$COMPILE prog3.cob], [0], , [])
 AT_CHECK([./prog3 --version=lang --verbose=k --usage -j 5 -k6 -l], [0], [])

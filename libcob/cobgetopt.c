@@ -1,9 +1,8 @@
 /* Getopt for GNU.
-   NOTE: getopt is now part of the C library, so if you don't know what
+   NOTE: getopt is part of the C library, so if you don't know what
    "Keep this file name-space clean" means, talk to drepper@gnu.org
    before changing it!
-   Copyright (C) 1987,88,89,90,91,92,93,94,95,96,98,99,2000,2001,2002
-   	Free Software Foundation, Inc.
+   Copyright (C) 1987-2002,2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -17,9 +16,8 @@
    Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to
-   the Free Software Foundation, 51 Franklin Street, Fifth Floor
-   Boston, MA 02110-1301 USA */
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
 
 /*
    Copyright (C) 2010-2012 Roger While
@@ -40,18 +38,16 @@
 
 #ifdef	ENABLE_NLS
 #include "lib/gettext.h"
-#define _(s)		gettext(s)
-#define N_(s)		gettext_noop(s)
+#define _(msgid)		gettext(msgid)
+#define N_(msgid)		gettext_noop(msgid)
 #else
-#define _(s)		s
-#define N_(s)		s
+#define _(msgid)		msgid
+#define N_(msgid)		msgid
 #endif
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 #include "libcob.h"
-
-#include "cobgetopt.h"
 
 #define NONOPTION_P (argv[cob_optind][0] != '-' || argv[cob_optind][1] == '\0')
 
@@ -69,6 +65,8 @@
 
    GNU application programs can use a third alternative mode in which
    they can distinguish the relative order of options and other arguments.  */
+
+#include "cobgetopt.h"
 
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
@@ -436,23 +434,28 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 	  || (long_only && !seen_short && (argv[cob_optind][2] || !strchr (optstring, argv[cob_optind][1])))))
     {
       char *nameend;
+      unsigned int namelen;
       const struct option *p;
       const struct option *pfound = NULL;
+      struct option_list
+      {
+	const struct option *p;
+	struct option_list *next;
+      } *ambig_list = NULL;
       int exact = 0;
-      int ambig = 0;
       int indfound = -1;
       int option_index;
 
       for (nameend = nextchar; *nameend && *nameend != '='; nameend++)
 	/* Do nothing.  */ ;
+      namelen = nameend - nextchar;
 
       /* Test all long options for either exact match
 	 or abbreviated matches.  */
       for (p = longopts, option_index = 0; p->name; p++, option_index++)
-	if (!strncmp (p->name, nextchar, (size_t)(nameend - nextchar)))
+	if (!strncmp (p->name, nextchar, namelen))
 	  {
-	    if ((unsigned int) (nameend - nextchar)
-		== (unsigned int) strlen (p->name))
+	    if (namelen == (unsigned int) strlen (p->name))
 	      {
 		/* Exact match found.  */
 		pfound = p;
@@ -466,24 +469,39 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		pfound = p;
 		indfound = option_index;
 	      }
-#if	0	/* RXWRXW - ambig */
 	    else if (long_only
 		     || pfound->has_arg != p->has_arg
 		     || pfound->flag != p->flag
 		     || pfound->val != p->val)
-#else
-	    else
-#endif
-	      /* Second or later nonexact match found.  */
-	      ambig = 1;
+	      {
+		/* Second or later nonexact match found.  */
+		struct option_list *newp = alloca (sizeof (*newp));
+		newp->p = p;
+		newp->next = ambig_list;
+		ambig_list = newp;
+	      }
 	  }
 
-      if (ambig && !exact)
+      if (ambig_list != NULL && !exact)
 	{
 	  if (cob_opterr)
 	    {
-	      fprintf (stderr, _("%s: option `%s' is ambiguous\n"),
+	      struct option_list first;
+	      first.p = pfound;
+	      first.next = ambig_list;
+	      ambig_list = &first;
+
+	      fprintf (stderr, _("%s: option '%s' is ambiguous; possibilities:"),
 		       argv[0], argv[cob_optind]);
+
+	      do
+		{
+		  fprintf (stderr, " '--%s'", ambig_list->p->name);
+		  ambig_list = ambig_list->next;
+		}
+	      while (ambig_list != NULL);
+
+	      fputc ('\n', stderr);
 	    }
 	  nextchar += strlen (nextchar);
 	  cob_optind++;
@@ -508,16 +526,16 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		      if (argv[cob_optind - 1][1] == '-')
 			{
 			  /* --option */
-			  fprintf (stderr,
-				   _("%s: option `--%s' doesn't allow an argument\n"),
+			  fprintf (stderr, _("%s: option '--%s' doesn't allow an argument"),
 				   argv[0], pfound->name);
+			  fputc ('\n', stderr);
 			}
 		      else
 			{
 			  /* +option or -option */
-			  fprintf (stderr,
-				   _("%s: option `%c%s' doesn't allow an argument\n"),
+			  fprintf (stderr, _("%s: option '%c%s' doesn't allow an argument"),
 				   argv[0], argv[cob_optind - 1][0], pfound->name);
+			  fputc ('\n', stderr);
 			}
 		    }
 
@@ -535,9 +553,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		{
 		  if (cob_opterr)
 		    {
-		      fprintf (stderr,
-			       _("%s: option `%s' requires an argument\n"),
+		      fprintf (stderr, _("%s: option '--%s' requires an argument"),
 			       argv[0], argv[cob_optind - 1]);
+		      fputc ('\n', stderr);
 		    }
 		  nextchar += strlen (nextchar);
 		  cob_optopt = pfound->val;
@@ -567,14 +585,16 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 	      if (argv[cob_optind][1] == '-')
 		{
 		  /* --option */
-		  fprintf (stderr, _("%s: unrecognized option `--%s'\n"),
+		  fprintf (stderr, _("%s: unrecognized option '--%s'"),
 			   argv[0], nextchar);
+		  fputc ('\n', stderr);
 		}
 	      else
 		{
 		  /* +option or -option */
-		  fprintf (stderr, _("%s: unrecognized option `%c%s'\n"),
+		  fprintf (stderr, _("%s: unrecognized option '%c%s'"),
 			   argv[0], argv[cob_optind][0], nextchar);
+		  fputc ('\n', stderr);
 		}
 	    }
 	  nextchar = (char *) "";
@@ -601,7 +621,8 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
       {
 	if (cob_opterr)
 	  {
-		fprintf (stderr, _("%s: invalid option -- %c\n"), argv[0], c);
+		fprintf (stderr, _("%s: invalid option -- %c"), argv[0], c);
+		fputc ('\n', stderr);
 	  }
 	cob_optopt = c;
 	seen_short = 0;
@@ -631,8 +652,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 	    if (cob_opterr)
 	      {
 		/* 1003.2 specifies the format of this message.  */
-		fprintf (stderr, _("%s: option requires an argument -- %c\n"),
+		fprintf (stderr, _("%s: option requires an argument -- %c"),
 			 argv[0], c);
+		fputc ('\n', stderr);
 	      }
 	    cob_optopt = c;
 	    if (optstring[0] == ':')
@@ -680,8 +702,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 	  {
 	    if (cob_opterr)
 	      {
-		fprintf (stderr, _("%s: option `-W %s' is ambiguous\n"),
+		fprintf (stderr, _("%s: option '-W %s' is ambiguous"),
 			 argv[0], argv[cob_optind]);
+		fputc ('\n', stderr);
 	      }
 	    nextchar += strlen (nextchar);
 	    cob_optind++;
@@ -701,9 +724,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		  {
 		    if (cob_opterr)
 		      {
-			fprintf (stderr, _("\
-%s: option `-W %s' doesn't allow an argument\n"),
+			fprintf (stderr, _("%s: option '-W %s' doesn't allow an argument"),
 				 argv[0], pfound->name);
+			fputc ('\n', stderr);
 		      }
 
 		    nextchar += strlen (nextchar);
@@ -719,9 +742,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		  {
 		    if (cob_opterr)
 		      {
-			fprintf (stderr,
-				 _("%s: option `%s' requires an argument\n"),
+			fprintf (stderr, _("%s: option `%s' requires an argument"),
 				 argv[0], argv[cob_optind - 1]);
+			fputc ('\n', stderr);
 		      }
 		    nextchar += strlen (nextchar);
 		    seen_short = 0;
@@ -770,9 +793,9 @@ cob_getopt_long_long (const int argc, char *const *argv, const char *optstring,
 		if (cob_opterr)
 		  {
 		    /* 1003.2 specifies the format of this message.  */
-		    fprintf (stderr,
-			     _("%s: option requires an argument -- %c\n"),
+		    fprintf (stderr, _("%s: option requires an argument -- %c"),
 			     argv[0], c);
+		     fputc ('\n', stderr);
 		  }
 		cob_optopt = c;
 		seen_short = 0;
