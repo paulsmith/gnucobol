@@ -10,9 +10,17 @@
 @include version.texi
 
 @ifinfo
+@dircategory Software development
+@direntry 
+* cobc: (gnucobol)Compile.      The GNU COBOL compiler. 
+@end direntry 
 @dircategory COBOL
 @direntry
-* GNU Cobol: (gnucobol).      A COBOL compiler
+* GNU Cobol: (gnucobol).        A COBOL compiler
+@end direntry
+@dircategory GnuCOBOL
+@direntry
+* Overview: (gnucobol).         COBOL compiler overview.
 @end direntry
 
 This file documents GNU Cobol, a COBOL compiler
