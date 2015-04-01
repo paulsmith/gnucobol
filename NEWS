@@ -1,5 +1,8 @@
 NEWS - user visible changes				-*- outline -*-
 
+* All files created by GnuCOBOL runtime use the same file permission settings
+  now: COB_FILE_MODE which was changed to 0666
+
 * 20130927 Change package name, and project to GNU Cobol
 
 * MARK - Version 2.0

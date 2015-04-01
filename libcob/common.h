@@ -692,7 +692,7 @@ enum cob_exception_id {
 #define COB_ASCENDING		0
 #define COB_DESCENDING		1
 
-#define COB_FILE_MODE		0644
+#define COB_FILE_MODE		0666
 
 /* Organization */
 

@@ -1,4 +1,10 @@
 
+2015-03-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.h: Changed COB_FILE_MODE to 0666
+	* fileio.c: use COB_FILE_MODE as permission for all cases where
+	  files are possibly created (fixes bug #126)
+
 2015-02-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* cobgetopt.c (cob_getopt_long_long): List all ambiguous possibilities,
