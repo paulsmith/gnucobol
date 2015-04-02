@@ -1,4 +1,8 @@
 
+2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c : replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
+
 2015-03-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* typeck.c : added more checks of overlapping MOVE,

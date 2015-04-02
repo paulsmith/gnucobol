@@ -79,6 +79,20 @@
 #define	cob_screen_ptr		cob_screen *
 #define	cob_file_key_ptr	cob_file_key *
 
+/* Readable compiler version defines */
+
+#if _MSC_VER >= 1400
+#define COB_USE_VC2005_OR_GREATER
+#endif
+
+#if _MSC_VER >= 1500
+#define COB_USE_VC2008_OR_GREATER
+#endif
+
+#if _MSC_VER >= 1800
+#define COB_USE_VC2013_OR_GREATER
+#endif
+
 /* Byte swap functions */
 
 /*
@@ -223,7 +237,7 @@
 
 #endif
 
-#elif defined(_MSC_VER) && (_MSC_VER >= 1400)
+#elif defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 
 #define COB_BSWAP_16(val) (_byteswap_ushort (val))
 #define COB_BSWAP_32(val) (_byteswap_ulong (val))

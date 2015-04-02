@@ -86,7 +86,7 @@
 /* #undef HAVE_DCGETTEXT */
 
 /* Has designated initializers */
-#if defined(_MSC_VER) && _MSC_VER >= 1800
+#if defined(_MSC_VER) && COB_USE_VC2013_OR_GREATER
 #define HAVE_DESIGNATED_INITS 1
 #endif
 /* #undef HAVE_DESIGNATED_INITS */
