@@ -81,16 +81,24 @@
 
 /* Readable compiler version defines */
 
+#if defined(_MSC_VER)
 #if _MSC_VER >= 1400
-#define COB_USE_VC2005_OR_GREATER
+#define COB_USE_VC2005_OR_GREATER 1
+#else
+#define COB_USE_VC2005_OR_GREATER 0
 #endif
 
 #if _MSC_VER >= 1500
-#define COB_USE_VC2008_OR_GREATER
+#define COB_USE_VC2008_OR_GREATER 1
+#else
+#define COB_USE_VC2008_OR_GREATER 0
 #endif
 
 #if _MSC_VER >= 1800
-#define COB_USE_VC2013_OR_GREATER
+#define COB_USE_VC2013_OR_GREATER 1
+#else
+#define COB_USE_VC2013_OR_GREATER 0
+#endif
 #endif
 
 /* Byte swap functions */

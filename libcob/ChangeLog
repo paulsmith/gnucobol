@@ -2,7 +2,7 @@
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h: added new macros COB_USE_VC(2005/2008/2013)_OR_GREATER to
-	  replace _MSC_VER checks
+	  replace _MSC_VER comparison
 
 2015-03-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
