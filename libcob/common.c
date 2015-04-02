@@ -170,6 +170,10 @@ static volatile sig_atomic_t	sig_is_handled = 0;
 /* Function Pointer for external signal handling */
 static void		(*cob_ext_sighdl) (int) = NULL;
 
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+static VOID		(WINAPI *time_as_filetime_func) (LPFILETIME) = NULL;
+#endif
+
 #undef	COB_EXCEPTION
 #define COB_EXCEPTION(code,tag,name,critical)	name,
 static const char		* const cob_exception_tab_name[] = {
@@ -1068,6 +1072,50 @@ cob_rescan_env_vals (void)
 		}
 	}
 }
+
+static int
+one_indexed_day_of_week_from_monday(int zero_indexed_from_sunday)
+{
+	return ((zero_indexed_from_sunday + 6) % 7) + 1;
+}
+
+static void
+set_unknown_offset(struct cob_time *time)
+{
+	time->offset_known = 0;
+	time->utc_offset = 0;
+}
+
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+static void
+set_cob_time_ns_from_filetime (const FILETIME filetime, struct cob_time *cb_time)
+{
+	ULONGLONG	filetime_int;
+
+	filetime_int = (((ULONGLONG) filetime.dwHighDateTime) << 32)
+		+ filetime.dwLowDateTime;
+	/* FILETIMEs are accurate to 100 nanosecond intervals */
+	cb_time->nanosecond = (filetime_int % (ULONGLONG) 10000000) * 100;
+
+}
+#endif
+
+#if defined (_WIN32) && !defined (__CYGWIN__)
+static void
+set_cob_time_offset (struct cob_time *cb_time)
+{
+	DWORD	time_zone_result;
+	TIME_ZONE_INFORMATION	time_zone_info;
+
+	time_zone_result = GetTimeZoneInformation (&time_zone_info);
+	if (time_zone_result != TIME_ZONE_ID_INVALID) {
+		cb_time->offset_known = 1;
+		cb_time->utc_offset = time_zone_info.Bias;
+	} else {
+		set_unknown_offset (cb_time);
+	}
+}
+#endif
 
 /* Global functions */
 
@@ -2413,6 +2461,132 @@ cob_external_addr (const char *exname, const int exlength)
 	return eptr->ext_alloc;
 }
 
+/* Retrieving current date and time */
+
+int
+cob_ctoi (const char digit)
+{
+	return (int) (digit - '0');
+}
+
+#if defined (_WIN32) && !defined (__CYGWIN__)
+struct cob_time
+cob_get_current_date_and_time (void)
+{
+	SYSTEMTIME	local_time;
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+	FILETIME	filetime;
+	SYSTEMTIME	utc_time;
+#endif
+	struct cob_time	cb_time;
+
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+	(time_as_filetime_func) (&filetime);
+	FileTimeToSystemTime (&filetime, &utc_time);
+	SystemTimeToTzSpecificLocalTime (NULL, &utc_time, &local_time);
+#else
+	GetLocalTime (&local_time);
+#endif
+
+	cb_time.year = local_time.wYear;
+	cb_time.month = local_time.wMonth;
+	cb_time.day_of_month = local_time.wDay;
+	cb_time.day_of_week = one_indexed_day_of_week_from_monday (local_time.wDayOfWeek);
+	cb_time.hour = local_time.wHour;
+	cb_time.minute = local_time.wMinute;
+	cb_time.second = local_time.wSecond;
+	cb_time.nanosecond = local_time.wMilliseconds;
+	cb_time.offset_known = 0;
+	cb_time.utc_offset = 0;
+
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+	set_cob_time_ns_from_filetime (filetime, &cb_time);
+#endif
+
+	set_cob_time_offset (&cb_time);
+
+	return cb_time;
+}
+#else
+struct cob_time
+cob_get_current_date_and_time (void)
+{
+#if defined (HAVE_CLOCK_GETTIME)
+	struct timespec	time_spec;
+#elif defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
+	struct timeval	tmv;
+#endif
+	time_t		curtime;
+	struct tm	*tmptr;
+	struct cob_time	cb_time;
+#if defined(COB_STRFTIME)
+	char		iso_timezone[6] = { '\0' };
+#endif
+
+	/* Get the current time */
+#if defined (HAVE_CLOCK_GETTIME)
+	clock_gettime (CLOCK_REALTIME, &time_spec);
+	curtime = time_spec.tv_sec;
+#elif defined (HAVE_SYS_TIME_H) && defined (HAVE_GETTIMEOFDAY)
+	gettimeofday(&tmv, NULL);
+	curtime = tmv.tv_sec;
+#else
+	curtime = time (NULL);
+#endif
+	tmptr = localtime (&curtime);
+	/* Leap seconds ? */
+	if (tmptr->tm_sec >= 60) {
+		tmptr->tm_sec = 59;
+	}
+
+	cb_time.year = tmptr->tm_year + 1900;
+	cb_time.month = tmptr->tm_mon + 1;
+	cb_time.day_of_month = tmptr->tm_mday;
+	cb_time.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
+	cb_time.hour = tmptr->tm_hour;
+	cb_time.minute = tmptr->tm_min;
+	cb_time.second = tmptr->tm_sec;
+	cb_time.nanosecond = 0;
+	cb_time.offset_known = 0;
+	cb_time.utc_offset = 0;
+
+	/* Get nanoseconds or microseconds, if possible */
+#if defined (HAVE_CLOCK_GETTIME)
+	cb_time.nanosecond = time_spec.tv_nsec;
+#elif defined (HAVE_SYS_TIME_H) && defined (HAVE_GETTIMEOFDAY)
+	cb_time.nanosecond = tmv.tv_usec * 1000;
+#else
+	cb_time.nanosecond = 0;
+#endif
+
+	/* Get the offset from UTC */
+#if defined (COB_STRFTIME)
+	strftime (iso_timezone, (size_t) 6, "%z", tmptr);
+
+	if (iso_timezone[0] == '0') {
+		set_unknown_offset (&cb_time);
+	} else {
+		/* Convert the timezone string into minutes from UTC */
+		cb_time.utc_offset =
+			cob_ctoi (iso_timezone[1]) * 60 * 10
+			+ cob_ctoi (iso_timezone[2]) * 60
+			+ cob_ctoi (iso_timezone[3]) * 10
+			+ cob_ctoi (iso_timezone[4]);
+		if (iso_timezone[0] == '-') {
+			cb_time.utc_offset *= -1;
+		}
+	}
+#elif defined (HAVE_TIMEZONE)
+	cb_time.offset_known = 1;
+	cb_time.utc_offset = timezone / 60;
+#else
+	set_unknown_offset(&cb_time);
+#endif
+
+	return cb_time;
+}
+#endif
+
 /* Extended ACCEPT/DISPLAY */
 
 void
@@ -2477,43 +2651,16 @@ cob_accept_day_of_week (cob_field *f)
 }
 
 void
-cob_accept_time (cob_field *f)
+cob_accept_time (cob_field *field)
 {
-#ifdef	_WIN32
-	SYSTEMTIME	syst;
-#else
-	struct tm	*tlt;
-	time_t		t;
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	struct timeval	tmv;
-	char		buff2[8];
-#endif
-#endif
-	char		s[12];
+	struct cob_time	time;
+	char		str[9] = { '\0' };
+	
+	time = cob_get_current_date_and_time ();
+	snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,
+		  time.second, time.nanosecond / 10000000);
 
-#ifdef	_WIN32
-	GetLocalTime (&syst);
-	sprintf (s, "%2.2d%2.2d%2.2d%2.2d", syst.wHour, syst.wMinute,
-		syst.wSecond, syst.wMilliseconds / 10);
-#else
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	gettimeofday (&tmv, NULL);
-	t = tmv.tv_sec;
-#else
-	t = time (NULL);
-#endif
-	tlt = localtime (&t);
-	/* Leap seconds ? */
-	if (tlt->tm_sec >= 60) {
-		tlt->tm_sec = 59;
-	}
-	strftime (s, (size_t)9, "%H%M%S00", tlt);
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	sprintf(buff2, "%2.2ld", (long int)(tmv.tv_usec / 10000));
-	memcpy (&s[6], buff2, (size_t)2);
-#endif
-#endif
-	cob_memcpy (f, s, (size_t)8);
+	cob_memcpy (field, str, (size_t)8);
 }
 
 void
@@ -4278,6 +4425,9 @@ cob_init (const int argc, char **argv)
 #ifdef	ENABLE_NLS
 	const char* localedir;
 #endif
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+	HMODULE		kernel32_handle
+#endif
 	int		i;
 
 	if (cob_initialized) {
@@ -4488,6 +4638,18 @@ cob_init (const int argc, char **argv)
 	if (!cob_user_name) {
 		cob_user_name = cob_strdup (_("Unknown"));
 	}
+
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+   /* Get function pointer for most precisise time function */
+   kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
+   if (kernel32_handle != NULL) {
+       time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))
+           GetProcAddress (kernel32_handle, "GetSystemTimePreciseAsFileTime");
+   }
+   if (time_as_filetime_func == NULL) {
+       time_as_filetime_func = GetSystemTimeAsFileTime;
+   }
+#endif
 
 	/* This must be last in this function as we do early return */
 	/* from certain ifdef's */

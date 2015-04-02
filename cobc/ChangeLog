@@ -1,6 +1,11 @@
 
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
+	* reserved.c: set FORMATTED-CURRENT-DATE, INTEGER-OF-FORMATTED-DATE, and
+	  TEST-FORMATTED-DATETIME and INTEGER-OF-FORMATTED-DATE to implemented
+
+2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
+
 	* cobc.c : replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
 
 2015-03-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
@@ -55,7 +60,7 @@
 	* pplex.l : bug #96 prevent line overflow, add warning "Source text too long"
 	* pplex.l : only show warning "Source text after column ..." if no comment was
 	  started in this line before
-	  
+
 2014-09-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: Set FORMATTED-DATE/DATETIME/TIME functions to implemented
@@ -79,8 +84,8 @@
 2014-09-03  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* cobc.c, cobc.h: added cobc_free() function
-	  (Own freeing functions for debugging purposes. 
-	  (e.g. to locate heap crashes caused by malloc/free))	
+	  (Own freeing functions for debugging purposes.
+	  (e.g. to locate heap crashes caused by malloc/free))
 	* change all free() to cobc_free()
 	* cobc.c (process) [_MSC_VER]: cob_malloc() to cobc_malloc()
 	* cobc.c: use COB_PIC_FLAGS for CB_LEVEL_ASSEMBLE
@@ -89,7 +94,7 @@
 
 	* parser.y: never warn ENTRY as unreachable
 
-2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* cobc.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
@@ -2663,4 +2668,3 @@
 	(short_options, long_options): New option -v and --verbose.
 	(process_command_line): Handle -v option.
 	* cobc.h (cobc_verbose_flag): Declared.
-

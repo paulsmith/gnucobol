@@ -1,6 +1,16 @@
 
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
+	* intrinsic.c: implemented FORMATTED-CURRENT-DATE,
+	  INTEGER-OF-FORMATTED-DATE and TEST-FORMATTED-DATETIME
+	* intrinsic.c: updated FORMATTED-DATETIME and FORMATTED-TIME to support
+	  fractional number of seconds.
+	* common.c: refactored (cob_accept_time)
+	* intrinsic.c: miscellaneous refactoring and deleted precondition
+	  comments which are currently just cluttering the code
+
+2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
+
 	* common.h: added new macros COB_USE_VC(2005/2008/2013)_OR_GREATER to
 	  replace _MSC_VER comparison
 

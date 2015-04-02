@@ -57,6 +57,10 @@
 #include "libcob.h"
 #include "coblocal.h"
 
+/* Function prototypes */
+static cob_u32_t	integer_of_date (const int, const int, const int);
+static void		get_iso_week (const int, int *, int *);
+
 /* Local variables */
 
 static cob_global	*cobglobptr;
@@ -414,6 +418,14 @@ static const char	cob_log_half_str[] =
 #define	COB_PI_LEN		2820UL
 #define	COB_SQRT_TWO_LEN	3827UL
 #define	COB_LOG_HALF_LEN	2784UL
+
+#define RETURN_IF_NOT_ZERO(expr)		\
+	do {					\
+		int error_pos = (expr);		\
+		if (error_pos != 0) {		\
+			return error_pos;	\
+		}				\
+	} while (0);
 
 /* Local functions */
 
@@ -1491,22 +1503,83 @@ cob_mpf_acos (mpf_t dst_val, const mpf_t src_val)
 }
 
 static int
+days_in_year (const int year)
+{
+	return 365 + leap_year (year);
+}
+
+static COB_INLINE COB_A_INLINE int
+in_range (const int min, const int max, const int val)
+{
+	return min <= val && val <= max;
+}
+
+static int
 valid_integer_date (const int days)
 {
-	return days >= 1 && days <= 3067671;
+	return in_range (1, 3067671, days);
 }
 
 static int
 valid_year (const int year)
 {
-	return year >= 1601 && year <= 9999;
+	return in_range (1601, 9999, year);
 }
+
+static int
+valid_month (const int month)
+{
+	return in_range (1, 12, month);
+}
+
+static int
+valid_day_of_year (const int year, const int day)
+{
+	return in_range (1, days_in_year (year), day);
+}
+
+static int
+valid_day_of_month (const int year, const int month, const int day)
+{
+	if (leap_year (year)) {
+		return in_range (1, leap_month_days[month], day);
+	} else {
+		return in_range (1, normal_month_days[month], day);
+	}
+}
+
+static int
+max_week (int year)
+{
+	int	first_day = integer_of_date (year, 1, 1);
+	int	last_day = first_day + days_in_year (year) - 1;
+	int	week;
+
+	get_iso_week (last_day, &year, &week);
+	return week;
+}
+
+/* 86400 = 60 * 60 * 24. We'll ignore leap seconds for now. */
+#define SECONDS_IN_DAY 86400
 
 static int
 valid_time (const int seconds_from_midnight)
 {
-	return seconds_from_midnight >= 1 && seconds_from_midnight <= 86400;
+	return in_range (0, SECONDS_IN_DAY, seconds_from_midnight);
 }
+
+/* Uses d5. */
+static int
+valid_decimal_time (cob_decimal *seconds_from_midnight)
+{
+	cob_decimal	*seconds_in_day = &d5;
+	mpz_set_ui (seconds_in_day->value, (unsigned long) SECONDS_IN_DAY);
+	seconds_in_day->scale = 0;
+
+	return cob_decimal_cmp (seconds_from_midnight, seconds_in_day) <= 0;
+}
+
+#undef SECONDS_IN_DAY
 
 static int
 valid_offset_time (const int offset)
@@ -1525,11 +1598,7 @@ date_of_integer (int days, int *year, int *month, int *day)
 	while (days > leapyear) {
 		days -= leapyear;
 		++baseyear;
-		if (leap_year (baseyear)) {
-			leapyear = 366;
-		} else {
-			leapyear = 365;
-		}
+		leapyear = days_in_year (baseyear);
 	}
 	for (i = 0; i < 13; ++i) {
 		if (leap_year (baseyear)) {
@@ -1555,21 +1624,104 @@ day_of_integer (int days, int *year, int *day)
 {
 	int leapyear = 365;
 
-	/* Precondition: year, day != NULL */
-
 	*year = 1601;
 
 	while (days > leapyear) {
 		days -= leapyear;
 		++*year;
-		if (leap_year (*year)) {
-			leapyear = 366;
-		} else {
-			leapyear = 365;
-		}
+		leapyear = days_in_year (*year);
 	}
 
 	*day = days;
+}
+
+static cob_u32_t
+days_up_to_year (const int year)
+{
+	cob_u32_t	totaldays = 0;
+	int		baseyear = 1601;
+
+	while (baseyear != year) {
+		totaldays += days_in_year (baseyear);
+		++baseyear;
+	}
+	return totaldays;
+}
+
+static cob_u32_t
+integer_of_date (const int year, const int month, const int days)
+{
+	cob_u32_t	totaldays;
+
+	totaldays = days_up_to_year (year);
+
+	if (leap_year (year)) {
+		totaldays += leap_days[month - 1];
+	} else {
+		totaldays += normal_days[month - 1];
+	}
+	totaldays += days;
+
+	return totaldays;
+}
+
+static cob_u32_t
+integer_of_day (const int year, const int days)
+{
+	cob_u32_t	totaldays;
+
+	totaldays = days_up_to_year (year);
+	totaldays += days;
+
+	return totaldays;
+}
+
+enum formatted_time_extra {
+	EXTRA_NONE = 0,
+	EXTRA_Z,
+	EXTRA_OFFSET_TIME
+};
+
+struct time_format {
+	int with_colons;
+	int decimal_places;
+	enum formatted_time_extra extra;
+};
+
+/* Uses d2 */
+static void
+seconds_from_formatted_time (const struct time_format format, const char *str,
+			     cob_decimal *seconds_decimal)
+{
+	const char	*scanf_str = format.with_colons ? "%2d:%2d:%2d" : "%2d%2d%2d";
+	int		hours;
+	int		minutes;
+	int		seconds;
+	int		total_seconds;
+	int		offset;
+	int		end_of_decimal;
+	int		unscaled_fraction = 0;
+	cob_decimal	*fractional_seconds = &d2;
+
+	sscanf (str, scanf_str, &hours, &minutes, &seconds);
+	total_seconds = (hours * 60 * 60) + (minutes * 60) + seconds;
+
+	if (format.decimal_places != 0) {
+		offset = format.with_colons ? 9 : 7;
+		end_of_decimal = offset + format.decimal_places;
+		for (; offset != end_of_decimal; ++offset) {
+			unscaled_fraction = unscaled_fraction * 10 + cob_ctoi (str[offset]);
+		}
+
+		mpz_set_ui (fractional_seconds->value, unscaled_fraction);
+		fractional_seconds->scale = format.decimal_places;
+
+		mpz_set_ui (seconds_decimal->value, total_seconds);
+		cob_decimal_add (seconds_decimal, fractional_seconds);
+	} else {
+		mpz_set_ui (seconds_decimal->value, total_seconds);
+		seconds_decimal->scale = 0;
+	}
 }
 
 static int
@@ -1581,10 +1733,10 @@ valid_day_and_format (const int day, const char *format)
 static int
 num_leading_nonspace (const char *str)
 {
-	int i;
-	int str_len = strlen (str);
+	size_t	i;
+	size_t	str_len = strlen (str);
 
-	for (i = 0; i < str_len && !isspace ((int)str[i]); ++i);
+	for (i = 0; i < str_len && !isspace ((int) str[i]); ++i);
 	return i;
 }
 
@@ -1595,8 +1747,6 @@ format_as_yyyymmdd (const int day_num, const int with_hyphen, char *buff)
 	int		month;
 	int		year;
 	const char	*format_str;
-
-	/* Precondition: valid_integer_date (day_num) and buff != NULL */
 
 	date_of_integer (day_num, &year, &month, &day_of_month);
 
@@ -1611,15 +1761,13 @@ format_as_yyyyddd (const int day_num, const int with_hyphen, char *buff)
 	int		year;
 	const char	*format_str;
 
-	/* Precondition: valid_integer_date (day_num) and buff != NULL */
-
 	day_of_integer (day_num, &year, &day_of_year);
 
 	format_str = with_hyphen ? "%4.4d-%3.3d" : "%4.4d%3.3d";
 	sprintf (buff, format_str, year, day_of_year);
 }
 
- /* 0 = Monday, ..., 6 = Sunday */
+/* 0 = Monday, ..., 6 = Sunday */
 static int
 get_day_of_week (const int day_num)
 {
@@ -1647,15 +1795,16 @@ get_iso_week (const int day_num, int *year, int *week)
 	int dec_29;
 	int week_one;
 
-	/* Precondition: valid_integer_date (day_num) and year, week != NULL */
-
 	day_of_integer (day_num, year, &day_of_year);
 
-	days_to_dec_29 = 365 + leap_year (*year) - 2;
+	days_to_dec_29 = days_in_year (*year) - 2;
 	dec_29 = day_num - day_of_year + days_to_dec_29;
 
 	if (day_num >= dec_29) {
-		week_one = get_iso_week_one (day_num + 365 + leap_year (*year), day_of_year);
+		/* If the day is (after) December 29, it may be in the first
+		    week of the following year
+		*/
+		week_one = get_iso_week_one (day_num + days_in_year (*year), day_of_year);
 		if (day_num < week_one) {
 			week_one = get_iso_week_one (day_num, day_of_year);
 		} else {
@@ -1663,10 +1812,14 @@ get_iso_week (const int day_num, int *year, int *week)
 		}
 	} else {
 		week_one = get_iso_week_one (day_num, day_of_year);
+
+		/* If the day is before December 29, it may be in the last week
+		   of the previous year
+		*/
 		if (day_num < week_one) {
 			--*year;
 			week_one = get_iso_week_one (day_num - day_of_year,
-						     365 + leap_year (*year));
+						     days_in_year (*year));
 		}
 	}
 
@@ -1681,8 +1834,6 @@ format_as_yyyywwwd (const int day_num, const int with_hyphen, char *buff)
 	int		year;
 	int		day_of_week;
 	const char	*format_str;
-
-	/* Precondition: valid_integer_date (day_num) and buff != NULL */
 
 	day_of_integer (day_num, &year, &ignored_day_of_year);
 	get_iso_week (day_num, &year, &week);
@@ -1708,8 +1859,6 @@ parse_date_format_string (const char *format_str)
 {
 	struct date_format format;
 
-	/* Precondition: cob_valid_date_format (format_str) */
-
 	if (!strcmp (format_str, "YYYYMMDD") || !strcmp (format_str, "YYYY-MM-DD")) {
 		format.days = DAYS_MMDD;
 	} else if (!strcmp (format_str, "YYYYDDD") || !strcmp (format_str, "YYYY-DDD")) {
@@ -1728,8 +1877,6 @@ format_date (const struct date_format format, const int days, char *buff)
 {
 	void	(*formatting_func) (int, int, char *);
 
-	/* Precondition: valid_integer_date (days) and buff != NULL */
-
 	if (format.days == DAYS_MMDD) {
 		formatting_func = &format_as_yyyymmdd;
 	} else if (format.days == DAYS_DDD) {
@@ -1737,8 +1884,24 @@ format_date (const struct date_format format, const int days, char *buff)
 	} else { /* DAYS_WWWD */
 		formatting_func = &format_as_yyyywwwd;
 	}
-
 	(*formatting_func) (days, format.with_hyphens, buff);
+}
+
+/* Uses d5. */
+static void
+get_fractional_seconds (cob_field *time, cob_decimal *fraction)
+{
+	int		seconds;
+	cob_decimal	*whole_seconds;
+
+
+	seconds = cob_get_int (time);
+	whole_seconds = &d5;
+	mpz_set_ui (whole_seconds->value, (unsigned long) seconds);
+	whole_seconds->scale = 0;
+
+	cob_decimal_set_field (fraction, time);
+	cob_decimal_sub (fraction, whole_seconds);
 }
 
 static int
@@ -1771,19 +1934,38 @@ rest_is_offset_format (const char *str, const int with_colon)
 }
 
 static void
-add_decimal_digits (const int decimal_places, char *buff, ptrdiff_t *buff_pos)
+add_decimal_digits (int decimal_places, cob_decimal *second_fraction,
+		    char *buff, ptrdiff_t *buff_pos)
 {
-	buff[*buff_pos] = COB_MODULE_PTR->decimal_point;
-	memset (buff + *buff_pos + 1, '0', decimal_places);
+	int		scale = second_fraction->scale;
+	unsigned int	power_of_ten;
+	unsigned int	fraction = mpz_get_ui (second_fraction->value);
 
-	*buff_pos += 1	+ decimal_places;
+	/* Add decimal point */
+	buff[*buff_pos] = COB_MODULE_PTR->decimal_point;
+	++*buff_pos;
+
+	/* Append decimal digits from second_fraction from left to right */
+	while (scale != 0 && decimal_places != 0) {
+		--scale;
+		power_of_ten = (unsigned int) pow (10, scale);
+		buff[*buff_pos] = '0' + (fraction / power_of_ten);
+
+		fraction %= power_of_ten;
+		++*buff_pos;
+		--decimal_places;
+	}
+
+	/* Set remaining digits to zero */
+	if (decimal_places != 0) {
+		memset (buff + *buff_pos, '0', decimal_places);
+		*buff_pos += decimal_places;
+	}
 }
 
 static void
 add_z (const ptrdiff_t buff_pos, char *buff)
 {
-	/* Precondition: buff != NULL */
-
 	buff[buff_pos] = 'Z';
 }
 
@@ -1795,8 +1977,6 @@ add_offset_time (const int with_colon, const int offset_time, const ptrdiff_t bu
 	int		minutes;
 	const char	*format_str;
 
-	/* Precondition: buff != NULL */
-
 	hours = offset_time / 60;
 	minutes = abs (offset_time) % 60;
 
@@ -1804,25 +1984,11 @@ add_offset_time (const int with_colon, const int offset_time, const ptrdiff_t bu
 	sprintf (buff + buff_pos, format_str, hours, minutes);
 }
 
-enum formatted_time_extra {
-	EXTRA_NONE = 0,
-	EXTRA_Z,
-	EXTRA_OFFSET_TIME
-};
-
-struct time_format {
-	int with_colons;
-	int decimal_places;
-	enum formatted_time_extra extra;
-};
-
 static struct time_format
 parse_time_format_string (const char *str)
 {
 	struct time_format	format;
 	ptrdiff_t		offset;
-
-	/* Precondition: cob_valid_time_format (str) */
 
 	if (!strncmp (str, "hhmmss", 6)) {
 		format.with_colons = 0;
@@ -1839,7 +2005,7 @@ parse_time_format_string (const char *str)
 		format.decimal_places = 0;
 	}
 
-	if (strlen (str) > offset) {
+	if (strlen (str) > (size_t) offset) {
 		if (rest_is_z (str + offset)) {
 			format.extra = EXTRA_Z;
 		} else { /* the rest is the offset time */
@@ -1853,21 +2019,14 @@ parse_time_format_string (const char *str)
 }
 
 static void
-format_time (const struct time_format format, int time, int *offset_time, char *buff)
+format_time (const struct time_format format, int time,
+	     cob_decimal *second_fraction, const int offset_time, char *buff)
 {
 	int		hours;
 	int		minutes;
 	int		seconds;
 	ptrdiff_t	buff_pos;
 	const char	*format_str;
-
-	/* Preconditions:
-	    * valid_time (time)
-	    * buff != NULL
-	    * If offset_time == NULL,
-                then format.extra != EXTRA_OFFSET_TIME
-		else valid_offset_time (*offset_time)
-	*/
 
 	if (format.with_colons) {
 		format_str = "%2.2d:%2.2d:%2.2d";
@@ -1886,13 +2045,14 @@ format_time (const struct time_format format, int time, int *offset_time, char *
 	sprintf (buff, format_str, hours, minutes, seconds);
 
 	if (format.decimal_places != 0) {
-		add_decimal_digits (format.decimal_places, buff, &buff_pos);
+		add_decimal_digits (format.decimal_places, second_fraction,
+				    buff, &buff_pos);
 	}
 
 	if (format.extra == EXTRA_Z) {
 		add_z (buff_pos, buff);
 	} else if (format.extra == EXTRA_OFFSET_TIME) {
-		add_offset_time (format.with_colons, *offset_time, buff_pos, buff);
+		add_offset_time (format.with_colons, offset_time, buff_pos, buff);
 	}
 }
 
@@ -1903,43 +2063,542 @@ split_around_t (const char *str, char *first, char *second)
 	size_t first_length;
 	size_t second_length;
 
-	/* Precondition: str, first, second != NULL */
-
+	/* Find 'T' */
 	for (i = 0; str[i] != '\0' && str[i] != 'T'; ++i);
 
+	/* Copy everything before 'T' into first (if present) */
 	first_length = i;
-	strncpy (first, str, first_length);
-	first[first_length] = '\0';
+	if (first != NULL) {
+		strncpy (first, str, first_length);
+		first[first_length] = '\0';
+	}
 
-	if (strlen (str) - i == 0) {
-		second[0] = '\0';
-	} else {
-		second_length = strlen (str) - i - 1U;
-		strncpy (second, str + i + 1U, second_length);
-		second[second_length] = '\0';
+	/* If there is anything after 'T', copy it into second (if present) */
+	if (second != NULL) {
+		if (strlen (str) - i == 0) {
+			second[0] = '\0';
+		} else {
+			second_length = strlen (str) - i - 1U;
+			strncpy (second, str + i + 1U, second_length);
+			second[second_length] = '\0';
+		}
 	}
 }
 
 static int
 try_get_valid_offset_time (const struct time_format time_format,
-		     cob_field *offset_time_field,
-		     int * offset_time, int **offset_time_ptr)
+			   cob_field *offset_time_field, int *offset_time)
 {
 	if (time_format.extra == EXTRA_OFFSET_TIME) {
 		if (offset_time_field != NULL) {
 			*offset_time = cob_get_int (offset_time_field);
 			if (valid_offset_time (*offset_time)) {
-				*offset_time_ptr = offset_time;
 				return 0;
 			}
 		}
 	} else {
-		*offset_time_ptr = NULL;
+		*offset_time = -1;
 		return 0;
 	}
 
-	*offset_time_ptr = NULL;
 	return 1;
+}
+
+static int
+test_char_cond (const int cond, int *offset)
+{
+	if (cond) {
+		++(*offset);
+		return 0;
+	} else {
+		return *offset + 1;
+	}
+}
+
+static int
+test_char (const char wanted, const char *str, int *offset)
+{
+	return test_char_cond (wanted == str[*offset], offset);
+}
+
+static COB_INLINE COB_A_INLINE int
+test_digit (const char ch, int *offset)
+{
+	return test_char_cond (isdigit (ch), offset);
+}
+
+static COB_INLINE COB_A_INLINE int
+test_char_in_range (const char min, const char max, const char ch, int *offset)
+{
+	return test_char_cond (min <= ch && ch <= max, offset);
+}
+
+static int test_millenium (const char *date, int *offset, int *millenium)
+{
+	RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset], offset));
+
+	*millenium = cob_ctoi (date[*offset - 1]);
+	return 0;
+}
+
+static int
+test_century (const char *date, int *offset, int *state)
+{
+	if (*state != 1) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('6', '9', date[*offset],
+							offset));
+	}
+
+	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	return 0;
+}
+
+static int
+test_decade (const char *date, int *offset, int *state)
+{
+	RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	return 0;
+}
+
+static int
+test_unit_year (const char *date, int *offset, int *state)
+{
+	if (*state != 160) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
+							offset));
+	}
+
+	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	return 0;
+}
+
+static int
+test_year (const char *date, int *offset, int *state)
+{
+	RETURN_IF_NOT_ZERO (test_millenium (date, offset, state));
+	RETURN_IF_NOT_ZERO (test_century (date, offset, state));
+	RETURN_IF_NOT_ZERO (test_decade (date, offset, state));
+	RETURN_IF_NOT_ZERO (test_unit_year (date, offset, state));
+
+	return 0;
+}
+
+static int
+test_hyphen_presence (const int with_hyphens, const char *date, int *offset)
+{
+	return with_hyphens ? test_char ('-', date, offset) : 0;
+}
+
+static int
+test_month (const char *date, int *offset, int *month)
+{
+	int	first_digit;
+
+	/* Validate first digit */
+	RETURN_IF_NOT_ZERO (test_char_cond (date[*offset] == '0' || date[*offset] == '1',
+					    offset));
+	first_digit = cob_ctoi (date[*offset - 1]);
+
+	/* Validate second digit */
+	if (first_digit == 0) {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
+							offset));
+	} else { /* first digit == 1 */
+		RETURN_IF_NOT_ZERO (test_char_cond (date[*offset] == '1' || date[*offset] == '2',
+						    offset));
+	}
+
+	*month = first_digit * 10 + cob_ctoi (date[*offset - 1]);
+	return 0;
+}
+
+static int
+test_day_of_month (const char *date, const int year, const int month,
+		   int *offset)
+{
+	int	days_in_month;
+	char	max_first_digit;
+	char	max_second_digit;
+	int	first_digit;
+
+	if (leap_year (year)) {
+		days_in_month = leap_month_days[month];
+	} else {
+		days_in_month = normal_month_days[month];
+	}
+	max_first_digit = '0' + (char) (days_in_month / 10);
+	max_second_digit = '0' + (char) (days_in_month % 10);
+
+	/* Validate first digit */
+	RETURN_IF_NOT_ZERO (test_char_in_range ('0', max_first_digit,
+						date[*offset], offset));
+	first_digit = date[*offset - 1];
+
+	/* Validate second digit */
+	if (first_digit == '0') {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
+							offset));
+	} else if (first_digit != max_first_digit) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', max_second_digit,
+							date[*offset], offset));
+	}
+
+	return 0;
+}
+
+static int
+test_day_of_year (const char *date, const int year, int *offset)
+{
+	char	max_last_digit;
+	int	state;
+
+	/* Validate first digit */
+	/* Check day is not greater than 399 */
+	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '3', date[*offset], offset));
+	state = cob_ctoi (date[*offset - 1]);
+
+	/* Validate second digit */
+	if (state != 3) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		/* Check day is not greater than 369 */
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', '6', date[*offset],
+							offset));
+	}
+	state = state * 10 + cob_ctoi (date[*offset - 1]);
+
+	/* Validate third digit */
+	if (state == 0) {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
+							offset));
+	} else if (state != 36) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		/* Check day is not greater than 366/365 */
+		max_last_digit = leap_year (year) ? '6' : '5';
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', max_last_digit,
+							date[*offset], offset));
+	}
+
+	return 0;
+}
+
+static int
+test_w_presence (const char *date, int *offset)
+{
+	return test_char ('W', date, offset);
+}
+
+static int
+test_week (const char *date, const int year, int *offset)
+{
+	int	first_digit;
+	char	max_last_digit;
+
+	/* Validate first digit */
+	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '5', date[*offset], offset));
+	first_digit = cob_ctoi (date[*offset - 1]);
+
+	/* Validate second digit */
+	if (first_digit == 0) {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
+							offset));
+	} else if (first_digit != 5) {
+		RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
+	} else {
+		max_last_digit = max_week (year) == 53 ? '3' : '2';
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', max_last_digit,
+							date[*offset], offset));
+	}
+
+	return 0;
+}
+
+static int
+test_day_of_week (const char *date, int *offset)
+{
+	RETURN_IF_NOT_ZERO (test_char_in_range ('1', '7', date[*offset], offset));
+	return 0;
+}
+
+static int
+test_date_end (const struct date_format format, const char *date, const int year, int *offset)
+{
+	int	month;
+
+	if (format.days == DAYS_MMDD) {
+		RETURN_IF_NOT_ZERO (test_month (date, offset, &month));
+		RETURN_IF_NOT_ZERO (test_hyphen_presence (format.with_hyphens, date, offset));
+		RETURN_IF_NOT_ZERO (test_day_of_month (date, year, month, offset));
+	} else if (format.days == DAYS_DDD) {
+		RETURN_IF_NOT_ZERO (test_day_of_year (date, year, offset));
+	} else { /* DAYS_WWWD */
+		RETURN_IF_NOT_ZERO (test_w_presence (date, offset));
+		RETURN_IF_NOT_ZERO (test_week (date, year, offset));
+		RETURN_IF_NOT_ZERO (test_hyphen_presence (format.with_hyphens, date, offset));
+		RETURN_IF_NOT_ZERO (test_day_of_week (date, offset));
+	}
+
+	return 0;
+}
+
+static int
+test_no_trailing_junk (const char *str, int offset, int end_of_string)
+{
+	if (end_of_string) {
+		/* Allow trailing spaces at the end of strings */
+		while (str[offset] != '\0') {
+			if (str[offset] != ' ') {
+				return offset + 1;
+			}
+			++offset;
+		}
+		return 0;
+	} else {
+		return str[offset] == '\0' ? 0 : offset + 1;
+	}
+
+}
+
+static int
+test_formatted_date (const struct date_format format, const char *date,
+		     const int end_of_string)
+{
+	int	offset = 0;
+	int	year;
+
+	RETURN_IF_NOT_ZERO (test_year (date, &offset, &year));
+	RETURN_IF_NOT_ZERO (test_hyphen_presence (format.with_hyphens, date, &offset));
+	RETURN_IF_NOT_ZERO (test_date_end (format, date, year, &offset));
+	RETURN_IF_NOT_ZERO (test_no_trailing_junk (date, offset, end_of_string));
+	return 0;
+}
+
+static int
+test_less_than_60 (const char *time, int *offset)
+{
+	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '5', time[*offset], offset));
+	RETURN_IF_NOT_ZERO (test_digit (time[*offset], offset));
+	return 0;
+}
+
+static int
+test_hour (const char *time, int *offset)
+{
+	int	first_digit;
+
+	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '2', time[*offset], offset));
+	first_digit = cob_ctoi (time[*offset - 1]);
+
+	if (first_digit != 2) {
+		RETURN_IF_NOT_ZERO (test_digit (time[*offset], offset));
+	} else {
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', '3', time[*offset], offset));
+	}
+
+	return 0;
+}
+
+static int
+test_minute (const char *time, int *offset)
+{
+	RETURN_IF_NOT_ZERO (test_less_than_60 (time, offset));
+	return 0;
+}
+
+static int
+test_second (const char *time, int *offset)
+{
+	RETURN_IF_NOT_ZERO (test_less_than_60 (time, offset));
+	return 0;
+}
+
+static int
+test_colon_presence (const int with_colons, const char *time,
+		     int *offset)
+{
+	if (with_colons) {
+		RETURN_IF_NOT_ZERO (test_char (':', time, offset));
+	}
+
+	return 0;
+}
+
+static int
+test_decimal_places (const int num_decimal_places, const char decimal_point,
+		     const char *time, int *offset)
+{
+	int	i;
+
+	if (num_decimal_places != 0) {
+		RETURN_IF_NOT_ZERO (test_char (decimal_point, time, offset));
+		for (i = 0; i < num_decimal_places; ++i) {
+			RETURN_IF_NOT_ZERO (test_digit (time[*offset], offset));
+		}
+	}
+
+	return 0;
+}
+
+static int
+test_z_presence (const char *time, int *offset)
+{
+	return test_char ('Z', time, offset);
+}
+
+static int
+test_two_zeroes (const char *str, int *offset)
+{
+	RETURN_IF_NOT_ZERO (test_char ('0', str, offset));
+	RETURN_IF_NOT_ZERO (test_char ('0', str, offset));
+	return 0;
+}
+
+static int
+test_offset_time (const struct time_format format, const char *time, int *offset)
+{
+	if (time[*offset] == '+' || time[*offset] == '-') {
+		++*offset;
+		RETURN_IF_NOT_ZERO (test_hour (time, offset));
+		RETURN_IF_NOT_ZERO (test_colon_presence (format.with_colons,
+							 time, offset));
+		RETURN_IF_NOT_ZERO (test_minute (time, offset));
+	} else if (time[*offset] == '0') {
+		++*offset;
+		RETURN_IF_NOT_ZERO (test_two_zeroes (time, offset));
+		RETURN_IF_NOT_ZERO (test_colon_presence (format.with_colons,
+							 time, offset));
+		RETURN_IF_NOT_ZERO (test_two_zeroes (time, offset));
+	} else {
+		return *offset + 1;
+	}
+
+	return 0;
+}
+
+static int
+test_time_end (const struct time_format format, const char *time,
+	       int *offset)
+{
+	if (format.extra == EXTRA_Z) {
+		RETURN_IF_NOT_ZERO (test_z_presence (time, offset));
+	} else if (format.extra == EXTRA_OFFSET_TIME) {
+		RETURN_IF_NOT_ZERO (test_offset_time (format, time, offset));
+	}
+
+	return 0;
+}
+
+static int
+test_formatted_time (const struct time_format format, const char *time,
+		     const char decimal_point)
+{
+	int	offset = 0;
+
+	RETURN_IF_NOT_ZERO (test_hour (time, &offset));
+	RETURN_IF_NOT_ZERO (test_colon_presence (format.with_colons, time, &offset));
+	RETURN_IF_NOT_ZERO (test_minute (time, &offset));
+	RETURN_IF_NOT_ZERO (test_colon_presence (format.with_colons, time, &offset));
+	RETURN_IF_NOT_ZERO (test_second (time, &offset));
+	RETURN_IF_NOT_ZERO (test_decimal_places (format.decimal_places,
+						 decimal_point, time, &offset));
+	RETURN_IF_NOT_ZERO (test_time_end (format, time, &offset));
+	RETURN_IF_NOT_ZERO (test_no_trailing_junk (time, offset, 1));
+
+	return 0;
+}
+
+#undef RETURN_IF_NOT_ZERO
+
+static cob_u32_t
+integer_of_mmdd (const struct date_format format, const int year,
+		 const char *final_part)
+{
+	const char	*scanf_str = format.with_hyphens ? "%2d-%2d" : "%2d%2d";
+	int		month;
+	int		day;
+
+	sscanf (final_part, scanf_str, &month, &day);
+	return integer_of_date (year, month, day);
+
+}
+
+static cob_u32_t
+integer_of_ddd (const struct date_format format, const int year,
+		const char *final_part)
+{
+	int	day;
+
+	sscanf (final_part, "%3d", &day);
+	return integer_of_day (year, day);
+}
+
+static cob_u32_t
+integer_of_wwwd (const struct date_format format, const int year,
+		 const char *final_part)
+{
+	int		first_week_monday;
+	const char	*scanf_str = format.with_hyphens ? "W%2d-%1d" : "W%2d%1d";
+	int		week;
+	int		day_of_week;
+	cob_u32_t	total_days = 0;
+
+	first_week_monday = get_iso_week_one (days_up_to_year (year) + 1, 1);
+	sscanf (final_part, scanf_str, &week, &day_of_week);
+	total_days = first_week_monday + ((week - 1) * 7) + day_of_week - 1;
+
+	return total_days;
+}
+
+static cob_u32_t
+integer_of_formatted_date (const struct date_format format,
+			   const char *formatted_date)
+{
+	int		year;
+	int		final_part_start = 4 + format.with_hyphens;
+	cob_u32_t	(*casting_func) (struct date_format, int, const char *);
+
+	sscanf (formatted_date, "%4d", &year);
+
+	if (format.days == DAYS_MMDD) {
+		casting_func = &integer_of_mmdd;
+	} else if (format.days == DAYS_DDD) {
+		casting_func = &integer_of_ddd;
+	} else { /* DAYS_WWWD */
+		casting_func = &integer_of_wwwd;
+	}
+
+	return casting_func (format, year, formatted_date + final_part_start);
+}
+
+/* Uses d1 */
+static void
+format_current_date (const struct date_format date_fmt,
+		     const struct time_format time_fmt,
+		     char *formatted_date)
+{
+	struct cob_time	time = cob_get_current_date_and_time ();
+	int		offset;
+	cob_decimal	*fractional_second = &d1;
+
+	format_date (date_fmt, integer_of_date (time.year, time.month, time.day_of_month),
+		     formatted_date);
+
+	offset = strlen (formatted_date);
+	formatted_date[offset] = 'T';
+	++offset;
+
+	mpz_set_ui (fractional_second->value, (unsigned long) time.nanosecond);
+	fractional_second->scale = 9;
+	format_time (time_fmt, time.hour * 60 * 60 + time.minute * 60 + time.second,
+		     fractional_second, time.utc_offset, formatted_date + offset);
 }
 
 /* Global functions */
@@ -2110,9 +2769,9 @@ cob_valid_date_format (const char *format)
 int
 cob_valid_time_format (const char *format, const char decimal_point)
 {
-	int with_colons;
-        ptrdiff_t format_offset;
-	int decimal_places = 0;
+	int		with_colons;
+	ptrdiff_t	format_offset;
+	unsigned int	decimal_places = 0;
 
 	if (!strncmp (format, "hhmmss", 6)) {
 		with_colons = 0;
@@ -2134,7 +2793,7 @@ cob_valid_time_format (const char *format, const char decimal_point)
 	}
 
 	/* Check for trailing garbage */
-	if (strlen (format) > format_offset
+	if (strlen (format) > (size_t) format_offset
 	    && !rest_is_z (format + format_offset)
 	    && !rest_is_offset_format (format + format_offset, with_colons)) {
 		return 0;
@@ -2146,7 +2805,7 @@ cob_valid_time_format (const char *format, const char decimal_point)
 int
 cob_valid_datetime_format (const char *format, const char decimal_point)
 {
-        char	date_format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char	date_format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
 	char	time_format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
 	struct date_format	date_format;
 	struct time_format	time_format;
@@ -2868,90 +3527,24 @@ cob_intr_when_compiled (const int offset, const int length, cob_field *f)
 cob_field *
 cob_intr_current_date (const int offset, const int length)
 {
-#if	defined(_WIN32) && !defined(__CYGWIN__)
-	struct tm	*tmptr;
-	long		contz;
-	struct _timeb	tmb;
 	cob_field	field;
-#else
+	struct cob_time time;
+	char		buff[22] = { '\0' };
 
-	struct tm	*tmptr;
-#if !defined(__linux__) && !defined(__CYGWIN__) && !defined(COB_STRFTIME) && defined(HAVE_TIMEZONE)
-	long		contz;
-#endif
-	time_t		curtime;
-	cob_field	field;
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	struct timeval	tmv;
-	char		buff2[8];
-#endif
-#endif
-	char		buff[24];
-
-	COB_FIELD_INIT (21, NULL, &const_alpha_attr);
+	COB_FIELD_INIT (22, NULL, &const_alpha_attr);
 	make_field_entry (&field);
-	memset (buff, 0, sizeof(buff));
 
-#if	defined(_WIN32) && !defined(__CYGWIN__)
-	_ftime (&tmb);
-	tmptr = localtime (&(tmb.time));
-	/* Leap seconds ? */
-	if (tmptr->tm_sec >= 60) {
-		tmptr->tm_sec = 59;
-	}
-	if (tmb.timezone <= 0) {
-		contz = -tmb.timezone;
-		snprintf (buff, (size_t)23,
-			"%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d+%2.2ld%2.2ld",
-			tmptr->tm_year + 1900, tmptr->tm_mon + 1, tmptr->tm_mday,
-			tmptr->tm_hour, tmptr->tm_min, tmptr->tm_sec,
-			tmb.millitm / 10, contz / 60, contz % 60);
+	time = cob_get_current_date_and_time ();
+
+	sprintf (buff, "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d",
+		  time.year, time.month, time.day_of_month, time.hour,
+		  time.minute, time.second, (int) time.nanosecond / 10000000);
+
+	if (time.offset_known) {
+		snprintf (buff + 16, 6, "%+5.5d", time.utc_offset);
 	} else {
-		contz = tmb.timezone;
-		snprintf (buff, (size_t)23,
-			"%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d-%2.2ld%2.2ld",
-			tmptr->tm_year + 1900, tmptr->tm_mon + 1, tmptr->tm_mday,
-			tmptr->tm_hour, tmptr->tm_min, tmptr->tm_sec,
-			tmb.millitm / 10, contz / 60, contz % 60);
+		memset (buff + 16, '0', 5);
 	}
-#else	/* defined(_WIN32) && !defined(__CYGWIN__) */
-
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	gettimeofday (&tmv, NULL);
-	curtime = tmv.tv_sec;
-#else
-	curtime = time (NULL);
-#endif
-	tmptr = localtime (&curtime);
-	/* Leap seconds ? */
-	if (tmptr->tm_sec >= 60) {
-		tmptr->tm_sec = 59;
-	}
-
-#if defined(__linux__) || defined(__CYGWIN__) || defined(COB_STRFTIME)
-	strftime (buff, (size_t)22, "%Y%m%d%H%M%S00%z", tmptr);
-#elif defined(HAVE_TIMEZONE)
-	strftime (buff, (size_t)17, "%Y%m%d%H%M%S00", tmptr);
-	contz = timezone;
-	if (tmptr->tm_isdst > 0) {
-		contz -= 3600;
-	}
-	if (contz <= 0) {
-		contz = -contz;
-		buff[16] = '+';
-	} else {
-		buff[16] = '-';
-	}
-	sprintf(&buff[17], "%2.2ld%2.2ld", contz / 3600, (contz % 3600) / 60);
-#else
-	strftime (buff, (size_t)22, "%Y%m%d%H%M%S0000000", tmptr);
-#endif
-
-#if defined(HAVE_SYS_TIME_H) && defined(HAVE_GETTIMEOFDAY)
-	snprintf(buff2, (size_t)7, "%2.2ld", tmv.tv_usec / 10000);
-	memcpy (&buff[14], buff2, (size_t)2);
-#endif
-#endif
 
 	memcpy (curr_field->data, buff, (size_t)21);
 	if (unlikely(offset > 0)) {
@@ -3007,30 +3600,46 @@ cob_field *
 cob_intr_combined_datetime (cob_field *srcdays, cob_field *srctime)
 {
 	int		srdays;
-	int		srtime;
-	cob_field_attr	attr;
-	cob_field	field;
-	char		buff[16];
-
-	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, 12, 5, 0, NULL);
-	COB_FIELD_INIT (12, NULL, &attr);
-	make_field_entry (&field);
+	cob_decimal	*combined_datetime;
+	cob_decimal	*srtime;
+	cob_decimal	*hundred_thousand;
 
 	cob_set_exception (0);
+
+	/* Validate and extract the value of srcdays */
 	srdays = cob_get_int (srcdays);
 	if (!valid_integer_date (srdays)) {
-		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		memset (curr_field->data, '0', (size_t)12);
-		return curr_field;
+		goto invalid_args;
 	}
-	srtime = cob_get_int (srctime);
-	if (!valid_time (srtime)) {
-		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		memset (curr_field->data, '0', (size_t)12);
-		return curr_field;
+	combined_datetime = &d1;
+	mpz_set_ui (combined_datetime->value, (unsigned long) srdays);
+	combined_datetime->scale = 0;
+
+	/* Extract and validate the value of srctime */
+	srtime = &d2;
+	cob_decimal_set_field (srtime, srctime);
+	if (!valid_decimal_time (srtime)) {
+		goto invalid_args;
 	}
-	snprintf (buff, (size_t)15, "%7.7d%5.5d", srdays, srtime);
-	memcpy (curr_field->data, buff, (size_t)12);
+
+	/* Set a decimal to 100 000. */
+	hundred_thousand = &d3;
+	mpz_set_ui (hundred_thousand->value, 100000UL);
+	hundred_thousand->scale = 0;
+
+	/* Combined datetime = date + (time / 100 000) */
+	cob_decimal_div (srtime,  hundred_thousand);
+	cob_decimal_add (combined_datetime, srtime);
+
+	cob_alloc_field (combined_datetime);
+	(void) cob_decimal_get_field (combined_datetime, curr_field, 0);
+	goto end_of_func;
+
+ invalid_args:
+	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
+	cob_alloc_set_field_uint (0);
+
+ end_of_func:
 	return curr_field;
 }
 
@@ -3039,7 +3648,7 @@ cob_intr_date_of_integer (cob_field *srcdays)
 {
 	int		days;
 	int		month;
-	int	        year;
+	int		year;
 	cob_field_attr	attr;
 	cob_field	field;
 	char		buff[16];
@@ -3098,10 +3707,8 @@ cob_intr_integer_of_date (cob_field *srcfield)
 {
 	int		indate;
 	int		days;
-	int		totaldays;
 	int		month;
 	int		year;
-	int		baseyear;
 
 	cob_set_exception (0);
 	/* Base 1601-01-01 */
@@ -3114,47 +3721,19 @@ cob_intr_integer_of_date (cob_field *srcfield)
 	}
 	indate %= 10000;
 	month = indate / 100;
-	if (month < 1 || month > 12) {
+	if (!valid_month (month)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
 		return curr_field;
 	}
 	days = indate % 100;
-	if (days < 1 || days > 31) {
+	if (!valid_day_of_month (year, month, days)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
 		return curr_field;
 	}
-	if (leap_year (year)) {
-		if (days > leap_month_days[month]) {
-			cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-			cob_alloc_set_field_uint (0);
-			return curr_field;
-		}
-	} else {
-		if (days > normal_month_days[month]) {
-			cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-			cob_alloc_set_field_uint (0);
-			return curr_field;
-		}
-	}
-	totaldays = 0;
-	baseyear = 1601;
-	while (baseyear != year) {
-		if (leap_year (baseyear)) {
-			totaldays += 366;
-		} else {
-			totaldays += 365;
-		}
-		++baseyear;
-	}
-	if (leap_year (baseyear)) {
-		totaldays += leap_days[month - 1];
-	} else {
-		totaldays += normal_days[month - 1];
-	}
-	totaldays += days;
-	cob_alloc_set_field_int (totaldays);
+
+	cob_alloc_set_field_uint (integer_of_date (year, month, days));
 	return curr_field;
 }
 
@@ -3163,9 +3742,7 @@ cob_intr_integer_of_day (cob_field *srcfield)
 {
 	int		indate;
 	int		days;
-	cob_u32_t	totaldays;
 	int		year;
-	int		baseyear;
 
 	cob_set_exception (0);
 	/* Base 1601-01-01 */
@@ -3177,23 +3754,13 @@ cob_intr_integer_of_day (cob_field *srcfield)
 		return curr_field;
 	}
 	days = indate % 1000;
-	if (days < 1 || days > 365 + leap_year (year)) {
+	if (!valid_day_of_year (year, days)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
 		return curr_field;
 	}
-	totaldays = 0;
-	baseyear = 1601;
-	while (baseyear != year) {
-		if (leap_year (baseyear)) {
-			totaldays += 366;
-		} else {
-			totaldays += 365;
-		}
-		++baseyear;
-	}
-	totaldays += days;
-	cob_alloc_set_field_uint (totaldays);
+
+	cob_alloc_set_field_uint (integer_of_day (year, days));
 	return curr_field;
 }
 
@@ -3214,25 +3781,14 @@ cob_intr_test_date_yyyymmdd (cob_field *srcfield)
 	}
 	indate %= 10000;
 	month = indate / 100;
-	if (month < 1 || month > 12) {
+	if (!valid_month (month)) {
 		cob_alloc_set_field_uint (2);
 		return curr_field;
 	}
 	days = indate % 100;
-	if (days < 1 || days > 31) {
+	if (!valid_day_of_month (year, month, days)) {
 		cob_alloc_set_field_uint (3);
 		return curr_field;
-	}
-	if (leap_year (year)) {
-		if (days > leap_month_days[month]) {
-			cob_alloc_set_field_uint (3);
-			return curr_field;
-		}
-	} else {
-		if (days > normal_month_days[month]) {
-			cob_alloc_set_field_uint (3);
-			return curr_field;
-		}
 	}
 	cob_alloc_set_field_uint (0);
 	return curr_field;
@@ -3253,7 +3809,7 @@ cob_intr_test_day_yyyyddd (cob_field *srcfield)
 		return curr_field;
 	}
 	days = indate % 1000;
-	if (days < 1 || days > 365 + leap_year (year)) {
+	if (!valid_day_of_year (year, days)) {
 		cob_alloc_set_field_uint (2);
 		return curr_field;
 	}
@@ -3820,7 +4376,7 @@ cob_intr_numval_f (cob_field *srcfield)
 			if (e_seen) {
 				exponent *= 10;
 				exponent += (*p & 0x0F);
-			} else  {
+			} else	{
 				if (dec_seen) {
 					decimal_digits++;
 				}
@@ -4625,65 +5181,52 @@ cob_intr_seconds_past_midnight (void)
 }
 
 cob_field *
-cob_intr_seconds_from_formatted_time (cob_field *format, cob_field *value)
+cob_intr_seconds_from_formatted_time (cob_field *format_field, cob_field *time_field)
 {
-	unsigned char	*p1;
-	unsigned char	*p2;
-	size_t		n;
-	cob_u32_t	seconds = 0;
-	cob_u32_t	minutes = 0;
-	cob_u32_t	hours = 0;
-	cob_u32_t	seconds_seen = 0;
-	cob_u32_t	minutes_seen = 0;
-	cob_u32_t	hours_seen = 0;
+	size_t		str_length;
+	char		format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	const char	decimal_point = COB_MODULE_PTR->decimal_point;
+	int		is_datetime = 0;
+	char		time_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	struct time_format	time_fmt;
+	cob_decimal	*seconds = &d1;
+
+	str_length = num_leading_nonspace ((char *) format_field->data);
+	memcpy (format_str, format_field->data, str_length);
 
 	cob_set_exception (0);
-	if (value->size < format->size) {
-		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		cob_alloc_set_field_uint (0);
-		return curr_field;
+
+	/* Validate the format string */
+	if (cob_valid_datetime_format (format_str, decimal_point)) {
+		is_datetime = 1;
+	} else if (!cob_valid_time_format (format_str, decimal_point)) {
+		goto invalid_args;
 	}
-	p1 = format->data;
-	p2 = value->data;
-	for (n = 0; n < format->size - 1; ++n, ++p1, ++p2) {
-		if (!memcmp (p1, "hh", (size_t)2) && !hours_seen) {
-			if (*p2 >= (unsigned char)'0' &&
-			    *p2 <= (unsigned char)'9' &&
-			    *(p2 + 1) >= (unsigned char)'0' &&
-			    *(p2 + 1) <= (unsigned char)'9') {
-				hours = ((*p2 - '0') * 10) + (*(p2 + 1) - '0');
-				hours_seen = 1;
-				continue;
-			}
-		}
-		if (!memcmp (p1, "mm", (size_t)2) && !minutes_seen) {
-			if (*p2 >= (unsigned char)'0' &&
-			    *p2 <= (unsigned char)'9' &&
-			    *(p2 + 1) >= (unsigned char)'0' &&
-			    *(p2 + 1) <= (unsigned char)'9') {
-				minutes = ((*p2 - '0') * 10) + (*(p2 + 1) - '0');
-				minutes_seen = 1;
-				continue;
-			}
-		}
-		if (!memcmp (p1, "ss", (size_t)2) && !seconds_seen) {
-			if (*p2 >= (unsigned char)'0' &&
-			    *p2 <= (unsigned char)'9' &&
-			    *(p2 + 1) >= (unsigned char)'0' &&
-			    *(p2 + 1) <= (unsigned char)'9') {
-				seconds = ((*p2 - '0') * 10) + (*(p2 + 1) - '0');
-				seconds_seen = 1;
-				continue;
-			}
-		}
-	}
-	if (hours_seen && minutes_seen && seconds_seen) {
-		seconds += (hours * 3600) + (minutes * 60);
+
+	/* Extract the time part of the strings */
+	if (is_datetime) {
+		split_around_t (format_str, NULL, format_str);
+		split_around_t ((char *) time_field->data, NULL, time_str);
 	} else {
-		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		seconds = 0;
+		memcpy (time_str, time_field->data, str_length);
 	}
-	cob_alloc_set_field_uint (seconds);
+
+	/* Validate the formatted time */
+	time_fmt = parse_time_format_string (format_str);
+	if (test_formatted_time (time_fmt, time_str, decimal_point) != 0) {
+		goto invalid_args;
+	}
+
+	seconds_from_formatted_time (time_fmt, time_str, seconds);
+
+	cob_alloc_field (seconds);
+	(void) cob_decimal_get_field (seconds, curr_field, 0);
+
+	return curr_field;
+
+ invalid_args:
+	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
+	cob_alloc_set_field_uint (0);
 	return curr_field;
 }
 
@@ -4739,21 +5282,12 @@ cob_intr_locale_date (const int offset, const int length,
 	}
 	indate %= 10000;
 	month = indate / 100;
-	if (month < 1 || month > 12) {
+	if (!valid_month (month)) {
 		goto derror;
 	}
 	days = indate % 100;
-	if (days < 1 || days > 31) {
+	if (!valid_day_of_month (year, month, days)) {
 		goto derror;
-	}
-	if (leap_year (year)) {
-		if (days > leap_month_days[month]) {
-			goto derror;
-		}
-	} else {
-		if (days > normal_month_days[month]) {
-			goto derror;
-		}
 	}
 #ifdef	HAVE_LANGINFO_CODESET
 	month--;
@@ -5531,7 +6065,7 @@ cob_intr_formatted_date (const int offset, const int length,
 	format = parse_date_format_string (format_str);
 	format_date (format, days, buff);
 
-	memcpy (curr_field->data, buff, (size_t) field_length);
+	memcpy (curr_field->data, buff, field_length);
 	goto end_of_func;
 
  invalid_args:
@@ -5539,7 +6073,7 @@ cob_intr_formatted_date (const int offset, const int length,
 	memset (curr_field->data, ' ', strlen (format_str));
 
  end_of_func:
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -5557,9 +6091,9 @@ cob_intr_formatted_time (const int offset, const int length,
 	size_t		field_length;
 	char		buff[MAX_TIME_STR_LENGTH] = { '\0' };
 	char		format_str[MAX_TIME_STR_LENGTH] = { '\0' };
-	int		time;
+	int		whole_seconds;
+	cob_decimal	*fractional_seconds;
 	int		offset_time;
-	int		*offset_time_ptr;
 	struct time_format	format;
 
 	if (!(params == 2 || params == 3)) {
@@ -5592,34 +6126,37 @@ cob_intr_formatted_time (const int offset, const int length,
 
 	/* Extract and validate the times and time format */
 
-	time = cob_get_int (time_field);
-	if (!valid_time (time)) {
+	whole_seconds = cob_get_int (time_field);
+	if (!valid_time (whole_seconds)) {
 		goto invalid_args;
 	}
+
+	fractional_seconds = &d2;
+	get_fractional_seconds (time_field, fractional_seconds);
 
 	if (!cob_valid_time_format (format_str, COB_MODULE_PTR->decimal_point)) {
 		goto invalid_args;
 	}
 	format = parse_time_format_string (format_str);
 
-	if (try_get_valid_offset_time (format, offset_time_field,
-				       &offset_time, &offset_time_ptr)) {
+	if (try_get_valid_offset_time (format, offset_time_field, &offset_time)) {
 		goto invalid_args;
 	}
 
-	format_time (format, time, offset_time_ptr, buff);
+	format_time (format, whole_seconds, fractional_seconds, offset_time,
+		     buff);
 
-	memcpy (curr_field->data, buff, (size_t) field_length);
+	memcpy (curr_field->data, buff, field_length);
 	goto end_of_func;
 
-invalid_args:
+ invalid_args:
 	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 	if (format_str != NULL) {
 		memset (curr_field->data, ' ', strlen (format_str));
 	}
 
  end_of_func:
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -5644,9 +6181,9 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	char		formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
 	char		formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
 	int		days;
-	int		time;
+	int		whole_seconds;
+	cob_decimal	*fractional_seconds;
 	int		offset_time;
-	int		*offset_time_ptr;
 	char		buff[MAX_DATETIME_STR_LENGTH] = { '\0' };
 
 	if (!(params == 3 || params == 4)) {
@@ -5683,9 +6220,9 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	}
 
 	days = cob_get_int (days_field);
-	time = cob_get_int (time_field);
+	whole_seconds = cob_get_int (time_field);
 
-	if (!valid_integer_date (days) || !valid_time (time)) {
+	if (!valid_integer_date (days) || !valid_time (whole_seconds)) {
 		goto invalid_args;
 	}
 
@@ -5693,7 +6230,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 
 	time_fmt = parse_time_format_string (time_fmt_str);
 	if (try_get_valid_offset_time (time_fmt, offset_time_field,
-				       &offset_time, &offset_time_ptr)) {
+				       &offset_time)) {
 		goto invalid_args;
 	}
 
@@ -5701,8 +6238,12 @@ cob_intr_formatted_datetime (const int offset, const int length,
 
 	/* Format */
 
+	fractional_seconds = &d1;
+	get_fractional_seconds (time_field, fractional_seconds);
+
 	format_date (date_fmt, days, formatted_date);
-	format_time (time_fmt, time, offset_time_ptr, formatted_time);
+	format_time (time_fmt, whole_seconds, fractional_seconds, offset_time,
+		     formatted_time);
 
 	sprintf (buff, "%sT%s", formatted_date, formatted_time);
 
@@ -5722,17 +6263,192 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	return curr_field;
 }
 
-/* RXWRXW - To be implemented */
+cob_field *
+cob_intr_test_formatted_datetime (cob_field *format_field,
+				  cob_field *datetime_field)
+{
+	char	*datetime_format_str = (char *) format_field->data;
+	char	date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	int	date_present;
+	int	time_present;
+	struct date_format date_fmt;
+	struct time_format time_fmt;
+	char	*formatted_datetime = (char *) datetime_field->data;
+	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
+	int	time_part_offset;
+	int	error_pos;
+
+	cob_set_exception (0);
+
+	/* Check whether date or time is present. */
+	if (cob_valid_date_format (datetime_format_str)) {
+		date_present = 1;
+		time_present = 0;
+	} else if (cob_valid_time_format (datetime_format_str,
+					  COB_MODULE_PTR->decimal_point)) {
+		date_present = 0;
+		time_present = 1;
+	} else if (cob_valid_datetime_format (datetime_format_str,
+					      COB_MODULE_PTR->decimal_point)) {
+		date_present = 1;
+		time_present = 1;
+	} else {
+		goto invalid_args;
+	}
+
+	/* Move date/time to respective variables */
+	if (date_present && time_present) {
+		split_around_t (datetime_format_str, date_format_str, time_format_str);
+	} else if (date_present) {
+		strncpy (date_format_str, datetime_format_str, MAX_DATE_STR_LENGTH);
+	} else { /* time_present */
+		strncpy (time_format_str, datetime_format_str, MAX_TIME_STR_LENGTH);
+	}
+
+	/* Parse date/time */
+	if (date_present) {
+		date_fmt = parse_date_format_string (date_format_str);
+	}
+	if (time_present) {
+		time_fmt = parse_time_format_string (time_format_str);
+	}
+
+	if (date_present && time_present) {
+		split_around_t (formatted_datetime, formatted_date, formatted_time);
+	} else if (date_present) {
+		strncpy (formatted_date, formatted_datetime, MAX_DATE_STR_LENGTH);
+	} else { /* time_present */
+		strncpy (formatted_time, formatted_datetime, MAX_TIME_STR_LENGTH);
+	}
+
+	/* Set time offset */
+	if (date_present) {
+		time_part_offset = strlen (formatted_date) + 1;
+	} else {
+		time_part_offset = 0;
+	}
+
+	/* Validate the formatted date/time */
+	if (date_present) {
+		error_pos = test_formatted_date (date_fmt, formatted_date, 0);
+		if (error_pos != 0) {
+			cob_alloc_set_field_uint (error_pos);
+			goto end_of_func;
+		}
+	}
+	if (time_present) {
+		error_pos = test_formatted_time (time_fmt, formatted_time,
+						 COB_MODULE_PTR->decimal_point);
+		if (error_pos != 0) {
+			cob_alloc_set_field_uint (time_part_offset + error_pos);
+			goto end_of_func;
+		}
+	}
+
+	cob_alloc_set_field_uint (0);
+	goto end_of_func;
+
+ invalid_args:
+	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
+	cob_alloc_set_field_uint (0);
+
+ end_of_func:
+	return curr_field;
+}
 
 cob_field *
 cob_intr_integer_of_formatted_date (cob_field *format_field,
 				    cob_field *date_field)
 {
-	COB_UNUSED (format_field);
-	COB_UNUSED (date_field);
+	char	*format_field_data = (char *) format_field->data;
+	char	format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	*date_field_data = (char *) date_field->data;
+	char	date_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	int	is_date;
+	struct date_format date_fmt;
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	cob_set_exception (0);
+
+	/* Get date format string and parse it */
+	is_date = cob_valid_date_format (format_field_data);
+	if (is_date) {
+		strncpy (format_str, format_field_data, MAX_DATE_STR_LENGTH);
+	} else if (cob_valid_datetime_format (format_field_data,
+					      COB_MODULE_PTR->decimal_point)) { /* Datetime */
+		split_around_t (format_field_data, format_str, NULL);
+	} else { /* Invalid format string */
+		goto invalid_args;
+	}
+	date_fmt = parse_date_format_string (format_str);
+
+	/* Get formatted date and validate it */
+	if (is_date) {
+		strncpy (date_str, date_field_data, MAX_DATE_STR_LENGTH);
+	} else { /* Datetime */
+		split_around_t (date_field_data, date_str, NULL);
+	}
+	if (test_formatted_date (date_fmt, date_str, 1) != 0) {
+		goto invalid_args;
+	}
+
+	cob_alloc_set_field_uint (integer_of_formatted_date (date_fmt, date_str));
+	goto end_of_func;
+
+ invalid_args:
+	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
+	cob_alloc_set_field_uint (0);
+
+ end_of_func:
+	return curr_field;
 }
+
+cob_field *
+cob_intr_formatted_current_date (const int offset, const int length,
+				 cob_field *format_field)
+{
+	cob_field	field;
+	size_t		field_length =
+		num_leading_nonspace ((char *) format_field->data);
+	char		format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char		date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char		time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	struct date_format	date_fmt;
+	struct time_format	time_fmt;
+	char		formatted_date[MAX_DATETIME_STR_LENGTH] = { '\0' };
+
+	strncpy (format_str, (char *) format_field->data, field_length);
+
+	COB_FIELD_INIT (field_length, NULL, &const_alpha_attr);
+	make_field_entry (&field);
+
+	cob_set_exception (0);
+
+	/* Validate format */
+	if (!cob_valid_datetime_format (format_str, COB_MODULE_PTR->decimal_point)) {
+		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
+		memset (curr_field->data, ' ', field_length);
+		goto end_of_func;
+	}
+
+	/* Parse format */
+	split_around_t (format_str, date_format_str, time_format_str);
+	date_fmt = parse_date_format_string (date_format_str);
+	time_fmt = parse_time_format_string (time_format_str);
+
+	/* Format current date */
+	format_current_date (date_fmt, time_fmt, formatted_date);
+	memcpy (curr_field->data, formatted_date, field_length);
+
+ end_of_func:
+	if (unlikely (offset > 0)) {
+		calc_ref_mod (curr_field, offset, length);
+	}
+	return curr_field;
+}
+
+/* RXWRXW - To be implemented */
 
 cob_field *
 cob_intr_boolean_of_integer (cob_field *f1, cob_field *f2)
@@ -5775,17 +6491,6 @@ cob_intr_exception_location_n (void)
 }
 
 cob_field *
-cob_intr_formatted_current_date (const int offset, const int length,
-				 cob_field *srcfield)
-{
-	COB_UNUSED (offset);
-	COB_UNUSED (length);
-	COB_UNUSED (srcfield);
-
-	cob_fatal_error (COB_FERROR_FUNCTION);
-}
-
-cob_field *
 cob_intr_integer_of_boolean (cob_field *srcfield)
 {
 	COB_UNUSED (srcfield);
@@ -5810,16 +6515,6 @@ cob_intr_standard_compare (const int params, ...)
 
 	cob_fatal_error (COB_FERROR_FUNCTION);
 }
-
-cob_field *
-cob_intr_test_formatted_datetime (cob_field *f1, cob_field *f2)
-{
-	COB_UNUSED (f1);
-	COB_UNUSED (f2);
-
-	cob_fatal_error (COB_FERROR_FUNCTION);
-}
-
 
 /* Initialization/exit routines */
 

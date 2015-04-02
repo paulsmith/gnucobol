@@ -190,14 +190,15 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-           DISPLAY FUNCTION COMBINED-DATETIME ( 987, 345 )
+           DISPLAY FUNCTION COMBINED-DATETIME ( 987, 345.6 )
            END-DISPLAY.
+
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
 AT_CHECK([./prog], [0],
-[0000987.00345
+[987.003456
 ])
 
 AT_CLEANUP
@@ -616,6 +617,33 @@ AT_CHECK([./prog], [0],
 
 AT_CLEANUP
 
+AT_SETUP([FUNCTION FORMATTED-CURRENT-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Datetime-Format CONSTANT "YYYYMMDDThhmmss.ss+hhmm".
+       01  str             PIC X(25).
+       PROCEDURE        DIVISION.
+      *>   Test normal inputs.
+           MOVE FUNCTION FORMATTED-CURRENT-DATE ( Datetime-Format )
+               TO str
+           IF FUNCTION TEST-FORMATTED-DATETIME ( Datetime-Format, str)
+                   <> 0
+               DISPLAY "Test 1 failed: " str
+           END-IF
+           
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0], [])
+
+AT_CLEANUP
+
 AT_SETUP([FUNCTION FORMATTED-DATE])
 AT_KEYWORDS([functions])
 
@@ -629,45 +657,45 @@ AT_DATA([prog.cob], [
       *>   Test normal inputs.
            MOVE FUNCTION FORMATTED-DATE ( "YYYYMMDD", 1 ) TO str
            IF str <> "16010101"
-               DISPLAY str
+               DISPLAY "Test 1 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATE ( "YYYY-MM-DD", 1 ) TO str
            IF str <> "1601-01-01"
-               DISPLAY str
+               DISPLAY "Test 2 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATE ( "YYYYDDD", 1 ) TO str
            IF str <> "1601001"
-               DISPLAY str
+               DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATE ( "YYYY-DDD", 1 ) TO str
            IF str <> "1601-001"
-               DISPLAY str
+               DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 1 ) TO str
            IF str <> "1601W011"
-               DISPLAY str
+               DISPLAY "Test 5 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATE ( "YYYY-Www-D", 1 ) TO str
            IF str <> "1601-W01-1"
-               DISPLAY str
+               DISPLAY "Test 6 failed: " str END-DISPLAY
            END-IF
 
       *>   Test week number edge cases.
       *>   For 2012-01-01.
            MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 150115 ) TO str
            IF str <> "2011W527"
-               DISPLAY str
+               DISPLAY "Test 7 failed: " str END-DISPLAY
            END-IF
 
       *>   and for 2013-12-30.
            MOVE FUNCTION FORMATTED-DATE ( "YYYYWwwD", 150844 ) TO str
            IF str <> "2014W011"
-               DISPLAY str
+               DISPLAY "Test 8 failed: " str END-DISPLAY
            END-IF
 
            STOP RUN.
@@ -686,6 +714,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
            DISPLAY FUNCTION FORMATTED-DATE ("YYYYMMDD", 1) (3:4)
+           END-DISPLAY
            STOP RUN.
 ])
 
@@ -704,28 +733,35 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  str          PIC X(20).
+       01  str          PIC X(40).
        PROCEDURE        DIVISION.
       *>   Test normal inputs.
            MOVE FUNCTION FORMATTED-DATETIME
                    ("YYYYMMDDThhmmss", 1, 45296)
                TO str
            IF str <> "16010101T123456"
-               DISPLAY str
+               DISPLAY "Test 1 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATETIME
                    ("YYYY-MM-DDThh:mm:ss", 1, 45296)
                TO str
            IF str <> "1601-01-01T12:34:56"
-               DISPLAY str
+               DISPLAY "Test 2 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-DATETIME
                     ("YYYYDDDThhmmss+hhmm", 1, 45296, -754)
                TO str
            IF str <> "1601001T123456-1234"
-               DISPLAY str
+               DISPLAY "Test 3 failed: " str END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss.sssssssssZ", 1, 45296.789012345)
+               TO str
+           IF str <> "1601001T123456.789012345Z"
+               DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
            STOP RUN.
@@ -745,6 +781,7 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            DISPLAY FUNCTION FORMATTED-DATETIME
                ("YYYYMMDDThhmmss", 1, 1) (3:4)
+           END-DISPLAY
            STOP RUN.
 ])
 
@@ -768,63 +805,68 @@ AT_DATA([prog.cob], [
       *>   Test normal inputs.
            MOVE FUNCTION FORMATTED-TIME ( "hhmmss", 45296 ) TO str
            IF str <> "123456"
-               DISPLAY str
+               DISPLAY "Test 1 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss", 45296 ) TO str
            IF str <> "12:34:56"
-               DISPLAY str
+               DISPLAY "Test 2 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hhmmssZ", 45296 ) TO str
            IF str <> "123456Z"
-               DISPLAY str
+               DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296 ) TO str
            IF str <> "12:34:56Z"
-               DISPLAY str
+               DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hhmmss.ss", 45296 ) TO str
-           IF str <> "123456.00"
-               DISPLAY str
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss.ss", 45296.78 ) TO str
+           IF str <> "123456.78"
+               DISPLAY "Test 5 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss.ssZ", 45296 ) TO str
-           IF str <> "12:34:56.00Z"
-               DISPLAY str
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss.ssZ", 45296.78 )
+               TO str
+           IF str <> "12:34:56.78Z"
+               DISPLAY "Test 6 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296, 0 )
                TO str
            IF str <> "123456+0000"
-               DISPLAY str
+               DISPLAY "Test 7 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss+hh:mm", 45296, 0 )
                TO str
            IF str <> "12:34:56+00:00"
-               DISPLAY str
+               DISPLAY "Test 8 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296, -754)
                TO str
            IF str <> "123456-1234"
-               DISPLAY str
+               DISPLAY "Test 9 failed: " str END-DISPLAY
            END-IF
 
       *>   Test with invalid/missing offset times.
            MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 1, 3000 )
                TO str
            IF str <> SPACES
-               DISPLAY str
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 59"
+               DISPLAY "Test 10 failed: " str END-DISPLAY
            END-IF
 
            MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 1, -3000 )
                TO str
            IF str <> SPACES
-               DISPLAY str
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 67"
+               DISPLAY "Test 11 failed: " str END-DISPLAY
            END-IF
 
            STOP RUN.
@@ -835,7 +877,7 @@ AT_CHECK([./prog], [0], [])
 
 AT_CLEANUP
 
-AT_SETUP([FUNCTION FORMATTED-TIME with DECIMAL-POINT IS COMMA])
+AT_SETUP([FUNCTION FORMATTED-TIME DP.COMMA])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
@@ -854,7 +896,7 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            MOVE FUNCTION FORMATTED-TIME ("hh:mm:ss,ss", 45296) TO str
            IF str <> "12:34:56,00"
-               DISPLAY str END-DISPLAY
+               DISPLAY "Test 1 failed: " str END-DISPLAY
            END-IF
 
            STOP RUN.
@@ -873,6 +915,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
            DISPLAY FUNCTION FORMATTED-TIME ("hhmmss", 45296) (3:4)
+           END-DISPLAY
            STOP RUN.
 ])
 
@@ -1024,6 +1067,55 @@ AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
 AT_CHECK([./prog], [0],
 [000146000
 ])
+
+AT_CLEANUP
+
+AT_SETUP([FUNCTION INTEGER-OF-FORMATTED-DATE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  day-int      PIC 9(9).
+
+       PROCEDURE        DIVISION.
+           *> The date 2013-12-30 is used as it can also be used to
+           *> check the conversion of dates in week form.
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-MM-DD", "2013-12-30")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 1 failed" END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-DDD", "2013-364")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 2 failed" END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-Www-D", "2014-W01-1")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 3 failed" END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION INTEGER-OF-FORMATTED-DATE
+                   ("YYYY-MM-DDThh:mm:ss", "2013-12-30T12:34:56")
+               TO day-int
+           IF day-int <> 150844
+               DISPLAY "Test 4 failed" END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0], [])
 
 AT_CLEANUP
 
@@ -2018,15 +2110,56 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  X   PIC      X(6)   VALUE "hhmmss".
-       01  Y   PIC      9(8)   COMP-5.
-       01  Z   PIC      X(6)   VALUE "010203".
+       01  result       PIC 9(8)V9(9) COMP-5.
        PROCEDURE        DIVISION.
-           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME (X, Z) TO Y.
-           IF Y NOT = 3723
-                   DISPLAY Y
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss", "010203")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 1 failed: " result
                    END-DISPLAY
            END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hh:mm:ss", "01:02:03")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 2 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss.ssssssss", "010203.04050607")
+               TO result.
+           IF result NOT = 3723.04050607
+                   DISPLAY "Test 3 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmssZ", "010203Z")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 4 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("hhmmss+hhmm", "010203+0405")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 5 failed: " result
+                   END-DISPLAY
+           END-IF.
+
+           MOVE FUNCTION SECONDS-FROM-FORMATTED-TIME
+                    ("YYYYMMDDThhmmss", "16010101T010203")
+               TO result.
+           IF result NOT = 3723
+                   DISPLAY "Test 6 failed: " result
+                   END-DISPLAY
+           END-IF.
+
            STOP RUN.
 ])
 
@@ -2380,6 +2513,289 @@ AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
 AT_CHECK([./prog], [0],
 [000000002
 ])
+
+AT_CLEANUP
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with dates])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010101") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-MM-DD", "1601-01-01") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601001") <> 0
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-DDD", "1601-001") <> 0
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W011") <> 0
+                DISPLAY "Test 5 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-Www-D", "1601-W01-1") <> 0
+                DISPLAY "Test 6 failed" END-DISPLAY
+            END-IF
+
+
+            *> How will this work with zero-length items?
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "1") <> 2
+                DISPLAY "Test 7 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "160A0101") <> 4
+                DISPLAY "Test 8 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "00000101") <> 1
+                DISPLAY "Test 9 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16000101") <> 4
+                DISPLAY "Test 10 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010001") <> 6
+                DISPLAY "Test 11 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16011301") <> 6
+                DISPLAY "Test 12 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "16010190") <> 7
+                DISPLAY "Test 13 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "18000229") <> 8
+                DISPLAY "Test 14 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYY-MM-DD", "1601 01 01") <> 5
+                DISPLAY "Test 15 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "160101010") <> 9
+                DISPLAY "Test 16 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601A011") <> 5
+                DISPLAY "Test 17 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W531") <> 7
+                DISPLAY "Test 18 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W601") <> 6
+                DISPLAY "Test 19 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "2009W531") <> 0
+                DISPLAY "Test 20 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYWwwD", "1601W018") <> 8
+                DISPLAY "Test 21 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601366") <> 7
+                DISPLAY "Test 22 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601370") <> 6
+                DISPLAY "Test 23 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYDDD", "1601400") <> 5
+                DISPLAY "Test 24 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "01") <> 1
+                DISPLAY "Test 25 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                   ("YYYYMMDD", "1601010") <> 8
+                DISPLAY "Test 26 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with times])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.sssssssssZ", "000000.000000000Z") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss.sssssssssZ", "00:00:00.000000000Z") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+            *> 0 instead of +/- valid in sending fields with offset of zero.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.sssssssss+hhmm", "000000.00000000000000")
+                    <> 0
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss.sssssssss+hh:mm",
+                    "00:00:00.000000000+00:00")
+                    <> 0
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "300000") <> 1
+                DISPLAY "Test 5 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "250000") <> 2
+                DISPLAY "Test 6 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "006000") <> 3
+                DISPLAY "Test 7 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", "000060") <> 5
+                DISPLAY "Test 8 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hh:mm:ss", "00-00-00") <> 3
+                DISPLAY "Test 9 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss.ss", "000000,00") <> 7
+                DISPLAY "Test 10 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss+hhmm", "000000 0000") <> 7
+                DISPLAY "Test 11 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss+hhmm", "00000000001") <> 11
+                DISPLAY "Test 12 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmssZ", "000000A") <> 7
+                DISPLAY "Test 13 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss", SPACE) <> 1
+                DISPLAY "Test 14 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME with datetimes])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101T000000") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYY-MM-DDThh:mm:ss.sssssssss+hh:mm",
+                    "1601-01-01T00:00:00.000000000+00:00") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101 000000") <> 9
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", SPACE) <> 1
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+AT_SETUP([FUNCTION TEST-FORMATTED-DATETIME DP.COMMA])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION   DIVISION.
+        PROGRAM-ID.      prog.
+        ENVIRONMENT      DIVISION.
+        CONFIGURATION    SECTION.
+        SPECIAL-NAMES.
+            DECIMAL-POINT IS COMMA.
+        DATA             DIVISION.
+        WORKING-STORAGE  SECTION.
+        PROCEDURE        DIVISION.
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss,ss", "000000,00") <> 0
+                DISPLAY "Test 1 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss,ss", "16010101T000000,00") <> 0
+                DISPLAY "Test 2 failed" END-DISPLAY
+            END-IF
+
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("hhmmss,ss", "000000.00") <> 7
+                DISPLAY "Test 3 failed" END-DISPLAY
+            END-IF
+            IF FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss,ss", "16010101T000000.00") <> 16
+                DISPLAY "Test 4 failed" END-DISPLAY
+            END-IF
+
+            STOP RUN
+            .
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0])
 
 AT_CLEANUP
 
@@ -2865,6 +3281,152 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([Formatted funcs w/ invalid variable format])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  invalid-date-format          PIC X(10) VALUE "yyyymmdd".
+       01  invalid-datetime-format      PIC X(17)
+                                        VALUE "yyyymmddtHHMMSS".
+       01  invalid-time-format          PIC X(6) VALUE "HHMMSS".
+       PROCEDURE        DIVISION.
+           IF FUNCTION FORMATTED-CURRENT-DATE
+                           (invalid-date-format) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 11"
+               DISPLAY "Test 1 failed" END-DISPLAY
+           END-IF       
+
+           IF FUNCTION FORMATTED-DATE (invalid-date-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 18"
+               DISPLAY "Test 2 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-DATETIME
+                           (invalid-datetime-format, 1, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 24"
+               DISPLAY "Test 3 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-TIME (invalid-time-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 31"
+               DISPLAY "Test 4 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION INTEGER-OF-FORMATTED-DATE
+                           (invalid-date-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 37"
+               DISPLAY "Test 5 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION SECONDS-FROM-FORMATTED-TIME
+                           (invalid-time-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 44"
+               DISPLAY "Test 6 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION TEST-FORMATTED-DATETIME
+                           (invalid-datetime-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 51"
+               DISPLAY "Test 7 failed" END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], ,
+[prog.cob: 11: Warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob: 18: Warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 24: Warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob: 31: Warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob: 37: Warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob: 44: Warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob: 51: Warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([Formatted funcs w/ invalid variable format])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  invalid-date-format          PIC X(10) VALUE "yyyymmdd".
+       01  invalid-datetime-format      PIC X(17)
+                                        VALUE "yyyymmddtHHMMSS".
+       01  invalid-time-format          PIC X(6) VALUE "HHMMSS".
+       PROCEDURE        DIVISION.
+           IF FUNCTION FORMATTED-CURRENT-DATE
+                           (invalid-date-format) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 11"
+               DISPLAY "Test 1 failed" END-DISPLAY
+           END-IF       
+
+           IF FUNCTION FORMATTED-DATE (invalid-date-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 18"
+               DISPLAY "Test 2 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-DATETIME
+                           (invalid-datetime-format, 1, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 24"
+               DISPLAY "Test 3 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION FORMATTED-TIME (invalid-time-format, 1) <> SPACES
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 31"
+               DISPLAY "Test 4 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION INTEGER-OF-FORMATTED-DATE
+                           (invalid-date-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 37"
+               DISPLAY "Test 5 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION SECONDS-FROM-FORMATTED-TIME
+                           (invalid-time-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 44"
+               DISPLAY "Test 6 failed" END-DISPLAY
+           END-IF
+
+           IF FUNCTION TEST-FORMATTED-DATETIME
+                           (invalid-datetime-format, 1) <> ZERO
+                  OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 51"
+               DISPLAY "Test 7 failed" END-DISPLAY
+           END-IF
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], , ignore)
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP

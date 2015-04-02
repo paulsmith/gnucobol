@@ -246,6 +246,21 @@ typedef struct runtime_env {
 
 } runtime_env;
 
+/* Datetime structure */
+struct cob_time
+{
+	int	year;
+	int	month; /* 1 = Jan ... 12 = Dec */
+	int	day_of_month; /* 1 ... 31 */
+	int	day_of_week; /* 1 = Monday ... 7 = Sunday */
+	int	hour;
+	int	minute;
+	int	second;
+	int	nanosecond;
+	int	offset_known;
+	int	utc_offset; /* in minutes */
+};
+
 /* Local function prototypes */
 COB_HIDDEN void		cob_init_numeric	(cob_global *);
 COB_HIDDEN void		cob_init_termio		(cob_global *);
@@ -288,6 +303,10 @@ COB_HIDDEN void		cob_parameter_check	(const char *, const int);
 COB_HIDDEN void		cob_runtime_error	(const char *, ...) COB_A_FORMAT12;
 
 COB_HIDDEN char*	cob_save_env_value	(char*, char*);
+
+COB_HIDDEN int		cob_ctoi		(const char);
+
+COB_HIDDEN struct cob_time cob_get_current_date_and_time	(void);
 
 #ifdef __cplusplus
 }
