@@ -72,6 +72,9 @@
    the CoreFoundation framework. */
 #undef HAVE_CFPREFERENCESCOPYAPPVALUE
 
+/* Has clock_gettime function and CLOCK_REALTIME */
+#undef HAVE_CLOCK_GETTIME
+
 /* curses has color_set function */
 #undef HAVE_COLOR_SET
 
@@ -178,7 +181,7 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
-/* Do we have mp_get_fmemory_functions in gmp */
+/* Do we have mp_get_memory_functions in gmp */
 #undef HAVE_MP_GET_MEMORY_FUNCTIONS
 
 /* Has nanosleep function */
@@ -374,7 +377,7 @@
 /* curses library for extended SCREEN I/O */
 #undef WITH_CURSES
 
-/* Compile with the Berkeley DB library */
+/* Use Berkeley DB library as emulation of ISAM handler */
 #undef WITH_DB
 
 /* Use DISAM as ISAM handler */

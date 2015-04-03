@@ -1688,10 +1688,10 @@ cobc_print_info (void)
 #endif
 #endif
 
-	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
-	cobc_var_print (_("Variable format"),	buff, 0);
-	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
-		cobc_var_print ("COB_VARSEQ_FORMAT", s, 1);
+	if (sizeof (void *) > 4U) {
+		cobc_var_print ("64bit-mode",	_("yes"), 0);
+	} else {
+		cobc_var_print ("64bit-mode",	_("no"), 0);
 	}
 
 #ifdef	COB_LI_IS_LL
@@ -1700,25 +1700,43 @@ cobc_print_info (void)
 	cobc_var_print ("BINARY-C-LONG",	_("4 bytes"), 0);
 #endif
 
+	cobc_var_print (_("Extended screen I/O"),	WITH_CURSES, 0);
+
+	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
+	cobc_var_print (_("Variable format"),	buff, 0);
+	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
+		cobc_var_print ("COB_VARSEQ_FORMAT", s, 1);
+	}
+
 #ifdef	WITH_SEQRA_EXTFH
 	cobc_var_print (_("Sequential handler"),	_("External"), 0);
 #else
 	cobc_var_print (_("Sequential handler"),	_("Internal"), 0);
 #endif
-#ifdef	WITH_INDEX_EXTFH
+
+#if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("ISAM handler"),		_("External"), 0);
+#elif defined	(WITH_DB)
+	cobc_var_print (_("ISAM handler"),		"BDB", 0);
+#elif defined	(WITH_CISAM)
+	cobc_var_print (_("ISAM handler"),		"C-ISAM", 0);
+#elif defined	(WITH_DISAM)
+	cobc_var_print (_("ISAM handler"),		"D-ISAM", 0);
+#elif defined	(WITH_VBISAM)
+	cobc_var_print (_("ISAM handler"),		"VBISAM", 0);
+#else
+	cobc_var_print (_("ISAM handler"),		_("Not available"), 0);
+#endif
+
+#ifdef	WITH_INDEX_EXTFH
 #endif
 #ifdef	WITH_DB
-	cobc_var_print (_("ISAM handler"),		_("BDB"), 0);
 #endif
 #ifdef	WITH_CISAM
-	cobc_var_print (_("ISAM handler"),		_("C-ISAM (Experimental)"), 0);
 #endif
 #ifdef	WITH_DISAM
-	cobc_var_print (_("ISAM handler"),		_("D-ISAM (Experimental)"), 0);
 #endif
 #ifdef	WITH_VBISAM
-	cobc_var_print (_("ISAM handler"),		_("VBISAM (Experimental)"), 0);
 #endif
 }
 
@@ -4326,6 +4344,7 @@ main (int argc, char **argv)
 	status = 0;
 	iparams = 0;
 	local_level = 0;
+
 	while (iargs < argc) {
 		/* Set up file parameters */
 		fn = process_filename (argv[iargs++]);

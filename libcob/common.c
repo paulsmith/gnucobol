@@ -4380,10 +4380,10 @@ print_info (void)
 	var_print ("\"CBL_\" param check",	_("Disabled"), "", 0);
 #endif
 
-	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
-	var_print (_("Variable format"), buff, "", 0);
-	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
-		var_print ("COB_VARSEQ_FORMAT", s, "", 1);
+	if (sizeof (void *) > 4U) {
+		var_print ("64bit-mode",	_("yes"), "", 0);
+	} else {
+		var_print ("64bit-mode",	_("no"), "", 0);
 	}
 
 #ifdef	COB_LI_IS_LL
@@ -4392,25 +4392,32 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
+	var_print (_("Extended screen I/O"),	WITH_CURSES, "", 0);
+
+	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
+	var_print (_("Variable format"), buff, "", 0);
+	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
+		var_print ("COB_VARSEQ_FORMAT", s, "", 1);
+	}
+
 #ifdef	WITH_SEQRA_EXTFH
 	var_print (_("Sequential handler"),	_("External"), "", 0);
 #else
 	var_print (_("Sequential handler"), _("Internal"), "", 0);
 #endif
-#ifdef	WITH_INDEX_EXTFH
+
+#if defined	(WITH_INDEX_EXTFH)
 	var_print (_("ISAM handler"),		_("External"), "", 0);
-#endif
-#ifdef	WITH_DB
-	var_print (_("ISAM handler"),		_("BDB"), "", 0);
-#endif
-#ifdef	WITH_CISAM
-	var_print (_("ISAM handler"),		_("C-ISAM (Experimental)"), "", 0);
-#endif
-#ifdef	WITH_DISAM
-	var_print (_("ISAM handler"),		_("D-ISAM (Experimental)"), "", 0);
-#endif
-#ifdef	WITH_VBISAM
-	var_print (_("ISAM handler"),		_("VBISAM (Experimental)"), "", 0);
+#elif defined	(WITH_DB)
+	var_print (_("ISAM handler"),		"BDB", "", 0);
+#elif defined	(WITH_CISAM)
+	var_print (_("ISAM handler"),		"C-ISAM" "", 0);
+#elif defined	(WITH_DISAM)
+	var_print (_("ISAM handler"),		"D-ISAM", "", 0);
+#elif defined	(WITH_VBISAM)
+	var_print (_("ISAM handler"),		"VBISAM", "", 0);
+#else
+	var_print (_("ISAM handler"),		_("Not available"), "", 0);
 #endif
 }
 
@@ -4426,7 +4433,7 @@ cob_init (const int argc, char **argv)
 	const char* localedir;
 #endif
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
-	HMODULE		kernel32_handle
+	HMODULE		kernel32_handle;
 #endif
 	int		i;
 

@@ -2730,24 +2730,33 @@ AT_DATA([prog.cob], [
         PROGRAM-ID.      prog.
         DATA             DIVISION.
         WORKING-STORAGE  SECTION.
+        77 RESULT        PIC 9(02).
         PROCEDURE        DIVISION.
-            IF FUNCTION TEST-FORMATTED-DATETIME
-                    ("YYYYMMDDThhmmss", "16010101T000000") <> 0
-                DISPLAY "Test 1 failed" END-DISPLAY
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101T000000")
+              TO RESULT
+            IF RESULT <> 0
+               DISPLAY "Test 1 failed: " RESULT END-DISPLAY
             END-IF
-            IF FUNCTION TEST-FORMATTED-DATETIME
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
                     ("YYYY-MM-DDThh:mm:ss.sssssssss+hh:mm",
-                    "1601-01-01T00:00:00.000000000+00:00") <> 0
-                DISPLAY "Test 2 failed" END-DISPLAY
+                    "1601-01-01T00:00:00.000000000+00:00")
+              TO RESULT
+            IF RESULT <> 0
+               DISPLAY "Test 2 failed: " RESULT END-DISPLAY
             END-IF
 
-            IF FUNCTION TEST-FORMATTED-DATETIME
-                    ("YYYYMMDDThhmmss", "16010101 000000") <> 9
-                DISPLAY "Test 3 failed" END-DISPLAY
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101 000000")
+              TO RESULT
+            IF RESULT <> 9
+               DISPLAY "Test 3 failed: " RESULT END-DISPLAY
             END-IF
-            IF FUNCTION TEST-FORMATTED-DATETIME
-                    ("YYYYMMDDThhmmss", SPACE) <> 1
-                DISPLAY "Test 4 failed" END-DISPLAY
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", SPACE)
+              TO RESULT
+            IF RESULT <> 1
+               DISPLAY "Test 4 failed: " RESULT END-DISPLAY
             END-IF
 
             STOP RUN

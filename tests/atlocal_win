@@ -53,3 +53,13 @@ export COB_UNIX_LF=YES
 export COB_MSG_FORMAT=GCC
 export COB_HAS_ISAM
 export LC_ALL=C
+
+# For later reference
+#export COB_CONFIG_DIR=$(echo "$COB_SRC_PATH/config" | sed 's/\//\\/g' | sed 's/^\\\([a-z]\)\\/\1:\\/g')
+#export COB_COPY_DIR=$(echo "$COB_SRC_PATH/copy" | sed 's/\//\\/g' | sed 's/^\\\([a-z]\)\\/\1:\\/g')
+
+# For running the testsuite in Cygwin with non-Cygwin binaries (for example Visual C builds)
+# (not needed for running the testsuite with MSYS)
+#export COB_CONFIG_DIR=$(cygpath -aw "$COB_CONFIG_DIR")
+#export COB_COPY_DIR=$(cygpath -aw "$COB_COPY_DIR")
+#export COB_LIBRARY_PATH=$(cygpath -pw "$COB_LIBRARY_PATH")

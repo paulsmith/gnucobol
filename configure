@@ -781,6 +781,10 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_rpath
+enable_debug
+enable_experimental
+enable_param_check
+with_patch_level
 with_curses
 with_seqra_extfh
 with_cisam
@@ -789,10 +793,6 @@ with_vbisam
 with_index_extfh
 with_db
 with_dl
-enable_debug
-enable_experimental
-enable_param_check
-with_patch_level
 with_varseq
 enable_nls
 with_libiconv_prefix
@@ -1451,15 +1451,15 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
+  --with-patch-level      (GNU Cobol) Define a patch level (default 0)
   --with-curses           (GNU Cobol) Used curses library for extended SCREEN I/O (default=check)
   --with-seqra-extfh      (GNU Cobol) Use external SEQ/RAN file handler
-  --with-cisam            (GNU Cobol) Use CISAM for ISAM I/O (Experimental)
-  --with-disam            (GNU Cobol) Use DISAM for ISAM I/O (Experimental)
-  --with-vbisam           (GNU Cobol) Use VBISAM for ISAM I/O (Experimental)
+  --with-cisam            (GNU Cobol) Use CISAM for ISAM I/O
+  --with-disam            (GNU Cobol) Use DISAM for ISAM I/O
+  --with-vbisam           (GNU Cobol) Use VBISAM for ISAM I/O
   --with-index-extfh      (GNU Cobol) Use external ISAM file handler
   --with-db               (GNU Cobol) Use Berkeley DB >= 4.1 for ISAM I/O (default)
   --with-dl               (GNU Cobol) Use system dynamic loader (default)
-  --with-patch-level      (GNU Cobol) Define a patch level (default 0)
   --with-varseq           (GNU Cobol) Define variable sequential format (default 0)
   --with-libiconv-prefix[=DIR]  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
@@ -2876,6 +2876,7 @@ fi
 
 
 # Autoheader templates
+
 
 
 
@@ -13202,6 +13203,57 @@ fi
 
 # Configure options.
 
+# Check whether --enable-debug was given.
+if test "${enable_debug+set}" = set; then :
+  enableval=$enable_debug;
+else
+  enable_debug=no
+fi
+
+
+# Check whether --enable-experimental was given.
+if test "${enable_experimental+set}" = set; then :
+  enableval=$enable_experimental; if test "$enable_experimental" = "yes"
+   then
+	$as_echo "#define COB_EXPERIMENTAL 1" >>confdefs.h
+
+   fi
+fi
+
+
+# Check whether --enable-param-check was given.
+if test "${enable_param_check+set}" = set; then :
+  enableval=$enable_param_check; if test "$enable_param_check" = "yes"
+   then
+	$as_echo "#define COB_PARAM_CHECK 1" >>confdefs.h
+
+   fi
+fi
+
+
+
+# Check whether --with-patch-level was given.
+if test "${with_patch_level+set}" = set; then :
+  withval=$with_patch_level; case $with_patch_level in
+    yes)	as_fn_error $? "You must give --with-patch-level an argument." "$LINENO" 5
+		;;
+    no)		as_fn_error $? "--without-patch-level not supported." "$LINENO" 5
+		;;
+    [0-9]*)
+		;;
+    *)		as_fn_error $? "You must use a numeric patch level" "$LINENO" 5
+		;;
+  esac
+else
+  with_patch_level=0
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define PATCH_LEVEL $with_patch_level
+_ACEOF
+
+
 
 # Check whether --with-curses was given.
 if test "${with_curses+set}" = set; then :
@@ -13212,7 +13264,7 @@ if test "${with_curses+set}" = set; then :
     *)
 		as_fn_error $? "Wrong value for --with-curses, must be one of the following
   ncursesw, ncurses, pdcurses, curses  (use only the specified library)
-  check  (use whatever curses libary is usable, disable if no curses usable)
+  check  (use whatever curses library is usable, disable if no one usable)
   no  (disable curses usage)" "$LINENO" 5
 		;;
   esac
@@ -13479,57 +13531,6 @@ if test "${with_dl+set}" = set; then :
 else
   with_dl=yes
 fi
-
-
-# Check whether --enable-debug was given.
-if test "${enable_debug+set}" = set; then :
-  enableval=$enable_debug;
-else
-  enable_debug=no
-fi
-
-
-# Check whether --enable-experimental was given.
-if test "${enable_experimental+set}" = set; then :
-  enableval=$enable_experimental; if test "$enable_experimental" = "yes"
-   then
-	$as_echo "#define COB_EXPERIMENTAL 1" >>confdefs.h
-
-   fi
-fi
-
-
-# Check whether --enable-param-check was given.
-if test "${enable_param_check+set}" = set; then :
-  enableval=$enable_param_check; if test "$enable_param_check" = "yes"
-   then
-	$as_echo "#define COB_PARAM_CHECK 1" >>confdefs.h
-
-   fi
-fi
-
-
-
-# Check whether --with-patch-level was given.
-if test "${with_patch_level+set}" = set; then :
-  withval=$with_patch_level; case $with_patch_level in
-    yes)	as_fn_error $? "You must give --with-patch-level an argument." "$LINENO" 5
-		;;
-    no)		as_fn_error $? "--without-patch-level not supported." "$LINENO" 5
-		;;
-    [0-9]*)
-		;;
-    *)		as_fn_error $? "You must use a numeric patch level" "$LINENO" 5
-		;;
-  esac
-else
-  with_patch_level=0
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define PATCH_LEVEL $with_patch_level
-_ACEOF
 
 
 
@@ -13880,6 +13881,30 @@ $as_echo "yes" >&6; }
 $as_echo "no" >&6; }
      fi
    fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for clock_gettime and CLOCK_REALTIME" >&5
+$as_echo_n "checking for clock_gettime and CLOCK_REALTIME... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+int
+main ()
+{
+clock_gettime (CLOCK_REALTIME, NULL);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  $as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -16297,7 +16322,7 @@ if test "x$ac_cv_header_curses_h" = xyes; then :
 _ACEOF
  USE_NCURSES="curses"
 else
-  if test "$USE_NCURSES" = "pdcurses"
+  if test "$USE_NCURSES" = "curses"
        then
          USE_NCURSES="missing_header"
        fi
@@ -16326,6 +16351,22 @@ case "$USE_NCURSES" in
 	;;
   missing_header)
 	as_fn_error $? "No header found for configured library $with_curses" "$LINENO" 5
+	;;
+  ncursesw)
+	$as_echo "#define WITH_CURSES \"ncursesw\"" >>confdefs.h
+
+	;;
+  ncurses)
+	$as_echo "#define WITH_CURSES \"ncurses\"" >>confdefs.h
+
+	;;
+  pdcurses)
+	$as_echo "#define WITH_CURSES \"pdcurses\"" >>confdefs.h
+
+	;;
+  curses)
+	$as_echo "#define WITH_CURSES \"curses\"" >>confdefs.h
+
 	;;
 esac
 
@@ -19998,11 +20039,11 @@ $as_echo "$as_me:  COB_STRIP_CMD     ${striplib}" >&6;}
 fi
 if test "${DEFINE_DL}" = "yes"
 then
-  { $as_echo "$as_me:${as_lineno-$LINENO}:  Dynamic loading:  System" >&5
-$as_echo "$as_me:  Dynamic loading:  System" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}:  Dynamic loading:                             System" >&5
+$as_echo "$as_me:  Dynamic loading:                             System" >&6;}
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}:  Dynamic loading:  Libtool" >&5
-$as_echo "$as_me:  Dynamic loading:  Libtool" >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}:  Dynamic loading:                             Libtool" >&5
+$as_echo "$as_me:  Dynamic loading:                             Libtool" >&6;}
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}:  Use gettext for international messages:      ${USE_NLS}" >&5
 $as_echo "$as_me:  Use gettext for international messages:      ${USE_NLS}" >&6;}
@@ -20014,8 +20055,8 @@ case "$USE_NCURSES" in
 $as_echo "$as_me:  screen I/O (no curses found):                NO" >&6;}
 	;;
   no)
-    { $as_echo "$as_me:${as_lineno-$LINENO}:  screen I/O (disabled)       :                NO" >&5
-$as_echo "$as_me:  screen I/O (disabled)       :                NO" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}:  screen I/O (disabled):                       NO" >&5
+$as_echo "$as_me:  screen I/O (disabled):                       NO" >&6;}
 	;;
   *)
     { $as_echo "$as_me:${as_lineno-$LINENO}:  Use ncurses/pdcurses/curses for screen I/O:  ${USE_NCURSES}" >&5

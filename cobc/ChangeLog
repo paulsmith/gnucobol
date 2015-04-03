@@ -214,11 +214,16 @@
 	* MARK - Version 2.0
 	* Move to GPL/LGPL 3
 
-20??-??-??  Roger While <simrw@sim-basis.de>
+2009-??-??  Roger While <simrw@sim-basis.de>
 
 	* cobc.c, cobc.h, codegen.c, tree.h, typeck.c : Adding new commands to cobc
 	  --info with most important configuration/environment details
 	  --list-system for displaying all registered system routines
+
+2009-??-??  Roger While <simrw@sim-basis.de>
+
+	* parser.y, typeck.c (cb_emit_accept_escape_key) : Implementing
+	  ACCEPT .. FROM ESCAPE KEY
 
 20??-??-??  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -792,8 +797,7 @@
 	* flag.def : Remove line-directive, tidy up comments
 	* codegen.c : Take out line directive
 	* cobc.c : Turn on source location for -g
-	* cobc.[ch] : Define ABORT to cobc_abort,
-		make cob_jmpbuf static
+	* cobc.[ch] : Define ABORT to cobc_abort, make cob_jmpbuf static
 	* cobc.[ch], scanner.l, typeck.c : Use new routine cobc_realloc
 	* cobc.c : In case of unrecognized option, exit immediately
 
@@ -804,8 +808,7 @@
 
 2008-03-04  Roger While <simrw@sim-basis.de>
 
-	* cobc.c : The -ext option must take precedence over default
-		suffixes
+	* cobc.c : The -ext option must take precedence over default suffixes
 
 2008-02-22  Roger While <simrw@sim-basis.de>
 
@@ -817,7 +820,8 @@
 
 2008-02-16  Roger While <simrw@sim-basis.de>
 
-	* parser.y, codegen.c, tree.[ch], field.c : Preliminary ANY LENGTH support
+	* parser.y, codegen.c, tree.c, tree.h, field.c : Preliminary support for
+	  ANY LENGTH
 
 2008-02-14  Roger While <simrw@sim-basis.de>
 
@@ -853,8 +857,7 @@
 
 2008-01-03  Roger While <simrw@sim-basis.de>
 
-	* typeck.c, codegen.c : Remove references to own_memxxx and
-		SUPER_OPTIMIZE
+	* typeck.c, codegen.c : Remove references to own_memxxx and SUPER_OPTIMIZE
 
 2008-01-02  Roger While <simrw@sim-basis.de>
 
@@ -916,8 +919,8 @@
 
 2007-09-11  Roger While <simrw@sim-basis.de>
 
-	* codegen.c : Fix a PERFORM problem whereby the UNTIL was
-		comparing signed to unsigned.
+	* codegen.c : Fix a PERFORM problem whereby the UNTIL was comparing
+	  signed to unsigned.
 
 2007-09-10  Roger While <simrw@sim-basis.de>
 
@@ -945,8 +948,8 @@
 
 2007-08-23  Roger While <simrw@sim-basis.de>
 
-	* All : Remove ASCII 10/20, default display sign according
-		to target machine, allow -fsign-ascii, -fsign-ebcdic
+	* All : Remove ASCII 10/20, default display sign according to target machine,
+	  allow -fsign-ascii, -fsign-ebcdic
 
 2007-08-20  Roger While <simrw@sim-basis.de>
 
@@ -974,13 +977,12 @@
 
 2007-08-09  Roger While <simrw@sim-basis.de>
 
-	* cobc.c : Allow environment variable COBCPY to specify
-		copy directories
+	* cobc.c : Allow environment variable COBCPY to specify copy directories
 
 2007-08-01  Roger While <simrw@sim-basis.de>
 
-	* codegen.c : If -fimplicit-init is specified, always
-		set up the cancel callback
+	* codegen.c : If -fimplicit-init is specified, always set up the cancel
+	  callback
 
 2007-07-30  Roger While <simrw@sim-basis.de>
 
@@ -989,8 +991,8 @@
 2007-07-26  Roger While <simrw@sim-basis.de>
 
 	* tree.h, parser.y, codegen.c : Trace improvements
-	* parser.y, error.c, codegen.c : Fix a problem with valid
-		duplicate paragraph names
+	* parser.y, error.c, codegen.c : Fix a problem with valid duplicate
+	  paragraph names
 	* typeck.c : Optimize comparison of unsigned numeric display fields
 
 2007-07-24  Roger While <simrw@sim-basis.de>
@@ -1038,8 +1040,8 @@
 
 	* tree.c : Produce error for partial expression code on WHEN clause
 	* codegen.c : When calling a "system" function (eg. CBL_OPEN_FILE) with
-		implicit "sticky linkage" (ie. -std=mvs), do not extend
-		the parameter list with NULL's
+	  implicit "sticky linkage" (ie. -std=mvs), do not extend the parameter list
+	  with NULL's
 	* cobc.c : Help was missing for -conf=
 
 2007-06-19  Roger While <simrw@sim-basis.de>
@@ -1052,8 +1054,8 @@
 
 2007-06-16  Roger While <simrw@sim-basis.de>
 
-	* tree.h, parser.y, typeck.c, codegen.c : Fix subtle difference
-		between GOBACK and EXIT PROGRAM
+	* tree.h, parser.y, typeck.c, codegen.c : Fix subtle difference between GOBACK
+	  and EXIT PROGRAM
 
 2007-06-14  Roger While <simrw@sim-basis.de>
 
@@ -1070,23 +1072,21 @@
 
 2007-05-18  Roger While <simrw@sim-basis.de>
 
-	* parser.y : Prevent duplicate ORGANIZATION use;
-		particularly the mistake INDEXED SEQUENTIAL
+	* parser.y : Prevent duplicate ORGANIZATION use; particularly the mistake
+	  INDEXED SEQUENTIAL
 
 2007-05-16  Roger While <simrw@sim-basis.de>
 
-	* parser.y : LOCK clause on a READ is illegal when the SELECT
-		clause specifies LOCK AUTOMATIC
+	* parser.y : LOCK clause on a READ is illegal when the SELECT clause specifies
+	  LOCK AUTOMATIC
 
 2007-05-15  Roger While <simrw@sim-basis.de>
 
-	* parser.y : The END PROGRAM identifier must agree with the
-		PROGRAM-ID
+	* parser.y : The END PROGRAM identifier must agree with the PROGRAM-ID
 
 2007-05-14  Roger While <simrw@sim-basis.de>
 
-	* parser.y, codegen.c : Use original names, not the mangled
-		names when tracing
+	* parser.y, codegen.c : Use original names, not the mangled names when tracing
 
 2007-05-11  Roger While <simrw@sim-basis.de>
 
@@ -1095,12 +1095,11 @@
 
 2007-05-09  Roger While <simrw@sim-basis.de>
 
-	* cobc.c : Implement -D option to specify defines for C compiles
-		and eventuallly for conditional Cobol compilation.
-		Fix up HP-UX machines that per default do not honour
-		SHLIB_PATH.
-		Implement -b option to create a single dynamically loadable
-		object from multiple input files.
+	* cobc.c : Implement -D option to specify defines for C compiles and
+	  and eventuallly for conditional COBOL compilation.
+	  Fix up HP-UX machines that per default do not honour SHLIB_PATH.
+	  Implement -b option to create a single dynamically loadable object from
+	  multiple input files.
 
 2007-05-08  Roger While <simrw@sim-basis.de>
 
@@ -1108,8 +1107,7 @@
 
 2007-05-04  Roger While <simrw@sim-basis.de>
 
-	* parser.y, codegen.c, tree.h : Preliminary support for LOCK
-		clause in SELECT
+	* parser.y, codegen.c, tree.h : Preliminary support for LOCK clause in SELECT
 
 2007-04-30  Roger While <simrw@sim-basis.de>
 
@@ -1117,8 +1115,7 @@
 
 2007-04-28  Roger While <simrw@sim-basis.de>
 
-	* codegen.c : If -fimplicit-init is used, we must always
-		honour an EXIT PROGRAM
+	* codegen.c : If -fimplicit-init is used, we must always honour an EXIT PROGRAM
 
 2007-04-26  Roger While <simrw@sim-basis.de>
 
