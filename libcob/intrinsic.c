@@ -1,5 +1,6 @@
 /*
    Copyright (C) 2005-2012 Roger While
+   Copyright (C) 2014-2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -559,9 +560,8 @@ cob_alloc_field (cob_decimal *d)
 {
 	size_t		bitnum;
 	size_t		sign;
-	size_t		attrsign;
-	int		size;
-	int		scale;
+	unsigned short	attrsign;
+	short	size, scale;
 	cob_field_attr	attr;
 	cob_field	field;
 
@@ -589,22 +589,22 @@ cob_alloc_field (cob_decimal *d)
 	if (bitnum < (33 - sign) && d->scale < 10) {
 		/* 4 bytes binary */
 		COB_ATTR_INIT (COB_TYPE_NUMERIC_BINARY, 9,
-			       d->scale, attrsign, NULL);
+			       (short)d->scale, attrsign, NULL);
 		COB_FIELD_INIT (4, NULL, &attr);
 		make_field_entry (&field);
 	} else if (bitnum < (65 - sign) && d->scale < 19) {
 		/* 8 bytes binary */
 		COB_ATTR_INIT (COB_TYPE_NUMERIC_BINARY, 20,
-			       d->scale, attrsign, NULL);
+			       (short)d->scale, attrsign, NULL);
 		COB_FIELD_INIT (8, NULL, &attr);
 		make_field_entry (&field);
 	} else {
 		/* Display decimal */
-		size = (int)mpz_sizeinbase (d->value, 10);
+		size = (short)mpz_sizeinbase (d->value, 10);
 		if (d->scale > size) {
-			size = d->scale;
+			size = (short)d->scale;
 		}
-		scale = d->scale;
+		scale = (short)d->scale;
 		COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, size,
 			       scale, attrsign, NULL);
 		COB_FIELD_INIT (size, NULL, &attr);
@@ -2068,6 +2068,9 @@ split_around_t (const char *str, char *first, char *second)
 
 	/* Copy everything before 'T' into first (if present) */
 	first_length = i;
+	if (first_length > MAX_DATE_STR_LENGTH) {
+		first_length = MAX_DATE_STR_LENGTH;
+	}
 	if (first != NULL) {
 		strncpy (first, str, first_length);
 		first[first_length] = '\0';
@@ -2079,6 +2082,9 @@ split_around_t (const char *str, char *first, char *second)
 			second[0] = '\0';
 		} else {
 			second_length = strlen (str) - i - 1U;
+			if (second_length > MAX_TIME_STR_LENGTH) {
+				second_length = MAX_TIME_STR_LENGTH;;
+			}
 			strncpy (second, str + i + 1U, second_length);
 			second[second_length] = '\0';
 		}
@@ -2122,7 +2128,7 @@ test_char (const char wanted, const char *str, int *offset)
 }
 
 static COB_INLINE COB_A_INLINE int
-test_digit (const char ch, int *offset)
+test_digit (const unsigned char ch, int *offset)
 {
 	return test_char_cond (isdigit (ch), offset);
 }
@@ -2531,8 +2537,7 @@ integer_of_mmdd (const struct date_format format, const int year,
 }
 
 static cob_u32_t
-integer_of_ddd (const struct date_format format, const int year,
-		const char *final_part)
+integer_of_ddd (const int year, const char *final_part)
 {
 	int	day;
 
@@ -2563,19 +2568,17 @@ integer_of_formatted_date (const struct date_format format,
 {
 	int		year;
 	int		final_part_start = 4 + format.with_hyphens;
-	cob_u32_t	(*casting_func) (struct date_format, int, const char *);
 
 	sscanf (formatted_date, "%4d", &year);
 
 	if (format.days == DAYS_MMDD) {
-		casting_func = &integer_of_mmdd;
+		return integer_of_mmdd (format, year, formatted_date + final_part_start);
 	} else if (format.days == DAYS_DDD) {
-		casting_func = &integer_of_ddd;
+		return integer_of_ddd (year, formatted_date + final_part_start);
 	} else { /* DAYS_WWWD */
-		casting_func = &integer_of_wwwd;
+		return integer_of_wwwd (format, year, formatted_date + final_part_start);
 	}
 
-	return casting_func (format, year, formatted_date + final_part_start);
 }
 
 /* Uses d1 */
@@ -2732,19 +2735,18 @@ cob_get_indirect_field (cob_field *f)
 void
 cob_decimal_move_temp (cob_field *src, cob_field *dst)
 {
-	int		size;
-	int		scale;
+	short		size, scale;
 	cob_field_attr	attr;
 	cob_field	field;
 
 	cob_decimal_set_field (&d1, src);
 	cob_trim_decimal (&d1);
 
-	size = (int)mpz_sizeinbase (d1.value, 10);
+	size = (short)mpz_sizeinbase (d1.value, 10);
 	if (d1.scale > size) {
-		size = d1.scale;
+		size = (short)d1.scale;
 	}
-	scale = d1.scale;
+	scale = (short)d1.scale;
 	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, size,
 		       scale, COB_FLAG_HAVE_SIGN, NULL);
 	COB_FIELD_INIT (size, NULL, &attr);
@@ -3566,7 +3568,7 @@ cob_intr_char (cob_field *srcfield)
 	if (i < 1 || i > 256) {
 		*curr_field->data = 0;
 	} else {
-		*curr_field->data = i - 1;
+		*curr_field->data = (unsigned char)i - 1;
 	}
 	return curr_field;
 }
@@ -5313,9 +5315,9 @@ cob_intr_locale_date (const int offset, const int length,
 	strftime (buff, sizeof(buff), buff2, &tstruct);
 #else
 	memset ((void *)&syst, 0, sizeof(syst));
-	syst.wYear = year;
-	syst.wMonth = month;
-	syst.wDay = days;
+	syst.wYear = (WORD)year;
+	syst.wMonth = (WORD)month;
+	syst.wDay = (WORD)days;
 	if (locale_field) {
 		if (locale_field->size >= COB_SMALL_BUFF) {
 			goto derror;
@@ -5442,9 +5444,9 @@ cob_intr_locale_time (const int offset, const int length,
 	strftime (buff, sizeof(buff), buff2, &tstruct);
 #else
 	memset ((void *)&syst, 0, sizeof(syst));
-	syst.wHour = hours;
-	syst.wMinute = minutes;
-	syst.wSecond = seconds;
+	syst.wHour = (WORD)hours;
+	syst.wMinute = (WORD)minutes;
+	syst.wSecond = (WORD)seconds;
 	if (locale_field) {
 		if (locale_field->size >= COB_SMALL_BUFF) {
 			goto derror;
@@ -5553,9 +5555,9 @@ cob_intr_lcl_time_from_secs (const int offset, const int length,
 	strftime (buff, sizeof(buff), buff2, &tstruct);
 #else
 	memset ((void *)&syst, 0, sizeof(syst));
-	syst.wHour = hours;
-	syst.wMinute = minutes;
-	syst.wSecond = seconds;
+	syst.wHour = (WORD)hours;
+	syst.wMinute = (WORD)minutes;
+	syst.wSecond = (WORD)seconds;
 	if (locale_field) {
 		if (locale_field->size >= COB_SMALL_BUFF) {
 			goto derror;
@@ -6272,8 +6274,6 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	char	time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
 	int	date_present;
 	int	time_present;
-	struct date_format date_fmt;
-	struct time_format time_fmt;
 	char	*formatted_datetime = (char *) datetime_field->data;
 	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
 	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
@@ -6307,14 +6307,6 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 		strncpy (time_format_str, datetime_format_str, MAX_TIME_STR_LENGTH);
 	}
 
-	/* Parse date/time */
-	if (date_present) {
-		date_fmt = parse_date_format_string (date_format_str);
-	}
-	if (time_present) {
-		time_fmt = parse_time_format_string (time_format_str);
-	}
-
 	if (date_present && time_present) {
 		split_around_t (formatted_datetime, formatted_date, formatted_time);
 	} else if (date_present) {
@@ -6330,17 +6322,18 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 		time_part_offset = 0;
 	}
 
-	/* Validate the formatted date/time */
+	/* Parse and validate the formatted date/time */
 	if (date_present) {
-		error_pos = test_formatted_date (date_fmt, formatted_date, 0);
+		error_pos = test_formatted_date (parse_date_format_string (date_format_str),
+						 formatted_date, 0);
 		if (error_pos != 0) {
 			cob_alloc_set_field_uint (error_pos);
 			goto end_of_func;
 		}
 	}
 	if (time_present) {
-		error_pos = test_formatted_time (time_fmt, formatted_time,
-						 COB_MODULE_PTR->decimal_point);
+		error_pos = test_formatted_time (parse_time_format_string (time_format_str),
+						 formatted_time, COB_MODULE_PTR->decimal_point);
 		if (error_pos != 0) {
 			cob_alloc_set_field_uint (time_part_offset + error_pos);
 			goto end_of_func;
