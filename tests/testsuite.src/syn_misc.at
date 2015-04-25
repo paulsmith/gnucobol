@@ -146,6 +146,32 @@ prog.cob: 17: Error: PROCEDURE DIVISION header missing
 
 AT_CLEANUP
 
+AT_SETUP([INITIALIZE constant])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  CON          CONSTANT 10.
+       01  V            PIC 9.
+       78  C78          VALUE 'A'.
+       PROCEDURE DIVISION.
+           INITIALIZE CON.
+           INITIALIZE V.
+           INITIALIZE V, 9.
+           INITIALIZE C78, V.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: Invalid INITIALIZE statement
+prog.cob: 12: Error: Invalid INITIALIZE statement
+prog.cob: 13: Error: Invalid INITIALIZE statement
+])
+
+AT_CLEANUP
+
 
 AT_SETUP([CLASS duplicate values])
 AT_KEYWORDS([misc])

@@ -5487,6 +5487,7 @@ cb_emit_initialize (cb_tree vars, cb_tree fillinit, cb_tree value,
 	cb_tree		l;
 	unsigned int	no_fill_init;
 	unsigned int	def_init;
+	cb_tree		x;
 
 	if (cb_validate_list (vars)) {
 		return;
@@ -5497,7 +5498,14 @@ cb_emit_initialize (cb_tree vars, cb_tree fillinit, cb_tree value,
 	no_fill_init = (fillinit == NULL);
 	def_init = (def != NULL);
 	for (l = vars; l; l = CB_CHAIN (l)) {
-		cb_emit (cb_build_initialize (CB_VALUE (l), value, replacing,
+		x = CB_VALUE (l);
+		if (!(CB_REFERENCE_P (x) && CB_FIELD_P (CB_REFERENCE (x)->value)) &&
+		    !CB_FIELD_P (x)) {
+			cb_error_x (CB_TREE (current_statement), _("Invalid INITIALIZE statement"));
+			return;
+		}
+
+		cb_emit (cb_build_initialize (x , value, replacing,
 					      def_init, 1, no_fill_init));
 	}
 }

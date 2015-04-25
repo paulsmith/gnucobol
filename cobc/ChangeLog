@@ -1,4 +1,9 @@
 
+2015-04-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* typeck.c (cb_emit_initialize): bug #84 check target for INITIALIZE,
+	  almost fixed as suggested by Edward Hard
+
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: set FORMATTED-CURRENT-DATE, INTEGER-OF-FORMATTED-DATE, and
