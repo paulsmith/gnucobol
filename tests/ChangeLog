@@ -1,4 +1,9 @@
 
+2015-04-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.src/run_file.at : (new) moved testsuite entries for
+	  file handling to their own test definition (origin: run_misc.at)
+
 2015-03-19  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.src/syn_functions.at : (new) moved testsuite entries for

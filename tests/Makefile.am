@@ -39,6 +39,7 @@ testsuite_sources = \
 	testsuite.src/syn_value.at \
 	testsuite.src/run_accept.at \
 	testsuite.src/run_extensions.at \
+	testsuite.src/run_file.at \
 	testsuite.src/run_functions.at \
 	testsuite.src/run_fundamental.at \
 	testsuite.src/run_initialize.at \
