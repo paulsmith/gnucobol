@@ -6270,13 +6270,13 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 				  cob_field *datetime_field)
 {
 	char	*datetime_format_str = (char *) format_field->data;
-	char	date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
-	char	time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	char	date_format_str[MAX_DATE_STR_LENGTH + 1] = { '\0' };
+	char	time_format_str[MAX_TIME_STR_LENGTH + 1] = { '\0' };
 	int	date_present;
 	int	time_present;
 	char	*formatted_datetime = (char *) datetime_field->data;
-	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
-	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
+	char	formatted_date[MAX_DATE_STR_LENGTH + 1] = { '\0' };
+	char	formatted_time[MAX_TIME_STR_LENGTH + 1] = { '\0' };
 	int	time_part_offset;
 	int	error_pos;
 
