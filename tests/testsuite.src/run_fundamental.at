@@ -1477,6 +1477,49 @@ AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
 AT_CLEANUP
 
 
+AT_SETUP([CANCEL test (3)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE        DIVISION.
+           CALL "prog2"
+           END-CALL.
+           CALL "prog2"
+           END-CALL.
+           CANCEL "prog2".
+           CALL "prog2"
+           END-CALL.
+           CANCEL "prog2".
+           DISPLAY "NG" NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  VAR          PIC 9(01) value 1.
+       PROCEDURE        DIVISION.
+           DISPLAY VAR NO ADVANCING
+           END-DISPLAY.
+           ADD  1 TO VAR END-ADD.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE_MODULE prog2.cob], [0], , [])
+AT_CHECK([./prog], [0], [121NG], [])
+AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [0], [121NG], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([Separate sign positions (1)])
 AT_KEYWORDS([fundamental])
 

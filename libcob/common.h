@@ -1186,6 +1186,7 @@ typedef struct __cob_global {
 	unsigned int		cob_display_warn;	/* Display warnings */
 	unsigned int		cob_first_init;		/* First call after init */
 	unsigned int		cob_env_mangle;		/* Mangle env names */
+	unsigned int		cob_physical_cancel;	/* Unloading of modules */
 
 	/* Library routine variables */
 

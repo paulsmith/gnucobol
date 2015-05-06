@@ -1,4 +1,10 @@
 
+2015-05-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.h, coblocal.h, call.c, common.c: fixed CALL after physical CANCEL
+	  by moving physical_cancel (defined in call.c and referenced via
+	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
+
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: implemented FORMATTED-CURRENT-DATE,

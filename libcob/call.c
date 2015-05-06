@@ -179,7 +179,6 @@ static size_t			resolve_size;
 static unsigned int		name_convert;
 static char*			name_convert_env;
 static unsigned int		cob_jmp_primed;
-static unsigned int		physical_cancel;
 static char*			physical_cancel_env;
 
 #undef	COB_SYSTEM_GEN
@@ -390,7 +389,7 @@ do_cancel_module (struct call_hash *p, struct call_hash **base_hash,
 	if (nocancel) {
 		return;
 	}
-	if (!physical_cancel) {
+	if (!cobglobptr->cob_physical_cancel) {
 		return;
 	}
 	if (p->no_phys_cancel) {
@@ -1314,7 +1313,7 @@ cob_init_call (cob_global *lptr, runtime_env* runtimeptr)
 	resolve_size = 0;
 	name_convert = 0;
 	cob_jmp_primed = 0;
-	physical_cancel = 0;
+	cobglobptr->cob_physical_cancel = 0;
 
 #ifndef	HAVE_DESIGNATED_INITS
 	memset (valid_char, 0, sizeof(valid_char));
@@ -1338,13 +1337,13 @@ cob_init_call (cob_global *lptr, runtime_env* runtimeptr)
 		physical_cancel_env = cob_save_env_value(physical_cancel_env, s);
 
 		if (*s == 'Y' || *s == 'y' || *s == '1') {
-			physical_cancel = 1;
+			cobglobptr->cob_physical_cancel = 1;
 		}
 	} else {
 		s = getenv ("default_cancel_mode");
 		if (s) {
 			if (*s == '0') {
-				physical_cancel = 1;
+				cobglobptr->cob_physical_cancel = 1;
 			}
 		}
 	}
@@ -1413,7 +1412,6 @@ cob_init_call (cob_global *lptr, runtime_env* runtimeptr)
 	call_buffer = cob_fast_malloc ((size_t)CALL_BUFF_SIZE);
 	call_lastsize = CALL_BUFF_SIZE;
 
-	runtimeptr->physical_cancel = &physical_cancel;
 	runtimeptr->physical_cancel_env = physical_cancel_env;
 	runtimeptr->name_convert = &name_convert;
 	runtimeptr->name_convert_env = name_convert_env;

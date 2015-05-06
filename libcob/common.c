@@ -4192,7 +4192,7 @@ print_runtime_env (void)
 	var_print ("COB_PHYSICAL_CANCEL", runtimeptr->physical_cancel_env,
 			not_set, 2);
 	var_print ("physical_cancel",
-			cob_int_to_string(*(runtimeptr->physical_cancel), intstring),
+			cob_int_to_string(cobglobptr->cob_physical_cancel, intstring),
 			no_default, 3);
 
 	putchar ('\n');

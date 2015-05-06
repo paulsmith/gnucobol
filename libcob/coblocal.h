@@ -194,7 +194,6 @@ extern "C" {
 /* Structure with pointers to the current runtime variables. */
 typedef struct runtime_env {
 	/* call.c */
-	unsigned int* physical_cancel;
 	char* physical_cancel_env;
 	unsigned int* name_convert;
 	char* name_convert_env;

@@ -3632,7 +3632,7 @@ output_call (struct cb_call *p)
 					break;
 				}
 			}
-			output ("if (unlikely(call_%s.funcvoid == NULL)) {\n", callp);
+			output ("if (unlikely(call_%s.funcvoid == NULL || cob_glob_ptr->cob_physical_cancel)) {\n", callp);
 			output_prefix ();
 			if (nlp) {
 				output ("  call_%s.funcint = %s_%d__;\n",
