@@ -82,7 +82,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Ambiguous AND/OR])
-AT_KEYWORDS([expression])
+AT_KEYWORDS([misc expression])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -102,6 +102,103 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 6: Warning: Suggest parentheses around AND within OR
 prog.cob: 10: Warning: Suggest parentheses around AND within OR
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Invalid expression])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  CON          CONSTANT 10.
+       01  V            PIC 9.
+       78  C78          VALUE 'A'.
+       PROCEDURE        DIVISION.
+           IF FUNCTION TRIM (' ')
+              CONTINUE
+              CONTINUE
+           END-IF.
+           IF CON
+              CONTINUE
+              CONTINUE
+           END-IF.
+           IF V
+              CONTINUE
+              CONTINUE
+           END-IF.
+           IF C78
+              CONTINUE
+              CONTINUE
+           END-IF.
+           IF '2'
+              CONTINUE
+              CONTINUE
+           END-IF.
+           EVALUATE TRUE
+              WHEN FUNCTION TRIM (' ')
+                 CONTINUE
+                 CONTINUE
+              WHEN CON
+                 CONTINUE
+                 CONTINUE
+              WHEN V
+                 CONTINUE
+                 CONTINUE
+              WHEN C78
+                 CONTINUE
+                 CONTINUE
+              WHEN '2'
+                 CONTINUE
+              WHEN OTHER
+                 CONTINUE
+           END-EVALUATE.
+           PERFORM VARYING V
+                   FROM 1 BY 1
+                   UNTIL FUNCTION TRIM (' ')
+              CONTINUE
+              CONTINUE
+           END-PERFORM.
+           PERFORM VARYING V
+                   FROM 1 BY 1
+                   UNTIL V
+              CONTINUE
+              CONTINUE
+           END-PERFORM.
+           PERFORM VARYING V
+                   FROM 1 BY 1
+                   UNTIL C78
+              CONTINUE
+              CONTINUE
+           END-PERFORM.
+           PERFORM VARYING V
+                   FROM 1 BY 1
+                   UNTIL '2'
+              CONTINUE
+              CONTINUE
+           END-PERFORM.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: Invalid expression
+prog.cob: 14: Error: Invalid expression
+prog.cob: 18: Error: Invalid expression
+prog.cob: 22: Error: Invalid expression
+prog.cob: 26: Error: Invalid expression
+prog.cob: 31: Error: Invalid expression
+prog.cob: 34: Error: Invalid expression
+prog.cob: 37: Error: Invalid expression
+prog.cob: 40: Error: Invalid expression
+prog.cob: 43: Error: Invalid expression
+prog.cob: 50: Error: Invalid expression
+prog.cob: 56: Error: Invalid expression
+prog.cob: 62: Error: Invalid expression
+prog.cob: 68: Error: Invalid expression
 ])
 
 AT_CLEANUP

@@ -3057,6 +3057,10 @@ cb_expr_finish (void)
 		cb_error (_("Invalid expression"));
 		return cb_error_node;
 	}
+	
+	expr_stack[3].value->source_file = cb_source_file;
+	expr_stack[3].value->source_line = cb_exp_line;
+
 	return expr_stack[3].value;
 }
 
@@ -3698,8 +3702,7 @@ cb_build_cond (cb_tree x)
 			return cb_build_cond (build_cond_88 (x));
 		}
 
-		cb_error_x (x, _("Invalid expression"));
-		return cb_error_node;
+		break;
 	case CB_TAG_BINARY_OP:
 		p = CB_BINARY_OP (x);
 		if (!p->x || p->x == cb_error_node) {

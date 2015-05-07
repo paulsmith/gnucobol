@@ -300,6 +300,7 @@ extern struct cb_program	*current_program;
 extern struct cb_statement	*current_statement;
 extern struct cb_label		*current_section;
 extern struct cb_label		*current_paragraph;
+extern int			cb_exp_line;
 extern int			functions_are_all;
 
 /* Functions */
