@@ -1,4 +1,9 @@
 
+2015-05-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* intrinsic.c (cob_intr_current_date): return field with size of 21
+	  and without trailing NULL
+
 2015-05-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.h, coblocal.h, call.c, common.c: fixed CALL after physical CANCEL
@@ -44,7 +49,7 @@
 
 2015-01-12  Sergey Kashyrin <ska@kiska.net>
 
-	* intrinsic.c : Fix for Bug #120 - Function CURRENT-DATE
+	* intrinsic.c: Fix for Bug #120 - Function CURRENT-DATE
 
 2014-12-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -71,11 +76,11 @@
 
 2014-09-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* numeric.c, intrinsic.c, common.h : use cob_gmp_free in intrinsics, too
+	* numeric.c, intrinsic.c, common.h: use cob_gmp_free in intrinsics, too
 
 2014-09-09  Philipp Böhme  <phi.boehme@googlemail.com>
 
-	* numeric.c : new static function cob_gmp_free
+	* numeric.c: new static function cob_gmp_free
 	* numeric.c (cob_decimal_set_double, cob_decimal_get_packed,
 	  cob_decimal_get_display): use cob_gmp_free() to free memory allocated in
 	  mpir/gmp
@@ -100,7 +105,7 @@
 
 2014-08-05  Louis Krupp <lkrupp@users.sf.net>
 
-	* screenio.c : compilation fails if configured without curses (bug #90)
+	* screenio.c: compilation fails if configured without curses (bug #90)
 
 2014-07-09  Philipp Böhme <phi.boehme@googlemail.com>
 
@@ -123,35 +128,35 @@
 
 2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* call.c : inverted preload list for WIN32 builds
-	* common.c, move.c, screenio.c, fileio.c : Set runtime switch
+	* call.c: inverted preload list for WIN32 builds
+	* common.c, move.c, screenio.c, fileio.c: Set runtime switch
 	  from environment to true on "1", "Y", "YES", "TRUE", "ON"
 
 2014-05-13  Ron Norman <rjn@inglenet.com>
 
-	* numeric.c : added cob_cmp_float with tolerance for equality comparison
+	* numeric.c: added cob_cmp_float with tolerance for equality comparison
 
 2014-05-07  Ron Norman <rjn@inglenet.com>
 
-	* move.c : replaced memcpy by memmove
+	* move.c: replaced memcpy by memmove
 
 2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* common.c, common.h : Added print_runtime_env showing all environment values
+	* common.c, common.h: Added print_runtime_env showing all environment values
 	  along with resolved variables used in libcob
 	  New string helper functions: cob_int_to_string, cob_strcat, cob_strjoin,
 	  cob_int_to_formatted_bytestring
-	* call.c : Remove duplicates when resolving COB_LIBRARY_PATH
+	* call.c: Remove duplicates when resolving COB_LIBRARY_PATH
 
 2014-04-25  Ron Norman <rjn@inglenet.com>
 
-	* move.c : fixed bug in cob_move_fp_to_fp()
-	* numeric.c : Fixed errors in cob_add_int() when computing with floats.
+	* move.c: fixed bug in cob_move_fp_to_fp()
+	* numeric.c: Fixed errors in cob_add_int() when computing with floats.
 
 2014-04-14  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* common.c, common.h, system.def : Added cob_sys_getopt_long_long
-	* makefile.am : Added cobgetopt.c, cobgetopt.h
+	* common.c, common.h, system.def: Added cob_sys_getopt_long_long
+	* makefile.am: Added cobgetopt.c, cobgetopt.h
 
 2014-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -159,21 +164,21 @@
 
 2014-03-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* common.c, common.h : Rewriting cob_sig_handler, printing caught signal to
+	* common.c, common.h: Rewriting cob_sig_handler, printing caught signal to
 	  stderr, adding cob_reg_sighnd for registration of external signal handling
 
 2014-01-17  Ron Norman <rjn@inglenet.com>
 
-	* intrinsic.c  - Change cob_intr_random to correctly compute RANDOM number
+	* intrinsic.c: Change cob_intr_random to correctly compute RANDOM number
 
 2013-12-26  Luke Bryan <cobcoder@users.sourceforge.net>
 
-	* strings.c : Fix Unstring delimited by all delimiter size > 1 issue,
+	* strings.c: Fix Unstring delimited by all delimiter size > 1 issue,
 	  see bug #54.
 
 2013-??-??  Sergey Kashyrin <ska@kiska.net>
 
-	* fileio.c : Bugfix in cob_sys_copy_file (now using file_open_buff)
+	* fileio.c: Bugfix in cob_sys_copy_file (now using file_open_buff)
 
 201?-??-??  Sergey Kashyrin <ska@kiska.net>
 
@@ -181,7 +186,7 @@
 
 2010-09-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* screenio.c : Added cob_convert_key for converting keys according to used
+	* screenio.c: Added cob_convert_key for converting keys according to used
 	  libraries (especially fix for PDCurses + numpad support)
 
 2010-06-28  Roger While <simrw@sim-basis.de>

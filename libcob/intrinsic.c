@@ -3533,7 +3533,7 @@ cob_intr_current_date (const int offset, const int length)
 	struct cob_time time;
 	char		buff[22] = { '\0' };
 
-	COB_FIELD_INIT (22, NULL, &const_alpha_attr);
+	COB_FIELD_INIT (21, NULL, &const_alpha_attr);
 	make_field_entry (&field);
 
 	time = cob_get_current_date_and_time ();
@@ -3543,7 +3543,7 @@ cob_intr_current_date (const int offset, const int length)
 		  time.minute, time.second, (int) time.nanosecond / 10000000);
 
 	if (time.offset_known) {
-		snprintf (buff + 16, 6, "%+5.5d", time.utc_offset);
+		snprintf (buff + 16, 5, "%+4.4d", time.utc_offset);
 	} else {
 		memset (buff + 16, '0', 5);
 	}
