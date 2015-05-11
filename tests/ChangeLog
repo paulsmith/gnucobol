@@ -1,4 +1,8 @@
 
+2015-05-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.src/run_functions.at : revised all tests from ACOS to LENGTH
+
 2015-04-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.src/run_file.at : (new) moved testsuite entries for
