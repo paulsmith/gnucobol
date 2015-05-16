@@ -1,6 +1,7 @@
 
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
+	* parser.y: bug #136 added check for duplicate on/off clauses for switches
 	* reserved.c, tree.h: fr #65 added more switches "SWITCH-16" to "SWITCH-36"
 	* parser.y, reserved.c, scanner.l: fr #65 better support for ACUCOBOL
 	  extension "SWITCH 1" to "SWITCH 26", added alias SWITCH [A-Z],

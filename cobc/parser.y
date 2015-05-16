@@ -1958,6 +1958,7 @@ mnemonic_name_clause:
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
+	check_duplicate = 0;
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 		save_tree = NULL;
@@ -2025,6 +2026,11 @@ on_off_clauses:
 	/* cb_define_switch_name checks param validity */
 	x = cb_define_switch_name ($3, save_tree, $1 == cb_int1);
 	if (x) {
+		if ($1 == cb_int1) {
+			check_repeated ("ON", SYN_CLAUSE_1);
+		} else {
+			check_repeated ("OFF", SYN_CLAUSE_2);
+		}
 		CB_CHAIN_PAIR (current_program->mnemonic_spec_list, $3, x);
 	}
   }
@@ -2035,6 +2041,11 @@ on_off_clauses:
 	/* cb_define_switch_name checks param validity */
 	x = cb_define_switch_name ($4, save_tree, $2 == cb_int1);
 	if (x) {
+		if ($2 == cb_int1) {
+			check_repeated ("ON", SYN_CLAUSE_1);
+		} else {
+			check_repeated ("OFF", SYN_CLAUSE_2);
+		}
 		CB_CHAIN_PAIR (current_program->mnemonic_spec_list, $4, x);
 	}
   }
