@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
+   Copyright (C) 2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -169,6 +170,27 @@ enum cb_system_name_category {
 #define CB_SWITCH_13		13
 #define CB_SWITCH_14		14
 #define CB_SWITCH_15		15
+#define CB_SWITCH_16		16
+#define CB_SWITCH_17		17
+#define CB_SWITCH_18		18
+#define CB_SWITCH_19		19
+#define CB_SWITCH_20		20
+#define CB_SWITCH_21		21
+#define CB_SWITCH_22		22
+#define CB_SWITCH_23		23
+#define CB_SWITCH_24		24
+#define CB_SWITCH_25		25
+#define CB_SWITCH_26		26
+#define CB_SWITCH_27		27
+#define CB_SWITCH_28		28
+#define CB_SWITCH_29		29
+#define CB_SWITCH_30		30
+#define CB_SWITCH_31		31
+#define CB_SWITCH_32		32
+#define CB_SWITCH_33		33
+#define CB_SWITCH_34		34
+#define CB_SWITCH_35		35
+#define CB_SWITCH_36		36
 /* Features */
 #define CB_FEATURE_FORMFEED	0
 #define CB_FEATURE_CONVENTION	1

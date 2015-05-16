@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
+   Copyright (C) 2014,2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -652,101 +653,66 @@ H\"[^\"\n]*\" {
 	/* Ignore */
 }
 
-"SWITCH"[ ]+"0" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('0');
-	} else {
-		yylval = cb_build_reference ("SWITCH-0");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
+"SWITCH"[ ]+([0-9][0-9]?|[A-Z])[ ,;\n] {
+	/* ACUCOBOL extension: switch-names with space and with letter */
+	char num[3] = "";
+	char name[10] = "";
 
-"SWITCH"[ ]+"1" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('1');
+	if (yytext[yyleng-3] == ' ' && isdigit((unsigned char)yytext[yyleng-2])) {
+		/* SWITCH 0  to SWITCH 9 */
+		num[0] = yytext[yyleng-2];
+	} else if (isdigit((unsigned char)yytext[yyleng-3])) {
+		/* SWITCH 00 to SWITCH 99 */ 
+		num[0] = yytext[yyleng-3];
+		num[1] = yytext[yyleng-2];
 	} else {
-		yylval = cb_build_reference ("SWITCH-1");
+		switch (toupper((unsigned char)yytext[yyleng-2])) {
+		/* SWITCH A  to SWITCH Z */
+			case 'A': num[0] = '1'; break;
+			case 'B': num[0] = '2'; break;
+			case 'C': num[0] = '3'; break;
+			case 'D': num[0] = '4'; break;
+			case 'E': num[0] = '5'; break;
+			case 'F': num[0] = '6'; break;
+			case 'G': num[0] = '7'; break;
+			case 'H': num[0] = '8'; break;
+			case 'I': num[0] = '9'; break;
+			case 'J': num[0] = '1'; num[1] = '0'; break;
+			case 'K': num[0] = '1'; num[1] = '1'; break;
+			case 'L': num[0] = '1'; num[1] = '2'; break;
+			case 'M': num[0] = '1'; num[1] = '3'; break;
+			case 'N': num[0] = '1'; num[1] = '4'; break;
+			case 'O': num[0] = '1'; num[1] = '5'; break;
+			case 'P': num[0] = '1'; num[1] = '6'; break;
+			case 'Q': num[0] = '1'; num[1] = '7'; break;
+			case 'R': num[0] = '1'; num[1] = '8'; break;
+			case 'S': num[0] = '1'; num[1] = '9'; break;
+			case 'T': num[0] = '2'; num[1] = '0'; break;
+			case 'U': num[0] = '2'; num[1] = '1'; break;
+			case 'V': num[0] = '2'; num[1] = '2'; break;
+			case 'W': num[0] = '2'; num[1] = '3'; break;
+			case 'X': num[0] = '2'; num[1] = '4'; break;
+			case 'Y': num[0] = '2'; num[1] = '5'; break;
+			case 'Z': num[0] = '2'; num[1] = '6'; break;
+		}
 	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"2" {
 	if (cobc_in_procedure) {
+		 /* unput characters */
 		yylval = cb_build_reference ("SWITCH");
-		unput ('2');
+		if (isdigit((unsigned char)yytext[yyleng-3])) {
+			unput (yytext[yyleng-3]);
+			unput (yytext[yyleng-2]);
+		} else {
+			unput (yytext[yyleng-2]);
+		}
 	} else {
-		yylval = cb_build_reference ("SWITCH-2");
+		 /* we need to return a single word, reverted later in parser.y */
+		strncpy(name, yytext, 6);
+		strcat(name, "_");
+		strcat(name, num);
+		yylval = cb_build_reference (name);
 	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"3" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('3');
-	} else {
-		yylval = cb_build_reference ("SWITCH-3");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"4" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('4');
-	} else {
-		yylval = cb_build_reference ("SWITCH-4");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"5" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('5');
-	} else {
-		yylval = cb_build_reference ("SWITCH-5");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"6" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('6');
-	} else {
-		yylval = cb_build_reference ("SWITCH-6");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"7" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('7');
-	} else {
-		yylval = cb_build_reference ("SWITCH-7");
-	}
-	SET_LOCATION (yylval);
-	return WORD;
-}
-
-"SWITCH"[ ]+"8" {
-	if (cobc_in_procedure) {
-		yylval = cb_build_reference ("SWITCH");
-		unput ('8');
-	} else {
-		yylval = cb_build_reference ("SWITCH-8");
-	}
+	unput (yytext[yyleng-1]); /* unput seperator */
 	SET_LOCATION (yylval);
 	return WORD;
 }

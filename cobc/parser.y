@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
-   Copyright (C) 2014 Simon Sobisch
+   Copyright (C) 2014,2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -1954,6 +1954,7 @@ special_name:
 mnemonic_name_clause:
   WORD
   {
+	char system_name[16];
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
@@ -1961,9 +1962,16 @@ mnemonic_name_clause:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 		save_tree = NULL;
 	} else {
-		save_tree = lookup_system_name (CB_NAME ($1));
+		/* get system name and revert word-combination of scanner.l,
+		   if necessary (e.g. SWITCH A <--> SWITCH_A) */
+		strncpy(system_name, CB_NAME ($1), 15);
+		if (system_name [6] == '_') {
+			system_name [6] = ' ';
+		}
+		/* lookup system name */
+		save_tree = lookup_system_name (system_name);
 		if (!save_tree) {
-			cb_error_x ($1, _("Invalid system-name '%s'"), CB_NAME ($1));
+			cb_error_x ($1, _("Invalid system-name '%s'"), system_name);
 		}
 	}
   }
