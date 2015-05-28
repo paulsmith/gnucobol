@@ -491,6 +491,134 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [0])
 AT_CLEANUP
 
 
+AT_SETUP([SWITCHES])
+AT_KEYWORDS([runmisc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           SW1
+             ON  IS SWIT1-ON
+             OFF IS SWIT1-OFF
+           .
+           SWITCH B IS SWITCH-B
+             ON  IS SWIT2-ON
+             OFF IS SWIT2-OFF
+           .
+           SWITCH-25
+             ON  IS SWIT25-ON
+             OFF IS SWIT25-OFF
+           .
+           SWITCH-25
+             ON  IS SWIT25-IS-ON
+             OFF IS SWIT25-IS-OFF
+           .
+           SWITCH 25
+             ON  IS SWIT25-SP-ON
+             OFF IS SWIT25-SP-OFF
+           .
+           SWITCH Y
+             ON  IS SWIT25-Y-ON
+             OFF IS SWIT25-Y-OFF
+           .
+           SWITCH Z
+             ON  IS SWIT26-ON
+             ON  IS SWIT26-OFF
+           .
+           SWITCH-32
+             ON  IS SWIT32-ON
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SWITCH       PIC 99 VALUE 12.
+       PROCEDURE        DIVISION.
+           ADD SWITCH 1 GIVING SWITCH
+           END-ADD.
+           IF SWITCH NOT = 13
+              DISPLAY "SWITCH (variable) WRONG: "
+                      SWITCH
+              END-DISPLAY
+           END-IF.
+           IF SWIT1-ON
+              DISPLAY "ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY "OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           IF SWIT2-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           SET SWITCH-B TO OFF
+           IF SWIT2-ON
+              CONTINUE
+           END-IF.
+           IF SWIT25-ON
+              CONTINUE
+           END-IF.
+           IF SWIT26-ON
+              CONTINUE
+           END-IF.
+           IF SWIT32-ON
+              CONTINUE
+           END-IF.
+           IF SWIT32-OFF
+              CONTINUE
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: Error: Invalid system-name 'SW1'
+prog.cob: 8: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 9: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 11: Error: Invalid system-name 'SWITCH B'
+prog.cob: 12: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 13: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 23: Error: Invalid system-name 'SWITCH 25'
+prog.cob: 24: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 25: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 27: Error: Invalid system-name 'SWITCH Y'
+prog.cob: 28: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 29: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 31: Error: Invalid system-name 'SWITCH Z'
+prog.cob: 32: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 33: Error: ON/OFF usage requires a SWITCH name
+prog.cob: 49: Error: 'SWIT1-ON' is not defined
+prog.cob: 56: Error: 'SWIT2-ON' is not defined
+prog.cob: 63: Error: 'SWITCH-B' is not defined
+prog.cob: 63: Error: syntax error, unexpected OFF
+prog.cob: 64: Error: syntax error, unexpected Identifier
+prog.cob: 66: Error: syntax error, unexpected END-IF
+prog.cob: 70: Error: 'SWIT26-ON' is not defined
+prog.cob: 76: Error: 'SWIT32-OFF' is not defined
+])
+# There should be an additional
+#prog.cob: 19: Error: duplicate definition of 'SWITCH-25'
+#prog.cob: 15: Error: 'SWITCH-25' previously defined here
+#
+AT_CHECK([$COMPILE_ONLY -fsyntax-extension prog.cob], [1], [], 
+[prog.cob: 33: Error: Duplicate ON clause
+prog.cob: 76: Error: 'SWIT32-OFF' is not defined
+])
+# There should be an additional
+#prog.cob: 19: Error: duplicate definition of 'SWITCH-25'
+#prog.cob: 15: Error: 'SWITCH-25' previously defined here
+#prog.cob: 23: Error: duplicate definition of 'SWITCH 25'
+#prog.cob: 15: Error: 'SWITCH-25' previously defined here
+#prog.cob: 27: Error: duplicate definition of 'SWITCH Y'
+#prog.cob: 15: Error: 'SWITCH-25' previously defined here
+
+AT_CLEANUP
+
+
 AT_SETUP([ACCEPT WITH ( NO ) UPDATE / DEFAULT])
 AT_KEYWORDS([misc extensions])
 

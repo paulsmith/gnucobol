@@ -2525,71 +2525,43 @@ YY_RULE_SETUP
 #line 656 "scanner.l"
 {
 	/* ACUCOBOL extension: switch-names with space and with letter */
-	char num[3] = "";
+	char suffix[3] = "";
 	char name[10] = "";
 
-	if (yytext[yyleng-3] == ' ' && isdigit((unsigned char)yytext[yyleng-2])) {
-		/* SWITCH 0  to SWITCH 9 */
-		num[0] = yytext[yyleng-2];
-	} else if (isdigit((unsigned char)yytext[yyleng-3])) {
-		/* SWITCH 00 to SWITCH 99 */ 
-		num[0] = yytext[yyleng-3];
-		num[1] = yytext[yyleng-2];
-	} else {
-		switch (toupper((unsigned char)yytext[yyleng-2])) {
-		/* SWITCH A  to SWITCH Z */
-			case 'A': num[0] = '1'; break;
-			case 'B': num[0] = '2'; break;
-			case 'C': num[0] = '3'; break;
-			case 'D': num[0] = '4'; break;
-			case 'E': num[0] = '5'; break;
-			case 'F': num[0] = '6'; break;
-			case 'G': num[0] = '7'; break;
-			case 'H': num[0] = '8'; break;
-			case 'I': num[0] = '9'; break;
-			case 'J': num[0] = '1'; num[1] = '0'; break;
-			case 'K': num[0] = '1'; num[1] = '1'; break;
-			case 'L': num[0] = '1'; num[1] = '2'; break;
-			case 'M': num[0] = '1'; num[1] = '3'; break;
-			case 'N': num[0] = '1'; num[1] = '4'; break;
-			case 'O': num[0] = '1'; num[1] = '5'; break;
-			case 'P': num[0] = '1'; num[1] = '6'; break;
-			case 'Q': num[0] = '1'; num[1] = '7'; break;
-			case 'R': num[0] = '1'; num[1] = '8'; break;
-			case 'S': num[0] = '1'; num[1] = '9'; break;
-			case 'T': num[0] = '2'; num[1] = '0'; break;
-			case 'U': num[0] = '2'; num[1] = '1'; break;
-			case 'V': num[0] = '2'; num[1] = '2'; break;
-			case 'W': num[0] = '2'; num[1] = '3'; break;
-			case 'X': num[0] = '2'; num[1] = '4'; break;
-			case 'Y': num[0] = '2'; num[1] = '5'; break;
-			case 'Z': num[0] = '2'; num[1] = '6'; break;
-		}
-	}
+	unput (yytext[yyleng-1]); /* unput seperator */
 	if (cobc_in_procedure) {
 		 /* unput characters */
 		yylval = cb_build_reference ("SWITCH");
 		if (isdigit((unsigned char)yytext[yyleng-3])) {
-			unput (yytext[yyleng-3]);
 			unput (yytext[yyleng-2]);
+			unput (yytext[yyleng-3]);
 		} else {
 			unput (yytext[yyleng-2]);
 		}
 	} else {
 		 /* we need to return a single word, reverted later in parser.y */
+		if (yytext[yyleng-3] == ' ' && isdigit((unsigned char)yytext[yyleng-2])) {
+			/* SWITCH 0  to SWITCH 9 */
+			suffix[0] = yytext[yyleng-2];
+		} else if (isdigit((unsigned char)yytext[yyleng-3])) {
+			/* SWITCH 00 to SWITCH 99 */ 
+			suffix[0] = yytext[yyleng-3];
+			suffix[1] = yytext[yyleng-2];
+		} else {
+			suffix[0] = yytext[yyleng-2];
+		}
 		strncpy(name, yytext, 6);
 		strcat(name, "_");
-		strcat(name, num);
+		strcat(name, suffix);
 		yylval = cb_build_reference (name);
 	}
-	unput (yytext[yyleng-1]); /* unput seperator */
 	SET_LOCATION (yylval);
 	return WORD;
 }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 720 "scanner.l"
+#line 692 "scanner.l"
 {
 	struct cb_level_78		*p78;
 	struct cb_intrinsic_table	*cbp;
@@ -2732,7 +2704,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 860 "scanner.l"
+#line 832 "scanner.l"
 {
 	yylval = NULL;
 	return LESS_OR_EQUAL;
@@ -2740,7 +2712,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 865 "scanner.l"
+#line 837 "scanner.l"
 {
 	yylval = NULL;
 	return GREATER_OR_EQUAL;
@@ -2748,7 +2720,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 870 "scanner.l"
+#line 842 "scanner.l"
 {
 	yylval = NULL;
 	return NOT_EQUAL;
@@ -2756,7 +2728,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 875 "scanner.l"
+#line 847 "scanner.l"
 {
 	yylval = NULL;
 	return EXPONENTIATION;
@@ -2764,7 +2736,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 880 "scanner.l"
+#line 852 "scanner.l"
 {
 	last_token_is_dot = 1;
 	yylval = NULL;
@@ -2773,7 +2745,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 886 "scanner.l"
+#line 858 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_AMPER;
@@ -2781,7 +2753,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 891 "scanner.l"
+#line 863 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_COLON;
@@ -2789,7 +2761,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 896 "scanner.l"
+#line 868 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_EQUAL;
@@ -2797,7 +2769,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 901 "scanner.l"
+#line 873 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_DIV;
@@ -2805,7 +2777,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 906 "scanner.l"
+#line 878 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MUL;
@@ -2813,7 +2785,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 911 "scanner.l"
+#line 883 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_PLUS;
@@ -2821,7 +2793,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 916 "scanner.l"
+#line 888 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MINUS;
@@ -2829,7 +2801,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 921 "scanner.l"
+#line 893 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_LESS;
@@ -2837,7 +2809,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 926 "scanner.l"
+#line 898 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_GREATER;
@@ -2845,7 +2817,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 931 "scanner.l"
+#line 903 "scanner.l"
 {
 	int	c;
 
@@ -2863,14 +2835,14 @@ YY_RULE_SETUP
 
 case 117:
 YY_RULE_SETUP
-#line 947 "scanner.l"
+#line 919 "scanner.l"
 {
 	/* Ignore */
   }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 950 "scanner.l"
+#line 922 "scanner.l"
 {
 	BEGIN INITIAL;
 	scan_picture (yytext);
@@ -2881,7 +2853,7 @@ YY_RULE_SETUP
 
 case 119:
 YY_RULE_SETUP
-#line 958 "scanner.l"
+#line 930 "scanner.l"
 {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				l;
@@ -2905,7 +2877,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 978 "scanner.l"
+#line 950 "scanner.l"
 {
 	yylval = NULL;
 	return yytext[0];
@@ -2917,7 +2889,7 @@ case YY_STATE_EOF(DECIMAL_IS_PERIOD):
 case YY_STATE_EOF(DECIMAL_IS_COMMA):
 case YY_STATE_EOF(PICTURE_STATE):
 case YY_STATE_EOF(FUNCTION_STATE):
-#line 984 "scanner.l"
+#line 956 "scanner.l"
 {
 	struct cb_level_78	*p78;
 	struct cb_level_78	*p782;
@@ -2950,10 +2922,10 @@ case YY_STATE_EOF(FUNCTION_STATE):
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 1014 "scanner.l"
+#line 986 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 2957 "scanner.c"
+#line 2929 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3790,7 +3762,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 1014 "scanner.l"
+#line 986 "scanner.l"
 
 
 

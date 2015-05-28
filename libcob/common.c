@@ -195,7 +195,7 @@ static const int		cob_exception_tab_code[] = {
 #define EXCEPTION_TAB_SIZE	sizeof(cob_exception_tab_code) / sizeof(int)
 
 /* Switches */
-#define	COB_SWITCH_MAX	16
+#define	COB_SWITCH_MAX	36  /* (must match cobc/tree.h)*/
 
 static int		cob_switch[COB_SWITCH_MAX];
 
@@ -2129,7 +2129,7 @@ cob_reg_sighnd	(void (*sighnd) (int))
 int
 cob_get_switch (const int n)
 {
-	if (n < 0 || n > (COB_SWITCH_MAX - 1)) {
+	if (n < 0 || n > COB_SWITCH_MAX) {
 		return 0;
 	}
 	return cob_switch[n];
@@ -2138,7 +2138,7 @@ cob_get_switch (const int n)
 void
 cob_set_switch (const int n, const int flag)
 {
-	if (n < 0 || n > (COB_SWITCH_MAX - 1)) {
+	if (n < 0 || n > COB_SWITCH_MAX) {
 		return;
 	}
 	if (flag == 0) {
@@ -4569,7 +4569,7 @@ cob_init (const int argc, char **argv)
 	cob_rescan_env_vals ();
 
 	/* Set switches */
-	for (i = 0; i < COB_SWITCH_MAX; ++i) {
+	for (i = 0; i <= COB_SWITCH_MAX; ++i) {
 		sprintf (runtime_err_str, "COB_SWITCH_%d", i);
 		s = getenv (runtime_err_str);
 		if (s && (*s == '1' || strcasecmp (s, "ON") == 0)) {

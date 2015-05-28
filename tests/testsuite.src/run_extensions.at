@@ -1,6 +1,6 @@
 ## Copyright (C) 2003,2004,2005,2006,2007 Keisuke Nishida
 ## Copyright (C) 2007-2012 Roger While
-## Copyright (C) 2014 Simon Sobisch
+## Copyright (C) 2014,2015 Simon Sobisch
 ## 
 ## This file is part of GNU Cobol.
 ## 
@@ -62,8 +62,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE dump.c], [0], , [])
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00001234
 00004660
@@ -91,7 +91,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00074565
 16777215
@@ -115,7 +115,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [OK])
 
 AT_CLEANUP
@@ -166,7 +166,7 @@ AT_DATA([prog.cob], [
          END-IF.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -205,7 +205,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -231,7 +231,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -261,7 +261,7 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
 ])
 
-AT_CHECK([$COMPILE -std=mvs -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mvs -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [123456:34:56])
 
 AT_CLEANUP
@@ -320,7 +320,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mf -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [18181    22        333
 1818  3    22      111
@@ -382,7 +382,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf -fodoslide -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mf -fodoslide -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0606122333
 1010  3  22111
@@ -447,7 +447,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mf -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [33331    22        333            444
 3333  3    22      111            000
@@ -512,7 +512,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf -fodoslide -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mf -fodoslide -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0909122333444
 1313  3  22111000
@@ -566,7 +566,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -698,8 +698,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE setfilename.c], [0], , [])
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE_MODULE setfilename.c], [0], [], [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 AT_CHECK([test -e TESTFILE], [0])
 
@@ -759,11 +759,11 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE A@B.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE A@%:@B.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE A-B.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE A_B.cob], [0], , [])
-AT_CHECK([$COMPILE -o caller caller.cob], [0], , [])
+AT_CHECK([$COMPILE_MODULE A@B.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE A@%:@B.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE A-B.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE A_B.cob], [0], [], [])
+AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 
 AT_CHECK([./caller], [0], [P1P2P3P4])
 
@@ -871,7 +871,7 @@ AT_DATA([prog.cob], [
        END PROGRAM PROG.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -893,7 +893,7 @@ AT_DATA([prog.cob], [
        END PROGRAM caller.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -915,7 +915,7 @@ AT_DATA([prog.cob], [
        END PROGRAM caller.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -1013,7 +1013,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], [], [])
 AT_CHECK([DD_FILENAME="x" ./prog], [0])
 AT_CHECK([test -f "x"], [0])
 AT_CHECK([dd_FILENAME="y" ./prog], [0])
@@ -1050,7 +1050,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], [], [])
 AT_CHECK([DIR="." ./prog], [0])
 AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0])
 
@@ -1081,7 +1081,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], [], [])
 AT_CHECK([COB_FILE_PATH=".." ./prog], [0])
 AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0])
 
@@ -1131,8 +1131,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], , [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([./caller], [0],
 [+000000000
 +000000001
@@ -1189,8 +1189,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], , [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([./caller], [0])
 
 AT_CLEANUP
@@ -1215,7 +1215,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([./prog X ABCD], [0])
 
@@ -1238,10 +1238,10 @@ AT_DATA([prog2.cob], [
            STOP RUN GIVING 2.
 ])
 
-AT_CHECK([$COMPILE prog1.cob], [0], , [])
+AT_CHECK([$COMPILE prog1.cob], [0], [], [])
 AT_CHECK([./prog1], [1])
 
-AT_CHECK([$COMPILE prog2.cob], [0], , [])
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 AT_CHECK([./prog2], [2])
 
 AT_CLEANUP
@@ -1289,7 +1289,7 @@ AT_DATA([prog2.cob], [
            GOBACK GIVING 2.
 ])
 
-AT_CHECK([$COMPILE prog.cob prog1.cob prog2.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob prog1.cob prog2.cob], [0], [], [])
 AT_CHECK([./prog], [2])
 
 AT_CLEANUP
@@ -1332,8 +1332,8 @@ AT_DATA([hello.cob], [
            EXIT PROGRAM.
 ])
 
-AT_CHECK([$COMPILE -std=mvs caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE -std=mvs hello.cob], [0], , [])
+AT_CHECK([$COMPILE -std=mvs caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -std=mvs hello.cob], [0], [], [])
 AT_CHECK([./caller], [0],
 [Hello, COBOL!
 Bye, COBOL!
@@ -1377,7 +1377,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog])
 AT_CHECK([cat TEST-FILE], [0], 
 [a
@@ -1444,7 +1444,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [(a   )
 (ab  )
@@ -1502,7 +1502,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([cat TEST-FILE | ./prog], [0],
 [a
 ab
@@ -1563,7 +1563,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([cat TEST-FILE | ./prog], [0],
 [0
 00
@@ -1613,7 +1613,7 @@ AT_DATA([prog.cob], [
 ])
 
 export TEST_ENV=OK
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog CHECKPAR], [0],
 [(OK  )
 (RXW )
@@ -1644,7 +1644,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00,50
 ])
@@ -1672,7 +1672,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [03,00
 ])
@@ -1700,7 +1700,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [01,50
 ])
@@ -1728,7 +1728,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00,10
 ])
@@ -1761,7 +1761,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [01,10
 00,10
@@ -1785,7 +1785,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OK
 ])
@@ -1811,7 +1811,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OKOKOK
 ])
@@ -1835,7 +1835,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OKOK
 ])
@@ -1843,7 +1843,7 @@ AT_CHECK([./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([DEBUG (1)])
+AT_SETUP([DEBUG (not active)])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -1852,22 +1852,21 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-           DISPLAY "OK"
+           DISPLAY "OK" NO ADVANCING
            END-DISPLAY.
-      D    DISPLAY "OK"
+      D    DISPLAY "KO" NO ADVANCING
       D    END-DISPLAY.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
-[OK
-])
+[OK])
 
 AT_CLEANUP
 
 
-AT_SETUP([DEBUG (2)])
+AT_SETUP([DEBUG (fdebugging-line)])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -1876,23 +1875,47 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-           DISPLAY "OK"
+           DISPLAY "OK" NO ADVANCING
            END-DISPLAY.
-      D    DISPLAY "OK"
+      D    DISPLAY "KO" NO ADVANCING
       D    END-DISPLAY.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -fdebugging-line prog.cob], [0], , [])
+AT_CHECK([$COMPILE -fdebugging-line prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
-[OK
-OK
-])
+[OKKO])
 
 AT_CLEANUP
 
 
-AT_SETUP([DEBUG free format (1)])
+AT_SETUP([DEBUG (obsolete WITH DEBUGGING MODE)])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+      D    DISPLAY "KO" NO ADVANCING
+      D    END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[OKKO])
+
+AT_CLEANUP
+
+
+AT_SETUP([DEBUG free format (not active)])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -1901,22 +1924,21 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-             DISPLAY "OK"
+             DISPLAY "OK" NO ADVANCING
              END-DISPLAY.
-      >>D    DISPLAY "OK"
+      >>D    DISPLAY "KO" NO ADVANCING
       >>D    END-DISPLAY.
              STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -free prog.cob], [0], , [])
+AT_CHECK([$COMPILE -free prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
-[OK
-])
+[OK])
 
 AT_CLEANUP
 
 
-AT_SETUP([DEBUG free format (2)])
+AT_SETUP([DEBUG free format (fdebugging-line)])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -1925,47 +1947,117 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-             DISPLAY "OK"
+             DISPLAY "OK" NO ADVANCING
              END-DISPLAY.
-      >>D    DISPLAY "OK"
+      >>D    DISPLAY "KO" NO ADVANCING
       >>D    END-DISPLAY.
              STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -free -fdebugging-line prog.cob], [0], , [])
+AT_CHECK([$COMPILE -free -fdebugging-line prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
-[OK
-OK
-])
+[OKKO])
 
 AT_CLEANUP
 
 
-AT_SETUP([SOURCE FIXED/FREE directives])
-AT_KEYWORDS([extensions])
+AT_SETUP([SWITCHES with non-standard names])
+AT_KEYWORDS([runmisc extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       >>SOURCE FREE
-   DATA             DIVISION.
-   WORKING-STORAGE  SECTION.
-   >>SOURCE FIXED
-       PROCEDURE        DIVISION.                                       FIXED
-             DISPLAY "OK"
-             END-DISPLAY.
-       >>SOURCE FREE
-                                                                        DISPLAY
-   "OK"
-   END-DISPLAY.
-             STOP RUN.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           SW1
+             ON  IS SWIT1-ON
+             OFF IS SWIT1-OFF
+           .
+           SWITCH B IS SWITCH-B
+             ON  IS SWIT2-ON
+             OFF IS SWIT2-OFF
+           .
+           SWITCH 25
+             ON  IS SWIT25-ON
+             OFF IS SWIT25-OFF
+           .
+           SWITCH Z
+             ON  IS SWIT26-ON
+             OFF IS SWIT26-OFF
+           .
+           SWITCH-32
+             ON  IS SWIT32-ON
+             OFF IS SWIT32-OFF
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SWITCH       PIC 99 VALUE 12.
+	   78  Z            VALUE 11.
+       PROCEDURE        DIVISION.
+           ADD SWITCH 1 GIVING SWITCH
+           END-ADD.
+           IF SWITCH NOT = 13
+              DISPLAY "SWITCH (variable) + 1 WRONG: "
+                      SWITCH
+              END-DISPLAY
+           END-IF.
+           ADD SWITCH Z GIVING SWITCH
+           END-ADD.
+           IF SWITCH NOT = 24
+              DISPLAY "SWITCH (variable) + Z WRONG: "
+                      SWITCH
+              END-DISPLAY
+           END-IF.
+           IF SWIT1-ON
+              DISPLAY "ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY "OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           IF SWIT2-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           SET SWITCH-B TO OFF
+           IF SWIT2-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           IF SWIT25-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           IF SWIT26-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           IF SWIT32-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
-AT_CHECK([./prog], [0],
-[OK
-OK
-])
+AT_CHECK([$COMPILE -fsyntax-extension prog.cob], [0], [], [])
+AT_CHECK([COB_SWITCH_2=1 COB_SWITCH_26=1 COB_SWITCH_32=1 ./prog], [0],
+[OFF ON OFF OFF ON ON], [])
 
 AT_CLEANUP
 
@@ -2071,7 +2163,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OKOK
 ])
@@ -2120,8 +2212,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], , [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([./caller], [1], [OKOK])
 
 AT_CLEANUP
@@ -2160,8 +2252,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], , [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([./caller], [0])
 
 AT_CLEANUP
@@ -2202,8 +2294,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE caller.cob], [0], , [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], , [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([./caller], [0])
 
 AT_CLEANUP
@@ -2228,7 +2320,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2257,7 +2349,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2277,7 +2369,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 AT_CHECK([test -d "TMP" && rmdir "TMP"], [0])
 
@@ -2303,7 +2395,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2328,7 +2420,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2353,7 +2445,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2380,7 +2472,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2407,7 +2499,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2434,7 +2526,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2461,7 +2553,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2488,7 +2580,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2515,7 +2607,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2541,7 +2633,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2568,7 +2660,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -2896,13 +2988,13 @@ AT_CHECK([./prog --version --verbose -jkl], [0], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN prog2 --ver --vers], [0], [], [prog2: option '--ver' is ambiguous; possibilities: '--version' '--verbose'
 ])
-AT_CHECK([$COMPILE prog3.cob], [0], , [])
+AT_CHECK([$COMPILE prog3.cob], [0], [], [])
 AT_CHECK([./prog3 --version=lang --verbose=k --usage -j 5 -k6 -l], [0], [])
-AT_CHECK([$COMPILE prog4.cob --free], [0], , [])
+AT_CHECK([$COMPILE prog4.cob --free], [0], [], [])
 AT_CHECK([./prog4 --static --dynamic --usage=boringandtoolongtext], [0], [])
 # Again a long and system specific error message which we ignore. 
 # Return code 1 is sufficient as proof of hard return (as wanted).
-AT_CHECK([$COMPILE prog5.cob], [0], , [])
+AT_CHECK([$COMPILE prog5.cob], [0], [], [])
 AT_CHECK([./prog5 --static], [1], [], [prog5.cob: 35: libcob: Call to CBL_OC_GETOPT with wrong longoption size.
 ])
 
@@ -3117,7 +3209,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [OK])
 
 AT_CLEANUP
@@ -3142,7 +3234,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -DACTIVATE prog.cob], [0], , [])
+AT_CHECK([$COMPILE -DACTIVATE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [OK])
 
 AT_CLEANUP
@@ -3170,7 +3262,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0], , [])
+AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [OK])
 
 AT_CLEANUP
@@ -3196,7 +3288,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0], , [])
+AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
