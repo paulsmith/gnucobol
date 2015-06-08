@@ -263,7 +263,7 @@ cob_display (const int to_stderr, const int newline, const int varcnt, ...)
 		f = va_arg (args, cob_field *);
 		if (unlikely(disp_redirect)) {
 			cob_field_display (f, NULL, NULL, NULL, NULL,
-					   NULL, nlattr);
+					   NULL, NULL, nlattr);
 		} else {
 			display_common (f, fp);
 		}
@@ -288,7 +288,8 @@ cob_accept (cob_field *f)
 
 	if (cobglobptr->cob_screen_initialized) {
 		cob_field_accept (f, NULL, NULL, NULL, NULL,
-				  NULL, NULL, NULL, COB_SCREEN_PROMPT);
+				  NULL, NULL, NULL, NULL, 
+				  COB_SCREEN_PROMPT);
 		return;
 	}
 	if (COB_MODULE_PTR->crt_status) {

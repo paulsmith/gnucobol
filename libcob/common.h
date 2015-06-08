@@ -1520,11 +1520,12 @@ COB_EXPIMP void cob_screen_display	(cob_screen *, cob_field *,
 COB_EXPIMP void cob_screen_accept	(cob_screen *, cob_field *,
 					 cob_field *, cob_field *);
 COB_EXPIMP void cob_field_display	(cob_field *, cob_field *, cob_field *,
-					 cob_field *, cob_field *, cob_field *,
-					 const int);
+					 cob_field *, cob_field *, cob_field *, 
+					 cob_field *, const int);
 COB_EXPIMP void cob_field_accept	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
-					 cob_field *, cob_field *, const int);
+					 cob_field *, cob_field *, cob_field *,
+					 const int);
 COB_EXPIMP void cob_accept_escape_key	(cob_field *);
 COB_EXPIMP int	cob_sys_clear_screen	(void);
 COB_EXPIMP int	cob_sys_sound_bell	(void);

@@ -609,28 +609,38 @@ bit_set_attr (const cb_tree onoff, const int attrval)
 
 static void
 check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
-	       cb_tree timeout, cb_tree prompt, int attrib)
+	       cb_tree timeout, cb_tree prompt, cb_tree size_is, int attrib)
 {
 	/* Attach attribute to current_statement */
 	if (!current_statement->attr_ptr) {
 		current_statement->attr_ptr =
 			cobc_parse_malloc (sizeof(struct cb_attr_struct));
 	}
+	/* [WITH] FOREGROUND-COLOR [IS] */
 	if (fgc) {
 		current_statement->attr_ptr->fgc = fgc;
 	}
+	/* [WITH] BACKGROUND-COLOR [IS] */ 
 	if (bgc) {
 		current_statement->attr_ptr->bgc = bgc;
 	}
+	/* [WITH] SCROLL UP | DOWN */ 
 	if (scroll) {
 		current_statement->attr_ptr->scroll = scroll;
 	}
+	/* [WITH] TIMEOUT [AFTER] */ 
 	if (timeout) {
 		current_statement->attr_ptr->timeout = timeout;
 	}
+	/* [WITH] PROMPT CHARACTER [IS] */
 	if (prompt) {
 		current_statement->attr_ptr->prompt = prompt;
 	}
+	/* [WITH] SIZE [IS] */
+	if (size_is) {
+		current_statement->attr_ptr->size_is = size_is;
+	}
+	/* Attribute */   
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
@@ -1093,6 +1103,7 @@ check_headers_present (const unsigned int lev1, const unsigned int lev2,
 %token PROGRAM_POINTER		"PROGRAM-POINTER"
 %token PROHIBITED
 %token PROMPT
+%token PROTECTED		"PROTECTED"
 %token QUOTE
 %token RANDOM
 %token RD
@@ -5741,10 +5752,10 @@ accept_statement:
   {
 	begin_statement ("ACCEPT", TERM_ACCEPT);
 	if (cb_accept_update) {
-		check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
+		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
 	}
 	if (cb_accept_auto) {
-		check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
+		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
 	}
 
   }
@@ -5896,7 +5907,7 @@ accp_attrs:
 accp_attr:
   AUTO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
   }
 | TAB
   {
@@ -5906,11 +5917,11 @@ accp_attr:
   }
 | BELL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
   }
 | BLINK
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
   }
 | CONVERSION
   {
@@ -5918,55 +5929,63 @@ accp_attr:
   }
 | FULL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_FULL);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_FULL);
   }
 | HIGHLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
   }
 | LEFTLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LEFTLINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LEFTLINE);
   }
 | LOWER
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWER);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWER);
   }
 | LOWLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
   }
 | NO_ECHO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_NO_ECHO);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_NO_ECHO);
   }
 | OVERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
   }
 | PROMPT CHARACTER _is id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, $4, COB_SCREEN_PROMPT);
+	check_attribs (NULL, NULL, NULL, NULL, $4, NULL, COB_SCREEN_PROMPT);
   }
 | PROMPT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_PROMPT);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_PROMPT);
   }
 | REQUIRED
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REQUIRED);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REQUIRED);
   }
 | REVERSE_VIDEO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
   }
 | SECURE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_SECURE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_SECURE);
+  }
+| PROTECTED SIZE _is num_id_or_lit
+  {
+	check_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
+  }
+| SIZE _is num_id_or_lit
+  {
+	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
   }
 | UNDERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
   }
 | NO update_default
   {
@@ -5976,31 +5995,31 @@ accp_attr:
   }
 | update_default
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
   }
 | UPPER
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPPER);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPPER);
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs ($3, NULL, NULL, NULL, NULL, 0);
+	check_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
   }
 | BACKGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs (NULL, $3, NULL, NULL, NULL, 0);
+	check_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
 | SCROLL UP _opt_scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, 0);
+	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, 0);
   }
 | SCROLL DOWN _opt_scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
+	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
   }
 | TIMEOUT _after positive_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, $3, NULL, 0);
+	check_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
 ;
 
@@ -6643,19 +6662,19 @@ disp_attrs:
 disp_attr:
   BELL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
   }
 | BLANK LINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_LINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_LINE);
   }
 | BLANK SCREEN
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_SCREEN);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_SCREEN);
   }
 | BLINK
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
   }
 | CONVERSION
   {
@@ -6663,47 +6682,51 @@ disp_attr:
   }
 | ERASE EOL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOL);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOL);
   }
 | ERASE EOS
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOS);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOS);
   }
 | HIGHLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
   }
 | LOWLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
   }
 | OVERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
   }
 | REVERSE_VIDEO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
+  }
+| SIZE _is num_id_or_lit 
+  {
+	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0); 
   }
 | UNDERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
+	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs ($3, NULL, NULL, NULL, NULL, 0);
+	check_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
   }
 | BACKGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs (NULL, $3, NULL, NULL, NULL, 0);
+	check_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
 | SCROLL UP _opt_scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, 0);
+	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, 0);
   }
 | SCROLL DOWN _opt_scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
+	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
   }
 ;
 

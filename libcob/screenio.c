@@ -1218,15 +1218,30 @@ cob_screen_accept (cob_screen *s, cob_field *line,
 void
 cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   const int fattr)
+		   cob_field *size_is, const int fattr)
 {
 	int	sline;
 	int	scolumn;
+	int	ssize_is = 0;	/* WITH SIZE IS */ 
+	int	size_display;	/* final size to display */
+	int	count;		/* loop counter */ 
+	char	fig_const;	/* figurative constant character */
 
 	if (!cobglobptr->cob_screen_initialized) {
 		cob_screen_init ();
 	}
 
+	/* Field size to display */ 
+	size_display = (int)f->size;
+	/* WITH SIZE IS */ 
+	if (size_is) {
+	    ssize_is = cob_get_int (size_is);
+	    /* Use WITH SIZE IS when less than field size */
+	    if (ssize_is > 0 && ssize_is < (int)f->size) {
+	      size_display = ssize_is; 
+	    }
+	} 
+	
 	if (fscroll) {
 		sline = cob_get_int (fscroll);
 		if (fattr & COB_SCREEN_SCROLL_DOWN) {
@@ -1247,7 +1262,21 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 
 	cob_screen_attr (fgc, bgc, fattr);
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
-		addnstr ((char *)f->data, (int)f->size);
+		/* figurative constant and WITH SIZE repeats the character */
+		if ((size_is) 
+		   && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
+		   && (int)f->size == 1) {
+			fig_const = f->data[0];
+			for (count = 0; count < ssize_is; count++) {
+			    addch (fig_const);
+			}
+		} else {
+			addnstr ((char *)f->data, size_display);
+			/* WITH SIZE larger than field displays trailing spaces */ 
+			for (count = (int)f->size; count < ssize_is; count++) {
+			    addch (COB_CH_SP);  
+			} 
+		}
 	}
 	if (fattr & COB_SCREEN_EMULATE_NL) {
 		if (++sline >= LINES) {
@@ -1261,7 +1290,8 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		  cob_field *ftimeout, cob_field *prompt, const int fattr)
+		  cob_field *ftimeout, cob_field *prompt, 
+		  cob_field *size_is, const int fattr)
 {
 	unsigned char	*p;
 	unsigned char	*s;
@@ -1278,6 +1308,8 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	int		gotbacksp;
 	int		gettimeout;
 	chtype		promptchar;
+	int		ssize_is = 0;	/* WITH SIZE IS */ 
+	int		size_accept;	/* final size to accept */
 	cob_field	temp;
 #if	0	/* RXWRXW - Screen update */
 	cob_field	char_temp;
@@ -1299,7 +1331,6 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	} else {
 		promptchar = COB_CH_UL;
 	}
-
 	if (!cobglobptr->cob_screen_initialized) {
 		cob_screen_init ();
 	}
@@ -1337,13 +1368,32 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	move (sline, scolumn);
 
 	cob_screen_attr (fgc, bgc, fattr);
+	
+	/* Field size to accept */ 
+	size_accept = (int)f->size;
+	/* WITH SIZE IS */ 
+	if (size_is) {
+	    ssize_is = cob_get_int (size_is);
+	    /* Use WITH SIZE IS when less than field size */
+	    if (ssize_is > 0 && ssize_is < (int)f->size) {
+	      size_accept = ssize_is; 
+	    }
+	} 
+	
 	if (f) {
 		p = COB_TERM_BUFF;
-		temp.size = f->size;
+		temp.size = size_accept;
 		if (fattr & COB_SCREEN_UPDATE) {
 			cob_move (f, &temp);
 		}
-		for (count = 0; count < f->size; count++) {
+		/* SIZE IS greater than field, blank out trailing screen */
+		if (ssize_is > (int)f->size) {
+		  for (count = 0; count < ssize_is; count++) {
+		    addch (COB_CH_SP);  
+		  }
+		  move (sline, scolumn);
+		} 
+		for (count = 0; count < size_accept; count++) {
 			if (fattr & COB_SCREEN_SECURE) {
 				addch (COB_CH_AS);
 			} else if (fattr & COB_SCREEN_NO_ECHO) {
@@ -1368,7 +1418,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			}
 		}
 #endif
-		rightpos = scolumn + (int)f->size - 1;
+		rightpos = scolumn + size_accept - 1;
 		p = COB_TERM_BUFF;
 	} else {
 		rightpos = 0;
@@ -1472,7 +1522,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			continue;
 		case KEY_END:
 			move (sline, rightpos);
-			p = COB_TERM_BUFF + f->size - 1;
+			p = COB_TERM_BUFF + size_accept - 1;
 			ateof = 0;
 			gotbacksp = 0;
 			continue;
@@ -1498,7 +1548,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			continue;
 		case KEY_IC:
 			s = COB_TERM_BUFF + ccolumn - scolumn;
-			size = f->size - (ccolumn - scolumn);
+			size = size_accept - (ccolumn - scolumn);
 			memmove (s + 1, s, size);
 			*s = ' ';
 			if (fattr & COB_SCREEN_SECURE) {
@@ -1529,7 +1579,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			continue;
 		case KEY_DC:
 			s = COB_TERM_BUFF + ccolumn - scolumn;
-			size = f->size - (ccolumn - scolumn);
+			size = size_accept - (ccolumn - scolumn);
 			memmove (s, s + 1, size);
 			*(s + size) = ' ';
 			if (fattr & COB_SCREEN_SECURE) {
@@ -1615,9 +1665,6 @@ field_return:
 	if (!f) {
 		return;
 	}
-	if (!count) {
-		return;
-	}
 	cob_move (&temp, f);
 }
 
@@ -1693,7 +1740,7 @@ cob_exit_screen (void)
 void
 cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   const int fattr)
+		   cob_field *size_is, const int fattr)
 {
 	COB_UNUSED (f);
 	COB_UNUSED (line);
@@ -1701,13 +1748,15 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 	COB_UNUSED (fgc);
 	COB_UNUSED (bgc);
 	COB_UNUSED (fscroll);
+	COB_UNUSED (size_is);
 	COB_UNUSED (fattr);
 }
 
 void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		  cob_field *ftimeout, cob_field *prompt, const int fattr)
+		  cob_field *ftimeout, cob_field *prompt, 
+		  cob_field *size_is, const int fattr)
 {
 	COB_UNUSED (f);
 	COB_UNUSED (line);
@@ -1717,6 +1766,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	COB_UNUSED (fscroll);
 	COB_UNUSED (ftimeout);
 	COB_UNUSED (prompt);
+	COB_UNUSED (size_is);
 	COB_UNUSED (fattr);
 }
 

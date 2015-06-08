@@ -92,7 +92,8 @@ approved by the Free Software Foundation.
 * Customize::                   Customizing the compiler
 * Optimize::                    Optimizing your program
 * Debug::                       Debugging your program
-* System routines::				Additional routines 
+* Extensions::                  Extensions not ISO/ANSI standard
+* System routines::             Additional routines 
 * Appendix A::                  @code{cobc --help}
 * Appendix B::                  @code{cobc --info}
 * Appendix C::                  @code{cobc --list-reserved}
@@ -100,6 +101,7 @@ approved by the Free Software Foundation.
 * Appendix E::                  @code{cobc --list-system}
 * Appendix F::                  @code{cobc --list-mnemonics}
 * Appendix G::                  config/default.conf
+* Index::                       Index
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -1074,14 +1076,14 @@ machine.  Set the config option @code{binary-byteorder} to
 In addition, setting the option @code{binary-size} to @code{2-4-8} or
 @code{1-2-4-8} is more efficient than others.
 
-@node Debug, System routines, Optimize, Top
+@node Debug, Debug Options, Optimize, Top
 @chapter Debug
 
 @menu
 * Debug Options::               Debug options
 @end menu
 
-@node Debug Options, , Debug, Debug
+@node Debug Options, Extensions, Debug, Debug
 @section Debug Options
 
 The compiler option @code{-debug} can be used during the development
@@ -1091,7 +1093,203 @@ run-time errors with source locations.
 
 @exampleindent 0
 
-@node System routines, Appendix A, Debug, Top
+
+@node Extensions, SELECT, Debug Options, Top
+@chapter Extensions not ISO/ANSI standard
+@cindex Extensions
+@cindex Extensions not ISO/ANSI standard
+
+@menu
+* SELECT::                      SELECT ASSIGN TO.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended ACCEPT.
+* Extended DISPLAY::            Extended DISPLAY.
+@end menu
+
+
+@node SELECT, Indexed , Extensions, Extensions
+@section SELECT ASSIGN TO
+@cindex SELECT 
+@cindex SELECT ASSIGN TO
+
+<This section is in progress.> 
+
+
+@node Indexed, Extended ACCEPT, SELECT, Extensions 
+@section Indexed file packages
+@cindex Indexed
+@cindex Indexed file packages
+
+<This section is in progress.> 
+
+
+@node Extended ACCEPT, Extended DISPLAY, Indexed, Extensions 
+@section Extended ACCEPT
+@cindex Extended ACCEPT 
+
+Extended ACCEPT statements allow for full control of items 
+accepted from the screen.  
+Items accept by line and column positioning. 
+
+@example 
+
+ACCEPT variable-1
+   LINE <line> COLUMN <column> 
+   WITH [PROTECTED] SIZE [IS] variable-2 | literal-2
+END-ACCEPT. 
+
+@end example 
+
+
+@subsection PROTECTED
+@cindex PROTECTED 
+
+PROTECTED is ignored. 
+It is optional. 
+
+
+@subsection SIZE
+@cindex SIZE
+
+The size of variable-1 to accept from the screen. 
+It is optional. 
+
+@vtable @option 
+
+@item SIZE <greater than zero> 
+
+If SIZE is less than the length of variable-1 then only the SIZE 
+number of characters accept into the field.  
+Variable-1 pads with spaces after SIZE to the end of the field. 
+
+If SIZE is greater than variable-1, then the screen pads with spaces 
+after variable-1 to the SIZE length. 
+
+@item SIZE ZERO
+@itemx <SIZE option not specified> 
+
+The variable-1 field accepts with its length.  
+
+@end vtable
+
+
+@node Extended DISPLAY, System routines, Extended ACCEPT, Extensions
+@section Extended DISPLAY
+@cindex Extended DISPLAY
+
+Extended DISPLAY statements allow for full control of items that display 
+on the screen. 
+Items display by line and column positioning.   
+
+@example
+
+DISPLAY variable-1 | literal-1 | figurative constant 
+   LINE <line> COLUMN <column> 
+   WITH BELL 
+        BLANK LINE | SCREEN 
+        ERASE EOL | EOS 
+        SIZE [IS] variable-2 | literal-2
+END-DISPLAY.
+
+@end example
+
+
+@subsection BELL 
+@cindex BELL 
+
+Ring the bell.  
+It is optional. 
+
+
+@subsection BLANK 
+@cindex BLANK LINE
+@cindex BLANK SCREEN 
+
+Clear the whole line or screen.  
+It is optional.  
+
+@vtable @option 
+
+@item BLANK LINE 
+
+Clear the line from the beginning of the line to the end of the line. 
+
+@item BLANK SCREEN 
+
+Clear the whole screen. 
+
+@end vtable
+
+
+@subsection ERASE
+@cindex ERASE EOL
+@cindex ERASE EOS 
+
+Clear the line or screen from LINE and COLUMN.  
+It is optional.  
+
+@vtable @option 
+
+@item ERASE EOL 
+
+Clear the line from LINE and COLUMN to the end of the line. 
+
+@item ERASE EOS 
+
+Clear the screen from LINE and COLUMN to the end of the screen. 
+
+@end vtable
+
+
+@subsection SIZE
+@cindex SIZE
+
+The size of variable-1, literal-1, or figurative constant 
+to display onto the screen. 
+It is optional. 
+
+@vtable @option 
+
+@item SIZE <greater than zero> 
+
+If SIZE is less than the length of variable-1 or literal-1  
+then only the SIZE number of characters display. 
+
+If SIZE is greater than the length of variable-1 or literal-1, 
+then the screen pads with spaces after the field to the SIZE length. 
+
+Figurative constants display repeatedly the number of times in SIZE. 
+Except that LOW-VALUES always positions the cursor (see SIZE ZERO below).
+
+@item SIZE ZERO
+@itemx <SIZE option not specified> 
+
+Variable-1 or literal-1 displays with the field length. 
+
+Certain figurative constants have special functions. 
+
+SPACE  Display spaces from LINE and COLUMN to the end of the screen. 
+This is the same as WITH ERASE EOS. 
+
+LOW-VALUE  Position the cursor to LINE and COLUMN.  
+The next DISPLAY statement does not need a LINE or COLUMN 
+to display at that position. 
+
+ALL "1"  Display spaces from LINE and COLUMN to the end of the line.
+This is the same as WITH ERASE EOL. 
+
+ALL "2"  Clear the whole screen. 
+This is the same as WITH BLANK SCREEN. 
+
+ALL "7"  Ring the bell. 
+This is the same as WITH BELL. 
+
+All other figurative constants display as a single character. 
+
+@end vtable
+
+
+@node System routines, Appendix A, Extended DISPLAY, Top
 @chapter System routines
 
 @menu
@@ -1229,16 +1427,23 @@ The return-codes of CBL_OC_GETOPT are:
 
 @include cbsyst.tex
 
-@node Appendix F, , Appendix E, Top
+@node Appendix F, Appendix G, Appendix E, Top
 @appendix @code{cobc --list-mnemonics}
 
 @include cbmnem.tex
 
-@node Appendix G, , , Top
+@node Appendix G, Index, Appendix F, Top
 @appendix config/default.conf
 
 @include cbconf.tex
 
+
+@comment Create index.
+@node Index, , Appendix G, Top
+@unnumbered Index
+@printindex cp
+
+@comment End info file.
 @bye
 
 @c Local Variables:

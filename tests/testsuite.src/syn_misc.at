@@ -669,6 +669,52 @@ AT_CHECK([$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([ACCEPT WITH SIZE])
+AT_KEYWORDS([PROTECTED SIZE misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X(05).
+       01 Y             PIC 9(04) BINARY VALUE 4.
+       PROCEDURE        DIVISION.
+           ACCEPT X WITH           SIZE    0 END-ACCEPT.
+           ACCEPT X WITH           SIZE IS 1 END-ACCEPT.
+           ACCEPT X WITH PROTECTED SIZE    2 END-ACCEPT.
+           ACCEPT X WITH PROTECTED SIZE IS 3 END-ACCEPT. 
+           ACCEPT X WITH           SIZE    Y END-ACCEPT. 
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY WITH SIZE])
+AT_KEYWORDS([SIZE misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X(05).
+       01 Y             PIC 9(04) BINARY VALUE 7. 
+       PROCEDURE        DIVISION.
+           DISPLAY X WITH SIZE    5 END-DISPLAY. 
+           DISPLAY X WITH SIZE IS 6 END-DISPLAY.
+           DISPLAY X WITH SIZE IS Y END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([Source text after column 72 in Fixed-form])
 AT_KEYWORDS([misc fixed])
 

@@ -2777,7 +2777,7 @@ cb_build_funcall (const char *name, const int argc,
 		  const cb_tree a1, const cb_tree a2, const cb_tree a3,
 		  const cb_tree a4, const cb_tree a5, const cb_tree a6,
 		  const cb_tree a7, const cb_tree a8, const cb_tree a9,
-		  const cb_tree a10)
+		  const cb_tree a10, const cb_tree a11)
 {
 	struct cb_funcall *p;
 
@@ -2797,6 +2797,7 @@ cb_build_funcall (const char *name, const int argc,
 	p->argv[7] = a8;
 	p->argv[8] = a9;
 	p->argv[9] = a10;
+	p->argv[10] = a11;
 	return CB_TREE (p);
 }
 

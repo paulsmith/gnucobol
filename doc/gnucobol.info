@@ -1,9 +1,17 @@
-This is gnucobol.info, produced by makeinfo version 4.13 from
-gnucobol.texi.
+This is doc/gnucobol.info, produced by makeinfo version 4.13 from
+doc/gnucobol.texi.
 
+INFO-DIR-SECTION Software development
+START-INFO-DIR-ENTRY
+* cobc: (gnucobol)Compile.      The GNU COBOL compiler.
+END-INFO-DIR-ENTRY
 INFO-DIR-SECTION COBOL
 START-INFO-DIR-ENTRY
-* GNU Cobol: (gnucobol).      A COBOL compiler
+* GNU Cobol: (gnucobol).        A COBOL compiler
+END-INFO-DIR-ENTRY
+INFO-DIR-SECTION GnuCOBOL
+START-INFO-DIR-ENTRY
+* Overview: (gnucobol).         COBOL compiler overview.
 END-INFO-DIR-ENTRY
 
    This file documents GNU Cobol, a COBOL compiler
@@ -35,7 +43,8 @@ File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 * Customize::                   Customizing the compiler
 * Optimize::                    Optimizing your program
 * Debug::                       Debugging your program
-* System routines::				Additional routines
+* Extensions::                  Extensions not ISO/ANSI standard
+* System routines::             Additional routines
 * Appendix A::                  `cobc --help'
 * Appendix B::                  `cobc --info'
 * Appendix C::                  `cobc --list-reserved'
@@ -43,6 +52,7 @@ File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 * Appendix E::                  `cobc --list-system'
 * Appendix F::                  `cobc --list-mnemonics'
 * Appendix G::                  config/default.conf
+* Index::                       Index
 
  --- The Detailed Node Listing ---
 
@@ -1023,7 +1033,7 @@ config file (*note Customize::).
 `1-2-4-8' is more efficient than others.
 
 
-File: gnucobol.info,  Node: Debug,  Next: System routines,  Prev: Optimize,  Up: Top
+File: gnucobol.info,  Node: Debug,  Next: Debug Options,  Prev: Optimize,  Up: Top
 
 5 Debug
 *******
@@ -1033,7 +1043,7 @@ File: gnucobol.info,  Node: Debug,  Next: System routines,  Prev: Optimize,  Up:
 * Debug Options::               Debug options
 
 
-File: gnucobol.info,  Node: Debug Options,  Prev: Debug,  Up: Debug
+File: gnucobol.info,  Node: Debug Options,  Next: Extensions,  Prev: Debug,  Up: Debug
 
 5.1 Debug Options
 =================
@@ -1044,9 +1054,166 @@ boundary checks and numeric data checks, and displays run-time errors
 with source locations.
 
 
-File: gnucobol.info,  Node: System routines,  Next: Appendix A,  Prev: Debug,  Up: Top
+File: gnucobol.info,  Node: Extensions,  Next: SELECT,  Prev: Debug Options,  Up: Top
 
-6 System routines
+6 Extensions not ISO/ANSI standard
+**********************************
+
+* Menu:
+
+* SELECT::                      SELECT ASSIGN TO.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended ACCEPT.
+* Extended DISPLAY::            Extended DISPLAY.
+
+
+File: gnucobol.info,  Node: SELECT,  Next: Indexed,  Prev: Extensions,  Up: Extensions
+
+6.1 SELECT ASSIGN TO
+====================
+
+<This section is in progress.>
+
+
+File: gnucobol.info,  Node: Indexed,  Next: Extended ACCEPT,  Prev: SELECT,  Up: Extensions
+
+6.2 Indexed file packages
+=========================
+
+<This section is in progress.>
+
+
+File: gnucobol.info,  Node: Extended ACCEPT,  Next: Extended DISPLAY,  Prev: Indexed,  Up: Extensions
+
+6.3 Extended ACCEPT
+===================
+
+Extended ACCEPT statements allow for full control of items accepted
+from the screen.  Items accept by line and column positioning.
+
+
+ACCEPT variable-1
+   LINE <line> COLUMN <column>
+   WITH [PROTECTED] SIZE [IS] variable-2 | literal-2
+END-ACCEPT.
+
+6.3.1 PROTECTED
+---------------
+
+PROTECTED is ignored.  It is optional.
+
+6.3.2 SIZE
+----------
+
+The size of variable-1 to accept from the screen.  It is optional.
+
+`SIZE <greater than zero>'
+     If SIZE is less than the length of variable-1 then only the SIZE
+     number of characters accept into the field.  Variable-1 pads with
+     spaces after SIZE to the end of the field.
+
+     If SIZE is greater than variable-1, then the screen pads with
+     spaces after variable-1 to the SIZE length.
+
+`SIZE ZERO'
+`<SIZE option not specified>'
+     The variable-1 field accepts with its length.
+
+
+
+File: gnucobol.info,  Node: Extended DISPLAY,  Next: System routines,  Prev: Extended ACCEPT,  Up: Extensions
+
+6.4 Extended DISPLAY
+====================
+
+Extended DISPLAY statements allow for full control of items that display
+on the screen.  Items display by line and column positioning.
+
+
+DISPLAY variable-1 | literal-1 | figurative constant
+   LINE <line> COLUMN <column>
+   WITH BELL
+        BLANK LINE | SCREEN
+        ERASE EOL | EOS
+        SIZE [IS] variable-2 | literal-2
+END-DISPLAY.
+
+6.4.1 BELL
+----------
+
+Ring the bell.  It is optional.
+
+6.4.2 BLANK
+-----------
+
+Clear the whole line or screen.  It is optional.
+
+`BLANK LINE'
+     Clear the line from the beginning of the line to the end of the
+     line.
+
+`BLANK SCREEN'
+     Clear the whole screen.
+
+
+6.4.3 ERASE
+-----------
+
+Clear the line or screen from LINE and COLUMN.  It is optional.
+
+`ERASE EOL'
+     Clear the line from LINE and COLUMN to the end of the line.
+
+`ERASE EOS'
+     Clear the screen from LINE and COLUMN to the end of the screen.
+
+
+6.4.4 SIZE
+----------
+
+The size of variable-1, literal-1, or figurative constant to display
+onto the screen.  It is optional.
+
+`SIZE <greater than zero>'
+     If SIZE is less than the length of variable-1 or literal-1 then
+     only the SIZE number of characters display.
+
+     If SIZE is greater than the length of variable-1 or literal-1,
+     then the screen pads with spaces after the field to the SIZE
+     length.
+
+     Figurative constants display repeatedly the number of times in
+     SIZE.  Except that LOW-VALUES always positions the cursor (see
+     SIZE ZERO below).
+
+`SIZE ZERO'
+`<SIZE option not specified>'
+     Variable-1 or literal-1 displays with the field length.
+
+     Certain figurative constants have special functions.
+
+     SPACE  Display spaces from LINE and COLUMN to the end of the
+     screen.  This is the same as WITH ERASE EOS.
+
+     LOW-VALUE  Position the cursor to LINE and COLUMN.  The next
+     DISPLAY statement does not need a LINE or COLUMN to display at
+     that position.
+
+     ALL "1"  Display spaces from LINE and COLUMN to the end of the
+     line.  This is the same as WITH ERASE EOL.
+
+     ALL "2"  Clear the whole screen.  This is the same as WITH BLANK
+     SCREEN.
+
+     ALL "7"  Ring the bell.  This is the same as WITH BELL.
+
+     All other figurative constants display as a single character.
+
+
+
+File: gnucobol.info,  Node: System routines,  Next: Appendix A,  Prev: Extended DISPLAY,  Up: Top
+
+7 System routines
 *****************
 
 * Menu:
@@ -1056,7 +1223,7 @@ File: gnucobol.info,  Node: System routines,  Next: Appendix A,  Prev: Debug,  U
 
 File: gnucobol.info,  Node: CBL_OC_GETOPT,  Prev: System routines,  Up: System routines
 
-6.1 CBL_OC_GETOPT
+7.1 CBL_OC_GETOPT
 =================
 
 CBL_OC_GETOPT realises the quite well-known option parser getopt for
@@ -2099,7 +2266,7 @@ X"F4"				2
 X"F5"				2
 
 
-File: gnucobol.info,  Node: Appendix F,  Prev: Appendix E,  Up: Top
+File: gnucobol.info,  Node: Appendix F,  Next: Appendix G,  Prev: Appendix E,  Up: Top
 
 Appendix F `cobc --list-mnemonics'
 **********************************
@@ -2168,7 +2335,7 @@ SW14		Switch name
 SW15		Switch name
 
 
-File: gnucobol.info,  Node: Appendix G,  Up: Top
+File: gnucobol.info,  Node: Appendix G,  Next: Index,  Prev: Appendix F,  Up: Top
 
 Appendix G config/default.conf
 ******************************
@@ -2316,53 +2483,85 @@ synchronized-clause:			ok
 top-level-occurs-clause:		ok
 value-of-clause:			obsolete
 
+
+File: gnucobol.info,  Node: Index,  Prev: Appendix G,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* BELL:                                  Extended DISPLAY.     (line 21)
+* BLANK LINE:                            Extended DISPLAY.     (line 26)
+* BLANK SCREEN:                          Extended DISPLAY.     (line 26)
+* ERASE EOL:                             Extended DISPLAY.     (line 39)
+* ERASE EOS:                             Extended DISPLAY.     (line 39)
+* Extended ACCEPT:                       Extended ACCEPT.      (line  6)
+* Extended DISPLAY:                      Extended DISPLAY.     (line  6)
+* Extensions:                            Extensions.           (line  6)
+* Extensions not ISO/ANSI standard:      Extensions.           (line  6)
+* Indexed:                               Indexed.              (line  6)
+* Indexed file packages:                 Indexed.              (line  6)
+* PROTECTED:                             Extended ACCEPT.      (line 18)
+* SELECT:                                SELECT.               (line  6)
+* SELECT ASSIGN TO:                      SELECT.               (line  6)
+* SIZE <1>:                              Extended DISPLAY.     (line 51)
+* SIZE:                                  Extended ACCEPT.      (line 23)
+
 
 
 Tag Table:
-Node: Top1015
-Node: Getting Started3352
-Node: Hello World!3529
-Node: Compile4913
-Node: Compiler Options5272
-Node: Help Options5946
-Ref: Help Options-Footnote-17587
-Node: Built Target7630
-Ref: Built Target-Footnote-19745
-Node: Source Format9798
-Node: Warning Options10708
-Node: Configuration Options11892
-Node: Debug Switches12637
-Node: Miscellaneous13723
-Node: Multiple Sources14533
-Node: Static Linking15213
-Node: Dynamic Linking16738
-Ref: Dynamic Linking-Footnote-118136
-Ref: Dynamic Linking-Footnote-218189
-Node: Building Library18242
-Node: Using Library18625
-Node: C Interface19196
-Node: Main C Program19540
-Node: Static C to COBOL20455
-Node: Dynamic C to COBOL21942
-Node: Static COBOL to C23392
-Node: Dynamic COBOL to C24824
-Node: Customize25229
-Node: Customizing Compiler25453
-Node: Customizing Library26031
-Node: Optimize26345
-Node: Optimize Options26648
-Node: Optimize Call27188
-Node: Optimize Binary27566
-Node: Debug28146
-Node: Debug Options28307
-Node: System routines28650
-Node: CBL_OC_GETOPT28822
-Node: Appendix A32574
-Node: Appendix B38463
-Node: Appendix C40119
-Node: Appendix D49816
-Node: Appendix E52231
-Node: Appendix F53184
-Node: Appendix G54520
+Node: Top1282
+Node: Getting Started3731
+Node: Hello World!3908
+Node: Compile5292
+Node: Compiler Options5651
+Node: Help Options6325
+Ref: Help Options-Footnote-17966
+Node: Built Target8009
+Ref: Built Target-Footnote-110124
+Node: Source Format10177
+Node: Warning Options11087
+Node: Configuration Options12271
+Node: Debug Switches13016
+Node: Miscellaneous14102
+Node: Multiple Sources14912
+Node: Static Linking15592
+Node: Dynamic Linking17117
+Ref: Dynamic Linking-Footnote-118515
+Ref: Dynamic Linking-Footnote-218568
+Node: Building Library18621
+Node: Using Library19004
+Node: C Interface19575
+Node: Main C Program19919
+Node: Static C to COBOL20834
+Node: Dynamic C to COBOL22321
+Node: Static COBOL to C23771
+Node: Dynamic COBOL to C25203
+Node: Customize25608
+Node: Customizing Compiler25832
+Node: Customizing Library26410
+Node: Optimize26724
+Node: Optimize Options27027
+Node: Optimize Call27567
+Node: Optimize Binary27945
+Node: Debug28525
+Node: Debug Options28684
+Node: Extensions29046
+Node: SELECT29420
+Node: Indexed29585
+Node: Extended ACCEPT29765
+Node: Extended DISPLAY30752
+Node: System routines33119
+Node: CBL_OC_GETOPT33302
+Node: Appendix A37054
+Node: Appendix B42943
+Node: Appendix C44599
+Node: Appendix D54296
+Node: Appendix E56711
+Node: Appendix F57664
+Node: Appendix G59019
+Node: Index63287
 
 End Tag Table

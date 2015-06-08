@@ -4177,25 +4177,25 @@ output_screen_to (struct cb_field *p, const unsigned int sisters)
 static void
 cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 		     cb_tree scroll, cb_tree timeout, cb_tree prompt,
-		     int dispattrs)
+		     cb_tree size_is, int dispattrs)
 {
 	cb_tree		line;
 	cb_tree		column;
 
 	if (!pos) {
-		cb_emit (CB_BUILD_FUNCALL_9 ("cob_field_accept",
+		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 			var, NULL, NULL, fgc, bgc, scroll,
-			timeout, prompt, cb_int (dispattrs)));
+			timeout, prompt, size_is, cb_int (dispattrs)));
 	} else if (CB_LIST_P (pos)) {
 		line = CB_PAIR_X (pos);
 		column = CB_PAIR_Y (pos);
-		cb_emit (CB_BUILD_FUNCALL_9 ("cob_field_accept",
+		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 			var, line, column, fgc, bgc, scroll,
-			timeout, prompt, cb_int (dispattrs)));
+			timeout, prompt, size_is, cb_int (dispattrs)));
 	} else {
-		cb_emit (CB_BUILD_FUNCALL_9 ("cob_field_accept",
+		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 			var, pos, NULL, fgc, bgc, scroll,
-			timeout, prompt, cb_int (dispattrs)));
+			timeout, prompt, size_is, cb_int (dispattrs)));
 	}
 }
 
@@ -4208,7 +4208,8 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		timeout;
-	cb_tree		prompt;
+	cb_tree		prompt;		
+	cb_tree		size_is;	/* WITH SIZE IS */
 	int		dispattrs;
 
 	if (attr_ptr) {
@@ -4216,14 +4217,16 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		bgc = attr_ptr->bgc;
 		scroll = attr_ptr->scroll;
 		timeout = attr_ptr->timeout;
-		prompt = attr_ptr->prompt;
+		prompt = attr_ptr->prompt;     
+		size_is = attr_ptr->size_is;   
 		dispattrs = attr_ptr->dispattrs;
 	} else {
 		fgc = NULL;
 		bgc = NULL;
 		scroll = NULL;
 		timeout = NULL;
-		prompt = NULL;
+		prompt = NULL;     
+		size_is = NULL;    
 		dispattrs = 0;
 	}
 
@@ -4247,7 +4250,10 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	}
 	if (cb_validate_one (prompt)) {
 		return;
-	}
+	}  
+	if (cb_validate_one (size_is)) {
+		return;
+	}  
 
 	if (prompt) {
 		/* PROMPT character - 1 character identifier or literal */
@@ -4302,12 +4308,12 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 			}
 			if (pos || fgc || bgc || scroll || dispattrs) {
 				cb_gen_field_accept (var, pos, fgc, bgc, scroll,
-						     timeout, prompt, dispattrs);
+						     timeout, prompt, size_is, dispattrs);
 			} else {
-				cb_emit (CB_BUILD_FUNCALL_9 ("cob_field_accept",
+				cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					var, NULL, NULL, fgc, bgc,
 					scroll, timeout, prompt,
-					cb_int (dispattrs)));
+					size_is, cb_int (dispattrs)));
 			}
 		}
 	} else if (pos || fgc || bgc || scroll || dispattrs) {
@@ -4319,13 +4325,13 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 			var = NULL;
 		}
 		cb_gen_field_accept (var, pos, fgc, bgc, scroll,
-				     timeout, prompt, dispattrs);
+				     timeout, prompt, size_is, dispattrs);
 	} else {
 		if (var == cb_null) {
 			var = NULL;
 		}
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
-	}
+	}	  
 }
 
 void
@@ -5006,17 +5012,20 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 	cb_tree		fgc;
 	cb_tree		bgc;
 	cb_tree		scroll;
+	cb_tree		size_is;	/* WITH SIZE IS */ 
 	int		dispattrs;
 
 	if (attr_ptr) {
 		fgc = attr_ptr->fgc;
 		bgc = attr_ptr->bgc;
 		scroll = attr_ptr->scroll;
+		size_is = attr_ptr->size_is; 
 		dispattrs = attr_ptr->dispattrs;
 	} else {
 		fgc = NULL;
 		bgc = NULL;
 		scroll = NULL;
+		size_is = NULL; 
 		dispattrs = 0;
 	}
 
@@ -5033,6 +5042,9 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 		return;
 	}
 	if (cb_validate_one (scroll)) {
+		return;
+	}
+	if (cb_validate_one (size_is)) {
 		return;
 	}
 	for (l = values; l; l = CB_CHAIN (l)) {
@@ -5086,44 +5098,51 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 				NULL, NULL));
 		}
 		gen_screen_ptr = 0;
-	} else if (pos || fgc || bgc || scroll || dispattrs || upon == cb_null) {
+	} else if (pos || fgc || bgc || scroll || size_is || dispattrs || upon == cb_null) {
 		for (l = values; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
-			if (x == cb_space) {
-				dispattrs |= COB_SCREEN_ERASE_EOS;
-				dispattrs |= COB_SCREEN_NO_DISP;
-			} else if (x == cb_low) {
-				dispattrs |= COB_SCREEN_NO_DISP;
-			} else if (CB_LITERAL_P (x) && CB_LITERAL (x)->all &&
-				   CB_LITERAL (x)->size == 1) {
-				if (CB_LITERAL (x)->data[0] == 1) {
-					dispattrs |= COB_SCREEN_ERASE_EOL;
-					dispattrs |= COB_SCREEN_NO_DISP;
-				} else if (CB_LITERAL (x)->data[0] == 2) {
-					cb_emit (CB_BUILD_FUNCALL_0 ("cob_sys_clear_screen"));
-					return;
-				} else if (CB_LITERAL (x)->data[0] == 7) {
-					dispattrs |= COB_SCREEN_BELL;
-					dispattrs |= COB_SCREEN_NO_DISP;
-				}
+			/* low-values position cursor, size does not matter */
+			if (x == cb_low) {
+			  dispattrs |= COB_SCREEN_NO_DISP;
+			}
+			/* no WITH SIZE then SPACE clears to end of screen */
+			if (!(size_is)) {
+			  if (x == cb_space) {
+				  dispattrs |= COB_SCREEN_ERASE_EOS;
+				  dispattrs |= COB_SCREEN_NO_DISP;
+			  } else if (x == cb_low) {
+				  dispattrs |= COB_SCREEN_NO_DISP;
+			  } else if (CB_LITERAL_P (x) && CB_LITERAL (x)->all &&
+				    CB_LITERAL (x)->size == 1) {
+				  if (CB_LITERAL (x)->data[0] == 1) {
+					  dispattrs |= COB_SCREEN_ERASE_EOL;
+					  dispattrs |= COB_SCREEN_NO_DISP;
+				  } else if (CB_LITERAL (x)->data[0] == 2) {
+					  cb_emit (CB_BUILD_FUNCALL_0 ("cob_sys_clear_screen"));
+					  return;
+				  } else if (CB_LITERAL (x)->data[0] == 7) {
+					  dispattrs |= COB_SCREEN_BELL;
+					  dispattrs |= COB_SCREEN_NO_DISP;
+				  }
+			  }
 			}
 			if (!pos) {
-				cb_emit (CB_BUILD_FUNCALL_7 ("cob_field_display",
+				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 					x, NULL, NULL, fgc, bgc,
-					scroll, cb_int (dispattrs)));
+					scroll, size_is, cb_int (dispattrs)));
 			} else if (CB_PAIR_P (pos)) {
 				line = CB_PAIR_X (pos);
 				column = CB_PAIR_Y (pos);
 				if (line == cb_int0) {
 					line = NULL;
 				}
-				cb_emit (CB_BUILD_FUNCALL_7 ("cob_field_display",
+				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 					x, line, column, fgc, bgc,
-					scroll, cb_int (dispattrs)));
+					scroll, size_is, cb_int (dispattrs)));
 			} else {
-				cb_emit (CB_BUILD_FUNCALL_7 ("cob_field_display",
+				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 					x, pos, NULL, fgc, bgc,
-					scroll, cb_int (dispattrs)));
+					scroll, size_is, cb_int (dispattrs)));
 			}
 		}
 	} else {

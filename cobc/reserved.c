@@ -1417,6 +1417,9 @@ static const struct cobc_reserved reserved_words[] = {
   { "PROPERTY",			0, 0, -1,			/* 2002 */
 				0, 0
   },
+  { "PROTECTED",		0, 0, PROTECTED,		/* Extension */
+				0, CB_CS_WITH
+  },
   { "PROTOTYPE",		0, 0, -1,			/* 2002 */
 				0, 0
   },
