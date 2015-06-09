@@ -1,4 +1,9 @@
 
+2015-06-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: bug #83 - added check for relative LINE/COLUMN clauses in
+	  screen section occurs items.
+
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* parser.y: bug #136 added check for duplicate on/off clauses for switches

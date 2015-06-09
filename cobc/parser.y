@@ -756,6 +756,14 @@ check_headers_present (const unsigned int lev1, const unsigned int lev2,
 	}
 }
 
+static int
+has_relative_pos (struct cb_field const *field)
+{
+	return !!(field->screen_flag
+		& (COB_SCREEN_LINE_PLUS | COB_SCREEN_LINE_MINUS
+		   | COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS));
+}
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -4930,6 +4938,9 @@ screen_description:
 	}
 	if (!description_field) {
 		description_field = current_field;
+	}
+	if (current_field->flag_occurs && !has_relative_pos (current_field)) {
+		cb_error ("Relative LINE/COLUMN clause required with OCCURS");
 	}
   }
 | level_number error TOK_DOT
