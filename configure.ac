@@ -645,6 +645,10 @@ fi
 case "$USE_NCURSES" in
   check)
 	USE_NCURSES="not_found"
+	AC_DEFINE([WITH_CURSES], ["no curses found"])
+	;;
+  no)
+	AC_DEFINE([WITH_CURSES], ["disabled"])
 	;;
   missing_lib)
 	AC_MSG_ERROR([[Not able to link configured library $with_curses]])

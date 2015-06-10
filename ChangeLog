@@ -18,6 +18,7 @@
 2015-02-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* general: removed "Experimental" marker from CISAM/DISAM/VBISAM
+	* configure.ac: define WITH_CURSES for printing library for screenio
 
 2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

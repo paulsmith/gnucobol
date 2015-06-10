@@ -16345,6 +16345,12 @@ fi
 case "$USE_NCURSES" in
   check)
 	USE_NCURSES="not_found"
+	$as_echo "#define WITH_CURSES \"no curses found\"" >>confdefs.h
+
+	;;
+  no)
+	$as_echo "#define WITH_CURSES \"disabled\"" >>confdefs.h
+
 	;;
   missing_lib)
 	as_fn_error $? "Not able to link configured library $with_curses" "$LINENO" 5
