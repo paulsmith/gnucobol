@@ -871,10 +871,13 @@ dist-hook:
 	chmod 755 $(distdir)/depcomp
 	chmod 755 $(distdir)/mkinstalldirs
 	chmod 755 $(distdir)/doc/cobcinfo.sh
+	touch $(distdir)/bin/cobcrun.1
+	touch $(distdir)/cobc/cobc.1
 	touch $(distdir)/cobc/ppparse.c
 	touch $(distdir)/cobc/parser.c
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
+	#touch $(distdir)/libcob/libcob.3
 	touch $(distdir)/tests/testsuite
 	touch $(distdir)/doc/gnucobol.info
 	touch $(distdir)/doc/gnucobol.pdf
