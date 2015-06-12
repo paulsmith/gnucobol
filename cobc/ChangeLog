@@ -1,4 +1,9 @@
 
+2015-06-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c: bug #78 - changed location of initialization of
+	  local-storage items.
+
 2015-06-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: bug #83 - added check for relative LINE/COLUMN clauses in

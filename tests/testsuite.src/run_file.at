@@ -184,7 +184,7 @@ AT_DATA([prog.cob], [
        SD SORT-WRK.
        01 WRK-REC       PIC X(6).
        PROCEDURE        DIVISION.
-           
+
       * We shouldn't use AT_DATA to create sequential record
       * data, because AT_DATA needs a \n at the end
            OPEN OUTPUT SORT-IN.
@@ -196,7 +196,7 @@ AT_DATA([prog.cob], [
            WRITE IN-REC FROM SPACES   END-WRITE.
            WRITE IN-REC FROM SPACES   END-WRITE.
            CLOSE SORT-IN.
-           
+
            SORT SORT-WRK
                 ASCENDING KEY WRK-REC
                 USING  SORT-IN
@@ -234,7 +234,7 @@ AT_DATA([prog.cob], [
        SD SORT-WRK.
        01 WRK-REC       PIC X(6).
        PROCEDURE        DIVISION.
-           
+
       * We shouldn't use AT_DATA to create sequential record
       * data, because AT_DATA needs a \n at the end
            OPEN OUTPUT SORT-IN.
@@ -246,7 +246,7 @@ AT_DATA([prog.cob], [
            WRITE IN-REC FROM SPACES   END-WRITE.
            WRITE IN-REC FROM SPACES   END-WRITE.
            CLOSE SORT-IN.
-           
+
            SORT SORT-WRK
                 ASCENDING KEY WRK-REC
                 USING  SORT-IN
@@ -356,5 +356,81 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], , [])
 AT_CHECK([./prog], [0])
 AT_CHECK([cat SORT-OUT], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN with LOCAL-STORAGE item])
+AT_KEYWORDS([runfile])
+
+AT_DATA([test.txt],
+[hello
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	        SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       LOCAL-STORAGE	SECTION.
+       01  path         PIC X(10) VALUE "test.txt".
+       PROCEDURE        DIVISION.
+           OPEN INPUT test-file
+           READ test-file
+	   DISPLAY test-rec
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([./prog], [0],
+[hello
+])
+
+AT_CLEANUP
+
+AT_SETUP([ASSIGN with LOCAL-STORAGE item and INITIAL prog])
+AT_KEYWORDS([runfile])
+
+# Files are initialised in a different location in INITIAL program, hence the
+# need for a separate test.
+
+AT_DATA([test.txt],
+[hello
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog INITIAL.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	        SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       LOCAL-STORAGE	SECTION.
+       01  path         PIC X(10) VALUE "test.txt".
+       PROCEDURE        DIVISION.
+           OPEN INPUT test-file
+           READ test-file
+	   DISPLAY test-rec
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([./prog], [0],
+[hello
+])
 
 AT_CLEANUP

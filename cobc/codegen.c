@@ -5859,7 +5859,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
-	/* Files */
+	/* Allocate files */
 	if (prog->file_list) {
 		i = 0;
 		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
@@ -6098,18 +6098,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 	output_newline ();
 
-	/* Initialization */
-	output_line ("/* Initialize program */");
-	output_line ("if (unlikely(initialized == 0)) {");
-	output_line ("\tgoto P_initialize;");
-	if (prog->flag_chained) {
-		output_line ("} else {");
-		output_line ("\tcob_fatal_error (COB_FERROR_CHAINING);");
-	}
-	output_line ("}");
-	output_line ("P_ret_initialize:");
-	output_newline ();
-
 	/* Set up LOCAL-STORAGE size */
 	if (prog->local_storage) {
 		for (f = prog->local_storage; f; f = f->sister) {
@@ -6132,6 +6120,35 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 					~COB_MALLOC_ALIGN);
 		}
 	}
+
+	/* Initialization */
+	
+	/* Allocate and initialize LOCAL storage */
+	if (prog->local_storage) {
+		if (local_mem) {
+			output_line ("/* Allocate LOCAL storage */");
+			output_line ("cob_local_ptr = cob_malloc (%dU);",
+				     local_mem);
+			if (prog->flag_global_use) {
+				output_line ("cob_local_save = cob_local_ptr;");
+			}
+		}
+		output_newline ();
+		output_line ("/* Initialize LOCAL storage */");
+		output_initial_values (prog->local_storage);
+		output_newline ();
+	}
+
+	output_line ("/* Initialize rest of program */");
+	output_line ("if (unlikely(initialized == 0)) {");
+	output_line ("\tgoto P_initialize;");
+	if (prog->flag_chained) {
+		output_line ("} else {");
+		output_line ("\tcob_fatal_error (COB_FERROR_CHAINING);");
+	}
+	output_line ("}");
+	output_line ("P_ret_initialize:");
+	output_newline ();
 
 	if (prog->decimal_index_max) {
 		output_line ("/* Allocate decimal numbers */");
@@ -6191,7 +6208,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	/* Initialize W/S unconditionally when INITIAL program */
+	/* Initialize W/S and files unconditionally when INITIAL program */
 	if (prog->flag_initial) {
 		output_line ("/* Initialize INITIAL program WORKING-STORAGE */");
 		output_initial_values (prog->working_storage);
@@ -6199,22 +6216,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 			output_file_initialization (CB_FILE (CB_VALUE (l)));
 		}
-		output_newline ();
-	}
-
-	/* Allocate / initialize LOCAL storage */
-	if (prog->local_storage) {
-		if (local_mem) {
-			output_line ("/* Allocate LOCAL storage */");
-			output_line ("cob_local_ptr = cob_malloc (%dU);",
-				     local_mem);
-			if (prog->flag_global_use) {
-				output_line ("cob_local_save = cob_local_ptr;");
-			}
-		}
-		output_newline ();
-		output_line ("/* Initialialize LOCAL storage */");
-		output_initial_values (prog->local_storage);
 		output_newline ();
 	}
 
@@ -6274,7 +6275,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			     f->usage == CB_USAGE_PACKED ||
 			     f->usage == CB_USAGE_COMP_6)) {
 				output_line ("cob_check_numeric (&%s%d, %s%d);",
-					     CB_PREFIX_FIELD 
+					     CB_PREFIX_FIELD
 					     f->id,
 					     CB_PREFIX_STRING,
 					     lookup_string (f->name));
