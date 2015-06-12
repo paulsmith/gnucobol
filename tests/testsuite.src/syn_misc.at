@@ -1766,3 +1766,20 @@ prog3.cob: 13: Error: syntax error, unexpected Literal
 
 AT_CLEANUP
 
+AT_SETUP([Continuation Indicator - No literal to continue])
+AT_KEYWORDS([misc fixed])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY "Hello,"
+      -        " world!"
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 6: Error: Invalid continuation: no string needs to be continued
+])
+AT_CLEANUP
