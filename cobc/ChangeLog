@@ -3,8 +3,8 @@
 
 	* codegen.c: bug #78 - changed location of initialization of
 	  local-storage items.
-	* pplex.l: bug #102 - added check for contination line without string to
-	  continue.
+	* pplex.l: bug #102 - added check for contination line without literal
+	  or word to continue.
 
 2015-06-09  Edward Hart <edward.dan.hart@gmail.com>
 

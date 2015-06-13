@@ -1240,7 +1240,7 @@ start:
 			goto start;
 		} else if (!need_continuation) {
 			cb_plex_error (newline_count,
-				       _("Invalid continuation: no string needs to be continued"));
+				       _("Invalid continuation: no literal/word needs to be continued"));
 		} else {
 			continuation = 1;
 		}
