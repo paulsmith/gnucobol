@@ -1,4 +1,9 @@
 
+2015-05-18  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c: Fix WITH BLANK SCREEN to color the whole screen. 
+          And WITH BLANK LINE to color the whole line.  See [patches/24]. 
+
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c: fr #65 added more switches "SWITCH-16" to "SWITCH-36"
@@ -175,7 +180,7 @@
 
 	* intrinsic.c: Change cob_intr_random to correctly compute RANDOM number
 
-2013-12-26  Luke Bryan <cobcoder@users.sourceforge.net>
+2013-12-26  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* strings.c: Fix Unstring delimited by all delimiter size > 1 issue,
 	  see bug #54.

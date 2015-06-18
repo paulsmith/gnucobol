@@ -319,17 +319,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr)
 	short		bgdef;
 
 	attrset (A_NORMAL);
-	if (attr & COB_SCREEN_BLANK_SCREEN) {
-		getyx (stdscr, line, column);
-		clear ();
-		move (line, column);
-	}
-	if (attr & COB_SCREEN_BLANK_LINE) {
-		getyx (stdscr, line, column);
-		move (line, 0);
-		clrtoeol ();
-		move (line, column);
-	}
 	if (attr & COB_SCREEN_BELL) {
 		cob_beep ();
 	}
@@ -433,6 +422,19 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr)
 				attrset (A_NORMAL);
 			}
 		}
+	}
+	/* BLANK SCREEN colors the whole screen. */ 
+	if (attr & COB_SCREEN_BLANK_SCREEN) {
+		getyx (stdscr, line, column);
+		clear ();
+		move (line, column);
+	}
+	/* BLANK LINE colors the whole line. */ 
+	if (attr & COB_SCREEN_BLANK_LINE) {
+		getyx (stdscr, line, column);
+		move (line, 0);
+		clrtoeol ();
+		move (line, column);
 	}
 	if (attr & COB_SCREEN_ERASE_EOL) {
 		clrtoeol ();
