@@ -1780,6 +1780,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: Error: Invalid continuation: no string needs to be continued
+[prog.cob: 6: Error: Invalid continuation: no literal/word needs to be continued
 ])
 AT_CLEANUP
