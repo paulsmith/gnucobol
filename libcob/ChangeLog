@@ -1,8 +1,13 @@
 
+2015-06-21  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c: fixed segfault caught in updated SWITCH test by extending
+	  cob_switch array by 1.
+
 2015-05-18  Luke Smith <cobcoder@users.sourceforge.net>
 
-	* screenio.c: Fix WITH BLANK SCREEN to color the whole screen. 
-          And WITH BLANK LINE to color the whole line.  See [patches/24]. 
+	* screenio.c: Fix WITH BLANK SCREEN to color the whole screen.
+          And WITH BLANK LINE to color the whole line.  See [patches/24].
 
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

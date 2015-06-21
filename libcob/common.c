@@ -197,7 +197,7 @@ static const int		cob_exception_tab_code[] = {
 /* Switches */
 #define	COB_SWITCH_MAX	36  /* (must match cobc/tree.h)*/
 
-static int		cob_switch[COB_SWITCH_MAX];
+static int		cob_switch[COB_SWITCH_MAX + 1];
 
 /* Runtime exit handling */
 static struct exit_handlerlist {
