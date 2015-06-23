@@ -1,3 +1,8 @@
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.cpy : Add COB-SCR-TAB, COB-SCR-BACK-TAB,
+	  COB-SCR-KEY-LEFT, and COB-SCR-KEY-RIGHT.
+
 2010-06-28  Roger While <simrw@sim-basis.de>
 
 	* MARK - Version 2.0

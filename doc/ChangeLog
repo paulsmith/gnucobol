@@ -1,3 +1,7 @@
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* gnu-cobol.texi : Add Extended ACCEPT special keys section. 
+
 2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* gnu-cobol.texi : Added documentation for CBL_OC_GETOPT

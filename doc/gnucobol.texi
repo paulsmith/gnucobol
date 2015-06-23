@@ -156,6 +156,14 @@ Debug
 
 * Debug Options::               Debug options
 
+Extensions
+
+* SELECT::                      SELECT ASSIGN TO.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended ACCEPT statement.
+* ACCEPT Special::              ACCEPT special keys.
+* Extended DISPLAY::            Extended DISPLAY statement.
+
 System routines
 
 * CBL_OC_GETOPT					GETOPT for Cobol
@@ -1102,8 +1110,9 @@ run-time errors with source locations.
 @menu
 * SELECT::                      SELECT ASSIGN TO.
 * Indexed::                     Indexed file packages.
-* Extended ACCEPT::             Extended ACCEPT.
-* Extended DISPLAY::            Extended DISPLAY.
+* Extended ACCEPT::             Extended ACCEPT statement.
+* ACCEPT Special::              ACCEPT special keys.
+* Extended DISPLAY::            Extended DISPLAY statement.
 @end menu
 
 
@@ -1123,9 +1132,9 @@ run-time errors with source locations.
 <This section is in progress.> 
 
 
-@node Extended ACCEPT, Extended DISPLAY, Indexed, Extensions 
-@section Extended ACCEPT
-@cindex Extended ACCEPT 
+@node Extended ACCEPT, ACCEPT Special, Indexed, Extensions 
+@section Extended ACCEPT statement
+@cindex Extended ACCEPT statement
 
 Extended ACCEPT statements allow for full control of items 
 accepted from the screen.  
@@ -1135,10 +1144,32 @@ Items accept by line and column positioning.
 
 ACCEPT variable-1
    LINE <line> COLUMN <column> 
-   WITH [PROTECTED] SIZE [IS] variable-2 | literal-2
+   WITH
+      AUTO-SKIP | AUTO
+      [PROTECTED] SIZE [IS] variable-2 | literal-2
 END-ACCEPT. 
 
 @end example 
+
+
+@subsection AUTO-SKIP 
+@cindex AUTO-SKIP 
+@cindex AUTO 
+
+With this option the ACCEPT statement returns after the last 
+character is typed at the end of the field.  
+This is the same as if the Enter key were pressed. 
+
+Without this option the cursor remains at the end of the field
+and waits for the user to press Enter. 
+
+The word AUTO may be used for AUTO-SKIP. 
+
+The Right-Arrow key returns from the end of the field. 
+The Left-Arrow key returns from the beginning. 
+@xref{ACCEPT Special, Arrow keys,,,}.
+
+The Alt-Right-Arrow and Alt-Left-Arrow keys never AUTO-SKIP. 
 
 
 @subsection PROTECTED
@@ -1173,9 +1204,102 @@ The variable-1 field accepts with its length.
 @end vtable
 
 
-@node Extended DISPLAY, System routines, Extended ACCEPT, Extensions
-@section Extended DISPLAY
-@cindex Extended DISPLAY
+@node ACCEPT Special, Extended DISPLAY, Extended ACCEPT, Extensions 
+@section ACCEPT special keys 
+@cindex ACCEPT special keys 
+
+Special keys are available for Extended ACCEPT statements. 
+
+The COB-CRT-STATUS values are in the screenio.cpy copy file. 
+
+
+@subsection Arrow keys
+@cindex Arrow keys
+
+The Left-Arrow key moves the cursor to the left. 
+Without AUTO-SKIP the cursor stops at the beginning of the field.
+With AUTO-SKIP it returns with the COB-SCR-KEY-LEFT value of 2009. 
+@xref{Extended ACCEPT, AUTO-SKIP,,,}.
+
+The Alt-Left-Arrow key is the same as Left-Arrow except that 
+it never returns, even for AUTO-SKIP. 
+
+The Right-Arrow key moves the cursor to the right. 
+Without AUTO-SKIP the cursor stops at the end of the field. 
+With AUTO-SKIP it returns with the COB-SCR-KEY-RIGHT value of 2010. 
+@xref{Extended ACCEPT, AUTO-SKIP,,,}.
+
+The Alt-Right-Arrow key is the same as Right-Arrow except that 
+it never returns, even for AUTO-SKIP. 
+
+
+@subsection Backspace key
+@cindex Backspace key
+
+The Backspace key moves the cursor, and the remainder of the text, 
+to the left.  
+
+
+@subsection Delete keys
+@cindex Delete keys
+
+The Delete key deletes the cursor's character and moves the 
+remainder of the text to the left. 
+The cursor does not move.
+
+The Alt-Delete key deletes all text from the cursor to the 
+end of the field. 
+
+
+@subsection End keys
+@cindex End keys
+
+The End key moves the cursor after the last non-space character.
+
+The Alt-End key moves the cursor to the end of the field. 
+
+
+@subsection Home keys
+@cindex Home keys
+
+The Home key moves the cursor to the first non-space character. 
+
+The Alt-Home key moves the cursor to the beginning of the field. 
+
+
+@subsection Insert key
+@cindex Insert key
+
+The Insert key changes the insert mode.
+
+When the insert mode is on, typed characters move the existing characters
+to the right.
+When it is off, typed characters type over existing characters. 
+
+The default insert mode is set by the COB_INSERT_MODE environment variable.
+This must be set before the first Extended ACCEPT, DISPLAY,
+or any routine that gets information from the screen. 
+
+If COB_INSERT_MODE is YES or Y (either case) then the program starts with
+insert mode on.  
+If it is set to NO, N, or is not set at all, then the program  
+starts with insert mode off.
+
+The last press of the Insert key is used in all following ACCEPT 
+statements while the program is running.
+
+
+@subsection Tab keys
+@cindex Tab keys
+
+The Tab key returns from the ACCEPT with the COB-SCR-TAB value of 2007.
+
+The Shift-Tab key returns with the COB-SCR-BACK-TAB value of 2008. 
+
+
+@node Extended DISPLAY, System routines, ACCEPT Special, Extensions
+@section Extended DISPLAY statement
+@cindex Extended DISPLAY statement
 
 Extended DISPLAY statements allow for full control of items that display 
 on the screen. 

@@ -1,5 +1,5 @@
-This is doc/gnucobol.info, produced by makeinfo version 4.13 from
-doc/gnucobol.texi.
+This is gnucobol.info, produced by makeinfo version 4.13 from
+gnucobol.texi.
 
 INFO-DIR-SECTION Software development
 START-INFO-DIR-ENTRY
@@ -105,6 +105,14 @@ Optimize
 Debug
 
 * Debug Options::               Debug options
+
+Extensions
+
+* SELECT::                      SELECT ASSIGN TO.
+* Indexed::                     Indexed file packages.
+* Extended ACCEPT::             Extended ACCEPT statement.
+* ACCEPT Special::              ACCEPT special keys.
+* Extended DISPLAY::            Extended DISPLAY statement.
 
 System routines
 
@@ -1063,8 +1071,9 @@ File: gnucobol.info,  Node: Extensions,  Next: SELECT,  Prev: Debug Options,  Up
 
 * SELECT::                      SELECT ASSIGN TO.
 * Indexed::                     Indexed file packages.
-* Extended ACCEPT::             Extended ACCEPT.
-* Extended DISPLAY::            Extended DISPLAY.
+* Extended ACCEPT::             Extended ACCEPT statement.
+* ACCEPT Special::              ACCEPT special keys.
+* Extended DISPLAY::            Extended DISPLAY statement.
 
 
 File: gnucobol.info,  Node: SELECT,  Next: Indexed,  Prev: Extensions,  Up: Extensions
@@ -1083,10 +1092,10 @@ File: gnucobol.info,  Node: Indexed,  Next: Extended ACCEPT,  Prev: SELECT,  Up:
 <This section is in progress.>
 
 
-File: gnucobol.info,  Node: Extended ACCEPT,  Next: Extended DISPLAY,  Prev: Indexed,  Up: Extensions
+File: gnucobol.info,  Node: Extended ACCEPT,  Next: ACCEPT Special,  Prev: Indexed,  Up: Extensions
 
-6.3 Extended ACCEPT
-===================
+6.3 Extended ACCEPT statement
+=============================
 
 Extended ACCEPT statements allow for full control of items accepted
 from the screen.  Items accept by line and column positioning.
@@ -1094,15 +1103,35 @@ from the screen.  Items accept by line and column positioning.
 
 ACCEPT variable-1
    LINE <line> COLUMN <column>
-   WITH [PROTECTED] SIZE [IS] variable-2 | literal-2
+   WITH
+      AUTO-SKIP | AUTO
+      [PROTECTED] SIZE [IS] variable-2 | literal-2
 END-ACCEPT.
 
-6.3.1 PROTECTED
+6.3.1 AUTO-SKIP
+---------------
+
+With this option the ACCEPT statement returns after the last character
+is typed at the end of the field.  This is the same as if the Enter key
+were pressed.
+
+   Without this option the cursor remains at the end of the field and
+waits for the user to press Enter.
+
+   The word AUTO may be used for AUTO-SKIP.
+
+   The Right-Arrow key returns from the end of the field.  The
+Left-Arrow key returns from the beginning.  *Note Arrow keys: ACCEPT
+Special.
+
+   The Alt-Right-Arrow and Alt-Left-Arrow keys never AUTO-SKIP.
+
+6.3.2 PROTECTED
 ---------------
 
 PROTECTED is ignored.  It is optional.
 
-6.3.2 SIZE
+6.3.3 SIZE
 ----------
 
 The size of variable-1 to accept from the screen.  It is optional.
@@ -1121,10 +1150,95 @@ The size of variable-1 to accept from the screen.  It is optional.
 
 
 
-File: gnucobol.info,  Node: Extended DISPLAY,  Next: System routines,  Prev: Extended ACCEPT,  Up: Extensions
+File: gnucobol.info,  Node: ACCEPT Special,  Next: Extended DISPLAY,  Prev: Extended ACCEPT,  Up: Extensions
 
-6.4 Extended DISPLAY
-====================
+6.4 ACCEPT special keys
+=======================
+
+Special keys are available for Extended ACCEPT statements.
+
+   The COB-CRT-STATUS values are in the screenio.cpy copy file.
+
+6.4.1 Arrow keys
+----------------
+
+The Left-Arrow key moves the cursor to the left.  Without AUTO-SKIP the
+cursor stops at the beginning of the field.  With AUTO-SKIP it returns
+with the COB-SCR-KEY-LEFT value of 2009.  *Note AUTO-SKIP: Extended
+ACCEPT.
+
+   The Alt-Left-Arrow key is the same as Left-Arrow except that it
+never returns, even for AUTO-SKIP.
+
+   The Right-Arrow key moves the cursor to the right.  Without
+AUTO-SKIP the cursor stops at the end of the field.  With AUTO-SKIP it
+returns with the COB-SCR-KEY-RIGHT value of 2010.  *Note AUTO-SKIP:
+Extended ACCEPT.
+
+   The Alt-Right-Arrow key is the same as Right-Arrow except that it
+never returns, even for AUTO-SKIP.
+
+6.4.2 Backspace key
+-------------------
+
+The Backspace key moves the cursor, and the remainder of the text, to
+the left.
+
+6.4.3 Delete keys
+-----------------
+
+The Delete key deletes the cursor's character and moves the remainder
+of the text to the left.  The cursor does not move.
+
+   The Alt-Delete key deletes all text from the cursor to the end of
+the field.
+
+6.4.4 End keys
+--------------
+
+The End key moves the cursor after the last non-space character.
+
+   The Alt-End key moves the cursor to the end of the field.
+
+6.4.5 Home keys
+---------------
+
+The Home key moves the cursor to the first non-space character.
+
+   The Alt-Home key moves the cursor to the beginning of the field.
+
+6.4.6 Insert key
+----------------
+
+The Insert key changes the insert mode.
+
+   When the insert mode is on, typed characters move the existing
+characters to the right.  When it is off, typed characters type over
+existing characters.
+
+   The default insert mode is set by the COB_INSERT_MODE environment
+variable.  This must be set before the first Extended ACCEPT, DISPLAY,
+or any routine that gets information from the screen.
+
+   If COB_INSERT_MODE is YES or Y (either case) then the program starts
+with insert mode on.  If it is set to NO, N, or is not set at all, then
+the program starts with insert mode off.
+
+   The last press of the Insert key is used in all following ACCEPT
+statements while the program is running.
+
+6.4.7 Tab keys
+--------------
+
+The Tab key returns from the ACCEPT with the COB-SCR-TAB value of 2007.
+
+   The Shift-Tab key returns with the COB-SCR-BACK-TAB value of 2008.
+
+
+File: gnucobol.info,  Node: Extended DISPLAY,  Next: System routines,  Prev: ACCEPT Special,  Up: Extensions
+
+6.5 Extended DISPLAY statement
+==============================
 
 Extended DISPLAY statements allow for full control of items that display
 on the screen.  Items display by line and column positioning.
@@ -1138,12 +1252,12 @@ DISPLAY variable-1 | literal-1 | figurative constant
         SIZE [IS] variable-2 | literal-2
 END-DISPLAY.
 
-6.4.1 BELL
+6.5.1 BELL
 ----------
 
 Ring the bell.  It is optional.
 
-6.4.2 BLANK
+6.5.2 BLANK
 -----------
 
 Clear the whole line or screen.  It is optional.
@@ -1156,7 +1270,7 @@ Clear the whole line or screen.  It is optional.
      Clear the whole screen.
 
 
-6.4.3 ERASE
+6.5.3 ERASE
 -----------
 
 Clear the line or screen from LINE and COLUMN.  It is optional.
@@ -1168,7 +1282,7 @@ Clear the line or screen from LINE and COLUMN.  It is optional.
      Clear the screen from LINE and COLUMN to the end of the screen.
 
 
-6.4.4 SIZE
+6.5.4 SIZE
 ----------
 
 The size of variable-1, literal-1, or figurative constant to display
@@ -2492,76 +2606,87 @@ Index
  [index ]
 * Menu:
 
+* ACCEPT special keys:                   ACCEPT Special.       (line  6)
+* Arrow keys:                            ACCEPT Special.       (line 13)
+* AUTO:                                  Extended ACCEPT.      (line 20)
+* AUTO-SKIP:                             Extended ACCEPT.      (line 20)
+* Backspace key:                         ACCEPT Special.       (line 32)
 * BELL:                                  Extended DISPLAY.     (line 21)
 * BLANK LINE:                            Extended DISPLAY.     (line 26)
 * BLANK SCREEN:                          Extended DISPLAY.     (line 26)
+* Delete keys:                           ACCEPT Special.       (line 38)
+* End keys:                              ACCEPT Special.       (line 47)
 * ERASE EOL:                             Extended DISPLAY.     (line 39)
 * ERASE EOS:                             Extended DISPLAY.     (line 39)
-* Extended ACCEPT:                       Extended ACCEPT.      (line  6)
-* Extended DISPLAY:                      Extended DISPLAY.     (line  6)
+* Extended ACCEPT statement:             Extended ACCEPT.      (line  6)
+* Extended DISPLAY statement:            Extended DISPLAY.     (line  6)
 * Extensions:                            Extensions.           (line  6)
 * Extensions not ISO/ANSI standard:      Extensions.           (line  6)
+* Home keys:                             ACCEPT Special.       (line 54)
 * Indexed:                               Indexed.              (line  6)
 * Indexed file packages:                 Indexed.              (line  6)
-* PROTECTED:                             Extended ACCEPT.      (line 18)
+* Insert key:                            ACCEPT Special.       (line 61)
+* PROTECTED:                             Extended ACCEPT.      (line 38)
 * SELECT:                                SELECT.               (line  6)
 * SELECT ASSIGN TO:                      SELECT.               (line  6)
 * SIZE <1>:                              Extended DISPLAY.     (line 51)
-* SIZE:                                  Extended ACCEPT.      (line 23)
+* SIZE:                                  Extended ACCEPT.      (line 43)
+* Tab keys:                              ACCEPT Special.       (line 81)
 
 
 
 Tag Table:
-Node: Top1282
-Node: Getting Started3731
-Node: Hello World!3908
-Node: Compile5292
-Node: Compiler Options5651
-Node: Help Options6325
-Ref: Help Options-Footnote-17966
-Node: Built Target8009
-Ref: Built Target-Footnote-110124
-Node: Source Format10177
-Node: Warning Options11087
-Node: Configuration Options12271
-Node: Debug Switches13016
-Node: Miscellaneous14102
-Node: Multiple Sources14912
-Node: Static Linking15592
-Node: Dynamic Linking17117
-Ref: Dynamic Linking-Footnote-118515
-Ref: Dynamic Linking-Footnote-218568
-Node: Building Library18621
-Node: Using Library19004
-Node: C Interface19575
-Node: Main C Program19919
-Node: Static C to COBOL20834
-Node: Dynamic C to COBOL22321
-Node: Static COBOL to C23771
-Node: Dynamic COBOL to C25203
-Node: Customize25608
-Node: Customizing Compiler25832
-Node: Customizing Library26410
-Node: Optimize26724
-Node: Optimize Options27027
-Node: Optimize Call27567
-Node: Optimize Binary27945
-Node: Debug28525
-Node: Debug Options28684
-Node: Extensions29046
-Node: SELECT29420
-Node: Indexed29585
-Node: Extended ACCEPT29765
-Node: Extended DISPLAY30752
-Node: System routines33119
-Node: CBL_OC_GETOPT33302
-Node: Appendix A37054
-Node: Appendix B42943
-Node: Appendix C44599
-Node: Appendix D54296
-Node: Appendix E56711
-Node: Appendix F57664
-Node: Appendix G59019
-Node: Index63287
+Node: Top1274
+Node: Getting Started4013
+Node: Hello World!4190
+Node: Compile5574
+Node: Compiler Options5933
+Node: Help Options6607
+Ref: Help Options-Footnote-18248
+Node: Built Target8291
+Ref: Built Target-Footnote-110406
+Node: Source Format10459
+Node: Warning Options11369
+Node: Configuration Options12553
+Node: Debug Switches13298
+Node: Miscellaneous14384
+Node: Multiple Sources15194
+Node: Static Linking15874
+Node: Dynamic Linking17399
+Ref: Dynamic Linking-Footnote-118797
+Ref: Dynamic Linking-Footnote-218850
+Node: Building Library18903
+Node: Using Library19286
+Node: C Interface19857
+Node: Main C Program20201
+Node: Static C to COBOL21116
+Node: Dynamic C to COBOL22603
+Node: Static COBOL to C24053
+Node: Dynamic COBOL to C25485
+Node: Customize25890
+Node: Customizing Compiler26114
+Node: Customizing Library26692
+Node: Optimize27006
+Node: Optimize Options27309
+Node: Optimize Call27849
+Node: Optimize Binary28227
+Node: Debug28807
+Node: Debug Options28966
+Node: Extensions29328
+Node: SELECT29775
+Node: Indexed29940
+Node: Extended ACCEPT30120
+Node: ACCEPT Special31703
+Node: Extended DISPLAY34260
+Node: System routines36646
+Node: CBL_OC_GETOPT36829
+Node: Appendix A40581
+Node: Appendix B46470
+Node: Appendix C48126
+Node: Appendix D57823
+Node: Appendix E60238
+Node: Appendix F61191
+Node: Appendix G62546
+Node: Index66814
 
 End Tag Table
