@@ -1,8 +1,14 @@
 
-2015-06-22   Luke Smith <cobcoder@users.sourceforge.net>
+2015-06-24  Edward Hart <edward.dan.hart@gmail.com>
 
-	* screenio.c: Add or enhance special keys to Extended ACCEPT. 
-          Insert, Tab, Shift-Tab, Backspace, Delete, Alt-Delete, End, 
+	* intrinsic.c: bug #140 - changed pow to int_pow to avoid rounding
+	  errors. On MinGW, pow (10, 8) rounded to 9999999 instead of 10000000,
+	  for example.
+
+2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c: Add or enhance special keys to Extended ACCEPT.
+          Insert, Tab, Shift-Tab, Backspace, Delete, Alt-Delete, End,
           Alt-End, Home, Alt-Home, Left-arrow, Alt-Left-arrow,
           Right-arrow, Alt-Right-arrow.
 
@@ -14,7 +20,7 @@
 2015-05-18  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* screenio.c: Fix WITH BLANK SCREEN to color the whole screen.
-          And WITH BLANK LINE to color the whole line.  
+          And WITH BLANK LINE to color the whole line.
 
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
