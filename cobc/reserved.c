@@ -2796,6 +2796,7 @@ cb_list_reserved (void)
 	puts ("SORT-RETURN\t\t\tUSAGE BINARY-LONG");
 	puts ("NUMBER-OF-CALL-PARAMETERS\tUSAGE BINARY-LONG");
 	puts ("COB-CRT-STATUS\t\t\tPIC 9(4)");
+	puts ("TALLY\t\t\t\tGLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
 	puts ("'LENGTH OF' phrase\t\tUSAGE BINARY-LONG");
 }
 

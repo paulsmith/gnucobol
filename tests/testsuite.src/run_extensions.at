@@ -1143,6 +1143,34 @@ AT_CHECK([./caller], [0],
 
 AT_CLEANUP
 
+# TALLY
+
+AT_SETUP([TALLY])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       PROCEDURE        DIVISION.
+           ADD 1 TO TALLY END-ADD
+           CALL "nested" END-CALL
+           STOP RUN.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      nested.
+       PROCEDURE        DIVISION.
+           DISPLAY tally END-DISPLAY
+           STOP RUN.
+       END PROGRAM      nested.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[00001
+])
+
+AT_CLEANUP
+
 # Program parameters
 
 AT_SETUP([PROCEDURE DIVISION USING BY ...])

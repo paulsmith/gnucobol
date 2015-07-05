@@ -1047,6 +1047,7 @@ cb_build_registers (void)
 #if !defined(__linux__) && !defined(__CYGWIN__) && defined(HAVE_TIMEZONE)
 	long	contz;
 #endif
+	cb_tree         r;
 	cb_tree		x;
 	struct tm	*tlt;
 	time_t		t;
@@ -1074,6 +1075,19 @@ cb_build_registers (void)
 	CB_FIELD_PTR (x)->special_index = 2;
 	current_program->cb_call_params = x;
 
+	/* TALLY */
+	if (current_program->nested_level == 0) {
+		r = cb_build_reference ("TALLY");
+		x = cb_build_field (r);
+		CB_FIELD_PTR (x)->usage = CB_USAGE_BINARY;
+		CB_FIELD_PTR (x)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
+		cb_validate_field (CB_FIELD_PTR (x));
+		CB_FIELD_PTR (x)->values = CB_LIST_INIT (cb_zero);
+		CB_FIELD_PTR (x)->flag_no_init = 1;
+		CB_FIELD_PTR (x)->flag_is_global = 1;
+		CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
+	}
+		
 	t = time (NULL);
 	tlt = localtime (&t);
 	/* Leap seconds ? */

@@ -1,6 +1,10 @@
 
 2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
 
+	* typeck.c: added TALLY special register (Wish List #34).
+
+2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
+
 	* scanner.l: Improved error detection of invalid floating-poit literals
 	  and associated error messages. Also minor refactoring.
 
