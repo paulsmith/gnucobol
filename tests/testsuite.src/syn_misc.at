@@ -1783,3 +1783,48 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 6: Error: Invalid continuation: no literal/word needs to be continued
 ])
 AT_CLEANUP
+
+AT_SETUP([Floating-point literals])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.       
+       PROCEDURE        DIVISION.
+           *> Refer to Section 8.3.1.2.2.2 of the COBOL 2010 FCD.
+           *> Valid literals
+           DISPLAY 1.0E76, +1.0E+3, +1.0E-0078,
+               +.0000000000000000000000000000000000E+0000
+           END-DISPLAY
+
+           *> Invalid literals
+           DISPLAY 1.0D3 END-DISPLAY
+           DISPLAY 1E3 END-DISPLAY
+           DISPLAY 1.0E3BLAH END-DISPLAY
+           DISPLAY 1.0E3.0 END-DISPLAY
+           DISPLAY -0.0E-0 END-DISPLAY
+           DISPLAY 1.0E00003 END-DISPLAY
+           DISPLAY .00000000000000000000000000000000000E0 END-DISPLAY
+           DISPLAY 0.0E3 END-DISPLAY
+
+           *> Implementor-defined invalid literals
+           DISPLAY 1.0E77 END-DISPLAY
+           DISPLAY 1.0E-79 END-DISPLAY
+           
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: Error: 'D3' is not defined
+prog.cob: 13: Error: '1E3' is not defined
+prog.cob: 14: Error: 'BLAH' is not defined
+prog.cob: 15: Error: Exponent has decimal point
+prog.cob: 16: Error: Significand of 0 is negative
+prog.cob: 16: Error: Exponent of 0 is negative
+prog.cob: 17: Error: Exponent has more than 4 digits
+prog.cob: 18: Error: Significand has more than 34 digits
+prog.cob: 19: Error: Exponent of 0 is not 0
+prog.cob: 22: Error: Exponent not between -78 and 76
+prog.cob: 23: Error: Exponent not between -78 and 76
+])
+AT_CLEANUP

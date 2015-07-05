@@ -42,6 +42,18 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
            DISPLAY -12.3
            END-DISPLAY.
+           DISPLAY 1.23E0
+           END-DISPLAY.
+           DISPLAY +1.23E0
+           END-DISPLAY.
+           DISPLAY -1.23E0
+           END-DISPLAY.
+           DISPLAY 12.3E-2
+           END-DISPLAY.
+           DISPLAY +12.3E-2
+           END-DISPLAY.
+           DISPLAY -12.3E-2
+           END-DISPLAY.
            STOP RUN.
 ])
 
@@ -54,6 +66,12 @@ AT_CHECK([./prog], [0],
 12.3
 +12.3
 -12.3
+1.23
++1.23
+-1.23
+.123
++.123
+-.123
 ])
 
 AT_CLEANUP
@@ -76,6 +94,12 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
            DISPLAY -12,3
            END-DISPLAY.
+           DISPLAY 1,23E0
+           END-DISPLAY.
+           DISPLAY +1,23E0
+           END-DISPLAY.
+           DISPLAY -1,23E0
+           END-DISPLAY.
            STOP RUN.
 ])
 
@@ -84,6 +108,9 @@ AT_CHECK([./prog], [0],
 [12,3
 +12,3
 -12,3
+1,23
++1,23
+-1,23
 ])
 
 AT_CLEANUP

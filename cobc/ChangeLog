@@ -1,4 +1,9 @@
 
+2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* scanner.l: Improved error detection of invalid floating-poit literals
+	  and associated error messages. Also minor refactoring.
+
 2015-06-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c: bug #78 - changed location of initialization of

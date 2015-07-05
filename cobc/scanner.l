@@ -374,8 +374,15 @@ H\"[^\"\n]*\" {
 	/* Ignore */
 }
 
-<DECIMAL_IS_PERIOD>[+-]?[0-9]+\.[0-9]*E[+-]?[0-9]+ {
+<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]*E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
+	return scan_floating_numeric (yytext);
+}
+
+<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]*E[+-]?[0-9]+\.[0.9]* {
+	/* Invalid numeric floating point literal */
+	cb_error (_("Exponent has decimal point"));
+	/* Accept anyway, to avoid unhelpful syntax errors */
 	return scan_floating_numeric (yytext);
 }
 
@@ -391,8 +398,15 @@ H\"[^\"\n]*\" {
 	/* Ignore */
 }
 
-<DECIMAL_IS_COMMA>[+-]?[0-9]+,[0-9]*E[+-]?[0-9]+ {
+<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]*E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
+	return scan_floating_numeric (yytext);
+}
+
+<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]*E[+-]?[0-9]+,[0.9]* {
+	/* Invalid numeric floating point literal */
+	cb_error (_("Exponent has decimal point"));
+	/* Accept anyway, to avoid unhelpful syntax errors */
 	return scan_floating_numeric (yytext);
 }
 
@@ -674,7 +688,7 @@ H\"[^\"\n]*\" {
 			/* SWITCH 0  to SWITCH 9 */
 			suffix[0] = yytext[yyleng-2];
 		} else if (isdigit((unsigned char)yytext[yyleng-3])) {
-			/* SWITCH 00 to SWITCH 99 */ 
+			/* SWITCH 00 to SWITCH 99 */
 			suffix[0] = yytext[yyleng-3];
 			suffix[1] = yytext[yyleng-2];
 		} else {
@@ -1136,6 +1150,19 @@ error:
 }
 
 static int
+get_sign (const char sign)
+{
+	return sign == '+' ? 1 : (sign == '-' ? -1 : 0);
+}
+
+#define INCREMENT_IF_SIGNED(text, sign) \
+	do {				\
+		if (sign) {		\
+			(text)++;	\
+		}			\
+	} while (0);
+
+static int
 scan_numeric (char *text)
 {
 	char		*s;
@@ -1143,10 +1170,8 @@ scan_numeric (char *text)
 	int		scale;
 
 	/* Get sign */
-	sign = (*text == '+') ? 1 : (*text == '-') ? -1 : 0;
-	if (sign) {
-		text++;
-	}
+	sign = get_sign (*text);
+	INCREMENT_IF_SIGNED (text, sign);
 
 	/* Get decimal point */
 	scale = 0;
@@ -1179,75 +1204,112 @@ num_zero:
 }
 
 static int
+all_zeroes (const char *str)
+{
+	int	i;
+
+	for (i = 0; str[i] != '\0'; ++i) {
+		if (str[i] != '0') {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+significand_is_zero (const char *int_part, const char *dec_part)
+{
+	return all_zeroes (int_part)
+		&& all_zeroes (dec_part);
+}
+
+static int
 scan_floating_numeric (const char *text)
 {
-	size_t		size1;
-	size_t		size2;
-	int		sign;
+	size_t		sig_int_len;
+	size_t		sig_dec_len;
+	int		sig_sign;
+	int		exp_sign;
 	int		scale;
-	int		exponent;
+	int		exponent = 0;
 	int		n;
-	char		significand_int[40];
-	char		significand_dec[40];
+	char		significand_int[40] = { '0' };
+	char		significand_dec[40] = { '0' };
+	char		exponent_str[7];
 	char		result[128];
 	char		decpoint[4];
 	char		junk[4];
 
 	/* Get sign */
-	sign = (*text == '+') ? 1 : (*text == '-') ? -1 : 0;
-	if (sign) {
-		text++;
-	}
 
-	exponent = 0;
-	significand_dec[0] = '0';
-	significand_dec[1] = 0;
+	sig_sign = get_sign (*text);
+	INCREMENT_IF_SIGNED (text, sig_sign);
 
 	/* Separate components */
-	n = sscanf (text, "%[^.,]%[,.]%[^Ee]%[Ee]%d", significand_int, decpoint,
-		    significand_dec, junk, &exponent);
-	if (n != 5) {
+	n = sscanf (text, "%[^.,]%[,.]%[^Ee]%[Ee]%6s", significand_int, decpoint,
+		    significand_dec, junk, exponent_str);
+	if (n == 0) {
+		/* No integer part in significand */
+		n = sscanf (text, "%[,.]%[^Ee]%[Ee]%6s", decpoint,
+			    significand_dec, junk, exponent_str);
+
+		/* Ensure that the number of digits does not include the default
+		   0 initialised in significand_int.
+		*/
+		significand_int[0] = '\0';
+	} else if (n != 5) {
 		/* No decimals in significand */
-		n = sscanf (text, "%[^.,]%[,.]%[Ee]%d", significand_int,
-			    decpoint, junk, &exponent);
+		n = sscanf (text, "%[^.,]%[,.]%[Ee]%6s", significand_int,
+			    decpoint, junk, exponent_str);
 	}
 
 	/* Validation */
-	size1 = strlen (significand_int);
-	if (size1 > 17U) {
-		size1 = 17;
-		significand_int[17] = 0;
-		cb_error (_("Invalid floating-point literal"));
+	sig_int_len = strlen (significand_int);
+	sig_dec_len = strlen (significand_dec);
+	if (sig_int_len + sig_dec_len > 34U) {
+		cb_error (_("Significand has more than 34 digits"));
 	}
-	size2 = strlen (significand_dec);
-	if (size2 > 17U) {
-		size2 = 17;
-		significand_dec[17] = 0;
-		cb_error (_("Invalid floating-point literal"));
+
+	exp_sign = get_sign (*exponent_str);
+	if (strlen (exponent_str + abs (exp_sign)) > 4) {
+		cb_error (_("Exponent has more than 4 digits"));
+		exponent_str[0] = '0';
+		exponent_str[1] = '\0';
 	}
-	if ((size1 + size2) > 18U) {
-		cb_error (_("Invalid floating-point literal"));
+
+	sscanf (exponent_str, "%d", &exponent);
+	if (!(-78 <= exponent && exponent <= 76)) {
+		cb_error (_("Exponent not between -78 and 76"));
+		exponent = 0;
 	}
-	if (exponent > 76) {
-		exponent = 76;
-		cb_error (_("Invalid floating-point literal"));
-	}
-	if (exponent < -78) {
-		exponent = -78;
-		cb_error (_("Invalid floating-point literal"));
+
+	if (significand_is_zero (significand_int, significand_dec)) {
+		if (exponent != 0) {
+			cb_error (_("Exponent of 0 is not 0"));
+			exponent = 0;
+		}
+
+		if (sig_sign == -1) {
+			cb_error (_("Significand of 0 is negative"));
+			sig_sign = 0;
+		}
+		if (exp_sign == -1) {
+			cb_error (_("Exponent of 0 is negative"));
+		}
 	}
 
 	/* Determine scale */
 	/* Base scale is decimal part of the significant */
-	scale = (int)size2;
+	scale = (int)sig_dec_len;
 	/* Adjust according to exponent */
 	if (exponent < 0) {
 		/* Decimals; power down by scale difference */
 		exponent = -exponent;
 		scale += exponent;
 		result[0] = 0;
-		if (exponent > (int)size1) {
-			n = exponent - (int)size1;
+		if (exponent > (int)sig_int_len) {
+			n = exponent - (int)sig_int_len;
 			for (; n; --n) {
 				strcat (result, "0");
 			}
@@ -1273,7 +1335,7 @@ scan_floating_numeric (const char *text)
 		strcat (result, significand_dec);
 	}
 
-	yylval = cb_build_numeric_literal (sign, result,
+	yylval = cb_build_numeric_literal (sig_sign, result,
 					   scale);
 	SET_LOCATION (yylval);
 	return LITERAL;
@@ -1512,10 +1574,8 @@ scan_define_options (const char *text)
 		x = cb_build_alphanumeric_literal (s + 1, size);
 	} else {
 		/* Get sign */
-		sign = (*s == '+') ? 1 : (*s == '-') ? -1 : 0;
-		if (sign) {
-			s++;
-		}
+		sign = get_sign (*s);
+		INCREMENT_IF_SIGNED (s, sign);
 
 		/* Get decimal point */
 		scale = 0;
@@ -1549,6 +1609,8 @@ freevar:
 	cobc_free (p);
 	cobc_free (var);
 }
+
+#undef INCREMENT_IF_SIGNED
 
 /* Global functions */
 
