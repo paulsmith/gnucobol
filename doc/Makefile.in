@@ -70,7 +70,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/codeset.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(SHELL) $(top_srcdir)/build_aux/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
@@ -366,7 +366,7 @@ gnucobol.html: gnucobol.texi $(srcdir)/version.texi $(gnucobol_TEXINFOS)
 $(srcdir)/version.texi: @MAINTAINER_MODE_TRUE@ $(srcdir)/stamp-vti
 $(srcdir)/stamp-vti: gnucobol.texi $(top_srcdir)/configure
 	@(dir=.; test -f ./gnucobol.texi || dir=$(srcdir); \
-	set `$(SHELL) $(srcdir)/mdate-sh $$dir/gnucobol.texi`; \
+	set `$(SHELL) $(top_srcdir)/build_aux/mdate-sh $$dir/gnucobol.texi`; \
 	echo "@set UPDATED $$1 $$2 $$3"; \
 	echo "@set UPDATED-MONTH $$2 $$3"; \
 	echo "@set EDITION $(VERSION)"; \

@@ -1,4 +1,10 @@
 
+2015-07-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: moved additional build-scripts to build_aux,
+	  regenerated all Makefiles
+	* configure.ac: added AC_CONFIG_AUX_DIR([build_aux])
+
 2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* Add WITH SIZE to extended ACCEPT and DISPLAY. (see wish list #37)

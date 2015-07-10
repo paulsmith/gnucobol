@@ -32,6 +32,7 @@ AC_CONFIG_SRCDIR([libcob.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build_aux])
 
 # Note for SUN Solaris (gcc)
 # export/setenv CFLAGS "-m64 -mptr64"

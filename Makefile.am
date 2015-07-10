@@ -37,6 +37,16 @@ dist-hook:
 	echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $(distdir)/tarstamp.h
 	find $(distdir) -type d -print | xargs chmod 777
 	chmod 644 $(distdir)/bin/cob-config.in
+	chmod 755 $(distdir)/build_aux/compile
+	chmod 755 $(distdir)/build_aux/config.guess
+	chmod 755 $(distdir)/build_aux/config.sub
+	chmod 755 $(distdir)/build_aux/config.rpath
+	chmod 755 $(distdir)/build_aux/depcomp
+	chmod 755 $(distdir)/build_aux/install-sh
+	chmod 755 $(distdir)/build_aux/ltmain.sh
+	chmod 755 $(distdir)/build_aux/mdate-sh
+	chmod 755 $(distdir)/build_aux/missing
+	chmod 755 $(distdir)/build_aux/mkinstalldirs
 	chmod 644 $(distdir)/ABOUT-NLS
 	chmod 644 $(distdir)/AUTHORS
 	chmod 644 $(distdir)/COPYING
@@ -48,14 +58,6 @@ dist-hook:
 	chmod 644 $(distdir)/THANKS
 	chmod 644 $(distdir)/TODO
 	chmod 644 $(distdir)/gnu-cobol.spec
-	chmod 755 $(distdir)/ltmain.sh
-	chmod 755 $(distdir)/missing
-	chmod 755 $(distdir)/install-sh
-	chmod 755 $(distdir)/config.guess
-	chmod 755 $(distdir)/config.sub
-	chmod 755 $(distdir)/config.rpath
-	chmod 755 $(distdir)/depcomp
-	chmod 755 $(distdir)/mkinstalldirs
 	chmod 755 $(distdir)/doc/cobcinfo.sh
 	touch $(distdir)/bin/cobcrun.1
 	touch $(distdir)/cobc/cobc.1
@@ -63,7 +65,7 @@ dist-hook:
 	touch $(distdir)/cobc/parser.c
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
-	#touch $(distdir)/libcob/libcob.3
+#	touch $(distdir)/libcob/libcob.3
 	touch $(distdir)/tests/testsuite
 	touch $(distdir)/doc/gnucobol.info
 	touch $(distdir)/doc/gnucobol.pdf
