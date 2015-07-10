@@ -4893,8 +4893,12 @@ start:
 					_("Invalid continuation in comment entry"));
 			newline_count++;
 			goto start;
+		} else if (!need_continuation) {
+			cb_plex_error (newline_count,
+				       _("Invalid continuation: no literal/word needs to be continued"));
+		} else {
+			continuation = 1;
 		}
-		continuation = 1;
 		break;
 	case 'd':
 	case 'D':
