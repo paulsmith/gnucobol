@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
+   Copyright (C) 2012-2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -1252,15 +1253,17 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		cob_screen_init ();
 	}
 
-	/* Field size to display */ 
-	size_display = (int)f->size;
-	/* WITH SIZE IS */ 
-	if (size_is) {
-	    ssize_is = cob_get_int (size_is);
-	    /* Use WITH SIZE IS when less than field size */
-	    if (ssize_is > 0 && ssize_is < (int)f->size) {
-	      size_display = ssize_is; 
-	    }
+	if (f) {
+		/* Field size to display */ 
+		size_display = (int)f->size;
+		/* WITH SIZE IS */ 
+		if (size_is) {
+			ssize_is = cob_get_int (size_is);
+			/* Use WITH SIZE IS when less than field size */
+			if (ssize_is > 0 && ssize_is < (int)f->size) {
+			  size_display = ssize_is; 
+			}
+		} 
 	} 
 	
 	if (fscroll) {
@@ -1393,18 +1396,18 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 
 	cob_screen_attr (fgc, bgc, fattr);
 	
-	/* Field size to accept */ 
-	size_accept = (int)f->size;
-	/* WITH SIZE IS */ 
-	if (size_is) {
-	    ssize_is = cob_get_int (size_is);
-	    /* Use WITH SIZE IS when less than field size */
-	    if (ssize_is > 0 && ssize_is < (int)f->size) {
-	      size_accept = ssize_is; 
-	    }
-	} 
-	
 	if (f) {
+		/* Field size to accept */ 
+		size_accept = (int)f->size;
+		/* WITH SIZE IS */ 
+		if (size_is) {
+			ssize_is = cob_get_int (size_is);
+			/* Use WITH SIZE IS when less than field size */
+			if (ssize_is > 0 && ssize_is < (int)f->size) {
+			  size_accept = ssize_is; 
+			}
+		}
+
 		p = COB_TERM_BUFF;
 		temp.size = size_accept;
 		if (fattr & COB_SCREEN_UPDATE) {
@@ -1455,13 +1458,13 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	count = 0;
 
 	/* Get characters from keyboard, processing each one. */
-	for (; ;) {  
+	for (; ;) {
 		/* Get current line, column. */
 		getyx (stdscr, cline, ccolumn);
 		/* Trailing prompts. */
 		if (fattr & COB_SCREEN_NO_ECHO) {
 		    prompt_char = COB_CH_SP;
-		} else if (COB_FIELD_IS_NUMERIC (f)) {
+		} else if (f && COB_FIELD_IS_NUMERIC (f)) {
 		    prompt_char = '0';
 		} else if (fattr & COB_SCREEN_PROMPT) {
 		    prompt_char = promptchar;
@@ -1613,13 +1616,13 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 				*p2 = '0';
 			    } else {
 				*p2 = COB_CH_SP;
-			    }
+			}
 			    /* Move cursor left one from current. */
-			    ccolumn--;
+				ccolumn--;
 			    move (cline, ccolumn);
 			    p--;
 			}
-			ateof = 0;
+				ateof = 0;
 			continue;
 		case KEY_HOME:
 			/* Home key, cursor to start of characters. */
@@ -1635,7 +1638,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			  if (move_char != ' ') {
 			    ccolumn = count;
 			    break;
-			  }
+			}
 			}
 			move (cline, ccolumn);
 			p = COB_TERM_BUFF + ccolumn - scolumn;
@@ -1742,10 +1745,10 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 				addch (COB_CH_SP);
 			    } else if (fattr & COB_SCREEN_SECURE) {
 				addch (COB_CH_AS);
-			    } else {
+					} else {
 				addch (move_char);
-			    }
-			}
+					}
+				}
 			/* Put space as the right most character. */
 			p2 = COB_TERM_BUFF + size_accept - 1;
 			if (fattr & COB_SCREEN_NO_ECHO) {
@@ -1776,9 +1779,9 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 				addch (COB_CH_SP);
 			    } else if (fattr & COB_SCREEN_SECURE) {
 				addch (COB_CH_AS);
-			    } else {
+			} else {
 				addch (move_char);
-			    }
+				}
 			}
 			/* Put cursor back to original position. */
 			move (cline, ccolumn);
