@@ -299,9 +299,12 @@ get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 		if (fline->size == 4) {
 			l = p / 100;
 			c = p % 100;
-		} else {
+		} else if (fline->size == 6) {
 			l = p / 1000;
 			c = p % 1000;
+		} else {
+			l = p;
+			c = 1;
 		}
 	} else {
 		l = p;
