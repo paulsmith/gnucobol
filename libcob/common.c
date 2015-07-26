@@ -361,6 +361,8 @@ cob_exit_common (void)
 				memcpy(&str,data,sizeof(char *));
 				if( str != NULL) {
 					cob_free((void*)str);
+					str = NULL;
+					memcpy(data,&str,sizeof(char *));	/* Reset pointer to NULL */
 				}
 			}
 		}
