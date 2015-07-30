@@ -1336,7 +1336,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	int		gettimeout;
 	chtype		promptchar;
 	int		ssize_is = 0;	/* WITH SIZE IS */ 
-	int		size_accept;	/* final size to accept */
+	int		size_accept = 0;	/* final size to accept */
 	cob_field	temp;
 #if	0	/* RXWRXW - Screen update */
 	cob_field	char_temp;
