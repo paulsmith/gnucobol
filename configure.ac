@@ -71,6 +71,9 @@ AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as ISAM handler])
 AH_TEMPLATE([COB_EXPORT_DYN], [Compile/link option for exporting symbols])
 AH_TEMPLATE([COB_PIC_FLAGS], [Compile/link option for PIC code])
 AH_TEMPLATE([COB_SHARED_OPT], [Compile/link option for shared code])
+AH_TEMPLATE([COB_DASH], [Command line argument that means use stdin])
+AH_TEMPLATE([COB_DASH_NAME], [Filename when using stdin])
+AH_TEMPLATE([COB_DASH_OUT], [Default executable name when using stdin])
 AH_TEMPLATE([COB_STRIP_CMD], [Strip command])
 AH_TEMPLATE([USE_LIBDL], [Use system dynamic loader])
 AH_TEMPLATE([HAVE_DLADDR], [Has dladdr function])
@@ -961,6 +964,9 @@ LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
+COB_DASH="-"
+COB_DASH_NAME="a.cob"
+COB_DASH_OUT="a.out"
 COB_EXEEXT="$EXEEXT"
 
 if test "$enable_cflags_setting" = yes
@@ -1162,6 +1168,9 @@ AM_CONDITIONAL([COB_MAKE_IX], [test $COB_HAS_ISAM = yes])
 AC_DEFINE_UNQUOTED([COB_EXPORT_DYN], ["$COB_EXPORT_DYN"])
 AC_DEFINE_UNQUOTED([COB_PIC_FLAGS], ["$COB_PIC_FLAGS"])
 AC_DEFINE_UNQUOTED([COB_SHARED_OPT], ["$COB_SHARED_OPT"])
+AC_DEFINE_UNQUOTED([COB_DASH], ["$COB_DASH"])
+AC_DEFINE_UNQUOTED([COB_DASH_NAME], ["$COB_DASH_NAME"])
+AC_DEFINE_UNQUOTED([COB_DASH_OUT], ["$COB_DASH_OUT"])
 AC_DEFINE_UNQUOTED([COB_EXEEXT], ["$COB_EXEEXT"])
 if test "x$striplib" != "x"
 then
@@ -1181,6 +1190,9 @@ AC_SUBST([LIBCOB_LIBS])
 AC_SUBST([COB_EXPORT_DYN])
 AC_SUBST([COB_PIC_FLAGS])
 AC_SUBST([COB_SHARED_OPT])
+AC_SUBST([COB_DASH])
+AC_SUBST([COB_DASH_NAME])
+AC_SUBST([COB_DASH_OUT])
 COB_BIGENDIAN="$ac_cv_c_bigendian"
 AC_SUBST([COB_BIGENDIAN])
 AC_SUBST([COB_FIX_LIB])
@@ -1218,6 +1230,9 @@ AC_MSG_NOTICE([ COB_LIBRARY_PATH  ${COB_LIBRARY_PATH}])
 AC_MSG_NOTICE([ COB_MODULE_EXT    ${COB_MODULE_EXT}])
 AC_MSG_NOTICE([ COB_OBJECT_EXT    ${COB_OBJECT_EXT}])
 AC_MSG_NOTICE([ COB_SHARED_OPT    ${COB_SHARED_OPT}])
+AC_MSG_NOTICE([ COB_DASH          ${COB_DASH}])
+AC_MSG_NOTICE([ COB_DASH_NAME     ${COB_DASH_NAME}])
+AC_MSG_NOTICE([ COB_DASH_OUT      ${COB_DASH_OUT}])
 AC_MSG_NOTICE([ COB_PIC_FLAGS     ${COB_PIC_FLAGS}])
 AC_MSG_NOTICE([ COB_EXPORT_DYN    ${COB_EXPORT_DYN}])
 if test "x$striplib" != "x"

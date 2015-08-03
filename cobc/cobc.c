@@ -169,6 +169,7 @@ int			cobc_flag_main = 0;
 int			cb_flag_main = 0;
 int			cobc_wants_debug = 0;
 int			cb_flag_functions_all = 0;
+int			cobc_seen_stdin = 0;
 
 int			errorcount = 0;
 int			warningcount = 0;
@@ -2556,6 +2557,20 @@ process_filename (const char *filename)
 	char		*fbasename;
 	char		*listptr;
 	size_t		fsize;
+	int		file_is_stdin;
+
+	if (strcmp(filename, COB_DASH) == 0) {
+		if (cobc_seen_stdin == 0) {
+			cobc_seen_stdin = 1;
+			file_is_stdin = 1;
+			filename = COB_DASH_NAME;
+		} else {
+			cobc_abort_pr (_("Only one stdin input allowed"));
+			return NULL;
+		}
+	} else {
+		file_is_stdin = 0;
+	}
 
 	fsize = strlen (filename);
 	if (fsize > COB_NORMAL_MAX) {
@@ -2567,7 +2582,7 @@ process_filename (const char *filename)
 	if (strchr (filename, '.') != NULL) {
 #endif
 
-	if (access (filename, R_OK) != 0) {
+	if (!file_is_stdin && access (filename, R_OK) != 0) {
 		cobc_terminate (filename);
 	}
 
@@ -2586,6 +2601,7 @@ process_filename (const char *filename)
 	fn->need_preprocess = 1;
 	fn->need_translate = 1;
 	fn->need_assemble = 1;
+	fn->file_is_stdin = file_is_stdin;
 	fn->next = NULL;
 
 	if (!file_list) {
@@ -3117,6 +3133,7 @@ preprocess (struct filename *fn)
 {
 	struct cobc_mem_struct	*m;
 	struct cobc_mem_struct	*ml;
+	const char     		*dashname;
 	int			save_source_format;
 	int			save_fold_copy;
 	int			save_fold_call;
@@ -3129,7 +3146,12 @@ preprocess (struct filename *fn)
 		cobc_terminate (fn->preprocess);
 	}
 
-	if (ppopen (fn->source, NULL) != 0) {
+	if (fn->file_is_stdin) {
+		dashname = COB_DASH;
+	} else {
+		dashname = fn->source;
+	}
+	if (ppopen (dashname, NULL) != 0) {
 		fclose (ppout);
 		ppout = NULL;
 		if (fn->preprocess) {
@@ -3142,7 +3164,7 @@ preprocess (struct filename *fn)
 	if (verbose_output) {
 		fputs (_("Preprocessing:"), stderr);
 		fprintf (stderr, "\t%s -> %s\n",
-			 fn->source, fn->preprocess);
+			 dashname, fn->preprocess);
 		fflush (stderr);
 	}
 
@@ -3172,7 +3194,7 @@ preprocess (struct filename *fn)
 
 	if (ppin) {
 		fclose (ppin);
-		ppin = NULL;
+       		ppin = NULL;
 	}
 
 	if (ppout) {
@@ -3801,7 +3823,7 @@ static int
 process_link (struct filename *l)
 {
 	struct filename	*f;
-	char		*name;
+	const char     	*name;
 	size_t		bufflen;
 	size_t		size;
 	int		ret;
@@ -3826,7 +3848,11 @@ process_link (struct filename *l)
 		name = output_name;
 #endif
 	} else {
-		name = file_basename (l->source);
+		if (l->file_is_stdin) {
+			name = COB_DASH_OUT;
+		} else {
+			name = file_basename (l->source);
+		}
 	}
 
 	size = strlen (name);

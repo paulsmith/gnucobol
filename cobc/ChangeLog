@@ -1,3 +1,5 @@
+2015-08-03  Brian Tiffin <btiffin@gnu.org>
+	* cobc.h, cobc.c, pplex.l: allow compiles from stdin
 
 2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
 

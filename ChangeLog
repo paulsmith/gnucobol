@@ -1,3 +1,6 @@
+2015-08-03  Brian Tiffin <btiffin@gnu.org>
+	* configure.ac: added COB_DASH, COB_DASH_NAME, COB_DASH_OUT
+	  to support compile from stdin
 
 2015-07-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -8,7 +11,7 @@
 2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* Add WITH SIZE to extended ACCEPT and DISPLAY. (see wish list #37)
-          Updated the info gnucobol and added Index at end. 
+	  Updated the info gnucobol and added Index at end. 
 	* cobc/parser.y:
 	* cobc/reserved.c:
 	* cobc/tree.c:

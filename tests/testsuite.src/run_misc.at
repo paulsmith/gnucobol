@@ -4422,3 +4422,24 @@ AT_CHECK([$COMPILE -o prog caller.cob], [0], , [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([Compile from stdin])
+AT_KEYWORDS([runmisc stdin])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      a.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([cat prog.cob | $COMPILE -], [0])
+AT_CHECK([./a.out], [0])
+
+AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], , [])
+AT_CHECK([$COBCRUN a], [0])
+
+AT_CLEANUP

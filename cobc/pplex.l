@@ -759,12 +759,17 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		}
 	}
 
-	/* Open copy/source file */
+	/* Open copy/source file, or use stdin */
+	if (strcmp(name, COB_DASH) == 0) {
+		ppin = stdin;
+	} else {
 #ifdef	__OS400__
-	ppin = fopen (name, "r");
+		ppin = fopen (name, "r");
 #else
-	ppin = fopen (name, "rb");
+		ppin = fopen (name, "rb");
 #endif
+	}
+
 	if (!ppin) {
 		if (cb_source_file) {
 			cb_error ("%s: %s", name,

@@ -200,6 +200,7 @@ struct filename {
 	unsigned int		need_translate;		/* Needs parse */
 	unsigned int		need_assemble;		/* Needs C compile */
 	int			has_error;		/* Error detected */
+	int			file_is_stdin;		/* dash used as filename */
 };
 
 /* Exception structure */
@@ -267,6 +268,7 @@ extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
 extern int			cb_flag_main;
 extern int			cobc_wants_debug;
+extern int			cobc_seen_stdin;
 
 extern int			errorcount;
 extern int			warningcount;
