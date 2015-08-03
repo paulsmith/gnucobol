@@ -1,5 +1,7 @@
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
-	* testsuite.src/run_misc.at: compile from stdin
+
+	* testsuite.src/run_misc.at: compile from stdin, run after compile
 
 2015-05-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

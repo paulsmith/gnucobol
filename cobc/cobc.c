@@ -3,6 +3,14 @@
    Copyright (C) 2006-2012 Roger While
    Copyright (C) 2009,2010,2012,2014,2015 Simon Sobisch
 
+   Copyright 2015 Free Software Foundation, Inc.
+
+   Authors:
+       Keisuke Nishida, 2001-2007
+       Roger While, 2006-2012
+       Simon Sobish, 2009-2015
+       Brian Tiffin, 2015
+
    This file is part of GNU Cobol.
 
    The GNU Cobol compiler is free software: you can redistribute it
@@ -270,6 +278,7 @@ static int		iargs;
 static size_t		wants_nonfinal = 0;
 static size_t		cobc_flag_module = 0;
 static size_t		cobc_flag_library = 0;
+static size_t		cobc_flag_run = 0;
 static size_t		save_temps = 0;
 static size_t		save_all_src = 0;
 static size_t		save_c_src = 0;
@@ -386,7 +395,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivECScbmxOPgwo:I:L:l:D:K:k:";
+static const char short_options[] = "hVivECScbmxjaFOPgwo:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -1436,11 +1445,12 @@ cobc_clean_up (const int status)
 			} else if (fn->translate) {
 				/* If we get syntax errors, we do not
 				   know the number of local include files */
-				sprintf (cobc_buffer, "%s.l.h", fn->translate);
+				snprintf (cobc_buffer, cobc_buffer_size,
+					 "%s.l.h", fn->translate);
 				for (i = 0; i < 30U; ++i) {
 					if (i) {
-						sprintf (cobc_buffer, "%s.l%u.h",
-							fn->translate, i);
+						snprintf (cobc_buffer, cobc_buffer_size,
+							 "%s.l%u.h", fn->translate, i);
 					}
 					if (!access (cobc_buffer, F_OK)) {
 						unlink (cobc_buffer);
@@ -1787,6 +1797,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -v                    Display the commands invoked by the compiler"));
 	puts (_("  -x                    Build an executable program"));
 	puts (_("  -m                    Build a dynamically loadable module (default)"));
+	puts (_("  -j                    Run job, after build"));
 	puts (_("  -std=<dialect>        Warnings/features for a specific dialect:"));
 	puts (_("                          cobol2002   COBOL 2002"));
 	puts (_("                          cobol85     COBOL 85"));
@@ -1799,9 +1810,11 @@ cobc_print_usage (char * prog)
 	puts (_("                        See config/default.conf and config/*.conf"));
 	puts (_("  -free                 Use free source format"));
 	puts (_("  -fixed                Use fixed source format (default)"));
+	puts (_("  -F                    Alias (short option) for -free"));
 	puts (_("  -O, -O2, -Os          Enable optimization"));
 	puts (_("  -g                    Enable C compiler debug / stack check / trace"));
 	puts (_("  -debug                Enable all run-time error checking"));
+	puts (_("  -a                    Alias (short option) for assistive -debug"));
 	puts (_("  -o <file>             Place the output into <file>"));
 	puts (_("  -b                    Combine all input files into a single"));
 	puts (_("                        dynamically loadable module"));
@@ -2046,6 +2059,16 @@ process_command_line (const int argc, char **argv)
 			no_physical_cancel = 1;
 			break;
 
+		case 'j':
+			/* -j : Run job; compile, link and go, either by ./ or cobcrun */
+			cobc_flag_run = 1;
+			break;
+
+		case 'F':
+			/* -F : short option for -free */
+			cb_source_format = CB_FORMAT_FREE;
+			break;
+
 		case 'v':
 			/* -v : Verbose reporting */
 			verbose_output = 1;
@@ -2121,6 +2144,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'd':
+		case 'a':
 			/* -debug : Turn on OC debugging */
 			/* Turn on all exception conditions */
 			for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
@@ -2746,6 +2770,37 @@ line_contains(char* line_start, char* line_end, char* search_patterns) {
 }
 #endif
 
+/** -j run job after build */
+static int
+process_run(const char *name) {
+	int ret;
+
+	if (cb_compile_level < CB_LEVEL_MODULE) {
+		fputs (_("Nothing for -j to run"), stderr);
+		fflush(stderr);
+		return 0;
+	}
+
+	if (cb_compile_level == CB_LEVEL_MODULE ||
+	    cb_compile_level == CB_LEVEL_LIBRARY) {
+		snprintf(cobc_buffer, cobc_buffer_size, "%s %s",
+			"cobcrun", file_basename(name));
+	} else {  /* executable */
+		snprintf(cobc_buffer, cobc_buffer_size, "%s%s",
+			"./", name);
+	}
+	if (verbose_output) {
+		cobc_cmd_print (cobc_buffer);
+	}
+	ret = system(cobc_buffer);
+	if (verbose_output) {
+		fputs (_("Return status:"), stderr);
+		fprintf (stderr, "\t%d\n", ret);
+		fflush (stderr);
+	}
+	return ret;
+}
+
 #ifdef	__OS400__
 static int
 process (char *cmd)
@@ -2984,6 +3039,10 @@ process (char *cmd)
 		fflush (stderr);
 	}
 	cobc_free (buffptr);
+
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
 	return ret;
 }
 
@@ -3219,7 +3278,8 @@ preprocess (struct filename *fn)
 			cobc_terminate(fn->listing_file);
 		}
 		if (cobc_gen_listing > 1) {
-			sprintf (cobc_buffer, "cobxref %s -R", fn->listing_file);
+			snprintf (cobc_buffer, cobc_buffer_size,
+				 "cobxref %s -R", fn->listing_file);
 			if (verbose_output) {
 				cobc_cmd_print (cobc_buffer);
 			}
@@ -3471,6 +3531,7 @@ process_compile (struct filename *fn)
 static int
 process_assemble (struct filename *fn)
 {
+	int		ret;
 	size_t		bufflen;
 #ifdef	__OS400__
 	char	*name;
@@ -3504,7 +3565,11 @@ process_assemble (struct filename *fn)
 	sprintf (cobc_buffer, "%s -c %s %s -o %s %s",
 		 cobc_cc, cobc_cflags, cobc_include,
 		 fn->object, name);
-	return process (cobc_buffer);
+	ret = process (cobc_buffer);
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
+	return ret;
 #elif defined(__WATCOMC__)
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
@@ -3516,7 +3581,11 @@ process_assemble (struct filename *fn)
 			 cobc_cc, cobc_cflags, cobc_include,
 			 fn->object, fn->translate);
 	}
-	return process (cobc_buffer);
+	ret = process (cobc_buffer);
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (fn->object);
+	}
+	return ret;
 #else
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY ||
@@ -3530,7 +3599,8 @@ process_assemble (struct filename *fn)
 			 cobc_cc, cobc_cflags, cobc_include,
 			 fn->object, fn->translate);
 	}
-	return process(cobc_buffer);
+	ret = process (cobc_buffer);
+	return ret;
 #endif
 
 }
@@ -3637,6 +3707,9 @@ process_module_direct (struct filename *fn)
 	}
 #endif
 #endif	/* _MSC_VER */
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
 	return ret;
 }
 
@@ -3722,6 +3795,10 @@ process_module (struct filename *fn)
 	}
 #endif
 #endif	/* _MSC_VER */
+	/* cobcrun job? */
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
 	return ret;
 }
 
@@ -3814,6 +3891,10 @@ process_library (struct filename *l)
 	}
 #endif
 #endif	/* _MSC_VER */
+	/* cobcrun job? */
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
 	return ret;
 }
 
@@ -3914,6 +3995,11 @@ process_link (struct filename *l)
 #endif
 
 #endif	/* _MSC_VER */
+
+	/* run job? */
+	if ((ret == 0) && cobc_flag_run) {
+		ret = process_run (name);
+	}
 	return ret;
 }
 

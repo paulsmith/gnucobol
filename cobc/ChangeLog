@@ -1,5 +1,9 @@
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
+
 	* cobc.h, cobc.c, pplex.l: allow compiles from stdin
+	* cobc.c: add -j after build run
+	  added short aliases for -free (-F) and -debug (-a)
 
 2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -4443,3 +4443,22 @@ AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], , [])
 AT_CHECK([$COBCRUN a], [0])
 
 AT_CLEANUP
+
+
+AT_SETUP([Run job after build])
+AT_KEYWORDS([runmisc job])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "job" WITH NO ADVANCING END-DISPLAY
+           STOP RUN WITH NORMAL STATUS.
+])
+
+AT_CHECK([$COMPILE -j prog.cob], [0], [job])
+AT_CHECK([$COMPILE_MODULE -j prog.cob], [0], [job], [])
+
+AT_CLEANUP

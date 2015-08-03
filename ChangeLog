@@ -1,4 +1,6 @@
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
+
 	* configure.ac: added COB_DASH, COB_DASH_NAME, COB_DASH_OUT
 	  to support compile from stdin
 
