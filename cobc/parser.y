@@ -4996,6 +4996,7 @@ screen_option:
 | LOWLIGHT
   {
 	check_screen_attr ("LOWLIGHT", COB_SCREEN_LOWLIGHT);
+	PENDING ("LOWLIGHT");
   }
 | REVERSE_VIDEO
   {
@@ -5008,10 +5009,12 @@ screen_option:
 | OVERLINE
   {
 	check_screen_attr ("OVERLINE", COB_SCREEN_OVERLINE);
+	PENDING ("OVERLINE");
   }
 | LEFTLINE
   {
 	check_screen_attr ("LEFTLINE", COB_SCREEN_LEFTLINE);
+	PENDING ("LEFTLINE");
   }
 | AUTO
   {
@@ -5024,10 +5027,12 @@ screen_option:
 | REQUIRED
   {
 	check_screen_attr ("REQUIRED", COB_SCREEN_REQUIRED);
+	PENDING ("REQUIRED");
   }
 | FULL
   {
 	check_screen_attr ("FULL", COB_SCREEN_FULL);
+	PENDING ("FULL");
   }
 | PROMPT CHARACTER _is id_or_lit
   {
