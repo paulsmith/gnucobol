@@ -620,15 +620,15 @@ check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 	if (fgc) {
 		current_statement->attr_ptr->fgc = fgc;
 	}
-	/* [WITH] BACKGROUND-COLOR [IS] */ 
+	/* [WITH] BACKGROUND-COLOR [IS] */
 	if (bgc) {
 		current_statement->attr_ptr->bgc = bgc;
 	}
-	/* [WITH] SCROLL UP | DOWN */ 
+	/* [WITH] SCROLL UP | DOWN */
 	if (scroll) {
 		current_statement->attr_ptr->scroll = scroll;
 	}
-	/* [WITH] TIMEOUT [AFTER] */ 
+	/* [WITH] TIMEOUT [AFTER] */
 	if (timeout) {
 		current_statement->attr_ptr->timeout = timeout;
 	}
@@ -640,7 +640,7 @@ check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 	if (size_is) {
 		current_statement->attr_ptr->size_is = size_is;
 	}
-	/* Attribute */   
+	/* Attribute */
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
@@ -4877,8 +4877,7 @@ opt_screen_description_list:
 
 screen_description_list:
   screen_description TOK_DOT
-| screen_description_list
-  screen_description TOK_DOT
+| screen_description_list screen_description TOK_DOT
 ;
 
 screen_description:
@@ -4945,7 +4944,7 @@ screen_description:
   }
 | level_number error TOK_DOT
   {
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	yyerrok;
 	cb_unput_dot ();
@@ -6715,9 +6714,9 @@ disp_attr:
   {
 	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
   }
-| SIZE _is num_id_or_lit 
+| SIZE _is num_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0); 
+	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
   }
 | UNDERLINE
   {
@@ -10188,11 +10187,10 @@ refmod:
 integer:
   LITERAL %prec SHIFT_PREFER
   {
-	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
-		cb_error (_("Integer value expected"));
-		$$ = cb_int1;
-	} else if (CB_LITERAL ($1)->sign < 0 || CB_LITERAL ($1)->scale) {
-		cb_error (_("Integer value expected"));
+	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
+	    || CB_LITERAL ($1)->sign < 0
+	    || CB_LITERAL ($1)->scale) {
+		cb_error (_("Positive integer value expected"));
 		$$ = cb_int1;
 	} else {
 		$$ = $1;
@@ -10228,16 +10226,15 @@ report_integer:
   {
 	int	n;
 
-	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
-		cb_error (_("Integer value expected"));
-		$$ = cb_int1;
-	} else if (CB_LITERAL ($1)->sign || CB_LITERAL ($1)->scale) {
-		cb_error (_("Integer value expected"));
+	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
+	    || CB_LITERAL ($1)->sign
+	    || CB_LITERAL ($1)->scale) {
+		cb_error (_("Unsigned integer value expected"));
 		$$ = cb_int1;
 	} else {
 		n = cb_get_int ($1);
 		if (n < 1) {
-			cb_error (_("Invalid integer"));
+			cb_error (_("Unsigned integer value expected"));
 			$$ = cb_int1;
 		} else {
 			$$ = $1;

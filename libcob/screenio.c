@@ -162,13 +162,13 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 		*keyp = KEY_BACKSPACE;
 		break;
 	case 01005:
-		*keyp = KEY_EOL;	/* Alt-Delete */ 
-		break; 
+		*keyp = KEY_EOL;	/* Alt-Delete */
+		break;
 	case 01040:
-		*keyp = KEY_CLOSE;	/* Alt-left-arrow */ 
+		*keyp = KEY_CLOSE;	/* Alt-left-arrow */
 		break;
 	case 01062:
-		*keyp = KEY_PREVIOUS;	/* Alt-right-arrow */ 
+		*keyp = KEY_PREVIOUS;	/* Alt-right-arrow */
 		break;
 
 #ifdef	KEY_A1
@@ -273,53 +273,68 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 static void
 get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 {
-	int	l;
-	int	c;
-	int	p;
-
-	getyx (stdscr, *line, *col);
+	int	line_val;
+	int	col_val;
+	
 	if (fline == NULL) {
-		if (fcol == NULL) {
-			*line = 0;
-			*col = 0;
-			return;
+		*line = 0;
+	} else {
+		line_val = cob_get_int (fline) - 1;
+		if (line_val < 0) {
+			line_val = 0;
 		}
-		c = cob_get_int (fcol);
-		if (c > 0) {
-			*col = c - 1;
-		} else if (c < 0) {
-			*col = 0;
-		}
-		return;
+		
+		*line = line_val;
 	}
-
-	p = cob_get_int (fline);
 
 	if (fcol == NULL) {
-		if (fline->size == 4) {
-			l = p / 100;
-			c = p % 100;
-		} else if (fline->size == 6) {
-			l = p / 1000;
-			c = p % 1000;
-		} else {
-			l = p;
-			c = 1;
-		}
-	} else {
-		l = p;
-		c = cob_get_int (fcol);
-	}
-	if (l > 0) {
-		*line = --l;
-	} else if (l < 0) {
-		*line = 0;
-	}
-	if (c > 0) {
-		*col = --c;
-	} else if (c < 0) {
 		*col = 0;
+	} else {
+		col_val = cob_get_int (fcol) - 1;
+		if (col_val < 0) {
+			col_val = 0;
+		}
+		
+		*col = col_val;
 	}
+}
+
+static void
+raise_ec_on_invalid_line_or_col (const int line, const int column)
+{
+	int	max_y;
+	int	max_x;
+
+	getmaxyx (stdscr, max_y, max_x);
+	if (line < 0 || line > max_y) {
+		cob_set_exception (COB_EC_SCREEN_LINE_NUMBER);
+	}
+	if (column < 0 || column > max_x) {
+		cob_set_exception (COB_EC_SCREEN_STARTING_COLUMN);
+	}
+}
+
+static void
+cob_move_cursor (const int line, const int column)
+{
+	int status = move (line, column);
+
+	if (status == ERR) {
+		raise_ec_on_invalid_line_or_col (line, column);
+	}
+}
+
+static void
+cob_move_to_beg_of_last_line (void)
+{
+	int	max_y;
+	int	max_x;
+
+	COB_UNUSED (max_x);
+	
+	getmaxyx (stdscr, max_y, max_x);
+	/* We don't need to check for exceptions here; it will always be fine */
+	move (max_y, 0);
 }
 
 static void
@@ -439,18 +454,18 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr)
 			}
 		}
 	}
-	/* BLANK SCREEN colors the whole screen. */ 
+	/* BLANK SCREEN colors the whole screen. */
 	if (attr & COB_SCREEN_BLANK_SCREEN) {
 		getyx (stdscr, line, column);
 		clear ();
-		move (line, column);
+		cob_move_cursor (line, column);
 	}
-	/* BLANK LINE colors the whole line. */ 
+	/* BLANK LINE colors the whole line. */
 	if (attr & COB_SCREEN_BLANK_LINE) {
 		getyx (stdscr, line, column);
-		move (line, 0);
+		cob_move_cursor (line, 0);
 		clrtoeol ();
-		move (line, column);
+		cob_move_cursor (line, column);
 	}
 	if (attr & COB_SCREEN_ERASE_EOL) {
 		clrtoeol ();
@@ -614,6 +629,57 @@ cob_check_pos_status (const int fret)
 }
 
 static void
+raise_ec_on_truncation (const int item_size)
+{
+	int	y;
+	int	x;
+	int	max_y;
+	int	max_x;
+
+	COB_UNUSED (y);
+	COB_UNUSED (max_y);
+
+	getyx (stdscr, y, x);
+	getmaxyx (stdscr, max_y, max_x);
+
+	if (x + item_size - 1 > max_x) {
+		cob_set_exception (COB_EC_SCREEN_ITEM_TRUNCATED);
+	}
+}
+
+static void
+cob_addnstr (const char *data, const int size)
+{
+	raise_ec_on_truncation (size);
+	addnstr (data, size);
+}
+
+static void
+cob_addch (const chtype c)
+{
+	raise_ec_on_truncation (1);
+	addch (c);
+}
+
+/* Use only when raise_ec_on_truncation is called beforehand. */
+static void
+cob_addch_no_trunc_check (const chtype c)
+{
+	addch (c);
+}
+
+static void
+cob_addnch (const int n, const chtype c)
+{
+	int	count;
+	
+	raise_ec_on_truncation (n);
+	for (count = 0; count < n; count++) {
+		cob_addch_no_trunc_check (c);
+	}
+}
+
+static void
 cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 {
 	unsigned char	*p;
@@ -656,7 +722,7 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 	} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
 		column = x - column + 1;
 	}
-	move (line, column);
+	cob_move_cursor (line, column);
 	cob_current_y = line;
 	cob_current_x = column;
 #if	0	/* RXWRXW - Attr */
@@ -670,21 +736,22 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 			promptchar = COB_CH_UL;
 		}
 		p = f->data;
+		raise_ec_on_truncation (f->size);
 		for (size = 0; size < f->size; size++, p++) {
 			if (s->attr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch_no_trunc_check (COB_CH_AS);
 			} else if (*p <= ' ') {
-				addch (promptchar);
+				cob_addch_no_trunc_check (promptchar);
 			} else {
-				addch ((const chtype)*p);
+				cob_addch_no_trunc_check ((const chtype)*p);
 			}
 		}
 	} else if (!is_input) {
 		cob_screen_attr (s->foreg, s->backg, s->attr);
-		addnstr ((char *)f->data, (int)f->size);
+		cob_addnstr ((char *)f->data, (int)f->size);
 	} else {
 		column += (int)f->size;
-		move (line, column);
+		cob_move_cursor (line, column);
 	}
 	refresh ();
 }
@@ -713,7 +780,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 	s = sptr->scr;
 	sline = sptr->this_y;
 	scolumn = sptr->this_x;
-	move (sline, scolumn);
+	cob_move_cursor (sline, scolumn);
 	cob_screen_attr (s->foreg, s->backg, s->attr);
 	ateof = 0;
 	gotbacksp = 0;
@@ -781,7 +848,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_BTAB:
@@ -800,10 +867,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			if (ungetched) {
 				ungetched = 0;
 				p = s->field->data + rightpos;
-				move (sline, rightpos);
+				cob_move_cursor (sline, rightpos);
 			} else {
 				p = s->field->data;
-				move (sline, scolumn);
+				cob_move_cursor (sline, scolumn);
 			}
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
@@ -817,7 +884,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_DOWN:
@@ -830,7 +897,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_HOME:
@@ -843,7 +910,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_END:
@@ -856,7 +923,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_BACKSPACE:
@@ -867,13 +934,13 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 					ateof = 0;
 				}
 				gotbacksp = 1;
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				if (s->attr & COB_SCREEN_SECURE) {
-					addch (COB_CH_AS);
+					cob_addch (COB_CH_AS);
 				} else {
-					addch (promptchar);
+					cob_addch (promptchar);
 				}
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				p = s->field->data + ccolumn - scolumn;
 				*p = ' ';
 			} else {
@@ -887,7 +954,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			if (ccolumn > scolumn) {
 				ccolumn--;
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				p = s->field->data + ccolumn - scolumn;
 			} else {
 				ungetched = 1;
@@ -898,7 +965,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			gotbacksp = 0;
 			if (ccolumn < rightpos) {
 				ccolumn++;
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				p = s->field->data + ccolumn - scolumn;
 			} else {
 				ungetch ('\t');
@@ -931,11 +998,11 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			++charswritten;
 
 			if (s->attr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch (COB_CH_AS);
 			} else if (s->attr & COB_SCREEN_NO_ECHO) {
-				addch (COB_CH_SP);
+				cob_addch (COB_CH_SP);
 			} else {
-				addch ((const chtype)keyp);
+				cob_addch ((const chtype)keyp);
 			}
 			if (ccolumn == rightpos) {
 				if (s->attr & COB_SCREEN_AUTO) {
@@ -945,7 +1012,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 						ungetch ('\t');
 					}
 				}
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				if (ateof) {
 					cob_beep ();
 				} else {
@@ -1033,7 +1100,8 @@ cob_screen_moveyx (cob_screen *s)
 		} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
 			column = x - column;
 		}
-		move (line, column);
+
+		cob_move_cursor (line, column);
 		refresh ();
 		cob_current_y = line;
 		cob_current_x = column;
@@ -1116,31 +1184,87 @@ cob_screen_iterate (cob_screen *s)
 	}
 }
 
-/* Global functions */
+enum default_line_col_type {
+	TYPE_DISPLAY,
+	TYPE_ACCEPT
+};
 
-void
-cob_screen_display (cob_screen *s, cob_field *line, cob_field *column)
+static COB_INLINE COB_A_INLINE void
+set_default_line_column (const enum default_line_col_type type, int *sline,
+			 int *scolumn)
 {
-	int	sline;
-	int	scolumn;
+	if (type == TYPE_DISPLAY) {
+		getyx (stdscr, *sline, *scolumn);
+	} else { /* TYPE_ACCEPT */
+		*sline = 0;
+		*scolumn = 0;	
+	}
+}
 
+static void
+pos_to_line_column (cob_field *pos, int *line, int *column)
+{
+	int	pos_val = cob_get_int (pos);
+	int	max_line_column;
+
+	if (pos->size < 4) {
+		*line = pos_val;
+		*column = 1;
+		return;
+	}
+
+	if (pos->size == 4) {
+		max_line_column = 100;
+	} else if (pos->size == 6) {
+		max_line_column = 1000;
+	} else {
+		/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
+	}
+	*line = (pos_val / max_line_column) - 1;
+	*column = (pos_val % max_line_column) - 1;
+}
+
+static void
+extract_line_and_col_vals (const enum default_line_col_type type,
+			   cob_field *line, cob_field *column, int *sline,
+			   int *scolumn)
+{
+	if (column == NULL) {
+		if (line == NULL) {
+			set_default_line_column (type, sline, scolumn);
+		} else {
+			/*
+			  line actually contains both the line and field
+			  numbers.
+			*/
+			pos_to_line_column (line, sline, scolumn);
+		}
+	} else {
+		get_line_column (line, column, sline, scolumn);
+	}
+}
+
+static COB_INLINE COB_A_INLINE void
+init_cob_screen_if_needed (void)
+{
 	if (!cobglobptr->cob_screen_initialized) {
 		cob_screen_init ();
 	}
+}
 
-	if (line == NULL && column == NULL) {
-		getyx (stdscr, sline, scolumn);
-	} else {
-		get_line_column (line, column, &sline, &scolumn);
-	}
-	move (sline, scolumn);
+static void
+screen_display (cob_screen *s, const int line, const int column)
+{
+	init_cob_screen_if_needed ();
+
+	cob_move_cursor (line, column);
 	cob_screen_iterate (s);
 	refresh ();
 }
 
-void
-cob_screen_accept (cob_screen *s, cob_field *line,
-		   cob_field *column, cob_field *ftimeout)
+static void
+screen_accept (cob_screen *s, const int line, const int column,
+	       cob_field *ftimeout)
 {
 	struct cob_inp_struct	*sptr;
 	struct cob_inp_struct	*sptr2;
@@ -1152,13 +1276,9 @@ cob_screen_accept (cob_screen *s, cob_field *line,
 	size_t			firsty;
 	int			starty;
 	int			initial_curs;
-	int			sline;
-	int			scolumn;
 	int			gettimeout;
 
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
+	init_cob_screen_if_needed ();
 	if (!cob_base_inp) {
 		cob_base_inp = cob_malloc (COB_INP_SIZE);
 	} else {
@@ -1168,12 +1288,8 @@ cob_screen_accept (cob_screen *s, cob_field *line,
 	cob_current_y = 0;
 	cob_current_x = 0;
 	totl_index = 0;
-	if (line == NULL && column == NULL) {
-		move (0, 0);
-	} else {
-		get_line_column (line, column, &sline, &scolumn);
-		move (sline, scolumn);
-	}
+
+	cob_move_cursor (line, column);
 
 	/* Prepare input fields */
 	if (cob_prep_input (s)) {
@@ -1240,35 +1356,32 @@ cob_screen_accept (cob_screen *s, cob_field *line,
 	cob_check_pos_status (global_return);
 }
 
-void
-cob_field_display (cob_field *f, cob_field *line, cob_field *column,
-		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   cob_field *size_is, const int fattr)
+static void
+field_display (cob_field *f, const int line, const int column, cob_field *fgc,
+	       cob_field *bgc, cob_field *fscroll, cob_field *size_is,
+	       const int fattr)
 {
 	int	sline;
 	int	scolumn;
-	int	ssize_is = 0;	/* WITH SIZE IS */ 
+	int	ssize_is = 0;	/* WITH SIZE IS */
 	int	size_display;	/* final size to display */
-	int	count;		/* loop counter */ 
 	char	fig_const;	/* figurative constant character */
 
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
+	init_cob_screen_if_needed ();
 
 	if (f) {
-		/* Field size to display */ 
+		/* Field size to display */
 		size_display = (int)f->size;
-		/* WITH SIZE IS */ 
+		/* WITH SIZE IS */
 		if (size_is) {
 			ssize_is = cob_get_int (size_is);
 			/* Use WITH SIZE IS when less than field size */
 			if (ssize_is > 0 && ssize_is < (int)f->size) {
-			  size_display = ssize_is; 
+			  size_display = ssize_is;
 			}
-		} 
-	} 
-	
+		}
+	}
+
 	if (fscroll) {
 		sline = cob_get_int (fscroll);
 		if (fattr & COB_SCREEN_SCROLL_DOWN) {
@@ -1280,62 +1393,52 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		refresh ();
 	}
 
-	if (line == NULL && column == NULL) {
-		getyx (stdscr, sline, scolumn);
-	} else {
-		get_line_column (line, column, &sline, &scolumn);
-	}
-	move (sline, scolumn);
+	sline = line;
+	scolumn = column;
+	cob_move_cursor (sline, scolumn);
 
 	cob_screen_attr (fgc, bgc, fattr);
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
 		/* figurative constant and WITH SIZE repeats the character */
-		if ((size_is) 
+		if ((size_is)
 		   && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
 		   && (int)f->size == 1) {
 			fig_const = f->data[0];
-			for (count = 0; count < ssize_is; count++) {
-			    addch (fig_const);
-			}
+			cob_addnch (ssize_is, fig_const);
 		} else {
 			addnstr ((char *)f->data, size_display);
-			/* WITH SIZE larger than field displays trailing spaces */ 
-			for (count = (int)f->size; count < ssize_is; count++) {
-			    addch (COB_CH_SP);  
-			} 
+			/* WITH SIZE larger than field displays trailing spaces */
+			cob_addnch (ssize_is - f->size, COB_CH_SP);
 		}
 	}
 	if (fattr & COB_SCREEN_EMULATE_NL) {
 		if (++sline >= LINES) {
 			sline = 0;
 		}
-		move (sline, 0);
+		cob_move_cursor (sline, 0);
 	}
 	refresh ();
 }
 
-void
-cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
-		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		  cob_field *ftimeout, cob_field *prompt, 
-		  cob_field *size_is, const int fattr)
+static void
+field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
+	      cob_field *bgc, cob_field *fscroll, cob_field *ftimeout,
+	      cob_field *prompt, cob_field *size_is, const int fattr)
 {
 	unsigned char	*p;
 	unsigned char	*p2;
 	size_t		count;
 	int		keyp;
 	int		fret;
-	int		sline;
-	int		scolumn;
 	int		cline;
 	int		ccolumn;
 	int		rightpos;
 	int		ateof;
 	int		move_char;      /* data shift character */
-	int		prompt_char;    /* prompt character */ 
+	int		prompt_char;    /* prompt character */
 	int		gettimeout;
 	chtype		promptchar;
-	int		ssize_is = 0;	/* WITH SIZE IS */ 
+	int		ssize_is = 0;	/* WITH SIZE IS */
 	int		size_accept = 0;	/* final size to accept */
 	cob_field	temp;
 #if	0	/* RXWRXW - Screen update */
@@ -1359,10 +1462,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	} else {
 		promptchar = COB_CH_UL;
 	}
-	/* Initialize the screen. */
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
+	init_cob_screen_if_needed ();
 
 	if (ftimeout) {
 		gettimeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
@@ -1385,29 +1485,19 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	}
 	cobglobptr->cob_exception_code = 0;
 
-	/* Start line and column. */
-	if (line == NULL && column == NULL) {
-		sline = 0;
-		scolumn = 0;
-#if	0	/* RXWRXW - Line / Col */
-		getyx (stdscr, sline, scolumn);
-#endif
-	} else {
-		get_line_column (line, column, &sline, &scolumn);
-	}
-	move (sline, scolumn);
+	cob_move_cursor (sline, scolumn);
 
 	cob_screen_attr (fgc, bgc, fattr);
-	
+
 	if (f) {
-		/* Field size to accept */ 
+		/* Field size to accept */
 		size_accept = (int)f->size;
-		/* WITH SIZE IS */ 
+		/* WITH SIZE IS */
 		if (size_is) {
 			ssize_is = cob_get_int (size_is);
 			/* Use WITH SIZE IS when less than field size */
 			if (ssize_is > 0 && ssize_is < (int)f->size) {
-			  size_accept = ssize_is; 
+			  size_accept = ssize_is;
 			}
 		}
 
@@ -1418,28 +1508,27 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		}
 		/* SIZE IS greater than field, blank out trailing screen */
 		if (ssize_is > (int)f->size) {
-		  for (count = 0; count < ssize_is; count++) {
-		    addch (COB_CH_SP);  
-		  }
-		  move (sline, scolumn);
-		} 
+			cob_addnch (ssize_is, COB_CH_SP);
+			cob_move_cursor (sline, scolumn);
+		}
+		raise_ec_on_truncation (size_accept);
 		for (count = 0; count < size_accept; count++) {
 			if (fattr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch_no_trunc_check (COB_CH_AS);
 			} else if (fattr & COB_SCREEN_NO_ECHO) {
-				addch (COB_CH_SP);
+				cob_addch_no_trunc_check (COB_CH_SP);
 			} else if (fattr & COB_SCREEN_UPDATE) {
 				fret = *p++;
-				addch ((const chtype)fret);
+				cob_addch_no_trunc_check ((const chtype)fret);
 			} else if (COB_FIELD_IS_NUMERIC (f)) {
-				addch ('0');
+				cob_addch_no_trunc_check ('0');
 			} else if (fattr & COB_SCREEN_PROMPT) {
-				addch (promptchar);
+				cob_addch_no_trunc_check (promptchar);
 			} else {
-				addch (COB_CH_SP);
+				cob_addch_no_trunc_check (COB_CH_SP);
 			}
 		}
-		move (sline, scolumn);
+		cob_move_cursor (sline, scolumn);
 #if	0	/* RXWRXW - Screen update */
 		if (!(fattr & COB_SCREEN_UPDATE)) {
 			if (COB_FIELD_IS_NUMERIC (f) ||
@@ -1482,8 +1571,8 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		    if (COB_FIELD_IS_NUMERIC (f)) {
 			/* Numeric prompt zeros. */
 			if (move_char == '0') {
-			    move (cline, count);
-			    addch (prompt_char);
+			    cob_move_cursor (cline, count);
+			    cob_addch (prompt_char);
 			} else {
 			    /* Switch to remove prompts from within field. */
 			    if (fattr & COB_SCREEN_NO_ECHO) {
@@ -1497,8 +1586,8 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		    } else {
 			/* Alpha prompts. */
 			if (move_char == ' ') {
-			    move (cline, count);
-			    addch (prompt_char);
+			    cob_move_cursor (cline, count);
+			    cob_addch (prompt_char);
 			} else {
 			    /* Switch to remove prompts from within field. */
 			    if (fattr & COB_SCREEN_NO_ECHO) {
@@ -1512,12 +1601,12 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		    }
 		}
 		/* Cursor to current column. */
-		move (cline, ccolumn);
+		cob_move_cursor (cline, ccolumn);
 		/* Refresh screen. */
 		refresh ();
 		errno = 0;
 		timeout (gettimeout);
-		
+
 		/* Get a character. */
 		keyp = getch ();
 
@@ -1602,13 +1691,13 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 				p2 = COB_TERM_BUFF + count - scolumn - 1;
 				*p2 = move_char;
 				/* Update screen with moved character. */
-				move (cline, count - 1);
+				cob_move_cursor (cline, count - 1);
 				if (fattr & COB_SCREEN_NO_ECHO) {
-				    addch (COB_CH_SP);
+				    cob_addch (COB_CH_SP);
 				} else if (fattr & COB_SCREEN_SECURE) {
-				    addch (COB_CH_AS);
+				    cob_addch (COB_CH_AS);
 				} else {
-				    addch (move_char);
+				    cob_addch (move_char);
 				}
 			    }
 			    /* Put space as the right most character. */
@@ -1622,7 +1711,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			}
 			    /* Move cursor left one from current. */
 				ccolumn--;
-			    move (cline, ccolumn);
+			    cob_move_cursor (cline, ccolumn);
 			    p--;
 			}
 				ateof = 0;
@@ -1641,15 +1730,15 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			  if (move_char != ' ') {
 			    ccolumn = count;
 			    break;
+			  }
 			}
-			}
-			move (cline, ccolumn);
+			cob_move_cursor (cline, ccolumn);
 			p = COB_TERM_BUFF + ccolumn - scolumn;
 			ateof = 0;
 			continue;
 		case 01026:
 			/* Alt-Home key, cursor to start of field. */
-			move (sline, scolumn);
+			cob_move_cursor (sline, scolumn);
 			p = COB_TERM_BUFF;
 			ateof = 0;
 			continue;
@@ -1673,13 +1762,13 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			if (move_char != ' ' && ccolumn != rightpos) {
 			    ccolumn++;
 			}
-			move (cline, ccolumn);
+			cob_move_cursor (cline, ccolumn);
 			p = COB_TERM_BUFF + ccolumn - scolumn;
 			ateof = 0;
 			continue;
 		case 01021:
 			/* Alt-End key, cursor to end of size of field */
-			move (sline, rightpos);
+			cob_move_cursor (sline, rightpos);
 			p = COB_TERM_BUFF + size_accept - 1;
 			ateof = 0;
 			continue;
@@ -1689,7 +1778,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			/* Alt-left-arrow KEY_CLOSE no auto-skip. */
 			if (ccolumn > scolumn) {
 				ccolumn--;
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				p = COB_TERM_BUFF + ccolumn - scolumn;
 				continue;
 			}
@@ -1706,7 +1795,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			/* Alt-right-arrow KEY_PREVIOUS no auto-skip. */
 			if (ccolumn < rightpos) {
 				ccolumn++;
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				p = COB_TERM_BUFF + ccolumn - scolumn;
 				continue;
 			}
@@ -1743,13 +1832,13 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			    p2 = COB_TERM_BUFF + count - scolumn;
 			    *p2 = move_char;
 			    /* Update screen with moved character. */
-			    move (cline, count);
+			    cob_move_cursor (cline, count);
 			    if (fattr & COB_SCREEN_NO_ECHO) {
-				addch (COB_CH_SP);
+				cob_addch (COB_CH_SP);
 			    } else if (fattr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch (COB_CH_AS);
 					} else {
-				addch (move_char);
+				cob_addch (move_char);
 					}
 				}
 			/* Put space as the right most character. */
@@ -1762,9 +1851,9 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			    *p2 = COB_CH_SP;
 			}
 			/* Put cursor back to original position. */
-			move (cline, ccolumn);
+			cob_move_cursor (cline, ccolumn);
 			continue;
-		case KEY_EOL: 
+		case KEY_EOL:
 			/* Alt-Delete key, erase cursor to end of field. */
 			for (count = ccolumn; count <= rightpos; count++) {
 			    /* Character position. */
@@ -1777,17 +1866,17 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 			    }
 			    *p2 = move_char;
 			    /* Update screen with blank character. */
-			    move (cline, count);
+			    cob_move_cursor (cline, count);
 			    if (fattr & COB_SCREEN_NO_ECHO) {
-				addch (COB_CH_SP);
+				cob_addch (COB_CH_SP);
 			    } else if (fattr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch (COB_CH_AS);
 			} else {
-				addch (move_char);
+				cob_addch (move_char);
 				}
 			}
 			/* Put cursor back to original position. */
-			move (cline, ccolumn);
+			cob_move_cursor (cline, ccolumn);
 			continue;
 		default:
 			break;
@@ -1824,36 +1913,36 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 				*p2 = move_char;
 				/* Update screen with moved character. */
 				if (count > scolumn) {
-				    move (cline, count);
+				    cob_move_cursor (cline, count);
 				    if (move_char != ' ') {
 					if (fattr & COB_SCREEN_NO_ECHO) {
-					    addch (COB_CH_SP);
+					    cob_addch (COB_CH_SP);
 					} else if (fattr & COB_SCREEN_SECURE) {
-					    addch (COB_CH_AS);
+					    cob_addch (COB_CH_AS);
 					} else {
-					    addch (move_char);
+					    cob_addch (move_char);
 					}
 				    }
 				}
 			    }
-			    move (cline, ccolumn);
+			    cob_move_cursor (cline, ccolumn);
 			}
 			*p = (unsigned char)keyp;
 			count = 1;
 			/* Display character or '*' if secure. */
 			if (fattr & COB_SCREEN_SECURE) {
-				addch (COB_CH_AS);
+				cob_addch (COB_CH_AS);
 			} else if (fattr & COB_SCREEN_NO_ECHO) {
-				addch (COB_CH_SP);
+				cob_addch (COB_CH_SP);
 			} else {
-				addch ((const chtype)keyp);
+				cob_addch ((const chtype)keyp);
 			}
 			if (ccolumn == rightpos) {
 				/* Auto-skip at end of field. */
 				if (fattr & COB_SCREEN_AUTO) {
 					break;
 				}
-				move (cline, ccolumn);
+				cob_move_cursor (cline, ccolumn);
 				if (ateof) {
 					cob_beep ();
 				} else {
@@ -1869,7 +1958,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	}
 field_return:
 	if (f) {
-		move (sline, rightpos + 1);
+		cob_move_cursor (sline, rightpos + 1);
 	}
 	refresh ();
 	cob_check_pos_status (fret);
@@ -1879,12 +1968,57 @@ field_return:
 	cob_move (&temp, f);
 }
 
+/* Global functions */
+
+void
+cob_screen_display (cob_screen *s, cob_field *line, cob_field *column)
+{
+	int	sline;
+	int	scolumn;
+
+	extract_line_and_col_vals (TYPE_DISPLAY, line, column, &sline, &scolumn);
+	screen_display (s, sline, scolumn);
+}
+void
+cob_screen_accept (cob_screen *s, cob_field *line, cob_field *column,
+		   cob_field *ftimeout)
+{
+	int	sline;
+	int	scolumn;
+
+	extract_line_and_col_vals (TYPE_ACCEPT, line, column, &sline, &scolumn);
+	screen_accept (s, sline, scolumn, ftimeout);
+}
+
+void
+cob_field_display (cob_field *f, cob_field *line, cob_field *column,
+		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
+		   cob_field *size_is, const int fattr)
+{
+	int	sline;
+	int	scolumn;
+
+	extract_line_and_col_vals (TYPE_DISPLAY, line, column, &sline, &scolumn);
+	field_display (f, sline, scolumn, fgc, bgc, fscroll, size_is, fattr);
+}
+
+void
+cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
+		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
+		  cob_field *ftimeout, cob_field *prompt, cob_field *size_is,
+		  const int fattr)
+{
+	int	sline;
+	int	scolumn;
+
+	extract_line_and_col_vals (TYPE_ACCEPT, line, column, &sline, &scolumn);
+	field_accept (f, sline, scolumn, fgc, bgc, fscroll, ftimeout, prompt, size_is, fattr);
+}
+
 void
 cob_screen_line_col (cob_field *f, const int l_or_c)
 {
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
+	init_cob_screen_if_needed ();
 	if (!l_or_c) {
 		cob_set_int (f, (int)LINES);
 	} else {
@@ -1895,9 +2029,7 @@ cob_screen_line_col (cob_field *f, const int l_or_c)
 int
 cob_sys_clear_screen (void)
 {
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
+	init_cob_screen_if_needed ();
 	clear ();
 	refresh ();
 	cob_current_y = 0;
@@ -1927,7 +2059,7 @@ cob_exit_screen (void)
 	if (cobglobptr->cob_screen_initialized) {
 		cobglobptr->cob_screen_initialized = 0;
 		clear ();
-		move (23, 0);
+		cob_move_to_beg_of_last_line ();
 		delwin (stdscr);
 		endwin ();
 #ifdef	HAVE_CURSES_FREEALL
@@ -1966,7 +2098,7 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		  cob_field *ftimeout, cob_field *prompt, 
+		  cob_field *ftimeout, cob_field *prompt,
 		  cob_field *size_is, const int fattr)
 {
 	COB_UNUSED (f);
@@ -2061,7 +2193,7 @@ cob_sys_get_csr_pos (unsigned char *fld)
 	getyx (stdscr, cline, ccol);
 	fld[0] = (unsigned char)cline;
 	fld[1] = (unsigned char)ccol;
-	
+
 #else
 	fld[0] = 1U;
 	fld[1] = 1U;

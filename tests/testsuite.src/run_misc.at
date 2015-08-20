@@ -4423,6 +4423,43 @@ AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
+AT_SETUP([EC-SCREEN-LINE-NUMBER and -STARTING-COLUMN])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    blah.
+
+       DATA           DIVISION.
+       SCREEN         SECTION.
+       01  invalid-line.
+           03  a      PIC X LINE 99999999.
+       01  invalid-col.
+           03  c     PIC X COLUMN 99999999.
+
+       PROCEDURE      DIVISION.
+           DISPLAY invalid-line END-DISPLAY
+           IF FUNCTION EXCEPTION-STATUS = "EC-SCREEN-LINE-NUMBER"
+               CONTINUE
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+
+           DISPLAY invalid-col END-DISPLAY
+           IF FUNCTION EXCEPTION-STATUS = "EC-SCREEN-STARTING-COLUMN"
+               CONTINUE
+           ELSE
+               GOBACK RETURNING 2
+           END-IF
+
+           GOBACK RETURNING 0
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([./prog], [0], ignore, [])
+
+AT_CLEANUP
 
 AT_SETUP([Compile from stdin])
 AT_KEYWORDS([runmisc stdin])

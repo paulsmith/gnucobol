@@ -1,4 +1,11 @@
 
+2015-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c: adding check for ACCEPT/DISPLAY statements taking
+	  the cursor position as a single field so that the position is an
+	  integer with 6 digits or less than 4 digits.
+	* parser.y: improved error messages of integer and report_integer.
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h, cobc.c, pplex.l: allow compiles from stdin

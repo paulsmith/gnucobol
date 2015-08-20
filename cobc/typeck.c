@@ -2492,6 +2492,9 @@ cb_validate_program_data (struct cb_program *prog)
 				if (!CB_REF_OR_FIELD_P(x)) {
 					cb_error (_("Invalid RECORD DEPENDING item"));
 				}
+#if	0			/* RXWRXW */
+				}
+#endif
 			}
 		}
 	}
@@ -4188,6 +4191,45 @@ output_screen_to (struct cb_field *p, const unsigned int sisters)
 
 /* ACCEPT statement */
 
+static COB_INLINE COB_A_INLINE int
+is_less_than_four_or_is_six (int x)
+{
+	return x <= 4 || x == 6;
+}
+
+static COB_INLINE COB_A_INLINE int
+valid_screen_pos_literal (cb_tree pos)
+{
+	return CB_NUMERIC_LITERAL_P (pos)
+		&& is_less_than_four_or_is_six ((CB_LITERAL (pos))->size);
+}
+
+static int
+valid_screen_pos_reference (cb_tree pos)
+{
+	/* This was highly unpleasant to write. */
+	return CB_REFERENCE_P (pos)
+		&& (CB_REFERENCE (pos))->value != NULL
+		&& CB_FIELD_P ((CB_REFERENCE (pos))->value)
+		&& (CB_REFERENCE (pos))->value->category == CB_CATEGORY_NUMERIC
+		&& (CB_FIELD ((CB_REFERENCE (pos))->value))->pic != NULL
+		&& is_less_than_four_or_is_six ((CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->size)
+		&& (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->scale == 0;
+}
+
+static int
+valid_screen_pos (cb_tree pos)
+{
+
+	if (valid_screen_pos_literal (pos)
+		|| valid_screen_pos_reference (pos)) {
+		return 1;
+	}
+	
+	cb_error (_("AT values must be an must have 6 digits or less than 4 digits."));
+	return 0;
+}
+
 static void
 cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 		     cb_tree scroll, cb_tree timeout, cb_tree prompt,
@@ -4206,7 +4248,7 @@ cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 			var, line, column, fgc, bgc, scroll,
 			timeout, prompt, size_is, cb_int (dispattrs)));
-	} else {
+	} else if (valid_screen_pos (pos)) {
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 			var, pos, NULL, fgc, bgc, scroll,
 			timeout, prompt, size_is, cb_int (dispattrs)));
@@ -4306,7 +4348,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 					column = CB_PAIR_Y (pos);
 					cb_emit (CB_BUILD_FUNCALL_4 ("cob_screen_accept",
 						var, line, column, timeout));
-				} else {
+				} else if (valid_screen_pos (pos)) {
 					cb_emit (CB_BUILD_FUNCALL_4 ("cob_screen_accept",
 						var, pos, NULL, timeout));
 				}
@@ -5103,7 +5145,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 				}
 				cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display",
 					 x, line, column));
-			} else {
+			} else if (valid_screen_pos (pos)) {
 				cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display",
 					 x, pos, NULL));
 			}
@@ -5153,7 +5195,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 					x, line, column, fgc, bgc,
 					scroll, size_is, cb_int (dispattrs)));
-			} else {
+			} else if (valid_screen_pos (pos)) {
 				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 					x, pos, NULL, fgc, bgc,
 					scroll, size_is, cb_int (dispattrs)));

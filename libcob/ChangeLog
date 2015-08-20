@@ -1,4 +1,11 @@
 
+2015-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: added detection of EC-SCREEN-LINE-NUMBER,
+	  EC-SCREEN-STARTING-COLUMN and EC-SCREEN-ITEM-TRUNCATED.
+	* screenio.c, common.h: refactored functions implementing ACCEPT and
+	  DISPLAY.
+
 2015-06-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: bug #140 - changed pow to int_pow to avoid rounding
