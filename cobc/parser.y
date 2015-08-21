@@ -4996,7 +4996,6 @@ screen_option:
 | LOWLIGHT
   {
 	check_screen_attr ("LOWLIGHT", COB_SCREEN_LOWLIGHT);
-	PENDING ("LOWLIGHT");
   }
 | REVERSE_VIDEO
   {

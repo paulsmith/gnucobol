@@ -359,6 +359,9 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr)
 	if (attr & COB_SCREEN_HIGHLIGHT) {
 		styles |= A_BOLD;
 	}
+	if (attr & COB_SCREEN_LOWLIGHT) {
+		styles |= A_DIM;
+	}
 	if (attr & COB_SCREEN_BLINK) {
 		styles |= A_BLINK;
 	}
