@@ -19,6 +19,45 @@
 
 ### ISO+IEC+1989-2002 REPORT WRITER module
 
+AT_SETUP([REPORT SECTION clause numbers])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT report-file ASSIGN "whatever".
+
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  report-file  REPORT r.
+       
+       REPORT           SECTION.
+       RD  r.
+       01  valid-num    TYPE DETAIL.
+           03  x        LINE 1.
+       01  invalid-nums TYPE DETAIL.
+           03  a        LINE +1.
+           03  b        LINE -1.
+           03  c        LINE 1.0.
+           03  d        LINE 0.
+
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+[prog.cob: 11: Warning: 'REPORT WRITER' not implemented
+prog.cob: 13: Warning: 'REPORT SECTION' not implemented
+prog.cob: 18: Error: Unsigned positive integer value expected
+prog.cob: 19: Error: Unsigned positive integer value expected
+prog.cob: 20: Error: Unsigned positive integer value expected
+prog.cob: 21: Error: Unsigned positive integer value expected
+])
+
+AT_CLEANUP
 
 AT_SETUP([Check REPORT error/warning])
 AT_KEYWORDS([report])

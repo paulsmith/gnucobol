@@ -10194,7 +10194,7 @@ integer:
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
 	    || CB_LITERAL ($1)->sign < 0
 	    || CB_LITERAL ($1)->scale) {
-		cb_error (_("Positive integer value expected"));
+		cb_error (_("Non-negative integer value expected"));
 		$$ = cb_int1;
 	} else {
 		$$ = $1;
@@ -10233,12 +10233,12 @@ report_integer:
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
 	    || CB_LITERAL ($1)->sign
 	    || CB_LITERAL ($1)->scale) {
-		cb_error (_("Unsigned integer value expected"));
+		cb_error (_("Unsigned positive integer value expected"));
 		$$ = cb_int1;
 	} else {
 		n = cb_get_int ($1);
 		if (n < 1) {
-			cb_error (_("Unsigned integer value expected"));
+			cb_error (_("Unsigned positive integer value expected"));
 			$$ = cb_int1;
 		} else {
 			$$ = $1;

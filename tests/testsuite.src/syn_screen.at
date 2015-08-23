@@ -44,3 +44,55 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
+
+AT_SETUP([SCREEN SECTION clause numbers])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       *> Valid numbers
+       01  a            LINE 1.
+       01  b            LINE +1.
+       01  c            LINE 0.
+
+       *> Invalid numbers
+       01  d            LINE -1.
+       01  e            LINE 1.0.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: Error: Non-negative integer value expected
+prog.cob: 13: Error: Non-negative integer value expected
+])
+
+AT_CLEANUP
+
+AT_SETUP([Pending clauses])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  foo          PIC X.
+       SCREEN           SECTION.
+       01  scr.
+           03  a        PIC X TO foo FULL, LEFTLINE, OVERLINE, REQUIRED.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 9: Warning: 'FULL' not implemented
+prog.cob: 9: Warning: 'LEFTLINE' not implemented
+prog.cob: 9: Warning: 'OVERLINE' not implemented
+prog.cob: 9: Warning: 'REQUIRED' not implemented
+])
+
+AT_CLEANUP

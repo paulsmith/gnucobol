@@ -1,4 +1,8 @@
 
+2015-08-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	*  parser.y: improved error messages of integer and report_integer.
+
 2015-08-21  Edward Hart <edward.dan.hart@gmail.com>
 
 	*  parser.y: removed PENDING from LOWLIGHT clause.
