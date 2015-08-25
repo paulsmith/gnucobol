@@ -1838,8 +1838,8 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        *> Note the number of digits in the value clause. This checks that the
-       *> compiler only warns on invalid PICTURE lengths, not the values in the
-       *> literals.
+       *> compiler only warns on invalid PICTURE lengths, not the literals in
+       *> the VALUE clauses.
        01  valid-1      PIC 9(3) VALUE 1.
        01  valid-2      PIC 9(4) VALUE 00001.
        01  valid-3      PIC 9(6) VALUE 0000001.
