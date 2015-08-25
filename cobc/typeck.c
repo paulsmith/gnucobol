@@ -4198,36 +4198,67 @@ is_less_than_four_or_is_six (int x)
 }
 
 static COB_INLINE COB_A_INLINE int
-valid_screen_pos_literal (cb_tree pos)
+is_reference_with_value (cb_tree pos)
 {
-	return CB_NUMERIC_LITERAL_P (pos)
-		&& is_less_than_four_or_is_six ((CB_LITERAL (pos))->size);
+	return CB_REFERENCE_P (pos)
+		&& (CB_REFERENCE (pos))->value != NULL;
+
+}
+
+static COB_INLINE COB_A_INLINE int
+value_is_numeric_field (cb_tree pos)
+{
+	return CB_FIELD_P ((CB_REFERENCE (pos))->value)
+		&& (CB_REFERENCE (pos))->value->category == CB_CATEGORY_NUMERIC;
+
+}
+
+static COB_INLINE COB_A_INLINE int
+value_has_picture_clause (cb_tree pos)
+{
+	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic != NULL;
+}
+
+static COB_INLINE COB_A_INLINE int
+value_pic_has_no_scale (cb_tree pos)
+{
+	return (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->scale == 0;
 }
 
 static int
-valid_screen_pos_reference (cb_tree pos)
+valid_screen_pos_type (cb_tree pos)
 {
-	/* This was highly unpleasant to write. */
-	return CB_REFERENCE_P (pos)
-		&& (CB_REFERENCE (pos))->value != NULL
-		&& CB_FIELD_P ((CB_REFERENCE (pos))->value)
-		&& (CB_REFERENCE (pos))->value->category == CB_CATEGORY_NUMERIC
-		&& (CB_FIELD ((CB_REFERENCE (pos))->value))->pic != NULL
-		&& is_less_than_four_or_is_six ((CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->size)
-		&& (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->scale == 0;
+	return is_reference_with_value (pos)
+		&& value_is_numeric_field (pos)
+		&& value_has_picture_clause (pos)
+		&& value_pic_has_no_scale (pos);
 }
 
 static int
 valid_screen_pos (cb_tree pos)
 {
+	int	size;
+	
+	/* Find size of pos value, if possible */
+	if (CB_NUMERIC_LITERAL_P (pos)) {
+		size = (CB_LITERAL (pos))->size;
+	} else if (valid_screen_pos_type (pos)) {
+		size = (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->size;
+	} else {
+		cb_error (_("Invalid value in AT clause"));
+		return 0;
+	}
 
-	if (valid_screen_pos_literal (pos)
-		|| valid_screen_pos_reference (pos)) {
+	/* Check if size is valid. If it isn't, display error. */
+	if (size == 5) {
+		cb_error (_("Value in AT clause may not have 5 digits"));
+		return 0;
+	} else if (size > 6) {
+		cb_error (_("Value in AT clause may not be longer than 6 digits"));
+		return 0;
+	} else {
 		return 1;
 	}
-	
-	cb_error (_("AT values must be an must have 6 digits or less than 4 digits."));
-	return 0;
 }
 
 static void

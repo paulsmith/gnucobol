@@ -5886,11 +5886,11 @@ at_line_column:
 | _at column_number line_number { $$ = CB_BUILD_PAIR ($3, $2); }
 | _at line_number		{ $$ = CB_BUILD_PAIR ($2, cb_int0); }
 | _at column_number		{ $$ = CB_BUILD_PAIR (cb_int0, $2); }
-| AT simple_value		{ $$ = $2; }
+| AT num_id_or_lit		{ $$ = $2; }
 ;
 
 line_number:
-  LINE _number num_id_or_lit		{ $$ = $3; }
+  LINE _number num_id_or_lit	{ $$ = $3; }
 ;
 
 column_number:

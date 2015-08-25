@@ -1828,3 +1828,47 @@ prog.cob: 22: Error: Exponent not between -78 and 76
 prog.cob: 23: Error: Exponent not between -78 and 76
 ])
 AT_CLEANUP
+
+AT_SETUP ([AT clause numbers])
+AT_KEYWORDS ([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       *> Note the number of digits in the value clause. This checks that the
+       *> compiler only warns on invalid PICTURE lengths, not the values in the
+       *> literals.
+       01  valid-1      PIC 9(3) VALUE 1.
+       01  valid-2      PIC 9(4) VALUE 00001.
+       01  valid-3      PIC 9(6) VALUE 0000001.
+
+       01  invalid-1    PIC 9(5) VALUE 1.
+       01  invalid-2    PIC 9(7) VALUE 1.
+       
+       PROCEDURE        DIVISION.
+           *> Valid values
+           DISPLAY SPACE AT 001 END-DISPLAY
+           DISPLAY SPACE AT 0101 END-DISPLAY
+           DISPLAY SPACE AT 001001 END-DISPLAY
+           DISPLAY SPACE AT valid-1 END-DISPLAY
+           DISPLAY SPACE AT valid-2 END-DISPLAY
+           DISPLAY SPACE AT valid-3 END-DISPLAY
+
+           *> Invalid values
+           DISPLAY SPACE AT 12345 END-DISPLAY
+           DISPLAY SPACE AT 1234567 END-DISPLAY
+           DISPLAY SPACE AT invalid-1 END-DISPLAY
+           DISPLAY SPACE AT invalid-2 END-DISPLAY
+           
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 26: Error: Value in AT clause may not have 5 digits
+prog.cob: 27: Error: Value in AT clause may not be longer than 6 digits
+prog.cob: 28: Error: Value in AT clause may not have 5 digits
+prog.cob: 29: Error: Value in AT clause may not be longer than 6 digits
+])
+AT_CLEANUP
