@@ -117,6 +117,12 @@
 #define	CB_CS_STOP			(1U << 14)
 #define	CB_CS_WITH			(1U << 15)
 
+/* Support for cobc from stdin */
+#define COB_DASH			"-"
+#define COB_DASH_NAME			"a.cob"
+#define COB_DASH_OUT			"a.out"
+
+
 /* Operand operation type */
 enum cb_operation_type {
 	CB_OPERATION_READ = 0,

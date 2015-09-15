@@ -1,4 +1,8 @@
 
+2015-09-15  Brian Tiffin <btiffin@gnu.org>
+
+	* cobc.h, moved COB_DASH defines out of ../configure.ac
+
 2015-08-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: tightened AT clause definition.

@@ -1,4 +1,8 @@
 
+2015-09-15  Brian Tiffin <btiffin@gnu.org>
+
+	* configure.ac, moved COB_DASH names to cobc/cobc.h
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
 
 	* configure.ac: added COB_DASH, COB_DASH_NAME, COB_DASH_OUT
