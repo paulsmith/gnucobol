@@ -1,19 +1,19 @@
 ## Copyright (C) 2003,2004,2005,2006,2007 Keisuke Nishida
 ## Copyright (C) 2007-2012 Roger While
 ## Copyright (C) 2014,2015 Simon Sobisch
-## 
+##
 ## This file is part of GNU Cobol.
-## 
+##
 ## The GNU Cobol compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GNU Cobol is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -67,6 +67,63 @@ AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00001234
 00004660
+])
+
+AT_CLEANUP
+
+## Numeric Boolean literal
+
+AT_SETUP([Numeric Boolean literal])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X-1           PIC 9(2) VALUE B"010101".
+       01 X-2           PIC 9(20) VALUE B"111111111111111111111111111111
+      -                                  "111111111111111111111111111111
+      -                                  "1111".
+       PROCEDURE        DIVISION.
+           DISPLAY X-1
+           END-DISPLAY.
+           DISPLAY X-2
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[21
+18446744073709551615
+])
+
+AT_CLEANUP
+
+# ACUCOBOL literal
+
+AT_SETUP([ACUCOBOL literal])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY B#101
+           DISPLAY O#1777777777777777777777
+           DISPLAY X#ffffffffffffffff
+           DISPLAY H#ffffffffffffffff
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[5
+18446744073709551615
+18446744073709551615
+18446744073709551615
 ])
 
 AT_CLEANUP
@@ -585,7 +642,7 @@ AT_DATA([prog.cob], [
         01 ALPHA-FIELD         PIC X(4).
 
         01 NON-INTEGER           PIC 9(2)V99   VALUE 12.89 .
-        01 NON-INTEGER-2         PIC 9(2)V99   
+        01 NON-INTEGER-2         PIC 9(2)V99
                                      USAGE BINARY VALUE 12.89 .
         01 NON-INTEGER-3         PIC 9(2)V99
                                       USAGE PACKED-DECIMAL VALUE 12.89 .
@@ -773,39 +830,39 @@ AT_SETUP([CALL / GOBACK with LOCAL-STORAGE])
 AT_KEYWORDS([extensions])
 
 # Testcase introduced when Bug #91 occured.
-# Will fail if memory is freed which was 
+# Will fail if memory is freed which was
 # allocated by mpir/gmp.
 AT_DATA([prog_a.cob], [
-		IDENTIFICATION DIVISION. 
+		IDENTIFICATION DIVISION.
 		PROGRAM-ID. prog_a.
 		DATA DIVISION.
 		WORKING-STORAGE SECTION.
 		77  WS-STRINGA   PIC X(10).
-		PROCEDURE DIVISION.       
+		PROCEDURE DIVISION.
 		    MOVE  "hi there"   TO WS-STRINGA
-		    CALL  "prog_b"  USING WS-STRINGA      
-		    DISPLAY "back in prog_a"  
+		    CALL  "prog_b"  USING WS-STRINGA
+		    DISPLAY "back in prog_a"
 		    GOBACK.
 ])
 
 AT_DATA([prog_b.cob], [
-		IDENTIFICATION DIVISION. 
+		IDENTIFICATION DIVISION.
 		PROGRAM-ID. prog_b.
 		DATA DIVISION.
-		WORKING-STORAGE SECTION. 
+		WORKING-STORAGE SECTION.
 		77  WS-STRINGB   PIC X(10).
 		77  WS-CALLSB    PIC 9(03).
 		LOCAL-STORAGE SECTION.
-		77  LS-STRING  PIC X(10). 
+		77  LS-STRING  PIC X(10).
 		LINKAGE SECTION.
-		77  LK-STRING  PIC X(10). 
-		
-		PROCEDURE DIVISION  USING  LK-STRING. 
-		    DISPLAY "entered prog_b"           
-		    ADD   1  TO  WS-CALLSB 
-		    MOVE  LK-STRING TO WS-STRINGB     
-		    MOVE  LK-STRING TO LS-STRING    
-		    DISPLAY "exiting prog_b"      
+		77  LK-STRING  PIC X(10).
+
+		PROCEDURE DIVISION  USING  LK-STRING.
+		    DISPLAY "entered prog_b"
+		    ADD   1  TO  WS-CALLSB
+		    MOVE  LK-STRING TO WS-STRINGB
+		    MOVE  LK-STRING TO LS-STRING
+		    DISPLAY "exiting prog_b"
 		    GOBACK.
 ])
 
@@ -1407,7 +1464,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog])
-AT_CHECK([cat TEST-FILE], [0], 
+AT_CHECK([cat TEST-FILE], [0],
 [a
 
 ababc
@@ -2159,7 +2216,7 @@ AT_DATA([prog.cob], [
            IF LENGTH OF USE-SECOND NOT = 27241
               DISPLAY LENGTH OF USE-SECOND  END-DISPLAY
            END-IF.
-           STOP RUN.                          
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE -frelax-syntax -o prog prog.cob], [0], ,
@@ -2716,25 +2773,25 @@ AT_DATA([prog.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "jkl" TO SO.
-            
+
             MOVE "version" TO ONAME(1).
             MOVE 0 TO HAS-VALUE(1).
             MOVE "v" TO VAL(1).
-            
+
             MOVE "verbose" TO ONAME(2).
             MOVE 0 TO HAS-VALUE(2).
             MOVE "V" TO VAL(2).
-        
+
             PERFORM WITH TEST BEFORE UNTIL COUNTER > 5
-                CALL 'CBL_OC_GETOPT' USING 
+                CALL 'CBL_OC_GETOPT' USING
                 BY REFERENCE SO LO LONGIND
                 BY VALUE LONG-ONLY
                 BY REFERENCE RETURN-CHAR OPT-VAL
-            
+
                 IF COUNTER = 0 AND RETURN-CHAR NOT = 'v' THEN
                     DISPLAY '0-Error: ' RETURN-CHAR
                 END-IF
@@ -2750,7 +2807,7 @@ AT_DATA([prog.cob], [
                 IF COUNTER = 4 AND RETURN-CHAR NOT = 'l' THEN
                     DISPLAY '4-ERROR: ' RETURN-CHAR
                END-IF
-                
+
                ADD 1 TO COUNTER
             END-PERFORM
 
@@ -2781,30 +2838,30 @@ AT_DATA([prog2.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "version" TO ONAME(1).
             MOVE 0 TO HAS-VALUE(1).
             MOVE "v" TO VAL(1).
-            
+
             MOVE "verbose" TO ONAME(2).
             MOVE 0 to HAS-VALUE(2).
             MOVE "V" TO VAL(2).
-        
+
             PERFORM WITH TEST BEFORE UNTIL COUNTER > 2
-                CALL 'CBL_OC_GETOPT' USING 
+                CALL 'CBL_OC_GETOPT' USING
                 BY REFERENCE SO LO LONGIND
                 BY VALUE LONG-ONLY
                 BY REFERENCE RETURN-CHAR OPT-VAL
-            
+
                 IF COUNTER = 0 AND RETURN-CHAR NOT = '?' THEN
                     DISPLAY '0-ERROR: ' RETURN-CHAR
                 END-IF
                 IF COUNTER = 1 AND RETURN-CHAR NOT = 'v' THEN
                     DISPLAY '1-ERROR: ' RETURN-CHAR
                 END-IF
-                      
+
                ADD 1 TO COUNTER
             END-PERFORM
 
@@ -2831,7 +2888,7 @@ AT_DATA([prog3.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "j:k::l" TO SO.
@@ -2857,20 +2914,20 @@ AT_DATA([prog3.cob], [
                 IF COUNTER = 0 AND OPT-VAL(1:4) NOT = 'lang' THEN
                         DISPLAY '0-ERROR: ' OPT-VAL
                 END-IF
-                IF COUNTER = 1 AND 
-                  (OPT-VAL(1:1) NOT = 'k' OR 
-                   RETURN-CHAR  NOT = 'V' OR 
+                IF COUNTER = 1 AND
+                  (OPT-VAL(1:1) NOT = 'k' OR
+                   RETURN-CHAR  NOT = 'V' OR
                    OPT-VAL(1:4)     = 'kang') THEN
                         DISPLAY '1-ERROR: ' OPT-VAL ' ' RETURN-CHAR ' '
                 END-IF
                 IF COUNTER = 2 AND RETURN-CHAR NOT = 'u' THEN
                         DISPLAY '2-ERROR: ' RETURN-CHAR
                 END-IF
-                IF COUNTER = 3 AND (OPT-VAL(1:1) NOT = '5' OR 
+                IF COUNTER = 3 AND (OPT-VAL(1:1) NOT = '5' OR
                 RETURN-CHAR NOT = 'j') THEN
                         DISPLAY '3-ERROR: ' RETURN-CHAR
                 END-IF
-                IF COUNTER = 4 AND (OPT-VAL(1:1) NOT = '6' OR 
+                IF COUNTER = 4 AND (OPT-VAL(1:1) NOT = '6' OR
                 RETURN-CHAR NOT = 'k') THEN
                         DISPLAY '4-ERROR: ' RETURN-CHAR
                 END-IF
@@ -2932,16 +2989,16 @@ AT_DATA([prog4.cob], [
                 BY REFERENCE RETURN-CHAR OPT-VAL
 
                 MOVE RETURN-CODE TO RET-DISP
-                
-                IF COUNTER = 0 AND (RETURN-CODE NOT = 0 OR 
+
+                IF COUNTER = 0 AND (RETURN-CODE NOT = 0 OR
                                     FLAG-VAL NOT = '1') THEN
                     DISPLAY 'RETURN VALUE: ' RET-DISP ' ' FLAG-VAL
                 END-IF
-                IF COUNTER = 1 AND (RETURN-CODE NOT = 0 OR 
+                IF COUNTER = 1 AND (RETURN-CODE NOT = 0 OR
                                     FLAG-VAL NOT = '0') THEN
                     DISPLAY 'RETURN VALUE: ' RET-DISP ' ' FLAG-VAL
                 END-IF
-                IF COUNTER = 2 AND (RETURN-CHAR NOT = 'u' OR 
+                IF COUNTER = 2 AND (RETURN-CHAR NOT = 'u' OR
                                     RETURN-CODE NOT = 2) THEN
                     DISPLAY 'RETURN VALUE: ' RET-DISP ' ' FLAG-VAL
                 END-IF
@@ -2983,12 +3040,12 @@ AT_DATA([prog5.cob], [
 
             01 FLAG-VAL PIC 9.
         PROCEDURE DIVISION.
-            MOVE "super-long-option-with-more-than-25-bytes" 
+            MOVE "super-long-option-with-more-than-25-bytes"
             TO ONAME(1).
             MOVE 0 TO HAS-VALUE(1).
             MOVE '1' TO VAL(1).
 
-            MOVE "stupid-long-option-with-more-than-25-bytes" 
+            MOVE "stupid-long-option-with-more-than-25-bytes"
             TO ONAME(2).
             MOVE 0 TO HAS-VALUE(2).
             MOVE '0' TO VAL(2).
@@ -3000,12 +3057,12 @@ AT_DATA([prog5.cob], [
                 BY REFERENCE RETURN-CHAR OPT-VAL
 
       *>          MOVE RETURN-CODE TO RET-DISP
-                
+
       *>          IF COUNTER = 0 AND RETURN-CODE NOT = 1 THEN
       *>              DISPLAY 'RETURN VALUE: ' RET-DISP ' ' FLAG-VAL
       *>          END-IF
             END-PERFORM
-            
+
       *>      MOVE 0 TO RETURN-CODE.
 
             STOP RUN.
@@ -3020,7 +3077,7 @@ AT_CHECK([$COMPILE prog3.cob], [0], [], [])
 AT_CHECK([./prog3 --version=lang --verbose=k --usage -j 5 -k6 -l], [0], [])
 AT_CHECK([$COMPILE prog4.cob --free], [0], [], [])
 AT_CHECK([./prog4 --static --dynamic --usage=boringandtoolongtext], [0], [])
-# Again a long and system specific error message which we ignore. 
+# Again a long and system specific error message which we ignore.
 # Return code 1 is sufficient as proof of hard return (as wanted).
 AT_CHECK([$COMPILE prog5.cob], [0], [], [])
 AT_CHECK([./prog5 --static], [1], [], [prog5.cob: 35: libcob: Call to CBL_OC_GETOPT with wrong longoption size.
@@ -3048,9 +3105,9 @@ AT_DATA([prog2.cob], [
         WORKING-STORAGE SECTION.
         01 FILE1 PIC X(8) VALUE 'prog.cob'.
         01 FILE2 PIC X(9) VALUE 'prog3.cob'.
-        
+
         PROCEDURE DIVISION.
-        CALL 'CBL_COPY_FILE' USING 
+        CALL 'CBL_COPY_FILE' USING
         FILE1 FILE2
         END-CALL
         STOP RUN.
@@ -3071,7 +3128,7 @@ AT_DATA([prog.cob], [
         DATA DIVISION.
         WORKING-STORAGE SECTION.
         01 DIR PIC X(4) VALUE 'ABCD'.
-        
+
         PROCEDURE DIVISION.
         CALL 'CBL_CREATE_DIR' USING DIR END-CALL
         IF RETURN-CODE NOT = 0
@@ -3092,7 +3149,7 @@ AT_DATA([prog.cob], [
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error deleting dir' END-DISPLAY
         END-IF
-        
+
         STOP RUN.
 ])
 
@@ -3114,42 +3171,42 @@ AT_DATA([prog.cob], [
         01 FNAME PIC X(256) VALUE 'testtext.txt'.
         01 ACCESS-MODE PIC X USAGE COMP-X VALUE 2.
         01 HANDLE PIC X(4) USAGE COMP-X.
-        
+
         01 OFFSET PIC X(8) USAGE COMP-X.
         01 NBYTES PIC X(4) USAGE COMP-X.
         01 WRITE-BUFFER PIC X(20).
-        
+
         PROCEDURE DIVISION.
-        CALL 'CBL_CREATE_FILE' USING 
-        FNAME 55 11 22 HANDLE 
+        CALL 'CBL_CREATE_FILE' USING
+        FNAME 55 11 22 HANDLE
         END-CALL
         IF RETURN-CODE NOT = -1
             DISPLAY 'Wrong return codes ...' END-DISPLAY
         END-IF
-        
-        CALL 'CBL_CREATE_FILE' USING 
-        FNAME ACCESS-MODE 0 0 HANDLE 
-        END-CALL        
+
+        CALL 'CBL_CREATE_FILE' USING
+        FNAME ACCESS-MODE 0 0 HANDLE
+        END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error creating file ...' END-DISPLAY
         END-IF
-        
+
         MOVE 'TestText.ABCD' TO WRITE-BUFFER.
         MOVE 0 TO OFFSET.
         MOVE 9 TO NBYTES.
 
-        CALL 'CBL_WRITE_FILE' USING 
+        CALL 'CBL_WRITE_FILE' USING
         HANDLE OFFSET NBYTES '0' WRITE-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error writing file ...' END-DISPLAY
         END-IF
-        
+
         CALL 'CBL_FLUSH_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error flushing file ...' END-DISPLAY
-        END-IF        
-        
+        END-IF
+
         STOP RUN.
 ])
 
@@ -3161,11 +3218,11 @@ AT_DATA([prog2.cob], [
         01 FNAME PIC X(256) VALUE 'testtext.txt'.
         01 RET PIC -9.
         01 HANDLE PIC X(4) USAGE COMP-X.
-        
+
         01 OFFSET PIC X(8) USAGE COMP-X.
         01 NBYTES PIC X(4) USAGE COMP-X.
         01 READ-BUFFER PIC X(10).
-        
+
         PROCEDURE DIVISION.
         CALL 'CBL_OPEN_FILE' USING
         FNAME 1 0 0 HANDLE
@@ -3173,36 +3230,36 @@ AT_DATA([prog2.cob], [
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error opening file ...' END-DISPLAY
         END-IF
-        
+
         MOVE SPACES TO READ-BUFFER.
         MOVE 2 TO OFFSET.
         MOVE 9 TO NBYTES.
-        
+
         CALL 'CBL_READ_FILE' USING
         HANDLE OFFSET NBYTES 0 READ-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error reading file ...' END-DISPLAY
-        END-IF        
+        END-IF
         IF READ-BUFFER NOT = 'stText.'
             DISPLAY 'Wrong readbuffer ...' END-DISPLAY
         END-IF
-        
+
         CALL 'CBL_CLOSE_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error closing file ...' END-DISPLAY
-        END-IF 
-        
+        END-IF
+
         CALL 'CBL_RENAME_FILE' USING FNAME 'foo.txt' END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error renaming file ...' END-DISPLAY
-        END-IF                               
-                
+        END-IF
+
         CALL 'CBL_DELETE_FILE' USING 'foo.txt' END-CALL
         IF RETURN-CODE NOT = 0
             DISPLAY 'Error deleting file ...' END-DISPLAY
-        END-IF                
-        
+        END-IF
+
         STOP RUN.
 ])
 
@@ -3346,4 +3403,3 @@ AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0],
 ])
 
 AT_CLEANUP
-

@@ -215,6 +215,8 @@ static void	read_literal (const int);
 static int	scan_x (char *, const int);
 static int	scan_z (char *, const int, const cob_u32_t);
 static int	scan_h (char *, const int);
+static int	scan_b (char *, const int);
+static int	scan_o (char *);
 static int	scan_numeric (char *);
 static int	scan_floating_numeric (const char *);
 static void	scan_picture (char *);
@@ -337,6 +339,41 @@ H\"[^\"\n]*\" {
 	/* H numeric literal */
 	cobc_force_literal = 0;
 	return scan_h (yytext + 2, yytext[1]);
+}
+
+B\'[^\'\n]*\' |
+B\"[^\"\n]*\" {
+	/* B boolean/numeric literal */
+	cb_verify (cb_numeric_boolean, _("Numeric boolean literal"));
+	cobc_force_literal = 0;
+	return scan_b (yytext + 2, yytext[1]);
+}
+
+B#[0-9]* {
+	/*
+	  To avoid subtle silent errors, such as B#021, this rule (and the ones
+	  following) here admit some invalid literals which emit errors when
+	  they are processed.
+	*/
+	/* ACUCOBOL binary numeric literal */
+	cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"));
+	cobc_force_literal = 0;
+	return scan_b (yytext + 2, '\0');
+}
+
+O#[0-9]* {
+	/* ACUCOBOL octal numeric literal */
+	cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"));
+	cobc_force_literal = 0;
+	return scan_o (yytext + 2);
+}
+
+X#[0-9A-Za-z]* |
+H#[0-9A-Za-z]* {
+	/* ACUCOBOL hexadecimal numeric literal */
+	cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"));
+	cobc_force_literal = 0;
+	return scan_h (yytext + 2, '\0');
 }
 
 \( {
@@ -1035,6 +1072,13 @@ read_literal (const int mark)
 	SET_LOCATION (yylval);
 }
 
+static void
+invalid_char_error (const char *literal_type, const char c)
+{
+	cb_error (_("%s literal contains invalid character '%c'"),
+		  literal_type, c);	
+}
+
 static int
 scan_x (char *text, const int mark)
 {
@@ -1043,6 +1087,7 @@ scan_x (char *text, const int mark)
 	size_t			currlen;
 	int			high;
 	int			c;
+	int			invalid_char = 0;
 
 	currlen = strlen (text);
 	if (currlen > plexsize) {
@@ -1061,7 +1106,12 @@ scan_x (char *text, const int mark)
 		} else if ('a' <= c && c <= 'f') {
 			c = c - 'a' + 10;
 		} else {
-			goto error;
+			invalid_char_error ("X", c);
+		        invalid_char = 1;
+			continue;
+			/* By not breaking immediately, we detect any following
+			   invalid chars
+			*/
 		}
 		if (high) {
 			*dst = (cob_u8_t)(c << 4);
@@ -1071,14 +1121,21 @@ scan_x (char *text, const int mark)
 		high = 1 - high;
 	}
 
+	if (invalid_char) {
+		goto error;
+	}
+	
 	if (high) {
 		yylval = cb_build_alphanumeric_literal (plexbuff, (size_t)(dst - plexbuff));
 		SET_LOCATION (yylval);
 		return LITERAL;
 	}
-	/* Fall through */
+
+	/* This is non-standard behaviour */
+	cb_error (_("X literal does not have an even number of digits"));
+	/* Fall through (to suppress compiler warning?) */
+
 error:
-	cb_error (_("Invalid %c literal: %s"), 'X', text);
 	yylval = cb_error_node;
 	return LITERAL;
 }
@@ -1113,16 +1170,15 @@ scan_z (char *text, const int mark, const cob_u32_t llit)
 static int
 scan_h (char *text, const int mark)
 {
-	unsigned char	*p;
-	cob_u64_t	val;
-	size_t		size;
+	unsigned char	*p = (unsigned char *)text;
+	cob_u64_t	val = 0;
+	size_t		size = 1;
 	int		c;
+	int		invalid_char = 0;
 
-	p = (unsigned char *)text;
-	val = 0;
-	size = 0;
 	for (; (int)*p != mark; p++, size++) {
-		if (size > 15) {
+		if (size > 16) {
+			cb_error (_("Hexadecimal literal is longer than 16 digits"));
 			goto error;
 		}
 		c = (int)*p;
@@ -1133,18 +1189,106 @@ scan_h (char *text, const int mark)
 		} else if ('a' <= c && c <= 'f') {
 			c = c - 'a' + 10;
 		} else {
-			goto error;
+			invalid_char_error ("Hexadecimal", c);
+		        invalid_char = 1;
+			continue;
 		}
+
 		val = (val << 4) + c;
 	}
 
+	if (invalid_char) {
+		goto error;
+	}
+	
+	/* Duplication? */
+	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
+	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+
+	SET_LOCATION (yylval);
+	return LITERAL;
+
+error:
+	yylval = cb_error_node;
+	return LITERAL;
+}
+
+static int
+scan_b (char *text, const int mark)
+{
+	size_t		size = 1;
+	cob_u64_t	val = 0;
+	int		c;
+	int		invalid_char = 0;
+
+	for (; *text != mark; text++, size++) {
+		if (size > 64) {
+			cb_error (_("B literal too long; 64 bits max"));
+			goto error;
+		}
+		c = (int) *text;
+		if (c == '0') {
+			c = 0;
+		} else if (c == '1') {
+			c = 1;
+		} else {
+			invalid_char_error ("B", c);
+			invalid_char = 1;
+			continue;
+		}
+
+		val = (val << 1) + c;
+	}
+
+	if (invalid_char) {
+		goto error;
+	}
+	
+	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
+	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+
+	SET_LOCATION (yylval);
+	return LITERAL;
+
+ error:
+	yylval = cb_error_node;
+	return LITERAL;
+}
+
+static int
+scan_o (char *text)
+{
+	cob_u64_t	val = 0;
+	size_t		size = 1;
+	int		c;
+	int		invalid_char = 0;
+
+	for (; *text != '\0'; text++, size++) {
+		if (size > 22) {
+			cb_error (_("O literal too long; 22 digits max"));
+			goto error;
+		}
+		c = (int) *text;
+		if (!('0' <= c && c <= '7')) {
+			invalid_char_error ("O", c);
+			invalid_char = 1;
+			continue;
+		}
+		
+		c = c - '0';
+		val = (val << 3) + c;
+	}
+
+	if (invalid_char) {
+		goto error;
+	}
+	
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 	SET_LOCATION (yylval);
 	return LITERAL;
 
-error:
-	cb_error (_("Invalid %c literal: %s"), 'H', text);
+ error:
 	yylval = cb_error_node;
 	return LITERAL;
 }
@@ -1152,7 +1296,13 @@ error:
 static int
 get_sign (const char sign)
 {
-	return sign == '+' ? 1 : (sign == '-' ? -1 : 0);
+	if (sign == '+') {
+		return 1;
+	} else if (sign == '-') {
+		return -1;
+	} else {
+		return 0;
+	}
 }
 
 #define INCREMENT_IF_SIGNED(text, sign) \

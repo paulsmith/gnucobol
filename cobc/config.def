@@ -63,3 +63,5 @@ CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alpha
 CB_CONFIG_SUPPORT (cb_odo_without_to, "odo-without-to")
 CB_CONFIG_SUPPORT (cb_section_segments, "section-segments")
 CB_CONFIG_SUPPORT (cb_alter_statement, "alter-statement")
+CB_CONFIG_SUPPORT (cb_numeric_boolean, "numeric-boolean")
+CB_CONFIG_SUPPORT (cb_acucobol_literals, "acucobol-literals")

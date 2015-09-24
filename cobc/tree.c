@@ -213,7 +213,7 @@ file_error (cb_tree name, const char *clause, const char errtype)
 			clause, CB_NAME (name));
 		break;
 	case CB_FILE_ERR_INVALID:
-		cb_error_x (name, _("%s clause is invalid for file '%s'"), 
+		cb_error_x (name, _("%s clause is invalid for file '%s'"),
 			clause, CB_NAME (name));
 		break;
 	}
@@ -518,7 +518,7 @@ valid_format (const enum cb_intr_enum intr, const char *format)
 {
 	char	decimal_point = current_program->decimal_point;
 
-        /* Precondition: iso_8601_func (intr) */
+	/* Precondition: iso_8601_func (intr) */
 
 	switch (intr) {
 	case CB_INTR_FORMATTED_CURRENT_DATE:
@@ -542,7 +542,7 @@ valid_format (const enum cb_intr_enum intr, const char *format)
 	default:
 		cb_error (_("Invalid date/time function - '%d'"), intr);
 		/* Ignore the content of the format */
-	        return 1;
+		return 1;
 	}
 }
 
@@ -565,14 +565,14 @@ offset_time_format (const char *format)
 {
 	char	decimal_point = current_program->decimal_point;
 
-        if (cob_valid_time_format (format, decimal_point)
+	if (cob_valid_time_format (format, decimal_point)
 	    || cob_valid_datetime_format (format, decimal_point)) {
 		/* Only offset time formats contain a '+'. */
-		return strchr (format, '+') !=  NULL;
+		return strchr (format, '+') !=	NULL;
 	} else {
 		return 0;
 	}
-}	
+}
 
 static int
 offset_arg_param_num (const enum cb_intr_enum intr)
@@ -613,6 +613,76 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 	}
 
 	return !error_found;
+}
+
+static int
+get_data_from_const (cb_tree const_val, unsigned char **data)
+{
+	if (const_val == cb_space) {
+		*data = (unsigned char *)" ";
+	} else if (const_val == cb_zero) {
+		*data = (unsigned char *)"0";
+	} else if (const_val == cb_quote) {
+		if (cb_flag_apostrophe) {
+			*data = (unsigned char *)"'";
+		} else {
+			*data = (unsigned char *)"\"";
+		}
+	} else if (const_val == cb_norm_low) {
+		*data = (unsigned char *)"\0";
+	} else if (const_val == cb_norm_high) {
+		*data = (unsigned char *)"\255";
+	} else if (const_val == cb_null) {
+		*data = (unsigned char *)"\0";
+	} else {
+		return 1;
+	}
+
+	return 0;
+}
+
+static int
+get_data_and_size_from_lit (cb_tree x, unsigned char **data, size_t *size)
+{
+	if (CB_LITERAL_P (x)) {
+		*data = CB_LITERAL (x)->data;
+		*size = CB_LITERAL (x)->size;
+	} else if (CB_CONST_P (x)) {
+		*size = 1;
+		if (get_data_from_const (x, data)) {
+			return 1;
+		}
+	} else {
+		return 1;
+	}
+
+	return 0;
+}
+
+static struct cb_literal *
+concat_literals (const cb_tree left, const cb_tree right)
+{
+	struct cb_literal	*p;
+	unsigned char		*ldata;
+	unsigned char		*rdata;
+	size_t			lsize;
+	size_t			rsize;
+
+	if (get_data_and_size_from_lit (left, &ldata, &lsize)) {
+		return NULL;
+	}
+	if (get_data_and_size_from_lit (right, &rdata, &rsize)) {
+		return NULL;
+	}
+
+	p = make_tree (CB_TAG_LITERAL, left->category, sizeof (struct cb_literal));
+	p->data = cobc_parse_malloc (lsize + rsize + 1U);
+	p->size = lsize + rsize;
+
+	memcpy (p->data, ldata, lsize);
+	memcpy (p->data + lsize, rdata, rsize);
+
+	return p;
 }
 
 /* Global functions */
@@ -1529,8 +1599,7 @@ cb_build_system_name (const enum cb_system_name_category category, const int tok
 /* Literal */
 
 cb_tree
-cb_build_numeric_literal (const int sign, const void *data,
-			  const int scale)
+cb_build_numeric_literal (const int sign, const void *data, const int scale)
 {
 	struct cb_literal *p;
 
@@ -1559,75 +1628,23 @@ cb_build_alphanumeric_literal (const void *data, const size_t size)
 cb_tree
 cb_concat_literals (const cb_tree x1, const cb_tree x2)
 {
-	unsigned char		*data1;
-	unsigned char		*data2;
 	struct cb_literal	*p;
-	size_t			size1;
-	size_t			size2;
 
 	if (x1 == cb_error_node || x2 == cb_error_node) {
 		return cb_error_node;
 	}
-	if (CB_LITERAL_P (x1)) {
-		data1 = CB_LITERAL (x1)->data;
-		size1 = CB_LITERAL (x1)->size;
-	} else if (CB_CONST_P (x1)) {
-		size1 = 1;
-		if (x1 == cb_space) {
-			data1 = (unsigned char *)" ";
-		} else if (x1 == cb_zero) {
-			data1 = (unsigned char *)"0";
-		} else if (x1 == cb_quote) {
-			if (cb_flag_apostrophe) {
-				data1 = (unsigned char *)"'";
-			} else {
-				data1 = (unsigned char *)"\"";
-			}
-		} else if (x1 == cb_norm_low) {
-			data1 = (unsigned char *)"\0";
-		} else if (x1 == cb_norm_high) {
-			data1 = (unsigned char *)"\255";
-		} else if (x1 == cb_null) {
-			data1 = (unsigned char *)"\0";
-		} else {
-			return cb_error_node;
-		}
-	} else {
+
+	if ((x1->category != CB_CATEGORY_ALPHANUMERIC)
+		|| (x2->category != CB_CATEGORY_ALPHANUMERIC)) {
+		cb_error (_("Non-alphanumeric literals cannot be concatenated"));
 		return cb_error_node;
 	}
-	if (CB_LITERAL_P (x2)) {
-		data2 = CB_LITERAL (x2)->data;
-		size2 = CB_LITERAL (x2)->size;
-	} else if (CB_CONST_P (x2)) {
-		size2 = 1;
-		if (x2 == cb_space) {
-			data2 = (unsigned char *)" ";
-		} else if (x2 == cb_zero) {
-			data2 = (unsigned char *)"0";
-		} else if (x2 == cb_quote) {
-			if (cb_flag_apostrophe) {
-				data2 = (unsigned char *)"'";
-			} else {
-				data2 = (unsigned char *)"\"";
-			}
-		} else if (x2 == cb_norm_low) {
-			data2 = (unsigned char *)"\0";
-		} else if (x2 == cb_norm_high) {
-			data2 = (unsigned char *)"\255";
-		} else if (x2 == cb_null) {
-			data2 = (unsigned char *)"\0";
-		} else {
-			return cb_error_node;
-		}
-	} else {
+
+	p = concat_literals (x1, x2);
+	if (p == NULL) {
 		return cb_error_node;
 	}
-	p = make_tree (CB_TAG_LITERAL, CB_CATEGORY_ALPHANUMERIC,
-			sizeof (struct cb_literal));
-	p->data = cobc_parse_malloc (size1 + size2 + 1U);
-	p->size = size1 + size2;
-	memcpy (p->data, data1, size1);
-	memcpy (p->data + size1, data2, size2);
+
 	return CB_TREE (p);
 }
 

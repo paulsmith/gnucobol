@@ -1,4 +1,10 @@
 
+2015-09-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* scanner.l: added non-standard numeric literals: MF's numeric
+	  boolean and ACUCOBOL's B#, O#, X# and H# literals.
+	* tree.c: improved error messages and refactored (cb_concat_literals).
+
 2015-09-15  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h, moved COB_DASH defines out of ../configure.ac

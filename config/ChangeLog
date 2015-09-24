@@ -1,4 +1,8 @@
 
+2015-09-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* added numeric-boolean and acucobol-literals
+
 2014-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* added new configuration acu.conf (most values marked as not verified yet)
