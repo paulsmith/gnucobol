@@ -1121,7 +1121,11 @@ scan_x (char *text, const int mark)
 		high = 1 - high;
 	}
 
-	if (invalid_char) {
+	if (!high) {
+		/* This is non-standard behaviour */
+		cb_error (_("X literal does not have an even number of digits"));
+		goto error;
+	} else if (invalid_char) {
 		goto error;
 	}
 	
@@ -1131,8 +1135,6 @@ scan_x (char *text, const int mark)
 		return LITERAL;
 	}
 
-	/* This is non-standard behaviour */
-	cb_error (_("X literal does not have an even number of digits"));
 	/* Fall through (to suppress compiler warning?) */
 
 error:
