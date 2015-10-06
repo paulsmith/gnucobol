@@ -1,7 +1,13 @@
 
+2015-10-06  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #158 - fixed TEST-FORMATTED-DATETIME rejecting
+	  October (month #10). Also fixed unreported bug where
+	  TEST-FORMATTED-DATETIME rejected dates followed by whitespace.
+
 2015-08-21  Edward Hart <edward.dan.hart@gmail.com>
 
-	*  screenio.c: implemented LOWLIGHT.
+	* screenio.c: implemented LOWLIGHT.
 
 2015-08-20  Edward Hart <edward.dan.hart@gmail.com>
 

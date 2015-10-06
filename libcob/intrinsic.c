@@ -2232,7 +2232,7 @@ test_month (const char *date, int *offset, int *month)
 		RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset],
 							offset));
 	} else { /* first digit == 1 */
-		RETURN_IF_NOT_ZERO (test_char_cond (date[*offset] == '1' || date[*offset] == '2',
+		RETURN_IF_NOT_ZERO (test_char_in_range ('0', '2', date[*offset],
 						    offset));
 	}
 
@@ -6342,7 +6342,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	/* Parse and validate the formatted date/time */
 	if (date_present) {
 		error_pos = test_formatted_date (parse_date_format_string (date_format_str),
-						 formatted_date, 0);
+						 formatted_date, !time_present);
 		if (error_pos != 0) {
 			cob_alloc_set_field_uint (error_pos);
 			goto end_of_func;
