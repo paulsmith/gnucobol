@@ -204,7 +204,9 @@ static struct handlerlist {
 	int			(*proc)(char *s);
 } *hdlrs;
 
-static const char *setting_group[] = {" hidden setting ","Call environment","File I/O","Screen I/O","Miscellaneous"};
+static const char *setting_group[] = {" hidden setting ","Call environment",
+					"File I/O","Screen I/O","Miscellaneous",
+					"System environment"};
 
 static char	not_set[] = "not set";
 static struct config_enum lwrupr[] = {{"LOWER","1"},{"UPPER","2"},{not_set,"0"},{NULL,NULL}};
@@ -237,8 +239,15 @@ static struct config_tbl gc_conf[] = {
 	{"COB_UNIX_LF","unix_lf",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_unix_lf)},
 #endif
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
-	{"USERNAME","username",			NULL,	NULL,GRP_MISC,ENV_STR,SETPOS(cob_user_name)},
+	{"USERNAME","username",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_user_name)},
 	{"LOGNAME","logname",			NULL,	NULL,GRP_HIDE,ENV_STR,SETPOS(cob_user_name)},
+#ifndef  _WIN32
+	{"LANG","lang",				NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_lang)},
+#if defined(__linux__)
+	{"OSTYPE","ostype",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_type)},
+#endif
+	{"TERM","term",				NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_term)},
+#endif
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
 	{"COB_LIBRARY_PATH","library_path",	"." PATHSEPS COB_LIBRARY_PATH,
 							NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)},
@@ -4876,6 +4885,14 @@ print_runtime_env()
 			}
 		}
 	}
+#ifdef	HAVE_SETLOCALE
+	printf("    : %-*s : %s\n",hdlen,"LC_CTYPE", (char*) setlocale (LC_CTYPE, NULL));
+	printf("    : %-*s : %s\n",hdlen,"LC_NUMERIC", (char*) setlocale (LC_NUMERIC, NULL));
+	printf("    : %-*s : %s\n",hdlen,"LC_COLLATE", (char*) setlocale (LC_COLLATE, NULL));
+	printf("    : %-*s : %s\n",hdlen,"LC_MESSAGES", (char*) setlocale (LC_MESSAGES, NULL));
+	printf("    : %-*s : %s\n",hdlen,"LC_MONETARY", (char*) setlocale (LC_MONETARY, NULL));
+	printf("    : %-*s : %s\n",hdlen,"LC_TIME", (char*) setlocale (LC_TIME, NULL));
+#endif
 }
 
 cob_settings *

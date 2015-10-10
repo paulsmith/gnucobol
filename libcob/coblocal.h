@@ -208,6 +208,9 @@ typedef struct __cob_settings {
 	char		**cob_config_file;	/* Keep all file names for later reporting */
 	char		*cob_trace_filename;
 	char		*cob_user_name;
+	char		*cob_sys_lang;		/* LANG setting from env */
+	char		*cob_sys_term;		/* TERM setting from env */
+	char		*cob_sys_type;		/* OSTYPE setting from env */
 	char		*cob_debug_log;
 
 	/* call.c */
@@ -282,7 +285,8 @@ struct config_tbl {
 #define GRP_FILE	2
 #define GRP_SCREEN	3
 #define GRP_MISC	4
-#define GRP_MAX 	5
+#define GRP_SYSENV	5
+#define GRP_MAX 	6
 
 #define SETPOS(member)	offsetof(cob_settings,member),sizeof(cobsetptr->member),0,0
 
