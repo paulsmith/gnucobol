@@ -306,10 +306,10 @@ raise_ec_on_invalid_line_or_col (const int line, const int column)
 	int	max_x;
 
 	getmaxyx (stdscr, max_y, max_x);
-	if (line < 0 || line > max_y) {
+	if (line < 0 || line >= max_y) {
 		cob_set_exception (COB_EC_SCREEN_LINE_NUMBER);
 	}
-	if (column < 0 || column > max_x) {
+	if (column < 0 || column >= max_x) {
 		cob_set_exception (COB_EC_SCREEN_STARTING_COLUMN);
 	}
 }
@@ -1211,8 +1211,8 @@ pos_to_line_column (cob_field *pos, int *line, int *column)
 	int	max_line_column;
 
 	if (pos->size < 4) {
-		*line = pos_val;
-		*column = 1;
+		*line = pos_val - 1;
+		*column = 0;
 		return;
 	}
 

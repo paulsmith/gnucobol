@@ -1,4 +1,10 @@
 
+2015-10-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #159 - added conversion from 1-based to 0-based
+	  coordinates for case where only LINE clause is given on
+	  ACCEPT/DISPLAY.
+
 2015-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: fixed bug #158 - fixed TEST-FORMATTED-DATETIME rejecting
