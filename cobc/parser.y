@@ -1058,6 +1058,7 @@ has_relative_pos (struct cb_field const *field)
 %token NOT
 %token NOT_END			"NOT END"
 %token NOT_EOP			"NOT EOP"
+%token NOT_ESCAPE		"NOT ESCAPE"
 %token NOT_EQUAL		"NOT EQUAL"
 %token NOT_EXCEPTION		"NOT EXCEPTION"
 %token NOT_INVALID_KEY		"NOT INVALID KEY"
@@ -1338,6 +1339,7 @@ has_relative_pos (struct cb_field const *field)
 
 %nonassoc NOT_END
 %nonassoc NOT_EOP
+%nonassoc NOT_ESCAPE
 %nonassoc NOT_INVALID_KEY
 %nonassoc NOT_OVERFLOW
 %nonassoc NOT_SIZE_ERROR
@@ -9216,7 +9218,7 @@ on_accp_exception:
 ;
 
 opt_on_accp_exception:
-| EXCEPTION
+| escape_or_exception
   statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_ACCEPT;
@@ -9224,14 +9226,24 @@ opt_on_accp_exception:
   }
 ;
 
+escape_or_exception:
+  ESCAPE
+| EXCEPTION
+;
+
 opt_not_on_accp_exception:
   %prec SHIFT_PREFER
-| NOT_EXCEPTION
+| not_escape_or_not_exception
   statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_ACCEPT;
 	current_statement->handler2 = $2;
   }
+;
+
+not_escape_or_not_exception:
+  NOT_ESCAPE
+| NOT_EXCEPTION
 ;
 
 on_disp_exception:

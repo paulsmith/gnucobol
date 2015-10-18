@@ -589,10 +589,21 @@ H#[0-9A-Za-z]* {
 	return SIZE_ERROR;
 }
 
+"NOT"[ ,;\n]+"ON"[ ,;\n]+"ESCAPE"[ ,;\n] |
+"NOT"[ ,;\n]+"ESCAPE"[ ,;\n] {
+	count_lines (yytext);
+	return NOT_ESCAPE;
+}
+
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"EXCEPTION"[ ,;\n] |
 "NOT"[ ,;\n]+"EXCEPTION"[ ,;\n] {
 	count_lines (yytext);
 	return NOT_EXCEPTION;
+}
+
+"ON"[ ,;\n]+"ESCAPE"[ ,;\n] {
+	count_lines (yytext);
+	return ESCAPE;
 }
 
 "ON"[ ,;\n]+"EXCEPTION"[ ,;\n] {

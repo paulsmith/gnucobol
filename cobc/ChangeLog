@@ -1,4 +1,9 @@
 
+2015-10-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, scanner.l: added support for MF's/ACUCOBOL's ON ESCAPE
+	  phrase for ACCEPT.
+
 2015-09-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* scanner.l: added non-standard numeric literals: MF's numeric
