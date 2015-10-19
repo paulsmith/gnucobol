@@ -96,3 +96,32 @@ prog.cob: 9: Warning: 'REQUIRED' not implemented
 ])
 
 AT_CLEANUP
+
+AT_SETUP([ACCEPT ON EXCEPTION/ESCAPE])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  foo          PIC X.
+       PROCEDURE        DIVISION.
+           ACCEPT foo
+               ON EXCEPTION
+                   CONTINUE
+               NOT EXCEPTION
+                   CONTINUE
+           END-ACCEPT
+           
+           ACCEPT foo
+               ESCAPE
+                   CONTINUE
+               NOT ON ESCAPE
+                   CONTINUE
+           END-ACCEPT
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
