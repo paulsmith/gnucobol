@@ -241,12 +241,15 @@ static struct config_tbl gc_conf[] = {
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
 	{"USERNAME","username",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_user_name)},
 	{"LOGNAME","logname",			NULL,	NULL,GRP_HIDE,ENV_STR,SETPOS(cob_user_name)},
-#ifndef  _WIN32
+#if !defined(_WIN32) || defined (__MINGW32__) /* cygwin does not define _WIN32 */
 	{"LANG","lang",				NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_lang)},
-#if defined(__linux__)
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__MINGW32__)
 	{"OSTYPE","ostype",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_type)},
 #endif
 	{"TERM","term",				NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_term)},
+#endif
+#if defined(_WIN32) && !defined(__MINGW32__)
+	{"OS","ostype",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_type)},
 #endif
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
 	{"COB_LIBRARY_PATH","library_path",	"." PATHSEPS COB_LIBRARY_PATH,

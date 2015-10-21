@@ -1,7 +1,14 @@
+
+2015-10-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c [WIN32][MINGW]: tweaking of additional environment settings
+
 2015-10-10 Ron Norman <rjn@inglenet.com>
-	* common.c added code to report additional environment settings
+
+	* common.c: added code to report additional environment settings
 
 2015-05-12  Ron Norman
+
 	* common.c: changed to be more specific about acceptable values for
 	  runtime Boolean options
 
@@ -13,7 +20,7 @@
 
 2015-03-14  Ron Norman <rjn@inglenet.com> 
 
-	* common.c has new code for table driven processing of runtime.cfg
+	* common.c: new code for table driven processing of runtime.cfg
 	  (runtime configuration) file and environment variables
 	  New cob_settings structure used to store all run-time options
 	  The old runtime_env was removed
