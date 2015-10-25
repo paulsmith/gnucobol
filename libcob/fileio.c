@@ -6303,7 +6303,7 @@ cob_exit_fileio (void)
 		cob_free (bdb_buff);
 		bdb_buff = NULL;
 	}
-	if (cobsetptr->bdb_home) {
+	if (cobsetptr && cobsetptr->bdb_home) {
 		cob_free (cobsetptr->bdb_home);
 		cobsetptr->bdb_home = NULL;
 	}

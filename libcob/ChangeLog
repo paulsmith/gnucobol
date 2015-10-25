@@ -1,4 +1,15 @@
 
+2015-10-24  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (conf_runtime_error): add function for configuration specific
+	  errors and tweaked the messages
+	* common.c (set_config_val): added possible values for gc_conf.enums
+	  to error messages; added check of maximum values for ENV_SIZE
+	* common.c (cob_load_config_file): if include file is not found prefix
+	  it with path of current loaded configuration file
+	* common.c: tweaked output for --runtime-env and added function
+	  (set_config_val_by_name) for overriding default values (used for USERNAME)
+
 2015-10-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c [WIN32][MINGW]: tweaking of additional environment settings
@@ -7,10 +18,21 @@
 
 	* common.c: added code to report additional environment settings
 
-2015-05-12  Ron Norman
+2015-05-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cb_config_entry): remove redundant aliases !copy/(un)set/!anything
+	* common.c: add ACUCOBOL configuration aliases LOGICAL_CANCELS
+	  (= !COB_PHYSICAL_CANCEL) and STRIP_TRAILING_SPACES (= !COB_LS_FIXED)
+
+2015-05-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cob_load_config_file, cob_load_config): respect environment
+	  COB_CONFIG_DIR when loading runtime configuration
+
+2015-05-12  Ron Norman <rjn@inglenet.com> 
 
 	* common.c: changed to be more specific about acceptable values for
-	  runtime Boolean options
+	  runtime boolean options
 
 2015-04-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

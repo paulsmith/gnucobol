@@ -262,8 +262,8 @@ struct config_tbl {
 	int		data_len;		/* Length of referenced field */
 	int		config_num;		/* Set by which runtime.cfg file */
 	int		set_by;			/* value set by a different keyword */
-	long		min_value;		/* Minium accepted value */
-	long		max_value;		/* Maximum accepted value */
+	unsigned long		min_value;		/* Minium accepted value */
+	unsigned long		max_value;		/* Maximum accepted value */
 };
 
 #define ENV_NOT		(1 << 1)		/* Negate True/False value setting */
@@ -273,12 +273,14 @@ struct config_tbl {
 #define ENV_CHAR	(1 << 5)		/* inline 'char[]' field */
 #define ENV_STR		(1 << 6)		/* a pointer to a string */
 #define ENV_PATH	(1 << 7)		/* a pointer to a file system path */
-#define ENV_ENUM	(1 << 8)		/* Value must in 'enum' list */
+#define ENV_ENUM	(1 << 8)		/* Value must in 'enum' list as match */
+#define ENV_ENUMVAL	(1 << 9)		/* Value must in 'enum' list as match or value */
 
 #define STS_ENVSET	(1 << 15)		/* value set via Env Var */
 #define STS_CNFSET	(1 << 16)		/* value set via config file */
 #define STS_ENVCLR	(1 << 17)		/* value removed from Env Var */
 #define STS_RESET	(1 << 18)		/* value was reset back to default */
+#define STS_FNCSET	(1 << 19)		/* value set via function call */
 
 #define GRP_HIDE	0
 #define GRP_CALL	1

@@ -40,7 +40,7 @@ OBJECT_EXT="@COB_OBJECT_EXT@"
 PATHSEP=":"
 
 # unset all environmental vars that are used by libcob
-for cobenv in $($COBCRUN --runtime-env | grep COB_ | cut -d: -f1); do unset $cobenv; done
+for cobenv in $($COBCRUN --runtime-env 2>/dev/null | grep COB_ | cut -d: -f2); do unset $cobenv; done
 
 PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
 export PATH
@@ -48,7 +48,7 @@ export COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
 export COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
 export COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
 export COB_CONFIG_DIR="${abs_top_srcdir}/config"
-export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime.cfg"
+export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
 export COB_COPY_DIR="${abs_top_srcdir}/copy"
 export LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
 export DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"

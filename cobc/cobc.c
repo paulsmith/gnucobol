@@ -2363,7 +2363,7 @@ process_command_line (const int argc, char **argv)
 		sub_ret = cb_load_std ("default.conf");
 		if (sub_ret != 0) {
 #if 0 /* Simon: likely too verbose */
-			configuration_error ("default.conf", 0, _("Failed to load the initial config file"));
+			configuration_error (1, "default.conf", 0, _("Failed to load the initial config file"));
 #endif
 			ret = sub_ret;
 		}

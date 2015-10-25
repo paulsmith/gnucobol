@@ -1,4 +1,15 @@
 
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: tweaked error messages, added possible values if invalid
+	* config.c (cb_load_conf_file): if include file is not found prefix it
+	  with path of current loaded configuration file
+
+2015-05-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: new options "includeif" to include only if file exists
+	  (implemented according to runtime configuration by Ron Norman)
+
 2015-04-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.c: load configuration file from COB_CONFIG_DIR if file cannot be

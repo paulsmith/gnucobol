@@ -108,6 +108,10 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -i, -info                   Display runtime information (build/environment)"));
 	puts (_("  -c <file>, -config=<file>   Set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-env            Display current runtime configuration"));
+	puts (_("                              This will show all settings and how they were set."));
+	puts (_("                              Possible options are runtime configuration file,"));
+	puts (_("                              environment (marked by 'env' when only set this way or"));
+	puts (_("                              by 'Ovr' if this overrides the runtime setting) or default"));
 }
 
 /* Set current argument from getopt as environment value */

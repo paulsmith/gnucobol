@@ -346,9 +346,9 @@ extern size_t			cobc_check_valid_name (const char *,
 #undef	CB_CONFIG_SUPPORT
 
 #define	CB_CONFIG_ANY(type,var,name)	extern type var;
-#define	CB_CONFIG_INT(var,name)		extern int var;
+#define	CB_CONFIG_INT(var,name)		extern unsigned int var;
 #define	CB_CONFIG_STRING(var,name)	extern const char *var;
-#define	CB_CONFIG_BOOLEAN(var,name)	extern int var;
+#define	CB_CONFIG_BOOLEAN(var,name)	extern unsigned int var;
 #define	CB_CONFIG_SUPPORT(var,name)	extern enum cb_support var;
 
 #include "config.def"
@@ -429,8 +429,8 @@ extern void		cb_plex_warning (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_error (const size_t,
 				       const char *, ...) COB_A_FORMAT23;
-extern void		configuration_error (const char *,
-					 const int, const char *, ...) COB_A_FORMAT34;
+extern void		configuration_error (const int, const char *,
+					 const int, const char *, ...) COB_A_FORMAT45;
 
 extern unsigned int	cb_verify (const enum cb_support, const char *);
 

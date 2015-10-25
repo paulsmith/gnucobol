@@ -47,10 +47,10 @@ PATH="$COB_WIN_BUILDPATH:${PATH}"
 export PATH
 
 # unset all environmental vars that are used by libcob
-for cobenv in $("$COBCRUN" --runtime-env | grep COB_ | cut -d: -f1); do unset $cobenv; done
+for cobenv in $("$COBCRUN" --runtime-env 2>/dev/null | grep COB_ | cut -d: -f2); do unset $cobenv; done
 
 export COB_CONFIG_DIR="$COB_SRC_PATH/config"
-export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime.cfg"
+export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
 export COB_COPY_DIR="$COB_SRC_PATH/copy"
 export COB_LIBRARY_PATH="$COB_WIN_BUILDPATH:$COB_LIBRARY_PATH"
 export COB_UNIX_LF=YES
