@@ -59,6 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -67,7 +68,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir).."
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -141,6 +142,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -149,7 +151,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir).."
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
@@ -398,18 +400,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="config.h"
-				>
-			</File>
-			<File
-				RelativePath="defaults.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\cobc\tree.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
@@ -422,11 +412,23 @@
 				>
 			</File>
 			<File
+				RelativePath="config.h"
+				>
+			</File>
+			<File
+				RelativePath="defaults.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libcob\exception.def"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libcob\system.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cobc\tree.h"
 				>
 			</File>
 		</Filter>

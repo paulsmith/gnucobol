@@ -11,6 +11,10 @@ set COB_ENV_SET=1
 
 :: Check for valid MSC Environment and let it do it's work.
 :: If not found try Windows SDKs in standard installation folders
+if exist "%VS140COMNTOOLS%vsvars32.bat" (
+   call "%VS140COMNTOOLS%vsvars32.bat"
+   goto :gc
+)
 if exist "%VS120COMNTOOLS%vsvars32.bat" (
    call "%VS120COMNTOOLS%vsvars32.bat"
    goto :gc

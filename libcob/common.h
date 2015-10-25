@@ -283,6 +283,9 @@
 #define snprintf		_snprintf
 #define getpid			_getpid
 #define access			_access
+#if defined COB_USE_VC2013_OR_GREATER
+#define timezone			_timezone
+#endif
 
 #define __attribute__(x)
 
@@ -1204,7 +1207,6 @@ typedef struct __cob_global {
 
 } cob_global;
 
-
 /* File I/O function pointer structure */
 struct cob_fileio_funcs {
 	int	(*open)		(cob_file *, char *, const int, const int);
@@ -1333,7 +1335,7 @@ COB_EXPIMP int	cob_sys_parameter_size	(void *);
  * cob_sys_getopt_long_long
  */
 COB_EXPIMP int	cob_sys_getopt_long_long	(void*, void*, void*, const int, void*, void*);
-typedef struct longoption_def{
+typedef struct longoption_def {
 	char name[25];
 	char has_option;
 	char return_value_pointer[sizeof(char*)];

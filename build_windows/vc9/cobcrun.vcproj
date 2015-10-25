@@ -59,6 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -139,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -355,6 +357,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\libcob\cobgetopt.h"
+				>
+			</File>
+			<File
 				RelativePath="config.h"
 				>
 			</File>
@@ -368,10 +374,6 @@
 			</File>
 			<File
 				RelativePath="..\..\tarstamp.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 		</Filter>

@@ -59,6 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -139,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -567,27 +569,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="config.h"
-				>
-			</File>
-			<File
-				RelativePath="defaults.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tarstamp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\cobc\cobc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\cobc\tree.h"
+				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 			<File
@@ -599,7 +585,19 @@
 				>
 			</File>
 			<File
+				RelativePath="config.h"
+				>
+			</File>
+			<File
+				RelativePath="defaults.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\flag.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob.h"
 				>
 			</File>
 			<File
@@ -607,11 +605,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\cobc\warning.def"
+				RelativePath="..\..\tarstamp.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcob\cobgetopt.h"
+				RelativePath="..\..\cobc\tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cobc\warning.def"
 				>
 			</File>
 		</Filter>

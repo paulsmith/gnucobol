@@ -51,13 +51,14 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -133,13 +134,14 @@
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="$(SolutionDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -149,7 +151,7 @@
 				AdditionalDependencies=""
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)..\($PlatformName)"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -570,28 +572,12 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			</File>
-			<File
-				RelativePath="config.h"
-				>
-			</File>
-			<File
-				RelativePath="defaults.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tarstamp.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\cobc\cobc.h"
 				>
+			</File>
 			<File
-				RelativePath="..\..\cobc\tree.h"
+				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 			<File
@@ -603,7 +589,19 @@
 				>
 			</File>
 			<File
+				RelativePath="config.h"
+				>
+			</File>
+			<File
+				RelativePath="defaults.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\flag.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob.h"
 				>
 			</File>
 			<File
@@ -611,11 +609,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\cobc\warning.def"
+				RelativePath="..\..\tarstamp.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcob\cobgetopt.h"
+				RelativePath="..\..\cobc\tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cobc\warning.def"
 				>
 			</File>
 		</Filter>
