@@ -1,4 +1,10 @@
 
+2015-10-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #161 - fixed screens terminating when the number
+	  of characters entered equalled the length of the first field.
+	* screenio.c: added a few comments and shortened some code.
+
 2015-10-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: fixed bug #159 - added conversion from 1-based to 0-based

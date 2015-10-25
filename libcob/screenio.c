@@ -695,10 +695,12 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 
 	getyx (stdscr, y, x);
 #if	1	/* RXWRXW - Column adjust */
+	/* ? */
 	if (x > 0) {
 		x--;
 	}
 #endif
+	/* If LINE is specified, move to specified line, else stay on current */
 	if (!s->line) {
 		line = y;
 	} else {
@@ -707,6 +709,7 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 			line = y;
 		}
 	}
+	/* Similarly for COLUMN */
 	if (!s->column) {
 		column = x;
 	} else {
@@ -715,16 +718,22 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 			column = x;
 		}
 	}
+	/*
+	  If it was LINE PLUS/MINUS, add current line + 1. We add 1 to undo the
+	  conversion from 1-based to 0-based coordinates.
+	*/
 	if (s->attr & COB_SCREEN_LINE_PLUS) {
 		line = y + line + 1;
 	} else if (s->attr & COB_SCREEN_LINE_MINUS) {
 		line = y - line + 1;
 	}
+	/* Similarly for COLUMN */
 	if (s->attr & COB_SCREEN_COLUMN_PLUS) {
 		column = x + column + 1;
 	} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
 		column = x - column + 1;
 	}
+	/* Move to specified position */
 	cob_move_cursor (line, column);
 	cob_current_y = line;
 	cob_current_x = column;
@@ -762,36 +771,24 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 static void
 cob_screen_get_all (const int initial_curs, const int gettimeout)
 {
-	struct cob_inp_struct	*sptr;
-	cob_screen		*s;
-	unsigned char		*p;
-	size_t			curr_index;
+	size_t			curr_index = (size_t)initial_curs;
+	struct cob_inp_struct	*sptr = cob_base_inp + curr_index;
+	cob_screen		*s = sptr->scr;
+	unsigned char		*p = s->field->data;
 	int			keyp;
-	int			sline;
-	int			scolumn;
+	int			sline = sptr->this_y;
+	int			scolumn = sptr->this_x;
 	int			cline;
 	int			ccolumn;
-	int			rightpos;
-	int			ateof;
-	int			gotbacksp;
-	int			ungetched;
+	int			rightpos = scolumn + (int)s->field->size - 1;
+	int			ateof = 0;
+	int			gotbacksp = 0;
+	int			ungetched = 0;
 	chtype			promptchar;
-	int		        charswritten;
 
-	curr_index = (size_t)initial_curs;
-	sptr = cob_base_inp + curr_index;
-	s = sptr->scr;
-	sline = sptr->this_y;
-	scolumn = sptr->this_x;
 	cob_move_cursor (sline, scolumn);
 	cob_screen_attr (s->foreg, s->backg, s->attr);
-	ateof = 0;
-	gotbacksp = 0;
-	ungetched = 0;
-	rightpos = scolumn + (int)s->field->size - 1;
-	p = s->field->data;
-	charswritten = 0;
-
+	
 	for (; ;) {
 		if (s->prompt) {
 			promptchar = s->prompt->data[0];
@@ -998,7 +995,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			}
 
 			*p = (unsigned char) keyp;
-			++charswritten;
 
 			if (s->attr & COB_SCREEN_SECURE) {
 				cob_addch (COB_CH_AS);
@@ -1023,9 +1019,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				}
 			} else {
 				p++;
-			}
-			if (charswritten == s->field->size) {
-				goto screen_return;
 			}
 			continue;
 		}
