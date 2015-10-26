@@ -2130,7 +2130,7 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR , "-conf");
 			}
-			sub_ret = cb_load_conf (cob_optarg, 1, 0);
+			sub_ret = cb_load_conf (cob_optarg, 0);
 			if (sub_ret != 0) ret = sub_ret;
 			break;
 
@@ -2406,7 +2406,7 @@ process_command_line (const int argc, char **argv)
 		sub_ret = cb_load_std ("default.conf");
 		if (sub_ret != 0) {
 #if 0 /* Simon: likely too verbose */
-			configuration_error ("default.conf", 0, _("Failed to load the initial config file"));
+			configuration_error (1, "default.conf", 0, _("Failed to load the initial config file"));
 #endif
 			ret = sub_ret;
 		}
@@ -3531,7 +3531,9 @@ process_compile (struct filename *fn)
 static int
 process_assemble (struct filename *fn)
 {
+#ifndef _MSC_VER
 	int		ret;
+#endif
 	size_t		bufflen;
 #ifdef	__OS400__
 	char	*name;
@@ -3924,7 +3926,7 @@ process_link (struct filename *l)
 	if (output_name) {
 #if	defined(_MSC_VER) || defined(__OS400__) || defined(__WATCOMC__) || defined(__BORLANDC__)
 		name = cobc_main_strdup (output_name);
-		file_stripext (name);
+		file_stripext ((char *)name);
 #else
 		name = output_name;
 #endif

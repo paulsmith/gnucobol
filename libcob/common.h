@@ -355,12 +355,12 @@
 #define	COB_A_NORETURN	__attribute__((noreturn))
 #define	COB_A_FORMAT12	__attribute__((format(printf, 1, 2)))
 #define	COB_A_FORMAT23	__attribute__((format(printf, 2, 3)))
-#define	COB_A_FORMAT34	__attribute__((format(printf, 3, 4)))
+#define	COB_A_FORMAT45	__attribute__((format(printf, 4, 5)))
 #else
 #define	COB_A_NORETURN
 #define	COB_A_FORMAT12
 #define	COB_A_FORMAT23
-#define	COB_A_FORMAT34
+#define	COB_A_FORMAT45
 #endif
 
 #ifdef	_MSC_VER
@@ -990,7 +990,7 @@ typedef union {
 	int		(*funcint)();	/* Function returning "int" */
 	void		*funcvoid;	/* Redefine to "void *" */
 #ifdef	_WIN32
-	/* stdcall variants */
+							/* stdcall variants */
 	void		*(__stdcall *funcptr_std)();
 	void		(__stdcall *funcnull_std)();
 	cob_field	*(__stdcall *funcfld_std)();
@@ -1080,7 +1080,7 @@ struct cob_func_loc {
 typedef struct {
 	cob_field	*field;	/* Key field */
 	int		flag;	/* WITH DUPLICATES (for RELATIVE/INDEXED) */
-				/* ASCENDING/DESCENDING (for SORT) */
+					/* ASCENDING/DESCENDING (for SORT) */
 	unsigned int	offset;	/* Offset of field */
 } cob_file_key;
 
@@ -1185,23 +1185,14 @@ typedef struct __cob_global {
 	unsigned int		cob_orig_line;		/* Program source line */
 	unsigned int		cob_got_exception;	/* Exception active */
 	unsigned int		cob_screen_initialized;	/* Screen initialized */
-	unsigned int		cob_unix_lf;		/* Use POSIX LF */
-	unsigned int		cob_display_warn;	/* Display warnings */
-	unsigned int		cob_first_init;		/* First call after init */
-	unsigned int		cob_env_mangle;		/* Mangle env names */
 	unsigned int		cob_physical_cancel;	/* Unloading of modules */
 
-	/* Library routine variables */
+												/* Library routine variables */
 
-	/* screenio / termio */
+												/* screenio / termio */
 	unsigned char		*cob_term_buff;		/* Screen I/O buffer */
-
-	unsigned int		cob_disp_to_stderr;	/* Redirect to stderr */
-	unsigned int		cob_beep_value;		/* Bell disposition */
 	int			cob_accept_status;	/* ACCEPT STATUS */
-	int			cob_timeout_scale;	/* timeout scale */
-	unsigned int		cob_extended_status;	/* Extended status */
-	unsigned int		cob_use_esc;		/* Check ESC key */
+
 	int			cob_max_y;		/* Screen max y */
 	int			cob_max_x;		/* Screen max x */
 
@@ -1233,9 +1224,11 @@ struct cobjmp_buf {
 
 /*******************************/
 /* Functions in common.c */
-COB_EXPIMP void print_runtime_env(void);
 COB_EXPIMP void print_info(void);
 COB_EXPIMP void print_version(void);
+COB_EXPIMP int cob_load_config(void);
+COB_EXPIMP void print_runtime_env(void);
+
 char* cob_int_to_string(int, char*);
 char* cob_int_to_formatted_bytestring(int, char*);
 char* cob_strcat(char*, char*);
@@ -1260,6 +1253,8 @@ COB_EXPIMP void	*cob_cache_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_realloc		(void *, const size_t);
 COB_EXPIMP void	cob_cache_free			(void *);
 COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
+
+COB_EXPIMP char *cob_expand_env_string(char *);
 
 COB_EXPIMP void	cob_check_version		(const char *, const char *,
 						 const int);

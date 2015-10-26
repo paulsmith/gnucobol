@@ -1,4 +1,10 @@
 
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: tweaked error messages, added possible values if invalid
+	* config.c (cb_load_conf_file): if include file is not found prefix it
+	  with path of current loaded configuration file
+
 2015-10-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, scanner.l: added support for MF's/ACUCOBOL's ON ESCAPE
@@ -69,6 +75,11 @@
 	  extension "SWITCH 1" to "SWITCH 26", added alias SWITCH [A-Z],
 	  allow this extension only with -fsyntax-extension
 
+2015-05-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: new options "includeif" to include only if file exists
+	  (implemented according to runtime configuration by Ron Norman)
+
 2015-05-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
@@ -79,6 +90,12 @@
 	* typeck.c (cb_emit_initialize): bug #84 check target for INITIALIZE,
 	  almost fixed as suggested by Edward Hard
 
+2015-04-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: load configuration file from COB_CONFIG_DIR if file cannot be
+	  accessed in current directory, only check for missing definitions if
+	  configuration file loaded without errors
+
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: set FORMATTED-CURRENT-DATE, INTEGER-OF-FORMATTED-DATE, and
@@ -87,6 +104,11 @@
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c : replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
+
+2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.c: support for multiple inclusion of conf files while
+	  checking for recursion
 
 2015-03-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

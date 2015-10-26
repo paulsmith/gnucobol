@@ -1,4 +1,15 @@
 
+2015-10-24  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (conf_runtime_error): add function for configuration specific
+	  errors and tweaked the messages
+	* common.c (set_config_val): added possible values for gc_conf.enums
+	  to error messages; added check of maximum values for ENV_SIZE
+	* common.c (cob_load_config_file): if include file is not found prefix
+	  it with path of current loaded configuration file
+	* common.c: tweaked output for --runtime-env and added function
+	  (set_config_val_by_name) for overriding default values (used for USERNAME)
+
 2015-10-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: fixed bug #161 - fixed screens terminating when the number
@@ -10,6 +21,14 @@
 	* intrinsic.c: fixed bug #159 - added conversion from 1-based to 0-based
 	  coordinates for case where only LINE clause is given on
 	  ACCEPT/DISPLAY.
+
+2015-10-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c [WIN32][MINGW]: tweaking of additional environment settings
+
+2015-10-10 Ron Norman <rjn@inglenet.com>
+
+	* common.c: added code to report additional environment settings
 
 2015-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -55,6 +74,22 @@
 
 	* common.c: fr #65 added more switches "SWITCH-16" to "SWITCH-36"
 
+2015-05-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cb_config_entry): remove redundant aliases !copy/(un)set/!anything
+	* common.c: add ACUCOBOL configuration aliases LOGICAL_CANCELS
+	  (= !COB_PHYSICAL_CANCEL) and STRIP_TRAILING_SPACES (= !COB_LS_FIXED)
+
+2015-05-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cob_load_config_file, cob_load_config): respect environment
+	  COB_CONFIG_DIR when loading runtime configuration
+
+2015-05-12  Ron Norman <rjn@inglenet.com> 
+
+	* common.c: changed to be more specific about acceptable values for
+	  runtime boolean options
+
 2015-05-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* intrinsic.c (cob_intr_current_date): return field with size of 21
@@ -65,6 +100,12 @@
 	* common.h, coblocal.h, call.c, common.c: fixed CALL after physical CANCEL
 	  by moving physical_cancel (defined in call.c and referenced via
 	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
+
+2015-04-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobgetopt.c (_getopt_initialize): re-added support for GNU extensions
+	  '+'/'-' in optstring[0], '+' => forcing POSIX correct behaviour (stop at
+	  first non-option), '-' => report non-options as argument of option code=1
 
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -86,6 +127,22 @@
 	* common.h: Changed COB_FILE_MODE to 0666
 	* fileio.c: use COB_FILE_MODE as permission for all cases where
 	  files are possibly created (fixes bug #126)
+
+2015-03-14  Ron Norman <rjn@inglenet.com> 
+
+	* common.c: new code for table driven processing of runtime.cfg
+	  (runtime configuration) file and environment variables
+	  New cob_settings structure used to store all run-time options
+	  The old runtime_env was removed
+	  call.c cobgetopt.c fileio.c intrinsic.c move.c numeric.c screenio.c
+	  all updated to work with the new cob_settings structure
+
+2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cob_load_config, cob_load_config_file, cb_config_entry): new
+	  functions for loading a runtime configuration file
+	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
+	  during runtime initialisation
 
 2015-02-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

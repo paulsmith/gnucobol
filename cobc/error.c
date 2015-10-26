@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
-   Copyright (C) 2014 Simon Sobisch
+   Copyright (C) 2014-2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -36,7 +36,9 @@ static char		*errnamebuff = NULL;
 static struct cb_label	*last_section = NULL;
 static struct cb_label	*last_paragraph = NULL;
 
-static unsigned int conf_error_displayed = 0;
+static int conf_error_displayed = 0;
+static int last_error_line = 0;
+static const char	*last_error_file = "Unknown";
 
 
 size_t				cb_msg_style;
@@ -140,7 +142,7 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 
 /* Error for config.c */
 void
-configuration_error (const char *fname, const int line, const char *fmt, ...)
+configuration_error (const int finish_error, const char *fname, const int line, const char *fmt, ...)
 {
 	va_list args;
 
@@ -150,22 +152,36 @@ configuration_error (const char *fname, const int line, const char *fmt, ...)
 		putc ('\n', stderr);
 	}
 
-	if (fname) {
-		if (line) {
-			fprintf (stderr, "%s:%d: ", fname, line);
-		} else {
+
+	/* Prefix */
+	if (fname != last_error_file
+		|| line != last_error_line) {
+		last_error_file = fname;
+		last_error_line = line;
+		if (fname) {
 			fprintf (stderr, "%s: ", fname);
+		} else {
+			fputs ("cb_conf: ", stderr);
 		}
-	} else {
-		fputs ("cb_conf: ", stderr);
+		if (line) {
+			fprintf (stderr, "%d: ", line);
+		}
 	}
 
+	/* Body */
 	va_start(args, fmt);
 	vfprintf (stderr, fmt, args);
 	va_end(args);
 
-	putc ('\n', stderr);
-	fflush (stderr);
+	/* Postfix */
+	if (!finish_error) {
+		putc(';', stderr);
+		putc('\n', stderr);
+		putc('\t', stderr);
+	} else {
+		putc('\n', stderr);
+		fflush(stderr);
+	}
 }
 
 /* Generic warning/error routines */

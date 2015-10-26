@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
-   Copyright (C) 2014 Simon Sobisch
+   Copyright (C) 2014-2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -49,9 +49,9 @@ enum cb_config_type {
 #undef	CB_CONFIG_SUPPORT
 
 #define CB_CONFIG_ANY(type,var,name)	type		var = (type)0;
-#define CB_CONFIG_INT(var,name)		int		var = 0;
+#define CB_CONFIG_INT(var,name)		unsigned int		var = 0;
 #define CB_CONFIG_STRING(var,name)	const char	*var = NULL;
-#define CB_CONFIG_BOOLEAN(var,name)	int		var = 0;
+#define CB_CONFIG_BOOLEAN(var,name)	unsigned int		var = 0;
 #define CB_CONFIG_SUPPORT(var,name)	enum cb_support	var = CB_OK;
 
 #include "config.def"
@@ -76,10 +76,17 @@ static struct config_struct {
 	void				*var;
 	char				*val;
 } config_table[] = {
-	{CB_STRING, "include", NULL, NULL}
-	, {CB_STRING, "not-reserved", NULL, NULL}
+	{CB_STRING, "include", NULL, NULL},
+	{CB_STRING, "includeif", NULL, NULL},
+	{CB_STRING, "not-reserved", NULL, NULL}
 #include "config.def"
 };
+
+/* Configuration includes */
+static struct includelist {
+	struct includelist	*next;
+	const char		*name;
+} *conf_includes = NULL;
 
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
@@ -110,16 +117,17 @@ read_string (const char *text)
 }
 
 static void
-invalid_value (const char *fname, const int line, const char *name, const char *val)
+invalid_value (const char *fname, const int line, const char *name, const char *val, const char *str)
 {
-	configuration_error (fname, line, 
+	configuration_error (0, fname, line,
 		_("Invalid value '%s' for configuration tag '%s'"), val, name);
+	configuration_error (1, fname, line, _("should be one of the following values: %s"), str);
 }
 
 static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
-	configuration_error (fname, line, 
+	configuration_error (1, fname, line, 
 		_("Unsupported value '%s' for configuration tag '%s'"), val, name);
 }
 
@@ -128,7 +136,7 @@ unsupported_value (const char *fname, const int line, const char *name, const ch
 int
 cb_load_std (const char *name)
 {
-	return cb_load_conf (name, 1, 1);
+	return cb_load_conf (name, 1);
 }
 
 int
@@ -147,8 +155,8 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
 	if (!s) {
-		configuration_error (fname, line,
-			_("Invalid configuration '%s'"), buff);
+		configuration_error (1, fname, line,
+			_("Invalid configuration tag '%s'"), buff);
 		return -1;
 	}
 	*s = 0;
@@ -160,7 +168,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		}
 	}
 	if (i == CB_CONFIG_SIZE) {
-		configuration_error (fname, line, _("Unknown configuration tag '%s'"), buff);
+		configuration_error (1, fname, line, _("Unknown configuration tag '%s'"), buff);
 		return -1;
 	}
 
@@ -195,7 +203,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "ibm") == 0) {
 					cb_assign_clause = CB_ASSIGN_IBM;
 				} else {
-					invalid_value (fname, line, name, val);
+					invalid_value (fname, line, name, val, "cobol2002, mf, ibm");
 					return -1;
 				}
 			} else if (strcmp (name, "binary-size") == 0) {
@@ -206,7 +214,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "1--8") == 0) {
 					cb_binary_size = CB_BINARY_SIZE_1__8;
 				} else {
-					invalid_value (fname, line, name, val);
+					invalid_value (fname, line, name, val, "2-4-8, 1-2-4-8, 1--8");
 					return -1;
 				}
 			} else if (strcmp (name, "binary-byteorder") == 0) {
@@ -215,7 +223,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "big-endian") == 0) {
 					cb_binary_byteorder = CB_BYTEORDER_BIG_ENDIAN;
 				} else {
-					invalid_value (fname, line, name, val);
+					invalid_value (fname, line, name, val, "native, big-endian");
 					return -1;
 				}
 			}
@@ -223,7 +231,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		case CB_INT:
 			for (j = 0; val[j]; j++) {
 				if (val[j] < '0' || val[j] > '9') {
-					invalid_value (fname, line, name, val);
+					invalid_value (fname, line, name, val, "0 - 9");
 					return -1;
 					break;
 				}
@@ -233,12 +241,20 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		case CB_STRING:
 			val = read_string (val);
 
-			if (strcmp (name, "include") == 0) {
+			if (strcmp (name, "include") == 0 ||
+				strcmp (name, "includeif") == 0) {
 				if (fname) {
 					/* Include another conf file */
-					return 1;
+					s = cob_expand_env_string((char *)val);
+					strcpy (buff, s);
+					cob_free (s);
+					if (strcmp (name, "includeif") == 0) {
+						return 3;
+					} else {
+						return 1;
+					}
 				} else {
-					configuration_error (NULL, 0,
+					configuration_error (1, NULL, 0,
 					      _("'%s' not supported with -cb_conf"), name);
 					return -1;
 				}
@@ -261,7 +277,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (val, "no") == 0) {
 				*((int *)var) = 0;
 			} else {
-				invalid_value (fname, line, name, val);
+				invalid_value (fname, line, name, val, "yes, no");
 				return -1;
 			}
 			break;
@@ -283,48 +299,94 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (val, "unconformable") == 0) {
 				*((enum cb_support *)var) = CB_UNCONFORMABLE;
 			} else {
-				invalid_value (fname, line, name, val);
+				invalid_value (fname, line, name, val, 
+					"ok, warning, archaic, obsolete, skip, ignore, error, unconformable");
 				return -1;
 			}
 			break;
 		default:
-			configuration_error (fname, line, _("Invalid type for '%s'"), name);
+			configuration_error (1, fname, line, _("Invalid type for '%s'"), name);
 			return -1;
 	}
 	return 0;
 }
 
-int
-cb_load_conf (const char *fname, const int check_nodef, const int prefix_dir)
+static int
+cb_load_conf_file (const char *conf_file, int isoptional)
 {
+	char			filename[COB_NORMAL_BUFF];
+	struct includelist	*c, *cc;
+
 	const unsigned char	*x;
-	const char		*name;
 	FILE			*fp;
-	size_t			i;
 	int			sub_ret, ret;
-	int			line;
+	int			i, line;
 	char			buff[COB_SMALL_BUFF];
 
-	/* Initialize the configuration table */
-	if (check_nodef) {
-		for (i = 0; i < CB_CONFIG_SIZE; i++) {
-			config_table[i].val = NULL;
+	for (i=0; conf_file[i] != 0 && conf_file[i] != SLASH_INT; i++);
+	if (conf_file[i] == 0) {			/* Just a name, No directory */
+		if (access(conf_file, F_OK) != 0) {	/* and file does not exist */
+			/* check for path of previous configuration file (for includes) */
+			c = conf_includes;
+			if (c) {
+				while (c->next != NULL) {
+					c = c->next;
+				}
+			}
+			filename[0] = 0;
+			if (c && c->name) {
+				strcpy(buff, conf_includes->name);
+				for (i = strlen(buff); i != 0 && buff[i] != SLASH_INT; i--);
+				if (i != 0) {
+					buff[i] = 0;
+					snprintf(filename, (size_t)COB_NORMAL_MAX, "%s%s%s", buff, SLASH_STR, conf_file);
+					if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
+						conf_file = filename;		/* Prefix last directory */
+					} else {
+						filename[0] = 0;
+					}
+				}
+			}
+			if (filename[0] == 0) {
+				/* check for COB_CONFIG_DIR (use default if not in environment) */
+				snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%s%s", cob_config_dir, SLASH_STR, conf_file);
+				if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
+					conf_file = filename;		/* Prefix COB_CONFIG_DIR */
+				}
+			}
 		}
 	}
 
-	if (prefix_dir) {
-		snprintf (buff, (size_t)COB_SMALL_MAX,
-			  "%s%s%s", cob_config_dir, SLASH_STR, fname);
-		name = buff;
-	} else {
-		name = fname;
+	/* check for recursion */
+	c = cc = conf_includes;
+	while (c != NULL) {
+		if (strcmp(c->name, conf_file) == 0) {
+			configuration_error (1, conf_file, 0, _("Recursive inclusion"));
+			return -2;
+		}
+		cc = c;
+		c = c->next;
 	}
+	/* add current entry to list*/
+	c = cob_malloc (sizeof(struct includelist));
+	c->next = NULL;
+	c->name = conf_file;
+	if (cc != NULL) {
+		cc->next = c;
+	} else {
+		conf_includes = c;
+	}
+
 	/* Open the configuration file */
-	fp = fopen (name, "r");
+	fp = fopen (conf_file, "r");
 	if (fp == NULL) {
-		fflush (stderr);
-		configuration_error (name, 0, _("No such file or directory"));
-		return -1;
+		if (!isoptional) {
+			fflush (stderr);
+			configuration_error (1, conf_file, 0, _("No such file or directory"));
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 
 	/* Read the configuration file */
@@ -348,36 +410,65 @@ cb_load_conf (const char *fname, const int check_nodef, const int prefix_dir)
 			continue;
 		}
 
-		sub_ret = cb_config_entry (buff, fname, line);
-		if (sub_ret == 1) {
-			/* Include another configuration file */
-			/* Find entry for getting include value */
-			for (i = 0; i < CB_CONFIG_SIZE; i++) {
-				if (strcmp (buff, config_table[i].name) == 0) {
-					break;
-				}
-			}
-			sub_ret = cb_load_conf (read_string(config_table[i].val), 0, 1);
-			if (sub_ret != 0) {
-				fclose (fp);
-				/* Only 1 include allowed */
-				if (sub_ret == 1) {
-					configuration_error (read_string(config_table[i].val), 0,
-						_("Only one include in configuration files allowed"));
-					sub_ret = -1;
-				}
+		sub_ret = cb_config_entry (buff, conf_file, line);
+		if (sub_ret == 1 || sub_ret == 3) {
+			sub_ret = cb_load_conf_file (buff, sub_ret == 3);
+			if (sub_ret < 0) {
+				ret = -1;
+				configuration_error (1, conf_file, line,
+						    _("Configuration file was included here"));
+				break;
 			}
 		}
 		if (sub_ret != 0) ret = sub_ret;
 	}
 	fclose (fp);
 
+	/* remove current entry from memory and list*/
+	if (cc) {
+		cc->next = NULL;
+	} else {
+		conf_includes = NULL;
+	}
+	cob_free (c);
+
+	return ret;
+}
+
+int
+cb_load_conf (const char *fname, const int prefix_dir)
+{
+	const char		*name;
+	int				ret;
+	size_t			i;
+	char			buff[COB_NORMAL_BUFF];
+
+	/* Initialize the configuration table */
+	for (i = 0; i < CB_CONFIG_SIZE; i++) {
+		config_table[i].val = NULL;
+	}
+
+	/* Get the name for the configuration file */
+	if (prefix_dir) {
+		snprintf (buff, (size_t)COB_NORMAL_MAX,
+			  "%s%s%s", cob_config_dir, SLASH_STR, fname);
+		name = buff;
+	} else {
+		name = fname;
+	}
+
+	ret = cb_load_conf_file (name, 0);
+
 	/* Checks for missing definitions */
-	if (check_nodef) {
-		for (i = 2U; i < CB_CONFIG_SIZE; i++) {
+	if (ret == 0) {
+		for (i = 3U; i < CB_CONFIG_SIZE; i++) {
 			if (config_table[i].val == NULL) {
-				configuration_error (fname, 0, _("No definition of '%s'"),
-					 config_table[i].name);
+				if (ret == 0) {
+					/* as there are likely more than one definition missing group it */
+					configuration_error(1, fname, 0, "Missing definitions");
+				}
+				configuration_error (1, fname, 0, _("\tNo definition of '%s'"),
+						config_table[i].name);
 				ret = -1;
 			}
 		}

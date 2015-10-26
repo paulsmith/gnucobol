@@ -91,8 +91,7 @@ struct cob_inp_struct {
 /* Local variables */
 
 static cob_global		*cobglobptr;
-static cob_u32_t		cob_legacy;
-static char*			cob_legacy_env;
+static cob_settings		*cobsetptr;
 
 /* Local variables when screenio activated */
 
@@ -107,7 +106,6 @@ static int			cob_current_y;
 static int			cob_current_x;
 static short			fore_color;
 static short			back_color;
-static int			insert_mode = 0;  /* insert toggle, 0=off, 1=on */
 #endif
 
 /* Local functions */
@@ -481,7 +479,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr)
 static void
 cob_screen_init (void)
 {
-	char	*s;
 
 #ifdef	HAVE_LIBPDCURSES
 	size_t	i;
@@ -497,30 +494,11 @@ cob_screen_init (void)
 	global_return = 0;
 	cob_current_y = 0;
 	cob_current_x = 0;
-	cob_legacy = 0;
 	fore_color = 0;
 	back_color = 0;
 
 	fflush (stdout);
 	fflush (stderr);
-
-	/*
-	 * TODO: needs Documentation
-	 */
-	if ((s = getenv ("COB_LEGACY")) != NULL) {
-		if (cob_check_env_true(s)) {
-			cob_legacy_env = cob_save_env_value(cob_legacy_env, s);
-
-			cob_legacy = 1U;
-		}
-	}
-	/* Get default insert mode, 'Y' or 'y' set to on */
-	s = getenv ("COB_INSERT_MODE");
-	if (s) {
-	    if (*s == 'Y' || *s == 'y') {
-		insert_mode = 1;
-	    }
-	}
 
 #if	0	/* RXWRXW sigtin */
 #ifndef _WIN32
@@ -1118,7 +1096,7 @@ cob_prep_input (cob_screen *s)
 		}
 		break;
 	case COB_SCREEN_TYPE_FIELD:
-		cob_screen_puts (s, s->field, cob_legacy);
+		cob_screen_puts (s, s->field, cobsetptr->cob_legacy);
 		if (s->attr & COB_SCREEN_INPUT) {
 			if (totl_index >= COB_INP_FLD_MAX) {
 				return 1;
@@ -1131,10 +1109,10 @@ cob_prep_input (cob_screen *s)
 		}
 		break;
 	case COB_SCREEN_TYPE_VALUE:
-		cob_screen_puts (s, s->value, cob_legacy);
+		cob_screen_puts (s, s->value, cobsetptr->cob_legacy);
 		if (s->occurs) {
 			for (n = 1; n < s->occurs; ++n) {
-				cob_screen_puts (s, s->value, cob_legacy);
+				cob_screen_puts (s, s->value, cobsetptr->cob_legacy);
 			}
 		}
 		break;
@@ -1215,6 +1193,7 @@ pos_to_line_column (cob_field *pos, int *line, int *column)
 		max_line_column = 1000;
 	} else {
 		/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
+		max_line_column = 1; /* set to some value that don't chrash */
 	}
 	*line = (pos_val / max_line_column) - 1;
 	*column = (pos_val % max_line_column) - 1;
@@ -1805,13 +1784,13 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		case KEY_IC:
 			/* Insert key toggle. */
 			/* If off turn on, if on turn off. */
-			if (insert_mode == 0) {
-			    insert_mode = 1;     /* on */
+			if (cobsetptr->cob_insert_mode == 0) {
+			    cobsetptr->cob_insert_mode = 1;     /* on */
 			    /* to do, needs vertical bar cursor */
 			    /* this doesn't seem to work */
 			    count = curs_set(1);
 			} else {
-			    insert_mode = 0;     /* off */
+			    cobsetptr->cob_insert_mode = 0;     /* off */
 			    /* to do, needs square cursor */
 			    /* this doesn't seem to work */
 			    count = curs_set(2);
@@ -1898,7 +1877,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				}
 			}
 			/* Insert character. */
-			if (insert_mode == 1) {
+			if (cobsetptr->cob_insert_mode == 1) {
 			    /* Move remainder to the right. */
 			    for (count = rightpos; count > ccolumn - 1; count--) {
 				/* Get character */
@@ -2213,22 +2192,8 @@ cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 }
 
 void
-cob_init_screenio (cob_global *lptr, runtime_env* runtimeptr)
+cob_init_screenio (cob_global *lptr, cob_settings *sptr)
 {
-	char* s;
-
-	/*
-	 * TODO: needs Documentation
-	 */
-	if ((s = getenv ("COB_LEGACY")) != NULL) {
-		if (cob_check_env_true(s)) {
-			cob_legacy_env = cob_save_env_value(cob_legacy_env, s);
-
-			cob_legacy = 1U;
-		}
-	}
-
 	cobglobptr = lptr;
-	runtimeptr->cob_legacy_env = cob_legacy_env;
-	runtimeptr->cob_legacy = &cob_legacy;
+	cobsetptr  = sptr;
 }

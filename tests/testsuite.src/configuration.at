@@ -1,0 +1,518 @@
+## Copyright (C) 2014,2015 Simon Sobisch
+## 
+## This file is part of GNU Cobol.
+## 
+## The GNU Cobol compiler is free software: you can redistribute it
+## and/or modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+## 
+## GNU Cobol is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+
+### GNU Cobol Test Suite
+
+
+AT_SETUP([cobc with standard configuration file])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# default configuration permits this extension
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD prog.cob], [0], [],
+[prog.cob: 4: Warning: AUTHOR is obsolete in GNU Cobol
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with configuration file via -std])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# check if -std loads configuration file and if override works
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -std=cobol2002 prog.cob], [1], [],
+[prog.cob: 4: Error: AUTHOR does not conform to COBOL 2002
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with standard configuration file via -conf])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# check if override via -conf works
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=cobol2002.conf prog.cob], [1], [],
+[prog.cob: 4: Error: AUTHOR does not conform to COBOL 2002
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with own configuration file via -conf])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.conf], [
+include "default.conf"
+name: "Sample Conf"
+author-paragraph:                       ok
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# check if override via -conf works and if include works
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [0], [], [])
+
+# check if configuration file loading with full path works
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=$(pwd)/test.conf prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc configuration: recursive include])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.conf], [
+# different line for "include" to check the line number
+include "test2.conf"
+])
+
+AT_DATA([test2.conf], [
+# include in
+# line 4
+include "test3.conf"
+])
+
+AT_DATA([test3.conf], [
+include "test.conf"
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [1], [],
+[Configuration Error
+test.conf: Recursive inclusion
+test3.conf: 2: Configuration file was included here
+test2.conf: 4: Configuration file was included here
+test.conf: 3: Configuration file was included here
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with -std and -conf])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.conf], [
+include "default.conf"
+name: "Sample Conf"
+author-paragraph:                       ok
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# check if override via -conf works and if include works
+AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with -cb_conf])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=author-paragraph:ok prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc with -cb_conf priority])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.conf], [
+include "default.conf"
+name: "Sample Conf"
+author-paragraph:   unconformable
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# -cb_conf must work
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=author-paragraph:ok prog.cob], [0], [], [])
+
+# -cb_conf must override all (no matter where it's used)
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=author-paragraph:ok -conf=test.conf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf -cb_conf=author-paragraph:ok prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc configuration: entries])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+# conf entries must be clean
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=author-paragraphok prog.cob], [1], [],
+[Configuration Error
+cb_conf: Invalid configuration tag 'author-paragraphok'
+])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=assign-clause:cobol2002 prog.cob], [1], [],
+[Configuration Error
+cb_conf: Unsupported value 'cobol2002' for configuration tag 'assign-clause'
+])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=assign-clause:cobol-2002 prog.cob], [1], [],
+[Configuration Error
+cb_conf: Invalid value 'cobol-2002' for configuration tag 'assign-clause';
+	should be one of the following values: cobol2002, mf, ibm
+])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -cb_conf=include:notthere.conf prog.cob], [1], [],
+[Configuration Error
+cb_conf: 'include' not supported with -cb_conf
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc configuration: conf missing])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([defunc.conf], [
+include "notthere.conf"
+])
+
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=notthere.conf prog.cob], [1], [],
+[Configuration Error
+notthere.conf: No such file or directory
+])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=defunc.conf prog.cob], [1], [],
+[Configuration Error
+notthere.conf: No such file or directory
+defunc.conf: 2: Configuration file was included here
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc configuration: conf optional])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([defunc.conf], [
+include "default.conf"
+includeif "notthere.conf"
+])
+
+AT_DATA([test.conf], [
+include "default.conf"
+include "test2.conf"
+])
+
+AT_DATA([test2.conf], [
+name: "Sample Conf"
+author-paragraph:                       ok
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       AUTHOR. tester.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=defunc.conf prog.cob], [0], [],
+[prog.cob: 4: Warning: AUTHOR is obsolete in GNU Cobol
+])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobc configuration: incomplete])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.conf], [
+name: "Sample Conf"
+])
+
+# check if incomplete configuration result in error
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [1], [],
+[Configuration Error
+test.conf: Missing definitions
+	No definition of 'tab-width'
+	No definition of 'text-column'
+	No definition of 'word-length'
+	No definition of 'assign-clause'
+	No definition of 'binary-size'
+	No definition of 'binary-byteorder'
+	No definition of 'standard-define'
+	No definition of 'filename-mapping'
+	No definition of 'pretty-display'
+	No definition of 'binary-truncate'
+	No definition of 'complex-odo'
+	No definition of 'indirect-redefines'
+	No definition of 'larger-redefines-ok'
+	No definition of 'relaxed-syntax-check'
+	No definition of 'perform-osvs'
+	No definition of 'sticky-linkage'
+	No definition of 'relax-level-hierarchy'
+	No definition of 'cobol85-reserved'
+	No definition of 'hostsign'
+	No definition of 'accept-update'
+	No definition of 'accept-auto'
+	No definition of 'author-paragraph'
+	No definition of 'memory-size-clause'
+	No definition of 'multiple-file-tape-clause'
+	No definition of 'label-records-clause'
+	No definition of 'value-of-clause'
+	No definition of 'data-records-clause'
+	No definition of 'top-level-occurs-clause'
+	No definition of 'synchronized-clause'
+	No definition of 'goto-statement-without-name'
+	No definition of 'stop-literal-statement'
+	No definition of 'debugging-line'
+	No definition of 'padding-character-clause'
+	No definition of 'next-sentence-phrase'
+	No definition of 'eject-statement'
+	No definition of 'entry-statement'
+	No definition of 'move-noninteger-to-alphanumeric'
+	No definition of 'odo-without-to'
+	No definition of 'section-segments'
+	No definition of 'alter-statement'
+	No definition of 'numeric-boolean'
+	No definition of 'acucobol-literals'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration])
+AT_KEYWORDS([configuration misc])
+
+# check if --runtime-env exits without error
+# don't compare stdout
+AT_CHECK([$COBCRUN --runtime-env], [0], ignore, [])
+
+# check if --runtime-env points to a file called "runtime_empty.cfg"
+# use tr to remove newlines and spaces as the path likely is splitted into two lines
+AT_CHECK([$COBCRUN --runtime-env | tr -d '\n ' | grep "runtime_empty.cfg"], [0], ignore, [])
+AT_CHECK([export COB_RUNTIME_CONFIG=""; $COBCRUN --runtime-env | tr -d '\n ' | grep "runtime.cfg"], [0], ignore, [])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration file])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.cfg], [
+include "test2.cfg"
+])
+
+AT_DATA([test2.cfg], [
+physical_cancel true
+])
+
+AT_DATA([test3.cfg], [
+setenv COB_PHYSICAL_CANCEL=true
+])
+
+
+# check if default for physical cancel is still false
+AT_CHECK([$COBCRUN --runtime-env | grep "COB_PHYSICAL_CANCEL" | grep "false" | grep "default"], [0], ignore, [])
+
+# check if override via -c works and if include works
+AT_CHECK([$COBCRUN -c test2.cfg --runtime-env | grep "physical_cancel" | grep "true"], [0], ignore, [])
+AT_CHECK([$COBCRUN -c test.cfg --runtime-env | grep "physical_cancel" | grep "true"], [0], ignore, [])
+AT_CHECK([$COBCRUN -c test3.cfg --runtime-env | grep "COB_PHYSICAL_CANCEL" | grep "true"], [0], ignore, [])
+
+# check if configuration file loading with full path works
+AT_CHECK([$COBCRUN -c $(pwd)/test.cfg --runtime-env], [0], ignore, [])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration: recursive include])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.cfg], [
+# different line for "include" to check the line number
+include "test2.cfg"
+])
+
+AT_DATA([test2.cfg], [
+# include in
+# line 4
+include "test3.cfg"
+])
+
+AT_DATA([test3.cfg], [
+include "test.cfg"
+])
+
+AT_CHECK([$COBCRUN -c test.cfg -r], [1], [],
+[Configuration Error
+test.cfg: Recursive inclusion
+test3.cfg: 2: Configuration file was included here
+test2.cfg: 4: Configuration file was included here
+test.cfg: 3: Configuration file was included here
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration: environment priority])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([test.cfg], [
+physical_cancel true
+])
+
+AT_CHECK([export COB_PHYSICAL_CANCEL=false; $COBCRUN -c test.cfg --runtime-env | grep "COB_PHYSICAL_CANCEL" | grep "false"], [0], ignore, [])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration: entries])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([defunc.cfg], [
+novar
+physical_cancel notwithme
+load_case  insensitive
+varseq_format big 
+sort_chunk 4K
+sort_memory 4G # too big by some byte
+])
+
+# conf entries must be clean
+AT_CHECK([$COBCRUN -c defunc.cfg --runtime-env], [1], [],
+[Configuration Error
+defunc.cfg: 2: Unknown configuration tag 'novar'
+defunc.cfg: 3: Invalid value 'notwithme' for configuration tag 'physical_cancel';
+	should be one of the following values: true, false
+defunc.cfg: 4: Invalid value 'insensitive' for configuration tag 'load_case';
+	should be one of the following values: LOWER(1), UPPER(2), not set(0)
+defunc.cfg: 5: Invalid value 'big' for configuration tag 'varseq_format';
+	should be one of the following values: 0, 1, 2, 3
+defunc.cfg: 6: Invalid value '4K' for configuration tag 'sort_chunk';
+	minimum value: 131072
+defunc.cfg: 7: Invalid value '4G' for configuration tag 'sort_memory';
+	maximum value: 4294967294
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration: conf missing])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([defunc.cfg], [
+include "notthere.cfg"
+])
+
+AT_CHECK([$COBCRUN -c notthere.cfg --runtime-env], [1], [],
+[Configuration Error
+notthere.cfg: No such file or directory
+])
+AT_CHECK([$COBCRUN -c defunc.cfg --runtime-env], [1], [],
+[Configuration Error
+notthere.cfg: No such file or directory
+defunc.cfg: 2: Configuration file was included here
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([runtime configuration: conf optional])
+AT_KEYWORDS([configuration misc])
+
+AT_DATA([defunc.cfg], [
+include "runtime_empty.cfg"
+includeif "notthere.cfg"
+])
+
+AT_CHECK([$COBCRUN -c defunc.cfg --runtime-env], [0], ignore, [])
+
+AT_CLEANUP

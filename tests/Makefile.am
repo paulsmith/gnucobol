@@ -24,9 +24,12 @@ SUBDIRS = cobol85
 TESTSUITE = $(srcdir)/testsuite
 
 testsuite_sources = \
+	testsuite.src/used_binaries.at \
+	testsuite.src/configuration.at \
 	testsuite.src/syn_copy.at \
 	testsuite.src/syn_definition.at \
 	testsuite.src/syn_file.at \
+	testsuite.src/syn_functions.at \
 	testsuite.src/syn_misc.at \
 	testsuite.src/syn_move.at \
 	testsuite.src/syn_multiply.at \

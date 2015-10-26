@@ -1,4 +1,9 @@
 
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.src/configuration.at: mayor update including runtime
+	  configuration
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_misc.at: compile from stdin, run after compile
@@ -17,6 +22,15 @@
 	* testsuite.src/syn_functions.at : (new) moved testsuite entries for
 	  FUNCTIONs to their own test definition (origin: syn_misc.at)
 
+2015-03-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* atlocal.in, atlocal_win: Added setting of COB_RUNTIME_CONFIG
+	* moved tests for checking used binaries (cobc, cobcrun, extras) from
+	  testsuite.src/run_misc.at to testsuite.src/used_binaries.at
+	* moved tests for checking compiler configuration from
+	  testsuite.src/syn_misc.at to testsuite.src/configuration.at, updated
+	  tests and added new ones
+
 2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.src/syn_screen.at : (new) Added first testsuite entries for
@@ -34,16 +48,16 @@
 
 2014-04-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* testsuite.src/*.at : Added check for cobc's exit code and stderr
+	* testsuite.src/*.at: Added check for cobc's exit code and stderr
 		where missing
 
 2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* testsuite.src/run_extensions.at : Added tests for getopt.
+	* testsuite.src/run_extensions.at: Added tests for getopt.
 
 2014-01-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* testsuite.src/run_reportwriter.at, testsuite.src/syn_reportwriter.at :
+	* testsuite.src/run_reportwriter.at, testsuite.src/syn_reportwriter.at:
 	  Added first testsuite entries for REPORT WRITER
 
 2010-06-28  Roger While <simrw@sim-basis.de>
