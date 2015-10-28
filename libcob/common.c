@@ -4642,17 +4642,18 @@ cb_config_entry (char *buf, int line)
 	char	keyword[COB_MINI_BUFF],value[COB_SMALL_BUFF],value2[COB_SMALL_BUFF];
 
 	cob_source_line = line;
+
 	for (j=strlen(buf); buf[j-1] == '\r' || buf[j-1] == '\n'; )	/* Remove CR LF */
 		buf[--j] = 0;
 
 	for (i=0; isspace((unsigned char)buf[i]); i++);
 
-	for (j=0; buf[i] != ':' && !isspace((unsigned char)buf[i]) && buf[i] != '=' && buf[i] != '#'; )
+	for (j=0; buf[i] != 0 && buf[i] != ':' && !isspace((unsigned char)buf[i]) && buf[i] != '=' && buf[i] != '#'; )
 		keyword[j++] = buf[i++];
 	keyword[j] = 0;
 
 	strcpy(value,"");
-	while (isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=') i++;
+	while (buf[i] == 0 || isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=') i++;
 	if (buf[i] == '"' 
 	||  buf[i] == '\'') {
 		qt = buf[i++];
@@ -4662,6 +4663,7 @@ cb_config_entry (char *buf, int line)
 		for (j=0; !isspace((unsigned char)buf[i]) && buf[i] != '#' && buf[i] != 0; )
 			value[j++] = buf[i++];
 	}
+
 	value[j] = 0;
 	if (strcmp(value, "") == 0) {
 		conf_runtime_error(1, _("WARNING - '%s' without a value - ignored!"), keyword);
