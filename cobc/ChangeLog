@@ -1,4 +1,10 @@
 
+2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* scanner.l: maximum word-length always resulted in error if -W[all]
+      was set, now only raise an error if -frelax-syntax is not set and
+      raise a warning if both -frelax-syntax and -W[all] are active
+      
 2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.c: tweaked error messages, added possible values if invalid

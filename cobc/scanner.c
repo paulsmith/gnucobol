@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 37
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -168,7 +168,6 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -1590,7 +1589,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1594 "scanner.c"
+#line 1593 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1755,6 +1754,31 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
+#line 232 "scanner.l"
+
+
+
+	if (likely(current_program)) {
+		if (current_program->decimal_point == '.') {
+			BEGIN DECIMAL_IS_PERIOD;
+		} else {
+			BEGIN DECIMAL_IS_COMMA;
+		}
+	}
+
+	/* We treat integer literals immediately after '.' as labels;
+	   that is, they must be level numbers or section names. */
+	if (last_token_is_dot) {
+		integer_is_label = 1;
+		last_token_is_dot = 0;
+	} else {
+		integer_is_label = 0;
+	}
+
+
+
+#line 1781 "scanner.c"
+
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -1781,32 +1805,6 @@ YY_DECL
 		yy_load_buffer_state( );
 		}
 
-	{
-#line 232 "scanner.l"
-
-
-
-	if (likely(current_program)) {
-		if (current_program->decimal_point == '.') {
-			BEGIN DECIMAL_IS_PERIOD;
-		} else {
-			BEGIN DECIMAL_IS_COMMA;
-		}
-	}
-
-	/* We treat integer literals immediately after '.' as labels;
-	   that is, they must be level numbers or section names. */
-	if (last_token_is_dot) {
-		integer_is_label = 1;
-		last_token_is_dot = 0;
-	} else {
-		integer_is_label = 0;
-	}
-
-
-
-#line 1809 "scanner.c"
-
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
@@ -1824,7 +1822,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
+			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -2716,8 +2714,11 @@ YY_RULE_SETUP
 			/* Absolute limit */
 			cb_error (_("Word length exceeds maximum of %d characters - '%s'"),
 				  COB_MAX_WORDLEN, yytext);
-		} else if (!cb_relaxed_syntax_check || warningopt) {
+		} else if (!cb_relaxed_syntax_check) {
 			cb_error (_("Word length exceeds %d characters - '%s'"),
+				  cb_word_length, yytext);
+		} else if (warningopt) {
+			cb_warning (_("Word length exceeds %d characters - '%s'"),
 				  cb_word_length, yytext);
 		}
 	}
@@ -2844,7 +2845,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 894 "scanner.l"
+#line 897 "scanner.l"
 {
 	yylval = NULL;
 	return LESS_OR_EQUAL;
@@ -2852,7 +2853,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 899 "scanner.l"
+#line 902 "scanner.l"
 {
 	yylval = NULL;
 	return GREATER_OR_EQUAL;
@@ -2860,7 +2861,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 904 "scanner.l"
+#line 907 "scanner.l"
 {
 	yylval = NULL;
 	return NOT_EQUAL;
@@ -2868,7 +2869,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 909 "scanner.l"
+#line 912 "scanner.l"
 {
 	yylval = NULL;
 	return EXPONENTIATION;
@@ -2876,7 +2877,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 914 "scanner.l"
+#line 917 "scanner.l"
 {
 	last_token_is_dot = 1;
 	yylval = NULL;
@@ -2885,7 +2886,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 920 "scanner.l"
+#line 923 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_AMPER;
@@ -2893,7 +2894,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 925 "scanner.l"
+#line 928 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_COLON;
@@ -2901,7 +2902,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 930 "scanner.l"
+#line 933 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_EQUAL;
@@ -2909,7 +2910,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 935 "scanner.l"
+#line 938 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_DIV;
@@ -2917,7 +2918,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 940 "scanner.l"
+#line 943 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MUL;
@@ -2925,7 +2926,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 945 "scanner.l"
+#line 948 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_PLUS;
@@ -2933,7 +2934,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 950 "scanner.l"
+#line 953 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MINUS;
@@ -2941,7 +2942,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 955 "scanner.l"
+#line 958 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_LESS;
@@ -2949,7 +2950,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 960 "scanner.l"
+#line 963 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_GREATER;
@@ -2957,7 +2958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 965 "scanner.l"
+#line 968 "scanner.l"
 {
 	int	c;
 
@@ -2975,14 +2976,14 @@ YY_RULE_SETUP
 
 case 128:
 YY_RULE_SETUP
-#line 981 "scanner.l"
+#line 984 "scanner.l"
 {
 	/* Ignore */
   }
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 984 "scanner.l"
+#line 987 "scanner.l"
 {
 	BEGIN INITIAL;
 	scan_picture (yytext);
@@ -2993,7 +2994,7 @@ YY_RULE_SETUP
 
 case 130:
 YY_RULE_SETUP
-#line 992 "scanner.l"
+#line 995 "scanner.l"
 {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				l;
@@ -3017,7 +3018,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 1012 "scanner.l"
+#line 1015 "scanner.l"
 {
 	yylval = NULL;
 	return yytext[0];
@@ -3029,7 +3030,7 @@ case YY_STATE_EOF(DECIMAL_IS_PERIOD):
 case YY_STATE_EOF(DECIMAL_IS_COMMA):
 case YY_STATE_EOF(PICTURE_STATE):
 case YY_STATE_EOF(FUNCTION_STATE):
-#line 1018 "scanner.l"
+#line 1021 "scanner.l"
 {
 	struct cb_level_78	*p78;
 	struct cb_level_78	*p782;
@@ -3062,10 +3063,10 @@ case YY_STATE_EOF(FUNCTION_STATE):
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 1048 "scanner.l"
+#line 1051 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3069 "scanner.c"
+#line 3070 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3195,7 +3196,6 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -3902,7 +3902,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 1048 "scanner.l"
+#line 1051 "scanner.l"
 
 
 

@@ -1514,7 +1514,31 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -free -W prog.cob], [1], [],
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  FILLER        PIC 9(01) VALUE 0.
+           88 SOME-SPECIAL-VAL-WITH-LENGTH30    VALUE 0.
+           88 SOME-SPECIAL-VAL-WITH-LENGTH-31   VALUE 1.
+           88 SOME-SPECIAL-VAL-WITH-LENGTH-32C  VALUE 1.
+           88 SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES      VALUE 3.
+       PROCEDURE        DIVISION.
+       SOME-SPECIAL-PAR-WITH-LENGTH30.
+           SET  SOME-SPECIAL-VAL-WITH-LENGTH30   TO TRUE.
+       SOME-SPECIAL-PAR-WITH-LENGTH-31.
+           SET  SOME-SPECIAL-VAL-WITH-LENGTH-31  TO TRUE.
+       SOME-SPECIAL-PAR-WITH-LENGTH-32C.
+           SET  SOME-SPECIAL-VAL-WITH-LENGTH-32C TO TRUE.
+       SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES.
+           SET  SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES TO TRUE.
+           STOP RUN.
+])
+
+AT_CHECK([$COBC -fsyntax-only -free -W prog.cob], [1], [],
 [prog.cob: 11: Error: Word length exceeds 31 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog.cob: 12: Error: Word length exceeds 31 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: 13: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
@@ -1530,7 +1554,7 @@ prog.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LON
 prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
-AT_CHECK([$COMPILE_ONLY -free -W -cb_conf=word-length:45 prog.cob], [1], [],
+AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob], [1], [],
 [prog.cob: 12: Error: Word length exceeds 45 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: 13: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
@@ -1542,13 +1566,25 @@ prog.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LON
 prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
-AT_CHECK([$COMPILE_ONLY -free -W -cb_conf=word-length:60 prog.cob], [1], [],
+AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob], [1], [],
 [prog.cob: 13: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
 prog.cob: 23: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
 prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
+
+AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob], [0], [],
+[prog2.cob: 12: Warning: Word length exceeds 45 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
+prog2.cob: 20: Warning: Word length exceeds 45 characters - 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob: In paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
+prog2.cob: 21: Warning: Word length exceeds 45 characters - 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+])
+
+AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob], [0], [], [])
+
+AT_CHECK([$COBC -fsyntax-only -free -frelax-syntax prog2.cob], [0], [], [])
 
 AT_CLEANUP
 
