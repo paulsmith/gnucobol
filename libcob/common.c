@@ -1128,8 +1128,9 @@ cob_rescan_env_vals (void)
 	cob_source_file = sv_src_file;
 
 	/* Extended ACCEPT status returns */
-	if(cobsetptr->cob_extended_status == 0)
+	if (cobsetptr->cob_extended_status == 0) {
 		cobsetptr->cob_use_esc = 0;
+	}
 }
 
 static int
@@ -2477,7 +2478,25 @@ void
 cob_check_based (const unsigned char *x, const char *name)
 {
 	if (!x) {
-		cob_runtime_error (_("BASED/LINKAGE item '%s' has NULL address"), name);
+      /* name includes '' already and can be ... 'x' (addressed by 'y'= */
+		cob_runtime_error (_("BASED/LINKAGE item %s has NULL address"), name);
+		cob_stop_run (1);
+	}
+}
+
+void
+cob_check_linkage (const unsigned char *x, const char *name, const int check_type)
+{
+	if (!x) {
+		/* name includes '' already and can be ... 'x' of 'y' */
+		switch(check_type) {
+		case 0: /* check for passed items and size on module entry */
+			cob_runtime_error (_("LINKAGE item %s not passed by caller"), name);
+			break;
+		case 1: /* check for passed OPTIONAL items on item use */
+			cob_runtime_error (_("LINKAGE item %s not passed by caller"), name);
+			break;
+		}
 		cob_stop_run (1);
 	}
 }
@@ -3719,6 +3738,8 @@ cob_sys_calledby (void *data)
 	COB_CHK_PARMS (C$CALLEDBY, 1);
 
 	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
+		/* check what ACU ccbl/runcbl returns, 
+		   the documentation doesn't say anything about this */
 		return -1;
 	}
 	size = COB_MODULE_PTR->cob_procedure_params[0]->size;
@@ -3864,7 +3885,7 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	temp = (char*) &return_value;
 	
 	/*
-	 * Write data back to Cobol
+	 * Write data back to COBOL
 	 */
 	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W' 
 		|| temp[0] == -1 || temp[0] == 0) exit_status = return_value;
@@ -4975,7 +4996,7 @@ cob_load_config (void)
 					set_config_val((char*)gc_conf[i].default_val,i);
 				}
 			} else {
-				set_config_val((char*)gc_conf[i].default_val,i); /*Set default value */
+				set_config_val((char*)gc_conf[i].default_val,i); /* Set default value */
 			}
 		}
 	}

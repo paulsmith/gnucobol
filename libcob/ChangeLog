@@ -1,4 +1,9 @@
 
+2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cob_check_linkage): add function for check of linkage items
+	  (currently checking only access to not passed OPTIONAL items)
+
 2015-10-24  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c (conf_runtime_error): add function for configuration specific

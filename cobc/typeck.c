@@ -1415,6 +1415,8 @@ cb_build_identifier (cb_tree x, const int subchk)
 	struct cb_field		*f;
 	struct cb_field		*p;
 	const char		*name;
+	char		full_name[COB_MAX_WORDLEN * 2 + 10];
+	cb_tree			xr;
 	cb_tree			v;
 	cb_tree			e1;
 	cb_tree			e2;
@@ -1454,21 +1456,38 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 	f = CB_FIELD (v);
 
-	/* BASED check */
-	if (current_statement && CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL)) {
+	/* BASED check and check for OPTIONAL LINKAGE items */
+	if (current_statement &&
+	    (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) ||
+	     CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED))) {
 		p = cb_field_founder (f);
 		if (p->redefines) {
 			p = p->redefines;
 		}
-		if (!current_statement->flag_no_based) {
+		if (p == f) {
+			sprintf(full_name, "'%s'", name);
+		} else {
+			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
+		}
+		xr = cb_build_reference(full_name);
+		
+		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) &&
+		    !current_statement->flag_no_based) {
 			if (p->flag_item_based ||
-			   (f->storage == CB_STORAGE_LINKAGE &&
+			   (p->storage == CB_STORAGE_LINKAGE &&
 				  !p->flag_is_pdiv_parm)) {
 				current_statement->null_check = CB_BUILD_FUNCALL_2 (
 					"cob_check_based",
 					cb_build_address (cb_build_field_reference (p, NULL)),
-					CB_BUILD_STRING0 (name));
+					CB_BUILD_STRING0 (CB_REFERENCE(xr)->word->name));
 			}
+		}
+		if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED) &&
+		    p->flag_is_pdiv_opt) {
+			current_statement->null_check = CB_BUILD_FUNCALL_3 (
+				"cob_check_linkage",
+				cb_build_address (cb_build_field_reference (p, NULL)),
+				CB_BUILD_STRING0 (CB_REFERENCE(xr)->word->name), cb_int1);
 		}
 	}
 

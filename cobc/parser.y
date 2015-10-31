@@ -5273,7 +5273,15 @@ procedure_param_list:
 procedure_param:
   procedure_type size_optional procedure_optional WORD
   {
-	$$ = CB_BUILD_PAIR (cb_int (call_mode), cb_build_identifier ($4, 0));
+	cb_tree		x;
+	struct cb_field	*f;
+	
+	x = cb_build_identifier ($4, 0);
+	if ($3 == cb_int1 && CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+		f = CB_FIELD (cb_ref (x));
+		f->flag_is_pdiv_opt = 1;
+	}
+	$$ = CB_BUILD_PAIR (cb_int (call_mode), x);
 	CB_SIZES ($$) = size_mode;
   }
 ;
@@ -5382,10 +5390,16 @@ size_optional:
 
 procedure_optional:
   /* empty */
+  {
+	$$ = cb_int0; 
+  }
 | OPTIONAL
   {
 	if (call_mode != CB_CALL_BY_REFERENCE) {
 		cb_error (_("OPTIONAL only allowed for BY REFERENCE items"));
+		$$ = cb_int0;
+	} else {
+		$$ = cb_int1;
 	}
   }
 ;

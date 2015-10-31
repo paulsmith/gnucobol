@@ -5,6 +5,16 @@
       was set, now only raise an error if -frelax-syntax is not set and
       raise a warning if both -frelax-syntax and -W[all] are active
       
+2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* tree.h: new field flag flag_is_pdiv_opt
+	* parser.y: set f->flag_is_pdiv_opt for vars in USING with OPTIONAL clause
+	* typeck.c (cb_build_identifier): add check for access of OPTIONAL LINKAGE
+	  items if COB_EC_PROGRAM_ARG_OMITTED is active
+	* typeck.c (cb_build_identifier): build and use full name (including the
+	  actual used var, not only the name of the parent) for runtime checks of
+	  BASED items and OPTIONAL LINKAGE items
+
 2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.c: tweaked error messages, added possible values if invalid
