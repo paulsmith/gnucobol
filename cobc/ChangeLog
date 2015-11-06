@@ -1,10 +1,14 @@
 
+2015-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobc.c (process) [_MSC_VER] : bugfix in output filter
+
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* scanner.l: maximum word-length always resulted in error if -W[all]
-      was set, now only raise an error if -frelax-syntax is not set and
-      raise a warning if both -frelax-syntax and -W[all] are active
-      
+	  was set, now only raise an error if -frelax-syntax is not set and
+	  raise a warning if both -frelax-syntax and -W[all] are active
+
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* tree.h: new field flag flag_is_pdiv_opt
@@ -31,6 +35,10 @@
 	* scanner.l: added non-standard numeric literals: MF's numeric
 	  boolean and ACUCOBOL's B#, O#, X# and H# literals.
 	* tree.c: improved error messages and refactored (cb_concat_literals).
+
+2015-09-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobc.c [_MSC_VER]: make sure that only temporary lib-files are removed
 
 2015-09-15  Brian Tiffin <btiffin@gnu.org>
 

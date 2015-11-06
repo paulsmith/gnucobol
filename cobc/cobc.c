@@ -8,7 +8,7 @@
    Authors:
        Keisuke Nishida, 2001-2007
        Roger While, 2006-2012
-       Simon Sobish, 2009-2015
+       Simon Sobisch, 2009-2015
        Brian Tiffin, 2015
 
    This file is part of GNU Cobol.
@@ -1286,8 +1286,7 @@ static char *
 cobc_stradd_dup (const char *str1, const char *str2)
 {
 	char	*p;
-	size_t	m;
-	size_t	n;
+	size_t	m, n;
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!str1 || !str2)) {
@@ -2442,7 +2441,7 @@ process_command_line (const int argc, char **argv)
 		cb_relaxed_syntax_check = 1;
 		cb_larger_redefines_ok = 1;
 		cb_relax_level_hierarchy = 1;
-		cb_top_level_occurs_clause = 1;
+		cb_top_level_occurs_clause = CB_OK;
 	}
 
 	/* If C debug, do not strip output */
@@ -2742,19 +2741,19 @@ process_filename (const char *filename)
 
 #ifdef _MSC_VER
 /*
- * search_pattern can contain one or more search strings separated by #
- * search_patterns must have a final #
+ * search_pattern can contain one or more search strings separated by '|'
+ * search_patterns must have a final '|'
  */
 static int 
 line_contains(char* line_start, char* line_end, char* search_patterns) {
 	int pattern_end, pattern_start;
 	char* line_pos;
 	
-	if(search_patterns[strlen(search_patterns) - 1] != '#') return -1;
+	if(search_patterns[strlen(search_patterns) - 1] != '|') return -1;
 
 	pattern_start = 0;
 	for(pattern_end = 0; pattern_end < (int) strlen(search_patterns); pattern_end++) {
-		if(search_patterns[pattern_end] == '#') {
+		if(search_patterns[pattern_end] == '|') {
 			for (line_pos = line_start; line_pos + pattern_end - pattern_start <= line_end; line_pos++) {
 				/* Find matching substring */
 				if (memcmp (line_pos, search_patterns + pattern_start, pattern_end - pattern_start) == 0) {
@@ -2783,11 +2782,11 @@ process_run(const char *name) {
 
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
-		snprintf(cobc_buffer, cobc_buffer_size, "%s %s",
-			"cobcrun", file_basename(name));
+		snprintf(cobc_buffer, cobc_buffer_size, "cobcrun %s",
+			file_basename(name));
 	} else {  /* executable */
-		snprintf(cobc_buffer, cobc_buffer_size, "%s%s",
-			"./", name);
+		snprintf(cobc_buffer, cobc_buffer_size, ".%c%s",
+			SLASH_INT, name);
 	}
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
@@ -3056,9 +3055,7 @@ process (const char *cmd, struct filename *fn)
 	char* search_pattern, *search_pattern2;
 	char* output_name_temp;
 	int i;
-
-	const char * sep = "|?|";
-
+	
 	/* if we are verbose, we don't need to filter anything */
 	if (verbose_output) {
 		cobc_cmd_print (cmd);
@@ -3066,30 +3063,32 @@ process (const char *cmd, struct filename *fn)
 	}
 
 	/* building search_patterns */
-	for(i = fn->translate_len - 1; i >= 0; i--) {
-		if(fn->translate[i] == '\\' || fn->translate[i] == '/') break;
+	/* check for last path seperator as we only need the file name */
+	for (i = fn->translate_len; i > 0; i--) {
+		if (fn->translate[i - 1] == '\\' || fn->translate[i - 1] == '/') break;
 	}
 
 	if(output_name) output_name_temp = file_basename(output_name);
 	else output_name_temp = (char *) fn->demangle_source;
 
-	search_pattern = (char*) cobc_malloc(fn->translate_len - i + strlen (sep));
-	snprintf(search_pattern, fn->translate_len - i, "%s%s", fn->translate + i + 1, sep); 
-	search_pattern2 = (char*) cobc_malloc(2 * (strlen(output_name_temp) + 4) + 2 * strlen (sep) + 1);
-	sprintf(search_pattern2, "%s.lib%s%s.exp%s", output_name_temp, sep, output_name_temp, sep);
+	search_pattern = (char*) cobc_malloc((fn->translate_len - i + 1) + 1);
+	sprintf (search_pattern, "%s|", fn->translate + i); 
+	search_pattern2 = (char*) cobc_malloc(2 * (strlen(output_name_temp) + 5) + 1);
+	sprintf (search_pattern2, "%s.lib|%s.exp|", output_name_temp, output_name_temp);
 
 	/* Open pipe to catch output of cl.exe */
 	pipe = _popen(cmd, "r");
 
-	if(!pipe) return !!-1; /* checkme */
-	else {
+	if (!pipe) {
+		return !!-1; /* checkme */
+	} else {
 		/* prepare buffer and read from pipe */
 		read_buffer = (char*) cobc_malloc(COB_FILE_BUFF);
 		line_start = read_buffer;
 		line_end = 0;
 		
 		/* reading two lines to filter unnecessary outputs */
-		for(i = 0; i < 2; i++) {
+		for (i = 0; i < 2; i++) {
 			line_start = fgets(read_buffer, COB_FILE_BUFF - 1, pipe);
 
 			if (line_start == NULL) {
@@ -3100,29 +3099,29 @@ process (const char *cmd, struct filename *fn)
 			line_end = line_start + strlen(line_start) - 1;
 
 			/* if non of the patterns was found, print line */
-			if(!line_contains(line_start, line_end, search_pattern)
-			   && !line_contains(line_start, line_end, search_pattern2)) 
+			if (!line_contains(line_start, line_end, search_pattern)
+			 && !line_contains(line_start, line_end, search_pattern2)) 
 			{
 				fprintf(stdout, "%*s", line_end - line_start + 2, line_start);
 			}
 		}
 
 		/* print rest of buffer */
-		fprintf(stdout, line_end + 1);
-		fflush(stdout);
+		fprintf (stdout, line_end + 1);
+		fflush (stdout);
 
-		while(fgets(read_buffer, COB_FILE_BUFF - 1, pipe) != NULL) {
-			fprintf(stdout, read_buffer);
-			fflush(stdout);
+		while (fgets(read_buffer, COB_FILE_BUFF - 1, pipe) != NULL) {
+			fprintf (stdout, read_buffer);
+			fflush (stdout);
 		}
 
-		cobc_free(read_buffer);
+		cobc_free (read_buffer);
 	}
-	cobc_free(search_pattern);
-	cobc_free(search_pattern2);
+	cobc_free (search_pattern);
+	cobc_free (search_pattern2);
 
 	/* close pipe and get return code of cl.exe */
-	return !!_pclose(pipe);
+	return !!_pclose (pipe);
 }
 
 #else
@@ -3548,7 +3547,7 @@ process_assemble (struct filename *fn)
 #ifdef	_MSC_VER
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /c %s %s /Od /MDd /Zi /FR /Fo\"%s\" \"%s\"" :
-		"%s /c %s %s /MD /Fo\"%s\" \"%s\"",
+		"%s /c %s %s     /MD          /Fo\"%s\" \"%s\"",
 			cobc_cc, cobc_cflags, cobc_include,
 			fn->object, fn->translate);
 	return process (cobc_buffer, fn);
@@ -3655,7 +3654,7 @@ process_module_direct (struct filename *fn)
 #ifdef	_MSC_VER
 	sprintf (cobc_buffer, gflag_set ?
 		"%s %s %s /Od /MDd /LDd /Zi /FR /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s" :
-		"%s %s %s /MD /LD /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s",
+		"%s %s %s     /MD  /LD          /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s",
 			cobc_cc, cobc_cflags, cobc_include, name, name,
 			fn->translate,
 			manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
@@ -3674,9 +3673,9 @@ process_module_direct (struct filename *fn)
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
-	cobc_check_action (cobc_buffer);
+	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.%s", name, COB_OBJECT_EXT);
-	if(strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 #else	/* _MSC_VER */
 #ifdef	__OS400__
 	if (fn->translate[0] != '/') {
@@ -3758,7 +3757,7 @@ process_module (struct filename *fn)
 #ifdef	_MSC_VER
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /LDd /Zi /FR /Fe\"%s\" \"%s\" %s %s %s %s" :
-		"%s /MD /LD /Fe\"%s\" \"%s\" %s %s %s %s",
+		"%s     /MD  /LD          /Fe\"%s\" \"%s\" %s %s %s %s",
 		cobc_cc, name, fn->object,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
 	ret = process (cobc_buffer, fn);
@@ -3776,9 +3775,9 @@ process_module (struct filename *fn)
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
-	cobc_check_action (cobc_buffer);
+	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.obj", name);
-	if(strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 #else	/* _MSC_VER */
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s %s %s -fe=\"%s\" \"%s\" %s %s %s",
@@ -3854,7 +3853,7 @@ process_library (struct filename *l)
 #ifdef	_MSC_VER
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /LDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
-		"%s /MD /LD /Fe\"%s\" %s %s %s %s %s",
+		"%s     /MD  /LD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, name, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
 	ret = process (cobc_buffer, l);
@@ -3872,7 +3871,7 @@ process_library (struct filename *l)
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
-	cobc_check_action (cobc_buffer);
+	if (strstr(f->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 #else	/* _MSC_VER */
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s %s %s -fe=\"%s\" %s %s %s %s",
@@ -3952,7 +3951,7 @@ process_link (struct filename *l)
 #ifdef	_MSC_VER
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
-		"%s /MD /Fe\"%s\" %s %s %s %s %s",
+		"%s     /MD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, name, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
 	ret = process (cobc_buffer, l);
