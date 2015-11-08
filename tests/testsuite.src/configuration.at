@@ -104,7 +104,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [0], [], [])
 
 # check if configuration file loading with full path works
-AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=$(pwd)/test.conf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf="$(_return_path "$(pwd)/test.conf")" prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -408,7 +408,7 @@ AT_CHECK([$COBCRUN -c test.cfg --runtime-env | grep "physical_cancel" | grep "tr
 AT_CHECK([$COBCRUN -c test3.cfg --runtime-env | grep "COB_PHYSICAL_CANCEL" | grep "true"], [0], ignore, [])
 
 # check if configuration file loading with full path works
-AT_CHECK([$COBCRUN -c $(pwd)/test.cfg --runtime-env], [0], ignore, [])
+AT_CHECK([$COBCRUN -c "$(_return_path "$(pwd)/test.cfg")" --runtime-env], [0], ignore, [])
 
 AT_CLEANUP
 

@@ -638,14 +638,12 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 COB_PATCH_LEVEL
+COB_HAS_CURSES
 COB_HAS_ISAM
 COB_KEYWORD_INLINE
 COB_FIX_LIBTOOL
 COB_FIX_LIB
 COB_BIGENDIAN
-COB_DASH_OUT
-COB_DASH_NAME
-COB_DASH
 COB_SHARED_OPT
 COB_PIC_FLAGS
 COB_EXPORT_DYN
@@ -16468,6 +16466,7 @@ case "$USE_NCURSES" in
 	;;
 esac
 
+
 if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"
 then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ncurses _nc_freeall function" >&5
@@ -17267,9 +17266,6 @@ LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
-COB_DASH="-"
-COB_DASH_NAME="a.cob"
-COB_DASH_OUT="a.out"
 COB_EXEEXT="$EXEEXT"
 
 if test "$enable_cflags_setting" = yes
@@ -17472,6 +17468,13 @@ else
 	COB_HAS_ISAM=yes
 fi
 
+if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"
+then
+	COB_HAS_CURSES=no
+else
+	COB_HAS_CURSES=yes
+fi
+
 unset COB_USES_GCC_ICC
 unset COB_USES_GCC_ONLY
 unset COB_USES_ICC_ONLY
@@ -17500,18 +17503,6 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define COB_SHARED_OPT "$COB_SHARED_OPT"
-_ACEOF
-
-cat >>confdefs.h <<_ACEOF
-#define COB_DASH "$COB_DASH"
-_ACEOF
-
-cat >>confdefs.h <<_ACEOF
-#define COB_DASH_NAME "$COB_DASH_NAME"
-_ACEOF
-
-cat >>confdefs.h <<_ACEOF
-#define COB_DASH_OUT "$COB_DASH_OUT"
 _ACEOF
 
 cat >>confdefs.h <<_ACEOF
@@ -20138,12 +20129,6 @@ $as_echo "$as_me:  COB_MODULE_EXT    ${COB_MODULE_EXT}" >&6;}
 $as_echo "$as_me:  COB_OBJECT_EXT    ${COB_OBJECT_EXT}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_SHARED_OPT    ${COB_SHARED_OPT}" >&5
 $as_echo "$as_me:  COB_SHARED_OPT    ${COB_SHARED_OPT}" >&6;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}:  COB_DASH          ${COB_DASH}" >&5
-$as_echo "$as_me:  COB_DASH          ${COB_DASH}" >&6;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}:  COB_DASH_NAME     ${COB_DASH_NAME}" >&5
-$as_echo "$as_me:  COB_DASH_NAME     ${COB_DASH_NAME}" >&6;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}:  COB_DASH_OUT      ${COB_DASH_OUT}" >&5
-$as_echo "$as_me:  COB_DASH_OUT      ${COB_DASH_OUT}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_PIC_FLAGS     ${COB_PIC_FLAGS}" >&5
 $as_echo "$as_me:  COB_PIC_FLAGS     ${COB_PIC_FLAGS}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_EXPORT_DYN    ${COB_EXPORT_DYN}" >&5

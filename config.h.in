@@ -3,15 +3,6 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Command line argument that means use stdin */
-#undef COB_DASH
-
-/* Filename when using stdin */
-#undef COB_DASH_NAME
-
-/* Default executable name when using stdin */
-#undef COB_DASH_OUT
-
 /* Executable extension */
 #undef COB_EXEEXT
 

@@ -23,6 +23,7 @@
 # CC="@CC@"
 COB_BIGENDIAN="@COB_BIGENDIAN@"
 COB_HAS_ISAM="@COB_HAS_ISAM@"
+COB_HAS_CURSES="@COB_HAS_CURSES@"
 COBC="${abs_top_builddir}/cobc/cobc"
 COBCRUN="${abs_top_builddir}/bin/cobcrun"
 
@@ -42,6 +43,11 @@ PATHSEP=":"
 # unset all environmental vars that are used by libcob
 for cobenv in $($COBCRUN --runtime-env 2>/dev/null | grep COB_ | cut -d: -f2); do unset $cobenv; done
 
+# For running the testsuite in Cygwin with non-Cygwin binaries we need a wrapper function
+_return_path () {
+	echo "$1"
+}
+
 PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
 export PATH
 export COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
@@ -57,4 +63,5 @@ export LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
 export COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
 export COB_UNIX_LF=YES
 export COB_HAS_ISAM
+export COB_HAS_CURSES
 export LC_ALL=C

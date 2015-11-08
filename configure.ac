@@ -671,6 +671,7 @@ case "$USE_NCURSES" in
 	;;
 esac
 
+
 if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"
 then
     AC_MSG_CHECKING([for ncurses _nc_freeall function])
@@ -1148,6 +1149,13 @@ else
 	COB_HAS_ISAM=yes
 fi
 
+if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"
+then
+	COB_HAS_CURSES=no
+else
+	COB_HAS_CURSES=yes
+fi
+
 unset COB_USES_GCC_ICC
 unset COB_USES_GCC_ONLY
 unset COB_USES_ICC_ONLY
@@ -1187,6 +1195,7 @@ AC_SUBST([COB_FIX_LIB])
 AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
+AC_SUBST([COB_HAS_CURSES])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level])
 
 AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
