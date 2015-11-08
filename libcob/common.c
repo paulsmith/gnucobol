@@ -1170,7 +1170,8 @@ set_cob_time_offset (struct cob_time *cb_time)
 	time_zone_result = GetTimeZoneInformation (&time_zone_info);
 	if (time_zone_result != TIME_ZONE_ID_INVALID) {
 		cb_time->offset_known = 1;
-		cb_time->utc_offset = time_zone_info.Bias;
+		cb_time->utc_offset = (time_zone_info.Bias * 100 / 60)
+							+ (time_zone_info.Bias % 60);
 	} else {
 		set_unknown_offset (cb_time);
 	}

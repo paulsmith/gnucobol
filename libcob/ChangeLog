@@ -1,4 +1,8 @@
 
+2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (set_cob_time_offset)[WIN32]: bug #161 - offset for CURRENT-DATE
+
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c (cob_check_linkage): add function for check of linkage items
