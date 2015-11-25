@@ -1172,7 +1172,7 @@ output_integer (cb_tree x)
 			output_data (x);
 			output ("))");
 #else
-			output ("(*(void **) (");
+			output ("(*(unsigned char **) (");
 			output_data (x);
 			output ("))");
 #endif
