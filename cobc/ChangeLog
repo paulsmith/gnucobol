@@ -1,7 +1,8 @@
 
-2015-11-25 Sergey Kashyrin <ska@kiska.net> Fix for Bug #157
+2015-11-25 Sergey Kashyrin <ska@kiska.net>
 
-	* codegen.c: cast program-pointer to unsigned char * and not to void *
+	* codegen.c (output_integer): cast program-pointer to unsigned char *,
+	  not to void *
 
 2015-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -82,6 +83,11 @@
 
 	* scanner.l: Improved error detection of invalid floating-poit literals
 	  and associated error messages. Also minor refactoring.
+
+2015-07-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* codegen.c (output_size): Fix Bug #146 reference modification
+	  ignored ODO size
 
 2015-06-12  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
+   Copyright (C) 2014-2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -793,12 +794,8 @@ output_size (const cb_tree x)
 		}
 		if (r->length) {
 			output_integer (r->length);
-		} else if (r->offset) {
-			if (f->flag_any_length) {
-				output ("%s%d.size - ", CB_PREFIX_FIELD, f->id);
-			} else {
-				output ("%d - ", f->size);
-			}
+		} else if (r->offset && f->flag_any_length) {
+			output ("%s%d.size - ", CB_PREFIX_FIELD, f->id);
 			output_index (r->offset);
 		} else {
 			p = chk_field_variable_size (f);
@@ -830,6 +827,10 @@ again:
 					output (" + ");
 					goto again;
 				}
+			}
+			if (r->offset) {
+				output (" - ");
+				output_index (r->offset);
 			}
 		}
 		break;
