@@ -749,9 +749,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	char			*s;
 	char			*dname;
 
-#ifdef	_WIN32
 	unsigned char		bom[4];
-#endif
 
 	if (ppin) {
 		for (; newline_count > 0; newline_count--) {
@@ -783,16 +781,18 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		}
 		return -1;
 	}
-#ifdef	_WIN32
-	/* Check for BOM */
-	if (fread (bom, 3, 1, ppin) == 1) {
-		if (bom[0] != 0xEF || bom[1] != 0xBB || bom[2] != 0xBF) {
+
+	/* Check for BOM - *not* for input from stdin as rewind() clears the input
+	  buffer if used on stdin and output in console has normally no BOM at all */
+	if (strcmp(name, COB_DASH) != 0) {
+		if (fread (bom, 3, 1, ppin) == 1) {
+			if (bom[0] != 0xEF || bom[1] != 0xBB || bom[2] != 0xBF) {
+				rewind (ppin);
+			}
+		} else {
 			rewind (ppin);
 		}
-	} else {
-		rewind (ppin);
 	}
-#endif
 
 	/* Preserve the current buffer */
 	p = cobc_malloc (sizeof (struct copy_info));

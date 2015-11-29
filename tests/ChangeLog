@@ -1,5 +1,14 @@
 
-2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-11-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: skip tests that need a curses build if not available
+	* general: use new internal shell function _return_path for resolving paths
+	  (necessary for use of paths in testsuite when testing non-cygwin builds
+	  with cygwin)
+	* atlocal_win: set tests to skip (via COB_HAS_ISAM / COB_HAS_CURSES)
+	  depending on available features (parsing cobc --info)
+
+22015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.src/configuration.at: mayor update including runtime
 	  configuration

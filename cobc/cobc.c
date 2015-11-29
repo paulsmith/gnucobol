@@ -2745,22 +2745,20 @@ process_filename (const char *filename)
  * search_patterns must have a final '|'
  */
 static int 
-line_contains(char* line_start, char* line_end, char* search_patterns) {
-	int pattern_end, pattern_start;
+line_contains (char* line_start, char* line_end, char* search_patterns) {
+	int pattern_end, pattern_start, pattern_length;
 	char* line_pos;
-	
-	if(search_patterns[strlen(search_patterns) - 1] != '|') return -1;
 
 	pattern_start = 0;
-	for(pattern_end = 0; pattern_end < (int) strlen(search_patterns); pattern_end++) {
-		if(search_patterns[pattern_end] == '|') {
-			for (line_pos = line_start; line_pos + pattern_end - pattern_start <= line_end; line_pos++) {
+	for (pattern_end = 0; pattern_end < (int) strlen(search_patterns); pattern_end++) {
+		if (search_patterns[pattern_end] == '|') {
+			pattern_length = pattern_end - pattern_start;
+			for (line_pos = line_start; line_pos + pattern_length <= line_end; line_pos++) {
 				/* Find matching substring */
-				if (memcmp (line_pos, search_patterns + pattern_start, pattern_end - pattern_start) == 0) {
+				if (memcmp (line_pos, search_patterns + pattern_start, pattern_length) == 0) {
 					return 1;
 				}
 			}
-
 			pattern_start = pattern_end + 1;
 		}
 	}
@@ -2771,27 +2769,27 @@ line_contains(char* line_start, char* line_end, char* search_patterns) {
 
 /** -j run job after build */
 static int
-process_run(const char *name) {
+process_run (const char *name) {
 	int ret;
 
 	if (cb_compile_level < CB_LEVEL_MODULE) {
 		fputs (_("Nothing for -j to run"), stderr);
-		fflush(stderr);
+		fflush (stderr);
 		return 0;
 	}
 
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
-		snprintf(cobc_buffer, cobc_buffer_size, "cobcrun %s",
+		snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
 			file_basename(name));
 	} else {  /* executable */
-		snprintf(cobc_buffer, cobc_buffer_size, ".%c%s",
+		snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
 			SLASH_INT, name);
 	}
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
 	}
-	ret = system(cobc_buffer);
+	ret = system (cobc_buffer);
 	if (verbose_output) {
 		fputs (_("Return status:"), stderr);
 		fprintf (stderr, "\t%d\n", ret);
@@ -3047,7 +3045,24 @@ process (char *cmd)
 
 #elif defined(_MSC_VER)
 static int
-process (const char *cmd, struct filename *fn)
+process (const char *cmd)
+{
+	int ret;
+
+	if (verbose_output) {
+		cobc_cmd_print (cmd);
+	}
+	ret = system (cmd);
+	if (verbose_output) {
+		fputs (_ ("Return status:"), stderr);
+		fprintf (stderr, "\t%d\n", ret);
+		fflush (stderr);
+	}
+	return !!ret;
+}
+
+static int
+process_filtered (const char *cmd, struct filename *fn)
 {
 	FILE* pipe;
 	char* read_buffer;
@@ -3055,68 +3070,60 @@ process (const char *cmd, struct filename *fn)
 	char* search_pattern, *search_pattern2;
 	char* output_name_temp;
 	int i;
-	
-	/* if we are verbose, we don't need to filter anything */
-	if (verbose_output) {
-		cobc_cmd_print (cmd);
-		return !!system(cmd);
-	}
-
-	/* building search_patterns */
-	/* check for last path seperator as we only need the file name */
-	for (i = fn->translate_len; i > 0; i--) {
-		if (fn->translate[i - 1] == '\\' || fn->translate[i - 1] == '/') break;
-	}
-
-	if(output_name) output_name_temp = file_basename(output_name);
-	else output_name_temp = (char *) fn->demangle_source;
-
-	search_pattern = (char*) cobc_malloc((fn->translate_len - i + 1) + 1);
-	sprintf (search_pattern, "%s|", fn->translate + i); 
-	search_pattern2 = (char*) cobc_malloc(2 * (strlen(output_name_temp) + 5) + 1);
-	sprintf (search_pattern2, "%s.lib|%s.exp|", output_name_temp, output_name_temp);
 
 	/* Open pipe to catch output of cl.exe */
 	pipe = _popen(cmd, "r");
 
 	if (!pipe) {
 		return !!-1; /* checkme */
-	} else {
-		/* prepare buffer and read from pipe */
-		read_buffer = (char*) cobc_malloc(COB_FILE_BUFF);
-		line_start = read_buffer;
-		line_end = 0;
-		
-		/* reading two lines to filter unnecessary outputs */
-		for (i = 0; i < 2; i++) {
-			line_start = fgets(read_buffer, COB_FILE_BUFF - 1, pipe);
-
-			if (line_start == NULL) {
-				return !!_pclose(pipe);
-			}
-
-			/* read one line from buffer, returning line end position */
-			line_end = line_start + strlen(line_start) - 1;
-
-			/* if non of the patterns was found, print line */
-			if (!line_contains(line_start, line_end, search_pattern)
-			 && !line_contains(line_start, line_end, search_pattern2)) 
-			{
-				fprintf(stdout, "%*s", line_end - line_start + 2, line_start);
-			}
-		}
-
-		/* print rest of buffer */
-		fprintf (stdout, line_end + 1);
-		fflush (stdout);
-
-		while (fgets(read_buffer, COB_FILE_BUFF - 1, pipe) != NULL) {
-			fprintf (stdout, read_buffer);
-			fflush (stdout);
-		}
-
-		cobc_free (read_buffer);
 	}
+	
+	/* building search_patterns */
+	if (output_name) {
+		output_name_temp = file_basename(output_name);
+	} else {
+		/* demangle_source is encoded and cannot be used
+		   -> set to file.something and strip at point
+		*/
+		output_name_temp = (char *)fn->source;
+		for (i = strlen(output_name_temp) - 2; i > 0; i--) {
+			if (output_name_temp[i] == '.') {
+				output_name_temp[i] = 0;
+				break;
+			}
+		}
+	}
+
+	/* check for last path seperator as we only need the file name */
+	for (i = fn->translate_len; i > 0; i--) {
+		if (fn->translate[i - 1] == '\\' || fn->translate[i - 1] == '/') break;
+	}
+
+	search_pattern = (char*)cobc_malloc((fn->translate_len - i + 1) + 1);
+	sprintf(search_pattern, "%s|", fn->translate + i);
+	search_pattern2 = (char*)cobc_malloc(2 * (strlen(output_name_temp) + 5) + 1);
+	sprintf(search_pattern2, "%s.lib|%s.exp|", output_name_temp, output_name_temp);
+
+	/* prepare buffer and read from pipe */
+	read_buffer = (char*) cobc_malloc(COB_FILE_BUFF);
+	line_start = fgets(read_buffer, COB_FILE_BUFF - 1, pipe);
+
+	while (line_start != NULL) {
+		/* read one line from buffer, returning line end position */
+		line_end = line_start + strlen(line_start) - 1;
+
+		/* if non of the patterns was found, print line */
+		if (line_start == line_end
+			|| (!line_contains(line_start, line_end, search_pattern)
+				&& !line_contains(line_start, line_end, search_pattern2)))
+		{
+			fprintf(stdout, "%*s", line_end - line_start + 2, line_start);
+		}
+		line_start = fgets(read_buffer, COB_FILE_BUFF - 1, pipe);
+	}
+	fflush (stdout);
+
+	cobc_free (read_buffer);
 	cobc_free (search_pattern);
 	cobc_free (search_pattern2);
 
@@ -3191,7 +3198,7 @@ preprocess (struct filename *fn)
 {
 	struct cobc_mem_struct	*m;
 	struct cobc_mem_struct	*ml;
-	const char     		*dashname;
+	const char		*sourcename;
 	int			save_source_format;
 	int			save_fold_copy;
 	int			save_fold_call;
@@ -3205,11 +3212,11 @@ preprocess (struct filename *fn)
 	}
 
 	if (fn->file_is_stdin) {
-		dashname = COB_DASH;
+		sourcename = COB_DASH;
 	} else {
-		dashname = fn->source;
+		sourcename = fn->source;
 	}
-	if (ppopen (dashname, NULL) != 0) {
+	if (ppopen (sourcename, NULL) != 0) {
 		fclose (ppout);
 		ppout = NULL;
 		if (fn->preprocess) {
@@ -3222,7 +3229,7 @@ preprocess (struct filename *fn)
 	if (verbose_output) {
 		fputs (_("Preprocessing:"), stderr);
 		fprintf (stderr, "\t%s -> %s\n",
-			 dashname, fn->preprocess);
+			 sourcename, fn->preprocess);
 		fflush (stderr);
 	}
 
@@ -3252,7 +3259,7 @@ preprocess (struct filename *fn)
 
 	if (ppin) {
 		fclose (ppin);
-       		ppin = NULL;
+		ppin = NULL;
 	}
 
 	if (ppout) {
@@ -3512,7 +3519,11 @@ process_compile (struct filename *fn)
 		"%s /c %s %s /MD /c /Fa\"%s\" /Fo\"%s\" \"%s\"",
 			cobc_cc, cobc_cflags, cobc_include, name,
 			name, fn->translate);
-	return process (cobc_buffer, fn);
+	if (verbose_output) {
+		return process (cobc_buffer);
+	} else {
+		return process_filtered (cobc_buffer, fn);
+	}
 #elif defined(__WATCOMC__)
 	sprintf (cobc_buffer, "%s -fe=\"%s\" -s %s %s %s", cobc_cc, name,
 			cobc_cflags, cobc_include, fn->translate);
@@ -3550,7 +3561,11 @@ process_assemble (struct filename *fn)
 		"%s /c %s %s     /MD          /Fo\"%s\" \"%s\"",
 			cobc_cc, cobc_cflags, cobc_include,
 			fn->object, fn->translate);
-	return process (cobc_buffer, fn);
+	if (verbose_output) {
+		return process (cobc_buffer);
+	} else {
+		return process_filtered (cobc_buffer, fn);
+	}
 #elif defined(__OS400__)
 	name = (char *) fn->translate;
 	if (name[0] != '/') {
@@ -3612,6 +3627,9 @@ static int
 process_module_direct (struct filename *fn)
 {
 	char	*name;
+#ifdef	_MSC_VER
+	char	*exename;
+#endif
 	size_t	bufflen;
 	size_t	size;
 	int	ret;
@@ -3634,6 +3652,9 @@ process_module_direct (struct filename *fn)
 		strcat (name, COB_MODULE_EXT);
 #endif
 	}
+#ifdef	_MSC_VER
+	exename = cobc_stradd_dup (name, ".dll");
+#endif
 
 	size = strlen (name);
 #ifdef	_MSC_VER
@@ -3655,18 +3676,22 @@ process_module_direct (struct filename *fn)
 	sprintf (cobc_buffer, gflag_set ?
 		"%s %s %s /Od /MDd /LDd /Zi /FR /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s" :
 		"%s %s %s     /MD  /LD          /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s",
-			cobc_cc, cobc_cflags, cobc_include, name, name,
+			cobc_cc, cobc_cflags, cobc_include, exename, name,
 			fn->translate,
 			manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	ret = process (cobc_buffer, fn);
+	if (verbose_output) {
+		ret = process (cobc_buffer);
+	} else {
+		ret = process_filtered (cobc_buffer, fn);
+	}
 #if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
-			 "%s /manifest \"%s.dll.manifest\" /outputresource:\"%s.dll\";#2",
-			 manicmd, name, name);
-		ret = process (cobc_buffer, fn);
-		sprintf (cobc_buffer, "%s.dll.manifest", name);
+			 "%s /manifest \"%s.manifest\" /outputresource:\"%s\";#2",
+			 manicmd, exename, exename);
+		ret = process (cobc_buffer);
+		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
 #endif
@@ -3720,6 +3745,9 @@ static int
 process_module (struct filename *fn)
 {
 	char	*name;
+#ifdef	_MSC_VER
+	char	*exename;
+#endif
 	size_t	bufflen;
 	size_t	size;
 	int	ret;
@@ -3742,6 +3770,9 @@ process_module (struct filename *fn)
 		strcat (name, COB_MODULE_EXT);
 #endif
 	}
+#ifdef	_MSC_VER
+	exename = cobc_stradd_dup (name, ".dll");
+#endif
 
 	size = strlen (name);
 	bufflen = cobc_cc_len + cobc_ldflags_len
@@ -3758,17 +3789,21 @@ process_module (struct filename *fn)
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /LDd /Zi /FR /Fe\"%s\" \"%s\" %s %s %s %s" :
 		"%s     /MD  /LD          /Fe\"%s\" \"%s\" %s %s %s %s",
-		cobc_cc, name, fn->object,
+		cobc_cc, exename, fn->object,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	ret = process (cobc_buffer, fn);
+	if (verbose_output) {
+		ret = process (cobc_buffer);
+	} else {
+		ret = process_filtered (cobc_buffer, fn);
+	}
 #if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
-			 "%s /manifest \"%s.dll.manifest\" /outputresource:\"%s.dll\";#2",
-			 manicmd, name, name);
-		ret = process (cobc_buffer, fn);
-		sprintf (cobc_buffer, "%s.dll.manifest", name);
+			 "%s /manifest \"%s.manifest\" /outputresource:\"%s\";#2",
+			 manicmd, exename, exename);
+		ret = process (cobc_buffer);
+		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
 #endif
@@ -3810,6 +3845,9 @@ process_library (struct filename *l)
 {
 	struct filename	*f;
 	char		*name;
+#ifdef	_MSC_VER
+	char	*exename;
+#endif
 	size_t		bufflen;
 	size_t		size;
 	int		ret;
@@ -3838,6 +3876,9 @@ process_library (struct filename *l)
 		strcat (name, COB_MODULE_EXT);
 #endif
 	}
+#ifdef	_MSC_VER
+	exename = cobc_stradd_dup (name, ".dll");
+#endif
 
 	size = strlen (name);
 	bufflen = cobc_cc_len + cobc_ldflags_len
@@ -3854,17 +3895,21 @@ process_library (struct filename *l)
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /LDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
 		"%s     /MD  /LD          /Fe\"%s\" %s %s %s %s %s",
-		cobc_cc, name, cobc_objects_buffer,
+		cobc_cc, exename, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	ret = process (cobc_buffer, l);
+	if (verbose_output) {
+		ret = process (cobc_buffer);
+	} else {
+		ret = process_filtered (cobc_buffer, l);
+	}
 #if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
-			 "%s /manifest \"%s.dll.manifest\" /outputresource:\"%s.dll\";#2",
-			 manicmd, name, name);
-		ret = process (cobc_buffer, l);
-		sprintf (cobc_buffer, "%s.dll.manifest", name);
+			 "%s /manifest \"%s.manifest\" /outputresource:\"%s\";#2",
+			 manicmd, exename, exename);
+		ret = process (cobc_buffer);
+		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
 #endif
@@ -3905,7 +3950,10 @@ static int
 process_link (struct filename *l)
 {
 	struct filename	*f;
-	const char     	*name;
+	const char		*name;
+#ifdef	_MSC_VER
+	const char		*exename;
+#endif
 	size_t		bufflen;
 	size_t		size;
 	int		ret;
@@ -3936,7 +3984,10 @@ process_link (struct filename *l)
 			name = file_basename (l->source);
 		}
 	}
-
+#ifdef	_MSC_VER
+	exename = cobc_stradd_dup (name, ".exe");
+#endif
+	
 	size = strlen (name);
 	bufflen = cobc_cc_len + cobc_ldflags_len
 			+ cobc_export_dyn_len + size
@@ -3952,17 +4003,21 @@ process_link (struct filename *l)
 	sprintf (cobc_buffer, gflag_set ?
 		"%s /Od /MDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
 		"%s     /MD          /Fe\"%s\" %s %s %s %s %s",
-		cobc_cc, name, cobc_objects_buffer,
+		cobc_cc, exename, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	ret = process (cobc_buffer, l);
+	if (verbose_output) {
+		ret = process (cobc_buffer);
+	} else {
+		ret = process_filtered (cobc_buffer, l);
+	}
 #if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
-			 "%s /manifest \"%s.exe.manifest\" /outputresource:\"%s.exe\";#1",
-			 manicmd, name, name);
-		ret = process (cobc_buffer, l);
-		sprintf (cobc_buffer, "%s.exe.manifest", name);
+			 "%s /manifest \"%s.manifest\" /outputresource:\"%s\";#1",
+			 manicmd, exename, exename);
+		ret = process (cobc_buffer);
+		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
 #endif

@@ -8,6 +8,11 @@
 	* common.c (cob_check_linkage): add function for check of linkage items
 	  (currently checking only access to not passed OPTIONAL items)
 
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (cob_init)[WIN32]: resolve COB_UNIX_LF before reading runtime
+	  configuration as error messages would have wrong LF otherwise
+
 2015-10-24  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c (conf_runtime_error): add function for configuration specific

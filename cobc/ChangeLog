@@ -4,9 +4,21 @@
 	* codegen.c (output_integer): cast program-pointer to unsigned char *,
 	  not to void *
 
+2015-11-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	Fix for Bug 165:
+	* pplex.l (ppopen): activated check for BOM independent of WIN32, skipped
+	  it on compilations from stdin
+	* cobc.c [_MSC_VER]: build and pass exename to cl.exe and mt.exe
+	Fix for Bug 166:
+	* cobc.c [_MSC_VER]: split (process) to (process_filtered) for filtering
+	  cl.exe's verbose output - now filtering *all* lines instead of first three
+	* cobc.c [_MSC_VER]: rewritten (line_contains) for matching "special" names
+
 2015-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c (process) [_MSC_VER] : bugfix in output filter
+	* cobc.c (process) [_MSC_VER]: bugfix in output filter
+	* cobc.c (process_run): enable -j to work on systems that need ".\", too
 
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -344,21 +356,26 @@
 
 	* parser.y : Added checks for RETURNING item: OCCURS, LOCAL-STORAGE
 
-
 2010-06-28  Roger While <simrw@sim-basis.de>
 
 	* MARK - Version 2.0
 	* Move to GPL/LGPL 3
 
+2010-05-??  Roger While <simrw@sim-basis.de> ?
+
+	* flag.def, cobc.c: remove compiler flags if-cutoff, extra-brace, optional-file
+	* error.c: remove special warnings for lvl-78
+	* pplex.l [_WIN32]: check for UTF-8 BOM in source files and skip it
+
 2009-??-??  Roger While <simrw@sim-basis.de>
 
-	* cobc.c, cobc.h, codegen.c, tree.h, typeck.c : Adding new commands to cobc
+	* cobc.c, cobc.h, codegen.c, tree.h, typeck.c: Adding new commands to cobc
 	  --info with most important configuration/environment details
 	  --list-system for displaying all registered system routines
 
 2009-??-??  Roger While <simrw@sim-basis.de>
 
-	* parser.y, typeck.c (cb_emit_accept_escape_key) : Implementing
+	* parser.y, typeck.c (cb_emit_accept_escape_key): Implementing
 	  ACCEPT .. FROM ESCAPE KEY
 
 20??-??-??  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
@@ -368,7 +385,7 @@
 
 20??-??-??  Roger While <simrw@sim-basis.de>
 
-	* cobc.c, cobc.h, tree.h : Simplify by handling stuff for
+	* cobc.c, cobc.h, tree.h: Simplify by handling stuff for
 	  different compilers by general defines (CB_COPT_x, COB_A_...),
 	  added parsing step and source name to verbose messages,
 	  added some comments
@@ -2280,13 +2297,13 @@
 2004-03-29  Keisuke Nishida  <knishida@opencobol.org>
 
 	* cobc.c (process_link) [__CYGWIN__, __MINGW32__]: Set
-	-Wl,--export-all-symbols instead of -Wl,--export-dynamic.
-	(Thanks to peg@coboler.com)
+	  -Wl,--export-all-symbols instead of -Wl,--export-dynamic.
+	  (Thanks to peg@coboler.com)
 
 2004-03-12  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
 	* cobc.c (process_module, process_link): Modify compile options
-	for Win32.
+	  for Win32.
 
 2004-03-10  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
@@ -2689,17 +2706,16 @@
 2002-06-08  Keisuke Nishida  <knishida@netlab.jp>
 
 	* cobc.c (long_options): Accept '-main' option.
-	* cobc.c, cobc.h (cobc_main_flag): New variable.
-	(cobc_module_flag): Removed.
+	* cobc.c, cobc.h: New variable cobc_main_flag, removed cobc_module_flag
 	* codegen.c (OUTPUT_HANDLER): Removed.
-	(codegen): Updated.
+	* codegen.c (codegen): Updated.
 	* parser.y (procedure_using): Don't show -m warning.
 
 2002-06-06  Keisuke Nishida  <knishida@netlab.jp>
 
 	* inline.c (search_set_keys): Dont check syntax error.
 	* parser.y (search_statement): Check syntax error here.
-	(resolve_predefined_name): Return filler on error.
+	* parser.y (resolve_predefined_name): Return filler on error.
 
 2002-06-06  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2717,7 +2733,7 @@
 2002-06-04  Keisuke Nishida  <knishida@netlab.jp>
 
 	* codegen.c (output_perform_call): New function.
-	(output_perform_once): Use 'output_perform_call'.
+	* codegen.c (output_perform_once): Use 'output_perform_call'.
 	* inline.c (output_file_handler): Use 'output_perform_call'. Cleanup.
 
 2002-06-04  Keisuke Nishida  <knishida@netlab.jp>
@@ -2731,8 +2747,7 @@
 
 2002-06-03  Keisuke Nishida  <knishida@netlab.jp>
 
-	* Makefile.am (cobc_LDADD): Add libsupport.a here.
-	(cobc_LIBS): Removed.
+	* Makefile.am: Add libsupport.a to cobc_LDADD, removed cobc_LIBS
 
 2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2760,26 +2775,26 @@
 
 	* Display index name with the error message.
 	* codegen.c (output_refmod_offset, output_length)
-	(output_field_definition): Updated.
+	* codegen.c (output_field_definition): Updated.
 
 2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
 
 	* tree.c, tree.h (cobc_return_code): New variable.
 	* parser.y (call_returning): Move RETURN-CODE to RETURNING field.
 	* inline.c (output_move_index): New function.
-	(output_call_statement): Don't take ret.
+	* inline.c (output_call_statement): Don't take ret.
 
 2002-05-31  Keisuke Nishida  <knishida@netlab.jp>
 
 	* codegen.c (output_expr): Give field name to cob_check_numeric.
-	(output_field_definition): No longer output field name.
+	* codegen.c (output_field_definition): No longer output field name.
 
 2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
 
 	* parser.y (expr_item_list): Better source location.
 	* codegen.c (output_compare): Take additional argument for better
-	source location.
-	(output_condition): Updated.
+	  source location.
+	* codegen.c (output_condition): Updated.
 	* inline.c (output_search_all): Updated.
 
 2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
@@ -2798,6 +2813,6 @@
 2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
 
 	* cobc.c (cobc_verbose_flag): New variable.
-	(short_options, long_options): New option -v and --verbose.
-	(process_command_line): Handle -v option.
+	* cobc.c (short_options, long_options): New option -v and --verbose.
+	* cobc.c (process_command_line): Handle -v option.
 	* cobc.h (cobc_verbose_flag): Declared.
