@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "cobc.h"
 #include "tree.h"
@@ -1053,10 +1054,8 @@ int
 cb_get_int (const cb_tree x)
 {
 	struct cb_literal	*l;
-#if	0	/* RXWRXW Fixme SZ */
 	const char		*s;
 	size_t			size;
-#endif
 	size_t			i;
 	int			val;
 
@@ -1071,16 +1070,42 @@ cb_get_int (const cb_tree x)
 		}
 	}
 
-#if	0	/* RXWRXW Fixme SZ */
-	if (l->sign < 0) {
-		s = "2147483648";
-	} else {
-		s = "2147483647";
-	}
 	size = l->size - i;
-	if (size > 10U || (size == 10U && memcmp (&l->data[i], s, 10) > 0)) {
-		cobc_abort_pr (_("Numeric literal exceeds limit - Aborting"));
-		COBC_ABORT ();
+#if INT_MAX >= 9223372036854775807
+	if (size >= 19U) {
+		if (l->sign < 0) {
+			s = "9223372036854775808";
+		} else {
+			s = "9223372036854775807";
+		}
+		if (size > 19U || memcmp (&l->data[i], s, (size_t)19) > 0) {
+			cb_error (_("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			return INT_MAX;
+		}
+	}
+#elif INT_MAX >= 2147483647
+	if (size >= 10U) {
+		if (l->sign < 0) {
+			s = "2147483648";
+		} else {
+			s = "2147483647";
+		}
+		if (size > 10U || memcmp (&l->data[i], s, (size_t)10) > 0) {
+			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			return INT_MAX;
+		}
+	}
+#else
+	if (size >= 5U) {
+		if (l->sign < 0) {
+			s = "32768";
+		} else {
+			s = "32767";
+		}
+		if (size == 5U || memcmp (&l->data[i], s, (size_t)5) > 0) {
+			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			return INT_MAX;
+		}
 	}
 #endif
 
@@ -1115,19 +1140,15 @@ cb_get_long_long (const cb_tree x)
 	}
 
 	size = l->size - i;
-	if (size > 19U) {
-		cobc_abort_pr (_("Numeric literal exceeds limit - Aborting"));
-		COBC_ABORT ();
-	}
-	if (size == 19U) {
+	if (size >= 19U) {
 		if (l->sign < 0) {
 			s = "9223372036854775808";
 		} else {
 			s = "9223372036854775807";
 		}
-		if (memcmp (&(l->data[i]), s, (size_t)19) > 0) {
-			cobc_abort_pr (_("Numeric literal exceeds limit - Aborting"));
-			COBC_ABORT ();
+		if (size == 19U || memcmp (&(l->data[i]), s, (size_t)19) > 0) {
+			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			return LLONG_MAX;
 		}
 	}
 
@@ -1145,6 +1166,7 @@ cob_u64_t
 cb_get_u_long_long (const cb_tree x)
 {
 	struct cb_literal	*l;
+	const char		*s;
 	size_t			i;
 	size_t			size;
 	cob_u64_t		val;
@@ -1157,14 +1179,11 @@ cb_get_u_long_long (const cb_tree x)
 	}
 
 	size = l->size - i;
-	if (size > 20U) {
-		cobc_abort_pr (_("Numeric literal exceeds limit - Aborting"));
-		COBC_ABORT ();
-	}
-	if (size == 20U) {
-		if (memcmp (&(l->data[i]), "18446744073709551615", (size_t)20) > 0) {
-			cobc_abort_pr (_("Numeric literal exceeds limit - Aborting"));
-			COBC_ABORT ();
+	if (size >= 20U) {
+		s = "18446744073709551615";
+		if (size == 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
+			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			return ULLONG_MAX;
 		}
 	}
 	val = 0;

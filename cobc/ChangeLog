@@ -4,13 +4,21 @@
 	* codegen.c (output_integer): cast program-pointer to unsigned char *,
 	  not to void *
 
+2015-11-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* tree.c (cb_get_int): Fix for Bug #167 - activated size check and set
+	  limit depending on INT_MAX
+	* tree.c (cb_get_int, cb_get_long_long, cb_get_u_long_long): don't COBC_ABORT
+	  if numeric literals are too big but raise a normal compiler error showing
+	  the actual (system specific) limit
+
 2015-11-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	Fix for Bug 165:
+	Fix for Bug #165:
 	* pplex.l (ppopen): activated check for BOM independent of WIN32, skipped
 	  it on compilations from stdin
 	* cobc.c [_MSC_VER]: build and pass exename to cl.exe and mt.exe
-	Fix for Bug 166:
+	Fix for Bug #166:
 	* cobc.c [_MSC_VER]: split (process) to (process_filtered) for filtering
 	  cl.exe's verbose output - now filtering *all* lines instead of first three
 	* cobc.c [_MSC_VER]: rewritten (line_contains) for matching "special" names

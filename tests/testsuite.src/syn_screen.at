@@ -45,6 +45,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([SCREEN SECTION clause numbers])
 AT_KEYWORDS([screen])
 
@@ -72,7 +73,8 @@ prog.cob: 13: Error: Non-negative integer value expected
 
 AT_CLEANUP
 
-AT_SETUP([Pending clauses])
+
+AT_SETUP([Pending screen clauses])
 AT_KEYWORDS([screen])
 
 AT_DATA([prog.cob], [
@@ -96,6 +98,7 @@ prog.cob: 9: Warning: 'REQUIRED' not implemented
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([ACCEPT ON EXCEPTION/ESCAPE])
 AT_KEYWORDS([screen])
