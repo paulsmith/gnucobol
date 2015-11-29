@@ -323,7 +323,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	int			i, line;
 	char			buff[COB_SMALL_BUFF];
 
-	for (i=0; conf_file[i] != 0 && conf_file[i] != SLASH_INT; i++);
+	for (i=0; conf_file[i] != 0 && conf_file[i] != SLASH_CHAR; i++);
 	if (conf_file[i] == 0) {			/* Just a name, No directory */
 		if (access(conf_file, F_OK) != 0) {	/* and file does not exist */
 			/* check for path of previous configuration file (for includes) */
@@ -336,10 +336,10 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			filename[0] = 0;
 			if (c && c->name) {
 				strcpy(buff, conf_includes->name);
-				for (i = strlen(buff); i != 0 && buff[i] != SLASH_INT; i--);
+				for (i = strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
-					snprintf(filename, (size_t)COB_NORMAL_MAX, "%s%s%s", buff, SLASH_STR, conf_file);
+					snprintf(filename, (size_t)COB_NORMAL_MAX, "%s%c%s", buff, SLASH_CHAR, conf_file);
 					if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
 						conf_file = filename;		/* Prefix last directory */
 					} else {
@@ -349,7 +349,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			}
 			if (filename[0] == 0) {
 				/* check for COB_CONFIG_DIR (use default if not in environment) */
-				snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%s%s", cob_config_dir, SLASH_STR, conf_file);
+				snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%c%s", cob_config_dir, SLASH_CHAR, conf_file);
 				if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
 					conf_file = filename;		/* Prefix COB_CONFIG_DIR */
 				}

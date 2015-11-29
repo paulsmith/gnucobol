@@ -267,8 +267,7 @@ static struct config_tbl gc_conf[] = {
 	{"OS","ostype",			NULL,	NULL,GRP_SYSENV,ENV_STR,SETPOS(cob_sys_type)},
 #endif
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
-	{"COB_LIBRARY_PATH","library_path",	"." PATHSEPS COB_LIBRARY_PATH,
-							NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)},
+	{"COB_LIBRARY_PATH","library_path",	NULL,	NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)}, /* default value set in cob_init_call() */
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
 	{"COB_LS_NULLS","ls_nulls",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},
@@ -3206,10 +3205,10 @@ cob_temp_name (char *filename, const char *ext)
 	/* Set temporary file name */
 	if (ext) {
 		snprintf (filename, (size_t)COB_FILE_MAX, "%s%ccob%d_%d%s",
-			cob_gettmpdir(), SLASH_INT, cob_sys_getpid(), cob_temp_iteration, ext);
+			cob_gettmpdir(), SLASH_CHAR, cob_sys_getpid(), cob_temp_iteration, ext);
 	} else {
 		snprintf (filename, (size_t)COB_FILE_MAX, "%s%ccobsort%d_%d",
-			cob_gettmpdir(), SLASH_INT, cob_sys_getpid(), cob_temp_iteration);
+			cob_gettmpdir(), SLASH_CHAR, cob_sys_getpid(), cob_temp_iteration);
 	}
 }
 
@@ -4845,14 +4844,14 @@ cob_load_config_file (const char *config_file, int isoptional)
 	int			line;
 	FILE			*conf_fd;
 
-	for (i=0; config_file[i] != 0 && config_file[i] != SLASH_INT; i++);
+	for (i=0; config_file[i] != 0 && config_file[i] != SLASH_CHAR; i++);
 	if (config_file[i] == 0) {			/* Just a name, No directory */
 		if (access(config_file, F_OK) != 0) {	/* and file does not exist */
 			/* check for path of previous configuration file (for includes) */
 			filename[0] = 0;
 			if (cobsetptr->cob_config_cur != 0) {
 				strcpy(buff, cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1]);
-				for (i = strlen(buff); i != 0 && buff[i] != SLASH_INT; i--);
+				for (i = strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
 					snprintf(filename, (size_t)COB_MEDIUM_MAX, "%s%s%s", buff, SLASH_STR, config_file);

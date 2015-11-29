@@ -50,6 +50,11 @@
 	  October (month #10). Also fixed unreported bug where
 	  TEST-FORMATTED-DATETIME rejected dates followed by whitespace.
 
+2015-09-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.h: cast PATHSEPC PATHSEPS SLASH_INT SLASH_STR with appropriate type
+	  and rename the first three to PATHSEP_CHAR PATHSEP_STR SLASH_CHAR
+
 2015-08-21  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: implemented LOWLIGHT.
@@ -60,6 +65,11 @@
 	  EC-SCREEN-STARTING-COLUMN and EC-SCREEN-ITEM-TRUNCATED.
 	* screenio.c, common.h: refactored functions implementing ACCEPT and
 	  DISPLAY.
+
+2015-09-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* call.c (cob_init_call): Don't add the current directory "." to resolve_path
+	  if it's already set (either via runtime configuration or default value)
 
 2015-06-24  Edward Hart <edward.dan.hart@gmail.com>
 

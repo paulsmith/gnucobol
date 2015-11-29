@@ -296,7 +296,7 @@ cob_set_library_path (const char *path)
 	i = 1;
 	size = 0;
 	for (p = (char *)path; *p; p++, size++) {
-		if (*p == PATHSEPC) {
+		if (*p == PATHSEP_CHAR) {
 			i++;
 		}
 	}
@@ -324,7 +324,7 @@ cob_set_library_path (const char *path)
 	resolve_size = 0;
 	pstr = resolve_alloc;
 	for (; ; ) {
-		p = strtok (pstr, PATHSEPS);
+		p = strtok (pstr, PATHSEP_STR);
 		if (!p) {
 			break;
 		}
@@ -511,7 +511,7 @@ cache_preload (const char *path)
 		cobsetptr->cob_preload_str = cob_strdup(path);
 	}
 	else {
-		cobsetptr->cob_preload_str = cob_strcat((char*) PATHSEPS, cobsetptr->cob_preload_str);
+		cobsetptr->cob_preload_str = cob_strcat((char*) PATHSEP_STR, cobsetptr->cob_preload_str);
 		cobsetptr->cob_preload_str = cob_strcat((char*) path, cobsetptr->cob_preload_str);
 	}
 
@@ -773,8 +773,8 @@ cob_resolve_internal (const char *name, const char *dirent,
 				  "%s.%s", (char *)s, COB_MODULE_EXT);
 		} else {
 			snprintf (call_filename_buff, (size_t)COB_NORMAL_MAX,
-				  "%s%s%s.%s", resolve_path[i],
-				  SLASH_STR,
+				  "%s%c%s.%s", resolve_path[i],
+				  SLASH_CHAR,
 				  (char *)s,
 				  COB_MODULE_EXT);
 		}
@@ -1327,12 +1327,22 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 	call_entry_buff = cob_malloc ((size_t)COB_SMALL_BUFF);
 
 	buff = cob_fast_malloc ((size_t)COB_MEDIUM_BUFF);
-	if (cobsetptr->cob_library_path == NULL) {
-		snprintf (buff, (size_t)COB_MEDIUM_MAX, ".%s%s",
-			  PATHSEPS, COB_LIBRARY_PATH);
+	if (cobsetptr->cob_library_path == NULL
+	 || strcmp(cobsetptr->cob_library_path, ".") == 0) {
+		if (strcmp(COB_LIBRARY_PATH, ".") == 0) {
+			snprintf (buff, (size_t)COB_MEDIUM_MAX, ".");
+		} else {
+			snprintf (buff, (size_t)COB_MEDIUM_MAX, ".%c%s",
+				  PATHSEP_CHAR, COB_LIBRARY_PATH);
+		}
 	} else {
-		snprintf (buff, (size_t)COB_MEDIUM_MAX, "%s%s.%s%s",
-			  cobsetptr->cob_library_path, PATHSEPS, PATHSEPS, COB_LIBRARY_PATH);
+		if (strcmp(COB_LIBRARY_PATH, ".") == 0) {
+			snprintf (buff, (size_t)COB_MEDIUM_MAX, "%s%c.",
+				  cobsetptr->cob_library_path, PATHSEP_CHAR);
+		} else {
+			snprintf (buff, (size_t)COB_MEDIUM_MAX, "%s%c.%c%s",
+				  cobsetptr->cob_library_path, PATHSEP_CHAR, PATHSEP_CHAR, COB_LIBRARY_PATH);
+		}
 	}
 	cob_set_library_path (buff);
 
@@ -1345,8 +1355,8 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 	if (cobsetptr->cob_preload_str != NULL) {
 
 		p = cob_strdup (cobsetptr->cob_preload_str);
-		s = strtok (p, PATHSEPS);
-		for (; s; s = strtok (NULL, PATHSEPS)) {
+		s = strtok (p, PATHSEP_STR);
+		for (; s; s = strtok (NULL, PATHSEP_STR)) {
 #ifdef __OS400__
 			for (t = s; *t; ++t) {
 				*t = toupper (*t);
@@ -1356,8 +1366,8 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 			for (i = 0; i < resolve_size; ++i) {
 				buff[COB_MEDIUM_MAX] = 0;
 				snprintf (buff, (size_t)COB_MEDIUM_MAX,
-					  "%s%s%s.%s",
-					  resolve_path[i], SLASH_STR, s, COB_MODULE_EXT);
+					  "%s%c%s.%s",
+					  resolve_path[i], SLASH_CHAR, s, COB_MODULE_EXT);
 				if (cache_preload (buff)) {
 					break;
 				}

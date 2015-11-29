@@ -487,19 +487,19 @@
 
 
 #if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__)
-#define PATHSEPC ';'
-#define PATHSEPS ";"
+#define PATHSEP_CHAR (char) ';'
+#define PATHSEP_STR (char *) ";"
 #else
-#define PATHSEPC ':'
-#define PATHSEPS ":"
+#define PATHSEP_CHAR (char) ':'
+#define PATHSEP_STR (char *) ":"
 #endif
 
 #ifndef	_WIN32
-#define SLASH_INT	'/'
-#define SLASH_STR	"/"
+#define SLASH_CHAR	(char) '/'
+#define SLASH_STR	(char *) "/"
 #else
-#define SLASH_INT	'\\'
-#define SLASH_STR	"\\"
+#define SLASH_CHAR	(char) '\\'
+#define SLASH_STR	(char *) "\\"
 #endif
 
 /* End compiler stuff */

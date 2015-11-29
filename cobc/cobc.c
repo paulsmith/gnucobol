@@ -2489,12 +2489,12 @@ process_env_copy_path (const char *p)
 	value = cobc_strdup (p);
 
 	/* Tokenize for path sep. */
-	token = strtok (value, PATHSEPS);
+	token = strtok (value, PATHSEP_STR);
 	while (token) {
 		if (!stat (token, &st) && (S_ISDIR (st.st_mode))) {
 			CB_TEXT_LIST_CHK (cb_include_list, token);
 		}
-		token = strtok (NULL, PATHSEPS);
+		token = strtok (NULL, PATHSEP_STR);
 	}
 
 	cobc_free (value);
@@ -2725,8 +2725,8 @@ process_filename (const char *filename)
 		} else if (cobc_list_dir) {
 			fsize = strlen (cobc_list_dir) + strlen (fbasename) + 8U;
 			listptr = cobc_main_malloc (fsize);
-			snprintf (listptr, fsize, "%s%s%s.lst",
-				  cobc_list_dir, SLASH_STR, fbasename);
+			snprintf (listptr, fsize, "%s%c%s.lst",
+				  cobc_list_dir, SLASH_CHAR, fbasename);
 			fn->listing_file = listptr;
 		} else {
 			fn->listing_file = cobc_stradd_dup (fbasename, ".lst");
@@ -2784,7 +2784,7 @@ process_run (const char *name) {
 			file_basename(name));
 	} else {  /* executable */
 		snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
-			SLASH_INT, name);
+			SLASH_CHAR, name);
 	}
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);

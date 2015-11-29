@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2002,2003,2004,2005,2006,2007 Keisuke Nishida
    Copyright (C) 2007-2012 Roger While
+   Copyright (C) 2014,2015 Simon Sobisch
 
    This file is part of GNU Cobol.
 
@@ -535,8 +536,8 @@ cob_chk_file_mapping (void)
 		if ((p = cob_chk_file_env (src)) != NULL) {
 			strncpy (file_open_name, p, (size_t)COB_FILE_MAX);
 		} else if (cobsetptr->cob_file_path) {
-			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%s%s",
-				  cobsetptr->cob_file_path, SLASH_STR, file_open_name);
+			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
+				  cobsetptr->cob_file_path, SLASH_CHAR, file_open_name);
 			strncpy (file_open_name, file_open_buff,
 				 (size_t)COB_FILE_MAX);
 		}
@@ -2658,11 +2659,11 @@ bdb_nofile (const char *filename)
 	for (i = 0; bdb_data_dir && bdb_data_dir[i]; ++i) {
 		bdb_buff[COB_SMALL_MAX] = 0;
 		if (is_absolute (bdb_data_dir[i])) {
-			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%s%s",
-				  bdb_data_dir[i], SLASH_STR, filename);
+			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s",
+				  bdb_data_dir[i], SLASH_CHAR, filename);
 		} else {
-			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%s%s%s%s",
-				  cobsetptr->bdb_home, SLASH_STR, bdb_data_dir[i], SLASH_STR, filename);
+			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s%c%s",
+				  cobsetptr->bdb_home, SLASH_CHAR, bdb_data_dir[i], SLASH_CHAR, filename);
 		}
 		errno = 0;
 		if (access (bdb_buff, F_OK) == 0 || errno != ENOENT) {
@@ -2671,8 +2672,8 @@ bdb_nofile (const char *filename)
 	}
 	if (i == 0) {
 		bdb_buff[COB_SMALL_MAX] = 0;
-		snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%s%s",
-			  cobsetptr->bdb_home, SLASH_STR, filename);
+		snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s",
+			  cobsetptr->bdb_home, SLASH_CHAR, filename);
 		errno = 0;
 		if (access (bdb_buff, F_OK) == 0 || errno != ENOENT) {
 			return 0;
