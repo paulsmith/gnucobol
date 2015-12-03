@@ -2035,16 +2035,17 @@ parse_time_format_string (const char *str)
 	return format;
 }
 
-static void
+static int
 format_time (const struct time_format format, int time,
 	     cob_decimal *second_fraction, const int offset_time, char *buff)
 {
 	int		hours;
 	int		minutes;
 	int		seconds;
+	int		date_overflow = 0;
 	ptrdiff_t	buff_pos;
 	const char	*format_str;
-
+	
 	if (format.with_colons) {
 		format_str = "%2.2d:%2.2d:%2.2d";
 		buff_pos = 8;
@@ -2058,6 +2059,27 @@ format_time (const struct time_format format, int time,
 	time %= 3600;
 	minutes = time / 60;
 	seconds = time % 60;
+	if (format.extra == EXTRA_Z) {
+		hours -= offset_time / 60;
+		minutes -= offset_time % 60;
+
+		/* Handle minute and hour overflow */
+		if (minutes >= 60) {
+			minutes -= 60;
+			++hours;
+		} else if (minutes < 0) {
+			minutes += 60;
+			--hours;
+		}
+
+		if (hours >= 24) {
+			hours -= 24;
+			date_overflow = 1;
+		} else if (hours < 0) {
+			hours += 24;
+			date_overflow = -1;
+		}
+	}
 
 	sprintf (buff, format_str, hours, minutes, seconds);
 
@@ -2071,6 +2093,8 @@ format_time (const struct time_format format, int time,
 	} else if (format.extra == EXTRA_OFFSET_TIME) {
 		add_offset_time (format.with_colons, offset_time, buff_pos, buff);
 	}
+
+	return date_overflow;
 }
 
 static void
@@ -2112,7 +2136,7 @@ static int
 try_get_valid_offset_time (const struct time_format time_format,
 			   cob_field *offset_time_field, int *offset_time)
 {
-	if (time_format.extra == EXTRA_OFFSET_TIME) {
+	if (time_format.extra != EXTRA_NONE) {
 		if (offset_time_field != NULL) {
 			*offset_time = cob_get_int (offset_time_field);
 			if (valid_offset_time (*offset_time)) {
@@ -2598,27 +2622,44 @@ integer_of_formatted_date (const struct date_format format,
 
 }
 
+static void
+format_datetime (const struct date_format date_fmt,
+		 const struct time_format time_fmt,
+		 const int days,
+		 const int whole_seconds,
+		 cob_decimal *fractional_seconds,
+		 const int offset_time,
+		 char *buff)
+{
+	int	overflow;
+	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
+	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
+
+	overflow = format_time (time_fmt, whole_seconds, fractional_seconds,
+				offset_time, formatted_time);
+	format_date (date_fmt, days + overflow, formatted_date);
+	
+	sprintf (buff, "%sT%s", formatted_date, formatted_time);
+}
+
 /* Uses d1 */
 static void
 format_current_date (const struct date_format date_fmt,
 		     const struct time_format time_fmt,
-		     char *formatted_date)
+		     char *formatted_datetime)
 {
 	struct cob_time	time = cob_get_current_date_and_time ();
-	int		offset;
+	int		days
+		= integer_of_date (time.year, time.month, time.day_of_month);
+	int		seconds_from_midnight
+		= time.hour * 60 * 60 + time.minute * 60 + time.second;
 	cob_decimal	*fractional_second = &d1;
-
-	format_date (date_fmt, integer_of_date (time.year, time.month, time.day_of_month),
-		     formatted_date);
-
-	offset = strlen (formatted_date);
-	formatted_date[offset] = 'T';
-	++offset;
 
 	mpz_set_ui (fractional_second->value, (unsigned long) time.nanosecond);
 	fractional_second->scale = 9;
-	format_time (time_fmt, time.hour * 60 * 60 + time.minute * 60 + time.second,
-		     fractional_second, time.utc_offset, formatted_date + offset);
+	
+	format_datetime (date_fmt, time_fmt, days, seconds_from_midnight,
+			 fractional_second, time.utc_offset, formatted_datetime);
 }
 
 /* Global functions */
@@ -6197,8 +6238,6 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	char		time_fmt_str[MAX_TIME_STR_LENGTH] = { '\0' };
 	struct date_format     date_fmt;
 	struct time_format     time_fmt;
-	char		formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
-	char		formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
 	int		days;
 	int		whole_seconds;
 	cob_decimal	*fractional_seconds;
@@ -6259,12 +6298,9 @@ cob_intr_formatted_datetime (const int offset, const int length,
 
 	fractional_seconds = &d1;
 	get_fractional_seconds (time_field, fractional_seconds);
-
-	format_date (date_fmt, days, formatted_date);
-	format_time (time_fmt, whole_seconds, fractional_seconds, offset_time,
-		     formatted_time);
-
-	sprintf (buff, "%sT%s", formatted_date, formatted_time);
+	
+	format_datetime (date_fmt, time_fmt, days, whole_seconds,
+			 fractional_seconds, offset_time, buff);
 
 	memcpy (curr_field->data, buff, (size_t) field_length);
 	goto end_of_func;
@@ -6287,13 +6323,13 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 				  cob_field *datetime_field)
 {
 	char	*datetime_format_str = (char *) format_field->data;
-	char	date_format_str[MAX_DATE_STR_LENGTH + 1] = { '\0' };
-	char	time_format_str[MAX_TIME_STR_LENGTH + 1] = { '\0' };
+	char	date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
 	int	date_present;
 	int	time_present;
 	char	*formatted_datetime = (char *) datetime_field->data;
-	char	formatted_date[MAX_DATE_STR_LENGTH + 1] = { '\0' };
-	char	formatted_time[MAX_TIME_STR_LENGTH + 1] = { '\0' };
+	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
 	int	time_part_offset;
 	int	error_pos;
 

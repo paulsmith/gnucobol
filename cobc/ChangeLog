@@ -1,4 +1,9 @@
 
+2015-12-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (offset_time_format): fixed bug #169 - require datetime
+	  functions with Z format to take an offset parameter.
+
 2015-11-25 Sergey Kashyrin <ska@kiska.net>
 
 	* codegen.c (output_integer): cast program-pointer to unsigned char *,

@@ -899,10 +899,12 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
+           *> Test underflow to next day due to offset
            MOVE FUNCTION FORMATTED-DATETIME
-                    ("YYYYDDDThhmmss.sssssssssZ", 1, 45296.789012345)
+                    ("YYYYDDDThhmmss.sssssssssZ", 150846, 0,
+                     1)
                TO str
-           IF str <> "1601001T123456.789012345Z"
+           IF str <> "2013365T235900.000000000Z"
                DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
@@ -962,13 +964,14 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 2 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hhmmssZ", 45296 ) TO str
-           IF str <> "123456Z"
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmssZ", 86399, -1 ) TO str
+           IF str <> "000059Z"
                DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296 ) TO str
-           IF str <> "12:34:56Z"
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296, 120 )
+               TO str
+           IF str <> "10:34:56Z"
                DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
@@ -977,9 +980,9 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 5 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss.ssZ", 45296.78 )
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ss.ssZ", 0, 120)
                TO str
-           IF str <> "12:34:56.78Z"
+           IF str <> "22:00:00.00Z"
                DISPLAY "Test 6 failed: " str END-DISPLAY
            END-IF
 
@@ -1006,7 +1009,7 @@ AT_DATA([prog.cob], [
                TO str
            IF str <> SPACES
                   OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
-                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 59"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 60"
                DISPLAY "Test 10 failed: " str END-DISPLAY
            END-IF
 
@@ -1014,7 +1017,7 @@ AT_DATA([prog.cob], [
                TO str
            IF str <> SPACES
                   OR FUNCTION EXCEPTION-STATUS <> "EC-ARGUMENT-FUNCTION"
-                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 67"
+                  OR FUNCTION EXCEPTION-LOCATION <> "prog; ; 68"
                DISPLAY "Test 11 failed: " str END-DISPLAY
            END-IF
 

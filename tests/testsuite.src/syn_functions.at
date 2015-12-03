@@ -101,7 +101,11 @@ AT_DATA([prog.cob], [
            END-DISPLAY
 
       *>   Test offset time formats without offset parameter.
+           DISPLAY FUNCTION FORMATTED-TIME ( "hhmmssZ", 1) END-DISPLAY
            DISPLAY FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 1)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-DATETIME
+               ( "YYYYMMDDThhmmssZ", 1, 1)
            END-DISPLAY
            DISPLAY FUNCTION FORMATTED-DATETIME
                ( "YYYYMMDDThhmmss+hhmm", 1, 1)
@@ -130,8 +134,10 @@ prog.cob: 42: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
 prog.cob: 45: Error: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has invalid date/time format
 prog.cob: 48: Error: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has invalid date/time format
 prog.cob: 53: Error: FUNCTION 'FORMATTED-TIME' does not have an offset time
-prog.cob: 55: Error: FUNCTION 'FORMATTED-DATETIME' does not have an offset time
-prog.cob: 60: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 54: Error: FUNCTION 'FORMATTED-TIME' does not have an offset time
+prog.cob: 56: Error: FUNCTION 'FORMATTED-DATETIME' does not have an offset time
+prog.cob: 59: Error: FUNCTION 'FORMATTED-DATETIME' does not have an offset time
+prog.cob: 64: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
 ])
 
 AT_CLEANUP

@@ -568,8 +568,9 @@ offset_time_format (const char *format)
 
 	if (cob_valid_time_format (format, decimal_point)
 	    || cob_valid_datetime_format (format, decimal_point)) {
-		/* Only offset time formats contain a '+'. */
-		return strchr (format, '+') !=	NULL;
+		/* Only offset time formats contain '+' or 'Z'. */
+		return strchr (format, '+') !=	NULL
+			|| strchr (format, 'Z') != NULL;
 	} else {
 		return 0;
 	}
