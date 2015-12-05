@@ -562,33 +562,6 @@ try_get_constant_data (cb_tree val)
 }
 
 static int
-offset_time_format (const char *format)
-{
-	char	decimal_point = current_program->decimal_point;
-
-	if (cob_valid_time_format (format, decimal_point)
-	    || cob_valid_datetime_format (format, decimal_point)) {
-		/* Only offset time formats contain '+' or 'Z'. */
-		return strchr (format, '+') !=	NULL
-			|| strchr (format, 'Z') != NULL;
-	} else {
-		return 0;
-	}
-}
-
-static int
-offset_arg_param_num (const enum cb_intr_enum intr)
-{
-	if (intr == CB_INTR_FORMATTED_TIME) {
-		return 3;
-	} else if (intr == CB_INTR_FORMATTED_DATETIME) {
-		return 4;
-	} else {
-		return 0;
-	}
-}
-
-static int
 valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table *intr,
 			    cb_tree args)
 {
@@ -600,14 +573,10 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 
 	data = try_get_constant_data (arg);
 	if (data != NULL) {
-		if(!valid_format (intr->intr_enum, data)) {
+		if (!valid_format (intr->intr_enum, data)) {
 			cb_error_x (tree, _("FUNCTION '%s' has invalid date/time format"),
 				    intr->name);
 			error_found = 1;
-		} else if (offset_time_format (data)
-			   && cb_list_length (args) < offset_arg_param_num (intr->intr_enum)) {
-			cb_error_x (tree, _("FUNCTION '%s' does not have an offset time"),
-				    intr->name);
 		}
 	} else {
 		cb_warning_x (tree, _("FUNCTION '%s' has format in variable"),

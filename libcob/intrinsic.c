@@ -2136,15 +2136,13 @@ static int
 try_get_valid_offset_time (const struct time_format time_format,
 			   cob_field *offset_time_field, int *offset_time)
 {
-	if (time_format.extra != EXTRA_NONE) {
-		if (offset_time_field != NULL) {
-			*offset_time = cob_get_int (offset_time_field);
-			if (valid_offset_time (*offset_time)) {
-				return 0;
-			}
+	if (offset_time_field != NULL) {
+		*offset_time = cob_get_int (offset_time_field);
+		if (valid_offset_time (*offset_time)) {
+			return 0;
 		}
 	} else {
-		*offset_time = -1;
+		*offset_time = 0;
 		return 0;
 	}
 

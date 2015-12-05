@@ -1,4 +1,9 @@
 
+2015-12-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (offset_time_format, offset_arg_param_num): deleted functions
+	  as offset parameter for the formatted datetime functions is optional.
+
 2015-12-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (offset_time_format): fixed bug #169 - require datetime

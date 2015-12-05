@@ -1,4 +1,9 @@
 
+2015-12-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: added support for optional offset parameter for
+	  FORMATTED-(DATE)TIME functions (defaults to zero).
+
 2015-12-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: fixed bug #169 - added correct implementation of times

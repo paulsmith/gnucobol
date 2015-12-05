@@ -899,13 +899,20 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
+           MOVE FUNCTION FORMATTED-DATETIME
+                    ("YYYYDDDThhmmss+hhmm", 1, 45296)
+               TO str
+           IF str <> "1601001T123456+0000"
+               DISPLAY "Test 4 failed: " str END-DISPLAY
+           END-IF
+
            *> Test underflow to next day due to offset
            MOVE FUNCTION FORMATTED-DATETIME
                     ("YYYYDDDThhmmss.sssssssssZ", 150846, 0,
                      1)
                TO str
            IF str <> "2013365T235900.000000000Z"
-               DISPLAY "Test 4 failed: " str END-DISPLAY
+               DISPLAY "Test 5 failed: " str END-DISPLAY
            END-IF
 
            STOP RUN.
@@ -969,9 +976,9 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 3 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296, 120 )
+           MOVE FUNCTION FORMATTED-TIME ( "hh:mm:ssZ", 45296)
                TO str
-           IF str <> "10:34:56Z"
+           IF str <> "12:34:56Z"
                DISPLAY "Test 4 failed: " str END-DISPLAY
            END-IF
 
@@ -986,7 +993,7 @@ AT_DATA([prog.cob], [
                DISPLAY "Test 6 failed: " str END-DISPLAY
            END-IF
 
-           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296, 0 )
+           MOVE FUNCTION FORMATTED-TIME ( "hhmmss+hhmm", 45296)
                TO str
            IF str <> "123456+0000"
                DISPLAY "Test 7 failed: " str END-DISPLAY
