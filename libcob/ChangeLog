@@ -1,4 +1,10 @@
 
+2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed bug #170 - added detection of whether offset_known
+	  is true or not - and added detection of EC-IMP-UTC-UNKNOWN exception.
+	* exception.def: added EC-IMP-UTC-UNKNOWN.
+
 2015-12-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: added support for optional offset parameter for
@@ -119,7 +125,7 @@
 	* common.c (cob_load_config_file, cob_load_config): respect environment
 	  COB_CONFIG_DIR when loading runtime configuration
 
-2015-05-12  Ron Norman <rjn@inglenet.com> 
+2015-05-12  Ron Norman <rjn@inglenet.com>
 
 	* common.c: changed to be more specific about acceptable values for
 	  runtime boolean options
@@ -162,7 +168,7 @@
 	* fileio.c: use COB_FILE_MODE as permission for all cases where
 	  files are possibly created (fixes bug #126)
 
-2015-03-14  Ron Norman <rjn@inglenet.com> 
+2015-03-14  Ron Norman <rjn@inglenet.com>
 
 	* common.c: new code for table driven processing of runtime.cfg
 	  (runtime configuration) file and environment variables
