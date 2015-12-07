@@ -1,6 +1,11 @@
 
 2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
 
+	* common.c (cob_get_current_date_and_time): fixed bug where offset_known
+	  was not set to 1 on Unix systems.
+
+2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
+
 	* intrinsic.c: fixed bug #170 - added detection of whether offset_known
 	  is true or not - and added detection of EC-IMP-UTC-UNKNOWN exception.
 	* exception.def: added EC-IMP-UTC-UNKNOWN.

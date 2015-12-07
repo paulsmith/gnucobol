@@ -2705,6 +2705,7 @@ cob_get_current_date_and_time (void)
 		set_unknown_offset (&cb_time);
 	} else {
 		/* Convert the timezone string into minutes from UTC */
+		cb_time.offset_known = 1;
 		cb_time.utc_offset =
 			cob_ctoi (iso_timezone[1]) * 60 * 10
 			+ cob_ctoi (iso_timezone[2]) * 60
