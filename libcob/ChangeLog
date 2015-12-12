@@ -1,4 +1,8 @@
 
+2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* intrinsic.c (cob_intr_current_date): known offset leads to wrong output
+
 2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.c (cob_get_current_date_and_time): fixed bug where offset_known

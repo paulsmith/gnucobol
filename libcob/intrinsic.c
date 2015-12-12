@@ -2066,7 +2066,7 @@ format_time (const struct time_format format, int time,
 
 	if (format.extra == EXTRA_Z) {
 		if (offset_time == NULL) {
-		        cob_set_exception (COB_EC_IMP_UTC_UNKNOWN);
+			cob_set_exception (COB_EC_IMP_UTC_UNKNOWN);
 			return 0;
 		}
 
@@ -3616,7 +3616,7 @@ cob_intr_current_date (const int offset, const int length)
 		  time.minute, time.second, (int) time.nanosecond / 10000000);
 
 	if (time.offset_known) {
-		snprintf (buff + 16, 5, "%+4.4d", time.utc_offset);
+		snprintf (buff + 16, 6, "%+4.4d", time.utc_offset);
 	} else {
 		memset (buff + 16, '0', 5);
 	}
