@@ -33962,7 +33962,7 @@ cat >prog.cob <<'_ATEOF'
                  CONTINUE
               WHEN OTHER
                  DISPLAY "CURRENT-DATE with wrong format: "
-                         TEST-FLD
+                         TEST-FLD (01:21)
                  END-DISPLAY
            END-EVALUATE.
            STOP RUN.

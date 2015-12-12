@@ -2001,7 +2001,7 @@ add_offset_time (const int with_colon, int const *offset_time,
 		format_str = with_colon ? "%+2.2d:%2.2d" : "%+2.2d%2.2d";
 		sprintf (buff + buff_pos, format_str, hours, minutes);
 	} else {
-		memset (buff + buff_pos, '0', 5);
+		sprintf (buff + buff_pos, "00000");
 	}
 }
 
@@ -3615,11 +3615,7 @@ cob_intr_current_date (const int offset, const int length)
 		  time.year, time.month, time.day_of_month, time.hour,
 		  time.minute, time.second, (int) time.nanosecond / 10000000);
 
-	if (time.offset_known) {
-		snprintf (buff + 16, 6, "%+4.4d", time.utc_offset);
-	} else {
-		memset (buff + 16, '0', 5);
-	}
+	add_offset_time (0, &time.utc_offset, 16, buff);
 
 	memcpy (curr_field->data, buff, (size_t)21);
 	if (unlikely(offset > 0)) {

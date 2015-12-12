@@ -1,7 +1,7 @@
 
 2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* intrinsic.c (cob_intr_current_date): known offset leads to wrong output
+	* intrinsic.c (cob_intr_current_date): bug #161 - offset for CURRENT-DATE
 
 2015-12-07  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -23,10 +23,6 @@
 
 	* intrinsic.c: fixed bug #169 - added correct implementation of times
 	  ending with Z (i.e. to return the UTC time).
-
-2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
-
-	* common.c (set_cob_time_offset)[WIN32]: bug #161 - offset for CURRENT-DATE
 
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
