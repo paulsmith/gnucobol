@@ -1,4 +1,8 @@
 
+2015-12-14  Brian Tiffin <btiffin@gnu.org>
+
+	* numeric.c (cob_print_realbin): bug #171 - unsigned values fail with high bit set
+
 2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* intrinsic.c (cob_intr_current_date): bug #161 - offset for CURRENT-DATE

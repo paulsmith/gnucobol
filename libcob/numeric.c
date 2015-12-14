@@ -1685,7 +1685,7 @@ cob_print_realbin (const cob_field *f, FILE *fp, const int size)
 		fprintf (fp, CB_FMT_PLLD, size, size, llval.val);
 		return;
 	}
-	llval.uval = cob_binary_get_sint64 (f);
+	llval.uval = cob_binary_get_uint64 (f);
 	fprintf (fp, CB_FMT_PLLU, size, size, llval.uval);
 }
 
