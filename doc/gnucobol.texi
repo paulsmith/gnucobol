@@ -335,6 +335,10 @@ object code, @file{*.i} for preprocessed code and @file{*.so}
 for dynamic modules and will do the right thing in terms of
 generation, compilation, or link.
 
+The special input name @file{-} takes input from @file{stdin} which is
+assumed to be COBOL source, and uses a default output name of
+@file{a.out} (or @file{a.so,c,o,i}) as appropriate for the build type.
+
 The following options specify the target type produced by the
 compiler:
 
@@ -375,6 +379,10 @@ image.  The main entry point being the outermost @code{PROGRAM-ID}.
 This option takes effect at the translation stage.
 If you give this option with @code{-C}, you will see the main
 function at the end of the generated C file.
+
+@item -j
+Run job after compilation.  Either from executable with -x, or with
+@code{cobcrun} when compiling a module.
 
 @item -I <directory>
 Add <directory> to copy/include search path
@@ -417,6 +425,10 @@ area, with columns 72-80 as a reference area.  Historically this
 format is based on 80 character punch cards.  FIXED format is the
 default used by the compiler unless overridden by compiler switch
 or source code directive, @code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}}. 
+
+@item -F
+Short alias for -free.  Useful when using @code{cobc} as a shell
+interpreter directive to the program loader.
 @end table
 
 @node Warning Options, Configuration Options, Source Format, Compiler Options
@@ -512,10 +524,13 @@ User defined dialect configuration. See @code{-std=} above.@*
 @table @code
 
 @item -debug
-Enable all run-time error checking
+Enable all run-time error checking.
+
+@item -R
+Short alias for -debug run-time checks.
 
 @item -g
-Produce debugging information in the output
+Produce debugging information in the output.
 
 @item -O
 Enable optimization of code size and execution speed.
