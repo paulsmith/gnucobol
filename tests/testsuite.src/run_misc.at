@@ -4481,7 +4481,7 @@ PROCEDURE        DIVISION.
     STOP RUN WITH NORMAL STATUS.
 ])
 
-AT_CHECK([$COMPILE -Fja prog.cob], [0], [job])
+AT_CHECK([$COMPILE -FjR prog.cob], [0], [job])
 AT_CHECK([$COMPILE_MODULE -Fj prog.cob], [0], [job], [])
 
 AT_CLEANUP

@@ -1,3 +1,9 @@
+
+2015-12-15  Brian Tiffin <btiffin@gnu.org>
+
+	* gnu-cobol.texi, cbhelp.texi : Add -R, -j -F documentation
+	  along with - stdin filename explanation.
+
 2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* gnu-cobol.texi : Add Extended ACCEPT special keys section. 

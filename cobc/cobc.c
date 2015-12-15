@@ -395,7 +395,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivECScbmxjaFOPgwo:I:L:l:D:K:k:";
+static const char short_options[] = "hVivECScbmxjRFOPgwo:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -1813,7 +1813,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -O, -O2, -Os          Enable optimization"));
 	puts (_("  -g                    Enable C compiler debug / stack check / trace"));
 	puts (_("  -debug                Enable all run-time error checking"));
-	puts (_("  -a                    Alias (short option) for assistive -debug"));
+	puts (_("  -R                    Alias (short option) for run-time -debug"));
 	puts (_("  -o <file>             Place the output into <file>"));
 	puts (_("  -b                    Combine all input files into a single"));
 	puts (_("                        dynamically loadable module"));
@@ -2143,7 +2143,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'd':
-		case 'a':
+		case 'R':
 			/* -debug : Turn on OC debugging */
 			/* Turn on all exception conditions */
 			for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {

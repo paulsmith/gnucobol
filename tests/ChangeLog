@@ -1,4 +1,9 @@
 
+2015-12-15  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_misc.at: command line option -a replaced with -R
+	  as short form for -debug
+
 2015-12-14  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/data_display.at: add unsigned numeric display tests
