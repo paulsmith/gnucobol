@@ -1,4 +1,8 @@
 
+2015-12-14  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/data_display.at: add unsigned numeric display tests
+
 2015-11-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* general: skip tests that need a curses build if not available
