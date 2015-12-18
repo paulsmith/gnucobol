@@ -1,4 +1,9 @@
 
+2015-12-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (validate_field_1): fixed bug #172, compiler rejecting nested
+	   OCCURS DEPENDING tables despite -fodoslide.
+
 2015-12-15  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c (cobc_print_usage, process_command_line): command line option -a

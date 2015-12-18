@@ -530,7 +530,7 @@ validate_field_1 (struct cb_field *f)
 		/* The data item that contains a OCCURS DEPENDING clause shall not
 		   be subordinate to a data item that has an OCCURS clause */
 		for (p = f->parent; p; p = p->parent) {
-			if (p->flag_occurs) {
+			if (p->flag_occurs && !cb_flag_odoslide) {
 				cb_error_x (CB_TREE (p),
 					    _("'%s' cannot have the OCCURS clause due to '%s'"),
 					    cb_name (CB_TREE (p)),
