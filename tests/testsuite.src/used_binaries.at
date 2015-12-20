@@ -51,6 +51,18 @@ AT_CHECK([$COMPILE_ONLY_WITHOUTSTD prog.cob], [1], [],
 
 AT_CLEANUP
 
+AT_SETUP([Compiler help and information])
+AT_KEYWORDS([runmisc cobc])
+
+AT_CHECK([$COBC --version], [0], [ignore], [])
+AT_CHECK([$COBC --help], [0], [ignore], [])
+AT_CHECK([$COBC --info], [0], [ignore], [])
+AT_CHECK([$COBC --list-reserved], [0], [ignore], [])
+AT_CHECK([$COBC --list-intrinsics], [0], [ignore], [])
+AT_CHECK([$COBC --list-mnemonics], [0], [ignore], [])
+AT_CHECK([$COBC --list-system], [0], [ignore], [])
+AT_CLEANUP
+
 
 AT_SETUP([Using full path for cobc])
 AT_KEYWORDS([runmisc])

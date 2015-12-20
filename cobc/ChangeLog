@@ -1,8 +1,15 @@
 
+2015-12-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.h: change order of fields in cb_intrinsic_table
+	* tree.c (cb_build_intrinsic): better check of min/max arguments
+	* reserved.c: set correct min/max values in function_list,
+	  (cb_list_intrinsics): output min/max value
+
 2015-12-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* field.c (validate_field_1): fixed bug #172, compiler rejecting nested
-	   OCCURS DEPENDING tables despite -fodoslide.
+	  OCCURS DEPENDING tables despite -fodoslide.
 
 2015-12-15  Brian Tiffin <btiffin@gnu.org>
 
@@ -24,15 +31,15 @@
 	* codegen.c (output_integer): cast program-pointer to unsigned char *,
 	  not to void *
 
-2015-11-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-11-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_get_int): Fix for Bug #167 - activated size check and set
 	  limit depending on INT_MAX
-	* tree.c (cb_get_int, cb_get_long_long, cb_get_u_long_long): don't COBC_ABORT
-	  if numeric literals are too big but raise a normal compiler error showing
-	  the actual (system specific) limit
+	* tree.c (cb_get_int, cb_get_long_long, cb_get_u_long_long): don't call
+	  COBC_ABORT if numeric literals are too big but raise a normal compiler
+	  error showing the actual (system specific) limit
 
-2015-11-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-11-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	Fix for Bug #165:
 	* pplex.l (ppopen): activated check for BOM independent of WIN32, skipped
@@ -43,18 +50,18 @@
 	  cl.exe's verbose output - now filtering *all* lines instead of first three
 	* cobc.c [_MSC_VER]: rewritten (line_contains) for matching "special" names
 
-2015-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process) [_MSC_VER]: bugfix in output filter
 	* cobc.c (process_run): enable -j to work on systems that need ".\", too
 
-2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: maximum word-length always resulted in error if -W[all]
 	  was set, now only raise an error if -frelax-syntax is not set and
 	  raise a warning if both -frelax-syntax and -W[all] are active
 
-2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h: new field flag flag_is_pdiv_opt
 	* parser.y: set f->flag_is_pdiv_opt for vars in USING with OPTIONAL clause
@@ -64,7 +71,7 @@
 	  actual used var, not only the name of the parent) for runtime checks of
 	  BASED items and OPTIONAL LINKAGE items
 
-2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c: tweaked error messages, added possible values if invalid
 	* config.c (cb_load_conf_file): if include file is not found prefix it
@@ -81,7 +88,7 @@
 	  boolean and ACUCOBOL's B#, O#, X# and H# literals.
 	* tree.c: improved error messages and refactored (cb_concat_literals).
 
-2015-09-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [_MSC_VER]: make sure that only temporary lib-files are removed
 
@@ -124,7 +131,7 @@
 	* scanner.l: Improved error detection of invalid floating-poit literals
 	  and associated error messages. Also minor refactoring.
 
-2015-07-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_size): Fix Bug #146 reference modification
 	  ignored ODO size
@@ -141,7 +148,7 @@
 	* parser.y: bug #83 - added check for relative LINE/COLUMN clauses in
 	  screen section occurs items.
 
-2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-05-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: bug #136 added check for duplicate on/off clauses for switches
 	* reserved.c, tree.h: fr #65 added more switches "SWITCH-16" to "SWITCH-36"
@@ -149,22 +156,22 @@
 	  extension "SWITCH 1" to "SWITCH 26", added alias SWITCH [A-Z],
 	  allow this extension only with -fsyntax-extension
 
-2015-05-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-05-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c: new options "includeif" to include only if file exists
 	  (implemented according to runtime configuration by Ron Norman)
 
-2015-05-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-05-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
 	  (cb_source_file + new cb_exp_line) for expression errors
 
-2015-04-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-04-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_emit_initialize): bug #84 check target for INITIALIZE,
 	  almost fixed as suggested by Edward Hard
 
-2015-04-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-04-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c: load configuration file from COB_CONFIG_DIR if file cannot be
 	  accessed in current directory, only check for missing definitions if
@@ -184,12 +191,12 @@
 	* config.c: support for multiple inclusion of conf files while
 	  checking for recursion
 
-2015-03-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c : added more checks of overlapping MOVE,
 	  generate MOVEs as overlapping if it's not sure it isn't
 
-2015-03-05  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c : added check of recursive CALL for INITIAL programs
 
@@ -206,7 +213,8 @@
 
 2014-12-02  Sergey Kashyrin <ska@kiska.net>
 
-	* codegen.c : fix for bug #52 incorrect premature memory release (CANCEL) of INITIAL programs
+	* codegen.c : fix for bug #52 incorrect premature memory release (CANCEL)
+	  of INITIAL programs
 
 2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

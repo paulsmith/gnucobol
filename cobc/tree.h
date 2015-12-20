@@ -973,13 +973,13 @@ struct cb_assign {
 struct cb_intrinsic_table {
 	const char		*name;		/* FUNCTION NAME */
 	const char		*intr_routine;	/* Routine name */
-	const int		args;		/* 0-n, negative = variable */
-	const int		implemented;	/* Have we implemented it? */
 	const enum cb_intr_enum	intr_enum;	/* Enum intrinsic */
+	const int		token;		/* Token value */
+	const int		implemented;	/* Have we implemented it? */
+	const int		args;		/* Maximum number of arguments, -1 = unlimited */
+	const int		min_args;	/* Minimum number of arguments */
 	const enum cb_category	category;	/* Category */
 	const unsigned int	refmod;		/* Can be refmodded */
-	const int		min_args;	/* Minimum number of args */
-	const int		token;		/* Token value */
 };
 
 struct cb_intrinsic {

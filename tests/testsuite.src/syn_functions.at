@@ -46,6 +46,117 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([Intrinsic Funtions: number of arguments])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION PI.
+           DISPLAY FUNCTION PI ( ).
+           DISPLAY FUNCTION PI (1).
+           DISPLAY FUNCTION ABS.
+           DISPLAY FUNCTION ABS (1).
+           DISPLAY FUNCTION ABS (1, 2).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD.
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50,1600).
+           DISPLAY FUNCTION DAY-TO-YYYYDDD (6000,50,1600,500).
+           DISPLAY FUNCTION MAX ().
+           DISPLAY FUNCTION MAX (6000).
+           DISPLAY FUNCTION SUBSTITUTE ('A' 'B' 'C' 'D').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+[prog.cob: 10: Error: FUNCTION 'PI' has wrong number of arguments
+prog.cob: 11: Error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 13: Error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 14: Error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 18: Error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 19: Error: FUNCTION 'MAX' has wrong number of arguments
+prog.cob: 21: Error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic Funtions: reference modification])
+AT_KEYWORDS([functions])
+
+# the following should be checked, currently doesn't work
+#AT_DATA([prog.cob], [
+#       IDENTIFICATION   DIVISION.
+#       PROGRAM-ID.      prog.
+#       ENVIRONMENT DIVISION.
+#       DATA             DIVISION.
+#       WORKING-STORAGE  SECTION.
+#       PROCEDURE        DIVISION.
+#           DISPLAY FUNCTION CHAR (66)(1:2).
+#           DISPLAY FUNCTION NUMVAL-C (123)(1:2).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(20:1).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(-1:1).
+#           DISPLAY FUNCTION REVERSE ("TESTME")(1:0).
+#           STOP RUN.
+#])
+#
+#AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+#[prog.cob: 8: Error: FUNCTION 'PI' can not have reference modification
+#prog.cob: 9: Error: FUNCTION 'NUMVAL-C' can not have reference modification
+#prog.cob: 10: Error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 11: Error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 12: Error: FUNCTION 'REVERSE' has invalid reference modification
+#])
+
+# test what is in already...
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION REVERSE ("TESTME")(-1:1).
+           DISPLAY FUNCTION REVERSE ("TESTME")(1:0).
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+[prog.cob: 8: Error: FUNCTION 'REVERSE' has invalid reference modification
+prog.cob: 9: Error: FUNCTION 'REVERSE' has invalid reference modification
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic Funtions: Parameter type])
+AT_KEYWORDS([functions])
+
+# TODO: Add more tests
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ABS ('1').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+[prog.cob: 8: Error: FUNCTION 'ABS' has invalid parameter
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Invalid formatted date/time args])
 AT_KEYWORDS([functions FORMATTED-DATE FORMATTED-CURRENT-DATE FORMATTED-TIME FORMATTED-DATETIME INTEGER-OF-FORMATTED-DATE SECONDS-FROM-FORMATTED-TIME])
 

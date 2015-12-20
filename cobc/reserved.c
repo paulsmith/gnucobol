@@ -1986,531 +1986,531 @@ static const struct cobc_reserved reserved_words[] = {
 /* Intrinsic Function List */
 /* Must be ordered on name for binary search */
 
-/*		Name,		Routine,				*/
-/*		Arguments,	Implemented,	Token,			*/
-/*		Category,	Can refmod,	Minimum number of args	*/
-/*		Parser token						*/
+/*	Name,		Routine,							*/
+/*	Token,	Parser token,	Implemented				*/
+/*	Number of arguments: Max [-1 = unlimited], Min,	*/	
+/*	Category,	Can refmod							*/
 
 static const struct cb_intrinsic_table function_list[] = {
   { "ABS",				"cob_intr_abs",
-					1, 1, CB_INTR_ABS,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ABS, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ACOS",				"cob_intr_acos",
-					1, 1, CB_INTR_ACOS,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ACOS, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ANNUITY",				"cob_intr_annuity",
-					2, 1, CB_INTR_ANNUITY,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_ANNUITY, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ASIN",				"cob_intr_asin",
-					1, 1, CB_INTR_ASIN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ASIN, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ATAN",				"cob_intr_atan",
-					1, 1, CB_INTR_ATAN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ATAN, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "BOOLEAN-OF-INTEGER",		"cob_intr_boolean_of_integer",
-					2, 0, CB_INTR_BOOLEAN_OF_INTEGER,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_BOOLEAN_OF_INTEGER, FUNCTION_NAME, 0,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "BYTE-LENGTH",			"cob_intr_byte_length",
-					1, 1, CB_INTR_BYTE_LENGTH,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_BYTE_LENGTH, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "CHAR",				"cob_intr_char",
-					1, 1, CB_INTR_CHAR,
-					CB_CATEGORY_ALPHANUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_CHAR, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "CHAR-NATIONAL",			"cob_intr_char_national",
-					1, 0, CB_INTR_CHAR_NATIONAL,
-					CB_CATEGORY_ALPHANUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_CHAR_NATIONAL, FUNCTION_NAME, 0,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "COMBINED-DATETIME",		"cob_intr_combined_datetime",
-					2, 1, CB_INTR_COMBINED_DATETIME,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_COMBINED_DATETIME, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "CONCATENATE",			"cob_intr_concatenate",
-					-1, 1, CB_INTR_CONCATENATE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					CONCATENATE_FUNC
+					CB_INTR_CONCATENATE, CONCATENATE_FUNC, 1,
+					-1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "COS",				"cob_intr_cos",
-					1, 1, CB_INTR_COS,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_COS, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "CURRENCY-SYMBOL",			"cob_intr_currency_symbol",
-					0, 1, CB_INTR_CURRENCY_SYMBOL,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_CURRENCY_SYMBOL, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "CURRENT-DATE",			"cob_intr_current_date",
-					0, 1, CB_INTR_CURRENT_DATE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 0,
-					CURRENT_DATE_FUNC
+					CB_INTR_CURRENT_DATE, CURRENT_DATE_FUNC, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "DATE-OF-INTEGER",			"cob_intr_date_of_integer",
-					1, 1, CB_INTR_DATE_OF_INTEGER,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_DATE_OF_INTEGER, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "DATE-TO-YYYYMMDD",			"cob_intr_date_to_yyyymmdd",
-					-1, 1, CB_INTR_DATE_TO_YYYYMMDD,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_DATE_TO_YYYYMMDD, FUNCTION_NAME, 1,
+					3, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "DAY-OF-INTEGER",			"cob_intr_day_of_integer",
-					1, 1, CB_INTR_DAY_OF_INTEGER,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_DAY_OF_INTEGER, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "DAY-TO-YYYYDDD",			"cob_intr_day_to_yyyyddd",
-					-1, 1, CB_INTR_DAY_TO_YYYYDDD,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_DAY_TO_YYYYDDD, FUNCTION_NAME, 1,
+					3, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "DISPLAY-OF",			"cob_intr_display_of",
-					-1, 0, CB_INTR_DISPLAY_OF,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					DISPLAY_OF_FUNC
+					CB_INTR_DISPLAY_OF, DISPLAY_OF_FUNC, 0,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "E",				"cob_intr_e",
-					0, 1, CB_INTR_E,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_E, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "EXCEPTION-FILE",			"cob_intr_exception_file",
-					0, 1, CB_INTR_EXCEPTION_FILE,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_FILE, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXCEPTION-FILE-N",			"cob_intr_exception_file_n",
-					0, 0, CB_INTR_EXCEPTION_FILE_N,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_FILE_N, FUNCTION_NAME, 0,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXCEPTION-LOCATION",		"cob_intr_exception_location",
-					0, 1, CB_INTR_EXCEPTION_LOCATION,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_LOCATION, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXCEPTION-LOCATION-N",		"cob_intr_exception_location_n",
-					0, 0, CB_INTR_EXCEPTION_LOCATION_N,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_LOCATION_N, FUNCTION_NAME, 0,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXCEPTION-STATEMENT",		"cob_intr_exception_statement",
-					0, 1, CB_INTR_EXCEPTION_STATEMENT,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_STATEMENT, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXCEPTION-STATUS",			"cob_intr_exception_status",
-					0, 1, CB_INTR_EXCEPTION_STATUS,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_EXCEPTION_STATUS, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "EXP",				"cob_intr_exp",
-					1, 1, CB_INTR_EXP,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_EXP, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "EXP10",				"cob_intr_exp10",
-					1, 1, CB_INTR_EXP10,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_EXP10, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "FACTORIAL",			"cob_intr_factorial",
-					1, 1, CB_INTR_FACTORIAL,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_FACTORIAL, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "FORMATTED-CURRENT-DATE",		"cob_intr_formatted_current_date",
-					1, 1, CB_INTR_FORMATTED_CURRENT_DATE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					FUNCTION_NAME
+					CB_INTR_FORMATTED_CURRENT_DATE, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FORMATTED-DATE",			"cob_intr_formatted_date",
-					2, 1, CB_INTR_FORMATTED_DATE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 2,
-					FORMATTED_DATE_FUNC
+					CB_INTR_FORMATTED_DATE, FORMATTED_DATE_FUNC, 1,
+					2, 2,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FORMATTED-DATETIME",		"cob_intr_formatted_datetime",
-					-1, 1, CB_INTR_FORMATTED_DATETIME,
-					CB_CATEGORY_ALPHANUMERIC, 1, 3,
-					FORMATTED_DATETIME_FUNC
+					CB_INTR_FORMATTED_DATETIME, FORMATTED_DATETIME_FUNC, 1,
+					4, 3,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FORMATTED-TIME",			"cob_intr_formatted_time",
-					-1, 1, CB_INTR_FORMATTED_TIME,
-					CB_CATEGORY_ALPHANUMERIC, 1, 2,
-					FORMATTED_TIME_FUNC
+					CB_INTR_FORMATTED_TIME, FORMATTED_TIME_FUNC, 1,
+					3, 2,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FRACTION-PART",			"cob_intr_fraction_part",
-					1, 1, CB_INTR_FRACTION_PART,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_FRACTION_PART, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "HIGHEST-ALGEBRAIC",		"cob_intr_highest_algebraic",
-					1, 1, CB_INTR_HIGHEST_ALGEBRAIC,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_HIGHEST_ALGEBRAIC, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER",				"cob_intr_integer",
-					1, 1, CB_INTR_INTEGER,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_INTEGER, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER-OF-BOOLEAN",		"cob_intr_integer_of_boolean",
-					1, 0, CB_INTR_INTEGER_OF_BOOLEAN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_INTEGER_OF_BOOLEAN, FUNCTION_NAME, 0,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER-OF-DATE",			"cob_intr_integer_of_date",
-					1, 1, CB_INTR_INTEGER_OF_DATE,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_INTEGER_OF_DATE, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER-OF-DAY",			"cob_intr_integer_of_day",
-					1, 1, CB_INTR_INTEGER_OF_DAY,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_INTEGER_OF_DAY, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER-OF-FORMATTED-DATE",	"cob_intr_integer_of_formatted_date",
-					2, 1, CB_INTR_INTEGER_OF_FORMATTED_DATE,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_INTEGER_OF_FORMATTED_DATE, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "INTEGER-PART",			"cob_intr_integer_part",
-					1, 1, CB_INTR_INTEGER_PART,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_INTEGER_PART, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "LENGTH",				"cob_intr_length",
-					1, 1, CB_INTR_LENGTH,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_LENGTH, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "LENGTH-AN",			"cob_intr_byte_length",
-					1, 1, CB_INTR_BYTE_LENGTH,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_BYTE_LENGTH, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "LOCALE-COMPARE",			"cob_intr_locale_compare",
-					-1, 1, CB_INTR_LOCALE_COMPARE,
-					CB_CATEGORY_ALPHANUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_LOCALE_COMPARE, FUNCTION_NAME, 1,
+					3, 2,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "LOCALE-DATE",			"cob_intr_locale_date",
-					2, 1, CB_INTR_LOCALE_DATE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 2,
-					LOCALE_DATE_FUNC
+					CB_INTR_LOCALE_DATE, LOCALE_DATE_FUNC, 1,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "LOCALE-TIME",			"cob_intr_locale_time",
-					2, 1, CB_INTR_LOCALE_TIME,
-					CB_CATEGORY_ALPHANUMERIC, 1, 2,
-					LOCALE_TIME_FUNC
+					CB_INTR_LOCALE_TIME, LOCALE_TIME_FUNC, 1,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "LOCALE-TIME-FROM-SECONDS",		"cob_intr_lcl_time_from_secs",
-					2, 1, CB_INTR_LOCALE_TIME_FROM_SECS,
-					CB_CATEGORY_ALPHANUMERIC, 1, 2,
-					LOCALE_TIME_FROM_FUNC
+					CB_INTR_LOCALE_TIME_FROM_SECS, LOCALE_TIME_FROM_FUNC, 1,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "LOG",				"cob_intr_log",
-					1, 1, CB_INTR_LOG,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_LOG, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "LOG10",				"cob_intr_log10",
-					1, 1, CB_INTR_LOG10,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_LOG10, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "LOWER-CASE",			"cob_intr_lower_case",
-					1, 1, CB_INTR_LOWER_CASE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					LOWER_CASE_FUNC
+					CB_INTR_LOWER_CASE, LOWER_CASE_FUNC, 1,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "LOWEST-ALGEBRAIC",			"cob_intr_lowest_algebraic",
-					1, 1, CB_INTR_LOWEST_ALGEBRAIC,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_LOWEST_ALGEBRAIC, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MAX",				"cob_intr_max",
-					-1, 1, CB_INTR_MAX,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_MAX, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MEAN",				"cob_intr_mean",
-					-1, 1, CB_INTR_MEAN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_MEAN, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MEDIAN",				"cob_intr_median",
-					-1, 1, CB_INTR_MEDIAN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_MEDIAN, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MIDRANGE",				"cob_intr_midrange",
-					-1, 1, CB_INTR_MIDRANGE,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_MIDRANGE, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MIN",				"cob_intr_min",
-					-1, 1, CB_INTR_MIN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_MIN, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MOD",				"cob_intr_mod",
-					2, 1, CB_INTR_MOD,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_MOD, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MODULE-CALLER-ID",			"cob_intr_module_caller_id",
-					0, 1, CB_INTR_MODULE_CALLER_ID,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_CALLER_ID, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MODULE-DATE",			"cob_intr_module_date",
-					0, 1, CB_INTR_MODULE_DATE,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_DATE, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MODULE-FORMATTED-DATE",		"cob_intr_module_formatted_date",
-					0, 1, CB_INTR_MODULE_FORMATTED_DATE,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_FORMATTED_DATE, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MODULE-ID",			"cob_intr_module_id",
-					0, 1, CB_INTR_MODULE_ID,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_ID, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MODULE-PATH",			"cob_intr_module_path",
-					0, 1, CB_INTR_MODULE_PATH,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_PATH, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MODULE-SOURCE",			"cob_intr_module_source",
-					0, 1, CB_INTR_MODULE_SOURCE,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_SOURCE, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MODULE-TIME",			"cob_intr_module_time",
-					0, 1, CB_INTR_MODULE_TIME,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MODULE_TIME, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "MONETARY-DECIMAL-POINT",		"cob_intr_mon_decimal_point",
-					0, 1, CB_INTR_MON_DECIMAL_POINT,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MON_DECIMAL_POINT, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "MONETARY-THOUSANDS-SEPARATOR",	"cob_intr_mon_thousands_sep",
-					0, 1, CB_INTR_MON_THOUSANDS_SEP,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_MON_THOUSANDS_SEP, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "NATIONAL-OF",			"cob_intr_national_of",
-					-1, 0, CB_INTR_NATIONAL_OF,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					NATIONAL_OF_FUNC
+					CB_INTR_NATIONAL_OF, NATIONAL_OF_FUNC, 0,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "NUMERIC-DECIMAL-POINT",		"cob_intr_num_decimal_point",
-					0, 1, CB_INTR_NUM_DECIMAL_POINT,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_NUM_DECIMAL_POINT, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "NUMERIC-THOUSANDS-SEPARATOR",	"cob_intr_num_thousands_sep",
-					0, 1, CB_INTR_NUM_THOUSANDS_SEP,
-					CB_CATEGORY_ALPHANUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_NUM_THOUSANDS_SEP, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "NUMVAL",				"cob_intr_numval",
-					1, 1, CB_INTR_NUMVAL,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_NUMVAL, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "NUMVAL-C",				"cob_intr_numval_c",
-					2, 1, CB_INTR_NUMVAL_C,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					NUMVALC_FUNC
+					CB_INTR_NUMVAL_C, NUMVALC_FUNC, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "NUMVAL-F",				"cob_intr_numval_f",
-					1, 1, CB_INTR_NUMVAL_F,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_NUMVAL_F, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ORD",				"cob_intr_ord",
-					1, 1, CB_INTR_ORD,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ORD, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ORD-MAX",				"cob_intr_ord_max",
-					-1, 1, CB_INTR_ORD_MAX,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ORD_MAX, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "ORD-MIN",				"cob_intr_ord_min",
-					-1, 1, CB_INTR_ORD_MIN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_ORD_MIN, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "PI",				"cob_intr_pi",
-					0, 1, CB_INTR_PI,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_PI, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "PRESENT-VALUE",			"cob_intr_present_value",
-					-1, 1, CB_INTR_PRESENT_VALUE,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_PRESENT_VALUE, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "RANDOM",				"cob_intr_random",
-					-1, 1, CB_INTR_RANDOM,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_RANDOM, FUNCTION_NAME, 1,
+					-1, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "RANGE",				"cob_intr_range",
-					-1, 1, CB_INTR_RANGE,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_RANGE, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "REM",				"cob_intr_rem",
-					2, 1, CB_INTR_REM,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_REM, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "REVERSE",				"cob_intr_reverse",
-					1, 1, CB_INTR_REVERSE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					REVERSE_FUNC
+					CB_INTR_REVERSE, REVERSE_FUNC, 1,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "SECONDS-FROM-FORMATTED-TIME",	"cob_intr_seconds_from_formatted_time",
-					2, 1, CB_INTR_SECONDS_FROM_FORMATTED_TIME,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_SECONDS_FROM_FORMATTED_TIME, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "SECONDS-PAST-MIDNIGHT",		"cob_intr_seconds_past_midnight",
-					0, 1, CB_INTR_SECONDS_PAST_MIDNIGHT,
-					CB_CATEGORY_NUMERIC, 0, 0,
-					FUNCTION_NAME
+					CB_INTR_SECONDS_PAST_MIDNIGHT, FUNCTION_NAME, 1,
+					0, 0,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "SIGN",				"cob_intr_sign",
-					1, 1, CB_INTR_SIGN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_SIGN, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "SIN",				"cob_intr_sin",
-					1, 1, CB_INTR_SIN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_SIN, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "SQRT",				"cob_intr_sqrt",
-					1, 1, CB_INTR_SQRT,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_SQRT, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "STANDARD-COMPARE",			"cob_intr_standard_compare",
-					-1, 0, CB_INTR_STANDARD_COMPARE,
-					CB_CATEGORY_ALPHANUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_STANDARD_COMPARE, FUNCTION_NAME, 0,
+					4, 2,
+					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "STANDARD-DEVIATION",		"cob_intr_standard_deviation",
-					-1, 1, CB_INTR_STANDARD_DEVIATION,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_STANDARD_DEVIATION, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "STORED-CHAR-LENGTH",		"cob_intr_stored_char_length",
-					1, 1, CB_INTR_STORED_CHAR_LENGTH,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_STORED_CHAR_LENGTH, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "SUBSTITUTE",			"cob_intr_substitute",
-					-1, 1, CB_INTR_SUBSTITUTE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 3,
-					SUBSTITUTE_FUNC
+					CB_INTR_SUBSTITUTE, SUBSTITUTE_FUNC, 1,
+					-1, 3,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "SUBSTITUTE-CASE",			"cob_intr_substitute_case",
-					-1, 1, CB_INTR_SUBSTITUTE_CASE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 3,
-					SUBSTITUTE_CASE_FUNC
+					CB_INTR_SUBSTITUTE_CASE, SUBSTITUTE_CASE_FUNC, 1,
+					-1, 3,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "SUM",				"cob_intr_sum",
-					-1, 1, CB_INTR_SUM,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_SUM, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TAN",				"cob_intr_tan",
-					1, 1, CB_INTR_TAN,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_TAN, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-DATE-YYYYMMDD",		"cob_intr_test_date_yyyymmdd",
-					1, 1, CB_INTR_TEST_DATE_YYYYMMDD,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_TEST_DATE_YYYYMMDD, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-DAY-YYYYDDD",			"cob_intr_test_day_yyyyddd",
-					1, 1, CB_INTR_TEST_DAY_YYYYDDD,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_TEST_DAY_YYYYDDD, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-FORMATTED-DATETIME",		"cob_intr_test_formatted_datetime",
-					2, 1, CB_INTR_TEST_FORMATTED_DATETIME,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					FUNCTION_NAME
+					CB_INTR_TEST_FORMATTED_DATETIME, FUNCTION_NAME, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-NUMVAL",			"cob_intr_test_numval",
-					1, 1, CB_INTR_TEST_NUMVAL,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_TEST_NUMVAL, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-NUMVAL-C",			"cob_intr_test_numval_c",
-					2, 1, CB_INTR_TEST_NUMVAL_C,
-					CB_CATEGORY_NUMERIC, 0, 2,
-					NUMVALC_FUNC
+					CB_INTR_TEST_NUMVAL_C, NUMVALC_FUNC, 1,
+					2, 2,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TEST-NUMVAL-F",			"cob_intr_test_numval_f",
-					1, 1, CB_INTR_TEST_NUMVAL_F,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_TEST_NUMVAL_F, FUNCTION_NAME, 1,
+					1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "TRIM",				"cob_intr_trim",
-					2, 1, CB_INTR_TRIM,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					TRIM_FUNC
+					CB_INTR_TRIM, TRIM_FUNC, 1,
+					2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "UPPER-CASE",			"cob_intr_upper_case",
-					1, 1, CB_INTR_UPPER_CASE,
-					CB_CATEGORY_ALPHANUMERIC, 1, 1,
-					UPPER_CASE_FUNC
+					CB_INTR_UPPER_CASE, UPPER_CASE_FUNC, 1,
+					1, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "VARIANCE",				"cob_intr_variance",
-					-1, 1, CB_INTR_VARIANCE,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_VARIANCE, FUNCTION_NAME, 1,
+					-1, 1,
+					CB_CATEGORY_NUMERIC, 0
   },
   { "WHEN-COMPILED",			"cob_intr_when_compiled",
-					0, 1, CB_INTR_WHEN_COMPILED,
-					CB_CATEGORY_ALPHANUMERIC, 1, 0,
-					WHEN_COMPILED_FUNC
+					CB_INTR_WHEN_COMPILED, WHEN_COMPILED_FUNC, 1,
+					0, 0,
+					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "YEAR-TO-YYYY",			"cob_intr_year_to_yyyy",
-					-1, 1, CB_INTR_YEAR_TO_YYYY,
-					CB_CATEGORY_NUMERIC, 0, 1,
-					FUNCTION_NAME
+					CB_INTR_YEAR_TO_YYYY, FUNCTION_NAME, 1,
+					3, 1,
+					CB_CATEGORY_NUMERIC, 0
   }
 };
 
@@ -2805,6 +2805,7 @@ cb_list_intrinsics (void)
 {
 	const char	*s;
 	const char	*t;
+	char	*argnum;
 	size_t		i;
 	size_t		n;
 
@@ -2831,13 +2832,17 @@ cb_list_intrinsics (void)
 		} else {
 			t = _("N");
 		}
-		if (function_list[i].args < 0) {
-			printf ("%s%s%s\t\tVariable\n", function_list[i].name,
-				s, t);
+		if (function_list[i].args == -1) {
+			argnum = (char*)_("Unlimited");
+		} else if (function_list[i].args != function_list[i].min_args) {
+			argnum = cob_malloc (7);
+			snprintf (argnum, 7, "%d - %d", (int)function_list[i].min_args,
+				(int)function_list[i].args);
 		} else {
-			printf ("%s%s%s\t\t%d\n", function_list[i].name,
-				s, t, function_list[i].args);
+			argnum = cob_malloc (3);
+			snprintf (argnum, 3, "%d", (int)function_list[i].args);
 		}
+		printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, argnum);
 	}
 }
 

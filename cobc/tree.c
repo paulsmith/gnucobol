@@ -3152,18 +3152,27 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 			    cbp->name);
 		return cb_error_node;
 	}
-	if ((cbp->args >= 0 && numargs != cbp->args) ||
-	    (cbp->args < 0 && numargs < cbp->min_args)) {
-		cb_error_x (name,
-			    _("FUNCTION '%s' has wrong number of arguments"),
-			    cbp->name);
-		return cb_error_node;
+	if ((cbp->args == -1)) {
+		if (numargs < cbp->min_args) {
+			cb_error_x (name,
+				_ ("FUNCTION '%s' has wrong number of arguments"),
+				cbp->name);
+			return cb_error_node;
+		}
+	} else {
+		if (numargs > cbp->args || numargs < cbp->min_args) {
+			cb_error_x (name,
+					_("FUNCTION '%s' has wrong number of arguments"),
+					cbp->name);
+			return cb_error_node;
+		}
 	}
 	if (refmod) {
 		if (!cbp->refmod) {
 			cb_error_x (name, _("FUNCTION '%s' can not have reference modification"), cbp->name);
 			return cb_error_node;
 		}
+		/* TODO: better check needed, see typeck.c (cb_build_identifier) */
 		if (CB_LITERAL_P(CB_PAIR_X(refmod)) &&
 		    cb_get_int (CB_PAIR_X(refmod)) < 1) {
 			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), cbp->name);
