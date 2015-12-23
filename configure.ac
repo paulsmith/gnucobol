@@ -1,29 +1,28 @@
 #
-# Configure template for GNU Cobol
+# Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-# Copyright (C) 2007-2012 Roger While
-# Copyright (C) 2014,2015 Simon Sobisch
+# Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 #
-# This file is part of GNU Cobol.
+# This file is part of GnuCOBOL.
 #
-# The GNU Cobol compiler is free software: you can redistribute it
+# The GnuCOBOL compiler is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# GNU Cobol is distributed in the hope that it will be useful,
+# GnuCOBOL is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.64])
 
-AC_INIT([GNU Cobol],
+AC_INIT([GnuCOBOL],
 	[2.0],
 	[open-cobol-list@lists.sourceforge.net],
 	[gnu-cobol],
@@ -242,12 +241,12 @@ fi
 # Configure options.
 
 AC_ARG_ENABLE([debug],
-  [  --enable-debug          (GNU Cobol) Enable -g C compiler debug option],
+  [  --enable-debug          (GnuCOBOL) Enable -g C compiler debug option],
   [],
   [enable_debug=no])
 
 AC_ARG_ENABLE([experimental],
-  [  --enable-experimental   (GNU Cobol) Enable experimental code (Developers only!)],
+  [  --enable-experimental   (GnuCOBOL) Enable experimental code (Developers only!)],
   [if test "$enable_experimental" = "yes"
    then
 	AC_DEFINE([COB_EXPERIMENTAL], [1])
@@ -255,7 +254,7 @@ AC_ARG_ENABLE([experimental],
   [])
 
 AC_ARG_ENABLE([param-check],
-  [  --enable-param-check    (GNU Cobol) Enable CALL parameter checking (default no)],
+  [  --enable-param-check    (GnuCOBOL) Enable CALL parameter checking (default no)],
   [if test "$enable_param_check" = "yes"
    then
 	AC_DEFINE([COB_PARAM_CHECK], [1])
@@ -263,7 +262,7 @@ AC_ARG_ENABLE([param-check],
   [])
 
 AC_ARG_WITH([patch-level],
-  [  --with-patch-level      (GNU Cobol) Define a patch level (default 0)],
+  [  --with-patch-level      (GnuCOBOL) Define a patch level (default 0)],
   [case $with_patch_level in  
     yes)	AC_MSG_ERROR([[You must give --with-patch-level an argument.]])
 		;;
@@ -279,7 +278,7 @@ AC_ARG_WITH([patch-level],
 AC_DEFINE_UNQUOTED([PATCH_LEVEL], [$with_patch_level])
 
 AC_ARG_WITH([curses],
-  [  --with-curses           (GNU Cobol) Used curses library for extended SCREEN I/O (default=check)],
+  [  --with-curses           (GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)],
   [case "$with_curses" in
     ncursesw | ncurses | pdcurses | curses | check | no)
 		USE_NCURSES="$with_curses"
@@ -294,7 +293,7 @@ AC_ARG_WITH([curses],
   [USE_NCURSES="check"])
 
 AC_ARG_WITH([seqra-extfh],
-  [  --with-seqra-extfh      (GNU Cobol) Use external SEQ/RAN file handler],
+  [  --with-seqra-extfh      (GnuCOBOL) Use external SEQ/RAN file handler],
   [ if test "$with_seqra_extfh" = "yes"
     then
 	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
@@ -302,7 +301,7 @@ AC_ARG_WITH([seqra-extfh],
   [])
 
 AC_ARG_WITH([cisam],
-  [  --with-cisam            (GNU Cobol) Use CISAM for ISAM I/O],
+  [  --with-cisam            (GnuCOBOL) Use CISAM for ISAM I/O],
   [ if test "$with_cisam" = "yes"
     then
 	AC_CHECK_HEADERS([isam.h], [],
@@ -317,7 +316,7 @@ AC_ARG_WITH([cisam],
 if test "$with_cisam" != "yes"
 then
   AC_ARG_WITH([disam],
-  [  --with-disam            (GNU Cobol) Use DISAM for ISAM I/O],
+  [  --with-disam            (GnuCOBOL) Use DISAM for ISAM I/O],
   [ if test "$with_disam" = "yes"
     then
 	AC_CHECK_HEADERS([disam.h], [],
@@ -333,7 +332,7 @@ fi
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes"
 then
   AC_ARG_WITH([vbisam],
-  [  --with-vbisam           (GNU Cobol) Use VBISAM for ISAM I/O],
+  [  --with-vbisam           (GnuCOBOL) Use VBISAM for ISAM I/O],
   [ if test "$with_vbisam" = "yes"
     then
 	AC_CHECK_HEADERS([vbisam.h], [],
@@ -349,7 +348,7 @@ fi
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"
 then
   AC_ARG_WITH([index-extfh],
-  [  --with-index-extfh      (GNU Cobol) Use external ISAM file handler],
+  [  --with-index-extfh      (GnuCOBOL) Use external ISAM file handler],
   [ if test "$with_index_extfh" = "yes"
     then
 	AC_DEFINE([WITH_INDEX_EXTFH], [1])
@@ -360,13 +359,13 @@ fi
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"
 then
   AC_ARG_WITH([db],
-  [  --with-db               (GNU Cobol) Use Berkeley DB >= 4.1 for ISAM I/O (default)],
+  [  --with-db               (GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)],
   [],
   [with_db=yes])
 fi
 
 AC_ARG_WITH([dl],
-  [  --with-dl               (GNU Cobol) Use system dynamic loader (default)],
+  [  --with-dl               (GnuCOBOL) Use system dynamic loader (default)],
   [case $with_dl in  
     yes)
 		;;
@@ -378,7 +377,7 @@ AC_ARG_WITH([dl],
   [with_dl=yes])
 
 AC_ARG_WITH([varseq],
-  [  --with-varseq           (GNU Cobol) Define variable sequential format (default 0)],
+  [  --with-varseq           (GnuCOBOL) Define variable sequential format (default 0)],
   [case $with_varseq in  
     yes)	AC_MSG_ERROR([[You must give --with-varseq an argument.]])
 		;;
@@ -916,7 +915,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
 	[AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
 
-# GNU Cobol Configuration
+# GnuCOBOL Configuration
 
 if test "x$prefix" = "xNONE"
 then
@@ -1210,7 +1209,7 @@ AC_CONFIG_COMMANDS([chmod3], [chmod +x tests/atlocal])
 
 AC_OUTPUT
 
-AC_MSG_NOTICE([GNU Cobol Configuration:])
+AC_MSG_NOTICE([GnuCOBOL Configuration:])
 AC_MSG_NOTICE([ CC                ${CC}])
 AC_MSG_NOTICE([ CFLAGS            ${CFLAGS}])
 AC_MSG_NOTICE([ COB_CFLAGS        ${COB_CFLAGS}])

@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename gnucobol.info
 @setcontentsaftertitlepage
-@settitle GNU Cobol Manual
+@settitle GnuCOBOL Manual
 @setchapternewpage on
 @footnotestyle end
 
@@ -12,21 +12,22 @@
 @ifinfo
 @dircategory Software development
 @direntry 
-* cobc: (gnucobol)Compile.      The GNU COBOL compiler. 
+* cobc: (gnucobol)Compile.      The GnuCOBOL compiler. 
 @end direntry 
 @dircategory COBOL
 @direntry
-* GNU Cobol: (gnucobol).        A COBOL compiler
+* GnuCOBOL: (gnucobol).         A COBOL compiler
 @end direntry
 @dircategory GnuCOBOL
 @direntry
 * Overview: (gnucobol).         COBOL compiler overview.
 @end direntry
 
-This file documents GNU Cobol, a COBOL compiler
+This file documents GnuCOBOL, a COBOL compiler
 
-Copyright @copyright{} 2002,2003,2004,2005,2006,2007 Keisuke Nishida
-Copyright @copyright{} 2007-2012 Roger While
+Copyright @copyright{} 2002-2012, 2014-2015 Free Software Foundation, Inc.
+
+Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 
 Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -51,32 +52,32 @@ approved by the Free Software Foundation.
 @end ifinfo
 
 @titlepage
-@title GNU Cobol Manual
-@subtitle for GNU Cobol @value{VERSION}
-@author Keisuke Nishida / Roger While
+@title GnuCOBOL Manual
+@subtitle for GnuCOBOL @value{VERSION}
+@author Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch
 
 Edition @value{EDITION} @*
-Updated for GNU Cobol @value{VERSION} @*
+Updated for GnuCOBOL @value{VERSION} @*
 @value{UPDATED} @*
 
-GNU Cobol is a free and open-source COBOL compiler, which translates
+GnuCOBOL is a free and open-source COBOL compiler, which translates
 COBOL programs to C code and compiles it using GCC or other native
 operating system C compiler.
-
-This manual corresponds to GNU Cobol @value{VERSION}.
-
+@sp 2
+This manual corresponds to GnuCOBOL @value{VERSION}.
+@page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2002,2003,2004,2005,2006 Keisuke Nishida@*
-Copyright @copyright{} 2007-2012 Roger While
-
+Copyright @copyright{} 2002-2012, 2014-2015 Free Software Foundation, Inc.@*
+Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
+@sp 2
 Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
-preserved on all copies.
+preserved on all copies.@*
 
 Permission is granted to copy and distribute modified versions of this
 manual under the conditions for verbatim copying, provided that the
 entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
+permission notice identical to this one.@*
 
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
@@ -87,7 +88,7 @@ approved by the Free Software Foundation.
 @node Top
 
 @menu
-* Getting Started::             Introduction to GNU Cobol
+* Getting Started::             Introduction to GnuCOBOL
 * Compile::                     Compiling COBOL programs
 * Customize::                   Customizing the compiler
 * Optimize::                    Optimizing your program
@@ -95,12 +96,13 @@ approved by the Free Software Foundation.
 * Extensions::                  Extensions not ISO/ANSI standard
 * System routines::             Additional routines 
 * Appendix A::                  @code{cobc --help}
-* Appendix B::                  @code{cobc --info}
-* Appendix C::                  @code{cobc --list-reserved}
-* Appendix D::                  @code{cobc --list-intrinsics}
-* Appendix E::                  @code{cobc --list-system}
-* Appendix F::                  @code{cobc --list-mnemonics}
-* Appendix G::                  config/default.conf
+* Appendix B::                  @code{cobc --list-reserved}
+* Appendix C::                  @code{cobc --list-intrinsics}
+* Appendix D::                  @code{cobc --list-system}
+* Appendix E::                  @code{cobc --list-mnemonics}
+* Appendix F::                  Compiler Configuration
+* Appendix G::                  @code{cobcrun --help}
+* Appendix H::                  Runtime configuration
 * Index::                       Index
 
 @detailmenu
@@ -182,6 +184,8 @@ Appendix F
 
 Appendix G
 
+Appendix H
+
 @end detailmenu
 @end menu
 
@@ -208,7 +212,7 @@ This is a sample program that displays ``Hello World'':
 ----------------------------------------
 @end example
 
-The compiler is @code{cobc}, which is executed as follows:
+@*The compiler is @code{cobc}, which is executed as follows:
 
 @example
 $ cobc -x hello.cob
@@ -216,10 +220,10 @@ $ ./hello
 Hello World!
 @end example
 
-The executable file name (i.e., @file{hello} in this case) is
+@*The executable file name (i.e., @file{hello} in this case) is
 determined by removing the extension from the source file name.
 
-You can specify the executable file name by specifying the compiler
+@*You can specify the executable file name by specifying the compiler
 option @code{-o} as follows:
 
 @example
@@ -228,11 +232,11 @@ $ ./hello-world
 Hello World!
 @end example
 
-Using more modern sources.
+@*Using more modern sources.
 
 @example
 ---- hellonew.cob ----------------
-*> Sample GNU Cobol program
+*> Sample GnuCOBOL program
 identification division.
 program-id. hellonew.
 procedure division.
@@ -249,14 +253,14 @@ $ ./hellonew
 Hello New World!
 @end example
 
-Showing the use of free format, to end of line comments, the
+@*Showing the use of free format, to end of line comments, the
 @code{goback} verb, and proper use of terminator with
 @code{end-display}.
 
 @node Compile, Customize, Getting Started, Top
 @chapter Compile
 
-This chapter describes how to compile COBOL programs using GNU Cobol.
+This chapter describes how to compile COBOL programs using GnuCOBOL.
 
 @menu
 * Compiler Options::            Compiler options
@@ -289,39 +293,39 @@ The following switches can be used for informational displays:
 
 @table @code
 @item --help
-Display help screen (@pxref{Appendix A, ,cobc --help}).
+Display help screen (@pxref{Appendix A, ,cobc --help}),
 @code{-h} will also display the help.
-No further actions will be taken except for further display options.
+@*No further actions will be taken.
 
 @item --version
 Display compiler version, author package date and executable build
 date.  @code{-V} will also display version.
-No further actions will be taken except for further display options.
+@*No further actions will be taken.
 
 @item --info
-Display build information (@pxref{Appendix B, ,cobc --info}).
+Display build information along with default and current compiler configuration.
 No further actions will be taken except for further display options.
 
 @item -v
 Verbosely displays the programs invoked during compilations.
 
 @item --list-reserved
-Display reserved words(@pxref{Appendix C, ,cobc --list-reserved}).
+Display reserved words(@pxref{Appendix B, ,cobc --list-reserved}).
 A Y/N field shows if the word is supported.
 @footnote{Support may be partial or complete}
 No further actions will be taken except for further display options.
 
 @item --list-intrinsics
-Display intrinsic functions (@pxref{Appendix D, ,cobc --list-intrinsics}).
+Display intrinsic functions (@pxref{Appendix C, ,cobc --list-intrinsics}).
 A Y/N field shows if the function is implemented.
 No further actions will be taken except for further display options.
 
 @item --list-system
-Display system routines (@pxref{Appendix E, ,cobc --list-system}).
+Display system routines (@pxref{Appendix D, ,cobc --list-system}).
 No further actions will be taken except for further display options.
 
 @item --list-mnemonics
-Display mnemonic names (@pxref{Appendix F, ,cobc --list-mnemonics}).
+Display mnemonic names (@pxref{Appendix E, ,cobc --list-mnemonics}).
 No further actions will be taken except for further display options.
 
 @end table
@@ -335,36 +339,36 @@ object code, @file{*.i} for preprocessed code and @file{*.so}
 for dynamic modules and will do the right thing in terms of
 generation, compilation, or link.
 
-The special input name @file{-} takes input from @file{stdin} which is
+@*The special input name @file{-} takes input from @file{stdin} which is
 assumed to be COBOL source, and uses a default output name of
 @file{a.out} (or @file{a.so,c,o,i}) as appropriate for the build type.
 
-The following options specify the target type produced by the
+@*The following options specify the target type produced by the
 compiler:
 
 @table @code
 @item -E
 Preprocess only.  Compiler directives are executed.  Comment lines are
 removed.  COPY statements are expanded.
-The output is saved in file @file{*.i}.
+@*The output is saved in file @file{*.i}.
 
 @item -C
 Translation only.  COBOL source files are translated into C files.
-The output is saved in file @file{*.c}.
+@*The output is saved in file @file{*.c}.
 
 @item -S
 Compile only.  Translated C files are compiled by the C compiler
 to assembler code.
-The output is saved in file @file{*.s}.
+@*The output is saved in file @file{*.s}.
 
 @item -c
 Compile and assemble.  This is equivalent to @code{cc -c}.
-The output is saved in file @file{*.o}.
+@*The output is saved in file @file{*.o}.
 
 @item -m
 Compile, assemble, and build a dynamically loadable module (i.e.,
-a shared library).  The output is saved in file @file{*.so}.
-This is the default behaviour if not other options are given.
+a shared library). @*The output is saved in file @file{*.so}.
+@*This is the default behaviour if not other options are given.
 @footnote{The extension varies depending on your host.}.
 
 @item -b
@@ -407,7 +411,7 @@ dynamically loadable module.
 @node Source Format, Warning Options, Built Target, Compiler Options
 @subsection Source Format
 
-GNU Cobol supports both fixed and free source format.
+GnuCOBOL supports both fixed and free source format.
 
 The default format is the fixed format.  This can be explicitly
 overwritten by one of the following options:
@@ -416,7 +420,9 @@ overwritten by one of the following options:
 @item -free
 Free format.  The program-text area starts in column 1 and
 continues till the end of line.  Effectively 255 characters
-in GNU Cobol.
+in GnuCOBOL.
+@code{-F} will also set free format, useful when using @code{cobc} as a shell
+interpreter directive to the program loader.
 
 @item -fixed
 Fixed format.  Source code is divided into a 1-6 column sequence
@@ -425,10 +431,6 @@ area, with columns 72-80 as a reference area.  Historically this
 format is based on 80 character punch cards.  FIXED format is the
 default used by the compiler unless overridden by compiler switch
 or source code directive, @code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}}. 
-
-@item -F
-Short alias for -free.  Useful when using @code{cobc} as a shell
-interpreter directive to the program loader.
 @end table
 
 @node Warning Options, Configuration Options, Source Format, Compiler Options
@@ -489,13 +491,16 @@ Warn unreachable statements (NOT set with -Wall)
 @item -std=<dialect>
 Compiler uses the given dialect to determine certain compiler features
 and warnings.@*
-@xref{Appendix G, ,config/default.conf}, and @file{config/*.conf}.
+@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
 
 @item -std=cobol2002
-Cobol 2002
+COBOL 2002
+
+@item -std=cobol2014
+COBOL 2014
 
 @item -std=cobol85
-Cobol 85
+COBOL 85
 
 @item -std=ibm
 IBM Compatible
@@ -509,12 +514,18 @@ BS2000 Compatible
 @item -std=mf
 Micro Focus Compatible
 
+@item -std=acu
+ACUCOBOL-GT Compatible
+
 @item -std=default
 When not specified
 
 @item -conf=<file>
 User defined dialect configuration. See @code{-std=} above.@*
-@xref{Appendix G, ,config/default.conf}, and @file{config/*.conf}.
+@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
+
+@item -cb_conf=<tag:value>
+Override a single configuration entry. @xref{Appendix F, Compiler Configuration}.
 
 @end table
 
@@ -524,10 +535,9 @@ User defined dialect configuration. See @code{-std=} above.@*
 @table @code
 
 @item -debug
-Enable all run-time error checking.
-
-@item -R
-Short alias for -debug run-time checks.
+Enable all run-time error checks.
+@code{-d} will also enable all run-time error checks, useful when using
+@code{cobc} as a shell interpreter directive to the program loader.
 
 @item -g
 Produce debugging information in the output.
@@ -558,7 +568,7 @@ Enable debugging lines ('D' in indicator column)
 Generate source location code (Turned on by -debug or -g)
 
 @item -fimplicit-init
-Do automatic initialization of the Cobol runtime system
+Do automatic initialization of the COBOL runtime system
 
 @item -fstack-check
 PERFORM stack checking (Turned on by -debug or -g)
@@ -580,6 +590,9 @@ Add default file extension
 
 @item -fmfcomment
 '*' or '/' in column 1 treated as comment (FIXED only)
+
+@item -acucomment
+'|' is treated as inline comment marker
 
 @item -fsign=ASCII
 Numeric display sign ASCII (Default on ASCII machines)
@@ -701,12 +714,14 @@ library directory:
 @example
 $ cp subr.so /your/cobol/lib
 @end example
-Set the environment variable @code{COB_LIBRARY_PATH}
+Set the runtime variable @code{COB_LIBRARY_PATH} 
 to your library directory, and run the main program:
 @example
 $ export COB_LIBRARY_PATH=/your/cobol/lib
 @end example
-Note: You may set the variable to directly point to the
+Note: You may set the variable via a runtime configuration file,
+@xref{Appendix H, Runtime Configuration}.
+You may set the variable to directly point to the
 directory where you compiled the sources.
 
 Now execute your program:
@@ -1046,14 +1061,19 @@ Additional libraries linked with the program ("")
 @node Customizing Library,  , Customizing Compiler, Customize
 @section Customizing Library
 
-These settings are effective at run-time.
+These settings are effective at run-time. You can set them either via
+environment or by a runtime configuration file.
 
-Environment variables (default value):
+To set global runtime configuration file export @code{COB_RUNTIME_CONFIG}
+pointing to your configuration file.
+To set an explicit runtime configuration file for a single run via
+@code{cobcrun} you can use its option @code{-c <file>, -config=<file>}.
 
-@table @code
-@item COB_LIBRARY_PATH
-Dynamic-linking module path (".:$(PREFIX)/lib/gnu-cobol")
-@end table
+For diplaying the current runtime settings you can use the option
+@code{-r, -runtime-env} of @code{cobcrun}.
+
+For a complete list of runtime variables, aliases, their default values and options
+to set them @xref{Appendix H, Runtime Configuration}.
 
 @node Optimize, Debug, Customize, Top
 @chapter Optimize
@@ -1291,14 +1311,10 @@ When the insert mode is on, typed characters move the existing characters
 to the right.
 When it is off, typed characters type over existing characters. 
 
-The default insert mode is set by the COB_INSERT_MODE environment variable.
+The default insert mode is set by the COB_INSERT_MODE variable,
+@xref{Appendix H, Runtime Configuration}.
 This must be set before the first Extended ACCEPT, DISPLAY,
-or any routine that gets information from the screen. 
-
-If COB_INSERT_MODE is YES or Y (either case) then the program starts with
-insert mode on.  
-If it is set to NO, N, or is not set at all, then the program  
-starts with insert mode off.
+or any routine that gets information from the screen.
 
 The last press of the Insert key is used in all following ACCEPT 
 statements while the program is running.
@@ -1431,6 +1447,9 @@ All other figurative constants display as a single character.
 @node System routines, Appendix A, Extended DISPLAY, Top
 @chapter System routines
 
+For a complete list of supported system routines
+@xref{Appendix D, ,cobc --list-system}.
+
 @menu
 * CBL_OC_GETOPT::				CBL_OC_GETOPT
 @end menu
@@ -1439,7 +1458,7 @@ All other figurative constants display as a single character.
 @section CBL_OC_GETOPT
 
 CBL_OC_GETOPT realises the quite well-known option parser getopt for 
-GNU Cobol. The usage of this system routine is described by the 
+GnuCOBOL. The usage of this system routine is described by the 
 following example.@*@*
 
 @example
@@ -1544,38 +1563,47 @@ The return-codes of CBL_OC_GETOPT are:
 @include cbhelp.tex
 
 @node Appendix B, Appendix C, Appendix A, Top
-@appendix @code{cobc --info}
-
-@include cbinfo.tex
-
-@node Appendix C, Appendix D, Appendix B, Top
 @appendix @code{cobc --list-reserved}
 
 @include cbrese.tex
 
-@node Appendix D, Appendix E, Appendix C, Top
+@node Appendix C, Appendix D, Appendix B, Top
 @appendix @code{cobc --list-intrinsics}
 
 @include cbintr.tex
 
-@node Appendix E, Appendix F, Appendix D, Top
+@node Appendix D, Appendix E, Appendix C, Top
 @appendix @code{cobc --list-system}
 
 @include cbsyst.tex
 
-@node Appendix F, Appendix G, Appendix E, Top
+@node Appendix E, Appendix F, Appendix D, Top
 @appendix @code{cobc --list-mnemonics}
 
 @include cbmnem.tex
 
-@node Appendix G, Index, Appendix F, Top
-@appendix config/default.conf
+@node Appendix F, Appendix G, Appendix E, Top
+@appendix Compiler Configuration
+
+The following list was extracted from @file{config/default.conf}.
 
 @include cbconf.tex
 
+@node Appendix G, Appendix H, Appendix F, Top
+@appendix @code{cobcrun --help}
+
+@include cbchelp.tex
+
+@node Appendix H, Index, Appendix G, Top
+@appendix Runtime configuration
+
+The following list was extracted from @file{config/runtime.cfg}.
+
+@include cbrunt.tex
+
 
 @comment Create index.
-@node Index, , Appendix G, Top
+@node Index, , Appendix H, Top
 @unnumbered Index
 @printindex cp
 

@@ -1,24 +1,23 @@
 #
 # Makefile gnucobol/cobc
 #
-# Copyright (C) 2003,2004,2005,2006,2007 Keisuke Nishida
-# Copyright (C) 2008-2012 Roger While
-# Copyright (C) 2014 Simon Sobisch
+# Copyright (C) 2003-2012, 2014 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While
 #
-# This file is part of GNU Cobol.
+# This file is part of GnuCOBOL.
 #
-# The GNU Cobol compiler is free software: you can redistribute it
+# The GnuCOBOL compiler is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# GNU Cobol is distributed in the hope that it will be useful,
+# GnuCOBOL is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 bin_PROGRAMS = cobc
 cobc_SOURCES = cobc.c cobc.h config.c tree.c tree.h reserved.c error.c \
@@ -30,6 +29,9 @@ dist_man_MANS = cobc.1
 cobc_CFLAGS = -I$(top_srcdir)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a
 
+SEDS = \(\#if defined (__STDC_VERSION__) \&\& __STDC_VERSION__ >= 199901L\)\n\n
+SEDE = \1 \\\n\&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)\n\n
+
 cobc.1: cobc.c flag.def warning.def $(top_srcdir)/configure.ac
 	$(MAKE) $(AM_MAKEFLAGS) cobc$(EXEEXT)
 	help2man --output=cobc.1  --info-page=gnucobol ./cobc$(EXEEXT)
@@ -38,8 +40,13 @@ BUILT_SOURCES = parser.c parser.h scanner.c ppparse.c ppparse.h pplex.c
 EXTRA_DIST = ppparse.y pplex.l parser.y scanner.l
 CLEANFILES = parser.output ppparse.output
 
+# bugfix for non-GNU compilers that define __STDC_VERSION__ >= 199901L but don't work correct
+# "sed -i" isn't supported on all systems --> use sed && mv
 .l.c:
-	LC_CTYPE=C flex -s -o$@ $<
+	LC_CTYPE=C flex -s -o$@.tmp $< && \
+	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@ > $@.tmp &&\
+	mv -f $@.tmp $@
+
 
 .y.c:
 	bison -o $@ $<

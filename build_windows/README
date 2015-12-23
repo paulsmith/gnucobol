@@ -11,7 +11,7 @@ How to build in native Windows environments:
 	according to your source folder
 * compile with your environment, for example via IDE by opening the solution
 	and click "build" or starting the VS/WinSDK command prompt and calling
-		msbuild "GNU Cobol.sln" /p:Platform=x64 /Configuration=Release
+		msbuild "GnuCOBOL.sln" /p:Platform=x64 /Configuration=Release
 
 How to use the dist package:
 

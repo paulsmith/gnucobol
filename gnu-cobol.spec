@@ -4,7 +4,7 @@
 Name:		gnu-cobol
 Version:	2.0
 Release:	1%{?dist}
-Summary:	GNU Cobol - COBOL compiler
+Summary:	GnuCOBOL - COBOL compiler
 
 # Packager:	Whoever
 
@@ -38,7 +38,7 @@ Requires:       ncurses >= 5.4
 Requires(post): /sbin/install-info
 
 %description
-GNU Cobol is an open-source COBOL compiler, which translates COBOL
+GnuCOBOL is an open-source COBOL compiler, which translates COBOL
 programs to C code and compiles it using GCC.
 
 %prep

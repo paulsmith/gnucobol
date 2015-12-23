@@ -1,4 +1,16 @@
 
+2015-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: post-process generated flex sources via sed for non-GNU
+	  compilers that define __STDC_VERSION__ >= 199901L but don't work correct
+
+2015-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: exit on -V for GNU-coding-conformance, added -vv (very verbose)
+	  resulting in a call to cobc_print_version() after command line parsing,
+	  removed -R as we have a short version for --debug in -d already
+	* cobc.h: added CB_STD_ACU and CB_STD_2014
+
 2015-12-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h: change order of fields in cb_intrinsic_table
@@ -140,7 +152,7 @@
 
 	* codegen.c: bug #78 - changed location of initialization of
 	  local-storage items.
-	* pplex.l: bug #102 - added check for contination line without literal
+	* pplex.l: bug #102 - added check for continuation line without literal
 	  or word to continue.
 
 2015-06-09  Edward Hart <edward.dan.hart@gmail.com>
@@ -184,7 +196,7 @@
 
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
-	* cobc.c : replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
+	* cobc.c: replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
 
 2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -193,36 +205,40 @@
 
 2015-03-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* typeck.c : added more checks of overlapping MOVE,
+	* typeck.c: added more checks of overlapping MOVE,
 	  generate MOVEs as overlapping if it's not sure it isn't
 
 2015-03-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* codegen.c : added check of recursive CALL for INITIAL programs
+	* codegen.c: added check of recursive CALL for INITIAL programs
 
 2015-01-31  Edward Hart <edward.dan.hart@gmail.com>
 
-	* tree.c : updated valid_time_format and valid_datetime_format to pass
+	* tree.c: updated valid_time_format and valid_datetime_format to pass
 	  decimal points
+
+2015-01-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: set TEST-FORMATTED-DATETIME and INTEGER-OF-FORMATTED-DATE
+	  to implemented
 
 2015-01-06  Brian Tiffin <btiffin@users.sf.net>
 
-	* cobc/parser.y : fixed segfault with STOP "literal" with the
-	  ACCEPT OMITTED feature of waiting for a return attempting
-	  to generate code with a null pointer
+	* parser.y: fixed segfault with STOP "literal" with the ACCEPT OMITTED
+	  feature attempting to generate code with null pointer
 
 2014-12-02  Sergey Kashyrin <ska@kiska.net>
 
-	* codegen.c : fix for bug #52 incorrect premature memory release (CANCEL)
+	* codegen.c: fix for bug #52 incorrect premature memory release (CANCEL)
 	  of INITIAL programs
 
 2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : fix bug #108 figurative constants not accepted in screen items
+	* parser.y: fix bug #108 figurative constants not accepted in screen items
 
 2014-11-18  Sergey Kashyrin <ska@kiska.net>
 
-	* field.c : fix bug #89 incorrect LENGTH OF redefined
+	* field.c: fix bug #89 incorrect LENGTH OF redefined
 
 2014-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -231,18 +247,18 @@
 2014-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.c (cb_config_entry): remove inline comments from entry
-	* config.def, scanner.l : check maximum word length depending on new
+	* config.def, scanner.l: check maximum word length depending on new
 	  configuration word-length
-	* cobc.c : added std=acu
+	* cobc.c: added std=acu
 
 2014-10-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : added SUPPRESS clause as PENDING, see request #23
+	* parser.y: added SUPPRESS clause as PENDING, see request #23
 
 2014-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* pplex.l : bug #96 prevent line overflow, add warning "Source text too long"
-	* pplex.l : only show warning "Source text after column ..." if no comment was
+	* pplex.l: bug #96 prevent line overflow, add warning "Source text too long"
+	* pplex.l: only show warning "Source text after column ..." if no comment was
 	  started in this line before
 
 2014-09-17  Edward Hart <edward.dan.hart@gmail.com>
@@ -254,16 +270,16 @@
 
 2014-09-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c [_MSC_VER] : correct handling of -l (add .lib and pass to linker)
-	* cobc.c, cobc.h, error.c : message style change according to C compiler,
+	* cobc.c [_MSC_VER]: correct handling of -l (add .lib and pass to linker)
+	* cobc.c, cobc.h, error.c: message style change according to C compiler,
 	  can be changed via COB_MSG_FORMAT (GCC/MSC)
-	* cobc.c (process) [_MSC_VER] : bugfix in output filter
-	* parser.y, reserved.c, typeck.c : Added parser support for OCCURS DYNAMIC
+	* cobc.c (process) [_MSC_VER]: bugfix in output filter
+	* parser.y, reserved.c, typeck.c: Added parser support for OCCURS DYNAMIC
 	  along with CAPACITY clause as not implemented
 
 2014-09-08  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* cobc.c (process) [_MSC_VER] : bugfix in output filter
+	* cobc.c (process) [_MSC_VER]: bugfix in output filter
 
 2014-09-03  Philipp Böhme <phi.boehme@googlemail.com>
 
@@ -280,8 +296,8 @@
 
 2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c : Changed output of --help for help2man
-	* Makefile.am : Added manpage generation + install
+	* cobc.c: Changed output of --help for help2man
+	* Makefile.am: Added manpage generation + install
 
 2014-07-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -305,7 +321,7 @@
 
 2014-07-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : fix #88 false unreachable warning after END DECLARATIVES
+	* parser.y: fix #88 false unreachable warning after END DECLARATIVES
 	  without main section/paragraph
 
 2014-07-10  Philipp Böhme <phi.boehme@googlemail.com>
@@ -326,38 +342,38 @@
 
 2014-06-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* tree.c : Detect missing ASSIGN at compile time
+	* tree.c: Detect missing ASSIGN at compile time
 
 2014-06-19  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c : Fixing compilers (like MSC) that don't HAVE_DESIGNATED_INITS
+	* cobc.c: Fixing compilers (like MSC) that don't HAVE_DESIGNATED_INITS
 	  cobc_init_reserved() has to be called before process_command_line()
 
 2014-05-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* scanner.l : Fixing #71 Referencing GLOBAL 78/CONSTANT in SELECT
+	* scanner.l: Fixing #71 Referencing GLOBAL 78/CONSTANT in SELECT
 	  causes internal error
 
 2014-05-26  Ron Norman <rjn@inglenet.com>
 
-	* typeck.c : use memmove for move of LINKAGE items
+	* typeck.c: use memmove for move of LINKAGE items
 
 2014-05-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : Added extension "USE AT PROGRAM START/END" as not implemented
+	* parser.y: Added extension "USE AT PROGRAM START/END" as not implemented
 
 2014-05-14  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* cobc.c : Catch and treat error when no disc space is available for
+	* cobc.c: Catch and treat error when no disc space is available for
 	  output files
 
 2014-04-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : Added extension "GOBACK/EXIT PROGRAM RETURNING/GIVING x"
+	* parser.y: Added extension "GOBACK/EXIT PROGRAM RETURNING/GIVING x"
 
 2014-04-29  Philipp Böhme <phi.boehme@googlemail.com>
 
-	* codeoptim.c : Fixed bug in COB_ADD_PACKED_INT.
+	* codeoptim.c: Fixed bug in COB_ADD_PACKED_INT.
 	  Computing COMP-3 failed in MSVC-build versions,
 	  in output_storage() calls '%' should be '%%'.
 
@@ -367,30 +383,30 @@
 
 2014-03-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* field.c : Added check for maximum size of group/alphanumeric items
+	* field.c: Added check for maximum size of group/alphanumeric items
 
 2014-02-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c : Tweaked --info for showing current settings (environment) along
+	* cobc.c: Tweaked --info for showing current settings (environment) along
 	  with settings hard-wired during build (COB_xyz)
 
 2014-01-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* parser.y : Bugfix: no exception check for NULL address on FREE statement
+	* parser.y: Bugfix: no exception check for NULL address on FREE statement
 	  (as this is explicit allowed)
 
 2014-01-02  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* codegen.c : Fixing Bug #55
+	* codegen.c: Fixing Bug #55
 	  UDF with no parameters do not compile
 
 2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c : Added conversion for enabling options in WIN style
+	* cobc.c: Added conversion for enabling options in WIN style
 
 201?-??-??  ??
 
-	* parser.y : Added checks for RETURNING item: OCCURS, LOCAL-STORAGE
+	* parser.y: Added checks for RETURNING item: OCCURS, LOCAL-STORAGE
 
 2010-06-28  Roger While <simrw@sim-basis.de>
 

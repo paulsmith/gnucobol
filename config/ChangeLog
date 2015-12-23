@@ -3,6 +3,10 @@
 
 	* added numeric-boolean and acucobol-literals
 
+2015-07-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added new configuration cobol2014.conf (most values marked as not verified yet)
+
 2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* added new configuration type "runtime configuration": runtime.cfg which

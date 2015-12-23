@@ -105,14 +105,14 @@ copy "%COB_SOURCE_PATH%extras\README"		extras\
 
 echo.
 echo.
-echo Using created GNU Cobol distribution (Win32) to compile extras
+echo Using created GnuCOBOL distribution (Win32) to compile extras
 cd "%COB_DIST_PATH%bin"
 call ..\set_env_vs.bat
 cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
 
 echo.
 echo.
-echo Using created GNU Cobol distribution (x64) to compile extras
+echo Using created GnuCOBOL distribution (x64) to compile extras
 cd "%COB_DIST_PATH%bin_x64"
 call ..\set_env_vs_x64.bat
 cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
@@ -123,13 +123,13 @@ echo.
 echo.
 
 if exist "%ProgramFiles%\7-Zip\7z.exe" (
-   erase "..\GNU Cobol.7z"
-   "%ProgramFiles%\7-Zip\7z.exe" a -r -mx=9 "..\GNU Cobol.7z" *
+   erase "..\GnuCOBOL.7z"
+   "%ProgramFiles%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
 ) else if exist "%ProgramFiles(x86)%\7-Zip\7z.exe" (
-   erase "..\GNU Cobol.7z"
-   "%ProgramFiles(x86)%\7-Zip\7z.exe" a -r -mx=9 "..\GNU Cobol.7z" *
+   erase "..\GnuCOBOL.7z"
+   "%ProgramFiles(x86)%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
 ) else (
-   echo 7-zip not found, "GNU Cobol.7z" not created
+   echo 7-zip not found, "GnuCOBOL.7z" not created
 )
 
 pause

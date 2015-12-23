@@ -1,30 +1,23 @@
 /*
-   Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-   Copyright (C) 2006-2012 Roger While
-   Copyright (C) 2009,2010,2012,2014,2015 Simon Sobisch
-
-   Copyright 2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2015 Free Software Foundation, Inc.
 
    Authors:
-       Keisuke Nishida, 2001-2007
-       Roger While, 2006-2012
-       Simon Sobisch, 2009-2015
-       Brian Tiffin, 2015
+   Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Brian Tiffin
 
-   This file is part of GNU Cobol.
+   This file is part of GnuCOBOL.
 
-   The GNU Cobol compiler is free software: you can redistribute it
+   The GnuCOBOL compiler is free software: you can redistribute it
    and/or modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation, either version 3 of the
    License, or (at your option) any later version.
 
-   GNU Cobol is distributed in the hope that it will be useful,
+   GnuCOBOL is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "config.h"
@@ -395,7 +388,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivECScbmxjRFOPgwo:I:L:l:D:K:k:";
+static const char short_options[] = "hVivECScbmxjdFOPgwo:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -404,9 +397,7 @@ static const char short_options[] = "hVivECScbmxjRFOPgwo:I:L:l:D:K:k:";
 static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"version",		CB_NO_ARG, NULL, 'V'},
-#if	1	/* getopt_long_only has a problem with eg. -xv - remove */
 	{"verbose",		CB_NO_ARG, NULL, 'v'},
-#endif
 	{"info",		CB_NO_ARG, NULL, 'i'},
 	{"list-reserved",	CB_NO_ARG, NULL, '5'},
 	{"list-intrinsics",	CB_NO_ARG, NULL, '6'},
@@ -1539,9 +1530,8 @@ cobc_print_version (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida");
-	puts ("Copyright (C) 2006-2012 Roger While");
-	puts ("Copyright (C) 2009,2010,2012,2014,2015 Simon Sobisch");
+	puts ("Copyright (C) 2001-2015 Free Software Foundation, Inc.");
+	puts ("Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cb_oc_build_stamp);
@@ -1640,7 +1630,7 @@ cobc_print_info (void)
 	cobc_var_print ("LD",			COB_BLD_LD, 0);
 	cobc_var_print ("LDFLAGS",		COB_BLD_LDFLAGS, 0);
 	putchar ('\n');
-	puts (_("GNU Cobol information"));
+	puts (_("GnuCOBOL information"));
 	cobc_var_print ("COB_CC",		COB_CC, 0);
 	if ((s = getenv ("COB_CC")) != NULL) {
 		cobc_var_print ("COB_CC",	s, 1);
@@ -1791,14 +1781,17 @@ cobc_print_usage (char * prog)
 	putchar ('\n');
 	puts (_("Options:"));
 	puts (_("  -h, -help             Display this help and exit"));
-	puts (_("  -V, -version          Display compiler version"));
+	puts (_("  -V, -version          Display compiler version and exit"));
 	puts (_("  -i, -info             Display compiler information (build/environment)"));
-	puts (_("  -v                    Display the commands invoked by the compiler"));
+	puts (_("  -v, -verbose          Display the commands invoked by the compiler"));
+	puts (_("  -vv                   Display compiler version and display the commands"));
+	puts (_("                        invoked by the compiler"));
 	puts (_("  -x                    Build an executable program"));
 	puts (_("  -m                    Build a dynamically loadable module (default)"));
 	puts (_("  -j                    Run job, after build"));
 	puts (_("  -std=<dialect>        Warnings/features for a specific dialect:"));
 	puts (_("                          cobol2002   COBOL 2002"));
+	puts (_("                          cobol2014   COBOL 2014"));
 	puts (_("                          cobol85     COBOL 85"));
 	puts (_("                          ibm         IBM Compatible"));
 	puts (_("                          mvs         MVS Compatible"));
@@ -1812,8 +1805,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -F                    Alias (short option) for -free"));
 	puts (_("  -O, -O2, -Os          Enable optimization"));
 	puts (_("  -g                    Enable C compiler debug / stack check / trace"));
-	puts (_("  -debug                Enable all run-time error checking"));
-	puts (_("  -R                    Alias (short option) for run-time -debug"));
+	puts (_("  -d, -debug            Enable all run-time error checking"));
 	puts (_("  -o <file>             Place the output into <file>"));
 	puts (_("  -b                    Combine all input files into a single"));
 	puts (_("                        dynamically loadable module"));
@@ -1832,7 +1824,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -D <define>           DEFINE <define> to the COBOL compiler"));
 	puts (_("  -K <entry>            Generate CALL to <entry> as static"));
 	puts (_("  -conf=<file>          User defined dialect configuration - See -std="));
-	puts (_("  -cb_conf=tag:value    Override configuration entry"));
+	puts (_("  -cb_conf=<tag:value>  Override configuration entry"));
 	puts (_("  -list-reserved        Display reserved words"));
 	puts (_("  -list-intrinsics      Display intrinsic functions"));
 	puts (_("  -list-mnemonics       Display mnemonic names"));
@@ -1960,8 +1952,7 @@ process_command_line (const int argc, char **argv)
 		case 'V':
 			/* --version */
 			cobc_print_version ();
-			exit_option = 1;
-			break;
+			exit (0);
 
 		case 'i':
 			/* --info */
@@ -2069,8 +2060,9 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'v':
-			/* -v : Verbose reporting */
-			verbose_output = 1;
+			/* --verbose : Verbose reporting */
+			/* VERY special case as we set different level by mutliple calls */
+			verbose_output++;
 			break;
 
 		case 'o':
@@ -2143,12 +2135,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'd':
-		case 'R':
 			/* -debug : Turn on OC debugging */
-			/* Turn on all exception conditions */
-			for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
-				CB_EXCEPTION_ENABLE (i) = 1;
-			}
 			cb_flag_source_location = 1;
 			cb_flag_trace = 1;
 			cb_flag_stack_check = 1;
@@ -2394,6 +2381,21 @@ process_command_line (const int argc, char **argv)
 		}
 	}
 
+	/* Output version information when running very verbose */
+	if (verbose_output > 1) {
+		cobc_print_version ();
+	}
+	/* debug: Turn on all exception conditions */
+	if (cobc_wants_debug) {
+		for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
+			CB_EXCEPTION_ENABLE (i) = 1;
+		}
+		if (verbose_output) {
+			fputs (_("All runtime checks are enabled"), stderr);
+			fputs ("\n", stderr);
+		}
+	}
+
 	/* Exit if list options specified */
 	if (exit_option) {
 		cobc_free_mem ();
@@ -2404,9 +2406,10 @@ process_command_line (const int argc, char **argv)
 	if (cb_config_name == NULL) {
 		sub_ret = cb_load_std ("default.conf");
 		if (sub_ret != 0) {
-#if 0 /* Simon: likely too verbose */
-			configuration_error (1, "default.conf", 0, _("Failed to load the initial config file"));
-#endif
+			if (verbose_output) {
+				configuration_error (1, "default.conf", 0,
+					_("Failed to load the initial config file"));
+			}
 			ret = sub_ret;
 		}
 	}

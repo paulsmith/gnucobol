@@ -38,20 +38,20 @@ VS_VERSION_INFO    VERSIONINFO
       // VALUE "Comments",         "Free for personal use only.\0"
       // VALUE "CompanyName",      "Fake Company\0"
       VALUE "FileDescription",  PACKAGE_NAME " compiler for most COBOL dialects with lots of extensions"
-      VALUE "FileVersion",      "2.0.656"
+      VALUE "FileVersion",      "2.0.684"
       VALUE "InternalName",     "cobc"
-      VALUE "LegalCopyright",   "Copyright (C) 2001-2015 Free Software Foundation"
+      VALUE "LegalCopyright",   "Copyright (C) 2001-2015 Free Software Foundation, Inc."
       VALUE "LegalTrademarks",  "Compiler: GNU General Public License v3 - see COPYING,\x0ADocumentation: GNU Free Documentation License."
       VALUE "OriginalFilename", "cobc.exe"
       VALUE "ProductName",      PACKAGE_NAME " Compiler"
-      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r656"
+      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r684"
       // Should be set if VS_FF_PRIVATEBUILD is set:
       VALUE "PrivateBuild",     "Built from SVN"
       // Should be set if VS_FF_SPECIALBUILD is set (including description what it was build for):
       VALUE "SpecialBuild",     ""
 
 	  /* Non-Standard entries */
-      VALUE "Build",            "Oct 2015"
+      VALUE "Build",            "Dec 2015"
       VALUE "Developer",        "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch and many others (see AUTHORS and THANKS)"
       VALUE "Support",          "https://sourceforge.net/p/open-cobol"
       VALUE "Users",            "Unlimited."

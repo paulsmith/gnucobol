@@ -3,12 +3,12 @@ NEWS - user visible changes				-*- outline -*-
 * All files created by GnuCOBOL runtime use the same file permission settings
   now: COB_FILE_MODE which was changed to 0666
 
-* 20130927 Change package name, and project to GNU Cobol
+* 20130927 Change package name, and project to GnuCOBOL
 
 * MARK - Version 2.0
 * Move to GPL/LGPL 3
 
-* 20140118 GNU Cobol 1.1 released
+* 20140118 GnuCOBOL 1.1 released
 
 * 20130510 Retagging OpenCOBOL 1.1 pre-rel as OpenCOBOL 1.1
            OpenCOBOL 1.1 CE announced
@@ -277,7 +277,7 @@ Decimal arithmetic is done by using `long long'.
 
 Currently the following standards are available:
 
-  gnu           GNU COBOL (default)
+  gnu           GnuCOBOL (default)
   cobol85       COBOL 85
   cobol2002     COBOL 2002
   mvs           IBM COBOL for MVS & VM

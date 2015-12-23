@@ -1,27 +1,8 @@
 @verbatim
-# GNU Cobol compiler configuration
-#
-# Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-# Copyright (C) 2007-2012 Roger While
-#
-# This file is part of GNU Cobol.
-#
-# The GNU Cobol compiler is free software: you can redistribute it
-# and/or modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# GNU Cobol is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
 
 
 # Value: any string
-name: "GNU Cobol"
+name: "GnuCOBOL"
 
 # Value: enum
 standard-define			0
@@ -30,12 +11,18 @@ standard-define			0
 #        CB_STD_IBM,
 #        CB_STD_MVS,
 #        CB_STD_BS2000,
+#        CB_STD_ACU,
 #        CB_STD_85,
-#        CB_STD_2002
+#        CB_STD_2002,
+#        CB_STD_2014
 
 # Value: int
 tab-width:			8
 text-column:			72
+# Maximum word-length for COBOL words / Programmer defined words
+# Be aware that GC checks the word length against COB_MAX_WORDLEN
+# first (currently 61)
+word-length:			31
 
 # Value: 'mf', 'ibm'
 # 
@@ -114,18 +101,27 @@ cobol85-reserved:		no
 # Allow Hex 'F' for NUMERIC test of signed PACKED DECIMAL field
 hostsign:			no
 
+# If yes, set WITH UPDATE clause as default for ACCEPT dest-item,
+# except if WITH NO UPDATE clause is used
+accept-update:		no
+
+# If yes, set WITH AUTO clause as default for ACCEPT dest-item,
+# except if WITH TAB clause is used
+accept-auto:		no
+
 # not-reserved:
 # Value: Word to be taken out of the reserved words list
 # (case independent)
 # Words that are in the (proposed) standard but may conflict
 
 # Dialect features
-# Value: 'ok', 'archaic', 'obsolete', 'skip', 'ignore', 'unconformable'
+# Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
+#        'unconformable'
 
 alter-statement:			obsolete
 author-paragraph:			obsolete
 data-records-clause:			obsolete
-debugging-line:				obsolete
+debugging-line:				ok
 eject-statement:			skip
 entry-statement:			obsolete
 goto-statement-without-name:		obsolete
@@ -134,12 +130,14 @@ memory-size-clause:			obsolete
 move-noninteger-to-alphanumeric:	error
 multiple-file-tape-clause:		obsolete
 next-sentence-phrase:			archaic
-odo-without-to:				ok
+odo-without-to:				warning
 padding-character-clause:		obsolete
 section-segments:			ignore
 stop-literal-statement:			obsolete
 synchronized-clause:			ok
 top-level-occurs-clause:		ok
 value-of-clause:			obsolete
+numeric-boolean:			unconformable
+acucobol-literals:			unconformable
 @end verbatim
 

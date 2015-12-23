@@ -315,10 +315,10 @@
 #define PACKAGE_BUGREPORT "open-cobol-list@lists.sourceforge.net"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "GNU Cobol"
+#define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GNU Cobol 2.0"
+#define PACKAGE_STRING "GnuCOBOL 2.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnu-cobol"

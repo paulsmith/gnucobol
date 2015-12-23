@@ -69,7 +69,7 @@ BY				Y
 BYTE-LENGTH			Y (Context sensitive)
 CALL				Y
 CANCEL				Y
-CAPACITY			N (Context sensitive)
+CAPACITY			Y (Context sensitive)
 CD				N (85 obsolete)
 CENTER				N (Context sensitive)
 CF				Y
@@ -402,6 +402,7 @@ PROGRAM-POINTER			Y
 PROHIBITED			Y (Context sensitive)
 PROMPT				Y
 PROPERTY			N
+PROTECTED			Y
 PROTOTYPE			N
 PURGE				N (85 obsolete)
 QUEUE				N (85 obsolete)
@@ -513,6 +514,7 @@ SYNC				Y
 SYNCHRONISED			Y
 SYNCHRONIZED			Y
 SYSTEM-DEFAULT			Y
+TAB				Y (Context sensitive)
 TABLE				N
 TALLYING			Y
 TAPE				Y (Context sensitive)
@@ -595,6 +597,7 @@ RETURN-CODE			USAGE BINARY-LONG
 SORT-RETURN			USAGE BINARY-LONG
 NUMBER-OF-CALL-PARAMETERS	USAGE BINARY-LONG
 COB-CRT-STATUS			PIC 9(4)
+TALLY				GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO
 'LENGTH OF' phrase		USAGE BINARY-LONG
 @end verbatim
 

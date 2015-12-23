@@ -1,21 +1,21 @@
 /*
-   Copyright (C) 2004-2012 Roger While
-   Copyright (C) 2012,2014,2015 Simon Sobisch
+   Copyright (C) 2004-2012, 2014-2015 Free Software Foundation, Inc.
+   Written by Roger While, Simon Sobisch
 
-   This file is part of GNU Cobol.
+   This file is part of GnuCOBOL.
 
-   The GNU Cobol compiler is free software: you can redistribute it
+   The GnuCOBOL compiler is free software: you can redistribute it
    and/or modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation, either version 3 of the
    License, or (at your option) any later version.
 
-   GNU Cobol is distributed in the hope that it will be useful,
+   GnuCOBOL is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include	"config.h"
@@ -81,8 +81,8 @@ cobcrun_print_version (void)
 	}
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2004-2012 Roger While");
-	puts ("Copyright (C) 2012,2014,2015 Simon Sobisch");
+	puts ("Copyright (C) 2004-2012, 2014-2015 Free Software Foundation, Inc.");
+	puts ("Written by Roger While, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), buff);
@@ -104,7 +104,7 @@ cobcrun_print_usage (char * prog)
 	putchar ('\n');
 	puts (_("Options:"));
 	puts (_("  -h, -help                   Display this help and exit"));
-	puts (_("  -V, -version                Display cobcrun and runtime version"));
+	puts (_("  -V, -version                Display cobcrun and runtime version and exit"));
 	puts (_("  -i, -info                   Display runtime information (build/environment)"));
 	puts (_("  -c <file>, -config=<file>   Set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-env            Display current runtime configuration"));

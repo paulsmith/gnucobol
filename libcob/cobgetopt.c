@@ -20,8 +20,8 @@
    <http://www.gnu.org/licenses/>.  */
 
 /*
-   Copyright (C) 2010-2012 Roger While
-   Modified for use in GNU Cobol
+   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Modified for use in GnuCOBOL by Roger While
 */
 
 #include "config.h"

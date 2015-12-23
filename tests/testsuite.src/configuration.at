@@ -1,21 +1,22 @@
-## Copyright (C) 2014,2015 Simon Sobisch
+## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Written by Simon Sobisch
 ## 
-## This file is part of GNU Cobol.
+## This file is part of GnuCOBOL.
 ## 
-## The GNU Cobol compiler is free software: you can redistribute it
+## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
 ## 
-## GNU Cobol is distributed in the hope that it will be useful,
+## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ## 
 ## You should have received a copy of the GNU General Public License
-## along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-### GNU Cobol Test Suite
+### GnuCOBOL Test Suite
 
 
 AT_SETUP([cobc with standard configuration file])
@@ -33,7 +34,7 @@ AT_DATA([prog.cob], [
 
 # default configuration permits this extension
 AT_CHECK([$COMPILE_ONLY_WITHOUTSTD prog.cob], [0], [],
-[prog.cob: 4: Warning: AUTHOR is obsolete in GNU Cobol
+[prog.cob: 4: Warning: AUTHOR is obsolete in GnuCOBOL
 ])
 
 AT_CLEANUP
@@ -313,7 +314,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=defunc.conf prog.cob], [0], [],
-[prog.cob: 4: Warning: AUTHOR is obsolete in GNU Cobol
+[prog.cob: 4: Warning: AUTHOR is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [0], [], [])
 

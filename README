@@ -1,10 +1,10 @@
-		                 GNU Cobol
+		                 GnuCOBOL
 		http://sourceforge.net/projects/open-cobol/
 
 		http://opencobol.add1tocobol.com/gnucobol
 		         http://www.opencobol.org/
 
-GNU Cobol is a free and open-source COBOL compiler, which translates
+GnuCOBOL is a free and open-source COBOL compiler, which translates
 COBOL programs to C code and compiles it using a native C compiler.
 
 Although many have participated, most development thanks go to
@@ -50,7 +50,7 @@ Requirements
     ALWAYS install the distribution packages when available !!
   ***
 
-GNU Cobol REQUIRES the following external library to be installed for
+GnuCOBOL REQUIRES the following external library to be installed for
 implementation of decimal arithmetic:
 
     BOTH runtime AND development components required.
@@ -71,7 +71,7 @@ implementation of decimal arithmetic:
     See NOTE above.
 
 
-GNU Cobol MAY require the following external library to be installed:
+GnuCOBOL MAY require the following external library to be installed:
 
     ***
     NOTE - libltdl is NOT needed when installing on Linux,
@@ -141,20 +141,20 @@ Installation
 ============
 
 ** NOTE **
-   Due to deficiencies in the tools used to prepare GNU Cobol
+   Due to deficiencies in the tools used to prepare GnuCOBOL
    (autoconf/automake/libtool), it is NOT generally possible
    to use path names with spaces embedded within them
    (Mainly Cygwin/MingW/Windows ports).
  
 ** NOTE **
-   The default installation path for GNU Cobol is /usr/local.
+   The default installation path for GnuCOBOL is /usr/local.
    The installation path may be changed by specifying --prefix=<dir>
    as a parameter to the configure.
    Further parameters may be specified to affect
    include/library search paths.
    Execute ./configure --help for further details.
 
-To generate/install GNU Cobol :
+To generate/install GnuCOBOL :
 
 **************************************
 
@@ -163,7 +163,7 @@ To generate/install GNU Cobol :
 
  Here you may run
     make check
- to run a series of GNU Cobol test programs (must do!)
+ to run a series of GnuCOBOL test programs (must do!)
  This MUST succeed - If not, please report.
 
     make install
@@ -263,10 +263,10 @@ There are the following configure options:
 Development
 ============
 
-If you wish to hack the GNU Cobol source code, proceed
+If you wish to hack the GnuCOBOL source code, proceed
 as follows.
 
-Before changing/building GNU Cobol, you need to install the
+Before changing/building GnuCOBOL, you need to install the
 following extra packages with versions equal or greater :
 
 For compiling (when changing flex/bison sources) :

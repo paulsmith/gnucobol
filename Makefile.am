@@ -1,23 +1,23 @@
 #
 # Makefile gnucobol
 #
-# Copyright (C) 2003,2004,2005,2006,2007 Keisuke Nishida
-# Copyright (C) 2008-2012 Roger While
+# Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
-# This file is part of GNU Cobol.
+# This file is part of GnuCOBOL.
 #
-# The GNU Cobol compiler is free software: you can redistribute it
+# The GnuCOBOL compiler is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# GNU Cobol is distributed in the hope that it will be useful,
+# GnuCOBOL is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 include_HEADERS = libcob.h
 
@@ -59,6 +59,7 @@ dist-hook:
 	chmod 644 $(distdir)/TODO
 	chmod 644 $(distdir)/gnu-cobol.spec
 	chmod 755 $(distdir)/doc/cobcinfo.sh
+	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
 	touch $(distdir)/bin/cobcrun.1
 	touch $(distdir)/cobc/cobc.1
 	touch $(distdir)/cobc/ppparse.c
@@ -66,9 +67,6 @@ dist-hook:
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
 #	touch $(distdir)/libcob/libcob.3
-	touch $(distdir)/tests/testsuite
-	touch $(distdir)/doc/gnucobol.info
-	touch $(distdir)/doc/gnucobol.pdf
 
 defaults.h: Makefile.am $(top_builddir)/config.status
 	@echo "Creating defaults.h..."

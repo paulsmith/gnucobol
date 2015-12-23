@@ -1,14 +1,14 @@
-This is gnucobol.info, produced by makeinfo version 5.2 from
+This is gnucobol.info, produced by makeinfo version 6.0 from
 gnucobol.texi.
 
 INFO-DIR-SECTION Software development
 START-INFO-DIR-ENTRY
-* cobc: (gnucobol)Compile.      The GNU COBOL compiler.
+* cobc: (gnucobol)Compile.      The GnuCOBOL compiler.
 END-INFO-DIR-ENTRY
 
 INFO-DIR-SECTION COBOL
 START-INFO-DIR-ENTRY
-* GNU Cobol: (gnucobol).        A COBOL compiler
+* GnuCOBOL: (gnucobol).        A COBOL compiler
 END-INFO-DIR-ENTRY
 
 INFO-DIR-SECTION GnuCOBOL
@@ -16,10 +16,10 @@ START-INFO-DIR-ENTRY
 * Overview: (gnucobol).         COBOL compiler overview.
 END-INFO-DIR-ENTRY
 
-This file documents GNU Cobol, a COBOL compiler
+This file documents GnuCOBOL, a COBOL compiler
 
-   Copyright (C) 2002,2003,2004,2005,2006,2007 Keisuke Nishida Copyright
-(C) 2007-2012 Roger While
+   Copyright (C) 2002-2012, 2014-2015 Free Software Foundation, Inc.
+Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -40,7 +40,7 @@ File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 
 * Menu:
 
-* Getting Started::             Introduction to GNU Cobol
+* Getting Started::             Introduction to GnuCOBOL
 * Compile::                     Compiling COBOL programs
 * Customize::                   Customizing the compiler
 * Optimize::                    Optimizing your program
@@ -48,12 +48,13 @@ File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 * Extensions::                  Extensions not ISO/ANSI standard
 * System routines::             Additional routines
 * Appendix A::                  'cobc --help'
-* Appendix B::                  'cobc --info'
-* Appendix C::                  'cobc --list-reserved'
-* Appendix D::                  'cobc --list-intrinsics'
-* Appendix E::                  'cobc --list-system'
-* Appendix F::                  'cobc --list-mnemonics'
-* Appendix G::                  config/default.conf
+* Appendix B::                  'cobc --list-reserved'
+* Appendix C::                  'cobc --list-intrinsics'
+* Appendix D::                  'cobc --list-system'
+* Appendix E::                  'cobc --list-mnemonics'
+* Appendix F::                  config/default.conf
+* Appendix G::                  'cobcrun --help'
+* Appendix H::                  config/runtime.cfg
 * Index::                       Index
 
  -- The Detailed Node Listing --
@@ -134,6 +135,8 @@ Appendix F
 
 Appendix G
 
+Appendix H
+
 
 
 File: gnucobol.info,  Node: Getting Started,  Next: Compile,  Prev: Top,  Up: Top
@@ -181,7 +184,7 @@ option '-o' as follows:
    Using more modern sources.
 
      ---- hellonew.cob ----------------
-     *> Sample GNU Cobol program
+     *> Sample GnuCOBOL program
      identification division.
      program-id. hellonew.
      procedure division.
@@ -204,7 +207,7 @@ File: gnucobol.info,  Node: Compile,  Next: Customize,  Prev: Getting Started,  
 2 Compile
 *********
 
-This chapter describes how to compile COBOL programs using GNU Cobol.
+This chapter describes how to compile COBOL programs using GnuCOBOL.
 
 * Menu:
 
@@ -252,28 +255,29 @@ The following switches can be used for informational displays:
      taken except for further display options.
 
 '--info'
-     Display build information (*note cobc -info: Appendix B.).  No
-     further actions will be taken except for further display options.
+     Display build information along with default and current compiler
+     configuration.  No further actions will be taken except for further
+     display options.
 
 '-v'
      Verbosely displays the programs invoked during compilations.
 
 '--list-reserved'
-     Display reserved words(*note cobc -list-reserved: Appendix C.).  A
+     Display reserved words(*note cobc -list-reserved: Appendix B.).  A
      Y/N field shows if the word is supported.  (1) No further actions
      will be taken except for further display options.
 
 '--list-intrinsics'
      Display intrinsic functions (*note cobc -list-intrinsics: Appendix
-     D.).  A Y/N field shows if the function is implemented.  No further
+     C.).  A Y/N field shows if the function is implemented.  No further
      actions will be taken except for further display options.
 
 '--list-system'
-     Display system routines (*note cobc -list-system: Appendix E.).  No
+     Display system routines (*note cobc -list-system: Appendix D.).  No
      further actions will be taken except for further display options.
 
 '--list-mnemonics'
-     Display mnemonic names (*note cobc -list-mnemonics: Appendix F.).
+     Display mnemonic names (*note cobc -list-mnemonics: Appendix E.).
      No further actions will be taken except for further display
      options.
 
@@ -291,6 +295,10 @@ The 'cobc' compiler can handle '*.cob', '*.cbl' as COBOL source code,
 '*.c' for C source code, '*.o' for object code, '*.i' for preprocessed
 code and '*.so' for dynamic modules and will do the right thing in terms
 of generation, compilation, or link.
+
+   The special input name '-' takes input from 'stdin' which is assumed
+to be COBOL source, and uses a default output name of 'a.out' (or
+'a.so,c,o,i') as appropriate for the build type.
 
    The following options specify the target type produced by the
 compiler:
@@ -330,6 +338,10 @@ compiler:
      this option with '-C', you will see the main function at the end of
      the generated C file.
 
+'-j'
+     Run job after compilation.  Either from executable with -x, or with
+     'cobcrun' when compiling a module.
+
 '-I <directory>'
      Add <directory> to copy/include search path
 
@@ -358,15 +370,16 @@ File: gnucobol.info,  Node: Source Format,  Next: Warning Options,  Prev: Built 
 2.1.3 Source Format
 -------------------
 
-GNU Cobol supports both fixed and free source format.
+GnuCOBOL supports both fixed and free source format.
 
    The default format is the fixed format.  This can be explicitly
 overwritten by one of the following options:
 
 '-free'
      Free format.  The program-text area starts in column 1 and
-     continues till the end of line.  Effectively 255 characters in GNU
-     Cobol.
+     continues till the end of line.  Effectively 255 characters in
+     GnuCOBOL. '-F' will also set free format, useful when using 'cobc'
+     as a shell interpreter directive to the program loader.
 
 '-fixed'
      Fixed format.  Source code is divided into a 1-6 column sequence
@@ -437,13 +450,16 @@ File: gnucobol.info,  Node: Configuration Options,  Next: Debug Switches,  Prev:
 '-std=<dialect>'
      Compiler uses the given dialect to determine certain compiler
      features and warnings.
-     *Note config/default.conf: Appendix G, and 'config/*.conf'.
+     *Note config/default.conf: Appendix F, and 'config/*.conf'.
 
 '-std=cobol2002'
-     Cobol 2002
+     COBOL 2002
+
+'-std=cobol2014'
+     COBOL 2014
 
 '-std=cobol85'
-     Cobol 85
+     COBOL 85
 
 '-std=ibm'
      IBM Compatible
@@ -457,12 +473,19 @@ File: gnucobol.info,  Node: Configuration Options,  Next: Debug Switches,  Prev:
 '-std=mf'
      Micro Focus Compatible
 
+'-std=acu'
+     ACUCOBOL-GT Compatible
+
 '-std=default'
      When not specified
 
 '-conf=<file>'
      User defined dialect configuration.  See '-std=' above.
-     *Note config/default.conf: Appendix G, and 'config/*.conf'.
+     *Note config/default.conf: Appendix F, and 'config/*.conf'.
+
+'-cb_conf=<tag:value>'
+     Override a single configuration entry.  *Note config/default.conf:
+     Appendix F.
 
 
 File: gnucobol.info,  Node: Debug Switches,  Next: Miscellaneous,  Prev: Configuration Options,  Up: Compiler Options
@@ -471,10 +494,12 @@ File: gnucobol.info,  Node: Debug Switches,  Next: Miscellaneous,  Prev: Configu
 --------------------
 
 '-debug'
-     Enable all run-time error checking
+     Enable all run-time error checks.  '-d' will also enable all
+     run-time error checks, useful when using 'cobc' as a shell
+     interpreter directive to the program loader.
 
 '-g'
-     Produce debugging information in the output
+     Produce debugging information in the output.
 
 '-O'
      Enable optimization of code size and execution speed.  See 'man
@@ -633,11 +658,12 @@ Compile all programs with the option '-m':
    Before running the main program, install the module files in your
 library directory:
      $ cp subr.so /your/cobol/lib
-   Set the environment variable 'COB_LIBRARY_PATH' to your library
+   Set the runtime variable 'COB_LIBRARY_PATH' to your library
 directory, and run the main program:
      $ export COB_LIBRARY_PATH=/your/cobol/lib
-   Note: You may set the variable to directly point to the directory
-where you compiled the sources.
+   Note: You may set the variable via a runtime configuration file,
+*Note config/runtime.cfg: Appendix H.  You may set the variable to
+directly point to the directory where you compiled the sources.
 
    Now execute your program:
      $ cobcrun main
@@ -970,12 +996,19 @@ File: gnucobol.info,  Node: Customizing Library,  Prev: Customizing Compiler,  U
 3.2 Customizing Library
 =======================
 
-These settings are effective at run-time.
+These settings are effective at run-time.  You can set them either via
+environment or by a runtime configuration file.
 
-   Environment variables (default value):
+   To set global runtime configuration file export 'COB_RUNTIME_CONFIG'
+pointing to your configuration file.  To set an explicit runtime
+configuration file for a single run via 'cobcrun' you can use its option
+'-c <file>, -config=<file>'.
 
-'COB_LIBRARY_PATH'
-     Dynamic-linking module path (".:$(PREFIX)/lib/gnu-cobol")
+   For diplaying the current runtime settings you can use the option
+'-r, -runtime-env' of 'cobcrun'.
+
+   For a complete list of runtime variables, aliases, their default
+values and options to set them *Note config/runtime.cfg: Appendix H.
 
 
 File: gnucobol.info,  Node: Optimize,  Next: Debug,  Prev: Customize,  Up: Top
@@ -1211,13 +1244,10 @@ The Insert key changes the insert mode.
 characters to the right.  When it is off, typed characters type over
 existing characters.
 
-   The default insert mode is set by the COB_INSERT_MODE environment
-variable.  This must be set before the first Extended ACCEPT, DISPLAY,
-or any routine that gets information from the screen.
-
-   If COB_INSERT_MODE is YES or Y (either case) then the program starts
-with insert mode on.  If it is set to NO, N, or is not set at all, then
-the program starts with insert mode off.
+   The default insert mode is set by the COB_INSERT_MODE variable, *Note
+config/runtime.cfg: Appendix H.  This must be set before the first
+Extended ACCEPT, DISPLAY, or any routine that gets information from the
+screen.
 
    The last press of the Insert key is used in all following ACCEPT
 statements while the program is running.
@@ -1328,6 +1358,9 @@ File: gnucobol.info,  Node: System routines,  Next: Appendix A,  Prev: Extended 
 7 System routines
 *****************
 
+For a complete list of supported system routines *Note cobc
+-list-system: Appendix D.
+
 * Menu:
 
 * CBL_OC_GETOPT::				CBL_OC_GETOPT
@@ -1338,8 +1371,8 @@ File: gnucobol.info,  Node: CBL_OC_GETOPT,  Prev: System routines,  Up: System r
 7.1 CBL_OC_GETOPT
 =================
 
-CBL_OC_GETOPT realises the quite well-known option parser getopt for GNU
-Cobol.  The usage of this system routine is described by the following
+CBL_OC_GETOPT realises the quite well-known option parser getopt for
+GnuCOBOL. The usage of this system routine is described by the following
 example.
 
 
@@ -1455,29 +1488,37 @@ File: gnucobol.info,  Node: Appendix A,  Next: Appendix B,  Prev: System routine
 Appendix A 'cobc --help'
 ************************
 
-Usage: cobc [options] file ...
+Usage: /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/cobc/.libs/cobc [options]... file...
+
+GnuCOBOL compiler for most COBOL dialects with lots of extensions
 
 Options:
-  -help                 Display this message
-  -version, -V          Display compiler version
-  -info, -i             Display compiler build information
-  -v                    Display the commands invoked by the compiler
+  -h, -help             Display this help and exit
+  -V, -version          Display compiler version and exit
+  -i, -info             Display compiler information (build/environment)
+  -v, -verbose          Display the commands invoked by the compiler
+  -vv                   Display compiler version and display the commands
+                        invoked by the compiler
   -x                    Build an executable program
   -m                    Build a dynamically loadable module (default)
-  -std=<dialect>        Warnings/features for a specific dialect :
-                          cobol2002   Cobol 2002
-                          cobol85     Cobol 85
+  -j                    Run job, after build
+  -std=<dialect>        Warnings/features for a specific dialect:
+                          cobol2002   COBOL 2002
+                          cobol2014   COBOL 2014
+                          cobol85     COBOL 85
                           ibm         IBM Compatible
                           mvs         MVS Compatible
                           bs2000      BS2000 Compatible
                           mf          Micro Focus Compatible
+                          acu         ACUCOBOL-GT Compatible
                           default     When not specified
                         See config/default.conf and config/*.conf
   -free                 Use free source format
   -fixed                Use fixed source format (default)
+  -F                    Alias (short option) for -free
   -O, -O2, -Os          Enable optimization
   -g                    Enable C compiler debug / stack check / trace
-  -debug                Enable all run-time error checking
+  -d, -debug            Enable all run-time error checking
   -o <file>             Place the output into <file>
   -b                    Combine all input files into a single
                         dynamically loadable module
@@ -1496,6 +1537,7 @@ Options:
   -D <define>           DEFINE <define> to the COBOL compiler
   -K <entry>            Generate CALL to <entry> as static
   -conf=<file>          User defined dialect configuration - See -std=
+  -cb_conf=<tag:value>  Override configuration entry
   -list-reserved        Display reserved words
   -list-intrinsics      Display intrinsic functions
   -list-mnemonics       Display mnemonic names
@@ -1558,6 +1600,8 @@ Options:
 			- Default : BEFORE 1
   -fmfcomment           '*' or '/' in column 1 treated as comment
 			- FIXED format only
+  -facucomment          '$' in indicator area treated as '*',
+			'|' treated as floating comment
   -fnotrunc             Allow numeric field overflow
 			- Non-ANSI behaviour
   -fodoslide            Adjust items following OCCURS DEPENDING
@@ -1574,49 +1618,7 @@ Options:
 
 File: gnucobol.info,  Node: Appendix B,  Next: Appendix C,  Prev: Appendix A,  Up: Top
 
-Appendix B 'cobc --info'
-************************
-
-cobc (GNU Cobol) 2.0.0
-Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-Copyright (C) 2006-2012 Roger While
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-Built     Jan 26 2012 12:30:55
-Packaged  Nov 26 2011 16:18:14 UTC
-C version "4.3.2 [gcc-4_3-branch revision 141291]"
-Build information
-Build environment        : x86_64-unknown-linux-gnu
-CC                       : gcc -std=gnu99
-CPPFLAGS                 :
-CFLAGS                   : -g -O2 -pipe -finline-functions -fsigned-char
-                           -Wall -Wwrite-strings -Wmissing-prototypes
-                           -Wno-format-y2k
-LD                       : /usr/x86_64-suse-linux/bin/ld -m elf_x86_64
-LDFLAGS                  : -Wl,-z,relro,-z,now
-
-GNU Cobol information
-COB_CC                   : gcc -std=gnu99
-COB_CFLAGS               : -I/usr/local/include -pipe
-COB_LDFLAGS              :
-COB_LIBS                 : -L/usr/local/lib -lcob -lm -lgmp -lncursesw
-                           -ldb
-COB_CONFIG_DIR           : /usr/local/share/gnu-cobol/config
-COB_COPY_DIR             : /usr/local/share/gnu-cobol/copy
-COB_LIBRARY_PATH         : /usr/local/lib/gnu-cobol
-COB_MODULE_EXT           : so
-COB_EXEEXT               :
-Dynamic loading          : System
-"CBL_" param check       : Disabled
-Variable format          : 0
-BINARY-C-LONG            : 8 bytes
-Sequential handler       : Internal
-ISAM handler             : BDB
-
-
-File: gnucobol.info,  Node: Appendix C,  Next: Appendix D,  Prev: Appendix B,  Up: Top
-
-Appendix C 'cobc --list-reserved'
+Appendix B 'cobc --list-reserved'
 *********************************
 
 
@@ -1689,7 +1691,7 @@ BY				Y
 BYTE-LENGTH			Y (Context sensitive)
 CALL				Y
 CANCEL				Y
-CAPACITY			N (Context sensitive)
+CAPACITY			Y (Context sensitive)
 CD				N (85 obsolete)
 CENTER				N (Context sensitive)
 CF				Y
@@ -2022,6 +2024,7 @@ PROGRAM-POINTER			Y
 PROHIBITED			Y (Context sensitive)
 PROMPT				Y
 PROPERTY			N
+PROTECTED			Y
 PROTOTYPE			N
 PURGE				N (85 obsolete)
 QUEUE				N (85 obsolete)
@@ -2133,6 +2136,7 @@ SYNC				Y
 SYNCHRONISED			Y
 SYNCHRONIZED			Y
 SYSTEM-DEFAULT			Y
+TAB				Y (Context sensitive)
 TABLE				N
 TALLYING			Y
 TAPE				Y (Context sensitive)
@@ -2215,12 +2219,13 @@ RETURN-CODE			USAGE BINARY-LONG
 SORT-RETURN			USAGE BINARY-LONG
 NUMBER-OF-CALL-PARAMETERS	USAGE BINARY-LONG
 COB-CRT-STATUS			PIC 9(4)
+TALLY				GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO
 'LENGTH OF' phrase		USAGE BINARY-LONG
 
 
-File: gnucobol.info,  Node: Appendix D,  Next: Appendix E,  Prev: Appendix C,  Up: Top
+File: gnucobol.info,  Node: Appendix C,  Next: Appendix D,  Prev: Appendix B,  Up: Top
 
-Appendix D 'cobc --list-intrinsics'
+Appendix C 'cobc --list-intrinsics'
 ***********************************
 
 
@@ -2235,15 +2240,15 @@ BYTE-LENGTH			Y		1
 CHAR				Y		1
 CHAR-NATIONAL			N		1
 COMBINED-DATETIME		Y		2
-CONCATENATE			Y		Variable
+CONCATENATE			Y		Unlimited
 COS				Y		1
 CURRENCY-SYMBOL			Y		0
 CURRENT-DATE			Y		0
 DATE-OF-INTEGER			Y		1
-DATE-TO-YYYYMMDD		Y		Variable
+DATE-TO-YYYYMMDD		Y		1 - 3
 DAY-OF-INTEGER			Y		1
-DAY-TO-YYYYDDD			Y		Variable
-DISPLAY-OF			N		Variable
+DAY-TO-YYYYDDD			Y		1 - 3
+DISPLAY-OF			N		1 - 2
 E				Y		0
 EXCEPTION-FILE			Y		0
 EXCEPTION-FILE-N		N		0
@@ -2254,33 +2259,33 @@ EXCEPTION-STATUS		Y		0
 EXP				Y		1
 EXP10				Y		1
 FACTORIAL			Y		1
-FORMATTED-CURRENT-DATE		N		1
-FORMATTED-DATE			N		2
-FORMATTED-DATETIME		N		Variable
-FORMATTED-TIME			N		Variable
+FORMATTED-CURRENT-DATE		Y		1
+FORMATTED-DATE			Y		2
+FORMATTED-DATETIME		Y		3 - 4
+FORMATTED-TIME			Y		2 - 3
 FRACTION-PART			Y		1
 HIGHEST-ALGEBRAIC		Y		1
 INTEGER				Y		1
 INTEGER-OF-BOOLEAN		N		1
 INTEGER-OF-DATE			Y		1
 INTEGER-OF-DAY			Y		1
-INTEGER-OF-FORMATTED-DATE	N		2
+INTEGER-OF-FORMATTED-DATE	Y		2
 INTEGER-PART			Y		1
 LENGTH				Y		1
 LENGTH-AN			Y		1
-LOCALE-COMPARE			Y		Variable
-LOCALE-DATE			Y		2
-LOCALE-TIME			Y		2
-LOCALE-TIME-FROM-SECONDS	Y		2
+LOCALE-COMPARE			Y		2 - 3
+LOCALE-DATE			Y		1 - 2
+LOCALE-TIME			Y		1 - 2
+LOCALE-TIME-FROM-SECONDS	Y		1 - 2
 LOG				Y		1
 LOG10				Y		1
 LOWER-CASE			Y		1
 LOWEST-ALGEBRAIC		Y		1
-MAX				Y		Variable
-MEAN				Y		Variable
-MEDIAN				Y		Variable
-MIDRANGE			Y		Variable
-MIN				Y		Variable
+MAX				Y		Unlimited
+MEAN				Y		Unlimited
+MEDIAN				Y		Unlimited
+MIDRANGE			Y		Unlimited
+MIN				Y		Unlimited
 MOD				Y		2
 MODULE-CALLER-ID		Y		0
 MODULE-DATE			Y		0
@@ -2291,19 +2296,19 @@ MODULE-SOURCE			Y		0
 MODULE-TIME			Y		0
 MONETARY-DECIMAL-POINT		Y		0
 MONETARY-THOUSANDS-SEPARATOR	Y		0
-NATIONAL-OF			N		Variable
+NATIONAL-OF			N		1 - 2
 NUMERIC-DECIMAL-POINT		Y		0
 NUMERIC-THOUSANDS-SEPARATOR	Y		0
 NUMVAL				Y		1
 NUMVAL-C			Y		2
 NUMVAL-F			Y		1
 ORD				Y		1
-ORD-MAX				Y		Variable
-ORD-MIN				Y		Variable
+ORD-MAX				Y		Unlimited
+ORD-MIN				Y		Unlimited
 PI				Y		0
-PRESENT-VALUE			Y		Variable
-RANDOM				Y		Variable
-RANGE				Y		Variable
+PRESENT-VALUE			Y		Unlimited
+RANDOM				Y		Unlimited
+RANGE				Y		Unlimited
 REM				Y		2
 REVERSE				Y		1
 SECONDS-FROM-FORMATTED-TIME	Y		2
@@ -2311,29 +2316,29 @@ SECONDS-PAST-MIDNIGHT		Y		0
 SIGN				Y		1
 SIN				Y		1
 SQRT				Y		1
-STANDARD-COMPARE		N		Variable
-STANDARD-DEVIATION		Y		Variable
+STANDARD-COMPARE		N		2 - 4
+STANDARD-DEVIATION		Y		Unlimited
 STORED-CHAR-LENGTH		Y		1
-SUBSTITUTE			Y		Variable
-SUBSTITUTE-CASE			Y		Variable
-SUM				Y		Variable
+SUBSTITUTE			Y		Unlimited
+SUBSTITUTE-CASE			Y		Unlimited
+SUM				Y		Unlimited
 TAN				Y		1
 TEST-DATE-YYYYMMDD		Y		1
 TEST-DAY-YYYYDDD		Y		1
-TEST-FORMATTED-DATETIME		N		2
+TEST-FORMATTED-DATETIME		Y		2
 TEST-NUMVAL			Y		1
 TEST-NUMVAL-C			Y		2
 TEST-NUMVAL-F			Y		1
-TRIM				Y		2
+TRIM				Y		1 - 2
 UPPER-CASE			Y		1
-VARIANCE			Y		Variable
+VARIANCE			Y		Unlimited
 WHEN-COMPILED			Y		0
-YEAR-TO-YYYY			Y		Variable
+YEAR-TO-YYYY			Y		1 - 3
 
 
-File: gnucobol.info,  Node: Appendix E,  Next: Appendix F,  Prev: Appendix D,  Up: Top
+File: gnucobol.info,  Node: Appendix D,  Next: Appendix E,  Prev: Appendix C,  Up: Top
 
-Appendix E 'cobc --list-system'
+Appendix D 'cobc --list-system'
 *******************************
 
 
@@ -2360,6 +2365,7 @@ CBL_IMP				3
 CBL_NIMP			3
 CBL_NOR				3
 CBL_NOT				2
+CBL_OC_GETOPT			6
 CBL_OC_NANOSLEEP		1
 CBL_OPEN_FILE			5
 CBL_OR				3
@@ -2390,9 +2396,9 @@ X"F4"				2
 X"F5"				2
 
 
-File: gnucobol.info,  Node: Appendix F,  Next: Appendix G,  Prev: Appendix E,  Up: Top
+File: gnucobol.info,  Node: Appendix E,  Next: Appendix F,  Prev: Appendix D,  Up: Top
 
-Appendix F 'cobc --list-mnemonics'
+Appendix E 'cobc --list-mnemonics'
 **********************************
 
 
@@ -2439,6 +2445,27 @@ SWITCH-12	Switch name
 SWITCH-13	Switch name
 SWITCH-14	Switch name
 SWITCH-15	Switch name
+SWITCH-16	Switch name
+SWITCH-17	Switch name
+SWITCH-18	Switch name
+SWITCH-19	Switch name
+SWITCH-20	Switch name
+SWITCH-21	Switch name
+SWITCH-22	Switch name
+SWITCH-23	Switch name
+SWITCH-24	Switch name
+SWITCH-25	Switch name
+SWITCH-26	Switch name
+SWITCH-27	Switch name
+SWITCH-28	Switch name
+SWITCH-29	Switch name
+SWITCH-30	Switch name
+SWITCH-31	Switch name
+SWITCH-32	Switch name
+SWITCH-33	Switch name
+SWITCH-34	Switch name
+SWITCH-35	Switch name
+SWITCH-36	Switch name
 
 Extended mnemonic names (with -fsyntax-extension)
 SW0		Switch name
@@ -2457,36 +2484,111 @@ SW12		Switch name
 SW13		Switch name
 SW14		Switch name
 SW15		Switch name
+SWITCH 0	Switch name
+SWITCH 1	Switch name
+SWITCH 2	Switch name
+SWITCH 3	Switch name
+SWITCH 4	Switch name
+SWITCH 5	Switch name
+SWITCH 6	Switch name
+SWITCH 7	Switch name
+SWITCH 8	Switch name
+SWITCH 9	Switch name
+SWITCH 10	Switch name
+SWITCH 11	Switch name
+SWITCH 12	Switch name
+SWITCH 13	Switch name
+SWITCH 14	Switch name
+SWITCH 15	Switch name
+SWITCH 16	Switch name
+SWITCH 17	Switch name
+SWITCH 18	Switch name
+SWITCH 19	Switch name
+SWITCH 20	Switch name
+SWITCH 21	Switch name
+SWITCH 22	Switch name
+SWITCH 23	Switch name
+SWITCH 24	Switch name
+SWITCH 25	Switch name
+SWITCH 26	Switch name
+SWITCH A	Switch name
+SWITCH B	Switch name
+SWITCH C	Switch name
+SWITCH D	Switch name
+SWITCH E	Switch name
+SWITCH F	Switch name
+SWITCH G	Switch name
+SWITCH H	Switch name
+SWITCH I	Switch name
+SWITCH J	Switch name
+SWITCH K	Switch name
+SWITCH L	Switch name
+SWITCH M	Switch name
+SWITCH N	Switch name
+SWITCH O	Switch name
+SWITCH P	Switch name
+SWITCH Q	Switch name
+SWITCH R	Switch name
+SWITCH S	Switch name
+SWITCH T	Switch name
+SWITCH U	Switch name
+SWITCH V	Switch name
+SWITCH W	Switch name
+SWITCH X	Switch name
+SWITCH Y	Switch name
+SWITCH Z	Switch name
 
 
-File: gnucobol.info,  Node: Appendix G,  Next: Index,  Prev: Appendix F,  Up: Top
+File: gnucobol.info,  Node: Appendix F,  Next: Appendix G,  Prev: Appendix E,  Up: Top
+
+Appendix F 'cobcrun --help'
+***************************
+
+Usage: /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun [options] PROGRAM [param ...]
+  or:  /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun options
+
+COBOL driver program for GnuCOBOL modules
+
+Options:
+  -h, -help                   Display this help and exit
+  -V, -version                Display cobcrun and runtime version and exit
+  -i, -info                   Display runtime information (build/environment)
+  -c <file>, -config=<file>   Set runtime configuration from <file>
+  -r, -runtime-env            Display current runtime configuration
+                              This will show all settings and how they were set.
+                              Possible options are runtime configuration file,
+                              environment (marked by 'env' when only set this way or
+                              by 'Ovr' if this overrides the runtime setting) or default
+
+
+File: gnucobol.info,  Node: Appendix G,  Next: Appendix H,  Prev: Appendix F,  Up: Top
 
 Appendix G config/default.conf
 ******************************
 
-# GNU Cobol compiler configuration
+# GnuCOBOL compiler configuration
 #
-# Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-# Copyright (C) 2007-2012 Roger While
+# Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
-# This file is part of GNU Cobol.
+# This file is part of GnuCOBOL.
 #
-# The GNU Cobol compiler is free software: you can redistribute it
+# The GnuCOBOL compiler is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# GNU Cobol is distributed in the hope that it will be useful,
+# GnuCOBOL is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 
 # Value: any string
-name: "GNU Cobol"
+name: "GnuCOBOL"
 
 # Value: enum
 standard-define			0
@@ -2495,12 +2597,18 @@ standard-define			0
 #        CB_STD_IBM,
 #        CB_STD_MVS,
 #        CB_STD_BS2000,
+#        CB_STD_ACU,
 #        CB_STD_85,
-#        CB_STD_2002
+#        CB_STD_2002,
+#        CB_STD_2014
 
 # Value: int
 tab-width:			8
 text-column:			72
+# Maximum word-length for COBOL words / Programmer defined words
+# Be aware that GC checks the word length against COB_MAX_WORDLEN
+# first (currently 61)
+word-length:			31
 
 # Value: 'mf', 'ibm'
 #
@@ -2579,18 +2687,27 @@ cobol85-reserved:		no
 # Allow Hex 'F' for NUMERIC test of signed PACKED DECIMAL field
 hostsign:			no
 
+# If yes, set WITH UPDATE clause as default for ACCEPT dest-item,
+# except if WITH NO UPDATE clause is used
+accept-update:		no
+
+# If yes, set WITH AUTO clause as default for ACCEPT dest-item,
+# except if WITH TAB clause is used
+accept-auto:		no
+
 # not-reserved:
 # Value: Word to be taken out of the reserved words list
 # (case independent)
 # Words that are in the (proposed) standard but may conflict
 
 # Dialect features
-# Value: 'ok', 'archaic', 'obsolete', 'skip', 'ignore', 'unconformable'
+# Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
+#        'unconformable'
 
 alter-statement:			obsolete
 author-paragraph:			obsolete
 data-records-clause:			obsolete
-debugging-line:				obsolete
+debugging-line:				ok
 eject-statement:			skip
 entry-statement:			obsolete
 goto-statement-without-name:		obsolete
@@ -2599,16 +2716,292 @@ memory-size-clause:			obsolete
 move-noninteger-to-alphanumeric:	error
 multiple-file-tape-clause:		obsolete
 next-sentence-phrase:			archaic
-odo-without-to:				ok
+odo-without-to:				warning
 padding-character-clause:		obsolete
 section-segments:			ignore
 stop-literal-statement:			obsolete
 synchronized-clause:			ok
 top-level-occurs-clause:		ok
 value-of-clause:			obsolete
+numeric-boolean:			unconformable
+acucobol-literals:			unconformable
 
 
-File: gnucobol.info,  Node: Index,  Prev: Appendix G,  Up: Top
+File: gnucobol.info,  Node: Appendix H,  Next: Index,  Prev: Appendix G,  Up: Top
+
+Appendix H config/runtime.cfg
+*****************************
+
+# GnuCOBOL runtime configuration
+#
+# Copyright (C) 2015 Free Software Foundation, Inc.
+# Written by Simon Sobisch, Ron Norman
+#
+# This file is part of the GnuCOBOL runtime.
+#
+# The GnuCOBOL runtime is free software: you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General Public License
+# as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# GnuCOBOL is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+## General instructions
+#
+
+# The initial runtime.cfg file is found in the $COB_CONFIG_DIR/config
+# (COB_CONFIG_DIR defaults to installdir/gnu-cobol).
+# The environment variable COB_RUNTIME_CONFIG may define a different runtime
+# configuration file to read.
+
+# If settings are included in the runtime environment file multiple times
+# then the last setting value is used, no warning occurs.
+
+# Settings via environment variables always take precedence over settings
+# that are given in runtime configuration files. And the environment is
+# checked after completing processing of the runtime configuration file(s)
+
+# All values set to string variables or environment variables are checked
+# for ${envvar} and replacement is done at the time of the setting.
+
+# Any environment variable may be set with the directive setenv.
+# Example:  setenv COB_LIBARAY_PATH ${LD_LIBRARY_PATH}
+
+# Any environment variable may be unset with the directive unsetenv
+# (one var per line).
+# Example:  unsetenv COB_LIBRARY_PATH
+
+# Runtime configuration files can include other files with the directive
+# include.
+# Example: "include my-runtime-configuration-file".
+
+# To include another configuration file only if it is present use the directive
+# includeif.
+# You can also use ${envvar} inside this.
+# Example:   includeif ${HOME}/mygc.cfg
+
+# If you want to reset a parameter to its default value use:
+#    reset parametername
+
+# Most runtime variables have boolean values, some are switches, some have
+# string values, integer values and some are size values.
+# The boolean values will be evaluated as following:
+#     to true:  1, Y, ON, YES, TRUE (no matter of case)
+#     to false: 0, N, OFF
+# A 'size' value is an integer optionally followed by K, M, or G for kilo, mega
+# or giga.
+
+# For convenience a parameter in the runtime.cfg file may be defined using
+# what is the environment variable name or via the parameter name.
+# In most cases the environment variable name is the parameter name (in upper
+# case) with the prefix  COB_
+
+#
+## General environment
+#
+
+# Environment name:  COB_DISABLE_WARNINGS
+#   Parameter name:  disable_warnings
+#          Purpose:  turn off runtime warning messages
+#             Type:  boolean
+#          Default:  false
+#          Example:  DISABLE_WARNINGS  TRUE
+
+# Environment name:  COB_ENV_MANGLE
+#   Parameter name:  env_mangle
+#          Purpose:  names checked in the environment would get non alphanumeric
+#                    change to '_'
+#             Type:  boolean
+#          Default:  false
+#          Example:  ENV_MANGLE  TRUE
+
+# Environment name:  COB_SET_TRACE
+#   Parameter name:  set_trace
+#          Purpose:  to enable to COBOL trace feature
+#             Type:  boolean
+#          Default:  false
+#          Example:  SET_TRACE  TRUE
+
+# Environment name:  COB_TRACE_FILE
+#   Parameter name:  trace_file
+#          Purpose:  to define where COBOL trace output should go
+#             Type:  string
+#          Default:  stderr
+#          Example:  TRACE_FILE  ${HOME}/mytrace.log
+
+#
+## Call environment
+#
+
+# Environment name:  COB_LIBRARY_PATH
+#   Parameter name:  library_path
+#          Purpose:  paths for dynamically-loadable modules
+#             Type:  string
+#             Note:  the default paths .:/installpath/extras are always
+#                    added to the given paths
+#          Example:  LIBRARY_PATH    /opt/myapp/test:/opt/myapp/production
+
+# Environment name:  COB_PRE_LOAD
+#   Parameter name:  pre_load
+#          Purpose:  modules that are loaded during startup, can be used
+#                    to CALL COBOL programs or C functions that are part
+#                    of a module library
+#             Type:  string
+#             Note:  the modules listed should NOT include extensions, the
+#                    runtime will use the right ones on the various platforms,
+#                    COB_LIBRARY_PATH is used to locate the modules
+#          Example:  PRE_LOAD      COBOL_function_library:external_c_library
+
+# Environment name:  COB_LOAD_CASE
+#   Parameter name:  load_case
+#          Purpose:  resolve ALL called program names to UPPER or LOWER case
+#             Type:  Only use  UPPER  or  LOWER
+#          Default:  if not set program names in CALL are case sensitive
+#          Example:  LOAD_CASE  UPPER
+
+# Environment name:  COB_PHYSICAL_CANCEL
+#   Parameter name:  physical_cancel
+#          Purpose:  physically unload a dynamically-loadable module on CANCEL,
+#                    this frees some RAM and allows the change of modules during
+#                    run-time but needs more time to resolve CALLs (both to
+#                    active and not-active programs)
+#            Alias:  default_cancel_mode, LOGICAL_CANCELS (0 = yes)
+#             Type:  boolean (evaluated for true only)
+#          Default:  false
+#          Example:  PHYSICAL_CANCEL  TRUE
+
+#
+## File I/O
+#
+
+# Environment name:  COB_VARSEQ_FORMAT
+#   Parameter name:  varseq_format
+#          Purpose:  declare format to be used for variable length sequential
+#                    files (different types and lengths preceding each record)
+#             Type:  0   means 2 byte record length (big-endian)
+#                    1   means 4 byte record length (big-endian)
+#                    2   means 4 byte record length (local machine int)
+#                    3   means 2 byte record length (local machine short)
+#          Default:  0
+#          Example:  VARSEQ_FORMAT 1
+
+# Environment name:  COB_FILE_PATH
+#   Parameter name:  file_path
+#          Purpose:  define default location where data files are stored
+#             Type:  file path directory
+#          Default:  .  (current directory)
+#          Example:  FILE_PATH ${HOME}/mydata
+
+# Environment name:  COB_LS_FIXED
+#   Parameter name:  ls_fixed
+#          Purpose:  Defines if LINE SEQUENTIAL files should be fixed length
+#                    (or variable, by removing trailing spaces)
+#            Alias:  STRIP_TRAILING_SPACES  (0 = yes)
+#             Type:  boolean
+#          Default:  false
+#          Example:  LS_FIXED TRUE
+
+# Environment name:  COB_LS_NULLS
+#   Parameter name:  ls_nulls
+#          Purpose:  Defines for LINE SEQUENTIAL files what to do with data
+#                    which is not DISPLAY type.  This could happen if a LINE
+#                    SEQUENTIAL record has COMP data fields in it.
+#             Type:  boolean
+#          Default:  false
+#             Note:  The TRUE setting will handle files that contain COMP data
+#                    in a similar manner to the method used by Micro Focus COBOL
+#          Example:  LS_NULL = TRUE
+
+# Environment name:  COB_SYNC
+#   Parameter name:  sync
+#          Purpose:  Should the file be synced to disk after each write/update
+#             Type:  boolean
+#          Default:  false
+#          Example:  SYNC: TRUE
+
+# Environment name:  COB_SORT_MEMORY
+#   Parameter name:  sort_memory
+#          Purpose:  Defines how much RAM to assign for sorting data
+#             Type:  size  but must be more than 1M
+#          Default:  128M
+#          Example:  SORT_MEMORY 64M
+
+# Environment name:  COB_SORT_CHUNK
+#   Parameter name:  sort_chunk
+#          Purpose:  Defines how much RAM to assign for sorting data in chunks
+#             Type:  size  but must be within 128K and 16M
+#          Default:  256K
+#          Example:  SORT_CHUNK 1M
+
+#
+## Screen I/O
+#
+
+# Environment name:  COB_BELL
+#   Parameter name:  bell
+#          Purpose:  Defines how a request for the screen to beep is handled
+#             Type:  FLASH, SPEAKER, FALSE, BEEP
+#          Default:  BEEP
+#          Example:  BELL SPEAKER
+
+# Environment name:  COB_REDIRECT_DISPLAY
+#   Parameter name:  redirect_display
+#          Purpose:  Defines if DISPLAY output should be sent to 'stderr'
+#             Type:  boolean
+#          Default:  false
+#          Example:  redirect_display Yes
+
+# Environment name:  COB_SCREEN_ESC
+#   Parameter name:  screen_esc
+#          Purpose:  Enable handling of ESC key during ACCEPT
+#             Type:  boolean
+#          Default:  false
+#             Note:  is only evaluated if COB_SCREEN_EXCEPTIONS is active
+#          Example:  screen_esc Yes
+
+# Environment name:  COB_SCREEN_EXCEPTIONS
+#   Parameter name:  screen_exceptions
+#          Purpose:  enable exceptions for function keys during ACCEPT
+#             Type:  boolean
+#          Default:  false
+#          Example:  screen_exceptions Yes
+
+# Environment name:  COB_TIMEOUT_SCALE
+#   Parameter name:  timeout_scale
+#          Purpose:  specify translation in milliseconds for ACCEPT clauses
+#                    BEFORE TIME value / AFTER TIMEOUT
+#             Type:  integer
+#                    0 means 1000 (Micro Focus COBOL compatible), 1 means 100
+#                    (ACUCOBOL compatible), 2 means 10, 3 means 1
+#          Default:  0
+#          Example:  timeout_scale 3
+
+# Environment name:  COB_INSERT_MODE
+#   Parameter name:  insert_mode
+#          Purpose:  specify default insert mode for ACCEPT; 0=off, 1=on
+#          Default:  false
+#          Example:  insert_mode Y
+
+# Environment name:  COB_LEGACY
+#   Parameter name:  legacy
+#          Purpose:  keep behaviour of former runtime versions, currently only
+#                    for setting screen attributes for non input fields
+#             Type:  boolean
+#          Default:  not set
+#          Example:  legacy true
+
+# Note: If you want to slightly speed up a program's startup time, remove all
+#       of the comments from the actual real file that is processed
+
+
+File: gnucobol.info,  Node: Index,  Prev: Appendix H,  Up: Top
 
 Index
 *****
@@ -2641,62 +3034,63 @@ Index
 * SELECT ASSIGN TO:                      SELECT.               (line  6)
 * SIZE:                                  Extended ACCEPT.      (line 44)
 * SIZE <1>:                              Extended DISPLAY.     (line 54)
-* Tab keys:                              ACCEPT Special.       (line 81)
+* Tab keys:                              ACCEPT Special.       (line 78)
 
 
 
 Tag Table:
-Node: Top1272
-Node: Getting Started4052
-Node: Hello World!4229
-Node: Compile5613
-Node: Compiler Options5972
-Node: Help Options6646
-Ref: Help Options-Footnote-18282
-Node: Built Target8325
-Ref: Built Target-Footnote-110439
-Node: Source Format10492
-Node: Warning Options11402
-Node: Configuration Options12586
-Node: Debug Switches13331
-Node: Miscellaneous14417
-Node: Multiple Sources15226
-Node: Static Linking15906
-Node: Dynamic Linking17431
-Ref: Dynamic Linking-Footnote-118829
-Ref: Dynamic Linking-Footnote-218882
-Node: Building Library18935
-Node: Using Library19318
-Node: C Interface19889
-Node: Main C Program20275
-Node: Static C to COBOL21190
-Node: Dynamic C to COBOL22677
-Node: Static COBOL to C24127
-Node: Dynamic COBOL to C25559
-Node: Customize25964
-Node: Customizing Compiler26188
-Node: Customizing Library26762
-Node: Optimize27076
-Node: Optimize Options27379
-Node: Optimize Call27919
-Node: Optimize Binary28297
-Node: Debug28877
-Node: Debug Options29036
-Node: Extensions29398
-Node: SELECT29845
-Node: Indexed30010
-Node: Extended ACCEPT30190
-Node: ACCEPT Special31805
-Node: Extended DISPLAY34362
-Node: System routines36772
-Node: CBL_OC_GETOPT36955
-Node: Appendix A41066
-Node: Appendix B46956
-Node: Appendix C48612
-Node: Appendix D58309
-Node: Appendix E60724
-Node: Appendix F61677
-Node: Appendix G63032
-Node: Index67300
+Node: Top1306
+Node: Getting Started4151
+Node: Hello World!4328
+Node: Compile5711
+Node: Compiler Options6069
+Node: Help Options6743
+Ref: Help Options-Footnote-18406
+Node: Built Target8449
+Ref: Built Target-Footnote-110870
+Node: Source Format10923
+Node: Warning Options11949
+Node: Configuration Options13133
+Node: Debug Switches14065
+Node: Miscellaneous15292
+Node: Multiple Sources16101
+Node: Static Linking16781
+Node: Dynamic Linking18306
+Ref: Dynamic Linking-Footnote-119798
+Ref: Dynamic Linking-Footnote-219851
+Node: Building Library19904
+Node: Using Library20287
+Node: C Interface20858
+Node: Main C Program21244
+Node: Static C to COBOL22159
+Node: Dynamic C to COBOL23646
+Node: Static COBOL to C25096
+Node: Dynamic COBOL to C26528
+Node: Customize26933
+Node: Customizing Compiler27157
+Node: Customizing Library27731
+Node: Optimize28477
+Node: Optimize Options28780
+Node: Optimize Call29320
+Node: Optimize Binary29698
+Node: Debug30278
+Node: Debug Options30437
+Node: Extensions30799
+Node: SELECT31246
+Node: Indexed31411
+Node: Extended ACCEPT31591
+Node: ACCEPT Special33206
+Node: Extended DISPLAY35603
+Node: System routines38013
+Node: CBL_OC_GETOPT38283
+Node: Appendix A42392
+Node: Appendix B48932
+Node: Appendix C58721
+Node: Appendix D61141
+Node: Appendix E62112
+Node: Appendix F65059
+Node: Appendix G66148
+Node: Appendix H70992
+Node: Index81456
 
 End Tag Table

@@ -1,22 +1,21 @@
 /*
-   Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida
-   Copyright (C) 2007-2012 Roger While
-   Copyright (C) 2014,2015 Simon Sobisch
+   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
-   This file is part of GNU Cobol.
+   This file is part of GnuCOBOL.
 
-   The GNU Cobol runtime library is free software: you can redistribute it
+   The GnuCOBOL runtime library is free software: you can redistribute it
    and/or modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation, either version 3 of the
    License, or (at your option) any later version.
 
-   GNU Cobol is distributed in the hope that it will be useful,
+   GnuCOBOL is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
 
    You should have received a copy of the GNU Lesser General Public License
-   along with GNU Cobol.  If not, see <http://www.gnu.org/licenses/>.
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "config.h"
@@ -4950,7 +4949,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 }
 
 /*
- * Load the GNU Cobol runtime configuration information
+ * Load the GnuCOBOL runtime configuration information
  */
 int
 cob_load_config (void)
@@ -5033,9 +5032,8 @@ print_version (void)
 
 	printf ("libcob (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2001,2002,2003,2004,2005,2006,2007 Keisuke Nishida");
-	puts ("Copyright (C) 2006-2012 Roger While");
-	puts ("Copyright (C) 2009,2010,2012,2014,2015 Simon Sobisch");
+	puts ("Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.");
+	puts ("Written by Keisuke Nishida, Roger While, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cobc_buffer);
@@ -5064,7 +5062,7 @@ print_info (void)
 	printf (_("C version %s%s"), OC_C_VERSION_PRF, OC_C_VERSION);
 	putchar ('\n');
 
-	puts (_("GNU Cobol information"));
+	puts (_("GnuCOBOL information"));
 
 	var_print ("COB_MODULE_EXT", COB_MODULE_EXT, "", 0);
 #if 0 /* only relevant for cobc */

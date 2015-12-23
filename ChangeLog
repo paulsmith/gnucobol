@@ -1,4 +1,10 @@
 
+2015-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Taken into account all copyright assignments and rechecking the dates
+	* Changed name spelling to GnuCOBOL
+	* general: update of automake/autoconf/bison/flex
+
 2015-09-15  Brian Tiffin <btiffin@gnu.org>
 
 	* configure.ac, moved COB_DASH names to cobc/cobc.h
@@ -8,7 +14,7 @@
 	* configure.ac: added COB_DASH, COB_DASH_NAME, COB_DASH_OUT
 	  to support compile from stdin
 
-2015-07-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: moved additional build-scripts to build_aux,
 	  regenerated all Makefiles

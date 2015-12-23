@@ -1,4 +1,4 @@
-:: Batch for setting GNU Cobol Environment in Windows with MSC compiler
+:: Batch for setting GnuCOBOL Environment in Windows with MSC compiler
 :: win32 version
 
 @echo off

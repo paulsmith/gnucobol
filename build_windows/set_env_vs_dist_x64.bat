@@ -1,4 +1,4 @@
-:: Batch for setting GNU Cobol Environment in Windows with MSC compiler
+:: Batch for setting GnuCOBOL Environment in Windows with MSC compiler
 :: _x64 version
 
 @echo off
@@ -88,8 +88,8 @@ color 07
 
 echo.
 echo.
-:: Now the stuff for GNU Cobol
-echo Setting environment for GNU Cobol.
+:: Now the stuff for GnuCOBOL
+echo Setting environment for GnuCOBOL.
 
 :: Get the main dir from the batch's position (only works in NT environments)
 set COB_MAIN_DIR=%~dp0
@@ -108,5 +108,5 @@ set COB_LIB_PATHS=/LIBPATH:"%COB_MAIN_DIR%lib_x64"
 ::   if exist "%COB_MAIN_DIR%lib\libgmp.lib" 	set COB_LIBS=libcob.lib libgmp.lib
 ::)
 
-:: Add the bin path of GNU Cobol to PATH for further references
+:: Add the bin path of GnuCOBOL to PATH for further references
 set PATH=%COB_MAIN_DIR%bin_x64;%PATH%

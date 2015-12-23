@@ -18,8 +18,8 @@
    Boston, MA 02110-1301 USA */
 
 /*
-   Copyright (C) 2010,2012 Roger While
-   Modified for use in GNU Cobol
+   Copyright (C) 2010,2012 Free Software Foundation, Inc.
+   Modified for use in GnuCOBOL by Roger While
 */
 
 #ifndef COB_GETOPT_H

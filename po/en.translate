@@ -1,6 +1,6 @@
-# English translations for GNU Cobol package.
-# Copyright (C) 2010 Keisuke Nishida / Roger While
-# This file is distributed under the same license as the GNU Cobol package.
+# English translations for GnuCOBOL package.
+# Copyright (C) 2010 Free Software Foundation, Inc.
+# This file is distributed under the same license as the GnuCOBOL package.
 # Automatically generated, 2010.
 #
 msgid ""
@@ -125,8 +125,8 @@ msgid "Build environment"
 msgstr "Build environment"
 
 #: cobc/cobc.c:1152 bin/cobcrun.c:134
-msgid "GNU Cobol information"
-msgstr "GNU Cobol information"
+msgid "GnuCOBOL information"
+msgstr "GnuCOBOL information"
 
 #: cobc/cobc.c:1164 cobc/cobc.c:1166 bin/cobcrun.c:146 bin/cobcrun.c:148
 msgid "Dynamic loading"
