@@ -74,8 +74,8 @@ prog.cob: 13: Error: Non-negative integer value expected
 
 AT_CLEANUP
 
-
-AT_SETUP([Pending screen clauses])
+# ToDo: Add all clauses, maybe split into multiple tests
+AT_SETUP([Screen clauses])
 AT_KEYWORDS([screen])
 
 AT_DATA([prog.cob], [
@@ -92,10 +92,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 9: Warning: 'FULL' not implemented
-prog.cob: 9: Warning: 'LEFTLINE' not implemented
+[prog.cob: 9: Warning: 'LEFTLINE' not implemented
 prog.cob: 9: Warning: 'OVERLINE' not implemented
-prog.cob: 9: Warning: 'REQUIRED' not implemented
 ])
 
 AT_CLEANUP
