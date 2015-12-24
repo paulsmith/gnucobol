@@ -1934,6 +1934,20 @@ try_get_valid_offset_time (const struct time_format time_format,
 	return 1;
 }
 
+static int *
+get_system_offset_time_ptr (int * const offset_time)
+{
+	struct cob_time	current_time;
+
+	current_time = cob_get_current_date_and_time ();
+	if (current_time.offset_known) {
+		*offset_time = current_time.utc_offset;
+		return offset_time;
+	} else {
+		return NULL;
+	}
+}
+
 static int
 test_char_cond (const int cond, int *offset)
 {
@@ -6165,10 +6179,12 @@ cob_intr_formatted_time (const int offset, const int length,
 	char		format_str[MAX_TIME_STR_LENGTH] = { '\0' };
 	int		whole_seconds;
 	cob_decimal	*fractional_seconds;
+	int		use_system_offset;
 	int		offset_time;
+	int		*offset_time_ptr;
 	struct time_format	format;
 
-	if (!(params == 2 || params == 3)) {
+	if (!(params == 3 || params == 4)) {
 		COB_FIELD_INIT (0, NULL, &const_alpha_attr);
 		make_field_entry (&field);
 		goto invalid_args;
@@ -6179,11 +6195,12 @@ cob_intr_formatted_time (const int offset, const int length,
 
 	format_field = va_arg (args, cob_field *);
 	time_field = va_arg (args, cob_field *);
-	if (params == 3) {
+	if (params == 4) {
 		offset_time_field = va_arg (args, cob_field *);
 	} else {
 		offset_time_field = NULL;
 	}
+	use_system_offset = va_arg (args, int);
 
 	va_end (args);
 
@@ -6211,11 +6228,18 @@ cob_intr_formatted_time (const int offset, const int length,
 	}
 	format = parse_time_format_string (format_str);
 
-	if (try_get_valid_offset_time (format, offset_time_field, &offset_time)) {
-		goto invalid_args;
+	if (use_system_offset) {
+		offset_time_ptr = get_system_offset_time_ptr (&offset_time);
+	} else {
+		if (try_get_valid_offset_time (format, offset_time_field,
+					       &offset_time)) {
+			goto invalid_args;
+		} else {
+			offset_time_ptr = &offset_time;
+		}
 	}
 
-	format_time (format, whole_seconds, fractional_seconds, &offset_time,
+	format_time (format, whole_seconds, fractional_seconds, offset_time_ptr,
 		     buff);
 
 	memcpy (curr_field->data, buff, field_length);
@@ -6253,10 +6277,12 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	int		days;
 	int		whole_seconds;
 	cob_decimal	*fractional_seconds;
+	int		use_system_offset;
 	int		offset_time;
+	int		*offset_time_ptr;
 	char		buff[MAX_DATETIME_STR_LENGTH] = { '\0' };
 
-	if (!(params == 3 || params == 4)) {
+	if (!(params == 4 || params == 5)) {
 		COB_FIELD_INIT (0, NULL, &const_alpha_attr);
 		make_field_entry (&field);
 		goto invalid_args;
@@ -6268,11 +6294,12 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	fmt_field = va_arg (args, cob_field *);
 	days_field = va_arg (args, cob_field *);
 	time_field = va_arg (args, cob_field *);
-	if (params == 4) {
+	if (params == 5) {
 		offset_time_field = va_arg (args, cob_field *);
 	} else {
 		offset_time_field = NULL;
 	}
+	use_system_offset = va_arg (args, int);
 
 	va_end (args);
 
@@ -6299,11 +6326,16 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	split_around_t (fmt_str, date_fmt_str, time_fmt_str);
 
 	time_fmt = parse_time_format_string (time_fmt_str);
-	if (try_get_valid_offset_time (time_fmt, offset_time_field,
-				       &offset_time)) {
-		goto invalid_args;
+	if (use_system_offset) {
+		offset_time_ptr = get_system_offset_time_ptr (&offset_time);
+	} else {
+		if (try_get_valid_offset_time (time_fmt, offset_time_field,
+					       &offset_time)) {
+			goto invalid_args;
+		} else {
+			offset_time_ptr = &offset_time;
+		}
 	}
-
 	date_fmt = parse_date_format_string (date_fmt_str);
 
 	/* Format */
@@ -6312,7 +6344,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	get_fractional_seconds (time_field, fractional_seconds);
 
 	format_datetime (date_fmt, time_fmt, days, whole_seconds,
-			 fractional_seconds, &offset_time, buff);
+			 fractional_seconds, offset_time_ptr, buff);
 
 	memcpy (curr_field->data, buff, (size_t) field_length);
 	goto end_of_func;

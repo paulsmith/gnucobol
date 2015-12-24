@@ -63,4 +63,5 @@ export COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
 export COB_UNIX_LF=YES
 export COB_HAS_ISAM
 export COB_HAS_CURSES
+export COB_HAS_UTC_OFFSET
 export LC_ALL=C

@@ -1202,6 +1202,7 @@ has_relative_pos (struct cb_field const *field)
 %token SYMBOLIC
 %token SYNCHRONIZED
 %token SYSTEM_DEFAULT		"SYSTEM-DEFAULT"
+%token SYSTEM_OFFSET		"SYSTEM-OFFSET"
 %token TAB
 %token TALLYING
 %token TAPE
@@ -10372,6 +10373,14 @@ function:
   {
 	$$ = cb_build_intrinsic ($1, $3, $5, 0);
   }
+| FORMATTED_DATETIME_FUNC TOK_OPEN_PAREN formatted_datetime_args TOK_CLOSE_PAREN func_refmod
+  {
+	  $$ = cb_build_intrinsic ($1, $3, $5, 0);
+  }
+| FORMATTED_TIME_FUNC TOK_OPEN_PAREN formatted_time_args TOK_CLOSE_PAREN func_refmod
+  {
+	  $$ = cb_build_intrinsic ($1, $3, $5, 0);
+  }
 | FUNCTION_NAME func_args
   {
 	$$ = cb_build_intrinsic ($1, $2, NULL, 0);
@@ -10396,8 +10405,6 @@ func_one_parm:
 func_multi_parm:
   CONCATENATE_FUNC
 | FORMATTED_DATE_FUNC
-| FORMATTED_DATETIME_FUNC
-| FORMATTED_TIME_FUNC
 | SUBSTITUTE_FUNC
 | SUBSTITUTE_CASE_FUNC
 ;
@@ -10487,6 +10494,40 @@ locale_dt_args:
 
 	x = CB_LIST_INIT ($1);
 	$$ = cb_list_add (x, cb_ref ($3));
+  }
+;
+
+formatted_datetime_args:
+  exp_list
+  {	  
+	$$ = cb_list_add ($1, cb_int0);
+  }
+| exp_list e_sep SYSTEM_OFFSET
+  {
+	const int	num_args = cb_list_length ($1);
+
+	if (num_args == 4) {
+		cb_error_x ($1, _("Cannot specify offset and SYSTEM-OFFSET at the same time."));
+	}
+	  
+	$$ = cb_list_add ($1, cb_int1);
+  }
+;
+
+formatted_time_args:
+  exp_list
+  {	  
+	$$ = cb_list_add ($1, cb_int0);
+  }
+| exp_list e_sep SYSTEM_OFFSET
+  {
+	const int	num_args = cb_list_length ($1);
+
+	if (num_args == 3) {
+		cb_error_x ($1, _("Cannot specify offset and SYSTEM-OFFSET at the same time."));
+	}
+	  
+	$$ = cb_list_add ($1, cb_int1);
   }
 ;
 

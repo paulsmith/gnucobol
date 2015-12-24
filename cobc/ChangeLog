@@ -1,6 +1,13 @@
 
 2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
+	* parser.y: added checks of number of args passed to
+	  FORMATTED-(DATE)TIME.
+	* parser.y, reserved.c: added SYSTEM-OFFSET to FORMATTED-(DATE)TIME.
+	* tree.c: added (warn_cannot_get_utc).
+
+2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
+
 	* parser.y: removed PENDING from FULL and REQUIRED clauses.
 
 2015-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

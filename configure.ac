@@ -1195,6 +1195,12 @@ AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
 AC_SUBST([COB_HAS_CURSES])
+if test "$COB_STRFTIME" = "no" -a "$COB_TIMEZONE" = "no"
+   COB_HAVE_UTC_OFFSET="no"
+else
+   COB_HAVE_UTC_OFFSET="yes"
+fi
+AC_SUBST([COB_HAS_UTC_OFFSET])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level])
 
 AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
@@ -1274,3 +1280,8 @@ else
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
 unset DEFINE_DL
+if test $COB_HAS_UTC_OFFSET = "no"
+then
+  AC_MSG_WARN([ Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE])
+  AC_MSG_WARN([and FORMATTED-DATETIME may not work.])
+fi

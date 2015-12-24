@@ -1773,6 +1773,9 @@ static const struct cobc_reserved reserved_words[] = {
   { "SYSTEM-DEFAULT",		0, 0, SYSTEM_DEFAULT,		/* 2002 */
 				0, 0
   },
+  { "SYSTEM-OFFSET",		0, 0, SYSTEM_OFFSET,		/* Extension */
+				0, 0
+  },
   { "TAB",			0, 1, TAB,			/* Extension */
 				0, CB_CS_ACCEPT
   },
@@ -2148,12 +2151,14 @@ static const struct cb_intrinsic_table function_list[] = {
   },
   { "FORMATTED-DATETIME",		"cob_intr_formatted_datetime",
 					CB_INTR_FORMATTED_DATETIME, FORMATTED_DATETIME_FUNC, 1,
-					4, 3,
+    					/* including implicit SYSTEM-OFFSET arg */
+    					5, 4,
 					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FORMATTED-TIME",			"cob_intr_formatted_time",
 					CB_INTR_FORMATTED_TIME, FORMATTED_TIME_FUNC, 1,
-					3, 2,
+    					/* including implicit SYSTEM-OFFSET arg */
+				        4, 3,
 					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "FRACTION-PART",			"cob_intr_fraction_part",

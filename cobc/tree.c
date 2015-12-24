@@ -586,6 +586,48 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 	return !error_found;
 }
 
+static cb_tree
+get_last_elt (cb_tree l)
+{
+	while (CB_CHAIN (l)) {
+		l = CB_CHAIN (l);
+	}
+	return l;
+}
+
+#if !defined (COB_STRFTIME) && !defined (COB_TIMEZONE)
+static void
+warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
+			cb_tree args)
+{
+	const char	*data = try_get_constant_data (CB_VALUE (args));
+	int		is_variable_format = data == NULL;
+	int		is_constant_utc_format
+		= data != NULL && strchr (data, 'Z') != NULL;
+	int		is_formatted_current_date
+		= intr == CB_INTR_FORMATTED_CURRENT_DATE;
+	cb_tree		last_arg = get_last_elt (args);
+	int	        has_system_offset_arg
+		= (intr == CB_INTR_FORMATTED_DATETIME
+		   || intr == CB_INTR_FORMATTED_TIME)
+		  && last_arg->tag == CB_TAG_INTEGER
+		  && ((struct cb_integer *) last_arg)->val == 1;
+        #define ERR_MSG _("Cannot find the UTC offset on this system")
+
+	if (!is_formatted_current_date && !has_system_offset_arg) {
+		return;
+	}
+	
+	if (is_variable_format) {
+		cb_warning_x (tree, ERR_MSG);
+	} else if (is_constant_utc_format) {
+		cb_error_x (tree, ERR_MSG);
+	}
+
+        #undef ERR_MSG
+}
+#endif
+
 static int
 get_data_from_const (cb_tree const_val, unsigned char **data)
 {
@@ -1212,16 +1254,10 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 cb_tree
 cb_list_append (cb_tree l1, cb_tree l2)
 {
-	cb_tree	l;
-
 	if (l1 == NULL) {
 		return l2;
 	}
-	l = l1;
-	while (CB_CHAIN (l)) {
-		l = CB_CHAIN (l);
-	}
-	CB_CHAIN (l) = l2;
+	CB_CHAIN (get_last_elt (l1)) = l2;
 	return l1;
 }
 
@@ -3189,6 +3225,9 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		if (!valid_const_date_time_args (name, cbp, args)) {
 			return cb_error_node;
 		}
+#if !defined (COB_STRFTIME) && !defined (COB_TIMEZONE)
+		warn_cannot_get_utc (name, cbp->intr_enum, args);
+#endif
 	}
 
 	switch (cbp->intr_enum) {

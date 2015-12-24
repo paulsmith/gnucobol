@@ -1,6 +1,11 @@
 
 2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
+	* intrinsic.c: added SYSTEM-OFFSET and support for unknown offsets for
+	  FORMATTED-(DATE)TIME.
+
+2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
+
 	* screenio.c: implemented FULL and REQUIRED clauses.
 
 2015-12-14  Brian Tiffin <btiffin@gnu.org>

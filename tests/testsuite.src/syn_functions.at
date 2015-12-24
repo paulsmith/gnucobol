@@ -271,3 +271,25 @@ prog.cob: 17: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
 AT_CLEANUP
 
 
+AT_SETUP([Specified offset and SYSTEM-OFFSET])
+AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION FORMATTED-DATETIME
+                       ("YYYYDDDThhmmssZ", 1, 1, 1, SYSTEM-OFFSET)
+           END-DISPLAY
+           DISPLAY FUNCTION FORMATTED-TIME
+                       ("hhmmssZ", 1, 1, SYSTEM-OFFSET)
+           END-DISPLAY
+           .
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+[prog.cob: 6: Error: Cannot specify offset and SYSTEM-OFFSET at the same time.
+prog.cob: 9: Error: Cannot specify offset and SYSTEM-OFFSET at the same time.
+])
+
+AT_CLEANUP
