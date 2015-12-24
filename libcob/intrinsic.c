@@ -663,231 +663,6 @@ cob_mod_or_rem (cob_field *f1, cob_field *f2, const int func_is_rem)
 	return curr_field;
 }
 
-/* Validate NUMVAL / NUMVAL-C item */
-/* [spaces][+|-][spaces]{digits[.[digits]]|.digits}[spaces] */
-/* [spaces]{digits[.[digits]]|.digits}[spaces][+|-|CR|DB][spaces] */
-
-static int
-cob_check_numval (const cob_field *srcfield, const cob_field *currency,
-		  const int chkcurr, const int anycase)
-{
-	unsigned char	*p;
-	unsigned char	*begp;
-	unsigned char	*endp;
-	size_t		pos;
-	size_t		plus_minus;
-	size_t		digits;
-	size_t		dec_seen;
-	size_t		space_seen;
-	size_t		break_needed;
-	size_t		currcy_size;
-	int		n;
-	unsigned char	dec_pt;
-	unsigned char	cur_symb;
-
-	begp = NULL;
-	currcy_size = 0;
-	if (currency) {
-		endp = NULL;
-		p = currency->data;
-		for (pos = 0; pos < currency->size; pos++, p++) {
-			switch (*p) {
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			case '+':
-			case '-':
-			case '.':
-			case ',':
-			case '*':
-				return 1;
-			case ' ':
-				break;
-			default:
-				if (pos < currency->size - 1) {
-					if (!memcmp (p, "CR", (size_t)2)) {
-						return 1;
-					}
-					if (!memcmp (p, "DB", (size_t)2)) {
-						return 1;
-					}
-				}
-				if (!begp) {
-					begp = p;
-				}
-				endp = p;
-				break;
-			}
-		}
-		if (!begp) {
-			return 1;
-		}
-		currcy_size = endp - begp;
-		currcy_size++;
-		if (currcy_size >= srcfield->size) {
-			begp = NULL;
-			currcy_size = 0;
-		}
-	} else if (chkcurr) {
-		cur_symb = COB_MODULE_PTR->currency_symbol;
-		begp = &cur_symb;
-		currcy_size = 1;
-	}
-
-	if (!srcfield->size) {
-		return 1;
-	}
-
-	p = srcfield->data;
-	plus_minus = 0;
-	digits = 0;
-	dec_seen = 0;
-	space_seen = 0;
-	break_needed = 0;
-	dec_pt = COB_MODULE_PTR->decimal_point;
-
-	/* Check leading positions */
-	for (n = 0; n < (int)srcfield->size; ++n, ++p) {
-		switch (*p) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			break_needed = 1;
-			break;
-		case ' ':
-			continue;
-		case '+':
-		case '-':
-			if (plus_minus) {
-				return n + 1;
-			}
-			plus_minus = 1;
-			continue;
-		case ',':
-		case '.':
-			if (*p != dec_pt) {
-				return n + 1;
-			}
-			break_needed = 1;
-			break;
-		default:
-			if (begp && n < (int)(srcfield->size - currcy_size)) {
-				if (!memcmp (p, begp, currcy_size)) {
-					break;
-				}
-			}
-			return n + 1;
-		}
-		if (break_needed) {
-			break;
-		}
-	}
-
-	if (n == (int)srcfield->size) {
-		return n + 1;
-	}
-
-	for (; n < (int)srcfield->size; ++n, ++p) {
-		switch (*p) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			if (++digits > COB_MAX_DIGITS || space_seen) {
-				return n + 1;
-			}
-			continue;
-		case ',':
-		case '.':
-			if (dec_seen || space_seen) {
-				return n + 1;
-			}
-			if (*p == dec_pt) {
-				dec_seen = 1;
-			} else if (!chkcurr) {
-				return n + 1;
-			}
-			continue;
-		case ' ':
-			space_seen = 1;
-			continue;
-		case '+':
-		case '-':
-			if (plus_minus) {
-				return n + 1;
-			}
-			plus_minus = 1;
-			continue;
-		case 'c':
-			if (!anycase) {
-				return n + 1;
-			}
-			/* Fall through */
-		case 'C':
-			if (plus_minus) {
-				return n + 1;
-			}
-			if (n < (int)srcfield->size - 1) {
-				if (*(p + 1) == 'R' ||
-				    (anycase && *(p + 1) == 'r')) {
-					plus_minus = 1;
-					p++;
-					n++;
-					continue;
-				}
-			}
-			return n + 2;
-		case 'd':
-			if (!anycase) {
-				return n + 1;
-			}
-			/* Fall through */
-		case 'D':
-			if (plus_minus) {
-				return n + 1;
-			}
-			if (n < (int)srcfield->size - 1) {
-				if (*(p + 1) == 'B' ||
-				    (anycase && *(p + 1) == 'b')) {
-					plus_minus = 1;
-					p++;
-					n++;
-					continue;
-				}
-			}
-			return n + 2;
-		default:
-			return n + 1;
-		}
-	}
-
-	if (!digits) {
-		return n + 1;
-	}
-
-	return 0;
-}
-
 /* Validate NUMVAL-F item */
 /* sp = spaces */
 /* [sp][+|-][sp]{digits[.[digits]]|.digits}[sp][E[sp]{+|-}[sp]digits[sp]] */
@@ -2826,6 +2601,232 @@ cob_decimal_move_temp (cob_field *src, cob_field *dst)
 	make_field_entry (&field);
 	(void)cob_decimal_get_field (&d1, curr_field, 0);
 	cob_move (curr_field, dst);
+}
+
+/* TEST-NUMVAL implementation */
+
+/* Validate NUMVAL / NUMVAL-C item */
+/* [spaces][+|-][spaces]{digits[.[digits]]|.digits}[spaces] */
+/* [spaces]{digits[.[digits]]|.digits}[spaces][+|-|CR|DB][spaces] */
+int
+cob_check_numval (const cob_field *srcfield, const cob_field *currency,
+		  const int chkcurr, const int anycase)
+{
+	unsigned char	*p;
+	unsigned char	*begp;
+	unsigned char	*endp;
+	size_t		pos;
+	size_t		plus_minus;
+	size_t		digits;
+	size_t		dec_seen;
+	size_t		space_seen;
+	size_t		break_needed;
+	size_t		currcy_size;
+	int		n;
+	unsigned char	dec_pt;
+	unsigned char	cur_symb;
+
+	begp = NULL;
+	currcy_size = 0;
+	if (currency) {
+		endp = NULL;
+		p = currency->data;
+		for (pos = 0; pos < currency->size; pos++, p++) {
+			switch (*p) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case '+':
+			case '-':
+			case '.':
+			case ',':
+			case '*':
+				return 1;
+			case ' ':
+				break;
+			default:
+				if (pos < currency->size - 1) {
+					if (!memcmp (p, "CR", (size_t)2)) {
+						return 1;
+					}
+					if (!memcmp (p, "DB", (size_t)2)) {
+						return 1;
+					}
+				}
+				if (!begp) {
+					begp = p;
+				}
+				endp = p;
+				break;
+			}
+		}
+		if (!begp) {
+			return 1;
+		}
+		currcy_size = endp - begp;
+		currcy_size++;
+		if (currcy_size >= srcfield->size) {
+			begp = NULL;
+			currcy_size = 0;
+		}
+	} else if (chkcurr) {
+		cur_symb = COB_MODULE_PTR->currency_symbol;
+		begp = &cur_symb;
+		currcy_size = 1;
+	}
+
+	if (!srcfield->size) {
+		return 1;
+	}
+
+	p = srcfield->data;
+	plus_minus = 0;
+	digits = 0;
+	dec_seen = 0;
+	space_seen = 0;
+	break_needed = 0;
+	dec_pt = COB_MODULE_PTR->decimal_point;
+
+	/* Check leading positions */
+	for (n = 0; n < (int)srcfield->size; ++n, ++p) {
+		switch (*p) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			break_needed = 1;
+			break;
+		case ' ':
+			continue;
+		case '+':
+		case '-':
+			if (plus_minus) {
+				return n + 1;
+			}
+			plus_minus = 1;
+			continue;
+		case ',':
+		case '.':
+			if (*p != dec_pt) {
+				return n + 1;
+			}
+			break_needed = 1;
+			break;
+		default:
+			if (begp && n < (int)(srcfield->size - currcy_size)) {
+				if (!memcmp (p, begp, currcy_size)) {
+					break;
+				}
+			}
+			return n + 1;
+		}
+		if (break_needed) {
+			break;
+		}
+	}
+
+	if (n == (int)srcfield->size) {
+		return n + 1;
+	}
+
+	for (; n < (int)srcfield->size; ++n, ++p) {
+		switch (*p) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			if (++digits > COB_MAX_DIGITS || space_seen) {
+				return n + 1;
+			}
+			continue;
+		case ',':
+		case '.':
+			if (dec_seen || space_seen) {
+				return n + 1;
+			}
+			if (*p == dec_pt) {
+				dec_seen = 1;
+			} else if (!chkcurr) {
+				return n + 1;
+			}
+			continue;
+		case ' ':
+			space_seen = 1;
+			continue;
+		case '+':
+		case '-':
+			if (plus_minus) {
+				return n + 1;
+			}
+			plus_minus = 1;
+			continue;
+		case 'c':
+			if (!anycase) {
+				return n + 1;
+			}
+			/* Fall through */
+		case 'C':
+			if (plus_minus) {
+				return n + 1;
+			}
+			if (n < (int)srcfield->size - 1) {
+				if (*(p + 1) == 'R' ||
+				    (anycase && *(p + 1) == 'r')) {
+					plus_minus = 1;
+					p++;
+					n++;
+					continue;
+				}
+			}
+			return n + 2;
+		case 'd':
+			if (!anycase) {
+				return n + 1;
+			}
+			/* Fall through */
+		case 'D':
+			if (plus_minus) {
+				return n + 1;
+			}
+			if (n < (int)srcfield->size - 1) {
+				if (*(p + 1) == 'B' ||
+				    (anycase && *(p + 1) == 'b')) {
+					plus_minus = 1;
+					p++;
+					n++;
+					continue;
+				}
+			}
+			return n + 2;
+		default:
+			return n + 1;
+		}
+	}
+
+	if (!digits) {
+		return n + 1;
+	}
+
+	return 0;
 }
 
 /* Date/time format validation */

@@ -272,7 +272,7 @@ get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 {
 	int	line_val;
 	int	col_val;
-	
+
 	if (fline == NULL) {
 		*line = 0;
 	} else {
@@ -280,7 +280,7 @@ get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 		if (line_val < 0) {
 			line_val = 0;
 		}
-		
+
 		*line = line_val;
 	}
 
@@ -291,7 +291,7 @@ get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 		if (col_val < 0) {
 			col_val = 0;
 		}
-		
+
 		*col = col_val;
 	}
 }
@@ -328,7 +328,7 @@ cob_move_to_beg_of_last_line (void)
 	int	max_x;
 
 	COB_UNUSED (max_x);
-	
+
 	getmaxyx (stdscr, max_y, max_x);
 	/* We don't need to check for exceptions here; it will always be fine */
 	move (max_y, 0);
@@ -652,7 +652,7 @@ static void
 cob_addnch (const int n, const chtype c)
 {
 	int	count;
-	
+
 	raise_ec_on_truncation (n);
 	for (count = 0; count < n; count++) {
 		cob_addch_no_trunc_check (c);
@@ -745,6 +745,244 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 	refresh ();
 }
 
+static COB_INLINE COB_A_INLINE int
+cob_field_is_numeric_or_numeric_edited (cob_field *field)
+{
+	return (COB_FIELD_IS_NUMERIC (field)
+		|| COB_FIELD_TYPE (field) == COB_TYPE_NUMERIC_EDITED);
+}
+
+static int
+field_is_empty (cob_screen *s)
+{
+	unsigned char	*data = s->field->data;
+	size_t		size = s->field->size;
+	size_t		i;
+
+	for (i = 0; i < size; ++i) {
+		if (!isspace (data[i])) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+field_is_zero (cob_screen *s)
+{
+	unsigned char	*data = s->field->data;
+	size_t		size = s->field->size;
+	size_t		i;
+	unsigned char	decimal_point = COB_MODULE_PTR->decimal_point;
+
+	for (i = 0; i < size; ++i) {
+		if (!(isspace (data[i]) || data[i] == '0'
+		      || data[i] == decimal_point)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+pic_has_zero_suppression (const char *pic)
+{
+	int	i;
+
+	for (i = 0; pic[i] != '\0'; i += 5) {
+		/*
+		  NB: + and - are floating-insertion editing characters, not
+		  zero-suppression ones.
+		*/
+		if (pic[i] == 'Z' || pic[i] == '*') {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+get_num_int_digits_for_no_zero_sup (const char *pic)
+{
+	int	i;
+	int	*times_repeated;
+	int	num_digits = 0;
+	char	numeric_separator = COB_MODULE_PTR->numeric_separator;
+
+	for (i = 0; pic[i] != '\0'; i += 5) {
+		if (pic[i] == '9' || pic[i] == 'Z' || pic[i] == '*') {
+			times_repeated = (int *) (pic + i + 1);
+			num_digits += *times_repeated;
+		} else if (!(pic[i] == numeric_separator
+			     || pic[i] == 'B' || pic[i] == '0' || pic[i] == '/')
+			   && num_digits != 0) {
+			break;
+		}
+	}
+
+	return num_digits;
+}
+
+static int
+field_is_zero_or_no_zero_suppression (cob_screen *s)
+{
+	const char	*pic = COB_FIELD_PIC (s->field);
+	int		i;
+	size_t		size = COB_FIELD_SIZE (s->field);
+	unsigned char	*data = COB_FIELD_DATA (s->field);
+	int		num_integer_digits;
+	int		num_digits_seen = 0;
+
+	if (field_is_zero (s) || !pic_has_zero_suppression (pic)) {
+		return 1;
+	}
+
+	num_integer_digits = get_num_int_digits_for_no_zero_sup (pic);
+
+	/*
+	  Verify there are sufficient non-zero digits before a decimal
+	  point/the end to fill the integer part of the field.
+	*/
+	for (i = 0; i < size; ++i) {
+		if (isdigit (data[i])) {
+			if (data[i] != '0' || num_digits_seen != 0) {
+				++num_digits_seen;
+			}
+		} else if (!isspace (data[i]) && num_digits_seen != 0) {
+			break;
+		}
+	}
+
+	return num_digits_seen >= num_integer_digits;
+}
+
+/* Assuming s->field is alphanumeric */
+static int
+field_is_full (cob_screen *s)
+{
+	unsigned char	*data = s->field->data;
+	size_t		size = s->field->size;
+
+	/* Per the standard, only the first and last chars need be non-space. */
+	return !isspace (*data) && !isspace (*(data + size - 1));
+}
+
+static int
+satisfied_full_clause (cob_screen *s)
+{
+	if (!(s->attr & COB_SCREEN_FULL)) {
+		return 1;
+	}
+
+	if (COB_FIELD_IS_NUMERIC (s->field)) {
+		return !field_is_zero (s);
+	} else if (COB_FIELD_TYPE (s->field) == COB_TYPE_NUMERIC_EDITED) {
+		return field_is_zero_or_no_zero_suppression (s);
+	} else { /* field is alphanumeric */
+		return field_is_full (s) || field_is_empty (s);
+	}
+}
+
+static int
+satisfied_required_clause (cob_screen *s)
+{
+	if (!(s->attr & COB_SCREEN_REQUIRED)) {
+		return 1;
+	}
+
+	if (cob_field_is_numeric_or_numeric_edited (s->field)) {
+		return !field_is_zero (s);
+	} else { /* field is alphanumeric */
+		return !field_is_empty (s);
+	}
+}
+
+static int
+valid_field_data (cob_field *field)
+{
+	if (COB_FIELD_IS_NUMERIC (field)) {
+		return cob_check_numval (field, NULL, 0, 0) == 0;
+	} else if (field->attr->type == COB_TYPE_NUMERIC_EDITED) {
+		return cob_check_numval (field, NULL, 1, 0) == 0;
+	} else {
+		return 1;
+	}
+}
+
+static void
+refresh_field (cob_screen *s)
+{
+	int		y;
+	int		x;
+
+	getyx (stdscr, y, x);
+	cob_screen_puts (s, s->field, cobsetptr->cob_legacy);
+	cob_move_cursor (y, x);
+}
+
+static void
+format_field (cob_screen *s)
+{
+	cob_field	field;
+	size_t		size = s->field->size;
+	unsigned char	*data;
+
+	/*
+	  We copy the data into another field and move it back to format the
+	  numeric data neatly, rather than re-implement that logic here. We
+	  assume the data is valid.
+	*/
+	data = cob_malloc (size);
+	memcpy (data, s->field->data, size);
+	COB_FIELD_INIT (size, data, s->field->attr);
+
+	if (COB_FIELD_IS_NUMERIC (s->field)) {
+		cob_move (cob_intr_numval (&field), s->field);
+	} else if (field.attr->type == COB_TYPE_NUMERIC_EDITED) {
+		cob_move (cob_intr_numval_c (&field, NULL), s->field);
+	}
+
+	cob_free (data);
+
+	refresh_field (s);
+}
+
+/* Finalize field on leaving it: checks and conversions */
+static int
+finalize_field_input (cob_screen *s)
+{
+	/* Only numeric types need to be validated and formatted. */
+	if (cob_field_is_numeric_or_numeric_edited (s->field)) {
+		if (!valid_field_data (s->field)) {
+			return 1;
+		}
+		format_field (s);
+	}
+
+	if (!satisfied_full_clause (s) || !satisfied_required_clause (s)) {
+		return 1;
+	}
+
+	return 0;
+}
+
+static int
+finalize_all_fields (struct cob_inp_struct *sptr, const size_t total_idx)
+{
+	const struct cob_inp_struct *end = sptr + total_idx;
+
+	for (; sptr < end; ++sptr) {
+		if (finalize_field_input (sptr->scr)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 static void
 cob_screen_get_all (const int initial_curs, const int gettimeout)
 {
@@ -765,7 +1003,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 
 	cob_move_cursor (sline, scolumn);
 	cob_screen_attr (s->foreg, s->backg, s->attr);
-	
+
 	for (; ;) {
 		if (s->prompt) {
 			promptchar = s->prompt->data[0];
@@ -798,6 +1036,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 
 		switch (keyp) {
 		case KEY_ENTER:
+			if (finalize_all_fields (cob_base_inp, totl_index)) {
+				cob_beep ();
+				continue;
+			}
 			goto screen_return;
 		case KEY_PPAGE:
 			global_return = 2001;
@@ -812,6 +1054,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			global_return = 2005;
 			goto screen_return;
 		case KEY_STAB:
+			finalize_field_input (s);
+
 			if (curr_index < totl_index - 1) {
 				curr_index++;
 			} else {
@@ -829,6 +1073,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_BTAB:
+			finalize_field_input (s);
+
 			if (curr_index > 0) {
 				curr_index--;
 			} else {
@@ -852,6 +1098,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_UP:
+			finalize_field_input (s);
+
 			curr_index = sptr->up_index;
 			sptr = cob_base_inp + curr_index;
 			s = sptr->scr;
@@ -865,6 +1113,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_DOWN:
+			finalize_field_input (s);
+
 			curr_index = sptr->down_index;
 			sptr = cob_base_inp + curr_index;
 			s = sptr->scr;
@@ -878,6 +1128,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_HOME:
+			finalize_field_input (s);
+
 			curr_index = 0;
 			sptr = cob_base_inp;
 			s = sptr->scr;
@@ -891,6 +1143,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			cob_screen_attr (s->foreg, s->backg, s->attr);
 			continue;
 		case KEY_END:
+			finalize_field_input (s);
+
 			curr_index = totl_index - 1;
 			sptr = cob_base_inp + curr_index;
 			s = sptr->scr;
@@ -953,8 +1207,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 		}
 
 		if (keyp > 037 && keyp < (int)A_CHARTEXT) {
-			if (COB_FIELD_IS_NUMERIC (s->field) ||
-			    COB_FIELD_TYPE (s->field) == COB_TYPE_NUMERIC_EDITED) {
+			if (cob_field_is_numeric_or_numeric_edited (s->field)) {
 				if (keyp < '0' || keyp > '9') {
 					cob_beep ();
 					continue;
@@ -1170,7 +1423,7 @@ set_default_line_column (const enum default_line_col_type type, int *sline,
 		getyx (stdscr, *sline, *scolumn);
 	} else { /* TYPE_ACCEPT */
 		*sline = 0;
-		*scolumn = 0;	
+		*scolumn = 0;
 	}
 }
 
@@ -1505,8 +1758,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		cob_move_cursor (sline, scolumn);
 #if	0	/* RXWRXW - Screen update */
 		if (!(fattr & COB_SCREEN_UPDATE)) {
-			if (COB_FIELD_IS_NUMERIC (f) ||
-			    COB_FIELD_TYPE (f) == COB_TYPE_NUMERIC_EDITED) {
+			if (cob_field_is_numeric_or_numeric_edited (f)) {
 				cob_set_int (f, 0);
 			} else {
 				cob_move (&char_temp, f);
@@ -1859,8 +2111,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		/* Printable character. */
 		if (keyp > '\037' && keyp < (int)A_CHARTEXT) {
 			/* Numeric field check. */
-			if (COB_FIELD_IS_NUMERIC (f) ||
-			    COB_FIELD_TYPE (f) == COB_TYPE_NUMERIC_EDITED) {
+			if (cob_field_is_numeric_or_numeric_edited (f)) {
 				if (keyp < '0' || keyp > '9') {
 					cob_beep ();
 					continue;

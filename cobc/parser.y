@@ -5027,12 +5027,10 @@ screen_option:
 | REQUIRED
   {
 	check_screen_attr ("REQUIRED", COB_SCREEN_REQUIRED);
-	PENDING ("REQUIRED");
   }
 | FULL
   {
 	check_screen_attr ("FULL", COB_SCREEN_FULL);
-	PENDING ("FULL");
   }
 | PROMPT CHARACTER _is id_or_lit
   {
