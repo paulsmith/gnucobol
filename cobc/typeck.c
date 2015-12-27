@@ -1418,7 +1418,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 	cb_tree			xr;
 	cb_tree			v;
 	cb_tree			e1;
-	cb_tree			e2;
 	cb_tree			l;
 	cb_tree			sub;
 	int			offset;
@@ -1498,7 +1497,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 
 	/* Check the number of subscripts */
-	numsubs = cb_list_length (r->subs);
+	numsubs = refsubs = cb_list_length (r->subs);
 	cb_check_lit_subs (r, numsubs, f->indexes);
 	if (subchk) {
 		if (!f->indexes) {
@@ -1509,58 +1508,81 @@ cb_build_identifier (cb_tree x, const int subchk)
 	} else {
 		numsubs = f->indexes;
 	}
-	refsubs = cb_list_length (r->subs);
-	if (!r->flag_all && refsubs != numsubs) {
-		if (refsubs > numsubs) {
-			goto refsubserr;
-		} else if (refsubs < numsubs) {
-			if (!cb_relaxed_syntax_check) {
+	if (unlikely(!r->flag_all)) {
+		if (refsubs != numsubs) {
+			if (refsubs > numsubs) {
 				goto refsubserr;
-			} else {
-				cb_warning_x (x,
-					    _("Subscripts missing for '%s' - Defaulting to 1"),
-					    name);
-				for (; refsubs < numsubs; ++refsubs) {
-					CB_ADD_TO_CHAIN (cb_one, r->subs);
+			} else if (refsubs < numsubs) {
+				if (!cb_relaxed_syntax_check) {
+					goto refsubserr;
+				} else {
+					cb_warning_x (x,
+							_("Subscripts missing for '%s' - Defaulting to 1"),
+							name);
+					for (; refsubs < numsubs; ++refsubs) {
+						CB_ADD_TO_CHAIN (cb_one, r->subs);
+					}
 				}
 			}
 		}
-	}
 
-	/* Subscript check and setting of table offset*/
-	if (!r->flag_all && r->subs) {
-		l = r->subs;
-		for (p = f; p; p = p->parent) {
-			if (!p->flag_occurs) {
-				continue;
-			}
+		/* Subscript check along with setting of table offset */
+		if (r->subs) {
+			l = r->subs;
+			for (p = f; p; p = p->parent) {
+				if (!p->flag_occurs) {
+					continue;
+				}
 
 #if	1	/* RXWRXW - Sub check */
-			if (!l) {
-				break;
-			}
+				if (!l) {
+					break;
+				}
 #endif
-			sub = cb_check_integer_value (CB_VALUE (l));
-			l = CB_CHAIN (l);
-			if (sub == cb_error_node) {
-				continue;
-			}
-
-			/* Compile-time check */
-			if (CB_LITERAL_P (sub)) {
-				n = cb_get_int (sub);
-				if (n < 1 || n > p->occurs_max) {
-					cb_error_x (x, _("Subscript of '%s' out of bounds: %d"),
-						    name, n);
+				sub = cb_check_integer_value (CB_VALUE (l));
+				l = CB_CHAIN (l);
+				if (sub == cb_error_node) {
+					continue;
 				}
-				if (p==f) {
-					/* Only valid for single subscript (!) */ 
-					f->mem_offset = f->size * (n - 1);
+
+				/* Compile-time check for all literals */
+				if (CB_LITERAL_P (sub)) {
+					n = cb_get_int (sub);
+					if (n < 1 || n > p->occurs_max) {
+						cb_error_x (x, _("Subscript of '%s' out of bounds: %d"),
+								name, n);
+					}
+					if (p==f) {
+						/* Only valid for single subscript (!) */ 
+						f->mem_offset = f->size * (n - 1);
+					}
+				}
+
+				/* Run-time check for all non-literals */
+				if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
+					if (p->depending) {
+						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
+							 cb_build_cast_int (sub),
+							 cb_int1,
+							 cb_build_cast_int (p->depending),
+							 CB_BUILD_STRING0 (name));
+						r->check = cb_list_add (r->check, e1);
+					} else {
+						if (!CB_LITERAL_P (sub)) {
+							e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
+								 cb_build_cast_int (sub),
+								 cb_int1,
+								 cb_int (p->occurs_max),
+								 CB_BUILD_STRING0 (name));
+							r->check = cb_list_add (r->check, e1);
+						}
+					}
 				}
 			}
-
-			/* Run-time check */
-			if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
+		}
+		/* Run-time check for ODO (including all the fields subordinate items) */
+		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->flag_odo_item) {
+			for (p = f; p; p = p->children) {
 				if (p->depending) {
 					e1 = CB_BUILD_FUNCALL_4 ("cob_check_odo",
 						 cb_build_cast_int (p->depending),
@@ -1568,25 +1590,11 @@ cb_build_identifier (cb_tree x, const int subchk)
 						 cb_int (p->occurs_max),
 						 CB_BUILD_STRING0
 						 ((CB_FIELD_PTR (p->depending)->name)));
-					e2 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
-						 cb_build_cast_int (sub),
-						 cb_int1,
-						 cb_build_cast_int (p->depending),
-						 CB_BUILD_STRING0 (name));
 					r->check = cb_list_add (r->check, e1);
-					r->check = cb_list_add (r->check, e2);
-				} else {
-					if (!CB_LITERAL_P (sub)) {
-						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
-							cb_build_cast_int (sub),
-							cb_int1,
-							cb_int (p->occurs_max),
-							CB_BUILD_STRING0 (name));
-						r->check = cb_list_add (r->check, e1);
-					}
 				}
 			}
 		}
+
 	}
 
 	if (subchk) {
@@ -2460,7 +2468,11 @@ cb_validate_program_data (struct cb_program *prog)
 		}
 		/* The data item that contains a OCCURS DEPENDING clause must be
 		   the last data item in the group */
-		for (p = q; p->parent; p = p->parent) {
+		for (p = q; ; p = p->parent) {
+			p->flag_odo_item = 1;
+			if (!p->parent) {
+				break;
+			}
 			for (; p->sister; p = p->sister) {
 				if (p->sister == depfld) {
 						cb_error_x (x,
@@ -2474,10 +2486,10 @@ cb_validate_program_data (struct cb_program *prog)
 							    cb_name (x));
 						break;
 					}
-					p->flag_odo_item = 1;
 				}
 			}
 		}
+
 		/* If the field is GLOBAL, then the ODO must also be GLOBAL */
 		if (q->flag_is_global && depfld) {
 			if (!depfld->flag_is_global) {

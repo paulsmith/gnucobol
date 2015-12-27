@@ -723,7 +723,8 @@ struct cb_field {
 
 	unsigned int flag_vsize_done	: 1;	/* Variable size cached */
 	unsigned int flag_vaddr_done	: 1;	/* Variable address cached */
-	unsigned int flag_odo_item	: 1;	/* ODO item */
+	unsigned int flag_odo_item	: 1;	/* ODO item: direct (check via depending) 
+										   or via subordinate) */
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_all_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */

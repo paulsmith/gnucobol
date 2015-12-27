@@ -1,6 +1,14 @@
 
 2015-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	part fixed bug #177 - added missing ODO checks for subordinate items
+	* typeck.c (cb_validate_program_data): set flag_odo_item for ODO parents
+	* typeck.c (cb_build_identifier): generate cob_check_odo for all sub-items
+	  of items with flag_odo_item (instead of only for ODO fields of itself)
+	* tree.h, codegen.c: adjustments for changes to typeck.c
+
+2015-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
 	fixed bug #172 - NESTED OCCURS with DEPENDING not working
 	* field.c (validate_field_1): allow nested ODO with complex-odo = yes
 	* codegen.c (output_data): recalculate size for nested ODO by -fodoslide
@@ -88,6 +96,10 @@
 	* typeck.c (cb_build_identifier): build and use full name (including the
 	  actual used var, not only the name of the parent) for runtime checks of
 	  BASED items and OPTIONAL LINKAGE items
+
+2015-10-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* error.c: warning/error output for compiler support options
 
 2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
