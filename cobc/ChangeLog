@@ -1,14 +1,17 @@
 
+2015-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	fixed bug #172 - NESTED OCCURS with DEPENDING not working
+	* field.c (validate_field_1): allow nested ODO with complex-odo = yes
+	* codegen.c (output_data): recalculate size for nested ODO by -fodoslide
+
 2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: added checks of number of args passed to
 	  FORMATTED-(DATE)TIME.
 	* parser.y, reserved.c: added SYSTEM-OFFSET to FORMATTED-(DATE)TIME.
-	* tree.c: added (warn_cannot_get_utc).
-
-2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
-
 	* parser.y: removed PENDING from FULL and REQUIRED clauses.
+	* tree.c: added (warn_cannot_get_utc).
 
 2015-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -28,11 +31,6 @@
 	* tree.c (cb_build_intrinsic): better check of min/max arguments
 	* reserved.c: set correct min/max values in function_list,
 	  (cb_list_intrinsics): output min/max value
-
-2015-12-18  Edward Hart <edward.dan.hart@gmail.com>
-
-	* field.c (validate_field_1): fixed bug #172, compiler rejecting nested
-	  OCCURS DEPENDING tables despite -fodoslide.
 
 2015-12-15  Brian Tiffin <btiffin@gnu.org>
 
@@ -83,9 +81,6 @@
 	* scanner.l: maximum word-length always resulted in error if -W[all]
 	  was set, now only raise an error if -frelax-syntax is not set and
 	  raise a warning if both -frelax-syntax and -W[all] are active
-
-2015-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
 	* tree.h: new field flag flag_is_pdiv_opt
 	* parser.y: set f->flag_is_pdiv_opt for vars in USING with OPTIONAL clause
 	* typeck.c (cb_build_identifier): add check for access of OPTIONAL LINKAGE

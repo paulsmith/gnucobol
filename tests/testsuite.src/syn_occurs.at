@@ -53,7 +53,7 @@ AT_CLEANUP
 
 
 AT_SETUP([OCCURS with variable-occurrence data item])
-AT_KEYWORDS([occurs extensions])
+AT_KEYWORDS([nested occurs extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -69,6 +69,8 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 7: Error: 'G-2' cannot have the OCCURS clause due to 'X'
 ])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -fodoslide prog.cob], [0], [], [])
 
@@ -140,7 +142,7 @@ AT_CLEANUP
 # 20) DONE
 
 AT_SETUP([OCCURS DEPENDING followed by another field])
-AT_KEYWORDS([occurs])
+AT_KEYWORDS([occurs extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -166,6 +168,8 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob: 10: Error: 'G-3' cannot have OCCURS DEPENDING
 prog.cob: 15: Error: 'X' cannot have OCCURS DEPENDING
 ])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
 
 AT_CLEANUP
 

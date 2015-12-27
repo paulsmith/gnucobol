@@ -577,6 +577,7 @@ chk_field_variable_size (struct cb_field *f)
 	return NULL;
 }
 
+/* Check if previous field on current or higher level has variable size */
 static unsigned int
 chk_field_variable_address (struct cb_field *fld)
 {
@@ -609,7 +610,7 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 	struct cb_field		*v;
 	struct base_list	*bl;
 
-	if (f->flag_item_78) {
+	if (unlikely(f->flag_item_78)) {
 		cobc_abort_pr (_("Unexpected CONSTANT item"));
 		COBC_ABORT ();
 	}
@@ -706,6 +707,8 @@ output_data (cb_tree x)
 	struct cb_literal	*l;
 	struct cb_reference	*r;
 	struct cb_field		*f;
+	struct cb_field		*o_slide;
+	struct cb_field		*o;
 	cb_tree			lsub;
 
 	switch (CB_TREE_TAG (x)) {
@@ -729,12 +732,31 @@ output_data (cb_tree x)
 		/* Subscripts */
 		if (r->subs) {
 			lsub = r->subs;
+			o_slide = NULL;
 			for (; f && lsub; f = f->parent) {
+				/* add current field size for OCCURS */
 				if (f->flag_occurs) {
-					output (" + ");
-					if (f->size != 1) {
-						output ("%d * ", f->size);
+					/* recalculate size for nested ODO ... */
+					if (unlikely(o_slide)) {
+						for (o = o_slide; o; o = o->children) {
+							if (o->depending) {
+								output (" + (%d * ", o->size);
+								output_integer (o->depending);
+								output (")");
+							}
+						}
+						output (" * ");
+					} else {
+					/* ... use field size otherwise */
+						output (" + ");
+						if (f->size != 1) {
+							output ("%d * ", f->size);
+						}
 					}
+					if (cb_flag_odoslide && f->depending) {
+						o_slide = f;
+					}
+
 					output_index (CB_VALUE (lsub));
 					lsub = CB_CHAIN (lsub);
 				}
