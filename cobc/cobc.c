@@ -2029,7 +2029,7 @@ process_command_line (const int argc, char **argv)
 	/* Load default configuration file if necessary */
 	if (cb_config_name == NULL) {
 		if (verbose_output) {
-			fputs (_("Loading standard configuration file '%s'"), "default.conf");
+			fputs (_("Loading standard configuration file 'default.conf'"), stderr);
 			fputc ('\n', stderr);
 		}
 		sub_ret = cb_load_std ("default.conf");

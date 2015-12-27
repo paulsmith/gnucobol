@@ -169,9 +169,9 @@ AT_DATA([prog.cob], [
 ])
 
 # check if override via -conf works and if include works
-AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0],
+AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0], [],
 [Configuration Warning: test.conf: The previous loaded configuration 'GnuCOBOL' will be discarded
-], [])
+])
 
 AT_CLEANUP
 
