@@ -1526,6 +1526,21 @@ cb_build_identifier (cb_tree x, const int subchk)
 			}
 		}
 
+		/* Run-time check for ODO (including all the fields subordinate items) */
+		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->flag_odo_item) {
+			for (p = f; p; p = p->children) {
+				if (p->depending) {
+					e1 = CB_BUILD_FUNCALL_4 ("cob_check_odo",
+						 cb_build_cast_int (p->depending),
+						 cb_int (p->occurs_min),
+						 cb_int (p->occurs_max),
+						 CB_BUILD_STRING0
+						 ((CB_FIELD_PTR (p->depending)->name)));
+					r->check = cb_list_add (r->check, e1);
+				}
+			}
+		}
+
 		/* Subscript check along with setting of table offset */
 		if (r->subs) {
 			l = r->subs;
@@ -1577,20 +1592,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 							r->check = cb_list_add (r->check, e1);
 						}
 					}
-				}
-			}
-		}
-		/* Run-time check for ODO (including all the fields subordinate items) */
-		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->flag_odo_item) {
-			for (p = f; p; p = p->children) {
-				if (p->depending) {
-					e1 = CB_BUILD_FUNCALL_4 ("cob_check_odo",
-						 cb_build_cast_int (p->depending),
-						 cb_int (p->occurs_min),
-						 cb_int (p->occurs_max),
-						 CB_BUILD_STRING0
-						 ((CB_FIELD_PTR (p->depending)->name)));
-					r->check = cb_list_add (r->check, e1);
 				}
 			}
 		}
