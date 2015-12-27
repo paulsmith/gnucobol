@@ -169,7 +169,9 @@ AT_DATA([prog.cob], [
 ])
 
 # check if override via -conf works and if include works
-AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0],
+[Configuration Warning: test.conf: The previous loaded configuration 'GnuCOBOL' will be discarded
+], [])
 
 AT_CLEANUP
 
@@ -331,7 +333,7 @@ name: "Sample Conf"
 # check if incomplete configuration result in error
 AT_CHECK([$COMPILE_ONLY_WITHOUTSTD -conf=test.conf prog.cob], [1], [],
 [Configuration Error
-test.conf: Missing definitions
+test.conf: Missing definitions:
 	No definition of 'tab-width'
 	No definition of 'text-column'
 	No definition of 'word-length'

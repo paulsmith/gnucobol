@@ -1915,10 +1915,8 @@ process_command_line (const int argc, char **argv)
 	enum cob_exception_id	i;
 	struct stat		st;
 	char			ext[COB_MINI_BUFF];
-	struct cb_text_list	*cb_conf_override_list = NULL;
-	struct cb_text_list	*covl;
 	
-	int			ret = 0;
+	int			conf_ret = 0;
 	int			sub_ret;
 
 #ifdef _WIN32
@@ -1930,13 +1928,14 @@ process_command_line (const int argc, char **argv)
 		}
 	}
 #endif
-
+	
+	/* First run of getopt: handle std/conf and all listing options
+	   We need to postpone single configuration flags as we need
+	   a full configuration to be loaded before */
+	cob_optind = 1;
 	while ((c = cob_getopt_long_long (argc, argv, short_options,
 					  long_options, &idx, 1)) >= 0) {
 		switch (c) {
-		case 0:
-			/* Defined flag */
-			break;
 
 		case '?':
 			/* Unknown option or ambiguous */
@@ -1982,6 +1981,98 @@ process_command_line (const int argc, char **argv)
 			/* --list-system */
 			cb_list_system ();
 			exit_option = 1;
+			break;
+
+		case 'v':
+			/* --verbose : Verbose reporting */
+			/* VERY special case as we set different level by mutliple calls */
+			/* Output version information when running very verbose */
+			if (++verbose_output == 2) {
+				cobc_print_version ();
+			}
+			break;
+
+		case '$':
+			/* -std=<xx> : Specify dialect */
+			if (!exit_option) {
+				snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
+				if (cb_load_std (ext) != 0) {
+					cobc_err_exit (_("Invalid option -std=%s"),
+							   cob_optarg);
+				}
+			}
+			break;
+
+		case '&':
+			/* -conf=<xx> : Specify dialect configuration file */
+			if (!exit_option) {
+				if (strlen (cob_optarg) > COB_SMALL_MAX) {
+					cobc_err_exit (COBC_INV_PAR, "-conf");
+				}
+				sub_ret = cb_load_conf (cob_optarg, 0);
+				if (sub_ret != 0) conf_ret = sub_ret;
+			}
+			break;
+
+		default:
+			/* as we postpone most options simply skip everything other here */
+			break;
+		}
+	}
+
+	/* Exit if list options were specified */
+	if (exit_option) {
+		cobc_free_mem ();
+		exit (0);
+	}
+
+	/* Load default configuration file if necessary */
+	if (cb_config_name == NULL) {
+		if (verbose_output) {
+			fputs (_("Loading standard configuration file '%s'"), "default.conf");
+			fputc ('\n', stderr);
+		}
+		sub_ret = cb_load_std ("default.conf");
+		if (sub_ret != 0) conf_ret = sub_ret;
+	}
+
+	/* Exit for configuration errors resulting from -std/-conf/default.conf */
+	if (conf_ret != 0) {
+		cobc_free_mem ();
+		exit (1);
+	}
+
+	/* Set relaxed syntax configuration options if requested */
+	if (cb_flag_relaxed_syntax) {
+		cb_relaxed_syntax_check = 1;
+		cb_larger_redefines_ok = 1;
+		cb_relax_level_hierarchy = 1;
+		cb_top_level_occurs_clause = CB_OK;
+	}
+	
+	cob_optind = 1;
+	while ((c = cob_getopt_long_long (argc, argv, short_options,
+					  long_options, &idx, 1)) >= 0) {
+		switch (c) {
+		case 0:
+			/* Defined flag */
+			break;
+		
+		case 'h':
+			/* --help */
+		case 'V':
+			/* --version */
+		case 'i':
+			/* --info */
+		case '5':
+			/* --list-reserved */
+		case '6':
+			/* --list-intrinsics */
+		case '7':
+			/* --list-mnemonics */
+		case '8':
+			/* --list-system */
+			/* These options were all processed in the first getopt-run */
 			break;
 
 		case 'E':
@@ -2061,8 +2152,7 @@ process_command_line (const int argc, char **argv)
 
 		case 'v':
 			/* --verbose : Verbose reporting */
-			/* VERY special case as we set different level by mutliple calls */
-			verbose_output++;
+			/* This option was processed in the first getopt-run */
 			break;
 
 		case 'o':
@@ -2109,20 +2199,9 @@ process_command_line (const int argc, char **argv)
 
 		case '$':
 			/* -std=<xx> : Specify dialect */
-			snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
-			if (cb_load_std (ext) != 0) {
-				cobc_err_exit (_("Invalid option -std=%s"),
-					       cob_optarg);
-			}
-			break;
-
 		case '&':
 			/* -conf=<xx> : Specify dialect configuration file */
-			if (strlen (cob_optarg) > COB_SMALL_MAX) {
-				cobc_err_exit (COBC_INV_PAR , "-conf");
-			}
-			sub_ret = cb_load_conf (cob_optarg, 0);
-			if (sub_ret != 0) ret = sub_ret;
+			/* These options were all processed in the first getopt-run */
 			break;
 
 		case '%':
@@ -2130,8 +2209,8 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR , "-cb_conf");
 			}
-			/* postponed as we need full configuration loaded before */
-			CB_TEXT_LIST_ADD (cb_conf_override_list, cob_optarg);
+			sub_ret = cb_config_entry (cob_optarg, NULL, 0);
+			if (sub_ret != 0) conf_ret = sub_ret;
 			break;
 
 		case 'd':
@@ -2148,7 +2227,8 @@ process_command_line (const int argc, char **argv)
 			if (cob_optarg) {
 				if (stat (cob_optarg, &st) != 0 ||
 				    !(S_ISDIR (st.st_mode))) {
-					cobc_abort_pr (_("Warning - '%s' is not a directory, defaulting to current directory"), cob_optarg);
+					cobc_abort_pr (_("Warning - '%s' is not a directory, defaulting to current directory"),
+						cob_optarg);
 				} else {
 					save_temps_dir = cobc_strdup (cob_optarg);
 				}
@@ -2381,58 +2461,21 @@ process_command_line (const int argc, char **argv)
 		}
 	}
 
-	/* Output version information when running very verbose */
-	if (verbose_output > 1) {
-		cobc_print_version ();
+	/* Exit for configuration errors resulting from -cb_conf */
+	if (conf_ret != 0) {
+		cobc_free_mem ();
+		exit (1);
 	}
+
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {
 		for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
 			CB_EXCEPTION_ENABLE (i) = 1;
 		}
-		if (verbose_output) {
+		if (verbose_output > 1) {
 			fputs (_("All runtime checks are enabled"), stderr);
-			fputs ("\n", stderr);
+			fputc ('\n', stderr);
 		}
-	}
-
-	/* Exit if list options specified */
-	if (exit_option) {
-		cobc_free_mem ();
-		exit (0);
-	}
-
-	/* Load default configuration file if necessary */
-	if (cb_config_name == NULL) {
-		sub_ret = cb_load_std ("default.conf");
-		if (sub_ret != 0) {
-			if (verbose_output) {
-				configuration_error (1, "default.conf", 0,
-					_("Failed to load the initial config file"));
-			}
-			ret = sub_ret;
-		}
-	}
-	/* Do postponed override of configuration entries here */
-	if (cb_conf_override_list) {
-		for (covl = cb_conf_override_list; covl; covl = covl->next) {
-			sub_ret = cb_config_entry ((char *)covl->text, NULL, 0);
-			if (sub_ret != 0) ret = sub_ret;
-		}
-		/* Todo: free list */
-	}
-	/* Exit for configuration errors */
-	if (ret != 0) {
-		cobc_free_mem ();
-		exit (1);
-	}
-
-	/* Set relaxed syntax parameters */
-	if (cb_flag_relaxed_syntax) {
-		cb_relaxed_syntax_check = 1;
-		cb_larger_redefines_ok = 1;
-		cb_relax_level_hierarchy = 1;
-		cb_top_level_occurs_clause = CB_OK;
 	}
 
 	/* If C debug, do not strip output */
@@ -2449,7 +2492,6 @@ process_command_line (const int argc, char **argv)
 }
 
 /* Reverse the list of programs */
-
 static struct cb_program *
 program_list_reverse (struct cb_program *p)
 {

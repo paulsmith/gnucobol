@@ -119,23 +119,24 @@ static void
 invalid_value (const char *fname, const int line, const char *name, const char *val,
 			   const char *str, const int max, const int min)
 {
-	configuration_error (0, fname, line,
+	configuration_error (fname, line, 0,
 		_("Invalid value '%s' for configuration tag '%s'"), val, name);
 	if (str) {
-		configuration_error (1, fname, line, _("should be one of the following values: %s"), str);
+		configuration_error (fname, line, 1,
+			_("should be one of the following values: %s"), str);
 	} else if (max == min && max == 0) {
-		configuration_error (1, fname, line, _("must be numeric"));
+		configuration_error (fname, line, 1, _("must be numeric"));
 	} else if (max) {
-		configuration_error (1, fname, line, _("maximum value: %lu"), (unsigned long)max);
+		configuration_error (fname, line, 1, _("maximum value: %lu"), (unsigned long)max);
 	} else {
-		configuration_error (1, fname, line, _("minimum value: %lu"), (unsigned long)min);
+		configuration_error (fname, line, 1, _("minimum value: %lu"), (unsigned long)min);
 	}
 }
 
 static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
-	configuration_error (1, fname, line, 
+	configuration_error (fname, line, 1, 
 		_("Unsupported value '%s' for configuration tag '%s'"), val, name);
 }
 
@@ -164,7 +165,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
 	if (!s) {
-		configuration_error (1, fname, line,
+		configuration_error (fname, line, 1,
 			_("Invalid configuration tag '%s'"), buff);
 		return -1;
 	}
@@ -177,7 +178,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		}
 	}
 	if (i == CB_CONFIG_SIZE) {
-		configuration_error (1, fname, line, _("Unknown configuration tag '%s'"), buff);
+		configuration_error (fname, line, 1, _("Unknown configuration tag '%s'"), buff);
 		return -1;
 	}
 
@@ -292,7 +293,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 						return 1;
 					}
 				} else {
-					configuration_error (1, NULL, 0,
+					configuration_error (NULL, 0, 1,
 					      _("'%s' not supported with -cb_conf"), name);
 					return -1;
 				}
@@ -343,7 +344,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			}
 			break;
 		default:
-			configuration_error (1, fname, line, _("Invalid type for '%s'"), name);
+			configuration_error (fname, line, 1, _("Invalid type for '%s'"), name);
 			return -1;
 	}
 	return 0;
@@ -399,7 +400,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	c = cc = conf_includes;
 	while (c != NULL) {
 		if (strcmp(c->name, conf_file) == 0) {
-			configuration_error (1, conf_file, 0, _("Recursive inclusion"));
+			configuration_error (conf_file, 0, 1, _("Recursive inclusion"));
 			return -2;
 		}
 		cc = c;
@@ -420,7 +421,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	if (fp == NULL) {
 		if (!isoptional) {
 			fflush (stderr);
-			configuration_error (1, conf_file, 0, _("No such file or directory"));
+			configuration_error (conf_file, 0, 1, _("No such file or directory"));
 			return -1;
 		} else {
 			return 0;
@@ -453,7 +454,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			sub_ret = cb_load_conf_file (buff, sub_ret == 3);
 			if (sub_ret < 0) {
 				ret = -1;
-				configuration_error (1, conf_file, line,
+				configuration_error (conf_file, line, 1,
 						    _("Configuration file was included here"));
 				break;
 			}
@@ -481,6 +482,13 @@ cb_load_conf (const char *fname, const int prefix_dir)
 	size_t		i;
 	char		buff[COB_NORMAL_BUFF];
 
+	/* Warn if we drop the configuration read already */
+	if (unlikely(cb_config_name != NULL)) {
+		configuration_warning (fname, 0,
+			_("The previous loaded configuration '%s' will be discarded"), 
+			cb_config_name);
+	}
+
 	/* Initialize the configuration table */
 	for (i = 0; i < CB_CONFIG_SIZE; i++) {
 		config_table[i].val = NULL;
@@ -501,11 +509,11 @@ cb_load_conf (const char *fname, const int prefix_dir)
 	if (ret == 0) {
 		for (i = 3U; i < CB_CONFIG_SIZE; i++) {
 			if (config_table[i].val == NULL) {
+				/* as there are likely more than one definition missing group it */
 				if (ret == 0) {
-					/* as there are likely more than one definition missing group it */
-					configuration_error(1, fname, 0, "Missing definitions");
+					configuration_error (fname, 0, 1, _("Missing definitions:"));
 				}
-				configuration_error (1, fname, 0, _("\tNo definition of '%s'"),
+				configuration_error (fname, 0, 1, _("\tNo definition of '%s'"),
 						config_table[i].name);
 				ret = -1;
 			}

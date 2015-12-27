@@ -440,7 +440,9 @@ extern void		cb_plex_warning (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_error (const size_t,
 				       const char *, ...) COB_A_FORMAT23;
-extern void		configuration_error (const int, const char *,
+extern void		configuration_warning (const char *, const int,
+					 const char *, ...) COB_A_FORMAT34;
+extern void		configuration_error (const char *, const int,
 					 const int, const char *, ...) COB_A_FORMAT45;
 
 extern unsigned int	cb_verify (const enum cb_support, const char *);

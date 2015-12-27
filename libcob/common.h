@@ -355,11 +355,13 @@
 #define	COB_A_NORETURN	__attribute__((noreturn))
 #define	COB_A_FORMAT12	__attribute__((format(printf, 1, 2)))
 #define	COB_A_FORMAT23	__attribute__((format(printf, 2, 3)))
+#define	COB_A_FORMAT34	__attribute__((format(printf, 3, 4)))
 #define	COB_A_FORMAT45	__attribute__((format(printf, 4, 5)))
 #else
 #define	COB_A_NORETURN
 #define	COB_A_FORMAT12
 #define	COB_A_FORMAT23
+#define	COB_A_FORMAT34
 #define	COB_A_FORMAT45
 #endif
 

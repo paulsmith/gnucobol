@@ -139,9 +139,43 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	}
 }
 
-/* Error for config.c */
+/* Warning/Error for config.c */
 void
-configuration_error (const int finish_error, const char *fname, const int line, const char *fmt, ...)
+configuration_warning (const char *fname, const int line, const char *fmt, ...)
+{
+	va_list args;
+
+	conf_error_displayed = 0;
+	fputs (_("Configuration Warning"), stderr);
+	fputs (": ", stderr);
+
+
+	/* Prefix */
+	if (fname != last_error_file
+		|| line != last_error_line) {
+		last_error_file = fname;
+		last_error_line = line;
+		if (fname) {
+			fprintf (stderr, "%s: ", fname);
+		} else {
+			fputs ("cb_conf: ", stderr);
+		}
+		if (line) {
+			fprintf (stderr, "%d: ", line);
+		}
+	}
+
+	/* Body */
+	va_start(args, fmt);
+	vfprintf (stderr, fmt, args);
+	va_end(args);
+
+	/* Postfix */
+	putc('\n', stderr);
+	fflush(stderr);
+}
+void
+configuration_error (const char *fname, const int line, const int finish_error, const char *fmt, ...)
 {
 	va_list args;
 

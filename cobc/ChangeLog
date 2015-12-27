@@ -5,6 +5,13 @@
 	* config.c (cb_config_entry): validate word length against COB_MAX_WORDLEN
 	* cobc.c (process_command_line): moved check of configuration values for
 	  tab-width and text-columns to config.c (cb_config_entry)
+	* cobc.c (process_command_line): process the command line twice: first time
+	  for handling all options that read a complete configuration or are
+	  output-only options, the second time for every other option including
+	  overriding of single configuration flags
+	* error.c, cobc.h: new (configuration_warning)
+	* config.c (cb_load_conf): issue a warning if a previous loaded configuration
+	  is discarded
 
 2015-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
