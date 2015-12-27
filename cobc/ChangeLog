@@ -1,4 +1,11 @@
 
+2015-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.c (invalid_value): added output for not-numeric, min, max
+	* config.c (cb_config_entry): validate word length against COB_MAX_WORDLEN
+	* cobc.c (process_command_line): moved check of configuration values for
+	  tab-width and text-columns to config.c (cb_config_entry)
+
 2015-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	part fixed bug #177 - added missing ODO checks for subordinate items

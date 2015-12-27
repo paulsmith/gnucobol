@@ -116,11 +116,20 @@ read_string (const char *text)
 }
 
 static void
-invalid_value (const char *fname, const int line, const char *name, const char *val, const char *str)
+invalid_value (const char *fname, const int line, const char *name, const char *val,
+			   const char *str, const int max, const int min)
 {
 	configuration_error (0, fname, line,
 		_("Invalid value '%s' for configuration tag '%s'"), val, name);
-	configuration_error (1, fname, line, _("should be one of the following values: %s"), str);
+	if (str) {
+		configuration_error (1, fname, line, _("should be one of the following values: %s"), str);
+	} else if (max == min && max == 0) {
+		configuration_error (1, fname, line, _("must be numeric"));
+	} else if (max) {
+		configuration_error (1, fname, line, _("maximum value: %lu"), (unsigned long)max);
+	} else {
+		configuration_error (1, fname, line, _("minimum value: %lu"), (unsigned long)min);
+	}
 }
 
 static void
@@ -150,6 +159,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	void			*var;
 	size_t			i;
 	size_t			j;
+	int				v;
 
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
@@ -202,7 +212,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "ibm") == 0) {
 					cb_assign_clause = CB_ASSIGN_IBM;
 				} else {
-					invalid_value (fname, line, name, val, "cobol2002, mf, ibm");
+					invalid_value (fname, line, name, val, "cobol2002, mf, ibm", 0, 0);
 					return -1;
 				}
 			} else if (strcmp (name, "binary-size") == 0) {
@@ -213,7 +223,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "1--8") == 0) {
 					cb_binary_size = CB_BINARY_SIZE_1__8;
 				} else {
-					invalid_value (fname, line, name, val, "2-4-8, 1-2-4-8, 1--8");
+					invalid_value (fname, line, name, val, "2-4-8, 1-2-4-8, 1--8", 0, 0);
 					return -1;
 				}
 			} else if (strcmp (name, "binary-byteorder") == 0) {
@@ -222,7 +232,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				} else if (strcmp (val, "big-endian") == 0) {
 					cb_binary_byteorder = CB_BYTEORDER_BIG_ENDIAN;
 				} else {
-					invalid_value (fname, line, name, val, "native, big-endian");
+					invalid_value (fname, line, name, val, "native, big-endian", 0, 0);
 					return -1;
 				}
 			}
@@ -230,12 +240,41 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		case CB_INT:
 			for (j = 0; val[j]; j++) {
 				if (val[j] < '0' || val[j] > '9') {
-					invalid_value (fname, line, name, val, "0 - 9");
+					invalid_value (fname, line, name, val, NULL, 0, 0);
 					return -1;
 					break;
 				}
 			}
-			*((int *)var) = atoi (val);
+			v = atoi (val);
+			if (strcmp (name, "tab-width") == 0) {
+				if (v < 1) {
+					invalid_value (fname, line, name, val, NULL, 1, 0);
+					return -1;
+				}
+				if (v > 8) {
+					invalid_value (fname, line, name, val, NULL, 0, 8);
+					return -1;
+				}
+			} else if (strcmp (name, "text-column") == 0) {
+				if (v < 72) {
+					invalid_value (fname, line, name, val, NULL, 72, 0);
+					return -1;
+				}
+				if (v > 255) {
+					invalid_value (fname, line, name, val, NULL, 0, 255);
+					return -1;
+				}
+			} else if (strcmp (name, "word-length") == 0) {
+				if (v < 1) {
+					invalid_value (fname, line, name, val, NULL, 1, 0);
+					return -1;
+				}
+				if (v > COB_MAX_WORDLEN) {
+					invalid_value (fname, line, name, val, NULL, 0, COB_MAX_WORDLEN);
+					return -1;
+				}
+			}
+			*((int *)var) = v;
 			break;
 		case CB_STRING:
 			val = read_string (val);
@@ -276,7 +315,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (val, "no") == 0) {
 				*((int *)var) = 0;
 			} else {
-				invalid_value (fname, line, name, val, "yes, no");
+				invalid_value (fname, line, name, val, "yes, no", 0, 0);
 				return -1;
 			}
 			break;
@@ -299,7 +338,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				*((enum cb_support *)var) = CB_UNCONFORMABLE;
 			} else {
 				invalid_value (fname, line, name, val, 
-					"ok, warning, archaic, obsolete, skip, ignore, error, unconformable");
+					"ok, warning, archaic, obsolete, skip, ignore, error, unconformable", 0, 0);
 				return -1;
 			}
 			break;
@@ -437,10 +476,10 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 int
 cb_load_conf (const char *fname, const int prefix_dir)
 {
-	const char		*name;
-	int				ret;
-	size_t			i;
-	char			buff[COB_NORMAL_BUFF];
+	const char	*name;
+	int			ret;
+	size_t		i;
+	char		buff[COB_NORMAL_BUFF];
 
 	/* Initialize the configuration table */
 	for (i = 0; i < CB_CONFIG_SIZE; i++) {

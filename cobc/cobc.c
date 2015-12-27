@@ -2427,18 +2427,6 @@ process_command_line (const int argc, char **argv)
 		exit (1);
 	}
 
-	/* Check valid tab width */
-	if (cb_tab_width < 1 || cb_tab_width > 8) {
-		cobc_err_exit (_("Invalid tab-width value - %d"),
-			 cb_tab_width);
-	}
-
-	/* Check valid text columns value */
-	if (cb_text_column < 72 || cb_text_column > 255) {
-		cobc_err_exit (_("Invalid text-column value - %d"),
-			 cb_text_column);
-	}
-
 	/* Set relaxed syntax parameters */
 	if (cb_flag_relaxed_syntax) {
 		cb_relaxed_syntax_check = 1;
