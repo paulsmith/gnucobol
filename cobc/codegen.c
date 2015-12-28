@@ -833,6 +833,20 @@ again:
 					output ("%d + ", p->offset - q->offset);
 				}
 				if (p->size != 1) {
+#if 0 /* draft from Simon - 
+		 works only if the ODOs are directly nested and
+		 have no "sister" elements,
+		 the content would only be correct if -fodoslide
+		 is active as we need a temporary field otherwise */
+					/* check for nested ODO */
+					q = chk_field_variable_size (p);
+					if (q != p) {
+						output_integer (p->depending);
+						output (" * ");
+						p = q;
+						goto again;
+					}
+#endif
 					output ("%d * ", p->size);
 				}
 				output_integer (p->depending);

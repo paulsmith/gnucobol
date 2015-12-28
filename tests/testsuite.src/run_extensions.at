@@ -604,10 +604,11 @@ AT_DATA([prog.cob], [
               DISPLAY "Vals (aligned) wrong: " vals
               END-DISPLAY
            END-IF
-       *>  IF a-table <> "ABCFGH"
-       *>     DISPLAY "Table (aligned) wrong: " a-table
-       *>     END-DISPLAY
-       *>  END-IF
+        *> currently not working (size is wrong and it needs a temporary field)
+        *> IF a-table <> "ABCFGH"
+        *>    DISPLAY "Table (aligned) wrong: " a-table
+        *>    END-DISPLAY
+        *> END-IF
            .
 ])
 
@@ -643,7 +644,7 @@ AT_DATA([prog.cob], [
               DISPLAY "Vals (slided) wrong: " vals
               END-DISPLAY
            END-IF
-        *> currently not working
+        *> currently not working (size is wrong)
         *> IF a-table <> "ABCDEF"
         *>    DISPLAY "Table (slided) wrong: " a-table
         *>    END-DISPLAY
