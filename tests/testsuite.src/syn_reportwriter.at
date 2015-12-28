@@ -18,7 +18,7 @@
 
 ### GnuCOBOL Test Suite
 
-### ISO+IEC+1989-2002 REPORT WRITER module
+### ISO+IEC+1989-2014 REPORT WRITER module
 
 AT_SETUP([REPORT SECTION clause numbers])
 AT_KEYWORDS([report])
@@ -158,12 +158,12 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# Parsing + Error with -std=cobol2002
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 17: Error: LABEL RECORDS does not conform to COBOL 2002
+# Parsing + Error with -std=cobol2014
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], ,
+[prog.cob: 17: Error: LABEL RECORDS does not conform to COBOL 2014
 prog.cob: 19: Warning: RECORD clause ignored for LINE SEQUENTIAL
-prog.cob: 20: Error: DATA RECORDS does not conform to COBOL 2002
-prog.cob: 34: Error: LABEL RECORDS does not conform to COBOL 2002
+prog.cob: 20: Error: DATA RECORDS does not conform to COBOL 2014
+prog.cob: 34: Error: LABEL RECORDS does not conform to COBOL 2014
 prog.cob: 41: Error: 'SOME-REPORT' is not defined
 prog.cob: 41: Error: 'SOME-REPORT' is not a report name
 ])

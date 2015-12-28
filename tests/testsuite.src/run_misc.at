@@ -158,7 +158,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -207,7 +207,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -235,7 +235,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob: 8: Warning: Overlapping MOVE may produce unpredictable results
 ])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -259,7 +259,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -285,7 +285,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -310,7 +310,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -336,7 +336,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -346,9 +346,6 @@ AT_KEYWORDS([runmisc])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#ifdef	__INTEL_COMPILER
-#pragma warning ( disable : 1419 )
-#endif
 #define COB_LIB_EXPIMP
 #include <libcob.h>
 COB_EXPIMP int dump (unsigned char *);
@@ -406,7 +403,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK])
+AT_CHECK([./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -542,7 +539,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: 6: Error: Level 01 item 'X' cannot have a OCCURS clause
 ])
 
@@ -570,7 +567,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -594,7 +591,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK])
+AT_CHECK([./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -619,7 +616,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -648,7 +645,7 @@ AT_DATA([caller.cob], [
 AT_CHECK([$COMPILE_MODULE -c callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -c caller.cob], [0], [], [])
 AT_CHECK([$COMPILE -o prog caller.$OBJECT_EXT callee.$OBJECT_EXT], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -703,7 +700,7 @@ AT_CHECK([$COMPILE_MODULE m1.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE m2.cob], [0], [], [])
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 
-AT_CHECK([./caller], [0])
+AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -755,7 +752,7 @@ AT_DATA([callee2.cob], [
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
-AT_CHECK([./caller], [0], [OK])
+AT_CHECK([./caller], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -870,11 +867,6 @@ AT_CLEANUP
 AT_SETUP([CALL binary literal parameter/LENGTH OF])
 AT_KEYWORDS([runmisc])
 
-AT_DATA([test.conf], [
-include "default.conf"
-binary-byteorder: native
-])
-
 AT_DATA([dump.c], [
 #include <stdio.h>
 #define COB_LIB_EXPIMP
@@ -914,7 +906,7 @@ AT_CHECK([./prog], [0],
 00000009
 00000004
 ])
-AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00000001
 00000009
@@ -945,7 +937,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -969,7 +961,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -993,7 +985,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1017,7 +1009,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1041,7 +1033,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1065,7 +1057,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1100,7 +1092,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1135,7 +1127,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1159,7 +1151,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1186,7 +1178,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
@@ -1330,7 +1322,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK])
+AT_CHECK([./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -1387,7 +1379,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1423,7 +1415,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1454,7 +1446,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1482,7 +1474,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1503,7 +1495,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax -o prog prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [])
 
 AT_CLEANUP
@@ -1533,7 +1525,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1561,7 +1553,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1580,7 +1572,7 @@ AT_DATA([prog.cob], [
            END-PERFORM.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -1607,7 +1599,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1642,7 +1634,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1707,7 +1699,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1762,7 +1754,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1803,8 +1795,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax -o prog prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1846,7 +1838,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2050,7 +2042,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2103,18 +2095,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([PERFORM type OSVS])
 AT_KEYWORDS([runmisc])
-
-AT_DATA([test.conf], [
-include "default.conf"
-perform-osvs: yes
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -2144,19 +2131,14 @@ AT_DATA([prog.cob], [
            EXIT.
 ])
 
-AT_CHECK([$COMPILE -conf=test.conf -o prog prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE -cb_conf=perform-osvs:yes prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([Sticky LINKAGE])
 AT_KEYWORDS([runmisc])
-
-AT_DATA([test.conf], [
-include "default.conf"
-sticky-linkage: yes
-])
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
@@ -2195,9 +2177,9 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE -conf=test.conf callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -conf=test.conf -o caller caller.cob], [0], [], [])
-AT_CHECK([./caller], [0])
+AT_CHECK([$COMPILE_MODULE -cb_conf=sticky-linkage:yes callee.cob], [0], [], [])
+AT_CHECK([$COMPILE -cb_conf=sticky-linkage:yes -o caller caller.cob], [0], [], [])
+AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2223,7 +2205,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([export COB_PRE_LOAD=callee; ./caller], [0])
+AT_CHECK([export COB_PRE_LOAD=callee; ./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2291,10 +2273,10 @@ AT_DATA([main-prog.cob], [
         stop run.
 ])
 
-AT_CHECK([$COMPILE_MODULE -std=default prog.cob], [0], [], [prog.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [prog.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
 prog.cob: 17: Warning: ENTRY is obsolete in GnuCOBOL
 ])
-AT_CHECK([$COMPILE_MODULE -std=default prog1.cob], [0], [], [prog1.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_MODULE prog1.cob], [0], [], [prog1.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
 prog1.cob: 17: Warning: ENTRY is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE main-prog.cob], [0], [], [])
@@ -2327,7 +2309,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE CALLEE.cob], [0], [], [])
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([export COB_LOAD_CASE=UPPER; ./caller], [0])
+AT_CHECK([export COB_LOAD_CASE=UPPER; ./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2355,7 +2337,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2382,7 +2364,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2426,10 +2408,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 # Run both executable and module as we have a different code generation here
 AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN prog], [0])
+AT_CHECK([$COBCRUN prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2470,7 +2452,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2495,7 +2477,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdefaultbyte=A prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2532,7 +2514,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
-AT_CHECK([./caller], [0])
+AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2575,7 +2557,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
-AT_CHECK([./caller], [0])
+AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2619,7 +2601,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
-AT_CHECK([./caller], [0])
+AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -2720,7 +2702,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2778,7 +2760,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2822,7 +2804,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2859,7 +2841,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2908,7 +2890,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3413,10 +3395,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3921,10 +3903,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
-AT_CHECK([./prog], [0])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 

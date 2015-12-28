@@ -249,6 +249,7 @@ cb_verify (const enum cb_support tag, const char *feature)
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
+		cb_warning (_("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
 		if (cb_warn_archaic) {
@@ -268,6 +269,7 @@ cb_verify (const enum cb_support tag, const char *feature)
 		}
 		return 0;
 	case CB_ERROR:
+		cb_error (_("%s used"), feature);
 		return 0;
 	case CB_UNCONFORMABLE:
 		cb_error (_("%s does not conform to %s"), feature, cb_config_name);

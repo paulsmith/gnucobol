@@ -139,7 +139,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -314,7 +314,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 11: Warning: No CORRESPONDING items found
 ])
 
@@ -386,7 +386,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [prog.cob: 18: Warning: Overlapping MOVE may produce unpredictable results
+AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 18: Warning: Overlapping MOVE may produce unpredictable results
 prog.cob: 21: Warning: Overlapping MOVE may produce unpredictable results
 prog.cob: 23: Warning: Overlapping MOVE may produce unpredictable results
 prog.cob: 24: Warning: Overlapping MOVE may produce unpredictable results

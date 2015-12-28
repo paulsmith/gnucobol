@@ -82,7 +82,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Value size exceeds data size
 prog.cob: 9: Warning: Value size exceeds data size
 ])
@@ -109,7 +109,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: Value does not fit the picture string
 prog.cob: 9: Warning: Value size exceeds data size
 prog.cob: 12: Warning: Value does not fit the picture string
@@ -188,7 +188,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 6: Warning: Alphanumeric value is expected
 prog.cob: 8: Warning: Value size exceeds data size
 ])
@@ -213,7 +213,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 6: Warning: Alphanumeric value is expected
 prog.cob: 10: Warning: Value size exceeds data size
 ])
@@ -247,7 +247,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Alphanumeric value is expected
 prog.cob: 10: Warning: Value size exceeds data size
 ])
@@ -270,7 +270,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 6: Warning: Alphanumeric value is expected
 prog.cob: 9: Warning: Value size exceeds data size
 ])

@@ -181,7 +181,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: The original definition 'X' should not have OCCURS
 ])
 
@@ -291,7 +291,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
 [prog.cob: 10: Error: 'B' not the original definition
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -404,7 +404,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -423,7 +423,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Redefinition of 'X'
 prog.cob: 6: Warning: 'X' previously defined here
 ])

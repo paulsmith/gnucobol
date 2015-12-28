@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -46,8 +46,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -72,8 +72,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -100,8 +100,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -127,8 +127,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -153,8 +153,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -186,8 +186,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -236,8 +236,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -261,7 +261,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
-AT_CHECK([./prog], [0])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

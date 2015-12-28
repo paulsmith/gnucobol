@@ -53,7 +53,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([./P64], [0], [X
 ], [],

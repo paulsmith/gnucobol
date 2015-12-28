@@ -379,7 +379,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wunreachable prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY -Wunreachable prog.cob], [0], [],
 [prog.cob: In paragraph 'P01':
 prog.cob: 26: Warning: Unreachable statement 'DISPLAY'
 ])
@@ -424,7 +424,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 7: Error: 'MY-CRT-STATUS' is not defined
 ])
-AT_CHECK([$COMPILE_ONLY prog2.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -699,7 +699,7 @@ AT_DATA([prog.cob], [
 ])
 
 # AT_DATA workaround via sed:
-AT_CHECK([sed -i -e 's/_$//' prog.cob], [0])
+AT_CHECK([sed -i -e 's/_$//' prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -fixed -W prog.cob], [0], [],
 [prog.cob: 7: Warning: Source text exceeds 512 bytes, will be truncated
@@ -1266,7 +1266,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=default prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 538: Error: Buffer overrun - Too much continuation lines
 ])
 
@@ -1762,29 +1762,30 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 6: Error: Invalid continuation: no literal/word needs to be continued
 ])
+
 AT_CLEANUP
 
 AT_SETUP([Floating-point literals])
+# Refer to Section 8.3.1.2.2.2 of the COBOL 2010 FCD.
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           *> Refer to Section 8.3.1.2.2.2 of the COBOL 2010 FCD.
            *> Valid literals
            DISPLAY 1.0E76, +1.0E+3, +1.0E-0078,
-               +.0000000000000000000000000000000000E+0000
+               +.1234567890123456789012345678901234E+0000
            END-DISPLAY
 
            *> Invalid literals
            DISPLAY 1.0D3 END-DISPLAY
            DISPLAY 1E3 END-DISPLAY
-           DISPLAY 1.0E3BLAH END-DISPLAY
+           DISPLAY '1.0E3'BLAH END-DISPLAY
            DISPLAY 1.0E3.0 END-DISPLAY
            DISPLAY -0.0E-0 END-DISPLAY
            DISPLAY 1.0E00003 END-DISPLAY
-           DISPLAY .00000000000000000000000000000000000E0 END-DISPLAY
+           DISPLAY .12345678901234567890123456789012345E0 END-DISPLAY
            DISPLAY 0.0E3 END-DISPLAY
 
            *> Implementor-defined invalid literals
@@ -1794,19 +1795,64 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: Error: 'D3' is not defined
-prog.cob: 13: Error: '1E3' is not defined
-prog.cob: 14: Error: 'BLAH' is not defined
-prog.cob: 15: Error: Exponent has decimal point
-prog.cob: 16: Error: Significand of 0 is negative
-prog.cob: 16: Error: Exponent of 0 is negative
-prog.cob: 17: Error: Exponent has more than 4 digits
-prog.cob: 18: Error: Significand has more than 34 digits
-prog.cob: 19: Error: Exponent of 0 is not 0
-prog.cob: 22: Error: Exponent not between -78 and 76
-prog.cob: 23: Error: Exponent not between -78 and 76
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+            DECIMAL-POINT IS COMMA.
+       PROCEDURE        DIVISION.
+           *> Valid literals
+           DISPLAY 1,0E76; +1,0E+3; +1,0E-0078;
+               +,1234567890123456789012345678901234E+0000
+           END-DISPLAY
+
+           *> Invalid literals
+           DISPLAY 1,0D3 END-DISPLAY
+           DISPLAY 1E3 END-DISPLAY
+           DISPLAY 1,0E3BLAH END-DISPLAY
+           DISPLAY 1,0E3,0 END-DISPLAY
+           DISPLAY -0,0E-0 END-DISPLAY
+           DISPLAY 1,0E00003 END-DISPLAY
+           DISPLAY ,12345678901234567890123456789012345E0 END-DISPLAY
+           DISPLAY 0,0E3 END-DISPLAY
+
+           *> Implementor-defined invalid literals
+           DISPLAY 1,0E77 END-DISPLAY
+           DISPLAY 1,0E-79 END-DISPLAY
+           
+           STOP RUN.
 ])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: Error: 'D3' is not defined
+prog.cob: 12: Error: '1E3' is not defined
+prog.cob: 13: Error: 'BLAH' is not defined
+prog.cob: 14: Error: Exponent has decimal point
+prog.cob: 15: Error: Significand of 0 is negative
+prog.cob: 15: Error: Exponent of 0 is negative
+prog.cob: 16: Error: Exponent has more than 4 digits
+prog.cob: 17: Error: Significand has more than 34 digits
+prog.cob: 18: Error: Exponent of 0 is not 0
+prog.cob: 21: Error: Exponent not between -78 and 76
+prog.cob: 22: Error: Exponent not between -78 and 76
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 15: Error: 'D3' is not defined
+prog2.cob: 16: Error: '1E3' is not defined
+prog2.cob: 17: Error: 'BLAH' is not defined
+prog2.cob: 18: Error: Exponent has decimal point
+prog2.cob: 19: Error: Significand of 0 is negative
+prog2.cob: 19: Error: Exponent of 0 is negative
+prog2.cob: 20: Error: Exponent has more than 4 digits
+prog2.cob: 21: Error: Significand has more than 34 digits
+prog2.cob: 22: Error: Exponent of 0 is not 0
+prog2.cob: 25: Error: Exponent not between -78 and 76
+prog2.cob: 26: Error: Exponent not between -78 and 76
+])
+
 AT_CLEANUP
 
 AT_SETUP([X literals])
@@ -1856,13 +1902,13 @@ prog.cob: 9: Error: B literal contains invalid character '3'
 prog.cob: 10: Error: B literal too long; 64 bits max
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 5: Error: Numeric boolean literal does not conform to COBOL 2002
-prog.cob: 6: Error: Numeric boolean literal does not conform to COBOL 2002
-prog.cob: 9: Error: Numeric boolean literal does not conform to COBOL 2002
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: 5: Error: Numeric boolean literal does not conform to COBOL 2014
+prog.cob: 6: Error: Numeric boolean literal does not conform to COBOL 2014
+prog.cob: 9: Error: Numeric boolean literal does not conform to COBOL 2014
 prog.cob: 9: Error: B literal contains invalid character '2'
 prog.cob: 9: Error: B literal contains invalid character '3'
-prog.cob: 10: Error: Numeric boolean literal does not conform to COBOL 2002
+prog.cob: 10: Error: Numeric boolean literal does not conform to COBOL 2014
 prog.cob: 10: Error: B literal too long; 64 bits max
 ])
 
@@ -1904,29 +1950,29 @@ prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
-prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
-prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
-prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
-prog.cob: 11: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob: 11: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 11: Error: B literal too long; 64 bits max
-prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 12: Error: O literal too long; 22 digits max
-prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
-prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
-prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 14: Error: B literal contains invalid character '2'
 prog.cob: 14: Error: B literal contains invalid character '3'
-prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 14: Error: O literal contains invalid character '8'
 prog.cob: 14: Error: O literal contains invalid character '9'
-prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2002
+prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 ])
@@ -1976,3 +2022,4 @@ prog.cob: 28: Error: Value in AT clause may not have 5 digits
 prog.cob: 29: Error: Value in AT clause may not be longer than 6 digits
 ])
 AT_CLEANUP
+>>>>>>> .r644

@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -27,9 +27,6 @@ AT_KEYWORDS([packed])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#ifdef	__INTEL_COMPILER
-#pragma warning ( disable : 1419 )
-#endif
 #define COB_LIB_EXPIMP
 #include <libcob.h>
 COB_EXPIMP int dump (unsigned char *);
@@ -45,8 +42,8 @@ int dump (unsigned char *data)
 
 sed -e 's/@USAGE@/PACKED-DECIMAL/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
-AT_CHECK([$COMPILE_MODULE dump.c], [0], , [])
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1f202020202020202020
 012f2020202020202020
@@ -202,7 +199,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00
 99
@@ -260,7 +257,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [34
 +34
@@ -304,7 +301,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00
 +00
@@ -342,7 +339,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [01
 09
@@ -474,7 +471,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OK
 OK
@@ -615,7 +612,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=ibm prog.cob], [0], , [])
+AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OK
 OK
@@ -661,7 +658,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00
 99
@@ -706,7 +703,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00
 99
@@ -741,7 +738,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0000000222
 ])
@@ -824,7 +821,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], , [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OK
 OK

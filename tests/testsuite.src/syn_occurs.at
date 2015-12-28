@@ -41,13 +41,19 @@ AT_DATA([prog.cob], [
        88 X-88          VALUE "X" OCCURS 10.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: 11: Error: Level 88 item 'X-88' can only have a VALUE clause
 prog.cob: 6: Error: Level 01 item 'X-01' cannot have a OCCURS clause
 prog.cob: 7: Error: Level 01 item 'G' cannot have a OCCURS clause
 prog.cob: 9: Error: Level 66 item 'X-66' can only have a RENAMES clause
 prog.cob: 10: Error: Level 77 item 'X-77' cannot have a OCCURS clause
 ])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: Error: Level 88 item 'X-88' can only have a VALUE clause
+prog.cob: 9: Error: Level 66 item 'X-66' can only have a RENAMES clause
+])
+
 
 AT_CLEANUP
 
@@ -71,8 +77,6 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 ])
 
 AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
-
-AT_CHECK([$COMPILE_ONLY -fodoslide prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -196,8 +200,11 @@ AT_DATA([prog.cob], [
           03 X  PIC X OCCURS 10 DEPENDING ON Y.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Error: ODO without TO clause does not conform to COBOL 2002
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: 8: Error: ODO without TO clause does not conform to COBOL 2014
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: Warning: ODO without TO clause used
 ])
 
 AT_CLEANUP

@@ -200,7 +200,7 @@ AT_DATA([prog.cob], [
        L.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -219,7 +219,7 @@ AT_DATA([prog.cob], [
        01 X             PIC X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Redefinition of 'X'
 prog.cob: 6: Warning: 'X' previously defined here
 ])
@@ -238,7 +238,7 @@ AT_DATA([prog.cob], [
          02 X           PIC X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Redefinition of 'X'
 prog.cob: 6: Warning: 'X' previously defined here
 ])
@@ -258,7 +258,7 @@ AT_DATA([prog.cob], [
          02 X           PIC X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: Redefinition of 'X'
 prog.cob: 7: Warning: 'X' previously defined here
 ])
@@ -277,7 +277,7 @@ AT_DATA([prog.cob], [
        77 X             PIC X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Redefinition of 'X'
 prog.cob: 6: Warning: 'X' previously defined here
 ])
@@ -296,7 +296,7 @@ AT_DATA([prog.cob], [
        77 X             PIC X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: Warning: Redefinition of 'X'
 prog.cob: 6: Warning: 'X' previously defined here
 ])
@@ -316,7 +316,7 @@ AT_DATA([prog.cob], [
          88 A           VALUE "B".
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: Redefinition of 'A'
 prog.cob: 7: Warning: 'A' previously defined here
 ])
@@ -424,7 +424,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -512,7 +512,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [])
 
 ## Change when we DON'T allow this
@@ -552,11 +552,6 @@ AT_CLEANUP
 AT_SETUP([Non-matching level numbers (extension)])
 AT_KEYWORDS([definition])
 
-AT_DATA([test.conf], [
-include "default.conf"
-relax-level-hierarchy: yes
-])
-
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -571,7 +566,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY -cb_conf=relax-level-hierarchy:yes prog.cob], [0], [],
 [prog.cob: 9: Warning: No previous data item of level 04
 ])
 
@@ -592,7 +587,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: BY CONTENT assumed for alphanumeric item
 ])
 

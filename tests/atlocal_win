@@ -32,11 +32,9 @@ COBCRUN="cobcrun"
 TEMPLATE="$COB_SRC_PATH/tests/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"
-STD="-std=cobol2002"
-COMPILE="${COBC} -x ${STD} ${FLAGS}"
-COMPILE_ONLY="${COBC} -fsyntax-only ${STD} ${FLAGS}"
-COMPILE_ONLY_WITHOUTSTD="${COBC} -fsyntax-only ${FLAGS}"
-COMPILE_MODULE="${COBC} -m ${FLAGS} ${STD}"
+COMPILE="${COBC} -x ${FLAGS}"
+COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
+COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
 OBJECT_EXT="obj"
 

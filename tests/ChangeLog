@@ -1,4 +1,15 @@
 
+2015-12-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: remove -std=cobol2002 for compiling (effectively using default),
+	  checked with cobol2014 where checking for standard behaviour,
+	  used -cb_conf when checking single compiler configurations instead
+	  of creating+using a test.conf or loading a completely different -std,
+	  check stdout+stderr where missing, removed the ifdef for __INTEL_COMPILER
+	  as this is included via libcob.h now
+	* configuration.at: check for all standard configurations -std to
+	  be usable
+
 2015-12-15  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_misc.at: command line option -a replaced with -R

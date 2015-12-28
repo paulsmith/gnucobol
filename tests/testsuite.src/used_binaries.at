@@ -46,7 +46,7 @@ AT_CLEANUP
 AT_SETUP([Source file not found])
 AT_KEYWORDS([runmisc])
 
-AT_CHECK([$COMPILE_ONLY_WITHOUTSTD prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [cobc: prog.cob: No such file or directory
 ])
 
@@ -80,7 +80,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE "$(_return_path "$(pwd)/prog.cob")"], [0], [], [])
-AT_CHECK([./prog], [0], [OK])
+AT_CHECK([./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -137,11 +137,11 @@ AT_DATA([prog.cob], [
            STOP RUN WITH NORMAL STATUS.
 ])
 
-AT_CHECK([cat prog.cob | $COMPILE -], [0])
-AT_CHECK([./a.out], [0])
+AT_CHECK([cat prog.cob | $COMPILE -], [0], [], [])
+AT_CHECK([./a.out], [0], [], [])
 
 AT_CHECK([cat prog.cob | $COMPILE_MODULE -], [0], [], [])
-AT_CHECK([$COBCRUN a], [0])
+AT_CHECK([$COBCRUN a], [0], [], [])
 
 AT_CLEANUP
 
