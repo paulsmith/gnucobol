@@ -1695,7 +1695,7 @@ cb_build_length_1 (cb_tree x)
 	for (f = f->children; f; f = f->sister) {
 		size = cb_build_length_1 (cb_build_field_reference (f, x));
 		if (f->depending) {
-			if (!cb_flag_odoslide && f->flag_odo_item) {
+			if (!cb_flag_odoslide && f->flag_odo_relative) {
 				size = cb_build_binary_op (size, '*',
 							   cb_int (f->occurs_max));
 			} else {
@@ -2487,6 +2487,7 @@ cb_validate_program_data (struct cb_program *prog)
 							    cb_name (x));
 						break;
 					}
+					p->flag_odo_relative = 1;
 				}
 			}
 		}

@@ -823,7 +823,7 @@ output_size (const cb_tree x)
 			q = f;
 
 again:
-			if (!cb_flag_odoslide && p && p->depending && p->flag_odo_item) {
+			if (!cb_flag_odoslide && p && p->flag_odo_relative) {
 				q = p;
 				output ("%d", p->size * p->occurs_max);
 			} else if (p && (!r->flag_receiving ||
