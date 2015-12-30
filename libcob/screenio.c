@@ -744,8 +744,8 @@ get_screen_item_line_and_col (cob_screen * const s, int * const line,
 
 	*line = 0;
 	*col = 0;
-
-	while (true) {
+	
+	for (;;) {
 		do {
 			if (sibling->child && !children_checked) {
 				/* Go to last child and start over */
