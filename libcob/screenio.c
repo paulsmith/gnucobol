@@ -701,7 +701,6 @@ update_line_and_col (const int screen_to_display, cob_screen * const s,
 		}
 
 		if (!s->column) {
-			*col = 0;
 			*found_col = 1;
 		}
 	}
