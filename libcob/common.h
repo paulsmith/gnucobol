@@ -1009,7 +1009,9 @@ struct cob_call_struct {
 /* Screen structure */
 typedef struct __cob_screen {
 	struct __cob_screen	*next;		/* Pointer to next */
+	struct __cob_screen	*prev;		/* Pointer to previous */
 	struct __cob_screen	*child;		/* For COB_SCREEN_TYPE_GROUP */
+	struct __cob_screen	*parent;	/* Pointer to parent */
 	cob_field		*field;		/* For COB_SCREEN_TYPE_FIELD */
 	cob_field		*value;		/* For COB_SCREEN_TYPE_VALUE */
 	cob_field		*line;		/* LINE */

@@ -1,4 +1,4 @@
-/*
+ /*
    Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
@@ -659,57 +659,138 @@ cob_addnch (const int n, const chtype c)
 	}
 }
 
+static int
+is_first_screen_item (cob_screen *s)
+{
+	do {
+		if (s->prev) {
+			return 0;
+		}
+		s = s->parent;
+	} while (s);
+
+	return 1;
+}
+
+static size_t
+get_size (cob_screen *s)
+{
+	if (s->field) {
+		return s->field->size;
+	} else { /* s->value */
+		return s->value->size;
+	}
+}
+
+static void
+update_line_and_col (const int screen_to_display, cob_screen * const s,
+		     int * const line, int * const found_line,
+		     int * const col, int * const found_col)
+{
+	const int	is_first_scr_item = is_first_screen_item (s);
+	const int	is_parent = !!s->child;
+
+	if (!*found_line && s->line) {
+		if (s->attr & COB_SCREEN_LINE_PLUS) {
+			*line += cob_get_int (s->line);
+		} else if (s->attr & COB_SCREEN_LINE_MINUS) {
+			*line -= cob_get_int (s->line);
+		} else {
+			*line += cob_get_int (s->line) - 1;
+			*found_line = 1;
+		}
+
+		if (!s->column) {
+			*col = 0;
+			*found_col = 1;
+		}
+	}
+
+	if (!*found_col) {
+		if (!screen_to_display && !is_parent) {
+			*col += get_size (s) - 1;
+		}
+
+		if (s->column) {
+			if (s->attr & COB_SCREEN_COLUMN_PLUS) {
+				*col += cob_get_int (s->column);
+			} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
+				*col -= cob_get_int (s->column);
+			} else {
+				*col += cob_get_int (s->column) - 1;
+				*found_col = 1;
+			}
+		} else if (!is_parent && !is_first_scr_item) {
+			++(*col);
+		}
+	}
+
+	if (is_first_scr_item && !s->parent) {
+		*found_line = 1;
+		*found_col = 1;
+	}
+}
+
+static void
+get_screen_item_line_and_col (cob_screen * const s, int * const line,
+			      int * const col)
+{
+	int		first = 1;
+	int		children_checked = 0;
+	int		found_line = 0;
+	int		found_col = 0;
+	cob_screen	*parent = s->parent;
+	cob_screen	*sibling = s;
+
+	*line = 0;
+	*col = 0;
+
+	while (true) {
+		do {
+			if (sibling->child && !children_checked) {
+				/* Go to last child and start over */
+				parent = sibling;
+				for (sibling = sibling->child;
+				     sibling->next;
+				     sibling = sibling->next);
+				continue;
+			} else {
+				update_line_and_col (first, sibling,
+						     line, &found_line,
+						     col, &found_col);
+
+				if (found_line && found_col) {
+					return;
+				}
+
+				first = 0;
+			}
+
+			children_checked = 0;
+			sibling = sibling->prev;
+		} while (sibling);
+
+		if (!parent) {
+			break;
+		}
+
+		sibling = parent;
+		parent = parent->parent;
+		children_checked = 1;
+	}
+}
+
 static void
 cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input)
 {
 	unsigned char	*p;
 	size_t		size;
-	int		y;
-	int		x;
 	int		line;
 	int		column;
 	chtype		promptchar;
 
-	getyx (stdscr, y, x);
-#if	1	/* RXWRXW - Column adjust */
-	/* ? */
-	if (x > 0) {
-		x--;
-	}
-#endif
-	/* If LINE is specified, move to specified line, else stay on current */
-	if (!s->line) {
-		line = y;
-	} else {
-		line = cob_get_int (s->line) - 1;
-		if (line < 0) {
-			line = y;
-		}
-	}
-	/* Similarly for COLUMN */
-	if (!s->column) {
-		column = x;
-	} else {
-		column = cob_get_int (s->column) - 1;
-		if (column < 0) {
-			column = x;
-		}
-	}
-	/*
-	  If it was LINE PLUS/MINUS, add current line + 1. We add 1 to undo the
-	  conversion from 1-based to 0-based coordinates.
-	*/
-	if (s->attr & COB_SCREEN_LINE_PLUS) {
-		line = y + line + 1;
-	} else if (s->attr & COB_SCREEN_LINE_MINUS) {
-		line = y - line + 1;
-	}
-	/* Similarly for COLUMN */
-	if (s->attr & COB_SCREEN_COLUMN_PLUS) {
-		column = x + column + 1;
-	} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
-		column = x - column + 1;
-	}
+	get_screen_item_line_and_col (s, &line, &column);
+
 	/* Move to specified position */
 	cob_move_cursor (line, column);
 	cob_current_y = line;

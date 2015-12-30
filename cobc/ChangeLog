@@ -1,4 +1,9 @@
 
+2015-12-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c, codeoptim.c: Changed code to generate cob_screen as a
+	  doubly linked list.
+
 2015-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	part fixed bug #177 - added missing ODO checks for subordinate items

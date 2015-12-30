@@ -52,13 +52,16 @@ cob_gen_optim (const enum cb_optim val)
 	case COB_SET_SCREEN:
 		output_storage ("static void COB_NOINLINE");
 		output_storage ("cob_set_screen (cob_screen *s, cob_screen *next,");
-		output_storage ("		cob_screen *child, cob_field *field, cob_field *value,");
+		output_storage ("		cob_screen *prev, cob_screen *child, cob_screen *parent,");
+		output_storage ("		cob_field *field, cob_field *value,");
 		output_storage ("		cob_field *line, cob_field *column,");
 		output_storage ("		cob_field *foreg, cob_field *backg, cob_field *prompt,");
 		output_storage ("		const int type, const int occurs, const int attr)");
 		output_storage ("{");
 		output_storage ("	s->next = next;");
+		output_storage ("	s->prev = prev;");
 		output_storage ("	s->child = child;");
+		output_storage ("	s->parent = parent;");
 		output_storage ("	s->field = field;");
 		output_storage ("	s->value = value;");
 		output_storage ("	s->line = line;");

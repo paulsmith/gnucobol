@@ -1,4 +1,11 @@
 
+2015-12-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #176 - added code to correctly find the line and
+	  column of a screen item.
+	* common.h: changed cob_screen to a doubly linked list (to simplify the
+	  algorithm required above).
+
 2015-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: added SYSTEM-OFFSET and support for unknown offsets for

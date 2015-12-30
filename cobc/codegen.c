@@ -5357,7 +5357,7 @@ output_screen_definition (struct cb_field *p)
 }
 
 static void
-output_screen_init (struct cb_field *p)
+output_screen_init (struct cb_field *p, struct cb_field *previous)
 {
 	int	type;
 
@@ -5372,20 +5372,40 @@ output_screen_init (struct cb_field *p)
 	} else {
 		output ("NULL, ");
 	}
+
+	if (previous && previous->level != 1) {
+		output ("&s_%d, ", previous->id);
+	} else {
+		output ("NULL, ");
+	}
+
+	output_newline ();
+	output_prefix ();
+	output ("\t\t  ");
+	
 	if (type == COB_SCREEN_TYPE_GROUP) {
 		output ("&s_%d, ", p->children->id);
 	} else {
 		output ("NULL, ");
 	}
-	output_newline ();
-	output_prefix ();
-	output ("\t\t  ");
+
+	if (p->parent) {
+		output ("&s_%d, ", p->parent->id);
+	} else {
+		output ("NULL, ");
+	}
+
 	if (type == COB_SCREEN_TYPE_FIELD) {
 		output_param (cb_build_field_reference (p, NULL), -1);
 		output (", ");
 	} else {
 		output ("NULL, ");
 	}
+
+	output_newline ();
+	output_prefix ();
+	output ("\t\t  ");
+	
 	if (type == COB_SCREEN_TYPE_VALUE) {
 		/* Need a field reference here */
 		output_param (cb_build_field_reference (p, NULL), -1);
@@ -5400,43 +5420,50 @@ output_screen_init (struct cb_field *p)
 	} else {
 		output ("NULL, ");
 	}
-	output_newline ();
-	output_prefix ();
-	output ("\t\t  ");
+
 	if (p->screen_column) {
 		output_param (p->screen_column, 0);
 		output (", ");
 	} else {
 		output ("NULL, ");
 	}
+
+	output_newline ();
+	output_prefix ();
+	output ("\t\t  ");
+
 	if (p->screen_foreg) {
 		output_param (p->screen_foreg, 0);
 		output (", ");
 	} else {
 		output ("NULL, ");
 	}
+
 	if (p->screen_backg) {
 		output_param (p->screen_backg, 0);
 		output (", ");
 	} else {
 		output ("NULL, ");
 	}
-	output_newline ();
-	output_prefix ();
-	output ("\t\t  ");
+
 	if (p->screen_prompt) {
 		output_param (p->screen_prompt, 0);
 		output (", ");
 	} else {
 		output ("NULL, ");
 	}
+
+	output_newline ();
+	output_prefix ();
+	output ("\t\t  ");
+	
 	output ("%d, %d, 0x%x);\n", type, p->occurs_min, p->screen_flag);
 
 	if (p->children) {
-		output_screen_init (p->children);
+		output_screen_init (p->children, NULL);
 	}
 	if (p->sister) {
-		output_screen_init (p->sister);
+		output_screen_init (p->sister, p);
 	}
 }
 
@@ -6158,7 +6185,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* Initialization */
-	
+
 	/* Allocate and initialize LOCAL storage */
 	if (prog->local_storage) {
 		if (local_mem) {
@@ -6674,7 +6701,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Initialize SCREEN items */");
 		/* Initialize items with VALUE */
 		output_initial_values (prog->screen_storage);
-		output_screen_init (prog->screen_storage);
+		output_screen_init (prog->screen_storage, NULL);
 		output_newline ();
 	}
 
