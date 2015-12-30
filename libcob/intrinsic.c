@@ -3592,12 +3592,9 @@ cob_intr_exception_statement (void)
 	if (cobglobptr->cob_exception_code && cobglobptr->cob_orig_statement) {
 		flen = strlen (cobglobptr->cob_orig_statement);
 		if (flen > 31) {
-			memcpy (curr_field->data,
-				cobglobptr->cob_orig_statement, (size_t)31);
-		} else {
-			memcpy (curr_field->data,
-				cobglobptr->cob_orig_statement, flen);
+			flen = 31;
 		}
+		memcpy (curr_field->data, cobglobptr->cob_orig_statement, flen);
 	}
 	return curr_field;
 }
@@ -6399,17 +6396,17 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	if (date_present && time_present) {
 		split_around_t (datetime_format_str, date_format_str, time_format_str);
 	} else if (date_present) {
-		strncpy (date_format_str, datetime_format_str, MAX_DATE_STR_LENGTH);
+		strncpy (date_format_str, datetime_format_str, max_date_length);
 	} else { /* time_present */
-		strncpy (time_format_str, datetime_format_str, MAX_TIME_STR_LENGTH);
+		strncpy (time_format_str, datetime_format_str, max_time_length);
 	}
 
 	if (date_present && time_present) {
 		split_around_t (formatted_datetime, formatted_date, formatted_time);
 	} else if (date_present) {
-		strncpy (formatted_date, formatted_datetime, MAX_DATE_STR_LENGTH);
+		strncpy (formatted_date, formatted_datetime, max_date_length);
 	} else { /* time_present */
-		strncpy (formatted_time, formatted_datetime, MAX_TIME_STR_LENGTH);
+		strncpy (formatted_time, formatted_datetime, max_time_length);
 	}
 
 	/* Set time offset */

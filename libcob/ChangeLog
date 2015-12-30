@@ -42,7 +42,7 @@
 
 2015-11-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* intrinsic.c (cob_intr_current_date): bug #161 - offset for CURRENT-DATE
+	* intrinsic.c (cob_intr_current_date): bug #164 - offset for CURRENT-DATE
 
 2015-10-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
