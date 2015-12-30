@@ -6461,7 +6461,7 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 	/* Get date format string and parse it */
 	is_date = cob_valid_date_format (format_field_data);
 	if (is_date) {
-		strncpy (format_str, format_field_data, MAX_DATE_STR_LENGTH);
+		strncpy (format_str, format_field_data, max_date_length);
 	} else if (cob_valid_datetime_format (format_field_data,
 					      COB_MODULE_PTR->decimal_point)) { /* Datetime */
 		split_around_t (format_field_data, format_str, NULL);
@@ -6472,7 +6472,7 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 
 	/* Get formatted date and validate it */
 	if (is_date) {
-		strncpy (date_str, date_field_data, MAX_DATE_STR_LENGTH);
+		strncpy (date_str, date_field_data, max_date_length);
 	} else { /* Datetime */
 		split_around_t (date_field_data, date_str, NULL);
 	}
