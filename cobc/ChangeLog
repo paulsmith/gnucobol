@@ -3,6 +3,7 @@
 
 	* codegen.c, codeoptim.c: Changed code to generate cob_screen as a
 	  doubly linked list.
+	* reserved.c (reserved_words): added GRID as synonym for LEFTLINE.
 
 2015-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
