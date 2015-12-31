@@ -906,6 +906,7 @@ enum cob_exception_id {
 #define COB_SCREEN_EMULATE_NL		(1 << 27)
 #define COB_SCREEN_UPPER		(1 << 28)
 #define COB_SCREEN_LOWER		(1 << 29)
+#define COB_SCREEN_GRID			(1 << 30)
 
 #define COB_SCREEN_TYPE_GROUP		0
 #define COB_SCREEN_TYPE_FIELD		1

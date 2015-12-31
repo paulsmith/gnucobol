@@ -1,4 +1,9 @@
 
+2015-12-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c (reserved_words), parser.y: corrected GRID implementation;
+	  is different to LEFTLINE.
+
 2015-12-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c, codeoptim.c: Changed code to generate cob_screen as a

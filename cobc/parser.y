@@ -973,6 +973,7 @@ has_relative_pos (struct cb_field const *field)
 %token GOBACK
 %token GREATER
 %token GREATER_OR_EQUAL		"GREATER OR EQUAL"
+%token GRID
 %token GROUP
 %token HEADING
 %token HIGHLIGHT
@@ -5011,6 +5012,11 @@ screen_option:
   {
 	check_screen_attr ("OVERLINE", COB_SCREEN_OVERLINE);
 	PENDING ("OVERLINE");
+  }
+| GRID
+  {
+	check_screen_attr ("GRID", COB_SCREEN_GRID);
+	PENDING ("GRID");
   }
 | LEFTLINE
   {

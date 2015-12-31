@@ -948,7 +948,7 @@ static const struct cobc_reserved reserved_words[] = {
   { "GREATER",			0, 0, GREATER,			/* 2002 */
 				0, 0
   },
-  { "GRID",			0, 0, LEFTLINE,			/* Extension */
+  { "GRID",			0, 0, GRID,			/* Extension */
     				0, 0
   },
   { "GROUP",			0, 0, GROUP,			/* 2002 */

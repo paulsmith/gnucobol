@@ -86,7 +86,8 @@ AT_DATA([prog.cob], [
        01  foo          PIC X.
        SCREEN           SECTION.
        01  scr.
-           03  a        PIC X TO foo FULL, LEFTLINE, OVERLINE, REQUIRED.
+           03  a        PIC X TO foo FULL, LEFTLINE, OVERLINE, REQUIRED,
+                        GRID.
        PROCEDURE        DIVISION.
            STOP RUN.
 ])
@@ -94,6 +95,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 9: Warning: 'LEFTLINE' not implemented
 prog.cob: 9: Warning: 'OVERLINE' not implemented
+prog.cob: 10: Warning: 'GRID' not implemented
 ])
 
 AT_CLEANUP
