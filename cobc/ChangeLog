@@ -1,4 +1,13 @@
 
+2016-01-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.h: remove flag_odo_item, add odo_level instead
+	* parser.y (integer): return numeric literal -1 instead of cb_int1 for
+	  incorrect numerical literals
+	* parser.y: add check OCCURS max. must be greater than OCCURS min.
+	* typeck.c: compute odo_level in (cb_validate_program_data),
+	  add check for nested ODO to (cb_validate_one)
+
 2015-12-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (reserved_words), parser.y: corrected GRID implementation;

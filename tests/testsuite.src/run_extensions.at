@@ -600,12 +600,12 @@ AT_DATA([prog.cob], [
            MOVE chars (1, 2) TO vals (1:1)
            MOVE chars (2, 1) TO vals (2:1)
            MOVE chars (2, 3) TO vals (3:1)
-           IF vals <> "BFH"
+           IF vals NOT = "BFH"
               DISPLAY "Vals (aligned) wrong: " vals
               END-DISPLAY
            END-IF
         *> currently not working (size is wrong and it needs a temporary field)
-        *> IF a-table <> "ABCFGH"
+        *> IF a-table NOT = "ABCFGH"
         *>    DISPLAY "Table (aligned) wrong: " a-table
         *>    END-DISPLAY
         *> END-IF
@@ -640,12 +640,12 @@ AT_DATA([prog.cob], [
            MOVE chars (1, 2) TO vals (1:1)
            MOVE chars (2, 1) TO vals (2:1)
            MOVE chars (2, 3) TO vals (3:1)
-           IF vals <> "BDF"
+           IF vals NOT = "BDF"
               DISPLAY "Vals (slided) wrong: " vals
               END-DISPLAY
            END-IF
         *> currently not working (size is wrong)
-        *> IF a-table <> "ABCDEF"
+        *> IF a-table NOT = "ABCDEF"
         *>    DISPLAY "Table (slided) wrong: " a-table
         *>    END-DISPLAY
         *> END-IF

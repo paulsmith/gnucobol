@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -682,6 +682,9 @@ struct cb_field {
 	int			screen_flag;	/* Flags used in SCREEN SECTION */
 	int			step_count;	/* STEP in REPORT */
 	unsigned int		vaddr;		/* Variable address cache */
+	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
+									   could be direct ODO (check via depending) 
+									   or via subordinate) */
 	cob_u32_t		special_index;	/* Special field */
 
 	enum cb_storage		storage;	/* Storage section */
@@ -723,8 +726,6 @@ struct cb_field {
 
 	unsigned int flag_vsize_done	: 1;	/* Variable size cached */
 	unsigned int flag_vaddr_done	: 1;	/* Variable address cached */
-	unsigned int flag_odo_item	: 1;	/* ODO item: direct (check via depending) 
-										   or via subordinate) */
 	unsigned int flag_odo_relative	: 1;	/* complex-odo: item address depends
 											on size of a different (ODO) item */
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -4187,39 +4187,59 @@ occurs_clause:
   occurs_depending occurs_keys occurs_indexed
   {
 	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
-	if (current_field->depending && !($3)) {
-		cb_verify (cb_odo_without_to, "ODO without TO clause");
-	}
-	current_field->occurs_min = $3 ? cb_get_int ($2) : 1;
-	current_field->occurs_max = $3 ? cb_get_int ($3) : cb_get_int ($2);
-	current_field->indexes++;
-	if (current_field->indexes > COB_MAX_SUBSCRIPTS) {
+	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
 		cb_error (_("Maximum OCCURS depth exceeded (%d)"),
 			  COB_MAX_SUBSCRIPTS);
+	} else {
+		current_field->indexes++;
 	}
 	if (current_field->flag_item_based) {
 		cb_error (_("%s and %s are mutually exclusive"), "BASED", "OCCURS");
 	} else if (current_field->flag_external) {
 		cb_error (_("%s and %s are mutually exclusive"), "EXTERNAL", "OCCURS");
+	}
+	if ($3) {
+		current_field->occurs_min = cb_get_int ($2);
+		current_field->occurs_max = cb_get_int ($3);
+		if (current_field->depending &&
+			current_field->occurs_max > 0 &&
+			current_field->occurs_max <= current_field->occurs_min) {
+			cb_error (_("OCCURS max. must be greater than OCCURS min."));
+		}
+	} else {
+		current_field->occurs_min = 1;
+		current_field->occurs_max = cb_get_int ($2);
+		if (current_field->depending) {
+			cb_verify (cb_odo_without_to, "ODO without TO clause");
+		}
 	}
 	current_field->flag_occurs = 1;
   }
 | OCCURS DYNAMIC capacity_in occurs_from_integer
   occurs_to_integer occurs_initialized occurs_keys occurs_indexed
   {
-	current_field->occurs_min = $4 ? cb_get_int ($4) : 0;
-	PENDING("OCCURS with DYNAMIC capacity");
-	current_field->occurs_max = $5 ? cb_get_int ($5) : 0;
-	current_field->indexes++;
-	if (current_field->indexes > COB_MAX_SUBSCRIPTS) {
+	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
+	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
 		cb_error (_("Maximum OCCURS depth exceeded (%d)"),
 			  COB_MAX_SUBSCRIPTS);
+	} else {
+		current_field->indexes++;
 	}
 	if (current_field->flag_item_based) {
 		cb_error (_("%s and %s are mutually exclusive"), "BASED", "OCCURS");
 	} else if (current_field->flag_external) {
 		cb_error (_("%s and %s are mutually exclusive"), "EXTERNAL", "OCCURS");
 	}
+	current_field->occurs_min = $4 ? cb_get_int ($4) : 0;
+	if ($5) {
+		current_field->occurs_max = cb_get_int ($5);
+		if (current_field->occurs_max <= current_field->occurs_min) {
+			cb_error (_("OCCURS max. must be greater than OCCURS min."));
+		}
+	} else {
+		current_field->occurs_max = 0;
+	}
+	PENDING("OCCURS with DYNAMIC capacity");
 	current_field->flag_occurs = 1;
   }
 ;
@@ -10225,7 +10245,7 @@ integer:
 	    || CB_LITERAL ($1)->sign < 0
 	    || CB_LITERAL ($1)->scale) {
 		cb_error (_("Non-negative integer value expected"));
-		$$ = cb_int1;
+		$$ = cb_build_numeric_literal(-1, "1", 0);
 	} else {
 		$$ = $1;
 	}

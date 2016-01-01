@@ -72,11 +72,29 @@ AT_DATA([prog.cob], [
        77 I             PIC 9.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: 'G-2' cannot have the OCCURS clause due to 'X'
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G-1.
+         02 G-2         OCCURS 1 TO 10 DEPENDING ON I.
+           03 X         PIC X(10) OCCURS 1 TO 4 DEPENDING ON I.
+       77 I             PIC 9.
+       PROCEDURE        DIVISION.
+           DISPLAY  X(I, I) END-DISPLAY
+           DISPLAY  G-2 (I) END-DISPLAY
+           DISPLAY  G-1     END-DISPLAY
+           .
+
 ])
 
 AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog2.cob], [1], [],
+[prog2.cob: 12: Error: 'Reference to item containing nested ODO' not implemented
+prog2.cob: 13: Error: 'Reference to item containing nested ODO' not implemented
+])
 
 AT_CLEANUP
 
@@ -133,6 +151,32 @@ AT_CLEANUP
 # 14) TODO
 
 # 15) TODO
+# in COBOL 2014 this is rule 16, not sure about COBOL 2002.
+
+AT_SETUP([OCCURS DEPENDING with wrong size])
+AT_KEYWORDS([occurs range])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 FILLER.
+         02 G-1         PIC X OCCURS  1 TO 1 DEPENDING ON I.
+       01 FILLER.
+         02 G-2         PIC X OCCURS -1 TO 1 DEPENDING ON I.
+       01 FILLER.
+         02 G-3         PIC X OCCURS  0 TO 1 DEPENDING ON I.
+       01 I             PIC 9.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: Error: OCCURS max. must be greater than OCCURS min.
+prog.cob: 9: Error: Non-negative integer value expected
+])
+
+AT_CLEANUP
+
 
 # 16) TODO
 
@@ -226,8 +270,8 @@ AT_DATA([prog.cob], [
           03 X  PIC X OCCURS 9223372036854775808 TIMES.
 ])
 
-# Don't check actual output here as the acutal limit depends on INT_MAX,
-# only the last "exceeds limit" is guaranteed.
+# Don't check actual output here as the actual limit depends on INT_MAX, therefore
+# all entries may raise this error but the last "exceeds limit" is guaranteed.
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [], ignore)
 AT_CHECK([$COMPILE_ONLY prog.cob 2>&1 | \
 grep "prog.cob: 11: Error: Numeric literal '9223372036854775808' exceeds limit"],

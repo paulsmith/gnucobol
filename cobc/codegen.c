@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -821,7 +821,6 @@ output_size (const cb_tree x)
 		} else {
 			p = chk_field_variable_size (f);
 			q = f;
-
 again:
 			if (!cb_flag_odoslide && p && p->flag_odo_relative) {
 				q = p;
@@ -838,9 +837,8 @@ again:
 		 have no "sister" elements,
 		 the content would only be correct if -fodoslide
 		 is active as we need a temporary field otherwise */
-					/* check for nested ODO */
-					q = chk_field_variable_size (p);
-					if (q != p) {
+					/* size for nested ODO */
+					if (p->odo_level > 1) {
 						output_integer (p->depending);
 						output (" * ");
 						p = q;

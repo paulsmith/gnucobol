@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -545,6 +545,7 @@ static size_t
 cb_validate_one (cb_tree x)
 {
 	cb_tree		y;
+	struct cb_field		*f;
 
 	if (x == cb_error_node) {
 		return 1;
@@ -558,12 +559,18 @@ cb_validate_one (cb_tree x)
 			return 1;
 		}
 		if (CB_FIELD_P (y)) {
-			if (CB_FIELD (y)->level == 88) {
+			f = CB_FIELD (y);
+			if (f->level == 88) {
 				cb_error_x (x, _("Invalid use of 88 level item"));
 				return 1;
 			}
-			if (CB_FIELD (y)->flag_invalid) {
+			if (f->flag_invalid) {
 				return 1;
+			}
+			/* check for nested ODO */
+			if (f->odo_level > 1) {
+				cb_error_x (x, _("'%s' not implemented"),
+					_("Reference to item containing nested ODO"));
 			}
 		}
 	}
@@ -1527,7 +1534,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 		}
 
 		/* Run-time check for ODO (including all the fields subordinate items) */
-		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->flag_odo_item) {
+		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->odo_level != 0) {
 			for (p = f; p; p = p->children) {
 				if (p->depending) {
 					e1 = CB_BUILD_FUNCALL_4 ("cob_check_odo",
@@ -2338,6 +2345,7 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_report	*rep;
 	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
+	unsigned int	odo_level;
 
 	for (l = current_program->report_list; l; l = CB_CHAIN (l)) {
 		/* Set up LINE-COUNTER / PAGE-COUNTER */
@@ -2469,8 +2477,10 @@ cb_validate_program_data (struct cb_program *prog)
 		}
 		/* The data item that contains a OCCURS DEPENDING clause must be
 		   the last data item in the group */
+		odo_level = 0;
 		for (p = q; ; p = p->parent) {
-			p->flag_odo_item = 1;
+			if (p->depending) odo_level++;
+			p->odo_level = odo_level;
 			if (!p->parent) {
 				break;
 			}
