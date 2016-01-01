@@ -1,10 +1,12 @@
 
 2016-01-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* tree.h: remove flag_odo_item, add odo_level instead
-	* parser.y (integer): return numeric literal -1 instead of cb_int1 for
-	  incorrect numerical literals
+	ODO checks:
+	* parser.y (integer): return numeric literal -1 instead of cb_int1 
+	  for incorrect numerical literals
 	* parser.y: add check OCCURS max. must be greater than OCCURS min.
+	NESTED OCCURS with DEPENDING - feature-requests:#99:
+	* tree.h: remove flag_odo_item, add odo_level instead
 	* typeck.c: compute odo_level in (cb_validate_program_data),
 	  add check for nested ODO to (cb_validate_one)
 
@@ -44,7 +46,7 @@
 
 2015-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	fixed bug #172 - NESTED OCCURS with DEPENDING not working
+	first implementation of feature-requests:#99 - NESTED OCCURS with DEPENDING
 	* field.c (validate_field_1): allow nested ODO with complex-odo = yes
 	* codegen.c (output_data): recalculate size for nested ODO by -fodoslide
 
