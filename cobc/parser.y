@@ -4160,7 +4160,7 @@ report_occurs_clause:
   {
 	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
 	if (current_field->depending && !($3)) {
-		cb_verify (cb_odo_without_to, "ODO without TO clause");
+		cb_verify (cb_odo_without_to, _("ODO without TO clause"));
 	}
 	current_field->occurs_min = $3 ? cb_get_int ($2) : 1;
 	current_field->occurs_max = $3 ? cb_get_int ($3) : cb_get_int ($2);
@@ -6407,9 +6407,15 @@ call_on_exception:
   {
 	$$ = NULL;
   }
-| exception_or_overflow
+| EXCEPTION
   statement_list
   {
+	$$ = $2;
+  }
+| TOK_OVERFLOW
+  statement_list
+  {
+	cb_verify (cb_call_overflow, "ON OVERFLOW clause");
 	$$ = $2;
   }
 ;
@@ -10831,7 +10837,6 @@ column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
 comp_equal:		TOK_EQUAL | EQUAL ;
 exception_or_error:	EXCEPTION | ERROR ;
-exception_or_overflow:	EXCEPTION | TOK_OVERFLOW ;
 in_of:			IN | OF ;
 label_option:		STANDARD | OMITTED ;
 line_or_lines:		LINE | LINES ;

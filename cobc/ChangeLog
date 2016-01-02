@@ -1,6 +1,9 @@
 
 2016-01-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* scanner.l: moved SET_LOCALATION to tree.c (cb_build_xyz)
+	* tree.c (cb_concat_literals): the new literal inherits its position from
+	  the first literal, check for cb_literal_length
 	ODO checks:
 	* parser.y (integer): return numeric literal -1 instead of cb_int1 
 	  for incorrect numerical literals
@@ -76,6 +79,11 @@
 	* tree.c (cb_build_intrinsic): better check of min/max arguments
 	* reserved.c: set correct min/max values in function_list,
 	  (cb_list_intrinsics): output min/max value
+
+2015-12-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.def: new configuration "call-overflow"
+	* parser.y: split exception_or_overflow to value cb_call_overflow
 
 2015-12-15  Brian Tiffin <btiffin@gnu.org>
 
@@ -189,13 +197,23 @@
 	* cobc.c: add -j after build run
 	  added short aliases for -free (-F) and -debug (-a)
 
+2015-07-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l: Improved parsing of all literals including error messages,
+	  fixing bug ".e000-expand-macro-calls." being misinterpreted as (wrong)
+	  floating-point literal
+
+	compiler configuration, including feature-request #43:
+	* config.def: new configurations "literal-length" and 
+	  "numeric-literal-length"
+	* typeck.c (non_integer_move): don't value suppress_warn more than
+	  cb_move_noninteger_to_alphanumeric
+	* scanner.l: value cb_numeric_literal_length and cb_literal_length
+
 2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c: added TALLY special register (Wish List #34).
-
-2015-07-05  Edward Hart <edward.dan.hart@gmail.com>
-
-	* scanner.l: Improved error detection of invalid floating-poit literals
+	* scanner.l: Improved error detection of invalid floating-point literals
 	  and associated error messages. Also minor refactoring.
 
 2015-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

@@ -381,6 +381,8 @@ test.conf: Missing definitions:
 	No definition of 'tab-width'
 	No definition of 'text-column'
 	No definition of 'word-length'
+	No definition of 'literal-length'
+	No definition of 'numeric-literal-length'
 	No definition of 'assign-clause'
 	No definition of 'binary-size'
 	No definition of 'binary-byteorder'
@@ -418,6 +420,7 @@ test.conf: Missing definitions:
 	No definition of 'odo-without-to'
 	No definition of 'section-segments'
 	No definition of 'alter-statement'
+	No definition of 'call-overflow'
 	No definition of 'numeric-boolean'
 	No definition of 'acucobol-literals'
 ])

@@ -22,7 +22,7 @@
 
 
 AT_SETUP([CALL BY CONTENT binary and literal])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions literals])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
@@ -70,7 +70,7 @@ AT_CLEANUP
 ## Numeric Boolean literal
 
 AT_SETUP([Numeric Boolean literal])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -100,7 +100,7 @@ AT_CLEANUP
 # ACUCOBOL literal
 
 AT_SETUP([ACUCOBOL literal])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -127,7 +127,7 @@ AT_CLEANUP
 ## H literal
 
 AT_SETUP([Hexadecimal numeric literal]) # Shouldn't this be in run_fundamentals?
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -709,7 +709,7 @@ AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
-AT_SETUP([MOVE NON-INTEGER TO ALPHA-NUMERIC])
+AT_SETUP([MOVE of non-integer to alphanumeric])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -781,17 +781,17 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
 [prog.cob: In paragraph 'S-03':
-prog.cob: 36: Warning: Move non-integer to alphanumeric
+prog.cob: 36: Warning: MOVE of non-integer to alphanumeric
 prog.cob: In paragraph 'S-10':
-prog.cob: 41: Warning: Move non-integer to alphanumeric
+prog.cob: 41: Warning: MOVE of non-integer to alphanumeric
 prog.cob: In paragraph 'S-20':
-prog.cob: 46: Warning: Move non-integer to alphanumeric
+prog.cob: 46: Warning: MOVE of non-integer to alphanumeric
 prog.cob: In paragraph 'S-30':
-prog.cob: 51: Warning: Move non-integer to alphanumeric
+prog.cob: 51: Warning: MOVE of non-integer to alphanumeric
 prog.cob: In paragraph 'S-40':
-prog.cob: 56: Warning: Move non-integer to alphanumeric
+prog.cob: 56: Warning: MOVE of non-integer to alphanumeric
 prog.cob: In paragraph 'S-50':
-prog.cob: 61: Warning: Move non-integer to alphanumeric
+prog.cob: 61: Warning: MOVE of non-integer to alphanumeric
 ])
 AT_CHECK([./prog], [0], [12891289128912891289128912891289])
 

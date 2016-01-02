@@ -2032,7 +2032,7 @@ int pp_flex_debug = 0;
 char *pptext;
 #line 1 "pplex.l"
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -4686,7 +4686,7 @@ start:
 		     (newline_count + PPLEX_BUFF_LEN) >= max_size)) {
 		if (need_continuation || continuation) {
 			cb_plex_error (newline_count,
-					_("Buffer overrun - Too much continuation lines"));
+					_("Buffer overrun - Too many continuation lines"));
 			return YY_NULL;
 		}
 		if (newline_count < max_size) {

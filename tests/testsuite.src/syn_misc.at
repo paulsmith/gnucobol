@@ -722,8 +722,8 @@ prog.cob: 8: Error: Unknown statement 'This'
 AT_CLEANUP
 
 
-AT_SETUP([Continuation Indicator - Literal too long])
-AT_KEYWORDS([misc fixed])
+AT_SETUP([Continuation Indicator - too many lines])
+AT_KEYWORDS([misc fixed literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1267,17 +1267,15 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 538: Error: Buffer overrun - Too much continuation lines
+[prog.cob: 538: Error: Buffer overrun - Too many continuation lines
 ])
 
 AT_CLEANUP
 
 
 AT_SETUP([Literal too long])
-AT_KEYWORDS([misc])
+AT_KEYWORDS([misc literals])
 
-# Currently not checked, see Feature Request #43
-AT_SKIP_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1479,12 +1477,34 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=default -fixed prog.cob], [1], [],
-[prog.cob: 148: Error: Literal too long, exceeds 8191 alphanumeric character positions.
+AT_CHECK([$COMPILE_ONLY -std=default prog.cob], [1], [],
+[prog.cob: 9: Error: Invalid literal: '                                   ...'
+prog.cob: 9: Error: Literal length exceeds 8191 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=default -free prog2.cob], [1], [],
-[prog.cob: 45: Error: Literal too long, exceeds 8191 alphanumeric character positions.
+[prog2.cob: 9: Error: Invalid literal: '                                   ...'
+prog2.cob: 9: Error: Literal length 8299 exceeds 8191 characters
+])
+
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
+[prog.cob: 9: Error: Invalid literal: '                                   ...'
+prog.cob: 9: Error: Literal length exceeds 8192 characters
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
+[prog.cob: 9: Error: Invalid literal: '                                   ...'
+prog.cob: 9: Error: Literal length exceeds 4096 characters
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 9: Error: Invalid literal: '                                   ...'
+prog.cob: 9: Error: Literal length exceeds 160 characters
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
+[prog.cob: 9: Error: Invalid literal: '                                   ...'
+prog.cob: 9: Error: Literal length exceeds 160 characters
 ])
 
 AT_CLEANUP
@@ -1747,7 +1767,7 @@ prog3.cob: 13: Error: syntax error, unexpected Literal
 AT_CLEANUP
 
 AT_SETUP([Continuation Indicator - No literal to continue])
-AT_KEYWORDS([misc fixed])
+AT_KEYWORDS([misc fixed literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1829,13 +1849,20 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 11: Error: 'D3' is not defined
 prog.cob: 12: Error: '1E3' is not defined
 prog.cob: 13: Error: 'BLAH' is not defined
+prog.cob: 14: Error: Invalid floating-point literal: '1.0E3.0'
 prog.cob: 14: Error: Exponent has decimal point
-prog.cob: 15: Error: Significand of 0 is negative
-prog.cob: 15: Error: Exponent of 0 is negative
+prog.cob: 15: Error: Invalid floating-point literal: '-0.0E-0'
+prog.cob: 15: Error: Significand of 0 must be positive
+prog.cob: 15: Error: Exponent of 0 must be positive
+prog.cob: 16: Error: Invalid floating-point literal: '1.0E00003'
 prog.cob: 16: Error: Exponent has more than 4 digits
+prog.cob: 17: Error: Invalid floating-point literal: '.12345678901234567890123456789012345E0'
 prog.cob: 17: Error: Significand has more than 34 digits
-prog.cob: 18: Error: Exponent of 0 is not 0
+prog.cob: 18: Error: Invalid floating-point literal: '0.0E3'
+prog.cob: 18: Error: Exponent of 0 must be 0
+prog.cob: 21: Error: Invalid floating-point literal: '1.0E77'
 prog.cob: 21: Error: Exponent not between -78 and 76
+prog.cob: 22: Error: Invalid floating-point literal: '1.0E-79'
 prog.cob: 22: Error: Exponent not between -78 and 76
 ])
 
@@ -1843,13 +1870,20 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
 [prog2.cob: 15: Error: 'D3' is not defined
 prog2.cob: 16: Error: '1E3' is not defined
 prog2.cob: 17: Error: 'BLAH' is not defined
+prog2.cob: 18: Error: Invalid floating-point literal: '1,0E3,0'
 prog2.cob: 18: Error: Exponent has decimal point
-prog2.cob: 19: Error: Significand of 0 is negative
-prog2.cob: 19: Error: Exponent of 0 is negative
+prog2.cob: 19: Error: Invalid floating-point literal: '-0,0E-0'
+prog2.cob: 19: Error: Significand of 0 must be positive
+prog2.cob: 19: Error: Exponent of 0 must be positive
+prog2.cob: 20: Error: Invalid floating-point literal: '1,0E00003'
 prog2.cob: 20: Error: Exponent has more than 4 digits
+prog2.cob: 21: Error: Invalid floating-point literal: ',12345678901234567890123456789012345E0'
 prog2.cob: 21: Error: Significand has more than 34 digits
-prog2.cob: 22: Error: Exponent of 0 is not 0
+prog2.cob: 22: Error: Invalid floating-point literal: '0,0E3'
+prog2.cob: 22: Error: Exponent of 0 must be 0
+prog2.cob: 25: Error: Invalid floating-point literal: '1,0E77'
 prog2.cob: 25: Error: Exponent not between -78 and 76
+prog2.cob: 26: Error: Invalid floating-point literal: '1,0E-79'
 prog2.cob: 26: Error: Exponent not between -78 and 76
 ])
 
@@ -1866,14 +1900,17 @@ AT_DATA([prog.cob], [
            DISPLAY X"0123456789ABCDEF"
 
            *> Invalid form
-           DISPLAY X"GH" X"1"
-           .
+           DISPLAY X"GH"
+                   X"1"
+           END-DISPLAY           .
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: Error: X literal contains invalid character 'G'
-prog.cob: 9: Error: X literal contains invalid character 'H'
-prog.cob: 9: Error: X literal does not have an even number of digits
+[prog.cob: 9: Error: Invalid X literal: 'GH'
+prog.cob: 9: Error: Literal contains invalid character 'G'
+prog.cob: 9: Error: Literal contains invalid character 'H'
+prog.cob: 10: Error: Invalid X literal: '1'
+prog.cob: 10: Error: Literal does not have an even number of digits
 ])
 AT_CLEANUP
 
@@ -1897,19 +1934,18 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
-[prog.cob: 9: Error: B literal contains invalid character '2'
-prog.cob: 9: Error: B literal contains invalid character '3'
-prog.cob: 10: Error: B literal too long; 64 bits max
+[prog.cob: 9: Error: Invalid B literal: '23'
+prog.cob: 9: Error: Literal contains invalid character '2'
+prog.cob: 9: Error: Literal contains invalid character '3'
+prog.cob: 10: Error: Invalid B literal: '11111111111111111111111111111111111...'
+prog.cob: 10: Error: Literal length 152 exceeds 64 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: 5: Error: Numeric boolean literal does not conform to COBOL 2014
 prog.cob: 6: Error: Numeric boolean literal does not conform to COBOL 2014
 prog.cob: 9: Error: Numeric boolean literal does not conform to COBOL 2014
-prog.cob: 9: Error: B literal contains invalid character '2'
-prog.cob: 9: Error: B literal contains invalid character '3'
 prog.cob: 10: Error: Numeric boolean literal does not conform to COBOL 2014
-prog.cob: 10: Error: B literal too long; 64 bits max
 ])
 
 AT_CLEANUP
@@ -1928,26 +1964,34 @@ AT_DATA([prog.cob], [
            *> Invalid forms
        >>SOURCE FREE
            DISPLAY B#11111111111111111111111111111111111111111111111111111111111111111
-               O#11111111111111111111111 X#11111111111111111 H#11111111111111111
+               O#11111111111111111111111 X#11111111111111111 H#22222222222222222
        >>SOURCE FIXED
-           DISPLAY B#23 O#89 X#GG H#GG
+           DISPLAY B#23 O#89 X#GG H#HH
        
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
-[prog.cob: 11: Error: B literal too long; 64 bits max
-prog.cob: 12: Error: O literal too long; 22 digits max
-prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
-prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
-prog.cob: 14: Error: B literal contains invalid character '2'
-prog.cob: 14: Error: B literal contains invalid character '3'
-prog.cob: 14: Error: O literal contains invalid character '8'
-prog.cob: 14: Error: O literal contains invalid character '9'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
+[prog.cob: 11: Error: Invalid B literal: '11111111111111111111111111111111111...'
+prog.cob: 11: Error: Literal length 65 exceeds 64 characters
+prog.cob: 12: Error: Invalid O literal: '11111111111111111111111'
+prog.cob: 12: Error: Literal length 23 exceeds 22 characters
+prog.cob: 12: Error: Invalid hexadecimal literal: '11111111111111111'
+prog.cob: 12: Error: Literal length 17 exceeds 16 characters
+prog.cob: 12: Error: Invalid hexadecimal literal: '22222222222222222'
+prog.cob: 12: Error: Literal length 17 exceeds 16 characters
+prog.cob: 14: Error: Invalid B literal: '23'
+prog.cob: 14: Error: Literal contains invalid character '2'
+prog.cob: 14: Error: Literal contains invalid character '3'
+prog.cob: 14: Error: Invalid O literal: '89'
+prog.cob: 14: Error: Literal contains invalid character '8'
+prog.cob: 14: Error: Literal contains invalid character '9'
+prog.cob: 14: Error: Invalid hexadecimal literal: 'GG'
+prog.cob: 14: Error: Literal contains invalid character 'G'
+prog.cob: 14: Error: Literal contains invalid character 'G'
+prog.cob: 14: Error: Invalid hexadecimal literal: 'HH'
+prog.cob: 14: Error: Literal contains invalid character 'H'
+prog.cob: 14: Error: Literal contains invalid character 'H'
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
@@ -1956,25 +2000,13 @@ prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 6: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 prog.cob: 11: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 11: Error: B literal too long; 64 bits max
 prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: Error: O literal too long; 22 digits max
 prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
 prog.cob: 12: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: Error: Hexadecimal literal is longer than 16 digits
 prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: Error: B literal contains invalid character '2'
-prog.cob: 14: Error: B literal contains invalid character '3'
 prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: Error: O literal contains invalid character '8'
-prog.cob: 14: Error: O literal contains invalid character '9'
 prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
-prog.cob: 14: Error: Hexadecimal literal contains invalid character 'G'
 ])
 
 AT_CLEANUP
@@ -2022,4 +2054,4 @@ prog.cob: 28: Error: Value in AT clause may not have 5 digits
 prog.cob: 29: Error: Value in AT clause may not be longer than 6 digits
 ])
 AT_CLEANUP
->>>>>>> .r644
+

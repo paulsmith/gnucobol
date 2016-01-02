@@ -1627,33 +1627,56 @@ cb_tree
 cb_build_numeric_literal (const int sign, const void *data, const int scale)
 {
 	struct cb_literal *p;
+	cb_tree			l;
 
 	p = build_literal (CB_CATEGORY_NUMERIC, data, strlen (data));
 	p->sign = (short)sign;
 	p->scale = scale;
-	return CB_TREE (p);
+
+	l = CB_TREE (p);
+	
+	l->source_file = cb_source_file;
+	l->source_line = cb_source_line;
+
+	return l;
 }
 
 cb_tree
 cb_build_numsize_literal (const void *data, const size_t size, const int sign)
 {
 	struct cb_literal *p;
+	cb_tree			l;
 
 	p = build_literal (CB_CATEGORY_NUMERIC, data, size);
 	p->sign = (short)sign;
-	return CB_TREE (p);
+
+	l = CB_TREE (p);
+	
+	l->source_file = cb_source_file;
+	l->source_line = cb_source_line;
+
+	return l;
 }
 
 cb_tree
 cb_build_alphanumeric_literal (const void *data, const size_t size)
 {
-	return CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, data, size));
+	cb_tree			l;
+
+	l = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, data, size));
+	
+	l->source_file = cb_source_file;
+	l->source_line = cb_source_line;
+
+	return l;
 }
 
 cb_tree
 cb_concat_literals (const cb_tree x1, const cb_tree x2)
 {
 	struct cb_literal	*p;
+	cb_tree			l;
+	char		lit_out[39];
 
 	if (x1 == cb_error_node || x2 == cb_error_node) {
 		return cb_error_node;
@@ -1661,7 +1684,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 
 	if ((x1->category != CB_CATEGORY_ALPHANUMERIC)
 		|| (x2->category != CB_CATEGORY_ALPHANUMERIC)) {
-		cb_error (_("Non-alphanumeric literals cannot be concatenated"));
+		cb_error_x (x1, _("Non-alphanumeric literals cannot be concatenated"));
 		return cb_error_node;
 	}
 
@@ -1669,8 +1692,22 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 	if (p == NULL) {
 		return cb_error_node;
 	}
+	if (p->size > cb_lit_length) {
+		/* shorten literal for output */
+		strncpy (lit_out, (char *)p->data, 38);
+		strcpy (lit_out + 35, "...");
+		cb_error_x (x1, _("Invalid literal: '%s'"), lit_out);
+		cb_error_x (x1, _("Literal length %d exceeds %d characters"),
+			p->size, cb_lit_length);
+		return cb_error_node;
+	}
 
-	return CB_TREE (p);
+	l = CB_TREE (p);
+	
+	l->source_file = x1->source_file;
+	l->source_line = x1->source_line;
+
+	return l;
 }
 
 /* Decimal */
@@ -2481,12 +2518,19 @@ cb_tree
 cb_build_reference (const char *name)
 {
 	struct cb_reference *p;
+	cb_tree			r;
 
 	p = make_tree (CB_TAG_REFERENCE, CB_CATEGORY_UNKNOWN,
 		       sizeof (struct cb_reference));
 	/* Look up / insert word into hash list */
 	lookup_word (p, name);
-	return CB_TREE (p);
+
+	r = CB_TREE (p);
+	
+	r->source_file = cb_source_file;
+	r->source_line = cb_source_line;
+
+	return r;
 }
 
 cb_tree

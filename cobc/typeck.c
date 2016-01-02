@@ -5585,7 +5585,7 @@ cb_emit_goto (cb_tree target, cb_tree depending)
 		return;
 	}
 	if (target == NULL) {
-		cb_verify (cb_goto_statement_without_name, "GO TO without procedure-name");
+		cb_verify (cb_goto_statement_without_name, _("GO TO without procedure-name"));
 	} else if (depending) {
 		/* GO TO procedure-name ... DEPENDING ON identifier */
 		if (cb_check_numeric_value (depending) == cb_error_node) {
@@ -6636,11 +6636,11 @@ numlit_overflow:
 	return 0;
 
 non_integer_move:
+	if (cb_move_noninteger_to_alphanumeric == CB_ERROR) {
+		goto invalid;
+	}
 	if (!suppress_warn) {
-		if (cb_move_noninteger_to_alphanumeric == CB_ERROR) {
-			goto invalid;
-		}
-		cb_warning_x (loc, _("Move non-integer to alphanumeric"));
+		cb_warning_x (loc, _("MOVE of non-integer to alphanumeric"));
 	}
 	return 0;
 
