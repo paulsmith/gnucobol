@@ -768,7 +768,7 @@ check_not_88_level (cb_tree x)
 {
 	struct cb_field	*f;
 
-	if (x != cb_error_node && x->tag != CB_TAG_REFERENCE) {
+	if (x == cb_error_node || x->tag != CB_TAG_REFERENCE) {
 		return;
 	}
 
