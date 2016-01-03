@@ -129,3 +129,33 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
+
+
+AT_SETUP([Referencing 88-level])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  flag PIC X.
+           88  blah VALUE "N".
+
+       SCREEN           SECTION.
+       01  scr.
+           03  PIC X COLUMN blah TO blah FROM blah.
+       
+       PROCEDURE        DIVISION.
+           ACCEPT scr
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: Error: 88-level cannot be used here
+prog.cob: 12: Error: 88-level cannot be used here
+prog.cob: 12: Error: 88-level cannot be used here
+])
+
+AT_CLEANUP

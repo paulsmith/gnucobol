@@ -1,11 +1,16 @@
 
+2016-01-03  Edward Hart <edwdrd.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #178 - added check that certain identifiers are
+	  not 88-level items.
+
 2016-01-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: moved SET_LOCALATION to tree.c (cb_build_xyz)
 	* tree.c (cb_concat_literals): the new literal inherits its position from
 	  the first literal, check for cb_literal_length
 	ODO checks:
-	* parser.y (integer): return numeric literal -1 instead of cb_int1 
+	* parser.y (integer): return numeric literal -1 instead of cb_int1
 	  for incorrect numerical literals
 	* parser.y: add check OCCURS max. must be greater than OCCURS min.
 	NESTED OCCURS with DEPENDING - feature-requests:#99:
@@ -204,7 +209,7 @@
 	  floating-point literal
 
 	compiler configuration, including feature-request #43:
-	* config.def: new configurations "literal-length" and 
+	* config.def: new configurations "literal-length" and
 	  "numeric-literal-length"
 	* typeck.c (non_integer_move): don't value suppress_warn more than
 	  cb_move_noninteger_to_alphanumeric

@@ -763,6 +763,22 @@ has_relative_pos (struct cb_field const *field)
 		   | COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS));
 }
 
+static void
+check_not_88_level (cb_tree x)
+{
+	struct cb_field	*f;
+
+	if (x != cb_error_node && x->tag != CB_TAG_REFERENCE) {
+		return;
+	}
+
+	f = CB_FIELD (cb_ref (x));
+	
+	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
+		cb_error (_("88-level cannot be used here"));
+	}
+}
+ 
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -5102,6 +5118,8 @@ screen_option:
 | screen_occurs_clause
 | USING identifier
   {
+	check_not_88_level ($2);
+
 	check_pic_repeated ("USING", SYN_CLAUSE_20);
 	current_field->screen_from = $2;
 	current_field->screen_to = $2;
@@ -5114,6 +5132,8 @@ screen_option:
   }
 | TO identifier
   {
+	check_not_88_level ($2);
+
 	check_pic_repeated ("TO", SYN_CLAUSE_22);
 	current_field->screen_to = $2;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
@@ -10076,17 +10096,26 @@ numeric_value:
 
 id_or_lit:
   identifier
+  {
+	check_not_88_level ($1);
+  }
 | LITERAL
 ;
 
 id_or_lit_or_func:
   identifier
+  {
+	check_not_88_level ($1);
+  }
 | LITERAL
 | function
 ;
 
 num_id_or_lit:
   sub_identifier
+  {
+	check_not_88_level ($1);
+  }
 | integer
 | ZERO
   {
@@ -10096,16 +10125,25 @@ num_id_or_lit:
 
 positive_id_or_lit:
   sub_identifier
+  {
+	check_not_88_level ($1);
+  }
 | report_integer
 ;
 
 pos_num_id_or_lit:
   sub_identifier
+  {
+	check_not_88_level ($1);
+  }
 | integer
 ;
 
 from_parameter:
   identifier
+  {
+	check_not_88_level ($1);
+  }
 | literal
 | function
 ;
