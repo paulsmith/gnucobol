@@ -3823,9 +3823,16 @@ output_call (struct cb_call *p)
 /* SET ATTRIBUTE */
 
 static void
-output_set_attribute (const struct cb_field *f,
-		      const int val_on, const int val_off)
+output_set_attribute (const struct cb_field *f, int val_on, int val_off)
 {
+	/* Extension */
+	/* Prevent specifying HIGHLIGHT and LOWLIGHT simultaneously. */
+	if (val_on & COB_SCREEN_HIGHLIGHT) {
+		val_off |= COB_SCREEN_LOWLIGHT;
+	} else if (val_on & COB_SCREEN_LOWLIGHT) {
+		val_off |= COB_SCREEN_HIGHLIGHT;
+	}
+	
 	if (val_on) {
 		output_line ("s_%d.attr |= 0x%x;", f->id, val_on);
 	}

@@ -159,3 +159,28 @@ prog.cob: 12: Error: 88-level cannot be used here
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([HIGHLIGHT and LOWLIGHT simultaneously])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01  scr.
+           03  VALUE "foo" HIGHLIGHT, LOWLIGHT.
+
+       PROCEDURE        DIVISION.
+           SET scr ATTRIBUTE HIGHLIGHT ON, LOWLIGHT OFF
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
+prog.cob: 11: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
+])
+
+AT_CLEANUP

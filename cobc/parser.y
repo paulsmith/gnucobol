@@ -583,6 +583,18 @@ check_comp_repeated (const char *clause, const unsigned int bitval)
 }
 
 static void
+check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
+{	
+	if (flag_to_set == COB_SCREEN_LOWLIGHT
+	    && (flags & COB_SCREEN_HIGHLIGHT)) {
+		cb_error (_("Cannot specify both HIGHLIGHT and LOWLIGHT"));
+	} else if (flag_to_set == COB_SCREEN_HIGHLIGHT
+		   && (flags & COB_SCREEN_LOWLIGHT)) {
+		cb_error (_("Cannot specify both HIGHLIGHT and LOWLIGHT"));
+	}
+}
+ 
+static void
 check_screen_attr (const char *clause, const int bitval)
 {
 	if (current_field->screen_flag & bitval) {
@@ -592,6 +604,8 @@ check_screen_attr (const char *clause, const int bitval)
 			cb_error (_("Duplicate %s clause"), clause);
 		}
 	} else {
+		check_not_highlight_and_lowlight (current_field->screen_flag,
+						  bitval);
 		current_field->screen_flag |= bitval;
 	}
 }
@@ -640,6 +654,8 @@ check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 		current_statement->attr_ptr->size_is = size_is;
 	}
 	/* Attribute */
+	check_not_highlight_and_lowlight (current_statement->attr_ptr->dispattrs,
+					  attrib);
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
@@ -8299,10 +8315,14 @@ set_attr_one:
 | HIGHLIGHT on_or_off
   {
 	bit_set_attr ($2, COB_SCREEN_HIGHLIGHT);
+	check_not_highlight_and_lowlight (setattr_val_on | setattr_val_off,
+					  COB_SCREEN_HIGHLIGHT);
   }
 | LOWLIGHT on_or_off
   {
 	bit_set_attr ($2, COB_SCREEN_LOWLIGHT);
+	check_not_highlight_and_lowlight (setattr_val_on | setattr_val_off,
+					  COB_SCREEN_LOWLIGHT);
   }
 | REVERSE_VIDEO on_or_off
   {

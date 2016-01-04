@@ -1,5 +1,12 @@
 
-2016-01-03  Edward Hart <edwdrd.dan.hart@gmail.com>
+2016-01-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #180 - added check that HIGHLIGHT and LOWLIGHT are
+	  not specified at the same time.
+	* codegen.c (output_set_attribute): made HIGLIGHT ON imply LOWLIGHT off
+	  and vice versa.
+
+2016-01-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #178 - added check that certain identifiers are
 	  not 88-level items.
