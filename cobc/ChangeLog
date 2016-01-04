@@ -1,5 +1,5 @@
 
-2016-01-03  Edward Hart <edward.dan.hart@gmail.com>
+2016-01-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #180 - added check that HIGHLIGHT and LOWLIGHT are
 	  not specified at the same time.
