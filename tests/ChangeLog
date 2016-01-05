@@ -28,7 +28,7 @@
 	* atlocal_win: set tests to skip (via COB_HAS_ISAM / COB_HAS_CURSES)
 	  depending on available features (parsing cobc --info)
 
-22015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.src/configuration.at: mayor update including runtime
 	  configuration
@@ -59,6 +59,11 @@
 	* moved tests for checking compiler configuration from
 	  testsuite.src/syn_misc.at to testsuite.src/configuration.at, updated
 	  tests and added new ones
+
+2015-02-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobol85/Makefile.am: added target for decompressing newcob.val.Z and
+	  download it
 
 2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
