@@ -24,17 +24,18 @@ cobc_SOURCES = cobc.c cobc.h config.c tree.c tree.h reserved.c error.c \
 	parser.c parser.h scanner.c field.c typeck.c codegen.c ppparse.c \
 	ppparse.h pplex.c config.def flag.def warning.def codeoptim.def \
 	ppparse.def codeoptim.c
-dist_man_MANS = cobc.1
 
 cobc_CFLAGS = -I$(top_srcdir)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a
 
-SEDS = \(\#if defined (__STDC_VERSION__) \&\& __STDC_VERSION__ >= 199901L\)\n\n
-SEDE = \1 \\\n\&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)\n\n
+dist_man_MANS = cobc.1
 
 cobc.1: cobc.c flag.def warning.def $(top_srcdir)/configure.ac
 	$(MAKE) $(AM_MAKEFLAGS) cobc$(EXEEXT)
 	help2man --output=cobc.1  --info-page=gnucobol ./cobc$(EXEEXT)
+
+SEDS = \(\#if defined (__STDC_VERSION__) \&\& __STDC_VERSION__ >= 199901L\)\n\n
+SEDE = \1 \\\n\&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)\n\n
 
 BUILT_SOURCES = parser.c parser.h scanner.c ppparse.c ppparse.h pplex.c
 EXTRA_DIST = ppparse.y pplex.l parser.y scanner.l
@@ -44,8 +45,7 @@ CLEANFILES = parser.output ppparse.output
 # "sed -i" isn't supported on all systems --> use sed && mv
 .l.c:
 	LC_CTYPE=C flex -s -o$@.tmp $< && \
-	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@ > $@.tmp &&\
-	mv -f $@.tmp $@
+	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@.tmp > $@
 
 
 .y.c:
