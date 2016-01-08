@@ -1100,21 +1100,47 @@ cob_call (const char *name, const int argc, void **argv)
 	for (i = 0; i < argc; ++i) {
 		pargv[i] = argv[i];
 	}
-	i =  unifunc.funcint (pargv[0], pargv[1], pargv[2], pargv[3],
-				pargv[4], pargv[5], pargv[6], pargv[7],
-				pargv[8], pargv[9], pargv[10], pargv[11],
-#if	COB_MAX_FIELD_PARAMS == 16
-				pargv[12], pargv[13], pargv[14], pargv[15]);
-#elif	COB_MAX_FIELD_PARAMS == 36
-				pargv[12], pargv[13], pargv[14], pargv[15],
-				pargv[16], pargv[17], pargv[18], pargv[19],
-				pargv[20], pargv[21], pargv[22], pargv[23],
-				pargv[24], pargv[25], pargv[26], pargv[27],
-				pargv[28], pargv[29], pargv[30], pargv[31],
-				pargv[32], pargv[33], pargv[34], pargv[35]);
+#if	COB_MAX_FIELD_PARAMS == 16 || \
+	COB_MAX_FIELD_PARAMS == 36 || \
+	COB_MAX_FIELD_PARAMS == 56 || \
+	COB_MAX_FIELD_PARAMS == 76 || \
+	COB_MAX_FIELD_PARAMS == 96
 #else
 #error	"Invalid COB_MAX_FIELD_PARAMS value"
 #endif
+	i =  unifunc.funcint (pargv[0], pargv[1], pargv[2], pargv[3]
+				,pargv[4], pargv[5], pargv[6], pargv[7]
+				,pargv[8], pargv[9], pargv[10], pargv[11]
+				,pargv[12], pargv[13], pargv[14], pargv[15]
+#if	COB_MAX_FIELD_PARAMS > 16
+				,pargv[16], pargv[17], pargv[18], pargv[19]
+				,pargv[20], pargv[21], pargv[22], pargv[23]
+				,pargv[24], pargv[25], pargv[26], pargv[27]
+				,pargv[28], pargv[29], pargv[30], pargv[31]
+				,pargv[32], pargv[33], pargv[34], pargv[35]
+#if	COB_MAX_FIELD_PARAMS > 36
+				,pargv[36], pargv[37], pargv[38], pargv[39]
+				,pargv[40], pargv[41], pargv[42], pargv[43]
+				,pargv[44], pargv[45], pargv[46], pargv[47]
+				,pargv[48], pargv[49], pargv[50], pargv[51]
+				,pargv[52], pargv[53], pargv[54], pargv[55]
+#if	COB_MAX_FIELD_PARAMS > 56
+				,pargv[56], pargv[57], pargv[58], pargv[59]
+				,pargv[60], pargv[61], pargv[62], pargv[63]
+				,pargv[64], pargv[65], pargv[66], pargv[67]
+				,pargv[68], pargv[69], pargv[70], pargv[71]
+				,pargv[72], pargv[73], pargv[74], pargv[75]
+#if	COB_MAX_FIELD_PARAMS > 76
+				,pargv[76], pargv[77], pargv[78], pargv[79]
+				,pargv[80], pargv[81], pargv[82], pargv[83]
+				,pargv[84], pargv[85], pargv[86], pargv[87]
+				,pargv[88], pargv[89], pargv[90], pargv[91]
+				,pargv[92], pargv[93], pargv[94], pargv[95]
+#endif
+#endif
+#endif
+#endif
+				);
 	cob_free (pargv);
 	return i;
 }

@@ -539,8 +539,8 @@
 /* Maximum size of file records */
 #define	MAX_FD_RECORD		65535
 
-/* Maximum number of parameters */
-#define	COB_MAX_FIELD_PARAMS	36
+/* Maximum number of parameters, possible values: 16,36,56,76,96 */
+#define	COB_MAX_FIELD_PARAMS	36	/* ToDo: move to config.h */
 
 /* Maximum number of field digits */
 #define	COB_MAX_DIGITS		38
