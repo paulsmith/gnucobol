@@ -50,8 +50,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L \
-&&(!defined(_MSC_VER) || _MSC_VER >= 1800)
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -162,7 +161,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -2162,7 +2169,7 @@ static void	check_comments		(const char *, const char *);
 
 
 
-#line 2165 "pplex.c"
+#line 2173 "pplex.c"
 
 #define INITIAL 0
 #define COPY_STATE 1
@@ -2236,7 +2243,12 @@ static int input (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -2373,7 +2385,7 @@ YY_DECL
 
 
 
-#line 2376 "pplex.c"
+#line 2389 "pplex.c"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3492,7 +3504,7 @@ YY_RULE_SETUP
 #line 715 "pplex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3495 "pplex.c"
+#line 3508 "pplex.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4369,7 +4381,7 @@ void ppfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 715 "pplex.l"
+#line 714 "pplex.l"
 
 
 
@@ -4903,11 +4915,9 @@ start:
 			newline_count++;
 			goto start;
 		} else if (!need_continuation) {
-			cb_plex_error (newline_count,
-				       _("Invalid continuation: no literal/word needs to be continued"));
-		} else {
-			continuation = 1;
+			cb_verify (cb_word_continuation, _("Continuation of COBOL words"));
 		}
+		continuation = 1;
 		break;
 	case 'd':
 	case 'D':
@@ -5288,7 +5298,7 @@ check_comments (const char *keyword, const char *text)
 {
 	/* Treated as comments when in Identification Division */
 	if (comment_allowed) {
-		cb_verify (cb_author_paragraph, keyword);
+		cb_verify (cb_comment_paragraphs, keyword);
 		/* Skip comments until the end of line */
 		within_comment = 1;
 		skip_to_eol ();

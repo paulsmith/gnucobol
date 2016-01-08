@@ -1,4 +1,9 @@
 
+2016-01-08  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l, config.def: reverted [r605]. Marked continuation of COBOL
+	  words as archaic in standard-conforming implementations.
+
 2016-01-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #180 - added check that HIGHLIGHT and LOWLIGHT are

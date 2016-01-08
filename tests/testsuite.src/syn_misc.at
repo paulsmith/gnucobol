@@ -1766,22 +1766,24 @@ prog3.cob: 13: Error: syntax error, unexpected Literal
 
 AT_CLEANUP
 
-AT_SETUP([Continuation Indicator - No literal to continue])
+AT_SETUP([Continuation of COBOL words])
 AT_KEYWORDS([misc fixed literals])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           DISPLAY "Hello,"
-      -        " world!"
-           END-DISPLAY
-           STOP RUN.
+           GO
+      -    BACK.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: Error: Invalid continuation: no literal/word needs to be continued
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [0], [],
+[prog.cob: 5: Warning: Continuation of COBOL words is archaic in COBOL 2014
 ])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 5: Warning: Continuation of COBOL words used
+])
+
 
 AT_CLEANUP
 

@@ -24,6 +24,12 @@ text-column:			72
 # first (currently 61)
 word-length:			31
 
+# Maximum literal size in general
+literal-length:			8191
+
+# Maximum numeric literal size
+numeric-literal-length:	61
+
 # Value: 'mf', 'ibm'
 # 
 assign-clause:			mf
@@ -119,7 +125,8 @@ accept-auto:		no
 #        'unconformable'
 
 alter-statement:			obsolete
-author-paragraph:			obsolete
+comment-paragraphs:			obsolete
+call-overflow:				archaic
 data-records-clause:			obsolete
 debugging-line:				ok
 eject-statement:			skip
@@ -139,5 +146,6 @@ top-level-occurs-clause:		ok
 value-of-clause:			obsolete
 numeric-boolean:			unconformable
 acucobol-literals:			unconformable
+word-continuation:			warning
 @end verbatim
 

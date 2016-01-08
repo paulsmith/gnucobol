@@ -56,8 +56,8 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -std=default prog.cob], [0], [],
 [prog.cob: 4: Warning: AUTHOR is obsolete in GnuCOBOL
 ])
-AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 4: Error: AUTHOR does not conform to COBOL 85
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [0], [],
+[prog.cob: 4: Warning: AUTHOR is obsolete in COBOL 85
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
 [prog.cob: 4: Error: AUTHOR does not conform to COBOL 2002
@@ -132,7 +132,7 @@ AT_KEYWORDS([configuration misc])
 AT_DATA([test.conf], [
 include "default.conf"
 name: "Sample Conf"
-author-paragraph:                       ok
+comment-paragraphs:                       ok
 ])
 
 AT_DATA([prog.cob], [
@@ -199,7 +199,7 @@ AT_KEYWORDS([configuration misc])
 AT_DATA([test.conf], [
 include "mf.conf"
 name: "Sample Conf"
-author-paragraph:                       ok
+comment-paragraphs:                       ok
 ])
 
 AT_DATA([prog.cob], [
@@ -233,7 +233,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=author-paragraph:ok prog.cob],
+AT_CHECK([$COMPILE_ONLY -cb_conf=comment-paragraphs:ok prog.cob],
 [0], [], [])
 
 AT_CLEANUP
@@ -245,7 +245,7 @@ AT_KEYWORDS([configuration misc])
 AT_DATA([test.conf], [
 include "default.conf"
 name: "Sample Conf"
-author-paragraph:   unconformable
+comment-paragraphs:   unconformable
 ])
 
 AT_DATA([prog.cob], [
@@ -260,13 +260,13 @@ AT_DATA([prog.cob], [
 
 # -cb_conf must work
 AT_CHECK([$COMPILE_ONLY \
--cb_conf=author-paragraph:ok prog.cob], [0], [], [])
+-cb_conf=comment-paragraphs:ok prog.cob], [0], [], [])
 
 # -cb_conf must override all (no matter where it's used)
 AT_CHECK([$COMPILE_ONLY \
--cb_conf=author-paragraph:ok -conf=test.conf prog.cob], [0], [], [])
+-cb_conf=comment-paragraphs:ok -conf=test.conf prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY \
--conf=test.conf -cb_conf=author-paragraph:ok prog.cob],
+-conf=test.conf -cb_conf=comment-paragraphs:ok prog.cob],
 [0], [], [])
 
 AT_CLEANUP
@@ -287,9 +287,9 @@ AT_DATA([prog.cob], [
 
 # conf entries must be clean
 AT_CHECK([$COMPILE_ONLY \
--cb_conf=author-paragraphok prog.cob], [1], [],
+-cb_conf=comment-paragraphsok prog.cob], [1], [],
 [Configuration Error
-cb_conf: Invalid configuration tag 'author-paragraphok'
+cb_conf: Invalid configuration tag 'comment-paragraphsok'
 ])
 AT_CHECK([$COMPILE_ONLY \
 -cb_conf=assign-clause:cobol2002 prog.cob], [1], [],
@@ -346,7 +346,7 @@ include "test2.conf"
 
 AT_DATA([test2.conf], [
 name: "Sample Conf"
-author-paragraph:                       ok
+comment-paragraphs:                       ok
 ])
 
 AT_DATA([prog.cob], [
@@ -401,7 +401,7 @@ test.conf: Missing definitions:
 	No definition of 'hostsign'
 	No definition of 'accept-update'
 	No definition of 'accept-auto'
-	No definition of 'author-paragraph'
+	No definition of 'comment-paragraphs'
 	No definition of 'memory-size-clause'
 	No definition of 'multiple-file-tape-clause'
 	No definition of 'label-records-clause'
@@ -423,6 +423,7 @@ test.conf: Missing definitions:
 	No definition of 'call-overflow'
 	No definition of 'numeric-boolean'
 	No definition of 'acucobol-literals'
+	No definition of 'word-continuation'
 ])
 
 AT_CLEANUP
