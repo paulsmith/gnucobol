@@ -182,6 +182,7 @@ static int			size_mode;
 static int			setattr_val_on;
 static int			setattr_val_off;
 static unsigned int		check_duplicate;
+static unsigned int		check_on_off_duplicate;
 static unsigned int		check_pic_duplicate;
 static unsigned int		check_comp_duplicate;
 static unsigned int		skip_statements;
@@ -541,44 +542,16 @@ clear_initial_values (void)
 }
 
 static void
-check_repeated (const char *clause, const unsigned int bitval)
+check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
 {
-	if (check_duplicate & bitval) {
+	if (*already_seen & bitval) {
 		if (cb_relaxed_syntax_check) {
 			cb_warning (_("Duplicate %s clause"), clause);
 		} else {
 			cb_error (_("Duplicate %s clause"), clause);
 		}
 	} else {
-		check_duplicate |= bitval;
-	}
-}
-
-static void
-check_pic_repeated (const char *clause, const unsigned int bitval)
-{
-	if (check_pic_duplicate & bitval) {
-		if (cb_relaxed_syntax_check) {
-			cb_warning (_("Duplicate %s clause"), clause);
-		} else {
-			cb_error (_("Duplicate %s clause"), clause);
-		}
-	} else {
-		check_pic_duplicate |= bitval;
-	}
-}
-
-static void
-check_comp_repeated (const char *clause, const unsigned int bitval)
-{
-	if (check_comp_duplicate & bitval) {
-		if (cb_relaxed_syntax_check) {
-			cb_warning (_("Duplicate %s clause"), clause);
-		} else {
-			cb_error (_("Duplicate %s clause"), clause);
-		}
-	} else {
-		check_comp_duplicate |= bitval;
+		*already_seen |= bitval;
 	}
 }
 
@@ -672,7 +645,7 @@ remove_attrib (int attrib)
 static void
 check_set_usage (const enum cb_usage usage)
 {
-	check_pic_repeated ("USAGE", SYN_CLAUSE_5);
+	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	current_field->usage = usage;
 }
 
@@ -1770,7 +1743,7 @@ source_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
-	check_comp_repeated ("SOURCE-COMPUTER", SYN_CLAUSE_1);
+	check_repeated ("SOURCE-COMPUTER", SYN_CLAUSE_1, &check_comp_duplicate);
 	if (warningopt && (check_comp_duplicate & SYN_CLAUSE_2)) {
 		cb_warning (_("Phrases in non-standard order"));
 	}
@@ -1801,7 +1774,7 @@ object_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
-	check_comp_repeated ("OBJECT-COMPUTER", SYN_CLAUSE_2);
+	check_repeated ("OBJECT-COMPUTER", SYN_CLAUSE_2, &check_comp_duplicate);
   }
   object_computer_entry
 ;
@@ -2073,22 +2046,29 @@ special_name_mnemonic_on_off:
 ;
 
 on_off_clauses:
+  on_off_clauses_1
+  {
+	  check_on_off_duplicate = 0;
+  }
+;
+
+on_off_clauses_1:
   on_or_off _onoff_status undefined_word
   {
 	cb_tree		x;
-
+	
 	/* cb_define_switch_name checks param validity */
 	x = cb_define_switch_name ($3, save_tree, $1 == cb_int1);
 	if (x) {
 		if ($1 == cb_int1) {
-			check_repeated ("ON", SYN_CLAUSE_1);
+			check_repeated ("ON", SYN_CLAUSE_1, &check_on_off_duplicate);
 		} else {
-			check_repeated ("OFF", SYN_CLAUSE_2);
+			check_repeated ("OFF", SYN_CLAUSE_2, &check_on_off_duplicate);
 		}
 		CB_CHAIN_PAIR (current_program->mnemonic_spec_list, $3, x);
 	}
   }
-| on_off_clauses on_or_off _onoff_status undefined_word
+| on_off_clauses_1 on_or_off _onoff_status undefined_word
   {
 	cb_tree		x;
 
@@ -2096,9 +2076,9 @@ on_off_clauses:
 	x = cb_define_switch_name ($4, save_tree, $2 == cb_int1);
 	if (x) {
 		if ($2 == cb_int1) {
-			check_repeated ("ON", SYN_CLAUSE_1);
+			check_repeated ("ON", SYN_CLAUSE_1, &check_on_off_duplicate);
 		} else {
-			check_repeated ("OFF", SYN_CLAUSE_2);
+			check_repeated ("OFF", SYN_CLAUSE_2, &check_on_off_duplicate);
 		}
 		CB_CHAIN_PAIR (current_program->mnemonic_spec_list, $4, x);
 	}
@@ -2410,7 +2390,7 @@ currency_sign_clause:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 		error_ind = 1;
 	}
-	check_repeated ("CURRENCY", SYN_CLAUSE_1);
+	check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
 	if ($5) {
 		PENDING ("PICTURE SYMBOL");
 	}
@@ -2500,7 +2480,7 @@ decimal_point_clause:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
-		check_repeated ("DECIMAL-POINT", SYN_CLAUSE_2);
+		check_repeated ("DECIMAL-POINT", SYN_CLAUSE_2, &check_duplicate);
 		current_program->decimal_point = ',';
 		current_program->numeric_separator = '.';
 	}
@@ -2535,7 +2515,7 @@ cursor_clause:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
-		check_repeated ("CURSOR", SYN_CLAUSE_3);
+		check_repeated ("CURSOR", SYN_CLAUSE_3, &check_duplicate);
 		current_program->cursor_pos = $3;
 	}
   }
@@ -2553,7 +2533,7 @@ crt_status_clause:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
-		check_repeated ("CRT STATUS", SYN_CLAUSE_4);
+		check_repeated ("CRT STATUS", SYN_CLAUSE_4, &check_duplicate);
 		current_program->crt_status = $4;
 	}
   }
@@ -2571,7 +2551,7 @@ screen_control:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
-		check_repeated ("SCREEN CONTROL", SYN_CLAUSE_5);
+		check_repeated ("SCREEN CONTROL", SYN_CLAUSE_5, &check_duplicate);
 		PENDING ("SCREEN CONTROL");
 	}
   }
@@ -2588,7 +2568,7 @@ event_status:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
-		check_repeated ("EVENT STATUS", SYN_CLAUSE_6);
+		check_repeated ("EVENT STATUS", SYN_CLAUSE_6, &check_duplicate);
 		PENDING ("EVENT STATUS");
 	}
   }
@@ -2686,13 +2666,13 @@ select_clause:
 assign_clause:
   ASSIGN _to_using _ext_clause _line_adv_file assignment_name
   {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1);
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
 	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
 | ASSIGN _to_using _ext_clause device_name opt_assignment_name
   {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1);
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -2702,7 +2682,7 @@ assign_clause:
   }
 | ASSIGN _to_using _ext_clause DISPLAY opt_assignment_name
   {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1);
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -2715,7 +2695,7 @@ assign_clause:
   }
 | ASSIGN _to_using _ext_clause KEYBOARD opt_assignment_name
   {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1);
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -2728,7 +2708,7 @@ assign_clause:
   }
 | ASSIGN _to_using _ext_clause PRINTER opt_assignment_name
   {
-	check_repeated ("ASSIGN", SYN_CLAUSE_1);
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
 	if ($5) {
@@ -2784,7 +2764,7 @@ access_mode_clause:
   ACCESS _mode _is access_mode
   {
 	cobc_cs_check = 0;
-	check_repeated ("ACCESS", SYN_CLAUSE_2);
+	check_repeated ("ACCESS", SYN_CLAUSE_2, &check_duplicate);
   }
 ;
 
@@ -2841,7 +2821,7 @@ suppress_clause:
 collating_sequence_clause:
   coll_sequence _is WORD
   {
-	check_repeated ("COLLATING", SYN_CLAUSE_3);
+	check_repeated ("COLLATING", SYN_CLAUSE_3, &check_duplicate);
 	PENDING ("COLLATING SEQUENCE");
   }
 ;
@@ -2852,7 +2832,7 @@ collating_sequence_clause:
 file_status_clause:
   file_or_sort STATUS _is reference
   {
-	check_repeated ("STATUS", SYN_CLAUSE_4);
+	check_repeated ("STATUS", SYN_CLAUSE_4, &check_duplicate);
 	current_file->file_status = $4;
   }
 ;
@@ -2867,7 +2847,7 @@ file_or_sort:
 
 lock_mode_clause:
   {
-	check_repeated ("LOCK", SYN_CLAUSE_5);
+	check_repeated ("LOCK", SYN_CLAUSE_5, &check_duplicate);
   }
   LOCK _mode _is lock_mode
 ;
@@ -2914,22 +2894,22 @@ organization_clause:
 organization:
   INDEXED
   {
-	check_repeated ("ORGANIZATION", SYN_CLAUSE_6);
+	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
 	current_file->organization = COB_ORG_INDEXED;
   }
 | _record _binary SEQUENTIAL
   {
-	check_repeated ("ORGANIZATION", SYN_CLAUSE_6);
+	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
 	current_file->organization = COB_ORG_SEQUENTIAL;
   }
 | RELATIVE
   {
-	check_repeated ("ORGANIZATION", SYN_CLAUSE_6);
+	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
 	current_file->organization = COB_ORG_RELATIVE;
   }
 | LINE SEQUENTIAL
   {
-	check_repeated ("ORGANIZATION", SYN_CLAUSE_6);
+	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
   }
 ;
@@ -2940,7 +2920,7 @@ organization:
 padding_character_clause:
   PADDING _character _is reference_or_literal
   {
-	check_repeated ("PADDING", SYN_CLAUSE_7);
+	check_repeated ("PADDING", SYN_CLAUSE_7, &check_duplicate);
 	cb_verify (cb_padding_character_clause, "PADDING CHARACTER");
   }
 ;
@@ -2951,7 +2931,7 @@ padding_character_clause:
 record_delimiter_clause:
   RECORD DELIMITER _is STANDARD_1
   {
-	check_repeated ("RECORD DELIMITER", SYN_CLAUSE_8);
+	check_repeated ("RECORD DELIMITER", SYN_CLAUSE_8, &check_duplicate);
   }
 ;
 
@@ -2961,7 +2941,7 @@ record_delimiter_clause:
 record_key_clause:
   RECORD _key _is opt_splitk
   {
-	check_repeated ("RECORD KEY", SYN_CLAUSE_9);
+	check_repeated ("RECORD KEY", SYN_CLAUSE_9, &check_duplicate);
 	current_file->key = $4;
   }
 ;
@@ -2977,7 +2957,7 @@ opt_splitk:
 relative_key_clause:
   RELATIVE _key _is reference
   {
-	check_repeated ("RELATIVE KEY", SYN_CLAUSE_10);
+	check_repeated ("RELATIVE KEY", SYN_CLAUSE_10, &check_duplicate);
 	current_file->key = $4;
   }
 ;
@@ -2988,7 +2968,7 @@ relative_key_clause:
 reserve_clause:
   RESERVE no_or_integer _area
   {
-	check_repeated ("RESERVE", SYN_CLAUSE_11);
+	check_repeated ("RESERVE", SYN_CLAUSE_11, &check_duplicate);
   }
 ;
 
@@ -3002,7 +2982,7 @@ no_or_integer:
 sharing_clause:
   SHARING _with sharing_option
   {
-	check_repeated ("SHARING", SYN_CLAUSE_12);
+	check_repeated ("SHARING", SYN_CLAUSE_12, &check_duplicate);
 	current_file->sharing = $3;
   }
 ;
@@ -3189,7 +3169,7 @@ file_description_clause_sequence:
 file_description_clause:
   _is EXTERNAL
   {
-	check_repeated ("EXTERNAL", SYN_CLAUSE_1);
+	check_repeated ("EXTERNAL", SYN_CLAUSE_1, &check_duplicate);
 #if	0	/* RXWRXW - Global/External */
 	if (current_file->flag_global) {
 		cb_error (_("File cannot have both EXTERNAL and GLOBAL clauses"));
@@ -3199,7 +3179,7 @@ file_description_clause:
   }
 | _is GLOBAL
   {
-	check_repeated ("GLOBAL", SYN_CLAUSE_2);
+	check_repeated ("GLOBAL", SYN_CLAUSE_2, &check_duplicate);
 #if	0	/* RXWRXW - Global/External */
 	if (current_file->flag_external) {
 		cb_error (_("File cannot have both EXTERNAL and GLOBAL clauses"));
@@ -3229,7 +3209,7 @@ file_description_clause:
 block_contains_clause:
   BLOCK _contains integer opt_to_integer _records_or_characters
   {
-	check_repeated ("BLOCK", SYN_CLAUSE_3);
+	check_repeated ("BLOCK", SYN_CLAUSE_3, &check_duplicate);
 	/* ignore */
   }
 ;
@@ -3242,7 +3222,7 @@ _records_or_characters:	| RECORDS | CHARACTERS ;
 record_clause:
   RECORD _contains integer _characters
   {
-	check_repeated ("RECORD", SYN_CLAUSE_4);
+	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
 		if (warningopt) {
 			cb_warning (_("RECORD clause ignored for LINE SEQUENTIAL"));
@@ -3264,7 +3244,7 @@ record_clause:
   {
 	int	error_ind = 0;
 
-	check_repeated ("RECORD", SYN_CLAUSE_4);
+	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
 		if (warningopt) {
 			cb_warning (_("RECORD clause ignored for LINE SEQUENTIAL"));
@@ -3299,7 +3279,7 @@ record_clause:
   {
 	int	error_ind = 0;
 
-	check_repeated ("RECORD", SYN_CLAUSE_4);
+	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	current_file->record_min = $6 ? cb_get_int ($6) : 0;
 	current_file->record_max = $7 ? cb_get_int ($7) : 0;
 	if ($6 && current_file->record_min < 0)  {
@@ -3348,7 +3328,7 @@ opt_to_integer:
 label_records_clause:
   LABEL records label_option
   {
-	check_repeated ("LABEL", SYN_CLAUSE_5);
+	check_repeated ("LABEL", SYN_CLAUSE_5, &check_duplicate);
 	cb_verify (cb_label_records_clause, "LABEL RECORDS");
   }
 ;
@@ -3359,12 +3339,12 @@ label_records_clause:
 value_of_clause:
   VALUE OF file_id _is valueof_name
   {
-	check_repeated ("VALUE OF", SYN_CLAUSE_6);
+	check_repeated ("VALUE OF", SYN_CLAUSE_6, &check_duplicate);
 	cb_verify (cb_value_of_clause, "VALUE OF");
   }
 | VALUE OF FILE_ID _is valueof_name
   {
-	check_repeated ("VALUE OF", SYN_CLAUSE_6);
+	check_repeated ("VALUE OF", SYN_CLAUSE_6, &check_duplicate);
 	cb_verify (cb_value_of_clause, "VALUE OF");
 	if (!current_file->assign) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -3387,7 +3367,7 @@ valueof_name:
 data_records_clause:
   DATA records opt_reference_list
   {
-	check_repeated ("DATA", SYN_CLAUSE_7);
+	check_repeated ("DATA", SYN_CLAUSE_7, &check_duplicate);
 	cb_verify (cb_data_records_clause, "DATA RECORDS");
   }
 ;
@@ -3399,7 +3379,7 @@ linage_clause:
   LINAGE _is reference_or_literal _lines
   linage_sequence
   {
-	check_repeated ("LINAGE", SYN_CLAUSE_8);
+	check_repeated ("LINAGE", SYN_CLAUSE_8, &check_duplicate);
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
 	    current_file->organization != COB_ORG_SEQUENTIAL) {
 		cb_error (_("LINAGE clause with wrong file type"));
@@ -3451,7 +3431,7 @@ recording_mode_clause:
   RECORDING _mode _is WORD
   {
 	cobc_cs_check = 0;
-	check_repeated ("RECORDING", SYN_CLAUSE_9);
+	check_repeated ("RECORDING", SYN_CLAUSE_9, &check_duplicate);
 	/* ignore */
   }
 ;
@@ -3462,7 +3442,7 @@ recording_mode_clause:
 code_set_clause:
   CODE_SET _is WORD
   {
-	check_repeated ("CODE SET", SYN_CLAUSE_10);
+	check_repeated ("CODE SET", SYN_CLAUSE_10, &check_duplicate);
 	if (CB_VALID_TREE ($3)) {
 		cb_tree			x;
 		struct cb_alphabet_name	*al;
@@ -3514,7 +3494,7 @@ code_set_clause:
 report_clause:
   report_keyword rep_name_list
   {
-	check_repeated ("REPORT", SYN_CLAUSE_11);
+	check_repeated ("REPORT", SYN_CLAUSE_11, &check_duplicate);
 	PENDING("REPORT WRITER");
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
 	    current_file->organization != COB_ORG_SEQUENTIAL) {
@@ -3888,7 +3868,7 @@ data_description_clause:
 redefines_clause:
   REDEFINES identifier_1
   {
-	check_pic_repeated ("REDEFINES", SYN_CLAUSE_1);
+	check_repeated ("REDEFINES", SYN_CLAUSE_1, &check_pic_duplicate);
 	if ($0 != NULL) {
 		if (cb_relaxed_syntax_check) {
 			cb_warning_x ($2, _("REDEFINES clause should follow entry-name"));
@@ -3912,7 +3892,7 @@ redefines_clause:
 external_clause:
   _is EXTERNAL as_extname
   {
-	check_pic_repeated ("EXTERNAL", SYN_CLAUSE_2);
+	check_repeated ("EXTERNAL", SYN_CLAUSE_2, &check_pic_duplicate);
 	if (current_storage != CB_STORAGE_WORKING) {
 		cb_error (_("%s not allowed here"), "EXTERNAL");
 	} else if (current_field->level != 1 && current_field->level != 77) {
@@ -3952,7 +3932,7 @@ as_extname:
 global_clause:
   _is GLOBAL
   {
-	check_pic_repeated ("GLOBAL", SYN_CLAUSE_3);
+	check_repeated ("GLOBAL", SYN_CLAUSE_3, &check_pic_duplicate);
 	if (current_field->level != 1 && current_field->level != 77) {
 		cb_error (_("%s only allowed at 01/77 level"), "GLOBAL");
 	} else if (!qualifier) {
@@ -3977,7 +3957,7 @@ global_clause:
 picture_clause:
   PICTURE
   {
-	check_pic_repeated ("PICTURE", SYN_CLAUSE_4);
+	check_repeated ("PICTURE", SYN_CLAUSE_4, &check_pic_duplicate);
 	current_field->pic = CB_PICTURE ($1);
   }
 ;
@@ -4151,7 +4131,7 @@ usage:
   }
 | NATIONAL
   {
-	check_pic_repeated ("USAGE", SYN_CLAUSE_5);
+	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	PENDING ("USAGE NATIONAL");
   }
 ;
@@ -4171,13 +4151,13 @@ double_usage:
 sign_clause:
   _sign_is LEADING flag_separate
   {
-	check_pic_repeated ("SIGN", SYN_CLAUSE_6);
+	check_repeated ("SIGN", SYN_CLAUSE_6, &check_pic_duplicate);
 	current_field->flag_sign_separate = ($3 ? 1 : 0);
 	current_field->flag_sign_leading  = 1;
   }
 | _sign_is TRAILING flag_separate
   {
-	check_pic_repeated ("SIGN", SYN_CLAUSE_6);
+	check_repeated ("SIGN", SYN_CLAUSE_6, &check_pic_duplicate);
 	current_field->flag_sign_separate = ($3 ? 1 : 0);
 	current_field->flag_sign_leading  = 0;
   }
@@ -4190,7 +4170,7 @@ report_occurs_clause:
   OCCURS integer occurs_to_integer _times
   occurs_depending occurs_step
   {
-	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
+	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
 	if (current_field->depending && !($3)) {
 		cb_verify (cb_odo_without_to, _("ODO without TO clause"));
 	}
@@ -4218,7 +4198,7 @@ occurs_clause:
   OCCURS integer occurs_to_integer _times
   occurs_depending occurs_keys occurs_indexed
   {
-	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
+	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
 	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
 		cb_error (_("Maximum OCCURS depth exceeded (%d)"),
 			  COB_MAX_SUBSCRIPTS);
@@ -4250,7 +4230,7 @@ occurs_clause:
 | OCCURS DYNAMIC capacity_in occurs_from_integer
   occurs_to_integer occurs_initialized occurs_keys occurs_indexed
   {
-	check_pic_repeated ("OCCURS", SYN_CLAUSE_7);
+	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
 	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
 		cb_error (_("Maximum OCCURS depth exceeded (%d)"),
 			  COB_MAX_SUBSCRIPTS);
@@ -4382,7 +4362,7 @@ occurs_index:
 justified_clause:
   JUSTIFIED _right
   {
-	check_pic_repeated ("JUSTIFIED", SYN_CLAUSE_8);
+	check_repeated ("JUSTIFIED", SYN_CLAUSE_8, &check_pic_duplicate);
 	current_field->flag_justified = 1;
   }
 ;
@@ -4393,7 +4373,7 @@ justified_clause:
 synchronized_clause:
   SYNCHRONIZED _left_or_right
   {
-	check_pic_repeated ("SYNCHRONIZED", SYN_CLAUSE_9);
+	check_repeated ("SYNCHRONIZED", SYN_CLAUSE_9, &check_pic_duplicate);
 	current_field->flag_synchronized = 1;
   }
 ;
@@ -4404,7 +4384,7 @@ synchronized_clause:
 blank_clause:
   BLANK _when ZERO
   {
-	check_pic_repeated ("BLANK", SYN_CLAUSE_10);
+	check_repeated ("BLANK", SYN_CLAUSE_10, &check_pic_duplicate);
 	current_field->flag_blank_zero = 1;
   }
 ;
@@ -4415,7 +4395,7 @@ blank_clause:
 based_clause:
   BASED
   {
-	check_pic_repeated ("BASED", SYN_CLAUSE_11);
+	check_repeated ("BASED", SYN_CLAUSE_11, &check_pic_duplicate);
 	if (current_storage != CB_STORAGE_WORKING &&
 	    current_storage != CB_STORAGE_LINKAGE &&
 	    current_storage != CB_STORAGE_LOCAL) {
@@ -4443,7 +4423,7 @@ based_clause:
 value_clause:
   VALUE _is_are value_item_list
   {
-	check_pic_repeated ("VALUE", SYN_CLAUSE_12);
+	check_repeated ("VALUE", SYN_CLAUSE_12, &check_pic_duplicate);
 	current_field->values = $3;
   }
   false_is
@@ -4475,7 +4455,7 @@ false_is:
 renames_clause:
   RENAMES qualified_word
   {
-	check_pic_repeated ("RENAMES", SYN_CLAUSE_13);
+	check_repeated ("RENAMES", SYN_CLAUSE_13, &check_pic_duplicate);
 	if (cb_ref ($2) != cb_error_node) {
 		if (CB_FIELD (cb_ref ($2))->level == 01 ||
 		    CB_FIELD (cb_ref ($2))->level > 50) {
@@ -4488,7 +4468,7 @@ renames_clause:
   }
 | RENAMES qualified_word THRU qualified_word
   {
-	check_pic_repeated ("RENAMES", SYN_CLAUSE_13);
+	check_repeated ("RENAMES", SYN_CLAUSE_13, &check_pic_duplicate);
 	if (cb_ref ($2) != cb_error_node && cb_ref ($4) != cb_error_node) {
 		if (CB_FIELD (cb_ref ($2))->level == 01 ||
 		    CB_FIELD (cb_ref ($2))->level > 50) {
@@ -4509,7 +4489,7 @@ renames_clause:
 any_length_clause:
   ANY LENGTH
   {
-	check_pic_repeated ("ANY", SYN_CLAUSE_14);
+	check_repeated ("ANY", SYN_CLAUSE_14, &check_pic_duplicate);
 	if (current_field->flag_item_based) {
 		cb_error (_("%s and %s are mutually exclusive"), "BASED", "ANY clause");
 	} else {
@@ -4518,7 +4498,7 @@ any_length_clause:
   }
 | ANY NUMERIC
   {
-	check_pic_repeated ("ANY", SYN_CLAUSE_14);
+	check_repeated ("ANY", SYN_CLAUSE_14, &check_pic_duplicate);
 	if (current_field->flag_item_based) {
 		cb_error (_("%s and %s are mutually exclusive"), "BASED", "ANY clause");
 	} else {
@@ -4609,12 +4589,12 @@ report_description_options:
 report_description_option:
   _is GLOBAL
   {
-	check_repeated ("GLOBAL", SYN_CLAUSE_1);
+	check_repeated ("GLOBAL", SYN_CLAUSE_1, &check_duplicate);
 	cb_error (_("GLOBAL is not allowed with RD"));
   }
 | CODE _is id_or_lit
   {
-	check_repeated ("CODE", SYN_CLAUSE_2);
+	check_repeated ("CODE", SYN_CLAUSE_2, &check_duplicate);
   }
 | control_clause
 | page_limit_clause
@@ -4625,7 +4605,7 @@ report_description_option:
 control_clause:
   control_keyword control_field_list
   {
-	check_repeated ("CONTROL", SYN_CLAUSE_3);
+	check_repeated ("CONTROL", SYN_CLAUSE_3, &check_duplicate);
   }
 ;
 
@@ -4644,7 +4624,7 @@ page_limit_clause:
   PAGE _limits page_line_column
   page_heading_list
   {
-	check_repeated ("PAGE", SYN_CLAUSE_4);
+	check_repeated ("PAGE", SYN_CLAUSE_4, &check_duplicate);
 	if (!current_report->heading) {
 		current_report->heading = 1;
 	}
@@ -4779,7 +4759,7 @@ report_group_option:
 type_clause:
   TYPE _is type_option
   {
-	check_pic_repeated ("TYPE", SYN_CLAUSE_16);
+	check_repeated ("TYPE", SYN_CLAUSE_16, &check_pic_duplicate);
   }
 ;
 
@@ -4805,14 +4785,14 @@ or_page:
 next_group_clause:
   NEXT GROUP _is line_or_plus
   {
-	check_pic_repeated ("NEXT GROUP", SYN_CLAUSE_17);
+	check_repeated ("NEXT GROUP", SYN_CLAUSE_17, &check_pic_duplicate);
   }
 ;
 
 sum_clause_list:
   SUM _of report_x_list reset_clause
   {
-	check_pic_repeated ("SUM", SYN_CLAUSE_19);
+	check_repeated ("SUM", SYN_CLAUSE_19, &check_pic_duplicate);
   }
 ;
 
@@ -4828,7 +4808,7 @@ data_or_final:
 present_when_condition:
   PRESENT WHEN condition
   {
-	check_pic_repeated ("PRESENT", SYN_CLAUSE_20);
+	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
   }
 ;
 
@@ -4839,7 +4819,7 @@ varying_clause:
 line_clause:
   line_keyword_clause report_line_integer_list
   {
-	check_pic_repeated ("LINE", SYN_CLAUSE_21);
+	check_repeated ("LINE", SYN_CLAUSE_21, &check_pic_duplicate);
   }
 ;
 
@@ -4851,7 +4831,7 @@ line_keyword_clause:
 column_clause:
   col_keyword_clause report_col_integer_list
   {
-	check_pic_repeated ("COLUMN", SYN_CLAUSE_18);
+	check_repeated ("COLUMN", SYN_CLAUSE_18, &check_pic_duplicate);
   }
 ;
 
@@ -4884,21 +4864,21 @@ col_or_plus:
 source_clause:
   SOURCE _is arith_x flag_rounded
   {
-	check_pic_repeated ("SOURCE", SYN_CLAUSE_22);
+	check_repeated ("SOURCE", SYN_CLAUSE_22, &check_pic_duplicate);
   }
 ;
 
 group_indicate_clause:
   GROUP _indicate
   {
-	check_pic_repeated ("GROUP", SYN_CLAUSE_23);
+	check_repeated ("GROUP", SYN_CLAUSE_23, &check_pic_duplicate);
   }
 ;
 
 report_usage_clause:
   USAGE _is DISPLAY
   {
-	check_pic_repeated ("USAGE", SYN_CLAUSE_24);
+	check_repeated ("USAGE", SYN_CLAUSE_24, &check_pic_duplicate);
   }
 ;
 
@@ -5106,22 +5086,22 @@ screen_option:
   }
 | LINE _number _is screen_line_plus_minus num_id_or_lit
   {
-	check_pic_repeated ("LINE", SYN_CLAUSE_16);
+	check_repeated ("LINE", SYN_CLAUSE_16, &check_pic_duplicate);
 	current_field->screen_line = $5;
   }
 | column_or_col _number _is screen_col_plus_minus num_id_or_lit
   {
-	check_pic_repeated ("COLUMN", SYN_CLAUSE_17);
+	check_repeated ("COLUMN", SYN_CLAUSE_17, &check_pic_duplicate);
 	current_field->screen_column = $5;
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
-	check_pic_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_18);
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_18, &check_pic_duplicate);
 	current_field->screen_foreg = $3;
   }
 | BACKGROUND_COLOR _is num_id_or_lit
   {
-	check_pic_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_19);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_19, &check_pic_duplicate);
 	current_field->screen_backg = $3;
   }
 | usage_clause
@@ -5136,21 +5116,21 @@ screen_option:
   {
 	check_not_88_level ($2);
 
-	check_pic_repeated ("USING", SYN_CLAUSE_20);
+	check_repeated ("USING", SYN_CLAUSE_20, &check_pic_duplicate);
 	current_field->screen_from = $2;
 	current_field->screen_to = $2;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
   }
 | FROM from_parameter
   {
-	check_pic_repeated ("FROM", SYN_CLAUSE_21);
+	check_repeated ("FROM", SYN_CLAUSE_21, &check_pic_duplicate);
 	current_field->screen_from = $2;
   }
 | TO identifier
   {
 	check_not_88_level ($2);
 
-	check_pic_repeated ("TO", SYN_CLAUSE_22);
+	check_repeated ("TO", SYN_CLAUSE_22, &check_pic_duplicate);
 	current_field->screen_to = $2;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
   }
@@ -5200,7 +5180,7 @@ screen_col_plus_minus:
 screen_occurs_clause:
   OCCURS integer _times
   {
-	check_pic_repeated ("OCCURS", SYN_CLAUSE_23);
+	check_repeated ("OCCURS", SYN_CLAUSE_23, &check_pic_duplicate);
 	current_field->occurs_max = cb_get_int ($2);
 	current_field->occurs_min = current_field->occurs_max;
 	current_field->indexes++;

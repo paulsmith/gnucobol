@@ -1,4 +1,11 @@
 
+2016-01-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #182 - ON/OFF in SWITCH clause causing incorrect
+	  duplicate CURRENCY clause error.
+	* parser.y (check_repeated): merged check_*_repeated functions into one
+	  function.
+
 2016-01-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l, config.def: reverted [r605]. Marked continuation of COBOL
