@@ -1628,7 +1628,7 @@ check_comments (const char *keyword, const char *text)
 	/* Treated as comments when in Identification Division */
 	if (comment_allowed) {
 		cb_verify (cb_comment_paragraphs, keyword);
-		/* Skip comments until the end of line */
+		/* Skip comments until the end of line. */
 		within_comment = 1;
 		skip_to_eol ();
 	} else {
