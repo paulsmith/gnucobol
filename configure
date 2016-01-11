@@ -638,6 +638,7 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 COB_PATCH_LEVEL
+COB_HAS_UTC_OFFSET
 COB_HAS_CURSES
 COB_HAS_ISAM
 COB_KEYWORD_INLINE
@@ -2399,10 +2400,8 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 # export/setenv CFLAGS=-maix64
 # export/setenv LDFLAGS=-maix64
 
-if echo $CFLAGS | grep 'aix64' 1>/dev/null 2>&1
-then
-	if test -f /usr/ccs/bin/ar
-	then
+if echo $CFLAGS | grep 'aix64' 1>/dev/null 2>&1; then
+	if test -f /usr/ccs/bin/ar; then
 		AR="/usr/ccs/bin/ar -X64"
 	else
 		AR="ar -X64"
@@ -3011,14 +3010,12 @@ fi
 save_libs="$LIBS"
 
 enable_cflags_setting=no
-if test "$enable_debug" = "yes"
-then
+if test "$enable_debug" = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether CFLAGS can be modified" >&5
 $as_echo_n "checking whether CFLAGS can be modified... " >&6; }
 	# Enable setting if the user has not specified the optimisation in CFLAGS.
 	echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
-	if test $? != 0
-	then
+	if test $? != 0; then
 		enable_cflags_setting=yes
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cflags_setting" >&5
@@ -13829,8 +13826,7 @@ fi
 
 
 COB_CC="$CC"
-if test "$COB_USES_ICC_ONLY" = "yes"
-then
+if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
 else
 	LIBCOB_LIBS="-lm"
@@ -13848,8 +13844,7 @@ fi
 
 # Check whether --enable-experimental was given.
 if test "${enable_experimental+set}" = set; then :
-  enableval=$enable_experimental; if test "$enable_experimental" = "yes"
-   then
+  enableval=$enable_experimental; if test "$enable_experimental" = "yes"; then
 	$as_echo "#define COB_EXPERIMENTAL 1" >>confdefs.h
 
    fi
@@ -13858,8 +13853,7 @@ fi
 
 # Check whether --enable-param-check was given.
 if test "${enable_param_check+set}" = set; then :
-  enableval=$enable_param_check; if test "$enable_param_check" = "yes"
-   then
+  enableval=$enable_param_check; if test "$enable_param_check" = "yes"; then
 	$as_echo "#define COB_PARAM_CHECK 1" >>confdefs.h
 
    fi
@@ -13911,8 +13905,7 @@ fi
 
 # Check whether --with-seqra-extfh was given.
 if test "${with_seqra_extfh+set}" = set; then :
-  withval=$with_seqra_extfh;  if test "$with_seqra_extfh" = "yes"
-    then
+  withval=$with_seqra_extfh;  if test "$with_seqra_extfh" = "yes"; then
 	$as_echo "#define WITH_SEQRA_EXTFH 1" >>confdefs.h
 
     fi
@@ -13922,8 +13915,7 @@ fi
 
 # Check whether --with-cisam was given.
 if test "${with_cisam+set}" = set; then :
-  withval=$with_cisam;  if test "$with_cisam" = "yes"
-    then
+  withval=$with_cisam;  if test "$with_cisam" = "yes"; then
 	for ac_header in isam.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "isam.h" "ac_cv_header_isam_h" "$ac_includes_default"
@@ -13986,13 +13978,11 @@ fi
 fi
 
 
-if test "$with_cisam" != "yes"
-then
+if test "$with_cisam" != "yes"; then
 
 # Check whether --with-disam was given.
 if test "${with_disam+set}" = set; then :
-  withval=$with_disam;  if test "$with_disam" = "yes"
-    then
+  withval=$with_disam;  if test "$with_disam" = "yes"; then
 	for ac_header in disam.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "disam.h" "ac_cv_header_disam_h" "$ac_includes_default"
@@ -14056,13 +14046,11 @@ fi
 
 fi
 
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes"
-then
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
 
 # Check whether --with-vbisam was given.
 if test "${with_vbisam+set}" = set; then :
-  withval=$with_vbisam;  if test "$with_vbisam" = "yes"
-    then
+  withval=$with_vbisam;  if test "$with_vbisam" = "yes"; then
 	for ac_header in vbisam.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "vbisam.h" "ac_cv_header_vbisam_h" "$ac_includes_default"
@@ -14126,13 +14114,11 @@ fi
 
 fi
 
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"
-then
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
 
 # Check whether --with-index-extfh was given.
 if test "${with_index_extfh+set}" = set; then :
-  withval=$with_index_extfh;  if test "$with_index_extfh" = "yes"
-    then
+  withval=$with_index_extfh;  if test "$with_index_extfh" = "yes"; then
 	$as_echo "#define WITH_INDEX_EXTFH 1" >>confdefs.h
 
     fi
@@ -14140,8 +14126,7 @@ fi
 
 fi
 
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"
-then
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
 
 # Check whether --with-db was given.
 if test "${with_db+set}" = set; then :
@@ -14285,8 +14270,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-if test "x$COB_GMP_HEADER" = "x"
-then
+if test "x$COB_GMP_HEADER" = "x"; then
 	as_fn_error $? "Unable to extract GMP version information" "$LINENO" 5
 fi
 
@@ -14320,8 +14304,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-if test "x$COB_GMP_LIB" = "x"
-then
+if test "x$COB_GMP_LIB" = "x"; then
 	as_fn_error $? "Unable to extract GMP version information" "$LINENO" 5
 fi
 
@@ -14330,8 +14313,7 @@ $as_echo_n "checking matching GMP version... " >&6; }
 COB_GMP_LIB_MAJOR=$(echo $COB_GMP_LIB | cut -d. -f1)
 COB_GMP_LIB_MINOR=$(echo $COB_GMP_LIB | cut -d. -f2)
 
-if test "$COB_GMP_HEADER" == "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR"
-then
+if test "$COB_GMP_HEADER" == "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_GMP_HEADER)" >&5
 $as_echo "yes ($COB_GMP_HEADER)" >&6; }
 else
@@ -14451,8 +14433,7 @@ _ACEOF
 
 fi
 
-   if test "x$ac_cv_lib_rt_nanosleep" = "xyes"
-   then
+   if test "x$ac_cv_lib_rt_nanosleep" = "xyes"; then
      $as_echo "#define HAVE_NANO_SLEEP 1" >>confdefs.h
 
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -14504,8 +14485,7 @@ _ACEOF
 
 fi
 
-     if test "x$ac_cv_lib_posix4_nanosleep" = "xyes"
-     then
+     if test "x$ac_cv_lib_posix4_nanosleep" = "xyes"; then
        $as_echo "#define HAVE_NANO_SLEEP 1" >>confdefs.h
 
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -16565,8 +16545,7 @@ $as_echo "#define HAVE_DCGETTEXT 1" >>confdefs.h
 
 
 
-if test "x$LTLIBINTL" != "x"
-then
+if test "x$LTLIBINTL" != "x"; then
   COBC_LIBS="$COBC_LIBS $LTLIBINTL"
   LIBCOB_LIBS="$LIBCOB_LIBS $LTLIBINTL"
 fi
@@ -16612,8 +16591,7 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
 { $as_echo "$as_me:${as_lineno-$LINENO}: Checks for curses ..." >&5
 $as_echo "$as_me: Checks for curses ..." >&6;}
 
-if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"
-then
+if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for initscr in -lncursesw" >&5
 $as_echo_n "checking for initscr in -lncursesw... " >&6; }
 if ${ac_cv_lib_ncursesw_initscr+:} false; then :
@@ -16659,8 +16637,7 @@ _ACEOF
 
 fi
 
-  if test "x$ac_cv_lib_ncursesw_initscr" = "xyes"
-  then
+  if test "x$ac_cv_lib_ncursesw_initscr" = "xyes"; then
     for ac_header in ncursesw/ncurses.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "ncursesw/ncurses.h" "ac_cv_header_ncursesw_ncurses_h" "$ac_includes_default"
@@ -16679,8 +16656,7 @@ if test "x$ac_cv_header_ncursesw_curses_h" = xyes; then :
 _ACEOF
  USE_NCURSES="ncursesw"
 else
-  if test "$USE_NCURSES" = "ncursesw"
-         then
+  if test "$USE_NCURSES" = "ncursesw"; then
            USE_NCURSES="missing_header"
          fi
 fi
@@ -16691,20 +16667,17 @@ fi
 
 done
 
-    if test "$USE_NCURSES" = "ncursesw"
-    then
+    if test "$USE_NCURSES" = "ncursesw"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lncursesw"
     fi
   else
-    if test "$USE_NCURSES" = "ncursesw"
-    then
+    if test "$USE_NCURSES" = "ncursesw"; then
       USE_NCURSES="missing_lib"
     fi
   fi
 fi
 
-if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "check"
-then
+if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "check"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for initscr in -lncurses" >&5
 $as_echo_n "checking for initscr in -lncurses... " >&6; }
 if ${ac_cv_lib_ncurses_initscr+:} false; then :
@@ -16750,8 +16723,7 @@ _ACEOF
 
 fi
 
-  if test "x$ac_cv_lib_ncurses_initscr" = "xyes"
-  then
+  if test "x$ac_cv_lib_ncurses_initscr" = "xyes"; then
     for ac_header in ncurses.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "ncurses.h" "ac_cv_header_ncurses_h" "$ac_includes_default"
@@ -16779,8 +16751,7 @@ if test "x$ac_cv_header_curses_h" = xyes; then :
 _ACEOF
  USE_NCURSES="ncurses"
 else
-  if test "$USE_NCURSES" = "ncurses"
-            then
+  if test "$USE_NCURSES" = "ncurses"; then
               USE_NCURSES="missing_header"
             fi
 fi
@@ -16795,21 +16766,18 @@ fi
 
 done
 
-    if test "$USE_NCURSES" = "ncurses"
-    then
+    if test "$USE_NCURSES" = "ncurses"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lncurses"
     fi
   else
-    if test "$USE_NCURSES" = "ncurses"
-    then
+    if test "$USE_NCURSES" = "ncurses"; then
       USE_NCURSES="missing_lib"
     fi
   fi
 fi
 
 
-if test "$USE_NCURSES" = "pdcurses" -o "$USE_NCURSES" = "check"
-then
+if test "$USE_NCURSES" = "pdcurses" -o "$USE_NCURSES" = "check"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for initscr in -lpdcurses" >&5
 $as_echo_n "checking for initscr in -lpdcurses... " >&6; }
 if ${ac_cv_lib_pdcurses_initscr+:} false; then :
@@ -16855,8 +16823,7 @@ _ACEOF
 
 fi
 
-  if test "x$ac_cv_lib_pdcurses_initscr" = "xyes"
-  then
+  if test "x$ac_cv_lib_pdcurses_initscr" = "xyes"; then
     for ac_header in pdcurses.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pdcurses.h" "ac_cv_header_pdcurses_h" "$ac_includes_default"
@@ -16875,8 +16842,7 @@ if test "x$ac_cv_header_curses_h" = xyes; then :
 _ACEOF
  USE_NCURSES="pdcurses"
 else
-  if test "$USE_NCURSES" = "pdcurses"
-          then
+  if test "$USE_NCURSES" = "pdcurses"; then
             USE_NCURSES="missing_header"
           fi
 fi
@@ -16887,20 +16853,17 @@ fi
 
 done
 
-    if test "$USE_NCURSES" = "pdcurses"
-    then
+    if test "$USE_NCURSES" = "pdcurses"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lpdcurses"
     fi
   else
-    if test "$USE_NCURSES" = "pdcurses"
-    then
+    if test "$USE_NCURSES" = "pdcurses"; then
       USE_NCURSES="missing_lib"
     fi
   fi
 fi
 
-if test "$USE_NCURSES" = "curses" -o "$USE_NCURSES" = "check"
-then
+if test "$USE_NCURSES" = "curses" -o "$USE_NCURSES" = "check"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for initscr in -lcurses" >&5
 $as_echo_n "checking for initscr in -lcurses... " >&6; }
 if ${ac_cv_lib_curses_initscr+:} false; then :
@@ -16946,8 +16909,7 @@ _ACEOF
 
 fi
 
-  if test "x$ac_cv_lib_curses_initscr" = "xyes"
-  then
+  if test "x$ac_cv_lib_curses_initscr" = "xyes"; then
     for ac_header in curses.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "curses.h" "ac_cv_header_curses_h" "$ac_includes_default"
@@ -16957,22 +16919,19 @@ if test "x$ac_cv_header_curses_h" = xyes; then :
 _ACEOF
  USE_NCURSES="curses"
 else
-  if test "$USE_NCURSES" = "curses"
-       then
+  if test "$USE_NCURSES" = "curses"; then
          USE_NCURSES="missing_header"
        fi
 fi
 
 done
 
-    if test "$USE_NCURSES" != "no"
-    then
+    if test "$USE_NCURSES" != "no"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lcurses"
     fi
   fi
 else
-  if test "$USE_NCURSES" = "curses"
-  then
+  if test "$USE_NCURSES" = "curses"; then
     USE_NCURSES="missing_lib"
   fi
 fi
@@ -17012,8 +16971,7 @@ case "$USE_NCURSES" in
 esac
 
 
-if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"
-then
+if test "$USE_NCURSES" = "ncurses" -o "$USE_NCURSES" = "ncursesw"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ncurses _nc_freeall function" >&5
 $as_echo_n "checking for ncurses _nc_freeall function... " >&6; }
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -17064,8 +17022,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 fi
 
-if test "$USE_NCURSES" != "no" -a "$USE_NCURSES" != "not_found"
-then
+if test "$USE_NCURSES" != "no" -a "$USE_NCURSES" != "not_found"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for curses color_set function" >&5
 $as_echo_n "checking for curses color_set function... " >&6; }
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -17106,8 +17063,7 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 
 # Checks for db.
-if test "$with_db" = "yes"
-then
+if test "$with_db" = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: Checks for Berkeley DB ..." >&5
 $as_echo "$as_me: Checks for Berkeley DB ..." >&6;}
 
@@ -17157,21 +17113,18 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-	if test "x$COB_BDB_HEADER" = "x"
-	then
+	if test "x$COB_BDB_HEADER" = "x"; then
 		as_fn_error $? "Unable to extract Berkeley DB version information" "$LINENO" 5
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB db.h version >= 4.1" >&5
 $as_echo_n "checking for Berkeley DB db.h version >= 4.1... " >&6; }
 	COB_BDB_HEADER_MAJOR=$(echo $COB_BDB_HEADER | cut -d. -f1)
-	if test $COB_BDB_HEADER_MAJOR -gt 4
-	then
+	if test $COB_BDB_HEADER_MAJOR -gt 4; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_BDB_HEADER)" >&5
 $as_echo "yes ($COB_BDB_HEADER)" >&6; }
 	else
 		COB_BDB_HEADER_MINOR=$(echo $COB_BDB_HEADER | cut -d. -f2)
-		if test $COB_BDB_HEADER_MAJOR -eq 4 -a $COB_BDB_HEADER_MINOR -ge 1
-		then
+		if test $COB_BDB_HEADER_MAJOR -eq 4 -a $COB_BDB_HEADER_MINOR -ge 1; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_BDB_HEADER)" >&5
 $as_echo "yes ($COB_BDB_HEADER)" >&6; }
 		else
@@ -17224,8 +17177,7 @@ fi
 
 	done
 	LIBS="$MYOLDLIBS"
-	if test "$cob_got_db" = "yes"
-	then
+	if test "$cob_got_db" = "yes"; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: BDB library version $COB_BDB_HEADER found as -l$cobdb" >&5
@@ -17273,10 +17225,8 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 
-if test "$DEFINE_DL" = "no" -a "$with_dl" = "yes"
-then
-  if test "x$ac_cv_header_dlfcn_h" = "xyes"
-  then
+if test "$DEFINE_DL" = "no" -a "$with_dl" = "yes"; then
+  if test "x$ac_cv_header_dlfcn_h" = "xyes"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -lc" >&5
 $as_echo_n "checking for dlopen in -lc... " >&6; }
 if ${ac_cv_lib_c_dlopen+:} false; then :
@@ -17317,8 +17267,7 @@ if test "x$ac_cv_lib_c_dlopen" = xyes; then :
   DEFINE_DL="yes"
 fi
 
-    if test "$DEFINE_DL" = "no"
-    then
+    if test "$DEFINE_DL" = "no"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
 $as_echo_n "checking for dlopen in -ldl... " >&6; }
 if ${ac_cv_lib_dl_dlopen+:} false; then :
@@ -17359,8 +17308,7 @@ if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
   DEFINE_DL="yes"
 fi
 
-      if test "$DEFINE_DL" = "yes"
-      then
+      if test "$DEFINE_DL" = "yes"; then
         $as_echo "#define USE_LIBDL 1" >>confdefs.h
 
         LIBCOB_LIBS="$LIBCOB_LIBS -ldl"
@@ -17446,8 +17394,7 @@ if test "x$ac_cv_lib_dld_dlopen" = xyes; then :
   DEFINE_DL="yes"
 fi
 
-        if test "$DEFINE_DL" = "yes"
-        then
+        if test "$DEFINE_DL" = "yes"; then
           $as_echo "#define USE_LIBDL 1" >>confdefs.h
 
           LIBCOB_LIBS="$LIBCOB_LIBS -ldld"
@@ -17542,8 +17489,7 @@ fi
   fi
 fi
 
-if test "$DEFINE_DL" = "no"
-then
+if test "$DEFINE_DL" = "no"; then
   for ac_header in ltdl.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "ltdl.h" "ac_cv_header_ltdl_h" "$ac_includes_default"
@@ -17686,8 +17632,7 @@ fi
 
 
 # Check gcc 4 pointer sign option
-if test "$COB_USES_GCC_ONLY" = "yes"
-then
+if test "$COB_USES_GCC_ONLY" = "yes"; then
 	MYOLDCFLAGS="$CFLAGS"
 	CFLAGS="$CFLAGS -Wno-pointer-sign"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc pointer sign option" >&5
@@ -17715,8 +17660,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	CFLAGS="$MYOLDCFLAGS"
 fi
 
-#if test "$enable_debug" != "yes" -a "$COB_USES_GCC_ONLY" = "yes"
-#then
+#if test "$enable_debug" != "yes" -a "$COB_USES_GCC_ONLY" = "yes"; then
 #	MYOLDCFLAGS="$CFLAGS"
 #	CFLAGS="$CFLAGS -fno-asynchronous-unwind-tables"
 #	AC_MSG_CHECKING([for gcc unwind tables option])
@@ -17728,8 +17672,7 @@ fi
 
 # Check gcc wrapv option
 # We MAY need this eventually for >= 4.4. 4.3 appears to be OK.
-#if test "$COB_USES_GCC_ONLY" = "yes"
-#then
+#if test "$COB_USES_GCC_ONLY" = "yes"; then
 #	MYOLDCFLAGS="$CFLAGS"
 #	CFLAGS="$CFLAGS -fwrapv"
 #	AC_MSG_CHECKING([for gcc -fwrapv option])
@@ -17767,19 +17710,15 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 # GnuCOBOL Configuration
 
-if test "x$prefix" = "xNONE"
-then
-  if test "x$includedir" = "x\${prefix}/include"
-  then
+if test "x$prefix" = "xNONE"; then
+  if test "x$includedir" = "x\${prefix}/include"; then
     COB_CFLAGS="-I${ac_default_prefix}/include"
   else
     COB_CFLAGS="-I${includedir}"
   fi
 else
-  if test "x$includedir" = "x\${prefix}/include"
-  then
-    if test "x$prefix" = "x/usr"
-    then
+  if test "x$includedir" = "x\${prefix}/include"; then
+    if test "x$prefix" = "x/usr"; then
       COB_CFLAGS=""
     else
       COB_CFLAGS="-I${prefix}/include"
@@ -17789,15 +17728,13 @@ else
   fi
 fi
 
-if test "x$CPPFLAGS" != "x"
-then
+if test "x$CPPFLAGS" != "x"; then
 	COB_CFLAGS="$COB_CFLAGS $CPPFLAGS"
 fi
 
 COB_LIBS="-L$libdir -lcob ${LIBCOB_LIBS}"
 COB_LDFLAGS=""
-if test "x$LDFLAGS" != "x"
-then
+if test "x$LDFLAGS" != "x"; then
 	COB_LIBS="$LDFLAGS $COB_LIBS"
 	COB_LDFLAGS="$LDFLAGS"
 fi
@@ -17813,28 +17750,24 @@ COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
 COB_EXEEXT="$EXEEXT"
 
-if test "$enable_cflags_setting" = yes
-then
+if test "$enable_cflags_setting" = yes; then
 	# Remove -O2 option added by AC_PROG_CC and add -O0
 	CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O[0-9a-zA-Z]* */ /g' -e 's/ $//' -e 's/^ //'`
-	if test "$COB_USES_GCC_ICC" = "yes"
-	then
+	if test "$COB_USES_GCC_ICC" = "yes"; then
 		CFLAGS="$CFLAGS -O0"
 	fi
 fi
 
 unset enable_cflags_setting
 
-if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"
-then
+if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
 	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/^ //' -e 's/ $//'`
 fi
 
 # Include CFLAGS in COB_CFLAGS without optimization/debug options
 
 cob_temp_flags=""
-if test "x$CFLAGS" != "x"
-then
+if test "x$CFLAGS" != "x"; then
 	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/[+-]O[0-9s]//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
@@ -17846,22 +17779,18 @@ then
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/  */ /g' -e 's/ $//' -e 's/^ //'`
 fi
 
-if test "x$cob_temp_flags" != "x"
-then
+if test "x$cob_temp_flags" != "x"; then
 	COB_CFLAGS="$COB_CFLAGS $cob_temp_flags"
 fi
 unset cob_temp_flags
 
-if test "$COB_USES_GCC_ICC" = "yes"
-then
-	if test "x$CFLAGS" != "x"
-	then
+if test "$COB_USES_GCC_ICC" = "yes"; then
+	if test "x$CFLAGS" != "x"; then
 		CFLAGS="$CFLAGS -pipe"
 	else
 		CFLAGS="-pipe"
 	fi
-	if test "x$COB_CFLAGS" != "x"
-	then
+	if test "x$COB_CFLAGS" != "x"; then
 		COB_CFLAGS="$COB_CFLAGS -pipe"
 	else
 		COB_CFLAGS="-pipe"
@@ -17875,8 +17804,7 @@ COB_FIX_LIB="$COB_EXPORT_DYN"
 COB_FIX_LIBTOOL=""
 case $host_os in
   mingw*)
-	if test "$prefix" = "NONE"
-	then
+	if test "$prefix" = "NONE"; then
 	COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
 	COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
 	fi
@@ -17893,16 +17821,14 @@ case $host_os in
 	COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
 	;;
   hpux*)
-	if test "$COB_USES_GCC_ICC" != "yes"
-	then
+	if test "$COB_USES_GCC_ICC" != "yes"; then
 		COB_SHARED_OPT="-b"
 		$as_echo "#define _XOPEN_SOURCE_EXTENDED 1" >>confdefs.h
 
 		rm -f hptest*
 		echo 'int main() { return 0; }' > hptest.c
 		${CC} ${CFLAGS} +Olit=all -o hptest hptest.c > hptest.out 2>&1
-		if test $? -ne 0 -o -s hptest.out
-		then
+		if test $? -ne 0 -o -s hptest.out; then
 			CFLAGS="$CFLAGS +ESlit"
 			COB_CFLAGS="$COB_CFLAGS +ESlit -w"
 		else
@@ -17910,8 +17836,7 @@ case $host_os in
 			COB_CFLAGS="$COB_CFLAGS +Olit=all -w"
 		fi
 
-		if test "$enable_debug" = "yes"
-		then
+		if test "$enable_debug" = "yes"; then
 			CFLAGS="$CFLAGS +O0"
 		else
 			CFLAGS="$CFLAGS +O2"
@@ -17922,11 +17847,9 @@ case $host_os in
 	;;
   aix*)
 	COB_EXPORT_DYN="-Wl,-bexpfull -Wl,-brtl"
-	if test "$COB_USES_GCC_ICC" != "yes"
-	then
+	if test "$COB_USES_GCC_ICC" != "yes"; then
 		CFLAGS="$CFLAGS -Q -qro -qroconst"
-		if test "$enable_debug" = "yes"
-		then
+		if test "$enable_debug" = "yes"; then
 			CFLAGS="$CFLAGS -qnoopt"
 		else
 			CFLAGS="$CFLAGS -O2"
@@ -17941,11 +17864,9 @@ case $host_os in
 	fi
 	;;
   solaris*)
-	if test "$COB_USES_GCC_ICC" != "yes"
-	then
+	if test "$COB_USES_GCC_ICC" != "yes"; then
 		CFLAGS="$CFLAGS -xstrconst"
-		if test "$enable_debug" != "yes"
-		then
+		if test "$enable_debug" != "yes"; then
 			CFLAGS="$CFLAGS -xO2"
 		fi
 		COB_CFLAGS="$COB_CFLAGS -xstrconst"
@@ -17954,8 +17875,7 @@ case $host_os in
 	;;
 esac
 
-if test "$COB_USES_GCC_ONLY" = "yes" && test "$with_gnu_ld" = "yes"
-then
+if test "$COB_USES_GCC_ONLY" = "yes" && test "$with_gnu_ld" = "yes"; then
 	MYOLDLDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS -Wl,-z,relro,-z,now,-O1"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld bind now option" >&5
@@ -17982,39 +17902,32 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 	unset MYOLDLDFLAGS
-	if test "$enable_debug" != "yes"
-	then
+	if test "$enable_debug" != "yes"; then
 		CFLAGS="$CFLAGS -finline-functions"
 	fi
 	CFLAGS="$CFLAGS -fsigned-char -Wall -Wwrite-strings -Wmissing-prototypes -Wno-format-y2k"
-	if test "$enable_debug" != "yes"
-	then
+	if test "$enable_debug" != "yes"; then
 		CFLAGS="$CFLAGS -U_FORTIFY_SOURCE"
 	fi
-elif test "$COB_USES_ICC_ONLY" = "yes"
-then
-	if test "$enable_debug" != "yes"
-	then
+elif test "$COB_USES_ICC_ONLY" = "yes"; then
+	if test "$enable_debug" != "yes"; then
 		CFLAGS="$CFLAGS -finline-functions"
 	fi
 	CFLAGS="$CFLAGS -Wall -wd1419 -vec-report0 -opt-report 0"
 fi
 
-if test "x$lt_cv_dlopen_self" != "xyes"
-then
+if test "x$lt_cv_dlopen_self" != "xyes"; then
 	$as_echo "#define COB_NO_SELFOPEN 1" >>confdefs.h
 
 fi
 
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes" -a "$with_db" != "yes"
-then
+if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes" -a "$with_db" != "yes"; then
 	COB_HAS_ISAM=no
 else
 	COB_HAS_ISAM=yes
 fi
 
-if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"
-then
+if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"; then
 	COB_HAS_CURSES=no
 else
 	COB_HAS_CURSES=yes
@@ -18054,8 +17967,7 @@ cat >>confdefs.h <<_ACEOF
 #define COB_EXEEXT "$COB_EXEEXT"
 _ACEOF
 
-if test "x$striplib" != "x"
-then
+if test "x$striplib" != "x"; then
 	cat >>confdefs.h <<_ACEOF
 #define COB_STRIP_CMD "$striplib"
 _ACEOF
@@ -18081,6 +17993,12 @@ COB_BIGENDIAN="$ac_cv_c_bigendian"
 
 
 
+
+if test "$COB_STRFTIME" = "no" -a "$COB_TIMEZONE" = "no"; then
+	COB_HAVE_UTC_OFFSET="no"
+else
+	COB_HAVE_UTC_OFFSET="yes"
+fi
 
 COB_PATCH_LEVEL=$with_patch_level
 
@@ -20570,8 +20488,7 @@ $as_echo "$as_me:  COB_CFLAGS        ${COB_CFLAGS}" >&6;}
 $as_echo "$as_me:  LDFLAGS           ${LDFLAGS}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_LDFLAGS       ${COB_LDFLAGS}" >&5
 $as_echo "$as_me:  COB_LDFLAGS       ${COB_LDFLAGS}" >&6;}
-if test "x$COBC_LIBS" != "x"
-then
+if test "x$COBC_LIBS" != "x"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  COBC_LIBS         ${COBC_LIBS}" >&5
 $as_echo "$as_me:  COBC_LIBS         ${COBC_LIBS}" >&6;}
 fi
@@ -20593,13 +20510,11 @@ $as_echo "$as_me:  COB_SHARED_OPT    ${COB_SHARED_OPT}" >&6;}
 $as_echo "$as_me:  COB_PIC_FLAGS     ${COB_PIC_FLAGS}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_EXPORT_DYN    ${COB_EXPORT_DYN}" >&5
 $as_echo "$as_me:  COB_EXPORT_DYN    ${COB_EXPORT_DYN}" >&6;}
-if test "x$striplib" != "x"
-then
+if test "x$striplib" != "x"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  COB_STRIP_CMD     ${striplib}" >&5
 $as_echo "$as_me:  COB_STRIP_CMD     ${striplib}" >&6;}
 fi
-if test "${DEFINE_DL}" = "yes"
-then
+if test "${DEFINE_DL}" = "yes" ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Dynamic loading:                             System" >&5
 $as_echo "$as_me:  Dynamic loading:                             System" >&6;}
 else
@@ -20624,29 +20539,23 @@ $as_echo "$as_me:  screen I/O (disabled):                       NO" >&6;}
 $as_echo "$as_me:  Use ncurses/pdcurses/curses for screen I/O:  ${USE_NCURSES}" >&6;}
 	;;
 esac
-if test "$with_seqra_extfh" = "yes"
-then
+if test "$with_seqra_extfh" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use external SEQ/RAN file handler            yes" >&5
 $as_echo "$as_me:  Use external SEQ/RAN file handler            yes" >&6;}
 fi
-if test "$with_index_extfh" = "yes"
-then
+if test "$with_index_extfh" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use external ISAM file handler               yes" >&5
 $as_echo "$as_me:  Use external ISAM file handler               yes" >&6;}
-elif test "$with_cisam" = "yes"
-then
+elif test "$with_cisam" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use CISAM for ISAM I/O                       yes" >&5
 $as_echo "$as_me:  Use CISAM for ISAM I/O                       yes" >&6;}
-elif test "$with_disam" = "yes"
-then
+elif test "$with_disam" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use DISAM for ISAM I/O                       yes" >&5
 $as_echo "$as_me:  Use DISAM for ISAM I/O                       yes" >&6;}
-elif test "$with_vbisam" = "yes"
-then
+elif test "$with_vbisam" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use VBISAM for ISAM I/O                      yes" >&5
 $as_echo "$as_me:  Use VBISAM for ISAM I/O                      yes" >&6;}
-elif test "$with_db" = "yes"
-then
+elif test "$with_db" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:  Use Berkeley DB for ISAM I/O:                yes" >&5
 $as_echo "$as_me:  Use Berkeley DB for ISAM I/O:                yes" >&6;}
 else
@@ -20654,3 +20563,9 @@ else
 $as_echo "$as_me:  ISAM I/O (no handler configured):            NO" >&6;}
 fi
 unset DEFINE_DL
+if test $COB_HAS_UTC_OFFSET = "no"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:  Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE" >&5
+$as_echo "$as_me: WARNING:  Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE" >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: and FORMATTED-DATETIME may not work." >&5
+$as_echo "$as_me: WARNING: and FORMATTED-DATETIME may not work." >&2;}
+fi
