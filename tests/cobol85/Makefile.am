@@ -74,13 +74,10 @@ clean-local:
 
 newcob.val:
 	if ! test -f "newcob.val"; then \
-#	   echo "newcob.val missing"; \
 	   if ! test -f "newcob.val.Z"; then \
-#	      echo "newcob.val.Z missing"; \
 	      wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"; \
 	   fi; \
 	   if test -f "newcob.val.Z"; then \
-#	      echo "unpacking newcob.val"; \
 	      gunzip newcob.val.Z || gzip -d newcob.val.Z || uncompress newcob.val.Z; \
 	   fi; \
 	   if ! test -f "newcob.val"; then \
@@ -88,7 +85,6 @@ newcob.val:
 	      exit 1; \
 	   fi; \
 	fi
-	
 
 $(MODULES): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
 	@echo -n "Building module directory $@ ..."
