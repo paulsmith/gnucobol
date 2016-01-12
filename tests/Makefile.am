@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/tests
 #
-# Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -70,6 +70,11 @@ check-local: $(TESTSUITE)
 
 clean-local:
 	rm -rf *.dir *.log
+
+test:
+	cd cobol85 && $(MAKE) $(AM_MAKEFLAGS) test
+
+checkall: check test
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	@echo "creating $(srcdir)/package.m4"

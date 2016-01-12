@@ -721,6 +721,11 @@ check-local: $(TESTSUITE)
 clean-local:
 	rm -rf *.dir *.log
 
+test:
+	cd cobol85 && $(MAKE) $(AM_MAKEFLAGS) test
+
+checkall: check test
+
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	@echo "creating $(srcdir)/package.m4"
 	@{								   \

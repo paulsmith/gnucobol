@@ -69,9 +69,6 @@ else
 	diff $(srcdir)/summarynoix.txt summary.log
 endif
 
-clean-local:
-	rm -rf copy copyalt $(MODULES) EXEC85 summary.log EXEC85.cob
-
 newcob.val:
 	if ! test -f "newcob.val"; then \
 	   if ! test -f "newcob.val.Z"; then \
@@ -85,6 +82,9 @@ newcob.val:
 	      exit 1; \
 	   fi; \
 	fi
+
+clean-local:
+	rm -rf copy copyalt $(MODULES) EXEC85 summary.log EXEC85.cob
 
 $(MODULES): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
 	@echo -n "Building module directory $@ ..."

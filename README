@@ -1,8 +1,7 @@
-		                 GnuCOBOL
-		http://sourceforge.net/projects/open-cobol/
 
-		http://opencobol.add1tocobol.com/gnucobol
-		         http://www.opencobol.org/
+		                 GnuCOBOL
+		https://sourceforge.net/projects/open-cobol
+		https://savannah.gnu.org/projects/gnucobol
 
 GnuCOBOL is a free and open-source COBOL compiler, which translates
 COBOL programs to C code and compiles it using a native C compiler.
@@ -21,7 +20,7 @@ This package contains the following subdirectories:
     config      Configuration files
     po          International messages
     doc         'info' and 'pdf' files
-    tests       Test suite
+    tests       Test suite (GnuCOBOL and framework for COBOL85)
     extras      useful COBOL programs 
 
 All programs except those in lib and libcob are distributed under
@@ -158,6 +157,7 @@ To generate/install GnuCOBOL :
 
 **************************************
 
+ Configure and build
     ./configure
     make
 
@@ -166,10 +166,28 @@ To generate/install GnuCOBOL :
  to run a series of GnuCOBOL test programs (must do!)
  This MUST succeed - If not, please report.
 
+ You may optionally perform a series of COBOL85 tests.
+    make test
+ It is recommended that you perform these tests.
+
+** NOTE **
+   The language interpreter "perl" is required to run COBOL85 tests.
+ 
+** NOTE **
+   Running "make test" will try to download the COBOL85
+   testsuite if it is missing.
+ For details see tests/cobol85/README.
+
+ If you want to run both tests you can run
+    make checkall 
+
+ Install
     make install
 
 ** NOTE **
-   You generally need super-user privileges to execute "make install".
+   You generally need super-user privileges to execute "make install"
+   unless you changed the installation directory with
+   "./configure --prefix=<dir>" and have full access to <dir>.
 
 ** NOTE **
    On Linux systems, if you are installing for the
@@ -183,10 +201,6 @@ To generate/install GnuCOBOL :
    Edit /etc/ld.so.conf (or the equivalent file) and add
    /usr/local/lib to the file.
    Rerun "ldconfig".
-
-You may optionally perform a series of COBOL85 tests.
-See tests/cobol85/README
-It is recommended that you perform this test.
 
 **************************************
 

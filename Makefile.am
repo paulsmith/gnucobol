@@ -89,3 +89,10 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define COB_BLD_BUILD    \"$(build)\"";			\
 	  echo "#define LOCALEDIR        \"$(datadir)/locale\"";	\
 	} > defaults.h
+
+test: all test-only
+
+test-only:
+	cd tests && $(MAKE) $(AM_MAKEFLAGS) test
+
+checkall: check test-only

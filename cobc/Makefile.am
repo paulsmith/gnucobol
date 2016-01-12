@@ -47,7 +47,6 @@ CLEANFILES = parser.output ppparse.output
 	LC_CTYPE=C flex -s -o$@.tmp $< && \
 	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@.tmp > $@
 
-
 .y.c:
 	bison -o $@ $<
 
