@@ -14310,8 +14310,8 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking matching GMP version" >&5
 $as_echo_n "checking matching GMP version... " >&6; }
-COB_GMP_LIB_MAJOR=$(echo $COB_GMP_LIB | cut -d. -f1)
-COB_GMP_LIB_MINOR=$(echo $COB_GMP_LIB | cut -d. -f2)
+COB_GMP_LIB_MAJOR=$(echo "$COB_GMP_LIB" | cut -d. -f1)
+COB_GMP_LIB_MINOR=$(echo "$COB_GMP_LIB" | cut -d. -f2)
 
 if test "$COB_GMP_HEADER" == "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_GMP_HEADER)" >&5
@@ -17118,12 +17118,12 @@ fi
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB db.h version >= 4.1" >&5
 $as_echo_n "checking for Berkeley DB db.h version >= 4.1... " >&6; }
-	COB_BDB_HEADER_MAJOR=$(echo $COB_BDB_HEADER | cut -d. -f1)
+	COB_BDB_HEADER_MAJOR=$(echo "$COB_BDB_HEADER" | cut -d. -f1)
 	if test $COB_BDB_HEADER_MAJOR -gt 4; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_BDB_HEADER)" >&5
 $as_echo "yes ($COB_BDB_HEADER)" >&6; }
 	else
-		COB_BDB_HEADER_MINOR=$(echo $COB_BDB_HEADER | cut -d. -f2)
+		COB_BDB_HEADER_MINOR=$(echo "$COB_BDB_HEADER" | cut -d. -f2)
 		if test $COB_BDB_HEADER_MAJOR -eq 4 -a $COB_BDB_HEADER_MINOR -ge 1; then
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($COB_BDB_HEADER)" >&5
 $as_echo "yes ($COB_BDB_HEADER)" >&6; }
@@ -17942,7 +17942,7 @@ unset MYOCLIBS
 
 # Generate the output
 
- if test $COB_HAS_ISAM = yes; then
+ if test "$COB_HAS_ISAM" = yes; then
   COB_MAKE_IX_TRUE=
   COB_MAKE_IX_FALSE='#'
 else
@@ -17995,9 +17995,9 @@ COB_BIGENDIAN="$ac_cv_c_bigendian"
 
 
 if test "$COB_STRFTIME" = "no" -a "$COB_TIMEZONE" = "no"; then
-	COB_HAVE_UTC_OFFSET="no"
+	COB_HAS_UTC_OFFSET="no"
 else
-	COB_HAVE_UTC_OFFSET="yes"
+	COB_HAS_UTC_OFFSET="yes"
 fi
 
 COB_PATCH_LEVEL=$with_patch_level
@@ -20563,7 +20563,7 @@ else
 $as_echo "$as_me:  ISAM I/O (no handler configured):            NO" >&6;}
 fi
 unset DEFINE_DL
-if test $COB_HAS_UTC_OFFSET = "no"; then
+if test "$COB_HAS_UTC_OFFSET" = "no"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:  Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE" >&5
 $as_echo "$as_me: WARNING:  Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE" >&2;}
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: and FORMATTED-DATETIME may not work." >&5
