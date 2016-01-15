@@ -1803,6 +1803,7 @@ object_computer_memory:
   {
 	cb_verify (cb_memory_size_clause, "MEMORY SIZE");
   }
+	/* Ignore */
 ;
 
 object_computer_sequence:

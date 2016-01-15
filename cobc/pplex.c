@@ -1,6 +1,6 @@
-#line 2 "pplex.c"
+#line 2 "pplex.c.tmp"
 
-#line 4 "pplex.c"
+#line 4 "pplex.c.tmp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -2162,7 +2162,7 @@ static void	check_comments		(const char *, const char *);
 
 
 
-#line 2165 "pplex.c"
+#line 2165 "pplex.c.tmp"
 
 #define INITIAL 0
 #define COPY_STATE 1
@@ -2373,7 +2373,7 @@ YY_DECL
 
 
 
-#line 2376 "pplex.c"
+#line 2376 "pplex.c.tmp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3492,7 +3492,7 @@ YY_RULE_SETUP
 #line 715 "pplex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3495 "pplex.c"
+#line 3495 "pplex.c.tmp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4903,11 +4903,9 @@ start:
 			newline_count++;
 			goto start;
 		} else if (!need_continuation) {
-			cb_plex_error (newline_count,
-				       _("Invalid continuation: no literal/word needs to be continued"));
-		} else {
-			continuation = 1;
+			cb_verify (cb_word_continuation, _("Continuation of COBOL words"));
 		}
+		continuation = 1;
 		break;
 	case 'd':
 	case 'D':
@@ -5288,8 +5286,8 @@ check_comments (const char *keyword, const char *text)
 {
 	/* Treated as comments when in Identification Division */
 	if (comment_allowed) {
-		cb_verify (cb_author_paragraph, keyword);
-		/* Skip comments until the end of line */
+		cb_verify (cb_comment_paragraphs, keyword);
+		/* Skip comments until the end of line. */
 		within_comment = 1;
 		skip_to_eol ();
 	} else {

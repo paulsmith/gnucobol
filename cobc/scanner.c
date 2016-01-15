@@ -1,6 +1,6 @@
-#line 2 "scanner.c"
+#line 2 "scanner.c.tmp"
 
-#line 4 "scanner.c"
+#line 4 "scanner.c.tmp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1563,7 +1563,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1566 "scanner.c"
+#line 1566 "scanner.c.tmp"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1778,7 +1778,7 @@ YY_DECL
 
 
 
-#line 1781 "scanner.c"
+#line 1781 "scanner.c.tmp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3013,7 +3013,7 @@ YY_RULE_SETUP
 #line 1021 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3016 "scanner.c"
+#line 3016 "scanner.c.tmp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4252,22 +4252,24 @@ scan_numeric (const char *text)
 {
 	char		*p = (char *)text;
 	char		*s;
-	int		sign;
-	int		scale;
+	int 		sign;
+	int 		scale;
 
 	/* Get sign */
 	sign = get_sign (*p);
 	INCREMENT_IF_SIGNED (p, sign);
 
 	/* Get decimal point */
-	scale = 0;
 	s = strchr (p, current_program->decimal_point);
 	if (s) {
 		scale = (int)strlen (s) - 1;
 		/* Remove decimal point */
 		/* Moves trailing null */
 		memmove (s, s + 1, (size_t)(scale + 1));
+	} else {
+		scale = 0;
 	}
+
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,

@@ -1418,22 +1418,24 @@ scan_numeric (const char *text)
 {
 	char		*p = (char *)text;
 	char		*s;
-	int		sign;
-	int		scale;
+	int 		sign;
+	int 		scale;
 
 	/* Get sign */
 	sign = get_sign (*p);
 	INCREMENT_IF_SIGNED (p, sign);
 
 	/* Get decimal point */
-	scale = 0;
 	s = strchr (p, current_program->decimal_point);
 	if (s) {
 		scale = (int)strlen (s) - 1;
 		/* Remove decimal point */
 		/* Moves trailing null */
 		memmove (s, s + 1, (size_t)(scale + 1));
+	} else {
+		scale = 0;
 	}
+
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,
