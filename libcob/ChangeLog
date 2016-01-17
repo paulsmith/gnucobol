@@ -1,7 +1,13 @@
 
+2016-01-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (get_screen_item_line_and_col): simplified and improved to
+	  make interpretation of LINE and COL clauses more similar to that of
+	  other implementations.
+
 2016-01-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* call.c (cob_call): fr #101 - allow more parameters for CALL 
+	* call.c (cob_call): fr #101 - allow more parameters for CALL
 	  (COB_MAX_FIELD_PARAMS to be one of 16/36/56/76/96)
 
 2015-12-31  Edward Hart <edward.dan.hart@gmail.com>

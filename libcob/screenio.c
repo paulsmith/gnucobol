@@ -672,6 +672,57 @@ is_first_screen_item (cob_screen *s)
 	return 1;
 }
 
+static cob_screen *
+get_last_child (cob_screen * const s)
+{
+	cob_screen	*child;
+
+	for (child = s->child; child->next; child = child->next);
+
+	if (child->child) {
+		return get_last_child (child);
+	} else {
+		return child;
+	}
+}
+
+static cob_screen *
+get_prev_screen_item (cob_screen * const s)
+{
+	if (s->prev) {
+		if (s->prev->child) {
+			return get_last_child (s->prev);
+		} else {
+			return s->prev;
+		}
+	} else if (s->parent) {
+		return s->parent;
+	} else {
+		return NULL;
+	}
+}
+
+
+#define UPDATE_CLAUSE_FUNC(clause_name_upper, clause_name_lower)	\
+	static void							\
+	update_##clause_name_lower (cob_screen *s, int * const count,	\
+				    int * const found_clause)		\
+	{								\
+		if (s->attr & COB_SCREEN_##clause_name_upper##_PLUS) {	\
+			*count += cob_get_int (s->clause_name_lower);	\
+		} else if (s->attr & COB_SCREEN_##clause_name_upper##_MINUS) { \
+			*count -= cob_get_int (s->clause_name_lower);	\
+		} else {						\
+			*count += cob_get_int (s->clause_name_lower) - 1; \
+			*found_clause = 1;				\
+		}							\
+	}
+
+UPDATE_CLAUSE_FUNC (LINE, line);
+UPDATE_CLAUSE_FUNC (COLUMN, column);
+
+#undef UPDATE_CLAUSE_FUNC
+
 static size_t
 get_size (cob_screen *s)
 {
@@ -680,102 +731,54 @@ get_size (cob_screen *s)
 	} else { /* s->value */
 		return s->value->size;
 	}
+
 }
-
 static void
-update_line_and_col (const int screen_to_display, cob_screen * const s,
-		     int * const line, int * const found_line,
-		     int * const col, int * const found_col)
-{
-	const int	is_first_scr_item = is_first_screen_item (s);
-	const int	is_parent = !!s->child;
-
-	if (!*found_line && s->line) {
-		if (s->attr & COB_SCREEN_LINE_PLUS) {
-			*line += cob_get_int (s->line);
-		} else if (s->attr & COB_SCREEN_LINE_MINUS) {
-			*line -= cob_get_int (s->line);
-		} else {
-			*line += cob_get_int (s->line) - 1;
-			*found_line = 1;
-		}
-
-		if (!s->column) {
-			*found_col = 1;
-		}
-	}
-
-	if (!*found_col) {
-		if (!screen_to_display && !is_parent) {
-			*col += get_size (s) - 1;
-		}
-
-		if (s->column) {
-			if (s->attr & COB_SCREEN_COLUMN_PLUS) {
-				*col += cob_get_int (s->column);
-			} else if (s->attr & COB_SCREEN_COLUMN_MINUS) {
-				*col -= cob_get_int (s->column);
-			} else {
-				*col += cob_get_int (s->column) - 1;
-				*found_col = 1;
-			}
-		} else if (!is_parent && !is_first_scr_item) {
-			++(*col);
-		}
-	}
-
-	if (is_first_scr_item && !s->parent) {
-		*found_line = 1;
-		*found_col = 1;
-	}
-}
-
-static void
-get_screen_item_line_and_col (cob_screen * const s, int * const line,
+get_screen_item_line_and_col (cob_screen * s, int * const line,
 			      int * const col)
 {
-	int		first = 1;
-	int		children_checked = 0;
 	int		found_line = 0;
 	int		found_col = 0;
-	cob_screen	*parent = s->parent;
-	cob_screen	*sibling = s;
+	int	        is_screen_to_display = 1;
+	int		is_parent;
 
 	*line = 0;
 	*col = 0;
-	
-	for (;;) {
-		do {
-			if (sibling->child && !children_checked) {
-				/* Go to last child and start over */
-				parent = sibling;
-				for (sibling = sibling->child;
-				     sibling->next;
-				     sibling = sibling->next);
-				continue;
-			} else {
-				update_line_and_col (first, sibling,
-						     line, &found_line,
-						     col, &found_col);
 
-				if (found_line && found_col) {
-					return;
-				}
-
-				first = 0;
+	for (; s; s = get_prev_screen_item (s)) {
+		if (s->line) {
+			if (!found_line) {
+				update_line (s, line, &found_line);
 			}
-
-			children_checked = 0;
-			sibling = sibling->prev;
-		} while (sibling);
-
-		if (!parent) {
-			break;
+			
+			if (!s->column) {
+				found_col = 1;
+			}
 		}
 
-		sibling = parent;
-		parent = parent->parent;
-		children_checked = 1;
+		if (!found_col) {
+			is_parent = !!s->child;
+			
+			if (!is_screen_to_display && !is_parent) {
+				*col += get_size (s) - 1;
+			}
+
+			if (s->column) {
+				update_column (s, col, &found_col);
+			}
+
+			if (!s->column && !is_parent && !is_first_screen_item (s)) {
+				/*
+				  Note that parents are excluded; the standard
+				  assumes COL + 1, unless otherwise specified,
+				  on all screen items. This seems silly on group
+				  items, hence why this non-standard extension.
+				*/
+				++(*col);
+			}
+		}
+
+	        is_screen_to_display = 0;
 	}
 }
 
