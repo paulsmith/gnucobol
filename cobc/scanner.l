@@ -386,8 +386,10 @@ H#[0-9A-Za-z]* {
 		yylval = cb_build_reference (yytext);
 		return WORD;
 	}
-	/* Numeric literal */
-	return scan_numeric (yytext);
+	/* Numeric literal or referenced integer label */
+	/* All transformations/checks are postponed to tree.c */
+	yylval = cb_build_numeric_literal (0, yytext, 0);
+	return LITERAL;
 }
 
 [+-][0-9]+ {
@@ -1435,6 +1437,8 @@ scan_numeric (const char *text)
 	} else {
 		scale = 0;
 	}
+
+	/* leading zeroes should be removed here, shouldn't they ? */
 
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */

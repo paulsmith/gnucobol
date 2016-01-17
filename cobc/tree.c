@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -87,6 +87,7 @@ static char			*pic_buff = NULL;
 static int			filler_id = 1;
 static int			class_id = 0;
 static int			toplev_count;
+static char			err_msg[COB_MINI_BUFF];
 static struct cb_program	*container_progs[64];
 static const char		* const cb_const_subs[] = {
 	"i0",
@@ -1062,6 +1063,40 @@ cb_fits_long_long (const cb_tree x)
 	}
 }
 
+static void
+error_numeric_literal (const char *literal)
+{
+	char		lit_out[39];
+
+	/* snip literal for output, if too long */
+	strncpy (lit_out, literal, 38);
+	if (strlen (literal) > 38) { 
+		strcpy (lit_out + 35, "...");
+	} else {
+		lit_out[38] = '\0';
+	}
+	cb_error (_("Invalid numeric literal: '%s'"), lit_out);
+	cb_error (err_msg);
+}
+
+/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+static void
+check_lit_length (const int size, const char *lit)
+{
+	if (unlikely(size > COB_MAX_DIGITS)) {
+		/* Absolute limit */
+		snprintf (err_msg, COB_MINI_MAX,
+			_("Literal length %d exceeds maximum of %d digits"),
+			size, COB_MAX_DIGITS);
+		error_numeric_literal (lit);
+	} else if (unlikely(size > cb_numlit_length)) {
+		snprintf (err_msg, COB_MINI_MAX,
+			_("Literal length %d exceeds %d digits"),
+			size, cb_numlit_length);
+		error_numeric_literal (lit);
+	}
+}
+
 int
 cb_get_int (const cb_tree x)
 {
@@ -1076,6 +1111,8 @@ cb_get_int (const cb_tree x)
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
+	
+	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
 			break;
@@ -1083,8 +1120,11 @@ cb_get_int (const cb_tree x)
 	}
 
 	size = l->size - i;
+	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	check_lit_length(size, (const char *)l->data + i);
+	/* Check numeric literal length matching requested output type */
 #if INT_MAX >= 9223372036854775807
-	if (size >= 19U) {
+	if (unlikely(size >= 19U)) {
 		if (l->sign < 0) {
 			s = "9223372036854775808";
 		} else {
@@ -1096,7 +1136,7 @@ cb_get_int (const cb_tree x)
 		}
 	}
 #elif INT_MAX >= 2147483647
-	if (size >= 10U) {
+	if (unlikely(size >= 10U)) {
 		if (l->sign < 0) {
 			s = "2147483648";
 		} else {
@@ -1108,7 +1148,7 @@ cb_get_int (const cb_tree x)
 		}
 	}
 #else
-	if (size >= 5U) {
+	if (unlikely(size >= 5U)) {
 		if (l->sign < 0) {
 			s = "32768";
 		} else {
@@ -1145,6 +1185,8 @@ cb_get_long_long (const cb_tree x)
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
+	
+	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
 			break;
@@ -1152,7 +1194,10 @@ cb_get_long_long (const cb_tree x)
 	}
 
 	size = l->size - i;
-	if (size >= 19U) {
+	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	check_lit_length(size, (const char *)l->data + i);
+	/* Check numeric literal length matching requested output type */
+	if (unlikely (size >= 19U)) {
 		if (l->sign < 0) {
 			s = "9223372036854775808";
 		} else {
@@ -1184,6 +1229,8 @@ cb_get_u_long_long (const cb_tree x)
 	cob_u64_t		val;
 
 	l = CB_LITERAL (x);
+	
+	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
 			break;
@@ -1191,7 +1238,10 @@ cb_get_u_long_long (const cb_tree x)
 	}
 
 	size = l->size - i;
-	if (size >= 20U) {
+	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	check_lit_length(size, (const char *)l->data + i);
+	/* Check numeric literal length matching requested output type */
+	if (unlikely(size >= 20U)) {
 		s = "18446744073709551615";
 		if (size == 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
 			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);

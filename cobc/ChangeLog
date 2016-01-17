@@ -6,6 +6,11 @@
 	* parser.y (check_repeated): merged check_*_repeated functions into one
 	  function.
 
+2016-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, tree.c: postponed numerical literal checks for possible labels
+	  from scanner.l to tree.c (check_lit_length, error_numeric_literal)
+
 2016-01-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l, config.def: reverted [r605]. Marked continuation of COBOL
