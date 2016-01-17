@@ -1,4 +1,9 @@
 
+2016-01-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (screen_description): fixed bug #186 - only the clauses
+	  in the current screen item are checked for duplication.
+
 2016-01-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #182 - ON/OFF in SWITCH clause causing incorrect

@@ -184,3 +184,25 @@ prog.cob: 11: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Redundant screen clauses])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01  scr.
+           03  HIGHLIGHT FULL.
+               05  HIGHLIGHT FULL.
+                   07  FULL FULL VALUE "foo".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: Duplicate FULL clause
+])
+
+AT_CLEANUP

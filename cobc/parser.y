@@ -4921,7 +4921,6 @@ screen_description:
 | level_number entry_name
   {
 	cb_tree	x;
-	int	flags;
 
 	x = cb_build_field_tree ($1, $2, current_field, current_storage,
 				 current_file, 0);
@@ -4934,6 +4933,16 @@ screen_description:
 
 	current_field = CB_FIELD (x);
 	if (current_field->parent) {
+		current_field->screen_foreg = current_field->parent->screen_foreg;
+		current_field->screen_backg = current_field->parent->screen_backg;
+		current_field->screen_prompt = current_field->parent->screen_prompt;
+	}
+  }
+  screen_options
+  {
+	int	flags;
+	  
+	if (current_field->parent) {
 		flags = current_field->parent->screen_flag;
 		flags &= ~COB_SCREEN_BLANK_LINE;
 		flags &= ~COB_SCREEN_BLANK_SCREEN;
@@ -4943,14 +4952,16 @@ screen_description:
 		flags &= ~COB_SCREEN_LINE_MINUS;
 		flags &= ~COB_SCREEN_COLUMN_PLUS;
 		flags &= ~COB_SCREEN_COLUMN_MINUS;
+
+		if (current_field->screen_flag & COB_SCREEN_HIGHLIGHT) {
+			flags &= ~COB_SCREEN_LOWLIGHT;
+		} else if (current_field->screen_flag & COB_SCREEN_LOWLIGHT) {
+			flags &= ~COB_SCREEN_HIGHLIGHT;
+		}
+		
 		current_field->screen_flag |= flags;
-		current_field->screen_foreg = current_field->parent->screen_foreg;
-		current_field->screen_backg = current_field->parent->screen_backg;
-		current_field->screen_prompt = current_field->parent->screen_prompt;
 	}
-  }
-  screen_options
-  {
+	  
 	if (!qualifier && (current_field->level == 88 ||
 	    current_field->level == 66 ||
 	    current_field->flag_item_78)) {
