@@ -3,6 +3,8 @@
 
 	* parser.y (screen_description): fixed bug #186 - only the clauses
 	  in the current screen item are checked for duplication.
+	* scanner.l (scan_*): suppressed compiler warnings by casting size_t to
+	  int in printf calls.
 
 2016-01-10  Edward Hart <edward.dan.hart@gmail.com>
 

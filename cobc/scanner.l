@@ -1119,7 +1119,7 @@ scan_x (const char *text)
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, cb_lit_length);
+			  (int) currlen, cb_lit_length);
 		error_literal ("X", text);
 		goto error;
 	}
@@ -1197,7 +1197,7 @@ scan_z (const char *text, const cob_u32_t llit)
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, cb_lit_length);
+			  (int) currlen, cb_lit_length);
 		if (llit) {
 			error_literal ("L", text);
 		} else {
@@ -1245,7 +1245,7 @@ scan_h (const char *text, const cob_u32_t with_mark)
 	if (unlikely(currlen > 16)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen,  16);
+			  (int) currlen,  16);
 		error_literal ("hex", plexbuff);
 		goto error;
 	}
@@ -1310,7 +1310,7 @@ scan_b (const char *text, const cob_u32_t with_mark)
 	if (unlikely(currlen > 64)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, 64);
+			  (int) currlen, 64);
 		error_literal ("B", plexbuff);
 		goto error;
 	}
@@ -1363,8 +1363,8 @@ scan_o (const char *text)
 	memcpy (plexbuff, text, currlen + 1);
 	if (unlikely(currlen > 22)) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds %d characters"),
-			currlen, 22);
+			  _("Literal length %d exceeds %d characters"),
+			  (int) currlen, 22);
 		error_literal ("O", plexbuff);
 		goto error;
 	}
@@ -1443,14 +1443,14 @@ scan_numeric (const char *text)
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds maximum of %d digits"),
-			strlen (p), COB_MAX_DIGITS);
+			  _("Literal length %d exceeds maximum of %d digits"),
+			  (int) strlen (p), COB_MAX_DIGITS);
 		error_literal ("num", text);
 		yylval = cb_error_node;
 	} else if (unlikely(strlen (p) > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds %d digits"),
-			strlen (p), cb_numlit_length);
+			  _("Literal length %d exceeds %d digits"),
+			  (int) strlen (p), cb_numlit_length);
 		error_literal ("num", text);
 		yylval = cb_error_node;
 	} else {
