@@ -556,15 +556,39 @@ check_repeated (const char *clause, const unsigned int bitval, unsigned int *alr
 }
 
 static void
-check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
-{	
-	if (flag_to_set == COB_SCREEN_LOWLIGHT
-	    && (flags & COB_SCREEN_HIGHLIGHT)) {
-		cb_error (_("Cannot specify both HIGHLIGHT and LOWLIGHT"));
-	} else if (flag_to_set == COB_SCREEN_HIGHLIGHT
-		   && (flags & COB_SCREEN_LOWLIGHT)) {
-		cb_error (_("Cannot specify both HIGHLIGHT and LOWLIGHT"));
+check_not_both (const int flag1, const int flag2,
+		const char *flag1_name, const char *flag2_name,
+		const int flags, const int flag_to_set)
+{
+	if (flag_to_set == flag1 && (flags & flag2)) {
+		cb_error (_("Cannot specify both %s and %s"),
+			  flag1_name, flag2_name);
+	} else if (flag_to_set == flag2 && (flags & flag1)) {
+		cb_error (_("Cannot specify both %s and %s"),
+			  flag1_name, flag2_name);
+
 	}
+}
+
+static COB_INLINE COB_A_INLINE void
+check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
+{
+	check_not_both (COB_SCREEN_HIGHLIGHT, COB_SCREEN_LOWLIGHT,
+			"HIGHLIGHT", "LOWLIGHT", flags, flag_to_set);
+}
+
+static COB_INLINE COB_A_INLINE void
+check_not_erase_eol_and_eos (const int flags, const int flag_to_set)
+{
+	check_not_both (COB_SCREEN_ERASE_EOL, COB_SCREEN_ERASE_EOS,
+			"ERASE EOL", "ERASE EOS", flags, flag_to_set);
+}
+
+static void
+check_no_conflicting_attrs (const int flags, const int flag_to_set)
+{
+	check_not_highlight_and_lowlight (flags, flag_to_set);
+	check_not_erase_eol_and_eos (flags, flag_to_set);
 }
  
 static void
@@ -579,6 +603,9 @@ check_screen_attr (const char *clause, const int bitval)
 	} else {
 		check_not_highlight_and_lowlight (current_field->screen_flag,
 						  bitval);
+		check_not_erase_eol_and_eos (current_field->screen_flag,
+					     bitval);
+
 		current_field->screen_flag |= bitval;
 	}
 }
@@ -627,8 +654,9 @@ check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 		current_statement->attr_ptr->size_is = size_is;
 	}
 	/* Attribute */
-	check_not_highlight_and_lowlight (current_statement->attr_ptr->dispattrs,
-					  attrib);
+	check_no_conflicting_attrs (current_statement->attr_ptr->dispattrs,
+				    attrib);
+
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
@@ -762,12 +790,12 @@ check_not_88_level (cb_tree x)
 	}
 
 	f = CB_FIELD (cb_ref (x));
-	
+
 	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
 		cb_error (_("88-level cannot be used here"));
 	}
 }
- 
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -2057,7 +2085,7 @@ on_off_clauses_1:
   on_or_off _onoff_status undefined_word
   {
 	cb_tree		x;
-	
+
 	/* cb_define_switch_name checks param validity */
 	x = cb_define_switch_name ($3, save_tree, $1 == cb_int1);
 	if (x) {
@@ -4941,7 +4969,7 @@ screen_description:
   screen_options
   {
 	int	flags;
-	  
+
 	if (current_field->parent) {
 		flags = current_field->parent->screen_flag;
 		flags &= ~COB_SCREEN_BLANK_LINE;
@@ -4958,10 +4986,10 @@ screen_description:
 		} else if (current_field->screen_flag & COB_SCREEN_LOWLIGHT) {
 			flags &= ~COB_SCREEN_HIGHLIGHT;
 		}
-		
+
 		current_field->screen_flag |= flags;
 	}
-	  
+
 	if (!qualifier && (current_field->level == 88 ||
 	    current_field->level == 66 ||
 	    current_field->flag_item_78)) {
@@ -5028,11 +5056,11 @@ screen_option:
   {
 	check_screen_attr ("BLINK", COB_SCREEN_BLINK);
   }
-| ERASE EOL
+| ERASE eol
   {
 	check_screen_attr ("ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
-| ERASE EOS
+| ERASE eos
   {
 	check_screen_attr ("ERASE EOS", COB_SCREEN_ERASE_EOS);
   }
@@ -5146,6 +5174,16 @@ screen_option:
 	current_field->screen_to = $2;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
   }
+;
+
+eol:
+  EOL
+| _end_of LINE
+;
+
+eos:
+  EOS
+| _end_of SCREEN
 ;
 
 plus_plus:
@@ -6768,11 +6806,11 @@ disp_attr:
   {
 	cb_warning (_("Ignoring CONVERSION"));
   }
-| ERASE EOL
+| ERASE eol
   {
 	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOL);
   }
-| ERASE EOS
+| ERASE eos
   {
 	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOS);
   }
@@ -10581,7 +10619,7 @@ locale_dt_args:
 
 formatted_datetime_args:
   exp_list
-  {	  
+  {
 	$$ = cb_list_add ($1, cb_int0);
   }
 | exp_list e_sep SYSTEM_OFFSET
@@ -10591,14 +10629,14 @@ formatted_datetime_args:
 	if (num_args == 4) {
 		cb_error_x ($1, _("Cannot specify offset and SYSTEM-OFFSET at the same time."));
 	}
-	  
+
 	$$ = cb_list_add ($1, cb_int1);
   }
 ;
 
 formatted_time_args:
   exp_list
-  {	  
+  {
 	$$ = cb_list_add ($1, cb_int0);
   }
 | exp_list e_sep SYSTEM_OFFSET
@@ -10608,7 +10646,7 @@ formatted_time_args:
 	if (num_args == 3) {
 		cb_error_x ($1, _("Cannot specify offset and SYSTEM-OFFSET at the same time."));
 	}
-	  
+
 	$$ = cb_list_add ($1, cb_int1);
   }
 ;
@@ -10838,6 +10876,7 @@ _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
 _contains:	| CONTAINS ;
 _data:		| DATA ;
+_end_of:	| END _of ;
 _file:		| TOK_FILE ;
 _final:		| FINAL ;
 _for:		| FOR ;
