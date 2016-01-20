@@ -1,9 +1,11 @@
 
 2016-01-20  Edward Hart <edward.dan.hart@gmail.com>
 
-	* parser.y: fixed bug #190 - added check that ERASE EOL and EOS and not
+	* parser.y: fixed bug #190 - added check that ERASE EOL and EOS are not
 	  specified at the same time.
 	* parser.y: added [END OF] LINE/SCREEN as synonym for EOL/EOS.
+	* parser.y: fixed bug #191 - added check that BLANK LINE and SCREEN are
+	  not specified at the same time.
 
 2016-01-17  Edward Hart <edward.dan.hart@gmail.com>
 

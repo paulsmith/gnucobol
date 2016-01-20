@@ -161,7 +161,7 @@ prog.cob: 12: Error: 88-level cannot be used here
 AT_CLEANUP
 
 
-AT_SETUP([HIGHLIGHT and LOWLIGHT simultaneously])
+AT_SETUP([Conflicting screen clauses])
 AT_KEYWORDS([screen])
 
 AT_DATA([prog.cob], [
@@ -171,43 +171,26 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "foo" HIGHLIGHT, LOWLIGHT.
+           03  VALUE "foo" HIGHLIGHT, LOWLIGHT;
+                           ERASE EOL, ERASE EOS;
+                           BLANK LINE, BLANK SCREEN.
 
        PROCEDURE        DIVISION.
-           DISPLAY "blah" WITH HIGHLIGHT, LOWLIGHT
+           DISPLAY "blah" WITH HIGHLIGHT, LOWLIGHT;
+                               ERASE EOL, ERASE EOS;
+                               BLANK LINE, BLANK SCREEN
            SET scr ATTRIBUTE HIGHLIGHT ON, LOWLIGHT OFF
            .
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
-prog.cob: 11: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
-prog.cob: 12: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
-])
-
-AT_CLEANUP
-
-
-AT_SETUP([ERASE EOL and EOS simultaneously])
-AT_KEYWORDS([screen])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-
-       DATA             DIVISION.
-       SCREEN           SECTION.
-       01  scr.
-           03  VALUE "foo" ERASE EOL, ERASE EOS.
-
-       PROCEDURE        DIVISION.
-           DISPLAY "blah" WITH ERASE END OF LINE, ERASE END OF SCREEN
-           .
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Error: Cannot specify both ERASE EOL and ERASE EOS
-prog.cob: 11: Error: Cannot specify both ERASE EOL and ERASE EOS
+prog.cob: 9: Error: Cannot specify both ERASE EOL and ERASE EOS
+prog.cob: 10: Error: Cannot specify both BLANK LINE and BLANK SCREEN
+prog.cob: 13: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
+prog.cob: 14: Error: Cannot specify both ERASE EOL and ERASE EOS
+prog.cob: 15: Error: Cannot specify both BLANK LINE and BLANK SCREEN
+prog.cob: 16: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
 AT_CLEANUP

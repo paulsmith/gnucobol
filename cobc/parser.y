@@ -584,11 +584,19 @@ check_not_erase_eol_and_eos (const int flags, const int flag_to_set)
 			"ERASE EOL", "ERASE EOS", flags, flag_to_set);
 }
 
+static COB_INLINE COB_A_INLINE void
+check_not_blank_line_and_screen (const int flags, const int flag_to_set)
+{
+	check_not_both (COB_SCREEN_BLANK_LINE, COB_SCREEN_BLANK_SCREEN,
+			"BLANK LINE", "BLANK SCREEN", flags, flag_to_set);
+}
+ 
 static void
 check_no_conflicting_attrs (const int flags, const int flag_to_set)
 {
 	check_not_highlight_and_lowlight (flags, flag_to_set);
 	check_not_erase_eol_and_eos (flags, flag_to_set);
+	check_not_blank_line_and_screen (flags, flag_to_set);
 }
  
 static void
@@ -601,11 +609,8 @@ check_screen_attr (const char *clause, const int bitval)
 			cb_error (_("Duplicate %s clause"), clause);
 		}
 	} else {
-		check_not_highlight_and_lowlight (current_field->screen_flag,
-						  bitval);
-		check_not_erase_eol_and_eos (current_field->screen_flag,
-					     bitval);
-
+		check_no_conflicting_attrs (current_field->screen_flag, bitval);
+		
 		current_field->screen_flag |= bitval;
 	}
 }
