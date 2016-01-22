@@ -577,44 +577,69 @@ check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
 			"HIGHLIGHT", "LOWLIGHT", flags, flag_to_set);
 }
 
-static COB_INLINE COB_A_INLINE void
-check_not_erase_eol_and_eos (const int flags, const int flag_to_set)
+static void
+emit_duplicate_clause_message (const char *clause)
 {
-	check_not_both (COB_SCREEN_ERASE_EOL, COB_SCREEN_ERASE_EOS,
-			"ERASE EOL", "ERASE EOS", flags, flag_to_set);
+	if (cb_relaxed_syntax_check) {
+		cb_warning (_("Duplicate %s clause"), clause);
+	} else {
+		cb_error (_("Duplicate %s clause"), clause);
+	}
 }
 
-static COB_INLINE COB_A_INLINE void
-check_not_blank_line_and_screen (const int flags, const int flag_to_set)
-{
-	check_not_both (COB_SCREEN_BLANK_LINE, COB_SCREEN_BLANK_SCREEN,
-			"BLANK LINE", "BLANK SCREEN", flags, flag_to_set);
-}
- 
-static void
-check_no_conflicting_attrs (const int flags, const int flag_to_set)
-{
-	check_not_highlight_and_lowlight (flags, flag_to_set);
-	check_not_erase_eol_and_eos (flags, flag_to_set);
-	check_not_blank_line_and_screen (flags, flag_to_set);
-}
- 
 static void
 check_screen_attr (const char *clause, const int bitval)
 {
 	if (current_field->screen_flag & bitval) {
-		if (cb_relaxed_syntax_check) {
-			cb_warning (_("Duplicate %s clause"), clause);
-		} else {
-			cb_error (_("Duplicate %s clause"), clause);
-		}
+		emit_duplicate_clause_message (clause);
 	} else {
-		check_no_conflicting_attrs (current_field->screen_flag, bitval);
-		
 		current_field->screen_flag |= bitval;
 	}
 }
 
+static void
+emit_conflicting_clause_message (const char *clause, const char *conflicting)
+{
+	if (cb_relaxed_syntax_check) {
+		cb_error (_("Cannot specify both %s and %s, %s ignored"),
+			  clause, conflicting, clause);
+	} else {
+		cb_error (_("Cannot specify both %s and %s"),
+			  clause, conflicting);
+	}
+
+}
+
+static void
+check_attr_with_conflict (const char *clause, const int bitval,
+			  const char *confl_clause, const int confl_bit,
+			  int *flags)
+{
+	if (current_field->screen_flag & bitval) {
+		emit_duplicate_clause_message (clause);
+	} else if (current_field->screen_flag & confl_bit) {
+		emit_conflicting_clause_message (clause, confl_clause);
+	} else {
+	        *flags |= bitval;
+	}
+}
+
+static COB_INLINE COB_A_INLINE void
+check_screen_attr_with_conflict (const char *clause, const int bitval,
+			  const char *confl_clause, const int confl_bit)
+{
+	check_attr_with_conflict (clause, bitval, confl_clause, confl_bit,
+				  &current_field->screen_flag);
+}
+ 
+static COB_INLINE COB_A_INLINE void
+check_dispattr_with_conflict (const char *attrib_name, const int attrib,
+			      const char *confl_name, const int confl_attrib)
+{
+	check_attr_with_conflict (attrib_name, attrib, confl_name, confl_attrib,
+				  &current_statement->attr_ptr->dispattrs);
+}
+ 
 static void
 bit_set_attr (const cb_tree onoff, const int attrval)
 {
@@ -626,14 +651,18 @@ bit_set_attr (const cb_tree onoff, const int attrval)
 }
 
 static void
-check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
-	       cb_tree timeout, cb_tree prompt, cb_tree size_is, int attrib)
+attach_attrib_to_cur_stmt (void)
 {
-	/* Attach attribute to current_statement */
 	if (!current_statement->attr_ptr) {
 		current_statement->attr_ptr =
 			cobc_parse_malloc (sizeof(struct cb_attr_struct));
 	}
+}
+
+static void
+check_field_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+		     cb_tree timeout, cb_tree prompt, cb_tree size_is)
+{
 	/* [WITH] FOREGROUND-COLOR [IS] */
 	if (fgc) {
 		current_statement->attr_ptr->fgc = fgc;
@@ -658,13 +687,60 @@ check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 	if (size_is) {
 		current_statement->attr_ptr->size_is = size_is;
 	}
-	/* Attribute */
-	check_no_conflicting_attrs (current_statement->attr_ptr->dispattrs,
-				    attrib);
+}
+
+static void
+check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+	       cb_tree timeout, cb_tree prompt, cb_tree size_is,
+	       const int attrib)
+{
+	attach_attrib_to_cur_stmt ();
+	check_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
 
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
+static void
+check_attribs_with_conflict (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+			     cb_tree timeout, cb_tree prompt, cb_tree size_is,
+			     const char *attrib_name, const int attrib,
+			     const char *confl_name, const int confl_attrib)
+{
+	attach_attrib_to_cur_stmt ();
+	check_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
+
+	check_dispattr_with_conflict (attrib_name, attrib, confl_name,
+				      confl_attrib);
+}
+
+static int
+zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1, const int flag2)
+{
+	if (screen_flag & flag1) {
+		parent_flag &= ~flag2;
+	} else if (screen_flag & flag2) {
+		parent_flag &= ~flag1;
+	}
+
+	return parent_flag;
+}
+ 
+static int
+zero_conflicting_flags (const int screen_flag, int parent_flag)
+{
+	parent_flag = zero_conflicting_flag (screen_flag, parent_flag,
+					     COB_SCREEN_BLANK_LINE,
+					     COB_SCREEN_BLANK_SCREEN);
+	parent_flag = zero_conflicting_flag (screen_flag, parent_flag,
+					     COB_SCREEN_ERASE_EOL,
+					     COB_SCREEN_ERASE_EOS);
+	parent_flag = zero_conflicting_flag (screen_flag, parent_flag,
+					     COB_SCREEN_HIGHLIGHT,
+					     COB_SCREEN_LOWLIGHT);
+
+	return parent_flag;
+}
+ 
 static void
 remove_attrib (int attrib)
 {
@@ -4986,11 +5062,8 @@ screen_description:
 		flags &= ~COB_SCREEN_COLUMN_PLUS;
 		flags &= ~COB_SCREEN_COLUMN_MINUS;
 
-		if (current_field->screen_flag & COB_SCREEN_HIGHLIGHT) {
-			flags &= ~COB_SCREEN_LOWLIGHT;
-		} else if (current_field->screen_flag & COB_SCREEN_LOWLIGHT) {
-			flags &= ~COB_SCREEN_HIGHLIGHT;
-		}
+		flags = zero_conflicting_flags (current_field->screen_flag,
+						flags);
 
 		current_field->screen_flag |= flags;
 	}
@@ -5047,11 +5120,13 @@ screen_options:
 screen_option:
   BLANK LINE
   {
-	check_screen_attr ("BLANK LINE", COB_SCREEN_BLANK_LINE);
+	check_screen_attr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
+					 "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
 | BLANK SCREEN
   {
-	check_screen_attr ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
+	check_screen_attr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
+					 "BLANK LINE", COB_SCREEN_BLANK_LINE);
   }
 | BELL
   {
@@ -5063,19 +5138,23 @@ screen_option:
   }
 | ERASE eol
   {
-	check_screen_attr ("ERASE EOL", COB_SCREEN_ERASE_EOL);
+	check_screen_attr_with_conflict ("ERASE EOL", COB_SCREEN_ERASE_EOL,
+					 "ERASE EOS", COB_SCREEN_ERASE_EOS);
   }
 | ERASE eos
   {
-	check_screen_attr ("ERASE EOS", COB_SCREEN_ERASE_EOS);
+	check_screen_attr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
+					 "ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
 | HIGHLIGHT
   {
-	check_screen_attr ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+	check_screen_attr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+					 "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LOWLIGHT
   {
-	check_screen_attr ("LOWLIGHT", COB_SCREEN_LOWLIGHT);
+	check_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+					 "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | REVERSE_VIDEO
   {
@@ -6058,7 +6137,9 @@ accp_attr:
   }
 | HIGHLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				     "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LEFTLINE
   {
@@ -6070,7 +6151,9 @@ accp_attr:
   }
 | LOWLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | NO_ECHO
   {
@@ -6797,11 +6880,15 @@ disp_attr:
   }
 | BLANK LINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_LINE);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "BLANK LINE", COB_SCREEN_BLANK_LINE,
+				     "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
 | BLANK SCREEN
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLANK_SCREEN);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
+				     "BLANK LINE", COB_SCREEN_BLANK_LINE);
   }
 | BLINK
   {
@@ -6813,19 +6900,27 @@ disp_attr:
   }
 | ERASE eol
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOL);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "ERASE EOL", COB_SCREEN_ERASE_EOL,
+				     "ERASE EOS", COB_SCREEN_ERASE_EOS);
   }
 | ERASE eos
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_ERASE_EOS);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "ERASE_EOS", COB_SCREEN_ERASE_EOS,
+				     "ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
 | HIGHLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_HIGHLIGHT);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				     "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LOWLIGHT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWLIGHT);
+	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
+				     "LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | OVERLINE
   {
