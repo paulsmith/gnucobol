@@ -542,14 +542,20 @@ clear_initial_values (void)
 }
 
 static void
+emit_duplicate_clause_message (const char *clause)
+{
+	if (cb_relaxed_syntax_check) {
+		cb_warning (_("Duplicate %s clause"), clause);
+	} else {
+		cb_error (_("Duplicate %s clause"), clause);
+	}
+}
+ 
+static void
 check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
 {
 	if (*already_seen & bitval) {
-		if (cb_relaxed_syntax_check) {
-			cb_warning (_("Duplicate %s clause"), clause);
-		} else {
-			cb_error (_("Duplicate %s clause"), clause);
-		}
+		emit_duplicate_clause_message (clause);
 	} else {
 		*already_seen |= bitval;
 	}
@@ -578,16 +584,6 @@ check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
 }
 
 static void
-emit_duplicate_clause_message (const char *clause)
-{
-	if (cb_relaxed_syntax_check) {
-		cb_warning (_("Duplicate %s clause"), clause);
-	} else {
-		cb_error (_("Duplicate %s clause"), clause);
-	}
-}
-
-static void
 check_screen_attr (const char *clause, const int bitval)
 {
 	if (current_field->screen_flag & bitval) {
@@ -601,8 +597,8 @@ static void
 emit_conflicting_clause_message (const char *clause, const char *conflicting)
 {
 	if (cb_relaxed_syntax_check) {
-		cb_error (_("Cannot specify both %s and %s, %s ignored"),
-			  clause, conflicting, clause);
+		cb_warning (_("Cannot specify both %s and %s, %s ignored"),
+			    clause, conflicting, clause);
 	} else {
 		cb_error (_("Cannot specify both %s and %s"),
 			  clause, conflicting);
@@ -615,9 +611,9 @@ check_attr_with_conflict (const char *clause, const int bitval,
 			  const char *confl_clause, const int confl_bit,
 			  int *flags)
 {
-	if (current_field->screen_flag & bitval) {
+	if (*flags & bitval) {
 		emit_duplicate_clause_message (clause);
-	} else if (current_field->screen_flag & confl_bit) {
+	} else if (*flags & confl_bit) {
 		emit_conflicting_clause_message (clause, confl_clause);
 	} else {
 	        *flags |= bitval;
@@ -6907,7 +6903,7 @@ disp_attr:
 | ERASE eos
   {
 	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "ERASE_EOS", COB_SCREEN_ERASE_EOS,
+				     "ERASE EOS", COB_SCREEN_ERASE_EOS,
 				     "ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
 | HIGHLIGHT
