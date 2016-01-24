@@ -105,6 +105,8 @@ static int			cob_current_y;
 static int			cob_current_x;
 static short			fore_color;
 static short			back_color;
+static int			origin_y;
+static int			origin_x;
 #endif
 
 /* Local functions */
@@ -759,7 +761,7 @@ get_screen_item_line_and_col (cob_screen * s, int * const line,
 			if (!found_line) {
 				update_line (s, line, &found_line);
 			}
-			
+
 			if (!s->column) {
 				found_col = 1;
 			}
@@ -767,7 +769,7 @@ get_screen_item_line_and_col (cob_screen * s, int * const line,
 
 		if (!found_col) {
 			is_parent = !!s->child;
-			
+
 			if (!is_screen_to_display && !is_parent) {
 				*col += get_size (s) - 1;
 			}
@@ -789,10 +791,14 @@ get_screen_item_line_and_col (cob_screen * s, int * const line,
 
 	        is_screen_to_display = 0;
 	}
+
+	*line += origin_y;
+	*col += origin_x;
 }
 
 static void
-cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input, const enum screen_statement stmt)
+cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input,
+		 const enum screen_statement stmt)
 {
 	unsigned char	*p;
 	size_t		size;
@@ -1401,7 +1407,7 @@ cob_screen_moveyx (cob_screen *s)
 		if (!s->line) {
 			line = y;
 		} else {
-			line = cob_get_int (s->line);
+			line = origin_y + cob_get_int (s->line);
 			if (line < 0) {
 				line = y;
 			}
@@ -1409,7 +1415,7 @@ cob_screen_moveyx (cob_screen *s)
 		if (!s->column) {
 			column = x;
 		} else {
-			column = cob_get_int (s->column);
+			column = origin_x + cob_get_int (s->column);
 			if (column < 0) {
 				column = x;
 			}
@@ -1582,6 +1588,9 @@ screen_display (cob_screen *s, const int line, const int column)
 {
 	init_cob_screen_if_needed ();
 
+	origin_y = line;
+	origin_x = column;
+
 	cob_move_cursor (line, column);
 	cob_screen_iterate (s);
 	refresh ();
@@ -1613,6 +1622,8 @@ screen_accept (cob_screen *s, const int line, const int column,
 	cob_current_y = 0;
 	cob_current_x = 0;
 	totl_index = 0;
+	origin_y = line;
+	origin_x = column;
 
 	cob_move_cursor (line, column);
 
@@ -1693,6 +1704,9 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	char	fig_const;	/* figurative constant character */
 
 	init_cob_screen_if_needed ();
+
+	origin_y = 0;
+	origin_x = 0;
 
 	if (f) {
 		/* Field size to display */
@@ -1781,6 +1795,10 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	space_buff[0] = ' ';
 	space_buff[1] = 0;
 #endif
+
+	origin_y = 0;
+	origin_x = 0;
+
 	/* Set the default prompt character */
 	if (prompt) {
 		promptchar = prompt->data[0];

@@ -1,4 +1,8 @@
 
+2016-01-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: fixed bug #160 - added support for variable screen origin.
+
 2016-01-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (cob_screen_attr): fixed bug #192 - stopped ERASE and BLANK
