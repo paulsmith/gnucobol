@@ -683,7 +683,7 @@ AT_KEYWORDS([misc])
 # AT_DATA removes trailing spaces, workaround: add "_" and
 # remove it later via sed
 
-AT_DATA([prog.cob], [
+AT_DATA([prog_tmpl.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        ENVIRONMENT DIVISION.
@@ -699,7 +699,7 @@ AT_DATA([prog.cob], [
 ])
 
 # AT_DATA workaround via sed:
-AT_CHECK([sed -i -e 's/_$//' prog.cob], [0], [], [])
+AT_CHECK([sed -e 's/_$//' prog_tmpl.cob > prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -fixed -W prog.cob], [0], [],
 [prog.cob: 7: Warning: Source text exceeds 512 bytes, will be truncated
