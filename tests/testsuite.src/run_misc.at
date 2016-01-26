@@ -4381,7 +4381,7 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 AT_SETUP([EC-SCREEN-LINE-NUMBER and -STARTING-COLUMN])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc screen])
 
 AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
 

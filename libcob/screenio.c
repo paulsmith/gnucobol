@@ -1525,6 +1525,12 @@ set_default_line_column (const enum screen_statement stmt, int *sline,
 {
 	if (stmt == DISPLAY_STATEMENT) {
 		getyx (stdscr, *sline, *scolumn);
+		if (*sline < 0) {
+			*sline = 0;
+		}
+		if (*scolumn < 0) {
+			*scolumn = 0;
+		}
 	} else { /* ACCEPT_STATEMENT */
 		*sline = 0;
 		*scolumn = 0;
