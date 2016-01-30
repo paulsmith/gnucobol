@@ -4264,7 +4264,7 @@ value_has_picture_clause (cb_tree pos)
 static COB_INLINE COB_A_INLINE int
 value_pic_has_no_scale (cb_tree pos)
 {
-	return (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->scale == 0;
+	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->scale == 0;
 }
 
 static int
@@ -4285,7 +4285,7 @@ valid_screen_pos (cb_tree pos)
 	if (CB_NUMERIC_LITERAL_P (pos)) {
 		size = (CB_LITERAL (pos))->size;
 	} else if (valid_screen_pos_type (pos)) {
-		size = (CB_PICTURE ((CB_FIELD ((CB_REFERENCE (pos))->value))->pic))->size;
+		size = (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->size;
 	} else {
 		cb_error (_("Invalid value in AT clause"));
 		return 0;
