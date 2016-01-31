@@ -5,6 +5,8 @@
 	  date/datetime format strings for FUNCTION TEST-FORMATTED-DATETIME
 	* intrinsic.c: changed definition of string lengths for date/time
 	  according to existing ones (COB_xyz_BUFF)
+	* common.h [_MSC_VER]: adding alias for setenv/unsetenv fixing small memory
+	  leak for calls of (putenv) - _MSC duplicates the string, POSIX does not
 
 2016-01-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
