@@ -1,4 +1,11 @@
 
+2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* intrinsic.c (split_around_t): fixed stack overflow occuring in wrong
+	  date/datetime format strings
+	* intrinsic.c: changed definition of string lengths for date/time
+	  according to existing ones (COB_xyz_BUFF)
+
 2016-01-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: fixed bug #160 - added support for variable screen origin.

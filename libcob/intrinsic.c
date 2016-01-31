@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2005-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2005-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -111,15 +111,17 @@ static const int normal_month_days[] =
 static const int leap_month_days[] =
 	{0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-static const size_t max_date_length = 10U;
-#define MAX_DATE_STR_LENGTH 11U
 
-static const size_t max_time_decimal_places = 9U;
-static const size_t max_time_length = 25U; /* including max decimal places */
-#define MAX_TIME_STR_LENGTH 26U
+#define COB_DATESTR_LEN		11
+#define	COB_DATESTR_MAX		(COB_DATESTR_LEN - 1)
 
-static const size_t max_datetime_length = 35U;
-#define MAX_DATETIME_STR_LENGTH 36U
+#define	COB_TIMEDEC_MAX		9
+
+#define COB_TIMESTR_LEN		26 /* including max decimal places */
+#define	COB_TIMESTR_MAX		(COB_TIMESTR_LEN - 1)
+
+#define COB_DATETIMESTR_LEN		36
+#define	COB_DATETIMESTR_MAX		(COB_DATETIMESTR_LEN - 1)
 
 /* Locale name to Locale ID table */
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -1894,8 +1896,8 @@ split_around_t (const char *str, char *first, char *second)
 
 	/* Copy everything before 'T' into first (if present) */
 	first_length = i;
-	if (first_length > MAX_DATE_STR_LENGTH) {
-		first_length = MAX_DATE_STR_LENGTH;
+	if (first_length > COB_DATESTR_MAX) {
+		first_length = COB_DATESTR_MAX;
 	}
 	if (first != NULL) {
 		strncpy (first, str, first_length);
@@ -1908,8 +1910,8 @@ split_around_t (const char *str, char *first, char *second)
 			second[0] = '\0';
 		} else {
 			second_length = strlen (str) - i - 1U;
-			if (second_length > MAX_TIME_STR_LENGTH) {
-				second_length = MAX_TIME_STR_LENGTH;;
+			if (second_length > COB_TIMESTR_MAX) {
+				second_length = COB_TIMESTR_MAX;;
 			}
 			strncpy (second, str + i + 1U, second_length);
 			second[second_length] = '\0';
@@ -2429,8 +2431,8 @@ format_datetime (const struct date_format date_fmt,
 		 char *buff)
 {
 	int	overflow;
-	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
-	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	formatted_time[COB_TIMESTR_LEN] = { '\0' };
+	char	formatted_date[COB_DATESTR_LEN] = { '\0' };
 
 	overflow = format_time (time_fmt, whole_seconds, fractional_seconds,
 				offset_time, formatted_time);
@@ -2877,7 +2879,7 @@ cob_valid_time_format (const char *format, const char decimal_point)
 	if (format[format_offset] == decimal_point) {
 		decimal_places = decimal_places_for_seconds (format, format_offset);
 		format_offset += decimal_places + 1;
-		if (!(1 <= decimal_places && decimal_places <= max_time_decimal_places)) {
+		if (!(1 <= decimal_places && decimal_places <= COB_TIMEDEC_MAX)) {
 			return 0;
 		}
 	}
@@ -2895,8 +2897,8 @@ cob_valid_time_format (const char *format, const char decimal_point)
 int
 cob_valid_datetime_format (const char *format, const char decimal_point)
 {
-	char	date_format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
-	char	time_format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char	date_format_str[COB_DATETIMESTR_LEN] = { '\0' };
+	char	time_format_str[COB_DATETIMESTR_LEN] = { '\0' };
 	struct date_format	date_format;
 	struct time_format	time_format;
 
@@ -5267,10 +5269,10 @@ cob_field *
 cob_intr_seconds_from_formatted_time (cob_field *format_field, cob_field *time_field)
 {
 	size_t		str_length;
-	char		format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char		format_str[COB_DATETIMESTR_LEN] = { '\0' };
 	const char	decimal_point = COB_MODULE_PTR->decimal_point;
 	int		is_datetime = 0;
-	char		time_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char		time_str[COB_DATETIMESTR_LEN] = { '\0' };
 	struct time_format	time_fmt;
 	cob_decimal	*seconds = &d1;
 
@@ -6128,10 +6130,10 @@ cob_intr_formatted_date (const int offset, const int length,
 	cob_field	field;
 	size_t		field_length =
 		num_leading_nonspace ((char *) format_field->data);
-	char		format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char		format_str[COB_DATESTR_LEN] = { '\0' };
 	int		days;
 	struct date_format	format;
-	char		buff[MAX_DATE_STR_LENGTH] = { '\0' };
+	char		buff[COB_DATESTR_LEN] = { '\0' };
 
 	memcpy (format_str, format_field->data, field_length);
 
@@ -6172,8 +6174,8 @@ cob_intr_formatted_time (const int offset, const int length,
 	cob_field	*offset_time_field;
 	cob_field	field;
 	size_t		field_length;
-	char		buff[MAX_TIME_STR_LENGTH] = { '\0' };
-	char		format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	char		buff[COB_TIMESTR_LEN] = { '\0' };
+	char		format_str[COB_TIMESTR_LEN] = { '\0' };
 	int		whole_seconds;
 	cob_decimal	*fractional_seconds;
 	int		use_system_offset;
@@ -6266,9 +6268,9 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	cob_field	*offset_time_field;
 	cob_field	field;
 	size_t		field_length;
-	char		fmt_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
-	char		date_fmt_str[MAX_DATE_STR_LENGTH] = { '\0' };
-	char		time_fmt_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	char		fmt_str[COB_DATETIMESTR_LEN] = { '\0' };
+	char		date_fmt_str[COB_DATESTR_LEN] = { '\0' };
+	char		time_fmt_str[COB_TIMESTR_LEN] = { '\0' };
 	struct date_format     date_fmt;
 	struct time_format     time_fmt;
 	int		days;
@@ -6277,7 +6279,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	int		use_system_offset;
 	int		offset_time;
 	int		*offset_time_ptr;
-	char		buff[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char		buff[COB_DATETIMESTR_LEN] = { '\0' };
 
 	if (!(params == 4 || params == 5)) {
 		COB_FIELD_INIT (0, NULL, &const_alpha_attr);
@@ -6363,14 +6365,14 @@ cob_field *
 cob_intr_test_formatted_datetime (cob_field *format_field,
 				  cob_field *datetime_field)
 {
-	char	*datetime_format_str = (char *) format_field->data;
-	char	date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
-	char	time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	char	*datetime_format_str = (char *)format_field->data;
+	char	date_format_str[COB_DATESTR_LEN] = { '\0' };
+	char	time_format_str[COB_TIMESTR_LEN] = { '\0' };
 	int	date_present;
 	int	time_present;
-	char	*formatted_datetime = (char *) datetime_field->data;
-	char	formatted_date[MAX_DATE_STR_LENGTH] = { '\0' };
-	char	formatted_time[MAX_TIME_STR_LENGTH] = { '\0' };
+	char	*formatted_datetime = (char *)datetime_field->data;
+	char	formatted_date[COB_DATESTR_LEN] = { '\0' };
+	char	formatted_time[COB_TIMESTR_LEN] = { '\0' };
 	int	time_part_offset;
 	int	error_pos;
 
@@ -6396,17 +6398,17 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	if (date_present && time_present) {
 		split_around_t (datetime_format_str, date_format_str, time_format_str);
 	} else if (date_present) {
-		strncpy (date_format_str, datetime_format_str, max_date_length);
+		strncpy (date_format_str, datetime_format_str, COB_DATESTR_MAX);
 	} else { /* time_present */
-		strncpy (time_format_str, datetime_format_str, max_time_length);
+		strncpy (time_format_str, datetime_format_str, COB_TIMESTR_MAX);
 	}
 
 	if (date_present && time_present) {
 		split_around_t (formatted_datetime, formatted_date, formatted_time);
 	} else if (date_present) {
-		strncpy (formatted_date, formatted_datetime, max_date_length);
+		strncpy (formatted_date, formatted_datetime, COB_DATESTR_MAX);
 	} else { /* time_present */
-		strncpy (formatted_time, formatted_datetime, max_time_length);
+		strncpy (formatted_time, formatted_datetime, COB_TIMESTR_MAX);
 	}
 
 	/* Set time offset */
@@ -6450,9 +6452,9 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 				    cob_field *date_field)
 {
 	char	*format_field_data = (char *) format_field->data;
-	char	format_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	format_str[COB_DATESTR_LEN] = { '\0' };
 	char	*date_field_data = (char *) date_field->data;
-	char	date_str[MAX_DATE_STR_LENGTH] = { '\0' };
+	char	date_str[COB_DATESTR_LEN] = { '\0' };
 	int	is_date;
 	struct date_format date_fmt;
 
@@ -6461,7 +6463,7 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 	/* Get date format string and parse it */
 	is_date = cob_valid_date_format (format_field_data);
 	if (is_date) {
-		strncpy (format_str, format_field_data, max_date_length);
+		strncpy (format_str, format_field_data, COB_DATESTR_MAX);
 	} else if (cob_valid_datetime_format (format_field_data,
 					      COB_MODULE_PTR->decimal_point)) { /* Datetime */
 		split_around_t (format_field_data, format_str, NULL);
@@ -6472,7 +6474,7 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 
 	/* Get formatted date and validate it */
 	if (is_date) {
-		strncpy (date_str, date_field_data, max_date_length);
+		strncpy (date_str, date_field_data, COB_DATESTR_MAX);
 	} else { /* Datetime */
 		split_around_t (date_field_data, date_str, NULL);
 	}
@@ -6498,12 +6500,12 @@ cob_intr_formatted_current_date (const int offset, const int length,
 	cob_field	field;
 	size_t		field_length =
 		num_leading_nonspace ((char *) format_field->data);
-	char		format_str[MAX_DATETIME_STR_LENGTH] = { '\0' };
-	char		date_format_str[MAX_DATE_STR_LENGTH] = { '\0' };
-	char		time_format_str[MAX_TIME_STR_LENGTH] = { '\0' };
+	char		format_str[COB_DATETIMESTR_LEN] = { '\0' };
+	char		date_format_str[COB_DATESTR_LEN] = { '\0' };
+	char		time_format_str[COB_TIMESTR_LEN] = { '\0' };
 	struct date_format	date_fmt;
 	struct time_format	time_fmt;
-	char		formatted_date[MAX_DATETIME_STR_LENGTH] = { '\0' };
+	char		formatted_date[COB_DATETIMESTR_LEN] = { '\0' };
 
 	strncpy (format_str, (char *) format_field->data, field_length);
 
@@ -6685,6 +6687,6 @@ cob_init_intrinsic (cob_global *lptr)
 	mpf_set_str (cob_log_half, cob_log_half_str, 10);
 }
 
-#undef MAX_DATETIME_STR_LENGTH
-#undef MAX_TIME_STR_LENGTH
-#undef MAX_DATE_STR_LENGTH
+#undef COB_DATETIMESTR_LEN
+#undef COB_TIMESTR_LEN
+#undef COB_DATESTR_LEN
