@@ -165,6 +165,8 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
 	if (!s) {
+		for (j=strlen(buff); buff[j-1] == '\r' || buff[j-1] == '\n'; )	/* Remove CR LF */
+			buff[--j] = 0;
 		configuration_error (fname, line, 1,
 			_("Invalid configuration tag '%s'"), buff);
 		return -1;

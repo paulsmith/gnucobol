@@ -4709,8 +4709,7 @@ cb_config_entry (char *buf, int line)
 		keyword[j++] = buf[i++];
 	keyword[j] = 0;
 
-	strcpy(value,"");
-	while (buf[i] == 0 || isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=') i++;
+	while (buf[i] != 0 && ( isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=')) i++;
 	if (buf[i] == '"' 
 	||  buf[i] == '\'') {
 		qt = buf[i++];
@@ -4722,10 +4721,6 @@ cb_config_entry (char *buf, int line)
 	}
 
 	value[j] = 0;
-	if (strcmp(value, "") == 0) {
-		conf_runtime_error(1, _("WARNING - '%s' without a value - ignored!"), keyword);
-		return 2;
-	}
 
 	if (strcasecmp (keyword,"setenv") == 0 ) {
 		/* collect additional value and push into environment */
@@ -4792,24 +4787,20 @@ cb_config_entry (char *buf, int line)
 		return 0;
 	}
 
-	if (strcasecmp (keyword, "include") == 0) {
+	if (strcasecmp (keyword, "include") == 0 ||
+		strcasecmp (keyword, "includeif") == 0) {
 		if (strcmp(value, "") == 0) {
+			conf_runtime_error(1, _("'%s' without a value!"), keyword);
 			return -1;
 		}
 		str = cob_expand_env_string(value);
 		strcpy (buf, str);
 		cob_free(str);
-		return 1;
-	}
-
-	if (strcasecmp (keyword, "includeif") == 0) {
-		if (strcmp(value, "") == 0) {
-			return -1;
+		if (strcasecmp (keyword, "include") == 0) {
+			return 1;
+		} else {
+			return 3;
 		}
-		str = cob_expand_env_string(value);
-		strcpy (buf, str);
-		cob_free(str);
-		return 3;
 	}
 
 	if (strcasecmp (keyword, "reset") == 0) {
@@ -4842,6 +4833,10 @@ cb_config_entry (char *buf, int line)
 	if (i >= NUM_CONFIG) {
 		conf_runtime_error (1,_("Unknown configuration tag '%s'"), keyword);
 		return -1;
+	}
+	if (strcmp(value, "") == 0) {
+		conf_runtime_error(1, _("WARNING - '%s' without a value - ignored!"), keyword);
+		return 2;
 	}
 
 	old_type = gc_conf[i].data_type;

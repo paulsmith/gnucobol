@@ -18,6 +18,8 @@
 	  to GetLocalTime if calls to FileTimeToSystemTime or 
 	  SystemTimeToTzSpecificLocalTime return an error
 	* common.c (print_version): changed generation of build stamp
+	* common.c (cb_config_entry): corrected check for setting without value
+	  and postponed it, doing the check for a valid setting name before
 	* cobgetopt.c (cob_getopt_long_long): Fix bug #194 and warnings of msc code
 	  analysis (possible memory issues) - switched from alloca to cobc's
 	  internal memory handling (cobc_malloc and cobc_free)

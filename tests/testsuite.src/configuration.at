@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2014-2016 Free Software Foundation, Inc.
 ## Written by Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -318,6 +318,10 @@ AT_DATA([defunc.conf], [
 include "notthere.conf"
 ])
 
+AT_DATA([defunc2.conf], [
+include
+])
+
 AT_CHECK([$COMPILE_ONLY -conf=notthere.conf prog.cob], [1], [],
 [Configuration Error
 notthere.conf: No such file or directory
@@ -326,6 +330,10 @@ AT_CHECK([$COMPILE_ONLY -conf=defunc.conf prog.cob], [1], [],
 [Configuration Error
 notthere.conf: No such file or directory
 defunc.conf: 2: Configuration file was included here
+])
+AT_CHECK([$COMPILE_ONLY -conf=defunc2.conf prog.cob], [1], [],
+[Configuration Error
+defunc2.conf: 2: Invalid configuration tag 'include'
 ])
 
 AT_CLEANUP
@@ -535,6 +543,8 @@ load_case  insensitive
 varseq_format big 
 sort_chunk 4K
 sort_memory 4G # too big by some byte
+setenv nothing
+sort_chunk
 ])
 
 # conf entries must be clean
@@ -551,6 +561,8 @@ defunc.cfg: 6: Invalid value '4K' for configuration tag 'sort_chunk';
 	minimum value: 131072
 defunc.cfg: 7: Invalid value '4G' for configuration tag 'sort_memory';
 	maximum value: 4294967294
+defunc.cfg: 8: WARNING - 'setenv nothing' without a value - ignored!
+defunc.cfg: 9: WARNING - 'sort_chunk' without a value - ignored!
 ])
 
 AT_CLEANUP
@@ -563,6 +575,10 @@ AT_DATA([defunc.cfg], [
 include "notthere.cfg"
 ])
 
+AT_DATA([defunc2.cfg], [
+include
+])
+
 AT_CHECK([$COBCRUN -c notthere.cfg --runtime-env], [1], [],
 [Configuration Error
 notthere.cfg: No such file or directory
@@ -571,6 +587,11 @@ AT_CHECK([$COBCRUN -c defunc.cfg --runtime-env], [1], [],
 [Configuration Error
 notthere.cfg: No such file or directory
 defunc.cfg: 2: Configuration file was included here
+])
+
+AT_CHECK([$COBCRUN -c defunc2.cfg --runtime-env], [1], [],
+[Configuration Error
+defunc2.cfg: 2: 'include' without a value!
 ])
 
 AT_CLEANUP
