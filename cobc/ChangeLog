@@ -1,4 +1,14 @@
 
+2016-01-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_filename): don't check object files for valid COBOL 
+	  file names
+	* cobc.c (process_library) [_MSC_VER]: check all input filenames
+	  preventing deletion of passed lib file
+	* cobc.c (process_filtered) [_MSC_VER]: fix deletion of passed obj file,
+	  only filter for file basename (not including directory)
+	* cobc.c (line_contains) [_MSC_VER]: only return if all patterns matched
+
 2016-01-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: refactored handling of conflicting screen clauses.
