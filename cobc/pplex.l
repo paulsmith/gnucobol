@@ -840,6 +840,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 	/* Locate and open COPY file */
 	if (lib) {
 		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
+		plexbuff1[COB_SMALL_MAX] = 0;
 		s = plexbuff1;
 	} else {
 		s = name;
@@ -852,6 +853,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 
 	for (el = cb_extension_list; el; el = el->next) {
 		snprintf (plexbuff2, (size_t)COB_SMALL_MAX, "%s%s", s, el->text);
+		plexbuff2[COB_SMALL_MAX] = 0;
 		if (access (plexbuff2, R_OK) == 0) {
 			return ppopen (plexbuff2, replace_list);
 		}
@@ -862,6 +864,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			for (el = cb_extension_list; el; el = el->next) {
 				snprintf (plexbuff2, (size_t)COB_SMALL_MAX,
 					  "%s/%s%s", il->text, name, el->text);
+				plexbuff2[COB_SMALL_MAX] = 0;
 				if (access (plexbuff2, R_OK) == 0) {
 					return ppopen (plexbuff2, replace_list);
 				}
@@ -1542,7 +1545,8 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 		}
 		if (lno == NULL) {
 			/* Match */
-			if (r->lead_trail == CB_REPLACE_TRAILING) {
+			if (r->lead_trail == CB_REPLACE_TRAILING
+				&& save_queue /* <- silence warnings */) {
 				/* Non-matched part of original text */
 				fprintf (ppout, "%*.*s", (int)size2, (int)size2,
 					 save_queue->text);
@@ -1559,7 +1563,8 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 					check_listing (lno->text, 0);
 				}
 			}
-			if (r->lead_trail == CB_REPLACE_LEADING) {
+			if (r->lead_trail == CB_REPLACE_LEADING
+				&& save_queue /* <- silence warnings */) {
 				/* Non-matched part of original text */
 				fputs (save_queue->text + size, ppout);
 				if (cb_listing_file) {

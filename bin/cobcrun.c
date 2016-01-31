@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2004-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -64,28 +64,31 @@ static const struct option long_options[] = {
 static void
 cobcrun_print_version (void)
 {
-	int	year;
-	int	day;
-	char	buff[64];
+	char	cob_build_stamp[COB_MINI_BUFF];
 	char	month[64];
+	int status, day, year;
 
-	memset (buff, 0, sizeof(buff));
+	/* Set up build time stamp */
+	memset (cob_build_stamp, 0, (size_t)COB_MINI_BUFF);
 	memset (month, 0, sizeof(month));
 	day = 0;
 	year = 0;
-	sscanf (__DATE__, "%s %d %d", month, &day, &year);
-	if (day && year) {
-		sprintf (buff, "%s %2.2d %4.4d %s", month, day, year, __TIME__);
+	status = sscanf (__DATE__, "%s %d %d", month, &day, &year);
+	if (status == 3) {
+		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
+			  "%s %2.2d %4.4d %s", month, day, year, __TIME__);
 	} else {
-		sprintf (buff, "%s %s", __DATE__, __TIME__);
+		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
+			  "%s %s", __DATE__, __TIME__);
 	}
+
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2004-2012, 2014-2015 Free Software Foundation, Inc.");
-	puts ("Written by Roger While, Simon Sobisch");
+	puts ("Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.");
+	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
-	printf (_("Built     %s"), buff);
+	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
 	putchar ('\n');

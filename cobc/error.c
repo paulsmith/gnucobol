@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -324,6 +324,7 @@ undefined_error (cb_tree x)
 	}
 	r = CB_REFERENCE (x);
 	snprintf (errnamebuff, (size_t)COB_NORMAL_MAX, "'%s'", CB_NAME (x));
+	errnamebuff[COB_NORMAL_MAX] = 0;
 	for (c = r->chain; c; c = CB_REFERENCE (c)->chain) {
 		strcat (errnamebuff, " in '");
 		strcat (errnamebuff, CB_NAME (c));
@@ -352,6 +353,7 @@ ambiguous_error (cb_tree x)
 		}
 		/* Display error the first time */
 		snprintf (errnamebuff, (size_t)COB_NORMAL_MAX, "'%s'", CB_NAME (x));
+		errnamebuff[COB_NORMAL_MAX] = 0;
 		for (l = CB_REFERENCE (x)->chain; l; l = CB_REFERENCE (l)->chain) {
 			strcat (errnamebuff, " in '");
 			strcat (errnamebuff, CB_NAME (l));
@@ -365,6 +367,7 @@ ambiguous_error (cb_tree x)
 			y = CB_VALUE (l);
 			snprintf (errnamebuff, (size_t)COB_NORMAL_MAX,
 				  "'%s' ", w->name);
+			errnamebuff[COB_NORMAL_MAX] = 0;
 			switch (CB_TREE_TAG (y)) {
 			case CB_TAG_FIELD:
 				for (p = CB_FIELD (y)->parent; p; p = p->parent) {

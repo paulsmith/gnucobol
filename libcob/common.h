@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1252,6 +1252,7 @@ DECLNORET COB_EXPIMP void	cob_stop_run	(const int) COB_A_NORETURN;
 DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
 
 COB_EXPIMP void	*cob_malloc			(const size_t) COB_A_MALLOC;
+COB_EXPIMP void	*cob_realloc			(void *, const size_t, const size_t) COB_A_MALLOC;
 COB_EXPIMP void	cob_free			(void *);
 COB_EXPIMP void	*cob_fast_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_malloc		(const size_t) COB_A_MALLOC;

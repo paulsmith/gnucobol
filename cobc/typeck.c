@@ -5200,7 +5200,8 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 			return;
 		}
 	}
-	if (upon == cb_error_node) {
+	if (upon == cb_error_node
+		|| !values /* <- silence warnings */) {
 		return;
 	}
 

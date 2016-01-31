@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -743,9 +743,9 @@ cob_resolve_internal (const char *name, const char *dirent,
 	}
 #else
 	if (dirent) {
-		call_filename_buff[COB_NORMAL_MAX] = 0;
 		snprintf (call_filename_buff, (size_t)COB_NORMAL_MAX,
 			  "%s%s.%s", dirent, (char *)s, COB_MODULE_EXT);
+		call_filename_buff[COB_NORMAL_MAX] = 0;
 		if (access (call_filename_buff, R_OK) != 0) {
 			set_resolve_error (_("Cannot find module"), name);
 			return NULL;
@@ -778,6 +778,7 @@ cob_resolve_internal (const char *name, const char *dirent,
 				  (char *)s,
 				  COB_MODULE_EXT);
 		}
+		call_filename_buff[COB_NORMAL_MAX] = 0;
 		if (access (call_filename_buff, R_OK) == 0) {
 			handle = lt_dlopen (call_filename_buff);
 			if (handle != NULL) {

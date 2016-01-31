@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -389,6 +389,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			if (filename[0] == 0) {
 				/* check for COB_CONFIG_DIR (use default if not in environment) */
 				snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%c%s", cob_config_dir, SLASH_CHAR, conf_file);
+				filename[COB_NORMAL_MAX] = 0;
 				if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
 					conf_file = filename;		/* Prefix COB_CONFIG_DIR */
 				}
@@ -399,7 +400,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	/* check for recursion */
 	c = cc = conf_includes;
 	while (c != NULL) {
-		if (strcmp(c->name, conf_file) == 0) {
+		if (c->name /* <- silence warnings */ && strcmp(c->name, conf_file) == 0) {
 			configuration_error (conf_file, 0, 1, _("Recursive inclusion"));
 			return -2;
 		}

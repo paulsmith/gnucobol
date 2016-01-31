@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -488,6 +488,7 @@ cob_chk_file_env (const char *src)
 	for (i = 0; i < NUM_PREFIX; ++i) {
 		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s",
 			  prefix[i], s);
+		file_open_env[COB_FILE_MAX] = 0;
 		p = getenv (file_open_env);
 		if (p) {
 			break;
@@ -537,6 +538,7 @@ cob_chk_file_mapping (void)
 		} else if (cobsetptr->cob_file_path) {
 			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s%c%s",
 				  cobsetptr->cob_file_path, SLASH_CHAR, file_open_name);
+			file_open_buff[COB_FILE_MAX] = 0;
 			strncpy (file_open_name, file_open_buff,
 				 (size_t)COB_FILE_MAX);
 		}
@@ -1091,6 +1093,8 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 			fmode = "ab+";
 		}
 		break;
+	default:
+		cob_fatal_error(COB_FERROR_CODEGEN);
 	}
 
 	errno = 0;
@@ -2692,8 +2696,10 @@ indexed_file_delete (cob_file *f, const char *filename)
 	COB_UNUSED (f);
 
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.idx", filename);
+	file_open_buff[COB_FILE_MAX] = 0;
 	unlink (file_open_buff);
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.dat", filename);
+	file_open_buff[COB_FILE_MAX] = 0;
 	unlink (file_open_buff);
 #elif	defined(WITH_DB)
 	size_t	i;
@@ -2706,6 +2712,7 @@ indexed_file_delete (cob_file *f, const char *filename)
 			snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.%d",
 				  filename, (int)i);
 		}
+		file_open_buff[COB_FILE_MAX] = 0;
 		unlink (file_open_buff);
 	}
 #endif
@@ -2778,6 +2785,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 	}
 
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.idx", filename);
+	file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
 	if (access (file_open_buff, checkvalue)) {
 		if (!(errno == ENOENT &&
@@ -2794,6 +2802,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 	}
 
 	snprintf (file_open_buff, (size_t)COB_FILE_MAX, "%s.dat", filename);
+	file_open_buff[COB_FILE_MAX] = 0;
 	errno = 0;
 	if (access (file_open_buff, checkvalue)) {
 		if (!(errno == ENOENT &&

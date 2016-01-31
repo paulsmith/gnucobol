@@ -1502,8 +1502,14 @@ scan_floating_numeric (const char *text)
 	literal_error = 0;
 
 	/* Separate into significand and exponent */
-	sscanf (text, "%36[0-9.,+-]%*[Ee]%7[0-9.,+-]",
-			significand_str, exponent_str);
+	n = sscanf (text, "%36[0-9.,+-]%*[Ee]%7[0-9.,+-]",
+		significand_str, exponent_str);
+	/* We check the return for silencing warnings,
+		this should never happen as the flex rule ensures this */
+	if (n == 0) {
+		yylval = cb_error_node;
+		return LITERAL;
+	}
 	
 	/* Get signs and adjust string positions accordingly */
 	significand_pos = &significand_str[0];
@@ -1518,8 +1524,12 @@ scan_floating_numeric (const char *text)
 	n = sscanf (significand_pos, "%35[0-9]%*[.,]%35[0-9]",
 			significand_int, significand_dec);
 	if (n == 0) { /* no integer part, copy after decimal-point */
-		significand_int [0] = '\0';
+		significand_int[0] = 0;
 		strncpy (significand_dec, significand_pos + 1, 35);
+		significand_dec[35] = 0;
+	} else {
+	/* silencing some warnings */
+		significand_int[35] = significand_dec[35] = 0;
 	}
 
 	/* Validation */
@@ -1541,7 +1551,14 @@ scan_floating_numeric (const char *text)
 				_("Exponent has more than 4 digits"));
 			error_literal ("float", text);
 		}
-		sscanf (exponent_pos, "%d", &exponent);
+		n = sscanf (exponent_pos, "%d", &exponent);
+		/* We check the return for silencing warnings,
+		   this should never happen as the flex rule ensures this */
+		if (n == 0) {
+			yylval = cb_error_node;
+			return LITERAL;
+		}
+		
 		if (exp_sign == -1) {
 			exponent = -exponent;
 		}

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -196,7 +196,7 @@ same_level:
 		f->parent = last_field->parent;
 	} else {
 		/* Upper level */
-		for (p = last_field->parent; p; p = p->parent) {
+		for (p = last_field->parent; p /* <- silence warnings */; p = p->parent) {
 			if (p->level == f->level) {
 				last_field = p;
 				goto same_level;
@@ -205,7 +205,8 @@ same_level:
 				break;
 			}
 		}
-		if (cb_relax_level_hierarchy) {
+		if (cb_relax_level_hierarchy
+		&& p /* <- silence warnings */) {
 			dummy_fill = cb_build_filler ();
 			field_fill = CB_FIELD (cb_build_field (dummy_fill));
 			cb_warning_x (name,

@@ -1,5 +1,5 @@
  /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -1709,21 +1709,23 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	int	size_display;	/* final size to display */
 	char	fig_const;	/* figurative constant character */
 
+	if (unlikely(!f)) {
+		cob_fatal_error(COB_FERROR_CODEGEN);
+	}
+
 	init_cob_screen_if_needed ();
 
 	origin_y = 0;
 	origin_x = 0;
 
-	if (f) {
-		/* Field size to display */
-		size_display = (int)f->size;
-		/* WITH SIZE IS */
-		if (size_is) {
-			ssize_is = cob_get_int (size_is);
-			/* Use WITH SIZE IS when less than field size */
-			if (ssize_is > 0 && ssize_is < (int)f->size) {
-			  size_display = ssize_is;
-			}
+	/* Field size to display */
+	size_display = (int)f->size;
+	/* WITH SIZE IS */
+	if (size_is) {
+		ssize_is = cob_get_int (size_is);
+		/* Use WITH SIZE IS when less than field size */
+		if (ssize_is > 0 && ssize_is < (int)f->size) {
+			size_display = ssize_is;
 		}
 	}
 

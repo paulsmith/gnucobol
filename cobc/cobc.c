@@ -459,7 +459,7 @@ static const struct option long_options[] = {
 #undef	CB_ARG_OP
 
 /* Prototype */
-static void COB_A_NORETURN	cobc_abort_terminate (void);
+DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
 
 /* cobc functions */
 
@@ -789,8 +789,13 @@ cobc_main_free (void *prevptr)
 		}
 		prev = curr;
 	}
-	if (!curr) {
+	if (unlikely(!curr)) {
+#ifdef	COB_TREE_DEBUG
+		cobc_abort_pr (_("Call to %s with invalid pointer, as it is missing in list"), "cobc_main_free");
+		cobc_abort_terminate ();
+#else
 		return;
+#endif
 	}
 	if (prev) {
 		prev->next = curr->next;
@@ -891,8 +896,13 @@ cobc_parse_free (void *prevptr)
 		}
 		prev = curr;
 	}
-	if (!curr) {
+	if (unlikely(!curr)) {
+#ifdef	COB_TREE_DEBUG
+		cobc_abort_pr (_("Call to %s with invalid pointer, as it is missing in list"), "cobc_parse_free");
+		cobc_abort_terminate ();
+#else
 		return;
+#endif
 	}
 	if (prev) {
 		prev->next = curr->next;
@@ -1217,7 +1227,7 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 	return n;
 }
 
-static void COB_A_NORETURN
+DECLNORET static void COB_A_NORETURN
 cobc_err_exit (const char *fmt, ...)
 {
 	va_list		ap;
@@ -1358,6 +1368,7 @@ cobc_check_action (const char *name)
 
 		snprintf (temp_buff, (size_t)COB_MEDIUM_MAX,
 			  "%s%s%s", save_temps_dir, SLASH_STR, name);
+		temp_buff[COB_MEDIUM_MAX] = 0;
 		/* Remove possible target file - ignore return */
 		(void)unlink (temp_buff);
 		if (rename (name, temp_buff)) {
@@ -1438,10 +1449,12 @@ cobc_clean_up (const int status)
 				   know the number of local include files */
 				snprintf (cobc_buffer, cobc_buffer_size,
 					 "%s.l.h", fn->translate);
+				cobc_buffer[cobc_buffer_size] = 0;
 				for (i = 0; i < 30U; ++i) {
 					if (i) {
 						snprintf (cobc_buffer, cobc_buffer_size,
 							 "%s.l%u.h", fn->translate, i);
+						cobc_buffer[cobc_buffer_size] = 0;
 					}
 					if (!access (cobc_buffer, F_OK)) {
 						unlink (cobc_buffer);
@@ -1456,7 +1469,7 @@ cobc_clean_up (const int status)
 	file_list = NULL;
 }
 
-static void COB_A_NORETURN
+DECLNORET static void COB_A_NORETURN
 cobc_terminate (const char *str)
 {
 	int	save_errno;
@@ -1471,7 +1484,7 @@ cobc_terminate (const char *str)
 	exit (1);
 }
 
-static void COB_A_NORETURN
+DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
 	if (cb_source_file) {
@@ -1483,7 +1496,7 @@ cobc_abort_terminate (void)
 }
 
 #ifdef	HAVE_SIGNAL_H
-static void COB_A_NORETURN
+DECLNORET static void COB_A_NORETURN
 cobc_sig_handler (int sig)
 {
 #if	defined(HAVE_SIGACTION) && !defined(SA_RESETHAND)
@@ -1531,8 +1544,8 @@ cobc_print_version (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2001-2015 Free Software Foundation, Inc.");
-	puts ("Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch");
+	puts ("Copyright (C) 2001-2016 Free Software Foundation, Inc.");
+	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cb_oc_build_stamp);
@@ -2562,6 +2575,12 @@ file_basename (const char *filename)
 	const char	*endp;
 	size_t		len;
 
+	if (!filename) {
+		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+			"file_basename", "filename");
+		COBC_ABORT ();
+	}
+
 	/* Remove directory name */
 	startp = NULL;
 	for (p = filename; *p; p++) {
@@ -2829,6 +2848,7 @@ process_run (const char *name) {
 		snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
 			SLASH_CHAR, name);
 	}
+	cobc_buffer[cobc_buffer_size] = 0;
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
 	}
@@ -3329,6 +3349,7 @@ preprocess (struct filename *fn)
 		if (cobc_gen_listing > 1) {
 			snprintf (cobc_buffer, cobc_buffer_size,
 				 "cobxref %s -R", fn->listing_file);
+			cobc_buffer[cobc_buffer_size] = 0;
 			if (verbose_output) {
 				cobc_cmd_print (cobc_buffer);
 			}
@@ -3520,7 +3541,10 @@ process_translate (struct filename *fn)
 	}
 	yyout = NULL;
 	for (q = p; q; q = q->next_program) {
-		if(unlikely(fclose (q->local_include->local_fp) != 0)) {
+		if (unlikely(!q->local_include->local_fp)) {
+			continue;
+		}
+		if (unlikely(fclose (q->local_include->local_fp) != 0)) {
 			cobc_terminate(lf->local_name);
 		}
 		q->local_include->local_fp = NULL;
@@ -3895,6 +3919,12 @@ process_library (struct filename *l)
 	size_t		size;
 	int		ret;
 
+	if (!l) {
+		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+			"process_library", "l");
+		COBC_ABORT ();
+	}
+
 	for (f = l; f; f = f->next) {
 		strcat (cobc_objects_buffer, "\"");
 		strcat (cobc_objects_buffer, f->object);
@@ -4006,6 +4036,12 @@ process_link (struct filename *l)
 	size_t		bufflen;
 	size_t		size;
 	int		ret;
+
+	if (!l) {
+		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+			"process_link", "l");
+		COBC_ABORT ();
+	}
 
 	for (f = l; f; f = f->next) {
 #ifdef	__OS400__
@@ -4269,9 +4305,9 @@ main (int argc, char **argv)
 	/* Allows running tests under Win */
 	p = getenv ("COB_UNIX_LF");
 	if (p && (*p == 'Y' || *p == 'y' || *p == '1')) {
-		_setmode (_fileno (stdin), _O_BINARY);
-		_setmode (_fileno (stdout), _O_BINARY);
-		_setmode (_fileno (stderr), _O_BINARY);
+		(void)_setmode (_fileno (stdin), _O_BINARY);
+		(void)_setmode (_fileno (stdout), _O_BINARY);
+		(void)_setmode (_fileno (stderr), _O_BINARY);
 	}
 #endif
 
@@ -4298,8 +4334,8 @@ main (int argc, char **argv)
 	memset (month, 0, sizeof(month));
 	day = 0;
 	year = 0;
-	sscanf (__DATE__, "%s %d %d", month, &day, &year);
-	if (day && year) {
+	status = sscanf (__DATE__, "%s %d %d", month, &day, &year);
+	if (status == 3) {
 		snprintf (cobc_buffer, (size_t)COB_MINI_MAX,
 			  "%s %2.2d %4.4d %s", month, day, year, __TIME__);
 	} else {
@@ -4666,13 +4702,15 @@ main (int argc, char **argv)
 	/* Allocate objects buffer */
 	cobc_objects_buffer = cobc_main_malloc (cobc_objects_len);
 
-	/* Link */
-	if (cb_compile_level == CB_LEVEL_LIBRARY) {
-		/* Multi-program module */
-		status = process_library (file_list);
-	} else {
-		/* Executable */
-		status = process_link (file_list);
+	if (file_list) {
+		/* Link */
+		if (cb_compile_level == CB_LEVEL_LIBRARY) {
+			/* Multi-program module */
+			status = process_library (file_list);
+		} else {
+			/* Executable */
+			status = process_link (file_list);
+		}
 	}
 
 	/* We have completed */

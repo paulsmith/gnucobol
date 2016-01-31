@@ -1421,7 +1421,8 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 	p->numeric_separator = ',';
 	/* Save current program as actual at it's level */
 	container_progs[nest_level] = p;
-	if (nest_level) {
+	if (nest_level
+		&& last_program /* <- silence warnings */) {
 		/* Contained program */
 		/* Inherit from upper level */
 		p->global_file_list = last_program->global_file_list;
