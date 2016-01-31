@@ -2,9 +2,15 @@
 2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* intrinsic.c (split_around_t): fixed stack overflow occuring in wrong
-	  date/datetime format strings
+	  date/datetime format strings for FUNCTION TEST-FORMATTED-DATETIME
 	* intrinsic.c: changed definition of string lengths for date/time
 	  according to existing ones (COB_xyz_BUFF)
+
+2016-01-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobgetopt.c (cob_getopt_long_long): Fix bug #194 and warnings of msc code
+	  analysis (possible memory issues) - switched from alloca to cobc's
+	  internal memory handling (cobc_malloc and cobc_free)
 
 2016-01-24  Edward Hart <edward.dan.hart@gmail.com>
 

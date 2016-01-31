@@ -2,7 +2,7 @@
 # Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -167,7 +167,6 @@ AC_MSG_RESULT([$cob_keyw])
 unset cob_keyw
 
 # Checks for library functions.
-AC_FUNC_ALLOCA
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	strchr strrchr strdup strstr strtol gettimeofday localeconv \
