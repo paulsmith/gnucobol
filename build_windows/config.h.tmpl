@@ -1,4 +1,15 @@
-/* config.h	Win32/x64 VS2003-2013  */
+/* config.h, tested with Win32/x64 VS2003-2015 */
+
+#define NOISAM 0
+#define BDB    1
+#define VBISAM 2
+#define CISAM  3
+#define DISAM  4
+
+/* Use the following global define to switch from VBISAM to another
+   ISAM configuration, if needed */
+
+#define CONFIGURED_ISAM VBISAM /* see possible values above */
 
 /* Define if building universal (internal helper macro) */
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
@@ -56,7 +67,7 @@
 
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
    */
-#define HAVE_ALLOCA_H 1
+/* #undef HAVE_ALLOCA_H */
 
 /* Has __attribute__((aligned)) */
 /* #undef HAVE_ATTRIBUTE_ALIGNED */
@@ -85,7 +96,11 @@
 #define HAVE_CURSES_H 1
 
 /* Define to 1 if you have the <db.h> header file. */
+#if CONFIGURED_ISAM == BDB
+#define HAVE_DB_H 1
+#else
 /* #undef HAVE_DB_H */
+#endif
 
 /* Define if the GNU dcgettext() function is already present or preinstalled.
    */
@@ -98,7 +113,11 @@
 #endif
 
 /* Define to 1 if you have the <disam.h> header file. */
+#if CONFIGURED_ISAM == DISAM
+#define HAVE_DISAM_H 1
+#else
 /* #undef HAVE_DISAM_H */
+#endif
 
 /* Has dladdr function */
 /* #undef HAVE_DLADDR */
@@ -140,7 +159,11 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the <isam.h> header file. */
+#if CONFIGURED_ISAM == CISAM
+#define HAVE_ISAM_H 1
+#else
 /* #undef HAVE_ISAM_H */
+#endif
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 /* #undef HAVE_LANGINFO_CODESET */
@@ -293,7 +316,11 @@
 /* #undef HAVE_USE_LEGACY_CODING */
 
 /* Define to 1 if you have the <vbisam.h> header file. */
+#if CONFIGURED_ISAM == VBISAM
 #define HAVE_VBISAM_H 1
+#else
+/* #undef HAVE_VBISAM_H */
+#endif
 
 /* Define to 1 if you have the `vprintf' function. */
 #define HAVE_VPRINTF 1
@@ -301,8 +328,7 @@
 /* Define to 1 if you have the <wchar.h> header file. */
 #define HAVE_WCHAR_H 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 /* #undef LT_OBJDIR */
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
@@ -375,16 +401,28 @@
 #define VERSION "2.0"
 
 /* Use CISAM as ISAM handler */
+#if CONFIGURED_ISAM == BDB
+#define WITH_CISAM 1
+#else
 /* #undef WITH_CISAM */
+#endif
 
 /* curses library for extended SCREEN I/O */
 #define WITH_CURSES "pdcurses"
 
 /* Use Berkeley DB library as emulation of ISAM handler */
+#if CONFIGURED_ISAM == BDB
+#define WITH_DB 1
+#else
 /* #undef WITH_DB */
+#endif
 
 /* Use DISAM as ISAM handler */
+#if CONFIGURED_ISAM == BDB
+#define WITH_DISAM 1
+#else
 /* #undef WITH_DISAM */
+#endif
 
 /* Compile with an external ISAM handler */
 /* #undef WITH_INDEX_EXTFH */
@@ -396,7 +434,11 @@
 #define WITH_VARSEQ 0
 
 /* Use VBISAM as ISAM handler */
+#if CONFIGURED_ISAM == VBISAM
 #define WITH_VBISAM 1
+#else
+/* #undef WITH_VBISAM */
+#endif
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -430,3 +472,9 @@
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
+
+#undef BDB
+#undef VBISAM
+#undef CISAM
+#undef DISAM
+#undef CONFIGURED_ISAM

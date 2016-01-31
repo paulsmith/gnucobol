@@ -174,8 +174,8 @@
     <None Include="..\..\lib\ChangeLog" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\config.h" />
     <ClInclude Include="..\..\lib\gettext.h" />
-    <ClInclude Include="config.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

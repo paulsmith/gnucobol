@@ -19,7 +19,7 @@
     <None Include="..\..\lib\ChangeLog" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="config.h">
+    <ClInclude Include="..\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\lib\gettext.h">

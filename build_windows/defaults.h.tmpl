@@ -40,10 +40,48 @@
 // /* try to use compile defines for that:
 #define COB_BLD_CC       "cl"
 #define COB_BLD_CPPFLAGS ""
+#if _MSC_VER == 1900
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS
+#else
+#define COB_BLD_CFLAGS
+#endif
+#elif _MSC_VER == 1800
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS
+#else
+#define COB_BLD_CFLAGS
+#endif
+#elif _MSC_VER == 1700
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "/GS /GL /analyze- /W4 /Zc:wchar_t /Zi /Gm- /O2 /Ob2 /fp:precise /WX- /Zc:forScope /Gd /Oy- /Oi /MD /EHsc /Ot"
+#else
+#define COB_BLD_CFLAGS   "/Zi /nologo /W4 /WX- /O2 /Ob2 /Oi /Ot /Oy- /GL /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Gd /analyze-"
+#endif
+#elif _MSC_VER == 1600
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "/GS /GL /analyze- /W4 /Zc:wchar_t /Zi /Gm- /O2 /Ob2 /fp:precise /WX- /Zc:forScope /Gd /Oy- /Oi /MD /EHsc /Ot"
+#else
+#define COB_BLD_CFLAGS   "/Zi /nologo /W4 /WX- /O2 /Ob2 /Oi /Ot /Oy- /GL /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Gd /analyze-"
+#endif
+#elif _MSC_VER == 1500
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "/O2 /Ob2 /Oi /Ot /GL /FD /EHsc /MD /W4 /nologo /c /Zi /TP"
+#else
+#define COB_BLD_CFLAGS   "/Od /Gm /EHsc /RTC1 /MDd /W3 /nologo /c /Zi /TP"
+#endif
+#elif _MSC_VER == 1400
 #ifdef _DEBUG
 #define COB_BLD_CFLAGS   "/Od /Gm /EHsc /RTC1 /MDd /W3 /nologo /c /Zi /TP"
 #else
 #define COB_BLD_CFLAGS   "/O2 /Ob2 /Oi /Ot /GL /FD /EHsc /MD /c /Zi /TP"
+#endif
+#elif _MSC_VER >= 1300
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "/Od /Gm /EHsc /RTC1 /MDd /GS /c /Zi /TP"
+#else
+#define COB_BLD_CFLAGS   "/O2 /Ot /GL /FD /EHsc /MD /GS /c /Zi /TP"
+#endif
 #endif
 #define COB_BLD_LD       "link.exe"
 #define COB_BLD_LDFLAGS  ""
