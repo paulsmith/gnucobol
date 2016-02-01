@@ -1,8 +1,8 @@
 #
 # Makefile gnucobol/cobc
 #
-# Copyright (C) 2003-2012, 2014 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While
+# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
 #
@@ -44,8 +44,8 @@ CLEANFILES = parser.output ppparse.output
 # bugfix for non-GNU compilers that define __STDC_VERSION__ >= 199901L but don't work correct
 # "sed -i" isn't supported on all systems --> use sed && mv
 .l.c:
-	LC_CTYPE=C flex -s -o$@.tmp $< && \
-	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@.tmp > $@
+	LC_CTYPE=C flex -s -o$@ $< && \
+	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@ > $@.tmp && mv -f $@.tmp $@
 
 .y.c:
 	bison -o $@ $<

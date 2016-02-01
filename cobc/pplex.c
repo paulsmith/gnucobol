@@ -1,6 +1,6 @@
-#line 2 "pplex.c.tmp"
+#line 2 "pplex.c"
 
-#line 4 "pplex.c.tmp"
+#line 4 "pplex.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -2162,7 +2162,7 @@ static void	check_comments		(const char *, const char *);
 
 
 
-#line 2165 "pplex.c.tmp"
+#line 2165 "pplex.c"
 
 #define INITIAL 0
 #define COPY_STATE 1
@@ -2373,7 +2373,7 @@ YY_DECL
 
 
 
-#line 2376 "pplex.c.tmp"
+#line 2376 "pplex.c"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3492,7 +3492,7 @@ YY_RULE_SETUP
 #line 715 "pplex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3495 "pplex.c.tmp"
+#line 3495 "pplex.c"
 
 	case YY_END_OF_BUFFER:
 		{

@@ -1,6 +1,6 @@
-#line 2 "scanner.c.tmp"
+#line 2 "scanner.c"
 
-#line 4 "scanner.c.tmp"
+#line 4 "scanner.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1563,7 +1563,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1566 "scanner.c.tmp"
+#line 1566 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1778,7 +1778,7 @@ YY_DECL
 
 
 
-#line 1781 "scanner.c.tmp"
+#line 1781 "scanner.c"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -3015,7 +3015,7 @@ YY_RULE_SETUP
 #line 1023 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3018 "scanner.c.tmp"
+#line 3018 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3953,7 +3953,7 @@ scan_x (const char *text)
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, cb_lit_length);
+			  (int) currlen, cb_lit_length);
 		error_literal ("X", text);
 		goto error;
 	}
@@ -4031,7 +4031,7 @@ scan_z (const char *text, const cob_u32_t llit)
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, cb_lit_length);
+			  (int) currlen, cb_lit_length);
 		if (llit) {
 			error_literal ("L", text);
 		} else {
@@ -4079,7 +4079,7 @@ scan_h (const char *text, const cob_u32_t with_mark)
 	if (unlikely(currlen > 16)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen,  16);
+			  (int) currlen,  16);
 		error_literal ("hex", plexbuff);
 		goto error;
 	}
@@ -4144,7 +4144,7 @@ scan_b (const char *text, const cob_u32_t with_mark)
 	if (unlikely(currlen > 64)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("Literal length %d exceeds %d characters"),
-			currlen, 64);
+			  (int) currlen, 64);
 		error_literal ("B", plexbuff);
 		goto error;
 	}
@@ -4197,8 +4197,8 @@ scan_o (const char *text)
 	memcpy (plexbuff, text, currlen + 1);
 	if (unlikely(currlen > 22)) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds %d characters"),
-			currlen, 22);
+			  _("Literal length %d exceeds %d characters"),
+			  (int) currlen, 22);
 		error_literal ("O", plexbuff);
 		goto error;
 	}
@@ -4277,14 +4277,14 @@ scan_numeric (const char *text)
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds maximum of %d digits"),
-			strlen (p), COB_MAX_DIGITS);
+			  _("Literal length %d exceeds maximum of %d digits"),
+			  (int) strlen (p), COB_MAX_DIGITS);
 		error_literal ("num", text);
 		yylval = cb_error_node;
 	} else if (unlikely(strlen (p) > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds %d digits"),
-			strlen (p), cb_numlit_length);
+			  _("Literal length %d exceeds %d digits"),
+			  (int) strlen (p), cb_numlit_length);
 		error_literal ("num", text);
 		yylval = cb_error_node;
 	} else {
@@ -4336,8 +4336,14 @@ scan_floating_numeric (const char *text)
 	literal_error = 0;
 
 	/* Separate into significand and exponent */
-	sscanf (text, "%36[0-9.,+-]%*[Ee]%7[0-9.,+-]",
-			significand_str, exponent_str);
+	n = sscanf (text, "%36[0-9.,+-]%*[Ee]%7[0-9.,+-]",
+		significand_str, exponent_str);
+	/* We check the return for silencing warnings,
+		this should never happen as the flex rule ensures this */
+	if (n == 0) {
+		yylval = cb_error_node;
+		return LITERAL;
+	}
 	
 	/* Get signs and adjust string positions accordingly */
 	significand_pos = &significand_str[0];
@@ -4352,8 +4358,12 @@ scan_floating_numeric (const char *text)
 	n = sscanf (significand_pos, "%35[0-9]%*[.,]%35[0-9]",
 			significand_int, significand_dec);
 	if (n == 0) { /* no integer part, copy after decimal-point */
-		significand_int [0] = '\0';
+		significand_int[0] = 0;
 		strncpy (significand_dec, significand_pos + 1, 35);
+		significand_dec[35] = 0;
+	} else {
+	/* silencing some warnings */
+		significand_int[35] = significand_dec[35] = 0;
 	}
 
 	/* Validation */
@@ -4375,7 +4385,14 @@ scan_floating_numeric (const char *text)
 				_("Exponent has more than 4 digits"));
 			error_literal ("float", text);
 		}
-		sscanf (exponent_pos, "%d", &exponent);
+		n = sscanf (exponent_pos, "%d", &exponent);
+		/* We check the return for silencing warnings,
+		   this should never happen as the flex rule ensures this */
+		if (n == 0) {
+			yylval = cb_error_node;
+			return LITERAL;
+		}
+		
 		if (exp_sign == -1) {
 			exponent = -exponent;
 		}
