@@ -1,4 +1,9 @@
 
+2016-02-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.at, tests/syn_reportwriter.at: RW checks earlier skipped are
+	  now only comments - will be added back in 2.1 with more and better checks
+
 2016-01-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* Makefile.am: added targets "test" (running ANSI testsuite) and
