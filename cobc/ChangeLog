@@ -1,4 +1,8 @@
 
+2016-02-32  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (read_literal): Fix multiple heap corruptions - bug 195
+
 2016-01-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c (cb_config_entry): remove CR/LF for error "invalid conf. tag"

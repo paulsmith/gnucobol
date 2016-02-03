@@ -1406,16 +1406,16 @@ char *yytext;
 
 #define	YY_USER_INIT	\
 	if (!plexbuff) {					\
-		plexbuff = cobc_malloc ((size_t)COB_MINI_BUFF);	\
-		plexsize = COB_MINI_BUFF;			\
+		plexsize = COB_MINI_BUFF;	/* must be >= cb_lit_length */	\
+		plexbuff = cobc_malloc (plexsize);	\
 	}							\
 	if (!picbuff1) {					\
-		picbuff1 = cobc_malloc ((size_t)COB_MINI_BUFF);	\
 		pic1size = COB_MINI_BUFF;			\
+		picbuff1 = cobc_malloc (pic1size);	\
 	}							\
 	if (!picbuff2) {					\
-		picbuff2 = cobc_malloc ((size_t)COB_MINI_BUFF);	\
 		pic2size = COB_MINI_BUFF;			\
+		picbuff2 = cobc_malloc (pic2size);	\
 	}
 
 #include "config.h"
@@ -1560,7 +1560,6 @@ static void	scan_picture (const char *);
 static void	count_lines (const char *);
 static void	scan_define_options (const char *);
 static void	scan_options (const char *, const unsigned int);
-
 
 
 #line 1566 "scanner.c"
@@ -3855,7 +3854,6 @@ void yyfree (void * ptr )
 #line 1023 "scanner.l"
 
 
-
 static void
 error_literal (const char *type, const char *literal)
 {
@@ -3896,18 +3894,24 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i > cb_lit_length)) {
-				plexbuff[i] = 0;
+			if (unlikely(i == cb_lit_length)) {
+				plexbuff[i - 1] = 0;
 				snprintf (err_msg, COB_MINI_MAX,
 					_("Literal length exceeds %d characters"),
 					cb_lit_length);
 				error_literal ("", plexbuff);
 			} else {
+				if (unlikely(i == plexsize)) {
+					plexsize *= 2;
+					if (unlikely (plexsize > cb_lit_length)) {
+						plexsize = cb_lit_length;
+					}
+					plexbuff = cobc_realloc (plexbuff, plexsize);
+				}
 				plexbuff[i++] = (cob_u8_t)c;
 			}
 		}
 		if (c == mark && (c = input ()) != (int)mark) {
-			i--;
 			if (c == '-') {
 				/* Free format continuation */
 				/* Hack it as concatenation */
@@ -3915,14 +3919,8 @@ read_literal (const char mark)
 			} else {
 				unput (c);
 			}
+			i--;
 			break;
-		}
-		if (!literal_error && i >= plexsize) {
-			plexsize *= 2;
-			if (unlikely (plexsize > cb_lit_length)) {
-				plexsize = cb_lit_length;
-			}
-			plexbuff = cobc_realloc (plexbuff, plexsize);
 		}
 	}
 	if (!i) {
