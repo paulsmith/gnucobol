@@ -3894,8 +3894,8 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i == cb_lit_length)) {
-				plexbuff[i - 1] = 0;
+			if (unlikely(i > cb_lit_length)) {
+				plexbuff[i] = 0;
 				snprintf (err_msg, COB_MINI_MAX,
 					_("Literal length exceeds %d characters"),
 					cb_lit_length);
@@ -3903,8 +3903,8 @@ read_literal (const char mark)
 			} else {
 				if (unlikely(i == plexsize)) {
 					plexsize *= 2;
-					if (unlikely (plexsize > cb_lit_length)) {
-						plexsize = cb_lit_length;
+					if (unlikely (plexsize > (cb_lit_length + 1))) {
+						plexsize = cb_lit_length + 1;
 					}
 					plexbuff = cobc_realloc (plexbuff, plexsize);
 				}
