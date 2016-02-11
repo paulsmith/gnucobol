@@ -1,25 +1,11 @@
-This is gnucobol.info, produced by makeinfo version 6.0 from
+This is gnucobol.info, produced by makeinfo version 5.2 from
 gnucobol.texi.
-
-INFO-DIR-SECTION Software development
-START-INFO-DIR-ENTRY
-* cobc: (gnucobol)Compile.      The GnuCOBOL compiler.
-END-INFO-DIR-ENTRY
-
-INFO-DIR-SECTION COBOL
-START-INFO-DIR-ENTRY
-* GnuCOBOL: (gnucobol).        A COBOL compiler
-END-INFO-DIR-ENTRY
-
-INFO-DIR-SECTION GnuCOBOL
-START-INFO-DIR-ENTRY
-* Overview: (gnucobol).         COBOL compiler overview.
-END-INFO-DIR-ENTRY
 
 This file documents GnuCOBOL, a COBOL compiler
 
-   Copyright (C) 2002-2012, 2014-2015 Free Software Foundation, Inc.
-Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
+   Copyright (C) 2002-2012, 2014-2016 Free Software Foundation, Inc.
+
+   Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
@@ -34,6 +20,20 @@ permission notice identical to this one.
 manual into another language, under the above conditions for modified
 versions, except that this permission notice may be stated in a
 translation approved by the Free Software Foundation.
+INFO-DIR-SECTION Software development
+START-INFO-DIR-ENTRY
+* cobc: (gnucobol)Compile.      The GnuCOBOL compiler.
+END-INFO-DIR-ENTRY
+
+INFO-DIR-SECTION COBOL
+START-INFO-DIR-ENTRY
+* GnuCOBOL: (gnucobol).         A COBOL compiler
+END-INFO-DIR-ENTRY
+
+INFO-DIR-SECTION GnuCOBOL
+START-INFO-DIR-ENTRY
+* Overview: (gnucobol).         COBOL compiler overview.
+END-INFO-DIR-ENTRY
 
 
 File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
@@ -52,9 +52,10 @@ File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 * Appendix C::                  'cobc --list-intrinsics'
 * Appendix D::                  'cobc --list-system'
 * Appendix E::                  'cobc --list-mnemonics'
-* Appendix F::                  config/default.conf
+* Appendix F::                  Compiler Configuration
 * Appendix G::                  'cobcrun --help'
-* Appendix H::                  config/runtime.cfg
+* Appendix H::                  Runtime configuration
+* Appendix I::                  GNU Free Documentation License
 * Index::                       Index
 
  -- The Detailed Node Listing --
@@ -165,14 +166,17 @@ This is a sample program that displays "Hello World":
             STOP RUN.
      ----------------------------------------
 
+
    The compiler is 'cobc', which is executed as follows:
 
      $ cobc -x hello.cob
      $ ./hello
      Hello World!
 
+
    The executable file name (i.e., 'hello' in this case) is determined
 by removing the extension from the source file name.
+
 
    You can specify the executable file name by specifying the compiler
 option '-o' as follows:
@@ -180,6 +184,7 @@ option '-o' as follows:
      $ cobc -x -o hello-world hello.cob
      $ ./hello-world
      Hello World!
+
 
    Using more modern sources.
 
@@ -197,6 +202,7 @@ option '-o' as follows:
      $ cobc -x -free hellonew.cob
      $ ./hellonew
      Hello New World!
+
 
    Showing the use of free format, to end of line comments, the 'goback'
 verb, and proper use of terminator with 'end-display'.
@@ -245,14 +251,14 @@ File: gnucobol.info,  Node: Help Options,  Next: Built Target,  Prev: Compiler O
 The following switches can be used for informational displays:
 
 '--help'
-     Display help screen (*note cobc -help: Appendix A.).  '-h' will
-     also display the help.  No further actions will be taken except for
-     further display options.
+     Display help screen (*note cobc -help: Appendix A.), '-h' will also
+     display the help.
+     No further actions will be taken.
 
 '--version'
      Display compiler version, author package date and executable build
-     date.  '-V' will also display version.  No further actions will be
-     taken except for further display options.
+     date.  '-V' will also display version.
+     No further actions will be taken.
 
 '--info'
      Display build information along with default and current compiler
@@ -296,17 +302,19 @@ The 'cobc' compiler can handle '*.cob', '*.cbl' as COBOL source code,
 code and '*.so' for dynamic modules and will do the right thing in terms
 of generation, compilation, or link.
 
+
    The special input name '-' takes input from 'stdin' which is assumed
 to be COBOL source, and uses a default output name of 'a.out' (or
 'a.so,c,o,i') as appropriate for the build type.
+
 
    The following options specify the target type produced by the
 compiler:
 
 '-E'
      Preprocess only.  Compiler directives are executed.  Comment lines
-     are removed.  COPY statements are expanded.  The output is saved in
-     file '*.i'.
+     are removed.  COPY statements are expanded.
+     The output is saved in file '*.i'.
 
 '-C'
      Translation only.  COBOL source files are translated into C files.
@@ -314,16 +322,18 @@ compiler:
 
 '-S'
      Compile only.  Translated C files are compiled by the C compiler to
-     assembler code.  The output is saved in file '*.s'.
+     assembler code.
+     The output is saved in file '*.s'.
 
 '-c'
-     Compile and assemble.  This is equivalent to 'cc -c'.  The output
-     is saved in file '*.o'.
+     Compile and assemble.  This is equivalent to 'cc -c'.
+     The output is saved in file '*.o'.
 
 '-m'
      Compile, assemble, and build a dynamically loadable module (i.e., a
-     shared library).  The output is saved in file '*.so'.  This is the
-     default behaviour if not other options are given.  (1).
+     shared library).
+     The output is saved in file '*.so'.
+     This is the default behaviour if not other options are given.  (1).
 
 '-b'
      Compile, assemble, and combine all input files into a single
@@ -450,7 +460,7 @@ File: gnucobol.info,  Node: Configuration Options,  Next: Debug Switches,  Prev:
 '-std=<dialect>'
      Compiler uses the given dialect to determine certain compiler
      features and warnings.
-     *Note config/default.conf: Appendix F, and 'config/*.conf'.
+     *Note Compiler Configuration: Appendix F, and 'config/*.conf'.
 
 '-std=cobol2002'
      COBOL 2002
@@ -481,11 +491,11 @@ File: gnucobol.info,  Node: Configuration Options,  Next: Debug Switches,  Prev:
 
 '-conf=<file>'
      User defined dialect configuration.  See '-std=' above.
-     *Note config/default.conf: Appendix F, and 'config/*.conf'.
+     *Note Compiler Configuration: Appendix F, and 'config/*.conf'.
 
 '-cb_conf=<tag:value>'
-     Override a single configuration entry.  *Note config/default.conf:
-     Appendix F.
+     Override a single configuration entry.  *Note Compiler
+     Configuration: Appendix F.
 
 
 File: gnucobol.info,  Node: Debug Switches,  Next: Miscellaneous,  Prev: Configuration Options,  Up: Compiler Options
@@ -528,7 +538,7 @@ File: gnucobol.info,  Node: Debug Switches,  Next: Miscellaneous,  Prev: Configu
      Generate source location code (Turned on by -debug or -g)
 
 '-fimplicit-init'
-     Do automatic initialization of the Cobol runtime system
+     Do automatic initialization of the COBOL runtime system
 
 '-fstack-check'
      PERFORM stack checking (Turned on by -debug or -g)
@@ -550,6 +560,9 @@ File: gnucobol.info,  Node: Miscellaneous,  Prev: Debug Switches,  Up: Compiler 
 
 '-fmfcomment'
      '*' or '/' in column 1 treated as comment (FIXED only)
+
+'-acucomment'
+     '|' is treated as inline comment marker
 
 '-fsign=ASCII'
      Numeric display sign ASCII (Default on ASCII machines)
@@ -662,7 +675,7 @@ library directory:
 directory, and run the main program:
      $ export COB_LIBRARY_PATH=/your/cobol/lib
    Note: You may set the variable via a runtime configuration file,
-*Note config/runtime.cfg: Appendix H.  You may set the variable to
+*Note Runtime Configuration: Appendix H.  You may set the variable to
 directly point to the directory where you compiled the sources.
 
    Now execute your program:
@@ -1008,7 +1021,7 @@ configuration file for a single run via 'cobcrun' you can use its option
 '-r, -runtime-env' of 'cobcrun'.
 
    For a complete list of runtime variables, aliases, their default
-values and options to set them *Note config/runtime.cfg: Appendix H.
+values and options to set them *Note Runtime Configuration: Appendix H.
 
 
 File: gnucobol.info,  Node: Optimize,  Next: Debug,  Prev: Customize,  Up: Top
@@ -1245,7 +1258,7 @@ characters to the right.  When it is off, typed characters type over
 existing characters.
 
    The default insert mode is set by the COB_INSERT_MODE variable, *Note
-config/runtime.cfg: Appendix H.  This must be set before the first
+Runtime Configuration: Appendix H.  This must be set before the first
 Extended ACCEPT, DISPLAY, or any routine that gets information from the
 screen.
 
@@ -1488,23 +1501,20 @@ File: gnucobol.info,  Node: Appendix A,  Next: Appendix B,  Prev: System routine
 Appendix A 'cobc --help'
 ************************
 
-Usage: /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/cobc/.libs/cobc [options]... file...
+Usage: /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/cobc/.libs/lt-cobc [options]... file...
 
-GnuCOBOL compiler for most COBOL dialects with lots of extensions
+GNU Cobol compiler for most COBOL dialects with lots of extensions
 
 Options:
   -h, -help             Display this help and exit
-  -V, -version          Display compiler version and exit
+  -V, -version          Display compiler version
   -i, -info             Display compiler information (build/environment)
-  -v, -verbose          Display the commands invoked by the compiler
-  -vv                   Display compiler version and display the commands
-                        invoked by the compiler
+  -v                    Display the commands invoked by the compiler
   -x                    Build an executable program
   -m                    Build a dynamically loadable module (default)
   -j                    Run job, after build
   -std=<dialect>        Warnings/features for a specific dialect:
                           cobol2002   COBOL 2002
-                          cobol2014   COBOL 2014
                           cobol85     COBOL 85
                           ibm         IBM Compatible
                           mvs         MVS Compatible
@@ -1518,7 +1528,8 @@ Options:
   -F                    Alias (short option) for -free
   -O, -O2, -Os          Enable optimization
   -g                    Enable C compiler debug / stack check / trace
-  -d, -debug            Enable all run-time error checking
+  -debug                Enable all run-time error checking
+  -a                    Alias (short option) for assistive -debug
   -o <file>             Place the output into <file>
   -b                    Combine all input files into a single
                         dynamically loadable module
@@ -1537,7 +1548,7 @@ Options:
   -D <define>           DEFINE <define> to the COBOL compiler
   -K <entry>            Generate CALL to <entry> as static
   -conf=<file>          User defined dialect configuration - See -std=
-  -cb_conf=<tag:value>  Override configuration entry
+  -cb_conf=tag:value    Override configuration entry
   -list-reserved        Display reserved words
   -list-intrinsics      Display intrinsic functions
   -list-mnemonics       Display mnemonic names
@@ -2240,15 +2251,15 @@ BYTE-LENGTH			Y		1
 CHAR				Y		1
 CHAR-NATIONAL			N		1
 COMBINED-DATETIME		Y		2
-CONCATENATE			Y		Unlimited
+CONCATENATE			Y		Variable
 COS				Y		1
 CURRENCY-SYMBOL			Y		0
 CURRENT-DATE			Y		0
 DATE-OF-INTEGER			Y		1
-DATE-TO-YYYYMMDD		Y		1 - 3
+DATE-TO-YYYYMMDD		Y		Variable
 DAY-OF-INTEGER			Y		1
-DAY-TO-YYYYDDD			Y		1 - 3
-DISPLAY-OF			N		1 - 2
+DAY-TO-YYYYDDD			Y		Variable
+DISPLAY-OF			N		Variable
 E				Y		0
 EXCEPTION-FILE			Y		0
 EXCEPTION-FILE-N		N		0
@@ -2261,8 +2272,8 @@ EXP10				Y		1
 FACTORIAL			Y		1
 FORMATTED-CURRENT-DATE		Y		1
 FORMATTED-DATE			Y		2
-FORMATTED-DATETIME		Y		3 - 4
-FORMATTED-TIME			Y		2 - 3
+FORMATTED-DATETIME		Y		Variable
+FORMATTED-TIME			Y		Variable
 FRACTION-PART			Y		1
 HIGHEST-ALGEBRAIC		Y		1
 INTEGER				Y		1
@@ -2273,19 +2284,19 @@ INTEGER-OF-FORMATTED-DATE	Y		2
 INTEGER-PART			Y		1
 LENGTH				Y		1
 LENGTH-AN			Y		1
-LOCALE-COMPARE			Y		2 - 3
-LOCALE-DATE			Y		1 - 2
-LOCALE-TIME			Y		1 - 2
-LOCALE-TIME-FROM-SECONDS	Y		1 - 2
+LOCALE-COMPARE			Y		Variable
+LOCALE-DATE			Y		2
+LOCALE-TIME			Y		2
+LOCALE-TIME-FROM-SECONDS	Y		2
 LOG				Y		1
 LOG10				Y		1
 LOWER-CASE			Y		1
 LOWEST-ALGEBRAIC		Y		1
-MAX				Y		Unlimited
-MEAN				Y		Unlimited
-MEDIAN				Y		Unlimited
-MIDRANGE			Y		Unlimited
-MIN				Y		Unlimited
+MAX				Y		Variable
+MEAN				Y		Variable
+MEDIAN				Y		Variable
+MIDRANGE			Y		Variable
+MIN				Y		Variable
 MOD				Y		2
 MODULE-CALLER-ID		Y		0
 MODULE-DATE			Y		0
@@ -2296,19 +2307,19 @@ MODULE-SOURCE			Y		0
 MODULE-TIME			Y		0
 MONETARY-DECIMAL-POINT		Y		0
 MONETARY-THOUSANDS-SEPARATOR	Y		0
-NATIONAL-OF			N		1 - 2
+NATIONAL-OF			N		Variable
 NUMERIC-DECIMAL-POINT		Y		0
 NUMERIC-THOUSANDS-SEPARATOR	Y		0
 NUMVAL				Y		1
 NUMVAL-C			Y		2
 NUMVAL-F			Y		1
 ORD				Y		1
-ORD-MAX				Y		Unlimited
-ORD-MIN				Y		Unlimited
+ORD-MAX				Y		Variable
+ORD-MIN				Y		Variable
 PI				Y		0
-PRESENT-VALUE			Y		Unlimited
-RANDOM				Y		Unlimited
-RANGE				Y		Unlimited
+PRESENT-VALUE			Y		Variable
+RANDOM				Y		Variable
+RANGE				Y		Variable
 REM				Y		2
 REVERSE				Y		1
 SECONDS-FROM-FORMATTED-TIME	Y		2
@@ -2316,12 +2327,12 @@ SECONDS-PAST-MIDNIGHT		Y		0
 SIGN				Y		1
 SIN				Y		1
 SQRT				Y		1
-STANDARD-COMPARE		N		2 - 4
-STANDARD-DEVIATION		Y		Unlimited
+STANDARD-COMPARE		N		Variable
+STANDARD-DEVIATION		Y		Variable
 STORED-CHAR-LENGTH		Y		1
-SUBSTITUTE			Y		Unlimited
-SUBSTITUTE-CASE			Y		Unlimited
-SUM				Y		Unlimited
+SUBSTITUTE			Y		Variable
+SUBSTITUTE-CASE			Y		Variable
+SUM				Y		Variable
 TAN				Y		1
 TEST-DATE-YYYYMMDD		Y		1
 TEST-DAY-YYYYDDD		Y		1
@@ -2329,11 +2340,11 @@ TEST-FORMATTED-DATETIME		Y		2
 TEST-NUMVAL			Y		1
 TEST-NUMVAL-C			Y		2
 TEST-NUMVAL-F			Y		1
-TRIM				Y		1 - 2
+TRIM				Y		2
 UPPER-CASE			Y		1
-VARIANCE			Y		Unlimited
+VARIANCE			Y		Variable
 WHEN-COMPILED			Y		0
-YEAR-TO-YYYY			Y		1 - 3
+YEAR-TO-YYYY			Y		Variable
 
 
 File: gnucobol.info,  Node: Appendix D,  Next: Appendix E,  Prev: Appendix C,  Up: Top
@@ -2541,50 +2552,11 @@ SWITCH Z	Switch name
 
 File: gnucobol.info,  Node: Appendix F,  Next: Appendix G,  Prev: Appendix E,  Up: Top
 
-Appendix F 'cobcrun --help'
-***************************
+Appendix F Compiler Configuration
+*********************************
 
-Usage: /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun [options] PROGRAM [param ...]
-  or:  /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun options
+The following list was extracted from 'config/default.conf'.
 
-COBOL driver program for GnuCOBOL modules
-
-Options:
-  -h, -help                   Display this help and exit
-  -V, -version                Display cobcrun and runtime version and exit
-  -i, -info                   Display runtime information (build/environment)
-  -c <file>, -config=<file>   Set runtime configuration from <file>
-  -r, -runtime-env            Display current runtime configuration
-                              This will show all settings and how they were set.
-                              Possible options are runtime configuration file,
-                              environment (marked by 'env' when only set this way or
-                              by 'Ovr' if this overrides the runtime setting) or default
-
-
-File: gnucobol.info,  Node: Appendix G,  Next: Appendix H,  Prev: Appendix F,  Up: Top
-
-Appendix G config/default.conf
-******************************
-
-# GnuCOBOL compiler configuration
-#
-# Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While, Simon Sobisch
-#
-# This file is part of GnuCOBOL.
-#
-# The GnuCOBOL compiler is free software: you can redistribute it
-# and/or modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# GnuCOBOL is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 
 # Value: any string
@@ -2609,6 +2581,12 @@ text-column:			72
 # Be aware that GC checks the word length against COB_MAX_WORDLEN
 # first (currently 61)
 word-length:			31
+
+# Maximum literal size in general
+literal-length:			8191
+
+# Maximum numeric literal size
+numeric-literal-length:	61
 
 # Value: 'mf', 'ibm'
 #
@@ -2705,7 +2683,8 @@ accept-auto:		no
 #        'unconformable'
 
 alter-statement:			obsolete
-author-paragraph:			obsolete
+comment-paragraphs:			obsolete
+call-overflow:				archaic
 data-records-clause:			obsolete
 debugging-line:				ok
 eject-statement:			skip
@@ -2725,280 +2704,767 @@ top-level-occurs-clause:		ok
 value-of-clause:			obsolete
 numeric-boolean:			unconformable
 acucobol-literals:			unconformable
+word-continuation:			warning
 
 
-File: gnucobol.info,  Node: Appendix H,  Next: Index,  Prev: Appendix G,  Up: Top
+File: gnucobol.info,  Node: Appendix G,  Next: Appendix H,  Prev: Appendix F,  Up: Top
 
-Appendix H config/runtime.cfg
-*****************************
+Appendix G 'cobcrun --help'
+***************************
 
-# GnuCOBOL runtime configuration
-#
-# Copyright (C) 2015 Free Software Foundation, Inc.
-# Written by Simon Sobisch, Ron Norman
-#
-# This file is part of the GnuCOBOL runtime.
-#
-# The GnuCOBOL runtime is free software: you can redistribute it
-# and/or modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# GnuCOBOL is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+Usage: /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/bin/.libs/lt-cobcrun [options] PROGRAM [param ...]
+  or:  /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/bin/.libs/lt-cobcrun options
 
-#
-## General instructions
-#
+COBOL driver program for GNU Cobol modules
 
-# The initial runtime.cfg file is found in the $COB_CONFIG_DIR/config
-# (COB_CONFIG_DIR defaults to installdir/gnu-cobol).
-# The environment variable COB_RUNTIME_CONFIG may define a different runtime
-# configuration file to read.
+Options:
+  -h, -help                   Display this help and exit
+  -V, -version                Display cobcrun and runtime version
+  -i, -info                   Display runtime information (build/environment)
+  -c <file>, -config=<file>   Set runtime configuration from <file>
+  -r, -runtime-env            Display current runtime configuration
+                              This will show all settings and how they were set.
+                              Possible options are runtime configuration file,
+                              environment (marked by 'env' when only set this way or
+                              by 'Ovr' if this overrides the runtime setting) or default
 
-# If settings are included in the runtime environment file multiple times
-# then the last setting value is used, no warning occurs.
+
+File: gnucobol.info,  Node: Appendix H,  Next: Appendix I,  Prev: Appendix G,  Up: Top
 
-# Settings via environment variables always take precedence over settings
-# that are given in runtime configuration files. And the environment is
-# checked after completing processing of the runtime configuration file(s)
+Appendix H Runtime configuration
+********************************
 
-# All values set to string variables or environment variables are checked
-# for ${envvar} and replacement is done at the time of the setting.
+The following list was extracted from 'config/runtime.cfg'.
 
-# Any environment variable may be set with the directive setenv.
-# Example:  setenv COB_LIBARAY_PATH ${LD_LIBRARY_PATH}
+H.1 General instructions
+========================
 
-# Any environment variable may be unset with the directive unsetenv
-# (one var per line).
-# Example:  unsetenv COB_LIBRARY_PATH
 
-# Runtime configuration files can include other files with the directive
-# include.
-# Example: "include my-runtime-configuration-file".
 
-# To include another configuration file only if it is present use the directive
-# includeif.
-# You can also use ${envvar} inside this.
-# Example:   includeif ${HOME}/mygc.cfg
+The initial runtime.cfg file is found in the '$COB_CONFIG_DIR/config' (
+'COB_CONFIG_DIR defaults to installdir/gnu-cobol ).' The environment
+variable 'COB_RUNTIME_CONFIG' may define a different runtime
+configuration file to read.
+If settings are included in the runtime environment file multiple times
+then the last setting value is used, no warning occurs.
+Settings via environment variables always take precedence over settings
+that are given in runtime configuration files.  And the environment is
+checked after completing processing of the runtime configuration file(s)
 
-# If you want to reset a parameter to its default value use:
-#    reset parametername
+All values set to string variables or environment variables are checked
+for '${envvar}' and replacement is done at the time of the setting.
+Any environment variable may be set with the directive 'setenv' .
+Example: 'setenv COB_LIBARAY_PATH ${LD_LIBRARY_PATH}'
+Any environment variable may be unset with the directive 'unsetenv' (one
+var per line).  Example: 'unsetenv COB_LIBRARY_PATH'
+Runtime configuration files can include other files with the directive
+include.  Example: 'include my-runtime-configuration-file'
+To include another configuration file only if it is present use the
+directive includeif.  You can also use '${envvar}' inside this.
+Example: 'includeif ${HOME}/mygc.cfg'
+If you want to reset a parameter to its default value use: 'reset
+parametername'
+Most runtime variables have boolean values, some are switches, some have
+string values, integer values and some are size values.  The boolean
+values will be evaluated as following:	to true:	'1, Y, ON, YES, TRUE'
+(no matter of case)	to false:	'0, N, OFF' A 'size' value is an integer
+optionally followed by K, M, or G for kilo, mega or giga.
+For convenience a parameter in the runtime.cfg file may be defined by
+using either the environment variable name or the parameter name.  In
+most cases the environment variable name is the parameter name (in upper
+case) with the prefix 'COB_' .
 
-# Most runtime variables have boolean values, some are switches, some have
-# string values, integer values and some are size values.
-# The boolean values will be evaluated as following:
-#     to true:  1, Y, ON, YES, TRUE (no matter of case)
-#     to false: 0, N, OFF
-# A 'size' value is an integer optionally followed by K, M, or G for kilo, mega
-# or giga.
 
-# For convenience a parameter in the runtime.cfg file may be defined using
-# what is the environment variable name or via the parameter name.
-# In most cases the environment variable name is the parameter name (in upper
-# case) with the prefix  COB_
 
-#
-## General environment
-#
 
-# Environment name:  COB_DISABLE_WARNINGS
-#   Parameter name:  disable_warnings
-#          Purpose:  turn off runtime warning messages
-#             Type:  boolean
-#          Default:  false
-#          Example:  DISABLE_WARNINGS  TRUE
+H.2 General environment
+=======================
 
-# Environment name:  COB_ENV_MANGLE
-#   Parameter name:  env_mangle
-#          Purpose:  names checked in the environment would get non alphanumeric
-#                    change to '_'
-#             Type:  boolean
-#          Default:  false
-#          Example:  ENV_MANGLE  TRUE
 
-# Environment name:  COB_SET_TRACE
-#   Parameter name:  set_trace
-#          Purpose:  to enable to COBOL trace feature
-#             Type:  boolean
-#          Default:  false
-#          Example:  SET_TRACE  TRUE
 
-# Environment name:  COB_TRACE_FILE
-#   Parameter name:  trace_file
-#          Purpose:  to define where COBOL trace output should go
-#             Type:  string
-#          Default:  stderr
-#          Example:  TRACE_FILE  ${HOME}/mytrace.log
+Environment name:  COB_DISABLE_WARNINGS
+  Parameter name:  disable_warnings
+         Purpose:  turn off runtime warning messages
+            Type:  boolean
+         Default:  false
+         Example:  DISABLE_WARNINGS  TRUE
 
-#
-## Call environment
-#
+Environment name:  COB_ENV_MANGLE
+  Parameter name:  env_mangle
+         Purpose:  names checked in the environment would get non alphanumeric
+                   change to '_'
+            Type:  boolean
+         Default:  false
+         Example:  ENV_MANGLE  TRUE
 
-# Environment name:  COB_LIBRARY_PATH
-#   Parameter name:  library_path
-#          Purpose:  paths for dynamically-loadable modules
-#             Type:  string
-#             Note:  the default paths .:/installpath/extras are always
-#                    added to the given paths
-#          Example:  LIBRARY_PATH    /opt/myapp/test:/opt/myapp/production
+Environment name:  COB_SET_TRACE
+  Parameter name:  set_trace
+         Purpose:  to enable to COBOL trace feature
+            Type:  boolean
+         Default:  false
+         Example:  SET_TRACE  TRUE
 
-# Environment name:  COB_PRE_LOAD
-#   Parameter name:  pre_load
-#          Purpose:  modules that are loaded during startup, can be used
-#                    to CALL COBOL programs or C functions that are part
-#                    of a module library
-#             Type:  string
-#             Note:  the modules listed should NOT include extensions, the
-#                    runtime will use the right ones on the various platforms,
-#                    COB_LIBRARY_PATH is used to locate the modules
-#          Example:  PRE_LOAD      COBOL_function_library:external_c_library
+Environment name:  COB_TRACE_FILE
+  Parameter name:  trace_file
+         Purpose:  to define where COBOL trace output should go
+            Type:  string
+         Default:  stderr
+         Example:  TRACE_FILE  ${HOME}/mytrace.log
 
-# Environment name:  COB_LOAD_CASE
-#   Parameter name:  load_case
-#          Purpose:  resolve ALL called program names to UPPER or LOWER case
-#             Type:  Only use  UPPER  or  LOWER
-#          Default:  if not set program names in CALL are case sensitive
-#          Example:  LOAD_CASE  UPPER
 
-# Environment name:  COB_PHYSICAL_CANCEL
-#   Parameter name:  physical_cancel
-#          Purpose:  physically unload a dynamically-loadable module on CANCEL,
-#                    this frees some RAM and allows the change of modules during
-#                    run-time but needs more time to resolve CALLs (both to
-#                    active and not-active programs)
-#            Alias:  default_cancel_mode, LOGICAL_CANCELS (0 = yes)
-#             Type:  boolean (evaluated for true only)
-#          Default:  false
-#          Example:  PHYSICAL_CANCEL  TRUE
 
-#
-## File I/O
-#
+H.3 Call environment
+====================
 
-# Environment name:  COB_VARSEQ_FORMAT
-#   Parameter name:  varseq_format
-#          Purpose:  declare format to be used for variable length sequential
-#                    files (different types and lengths preceding each record)
-#             Type:  0   means 2 byte record length (big-endian)
-#                    1   means 4 byte record length (big-endian)
-#                    2   means 4 byte record length (local machine int)
-#                    3   means 2 byte record length (local machine short)
-#          Default:  0
-#          Example:  VARSEQ_FORMAT 1
 
-# Environment name:  COB_FILE_PATH
-#   Parameter name:  file_path
-#          Purpose:  define default location where data files are stored
-#             Type:  file path directory
-#          Default:  .  (current directory)
-#          Example:  FILE_PATH ${HOME}/mydata
 
-# Environment name:  COB_LS_FIXED
-#   Parameter name:  ls_fixed
-#          Purpose:  Defines if LINE SEQUENTIAL files should be fixed length
-#                    (or variable, by removing trailing spaces)
-#            Alias:  STRIP_TRAILING_SPACES  (0 = yes)
-#             Type:  boolean
-#          Default:  false
-#          Example:  LS_FIXED TRUE
+Environment name:  COB_LIBRARY_PATH
+  Parameter name:  library_path
+         Purpose:  paths for dynamically-loadable modules
+            Type:  string
+            Note:  the default paths .:/installpath/extras are always
+                   added to the given paths
+         Example:  LIBRARY_PATH    /opt/myapp/test:/opt/myapp/production
 
-# Environment name:  COB_LS_NULLS
-#   Parameter name:  ls_nulls
-#          Purpose:  Defines for LINE SEQUENTIAL files what to do with data
-#                    which is not DISPLAY type.  This could happen if a LINE
-#                    SEQUENTIAL record has COMP data fields in it.
-#             Type:  boolean
-#          Default:  false
-#             Note:  The TRUE setting will handle files that contain COMP data
-#                    in a similar manner to the method used by Micro Focus COBOL
-#          Example:  LS_NULL = TRUE
+Environment name:  COB_PRE_LOAD
+  Parameter name:  pre_load
+         Purpose:  modules that are loaded during startup, can be used
+                   to CALL COBOL programs or C functions that are part
+                   of a module library
+            Type:  string
+            Note:  the modules listed should NOT include extensions, the
+                   runtime will use the right ones on the various platforms,
+                   COB_LIBRARY_PATH is used to locate the modules
+         Example:  PRE_LOAD      COBOL_function_library:external_c_library
 
-# Environment name:  COB_SYNC
-#   Parameter name:  sync
-#          Purpose:  Should the file be synced to disk after each write/update
-#             Type:  boolean
-#          Default:  false
-#          Example:  SYNC: TRUE
+Environment name:  COB_LOAD_CASE
+  Parameter name:  load_case
+         Purpose:  resolve ALL called program names to UPPER or LOWER case
+            Type:  Only use  UPPER  or  LOWER
+         Default:  if not set program names in CALL are case sensitive
+         Example:  LOAD_CASE  UPPER
 
-# Environment name:  COB_SORT_MEMORY
-#   Parameter name:  sort_memory
-#          Purpose:  Defines how much RAM to assign for sorting data
-#             Type:  size  but must be more than 1M
-#          Default:  128M
-#          Example:  SORT_MEMORY 64M
+Environment name:  COB_PHYSICAL_CANCEL
+  Parameter name:  physical_cancel
+         Purpose:  physically unload a dynamically-loadable module on CANCEL,
+                   this frees some RAM and allows the change of modules during
+                   run-time but needs more time to resolve CALLs (both to
+                   active and not-active programs)
+           Alias:  default_cancel_mode, LOGICAL_CANCELS (0 = yes)
+            Type:  boolean (evaluated for true only)
+         Default:  false
+         Example:  PHYSICAL_CANCEL  TRUE
 
-# Environment name:  COB_SORT_CHUNK
-#   Parameter name:  sort_chunk
-#          Purpose:  Defines how much RAM to assign for sorting data in chunks
-#             Type:  size  but must be within 128K and 16M
-#          Default:  256K
-#          Example:  SORT_CHUNK 1M
 
-#
-## Screen I/O
-#
 
-# Environment name:  COB_BELL
-#   Parameter name:  bell
-#          Purpose:  Defines how a request for the screen to beep is handled
-#             Type:  FLASH, SPEAKER, FALSE, BEEP
-#          Default:  BEEP
-#          Example:  BELL SPEAKER
+H.4 File I/O
+============
 
-# Environment name:  COB_REDIRECT_DISPLAY
-#   Parameter name:  redirect_display
-#          Purpose:  Defines if DISPLAY output should be sent to 'stderr'
-#             Type:  boolean
-#          Default:  false
-#          Example:  redirect_display Yes
 
-# Environment name:  COB_SCREEN_ESC
-#   Parameter name:  screen_esc
-#          Purpose:  Enable handling of ESC key during ACCEPT
-#             Type:  boolean
-#          Default:  false
-#             Note:  is only evaluated if COB_SCREEN_EXCEPTIONS is active
-#          Example:  screen_esc Yes
 
-# Environment name:  COB_SCREEN_EXCEPTIONS
-#   Parameter name:  screen_exceptions
-#          Purpose:  enable exceptions for function keys during ACCEPT
-#             Type:  boolean
-#          Default:  false
-#          Example:  screen_exceptions Yes
+Environment name:  COB_VARSEQ_FORMAT
+  Parameter name:  varseq_format
+         Purpose:  declare format to be used for variable length sequential
+                   files (different types and lengths preceding each record)
+            Type:  0   means 2 byte record length (big-endian)
+                   1   means 4 byte record length (big-endian)
+                   2   means 4 byte record length (local machine int)
+                   3   means 2 byte record length (local machine short)
+         Default:  0
+         Example:  VARSEQ_FORMAT 1
 
-# Environment name:  COB_TIMEOUT_SCALE
-#   Parameter name:  timeout_scale
-#          Purpose:  specify translation in milliseconds for ACCEPT clauses
-#                    BEFORE TIME value / AFTER TIMEOUT
-#             Type:  integer
-#                    0 means 1000 (Micro Focus COBOL compatible), 1 means 100
-#                    (ACUCOBOL compatible), 2 means 10, 3 means 1
-#          Default:  0
-#          Example:  timeout_scale 3
+Environment name:  COB_FILE_PATH
+  Parameter name:  file_path
+         Purpose:  define default location where data files are stored
+            Type:  file path directory
+         Default:  .  (current directory)
+         Example:  FILE_PATH ${HOME}/mydata
 
-# Environment name:  COB_INSERT_MODE
-#   Parameter name:  insert_mode
-#          Purpose:  specify default insert mode for ACCEPT; 0=off, 1=on
-#          Default:  false
-#          Example:  insert_mode Y
+Environment name:  COB_LS_FIXED
+  Parameter name:  ls_fixed
+         Purpose:  Defines if LINE SEQUENTIAL files should be fixed length
+                   (or variable, by removing trailing spaces)
+           Alias:  STRIP_TRAILING_SPACES  (0 = yes)
+            Type:  boolean
+         Default:  false
+         Example:  LS_FIXED TRUE
 
-# Environment name:  COB_LEGACY
-#   Parameter name:  legacy
-#          Purpose:  keep behaviour of former runtime versions, currently only
-#                    for setting screen attributes for non input fields
-#             Type:  boolean
-#          Default:  not set
-#          Example:  legacy true
+Environment name:  COB_LS_NULLS
+  Parameter name:  ls_nulls
+         Purpose:  Defines for LINE SEQUENTIAL files what to do with data
+                   which is not DISPLAY type.  This could happen if a LINE
+                   SEQUENTIAL record has COMP data fields in it.
+            Type:  boolean
+         Default:  false
+            Note:  The TRUE setting will handle files that contain COMP data
+                   in a similar manner to the method used by Micro Focus COBOL
+         Example:  LS_NULL = TRUE
 
-# Note: If you want to slightly speed up a program's startup time, remove all
-#       of the comments from the actual real file that is processed
+Environment name:  COB_SYNC
+  Parameter name:  sync
+         Purpose:  Should the file be synced to disk after each write/update
+            Type:  boolean
+         Default:  false
+         Example:  SYNC: TRUE
+
+Environment name:  COB_SORT_MEMORY
+  Parameter name:  sort_memory
+         Purpose:  Defines how much RAM to assign for sorting data
+            Type:  size  but must be more than 1M
+         Default:  128M
+         Example:  SORT_MEMORY 64M
+
+Environment name:  COB_SORT_CHUNK
+  Parameter name:  sort_chunk
+         Purpose:  Defines how much RAM to assign for sorting data in chunks
+            Type:  size  but must be within 128K and 16M
+         Default:  256K
+         Example:  SORT_CHUNK 1M
+
+
+
+H.5 Screen I/O
+==============
+
+
+
+Environment name:  COB_BELL
+  Parameter name:  bell
+         Purpose:  Defines how a request for the screen to beep is handled
+            Type:  FLASH, SPEAKER, FALSE, BEEP
+         Default:  BEEP
+         Example:  BELL SPEAKER
+
+Environment name:  COB_REDIRECT_DISPLAY
+  Parameter name:  redirect_display
+         Purpose:  Defines if DISPLAY output should be sent to 'stderr'
+            Type:  boolean
+         Default:  false
+         Example:  redirect_display Yes
+
+Environment name:  COB_SCREEN_ESC
+  Parameter name:  screen_esc
+         Purpose:  Enable handling of ESC key during ACCEPT
+            Type:  boolean
+         Default:  false
+            Note:  is only evaluated if COB_SCREEN_EXCEPTIONS is active
+         Example:  screen_esc Yes
+
+Environment name:  COB_SCREEN_EXCEPTIONS
+  Parameter name:  screen_exceptions
+         Purpose:  enable exceptions for function keys during ACCEPT
+            Type:  boolean
+         Default:  false
+         Example:  screen_exceptions Yes
+
+Environment name:  COB_TIMEOUT_SCALE
+  Parameter name:  timeout_scale
+         Purpose:  specify translation in milliseconds for ACCEPT clauses
+                   BEFORE TIME value / AFTER TIMEOUT
+            Type:  integer
+                   0 means 1000 (Micro Focus COBOL compatible), 1 means 100
+                   (ACUCOBOL compatible), 2 means 10, 3 means 1
+         Default:  0
+         Example:  timeout_scale 3
+
+Environment name:  COB_INSERT_MODE
+  Parameter name:  insert_mode
+         Purpose:  specify default insert mode for ACCEPT; 0=off, 1=on
+         Default:  false
+         Example:  insert_mode Y
+
+Environment name:  COB_LEGACY
+  Parameter name:  legacy
+         Purpose:  keep behaviour of former runtime versions, currently only
+                   for setting screen attributes for non input fields
+            Type:  boolean
+         Default:  not set
+         Example:  legacy true
+
+Note: If you want to slightly speed up a program's startup time, remove all
+      of the comments from the actual real file that is processed
+
+
+File: gnucobol.info,  Node: Appendix I,  Next: Index,  Prev: Appendix H,  Up: Top
+
+Appendix I GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     <http://fsf.org/>
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.  We
+     recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it can
+     be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You accept
+     the license if you copy, modify or distribute the work in a way
+     requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in the
+     notice that says that the Document is released under this License.
+     If a section does not fit the above definition of Secondary then it
+     is not allowed to be designated as Invariant.  The Document may
+     contain zero Invariant Sections.  If the Document does not identify
+     any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images composed
+     of pixels) generic paint programs or (for drawings) some widely
+     available drawing editor, and that is suitable for input to text
+     formatters or for automatic translation to a variety of formats
+     suitable for input to text formatters.  A copy made in an otherwise
+     Transparent file format whose markup, or absence of markup, has
+     been arranged to thwart or discourage subsequent modification by
+     readers is not Transparent.  An image format is not Transparent if
+     used for any substantial amount of text.  A copy that is not
+     "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and standard-conforming
+     simple HTML, PostScript or PDF designed for human modification.
+     Examples of transparent image formats include PNG, XCF and JPG.
+     Opaque formats include proprietary formats that can be read and
+     edited only by proprietary word processors, SGML or XML for which
+     the DTD and/or processing tools are not generally available, and
+     the machine-generated HTML, PostScript or PDF produced by some word
+     processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow the
+     conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the title
+     equally prominent and visible.  You may add other material on the
+     covers in addition.  Copying with changes limited to the covers, as
+     long as they preserve the title of the Document and satisfy these
+     conditions, can be treated as verbatim copying in other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a machine-readable
+     Transparent copy along with each Opaque copy, or state in or with
+     each Opaque copy a computer-network location from which the general
+     network-using public has access to download using public-standard
+     network protocols a complete Transparent copy of the Document, free
+     of added material.  If you use the latter option, you must take
+     reasonably prudent steps, when you begin distribution of Opaque
+     copies in quantity, to ensure that this Transparent copy will
+     remain thus accessible at the stated location until at least one
+     year after the last time you distribute an Opaque copy (directly or
+     through your agents or retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of copies,
+     to give them a chance to provide you with an updated version of the
+     Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with the
+     Modified Version filling the role of the Document, thus licensing
+     distribution and modification of the Modified Version to whoever
+     possesses a copy of it.  In addition, you must do these things in
+     the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of previous
+          versions (which should, if there were any, be listed in the
+          History section of the Document).  You may use the same title
+          as a previous version if the original publisher of that
+          version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on the
+          Title Page.  If there is no section Entitled "History" in the
+          Document, create one stating the title, year, authors, and
+          publisher of the Document as given on its Title Page, then add
+          an item describing the Modified Version as stated in the
+          previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in the
+          "History" section.  You may omit a network location for a work
+          that was published at least four years before the Document
+          itself, or if the original publisher of the version it refers
+          to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the section
+          all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document, unaltered
+          in their text and in their titles.  Section numbers or the
+          equivalent are not considered part of the section titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option designate
+     some or all of these sections as invariant.  To do this, add their
+     titles to the list of Invariant Sections in the Modified Version's
+     license notice.  These titles must be distinct from any other
+     section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end of
+     the list of Cover Texts in the Modified Version.  Only one passage
+     of Front-Cover Text and one of Back-Cover Text may be added by (or
+     through arrangements made by) any one entity.  If the Document
+     already includes a cover text for the same cover, previously added
+     by you or by arrangement made by the same entity you are acting on
+     behalf of, you may not add another; but you may replace the old
+     one, on explicit permission from the previous publisher that added
+     the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination all
+     of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the documents
+     in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of a
+     storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly and
+     finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from you
+     under this License.  If your rights have been terminated and not
+     permanently reinstated, receipt of a copy of some or all of the
+     same material does not give you any rights to use it.
+
+  10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     <http://www.gnu.org/copyleft/>.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If the
+     Document does not specify a version number of this License, you may
+     choose any version ever published (not as a draft) by the Free
+     Software Foundation.  If the Document specifies that a proxy can
+     decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+  11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit
+their use in free software.
 
 
 File: gnucobol.info,  Node: Index,  Prev: Appendix H,  Up: Top
@@ -3017,6 +3483,7 @@ Index
 * BELL:                                  Extended DISPLAY.     (line 22)
 * BLANK LINE:                            Extended DISPLAY.     (line 27)
 * BLANK SCREEN:                          Extended DISPLAY.     (line 27)
+* Copying:                               Appendix I.           (line  6)
 * Delete keys:                           ACCEPT Special.       (line 38)
 * End keys:                              ACCEPT Special.       (line 47)
 * ERASE EOL:                             Extended DISPLAY.     (line 41)
@@ -3029,6 +3496,7 @@ Index
 * Indexed:                               Indexed.              (line  6)
 * Indexed file packages:                 Indexed.              (line  6)
 * Insert key:                            ACCEPT Special.       (line 61)
+* Invoking:                              Compile.              (line  6)
 * PROTECTED:                             Extended ACCEPT.      (line 39)
 * SELECT:                                SELECT.               (line  6)
 * SELECT ASSIGN TO:                      SELECT.               (line  6)
@@ -3039,58 +3507,59 @@ Index
 
 
 Tag Table:
-Node: Top1306
-Node: Getting Started4151
-Node: Hello World!4328
-Node: Compile5711
-Node: Compiler Options6069
-Node: Help Options6743
-Ref: Help Options-Footnote-18406
-Node: Built Target8449
-Ref: Built Target-Footnote-110870
-Node: Source Format10923
-Node: Warning Options11949
-Node: Configuration Options13133
-Node: Debug Switches14065
-Node: Miscellaneous15292
-Node: Multiple Sources16101
-Node: Static Linking16781
-Node: Dynamic Linking18306
-Ref: Dynamic Linking-Footnote-119798
-Ref: Dynamic Linking-Footnote-219851
-Node: Building Library19904
-Node: Using Library20287
-Node: C Interface20858
-Node: Main C Program21244
-Node: Static C to COBOL22159
-Node: Dynamic C to COBOL23646
-Node: Static COBOL to C25096
-Node: Dynamic COBOL to C26528
-Node: Customize26933
-Node: Customizing Compiler27157
-Node: Customizing Library27731
-Node: Optimize28477
-Node: Optimize Options28780
-Node: Optimize Call29320
-Node: Optimize Binary29698
-Node: Debug30278
-Node: Debug Options30437
-Node: Extensions30799
-Node: SELECT31246
-Node: Indexed31411
-Node: Extended ACCEPT31591
-Node: ACCEPT Special33206
-Node: Extended DISPLAY35603
-Node: System routines38013
-Node: CBL_OC_GETOPT38283
-Node: Appendix A42392
-Node: Appendix B48932
-Node: Appendix C58721
-Node: Appendix D61141
-Node: Appendix E62112
-Node: Appendix F65059
-Node: Appendix G66148
-Node: Appendix H70992
-Node: Index81456
+Node: Top1310
+Node: Getting Started4224
+Node: Hello World!4401
+Node: Compile5789
+Node: Compiler Options6147
+Node: Help Options6821
+Ref: Help Options-Footnote-18411
+Node: Built Target8454
+Ref: Built Target-Footnote-110882
+Node: Source Format10935
+Node: Warning Options11961
+Node: Configuration Options13145
+Node: Debug Switches14086
+Node: Miscellaneous15313
+Node: Multiple Sources16182
+Node: Static Linking16862
+Node: Dynamic Linking18387
+Ref: Dynamic Linking-Footnote-119882
+Ref: Dynamic Linking-Footnote-219935
+Node: Building Library19988
+Node: Using Library20371
+Node: C Interface20942
+Node: Main C Program21328
+Node: Static C to COBOL22243
+Node: Dynamic C to COBOL23730
+Node: Static COBOL to C25180
+Node: Dynamic COBOL to C26612
+Node: Customize27017
+Node: Customizing Compiler27241
+Node: Customizing Library27815
+Node: Optimize28564
+Node: Optimize Options28867
+Node: Optimize Call29407
+Node: Optimize Binary29785
+Node: Debug30365
+Node: Debug Options30524
+Node: Extensions30886
+Node: SELECT31333
+Node: Indexed31498
+Node: Extended ACCEPT31678
+Node: ACCEPT Special33293
+Node: Extended DISPLAY35693
+Node: System routines38103
+Node: CBL_OC_GETOPT38373
+Node: Appendix A42482
+Node: Appendix B48904
+Node: Appendix C58693
+Node: Appendix D61108
+Node: Appendix E62079
+Node: Appendix F65026
+Node: Appendix G69279
+Node: Appendix H70350
+Node: Appendix I79786
+Node: Index104912
 
 End Tag Table
