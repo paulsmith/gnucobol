@@ -950,7 +950,7 @@
 
 2008-07-31  Roger While <simrw@sim-basis.de>
 
-	* parser.y : FOREGROUND/BACKGROUND must be propogated from parent
+	* parser.y : FOREGROUND/BACKGROUND must be propagated from parent
 
 2008-07-28  Roger While <simrw@sim-basis.de>
 
@@ -1039,7 +1039,7 @@
 
 2008-06-17  Roger While <simrw@sim-basis.de>
 
-	* parser.y : Ammendments to SCREEN/ACCEPT/DISPLAY
+	* parser.y : Amendments to SCREEN/ACCEPT/DISPLAY
 
 2008-06-12  Roger While <simrw@sim-basis.de>
 

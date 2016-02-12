@@ -1,18 +1,15 @@
 @verbatim
-Usage: /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun [options] PROGRAM [param ...]
-  or:  /d/Programme/Entwicklung/GnuCOBOL/gnu-cobol-2.0_ultraclean2/bin/.libs/cobcrun options
-
 COBOL driver program for GnuCOBOL modules
 
-Options:
-  -h, -help                   Display this help and exit
-  -V, -version                Display cobcrun and runtime version and exit
-  -i, -info                   Display runtime information (build/environment)
-  -c <file>, -config=<file>   Set runtime configuration from <file>
-  -r, -runtime-env            Display current runtime configuration
-                              This will show all settings and how they were set.
-                              Possible options are runtime configuration file,
-                              environment (marked by 'env' when only set this way or
-                              by 'Ovr' if this overrides the runtime setting) or default
+usage: cobcrun [options] PROGRAM [param ...]
+  or: cobcrun options
+
+options:
+  -h, -help             display this help and exit
+  -V, -version          display cobcrun and runtime version and exit
+  -i, -info             display runtime information (build/environment)
+  -c <file>, -config=<file>   set runtime configuration from <file>
+  -r, -runtime-env      display current runtime configuration
+                        (value and origin for all settings)
 @end verbatim
 

@@ -86,8 +86,8 @@ cobcrun_print_version (void)
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts ("Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.");
 	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
-	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
+	puts (_("This is free software; see the source for copying conditions.  There is NO\n"\
+	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
@@ -97,24 +97,20 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 static void
 cobcrun_print_usage (char * prog)
 {
-	printf (_("Usage: %s [options] PROGRAM [param ...]"), prog);
+	puts (_("COBOL driver program for GnuCOBOL modules"));
+	putchar ('\n');
+	printf (_("usage: %s [options] PROGRAM [param ...]"), prog);
 	putchar ('\n');
 	printf (_("  or:  %s options"), prog);
 	putchar ('\n');
 	putchar ('\n');
-	printf (_("COBOL driver program for %s modules"), PACKAGE_NAME);
-	putchar ('\n');
-	putchar ('\n');
-	puts (_("Options:"));
-	puts (_("  -h, -help                   Display this help and exit"));
-	puts (_("  -V, -version                Display cobcrun and runtime version and exit"));
-	puts (_("  -i, -info                   Display runtime information (build/environment)"));
-	puts (_("  -c <file>, -config=<file>   Set runtime configuration from <file>"));
-	puts (_("  -r, -runtime-env            Display current runtime configuration"));
-	puts (_("                              This will show all settings and how they were set."));
-	puts (_("                              Possible options are runtime configuration file,"));
-	puts (_("                              environment (marked by 'env' when only set this way or"));
-	puts (_("                              by 'Ovr' if this overrides the runtime setting) or default"));
+	puts (_("options:"));
+	puts (_("  -h, -help             display this help and exit"));
+	puts (_("  -V, -version          display cobcrun and runtime version and exit"));
+	puts (_("  -i, -info             display runtime information (build/environment)"));
+	puts (_("  -c <file>, -config=<file>   set runtime configuration from <file>"));
+	puts (_("  -r, -runtime-env      display current runtime configuration\n"
+	        "                        (value and origin for all settings)"));
 }
 
 /* Set current argument from getopt as environment value */
@@ -162,7 +158,7 @@ process_command_line (int argc, char *argv[])
 		case 'C':
 			/* --config=<file> */
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
-				fputs (_("Invalid configuration file name"), stderr);
+				fputs (_("invalid configuration file name"), stderr);
 				putc ('\n', stderr);
 				fflush (stderr);
 				exit (1);

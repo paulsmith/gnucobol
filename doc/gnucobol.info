@@ -1,4 +1,4 @@
-This is gnucobol.info, produced by makeinfo version 5.2 from
+This is gnucobol.info, produced by makeinfo version 6.0 from
 gnucobol.texi.
 
 Permission is granted to make and distribute verbatim copies of this
@@ -1497,128 +1497,124 @@ File: gnucobol.info,  Node: Appendix A,  Next: Appendix B,  Prev: System routine
 Appendix A 'cobc --help'
 ************************
 
-Usage: /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/cobc/.libs/lt-cobc [options]... file...
+GnuCOBOL compiler for most COBOL dialects with lots of extensions
 
-GNU Cobol compiler for most COBOL dialects with lots of extensions
+usage: cobc [options]... file...
 
-Options:
-  -h, -help             Display this help and exit
-  -V, -version          Display compiler version
-  -i, -info             Display compiler information (build/environment)
-  -v                    Display the commands invoked by the compiler
-  -x                    Build an executable program
-  -m                    Build a dynamically loadable module (default)
-  -j                    Run job, after build
-  -std=<dialect>        Warnings/features for a specific dialect:
-                          cobol2002   COBOL 2002
-                          cobol85     COBOL 85
-                          ibm         IBM Compatible
-                          mvs         MVS Compatible
-                          bs2000      BS2000 Compatible
-                          mf          Micro Focus Compatible
-                          acu         ACUCOBOL-GT Compatible
-                          default     When not specified
-                        See config/default.conf and config/*.conf
-  -free                 Use free source format
-  -fixed                Use fixed source format (default)
-  -F                    Alias (short option) for -free
-  -O, -O2, -Os          Enable optimization
-  -g                    Enable C compiler debug / stack check / trace
-  -debug                Enable all run-time error checking
-  -a                    Alias (short option) for assistive -debug
-  -o <file>             Place the output into <file>
-  -b                    Combine all input files into a single
+options:
+  -h, -help             display this help and exit
+  -V, -version          display compiler version and exit
+  -i, -info             display compiler information (build/environment)
+  -v, -verbose          display the commands invoked by the compiler
+  -vv                   display compiler version and the commands
+                        invoked by the compiler
+  -x                    build an executable program
+  -m                    build a dynamically loadable module (default)
+  -j                    run job, after build
+  -std=<dialect>        warnings/features for a specific dialect
+                        <dialect> can be one of:
+                        cobol2014, cobol2002, cobol85, default,
+                        ibm, mvs, bs2000, mf, acu;
+                        see configuration files in directory config
+  -F, -free             use free source format
+  -free                 use free source format
+  -fixed                use fixed source format (default)
+  -O, -O2, -Os          enable optimization
+  -g                    enable C compiler debug / stack check / trace
+  -d, -debug            enable all run-time error checking
+  -o <file>             place the output into <file>
+  -b                    combine all input files into a single
                         dynamically loadable module
-  -E                    Preprocess only; do not compile or link
-  -C                    Translation only; convert COBOL to C
-  -S                    Compile only; output assembly file
-  -c                    Compile and assemble, but do not link
-  -P(=<dir or file>)    Generate preprocessed program listing (.lst)
-  -Xref                 Generate cross reference through 'cobxref'
+  -E                    preprocess only; do not compile or link
+  -C                    translation only; convert COBOL to C
+  -S                    compile only; output assembly file
+  -c                    compile and assemble, but do not link
+  -P(=<dir or file>)    generate preprocessed program listing (.lst)
+  -Xref                 generate cross reference through 'cobxref'
                         (V. Coen's 'cobxref' must be in path)
-  -I <directory>        Add <directory> to copy/include search path
-  -L <directory>        Add <directory> to library search path
-  -l <lib>              Link the library <lib>
-  -A <options>          Add <options> to the C compile phase
-  -Q <options>          Add <options> to the C link phase
-  -D <define>           DEFINE <define> to the COBOL compiler
-  -K <entry>            Generate CALL to <entry> as static
-  -conf=<file>          User defined dialect configuration - See -std=
-  -cb_conf=tag:value    Override configuration entry
-  -list-reserved        Display reserved words
-  -list-intrinsics      Display intrinsic functions
-  -list-mnemonics       Display mnemonic names
-  -list-system          Display system routines
-  -save-temps(=<dir>)   Save intermediate files
-                        - Default : current directory
-  -ext <extension>      Add default file extension
+  -I <directory>        add <directory> to copy/include search path
+  -L <directory>        add <directory> to library search path
+  -l <lib>              link the library <lib>
+  -A <options>          add <options> to the C compile phase
+  -Q <options>          add <options> to the C link phase
+  -D <define>           define <define> for COBOL compilation
+  -K <entry>            generate CALL to <entry> as static
+  -conf=<file>          user defined dialect configuration - See -std=
+  -cb_conf=<tag:value>  override configuration entry
+  -list-reserved        display reserved words
+  -list-intrinsics      display intrinsic functions
+  -list-mnemonics       display mnemonic names
+  -list-system          display system routines
+  -save-temps(=<dir>)   save intermediate files
+                        - default: current directory
+  -ext <extension>      add default file extension
 
-  -W                    Enable ALL warnings
-  -Wall                 Enable all warnings except as noted below
-  -Wobsolete            Warn if obsolete features are used
-  -Warchaic             Warn if archaic features are used
-  -Wredefinition        Warn incompatible redefinition of data items
-  -Wconstant            Warn inconsistent constant
-  -Woverlap             Warn overlapping MOVE items
-  -Wparentheses         Warn lack of parentheses around AND within OR
-  -Wstrict-typing       Warn type mismatch strictly
-  -Wimplicit-define     Warn implicitly defined data items
-  -Wcorresponding       Warn CORRESPONDING with no matching items
-  -Wexternal-value      Warn EXTERNAL item with VALUE clause
-  -Wcall-params         Warn non 01/77 items for CALL params
+  -W                    enable ALL warnings
+  -Wall                 enable all warnings except as noted below
+  -Wobsolete            warn if obsolete features are used
+  -Warchaic             warn if archaic features are used
+  -Wredefinition        warn incompatible redefinition of data items
+  -Wconstant            warn inconsistent constant
+  -Woverlap             warn overlapping MOVE items
+  -Wparentheses         warn lack of parentheses around AND within OR
+  -Wstrict-typing       warn type mismatch strictly
+  -Wimplicit-define     warn implicitly defined data items
+  -Wcorresponding       warn CORRESPONDING with no matching items
+  -Wexternal-value      warn EXTERNAL item with VALUE clause
+  -Wcall-params         warn non 01/77 items for CALL params
 			- NOT set with -Wall
-  -Wcolumn-overflow     Warn text after column 72, FIXED format
+  -Wcolumn-overflow     warn text after column 72, FIXED format
 			- NOT set with -Wall
-  -Wterminator          Warn lack of scope terminator END-XXX
+  -Wterminator          warn lack of scope terminator END-XXX
 			- NOT set with -Wall
-  -Wtruncate            Warn possible field truncation
+  -Wtruncate            warn possible field truncation
 			- NOT set with -Wall
-  -Wlinkage             Warn dangling LINKAGE items
+  -Wlinkage             warn dangling LINKAGE items
 			- NOT set with -Wall
-  -Wunreachable         Warn unreachable statements
+  -Wunreachable         warn unreachable statements
 			- NOT set with -Wall
 
-  -fsign=<value>        Define display sign representation
-			- ASCII or EBCDIC (Default : machine native)
-  -ffold-copy=<value>   Fold COPY subject to value
-			- UPPER or LOWER (Default : no transformation)
-  -ffold-call=<value>   Fold PROGRAM-ID, CALL, CANCEL subject to value
-			- UPPER or LOWER (Default : no transformation)
-  -fdefaultbyte=<value> Initialize fields without VALUE to decimal value
-			- 0 to 255 (Default : initialize to picture)
-  -fintrinsics=<value>  Intrinsics to be used without FUNCTION keyword
-			- ALL or intrinsic function name (,name,...)
-  -ftrace               Generate trace code
-			- Executed SECTION/PARAGRAPH
-  -ftraceall            Generate trace code
-			- Executed SECTION/PARAGRAPH/STATEMENTS
-			- Turned on by -debug
-  -fsyntax-only         Syntax error checking only; don't emit any output
-  -fdebugging-line      Enable debugging lines
+  -fsign=<value>        define display sign representation
+			- ASCII or EBCDIC (default: machine native)
+  -ffold-copy=<value>   fold COPY subject to value
+			- UPPER or LOWER (default: no transformation)
+  -ffold-call=<value>   fold PROGRAM-ID, CALL, CANCEL subject to value
+			- UPPER or LOWER (default: no transformation)
+  -fdefaultbyte=<value> initialize fields without VALUE to decimal value
+			- 0 to 255 (default: initialize to picture)
+  -fintrinsics=<value>  intrinsics to be used without FUNCTION keyword
+			- ALL or intrinsic function name(,name,...)
+  -ftrace               generate trace code
+			- executed SECTION/PARAGRAPH
+  -ftraceall            generate trace code
+			- executed SECTION/PARAGRAPH/STATEMENTS
+			- turned on by -debug
+  -fsyntax-only         syntax error checking only; don't emit any output
+  -fdebugging-line      enable debugging lines
 			- 'D' in indicator column or floating >>D
-  -fsource-location     Generate source location code
-			- Turned on by -debug/-g/-ftraceall
-  -fimplicit-init       Automatic initialization of the Cobol runtime system
+  -fsource-location     generate source location code
+			- turned on by -debug/-g/-ftraceall
+  -fimplicit-init       automatic initialization of the COBOL runtime system
   -fstack-check         PERFORM stack checking
-			- Turned on by -debug or -g
-  -fsyntax-extension    Allow syntax extensions
-			- eg. Switch name SW1, etc.
-  -fwrite-after         Use AFTER 1 for WRITE of LINE SEQUENTIAL
-			- Default : BEFORE 1
+			- turned on by -debug or -g
+  -fsyntax-extension    allow syntax extensions
+			- eg. switch name SW1, etc.
+  -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL
+			- default: BEFORE 1
   -fmfcomment           '*' or '/' in column 1 treated as comment
 			- FIXED format only
   -facucomment          '$' in indicator area treated as '*',
 			'|' treated as floating comment
-  -fnotrunc             Allow numeric field overflow
-			- Non-ANSI behaviour
-  -fodoslide            Adjust items following OCCURS DEPENDING
-			- Requires implicit/explicit relaxed syntax
-  -fsingle-quote        Use a single quote (apostrophe) for QUOTE
-			- Default : double quote
-  -frecursive-check     Check recursive program call
-  -frelax-syntax        Relax syntax checking
+  -fnotrunc             allow numeric field overflow
+			- non-ANSI behaviour
+  -fodoslide            adjust items following OCCURS DEPENDING
+			- requires implicit/explicit relaxed syntax
+  -fsingle-quote        use a single quote (apostrophe) for QUOTE
+			- default: double quote
+  -frecursive-check     check recursive program call
+  -frelax-syntax        relax syntax checking
 			- eg. REDEFINES position
-  -foptional-file       Treat all files as OPTIONAL
+  -foptional-file       treat all files as OPTIONAL
 			- unless NOT OPTIONAL specified
 
 
@@ -1876,6 +1872,7 @@ GLOBAL				Y
 GO				Y
 GOBACK				Y
 GREATER				Y
+GRID				Y
 GROUP				Y
 GROUP-USAGE			N
 HEADING				Y
@@ -2143,6 +2140,7 @@ SYNC				Y
 SYNCHRONISED			Y
 SYNCHRONIZED			Y
 SYSTEM-DEFAULT			Y
+SYSTEM-OFFSET			Y
 TAB				Y (Context sensitive)
 TABLE				N
 TALLYING			Y
@@ -2247,15 +2245,15 @@ BYTE-LENGTH			Y		1
 CHAR				Y		1
 CHAR-NATIONAL			N		1
 COMBINED-DATETIME		Y		2
-CONCATENATE			Y		Variable
+CONCATENATE			Y		Unlimited
 COS				Y		1
 CURRENCY-SYMBOL			Y		0
 CURRENT-DATE			Y		0
 DATE-OF-INTEGER			Y		1
-DATE-TO-YYYYMMDD		Y		Variable
+DATE-TO-YYYYMMDD		Y		1 - 3
 DAY-OF-INTEGER			Y		1
-DAY-TO-YYYYDDD			Y		Variable
-DISPLAY-OF			N		Variable
+DAY-TO-YYYYDDD			Y		1 - 3
+DISPLAY-OF			N		1 - 2
 E				Y		0
 EXCEPTION-FILE			Y		0
 EXCEPTION-FILE-N		N		0
@@ -2268,8 +2266,8 @@ EXP10				Y		1
 FACTORIAL			Y		1
 FORMATTED-CURRENT-DATE		Y		1
 FORMATTED-DATE			Y		2
-FORMATTED-DATETIME		Y		Variable
-FORMATTED-TIME			Y		Variable
+FORMATTED-DATETIME		Y		4 - 5
+FORMATTED-TIME			Y		3 - 4
 FRACTION-PART			Y		1
 HIGHEST-ALGEBRAIC		Y		1
 INTEGER				Y		1
@@ -2280,19 +2278,19 @@ INTEGER-OF-FORMATTED-DATE	Y		2
 INTEGER-PART			Y		1
 LENGTH				Y		1
 LENGTH-AN			Y		1
-LOCALE-COMPARE			Y		Variable
-LOCALE-DATE			Y		2
-LOCALE-TIME			Y		2
-LOCALE-TIME-FROM-SECONDS	Y		2
+LOCALE-COMPARE			Y		2 - 3
+LOCALE-DATE			Y		1 - 2
+LOCALE-TIME			Y		1 - 2
+LOCALE-TIME-FROM-SECONDS	Y		1 - 2
 LOG				Y		1
 LOG10				Y		1
 LOWER-CASE			Y		1
 LOWEST-ALGEBRAIC		Y		1
-MAX				Y		Variable
-MEAN				Y		Variable
-MEDIAN				Y		Variable
-MIDRANGE			Y		Variable
-MIN				Y		Variable
+MAX				Y		Unlimited
+MEAN				Y		Unlimited
+MEDIAN				Y		Unlimited
+MIDRANGE			Y		Unlimited
+MIN				Y		Unlimited
 MOD				Y		2
 MODULE-CALLER-ID		Y		0
 MODULE-DATE			Y		0
@@ -2303,19 +2301,19 @@ MODULE-SOURCE			Y		0
 MODULE-TIME			Y		0
 MONETARY-DECIMAL-POINT		Y		0
 MONETARY-THOUSANDS-SEPARATOR	Y		0
-NATIONAL-OF			N		Variable
+NATIONAL-OF			N		1 - 2
 NUMERIC-DECIMAL-POINT		Y		0
 NUMERIC-THOUSANDS-SEPARATOR	Y		0
 NUMVAL				Y		1
 NUMVAL-C			Y		2
 NUMVAL-F			Y		1
 ORD				Y		1
-ORD-MAX				Y		Variable
-ORD-MIN				Y		Variable
+ORD-MAX				Y		Unlimited
+ORD-MIN				Y		Unlimited
 PI				Y		0
-PRESENT-VALUE			Y		Variable
-RANDOM				Y		Variable
-RANGE				Y		Variable
+PRESENT-VALUE			Y		Unlimited
+RANDOM				Y		Unlimited
+RANGE				Y		Unlimited
 REM				Y		2
 REVERSE				Y		1
 SECONDS-FROM-FORMATTED-TIME	Y		2
@@ -2323,12 +2321,12 @@ SECONDS-PAST-MIDNIGHT		Y		0
 SIGN				Y		1
 SIN				Y		1
 SQRT				Y		1
-STANDARD-COMPARE		N		Variable
-STANDARD-DEVIATION		Y		Variable
+STANDARD-COMPARE		N		2 - 4
+STANDARD-DEVIATION		Y		Unlimited
 STORED-CHAR-LENGTH		Y		1
-SUBSTITUTE			Y		Variable
-SUBSTITUTE-CASE			Y		Variable
-SUM				Y		Variable
+SUBSTITUTE			Y		Unlimited
+SUBSTITUTE-CASE			Y		Unlimited
+SUM				Y		Unlimited
 TAN				Y		1
 TEST-DATE-YYYYMMDD		Y		1
 TEST-DAY-YYYYDDD		Y		1
@@ -2336,11 +2334,11 @@ TEST-FORMATTED-DATETIME		Y		2
 TEST-NUMVAL			Y		1
 TEST-NUMVAL-C			Y		2
 TEST-NUMVAL-F			Y		1
-TRIM				Y		2
+TRIM				Y		1 - 2
 UPPER-CASE			Y		1
-VARIANCE			Y		Variable
+VARIANCE			Y		Unlimited
 WHEN-COMPILED			Y		0
-YEAR-TO-YYYY			Y		Variable
+YEAR-TO-YYYY			Y		1 - 3
 
 
 File: gnucobol.info,  Node: Appendix D,  Next: Appendix E,  Prev: Appendix C,  Up: Top
@@ -2708,21 +2706,18 @@ File: gnucobol.info,  Node: Appendix G,  Next: Appendix H,  Prev: Appendix F,  U
 Appendix G 'cobcrun --help'
 ***************************
 
-Usage: /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/bin/.libs/lt-cobcrun [options] PROGRAM [param ...]
-  or:  /home/btiffin/wip-org/builds/branches/gnu-cobol-2.0/bin/.libs/lt-cobcrun options
+COBOL driver program for GnuCOBOL modules
 
-COBOL driver program for GNU Cobol modules
+usage: cobcrun [options] PROGRAM [param ...]
+  or: cobcrun options
 
-Options:
-  -h, -help                   Display this help and exit
-  -V, -version                Display cobcrun and runtime version
-  -i, -info                   Display runtime information (build/environment)
-  -c <file>, -config=<file>   Set runtime configuration from <file>
-  -r, -runtime-env            Display current runtime configuration
-                              This will show all settings and how they were set.
-                              Possible options are runtime configuration file,
-                              environment (marked by 'env' when only set this way or
-                              by 'Ovr' if this overrides the runtime setting) or default
+options:
+  -h, -help             display this help and exit
+  -V, -version          display cobcrun and runtime version and exit
+  -i, -info             display runtime information (build/environment)
+  -c <file>, -config=<file>   set runtime configuration from <file>
+  -r, -runtime-env      display current runtime configuration
+                        (value and origin for all settings)
 
 
 File: gnucobol.info,  Node: Appendix H,  Next: Appendix I,  Prev: Appendix G,  Up: Top
@@ -3548,14 +3543,14 @@ Node: Extended DISPLAY35538
 Node: System routines37948
 Node: CBL_OC_GETOPT38218
 Node: Appendix A42327
-Node: Appendix B48749
-Node: Appendix C58538
-Node: Appendix D60953
-Node: Appendix E61924
-Node: Appendix F64871
-Node: Appendix G69124
-Node: Appendix H70195
-Node: Appendix I79631
-Node: Index104757
+Node: Appendix B48451
+Node: Appendix C58268
+Node: Appendix D60688
+Node: Appendix E61659
+Node: Appendix F64606
+Node: Appendix G68859
+Node: Appendix H69509
+Node: Appendix I78945
+Node: Index104071
 
 End Tag Table

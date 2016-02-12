@@ -5158,7 +5158,8 @@ print_runtime_env()
 	unsigned int 	i,j,k,vl,dohdg,hdlen,plen;
 	char	value[COB_MEDIUM_BUFF],orgvalue[COB_MINI_BUFF];
 
-	printf ("%s %s.%d runtime environment\n", PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
+	printf ("%s %s.%d ", PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
+	puts (_("runtime environment"));
 	if (cobsetptr->cob_config_file) {
 		strcpy(value, _("via"));
 		hdlen = strlen(value) + 3;

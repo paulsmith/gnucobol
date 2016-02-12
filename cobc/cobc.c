@@ -1546,8 +1546,8 @@ cobc_print_version (void)
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts ("Copyright (C) 2001-2016 Free Software Foundation, Inc.");
 	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch");
-	puts (_("This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
+	puts (_("This is free software; see the source for copying conditions.  There is NO\n" 
+	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cb_oc_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
@@ -1636,8 +1636,8 @@ cobc_print_info (void)
 
 	cobc_print_version ();
 	putchar ('\n');
-	puts (_("Build information"));
-	cobc_var_print (_("Build environment"),	COB_BLD_BUILD, 0);
+	puts (_("build information"));
+	cobc_var_print (_("build environment"),	COB_BLD_BUILD, 0);
 	cobc_var_print ("CC",			COB_BLD_CC, 0);
 	cobc_var_print ("CPPFLAGS",		COB_BLD_CPPFLAGS, 0);
 	cobc_var_print ("CFLAGS",		COB_BLD_CFLAGS, 0);
@@ -1787,70 +1787,63 @@ cobc_print_flag (const char *name, const char *doc,
 static void
 cobc_print_usage (char * prog)
 {
-	printf (_("Usage: %s [options]... file..."), prog);
+	puts (_("GnuCOBOL compiler for most COBOL dialects with lots of extensions"));
+	putchar ('\n');
+	printf (_("usage: %s [options]... file..."), prog);
 	putchar ('\n');
 	putchar ('\n');
-	printf (_("%s compiler for most COBOL dialects with lots of extensions"), PACKAGE_NAME);
-	putchar ('\n');
-	putchar ('\n');
-	puts (_("Options:"));
-	puts (_("  -h, -help             Display this help and exit"));
-	puts (_("  -V, -version          Display compiler version and exit"));
-	puts (_("  -i, -info             Display compiler information (build/environment)"));
-	puts (_("  -v, -verbose          Display the commands invoked by the compiler"));
-	puts (_("  -vv                   Display compiler version and display the commands"));
-	puts (_("                        invoked by the compiler"));
-	puts (_("  -x                    Build an executable program"));
-	puts (_("  -m                    Build a dynamically loadable module (default)"));
-	puts (_("  -j                    Run job, after build"));
-	puts (_("  -std=<dialect>        Warnings/features for a specific dialect:"));
-	puts (_("                          cobol2002   COBOL 2002"));
-	puts (_("                          cobol2014   COBOL 2014"));
-	puts (_("                          cobol85     COBOL 85"));
-	puts (_("                          ibm         IBM Compatible"));
-	puts (_("                          mvs         MVS Compatible"));
-	puts (_("                          bs2000      BS2000 Compatible"));
-	puts (_("                          mf          Micro Focus Compatible"));
-	puts (_("                          acu         ACUCOBOL-GT Compatible"));
-	puts (_("                          default     When not specified"));
-	puts (_("                        See config/default.conf and config/*.conf"));
-	puts (_("  -free                 Use free source format"));
-	puts (_("  -fixed                Use fixed source format (default)"));
-	puts (_("  -F                    Alias (short option) for -free"));
-	puts (_("  -O, -O2, -Os          Enable optimization"));
-	puts (_("  -g                    Enable C compiler debug / stack check / trace"));
-	puts (_("  -d, -debug            Enable all run-time error checking"));
-	puts (_("  -o <file>             Place the output into <file>"));
-	puts (_("  -b                    Combine all input files into a single"));
-	puts (_("                        dynamically loadable module"));
-	puts (_("  -E                    Preprocess only; do not compile or link"));
-	puts (_("  -C                    Translation only; convert COBOL to C"));
-	puts (_("  -S                    Compile only; output assembly file"));
-	puts (_("  -c                    Compile and assemble, but do not link"));
-	puts (_("  -P(=<dir or file>)    Generate preprocessed program listing (.lst)"));
-	puts (_("  -Xref                 Generate cross reference through 'cobxref'"));
-	puts (_("                        (V. Coen's 'cobxref' must be in path)"));
-	puts (_("  -I <directory>        Add <directory> to copy/include search path"));
-	puts (_("  -L <directory>        Add <directory> to library search path"));
-	puts (_("  -l <lib>              Link the library <lib>"));
-	puts (_("  -A <options>          Add <options> to the C compile phase"));
-	puts (_("  -Q <options>          Add <options> to the C link phase"));
-	puts (_("  -D <define>           DEFINE <define> to the COBOL compiler"));
-	puts (_("  -K <entry>            Generate CALL to <entry> as static"));
-	puts (_("  -conf=<file>          User defined dialect configuration - See -std="));
-	puts (_("  -cb_conf=<tag:value>  Override configuration entry"));
-	puts (_("  -list-reserved        Display reserved words"));
-	puts (_("  -list-intrinsics      Display intrinsic functions"));
-	puts (_("  -list-mnemonics       Display mnemonic names"));
-	puts (_("  -list-system          Display system routines"));
-	puts (_("  -save-temps(=<dir>)   Save intermediate files"));
-	puts (_("                        - Default : current directory"));
-	puts (_("  -ext <extension>      Add default file extension"));
+	puts (_("options:"));
+	puts (_("  -h, -help             display this help and exit"));
+	puts (_("  -V, -version          display compiler version and exit"));
+	puts (_("  -i, -info             display compiler information (build/environment)"));
+	puts (_("  -v, -verbose          display the commands invoked by the compiler"));
+	puts (_("  -vv                   display compiler version and the commands\n" \
+	        "                        invoked by the compiler"));
+	puts (_("  -x                    build an executable program"));
+	puts (_("  -m                    build a dynamically loadable module (default)"));
+	puts (_("  -j                    run job, after build"));
+	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n" 
+			"                        <dialect> can be one of:\n"
+			"                        cobol2014, cobol2002, cobol85, default,\n"
+			"                        ibm, mvs, bs2000, mf, acu;\n" 
+			"                        see configuration files in directory config"));
+	puts (_("  -F, -free             use free source format"));
+	puts (_("  -free                 use free source format"));
+	puts (_("  -fixed                use fixed source format (default)"));
+	puts (_("  -O, -O2, -Os          enable optimization"));
+	puts (_("  -g                    enable C compiler debug / stack check / trace"));
+	puts (_("  -d, -debug            enable all run-time error checking"));
+	puts (_("  -o <file>             place the output into <file>"));
+	puts (_("  -b                    combine all input files into a single\n"
+			"                        dynamically loadable module"));
+	puts (_("  -E                    preprocess only; do not compile or link"));
+	puts (_("  -C                    translation only; convert COBOL to C"));
+	puts (_("  -S                    compile only; output assembly file"));
+	puts (_("  -c                    compile and assemble, but do not link"));
+	puts (_("  -P(=<dir or file>)    generate preprocessed program listing (.lst)"));
+	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
+			"                        (V. Coen's 'cobxref' must be in path)"));
+	puts (_("  -I <directory>        add <directory> to copy/include search path"));
+	puts (_("  -L <directory>        add <directory> to library search path"));
+	puts (_("  -l <lib>              link the library <lib>"));
+	puts (_("  -A <options>          add <options> to the C compile phase"));
+	puts (_("  -Q <options>          add <options> to the C link phase"));
+	puts (_("  -D <define>           define <define> for COBOL compilation"));
+	puts (_("  -K <entry>            generate CALL to <entry> as static"));
+	puts (_("  -conf=<file>          user defined dialect configuration - See -std="));
+	puts (_("  -cb_conf=<tag:value>  override configuration entry"));
+	puts (_("  -list-reserved        display reserved words"));
+	puts (_("  -list-intrinsics      display intrinsic functions"));
+	puts (_("  -list-mnemonics       display mnemonic names"));
+	puts (_("  -list-system          display system routines"));
+	puts (_("  -save-temps(=<dir>)   save intermediate files\n"
+			"                        - default: current directory"));
+	puts (_("  -ext <extension>      add default file extension"));
 
 	putchar ('\n');
 
-	puts (_("  -W                    Enable ALL warnings"));
-	puts (_("  -Wall                 Enable all warnings except as noted below"));
+	puts (_("  -W                    enable ALL warnings"));
+	puts (_("  -Wall                 enable all warnings except as noted below"));
 #undef	CB_WARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)		\

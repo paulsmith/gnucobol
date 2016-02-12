@@ -25,49 +25,49 @@
 /* CB_NOWARNDEF (var, name, doc) */
 
 CB_WARNDEF (cb_warn_obsolete, "obsolete",
-	    _("Warn if obsolete features are used"))
+	    _("warn if obsolete features are used"))
 
 CB_WARNDEF (cb_warn_archaic, "archaic",
-	    _("Warn if archaic features are used"))
+	    _("warn if archaic features are used"))
 
 CB_WARNDEF (cb_warn_redefinition, "redefinition",
-	    _("Warn incompatible redefinition of data items"))
+	    _("warn incompatible redefinition of data items"))
 
 CB_WARNDEF (cb_warn_constant, "constant",
-	    _("Warn inconsistent constant"))
+	    _("warn inconsistent constant"))
 
 CB_WARNDEF (cb_warn_overlap, "overlap",
-	    _("Warn overlapping MOVE items"))
+	    _("warn overlapping MOVE items"))
 
 CB_WARNDEF (cb_warn_parentheses, "parentheses",
-	    _("Warn lack of parentheses around AND within OR"))
+	    _("warn lack of parentheses around AND within OR"))
 
 CB_WARNDEF (cb_warn_strict_typing, "strict-typing",
-	    _("Warn type mismatch strictly"))
+	    _("warn type mismatch strictly"))
 
 CB_WARNDEF (cb_warn_implicit_define, "implicit-define",
-	    _("Warn implicitly defined data items"))
+	    _("warn implicitly defined data items"))
 
 CB_WARNDEF (cb_warn_corresponding, "corresponding",
-	    _("Warn CORRESPONDING with no matching items"))
+	    _("warn CORRESPONDING with no matching items"))
 
 CB_WARNDEF (cb_warn_external_val, "external-value",
-	    _("Warn EXTERNAL item with VALUE clause"))
+	    _("warn EXTERNAL item with VALUE clause"))
 
 CB_NOWARNDEF (cb_warn_call_params, "call-params",
-	    _("Warn non 01/77 items for CALL params"))
+	    _("warn non 01/77 items for CALL params"))
 
 CB_NOWARNDEF (cb_warn_column_overflow, "column-overflow",
-	    _("Warn text after column 72, FIXED format"))
+	    _("warn text after column 72, FIXED format"))
 
 CB_NOWARNDEF (cb_warn_terminator, "terminator",
-	    _("Warn lack of scope terminator END-XXX"))
+	    _("warn lack of scope terminator END-XXX"))
 
 CB_NOWARNDEF (cb_warn_truncate, "truncate",
-	    _("Warn possible field truncation"))
+	    _("warn possible field truncation"))
 
 CB_NOWARNDEF (cb_warn_linkage, "linkage",
-	    _("Warn dangling LINKAGE items"))
+	    _("warn dangling LINKAGE items"))
 
 CB_NOWARNDEF (cb_warn_unreachable, "unreachable",
-	    _("Warn unreachable statements"))
+	    _("warn unreachable statements"))

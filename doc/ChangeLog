@@ -1,4 +1,9 @@
 
+2016-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: remove the built-prefix from cobc/cobcrun
+	  when capturing --help
+
 2015-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* gnucobol.texi: Update for GnuCOBOL 2.0
