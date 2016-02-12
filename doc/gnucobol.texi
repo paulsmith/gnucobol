@@ -10,28 +10,23 @@
 @include version.texi
 
 @copying
-This file documents GnuCOBOL, a COBOL compiler
-
-Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.
-
-Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
-
 Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
 preserved on all copies.
+@sp 1
 
 @ignore
 Permission is granted to process this file through TeX and print the
 results, provided the printed document carries a copying permission
 notice identical to this one except for the removal of this paragraph
 (this paragraph not being relevant to the printed manual).
-
 @end ignore
+
 Permission is granted to copy and distribute modified versions of this
 manual under the conditions for verbatim copying, provided that the
 entire resulting derived work is distributed under the terms of a
 permission notice identical to this one.
-
+@sp 1
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that this permission notice may be stated in a translation
@@ -68,28 +63,23 @@ COBOL programs to C code and compiles it using GCC or other native
 operating system C compiler.
 @sp 2
 This manual corresponds to GnuCOBOL @value{VERSION}.
-@insertcopying
+@sp 1
+Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.@*
+Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 @page
+GnuCOBOL 2.0
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2002-2012, 2014-2015 Free Software Foundation, Inc.@*
-Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
+@insertcopying
 @sp 2
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.@*
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.@*
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that this permission notice may be stated in a translation
-approved by the Free Software Foundation.
+Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.@*
+Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
 @end titlepage
 
 @node Top
+
+@ifinfo
+Welcome to the GnuCOBOL 2.0 manual.
+@end ifinfo
 
 @menu
 * Getting Started::             Introduction to GnuCOBOL

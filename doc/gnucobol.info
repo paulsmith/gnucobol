@@ -1,13 +1,7 @@
 This is gnucobol.info, produced by makeinfo version 5.2 from
 gnucobol.texi.
 
-This file documents GnuCOBOL, a COBOL compiler
-
-   Copyright (C) 2002-2012, 2014-2016 Free Software Foundation, Inc.
-
-   Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
-
-   Permission is granted to make and distribute verbatim copies of this
+Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice are
 preserved on all copies.
 
@@ -37,6 +31,8 @@ END-INFO-DIR-ENTRY
 
 
 File: gnucobol.info,  Node: Top,  Next: Getting Started,  Up: (dir)
+
+Welcome to the GnuCOBOL 2.0 manual.
 
 * Menu:
 
@@ -3507,59 +3503,59 @@ Index
 
 
 Tag Table:
-Node: Top1310
-Node: Getting Started4224
-Node: Hello World!4401
-Node: Compile5789
-Node: Compiler Options6147
-Node: Help Options6821
-Ref: Help Options-Footnote-18411
-Node: Built Target8454
-Ref: Built Target-Footnote-110882
-Node: Source Format10935
-Node: Warning Options11961
-Node: Configuration Options13145
-Node: Debug Switches14086
-Node: Miscellaneous15313
-Node: Multiple Sources16182
-Node: Static Linking16862
-Node: Dynamic Linking18387
-Ref: Dynamic Linking-Footnote-119882
-Ref: Dynamic Linking-Footnote-219935
-Node: Building Library19988
-Node: Using Library20371
-Node: C Interface20942
-Node: Main C Program21328
-Node: Static C to COBOL22243
-Node: Dynamic C to COBOL23730
-Node: Static COBOL to C25180
-Node: Dynamic COBOL to C26612
-Node: Customize27017
-Node: Customizing Compiler27241
-Node: Customizing Library27815
-Node: Optimize28564
-Node: Optimize Options28867
-Node: Optimize Call29407
-Node: Optimize Binary29785
-Node: Debug30365
-Node: Debug Options30524
-Node: Extensions30886
-Node: SELECT31333
-Node: Indexed31498
-Node: Extended ACCEPT31678
-Node: ACCEPT Special33293
-Node: Extended DISPLAY35693
-Node: System routines38103
-Node: CBL_OC_GETOPT38373
-Node: Appendix A42482
-Node: Appendix B48904
-Node: Appendix C58693
-Node: Appendix D61108
-Node: Appendix E62079
-Node: Appendix F65026
-Node: Appendix G69279
-Node: Appendix H70350
-Node: Appendix I79786
-Node: Index104912
+Node: Top1118
+Node: Getting Started4069
+Node: Hello World!4246
+Node: Compile5634
+Node: Compiler Options5992
+Node: Help Options6666
+Ref: Help Options-Footnote-18256
+Node: Built Target8299
+Ref: Built Target-Footnote-110727
+Node: Source Format10780
+Node: Warning Options11806
+Node: Configuration Options12990
+Node: Debug Switches13931
+Node: Miscellaneous15158
+Node: Multiple Sources16027
+Node: Static Linking16707
+Node: Dynamic Linking18232
+Ref: Dynamic Linking-Footnote-119727
+Ref: Dynamic Linking-Footnote-219780
+Node: Building Library19833
+Node: Using Library20216
+Node: C Interface20787
+Node: Main C Program21173
+Node: Static C to COBOL22088
+Node: Dynamic C to COBOL23575
+Node: Static COBOL to C25025
+Node: Dynamic COBOL to C26457
+Node: Customize26862
+Node: Customizing Compiler27086
+Node: Customizing Library27660
+Node: Optimize28409
+Node: Optimize Options28712
+Node: Optimize Call29252
+Node: Optimize Binary29630
+Node: Debug30210
+Node: Debug Options30369
+Node: Extensions30731
+Node: SELECT31178
+Node: Indexed31343
+Node: Extended ACCEPT31523
+Node: ACCEPT Special33138
+Node: Extended DISPLAY35538
+Node: System routines37948
+Node: CBL_OC_GETOPT38218
+Node: Appendix A42327
+Node: Appendix B48749
+Node: Appendix C58538
+Node: Appendix D60953
+Node: Appendix E61924
+Node: Appendix F64871
+Node: Appendix G69124
+Node: Appendix H70195
+Node: Appendix I79631
+Node: Index104757
 
 End Tag Table
