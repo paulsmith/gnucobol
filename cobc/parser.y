@@ -6064,6 +6064,7 @@ accept_statement:
 accept_body:
   accp_identifier
   {
+	  check_duplicate = 0;
 	  check_line_col_duplicate = 0;
 	  line_column = NULL;
   }
