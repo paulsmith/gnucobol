@@ -510,6 +510,11 @@
 
 	* typeck.c: use memmove for move of LINKAGE items
 
+2014-05-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* scanner.l : Fixing #71 Referencing GLOBAL 78/CONSTANT in SELECT causes
+	  internal error
+
 2014-05-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* parser.y: Added extension "USE AT PROGRAM START/END" as not implemented
@@ -518,6 +523,10 @@
 
 	* cobc.c: Catch and treat error when no disc space is available for
 	  output files
+
+2014-05-07  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c: use memmove for move of LINKAGE items
 
 2014-04-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -551,6 +560,12 @@
 
 	* codegen.c: Fixing Bug #55
 	  UDF with no parameters do not compile
+
+201?-??-??  Sergey Kashyrin <ska@kiska.net>
+
+	* codeoptim.c : Fixed bug in COB_ADD_PACKED_INT. 
+	  Computing COMP-3 failed in MSVC-build versions, 
+	  in output_storage() calls '%' should be '%%'.
 
 2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -1486,9 +1501,9 @@
 2007-04-10  Roger While <simrw@sim-basis.de>
 
 	* typeck.c : Enable runtime numeric checks for ADD/SUBTRACT in debug mode
-				Pass number of delimiters for unstring
+	  Pass number of delimiters for unstring
 	* pplex.l : If -fdebugging-line is specified, treat a "D" in column 7
-			(fixed format) as a space
+	  (fixed format) as a space
 
 2007-03-29  Roger While <simrw@sim-basis.de>
 
@@ -1556,7 +1571,7 @@
 2007-01-24  Roger While <simrw@sim-basis.de>
 
 	* parser.y, typeck.c : Implement new SORT routines
-					 Note that these no longer need the ISAM handler
+	  Note that these no longer need the ISAM handler
 
 2007-01-17  Roger While <simrw@sim-basis.de>
 
@@ -1578,11 +1593,11 @@
 2007-01-10  Roger While <simrw@sim-basis.de>
 
 	* parser.y : A file SORT (as opposed to a table SORT) must have
-				a KEY phrase and a USING or INPUT PROCEDURE and a
-				GIVING or OUTPUT PROCEDURE.
-				A table SORT must not have USING/INPUT or GIVING/OUTPUT.
+	  a KEY phrase and a USING or INPUT PROCEDURE and a
+	  GIVING or OUTPUT PROCEDURE.
+	  A table SORT must not have USING/INPUT or GIVING/OUTPUT.
 	* parser.y, tree.[ch], codegen.c, typeck.c : Allow special
-				ASSIGN [TO] KEYBOARD
+	  ASSIGN [TO] KEYBOARD
 
 2007-01-08  Roger While <simrw@sim-basis.de>
 
@@ -1609,16 +1624,16 @@
 2006-11-18  Roger While <simrw@sim-basis.de>
 
 	* parser.y : Initialize EVALUATE check stack at current level
-				at statement start
+	  at statement start
 
 2006-11-12  Roger While <simrw@sim-basis.de>
 
 	* pplex.l : Check source suffixes also when a COPY refers to
-			 an absolute path name
-			 Fix an obscure problem whereby a 2 line data definition
-			 following a COPY and the second line was a literal
-			 continuation would not compile
-		typeck.c : Remaining cmp/add/sub optimizations
+	  an absolute path name
+	  Fix an obscure problem whereby a 2 line data definition
+	  following a COPY and the second line was a literal
+	  continuation would not compile
+	* typeck.c : Remaining cmp/add/sub optimizations
 
 2006-11-06  Roger While <simrw@sim-basis.de>
 
@@ -1735,7 +1750,7 @@
 2006-05-27  Roger While <simrw@sim-basis.de>
 
 	* codegen.c : Stack overflow check, implement new cob_fatal_error,
-				fix null ref on cob_current_section/paragraph
+	  fix null ref on cob_current_section/paragraph
 
 2006-05-23  Roger While <simrw@sim-basis.de>
 
@@ -1810,7 +1825,7 @@
 	* cobc.c : Add CPY and cpy to automatically detected COPY extensions
 	* codegen.c : Detect gcc < 3 (Doesn't like nested functions)
 	* config.c : Fix an enum
-				Allow sign-ebcdic and sign-ascii20
+	  Allow sign-ebcdic and sign-ascii20
 	* pplex.l, scanner.l : Allow underscore '_' in user names (2002 standard)
 	* field.c : Implement support for 78 level (MF, ACU)
 
@@ -1826,8 +1841,8 @@
 
 2006-04-04  Roger While <simrw@sim-basis.de>
 
-	* parser.y : Correctly produce minimal one-line
-				program > PROGRAM-ID. MYPROG.
+	* parser.y : Correctly produce minimal one-line program:
+	  PROGRAM-ID. MYPROG.
 	* codegen.c, field.c : Run lindent
 
 2006-03-31  Roger While <simrw@sim-basis.de>
@@ -1874,8 +1889,8 @@
 2006-03-16  Roger While <simrw@sim-basis.de>
 
 	* parser.y : Fix param check for PROCEDUE/ENTRY
-				Allow EXTERNAL/DYNAMIC in SELECT
-		typeck.c : Force ref count for display items
+	  Allow EXTERNAL/DYNAMIC in SELECT
+	  typeck.c : Force ref count for display items
 
 2006-03-10  Roger While <simrw@sim-basis.de>
 
@@ -1889,17 +1904,15 @@
 
 2006-03-04  Roger While <simrw@sim-basis.de>
 
-	* codegen.c : Don't generate NULL params on CALL
-				for !cb_sticky_linkage
-		parser.y : Allow ACU variant of ACCEPT FROM ENVIRONMENT
-		parser.y, tree.h, typeck.c : Implement WHEN SET TO FALSE IS
-						 Also SET TO FALSE
+	* codegen.c : Don't generate NULL params on CALL for !cb_sticky_linkage
+	  parser.y : Allow ACU variant of ACCEPT FROM ENVIRONMENT
+	  parser.y, tree.h, typeck.c : Implement WHEN SET TO FALSE IS
+	  Also SET TO FALSE
 
 2006-03-02  Roger While <simrw@sim-basis.de>
 
-	* tree.c : cb_int cannot use hash table as value may
-			be negative
-		typeck.c : Param to cb_build_memset should be int
+	* tree.c : cb_int cannot use hash table as value may be negative
+	* typeck.c : Param to cb_build_memset should be int
 
 2006-02-28  Roger While <simrw@sim-basis.de>
 
@@ -1939,11 +1952,9 @@
 
 2006-01-28  Roger While <simrw@sim-basis.de>
 
-	* typeck.c : Optimize move literals, check PROG-ID not =
-				source name
-		parser.y : ID DIV is optional, don't abort on rubbish
-				input, generate "source name" entry point when
-				!= PROG-ID
+	* typeck.c : Optimize move literals, check PROG-ID not = source name
+	* parser.y : ID DIV is optional, don't abort on rubbish input,
+	  generate "source name" entry point when != PROG-ID
 
 2006-01-26  Roger While <simrw@sim-basis.de>
 
@@ -1958,12 +1969,12 @@
 2006-01-20  Roger While <simrw@sim-basis.de>
 
 	* parser.y, field.c : Prepare for duplicate paragraph names
-		scanner.l : Fix incorrect parsing
-		field.c : Allow mismatched level numbers based on config
-			 parameter relax-level-hierarchy
-		codegen.c : Generate memset instead of memcpy for literals
-				when literal is a repeated character
-		pplex.l : Fix fixed format literal continuation
+	* scanner.l : Fix incorrect parsing
+	* field.c : Allow mismatched level numbers based on config
+	  parameter relax-level-hierarchy
+	* codegen.c : Generate memset instead of memcpy for literals
+	  when literal is a repeated character
+	* pplex.l : Fix fixed format literal continuation
 
 2006-01-18  Roger While <simrw@sim-basis.de>
 
@@ -1988,10 +1999,10 @@
 2006-01-05  Roger While <simrw@sim-basis.de>
 
 	* General : Bootstrap to new libtool/automake
-		cobc.c : MS VS/VC changes
-			Get COB_LDFLAGS from config
-		tree.c : Fix invalid picture
-		codegen.c : Non-gcc and MS VS/VC fixes
+	* cobc.c : MS VS/VC changes
+	  Get COB_LDFLAGS from config
+	* tree.c : Fix invalid picture
+	* codegen.c : Non-gcc and MS VS/VC fixes
 
 2006-01-03  Roger While <simrw@sim-basis.de>
 
@@ -2009,8 +2020,8 @@
 2005-12-27  Roger While <simrw@sim-basis.de>
 
 	* General : Change all occurrences of "char[variable]"
-		typeck.c : Fix huge literal generation
-				Hack for systems that need pointer alignment
+	* typeck.c : Fix huge literal generation
+	  Hack for systems that need pointer alignment
 
 2005-12-23  Roger While <simrw@sim-basis.de>
 
@@ -2023,9 +2034,9 @@
 2005-12-18  Roger While <simrw@sim-basis.de>
 
 	* All : cleanup of "shadowed" variables
-		codegen.c : File struct initialization
-				Save/restore params for sticky-linkage
-				Generate Ebcdic table when needed
+	* codegen.c : File struct initialization
+	  Save/restore params for sticky-linkage
+	  Generate Ebcdic table when needed
 
 2005-12-13  Roger While <simrw@sim-basis.de>
 
@@ -2034,35 +2045,33 @@
 2005-12-13  Roger While <simrw@sim-basis.de>
 
 	* codegen.c : Do not statically initialize the file structure
-		cobc.c : Change long_opt "version" to "Version"
-		parser.y : Extra EXTERNAL checking
+	* cobc.c : Change long_opt "version" to "Version"
+	* parser.y : Extra EXTERNAL checking
 
 2005-12-09  Roger While <simrw@sim-basis.de>
 
 	* cobc.c : Show a warning to use '-x' for executables.
-		typeck.c : Implement new display code.
+	* typeck.c : Implement new display code.
 
 2005-12-08  Roger While <simrw@sim-basis.de>
 
-	* cobc.h : New defines - COB_SMALL_BUFF, COB_MEDIUM_BUFF,
-			COB_LARGE_BUFF
+	* cobc.h : New defines - COB_SMALL_BUFF, COB_MEDIUM_BUFF, COB_LARGE_BUFF
 	* Relevant files : Replace all occurences of FILENAME_MAX/BUFSIZ
 	* codegen.c : Do not use arrays for cob_decimal
 	* flags.def : Mark -fmain as deprecated
 	* cobc.c : Implement '-x' option (Create executable).
-			Harden buffer checking for command lines.
-			Check illegal option combinations.
+	  Harden buffer checking for command lines.
+	  Check illegal option combinations.
 
 2005-12-05  Roger While <simrw@sim-basis.de>
 
-	* tree.c : Take out unnecessary zero clears
-			(Done by cob_malloc)
-		cobc.c : Use the executable extension when stripping
+	* tree.c : Take out unnecessary zero clears (Done by cob_malloc)
+	* cobc.c : Use the executable extension when stripping
 
 2005-12-04  Roger While <simrw@sim-basis.de>
 
 	* tree.c : Fix buffer usage
-		typeck.c : Fix strftime for MingW
+	* typeck.c : Fix strftime for MingW
 
 2005-12-04  Roger While <simrw@sim-basis.de>
 
@@ -2071,18 +2080,15 @@
 2005-11-28  Roger While <simrw@sim-basis.de>
 
 	* parser.y, tree.c, typeck.c : Improve error checking
-		codegen.c : Fix -debug code generation
+	* codegen.c : Fix -debug code generation
 
 2005-11-25  Roger While <simrw@sim-basis.de>
 
 	* scanner.l, pplex.l : clean up
-		cobc.c : Don't use mkstemp on non-Win
-			Tidy cleanup code
-			Add in bs2000 to help text
-			getopt includes
-			Put back in -fno-gcse
-		codegen.c : Preliminary sticky-linkage code
-				Further mods for perform-osvs
+	* cobc.c : don't use mkstemp on non-Win, tidy cleanup code,
+	  add in bs2000 to help text, getopt includes, put back in -fno-gcse
+	* codegen.c : preliminary sticky-linkage code,
+	  further mods for perform-osvs
 
 2005-11-09  Roger While <simrw@sim-basis.de>
 
@@ -2101,13 +2107,11 @@
 
 	* cobc.c : Take out option -no-gcse
 	* codegen.c : Don't use arrays for local stack variables
-		Put in experimental (deactivated) setjmp/longjmp code
-		for performs.
+	  Put in experimental (deactivated) setjmp/longjmp code for performs.
 
 2005-11-01  Roger While <simrw@sim-basis.de>
 
-	* codegen.c : Take out attribute aligned. It borks
-		under Cygwin latest.
+	* codegen.c : Take out attribute aligned. It borks under latest Cygwin.
 
 2005-10-31  Roger While <simrw@sim-basis.de>
 
@@ -2217,19 +2221,18 @@
 
 2005-06-04  Roger While <simrw@sim-basis.de>
 
-	* typeck.c : disable optimization until we
-		can do it really.
+	* typeck.c : disable optimization until we can do it really.
 
 2005-06-01  Roger While <simrw@sim-basis.de>
 
 	* cobc.c : Include unistd.h for MinGW.
-		field.c : Warning for VALUE on EXTERNAL field.
+	* field.c : Warning for VALUE on EXTERNAL field.
 
 2005-05-31  Roger While <simrw@sim-basis.de>
 
 	* codegen.c : Fix code for children of external items.
-		field.c, tree.h, tree.c, typeck.c, reserved.c :
-		 Rough implementation of COMP-1/2.
+	* field.c, tree.h, tree.c, typeck.c, reserved.c :
+	  Rough implementation of COMP-1/2.
 
 2005-05-31  Roger While <simrw@sim-basis.de>
 
@@ -2238,28 +2241,25 @@
 2005-05-23  Roger While <simrw@sim-basis.de>
 
 	* cobc.c : New option -dynopt
-		codegen.c : Cater for -dynopt
-				Optimize dynamic calling
-				Move the include of the c.h down into the
-				internal function. This is necessary for
-				upcoming nested programs.
-		parser.y : Cater for optimized dynamic calling.
+	* codegen.c : cater for -dynopt
+	  Optimize dynamic calling
+	  Move the include of the c.h down into the internal function.
+	  This is necessary for upcoming nested programs.
+	* parser.y : cater for optimized dynamic calling.
 
 2005-05-21  Roger While <simrw@sim-basis.de>
 
-	* New file call.def : Defines entry points that will be
-		generated as static calls in Cobol programs.
-		eg. Own C routines or other software entry points that are
-		linked to the main program (or cobcrun).
+	* New file call.def : Defines entry points that will be generated as
+	  static calls in Cobol programs.
+	  eg. own C routines or other software entry points that are
+	  linked to the main program (or cobcrun).
 
-	* codegen.c : Inline cob_module_xxx
-				Cater for above call.def
-				Check for cob_initialized in initialization path
+	* codegen.c : Inline cob_module_xxx, cater for above call.def
+	  check for cob_initialized in initialization path
 
 2005-05-15  Roger While <simrw@sim-basis.de>
 
-	* error.c - Change "warning: " to "Warning: " and insert
-		"Error: ".
+	* error.c - Change "warning: " to "Warning: " and insert  "Error: ".
 
 2005-05-13  Roger While <simrw@sim-basis.de>
 

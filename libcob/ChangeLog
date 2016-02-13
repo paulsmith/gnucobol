@@ -181,8 +181,8 @@
 
 2015-05-18  Luke Smith <cobcoder@users.sourceforge.net>
 
-	* screenio.c: Fix WITH BLANK SCREEN to color the whole screen.
-          And WITH BLANK LINE to color the whole line.
+	* screenio.c (cob_screen_attr): Fix bug #143 WITH BLANK SCREEN / BLANK LINE
+	  has to color the whole screen / line.
 
 2015-05-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
@@ -423,8 +423,7 @@
 
 2010-05-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* strings.c : fixing cob_unstring_into bug
-	  www.opencobol.org/modules/newbb/viewtopic.php?topic_id=1003&forum=1
+   * strings.c : Fixing cob_unstring_into bug (#139)
 
 20??-??-??  Roger While <simrw@sim-basis.de>
 
@@ -1596,10 +1595,12 @@
 	* move.c : Fix regression for NIST suite
 
 2004-11-04  Bernard Giroud <bgiroud@opencobol.org>
+
 	* numeric.c (cob_decimal_get_binary) : reverted:
 	  NIST test suite is no mre working.
 
 2004-11-02  Bernard Giroud <bgiroud@opencobol.org>
+
 	* numeric.c (cob_decimal_get_binary) :
 	  Worked around what I consider a bug in Gmp for getting
 	  a long signed value.
