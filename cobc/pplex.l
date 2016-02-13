@@ -1398,7 +1398,7 @@ start:
 	   and not whitespace (postponed here) */
 	if (line_overflow != 0) {
 		cb_plex_warning (newline_count,
-					_("Source text after column %d"),
+					_("Source text after program-text area (column %d)"),
 				cb_text_column);
 	}
 

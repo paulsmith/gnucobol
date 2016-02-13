@@ -653,7 +653,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Source text after column 72 in Fixed-form])
+AT_SETUP([Source text after program-text area])
 AT_KEYWORDS([misc fixed])
 
 AT_DATA([prog.cob], [
@@ -668,7 +668,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -W prog.cob], [0], [],
-[prog.cob: 8: Warning: Source text after column 72
+[prog.cob: 8: Warning: Source text after program-text area (column 72)
 ])
 
 AT_CLEANUP
@@ -704,7 +704,7 @@ AT_CHECK([sed -e 's/_$//' prog_tmpl.cob > prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -fixed -W prog.cob], [0], [],
 [prog.cob: 7: Warning: Source text exceeds 512 bytes, will be truncated
 prog.cob: 8: Warning: Source text exceeds 512 bytes, will be truncated
-prog.cob: 11: Warning: Source text after column 72
+prog.cob: 11: Warning: Source text after program-text area (column 72)
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -W prog.cob], [1], [],
