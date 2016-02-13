@@ -185,6 +185,7 @@ static unsigned int		check_duplicate;
 static unsigned int		check_on_off_duplicate;
 static unsigned int		check_pic_duplicate;
 static unsigned int		check_comp_duplicate;
+static int			check_line_col_duplicate;
 static unsigned int		skip_statements;
 static unsigned int		start_debug;
 static unsigned int		save_debug;
@@ -192,6 +193,10 @@ static unsigned int		needs_field_debug;
 static unsigned int		needs_debug_item;
 static unsigned int		env_div_seen;
 static unsigned int		header_check;
+
+static cb_tree			advancing_value;
+static cb_tree			upon_value;
+static cb_tree			line_column;
 
 static int			term_array[TERM_MAX];
 static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
@@ -550,7 +555,7 @@ emit_duplicate_clause_message (const char *clause)
 		cb_error (_("Duplicate %s clause"), clause);
 	}
 }
- 
+
 static void
 check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
 {
@@ -627,7 +632,7 @@ check_screen_attr_with_conflict (const char *clause, const int bitval,
 	check_attr_with_conflict (clause, bitval, confl_clause, confl_bit,
 				  &current_field->screen_flag);
 }
- 
+
 static COB_INLINE COB_A_INLINE void
 check_dispattr_with_conflict (const char *attrib_name, const int attrib,
 			      const char *confl_name, const int confl_attrib)
@@ -635,7 +640,7 @@ check_dispattr_with_conflict (const char *attrib_name, const int attrib,
 	check_attr_with_conflict (attrib_name, attrib, confl_name, confl_attrib,
 				  &current_statement->attr_ptr->dispattrs);
 }
- 
+
 static void
 bit_set_attr (const cb_tree onoff, const int attrval)
 {
@@ -720,7 +725,7 @@ zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1, 
 
 	return parent_flag;
 }
- 
+
 static int
 zero_conflicting_flags (const int screen_flag, int parent_flag)
 {
@@ -736,7 +741,7 @@ zero_conflicting_flags (const int screen_flag, int parent_flag)
 
 	return parent_flag;
 }
- 
+
 static void
 remove_attrib (int attrib)
 {
@@ -870,6 +875,100 @@ check_not_88_level (cb_tree x)
 
 	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
 		cb_error (_("88-level cannot be used here"));
+	}
+}
+
+static int
+is_screen_field (cb_tree x)
+{
+	if (CB_FIELD_P (x)) {
+		return (CB_FIELD (x))->storage == CB_STORAGE_SCREEN;
+	} else if (CB_REFERENCE_P (x)) {
+		return is_screen_field (cb_ref (x));
+	} else {
+		return 0;
+	}
+}
+
+static /* COB_INLINE COB_A_INLINE */ int
+contains_only_screen_field (struct cb_list *x_list)
+{
+	return cb_list_length ((cb_tree) x_list) == 1
+		&& is_screen_field (x_list->value);
+}
+
+static COB_INLINE COB_A_INLINE void
+emit_default_screen_display (cb_tree x_list)
+{
+	cb_emit_display (x_list, cb_null, cb_int1, NULL, NULL);
+}
+
+static cb_tree
+get_default_display_device ()
+{
+	if (current_program->flag_console_is_crt) {
+		return cb_null;
+	} else {
+		return cb_int0;
+	}
+}
+
+static void
+emit_default_device_display (cb_tree x_list)
+{
+	cb_emit_display (x_list, get_default_display_device (), cb_int1, NULL,
+			 NULL);
+}
+
+static void
+emit_default_displays_for_x_list (struct cb_list *x_list)
+{
+	struct cb_list	*elt;
+	cb_tree	        value;
+	cb_tree		device_display_x_list = NULL;
+	int	        display_on_crt = current_program->flag_console_is_crt;
+
+	for (elt = x_list; elt; elt = (struct cb_list *) elt->chain) {
+		/* Get the list element value */
+		if (CB_REFERENCE_P (elt->value)) {
+			value = cb_ref (elt->value);
+		} else {
+			value = elt->value;
+		}
+
+		if (is_screen_field (value)) {
+			/*
+			  Emit DISPLAY for previous values before emitting
+			  screen DISPLAY
+			*/
+			if (device_display_x_list != NULL) {
+				emit_default_device_display (device_display_x_list);
+				begin_implicit_statement ();
+
+				device_display_x_list = NULL;
+			}
+
+			emit_default_screen_display (CB_LIST_INIT (elt->value));
+			begin_implicit_statement ();
+		} else {
+			if (display_on_crt) {
+				cb_error ("Cannot display item upon CRT without LINE or COLUMN");
+				return;
+			}
+
+			/* Add value to list for screen DISPLAY */
+			if (device_display_x_list == NULL) {
+				device_display_x_list = CB_LIST_INIT (elt->value);
+			} else {
+				cb_list_add (device_display_x_list, elt->value);
+			}
+		}
+	}
+
+	/* Emit screen DISPLAY for remaining values */
+	if (device_display_x_list != NULL) {
+		emit_default_device_display (device_display_x_list);
+		begin_implicit_statement ();
 	}
 }
 
@@ -5957,18 +6056,21 @@ accept_statement:
 	if (cb_accept_auto) {
 		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
 	}
-
   }
   accept_body
   end_accept
 ;
 
 accept_body:
-  accp_identifier opt_at_line_column opt_at_from
-  opt_at_block opt_accp_attr on_accp_exception
+  accp_identifier
+  {
+	  check_line_col_duplicate = 0;
+	  line_column = NULL;
+  }
+  opt_accept_clauses on_accp_exception
   {
 	cobc_cs_check = 0;
-	cb_emit_accept ($1, $2, current_statement->attr_ptr);
+	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
   }
 | identifier FROM lines_or_number
   {
@@ -6057,22 +6159,67 @@ accp_identifier:
   }
 ;
 
+opt_accept_clauses:
+  /* empty */
+| accept_clauses
+;
+
+accept_clauses:
+  accept_clause
+| accept_clauses accept_clause
+;
+
+accept_clause:
+  at_line_column
+| FROM_CRT
+  {
+	  check_repeated ("FROM CRT", SYN_CLAUSE_1, &check_duplicate);
+  }
+| mode_is_block
+  {
+	  check_repeated ("MODE IS BLOCK", SYN_CLAUSE_2, &check_duplicate);
+  }
+| _with accp_attr
+;
+
 lines_or_number:
   LINES
 | LINE NUMBER
 ;
 
-opt_at_line_column:
-  /* empty */			{ $$ = NULL; }
-| at_line_column		{ $$ = $1; }
-;
-
 at_line_column:
-  _at line_number column_number { $$ = CB_BUILD_PAIR ($2, $3); }
-| _at column_number line_number { $$ = CB_BUILD_PAIR ($3, $2); }
-| _at line_number		{ $$ = CB_BUILD_PAIR ($2, cb_int0); }
-| _at column_number		{ $$ = CB_BUILD_PAIR (cb_int0, $2); }
-| AT num_id_or_lit		{ $$ = $2; }
+  _at line_number
+  {
+	check_attr_with_conflict ("LINE", SYN_CLAUSE_1,
+				  _("AT screen-location"), SYN_CLAUSE_3,
+				  &check_line_col_duplicate);
+
+	if (!line_column) {
+		line_column = CB_BUILD_PAIR ($2, cb_int0);
+	} else {
+		CB_PAIR_X (line_column) = $2;
+	}
+  }
+| _at column_number
+  {
+	check_attr_with_conflict ("COLUMN", SYN_CLAUSE_2,
+				  _("AT screen-location"), SYN_CLAUSE_3,
+				  &check_line_col_duplicate);
+
+	if(!line_column) {
+		line_column = CB_BUILD_PAIR (cb_int0, $2);
+	} else {
+		CB_PAIR_Y (line_column) = $2;
+	}
+  }
+| AT num_id_or_lit
+  {
+	check_attr_with_conflict (_("AT screen-location"), SYN_CLAUSE_3,
+				  _("LINE or COLUMN"), SYN_CLAUSE_1 | SYN_CLAUSE_2,
+				  &check_line_col_duplicate);
+
+	line_column = $2;
+  }
 ;
 
 line_number:
@@ -6084,24 +6231,11 @@ column_number:
 | POSITION _number num_id_or_lit	{ $$ = $3; }
 ;
 
-opt_at_from:
-| FROM_CRT
-;
-
-opt_at_block:
-| MODE _is BLOCK
+mode_is_block:
+  MODE _is BLOCK
   {
 	cobc_cs_check = 0;
   }
-;
-
-opt_accp_attr:
-| WITH accp_attrs
-;
-
-accp_attrs:
-  accp_attr
-| accp_attrs accp_attr
 ;
 
 accp_attr:
@@ -6779,69 +6913,120 @@ display_body:
   {
 	cb_emit_command_line ($1);
   }
-| x_list display_upon with_no_adv_clause on_disp_exception
+| screen_or_device_display on_disp_exception
+;
+
+screen_or_device_display:
+  display_list
+  opt_x_list
   {
-	cb_emit_display ($1, $2, $3, NULL, NULL);
+	  emit_default_displays_for_x_list ((struct cb_list *) $2);
   }
-| display_list on_disp_exception
-| x WITH disp_attrs on_disp_exception
+| x_list
   {
-	cobc_cs_check = 0;
-	cb_emit_display (CB_LIST_INIT ($1), cb_null, cb_int1,
-			 NULL, current_statement->attr_ptr);
+	  emit_default_displays_for_x_list ((struct cb_list *) $1);
   }
 ;
 
 display_list:
   display_atom
-| display_list
-  {
-	begin_implicit_statement ();
-  }
-  display_atom
+| display_list display_atom
 ;
 
 display_atom:
-  x at_line_column display_upon_crt opt_at_block with_clause
+  x_list
   {
-	cb_emit_display (CB_LIST_INIT ($1), cb_null, cb_int1,
-			 $2, current_statement->attr_ptr);
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+  	advancing_value = cb_int1;
+	upon_value = NULL;
+	line_column = NULL;
   }
+  display_clauses
+  {
+	/* What if I want to allow implied LINE/COL? */
+	int     is_screen_field =
+		contains_only_screen_field ((struct cb_list *) $1);
+	int	screen_display =
+	        is_screen_field
+		|| upon_value == cb_null
+		|| line_column
+		|| current_statement->attr_ptr;
+
+	if (cb_list_length ($1) > 1 && screen_display) {
+		cb_error (_("Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY"));
+	}
+
+	if (screen_display) {
+		if (upon_value != NULL) {
+			if (is_screen_field) {
+				cb_error (_("Screens cannot be displayed on a device"));
+			} else { /* line_column || current_statement->attr_ptr */
+				cb_error (_("Cannot use screen clauses with device DISPLAY"));
+			}
+		} else {
+			upon_value = cb_null;
+		}
+
+		if (advancing_value != cb_int1) {
+			cb_error (_("Cannot specify NO ADVANCING in screen DISPLAY"));
+		}
+
+		if (!line_column && !is_screen_field) {
+			cb_error (_("Screen DISPLAY does not have a LINE or COL clause"));
+		}
+
+		cb_emit_display ($1, cb_null, cb_int1, line_column,
+				 current_statement->attr_ptr);
+	} else { /* device display */
+		upon_value = get_default_display_device ();
+		cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
+	}
+
+	/*
+	  This should be placed after the display_list in the second case
+	  of display_list, but that causes a shift/reduce error.
+	*/
+	begin_implicit_statement ();
+  }
+;
+
+display_clauses:
+  display_clause
+| display_clauses display_clause
+;
+
+display_clause:
+  display_upon
+  {
+	check_repeated ("UPON", SYN_CLAUSE_1, &check_duplicate);
+  }
+| _with NO_ADVANCING
+  {
+ 	check_repeated ("NO ADVANCING", SYN_CLAUSE_2, &check_duplicate);
+	advancing_value = cb_int0;
+  }
+| mode_is_block
+  {
+	check_repeated ("MODE IS BLOCK", SYN_CLAUSE_3, &check_duplicate);
+  }
+| at_line_column
+| _with disp_attr
 ;
 
 display_upon:
-  /* empty */
+  UPON mnemonic_name
   {
-	if (current_program->flag_console_is_crt) {
-		$$ = cb_null;
-	} else {
-		$$ = cb_int0;
-	}
-  }
-| UPON mnemonic_name
-  {
-	$$ = cb_build_display_mnemonic ($2);
+	upon_value = cb_build_display_mnemonic ($2);
   }
 | UPON WORD
   {
-	$$ = cb_build_display_name ($2);
+	upon_value = cb_build_display_name ($2);
   }
 | UPON PRINTER
   {
-	$$ = cb_int0;
+	upon_value = cb_int0;
   }
-| UPON CRT
-  {
-	if (current_program->flag_console_is_crt) {
-		$$ = cb_null;
-	} else {
-		$$ = cb_int0;
-	}
-  }
-;
-
-display_upon_crt:
-  /* empty */
 | UPON crt_under
 ;
 
@@ -6849,25 +7034,6 @@ crt_under:
   CRT
 | CRT_UNDER
 ;
-
-with_clause:
-  /* empty */
-| WITH disp_attrs
-  {
-	cobc_cs_check = 0;
-  }
-;
-
-with_no_adv_clause:
-  /* empty */			{ $$ = cb_int1; }
-| NO_ADVANCING			{ $$ = cb_int0; }
-;
-
-disp_attrs:
-  disp_attr
-| disp_attrs disp_attr
-;
-
 
 disp_attr:
   BELL
@@ -10119,6 +10285,11 @@ target_x:
   {
 	$$ = cb_build_address ($3);
   }
+;
+
+opt_x_list:
+  /* empty */	{ $$ = NULL; }
+| x_list	{ $$ = $1; }
 ;
 
 x_list:

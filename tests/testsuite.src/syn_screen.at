@@ -21,6 +21,79 @@
 ### ISO+IEC+1989-2014 13.9 SCREEN section
 
 
+AT_SETUP([Flexible ACCEPT/DISPLAY syntax])
+AT_KEYWORDS([screen ACCEPT DISPLAY])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           SYSERR IS ERR-STREAM
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  a-field      PIC XXX.
+
+       SCREEN           SECTION.
+       01  scr.
+           03 VALUE "blah" LINE 5 COL 5.
+
+       PROCEDURE        DIVISION.
+           *> Valid statements
+           DISPLAY "123" "456" "789" NO ADVANCING
+           DISPLAY "foo" COL 1 HIGHLIGHT AT LINE 1 WITH UNDERLINE,
+               scr
+           DISPLAY "a" LINE 3 COL 3, "d" UPON ERR-STREAM
+           DISPLAY scr
+
+           ACCEPT a-field LINE 5 SIZE 3 AT COL 1 WITH AUTO WITH
+               REVERSE-VIDEO, BLINK
+
+           *> Invalid statements
+           DISPLAY scr WITH NO ADVANCING
+           DISPLAY scr scr LINE 2 COL 2
+           DISPLAY "foo" scr LINE 2 COL 2
+           DISPLAY "foo" LINE 1 COL 1 HIGHLIGHT LINE 1 HIGHLIGHT
+               AT 0101 MODE IS BLOCK MODE IS BLOCK
+           ACCEPT a-field LINE 1 COL 1 HIGHLIGHT LINE 1 HIGHLIGHT
+               AT 0101
+           .
+       END PROGRAM prog.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog-2.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           CONSOLE IS CRT
+           .
+       PROCEDURE DIVISION.
+           DISPLAY "foo"
+           .
+       END PROGRAM prog-2.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 31: Error: Cannot specify NO ADVANCING in screen DISPLAY
+prog.cob: 32: Error: Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY
+prog.cob: 33: Error: Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY
+prog.cob: 33: Error: Duplicate LINE clause
+prog.cob: 33: Error: Duplicate HIGHLIGHT clause
+prog.cob: 34: Error: Cannot specify both AT screen-location and LINE or COLUMN
+prog.cob: 34: Error: Duplicate MODE IS BLOCK clause
+prog.cob: 35: Error: Duplicate LINE clause
+prog.cob: 35: Error: Duplicate HIGHLIGHT clause
+prog.cob: 36: Error: Cannot specify both AT screen-location and LINE or COLUMN
+prog.cob: 50: Error: Cannot display item upon CRT without LINE or COLUMN
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([FROM clause])
 AT_KEYWORDS([screen])
 
@@ -190,6 +263,7 @@ prog.cob: 10: Error: Cannot specify both BLANK SCREEN and BLANK LINE
 prog.cob: 13: Error: Cannot specify both LOWLIGHT and HIGHLIGHT
 prog.cob: 14: Error: Cannot specify both ERASE EOS and ERASE EOL
 prog.cob: 15: Error: Cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob: 16: Error: Screen DISPLAY does not have a LINE or COL clause
 prog.cob: 16: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
@@ -200,6 +274,7 @@ prog.cob: 10: Warning: Cannot specify both BLANK SCREEN and BLANK LINE, BLANK SC
 prog.cob: 13: Warning: Cannot specify both LOWLIGHT and HIGHLIGHT, LOWLIGHT ignored
 prog.cob: 14: Warning: Cannot specify both ERASE EOS and ERASE EOL, ERASE EOS ignored
 prog.cob: 15: Warning: Cannot specify both BLANK SCREEN and BLANK LINE, BLANK SCREEN ignored
+prog.cob: 16: Error: Screen DISPLAY does not have a LINE or COL clause
 prog.cob: 16: Error: Cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
