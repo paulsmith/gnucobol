@@ -428,7 +428,7 @@ static const char	cob_log_half_str[] =
 		if (error_pos != 0) {		\
 			return error_pos;	\
 		}				\
-	} while (0);
+	} ONCE_COB
 
 /* Local functions */
 

@@ -519,9 +519,20 @@
 #undef	COB_EBCDIC_MACHINE
 #endif
 
+/* Macro to prevent compiler warning "conditional expression is constant" */
+#if defined (_MSC_VER) && _MSC_VER >= 1500
+#define ONCE_COB \
+__pragma( warning(push) ) \
+__pragma( warning(disable:4127) ) \
+while (0) \
+__pragma( warning(pop) )
+#else
+#define ONCE_COB while (0)
+#endif
+
 /* Macro to prevent unused parameter warning */
 
-#define	COB_UNUSED(z)	do { (void)(z); } while (0)
+#define	COB_UNUSED(z)	do { (void)(z); } ONCE_COB
 
 /* Buffer size definitions */
 

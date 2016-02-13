@@ -1595,14 +1595,14 @@ cobc_var_print (const char *msg, const char *val, const unsigned int env)
 	char	*p;
 	char	*token;
 	size_t	n;
-	size_t	lablen;
+	int 	lablen;
 	size_t	toklen;
 
 	if (!env) {
 		printf ("%-*.*s : ", CB_IMSG_SIZE, CB_IMSG_SIZE, msg);
 	} else {
 		printf ("  %s: ", _("env"));
-		lablen = CB_IMSG_SIZE - 2 - strlen(_("env")) - 2;
+		lablen = CB_IMSG_SIZE - 2 - (int)strlen(_("env")) - 2;
 		printf ("%-*.*s : ", lablen, lablen, msg);
 	}
 	if (strlen(val) <= CB_IVAL_SIZE) {
@@ -1613,7 +1613,7 @@ cobc_var_print (const char *msg, const char *val, const unsigned int env)
 	n = 0;
 	token = strtok (p, " ");
 	for (; token; token = strtok (NULL, " ")) {
-		toklen = strlen (token) + 1;
+		toklen = (int)strlen (token) + 1;
 		if ((n + toklen) > CB_IVAL_SIZE) {
 			if (n) {
 				printf ("\n%*.*s", CB_IMSG_SIZE + 3,
@@ -2799,8 +2799,8 @@ line_contains (char* line_start, char* line_end, char* search_patterns) {
 	if (search_patterns == NULL) return 0;
 
 	pattern_start = 0;
-	full_length = strlen (search_patterns) - 1;
-	for (pattern_end = 0; pattern_end < (int) strlen(search_patterns); pattern_end++) {
+	full_length = (int)strlen (search_patterns) - 1;
+	for (pattern_end = 0; pattern_end < (int)strlen(search_patterns); pattern_end++) {
 		if (search_patterns[pattern_end] == PATTERN_DELIM) {
 			pattern_length = pattern_end - pattern_start;
 			for (line_pos = line_start; line_pos + pattern_length <= line_end; line_pos++) {
@@ -3171,7 +3171,7 @@ process_filtered (const char *cmd, struct filename *fn)
 			|| (!line_contains(line_start, line_end, search_pattern)
 				&& !line_contains(line_start, line_end, search_pattern2)))
 		{
-			fprintf(stdout, "%*s", line_end - line_start + 2, line_start);
+			fprintf(stdout, "%*s", (int)(line_end - line_start + 2), line_start);
 		}
 		line_start = fgets(read_buffer, COB_FILE_BUFF - 1, pipe);
 	}

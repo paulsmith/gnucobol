@@ -55,7 +55,9 @@
 #define	YY_BUF_SIZE		32768
 
 #define	YY_SKIP_YYWRAP
-#define	ppwrap()		1
+static int ppwrap (void) {
+	return 1;
+}
 
 #define	PPLEX_BUFF_LEN		512
 #define YY_INPUT(buf,result,max_size)	result = ppinput (buf, max_size);

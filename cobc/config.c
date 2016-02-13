@@ -377,7 +377,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			filename[0] = 0;
 			if (c && c->name) {
 				strcpy(buff, conf_includes->name);
-				for (i = strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
+				for (i = (int)strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
 					snprintf(filename, (size_t)COB_NORMAL_MAX, "%s%c%s", buff, SLASH_CHAR, conf_file);

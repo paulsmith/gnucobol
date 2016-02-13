@@ -48,7 +48,7 @@ do { \
   if (!skip_statements) { \
 	CB_ADD_TO_CHAIN (x, current_program->exec_list); \
   } \
-} while (0)
+}  ONCE_COB
 
 #define push_expr(type, node) \
   current_expr = cb_build_list (cb_int (type), node, current_expr)
@@ -1771,10 +1771,6 @@ program_body:
 	current_storage = CB_STORAGE_WORKING;
   }
   working_storage_section
-/* RXWRXW - W/S
-  working_storage_header
-  working_storage_records
-*/
   local_storage_section
   linkage_section
   report_section
@@ -3741,31 +3737,6 @@ rep_name_list:
 
 /* WORKING-STORAGE SECTION */
 
-/* RXWRXW - W/S
-working_storage_header:
-| WORKING_STORAGE SECTION TOK_DOT
-  {
-	current_storage = CB_STORAGE_WORKING;
-	check_headers_present (COBC_HD_DATA_DIVISION, 0, 0, 0);
-	header_check |= COBC_HD_WORKING_STORAGE_SECTION;
-  }
-;
-
-working_storage_records:
-  {
-	current_storage = CB_STORAGE_WORKING;
-	check_headers_present (COBC_HD_DATA_DIVISION,
-			       COBC_HD_WORKING_STORAGE_SECTION, 0, 0);
-  }
-  record_description_list
-  {
-	if ($2) {
-		CB_FIELD_ADD (current_program->working_storage, CB_FIELD ($2));
-	}
-  }
-;
-*/
-
 working_storage_section:
 | WORKING_STORAGE SECTION TOK_DOT
   {
@@ -3817,7 +3788,7 @@ data_description:
 
 	x = cb_build_field_tree ($1, $2, current_field, current_storage,
 				 current_file, 0);
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	if (CB_INVALID_TREE (x)) {
 		YYERROR;

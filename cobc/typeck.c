@@ -4341,6 +4341,10 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		size_is;	/* WITH SIZE IS */
 	int		dispattrs;
 
+	if (cb_validate_one (var)) {
+		return;
+	}
+
 	if (attr_ptr) {
 		fgc = attr_ptr->fgc;
 		bgc = attr_ptr->bgc;
@@ -4349,6 +4353,27 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		prompt = attr_ptr->prompt;     
 		size_is = attr_ptr->size_is;   
 		dispattrs = attr_ptr->dispattrs;
+		if (cb_validate_one (pos)) {
+			return;
+		}
+		if (cb_validate_one (fgc)) {
+			return;
+		}
+		if (cb_validate_one (bgc)) {
+			return;
+		}
+		if (cb_validate_one (scroll)) {
+			return;
+		}
+		if (cb_validate_one (timeout)) {
+			return;
+		}
+		if (cb_validate_one (prompt)) {
+			return;
+		}
+		if (cb_validate_one (size_is)) {
+			return;
+		}
 	} else {
 		fgc = NULL;
 		bgc = NULL;
@@ -4358,31 +4383,6 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		size_is = NULL;    
 		dispattrs = 0;
 	}
-
-	if (cb_validate_one (var)) {
-		return;
-	}
-	if (cb_validate_one (pos)) {
-		return;
-	}
-	if (cb_validate_one (fgc)) {
-		return;
-	}
-	if (cb_validate_one (bgc)) {
-		return;
-	}
-	if (cb_validate_one (scroll)) {
-		return;
-	}
-	if (cb_validate_one (timeout)) {
-		return;
-	}
-	if (cb_validate_one (prompt)) {
-		return;
-	}  
-	if (cb_validate_one (size_is)) {
-		return;
-	}  
 
 	if (prompt) {
 		/* PROMPT character - 1 character identifier or literal */
@@ -5144,37 +5144,37 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 	cb_tree		size_is;	/* WITH SIZE IS */ 
 	int		dispattrs;
 
-	if (attr_ptr) {
-		fgc = attr_ptr->fgc;
-		bgc = attr_ptr->bgc;
-		scroll = attr_ptr->scroll;
-		size_is = attr_ptr->size_is; 
-		dispattrs = attr_ptr->dispattrs;
-	} else {
-		fgc = NULL;
-		bgc = NULL;
-		scroll = NULL;
-		size_is = NULL; 
-		dispattrs = 0;
-	}
-
 	if (cb_validate_list (values)) {
 		return;
 	}
 	if (cb_validate_one (pos)) {
 		return;
 	}
-	if (cb_validate_one (fgc)) {
-		return;
-	}
-	if (cb_validate_one (bgc)) {
-		return;
-	}
-	if (cb_validate_one (scroll)) {
-		return;
-	}
-	if (cb_validate_one (size_is)) {
-		return;
+
+	if (attr_ptr) {
+		fgc = attr_ptr->fgc;
+		bgc = attr_ptr->bgc;
+		scroll = attr_ptr->scroll;
+		size_is = attr_ptr->size_is; 
+		dispattrs = attr_ptr->dispattrs;
+		if (cb_validate_one (fgc)) {
+			return;
+		}
+		if (cb_validate_one (bgc)) {
+			return;
+		}
+		if (cb_validate_one (scroll)) {
+			return;
+		}
+		if (cb_validate_one (size_is)) {
+			return;
+		}
+	} else {
+		fgc = NULL;
+		bgc = NULL;
+		scroll = NULL;
+		size_is = NULL; 
+		dispattrs = 0;
 	}
 	for (l = values; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);

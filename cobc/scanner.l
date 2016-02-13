@@ -51,7 +51,9 @@
 #define	YY_BUF_SIZE		32768
 
 #define	YY_SKIP_YYWRAP
-#define	yywrap()		1
+static int yywrap (void) {
+    return 1;
+}
 
 #define YY_INPUT(buf,result,max_size)	\
 	{	\
@@ -1413,7 +1415,7 @@ get_sign (const char sign)
 		if (sign) {		\
 			(text)++;	\
 		}			\
-	} while (0);
+	} ONCE_COB
 
 static int
 scan_numeric (const char *text)

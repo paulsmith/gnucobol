@@ -3821,6 +3821,7 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	size_t opt_val_size = 0;
 	size_t so_size = 0;
 	size_t lo_size = 0;
+	size_t optlen;
 	
 	unsigned int lo_amount;
 
@@ -3836,7 +3837,6 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	unsigned int i;
 	int j;
 
-	unsigned int optlen;
 	int return_value;
 
 	COB_UNUSED (idx);
@@ -4269,7 +4269,7 @@ var_print (const char *msg, const char *val, const char *default_val,
 		break;
 		case 1: {
 		printf("  %s: ", _("env"));
-		lablen = CB_IMSG_SIZE - 2 - strlen(_("env")) - 2;
+		lablen = (int)(CB_IMSG_SIZE - 2 - strlen(_("env")) - 2);
 		printf("%-*.*s : ", lablen, lablen, msg);
 			break;
 		}
@@ -4305,7 +4305,7 @@ var_print (const char *msg, const char *val, const char *default_val,
 	n = 0;
 	token = strtok (p, " ");
 	for (; token; token = strtok (NULL, " ")) {
-		toklen = strlen (token) + 1;
+		toklen = (int)strlen (token) + 1;
 		if ((n + toklen) > CB_IVAL_SIZE) {
 			if (n) {
 				if (format == 2 || format == 3)
@@ -4371,7 +4371,7 @@ cob_expand_env_string (char *strval)
 				if(penv != NULL) {
 					if((j + strlen(penv)) > (unsigned int)(envlen - 128)) {
 						env = cob_realloc(env,envlen, strlen(penv) + 256);
-						envlen = strlen(penv) + 256;
+						envlen = (unsigned int)strlen(penv) + 256;
 					}
 					j += sprintf(&env[j],"%s",penv);
 					penv = NULL;
@@ -4552,7 +4552,7 @@ set_config_val(char *value, int pos)
 
 	} else if((data_type & ENV_CHAR)) {	/* 'char' field inline */
 		memset(data,0,data_len);
-		slen = strlen(value);
+		slen = (int)strlen(value);
 		if (slen > data_len) {
 			slen = data_len;
 		}
@@ -4700,7 +4700,7 @@ cb_config_entry (char *buf, int line)
 
 	cob_source_line = line;
 
-	for (j=strlen(buf); buf[j-1] == '\r' || buf[j-1] == '\n'; )	/* Remove CR LF */
+	for (j=(int)strlen(buf); buf[j-1] == '\r' || buf[j-1] == '\n'; )	/* Remove CR LF */
 		buf[--j] = 0;
 
 	for (i=0; isspace((unsigned char)buf[i]); i++);
@@ -4728,7 +4728,7 @@ cb_config_entry (char *buf, int line)
 		/*check for := in value 2 and split, if necessary*/
 		k = 0; while (value[k] != '=' && value[k] != ':' && value[k] != '"' && value[k] != '\'' && value[k] != 0) k++;
 		if (value[k] == '=' || value[k] == ':') {
-			i = i - strlen(value + k);
+			i = i - (int)strlen(value + k);
 			value[k] = 0;
 		}
 		while(isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=') i++;
@@ -4879,7 +4879,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 			filename[0] = 0;
 			if (cobsetptr->cob_config_cur != 0) {
 				strcpy(buff, cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1]);
-				for (i = strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
+				for (i = (int)strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
 					snprintf(filename, (size_t)COB_FILE_MAX, "%s%s%s", buff, SLASH_STR, config_file);
@@ -5162,13 +5162,13 @@ print_runtime_env()
 	puts (_("runtime environment"));
 	if (cobsetptr->cob_config_file) {
 		strcpy(value, _("via"));
-		hdlen = strlen(value) + 3;
+		hdlen = (unsigned int)strlen(value) + 3;
 
 		/* output path of main configuration file */
 		printf(" %s  ", value);
 		plen = 80 - hdlen;
 		strcpy(value, cobsetptr->cob_config_file[0]);
-		vl = strlen(value);
+		vl = (unsigned int)strlen(value);
 		for (k = 0; vl > plen; vl -= plen, k += plen) {
 			printf("%.*s\n%-*s", plen, &value[k], hdlen, "");
 		}
@@ -5178,7 +5178,7 @@ print_runtime_env()
 		for (i = 1; i < cobsetptr->cob_config_num; i++) {
 			printf("%*d  ", hdlen - 2, i);
 			strcpy(value, cobsetptr->cob_config_file[i]);
-			vl = strlen(value);
+			vl = (unsigned int)strlen(value);
 			for (k = 0; vl > plen; vl -= plen, k += plen) {
 				printf("%.*s\n%-*s", plen, &value[k], hdlen, "");
 			}
@@ -5190,10 +5190,10 @@ print_runtime_env()
 	strcpy(value,"todo");
 	hdlen = 15;
 	for (i=0; i < NUM_CONFIG; i++) {
-		j = strlen(gc_conf[i].env_name);
+		j = (unsigned int)strlen(gc_conf[i].env_name);
 		if(j > hdlen)
 			hdlen = j;
-		j = strlen(gc_conf[i].conf_name);
+		j = (unsigned int)strlen(gc_conf[i].conf_name);
 		if(j > hdlen)
 			hdlen = j;
 	}
@@ -5243,7 +5243,7 @@ print_runtime_env()
 				} else {
 					printf("    : %-*s : ",hdlen,gc_conf[i].conf_name);
 				}
-				vl = strlen(value);
+				vl = (unsigned int)strlen(value);
 				plen = 71 - hdlen;
 				for (k = 0; vl > plen; vl -= plen, k += plen) {
 					printf("%.*s\n      %-*s : ", plen, &value[k], hdlen, "");
