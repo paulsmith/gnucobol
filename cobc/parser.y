@@ -6951,7 +6951,9 @@ display_atom:
 		cb_emit_display ($1, cb_null, cb_int1, line_column,
 				 current_statement->attr_ptr);
 	} else { /* device display */
-		upon_value = get_default_display_device ();
+		if (upon_value == NULL) {
+			upon_value = get_default_display_device ();
+		}
 		cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
 	}
 

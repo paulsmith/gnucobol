@@ -1,4 +1,9 @@
 
+2016-02-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #201 - where a specified UPON device was replaced
+	  with the default.
+
 2016-02-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: permit DISPLAY and ACCEPT clauses in any order.
