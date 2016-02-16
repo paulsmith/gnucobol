@@ -1,4 +1,8 @@
 
+2016-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_expr_finish): tweak line number to match the error
+
 2016-02-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #201 - where a specified UPON device was replaced

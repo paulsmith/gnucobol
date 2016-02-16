@@ -3102,23 +3102,24 @@ cb_expr_finish (void)
 	/* Reduce all */
 	(void)expr_reduce (0);
 
-	if (expr_index != 4) {
-		cb_error (_("Invalid expression"));
-		return cb_error_node;
-	}
-
 	if (!expr_stack[3].value) {
-		cb_error (_("Invalid expression"));
-		return cb_error_node;
-	}
-	expr_expand (&expr_stack[3].value);
-	if (expr_stack[3].token != 'x') {
 		cb_error (_("Invalid expression"));
 		return cb_error_node;
 	}
 	
 	expr_stack[3].value->source_file = cb_source_file;
 	expr_stack[3].value->source_line = cb_exp_line;
+
+	if (expr_index != 4) {
+		cb_error_x (expr_stack[3].value, _("Invalid expression"));
+		return cb_error_node;
+	}
+
+	expr_expand (&expr_stack[3].value);
+	if (expr_stack[3].token != 'x') {
+		cb_error_x (expr_stack[3].value, _("Invalid expression"));
+		return cb_error_node;
+	}
 
 	return expr_stack[3].value;
 }
