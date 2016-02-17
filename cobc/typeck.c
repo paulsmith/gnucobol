@@ -1093,7 +1093,7 @@ cb_build_registers (void)
 		CB_FIELD_PTR (x)->flag_is_global = 1;
 		CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
 	}
-		
+
 	t = time (NULL);
 	tlt = localtime (&t);
 	/* Leap seconds ? */
@@ -1475,7 +1475,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
 		}
 		xr = cb_build_reference(full_name);
-		
+
 		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) &&
 		    !current_statement->flag_no_based) {
 			if (p->flag_item_based ||
@@ -1575,7 +1575,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 								name, n);
 					}
 					if (p==f) {
-						/* Only valid for single subscript (!) */ 
+						/* Only valid for single subscript (!) */
 						f->mem_offset = f->size * (n - 1);
 					}
 				}
@@ -3106,7 +3106,7 @@ cb_expr_finish (void)
 		cb_error (_("Invalid expression"));
 		return cb_error_node;
 	}
-	
+
 	expr_stack[3].value->source_file = cb_source_file;
 	expr_stack[3].value->source_line = cb_exp_line;
 
@@ -4281,7 +4281,7 @@ static int
 valid_screen_pos (cb_tree pos)
 {
 	int	size;
-	
+
 	/* Find size of pos value, if possible */
 	if (CB_NUMERIC_LITERAL_P (pos)) {
 		size = (CB_LITERAL (pos))->size;
@@ -4338,7 +4338,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		timeout;
-	cb_tree		prompt;		
+	cb_tree		prompt;
 	cb_tree		size_is;	/* WITH SIZE IS */
 	int		dispattrs;
 
@@ -4351,8 +4351,8 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		bgc = attr_ptr->bgc;
 		scroll = attr_ptr->scroll;
 		timeout = attr_ptr->timeout;
-		prompt = attr_ptr->prompt;     
-		size_is = attr_ptr->size_is;   
+		prompt = attr_ptr->prompt;
+		size_is = attr_ptr->size_is;
 		dispattrs = attr_ptr->dispattrs;
 		if (cb_validate_one (pos)) {
 			return;
@@ -4380,8 +4380,8 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		bgc = NULL;
 		scroll = NULL;
 		timeout = NULL;
-		prompt = NULL;     
-		size_is = NULL;    
+		prompt = NULL;
+		size_is = NULL;
 		dispattrs = 0;
 	}
 
@@ -4461,7 +4461,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 			var = NULL;
 		}
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
-	}	  
+	}
 }
 
 void
@@ -5130,53 +5130,122 @@ cb_emit_command_line (cb_tree value)
 	cb_emit (CB_BUILD_FUNCALL_1 ("cob_display_command_line", value));
 }
 
+static int
+validate_attrs (cb_tree pos, cb_tree fgc, cb_tree bgc, cb_tree scroll, cb_tree size_is)
+{
+	return 	cb_validate_one (pos)
+		|| cb_validate_one (fgc)
+		|| cb_validate_one (bgc)
+		|| cb_validate_one (scroll)
+		|| cb_validate_one (size_is);
+}
+
+static void
+initialize_attrs (const struct cb_attr_struct * const attr_ptr,
+		  cb_tree * const fgc, cb_tree * const bgc,
+		  cb_tree * const scroll, cb_tree * const size_is,
+		  int * const dispattrs)
+{
+	if (attr_ptr) {
+		*fgc = attr_ptr->fgc;
+		*bgc = attr_ptr->bgc;
+		*scroll = attr_ptr->scroll;
+		*size_is = attr_ptr->size_is;
+		*dispattrs = attr_ptr->dispattrs;
+	} else {
+		*fgc = NULL;
+		*bgc = NULL;
+		*scroll = NULL;
+		*size_is = NULL;
+		*dispattrs = 0;
+	}
+}
+
+static void
+get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line,
+			      cb_tree * const column)
+{
+	if (!pos) {
+		*line = NULL;
+		*column = NULL;
+	} else if (CB_PAIR_P (pos)) {
+		*line = CB_PAIR_X (pos);
+		*column = CB_PAIR_Y (pos);
+		if (*line == cb_int0) {
+			*line = NULL;
+		}
+	} else if (valid_screen_pos (pos)) {
+		*line = pos;
+		*column = NULL;
+	}
+}
+
+static void
+emit_screen_display (const cb_tree x, const cb_tree pos)
+{
+	cb_tree	line;
+	cb_tree	column;
+
+	get_line_and_column_from_pos (pos, &line, &column);
+	cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display", x, line, column));
+}
+
+static void
+emit_field_display (const cb_tree x, const cb_tree pos, const cb_tree fgc,
+		    const cb_tree bgc, const cb_tree scroll,
+		    const cb_tree size_is, const int dispattrs)
+{
+	cb_tree	line;
+	cb_tree	column;
+
+	get_line_and_column_from_pos (pos, &line, &column);
+	cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
+				     x, line, column, fgc, bgc,
+				     scroll, size_is,
+				     cb_int (dispattrs)));
+}
+
+void
+cb_emit_display_omitted (cb_tree pos, struct cb_attr_struct *attr_ptr)
+{
+	cb_tree		fgc;
+	cb_tree		bgc;
+	cb_tree		scroll;
+	cb_tree		size_is;	/* WITH SIZE IS */
+	int		dispattrs;
+
+	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &dispattrs);
+	if (validate_attrs (pos, fgc, bgc, scroll, size_is)) {
+		return;
+	}
+
+	/* TODO: Implement */
+	/* Should we create a distinct omitted_display function in screenio.c? */
+	/* emit_field_display (NULL, pos, fgc, bgc, scroll, size_is, dispattrs); */
+}
+
 void
 cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 		 struct cb_attr_struct *attr_ptr)
 {
 	cb_tree		l;
 	cb_tree		x;
-	cb_tree		line;
-	cb_tree		column;
 	cb_tree		p;
 	cb_tree		fgc;
 	cb_tree		bgc;
 	cb_tree		scroll;
-	cb_tree		size_is;	/* WITH SIZE IS */ 
+	cb_tree		size_is;	/* WITH SIZE IS */
 	int		dispattrs;
 
 	if (cb_validate_list (values)) {
 		return;
 	}
-	if (cb_validate_one (pos)) {
+
+	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &dispattrs);
+	if (validate_attrs (pos, fgc, bgc, scroll, size_is)) {
 		return;
 	}
 
-	if (attr_ptr) {
-		fgc = attr_ptr->fgc;
-		bgc = attr_ptr->bgc;
-		scroll = attr_ptr->scroll;
-		size_is = attr_ptr->size_is; 
-		dispattrs = attr_ptr->dispattrs;
-		if (cb_validate_one (fgc)) {
-			return;
-		}
-		if (cb_validate_one (bgc)) {
-			return;
-		}
-		if (cb_validate_one (scroll)) {
-			return;
-		}
-		if (cb_validate_one (size_is)) {
-			return;
-		}
-	} else {
-		fgc = NULL;
-		bgc = NULL;
-		scroll = NULL;
-		size_is = NULL; 
-		dispattrs = 0;
-	}
 	for (l = values; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (x == cb_error_node) {
@@ -5206,28 +5275,13 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 		return;
 	}
 
+
 	x = CB_VALUE (values);
 	if ((CB_REF_OR_FIELD_P (x)) &&
 	     CB_FIELD (cb_ref (x))->storage == CB_STORAGE_SCREEN) {
 		output_screen_from (CB_FIELD (cb_ref (x)), 0);
 		gen_screen_ptr = 1;
-		if (pos) {
-			if (CB_PAIR_P (pos)) {
-				line = CB_PAIR_X (pos);
-				column = CB_PAIR_Y (pos);
-				if (line == cb_int0) {
-					line = NULL;
-				}
-				cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display",
-					 x, line, column));
-			} else if (valid_screen_pos (pos)) {
-				cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display",
-					 x, pos, NULL));
-			}
-		} else {
-			cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display", x,
-				NULL, NULL));
-		}
+	        emit_screen_display (x, pos);
 		gen_screen_ptr = 0;
 	} else if (pos || fgc || bgc || scroll || size_is || dispattrs || upon == cb_null) {
 		for (l = values; l; l = CB_CHAIN (l)) {
@@ -5257,24 +5311,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv, cb_tree pos,
 				  }
 			  }
 			}
-			if (!pos) {
-				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
-					x, NULL, NULL, fgc, bgc,
-					scroll, size_is, cb_int (dispattrs)));
-			} else if (CB_PAIR_P (pos)) {
-				line = CB_PAIR_X (pos);
-				column = CB_PAIR_Y (pos);
-				if (line == cb_int0) {
-					line = NULL;
-				}
-				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
-					x, line, column, fgc, bgc,
-					scroll, size_is, cb_int (dispattrs)));
-			} else if (valid_screen_pos (pos)) {
-				cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
-					x, pos, NULL, fgc, bgc,
-					scroll, size_is, cb_int (dispattrs)));
-			}
+			emit_field_display (x, pos, fgc, bgc, scroll, size_is, dispattrs);
 		}
 	} else {
 		/* DISPLAY x ... [UPON device-name] */
@@ -6079,7 +6116,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		(dst_f->flag_occurs && !dst_f->mem_offset)) {
 		return 1; /* overlapping possible, would need more checks */
 	}
-	
+
 	/* Same field - Check offsets */
 	src_off = src_f->offset;
 	dst_off = dst_f->offset;
@@ -6699,7 +6736,7 @@ cb_build_move_copy (cb_tree src, cb_tree dst)
 	if (size == 1) {
 		return CB_BUILD_FUNCALL_2 ("$F", dst, src);
 	}
-	if (overlapping 
+	if (overlapping
 	|| CB_FIELD_PTR (src)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (dst)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (src)->flag_item_based

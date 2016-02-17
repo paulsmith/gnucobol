@@ -1,4 +1,10 @@
 
+2016-02-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (display_atom): prepare for DISPLAY OMITTED.
+	* typeck.c (cb_emit_display): refactored.
+	* typeck.c: added non-functional version of (cb_emit_display_omitted).
+
 2016-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_expr_finish): tweak line number to match the error

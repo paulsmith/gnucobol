@@ -893,7 +893,8 @@ is_screen_field (cb_tree x)
 static /* COB_INLINE COB_A_INLINE */ int
 contains_only_screen_field (struct cb_list *x_list)
 {
-	return cb_list_length ((cb_tree) x_list) == 1
+	return (cb_tree) x_list != cb_null
+		&& cb_list_length ((cb_tree) x_list) == 1
 		&& is_screen_field (x_list->value);
 }
 
@@ -969,6 +970,14 @@ emit_default_displays_for_x_list (struct cb_list *x_list)
 	if (device_display_x_list != NULL) {
 		emit_default_device_display (device_display_x_list);
 		begin_implicit_statement ();
+	}
+}
+
+static void
+error_if_no_advancing_in_screen_display (cb_tree advancing)
+{
+	if (advancing_value != cb_int1) {
+		cb_error (_("Cannot specify NO ADVANCING in screen DISPLAY"));
 	}
 }
 
@@ -6906,7 +6915,7 @@ display_list:
 ;
 
 display_atom:
-  x_list
+  disp_list
   {
 	check_duplicate = 0;
 	check_line_col_duplicate = 0;
@@ -6925,36 +6934,41 @@ display_atom:
 		|| line_column
 		|| current_statement->attr_ptr;
 
-	if (cb_list_length ($1) > 1 && screen_display) {
-		cb_error (_("Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY"));
-	}
+	if ($1 == cb_null) {
+		error_if_no_advancing_in_screen_display (advancing_value);
 
-	if (screen_display) {
-		if (upon_value != NULL) {
-			if (is_screen_field) {
-				cb_error (_("Screens cannot be displayed on a device"));
-			} else { /* line_column || current_statement->attr_ptr */
-				cb_error (_("Cannot use screen clauses with device DISPLAY"));
+		cb_emit_display_omitted (line_column,
+					 current_statement->attr_ptr);
+	} else {
+		if (cb_list_length ($1) > 1 && screen_display) {
+			cb_error (_("Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY"));
+		}
+
+		if (screen_display) {
+			if (upon_value != NULL) {
+				if (is_screen_field) {
+					cb_error (_("Screens cannot be displayed on a device"));
+				} else { /* line_column || current_statement->attr_ptr */
+					cb_error (_("Cannot use screen clauses with device DISPLAY"));
+				}
+			} else {
+				upon_value = cb_null;
 			}
-		} else {
-			upon_value = cb_null;
-		}
 
-		if (advancing_value != cb_int1) {
-			cb_error (_("Cannot specify NO ADVANCING in screen DISPLAY"));
-		}
+			error_if_no_advancing_in_screen_display (advancing_value);
 
-		if (!line_column && !is_screen_field) {
-			cb_error (_("Screen DISPLAY does not have a LINE or COL clause"));
-		}
+			if (!line_column && !is_screen_field) {
+				cb_error (_("Screen DISPLAY does not have a LINE or COL clause"));
+			}
 
-		cb_emit_display ($1, cb_null, cb_int1, line_column,
-				 current_statement->attr_ptr);
-	} else { /* device display */
-		if (upon_value == NULL) {
-			upon_value = get_default_display_device ();
+			cb_emit_display ($1, cb_null, cb_int1, line_column,
+					 current_statement->attr_ptr);
+		} else { /* device display */
+			if (upon_value == NULL) {
+				upon_value = get_default_display_device ();
+			}
+			cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
 		}
-		cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
 	}
 
 	/*
@@ -6962,6 +6976,18 @@ display_atom:
 	  of display_list, but that causes a shift/reduce error.
 	*/
 	begin_implicit_statement ();
+  }
+;
+
+disp_list:
+  x_list
+  {
+	$$ = $1;
+  }
+| OMITTED
+  {
+	PENDING ("DISPLAY OMITTED");
+	$$ = cb_null;
   }
 ;
 
