@@ -1,4 +1,9 @@
 
+2016-02-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (set_default_line_column): fixed bug #202 where screens
+	  were displayed at the cursor position when no LINE or COL was given.
+
 2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* intrinsic.c (split_around_t): fixed stack overflow occuring in wrong
@@ -15,7 +20,7 @@
 	* common.c (cob_rescan_env_vals): always remove invalid settings from env.
 	* common.c (cob_realloc): new, combining cob_malloc, cob_free and memcpy
 	* common.c (cob_get_current_date_and_time) [_MSC_VER]: use fallback
-	  to GetLocalTime if calls to FileTimeToSystemTime or 
+	  to GetLocalTime if calls to FileTimeToSystemTime or
 	  SystemTimeToTzSpecificLocalTime return an error
 	* common.c (print_version): changed generation of build stamp
 	* common.c (cb_config_entry): corrected check for setting without value

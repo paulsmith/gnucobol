@@ -1520,10 +1520,12 @@ cob_screen_iterate (cob_screen *s)
 }
 
 static COB_INLINE COB_A_INLINE void
-set_default_line_column (const enum screen_statement stmt, int *sline,
-			 int *scolumn)
+set_default_line_column (const int is_screen, int *sline, int *scolumn)
 {
-	if (stmt == DISPLAY_STATEMENT) {
+	if (is_screen) {
+		*sline = 0;
+		*scolumn = 0;
+	} else {
 		getyx (stdscr, *sline, *scolumn);
 		if (*sline < 0) {
 			*sline = 0;
@@ -1531,9 +1533,6 @@ set_default_line_column (const enum screen_statement stmt, int *sline,
 		if (*scolumn < 0) {
 			*scolumn = 0;
 		}
-	} else { /* ACCEPT_STATEMENT */
-		*sline = 0;
-		*scolumn = 0;
 	}
 }
 
@@ -1562,13 +1561,12 @@ pos_to_line_column (cob_field *pos, int *line, int *column)
 }
 
 static void
-extract_line_and_col_vals (const enum screen_statement stmt,
-			   cob_field *line, cob_field *column, int *sline,
-			   int *scolumn)
+extract_line_and_col_vals (const int is_screen, cob_field *line,
+			   cob_field *column, int *sline, int *scolumn)
 {
 	if (column == NULL) {
 		if (line == NULL) {
-			set_default_line_column (stmt, sline, scolumn);
+			set_default_line_column (is_screen, sline, scolumn);
 		} else {
 			/*
 			  line actually contains both the line and field
@@ -2325,7 +2323,7 @@ cob_screen_display (cob_screen *s, cob_field *line, cob_field *column)
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (DISPLAY_STATEMENT, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (1, line, column, &sline, &scolumn);
 	screen_display (s, sline, scolumn);
 }
 void
@@ -2335,7 +2333,7 @@ cob_screen_accept (cob_screen *s, cob_field *line, cob_field *column,
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (ACCEPT_STATEMENT, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (1, line, column, &sline, &scolumn);
 	screen_accept (s, sline, scolumn, ftimeout);
 }
 
@@ -2347,7 +2345,7 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (DISPLAY_STATEMENT, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (0, line, column, &sline, &scolumn);
 	field_display (f, sline, scolumn, fgc, bgc, fscroll, size_is, fattr);
 }
 
@@ -2360,7 +2358,7 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (ACCEPT_STATEMENT, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (0, line, column, &sline, &scolumn);
 	field_accept (f, sline, scolumn, fgc, bgc, fscroll, ftimeout, prompt, size_is, fattr);
 }
 
