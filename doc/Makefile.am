@@ -1,7 +1,7 @@
 #
 # Makefile gnu-cobol/doc
 #
-# Copyright (C) 2003-2012, 2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -37,13 +37,14 @@ cbconf.tex: $(top_srcdir)/config/default.conf cobcinfo.sh
 cbrunt.tex: $(top_srcdir)/config/runtime.cfg cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex.tex: \
+cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c cobcinfo.sh
 	$(COBCINFOSH) $@
 
 EXTRA_DIST = gnucobol.pdf cobcinfo.sh \
 	cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex cbconf.tex \
 	cbchelp.tex cbrunt.tex
+
 TEXINFO_TEX = ../texinfo.tex
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs
