@@ -66,7 +66,7 @@ static int yywrap (void) {
 
 #define	YY_USER_INIT	\
 	if (!plexbuff) {					\
-		plexsize = COB_MINI_BUFF;	/* must be >= cb_lit_length */	\
+		plexsize = COB_MINI_BUFF;			\
 		plexbuff = cobc_malloc (plexsize);	\
 	}							\
 	if (!picbuff1) {					\
@@ -1064,7 +1064,7 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i > cb_lit_length)) {
+			if (unlikely(i == cb_lit_length)) {
 				plexbuff[i] = 0;
 				snprintf (err_msg, COB_MINI_MAX,
 					_("Literal length exceeds %d characters"),
@@ -1125,7 +1125,7 @@ scan_x (const char *text)
 		error_literal ("X", text);
 		goto error;
 	}
-	if (currlen > plexsize) {
+	if (unlikely(currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
@@ -1208,12 +1208,12 @@ scan_z (const char *text, const cob_u32_t llit)
 		yylval = cb_error_node;
 		return LITERAL;
 	}
-	if (currlen > plexsize) {
+	if (unlikely(currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
 	memcpy (plexbuff, text, currlen);
-	plexbuff[currlen -1] = 0;
+	plexbuff[currlen - 1] = 0;
 
 	/* Count is correct here as the trailing quote is now a null */
 	yylval = cb_build_alphanumeric_literal (plexbuff, currlen);

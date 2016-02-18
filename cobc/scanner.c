@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 37
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -169,7 +169,6 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -1408,7 +1407,7 @@ static int yywrap (void) {
 
 #define	YY_USER_INIT	\
 	if (!plexbuff) {					\
-		plexsize = COB_MINI_BUFF;	/* must be >= cb_lit_length */	\
+		plexsize = COB_MINI_BUFF;			\
 		plexbuff = cobc_malloc (plexsize);	\
 	}							\
 	if (!picbuff1) {					\
@@ -1565,7 +1564,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1568 "scanner.c"
+#line 1567 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1730,6 +1729,31 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
+#line 229 "scanner.l"
+
+
+
+	if (likely(current_program)) {
+		if (current_program->decimal_point == '.') {
+			BEGIN DECIMAL_IS_PERIOD;
+		} else {
+			BEGIN DECIMAL_IS_COMMA;
+		}
+	}
+
+	/* We treat integer literals immediately after '.' as labels;
+	   that is, they must be level numbers or section names. */
+	if (last_token_is_dot) {
+		integer_is_label = 1;
+		last_token_is_dot = 0;
+	} else {
+		integer_is_label = 0;
+	}
+
+
+
+#line 1755 "scanner.c"
+
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -1756,32 +1780,6 @@ YY_DECL
 		yy_load_buffer_state( );
 		}
 
-	{
-#line 229 "scanner.l"
-
-
-
-	if (likely(current_program)) {
-		if (current_program->decimal_point == '.') {
-			BEGIN DECIMAL_IS_PERIOD;
-		} else {
-			BEGIN DECIMAL_IS_COMMA;
-		}
-	}
-
-	/* We treat integer literals immediately after '.' as labels;
-	   that is, they must be level numbers or section names. */
-	if (last_token_is_dot) {
-		integer_is_label = 1;
-		last_token_is_dot = 0;
-	} else {
-		integer_is_label = 0;
-	}
-
-
-
-#line 1783 "scanner.c"
-
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
@@ -1799,7 +1797,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
+			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -3017,7 +3015,7 @@ YY_RULE_SETUP
 #line 1025 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3020 "scanner.c"
+#line 3018 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3147,7 +3145,6 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -3898,7 +3895,7 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i > cb_lit_length)) {
+			if (unlikely(i == cb_lit_length)) {
 				plexbuff[i] = 0;
 				snprintf (err_msg, COB_MINI_MAX,
 					_("Literal length exceeds %d characters"),
@@ -3959,7 +3956,7 @@ scan_x (const char *text)
 		error_literal ("X", text);
 		goto error;
 	}
-	if (currlen > plexsize) {
+	if (unlikely(currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
@@ -4042,12 +4039,12 @@ scan_z (const char *text, const cob_u32_t llit)
 		yylval = cb_error_node;
 		return LITERAL;
 	}
-	if (currlen > plexsize) {
+	if (unlikely(currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
 	memcpy (plexbuff, text, currlen);
-	plexbuff[currlen -1] = 0;
+	plexbuff[currlen - 1] = 0;
 
 	/* Count is correct here as the trailing quote is now a null */
 	yylval = cb_build_alphanumeric_literal (plexbuff, currlen);
