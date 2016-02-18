@@ -2840,16 +2840,19 @@ cb_list_intrinsics (void)
 			t = _("N");
 		}
 		if (function_list[i].args == -1) {
-			argnum = (char*)_("Unlimited");
-		} else if (function_list[i].args != function_list[i].min_args) {
-			argnum = cob_malloc (7);
-			snprintf (argnum, 7, "%d - %d", (int)function_list[i].min_args,
-				(int)function_list[i].args);
-		} else {
-			argnum = cob_malloc (3);
-			snprintf (argnum, 3, "%d", (int)function_list[i].args);
+			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, _("Unlimited");
+		} else
+			if (function_list[i].args != function_list[i].min_args) {
+				argnum = cob_malloc (7);
+				snprintf (argnum, 7, "%d - %d", (int)function_list[i].min_args,
+					(int)function_list[i].args);
+			} else {
+				argnum = cob_malloc (3);
+				snprintf (argnum, 3, "%d", (int)function_list[i].args);
+			}
+			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, argnum);
+			cob_free (argnum);
 		}
-		printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, argnum);
 	}
 }
 

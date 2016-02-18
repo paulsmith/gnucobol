@@ -4461,7 +4461,8 @@ set_config_val(char *value, int pos)
 				}
 			}
 			conf_runtime_error_value(ptr, pos);
-			conf_runtime_error(1, _("should be one of the following values: %s"), str); 
+			conf_runtime_error(1, _("should be one of the following values: %s"), str);
+			cob_free (str);
 			return 1;
 		}
 	}

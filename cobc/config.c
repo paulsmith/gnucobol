@@ -409,15 +409,6 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 		cc = c;
 		c = c->next;
 	}
-	/* add current entry to list*/
-	c = cob_malloc (sizeof(struct includelist));
-	c->next = NULL;
-	c->name = conf_file;
-	if (cc != NULL) {
-		cc->next = c;
-	} else {
-		conf_includes = c;
-	}
 
 	/* Open the configuration file */
 	fp = fopen (conf_file, "r");
@@ -429,6 +420,16 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 		} else {
 			return 0;
 		}
+	}
+
+	/* add current entry to list*/
+	c = cob_malloc (sizeof(struct includelist));
+	c->next = NULL;
+	c->name = conf_file;
+	if (cc != NULL) {
+		cc->next = c;
+	} else {
+		conf_includes = c;
 	}
 
 	/* Read the configuration file */
