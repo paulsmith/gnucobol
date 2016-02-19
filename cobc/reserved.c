@@ -2840,8 +2840,8 @@ cb_list_intrinsics (void)
 			t = _("N");
 		}
 		if (function_list[i].args == -1) {
-			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, _("Unlimited");
-		} else
+			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, _("Unlimited"));
+		} else {
 			if (function_list[i].args != function_list[i].min_args) {
 				argnum = cob_malloc (7);
 				snprintf (argnum, 7, "%d - %d", (int)function_list[i].min_args,
