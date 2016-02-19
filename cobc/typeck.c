@@ -5183,8 +5183,8 @@ get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line,
 static void
 emit_screen_display (const cb_tree x, const cb_tree pos)
 {
-	cb_tree	line;
-	cb_tree	column;
+	cb_tree	line = NULL;
+	cb_tree	column = NULL;
 
 	get_line_and_column_from_pos (pos, &line, &column);
 	cb_emit (CB_BUILD_FUNCALL_3 ("cob_screen_display", x, line, column));
@@ -5195,8 +5195,8 @@ emit_field_display (const cb_tree x, const cb_tree pos, const cb_tree fgc,
 		    const cb_tree bgc, const cb_tree scroll,
 		    const cb_tree size_is, const int dispattrs)
 {
-	cb_tree	line;
-	cb_tree	column;
+	cb_tree	line = NULL;
+	cb_tree	column = NULL;
 
 	get_line_and_column_from_pos (pos, &line, &column);
 	cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
