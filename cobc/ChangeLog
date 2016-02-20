@@ -1,4 +1,9 @@
 
+2016-02-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (procedure_returning): fixed bug #203: emit error if function
+	  returning item has ANY LENGTH clause.
+
 2016-02-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (display_atom): prepare for DISPLAY OMITTED.

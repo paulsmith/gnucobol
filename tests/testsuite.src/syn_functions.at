@@ -19,6 +19,29 @@
 ### GnuCOBOL Test Suite
 
 
+AT_SETUP([ANY LENGTH as function RETURNING item])
+AT_KEYWORDS([functions ANY LENGTH])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID.   func.
+
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       01  any-len    PIC 9 ANY LENGTH.
+
+       PROCEDURE      DIVISION RETURNING any-len.
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: Error: Function RETURNING item may not be ANY LENGTH
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([REPOSITORY])
 AT_KEYWORDS([functions])
 

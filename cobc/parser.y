@@ -5679,6 +5679,10 @@ procedure_returning:
 			cb_error (_("RETURNING item should not be in LOCAL-STORAGE"));
 		} else {
 			if (current_program->prog_type == CB_FUNCTION_TYPE) {
+				if (f->flag_any_length) {
+					cb_error (_("Function RETURNING item may not be ANY LENGTH"));
+				}
+				
 				f->flag_is_returning = 1;
 			}
 			current_program->returning = $2;
