@@ -362,9 +362,6 @@ cob_exit_common (void)
 	}
 
 	/* Free last stuff */
-	if (strbuff) {
-		cob_free (strbuff);
-	}
 	if (runtime_err_str) {
 		cob_free (runtime_err_str);
 	}
@@ -4453,18 +4450,20 @@ set_config_val(char *value, int pos)
 		}
 		if((data_type & ENV_ENUM || data_type & ENV_ENUMVAL)	/* Must be one of the 'enum' values */
 		&& gc_conf[pos].enums[i].match == NULL) {
-			str = cob_strcat((char*)"", (char*)"");
+			conf_runtime_error_value(ptr, pos);
+			fprintf(stderr, _("should be one of the following values: %s"), "");
 			for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
-				if (i != 0)	str = cob_strcat(str, (char*)", ");
-				str = cob_strcat(str, (char*)gc_conf[pos].enums[i].match);
+				if (i != 0) {
+					putc (',', stderr);
+					putc (' ', stderr);
+				}
+				fprintf (stderr, "%s", (char*)gc_conf[pos].enums[i].match);
 				if (data_type & ENV_ENUMVAL) {
-					str = cob_strcat(str, (char*)"(");
-					str = cob_strcat(str, (char*)gc_conf[pos].enums[i].value);
-					str = cob_strcat(str, (char*)")");
+					fprintf (stderr, "(%s)", (char*)gc_conf[pos].enums[i].value);
 				}
 			}
-			conf_runtime_error_value(ptr, pos);
-			conf_runtime_error(1, _("should be one of the following values: %s"), str);
+			putc ('\n', stderr);
+			fflush (stderr);
 			return 1;
 		}
 	}

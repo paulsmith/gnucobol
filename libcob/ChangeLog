@@ -1,4 +1,9 @@
 
+2016-02-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* common.c (set_config_val): removed use of cob_strcat for output of
+	  possible values
+
 2016-02-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (set_default_line_column): fixed bug #202 where screens
