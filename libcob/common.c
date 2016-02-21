@@ -362,6 +362,9 @@ cob_exit_common (void)
 	}
 
 	/* Free last stuff */
+	if (strbuff) {
+		cob_free (strbuff);
+	}
 	if (runtime_err_str) {
 		cob_free (runtime_err_str);
 	}
@@ -4269,7 +4272,7 @@ var_print (const char *msg, const char *val, const char *default_val,
 		break;
 		case 1: {
 		printf("  %s: ", _("env"));
-		lablen = (int)(CB_IMSG_SIZE - 2 - strlen(_("env")) - 2);
+		lablen = CB_IMSG_SIZE - 2 - (int)strlen(_("env")) - 2;
 		printf("%-*.*s : ", lablen, lablen, msg);
 			break;
 		}
@@ -4462,7 +4465,6 @@ set_config_val(char *value, int pos)
 			}
 			conf_runtime_error_value(ptr, pos);
 			conf_runtime_error(1, _("should be one of the following values: %s"), str);
-			cob_free (str);
 			return 1;
 		}
 	}
