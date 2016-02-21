@@ -1064,35 +1064,42 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i == cb_lit_length)) {
-				plexbuff[i] = 0;
-				snprintf (err_msg, COB_MINI_MAX,
-					_("Literal length exceeds %d characters"),
-					cb_lit_length);
-				error_literal ("", plexbuff);
-			} else {
-				if (unlikely(i == plexsize)) {
-					plexsize *= 2;
-					if (unlikely (plexsize > (cb_lit_length + 1))) {
-						plexsize = cb_lit_length + 1;
-					}
-					plexbuff = cobc_realloc (plexbuff, plexsize);
+			if (unlikely(i == plexsize)) {
+				plexsize *= 2;
+				if (unlikely (plexsize > (cb_lit_length + 1))) {
+					plexsize = cb_lit_length + 1;
 				}
-				plexbuff[i++] = (cob_u8_t)c;
+				plexbuff = cobc_realloc (plexbuff, plexsize);
 			}
+			plexbuff[i] = (cob_u8_t)c;
 		}
 		if (c == mark && (c = input ()) != (int)mark) {
 			if (c == '-') {
-				/* Free format continuation */
+				/* Free format continuation ("a"- 'b'- ) */
 				/* Hack it as concatenation */
 				unput ('&');
 			} else {
 				unput (c);
 			}
-			i--;
 			break;
 		}
+		/* check literal size here as we have to adjust and check
+		   for (escaped) mark before checking the max length */
+		if (unlikely (i++ == cb_lit_length)) {
+			plexbuff[i] = 0;
+			snprintf (err_msg, COB_MINI_MAX,
+				_ ("Literal length exceeds %d characters"),
+				cb_lit_length);
+			error_literal ("", plexbuff);
+		}
 	}
+	/* fixme: cobol 2014 allows this (and needs it for DYNAMIC LENGTH items),
+	   while other versions do not allow this at all
+	   --> add a compiler support configuration for "OK" => zero length,
+	   "warning" => current implementation, "error" (for example in cobol2002),
+	   "ignore" => assume a space without warning; make sure zero length items
+	   work everywhere (should do as we support zero lengths via ODO items already)
+	*/
 	if (!i) {
 		cb_warning (_("Alphanumeric literal has zero length"));
 		cb_warning (_("A SPACE will be assumed"));

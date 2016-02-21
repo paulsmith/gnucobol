@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_SUBMINOR_VERSION 39
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -169,6 +169,7 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
+    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -1564,7 +1565,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1567 "scanner.c"
+#line 1568 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1729,31 +1730,6 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 229 "scanner.l"
-
-
-
-	if (likely(current_program)) {
-		if (current_program->decimal_point == '.') {
-			BEGIN DECIMAL_IS_PERIOD;
-		} else {
-			BEGIN DECIMAL_IS_COMMA;
-		}
-	}
-
-	/* We treat integer literals immediately after '.' as labels;
-	   that is, they must be level numbers or section names. */
-	if (last_token_is_dot) {
-		integer_is_label = 1;
-		last_token_is_dot = 0;
-	} else {
-		integer_is_label = 0;
-	}
-
-
-
-#line 1755 "scanner.c"
-
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -1780,6 +1756,32 @@ YY_DECL
 		yy_load_buffer_state( );
 		}
 
+	{
+#line 229 "scanner.l"
+
+
+
+	if (likely(current_program)) {
+		if (current_program->decimal_point == '.') {
+			BEGIN DECIMAL_IS_PERIOD;
+		} else {
+			BEGIN DECIMAL_IS_COMMA;
+		}
+	}
+
+	/* We treat integer literals immediately after '.' as labels;
+	   that is, they must be level numbers or section names. */
+	if (last_token_is_dot) {
+		integer_is_label = 1;
+		last_token_is_dot = 0;
+	} else {
+		integer_is_label = 0;
+	}
+
+
+
+#line 1783 "scanner.c"
+
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
@@ -1797,7 +1799,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -3015,7 +3017,7 @@ YY_RULE_SETUP
 #line 1025 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3018 "scanner.c"
+#line 3020 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3145,6 +3147,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
+	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -3895,35 +3898,42 @@ read_literal (const char mark)
 	i = 0;
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i == cb_lit_length)) {
-				plexbuff[i] = 0;
-				snprintf (err_msg, COB_MINI_MAX,
-					_("Literal length exceeds %d characters"),
-					cb_lit_length);
-				error_literal ("", plexbuff);
-			} else {
-				if (unlikely(i == plexsize)) {
-					plexsize *= 2;
-					if (unlikely (plexsize > (cb_lit_length + 1))) {
-						plexsize = cb_lit_length + 1;
-					}
-					plexbuff = cobc_realloc (plexbuff, plexsize);
+			if (unlikely(i == plexsize)) {
+				plexsize *= 2;
+				if (unlikely (plexsize > (cb_lit_length + 1))) {
+					plexsize = cb_lit_length + 1;
 				}
-				plexbuff[i++] = (cob_u8_t)c;
+				plexbuff = cobc_realloc (plexbuff, plexsize);
 			}
+			plexbuff[i] = (cob_u8_t)c;
 		}
 		if (c == mark && (c = input ()) != (int)mark) {
 			if (c == '-') {
-				/* Free format continuation */
+				/* Free format continuation ("a"- 'b'- ) */
 				/* Hack it as concatenation */
 				unput ('&');
 			} else {
 				unput (c);
 			}
-			i--;
 			break;
 		}
+		/* check literal size here as we have to adjust and check
+		   for (escaped) mark before checking the max length */
+		if (unlikely (i++ == cb_lit_length)) {
+			plexbuff[i] = 0;
+			snprintf (err_msg, COB_MINI_MAX,
+				_ ("Literal length exceeds %d characters"),
+				cb_lit_length);
+			error_literal ("", plexbuff);
+		}
 	}
+	/* fixme: cobol 2014 allows this (and needs it for DYNAMIC LENGTH items),
+	   while other versions do not allow this at all
+	   --> add a compiler support configuration for "OK" => zero length,
+	   "warning" => current implementation, "error" (for example in cobol2002),
+	   "ignore" => assume a space without warning; make sure zero length items
+	   work everywhere (should do as we support zero lengths via ODO items already)
+	*/
 	if (!i) {
 		cb_warning (_("Alphanumeric literal has zero length"));
 		cb_warning (_("A SPACE will be assumed"));

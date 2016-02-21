@@ -1,4 +1,9 @@
 
+2016-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (read_literal): Fix wrong error about max-literal length
+	  when the last position is an escaped literal mark
+
 2016-02-20  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (procedure_returning): fixed bug #203: emit error if function
