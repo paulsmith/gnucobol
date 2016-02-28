@@ -1,4 +1,9 @@
 
+2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* added reserved and specify-all-reserved
+	* removed cobol85-reserved
+
 2015-12-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* added call-overflow

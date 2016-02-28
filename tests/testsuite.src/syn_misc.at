@@ -1445,7 +1445,7 @@ AT_DATA([prog.cob], [
       -    '
       -    '
       -    '
-      -    ' ' END-DISPLAY.
+      -    ' '.
            STOP RUN.
 ])
 
@@ -2062,3 +2062,25 @@ prog.cob: 29: Error: Value in AT clause may not be longer than 6 digits
 ])
 AT_CLEANUP
 
+
+AT_SETUP([Adding/removing reserved words])
+AT_KEYWORDS([misc extension configuration])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  hello       PIC X.
+       01  file        PIC X.
+       
+       PROCEDURE       DIVISION.
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob], [1], [],
+[prog.cob: 7: Error: 'hello' reserved word, but not supported
+])
+AT_CLEANUP

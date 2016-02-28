@@ -31,6 +31,12 @@
 #include "tree.h"
 #include "parser.h"
 
+/* Global variables */
+
+struct reserved_word_list	*cobc_user_res_list = NULL;
+
+/* Local variables */
+
 struct system_struct {
 	const char				*name;
 	const enum cb_system_name_category	category;
@@ -187,7 +193,9 @@ static const struct system_struct	ext_system_table[] = {
 /* Word # Statement has terminator # Is context sensitive # Token */
 /* Special context set # Special context test */
 
-static const struct cobc_reserved reserved_words[] = {
+static struct cobc_reserved *reserved_words;
+
+static struct cobc_reserved default_reserved_words[] = {
   { "ACCEPT",			1, 0, ACCEPT,			/* 2002 */
 				CB_CS_ACCEPT, 0
   },
@@ -393,9 +401,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
 	/* FIXME: 2014 Context-sensitive to OCCURS clause */
   },
-  { "CD",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "CENTER",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
 	/* FIXME + Check: 2014 Context-sensitive to COLUMN clause */
@@ -461,9 +466,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
   },
   { "COMMON",			0, 0, COMMON,			/* 2002 */
-				0, 0
-  },
-  { "COMMUNICATION",		0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "COMP",			0, 0, COMP,			/* 2002 */
@@ -673,19 +675,10 @@ static const struct cobc_reserved reserved_words[] = {
   { "EC",			0, 0, EC,			/* 2002 */
 				0, 0
   },
-  { "EGI",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "ELSE",			0, 0, ELSE,			/* 2002 */
 				0, 0
   },
-  { "EMI",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "EMPTY-CHECK",		0, 0, REQUIRED,			/* Extension */
-				0, 0
-  },
-  { "ENABLE",			0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "END",			0, 0, END,			/* 2002 */
@@ -731,9 +724,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
   },
   { "END-READ",			0, 0, END_READ,			/* 2002 */
-				0, 0
-  },
-  { "END-RECEIVE",		0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "END-RETURN",		0, 0, END_RETURN,		/* 2002 */
@@ -800,9 +790,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
   },
   { "ESCAPE",			0, 0, ESCAPE,			/* Extension */
-				0, 0
-  },
-  { "ESI",			0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "EVALUATE",			1, 0, EVALUATE,			/* 2002 */
@@ -1181,9 +1168,6 @@ static const struct cobc_reserved reserved_words[] = {
   { "MERGE",			0, 0, MERGE,			/* 2002 */
 				0, 0
   },
-  { "MESSAGE",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "METHOD",			0, 0, -1,			/* 2002 */
 				0, 0
   },
@@ -1425,12 +1409,6 @@ static const struct cobc_reserved reserved_words[] = {
   { "PROTOTYPE",		0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "PURGE",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
-  { "QUEUE",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "QUOTE",			0, 0, QUOTE,			/* 2002 */
 				0, 0
   },
@@ -1450,9 +1428,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
   },
   { "READ",			1, 0, READ,			/* 2002 */
-				0, 0
-  },
-  { "RECEIVE",			1, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "RECORD",			0, 0, RECORD,			/* 2002 */
@@ -1597,9 +1572,6 @@ static const struct cobc_reserved reserved_words[] = {
   { "SECURE",			0, 0, SECURE,			/* 2002 (C/S) */
 				0, 0
   },
-  { "SEGMENT",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "SEGMENT-LIMIT",		0, 0, SEGMENT_LIMIT,		/* 85 */
 				0, 0
   },
@@ -1607,9 +1579,6 @@ static const struct cobc_reserved reserved_words[] = {
 				0, 0
   },
   { "SELF",			0, 0, -1,			/* 2002 */
-				0, 0
-  },
-  { "SEND",			0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "SENTENCE",			0, 0, SENTENCE,			/* 2002 */
@@ -1737,15 +1706,6 @@ static const struct cobc_reserved reserved_words[] = {
   { "STRONG",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
   },
-  { "SUB-QUEUE-1",		0, 0, 0,			/* 85 CM */
-				0, 0
-  },
-  { "SUB-QUEUE-2",		0, 0, 0,			/* 85 CM */
-				0, 0
-  },
-  { "SUB-QUEUE-3",		0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "SUBTRACT",			1, 0, SUBTRACT,			/* 2002 */
 				0, 0
   },
@@ -1791,16 +1751,10 @@ static const struct cobc_reserved reserved_words[] = {
   { "TAPE",			0, 1, TAPE,			/* 85 */
 				0, CB_CS_ASSIGN
   },
-  { "TERMINAL",			0, 0, 0,			/* 85 CM */
-				0, 0
-  },
   { "TERMINATE",		0, 0, TERMINATE,		/* 2002 */
 				0, 0
   },
   { "TEST",			0, 0, TEST,			/* 2002 */
-				0, 0
-  },
-  { "TEXT",			0, 0, 0,			/* 85 CM */
 				0, 0
   },
   { "THAN",			0, 0, THAN,			/* 2002 */
@@ -1985,8 +1939,9 @@ static const struct cobc_reserved reserved_words[] = {
   }
 };
 
-#define NUM_RESERVED_WORDS	\
-	sizeof (reserved_words) / sizeof (struct cobc_reserved)
+static size_t	num_reserved_words;
+#define NUM_DEFAULT_RESERVED_WORDS	\
+	sizeof (default_reserved_words) / sizeof (struct cobc_reserved)
 
 /* Intrinsic Function List */
 /* Must be ordered on name for binary search */
@@ -2568,8 +2523,6 @@ cob_strcasecmp (const void *s1, const void *s2)
 	unsigned char		c1;
 	unsigned char		c2;
 
-	/* Note - second parameter is assumed already upper case */
-
 	p1 = (const unsigned char *)s1;
 	p2 = (const unsigned char *)s2;
 
@@ -2579,7 +2532,13 @@ cob_strcasecmp (const void *s1, const void *s2)
 		} else {
 			c1 = *p1++;
 		}
-		c2 = *p2++;
+
+		if (cob_lower_tab[*p2]) {
+			c2 = cob_lower_tab[*p2++];
+		} else {
+			c2 = *p2++;
+		}
+		
 		if (c1 != c2) {
 			return c1 < c2 ? -1 : 1;
 		}
@@ -2593,7 +2552,8 @@ cob_strcasecmp (const void *s1, const void *s2)
 static int
 reserve_comp (const void *p1, const void *p2)
 {
-	return cob_strcasecmp (p1, ((struct cobc_reserved *)p2)->name);
+	return cob_strcasecmp (((struct cobc_reserved *)p1)->name,
+			       ((struct cobc_reserved *)p2)->name);
 }
 
 static int
@@ -2624,6 +2584,163 @@ res_get_feature (const enum cb_system_name_category category)
 	return s;
 }
 
+static struct cobc_reserved
+create_dummy_reserved (const char *word)
+{
+	struct cobc_reserved	ret;
+
+	ret.name = word;
+	ret.nodegen = 0;
+	ret.context_sens = 0;
+	ret.token = -1;
+	ret.context_set = 0;
+	ret.context_test = 0;
+
+	return ret;
+}
+
+enum free_word_action {
+	FREE_WORD_STR,
+        DONT_FREE_WORD_STR
+};
+
+static void
+delete_reserved_word_from_list (struct reserved_word_list * const prev,
+				const enum free_word_action action,
+				struct reserved_word_list * to_delete)
+{
+	if (prev) {
+		prev->next = to_delete->next;
+	}
+	if (to_delete == cobc_user_res_list) {
+		cobc_user_res_list = to_delete->next;
+	}
+
+	if (action == FREE_WORD_STR) {
+		cobc_main_free (to_delete->word);
+	}
+	cobc_main_free (to_delete);
+}
+
+static void
+add_reserved_word_without_init (const char *word)
+{
+	struct reserved_word_list	*reserved;
+	size_t				size;
+
+	/* Check the word has not already been specified */
+	for (reserved = cobc_user_res_list; reserved; reserved = reserved->next)
+	{
+		if (cob_strcasecmp (reserved->word, word) == 0) {
+			return;
+		}
+	}
+
+	/* Allocate and initialize word */
+	size = strlen (word);
+	reserved = cobc_main_malloc (sizeof (struct reserved_word_list));
+	     
+	reserved->word = cobc_main_malloc (size + 1U);
+        strcpy (reserved->word, word);
+
+	/* Insert word at beginning of cobc_user_res_list. */
+	reserved->next = cobc_user_res_list;
+	cobc_user_res_list = reserved;
+}
+
+static void
+initialize_user_res_list_if_needed (void)
+{
+	const size_t	num_default_words = NUM_DEFAULT_RESERVED_WORDS;
+	int		i;
+	
+	if (likely (cobc_user_res_list || cb_specify_all_reserved)) {
+		return;
+	}
+
+	/* Initialize the list with the words from the default list. */
+	for (i = 0; i < num_default_words; ++i) {
+		add_reserved_word_without_init (default_reserved_words[i].name);
+	}
+}
+
+static size_t
+get_length_of_user_res_list (void)
+{
+	struct reserved_word_list	*l = cobc_user_res_list;
+	size_t				length;
+	
+	for (length = 0; l; ++length, l = l->next);
+	return length;
+}
+
+static COB_INLINE COB_A_INLINE void
+pop_reserved_word (const enum free_word_action action)
+{
+	delete_reserved_word_from_list (NULL, action, cobc_user_res_list);
+}
+
+static void
+get_reserved_words_from_user_list (void)
+{
+	int	i;
+	struct cobc_reserved		to_find;
+	struct cobc_reserved		*p;
+	
+	num_reserved_words = get_length_of_user_res_list ();
+	reserved_words = cobc_main_malloc (num_reserved_words
+					   * sizeof (struct cobc_reserved));
+
+	/*
+	  Populate reserved_words array with data from default_reserved_words,
+	  where possible. Free each word once processed.
+	*/
+	for (i = 0; cobc_user_res_list; ++i) {
+		to_find = create_dummy_reserved (cobc_user_res_list->word);
+		p = bsearch (&to_find, default_reserved_words,
+			     NUM_DEFAULT_RESERVED_WORDS,
+			     sizeof (struct cobc_reserved), reserve_comp);
+		if (p) {
+			reserved_words[i] = *p;
+			/*
+			  We use the string literal in the default_reserved_
+			  words array.
+			*/
+		        pop_reserved_word (FREE_WORD_STR);
+		} else {
+			reserved_words[i] = to_find;
+			/*
+			  We use the string copy allocated for cobc_user_res_
+			  list.
+			*/
+			pop_reserved_word (DONT_FREE_WORD_STR);
+		}
+	}
+
+	/* Later code assumes the array to be sorted */
+	qsort (reserved_words, num_reserved_words,
+	       sizeof (struct cobc_reserved), reserve_comp);
+}
+
+static void
+get_reserved_words_from_default_list (void)
+{
+	reserved_words = default_reserved_words;
+	num_reserved_words = NUM_DEFAULT_RESERVED_WORDS;
+}
+
+static void
+initialize_reserved_words_if_needed (void)
+{
+	if (!reserved_words) {
+		if (cobc_user_res_list) {
+			get_reserved_words_from_user_list ();
+		} else {
+			get_reserved_words_from_default_list ();
+		}
+	}
+}
+
 /* Global functions */
 
 cb_tree
@@ -2648,28 +2765,47 @@ lookup_system_name (const char *name)
 	return NULL;
 }
 
+void
+remove_reserved_word (const char *word)
+{
+	struct reserved_word_list	*reserved;
+	struct reserved_word_list	*prev = NULL;
+	
+	initialize_user_res_list_if_needed ();
+
+	for (reserved = cobc_user_res_list; reserved; reserved = reserved->next) {
+		/*
+		  We can only remove the word if it has already been specified.
+		*/
+		if (cob_strcasecmp (reserved->word, word) == 0) {
+		        delete_reserved_word_from_list (prev, FREE_WORD_STR,
+							reserved);
+			return;
+		}
+		prev = reserved;
+	}
+}
+
+void
+add_reserved_word (const char *word)
+{
+	initialize_user_res_list_if_needed ();
+	add_reserved_word_without_init (word);
+}
+
 struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
-	struct cobc_reserved	*p;
-	struct noreserve	*nr;
+	struct cobc_reserved		*p;
+	struct cobc_reserved		to_find;
 
-	p = bsearch (name, reserved_words, NUM_RESERVED_WORDS,
+	initialize_reserved_words_if_needed ();
+
+	to_find = create_dummy_reserved (name);
+	p = bsearch (&to_find, reserved_words, num_reserved_words,
 		     sizeof (struct cobc_reserved), reserve_comp);
 	if (!p) {
 		return NULL;
-	}
-
-	/* Allow obsolete/unimplemented 85 keywords as user names */
-	if (!p->token && !cb_cobol85_reserved) {
-		return NULL;
-	}
-
-	/* Check if the configuration has unreserved the word */
-	for (nr = cobc_nores_base; nr; nr = nr->next) {
-		if (strcasecmp (name, nr->noresword) == 0) {
-			return NULL;
-		}
 	}
 
 	/* Check word is implemented */
@@ -2727,15 +2863,7 @@ struct cb_intrinsic_table *
 lookup_intrinsic (const char *name, const int checkres, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
-	struct noreserve		*nr;
 
-	if (unlikely(cobc_nores_base && checkres)) {
-		for (nr = cobc_nores_base; nr; nr = nr->next) {
-			if (strcasecmp (name, nr->noresword) == 0) {
-				return NULL;
-			}
-		}
-	}
 	cbp = bsearch (name, function_list, NUM_INTRINSICS,
 			sizeof (struct cb_intrinsic_table), intrinsic_comp);
 	if (cbp && (checkimpl || cbp->implemented)) {
@@ -2752,10 +2880,12 @@ cb_list_reserved (void)
 	size_t		i;
 	size_t		n;
 
+	initialize_reserved_words_if_needed ();
+	
 	putchar ('\n');
 	printf (_("Reserved Words\t\t\tImplemented (Y/N)"));
 	puts ("\n");
-	for (i = 0; i < NUM_RESERVED_WORDS; ++i) {
+	for (i = 0; i < num_reserved_words; ++i) {
 		n = strlen (reserved_words[i].name);
 		switch (n / 8) {
 		case 0:
@@ -2771,9 +2901,7 @@ cb_list_reserved (void)
 			s = "\t";
 			break;
 		}
-		if (reserved_words[i].token == 0) {
-			p = _("N (85 obsolete)");
-		} else if (reserved_words[i].token > 0) {
+		if (reserved_words[i].token > 0) {
 			if (reserved_words[i].context_sens) {
 				p = _("Y (Context sensitive)");
 			} else {
@@ -2815,7 +2943,7 @@ cb_list_intrinsics (void)
 	char	*argnum;
 	size_t		i;
 	size_t		n;
-
+	
 	putchar ('\n');
 	puts (_("Intrinsic Function\t\tImplemented\tParameters"));
 	for (i = 0; i < NUM_INTRINSICS; ++i) {

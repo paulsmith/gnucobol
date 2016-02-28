@@ -413,12 +413,12 @@ enum cb_perform_type {
 
 /* Reserved word list structure */
 struct cobc_reserved {
-	const char		*name;		/* Word */
-	const unsigned short	nodegen;	/* Statement with END-xxx */
-	const unsigned short	context_sens;	/* Context sensitive */
-	const int		token;		/* Token */
-	const unsigned int	context_set;	/* Set context sensitive */
-	const unsigned int	context_test;	/* Test context sensitive */
+	const char	*name;		/* Word */
+	unsigned short	nodegen;	/* Statement with END-xxx */
+	unsigned short	context_sens;	/* Context sensitive */
+	int		token;		/* Token */
+	unsigned int	context_set;	/* Set context sensitive */
+	unsigned int	context_test;	/* Test context sensitive */
 };
 
 /* Basic common tree structure */

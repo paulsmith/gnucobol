@@ -159,8 +159,6 @@ FILE			*cb_listing_file = NULL;
 char			*source_name = NULL;
 #endif
 
-struct noreserve	*cobc_nores_base = NULL;
-
 int			cb_source_format = CB_FORMAT_FIXED;	/* Default format */
 int			cb_id = 0;
 int			cb_attr_id = 0;
@@ -1916,6 +1914,7 @@ process_command_line (const int argc, char **argv)
 	int			c;
 	int			idx;
 	int			n;
+	int			list_reserved = 0;
 #ifdef _WIN32
 	int 			argnum;
 #endif
@@ -1968,8 +1967,11 @@ process_command_line (const int argc, char **argv)
 
 		case '5':
 			/* --list-reserved */
-			cb_list_reserved ();
-			exit_option = 1;
+			/*
+			  This must be postponed until after the configuration
+			  is loaded.
+			*/
+			list_reserved = 1;
 			break;
 
 		case '6':
@@ -2474,6 +2476,12 @@ process_command_line (const int argc, char **argv)
 		exit (1);
 	}
 
+	if (list_reserved) {
+		cb_list_reserved ();
+		cobc_free_mem ();
+		exit (0);
+	}
+	
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {
 		for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {

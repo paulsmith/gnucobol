@@ -219,9 +219,9 @@ struct cb_exception {
 };
 
 /* Structure for reserved words that have been reverted */
-struct noreserve {
-	struct	noreserve	*next;			/* next pointer */
-	char			*noresword;
+struct reserved_word_list {	
+	struct reserved_word_list	*next;	/* next pointer */
+	char				*word;
 };
 
 /* Basic memory structure */
@@ -317,7 +317,7 @@ extern int			functions_are_all;
 
 /* cobc.c */
 
-extern struct noreserve		*cobc_nores_base;
+extern struct reserved_word_list	*cob_user_res_list;
 
 extern void			*cobc_malloc (const size_t);
 extern void			cobc_free (void *);
@@ -446,5 +446,11 @@ extern void		configuration_error (const char *, const int,
 					 const int, const char *, ...) COB_A_FORMAT45;
 
 extern unsigned int	cb_verify (const enum cb_support, const char *);
+
+/* reserved.c */
+extern struct reserved_word_list	*cobc_user_res_list;
+
+extern void		remove_reserved_word (const char *);
+extern void		add_reserved_word (const char *);
 
 #endif /* CB_COBC_H */

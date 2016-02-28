@@ -308,7 +308,7 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            MOVE 2 TO I.
            DISPLAY G-1 ":" G-4 ":" G-5 NO ADVANCING
-           END-DISPLAY.
+           .
 ])
 
 AT_CHECK([$COMPILE -std=mvs prog.cob], [0], [], [])
@@ -1486,13 +1486,11 @@ AT_DATA([hello.cob], [
        01 X             PIC X(5).
        01 Y             PIC X(5).
        PROCEDURE        DIVISION USING X.
-           DISPLAY MSG-HELLO X "!"
-           END-DISPLAY.
+           DISPLAY MSG-HELLO X "!".
            EXIT PROGRAM.
 
        ENTRY "bye" USING Y.
-           DISPLAY MSG-BYE Y "!"
-           END-DISPLAY.
+           DISPLAY MSG-BYE Y "!".
            EXIT PROGRAM.
 ])
 

@@ -77,7 +77,8 @@ static struct config_struct {
 } config_table[] = {
 	{CB_STRING, "include", NULL, NULL},
 	{CB_STRING, "includeif", NULL, NULL},
-	{CB_STRING, "not-reserved", NULL, NULL}
+	{CB_STRING, "not-reserved", NULL, NULL},
+	{CB_STRING, "reserved", NULL, NULL}
 #include "config.def"
 };
 
@@ -154,8 +155,6 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	char			*s;
 	const char		*name;
 	char			*e;
-	struct noreserve	*noresptr;
-	size_t			size;
 	const char		*val;
 	void			*var;
 	size_t			i;
@@ -300,17 +299,13 @@ cb_config_entry (char *buff, const char *fname, const int line)
 					return -1;
 				}
 			} else if (strcmp (name, "not-reserved") == 0) {
-				size = strlen (val);
-				noresptr = cobc_main_malloc (sizeof (struct noreserve)
-				                             + size + 1U);
-				noresptr->noresword = (char *)noresptr
-				                    + sizeof (struct noreserve);
-				memcpy (noresptr->noresword, val, size);
-				noresptr->next = cobc_nores_base;
-				cobc_nores_base = noresptr;
+				remove_reserved_word (val);
+			} else if (strcmp (name, "reserved") == 0) {
+			        add_reserved_word (val);
 			} else {
 				*((const char **)var) = val;
 			}
+			
 			break;
 		case CB_BOOLEAN:
 			if (strcmp (val, "yes") == 0) {
@@ -357,7 +352,6 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 {
 	char			filename[COB_NORMAL_BUFF];
 	struct includelist	*c, *cc;
-
 	const unsigned char	*x;
 	FILE			*fp;
 	int			sub_ret, ret;
@@ -482,7 +476,7 @@ int
 cb_load_conf (const char *fname, const int prefix_dir)
 {
 	const char	*name;
-	int			ret;
+	int		ret;
 	size_t		i;
 	char		buff[COB_NORMAL_BUFF];
 
@@ -511,7 +505,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 
 	/* Checks for missing definitions */
 	if (ret == 0) {
-		for (i = 3U; i < CB_CONFIG_SIZE; i++) {
+		for (i = 4U; i < CB_CONFIG_SIZE; i++) {
 			if (config_table[i].val == NULL) {
 				/* as there are likely more than one definition missing group it */
 				if (ret == 0) {

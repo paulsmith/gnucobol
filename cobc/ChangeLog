@@ -1,4 +1,18 @@
 
+2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.def, config.c, reserved.c: added reserved and specify-all-
+	  reserved options to let configs specify all the reserved words. Also
+	  removed now redundant cobol85-reserved option.
+	* reserved.c (default_reserved_word_list): removed unimplemented
+	  COBOL-85 words.
+	* reserved.c (cob_strcasecmp): removed assumption that second arg was
+	  all caps.
+	* cobc.c (process_command_line): moved cb_list_reserved call to after
+	  the configuration has loaded.
+	* cobc.h (noreserve): renamed to reserved_word_list.
+	* tree.h (cobc_reserved): removed const qualifiers from members.
+
 2016-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (read_literal): Fix wrong error about max-literal length
