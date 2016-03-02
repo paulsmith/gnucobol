@@ -25,7 +25,6 @@
 #include	<stdlib.h>
 #include	<stddef.h>
 #include	<string.h>
-#include	<errno.h>
 #include	"libcob.h"
 #include	"tarstamp.h"
 
@@ -37,7 +36,7 @@
 
 static int arg_shift = 1;
 
-static const char short_options[] = "+hirc:Vm:";
+static const char short_options[] = "+hirc:V";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -48,9 +47,8 @@ static const struct option long_options[] = {
 	{"info",		CB_NO_ARG, NULL, 'i'},
 	{"runtime-env",	CB_NO_ARG, NULL, 'r'},
 	{"config",	CB_RQ_ARG, NULL, 'C'},
-	{"version",		CB_NO_ARG, NULL, 'V'},
-	{"module",	CB_RQ_ARG, NULL, 'M'},
-	{NULL,		0, NULL, 0}
+	{"version",   	CB_NO_ARG, NULL, 'V'},
+	{NULL, 0, NULL, 0}
 };
 
 #if	defined(ENABLE_NLS) && defined(COB_NLS_RUNTIME)
@@ -63,9 +61,6 @@ static const struct option long_options[] = {
 #endif
 
 
-/**
- * Display cobcrun build and version date
- */
 static void
 cobcrun_print_version (void)
 {
@@ -90,7 +85,7 @@ cobcrun_print_version (void)
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
 	puts ("Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.");
-	printf (_("Written by %s\n"), "Roger While, Simon Sobisch, Brian Tiffin");
+	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"\
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Built     %s"), cob_build_stamp);
@@ -99,9 +94,6 @@ cobcrun_print_version (void)
 	putchar ('\n');
 }
 
-/**
- * Display cobcrun help
- */
 static void
 cobcrun_print_usage (char * prog)
 {
@@ -119,29 +111,11 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -c <file>, -config=<file>   set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-env      display current runtime configuration\n"
 	        "                        (value and origin for all settings)"));
-	puts (_("  -m <preload>, -module <preload>   preload given modules and/or add\n"
-	        "                        additional entries to the search path"));
-}
-
-/**
- * split into path and file, or just path, or just file
- *  Note: strndup and strdup memory needs to be freed
- */
-static void
-cobcrun_split_path_file(char** p, char** f, char *pf)
-{
-	 char *slash = pf, *next;
-
-	 while ((next = strpbrk(slash + 1, "\\/"))) slash = next;
-	 if (pf != slash) slash++;
-
-	 *p = strndup(pf, slash - pf);
-	 *f = strdup(slash);
 }
 
 /* Set current argument from getopt as environment value */
 static int
-cobcrun_setenv (const char * environment, const int mode)
+cobcrun_setenv (const char * environment)
 {
 #if !HAVE_SETENV
 	int len;
@@ -156,55 +130,6 @@ cobcrun_setenv (const char * environment, const int mode)
 #endif
 }
 
-/**
- * Prepend a new directory path to the library search COB_LIBRARY_PATH
- * and setup a module COB_PRE_LOAD, for each component included.
- */
-static void
-cobcrun_initial_module (char *module_argument)
-	int envop_return;
-	char *pathname, *filename;
-	char env_space[COB_MEDIUM_BUFF], *envptr;
-
-	/* See if we have a /dir/path/module, or a /dir/path/ or a module (no slash) */
-	cobcrun_split_path_file(&pathname, &filename, module_argument);
-
-	if (pathname && *pathname) {
-		memset(env_space, 0, COB_MEDIUM_BUFF);
-		envptr = getenv("COB_LIBRARY_PATH");
-		if (envptr) {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s:%s", pathname, envptr);
-		} else {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s", pathname);
-		}
-		envop_return = setenv("COB_LIBRARY_PATH", env_space, 1);
-		free(pathname);
-		if (envop_return) {
-			fprintf(stderr, "Problem with setenv COB_LIBRARY_PATH: %d\n", errno);
-			return;
-		}
-	}
-
-	if (filename && *filename) {
-		memset(env_space, 0, COB_MEDIUM_BUFF);
-		envptr = getenv("COB_PRE_LOAD");
-		if (envptr) {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s:%s", filename, envptr);
-		} else {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s", filename);
-		}
-		envop_return = setenv("COB_PRE_LOAD", filename, 1);
-		free(filename);
-		if (envop_return) {
-			fprintf(stderr, "Problem with setenv COB_PRE_LOAD: %d\n", errno);
-			return;
-		}
-	}
-}
-
-/**
- * Process command line arguments; help, version, and module setting
- */
 static void
 process_command_line (int argc, char *argv[])
 {
@@ -239,7 +164,7 @@ process_command_line (int argc, char *argv[])
 				exit (1);
 			}
 			arg_shift++;
-			cobcrun_setenv ("COB_RUNTIME_CONFIG", 0);
+			cobcrun_setenv ("COB_RUNTIME_CONFIG");
 			/* shift argument again if two part argument was used */
 			if (c == 'c') {
 				arg_shift++;
@@ -268,23 +193,10 @@ process_command_line (int argc, char *argv[])
 			putchar ('\n');
 			print_version();
 			exit (0);
-
-		case 'm':
-		case 'M':
-			/* -m <preload> */
-			arg_shift++;
-			cobcrun_initial_module (optarg)
-			/* shift argument again if two part argument was used */
-			if (c == 'm') {
-				arg_shift++;
-			}
 		}
 	}
 }
 
-/**
- * cobcrun, for invoking entry points from dynamic shared object libraries
- */
 int
 main (int argc, char **argv)
 {
@@ -307,9 +219,6 @@ main (int argc, char **argv)
 		putc ('\n', stderr);
 		return 1;
 	}
-
-	/* Initialize the COBOL system, resolve the PROGRAM name */
-	/*   and invoke, wrapped in a STOP RUN, if found */
 	cob_init (argc - arg_shift, &argv[arg_shift]);
 	unifunc.funcvoid = cob_resolve (argv[arg_shift]);
 	if (unifunc.funcvoid == NULL) {
