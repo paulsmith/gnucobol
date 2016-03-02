@@ -13,7 +13,7 @@
 	* cobcrun.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
 
-2014-05-06  Philipp BÃ¶hme <phi.boehme@googlemail.com>
+2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* cobcrun.c : Added --runtime-env for displaying current runtime variables.;
 	  --version shows both version numbers of cobcrun (new) and libcob.;
@@ -24,6 +24,12 @@
 	* cobcrun.c : Tweaked --info for showing current settings (environment) along
 	  with settings hard-wired during build (COB_xyz),
 	  removed entries in output that belongs to cobc only
+
+2014-01-25  Brian Tiffin <btiffin@gnu.org>
+	* cobcrun.c : Added -M path/module command line option
+	  if path/ found, prepend to COB_LIBRARY_PATH
+	  if module (no slash) found, prepend to COB_PRE_LOAD
+	  may set both.
 
 2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
