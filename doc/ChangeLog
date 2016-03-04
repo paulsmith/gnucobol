@@ -1,4 +1,11 @@
 
+2016-03-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* gnucobol.texi: Copyediting: improved capitalisation of headings,
+	  changed "Hello World!" to "Hello, world!", formatted COBOL/C/compiler
+	  options as code, added missing full stops in bullet point lists and
+	  improved some sentences.
+
 2016-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: remove the built-prefix from cobc/cobcrun
