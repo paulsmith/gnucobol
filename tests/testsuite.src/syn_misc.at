@@ -2064,7 +2064,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Adding/removing reserved words])
-AT_KEYWORDS([misc extension configuration])
+AT_KEYWORDS([misc extensions configuration])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.

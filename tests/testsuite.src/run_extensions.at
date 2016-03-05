@@ -960,6 +960,8 @@ AT_CLEANUP
 AT_SETUP([CALL BY VALUE alphanumeric item])
 AT_KEYWORDS([extensions])
 
+AT_XFAIL_IF(true)
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -1311,6 +1313,8 @@ AT_CLEANUP
 
 AT_SETUP([PROCEDURE DIVISION USING BY ...])
 AT_KEYWORDS([extensions])
+
+AT_XFAIL_IF(true)
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.

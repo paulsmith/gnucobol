@@ -5546,6 +5546,7 @@ procedure_type:
 	if (current_program->flag_chained) {
 		cb_error (_("%s not allowed in CHAINED programs"), "BY VALUE");
 	} else {
+		PENDING (_("BY VALUE parameters"));
 		call_mode = CB_CALL_BY_VALUE;
 	}
   }

@@ -1,4 +1,9 @@
 
+2016-03-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: disabled formal BY VALUE paremeters, pending fix of bug
+	  #109.
+
 2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, config.c, reserved.c: added reserved and specify-all-
