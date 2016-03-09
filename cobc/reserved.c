@@ -2640,9 +2640,17 @@ add_reserved_word_without_init (const char *word)
 	size = strlen (word);
 	reserved = cobc_main_malloc (sizeof (struct reserved_word_list));
 	     
-	reserved->word = cobc_main_malloc (size + 1U);
-        strcpy (reserved->word, word);
-
+	reserved->is_context_sensitive = word[size - 1] == '*';
+	/* Remove the trailing asterisk if present */
+	if (reserved->is_context_sensitive) {
+		reserved->word = cobc_main_malloc (size);
+		strncpy (reserved->word, word, size);
+		reserved->word[size - 1] = '\0';
+	} else {
+		reserved->word = cobc_main_malloc (size + 1U);
+		strcpy (reserved->word, word);
+	}
+	
 	/* Insert word at beginning of cobc_user_res_list. */
 	reserved->next = cobc_user_res_list;
 	cobc_user_res_list = reserved;
@@ -2703,12 +2711,19 @@ get_reserved_words_from_user_list (void)
 		if (p) {
 			reserved_words[i] = *p;
 			/*
+			  Note that we ignore if the user specified this word
+			  as context-sensitive.
+			*/
+			
+			/*
 			  We use the string literal in the default_reserved_
 			  words array.
 			*/
 		        pop_reserved_word (FREE_WORD_STR);
 		} else {
 			reserved_words[i] = to_find;
+			reserved_words[i].context_sens
+				= cobc_user_res_list->is_context_sensitive;
 			/*
 			  We use the string copy allocated for cobc_user_res_
 			  list.

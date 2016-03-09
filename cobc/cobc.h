@@ -222,6 +222,7 @@ struct cb_exception {
 struct reserved_word_list {	
 	struct reserved_word_list	*next;	/* next pointer */
 	char				*word;
+	int				is_context_sensitive;
 };
 
 /* Basic memory structure */

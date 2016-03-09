@@ -1,4 +1,9 @@
 
+2016-03-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c, cobc.h: enhanced reserved conf. option to allow
+	  specification of context-sensitive words.
+
 2016-03-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: disabled formal BY VALUE paremeters, pending fix of bug
