@@ -1,4 +1,11 @@
 
+2016-03-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: consolidated copy-and-pasted code in numerous functions,
+	  including: SUBSTITUTE(-CASE), NUMVAL(-C), VARIANCE and
+	  LOCALE-TIME(-FROM-SECONDS).
+	* intrinsic.c: renamed "xqtyear" variables to "current_year".
+
 2016-02-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c (set_config_val): removed use of cob_strcat for output of
