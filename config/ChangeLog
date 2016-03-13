@@ -1,39 +1,55 @@
 
+2016-03-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* acu.conf: added ASSIGN TO devices as context-sensitive words
+
 2016-03-09  Edward Hart <edward.dan.hart@gmail.com>
 
-	* added/marked context-sensitive words
+	* general: added/marked context-sensitive words
 
 2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
 
-	* added reserved and specify-all-reserved
-	* removed cobol85-reserved
+	* general: added reserved and specify-all-reserved
+	* general: removed cobol85-reserved
 
 2015-12-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added call-overflow
+	* general: added call-overflow
+
+2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* runtime.cfg: update for documentation
+	* runtime_empty.cfg: new empty file for faster startup (used in testsuite)
 
 2015-09-23  Edward Hart <edward.dan.hart@gmail.com>
 
-	* added numeric-boolean and acucobol-literals
+	* general: added numeric-boolean and acucobol-literals
 
 2015-07-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added new configuration cobol2014.conf (most values marked as not verified yet)
-	* added literal-length, numeric-literal-length
+	* cobol2014.conf: added new configuration for COBOL 2014 (most values
+	  marked as not verified yet)
+	* general: added literal-length, numeric-literal-length
+
+2015-03-14  Ron Norman <rjn@inglenet.com> 
+
+	* runtime.cfg: added all configuration options with documentation
 
 2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added new configuration type "runtime configuration": runtime.cfg which
-	  will include all runtime flags and short documentation of these (TODO)
+	* runtime.cfg: added new configuration type "runtime configuration",
+	  runtime.cfg will include all runtime flags and short documentation
+	  of these (TODO)
 
 2014-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added new configuration acu.conf (most values marked as not verified yet)
-	* added word-length
+	* acu.conf: added new configuration for ACUCOBOL-GT (most values marked as
+	  not verified yet)
+	* general: added word-length
 
 2014-07-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added accept-update and accept-auto (set to "no" in all
+	* general: added accept-update and accept-auto (set to "no" in all
 	  configuration files)
 
 2010-06-28  Roger While <simrw@sim-basis.de>
