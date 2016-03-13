@@ -1638,7 +1638,7 @@ get_interval_and_current_year_from_args (const int num_args, va_list args,
 
 /* Locale time */
 
-#if defined(_WIN32) || defined(_CYGWIN_) || defined (HAVE_LANGINFO_CODESET)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined (HAVE_LANGINFO_CODESET)
 #ifdef HAVE_LANGINFO_CODESET
 static int
 locale_time (const int hours, const int minutes, const int seconds,
@@ -1683,6 +1683,7 @@ static int
 locale_time (const int hours, const int minutes, const int seconds,
 	     cob_field *locale_field, char *buff)
 {
+	size_t		len;
 	unsigned char	*p;
 	LCID		localeid = LOCALE_USER_DEFAULT;
 	SYSTEMTIME	syst;
@@ -5580,6 +5581,7 @@ cob_intr_lcl_time_from_secs (const int offset, const int length,
 derror:
 #endif
 	cob_alloc_set_field_spaces (10);
+	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 	return curr_field;
 }
 
