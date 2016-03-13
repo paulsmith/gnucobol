@@ -35,6 +35,9 @@
 #include <math.h>
 
 /* Note we include the Cygwin version of windows.h here */
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_LANGINFO_CODESET)
+#define LOCTIME_BUFSIZE 128
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 #undef	HAVE_LANGINFO_CODESET
 #define WIN32_LEAN_AND_MEAN
@@ -46,6 +49,7 @@
 
 #ifdef	HAVE_LANGINFO_CODESET
 #include <langinfo.h>
+#endif
 #endif
 
 #ifdef	HAVE_LOCALE_H
@@ -1646,7 +1650,7 @@ locale_time (const int hours, const int minutes, const int seconds,
 {
 	char		*deflocale = NULL;
 	struct tm	tstruct;
-	char		buff2[128] =  { '\0' };
+	char		buff2[LOCTIME_BUFSIZE] =  { '\0' };
 	char		locale_buff[COB_SMALL_BUFF] =  { '\0' };
 
 	/* Initialize tstruct to given time */
@@ -1666,15 +1670,15 @@ locale_time (const int hours, const int minutes, const int seconds,
 	}
 
 	/* Get strftime format string for locale */
-	memset (buff2, 0, sizeof(buff2));
-	snprintf(buff2, sizeof(buff2) - 1, "%s", nl_langinfo(T_FMT));
+	memset (buff2, 0, LOCTIME_BUFSIZE);
+	snprintf(buff2, LOCTIME_BUFSIZE - 1, "%s", nl_langinfo(T_FMT));
 
-	/* Set locale if not yet done */
+	/* Set locale if not done yet */
 	if (deflocale) {
 		(void) setlocale (LC_ALL, cobglobptr->cob_locale);
 	}
 
-	strftime (buff, sizeof(buff), buff2, &tstruct);
+	strftime (buff, LOCTIME_BUFSIZE, buff2, &tstruct);
 
 	return 0;
 }
@@ -1726,7 +1730,7 @@ locale_time (const int hours, const int minutes, const int seconds,
 
 	/* Get locale time */
 	if (!GetTimeFormat (localeid, LOCALE_NOUSEROVERRIDE, &syst, NULL, buff,
-			    sizeof(buff))) {
+			    LOCTIME_BUFSIZE)) {
 		return 1;
 	}
 
@@ -5494,7 +5498,7 @@ cob_intr_locale_time (const int offset, const int length,
 	int		hours;
 	int		minutes;
 	int		seconds;
-	char		buff[128] = { '\0' };
+	char		buff[LOCTIME_BUFSIZE] = { '\0' };
 #endif
 
 	cob_set_exception (0);
@@ -5553,7 +5557,7 @@ cob_intr_lcl_time_from_secs (const int offset, const int length,
 	int		hours;
 	int		minutes;
 	int		seconds;
-	char		buff[128] = { '\0' };
+	char		buff[LOCTIME_BUFSIZE] = { '\0' };
 #endif
 
 	cob_set_exception (0);

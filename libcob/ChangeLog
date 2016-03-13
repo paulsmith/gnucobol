@@ -1,4 +1,10 @@
 
+2016-03-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* intrinsic.c (locale_time): consolidation still used sizeof(buff) after
+	  buff changed from char [] to char *, fixed by introducing LOCTIME_BUFSIZE
+	* intrinsic.c (cob_intr_lcl_time_from_secs) re-added missing exception
+
 2016-03-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: consolidated copy-and-pasted code in numerous functions,
