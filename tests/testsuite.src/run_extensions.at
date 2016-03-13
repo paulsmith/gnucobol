@@ -22,7 +22,7 @@
 
 
 AT_SETUP([CALL BY CONTENT binary and literal])
-AT_KEYWORDS([extensions literals])
+AT_KEYWORDS([extensions literals]) 
 
 AT_DATA([dump.c], [
 #include <stdio.h>
@@ -708,6 +708,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([MOVE of non-integer to alphanumeric])
 AT_KEYWORDS([extensions])

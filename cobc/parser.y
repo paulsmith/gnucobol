@@ -1319,7 +1319,9 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token POSITIVE
 %token PRESENT
 %token PREVIOUS
+%token PRINT
 %token PRINTER
+%token PRINTER_1
 %token PRINTING
 %token PROCEDURE
 %token PROCEDURES
@@ -2916,7 +2918,7 @@ assign_clause:
 		current_file->special = COB_SELECT_STDIN;
 	}
   }
-| ASSIGN _to_using _ext_clause PRINTER opt_assignment_name
+| ASSIGN _to_using _ext_clause printer_name opt_assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
@@ -2924,11 +2926,28 @@ assign_clause:
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
 	} else {
+		/* RM/COBOL always expects an assignment name here - we ignore this
+		   for PRINTER + PRINTER-1 as ACUCOBOL allows this for using as alias */
 		current_file->flag_ext_assign = 0;
-		current_file->assign =
-			cb_build_alphanumeric_literal ("LPT1", (size_t)4);
+		if ($4 == cb_int0) {
+			current_file->assign =
+				cb_build_alphanumeric_literal ("PRINTER",	(size_t)7);
+		} else if ($4 == cb_int1) {
+			current_file->assign =
+				cb_build_alphanumeric_literal ("PRINTER-1",	(size_t)9);
+		} else {
+			current_file->assign =
+				cb_build_alphanumeric_literal ("LPT1",	(size_t)4);
+		}
+		
 	}
   }
+;
+
+printer_name:
+  PRINTER	{ $$ = cb_int0; }
+| PRINTER_1	{ $$ = cb_int1; }
+| PRINT		{ $$ = cb_int4; }
 ;
 
 device_name:
@@ -5167,7 +5186,7 @@ screen_description:
 		description_field = current_field;
 	}
 	if (current_field->flag_occurs && !has_relative_pos (current_field)) {
-		cb_error ("Relative LINE/COLUMN clause required with OCCURS");
+		cb_error (_("Relative LINE/COLUMN clause required with OCCURS"));
 	}
   }
 | level_number error TOK_DOT

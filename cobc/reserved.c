@@ -51,7 +51,9 @@ static const struct system_struct	system_table[] = {
 	{"SYSLIST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
 	{"SYSLST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
 	{"STDOUT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
+	{"PRINT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
 	{"PRINTER",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
+	{"PRINTER-1",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
 	{"SYSERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR},
 	{"STDERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR},
 	{"CONSOLE",		CB_DEVICE_NAME,  CB_DEVICE_CONSOLE},
@@ -1367,7 +1369,13 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PREVIOUS",			0, 0, PREVIOUS,			/* 2002 (C/S) */
 				0, 0
   },
+  { "PRINT",			0, 1, PRINT,			/* Extension */
+				0, CB_CS_ASSIGN
+  },
   { "PRINTER",			0, 1, PRINTER,			/* Extension */
+				0, CB_CS_ASSIGN
+  },
+  { "PRINTER-1",			0, 1, PRINTER_1,			/* Extension */
 				0, CB_CS_ASSIGN
   },
   { "PRINTING",			0, 0, PRINTING,			/* 2002 */

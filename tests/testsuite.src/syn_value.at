@@ -254,6 +254,7 @@ prog.cob: 10: Warning: Value size exceeds data size
 
 AT_CLEANUP
 
+
 AT_SETUP([Alphanumeric-edited item])
 AT_KEYWORDS([value])
 
@@ -319,3 +320,26 @@ AT_CLEANUP
 # 28) TODO
 
 # 29) TODO
+
+
+
+AT_SETUP([Implicit picture from value])
+AT_KEYWORDS([value])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 IMPHEAD.
+          05 IMPPIC     VALUE " abc".
+       PROCEDURE        DIVISION.
+           DISPLAY IMPPIC END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [],
+[prog.cob: 7: Warning: Defining implicit picture size 4 for 'IMPPIC'
+])
+
+AT_CLEANUP
