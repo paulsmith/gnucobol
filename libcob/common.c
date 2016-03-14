@@ -4381,8 +4381,10 @@ cob_expand_env_string (char *strval)
 				if(strval[k] == '}')
 					k++;
 				k--;
-			} else if(!isspace((unsigned char)strval[k])) {
+			} else if (!isspace ((unsigned char)strval[k])) {
 				env[j++] = strval[k];
+			} else {
+				env[j++] = ' ';
 			}
 		}
 		env[j] = 0;
