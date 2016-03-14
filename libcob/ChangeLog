@@ -188,6 +188,7 @@
 
 	* common.c (cob_expand_env_string): copy SPACE, LR, CR, HT, VT as spaces,
 	  the first implementation dropped them completely
+	* fileio.c fixed to avoid core dump when COB_SYNC and using BDB
 
 2015-06-24  Edward Hart <edward.dan.hart@gmail.com>
 
