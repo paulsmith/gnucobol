@@ -223,6 +223,7 @@ struct reserved_word_list {
 	struct reserved_word_list	*next;	/* next pointer */
 	char				*word;
 	int				is_context_sensitive;
+	char				*alias_for;
 };
 
 /* Basic memory structure */
@@ -452,6 +453,7 @@ extern unsigned int	cb_verify (const enum cb_support, const char *);
 extern struct reserved_word_list	*cobc_user_res_list;
 
 extern void		remove_reserved_word (const char *);
-extern void		add_reserved_word (const char *);
+extern void		add_reserved_word (const char *, const char *,
+					   const int);
 
 #endif /* CB_COBC_H */

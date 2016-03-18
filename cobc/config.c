@@ -301,7 +301,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (name, "not-reserved") == 0) {
 				remove_reserved_word (val);
 			} else if (strcmp (name, "reserved") == 0) {
-			        add_reserved_word (val);
+			        add_reserved_word (val, fname, line);
 			} else {
 				*((const char **)var) = val;
 			}

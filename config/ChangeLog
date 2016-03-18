@@ -1,4 +1,9 @@
 
+2016-03-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: updated comment for reserved to describe how to specify
+	  aliases
+
 2016-03-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* acu.conf: added ASSIGN TO devices as context-sensitive words

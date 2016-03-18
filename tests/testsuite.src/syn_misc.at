@@ -2084,3 +2084,23 @@ AT_CHECK([$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.
 [prog.cob: 7: Error: 'hello' reserved word, but not supported
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Adding aliases])
+AT_KEYWORDS([misc extensions configuration])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  prog.
+
+       PROCEDURE DIVISION.
+           FOO "Hello, world!"
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob], [0], [],
+[Configuration Warning: cb_conf: Ignored asterisk at end of alias target
+Configuration Error
+Alias target 'FOO' is not a default reserved word
+])
+AT_CLEANUP
