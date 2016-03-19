@@ -1316,6 +1316,8 @@ struct cb_program {
 	unsigned int	flag_gen_debug		: 1;	/* DEBUGGING MODE */
 
 	unsigned int	flag_save_exception	: 1;	/* Save execption code */
+	unsigned int	flag_report		: 1;	/* Have REPORT SECTION */
+	unsigned int	flag_void		: 1;	/* void return for subprogram */
 };
 
 

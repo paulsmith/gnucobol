@@ -1,4 +1,9 @@
 
+2016-03-19  Brian Tiffin
+
+	* codegen.c, reserved.c, parser.y, tree.h: Allow for
+	  PROCEDURE DIVISION RETURNING OMITTED and CALL ... RETURINING NOTHING
+
 2016-03-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c, config.c, cobc.h: added ability to specify aliases for

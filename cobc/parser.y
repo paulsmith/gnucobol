@@ -193,6 +193,7 @@ static unsigned int		needs_field_debug;
 static unsigned int		needs_debug_item;
 static unsigned int		env_div_seen;
 static unsigned int		header_check;
+static unsigned int		call_nothing;
 
 static cb_tree			advancing_value;
 static cb_tree			upon_value;
@@ -1274,6 +1275,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token NO_ECHO			"NO-ECHO"
 %token NORMAL
 %token NOT
+%token NOTHING
 %token NOT_END			"NOT END"
 %token NOT_EOP			"NOT EOP"
 %token NOT_ESCAPE		"NOT ESCAPE"
@@ -5680,6 +5682,16 @@ procedure_returning:
 		cb_error (_("RETURNING clause is required for a FUNCTION"));
 	}
   }
+| RETURNING OMITTED
+  {
+	if (current_program->flag_main) {
+		cb_error (_("RETURNING clause cannot be OMITTED for main program"));
+	}
+	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+		cb_error (_("RETURNING clause cannot be OMITTED for a FUNCTION"));
+	}
+	current_program->flag_void = 1;
+  }
 | RETURNING WORD
   {
 	struct cb_field	*f;
@@ -6501,6 +6513,7 @@ call_statement:
   {
 	begin_statement ("CALL", TERM_CALL);
 	cobc_cs_check = CB_CS_CALL;
+	call_nothing = 0;
   }
   call_body
   end_call
@@ -6520,6 +6533,14 @@ call_body:
 	    !strcmp ((const char *)(CB_LITERAL($2)->data), current_program->orig_program_id)) {
 		cb_warning_x ($2, _("Recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
+	}
+	/* For CALL ... RETURNING NOTHING, set the call convention bit */
+	if (call_nothing) {
+		if ($1 && CB_INTEGER_P ($1)) {
+			$1 = cb_int ((CB_INTEGER ($1)->val) | CB_CONV_NO_RET_UPD);
+		} else {
+			$1 = cb_int (CB_CONV_NO_RET_UPD);
+		}
 	}
 	cb_emit_call ($2, $3, $4, $5, $6, $1);
   }
@@ -6657,6 +6678,11 @@ call_returning:
   }
 | return_give null_or_omitted
   {
+	$$ = cb_null;
+  }
+| return_give NOTHING
+  {
+	call_nothing = CB_CONV_NO_RET_UPD;
 	$$ = cb_null;
   }
 | return_give ADDRESS _of identifier

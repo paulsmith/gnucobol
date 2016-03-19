@@ -1236,6 +1236,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "NOT",			0, 0, NOT,			/* 2002 */
 				0, 0
   },
+  { "NOTHING",			0, 0, NOTHING,			/* Extension */
+				0, 0
+  },
   { "NULL",			0, 0, TOK_NULL,			/* 2002 */
 				0, 0
   },

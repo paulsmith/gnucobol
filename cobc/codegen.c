@@ -3790,7 +3790,7 @@ output_call (struct cb_call *p)
 
 	output (");\n");
 
-	if (p->call_returning) {
+	if (p->call_returning && (!(p->convention & CB_CONV_NO_RET_UPD))) {
 		if (p->call_returning == cb_null) {
 			output_prefix ();
 			output_integer (current_prog->cb_return_code);
@@ -6989,18 +6989,34 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 	if (prog->nested_level) {
 		if (gencode) {
-			output ("static int\n");
+			if (prog->flag_void) {
+				output("void\n");
+			} else {
+				output ("static int\n");
+			}
 		} else {
-			output ("static int\t\t");
+			if (prog->flag_void) {
+				output("void\t\t");
+			} else {
+				output ("static int\t\t");
+			}
 		}
 	} else {
 		if (prog->flag_main && !prog->flag_recursive) {
 			output ("static ");
 		}
 		if (gencode) {
-			output ("int\n");
+			if (prog->flag_void && !prog->flag_main) {
+				output ("void\n");
+			} else {
+				output ("int\n");
+			}
 		} else {
-			output ("int\t\t\t");
+			if (prog->flag_void && !prog->flag_main) {
+				output ("void\t\t\t");
+			} else {
+				output ("int\t\t\t");
+			}
 		}
 	}
 
@@ -7274,7 +7290,8 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
 		parmnum = 0;
-		output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
+		//output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
+		output ("  switch (module->cob_procedure_params) {\n");
 		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
 			output ("  case %u:\n", parmnum);
 			for (n = 0; n < parmnum; ++n) {
@@ -7329,10 +7346,19 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 
 	if (!prog->nested_level) {
-		output ("  return %s_ (%d", prog->program_id, progid++);
+		if (prog->flag_void && !prog->flag_main) {
+			output ("  return (void)%s_ (%d", prog->program_id, progid++);
+		} else {
+			output ("  return %s_ (%d", prog->program_id, progid++);
+		}
 	} else {
-		output ("  return %s_%d_ (%d", prog->program_id,
-			prog->toplev_count, progid++);
+		if (prog->flag_void && !prog->flag_main) {
+			output ("  return (void)%s_%d_ (%d", prog->program_id,
+				prog->toplev_count, progid++);
+		} else {
+			output ("  return %s_%d_ (%d", prog->program_id,
+				prog->toplev_count, progid++);
+		}
 	}
 
 	if (!using_list && !parameter_list) {
