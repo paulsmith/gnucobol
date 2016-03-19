@@ -7290,8 +7290,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
 		parmnum = 0;
-		//output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
-		output ("  switch (module->cob_procedure_params) {\n");
+		output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
 		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
 			output ("  case %u:\n", parmnum);
 			for (n = 0; n < parmnum; ++n) {
