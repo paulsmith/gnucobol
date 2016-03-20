@@ -4420,3 +4420,96 @@ AT_CHECK([./prog], [0], ignore, [])
 
 AT_CLEANUP
 
+# PROCEDURE DIVISION RETURNING OMITTED
+AT_SETUP([void PROCEDURE])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       PROCEDURE        DIVISION.
+           CALL "callee" RETURNING OMITTED
+           END-CALL.
+           DISPLAY RETURN-CODE WITH NO ADVANCING
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
+AT_CHECK([./prog], [0], [+000000000], [])
+
+AT_CLEANUP
+
+# PROCEDURE DIVISION RETURNING OMITTED, CALL RETURNING NOTHING
+AT_SETUP([void PROCEDURE, NOTHING return])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       PROCEDURE        DIVISION.
+           MOVE 42 TO RETURN-CODE
+           CALL "callee" RETURNING NOTHING
+           END-CALL.
+           DISPLAY RETURN-CODE WITH NO ADVANCING
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
+AT_CHECK([./prog], [42], [+000000042], [])
+
+AT_CLEANUP
+
+# Disallow PROCEDURE DIVISION RETURNING OMITTED for main
+AT_SETUP([void PROCEDURE, main not allowed])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [], [ignore])
+
+AT_CLEANUP
+
+# Disallow PROCEDURE DIVISION RETURNING OMITTED for FUNCTION
+AT_SETUP([void PROCEDURE not allowed for FUNCTION])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [1], [], [ignore])
+
+AT_CLEANUP
+

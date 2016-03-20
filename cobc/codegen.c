@@ -7006,13 +7006,13 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 			output ("static ");
 		}
 		if (gencode) {
-			if (prog->flag_void && !prog->flag_main) {
+			if (prog->flag_void) {
 				output ("void\n");
 			} else {
 				output ("int\n");
 			}
 		} else {
-			if (prog->flag_void && !prog->flag_main) {
+			if (prog->flag_void) {
 				output ("void\t\t\t");
 			} else {
 				output ("int\t\t\t");
@@ -7345,13 +7345,13 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 
 	if (!prog->nested_level) {
-		if (prog->flag_void && !prog->flag_main) {
+		if (prog->flag_void) {
 			output ("  return (void)%s_ (%d", prog->program_id, progid++);
 		} else {
 			output ("  return %s_ (%d", prog->program_id, progid++);
 		}
 	} else {
-		if (prog->flag_void && !prog->flag_main) {
+		if (prog->flag_void) {
 			output ("  return (void)%s_%d_ (%d", prog->program_id,
 				prog->toplev_count, progid++);
 		} else {
