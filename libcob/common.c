@@ -362,6 +362,9 @@ cob_exit_common (void)
 	}
 
 	/* Free last stuff */
+	if (cob_last_sfile) {
+		cob_free ((void *)cob_last_sfile);
+	}
 	if (runtime_err_str) {
 		cob_free (runtime_err_str);
 	}
@@ -1394,7 +1397,10 @@ cob_set_location (const char *sfile, const unsigned int sline,
 			if (!cob_trace_file) return; /* silence warnings */
 		}
 		if (!cob_last_sfile || strcmp (cob_last_sfile, sfile)) {
-			cob_last_sfile = sfile;
+			if (cob_last_sfile) {
+				cob_free((void *)cob_last_sfile);
+			}
+			cob_last_sfile = cob_strdup (sfile);
 			fprintf (cob_trace_file, "Source :    '%s'\n", sfile);
 		}
 		if (COB_MODULE_PTR->module_name) {
@@ -1423,7 +1429,10 @@ cob_trace_section (const char *para, const char *source, const int line)
 		}
 		if (source &&
 		    (!cob_last_sfile || strcmp (cob_last_sfile, source))) {
-			cob_last_sfile = source;
+			if (cob_last_sfile) {
+				cob_free ((void *)cob_last_sfile);
+			}
+			cob_last_sfile = cob_strdup (source);
 			fprintf (cob_trace_file, "Source:     '%s'\n", source);
 		}
 		if (COB_MODULE_PTR->module_name) {
