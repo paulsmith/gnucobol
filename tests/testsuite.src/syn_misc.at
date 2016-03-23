@@ -2104,3 +2104,26 @@ Configuration Error
 Alias target 'FOO' is not a default reserved word
 ])
 AT_CLEANUP
+
+
+AT_SETUP([ANY LENGTH item as BY VALUE formal parameter])
+AT_KEYWORDS([misc BY VALUE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       01  str        ANY LENGTH PIC X.
+       
+       PROCEDURE DIVISION USING VALUE str.
+           GOBACK
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: Warning: 'BY VALUE parameters' not implemented
+prog.cob: 9: Error: ANY LENGTH items may only be BY REFERENCE formal parameters
+])
+AT_CLEANUP

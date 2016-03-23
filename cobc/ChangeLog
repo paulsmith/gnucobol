@@ -1,5 +1,10 @@
 
-2016-03-19  Brian Tiffin
+2016-03-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: added check that BY VALUE formal parameters are not ANY
+	  LENGTH (see bug #219).
+
+2016-03-19  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c, reserved.c, parser.y, tree.h: Allow for
 	  PROCEDURE DIVISION RETURNING OMITTED and CALL ... RETURINING NOTHING
