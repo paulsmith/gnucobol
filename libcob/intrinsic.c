@@ -1435,9 +1435,9 @@ int_strncasecmp (const void *s1, const void *s2, size_t n)
 /* NUMVAL */
 
 static int
-in_last_two_chars (const cob_field *field, const int i)
+in_last_n_chars (const cob_field *field, const size_t n, const int i)
 {
-	return i >= (field->size - 1);
+	return i >= (field->size - n);
 }
 
 static int
@@ -1447,8 +1447,13 @@ at_cr_or_db (const cob_field *srcfield, const int pos)
 		|| memcmp (&srcfield->data[pos], "DB", (size_t)2) == 0;
 }
 
+enum numval_type {
+	NUMVAL,
+	NUMVAL_C
+};
+
 static cob_field *
-numval (cob_field *srcfield, cob_field *currency)
+numval (cob_field *srcfield, cob_field *currency, const enum numval_type type)
 {
 	unsigned char	*final_buff = cob_malloc (srcfield->size + 1U);
 	unsigned char	*currency_data = NULL;
@@ -1461,7 +1466,7 @@ numval (cob_field *srcfield, cob_field *currency)
 	unsigned char	cur_symb = COB_MODULE_PTR->currency_symbol;
 
 	/* Validate source field */
-	if (cob_check_numval (srcfield, currency, 0, 0)) {
+	if (cob_check_numval (srcfield, currency, type == NUMVAL_C, 0)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
 		return curr_field;
@@ -1472,20 +1477,20 @@ numval (cob_field *srcfield, cob_field *currency)
 	}
 
 	for (i = 0; i < srcfield->size; ++i) {
-		if (!in_last_two_chars (srcfield, i)
+		if (!in_last_n_chars (srcfield, 2, i)
 		    && at_cr_or_db (srcfield, i)) {
 			sign = 1;
 			break;
 		}
 
 		if (currency_data) {
-			if (!in_last_two_chars (srcfield, i)
+			if (!in_last_n_chars (srcfield, currency->size, i)
 			    && !memcmp (&srcfield->data[i], currency_data,
 					currency->size)) {
 				i += (currency->size - 1);
 				continue;
 			}
-		} else if (srcfield->data[i] == cur_symb) {
+		} else if (type == NUMVAL_C && srcfield->data[i] == cur_symb) {
 			continue;
 		}
 
@@ -4578,13 +4583,13 @@ cob_intr_sqrt (cob_field *srcfield)
 cob_field *
 cob_intr_numval (cob_field *srcfield)
 {
-	return numval (srcfield, NULL);
+	return numval (srcfield, NULL, NUMVAL);
 }
 
 cob_field *
 cob_intr_numval_c (cob_field *srcfield, cob_field *currency)
 {
-	return numval (srcfield, currency);
+	return numval (srcfield, currency, NUMVAL_C);
 }
 
 cob_field *

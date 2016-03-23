@@ -1,4 +1,9 @@
 
+2016-03-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c (numval): added missing NUMVAL-C-specific code I missed in
+          r793, causing bug #218.
+
 2016-03-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* common.c (cob_set_location, cob_trace_section, cob_exit_common): fix for
