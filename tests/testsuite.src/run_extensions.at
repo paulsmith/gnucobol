@@ -995,7 +995,7 @@ AT_CHECK([./prog], [0], [])
 
 AT_CLEANUP
 
-AT_SETUP([Case independent PROGRAM-ID])
+AT_SETUP([Case-sensitive PROGRAM-ID])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [

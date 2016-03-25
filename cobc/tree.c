@@ -1414,6 +1414,9 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 	p = cobc_parse_malloc (sizeof (struct cb_program));
 	p->word_table = cobc_parse_malloc (CB_WORD_TABLE_SIZE);
 
+	p->common.tag = CB_TAG_PROGRAM;
+	p->common.category = CB_CATEGORY_UNKNOWN;
+	
 	p->next_program = last_program;
 	p->nested_level = nest_level;
 	p->decimal_point = '.';
@@ -2568,7 +2571,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 cb_tree
 cb_build_reference (const char *name)
 {
-	struct cb_reference *p;
+	struct cb_reference	*p;
 	cb_tree			r;
 
 	p = make_tree (CB_TAG_REFERENCE, CB_CATEGORY_UNKNOWN,
@@ -3234,6 +3237,16 @@ cb_build_set_attribute (const struct cb_field *fld,
 }
 
 /* FUNCTION */
+
+cb_tree
+cb_build_repo_func_prototype (void)
+{
+	cb_tree	func_prototype;
+	
+	func_prototype = make_tree (CB_TAG_FUNC_PROTOTYPE, CB_CATEGORY_UNKNOWN,
+				    sizeof (struct cb_tree_common));
+	return func_prototype;
+}
 
 cb_tree
 cb_build_any_intrinsic (cb_tree args)

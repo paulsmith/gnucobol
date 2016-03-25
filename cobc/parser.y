@@ -127,6 +127,7 @@ struct cb_program		*current_program = NULL;
 struct cb_statement		*current_statement = NULL;
 struct cb_label			*current_section = NULL;
 struct cb_label			*current_paragraph = NULL;
+cb_tree				defined_prog_list = NULL;
 char				*cobc_glob_line = NULL;
 int				cb_exp_line = 0;
 
@@ -547,6 +548,173 @@ clear_initial_values (void)
 	}
 }
 
+/*
+  We must check for redefinitions of program-names and external program names
+  outside of the usual reference/word_list methods as it may have to be done in
+  a case-sensitive way.
+*/
+static void
+begin_scope_of_program_name (struct cb_program *program)
+{
+	const char	*prog_name = program->program_name;
+	const char	*prog_id = program->orig_program_id;
+	const char	*elt_name;
+	const char	*elt_id;
+	cb_tree		l;
+
+	/* Error if a program with the same name has been defined. */
+	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
+		elt_name = ((struct cb_program *) CB_VALUE (l))->program_name;
+		elt_id = ((struct cb_program *) CB_VALUE (l))->orig_program_id;
+		if (cb_fold_call && strcasecmp (prog_name, elt_name) == 0) {
+			cb_error_x ((cb_tree) program,
+				    _("Redefinition of program name '%s'"),
+				    elt_name);
+		} else if (strcmp (prog_id, elt_id) == 0) {
+		        cb_error_x ((cb_tree) program,
+				    _("Redefinition of program ID '%s'"),
+				    elt_id);
+			return;
+		}
+	}
+
+	/* Otherwise, add the program to the list. */
+	defined_prog_list = cb_list_add (defined_prog_list,
+					 (cb_tree) program);
+}
+
+static void
+remove_program_name (struct cb_list *l, struct cb_list *prev)
+{
+	if (prev == NULL) {
+		defined_prog_list = l->chain;
+	} else {
+		prev->chain = l->chain;
+	}
+	cobc_parse_free (l);
+}
+ 
+/* Remove the program from defined_prog_list, if necessary. */
+static void
+end_scope_of_program_name (struct cb_program *program)
+{
+	struct	cb_list	*prev = NULL;
+	struct	cb_list *l = (struct cb_list *) defined_prog_list;
+
+	if (program->nested_level == 0) {
+		return;
+	}
+
+	/* Remove any subprograms */
+	l = CB_LIST (defined_prog_list);
+        while (l) {
+		if (CB_PROGRAM (l->value)->nested_level > program->nested_level) {
+			remove_program_name (l, prev);
+			l = CB_LIST (prev->chain);
+		} else {
+			prev = l;
+			l = CB_LIST (l->chain);
+		}
+	}
+
+	/* Remove the specified program, if it is not COMMON */
+	if (!program->flag_common) {
+		l = (struct cb_list *) defined_prog_list;
+	        while (l) {
+			if (strcmp (program->orig_program_id,
+				    CB_PROGRAM (l->value)->orig_program_id)
+			    == 0) {
+				remove_program_name (l, prev);
+				l = CB_LIST (prev->chain);
+				break;
+			} else {
+				prev = l;
+				l = CB_LIST (l->chain);
+			}
+		}
+	}
+}
+
+static int
+setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+{
+	current_section = NULL;
+	current_paragraph = NULL;
+
+	if (CB_LITERAL_P (id)) {
+		stack_progid[depth] = (char *)(CB_LITERAL (id)->data);
+	} else {
+		stack_progid[depth] = (char *)(CB_NAME (id));
+	}
+
+	if (prog_end) {
+		if (!current_program->flag_validated) {
+			current_program->flag_validated = 1;
+			cb_validate_program_body (current_program);
+		}
+		clear_initial_values ();
+		current_program = cb_build_program (current_program, depth);
+		build_nested_special (depth);
+		cb_build_registers ();
+	} else {
+		prog_end = 1;
+	}
+
+	if (increment_depth ()) {
+	        return 1;
+	}
+
+	current_program->program_id = cb_build_program_id (id, as_literal, type == CB_FUNCTION_TYPE);
+	current_program->prog_type = type;
+
+	if (type == CB_PROGRAM_TYPE) {
+		if (!main_flag_set) {
+			main_flag_set = 1;
+			current_program->flag_main = !!cobc_flag_main;
+		}
+	} else { /* CB_FUNCTION_TYPE */
+		current_program->flag_recursive = 1;
+	}
+
+	if (CB_REFERENCE_P (id)) {
+	        cb_define (id, CB_TREE (current_program));
+	}
+
+	begin_scope_of_program_name (current_program);
+	
+	return 0;
+}
+
+static void
+clean_up_program (cb_tree name, const unsigned char type)
+{
+	char		*s;
+	const char	*type_str;
+
+	end_scope_of_program_name (current_program);
+
+	if (CB_LITERAL_P (name)) {
+		s = (char *)(CB_LITERAL (name)->data);
+	} else {
+		s = (char *)(CB_NAME (name));
+	}
+	if (depth) {
+		depth--;
+	}
+	if (strcmp (stack_progid[depth], s)) {
+		if (type == CB_PROGRAM_TYPE) {
+			type_str = _("END PROGRAM '%s' is different to PROGRAM-ID '%s'");
+		} else { /* CB_FUNCTION_TYPE */
+			type_str = _("END FUNCTION '%s' is different to FUNCTION-ID '%s'");
+		}
+		cb_error (type_str, s, stack_progid[depth]);
+	}
+	if (!current_program->flag_validated) {
+		current_program->flag_validated = 1;
+		cb_validate_program_body (current_program);
+	}
+}
+ 
 static void
 emit_duplicate_clause_message (const char *clause)
 {
@@ -1184,7 +1352,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token FULL
 %token FUNCTION
 %token FUNCTION_ID		"FUNCTION-ID"
-%token FUNCTION_NAME		"FUNCTION"
+%token FUNCTION_NAME		"Intrinsic function name"
 %token GENERATE
 %token GIVING
 %token GLOBAL
@@ -1359,7 +1527,6 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token REPORTING
 %token REPORTS
 %token REPOSITORY
-%token REPO_FUNCTION		"Intrinsic function name"
 %token REQUIRED
 %token RESERVE
 %token RESET
@@ -1486,8 +1653,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token USE
 %token USER
 %token USER_DEFAULT		"USER-DEFAULT"
-%token USER_FUNCTION_NAME	"User FUNCTION"
-%token USER_REPO_FUNCTION	"User FUNCTION name"
+%token USER_FUNCTION_NAME	"User function name"
 %token USING
 %token VALUE
 %token VARYING
@@ -1613,6 +1779,7 @@ start:
   {
 	clear_initial_values ();
 	current_program = NULL;
+	defined_prog_list = NULL;
 	cobc_cs_check = 0;
 	prog_end = 0;
 	depth = 0;
@@ -1711,26 +1878,9 @@ end_program:
 ;
 
 end_mandatory:
-  END_PROGRAM program_name TOK_DOT
+  END_PROGRAM end_program_name TOK_DOT
   {
-	char	*s;
-
-	if (CB_LITERAL_P ($2)) {
-		s = (char *)(CB_LITERAL ($2)->data);
-	} else {
-		s = (char *)(CB_NAME ($2));
-	}
-	if (depth) {
-		depth--;
-	}
-	if (strcmp (stack_progid[depth], s)) {
-		cb_error (_("END PROGRAM '%s' is different to PROGRAM-ID '%s'"),
-			s, stack_progid[depth]);
-	}
-	if (!current_program->flag_validated) {
-		current_program->flag_validated = 1;
-		cb_validate_program_body (current_program);
-	}
+	clean_up_program ($2, CB_PROGRAM_TYPE);	  
   }
 ;
 
@@ -1740,26 +1890,9 @@ end_function:
 ;
 
 end_function_mandatory:
-  END_FUNCTION program_name TOK_DOT
+  END_FUNCTION end_program_name TOK_DOT
   {
-	char	*s;
-
-	if (CB_LITERAL_P ($2)) {
-		s = (char *)(CB_LITERAL ($2)->data);
-	} else {
-		s = (char *)(CB_NAME ($2));
-	}
-	if (depth) {
-		depth--;
-	}
-	if (strcmp (stack_progid[depth], s)) {
-		cb_error (_("END FUNCTION '%s' is different to FUNCTION-ID '%s'"),
-			s, stack_progid[depth]);
-	}
-	if (!current_program->flag_validated) {
-		current_program->flag_validated = 1;
-		cb_validate_program_body (current_program);
-	}
+	  clean_up_program ($2, CB_FUNCTION_TYPE);
   }
 ;
 
@@ -1797,35 +1930,10 @@ program_body:
 /* IDENTIFICATION DIVISION */
 
 program_identification:
-  PROGRAM_ID TOK_DOT program_name as_literal
+  PROGRAM_ID TOK_DOT program_id_name as_literal
   {
-	current_section = NULL;
-	current_paragraph = NULL;
-	if (CB_LITERAL_P ($3)) {
-		stack_progid[depth] = (char *)(CB_LITERAL ($3)->data);
-	} else {
-		stack_progid[depth] = (char *)(CB_NAME ($3));
-	}
-	if (prog_end) {
-		if (!current_program->flag_validated) {
-			current_program->flag_validated = 1;
-			cb_validate_program_body (current_program);
-		}
-		clear_initial_values ();
-		current_program = cb_build_program (current_program, depth);
-		build_nested_special (depth);
-		cb_build_registers ();
-	} else {
-		prog_end = 1;
-	}
-	if (increment_depth ()) {
+	if (setup_program ($3, $4, CB_PROGRAM_TYPE)) {
 		YYABORT;
-	}
-	current_program->program_id = cb_build_program_id ($3, $4, 0);
-	current_program->prog_type = CB_PROGRAM_TYPE;
-	if (!main_flag_set) {
-		main_flag_set = 1;
-		current_program->flag_main = !!cobc_flag_main;
 	}
   }
   program_type TOK_DOT
@@ -1835,38 +1943,31 @@ program_identification:
 ;
 
 function_identification:
-  FUNCTION_ID TOK_DOT program_name as_literal TOK_DOT
+  FUNCTION_ID TOK_DOT program_id_name as_literal TOK_DOT
   {
-	current_section = NULL;
-	current_paragraph = NULL;
-	if (CB_LITERAL_P ($3)) {
-		stack_progid[depth] = (char *)(CB_LITERAL ($3)->data);
-	} else {
-		stack_progid[depth] = (char *)(CB_NAME ($3));
-	}
-	if (prog_end) {
-		if (!current_program->flag_validated) {
-			current_program->flag_validated = 1;
-			cb_validate_program_body (current_program);
-		}
-		clear_initial_values ();
-		current_program = cb_build_program (current_program, depth);
-		build_nested_special (depth);
-		cb_build_registers ();
-	} else {
-		prog_end = 1;
-	}
-	if (increment_depth ()) {
+	if (setup_program ($3, $4, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
-	current_program->program_id = cb_build_program_id ($3, $4, 1);
-	current_program->prog_type = CB_FUNCTION_TYPE;
-	current_program->flag_recursive = 1;
 	cobc_cs_check = 0;
   }
 ;
 
-program_name:
+program_id_name:
+  PROGRAM_NAME
+  {
+	if (CB_REFERENCE_P ($1) && CB_WORD_COUNT ($1) > 0) {
+		redefinition_error ($1);
+	}
+	/*
+	  The program name is a key part of defining the current_program, so we
+	  mustn't lose it (unlike in undefined_word).
+	*/
+	$$ = $1;  
+  }
+| LITERAL
+;
+
+end_program_name:
   PROGRAM_NAME
 | LITERAL
 ;
@@ -2100,24 +2201,24 @@ repository_name:
   {
 	functions_are_all = 1;
   }
-| FUNCTION user_or_intrinsic _as_literal_intrinsic
+| FUNCTION undefined_word _as_literal_intrinsic
   {
-	cb_tree		x;
+	const char	*name;
 
-	if ($3) {
-		x = $3;
-	} else {
-		x = $2;
+	if ($2 != cb_error_node) {
+		cb_define ($2, cb_build_repo_func_prototype ());
+
+		if ($3) {
+			name = (const char *)(CB_LITERAL ($3)->data);
+		} else {
+			name = (const char *)(CB_NAME ($2));
+		}
+		current_program->user_spec_list =
+			cb_list_add (current_program->user_spec_list,
+				     cb_build_reference (name));
 	}
-	current_program->user_spec_list =
-		cb_list_add (current_program->user_spec_list, x);
   }
 | FUNCTION repository_name_list INTRINSIC
-;
-
-user_or_intrinsic:
-  REPO_FUNCTION
-| USER_REPO_FUNCTION
 ;
 
 _as_literal_intrinsic:
@@ -2132,12 +2233,12 @@ _as_literal_intrinsic:
 ;
 
 repository_name_list:
-  REPO_FUNCTION
+  FUNCTION_NAME
   {
 	current_program->function_spec_list =
 		cb_list_add (current_program->function_spec_list, $1);
   }
-| repository_name_list REPO_FUNCTION
+| repository_name_list FUNCTION_NAME
   {
 	current_program->function_spec_list =
 		cb_list_add (current_program->function_spec_list, $2);
@@ -2941,7 +3042,7 @@ assign_clause:
 			current_file->assign =
 				cb_build_alphanumeric_literal ("LPT1",	(size_t)4);
 		}
-		
+
 	}
   }
 ;
@@ -5721,7 +5822,7 @@ procedure_returning:
 				if (f->flag_any_length) {
 					cb_error (_("Function RETURNING item may not be ANY LENGTH"));
 				}
-				
+
 				f->flag_is_returning = 1;
 			}
 			current_program->returning = $2;

@@ -98,7 +98,9 @@ enum cb_tag {
 	CB_TAG_LIST,		/* 32 List */
 	CB_TAG_DIRECT,		/* 33 Code output or comment */
 	CB_TAG_DEBUG,		/* 34 Debug item set */
-	CB_TAG_DEBUG_CALL	/* 35 Debug callback */
+	CB_TAG_DEBUG_CALL,	/* 35 Debug callback */
+	CB_TAG_PROGRAM,		/* 36 Program */
+	CB_TAG_FUNC_PROTOTYPE	/* 37 Function prototype */
 };
 
 /* Alphabet type */
@@ -1234,11 +1236,14 @@ struct nested_list {
 };
 
 struct cb_program {
+	struct cb_tree_common	common;		/* Common values */
+	
 	/* Program variables */
 	struct cb_program	*next_program;		/* Nested/contained */
-	const char		*program_id;		/* Demangled PROGRAM-ID */
+	const char		*program_name;		/* Internal program-name */
+	const char		*program_id;		/* Demangled external PROGRAM-ID */
 	char			*source_name;		/* Source name */
-	char			*orig_program_id;	/* Original PROGRAM-ID */
+	char			*orig_program_id;	/* Original external PROGRAM-ID */
 	struct cb_word		**word_table;		/* Name hash table */
 	struct local_filename	*local_include;		/* Local include info */
 	struct nested_list	*nested_prog_list;	/* Callable contained */
@@ -1320,6 +1325,7 @@ struct cb_program {
 	unsigned int	flag_void		: 1;	/* void return for subprogram */
 };
 
+#define CB_PROGRAM(x)	(CB_TREE_CAST (CB_TAG_PROGRAM, struct cb_program, x))
 
 /* Functions/variables */
 
@@ -1453,6 +1459,7 @@ extern cb_tree			cb_build_assign (const cb_tree, const cb_tree);
 
 extern cb_tree			cb_build_intrinsic (cb_tree, cb_tree,
 						    cb_tree, const int);
+extern cb_tree			cb_build_repo_func_prototype (void);
 extern cb_tree			cb_build_any_intrinsic (cb_tree);
 
 extern cb_tree			cb_build_search (const int,

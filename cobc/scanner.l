@@ -742,6 +742,7 @@ H#[0-9A-Za-z]* {
 	struct cb_text_list		*tlp;
 	cb_tree				x;
 	cb_tree				l;
+	int				(*cmp_func)(const char *, const char *);
 
 	/* Check word length */
 	if (unlikely(yyleng > cb_word_length)) {
@@ -765,7 +766,7 @@ H#[0-9A-Za-z]* {
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-				return REPO_FUNCTION;
+				return FUNCTION_NAME;
 			}
 			if (functions_are_all) {
 				yylval = cb_build_reference (yytext);
@@ -793,8 +794,13 @@ H#[0-9A-Za-z]* {
 	if (unlikely(cobc_force_literal)) {
 		/* Force PROGRAM-ID / END PROGRAM */
 		cobc_force_literal = 0;
-		yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-		return PROGRAM_NAME;
+		if (cb_fold_call) {
+			yylval = cb_build_reference (yytext);
+			return PROGRAM_NAME;
+		} else {
+			yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
+			return LITERAL;
+		}
 	}
 
 	/* Check reserved word */
@@ -812,9 +818,9 @@ H#[0-9A-Za-z]* {
 
 	/* Check user function */
 	if (cobc_in_repository) {
-		yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-		return USER_REPO_FUNCTION;
-	} else if (cobc_in_procedure) {
+		yylval = cb_build_reference (yytext);
+		return WORD;
+	} else {
 		if (current_program->prog_type == CB_FUNCTION_TYPE &&
 		    !functions_are_all &&
 		    !strcasecmp (yytext, current_program->orig_program_id)) {
@@ -824,10 +830,24 @@ H#[0-9A-Za-z]* {
 		}
 		for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 			x = CB_VALUE (l);
-			if (!strcasecmp (yytext, (char *)(CB_LITERAL(x)->data))) {
+			if (!strcasecmp (yytext, CB_REFERENCE(x)->word->name)) {
 				yylval = cb_build_reference (yytext);
 				return USER_FUNCTION_NAME;
 			}
+		}
+	}
+
+	/* Check user programs */
+	if (cb_fold_call) {
+		cmp_func = &strcasecmp;
+	} else {
+		cmp_func = &strcmp;
+	}
+	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if ((*cmp_func)(yytext, CB_PROGRAM (x)->program_name) == 0) {
+			yylval = cb_build_reference (yytext);
+			return PROGRAM_NAME;
 		}
 	}
 
@@ -970,13 +990,13 @@ H#[0-9A-Za-z]* {
   [A-Z0-9-]+ {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				l;
-	cb_tree				x;
+	struct cb_reference		*x;
 
 	BEGIN INITIAL;
 	yylval = cb_build_reference (yytext);
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
-		x = CB_VALUE (l);
-		if (!strcasecmp (yytext, (char *)(CB_LITERAL(x)->data))) {
+		x = CB_REFERENCE (CB_VALUE (l));
+		if (!strcasecmp (yytext, x->word->name)) {
 			return USER_FUNCTION_NAME;
 		}
 	}
@@ -1032,7 +1052,7 @@ error_literal (const char *type, const char *literal)
 	if (!literal_error) {
 		/* snip literal for output, if too long */
 		strncpy (lit_out, literal, 38);
-		if (strlen (literal) > 38) { 
+		if (strlen (literal) > 38) {
 			strcpy (lit_out + 35, "...");
 		} else {
 			lit_out[38] = '\0';
@@ -1184,7 +1204,7 @@ scan_x (const char *text)
 	if (unlikely(literal_error != 0)) {
 		goto error;
 	}
-	
+
 	yylval = cb_build_alphanumeric_literal (plexbuff, (size_t)(dst - plexbuff));
 	return LITERAL;
 
@@ -1238,7 +1258,7 @@ scan_h (const char *text, const cob_u32_t with_mark)
 
 	literal_error = 0;
 
-	if (!with_mark && 
+	if (!with_mark &&
 		!cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"))) {
 		goto error;
 	}
@@ -1280,7 +1300,7 @@ scan_h (const char *text, const cob_u32_t with_mark)
 	if (literal_error) {
 		goto error;
 	}
-	
+
 	/* Duplication? */
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
@@ -1302,9 +1322,9 @@ scan_b (const char *text, const cob_u32_t with_mark)
 
 	literal_error = 0;
 
-	if (( with_mark && 
+	if (( with_mark &&
 		 !cb_verify (cb_numeric_boolean, _ ("Numeric boolean literal"))) ||
-		(!with_mark && 
+		(!with_mark &&
 		 !cb_verify (cb_acucobol_literals, _ ("ACUCOBOL numeric literal")))) {
 		goto error;
 	}
@@ -1343,7 +1363,7 @@ scan_b (const char *text, const cob_u32_t with_mark)
 	if (literal_error) {
 		goto error;
 	}
-	
+
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
@@ -1386,7 +1406,7 @@ scan_o (const char *text)
 			error_literal ("O", plexbuff);
 			continue;
 		}
-		
+
 		c = c - '0';
 		val = (val << 3) + c;
 	}
@@ -1394,7 +1414,7 @@ scan_o (const char *text)
 	if (literal_error) {
 		goto error;
 	}
-	
+
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
@@ -1505,7 +1525,7 @@ scan_floating_numeric (const char *text)
 	char		significand_int[36];
 	char		exponent_str[8];
 	char		*exponent_pos;
-	
+
 	char		result[128];
 
 	literal_error = 0;
@@ -1519,16 +1539,16 @@ scan_floating_numeric (const char *text)
 		yylval = cb_error_node;
 		return LITERAL;
 	}
-	
+
 	/* Get signs and adjust string positions accordingly */
 	significand_pos = &significand_str[0];
 	sig_sign = get_sign (*significand_pos);
 	INCREMENT_IF_SIGNED (significand_pos, sig_sign);
-	
+
 	exponent_pos = &exponent_str[0];
 	exp_sign = get_sign (*exponent_pos);
 	INCREMENT_IF_SIGNED (exponent_pos, exp_sign);
-	
+
 	/* Separate into integer and decimal */
 	n = sscanf (significand_pos, "%35[0-9]%*[.,]%35[0-9]",
 			significand_int, significand_dec);
@@ -1567,7 +1587,7 @@ scan_floating_numeric (const char *text)
 			yylval = cb_error_node;
 			return LITERAL;
 		}
-		
+
 		if (exp_sign == -1) {
 			exponent = -exponent;
 		}
@@ -1596,7 +1616,7 @@ scan_floating_numeric (const char *text)
 			error_literal ("float", text);
 		}
 	}
-	
+
 	if (literal_error) {
 		yylval = cb_error_node;
 		return LITERAL;

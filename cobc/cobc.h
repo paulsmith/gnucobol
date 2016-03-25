@@ -314,6 +314,7 @@ extern struct cb_label		*current_section;
 extern struct cb_label		*current_paragraph;
 extern int			cb_exp_line;
 extern int			functions_are_all;
+extern struct cb_tree_common	*defined_prog_list;
 
 /* Functions */
 

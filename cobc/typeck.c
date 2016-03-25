@@ -1189,23 +1189,33 @@ cb_encode_program_id (const char *name)
 char *
 cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 {
+	const char	*name_str;
 	char		*s;
 	unsigned char	*p;
 
-	if (alt_name) {
-		current_program->orig_program_id =
-			cobc_check_string ((char *)CB_LITERAL (alt_name)->data);
-		s = cb_encode_program_id ((char *)CB_LITERAL (alt_name)->data);
-	} else if (CB_LITERAL_P (name)) {
-		current_program->orig_program_id =
-			cobc_check_string ((char *)CB_LITERAL (name)->data);
-		s = cb_encode_program_id ((char *)CB_LITERAL (name)->data);
+	/* Set the program name */
+	if (CB_LITERAL_P (name)) {
+		current_program->program_name
+			= cobc_check_string ((char *)CB_LITERAL (name)->data);
 	} else {
-		current_program->orig_program_id =
+		current_program->program_name =
 			cobc_check_string (CB_NAME (name));
-		s = cb_encode_program_id (CB_NAME (name));
 	}
+
+	/* Set and encode the PROGRAM-ID */
+	if (alt_name) {
+		name_str = (const char *)CB_LITERAL (alt_name)->data;
+	} else if (CB_LITERAL_P (name)) {
+		name_str = (const char *)CB_LITERAL (name)->data;
+	} else {
+		name_str = CB_NAME (name);
+	}
+	current_program->orig_program_id = cobc_check_string (name_str);
+	s = cb_encode_program_id (name_str);
+
 	(void)cobc_check_valid_name (current_program->orig_program_id, 2U);
+
+	/* Convert function names to upper case */
 	if (is_func) {
 		for (p = (unsigned char *)s; *p; ++p) {
 			if (islower ((int)*p)) {

@@ -1,18 +1,18 @@
 ## Copyright (C) 2003-2012 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -323,6 +323,96 @@ prog.cob: 7: Warning: 'A' previously defined here
 
 AT_CLEANUP
 
+
+AT_SETUP([Redefinition of program-name])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  PROG         PIC X.
+
+       PROCEDURE        DIVISION.
+           CONTINUE
+           .
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      foo COMMON.
+       END PROGRAM      foo.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      barr.
+       PROCEDURE        DIVISION.
+           CONTINUE
+           .
+       *> This should cause an error.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      foo.
+       END PROGRAM      foo.
+       END PROGRAM      barr.
+       END PROGRAM      prog.
+
+
+       *> This should cause an error.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+           
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  foo          PIC X.
+           
+       PROCEDURE        DIVISION.
+           CONTINUE
+           .
+       *> This should clash with the data definition.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      foo.
+       END PROGRAM      foo.
+       END PROGRAM      prog.
+])
+
+AT_CHECK([$COMPILE_ONLY --ffold-call=upper prog.cob], [1], [],
+[prog.cob: 7: Error: syntax error, unexpected Program name
+prog.cob: 23: Error: Redefinition of program name 'foo'
+prog.cob: 31: Error: Redefinition of program name 'prog'
+prog.cob: 42: Error: Redefinition of 'foo'
+prog.cob: 35: Error: 'foo' previously defined here
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 23: Error: Redefinition of program ID 'foo'
+prog.cob: 31: Error: Redefinition of program ID 'prog'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Redefinition of function-prototype name])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION func
+           .
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  func         PIC X.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: Error: syntax error, unexpected User function name
+])
+AT_CLEANUP
+
+## Ambiguous reference
+
 AT_SETUP([Ambiguous reference to 02 items])
 AT_KEYWORDS([definition])
 
@@ -401,7 +491,6 @@ prog.cob: 11: Error: 'Y' in 'X' in 'G2' defined here
 ])
 
 AT_CLEANUP
-
 
 
 AT_SETUP([Unique reference with ambiguous qualifiers])
@@ -592,4 +681,3 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 ])
 
 AT_CLEANUP
-

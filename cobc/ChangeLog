@@ -1,4 +1,12 @@
 
+2016-03-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, scanner.l, tree.c, tree.h, typeck.c: added checks for
+	  redefinition of program and function-prototype names. (See bugs #212
+	  and #205).
+	* parser.y: moved duplicated PROGRAM/FUNCTION-ID and END PROGRAM/
+	  FUNCTION code into functions.
+
 2016-03-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: added check that BY VALUE formal parameters are not ANY
