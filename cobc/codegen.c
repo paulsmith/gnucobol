@@ -832,7 +832,7 @@ again:
 					output ("%d + ", p->offset - q->offset);
 				}
 				if (p->size != 1) {
-#if 0 /* draft from Simon - 
+#if 0 /* draft from Simon -
 		 works only if the ODOs are directly nested and
 		 have no "sister" elements,
 		 the content would only be correct if -fodoslide
@@ -1358,6 +1358,10 @@ output_integer (cb_tree x)
 	}
 }
 
+#if 0
+}
+#endif
+
 static void
 output_long_integer (cb_tree x)
 {
@@ -1619,6 +1623,26 @@ output_index (cb_tree x)
 }
 
 /* Parameter */
+
+static const char *
+find_func_ext_name (cb_tree func_prototype)
+{
+	const struct cb_func_prototype	f = *CB_FUNC_PROTOTYPE (func_prototype);
+	struct cb_program		*program;
+
+	if (!f.check_needed) {
+		return f.function_id;
+	}
+
+	program = cb_find_defined_program (f.function_id);
+	if (program) {
+		return program->program_id;
+	}
+
+	cb_warning (_("No definition or prototype seen for function '%s'"),
+		    f.function_id);
+	return f.function_id;
+}
 
 static void
 output_param (cb_tree x, int id)
@@ -1937,7 +1961,7 @@ output_param (cb_tree x, int id)
 	case CB_TAG_INTRINSIC:
 		ip = CB_INTRINSIC (x);
 		if (ip->isuser) {
-			func = user_func_upper (cb_name(ip->name));
+			func = user_func_upper (find_func_ext_name (cb_ref (ip->name)));
 			lookup_func_call (func);
 #if	0	/* RXWRXW Func */
 			output ("cob_user_function (func_%s, &cob_dyn_%u, ",
@@ -3839,7 +3863,7 @@ output_set_attribute (const struct cb_field *f, int val_on, int val_off)
 	} else if (val_on & COB_SCREEN_LOWLIGHT) {
 		val_off |= COB_SCREEN_HIGHLIGHT;
 	}
-	
+
 	if (val_on) {
 		output_line ("s_%d.attr |= 0x%x;", f->id, val_on);
 	}
@@ -5394,7 +5418,7 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output_newline ();
 	output_prefix ();
 	output ("\t\t  ");
-	
+
 	if (type == COB_SCREEN_TYPE_GROUP) {
 		output ("&s_%d, ", p->children->id);
 	} else {
@@ -5417,7 +5441,7 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output_newline ();
 	output_prefix ();
 	output ("\t\t  ");
-	
+
 	if (type == COB_SCREEN_TYPE_VALUE) {
 		/* Need a field reference here */
 		output_param (cb_build_field_reference (p, NULL), -1);
@@ -5468,7 +5492,7 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output_newline ();
 	output_prefix ();
 	output ("\t\t  ");
-	
+
 	output ("%d, %d, 0x%x);\n", type, p->occurs_min, p->screen_flag);
 
 	if (p->children) {

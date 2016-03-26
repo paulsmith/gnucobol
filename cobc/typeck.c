@@ -1195,11 +1195,9 @@ cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 
 	/* Set the program name */
 	if (CB_LITERAL_P (name)) {
-		current_program->program_name
-			= cobc_check_string ((char *)CB_LITERAL (name)->data);
+		current_program->program_name = (char *)CB_LITERAL (name)->data;
 	} else {
-		current_program->program_name =
-			cobc_check_string (CB_NAME (name));
+		current_program->program_name = CB_NAME (name);
 	}
 
 	/* Set and encode the PROGRAM-ID */

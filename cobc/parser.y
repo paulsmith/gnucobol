@@ -452,7 +452,7 @@ literal_value (cb_tree x)
 }
 
 static void
-setup_use_file (struct cb_file *fileptr)
+set_up_use_file (struct cb_file *fileptr)
 {
 	struct cb_file	*newptr;
 
@@ -636,7 +636,7 @@ end_scope_of_program_name (struct cb_program *program)
 }
 
 static int
-setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+set_up_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 {
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -713,6 +713,22 @@ clean_up_program (cb_tree name, const unsigned char type)
 		current_program->flag_validated = 1;
 		cb_validate_program_body (current_program);
 	}
+}
+
+static void
+set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name)
+{
+	cb_tree func_prototype;
+	
+	func_prototype = cb_build_func_prototype (prototype_name, ext_name);
+	if (CB_REFERENCE_P (prototype_name)) {
+		cb_define (prototype_name, func_prototype);
+	} else { /* CB_LITERAL_P (prototype_name) */
+		cb_define (cb_build_reference ((const char *) CB_LITERAL (prototype_name)->data),
+			   func_prototype);
+	}
+	current_program->user_spec_list =
+		cb_list_add (current_program->user_spec_list, func_prototype);
 }
  
 static void
@@ -1932,7 +1948,7 @@ program_body:
 program_identification:
   PROGRAM_ID TOK_DOT program_id_name as_literal
   {
-	if (setup_program ($3, $4, CB_PROGRAM_TYPE)) {
+	if (set_up_program ($3, $4, CB_PROGRAM_TYPE)) {
 		YYABORT;
 	}
   }
@@ -1945,9 +1961,10 @@ program_identification:
 function_identification:
   FUNCTION_ID TOK_DOT program_id_name as_literal TOK_DOT
   {
-	if (setup_program ($3, $4, CB_FUNCTION_TYPE)) {
+	if (set_up_program ($3, $4, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
+	set_up_func_prototype ($3, $4);
 	cobc_cs_check = 0;
   }
 ;
@@ -2203,19 +2220,8 @@ repository_name:
   }
 | FUNCTION undefined_word _as_literal_intrinsic
   {
-	const char	*name;
-
 	if ($2 != cb_error_node) {
-		cb_define ($2, cb_build_repo_func_prototype ());
-
-		if ($3) {
-			name = (const char *)(CB_LITERAL ($3)->data);
-		} else {
-			name = (const char *)(CB_NAME ($2));
-		}
-		current_program->user_spec_list =
-			cb_list_add (current_program->user_spec_list,
-				     cb_build_reference (name));
+		set_up_func_prototype ($2, $3);
 	}
   }
 | FUNCTION repository_name_list INTRINSIC
@@ -9476,7 +9482,7 @@ use_file_exception_target:
 
 	for (l = $1; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
-			setup_use_file (CB_FILE (cb_ref (CB_VALUE (l))));
+			set_up_use_file (CB_FILE (cb_ref (CB_VALUE (l))));
 		}
 	}
   }

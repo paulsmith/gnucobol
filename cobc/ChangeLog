@@ -1,4 +1,17 @@
 
+2016-03-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (find_func_ext_name), tree.h: created to find external name
+	  of functions from a given prototype. Also created struct
+	  (cb_func_prototype).
+	* tree.c (cb_build_repo_func_prototype): dropped repo_ from name.
+	* parser.y, tree.c (cb_build_func_prototype): made FUNCTION-ID
+	  generate implicit REPOSITORY entry to permit recursion.
+	* parser.y: corrected spelling: setup_* to set_up_*.
+	* scanner.l: moved code for finding program based on program-name to
+	  separate function (cb_find_defined_program).
+	* typeck.c: stopped function-names being converted to upper-case.
+
 2016-03-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, scanner.l, tree.c, tree.h, typeck.c: added checks for
@@ -15,7 +28,7 @@
 2016-03-19  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c, reserved.c, parser.y, tree.h: Allow for
-	  PROCEDURE DIVISION RETURNING OMITTED and CALL ... RETURINING NOTHING
+	  PROCEDURE DIVISION RETURNING OMITTED and CALL ... RETURNING NOTHING
 
 2016-03-18  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -29,7 +42,7 @@
 
 2016-03-05  Edward Hart <edward.dan.hart@gmail.com>
 
-	* parser.y: disabled formal BY VALUE paremeters, pending fix of bug
+	* parser.y: disabled formal BY VALUE parameters, pending fix of bug
 	  #109.
 
 2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
@@ -146,7 +159,7 @@
 
 	* parser.y: fixed bug #180 - added check that HIGHLIGHT and LOWLIGHT are
 	  not specified at the same time.
-	* codegen.c (output_set_attribute): made HIGLIGHT ON imply LOWLIGHT off
+	* codegen.c (output_set_attribute): made HIGHLIGHT ON imply LOWLIGHT off
 	  and vice versa.
 
 2016-01-03  Edward Hart <edward.dan.hart@gmail.com>

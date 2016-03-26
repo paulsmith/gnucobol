@@ -42,7 +42,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([REPOSITORY])
+AT_SETUP([REPOSITORY INTRINSIC phrase])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
@@ -50,9 +50,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
-       SPECIAL-NAMES.
        REPOSITORY.
-           FUNCTION rxwfun
            FUNCTION pi e intrinsic
            .
        DATA             DIVISION.
@@ -64,7 +62,54 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
 
+
+AT_SETUP([REPOSITORY FUNCTION phrase])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. x AS "y".
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC 9(4).
+       
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE 100 TO ret
+           .
+       END FUNCTION x.
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. z.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC 9(5).
+       
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE 1 TO ret
+           .
+       END FUNCTION z.
+           
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. testing.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION y AS "x"
+           FUNCTION z.          
+           
+       PROCEDURE DIVISION.
+           DISPLAY FUNCTION y
+           DISPLAY FUNCTION z
+           .
+       END PROGRAM testing.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 

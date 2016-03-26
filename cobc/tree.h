@@ -685,7 +685,7 @@ struct cb_field {
 	int			step_count;	/* STEP in REPORT */
 	unsigned int		vaddr;		/* Variable address cache */
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
-									   could be direct ODO (check via depending) 
+									   could be direct ODO (check via depending)
 									   or via subordinate) */
 	cob_u32_t		special_index;	/* Special field */
 
@@ -1237,7 +1237,7 @@ struct nested_list {
 
 struct cb_program {
 	struct cb_tree_common	common;		/* Common values */
-	
+
 	/* Program variables */
 	struct cb_program	*next_program;		/* Nested/contained */
 	const char		*program_name;		/* Internal program-name */
@@ -1326,6 +1326,19 @@ struct cb_program {
 };
 
 #define CB_PROGRAM(x)	(CB_TREE_CAST (CB_TAG_PROGRAM, struct cb_program, x))
+
+/* Function prototype */
+struct cb_func_prototype {
+	struct cb_tree_common	common;
+	/* Name as declared in the REPOSITORY */
+	const char		*name;
+	/* Name of the prototype/definition */
+	const char		*function_id;
+	/* Whether details must be checked against COBOL prototype/definition */
+	int		        check_needed;
+};
+
+#define CB_FUNC_PROTOTYPE(x)	(CB_TREE_CAST (CB_TAG_FUNC_PROTOTYPE, struct cb_func_prototype, x))
 
 /* Functions/variables */
 
@@ -1459,7 +1472,8 @@ extern cb_tree			cb_build_assign (const cb_tree, const cb_tree);
 
 extern cb_tree			cb_build_intrinsic (cb_tree, cb_tree,
 						    cb_tree, const int);
-extern cb_tree			cb_build_repo_func_prototype (void);
+extern cb_tree			cb_build_func_prototype (const cb_tree,
+							 const cb_tree);
 extern cb_tree			cb_build_any_intrinsic (cb_tree);
 
 extern cb_tree			cb_build_search (const int,
@@ -1773,6 +1787,8 @@ extern void		cb_reset_78 (void);
 extern void		cb_reset_global_78 (void);
 extern struct cb_field	*check_level_78 (const char *);
 
+extern struct cb_program	*cb_find_defined_program (const char *);
+
 /* Function defines */
 
 #define CB_BUILD_FUNCALL_0(f)					\
@@ -1814,7 +1830,7 @@ extern struct cb_field	*check_level_78 (const char *);
 #define CB_BUILD_FUNCALL_9(f,a1,a2,a3,a4,a5,a6,a7,a8,a9)	\
 	cb_build_funcall (f, 9, a1, a2, a3, a4, a5, a6, a7, a8,	\
 			  a9, NULL, NULL)
-			  
+
 #define CB_BUILD_FUNCALL_10(f,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)	\
 	cb_build_funcall (f, 10, a1, a2, a3, a4, a5, a6, a7, a8,	\
 			  a9, a10, NULL)

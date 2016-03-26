@@ -742,7 +742,7 @@ H#[0-9A-Za-z]* {
 	struct cb_text_list		*tlp;
 	cb_tree				x;
 	cb_tree				l;
-	int				(*cmp_func)(const char *, const char *);
+	struct cb_program		*program;
 
 	/* Check word length */
 	if (unlikely(yyleng > cb_word_length)) {
@@ -830,7 +830,7 @@ H#[0-9A-Za-z]* {
 		}
 		for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 			x = CB_VALUE (l);
-			if (!strcasecmp (yytext, CB_REFERENCE(x)->word->name)) {
+			if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
 				return USER_FUNCTION_NAME;
 			}
@@ -838,17 +838,10 @@ H#[0-9A-Za-z]* {
 	}
 
 	/* Check user programs */
-	if (cb_fold_call) {
-		cmp_func = &strcasecmp;
-	} else {
-		cmp_func = &strcmp;
-	}
-	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
-		x = CB_VALUE (l);
-		if ((*cmp_func)(yytext, CB_PROGRAM (x)->program_name) == 0) {
-			yylval = cb_build_reference (yytext);
-			return PROGRAM_NAME;
-		}
+        program = cb_find_defined_program (yytext);
+	if (program) {
+		yylval = cb_build_reference (yytext);
+		return PROGRAM_NAME;
 	}
 
 	/* User word */
@@ -990,13 +983,13 @@ H#[0-9A-Za-z]* {
   [A-Z0-9-]+ {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				l;
-	struct cb_reference		*x;
+        cb_tree				x;
 
 	BEGIN INITIAL;
 	yylval = cb_build_reference (yytext);
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
-		x = CB_REFERENCE (CB_VALUE (l));
-		if (!strcasecmp (yytext, x->word->name)) {
+		x = CB_VALUE (l);
+		if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
 			return USER_FUNCTION_NAME;
 		}
 	}
@@ -2075,6 +2068,33 @@ check_level_78 (const char *name)
 			return p78->fld78;
 		}
 	}
+	return NULL;
+}
+
+/*
+  Find program with the program-name name in defined_prog_list. If it is not
+  there, return NULL.
+*/
+struct cb_program *
+cb_find_defined_program (const char *name)
+{
+	int	(*cmp_func)(const char *, const char *);
+	cb_tree	l;
+	cb_tree	x;
+	
+	if (cb_fold_call) {
+		cmp_func = &strcasecmp;
+	} else {
+		cmp_func = &strcmp;
+	}
+	
+	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if ((*cmp_func)(name, CB_PROGRAM (x)->program_name) == 0) {
+			return CB_PROGRAM (x);
+		}
+	}
+
 	return NULL;
 }
 

@@ -618,7 +618,7 @@ warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
 	if (!is_formatted_current_date && !has_system_offset_arg) {
 		return;
 	}
-	
+
 	if (is_variable_format) {
 		cb_warning_x (tree, ERR_MSG);
 	} else if (is_constant_utc_format) {
@@ -1070,7 +1070,7 @@ error_numeric_literal (const char *literal)
 
 	/* snip literal for output, if too long */
 	strncpy (lit_out, literal, 38);
-	if (strlen (literal) > 38) { 
+	if (strlen (literal) > 38) {
 		strcpy (lit_out + 35, "...");
 	} else {
 		lit_out[38] = '\0';
@@ -1111,7 +1111,7 @@ cb_get_int (const cb_tree x)
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
-	
+
 	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
@@ -1185,7 +1185,7 @@ cb_get_long_long (const cb_tree x)
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
-	
+
 	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
@@ -1229,7 +1229,7 @@ cb_get_u_long_long (const cb_tree x)
 	cob_u64_t		val;
 
 	l = CB_LITERAL (x);
-	
+
 	/* Skip leading zeroes */
 	for (i = 0; i < l->size; i++) {
 		if (l->data[i] != '0') {
@@ -1416,7 +1416,7 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 
 	p->common.tag = CB_TAG_PROGRAM;
 	p->common.category = CB_CATEGORY_UNKNOWN;
-	
+
 	p->next_program = last_program;
 	p->nested_level = nest_level;
 	p->decimal_point = '.';
@@ -1688,7 +1688,7 @@ cb_build_numeric_literal (const int sign, const void *data, const int scale)
 	p->scale = scale;
 
 	l = CB_TREE (p);
-	
+
 	l->source_file = cb_source_file;
 	l->source_line = cb_source_line;
 
@@ -1705,7 +1705,7 @@ cb_build_numsize_literal (const void *data, const size_t size, const int sign)
 	p->sign = (short)sign;
 
 	l = CB_TREE (p);
-	
+
 	l->source_file = cb_source_file;
 	l->source_line = cb_source_line;
 
@@ -1718,7 +1718,7 @@ cb_build_alphanumeric_literal (const void *data, const size_t size)
 	cb_tree			l;
 
 	l = CB_TREE (build_literal (CB_CATEGORY_ALPHANUMERIC, data, size));
-	
+
 	l->source_file = cb_source_file;
 	l->source_line = cb_source_line;
 
@@ -1757,7 +1757,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 	}
 
 	l = CB_TREE (p);
-	
+
 	l->source_file = x1->source_file;
 	l->source_line = x1->source_line;
 
@@ -2580,7 +2580,7 @@ cb_build_reference (const char *name)
 	lookup_word (p, name);
 
 	r = CB_TREE (p);
-	
+
 	r->source_file = cb_source_file;
 	r->source_line = cb_source_line;
 
@@ -3239,13 +3239,38 @@ cb_build_set_attribute (const struct cb_field *fld,
 /* FUNCTION */
 
 cb_tree
-cb_build_repo_func_prototype (void)
+cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
 {
-	cb_tree	func_prototype;
-	
+	struct cb_func_prototype	*func_prototype;
+
 	func_prototype = make_tree (CB_TAG_FUNC_PROTOTYPE, CB_CATEGORY_UNKNOWN,
-				    sizeof (struct cb_tree_common));
-	return func_prototype;
+				    sizeof (struct cb_func_prototype));
+
+	if (CB_LITERAL_P (prototype_name)) {
+		func_prototype->name
+			= (const char *) CB_LITERAL (prototype_name)->data;
+	} else {
+		func_prototype->name = (const char *) CB_NAME (prototype_name);
+	}
+
+	if (ext_name) {
+		func_prototype->function_id =
+			(const char *) CB_LITERAL (ext_name)->data;
+	} else if (CB_LITERAL_P (prototype_name)) {
+		func_prototype->function_id =
+			(const char *) CB_LITERAL (prototype_name)->data;
+	} else {
+		func_prototype->function_id =
+			(const char *) CB_NAME (prototype_name);
+	}
+
+	/*
+	  A literal prototype_name is only possible if this prototype is being
+	  implicitly defined in a FUNCTION-ID clause. Hence no check is needed.
+	*/
+	func_prototype->check_needed = !CB_LITERAL_P (prototype_name);
+
+	return CB_TREE (func_prototype);
 }
 
 cb_tree
