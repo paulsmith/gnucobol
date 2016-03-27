@@ -5,6 +5,9 @@
 	  REPOSITORY FUNCTION phrase: actually gives function (prototype)
 	  external name, not actual function-(prototype-)name. This fixed bug
 	  #124.
+	* parser.y: allow redundant FUNCTION clauses.
+	* tree.c (cb_build_func_prototype): set check_needed to 0 when ext_name
+	  is given.
 
 2016-03-26  Edward Hart <edward.dan.hart@gmail.com>
 

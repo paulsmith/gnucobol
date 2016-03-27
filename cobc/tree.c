@@ -3265,10 +3265,11 @@ cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
 	}
 
 	/*
-	  A literal prototype_name is only possible if this prototype is being
-	  implicitly defined in a FUNCTION-ID clause. Hence no check is needed.
+	  A check is needed when we have the function-prototype name, but not
+	  the external name (which may or may not be the function-prototype
+	  name).
 	*/
-	func_prototype->check_needed = !CB_LITERAL_P (prototype_name);
+	func_prototype->check_needed = CB_REFERENCE_P (prototype_name);
 
 	return CB_TREE (func_prototype);
 }

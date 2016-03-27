@@ -113,6 +113,37 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([Redundant REPOSITORY FUNCTION phrase])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. alpha.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET gamma IS ASCII
+           .
+       REPOSITORY.
+           FUNCTION alpha
+           FUNCTION beta
+           FUNCTION beta
+           FUNCTION beta AS "alpha"
+           FUNCTION gamma
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: Warning: Prototype has same name as current function and will be ignored
+prog.cob: 13: Warning: Duplicate REPOSITORY entry for 'beta'
+prog.cob: 14: Error: Duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 15: Error: Redefinition of 'gamma'
+prog.cob: 8: Error: 'gamma' previously defined here
+])
+AT_CLEANUP
+
+
 AT_SETUP([Intrinsic Funtions: number of arguments])
 AT_KEYWORDS([functions])
 

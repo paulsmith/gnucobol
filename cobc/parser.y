@@ -715,12 +715,79 @@ clean_up_program (cb_tree name, const unsigned char type)
 	}
 }
 
-static void
-set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name)
+static const char *
+get_literal_or_word_name (const cb_tree x)
 {
-	cb_tree func_prototype;
+	if (CB_LITERAL_P (x)) {
+		return (const char *) CB_LITERAL (x)->data;
+	} else { /* CB_REFERENCE_P (x) */
+		return (const char *) CB_NAME (x);
+	}
+}
+
+/* Return 1 if the prototype name is the same as the current function's. */
+static int
+check_prototype_redefines_current_func (const cb_tree prototype_name)
+{
+	const char	*name = get_literal_or_word_name (prototype_name);
+	
+	if (strcasecmp (name, current_program->program_name) == 0) {
+		cb_warning_x (prototype_name, _("Prototype has same name as current function and will be ignored"));
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Returns 1 if the prototype has been duplicated. */
+static int
+check_for_duplicate_prototype (const cb_tree prototype_name,
+			       const cb_tree func_prototype)
+{
+	cb_tree	dup;
+	
+	if (CB_WORD_COUNT (prototype_name) > 0) {
+		/* Make sure the duplicate is a prototype */
+		dup = cb_ref (prototype_name);
+		if (!CB_FUNC_PROTOTYPE_P (dup)) {
+			redefinition_error (prototype_name);
+			return 1;
+		}
+
+		/* Check the duplicate prototypes match */
+		if (strcmp (CB_FUNC_PROTOTYPE (func_prototype)->ext_name,
+			    CB_FUNC_PROTOTYPE (dup)->ext_name)) {
+			cb_error_x (prototype_name,
+				    _("Duplicate REPOSITORY entries for '%s' do not match"),
+				    get_literal_or_word_name (prototype_name));
+		} else {
+			cb_warning_x (prototype_name,
+				      _("Duplicate REPOSITORY entry for '%s'"),
+				      get_literal_or_word_name (prototype_name));
+		}
+		return 1;
+	}
+
+	return 0;
+}
+ 
+static void
+set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name, const int is_current_func)
+{
+	cb_tree 	func_prototype;
+
+	if (!is_current_func
+	    && check_prototype_redefines_current_func (prototype_name)) {
+		return;
+	}
 	
 	func_prototype = cb_build_func_prototype (prototype_name, ext_name);
+
+	if (!is_current_func
+	    && check_for_duplicate_prototype (prototype_name, func_prototype)) {
+		return;
+	}
+	
 	if (CB_REFERENCE_P (prototype_name)) {
 		cb_define (prototype_name, func_prototype);
 	} else { /* CB_LITERAL_P (prototype_name) */
@@ -1964,7 +2031,7 @@ function_identification:
 	if (set_up_program ($3, $4, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
-	set_up_func_prototype ($3, $4);
+	set_up_func_prototype ($3, $4, 1);
 	cobc_cs_check = 0;
   }
 ;
@@ -2218,10 +2285,10 @@ repository_name:
   {
 	functions_are_all = 1;
   }
-| FUNCTION undefined_word _as_literal_intrinsic
+| FUNCTION WORD _as_literal_intrinsic
   {
 	if ($2 != cb_error_node) {
-		set_up_func_prototype ($2, $3);
+		set_up_func_prototype ($2, $3, 0);
 	}
   }
 | FUNCTION repository_name_list INTRINSIC

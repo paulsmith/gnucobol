@@ -1339,6 +1339,7 @@ struct cb_func_prototype {
 };
 
 #define CB_FUNC_PROTOTYPE(x)	(CB_TREE_CAST (CB_TAG_FUNC_PROTOTYPE, struct cb_func_prototype, x))
+#define CB_FUNC_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_FUNC_PROTOTYPE)
 
 /* Functions/variables */
 
