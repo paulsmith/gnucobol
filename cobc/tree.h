@@ -1330,10 +1330,10 @@ struct cb_program {
 /* Function prototype */
 struct cb_func_prototype {
 	struct cb_tree_common	common;
-	/* Name as declared in the REPOSITORY */
+	/* Name of prototype in the REPOSITORY */
 	const char		*name;
-	/* Name of the prototype/definition */
-	const char		*function_id;
+	/* External name of the prototype/definition */
+	const char		*ext_name;
 	/* Whether details must be checked against COBOL prototype/definition */
 	int		        check_needed;
 };
@@ -1787,7 +1787,8 @@ extern void		cb_reset_78 (void);
 extern void		cb_reset_global_78 (void);
 extern struct cb_field	*check_level_78 (const char *);
 
-extern struct cb_program	*cb_find_defined_program (const char *);
+extern struct cb_program	*cb_find_defined_program_by_name (const char *);
+extern struct cb_program	*cb_find_defined_program_by_id (const char *);
 
 /* Function defines */
 

@@ -838,7 +838,7 @@ H#[0-9A-Za-z]* {
 	}
 
 	/* Check user programs */
-        program = cb_find_defined_program (yytext);
+        program = cb_find_defined_program_by_name (yytext);
 	if (program) {
 		yylval = cb_build_reference (yytext);
 		return PROGRAM_NAME;
@@ -2076,7 +2076,7 @@ check_level_78 (const char *name)
   there, return NULL.
 */
 struct cb_program *
-cb_find_defined_program (const char *name)
+cb_find_defined_program_by_name (const char *name)
 {
 	int	(*cmp_func)(const char *, const char *);
 	cb_tree	l;
@@ -2091,6 +2091,22 @@ cb_find_defined_program (const char *name)
 	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if ((*cmp_func)(name, CB_PROGRAM (x)->program_name) == 0) {
+			return CB_PROGRAM (x);
+		}
+	}
+
+	return NULL;
+}
+
+struct cb_program *
+cb_find_defined_program_by_id (const char *orig_id)
+{
+	cb_tree	l;
+	cb_tree	x;
+	
+	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if (strcmp (orig_id, CB_PROGRAM (x)->orig_program_id) == 0) {
 			return CB_PROGRAM (x);
 		}
 	}

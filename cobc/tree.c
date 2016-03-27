@@ -3254,13 +3254,13 @@ cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
 	}
 
 	if (ext_name) {
-		func_prototype->function_id =
+		func_prototype->ext_name =
 			(const char *) CB_LITERAL (ext_name)->data;
 	} else if (CB_LITERAL_P (prototype_name)) {
-		func_prototype->function_id =
+		func_prototype->ext_name =
 			(const char *) CB_LITERAL (prototype_name)->data;
 	} else {
-		func_prototype->function_id =
+		func_prototype->ext_name =
 			(const char *) CB_NAME (prototype_name);
 	}
 

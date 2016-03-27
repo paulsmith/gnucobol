@@ -1,4 +1,11 @@
 
+2016-03-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (find_func_ext_name), tree.h: corrected AS clause of
+	  REPOSITORY FUNCTION phrase: actually gives function (prototype)
+	  external name, not actual function-(prototype-)name. This fixed bug
+	  #124.
+
 2016-03-26  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c (find_func_ext_name), tree.h: created to find external name

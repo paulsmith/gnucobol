@@ -1631,17 +1631,22 @@ find_func_ext_name (cb_tree func_prototype)
 	struct cb_program		*program;
 
 	if (!f.check_needed) {
-		return f.function_id;
+		return f.ext_name;
 	}
 
-	program = cb_find_defined_program (f.function_id);
+	program = cb_find_defined_program_by_id (f.ext_name);
 	if (program) {
 		return program->program_id;
 	}
 
-	cb_warning (_("No definition or prototype seen for function '%s'"),
-		    f.function_id);
-	return f.function_id;
+	if (strcmp (f.name, f.ext_name) == 0) {
+		cb_warning (_("No definition/prototype seen for function '%s'"),
+			    f.name);
+	} else {
+		cb_warning (_("No definition/prototype seen for function with external name '%s'"),
+			    f.ext_name);
+	}
+	return f.ext_name;
 }
 
 static void
