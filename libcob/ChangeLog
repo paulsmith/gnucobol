@@ -1,8 +1,12 @@
 
+2016-03-28  Brian Tiffin <btiffin@gnu.org>
+	* common.c common.h system.def: Added CBL_OC_HOSTED
+	  feature-request #49.
+
 2016-03-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c (numval): added missing NUMVAL-C-specific code I missed in
-          r793, causing bug #218.
+	  r793, causing bug #218.
 
 2016-03-21  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

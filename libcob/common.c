@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include <math.h>
 #ifdef HAVE_FINITE_IEEEFP_H
@@ -3453,6 +3454,49 @@ cob_sys_system (const void *cmdline)
 	return 1;
 }
 
+int
+cob_sys_hosted (void *p, const void *var)
+{
+	const char		*name = var;
+	cob_u8_ptr		data = p;
+	size_t			i;
+
+	COB_CHK_PARMS (CBL_OC_HOSTED, 2);
+
+	if (!data) {
+		return 1;
+	}
+
+	if (COB_MODULE_PTR->cob_procedure_params[1]) {
+		i = (int)COB_MODULE_PTR->cob_procedure_params[1]->size;
+		if ((i == 4) && !strncmp (name, "argc", 4)) {
+			*((int *)data) = cob_argc;
+			return 0;
+		}
+		if ((i == 4) && !strncmp (name, "argv", 4)) {
+			*((char ***)data) = cob_argv;
+			return 0;
+		}
+		if ((i == 5) && !strncmp (name, "stdin", 5)) {
+			*((FILE **)data) = stdin;
+			return 0;
+		}
+		if ((i == 6) && !strncmp (name, "stdout", 6)) {
+			*((FILE **)data) = stdout;
+			return 0;
+		}
+		if ((i == 6) && !strncmp (name, "stderr", 6)) {
+			*((FILE **)data) = stderr;
+			return 0;
+		}
+		if ((i == 5) && !strncmp (name, "errno", 5)) {
+			*((int **)data) = &errno;
+			return 0;
+		}
+	}
+	return 1;
+}
+			
 int
 cob_sys_and (const void *p1, void *p2, const int length)
 {
