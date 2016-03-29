@@ -1,3 +1,9 @@
+2016-03-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (find_func_ext_name): moved missing prototype/function check
+	  to tree.c, to be done when REPOSITORY entry is given.
+	* tree.h (cb_func_prototype): removed now redundant check_needed flag.
+	* warning.def: added prototype warning flag for above.
 
 2016-03-27  Edward Hart <edward.dan.hart@gmail.com>
 

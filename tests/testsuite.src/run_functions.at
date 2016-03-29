@@ -3823,7 +3823,10 @@ AT_DATA([prog.cob], [
        END FUNCTION WITHOUTPAR.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 8: Warning: No definition/prototype seen for function 'WITHPAR'
+prog.cob: 8: Warning: No definition/prototype seen for function 'WITHOUTPAR'
+])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

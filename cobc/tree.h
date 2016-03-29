@@ -1334,8 +1334,6 @@ struct cb_func_prototype {
 	const char		*name;
 	/* External name of the prototype/definition */
 	const char		*ext_name;
-	/* Whether details must be checked against COBOL prototype/definition */
-	int		        check_needed;
 };
 
 #define CB_FUNC_PROTOTYPE(x)	(CB_TREE_CAST (CB_TAG_FUNC_PROTOTYPE, struct cb_func_prototype, x))

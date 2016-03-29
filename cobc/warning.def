@@ -54,6 +54,9 @@ CB_WARNDEF (cb_warn_corresponding, "corresponding",
 CB_WARNDEF (cb_warn_external_val, "external-value",
 	    _("warn EXTERNAL item with VALUE clause"))
 
+CB_WARNDEF (cb_warn_prototypes, "prototypes",
+	    _("warn missing FUNCTION prototypes/definitions"))
+
 CB_NOWARNDEF (cb_warn_call_params, "call-params",
 	    _("warn non 01/77 items for CALL params"))
 

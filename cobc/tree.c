@@ -3238,6 +3238,29 @@ cb_build_set_attribute (const struct cb_field *fld,
 
 /* FUNCTION */
 
+static void
+check_prototype_seen (const struct cb_func_prototype *fp)
+{
+	struct cb_program		*program;
+
+	program = cb_find_defined_program_by_id (fp->ext_name);
+	if (program) {
+		return;
+	}
+
+	if (cb_warn_prototypes) {
+		if (strcmp (fp->name, fp->ext_name) == 0) {
+			cb_warning_x (CB_TREE (fp),
+				      _("No definition/prototype seen for function '%s'"),
+				      fp->name);
+		} else {
+			cb_warning_x (CB_TREE (fp),
+				      _("No definition/prototype seen for function with external name '%s'"),
+				      fp->ext_name);
+		}
+	}
+}
+
 cb_tree
 cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
 {
@@ -3260,16 +3283,10 @@ cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
 		func_prototype->ext_name =
 			(const char *) CB_LITERAL (prototype_name)->data;
 	} else {
-		func_prototype->ext_name =
-			(const char *) CB_NAME (prototype_name);
+		func_prototype->ext_name = CB_NAME (prototype_name);
 	}
 
-	/*
-	  A check is needed when we have the function-prototype name, but not
-	  the external name (which may or may not be the function-prototype
-	  name).
-	*/
-	func_prototype->check_needed = CB_REFERENCE_P (prototype_name);
+	check_prototype_seen (func_prototype);
 
 	return CB_TREE (func_prototype);
 }

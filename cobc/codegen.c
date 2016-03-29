@@ -1624,31 +1624,6 @@ output_index (cb_tree x)
 
 /* Parameter */
 
-static const char *
-find_func_ext_name (cb_tree func_prototype)
-{
-	const struct cb_func_prototype	f = *CB_FUNC_PROTOTYPE (func_prototype);
-	struct cb_program		*program;
-
-	if (!f.check_needed) {
-		return f.ext_name;
-	}
-
-	program = cb_find_defined_program_by_id (f.ext_name);
-	if (program) {
-		return program->program_id;
-	}
-
-	if (strcmp (f.name, f.ext_name) == 0) {
-		cb_warning (_("No definition/prototype seen for function '%s'"),
-			    f.name);
-	} else {
-		cb_warning (_("No definition/prototype seen for function with external name '%s'"),
-			    f.ext_name);
-	}
-	return f.ext_name;
-}
-
 static void
 output_param (cb_tree x, int id)
 {
@@ -1966,7 +1941,7 @@ output_param (cb_tree x, int id)
 	case CB_TAG_INTRINSIC:
 		ip = CB_INTRINSIC (x);
 		if (ip->isuser) {
-			func = user_func_upper (find_func_ext_name (cb_ref (ip->name)));
+			func = user_func_upper (CB_FUNC_PROTOTYPE (cb_ref (ip->name))->ext_name);
 			lookup_func_call (func);
 #if	0	/* RXWRXW Func */
 			output ("cob_user_function (func_%s, &cob_dyn_%u, ",

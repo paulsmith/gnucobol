@@ -136,10 +136,42 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 11: Warning: Prototype has same name as current function and will be ignored
+prog.cob: 13: Warning: No definition/prototype seen for function 'beta'
+prog.cob: 14: Warning: No definition/prototype seen for function 'beta'
 prog.cob: 13: Warning: Duplicate REPOSITORY entry for 'beta'
 prog.cob: 14: Error: Duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 16: Warning: No definition/prototype seen for function 'gamma'
 prog.cob: 15: Error: Redefinition of 'gamma'
 prog.cob: 8: Error: 'gamma' previously defined here
+])
+AT_CLEANUP
+
+
+AT_SETUP([Missing function prototype/definition])
+AT_KEYWORDS([functions prototypes])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. blah.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION x.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  ret PIC X.
+           
+       PROCEDURE DIVISION RETURNING ret.
+           MOVE FUNCTION x TO ret
+           MOVE FUNCTION x TO ret
+           .
+       END FUNCTION blah.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: Warning: No definition/prototype seen for function 'x'
 ])
 AT_CLEANUP
 
