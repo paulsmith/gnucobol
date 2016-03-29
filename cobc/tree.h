@@ -1740,6 +1740,7 @@ extern void		cb_emit_set_false (cb_tree);
 extern void		cb_emit_set_attribute (cb_tree, const int, const int);
 extern cb_tree		cb_build_set_attribute (const struct cb_field *,
 						const int, const int);
+extern void		cb_emit_set_last_exception_to_off (void);
 
 extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_sort_using (cb_tree, cb_tree);

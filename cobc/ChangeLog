@@ -4,6 +4,7 @@
 	  to tree.c, to be done when REPOSITORY entry is given.
 	* tree.h (cb_func_prototype): removed now redundant check_needed flag.
 	* warning.def: added prototype warning flag for above.
+	* parser.y, tree.h, typeck.c: added SET LAST EXCEPTION TO OFF.
 
 2016-03-27  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -8225,6 +8225,12 @@ cb_emit_set_attribute (cb_tree x, const int val_on, const int val_off)
 	cb_emit (cb_build_set_attribute (f, val_on, val_off));
 }
 
+void
+cb_emit_set_last_exception_to_off (void)
+{
+	cb_emit (CB_BUILD_FUNCALL_1 ("cob_set_exception", cb_int0));
+}
+
 /* SORT statement */
 
 void

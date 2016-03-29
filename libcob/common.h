@@ -1250,6 +1250,8 @@ COB_EXPIMP void print_version(void);
 COB_EXPIMP int cob_load_config(void);
 COB_EXPIMP void print_runtime_env(void);
 
+void cob_set_exception(const int);
+
 char* cob_int_to_string(int, char*);
 char* cob_int_to_formatted_bytestring(int, char*);
 char* cob_strcat(char*, char*);

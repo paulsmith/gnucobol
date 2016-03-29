@@ -8791,6 +8791,7 @@ set_body:
 | set_up_down
 | set_to_on_off_sequence
 | set_to_true_false_sequence
+| set_last_exception_to_off
 ;
 
 on_or_off:
@@ -8919,6 +8920,14 @@ set_to_true_false:
   }
 ;
 
+/* SET LAST EXCEPTION TO OFF */
+
+set_last_exception_to_off:
+  LAST EXCEPTION TO OFF
+  {
+	  cb_emit_set_last_exception_to_off ();
+  }
+;
 
 /* SORT statement */
 

@@ -1866,13 +1866,13 @@ AT_DATA([prog.cob], [
 
        01 CNT1              PIC 9(9) COMP-5 VALUE 4.
        01 TAB1.
-          05 ROW1 OCCURS 1 TO 4 DEPENDING CNT1 
+          05 ROW1 OCCURS 1 TO 4 DEPENDING CNT1
                                  DESCENDING TAB1-NR.
              10 TAB1-NR     PIC 99.
 
        01 TAB2.
           05 CNT2           PIC 9(9) COMP-5 VALUE 4.
-          05 ROW2 OCCURS 1 TO 4 DEPENDING CNT2 
+          05 ROW2 OCCURS 1 TO 4 DEPENDING CNT2
                                  DESCENDING TAB2-NR.
              10 TAB2-NR PIC 99.
 
@@ -1893,7 +1893,7 @@ AT_DATA([prog.cob], [
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
              MOVE K TO TAB1-NR(K), TAB2-NR(K)
            END-PERFORM
-           
+
            MOVE 1 TO TAB3-NR(1).
            MOVE 1 TO TAB3-NR(8).
            MOVE 1 TO TAB3-NR(4).
@@ -1904,7 +1904,7 @@ AT_DATA([prog.cob], [
            MOVE 2 TO TAB3-NR(10).
            MOVE 4 TO TAB3-NR(6).
            MOVE 3 TO TAB3-NR(7).
-                      
+
            MOVE "abcde" TO TAB3-DATA(1).
            MOVE "AbCde" TO TAB3-DATA(2).
            MOVE "abcde" TO TAB3-DATA(3).
@@ -1915,7 +1915,7 @@ AT_DATA([prog.cob], [
            MOVE "AbCde" TO TAB3-DATA(8).
            MOVE "abc" TO TAB3-DATA(9).
            MOVE "12346" TO TAB3-DATA(10).
-           
+
            MOVE "day" TO TAB3-DATA2(1).
            MOVE "The" TO TAB3-DATA2(2).
            MOVE "eats" TO TAB3-DATA2(3).
@@ -1926,10 +1926,10 @@ AT_DATA([prog.cob], [
            MOVE "whole" TO TAB3-DATA2(8).
            MOVE "cow" TO TAB3-DATA2(9).
            MOVE "the" TO TAB3-DATA2(10).
-           
+
            SORT ROW1 DESCENDING TAB1-NR
            SORT ROW2 DESCENDING TAB2-NR
-  
+
            DISPLAY "SINGLE TABLE" END-DISPLAY
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
              DISPLAY  FUNCTION TRIM(TAB1-NR(K)) END-DISPLAY
@@ -1939,14 +1939,14 @@ AT_DATA([prog.cob], [
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
              DISPLAY  FUNCTION TRIM(TAB2-NR(K)) END-DISPLAY
            END-PERFORM
-           
+
            SORT ROW3 DESCENDING TAB3-NR ASCENDING TAB3-DATA
-           
+
            DISPLAY "MULTY KEY SORT" END-DISPLAY
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 10
              DISPLAY  FUNCTION TRIM(ROW3(K))
              END-DISPLAY
-           END-PERFORM           
+           END-PERFORM
 
            STOP RUN.
 ])
@@ -1965,7 +1965,7 @@ LOWER LEVEL TABLE
 MULTY KEY SORT
 06  AbCde  The
 05  abc    cow
-05  abcde  eats 
+05  abcde  eats
 04  zyx    grass
 03  abcde  and
 02  12345  mooos
@@ -1997,20 +1997,20 @@ AT_DATA([prog.cob], [
                                   DESCENDING TAB1-NR.
              10 TAB1-NR     PIC 99.
              10 TAB-DATA    PIC X(5).
-             
+
        PROCEDURE DIVISION.
        A.
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
              MOVE K TO TAB1-NR(K)
              MOVE 'BLA' TO TAB-DATA(K)
-           END-PERFORM             
-           
+           END-PERFORM
+
            SORT ROW1.
-           
+
            PERFORM VARYING K FROM 1 BY 1 UNTIL K > 4
 		     DISPLAY TAB1-NR(K) NO ADVANCING END-DISPLAY
-           END-PERFORM           
-           
+           END-PERFORM
+
            STOP RUN.
 ])
 
@@ -2234,7 +2234,7 @@ AT_DATA([prog.cob], [
         01 VAR2 PIC X(2) VALUE '11'.
 
         PROCEDURE DIVISION.
-        
+
         ENTRY 'ent1'.
         DISPLAY VAR1 END-DISPLAY
         GOBACK.
@@ -2261,7 +2261,7 @@ AT_DATA([prog1.cob], [
         ENTRY 'ent2'.
         DISPLAY VAR2 END-DISPLAY
         GOBACK.
-        
+
         ENTRY 'ent3'.
         DISPLAY VAR3 END-DISPLAY
         GOBACK.
@@ -2279,7 +2279,7 @@ AT_DATA([main-prog.cob], [
         CALL 'ent1' END-CALL
         CALL 'ent2' END-CALL
         CALL 'ent3' END-CALL
-       
+
         stop run.
 ])
 
@@ -4382,7 +4382,7 @@ AT_CLEANUP
 
 
 AT_SETUP([EC-SCREEN-LINE-NUMBER and -STARTING-COLUMN])
-AT_KEYWORDS([runmisc screen])
+AT_KEYWORDS([runmisc exceptions screen])
 
 AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
 
@@ -4419,6 +4419,37 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], ignore, [])
 
+AT_CLEANUP
+
+
+AT_SETUP([SET LAST EXCEPTION TO OFF])
+AT_KEYWORDS([runmisc exceptions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. blah.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 9.
+
+       PROCEDURE DIVISION.
+           COMPUTE x = 10
+           DISPLAY FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
+           DISPLAY FUNCTION TRIM(FUNCTION EXCEPTION-LOCATION)
+           SET LAST EXCEPTION TO OFF
+           DISPLAY FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
+           DISPLAY FUNCTION TRIM(FUNCTION EXCEPTION-LOCATION)
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[EC-SIZE-OVERFLOW
+blah; ; 10
+
+
+])
 AT_CLEANUP
 
 
@@ -4537,7 +4568,7 @@ AT_DATA([caller.cob], [
            READY TRACE
            MOVE 2 TO RETURN-CODE
            CALL "callee1"
-           END-CALL                       
+           END-CALL
            CANCEL "callee1"
            MOVE 0 TO RETURN-CODE
            STOP RUN.
@@ -4548,9 +4579,9 @@ AT_DATA([callee1.cob], [
        PROGRAM-ID.      callee1.
        PROCEDURE        DIVISION.
            ADD 1 TO RETURN-CODE END-ADD
-           CALL "callee2" END-CALL                               
+           CALL "callee2" END-CALL
            CANCEL "callee2"
-           CALL "callee2b" END-CALL                               
+           CALL "callee2b" END-CALL
            CANCEL "callee2b"
            SUBTRACT 1 FROM RETURN-CODE END-SUBTRACT
            EXIT PROGRAM.
@@ -4561,7 +4592,7 @@ AT_DATA([callee2.cob], [
        PROGRAM-ID.      callee2.
        PROCEDURE        DIVISION.
            COMPUTE RETURN-CODE = 1 + 2 END-COMPUTE.
-           CALL "callee2c" END-CALL                               
+           CALL "callee2c" END-CALL
            CANCEL "callee2c"
            MOVE 0 TO RETURN-CODE.
            EXIT PROGRAM.
@@ -4646,4 +4677,3 @@ Program-Id: caller           Statement: STOP RUN               Line: 17
 ])
 
 AT_CLEANUP
-

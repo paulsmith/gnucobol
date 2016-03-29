@@ -1,6 +1,12 @@
 
+2016-03-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c (cob_set_exception), common.h, coblocal.h: made cob_set_
+	  exception a public function for SET LAST EXCEPTION TO OFF. Also made
+	  argument of 0 reset all exception information.
+
 2016-03-28  Brian Tiffin <btiffin@gnu.org>
-	* common.c common.h system.def: Added CBL_OC_HOSTED
+	* common.c, common.h, system.def: Added CBL_OC_HOSTED
 	  feature-request #49.
 
 2016-03-23  Edward Hart <edward.dan.hart@gmail.com>

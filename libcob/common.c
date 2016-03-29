@@ -1219,6 +1219,13 @@ cob_set_exception (const int id)
 		cobglobptr->cob_orig_program_id = cob_current_program_id;
 		cobglobptr->cob_orig_section = cob_current_section;
 		cobglobptr->cob_orig_paragraph = cob_current_paragraph;
+	} else {
+		cobglobptr->cob_got_exception = 0;
+		cobglobptr->cob_orig_statement = NULL;
+		cobglobptr->cob_orig_line = 0;
+		cobglobptr->cob_orig_program_id = NULL;
+		cobglobptr->cob_orig_section = NULL;
+		cobglobptr->cob_orig_paragraph = NULL;
 	}
 }
 
