@@ -1842,6 +1842,7 @@ cobc_print_usage (char * prog)
 
 	puts (_("  -W                    enable ALL warnings"));
 	puts (_("  -Wall                 enable all warnings except as noted below"));
+	puts (_("  -Wno-<feature>        disable warning enabled by -W or -Wall"));
 #undef	CB_WARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)		\
