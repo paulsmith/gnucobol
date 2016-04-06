@@ -3500,6 +3500,20 @@ cob_sys_hosted (void *p, const void *var)
 			*((int **)data) = &errno;
 			return 0;
 		}
+#if defined(HAVE_TIMEZONE)
+		if ((i == 6) && !strncmp (name, "tzname", 6)) {
+			*((char ***)data) = tzname;
+			return 0;
+		}
+		if ((i == 8) && !strncmp (name, "timezone", 8)) {
+			*((long *)data) = timezone;
+			return 0;
+		}
+		if ((i == 8) && !strncmp (name, "daylight", 8)) {
+			*((int *)data) = daylight;
+			return 0;
+		}
+#endif
 	}
 	return 1;
 }

@@ -1,4 +1,7 @@
 
+2016-04-06  Brian Tiffin <btiffin@gnu.org>
+	* common.c: Updated CBL_OC_HOSTED with tzname, timezone, daylight.
+
 2016-03-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.c (cob_set_exception), common.h, coblocal.h: made cob_set_
