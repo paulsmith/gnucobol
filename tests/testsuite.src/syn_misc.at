@@ -2127,3 +2127,22 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob: 9: Error: ANY LENGTH items may only be BY REFERENCE formal parameters
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Swapped SOURCE- and OBJECT-COMPUTER])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       OBJECT-COMPUTER. a.
+       SOURCE-COMPUTER. b.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: Warning: Phrases in non-standard order
+])
+AT_CLEANUP

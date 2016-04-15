@@ -695,11 +695,6 @@ H#[0-9A-Za-z]* {
 	return LENGTH_OF;
 }
 
-"ID"[ ,;]+"DIVISION"[ ,;]*"." |
-"IDENTIFICATION"[ ,;]+"DIVISION"[ ,;]*"." {
-	/* Ignore */
-}
-
 "SWITCH"[ ]+([0-9][0-9]?|[A-Z])[ ,;\n] {
 	/* ACUCOBOL extension: switch-names with space and with letter */
 	char suffix[3] = "";

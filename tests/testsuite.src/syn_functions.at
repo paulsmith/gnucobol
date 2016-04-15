@@ -33,6 +33,7 @@ AT_DATA([prog.cob], [
        PROCEDURE      DIVISION RETURNING any-len.
            CONTINUE
            .
+       END FUNCTION   func.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -132,6 +133,7 @@ AT_DATA([prog.cob], [
            FUNCTION beta AS "alpha"
            FUNCTION gamma
            .
+       END FUNCTION alpha.
 ])
 
 AT_CHECK([$COMPILE_ONLY -Wno-prototypes prog.cob], [1], [],

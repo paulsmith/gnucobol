@@ -682,3 +682,102 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Duplicate identification division header])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 3: Error: syntax error, unexpected IDENTIFICATION, expecting FUNCTION-ID or PROGRAM-ID
+])
+AT_CLEANUP
+
+
+AT_SETUP([Invalid environment division order])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CONSOLE IS CRT
+           .
+       SPECIAL-NAMES.
+           DECIMAL-POINT IS COMMA
+           .
+       SOURCE-COMPUTER. a-computer.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: PROCEDURE DIVISION header missing
+prog.cob: 10: Error: syntax error, unexpected SPECIAL-NAMES
+prog.cob: 11: Error: syntax error, unexpected DECIMAL-POINT
+prog.cob: 13: Error: syntax error, unexpected SOURCE-COMPUTER
+prog.cob: 13: Error: syntax error, unexpected Identifier
+prog.cob: 14: Error: syntax error, unexpected end of file
+])
+AT_CLEANUP
+
+
+AT_SETUP([Function without END FUNCTION])
+AT_KEYWORDS([definition functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. func.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 4: Error: syntax error, unexpected end of file, expecting END FUNCTION
+])
+AT_CLEANUP
+
+
+AT_SETUP([Nested programs without END PROGRAM])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-1.
+       PROCEDURE DIVISION.
+           
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-2.
+       PROCEDURE DIVISION.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-3.
+
+       END PROGRAM prog-1.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([Nested programs not in procedure division])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-1.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-2.
+
+       END PROGRAM prog-1.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 6: Error: PROCEDURE DIVISION header missing
+])
+AT_CLEANUP

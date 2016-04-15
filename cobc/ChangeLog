@@ -1,3 +1,18 @@
+
+2016-04-15  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #224: disallow configuration section elements in
+	  any order.
+	* scanner.l, parser.y: moved handling of IDENTIFICATION DIVISION header
+	  to parser.y.
+	* parser.y: disallow functions without END FUNCTION.
+	* parser.y: allow nested programs to omit END PROGRAM, per standard.
+	* parser.y: emit error if nested programs are defined in a program
+	  without a PROCEDURE DIVISION header.
+	* parser.y: refactored grammar of source_element and program_body.
+	* parser.y: renamed all optional tokens to be begin with underscore for
+	  consistency.
+
 2016-03-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c (find_func_ext_name): moved missing prototype/function check
