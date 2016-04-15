@@ -1964,7 +1964,10 @@ program_definition:
   _identification_header
   program_id_paragraph
   _program_body
-  /* The list is the program which contains a nested programs can have an end marker */
+  /*
+    The list is so a program which contains a nested program can have an end
+    marker.
+  */
   _end_program_list
 ;
 
