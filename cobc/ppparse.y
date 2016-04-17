@@ -24,7 +24,7 @@
 %defines
 %error-verbose
 %verbose
-%name-prefix="pp"
+%name-prefix "pp"
 
 %{
 #include "config.h"
