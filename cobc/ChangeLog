@@ -3,6 +3,8 @@
 
 	* parser.y (screen_description): fixed bug #227: code now handles case
 	  where no screen precedes a 78-level item.
+	* parser.y (undefined_word): Added error case to improve error handling.
+	  This required a slight change to file_control_entry.
 
 2016-04-15  Edward Hart <edward.dan.hart@gmail.com>
 

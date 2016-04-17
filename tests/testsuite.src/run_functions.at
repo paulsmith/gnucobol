@@ -3783,25 +3783,6 @@ AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION.
-       CONFIGURATION    SECTION.
-       REPOSITORY.
-           FUNCTION     WITHPAR
-           FUNCTION     WITHOUTPAR.
-       PROCEDURE        DIVISION.
-           IF WITHPAR(1) NOT = 2
-              DISPLAY WITHPAR(1)
-              END-DISPLAY
-           END-IF.
-           IF WITHOUTPAR NOT = 1
-              DISPLAY WITHOUTPAR
-              END-DISPLAY
-           END-IF.
-           STOP RUN.
-       END PROGRAM prog.
-
-       IDENTIFICATION   DIVISION.
        FUNCTION-ID.     WITHPAR.
        DATA             DIVISION.
        LINKAGE          SECTION.
@@ -3821,9 +3802,28 @@ AT_DATA([prog.cob], [
            MOVE 1 TO PAR.
            GOBACK.
        END FUNCTION WITHOUTPAR.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION     WITHPAR
+           FUNCTION     WITHOUTPAR.
+       PROCEDURE        DIVISION.
+           IF WITHPAR(1) NOT = 2
+              DISPLAY WITHPAR(1)
+              END-DISPLAY
+           END-IF.
+           IF WITHOUTPAR NOT = 1
+              DISPLAY WITHOUTPAR
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+       END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE -Wno-prototypes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

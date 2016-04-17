@@ -3031,27 +3031,26 @@ file_control_entry:
 			       COBC_HD_INPUT_OUTPUT_SECTION,
 			       COBC_HD_FILE_CONTROL, 0);
 	check_duplicate = 0;
-	if (CB_INVALID_TREE ($3)) {
-		YYERROR;
+	if (CB_VALID_TREE ($3)) {
+		/* Build new file */
+		current_file = build_file ($3);
+		current_file->optional = CB_INTEGER ($2)->val;
+
+		/* Add file to current program list */
+		CB_ADD_TO_CHAIN (CB_TREE (current_file),
+				 current_program->file_list);
+	} else {
+		current_file = NULL;
+		if (current_program->file_list) {
+			current_program->file_list
+				= CB_CHAIN (current_program->file_list);
+		}
 	}
-
-	/* Build new file */
-	current_file = build_file ($3);
-	current_file->optional = CB_INTEGER ($2)->val;
-
-	/* Add file to current program list */
-	CB_ADD_TO_CHAIN (CB_TREE (current_file), current_program->file_list);
   }
   _select_clause_sequence TOK_DOT
   {
-	validate_file (current_file, $3);
-  }
-| SELECT error TOK_DOT
-  {
-	yyerrok;
-	current_file = NULL;
-	if (current_program->file_list) {
-		current_program->file_list = CB_CHAIN (current_program->file_list);
+	if (CB_VALID_TREE ($3)) {
+		validate_file (current_file, $3);
 	}
   }
 ;
@@ -10526,6 +10525,12 @@ undefined_word:
 	} else {
 		$$ = $1;
 	}
+  }
+|  error
+  {
+	  yyclearin;
+	  yyerrok;
+	  $$ = cb_error_node;
   }
 ;
 

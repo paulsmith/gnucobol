@@ -118,6 +118,9 @@ AT_SETUP([Redundant REPOSITORY FUNCTION phrase])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
+       FUNCTION-ID. beta.
+       END FUNCTION beta.
+
        IDENTIFICATION DIVISION.
        FUNCTION-ID. alpha.
 
@@ -136,12 +139,13 @@ AT_DATA([prog.cob], [
        END FUNCTION alpha.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-prototypes prog.cob], [1], [],
-[prog.cob: 11: Warning: Prototype has same name as current function and will be ignored
-prog.cob: 13: Warning: Duplicate REPOSITORY entry for 'beta'
-prog.cob: 14: Error: Duplicate REPOSITORY entries for 'beta' do not match
-prog.cob: 15: Error: Redefinition of 'gamma'
-prog.cob: 8: Error: 'gamma' previously defined here
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 14: Warning: Prototype has same name as current function and will be ignored
+prog.cob: 16: Warning: Duplicate REPOSITORY entry for 'beta'
+prog.cob: 17: Error: Duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 19: Warning: No definition/prototype seen for function 'gamma'
+prog.cob: 18: Error: Redefinition of 'gamma'
+prog.cob: 11: Error: 'gamma' previously defined here
 ])
 AT_CLEANUP
 
