@@ -781,3 +781,19 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 6: Error: PROCEDURE DIVISION header missing
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Screen section starts with 78-level])
+AT_KEYWORDS([screen definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       SCREEN SECTION.
+       78 const VALUE "x".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP

@@ -1,4 +1,9 @@
 
+2016-04-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (screen_description): fixed bug #227: code now handles case
+	  where no screen precedes a 78-level item.
+
 2016-04-15  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #224: disallow configuration section elements in
@@ -684,8 +689,8 @@
 
 201?-??-??  Sergey Kashyrin <ska@kiska.net>
 
-	* codeoptim.c : Fixed bug in COB_ADD_PACKED_INT. 
-	  Computing COMP-3 failed in MSVC-build versions, 
+	* codeoptim.c : Fixed bug in COB_ADD_PACKED_INT.
+	  Computing COMP-3 failed in MSVC-build versions,
 	  in output_storage() calls '%' should be '%%'.
 
 2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
@@ -1022,7 +1027,7 @@
 2008-11-02  Roger While <simrw@sim-basis.de>
 
 	* cobc.c, cobc.h, tree.h, codegen.c, typeck.c :
-	  Handling of local fields, alphabet names, etc. 
+	  Handling of local fields, alphabet names, etc.
 	  Create local include file for each, possibly nested, program
 
 2008-11-01  Roger While <simrw@sim-basis.de>

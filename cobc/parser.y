@@ -5400,14 +5400,17 @@ screen_description:
 		cb_validate_88_item (current_field);
 	}
 	if (current_field->flag_item_78) {
-		/* Reset to last non-78 item */
+		/* Reset to last non-78 item - may set current_field to NULL */
 		current_field = cb_validate_78_item (current_field, 0);
 	}
-	if (!description_field) {
-		description_field = current_field;
-	}
-	if (current_field->flag_occurs && !has_relative_pos (current_field)) {
-		cb_error (_("Relative LINE/COLUMN clause required with OCCURS"));
+	if (likely (current_field)) {
+		if (!description_field) {
+			description_field = current_field;
+		}
+		if (current_field->flag_occurs
+		    && !has_relative_pos (current_field)) {
+			cb_error (_("Relative LINE/COLUMN clause required with OCCURS"));
+		}
 	}
   }
 | level_number error TOK_DOT
