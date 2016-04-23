@@ -880,7 +880,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 void
 ppparse_error (const char *msg)
 {
-	cb_plex_error (newline_count, msg);
+	cb_plex_error (newline_count, "%s", msg);
 }
 
 void

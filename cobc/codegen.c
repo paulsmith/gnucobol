@@ -478,7 +478,7 @@ output_indent (const char *str)
 		output_indent_level -= level;
 	}
 
-	output_line (str);
+	output_line ("%s", str);
 
 	if (*p == '{' && strcmp (str, ")}") != 0) {
 		output_indent_level += level;

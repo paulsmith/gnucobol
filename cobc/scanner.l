@@ -1058,7 +1058,7 @@ error_literal (const char *type, const char *literal)
 		}
 	}
 	literal_error++;
-	cb_error (err_msg);
+	cb_error ("%s", err_msg);
 }
 
 static void

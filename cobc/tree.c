@@ -1076,7 +1076,7 @@ error_numeric_literal (const char *literal)
 		lit_out[38] = '\0';
 	}
 	cb_error (_("Invalid numeric literal: '%s'"), lit_out);
-	cb_error (err_msg);
+	cb_error ("%s", err_msg);
 }
 
 /* Check numeric literal length, postponed from scanner.l (scan_numeric) */

@@ -389,7 +389,7 @@ ambiguous_error (cb_tree x)
 				break;
 			}
 			strcat (errnamebuff, _("defined here"));
-			cb_error_x (y, errnamebuff);
+			cb_error_x (y, "%s", errnamebuff);
 		}
 	}
 }

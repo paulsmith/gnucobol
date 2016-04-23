@@ -6034,17 +6034,17 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 	if (value_flag) {
 		/* VALUE clause */
 		if (CB_LITERAL_P (src)) {
-			cb_warning_x (dst, msg);
+			cb_warning_x (dst, "%s", msg);
 		} else {
-			cb_warning_x (loc, msg);
+			cb_warning_x (loc, "%s", msg);
 		}
 	} else {
 		/* MOVE statement */
 		if (flag) {
 			if (CB_LITERAL_P (src)) {
-				cb_warning_x (dst, msg);
+				cb_warning_x (dst, "%s", msg);
 			} else {
-				cb_warning_x (loc, msg);
+				cb_warning_x (loc, "%s", msg);
 			}
 			if (src_flag) {
 				warning_destination (src);
