@@ -1229,6 +1229,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [18446744073709551615
-09223372036854775807], [])
+09223372036854775807
+], [])
 
 AT_CLEANUP
