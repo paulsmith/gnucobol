@@ -4893,7 +4893,9 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 						break;
 					}
 					if (memcmp (CB_LITERAL (x)->data,
-						    "9223372036854775807",
+						    CB_LITERAL (x)->sign ?
+								"9223372036854775808" :
+								"9223372036854775807",
 						    (size_t)19) > 0) {
 						valmin = 1;
 						break;
@@ -6474,7 +6476,9 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 						if (i > 19) {
 							goto numlit_overflow;
 						}
-						if (memcmp (p, "9223372036854775807", (size_t)19) > 0) {
+						if (memcmp (p, l->sign ? "9223372036854775808" :
+									 "9223372036854775807",
+									 (size_t)19) > 0) {
 							goto numlit_overflow;
 						}
 					} else {

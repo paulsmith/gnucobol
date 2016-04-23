@@ -1,6 +1,10 @@
 
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
+	* typeck.c: 64bit signed constant did not allow max negative.
+
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
 	* typeck.c: 64bit unsigned treated as signed when long int
 	  same size as long long.
 	* tree.h: realign some tabs.

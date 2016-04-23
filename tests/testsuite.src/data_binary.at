@@ -1233,3 +1233,25 @@ AT_CHECK([./prog], [0], [18446744073709551615
 ], [])
 
 AT_CLEANUP
+
+
+# bug #197 64bit signed values not accepting min value constant
+AT_SETUP([BINARY: 64bit signed negative constant range])
+AT_KEYWORDS([binary])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WORK-DWORD-1  PIC S9(18) COMP-5 VALUE -9223372036854775808.
+       PROCEDURE        DIVISION.
+           DISPLAY WORK-DWORD-1 WITH NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [-09223372036854775808], [])
+
+AT_CLEANUP
