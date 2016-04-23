@@ -1178,3 +1178,29 @@ AT_CHECK([./prog], [0],
 ])
 
 AT_CLEANUP
+
+
+# 64bit unsigned
+
+AT_SETUP([BINARY: 64bit unsigned compare])
+AT_KEYWORDS([binary])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 BDU-1         USAGE BINARY-DOUBLE UNSIGNED.
+       01 BDU-2         USAGE BINARY-DOUBLE UNSIGNED.
+       PROCEDURE        DIVISION.
+           MOVE 18446744073709551615 TO BDU-1 BDU-2
+           IF BDU-1 NOT EQUAL BDU-2 THEN
+           DISPLAY "FAIL"
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
+
+AT_CLEANUP

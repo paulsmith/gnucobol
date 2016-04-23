@@ -711,16 +711,13 @@ cob_gen_optim (const enum cb_optim val)
 
 	case COB_CMP_U64:
 		output_storage ("static COB_INLINE COB_A_INLINE int");
-		output_storage ("cob_cmp_u64 (const void *p, const cob_s64_t n)");
+		output_storage ("cob_cmp_u64 (const void *p, const cob_u64_t n)");
 		output_storage ("{");
 #ifndef COB_ALLOW_UNALIGNED
 		output_storage ("	void		*x;");
 #endif
 		output_storage ("	cob_u64_t	val;");
 
-		output_storage ("	if (unlikely(n < 0)) {");
-		output_storage ("		return 1;");
-		output_storage ("	}");
 #ifdef	COB_ALLOW_UNALIGNED
 		output_storage ("	val = *(const cob_u64_t __unaligned *)p;");
 #else

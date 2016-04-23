@@ -1,4 +1,8 @@
 
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+	* codeoptim.c: Bug #229: binary-double unsigned compares failed when high
+	  bit set.
+
 2016-04-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (screen_description): fixed bug #227: code now handles case

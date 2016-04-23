@@ -1,4 +1,9 @@
 
+2016-04-23  Brian Tiffin <btiffin@gnu.prg>
+
+	* testsuite.src/data_binary.at: added test for binary-double unsigned
+	  compare when high bit set.
+
 2016-02-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* testsuite.at, tests/syn_reportwriter.at: RW checks earlier skipped are
