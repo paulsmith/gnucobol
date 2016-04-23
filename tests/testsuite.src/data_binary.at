@@ -1204,3 +1204,31 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+# bug #173 unsigned values being treated as signed
+AT_SETUP([BINARY: 64bit unsigned arthimetic notrunc])
+AT_KEYWORDS([binary])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WORK-UDWORD-1 PIC 9(18) COMP.
+       PROCEDURE        DIVISION.
+           MOVE 18446744073709551615 TO WORK-UDWORD-1.
+           DISPLAY WORK-UDWORD-1
+           END-DISPLAY.
+           COMPUTE  WORK-UDWORD-1 = WORK-UDWORD-1 / 2
+           END-COMPUTE.
+           DISPLAY WORK-UDWORD-1
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [18446744073709551615
+09223372036854775807], [])
+
+AT_CLEANUP
