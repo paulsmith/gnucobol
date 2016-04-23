@@ -324,6 +324,34 @@ cob_decimal_init (cob_decimal *d)
 	d->scale = 0;
 }
 
+/** setting a decimal field from an unsigned binary long int */
+void
+cob_decimal_set_ullint (cob_decimal *d, const cob_u64_t n)
+{
+#ifdef	COB_LI_IS_LL
+	mpz_set_ui (d->value, (cob_uli_t)n);
+#else
+	cob_u64_t	uval;
+	cob_u32_t	negative;
+
+	negative = 0;
+	if (n < 0) {
+		negative = 1;
+		uval = (cob_u64_t)-n;
+	} else {
+		uval = (cob_u64_t)n;
+	}
+	mpz_set_ui (d->value, (cob_uli_t)(uval >> 32));
+	mpz_mul_2exp (d->value, d->value, 32);
+	mpz_add_ui (d->value, d->value, (cob_uli_t)(uval & 0xFFFFFFFFU));
+	if (negative) {
+		mpz_neg (d->value, d->value);
+	}
+#endif
+	d->scale = 0;
+}
+
+/** setting a decimal field from a signed binary long int */
 void
 cob_decimal_set_llint (cob_decimal *d, const cob_s64_t n)
 {

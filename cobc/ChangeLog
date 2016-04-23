@@ -1,5 +1,15 @@
 
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
+	* typeck.c: 64bit unsigned treated as signed when long int
+	  same size as long long.
+	* tree.h: realign some tabs.
+	* codegen.c, error.c, pplex.l, scanner.l, tree.c, typeck.c: remove printf
+	  non literal spec warning.
+
+
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
 	* codeoptim.c: Bug #229: binary-double unsigned compares failed when high
 	  bit set.
 

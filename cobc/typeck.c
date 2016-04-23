@@ -3332,7 +3332,13 @@ decimal_expand (cb_tree d, cb_tree x)
 		    !f->pic->scale &&
 		    (f->size == 1 || f->size == 2 || f->size == 4 ||
 		     f->size == 8)) {
-			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d, cb_build_cast_llint (x)));
+			if (f->pic->have_sign) {
+				dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint",
+					 		   d, cb_build_cast_llint (x)));
+			} else {
+				dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_ullint",
+							   d, cb_build_cast_llint (x)));
+			}
 		} else {
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
 		}

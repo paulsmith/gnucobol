@@ -1,4 +1,9 @@
 
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
+
+	* common.h, numeric.c: 64bit unsigned treated as signed when long int
+	  same size as long long.
+
 2016-04-06  Brian Tiffin <btiffin@gnu.org>
 	* common.c: Updated CBL_OC_HOSTED with tzname, timezone, daylight.
 
@@ -9,6 +14,7 @@
 	  argument of 0 reset all exception information.
 
 2016-03-28  Brian Tiffin <btiffin@gnu.org>
+
 	* common.c, common.h, system.def: Added CBL_OC_HOSTED
 	  feature-request #49.
 
