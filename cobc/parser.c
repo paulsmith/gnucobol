@@ -78,7 +78,7 @@
 #endif
 
 #define YYSTYPE			cb_tree
-#define yyerror			cb_error
+#define yyerror(x)		cb_error ("%s", x)
 
 #define PENDING(x)		cb_warning (_("'%s' not implemented"), x)
 
