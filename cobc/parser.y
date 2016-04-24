@@ -9269,9 +9269,13 @@ stop_returning:
   {
 	$$ = current_program->cb_return_code;
   }
-| return_give x
+| return_give x	/* common extension, should error with -std=cobolX */
   {
 	$$ = $2;
+  }
+| x		/* RM/COBOL extension, should error with most -std */
+  {
+	$$ = $1;
   }
 | _with ERROR _status _status_x
   {

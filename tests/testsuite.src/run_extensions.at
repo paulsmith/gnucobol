@@ -1396,22 +1396,54 @@ AT_KEYWORDS([extensions])
 AT_DATA([prog1.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog1.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  RET          PIC 99 USAGE DISPLAY.
        PROCEDURE        DIVISION.
-           STOP RUN RETURNING 1.
+           MOVE 11 TO RET
+           STOP RUN RETURNING RET.
 ])
 
 AT_DATA([prog2.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  RET          PIC 99 USAGE PACKED-DECIMAL.
        PROCEDURE        DIVISION.
-           STOP RUN GIVING 2.
+           MOVE 22 TO RET
+           STOP RUN GIVING RET.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77  RET          PIC 99 USAGE BINARY.
+       PROCEDURE        DIVISION.
+           MOVE 33 TO RET
+           STOP RUN 33.
+])
+
+AT_DATA([prog4.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog4.
+       PROCEDURE        DIVISION.
+           STOP RUN RETURNING 44.
 ])
 
 AT_CHECK([$COMPILE prog1.cob], [0], [], [])
-AT_CHECK([./prog1], [1])
+AT_CHECK([./prog1], [11])
 
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
-AT_CHECK([./prog2], [2])
+AT_CHECK([./prog2], [22])
+
+AT_CHECK([$COMPILE prog3.cob], [0], [], [])
+AT_CHECK([./prog3], [33])
+
+AT_CHECK([$COMPILE prog4.cob], [0], [], [])
+AT_CHECK([./prog4], [44])
 
 AT_CLEANUP
 

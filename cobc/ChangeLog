@@ -1,4 +1,9 @@
 
+2016-04-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: implement STOP RUN integer/identifier (RM/COBOL extension)
+	* parser.y, pparse.y: remove printf non literal spec warning.
+
 2016-04-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, tree.c: fixed bug #231: tightened handling of alphabet-names
@@ -15,7 +20,6 @@
 	* tree.h: realign some tabs.
 	* codegen.c, error.c, pplex.l, scanner.l, tree.c, typeck.c: remove printf
 	  non literal spec warning.
-
 
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
