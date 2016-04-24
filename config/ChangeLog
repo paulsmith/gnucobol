@@ -1,4 +1,8 @@
 
+2016-04-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added recording-modes as context-sensitive words.
+
 2016-03-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: updated comment for reserved to describe how to specify

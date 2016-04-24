@@ -116,6 +116,7 @@
 #define	CB_CS_SET			(1U << 13)
 #define	CB_CS_STOP			(1U << 14)
 #define	CB_CS_WITH			(1U << 15)
+#define	CB_CS_RECORDING			(1U << 16)
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

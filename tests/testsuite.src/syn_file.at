@@ -1,18 +1,18 @@
 ## Copyright (C) 2003-2012, 2014, 2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -328,4 +328,103 @@ prog.cob: In paragraph 'PP02':
 prog.cob: 25: Error: Invalid reference to 'P02' (In DECLARATIVES)
 ])
 
+AT_CLEANUP
+
+
+AT_SETUP([RECORDING MODE])
+AT_KEYWORDS([file extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.dat" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f RECORDING MODE IS U.
+       01  x PIC X.
+
+       PROCEDURE DIVISION.
+           OPEN INPUT f
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: Error: Can only use U or S mode with RECORD SEQUENTIAL files
+])
+AT_CLEANUP
+
+
+AT_SETUP([CODE-SET clause])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET A IS ASCII.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f, ASSIGN "f.dat", LINE SEQUENTIAL.
+           SELECT g, ASSIGN "g.dat", LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f CODE-SET A.
+       01  f-rec PIC X(10).
+
+       FD  g CODE-SET foo.
+       01  g-rec PIC X(10).
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 17: Warning: Ignoring CODE-SET 'A'
+prog.cob: 17: Warning: 'CODE-SET' not implemented
+prog.cob: 20: Error: 'foo' is not defined
+prog.cob: 20: Error: 'foo' is not an alphabet-name
+prog.cob: 20: Warning: 'CODE-SET' not implemented
+])
+AT_CLEANUP
+
+
+AT_SETUP([CODE-SET FOR clause])
+AT_KEYWORDS([file extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET A IS EBCDIC.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.dat" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f CODE-SET A FOR x, y, z.
+       01  x.
+           03  y PIC X(10).
+       01  x-2.
+           03  z PIC X(10).
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 16: Warning: 'FOR sub-records clause' not implemented
+prog.cob: 16: Warning: 'CODE-SET' not implemented
+prog.cob: 16: Error: FOR item 'x' is a record
+prog.cob: 16: Error: FOR item 'z' is in different record to 'x'
+])
 AT_CLEANUP

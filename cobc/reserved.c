@@ -818,6 +818,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
 				0, 0
   },
+  { "F",			0, 0, F,			/* Extension */
+    				0, CB_CS_RECORDING
+  },
   { "FACTORY",			0, 0, -1,			/* 2002 */
 				0, 0
   },
@@ -844,6 +847,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "FIRST",			0, 0, FIRST,			/* 2002 */
 				0, 0
+  },
+  { "FIXED",			0, 0, FIXED,			/* Extension */
+    				0, CB_CS_RECORDING
   },
   { "FLOAT-BINARY-128",		0, 0, -1,			/* 2011 */
 				0, 0
@@ -1445,7 +1451,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "RECORDING",		0, 0, RECORDING,		/* Extension */
-				0, 0
+				CB_CS_RECORDING, 0
   },
   { "RECORDS",			0, 0, RECORDS,			/* 2002 */
 				0, 0
@@ -1558,6 +1564,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "RUN",			0, 0, RUN,			/* 2002 */
 				0, 0
+  },
+  { "S",			0, 0, S,			/* Extension */
+    				0, CB_CS_RECORDING
   },
   { "SAME",			0, 0, SAME,			/* 2002 */
 				0, 0
@@ -1825,6 +1834,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "TYPEDEF",			0, 0, -1,			/* 2002 */
 				0, 0
   },
+  { "U",			0, 0, U,			/* Extension */
+    				0, CB_CS_RECORDING
+  },
   { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
   },
@@ -1891,6 +1903,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "UTF-8",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
   },
+  { "V",			0, 0, V,			/* Extension */
+    				0, CB_CS_RECORDING
+  },
   { "VAL-STATUS",		0, 0, -1,			/* 2002 */
 				0, 0
   },
@@ -1908,6 +1923,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "VALUES",			0, 0, VALUE,			/* 2002 */
 				0, 0
+  },
+  { "VARIABLE",			0, 0, VARIABLE,			/* Extension */
+    				0, CB_CS_RECORDING
   },
   { "VARYING",			0, 0, VARYING,			/* 2002 */
 				0, 0

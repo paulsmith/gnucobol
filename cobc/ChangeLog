@@ -1,4 +1,9 @@
 
+2016-04-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, tree.c: fixed bug #231: tightened handling of alphabet-names
+	  and recording-modes. Also added FOR clause syntax to CODE-SET clause.
+
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
 	* typeck.c: 64bit signed constant did not allow max negative.

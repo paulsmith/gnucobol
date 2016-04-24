@@ -221,6 +221,50 @@ file_error (cb_tree name, const char *clause, const char errtype)
 	}
 }
 
+
+static void
+check_code_set_items_are_subitems_of_records (struct cb_file * const file)
+{
+	struct cb_list		*l;
+	cb_tree			r;
+	struct cb_field		*f;
+	cb_tree			first_ref = NULL;
+	struct cb_field		*first_record;
+	struct cb_field		*current_record;
+
+	/*
+	  Check each item belongs to this FD, is not a record and are all in the
+	  same record.
+	 */
+	for (l = file->code_set_items; l; l = CB_LIST (l->chain)) {
+		r = CB_VALUE (l);
+		f = CB_FIELD (cb_ref (r));
+
+		if (f->level == 1) {
+			cb_error_x (r, _("FOR item '%s' is a record"),
+				    cb_name (r));
+		}
+
+		for (current_record = f; current_record->parent;
+		     current_record = current_record->parent);
+
+		if (first_ref) {
+			if (current_record != first_record) {
+				cb_error_x (r, _("FOR item '%s' is in different record to '%s'"),
+					    cb_name (r), cb_name (first_ref));
+			}
+		} else {
+			first_ref = r;
+			first_record = current_record;
+		}
+
+		if (current_record->file != file) {
+			cb_error_x (r, _("FOR item '%s' is not in a record associated with '%s'"),
+				    cb_name (r), cb_name (CB_TREE (file)));
+		}
+	}
+}
+
 /* Tree */
 
 static void *
@@ -2552,7 +2596,13 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		}
 #endif
 	}
+
+	if (f->code_set_items) {
+		check_code_set_items_are_subitems_of_records (f);
+	}
+
 	f->flag_finalized = 1;
+
 	if (f->linage) {
 		snprintf (scratch_buff, (size_t)COB_MINI_MAX,
 			  "LINAGE-COUNTER %s", f->name);

@@ -838,6 +838,7 @@ struct cb_file {
 	struct cb_program	*handler_prog;		/* Prog where defined */
 	struct cb_label		*debug_section;		/* DEBUG SECTION */
 	struct cb_alphabet_name	*code_set;		/* CODE-SET */
+	struct cb_list		*code_set_items;	/* CODE-SET FOR items */
 	int			record_min;		/* RECORD CONTAINS */
 	int			record_max;		/* RECORD CONTAINS */
 	int			optional;		/* OPTIONAL */

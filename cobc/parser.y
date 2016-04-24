@@ -1438,12 +1438,14 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token EXPONENTIATION		"Exponentiation operator"
 %token EXTEND
 %token EXTERNAL
+%token F
 %token FD
 %token FILE_CONTROL		"FILE-CONTROL"
 %token FILE_ID			"FILE-ID"
 %token FILLER
 %token FINAL
 %token FIRST
+%token FIXED
 %token FLOAT_BINARY_128		"FLOAT-BINARY-128"
 %token FLOAT_BINARY_32		"FLOAT-BINARY-32"
 %token FLOAT_BINARY_64		"FLOAT-BINARY-64"
@@ -1658,6 +1660,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token ROLLBACK
 %token ROUNDED
 %token RUN
+%token S
 %token SAME
 %token SCREEN
 %token SCREEN_CONTROL		"SCREEN-CONTROL"
@@ -1745,6 +1748,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token TRIM_FUNC		"FUNCTION TRIM"
 %token TRUNCATION
 %token TYPE
+%token U
 %token UNDERLINE
 %token UNIT
 %token UNLOCK
@@ -1769,7 +1773,9 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token USER_DEFAULT		"USER-DEFAULT"
 %token USER_FUNCTION_NAME	"User function name"
 %token USING
+%token V
 %token VALUE
+%token VARIABLE
 %token VARYING
 %token WAIT
 %token WHEN
@@ -3251,13 +3257,25 @@ _suppress_clause:
 /* COLLATING SEQUENCE clause */
 
 collating_sequence_clause:
-  coll_sequence _is WORD
+  coll_sequence _is alphabet_name
   {
 	check_repeated ("COLLATING", SYN_CLAUSE_3, &check_duplicate);
 	PENDING ("COLLATING SEQUENCE");
   }
 ;
 
+alphabet_name:
+  WORD
+  {
+	  if (CB_ALPHABET_NAME_P (cb_ref ($1))) {
+		  $$ = $1;
+	  } else {
+		  cb_error_x ($1, _("'%s' is not an alphabet-name"),
+			      cb_name ($1));
+		  $$ = cb_error_node;
+	  }
+  }
+;
 
 /* FILE STATUS clause */
 
@@ -3877,7 +3895,7 @@ linage_bottom:
 /* RECORDING MODE clause */
 
 recording_mode_clause:
-  RECORDING _mode _is WORD
+  RECORDING _mode _is recording_mode
   {
 	cobc_cs_check = 0;
 	check_repeated ("RECORDING", SYN_CLAUSE_9, &check_duplicate);
@@ -3885,56 +3903,70 @@ recording_mode_clause:
   }
 ;
 
+recording_mode:
+  F
+| V
+| FIXED
+| VARIABLE
+| u_or_s
+  {
+	if (current_file->organization != COB_ORG_SEQUENTIAL) {
+		cb_error (_("Can only use U or S mode with RECORD SEQUENTIAL files"));
+	}
+  }
+;
+
+u_or_s:
+  U
+| S
+;
 
 /* CODE-SET clause */
 
 code_set_clause:
-  CODE_SET _is WORD
+  CODE_SET _is alphabet_name _for_sub_records_clause
   {
+	struct cb_alphabet_name	*al;
+	  
 	check_repeated ("CODE SET", SYN_CLAUSE_10, &check_duplicate);
-	if (CB_VALID_TREE ($3)) {
-		cb_tree			x;
-		struct cb_alphabet_name	*al;
 
-		x = cb_ref ($3);
-		if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
-		    current_file->organization != COB_ORG_SEQUENTIAL) {
-			cb_error (_("CODE-SET clause invalid for file type"));
-		}
-		if (!CB_ALPHABET_NAME_P (x)) {
-			cb_error_x ($3, _("Alphabet-name is expected '%s'"), cb_name ($3));
-		} else {
-			al = CB_ALPHABET_NAME (x);
-			switch (al->alphabet_type) {
+	al = CB_ALPHABET_NAME (cb_ref ($3));
+	switch (al->alphabet_type) {
 #ifdef	COB_EBCDIC_MACHINE
-			case CB_ALPHABET_ASCII:
-			case CB_ALPHABET_CUSTOM:
-				current_file->code_set = al;
-				break;
-			default:
-				if (warningopt) {
-					cb_warning_x ($3, _("Ignoring CODE-SET '%s'"),
-						      cb_name ($3));
-				}
-				break;
+	case CB_ALPHABET_ASCII:
 #else
-			case CB_ALPHABET_EBCDIC:
-			case CB_ALPHABET_CUSTOM:
-				current_file->code_set = al;
-				break;
-			default:
-				if (warningopt) {
-					cb_warning_x ($3, _("Ignoring CODE-SET '%s'"),
-						      cb_name ($3));
-				}
-				break;
+	case CB_ALPHABET_EBCDIC:
 #endif
-			}
-			if (warningopt) {
-				PENDING ("CODE-SET");
-			}
+	case CB_ALPHABET_CUSTOM:
+		current_file->code_set = al;
+		break;
+	default:
+		if (warningopt && CB_VALID_TREE ($3)) {
+			cb_warning_x ($3, _("Ignoring CODE-SET '%s'"),
+				      cb_name ($3));
 		}
+		break;
 	}
+	
+	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
+	    current_file->organization != COB_ORG_SEQUENTIAL) {
+		cb_error (_("CODE-SET clause invalid for file type"));
+	}
+
+	if (warningopt) {
+		PENDING ("CODE-SET");
+	}
+  }
+;
+
+_for_sub_records_clause:
+| FOR reference_list
+  {
+	  if (warningopt) {
+		  PENDING ("FOR sub-records clause");
+	  }
+
+	  current_file->code_set_items = CB_LIST ($2);
   }
 ;
 
@@ -4023,9 +4055,7 @@ _record_description_list:
 
 record_description_list_2:
   data_description TOK_DOT
-| record_description_list_2
-  data_description TOK_DOT
-| record_description_list_2 TOK_DOT
+| record_description_list_2 data_description TOK_DOT
 ;
 
 data_description:
