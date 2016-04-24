@@ -79,8 +79,7 @@ _create_file () {
 			      -e 's/  \([^ ].*\)$/ @code{\1}/g' \
 			      -e 's/^$/@\*/g' \
 			                               > $1.tmp
-			declare -i lines=$(cat $1.tmp | wc -l)
-			lines=$lines+20
+            lines=$(expr 20 + $(cat $1.tmp | wc -l))
 			# All other sections
 			echo "@verbatim"               >>$1.tmp
 			tail -n +$lines $confdir/runtime.cfg \
