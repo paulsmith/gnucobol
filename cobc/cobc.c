@@ -1542,10 +1542,11 @@ cobc_print_version (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2001-2016 Free Software Foundation, Inc.");
-	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch");
-	puts (_("This is free software; see the source for copying conditions.  There is NO\n" 
+	puts ("Copyright (C) 2016 Free Software Foundation, Inc.");
+	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
+	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
+	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart");
 	printf (_("Built     %s"), cb_oc_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
@@ -1739,17 +1740,6 @@ cobc_print_info (void)
 #else
 	cobc_var_print (_("ISAM handler"),		_("Not available"), 0);
 #endif
-
-#ifdef	WITH_INDEX_EXTFH
-#endif
-#ifdef	WITH_DB
-#endif
-#ifdef	WITH_CISAM
-#endif
-#ifdef	WITH_DISAM
-#endif
-#ifdef	WITH_VBISAM
-#endif
 }
 
 static void
@@ -1870,6 +1860,14 @@ cobc_print_usage (char * prog)
 #undef	CB_FLAG_NQ
 
 	putchar ('\n');
+
+	putchar ('\n');
+	printf (_("Report bugs to: %s or\n"
+			  "use the preferred issue tracker via home page."), "bug-gnucobol@gnu.org");
+	putchar ('\n');
+	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
+	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
+
 }
 
 static void

@@ -84,10 +84,11 @@ cobcrun_print_version (void)
 
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.");
-	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
-	puts (_("This is free software; see the source for copying conditions.  There is NO\n"\
+	puts ("Copyright (C) 2016 Free Software Foundation, Inc.");
+	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
+	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
+	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
 	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
@@ -99,7 +100,7 @@ cobcrun_print_usage (char * prog)
 {
 	puts (_("COBOL driver program for GnuCOBOL modules"));
 	putchar ('\n');
-	printf (_("usage: %s [options] PROGRAM [param ...]"), prog);
+	printf (_("usage: %s [options] PROGRAM [parameter ...]"), prog);
 	putchar ('\n');
 	printf (_("  or:  %s options"), prog);
 	putchar ('\n');
@@ -111,6 +112,12 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -c <file>, -config=<file>   set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-env      display current runtime configuration\n"
 	        "                        (value and origin for all settings)"));
+	putchar ('\n');
+	printf (_("Report bugs to: %s or\n"
+			  "use the preferred issue tracker via home page"), "bug-gnucobol@gnu.org");
+	putchar ('\n');
+	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
+	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
 }
 
 /* Set current argument from getopt as environment value */
