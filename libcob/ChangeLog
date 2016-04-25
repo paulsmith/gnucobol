@@ -1,10 +1,15 @@
 
+2016-04-06  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c: Fixed CBL_OC_HOSTED tzname, timezone, daylight for WIN32 names.
+
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
 	* common.h, numeric.c: 64bit unsigned treated as signed when long int
 	  same size as long long.
 
 2016-04-06  Brian Tiffin <btiffin@gnu.org>
+
 	* common.c: Updated CBL_OC_HOSTED with tzname, timezone, daylight.
 
 2016-03-29  Edward Hart <edward.dan.hart@gmail.com>

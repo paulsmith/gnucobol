@@ -3501,6 +3501,14 @@ cob_sys_hosted (void *p, const void *var)
 			return 0;
 		}
 #if defined(HAVE_TIMEZONE)
+#if defined(_WIN32)
+#undef timezone
+#undef tzname
+#undef daylight
+#define timezone	_timezone
+#define tzname		_tzname
+#define daylight	_daylight
+#endif
 		if ((i == 6) && !strncmp (name, "tzname", 6)) {
 			*((char ***)data) = tzname;
 			return 0;
@@ -3513,7 +3521,12 @@ cob_sys_hosted (void *p, const void *var)
 			*((int *)data) = daylight;
 			return 0;
 		}
+#if defined(_WIN32)
+#undef timezone
+#undef tzname
+#undef daylight
 #endif
+#endif /* HAVE_TIMEZONE */
 	}
 	return 1;
 }
