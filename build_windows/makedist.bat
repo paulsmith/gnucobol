@@ -45,6 +45,7 @@ call :copyrel x64
 
 mkdir config
 copy "%COB_SOURCE_PATH%config\*.conf"		config\
+copy "%COB_SOURCE_PATH%config\*.cfg"		config\
 
 mkdir copy
 copy "%COB_SOURCE_PATH%copy\*.cpy"		copy\
@@ -72,7 +73,7 @@ goto :end
 
 :copyrel
 if NOT "%1"=="x64" (
-   set copyfrom="%COB_RELEASE_PATH%win32\release"
+   set copyfrom="%COB_RELEASE_PATH%Win32\release"
    set  copytobin=bin
    set  copytolib=lib
 ) else (
