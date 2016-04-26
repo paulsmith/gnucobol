@@ -1,5 +1,9 @@
 
-2016-04-06  Brian Tiffin <btiffin@gnu.org>
+2016-04-26  Brian Tiffin <btiffin@gnu.org>
+
+	* common.c, common.h: Re-fixed CBL_OC_HOSTED tzname, timezone, daylight for VC2013 names.
+
+2016-04-25  Brian Tiffin <btiffin@gnu.org>
 
 	* common.c: Fixed CBL_OC_HOSTED tzname, timezone, daylight for WIN32 names.
 

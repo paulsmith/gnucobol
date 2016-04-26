@@ -290,6 +290,8 @@
 #endif
 #if defined COB_USE_VC2013_OR_GREATER
 #define timezone			_timezone
+#define tzname				_tzname
+#define daylight			_daylight
 #endif
 
 #define __attribute__(x)
