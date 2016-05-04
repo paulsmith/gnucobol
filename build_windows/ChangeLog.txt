@@ -1,8 +1,15 @@
 
+2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* vc7: removed (GC 2+ will not build with Visual C compiler < 2005)
+	* config.h.tmpl, defaults.h.tmpl, set_env_vs.bat, set_env_vs_dist.bat:
+	  removed pre-VS2005 references
+
 2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* config.h.tmpl, defaults.h.tmpl: combined all files config.h/default.h from
-	  subfolders and config.h.bdb.win, config.h.vb.win, deleted the old files
+	* config.h.tmpl, defaults.h.tmpl: combined all files config.h/default.h
+	  from subfolders and config.h.bdb.win, config.h.vb.win,
+	  deleted the old files
 	* config.h.tmpl: added CONFIGURED_ISAM for a single configuration option
 	* config.h.tmpl: pretend _MSC has setenv (using the alias to _putenv_s)
 	* changed path in all project files accordingly

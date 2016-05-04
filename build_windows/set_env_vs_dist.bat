@@ -35,14 +35,6 @@ if exist "%VS80COMNTOOLS%vsvars32.bat" (
    call "%VS80COMNTOOLS%vsvars32.bat"
    goto :gc
 )
-if exist "%VS71COMNTOOLS%" NEQ "" (
-   call "%VS71COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
-if exist "%VS70COMNTOOLS%vsvars32.bat" (
-   call "%VS70COMNTOOLS%vsvars32.bat"
-   goto :gc
-)
 
 echo Warning: Not possible to set environment for Microsoft Visual Studio!
 if exist "%ProgramFiles(x86)%\Microsoft SDKs\Windows\v8.1\Bin\SetEnv.Cmd" (

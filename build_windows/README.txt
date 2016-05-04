@@ -1,3 +1,12 @@
+The following was written for using the Microsoft Visual C++ compiler in the
+rare circumstances where a GCC build (for example via MinGW) cannot be used.
+
+Most of this applies to other C compilers for Microsoft Windows, too - please
+report any issues and working solutions with other compilers.
+
+GnuCOBOL needs support for either `long long` (for WIN32 `__int64` is used),
+very old compilers may lack support for this (like Visual C++ 2003 and older).
+
 How to build in native Windows environments:
 
 * get/build necessary headers, link libraries and runtime dlls,

@@ -277,9 +277,7 @@ static size_t		verbose_output = 0;
 static size_t		cob_optimize = 0;
 
 #ifdef	_MSC_VER
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 static const char	*manicmd;
-#endif
 static const char	*manilink;
 static size_t		manilink_len;
 #define PATTERN_DELIM '|'
@@ -3751,7 +3749,6 @@ process_module_direct (struct filename *fn)
 	} else {
 		ret = process_filtered (cobc_buffer, fn);
 	}
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
@@ -3761,7 +3758,6 @@ process_module_direct (struct filename *fn)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
-#endif
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
@@ -3863,7 +3859,6 @@ process_module (struct filename *fn)
 	} else {
 		ret = process_filtered (cobc_buffer, fn);
 	}
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
@@ -3873,7 +3868,6 @@ process_module (struct filename *fn)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
-#endif
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
@@ -3975,7 +3969,6 @@ process_library (struct filename *l)
 	} else {
 		ret = process_filtered (cobc_buffer, l);
 	}
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
@@ -3985,7 +3978,6 @@ process_library (struct filename *l)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
-#endif
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
@@ -4095,7 +4087,6 @@ process_link (struct filename *l)
 	} else {
 		ret = process_filtered (cobc_buffer, l);
 	}
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	/* Embedding manifest */
 	if (ret == 0) {
 		sprintf (cobc_buffer,
@@ -4105,7 +4096,6 @@ process_link (struct filename *l)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
-#endif
 #else	/* _MSC_VER */
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s -fe=\"%s\" %s %s %s %s",
@@ -4465,7 +4455,6 @@ main (int argc, char **argv)
 	if (!verbose_output) {
 		COBC_ADD_STR (cobc_cflags, " /nologo", NULL, NULL);
 	}
-#if	defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
 	if (!verbose_output) {
 		manicmd = "mt /nologo";
 		manilink = "/link /nologo /manifest";
@@ -4473,13 +4462,6 @@ main (int argc, char **argv)
 		manicmd = "mt";
 		manilink = "/link /manifest";
 	}
-#else
-	if (!verbose_output) {
-		manilink = "/link /nologo";
-	} else {
-		manilink = "/link";
-	}
-#endif
 	manilink_len = strlen (manilink);
 #endif
 

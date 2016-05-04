@@ -82,16 +82,14 @@
 /* Readable compiler version defines */
 
 #if defined(_MSC_VER)
-#if _MSC_VER >= 1400
-#define COB_USE_VC2005_OR_GREATER 1
-#else
-#define COB_USE_VC2005_OR_GREATER 0
-#endif
 
 #if _MSC_VER >= 1500
 #define COB_USE_VC2008_OR_GREATER 1
 #else
-#define COB_USE_VC2008_OR_GREATER 0
+#define COB_USE_VC2008_OR_GREATER 
+#if _MSC_VER < 1400
+#error Support for Visual Studio 2003 and earlier dropped with GnuCOBOL 2.0
+#endif
 #endif
 
 #if _MSC_VER >= 1800
@@ -245,7 +243,7 @@
 
 #endif
 
-#elif defined(_MSC_VER) && COB_USE_VC2005_OR_GREATER
+#elif defined(_MSC_VER)
 
 #define COB_BSWAP_16(val) (_byteswap_ushort (val))
 #define COB_BSWAP_32(val) (_byteswap_ulong (val))
@@ -283,11 +281,9 @@
 #define snprintf		_snprintf
 #define getpid			_getpid
 #define access			_access
-#if defined COB_USE_VC2005_OR_GREATER
 /* remark: _putenv_s always overwrites, add a check for overwrite = 1 if necessary later*/
 #define setenv(name,value,overwrite)	_putenv_s(name,value)
 #define unsetenv(name)					_putenv_s(name,"")
-#endif
 #if defined COB_USE_VC2013_OR_GREATER
 #define timezone			_timezone
 #define tzname				_tzname

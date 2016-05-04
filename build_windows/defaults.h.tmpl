@@ -40,7 +40,14 @@
 // /* try to use compile defines for that:
 #define COB_BLD_CC       "cl"
 #define COB_BLD_CPPFLAGS ""
-#if _MSC_VER == 1900
+#if defined (_MSC_VER)
+#if _MSC_VER > 1900
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "unknown MSC DEBUG generation"
+#else
+#define COB_BLD_CFLAGS   "unknown MSC RELEASE generation"
+#endif
+#elif _MSC_VER == 1900
 #ifdef _DEBUG
 #define COB_BLD_CFLAGS	"/GS /analyze- /W3 /Zc:wchar_t /ZI /Gm /Od /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /Oy- /MDd /EHsc"
 #else
@@ -76,12 +83,7 @@
 #else
 #define COB_BLD_CFLAGS   "/O2 /Ob2 /Oi /Ot /GL /FD /EHsc /MD /c /Zi /TP"
 #endif
-#elif _MSC_VER == 1300
-#ifdef _DEBUG
-#define COB_BLD_CFLAGS   "/Od /Gm /EHsc /RTC1 /MDd /GS /c /Zi /TP"
-#else
-#define COB_BLD_CFLAGS   "/O2 /Ot /GL /FD /EHsc /MD /GS /c /Zi /TP"
-#endif
+#endif // _MSC_VER checks
 #else
 #ifdef _DEBUG
 #define COB_BLD_CFLAGS   "unknown DEBUG generation"
