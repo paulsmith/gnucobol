@@ -2830,7 +2830,7 @@ line_contains (char* line_start, char* line_end, char* search_patterns) {
 /** -j run job after build */
 static int
 process_run (const char *name) {
-	int ret;
+	int ret, status;
 
 	if (cb_compile_level < CB_LEVEL_MODULE) {
 		fputs (_("Nothing for -j to run"), stderr);
@@ -2850,7 +2850,16 @@ process_run (const char *name) {
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
 	}
-	ret = system (cobc_buffer);
+	status = system (cobc_buffer);
+#ifdef WEXITSTATUS
+	if (WIFEXITED(status)) {
+		ret = WEXITSTATUS(status);
+	} else {
+		ret = status;
+	}
+#else
+	ret = status;
+#endif
 	if (verbose_output) {
 		fputs (_("Return status:"), stderr);
 		fprintf (stderr, "\t%d\n", ret);

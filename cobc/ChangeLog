@@ -1,4 +1,8 @@
 
+2016-05-15 Brian Tiffin <btiffin@gnu.org>
+
+	* cobc.c: correct process_run return code for systems with WEXITSTATUS
+
 2016-04-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: implement STOP RUN integer/identifier (RM/COBOL extension)
