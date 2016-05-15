@@ -1,5 +1,9 @@
 
-2016-04-23  Brian Tiffin <btiffin@gnu.prg>
+2016-05-15  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/used_binaries.at: added tests for cobcrun -M <module>
+
+2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/data_binary.at: added test for binary-double unsigned
 	  compare when high bit set.

@@ -125,6 +125,185 @@ AT_CHECK([$COBCRUN caller], [0], [HelloWorld])
 AT_CLEANUP
 
 
+AT_SETUP([cobcrun -M DSO entry argument])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM caller.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      inside.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       01 CLA-VAR       PIC X(5).
+       PROCEDURE        DIVISION.
+           MOVE "Aloha" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           ACCEPT CLA-VAR FROM COMMAND-LINE END-ACCEPT.
+           DISPLAY CLA-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM inside.
+])
+
+AT_CHECK([${COMPILE_MODULE} callee.cob])
+AT_CHECK([${COMPILE_MODULE} caller.cob])
+AT_CHECK([${COBCRUN} -M ./caller inside again], [0],
+[Aloha
+World
+again
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M directory/ default])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([${COMPILE_MODULE} callee.cob])
+AT_CHECK([${COMPILE_MODULE} caller.cob])
+AT_CHECK([${COBCRUN} -M ./ caller], [0],
+[Hello
+World
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M directory/dso alternate])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           DISPLAY EXT-VAR END-DISPLAY.
+           MOVE "World" TO EXT-VAR.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Hello" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM caller.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      inside.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 EXT-VAR       PIC X(5) EXTERNAL.
+       PROCEDURE        DIVISION.
+           MOVE "Aloha" TO EXT-VAR.
+           CALL "callee" END-CALL.
+           DISPLAY EXT-VAR END-DISPLAY.
+           STOP RUN.
+       END PROGRAM inside.
+])
+
+AT_CHECK([${COMPILE_MODULE} callee.cob])
+AT_CHECK([${COMPILE_MODULE} caller.cob])
+AT_CHECK([${COBCRUN} -M ./caller inside], [0],
+[Aloha
+World
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun -M DSO entry multiple arguments])
+AT_KEYWORDS([runmisc])
+
+# Test that modules can be called with ARGUMENT-VALUES
+AT_DATA([called.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      called.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CLI-ARGS      PIC X(27).
+       01 ARG-TWO       PIC X(6).
+       PROCEDURE        DIVISION.
+           ACCEPT CLI-ARGS FROM COMMAND-LINE END-ACCEPT.
+           DISPLAY 2 UPON ARGUMENT-NUMBER END-DISPLAY.
+           ACCEPT ARG-TWO FROM ARGUMENT-VALUE END-ACCEPT.
+           DISPLAY CLI-ARGS ":" ARG-TWO END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_DATA([mainer.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      mainer.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+       END PROGRAM mainer.
+])
+
+AT_CHECK([${COBC} -b ${FLAGS} mainer.cob called.cob])
+AT_CHECK([${COBCRUN} -M ./mainer called "first argument" "second" "third"], [0],
+[first argument second third:second
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Compile from stdin])
 AT_KEYWORDS([runmisc stdin])
 

@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Roger While, Simon Sobisch
+   Written by Roger While, Simon Sobisch, Brian Tiffin
 
    This file is part of GnuCOBOL.
 
@@ -25,6 +25,7 @@
 #include	<stdlib.h>
 #include	<stddef.h>
 #include	<string.h>
+#include	<errno.h>
 #include	"libcob.h"
 #include	"tarstamp.h"
 
@@ -36,7 +37,7 @@
 
 static int arg_shift = 1;
 
-static const char short_options[] = "+hirc:V";
+static const char short_options[] = "+hirc:VM:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -45,9 +46,10 @@ static const char short_options[] = "+hirc:V";
 static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"info",		CB_NO_ARG, NULL, 'i'},
-	{"runtime-env",	CB_NO_ARG, NULL, 'r'},
-	{"config",	CB_RQ_ARG, NULL, 'C'},
-	{"version",   	CB_NO_ARG, NULL, 'V'},
+	{"runtime-env",		CB_NO_ARG, NULL, 'r'},
+	{"config",		CB_RQ_ARG, NULL, 'C'},
+	{"version",   		CB_NO_ARG, NULL, 'V'},
+	{"module",		CB_RQ_ARG, NULL, 'm'},
 	{NULL, 0, NULL, 0}
 };
 
@@ -88,7 +90,7 @@ cobcrun_print_version (void)
 	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
-	printf (_("Written by %s\n"), "Roger While, Simon Sobisch");
+	printf (_("Written by %s\n"), "Roger While, Simon Sobisch, Brian Tiffin");
 	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
@@ -106,12 +108,17 @@ cobcrun_print_usage (char * prog)
 	putchar ('\n');
 	putchar ('\n');
 	puts (_("options:"));
-	puts (_("  -h, -help             display this help and exit"));
-	puts (_("  -V, -version          display cobcrun and runtime version and exit"));
-	puts (_("  -i, -info             display runtime information (build/environment)"));
-	puts (_("  -c <file>, -config=<file>   set runtime configuration from <file>"));
-	puts (_("  -r, -runtime-env      display current runtime configuration\n"
-	        "                        (value and origin for all settings)"));
+	puts (_("  -h, -help                      display this help and exit"));
+	puts (_("  -V, -version                   display cobcrun and runtime version and exit"));
+	puts (_("  -i, -info                      display runtime information (build/environment)"));
+	puts (_("  -c <file>, -config=<file>      set runtime configuration from <file>"));
+	puts (_("  -r, -runtime-env               display current runtime configuration\n"
+	        "                                 (value and origin for all settings)"));
+	puts (_("  -M <module>, -module=<module>  set entry point module name and/or load path"));
+	puts (_("                                 where -M module prepends any directory to the"));
+	puts (_("                                 dynamic link loader library search path"));
+	puts (_("                                 and any basename to the module preload list"));
+	puts (_("                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)"));
 	putchar ('\n');
 	printf (_("Report bugs to: %s or\n"
 			  "use the preferred issue tracker via home page"), "bug-gnucobol@gnu.org");
@@ -120,7 +127,9 @@ cobcrun_print_usage (char * prog)
 	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
 }
 
-/* Set current argument from getopt as environment value */
+/**
+ * Set current argument from getopt as environment value
+ */
 static int
 cobcrun_setenv (const char * environment)
 {
@@ -137,6 +146,77 @@ cobcrun_setenv (const char * environment)
 #endif
 }
 
+/**
+ * split into path and file, or just path, or just file
+ *  Note: strndup and strdup memory needs to be freed
+ */
+static void
+cobcrun_split_path_file(char** p, char** f, char *pf)
+{
+	 char *slash = pf, *next;
+
+	 while ((next = strpbrk(slash + 1, "\\/"))) slash = next;
+	 if (pf != slash) slash++;
+
+	 *p = strndup(pf, slash - pf);
+	 *f = strdup(slash);
+}
+
+/**
+ * Prepend a new directory path to the library search COB_LIBRARY_PATH
+ * and setup a module COB_PRE_LOAD, for each component included.
+ */
+static int
+cobcrun_initial_module (char *module_argument)
+{
+	int envop_return;
+	char *pathname, *filename;
+	char env_space[COB_MEDIUM_BUFF], *envptr;
+
+	if (!module_argument) {
+		return 1;
+	}
+
+	/* See if we have a /dir/path/module, or a /dir/path/ or a module (no slash) */
+	cobcrun_split_path_file(&pathname, &filename, module_argument);
+
+	if (pathname && *pathname) {
+		memset(env_space, 0, COB_MEDIUM_BUFF);
+		envptr = getenv("COB_LIBRARY_PATH");
+		if (envptr) {
+			snprintf(env_space, COB_MEDIUM_BUFF, "%s:%s", pathname, envptr);
+		} else {
+			snprintf(env_space, COB_MEDIUM_BUFF, "%s", pathname);
+		}
+		envop_return = setenv("COB_LIBRARY_PATH", env_space, 1);
+		if (envop_return) {
+			fprintf(stderr, "Problem with setenv COB_LIBRARY_PATH: %d\n", errno);
+			return 1;
+		}
+		free(pathname);
+	}
+
+	if (filename && *filename) {
+		memset(env_space, 0, COB_MEDIUM_BUFF);
+		envptr = getenv("COB_PRE_LOAD");
+		if (envptr) {
+			snprintf(env_space, COB_MEDIUM_BUFF, "%s:%s", filename, envptr);
+		} else {
+			snprintf(env_space, COB_MEDIUM_BUFF, "%s", filename);
+		}
+		envop_return = setenv("COB_PRE_LOAD", filename, 1);
+		if (envop_return) {
+			fprintf(stderr, "Problem with setenv COB_PRE_LOAD: %d\n", errno);
+			return 1;
+		}
+		free(filename);
+	}
+	return 0;
+}
+
+/**
+ * process the cobcrun command options
+ */
 static void
 process_command_line (int argc, char *argv[])
 {
@@ -160,7 +240,7 @@ process_command_line (int argc, char *argv[])
 		case '?':
 			/* Unknown option or ambiguous */
 			exit (1);
-		
+
 		case 'c':
 		case 'C':
 			/* --config=<file> */
@@ -200,10 +280,28 @@ process_command_line (int argc, char *argv[])
 			putchar ('\n');
 			print_version();
 			exit (0);
+		case 'M':
+		case 'm':
+			/* --module=<module> */
+			arg_shift++;
+			if (cobcrun_initial_module (cob_optarg)) {
+				fputs (_("invalid module argument"), stderr);
+				putc ('\n', stderr);
+				fflush (stderr);
+				exit (1);
+			}
+			/* shift argument again if two part argument was used */
+			if (c == 'M') {
+				arg_shift++;
+			}
+			break;
 		}
 	}
 }
 
+/**
+ * cobcrun, for invoking entry points from dynamic shared object libraries
+ */
 int
 main (int argc, char **argv)
 {
