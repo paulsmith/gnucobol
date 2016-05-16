@@ -1,5 +1,10 @@
 
+2016-05-16  Brian Tiffin <btiffin@gnu.org>
+
+	* cobcrun.c : replaced non-portable strndup, and fixed free with cob_free
+
 2016-05-15  Brian Tiffin <btiffin@gnu.org>
+
 	* cobcrun.c : Added -M path/module command line option
 	  if path/ found, prepend to COB_LIBRARY_PATH
 	  if module (no slash) found, prepend to COB_PRE_LOAD
