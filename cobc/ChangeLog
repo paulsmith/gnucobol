@@ -1,4 +1,8 @@
 
+2016-05-16 Brian Tiffin <btiffin@gnu.org>
+
+	* codeoptim.c: bug #229, missed patching cob_cmp_align_u64
+
 2016-05-15 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: correct process_run return code for systems with WEXITSTATUS
