@@ -850,7 +850,7 @@ AT_DATA([prog.cob], [
            03  PIC 99-B.
            03  PIC 9CRB.
            03  PIC DB9(5).
-           03  PIC 99$$$. *> Not before decimal point, but as (second to) last symbol
+           03  PIC 99$$$.
            03  PIC 99$B.
            03  PIC 0$99.
            03  PIC PPPVP9.
