@@ -425,6 +425,7 @@ validate_field_1 (struct cb_field *f)
 	int		n;
 	int		need_picture;
 	unsigned int	ret;
+	int		i;
 
 	if (f->flag_invalid) {
 		return 1;
@@ -765,6 +766,10 @@ validate_field_1 (struct cb_field *f)
 
 		/* Validate BLANK ZERO */
 		if (f->flag_blank_zero) {
+			if (f->pic->have_sign) {
+				cb_error_x (x, _("Cannot have S in PICTURE string and BLANK WHEN ZERO"));
+			}
+			
 			switch (f->pic->category) {
 			case CB_CATEGORY_NUMERIC:
 				/* Reconstruct the picture string */
@@ -813,9 +818,15 @@ validate_field_1 (struct cb_field *f)
 				f->pic->category = CB_CATEGORY_NUMERIC_EDITED;
 				break;
 			case CB_CATEGORY_NUMERIC_EDITED:
+				for (i = 0; f->pic->str[i] != '\0'; ++i) {
+					if (f->pic->str[i] == '*') {
+						cb_error_x (x, _("Cannot have * in PICTURE string and BLANK WHEN ZERO"));
+						break;
+					}
+				}
 				break;
 			default:
-				cb_error_x (x, _("'%s' cannot have BLANK WHEN ZERO"), cb_name (x));
+				cb_error_x (x, _("'%s' is not numeric, so cannot have BLANK WHEN ZERO"), cb_name (x));
 				break;
 			}
 		}

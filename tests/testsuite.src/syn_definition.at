@@ -797,3 +797,150 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
+
+
+AT_SETUP([Invalid PICTURE strings])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  empty-pic PIC.
+       01  too-long-pic PIC XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+       01  mutiple-symbols.
+           03  PIC 9CRCR.
+           03  PIC 9DBDB.
+           03  PIC S99S.
+           03  PIC 99..9.
+           03  PIC 99VV9.
+           03  PIC +$99+.
+           03  PIC $+99$-.
+       01  non-symbols.
+           03  PIC 9K.
+           03  PIC 999C.
+           03  PIC 999D.
+       01  too-many-digits PIC 9(50).
+       01  too-long-number-in-parens PIC 9(11111111111111).
+       01  nested-parens PIC 9((100)).
+       01  unbalanced-parens PIC 9(.
+       01  multiple-pairs-of-parens PIC 9(5)(3).
+       01  no-digit-in-parens PIC 9().
+       01  mutually-exclusive-symbols.
+           03  PIC P(3)9.9.
+           03  PIC 9V.9.
+           03  PIC Z*.
+           03  PIC +(5)--.
+           03  PIC $(4)Z(9).
+           03  PIC $$B*(4).
+           03  PIC NX.
+           03  PIC AN.
+           03  PIC AZ(3).
+           03  PIC 99.99XXXXX.
+           03  PIC SA.
+           03  PIC $$$B+++B---.
+           03  PIC +++9+.
+           03  PIC +9(5)CR.
+           03  PIC -9(5)DB.
+       01 non-rightmost-leftmost-symbols.
+           03  PIC BBB+BB99.
+           03  PIC 99-B.
+           03  PIC 9CRB.
+           03  PIC DB9(5).
+           03  PIC 99$$$. *> Not before decimal point, but as (second to) last symbol
+           03  PIC 99$B.
+           03  PIC 0$99.
+           03  PIC PPPVP9.
+       01  missing-symbols.
+           03  PIC B(5).
+           03  PIC +.
+           03  PIC $.
+       01  valid-pics.
+           03  PIC VP9B.
+           03  PIC B9P(3).
+           03  PIC B$$$.
+           03  PIC 0000+B0+++0B,+.
+           03  PIC +(5)P(3).
+           03  PIC ++.++.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: Warning: Continuation of COBOL words used
+prog.cob: 7: Error: Missing PICTURE string
+prog.cob: 8: Error: PICTURE string may not contain more than 63 characters
+prog.cob: 11: Error: CR or DB cannot follow CR or DB
+prog.cob: 12: Error: CR or DB cannot follow CR or DB
+prog.cob: 13: Error: S cannot follow S
+prog.cob: 14: Error: . cannot follow .
+prog.cob: 15: Error: V cannot follow V
+prog.cob: 16: Error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 17: Error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob: 17: Error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob: 17: Error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 19: Error: Invalid PICTURE character 'K'
+prog.cob: 20: Error: C must be followed by R
+prog.cob: 21: Error: D must be followed by B
+prog.cob: 22: Error: Numeric field cannot be larger than 38 digits
+prog.cob: 23: Error: Only up to 9 significant digits in parentheses are permitted
+prog.cob: 24: Error: Non-digits in parentheses not permitted
+prog.cob: 24: Error: Invalid PICTURE character ')'
+prog.cob: 25: Error: Unbalanced parenthesis
+prog.cob: 26: Error: Only one set of parentheses is permitted
+prog.cob: 27: Error: Parentheses must contain a number greater than zero
+prog.cob: 27: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
+prog.cob: 29: Error: . cannot follow a P which is after the decimal point
+prog.cob: 30: Error: . cannot follow V
+prog.cob: 31: Error: Cannot have both Z and * in PICTURE string
+prog.cob: 32: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 32: Error: a trailing +/- sign cannot follow a trailing +/- sign
+prog.cob: 33: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
+prog.cob: 34: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
+prog.cob: 35: Error: A or X cannot follow N
+prog.cob: 36: Error: N cannot follow A or X
+prog.cob: 37: Error: a Z or * which is before the decimal point cannot follow A or X
+prog.cob: 38: Error: A or X cannot follow .
+prog.cob: 39: Error: A or X cannot follow S
+prog.cob: 40: Error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 40: Error: a leading +/- sign cannot follow a floating currency symbol string which is before the decimal point
+prog.cob: 40: Error: a leading +/- sign cannot follow a leading +/- sign
+prog.cob: 40: Error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 40: Error: a trailing +/- sign cannot follow a trailing +/- sign
+prog.cob: 41: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 42: Error: CR or DB cannot follow a leading +/- sign
+prog.cob: 43: Error: CR or DB cannot follow a leading +/- sign
+prog.cob: 45: Error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 46: Error: a leading +/- sign cannot follow 9
+prog.cob: 47: Error: B, 0 or / cannot follow CR or DB
+prog.cob: 48: Error: 9 cannot follow CR or DB
+prog.cob: 49: Error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob: 50: Error: a leading currency symbol cannot follow 9
+prog.cob: 51: Error: a leading currency symbol cannot follow B, 0 or /
+prog.cob: 52: Error: V cannot follow a P which is after the decimal point
+prog.cob: 54: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
+prog.cob: 55: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
+prog.cob: 56: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
+])
+AT_CLEANUP
+
+
+AT_SETUP([PICTURE strings invalid with BLANK WHEN ZERO])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC S9(5) BLANK ZERO.
+       01  y PIC *(5) BLANK ZERO.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: Error: Cannot have S in PICTURE string and BLANK WHEN ZERO
+prog.cob: 8: Error: Cannot have * in PICTURE string and BLANK WHEN ZERO
+])
+AT_CLEANUP

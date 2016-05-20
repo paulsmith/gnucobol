@@ -1,4 +1,11 @@
 
+2016-05-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c: fixed bug #232, tightening permitted PICTURE strings and
+	  improving error messages.
+	* field.c: improved error checking for BLANK WHEN ZERO with invalid
+	  PICs.
+
 2016-05-16 Brian Tiffin <btiffin@gnu.org>
 
 	* codeoptim.c: bug #229, missed patching cob_cmp_align_u64

@@ -643,7 +643,7 @@ get_last_elt (cb_tree l)
 #if !defined (COB_STRFTIME) && !defined (COB_TIMEZONE)
 static void
 warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
-			cb_tree args)
+		     cb_tree args)
 {
 	const char	*data = try_get_constant_data (CB_VALUE (args));
 	int		is_variable_format = data == NULL;
@@ -1840,58 +1840,414 @@ cb_build_binary_picture (const char *str, const cob_u32_t size,
 	return pic;
 }
 
+static COB_INLINE COB_A_INLINE int
+is_simple_insertion_char (const char c)
+{
+	return c == 'B' || c == '0' || c == '/'
+		|| c == current_program->numeric_separator;
+}
+
+/*
+  Return the first character 
+
+  A floating insertion string is made up of two adjacent +'s, -'s or currency
+  symbols to each other, optionally with simple insertion characters between them.
+*/
+static void
+find_floating_insertion_str (const char *str, const char **first, const char **last)
+{
+	const char	*last_non_simple_insertion = NULL;
+	char		floating_char;
+
+	*first = NULL;
+	*last = NULL;
+	
+	for (; *str; str += 1 + sizeof(int)) {
+		if (!*first && (*str == '+' || *str == '-'
+				|| *str == current_program->currency_symbol)) {
+			if (last_non_simple_insertion
+			    && *last_non_simple_insertion == *str) {
+				*first = last_non_simple_insertion;
+				floating_char = *str;
+				continue;
+			} else if (*((int *) (str + 1)) > 1) {
+				*first = str;
+				floating_char = *str;
+				continue;
+			}
+		}
+
+
+		if (!*first && !is_simple_insertion_char (*str)) {
+			last_non_simple_insertion = str;
+		} else if (*first && !(is_simple_insertion_char (*str)
+				       || *str == floating_char)) {
+			*last = str - (1 + sizeof(int));
+		        break;
+		}
+	}
+
+	if (!*str && *first) {
+		*last = str - (1 + sizeof(int));
+		return;
+	} else if (!(*str == current_program->decimal_point
+		     || *str == 'V')) {
+		return;
+	}
+
+	/*
+	  Check whether all digits after the decimal point are also part of the
+	  floating insertion string. If they are, set *last to the last
+	  character in the string.
+	*/
+	str += 1 + sizeof (int);
+	for (; *str; str += 1 + sizeof(int)) {
+		if (!(is_simple_insertion_char (*str)
+		      || *str == floating_char)) {
+			return;
+		}
+	}
+	*last = str - (1 + sizeof(int));
+}
+
+static int
+char_to_precedence_idx (const char *str,
+			const char *current_char,
+			const char *first_floating_char,
+			const char *last_floating_char,
+			const int before_decimal_point,
+			const int non_p_digits_seen)
+{
+	const int	first_char = str == current_char;
+	const int	second_char = str + (1 + sizeof(int)) == current_char;
+	const int	last_char = *(current_char + (1 + sizeof(int))) == '\0';
+	const int	penultimate_char
+		= !last_char && *(current_char + 2 * (1 + sizeof(int))) == '\0';
+
+	switch (*current_char) {
+	case 'B':
+	case '0':
+	case '/':
+		return 0;
+
+	case '.':
+	case ',':
+		if (*current_char == current_program->decimal_point) {
+			return 2;
+		} else {
+			return 1;
+		}
+
+		/* To-do: Allow floating-point PICTURE strings */
+	/* case '+': */
+		/* Exponent symbol */
+		/* return 3; */
+
+	case '+':
+	case '-':
+		if (!(first_floating_char <= current_char
+		      && current_char <= last_floating_char)) {
+			if (first_char) {
+				return 4;
+			} else if (last_char) {
+				return 5;
+			} else {
+				/* Fudge char type - will still result in error */
+				return 4;
+			}
+		} else {
+			if (before_decimal_point) {
+				return 11;
+			} else {
+				return 12;
+			}
+		}
+
+	case 'C':
+	case 'D':
+		return 6;
+
+	case 'Z':
+	case '*':
+		if (before_decimal_point) {
+			return 9;
+		} else {
+			return 10;
+		}
+
+	case '9':
+		return 15;
+
+	case 'A':
+	case 'X':
+		return 16;
+
+	case 'S':
+		return 17;
+
+	case 'V':
+		return 18;
+
+	case 'P':
+	        if (non_p_digits_seen && before_decimal_point) {
+			return 19;
+		} else {
+			return 20;
+		}
+
+	case '1':
+		return 21;
+
+	case 'N':
+		return 22;
+
+	case 'E':
+		return 23;
+
+	default:
+		if (*current_char == current_program->currency_symbol) {
+			if (!(first_floating_char <= current_char
+			      && current_char <= last_floating_char)) {
+				if (first_char || second_char) {
+					return 7;
+				} else if (penultimate_char || last_char) {
+					return 8;
+				} else {
+					/* Fudge char type - will still result in error */
+					return 7;
+				}
+			} else {
+				if (before_decimal_point) {
+					return 13;
+				} else {
+					return 14;
+				}
+			}
+		} else {
+			/*
+			  Invalid characters have already been detected, so no
+			  need to emit an error here.
+			*/ 
+			return -1;
+		}
+	}
+}
+
+static const char *
+get_char_type_description (const int idx)
+{
+	switch (idx) {
+	case 0:
+		return _("B, 0 or /");
+	case 1:
+		if (current_program->numeric_separator == ',') {
+			return ",";
+		} else {
+			return ".";
+		}
+	case 2:
+		if (current_program->decimal_point == '.') {
+			return ".";
+		} else {
+			return ",";
+		}
+	case 3:
+		return _("the sign of the floating-point exponent");
+	case 4:
+		return _("a leading +/- sign");
+	case 5:
+		return _("a trailing +/- sign");
+	case 6:
+		return _("CR or DB");
+	case 7:
+		return _("a leading currency symbol");
+	case 8:
+		return _("a trailing currency symbol");
+	case 9:
+		return _("a Z or * which is before the decimal point");
+	case 10:
+		return _("a Z or * which is after the decimal point");
+	case 11:
+		return _("a floating +/- string which is before the decimal point");
+	case 12:
+		return _("a floating +/- string which is after the decimal point");
+	case 13:
+		return _("a floating currency symbol string which is before the decimal point");
+	case 14:
+		return _("a floating currency symbol string which is after the decimal point");
+	case 15:
+		return "9";
+	case 16:
+		return _("A or X");
+	case 17:
+		return "S";
+	case 18:
+		return "V";
+	case 19:
+		return _("a P which is before the decimal point");
+	case 20:
+		return _("a P which is after the decimal point");
+	case 21:
+		return "1";
+	case 22:
+		return "N";
+	case 23:
+		return "E";
+	default:
+		return NULL;
+	}
+}
+
+static void
+emit_precedence_error (const int preceding_idx, const int following_idx)
+{
+	const char	*preceding_descr = get_char_type_description (preceding_idx);
+	const char	*following_descr = get_char_type_description (following_idx);
+
+	if (following_descr && preceding_descr) {
+		cb_error (_("%s cannot follow %s"), following_descr, preceding_descr);
+	} else {
+		cb_error (_("Invalid PICTURE string detected"));
+	}
+}
+
+static int
+valid_char_order (const char *str, const int s_char_seen)
+{
+	const int	precedence_table[24][24] = {
+		/*
+		  Refer to the standard's PICTURE clause precedence rules for
+		  complete explanation.
+		*/
+		/*
+		  B  ,  .  +  +  + CR cs cs  Z  Z  +  + cs cs  9  A  S  V  P  P  1  N  E
+		  0           -  - DB        *  *  -  -           X
+		  /
+		*/
+		{ 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0 },
+		{ 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0 },
+		{ 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0 },
+		{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0 },
+		{ 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 },
+		{ 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+		{ 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+		{ 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+		{ 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+		{ 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
+		{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+	};
+	int		error_emitted[24][24] = { 0 };
+	int		chars_seen[24] = { 0 };
+	const char	*first_floating_char;
+	const char	*last_floating_char;
+	int		before_decimal_point = 1;
+	int		idx;
+	const char	*p;
+	int		repeated;
+	int		i;
+	int		j;
+	int		non_p_digits_seen = 0;
+	int		error_detected = 0;
+
+	chars_seen[17] = s_char_seen;
+	find_floating_insertion_str (str, &first_floating_char, &last_floating_char);
+	
+	for (p = str; *p; p += 1 + sizeof(int)) {
+		/* Perform the check twice if a character is repeated, e.g. to detect 9VV. */
+		repeated = *((int *) (p + 1)) > 1;
+		for (i = 0; i < 1 + repeated; ++i) {
+			idx = char_to_precedence_idx (str, p,
+						      first_floating_char,
+						      last_floating_char,
+						      before_decimal_point,
+						      non_p_digits_seen);
+			if (idx == -1) {
+				continue;
+			} else if (9 <= idx && idx <= 15) {
+				non_p_digits_seen = 1;
+			}
+
+			/*
+			  Emit an error if the current character is following a
+			  character it is not allowed to. Display an error once
+			  for each combination detected.
+			*/
+			for (j = 0; j < 24; ++j) {
+				if (chars_seen[j]
+				    && !precedence_table[idx][j]
+				    && !error_emitted[idx][j]) {
+				        emit_precedence_error (j, idx);
+					error_emitted[idx][j] = 1;
+					error_detected = 1;
+				}
+			}
+			chars_seen[idx] = 1;
+
+			if (*p == 'V' || *p == current_program->decimal_point) {
+				before_decimal_point = 0;
+			}
+		}
+	}
+
+	return !error_detected;
+}
+
 cb_tree
 cb_build_picture (const char *str)
 {
-	struct cb_picture	*pic;
+	struct cb_picture	*pic
+		= make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
+			     sizeof (struct cb_picture));
 	const unsigned char	*p;
-	size_t			idx;
-	size_t			buffcnt;
+	size_t			idx = 0;
+	size_t			buffcnt = 0;
 	cob_u32_t		at_beginning;
 	cob_u32_t		at_end;
-	cob_u32_t		p_char_seen;
-	cob_u32_t		s_char_seen;
-	cob_u32_t		dp_char_seen;
-	cob_u32_t		real_digits;
-	cob_u32_t		s_count;
-	cob_u32_t		v_count;
-	cob_u32_t		allocated;
-	cob_u32_t		x_digits;
-	cob_u32_t		digits;
-	int			category;
-	int			size;
-	int			scale;
+	cob_u32_t		s_char_seen = 0;
+	cob_u32_t		asterisk_seen = 0;
+	cob_u32_t		z_char_seen = 0;
+	cob_u32_t		s_count = 0;
+	cob_u32_t		v_count = 0;
+	cob_u32_t		allocated = 0;
+	cob_u32_t		digits = 0;
+	cob_u32_t		real_digits = 0;
+	cob_u32_t		x_digits = 0;
+	int			category = 0;
+	int			size = 0;
+	int			scale = 0;
 	int			i;
 	int			n;
 	unsigned char		c;
-	unsigned char		lastonechar;
-	unsigned char		lasttwochar;
+	unsigned char		lastonechar = '\0';
+	unsigned char		lasttwochar = '\0';
+	int			error_detected = 0;
 
-	pic = make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
-			 sizeof (struct cb_picture));
-	if (strlen (str) > 50) {
-		goto error;
+
+	if (strlen (str) == 0) {
+		cb_error (_("Missing PICTURE string"));
+		goto end;
+	} else if (strlen (str) > 63) {
+		/* Limit of 63 is from the 2014 standard. */
+		cb_error (_("PICTURE string may not contain more than 63 characters"));
+		goto end;
 	}
+
 	if (!pic_buff) {
 		pic_buff = cobc_main_malloc ((size_t)COB_SMALL_BUFF);
 	}
-
-	idx = 0;
-	buffcnt = 0;
-	p_char_seen = 0;
-	s_char_seen = 0;
-	dp_char_seen = 0;
-	category = 0;
-	size = 0;
-	allocated = 0;
-	digits = 0;
-	x_digits = 0;
-	real_digits = 0;
-	scale = 0;
-	s_count = 0;
-	v_count = 0;
-	lastonechar = 0;
-	lasttwochar = 0;
 
 	for (p = (const unsigned char *)str; *p; p++) {
 		n = 1;
@@ -1902,46 +2258,55 @@ repeat:
 			p++, n++;
 		}
 
-		/* Add parenthesized numbers */
-		if (p[1] == '(') {
+		if (*p == ')' && p[1] == '(') {
+			cb_error (_("Only one set of parentheses is permitted"));
+			error_detected = 1;
+
+			++p;
+			while (*p != ')' && *p != '\0') {
+				++p;
+			}
+		} else if (p[1] == '(') {
 			i = 0;
 			p += 2;
-			for (; *p == '0'; p++) {
+			for (; *p == '0' && *p; p++) {
 				;
 			}
-			for (; *p != ')'; p++) {
+			for (; *p != ')' && *p; p++) {
 				if (!isdigit (*p)) {
-					goto error;
+					cb_error (_("Non-digits in parentheses not permitted"));
+					error_detected = 1;
 				} else {
 					allocated++;
-					if (allocated > 9) {
-						goto error;
+					if (allocated <= 9) {
+						i = i * 10 + (*p - '0');
+					} else if (allocated == 10) {
+						cb_error (_("Only up to 9 significant digits in parentheses are permitted"));
+						error_detected = 1;
 					}
-					i = i * 10 + (*p - '0');
+					
 				}
 			}
-			if (i == 0) {
-				goto error;
+			if (!*p) {
+				cb_error (_("Unbalanced parenthesis"));
+				/* There are no more informative messages to display, so skip to end */
+				goto end;
+			} else if (i == 0) {
+				cb_error (_("Parentheses must contain a number greater than zero"));
+				error_detected = 1;
 			}
 			n += i - 1;
 			goto repeat;
 		}
 
 		/* Check grammar and category */
-		/* FIXME: need more error checks */
 		switch (c) {
 		case 'A':
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			category |= PIC_ALPHABETIC;
 			x_digits += n;
 			break;
 
 		case 'X':
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			category |= PIC_ALPHANUMERIC;
 			x_digits += n;
 			break;
@@ -1956,21 +2321,19 @@ repeat:
 			break;
 
 		case 'N':
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			category |= PIC_NATIONAL;
 			x_digits += n;
 			break;
 
 		case 'S':
 			category |= PIC_NUMERIC;
-			if (category & PIC_ALPHABETIC) {
-				goto error;
-			}
 			s_count++;
-			if (s_count > 1 || idx != 0) {
-				goto error;
+			if (s_count > 1) {
+				cb_error (_("S cannot follow S"));
+				error_detected = 1;
+			} else if (idx != 0) {
+				cb_error (_("S must be at start of PICTURE string"));
+				error_detected = 1;
 			}
 			s_char_seen = 1;
 			continue;
@@ -1978,33 +2341,20 @@ repeat:
 		case ',':
 		case '.':
 			category |= PIC_NUMERIC_EDITED;
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			if (c != current_program->decimal_point) {
 				break;
 			}
-			dp_char_seen = 1;
 			/* fall through */
 		case 'V':
 			category |= PIC_NUMERIC;
-			if (category & PIC_ALPHABETIC) {
-				goto error;
-			}
 			v_count++;
 			if (v_count > 1) {
-				goto error;
+				error_detected = 1;
 			}
 			break;
 
 		case 'P':
 			category |= PIC_NUMERIC;
-			if (category & PIC_ALPHABETIC) {
-				goto error;
-			}
-			if (p_char_seen || dp_char_seen) {
-				goto error;
-			}
 			at_beginning = 0;
 			at_end = 0;
 			switch (buffcnt) {
@@ -2034,9 +2384,9 @@ repeat:
 				at_end = 1;
 			}
 			if (!at_beginning && !at_end) {
-				goto error;
+				cb_error (_("P must be at start or end of PICTURE string"));
+				error_detected = 1;
 			}
-			p_char_seen = 1;
 			if (at_beginning) {
 				/* Implicit V */
 				v_count++;
@@ -2053,19 +2403,24 @@ repeat:
 		case 'B':
 		case '/':
 			category |= PIC_EDITED;
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			break;
 
 		case '*':
 		case 'Z':
+			if (c == '*') {
+				asterisk_seen = 1;
+			} else if (c == 'Z') {
+				z_char_seen = 1;
+			}
+
+			if (asterisk_seen && z_char_seen) {
+				cb_error (_("Cannot have both Z and * in PICTURE string"));
+				error_detected = 1;
+			}
+			
 			category |= PIC_NUMERIC_EDITED;
 			if (category & PIC_ALPHABETIC) {
-				goto error;
-			}
-			if (s_char_seen || p_char_seen) {
-				goto error;
+				error_detected = 1;
 			}
 			digits += n;
 			if (v_count) {
@@ -2076,38 +2431,32 @@ repeat:
 		case '+':
 		case '-':
 			category |= PIC_NUMERIC_EDITED;
-			if (category & PIC_ALPHABETIC) {
-				goto error;
-			}
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
 			digits += n - 1;
 			s_count++;
-			/* FIXME: need more check */
 			break;
 
 		case 'C':
 			category |= PIC_NUMERIC_EDITED;
-			if (!(p[1] == 'R' && p[2] == 0)) {
-				goto error;
+			if (p[1] != 'R') {
+				cb_error (_("C must be followed by R"));
+				error_detected = 1;
+			} else {
+				p++;
 			}
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
-			p++;
+			
 			s_count++;
 			break;
 
 		case 'D':
 			category |= PIC_NUMERIC_EDITED;
-			if (!(p[1] == 'B' && p[2] == 0)) {
-				goto error;
+
+			if (p[1] != 'B') {
+				cb_error (_("D must be followed by B"));
+				error_detected = 1;
+			} else {
+				p++;
 			}
-			if (s_char_seen || p_char_seen) {
-				goto error;
-			}
-			p++;
+			
 			s_count++;
 			break;
 
@@ -2115,11 +2464,11 @@ repeat:
 			if (c == current_program->currency_symbol) {
 				category |= PIC_NUMERIC_EDITED;
 				digits += n - 1;
-				/* FIXME: need more check */
 				break;
 			}
 
-			goto error;
+			cb_error (_("Invalid PICTURE character '%c'"), c);
+			error_detected = 1;
 		}
 
 		/* Calculate size */
@@ -2143,9 +2492,18 @@ repeat:
 	}
 	pic_buff[idx] = 0;
 
-	if (size == 0 && v_count) {
-		goto error;
+	if (digits == 0 && x_digits == 0) {
+		cb_error (_("PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol"));
+		error_detected = 1;
 	}
+	if (!valid_char_order (pic_buff, s_char_seen)) {
+		error_detected = 1;
+	}
+	
+	if (error_detected) {
+		goto end;
+	}
+
 	/* Set picture */
 	pic->orig = cobc_check_string (str);
 	pic->size = size;
@@ -2186,12 +2544,8 @@ repeat:
 		pic->digits = x_digits;
 		break;
 	default:
-		goto error;
+		;
 	}
-	goto end;
-
-error:
-	cb_error (_("Invalid picture string - '%s'"), str);
 
 end:
 	return CB_TREE (pic);
