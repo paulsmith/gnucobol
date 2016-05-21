@@ -1,4 +1,8 @@
 
+2016-05-21  Brian Tiffin <btiffin@gnu.org>
+
+	* termio.c: Removed a length test from cob_accept for numeric fields.
+
 2016-04-26  Brian Tiffin <btiffin@gnu.org>
 
 	* common.c, common.h: Re-fixed CBL_OC_HOSTED tzname, timezone, daylight for VC2013 names.
