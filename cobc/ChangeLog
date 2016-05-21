@@ -1,4 +1,8 @@
 
+2016-05-21 Brian Tiffin <btiffin@gnu.org>
+
+	* codegen.c: improving CALL BY VALUE. One step of many, more to do.
+
 2016-05-20  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c: fixed bug #232, tightening permitted PICTURE strings and
@@ -8,7 +12,7 @@
 
 2016-05-16 Brian Tiffin <btiffin@gnu.org>
 
-	* codeoptim.c: bug #229, missed patching cob_cmp_align_u64
+	* codeoptim.c: bug #229, missed patching cob_cmp_align_u64.
 
 2016-05-15 Brian Tiffin <btiffin@gnu.org>
 
