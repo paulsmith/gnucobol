@@ -918,6 +918,7 @@ prog.cob: 48: Error: 9 cannot follow CR or DB
 prog.cob: 49: Error: a floating currency symbol string which is before the decimal point cannot follow 9
 prog.cob: 50: Error: a leading currency symbol cannot follow 9
 prog.cob: 51: Error: a leading currency symbol cannot follow B, 0 or /
+prog.cob: 52: Error: P must be at start or end of PICTURE string
 prog.cob: 52: Error: V cannot follow a P which is after the decimal point
 prog.cob: 54: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
 prog.cob: 55: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
