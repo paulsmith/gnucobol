@@ -1,4 +1,8 @@
 
+2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (codegen): split large chunks of code in separate functions.
+
 2016-05-21 Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: improving CALL BY VALUE. One step of many, more to do.
