@@ -868,7 +868,7 @@ lookup_pic (const cob_pic_symbol *pic, const int length)
 	int		i;
 	int		different_pic_str;
 
-	/* Search attribute cache */
+	/* Search picture string cache */
 	for (l = pic_cache; l; l = l->next) {
 		if (length != l->length) {
 			continue;
