@@ -272,6 +272,7 @@ enum cb_optim {
 #undef	CB_OPTIM_DEF
 
 extern int			cb_id;
+extern int			cb_pic_id;
 extern int			cb_attr_id;
 extern int			cb_literal_id;
 extern int			cb_field_id;

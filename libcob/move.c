@@ -675,7 +675,7 @@ cob_move_binary_to_display (cob_field *f1, cob_field *f2)
 static void
 cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 {
-	const char	*p;
+	const cob_pic_symbol	*p;
 	unsigned char	*min;
 	unsigned char	*max;
 	unsigned char	*src;
@@ -728,9 +728,9 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	sign = COB_GET_SIGN (f1);
 	neg = (sign < 0) ? 1 : 0;
 	/* Count the number of digit places before decimal point */
-	for (p = COB_FIELD_PIC (f2); *p; p += 5) {
-		c = p[0];
-		memmove ((unsigned char *)&repeat, p + 1, sizeof(int));
+	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+		c = p->symbol;
+		repeat = p->times_repeated;
 		if (c == '9' || c == 'Z' || c == '*') {
 			count += repeat;
 			count_sign = 0;
@@ -758,10 +758,9 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	src = max - COB_FIELD_SCALE(f1) - count;
 	dst = f2->data;
 	end = f2->data + f2->size;
-	for (p = COB_FIELD_PIC (f2); *p;) {
-		c = *p++;	/* PIC char */
-		memmove ((void *)&n, p, sizeof(int));	/* PIC char count */
-		p += sizeof(int);
+	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+		c = p->symbol;
+		n = p->times_repeated;
 		for (; n > 0; n--, ++dst) {
 			switch (c) {
 			case '0':
@@ -985,7 +984,7 @@ cob_move_edited_to_display (cob_field *f1, cob_field *f2)
 {
 	unsigned char	*p;
 	unsigned char	*buff;
-	const char	*p1;
+	const cob_pic_symbol	*pic_symbol;
 	size_t		i;
 	int		sign = 0;
 	int		scale = 0;
@@ -1032,9 +1031,9 @@ cob_move_edited_to_display (cob_field *f1, cob_field *f2)
 	}
 	/* Count number of digit places after decimal point in case of 'V', 'P' */
 	if (scale == 0) {
-		for (p1 = COB_FIELD_PIC (f1); *p1; p1 += 5) {
-			c = p1[0];
-			memmove ((void *)&n, p1 + 1, sizeof(int));
+		for (pic_symbol = COB_FIELD_PIC (f1); pic_symbol->symbol; ++pic_symbol) {
+			c = pic_symbol->symbol;
+			n = pic_symbol->times_repeated;
 			if (c == '9' || c == '0' || c == 'Z' || c == '*') {
 				if (have_point) {
 					scale += n;
@@ -1064,7 +1063,7 @@ cob_move_edited_to_display (cob_field *f1, cob_field *f2)
 static void
 cob_move_alphanum_to_edited (cob_field *f1, cob_field *f2)
 {
-	const char	*p;
+	const cob_pic_symbol	*p;
 	unsigned char	*max;
 	unsigned char	*src;
 	unsigned char	*dst;
@@ -1076,10 +1075,9 @@ cob_move_alphanum_to_edited (cob_field *f1, cob_field *f2)
 	src = COB_FIELD_DATA (f1);
 	max = src + COB_FIELD_SIZE (f1);
 	dst = f2->data;
-	for (p = COB_FIELD_PIC (f2); *p;) {
-		c = *p++;	/* PIC char */
-		memcpy ((void *)&n, p, sizeof(int));	/* PIC char count */
-		p += sizeof(int);
+	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
+		c = p->symbol;
+		n = p->times_repeated;
 		for (; n > 0; --n) {
 			switch (c) {
 			case 'A':

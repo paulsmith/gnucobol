@@ -420,8 +420,7 @@ validate_field_1 (struct cb_field *f)
 	cb_tree		x;
 	cb_tree		l;
 	struct cb_field *p;
-	unsigned char	*pstr;
-	int		vorint;
+	cob_pic_symbol	*pstr;
 	int		n;
 	int		need_picture;
 	unsigned int	ret;
@@ -776,50 +775,48 @@ validate_field_1 (struct cb_field *f)
 				n = 0;
 				if (f->pic->scale > 0) {
 					/* Enough for genned string */
-					f->pic->str = cobc_parse_malloc ((size_t)32);
-					pstr = (unsigned char *)(f->pic->str);
+					f->pic->str = cobc_parse_malloc ((size_t)5 * sizeof (cob_pic_symbol));
+					pstr = f->pic->str;
 					if (f->pic->have_sign) {
-						*pstr++ = '+';
-						vorint = 1;
-						memcpy (pstr, (void *)&vorint, sizeof(int));
-						pstr += sizeof(int);
+						pstr->symbol = '+';
+					        pstr->times_repeated = 1;
+						++pstr;
 						n = 5;
 					}
-					*pstr++ = '9';
-					vorint = (int)f->pic->digits - f->pic->scale;
-					memcpy (pstr, (void *)&vorint, sizeof(int));
-					pstr += sizeof(int);
-					*pstr++ = 'V';
-					vorint = 1;
-					memcpy (pstr, (void *)&vorint, sizeof(int));
-					pstr += sizeof(int);
-					*pstr++ = '9';
-					vorint = f->pic->scale;
-					memcpy (pstr, (void *)&vorint, sizeof(int));
+					pstr->symbol = '9';
+					pstr->times_repeated = (int)f->pic->digits - f->pic->scale;
+					++pstr;
+
+					pstr->symbol = 'V';
+					pstr->times_repeated = 1;
+					++pstr;
+					
+					pstr->symbol = '9';
+					pstr->times_repeated = f->pic->scale;
+					++pstr;
+
 					f->pic->size++;
 					n += 15;
 				} else {
 					/* Enough for genned string */
-					f->pic->str = cobc_parse_malloc ((size_t)16);
-					pstr = (unsigned char *)(f->pic->str);
+					f->pic->str = cobc_parse_malloc ((size_t)3 * sizeof(cob_pic_symbol));
+					pstr = f->pic->str;
 					if (f->pic->have_sign) {
-						*pstr++ = '+';
-						vorint = 1;
-						memcpy (pstr, (void *)&vorint, sizeof(int));
-						pstr += sizeof(int);
+						pstr->symbol = '+';
+						pstr->times_repeated = 1;
+						++pstr;
 						n = 5;
 					}
-					*pstr++ = '9';
-					vorint = f->pic->digits;
-					memcpy (pstr, (void *)&vorint, sizeof(int));
+					pstr->symbol = '9';
+					pstr->times_repeated = f->pic->digits;
 					n += 5;
 				}
 				f->pic->lenstr = n;
 				f->pic->category = CB_CATEGORY_NUMERIC_EDITED;
 				break;
 			case CB_CATEGORY_NUMERIC_EDITED:
-				for (i = 0; f->pic->str[i] != '\0'; ++i) {
-					if (f->pic->str[i] == '*') {
+				for (i = 0; f->pic->str[i].symbol != '\0'; ++i) {
+					if (f->pic->str[i].symbol == '*') {
 						cb_error_x (x, _("Cannot have * in PICTURE string and BLANK WHEN ZERO"));
 						break;
 					}

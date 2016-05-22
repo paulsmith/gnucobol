@@ -1,6 +1,8 @@
 
 2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
 
+	* tree.c, field.c, codegen.c: replaced PICTURE strings containing packed ints with
+	  array of (cob_pic_symbol) structs which are easier to use.
 	* codegen.c (codegen): split large chunks of code in separate functions.
 
 2016-05-21 Brian Tiffin <btiffin@gnu.org>

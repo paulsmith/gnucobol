@@ -161,6 +161,7 @@ char			*source_name = NULL;
 
 int			cb_source_format = CB_FORMAT_FIXED;	/* Default format */
 int			cb_id = 0;
+int			cb_pic_id = 0;
 int			cb_attr_id = 0;
 int			cb_literal_id = 0;
 int			cb_field_id = 0;
@@ -4291,6 +4292,7 @@ main (int argc, char **argv)
 	base_string = NULL;
 	cobc_objects_len = 0;
 	cb_id = 1;
+	cb_pic_id = 1;
 	cb_attr_id = 1;
 	cb_literal_id = 1;
 	cb_field_id = 1;
@@ -4597,6 +4599,7 @@ main (int argc, char **argv)
 			return 1;
 		}
 		cb_id = 1;
+		cb_pic_id = 1;
 		cb_attr_id = 1;
 		cb_literal_id = 1;
 		cb_field_id = 1;

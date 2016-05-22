@@ -79,15 +79,21 @@ struct string_list {
 	int			id;
 };
 
+struct pic_list {
+	struct pic_list		*next;
+	const cob_pic_symbol	*str;
+	int			length;
+	int			id;
+};
+
 struct attr_list {
 	struct attr_list	*next;
-	unsigned char		*pic;
+	int			pic_id;
 	int			id;
 	int			type;
 	cob_u32_t		digits;
 	int			scale;
 	cob_u32_t		flags;
-	int			lenstr;
 };
 
 struct literal_list {
@@ -118,6 +124,7 @@ struct base_list {
 
 /* Local variables */
 
+static struct pic_list		*pic_cache = NULL;
 static struct attr_list		*attr_cache = NULL;
 static struct literal_list	*literal_cache = NULL;
 static struct field_list	*field_cache = NULL;
@@ -281,6 +288,7 @@ lookup_func_call (const char *p)
 		return last;			      \
 	}
 
+LIST_REVERSE_FUNC (pic_list);
 LIST_REVERSE_FUNC (attr_list);
 LIST_REVERSE_FUNC (string_list);
 LIST_REVERSE_FUNC (literal_list);
@@ -851,13 +859,87 @@ again:
 	}
 }
 
+/* Picture strings */
+
+static int
+lookup_pic (const cob_pic_symbol *pic, const int length)
+{
+	struct pic_list *l;
+	int		i;
+	int		different_pic_str;
+
+	/* Search attribute cache */
+	for (l = pic_cache; l; l = l->next) {
+		if (length != l->length) {
+			continue;
+		}
+
+		different_pic_str = 0;
+		for (i = 0; i < l->length; ++i) {
+			if (pic[i].symbol != l->str[i].symbol
+			    || pic[i].times_repeated != l->str[i].times_repeated) {
+				different_pic_str = 1;
+				break;
+			}
+		}
+
+		if (different_pic_str) {
+			continue;
+		}
+
+		return l->id;
+	}
+
+	/* Cache new picture string */
+
+	l = cobc_parse_malloc (sizeof (struct pic_list));
+	l->id = cb_pic_id;
+	l->length = length;
+	l->str = pic;
+	l->next = pic_cache;
+	pic_cache = l;
+
+	return cb_pic_id++;
+}
+
+static void
+output_pic_cache (void)
+{
+	struct pic_list	*pic;
+	int		pos;
+
+	if (!pic_cache) {
+		return;
+	}
+
+	output_storage ("\n/* Picture strings */\n\n");
+	pic_cache = pic_list_reverse (pic_cache);
+
+	for (pic = pic_cache; pic; pic = pic->next) {
+		output_storage ("static const cob_pic_symbol %s%d[] = {\n",
+				CB_PREFIX_PIC, pic->id);
+
+		for (pos = 0; pos < pic->length
+			     && pic->str[pos].symbol != '\0'; ++pos) {
+			output_storage ("\t{'%c', %u}",
+					pic->str[pos].symbol,
+					pic->str[pos].times_repeated);
+			output_storage (",\n");
+		}
+		output_storage ("\t{'\\0', 1}");
+		output_storage ("\n};\n");
+	}
+	output_storage ("\n");
+}
+
 /* Attributes */
 
 static int
 lookup_attr (const int type, const cob_u32_t digits, const int scale,
-	     const cob_u32_t flags, unsigned char *pic, const int lenstr)
+	     const cob_u32_t flags, cob_pic_symbol *pic, const int lenstr)
 {
-	struct attr_list *l;
+	const int		pic_id = pic ? lookup_pic (pic, lenstr) : -1;
+	struct attr_list	*l;
 
 	/* Search attribute cache */
 	for (l = attr_cache; l; l = l->next) {
@@ -865,8 +947,7 @@ lookup_attr (const int type, const cob_u32_t digits, const int scale,
 		    digits == l->digits &&
 		    scale == l->scale &&
 		    flags == l->flags &&
-		    ((pic == l->pic) || (pic && l->pic && lenstr == l->lenstr &&
-		     memcmp ((char *)pic, (char *)(l->pic), (size_t)lenstr) == 0))) {
+		    pic_id == l->pic_id) {
 			return l->id;
 		}
 	}
@@ -879,8 +960,7 @@ lookup_attr (const int type, const cob_u32_t digits, const int scale,
 	l->digits = digits;
 	l->scale = scale;
 	l->flags = flags;
-	l->pic = pic;
-	l->lenstr = lenstr;
+	l->pic_id = pic_id;
 	l->next = attr_cache;
 	attr_cache = l;
 
@@ -987,8 +1067,7 @@ output_attr (const cb_tree x)
 
 				id = lookup_attr (type, f->pic->digits,
 						  f->pic->scale, flags,
-						  (cob_u8_ptr) f->pic->str,
-						  f->pic->lenstr);
+						  f->pic->str, f->pic->lenstr);
 				break;
 			}
 		}
@@ -1008,7 +1087,6 @@ static void
 output_attributes (void)
 {
 	struct attr_list	*attr;
-	unsigned char		*s;
 	
 	if (!(attr_cache || gen_figurative)) {
 		return;
@@ -1023,13 +1101,8 @@ output_attributes (void)
 		output_storage ("{0x%02x, %3u, %3d, 0x%04x, ",
 				attr->type, attr->digits,
 				attr->scale, attr->flags);
-			if (attr->pic) {
-				output_storage ("\"");
-				for (s = attr->pic; *s; s += 5) {
-					output_storage ("%c\\%03o\\%03o\\%03o\\%03o",
-						s[0], s[1], s[2], s[3], s[4]);
-				}
-				output_storage ("\"");
+		if (attr->pic_id != -1) {
+			output_storage ("%s%d", CB_PREFIX_PIC, attr->pic_id);
 		} else {
 			output_storage ("NULL");
 		}
@@ -8711,6 +8784,7 @@ codegen (struct cb_program *prog, const int nested)
 
 	output_globext_cache ();
 	output_nonlocal_base_cache ();
+	output_pic_cache ();
 	output_attributes ();
 	output_nonlocal_field_cache ();
 	output_literals_figuratives_and_constants ();

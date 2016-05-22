@@ -933,14 +933,21 @@ enum cob_exception_id {
 /* Structure/union declarations */
 
 
+/* Picture symbol structure */
+
+typedef struct {
+        char	symbol;
+	int     times_repeated;
+} cob_pic_symbol;
+
 /* Field attribute structure */
 
 typedef struct {
-	unsigned short	type;		/* Field type */
-	unsigned short	digits;		/* Digit count */
-	signed short	scale;		/* Field scale */
-	unsigned short	flags;		/* Field flags */
-	const char	*pic;		/* Pointer to picture string */
+	unsigned short		type;		/* Field type */
+	unsigned short		digits;		/* Digit count */
+	signed short		scale;		/* Field scale */
+	unsigned short		flags;		/* Field flags */
+	const cob_pic_symbol	*pic;		/* Pointer to picture string */
 } cob_field_attr;
 
 /* Field structure */

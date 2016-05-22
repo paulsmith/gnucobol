@@ -6067,16 +6067,13 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 static int
 count_pic_alphanumeric_edited (struct cb_field *field)
 {
-	unsigned char	*p;
-	int		count;
-	int		repeat;
+	cob_pic_symbol	*s;
+	int		count = 0;
 
 	/* Count number of free places in an alphanumeric edited field */
-	count = 0;
-	for (p = (unsigned char *)(field->pic->str); *p; p += 5) {
-		if (*p == '9' || *p == 'A' || *p == 'X') {
-			memcpy ((void *)&repeat, p + 1, sizeof(int));
-			count += repeat;
+	for (s = field->pic->str; s->symbol != '\0'; ++s) {
+		if (s->symbol == '9' || s->symbol == 'A' || s->symbol == 'X') {
+			count += s->times_repeated;
 		}
 	}
 	return count;

@@ -83,7 +83,6 @@ struct int_node {
 
 static struct int_node		*int_node_table = NULL;
 static char			*scratch_buff = NULL;
-static char			*pic_buff = NULL;
 static int			filler_id = 1;
 static int			class_id = 0;
 static int			toplev_count;
@@ -1848,50 +1847,52 @@ is_simple_insertion_char (const char c)
 }
 
 /*
-  Return the first character 
+  Returns the first and last characters of a floating insertion string.
 
   A floating insertion string is made up of two adjacent +'s, -'s or currency
   symbols to each other, optionally with simple insertion characters between them.
 */
 static void
-find_floating_insertion_str (const char *str, const char **first, const char **last)
+find_floating_insertion_str (const cob_pic_symbol *str,
+			     const cob_pic_symbol **first,
+			     const cob_pic_symbol **last)
 {
-	const char	*last_non_simple_insertion = NULL;
-	char		floating_char;
+	const cob_pic_symbol	*last_non_simple_insertion = NULL;
+	char			floating_char;
 
 	*first = NULL;
 	*last = NULL;
 	
-	for (; *str; str += 1 + sizeof(int)) {
-		if (!*first && (*str == '+' || *str == '-'
-				|| *str == current_program->currency_symbol)) {
+	for (; str->symbol != '\0'; ++str) {
+		if (!*first && (str->symbol == '+' || str->symbol == '-'
+				|| str->symbol == current_program->currency_symbol)) {
 			if (last_non_simple_insertion
-			    && *last_non_simple_insertion == *str) {
+			    && last_non_simple_insertion->symbol == str->symbol) {
 				*first = last_non_simple_insertion;
-				floating_char = *str;
+				floating_char = str->symbol;
 				continue;
-			} else if (*((int *) (str + 1)) > 1) {
+			} else if (str->times_repeated > 1) {
 				*first = str;
-				floating_char = *str;
+				floating_char = str->symbol;
 				continue;
 			}
 		}
 
 
-		if (!*first && !is_simple_insertion_char (*str)) {
+		if (!*first && !is_simple_insertion_char (str->symbol)) {
 			last_non_simple_insertion = str;
-		} else if (*first && !(is_simple_insertion_char (*str)
-				       || *str == floating_char)) {
-			*last = str - (1 + sizeof(int));
+		} else if (*first && !(is_simple_insertion_char (str->symbol)
+				       || str->symbol == floating_char)) {
+			*last = str - 1;
 		        break;
 		}
 	}
 
-	if (!*str && *first) {
-		*last = str - (1 + sizeof(int));
+	if (str->symbol == '\0' && *first) {
+		*last = str - 1;
 		return;
-	} else if (!(*str == current_program->decimal_point
-		     || *str == 'V')) {
+	} else if (!(str->symbol == current_program->decimal_point
+		     || str->symbol == 'V')) {
 		return;
 	}
 
@@ -1900,31 +1901,31 @@ find_floating_insertion_str (const char *str, const char **first, const char **l
 	  floating insertion string. If they are, set *last to the last
 	  character in the string.
 	*/
-	str += 1 + sizeof (int);
-	for (; *str; str += 1 + sizeof(int)) {
-		if (!(is_simple_insertion_char (*str)
-		      || *str == floating_char)) {
+	++str;
+	for (; str->symbol != '\0'; ++str) {
+		if (!(is_simple_insertion_char (str->symbol)
+		      || str->symbol == floating_char)) {
 			return;
 		}
 	}
-	*last = str - (1 + sizeof(int));
+	*last = str - 1;
 }
 
 static int
-char_to_precedence_idx (const char *str,
-			const char *current_char,
-			const char *first_floating_char,
-			const char *last_floating_char,
+char_to_precedence_idx (const cob_pic_symbol *str,
+			const cob_pic_symbol *current_sym,
+			const cob_pic_symbol *first_floating_sym,
+			const cob_pic_symbol *last_floating_sym,
 			const int before_decimal_point,
 			const int non_p_digits_seen)
 {
-	const int	first_char = str == current_char;
-	const int	second_char = str + (1 + sizeof(int)) == current_char;
-	const int	last_char = *(current_char + (1 + sizeof(int))) == '\0';
-	const int	penultimate_char
-		= !last_char && *(current_char + 2 * (1 + sizeof(int))) == '\0';
+	const int	first_sym = str == current_sym;
+	const int	second_sym = str + 1 == current_sym;
+	const int	last_sym = (current_sym + 1)->symbol == '\0';
+	const int	penultimate_sym
+		= !last_sym && (current_sym + 2)->symbol == '\0';
 
-	switch (*current_char) {
+	switch (current_sym->symbol) {
 	case 'B':
 	case '0':
 	case '/':
@@ -1932,7 +1933,7 @@ char_to_precedence_idx (const char *str,
 
 	case '.':
 	case ',':
-		if (*current_char == current_program->decimal_point) {
+		if (current_sym->symbol == current_program->decimal_point) {
 			return 2;
 		} else {
 			return 1;
@@ -1945,11 +1946,11 @@ char_to_precedence_idx (const char *str,
 
 	case '+':
 	case '-':
-		if (!(first_floating_char <= current_char
-		      && current_char <= last_floating_char)) {
-			if (first_char) {
+		if (!(first_floating_sym <= current_sym
+		      && current_sym <= last_floating_sym)) {
+			if (first_sym) {
 				return 4;
-			} else if (last_char) {
+			} else if (last_sym) {
 				return 5;
 			} else {
 				/* Fudge char type - will still result in error */
@@ -2005,12 +2006,12 @@ char_to_precedence_idx (const char *str,
 		return 23;
 
 	default:
-		if (*current_char == current_program->currency_symbol) {
-			if (!(first_floating_char <= current_char
-			      && current_char <= last_floating_char)) {
-				if (first_char || second_char) {
+		if (current_sym->symbol == current_program->currency_symbol) {
+			if (!(first_floating_sym <= current_sym
+			      && current_sym <= last_floating_sym)) {
+				if (first_sym || second_sym) {
 					return 7;
-				} else if (penultimate_char || last_char) {
+				} else if (penultimate_sym || last_sym) {
 					return 8;
 				} else {
 					/* Fudge char type - will still result in error */
@@ -2112,7 +2113,7 @@ emit_precedence_error (const int preceding_idx, const int following_idx)
 }
 
 static int
-valid_char_order (const char *str, const int s_char_seen)
+valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 {
 	const int	precedence_table[24][24] = {
 		/*
@@ -2151,11 +2152,11 @@ valid_char_order (const char *str, const int s_char_seen)
 	};
 	int		error_emitted[24][24] = { 0 };
 	int		chars_seen[24] = { 0 };
-	const char	*first_floating_char;
-	const char	*last_floating_char;
+	const cob_pic_symbol	*first_floating_sym;
+	const cob_pic_symbol	*last_floating_sym;
 	int		before_decimal_point = 1;
 	int		idx;
-	const char	*p;
+	const cob_pic_symbol	*s;
 	int		repeated;
 	int		i;
 	int		j;
@@ -2163,15 +2164,15 @@ valid_char_order (const char *str, const int s_char_seen)
 	int		error_detected = 0;
 
 	chars_seen[17] = s_char_seen;
-	find_floating_insertion_str (str, &first_floating_char, &last_floating_char);
+	find_floating_insertion_str (str, &first_floating_sym, &last_floating_sym);
 	
-	for (p = str; *p; p += 1 + sizeof(int)) {
+	for (s = str; s->symbol != '\0'; ++s) {
 		/* Perform the check twice if a character is repeated, e.g. to detect 9VV. */
-		repeated = *((int *) (p + 1)) > 1;
+		repeated = s->times_repeated > 1;
 		for (i = 0; i < 1 + repeated; ++i) {
-			idx = char_to_precedence_idx (str, p,
-						      first_floating_char,
-						      last_floating_char,
+			idx = char_to_precedence_idx (str, s,
+						      first_floating_sym,
+						      last_floating_sym,
 						      before_decimal_point,
 						      non_p_digits_seen);
 			if (idx == -1) {
@@ -2196,7 +2197,8 @@ valid_char_order (const char *str, const int s_char_seen)
 			}
 			chars_seen[idx] = 1;
 
-			if (*p == 'V' || *p == current_program->decimal_point) {
+			if (s->symbol == 'V'
+			    || s->symbol == current_program->decimal_point) {
 				before_decimal_point = 0;
 			}
 		}
@@ -2211,6 +2213,7 @@ cb_build_picture (const char *str)
 	struct cb_picture	*pic
 		= make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
 			     sizeof (struct cb_picture));
+	static cob_pic_symbol	*pic_buff = NULL;
 	const unsigned char	*p;
 	size_t			idx = 0;
 	size_t			buffcnt = 0;
@@ -2246,7 +2249,7 @@ cb_build_picture (const char *str)
 	}
 
 	if (!pic_buff) {
-		pic_buff = cobc_main_malloc ((size_t)COB_SMALL_BUFF);
+		pic_buff = cobc_main_malloc ((size_t)COB_SMALL_BUFF * sizeof(cob_pic_symbol));
 	}
 
 	for (p = (const unsigned char *)str; *p; p++) {
@@ -2483,14 +2486,14 @@ repeat:
 		}
 
 		/* Store in the buffer */
-		pic_buff[idx++] = c;
+		pic_buff[idx].symbol = c;
+		pic_buff[idx].times_repeated = n;
+		++idx;
 		lasttwochar = lastonechar;
 		lastonechar = c;
-		memcpy (&pic_buff[idx], (void *)&n, sizeof(int));
-		idx += sizeof(int);
 		++buffcnt;
 	}
-	pic_buff[idx] = 0;
+	pic_buff[idx].symbol = '\0';
 
 	if (digits == 0 && x_digits == 0) {
 		cb_error (_("PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol"));
@@ -2528,8 +2531,8 @@ repeat:
 		pic->category = CB_CATEGORY_ALPHANUMERIC;
 		break;
 	case PIC_NUMERIC_EDITED:
-		pic->str = cobc_parse_malloc (idx + 1);
-		memcpy (pic->str, pic_buff, idx);
+		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
+		memcpy (pic->str, pic_buff, idx * sizeof(cob_pic_symbol));
 		pic->category = CB_CATEGORY_NUMERIC_EDITED;
 		pic->lenstr = idx;
 		break;
@@ -2537,8 +2540,8 @@ repeat:
 	case PIC_ALPHABETIC_EDITED:
 	case PIC_ALPHANUMERIC_EDITED:
 	case PIC_NATIONAL_EDITED:
-		pic->str = cobc_parse_malloc (idx + 1);
-		memcpy (pic->str, pic_buff, idx);
+		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
+		memcpy (pic->str, pic_buff, idx * sizeof(cob_pic_symbol));
 		pic->category = CB_CATEGORY_ALPHANUMERIC_EDITED;
 		pic->lenstr = idx;
 		pic->digits = x_digits;

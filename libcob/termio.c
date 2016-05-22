@@ -89,63 +89,53 @@ display_numeric (cob_field *f, FILE *fp)
 static void
 pretty_display_numeric (cob_field *f, FILE *fp)
 {
-	unsigned char	*p;
-	unsigned char	*q;
+	cob_pic_symbol	*p;
+	unsigned char	*q = COB_TERM_BUFF;
 	int		i;
-	unsigned short	digits;
-	signed short	scale;
-	int		size;
+	unsigned short	digits = COB_FIELD_DIGITS (f);
+	signed short	scale = COB_FIELD_SCALE (f);
+	int		size = digits + !!COB_FIELD_HAVE_SIGN (f) + !!scale;
 	cob_field_attr	attr;
 	cob_field	temp;
-	unsigned char	pic[32];
+	cob_pic_symbol	pic[6] = { '\0' };
 
-	digits = COB_FIELD_DIGITS (f);
-	scale = COB_FIELD_SCALE (f);
-	size = (digits + (COB_FIELD_HAVE_SIGN (f) ? 1 : 0)
-		+ (scale > 0 ? 1 : 0));
+
 	if (size > COB_MEDIUM_MAX) {
 		fputs (_("(Not representable)"), fp);
 		return;
 	}
-	q = COB_TERM_BUFF;
 	temp.size = size;
 	temp.data = q;
 	temp.attr = &attr;
 	COB_ATTR_INIT (COB_TYPE_NUMERIC_EDITED, digits, scale, 0,
-		       (const char *)pic);
+		       (const cob_pic_symbol *)pic);
 	p = pic;
-#if	0	/* RXWRXW - memset */
-	memset (pic, 0, sizeof (pic));
-	memset (q, 0, 256);
-#endif
+
 	if (COB_FIELD_HAVE_SIGN (f)) {
-		*p++ = '+';
-		i = 1;
-		memcpy (p, (unsigned char *)&i, sizeof(int));
-		p += sizeof(int);
+		p->symbol = '+';
+		p->times_repeated = 1;
+		++p;
 	}
 	if (scale > 0) {
-		i = digits - scale;
-		if (i > 0 ) {
-			*p++ = '9';
-			memcpy (p, (unsigned char *)&i, sizeof(int));
-			p += sizeof(int);
+		if (digits - scale > 0) {
+			p->symbol = '9';
+			p->times_repeated = digits - scale;
+			++p;
 		}
-		*p++ = COB_MODULE_PTR->decimal_point;
-		i = 1;
-		memcpy (p, (unsigned char *)&i, sizeof(int));
-		p += sizeof(int);
-		*p++ = '9';
-		i = scale;
-		memcpy (p, (unsigned char *)&i, sizeof(int));
-		p += sizeof(int);
+		
+		p->symbol = COB_MODULE_PTR->decimal_point;
+		p->times_repeated = 1;
+		++p;
+
+		p->symbol = '9';
+		p->times_repeated = scale;
+		++p;
 	} else {
-		*p++ = '9';
-		i = digits;
-		memcpy (p, (unsigned char *)&i, sizeof(int));
-		p += sizeof(int);
+		p->symbol = '9';
+		p->times_repeated = digits;
+		++p;
 	}
-	*p = 0;
+	p->symbol = '\0';
 
 	cob_move (f, &temp);
 	for (i = 0; i < size; ++i) {

@@ -35,6 +35,7 @@
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
 #define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
 #define CB_PREFIX_LABEL		"l_"	/* Label */
+#define CB_PREFIX_PIC		"p_"	/* PICTURE string */
 #define CB_PREFIX_SEQUENCE	"s_"	/* Collating sequence */
 #define CB_PREFIX_STRING	"st_"	/* String */
 
@@ -618,7 +619,7 @@ struct cb_decimal {
 struct cb_picture {
 	struct cb_tree_common	common;		/* Common values */
 	char			*orig;		/* Original picture string */
-	char			*str;		/* Packed picture string */
+	cob_pic_symbol		*str;		/* Picture string */
 	int			size;		/* Byte size */
 	int			lenstr;		/* Length of picture string */
 	enum cb_category	category;	/* Field category */

@@ -885,16 +885,16 @@ field_is_zero (cob_screen *s)
 }
 
 static int
-pic_has_zero_suppression (const char *pic)
+pic_has_zero_suppression (const cob_pic_symbol *pic)
 {
 	int	i;
 
-	for (i = 0; pic[i] != '\0'; i += 5) {
+	for (i = 0; pic[i].symbol != '\0'; ++i) {
 		/*
 		  NB: + and - are floating-insertion editing characters, not
 		  zero-suppression ones.
 		*/
-		if (pic[i] == 'Z' || pic[i] == '*') {
+		if (pic[i].symbol == 'Z' || pic[i].symbol == '*') {
 			return 1;
 		}
 	}
@@ -903,19 +903,21 @@ pic_has_zero_suppression (const char *pic)
 }
 
 static int
-get_num_int_digits_for_no_zero_sup (const char *pic)
+get_num_int_digits_for_no_zero_sup (const cob_pic_symbol *pic)
 {
 	int	i;
-	int	*times_repeated;
 	int	num_digits = 0;
 	char	numeric_separator = COB_MODULE_PTR->numeric_separator;
 
-	for (i = 0; pic[i] != '\0'; i += 5) {
-		if (pic[i] == '9' || pic[i] == 'Z' || pic[i] == '*') {
-			times_repeated = (int *) (pic + i + 1);
-			num_digits += *times_repeated;
-		} else if (!(pic[i] == numeric_separator
-			     || pic[i] == 'B' || pic[i] == '0' || pic[i] == '/')
+	for (i = 0; pic[i].symbol != '\0'; ++i) {
+		if (pic[i].symbol == '9'
+		    || pic[i].symbol == 'Z'
+		    || pic[i].symbol == '*') {
+			num_digits += pic[i].times_repeated;
+		} else if (!(pic[i].symbol == numeric_separator
+			     || pic[i].symbol == 'B'
+			     || pic[i].symbol == '0'
+			     || pic[i].symbol == '/')
 			   && num_digits != 0) {
 			break;
 		}
@@ -927,7 +929,7 @@ get_num_int_digits_for_no_zero_sup (const char *pic)
 static int
 field_is_zero_or_no_zero_suppression (cob_screen *s)
 {
-	const char	*pic = COB_FIELD_PIC (s->field);
+	const cob_pic_symbol	*pic = COB_FIELD_PIC (s->field);
 	int		i;
 	size_t		size = COB_FIELD_SIZE (s->field);
 	unsigned char	*data = COB_FIELD_DATA (s->field);
