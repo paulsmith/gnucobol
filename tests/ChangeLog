@@ -1,4 +1,8 @@
 
+2016-05-22  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: changed CBL_OC_HOSTED errno test
+
 2016-05-15  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/used_binaries.at: added tests for cobcrun -M <module>
