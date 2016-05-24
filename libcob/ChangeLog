@@ -1,4 +1,8 @@
 
+2016-05-23  Brian Tiffin <btiffin@gnu.org>
+
+	* termio.c: Reverted length truncation in cob_accept for numeric fields.
+
 2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h, move.c, termio.c: replaced PICTURE strings containing packed

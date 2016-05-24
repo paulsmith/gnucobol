@@ -321,13 +321,11 @@ cob_accept (cob_field *f)
 		p[size++] = (char) ipchr;
 	}
 	temp.size = size;
-#if	0	/* BWT, this test breaks numeric input */
 	if (COB_FIELD_TYPE(f) == COB_TYPE_NUMERIC_DISPLAY) {
 		if (temp.size > f->size) {
 			temp.size = f->size;
 		}
 	}
-#endif
 	cob_move (&temp, f);
 }
 
