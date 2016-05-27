@@ -1208,8 +1208,8 @@ cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 	} else {
 		name_str = CB_NAME (name);
 	}
-	current_program->orig_program_id = cobc_strdup (name_str);
-	s = cb_encode_program_id (name_str);
+	current_program->orig_program_id = name_str;
+	s = cb_encode_program_id (cobc_parse_strdup (name_str));
 
 	(void)cobc_check_valid_name (current_program->orig_program_id, 2U);
 
