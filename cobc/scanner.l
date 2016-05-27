@@ -1507,20 +1507,20 @@ scan_floating_numeric (const char *text)
 	int		scale;
 	int		exponent;
 	int		n;
-	char		significand_str[37];
+	char		significand_str[37] = { '\0' };
 	char		*significand_pos;
-	char		significand_dec[36];
-	char		significand_int[36];
-	char		exponent_str[8];
+	char		significand_dec[36] = { '\0' };
+	char		significand_int[36] = { '\0' };
+	char		exponent_str[8] = { '\0' };
 	char		*exponent_pos;
 
-	char		result[128];
+	char		result[128] = { '\0' };
 
 	literal_error = 0;
 
 	/* Separate into significand and exponent */
-	n = sscanf (text, "%36[0-9.,+-]%*[Ee]%7[0-9.,+-]",
-		significand_str, exponent_str);
+	n = sscanf (text, "%36[0-9.,+-]%*1[Ee]%7[0-9.,+-]",
+		    significand_str, exponent_str);
 	/* We check the return for silencing warnings,
 		this should never happen as the flex rule ensures this */
 	if (n == 0) {
@@ -1538,8 +1538,8 @@ scan_floating_numeric (const char *text)
 	INCREMENT_IF_SIGNED (exponent_pos, exp_sign);
 
 	/* Separate into integer and decimal */
-	n = sscanf (significand_pos, "%35[0-9]%*[.,]%35[0-9]",
-			significand_int, significand_dec);
+	n = sscanf (significand_pos, "%35[0-9]%*1[.,]%35[0-9]",
+		    significand_int, significand_dec);
 	if (n == 0) { /* no integer part, copy after decimal-point */
 		significand_int[0] = 0;
 		strncpy (significand_dec, significand_pos + 1, 35);
