@@ -1,4 +1,9 @@
 
+2016-05-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* move.c (cob_move_display_to_edited): fixed bug #220 - fixed insertion
+	  which float are now distinguished from those which don't.
+
 2016-05-23  Brian Tiffin <btiffin@gnu.org>
 
 	* termio.c: Reverted length truncation in cob_accept for numeric fields.

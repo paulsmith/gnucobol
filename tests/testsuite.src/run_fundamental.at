@@ -360,8 +360,6 @@ AT_CLEANUP
 AT_SETUP([Move to item with simple and floating insertion])
 AT_KEYWORDS([fundamental edited])
 
-AT_XFAIL_IF(true)
-
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
