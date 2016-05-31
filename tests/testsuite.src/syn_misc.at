@@ -310,9 +310,85 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Error: INSPECT missing a keyword
+[prog.cob: 8: Error: INSPECT missing ALL/FIRST/LEADING/TRAILING
 ])
 
+AT_CLEANUP
+
+
+AT_SETUP([INSPECT repeated keywords])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 9(5).
+       
+       PROCEDURE DIVISION.
+           INSPECT "abcde" TALLYING x FOR ALL LEADING
+               TRAILING ALL ALL ALL TRAILING
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob: 12: Error: TALLYING clause is incomplete
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([INSPECT incomplete clause])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 9(5).
+       
+       PROCEDURE DIVISION.
+           INSPECT "abcde" TALLYING x FOR
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: Error: TALLYING clause is incomplete
+])
+AT_CLEANUP
+
+
+AT_SETUP([INSPECT multiple BEFORE/AFTER clauses])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC X(10).
+
+       PROCEDURE DIVISION.
+           INSPECT x REPLACING CHARACTERS BY "x"
+               BEFORE "A" BEFORE "b" AFTER "c"
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: Error: syntax error, unexpected BEFORE
+prog.cob: 13: Error: syntax error, unexpected end of file
+])
 AT_CLEANUP
 
 

@@ -141,6 +141,14 @@ unsigned int			cobc_cs_check = 0;
 
 /* Local variables */
 
+enum tallying_phrase {
+	NO_PHRASE,
+	FOR_PHRASE,
+	CHARACTERS_PHRASE,
+	ALL_LEADING_TRAILING_PHRASES,
+	VALUE_REGION_PHRASE
+};
+
 static struct cb_statement	*main_statement;
 
 static cb_tree			current_expr;
@@ -196,6 +204,7 @@ static unsigned int		needs_debug_item;
 static unsigned int		env_div_seen;
 static unsigned int		header_check;
 static unsigned int		call_nothing;
+static enum tallying_phrase	previous_tallying_phrase;
 
 static cb_tree			advancing_value;
 static cb_tree			upon_value;
@@ -1137,6 +1146,41 @@ check_set_usage (const enum cb_usage usage)
 	current_field->usage = usage;
 }
 
+static void
+check_preceding_tallying_phrases (const enum tallying_phrase phrase)
+{
+	switch (phrase) {
+	case FOR_PHRASE:
+		if (previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES) {
+			cb_error (_("FOR phrase cannot immediately follow ALL/LEADING/TRAILING"));
+		}
+		break;
+
+	case CHARACTERS_PHRASE:
+	case ALL_LEADING_TRAILING_PHRASES:
+		if (previous_tallying_phrase == NO_PHRASE) {
+			cb_error (_("Missing FOR phrase before CHARACTERS/ALL/LEADING/TRAILING phrase"));
+		} else if (previous_tallying_phrase == CHARACTERS_PHRASE
+			   || previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES) {
+			cb_error (_("Missing value between CHARACTERS/ALL/LEADING/TRAILING words"));
+		}
+		break;
+
+	case VALUE_REGION_PHRASE:
+		if (!(previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES
+		      || previous_tallying_phrase == VALUE_REGION_PHRASE)) {
+			cb_error (_("Missing ALL/LEADING/TRAILING before value"));
+		}
+		break;
+
+	default:
+		/* This should never happen */
+		cb_error (_("Unexpected tallying phrase"));
+	}
+
+	previous_tallying_phrase = phrase;
+}
+
 static int
 has_relative_pos (struct cb_field const *field)
 {
@@ -1222,7 +1266,7 @@ emit_default_displays_for_x_list (struct cb_list *x_list)
 
 		if (is_screen_field (value)) {
 			/*
-			  Emit DISPLAY for previous values before emitting
+			  Emit DISPLAY for previous_tallying_phrase values before emitting
 			  screen DISPLAY
 			*/
 			if (device_display_x_list != NULL) {
@@ -3927,7 +3971,7 @@ code_set_clause:
   CODE_SET _is alphabet_name _for_sub_records_clause
   {
 	struct cb_alphabet_name	*al;
-	  
+
 	check_repeated ("CODE SET", SYN_CLAUSE_10, &check_duplicate);
 
 	al = CB_ALPHABET_NAME (cb_ref ($3));
@@ -3947,7 +3991,7 @@ code_set_clause:
 		}
 		break;
 	}
-	
+
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
 	    current_file->organization != COB_ORG_SEQUENTIAL) {
 		cb_error (_("CODE-SET clause invalid for file type"));
@@ -8143,11 +8187,18 @@ inspect_list:
 inspect_tallying:
   TALLYING
   {
+	previous_tallying_phrase = NO_PHRASE;
 	cb_init_tallying ();
   }
   tallying_list
   {
-	cb_emit_inspect ($0, $3, cb_int0, 0);
+	if (!(previous_tallying_phrase == CHARACTERS_PHRASE
+	      || previous_tallying_phrase == VALUE_REGION_PHRASE)) {
+		cb_error (_("TALLYING clause is incomplete"));
+	} else {
+		cb_emit_inspect ($0, $3, cb_int0, 0);
+	}
+	
 	$$ = $0;
   }
 ;
@@ -8174,17 +8225,47 @@ inspect_converting:
 ;
 
 tallying_list:
-  tallying_item			{ $$ = $1; }
-| tallying_list tallying_item	{ $$ = cb_list_append ($1, $2); }
+  tallying_item
+  {
+	$$ = $1;
+  }
+| tallying_list tallying_item
+  {
+	$$ = cb_list_append ($1, $2);
+  }
 ;
 
 tallying_item:
-  simple_value FOR		{ $$ = cb_build_tallying_data ($1); }
-| CHARACTERS inspect_region	{ $$ = cb_build_tallying_characters ($2); }
-| ALL				{ $$ = cb_build_tallying_all (); }
-| LEADING			{ $$ = cb_build_tallying_leading (); }
-| TRAILING			{ $$ = cb_build_tallying_trailing (); }
-| simple_value inspect_region	{ $$ = cb_build_tallying_value ($1, $2); }
+  simple_value FOR
+  {
+	check_preceding_tallying_phrases (FOR_PHRASE);
+	$$ = cb_build_tallying_data ($1);
+  }
+| CHARACTERS inspect_region
+  {
+	check_preceding_tallying_phrases (CHARACTERS_PHRASE);
+	$$ = cb_build_tallying_characters ($2);
+  }
+| ALL
+  {
+	check_preceding_tallying_phrases (ALL_LEADING_TRAILING_PHRASES);
+	$$ = cb_build_tallying_all ();
+  }
+| LEADING
+  {
+	check_preceding_tallying_phrases (ALL_LEADING_TRAILING_PHRASES);
+	$$ = cb_build_tallying_leading ();
+  }
+| TRAILING
+  {
+	check_preceding_tallying_phrases (ALL_LEADING_TRAILING_PHRASES);
+	$$ = cb_build_tallying_trailing ();
+  }
+| simple_value inspect_region
+  {
+	check_preceding_tallying_phrases (VALUE_REGION_PHRASE);
+	$$ = cb_build_tallying_value ($1, $2);
+  }
 ;
 
 replacing_list:
@@ -8205,7 +8286,7 @@ replacing_item:
 ;
 
 rep_keyword:
-  /* empty */			{ /* Nothing */ }
+  /* empty */
 | ALL				{ inspect_keyword = 1; }
 | LEADING			{ inspect_keyword = 2; }
 | FIRST				{ inspect_keyword = 3; }
@@ -8230,7 +8311,7 @@ replacing_region:
 			break;
 		default:
 			cb_error_x (CB_TREE (current_statement),
-				    _("INSPECT missing a keyword"));
+				    _("INSPECT missing ALL/FIRST/LEADING/TRAILING"));
 			$$ = cb_build_replacing_all ($1, $3, $4);
 			break;
 	}
@@ -8244,20 +8325,35 @@ inspect_region:
   {
 	$$ = cb_build_inspect_region_start ();
   }
-| inspect_region inspect_before_after
+| inspect_before
   {
-	$$ = $2;
+	$$ = cb_list_add (cb_build_inspect_region_start (), $1);
+  }
+| inspect_after
+  {	
+	$$ = cb_list_add (cb_build_inspect_region_start (), $1);  
+  }
+| inspect_before inspect_after
+  {
+	$$ = cb_list_add (cb_list_add (cb_build_inspect_region_start (), $1), $2);
+  }
+| inspect_after inspect_before
+  {
+	$$ = cb_list_add (cb_list_add (cb_build_inspect_region_start (), $1), $2);
   }
 ;
 
-inspect_before_after:
+inspect_before:
   BEFORE _initial x
   {
-	$$ = cb_list_add ($0, CB_BUILD_FUNCALL_1 ("cob_inspect_before", $3));
+	$$ = CB_BUILD_FUNCALL_1 ("cob_inspect_before", $3);
   }
-| AFTER _initial x
+;
+
+inspect_after:
+  AFTER _initial x
   {
-	$$ = cb_list_add ($0, CB_BUILD_FUNCALL_1 ("cob_inspect_after", $3));
+	$$ = CB_BUILD_FUNCALL_1 ("cob_inspect_after", $3);
   }
 ;
 
