@@ -1266,7 +1266,7 @@ emit_default_displays_for_x_list (struct cb_list *x_list)
 
 		if (is_screen_field (value)) {
 			/*
-			  Emit DISPLAY for previous_tallying_phrase values before emitting
+			  Emit DISPLAY for previous values before emitting
 			  screen DISPLAY
 			*/
 			if (device_display_x_list != NULL) {
