@@ -1571,7 +1571,7 @@ The following list was extracted from @file{config/runtime.cfg}.
 @include fdl.texi
 
 @comment Create index.
-@node Index, , Appendix H, Top
+@node Index, , Appendix I, Top
 @unnumbered Index
 @printindex cp
 
