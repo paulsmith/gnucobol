@@ -1,7 +1,7 @@
 
-2016-05-31  Edward Hart <edward.dan.hart@gmail.com>
+2016-05-31 Brian Tiffin <btiffin@gnu.org>
 
-	* parser.y: fixed bug #47 - tightened INSPECT syntax rules.
+	* typeck.c: fix bug #235 ADD/SUBTRACT CORRESPONDING only for NUMERIC items.
 
 2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
 

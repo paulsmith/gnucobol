@@ -1,4 +1,8 @@
 
+2016-05-31  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_fundamental.at: Added ADD/SUBTRACT CORRESPONDING test
+
 2016-05-22  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_extensions.at: changed CBL_OC_HOSTED errno test

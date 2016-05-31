@@ -4115,8 +4115,11 @@ emit_corresponding (cb_tree (*func) (cb_tree f1, cb_tree f2, cb_tree f3),
 						if (f1->children && f2->children) {
 							found += emit_corresponding (func, t1, t2, opt);
 						} else {
-							found++;
-							cb_emit (func (t1, t2, opt));
+							if ((CB_TREE_CATEGORY (t1) == CB_CATEGORY_NUMERIC) &&
+							    (CB_TREE_CATEGORY (t2) == CB_CATEGORY_NUMERIC)) {
+								found++;
+								cb_emit (func (t1, t2, opt));
+							}
 						}
 					}
 				}
