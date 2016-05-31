@@ -3,6 +3,10 @@
 
 	* typeck.c: fix bug #235 ADD/SUBTRACT CORRESPONDING only for NUMERIC items.
 
+2016-05-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: fixed bug #47 - tightened INSPECT syntax rules.
+	
 2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, field.c, codegen.c: replaced PICTURE strings containing packed ints with
