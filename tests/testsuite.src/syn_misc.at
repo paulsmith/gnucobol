@@ -2222,3 +2222,42 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: Warning: Phrases in non-standard order
 ])
 AT_CLEANUP
+
+
+AT_SETUP([NOT ON EXCEPTION phrases before ON EXCEPTION])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       ENVIRONMENT    DIVISION.
+       INPUT-OUTPUT   SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.txt"
+               ORGANIZATION LINE SEQUENTIAL.
+
+       DATA           DIVISION.
+       FILE           SECTION.
+       FD  f LINAGE 10.
+       01  f-rec PIC X.
+
+       PROCEDURE      DIVISION.
+           WRITE f-rec FROM "x"
+               NOT END-OF-PAGE
+                   CONTINUE
+               END-OF-PAGE
+                   CONTINUE
+           END-WRITE
+
+           DISPLAY "blah"
+               ON EXCEPTION
+                   CALL "err"
+                       NOT ON EXCEPTION
+                           CONTINUE
+                       ON EXCEPTION
+                           CONTINUE.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP

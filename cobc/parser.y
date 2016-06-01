@@ -1890,13 +1890,12 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %nonassoc UNSTRING
 %nonassoc WRITE
 
-%nonassoc NOT_END
-%nonassoc NOT_EOP
-%nonassoc NOT_ESCAPE
-%nonassoc NOT_INVALID_KEY
-%nonassoc NOT_OVERFLOW
-%nonassoc NOT_SIZE_ERROR
-%nonassoc NOT_EXCEPTION
+%nonassoc NOT_END END
+%nonassoc NOT_EOP EOP
+%nonassoc NOT_INVALID_KEY INVALID_KEY
+%nonassoc NOT_OVERFLOW OVERFLOW TOK_OVERFLOW
+%nonassoc NOT_SIZE_ERROR SIZE_ERROR
+%nonassoc NOT_EXCEPTION EXCEPTION NOT_ESCAPE ESCAPE
 
 %nonassoc END_ACCEPT
 %nonassoc END_ADD
@@ -6386,7 +6385,7 @@ accept_body:
 	  check_line_col_duplicate = 0;
 	  line_column = NULL;
   }
-  _accept_clauses on_accp_exception
+  _accept_clauses _accept_exception_phrases
   {
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
@@ -6444,11 +6443,11 @@ accept_body:
   {
 	cb_emit_accept_command_line ($1);
   }
-| identifier FROM ENVIRONMENT_VALUE on_accp_exception
+| identifier FROM ENVIRONMENT_VALUE _accept_exception_phrases
   {
 	cb_emit_accept_environment ($1);
   }
-| identifier FROM ENVIRONMENT simple_value on_accp_exception
+| identifier FROM ENVIRONMENT simple_value _accept_exception_phrases
   {
 	cb_emit_get_environment ($4, $1);
   }
@@ -6456,7 +6455,7 @@ accept_body:
   {
 	cb_emit_accept_arg_number ($1);
   }
-| identifier FROM ARGUMENT_VALUE on_accp_exception
+| identifier FROM ARGUMENT_VALUE _accept_exception_phrases
   {
 	cb_emit_accept_arg_value ($1);
   }
@@ -6716,15 +6715,15 @@ add_statement:
 ;
 
 add_body:
-  x_list TO arithmetic_x_list on_size_error
+  x_list TO arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($3, '+', cb_build_binary_list ($1, '+'));
   }
-| x_list _add_to GIVING arithmetic_x_list on_size_error
+| x_list _add_to GIVING arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($4, 0, cb_build_binary_list ($1, '+'));
   }
-| CORRESPONDING identifier TO identifier flag_rounded on_size_error
+| CORRESPONDING identifier TO identifier flag_rounded on_size_error_phrases
   {
 	cb_emit_corresponding (cb_build_add, $4, $2, $5);
   }
@@ -6826,8 +6825,7 @@ call_body:
   id_or_lit_or_func
   call_using
   call_returning
-  call_on_exception
-  call_not_on_exception
+  call_exception_phrases
   {
 	if (CB_LITERAL_P ($2) &&
 	    current_program->prog_type == CB_PROGRAM_TYPE &&
@@ -6844,7 +6842,7 @@ call_body:
 			$1 = cb_int (CB_CONV_NO_RET_UPD);
 		}
 	}
-	cb_emit_call ($2, $3, $4, $5, $6, $1);
+	cb_emit_call ($2, $3, $4, CB_PAIR_X ($5), CB_PAIR_Y ($5), $1);
   }
 ;
 
@@ -7019,31 +7017,57 @@ null_or_omitted:
 | OMITTED
 ;
 
-call_on_exception:
-  /* empty */
+call_exception_phrases:
+  %prec SHIFT_PREFER
+  {
+	  $$ = CB_BUILD_PAIR (NULL, NULL);
+  }
+| call_on_exception _call_not_on_exception
+  {
+	  $$ = CB_BUILD_PAIR ($1, $2);
+  }
+| call_not_on_exception _call_on_exception
+  {
+	  $$ = CB_BUILD_PAIR ($2, $1);
+  }
+;
+
+_call_on_exception:
+  %prec SHIFT_PREFER
   {
 	$$ = NULL;
   }
-| EXCEPTION
-  statement_list
+| call_on_exception
+  {
+	$$ = $1;
+  }
+;
+
+call_on_exception:
+  EXCEPTION statement_list
   {
 	$$ = $2;
   }
-| TOK_OVERFLOW
-  statement_list
+| TOK_OVERFLOW statement_list
   {
 	cb_verify (cb_call_overflow, "ON OVERFLOW clause");
 	$$ = $2;
   }
 ;
 
-call_not_on_exception:
-  /* empty */	%prec SHIFT_PREFER
+_call_not_on_exception:
+  %prec SHIFT_PREFER
   {
 	$$ = NULL;
   }
-| NOT_EXCEPTION
-  statement_list
+| call_not_on_exception
+  {
+	$$ = $1;
+  }
+;
+
+call_not_on_exception:
+  NOT_EXCEPTION statement_list
   {
 	$$ = $2;
   }
@@ -7127,7 +7151,7 @@ compute_statement:
 ;
 
 compute_body:
-  arithmetic_x_list comp_equal exp on_size_error
+  arithmetic_x_list comp_equal exp on_size_error_phrases
   {
 	cb_emit_arithmetic ($1, 0, $3);
   }
@@ -7185,7 +7209,7 @@ delete_statement:
 ;
 
 delete_body:
-  file_name _record invalid_key
+  file_name _record _invalid_key_phrases
   {
 	cb_emit_delete ($1);
   }
@@ -7230,23 +7254,23 @@ display_statement:
 ;
 
 display_body:
-  id_or_lit UPON_ENVIRONMENT_NAME on_disp_exception
+  id_or_lit UPON_ENVIRONMENT_NAME _display_exception_phrases
   {
 	cb_emit_env_name ($1);
   }
-| id_or_lit UPON_ENVIRONMENT_VALUE on_disp_exception
+| id_or_lit UPON_ENVIRONMENT_VALUE _display_exception_phrases
   {
 	cb_emit_env_value ($1);
   }
-| id_or_lit UPON_ARGUMENT_NUMBER on_disp_exception
+| id_or_lit UPON_ARGUMENT_NUMBER _display_exception_phrases
   {
 	cb_emit_arg_number ($1);
   }
-| id_or_lit UPON_COMMAND_LINE on_disp_exception
+| id_or_lit UPON_COMMAND_LINE _display_exception_phrases
   {
 	cb_emit_command_line ($1);
   }
-| screen_or_device_display on_disp_exception
+| screen_or_device_display _display_exception_phrases
 ;
 
 screen_or_device_display:
@@ -7494,23 +7518,23 @@ divide_statement:
 ;
 
 divide_body:
-  x INTO arithmetic_x_list on_size_error
+  x INTO arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($3, '/', $1);
   }
-| x INTO x GIVING arithmetic_x_list on_size_error
+| x INTO x GIVING arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($5, 0, cb_build_binary_op ($3, '/', $1));
   }
-| x BY x GIVING arithmetic_x_list on_size_error
+| x BY x GIVING arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($5, 0, cb_build_binary_op ($1, '/', $3));
   }
-| x INTO x GIVING arithmetic_x REMAINDER arithmetic_x on_size_error
+| x INTO x GIVING arithmetic_x REMAINDER arithmetic_x on_size_error_phrases
   {
 	cb_emit_divide ($3, $1, $5, $7);
   }
-| x BY x GIVING arithmetic_x REMAINDER arithmetic_x on_size_error
+| x BY x GIVING arithmetic_x REMAINDER arithmetic_x on_size_error_phrases
   {
 	cb_emit_divide ($1, $3, $5, $7);
   }
@@ -8403,11 +8427,11 @@ multiply_statement:
 ;
 
 multiply_body:
-  x BY arithmetic_x_list on_size_error
+  x BY arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($3, '*', $1);
   }
-| x BY x GIVING arithmetic_x_list on_size_error
+| x BY x GIVING arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($5, 0, cb_build_binary_op ($1, '*', $3));
   }
@@ -8725,7 +8749,7 @@ read_key:
 ;
 
 read_handler:
-  invalid_key
+  _invalid_key_phrases
 | at_end
 ;
 
@@ -8824,7 +8848,7 @@ rewrite_statement:
 ;
 
 rewrite_body:
-  record_name from_option write_lock invalid_key
+  record_name from_option write_lock _invalid_key_phrases
   {
 	cb_emit_rewrite ($1, $2, $3);
 	start_debug = save_debug;
@@ -9258,7 +9282,7 @@ start_statement:
 ;
 
 start_body:
-  file_name start_key sizelen_clause invalid_key
+  file_name start_key sizelen_clause _invalid_key_phrases
   {
 	if ($3 && !$2) {
 		cb_error_x (CB_TREE (current_statement),
@@ -9421,7 +9445,7 @@ string_statement:
 ;
 
 string_body:
-  string_item_list INTO identifier _with_pointer on_overflow
+  string_item_list INTO identifier _with_pointer _on_overflow_phrases
   {
 	cb_emit_string ($1, $3, $4);
   }
@@ -9467,15 +9491,15 @@ subtract_statement:
 ;
 
 subtract_body:
-  x_list FROM arithmetic_x_list on_size_error
+  x_list FROM arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($3, '-', cb_build_binary_list ($1, '+'));
   }
-| x_list FROM x GIVING arithmetic_x_list on_size_error
+| x_list FROM x GIVING arithmetic_x_list on_size_error_phrases
   {
 	cb_emit_arithmetic ($5, 0, cb_build_binary_list (CB_BUILD_CHAIN ($3, $1), '-'));
   }
-| CORRESPONDING identifier FROM identifier flag_rounded on_size_error
+| CORRESPONDING identifier FROM identifier flag_rounded on_size_error_phrases
   {
 	cb_emit_corresponding (cb_build_sub, $4, $2, $5);
   }
@@ -9594,14 +9618,14 @@ unstring_statement:
 ;
 
 unstring_body:
-  identifier unstring_delimited unstring_into
-  _with_pointer unstring_tallying on_overflow
+  identifier _unstring_delimited unstring_into
+  _with_pointer _unstring_tallying _on_overflow_phrases
   {
 	cb_emit_unstring ($1, $2, $3, $4, $5);
   }
 ;
 
-unstring_delimited:
+_unstring_delimited:
   /* empty */			{ $$ = NULL; }
 | DELIMITED _by
   unstring_delimited_list	{ $$ = $3; }
@@ -9627,23 +9651,23 @@ unstring_into:
 ;
 
 unstring_into_item:
-  identifier unstring_into_delimiter unstring_into_count
+  identifier _unstring_into_delimiter _unstring_into_count
   {
 	$$ = cb_build_unstring_into ($1, $2, $3);
   }
 ;
 
-unstring_into_delimiter:
+_unstring_into_delimiter:
   /* empty */			{ $$ = NULL; }
 | DELIMITER _in identifier	{ $$ = $3; }
 ;
 
-unstring_into_count:
+_unstring_into_count:
   /* empty */			{ $$ = NULL; }
 | COUNT _in identifier		{ $$ = $3; }
 ;
 
-unstring_tallying:
+_unstring_tallying:
   /* empty */			{ $$ = NULL; }
 | TALLYING _in identifier	{ $$ = $3; }
 ;
@@ -9979,8 +10003,9 @@ before_or_after:
 ;
 
 write_handler:
-  invalid_key
-| at_eop
+  %prec SHIFT_PREFER
+| invalid_key_phrases
+| at_eop_clauses
 ;
 
 end_write:
@@ -9999,13 +10024,19 @@ end_write:
 
 /* ON EXCEPTION */
 
-on_accp_exception:
-  _on_accp_exception _not_on_accp_exception
+_accept_exception_phrases:
+  %prec SHIFT_PREFER
+| accp_on_exception _accp_not_on_exception
+| accp_not_on_exception _accp_on_exception
 ;
 
-_on_accp_exception:
-| escape_or_exception
-  statement_list
+_accp_on_exception:
+  %prec SHIFT_PREFER
+| accp_on_exception
+;
+
+accp_on_exception:
+  escape_or_exception statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_ACCEPT;
 	current_statement->handler1 = $2;
@@ -10017,10 +10048,13 @@ escape_or_exception:
 | EXCEPTION
 ;
 
-_not_on_accp_exception:
+_accp_not_on_exception:
   %prec SHIFT_PREFER
-| not_escape_or_not_exception
-  statement_list
+| accp_not_on_exception
+;
+
+accp_not_on_exception:
+  not_escape_or_not_exception statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_ACCEPT;
 	current_statement->handler2 = $2;
@@ -10032,23 +10066,33 @@ not_escape_or_not_exception:
 | NOT_EXCEPTION
 ;
 
-on_disp_exception:
-  _on_disp_exception _not_on_disp_exception
+
+_display_exception_phrases:
+  %prec SHIFT_PREFER
+| disp_on_exception _disp_not_on_exception
+| disp_not_on_exception _disp_on_exception
 ;
 
-_on_disp_exception:
-| EXCEPTION
-  statement_list
+_disp_on_exception:
+  %prec SHIFT_PREFER
+| disp_on_exception
+;
+
+disp_on_exception:
+  EXCEPTION statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_DISPLAY;
 	current_statement->handler1 = $2;
   }
 ;
 
-_not_on_disp_exception:
+_disp_not_on_exception:
   %prec SHIFT_PREFER
-| NOT_EXCEPTION
-  statement_list
+| disp_not_on_exception
+;
+
+disp_not_on_exception:
+  NOT_EXCEPTION statement_list
   {
 	current_statement->handler_id = COB_EC_IMP_DISPLAY;
 	current_statement->handler2 = $2;
@@ -10057,13 +10101,19 @@ _not_on_disp_exception:
 
 /* ON SIZE ERROR */
 
-on_size_error:
-  _on_size_error _not_on_size_error
+on_size_error_phrases:
+  %prec SHIFT_PREFER
+| on_size_error _not_on_size_error
+| not_on_size_error _on_size_error
 ;
 
 _on_size_error:
-| SIZE_ERROR
-  statement_list
+  %prec SHIFT_PREFER
+| on_size_error
+;
+
+on_size_error:
+  SIZE_ERROR statement_list
   {
 	current_statement->handler_id = COB_EC_SIZE;
 	current_statement->handler1 = $2;
@@ -10072,25 +10122,32 @@ _on_size_error:
 
 _not_on_size_error:
   %prec SHIFT_PREFER
-| NOT_SIZE_ERROR
-  statement_list
+| not_on_size_error
+;
+
+not_on_size_error:
+  NOT_SIZE_ERROR statement_list
   {
 	current_statement->handler_id = COB_EC_SIZE;
 	current_statement->handler2 = $2;
   }
 ;
 
-
 /* ON OVERFLOW */
 
-on_overflow:
-  _on_overflow _not_on_overflow
+_on_overflow_phrases:
+  %prec SHIFT_PREFER
+| on_overflow _not_on_overflow
+| not_on_overflow _on_overflow
 ;
 
 _on_overflow:
-  /* empty */
-| TOK_OVERFLOW
-  statement_list
+  %prec SHIFT_PREFER
+| on_overflow
+;
+
+on_overflow:
+  TOK_OVERFLOW statement_list
   {
 	current_statement->handler_id = COB_EC_OVERFLOW;
 	current_statement->handler1 = $2;
@@ -10098,10 +10155,12 @@ _on_overflow:
 ;
 
 _not_on_overflow:
-  /* empty */
   %prec SHIFT_PREFER
-| NOT_OVERFLOW
-  statement_list
+| not_on_overflow
+;
+
+not_on_overflow:
+  NOT_OVERFLOW statement_list
   {
 	current_statement->handler_id = COB_EC_OVERFLOW;
 	current_statement->handler2 = $2;
@@ -10112,28 +10171,36 @@ _not_on_overflow:
 /* AT END */
 
 return_at_end:
-  at_end_clause not_at_end_clause
-| at_end_clause %prec SHIFT_PREFER
+  at_end_clause _not_at_end_clause
+| not_at_end_clause at_end_clause
 ;
 
 at_end:
-  at_end_clause not_at_end_clause
-| at_end_clause %prec SHIFT_PREFER
-| not_at_end_clause
+  %prec SHIFT_PREFER
+  at_end_clause _not_at_end_clause
+| not_at_end_clause _at_end_clause
+;
+
+_at_end_clause:
+  %prec SHIFT_PREFER
+| at_end_clause
 ;
 
 at_end_clause:
-  END
-  statement_list
+  END statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_AT_END;
 	current_statement->handler1 = $2;
   }
 ;
 
+_not_at_end_clause:
+  %prec SHIFT_PREFER
+| not_at_end_clause
+;
+
 not_at_end_clause:
-  NOT_END
-  statement_list
+  NOT_END statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_AT_END;
 	current_statement->handler2 = $2;
@@ -10142,24 +10209,31 @@ not_at_end_clause:
 
 /* AT EOP */
 
-at_eop:
-  at_eop_clause not_at_eop_clause
-| at_eop_clause %prec SHIFT_PREFER
-| not_at_eop_clause
+at_eop_clauses:
+  at_eop_clause _not_at_eop_clause
+| not_at_eop_clause _at_eop_clause
+;
+
+_at_eop_clause:
+  %prec SHIFT_PREFER
+| at_eop_clause
 ;
 
 at_eop_clause:
-  EOP
-  statement_list
+  EOP statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_EOP;
 	current_statement->handler1 = $2;
   }
 ;
 
+_not_at_eop_clause:
+  %prec SHIFT_PREFER
+| not_at_eop_clause
+;
+
 not_at_eop_clause:
-  NOT_EOP
-  statement_list
+  NOT_EOP statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_EOP;
 	current_statement->handler2 = $2;
@@ -10168,15 +10242,23 @@ not_at_eop_clause:
 
 /* INVALID KEY */
 
-invalid_key:
-  _invalid_key_sentence
-  _not_invalid_key_sentence
+_invalid_key_phrases:
+  %prec SHIFT_PREFER
+| invalid_key_phrases
+;
+
+invalid_key_phrases:
+  invalid_key_sentence _not_invalid_key_sentence
+| not_invalid_key_sentence _invalid_key_sentence
 ;
 
 _invalid_key_sentence:
-  /* empty */	%prec SHIFT_PREFER
-| INVALID_KEY
-  statement_list
+  %prec SHIFT_PREFER
+| invalid_key_sentence
+;
+
+invalid_key_sentence:
+  INVALID_KEY statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_INVALID_KEY;
 	current_statement->handler1 = $2;
@@ -10184,9 +10266,12 @@ _invalid_key_sentence:
 ;
 
 _not_invalid_key_sentence:
-  /* empty */	%prec SHIFT_PREFER
-| NOT_INVALID_KEY
-  statement_list
+  %prec SHIFT_PREFER
+| not_invalid_key_sentence
+;
+
+not_invalid_key_sentence:
+  NOT_INVALID_KEY statement_list
   {
 	current_statement->handler_id = COB_EC_I_O_INVALID_KEY;
 	current_statement->handler2 = $2;
