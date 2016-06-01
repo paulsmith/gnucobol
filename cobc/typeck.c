@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -1190,7 +1190,7 @@ char *
 cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 {
 	const char	*name_str;
-	char		*s;
+	char			*s;
 	unsigned char	*p;
 
 	/* Set the program name */
@@ -1208,7 +1208,7 @@ cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 	} else {
 		name_str = CB_NAME (name);
 	}
-	current_program->orig_program_id = name_str;
+	current_program->orig_program_id = (char *) name_str;
 	s = cb_encode_program_id (cobc_parse_strdup (name_str));
 
 	(void)cobc_check_valid_name (current_program->orig_program_id, 2U);
