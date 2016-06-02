@@ -5370,37 +5370,49 @@ output_alter (struct cb_alter *p)
 
 /* Output statement */
 
+static int
+get_ec_code_for_handler (const enum cb_handler_type handler_type)
+{
+	switch (handler_type) {
+	case AT_END_HANDLER:
+		return CB_EXCEPTION_CODE (COB_EC_I_O_AT_END);
+	case EOP_HANDLER:
+		return CB_EXCEPTION_CODE (COB_EC_I_O_EOP);
+	case INVALID_KEY_HANDLER:
+		return CB_EXCEPTION_CODE (COB_EC_I_O_INVALID_KEY);
+	default:
+		cobc_abort_pr (_("Unexpected handler type %d"), (int) handler_type);
+		COBC_ABORT ();
+	}
+}
+ 
 static void
-output_ferror_stmt (struct cb_statement *p, const int code)
+output_ferror_stmt (struct cb_statement *stmt)
 {
 	output_line ("if (unlikely(cob_glob_ptr->cob_exception_code != 0))");
 	output_indent ("{");
-	if (p->handler1) {
-		if ((code & 0x00ff) == 0) {
-			output_line ("if ((cob_glob_ptr->cob_exception_code & 0xff00) == 0x%04x)",
-			     code);
-		} else {
-			output_line ("if (cob_glob_ptr->cob_exception_code == 0x%04x)", code);
-		}
+	if (stmt->ex_handler) {
+		output_line ("if (cob_glob_ptr->cob_exception_code == 0x%04x)",
+			     get_ec_code_for_handler (stmt->handler_type));
 		output_indent ("{");
-		output_stmt (p->handler1);
+		output_stmt (stmt->ex_handler);
 		output_indent ("}");
 		output_line ("else");
 		output_indent ("{");
 	}
-	output_file_error (CB_FILE (p->file));
+	output_file_error (CB_FILE (stmt->file));
 	output_indent ("}");
-	if (p->handler1) {
+	if (stmt->ex_handler) {
 		output_indent ("}");
 	}
-	if (p->handler2 || p->handler3) {
+	if (stmt->not_ex_handler || stmt->handler3) {
 		output_line ("else");
 		output_indent ("{");
-		if (p->handler3) {
-			output_stmt (p->handler3);
+		if (stmt->handler3) {
+			output_stmt (stmt->handler3);
 		}
-		if (p->handler2) {
-			output_stmt (p->handler2);
+		if (stmt->not_ex_handler) {
+			output_stmt (stmt->not_ex_handler);
 		}
 		output_indent ("}");
 	}
@@ -5542,6 +5554,85 @@ output_alter_check (struct cb_label *lp)
 }
 
 static void
+output_level_2_ex_condition (const int level_2_ec)
+{
+	output_line ("if (unlikely ((cob_glob_ptr->cob_exception_code & 0xff00) == 0x%04x))",
+		     CB_EXCEPTION_CODE (level_2_ec));
+}
+ 
+static void
+output_display_accept_ex_condition (const enum cb_handler_type handler_type)
+{
+        int	imp_ec;
+	
+	output_line ("if (unlikely ((cob_glob_ptr->cob_exception_code & 0xff00) == 0x%04x",
+		     CB_EXCEPTION_CODE (COB_EC_SCREEN));
+
+	if (handler_type == DISPLAY_HANDLER) {
+		imp_ec = COB_EC_IMP_DISPLAY;
+	} else { /* ACCEPT_HANDLER */
+		imp_ec = COB_EC_IMP_DISPLAY;
+	}
+	output_line ("               || cob_glob_ptr->cob_exception_code == 0x%04x))",
+		     CB_EXCEPTION_CODE (imp_ec));
+}
+ 
+static void
+output_ec_condition_for_handler (const enum cb_handler_type handler_type)
+{
+	
+	switch (handler_type) {
+	case DISPLAY_HANDLER:
+		output_display_accept_ex_condition (DISPLAY_HANDLER);
+		break;
+		
+	case ACCEPT_HANDLER:
+		output_display_accept_ex_condition (ACCEPT_HANDLER);
+		break;
+		
+	case SIZE_ERROR_HANDLER:
+		output_level_2_ex_condition (COB_EC_SIZE);
+		break;		
+		
+	case OVERFLOW_HANDLER:
+		output_level_2_ex_condition (COB_EC_OVERFLOW);
+		break;
+		
+	default:
+		cobc_abort_pr (_("Unexpected handler type %d"), (int) handler_type);
+		COBC_ABORT ();
+	}
+}
+ 
+static void
+output_handler (struct cb_statement *stmt)
+{
+	if (stmt->file) {
+		output_ferror_stmt (stmt);
+		return;
+	}
+	
+	if (stmt->ex_handler) {
+		output_ec_condition_for_handler (stmt->handler_type);
+		output_indent ("{");
+		output_stmt (stmt->ex_handler);
+		output_indent ("}");
+		if (stmt->not_ex_handler) {
+			output_line ("else");
+		}
+	}
+	if (stmt->not_ex_handler) {
+		if (stmt->ex_handler == NULL) {
+			output_line ("if (!cob_glob_ptr->cob_exception_code)");
+		}
+		output_indent ("{");
+		output_stmt (stmt->not_ex_handler);
+		output_indent ("}");
+	}
+}
+
+ 
+static void
 output_stmt (cb_tree x)
 {
 	struct cb_statement	*p;
@@ -5597,12 +5688,7 @@ output_stmt (cb_tree x)
 			last_line = x->source_line;
 		}
 
-#if	0	/* RXWRXW - Exception */
-		if (p->handler1 || p->handler2 ||
-		    (p->file && CB_EXCEPTION_ENABLE (COB_EC_I_O))) {
-#else
-		if (!p->file && (p->handler1 || p->handler2)) {
-#endif
+		if (!p->file && (p->ex_handler || p->not_ex_handler)) {
 			output_line ("cob_glob_ptr->cob_exception_code = 0;");
 		}
 
@@ -5633,35 +5719,9 @@ output_stmt (cb_tree x)
 			need_save_exception = 1;
 		}
 
-		if (p->handler1 || p->handler2 ||
+		if (p->ex_handler || p->not_ex_handler ||
 		    (p->file && CB_EXCEPTION_ENABLE (COB_EC_I_O))) {
-			code = CB_EXCEPTION_CODE (p->handler_id);
-			if (p->file) {
-				output_ferror_stmt (p, code);
-			} else {
-				if (p->handler1) {
-					if ((code & 0x00ff) == 0) {
-						output_line ("if (unlikely((cob_glob_ptr->cob_exception_code & 0xff00) == 0x%04x))",
-						     code);
-					} else {
-						output_line ("if (unlikely(cob_glob_ptr->cob_exception_code == 0x%04x))", code);
-					}
-					output_indent ("{");
-					output_stmt (p->handler1);
-					output_indent ("}");
-					if (p->handler2) {
-						output_line ("else");
-					}
-				}
-				if (p->handler2) {
-					if (p->handler1 == NULL) {
-						output_line ("if (!cob_glob_ptr->cob_exception_code)");
-					}
-					output_indent ("{");
-					output_stmt (p->handler2);
-					output_indent ("}");
-				}
-			}
+			output_handler (p);
 		}
 		break;
 	case CB_TAG_LABEL:

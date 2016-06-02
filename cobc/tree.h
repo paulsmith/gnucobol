@@ -1132,6 +1132,19 @@ struct cb_attr_struct {
 	int			dispattrs;	/* Attributes */
 };
 
+/* Exception handler type */
+
+enum cb_handler_type {
+	NO_HANDLER = 0,
+	DISPLAY_HANDLER,
+	ACCEPT_HANDLER,
+	SIZE_ERROR_HANDLER,
+	OVERFLOW_HANDLER,
+	AT_END_HANDLER,
+	EOP_HANDLER,
+	INVALID_KEY_HANDLER
+};
+
 /* Statement */
 
 struct cb_statement {
@@ -1140,14 +1153,14 @@ struct cb_statement {
 	const char		*statement;		/* Statement line */
 	cb_tree			body;			/* Statement body */
 	cb_tree			file;			/* File reference */
-	cb_tree			handler1;		/* Exception handler */
-	cb_tree			handler2;		/* Exception handler */
+	cb_tree			ex_handler;		/* Exception handler */
+	cb_tree			not_ex_handler;		/* Exception handler */
 	cb_tree			handler3;		/* INTO clause */
 	cb_tree			null_check;		/* NULL check */
 	cb_tree			debug_check;		/* Field DEBUG */
 	cb_tree			debug_nodups;		/* Field DEBUG dups */
 	struct cb_attr_struct	*attr_ptr;		/* Attributes */
-	int			handler_id;		/* Handler id */
+	enum cb_handler_type	handler_type;		/* Handler type */
 	unsigned int		flag_no_based	: 1;	/* Check BASED */
 	unsigned int		flag_in_debug	: 1;	/* In DEBUGGING */
 	unsigned int		flag_merge	: 1;	/* Is MERGE */

@@ -4381,6 +4381,31 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([ON EXCEPTION clause of DISPLAY])
+AT_KEYWORDS([runmisc exceptions screen])
+
+AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       PROCEDURE DIVISION.
+           DISPLAY "hello" AT COLUMN 500
+               ON EXCEPTION
+                   GOBACK RETURNING 0
+               NOT ON EXCEPTION
+                   GOBACK RETURNING 1
+           END-DISPLAY
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], ignore, [])
+
+AT_CLEANUP
+
+
 AT_SETUP([EC-SCREEN-LINE-NUMBER and -STARTING-COLUMN])
 AT_KEYWORDS([runmisc exceptions screen])
 

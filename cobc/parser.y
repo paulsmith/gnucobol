@@ -7346,12 +7346,6 @@ display_atom:
 			cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
 		}
 	}
-
-	/*
-	  This should be placed after the display_list in the second case
-	  of display_list, but that causes a shift/reduce error.
-	*/
-	begin_implicit_statement ();
   }
 ;
 
@@ -8695,7 +8689,7 @@ read_body:
 		       cf->organization != COB_ORG_INDEXED)) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("KEY clause invalid with this file type"));
-		} else if (current_statement->handler_id == COB_EC_I_O_INVALID_KEY &&
+		} else if (current_statement->handler_type == INVALID_KEY_HANDLER &&
 			   (cf->organization != COB_ORG_RELATIVE &&
 			    cf->organization != COB_ORG_INDEXED)) {
 			cb_error_x (CB_TREE (current_statement),
@@ -10038,8 +10032,8 @@ _accp_on_exception:
 accp_on_exception:
   escape_or_exception statement_list
   {
-	current_statement->handler_id = COB_EC_IMP_ACCEPT;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = ACCEPT_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10056,8 +10050,8 @@ _accp_not_on_exception:
 accp_not_on_exception:
   not_escape_or_not_exception statement_list
   {
-	current_statement->handler_id = COB_EC_IMP_ACCEPT;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = ACCEPT_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10081,8 +10075,8 @@ _disp_on_exception:
 disp_on_exception:
   EXCEPTION statement_list
   {
-	current_statement->handler_id = COB_EC_IMP_DISPLAY;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = DISPLAY_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10094,8 +10088,8 @@ _disp_not_on_exception:
 disp_not_on_exception:
   NOT_EXCEPTION statement_list
   {
-	current_statement->handler_id = COB_EC_IMP_DISPLAY;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = DISPLAY_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10115,8 +10109,8 @@ _on_size_error:
 on_size_error:
   SIZE_ERROR statement_list
   {
-	current_statement->handler_id = COB_EC_SIZE;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = SIZE_ERROR_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10128,8 +10122,8 @@ _not_on_size_error:
 not_on_size_error:
   NOT_SIZE_ERROR statement_list
   {
-	current_statement->handler_id = COB_EC_SIZE;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = SIZE_ERROR_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10149,8 +10143,8 @@ _on_overflow:
 on_overflow:
   TOK_OVERFLOW statement_list
   {
-	current_statement->handler_id = COB_EC_OVERFLOW;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = OVERFLOW_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10162,8 +10156,8 @@ _not_on_overflow:
 not_on_overflow:
   NOT_OVERFLOW statement_list
   {
-	current_statement->handler_id = COB_EC_OVERFLOW;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = OVERFLOW_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10189,8 +10183,8 @@ _at_end_clause:
 at_end_clause:
   END statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_AT_END;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = AT_END_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10202,8 +10196,8 @@ _not_at_end_clause:
 not_at_end_clause:
   NOT_END statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_AT_END;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = AT_END_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10222,8 +10216,8 @@ _at_eop_clause:
 at_eop_clause:
   EOP statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_EOP;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = EOP_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10235,8 +10229,8 @@ _not_at_eop_clause:
 not_at_eop_clause:
   NOT_EOP statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_EOP;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = EOP_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 
@@ -10260,8 +10254,8 @@ _invalid_key_sentence:
 invalid_key_sentence:
   INVALID_KEY statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_INVALID_KEY;
-	current_statement->handler1 = $2;
+	current_statement->handler_type = INVALID_KEY_HANDLER;
+	current_statement->ex_handler = $2;
   }
 ;
 
@@ -10273,8 +10267,8 @@ _not_invalid_key_sentence:
 not_invalid_key_sentence:
   NOT_INVALID_KEY statement_list
   {
-	current_statement->handler_id = COB_EC_I_O_INVALID_KEY;
-	current_statement->handler2 = $2;
+	current_statement->handler_type = INVALID_KEY_HANDLER;
+	current_statement->not_ex_handler = $2;
   }
 ;
 

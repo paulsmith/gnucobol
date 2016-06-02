@@ -3211,10 +3211,10 @@ build_store_option (cb_tree x, cb_tree round_opt)
 
 	if (usage == CB_USAGE_COMP_5 || usage == CB_USAGE_COMP_X) {
 		/* Do not check NOT ERROR case, so that we optimize */
-		if (current_statement->handler1) {
+		if (current_statement->ex_handler) {
 			opt |= COB_STORE_KEEP_ON_OVERFLOW;
 		}
-	} else if (current_statement->handler_id) {
+	} else if (current_statement->handler_type != NO_HANDLER) {
 		/* There is a [NOT] ERROR/OVERFLOW/EXCEPTION - Set in parser */
 		opt |= COB_STORE_KEEP_ON_OVERFLOW;
 	} else if (usage == CB_USAGE_BINARY && cb_binary_truncate) {
@@ -4730,7 +4730,7 @@ cb_emit_allocate (cb_tree target1, cb_tree target2, cb_tree size,
 			 NULL, target2, size, initialize));
 	}
 	if (initialize && target1) {
-		current_statement->handler2 =
+		current_statement->not_ex_handler =
 			cb_build_initialize (target1, cb_true, NULL, 1, 0, 0);
 	}
 }
@@ -7654,7 +7654,7 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 		/* READ */
 		/* DYNAMIC with [NOT] AT END */
 		if (f->access_mode == COB_ACCESS_DYNAMIC &&
-		    current_statement->handler_id == COB_EC_I_O_AT_END) {
+		    current_statement->handler_type == AT_END_HANDLER) {
 			read_opts |= COB_READ_NEXT;
 			cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
 				 f->file_status,
@@ -7753,7 +7753,7 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "REWRITE", "LINE SEQUENTIAL");
 		return;
-	} else if (current_statement->handler_id == COB_EC_I_O_INVALID_KEY &&
+	} else if (current_statement->handler_type == INVALID_KEY_HANDLER &&
 		  (f->organization != COB_ORG_RELATIVE &&
 		   f->organization != COB_ORG_INDEXED)) {
 			cb_error_x (CB_TREE(current_statement),
@@ -8643,7 +8643,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
 		_("%s not allowed on %s files"), "WRITE", "SORT");
-	} else if (current_statement->handler_id == COB_EC_I_O_INVALID_KEY &&
+	} else if (current_statement->handler_type == INVALID_KEY_HANDLER &&
 		  (f->organization != COB_ORG_RELATIVE &&
 		   f->organization != COB_ORG_INDEXED)) {
 			cb_error_x (CB_TREE(current_statement),
@@ -8681,8 +8681,8 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 			opt = cb_int_hex (COB_WRITE_BEFORE | COB_WRITE_LINES | 1);
 		}
 	}
-	if (current_statement->handler_id == COB_EC_I_O_EOP &&
-	    current_statement->handler1) {
+	if (current_statement->handler_type == EOP_HANDLER &&
+	    current_statement->ex_handler) {
 		check_eop = cb_int1;
 	} else {
 		check_eop = cb_int0;

@@ -1,4 +1,15 @@
 
+2016-06-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (display_atom): fixed bug #243, which was caused by a
+	  begin_implicit_statement causing exceptions to be set to off before
+	  checking which exception handler to go to.
+	* codegen.c: fixed another cause of bug #243, where only EC-IMP-DISPLAY
+	  (and not EC-SCREEN) triggered the ON EXCEPTION phrase. As part of
+	  this, refactored the handling of exception handlers.
+	* tree.h (cb_statement): renamed handler1 and handler2 to ex_handler and
+	  not_ex_handler, respectively.
+
 2016-06-01  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: fixed bug #242 and allowed exception handlers to be in any
