@@ -1,4 +1,9 @@
 
+2016-06-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.def, parser.y: added not-exception-before-exception
+	  configuration option.
+
 2016-06-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (display_atom): fixed bug #243, which was caused by a

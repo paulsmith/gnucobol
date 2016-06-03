@@ -1,4 +1,8 @@
 
+2016-06-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added not-exception-before-exception configuration option.
+
 2016-04-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added recording-modes as context-sensitive words.

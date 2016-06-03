@@ -432,6 +432,7 @@ test.conf: Missing definitions:
 	No definition of 'numeric-boolean'
 	No definition of 'acucobol-literals'
 	No definition of 'word-continuation'
+	No definition of 'not-exception-before-exception'
 ])
 
 AT_CLEANUP

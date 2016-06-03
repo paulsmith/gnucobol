@@ -7020,15 +7020,16 @@ null_or_omitted:
 call_exception_phrases:
   %prec SHIFT_PREFER
   {
-	  $$ = CB_BUILD_PAIR (NULL, NULL);
+	$$ = CB_BUILD_PAIR (NULL, NULL);
   }
 | call_on_exception _call_not_on_exception
   {
-	  $$ = CB_BUILD_PAIR ($1, $2);
+	$$ = CB_BUILD_PAIR ($1, $2);
   }
 | call_not_on_exception _call_on_exception
   {
-	  $$ = CB_BUILD_PAIR ($2, $1);
+	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	$$ = CB_BUILD_PAIR ($2, $1);
   }
 ;
 
@@ -10022,6 +10023,9 @@ _accept_exception_phrases:
   %prec SHIFT_PREFER
 | accp_on_exception _accp_not_on_exception
 | accp_not_on_exception _accp_on_exception
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+  }
 ;
 
 _accp_on_exception:
@@ -10065,6 +10069,9 @@ _display_exception_phrases:
   %prec SHIFT_PREFER
 | disp_on_exception _disp_not_on_exception
 | disp_not_on_exception _disp_on_exception
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+  }
 ;
 
 _disp_on_exception:
@@ -10099,6 +10106,9 @@ on_size_error_phrases:
   %prec SHIFT_PREFER
 | on_size_error _not_on_size_error
 | not_on_size_error _on_size_error
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT SIZE ERROR before SIZE ERROR");
+  }
 ;
 
 _on_size_error:
@@ -10133,6 +10143,9 @@ _on_overflow_phrases:
   %prec SHIFT_PREFER
 | on_overflow _not_on_overflow
 | not_on_overflow _on_overflow
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT OVERFLOW before OVERFLOW");
+  }
 ;
 
 _on_overflow:
@@ -10166,7 +10179,6 @@ not_on_overflow:
 
 return_at_end:
   at_end_clause _not_at_end_clause
-| not_at_end_clause at_end_clause
 ;
 
 at_end:
@@ -10206,6 +10218,9 @@ not_at_end_clause:
 at_eop_clauses:
   at_eop_clause _not_at_eop_clause
 | not_at_eop_clause _at_eop_clause
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT AT END-OF-PAGE before AT END-OF-PAGE");
+  }
 ;
 
 _at_eop_clause:
@@ -10244,6 +10259,9 @@ _invalid_key_phrases:
 invalid_key_phrases:
   invalid_key_sentence _not_invalid_key_sentence
 | not_invalid_key_sentence _invalid_key_sentence
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT INVALID KEY before INVALID KEY");
+  }
 ;
 
 _invalid_key_sentence:
