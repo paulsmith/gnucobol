@@ -2129,7 +2129,7 @@ program_type_clause:
 		cb_add_common_prog (current_program);
 	}
   }
-| COMMON _init_or_recurs
+| init_or_recurse_and_common
   {
 	if (!current_program->nested_level) {
 		cb_error (_("COMMON may only be used in a contained program"));
@@ -2138,11 +2138,16 @@ program_type_clause:
 		cb_add_common_prog (current_program);
 	}
   }
-| _init_or_recurs
+| init_or_recurse
 | EXTERNAL
 ;
 
-_init_or_recurs:
+init_or_recurse_and_common:
+  init_or_recurse COMMON
+| COMMON init_or_recurse
+;
+
+init_or_recurse:
   TOK_INITIAL
   {
 	current_program->flag_initial = 1;

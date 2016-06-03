@@ -3,6 +3,8 @@
 
 	* config.def, parser.y: added not-exception-before-exception
 	  configuration option.
+	* parser.y (program_id_paragraph), tree.c: fixed bug #244 and allow
+	  INITIAL or RECURSIVE before COMMON.
 
 2016-06-02  Edward Hart <edward.dan.hart@gmail.com>
 
