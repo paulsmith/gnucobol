@@ -20,6 +20,10 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# Make sure to source atconfig/atlocal before running this shell
+# to use the currently compiled version of cobc
+# (is done in the makefile for automated calls)
+
 # Function for creating the actual file and check
 _create_file () {
 	echo "$0: creating $1"
@@ -102,12 +106,6 @@ _create_file () {
 
 docdir=`dirname $0`
 confdir=$docdir/../config
-
-# make sure we use the currently compiled version of cobc
-if test "$1" != "fixtimestamps"; then
-	. $docdir/../tests/atconfig && \
-	. $docdir/../tests/atlocal
-fi
 
 case "$1" in
 	"")

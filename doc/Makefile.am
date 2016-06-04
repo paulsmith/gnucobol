@@ -19,26 +19,29 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-COBCINFOSH = $(top_srcdir)/doc/cobcinfo.sh
+COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \
+	$(top_srcdir)/doc/cobcinfo.sh
 info_TEXINFOS = gnucobol.texi
 gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
 	 cbconf.tex cbchelp.tex cbrunt.tex
 
-cbhelp.tex: $(top_srcdir)/cobc/cobc.c cobcinfo.sh $(top_srcdir)/configure.ac \
-	$(top_srcdir)/cobc/flag.def  $(top_srcdir)/cobc/warning.def
+cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
+	$(top_srcdir)/cobc/flag.def $(top_srcdir)/cobc/warning.def \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac cobcinfo.sh
+cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbconf.tex: $(top_srcdir)/config/default.conf cobcinfo.sh
+cbconf.tex: $(top_srcdir)/config/default.conf $(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbrunt.tex: $(top_srcdir)/config/runtime.cfg cobcinfo.sh
+cbrunt.tex: $(top_srcdir)/config/runtime.cfg $(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
-	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c cobcinfo.sh
+	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c $(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
 EXTRA_DIST = gnucobol.pdf cobcinfo.sh \
