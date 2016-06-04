@@ -2249,6 +2249,20 @@ AT_DATA([prog.cob], [
                END-OF-PAGE
                    CONTINUE
            END-WRITE
+           WRITE f-rec FROM "x"
+               END-OF-PAGE
+                   CONTINUE
+               NOT END-OF-PAGE
+                   CONTINUE
+           END-WRITE
+           WRITE f-rec FROM "x"
+               NOT END-OF-PAGE
+                   CONTINUE
+           END-WRITE
+           WRITE f-rec FROM "x"
+               END-OF-PAGE
+                   CONTINUE
+           END-WRITE
 
            DISPLAY "blah"
                ON EXCEPTION
@@ -2257,7 +2271,18 @@ AT_DATA([prog.cob], [
                            CONTINUE
                        ON EXCEPTION
                            CONTINUE.
+           DISPLAY "blah"
+               NOT ON EXCEPTION
+                   CALL "err"
+                       ON EXCEPTION
+                           CONTINUE
+                       NOT ON EXCEPTION
+                           CONTINUE.
 ])
 
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 22: Error: NOT AT END-OF-PAGE before AT END-OF-PAGE does not conform to COBOL 85
+prog.cob: 44: Error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
+])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP

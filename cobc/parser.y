@@ -7033,7 +7033,9 @@ call_exception_phrases:
   }
 | call_not_on_exception _call_on_exception
   {
-	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	}
 	$$ = CB_BUILD_PAIR ($2, $1);
   }
 ;
@@ -10029,13 +10031,17 @@ _accept_exception_phrases:
 | accp_on_exception _accp_not_on_exception
 | accp_not_on_exception _accp_on_exception
   {
-	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	}
   }
 ;
 
 _accp_on_exception:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | accp_on_exception
+	{$$ = cb_int1;}
 ;
 
 accp_on_exception:
@@ -10075,13 +10081,17 @@ _display_exception_phrases:
 | disp_on_exception _disp_not_on_exception
 | disp_not_on_exception _disp_on_exception
   {
-	cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT EXCEPTION before EXCEPTION");
+	}
   }
 ;
 
 _disp_on_exception:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | disp_on_exception
+	{$$ = cb_int1;}
 ;
 
 disp_on_exception:
@@ -10112,13 +10122,17 @@ on_size_error_phrases:
 | on_size_error _not_on_size_error
 | not_on_size_error _on_size_error
   {
-	cb_verify (cb_not_exception_before_exception, "NOT SIZE ERROR before SIZE ERROR");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT SIZE ERROR before SIZE ERROR");
+	}
   }
 ;
 
 _on_size_error:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | on_size_error
+	{$$ = cb_int1;}
 ;
 
 on_size_error:
@@ -10149,13 +10163,17 @@ _on_overflow_phrases:
 | on_overflow _not_on_overflow
 | not_on_overflow _on_overflow
   {
-	cb_verify (cb_not_exception_before_exception, "NOT OVERFLOW before OVERFLOW");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT OVERFLOW before OVERFLOW");
+	}
   }
 ;
 
 _on_overflow:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | on_overflow
+	{$$ = cb_int1;}
 ;
 
 on_overflow:
@@ -10224,13 +10242,17 @@ at_eop_clauses:
   at_eop_clause _not_at_eop_clause
 | not_at_eop_clause _at_eop_clause
   {
-	cb_verify (cb_not_exception_before_exception, "NOT AT END-OF-PAGE before AT END-OF-PAGE");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT AT END-OF-PAGE before AT END-OF-PAGE");
+	}
   }
 ;
 
 _at_eop_clause:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | at_eop_clause
+	{$$ = cb_int1;}
 ;
 
 at_eop_clause:
@@ -10265,13 +10287,17 @@ invalid_key_phrases:
   invalid_key_sentence _not_invalid_key_sentence
 | not_invalid_key_sentence _invalid_key_sentence
   {
-	cb_verify (cb_not_exception_before_exception, "NOT INVALID KEY before INVALID KEY");
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT INVALID KEY before INVALID KEY");
+	}
   }
 ;
 
 _invalid_key_sentence:
   %prec SHIFT_PREFER
+	{$$ = NULL;}
 | invalid_key_sentence
+	{$$ = cb_int1;}
 ;
 
 invalid_key_sentence:
