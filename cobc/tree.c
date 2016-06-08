@@ -1857,7 +1857,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 			     const cob_pic_symbol **last)
 {
 	const cob_pic_symbol	*last_non_simple_insertion = NULL;
-	char			floating_char;
+	char			floating_char = ' ';
 
 	*first = NULL;
 	*last = NULL;
