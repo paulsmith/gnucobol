@@ -343,7 +343,7 @@ extern void			*cobc_plex_malloc (const size_t);
 extern void			*cobc_plex_strdup (const char *);
 
 extern void			*cobc_check_string (const char *);
-extern void			cobc_abort_pr (const char *, ...) COB_A_FORMAT12;
+extern void			cobc_err_msg (const char *, ...) COB_A_FORMAT12;
 
 DECLNORET extern void		cobc_abort (const char *,
 					    const int) COB_A_NORETURN;

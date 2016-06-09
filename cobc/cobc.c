@@ -582,11 +582,13 @@ cobc_enum_explain (const enum cb_tag tag)
 
 /* Global functions */
 
+/* Output a formatted message to stderr */
 void
-cobc_abort_pr (const char *fmt, ...)
+cobc_err_msg (const char *fmt, ...)
 {
 	va_list		ap;
 
+	fprintf (stderr, "cobc: ");
 	va_start (ap, fmt);
 	vfprintf (stderr, fmt, ap);
 	va_end (ap);
@@ -597,14 +599,15 @@ cobc_abort_pr (const char *fmt, ...)
 void
 cobc_too_many_errors (void)
 {
-	cobc_abort_pr (_("Too many errors - Aborting compilation"));
+	cobc_err_msg (_("too many errors"));
 	cobc_abort_terminate ();
 }
 
+/* Output cobc source/line where an internal error occurs and exit */
 void
 cobc_abort (const char *filename, const int linenum)
 {
-	cobc_abort_pr (_("%s:%d Internal compiler error"), filename, linenum);
+	cobc_err_msg (_("%s: %d: internal compiler error"), filename, linenum);
 	cobc_abort_terminate ();
 }
 
@@ -614,11 +617,12 @@ cobc_dumb_abort (const char *filename, const int linenum)
 	cobc_abort (filename, linenum);
 }
 
+/* Output cobc source/line where a tree cast error occurs and exit */
 void
 cobc_tree_cast_error (const cb_tree x, const char *filename, const int linenum,
 		      const enum cb_tag tagnum)
 {
-	cobc_abort_pr (_("%s:%d Invalid cast from '%s' type %s to type %s"),
+	cobc_err_msg (_("%s: %d: invalid cast from '%s' type %s to type %s"),
 		filename, linenum,
 		x ? cb_name (x) : "NULL", 
 		x ? cobc_enum_explain (CB_TREE_TAG(x)) : "None",
@@ -645,7 +649,7 @@ cobc_malloc (const size_t size)
 
 	mptr = calloc ((size_t)1, size);
 	if (unlikely(!mptr)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -657,7 +661,7 @@ cobc_free(void * mptr)
 {
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!mptr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_free");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -672,7 +676,7 @@ cobc_strdup (const char *dupstr)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!dupstr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_strdup");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_strdup");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -689,7 +693,7 @@ cobc_realloc (void *prevptr, const size_t size)
 
 	mptr = realloc (prevptr, size);
 	if (unlikely(!mptr)) {
-		cobc_abort_pr (_("Cannot reallocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot reallocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -704,7 +708,7 @@ cobc_main_malloc (const size_t size)
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
 	if (unlikely(!m)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -723,7 +727,7 @@ cobc_main_strdup (const char *dupstr)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!dupstr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_main_strdup");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_strdup");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -742,7 +746,7 @@ cobc_main_realloc (void *prevptr, const size_t size)
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
 	if (unlikely(!m)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -757,7 +761,7 @@ cobc_main_realloc (void *prevptr, const size_t size)
 		prev = curr;
 	}
 	if (unlikely(!curr)) {
-		cobc_abort_pr (_("Attempt to reallocate non-allocated memory - Aborting"));
+		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
 		cobc_abort_terminate ();
 	}
 	m->next = curr->next;
@@ -788,7 +792,8 @@ cobc_main_free (void *prevptr)
 	}
 	if (unlikely(!curr)) {
 #ifdef	COB_TREE_DEBUG
-		cobc_abort_pr (_("Call to %s with invalid pointer, as it is missing in list"), "cobc_main_free");
+		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
+			"cobc_main_free");
 		cobc_abort_terminate ();
 #else
 		return;
@@ -811,7 +816,7 @@ cobc_parse_malloc (const size_t size)
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
 	if (unlikely(!m)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -830,7 +835,7 @@ cobc_parse_strdup (const char *dupstr)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!dupstr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_parse_strdup");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_parse_strdup");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -849,7 +854,7 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
 	if (unlikely(!m)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -864,7 +869,7 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 		prev = curr;
 	}
 	if (unlikely(!curr)) {
-		cobc_abort_pr (_("Attempt to reallocate non-allocated memory - Aborting"));
+		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
 		cobc_abort_terminate ();
 	}
 	m->next = curr->next;
@@ -895,7 +900,8 @@ cobc_parse_free (void *prevptr)
 	}
 	if (unlikely(!curr)) {
 #ifdef	COB_TREE_DEBUG
-		cobc_abort_pr (_("Call to %s with invalid pointer, as it is missing in list"), "cobc_parse_free");
+		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
+			"cobc_parse_free");
 		cobc_abort_terminate ();
 #else
 		return;
@@ -918,7 +924,7 @@ cobc_plex_malloc (const size_t size)
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
 	if (unlikely(!m)) {
-		cobc_abort_pr (_("Cannot allocate %d bytes of memory - Aborting"),
+		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
 	}
@@ -936,7 +942,7 @@ cobc_plex_strdup (const char *dupstr)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!dupstr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_plex_strdup");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_plex_strdup");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -953,7 +959,7 @@ cobc_check_string (const char *dupstr)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!dupstr)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_check_string");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_check_string");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -1060,7 +1066,7 @@ cobc_set_value (struct cb_define_struct *p, const char *value)
 	if (*s || size <= (dot_seen + sign_seen)) {
 		/* Not numeric */
 #if	0	/* RXWRXW - Lit warn */
-		cobc_abort_pr (_("Warning - Assuming literal for unquoted '%s'"),
+		cb_warning (_("assuming literal for unquoted '%s'"),
 				value);
 #endif
 		size = strlen (value);
@@ -1096,7 +1102,6 @@ cobc_error_name (const char *name, const unsigned int source,
 {
 	const char	*s;
 
-	s = "";
 	switch (reason) {
 	case 1:
 		s = _(" - Length is < 1 or > 31");
@@ -1114,12 +1119,13 @@ cobc_error_name (const char *name, const unsigned int source,
 		s = _(" - Name cannot contain a directory separator");
 		break;
 	default:
+		s = "";
 		break;
 	}
 	switch (source) {
 	case 0:
 		/* basename */
-		cobc_abort_pr (_("Invalid file base name '%s'%s"),
+		cobc_err_msg (_("invalid file base name '%s'%s"),
 				name, s);
 		break;
 	case 1:
@@ -1131,7 +1137,7 @@ cobc_error_name (const char *name, const unsigned int source,
 		cb_error (_("Invalid PROGRAM-ID '%s'%s"), name, s);
 		break;
 	default:
-		cobc_abort_pr (_("Unknown name error '%s'%s"),
+		cobc_err_msg (_("unknown name error '%s'%s"),
 				name, s);
 		break;
 	}
@@ -1254,7 +1260,7 @@ cb_define_list_add (struct cb_define_struct *list, const char *text)
 	/* Check duplicate */
 	for (l = list; l; l = l->next) {
 		if (!strcasecmp (s, l->name)) {
-			cobc_abort_pr (_("Duplicate define '%s' - Ignoring"), s);
+			cobc_err_msg (_("duplicate define '%s' - ignored"), s);
 			cobc_free (x);
 			return list;
 		}
@@ -1289,7 +1295,7 @@ cobc_stradd_dup (const char *str1, const char *str2)
 
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!str1 || !str2)) {
-		cobc_abort_pr (_("Call to %s with NULL pointer"), "cobc_stradd_dup");
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
 		cobc_abort_terminate ();
 	}
 #endif
@@ -1333,7 +1339,7 @@ cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 	}
 	if (calcsize >= 131072) {
 		/* Arbitrary limit */
-		cobc_err_exit (_("Parameter buffer size exceeded"));
+		cobc_err_exit (_("parameter buffer size exceeded"));
 	}
 	if (calcsize >= *cursize) {
 		while (*cursize <= calcsize) {
@@ -1369,7 +1375,7 @@ cobc_check_action (const char *name)
 		/* Remove possible target file - ignore return */
 		(void)unlink (temp_buff);
 		if (rename (name, temp_buff)) {
-			cobc_abort_pr (_("Warning - Could not move temporary file to %s"),
+			cobc_err_msg (_("warning: could not move temporary file to %s"),
 					temp_buff);
 		}
 	}
@@ -1485,8 +1491,10 @@ DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
 	if (cb_source_file) {
-		cobc_abort_pr (_("Aborting compile of %s at line %d"),
-			 cb_source_file, cb_source_line);
+		cobc_err_msg (_("aborting compile of %s at line %d"),
+			cb_source_file, cb_source_line);
+	} else {
+		cobc_err_msg (_("aborting"));
 	}
 	cobc_clean_up (99);
 	exit (99);
@@ -1678,27 +1686,8 @@ cobc_print_info (void)
 	if ((s = getenv ("COB_MSG_FORMAT")) != NULL) {
 		cobc_var_print ("COB_MSG_FORMAT",	s, 1);
 	}
-#if 0 /* Simon: only relevant for libcob */
-	if ((s = getenv ("COB_LIBRARY_PATH")) != NULL) {
-		cobc_var_print ("COB_LIBRARY_PATH",	s, 1);
-	}
-#endif
 	cobc_var_print ("COB_MODULE_EXT",	COB_MODULE_EXT, 0);
 	cobc_var_print ("COB_EXEEXT",		COB_EXEEXT, 0);
-
-#if 0 /* Simon: only relevant for libcob */
-#if	defined(USE_LIBDL) || defined(_WIN32)
-	cobc_var_print (_("Dynamic loading"),	_("System"), 0);
-#else
-	cobc_var_print (_("Dynamic loading"),	_("Libtool"), 0);
-#endif
-
-#ifdef	COB_PARAM_CHECK
-	cobc_var_print ("\"CBL_\" param check",	_("Enabled"), 0);
-#else
-	cobc_var_print ("\"CBL_\" param check",	_("Disabled"), 0);
-#endif
-#endif
 
 	if (sizeof (void *) > 4U) {
 		cobc_var_print ("64bit-mode",	_("yes"), 0);
@@ -1872,13 +1861,13 @@ cobc_print_usage (char * prog)
 static void
 cobc_options_error_nonfinal (void)
 {
-	cobc_err_exit (_("Only one of options 'E', 'S', 'C', 'c' may be specified"));
+	cobc_err_exit (_("only one of options 'E', 'S', 'C', 'c' may be specified"));
 }
 
 static void
 cobc_options_error_build (void)
 {
-	cobc_err_exit (_("Only one of options 'm', 'x', 'b' may be specified"));
+	cobc_err_exit (_("only one of options 'm', 'x', 'b' may be specified"));
 }
 
 static void
@@ -2234,7 +2223,7 @@ process_command_line (const int argc, char **argv)
 			if (cob_optarg) {
 				if (stat (cob_optarg, &st) != 0 ||
 				    !(S_ISDIR (st.st_mode))) {
-					cobc_abort_pr (_("Warning - '%s' is not a directory, defaulting to current directory"),
+					cobc_err_msg (_("warning: '%s' is not a directory, defaulting to current directory"),
 						cob_optarg);
 				} else {
 					save_temps_dir = cobc_strdup (cob_optarg);
@@ -2267,7 +2256,7 @@ process_command_line (const int argc, char **argv)
 				cobc_err_exit (COBC_INV_PAR, "-D");
 			}
 			if (!strcasecmp (cob_optarg, "ebug")) {
-				cobc_abort_pr (_("Warning - assuming '%s' is a DEFINE - did you intend to use -debug?"),
+				cobc_err_msg (_("warning: assuming '%s' is a DEFINE - did you intend to use -debug?"),
 						cob_optarg);
 			}
 			p = cb_define_list_add (cb_define_list, cob_optarg);
@@ -2575,7 +2564,7 @@ file_basename (const char *filename)
 	size_t		len;
 
 	if (!filename) {
-		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"file_basename", "filename");
 		COBC_ABORT ();
 	}
@@ -2640,7 +2629,7 @@ process_filename (const char *filename)
 			file_is_stdin = 1;
 			filename = COB_DASH_NAME;
 		} else {
-			cobc_abort_pr (_("Only one stdin input allowed"));
+			cobc_err_msg (_("only one stdin input allowed"));
 			return NULL;
 		}
 	} else {
@@ -2649,7 +2638,7 @@ process_filename (const char *filename)
 
 	fsize = strlen (filename);
 	if (fsize > COB_NORMAL_MAX) {
-		cobc_abort_pr (_("Invalid file name parameter"));
+		cobc_err_msg (_("invalid file name parameter (length > %d)"), COB_NORMAL_MAX);
 		return NULL;
 	}
 
@@ -2989,7 +2978,7 @@ process (char *cmd)
 			optimize = 1;
 			break;
 		default:
-			cobc_abort_pr (_("Unknown option ignored:\t%s"),
+			cobc_err_msg (_("unknown option ignored:\t%s"),
 				 token - 1);
 		}
 	}
@@ -3924,7 +3913,7 @@ process_library (struct filename *l)
 	int		ret;
 
 	if (!l) {
-		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"process_library", "l");
 		COBC_ABORT ();
 	}
@@ -4040,7 +4029,7 @@ process_link (struct filename *l)
 	int		ret;
 
 	if (!l) {
-		cobc_abort_pr (_("Call to '%s' with invalid parameter '%s'"),
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"process_link", "l");
 		COBC_ABORT ();
 	}

@@ -817,7 +817,7 @@ cb_field_size (const cb_tree x)
 			return f->size;
 		}
 	default:
-		cobc_abort_pr (_("Unexpected tree tag %d"), (int)CB_TREE_TAG (x));
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		/* Use dumb variant */
 		COBC_DUMB_ABORT ();
 	}
@@ -3233,10 +3233,10 @@ decimal_alloc (void)
 	x = cb_build_decimal (current_program->decimal_index);
 	current_program->decimal_index++;
 	if (current_program->decimal_index >= COB_MAX_DEC_STRUCT) {
-		cobc_abort_pr (_("Internal decimal structure size exceeded - %d"),
+		cobc_err_msg (_("internal decimal structure size exceeded: %d"),
 				COB_MAX_DEC_STRUCT);
 		if (strcmp(current_statement->name, "COMPUTE") == 0) {
-			cobc_abort_pr (_("Try to minimize the number of parenthesis "
+			cobc_err_msg (_("Try to minimize the number of parenthesis "
 							 "or split into multiple computations."));
 		}
 		COBC_ABORT ();
@@ -3275,7 +3275,7 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		func = "cob_decimal_pow";
 		break;
 	default:
-		cobc_abort_pr (_("Unexpected operation %d"), op);
+		cobc_err_msg (_("unexpected operation: %d"), op);
 		COBC_ABORT ();
 	}
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
@@ -3295,7 +3295,7 @@ decimal_expand (cb_tree d, cb_tree x)
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
 				cb_int0));
 		} else {
-			cobc_abort_pr (_("Unexpected constant expansion"));
+			cobc_err_msg (_("unexpected constant expansion"));
 			COBC_ABORT ();
 		}
 		break;
@@ -3358,7 +3358,7 @@ decimal_expand (cb_tree d, cb_tree x)
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
 		break;
 	default:
-		cobc_abort_pr (_("Unexpected tree tag %d"), (int)CB_TREE_TAG (x));
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
 	}
 }
@@ -6668,7 +6668,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 		/* TODO: check this */
 		break;
 	default:
-		cobc_abort_pr (_("Unexpected tree tag %d"),
+		cobc_err_msg (_("unexpected tree tag: %d"),
 				(int)CB_TREE_TAG (src));
 		COBC_ABORT ();
 	}

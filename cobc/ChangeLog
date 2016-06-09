@@ -1,4 +1,9 @@
 
+2016-06-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: renamed (cobc_abort_pr) to (cobc_err_msg), 
+	  revised message strings for exceptional/fatal errors 
+
 2016-06-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, parser.y: added not-exception-before-exception

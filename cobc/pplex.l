@@ -923,7 +923,7 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 	case PLEX_ACT_IF:
 		/* Push stack - First occurrence is dummy */
 		if (++plex_nest_depth >= PLEX_COND_DEPTH) {
-			cobc_abort_pr (_("Directive nest depth exceeded - %d"),
+			cobc_err_msg (_("directive nest depth exceeded: %d"),
 					PLEX_COND_DEPTH);
 			COBC_ABORT ();
 		}
@@ -993,7 +993,7 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 		plex_skip_input = plex_cond_stack[plex_nest_depth - 1].skip | n;
 		return;
 	default:
-		cobc_abort_pr (_("Invalid internal case - %u"),
+		cobc_err_msg (_("invalid internal case: %u"),
 				cmdtype);
 		COBC_ABORT ();
 	}

@@ -3834,7 +3834,7 @@ static int yy_get_next_buffer (void)
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 1081);
 
-		return yy_is_jam ? 0 : yy_current_state;
+	return yy_is_jam ? 0 : yy_current_state;
 }
 
     static void yyunput (int c, register char * yy_bp )
@@ -4552,7 +4552,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 void
 ppparse_error (const char *msg)
 {
-	cb_plex_error (newline_count, msg);
+	cb_plex_error (newline_count, "%s", msg);
 }
 
 void
@@ -4595,7 +4595,7 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 	case PLEX_ACT_IF:
 		/* Push stack - First occurrence is dummy */
 		if (++plex_nest_depth >= PLEX_COND_DEPTH) {
-			cobc_abort_pr (_("Directive nest depth exceeded - %d"),
+			cobc_err_msg (_("directive nest depth exceeded: %d"),
 					PLEX_COND_DEPTH);
 			COBC_ABORT ();
 		}
@@ -4665,7 +4665,7 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 		plex_skip_input = plex_cond_stack[plex_nest_depth - 1].skip | n;
 		return;
 	default:
-		cobc_abort_pr (_("Invalid internal case - %u"),
+		cobc_err_msg (_("invalid internal case: %u"),
 				cmdtype);
 		COBC_ABORT ();
 	}

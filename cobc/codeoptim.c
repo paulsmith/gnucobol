@@ -2621,8 +2621,7 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("}");
 		return;
 	default:
-		break;
+		cobc_err_msg (_("unexpected optimization value: %d"), val);
+		COBC_ABORT ();
 	}
-	cobc_abort_pr (_("Unexpected optimization value"));
-	COBC_ABORT ();
 }

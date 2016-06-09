@@ -810,7 +810,7 @@ cb_tree_category (cb_tree x)
 			x->category = CB_CATEGORY_PROGRAM_POINTER;
 			break;
 		default:
-			cobc_abort_pr (_("Unexpected cast type -> %d"),
+			cobc_err_msg (_("unexpected cast type: %d"),
 					(int)(p->cast_type));
 			COBC_ABORT ();
 		}
@@ -865,7 +865,7 @@ cb_tree_category (cb_tree x)
 		break;
 	default:
 #if	0	/* RXWRXW - Tree tag */
-		cobc_abort_pr (_("Unknown tree tag %d Category %d"),
+		cobc_err_msg (_("unknown tree tag: %d, category: %d"),
 				(int)CB_TREE_TAG (x), (int)x->category);
 		COBC_ABORT ();
 #endif
@@ -931,7 +931,7 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		case CB_USAGE_FP_DEC128:
 			return COB_TYPE_NUMERIC_FP_DEC128;
 		default:
-			cobc_abort_pr (_("Unexpected numeric usage -> %d"),
+			cobc_err_msg (_("unexpected numeric USAGE: %d"),
 					(int)f->usage);
 			COBC_ABORT ();
 		}
@@ -942,7 +942,7 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 	case CB_CATEGORY_PROGRAM_POINTER:
 		return COB_TYPE_NUMERIC_BINARY;
 	default:
-		cobc_abort_pr (_("Unexpected category -> %d"),
+		cobc_err_msg (_("unexpected category: %d"),
 				(int)CB_TREE_CATEGORY (x));
 		/* Use dumb variant */
 		COBC_DUMB_ABORT ();
@@ -1150,7 +1150,7 @@ cb_get_int (const cb_tree x)
 	int			val;
 
 	if (!CB_LITERAL_P (x)) {
-		cobc_abort_pr (_("Invalid literal cast - Aborting"));
+		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
@@ -1224,7 +1224,7 @@ cb_get_long_long (const cb_tree x)
 	cob_s64_t		val;
 
 	if (!CB_LITERAL_P (x)) {
-		cobc_abort_pr (_("Invalid literal cast - Aborting"));
+		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
 	}
 	l = CB_LITERAL (x);
@@ -3293,7 +3293,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		break;
 
 	default:
-		cobc_abort_pr (_("Unexpected operator -> %d"), op);
+		cobc_err_msg (_("unexpected operator: %d"), op);
 		COBC_ABORT ();
 	}
 
