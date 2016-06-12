@@ -841,7 +841,7 @@ AT_DATA([prog.cob], [
        01  mutiple-symbols.
            03  PIC 9CRCR.
            03  PIC 9DBDB.
-           03  PIC S99S.
+           03  PIC SS99S.
            03  PIC 99..9.
            03  PIC 99VV9.
            03  PIC +$99+.
@@ -900,6 +900,7 @@ prog.cob: 7: Error: Missing PICTURE string
 prog.cob: 8: Error: PICTURE string may not contain more than 63 characters
 prog.cob: 11: Error: CR or DB cannot follow CR or DB
 prog.cob: 12: Error: CR or DB cannot follow CR or DB
+prog.cob: 13: Error: S cannot follow S
 prog.cob: 13: Error: S cannot follow S
 prog.cob: 14: Error: . cannot follow .
 prog.cob: 15: Error: V cannot follow V

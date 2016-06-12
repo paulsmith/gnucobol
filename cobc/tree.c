@@ -2329,7 +2329,7 @@ repeat:
 
 		case 'S':
 			category |= PIC_NUMERIC;
-			s_count++;
+			s_count += n;
 			if (s_count > 1) {
 				cb_error (_("S cannot follow S"));
 				error_detected = 1;
@@ -2349,7 +2349,7 @@ repeat:
 			/* fall through */
 		case 'V':
 			category |= PIC_NUMERIC;
-			v_count++;
+			v_count += n;
 			if (v_count > 1) {
 				error_detected = 1;
 			}
