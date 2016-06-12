@@ -2,7 +2,7 @@
 2016-06-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_build_picture): fixed bug where PIC SS9 was not detected as
-	  invalid. (See bug #40.)
+	  invalid. (See bug #40.) Also improved error messages.
 
 2016-06-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

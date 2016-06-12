@@ -2104,8 +2104,13 @@ emit_precedence_error (const int preceding_idx, const int following_idx)
 	const char	*preceding_descr = get_char_type_description (preceding_idx);
 	const char	*following_descr = get_char_type_description (following_idx);
 
+	
 	if (following_descr && preceding_descr) {
-		cb_error (_("%s cannot follow %s"), following_descr, preceding_descr);
+		if (preceding_idx == following_idx) {
+			cb_error (_("%s may only occur once in a PICTURE string"), preceding_descr);
+		} else {
+			cb_error (_("%s cannot follow %s"), following_descr, preceding_descr);
+		}
 	} else {
 		cb_error (_("Invalid PICTURE string detected"));
 	}
@@ -2329,14 +2334,18 @@ repeat:
 
 		case 'S':
 			category |= PIC_NUMERIC;
-			s_count += n;
-			if (s_count > 1) {
-				cb_error (_("S cannot follow S"));
-				error_detected = 1;
-			} else if (idx != 0) {
+			if (s_count <= 1) {
+				s_count += n;
+				if (s_count > 1) {
+					cb_error (_("S may only occur once in a PICTURE string"));
+					error_detected = 1;
+				}
+			}
+			if (idx != 0) {
 				cb_error (_("S must be at start of PICTURE string"));
 				error_detected = 1;
 			}
+			
 			s_char_seen = 1;
 			continue;
 

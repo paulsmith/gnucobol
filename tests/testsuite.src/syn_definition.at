@@ -898,12 +898,12 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: Warning: Continuation of COBOL words used
 prog.cob: 7: Error: Missing PICTURE string
 prog.cob: 8: Error: PICTURE string may not contain more than 63 characters
-prog.cob: 11: Error: CR or DB cannot follow CR or DB
-prog.cob: 12: Error: CR or DB cannot follow CR or DB
-prog.cob: 13: Error: S cannot follow S
-prog.cob: 13: Error: S cannot follow S
-prog.cob: 14: Error: . cannot follow .
-prog.cob: 15: Error: V cannot follow V
+prog.cob: 11: Error: CR or DB may only occur once in a PICTURE string
+prog.cob: 12: Error: CR or DB may only occur once in a PICTURE string
+prog.cob: 13: Error: S may only occur once in a PICTURE string
+prog.cob: 13: Error: S must be at start of PICTURE string
+prog.cob: 14: Error: . may only occur once in a PICTURE string
+prog.cob: 15: Error: V may only occur once in a PICTURE string
 prog.cob: 16: Error: a trailing +/- sign cannot follow a leading +/- sign
 prog.cob: 17: Error: a leading +/- sign cannot follow a leading currency symbol
 prog.cob: 17: Error: a trailing currency symbol cannot follow a leading currency symbol
@@ -923,7 +923,7 @@ prog.cob: 29: Error: . cannot follow a P which is after the decimal point
 prog.cob: 30: Error: . cannot follow V
 prog.cob: 31: Error: Cannot have both Z and * in PICTURE string
 prog.cob: 32: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 32: Error: a trailing +/- sign cannot follow a trailing +/- sign
+prog.cob: 32: Error: a trailing +/- sign may only occur once in a PICTURE string
 prog.cob: 33: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
 prog.cob: 34: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
 prog.cob: 35: Error: A or X cannot follow N
@@ -933,9 +933,9 @@ prog.cob: 38: Error: A or X cannot follow .
 prog.cob: 39: Error: A or X cannot follow S
 prog.cob: 40: Error: a leading +/- sign cannot follow B, 0 or /
 prog.cob: 40: Error: a leading +/- sign cannot follow a floating currency symbol string which is before the decimal point
-prog.cob: 40: Error: a leading +/- sign cannot follow a leading +/- sign
+prog.cob: 40: Error: a leading +/- sign may only occur once in a PICTURE string
 prog.cob: 40: Error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 40: Error: a trailing +/- sign cannot follow a trailing +/- sign
+prog.cob: 40: Error: a trailing +/- sign may only occur once in a PICTURE string
 prog.cob: 41: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 prog.cob: 42: Error: CR or DB cannot follow a leading +/- sign
 prog.cob: 43: Error: CR or DB cannot follow a leading +/- sign
