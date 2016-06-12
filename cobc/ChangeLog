@@ -3,6 +3,8 @@
 
 	* tree.c (cb_build_picture): fixed bug where PIC SS9 was not detected as
 	  invalid. (See bug #40.) Also improved error messages.
+	* parser.y (check_preceding_tallying_phrases): fixed bug where
+	  consecutive FOR phrases were allowed.
 
 2016-06-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

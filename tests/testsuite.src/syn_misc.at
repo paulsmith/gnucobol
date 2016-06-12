@@ -330,6 +330,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
            INSPECT "abcde" TALLYING x FOR ALL LEADING
                TRAILING ALL ALL ALL TRAILING
+           INSPECT "abcde" TALLYING x FOR x FOR LEADING "a"
            .
 ])
 
@@ -341,6 +342,7 @@ prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
 prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
 prog.cob: 11: Error: Missing value between CHARACTERS/ALL/LEADING/TRAILING words
 prog.cob: 12: Error: TALLYING clause is incomplete
+prog.cob: 12: Error: Missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase
 ])
 
 AT_CLEANUP

@@ -1153,6 +1153,8 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 	case FOR_PHRASE:
 		if (previous_tallying_phrase == ALL_LEADING_TRAILING_PHRASES) {
 			cb_error (_("FOR phrase cannot immediately follow ALL/LEADING/TRAILING"));
+		} else if (previous_tallying_phrase == FOR_PHRASE) {
+			cb_error (_("Missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase"));
 		}
 		break;
 
