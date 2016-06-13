@@ -1271,7 +1271,11 @@ start:
 		cb_plex_error (newline_count,
 				_("Invalid indicator '%c' at column 7"), buff[6]);
 		newline_count++;
+#if 1 /* Simon: treat as comment line instead of aborting compilation */
+		goto start;
+#else
 		return YY_NULL;
+#endif
 	}
 
 	/* Skip comments that follow after AUTHORS, etc. */

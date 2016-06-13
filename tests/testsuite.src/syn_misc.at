@@ -1610,7 +1610,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Line and floating comments])
-AT_KEYWORDS([misc extensions])
+AT_KEYWORDS([misc extensions indicator])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1668,6 +1668,7 @@ PROCEDURE        DIVISION.
 /       DISPLAY 'NOMFCOMMENTSLASH'    END-DISPLAY
  |      DISPLAY 'ACUFLOATING'         END-DISPLAY
  *>     DISPLAY 'FLOATING'            END-DISPLAY
+      x DISPLAY 'WRONGINDICATOR'      END-DISPLAY
         STOP RUN.
 ])
 
@@ -1733,6 +1734,8 @@ prog3.cob: 12: Error: syntax error, unexpected Literal
 prog3.cob: 13: Error: syntax error, unexpected /
 prog3.cob: 13: Error: syntax error, unexpected Literal
 prog3.cob: 14: Error: Invalid symbol: | - Skipping word
+prog3.cob: 16: Error: syntax error, unexpected Identifier
+prog3.cob: 16: Error: syntax error, unexpected Literal
 ])
 AT_CHECK([$COMPILE_ONLY -free -fmfcomment prog3.cob], [1], [],
 [prog3.cob: 11: Warning: Spurious '$' detected - ignoring
@@ -1745,6 +1748,8 @@ prog3.cob: 12: Error: syntax error, unexpected Literal
 prog3.cob: 13: Error: syntax error, unexpected /
 prog3.cob: 13: Error: syntax error, unexpected Literal
 prog3.cob: 14: Error: Invalid symbol: | - Skipping word
+prog3.cob: 16: Error: syntax error, unexpected Identifier
+prog3.cob: 16: Error: syntax error, unexpected Literal
 ])
 AT_CHECK([$COMPILE_ONLY -free -facucomment prog3.cob], [1], [],
 [prog3.cob: 11: Warning: Spurious '$' detected - ignoring
@@ -1756,6 +1761,19 @@ prog3.cob: 12: Error: syntax error, unexpected *
 prog3.cob: 12: Error: syntax error, unexpected Literal
 prog3.cob: 13: Error: syntax error, unexpected /
 prog3.cob: 13: Error: syntax error, unexpected Literal
+prog3.cob: 16: Error: syntax error, unexpected Identifier
+prog3.cob: 16: Error: syntax error, unexpected Literal
+])
+# Check that invalid indicator doesn't abort compilation completely
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob: 2: Error: Invalid indicator 'F' at column 7
+prog3.cob: 3: Error: Invalid indicator 'M' at column 7
+prog3.cob: 4: Error: Invalid indicator 'N' at column 7
+prog3.cob: 5: Error: Invalid indicator 'U' at column 7
+prog3.cob: 7: Error: Invalid indicator 'G' at column 7
+prog3.cob: 8: Error: Invalid indicator 'U' at column 7
+prog3.cob: 11: Error: Invalid indicator '$' at column 7
+prog3.cob: 16: Error: Invalid indicator 'x' at column 7
 ])
 
 AT_CLEANUP

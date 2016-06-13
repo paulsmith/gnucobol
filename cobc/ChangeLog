@@ -1,4 +1,9 @@
 
+2016-06-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pplex.c (ppinput): FR #126 treat invalid indicator (free format) as
+	  line comment instead of aborting compilation
+
 2016-06-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_build_picture): fixed bug where PIC SS9 was not detected as
