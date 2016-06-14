@@ -1063,7 +1063,7 @@ check_field_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 	if (scroll) {
 		current_statement->attr_ptr->scroll = scroll;
 	}
-	/* [WITH] TIMEOUT [AFTER] */
+	/* [WITH] TIME-OUT [AFTER] */
 	if (timeout) {
 		current_statement->attr_ptr->timeout = timeout;
 	}
@@ -1765,7 +1765,7 @@ error_if_no_advancing_in_screen_display (cb_tree advancing)
 %token THEN
 %token THRU
 %token TIME
-%token TIMEOUT
+%token TIME_OUT			"TIME-OUT"
 %token TIMES
 %token TO
 %token TOK_AMPER		"&"
@@ -6680,7 +6680,7 @@ accp_attr:
   {
 	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
   }
-| TIMEOUT _after positive_id_or_lit
+| TIME_OUT _after positive_id_or_lit
   {
 	check_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
