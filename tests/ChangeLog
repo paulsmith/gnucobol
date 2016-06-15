@@ -1,4 +1,8 @@
 
+2016-06-15 Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/used_binaries.at: added tests for -j"args"
+
 2016-05-31  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_fundamental.at: Added ADD/SUBTRACT CORRESPONDING test

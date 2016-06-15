@@ -271,6 +271,7 @@ static size_t		wants_nonfinal = 0;
 static size_t		cobc_flag_module = 0;
 static size_t		cobc_flag_library = 0;
 static size_t		cobc_flag_run = 0;
+static char		*cobc_run_args;
 static size_t		save_temps = 0;
 static size_t		save_all_src = 0;
 static size_t		save_c_src = 0;
@@ -413,6 +414,7 @@ static const struct option long_options[] = {
 	{"fixed",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FIXED},
 	{"static",		CB_NO_ARG, &cb_flag_static_call, 1},
 	{"dynamic",		CB_NO_ARG, &cb_flag_static_call, 0},
+	{"j",			CB_OP_ARG, NULL, 'j'},
 	{"Q",			CB_RQ_ARG, NULL, 'Q'},
 	{"A",			CB_RQ_ARG, NULL, 'A'},
 	{"P",			CB_OP_ARG, NULL, 'P'},
@@ -477,6 +479,10 @@ cobc_free_mem (void)
 	if (cobc_list_file) {
 		cobc_free (cobc_list_file);
 		cobc_list_file = NULL;
+	}
+	if (cobc_run_args) {
+		cobc_free (cobc_run_args);
+		cobc_run_args = NULL;
 	}
 	for (reps = cobc_plexmem_base; reps; ) {
 		repsl = reps;
@@ -1777,14 +1783,13 @@ cobc_print_usage (char * prog)
 	        "                        invoked by the compiler"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
-	puts (_("  -j                    run job, after build"));
+	puts (_("  -j(=<args>)           run job, with optional arguments passed to program/module"));
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n" 
 			"                        <dialect> can be one of:\n"
 			"                        cobol2014, cobol2002, cobol85, default,\n"
 			"                        ibm, mvs, bs2000, mf, acu;\n" 
 			"                        see configuration files in directory config"));
 	puts (_("  -F, -free             use free source format"));
-	puts (_("  -free                 use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
 	puts (_("  -O, -O2, -Os          enable optimization"));
 	puts (_("  -g                    enable C compiler debug / stack check / trace"));
@@ -2138,7 +2143,11 @@ process_command_line (const int argc, char **argv)
 
 		case 'j':
 			/* -j : Run job; compile, link and go, either by ./ or cobcrun */
+			/* allows optional arguments, passed to program */
 			cobc_flag_run = 1;
+			if (cob_optarg) {
+				cobc_run_args = cobc_strdup (cob_optarg);
+			}
 			break;
 
 		case 'F':
@@ -2830,11 +2839,21 @@ process_run (const char *name) {
 
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
-		snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
-			file_basename(name));
+		if (cobc_run_args) {
+			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s %s",
+				file_basename(name), cobc_run_args);
+		} else {
+			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
+				file_basename(name));
+		}
 	} else {  /* executable */
-		snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
-			SLASH_CHAR, name);
+		if (cobc_run_args) {
+			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s %s",
+				SLASH_CHAR, name, cobc_run_args);
+		} else {
+			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
+				SLASH_CHAR, name);
+		}
 	}
 	cobc_buffer[cobc_buffer_size] = 0;
 	if (verbose_output) {

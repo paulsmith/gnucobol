@@ -1,4 +1,8 @@
 
+2016-06-14 Brian Tiffin <btiffin@gnu.org>
+
+	* cobc.c: Added optional arguments for -j job submits
+
 2016-06-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (default_reserved_words): moved uncommon, non-standard
