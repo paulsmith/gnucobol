@@ -365,9 +365,10 @@ This option takes effect at the translation stage.
 If you give this option with @code{-C}, you will see the main
 function at the end of the generated C file.
 
-@item -j
+@item -j(=<args>), -job(=<args>)
 Run job after compilation.  Either from executable with @code{-x}, or with
-@code{cobcrun} when compiling a module.
+@code{cobcrun} when compiling a module.  Optional arguments, if given, are
+passed to the program or module command line.
 
 @item -I <directory>
 Add <directory> to copy/include search path.
@@ -554,7 +555,7 @@ Do not truncate binary fields according to PICTURE.
 @subsection Miscellaneous
 @table @code
 
-@item -P
+@item -P(=<dir or file>)
 Generate and place a program listing into @file{*.lst}.
 
 @item -ext <extension>
