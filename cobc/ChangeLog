@@ -1,7 +1,7 @@
 
-2016-06-14 Brian Tiffin <btiffin@gnu.org>
+2016-06-15 Brian Tiffin <btiffin@gnu.org>
 
-	* cobc.c: Added optional arguments for -j job submits
+	* cobc.c: Added optional arguments for -j job submits and -job alias
 
 2016-06-14  Edward Hart <edward.dan.hart@gmail.com>
 

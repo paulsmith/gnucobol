@@ -414,6 +414,7 @@ static const struct option long_options[] = {
 	{"fixed",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FIXED},
 	{"static",		CB_NO_ARG, &cb_flag_static_call, 1},
 	{"dynamic",		CB_NO_ARG, &cb_flag_static_call, 0},
+	{"job",			CB_OP_ARG, NULL, 'j'},
 	{"j",			CB_OP_ARG, NULL, 'j'},
 	{"Q",			CB_RQ_ARG, NULL, 'Q'},
 	{"A",			CB_RQ_ARG, NULL, 'A'},
@@ -1783,7 +1784,7 @@ cobc_print_usage (char * prog)
 	        "                        invoked by the compiler"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
-	puts (_("  -j(=<args>)           run job, with optional arguments passed to program/module"));
+	puts (_("  -j(=<args>), -job(=<args>) run job, with optional arguments passed to program/module"));
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n" 
 			"                        <dialect> can be one of:\n"
 			"                        cobol2014, cobol2002, cobol85, default,\n"

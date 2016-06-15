@@ -360,6 +360,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ])
 AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ])
-AT_CHECK([$COMPILE_MODULE -j=job123 prog.cob], [0], [job123  ], [])
+AT_CHECK([$COMPILE_MODULE --job=job123 prog.cob], [0], [job123  ], [])
 
 AT_CLEANUP
