@@ -109,6 +109,12 @@ static int			origin_y;
 static int			origin_x;
 #endif
 
+/* Local function prototypes when screenio activated */
+
+#ifdef	COB_GEN_SCREENIO
+static void cob_screen_init	(void);
+#endif
+
 /* Local functions */
 
 static void
@@ -120,6 +126,19 @@ cob_speaker_beep (void)
 	if (fd >= 0) {
 		(void)write (fd, "\a", (size_t)1);
 	}
+}
+
+static COB_INLINE COB_A_INLINE void
+init_cob_screen_if_needed (void)
+{
+	if (!cobglobptr) {
+		cob_fatal_error (COB_FERROR_INITIALIZED);
+	}
+#ifdef	COB_GEN_SCREENIO
+	if (!cobglobptr->cob_screen_initialized) {
+		cob_screen_init ();
+	}
+#endif
 }
 
 #ifdef	COB_GEN_SCREENIO
@@ -1581,14 +1600,6 @@ extract_line_and_col_vals (const int is_screen, cob_field *line,
 	}
 }
 
-static COB_INLINE COB_A_INLINE void
-init_cob_screen_if_needed (void)
-{
-	if (!cobglobptr->cob_screen_initialized) {
-		cob_screen_init ();
-	}
-}
-
 static void
 screen_display (cob_screen *s, const int line, const int column)
 {
@@ -2364,17 +2375,6 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	field_accept (f, sline, scolumn, fgc, bgc, fscroll, ftimeout, prompt, size_is, fattr);
 }
 
-void
-cob_screen_line_col (cob_field *f, const int l_or_c)
-{
-	init_cob_screen_if_needed ();
-	if (!l_or_c) {
-		cob_set_int (f, (int)LINES);
-	} else {
-		cob_set_int (f, (int)COLS);
-	}
-}
-
 int
 cob_sys_clear_screen (void)
 {
@@ -2481,16 +2481,6 @@ cob_screen_accept (cob_screen *s, cob_field *line,
 }
 
 void
-cob_screen_line_col (cob_field *f, const int l_or_c)
-{
-	if (!l_or_c) {
-		cob_set_int (f, 24);
-	} else {
-		cob_set_int (f, 80);
-	}
-}
-
-void
 cob_screen_set_mode (const cob_u32_t smode)
 {
 	COB_UNUSED (smode);
@@ -2503,6 +2493,25 @@ cob_sys_clear_screen (void)
 }
 
 #endif	/* COB_GEN_SCREENIO */
+
+void
+cob_screen_line_col (cob_field *f, const int l_or_c)
+{
+	init_cob_screen_if_needed ();
+#ifdef	COB_GEN_SCREENIO
+	if (!l_or_c) {
+		cob_set_int (f, (int)LINES);
+	} else {
+		cob_set_int (f, (int)COLS);
+	}
+#else
+	if (!l_or_c) {
+		cob_set_int (f, 24);();
+	} else {
+		cob_set_int (f, 80);();
+	}
+#endif
+}
 
 int
 cob_sys_sound_bell (void)
@@ -2568,10 +2577,7 @@ cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 int
 cob_get_scr_cols (void)
 {
-	if (!cob_initialized) {
-		cob_runtime_error (_("'%s' - runtime has not been initialized"), "cobcols");
-		cob_stop_run (1);
-	}
+	init_cob_screen_if_needed();
 #ifdef	COB_GEN_SCREENIO
 	return (int)COLS;
 #else
@@ -2582,10 +2588,7 @@ cob_get_scr_cols (void)
 int
 cob_get_scr_lines (void)
 {
-	if (!cob_initialized) {
-		cob_runtime_error (_("'%s' - runtime has not been initialized"), "coblines");
-		cob_stop_run (1);
-	}
+	init_cob_screen_if_needed();
 #ifdef	COB_GEN_SCREENIO
 	return (int)LINES;
 #else
