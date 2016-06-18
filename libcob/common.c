@@ -214,7 +214,7 @@ static struct handlerlist {
 
 static const char *setting_group[] = {" hidden setting ",_("CALL configuration"),
 					_("File I/O configuration"),_("Screen I/O configuration"),_("Miscellaneous"),
-					_("System configuration"};
+					_("System configuration")};
 
 static char	not_set[] = "not set";
 static struct config_enum lwrupr[] = {{"LOWER","1"},{"UPPER","2"},{not_set,"0"},{NULL,NULL}};

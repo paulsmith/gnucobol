@@ -4,7 +4,7 @@
 	* screenio.c: added (cob_get_scr_cols) and (cob_get_scr_lines) for
 	  providing the C interface with the current COBOL screen cols/lines
 	* common.h: FR #145: added defines for cobcols, coblines and cobrescanenv
-	* common.c, common.h: renamed (runtime_env) to (runtime_conf)
+	* common.c, common.h: FR #126: renamed (runtime_env) to (runtime_conf)
 
 2016-05-27  Edward Hart <edward.dan.hart@gmail.com>
 
