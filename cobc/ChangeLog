@@ -1,4 +1,9 @@
 
+2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ppparse.def: Added compiler constants GNUCOBOL (alias for OPENCOBOL)
+	  and GCCOMP (alias for OCCOMP)
+
 2016-06-15 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: Added optional arguments for -j job submits and -job alias

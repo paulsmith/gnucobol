@@ -22,6 +22,7 @@
 /* CB_PARSE_DEF (name, return value if true) */
 
 CB_PARSE_DEF ("OPENCOBOL",		1U)
+CB_PARSE_DEF ("GNUCOBOL",		1U)
 CB_PARSE_DEF ("P64",			sizeof (void *) > 4U)
 CB_PARSE_DEF ("EXECUTABLE",		cb_flag_main != 0)
 CB_PARSE_DEF ("MODULE",			cb_flag_main == 0)
@@ -34,4 +35,5 @@ CB_PARSE_DEF ("HOSTSIGNS",		cb_host_sign != 0)
 CB_PARSE_DEF ("NOHOSTSIGNS",		cb_host_sign == 0)
 CB_PARSE_DEF ("IBMCOMP",		cb_binary_size == CB_BINARY_SIZE_2_4_8)
 CB_PARSE_DEF ("OCCOMP",			cb_binary_size == CB_BINARY_SIZE_1_2_4_8)
+CB_PARSE_DEF ("GCCOMP",			cb_binary_size == CB_BINARY_SIZE_1_2_4_8)
 CB_PARSE_DEF ("NOIBMCOMP",		cb_binary_size != CB_BINARY_SIZE_2_4_8)
