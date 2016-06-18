@@ -1,4 +1,8 @@
 
+2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: renamed (runtime_env) to (runtime_conf)
+
 2016-05-27  Edward Hart <edward.dan.hart@gmail.com>
 
 	* move.c (cob_move_display_to_edited): fixed bug #220 - fixed insertion
@@ -241,7 +245,7 @@
 	* call.c (cob_init_call): Don't add the current directory "." to resolve_path
 	  if it's already set (either via runtime configuration or default value)
 
-2015-07-07 Ron Norman <rjn@inglenet.com>
+2015-07-07  Ron Norman
 
 	* common.c (cob_expand_env_string): copy SPACE, LR, CR, HT, VT as spaces,
 	  the first implementation dropped them completely

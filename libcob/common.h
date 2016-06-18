@@ -518,7 +518,7 @@
 #endif
 
 /* Macro to prevent compiler warning "conditional expression is constant" */
-#if defined (_MSC_VER) && _MSC_VER >= 1500
+#if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
 #define ONCE_COB \
 __pragma( warning(push) ) \
 __pragma( warning(disable:4127) ) \
@@ -1253,7 +1253,7 @@ struct cobjmp_buf {
 COB_EXPIMP void print_info(void);
 COB_EXPIMP void print_version(void);
 COB_EXPIMP int cob_load_config(void);
-COB_EXPIMP void print_runtime_env(void);
+COB_EXPIMP void print_runtime_conf(void);
 
 void cob_set_exception(const int);
 

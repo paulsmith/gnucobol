@@ -212,9 +212,9 @@ static struct handlerlist {
 	int			(*proc)(char *s);
 } *hdlrs;
 
-static const char *setting_group[] = {" hidden setting ","Call environment",
-					"File I/O","Screen I/O","Miscellaneous",
-					"System environment"};
+static const char *setting_group[] = {" hidden setting ",_("CALL configuration"),
+					_("File I/O configuration"),_("Screen I/O configuration"),_("Miscellaneous"),
+					_("System configuration"};
 
 static char	not_set[] = "not set";
 static struct config_enum lwrupr[] = {{"LOWER","1"},{"UPPER","2"},{not_set,"0"},{NULL,NULL}};
@@ -5232,13 +5232,13 @@ print_info (void)
 
 
 void
-print_runtime_env()
+print_runtime_conf()
 {
 	unsigned int 	i,j,k,vl,dohdg,hdlen,plen;
 	char	value[COB_MEDIUM_BUFF],orgvalue[COB_MINI_BUFF];
 
 	printf ("%s %s.%d ", PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts (_("runtime environment"));
+	puts (_("runtime configuration"));
 	if (cobsetptr->cob_config_file) {
 		strcpy(value, _("via"));
 		hdlen = (unsigned int)strlen(value) + 3;
