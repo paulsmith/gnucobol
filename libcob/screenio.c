@@ -2565,6 +2565,34 @@ cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 	return 0;
 }
 
+int
+cob_get_scr_cols (void)
+{
+	if (!cob_initialized) {
+		cob_runtime_error (_("'%s' - runtime has not been initialized"), "cobcols");
+		cob_stop_run (1);
+	}
+#ifdef	COB_GEN_SCREENIO
+	return (int)COLS;
+#else
+	return 80;
+#endif
+}
+
+int
+cob_get_scr_lines (void)
+{
+	if (!cob_initialized) {
+		cob_runtime_error (_("'%s' - runtime has not been initialized"), "coblines");
+		cob_stop_run (1);
+	}
+#ifdef	COB_GEN_SCREENIO
+	return (int)LINES;
+#else
+	return 24;
+#endif
+}
+
 void
 cob_init_screenio (cob_global *lptr, cob_settings *sptr)
 {

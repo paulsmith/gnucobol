@@ -1326,13 +1326,6 @@ COB_EXPIMP int	cob_putenv			(char *);
 COB_EXPIMP void	cob_incr_temp_iteration 	(void);
 COB_EXPIMP void	cob_temp_name			(char *, const char *);
 
-#define	cobgetenv(x)			cob_getenv (x)
-#define	cobputenv(x)			cob_putenv (x)
-#define	cobtidy()			cob_tidy ()
-#define	cobinit()			cob_extern_init ()
-#define	cobexit(x)			cob_stop_run (x)
-#define	cobcommandline(v,w,x,y,z)	cob_command_line (v,w,x,y,z)
-
 /* System routines */
 COB_EXPIMP int	cob_sys_exit_proc	(const void *, const void *);
 COB_EXPIMP int	cob_sys_error_proc	(const void *, const void *);
@@ -1536,14 +1529,6 @@ COB_EXPIMP void		*cob_savenv		(struct cobjmp_buf *);
 COB_EXPIMP void		*cob_savenv2		(struct cobjmp_buf *, const int);
 COB_EXPIMP void		cob_longjmp		(struct cobjmp_buf *);
 
-#define	cobsetjmp(x)	setjmp (cob_savenv (x))
-#define	coblongjmp(x)	cob_longjmp (x)
-#define	cobsavenv(x)	cob_savenv (x)
-#define	cobsavenv2(x,z)	cob_savenv2 (x, z)
-#define	cobfunc(x,y,z)	cob_func (x, y, z)
-#define	cobcall(x,y,z)	cob_call (x, y, z)
-#define	cobcancel(x)	cob_cancel (x)
-
 /*******************************/
 /* Functions in screenio.c */
 
@@ -1564,6 +1549,8 @@ COB_EXPIMP int	cob_sys_clear_screen	(void);
 COB_EXPIMP int	cob_sys_sound_bell	(void);
 COB_EXPIMP int	cob_sys_get_csr_pos	(unsigned char *);
 COB_EXPIMP int	cob_sys_get_scr_size	(unsigned char *, unsigned char *);
+COB_EXPIMP int	cob_get_scr_cols	(void);
+COB_EXPIMP int	cob_get_scr_lines	(void);
 
 /*******************************/
 /* Functions in termio.c */
@@ -1778,6 +1765,28 @@ COB_EXPIMP cob_field *cob_intr_test_formatted_datetime	(cob_field *, cob_field *
 COB_EXPIMP cob_field *cob_intr_integer_of_formatted_date	(cob_field *,
 								 cob_field *);
 
+/*******************************/
+
+/*******************************/
+/* defines for MicroFocus C -> COBOL API */
+#define	cobsetjmp(x)	setjmp (cob_savenv (x))
+#define	coblongjmp(x)	cob_longjmp (x)
+#define	cobsavenv(x)	cob_savenv (x)
+#define	cobsavenv2(x,z)	cob_savenv2 (x, z)
+#define	cobfunc(x,y,z)	cob_func (x, y, z)
+#define	cobcall(x,y,z)	cob_call (x, y, z)
+#define	cobcancel(x)	cob_cancel (x)
+
+#define	cobgetenv(x)			cob_getenv (x)
+#define	cobputenv(x)			cob_putenv (x)
+#define cobrescanenv()	/* not necessary as GnuCOBOL always reads the process environment */
+#define	cobtidy()			cob_tidy ()
+#define	cobinit()			cob_extern_init ()
+#define	cobexit(x)			cob_stop_run (x)
+#define	cobcommandline(v,w,x,y,z)	cob_command_line (v,w,x,y,z)
+
+#define	cobcols()			cob_get_scr_cols ()
+#define	coblines()			cob_get_scr_lines ()
 /*******************************/
 
 #endif	/* COB_COMMON_H */
