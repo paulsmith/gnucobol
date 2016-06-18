@@ -13,6 +13,8 @@
 
 	* pplex.l (ppinput): FR #126 treat invalid indicator (free format) as
 	  line comment instead of aborting compilation
+	* typeck.c (cb_validate_program_environment): FR #67 output duplicate values
+	  in errornous alphabet-names at correct error position
 
 2016-06-12  Edward Hart <edward.dan.hart@gmail.com>
 

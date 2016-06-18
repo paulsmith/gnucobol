@@ -1905,10 +1905,13 @@ cb_validate_program_environment (struct cb_program *prog)
 	int			size;
 	int			n;
 	int			i;
+	int			pos;
 	int			lastval;
 	int			tableval;
 	int			values[256];
 	int			charvals[256];
+	int			dupvals[256];
+	char		errmsg[256];
 
 	/* Check ALPHABET clauses */
 	/* Complicated by difference between code set and collating sequence */
@@ -1955,20 +1958,23 @@ cb_validate_program_environment (struct cb_program *prog)
 		/* Custom alphabet */
 		dupls = 0;
 		unvals = 0;
+		pos = 0;
 		count = 0;
 		lastval = 0;
 		tableval = 0;
 		for (n = 0; n < 256; n++) {
 			values[n] = -1;
 			charvals[n] = -1;
+			dupvals[n] = -1;
 			ap->values[n] = -1;
 			ap->alphachr[n] = -1;
 		}
 		ap->low_val_char = 0;
 		ap->high_val_char = 255;
 		for (y = ap->custom_list; y; y = CB_CHAIN (y)) {
+			pos++;
 			if (count > 255) {
-				unvals = 1;
+				unvals = pos;
 				break;
 			}
 			x = CB_VALUE (y);
@@ -1981,16 +1987,17 @@ cb_validate_program_environment (struct cb_program *prog)
 					ap->low_val_char = lower;
 				}
 				if (lower < 0 || lower > 255) {
-					unvals = 1;
+					unvals = pos;
 					continue;
 				}
 				if (upper < 0 || upper > 255) {
-					unvals = 1;
+					unvals = pos;
 					continue;
 				}
 				if (lower <= upper) {
 					for (i = lower; i <= upper; i++) {
 						if (values[i] != -1) {
+							dupvals[i] = i;
 							dupls = 1;
 						}
 						values[i] = i;
@@ -2002,6 +2009,7 @@ cb_validate_program_environment (struct cb_program *prog)
 				} else {
 					for (i = lower; i >= upper; i--) {
 						if (values[i] != -1) {
+							dupvals[i] = i;
 							dupls = 1;
 						}
 						values[i] = i;
@@ -2022,10 +2030,11 @@ cb_validate_program_environment (struct cb_program *prog)
 						lastval = n;
 					}
 					if (n < 0 || n > 255) {
-						unvals = 1;
+						unvals = pos;
 						continue;
 					}
 					if (values[n] != -1) {
+						dupvals[n] = n;
 						dupls = 1;
 					}
 					values[n] = n;
@@ -2046,10 +2055,11 @@ cb_validate_program_environment (struct cb_program *prog)
 						ap->low_val_char = n;
 					}
 					if (n < 0 || n > 255) {
-						unvals = 1;
+						unvals = pos;
 						continue;
 					}
 					if (values[n] != -1) {
+						dupvals[n] = n;
 						dupls = 1;
 					}
 					values[n] = n;
@@ -2067,6 +2077,7 @@ cb_validate_program_environment (struct cb_program *prog)
 					for (i = 0; i < size; i++) {
 						n = data[i];
 						if (values[n] != -1) {
+							dupvals[n] = n;
 							dupls = 1;
 						}
 						values[n] = n;
@@ -2082,7 +2093,7 @@ cb_validate_program_environment (struct cb_program *prog)
 						ap->low_val_char = n;
 					}
 					if (n < 0 || n > 255) {
-						unvals = 1;
+						unvals = pos;
 						continue;
 					}
 					if (values[n] != -1) {
@@ -2098,12 +2109,33 @@ cb_validate_program_environment (struct cb_program *prog)
 		}
 		if (dupls || unvals) {
 			if (dupls) {
-				cb_error_x (l, _("Duplicate character values in alphabet '%s'"),
-					    cb_name (CB_VALUE(l)));
+				i = 0;
+				for (n = 0; n < 256; n++) {
+					if (dupvals[n] != -1) {
+						if (i > 240) {
+							sprintf(&errmsg[i], ", ...");
+							i = i + 5;
+							break;
+						}
+						if (i) {
+							sprintf(&errmsg[i], ", ");
+							i = i + 2;
+						}
+						if (isprint(n)) {
+							errmsg[i++] = (char)n;
+						} else {
+							sprintf(&errmsg[i], "x'%02x'", n);
+							i = i + 5;
+						}
+					};
+				}
+				errmsg[i] = 0;
+				cb_error_x (CB_VALUE(l), _("Duplicate character values in alphabet '%s': %s"),
+					    ap->name, errmsg);
 			}
 			if (unvals) {
-				cb_error_x (l, _("Invalid character values in alphabet '%s'"),
-					    cb_name (CB_VALUE(l)));
+				cb_error_x (CB_VALUE(l), _("Invalid character values in alphabet '%s', starting at position %d"),
+					    ap->name, pos);
 			}
 			ap->low_val_char = 0;
 			ap->high_val_char = 255;
