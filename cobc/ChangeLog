@@ -1,4 +1,10 @@
 
+2016-06-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_internal_function): fixing bug #234 segfault by
+	  generating code for setting not passed parameter pointers to NULL as if
+	  they would have been passed as OMITTED, allowing (cob_is_omitted) to work
+
 2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* ppparse.def: Added compiler constants GNUCOBOL (alias for OPENCOBOL)

@@ -7220,11 +7220,10 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		for (l = prog->global_list; l; l = CB_CHAIN (l)) {
 			output_line ("if (unlikely(entry == %d)) {",
 					CB_LABEL (CB_VALUE (l))->id);
-			i = 0;
 			if (local_mem) {
 				output_line ("\tcob_local_ptr = cob_local_save;");
 			}
-			for (l2 = parameter_list; l2; l2 = CB_CHAIN (l2), i++) {
+			for (l2 = parameter_list; l2; l2 = CB_CHAIN (l2)) {
 				f = cb_code_field (CB_VALUE (l2));
 				output_line ("\t%s%d = save_%s%d;",
 					CB_PREFIX_BASE, f->id,
@@ -7276,11 +7275,26 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-#if	1	/* RXWRXW - Save call params */
 	output_line ("/* Save number of call params */");
 	output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
 	output_newline ();
+	
+	if (!cb_sticky_linkage && !prog->flag_chained
+#if	0	/* RXWRXW USERFUNC */
+		&& prog->prog_type != CB_FUNCTION_TYPE
 #endif
+		&& prog->num_proc_params) {
+		output_line ("/* Set not passed parameter pointers to NULL */");
+		output_line ("switch (cob_glob_ptr->cob_call_params) {");
+		i = 0;
+		for (l = parameter_list; l; l = CB_CHAIN (l)) {
+			output_line ("  case %d: %s%d = NULL;", i++, 
+				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
+		}
+		output_line ("  default: break;");
+		output_line ("}");
+		output_newline ();
+	}
 
 	/* Set up ANY length items */
 	i = 0;
