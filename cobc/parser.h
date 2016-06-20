@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -497,7 +497,7 @@ extern int yydebug;
     THEN = 706,
     THRU = 707,
     TIME = 708,
-    TIMEOUT = 709,
+    TIME_OUT = 709,
     TIMES = 710,
     TO = 711,
     TOK_AMPER = 712,
@@ -566,7 +566,8 @@ extern int yydebug;
     YYYYDDD = 775,
     YYYYMMDD = 776,
     ZERO = 777,
-    SHIFT_PREFER = 778
+    SHIFT_PREFER = 778,
+    OVERFLOW = 779
   };
 #endif
 
