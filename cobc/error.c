@@ -56,7 +56,8 @@ print_error (const char *file, int line, const char *prefix,
 	/* Print section and/or paragraph name */
 	if (current_section != last_section) {
 		if (current_section && !current_section->flag_dummy_section) {
-			fprintf (stderr, "%s: ", file);
+			if(file)
+				fprintf (stderr, "%s: ", file);
 			fputs (_("In section"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_section->name);
@@ -65,7 +66,8 @@ print_error (const char *file, int line, const char *prefix,
 	}
 	if (current_paragraph != last_paragraph) {
 		if (current_paragraph && !current_paragraph->flag_dummy_paragraph) {
-			fprintf (stderr, "%s: ", file);
+			if(file)
+				fprintf (stderr, "%s: ", file);
 			fputs (_("In paragraph"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_paragraph->name);
@@ -74,10 +76,15 @@ print_error (const char *file, int line, const char *prefix,
 	}
 
 	/* Print the error */
-    if (cb_msg_style == CB_MSG_STYLE_MSC) {
-		fprintf (stderr, "%s (%d): %s", file, line, prefix);
-	} else {
-		fprintf (stderr, "%s: %d: %s", file, line, prefix);
+	if (file) {
+		if (cb_msg_style == CB_MSG_STYLE_MSC) {
+			fprintf (stderr, "%s (%d): ", file, line);
+		} else {
+			fprintf (stderr, "%s: %d: ", file, line);
+		}
+	}
+	if (prefix) {
+		fprintf (stderr, "%s", prefix);
 	}
 	vfprintf (stderr, fmt, ap);
 	putc ('\n', stderr);

@@ -1,4 +1,14 @@
 
+2016-06-20 Ron Norman <rjn@inglenet.com>
+
+	* coblocal.h, common.c: FR #138 identify config variables which accept
+	  a path list and any which only accept a single directory/file
+	  are checked for the PATH_SEP character and error is given if
+	  that has been used by mistake. Example:
+
+	  Invalid value '/temp:/tmp' for configuration tag 'COB_TRACE_FILE';
+	       should not contain ':'
+
 2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c: added (cob_get_scr_cols) and (cob_get_scr_lines) for

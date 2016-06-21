@@ -1326,6 +1326,26 @@ cobc_getenv (const char *env)
 	return cobc_main_strdup (p);
 }
 
+/*
+ * Like cobc_getenv, except value is not allowed to hold any PATHSEP_CHAR
+ */
+static char *
+cobc_getenv_path (const char *env)
+{
+	char	*p;
+
+	p = getenv (env);
+	if (!p || *p == 0 || *p == ' ') {
+		return NULL;
+	}
+	if(strchr(p,PATHSEP_CHAR) != NULL) {
+		cobc_err_msg (_("environment variable '%s' is '%s'; should not contain '%c'"), env, p, PATHSEP_CHAR);
+		cobc_abort_terminate ();
+		return NULL;
+	}
+	return cobc_main_strdup (p);
+}
+
 static void
 cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 	      const char *s3)
@@ -4356,12 +4376,12 @@ main (int argc, char **argv)
 
 	output_name = NULL;
 
-	cobc_cc = cobc_getenv ("COB_CC");
+	cobc_cc = cobc_getenv_path ("COB_CC");
 	if (cobc_cc == NULL) {
 		cobc_cc = COB_CC;
 	}
 
-	cob_config_dir = cobc_getenv ("COB_CONFIG_DIR");
+	cob_config_dir = cobc_getenv_path ("COB_CONFIG_DIR");
 	if (cob_config_dir == NULL) {
 		cob_config_dir = COB_CONFIG_DIR;
 	}

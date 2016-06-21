@@ -1,4 +1,10 @@
 
+2016-06-21  Ron Norman <rjn@inglenet.com>
+
+	* error.c (print_error): fixed to verify 'file' is NOT NULL before using it
+	* cobc.c: FR #138 added checks for some env vars which are not allowed to
+	  have PATHSEP_CHAR in them
+
 2016-06-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_internal_function): fixing bug #234 segfault by

@@ -293,9 +293,10 @@ struct config_tbl {
 #define ENV_BOOL	(1 << 4)		/* int boolean; Yes, True, 1, No, False, 0, ... */
 #define ENV_CHAR	(1 << 5)		/* inline 'char[]' field */
 #define ENV_STR		(1 << 6)		/* a pointer to a string */
-#define ENV_PATH	(1 << 7)		/* a pointer to a file system path */
+#define ENV_PATH	(1 << 7)		/* a pointer to one or more file system paths [fp1:fp2:fp3] */
 #define ENV_ENUM	(1 << 8)		/* Value must in 'enum' list as match */
 #define ENV_ENUMVAL	(1 << 9)		/* Value must in 'enum' list as match or value */
+#define ENV_FILE 	(1 << 10)		/* a pointer to a directory/file [single path] */
 
 #define STS_ENVSET	(1 << 15)		/* value set via Env Var */
 #define STS_CNFSET	(1 << 16)		/* value set via config file */
