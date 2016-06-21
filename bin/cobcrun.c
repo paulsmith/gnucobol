@@ -204,7 +204,7 @@ cobcrun_initial_module (char *module_argument)
 #else
 		put = cob_fast_malloc (strlen (env_space) + 19U);
 		sprintf (put, "COB_LIBRARY_PATH=%s", env_space);
-		(void)putenv (cob_strdup (put));
+		(void)putenv (strdup (put));
 		cob_free ((void *)put);
 #endif
 	}
@@ -228,7 +228,7 @@ cobcrun_initial_module (char *module_argument)
 #else
 		put = cob_fast_malloc (strlen (env_space) + 15U);
 		sprintf (put, "COB_PRE_LOAD=%s", env_space);
-		(void)putenv (cob_strdup (put));
+		(void)putenv (strdup (put));
 		cob_free ((void *)put);
 #endif
 	}
