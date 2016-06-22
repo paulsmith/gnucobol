@@ -6212,7 +6212,14 @@ invalid_statement:
 	non_const_word = 0;
 	check_unreached = 0;
 	if (cb_build_section_name ($1, 0) != cb_error_node) {
-		cb_error_x ($1, _("Unknown statement '%s'"), CB_NAME ($1));
+		if (is_reserved_word (CB_NAME ($1))) {
+			cb_error_x ($1, _("'%s' is not a statement"), CB_NAME ($1));
+		} else if (is_default_reserved_word (CB_NAME ($1))) {
+			cb_error_x ($1, _("Unknown statement '%s'; it may exist in another dialect"),
+				    CB_NAME ($1));
+		} else {
+			cb_error_x ($1, _("Unknown statement '%s'"), CB_NAME ($1));
+		}
 	}
 	YYERROR;
   }

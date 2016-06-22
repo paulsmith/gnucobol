@@ -1,4 +1,9 @@
 
+2016-06-22  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, error.c: added hints to change dialect if an undefined word
+	  is used which is reserved in another dialect (see Wish List #107).
+
 2016-06-21  Ron Norman <rjn@inglenet.com>
 
 	* error.c (print_error): fixed to verify 'file' is NOT NULL before using it

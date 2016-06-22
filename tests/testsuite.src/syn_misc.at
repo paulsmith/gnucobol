@@ -2306,3 +2306,26 @@ prog.cob: 44: Error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
+
+AT_SETUP([Wrong dialect hints])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC X.
+    
+       PROCEDURE DIVISION.
+           DISPLAY x CONVERSION.
+           TRANSFORM x
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 10: Error: 'CONVERSION' is not defined, but is a reserved word in another dialect
+prog.cob: 11: Error: Unknown statement 'TRANSFORM'; it may exist in another dialect
+])
+AT_CLEANUP

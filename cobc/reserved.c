@@ -2722,9 +2722,16 @@ get_length_of_user_res_list (void)
 }
 
 static COB_INLINE COB_A_INLINE struct cobc_reserved *
-find_default_reserved_word (struct cobc_reserved *to_find)
+find_reserved_word (struct cobc_reserved to_find)
 {
-	return bsearch (to_find, default_reserved_words,
+	return bsearch (&to_find, reserved_words, num_reserved_words,
+			sizeof (struct cobc_reserved), reserve_comp);
+}
+
+static COB_INLINE COB_A_INLINE struct cobc_reserved *
+find_default_reserved_word (struct cobc_reserved to_find)
+{
+	return bsearch (&to_find, default_reserved_words,
 			NUM_DEFAULT_RESERVED_WORDS,
 			sizeof (struct cobc_reserved), reserve_comp);
 }
@@ -2742,7 +2749,7 @@ get_user_specified_reserved_word (struct reserved_word_list user_reserved)
 			= user_reserved.is_context_sensitive;
 	} else {
 		to_find = create_dummy_reserved (user_reserved.alias_for);
-		p = find_default_reserved_word (&to_find);
+		p = find_default_reserved_word (to_find);
 
 		if (p) {
 			cobc_reserved.token = p->token;
@@ -2779,7 +2786,7 @@ get_reserved_words_from_user_list (void)
 	*/
 	for (i = 0; cobc_user_res_list; ++i) {
 		to_find = create_dummy_reserved (cobc_user_res_list->word);
-		p = find_default_reserved_word (&to_find);
+		p = find_default_reserved_word (to_find);
 		if (p) {
 			reserved_words[i] = *p;
 			/*
@@ -2828,6 +2835,18 @@ initialize_reserved_words_if_needed (void)
 }
 
 /* Global functions */
+
+int
+is_reserved_word (const char *word)
+{
+	return !!find_reserved_word (create_dummy_reserved (word));
+}
+
+int
+is_default_reserved_word (const char *word)
+{
+	return !!find_default_reserved_word (create_dummy_reserved (word));
+}
 
 cb_tree
 lookup_system_name (const char *name)
@@ -2883,13 +2902,10 @@ struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
 	struct cobc_reserved		*p;
-	struct cobc_reserved		to_find;
 
 	initialize_reserved_words_if_needed ();
 
-	to_find = create_dummy_reserved (name);
-	p = bsearch (&to_find, reserved_words, num_reserved_words,
-		     sizeof (struct cobc_reserved), reserve_comp);
+	p = find_reserved_word (create_dummy_reserved (name));
 	if (!p) {
 		return NULL;
 	}

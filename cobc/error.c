@@ -322,14 +322,18 @@ redefinition_warning (cb_tree x, cb_tree y)
 
 void
 undefined_error (cb_tree x)
-{
-	struct cb_reference	*r;
+{	
+	struct cb_reference	*r = CB_REFERENCE (x);
 	cb_tree			c;
-
+        void (* const emit_error_func)(cb_tree, const char *, ...)
+		= r->flag_optional ? &cb_warning_x : &cb_error_x;
+	const char		*error_message;
+	
 	if (!errnamebuff) {
 		errnamebuff = cobc_main_malloc ((size_t)COB_NORMAL_BUFF);
 	}
-	r = CB_REFERENCE (x);
+
+	/* Get complete variable name */
 	snprintf (errnamebuff, (size_t)COB_NORMAL_MAX, "'%s'", CB_NAME (x));
 	errnamebuff[COB_NORMAL_MAX] = 0;
 	for (c = r->chain; c; c = CB_REFERENCE (c)->chain) {
@@ -337,11 +341,16 @@ undefined_error (cb_tree x)
 		strcat (errnamebuff, CB_NAME (c));
 		strcat (errnamebuff, "'");
 	}
-	if (r->flag_optional) {
-		cb_warning_x (x, _("%s is not defined"), errnamebuff);
+
+	if (is_reserved_word (CB_NAME (x))) {
+		error_message = _("%s cannot be used here");
+	} else if (is_default_reserved_word (CB_NAME (x))) {
+		error_message = _("%s is not defined, but is a reserved word in another dialect");
 	} else {
-		cb_error_x (x, _("%s is not defined"), errnamebuff);
-	}
+		error_message = _("%s is not defined");
+	} 
+	
+	(*emit_error_func) (x, error_message, errnamebuff);
 }
 
 void

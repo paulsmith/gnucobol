@@ -1558,6 +1558,8 @@ extern unsigned int	cobc_force_literal;
 extern unsigned int	cobc_cs_check;
 
 /* reserved.c */
+extern int			is_reserved_word (const char *);
+extern int			is_default_reserved_word (const char *);
 extern struct cobc_reserved	*lookup_reserved_word (const char *);
 extern cb_tree			lookup_system_name (const char *);
 extern void			cb_list_reserved (void);
