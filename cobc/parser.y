@@ -2066,6 +2066,7 @@ _program_body:
 _identification_header:
   %prec SHIFT_PREFER
 | IDENTIFICATION DIVISION TOK_DOT
+| ID DIVISION TOK_DOT
 ;
 
 program_id_paragraph:

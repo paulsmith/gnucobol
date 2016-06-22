@@ -3,6 +3,7 @@
 
 	* parser.y, error.c: added hints to change dialect if an undefined word
 	  is used which is reserved in another dialect (see Wish List #107).
+	* parser.y (_identification_header): reinstate ID DIVISION option.
 
 2016-06-21  Ron Norman <rjn@inglenet.com>
 
