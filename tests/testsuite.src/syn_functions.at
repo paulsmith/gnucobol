@@ -179,7 +179,28 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 AT_CLEANUP
 
 
-AT_SETUP([Intrinsic Funtions: number of arguments])
+AT_SETUP([Function definition inside program])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+           CONTINUE
+           .
+
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. f.
+       END FUNCTION f.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: Error: Functions may not be defined within a program/function
+])
+AT_CLEANUP
+
+AT_SETUP([Intrinsic functions: number of arguments])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
@@ -219,7 +240,7 @@ prog.cob: 21: Error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
 AT_CLEANUP
 
 
-AT_SETUP([Intrinsic Funtions: reference modification])
+AT_SETUP([Intrinsic functions: reference modification])
 AT_KEYWORDS([functions])
 
 # the following should be checked, currently doesn't work
@@ -267,7 +288,7 @@ prog.cob: 9: Error: FUNCTION 'REVERSE' has invalid reference modification
 AT_CLEANUP
 
 
-AT_SETUP([Intrinsic Funtions: Parameter type])
+AT_SETUP([Intrinsic functions: Parameter type])
 AT_KEYWORDS([functions])
 
 # TODO: Add more tests

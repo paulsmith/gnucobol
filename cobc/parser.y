@@ -752,8 +752,13 @@ set_up_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		stack_progid[depth] = (char *)(CB_NAME (id));
 	}
 
-	if (depth > 0 && first_nested_program) {
-		check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0);
+	if (depth > 0) {
+		if (first_nested_program) {
+			check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0);
+		}
+		if (type == CB_FUNCTION_TYPE) {
+			cb_error ("Functions may not be defined within a program/function");
+		}
 	}
 	first_nested_program = 1;
 
