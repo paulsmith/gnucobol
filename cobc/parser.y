@@ -41,8 +41,6 @@
 #define YYSTYPE			cb_tree
 #define yyerror(x)		cb_error ("%s", x)
 
-#define PENDING(x)		cb_warning (_("'%s' not implemented"), x)
-
 #define emit_statement(x) \
 do { \
   if (!skip_statements) { \
@@ -2859,7 +2857,7 @@ currency_sign_clause:
 	}
 	check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
 	if ($5) {
-		PENDING ("PICTURE SYMBOL");
+		CB_PENDING ("PICTURE SYMBOL");
 	}
 	if (CB_LITERAL ($4)->size != 1) {
 		cb_error_x ($4, _("Invalid currency sign '%s'"), (char *)s);
@@ -3019,7 +3017,7 @@ screen_control:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
 		check_repeated ("SCREEN CONTROL", SYN_CLAUSE_5, &check_duplicate);
-		PENDING ("SCREEN CONTROL");
+		CB_PENDING ("SCREEN CONTROL");
 	}
   }
 ;
@@ -3036,7 +3034,7 @@ event_status:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
 		check_repeated ("EVENT STATUS", SYN_CLAUSE_6, &check_duplicate);
-		PENDING ("EVENT STATUS");
+		CB_PENDING ("EVENT STATUS");
 	}
   }
 ;
@@ -3300,12 +3298,12 @@ _suppress_clause:
 |
   SUPPRESS WHEN ALL basic_value
   {
-	PENDING ("SUPPRESS WHEN ALL");
+	CB_PENDING ("SUPPRESS WHEN ALL");
   }
 |
   SUPPRESS WHEN space_or_zero
   {
-	PENDING ("SUPPRESS WHEN SPACE/ZERO");
+	CB_PENDING ("SUPPRESS WHEN SPACE/ZERO");
   }
 ;
 
@@ -3316,7 +3314,7 @@ collating_sequence_clause:
   coll_sequence _is alphabet_name
   {
 	check_repeated ("COLLATING", SYN_CLAUSE_3, &check_duplicate);
-	PENDING ("COLLATING SEQUENCE");
+	CB_PENDING ("COLLATING SEQUENCE");
   }
 ;
 
@@ -3385,7 +3383,7 @@ _lock_with:
 | WITH ROLLBACK
   {
 	current_file->lock_mode |= COB_LOCK_MULTIPLE;
-	PENDING ("WITH ROLLBACK");
+	CB_PENDING ("WITH ROLLBACK");
   }
 ;
 
@@ -3454,8 +3452,8 @@ record_key_clause:
 
 key_or_split_keys:
   reference				{ $$ = $1; }
-| reference TOK_EQUAL reference_list	{ PENDING ("SPLIT KEYS"); }
-| reference SOURCE _is reference_list	{ PENDING ("SPLIT KEYS"); }
+| reference TOK_EQUAL reference_list	{ CB_PENDING ("SPLIT KEYS"); }
+| reference SOURCE _is reference_list	{ CB_PENDING ("SPLIT KEYS"); }
 ;
 
 /* RELATIVE KEY clause */
@@ -4010,7 +4008,7 @@ code_set_clause:
 	}
 
 	if (warningopt) {
-		PENDING ("CODE-SET");
+		CB_PENDING ("CODE-SET");
 	}
   }
 ;
@@ -4019,7 +4017,7 @@ _for_sub_records_clause:
 | FOR reference_list
   {
 	  if (warningopt) {
-		  PENDING ("FOR sub-records clause");
+		  CB_PENDING ("FOR sub-records clause");
 	  }
 
 	  current_file->code_set_items = CB_LIST ($2);
@@ -4032,7 +4030,7 @@ report_clause:
   report_keyword rep_name_list
   {
 	check_repeated ("REPORT", SYN_CLAUSE_11, &check_duplicate);
-	PENDING("REPORT WRITER");
+	CB_PENDING("REPORT WRITER");
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
 	    current_file->organization != COB_ORG_SEQUENTIAL) {
 		cb_error (_("REPORT clause with wrong file type"));
@@ -4336,7 +4334,7 @@ constant_source:
   }
 | FROM WORD
   {
-	PENDING ("CONSTANT FROM clause");
+	CB_PENDING ("CONSTANT FROM clause");
 	$$ = NULL;
   }
 ;
@@ -4642,7 +4640,7 @@ usage:
 | NATIONAL
   {
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
-	PENDING ("USAGE NATIONAL");
+	CB_PENDING ("USAGE NATIONAL");
   }
 ;
 
@@ -4761,7 +4759,7 @@ occurs_clause:
 	} else {
 		current_field->occurs_max = 0;
 	}
-	PENDING("OCCURS with DYNAMIC capacity");
+	CB_PENDING("OCCURS with DYNAMIC capacity");
 	current_field->flag_occurs = 1;
   }
 ;
@@ -5061,7 +5059,7 @@ _linkage_section:
 _report_section:
 | REPORT SECTION TOK_DOT
   {
-	PENDING("REPORT SECTION");
+	CB_PENDING("REPORT SECTION");
 	current_storage = CB_STORAGE_REPORT;
 	cb_clear_real_field ();
   }
@@ -5570,17 +5568,17 @@ screen_option:
 | OVERLINE
   {
 	check_screen_attr ("OVERLINE", COB_SCREEN_OVERLINE);
-	PENDING ("OVERLINE");
+	CB_PENDING ("OVERLINE");
   }
 | GRID
   {
 	check_screen_attr ("GRID", COB_SCREEN_GRID);
-	PENDING ("GRID");
+	CB_PENDING ("GRID");
   }
 | LEFTLINE
   {
 	check_screen_attr ("LEFTLINE", COB_SCREEN_LEFTLINE);
-	PENDING ("LEFTLINE");
+	CB_PENDING ("LEFTLINE");
   }
 | AUTO
   {
@@ -5881,7 +5879,7 @@ _procedure_type:
 	if (current_program->flag_chained) {
 		cb_error (_("%s not allowed in CHAINED programs"), "BY VALUE");
 	} else {
-		PENDING (_("BY VALUE parameters"));
+		CB_PENDING (_("BY VALUE parameters"));
 		call_mode = CB_CALL_BY_VALUE;
 	}
   }
@@ -7379,7 +7377,7 @@ disp_list:
   }
 | OMITTED
   {
-	PENDING ("DISPLAY OMITTED");
+	CB_PENDING ("DISPLAY OMITTED");
 	$$ = cb_null;
   }
 ;
@@ -7980,7 +7978,7 @@ generate_statement:
   GENERATE
   {
 	begin_statement ("GENERATE", 0);
-	PENDING("GENERATE");
+	CB_PENDING("GENERATE");
   }
   generate_body
 ;
@@ -8166,7 +8164,7 @@ initiate_statement:
   INITIATE
   {
 	begin_statement ("INITIATE", 0);
-	PENDING("INITIATE");
+	CB_PENDING("INITIATE");
   }
   initiate_body
 ;
@@ -9544,7 +9542,7 @@ suppress_statement:
 		cb_error_x (CB_TREE (current_statement),
 			    _("SUPPRESS statement must be within DECLARATIVES"));
 	}
-	PENDING("SUPPRESS");
+	CB_PENDING("SUPPRESS");
   }
 ;
 
@@ -9558,7 +9556,7 @@ terminate_statement:
   TERMINATE
   {
 	begin_statement ("TERMINATE", 0);
-	PENDING("TERMINATE");
+	CB_PENDING("TERMINATE");
   }
   terminate_body
 ;
@@ -9932,13 +9930,13 @@ program_start_end:
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM START"));
 	/* emit_entry ("_START", 0, NULL); */
-	PENDING ("USE AT PROGRAM START");
+	CB_PENDING ("USE AT PROGRAM START");
   }
   | END
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM END"));
 	/* emit_entry ("_END", 0, NULL); */
-	PENDING ("USE AT PROGRAM END");
+	CB_PENDING ("USE AT PROGRAM END");
   }
 ;
 
@@ -9948,7 +9946,7 @@ use_reporting:
   {
 	current_section->flag_real_label = 1;
 	emit_statement (cb_build_comment ("USE BEFORE REPORTING"));
-	PENDING ("USE BEFORE REPORTING");
+	CB_PENDING ("USE BEFORE REPORTING");
   }
 ;
 
@@ -9957,7 +9955,7 @@ use_exception:
   {
 	current_section->flag_real_label = 1;
 	emit_statement (cb_build_comment ("USE AFTER EXCEPTION CONDITION"));
-	PENDING ("USE AFTER EXCEPTION CONDITION");
+	CB_PENDING ("USE AFTER EXCEPTION CONDITION");
   }
 ;
 

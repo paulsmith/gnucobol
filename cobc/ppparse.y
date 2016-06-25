@@ -808,12 +808,15 @@ define_directive:
 
 
 page_directive:
+  {
+	CB_PENDING (_("PAGE directive"));
+  }
 ;
 
 turn_directive:
   ec_list CHECKING on_or_off
   {
-	cb_warning (_("%s directive not yet implemented"), "TURN");
+	CB_PENDING (_("TURN directive"));
   }
 ;
 

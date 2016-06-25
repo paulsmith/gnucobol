@@ -155,6 +155,7 @@ static void	skip_to_eol		(void);
 static void	display_to_eol		(void);
 static void	check_comments		(const char *, const char *);
 static void	set_print_replace_list	(struct cb_replace_list *list);
+static void	get_new_listing_file	(void);
 
 %}
 
@@ -330,25 +331,14 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 "COPY"			{
-	struct list_files *newfile;
 	yy_push_state (COPY_STATE);
-	newfile = cobc_malloc (sizeof (struct list_files));
-	memset (newfile, 0, sizeof (struct list_files));
-	newfile->copy_line = cb_source_line;
-	if (cb_current_file->copy_tail) {
-		cb_current_file->copy_tail->next = newfile;
-	}
-	if (!cb_current_file->copy_head) {
-		cb_current_file->copy_head = newfile;
-	}
-	cb_current_file->copy_tail = newfile;
-	old_list_file = cb_current_file;
-	cb_current_file = newfile;
+        get_new_listing_file ();
 	return COPY;
 }
 
 "INCLUDE"		{
 	yy_push_state (COPY_STATE);
+	get_new_listing_file ();
 	return COPY;
 }
 
@@ -1033,34 +1023,54 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 /* Local functions */
 
 static void
+get_new_listing_file (void)
+{
+	struct list_files	*newfile = cobc_malloc (sizeof (struct list_files));	
+	
+	if (cb_current_file->copy_tail) {
+		cb_current_file->copy_tail->next = newfile;
+	}
+	if (!cb_current_file->copy_head) {
+		cb_current_file->copy_head = newfile;
+	}
+	cb_current_file->copy_tail = newfile;
+
+	memset (newfile, 0, sizeof (struct list_files));
+	newfile->copy_line = cb_source_line;
+	old_list_file = cb_current_file;
+	cb_current_file = newfile;
+}
+
+static void
 set_print_replace_list (struct cb_replace_list *list)
 {
+	struct cb_replace_list	*r;
+	struct cb_text_list	*l;
+	struct list_replace	*repl;
+	
 	if (cb_src_list_file) {
+		for (r = list; r; r = r->next) {
+			repl = cobc_malloc (sizeof (struct list_replace));
+			memset (repl, 0, sizeof (struct list_replace));
+			repl->firstline = r->line_num;
+			repl->lead_trail = r->lead_trail;
+			repl->lastline = cb_source_line;
+			
+			for (l = r->old_text; l; l = l->next) {
+				strcat (repl->from, l->text);
+			}
+			for (l = r->new_text; l; l = l->next) {
+				strcat (repl->to, l->text);
+			}
 
-	   struct cb_replace_list *r;
-	   struct cb_text_list	*l;
-
-	   for (r = list; r; r = r->next) {
-	      struct list_replace *repl;
-
-	      repl = cobc_malloc (sizeof (struct list_replace));
-	      memset (repl, 0, sizeof (struct list_replace));
-	      repl->firstline = r->line_num;
-	      repl->lead_trail = r->lead_trail;
-	      repl->lastline = cb_source_line;
-	      for (l = r->old_text; l; l = l->next) 
-		 strcat (repl->from, l->text);
-	      for (l = r->new_text; l; l = l->next) 
-		 strcat (repl->to, l->text);
-	      
-	      if (cb_current_file->replace_tail) {
-		 cb_current_file->replace_tail->next = repl;
-	      }
-	      if (!cb_current_file->replace_head) {
-		 cb_current_file->replace_head = repl;
-	      }
-	      cb_current_file->replace_tail = repl;
-	   }
+			if (cb_current_file->replace_tail) {
+				cb_current_file->replace_tail->next = repl;
+			}
+			if (!cb_current_file->replace_head) {
+				cb_current_file->replace_head = repl;
+			}
+			cb_current_file->replace_tail = repl;
+		}
 	}
 }
 
@@ -1099,7 +1109,8 @@ ppinput (char *buff, const size_t max_size)
 	int	i;
 	int	n;
 	int	coln;
-
+	struct list_skip *skip;		
+	
 	/* Read line(s) */
 
 	continuation = 0;
@@ -1296,19 +1307,17 @@ start:
 		/* Skipping input */
 		newline_count++;
 		if (cb_src_list_file) {
-		      struct list_skip *skip;
+			skip = cobc_malloc (sizeof (struct list_skip));
+			memset (skip, 0, sizeof (struct list_skip));
+			skip->skipline = cb_source_line + (int)newline_count;
 
-		      skip = cobc_malloc (sizeof (struct list_skip));
-		      memset (skip, 0, sizeof (struct list_skip));
-		      skip->skipline = cb_source_line + (int)newline_count;
-		      
-		      if (cb_current_file->skip_tail) {
-			 cb_current_file->skip_tail->next = skip;
-		      }
-		      if (!cb_current_file->skip_head) {
-			 cb_current_file->skip_head = skip;
-		      }
-		      cb_current_file->skip_tail = skip;
+			if (cb_current_file->skip_tail) {
+				cb_current_file->skip_tail->next = skip;
+			}
+			if (!cb_current_file->skip_head) {
+				cb_current_file->skip_head = skip;
+			}
+			cb_current_file->skip_tail = skip;
 		}
 		goto start;
 	}
