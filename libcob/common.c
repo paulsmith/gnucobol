@@ -5579,7 +5579,7 @@ cob_init (const int argc, char **argv)
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");
 		}
-#elif	!defined(__OS400__)
+#elif	!defined(__OS400__) && !defined(_MSC_VER)
 		s = getlogin ();
 		if (s) {
 			set_config_val_by_name(s, "username", "getlogin()");

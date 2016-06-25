@@ -1,4 +1,8 @@
 
+2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: minor fixes for compatibility to VC2005
+
 2016-06-20 Ron Norman <rjn@inglenet.com>
 
 	* coblocal.h, common.c: FR #138 identify config variables which accept

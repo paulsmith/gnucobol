@@ -86,7 +86,7 @@
 #if _MSC_VER >= 1500
 #define COB_USE_VC2008_OR_GREATER 1
 #else
-#define COB_USE_VC2008_OR_GREATER 
+#define COB_USE_VC2008_OR_GREATER 0
 #if _MSC_VER < 1400
 #error Support for Visual Studio 2003 and earlier dropped with GnuCOBOL 2.0
 #endif
