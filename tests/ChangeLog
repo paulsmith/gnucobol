@@ -1,3 +1,8 @@
+2016-06-20  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added new tests for compiler listings.
+	* Makefile.in, Makefile.am - Added testsuite/listings.at.
+	* testsuite.at - Added testsuite/listings.at
 
 2016-06-15 Brian Tiffin <btiffin@gnu.org>
 

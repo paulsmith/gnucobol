@@ -129,6 +129,7 @@ ppp_replace_list_add (struct cb_replace_list *list,
 	struct cb_replace_list *p;
 
 	p = cobc_plex_malloc (sizeof (struct cb_replace_list));
+	p->line_num = cb_source_line;
 	p->old_text = old_text;
 	p->new_text = new_text;
 	p->lead_trail = lead_or_trail;
@@ -527,6 +528,8 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 
 %token GARBAGE		"word"
 
+%token PAGE_DIRECTIVE
+
 %token SOURCE_DIRECTIVE
 %token FORMAT
 %token IS
@@ -616,6 +619,7 @@ directive:
 | DEFINE_DIRECTIVE define_directive
 | SET_DIRECTIVE set_directive
 | TURN_DIRECTIVE turn_directive
+| PAGE_DIRECTIVE page_directive
 | IF_DIRECTIVE
   {
 	current_cmd = PLEX_ACT_IF;
@@ -802,6 +806,9 @@ define_directive:
   }
 ;
 
+
+page_directive:
+;
 
 turn_directive:
   ec_list CHECKING on_or_off

@@ -20,6 +20,8 @@
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*#define DEBUG_REPLACE*/
+
 #include "config.h"
 #include "defaults.h"
 
@@ -155,6 +157,15 @@ char			**cb_saveargv = NULL;
 const char		*cob_config_dir = NULL;
 FILE			*cb_storage_file = NULL;
 FILE			*cb_listing_file = NULL;
+
+FILE			*cb_src_list_file = NULL;
+int			cb_listing_page = 0;
+int			cb_listing_wide = 0;
+int			cb_lines_per_page = CB_MAX_LINES;
+char			cb_listing_date[48]; /* Date/Time buffer for listing */
+struct list_files	*cb_listing_files = NULL;
+struct list_files	*cb_current_file = NULL;
+
 #if	0	/* RXWRXW - source format */
 char			*source_name = NULL;
 #endif
@@ -278,6 +289,14 @@ static size_t		save_c_src = 0;
 static size_t		verbose_output = 0;
 static size_t		cob_optimize = 0;
 
+static int		cb_listing_linecount = 10000;
+static int		cb_listing_eject = 0;
+static int		cb_inreplace = 0;
+static char		cb_listing_filename[FILENAME_MAX];
+static char		*cb_listing_outputfile = NULL;
+static char		cb_listing_ttl[133];	/* Listing subtitle */
+static void		print_program_code (struct list_files *, int);
+
 #ifdef	_MSC_VER
 static const char	*manicmd;
 static const char	*manilink;
@@ -387,7 +406,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivECScbmxjdFOPgwo:I:L:l:D:K:k:";
+static const char short_options[] = "hVivECScbmxjdFOPgwo:t:T:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -422,6 +441,7 @@ static const struct option long_options[] = {
 	{"Xref",		CB_NO_ARG, NULL, 'X'},
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
+	{"tlines", 		CB_RQ_ARG, NULL, '#'},
 
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -1415,6 +1435,10 @@ cobc_clean_up (const int status)
 	struct local_filename	*lf;
 	cob_u32_t		i;
 
+	if (cb_src_list_file) {
+		fclose (cb_src_list_file);
+		cb_src_list_file = NULL;
+	}
 	if (cb_listing_file) {
 		fclose (cb_listing_file);
 		cb_listing_file = NULL;
@@ -1822,6 +1846,9 @@ cobc_print_usage (char * prog)
 	puts (_("  -C                    translation only; convert COBOL to C"));
 	puts (_("  -S                    compile only; output assembly file"));
 	puts (_("  -c                    compile and assemble, but do not link"));
+	puts (_("  -T <file>             Generate and place a wide program listing into <file>"));
+	puts (_("  -t <file>             Generate and place a program listing into <file>"));
+	puts (_("  --tlines=<lines>      Specify lines per page in listing, default = 55"));
 	puts (_("  -P(=<dir or file>)    generate preprocessed program listing (.lst)"));
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
 			"                        (V. Coen's 'cobxref' must be in path)"));
@@ -2261,8 +2288,30 @@ process_command_line (const int argc, char **argv)
 			}
 			break;
 
+		case 'T':
+			/* -T : Generate wide listing */
+			cb_listing_wide = 1;
+			/* fall through */
+
+		case 't':
+			/* -t : Generate listing */
+			{
+			   time_t curtime;		/* Compile time */
+
+			   cb_listing_outputfile = cobc_strdup (cob_optarg);
+			   curtime = time(NULL);
+			   strcpy (cb_listing_date, ctime(&curtime));
+			   *strchr (cb_listing_date, '\n') = '\0';
+			}
+			break;
+
+		case '#':
+			/* --tlines=nn : Lines per page */
+			cb_lines_per_page = atoi(cob_optarg);
+			break;
+
 		case 'P':
-			/* -P : Generate listing */
+			/* -P : Generate preproc listing */
 			if (cob_optarg) {
 				if (!stat (cob_optarg, &st) && S_ISDIR (st.st_mode)) {
 					cobc_list_dir = cobc_strdup (cob_optarg);
@@ -3426,6 +3475,988 @@ preprocess (struct filename *fn)
 	return !!errorcount;
 }
 
+/* Routines to generate program listing */
+
+static void
+print_program_header (void)
+{
+  if (++cb_listing_linecount >= cb_lines_per_page) {
+      char version[20];
+
+      sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
+      cb_listing_linecount = 0;
+      if (cb_listing_eject) {
+         fputs ("\f", cb_src_list_file);
+      } else {
+         cb_listing_eject = 1;
+      }
+
+      if (cb_listing_wide)
+         fprintf (cb_src_list_file,
+	         "%s %-6.6s  %-65.65s  %s  Page %04d\n\n",
+		 PACKAGE_NAME,
+	         version,
+	         cb_listing_filename,
+	         cb_listing_date,
+	         ++cb_listing_page);
+      else
+         fprintf (cb_src_list_file,
+	         "%s %-6.6s  %-25.25s  %s  Page %04d\n\n",
+		 PACKAGE_NAME,
+	         version,
+	         cb_listing_filename,
+	         cb_listing_date,
+	         ++cb_listing_page);
+      fprintf (cb_src_list_file, "%s\n\n", cb_listing_ttl);
+    }
+}
+
+static char *
+check_filler_name (char *name)
+{
+	if (!memcmp (name, "FILLER", 6)) {
+		name = (char *)"FILLER";
+	}
+	return name;
+}
+
+static void
+print_fields (int lvl, struct cb_field *top)
+{
+	int i;
+	int first = 1;
+	int getcat;
+	int oldlevel = 0;
+	char type[20];
+
+	while (top) {
+	   if (top->level) {
+	      char lclname[80];
+
+	      lclname[0] = '\0';
+	      for (i = 0; i < lvl; i++) strcat (lclname, "  ");
+	      strcat (lclname, check_filler_name((char *)top->name));
+	      getcat = 1;
+	      if (top->level == 01) {
+	         if (!first) {
+		    print_program_header();
+		    fprintf (cb_src_list_file, "\n");
+		 }
+		 if (top->children) {
+		    strcpy (type, "GROUP");
+		    getcat = 0;
+		 }
+	      }
+	      else if (top->level == 77) {
+	         if (!first && (oldlevel != 77)) {
+		    print_program_header();
+		    fprintf (cb_src_list_file, "\n");
+		 }
+	      }
+	      if (getcat) switch (top->common.category) {
+		 case CB_CATEGORY_ALPHABETIC:
+		    strcpy (type, "ALPHABETIC");
+		    break;
+		 case CB_CATEGORY_UNKNOWN:
+		 case CB_CATEGORY_ALPHANUMERIC:
+		 case CB_CATEGORY_ALPHANUMERIC_EDITED:
+		    strcpy (type, "ALPHANUMERIC");
+		    break;
+		 case CB_CATEGORY_BOOLEAN:
+		    strcpy (type, "BOOLEAN");
+		    break;
+		 case CB_CATEGORY_INDEX:
+		    strcpy (type, "INDEX");
+		    break;
+		 case CB_CATEGORY_NATIONAL:
+		 case CB_CATEGORY_NATIONAL_EDITED:
+		    strcpy (type, "NATIONAL");
+		    break;
+		 case CB_CATEGORY_NUMERIC:
+		 case CB_CATEGORY_NUMERIC_EDITED:
+		    strcpy (type, "NUMERIC");
+		    break;
+		 case CB_CATEGORY_OBJECT_REFERENCE:
+		    strcpy (type, "REFERENCE");
+		    break;
+		 case CB_CATEGORY_DATA_POINTER:
+		 case CB_CATEGORY_PROGRAM_POINTER:
+		    strcpy (type, "POINTER");
+		    break;
+		 default:
+		    strcpy (type, "UNKNOWN");
+	      }
+	      print_program_header();
+	      fprintf (cb_src_list_file, "%04d %-14.14s %02d   %-30.30s %s\n",
+		     top->size, type, top->level, lclname,
+		     top->pic ? top->pic->orig : " ");
+	      first = 0;
+	      oldlevel = top->level;
+	      if (top->children) print_fields (lvl+1, top->children);
+	   }
+	   top = top->sister;
+	}
+}
+
+static void
+print_program_trailer (void)
+{
+	cb_tree l;
+	char type[20];
+
+	if (cb_src_list_file) {
+
+	   /* Print file/symbol tables */
+
+	   strcpy (cb_listing_ttl,
+	     "SIZE TYPE           LVL  NAME                           PICTURE");
+
+	   cb_listing_linecount = cb_lines_per_page;
+	   print_program_header();
+
+	   if ((l = current_program->file_list) != NULL) {
+	      strcpy (type, "FILE");
+	      for (; l; l = CB_CHAIN (l)) {
+		 print_program_header();
+	         fprintf (cb_src_list_file, "%04d %-14.14s      %s\n",
+			  CB_FILE(CB_VALUE(l))->record_max,
+			  type,
+			  CB_FILE(CB_VALUE(l))->name);
+	         if (CB_FILE(CB_VALUE(l))->record) {
+		    print_fields (0, CB_FILE(CB_VALUE(l))->record);
+		 }
+		 print_program_header();
+		 fprintf (cb_src_list_file, "\n");
+	      }
+	   }
+
+	   if (current_program->working_storage != NULL) {
+	      print_fields (0, current_program->working_storage);
+	      print_program_header();
+	      fprintf (cb_src_list_file, "\n");
+	   }
+
+	   if (current_program->local_storage != NULL) {
+	      print_fields (0, current_program->local_storage);
+	      print_program_header();
+	      fprintf (cb_src_list_file, "\n");
+	   }
+
+	   /* Print error counts */
+
+	   fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
+	   fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
+	   cb_listing_linecount = cb_lines_per_page;
+	}
+}
+
+static char *
+print_token (char *bp, char *token, char *term)
+{
+   char *otoken = token;
+
+   do {
+      while (*bp && isspace (*bp)) bp++;
+      term[0] = 0;
+      term[1] = 0;
+      if (*bp == 0)
+	 return NULL;
+      while (*bp)
+      {
+	 if (*bp == '&') {
+	    bp++;
+	    continue;
+	 }
+	 if (*bp == '.' && isdigit(*(bp+1))) ;
+	 else if (isspace(*bp) || *bp == ',' || *bp == '.' || *bp == ';') {
+	    term[0] = *bp++;
+	    break;
+	 }
+	 *token++ = *bp++;
+      }
+      *token = 0;
+   } while (*otoken == 0 && *term != 0);
+   return (bp);
+}
+
+static int
+print_read (FILE *fd, char *line, int fixed)
+{
+   char *pl, *il;
+   int i;
+   char iline[CB_LINE_LENGTH+2];
+
+   memset (line, 0, CB_LINE_LENGTH);
+   if (!fgets (iline, CB_LINE_LENGTH, fd)) {
+      return -1;
+   }
+
+   if ((pl = strchr (iline, '\n')) != NULL) *pl = '\0';
+   if ((pl = strchr (iline, '\r')) != NULL) *pl = '\0';
+
+   il = iline;
+   pl = line;
+   for (i = 0; *il; il++, i++) {
+      if (*il == '\t') {
+	 int j, k;
+
+	 k = 8 - (i % 8);
+	 for (j = 0; j < k; j++) *pl++ = ' ';
+      }
+      else {
+	 *pl++ = *il;
+      }
+   }
+   if (fixed) {
+      for (i = (pl - line); i < 80; i++);
+         *pl++ = ' ';
+   }
+   else {
+      *pl++ = ' ';
+   }
+   *pl = 0;
+   return strlen(line);
+}
+
+static void
+print_line (struct list_files *cfile, char *line, int linenum, int incopy, 
+	    int fixed)
+{
+   struct list_skip *skip;
+   char pch;
+   char buffer[133];
+
+   if (fixed && line[CB_INDICATOR] == '/')
+      cb_listing_linecount = cb_lines_per_page;
+   if (!fixed) {
+      char *dp;
+
+      if ((dp = strchr (line, '>')) != NULL) {
+	 if (!strncasecmp (dp, ">>PAGE", 6))
+	    cb_listing_linecount = cb_lines_per_page;
+      }
+   }
+   
+   pch = incopy ? 'C' : ' ';
+
+   for (skip = cfile->skip_head; skip; skip = skip->next) {
+      if (skip->skipline == linenum) {
+         pch = 'X';
+	 break;
+      }
+   }
+
+   if (fixed) {
+      int j;
+
+      if (line[CB_INDICATOR] == '&') {
+         line[CB_INDICATOR] = '-';
+	 pch = '+';
+      }
+      print_program_header();
+      if (cb_listing_wide)
+	 sprintf (buffer, "%06d%c %s", linenum, pch, line);
+      else
+	 sprintf (buffer, "%06d%c %-72.72s", linenum, pch, line);
+      for (j = strlen(buffer) - 1; j; j--) {
+         if (buffer[j] != ' ')
+	    break;
+         buffer[j] = 0;
+      }
+      fprintf (cb_src_list_file, "%s\n", buffer);
+   }
+   else {
+      int i, j;
+      int len = strlen(line);
+      int max = cb_listing_wide ? 112 : 72;
+      for (i = 0; len > 0; i += max, len -= max) {
+	 print_program_header();
+	 if (cb_listing_wide)
+	    sprintf (buffer, "%06d%c %-112.112s",
+		     linenum, pch, &line[i]);
+	 else
+	    sprintf (buffer, "%06d%c %-72.72s",
+		     linenum, pch, &line[i]);
+	 for (j = strlen(buffer) - 1; j; j--) {
+	    if (buffer[j] != ' ')
+	       break;
+	    buffer[j] = 0;
+	 }
+	 fprintf (cb_src_list_file, "%s\n", buffer);
+         pch = '+';
+      }
+   }
+   if (cfile->err_head) {
+      struct list_error *err;
+      err = cfile->err_head;
+      while (err) {
+	 if (err->line == linenum) {
+	    print_program_header();
+	    fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
+	 }
+	 err = err->next;
+      }
+   }
+}
+
+static int
+compare_prepare (char *cmpline, char pline[CB_READ_AHEAD][CB_LINE_LENGTH+2],
+		 int firstndx, int lastndx, int firstcol, int fixed)
+{
+   int i, j, k;
+   int instring, lastcol;
+   int last;
+
+   cmpline[0] = 0;
+   j = 0;
+   instring = 0;
+   lastcol = CB_SEQUENCE;
+   for (k = firstndx; k < lastndx; k++) {
+      if (!fixed) {
+	 lastcol = strlen(pline[k]);
+      }
+      for (last = lastcol; isspace(pline[k][last-1]) && last > firstcol;
+	   last--) ;
+      for (i = firstcol; (i < last) && isspace(pline[k][i]); i++) ;
+      while (i < last) {
+	 if (isspace(pline[k][i])) {
+	    cmpline[j++] = ' ';
+	    for (i++; (i < last) && isspace(pline[k][i]); i++) ;
+	    if (i == last) break;
+	 }
+	 else if (pline[k][i] == '"') {
+	    if (instring) {
+	       i++;
+	    }
+	    else {
+	       cmpline[j++] = pline[k][i++];
+	       instring = 1;
+	    }
+	    for (; (i < last) && (pline[k][i] != '"'); ) {
+	       cmpline[j++] = pline[k][i++];
+	    }
+	    if (pline[k][i] == '"') {
+	       cmpline[j++] = pline[k][i++];
+	       instring = 0;
+	    }
+	    if (i == last) break;
+	 }
+	 else {
+	    cmpline[j++] = pline[k][i++];
+	 }
+      }
+   }
+   cmpline[j] = 0;
+#ifdef DEBUG_REPLACE
+   fprintf (stdout, "   lastcol = %d\n   cmpline: %s\n", lastcol, cmpline);
+#endif
+   return lastcol;
+}
+
+static void
+print_adjust (struct list_files *cfile, int linenum, int adjust)
+{
+   if (cfile->copy_head) {
+      struct list_files *cur;
+      for (cur = cfile->copy_head; cur; cur = cur->next) {
+	 cur->copy_line += adjust;
+      }
+   }
+   if (cfile->replace_head) {
+      struct list_replace *rep;
+      rep = cfile->replace_head;
+      for (; rep; rep = rep->next) {
+	 if (rep->firstline > linenum)
+	    rep->firstline += adjust;
+      }
+   }
+   if (cfile->err_head) {
+      struct list_error *err;
+      err = cfile->err_head;
+      for (; err; err = err->next) {
+	 err->line += adjust;
+      }
+   }
+}
+
+static int
+is_debug_line (char *line, int fixed)
+{
+   if (fixed && !cb_flag_debugging_line && IS_DEBUG_LINE(line))
+      return 1;
+   if (!fixed && !cb_flag_debugging_line && !strncasecmp (line, "D ", 2))
+      return 1;
+   return 0;
+}
+
+static int
+is_comment_line (char *line, int fixed)
+{
+   if (fixed && IS_COMMENT_LINE(line))
+      return 1;
+   if (!fixed && !strncmp (line, "*>", 2))
+      return 1;
+   return 0;
+}
+
+static int
+is_continue_line (char *line, int fixed)
+{
+   if (fixed && IS_CONTINUE_LINE(line))
+      return 1;
+   if (!fixed) {
+      int i = strlen(line) - 1;
+      for (; i && isspace(line[i]); i--) ;
+      if (line[i] == '&')
+	 return 1;
+   }
+   return 0;
+}
+
+static int
+print_replace_text (struct list_files *cfile, FILE *fd,
+		    struct list_replace *rep,
+		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH+2],
+		    int plinecnt, int linenum)
+{
+   char *rfp;
+   char *fp;
+   char *tp;
+   int i, j, k;
+   int firstcol, last;
+   int multi_token, fixed;
+   int match = 0;
+   int eof;
+   char fterm[2], ftoken[CB_LINE_LENGTH+2];
+   char tterm[2], ttoken[CB_LINE_LENGTH+2];
+   char cmpline[CB_LINE_LENGTH+2];
+   char newline[CB_LINE_LENGTH+2];
+   char frmline[CB_LINE_LENGTH+2];
+
+   fixed = (cb_source_format == CB_FORMAT_FIXED);
+   if (is_comment_line (pline[0], fixed))
+      return plinecnt;
+
+   rfp = rep->from;
+   for (i = strlen(rfp)-1; i && isspace(rfp[i]); i--) rfp[i] = 0;
+   while (*rfp && isspace(*rfp)) rfp++;
+   multi_token = (strchr (rfp, ' ') != NULL);
+   eof = 0;
+
+#ifdef DEBUG_REPLACE
+   fprintf (stdout, "print_replace_text: linenum = %d", linenum);
+   fprintf (stdout, ", multi_token = %s, fixed = %s\n",
+	    multi_token ? "TRUE" : "FALSE", fixed ? "TRUE" : "FALSE"); 
+   fprintf (stdout, "   plinecnt = %d\n", plinecnt);
+   for (i = 0; i < plinecnt; i++)
+      fprintf (stdout, "   pline[%2d]: %s\n", i, pline[i]);
+   fprintf (stdout, "   rep: first = %d, last = %d, lead_trail = %d\n",
+	    rep->firstline, rep->lastline, rep->lead_trail);
+   fprintf (stdout, "   from: '%s'\n", rfp);
+   fprintf (stdout, "   to:   '%s'\n", rep->to);
+#endif
+
+   firstcol = 0;
+   if (fixed) {
+      firstcol = CB_MARGIN_A;
+   }
+
+   last = compare_prepare (cmpline, pline, 0, plinecnt, firstcol, fixed);
+
+   k = 0;
+   newline[0] = 0;
+   if (multi_token) {
+      int submatch = 0;
+      int seccount = 0;
+      char lterm[2];
+
+      strcpy (frmline, rfp);
+      fp = print_token (frmline, ftoken, fterm);
+   NEXT_LINE:
+      tp = print_token (cmpline, ttoken, tterm);
+      while (tp && fp) {
+	 while (tp && fp) {
+	    if (!strcasecmp (ttoken, ftoken)) {
+	       submatch = 1;
+	       if (fterm[0] == tterm[0])
+		  lterm[0] = 0;
+	       else
+		  lterm[0] = tterm[0];
+	       lterm[1] = tterm[1];
+	       tp = print_token (tp, ttoken, tterm);
+	       fp = print_token (fp, ftoken, fterm);
+	    }
+	    else {
+	       if (seccount == 0) {
+		  strcat (newline, ttoken);
+		  strcat (newline, tterm);
+	       }
+	       submatch = 0;
+	       strcpy (frmline, rfp);
+	       fp = print_token (frmline, ftoken, fterm);
+	       tp = print_token (tp, ttoken, tterm);
+	       break;
+	    }
+	 }
+      }
+      if (!fp && submatch) {
+         match = 1;
+	 strcat (newline, rep->to);
+	 strcat (newline, lterm);
+	 if (tp) {
+	    strcat (newline, ttoken);
+	    strcat (newline, tterm);
+	    strcat (newline, tp);
+	 }
+      }
+      else if (!tp && submatch) {
+	 int overread = 0;
+#ifdef DEBUG_REPLACE
+	 fprintf (stdout, "   submatch = TRUE\n");
+#endif
+         if (eof) {
+	    return plinecnt;
+	 }
+	 if (is_comment_line (pline[plinecnt], fixed)) {
+	    print_adjust (cfile, linenum, -1);
+	    overread = 1;
+	 }
+	 if (is_debug_line (pline[plinecnt], fixed)) {
+	    print_adjust (cfile, linenum, -1);
+	    overread = 1;
+	 }
+      NEXT_REC:
+	 if (!is_comment_line (pline[plinecnt], fixed))
+	    plinecnt++;
+	 if (print_read (fd, pline[plinecnt], fixed) < 0) {
+	    pline[plinecnt][0] = 0;
+	    eof = 1;
+	 }
+	 if (is_debug_line (pline[plinecnt], fixed)) {
+	    print_adjust (cfile, linenum, -1);
+	    goto NEXT_REC;
+	 }
+	 if (is_comment_line (pline[plinecnt], fixed)) {
+	    print_adjust (cfile, linenum, -1);
+	    goto NEXT_REC;
+	 }
+#ifdef DEBUG_REPLACE
+	 fprintf (stdout, "   pline[%2d]: %s\n", plinecnt-1,
+		  pline[plinecnt-1]);
+#endif
+	 linenum++;
+	 seccount++;
+	 if (overread) {
+	    overread = 0;
+	    goto NEXT_REC;
+	 }
+	 last = compare_prepare (cmpline, pline, plinecnt-1, plinecnt,
+				 firstcol, fixed);
+	 strcat (newline, " ");
+	 goto NEXT_LINE;
+      }
+   }
+
+   else {
+      int tokmatch = 0;
+      int subword = 0;
+      int ttix, ttlen, ftlen;
+
+      strcpy (frmline, rfp);
+      fp = print_token (frmline, ftoken, fterm);
+      if (ftoken[0] == ':' || ftoken[0] == '(')
+         subword = 1;
+      ftlen = strlen(ftoken);
+
+      for (tp = print_token (cmpline, ttoken, tterm); tp;
+           tp = print_token (tp, ttoken, tterm)) {
+#ifdef DEBUG_REPLACE
+	 fprintf (stdout, "   tterm = '%s', ttoken = '%s', ftoken = '%s'\n",
+		  tterm, ttoken, ftoken);
+#endif
+	 ttlen = strlen(ttoken);
+	 ttix = 0;
+	 if (rep->lead_trail == CB_REPLACE_LEADING) {
+	    subword = 1;
+	 }
+	 else if (rep->lead_trail == CB_REPLACE_TRAILING) {
+	    if (ttlen >= ftlen) {
+	       subword = 1;
+	       ttix = ttlen - ftlen;
+	       ttlen = ttix;
+	    }
+	 }
+	 if (subword) {
+            tokmatch = !strncasecmp (&ttoken[ttix], ftoken, ftlen);
+	 } else {
+            tokmatch = !strcasecmp (ttoken, ftoken);
+	 }
+         if (tokmatch) {
+	    if (subword) {
+	       if (rep->lead_trail == CB_REPLACE_LEADING) {
+		  strcat (newline, rep->to);
+		  strcat (newline, &ttoken[ftlen]);
+	       }
+	       else if (rep->lead_trail == CB_REPLACE_TRAILING) {
+		  strncat (newline, ttoken, ttlen);
+		  strcat (newline, rep->to);
+	       }
+	       else {
+		  strcat (newline, rep->to);
+	       }
+	    }
+	    else {
+	       strcat (newline, rep->to);
+	    }
+	    strcat (newline, tterm);
+	    match = 1;
+	 }
+	 else {
+	    strcat (newline, ttoken);
+	    strcat (newline, tterm);
+	 }
+      }
+   }
+
+   if (match) {
+#ifdef DEBUG_REPLACE
+      fprintf (stdout, "   match = TRUE\n   newline = %s\n", newline);
+#endif
+      if (fixed) {
+	 fp = print_token (newline, ftoken, fterm);
+	 for (j = firstcol; (j < last) && isspace(pline[k][j]); j++) ;
+	 if (j >= CB_MARGIN_B) firstcol = CB_MARGIN_B;
+	 for (k = 0; k < plinecnt; k++) {
+	    int nextrec;
+	    nextrec = 0;
+	    j = firstcol;
+	    while (fp && !nextrec) {
+	       int ftlen;
+	       ftlen = strlen(ftoken);
+	       i = 0;
+	       if (ftlen >= (CB_SEQUENCE - firstcol)) {
+#ifdef DEBUG_REPLACE
+		  fprintf (stdout, "   ftlen = %d\n", ftlen);
+#endif
+		  while (ftlen) {
+		     pline[k][j++] = ftoken[i++];
+		     ftlen--;
+		     if (j == CB_SEQUENCE) {
+#ifdef DEBUG_REPLACE
+			fprintf (stdout, "   NEW pline[%2d] = %s\n",
+				 k, pline[k]);
+#endif
+			j = firstcol;
+			k++;
+			if (k == plinecnt) {
+			   strcpy (pline[plinecnt+1], pline[plinecnt]);
+			   strcpy (pline[plinecnt], pline[plinecnt-1]);
+			   memset (&pline[plinecnt][CB_MARGIN_A], ' ', 
+				   CB_SEQUENCE - CB_MARGIN_A);
+			   pline[plinecnt][CB_INDICATOR] = '&';
+			   plinecnt++;
+			}
+		     }
+		  }
+		  pline[k][j++] = ' ';
+	       }
+	       else {
+		  if ((j + 2 + ftlen) < last) {
+		     for (i = 0; i < strlen(ftoken); i++)
+			pline[k][j++] = ftoken[i];
+		     pline[k][j++] = fterm[0] ? fterm[0] : ' ';
+		     if (fterm[0] == '.')
+			pline[k][j++] = ' ';
+		  }
+		  else
+		     nextrec = 1;
+	       }
+	       fp = print_token (fp, ftoken, fterm);
+	    }
+	    if (j == firstcol) 
+	       pline[k][CB_INDICATOR] = ' ';
+	    while (j < last) pline[k][j++] = ' ';
+#ifdef DEBUG_REPLACE
+	    fprintf (stdout, "   NEW pline[%2d] = %s\n", k, pline[k]);
+#endif
+	 }
+      }
+      else {
+	 fp = print_token (newline, ftoken, fterm);
+	 for (k = 0; k < plinecnt; k++) {
+	    j = firstcol;
+	    pline[k][j] = 0;
+	    while (fp) {
+	       strcat (pline[k], ftoken);
+	       strcat (pline[k], fterm);
+	       j++;
+	       fp = print_token (fp, ftoken, fterm);
+	    }
+	    if (j == firstcol) {
+	       strcat (pline[k], " ");
+	    }
+	 }
+      }
+   }
+
+   return plinecnt;
+}
+
+static int
+print_replace_main (struct list_files *cfile, FILE *fd,
+		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH+2],
+		    int plinecnt, int linenum)
+{
+   char *tp;
+   struct list_replace *rep;
+   int i, fixed, firstcol;
+   int iscopy, isreplace, isoff;
+   char tterm[2], ttoken[CB_LINE_LENGTH+2];
+   char cmpline[CB_LINE_LENGTH+2];
+
+   fixed = (cb_source_format == CB_FORMAT_FIXED);
+   if (is_comment_line (pline[0], fixed))
+      return plinecnt;
+
+   firstcol = 0;
+   if (fixed)
+      firstcol = CB_MARGIN_A;
+
+#ifdef DEBUG_REPLACE
+   fprintf (stdout, "print_replace_main: linenum = %d\n", linenum);
+   fprintf (stdout, "   plinecnt = %d\n", plinecnt);
+   for (i = 0; i < plinecnt; i++)
+      fprintf (stdout, "   pline[%2d]: %s\n", i, pline[i]);
+#endif
+
+   compare_prepare (cmpline, pline, 0, plinecnt, firstcol, fixed);
+   tp = print_token (cmpline, ttoken, tterm);
+   isreplace = !strcasecmp (ttoken, "REPLACE");
+   iscopy = !strcasecmp (ttoken, "COPY");
+   isoff = 0;
+   if (isreplace) {
+      tp = print_token (tp, ttoken, tterm);
+      isoff = !strcasecmp (ttoken, "OFF");
+   }
+
+   if (!cb_inreplace && isreplace) {
+	 if (!isoff) {
+	    cb_inreplace = 1;
+#ifdef DEBUG_REPLACE
+            for (i = 0, rep = cfile->replace_head; rep; i++, rep = rep->next) {
+	       if (rep->firstline < (linenum + 10)) {
+		  if (i == 0)
+		     fprintf (stdout, "   replace_list: \n");
+		  fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
+		  fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
+		  fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+	       }
+	    }
+#endif
+	 }
+   }
+   else if (cb_inreplace) {
+
+      if (isreplace) {
+	 if (isoff) {
+	    cb_inreplace = 0;
+	    rep = cfile->replace_head;
+	    while (rep && rep->firstline < linenum) {
+	       cfile->replace_head = rep->next;
+	       free (rep);
+	       rep = cfile->replace_head;
+	    }
+	 }
+      }
+      if (cb_inreplace) {
+	 if (iscopy) {
+	    if (cfile->copy_head) {
+	       struct list_files *cur;
+
+	       for (i = 0; i < plinecnt; i++) {
+		  print_line (cfile, pline[i], linenum + i, 0, fixed);
+		  pline[i][0] = 0;
+	       }
+	       cur = cfile->copy_head;
+	       if (!cur->replace_head) {
+		  struct list_replace *repl;
+
+		  rep = cfile->replace_head;
+		  while (rep && rep->firstline <= linenum) {
+		     repl = cobc_malloc (sizeof (struct list_replace));
+		     memcpy (repl, rep, sizeof (struct list_replace));
+		     repl->next = NULL;
+		     if (cur->replace_tail) {
+			cur->replace_tail->next = repl;
+		     }
+		     if (!cur->replace_head) {
+			cur->replace_head = repl;
+		     }
+		     cur->replace_tail = repl;
+		     rep = rep->next;
+		  }
+	       }
+	       print_program_code (cur, 1);
+	       cfile->copy_head = cur->next;
+	       free (cur);
+	    }
+	 }
+	 else {
+	    rep = cfile->replace_head;
+	    while (rep && rep->firstline < linenum) {
+	       plinecnt = print_replace_text (cfile, fd, rep, pline,
+					      plinecnt, linenum);
+	       rep = rep->next;
+	    }
+	 }
+      }
+   }
+   return plinecnt;
+}
+
+static void
+print_program_code (struct list_files *cfile, int incopy)
+{
+   FILE *fd;
+   struct list_replace *rep;
+   struct list_files *cur;
+   struct list_error *err;
+   int i;
+   int linenum;
+   int fixed, done, eof;
+   int plinecnt;
+   char pline[CB_READ_AHEAD][CB_LINE_LENGTH+2];
+
+   fixed = (cb_source_format == CB_FORMAT_FIXED);
+   if (cb_src_list_file) {
+#ifdef DEBUG_REPLACE
+      struct list_skip *skip;
+
+      fprintf (stdout, "print_program_code: incopy = %s\n",
+	       incopy ? "YES" : "NO");
+      fprintf (stdout, "   name: %s\n", cfile->name);
+      fprintf (stdout, "   copy_line: %d\n", cfile->copy_line);
+      for (i = 0, cur = cfile->copy_head; cur; i++, cur = cur->next) {
+	 if (i == 0)
+	    fprintf (stdout, "   copy_books: \n");
+         fprintf (stdout, "      name[%d]: %s\n", i, cur->name);
+         fprintf (stdout, "      line[%d]: %d\n", i, cur->copy_line);
+      }
+      for (i = 0, rep = cfile->replace_head; rep; i++, rep = rep->next) {
+	 if (i == 0)
+	    fprintf (stdout, "   replace_list: \n");
+         fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
+         fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
+         fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+      }
+      for (i = 0, err = cfile->err_head; err; i++, err = err->next) {
+	 if (i == 0)
+	    fprintf (stdout, "   error_list: \n");
+         fprintf (stdout, "      line[%d]: %d\n", i, err->line);
+         fprintf (stdout, "      pref[%d]: '%s'\n", i, err->prefix);
+         fprintf (stdout, "      msg [%d]: '%s'\n", i, err->msg);
+      }
+      for (i = 0, skip = cfile->skip_head; skip; i++, skip = skip->next) {
+	 if (i == 0)
+	    fprintf (stdout, "   skip_list: \n");
+         fprintf (stdout, "      line[%d]: %d\n", i, skip->skipline);
+      }
+#endif
+      if ((fd = fopen (cfile->name, "r")) != NULL) {
+ 
+ 	 linenum = 1;
+  	 plinecnt = 0;
+  
+  	 eof = 0;
+  	 done = 0;
+  	 if (print_read (fd, pline[plinecnt], fixed) >= 0) {
+	    int prec;
+
+	    while (!done) {
+	    NEXT_REC:
+	       if (print_read (fd, pline[plinecnt+1], fixed) < 0) {
+		  if (eof) {
+		     done = 1;
+		     break;
+		  }
+		  eof = 1;
+	       }
+	       plinecnt++;
+	       if (is_continue_line (pline[fixed ? plinecnt : plinecnt-1],
+				     fixed)) {
+		  goto NEXT_REC;
+	       }
+
+	       if (!incopy) {
+		  plinecnt = print_replace_main (cfile, fd, pline, plinecnt,
+						 linenum);
+	       }
+	       else {
+		  if (cfile->replace_head) {
+		     rep = cfile->replace_head;
+		     while (rep) {
+			plinecnt = print_replace_text (cfile, fd, rep, pline,
+						       plinecnt, linenum);
+			rep = rep->next;
+		     }
+		  }
+	       }
+
+	       prec = 0;
+	       for (i = 0; i < plinecnt; i++) {
+		  if (pline[i][0]) {
+		     if (pline[i][CB_INDICATOR] == '&') {
+		       print_line (cfile, pline[i], linenum, incopy, fixed);
+		     }
+		     else {
+		       print_line (cfile, pline[i], linenum + i, incopy, fixed);
+		       prec++;
+		     }
+		  }
+	       }
+
+	       if (cfile->copy_head) {
+		  cur = cfile->copy_head;
+		  if (cur->copy_line == linenum) {
+		     struct list_replace *repl;
+
+		     rep = cfile->replace_head;
+		     /*  COPY in COPY, add replacement text to new COPY */
+		     while (rep && incopy) {
+		        repl = cobc_malloc (sizeof (struct list_replace));
+		        memcpy (repl, rep, sizeof (struct list_replace));
+		        repl->next = NULL;
+		        if (cur->replace_tail) {
+			   cur->replace_tail->next = repl;
+		        }
+		        if (!cur->replace_head) {
+			   cur->replace_head = repl;
+		        }
+		        cur->replace_tail = repl;
+		        rep = rep->next;
+		     }
+		     print_program_code (cur, 1);
+		     cfile->copy_head = cur->next;
+		     free (cur);
+		  }
+	       }
+	       strcpy (pline[0], pline[plinecnt]);
+	       linenum += prec;
+	       plinecnt = 0;
+	       if (pline[0][0] == 0)
+	          eof = 1;
+	    }
+	 }
+      }
+   }
+
+   while (cfile->err_head) {
+      err = cfile->err_head;
+      cfile->err_head = err->next;
+      free (err);
+   }
+}
+
 /* Create single-element C source */
 
 static int
@@ -3438,6 +4469,7 @@ process_translate (struct filename *fn)
 	struct handler_struct	*hstr1;
 	struct handler_struct	*hstr2;
 	struct local_filename	*lf;
+	struct list_files       *cfile;
 	int			ret;
 	int			i;
 
@@ -3445,6 +4477,29 @@ process_translate (struct filename *fn)
 	cb_source_file = NULL;
 	cb_source_line = 0;
 	errorcount = 0;
+
+	cb_listing_page = 0;
+        strcpy (cb_listing_filename, fn->source);
+	strcpy (cb_listing_ttl, "LINE    ");
+	if (cb_source_format == CB_FORMAT_FIXED) {
+	   strcat (cb_listing_ttl,
+		   "PG/LN  A...B......................................"
+		   "......................");
+	   if (cb_listing_wide) {
+		   strcat (cb_listing_ttl, "SEQUENCE");
+	   }
+	}
+	else {
+	   if (cb_listing_wide) {
+	      strcat (cb_listing_ttl, "................................");
+	   }
+	   strcat (cb_listing_ttl,
+		   ".....................SOURCE......................."
+		   "......................");
+	   if (cb_listing_wide) {
+		   strcat (cb_listing_ttl, "........");
+	   }
+	}
 
 	/* Open the input file */
 	yyin = fopen (fn->preprocess, "r");
@@ -3476,9 +4531,25 @@ process_translate (struct filename *fn)
 		fflush (stderr);
 	}
 
-	if (ret || cb_flag_syntax_only) {
+	/* Print the listing for this file */
+	cfile = cb_listing_files;
+	print_program_code(cfile, 0);
+	cb_listing_files = cb_listing_files->next;
+	free (cfile);
+
+	if (ret) {
+		print_program_trailer();
 		return !!ret;
 	}
+	if (cb_flag_syntax_only || current_program->entry_list == NULL) {
+		print_program_trailer();
+		return 0;
+	}
+
+
+	//if (ret || cb_flag_syntax_only) {
+	//	return !!ret;
+	//}
 	if (current_program && current_program->entry_list == NULL) {
 		return 0;
 	}
@@ -3567,6 +4638,9 @@ process_translate (struct filename *fn)
 	errorcount = 0;
 	/* Translate to C */
 	codegen (p, 0);
+
+	/* Print program trailer */
+	print_program_trailer();
 
 	/* Close files */
 	if(unlikely(fclose (cb_storage_file) != 0)) {
@@ -4201,6 +5275,7 @@ main (int argc, char **argv)
 
 	file_list = NULL;
 	cb_listing_file = NULL;
+	cb_src_list_file = NULL;
 	ppin = NULL;
 	ppout = NULL;
 	yyin = NULL;
@@ -4595,6 +5670,13 @@ main (int argc, char **argv)
 		}
 	}
 
+	/* Open source listing file */
+	if (cb_listing_outputfile) {
+		cb_src_list_file = fopen (cb_listing_outputfile, "w");
+		if (!cb_src_list_file)
+			cobc_terminate (cb_listing_outputfile);
+	}
+
 	if (verbose_output) {
 		fputs (_("Command line:"), stderr);
 		putc ('\t', stderr);
@@ -4621,12 +5703,25 @@ main (int argc, char **argv)
 	local_level = 0;
 
 	while (iargs < argc) {
+		struct list_files *newfile;
+
 		/* Set up file parameters */
 		fn = process_filename (argv[iargs++]);
 		if (!fn) {
 			cobc_clean_up (1);
 			return 1;
 		}
+
+		newfile = cobc_malloc (sizeof (struct list_files));
+		memset (newfile, 0, sizeof (struct list_files));
+		if (cb_current_file) {
+			cb_current_file->next = newfile;
+		}
+		if (!cb_listing_files) {
+		   cb_listing_files = newfile;
+		}
+		cb_current_file = newfile;
+
 		cb_id = 1;
 		cb_pic_id = 1;
 		cb_attr_id = 1;
@@ -4640,6 +5735,7 @@ main (int argc, char **argv)
 			cb_compile_level = CB_LEVEL_ASSEMBLE;
 			cobc_flag_main = 0;
 		}
+		cb_current_file = cb_listing_files;
 
 		if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
 		    fn->need_preprocess) {

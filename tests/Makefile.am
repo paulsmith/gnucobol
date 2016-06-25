@@ -40,6 +40,7 @@ testsuite_sources = \
 	testsuite.src/syn_set.at \
 	testsuite.src/syn_subscripts.at \
 	testsuite.src/syn_value.at \
+	testsuite.src/listings.at \
 	testsuite.src/run_accept.at \
 	testsuite.src/run_extensions.at \
 	testsuite.src/run_file.at \

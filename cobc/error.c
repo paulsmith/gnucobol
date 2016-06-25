@@ -46,6 +46,8 @@ static void
 print_error (const char *file, int line, const char *prefix,
 	     const char *fmt, va_list ap)
 {
+	char errmsg[BUFSIZ];
+
 	if (!file) {
 		file = cb_source_file;
 	}
@@ -86,8 +88,38 @@ print_error (const char *file, int line, const char *prefix,
 	if (prefix) {
 		fprintf (stderr, "%s", prefix);
 	}
-	vfprintf (stderr, fmt, ap);
-	putc ('\n', stderr);
+	vsprintf (errmsg, fmt, ap);
+	fprintf (stderr, "%s\n", errmsg);
+
+	if (cb_src_list_file) {
+		struct list_error *err;
+		struct list_files *cfile;
+
+		err = cobc_malloc (sizeof (struct list_error));
+		memset (err, 0, sizeof (struct list_error));
+		err->line = line;
+		strcpy (err->prefix, prefix);
+		strcpy (err->msg, errmsg);
+		cfile = cb_current_file;
+		if (strcmp (cfile->name, file)) {
+		   cfile = cfile->copy_head;
+		   while (cfile) {
+		      if (!strcmp (cfile->name, file)) {
+		         break;
+		      }
+		      cfile = cfile->next;
+		   }
+		}
+		if (cfile) {
+		   if (cfile->err_tail) {
+		      cfile->err_tail->next = err;
+		   }
+		   if (!cfile->err_head) {
+			cfile->err_head = err;
+		   }
+		   cfile->err_tail = err;
+		}
+	}
 }
 
 void

@@ -96,6 +96,7 @@ static int ppwrap (void) {
 
 struct copy_info {
 	struct copy_info	*next;
+	struct list_files       *listfile;
 	const char		*file;
 	char			*dname;
 	struct cb_replace_list	*replacing;
@@ -118,6 +119,7 @@ struct plex_stack {
 /* Local variables */
 static char			*plexbuff1 = NULL;
 static char			*plexbuff2 = NULL;
+static struct list_files	*old_list_file = NULL;
 static size_t			newline_count = 0;
 static size_t			within_comment = 0;
 static size_t			inside_bracket = 0;
@@ -152,6 +154,7 @@ static void	check_listing		(const char *, const unsigned int);
 static void	skip_to_eol		(void);
 static void	display_to_eol		(void);
 static void	check_comments		(const char *, const char *);
+static void	set_print_replace_list	(struct cb_replace_list *list);
 
 %}
 
@@ -202,6 +205,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	if (!cb_flag_debugging_line) {
 		skip_to_eol ();
 	}
+}
+
+^[ ]*">>"[ ]?"PAGE"	{
+	skip_to_eol ();
 }
 
 ^[ ]*">>"[ ]?"SOURCE "	{
@@ -323,7 +330,20 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 "COPY"			{
+	struct list_files *newfile;
 	yy_push_state (COPY_STATE);
+	newfile = cobc_malloc (sizeof (struct list_files));
+	memset (newfile, 0, sizeof (struct list_files));
+	newfile->copy_line = cb_source_line;
+	if (cb_current_file->copy_tail) {
+		cb_current_file->copy_tail->next = newfile;
+	}
+	if (!cb_current_file->copy_head) {
+		cb_current_file->copy_head = newfile;
+	}
+	cb_current_file->copy_tail = newfile;
+	old_list_file = cb_current_file;
+	cb_current_file = newfile;
 	return COPY;
 }
 
@@ -701,6 +721,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	/* Close the current file */
 	fclose (ppin);
 
+	if (p->listfile) {
+	   cb_current_file = p->listfile;
+	}
+
 	/* Switch to previous buffer */
 	switch_to_buffer (p->line, p->file, p->buffer);
 
@@ -742,6 +766,7 @@ pp_set_replace_list (struct cb_replace_list *list, const cob_u32_t is_pushpop)
 		list->prev = NULL;
 	}
 	base_replace_list = list;
+	set_print_replace_list (list);
 }
 
 int
@@ -784,6 +809,8 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		return -1;
 	}
 
+	strcpy (cb_current_file->name, name);
+
 	/* Check for BOM - *not* for input from stdin as rewind() clears the input
 	  buffer if used on stdin and output in console has normally no BOM at all */
 	if (strcmp(name, COB_DASH) != 0) {
@@ -808,7 +835,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	p->source_format = cb_source_format;
 
 	p->next = copy_stack;
+	p->listfile = old_list_file;
 	copy_stack = p;
+	cb_current_file->copy_line = cb_source_line;
 
 	/* Set replacing list */
 	if (replacing_list) {
@@ -817,6 +846,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 			replacing_list->last = current_replace_list->last;
 		}
 		current_replace_list = replacing_list;
+		set_print_replace_list (replacing_list);
 	}
 
 	dname = cobc_strdup (name);
@@ -839,6 +869,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 	struct cb_text_list	*el;
 	const char		*s;
 
+	cb_current_file->copy_line = cb_source_line;
 	/* Locate and open COPY file */
 	if (lib) {
 		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
@@ -1000,6 +1031,38 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 }
 
 /* Local functions */
+
+static void
+set_print_replace_list (struct cb_replace_list *list)
+{
+	if (cb_src_list_file) {
+
+	   struct cb_replace_list *r;
+	   struct cb_text_list	*l;
+
+	   for (r = list; r; r = r->next) {
+	      struct list_replace *repl;
+
+	      repl = cobc_malloc (sizeof (struct list_replace));
+	      memset (repl, 0, sizeof (struct list_replace));
+	      repl->firstline = r->line_num;
+	      repl->lead_trail = r->lead_trail;
+	      repl->lastline = cb_source_line;
+	      for (l = r->old_text; l; l = l->next) 
+		 strcat (repl->from, l->text);
+	      for (l = r->new_text; l; l = l->next) 
+		 strcat (repl->to, l->text);
+	      
+	      if (cb_current_file->replace_tail) {
+		 cb_current_file->replace_tail->next = repl;
+	      }
+	      if (!cb_current_file->replace_head) {
+		 cb_current_file->replace_head = repl;
+	      }
+	      cb_current_file->replace_tail = repl;
+	   }
+	}
+}
 
 static void
 switch_to_buffer (const int line, const char *file, const YY_BUFFER_STATE buffer)
@@ -1218,6 +1281,21 @@ start:
 	if (plex_skip_input) {
 		/* Skipping input */
 		newline_count++;
+		if (cb_src_list_file) {
+		      struct list_skip *skip;
+
+		      skip = cobc_malloc (sizeof (struct list_skip));
+		      memset (skip, 0, sizeof (struct list_skip));
+		      skip->skipline = cb_source_line + (int)newline_count;
+		      
+		      if (cb_current_file->skip_tail) {
+			 cb_current_file->skip_tail->next = skip;
+		      }
+		      if (!cb_current_file->skip_head) {
+			 cb_current_file->skip_head = skip;
+		      }
+		      cb_current_file->skip_tail = skip;
+		}
 		goto start;
 	}
 

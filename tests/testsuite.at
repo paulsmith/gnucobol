@@ -48,6 +48,11 @@ m4_include([syn_screen.at])		# 13.9 SCREEN section
 m4_include([syn_set.at])		# 14.8.35 SET statement
 m4_include([syn_functions.at])		# 15 Intrinsic functions
 
+## Listings tests
+AT_BANNER([Listings tests])
+
+m4_include([listings.at])		# Listings
+
 ## Run tests
 AT_BANNER([Run tests])
 
