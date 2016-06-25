@@ -1,3 +1,9 @@
+2016-06-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l: fixed bug #248, where any directive was evaluated inside the
+	  false part of a conditional directive. Restricted this to ELSE,
+	  END(-IF), WHEN, etc.
+
 2016-06-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, error.c: added hints to change dialect if an undefined word

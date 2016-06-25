@@ -3588,7 +3588,6 @@ AT_CLEANUP
 
 
 AT_SETUP([Conditional/define directives (1)])
-AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3713,6 +3712,29 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0],
 [OK
 ])
+AT_CLEANUP
 
+AT_SETUP([Conditional/define directives (6)])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+       >>IF X DEFINED
+         >>DISPLAY X defined
+       >>ELSE
+         >>DISPLAY X not defined
+         >>DEFINE X 1
+       >>END-IF
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE -D X prog.cob], [0],
+[X defined
+])
+AT_CHECK([$COMPILE prog.cob], [0],
+[X not defined
+])
 AT_CLEANUP
 

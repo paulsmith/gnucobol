@@ -1076,6 +1076,19 @@ switch_to_buffer (const int line, const char *file, const YY_BUFFER_STATE buffer
 }
 
 static int
+is_condition_directive_clause (const char *buff)
+{
+	while (buff && !isalpha (*buff)) {
+		++buff;
+	}
+
+	return buff && (strncmp (buff, "END", 3) == 0
+			|| strncmp (buff, "ELSE", 4) == 0
+			|| strncmp (buff, "ELIF", 4) == 0
+			|| strncmp (buff, "WHEN", 4) == 0);
+}
+
+static int
 ppinput (char *buff, const size_t max_size)
 {
 	char	*bp;
@@ -1266,7 +1279,8 @@ start:
 		}
 		i = 1;
 	}
-	if (ipchar) {
+	if (ipchar && (!plex_skip_input
+		       || is_condition_directive_clause (bp))) {
 		/* Directive - pass complete line with NL to ppparse */
 		if (newline_count) {
 			/* Move including NL and NULL byte */
