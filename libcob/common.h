@@ -1255,15 +1255,7 @@ COB_EXPIMP void print_version(void);
 COB_EXPIMP int cob_load_config(void);
 COB_EXPIMP void print_runtime_conf(void);
 
-void cob_set_exception(const int);
-
-char* cob_int_to_string(int, char*);
-char* cob_int_to_formatted_bytestring(int, char*);
-char* cob_strcat(char*, char*);
-char* cob_strjoin(char**, int, char*);
-
-int cob_min_int(int, int);
-int cob_max_int(int, int);
+COB_EXPIMP void cob_set_exception(const int);
 
 /* General functions */
 

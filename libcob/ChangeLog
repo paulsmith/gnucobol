@@ -1,8 +1,15 @@
 
+2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h, coblocal.h: moved internal functions to coblocal as COB_HIDDEN
+	* common.h: added COB_EXPIMP to cob_set_exception
+	* common.c, coblocal.h: #ifdef 0 for unused helper functions
+	  cob_int_to_string and cob_int_to_formatted_bytestring
+
 2016-06-26  Edward Hart <edward.dan.hart@gmail.com>
 
-	* common.*, move.c, string.c: moved cob_max_int and cob_min_int to
-	  common.c.
+	* common.c, common.h, move.c, string.c: moved cob_max_int and cob_min_int
+	  to common.c.
 
 2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1391,7 +1398,7 @@
 
 2006-02-08  Roger While <simrw@sim-basis.de>
 
-	* common.c/h, numeric.c/h: Optimize COMP/COMP-3
+	* common.c, common.h, numeric.c, numeric.h: Optimize COMP/COMP-3
 
 2006-02-01  Roger While <simrw@sim-basis.de>
 

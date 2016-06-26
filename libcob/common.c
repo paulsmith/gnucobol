@@ -4253,6 +4253,8 @@ cob_set_locale (cob_field *locale, const int category)
 #endif
 }
 
+
+#if 0 /* currently not used */
 char *
 cob_int_to_string (int i, char* number)
 {
@@ -4284,6 +4286,7 @@ cob_int_to_formatted_bytestring (int i, char* number)
 	sprintf (number, "%3.2f %s", d, strB);
 	return number;
 }
+#endif
 
 char *
 cob_strcat (char* str1, char* str2)
