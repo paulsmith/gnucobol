@@ -89,24 +89,6 @@ static const cob_s64_t	cob_exp10_ll[19] = {
 	COB_S64_C(1000000000000000000)
 };
 
-static COB_INLINE int
-cob_min_int (const int x, const int y)
-{
-	if (x < y) {
-		return x;
-	}
-	return y;
-}
-
-static COB_INLINE int
-cob_max_int (const int x, const int y)
-{
-	if (x > y) {
-		return x;
-	}
-	return y;
-}
-
 static COB_INLINE COB_A_INLINE void
 own_byte_memcpy (unsigned char *s1, const unsigned char *s2, size_t size)
 {

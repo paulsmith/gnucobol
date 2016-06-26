@@ -1262,6 +1262,9 @@ char* cob_int_to_formatted_bytestring(int, char*);
 char* cob_strcat(char*, char*);
 char* cob_strjoin(char**, int, char*);
 
+int cob_min_int(int, int);
+int cob_max_int(int, int);
+
 /* General functions */
 
 COB_EXPIMP cob_global		*cob_get_global_ptr	(void);

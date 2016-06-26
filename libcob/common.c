@@ -1190,6 +1190,24 @@ set_cob_time_offset (struct cob_time *cb_time)
 
 /* Global functions */
 
+COB_INLINE int
+cob_min_int (const int x, const int y)
+{
+	if (x < y) {
+		return x;
+	}
+	return y;
+}
+
+COB_INLINE int
+cob_max_int (const int x, const int y)
+{
+	if (x > y) {
+		return x;
+	}
+	return y;
+}
+
 int
 cob_get_exception_code (void)
 {

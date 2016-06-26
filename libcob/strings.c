@@ -91,15 +91,6 @@ static cob_field		str_cob_low;
 
 /* Local functions */
 
-static COB_INLINE int
-cob_min_int (const int x, const int y)
-{
-	if (x < y) {
-		return x;
-	}
-	return y;
-}
-
 static void
 cob_str_memcpy (cob_field *dst, unsigned char *src, const int size)
 {

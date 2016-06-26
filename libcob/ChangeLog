@@ -1,4 +1,9 @@
 
+2016-06-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.*, move.c, string.c: moved cob_max_int and cob_min_int to
+	  common.c.
+
 2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, common.h: minor fixes for compatibility to VC2005

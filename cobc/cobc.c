@@ -294,7 +294,7 @@ static int		cb_listing_eject = 0;
 static int		cb_inreplace = 0;
 static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
-static char		cb_listing_ttl[133];	/* Listing subtitle */
+static char		cb_listing_title[133];	/* Listing subtitle */
 
 #ifdef	_MSC_VER
 static const char	*manicmd;
@@ -1969,8 +1969,8 @@ process_command_line (const int argc, char **argv)
 	/* Translate command line arguments from WIN to UNIX style */
 	argnum = 1;
 	while (++argnum <= argc) {
-		if (strrchr(argv[argnum -1], '/') == argv[argnum -1]) {
-			argv[argnum -1][0] = '-';
+		if (strrchr(argv[argnum - 1], '/') == argv[argnum - 1]) {
+			argv[argnum - 1][0] = '-';
 		}
 	}
 #endif
@@ -3480,7 +3480,8 @@ preprocess (struct filename *fn)
 static void
 print_program_header (void)
 {
-	char version[20];
+	char		version[20];
+	const char	*format_str;
 
 	if (++cb_listing_linecount >= cb_lines_per_page) {
 		sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
@@ -3492,23 +3493,19 @@ print_program_header (void)
 		}
 
 		if (cb_listing_wide) {
-			fprintf (cb_src_list_file,
-				 "%s %-6.6s  %-65.65s  %s  Page %04d\n\n",
-				 PACKAGE_NAME,
-				 version,
-				 cb_listing_filename,
-				 cb_listing_date,
-				 ++cb_listing_page);
+			format_str = "%s %-6.6s  %-65.65s  %s  Page %04d\n\n";
 		} else {
-			fprintf (cb_src_list_file,
-				 "%s %-6.6s  %-25.25s  %s  Page %04d\n\n",
-				 PACKAGE_NAME,
-				 version,
-				 cb_listing_filename,
-				 cb_listing_date,
-				 ++cb_listing_page);
+			format_str = "%s %-6.6s  %-25.25s  %s  Page %04d\n\n";
 		}
-		fprintf (cb_src_list_file, "%s\n\n", cb_listing_ttl);
+		fprintf (cb_src_list_file,
+			 format_str,
+			 PACKAGE_NAME,
+			 version,
+			 cb_listing_filename,
+			 cb_listing_date,
+			 ++cb_listing_page);
+
+		fprintf (cb_src_list_file, "%s\n\n", cb_listing_title);
 	}
 }
 
@@ -3523,142 +3520,162 @@ check_filler_name (char *name)
 }
 
 static void
+set_type (int category, char *type)
+{
+	switch (category) {
+	case CB_CATEGORY_ALPHABETIC:
+		strcpy (type, "ALPHABETIC");
+		break;
+	case CB_CATEGORY_UNKNOWN:
+	case CB_CATEGORY_ALPHANUMERIC:
+	case CB_CATEGORY_ALPHANUMERIC_EDITED:
+		strcpy (type, "ALPHANUMERIC");
+		break;
+	case CB_CATEGORY_BOOLEAN:
+		strcpy (type, "BOOLEAN");
+		break;
+	case CB_CATEGORY_INDEX:
+		strcpy (type, "INDEX");
+		break;
+	case CB_CATEGORY_NATIONAL:
+	case CB_CATEGORY_NATIONAL_EDITED:
+		strcpy (type, "NATIONAL");
+		break;
+	case CB_CATEGORY_NUMERIC:
+	case CB_CATEGORY_NUMERIC_EDITED:
+		strcpy (type, "NUMERIC");
+		break;
+	case CB_CATEGORY_OBJECT_REFERENCE:
+		strcpy (type, "REFERENCE");
+		break;
+	case CB_CATEGORY_DATA_POINTER:
+	case CB_CATEGORY_PROGRAM_POINTER:
+		strcpy (type, "POINTER");
+		break;
+	default:
+		strcpy (type, "UNKNOWN");
+	}
+}
+
+static void
 print_fields (int lvl, struct cb_field *top)
 {
-	int	i;
 	int	first = 1;
-	int	getcat;
-	int	oldlevel = 0;
+	int	get_cat;
+	int	old_level = 0;
 	char	type[20];
-	char	lclname[80];
+	char	lcl_name[80] = { '\0' };
 
-	while (top) {
-		if (top->level) {
-			lclname[0] = '\0';
-			for (i = 0; i < lvl; i++) {
-				strcat (lclname, "  ");
-			}
-			strcat (lclname, check_filler_name((char *)top->name));
-			getcat = 1;
-			if (top->level == 01) {
-				if (!first) {
-					print_program_header ();
-					fprintf (cb_src_list_file, "\n");
-				}
-				if (top->children) {
-					strcpy (type, "GROUP");
-					getcat = 0;
-				}
-			}
-			else if (top->level == 77) {
-				if (!first && (oldlevel != 77)) {
-					print_program_header ();
-					fprintf (cb_src_list_file, "\n");
-				}
-			}
-			if (getcat) {
-				switch (top->common.category) {
-				case CB_CATEGORY_ALPHABETIC:
-					strcpy (type, "ALPHABETIC");
-					break;
-				case CB_CATEGORY_UNKNOWN:
-				case CB_CATEGORY_ALPHANUMERIC:
-				case CB_CATEGORY_ALPHANUMERIC_EDITED:
-					strcpy (type, "ALPHANUMERIC");
-					break;
-				case CB_CATEGORY_BOOLEAN:
-					strcpy (type, "BOOLEAN");
-					break;
-				case CB_CATEGORY_INDEX:
-					strcpy (type, "INDEX");
-					break;
-				case CB_CATEGORY_NATIONAL:
-				case CB_CATEGORY_NATIONAL_EDITED:
-					strcpy (type, "NATIONAL");
-					break;
-				case CB_CATEGORY_NUMERIC:
-				case CB_CATEGORY_NUMERIC_EDITED:
-					strcpy (type, "NUMERIC");
-					break;
-				case CB_CATEGORY_OBJECT_REFERENCE:
-					strcpy (type, "REFERENCE");
-					break;
-				case CB_CATEGORY_DATA_POINTER:
-				case CB_CATEGORY_PROGRAM_POINTER:
-					strcpy (type, "POINTER");
-					break;
-				default:
-					strcpy (type, "UNKNOWN");
-				}
-			}
-			print_program_header ();
-			fprintf (cb_src_list_file, "%04d %-14.14s %02d   %-30.30s %s\n",
-				 top->size, type, top->level, lclname,
-				 top->pic ? top->pic->orig : " ");
-			first = 0;
-			oldlevel = top->level;
-			if (top->children) {
-				print_fields (lvl + 1, top->children);
-			}
+        for (; top; top = top->sister) {
+		if (!top->level) {
+			continue;
 		}
-		top = top->sister;
+
+		lcl_name[0] = '\0';
+		memset (lcl_name, ' ', lvl * 2);
+		strcat (lcl_name, check_filler_name((char *)top->name));
+		get_cat = 1;
+
+		if (top->level == 01) {
+			if (!first) {
+				print_program_header ();
+				fprintf (cb_src_list_file, "\n");
+			}
+			if (top->children) {
+				strcpy (type, "GROUP");
+				get_cat = 0;
+			}
+		} else if (top->level == 77 && !first
+			   && old_level != 77) {
+			print_program_header ();
+			fprintf (cb_src_list_file, "\n");
+		}
+
+		if (get_cat) {
+			set_type (top->common.category, type);
+		}
+
+		print_program_header ();
+		fprintf (cb_src_list_file, "%04d %-14.14s %02d   %-30.30s %s\n",
+			 top->size, type, top->level, lcl_name,
+			 top->pic ? top->pic->orig : " ");
+		first = 0;
+		old_level = top->level;
+
+		if (top->children) {
+			print_fields (lvl + 1, top->children);
+		}
 	}
+}
+
+static void
+print_files_and_their_records (cb_tree file_list)
+{
+	cb_tree	l;
+
+	if (file_list == NULL) {
+		return;
+	}
+
+	for (; l; l = CB_CHAIN (l)) {
+		print_program_header ();
+		fprintf (cb_src_list_file, "%04d %-14.14s      %s\n",
+			 CB_FILE (CB_VALUE (l))->record_max,
+			 "FILE",
+			 CB_FILE (CB_VALUE (l))->name);
+		if (CB_FILE (CB_VALUE (l))->record) {
+			print_fields (0, CB_FILE (CB_VALUE (l))->record);
+		}
+		print_program_header ();
+		fprintf (cb_src_list_file, "\n");
+	}
+}
+
+static void
+print_fields_in_section (struct cb_field *first_field_in_section)
+{
+	if (first_field_in_section != NULL) {
+		print_fields (0, first_field_in_section);
+		print_program_header ();
+		fprintf (cb_src_list_file, "\n");
+	}
+}
+
+static COB_INLINE COB_A_INLINE void
+force_new_page_for_next_line (void)
+{
+	cb_listing_linecount = cb_lines_per_page;
 }
 
 static void
 print_program_trailer (void)
 {
-	cb_tree l;
-	char type[20];
-
-	if (cb_src_list_file) {
-		/* Print file/symbol tables */
-		strcpy (cb_listing_ttl,
-			"SIZE TYPE           LVL  NAME                           PICTURE");
-
-		cb_listing_linecount = cb_lines_per_page;
-		print_program_header ();
-
-		if ((l = current_program->file_list) != NULL) {
-			strcpy (type, "FILE");
-			for (; l; l = CB_CHAIN (l)) {
-				print_program_header ();
-				fprintf (cb_src_list_file, "%04d %-14.14s      %s\n",
-					 CB_FILE(CB_VALUE(l))->record_max,
-					 type,
-					 CB_FILE(CB_VALUE(l))->name);
-				if (CB_FILE(CB_VALUE(l))->record) {
-					print_fields (0, CB_FILE(CB_VALUE(l))->record);
-				}
-				print_program_header ();
-				fprintf (cb_src_list_file, "\n");
-			}
-		}
-
-		if (current_program->working_storage != NULL) {
-			print_fields (0, current_program->working_storage);
-			print_program_header ();
-			fprintf (cb_src_list_file, "\n");
-		}
-
-		if (current_program->local_storage != NULL) {
-			print_fields (0, current_program->local_storage);
-			print_program_header ();
-			fprintf (cb_src_list_file, "\n");
-		}
-
-		/* Print error counts */
-
-		fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
-		fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
-		cb_listing_linecount = cb_lines_per_page;
+	if (!cb_src_list_file) {
+		return;
 	}
+
+	/* Print file/symbol tables */
+	
+	strcpy (cb_listing_title,
+		"SIZE TYPE           LVL  NAME                           PICTURE");
+	force_new_page_for_next_line ();
+	print_program_header ();
+
+	print_files_and_their_records (current_program->file_list);
+	print_fields_in_section (current_program->working_storage);
+	print_fields_in_section (current_program->local_storage);
+
+	/* Print error counts */
+
+	fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
+	fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
+	force_new_page_for_next_line ();
 }
 
 static char *
 print_token (char *bp, char *token, char *term)
 {
-	char *otoken = token;
+	char *orig_token = token;
 
 	do {
 		while (*bp && isspace (*bp)) {
@@ -3685,79 +3702,172 @@ print_token (char *bp, char *token, char *term)
 			*token++ = *bp++;
 		}
 		*token = 0;
-	} while (*otoken == 0 && *term != 0);
+	} while (*orig_token == 0 && *term != 0);
 
 	return bp;
 }
 
-static int
-print_read (FILE *fd, char *line, int fixed)
+static void
+terminate_str_at_first_of_char (const char c, char * const str)
 {
-	char *pl, *il;
-	int i;
-	int j;
-	int k;
-	char iline[CB_LINE_LENGTH + 2];
+	char	*first_instance  = strchr (str, '\n');
 
-	memset (line, 0, CB_LINE_LENGTH);
-	if (!fgets (iline, CB_LINE_LENGTH, fd)) {
+	if (first_instance != NULL) {
+		*first_instance = '\0';
+	}
+}
+
+static int
+print_read (FILE *fd, char *out_line, int fixed)
+{
+	char	*out_char;
+	char	*in_char;
+	int	i;
+	int	j;
+	int	spaces_to_add;
+	char	in_line[CB_LINE_LENGTH + 2] =  { '\0' };
+	int	col;
+
+	if (!fgets (in_line, CB_LINE_LENGTH, fd)) {
 		return -1;
 	}
 
-	pl = strchr (iline, '\n');
-	if (pl != NULL) {
-		*pl = '\0';
-	}
-	pl = strchr (iline, '\r');
-	if (pl != NULL) {
-		*pl = '\0';
-	}
+	terminate_str_at_first_of_char ('\n', in_line);
+	terminate_str_at_first_of_char ('\r', in_line);
 
-	il = iline;
-	pl = line;
-	for (i = 0; *il; il++, i++) {
-		if (*il == '\t') {
-			k = 8 - (i % 8);
-			for (j = 0; j < k; j++) {
-				*pl++ = ' ';
+	in_char = in_line;
+	out_char = out_line;
+	for (i = 0; *in_char; in_char++, i++) {
+		if (*in_char == '\t') {
+			spaces_to_add = 8 - (i % 8);
+			for (j = 0; j < spaces_to_add; j++) {
+				*out_char++ = ' ';
 			}
 		} else {
-			*pl++ = *il;
+			*out_char++ = *in_char;
 		}
 	}
-	if (fixed) {
-		for (i = (pl - line); i < 80; i++);
-		*pl++ = ' ';
-	} else {
-		*pl++ = ' ';
-	}
-	*pl = 0;
 
-	return strlen (line);
+	if (fixed) {
+		for (col = out_char - out_line; col < 80; col++) {
+			*out_char++ = ' ';
+		}
+	} else {
+		*out_char++ = ' ';
+	}
+	*out_char = 0;
+
+	return strlen (out_line);
+}
+
+static int
+line_has_page_eject (const char *line, const int fixed)
+{
+	char	*directive_start;
+
+	if (fixed && line[CB_INDICATOR] == '/') {
+		return 1;
+	} else {
+		directive_start = strchr (line, '>');
+		return directive_start != NULL
+			&& !strncasecmp (directive_start, ">>PAGE", 6);
+	}
 }
 
 static void
-print_line (struct list_files *cfile, char *line, int line_num, int incopy,
-	    int fixed)
+terminate_str_at_first_trailing_space (char * const str)
 {
-	struct list_skip *skip;
-	char pch;
-	char buffer[133];
-	char *dp;
-	int j;
+	int	i;
 
-	if (fixed && line[CB_INDICATOR] == '/') {
-		cb_listing_linecount = cb_lines_per_page;
+	for (i = strlen (str) - 1; i; i--) {
+		if (str[i] != ' ') {
+			break;
+		}
+		str[i] = 0;
 	}
-	if (!fixed) {
-		if ((dp = strchr (line, '>')) != NULL) {
-			if (!strncasecmp (dp, ">>PAGE", 6))
-				cb_listing_linecount = cb_lines_per_page;
+}
+
+static void
+print_fixed_line (const int line_num, char pch, char *line)
+{
+	char		buffer[133];
+	const char	*format_str;
+
+	if (line[CB_INDICATOR] == '&') {
+		line[CB_INDICATOR] = '-';
+		pch = '+';
+	}
+
+	print_program_header ();
+
+	if (cb_listing_wide) {
+		format_str = "%06d%c %s";
+	} else {
+		format_str = "%06d%c %-72.72s";
+	}
+	sprintf (buffer, format_str, line_num, pch, line);
+
+	terminate_str_at_first_trailing_space (buffer);
+
+	fprintf (cb_src_list_file, "%s\n", buffer);
+
+}
+
+static void
+print_free_line (const int line_num, char pch, char *line)
+{
+	int		i;
+	int		len = strlen (line);
+	const int	max_chars_on_line = cb_listing_wide ? 112 : 72;
+	const char	*format_str;
+	char		buffer[133];
+	
+	for (i = 0; len > 0;
+	     i += max_chars_on_line, len -= max_chars_on_line) {
+		print_program_header ();
+
+		if (cb_listing_wide) {
+			format_str = "%06d%c %-112.112s";
+		} else {
+			format_str = "%06d%c %-72.72s";
+		}
+		sprintf (buffer, format_str,
+			 line_num, pch, &line[i]);
+
+		terminate_str_at_first_trailing_space (buffer);
+
+		fprintf (cb_src_list_file, "%s\n", buffer);
+		pch = '+';
+	}
+}
+
+static void
+print_errors_for_line (const struct list_error * const first_error,
+		       const int line_num)
+{
+	const struct list_error	*err;
+
+	for (err = first_error; err; err = err->next) {
+		if (err->line == line_num) {
+			print_program_header ();
+			fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
 		}
 	}
+}
 
-	pch = incopy ? 'C' : ' ';
+static void
+print_line (struct list_files *cfile, char *line, int line_num, int in_copy,
+	    int fixed)
+{
+	struct list_skip	*skip;
+	/* What does the p stand for? */
+	char	pch;
 
+	if (line_has_page_eject (line, fixed)) {
+		force_new_page_for_next_line ();
+	}
+
+	pch = in_copy ? 'C' : ' ';
 	for (skip = cfile->skip_head; skip; skip = skip->next) {
 		if (skip->skipline == line_num) {
 			pch = 'X';
@@ -3766,56 +3876,13 @@ print_line (struct list_files *cfile, char *line, int line_num, int incopy,
 	}
 
 	if (fixed) {
-		if (line[CB_INDICATOR] == '&') {
-			line[CB_INDICATOR] = '-';
-			pch = '+';
-		}
-		print_program_header ();
-		if (cb_listing_wide) {
-			sprintf (buffer, "%06d%c %s", line_num, pch, line);
-		} else {
-			sprintf (buffer, "%06d%c %-72.72s", line_num, pch, line);
-		}
-		for (j = strlen (buffer) -1; j; j--) {
-			if (buffer[j] != ' ') {
-				break;
-			}
-			buffer[j] = 0;
-		}
-		fprintf (cb_src_list_file, "%s\n", buffer);
+		print_fixed_line (line_num, pch, line);
 	} else {
-		int i, j;
-		int len = strlen (line);
-		int max = cb_listing_wide ? 112 : 72;
-		for (i = 0; len > 0; i += max, len -= max) {
-			print_program_header ();
-			if (cb_listing_wide) {
-				sprintf (buffer, "%06d%c %-112.112s",
-					 line_num, pch, &line[i]);
-			} else {
-				sprintf (buffer, "%06d%c %-72.72s",
-					 line_num, pch, &line[i]);
-			}
-			for (j = strlen (buffer) - 1; j; j--) {
-				if (buffer[j] != ' ') {
-					break;
-				}
-				buffer[j] = 0;
-			}
-			fprintf (cb_src_list_file, "%s\n", buffer);
-			pch = '+';
-		}
+		print_free_line (line_num, pch, line);
 	}
+
 	if (cfile->err_head) {
-		struct list_error *err;
-		err = cfile->err_head;
-		while (err) {
-			if (err->line == line_num) {
-				print_program_header ();
-				fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
-			}
-			err = err->next;
-		}
+		print_errors_for_line (cfile->err_head, line_num);
 	}
 }
 
@@ -3823,27 +3890,27 @@ static int
 compare_prepare (char *cmp_line, char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
 		 int firstndx, int lastndx, int first_col, int fixed)
 {
-	int i, j, k;
-	int instring, lastcol;
-	int last;
+	int	i;
+	int	j = 0;
+	int	k;
+	int	instring = 0;
+	int	lastcol = CB_SEQUENCE;
+	int	last;
 
 	cmp_line[0] = 0;
-	j = 0;
-	instring = 0;
-	lastcol = CB_SEQUENCE;
 	for (k = firstndx; k < lastndx; k++) {
 		if (!fixed) {
 			lastcol = strlen (pline[k]);
 		}
 
 		for (last = lastcol; isspace(pline[k][last - 1]) && last > first_col;
-		     last--) ;
-		for (i = first_col; (i < last) && isspace(pline[k][i]); i++) ;
+		     last--);
+		for (i = first_col; (i < last) && isspace(pline[k][i]); i++);
 
 		while (i < last) {
 			if (isspace(pline[k][i])) {
 				cmp_line[j++] = ' ';
-				for (i++; (i < last) && isspace(pline[k][i]); i++) ;
+				for (i++; (i < last) && isspace(pline[k][i]); i++);
 				if (i == last) {
 					break;
 				}
@@ -3880,26 +3947,22 @@ compare_prepare (char *cmp_line, char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
 static void
 print_adjust (struct list_files *cfile, int line_num, int adjust)
 {
-	if (cfile->copy_head) {
-		struct list_files *cur;
-		for (cur = cfile->copy_head; cur; cur = cur->next) {
-			cur->copy_line += adjust;
+	struct list_files *cur;
+	struct list_replace *rep;
+	struct list_error *err;
+
+	for (cur = cfile->copy_head; cur; cur = cur->next) {
+		cur->copy_line += adjust;
+	}
+
+	for (rep = cfile->replace_head; rep; rep = rep->next) {
+		if (rep->firstline > line_num) {
+			rep->firstline += adjust;
 		}
 	}
-	if (cfile->replace_head) {
-		struct list_replace *rep;
-		rep = cfile->replace_head;
-		for (; rep; rep = rep->next) {
-			if (rep->firstline > line_num)
-				rep->firstline += adjust;
-		}
-	}
-	if (cfile->err_head) {
-		struct list_error *err;
-		err = cfile->err_head;
-		for (; err; err = err->next) {
-			err->line += adjust;
-		}
+
+	for (err = cfile->err_head; err; err = err->next) {
+		err->line += adjust;
 	}
 }
 
@@ -3929,7 +3992,7 @@ is_continue_line (char *line, int fixed)
 
 	if (!fixed) {
 		i = strlen (line) - 1;
-		for (; i && isspace(line[i]); i--) ;
+		for (; i && isspace(line[i]); i--);
 		if (line[i] == '&') {
 			return 1;
 		}
@@ -3944,19 +4007,25 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
 		    int pline_cnt, int line_num)
 {
-	char *rfp;
-	char *fp;
-	char *tp;
-	int i, j, k;
-	int first_col, last;
-	int multi_token, fixed;
-	int match = 0;
-	int eof;
-	char fterm[2], ftoken[CB_LINE_LENGTH + 2];
-	char tterm[2], ttoken[CB_LINE_LENGTH + 2];
-	char cmp_line[CB_LINE_LENGTH + 2];
-	char newline[CB_LINE_LENGTH + 2];
-	char frmline[CB_LINE_LENGTH + 2];
+	char	*rfp;
+	char	*fp;
+	char	*tp;
+	int	i;
+	int	j;
+	int	k;
+	int	first_col;
+	int	last;
+	int	multi_token;
+	int	fixed;
+	int	match = 0;
+	int	eof;
+	char	fterm[2];
+	char	ftoken[CB_LINE_LENGTH + 2];
+	char	tterm[2];
+	char	ttoken[CB_LINE_LENGTH + 2];
+	char	cmp_line[CB_LINE_LENGTH + 2];
+	char	newline[CB_LINE_LENGTH + 2];
+	char	frm_line[CB_LINE_LENGTH + 2];
 
 	fixed = (cb_source_format == CB_FORMAT_FIXED);
 	if (is_comment_line (pline[0], fixed)) {
@@ -4001,8 +4070,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		int seccount = 0;
 		char lterm[2];
 
-		strcpy (frmline, rfp);
-		fp = print_token (frmline, ftoken, fterm);
+		strcpy (frm_line, rfp);
+		fp = print_token (frm_line, ftoken, fterm);
 	next_line:
 		tp = print_token (cmp_line, ttoken, tterm);
 		while (tp && fp) {
@@ -4022,8 +4091,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 					strcat (newline, tterm);
 				}
 				submatch = 0;
-				strcpy (frmline, rfp);
-				fp = print_token (frmline, ftoken, fterm);
+				strcpy (frm_line, rfp);
+				fp = print_token (frm_line, ftoken, fterm);
 				tp = print_token (tp, ttoken, tterm);
 				break;
 			}
@@ -4089,8 +4158,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		int subword = 0;
 		int ttix, ttlen, ftlen;
 
-		strcpy (frmline, rfp);
-		fp = print_token (frmline, ftoken, fterm);
+		strcpy (frm_line, rfp);
+		fp = print_token (frm_line, ftoken, fterm);
 		if (ftoken[0] == ':' || ftoken[0] == '(') {
 			subword = 1;
 		}
@@ -4345,25 +4414,26 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 }
 
 static void
-print_program_code (struct list_files *cfile, int incopy)
+print_program_code (struct list_files *cfile, int in_copy)
 {
-	FILE *fd;
-	struct list_replace *rep;
-	struct list_files *cur;
-	struct list_error *err;
-	int i;
-	int line_num;
-	int fixed, done, eof;
-	int pline_cnt;
-	char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2];
+	FILE			*fd;
+	struct list_replace	*rep;
+	struct list_files	*cur;
+	struct list_error	*err;
+	int	i;
+	int	line_num;
+	int	fixed = (cb_source_format == CB_FORMAT_FIXED);
+	int	done;
+	int	eof;
+	int	pline_cnt;
+	char	pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2];
 
-	fixed = (cb_source_format == CB_FORMAT_FIXED);
 	if (cb_src_list_file) {
 #ifdef DEBUG_REPLACE
 		struct list_skip *skip;
 
-		fprintf (stdout, "print_program_code: incopy = %s\n",
-			 incopy ? "YES" : "NO");
+		fprintf (stdout, "print_program_code: in_copy = %s\n",
+			 in_copy ? "YES" : "NO");
 		fprintf (stdout, "   name: %s\n", cfile->name);
 		fprintf (stdout, "   copy_line: %d\n", cfile->copy_line);
 		for (i = 0, cur = cfile->copy_head; cur; i++, cur = cur->next) {
@@ -4421,7 +4491,7 @@ print_program_code (struct list_files *cfile, int incopy)
 						goto next_rec;
 					}
 
-					if (!incopy) {
+					if (!in_copy) {
 						pline_cnt = print_replace_main (cfile, fd, pline, pline_cnt,
 									       line_num);
 					} else if (cfile->replace_head) {
@@ -4437,9 +4507,9 @@ print_program_code (struct list_files *cfile, int incopy)
 					for (i = 0; i < pline_cnt; i++) {
 						if (pline[i][0]) {
 							if (pline[i][CB_INDICATOR] == '&') {
-								print_line (cfile, pline[i], line_num, incopy, fixed);
+								print_line (cfile, pline[i], line_num, in_copy, fixed);
 							} else {
-								print_line (cfile, pline[i], line_num + i, incopy, fixed);
+								print_line (cfile, pline[i], line_num + i, in_copy, fixed);
 								prec++;
 							}
 						}
@@ -4452,7 +4522,7 @@ print_program_code (struct list_files *cfile, int incopy)
 
 							rep = cfile->replace_head;
 							/*  COPY in COPY, add replacement text to new COPY */
-							while (rep && incopy) {
+							while (rep && in_copy) {
 								repl = cobc_malloc (sizeof (struct list_replace));
 								memcpy (repl, rep, sizeof (struct list_replace));
 								repl->next = NULL;
@@ -4511,24 +4581,24 @@ process_translate (struct filename *fn)
 
 	cb_listing_page = 0;
         strcpy (cb_listing_filename, fn->source);
-	strcpy (cb_listing_ttl, "LINE    ");
+	strcpy (cb_listing_title, "LINE    ");
 	if (cb_source_format == CB_FORMAT_FIXED) {
-	   strcat (cb_listing_ttl,
+	   strcat (cb_listing_title,
 		   "PG/LN  A...B......................................"
 		   "......................");
 	   if (cb_listing_wide) {
-		   strcat (cb_listing_ttl, "SEQUENCE");
+		   strcat (cb_listing_title, "SEQUENCE");
 	   }
 	}
 	else {
 	   if (cb_listing_wide) {
-	      strcat (cb_listing_ttl, "................................");
+	      strcat (cb_listing_title, "................................");
 	   }
-	   strcat (cb_listing_ttl,
+	   strcat (cb_listing_title,
 		   ".....................SOURCE......................."
 		   "......................");
 	   if (cb_listing_wide) {
-		   strcat (cb_listing_ttl, "........");
+		   strcat (cb_listing_title, "........");
 	   }
 	}
 
@@ -4564,7 +4634,7 @@ process_translate (struct filename *fn)
 
 	/* Print the listing for this file */
 	cfile = cb_listing_files;
-	print_program_code(cfile, 0);
+	print_program_code (cfile, 0);
 	if ((struct list_files *) cb_listing_files == cb_current_file) {
 		cb_current_file = cb_current_file->next;
 	}
@@ -4572,11 +4642,11 @@ process_translate (struct filename *fn)
 	free (cfile);
 
 	if (ret) {
-		print_program_trailer();
-		return !!ret;
+		print_program_trailer ();
+		return 1;
 	}
 	if (cb_flag_syntax_only || current_program->entry_list == NULL) {
-		print_program_trailer();
+		print_program_trailer ();
 		return 0;
 	}
 
