@@ -8437,7 +8437,7 @@ output_header (FILE *fp, const char *locbuff, const struct cb_program *cp)
 }
 
 void
-codegen (struct cb_program *prog, const int nested)
+codegen (struct cb_program *prog, const int subsequent_call)
 {
 	cb_tree			l;
 	struct call_list	*clp;
@@ -8497,7 +8497,7 @@ codegen (struct cb_program *prog, const int nested)
 	output_target = yyout;
 	cb_local_file = current_prog->local_include->local_fp;
 
-	if (!nested) {
+	if (!subsequent_call) {
 		/* First iteration */
 		gen_alt_ebcdic = 0;
 		gen_ebcdic_ascii = 0;
@@ -8669,7 +8669,7 @@ codegen (struct cb_program *prog, const int nested)
 	}
 
 	/* Functions */
-	if (!nested) {
+	if (!subsequent_call) {
 		output ("/* Functions */\n\n");
 	}
 
@@ -8834,7 +8834,7 @@ codegen (struct cb_program *prog, const int nested)
 	output_local_base_cache ();
 	output_local_field_cache ();
 
-	/* Skip to next nested program */
+	/* Skip to next program contained in the source */
 
 	if (prog->next_program) {
 		codegen (prog->next_program, 1);

@@ -1,6 +1,12 @@
+
+2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (codegen): renamed parameter nested to subsequent_call
+	  removing the confusing title (for nested check nested_level)
+
 2016-06-26  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.*, pplex.l, ppparse.y: Added LISTING ON/OFF directive.
+	* cobc.c, cobc.h, pplex.l, ppparse.y: Added LISTING ON/OFF directive.
 
 2016-06-25  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -24,9 +30,8 @@
 
 2016-06-20  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.*, error.c, pplex.l, ppparse.y : Added support for compiler
+	* cobc.c, cobc.h, error.c, pplex.l, ppparse.y: Added support for compiler
 	  listings.
-
 
 2016-06-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
