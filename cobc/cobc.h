@@ -511,6 +511,7 @@ struct list_files {
 	struct list_skip	*skip_head;
 	struct list_skip	*skip_tail;
 	int 			copy_line;
+	int 			listing_on;
 	char			name[CB_LINE_LENGTH+2];
 };
 

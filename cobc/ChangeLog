@@ -1,3 +1,7 @@
+2016-06-26  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.*, pplex.l, ppparse.y: Added LISTING ON/OFF directive.
+
 2016-06-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l: fixed bug #248, where any directive was evaluated inside the

@@ -1,3 +1,7 @@
+2016-06-26  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added LISTING ON/OFF test.
+
 2016-06-20  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Added new tests for compiler listings.

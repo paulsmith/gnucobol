@@ -529,6 +529,7 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token GARBAGE		"word"
 
 %token PAGE_DIRECTIVE
+%token LISTING_DIRECTIVE
 
 %token SOURCE_DIRECTIVE
 %token FORMAT
@@ -620,6 +621,7 @@ directive:
 | SET_DIRECTIVE set_directive
 | TURN_DIRECTIVE turn_directive
 | PAGE_DIRECTIVE page_directive
+| LISTING_DIRECTIVE listing_directive
 | IF_DIRECTIVE
   {
 	current_cmd = PLEX_ACT_IF;
@@ -811,6 +813,11 @@ page_directive:
   {
 	CB_PENDING (_("PAGE directive"));
   }
+;
+
+listing_directive:
+  ON
+| OFF
 ;
 
 turn_directive:

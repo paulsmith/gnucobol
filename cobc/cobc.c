@@ -3774,6 +3774,26 @@ line_has_page_eject (const char *line, const int fixed)
 	}
 }
 
+static int
+line_has_listing_directive (const char *line, int *onoff)
+{
+	char	*directive_start;
+
+	directive_start = strchr (line, '>');
+	if (directive_start != NULL
+		&& !strncasecmp (directive_start, ">>LISTING", 9)) {
+		char	token[32], term[2];
+
+		directive_start += 9;
+		*onoff = 1;
+		print_token (directive_start, token, term);
+		if (!strcasecmp (token, "OFF"))
+			*onoff = 0;
+		return 1;
+	}
+	return 0;
+}
+
 static void
 terminate_str_at_first_trailing_space (char * const str)
 {
@@ -3860,27 +3880,37 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy,
 	    int fixed)
 {
 	struct list_skip	*skip;
-	/* What does the p stand for? */
+	int	doprint;
+	int	onoff;
 	char	pch;
 
 	if (line_has_page_eject (line, fixed)) {
 		force_new_page_for_next_line ();
 	}
 
-	pch = in_copy ? 'C' : ' ';
-	for (skip = cfile->skip_head; skip; skip = skip->next) {
-		if (skip->skipline == line_num) {
-			pch = 'X';
-			break;
+	doprint = cfile->listing_on;
+	if (line_has_listing_directive (line, &onoff)) {
+		cfile->listing_on = onoff;
+		doprint = 1; /* always print the directive itself */
+	}
+
+	if (doprint) {
+		pch = in_copy ? 'C' : ' ';
+		for (skip = cfile->skip_head; skip; skip = skip->next) {
+			if (skip->skipline == line_num) {
+				pch = 'X';
+				break;
+			}
+		}
+
+		if (fixed) {
+			print_fixed_line (line_num, pch, line);
+		} else {
+			print_free_line (line_num, pch, line);
 		}
 	}
 
-	if (fixed) {
-		print_fixed_line (line_num, pch, line);
-	} else {
-		print_free_line (line_num, pch, line);
-	}
-
+	/* Print errors regardless of LISTING setting */
 	if (cfile->err_head) {
 		print_errors_for_line (cfile->err_head, line_num);
 	}
@@ -4428,6 +4458,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 	int	pline_cnt;
 	char	pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2];
 
+	cfile->listing_on = 1;
 	if (cb_src_list_file) {
 #ifdef DEBUG_REPLACE
 		struct list_skip *skip;

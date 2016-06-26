@@ -169,6 +169,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 %x PSEUDO_STATE
 %x SOURCE_DIRECTIVE_STATE
 %x DEFINE_DIRECTIVE_STATE
+%x LISTING_DIRECTIVE_STATE
 %x SET_DIRECTIVE_STATE
 %x TURN_DIRECTIVE_STATE
 %x IF_DIRECTIVE_STATE
@@ -209,6 +210,15 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 ^[ ]*">>"[ ]?"PAGE"	{
+	skip_to_eol ();
+}
+
+^[ ]*">>"[ ]?"LISTING "	{
+	BEGIN LISTING_DIRECTIVE_STATE;
+	return LISTING_DIRECTIVE;
+}
+
+^[ ]*">>"[ ]?"LISTING"	{
 	skip_to_eol ();
 }
 
@@ -434,6 +444,18 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 {ALNUM_LITERAL} |
 .		{
 	ppecho (yytext, 0, yyleng);
+}
+
+<LISTING_DIRECTIVE_STATE>{
+  \n			{
+	BEGIN INITIAL;
+	unput ('\n');
+	return TERMINATOR;
+  }
+  "ON"			{ return ON; }
+  "OFF"			{ return OFF; }
+  [ ,;]+		{ /* ignore */ }
+  .			{ }
 }
 
 <SOURCE_DIRECTIVE_STATE>{

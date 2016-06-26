@@ -1082,8 +1082,95 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
-cp prog.lis /tmp/prog16.lst
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
+AT_SETUP([LISTING ON/OFF])
+AT_KEYWORDS([listing])
+
+AT_DATA([sed.txt],
+[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+
+AT_DATA([copy.inc], [
+       >>LISTING OFF
+       01 TEST1-VAR PIC X(2) VALUE "OK".
+       01 TEST2-VAR PIC X(2) VALUE "OK".
+       01 TEST3-VAR PIC X(2) VALUE "OK".
+       01 TEST4-VAR PIC X(2) VALUE "OK".
+       >>LISTING ON
+       01 TEST5-VAR PIC X(2) VALUE "OK".
+       01 TEST6-VAR PIC X(2) VALUE "OK".
+       01 TEST7-VAR PIC X(2) VALUE "OK".
+       01 TEST8-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc".
+       PROCEDURE        DIVISION.
+           DISPLAY TEST1-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
+
+AT_DATA([prog17.lst],
+[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         COPY "copy.inc".
+000001C
+000002C        >>LISTING OFF
+000007C        >>LISTING ON
+000008C        01 TEST5-VAR PIC X(2) VALUE "OK".
+000009C        01 TEST6-VAR PIC X(2) VALUE "OK".
+000010C        01 TEST7-VAR PIC X(2) VALUE "OK".
+000011C        01 TEST8-VAR PIC X(2) VALUE "OK".
+000007         PROCEDURE        DIVISION.
+000008             DISPLAY TEST1-VAR NO ADVANCING
+000009             END-DISPLAY.
+000010             STOP RUN.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 ALPHANUMERIC   01   TEST1-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST2-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST3-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST4-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST5-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST6-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
+
+0002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
+
+0 Warnings in program
+0 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
