@@ -1,4 +1,9 @@
 
+2016-06-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (validate_field_1): fixed bug #260, where + or - in PIC was
+	  mistaken for S.
+
 2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (codegen): renamed parameter nested to subsequent_call

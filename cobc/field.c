@@ -765,7 +765,8 @@ validate_field_1 (struct cb_field *f)
 
 		/* Validate BLANK ZERO */
 		if (f->flag_blank_zero) {
-			if (f->pic->have_sign) {
+			if (f->pic->have_sign
+			    && f->pic->category != CB_CATEGORY_NUMERIC_EDITED) {
 				cb_error_x (x, _("Cannot have S in PICTURE string and BLANK WHEN ZERO"));
 			}
 			

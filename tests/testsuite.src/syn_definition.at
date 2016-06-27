@@ -966,6 +966,9 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  x PIC S9(5) BLANK ZERO.
        01  y PIC *(5) BLANK ZERO.
+
+       *> Actually valid
+       01  z PIC -9(5) BLANK ZERO.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
