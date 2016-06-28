@@ -1174,3 +1174,349 @@ AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+AT_SETUP([File descriptions])
+AT_KEYWORDS([listing])
+
+AT_DATA([sed.txt],
+[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT OLD-VERSION  ASSIGN TO "SYSUT1"
+                               ORGANIZATION LINE SEQUENTIAL.
+           SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
+                               ORGANIZATION LINE SEQUENTIAL.
+           SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
+                               ORGANIZATION LINE SEQUENTIAL.
+           SELECT MODIFICATION ASSIGN TO "SYSIN1"
+                               ORGANIZATION LINE SEQUENTIAL.
+           SELECT COMMENTARY   ASSIGN TO "SYSOU1"
+                               ORGANIZATION LINE SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD  OLD-VERSION
+           LABEL RECORDS ARE STANDARD
+           BLOCK CONTAINS 80 CHARACTERS
+           DATA RECORD IS OLD-RECORD.
+
+       01  OLD-RECORD.
+           02 OLD-STATEMENT       PICTURE X(75).
+           02 OLD-NUMBER          PICTURE X(5).
+
+       FD  NEW-VERSION
+           LABEL RECORDS ARE STANDARD
+           BLOCK CONTAINS 80 CHARACTERS
+           DATA RECORD IS NEW-RECORD.
+
+       01  NEW-RECORD.
+           02 NEW-STATEMENT       PICTURE X(75).
+           02 NEW-NUMBER          PICTURE X(5).
+
+       FD  MODIFICATION
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 80 CHARACTERS
+           DATA RECORD IS UPDATE-ORDER.
+
+       01  UPDATE-ORDER.
+           02 INSERTION.
+              03 COMMAND          PICTURE X(6).
+                 88 ENDJOB        VALUE "ENDJOB".
+                 88 ENDSET        VALUE "ENDSET".
+                 88 REMOVE        VALUE "REMOVE".
+                 88 ADDNEW        VALUE "INSERT".
+                 88 CHANGE        VALUE "CHANGE".
+                 88 DISPLY        VALUE "DISPLY".
+              03 FILLER           PICTURE X.
+              03 A-FIELD          PICTURE 9(5).
+              03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).
+                 88 A-BLANK       VALUE SPACES.
+              03 FILLER           PICTURE X(4).
+              03 B-FIELD          PICTURE 9(5).
+              03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).
+                 88 B-BLANK       VALUE SPACES.
+              03 FILLER           PICTURE X(54).
+           02 FILLER              PICTURE X(5).
+
+       FD  COMMENTARY
+           LABEL RECORDS ARE OMITTED
+           BLOCK CONTAINS 82 CHARACTERS
+           DATA RECORD IS COMMENT-LINE.
+
+       01  COMMENT-LINE.
+           02 FILLER              PICTURE X(82).
+
+       WORKING-STORAGE  SECTION.
+
+       01  HEADINGS-LINE.
+           02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION".
+           02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".
+           02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF".
+           02 MONTH-RUN           PICTURE XX.
+           02 FILLER              PICTURE X VALUE "/".
+           02 DAY-RUN             PICTURE XX.
+           02 FILLER              PICTURE X VALUE "/".
+           02 YEAR-RUN            PICTURE XX.
+           02 FILLER              PICTURE X(8) VALUE SPACES.
+           02 FILLER              PICTURE X(8) VALUE "  PAGE: ".
+           02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.
+
+       01  COMMAND-LISTING.
+           02 FILLER              PICTURE X(2) VALUE SPACES.
+           02 COMMAND-IMAGE       PICTURE X(80).
+
+       01  ACTIVITIES-LISTING.
+           02 DISPOSITION         PICTURE X(2).
+           02 ACTIVE-IMAGE        PICTURE X(80).
+
+       01  UPSI-BYTE.
+           02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.
+
+       01  MESSAGE-LOG.
+           02 FILLER              PICTURE X(2) VALUE SPACES.
+           02 MESSAGE-TEXT        PICTURE X(80).
+
+       01  DISPLAY-MESSAGE.
+           02 FILLER              PICTURE X(2) VALUE SPACES.
+           02 DISPLAY-TEMP        PICTURE X(6).
+           02 FILLER              PICTURE X(2) VALUE SPACES.
+           02 DISPLAY-TEXT        PICTURE X(60).
+
+       PROCEDURE DIVISION.
+           OPEN INPUT OLD-VERSION, MODIFICATION,
+                OUTPUT NEW-VERSION, COMMENTARY.
+           CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
+           STOP RUN.
+])
+
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
+[prog.cob: 21: Warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 23: Warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 30: Warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 32: Warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 39: Warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 41: Warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 64: Warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 66: Warning: DATA RECORDS is obsolete in GnuCOBOL
+])
+
+
+AT_DATA([prog18.lst],
+[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog.
+000004         ENVIRONMENT DIVISION.
+000005         INPUT-OUTPUT SECTION.
+000006         FILE-CONTROL.
+000007             SELECT OLD-VERSION  ASSIGN TO "SYSUT1"
+000008                                 ORGANIZATION LINE SEQUENTIAL.
+000009             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
+000010                                 ORGANIZATION LINE SEQUENTIAL.
+000011             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
+000012                                 ORGANIZATION LINE SEQUENTIAL.
+000013             SELECT MODIFICATION ASSIGN TO "SYSIN1"
+000014                                 ORGANIZATION LINE SEQUENTIAL.
+000015             SELECT COMMENTARY   ASSIGN TO "SYSOU1"
+000016                                 ORGANIZATION LINE SEQUENTIAL.
+000017         DATA DIVISION.
+000018         FILE SECTION.
+000019
+000020         FD  OLD-VERSION
+000021             LABEL RECORDS ARE STANDARD
+Warning: LABEL RECORDS is obsolete in GnuCOBOL
+000022             BLOCK CONTAINS 80 CHARACTERS
+000023             DATA RECORD IS OLD-RECORD.
+Warning: DATA RECORDS is obsolete in GnuCOBOL
+000024
+000025         01  OLD-RECORD.
+000026             02 OLD-STATEMENT       PICTURE X(75).
+000027             02 OLD-NUMBER          PICTURE X(5).
+000028
+000029         FD  NEW-VERSION
+000030             LABEL RECORDS ARE STANDARD
+Warning: LABEL RECORDS is obsolete in GnuCOBOL
+000031             BLOCK CONTAINS 80 CHARACTERS
+000032             DATA RECORD IS NEW-RECORD.
+Warning: DATA RECORDS is obsolete in GnuCOBOL
+000033
+000034         01  NEW-RECORD.
+000035             02 NEW-STATEMENT       PICTURE X(75).
+000036             02 NEW-NUMBER          PICTURE X(5).
+000037
+000038         FD  MODIFICATION
+000039             LABEL RECORDS ARE OMITTED
+Warning: LABEL RECORDS is obsolete in GnuCOBOL
+000040             BLOCK CONTAINS 80 CHARACTERS
+000041             DATA RECORD IS UPDATE-ORDER.
+Warning: DATA RECORDS is obsolete in GnuCOBOL
+000042
+000043         01  UPDATE-ORDER.
+000044             02 INSERTION.
+000045                03 COMMAND          PICTURE X(6).
+000046                   88 ENDJOB        VALUE "ENDJOB".
+000047                   88 ENDSET        VALUE "ENDSET".
+000048                   88 REMOVE        VALUE "REMOVE".
+000049                   88 ADDNEW        VALUE "INSERT".
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000050                   88 CHANGE        VALUE "CHANGE".
+000051                   88 DISPLY        VALUE "DISPLY".
+000052                03 FILLER           PICTURE X.
+000053                03 A-FIELD          PICTURE 9(5).
+000054                03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).
+000055                   88 A-BLANK       VALUE SPACES.
+000056                03 FILLER           PICTURE X(4).
+000057                03 B-FIELD          PICTURE 9(5).
+000058                03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).
+000059                   88 B-BLANK       VALUE SPACES.
+000060                03 FILLER           PICTURE X(54).
+000061             02 FILLER              PICTURE X(5).
+000062
+000063         FD  COMMENTARY
+000064             LABEL RECORDS ARE OMITTED
+Warning: LABEL RECORDS is obsolete in GnuCOBOL
+000065             BLOCK CONTAINS 82 CHARACTERS
+000066             DATA RECORD IS COMMENT-LINE.
+Warning: DATA RECORDS is obsolete in GnuCOBOL
+000067
+000068         01  COMMENT-LINE.
+000069             02 FILLER              PICTURE X(82).
+000070
+000071         WORKING-STORAGE  SECTION.
+000072
+000073         01  HEADINGS-LINE.
+000074             02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION".
+000075             02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".
+000076             02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF".
+000077             02 MONTH-RUN           PICTURE XX.
+000078             02 FILLER              PICTURE X VALUE "/".
+000079             02 DAY-RUN             PICTURE XX.
+000080             02 FILLER              PICTURE X VALUE "/".
+000081             02 YEAR-RUN            PICTURE XX.
+000082             02 FILLER              PICTURE X(8) VALUE SPACES.
+000083             02 FILLER              PICTURE X(8) VALUE "  PAGE: ".
+000084             02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.
+000085
+000086         01  COMMAND-LISTING.
+000087             02 FILLER              PICTURE X(2) VALUE SPACES.
+000088             02 COMMAND-IMAGE       PICTURE X(80).
+000089
+000090         01  ACTIVITIES-LISTING.
+000091             02 DISPOSITION         PICTURE X(2).
+000092             02 ACTIVE-IMAGE        PICTURE X(80).
+000093
+000094         01  UPSI-BYTE.
+000095             02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.
+000096
+000097         01  MESSAGE-LOG.
+000098             02 FILLER              PICTURE X(2) VALUE SPACES.
+000099             02 MESSAGE-TEXT        PICTURE X(80).
+000100
+000101         01  DISPLAY-MESSAGE.
+000102             02 FILLER              PICTURE X(2) VALUE SPACES.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+LINE    PG/LN  A...B............................................................
+
+000103             02 DISPLAY-TEMP        PICTURE X(6).
+000104             02 FILLER              PICTURE X(2) VALUE SPACES.
+000105             02 DISPLAY-TEXT        PICTURE X(60).
+000106
+000107         PROCEDURE DIVISION.
+000108             OPEN INPUT OLD-VERSION, MODIFICATION,
+000109                  OUTPUT NEW-VERSION, COMMENTARY.
+000110             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
+000111             STOP RUN.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0080 FILE                OLD-VERSION
+0080 GROUP          01   OLD-RECORD                      
+0075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
+0005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+
+0080 FILE                NEW-VERSION
+0080 GROUP          01   NEW-RECORD                      
+0075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
+0005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+
+0032 FILE                PRT-VERSION
+
+0080 FILE                MODIFICATION
+0080 GROUP          01   UPDATE-ORDER                    
+0075 ALPHANUMERIC   02     INSERTION                     
+0006 ALPHANUMERIC   03       COMMAND                    X(6)
+0001 ALPHANUMERIC   03       FILLER                     X
+0005 ALPHANUMERIC   03       A-FIELD                    9(5)
+0005 ALPHANUMERIC   03       A-ALPHA                    X(5)
+0004 ALPHANUMERIC   03       FILLER                     X(4)
+0005 ALPHANUMERIC   03       B-FIELD                    9(5)
+0005 ALPHANUMERIC   03       B-ALPHA                    X(5)
+0054 ALPHANUMERIC   03       FILLER                     X(54)
+0005 ALPHANUMERIC   02     FILLER                       X(5)
+
+0082 FILE                COMMENTARY
+0082 GROUP          01   COMMENT-LINE                    
+0082 ALPHANUMERIC   02     FILLER                       X(82)
+
+0080 GROUP          01   HEADINGS-LINE                   
+0015 ALPHANUMERIC   02     FILLER                       X(15)
+0020 ALPHANUMERIC   02     FILLER                       X(20)
+0017 ALPHANUMERIC   02     PHASE                        X(17)
+0002 ALPHANUMERIC   02     MONTH-RUN                    XX
+0001 ALPHANUMERIC   02     FILLER                       X
+0002 ALPHANUMERIC   02     DAY-RUN                      XX
+0001 ALPHANUMERIC   02     FILLER                       X
+0002 ALPHANUMERIC   02     YEAR-RUN                     XX
+0008 ALPHANUMERIC   02     FILLER                       X(8)
+0008 ALPHANUMERIC   02     FILLER                       X(8)
+0004 NUMERIC        02     PAGE-NUMBER                  9(4)
+
+0082 GROUP          01   COMMAND-LISTING                 
+0002 ALPHANUMERIC   02     FILLER                       X(2)
+0080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+
+0082 GROUP          01   ACTIVITIES-LISTING              
+0002 ALPHANUMERIC   02     DISPOSITION                  X(2)
+0080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+
+0008 GROUP          01   UPSI-BYTE                       
+0001 ALPHANUMERIC   02     UPSI-BIT                     X
+
+0082 GROUP          01   MESSAGE-LOG                     
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 ALPHANUMERIC   02     FILLER                       X(2)
+0080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+
+0070 GROUP          01   DISPLAY-MESSAGE                 
+0002 ALPHANUMERIC   02     FILLER                       X(2)
+0006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
+0002 ALPHANUMERIC   02     FILLER                       X(2)
+0060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+
+8 Warnings in program
+0 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+

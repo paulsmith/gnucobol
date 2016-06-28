@@ -3513,7 +3513,6 @@ static char *
 check_filler_name (char *name)
 {
 	if (!memcmp (name, "FILLER", 6)) {
-		/* #error "Risk of segfault?" */
 		name = (char *)"FILLER";
 	}
 	return name;
@@ -3571,7 +3570,7 @@ print_fields (int lvl, struct cb_field *top)
 			continue;
 		}
 
-		lcl_name[0] = '\0';
+		memset (lcl_name, 0, sizeof(lcl_name));
 		memset (lcl_name, ' ', lvl * 2);
 		strcat (lcl_name, check_filler_name((char *)top->name));
 		get_cat = 1;
@@ -3596,9 +3595,15 @@ print_fields (int lvl, struct cb_field *top)
 		}
 
 		print_program_header ();
-		fprintf (cb_src_list_file, "%04d %-14.14s %02d   %-30.30s %s\n",
-			 top->size, type, top->level, lcl_name,
-			 top->pic ? top->pic->orig : " ");
+		if (!top->pic) /* Trailing spaces break testsuite AT_DATA */
+			fprintf (cb_src_list_file,
+				"%04d %-14.14s %02d   %s\n",
+			 	top->size, type, top->level, lcl_name);
+		else
+			fprintf (cb_src_list_file,
+				"%04d %-14.14s %02d   %-30.30s %s\n",
+			 	top->size, type, top->level, lcl_name,
+			 	top->pic ? top->pic->orig : " ");
 		first = 0;
 		old_level = top->level;
 
@@ -3613,7 +3618,7 @@ print_files_and_their_records (cb_tree file_list)
 {
 	cb_tree	l;
 
-	if (file_list == NULL) {
+	if ((l = file_list) == NULL) {
 		return;
 	}
 

@@ -1,3 +1,6 @@
+2016-06-28  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Fixed mystery edits that broke FILE and FILLER listing.
 
 2016-06-27  Edward Hart <edward.dan.hart@gmail.com>
 
