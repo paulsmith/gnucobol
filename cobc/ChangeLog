@@ -1,3 +1,12 @@
+
+2016-06-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c, cobc.h: Added comments to functions, improved names where possible and
+	  fixed style issues (see below).
+	* cobc.c (print_replace_main): Made cb_inreplace a static variable
+	  in_replace. Also split code into new functions free_replace_list and
+	  copy_list_replace.
+
 2016-06-28  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Fixed mystery edits that broke FILE and FILLER listing.
@@ -16,11 +25,28 @@
 
 	* cobc.c, cobc.h, pplex.l, ppparse.y: Added LISTING ON/OFF directive.
 
+2016-06-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c: lengthened variable names, fixed style issues (see below, also
+	  replacing while loops with for where appropriate) and simplified and
+	  modularised code.
+
 2016-06-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l: fixed bug #248, where any directive was evaluated inside the
 	  false part of a conditional directive. Restricted this to ELSE,
 	  END(-IF), WHEN, etc.
+	* cobc.c, error.c: fixed style issues: non_snake_case variable names,
+	  non-K&R or missing braces, no space before parentheses or around + or
+	  -, spaces instead of tabs, variable declarations without names
+	  indented and more than one declaration per line.
+	* cobc.c (print_program_code): fixed corrupt doubled-linked list error
+	  caused when cb_listing_files and cb_current_file pointed to the same
+	  struct and cb_current_file was freed.
+	* pplex.l: moved COPY-specific code to get_new_listing_file and added
+	  call to it from INCLUDE.
+	* cobc.h, parser.y, pplex.l, ppparse.y: moved PENDING macro to cobc.h as
+	  CB_PENDING.
 
 2016-06-22  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -221,7 +221,7 @@ struct cb_exception {
 };
 
 /* Structure for reserved words that have been reverted */
-struct reserved_word_list {	
+struct reserved_word_list {
 	struct reserved_word_list	*next;	/* next pointer */
 	char				*word;
 	int				is_context_sensitive;
@@ -483,16 +483,16 @@ extern void		add_reserved_word (const char *, const char *,
 struct list_error {
 	struct list_error	*next;
 	int			line;
-	char			prefix[CB_LINE_LENGTH+2];
-	char			msg[CB_LINE_LENGTH+2];
+	char			prefix[CB_LINE_LENGTH + 2];
+	char			msg[CB_LINE_LENGTH + 2];
 };
 struct list_replace {
 	struct list_replace	*next;
 	int			firstline;
 	int			lastline;
 	int			lead_trail;
-	char			from[CB_LINE_LENGTH+2];
-	char			to[CB_LINE_LENGTH+2];
+	char			from[CB_LINE_LENGTH + 2];
+	char			to[CB_LINE_LENGTH + 2];
 };
 
 struct list_skip {
@@ -512,7 +512,7 @@ struct list_files {
 	struct list_skip	*skip_tail;
 	int 			copy_line;
 	int 			listing_on;
-	char			name[CB_LINE_LENGTH+2];
+	char			name[CB_LINE_LENGTH + 2];
 };
 
 extern struct list_files	*cb_listing_files;
