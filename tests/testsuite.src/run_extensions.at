@@ -3738,3 +3738,22 @@ AT_CHECK([$COMPILE prog.cob], [0],
 ])
 AT_CLEANUP
 
+AT_SETUP([Conditional/define directives (7)])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+       >>IF A IS DEFINED
+       >>IF B IS DEFINED
+           CONTINUE
+           .
+       >>ELSE
+           CONTINUE
+           .
+       >>END-IF
+       >>END-IF
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [])
+AT_CLEANUP

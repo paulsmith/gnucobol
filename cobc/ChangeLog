@@ -1,4 +1,9 @@
 
+2016-06-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l (is_condition_directive_clause): fixed bug #263 where >>IF's
+	  where not detected inside false >>IF's.
+
 2016-06-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c, cobc.h: Added comments to functions, improved names where possible and

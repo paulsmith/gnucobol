@@ -1115,8 +1115,10 @@ is_condition_directive_clause (const char *buff)
 	}
 
 	return buff && (strncmp (buff, "END", 3) == 0
+			|| strncmp (buff, "IF", 2) == 0
 			|| strncmp (buff, "ELSE", 4) == 0
 			|| strncmp (buff, "ELIF", 4) == 0
+			|| strncmp (buff, "EVALUATE", 8) == 0
 			|| strncmp (buff, "WHEN", 4) == 0);
 }
 
