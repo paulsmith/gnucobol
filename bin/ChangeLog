@@ -1,4 +1,9 @@
 
+2016-06-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+
+	* cobcrun.c (cobcrun_initial_module) [_WIN32]: fixed setting of
+	  COB_PRE_LOAD and COB_LIBRARY_PATH to use PATHSEP_CHAR
+
 2016-06-21  Brian Tiffin <btiffin@gnu.org>
 
 	* cobcrun.c : replaced cob_strdup. Need to revisit.

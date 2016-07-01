@@ -180,7 +180,8 @@ cobcrun_initial_module (char *module_argument)
 #if !HAVE_SETENV
 	char	*put;
 #endif
-
+	/* FIXME: split in two functions (one setting module, one setting path)
+	          after allowing module with path in COB_PRE_LOAD */
 	if (!module_argument) {
 		return 1;
 	}
@@ -191,14 +192,14 @@ cobcrun_initial_module (char *module_argument)
 		memset (env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_LIBRARY_PATH");
 		if (envptr) {
-			snprintf (env_space, COB_MEDIUM_BUFF, "%s:%s", pathname, envptr);
+			snprintf (env_space, COB_MEDIUM_BUFF, "%s%c%s", pathname, PATHSEP_CHAR, envptr);
 		} else {
 			snprintf (env_space, COB_MEDIUM_BUFF, "%s", pathname);
 		}
 #if HAVE_SETENV
-		envop_return = setenv("COB_LIBRARY_PATH", env_space, 1);
+		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
 		if (envop_return) {
-			fprintf(stderr, "Problem with setenv COB_LIBRARY_PATH: %d\n", errno);
+			fprintf (stderr, "Problem with setenv COB_LIBRARY_PATH: %d\n", errno);
 			return 1;
 		}
 #else
@@ -213,16 +214,16 @@ cobcrun_initial_module (char *module_argument)
 	}
 	if (filename && *filename) {
 		memset(env_space, 0, COB_MEDIUM_BUFF);
-		envptr = getenv("COB_PRE_LOAD");
+		envptr = getenv ("COB_PRE_LOAD");
 		if (envptr) {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s:%s", filename, envptr);
+			snprintf (env_space, COB_MEDIUM_BUFF, "%s%c%s", filename, PATHSEP_CHAR, envptr);
 		} else {
-			snprintf(env_space, COB_MEDIUM_BUFF, "%s", filename);
+			snprintf (env_space, COB_MEDIUM_BUFF, "%s", filename);
 		}
 #if HAVE_SETENV
-		envop_return = setenv("COB_PRE_LOAD", env_space, 1);
+		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
 		if (envop_return) {
-			fprintf(stderr, "Problem with setenv COB_PRE_LOAD: %d\n", errno);
+			fprintf (stderr, "Problem with setenv COB_PRE_LOAD: %d\n", errno);
 			return 1;
 		}
 #else
@@ -233,7 +234,7 @@ cobcrun_initial_module (char *module_argument)
 #endif
 	}
 	if (filename) {
-		cob_free((void *)filename);
+		cob_free ((void *)filename);
 	}
 	return 0;
 }
