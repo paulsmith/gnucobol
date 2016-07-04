@@ -3413,11 +3413,6 @@ AT_DATA([prog.cob], [
            DISPLAY "BAD DAYLIGHT" DAYLIGHT END-DISPLAY
        END-IF
 
-       CALL "feof" USING BY VALUE STDIN END-CALL
-       IF RETURN-CODE NOT EQUAL ZERO THEN
-           DISPLAY "BAD STDIN EOF" END-DISPLAY
-       END-IF
-
        *> Test assumes return-code will be 3, chars output by fprintf
        CALL "fprintf" USING BY VALUE STDOUT BY CONTENT Z"OUT" END-CALL
        CALL "fprintf" USING BY VALUE STDERR BY CONTENT Z"ERR" END-CALL

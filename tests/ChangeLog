@@ -1,3 +1,9 @@
+
+2016-07-04 Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: removed a call to "feof" in 
+	  CBL_OC_HOSTED tests to fix a problem with Cygwin
+
 2016-06-28  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Added Files with FILLER.
