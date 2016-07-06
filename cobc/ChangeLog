@@ -1,4 +1,13 @@
 
+2016-07-06  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c: fixed bug #264, where fields of category CB_CATEGORY_UNKNOWN
+	  were rejected in the AT clause despite being numeric (or having only
+	  numeric children).
+	* typeck.c (valid_screen_pos): removed extension to AT clause where less
+	  than 4 digits was permitted (I'd added this because I thought leading
+	  zeroes were truncated from literals).
+
 2016-06-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l (is_condition_directive_clause): fixed bug #263 where >>IF's

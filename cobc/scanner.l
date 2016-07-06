@@ -1455,7 +1455,7 @@ scan_numeric (const char *text)
 		scale = 0;
 	}
 
-	/* leading zeroes should be removed here, shouldn't they ? */
+	/* Note that leading zeroes are not removed from the literal. */
 
 	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */

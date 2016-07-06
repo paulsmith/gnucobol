@@ -4298,17 +4298,15 @@ is_reference_with_value (cb_tree pos)
 }
 
 static COB_INLINE COB_A_INLINE int
-value_is_numeric_field (cb_tree pos)
-{
-	return CB_FIELD_P ((CB_REFERENCE (pos))->value)
-		&& (CB_REFERENCE (pos))->value->category == CB_CATEGORY_NUMERIC;
-
-}
-
-static COB_INLINE COB_A_INLINE int
 value_has_picture_clause (cb_tree pos)
 {
 	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic != NULL;
+}
+
+static COB_INLINE COB_A_INLINE int
+value_pic_is_numeric (cb_tree pos)
+{
+	return (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->category == CB_CATEGORY_NUMERIC;
 }
 
 static COB_INLINE COB_A_INLINE int
@@ -4318,12 +4316,43 @@ value_pic_has_no_scale (cb_tree pos)
 }
 
 static int
-valid_screen_pos_type (cb_tree pos)
+numeric_screen_pos_type (cb_tree pos)
 {
 	return is_reference_with_value (pos)
-		&& value_is_numeric_field (pos)
 		&& value_has_picture_clause (pos)
+		&& value_pic_is_numeric (pos)
 		&& value_pic_has_no_scale (pos);
+}
+
+static int
+has_children (cb_tree pos)
+{
+	return (CB_FIELD ((CB_REFERENCE (pos))->value))->children != NULL;
+}
+
+static int
+children_are_numeric (cb_tree pos)
+{
+	struct cb_field	*child
+		= (CB_FIELD ((CB_REFERENCE (pos))->value))->children;
+
+	for (; child; child = child->sister) {
+		if (!(child->pic
+		      && child->pic->category == CB_CATEGORY_NUMERIC
+		      && child->pic->scale == 0)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+numeric_children_screen_pos_type (cb_tree pos)
+{
+	return is_reference_with_value (pos)
+		&& has_children (pos)
+		&& children_are_numeric (pos);
 }
 
 static int
@@ -4334,19 +4363,18 @@ valid_screen_pos (cb_tree pos)
 	/* Find size of pos value, if possible */
 	if (CB_NUMERIC_LITERAL_P (pos)) {
 		size = (CB_LITERAL (pos))->size;
-	} else if (valid_screen_pos_type (pos)) {
+	} else if (numeric_screen_pos_type (pos)) {
 		size = (CB_FIELD ((CB_REFERENCE (pos))->value))->pic->size;
+	} else if (numeric_children_screen_pos_type (pos)) {
+		size = (CB_FIELD ((CB_REFERENCE (pos))->value))->size;
 	} else {
-		cb_error (_("Invalid value in AT clause"));
+		cb_error_x (pos, _("Value in AT clause is not numeric"));
 		return 0;
 	}
 
 	/* Check if size is valid. If it isn't, display error. */
-	if (size == 5) {
-		cb_error (_("Value in AT clause may not have 5 digits"));
-		return 0;
-	} else if (size > 6) {
-		cb_error (_("Value in AT clause may not be longer than 6 digits"));
+	if (size != 4 && size != 6) {
+		cb_error_x (pos, _("Value in AT clause must have 4 or 6 digits"));
 		return 0;
 	} else {
 		return 1;

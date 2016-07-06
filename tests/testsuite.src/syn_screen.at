@@ -94,6 +94,48 @@ prog.cob: 50: Error: Cannot display item upon CRT without LINE or COLUMN
 AT_CLEANUP
 
 
+AT_SETUP([AT clause])
+AT_KEYWORDS([screen extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  curs-1      PIC 9(4) VALUE 00000000001111.
+       01  curs-2.
+           03  linee   PIC 999.
+           03  coll    PIC 999.
+       01  pos         CONSTANT 0101.
+
+       01  curs-3      PIC 99.
+       01  curs-4      PIC 9(8) VALUE 0101.
+       01  curs-5      PIC X(4).
+
+       PROCEDURE       DIVISION.
+           *> Valid AT clauses
+           DISPLAY "a" AT curs-1
+           DISPLAY "a" AT curs-2
+           DISPLAY "a" AT pos
+
+           *> Invalid AT clauses
+           DISPLAY "a" AT curs-3
+           DISPLAY "a" AT curs-4
+           DISPLAY "a" AT curs-5
+           DISPLAY "a" AT 101
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 24: Error: Value in AT clause must have 4 or 6 digits
+prog.cob: 25: Error: Value in AT clause must have 4 or 6 digits
+prog.cob: 26: Error: Value in AT clause is not numeric
+prog.cob: 27: Error: Value in AT clause must have 4 or 6 digits
+])
+AT_CLEANUP
+
+
 AT_SETUP([FROM clause])
 AT_KEYWORDS([screen])
 
