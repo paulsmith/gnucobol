@@ -132,6 +132,7 @@ int				cb_exp_line = 0;
 cb_tree				cobc_printer_node = NULL;
 int				functions_are_all = 0;
 int				non_const_word = 0;
+unsigned int			cobc_in_id = 0;
 unsigned int			cobc_in_procedure = 0;
 unsigned int			cobc_in_repository = 0;
 unsigned int			cobc_force_literal = 0;
@@ -633,6 +634,7 @@ clear_initial_values (void)
 	eval_inc2 = 0;
 	inspect_keyword = 0;
 	check_unreached = 0;
+	cobc_in_id = 0;
 	cobc_in_procedure = 0;
 	cobc_in_repository = 0;
 	cobc_force_literal = 0;
@@ -2073,26 +2075,36 @@ _identification_header:
 ;
 
 program_id_paragraph:
-  PROGRAM_ID TOK_DOT program_id_name _as_literal
+  PROGRAM_ID
   {
-	if (set_up_program ($3, $4, CB_PROGRAM_TYPE)) {
+	cobc_in_id = 1;
+  }
+  TOK_DOT program_id_name _as_literal
+  {
+	if (set_up_program ($4, $5, CB_PROGRAM_TYPE)) {
 		YYABORT;
 	}
   }
   _program_type TOK_DOT
   {
 	cobc_cs_check = 0;
+	cobc_in_id = 0;
   }
 ;
 
 function_id_paragraph:
-  FUNCTION_ID TOK_DOT program_id_name _as_literal TOK_DOT
+  FUNCTION_ID
   {
-	if (set_up_program ($3, $4, CB_FUNCTION_TYPE)) {
+	cobc_in_id = 1;
+  }
+  TOK_DOT program_id_name _as_literal TOK_DOT
+  {
+	if (set_up_program ($4, $5, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
-	set_up_func_prototype ($3, $4, 1);
+	set_up_func_prototype ($4, $5, 1);
 	cobc_cs_check = 0;
+	cobc_in_id = 0;
   }
 ;
 

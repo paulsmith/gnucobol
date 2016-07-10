@@ -833,10 +833,12 @@ H#[0-9A-Za-z]* {
 	}
 
 	/* Check user programs */
-        program = cb_find_defined_program_by_name (yytext);
-	if (program) {
-		yylval = cb_build_reference (yytext);
-		return PROGRAM_NAME;
+	if (cobc_in_id) {
+		program = cb_find_defined_program_by_name (yytext);
+		if (program) {
+			yylval = cb_build_reference (yytext);
+			return PROGRAM_NAME;
+		}
 	}
 
 	/* User word */

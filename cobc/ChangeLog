@@ -1,4 +1,9 @@
 
+2016-07-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, scanner.l, tree.h: fixed bug #270 by only returning
+	  PROGRAM_NAME's from scanner inside the identification division.
+
 2016-07-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c: fixed bug #264, where fields of category CB_CATEGORY_UNKNOWN

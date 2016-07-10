@@ -401,7 +401,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY --ffold-call=upper prog.cob], [1], [],
-[prog.cob: 7: Error: syntax error, unexpected Program name
+[prog.cob: 7: Warning: Redefinition of 'prog'
+prog.cob: 3: Warning: 'prog' previously defined here
 prog.cob: 23: Error: Redefinition of program name 'foo'
 prog.cob: 31: Error: Redefinition of program name 'prog'
 prog.cob: 42: Error: Redefinition of 'foo'
@@ -437,6 +438,31 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: Warning: No definition/prototype seen for function 'func'
 prog.cob: 12: Error: syntax error, unexpected User function name
 ])
+AT_CLEANUP
+
+AT_SETUP([Data item with same name as program-name])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       FUNCTION-ID.    x.
+       DATA            DIVISION.
+       LINKAGE         SECTION.
+       01  ret         PIC 99.
+       PROCEDURE       DIVISION RETURNING ret.
+           CONTINUE
+           .
+       END FUNCTION x.
+
+           
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.           
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 999 VALUE 134.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 ## Ambiguous reference
