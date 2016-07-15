@@ -2283,3 +2283,27 @@ AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
 prog.cob: 11: Error: Unknown statement 'TRANSFORM'; it may exist in another dialect
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Redundant periods])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       REPLACE ==a== BY ==b==..  .
+
+       78  var VALUE "hello".
+
+          .
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [0], [],
+[prog.cob: 8: Warning: Ignoring redundant .
+prog.cob: 10: Warning: Ignoring redundant .
+])
+AT_CLEANUP

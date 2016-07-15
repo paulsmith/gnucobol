@@ -1,4 +1,9 @@
 
+2016-07-15  Edward Hart <edward.dan.hart@gmail.com>
+
+	* scanner.l, pplex.l: fixed bug #269. GnuCOBOL now gobbles redundant
+	  periods, instead of releasing them to the parser.
+
 2016-07-15 Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: correction to exception code tested for ACCEPT ON EXCEPTION

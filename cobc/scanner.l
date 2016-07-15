@@ -899,10 +899,16 @@ H#[0-9A-Za-z]* {
 	return EXPONENTIATION;
 }
 
-"." {
-	last_token_is_dot = 1;
-	yylval = NULL;
-	return TOK_DOT;
+"."([ \n]*".")* {
+	if (last_token_is_dot || strlen (yytext) > 1) {
+		cb_warning (_("Ignoring redundant ."));
+	}
+
+	if (!last_token_is_dot) {
+		last_token_is_dot = 1;
+		yylval = NULL;
+		return TOK_DOT;
+	}
 }
 
 "&" {
