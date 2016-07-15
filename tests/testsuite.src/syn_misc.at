@@ -2295,10 +2295,11 @@ AT_DATA([prog.cob], [
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       REPLACE ==a== BY ==b==..  .
+       REPLACE ==a== BY ==b==.. *> blah blah
+       .
 
        78  var VALUE "hello".
-
+      * blah blah
           .
 ])
 
