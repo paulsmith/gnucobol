@@ -5571,7 +5571,7 @@ output_display_accept_ex_condition (const enum cb_handler_type handler_type)
 	if (handler_type == DISPLAY_HANDLER) {
 		imp_ec = COB_EC_IMP_DISPLAY;
 	} else { /* ACCEPT_HANDLER */
-		imp_ec = COB_EC_IMP_DISPLAY;
+		imp_ec = COB_EC_IMP_ACCEPT;
 	}
 	output_line ("               || cob_glob_ptr->cob_exception_code == 0x%04x))",
 		     CB_EXCEPTION_CODE (imp_ec));
