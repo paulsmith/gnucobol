@@ -1760,7 +1760,6 @@ AT_DATA([prog.cob], [
               DELIMITER WS-KEYWORD
               POINTER WS-POINTER
            END-UNSTRING.
-           .
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
@@ -2242,8 +2241,6 @@ AT_DATA([prog.cob], [
         ENTRY 'ent2'.
         DISPLAY VAR2 END-DISPLAY
         GOBACK.
-
-        .
 ])
 
 AT_DATA([prog1.cob], [
@@ -2265,8 +2262,6 @@ AT_DATA([prog1.cob], [
         ENTRY 'ent3'.
         DISPLAY VAR3 END-DISPLAY
         GOBACK.
-
-        .
 ])
 
 AT_DATA([main-prog.cob], [
@@ -2280,7 +2275,7 @@ AT_DATA([main-prog.cob], [
         CALL 'ent2' END-CALL
         CALL 'ent3' END-CALL
 
-        stop run.
+        STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [prog.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
