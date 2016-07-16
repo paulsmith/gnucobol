@@ -1357,10 +1357,9 @@ cobc_getenv_path (const char *env)
 	if (!p || *p == 0 || *p == ' ') {
 		return NULL;
 	}
-	if(strchr(p,PATHSEP_CHAR) != NULL) {
+	if (strchr (p, PATHSEP_CHAR) != NULL) {
 		cobc_err_msg (_("environment variable '%s' is '%s'; should not contain '%c'"), env, p, PATHSEP_CHAR);
 		cobc_abort_terminate ();
-		return NULL;
 	}
 	return cobc_main_strdup (p);
 }
