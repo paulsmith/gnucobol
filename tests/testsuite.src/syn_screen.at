@@ -343,3 +343,55 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Screen item OCCURS w-/wo relative LINE/COL])
+AT_KEYWORDS([occurs])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X OCCURS 10.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X OCCURS 10 COL  10.
+       01 y-scr.
+          03 y PIC X OCCURS 10 LINE 10.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA             DIVISION.
+       SCREEN           SECTION.
+       01 x-scr.
+          03 x PIC X OCCURS 10 COL  + 10.
+       01 y-scr.
+          03 y PIC X OCCURS 10 LINE - 10.
+       01 a-scr.
+          03 a PIC X OCCURS 10 COL  PLUS 10.
+       01 b-scr.
+          03 b PIC X OCCURS 10 LINE MINUS 10.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: Error: Relative LINE/COLUMN clause required with OCCURS
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 7: Error: Relative LINE/COLUMN clause required with OCCURS
+prog2.cob: 9: Error: Relative LINE/COLUMN clause required with OCCURS
+])
+
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [], [])
+
+AT_CLEANUP

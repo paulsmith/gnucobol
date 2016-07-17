@@ -375,23 +375,23 @@ AT_DATA([prog.cob], [
        SELECT test-file ASSIGN path
                         ORGANIZATION LINE SEQUENTIAL.
        DATA             DIVISION.
-       FILE	        SECTION.
+       FILE	            SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
-       LOCAL-STORAGE	SECTION.
+       LOCAL-STORAGE    SECTION.
        01  path         PIC X(10) VALUE "test.txt".
        PROCEDURE        DIVISION.
-           OPEN INPUT test-file
-           READ test-file
-	   DISPLAY test-rec
-           CLOSE test-file
+           OPEN INPUT test-file.
+           READ test-file   END-READ.
+           DISPLAY test-rec END-DISPLAY.
+           CLOSE test-file.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob])
 AT_CHECK([./prog], [0],
 [hello
-])
+], [])
 
 AT_CLEANUP
 
@@ -414,22 +414,22 @@ AT_DATA([prog.cob], [
        SELECT test-file ASSIGN path
                         ORGANIZATION LINE SEQUENTIAL.
        DATA             DIVISION.
-       FILE	        SECTION.
+       FILE	            SECTION.
        FD  test-file.
        01  test-rec     PIC X(5).
-       LOCAL-STORAGE	SECTION.
+       LOCAL-STORAGE    SECTION.
        01  path         PIC X(10) VALUE "test.txt".
        PROCEDURE        DIVISION.
-           OPEN INPUT test-file
-           READ test-file
-	   DISPLAY test-rec
-           CLOSE test-file
+           OPEN INPUT test-file.
+           READ test-file   END-READ.
+           DISPLAY test-rec END-DISPLAY.
+           CLOSE test-file.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob])
 AT_CHECK([./prog], [0],
 [hello
-])
+], [])
 
 AT_CLEANUP

@@ -280,20 +280,3 @@ grep "prog.cob: 11: Error: Numeric literal '9223372036854775808' exceeds limit"]
 AT_CLEANUP
 
 
-AT_SETUP([Screen item OCCURS without relative LINE/COL])
-AT_KEYWORDS([occurs])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       SCREEN           SECTION.
-       01 x-scr.
-          03 x PIC X OCCURS 10.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: Relative LINE/COLUMN clause required with OCCURS
-])
-
-AT_CLEANUP
