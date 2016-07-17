@@ -374,9 +374,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr,
 	short		bgdef;
 
 	attrset (A_NORMAL);
-	if (attr & COB_SCREEN_BELL) {
-		cob_beep ();
-	}
 	if (attr & COB_SCREEN_REVERSE) {
 		styles |= A_REVERSE;
 	}
@@ -502,6 +499,9 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr,
 		if (attr & COB_SCREEN_ERASE_EOS) {
 			clrtobot ();
 		}
+	}
+	if (attr & COB_SCREEN_BELL) {
+		cob_beep ();
 	}
 }
 

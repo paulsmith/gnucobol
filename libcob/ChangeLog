@@ -551,6 +551,16 @@
 
 20??-??-??  Roger While <simrw@sim-basis.de>
 
+	* fileio.c: used fdcobsync for sync, defined depending on configuration
+	* fileio.c (cob_sync): droped synch mode for COB_SYNCH (Y=P), moved
+	  calls of cob_sync to (save_status)
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
+	* fileio.c: dropped support for BDB < 4.1
+
+20??-??-??  Roger While <simrw@sim-basis.de>
+
 	* call.c (cob_init_call): Change to COB_PRE_LOAD: if an entry is not
 	  found in COB_LIBRARY_PATH try the full name
 
@@ -594,9 +604,9 @@
 2009-05-25  Roger While <simrw@sim-basis.de>
 
 	* General: Remove the following extraneous include files:
-	           byteswap.h, call.h, fileio.h, intrinsic.h, move.h, numeric.h,
-	           screenio.h, strings.h, termio.h by integration into common.h
-	           as first step
+	            byteswap.h, call.h, fileio.h, intrinsic.h, move.h, numeric.h,
+	            screenio.h, strings.h, termio.h by integration into common.h
+	            as first step
 
 2009-05-16  Roger While <simrw@sim-basis.de>
 
@@ -1721,7 +1731,7 @@
 2004-11-04  Bernard Giroud <bgiroud@opencobol.org>
 
 	* numeric.c (cob_decimal_get_binary): reverted:
-	  NIST test suite is no mre working.
+	  NIST test suite is no more working.
 
 2004-11-02  Bernard Giroud <bgiroud@opencobol.org>
 
