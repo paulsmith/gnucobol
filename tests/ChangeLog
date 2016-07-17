@@ -3,6 +3,7 @@
 
 	* testsuite.src/run_extensions.at: Moved stdout stderr fprintf test
 	  in CBL_OC_HOSTED to external C subprogram.
+	  And then a correction to account for linkage exports.
 
 2016-07-04  Brian Tiffin <btiffin@gnu.org>
 

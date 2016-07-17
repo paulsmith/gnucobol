@@ -3340,6 +3340,10 @@ AT_DATA([test_errno.c], [
 #include <errno.h>
 #include <stdio.h>
 
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int test_errno(void);
+
 int
 test_errno(void)
 {
@@ -3354,12 +3358,19 @@ test_errno(void)
 }
 ])
 
-AT_DATA([test_fprintf.c], [
+AT_DATA([test_stdio.c], [
 #include <stdio.h>
 
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int test_stdio(FILE *, FILE *, FILE *);
+
 int
-test_fprintf(FILE *so, FILE *se)
+test_stdio(FILE *si, FILE *so, FILE *se)
 {
+    if (feof(si)) {
+        fprintf(se, "BAD STDIN EOF\n");
+    }
     fprintf(so, "OUT");
     return fprintf(se, "ERR");
 }
@@ -3429,15 +3440,15 @@ AT_DATA([prog.cob], [
            DISPLAY "BAD DAYLIGHT" DAYLIGHT END-DISPLAY
        END-IF
 
-       *> Test assumes return-code will be 3, chars output by fprintf
-       CALL "test_fprintf" USING BY VALUE STDOUT STDERR 
+       *> Test assumes return-code will be 3, chars output by last fprintf
+       CALL "test_stdio" USING BY VALUE STDIN STDOUT STDERR 
        END-CALL
 
        STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_MODULE test_errno.c], [0], [], [])
-AT_CHECK([$COMPILE_MODULE test_fprintf.c], [0], [], [])
+AT_CHECK([$COMPILE_MODULE test_stdio.c], [0], [], [])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog 1ARG], [3], [OUT], [ERR])
 
