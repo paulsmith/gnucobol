@@ -3354,6 +3354,16 @@ test_errno(void)
 }
 ])
 
+AT_DATA([test_fprintf.c], [
+#include <stdio.h>
+
+int
+test_fprintf(FILE *so, FILE *se)
+{
+    fprintf(so, "OUT");
+    return fprintf(se, "ERR");
+}
+])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
@@ -3362,6 +3372,7 @@ AT_DATA([prog.cob], [
        01 STDIN    USAGE POINTER.
        01 STDOUT   USAGE POINTER.
        01 STDERR   USAGE POINTER.
+       01 CELL     USAGE BINARY-LONG.
        01 ARGC     USAGE BINARY-LONG.
        01 ARGV     USAGE POINTER.
        01 ERRNO    USAGE POINTER.
@@ -3378,6 +3389,7 @@ AT_DATA([prog.cob], [
        CALL "CBL_OC_HOSTED" USING STDERR "stderr" END-CALL
        CALL "CBL_OC_HOSTED" USING ARGC "argc" END-CALL
        CALL "CBL_OC_HOSTED" USING ARGV "argv" END-CALL
+       CALL "CBL_OC_HOSTED" USING CELL "cell" END-CALL
        CALL "CBL_OC_HOSTED" USING ERRNO "errno" END-CALL
        CALL "CBL_OC_HOSTED" USING ARGC "arg" END-CALL
        CALL "CBL_OC_HOSTED" USING NULL "argc" END-CALL
@@ -3393,10 +3405,14 @@ AT_DATA([prog.cob], [
        END-IF
 
        IF ARGC NOT EQUAL 2 THEN
-           DISPLAY "BAD ARGC" ARGC END-DISPLAY
+           DISPLAY "BAD ARGC " ARGC END-DISPLAY
        END-IF
        IF ARGV EQUAL NULL THEN
            DISPLAY "BAD ARGV" END-DISPLAY
+       END-IF
+
+       IF CELL LESS THAN 0 OR GREATER THAN 8 THEN
+           DISPLAY "UNK CELL " CELL END-DISPLAY
        END-IF
 
        SET ENVIRONMENT "TZ" TO "PST8PDT"
@@ -3414,13 +3430,14 @@ AT_DATA([prog.cob], [
        END-IF
 
        *> Test assumes return-code will be 3, chars output by fprintf
-       CALL "fprintf" USING BY VALUE STDOUT BY CONTENT Z"OUT" END-CALL
-       CALL "fprintf" USING BY VALUE STDERR BY CONTENT Z"ERR" END-CALL
+       CALL "test_fprintf" USING BY VALUE STDOUT STDERR 
+       END-CALL
 
        STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_MODULE test_errno.c], [0], [], [])
+AT_CHECK([$COMPILE_MODULE test_fprintf.c], [0], [], [])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog 1ARG], [3], [OUT], [ERR])
 

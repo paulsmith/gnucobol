@@ -1,8 +1,13 @@
 
-2016-07-04 Brian Tiffin <btiffin@gnu.org>
+2016-07-17  Brian Tiffin <btiffin@gnu.org>
 
-	* testsuite.src/run_extensions.at: removed a call to "feof" in 
-	  CBL_OC_HOSTED tests to fix a problem with Cygwin
+	* testsuite.src/run_extensions.at: Moved stdout stderr fprintf test
+	  in CBL_OC_HOSTED to external C subprogram.
+
+2016-07-04  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_extensions.at: Removed a "feof" call in
+	  CBL_OC_HOSTED testing to help with Cygwin
 
 2016-06-28  Dave Pitts <dpitts@cozx.com>
 
@@ -18,7 +23,7 @@
 	* Makefile.in, Makefile.am - Added testsuite/listings.at.
 	* testsuite.at - Added testsuite/listings.at
 
-2016-06-15 Brian Tiffin <btiffin@gnu.org>
+2016-06-15  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/used_binaries.at: added tests for -j"args"
 
