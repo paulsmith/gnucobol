@@ -1529,11 +1529,11 @@ COB_EXPIMP void		cob_longjmp		(struct cobjmp_buf *);
 
 COB_EXPIMP void cob_screen_line_col	(cob_field *, const int);
 COB_EXPIMP void cob_screen_display	(cob_screen *, cob_field *,
-					 cob_field *);
+					 cob_field *, const int);
 COB_EXPIMP void cob_screen_accept	(cob_screen *, cob_field *,
-					 cob_field *, cob_field *);
+					 cob_field *, cob_field *, const int);
 COB_EXPIMP void cob_field_display	(cob_field *, cob_field *, cob_field *,
-					 cob_field *, cob_field *, cob_field *, 
+					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, const int);
 COB_EXPIMP void cob_field_accept	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,

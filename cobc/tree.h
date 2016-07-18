@@ -1354,6 +1354,16 @@ struct cb_func_prototype {
 #define CB_FUNC_PROTOTYPE(x)	(CB_TREE_CAST (CB_TAG_FUNC_PROTOTYPE, struct cb_func_prototype, x))
 #define CB_FUNC_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_FUNC_PROTOTYPE)
 
+/* DISPLAY type */
+
+enum cb_display_type {
+	UNKNOWN_DISPLAY,
+	SCREEN_DISPLAY,
+	FIELD_ON_SCREEN_DISPLAY,
+	DEVICE_DISPLAY,
+	MIXED_DISPLAY
+};
+
 /* Functions/variables */
 
 /* tree.c */
@@ -1572,6 +1582,8 @@ extern void			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
 /* error.c */
 extern void	cb_warning_x (cb_tree, const char *, ...) COB_A_FORMAT23;
 extern void	cb_error_x (cb_tree, const char *, ...) COB_A_FORMAT23;
+extern unsigned int	cb_verify_x (cb_tree, const enum cb_support,
+				     const char *);
 
 extern void		redefinition_error (cb_tree);
 extern void		redefinition_warning (cb_tree, cb_tree);
@@ -1679,7 +1691,8 @@ extern void		cb_emit_display_omitted (cb_tree,
 						 struct cb_attr_struct *);
 extern void		cb_emit_display (cb_tree, cb_tree,
 					 cb_tree, cb_tree,
-					 struct cb_attr_struct *);
+					 struct cb_attr_struct *,
+					 int, enum cb_display_type);
 extern cb_tree		cb_build_display_mnemonic (cb_tree);
 extern cb_tree		cb_build_display_name (cb_tree);
 extern void		cb_emit_env_name (cb_tree);
@@ -1850,9 +1863,13 @@ extern struct cb_program	*cb_find_defined_program_by_id (const char *);
 	cb_build_funcall (f, 9, a1, a2, a3, a4, a5, a6, a7, a8,	\
 			  a9, NULL, NULL)
 
-#define CB_BUILD_FUNCALL_10(f,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)	\
+#define CB_BUILD_FUNCALL_10(f,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)		\
 	cb_build_funcall (f, 10, a1, a2, a3, a4, a5, a6, a7, a8,	\
 			  a9, a10, NULL)
+
+#define CB_BUILD_FUNCALL_11(f,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)	\
+	cb_build_funcall (f, 11, a1, a2, a3, a4, a5, a6, a7, a8,	\
+			  a9, a10, a11)
 
 /* Miscellanous defines */
 

@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -106,10 +106,10 @@ AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           DISPLAY B#101
-           DISPLAY O#1777777777777777777777
-           DISPLAY X#ffffffffffffffff
-           DISPLAY H#ffffffffffffffff
+           DISPLAY B#101 UPON STDOUT
+           DISPLAY O#1777777777777777777777 UPON STDOUT
+           DISPLAY X#ffffffffffffffff UPON STDOUT
+           DISPLAY H#ffffffffffffffff UPON STDOUT
 
            STOP RUN.
 ])
@@ -2100,9 +2100,9 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-           DISPLAY "OK" NO ADVANCING
+           DISPLAY "OK" NO ADVANCING UPON STDOUT
            END-DISPLAY.
-      D    DISPLAY "KO" NO ADVANCING
+      D    DISPLAY "KO" NO ADVANCING UPON STDOUT
       D    END-DISPLAY.
            STOP RUN.
 ])

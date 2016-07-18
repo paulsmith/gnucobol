@@ -49,7 +49,7 @@ print_error (const char *file, int line, const char *prefix,
 	char			errmsg[BUFSIZ];
 	struct list_error	*err;
 	struct list_files	*cfile;
-	
+
 	if (!file) {
 		file = cb_source_file;
 	}
@@ -280,42 +280,60 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	}
 }
 
-unsigned int
-cb_verify (const enum cb_support tag, const char *feature)
+static unsigned int
+cb_verify_common (cb_tree x, const enum cb_support tag, const char *feature)
 {
+	if (!x) {
+		x = cobc_parse_malloc (sizeof (struct cb_tree_common));
+		x->source_file = NULL;
+		x->source_line = 0;
+	}
+
 	switch (tag) {
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
-		cb_warning (_("%s used"), feature);
+		cb_warning_x (x, _("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
 		if (cb_warn_archaic) {
-			cb_warning (_("%s is archaic in %s"), feature, cb_config_name);
+			cb_warning_x (x, _("%s is archaic in %s"), feature, cb_config_name);
 		}
 		return 1;
 	case CB_OBSOLETE:
 		if (cb_warn_obsolete) {
-			cb_warning (_("%s is obsolete in %s"), feature, cb_config_name);
+			cb_warning_x (x, _("%s is obsolete in %s"), feature, cb_config_name);
 		}
 		return 1;
 	case CB_SKIP:
 		return 0;
 	case CB_IGNORE:
 		if (warningopt) {
-			cb_warning (_("%s ignored"), feature);
+			cb_warning_x (x, _("%s ignored"), feature);
 		}
 		return 0;
 	case CB_ERROR:
-		cb_error (_("%s used"), feature);
+		cb_error_x (x, _("%s used"), feature);
 		return 0;
 	case CB_UNCONFORMABLE:
-		cb_error (_("%s does not conform to %s"), feature, cb_config_name);
+		cb_error_x (x, _("%s does not conform to %s"), feature, cb_config_name);
 		return 0;
 	default:
 		break;
 	}
 	return 0;
+}
+
+COB_INLINE COB_A_INLINE unsigned int
+cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
+{
+	return cb_verify_common (x, tag, feature);
+}
+
+COB_INLINE COB_A_INLINE unsigned int
+cb_verify (const enum cb_support tag, const char *feature)
+{
+	return cb_verify_common (NULL, tag, feature);
 }
 
 void
@@ -353,13 +371,13 @@ redefinition_warning (cb_tree x, cb_tree y)
 
 void
 undefined_error (cb_tree x)
-{	
+{
 	struct cb_reference	*r = CB_REFERENCE (x);
 	cb_tree			c;
         void (* const emit_error_func)(cb_tree, const char *, ...)
 		= r->flag_optional ? &cb_warning_x : &cb_error_x;
 	const char		*error_message;
-	
+
 	if (!errnamebuff) {
 		errnamebuff = cobc_main_malloc ((size_t)COB_NORMAL_BUFF);
 	}
@@ -379,8 +397,8 @@ undefined_error (cb_tree x)
 		error_message = _("%s is not defined, but is a reserved word in another dialect");
 	} else {
 		error_message = _("%s is not defined");
-	} 
-	
+	}
+
 	(*emit_error_func) (x, error_message, errnamebuff);
 }
 

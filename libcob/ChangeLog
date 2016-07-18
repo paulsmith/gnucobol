@@ -1,4 +1,9 @@
 
+2016-07-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c: added support for LINE/COL 0.
+	* screenio.c: fixed small issues with DISPLAY ALL X"02" and X"07".
+
 2016-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h, coblocal.h: moved internal functions to coblocal as COB_HIDDEN

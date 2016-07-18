@@ -1341,6 +1341,14 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 	p->chain = chain;
 	p->value = value;
 	p->purpose = purpose;
+
+	/* Set location to that of initial element. */
+	if (value) {
+		p->common.source_file = value->source_file;
+		p->common.source_line = value->source_line;
+		p->common.source_column = value->source_column;
+	}
+	
 	return CB_TREE (p);
 }
 

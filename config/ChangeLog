@@ -1,4 +1,9 @@
 
+2016-07-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added accept-display-extensions and console-is-crt
+	  configuration options.
+
 2016-06-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: moved uncommon aliases from reserved.c to config files.

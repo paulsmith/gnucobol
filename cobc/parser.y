@@ -205,6 +205,8 @@ static unsigned int		header_check;
 static unsigned int		call_nothing;
 static enum tallying_phrase	previous_tallying_phrase;
 
+static enum cb_display_type	display_type;
+static int			is_first_display_item;
 static cb_tree			advancing_value;
 static cb_tree			upon_value;
 static cb_tree			line_column;
@@ -1192,8 +1194,8 @@ static int
 has_relative_pos (struct cb_field const *field)
 {
 	return !!(field->screen_flag
-		& (COB_SCREEN_LINE_PLUS | COB_SCREEN_LINE_MINUS
-		   | COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS));
+		  & (COB_SCREEN_LINE_PLUS | COB_SCREEN_LINE_MINUS
+		     | COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS));
 }
 
 static void
@@ -1224,95 +1226,147 @@ is_screen_field (cb_tree x)
 	}
 }
 
-static /* COB_INLINE COB_A_INLINE */ int
-contains_only_screen_field (struct cb_list *x_list)
-{
-	return (cb_tree) x_list != cb_null
-		&& cb_list_length ((cb_tree) x_list) == 1
-		&& is_screen_field (x_list->value);
-}
-
-static COB_INLINE COB_A_INLINE void
-emit_default_screen_display (cb_tree x_list)
-{
-	cb_emit_display (x_list, cb_null, cb_int1, NULL, NULL);
-}
-
-static cb_tree
-get_default_display_device ()
-{
-	if (current_program->flag_console_is_crt) {
-		return cb_null;
-	} else {
-		return cb_int0;
-	}
-}
-
-static void
-emit_default_device_display (cb_tree x_list)
-{
-	cb_emit_display (x_list, get_default_display_device (), cb_int1, NULL,
-			 NULL);
-}
-
-static void
-emit_default_displays_for_x_list (struct cb_list *x_list)
-{
-	struct cb_list	*elt;
-	cb_tree	        value;
-	cb_tree		device_display_x_list = NULL;
-	int	        display_on_crt = current_program->flag_console_is_crt;
-
-	for (elt = x_list; elt; elt = (struct cb_list *) elt->chain) {
-		/* Get the list element value */
-		if (CB_REFERENCE_P (elt->value)) {
-			value = cb_ref (elt->value);
-		} else {
-			value = elt->value;
-		}
-
-		if (is_screen_field (value)) {
-			/*
-			  Emit DISPLAY for previous values before emitting
-			  screen DISPLAY
-			*/
-			if (device_display_x_list != NULL) {
-				emit_default_device_display (device_display_x_list);
-				begin_implicit_statement ();
-
-				device_display_x_list = NULL;
-			}
-
-			emit_default_screen_display (CB_LIST_INIT (elt->value));
-			begin_implicit_statement ();
-		} else {
-			if (display_on_crt) {
-				cb_error ("Cannot display item upon CRT without LINE or COLUMN");
-				return;
-			}
-
-			/* Add value to list for screen DISPLAY */
-			if (device_display_x_list == NULL) {
-				device_display_x_list = CB_LIST_INIT (elt->value);
-			} else {
-				cb_list_add (device_display_x_list, elt->value);
-			}
-		}
-	}
-
-	/* Emit screen DISPLAY for remaining values */
-	if (device_display_x_list != NULL) {
-		emit_default_device_display (device_display_x_list);
-		begin_implicit_statement ();
-	}
-}
-
 static void
 error_if_no_advancing_in_screen_display (cb_tree advancing)
 {
 	if (advancing_value != cb_int1) {
 		cb_error (_("Cannot specify NO ADVANCING in screen DISPLAY"));
 	}
+}
+
+static cb_tree
+get_default_display_device (void)
+{
+	if (current_program->flag_console_is_crt
+	    || cb_console_is_crt) {
+		return cb_null;
+	} else {
+		return cb_int0;
+	}
+}
+
+static COB_INLINE COB_A_INLINE int
+contains_one_screen_field (struct cb_list *x_list)
+{
+	return (cb_tree) x_list != cb_null
+		&& cb_list_length ((cb_tree) x_list) == 1
+		&& is_screen_field (x_list->value);
+}
+
+static int
+contains_only_screen_fields (struct cb_list *x_list)
+{
+	if ((cb_tree) x_list == cb_null) {
+		return 0;
+	}
+
+	for (; x_list; x_list = (struct cb_list *) x_list->chain) {
+		if (!is_screen_field (x_list->value)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+contains_fields_and_screens (struct cb_list *x_list)
+{
+	int	field_seen = 0;
+	int	screen_seen = 0;
+
+	if ((cb_tree) x_list == cb_null) {
+		return 0;
+	}
+
+	for (; x_list; x_list = (struct cb_list *) x_list->chain) {
+		if (is_screen_field (x_list->value)) {
+			screen_seen = 1;
+		} else {
+			field_seen = 1;
+		}
+	}
+
+	return screen_seen && field_seen;
+}
+
+static enum cb_display_type
+deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
+		     struct cb_attr_struct * const attr_ptr)
+{
+	int	using_default_device_which_is_crt =
+		upon_value == NULL && get_default_display_device () == cb_null;
+
+	if (contains_only_screen_fields ((struct cb_list *) x_list)) {
+		if (!contains_one_screen_field ((struct cb_list *) x_list)) {
+			cb_error_x (x_list, _("Each screen must have its own DISPLAY statement"));
+		}
+
+		if (upon_value != NULL && upon_value != cb_null) {
+			cb_error_x (x_list, _("Screens may only be displayed on CRT"));
+		}
+
+		if (attr_ptr) {
+			cb_verify_x (x_list, cb_accept_display_extensions,
+				     _("Non-standard DISPLAY"));
+		}
+
+		return SCREEN_DISPLAY;
+	} else if (contains_fields_and_screens ((struct cb_list *) x_list)) {
+		cb_error_x (x_list, _("Cannot mix screens and fields in the same DISPLAY statement"));
+		return MIXED_DISPLAY;
+	} else if (line_column || attr_ptr) {
+		if (upon_value != NULL && upon_value != cb_null) {
+			cb_error_x (x_list, _("Screen clauses may only be used for DISPLAY on CRT"));
+		}
+
+		cb_verify_x (x_list, cb_accept_display_extensions,
+			     _("Non-standard DISPLAY"));
+
+		return FIELD_ON_SCREEN_DISPLAY;
+	} else if (upon_value == cb_null || using_default_device_which_is_crt) {
+		/* This is the only format permitted by the standard */
+		return FIELD_ON_SCREEN_DISPLAY;
+	} else if (display_type == FIELD_ON_SCREEN_DISPLAY && upon_value == NULL) {
+		/* This is for when fields without clauses follow fields with screen clauses */
+		return FIELD_ON_SCREEN_DISPLAY;
+	} else {
+		return DEVICE_DISPLAY;
+	}
+}
+
+static void
+set_display_type (cb_tree x_list, cb_tree upon_value,
+		  cb_tree line_column, struct cb_attr_struct * const attr_ptr)
+{
+	display_type = deduce_display_type (x_list, upon_value, line_column, attr_ptr);
+}
+
+static void
+error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
+				 cb_tree line_column, struct cb_attr_struct * const attr_ptr)
+{
+        const enum cb_display_type	type =
+		deduce_display_type (x_list, upon_value, line_column, attr_ptr);
+
+	/* Avoid re-displaying the same error for mixed DISPLAYs */
+	if (type == display_type || display_type == MIXED_DISPLAY) {
+		return;
+	}
+
+	if (type != MIXED_DISPLAY) {
+		if (type == SCREEN_DISPLAY || display_type == SCREEN_DISPLAY) {
+			cb_error_x (x_list, _("A screen must be displayed in its own DISPLAY statement"));
+		} else {
+			/*
+			  The only other option is that there is a mix of
+			  FIELD_ON_SCREEN_DISPLAY and DEVICE_DISPLAY.
+			*/
+			cb_error_x (x_list, _("Ambiguous DISPLAY; put items to display on device in separate DISPLAY"));
+		}
+	}
+
+	display_type = MIXED_DISPLAY;
 }
 
 %}
@@ -6397,6 +6451,7 @@ accept_statement:
   ACCEPT
   {
 	begin_statement ("ACCEPT", TERM_ACCEPT);
+	cobc_cs_check = CB_CS_ACCEPT;
 	if (cb_accept_update) {
 		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
 	}
@@ -6417,6 +6472,13 @@ accept_body:
   }
   _accept_clauses _accept_exception_phrases
   {
+	/* Check for invalid use of screen clauses */
+	  if (current_statement->attr_ptr
+	      || (!is_screen_field ($1) && line_column)) {
+		  cb_verify_x ($1, cb_accept_display_extensions,
+			       _("Non-standard ACCEPT"));
+	  }
+
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
   }
@@ -6542,6 +6604,10 @@ at_line_column:
 				  _("AT screen-location"), SYN_CLAUSE_3,
 				  &check_line_col_duplicate);
 
+	if ((CB_LITERAL_P ($2) && cb_get_int ($2) == 0) || $2 == cb_zero) {
+		cb_verify (cb_accept_display_extensions, "LINE 0");
+	}
+
 	if (!line_column) {
 		line_column = CB_BUILD_PAIR ($2, cb_int0);
 	} else {
@@ -6554,7 +6620,11 @@ at_line_column:
 				  _("AT screen-location"), SYN_CLAUSE_3,
 				  &check_line_col_duplicate);
 
-	if(!line_column) {
+	if ((CB_LITERAL_P ($2) && cb_get_int ($2) == 0) || $2 == cb_zero) {
+		cb_verify (cb_accept_display_extensions, "COLUMN 0");
+	}
+
+	if (!line_column) {
 		line_column = CB_BUILD_PAIR (cb_int0, $2);
 	} else {
 		CB_PAIR_Y (line_column) = $2;
@@ -6565,6 +6635,8 @@ at_line_column:
 	check_attr_with_conflict (_("AT screen-location"), SYN_CLAUSE_3,
 				  _("LINE or COLUMN"), SYN_CLAUSE_1 | SYN_CLAUSE_2,
 				  &check_line_col_duplicate);
+
+	cb_verify (cb_accept_display_extensions, "AT clause");
 
 	line_column = $2;
   }
@@ -7281,6 +7353,8 @@ display_statement:
   {
 	begin_statement ("DISPLAY", TERM_DISPLAY);
 	cobc_cs_check = CB_CS_DISPLAY;
+	display_type = UNKNOWN_DISPLAY;
+	is_first_display_item = 1;
   }
   display_body
   end_display
@@ -7307,14 +7381,19 @@ display_body:
 ;
 
 screen_or_device_display:
-  display_list
-  _x_list
+  display_list _x_list
   {
-	  emit_default_displays_for_x_list ((struct cb_list *) $2);
+	if ($2 != NULL) {
+		error_if_different_display_type ($2, NULL, NULL, NULL);
+		cb_emit_display ($2, NULL, cb_int1, NULL, NULL, 0,
+				 display_type);
+	}
   }
 | x_list
   {
-	  emit_default_displays_for_x_list ((struct cb_list *) $1);
+	set_display_type ($1, NULL, NULL, NULL);
+	cb_emit_display ($1, NULL, cb_int1, NULL, NULL, 1,
+			 display_type);
   }
 ;
 
@@ -7334,51 +7413,37 @@ display_atom:
   }
   display_clauses
   {
-	/* What if I want to allow implied LINE/COL? */
-	int     is_screen_field =
-		contains_only_screen_field ((struct cb_list *) $1);
-	int	screen_display =
-	        is_screen_field
-		|| upon_value == cb_null
-		|| line_column
-		|| current_statement->attr_ptr;
-
 	if ($1 == cb_null) {
+		/* Emit DISPLAY OMITTED. */
 		error_if_no_advancing_in_screen_display (advancing_value);
-
 		cb_emit_display_omitted (line_column,
 					 current_statement->attr_ptr);
 	} else {
-		if (cb_list_length ($1) > 1 && screen_display) {
-			cb_error (_("Ambiguous DISPLAY; put clauseless items at end or in separate DISPLAY"));
+		/* Emit device or screen DISPLAY. */
+
+		/*
+		  Check that disp_list does not contain an invalid mix of fields.
+		*/
+		if (display_type == UNKNOWN_DISPLAY) {
+			set_display_type ($1, upon_value, line_column,
+					  current_statement->attr_ptr);
+		} else {
+		        error_if_different_display_type ($1, upon_value,
+							 line_column,
+							 current_statement->attr_ptr);
 		}
 
-		if (screen_display) {
-			if (upon_value != NULL) {
-				if (is_screen_field) {
-					cb_error (_("Screens cannot be displayed on a device"));
-				} else { /* line_column || current_statement->attr_ptr */
-					cb_error (_("Cannot use screen clauses with device DISPLAY"));
-				}
-			} else {
-				upon_value = cb_null;
-			}
-
+		if (display_type == SCREEN_DISPLAY
+		    || display_type == FIELD_ON_SCREEN_DISPLAY) {
 			error_if_no_advancing_in_screen_display (advancing_value);
-
-			if (!line_column && !is_screen_field) {
-				cb_error (_("Screen DISPLAY does not have a LINE or COL clause"));
-			}
-
-			cb_emit_display ($1, cb_null, cb_int1, line_column,
-					 current_statement->attr_ptr);
-		} else { /* device display */
-			if (upon_value == NULL) {
-				upon_value = get_default_display_device ();
-			}
-			cb_emit_display ($1, upon_value, advancing_value, NULL, NULL);
 		}
+
+		cb_emit_display ($1, upon_value, advancing_value, line_column,
+				 current_statement->attr_ptr,
+				 is_first_display_item, display_type);
 	}
+
+	is_first_display_item = 0;
   }
 ;
 
@@ -7431,6 +7496,9 @@ display_upon:
 	upon_value = cb_int0;
   }
 | UPON crt_under
+  {
+	upon_value = cb_null;
+  }
 ;
 
 crt_under:
@@ -8249,7 +8317,7 @@ inspect_tallying:
 	} else {
 		cb_emit_inspect ($0, $3, cb_int0, 0);
 	}
-	
+
 	$$ = $0;
   }
 ;
@@ -8381,8 +8449,8 @@ inspect_region:
 	$$ = cb_list_add (cb_build_inspect_region_start (), $1);
   }
 | inspect_after
-  {	
-	$$ = cb_list_add (cb_build_inspect_region_start (), $1);  
+  {
+	$$ = cb_list_add (cb_build_inspect_region_start (), $1);
   }
 | inspect_before inspect_after
   {
@@ -9405,7 +9473,7 @@ stop_statement:
 	begin_statement ("STOP", 0);
 	cb_verify (cb_stop_literal_statement, "STOP literal");
 	cb_emit_display (CB_LIST_INIT ($2), cb_int0, cb_int1, NULL,
-			 NULL);
+			 NULL, 1, DEVICE_DISPLAY);
 	cb_emit_accept (cb_null, NULL, NULL);
 	cobc_cs_check = 0;
   }
@@ -9944,7 +10012,7 @@ program_start_end:
 	/* emit_entry ("_START", 0, NULL); */
 	CB_PENDING ("USE AT PROGRAM START");
   }
-  | END
+| END
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM END"));
 	/* emit_entry ("_END", 0, NULL); */

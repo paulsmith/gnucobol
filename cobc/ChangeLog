@@ -1,4 +1,19 @@
 
+2016-07-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (screen_or_device_display): changed permitted DISPLAY
+	  combinations (to follow Micro Focus). Now screens must have their own,
+	  individual displays and cannot be mixed with the display of
+	  non-screens on CRT. CRT and non-CRT displays can no longer be mixed.
+	* parser.y, typeck.c: added support for LINE/COLUMN/AT 0 and removed
+	  requirement of LINE/COLUMN clause on CRT displays.
+	* config.def: added accept-display-extensions to enable/disable
+	  the above and any other non-standard extensions.
+	* config.def: added console-is-crt to set the default DISPLAY/ACCEPT
+	  device to CRT (for ACUCOBOL).
+	* parser.y (accept_statement): fixed bug where context-sensitive words
+	  were not detected.
+
 2016-07-17 Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: when emitting source for a function entry, if cob_call_params

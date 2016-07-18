@@ -107,6 +107,10 @@ static short			fore_color;
 static short			back_color;
 static int			origin_y;
 static int			origin_x;
+static int			display_cursor_y;
+static int			display_cursor_x;
+static int			accept_cursor_y;
+static int			accept_cursor_x;
 #endif
 
 /* Local function prototypes when screenio activated */
@@ -288,34 +292,6 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 	}
 }
 
-static void
-get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
-{
-	int	line_val;
-	int	col_val;
-
-	if (fline == NULL) {
-		*line = 0;
-	} else {
-		line_val = cob_get_int (fline) - 1;
-		if (line_val < 0) {
-			line_val = 0;
-		}
-
-		*line = line_val;
-	}
-
-	if (fcol == NULL) {
-		*col = 0;
-	} else {
-		col_val = cob_get_int (fcol) - 1;
-		if (col_val < 0) {
-			col_val = 0;
-		}
-
-		*col = col_val;
-	}
-}
 
 static void
 raise_ec_on_invalid_line_or_col (const int line, const int column)
@@ -508,7 +484,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr,
 static void
 cob_screen_init (void)
 {
-
 #ifdef	HAVE_LIBPDCURSES
 	size_t	i;
 #endif
@@ -525,6 +500,10 @@ cob_screen_init (void)
 	cob_current_x = 0;
 	fore_color = 0;
 	back_color = 0;
+	display_cursor_y = 0;
+	display_cursor_x = 0;
+	accept_cursor_y = 0;
+	accept_cursor_x = 0;
 
 	fflush (stdout);
 	fflush (stderr);
@@ -859,6 +838,15 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input,
 		column += (int)f->size;
 		cob_move_cursor (line, column);
 	}
+
+	if (stmt == DISPLAY_STATEMENT) {
+		display_cursor_y = line;
+		display_cursor_x = column + f->size;
+	} else { /* ACCEPT_STATEMENT */
+		accept_cursor_y = line;
+		accept_cursor_x = column + f->size;
+	}
+
 	refresh ();
 }
 
@@ -1540,32 +1528,18 @@ cob_screen_iterate (cob_screen *s)
 	}
 }
 
-static COB_INLINE COB_A_INLINE void
-set_default_line_column (const int is_screen, int *sline, int *scolumn)
-{
-	if (is_screen) {
-		*sline = 0;
-		*scolumn = 0;
-	} else {
-		getyx (stdscr, *sline, *scolumn);
-		if (*sline < 0) {
-			*sline = 0;
-		}
-		if (*scolumn < 0) {
-			*scolumn = 0;
-		}
-	}
-}
-
 static void
-pos_to_line_column (cob_field *pos, int *line, int *column)
+get_line_and_col_from_num (cob_field *pos, int *line, int *column)
 {
 	int	pos_val = cob_get_int (pos);
 	int	max_line_column;
 
+	/*
+	  This is used when only a LINE clause is specified, not an AT clause.
+	*/
 	if (pos->size < 4) {
-		*line = pos_val - 1;
-		*column = 0;
+		*line = pos_val;
+		*column = 1;
 		return;
 	}
 
@@ -1577,27 +1551,98 @@ pos_to_line_column (cob_field *pos, int *line, int *column)
 		/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
 		max_line_column = 1; /* set to some value that don't chrash */
 	}
-	*line = (pos_val / max_line_column) - 1;
-	*column = (pos_val % max_line_column) - 1;
+	*line = (pos_val / max_line_column);
+	*column = (pos_val % max_line_column);
 }
 
 static void
-extract_line_and_col_vals (const int is_screen, cob_field *line,
-			   cob_field *column, int *sline, int *scolumn)
+get_line_column (cob_field *fline, cob_field *fcol, int *line, int *col)
 {
+	if (fline == NULL) {
+		*line = 1;
+	} else {
+		*line = cob_get_int (fline);
+	}
+
+	if (fcol == NULL) {
+		*col = 1;
+	} else {
+		*col = cob_get_int (fcol);
+	}
+}
+
+static COB_INLINE COB_A_INLINE int
+col_where_last_stmt_ended (const enum screen_statement stmt)
+{
+	return stmt == DISPLAY_STATEMENT ? display_cursor_x : accept_cursor_x;
+}
+
+static COB_INLINE COB_A_INLINE int
+line_where_last_stmt_ended (const enum screen_statement stmt)
+{
+	return stmt == DISPLAY_STATEMENT ? display_cursor_y : accept_cursor_y;
+}
+
+static void
+extract_line_and_col_vals (cob_field *line, cob_field *column,
+			   const enum screen_statement stmt,
+			   const int zero_line_col_allowed,
+			   int *sline, int *scolumn)
+{
+	int cobol_line;
+	int cobol_col;
+
 	if (column == NULL) {
 		if (line == NULL) {
-			set_default_line_column (is_screen, sline, scolumn);
+			*sline = 0;
+			*scolumn = 0;
+			return;
 		} else {
 			/*
 			  line actually contains both the line and field
 			  numbers.
 			*/
-			pos_to_line_column (line, sline, scolumn);
+			get_line_and_col_from_num (line, &cobol_line,
+						   &cobol_col);
 		}
 	} else {
-		get_line_column (line, column, sline, scolumn);
+		get_line_column (line, column, &cobol_line, &cobol_col);
 	}
+
+	if (cobol_line == 0) {
+		if (cobol_col == 0) {
+			if (zero_line_col_allowed) {
+				*sline = line_where_last_stmt_ended (stmt);
+				*scolumn = col_where_last_stmt_ended (stmt);
+			} else {
+				cob_set_exception (COB_EC_SCREEN_LINE_NUMBER);
+				cob_set_exception (COB_EC_SCREEN_STARTING_COLUMN);
+				*sline = 0;
+				*scolumn = 0;
+			}
+		} else {
+			if (zero_line_col_allowed) {
+				*sline = line_where_last_stmt_ended (stmt) + 1;
+			} else {
+				cob_set_exception (COB_EC_SCREEN_LINE_NUMBER);
+				*sline = 0;
+			}
+			*scolumn = cobol_col - 1;
+		}
+	} else if (cobol_col == 0) {
+		*sline = cobol_line - 1;
+		if (zero_line_col_allowed) {
+			*scolumn = col_where_last_stmt_ended (stmt);
+		} else {
+			cob_set_exception (COB_EC_SCREEN_STARTING_COLUMN);
+			*scolumn = 0;
+		}
+	} else {
+		*sline = cobol_line - 1;
+		*scolumn = cobol_col - 1;
+	}
+
+	/* TO-DO: If scolumn == max_x + 1, go to start of next line */
 }
 
 static void
@@ -1738,6 +1783,8 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 		if (ssize_is > 0 && ssize_is < (int)f->size) {
 			size_display = ssize_is;
 		}
+	} else if (fattr & COB_SCREEN_NO_DISP) {
+		size_display = 0;
 	}
 
 	if (fscroll) {
@@ -1759,16 +1806,20 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
 		/* figurative constant and WITH SIZE repeats the character */
 		if ((size_is)
-		   && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
-		   && (int)f->size == 1) {
+		    && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
+		    && (int)f->size == 1) {
 			fig_const = f->data[0];
 			cob_addnch (ssize_is, fig_const);
 		} else {
-			addnstr ((char *)f->data, size_display);
+			addnstr ((char *)f->data, f->size);
 			/* WITH SIZE larger than field displays trailing spaces */
-			cob_addnch (ssize_is - f->size, COB_CH_SP);
+			cob_addnch (size_display - f->size, COB_CH_SP);
 		}
 	}
+
+	display_cursor_y = sline;
+	display_cursor_x = scolumn + size_display;
+
 	if (fattr & COB_SCREEN_EMULATE_NL) {
 		if (++sline >= LINES) {
 			sline = 0;
@@ -1900,6 +1951,10 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			}
 		}
 #endif
+
+		accept_cursor_y = sline;
+		accept_cursor_x = scolumn + size_accept;
+
 		rightpos = scolumn + size_accept - 1;
 		p = COB_TERM_BUFF;
 	} else {
@@ -2229,12 +2284,12 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			    /* Update screen with blank character. */
 			    cob_move_cursor (cline, count);
 			    if (fattr & COB_SCREEN_NO_ECHO) {
-				cob_addch (COB_CH_SP);
+				    cob_addch (COB_CH_SP);
 			    } else if (fattr & COB_SCREEN_SECURE) {
-				cob_addch (COB_CH_AS);
-			} else {
-				cob_addch (move_char);
-				}
+				    cob_addch (COB_CH_AS);
+			    } else {
+				    cob_addch (move_char);
+			    }
 			}
 			/* Put cursor back to original position. */
 			cob_move_cursor (cline, ccolumn);
@@ -2331,22 +2386,25 @@ field_return:
 /* Global functions */
 
 void
-cob_screen_display (cob_screen *s, cob_field *line, cob_field *column)
+cob_screen_display (cob_screen *s, cob_field *line, cob_field *column,
+		    const int zero_line_col_allowed)
 {
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (1, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (line, column, DISPLAY_STATEMENT,
+				   zero_line_col_allowed, &sline, &scolumn);
 	screen_display (s, sline, scolumn);
 }
 void
 cob_screen_accept (cob_screen *s, cob_field *line, cob_field *column,
-		   cob_field *ftimeout)
+		   cob_field *ftimeout, const int zero_line_col_allowed)
 {
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (1, line, column, &sline, &scolumn);
+	extract_line_and_col_vals (line, column, ACCEPT_STATEMENT,
+				   zero_line_col_allowed, &sline, &scolumn);
 	screen_accept (s, sline, scolumn, ftimeout);
 }
 
@@ -2358,7 +2416,14 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (0, line, column, &sline, &scolumn);
+	/*
+	  LINE/COL 0 is always allowed as it is impossible to specify it in the
+	  standard format (DISPLAY ... UPON CRT) and all implementations of the
+	  extended screen format (DISPLAY ... WITH UNDERLINE, HIGHLIGHT, etc.)
+	  require it.
+	*/
+	extract_line_and_col_vals (line, column, DISPLAY_STATEMENT, 1, &sline,
+				   &scolumn);
 	field_display (f, sline, scolumn, fgc, bgc, fscroll, size_is, fattr);
 }
 
@@ -2371,8 +2436,11 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	int	sline;
 	int	scolumn;
 
-	extract_line_and_col_vals (0, line, column, &sline, &scolumn);
-	field_accept (f, sline, scolumn, fgc, bgc, fscroll, ftimeout, prompt, size_is, fattr);
+	/* See above comment in cob_field_display. */
+	extract_line_and_col_vals (line, column, ACCEPT_STATEMENT, 1, &sline,
+				   &scolumn);
+	field_accept (f, sline, scolumn, fgc, bgc, fscroll, ftimeout, prompt,
+		      size_is, fattr);
 }
 
 int
@@ -2432,7 +2500,8 @@ cob_exit_screen (void)
 void
 cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   cob_field *size_is, const int fattr)
+		   cob_field *size_is, const int fattr,
+		   const int zero_line_col_allowed)
 {
 	COB_UNUSED (f);
 	COB_UNUSED (line);
@@ -2442,13 +2511,15 @@ cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 	COB_UNUSED (fscroll);
 	COB_UNUSED (size_is);
 	COB_UNUSED (fattr);
+	COB_UNUSED (zero_line_col_allowed);
 }
 
 void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
 		  cob_field *ftimeout, cob_field *prompt,
-		  cob_field *size_is, const int fattr)
+		  cob_field *size_is, const int fattr,
+		  const int zero_line_col_allowed)
 {
 	COB_UNUSED (f);
 	COB_UNUSED (line);
@@ -2460,14 +2531,16 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 	COB_UNUSED (prompt);
 	COB_UNUSED (size_is);
 	COB_UNUSED (fattr);
+	COB_UNUSED (zero_line_col_allowed);
 }
 
 void
-cob_screen_display (cob_screen *s, cob_field *line, cob_field *column)
+cob_screen_display (cob_screen *s, cob_field *line, cob_field *column, const int zero_line_col_allowed)
 {
 	COB_UNUSED (s);
 	COB_UNUSED (line);
 	COB_UNUSED (column);
+	COB_UNUSED (zero_line_col_allowed);
 }
 
 void

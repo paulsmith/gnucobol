@@ -408,6 +408,7 @@ test.conf: Missing definitions:
 	No definition of 'hostsign'
 	No definition of 'accept-update'
 	No definition of 'accept-auto'
+	No definition of 'console-is-crt'
 	No definition of 'specify-all-reserved'
 	No definition of 'comment-paragraphs'
 	No definition of 'memory-size-clause'
@@ -433,6 +434,7 @@ test.conf: Missing definitions:
 	No definition of 'acucobol-literals'
 	No definition of 'word-continuation'
 	No definition of 'not-exception-before-exception'
+	No definition of 'accept-display-extensions'
 ])
 
 AT_CLEANUP
