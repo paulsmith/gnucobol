@@ -289,7 +289,7 @@ static size_t		save_c_src = 0;
 static size_t		verbose_output = 0;
 static size_t		cob_optimize = 0;
 
-static int		cb_listing_linecount = 10000;
+static int		cb_listing_linecount;
 static int		cb_listing_eject = 0;
 static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
@@ -3647,7 +3647,7 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 static COB_INLINE COB_A_INLINE void
 force_new_page_for_next_line (void)
 {
-	cb_listing_linecount = cb_lines_per_page;
+	cb_listing_linecount = 100000;
 }
 
 static void
@@ -3667,6 +3667,9 @@ print_program_trailer (void)
 	print_files_and_their_records (current_program->file_list);
 	print_fields_in_section (current_program->working_storage);
 	print_fields_in_section (current_program->local_storage);
+	print_fields_in_section (current_program->linkage_storage);
+	print_fields_in_section (current_program->screen_storage);
+	print_fields_in_section (current_program->report_storage);
 
 	/* Print error counts */
 
@@ -5613,6 +5616,7 @@ main (int argc, char **argv)
 	cobc_ldflags_size = COB_MINI_MAX;
 
 	cb_source_file = NULL;
+	cb_listing_linecount = 100000;
 	save_temps_dir = NULL;
 	base_string = NULL;
 	cobc_objects_len = 0;

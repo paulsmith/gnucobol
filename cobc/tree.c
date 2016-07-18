@@ -228,7 +228,7 @@ check_code_set_items_are_subitems_of_records (struct cb_file * const file)
 	cb_tree			r;
 	struct cb_field		*f;
 	cb_tree			first_ref = NULL;
-	struct cb_field		*first_record;
+	struct cb_field		*first_record = NULL;
 	struct cb_field		*current_record;
 
 	/*

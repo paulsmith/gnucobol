@@ -1072,9 +1072,9 @@ get_new_listing_file (void)
 static void
 set_print_replace_list (struct cb_replace_list *list)
 {
-	struct cb_replace_list	*r;
-	struct cb_text_list	*l;
-	struct list_replace	*repl;
+	struct cb_replace_list		*r;
+	const struct cb_text_list	*l;
+	struct list_replace		*repl;
 	
 	if (cb_src_list_file) {
 		for (r = list; r; r = r->next) {

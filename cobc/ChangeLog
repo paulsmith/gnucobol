@@ -1,3 +1,7 @@
+2016-06-28  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Added symbol listing support for LINKAGE and SCREEN sections.
+	* pplex.l, cobc.c, tree.c: Fixed compile warnings.
 
 2016-07-18  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -106,11 +106,15 @@ hostsign:			no
 
 # If yes, set WITH UPDATE clause as default for ACCEPT dest-item,
 # except if WITH NO UPDATE clause is used
-accept-update:		no
+accept-update:			no
 
 # If yes, set WITH AUTO clause as default for ACCEPT dest-item,
 # except if WITH TAB clause is used
-accept-auto:		no
+accept-auto:			no
+
+# If yes, DISPLAYs and ACCEPTs are, by default, done on the CRT (i.e., using
+# curses).
+console-is-crt:			no
 
 # Dialect features
 # Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
@@ -140,6 +144,7 @@ numeric-boolean:			unconformable
 acucobol-literals:			unconformable
 word-continuation:			warning
 not-exception-before-exception:		ok
+accept-display-extensions:		ok
 
 # If yes, all the reserved words must be specified in a list of reserved:
 # entries; the default reserved word list will not be used.
