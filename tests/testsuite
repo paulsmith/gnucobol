@@ -831,9 +831,9 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 219;listings.at:715;Two source files;listing;
 220;listings.at:793;Error/Warning messages;listing;
 221;listings.at:951;Symbols;listing;
-222;listings.at:1224;Conditional compilation;listing;
-223;listings.at:1290;LISTING ON/OFF;listing;
-224;listings.at:1377;File descriptions;listing;
+222;listings.at:1338;Conditional compilation;listing;
+223;listings.at:1404;LISTING ON/OFF;listing;
+224;listings.at:1491;File descriptions;listing;
 225;run_fundamental.at:23;DISPLAY literals;fundamental;
 226;run_fundamental.at:79;DISPLAY literals, DECIMAL-POINT is COMMA;fundamental;
 227;run_fundamental.at:118;Hexadecimal literal;fundamental;
@@ -18195,13 +18195,156 @@ $at_failed && at_fn_log_failure  \
 $at_traceon; }
 
 
+cat >prog4.cob <<'_ATEOF'
+
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-IN        PIC 9.
+       01 PAR-OUT       PIC 9.
+       PROCEDURE DIVISION USING PAR-IN RETURNING PAR-OUT.
+           ADD 1 TO PAR-IN GIVING PAR-OUT END-ADD.
+           GOBACK.
+       END FUNCTION WITHPAR.
+
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHOUTPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR           PIC 9.
+       PROCEDURE DIVISION RETURNING PAR.
+           MOVE 1 TO PAR.
+           GOBACK.
+       END FUNCTION WITHOUTPAR.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION     WITHPAR
+           FUNCTION     WITHOUTPAR.
+       PROCEDURE        DIVISION.
+           IF WITHPAR(1) NOT = 2
+              DISPLAY WITHPAR(1)
+              END-DISPLAY
+           END-IF.
+           IF WITHOUTPAR NOT = 1
+              DISPLAY WITHOUTPAR
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+       END PROGRAM prog.
+_ATEOF
+
+
+daymon=`date +"%a %b %e"`
+{ set +x
+$as_echo "$at_srcdir/listings.at:1265: \$COMPILE_ONLY -t prog.lst prog4.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog4.cob" "listings.at:1265"
+( $at_check_trace; $COMPILE_ONLY -t prog.lst prog4.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1265"
+$at_failed && at_fn_log_failure  \
+"prog.lis"
+$at_traceon; }
+
+
+cat >prog18.lst <<'_ATEOF'
+GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         FUNCTION-ID.     WITHPAR.
+000004         DATA             DIVISION.
+000005         LINKAGE          SECTION.
+000006         01 PAR-IN        PIC 9.
+000007         01 PAR-OUT       PIC 9.
+000008         PROCEDURE DIVISION USING PAR-IN RETURNING PAR-OUT.
+000009             ADD 1 TO PAR-IN GIVING PAR-OUT END-ADD.
+000010             GOBACK.
+000011         END FUNCTION WITHPAR.
+000012
+000013         IDENTIFICATION   DIVISION.
+000014         FUNCTION-ID.     WITHOUTPAR.
+000015         DATA             DIVISION.
+000016         LINKAGE          SECTION.
+000017         01 PAR           PIC 9.
+000018         PROCEDURE DIVISION RETURNING PAR.
+000019             MOVE 1 TO PAR.
+000020             GOBACK.
+000021         END FUNCTION WITHOUTPAR.
+000022
+000023         IDENTIFICATION   DIVISION.
+000024         PROGRAM-ID.      prog.
+000025         ENVIRONMENT      DIVISION.
+000026         CONFIGURATION    SECTION.
+000027         REPOSITORY.
+000028             FUNCTION     WITHPAR
+000029             FUNCTION     WITHOUTPAR.
+000030         PROCEDURE        DIVISION.
+000031             IF WITHPAR(1) NOT = 2
+000032                DISPLAY WITHPAR(1)
+000033                END-DISPLAY
+000034             END-IF.
+000035             IF WITHOUTPAR NOT = 1
+000036                DISPLAY WITHOUTPAR
+000037                END-DISPLAY
+000038             END-IF.
+000039             STOP RUN.
+000040         END PROGRAM prog.
+GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+     PROGRAM             prog
+
+     FUNCTION            WITHOUTPAR
+
+0001 NUMERIC        01   PAR                            9
+
+     FUNCTION            WITHPAR
+
+0001 NUMERIC        01   PAR-IN                         9
+
+0001 NUMERIC        01   PAR-OUT                        9
+
+0 Warnings in program
+0 Errors in program
+_ATEOF
+
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+
+{ set +x
+$as_echo "$at_srcdir/listings.at:1334: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1334"
+( $at_check_trace; diff prog18.lst prog.lis
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1334"
+$at_failed && at_fn_log_failure  \
+"prog.lis"
+$at_traceon; }
+
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_221
 #AT_START_222
-at_fn_group_banner 222 'listings.at:1224' \
+at_fn_group_banner 222 'listings.at:1338' \
   "Conditional compilation" "                        " 3
 at_xfail=no
 (
@@ -18238,15 +18381,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1251: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1251"
+$as_echo "$at_srcdir/listings.at:1365: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1365"
 ( $at_check_trace; $COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1251"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1365"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -18286,15 +18429,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1286: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1286"
+$as_echo "$at_srcdir/listings.at:1400: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1400"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1286"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1400"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -18306,7 +18449,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_222
 #AT_START_223
-at_fn_group_banner 223 'listings.at:1290' \
+at_fn_group_banner 223 'listings.at:1404' \
   "LISTING ON/OFF" "                                 " 3
 at_xfail=no
 (
@@ -18351,15 +18494,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1323: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1323"
+$as_echo "$at_srcdir/listings.at:1437: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1437"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1323"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1437"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -18414,15 +18557,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1373: diff prog17.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1373"
+$as_echo "$at_srcdir/listings.at:1487: diff prog17.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1487"
 ( $at_check_trace; diff prog17.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1373"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1487"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -18434,7 +18577,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_223
 #AT_START_224
-at_fn_group_banner 224 'listings.at:1377' \
+at_fn_group_banner 224 'listings.at:1491' \
   "File descriptions" "                              " 3
 at_xfail=no
 (
@@ -18565,8 +18708,8 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1498: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1498"
+$as_echo "$at_srcdir/listings.at:1612: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1612"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -18582,7 +18725,7 @@ prog.cob: 66: Warning: DATA RECORDS is obsolete in GnuCOBOL
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1498"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1612"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -18799,15 +18942,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1719: diff prog18.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1719"
+$as_echo "$at_srcdir/listings.at:1833: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1833"
 ( $at_check_trace; diff prog18.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1719"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1833"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }

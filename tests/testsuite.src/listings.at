@@ -1219,6 +1219,120 @@ sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
+AT_DATA([prog4.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-IN        PIC 9.
+       01 PAR-OUT       PIC 9.
+       PROCEDURE DIVISION USING PAR-IN RETURNING PAR-OUT.
+           ADD 1 TO PAR-IN GIVING PAR-OUT END-ADD.
+           GOBACK.
+       END FUNCTION WITHPAR.
+
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     WITHOUTPAR.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR           PIC 9.
+       PROCEDURE DIVISION RETURNING PAR.
+           MOVE 1 TO PAR.
+           GOBACK.
+       END FUNCTION WITHOUTPAR.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           FUNCTION     WITHPAR
+           FUNCTION     WITHOUTPAR.
+       PROCEDURE        DIVISION.
+           IF WITHPAR(1) NOT = 2
+              DISPLAY WITHPAR(1)
+              END-DISPLAY
+           END-IF.
+           IF WITHOUTPAR NOT = 1
+              DISPLAY WITHOUTPAR
+              END-DISPLAY
+           END-IF.
+           STOP RUN.
+       END PROGRAM prog.
+])
+
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog4.cob], [0], [], [])
+
+AT_DATA([prog18.lst],
+[GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         FUNCTION-ID.     WITHPAR.
+000004         DATA             DIVISION.
+000005         LINKAGE          SECTION.
+000006         01 PAR-IN        PIC 9.
+000007         01 PAR-OUT       PIC 9.
+000008         PROCEDURE DIVISION USING PAR-IN RETURNING PAR-OUT.
+000009             ADD 1 TO PAR-IN GIVING PAR-OUT END-ADD.
+000010             GOBACK.
+000011         END FUNCTION WITHPAR.
+000012
+000013         IDENTIFICATION   DIVISION.
+000014         FUNCTION-ID.     WITHOUTPAR.
+000015         DATA             DIVISION.
+000016         LINKAGE          SECTION.
+000017         01 PAR           PIC 9.
+000018         PROCEDURE DIVISION RETURNING PAR.
+000019             MOVE 1 TO PAR.
+000020             GOBACK.
+000021         END FUNCTION WITHOUTPAR.
+000022
+000023         IDENTIFICATION   DIVISION.
+000024         PROGRAM-ID.      prog.
+000025         ENVIRONMENT      DIVISION.
+000026         CONFIGURATION    SECTION.
+000027         REPOSITORY.
+000028             FUNCTION     WITHPAR
+000029             FUNCTION     WITHOUTPAR.
+000030         PROCEDURE        DIVISION.
+000031             IF WITHPAR(1) NOT = 2
+000032                DISPLAY WITHPAR(1)
+000033                END-DISPLAY
+000034             END-IF.
+000035             IF WITHOUTPAR NOT = 1
+000036                DISPLAY WITHOUTPAR
+000037                END-DISPLAY
+000038             END-IF.
+000039             STOP RUN.
+000040         END PROGRAM prog.
+GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+     PROGRAM             prog
+
+     FUNCTION            WITHOUTPAR
+
+0001 NUMERIC        01   PAR                            9
+
+     FUNCTION            WITHPAR
+
+0001 NUMERIC        01   PAR-IN                         9
+
+0001 NUMERIC        01   PAR-OUT                        9
+
+0 Warnings in program
+0 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+
 AT_CLEANUP
 
 AT_SETUP([Conditional compilation])
