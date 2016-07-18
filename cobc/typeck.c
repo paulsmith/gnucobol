@@ -5348,16 +5348,13 @@ emit_screen_display (const cb_tree x, const cb_tree pos)
 }
 
 static void
-process_special_values (cb_tree value, cb_tree size_is, int * const attrs,
-			int * const function_emitted)
+process_special_values (cb_tree value, cb_tree size_is, int * const attrs)
 {
 	/*
 	  The following are MF extensions. MF specifically
 	  states X"01", X"02" and X"07", so the values do not
 	  need to be changed for other codesets.
 	*/
-
-	*function_emitted = 0;
 
 	/* low-values position cursor, size does not matter */
 	if (value == cb_low) {
@@ -5456,7 +5453,6 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 	int	is_first_display_item = is_first_display_list;
 	cb_tree	pos;
 	int	attrs;
-	int	func_emitted;
 	cb_tree	x;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l)) {
@@ -5466,11 +5462,9 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 
 		x = CB_VALUE (l);
 		attrs = 0;
-		process_special_values (x, size_is, &attrs, &func_emitted);
+		process_special_values (x, size_is, &attrs);
 
-		if (!func_emitted) {
-			emit_field_display (x, pos, NULL, NULL, NULL, NULL, attrs);
-		}
+		emit_field_display (x, pos, NULL, NULL, NULL, NULL, attrs);
 	}
 }
 
@@ -5483,7 +5477,6 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 {
 	cb_tree	l;
 	cb_tree val;
-	int	func_emitted;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
 	val = CB_VALUE (l);
@@ -5492,12 +5485,9 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 		line_column = get_default_field_line_column (display_type, is_first_display_list && l == values);
 	}
 
-	process_special_values (val, size_is, &disp_attrs, &func_emitted);
-	if (!func_emitted) {
-		emit_field_display (val, line_column, fgc, bgc, scroll, size_is,
-				    disp_attrs);
-	}
-
+	process_special_values (val, size_is, &disp_attrs);
+	emit_field_display (val, line_column, fgc, bgc, scroll, size_is,
+			    disp_attrs);
 }
 
 void
