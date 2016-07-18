@@ -1,4 +1,14 @@
 
+2016-07-17 Brian Tiffin <btiffin@gnu.org>
+
+	* codegen.c: when emitting source for a function entry, if cob_call_params
+	  is zero, and cob_module is not set, set cob_call_params to the number of
+	  arguments in GnuCOBOL using_list. Need to document that C can't call a
+	  GnuCOBOL function with zero arguments if GnuCOBOL expects at least one,
+	  even if all are optional from the GnuCOBOL perspective.  Except for that
+	  edge case, this fixes bug #208 (and possibly others).
+	* codegen.c: allow for ENTRY lookup inside main module.
+
 2016-07-15  Edward Hart <edward.dan.hart@gmail.com>
 
 	* scanner.l, pplex.l: fixed bug #269. GnuCOBOL now gobbles redundant

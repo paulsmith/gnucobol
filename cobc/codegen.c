@@ -7288,10 +7288,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("switch (cob_glob_ptr->cob_call_params) {");
 		i = 0;
 		for (l = parameter_list; l; l = CB_CHAIN (l)) {
-			output_line ("  case %d: %s%d = NULL;", i++, 
+			output_line ("case %d:", i++);
+			output_line ("\t%s%d = NULL;", 
 				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
 		}
-		output_line ("  default: break;");
+		output_line ("default:\n\tbreak;");
 		output_line ("}");
 		output_newline ();
 	}
@@ -7998,7 +7999,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 			}
 		}
 	} else {
-		if (prog->flag_main && !prog->flag_recursive) {
+		if (prog->flag_main && !prog->flag_recursive && !strcmp(prog->program_id, entry_name)) {
 			output ("static ");
 		}
 		if (gencode) {
@@ -8194,6 +8195,19 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	output ("{\n");
 
+	/* For calling into a module, cob_call_params may not be known */
+	if (using_list) {
+		parmnum = 0;
+		for (l = using_list; l; l = CB_CHAIN (l)) {
+			parmnum++;
+		}
+		output("  /* If the parameter count is unknown, set it to all */\n");
+		output("  if ((cob_get_global_ptr ()->cob_call_params == 0) &&\n");
+		output("      !(cob_get_global_ptr ()->cob_current_module)) {\n");
+		output("\tcob_get_global_ptr ()->cob_call_params = %d;\n", parmnum);
+		output("  };\n\n");
+	}
+
 	/* We have to cater for sticky-linkage here at the entry point site */
 	/* Doing it in the internal function is too late as we */
 	/* then do not have the information as to possible ENTRY clauses */
@@ -8285,6 +8299,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
+		output("  /* Set the parameter list */\n");
 		parmnum = 0;
 		output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
 		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {

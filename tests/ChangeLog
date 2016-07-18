@@ -1,6 +1,12 @@
 
 2016-07-17  Brian Tiffin <btiffin@gnu.org>
 
+	* testsuite.src/run_misc.at: Added tests for C calling COBOL
+	  with and without setting cob_call_params.
+	  Added tests for ENTRY lookup within main module.
+
+2016-07-17  Brian Tiffin <btiffin@gnu.org>
+
 	* testsuite.src/run_extensions.at: Moved stdout stderr fprintf test
 	  in CBL_OC_HOSTED to external C subprogram.
 	  And then a correction to account for linkage exports.

@@ -2293,6 +2293,48 @@ xxxxx
 AT_CLEANUP
 
 
+AT_SETUP([Lookup ENTRY from main executable])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 PROGRAM-LINK         USAGE PROGRAM-POINTER.
+
+       PROCEDURE DIVISION.
+       SET PROGRAM-LINK TO ENTRY "subprogram"
+       IF PROGRAM-LINK EQUAL NULL THEN
+           DISPLAY "error: no subprogram linkage" UPON SYSERR
+           END-DISPLAY
+       ELSE
+           CALL PROGRAM-LINK
+               ON EXCEPTION
+                   DISPLAY "hard error: unable to invoke subprogram"
+                      UPON SYSERR
+                   END-DISPLAY
+           END-CALL
+           DISPLAY RETURN-CODE WITH NO ADVANCING
+           END-DISPLAY
+       END-IF
+       GOBACK.
+
+       ENTRY "subprogram".
+           DISPLAY "subprogram" WITH NO ADVANCING
+           END-DISPLAY
+           SET RETURN-CODE TO 42
+       .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 26: Warning: ENTRY is obsolete in GnuCOBOL
+])
+AT_CHECK([./prog], [42], [subprogram+000000042], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([COB_LOAD_CASE=UPPER test])
 AT_KEYWORDS([runmisc])
 
@@ -2525,6 +2567,90 @@ AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
+AT_SETUP([CALL in from C, cob_call_params explicitly set])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            PIC X.
+       01 P2            PIC X(6).
+       PROCEDURE        DIVISION USING P1 OPTIONAL P2.
+           IF P2 NOT OMITTED
+              DISPLAY P2
+              END-DISPLAY
+           END-IF.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.c], [
+#include <libcob.h>
+
+
+int callee (char *);
+
+int
+main (int argc, char **argv)
+{
+    cob_global *cobol_global;
+    char *p1 = "A";
+
+    cob_init(argc, argv);
+    cobol_global = cob_get_global_ptr ();
+    cobol_global->cob_call_params = 1;
+    return callee (p1);
+}
+])
+
+AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
+AT_CHECK([./caller], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([CALL in from C, cob_call_params unknown])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            PIC X.
+       01 P2            PIC X(6).
+       PROCEDURE        DIVISION USING P1 P2.
+           IF P1 NOT EQUAL "A"
+              DISPLAY P1
+              END-DISPLAY
+           END-IF.
+           IF P2 NOT EQUAL "FROM C"
+              DISPLAY P2
+              END-DISPLAY
+           END-IF.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.c], [
+#include <libcob.h>
+
+int callee (char *, char *);
+
+int
+main (int argc, char **argv)
+{
+    char *p1 = "A";
+    char *p2 = "FROM C";
+ 
+    cob_init(argc, argv);
+    return callee (p1, p2);
+}
+])
+
+AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
+AT_CHECK([./caller], [0], [], [])
+
+AT_CLEANUP
 
 AT_SETUP([ANY LENGTH (1)])
 AT_KEYWORDS([runmisc])
