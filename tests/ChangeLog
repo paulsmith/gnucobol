@@ -1,3 +1,7 @@
+2016-07-18  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added SCREEN and LINKAGE section tests.
+
 
 2016-07-17  Brian Tiffin <btiffin@gnu.org>
 
