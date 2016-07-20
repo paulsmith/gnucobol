@@ -254,7 +254,6 @@
 	  where no screen precedes a 78-level item.
 	* parser.y (undefined_word): Added error case to improve error handling.
 	  This required a slight change to file_control_entry.
-	* ppparse.y: Fixed name-prefix directive warning.
 
 2016-04-15  Edward Hart <edward.dan.hart@gmail.com>
 

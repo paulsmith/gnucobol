@@ -24,7 +24,7 @@
 %defines
 %error-verbose
 %verbose
-%name-prefix "pp"
+%name-prefix="pp" // recent versions want %api.prefix "pp", older cannot compile this
 
 %{
 #include "config.h"

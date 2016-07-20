@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
 #ifndef YY_PP_PPPARSE_H_INCLUDED
 # define YY_PP_PPPARSE_H_INCLUDED
-/* Enabling traces.  */
+/* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -40,82 +40,81 @@
 extern int ppdebug;
 #endif
 
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     TOKEN_EOF = 0,
-     ALSO = 258,
-     BY = 259,
-     COPY = 260,
-     EQEQ = 261,
-     IN = 262,
-     LAST = 263,
-     LEADING = 264,
-     OF = 265,
-     OFF = 266,
-     PRINTING = 267,
-     REPLACE = 268,
-     REPLACING = 269,
-     SUPPRESS = 270,
-     TRAILING = 271,
-     DOT = 272,
-     GARBAGE = 273,
-     PAGE_DIRECTIVE = 274,
-     LISTING_DIRECTIVE = 275,
-     SOURCE_DIRECTIVE = 276,
-     FORMAT = 277,
-     IS = 278,
-     FIXED = 279,
-     FREE = 280,
-     DEFINE_DIRECTIVE = 281,
-     AS = 282,
-     PARAMETER = 283,
-     OVERRIDE = 284,
-     SET_DIRECTIVE = 285,
-     CONSTANT = 286,
-     SOURCEFORMAT = 287,
-     FOLDCOPYNAME = 288,
-     NOFOLDCOPYNAME = 289,
-     IF_DIRECTIVE = 290,
-     ELSE_DIRECTIVE = 291,
-     ENDIF_DIRECTIVE = 292,
-     ELIF_DIRECTIVE = 293,
-     GE = 294,
-     LE = 295,
-     LT = 296,
-     GT = 297,
-     EQ = 298,
-     NE = 299,
-     NOT = 300,
-     THAN = 301,
-     TO = 302,
-     OR = 303,
-     EQUAL = 304,
-     GREATER = 305,
-     LESS = 306,
-     SET = 307,
-     DEFINED = 308,
-     TURN_DIRECTIVE = 309,
-     ON = 310,
-     CHECKING = 311,
-     WITH = 312,
-     LOCATION = 313,
-     TERMINATOR = 314,
-     TOKEN = 315,
-     VARIABLE = 316,
-     LITERAL = 317
-   };
+  enum yytokentype
+  {
+    TOKEN_EOF = 0,
+    ALSO = 258,
+    BY = 259,
+    COPY = 260,
+    EQEQ = 261,
+    IN = 262,
+    LAST = 263,
+    LEADING = 264,
+    OF = 265,
+    OFF = 266,
+    PRINTING = 267,
+    REPLACE = 268,
+    REPLACING = 269,
+    SUPPRESS = 270,
+    TRAILING = 271,
+    DOT = 272,
+    GARBAGE = 273,
+    PAGE_DIRECTIVE = 274,
+    LISTING_DIRECTIVE = 275,
+    SOURCE_DIRECTIVE = 276,
+    FORMAT = 277,
+    IS = 278,
+    FIXED = 279,
+    FREE = 280,
+    DEFINE_DIRECTIVE = 281,
+    AS = 282,
+    PARAMETER = 283,
+    OVERRIDE = 284,
+    SET_DIRECTIVE = 285,
+    CONSTANT = 286,
+    SOURCEFORMAT = 287,
+    FOLDCOPYNAME = 288,
+    NOFOLDCOPYNAME = 289,
+    IF_DIRECTIVE = 290,
+    ELSE_DIRECTIVE = 291,
+    ENDIF_DIRECTIVE = 292,
+    ELIF_DIRECTIVE = 293,
+    GE = 294,
+    LE = 295,
+    LT = 296,
+    GT = 297,
+    EQ = 298,
+    NE = 299,
+    NOT = 300,
+    THAN = 301,
+    TO = 302,
+    OR = 303,
+    EQUAL = 304,
+    GREATER = 305,
+    LESS = 306,
+    SET = 307,
+    DEFINED = 308,
+    TURN_DIRECTIVE = 309,
+    ON = 310,
+    CHECKING = 311,
+    WITH = 312,
+    LOCATION = 313,
+    TERMINATOR = 314,
+    TOKEN = 315,
+    VARIABLE = 316,
+    LITERAL = 317
+  };
 #endif
 
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
 {
-/* Line 2058 of yacc.c  */
-#line 502 "ppparse.y"
+#line 502 "ppparse.y" /* yacc.c:1909  */
 
 	char			*s;
 	struct cb_text_list	*l;
@@ -124,29 +123,15 @@ typedef union YYSTYPE
 	unsigned int		ui;
 	int			si;
 
-
-/* Line 2058 of yacc.c  */
-#line 130 "ppparse.h"
-} YYSTYPE;
+#line 127 "ppparse.h" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+
 extern YYSTYPE pplval;
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int ppparse (void *YYPARSE_PARAM);
-#else
-int ppparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
 int ppparse (void);
-#else
-int ppparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
 #endif /* !YY_PP_PPPARSE_H_INCLUDED  */
