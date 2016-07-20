@@ -745,40 +745,40 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 133;syn_misc.at:22;Ambiguous AND/OR;misc expression;
 134;syn_misc.at:48;Invalid expression;misc;
 135;syn_misc.at:145;Missing headers;misc;
-136;syn_misc.at:184;INITIALIZE constant;misc;
-137;syn_misc.at:211;CLASS duplicate values;misc;
-138;syn_misc.at:246;INSPECT invalid size;misc;
-139;syn_misc.at:275;INSPECT invalid target;misc;
-140;syn_misc.at:298;INSPECT missing keyword;misc;
-141;syn_misc.at:319;INSPECT repeated keywords;misc;
-142;syn_misc.at:351;INSPECT incomplete clause;misc;
-143;syn_misc.at:373;INSPECT multiple BEFORE/AFTER clauses;misc;
-144;syn_misc.at:397;Maximum data size;misc;
-145;syn_misc.at:426;Unreachable statement;misc extensions;
-146;syn_misc.at:468;CRT STATUS;special-names misc;
-147;syn_misc.at:510;SWITCHES;runmisc extensions;
-148;syn_misc.at:638;ACCEPT WITH ( NO ) UPDATE / DEFAULT;misc extensions;
-149;syn_misc.at:663;ACCEPT WITH AUTO / TAB;auto-skip autoterminate misc extensions;
-150;syn_misc.at:688;ACCEPT WITH SIZE;protected size misc extensions;
-151;syn_misc.at:712;DISPLAY WITH SIZE;size misc extensions;
-152;syn_misc.at:734;Source text after program-text area;misc fixed;
-153;syn_misc.at:755;Line overflow in Fixed-form / Free-form;misc;
-154;syn_misc.at:803;Continuation Indicator - too many lines;misc fixed literals;
-155;syn_misc.at:1354;Continuation of COBOL words;misc fixed literals;
-156;syn_misc.at:1375;Literal too long;misc literals literal-length continuation;
-157;syn_misc.at:1612;Line and floating comments;misc extensions indicator;
-158;syn_misc.at:1782;word length;misc word-length;
-159;syn_misc.at:1887;Floating-point literals;misc;
-160;syn_misc.at:1992;X literals;misc;
-161;syn_misc.at:2018;Binary literals;misc extensions;
-162;syn_misc.at:2055;ACUCOBOL literals;misc extensions;
-163;syn_misc.at:2116;Adding/removing reserved words;misc extensions configuration;
-164;syn_misc.at:2139;Adding aliases;misc extensions configuration;
-165;syn_misc.at:2159;ANY LENGTH item as BY VALUE formal parameter;misc by value;
-166;syn_misc.at:2182;Swapped SOURCE- and OBJECT-COMPUTER;misc extensions;
-167;syn_misc.at:2201;NOT ON EXCEPTION phrases before ON EXCEPTION;misc;
-168;syn_misc.at:2264;Wrong dialect hints;misc;
-169;syn_misc.at:2288;Redundant periods;misc;
+136;syn_misc.at:194;INITIALIZE constant;misc;
+137;syn_misc.at:221;CLASS duplicate values;misc;
+138;syn_misc.at:256;INSPECT invalid size;misc;
+139;syn_misc.at:285;INSPECT invalid target;misc;
+140;syn_misc.at:308;INSPECT missing keyword;misc;
+141;syn_misc.at:329;INSPECT repeated keywords;misc;
+142;syn_misc.at:361;INSPECT incomplete clause;misc;
+143;syn_misc.at:383;INSPECT multiple BEFORE/AFTER clauses;misc;
+144;syn_misc.at:407;Maximum data size;misc;
+145;syn_misc.at:436;Unreachable statement;misc extensions;
+146;syn_misc.at:478;CRT STATUS;special-names misc;
+147;syn_misc.at:520;SWITCHES;runmisc extensions;
+148;syn_misc.at:648;ACCEPT WITH ( NO ) UPDATE / DEFAULT;misc extensions;
+149;syn_misc.at:673;ACCEPT WITH AUTO / TAB;auto-skip autoterminate misc extensions;
+150;syn_misc.at:698;ACCEPT WITH SIZE;protected size misc extensions;
+151;syn_misc.at:722;DISPLAY WITH SIZE;size misc extensions;
+152;syn_misc.at:744;Source text after program-text area;misc fixed;
+153;syn_misc.at:765;Line overflow in Fixed-form / Free-form;misc;
+154;syn_misc.at:813;Continuation Indicator - too many lines;misc fixed literals;
+155;syn_misc.at:1364;Continuation of COBOL words;misc fixed literals;
+156;syn_misc.at:1385;Literal too long;misc literals literal-length continuation;
+157;syn_misc.at:1622;Line and floating comments;misc extensions indicator;
+158;syn_misc.at:1792;word length;misc word-length;
+159;syn_misc.at:1897;Floating-point literals;misc;
+160;syn_misc.at:2002;X literals;misc;
+161;syn_misc.at:2028;Binary literals;misc extensions;
+162;syn_misc.at:2065;ACUCOBOL literals;misc extensions;
+163;syn_misc.at:2126;Adding/removing reserved words;misc extensions configuration;
+164;syn_misc.at:2149;Adding aliases;misc extensions configuration;
+165;syn_misc.at:2169;ANY LENGTH item as BY VALUE formal parameter;misc by value;
+166;syn_misc.at:2192;Swapped SOURCE- and OBJECT-COMPUTER;misc extensions;
+167;syn_misc.at:2211;NOT ON EXCEPTION phrases before ON EXCEPTION;misc;
+168;syn_misc.at:2274;Wrong dialect hints;misc;
+169;syn_misc.at:2298;Redundant periods;misc;
 170;syn_move.at:37;MOVE SPACE TO numeric or numeric-edited item;move;
 171;syn_move.at:63;MOVE ZERO TO alphabetic item;move;
 172;syn_move.at:89;MOVE alphabetic TO x;move;
@@ -10652,13 +10652,35 @@ $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
+{ set +x
+$as_echo "$at_srcdir/syn_misc.at:182: \$COMPILE_ONLY -frelax-syntax prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -frelax-syntax prog.cob" "syn_misc.at:182"
+( $at_check_trace; $COMPILE_ONLY -frelax-syntax prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "prog.cob: 2: Warning: PROGRAM-ID header missing - assumed
+prog.cob: 2: Warning: ENVIRONMENT DIVISION header missing - assumed
+prog.cob: 2: Warning: CONFIGURATION SECTION header missing - assumed
+prog.cob: 10: Warning: INPUT-OUTPUT SECTION header missing - assumed
+prog.cob: 10: Warning: FILE-CONTROL header missing - assumed
+prog.cob: 14: Warning: FILE SECTION header missing - assumed
+prog.cob: 17: Warning: PROCEDURE DIVISION header missing - assumed
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:182"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_135
 #AT_START_136
-at_fn_group_banner 136 'syn_misc.at:184' \
+at_fn_group_banner 136 'syn_misc.at:194' \
   "INITIALIZE constant" "                            " 2
 at_xfail=no
 (
@@ -10685,8 +10707,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:202: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:202"
+$as_echo "$at_srcdir/syn_misc.at:212: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:212"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10697,7 +10719,7 @@ prog.cob: 13: Error: Invalid INITIALIZE statement
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:202"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:212"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10708,7 +10730,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_136
 #AT_START_137
-at_fn_group_banner 137 'syn_misc.at:211' \
+at_fn_group_banner 137 'syn_misc.at:221' \
   "CLASS duplicate values" "                         " 2
 at_xfail=no
 (
@@ -10745,8 +10767,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:239: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:239"
+$as_echo "$at_srcdir/syn_misc.at:249: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:249"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10755,7 +10777,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 9: Error: Duplicate values in class 'CH
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:239"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:249"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10766,7 +10788,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_137
 #AT_START_138
-at_fn_group_banner 138 'syn_misc.at:246' \
+at_fn_group_banner 138 'syn_misc.at:256' \
   "INSPECT invalid size" "                           " 2
 at_xfail=no
 (
@@ -10794,8 +10816,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:265: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:265"
+$as_echo "$at_srcdir/syn_misc.at:275: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:275"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10807,7 +10829,7 @@ prog.cob: 12: Error: CONVERTING operands differ in size
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:265"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:275"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10818,7 +10840,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_138
 #AT_START_139
-at_fn_group_banner 139 'syn_misc.at:275' \
+at_fn_group_banner 139 'syn_misc.at:285' \
   "INSPECT invalid target" "                         " 2
 at_xfail=no
 (
@@ -10842,8 +10864,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:290: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:290"
+$as_echo "$at_srcdir/syn_misc.at:300: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:300"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10853,7 +10875,7 @@ prog.cob: 9: Error: Invalid target for CONVERTING
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:290"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:300"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10864,7 +10886,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_139
 #AT_START_140
-at_fn_group_banner 140 'syn_misc.at:298' \
+at_fn_group_banner 140 'syn_misc.at:308' \
   "INSPECT missing keyword" "                        " 2
 at_xfail=no
 (
@@ -10887,8 +10909,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:312: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:312"
+$as_echo "$at_srcdir/syn_misc.at:322: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:322"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10897,7 +10919,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 8: Error: INSPECT missing ALL/FIRST/LEA
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:312"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:322"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10908,7 +10930,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_140
 #AT_START_141
-at_fn_group_banner 141 'syn_misc.at:319' \
+at_fn_group_banner 141 'syn_misc.at:329' \
   "INSPECT repeated keywords" "                      " 2
 at_xfail=no
 (
@@ -10935,8 +10957,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:337: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:337"
+$as_echo "$at_srcdir/syn_misc.at:347: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:347"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10952,7 +10974,7 @@ prog.cob: 12: Error: Missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR ph
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:337"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:347"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -10963,7 +10985,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_141
 #AT_START_142
-at_fn_group_banner 142 'syn_misc.at:351' \
+at_fn_group_banner 142 'syn_misc.at:361' \
   "INSPECT incomplete clause" "                      " 2
 at_xfail=no
 (
@@ -10988,8 +11010,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:367: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:367"
+$as_echo "$at_srcdir/syn_misc.at:377: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:377"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -10998,7 +11020,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 11: Error: TALLYING clause is incomplet
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:367"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:377"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11008,7 +11030,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_142
 #AT_START_143
-at_fn_group_banner 143 'syn_misc.at:373' \
+at_fn_group_banner 143 'syn_misc.at:383' \
   "INSPECT multiple BEFORE/AFTER clauses" "          " 2
 at_xfail=no
 (
@@ -11034,8 +11056,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:390: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:390"
+$as_echo "$at_srcdir/syn_misc.at:400: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:400"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11045,7 +11067,7 @@ prog.cob: 13: Error: syntax error, unexpected end of file
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:390"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:400"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11055,7 +11077,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_143
 #AT_START_144
-at_fn_group_banner 144 'syn_misc.at:397' \
+at_fn_group_banner 144 'syn_misc.at:407' \
   "Maximum data size" "                              " 2
 at_xfail=no
 (
@@ -11083,8 +11105,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:416: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:416"
+$as_echo "$at_srcdir/syn_misc.at:426: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:426"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11096,7 +11118,7 @@ prog.cob: 9: Error: 'GROUP-ITEM2' cannot be larger than 268435456 bytes
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:416"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:426"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11107,7 +11129,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_144
 #AT_START_145
-at_fn_group_banner 145 'syn_misc.at:426' \
+at_fn_group_banner 145 'syn_misc.at:436' \
   "Unreachable statement" "                          " 2
 at_xfail=no
 (
@@ -11150,8 +11172,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:460: \$COMPILE_ONLY -Wunreachable prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -Wunreachable prog.cob" "syn_misc.at:460"
+$as_echo "$at_srcdir/syn_misc.at:470: \$COMPILE_ONLY -Wunreachable prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -Wunreachable prog.cob" "syn_misc.at:470"
 ( $at_check_trace; $COMPILE_ONLY -Wunreachable prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11161,7 +11183,7 @@ prog.cob: 26: Warning: Unreachable statement 'DISPLAY'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:460"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:470"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11172,7 +11194,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_145
 #AT_START_146
-at_fn_group_banner 146 'syn_misc.at:468' \
+at_fn_group_banner 146 'syn_misc.at:478' \
   "CRT STATUS" "                                     " 2
 at_xfail=no
 (
@@ -11217,8 +11239,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:502: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:502"
+$as_echo "$at_srcdir/syn_misc.at:512: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:512"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11227,20 +11249,20 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 7: Error: 'MY-CRT-STATUS' is not define
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:502"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:512"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:505: \$COMPILE_ONLY prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:505"
+$as_echo "$at_srcdir/syn_misc.at:515: \$COMPILE_ONLY prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:515"
 ( $at_check_trace; $COMPILE_ONLY prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:505"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:515"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11251,7 +11273,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_146
 #AT_START_147
-at_fn_group_banner 147 'syn_misc.at:510' \
+at_fn_group_banner 147 'syn_misc.at:520' \
   "SWITCHES" "                                       " 2
 at_xfail=no
 (
@@ -11344,8 +11366,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:594: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:594"
+$as_echo "$at_srcdir/syn_misc.at:604: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:604"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11376,7 +11398,7 @@ prog.cob: 76: Error: 'SWIT32-OFF' is not defined
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:594"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:604"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11385,8 +11407,8 @@ $at_traceon; }
 #prog.cob: 15: Error: 'SWITCH-25' previously defined here
 #
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:623: \$COMPILE_ONLY -fsyntax-extension prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -fsyntax-extension prog.cob" "syn_misc.at:623"
+$as_echo "$at_srcdir/syn_misc.at:633: \$COMPILE_ONLY -fsyntax-extension prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -fsyntax-extension prog.cob" "syn_misc.at:633"
 ( $at_check_trace; $COMPILE_ONLY -fsyntax-extension prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11396,7 +11418,7 @@ prog.cob: 76: Error: 'SWIT32-OFF' is not defined
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:623"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:633"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11414,7 +11436,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_147
 #AT_START_148
-at_fn_group_banner 148 'syn_misc.at:638' \
+at_fn_group_banner 148 'syn_misc.at:648' \
   "ACCEPT WITH ( NO ) UPDATE / DEFAULT" "            " 2
 at_xfail=no
 (
@@ -11443,15 +11465,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:658: \$COMPILE_ONLY -cb_conf=accept-update:yes prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=accept-update:yes prog.cob" "syn_misc.at:658"
+$as_echo "$at_srcdir/syn_misc.at:668: \$COMPILE_ONLY -cb_conf=accept-update:yes prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=accept-update:yes prog.cob" "syn_misc.at:668"
 ( $at_check_trace; $COMPILE_ONLY -cb_conf=accept-update:yes prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:658"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:668"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11462,7 +11484,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_148
 #AT_START_149
-at_fn_group_banner 149 'syn_misc.at:663' \
+at_fn_group_banner 149 'syn_misc.at:673' \
   "ACCEPT WITH AUTO / TAB" "                         " 2
 at_xfail=no
 (
@@ -11491,15 +11513,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:683: \$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob" "syn_misc.at:683"
+$as_echo "$at_srcdir/syn_misc.at:693: \$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob" "syn_misc.at:693"
 ( $at_check_trace; $COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:683"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:693"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11510,7 +11532,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_149
 #AT_START_150
-at_fn_group_banner 150 'syn_misc.at:688' \
+at_fn_group_banner 150 'syn_misc.at:698' \
   "ACCEPT WITH SIZE" "                               " 2
 at_xfail=no
 (
@@ -11538,15 +11560,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:707: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:707"
+$as_echo "$at_srcdir/syn_misc.at:717: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:717"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:707"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:717"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11557,7 +11579,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_150
 #AT_START_151
-at_fn_group_banner 151 'syn_misc.at:712' \
+at_fn_group_banner 151 'syn_misc.at:722' \
   "DISPLAY WITH SIZE" "                              " 2
 at_xfail=no
 (
@@ -11583,15 +11605,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:729: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:729"
+$as_echo "$at_srcdir/syn_misc.at:739: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:739"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:729"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:739"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11602,7 +11624,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_151
 #AT_START_152
-at_fn_group_banner 152 'syn_misc.at:734' \
+at_fn_group_banner 152 'syn_misc.at:744' \
   "Source text after program-text area" "            " 2
 at_xfail=no
 (
@@ -11625,8 +11647,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:748: \$COMPILE_ONLY -W prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -W prog.cob" "syn_misc.at:748"
+$as_echo "$at_srcdir/syn_misc.at:758: \$COMPILE_ONLY -W prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -W prog.cob" "syn_misc.at:758"
 ( $at_check_trace; $COMPILE_ONLY -W prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11635,7 +11657,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 8: Warning: Source text after program-t
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:748"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:758"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11646,7 +11668,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_152
 #AT_START_153
-at_fn_group_banner 153 'syn_misc.at:755' \
+at_fn_group_banner 153 'syn_misc.at:765' \
   "Line overflow in Fixed-form / Free-form" "        " 2
 at_xfail=no
 (
@@ -11680,22 +11702,22 @@ _ATEOF
 
 # AT_DATA workaround via sed:
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:780: sed -e 's/_\$//' prog_tmpl.cob > prog.cob"
-at_fn_check_prepare_dynamic "sed -e 's/_$//' prog_tmpl.cob > prog.cob" "syn_misc.at:780"
+$as_echo "$at_srcdir/syn_misc.at:790: sed -e 's/_\$//' prog_tmpl.cob > prog.cob"
+at_fn_check_prepare_dynamic "sed -e 's/_$//' prog_tmpl.cob > prog.cob" "syn_misc.at:790"
 ( $at_check_trace; sed -e 's/_$//' prog_tmpl.cob > prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:780"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:790"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:782: \$COMPILE_ONLY -fixed -W prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -fixed -W prog.cob" "syn_misc.at:782"
+$as_echo "$at_srcdir/syn_misc.at:792: \$COMPILE_ONLY -fixed -W prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -fixed -W prog.cob" "syn_misc.at:792"
 ( $at_check_trace; $COMPILE_ONLY -fixed -W prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11706,14 +11728,14 @@ prog.cob: 11: Warning: Source text after program-text area (column 72)
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:782"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:792"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:788: \$COMPILE_ONLY -free -W prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -W prog.cob" "syn_misc.at:788"
+$as_echo "$at_srcdir/syn_misc.at:798: \$COMPILE_ONLY -free -W prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -W prog.cob" "syn_misc.at:798"
 ( $at_check_trace; $COMPILE_ONLY -free -W prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11724,14 +11746,14 @@ prog.cob: 8: Error: Unknown statement 'This'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:788"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:798"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:794: \$COMPILE_ONLY -F -W prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -F -W prog.cob" "syn_misc.at:794"
+$as_echo "$at_srcdir/syn_misc.at:804: \$COMPILE_ONLY -F -W prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -F -W prog.cob" "syn_misc.at:804"
 ( $at_check_trace; $COMPILE_ONLY -F -W prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11742,7 +11764,7 @@ prog.cob: 8: Error: Unknown statement 'This'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:794"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:804"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11753,7 +11775,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_153
 #AT_START_154
-at_fn_group_banner 154 'syn_misc.at:803' \
+at_fn_group_banner 154 'syn_misc.at:813' \
   "Continuation Indicator - too many lines" "        " 2
 at_xfail=no
 (
@@ -12306,8 +12328,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1347: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1347"
+$as_echo "$at_srcdir/syn_misc.at:1357: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1357"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12316,7 +12338,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 538: Error: Buffer overrun - Too many c
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1347"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1357"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -12327,7 +12349,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_154
 #AT_START_155
-at_fn_group_banner 155 'syn_misc.at:1354' \
+at_fn_group_banner 155 'syn_misc.at:1364' \
   "Continuation of COBOL words" "                    " 2
 at_xfail=no
 (
@@ -12347,8 +12369,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1365: \$COMPILE_ONLY -std=cobol2014 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:1365"
+$as_echo "$at_srcdir/syn_misc.at:1375: \$COMPILE_ONLY -std=cobol2014 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:1375"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol2014 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12357,13 +12379,13 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 5: Warning: Continuation of COBOL words
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1365"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1375"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1368: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1368"
+$as_echo "$at_srcdir/syn_misc.at:1378: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1378"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12372,7 +12394,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 5: Warning: Continuation of COBOL words
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1368"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1378"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -12383,7 +12405,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_155
 #AT_START_156
-at_fn_group_banner 156 'syn_misc.at:1375' \
+at_fn_group_banner 156 'syn_misc.at:1385' \
   "Literal too long" "                               " 2
 at_xfail=no
 (
@@ -12598,8 +12620,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1579: \$COMPILE_ONLY -std=default prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=default prog.cob" "syn_misc.at:1579"
+$as_echo "$at_srcdir/syn_misc.at:1589: \$COMPILE_ONLY -std=default prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=default prog.cob" "syn_misc.at:1589"
 ( $at_check_trace; $COMPILE_ONLY -std=default prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12609,14 +12631,14 @@ prog.cob: 9: Error: Literal length exceeds 8191 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1579"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1589"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1584: \$COMPILE_ONLY -std=default -free prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=default -free prog2.cob" "syn_misc.at:1584"
+$as_echo "$at_srcdir/syn_misc.at:1594: \$COMPILE_ONLY -std=default -free prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=default -free prog2.cob" "syn_misc.at:1594"
 ( $at_check_trace; $COMPILE_ONLY -std=default -free prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12626,14 +12648,14 @@ prog2.cob: 9: Error: Literal length 8299 exceeds 8191 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1584"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1594"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1589: \$COMPILE_ONLY -std=mf prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf prog.cob" "syn_misc.at:1589"
+$as_echo "$at_srcdir/syn_misc.at:1599: \$COMPILE_ONLY -std=mf prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf prog.cob" "syn_misc.at:1599"
 ( $at_check_trace; $COMPILE_ONLY -std=mf prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12643,14 +12665,14 @@ prog.cob: 9: Error: Literal length exceeds 8192 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1589"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1599"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1594: \$COMPILE_ONLY -std=acu prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=acu prog.cob" "syn_misc.at:1594"
+$as_echo "$at_srcdir/syn_misc.at:1604: \$COMPILE_ONLY -std=acu prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=acu prog.cob" "syn_misc.at:1604"
 ( $at_check_trace; $COMPILE_ONLY -std=acu prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12660,14 +12682,14 @@ prog.cob: 9: Error: Literal length exceeds 4096 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1594"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1604"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1599: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:1599"
+$as_echo "$at_srcdir/syn_misc.at:1609: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:1609"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12677,14 +12699,14 @@ prog.cob: 9: Error: Literal length exceeds 160 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1599"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1609"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1604: \$COMPILE_ONLY -std=cobol2002 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2002 prog.cob" "syn_misc.at:1604"
+$as_echo "$at_srcdir/syn_misc.at:1614: \$COMPILE_ONLY -std=cobol2002 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2002 prog.cob" "syn_misc.at:1614"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol2002 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12694,7 +12716,7 @@ prog.cob: 9: Error: Literal length exceeds 160 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1604"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1614"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -12705,7 +12727,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_156
 #AT_START_157
-at_fn_group_banner 157 'syn_misc.at:1612' \
+at_fn_group_banner 157 'syn_misc.at:1622' \
   "Line and floating comments" "                     " 2
 at_xfail=no
 (
@@ -12781,22 +12803,22 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1675: \$COMPILE prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE prog.cob" "syn_misc.at:1675"
+$as_echo "$at_srcdir/syn_misc.at:1685: \$COMPILE prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE prog.cob" "syn_misc.at:1685"
 ( $at_check_trace; $COMPILE prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1675"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1685"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1677: ./prog"
-at_fn_check_prepare_trace "syn_misc.at:1677"
+$as_echo "$at_srcdir/syn_misc.at:1687: ./prog"
+at_fn_check_prepare_trace "syn_misc.at:1687"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12809,14 +12831,14 @@ NOMFCOMMENTSLASH
 NOFLOATING
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1677"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1687"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1685: \$COMPILE_ONLY prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:1685"
+$as_echo "$at_srcdir/syn_misc.at:1695: \$COMPILE_ONLY prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:1695"
 ( $at_check_trace; $COMPILE_ONLY prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12825,29 +12847,29 @@ echo >>"$at_stderr"; $as_echo "prog2.cob: 11: Error: Invalid indicator '\$' at c
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1685"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1695"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1690: \$COMPILE -fmfcomment prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -fmfcomment prog.cob" "syn_misc.at:1690"
+$as_echo "$at_srcdir/syn_misc.at:1700: \$COMPILE -fmfcomment prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -fmfcomment prog.cob" "syn_misc.at:1700"
 ( $at_check_trace; $COMPILE -fmfcomment prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1690"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1700"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1693: ./prog"
-at_fn_check_prepare_trace "syn_misc.at:1693"
+$as_echo "$at_srcdir/syn_misc.at:1703: ./prog"
+at_fn_check_prepare_trace "syn_misc.at:1703"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12858,14 +12880,14 @@ NOMFCOMMENTSLASH
 NOFLOATING
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1693"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1703"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1699: \$COMPILE_ONLY -fmfcomment prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -fmfcomment prog2.cob" "syn_misc.at:1699"
+$as_echo "$at_srcdir/syn_misc.at:1709: \$COMPILE_ONLY -fmfcomment prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -fmfcomment prog2.cob" "syn_misc.at:1709"
 ( $at_check_trace; $COMPILE_ONLY -fmfcomment prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12874,50 +12896,16 @@ echo >>"$at_stderr"; $as_echo "prog2.cob: 11: Error: Invalid indicator '\$' at c
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1699"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1709"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1704: \$COMPILE -facucomment prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -facucomment prog.cob" "syn_misc.at:1704"
+$as_echo "$at_srcdir/syn_misc.at:1714: \$COMPILE -facucomment prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -facucomment prog.cob" "syn_misc.at:1714"
 ( $at_check_trace; $COMPILE -facucomment prog.cob
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1704"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-{ set +x
-$as_echo "$at_srcdir/syn_misc.at:1706: ./prog"
-at_fn_check_prepare_trace "syn_misc.at:1706"
-( $at_check_trace; ./prog
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo >>"$at_stdout"; $as_echo "MFCOMMENTASTERISK
-MFCOMMENTSLASH
-NOMFCOMMENTASTERISK
-NOMFCOMMENTSLASH
-NOFLOATING
-" | \
-  $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1706"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-{ set +x
-$as_echo "$at_srcdir/syn_misc.at:1714: \$COMPILE -facucomment prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE -facucomment prog2.cob" "syn_misc.at:1714"
-( $at_check_trace; $COMPILE -facucomment prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -12929,8 +12917,42 @@ $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1716: ./prog2"
+$as_echo "$at_srcdir/syn_misc.at:1716: ./prog"
 at_fn_check_prepare_trace "syn_misc.at:1716"
+( $at_check_trace; ./prog
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "MFCOMMENTASTERISK
+MFCOMMENTSLASH
+NOMFCOMMENTASTERISK
+NOMFCOMMENTSLASH
+NOFLOATING
+" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1716"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+{ set +x
+$as_echo "$at_srcdir/syn_misc.at:1724: \$COMPILE -facucomment prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE -facucomment prog2.cob" "syn_misc.at:1724"
+( $at_check_trace; $COMPILE -facucomment prog2.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1724"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+{ set +x
+$as_echo "$at_srcdir/syn_misc.at:1726: ./prog2"
+at_fn_check_prepare_trace "syn_misc.at:1726"
 ( $at_check_trace; ./prog2
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12944,15 +12966,15 @@ NOACUFLOATING
 NOFLOATING
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1716"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1726"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1726: \$COMPILE_ONLY -free prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -free prog3.cob" "syn_misc.at:1726"
+$as_echo "$at_srcdir/syn_misc.at:1736: \$COMPILE_ONLY -free prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -free prog3.cob" "syn_misc.at:1736"
 ( $at_check_trace; $COMPILE_ONLY -free prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12972,13 +12994,13 @@ prog3.cob: 16: Error: syntax error, unexpected Literal
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1726"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1736"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1740: \$COMPILE_ONLY -free -fmfcomment prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -fmfcomment prog3.cob" "syn_misc.at:1740"
+$as_echo "$at_srcdir/syn_misc.at:1750: \$COMPILE_ONLY -free -fmfcomment prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -fmfcomment prog3.cob" "syn_misc.at:1750"
 ( $at_check_trace; $COMPILE_ONLY -free -fmfcomment prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -12998,13 +13020,13 @@ prog3.cob: 16: Error: syntax error, unexpected Literal
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1740"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1750"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1754: \$COMPILE_ONLY -free -facucomment prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -facucomment prog3.cob" "syn_misc.at:1754"
+$as_echo "$at_srcdir/syn_misc.at:1764: \$COMPILE_ONLY -free -facucomment prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -free -facucomment prog3.cob" "syn_misc.at:1764"
 ( $at_check_trace; $COMPILE_ONLY -free -facucomment prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13023,14 +13045,14 @@ prog3.cob: 16: Error: syntax error, unexpected Literal
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1754"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1764"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 # Check that invalid indicator doesn't abort compilation completely
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1768: \$COMPILE_ONLY prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog3.cob" "syn_misc.at:1768"
+$as_echo "$at_srcdir/syn_misc.at:1778: \$COMPILE_ONLY prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog3.cob" "syn_misc.at:1778"
 ( $at_check_trace; $COMPILE_ONLY prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13046,7 +13068,7 @@ prog3.cob: 16: Error: Invalid indicator 'x' at column 7
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1768"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1778"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13057,7 +13079,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_157
 #AT_START_158
-at_fn_group_banner 158 'syn_misc.at:1782' \
+at_fn_group_banner 158 'syn_misc.at:1792' \
   "word length" "                                    " 2
 at_xfail=no
 (
@@ -13122,8 +13144,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1836: \$COBC -fsyntax-only -free -W prog.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W prog.cob" "syn_misc.at:1836"
+$as_echo "$at_srcdir/syn_misc.at:1846: \$COBC -fsyntax-only -free -W prog.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W prog.cob" "syn_misc.at:1846"
 ( $at_check_trace; $COBC -fsyntax-only -free -W prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13144,14 +13166,14 @@ prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIA
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1836"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1846"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1852: \$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob" "syn_misc.at:1852"
+$as_echo "$at_srcdir/syn_misc.at:1862: \$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob" "syn_misc.at:1862"
 ( $at_check_trace; $COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13168,14 +13190,14 @@ prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIA
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1852"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1862"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1864: \$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob" "syn_misc.at:1864"
+$as_echo "$at_srcdir/syn_misc.at:1874: \$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob" "syn_misc.at:1874"
 ( $at_check_trace; $COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13188,14 +13210,14 @@ prog.cob: 24: Error: Word length exceeds maximum of 61 characters - 'SOME-SPECIA
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1864"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1874"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1872: \$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob" "syn_misc.at:1872"
+$as_echo "$at_srcdir/syn_misc.at:1882: \$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob" "syn_misc.at:1882"
 ( $at_check_trace; $COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13208,35 +13230,35 @@ prog2.cob: 21: Warning: Word length exceeds 45 characters - 'SOME-SPECIAL-VAL-WI
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1872"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1882"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1880: \$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob" "syn_misc.at:1880"
+$as_echo "$at_srcdir/syn_misc.at:1890: \$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob" "syn_misc.at:1890"
 ( $at_check_trace; $COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1880"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1890"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1882: \$COBC -fsyntax-only -free -frelax-syntax prog2.cob"
-at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -frelax-syntax prog2.cob" "syn_misc.at:1882"
+$as_echo "$at_srcdir/syn_misc.at:1892: \$COBC -fsyntax-only -free -frelax-syntax prog2.cob"
+at_fn_check_prepare_dynamic "$COBC -fsyntax-only -free -frelax-syntax prog2.cob" "syn_misc.at:1892"
 ( $at_check_trace; $COBC -fsyntax-only -free -frelax-syntax prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1882"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:1892"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13247,7 +13269,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_158
 #AT_START_159
-at_fn_group_banner 159 'syn_misc.at:1887' \
+at_fn_group_banner 159 'syn_misc.at:1897' \
   "Floating-point literals" "                        " 2
 at_xfail=no
 (
@@ -13318,8 +13340,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1947: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1947"
+$as_echo "$at_srcdir/syn_misc.at:1957: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:1957"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13345,14 +13367,14 @@ prog.cob: 22: Error: Exponent not between -78 and 76
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1947"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1957"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:1968: \$COMPILE_ONLY prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:1968"
+$as_echo "$at_srcdir/syn_misc.at:1978: \$COMPILE_ONLY prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_misc.at:1978"
 ( $at_check_trace; $COMPILE_ONLY prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13378,7 +13400,7 @@ prog2.cob: 26: Error: Exponent not between -78 and 76
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1968"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:1978"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13389,7 +13411,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_159
 #AT_START_160
-at_fn_group_banner 160 'syn_misc.at:1992' \
+at_fn_group_banner 160 'syn_misc.at:2002' \
   "X literals" "                                     " 2
 at_xfail=no
 (
@@ -13414,8 +13436,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2008: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2008"
+$as_echo "$at_srcdir/syn_misc.at:2018: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2018"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13428,7 +13450,7 @@ prog.cob: 10: Error: Literal does not have an even number of digits
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2008"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2018"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13438,7 +13460,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_160
 #AT_START_161
-at_fn_group_banner 161 'syn_misc.at:2018' \
+at_fn_group_banner 161 'syn_misc.at:2028' \
   "Binary literals" "                                " 2
 at_xfail=no
 (
@@ -13466,8 +13488,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2037: \$COMPILE_ONLY -std=mf prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf prog.cob" "syn_misc.at:2037"
+$as_echo "$at_srcdir/syn_misc.at:2047: \$COMPILE_ONLY -std=mf prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf prog.cob" "syn_misc.at:2047"
 ( $at_check_trace; $COMPILE_ONLY -std=mf prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13480,14 +13502,14 @@ prog.cob: 10: Error: Literal length 152 exceeds 64 characters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2037"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2047"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2045: \$COMPILE_ONLY -std=cobol2014 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:2045"
+$as_echo "$at_srcdir/syn_misc.at:2055: \$COMPILE_ONLY -std=cobol2014 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:2055"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol2014 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13499,7 +13521,7 @@ prog.cob: 10: Error: Numeric boolean literal does not conform to COBOL 2014
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2045"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2055"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13510,7 +13532,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_161
 #AT_START_162
-at_fn_group_banner 162 'syn_misc.at:2055' \
+at_fn_group_banner 162 'syn_misc.at:2065' \
   "ACUCOBOL literals" "                              " 2
 at_xfail=no
 (
@@ -13540,8 +13562,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2076: \$COMPILE_ONLY -std=acu prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=acu prog.cob" "syn_misc.at:2076"
+$as_echo "$at_srcdir/syn_misc.at:2086: \$COMPILE_ONLY -std=acu prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=acu prog.cob" "syn_misc.at:2086"
 ( $at_check_trace; $COMPILE_ONLY -std=acu prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13569,14 +13591,14 @@ prog.cob: 14: Error: Literal contains invalid character 'H'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2076"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2086"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2099: \$COMPILE_ONLY -std=cobol2014 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:2099"
+$as_echo "$at_srcdir/syn_misc.at:2109: \$COMPILE_ONLY -std=cobol2014 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_misc.at:2109"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol2014 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13596,7 +13618,7 @@ prog.cob: 14: Error: ACUCOBOL numeric literal does not conform to COBOL 2014
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2099"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2109"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13607,7 +13629,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_162
 #AT_START_163
-at_fn_group_banner 163 'syn_misc.at:2116' \
+at_fn_group_banner 163 'syn_misc.at:2126' \
   "Adding/removing reserved words" "                 " 2
 at_xfail=no
 (
@@ -13633,8 +13655,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2133: \$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob" "syn_misc.at:2133"
+$as_echo "$at_srcdir/syn_misc.at:2143: \$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob" "syn_misc.at:2143"
 ( $at_check_trace; $COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13643,7 +13665,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 7: Error: 'hello' reserved word, but no
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2133"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2143"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13653,7 +13675,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_163
 #AT_START_164
-at_fn_group_banner 164 'syn_misc.at:2139' \
+at_fn_group_banner 164 'syn_misc.at:2149' \
   "Adding aliases" "                                 " 2
 at_xfail=no
 (
@@ -13674,8 +13696,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2151: \$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob" "syn_misc.at:2151"
+$as_echo "$at_srcdir/syn_misc.at:2161: \$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob" "syn_misc.at:2161"
 ( $at_check_trace; $COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13686,7 +13708,7 @@ Alias target 'FOO' is not a default reserved word
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2151"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2161"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13696,7 +13718,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_164
 #AT_START_165
-at_fn_group_banner 165 'syn_misc.at:2159' \
+at_fn_group_banner 165 'syn_misc.at:2169' \
   "ANY LENGTH item as BY VALUE formal parameter" "   " 2
 at_xfail=no
 (
@@ -13721,8 +13743,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2175: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2175"
+$as_echo "$at_srcdir/syn_misc.at:2185: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2185"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13732,7 +13754,7 @@ prog.cob: 9: Error: ANY LENGTH items may only be BY REFERENCE formal parameters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2175"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2185"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13742,7 +13764,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_165
 #AT_START_166
-at_fn_group_banner 166 'syn_misc.at:2182' \
+at_fn_group_banner 166 'syn_misc.at:2192' \
   "Swapped SOURCE- and OBJECT-COMPUTER" "            " 2
 at_xfail=no
 (
@@ -13764,8 +13786,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2195: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2195"
+$as_echo "$at_srcdir/syn_misc.at:2205: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2205"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13774,7 +13796,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 8: Warning: Phrases in non-standard ord
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2195"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2205"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13784,7 +13806,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_166
 #AT_START_167
-at_fn_group_banner 167 'syn_misc.at:2201' \
+at_fn_group_banner 167 'syn_misc.at:2211' \
   "NOT ON EXCEPTION phrases before ON EXCEPTION" "   " 2
 at_xfail=no
 (
@@ -13849,8 +13871,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2257: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2257"
+$as_echo "$at_srcdir/syn_misc.at:2267: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2267"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13860,20 +13882,20 @@ prog.cob: 44: Error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2257"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2267"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2261: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2261"
+$as_echo "$at_srcdir/syn_misc.at:2271: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2271"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2261"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2271"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13883,7 +13905,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_167
 #AT_START_168
-at_fn_group_banner 168 'syn_misc.at:2264' \
+at_fn_group_banner 168 'syn_misc.at:2274' \
   "Wrong dialect hints" "                            " 2
 at_xfail=no
 (
@@ -13909,8 +13931,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2281: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2281"
+$as_echo "$at_srcdir/syn_misc.at:2291: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2291"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13920,7 +13942,7 @@ prog.cob: 11: Error: Unknown statement 'TRANSFORM'; it may exist in another dial
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2281"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2291"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -13930,7 +13952,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_168
 #AT_START_169
-at_fn_group_banner 169 'syn_misc.at:2288' \
+at_fn_group_banner 169 'syn_misc.at:2298' \
   "Redundant periods" "                              " 2
 at_xfail=no
 (
@@ -13957,8 +13979,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2306: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2306"
+$as_echo "$at_srcdir/syn_misc.at:2316: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2316"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -13968,7 +13990,7 @@ prog.cob: 10: Warning: Ignoring redundant .
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2306"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2316"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
