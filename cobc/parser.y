@@ -851,6 +851,8 @@ clean_up_program (cb_tree name, const unsigned char type)
 
 	decrement_depth (s, type);
 
+	current_section = NULL;
+	current_paragraph = NULL;
 	if (!current_program->flag_validated) {
 		current_program->flag_validated = 1;
 		cb_validate_program_body (current_program);
