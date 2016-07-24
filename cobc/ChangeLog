@@ -1,3 +1,7 @@
+2016-07-24  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Additional picture information. TYPE field additions/changes.
+
 2016-07-18  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Added symbol listing support for LINKAGE and SCREEN sections.

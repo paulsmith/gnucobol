@@ -1,7 +1,11 @@
+2016-07-24  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Fixed test for 32/64 bit pointers and 
+	  additional picture information.
+
 2016-07-18  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Added SCREEN and LINKAGE section tests.
-
 
 2016-07-17  Brian Tiffin <btiffin@gnu.org>
 

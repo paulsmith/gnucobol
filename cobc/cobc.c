@@ -3516,14 +3516,136 @@ check_filler_name (char *name)
 	return name;
 }
 
+static int
+set_picture (struct cb_field *field, char *picture)
+{
+	int got_picture = 0;
+
+	switch (field->usage) {
+	case CB_USAGE_INDEX:
+	case CB_USAGE_LENGTH:
+	case CB_USAGE_OBJECT:
+	case CB_USAGE_POINTER:
+	case CB_USAGE_PROGRAM_POINTER:
+	case CB_USAGE_LONG_DOUBLE:
+	case CB_USAGE_FP_BIN32:
+	case CB_USAGE_FP_BIN64:
+	case CB_USAGE_FP_BIN128:
+	case CB_USAGE_FP_DEC64:
+	case CB_USAGE_FP_DEC128:
+	case CB_USAGE_SIGNED_CHAR:
+	case CB_USAGE_SIGNED_SHORT:
+	case CB_USAGE_SIGNED_INT:
+	case CB_USAGE_SIGNED_LONG:
+	case CB_USAGE_UNSIGNED_CHAR:
+	case CB_USAGE_UNSIGNED_SHORT:
+	case CB_USAGE_UNSIGNED_INT:
+	case CB_USAGE_UNSIGNED_LONG:
+	case CB_USAGE_PROGRAM:
+		got_picture = 0;
+		break;
+	case CB_USAGE_BINARY:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP");
+		break;
+	case CB_USAGE_FLOAT:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-1");
+		break;
+	case CB_USAGE_DOUBLE:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-2");
+		break;
+	case CB_USAGE_PACKED:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-3");
+		break;
+	case CB_USAGE_COMP_5:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-5");
+		break;
+	case CB_USAGE_COMP_6:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-6");
+		break;
+	case CB_USAGE_COMP_X:
+		got_picture = 1;
+		if (field->pic) {
+			strcpy (picture, field->pic->orig);
+			strcat (picture, " ");
+		}
+		strcat (picture, "COMP-X");
+		break;
+	default:
+		if (field->pic) {
+			got_picture = 1;
+			strcpy (picture, field->pic->orig);
+		}
+		break;
+	}
+	return got_picture;
+}
+
 static void
-set_type (int category, char *type)
+set_usage_type (int usage, char *type)
+{
+	switch (usage) {
+	case CB_USAGE_INDEX:
+		strcpy (type, "INDEX");
+		break;
+	case CB_USAGE_POINTER:
+	case CB_USAGE_PROGRAM_POINTER:
+		strcpy (type, "POINTER");
+		break;
+	case CB_USAGE_DISPLAY:
+		strcpy (type, "ALPHANUMERIC");
+		break;
+	case CB_USAGE_NATIONAL:
+		strcpy (type, "NATIONAL");
+		break;
+	case CB_USAGE_BIT:
+		strcpy (type, "BOOLEAN");
+		break;
+	default:
+		strcpy (type, "NUMERIC");
+		break;
+	}
+}
+
+static void
+set_type (int category, int usage, char *type)
 {
 	switch (category) {
+	case CB_CATEGORY_UNKNOWN:
+		set_usage_type (usage, type);
+		break;
 	case CB_CATEGORY_ALPHABETIC:
 		strcpy (type, "ALPHABETIC");
 		break;
-	case CB_CATEGORY_UNKNOWN:
 	case CB_CATEGORY_ALPHANUMERIC:
 	case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		strcpy (type, "ALPHANUMERIC");
@@ -3559,9 +3681,11 @@ print_fields (int lvl, struct cb_field *top)
 {
 	int	first = 1;
 	int	get_cat;
+	int	got_picture;
 	int	old_level = 0;
 	char	type[20];
-	char	lcl_name[80] = { '\0' };
+	char	picture[40];
+	char	lcl_name[80];
 
         for (; top; top = top->sister) {
 		if (!top->level) {
@@ -3572,6 +3696,7 @@ print_fields (int lvl, struct cb_field *top)
 		memset (lcl_name, ' ', lvl * 2);
 		strcat (lcl_name, check_filler_name((char *)top->name));
 		get_cat = 1;
+		got_picture = 1;
 
 		if (top->level == 01) {
 			if (!first) {
@@ -3581,6 +3706,7 @@ print_fields (int lvl, struct cb_field *top)
 			if (top->children) {
 				strcpy (type, "GROUP");
 				get_cat = 0;
+				got_picture = 0;
 			}
 		} else if (top->level == 77 && !first
 			   && old_level != 77) {
@@ -3589,19 +3715,21 @@ print_fields (int lvl, struct cb_field *top)
 		}
 
 		if (get_cat) {
-			set_type (top->common.category, type);
+			set_type (top->common.category, top->usage, type);
+			got_picture = set_picture (top, picture);
 		}
 
 		print_program_header ();
-		if (!top->pic) /* Trailing spaces break testsuite AT_DATA */
-			fprintf (cb_src_list_file,
-				"%04d %-14.14s %02d   %s\n",
-			 	top->size, type, top->level, lcl_name);
-		else
+		if (got_picture) {
 			fprintf (cb_src_list_file,
 				"%04d %-14.14s %02d   %-30.30s %s\n",
 			 	top->size, type, top->level, lcl_name,
-			 	top->pic ? top->pic->orig : " ");
+			 	picture);
+		} else { /* Trailing spaces break testsuite AT_DATA */
+			fprintf (cb_src_list_file,
+				"%04d %-14.14s %02d   %s\n",
+			 	top->size, type, top->level, lcl_name);
+		}
 		first = 0;
 		old_level = top->level;
 
