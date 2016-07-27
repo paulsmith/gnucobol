@@ -62,7 +62,7 @@ print_error (const char *file, int line, const char *prefix,
 	/* Print section and/or paragraph name */
 	if (current_section != last_section) {
 		if (current_section && !current_section->flag_dummy_section) {
-			if(file)
+			if (file)
 				fprintf (stderr, "%s: ", file);
 			fputs (_("In section"), stderr);
 			fprintf (stderr, " '%s':\n",
@@ -72,7 +72,7 @@ print_error (const char *file, int line, const char *prefix,
 	}
 	if (current_paragraph != last_paragraph) {
 		if (current_paragraph && !current_paragraph->flag_dummy_paragraph) {
-			if(file)
+			if (file)
 				fprintf (stderr, "%s: ", file);
 			fputs (_("In paragraph"), stderr);
 			fprintf (stderr, " '%s':\n",
@@ -136,7 +136,7 @@ cb_warning (const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, 0, _("Warning: "), fmt, ap);
+	print_error (NULL, 0, _("Warning: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	warningcount++;
 }
@@ -151,7 +151,7 @@ cb_error (const char *fmt, ...)
 	cobc_cs_check = 0;
 #endif
 	va_start (ap, fmt);
-	print_error (NULL, 0, _("Error: "), fmt, ap);
+	print_error (NULL, 0, _("Error: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
