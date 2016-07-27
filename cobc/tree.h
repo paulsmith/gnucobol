@@ -1604,6 +1604,7 @@ extern struct cb_field	*cb_resolve_redefines (struct cb_field *, cb_tree);
 extern void		cb_validate_field (struct cb_field *);
 extern void		cb_validate_88_item (struct cb_field *);
 extern struct cb_field	*cb_validate_78_item (struct cb_field *, const cob_u32_t);
+extern void		cb_validate_renames_item (struct cb_field *);
 extern struct cb_field	*cb_get_real_field (void);
 extern void		cb_clear_real_field (void);
 

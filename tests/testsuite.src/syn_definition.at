@@ -1046,3 +1046,67 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
 prog2.cob: 8: Error: 'TESTNO' is not an alphabet name
 ])
 AT_CLEANUP
+
+
+AT_SETUP([RENAMES item])
+AT_KEYWORDS([definition 66])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  a.
+           03  b       PIC X.
+           03  c.
+               05 d    PIC X.
+               05 e    PIC X.
+
+       66  valid-1     RENAMES b.
+       66  valid-2     RENAMES d THRU e.
+
+       66  invalid-1   RENAMES a.
+       66  invalid-2   RENAMES c THRU d.
+       66  invalid-3   RENAMES e THRU d.
+       66  invalid-4   RENAMES valid-2.
+
+       01  f.
+           03  g       PIC X.
+               88  h   VALUE "a".
+           03  i       PIC X.
+           03  j       OCCURS 5 TIMES.
+               05  k   PIC X.
+               05  l   PIC X.
+           03  m       PIC 9.
+           03  n       POINTER.
+           03  o.
+               05  p   PIC X OCCURS 1 TO 10 DEPENDING ON l.
+
+       66  valid-3     RENAMES g THRU i.
+       66  invalid-5   RENAMES h.
+       66  invalid-6   RENAMES k THRU l.
+       66  invalid-7   RENAMES j.
+       66  invalid-8   RENAMES k THRU o.
+       66  invalid-9   RENAMES b THRU m.
+
+       PROCEDURE       DIVISION.
+           DISPLAY valid-2 OF a
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 15: Error: RENAMES may not reference a level 01 or > 50
+prog.cob: 16: Error: THRU item 'd' may not be subordinate to 'c'
+prog.cob: 17: Error: THRU item 'd' may not come before 'e'
+prog.cob: 18: Error: RENAMES may not reference a level 01 or > 50
+prog.cob: 33: Error: RENAMES may not reference a level 01 or > 50
+prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
+prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
+prog.cob: 35: Error: RENAMES cannot start/end at the OCCURS item 'j'
+prog.cob: 36: Error: RENAMES may not contain 'n' as it is a pointer or object reference
+prog.cob: 36: Error: RENAMES may not contain 'p' as it is an OCCURS DEPENDING table
+prog.cob: 36: Error: Cannot use RENAMES on part of the table 'j'
+prog.cob: 37: Error: 'invalid-9' must immediately follow the record 'a'
+prog.cob: 37: Error: 'b' and 'm' must be in the same record
+])
+AT_CLEANUP

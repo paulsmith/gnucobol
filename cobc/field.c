@@ -177,6 +177,7 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 		return cb_error_node;
 	} else if (f->level == 66) {
 		/* Level 66 */
+		/* Check no segfault when 66 is first field */
 		f->parent = cb_field_founder (last_field);
 		for (p = f->parent->children; p && p->sister; p = p->sister) ;
 		if (p) {
@@ -299,10 +300,6 @@ cb_resolve_redefines (struct cb_field *field, cb_tree redefines)
 	/* Check level number */
 	if (f->level != field->level) {
 		cb_error_x (x, _("Level number of REDEFINES entries must be identical"));
-		return NULL;
-	}
-	if (f->level == 66 || f->level == 88) {
-		cb_error_x (x, _("Level number of REDEFINES entry cannot be 66 or 88"));
 		return NULL;
 	}
 
@@ -503,22 +500,11 @@ validate_field_1 (struct cb_field *f)
 			cb_error_x (x, _("'%s' BASED only allowed at the 01 and 77 levels"), cb_name (x));
 		}
 	}
-	if (f->level == 66) {
-		if (!f->redefines) {
-			level_require_error (x, "RENAMES");
-			return 1;
-		}
-		if (f->flag_occurs) {
-			level_except_error (x, "RENAMES");
-		}
-		return 0;
-	}
 
 	/* Validate OCCURS */
 	if (f->flag_occurs) {
-		if ((!cb_verify (cb_top_level_occurs_clause, "01/77 OCCURS") &&
-		     (f->level == 01 || f->level == 77)) ||
-		    (f->level == 66 || f->level == 88)) {
+		if (!cb_verify (cb_top_level_occurs_clause, "01/77 OCCURS") &&
+		    (f->level == 01 || f->level == 77)) {
 			level_redundant_error (x, "OCCURS");
 		}
 		for (l = f->index_list; l; l = CB_CHAIN (l)) {
@@ -547,7 +533,7 @@ validate_field_1 (struct cb_field *f)
 	}
 
 	/* Validate REDEFINES */
-	if (f->redefines) {
+	if (f->redefines && f->level != 66) {
 		/* Check OCCURS */
 		if (f->redefines->flag_occurs) {
 			cb_warning_x (x, _("The original definition '%s' should not have OCCURS"),
@@ -573,6 +559,10 @@ validate_field_1 (struct cb_field *f)
 		}
 	}
 
+	if (f->level == 66) {
+		return 0;
+	}
+	
 	if (f->children) {
 		/* Group item */
 
@@ -769,7 +759,7 @@ validate_field_1 (struct cb_field *f)
 			    && f->pic->category != CB_CATEGORY_NUMERIC_EDITED) {
 				cb_error_x (x, _("Cannot have S in PICTURE string and BLANK WHEN ZERO"));
 			}
-			
+
 			switch (f->pic->category) {
 			case CB_CATEGORY_NUMERIC:
 				/* Reconstruct the picture string */
@@ -791,7 +781,7 @@ validate_field_1 (struct cb_field *f)
 					pstr->symbol = 'V';
 					pstr->times_repeated = 1;
 					++pstr;
-					
+
 					pstr->symbol = '9';
 					pstr->times_repeated = f->pic->scale;
 					++pstr;
@@ -1394,20 +1384,10 @@ cb_validate_field (struct cb_field *f)
 void
 cb_validate_88_item (struct cb_field *f)
 {
-	cb_tree x;
+	cb_tree x = CB_TREE (f);
 	cb_tree l;
 	cb_tree t;
 
-	x = CB_TREE (f);
-	if (!f->values) {
-		level_require_error (x, "VALUE");
-		return;
-	}
-
-	if (f->pic || f->flag_occurs) {
-		level_except_error (x, "VALUE");
-		return;
-	}
 	if (CB_VALID_TREE(f->parent) &&
 	    CB_TREE_CLASS (f->parent) == CB_CLASS_NUMERIC) {
 		for (l = f->values; l; l = CB_CHAIN (l)) {
@@ -1434,14 +1414,180 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 		noadd = 1;
 	}
 
-	if (f->pic || f->flag_occurs) {
-		level_except_error (x, "VALUE");
-		noadd = 1;
-	}
 	if (!noadd) {
 		cb_add_78 (f);
 	}
 	return last_real_field;
+}
+
+static const struct cb_field *
+get_last_child (const struct cb_field *f)
+{
+	do {
+		f = f->children;
+		while (f->sister) {
+			f = f->sister;
+		}
+	} while (f->children);
+
+	return f;
+}
+
+static struct cb_field *
+get_next_record_field (const struct cb_field *f)
+{
+	if (f->children) {
+		return f->children;
+	}
+
+	while (f) {
+		if (f->sister) {
+			return f->sister;
+		} else {
+			f = f->parent;
+		}
+	}
+	
+	return NULL;
+}
+
+static int
+error_if_rename_thru_is_before_redefines (const struct cb_field * const item)
+{
+	struct cb_field	*f = cb_field_founder (item->redefines);
+
+	/*
+	  Perform depth-first search on the record containing the RENAMES items.
+	*/
+	while (f) {
+		/* Error if we find rename_thru before redefines */
+		if (f == item->rename_thru) {
+			cb_error_x (CB_TREE (item),
+				    _("THRU item '%s' may not come before '%s'"),
+				    cb_name (CB_TREE (item->rename_thru)),
+				    cb_name (CB_TREE (item->redefines)));
+			return 1;
+		} else if (f == item->redefines) {
+		        return 0;
+		}
+
+		f = get_next_record_field (f);
+	}
+
+	return 0;
+}
+
+static void
+error_if_is_or_in_occurs (const struct cb_field * const field,
+			  const struct cb_field * const referring_field)
+{
+	struct cb_field *parent;
+
+	if (field->flag_occurs) {
+		cb_error_x (CB_TREE (referring_field),
+			    _("RENAMES cannot start/end at the OCCURS item '%s'"),
+			    cb_name (CB_TREE (field)));
+	}
+
+	for (parent = field->parent; parent; parent = parent->parent) {
+		if (parent->flag_occurs) {
+			cb_error_x (CB_TREE (referring_field),
+				    _("Cannot use RENAMES on part of the table '%s'"),
+				    cb_name (CB_TREE (parent)));
+		}
+	}
+}
+
+static void
+error_if_invalid_type_in_renames_range (const struct cb_field * const item)
+{
+	const struct cb_field	*end;
+	const struct cb_field	*f = item->redefines;
+	enum cb_category	category;
+
+	/* Find last item in RENAMES range */
+	if (item->rename_thru) {
+		if (item->rename_thru->children) {
+			end = get_last_child (item->rename_thru);
+		} else {
+			end = item->rename_thru;
+		}
+	} else {
+		end = item->redefines;
+	}
+
+	/*
+	  Check all items are not pointers, object references or OCCURS
+	  DEPENDING tables.
+	*/
+	while (f) {
+		category = cb_tree_category (CB_TREE (f));
+		if (category == CB_CATEGORY_OBJECT_REFERENCE
+		    || category == CB_CATEGORY_DATA_POINTER
+		    || category == CB_CATEGORY_PROGRAM_POINTER) {
+			cb_error_x (CB_TREE (item),
+				    _("RENAMES may not contain '%s' as it is a pointer or object reference"),
+				    cb_name (CB_TREE (f)));
+		} else if (f->depending) {
+			cb_error_x (CB_TREE (item),
+				    _("RENAMES may not contain '%s' as it is an OCCURS DEPENDING table"),
+				    cb_name (CB_TREE (f)));
+				    
+		}
+
+		if (f == end) {
+			break;
+		} else {
+			f = get_next_record_field (f);
+		}
+	}
+}
+
+void
+cb_validate_renames_item (struct cb_field *item)
+{
+	const cb_tree	item_tree = CB_TREE (item);
+	const char	*redefines_name = cb_name (CB_TREE (item->redefines));
+        const char	*rename_thru_name = cb_name (CB_TREE (item->rename_thru));
+	struct cb_field *founder;
+	struct cb_field *f;
+
+	founder = cb_field_founder (item->redefines);
+	if (item->parent != founder) {
+		cb_error_x (item_tree,
+			    _("'%s' must immediately follow the record '%s'"),
+			    cb_name (item_tree),
+			    cb_name (CB_TREE (founder)));
+	}
+
+	if (item->rename_thru
+	    && founder != cb_field_founder (item->rename_thru)) {
+		cb_error_x (item_tree,
+			    _("'%s' and '%s' must be in the same record"),
+			    redefines_name, rename_thru_name);
+	}
+
+	if (item->redefines == item->rename_thru) {
+		cb_error_x (item_tree,
+			    _("THRU item must be different to '%s'"),
+			    redefines_name);
+	} else if (!error_if_rename_thru_is_before_redefines (item)) {
+		error_if_invalid_type_in_renames_range (item);
+	}
+
+	for (f = item->rename_thru; f; f = f->parent) {
+		if (f->parent == item->redefines) {
+			cb_error_x (item_tree,
+				    _("THRU item '%s' may not be subordinate to '%s'"),
+				    rename_thru_name, redefines_name);
+			break;
+		}
+	}
+
+	error_if_is_or_in_occurs (item->redefines, item);
+	if (item->rename_thru) {
+		error_if_is_or_in_occurs (item->rename_thru, item);
+	}
 }
 
 void

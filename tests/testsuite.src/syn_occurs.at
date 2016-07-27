@@ -1,18 +1,18 @@
-## Copyright (C) 2003-2012, 2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -25,7 +25,7 @@
 
 # 1) DONE
 
-AT_SETUP([OCCURS with level 01, 66, 77, and 88])
+AT_SETUP([OCCURS with level 01 and 77])
 AT_KEYWORDS([occurs])
 
 AT_DATA([prog.cob], [
@@ -36,24 +36,55 @@ AT_DATA([prog.cob], [
        01 X-01          PIC X OCCURS 10.
        01 G             OCCURS 10.
          02 X-02        PIC X OCCURS 10.
-         66 X-66        RENAMES X-02 OCCURS 10.
        77 X-77          PIC X OCCURS 10.
-       88 X-88          VALUE "X" OCCURS 10.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 11: Error: Level 88 item 'X-88' can only have a VALUE clause
-prog.cob: 6: Error: Level 01 item 'X-01' cannot have a OCCURS clause
+[prog.cob: 6: Error: Level 01 item 'X-01' cannot have a OCCURS clause
 prog.cob: 7: Error: Level 01 item 'G' cannot have a OCCURS clause
-prog.cob: 9: Error: Level 66 item 'X-66' can only have a RENAMES clause
-prog.cob: 10: Error: Level 77 item 'X-77' cannot have a OCCURS clause
+prog.cob: 9: Error: Level 77 item 'X-77' cannot have a OCCURS clause
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([OCCURS with level 66])
+AT_KEYWORDS([occurs RENAMES])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x PIC X.
+       66  y RENAMES x OCCURS 10.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: Error: Level 88 item 'X-88' can only have a VALUE clause
-prog.cob: 9: Error: Level 66 item 'X-66' can only have a RENAMES clause
+[prog.cob: 7: Error: RENAMES may not reference a level 01 or > 50
+prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
 ])
 
+AT_CLEANUP
+
+
+AT_SETUP([OCCURS with level 88])
+AT_KEYWORDS([occurs])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x PIC X.
+           88  y VALUE "a" OCCURS 10.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
+])
 
 AT_CLEANUP
 
@@ -278,5 +309,3 @@ grep "prog.cob: 11: Error: Numeric literal '9223372036854775808' exceeds limit"]
 [0], ignore, [])
 
 AT_CLEANUP
-
-

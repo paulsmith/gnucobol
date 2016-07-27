@@ -384,8 +384,21 @@ H#[0-9A-Za-z]* {
 [0-9]+ {
 	cobc_force_literal = 0;
 	if (integer_is_label) {
-		/* Integer label or level number */
 		yylval = cb_build_reference (yytext);
+		if (!cobc_in_procedure) {
+			if (!strcmp (yytext, "66")) {
+				/* Level number 66 */
+				return SIXTY_SIX;
+			} else if (!strcmp (yytext, "78")) {
+				/* Level number 78 */
+				return SEVENTY_EIGHT;
+			} else if (!strcmp (yytext, "88")) {
+				/* Level number 88 */
+				return EIGHTY_EIGHT;
+			}
+		}
+
+		/* Integer label or level number */
 		return WORD;
 	}
 	/* Numeric literal or referenced integer label */

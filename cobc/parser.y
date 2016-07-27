@@ -942,6 +942,31 @@ set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name, const int is_cu
 		cb_list_add (current_program->user_spec_list, func_prototype);
 }
 
+static COB_INLINE COB_A_INLINE int
+has_valid_level_for_renames (cb_tree item)
+{
+	int	level = CB_FIELD (cb_ref (item))->level;
+
+	return 1 < level && level < 50;
+}
+
+static int
+set_current_field (cb_tree level, cb_tree name)
+{
+	cb_tree	x  = cb_build_field_tree (level, name, current_field,
+					  current_storage, current_file, 0);
+	cobc_parse_free (level);
+	
+	if (CB_INVALID_TREE (x)) {
+	        return 1;
+	} else {
+		current_field = CB_FIELD (x);
+		check_pic_duplicate = 0;
+	}
+
+	return 0;
+}
+
 static void
 emit_duplicate_clause_message (const char *clause)
 {
@@ -951,7 +976,7 @@ emit_duplicate_clause_message (const char *clause)
 		cb_error (_("Duplicate %s clause"), clause);
 	}
 }
-
+ 
 static void
 check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
 {
@@ -1501,6 +1526,7 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 %token DYNAMIC
 %token EBCDIC
 %token EC
+%token EIGHTY_EIGHT		"88"
 %token ELSE
 %token END
 %token END_ACCEPT		"END-ACCEPT"
@@ -1784,12 +1810,14 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 %token SEQUENCE
 %token SEQUENTIAL
 %token SET
+%token SEVENTY_EIGHT		"78"
 %token SHARING
 %token SIGN
 %token SIGNED
 %token SIGNED_INT		"SIGNED-INT"
 %token SIGNED_LONG		"SIGNED-LONG"
 %token SIGNED_SHORT		"SIGNED-SHORT"
+%token SIXTY_SIX		"66"
 %token SIZE
 %token SIZE_ERROR		"SIZE ERROR"
 %token SORT
@@ -4182,36 +4210,18 @@ record_description_list_2:
 
 data_description:
   constant_entry
+| renames_entry
+| condition_name_entry
 | level_number _entry_name
   {
-	cb_tree x;
-
-	x = cb_build_field_tree ($1, $2, current_field, current_storage,
-				 current_file, 0);
-	/* Free tree associated with level number */
-	cobc_parse_free ($1);
-	if (CB_INVALID_TREE (x)) {
+	if (set_current_field ($1, $2)) {
 		YYERROR;
-	} else {
-		current_field = CB_FIELD (x);
-		check_pic_duplicate = 0;
 	}
   }
   _data_description_clause_sequence
   {
-	if (!qualifier && (current_field->level == 88 ||
-	    current_field->level == 66 || current_field->flag_item_78)) {
-		cb_error (_("Item requires a data name"));
-	}
 	if (!qualifier) {
 		current_field->flag_filler = 1;
-	}
-	if (current_field->level == 88) {
-		cb_validate_88_item (current_field);
-	}
-	if (current_field->flag_item_78) {
-		/* Reset to last non-78 item */
-		current_field = cb_validate_78_item (current_field, 0);
 	}
 	if (!description_field) {
 		description_field = current_field;
@@ -4249,15 +4259,10 @@ _entry_name:
 	qualifier = NULL;
 	non_const_word = 0;
   }
-| WORD
-  {
-	$$ = $1;
-	qualifier = $1;
-	non_const_word = 0;
-  }
+| user_entry_name
 ;
 
-const_name:
+user_entry_name:
   WORD
   {
 	$$ = $1;
@@ -4369,8 +4374,57 @@ pointer_len:
 | PROGRAM_POINTER
 ;
 
+renames_entry:
+  SIXTY_SIX user_entry_name RENAMES qualified_word _renames_thru
+  {
+	if (set_current_field ($1, $2)) {
+		YYERROR;
+	}
+	  
+	if (cb_ref ($4) != cb_error_node) {
+		if (!has_valid_level_for_renames ($4)) {
+			cb_error (_("RENAMES may not reference a level 01 or > 50"));
+		}
+		current_field->redefines = CB_FIELD (cb_ref ($4));
+	}
+
+	if ($5) {
+		if (!has_valid_level_for_renames ($5)) {
+			cb_error (_("RENAMES may not reference a level 01 or > 50"));
+		}
+		current_field->rename_thru = CB_FIELD (cb_ref ($5));
+	}
+
+	cb_validate_renames_item (current_field);
+  }
+;
+
+_renames_thru:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| THRU qualified_word
+  {
+	$$ = $2 == cb_error_node ? NULL : $2;
+  }
+;
+
+condition_name_entry:
+  EIGHTY_EIGHT user_entry_name
+  {
+	if (set_current_field ($1, $2)) {
+		YYERROR;
+	}
+  }
+  value_clause
+  {
+	cb_validate_88_item (current_field);
+  }
+;
+
 constant_entry:
-  level_number const_name CONSTANT const_global constant_source
+  level_number user_entry_name CONSTANT const_global constant_source
   {
 	cb_tree x;
 	int	level;
@@ -4392,6 +4446,17 @@ constant_entry:
 		/* Ignore return value */
 		(void)cb_validate_78_item (CB_FIELD (x), 0);
 	}
+  }
+| SEVENTY_EIGHT user_entry_name
+  {
+	if (set_current_field ($1, $2)) {
+		YYERROR;
+	}
+  }
+  _global_clause value_clause
+  {
+	/* Reset to last non-78 item */
+	current_field = cb_validate_78_item (current_field, 0);
   }
 ;
 
@@ -4434,7 +4499,6 @@ data_description_clause:
 | blank_clause
 | based_clause
 | value_clause
-| renames_clause
 | any_length_clause
 ;
 
@@ -4504,6 +4568,10 @@ _as_extname:
 ;
 
 /* GLOBAL clause */
+
+_global_clause:
+| global_clause
+;
 
 global_clause:
   _is GLOBAL
@@ -5025,41 +5093,6 @@ _false_is:
   }
 ;
 
-
-/* RENAMES clause */
-
-renames_clause:
-  RENAMES qualified_word
-  {
-	check_repeated ("RENAMES", SYN_CLAUSE_13, &check_pic_duplicate);
-	if (cb_ref ($2) != cb_error_node) {
-		if (CB_FIELD (cb_ref ($2))->level == 01 ||
-		    CB_FIELD (cb_ref ($2))->level > 50) {
-			cb_error (_("RENAMES may not reference a level 01 or > 50"));
-		} else {
-			current_field->redefines = CB_FIELD (cb_ref ($2));
-			current_field->pic = current_field->redefines->pic;
-		}
-	}
-  }
-| RENAMES qualified_word THRU qualified_word
-  {
-	check_repeated ("RENAMES", SYN_CLAUSE_13, &check_pic_duplicate);
-	if (cb_ref ($2) != cb_error_node && cb_ref ($4) != cb_error_node) {
-		if (CB_FIELD (cb_ref ($2))->level == 01 ||
-		    CB_FIELD (cb_ref ($2))->level > 50) {
-			cb_error (_("RENAMES may not reference a level 01 or > 50"));
-		} else if (CB_FIELD (cb_ref ($4))->level == 01 ||
-		    CB_FIELD (cb_ref ($4))->level > 50) {
-			cb_error (_("RENAMES may not reference a level 01 or > 50"));
-		} else {
-			current_field->redefines = CB_FIELD (cb_ref ($2));
-			current_field->rename_thru = CB_FIELD (cb_ref ($4));
-		}
-	}
-  }
-;
-
 /* ANY LENGTH clause */
 
 any_length_clause:
@@ -5534,11 +5567,6 @@ screen_description:
 		current_field->screen_flag |= flags;
 	}
 
-	if (!qualifier && (current_field->level == 88 ||
-	    current_field->level == 66 ||
-	    current_field->flag_item_78)) {
-		cb_error (_("Item requires a data name"));
-	}
 	if (current_field->screen_flag & COB_SCREEN_INITIAL) {
 		if (!(current_field->screen_flag & COB_SCREEN_INPUT)) {
 			cb_error (_("INITIAL specified on non-input field"));
@@ -5547,13 +5575,7 @@ screen_description:
 	if (!qualifier) {
 		current_field->flag_filler = 1;
 	}
-	if (current_field->level == 88) {
-		cb_validate_88_item (current_field);
-	}
-	if (current_field->flag_item_78) {
-		/* Reset to last non-78 item - may set current_field to NULL */
-		current_field = cb_validate_78_item (current_field, 0);
-	}
+
 	if (likely (current_field)) {
 		if (!description_field) {
 			description_field = current_field;
