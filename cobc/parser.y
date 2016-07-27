@@ -942,12 +942,17 @@ set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name, const int is_cu
 		cb_list_add (current_program->user_spec_list, func_prototype);
 }
 
-static COB_INLINE COB_A_INLINE int
-has_valid_level_for_renames (cb_tree item)
+static void
+error_if_invalid_level_for_renames (cb_tree item)
 {
 	int	level = CB_FIELD (cb_ref (item))->level;
 
-	return 1 < level && level < 50;
+	if (level == 1 || level == 77) {
+	        cb_verify (cb_rename_01_and_77,
+			   _("RENAMES of 01- and 77-level items"));
+	} else if (level == 66 || level == 88) {
+		cb_error (_("RENAMES may not reference a level 66 or 88"));
+	}
 }
 
 static int
@@ -4382,16 +4387,12 @@ renames_entry:
 	}
 	  
 	if (cb_ref ($4) != cb_error_node) {
-		if (!has_valid_level_for_renames ($4)) {
-			cb_error (_("RENAMES may not reference a level 01 or > 50"));
-		}
+		error_if_invalid_level_for_renames ($4);
 		current_field->redefines = CB_FIELD (cb_ref ($4));
 	}
 
 	if ($5) {
-		if (!has_valid_level_for_renames ($5)) {
-			cb_error (_("RENAMES may not reference a level 01 or > 50"));
-		}
+		error_if_invalid_level_for_renames ($5);
 		current_field->rename_thru = CB_FIELD (cb_ref ($5));
 	}
 

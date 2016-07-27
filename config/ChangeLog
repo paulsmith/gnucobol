@@ -1,4 +1,8 @@
 
+2016-07-27  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added rename-01-and-77 configuration option.
+
 2016-07-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added accept-display-extensions and console-is-crt

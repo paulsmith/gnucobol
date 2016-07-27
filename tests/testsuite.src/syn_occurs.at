@@ -63,8 +63,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: RENAMES may not reference a level 01 or > 50
-prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
+[prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
 ])
 
 AT_CLEANUP

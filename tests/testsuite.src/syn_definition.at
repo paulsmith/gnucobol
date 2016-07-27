@@ -1094,12 +1094,12 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 15: Error: RENAMES may not reference a level 01 or > 50
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: 15: Error: RENAMES of 01- and 77-level items does not conform to COBOL 2014
 prog.cob: 16: Error: THRU item 'd' may not be subordinate to 'c'
 prog.cob: 17: Error: THRU item 'd' may not come before 'e'
-prog.cob: 18: Error: RENAMES may not reference a level 01 or > 50
-prog.cob: 33: Error: RENAMES may not reference a level 01 or > 50
+prog.cob: 18: Error: RENAMES may not reference a level 66 or 88
+prog.cob: 33: Error: RENAMES may not reference a level 66 or 88
 prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
 prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
 prog.cob: 35: Error: RENAMES cannot start/end at the OCCURS item 'j'
@@ -1109,4 +1109,28 @@ prog.cob: 36: Error: Cannot use RENAMES on part of the table 'j'
 prog.cob: 37: Error: 'invalid-9' must immediately follow the record 'a'
 prog.cob: 37: Error: 'b' and 'm' must be in the same record
 ])
+AT_CLEANUP
+
+
+AT_SETUP([RENAMES of 01- and 77-level items])
+AT_KEYWORDS([definition 66 extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  a PIC X.
+       66  renames-a RENAMES a.
+
+       77  b PIC X.
+       66  renames-b RENAMES b.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: 7: Error: RENAMES of 01- and 77-level items does not conform to COBOL 2014
+prog.cob: 10: Error: RENAMES of 01- and 77-level items does not conform to COBOL 2014
+])
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [0], [], [])
+
 AT_CLEANUP
