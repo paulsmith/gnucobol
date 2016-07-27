@@ -435,7 +435,7 @@ test.conf: Missing definitions:
 	No definition of 'word-continuation'
 	No definition of 'not-exception-before-exception'
 	No definition of 'accept-display-extensions'
-	No definition of 'rename-01-and-77'
+	No definition of 'renames-uncommon-levels'
 ])
 
 AT_CLEANUP

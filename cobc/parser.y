@@ -947,11 +947,11 @@ error_if_invalid_level_for_renames (cb_tree item)
 {
 	int	level = CB_FIELD (cb_ref (item))->level;
 
-	if (level == 1 || level == 77) {
-	        cb_verify (cb_rename_01_and_77,
-			   _("RENAMES of 01- and 77-level items"));
-	} else if (level == 66 || level == 88) {
-		cb_error (_("RENAMES may not reference a level 66 or 88"));
+	if (level == 1 || level == 66 || level == 77) {
+	        cb_verify (cb_renames_uncommon_levels,
+			   _("RENAMES of 01-, 66- and 77-level items"));
+	} else if (level == 88) {
+		cb_error (_("RENAMES may not reference a level 88"));
 	}
 }
 

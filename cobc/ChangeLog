@@ -5,7 +5,8 @@
 	* field.c: removed code made redundant by the above change.
 	* field.c, tree.h (cb_validate_renames_item): strengthened 66-level
 	  syntax checks.
-	* config.def: added rename-01-and-77 config option (for MF extension).
+	* config.def: added renames-uncommon-levels config option (for MF
+	  extension).
 
 2016-07-24  Dave Pitts <dpitts@cozx.com>
 
