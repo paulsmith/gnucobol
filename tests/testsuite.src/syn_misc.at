@@ -2298,8 +2298,11 @@ AT_CLEANUP
 AT_SETUP([Redundant periods])
 AT_KEYWORDS([misc])
 
-AT_DATA([prog.cob], [
+AT_DATA([a.cpy], [
+       01  var PIC X
+])
 
+AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
 
@@ -2308,13 +2311,15 @@ AT_DATA([prog.cob], [
        REPLACE ==a== BY ==b==.. *> blah blah
        .
 
+       COPY a..
+
        78  var VALUE "hello".
       * blah blah
           .
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [0], [],
-[prog.cob: 8: Warning: Ignoring redundant .
-prog.cob: 10: Warning: Ignoring redundant .
+[prog.cob: 6: Warning: Ignoring redundant .
+prog.cob: 12: Warning: Ignoring redundant .
 ])
 AT_CLEANUP

@@ -646,10 +646,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	cb_source_line++;
   }
   [,;]?[ ]+		{ /* ignore */ }
-  \.([ \n]*\.)*		{
-	  if (strlen (yytext) > 1) {
-		  cb_warning (_("Ignoring redundant ."));
-	  }
+  \. 			{
 	  yy_pop_state ();
 	  return DOT;
   }
