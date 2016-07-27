@@ -1524,14 +1524,7 @@ cobc_clean_up (const int status)
 DECLNORET static void COB_A_NORETURN
 cobc_terminate (const char *str)
 {
-	int	save_errno;
-
-	save_errno = errno;
-	fprintf (stderr, "cobc: ");
-	fflush (stderr);
-	errno = save_errno;
-	perror (str);
-	fflush (stderr);
+	cb_perror(errno, str, 1);
 	cobc_clean_up (1);
 	exit (1);
 }

@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "cobc.h"
 
@@ -408,8 +409,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	fp = fopen (conf_file, "r");
 	if (fp == NULL) {
 		if (!isoptional) {
-			fflush (stderr);
-			configuration_error (conf_file, 0, 1, _("No such file or directory"));
+			cb_perror (errno, conf_file, 2);
 			return -1;
 		} else {
 			return 0;

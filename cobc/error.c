@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 
 #include "cobc.h"
@@ -44,6 +45,7 @@ size_t				cb_msg_style;
 
 static void
 print_error (const char *file, int line, const char *prefix,
+	     const int perrno, const char *pstr,
 	     const char *fmt, va_list ap)
 {
 	char			errmsg[BUFSIZ];
@@ -90,8 +92,15 @@ print_error (const char *file, int line, const char *prefix,
 	if (prefix) {
 		fprintf (stderr, "%s", prefix);
 	}
-	vsprintf (errmsg, fmt, ap);
-	fprintf (stderr, "%s\n", errmsg);
+	if (!perrno) {
+		vsprintf (errmsg, fmt, ap);
+		fprintf (stderr, "%s\n", errmsg);
+	} else {
+		fflush (stderr);
+		errno = perrno;
+		perror (pstr);
+		fflush (stderr);
+	}
 
 	if (cb_src_list_file) {
 		err = cobc_malloc (sizeof (struct list_error));
@@ -149,6 +158,28 @@ cb_error (const char *fmt, ...)
 	}
 }
 
+void
+cb_perror (const int perrno, const char *pstr, const char error_type)
+{
+	const char *prefix = NULL;
+	
+	switch (error_type) {
+		case 1:
+			prefix = "cobc: ";
+			break;
+		case 2:
+			if (!conf_error_displayed) {
+				conf_error_displayed = 1;
+				fputs (_("configuration error:"), stderr);
+				putc ('\n', stderr);
+			}
+			break;
+		default:
+			prefix = _("error: ");
+	}
+	print_error (NULL, 0, prefix, perrno, pstr, NULL, NULL);
+}
+
 /* Warning/error for pplex.l input routine */
 /* At this stage we have not parsed the newline so that */
 /* cb_source_line needs to be adjusted by newline_count in pplex.l */
@@ -159,7 +190,8 @@ cb_plex_warning (const size_t sline, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, (int)(cb_source_line + sline), _("Warning: "), fmt, ap);
+	print_error (NULL, (int)(cb_source_line + sline),
+	    _("Warning: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	warningcount++;
 }
@@ -170,7 +202,8 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, (int)(cb_source_line + sline), _("Error: "), fmt, ap);
+	print_error (NULL, (int)(cb_source_line + sline),
+	    _("Error: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
@@ -262,7 +295,8 @@ cb_warning_x (cb_tree x, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (x->source_file, x->source_line, _("Warning: "), fmt, ap);
+	print_error (x->source_file, x->source_line,
+	   _("Warning: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	warningcount++;
 }
@@ -273,7 +307,8 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (x->source_file, x->source_line, _("Error: "), fmt, ap);
+	print_error (x->source_file, x->source_line,
+	    _("Error: "), 0, NULL, fmt, ap);
 	va_end (ap);
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();

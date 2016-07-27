@@ -445,6 +445,7 @@ extern size_t		cb_msg_style;
 
 extern void		cb_warning (const char *, ...) COB_A_FORMAT12;
 extern void		cb_error (const char *, ...) COB_A_FORMAT12;
+extern void		cb_perror (const int, const char *, const char);
 extern void		cb_plex_warning (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_error (const size_t,

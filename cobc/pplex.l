@@ -811,16 +811,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	}
 
 	if (!ppin) {
-		if (cb_source_file) {
-			cb_error ("%s: %s", name,
-				  _("No such file or directory"));
-		} else {
-			fflush (stderr);
-			fprintf (stderr, "%s: %s", name,
-				 _("No such file or directory"));
-			fflush (stderr);
-			errorcount++;
-		}
+		cb_perror (errno, name, 1);
 		return -1;
 	}
 
@@ -919,7 +910,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			}
 		}
 	}
-	cb_error ("%s: %s", name, _("No such file or directory"));
+	cb_perror (errno, name, 0);
 	return -1;
 }
 

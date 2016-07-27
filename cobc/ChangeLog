@@ -1,3 +1,11 @@
+
+2016-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* error.c , cobc.h: new function cb_perror for returning system errors
+	* error.c (print_error): changes for cb_perror
+	* cobc.c (cobc_terminate), config.c (cb_load_conf_file), pplex.l (ppcopy):
+	  use cb_perror instead of output of a guessed error message
+
 2016-07-27  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, scanner.l: seperated 66-, 78- and 88-level handling from
