@@ -170,14 +170,14 @@ cb_perror (const int perrno, const char *pstr, const char error_type)
 		case 2:
 			if (!conf_error_displayed) {
 				conf_error_displayed = 1;
-				fputs (_("configuration error:"), stderr);
+				fputs (_("Configuration Error"), stderr);
 				putc ('\n', stderr);
 			}
 			break;
 		default:
-			prefix = _("error: ");
+			prefix = _("Error: ");
 	}
-	print_error (NULL, 0, prefix, perrno, pstr, NULL, NULL);
+	print_error (NULL, 0, prefix, perrno, pstr, NULL, (va_list)NULL);
 }
 
 /* Warning/error for pplex.l input routine */
