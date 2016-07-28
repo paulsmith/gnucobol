@@ -177,7 +177,7 @@ cb_perror (const int perrno, const char *pstr, const char error_type)
 		default:
 			prefix = _("Error: ");
 	}
-	print_error (NULL, 0, prefix, perrno, pstr, NULL, (va_list)NULL);
+	print_error (NULL, 0, prefix, perrno, pstr, NULL, NULL);
 }
 
 /* Warning/error for pplex.l input routine */
