@@ -637,12 +637,6 @@ cobc_abort (const char *filename, const int line_num)
 	cobc_abort_terminate ();
 }
 
-void
-cobc_dumb_abort (const char *filename, const int line_num)
-{
-	cobc_abort (filename, line_num);
-}
-
 /* Output cobc source/line where a tree cast error occurs and exit */
 void
 cobc_tree_cast_error (const cb_tree x, const char *filename, const int line_num,
@@ -4500,7 +4494,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 						pline[k][j++] = ' ';
 					} else {
 						if ((j + 2 + ftlen) < last) {
-							for (i = 0; i < strlen (ftoken); i++)
+							for (i = 0; i < (int)strlen (ftoken); i++)
 								pline[k][j++] = ftoken[i];
 							pline[k][j++] = fterm[0] ? fterm[0] : ' ';
 							if (fterm[0] == '.')

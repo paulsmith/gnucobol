@@ -818,8 +818,7 @@ cb_field_size (const cb_tree x)
 		}
 	default:
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
-		/* Use dumb variant */
-		COBC_DUMB_ABORT ();
+		COBC_ABORT ();
 	}
 	/* NOT REACHED */
 #ifndef _MSC_VER

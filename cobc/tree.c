@@ -944,8 +944,7 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 	default:
 		cobc_err_msg (_("unexpected category: %d"),
 				(int)CB_TREE_CATEGORY (x));
-		/* Use dumb variant */
-		COBC_DUMB_ABORT ();
+		COBC_ABORT ();
 	}
 	/* NOT REACHED */
 #ifndef _MSC_VER

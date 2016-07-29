@@ -59,7 +59,6 @@
 #endif
 
 #define COBC_ABORT()			cobc_abort(__FILE__, __LINE__)
-#define COBC_DUMB_ABORT()		cobc_dumb_abort(__FILE__, __LINE__)
 
 /* Source format defines */
 #define CB_FORMAT_FIXED			0
@@ -350,7 +349,6 @@ extern void			cobc_err_msg (const char *, ...) COB_A_FORMAT12;
 DECLNORET extern void		cobc_abort (const char *,
 					    const int) COB_A_NORETURN;
 DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
-DECLNORET extern void			cobc_dumb_abort (const char *, const int);
 
 extern size_t			cobc_check_valid_name (const char *,
 						       const unsigned int);
