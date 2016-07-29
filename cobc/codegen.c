@@ -288,10 +288,10 @@ lookup_func_call (const char *p)
 		return last;			      \
 	}
 
-LIST_REVERSE_FUNC (pic_list);
-LIST_REVERSE_FUNC (attr_list);
-LIST_REVERSE_FUNC (string_list);
-LIST_REVERSE_FUNC (literal_list);
+LIST_REVERSE_FUNC (pic_list)
+LIST_REVERSE_FUNC (attr_list)
+LIST_REVERSE_FUNC (string_list)
+LIST_REVERSE_FUNC (literal_list)
 
 static int field_cache_cmp (const void *mp1, const void *mp2) {
 	const struct field_list	*fl1;

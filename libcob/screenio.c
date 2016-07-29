@@ -727,8 +727,8 @@ get_prev_screen_item (cob_screen * const s)
 		}							\
 	}
 
-UPDATE_CLAUSE_FUNC (LINE, line);
-UPDATE_CLAUSE_FUNC (COLUMN, column);
+UPDATE_CLAUSE_FUNC (LINE, line)
+UPDATE_CLAUSE_FUNC (COLUMN, column)
 
 #undef UPDATE_CLAUSE_FUNC
 
