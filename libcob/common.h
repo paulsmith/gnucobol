@@ -429,6 +429,16 @@
 #define	COB_A_COLD
 #define	COB_HAVE_STEXPR	1
 
+#elif	defined(_MSC_VER)
+
+#define likely(x)	(x)
+#define unlikely(x)	(x)
+#define	COB_A_MALLOC
+#define	COB_NOINLINE	__declspec(noinline)
+#define	COB_A_INLINE	__forceinline
+#define	COB_A_COLD
+#define	COB_HAVE_STEXPR	1
+
 #else
 
 #define likely(x)	(x)

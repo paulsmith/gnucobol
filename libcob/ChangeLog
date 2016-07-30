@@ -1,4 +1,9 @@
 
+2016-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* coblocal.h: changed types in config_tbl to unsigned (compiler warnings)
+	* common.h [_MSC_VER]: added definitions for COB_NOINLINE, COB_A_INLINE
+
 2016-07-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: added support for LINE/COL 0.
@@ -124,7 +129,7 @@
 	* intrinsic.c: changed definition of string lengths for date/time
 	  according to existing ones (COB_xyz_BUFF)
 	* common.h [_MSC_VER]: adding alias for setenv/unsetenv fixing small memory
-	  leak for calls of (putenv) - _MSC duplicates the string, POSIX does not
+	  leak for calls of (putenv) - MSC duplicates the string, POSIX does not
 
 2016-01-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

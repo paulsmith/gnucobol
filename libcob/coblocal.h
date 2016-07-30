@@ -277,12 +277,12 @@ struct config_tbl {
 	const char	*conf_name;		/* Name used in run-time config file */
 	const char	*default_val;		/* Default value */
 	struct config_enum *enums;		/* Table of Alternate values */
-	int		env_group;		/* Grouping for display of run-time options */
-	int		data_type;		/* Data type */
-	int		data_loc;		/* Location within structure */
-	int		data_len;		/* Length of referenced field */
-	int		config_num;		/* Set by which runtime.cfg file */
-	int		set_by;			/* value set by a different keyword */
+	unsigned int		env_group;		/* Grouping for display of run-time options */
+	unsigned int		data_type;		/* Data type */
+	unsigned int		data_loc;		/* Location within structure */
+	unsigned int		data_len;		/* Length of referenced field */
+	unsigned int		config_num;		/* Set by which runtime.cfg file */
+	unsigned int		set_by;			/* value set by a different keyword */
 	unsigned long		min_value;		/* Minium accepted value */
 	unsigned long		max_value;		/* Maximum accepted value */
 };
