@@ -1,4 +1,8 @@
 
+2016-07-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (return_at_end): allow NOT AT END before AT END (bugs #242).
+
 2016-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, cobc.h, tree.c, typeck.c: removed COBC_DUMP_ABORT as it did not

@@ -10320,6 +10320,7 @@ not_on_overflow:
 
 return_at_end:
   at_end_clause _not_at_end_clause
+| not_at_end_clause at_end_clause
 ;
 
 at_end:
