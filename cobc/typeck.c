@@ -5423,8 +5423,7 @@ get_origin_line_column (void)
 }
 
 static cb_tree
-get_default_field_line_column (const enum cb_display_type display_type,
-			       const int is_first_display_item)
+get_default_field_line_column (const int is_first_display_item)
 {
 	/*
 	  Note if LINE/COL 0 is not allowed, then this must be a
@@ -5455,8 +5454,7 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 	cb_tree	x;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l)) {
-		pos = get_default_field_line_column (display_type,
-						     is_first_display_item);
+		pos = get_default_field_line_column (is_first_display_item);
 		is_first_display_item = 0;
 
 		x = CB_VALUE (l);
@@ -5475,17 +5473,19 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 			     const int is_first_display_list)
 {
 	cb_tree	l;
-	cb_tree val;
+	cb_tree last_elt;
+	int	is_first_item;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
-	val = CB_VALUE (l);
+	last_elt = CB_VALUE (l);
 
 	if (line_column == NULL) {
-		line_column = get_default_field_line_column (display_type, is_first_display_list && l == values);
+		is_first_item = is_first_display_list && l == values;
+		line_column = get_default_field_line_column (is_first_item);
 	}
 
-	process_special_values (val, size_is, &disp_attrs);
-	emit_field_display (val, line_column, fgc, bgc, scroll, size_is,
+	process_special_values (last_elt, size_is, &disp_attrs);
+	emit_field_display (last_elt, line_column, fgc, bgc, scroll, size_is,
 			    disp_attrs);
 }
 
