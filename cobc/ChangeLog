@@ -1,4 +1,11 @@
 
+2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: FR #127 extracted (cobc_abort_msg) from (cobc_abort_terminate)
+	  and using it in (cobc_sig_handler), too
+	* cobc.c: minimized (cob_reg_sighnd) and register libcob's signal handler
+	  instead of self-registering one
+
 2016-07-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (program_type_clause): marked EXTERNAL as pending.

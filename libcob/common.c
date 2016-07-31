@@ -544,7 +544,7 @@ cob_sig_handler (int sig)
 
 	cob_sig_handler_ex(sig);
 }
-#endif
+#endif /* HAVE_SIGNAL_H */
 
 static void
 cob_set_signal (void)
@@ -2306,6 +2306,9 @@ cob_real_put_sign (cob_field *f, const int sign)
 void
 cob_reg_sighnd	(void (*sighnd) (int))
 {
+	if (!cob_initialized) {
+		cob_set_signal ();
+	}
 	cob_ext_sighdl = sighnd;
 }
 

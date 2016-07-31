@@ -1,4 +1,8 @@
 
+2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_reg_sighnd): call cob_set_signal() if not done already
+
 2016-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* coblocal.h: changed types in config_tbl to unsigned (compiler warnings)

@@ -223,10 +223,6 @@ struct cb_exception cb_exception_table[] = {
 
 /* Local variables */
 
-#if	defined(HAVE_SIGNAL_H) && defined(HAVE_SIG_ATOMIC_T)
-static volatile sig_atomic_t	sig_is_handled = 0;
-#endif
-
 static struct cb_define_struct	*cb_define_list = NULL;
 
 static struct cobc_mem_struct	*cobc_mainmem_base = NULL;
@@ -1523,8 +1519,8 @@ cobc_terminate (const char *str)
 	exit (1);
 }
 
-DECLNORET static void COB_A_NORETURN
-cobc_abort_terminate (void)
+static void
+cobc_abort_msg (void)
 {
 	if (cb_source_file) {
 		cobc_err_msg (_("aborting compile of %s at line %d"),
@@ -1532,51 +1528,23 @@ cobc_abort_terminate (void)
 	} else {
 		cobc_err_msg (_("aborting"));
 	}
+}
+
+DECLNORET static void COB_A_NORETURN
+cobc_abort_terminate (void)
+{
+	cobc_abort_msg ();
 	cobc_clean_up (99);
 	exit (99);
 }
 
-#ifdef	HAVE_SIGNAL_H
-DECLNORET static void COB_A_NORETURN
+static void
 cobc_sig_handler (int sig)
 {
-#if	defined(HAVE_SIGACTION) && !defined(SA_RESETHAND)
-	struct sigaction	sa;
-#endif
-
-#ifdef	HAVE_SIG_ATOMIC_T
-	if (sig_is_handled) {
-#ifdef	HAVE_RAISE
-		raise (sig);
-#else
-		kill (cob_sys_getpid (), sig);
-#endif
-		exit (sig);
-	}
-	sig_is_handled = 1;
-#endif
-
-#ifdef	HAVE_SIGACTION
-#ifndef	SA_RESETHAND
-	memset (&sa, 0, sizeof(sa));
-	sa.sa_handler = SIG_DFL;
-	(void)sigemptyset (&sa.sa_mask);
-	(void)sigaction (sig, &sa, NULL);
-#endif
-#else
-	(void)signal (sig, SIG_DFL);
-#endif
-
+	cobc_abort_msg ();
 	save_temps = 0;
 	cobc_clean_up (1);
-#ifdef	HAVE_RAISE
-	raise (sig);
-#else
-	kill (cob_sys_getpid (), sig);
-#endif
-	exit (sig);
 }
-#endif
 
 /* Command line */
 
@@ -5618,15 +5586,10 @@ main (int argc, char **argv)
 	int			i;
 	char			month[32];
 
-#if	defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION)
-	struct sigaction	sa;
-	struct sigaction	osa;
-#endif
 #ifdef	ENABLE_NLS
 	struct stat	localest;
 	const char* localedir;
 #endif
-
 
 	file_list = NULL;
 	cb_listing_file = NULL;
@@ -5636,94 +5599,8 @@ main (int argc, char **argv)
 	yyin = NULL;
 	yyout = NULL;
 
-#ifdef	HAVE_SIGNAL_H
 
-#ifdef	HAVE_SIGACTION
-	memset (&sa, 0, sizeof(sa));
-	sa.sa_handler = cobc_sig_handler;
-#ifdef	SA_RESETHAND
-	sa.sa_flags = SA_RESETHAND;
-#else
-	sa.sa_flags = 0;
-#endif
-#ifdef	SA_NOCLDSTOP
-	sa.sa_flags |= SA_NOCLDSTOP;
-#endif
-#ifdef	SIGINT
-	(void)sigaction (SIGINT, NULL, &osa);
-	if (osa.sa_handler != SIG_IGN) {
-		(void)sigemptyset (&sa.sa_mask);
-		(void)sigaction (SIGINT, &sa, NULL);
-	}
-#endif
-#ifdef	SIGHUP
-	(void)sigaction (SIGHUP, NULL, &osa);
-	if (osa.sa_handler != SIG_IGN) {
-		(void)sigemptyset (&sa.sa_mask);
-		(void)sigaction (SIGHUP, &sa, NULL);
-	}
-#endif
-#ifdef	SIGQUIT
-	(void)sigaction (SIGQUIT, NULL, &osa);
-	if (osa.sa_handler != SIG_IGN) {
-		(void)sigemptyset (&sa.sa_mask);
-		(void)sigaction (SIGQUIT, &sa, NULL);
-	}
-#endif
-#ifdef	SIGTERM
-	(void)sigaction (SIGTERM, NULL, &osa);
-	if (osa.sa_handler != SIG_IGN) {
-		(void)sigemptyset (&sa.sa_mask);
-		(void)sigaction (SIGTERM, &sa, NULL);
-	}
-#endif
-#ifdef	SIGPIPE
-	(void)sigaction (SIGPIPE, NULL, &osa);
-	if (osa.sa_handler != SIG_IGN) {
-		(void)sigemptyset (&sa.sa_mask);
-		(void)sigaction (SIGPIPE, &sa, NULL);
-	}
-#endif
-#ifdef	SIGSEGV
-	/* Take direct control of segementation violation */
-	(void)sigemptyset (&sa.sa_mask);
-	(void)sigaction (SIGSEGV, &sa, NULL);
-#endif
-
-#else
-
-#ifdef	SIGINT
-	if (signal (SIGINT, SIG_IGN) != SIG_IGN) {
-		(void)signal (SIGINT, cobc_sig_handler);
-	}
-#endif
-#ifdef	SIGHUP
-	if (signal (SIGHUP, SIG_IGN) != SIG_IGN) {
-		(void)signal (SIGHUP, cobc_sig_handler);
-	}
-#endif
-#ifdef	SIGQUIT
-	if (signal (SIGQUIT, SIG_IGN) != SIG_IGN) {
-		(void)signal (SIGQUIT, cobc_sig_handler);
-	}
-#endif
-#ifdef	SIGTERM
-	if (signal (SIGTERM, SIG_IGN) != SIG_IGN) {
-		(void)signal (SIGTERM, cobc_sig_handler);
-	}
-#endif
-#ifdef	SIGPIPE
-	if (signal (SIGPIPE, SIG_IGN) != SIG_IGN) {
-		(void)signal (SIGPIPE, cobc_sig_handler);
-	}
-#endif
-	/* Take direct control of segmentation violation */
-#ifdef	SIGSEGV
-	(void)signal (SIGSEGV, cobc_sig_handler);
-#endif
-#endif
-
-#endif
+	cob_reg_sighnd(&cobc_sig_handler);
 
 	cb_saveargc = argc;
 	cb_saveargv = argv;
