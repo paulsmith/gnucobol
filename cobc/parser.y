@@ -10157,9 +10157,13 @@ _accept_exception_phrases:
 
 _accp_on_exception:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | accp_on_exception
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 accp_on_exception:
@@ -10207,9 +10211,13 @@ _display_exception_phrases:
 
 _disp_on_exception:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | disp_on_exception
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 disp_on_exception:
@@ -10248,9 +10256,13 @@ on_size_error_phrases:
 
 _on_size_error:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | on_size_error
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 on_size_error:
@@ -10289,9 +10301,13 @@ _on_overflow_phrases:
 
 _on_overflow:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | on_overflow
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 on_overflow:
@@ -10321,17 +10337,31 @@ not_on_overflow:
 return_at_end:
   at_end_clause _not_at_end_clause
 | not_at_end_clause at_end_clause
+  {
+	cb_verify (cb_not_exception_before_exception, "NOT AT END before AT END");
+  }
 ;
 
 at_end:
   %prec SHIFT_PREFER
   at_end_clause _not_at_end_clause
 | not_at_end_clause _at_end_clause
+  {
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception, "NOT AT END before AT END");
+	}
+  }
 ;
 
 _at_end_clause:
   %prec SHIFT_PREFER
+  {
+	$$ = NULL;
+  }
 | at_end_clause
+  {
+	$$ = cb_int1;
+  }
 ;
 
 at_end_clause:
@@ -10369,9 +10399,13 @@ at_eop_clauses:
 
 _at_eop_clause:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | at_eop_clause
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 at_eop_clause:
@@ -10414,9 +10448,13 @@ invalid_key_phrases:
 
 _invalid_key_sentence:
   %prec SHIFT_PREFER
-	{$$ = NULL;}
+  {
+	$$ = NULL;
+  }
 | invalid_key_sentence
-	{$$ = cb_int1;}
+  {
+	$$ = cb_int1;
+  }
 ;
 
 invalid_key_sentence:
