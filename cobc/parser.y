@@ -2247,6 +2247,9 @@ program_type_clause:
   }
 | init_or_recurse
 | EXTERNAL
+  {
+	CB_PENDING (_("CALL prototypes"));
+  }
 ;
 
 init_or_recurse_and_common:

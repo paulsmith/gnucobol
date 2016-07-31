@@ -1,4 +1,8 @@
 
+2016-07-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (program_type_clause): marked EXTERNAL as pending.
+
 2016-07-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (return_at_end): allow NOT AT END before AT END (bugs #242).
