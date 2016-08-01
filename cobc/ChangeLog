@@ -1,4 +1,9 @@
 
+2016-08-01  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (renames_entry): fixed bug #289 where PICTURE of renamed
+	  field was not copied to the RENAMES item.
+
 2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: FR #127 extracted (cobc_abort_msg) from (cobc_abort_terminate)

@@ -4397,6 +4397,9 @@ renames_entry:
 	if ($5) {
 		error_if_invalid_level_for_renames ($5);
 		current_field->rename_thru = CB_FIELD (cb_ref ($5));
+	} else {
+		/* If there is no THRU clause, RENAMES acts like REDEFINES. */
+		current_field->pic = current_field->redefines->pic;
 	}
 
 	cb_validate_renames_item (current_field);
