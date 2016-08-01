@@ -1,3 +1,8 @@
+2016-08-01  Dave Pitts <dpitts@cozx.com>
+
+        * cobc.c, error.c pplex.l: Changes to change fixed sized character
+	  arrays to pointers. Allocate strings based on length.
+	* cobc.h: Moved structure declatations and added comments.
 
 2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

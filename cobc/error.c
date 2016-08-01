@@ -99,8 +99,8 @@ print_error (const char *file, int line, const char *prefix,
 		err = cobc_malloc (sizeof (struct list_error));
 		memset (err, 0, sizeof (struct list_error));
 		err->line = line;
-		strcpy (err->prefix, prefix);
-		strcpy (err->msg, errmsg);
+		err->prefix = cobc_strdup (prefix);
+		err->msg = cobc_strdup (errmsg);
 		cfile = cb_current_file;
 		if (strcmp (cfile->name, file)) {
 			cfile = cfile->copy_head;

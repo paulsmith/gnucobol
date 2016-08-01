@@ -234,6 +234,66 @@ struct cobc_mem_struct {
 	size_t			memlen;
 };
 
+/* Listing structures and externals */
+
+#define CB_MAX_LINES	55
+
+#define CB_LINE_LENGTH 1024
+#define CB_READ_AHEAD 32
+
+#define CB_INDICATOR	6
+#define CB_MARGIN_A	7
+#define CB_MARGIN_B	11
+#define CB_SEQUENCE	72
+
+#define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
+#define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
+#define IS_COMMENT_LINE(line) \
+   ((line)[CB_INDICATOR] == '*' || (line)[CB_INDICATOR] == '/')
+
+/* List of error messages */
+struct list_error {
+	struct list_error	*next;
+	int			line;		/* Line number for error */
+	char			*prefix;	/* Error prefix */
+	char			*msg;		/* Error Message text */
+};
+
+/* List of REPLACE text blocks */
+struct list_replace {
+	struct list_replace	*next;
+	int			firstline;	/* First line for replace */
+	int			lastline;	/* Last line for replace */
+	int			lead_trail;	/* LEADING/TRAILING flag */
+	char			*from;		/* Old (from) text */
+	char			*to;		/* New (to) text */
+};
+
+/* List of skipped lines (conditional compilation) */
+struct list_skip {
+	struct list_skip	*next;
+	int			skipline;	/* line number of skipped line */
+};
+
+/* Listing file control structure */
+struct list_files {
+	struct list_files	*next;
+	struct list_files	*copy_head;	/* COPY book list head */
+	struct list_files	*copy_tail;	/* COPY book list tail */
+	struct list_error	*err_head;	/* Error message list head */
+	struct list_error	*err_tail;	/* Error message list tail */
+	struct list_replace	*replace_head;	/* REPLACE list head */
+	struct list_replace	*replace_tail;	/* REPLACE list tail */
+	struct list_skip	*skip_head;	/* Skip list head */
+	struct list_skip	*skip_tail;	/* Skip list tail */
+	int 			copy_line;	/* Line start for copy book */
+	int 			listing_on;	/* Listing flag for this file */
+	char			*name;		/* Name of this file */
+};
+
+extern struct list_files	*cb_listing_files;
+extern struct list_files	*cb_current_file;
+
 
 extern int			cb_source_format;
 
@@ -462,60 +522,4 @@ extern struct reserved_word_list	*cobc_user_res_list;
 extern void		remove_reserved_word (const char *);
 extern void		add_reserved_word (const char *, const char *,
 					   const int);
-
-/* Listing structures and externals */
-
-#define CB_MAX_LINES	55
-
-#define CB_LINE_LENGTH 1024
-#define CB_READ_AHEAD 32
-
-#define CB_INDICATOR	6
-#define CB_MARGIN_A	7
-#define CB_MARGIN_B	11
-#define CB_SEQUENCE	72
-
-#define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
-#define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
-#define IS_COMMENT_LINE(line) \
-   ((line)[CB_INDICATOR] == '*' || (line)[CB_INDICATOR] == '/')
-
-struct list_error {
-	struct list_error	*next;
-	int			line;
-	char			prefix[CB_LINE_LENGTH + 2];
-	char			msg[CB_LINE_LENGTH + 2];
-};
-struct list_replace {
-	struct list_replace	*next;
-	int			firstline;
-	int			lastline;
-	int			lead_trail;
-	char			from[CB_LINE_LENGTH + 2];
-	char			to[CB_LINE_LENGTH + 2];
-};
-
-struct list_skip {
-	struct list_skip	*next;
-	int			skipline;
-};
-
-struct list_files {
-	struct list_files	*next;
-	struct list_files	*copy_head;
-	struct list_files	*copy_tail;
-	struct list_error	*err_head;
-	struct list_error	*err_tail;
-	struct list_replace	*replace_head;
-	struct list_replace	*replace_tail;
-	struct list_skip	*skip_head;
-	struct list_skip	*skip_tail;
-	int 			copy_line;
-	int 			listing_on;
-	char			name[CB_LINE_LENGTH + 2];
-};
-
-extern struct list_files	*cb_listing_files;
-extern struct list_files	*cb_current_file;
-
 #endif /* CB_COBC_H */

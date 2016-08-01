@@ -811,7 +811,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		return -1;
 	}
 
-	strcpy (cb_current_file->name, name);
+	cb_current_file->name = cobc_strdup (name);
 
 	/* Check for BOM - *not* for input from stdin as rewind() clears the input
 	  buffer if used on stdin and output in console has normally no BOM at all */
@@ -1059,6 +1059,7 @@ set_print_replace_list (struct cb_replace_list *list)
 	struct cb_replace_list		*r;
 	const struct cb_text_list	*l;
 	struct list_replace		*repl;
+	int 				length;
 	
 	if (cb_src_list_file) {
 		for (r = list; r; r = r->next) {
@@ -1068,9 +1069,20 @@ set_print_replace_list (struct cb_replace_list *list)
 			repl->lead_trail = r->lead_trail;
 			repl->lastline = cb_source_line;
 			
+			for (l = r->old_text, length = 0; l; l = l->next) {
+				length += strlen (l->text);
+			}
+			repl->from = cobc_malloc (length + 2);
+			memset (repl->from, 0, length + 2);
 			for (l = r->old_text; l; l = l->next) {
 				strcat (repl->from, l->text);
 			}
+
+			for (l = r->new_text, length = 0; l; l = l->next) {
+				length += strlen (l->text);
+			}
+			repl->to = cobc_malloc (length + 2);
+			memset (repl->to, 0, length + 2);
 			for (l = r->new_text; l; l = l->next) {
 				strcat (repl->to, l->text);
 			}

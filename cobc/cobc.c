@@ -4194,6 +4194,13 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	multi_token;
 	int	match = 0;
 	int	eof = 0;
+	int	submatch = 0;
+	int	seccount = 0;
+	int	overread = 0;
+	int	tokmatch = 0;
+	int	subword = 0;
+	int	ttix, ttlen, ftlen;
+	char	lterm[2];
 	char	fterm[2];
 	char	ftoken[CB_LINE_LENGTH + 2];
 	char	tterm[2];
@@ -4236,10 +4243,6 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		  match is found, output the line to newline with the match
 		  replaced.
 		*/
-
-		int submatch = 0;
-		int seccount = 0;
-		char lterm[2];
 
 		strcpy (frm_line, rfp);
 		fp = get_next_token (frm_line, ftoken, fterm);
@@ -4300,7 +4303,6 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			  more.
 			*/
 
-			int overread = 0;
 #ifdef DEBUG_REPLACE
 			fprintf (stdout, "   submatch = TRUE\n");
 #endif
@@ -4356,10 +4358,6 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			goto next_line;
 		}
 	} else {
-		int tokmatch = 0;
-		int subword = 0;
-		int ttix, ttlen, ftlen;
-
 		strcpy (frm_line, rfp);
 		fp = get_next_token (frm_line, ftoken, fterm);
 		if (ftoken[0] == ':' || ftoken[0] == '(') {
