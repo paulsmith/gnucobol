@@ -1,4 +1,8 @@
 
+2016-08-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: revised all message strings
+
 2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* general: removed project files and references to Visual C < 2005
@@ -57,12 +61,6 @@
 	* general: removed "Experimental" marker from CISAM/DISAM/VBISAM
 	* configure.ac: define WITH_CURSES for printing library for screenio
 
-2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
-
-	* general: message strings revised (not all done yet);
-	  similar message strings combined (23 translatable strings removed);
-	  removed line breaks from translatable strings
-
 2015-03-06  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* m4/gettext.m4: Upgrade to gettext-0.19.4.
@@ -74,6 +72,14 @@
 	* m4/po.m4: Upgrade to gettext-0.19.4.
 	* m4/progtest.m4: Upgrade to gettext-0.19.4.
 	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.4.
+
+2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: revised message strings (not all done yet);
+	  similar message strings combined (23 translatable strings removed);
+	  removed line breaks from translatable strings
+	* configure.ac: don't disable NLS automatically for CYGWIN
+	  (--disable-nls can be used by the user instead)
 
 2014-12-04  Edward Hart <edward-h@users.sf.net>
 

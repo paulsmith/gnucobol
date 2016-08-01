@@ -22,7 +22,7 @@
 
 
 AT_SETUP([CALL BY CONTENT binary and literal])
-AT_KEYWORDS([extensions literals]) 
+AT_KEYWORDS([extensions literals])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
@@ -781,18 +781,18 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
-[prog.cob: In paragraph 'S-03':
-prog.cob: 36: Warning: MOVE of non-integer to alphanumeric
-prog.cob: In paragraph 'S-10':
-prog.cob: 41: Warning: MOVE of non-integer to alphanumeric
-prog.cob: In paragraph 'S-20':
-prog.cob: 46: Warning: MOVE of non-integer to alphanumeric
-prog.cob: In paragraph 'S-30':
-prog.cob: 51: Warning: MOVE of non-integer to alphanumeric
-prog.cob: In paragraph 'S-40':
-prog.cob: 56: Warning: MOVE of non-integer to alphanumeric
-prog.cob: In paragraph 'S-50':
-prog.cob: 61: Warning: MOVE of non-integer to alphanumeric
+[prog.cob: in paragraph 'S-03':
+prog.cob: 36: warning: MOVE of non-integer to alphanumeric
+prog.cob: in paragraph 'S-10':
+prog.cob: 41: warning: MOVE of non-integer to alphanumeric
+prog.cob: in paragraph 'S-20':
+prog.cob: 46: warning: MOVE of non-integer to alphanumeric
+prog.cob: in paragraph 'S-30':
+prog.cob: 51: warning: MOVE of non-integer to alphanumeric
+prog.cob: in paragraph 'S-40':
+prog.cob: 56: warning: MOVE of non-integer to alphanumeric
+prog.cob: in paragraph 'S-50':
+prog.cob: 61: warning: MOVE of non-integer to alphanumeric
 ])
 AT_CHECK([./prog], [0], [12891289128912891289128912891289])
 
@@ -989,7 +989,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 8: Warning: BY CONTENT assumed for alphanumeric item
+[prog.cob: 8: warning: BY CONTENT assumed for alphanumeric item
 ])
 AT_CHECK([./prog], [0], [])
 
@@ -1085,7 +1085,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -cb_conf=assign-clause:mf prog.cob], [0], [],
-[prog.cob: 12: Warning: 'FILENAME' will be implicitly defined
+[prog.cob: 12: warning: 'FILENAME' will be implicitly defined
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -1112,7 +1112,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -cb_conf=assign-clause:ibm prog.cob], [0], [],
-[prog.cob: 7: Warning: ASSIGN interpreted as FILENAME
+[prog.cob: 7: warning: ASSIGN interpreted as FILENAME
 ])
 AT_CHECK([./prog], [0], [], [])
 AT_CHECK([test -f FILENAME], [0], [], [])
@@ -2334,12 +2334,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [],
-[prog.cob: 12: Warning: Size of 'XMAIN0502' larger than size of 'XMAIN0501'
-prog.cob: 21: Warning: Size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
-prog.cob: 23: Warning: Size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'
-prog.cob: 25: Warning: Size of 'FIRST-VARIANT-C' larger than size of 'FIRST-DATA'
-prog.cob: 31: Warning: Size of 'SECOND-VARIANT-A' larger than size of 'SECOND-HEADER'
-prog.cob: 33: Warning: Size of 'SECOND-VARIANT-B' larger than size of 'SECOND-HEADER'
+[prog.cob: 12: warning: size of 'XMAIN0502' larger than size of 'XMAIN0501'
+prog.cob: 21: warning: size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
+prog.cob: 23: warning: size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'
+prog.cob: 25: warning: size of 'FIRST-VARIANT-C' larger than size of 'FIRST-DATA'
+prog.cob: 31: warning: size of 'SECOND-VARIANT-A' larger than size of 'SECOND-HEADER'
+prog.cob: 33: warning: size of 'SECOND-VARIANT-B' larger than size of 'SECOND-HEADER'
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -2887,23 +2887,23 @@ AT_DATA([prog.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "jkl"     TO SO.
-            
+
             MOVE "version" TO ONAME     (1).
             MOVE 0         TO HAS-VALUE (1).
             MOVE "v"       TO VAL       (1).
-            
+
             MOVE "verbose" TO ONAME     (2).
             MOVE 0         TO HAS-VALUE (2).
             MOVE "V"       TO VAL       (2).
-        
+
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
-               CALL 'CBL_OC_GETOPT' USING 
+               CALL 'CBL_OC_GETOPT' USING
                   BY REFERENCE SO LO LONGIND
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
@@ -2973,17 +2973,17 @@ AT_DATA([prog2.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "version" TO ONAME     (1).
             MOVE 0         TO HAS-VALUE (1).
             MOVE "v"       TO VAL       (1).
-            
+
             MOVE "verbose" TO ONAME     (2).
             MOVE 0         TO HAS-VALUE (2).
             MOVE "V"       TO VAL       (2).
-        
+
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
@@ -3041,7 +3041,7 @@ AT_DATA([prog3.cob], [
             01 RETURN-CHAR PIC X(4).
             01 OPT-VAL PIC X(10).
             01 RET-DISP PIC S9 VALUE 0.
-            
+
             01 COUNTER PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "j:k::l"  TO SO.
@@ -3231,12 +3231,12 @@ AT_DATA([prog5.cob], [
 
             01 FLAG-VAL PIC 9.
         PROCEDURE DIVISION.
-            MOVE "super-long-option-with-more-than-25-bytes" 
+            MOVE "super-long-option-with-more-than-25-bytes"
               TO ONAME(1).
             MOVE 0   TO HAS-VALUE(1).
             MOVE '1' TO VAL(1).
 
-            MOVE "stupid-long-option-with-more-than-25-bytes" 
+            MOVE "stupid-long-option-with-more-than-25-bytes"
               TO ONAME(2).
             MOVE 0   TO HAS-VALUE(2).
             MOVE '0' TO VAL(2).
@@ -3257,7 +3257,7 @@ AT_DATA([prog5.cob], [
                      CONTINUE
 
       *>       MOVE RETURN-CODE TO RET-DISP
-                
+
       *>       IF COUNTER = 0 AND RETURN-CODE NOT = 1 THEN
       *>          DISPLAY 'RETURN VALUE: ' RET-DISP ' ' FLAG-VAL
       *>       END-IF
@@ -3272,7 +3272,7 @@ AT_DATA([prog5.cob], [
             END-PERFORM.
 
             MOVE 0 TO RETURN-CODE.
-            
+
             IF COUNTER NOT = 3 THEN
                MOVE RETURN-CODE TO RET-DISP
                DISPLAY 'CBL_OC_GETOPT returned -1 too early: ' COUNTER
@@ -3285,16 +3285,18 @@ AT_DATA([prog5.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog --version --verbose -jkl], [0], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
-AT_CHECK([$COBCRUN prog2 --ver --vers], [0], [], [prog2: option '--ver' is ambiguous; possibilities: '--version' '--verbose'
+AT_CHECK([$COBCRUN prog2 --ver --vers], [0], [],
+[prog2: option '--ver' is ambiguous; possibilities: '--version' '--verbose'
 ])
 AT_CHECK([$COMPILE prog3.cob], [0], [], [])
 AT_CHECK([./prog3 --version=lang --verbose=k --usage -j 5 -k6 -l], [0], [])
 AT_CHECK([$COMPILE prog4.cob --free], [0], [], [])
 AT_CHECK([./prog4 --static --dynamic --usage=boringandtoolongtext], [0], [])
-# Again a long and system specific error message which we ignore. 
+# Again a long and system specific error message which we ignore.
 # Return code 1 is sufficient as proof of hard return (as wanted).
 AT_CHECK([$COMPILE prog5.cob], [0], [], [])
-AT_CHECK([./prog5 --static], [1], [], [prog5.cob: 37: libcob: Call to CBL_OC_GETOPT with wrong longoption size.
+AT_CHECK([./prog5 --static], [1], [],
+[libcob: prog5.cob: 37: Call to CBL_OC_GETOPT with wrong longoption size.
 ])
 
 AT_CLEANUP
@@ -3467,22 +3469,22 @@ AT_DATA([prog.cob], [
         PROCEDURE DIVISION.
         CALL 'CBL_CREATE_DIR' USING DIR END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error creating dir ...' END-DISPLAY
+            DISPLAY 'error creating dir ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_CHANGE_DIR' USING DIR END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error changing dir ...' END-DISPLAY
+            DISPLAY 'error changing dir ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_CHANGE_DIR' USING '..' END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error changing dir up ...' END-DISPLAY
+            DISPLAY 'error changing dir up ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_DELETE_DIR' USING DIR END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error deleting dir' END-DISPLAY
+            DISPLAY 'error deleting dir' END-DISPLAY
         END-IF
 
         STOP RUN.
@@ -3523,7 +3525,7 @@ AT_DATA([prog.cob], [
         FNAME ACCESS-MODE 0 0 HANDLE
         END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error creating file ...' END-DISPLAY
+            DISPLAY 'error creating file ...' END-DISPLAY
         END-IF
 
         MOVE 'TestText.ABCD' TO WRITE-BUFFER.
@@ -3534,12 +3536,12 @@ AT_DATA([prog.cob], [
         HANDLE OFFSET NBYTES '0' WRITE-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error writing file ...' END-DISPLAY
+            DISPLAY 'error writing file ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_FLUSH_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error flushing file ...' END-DISPLAY
+            DISPLAY 'error flushing file ...' END-DISPLAY
         END-IF
 
         STOP RUN.
@@ -3563,7 +3565,7 @@ AT_DATA([prog2.cob], [
         FNAME 1 0 0 HANDLE
         END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error opening file ...' END-DISPLAY
+            DISPLAY 'error opening file ...' END-DISPLAY
         END-IF
 
         MOVE SPACES TO READ-BUFFER.
@@ -3574,7 +3576,7 @@ AT_DATA([prog2.cob], [
         HANDLE OFFSET NBYTES 0 READ-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error reading file ...' END-DISPLAY
+            DISPLAY 'error reading file ...' END-DISPLAY
         END-IF
         IF READ-BUFFER NOT = 'stText.'
             DISPLAY 'Wrong readbuffer ...' END-DISPLAY
@@ -3582,17 +3584,17 @@ AT_DATA([prog2.cob], [
 
         CALL 'CBL_CLOSE_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error closing file ...' END-DISPLAY
+            DISPLAY 'error closing file ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_RENAME_FILE' USING FNAME 'foo.txt' END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error renaming file ...' END-DISPLAY
+            DISPLAY 'error renaming file ...' END-DISPLAY
         END-IF
 
         CALL 'CBL_DELETE_FILE' USING 'foo.txt' END-CALL
         IF RETURN-CODE NOT = 0
-            DISPLAY 'Error deleting file ...' END-DISPLAY
+            DISPLAY 'error deleting file ...' END-DISPLAY
         END-IF
 
         STOP RUN.

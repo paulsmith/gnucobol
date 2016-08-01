@@ -102,12 +102,12 @@ cobcrun_print_usage (char * prog)
 {
 	puts (_("COBOL driver program for GnuCOBOL modules"));
 	putchar ('\n');
-	printf (_("usage: %s [options] PROGRAM [parameter ...]"), prog);
+	printf (_("Usage: %s [options] PROGRAM [parameter ...]"), prog);
 	putchar ('\n');
 	printf (_("  or:  %s options"), prog);
 	putchar ('\n');
 	putchar ('\n');
-	puts (_("options:"));
+	puts (_("Options:"));
 	puts (_("  -h, -help                      display this help and exit"));
 	puts (_("  -V, -version                   display cobcrun and runtime version and exit"));
 	puts (_("  -i, -info                      display runtime information (build/environment)"));
@@ -199,7 +199,8 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
 		if (envop_return) {
-			fprintf (stderr, "Problem with setenv COB_LIBRARY_PATH: %d\n", errno);
+			fprintf (stderr, _("problem with setenv %s: %d"), "COB_LIBRARY_PATH", errno);
+			fputc ('\n', stderr);
 			return 1;
 		}
 #else
@@ -223,7 +224,8 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
 		if (envop_return) {
-			fprintf (stderr, "Problem with setenv COB_PRE_LOAD: %d\n", errno);
+			fprintf (stderr, _("problem with setenv %s: %d"), "COB_PRE_LOAD", errno);
+			fputc ('\n', stderr);
 			return 1;
 		}
 #else

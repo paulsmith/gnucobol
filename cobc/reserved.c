@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
 
    This file is part of GnuCOBOL.
 
@@ -2553,16 +2553,16 @@ res_get_feature (const enum cb_system_name_category category)
 
 	switch (category) {
 	case CB_DEVICE_NAME:
-		s = _("Device name");
+		s = _("device name");
 		break;
 	case CB_SWITCH_NAME:
-		s = _("Switch name");
+		s = _("switch name");
 		break;
 	case CB_FEATURE_NAME:
-		s = _("Feature name");
+		s = _("feature name");
 		break;
 	default:
-		s = _("Unknown");
+		s = _("unknown");
 		break;
 	}
 	return s;
@@ -2647,7 +2647,8 @@ initialize_alias_for (const char *alias_for,
 	const size_t	size = strlen (alias_for);
 
 	if (has_context_sensitive_indicator (alias_for, size)) {
-		configuration_warning (fname, line, _("Ignored asterisk at end of alias target"));
+		configuration_warning (fname, line,
+			_("ignored asterisk at end of alias target"));
 	}
 	allocate_str_removing_asterisk (alias_for, size, &reserved->alias_for);
 }
@@ -2755,7 +2756,7 @@ get_user_specified_reserved_word (struct reserved_word_list user_reserved)
 			cobc_reserved.token = p->token;
 		} else {
 		        configuration_error (NULL, 0, 1,
-					     _("Alias target '%s' is not a default reserved word"),
+					     _("alias target '%s' is not a default reserved word"),
 					     user_reserved.alias_for);
 		}
 	}

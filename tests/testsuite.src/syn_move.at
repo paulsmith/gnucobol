@@ -51,8 +51,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 9: Error: Invalid MOVE statement
-prog.cob: 10: Error: Invalid MOVE statement
+[prog.cob: 9: error: invalid MOVE statement
+prog.cob: 10: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -75,7 +75,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: Invalid MOVE statement
+[prog.cob: 8: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -110,8 +110,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 16: Error: Invalid MOVE statement
-prog.cob: 17: Error: Invalid MOVE statement
+[prog.cob: 16: error: invalid MOVE statement
+prog.cob: 17: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -167,8 +167,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 16: Error: Invalid MOVE statement
-prog.cob: 17: Error: Invalid MOVE statement
+[prog.cob: 16: error: invalid MOVE statement
+prog.cob: 17: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -197,7 +197,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 13: Error: Invalid MOVE statement
+[prog.cob: 13: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -226,9 +226,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 13: Error: Invalid MOVE statement
-prog.cob: 14: Error: Invalid MOVE statement
-prog.cob: 15: Error: Invalid MOVE statement
+[prog.cob: 13: error: invalid MOVE statement
+prog.cob: 14: error: invalid MOVE statement
+prog.cob: 15: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -257,7 +257,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 13: Error: Invalid MOVE statement
+[prog.cob: 13: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
@@ -289,10 +289,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 11: Error: 'X' is not group name
-prog.cob: 12: Error: 'X' is not group name
-prog.cob: 13: Error: 'G-1 (1:1)' is not group name
-prog.cob: 14: Error: 'G-2 (1:1)' is not group name
+[prog.cob: 11: error: 'X' is not a group name
+prog.cob: 12: error: 'X' is not a group name
+prog.cob: 13: error: 'G-1 (1:1)' is not a group name
+prog.cob: 14: error: 'G-2 (1:1)' is not a group name
 ])
 
 AT_CLEANUP
@@ -315,7 +315,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 11: Warning: No CORRESPONDING items found
+[prog.cob: 11: warning: no CORRESPONDING items found
 ])
 
 AT_CLEANUP
@@ -341,7 +341,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 6: Error: PICTURE clause required for 'INVALID-ITEM'
+[prog.cob: 6: error: PICTURE clause required for 'INVALID-ITEM'
 ])
 
 AT_CLEANUP
@@ -386,13 +386,14 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 18: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 21: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 23: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 24: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 27: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 29: Warning: Overlapping MOVE may produce unpredictable results
-prog.cob: 30: Warning: Overlapping MOVE may produce unpredictable results
+AT_CHECK([$COMPILE prog.cob], [0], [], 
+[prog.cob: 18: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 21: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 23: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 24: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 27: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 29: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 30: warning: overlapping MOVE may produce unpredictable results
 ])
 AT_CHECK([./prog], [0], [], [])
 

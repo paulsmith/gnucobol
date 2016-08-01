@@ -121,7 +121,7 @@ invalid_value (const char *fname, const int line, const char *name, const char *
 			   const char *str, const int max, const int min)
 {
 	configuration_error (fname, line, 0,
-		_("Invalid value '%s' for configuration tag '%s'"), val, name);
+		_("invalid value '%s' for configuration tag '%s'"), val, name);
 	if (str) {
 		configuration_error (fname, line, 1,
 			_("should be one of the following values: %s"), str);
@@ -138,7 +138,7 @@ static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
 	configuration_error (fname, line, 1, 
-		_("Unsupported value '%s' for configuration tag '%s'"), val, name);
+		_("unsupported value '%s' for configuration tag '%s'"), val, name);
 }
 
 /* Global functions */
@@ -167,7 +167,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		for (j=strlen(buff); buff[j-1] == '\r' || buff[j-1] == '\n'; )	/* Remove CR LF */
 			buff[--j] = 0;
 		configuration_error (fname, line, 1,
-			_("Invalid configuration tag '%s'"), buff);
+			_("invalid configuration tag '%s'"), buff);
 		return -1;
 	}
 	*s = 0;
@@ -179,7 +179,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		}
 	}
 	if (i == CB_CONFIG_SIZE) {
-		configuration_error (fname, line, 1, _("Unknown configuration tag '%s'"), buff);
+		configuration_error (fname, line, 1, _("unknown configuration tag '%s'"), buff);
 		return -1;
 	}
 
@@ -340,7 +340,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			}
 			break;
 		default:
-			configuration_error (fname, line, 1, _("Invalid type for '%s'"), name);
+			configuration_error (fname, line, 1, _("invalid type for '%s'"), name);
 			return -1;
 	}
 	return 0;
@@ -396,7 +396,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	c = cc = conf_includes;
 	while (c != NULL) {
 		if (c->name /* <- silence warnings */ && strcmp(c->name, conf_file) == 0) {
-			configuration_error (conf_file, 0, 1, _("Recursive inclusion"));
+			configuration_error (conf_file, 0, 1, _("recursive inclusion"));
 			return -2;
 		}
 		cc = c;
@@ -451,7 +451,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 			if (sub_ret < 0) {
 				ret = -1;
 				configuration_error (conf_file, line, 1,
-						    _("Configuration file was included here"));
+						    _("configuration file was included here"));
 				break;
 			}
 		}
@@ -481,7 +481,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 	/* Warn if we drop the configuration read already */
 	if (unlikely(cb_config_name != NULL)) {
 		configuration_warning (fname, 0,
-			_("The previous loaded configuration '%s' will be discarded"), 
+			_("The previous loaded configuration '%s' will be discarded."), 
 			cb_config_name);
 	}
 
@@ -507,7 +507,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 			if (config_table[i].val == NULL) {
 				/* as there are likely more than one definition missing group it */
 				if (ret == 0) {
-					configuration_error (fname, 0, 1, _("Missing definitions:"));
+					configuration_error (fname, 0, 1, _("missing definitions:"));
 				}
 				configuration_error (fname, 0, 1, _("\tNo definition of '%s'"),
 						config_table[i].name);

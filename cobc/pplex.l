@@ -257,13 +257,13 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
 ^[ ]*">>"[ ]?"LEAP-SECOND"	{
 	if (warningopt) {
-		cb_plex_warning (newline_count, _("Ignoring LEAP-SECOND directive"));
+		cb_plex_warning (newline_count, _("ignoring LEAP-SECOND directive"));
 	}
 	skip_to_eol ();
 }
 
 ^[ ]*">>"[ ]*\n		{
-	cb_plex_warning (newline_count, _("Ignoring empty directive"));
+	cb_plex_warning (newline_count, _("ignoring empty directive"));
 	unput ('\n');
 }
 
@@ -271,12 +271,12 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	char	*s;
 
 	s = strchr (yytext, '>');
-	cb_plex_warning (newline_count, _("Ignoring invalid directive - '%s'"), s);
+	cb_plex_warning (newline_count, _("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
 
 ^[ ]*">>"		{
-	cb_plex_warning (newline_count, _("Ignoring invalid directive"));
+	cb_plex_warning (newline_count, _("ignoring invalid directive"));
 	skip_to_eol ();
 }
 
@@ -314,20 +314,20 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	char	*s;
 
 	s = strchr (yytext, '$');
-	cb_plex_warning (newline_count, _("Ignoring invalid directive - '%s'"), s);
+	cb_plex_warning (newline_count, _("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
 
 ^......"$"		{
 	/* Allow $ in column 7 for acucomment in fixed format */
 	if (cb_source_format == CB_FORMAT_FREE) {
-		cb_plex_warning (newline_count, _("Spurious '$' detected - ignoring"));
+		cb_plex_warning (newline_count, _("spurious '$' detected - ignored"));
 		skip_to_eol ();
 	}
 }
 
 ^[ ]*"$"		{
-	cb_plex_warning (newline_count, _("Spurious '$' detected - ignoring"));
+	cb_plex_warning (newline_count, _("spurious '$' detected - ignored"));
 	skip_to_eol ();
 }
 
@@ -705,7 +705,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 		/* Check dangling IF/ELSE */
 		for (; plex_nest_depth > 0; --plex_nest_depth) {
 			cb_source_line = plex_cond_stack[plex_nest_depth].line;
-			cb_error (_("Dangling IF/ELSE directive"));
+			cb_error (_("IF/ELIF/ELSE directive without matching END-IF"));
 		}
 		plex_nest_depth = 0;
 		cobc_free (p->dname);
@@ -1133,7 +1133,7 @@ start:
 		     (newline_count + PPLEX_BUFF_LEN) >= max_size)) {
 		if (need_continuation || continuation) {
 			cb_plex_error (newline_count,
-					_("Buffer overrun - Too many continuation lines"));
+					_("buffer overrun - too many continuation lines"));
 			return YY_NULL;
 		}
 		if (newline_count < max_size) {
@@ -1221,18 +1221,18 @@ start:
 		if (cb_source_format == CB_FORMAT_FREE) {
 			if (line_overflow == 0) {
 				cb_plex_warning (newline_count + 1,
-						 _("Line not terminated by a newline"));
+						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (newline_count + 1,
-						 _("Source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
 			}
 		} else {
 			if (line_overflow == 0) {
 				cb_plex_warning (newline_count,
-						 _("Line not terminated by a newline"));
+						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
 				cb_plex_warning (newline_count,
-						 _("Source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
+						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
 			}
 		}
 		buff[n++] = '\n';
@@ -1360,11 +1360,11 @@ start:
 	case '-':
 		if (unlikely(within_comment)) {
 			cb_plex_error (newline_count,
-					_("Invalid continuation in comment entry"));
+					_("invalid continuation in comment entry"));
 			newline_count++;
 			goto start;
 		} else if (!need_continuation) {
-			cb_verify (cb_word_continuation, _("Continuation of COBOL words"));
+			cb_verify (cb_word_continuation, _("continuation of COBOL words"));
 		}
 		continuation = 1;
 		break;
@@ -1384,7 +1384,7 @@ start:
 	default:
 		/* Invalid indicator */
 		cb_plex_error (newline_count,
-				_("Invalid indicator '%c' at column 7"), buff[6]);
+				_("invalid indicator '%c' at column 7"), buff[6]);
 		newline_count++;
 #if 1 /* Simon: treat as comment line instead of aborting compilation */
 		goto start;
@@ -1434,7 +1434,7 @@ start:
 				bp++;
 			} else {
 				cb_plex_error (newline_count,
-						_("Invalid line continuation"));
+						_("invalid line continuation"));
 				return YY_NULL;
 			}
 			quotation_mark = 0;
@@ -1445,7 +1445,7 @@ start:
 				bp++;
 			} else {
 				cb_plex_error (newline_count,
-						_("Invalid line continuation"));
+						_("invalid line continuation"));
 				return YY_NULL;
 			}
 		}
@@ -1453,7 +1453,7 @@ start:
 		/* Normal line */
 		if (need_continuation) {
 			cb_plex_error (newline_count,
-					_("Continuation character expected"));
+					_("continuation character expected"));
 			need_continuation = 0;
 		}
 		quotation_mark = 0;
@@ -1519,7 +1519,7 @@ start:
 	   and not whitespace (postponed here) */
 	if (line_overflow != 0) {
 		cb_plex_warning (newline_count,
-					_("Source text after program-text area (column %d)"),
+					_("source text after program-text area (column %d)"),
 				cb_text_column);
 	}
 

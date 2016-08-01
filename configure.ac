@@ -57,7 +57,7 @@ AM_MAINTAINER_MODE
 
 # Autoheader templates
 AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
-AH_TEMPLATE([COB_PARAM_CHECK], [Enable CALL parameter checking])
+AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
 AH_TEMPLATE([PATCH_LEVEL], [Define a patch level])
 AH_TEMPLATE([WITH_INDEX_EXTFH], [Compile with an external ISAM handler])
 AH_TEMPLATE([WITH_SEQRA_EXTFH], [Compile with an external SEQ/RAN handler])
@@ -247,7 +247,7 @@ AC_ARG_ENABLE([experimental],
   [])
 
 AC_ARG_ENABLE([param-check],
-  [  --enable-param-check    (GnuCOBOL) Enable CALL parameter checking (default no)],
+  [  --enable-param-check    (GnuCOBOL) Enable minimum parameter check for system libraries (default no)],
   [if test "$enable_param_check" = "yes"; then
 	AC_DEFINE([COB_PARAM_CHECK], [1])
    fi],
@@ -501,16 +501,17 @@ case $host_os in
 	;;
 esac
 
-# Disable for Cygwin
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __CYGWIN__
-	return 0;
-	#else
-	return 1;
-	#endif]])],
-	[enable_nls=no],
-	[],
-	[])
+# Simon: removed, use --disable-nls instead
+## Disable for Cygwin
+#AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+#	#ifdef __CYGWIN__
+#	return 0;
+#	#else
+#	return 1;
+#	#endif]])],
+#	[enable_nls=no],
+#	[],
+#	[])
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19.4])

@@ -111,10 +111,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: Offset of 'X' out of bounds: 0
-prog.cob: 10: Error: Offset of 'X' out of bounds: 5
-prog.cob: 12: Error: Length of 'X' out of bounds: 0
-prog.cob: 14: Error: Length of 'X' out of bounds: 5
+[prog.cob: 8: error: offset of 'X' out of bounds: 0
+prog.cob: 10: error: offset of 'X' out of bounds: 5
+prog.cob: 12: error: length of 'X' out of bounds: 0
+prog.cob: 14: error: length of 'X' out of bounds: 5
 ])
 
 AT_CLEANUP
@@ -137,7 +137,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], ,
-[prog.cob: 9: libcob: Offset of 'X' out of bounds: 0
+[libcob: prog.cob: 9: offset of 'X' out of bounds: 0
 ])
 
 AT_CLEANUP
@@ -160,7 +160,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], ,
-[prog.cob: 9: libcob: Offset of 'X' out of bounds: 5
+[libcob: prog.cob: 9: offset of 'X' out of bounds: 5
 ])
 
 AT_CLEANUP
@@ -183,7 +183,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], ,
-[prog.cob: 9: libcob: Length of 'X' out of bounds: 0
+[libcob: prog.cob: 9: length of 'X' out of bounds: 0
 ])
 
 AT_CLEANUP
@@ -206,7 +206,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], ,
-[prog.cob: 9: libcob: Length of 'X' out of bounds: 5
+[libcob: prog.cob: 9: length of 'X' out of bounds: 5
 ])
 
 AT_CLEANUP

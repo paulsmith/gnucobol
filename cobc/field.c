@@ -82,7 +82,7 @@ cb_get_level (cb_tree x)
 	return level;
 
 level_error:
-	cb_error_x (x, _("Invalid level number '%s'"), name);
+	cb_error_x (x, _("invalid level number '%s'"), name);
 	return 0;
 }
 
@@ -136,7 +136,7 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 	if (last_field) {
 		if (last_field->level == 77 && f->level != 01 &&
 		    f->level != 77 && f->level != 66 && f->level != 88) {
-			cb_error_x (name, _("Level number must begin with 01 or 77"));
+			cb_error_x (name, _("level number must begin with 01 or 77"));
 			return cb_error_node;
 		}
 	}
@@ -173,7 +173,7 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 		}
 	} else if (!last_field || cb_needs_01) {
 		/* Invalid top level */
-		cb_error_x (name, _("Level number must begin with 01 or 77"));
+		cb_error_x (name, _("level number must begin with 01 or 77"));
 		return cb_error_node;
 	} else if (f->level == 66) {
 		/* Level 66 */
@@ -211,7 +211,7 @@ same_level:
 			dummy_fill = cb_build_filler ();
 			field_fill = CB_FIELD (cb_build_field (dummy_fill));
 			cb_warning_x (name,
-				      _("No previous data item of level %02d"),
+				      _("no previous data item of level %02d"),
 				      f->level);
 			field_fill->level = f->level;
 			field_fill->flag_filler = 1;
@@ -227,7 +227,7 @@ same_level:
 			/* last_field = field_fill; */
 		} else {
 			cb_error_x (name,
-				    _("No previous data item of level %02d"),
+				    _("no previous data item of level %02d"),
 				    f->level);
 			return cb_error_node;
 		}
@@ -299,12 +299,12 @@ cb_resolve_redefines (struct cb_field *field, cb_tree redefines)
 
 	/* Check level number */
 	if (f->level != field->level) {
-		cb_error_x (x, _("Level number of REDEFINES entries must be identical"));
+		cb_error_x (x, _("level number of REDEFINES entries must be identical"));
 		return NULL;
 	}
 
 	if (!cb_indirect_redefines && f->redefines) {
-		cb_error_x (x, _("'%s' not the original definition"), f->name);
+		cb_error_x (x, _("'%s' is not the original definition"), f->name);
 		return NULL;
 	}
 
@@ -319,10 +319,12 @@ static void
 validate_field_clauses (cb_tree x, struct cb_field *f)
 {
 	if (f->flag_blank_zero) {
-		cb_error_x (x, _("BLANK ZERO not compatible with USAGE"));
+		cb_error_x (x, _("%s clause not compatible with USAGE %d"),
+			"BLANK ZERO", f->usage);
 	}
 	if (f->flag_sign_leading || f->flag_sign_separate) {
-		cb_error_x (x, _("SIGN clause not compatible with USAGE"));
+		cb_error_x (x, _("%s clause not compatible with USAGE %d"),
+			"SIGN", f->usage);
 	}
 }
 
@@ -395,13 +397,13 @@ check_picture_item (cb_tree x, struct cb_field *f)
 		return 1;
 	}
 	if (CB_NUMERIC_LITERAL_P(CB_VALUE(f->values))) {
-		cb_error_x (x, _("A non-numeric literal is expected for '%s'"),
+		cb_error_x (x, _("a non-numeric literal is expected for '%s'"),
 			    cb_name (x));
 		return 1;
 	}
 	vorint = (int)CB_LITERAL(CB_VALUE(f->values))->size;
 	if (warningopt) {
-		cb_warning_x (x, _("Defining implicit picture size %d for '%s'"),
+		cb_warning_x (x, _("defining implicit picture size %d for '%s'"),
 			    vorint, cb_name (x));
 	}
 	sprintf (pic, "X(%d)", vorint);
@@ -536,7 +538,7 @@ validate_field_1 (struct cb_field *f)
 	if (f->redefines && f->level != 66) {
 		/* Check OCCURS */
 		if (f->redefines->flag_occurs) {
-			cb_warning_x (x, _("The original definition '%s' should not have OCCURS"),
+			cb_warning_x (x, _("the original definition '%s' should not have OCCURS clause"),
 				      f->redefines->name);
 		}
 
@@ -554,7 +556,7 @@ validate_field_1 (struct cb_field *f)
 		}
 		if (cb_field_variable_size (f->redefines)) {
 			cb_error_x (x,
-				    _("The original definition '%s' cannot be variable length"),
+				    _("the original definition '%s' cannot be variable length"),
 				    f->redefines->name);
 		}
 	}
@@ -695,16 +697,18 @@ validate_field_1 (struct cb_field *f)
 		case CB_USAGE_PACKED:
 		case CB_USAGE_BIT:
 			if (f->pic->category != CB_CATEGORY_NUMERIC) {
-				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE"), cb_name (x));
+				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
+					cb_name (x), f->usage);
 			}
 			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_COMP_6:
 			if (f->pic->category != CB_CATEGORY_NUMERIC) {
-				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE"), cb_name (x));
+				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
+					cb_name (x), f->usage);
 			}
 			if (f->pic->have_sign) {
-				cb_warning_x (x, _("'%s' COMP-6 with sign - Changing to COMP-3"), cb_name (x));
+				cb_warning_x (x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
 				f->usage = CB_USAGE_PACKED;
 			}
 			validate_field_clauses (x, f);
@@ -714,7 +718,8 @@ validate_field_1 (struct cb_field *f)
 			if (f->pic) {
 				if (f->pic->category != CB_CATEGORY_NUMERIC &&
 				    f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
-					cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE"), cb_name (x));
+					cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
+						cb_name (x), f->usage);
 				}
 			}
 			validate_field_clauses (x, f);
@@ -757,7 +762,8 @@ validate_field_1 (struct cb_field *f)
 		if (f->flag_blank_zero) {
 			if (f->pic->have_sign
 			    && f->pic->category != CB_CATEGORY_NUMERIC_EDITED) {
-				cb_error_x (x, _("Cannot have S in PICTURE string and BLANK WHEN ZERO"));
+				cb_error_x (x, _("'%s' cannot have S in PICTURE string and BLANK WHEN ZERO"),
+					cb_name (x));
 			}
 
 			switch (f->pic->category) {
@@ -808,7 +814,8 @@ validate_field_1 (struct cb_field *f)
 			case CB_CATEGORY_NUMERIC_EDITED:
 				for (i = 0; f->pic->str[i].symbol != '\0'; ++i) {
 					if (f->pic->str[i].symbol == '*') {
-						cb_error_x (x, _("Cannot have * in PICTURE string and BLANK WHEN ZERO"));
+						cb_error_x (x, _("'%s' cannot have * in PICTURE string and BLANK WHEN ZERO"),
+							cb_name (x));
 						break;
 					}
 				}
@@ -822,16 +829,16 @@ validate_field_1 (struct cb_field *f)
 		/* Validate VALUE */
 		if (f->values) {
 			if (CB_PAIR_P (CB_VALUE (f->values)) || CB_CHAIN (f->values)) {
-				cb_error_x (x, _("Only level 88 item may have multiple values"));
+				cb_error_x (x, _("only level 88 items may have multiple values"));
 			}
 
 			/* ISO+IEC+1989-2002: 13.16.42.2-10 */
 			for (p = f; p; p = p->parent) {
 				if (p->redefines) {
-					cb_error_x (x, _("Entries under REDEFINES cannot have a VALUE clause"));
+					cb_error_x (x, _("entries under REDEFINES cannot have a VALUE clause"));
 				}
 				if (p->flag_external && cb_warn_external_val) {
-					cb_warning_x (x, _("Initial VALUE clause ignored for EXTERNAL item"));
+					cb_warning_x (x, _("initial VALUE clause ignored for EXTERNAL item"));
 				}
 			}
 		}
@@ -1111,7 +1118,7 @@ compute_size (struct cb_field *f)
 	if (f->children) {
 		/* Groups */
 		if (f->flag_synchronized && warningopt) {
-			cb_warning_x (CB_TREE(f), _("Ignoring SYNCHRONIZED for group item '%s'"),
+			cb_warning_x (CB_TREE(f), _("ignoring SYNCHRONIZED for group item '%s'"),
 				    cb_name (CB_TREE (f)));
 		}
 		size_check = 0;
@@ -1126,7 +1133,7 @@ compute_size (struct cb_field *f)
 				    c->redefines->size * c->redefines->occurs_max) {
 					if (cb_larger_redefines_ok) {
 						cb_warning_x (CB_TREE (c),
-							      _("Size of '%s' larger than size of '%s'"),
+							      _("size of '%s' larger than size of '%s'"),
 							      c->name, c->redefines->name);
 						maxsz = c->redefines->size * c->redefines->occurs_max;
 						for (c0 = c->redefines->sister; c0 != c; c0 = c0->sister) {
@@ -1139,7 +1146,7 @@ compute_size (struct cb_field *f)
 						}
 					} else {
 						cb_error_x (CB_TREE (c),
-							    _("Size of '%s' larger than size of '%s'"),
+							    _("size of '%s' larger than size of '%s'"),
 							    c->name, c->redefines->name);
 					}
 				}
@@ -1306,10 +1313,10 @@ compute_size (struct cb_field *f)
 	if (f->redefines && f->redefines->flag_external &&
 	    (f->size * f->occurs_max > f->redefines->size * f->redefines->occurs_max)) {
 		if (cb_larger_redefines_ok) {
-			cb_warning_x (CB_TREE (f), _("Size of '%s' larger than size of '%s'"),
+			cb_warning_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),
 				      f->name, f->redefines->name);
 		} else {
-			cb_error_x (CB_TREE (f), _("Size of '%s' larger than size of '%s'"),
+			cb_error_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),
 				    f->name, f->redefines->name);
 		}
 	}
@@ -1394,7 +1401,7 @@ cb_validate_88_item (struct cb_field *f)
 			t = CB_VALUE (l);
 			if (t == cb_space || t == cb_low ||
 			    t == cb_high || t == cb_quote) {
-				cb_error_x (x, _("Literal type does not match data type"));
+				cb_error_x (x, _("literal type does not match numeric data type"));
 			}
 		}
 	}
@@ -1492,7 +1499,7 @@ error_if_is_or_in_occurs (const struct cb_field * const field,
 	for (parent = field->parent; parent; parent = parent->parent) {
 		if (parent->flag_occurs) {
 			cb_error_x (CB_TREE (referring_field),
-				    _("Cannot use RENAMES on part of the table '%s'"),
+				    _("cannot use RENAMES on part of the table '%s'"),
 				    cb_name (CB_TREE (parent)));
 		}
 	}

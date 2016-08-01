@@ -42,7 +42,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 10: libcob: Subscript of 'X' out of bounds: 0
+[libcob: prog.cob: 10: subscript of 'X' out of bounds: 0
 ])
 
 AT_CLEANUP
@@ -67,7 +67,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 10: libcob: Subscript of 'X' out of bounds: 11
+[libcob: prog.cob: 10: subscript of 'X' out of bounds: 11
 ])
 
 AT_CLEANUP
@@ -92,7 +92,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 10: libcob: OCCURS DEPENDING ON 'N' out of bounds: 3
+[libcob: prog.cob: 10: OCCURS DEPENDING ON 'N' out of bounds: 3
 ])
 
 AT_CLEANUP
@@ -117,7 +117,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 10: libcob: OCCURS DEPENDING ON 'N' out of bounds: 7
+[libcob: prog.cob: 10: OCCURS DEPENDING ON 'N' out of bounds: 7
 ])
 
 AT_CLEANUP
@@ -142,7 +142,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 10: libcob: Subscript of 'X' out of bounds: 5
+[libcob: prog.cob: 10: subscript of 'X' out of bounds: 5
 ])
 
 AT_CLEANUP

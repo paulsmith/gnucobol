@@ -449,8 +449,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 8: Warning: Alphanumeric value is expected
-prog.cob: 6: Warning: 'X' defined here as PIC X(04)
+[prog.cob: 8: warning: alphanumeric value is expected
+prog.cob: 6: warning: 'X' defined here as PIC X(04)
 ])
 AT_CHECK([./prog], [0], [0   ])
 
@@ -473,14 +473,14 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            MOVE SRC1 TO DST1.
            IF DST1 not = 11.55
-               DISPLAY "Error: move/compare FLOAT-LONG to FLOAT-SHORT fa
+               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-SHORT fa
       -                "iled " DST1
                END-DISPLAY
            END-IF.
            
            MOVE SRC1 TO DST2.
            IF DST1 not = 11.55
-               DISPLAY "Error: move/compare FLOAT-LONG to FLOAT-LONG fai
+               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-LONG fai
       -                "led " DST2
                END-DISPLAY
            END-IF.
@@ -490,14 +490,14 @@ AT_DATA([prog.cob], [
 
            MOVE SRC2 TO DST1.
            IF DST1 not = 11.55
-               DISPLAY "Error: move/compare FLOAT-SHORT to FLOAT-SHORT f
+               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-SHORT f
       -                "ailed: " DST1
                END-DISPLAY
            END-IF.
            
            MOVE SRC2 TO DST2.
            IF DST2 not = 11.55
-               DISPLAY "Error: move/compare FLOAT-SHORT to FLOAT-LONG fa
+               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-LONG fa
       -                "iled: " DST2
                END-DISPLAY
            END-IF.
@@ -595,7 +595,7 @@ AT_DATA([subprog.cob], [
         PROCEDURE DIVISION USING F1 F2.
         MOVE F2(1:6) TO F1 (1:8).
         IF F1 not = "Hallo1  90"
-           DISPLAY "Error: 3: " F1
+           DISPLAY "error: 3: " F1
            END-DISPLAY
         END-IF
 
@@ -618,11 +618,11 @@ AT_DATA([prog.cob], [
         
         MOVE FIELD2 TO STRUCTURE.
         IF FIELD1 not = "12345"
-           DISPLAY "Error: 1: " FIELD1
+           DISPLAY "error: 1: " FIELD1
            END-DISPLAY
         END-IF        
         IF FIELD2 not = "67890     "
-           DISPLAY "Error: 2: " FIELD2
+           DISPLAY "error: 2: " FIELD2
                END-DISPLAY
            END-IF
            
@@ -637,7 +637,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE subprog.cob], [0], [], [])
-AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 15: Warning: Overlapping MOVE may produce unpredictable results
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 15: warning: overlapping MOVE may produce unpredictable results
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -912,7 +913,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 60: Warning: 'GLOB-PATH' will be implicitly defined
+[prog.cob: 60: warning: 'GLOB-PATH' will be implicitly defined
 ])
 AT_CHECK([./prog], [0],
 [GLOBP1GLOBV1
@@ -972,7 +973,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 14: libcob: Cannot find module 'prog3'
+[libcob: prog.cob: 14: cannot find module 'prog3'
 ])
 
 AT_CLEANUP
@@ -1025,7 +1026,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 25: libcob: Cannot find module 'prog3'
+[libcob: prog.cob: 25: cannot find module 'prog3'
 ])
 
 AT_CLEANUP
@@ -1481,10 +1482,10 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog.cob: 8: libcob: Attempt to CANCEL active program
+[libcob: prog.cob: 8: attempt to CANCEL active program
 ])
 AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
-[prog.cob: 8: libcob: Attempt to CANCEL active program
+[libcob: prog.cob: 8: attempt to CANCEL active program
 ])
 
 AT_CLEANUP
@@ -1521,10 +1522,10 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[prog2.cob: 7: libcob: Attempt to CANCEL active program
+[libcob: prog2.cob: 7: attempt to CANCEL active program
 ])
 AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
-[prog2.cob: 7: libcob: Attempt to CANCEL active program
+[libcob: prog2.cob: 7: attempt to CANCEL active program
 ])
 
 AT_CLEANUP
@@ -2579,10 +2580,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 137: Warning: Ignoring sign
-prog.cob: 144: Warning: Ignoring sign
-prog.cob: 165: Warning: Ignoring sign
-prog.cob: 172: Warning: Ignoring sign
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -2885,10 +2886,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 137: Warning: Ignoring sign
-prog.cob: 144: Warning: Ignoring sign
-prog.cob: 165: Warning: Ignoring sign
-prog.cob: 172: Warning: Ignoring sign
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -3191,10 +3192,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 137: Warning: Ignoring sign
-prog.cob: 144: Warning: Ignoring sign
-prog.cob: 165: Warning: Ignoring sign
-prog.cob: 172: Warning: Ignoring sign
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -3497,10 +3498,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 137: Warning: Ignoring sign
-prog.cob: 144: Warning: Ignoring sign
-prog.cob: 165: Warning: Ignoring sign
-prog.cob: 172: Warning: Ignoring sign
+[prog.cob: 137: warning: ignoring sign
+prog.cob: 144: warning: ignoring sign
+prog.cob: 165: warning: ignoring sign
+prog.cob: 172: warning: ignoring sign
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -3961,7 +3962,7 @@ AT_DATA([prog.cob], [
 ])
       
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 20: Warning: No CORRESPONDING items found
+[prog.cob: 20: warning: no CORRESPONDING items found
 ])
 AT_CHECK([./prog], [0], [], [])
 

@@ -8534,21 +8534,19 @@ codegen (struct cb_program *prog, const int subsequent_call)
 
 		sectime = time (NULL);
 		loctime = localtime (&sectime);
-		/* Leap seconds ? */
-		if (loctime->tm_sec >= 60) {
-			loctime->tm_sec = 59;
-		}
 		if (loctime) {
+		/* Leap seconds ? */
+			if (loctime->tm_sec >= 60) {
+				loctime->tm_sec = 59;
+			}
 			strftime (string_buffer, (size_t)COB_MINI_MAX,
 				  "%b %d %Y %H:%M:%S", loctime);
-		} else {
-			strcpy (string_buffer, _("Unknown"));
-		}
-		output_header (output_target, string_buffer, NULL);
-		output_header (cb_storage_file, string_buffer, NULL);
-		for (cp = prog; cp; cp = cp->next_program) {
-			output_header (cp->local_include->local_fp,
-					string_buffer, cp);
+			output_header (output_target, string_buffer, NULL);
+			output_header (cb_storage_file, string_buffer, NULL);
+			for (cp = prog; cp; cp = cp->next_program) {
+				output_header (cp->local_include->local_fp,
+						string_buffer, cp);
+			}
 		}
 
 #ifndef	_GNU_SOURCE

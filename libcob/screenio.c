@@ -533,7 +533,7 @@ cob_screen_init (void)
 #endif
 
 	if (!initscr ()) {
-		cob_runtime_error (_("Failed to initialize curses"));
+		cob_runtime_error (_("failed to initialize curses"));
 		cob_stop_run (1);
 	}
 	cobglobptr->cob_screen_initialized = 1;

@@ -815,8 +815,8 @@ AT_DATA([prog.cob], [
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
-[copy.inc: 2: Error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 8: Error: 'FIRST-MATCH' is not defined
+[copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog12.lst],
@@ -832,10 +832,10 @@ LINE    PG/LN  A...B............................................................
 000006         COPY "copy.inc".
 000001C
 000002C        01 TEST-VAR PIC X(2) VULUE "OK".
-Error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 000007         PROCEDURE        DIVISION.
 000008             DISPLAY FIRST-MATCH NO ADVANCING
-Error: 'FIRST-MATCH' is not defined
+error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
 GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
@@ -865,8 +865,8 @@ AT_DATA([prog.cob], [
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
-[prog.cob: 6: Error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 8: Error: 'FIRST-MATCH' is not defined
+[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog13.lst],
@@ -880,10 +880,10 @@ LINE    PG/LN  A...B............................................................
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 TEST-VAR PIC X(2) VULUE "OK".
-Error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 000007         PROCEDURE        DIVISION.
 000008             DISPLAY FIRST-MATCH NO ADVANCING
-Error: 'FIRST-MATCH' is not defined
+error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
 GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
@@ -913,7 +913,7 @@ AT_DATA([prog.cob], [
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
-[prog.cob: 6: Warning: Numeric value is expected
+[prog.cob: 6: warning: numeric value is expected
 ])
 
 AT_DATA([prog14.lst],
@@ -927,7 +927,7 @@ LINE    PG/LN  A...B............................................................
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 TEST-VAR PIC 9(2) VALUE 'F1F2'.
-Warning: Numeric value is expected
+warning: numeric value is expected
 000007         PROCEDURE        DIVISION.
 000008             DISPLAY TEST-VAR NO ADVANCING
 000009             END-DISPLAY.
@@ -1732,14 +1732,14 @@ AT_DATA([prog.cob], [
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
-[prog.cob: 21: Warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 23: Warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 30: Warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 32: Warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 39: Warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 41: Warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 64: Warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 66: Warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob: 21: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 23: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 30: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 32: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 39: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 41: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
 ])
 
 
@@ -1769,10 +1769,10 @@ LINE    PG/LN  A...B............................................................
 000019
 000020         FD  OLD-VERSION
 000021             LABEL RECORDS ARE STANDARD
-Warning: LABEL RECORDS is obsolete in GnuCOBOL
+warning: LABEL RECORDS is obsolete in GnuCOBOL
 000022             BLOCK CONTAINS 80 CHARACTERS
 000023             DATA RECORD IS OLD-RECORD.
-Warning: DATA RECORDS is obsolete in GnuCOBOL
+warning: DATA RECORDS is obsolete in GnuCOBOL
 000024
 000025         01  OLD-RECORD.
 000026             02 OLD-STATEMENT       PICTURE X(75).
@@ -1780,10 +1780,10 @@ Warning: DATA RECORDS is obsolete in GnuCOBOL
 000028
 000029         FD  NEW-VERSION
 000030             LABEL RECORDS ARE STANDARD
-Warning: LABEL RECORDS is obsolete in GnuCOBOL
+warning: LABEL RECORDS is obsolete in GnuCOBOL
 000031             BLOCK CONTAINS 80 CHARACTERS
 000032             DATA RECORD IS NEW-RECORD.
-Warning: DATA RECORDS is obsolete in GnuCOBOL
+warning: DATA RECORDS is obsolete in GnuCOBOL
 000033
 000034         01  NEW-RECORD.
 000035             02 NEW-STATEMENT       PICTURE X(75).
@@ -1791,10 +1791,10 @@ Warning: DATA RECORDS is obsolete in GnuCOBOL
 000037
 000038         FD  MODIFICATION
 000039             LABEL RECORDS ARE OMITTED
-Warning: LABEL RECORDS is obsolete in GnuCOBOL
+warning: LABEL RECORDS is obsolete in GnuCOBOL
 000040             BLOCK CONTAINS 80 CHARACTERS
 000041             DATA RECORD IS UPDATE-ORDER.
-Warning: DATA RECORDS is obsolete in GnuCOBOL
+warning: DATA RECORDS is obsolete in GnuCOBOL
 000042
 000043         01  UPDATE-ORDER.
 000044             02 INSERTION.
@@ -1822,10 +1822,10 @@ LINE    PG/LN  A...B............................................................
 000062
 000063         FD  COMMENTARY
 000064             LABEL RECORDS ARE OMITTED
-Warning: LABEL RECORDS is obsolete in GnuCOBOL
+warning: LABEL RECORDS is obsolete in GnuCOBOL
 000065             BLOCK CONTAINS 82 CHARACTERS
 000066             DATA RECORD IS COMMENT-LINE.
-Warning: DATA RECORDS is obsolete in GnuCOBOL
+warning: DATA RECORDS is obsolete in GnuCOBOL
 000067
 000068         01  COMMENT-LINE.
 000069             02 FILLER              PICTURE X(82).

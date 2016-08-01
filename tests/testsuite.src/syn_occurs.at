@@ -40,9 +40,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 6: Error: Level 01 item 'X-01' cannot have a OCCURS clause
-prog.cob: 7: Error: Level 01 item 'G' cannot have a OCCURS clause
-prog.cob: 9: Error: Level 77 item 'X-77' cannot have a OCCURS clause
+[prog.cob: 6: error: level 01 item 'X-01' cannot have a OCCURS clause
+prog.cob: 7: error: level 01 item 'G' cannot have a OCCURS clause
+prog.cob: 9: error: level 77 item 'X-77' cannot have a OCCURS clause
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
@@ -63,7 +63,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
+[prog.cob: 7: error: syntax error, unexpected OCCURS, expecting .
 ])
 
 AT_CLEANUP
@@ -82,7 +82,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: syntax error, unexpected OCCURS, expecting .
+[prog.cob: 7: error: syntax error, unexpected OCCURS, expecting .
 ])
 
 AT_CLEANUP
@@ -122,8 +122,8 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog2.cob], [1], [],
-[prog2.cob: 12: Error: 'Reference to item containing nested ODO' not implemented
-prog2.cob: 13: Error: 'Reference to item containing nested ODO' not implemented
+[prog2.cob: 12: error: reference to item containing nested ODO not implemented
+prog2.cob: 13: error: reference to item containing nested ODO not implemented
 ])
 
 AT_CLEANUP
@@ -201,8 +201,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: OCCURS max. must be greater than OCCURS min.
-prog.cob: 9: Error: Non-negative integer value expected
+[prog.cob: 7: error: OCCURS TO must be greater than OCCURS FROM
+prog.cob: 9: error: non-negative integer value expected
 ])
 
 AT_CLEANUP
@@ -242,9 +242,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: 'X' cannot have OCCURS DEPENDING
-prog.cob: 10: Error: 'G-3' cannot have OCCURS DEPENDING
-prog.cob: 15: Error: 'X' cannot have OCCURS DEPENDING
+[prog.cob: 7: error: 'X' cannot have OCCURS DEPENDING
+prog.cob: 10: error: 'G-3' cannot have OCCURS DEPENDING
+prog.cob: 15: error: 'X' cannot have OCCURS DEPENDING
 ])
 
 AT_CHECK([$COMPILE_ONLY -cb_conf=complex-odo:yes prog.cob], [0], [], [])
@@ -275,10 +275,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 8: Error: ODO without TO clause does not conform to COBOL 2014
+[prog.cob: 8: error: ODO without TO clause does not conform to COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: ODO without TO clause used
+[prog.cob: 8: warning: ODO without TO clause used
 ])
 
 AT_CLEANUP
@@ -304,7 +304,9 @@ AT_DATA([prog.cob], [
 # all entries may raise this error but the last "exceeds limit" is guaranteed.
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [], ignore)
 AT_CHECK([$COMPILE_ONLY prog.cob 2>&1 | \
-grep "prog.cob: 11: Error: Numeric literal '9223372036854775808' exceeds limit"],
+grep "prog.cob: 11: error: numeric literal '9223372036854775808' exceeds limit"],
 [0], ignore, [])
 
 AT_CLEANUP
+
+

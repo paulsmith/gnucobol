@@ -1323,7 +1323,7 @@ COB_EXPIMP void	cob_allocate			(unsigned char **, cob_field *,
 COB_EXPIMP void	cob_free_alloc			(unsigned char **, unsigned char *);
 COB_EXPIMP int	cob_extern_init			(void);
 COB_EXPIMP int	cob_tidy			(void);
-COB_EXPIMP void	*cob_command_line		(int, int *, char ***,
+COB_EXPIMP char	*cob_command_line		(int, int *, char ***,
 						 char ***, char **);
 COB_EXPIMP char	*cob_getenv			(const char *);
 COB_EXPIMP int	cob_putenv			(char *);

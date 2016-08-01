@@ -1,4 +1,9 @@
 
+2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_runtime_error): reversed the prefix from runtime errors,
+	  always starts with "libcob: " now
+
 2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_reg_sighnd): call cob_set_signal() if not done already
@@ -41,6 +46,7 @@
 
 2016-06-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* general: revised all message strings
 	* screenio.c: added (cob_get_scr_cols) and (cob_get_scr_lines) for
 	  providing the C interface with the current COBOL screen cols/lines
 	* common.h: FR #145: added defines for cobcols, coblines and cobrescanenv

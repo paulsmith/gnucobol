@@ -233,7 +233,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 8: Warning: Overlapping MOVE may produce unpredictable results
+[prog.cob: 8: warning: overlapping MOVE may produce unpredictable results
 ])
 AT_CHECK([./prog], [0], [], [])
 
@@ -550,7 +550,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 6: Error: Level 01 item 'X' cannot have a OCCURS clause
+[prog.cob: 6: error: level 01 item 'X' cannot have a OCCURS clause
 ])
 
 AT_CLEANUP
@@ -811,7 +811,7 @@ AT_DATA([callee2.cob], [
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
-AT_CHECK([./caller], [1], [], [callee2.cob: 5: libcob: Invalid recursive COBOL CALL to 'callee'
+AT_CHECK([./caller], [1], [], [libcob: callee2.cob: 5: invalid recursive COBOL CALL to 'callee'
 ])
 
 AT_CLEANUP
@@ -2278,11 +2278,11 @@ AT_DATA([main-prog.cob], [
         STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [prog.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
-prog.cob: 17: Warning: ENTRY is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [prog.cob: 13: warning: ENTRY is obsolete in GnuCOBOL
+prog.cob: 17: warning: ENTRY is obsolete in GnuCOBOL
 ])
-AT_CHECK([$COMPILE_MODULE prog1.cob], [0], [], [prog1.cob: 13: Warning: ENTRY is obsolete in GnuCOBOL
-prog1.cob: 17: Warning: ENTRY is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_MODULE prog1.cob], [0], [], [prog1.cob: 13: warning: ENTRY is obsolete in GnuCOBOL
+prog1.cob: 17: warning: ENTRY is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE main-prog.cob], [0], [], [])
 AT_CHECK([export COB_PRE_LOAD="prog"$PATHSEP"prog1"; ./main-prog], [0], [12abc
@@ -2328,7 +2328,7 @@ AT_DATA([prog.cob], [
        .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 26: Warning: ENTRY is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 26: warning: ENTRY is obsolete in GnuCOBOL
 ])
 AT_CHECK([./prog], [42], [subprogram+000000042], [])
 
@@ -2771,10 +2771,10 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 
 AT_CHECK([./prog], [1], [],
-[prog.cob: 8: libcob: BASED/LINKAGE item 'X' has NULL address
+[libcob: prog.cob: 8: BASED/LINKAGE item 'X' has NULL address
 ])
 AT_CHECK([./prog2], [1], [],
-[prog2.cob: 9: libcob: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
+[libcob: prog2.cob: 9: BASED/LINKAGE item 'X' (accessed by 'Y') has NULL address
 ])
 
 AT_CLEANUP
@@ -2816,7 +2816,7 @@ AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 
 AT_CHECK([./caller], [1], [],
-[callee.cob: 9: libcob: LINKAGE item 'X' (accessed by 'Y') not passed by caller
+[libcob: callee.cob: 9: LINKAGE item 'X' (accessed by 'Y') not passed by caller
 ])
 
 AT_CLEANUP

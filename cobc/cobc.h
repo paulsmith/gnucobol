@@ -437,7 +437,7 @@ extern void		cob_gen_optim (const enum cb_optim);
 #define CB_MSG_STYLE_GCC	0
 #define CB_MSG_STYLE_MSC	1U
 
-#define CB_PENDING(x)		cb_warning (_("'%s' not implemented"), x)
+#define CB_PENDING(x)		cb_warning (_("%s not implemented"), x)
 
 extern size_t		cb_msg_style;
 

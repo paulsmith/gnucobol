@@ -33,7 +33,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 3: Error: Invalid PROGRAM-ID 'short' - Name duplicates a 'C' keyword
+[prog.cob: 3: error: invalid PROGRAM-ID 'short' - name duplicates a 'C' keyword
 ])
 
 AT_CLEANUP
@@ -49,12 +49,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 3: Error: COMMON may only be used in a contained program
+[prog.cob: 3: error: COMMON may only be used in a contained program
 ])
 
 AT_CLEANUP
 
-AT_SETUP([Invalid PROGRAM-ID type clause (2)])
+AT_SETUP([invalid PROGRAM-ID type clause (2)])
 AT_KEYWORDS([definition])
 
 AT_DATA([prog.cob], [
@@ -65,7 +65,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 3: Error: syntax error, unexpected RECURSIVE, expecting .
+[prog.cob: 3: error: syntax error, unexpected RECURSIVE, expecting .
 ])
 
 AT_CLEANUP
@@ -116,7 +116,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 5: Error: 'X' is not defined
+[prog.cob: 5: error: 'X' is not defined
 ])
 
 AT_CLEANUP
@@ -137,7 +137,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: 'X' in 'G' is not defined
+[prog.cob: 8: error: 'X IN G' is not defined
 ])
 
 AT_CLEANUP
@@ -160,7 +160,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: Error: 'Y' in 'G' is not defined
+[prog.cob: 10: error: 'Y IN G' is not defined
 ])
 
 AT_CLEANUP
@@ -181,7 +181,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: 'X' in 'X' is not defined
+[prog.cob: 8: error: 'X IN X' is not defined
 ])
 
 AT_CLEANUP
@@ -201,7 +201,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 6: Error: PICTURE clause required for 'X'
+[prog.cob: 6: error: PICTURE clause required for 'X'
 ])
 
 AT_CLEANUP
@@ -247,8 +247,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: Warning: Redefinition of 'X'
-prog.cob: 6: Warning: 'X' previously defined here
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP
@@ -266,8 +266,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: Warning: Redefinition of 'X'
-prog.cob: 6: Warning: 'X' previously defined here
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP
@@ -286,8 +286,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: Redefinition of 'X'
-prog.cob: 7: Warning: 'X' previously defined here
+[prog.cob: 8: warning: redefinition of 'X'
+prog.cob: 7: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP
@@ -305,8 +305,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: Warning: Redefinition of 'X'
-prog.cob: 6: Warning: 'X' previously defined here
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP
@@ -324,8 +324,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: Warning: Redefinition of 'X'
-prog.cob: 6: Warning: 'X' previously defined here
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP
@@ -344,8 +344,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: Redefinition of 'A'
-prog.cob: 7: Warning: 'A' previously defined here
+[prog.cob: 8: warning: redefinition of 'A'
+prog.cob: 7: warning: 'A' previously defined here
 ])
 
 AT_CLEANUP
@@ -401,17 +401,17 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY --ffold-call=upper prog.cob], [1], [],
-[prog.cob: 7: Warning: Redefinition of 'prog'
-prog.cob: 3: Warning: 'prog' previously defined here
-prog.cob: 23: Error: Redefinition of program name 'foo'
-prog.cob: 31: Error: Redefinition of program name 'prog'
-prog.cob: 42: Error: Redefinition of 'foo'
-prog.cob: 35: Error: 'foo' previously defined here
+[prog.cob: 7: warning: redefinition of 'prog'
+prog.cob: 3: warning: 'prog' previously defined here
+prog.cob: 23: error: redefinition of program name 'foo'
+prog.cob: 31: error: redefinition of program name 'prog'
+prog.cob: 42: error: redefinition of 'foo'
+prog.cob: 35: error: 'foo' previously defined here
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 23: Error: Redefinition of program ID 'foo'
-prog.cob: 31: Error: Redefinition of program ID 'prog'
+[prog.cob: 23: error: redefinition of program ID 'foo'
+prog.cob: 31: error: redefinition of program ID 'prog'
 ])
 
 AT_CLEANUP
@@ -435,8 +435,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: Warning: No definition/prototype seen for function 'func'
-prog.cob: 12: Error: syntax error, unexpected User function name
+[prog.cob: 9: warning: no definition/prototype seen for function 'func'
+prog.cob: 12: error: syntax error, unexpected User function name
 ])
 AT_CLEANUP
 
@@ -486,9 +486,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 11: Error: 'X' ambiguous; need qualification
-prog.cob: 7: Error: 'X' in 'G1' defined here
-prog.cob: 9: Error: 'X' in 'G2' defined here
+[prog.cob: 11: error: 'X' is ambiguous; needs qualification
+prog.cob: 7: error: 'X IN G1' defined here
+prog.cob: 9: error: 'X IN G2' defined here
 ])
 
 AT_CLEANUP
@@ -511,9 +511,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: Error: 'X' ambiguous; need qualification
-prog.cob: 7: Error: 'X' in 'G' defined here
-prog.cob: 8: Error: 'X' in 'X' in 'G' defined here
+[prog.cob: 10: error: 'X' is ambiguous; needs qualification
+prog.cob: 7: error: 'X IN G' defined here
+prog.cob: 8: error: 'X IN X IN G' defined here
 ])
 
 AT_CLEANUP
@@ -533,15 +533,15 @@ AT_DATA([prog.cob], [
          02 X.
            03 Y         PIC X.
        PROCEDURE        DIVISION.
-           DISPLAY Y OF X
+           DISPLAY Y IN X
            END-DISPLAY.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 13: Error: 'Y' in 'X' ambiguous; need qualification
-prog.cob: 8: Error: 'Y' in 'X' in 'G1' defined here
-prog.cob: 11: Error: 'Y' in 'X' in 'G2' defined here
+[prog.cob: 13: error: 'Y IN X' is ambiguous; needs qualification
+prog.cob: 8: error: 'Y IN X IN G1' defined here
+prog.cob: 11: error: 'Y IN X IN G2' defined here
 ])
 
 AT_CLEANUP
@@ -562,7 +562,7 @@ AT_DATA([prog.cob], [
          02 X.
            03 Z         PIC X VALUE "Z".
        PROCEDURE        DIVISION.
-           DISPLAY Z OF X NO ADVANCING
+           DISPLAY Z IN X NO ADVANCING
            END-DISPLAY.
            STOP RUN.
 ])
@@ -595,7 +595,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 5: Error: 'END-OF-PROGRAM' is not defined
+[prog.cob: 5: error: 'END-OF-PROGRAM' is not defined
 ])
 
 AT_CLEANUP
@@ -616,9 +616,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: In section 'L':
-prog.cob: 6: Error: Redefinition of 'L'
-prog.cob: 5: Error: 'L' previously defined here
+[prog.cob: in section 'L':
+prog.cob: 6: error: redefinition of 'L'
+prog.cob: 5: error: 'L' previously defined here
 ])
 
 AT_CLEANUP
@@ -636,9 +636,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: In section 'L':
-prog.cob: 6: Error: Redefinition of 'L'
-prog.cob: 5: Error: 'L' previously defined here
+[prog.cob: in section 'L':
+prog.cob: 6: error: redefinition of 'L'
+prog.cob: 5: error: 'L' previously defined here
 ])
 
 AT_CLEANUP
@@ -658,11 +658,12 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [])
 
-## Change when we DON'T allow this
+## Change when we DON'T allow this (likely as a warning,
+## depending on compiler configuration)
 ## AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-## [prog.cob: In paragraph 'L':
-## prog.cob: 6: Error: redefinition of 'L'
-## prog.cob: 5: Error: 'L' previously defined here
+## [prog.cob: in paragraph 'L':
+## prog.cob: 6: error: redefinition of 'L'
+## prog.cob: 5: error: 'L' previously defined here
 ## ])
 
 AT_CLEANUP
@@ -684,10 +685,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: In section 'S-3':
-prog.cob: 10: Error: 'L' ambiguous; need qualification
-prog.cob: 6: Error: 'L' in 'S-1' defined here
-prog.cob: 8: Error: 'L' in 'S-2' defined here
+[prog.cob: in section 'S-3':
+prog.cob: 10: error: 'L' is ambiguous; needs qualification
+prog.cob: 6: error: 'L IN S-1' defined here
+prog.cob: 8: error: 'L IN S-2' defined here
 ])
 
 AT_CLEANUP
@@ -710,7 +711,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -cb_conf=relax-level-hierarchy:yes prog.cob], [0], [],
-[prog.cob: 9: Warning: No previous data item of level 04
+[prog.cob: 9: warning: no previous data item of level 04
 ])
 
 AT_CLEANUP
@@ -731,7 +732,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: BY CONTENT assumed for alphanumeric item
+[prog.cob: 8: warning: BY CONTENT assumed for alphanumeric item
 ])
 
 AT_CLEANUP
@@ -747,7 +748,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 3: Error: syntax error, unexpected IDENTIFICATION, expecting FUNCTION-ID or PROGRAM-ID
+[prog.cob: 3: error: syntax error, unexpected IDENTIFICATION, expecting FUNCTION-ID or PROGRAM-ID
 ])
 AT_CLEANUP
 
@@ -771,12 +772,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: Error: PROCEDURE DIVISION header missing
-prog.cob: 10: Error: syntax error, unexpected SPECIAL-NAMES
-prog.cob: 11: Error: syntax error, unexpected DECIMAL-POINT
-prog.cob: 13: Error: syntax error, unexpected SOURCE-COMPUTER
-prog.cob: 13: Error: syntax error, unexpected Identifier
-prog.cob: 14: Error: syntax error, unexpected end of file
+[prog.cob: 10: error: PROCEDURE DIVISION header missing
+prog.cob: 10: error: syntax error, unexpected SPECIAL-NAMES
+prog.cob: 11: error: syntax error, unexpected DECIMAL-POINT
+prog.cob: 13: error: syntax error, unexpected SOURCE-COMPUTER
+prog.cob: 13: error: syntax error, unexpected Identifier
+prog.cob: 14: error: syntax error, unexpected end of file
 ])
 AT_CLEANUP
 
@@ -790,7 +791,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 4: Error: syntax error, unexpected end of file, expecting END FUNCTION
+[prog.cob: 4: error: syntax error, unexpected end of file, expecting END FUNCTION
 ])
 AT_CLEANUP
 
@@ -831,7 +832,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: Error: PROCEDURE DIVISION header missing
+[prog.cob: 6: error: PROCEDURE DIVISION header missing
 ])
 AT_CLEANUP
 
@@ -921,62 +922,62 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Warning: Continuation of COBOL words used
-prog.cob: 7: Error: Missing PICTURE string
-prog.cob: 8: Error: PICTURE string may not contain more than 63 characters
-prog.cob: 11: Error: CR or DB may only occur once in a PICTURE string
-prog.cob: 12: Error: CR or DB may only occur once in a PICTURE string
-prog.cob: 13: Error: S may only occur once in a PICTURE string
-prog.cob: 13: Error: S must be at start of PICTURE string
-prog.cob: 14: Error: . may only occur once in a PICTURE string
-prog.cob: 15: Error: V may only occur once in a PICTURE string
-prog.cob: 16: Error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 17: Error: a leading +/- sign cannot follow a leading currency symbol
-prog.cob: 17: Error: a trailing currency symbol cannot follow a leading currency symbol
-prog.cob: 17: Error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 19: Error: Invalid PICTURE character 'K'
-prog.cob: 20: Error: C must be followed by R
-prog.cob: 21: Error: D must be followed by B
-prog.cob: 22: Error: Numeric field cannot be larger than 38 digits
-prog.cob: 23: Error: Only up to 9 significant digits in parentheses are permitted
-prog.cob: 24: Error: Non-digits in parentheses not permitted
-prog.cob: 24: Error: Invalid PICTURE character ')'
-prog.cob: 25: Error: Unbalanced parenthesis
-prog.cob: 26: Error: Only one set of parentheses is permitted
-prog.cob: 27: Error: Parentheses must contain a number greater than zero
-prog.cob: 27: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
-prog.cob: 29: Error: . cannot follow a P which is after the decimal point
-prog.cob: 30: Error: . cannot follow V
-prog.cob: 31: Error: Cannot have both Z and * in PICTURE string
-prog.cob: 32: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 32: Error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 33: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
-prog.cob: 34: Error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
-prog.cob: 35: Error: A or X cannot follow N
-prog.cob: 36: Error: N cannot follow A or X
-prog.cob: 37: Error: a Z or * which is before the decimal point cannot follow A or X
-prog.cob: 38: Error: A or X cannot follow .
-prog.cob: 39: Error: A or X cannot follow S
-prog.cob: 40: Error: a leading +/- sign cannot follow B, 0 or /
-prog.cob: 40: Error: a leading +/- sign cannot follow a floating currency symbol string which is before the decimal point
-prog.cob: 40: Error: a leading +/- sign may only occur once in a PICTURE string
-prog.cob: 40: Error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 40: Error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 41: Error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 42: Error: CR or DB cannot follow a leading +/- sign
-prog.cob: 43: Error: CR or DB cannot follow a leading +/- sign
-prog.cob: 45: Error: a leading +/- sign cannot follow B, 0 or /
-prog.cob: 46: Error: a leading +/- sign cannot follow 9
-prog.cob: 47: Error: B, 0 or / cannot follow CR or DB
-prog.cob: 48: Error: 9 cannot follow CR or DB
-prog.cob: 49: Error: a floating currency symbol string which is before the decimal point cannot follow 9
-prog.cob: 50: Error: a leading currency symbol cannot follow 9
-prog.cob: 51: Error: a leading currency symbol cannot follow B, 0 or /
-prog.cob: 52: Error: P must be at start or end of PICTURE string
-prog.cob: 52: Error: V cannot follow a P which is after the decimal point
-prog.cob: 54: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
-prog.cob: 55: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
-prog.cob: 56: Error: PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol
+[prog.cob: 8: warning: continuation of COBOL words used
+prog.cob: 7: error: missing PICTURE string
+prog.cob: 8: error: PICTURE string may not contain more than 63 characters
+prog.cob: 11: error: CR or DB may only occur once in a PICTURE string
+prog.cob: 12: error: CR or DB may only occur once in a PICTURE string
+prog.cob: 13: error: S may only occur once in a PICTURE string
+prog.cob: 13: error: S must be at start of PICTURE string
+prog.cob: 14: error: . may only occur once in a PICTURE string
+prog.cob: 15: error: V may only occur once in a PICTURE string
+prog.cob: 16: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 17: error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob: 17: error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob: 17: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 19: error: invalid PICTURE character 'K'
+prog.cob: 20: error: C must be followed by R
+prog.cob: 21: error: D must be followed by B
+prog.cob: 22: error: numeric field cannot be larger than 38 digits
+prog.cob: 23: error: only up to 9 significant digits are permitted within parentheses
+prog.cob: 24: error: only digits are permitted within parentheses
+prog.cob: 24: error: invalid PICTURE character ')'
+prog.cob: 25: error: unbalanced parenthesis
+prog.cob: 26: error: only one set of parentheses is permitted
+prog.cob: 27: error: parentheses must contain a number greater than zero
+prog.cob: 27: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 29: error: . cannot follow a P which is after the decimal point
+prog.cob: 30: error: . cannot follow V
+prog.cob: 31: error: cannot have both Z and * in PICTURE string
+prog.cob: 32: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 32: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob: 33: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
+prog.cob: 34: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
+prog.cob: 35: error: A or X cannot follow N
+prog.cob: 36: error: N cannot follow A or X
+prog.cob: 37: error: a Z or * which is before the decimal point cannot follow A or X
+prog.cob: 38: error: A or X cannot follow .
+prog.cob: 39: error: A or X cannot follow S
+prog.cob: 40: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 40: error: a leading +/- sign cannot follow a floating currency symbol string which is before the decimal point
+prog.cob: 40: error: a leading +/- sign may only occur once in a PICTURE string
+prog.cob: 40: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 40: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob: 41: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 42: error: CR or DB cannot follow a leading +/- sign
+prog.cob: 43: error: CR or DB cannot follow a leading +/- sign
+prog.cob: 45: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 46: error: a leading +/- sign cannot follow 9
+prog.cob: 47: error: B, 0 or / cannot follow CR or DB
+prog.cob: 48: error: 9 cannot follow CR or DB
+prog.cob: 49: error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob: 50: error: a leading currency symbol cannot follow 9
+prog.cob: 51: error: a leading currency symbol cannot follow B, 0 or /
+prog.cob: 52: error: P must be at start or end of PICTURE string
+prog.cob: 52: error: V cannot follow a P which is after the decimal point
+prog.cob: 54: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 55: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 56: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 ])
 AT_CLEANUP
 
@@ -998,8 +999,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: Error: Cannot have S in PICTURE string and BLANK WHEN ZERO
-prog.cob: 8: Error: Cannot have * in PICTURE string and BLANK WHEN ZERO
+[prog.cob: 7: error: 'x' cannot have S in PICTURE string and BLANK WHEN ZERO
+prog.cob: 8: error: 'y' cannot have * in PICTURE string and BLANK WHEN ZERO
 ])
 AT_CLEANUP
 
@@ -1039,11 +1040,11 @@ AT_DATA([prog2.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: Error: Duplicate character values in alphabet 'TESTME': x'00', A, B
+[prog.cob: 10: error: duplicate character values in alphabet 'TESTME': x'00', A, B
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 8: Error: 'TESTNO' is not defined
-prog2.cob: 8: Error: 'TESTNO' is not an alphabet name
+[prog2.cob: 8: error: 'TESTNO' is not defined
+prog2.cob: 8: error: 'TESTNO' is not an alphabet name
 ])
 AT_CLEANUP
 
@@ -1098,19 +1099,19 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 15: Error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
-prog.cob: 16: Error: THRU item 'd' may not be subordinate to 'c'
-prog.cob: 17: Error: THRU item 'd' may not come before 'e'
-prog.cob: 18: Error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
-prog.cob: 33: Error: RENAMES may not reference a level 88
-prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
-prog.cob: 34: Error: Cannot use RENAMES on part of the table 'j'
-prog.cob: 35: Error: RENAMES cannot start/end at the OCCURS item 'j'
-prog.cob: 36: Error: RENAMES may not contain 'n' as it is a pointer or object reference
-prog.cob: 36: Error: RENAMES may not contain 'p' as it is an OCCURS DEPENDING table
-prog.cob: 36: Error: Cannot use RENAMES on part of the table 'j'
-prog.cob: 37: Error: 'invalid-9' must immediately follow the record 'a'
-prog.cob: 37: Error: 'b' and 'm' must be in the same record
+[prog.cob: 15: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
+prog.cob: 16: error: THRU item 'd' may not be subordinate to 'c'
+prog.cob: 17: error: THRU item 'd' may not come before 'e'
+prog.cob: 18: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
+prog.cob: 33: error: RENAMES may not reference a level 88
+prog.cob: 34: error: cannot use RENAMES on part of the table 'j'
+prog.cob: 34: error: cannot use RENAMES on part of the table 'j'
+prog.cob: 35: error: RENAMES cannot start/end at the OCCURS item 'j'
+prog.cob: 36: error: RENAMES may not contain 'n' as it is a pointer or object reference
+prog.cob: 36: error: RENAMES may not contain 'p' as it is an OCCURS DEPENDING table
+prog.cob: 36: error: cannot use RENAMES on part of the table 'j'
+prog.cob: 37: error: 'invalid-9' must immediately follow the record 'a'
+prog.cob: 37: error: 'b' and 'm' must be in the same record
 ])
 AT_CLEANUP
 
@@ -1132,10 +1133,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 7: Error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
-prog.cob: 8: Error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
-prog.cob: 11: Error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
+[prog.cob: 7: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
+prog.cob: 8: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
+prog.cob: 11: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [0], [], [])
 
 AT_CLEANUP
+

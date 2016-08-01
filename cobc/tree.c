@@ -336,9 +336,9 @@ cb_name_1 (char *s, cb_tree x)
 		} else if (x == cb_quote) {
 			strcpy (s, "QUOTE");
 		} else if (x == cb_error_node) {
-			strcpy (s, _("Internal error node"));
+			strcpy (s, _("internal error node"));
 		} else {
-			strcpy (s, _("Unknown constant"));
+			strcpy (s, _("unknown constant"));
 		}
 		break;
 
@@ -446,7 +446,7 @@ cb_name_1 (char *s, cb_tree x)
 		sprintf (s, "FILE %s", CB_FILE (x)->name);
 		break;
 	default:
-		sprintf (s, _("<Unexpected tree tag %d>"), (int)CB_TREE_TAG (x));
+		sprintf (s, _("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 	}
 
 	return strlen (orig);
@@ -585,7 +585,7 @@ valid_format (const enum cb_intr_enum intr, const char *format)
 			|| cob_valid_date_format (format)
 			|| cob_valid_datetime_format (format, decimal_point);
 	default:
-		cb_error (_("Invalid date/time function - '%d'"), intr);
+		cb_error (_("invalid date/time function: '%d'"), intr);
 		/* Ignore the content of the format */
 		return 1;
 	}
@@ -656,19 +656,18 @@ warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
 		   || intr == CB_INTR_FORMATTED_TIME)
 		  && last_arg->tag == CB_TAG_INTEGER
 		  && ((struct cb_integer *) last_arg)->val == 1;
-        #define ERR_MSG _("Cannot find the UTC offset on this system")
 
 	if (!is_formatted_current_date && !has_system_offset_arg) {
 		return;
 	}
+	/* Fixme: this should not be an error by default as we may compile
+	   for a different system */
 
 	if (is_variable_format) {
-		cb_warning_x (tree, ERR_MSG);
+		cb_warning_x (tree, _("cannot find the UTC offset on this system"));
 	} else if (is_constant_utc_format) {
-		cb_error_x (tree, ERR_MSG);
+		cb_error_x (tree, _("cannot find the UTC offset on this system"));
 	}
-
-        #undef ERR_MSG
 }
 #endif
 
@@ -1117,7 +1116,7 @@ error_numeric_literal (const char *literal)
 	} else {
 		lit_out[38] = '\0';
 	}
-	cb_error (_("Invalid numeric literal: '%s'"), lit_out);
+	cb_error (_("invalid numeric literal: '%s'"), lit_out);
 	cb_error ("%s", err_msg);
 }
 
@@ -1128,12 +1127,12 @@ check_lit_length (const int size, const char *lit)
 	if (unlikely(size > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds maximum of %d digits"),
+			_("literal length %d exceeds maximum of %d digits"),
 			size, COB_MAX_DIGITS);
 		error_numeric_literal (lit);
 	} else if (unlikely(size > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("Literal length %d exceeds %d digits"),
+			_("literal length %d exceeds %d digits"),
 			size, cb_numlit_length);
 		error_numeric_literal (lit);
 	}
@@ -1173,7 +1172,7 @@ cb_get_int (const cb_tree x)
 			s = "9223372036854775807";
 		}
 		if (size > 19U || memcmp (&l->data[i], s, (size_t)19) > 0) {
-			cb_error (_("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return INT_MAX;
 		}
 	}
@@ -1185,7 +1184,7 @@ cb_get_int (const cb_tree x)
 			s = "2147483647";
 		}
 		if (size > 10U || memcmp (&l->data[i], s, (size_t)10) > 0) {
-			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return INT_MAX;
 		}
 	}
@@ -1197,7 +1196,7 @@ cb_get_int (const cb_tree x)
 			s = "32767";
 		}
 		if (size == 5U || memcmp (&l->data[i], s, (size_t)5) > 0) {
-			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return INT_MAX;
 		}
 	}
@@ -1246,7 +1245,7 @@ cb_get_long_long (const cb_tree x)
 			s = "9223372036854775807";
 		}
 		if (size == 19U || memcmp (&(l->data[i]), s, (size_t)19) > 0) {
-			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return LLONG_MAX;
 		}
 	}
@@ -1286,7 +1285,7 @@ cb_get_u_long_long (const cb_tree x)
 	if (unlikely(size >= 20U)) {
 		s = "18446744073709551615";
 		if (size == 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
-			cb_error (_ ("Numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
+			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return ULLONG_MAX;
 		}
 	}
@@ -1699,7 +1698,7 @@ cb_build_locale_name (cb_tree name, cb_tree list)
 		return NULL;
 	}
 	if (!CB_LITERAL_P (list) || CB_NUMERIC_LITERAL_P (list)) {
-		cb_error (_("Invalid LOCALE literal"));
+		cb_error (_("invalid LOCALE literal"));
 		return cb_error_node;
 	}
 	p = make_tree (CB_TAG_LOCALE_NAME, CB_CATEGORY_UNKNOWN,
@@ -1787,7 +1786,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 
 	if ((x1->category != CB_CATEGORY_ALPHANUMERIC)
 		|| (x2->category != CB_CATEGORY_ALPHANUMERIC)) {
-		cb_error_x (x1, _("Non-alphanumeric literals cannot be concatenated"));
+		cb_error_x (x1, _("non-alphanumeric literals cannot be concatenated"));
 		return cb_error_node;
 	}
 
@@ -1799,8 +1798,8 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 		/* shorten literal for output */
 		strncpy (lit_out, (char *)p->data, 38);
 		strcpy (lit_out + 35, "...");
-		cb_error_x (x1, _("Invalid literal: '%s'"), lit_out);
-		cb_error_x (x1, _("Literal length %d exceeds %d characters"),
+		cb_error_x (x1, _("invalid literal: '%s'"), lit_out);
+		cb_error_x (x1, _("literal length %d exceeds %d characters"),
 			p->size, cb_lit_length);
 		return cb_error_node;
 	}
@@ -2119,7 +2118,7 @@ emit_precedence_error (const int preceding_idx, const int following_idx)
 			cb_error (_("%s cannot follow %s"), following_descr, preceding_descr);
 		}
 	} else {
-		cb_error (_("Invalid PICTURE string detected"));
+		cb_error (_("invalid PICTURE string detected"));
 	}
 }
 
@@ -2251,11 +2250,11 @@ cb_build_picture (const char *str)
 
 
 	if (strlen (str) == 0) {
-		cb_error (_("Missing PICTURE string"));
+		cb_error (_("missing PICTURE string"));
 		goto end;
 	} else if (strlen (str) > 63) {
 		/* Limit of 63 is from the 2014 standard. */
-		cb_error (_("PICTURE string may not contain more than 63 characters"));
+		cb_error (_("PICTURE string may not contain more than %d characters"), 63);
 		goto end;
 	}
 
@@ -2273,7 +2272,7 @@ repeat:
 		}
 
 		if (*p == ')' && p[1] == '(') {
-			cb_error (_("Only one set of parentheses is permitted"));
+			cb_error (_("only one set of parentheses is permitted"));
 			error_detected = 1;
 
 			++p;
@@ -2288,25 +2287,25 @@ repeat:
 			}
 			for (; *p != ')' && *p; p++) {
 				if (!isdigit (*p)) {
-					cb_error (_("Non-digits in parentheses not permitted"));
+					cb_error (_("only digits are permitted within parentheses"));
 					error_detected = 1;
 				} else {
 					allocated++;
 					if (allocated <= 9) {
 						i = i * 10 + (*p - '0');
 					} else if (allocated == 10) {
-						cb_error (_("Only up to 9 significant digits in parentheses are permitted"));
+						cb_error (_("only up to 9 significant digits are permitted within parentheses"));
 						error_detected = 1;
 					}
 					
 				}
 			}
 			if (!*p) {
-				cb_error (_("Unbalanced parenthesis"));
+				cb_error (_("unbalanced parenthesis"));
 				/* There are no more informative messages to display, so skip to end */
 				goto end;
 			} else if (i == 0) {
-				cb_error (_("Parentheses must contain a number greater than zero"));
+				cb_error (_("parentheses must contain a number greater than zero"));
 				error_detected = 1;
 			}
 			n += i - 1;
@@ -2344,7 +2343,7 @@ repeat:
 			if (s_count <= 1) {
 				s_count += n;
 				if (s_count > 1) {
-					cb_error (_("S may only occur once in a PICTURE string"));
+					cb_error (_("%s may only occur once in a PICTURE string"), "S");
 					error_detected = 1;
 				}
 			}
@@ -2432,7 +2431,7 @@ repeat:
 			}
 
 			if (asterisk_seen && z_char_seen) {
-				cb_error (_("Cannot have both Z and * in PICTURE string"));
+				cb_error (_("cannot have both Z and * in PICTURE string"));
 				error_detected = 1;
 			}
 			
@@ -2485,7 +2484,7 @@ repeat:
 				break;
 			}
 
-			cb_error (_("Invalid PICTURE character '%c'"), c);
+			cb_error (_("invalid PICTURE character '%c'"), c);
 			error_detected = 1;
 		}
 
@@ -2511,7 +2510,7 @@ repeat:
 	pic_buff[idx].symbol = '\0';
 
 	if (digits == 0 && x_digits == 0) {
-		cb_error (_("PICTURE string must contain 1+ of A, N, X, Z, 1, 9 and *, or 2+ of +, - and the currency symbol"));
+		cb_error (_("PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol"));
 		error_detected = 1;
 	}
 	if (!valid_char_order (pic_buff, s_char_seen)) {
@@ -2538,7 +2537,7 @@ repeat:
 	case PIC_NUMERIC:
 		pic->category = CB_CATEGORY_NUMERIC;
 		if (digits > COB_MAX_DIGITS) {
-			cb_error (_("Numeric field cannot be larger than %d digits"), COB_MAX_DIGITS);
+			cb_error (_("numeric field cannot be larger than %d digits"), COB_MAX_DIGITS);
 		}
 		break;
 	case PIC_ALPHANUMERIC:
@@ -2775,7 +2774,7 @@ build_file (cb_tree name)
 void
 validate_file (struct cb_file *f, cb_tree name)
 {
-	/* Check ASSIGN clause
+	/* FIXME - Check ASSIGN clause
 		Currently break's GnuCOBOL's extension for SORT FILEs having no need
 		for an ASSIGN clause (tested in run_extensions "SORT ASSIGN ..."
 		According to the Programmer's Guide for 1.1 the ASSIGN is totally
@@ -2848,7 +2847,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 			}
 		}
 		if (!p) {
-			cb_error (_("Invalid KEY item '%s'"),
+			cb_error (_("invalid KEY item '%s'"),
 				  CB_FIELD_PTR (l)->name);
 		}
 	}
@@ -2865,7 +2864,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 				}
 			}
 			if (!p) {
-				cb_error (_("Invalid KEY item '%s'"),
+				cb_error (_("invalid KEY item '%s'"),
 					    CB_FIELD_PTR (l)->name);
 			}
 		}
@@ -2875,14 +2874,14 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	for (p = records; p; p = p->sister) {
 		if (f->record_min > 0) {
 			if (p->size < f->record_min) {
-				cb_error (_("Record size too small '%s' (%d)"),
-					 p->name, p->size);
+				cb_error (_("file '%s': record size %d too small, file minimum %d"),
+					 p->name, p->size, f->record_min);
 			}
 		}
 		if (f->record_max > 0) {
 			if (p->size > f->record_max) {
-				cb_error (_("Record size too large '%s' (%d)"),
-					 p->name, p->size);
+				cb_error (_("file '%s': record size %d too large, file maximum %d"),
+					 p->name, p->size, f->record_max);
 			}
 		}
 	}
@@ -2909,8 +2908,8 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	if (f->record_max > MAX_FD_RECORD) {
-		cb_error (_("Record size exceeds maximum allowed (%d) - File '%s'"),
-			  MAX_FD_RECORD, f->name);
+		cb_error (_("file '%s': record size %d exceeds maximum allowed (%d)"),
+			f->name, f->record_max, MAX_FD_RECORD);
 	}
 
 	if (f->same_clause) {
@@ -3280,12 +3279,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		/* Relational operators */
 		if ((CB_REF_OR_FIELD_P (x)) &&
 		    CB_FIELD (cb_ref (x))->level == 88) {
-			cb_error_x (x, _("Invalid expression"));
+			cb_error_x (x, _("invalid expression"));
 			return cb_error_node;
 		}
 		if ((CB_REF_OR_FIELD_P (y)) &&
 		    CB_FIELD (cb_ref (y))->level == 88) {
-			cb_error_x (y, _("Invalid expression"));
+			cb_error_x (y, _("invalid expression"));
 			return cb_error_node;
 		}
 		category = CB_CATEGORY_BOOLEAN;
@@ -3297,7 +3296,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		/* Logical operators */
 		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN ||
 		    (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
-			cb_error_x (x, _("Invalid expression"));
+			cb_error_x (x, _("invalid expression"));
 			return cb_error_node;
 		}
 		category = CB_CATEGORY_BOOLEAN;
@@ -3673,11 +3672,11 @@ check_prototype_seen (const struct cb_func_prototype *fp)
 	if (cb_warn_prototypes) {
 		if (strcmp (fp->name, fp->ext_name) == 0) {
 			cb_warning_x (CB_TREE (fp),
-				      _("No definition/prototype seen for function '%s'"),
+				      _("no definition/prototype seen for function '%s'"),
 				      fp->name);
 		} else {
 			cb_warning_x (CB_TREE (fp),
-				      _("No definition/prototype seen for function with external name '%s'"),
+				      _("no definition/prototype seen for function with external name '%s'"),
 				      fp->ext_name);
 		}
 	}
@@ -3764,7 +3763,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	if ((cbp->args == -1)) {
 		if (numargs < cbp->min_args) {
 			cb_error_x (name,
-				_ ("FUNCTION '%s' has wrong number of arguments"),
+				_("FUNCTION '%s' has wrong number of arguments"),
 				cbp->name);
 			return cb_error_node;
 		}

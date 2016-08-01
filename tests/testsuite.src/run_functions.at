@@ -3681,13 +3681,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 11: Warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
-prog.cob: 18: Warning: FUNCTION 'FORMATTED-DATE' has format in variable
-prog.cob: 24: Warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
-prog.cob: 31: Warning: FUNCTION 'FORMATTED-TIME' has format in variable
-prog.cob: 37: Warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
-prog.cob: 44: Warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
-prog.cob: 51: Warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+[prog.cob: 11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob: 18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob: 31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob: 37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob: 44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
 ])
 AT_CHECK([./prog], [0], [], [])
 

@@ -38,7 +38,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 7: Error: REDEFINES clause must follow entry-name
+[prog.cob: 7: error: REDEFINES clause must follow entry-name
 ])
 
 AT_CLEANUP
@@ -62,7 +62,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: Level number of REDEFINES entries must be identical
+[prog.cob: 8: error: level number of REDEFINES entries must be identical
 ])
 
 AT_CLEANUP
@@ -84,7 +84,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 9: Error: 'X' is not defined in 'G1'
+[prog.cob: 9: error: 'X' is not defined in 'G1'
 ])
 
 AT_CLEANUP
@@ -106,7 +106,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 9: Error: syntax error, unexpected REDEFINES, expecting RENAMES
+[prog.cob: 9: error: syntax error, unexpected REDEFINES, expecting RENAMES
 ])
 
 AT_CLEANUP
@@ -127,7 +127,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: syntax error, unexpected REDEFINES, expecting VALUE
+[prog.cob: 8: error: syntax error, unexpected REDEFINES, expecting VALUE
 ])
 
 AT_CLEANUP
@@ -158,7 +158,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: Error: 'X' is not defined in 'G3'
+[prog.cob: 10: error: 'X' is not defined in 'G3'
 ])
 
 AT_CLEANUP
@@ -182,7 +182,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: The original definition 'X' should not have OCCURS
+[prog.cob: 8: warning: the original definition 'X' should not have OCCURS clause
 ])
 
 AT_CLEANUP
@@ -204,7 +204,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 9: Error: 'X' cannot be subscripted here
+[prog.cob: 9: error: 'X' cannot be subscripted here
 ])
 
 AT_CLEANUP
@@ -234,9 +234,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: 'Y' cannot be variable length
-prog.cob: 11: Error: 'Y' cannot be variable length
-prog.cob: 16: Error: The original definition 'X' cannot be variable length
+[prog.cob: 8: error: 'Y' cannot be variable length
+prog.cob: 11: error: 'Y' cannot be variable length
+prog.cob: 16: error: the original definition 'X' cannot be variable length
 ])
 
 AT_CLEANUP
@@ -262,7 +262,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: Error: 'X' cannot be qualified here
+[prog.cob: 10: error: 'X' cannot be qualified here
 ])
 
 AT_CLEANUP
@@ -288,7 +288,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: Error: 'B' not the original definition
+[prog.cob: 10: error: 'B' is not the original definition
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
@@ -321,9 +321,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: Size of 'A' larger than size of 'X'
-prog.cob: 11: Error: Size of 'A' larger than size of 'X'
-prog.cob: 15: Error: Size of 'EXT-X-REDEF' larger than size of 'EXT-X'
+[prog.cob: 8: error: size of 'A' larger than size of 'X'
+prog.cob: 11: error: size of 'A' larger than size of 'X'
+prog.cob: 15: error: size of 'EXT-X-REDEF' larger than size of 'EXT-X'
 ])
 
 AT_CLEANUP
@@ -350,8 +350,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 7: Error: Entries under REDEFINES cannot have a VALUE clause
-prog.cob: 9: Error: Entries under REDEFINES cannot have a VALUE clause
+[prog.cob: 7: error: entries under REDEFINES cannot have a VALUE clause
+prog.cob: 9: error: entries under REDEFINES cannot have a VALUE clause
 ])
 
 AT_CLEANUP
@@ -379,8 +379,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 8: Error: REDEFINES must follow the original definition
-prog.cob: 12: Error: REDEFINES must follow the original definition
+[prog.cob: 8: error: REDEFINES must follow the original definition
+prog.cob: 12: error: REDEFINES must follow the original definition
 ])
 
 AT_CLEANUP
@@ -424,8 +424,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: Warning: Redefinition of 'X'
-prog.cob: 6: Warning: 'X' previously defined here
+[prog.cob: 7: warning: redefinition of 'X'
+prog.cob: 6: warning: 'X' previously defined here
 ])
 
 AT_CLEANUP

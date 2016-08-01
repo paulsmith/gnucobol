@@ -37,7 +37,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: Error: Function RETURNING item may not be ANY LENGTH
+[prog.cob: 9: error: function RETURNING item may not be ANY LENGTH
 ])
 
 AT_CLEANUP
@@ -140,12 +140,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 14: Warning: Prototype has same name as current function and will be ignored
-prog.cob: 16: Warning: Duplicate REPOSITORY entry for 'beta'
-prog.cob: 17: Error: Duplicate REPOSITORY entries for 'beta' do not match
-prog.cob: 19: Warning: No definition/prototype seen for function 'gamma'
-prog.cob: 18: Error: Redefinition of 'gamma'
-prog.cob: 11: Error: 'gamma' previously defined here
+[prog.cob: 14: warning: prototype has same name as current function and will be ignored
+prog.cob: 16: warning: duplicate REPOSITORY entry for 'beta'
+prog.cob: 17: error: duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 19: warning: no definition/prototype seen for function 'gamma'
+prog.cob: 18: error: redefinition of 'gamma'
+prog.cob: 11: error: 'gamma' previously defined here
 ])
 AT_CLEANUP
 
@@ -174,7 +174,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: Warning: No definition/prototype seen for function 'x'
+[prog.cob: 8: warning: no definition/prototype seen for function 'x'
 ])
 AT_CLEANUP
 
@@ -196,7 +196,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: Error: Functions may not be defined within a program/function
+[prog.cob: 10: error: functions may not be defined within a program/function
 ])
 AT_CLEANUP
 
@@ -228,13 +228,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: Error: FUNCTION 'PI' has wrong number of arguments
-prog.cob: 11: Error: FUNCTION 'ABS' has wrong number of arguments
-prog.cob: 13: Error: FUNCTION 'ABS' has wrong number of arguments
-prog.cob: 14: Error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
-prog.cob: 18: Error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
-prog.cob: 19: Error: FUNCTION 'MAX' has wrong number of arguments
-prog.cob: 21: Error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+[prog.cob: 10: error: FUNCTION 'PI' has wrong number of arguments
+prog.cob: 11: error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 13: error: FUNCTION 'ABS' has wrong number of arguments
+prog.cob: 14: error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 18: error: FUNCTION 'DAY-TO-YYYYDDD' has wrong number of arguments
+prog.cob: 19: error: FUNCTION 'MAX' has wrong number of arguments
+prog.cob: 21: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
 ])
 
 AT_CLEANUP
@@ -260,11 +260,11 @@ AT_KEYWORDS([functions])
 #])
 #
 #AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-#[prog.cob: 8: Error: FUNCTION 'PI' can not have reference modification
-#prog.cob: 9: Error: FUNCTION 'NUMVAL-C' can not have reference modification
-#prog.cob: 10: Error: FUNCTION 'REVERSE' has invalid reference modification
-#prog.cob: 11: Error: FUNCTION 'REVERSE' has invalid reference modification
-#prog.cob: 12: Error: FUNCTION 'REVERSE' has invalid reference modification
+#[prog.cob: 8: error: FUNCTION 'PI' can not have reference modification
+#prog.cob: 9: error: FUNCTION 'NUMVAL-C' can not have reference modification
+#prog.cob: 10: error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 11: error: FUNCTION 'REVERSE' has invalid reference modification
+#prog.cob: 12: error: FUNCTION 'REVERSE' has invalid reference modification
 #])
 
 # test what is in already...
@@ -281,8 +281,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Error: FUNCTION 'REVERSE' has invalid reference modification
-prog.cob: 9: Error: FUNCTION 'REVERSE' has invalid reference modification
+[prog.cob: 8: error: FUNCTION 'REVERSE' has invalid reference modification
+prog.cob: 9: error: FUNCTION 'REVERSE' has invalid reference modification
 ])
 
 AT_CLEANUP
@@ -305,13 +305,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: Error: FUNCTION 'ABS' has invalid parameter
+[prog.cob: 8: error: FUNCTION 'ABS' has invalid parameter
 ])
 
 AT_CLEANUP
 
 
-AT_SETUP([Invalid formatted date/time args])
+AT_SETUP([invalid formatted date/time args])
 AT_KEYWORDS([functions FORMATTED-DATE FORMATTED-CURRENT-DATE FORMATTED-TIME FORMATTED-DATETIME INTEGER-OF-FORMATTED-DATE SECONDS-FROM-FORMATTED-TIME])
 
 AT_DATA([prog.cob], [
@@ -373,26 +373,26 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: Error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
-prog.cob: 14: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
-prog.cob: 16: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
-prog.cob: 21: Warning: FUNCTION 'FORMATTED-DATE' has format in variable
-prog.cob: 25: Error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
-prog.cob: 27: Error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
-prog.cob: 30: Error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
-prog.cob: 32: Error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
-prog.cob: 35: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
-prog.cob: 37: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
-prog.cob: 40: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
-prog.cob: 42: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
-prog.cob: 45: Error: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has invalid date/time format
-prog.cob: 48: Error: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has invalid date/time format
-prog.cob: 53: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+[prog.cob: 12: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 14: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 16: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 21: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob: 25: error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
+prog.cob: 27: error: FUNCTION 'FORMATTED-CURRENT-DATE' has invalid date/time format
+prog.cob: 30: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 32: error: FUNCTION 'FORMATTED-DATE' has invalid date/time format
+prog.cob: 35: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 37: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 40: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 42: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+prog.cob: 45: error: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has invalid date/time format
+prog.cob: 48: error: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has invalid date/time format
+prog.cob: 53: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
 ])
 
 AT_CLEANUP
 
-AT_SETUP([Invalid formats w/ DECIMAL-POINT IS COMMA])
+AT_SETUP([invalid formats w/ DECIMAL-POINT IS COMMA])
 AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME])
 
 AT_DATA([prog.cob], [
@@ -419,8 +419,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 15: Error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
-prog.cob: 17: Error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
+[prog.cob: 15: error: FUNCTION 'FORMATTED-TIME' has invalid date/time format
+prog.cob: 17: error: FUNCTION 'FORMATTED-DATETIME' has invalid date/time format
 ])
 
 AT_CLEANUP
@@ -443,8 +443,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
-[prog.cob: 6: Error: Cannot specify offset and SYSTEM-OFFSET at the same time.
-prog.cob: 9: Error: Cannot specify offset and SYSTEM-OFFSET at the same time.
+[prog.cob: 6: error: cannot specify offset and SYSTEM-OFFSET at the same time
+prog.cob: 9: error: cannot specify offset and SYSTEM-OFFSET at the same time
 ])
 
 AT_CLEANUP
