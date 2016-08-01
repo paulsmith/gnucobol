@@ -1057,10 +1057,10 @@ AT_DATA([prog.cob], [
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  a.
-           03  b       PIC X.
+           03  b       PIC 9.
            03  c.
-               05 d    PIC X.
-               05 e    PIC X.
+               05 d    PIC 9.
+               05 e    PIC 9.
 
        66  valid-1     RENAMES b.
        66  valid-2     RENAMES d THRU e.
@@ -1091,6 +1091,9 @@ AT_DATA([prog.cob], [
 
        PROCEDURE       DIVISION.
            DISPLAY valid-2 OF a
+           IF valid-1 = 1
+              CONTINUE
+           END-IF
            .
 ])
 
