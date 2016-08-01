@@ -807,7 +807,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	}
 
 	if (!ppin) {
-		cb_perror (errno, name, 1);
+		cb_error ("%s: %s", name, cb_get_strerror ());
 		return -1;
 	}
 
@@ -906,7 +906,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			}
 		}
 	}
-	cb_perror (errno, name, 0);
+	cb_error ("%s: %s", s, cb_get_strerror ());
 	return -1;
 }
 

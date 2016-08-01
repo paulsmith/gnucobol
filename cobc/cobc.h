@@ -443,7 +443,7 @@ extern size_t		cb_msg_style;
 
 extern void		cb_warning (const char *, ...) COB_A_FORMAT12;
 extern void		cb_error (const char *, ...) COB_A_FORMAT12;
-extern void		cb_perror (const int, const char *, const char);
+extern void		cb_perror (const int, const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_warning (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_error (const size_t,
@@ -452,6 +452,7 @@ extern void		configuration_warning (const char *, const int,
 					 const char *, ...) COB_A_FORMAT34;
 extern void		configuration_error (const char *, const int,
 					 const int, const char *, ...) COB_A_FORMAT45;
+extern char *	cb_get_strerror (void);
 
 extern unsigned int	cb_verify (const enum cb_support, const char *);
 

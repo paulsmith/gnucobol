@@ -27,7 +27,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
 
 #include "cobc.h"
 
@@ -408,7 +407,7 @@ cb_load_conf_file (const char *conf_file, int isoptional)
 	fp = fopen (conf_file, "r");
 	if (fp == NULL) {
 		if (!isoptional) {
-			cb_perror (errno, conf_file, 2);
+			cb_perror (1, "%s: %s", conf_file, cb_get_strerror ());
 			return -1;
 		} else {
 			return 0;

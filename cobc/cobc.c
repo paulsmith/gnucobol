@@ -31,7 +31,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -1514,7 +1513,7 @@ cobc_clean_up (const int status)
 DECLNORET static void COB_A_NORETURN
 cobc_terminate (const char *str)
 {
-	cb_perror(errno, str, 1);
+	cb_perror (0, "cobc: %s: %s", str, cb_get_strerror ());
 	cobc_clean_up (1);
 	exit (1);
 }

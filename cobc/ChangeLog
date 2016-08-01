@@ -1,4 +1,11 @@
 
+2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* error.c, cobc.h (cb_get_strerror): own reentrant version of strerror
+	* error.c: extracted (configuration_error_head) from (configuration_error)
+	* error.c: adjusted (cb_perror) to receive a formatted message
+	* adjusted callers of (cb_perror)
+
 2016-08-01  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (renames_entry): fixed bug #289 where PICTURE of renamed
