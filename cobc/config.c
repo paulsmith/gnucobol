@@ -245,7 +245,6 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				if (val[j] < '0' || val[j] > '9') {
 					invalid_value (fname, line, name, val, NULL, 0, 0);
 					return -1;
-					break;
 				}
 			}
 			v = atoi (val);

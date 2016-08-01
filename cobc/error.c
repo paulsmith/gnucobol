@@ -315,8 +315,8 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	}
 }
 
-static unsigned int
-cb_verify_common (cb_tree x, const enum cb_support tag, const char *feature)
+unsigned int
+cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 {
 	if (!x) {
 		x = cobc_parse_malloc (sizeof (struct cb_tree_common));
@@ -359,16 +359,10 @@ cb_verify_common (cb_tree x, const enum cb_support tag, const char *feature)
 	return 0;
 }
 
-COB_INLINE COB_A_INLINE unsigned int
-cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
-{
-	return cb_verify_common (x, tag, feature);
-}
-
-COB_INLINE COB_A_INLINE unsigned int
+unsigned int
 cb_verify (const enum cb_support tag, const char *feature)
 {
-	return cb_verify_common (NULL, tag, feature);
+	return cb_verify_x (NULL, tag, feature);
 }
 
 void

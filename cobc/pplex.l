@@ -75,16 +75,12 @@ static int ppwrap (void) {
 
 #include "config.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
 #else
 #define	YY_NO_UNISTD_H	1
 #endif
 #include <ctype.h>
-#include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

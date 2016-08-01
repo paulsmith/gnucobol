@@ -23,6 +23,9 @@
 
 	* cobc.c, cobc.h, tree.c, typeck.c: removed COBC_DUMP_ABORT as it did not
 	  work as intended (fixing compiler warnings because of return not reached)
+	* pplex.l, scanner.l: removed standard C headers already included by flex
+	* error.c: removed inline attribute from (cb_verify), (cb_verify_x) and
+	  removed extra function (cb_verify_common)
 
 2016-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
