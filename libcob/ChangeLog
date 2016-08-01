@@ -3,6 +3,9 @@
 
 	* common.c (cob_runtime_error): reversed the prefix from runtime errors,
 	  always starts with "libcob: " now
+	* common.c (cob_get_strerror): own reentrant version of strerror
+	* common.c (cob_load_config_file): use cob_get_strerror instead of
+	  a guessed error message
 
 2016-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

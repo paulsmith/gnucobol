@@ -4343,6 +4343,20 @@ cob_strjoin (char** strarray, int size, char* separator)
 	return result;
 }
 
+/* reentrant version of strerror */
+static char *
+cob_get_strerror (void)
+{
+	char * msg;
+	msg = cob_cache_malloc ((size_t)COB_ERRBUF_SIZE);
+#ifdef HAVE_STRERROR
+	strncpy (msg, strerror (errno), COB_ERRBUF_SIZE - 1);
+#else
+	snprintf (msg, COB_ERRBUF_SIZE - 1, _("system error %d"), errno);
+#endif
+	return msg;
+}
+
 char *
 cob_save_env_value (char* env_var, char* env_val)
 {
@@ -4498,7 +4512,7 @@ cob_expand_env_string (char *strval)
 
 /* Store 'integer' value in field for correct length */
 static void
-set_value(char *data, int len, long val)
+set_value (char *data, int len, long val)
 {
 	if(len == sizeof(int)) {
 		*(int*)data = (int)val;
@@ -4513,7 +4527,7 @@ set_value(char *data, int len, long val)
 
 /* Get 'integer' value from field */
 static long
-get_value(char *data, int len)
+get_value (char *data, int len)
 {
 	if(len == sizeof(int)) {
 		return (long)*(int*)data;
@@ -4528,7 +4542,7 @@ get_value(char *data, int len)
 
 /* Set runtime setting with given value */
 static int					/* returns 1 if any error, else 0 */
-set_config_val(char *value, int pos)
+set_config_val (char *value, int pos)
 {
 	void 	*data;
 	char	*ptr = value,*str;
@@ -5042,7 +5056,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 	conf_fd = fopen (config_file, "r");
 	if (conf_fd == NULL && !isoptional) {
 		cob_source_line = 0;
-		conf_runtime_error (1,_("no such file or directory"));
+		conf_runtime_error (1, cob_get_strerror());
 		if (cobsetptr->cob_config_file) {
 			cob_source_file = cobsetptr->cob_config_file[cobsetptr->cob_config_num-1];
 		}
