@@ -2325,3 +2325,68 @@ prog.cob: 12: warning: ignoring redundant .
 AT_CLEANUP
 
 
+AT_SETUP([STRING / UNSTRING with invalid syntax])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  a   PIC X.
+       77  b   PIC X.
+       77  c   PIC XXX.
+    
+       PROCEDURE DIVISION.
+           STRING   DELIMITED BY SPACE INTO 
+           END-STRING
+           STRING a DELIMITED BY SPACE c
+           END-STRING
+           STRING a DELIMITED BY SPACE INTO
+           END-STRING
+           STRING 
+                  DELIMITED BY SPACE
+                  INTO c
+           END-STRING
+           STRING a DELIMITED BY SPACE
+           
+                  DELIMITED BY SIZE
+                  INTO c
+           END-STRING
+           STRING a DELIMITED BY SPACE 
+                  b DELIMITED BY SIZE
+                  INTO c
+           END-STRING
+      *
+           UNSTRING   DELIMITED BY SPACE INTO a
+           END-UNSTRING
+           UNSTRING c DELIMITED BY SPACE a
+           END-UNSTRING
+           UNSTRING c DELIMITED BY SPACE INTO
+           END-UNSTRING
+           UNSTRING   DELIMITED BY SPACE INTO a
+           END-UNSTRING
+           UNSTRING c DELIMITED BY SPACE INTO a
+           END-UNSTRING
+           UNSTRING c DELIMITED BY SPACE
+                      DELIMITED BY SIZE  INTO a
+           END-UNSTRING
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: syntax error, unexpected DELIMITED
+prog.cob: 15: error: syntax error, unexpected END-STRING
+prog.cob: 17: error: syntax error, unexpected END-STRING, expecting Identifier
+prog.cob: 19: error: syntax error, unexpected DELIMITED
+prog.cob: 24: error: syntax error, unexpected DELIMITED
+prog.cob: 32: error: syntax error, unexpected DELIMITED, expecting Identifier
+prog.cob: 34: error: syntax error, unexpected Identifier, expecting INTO
+prog.cob: 37: error: syntax error, unexpected END-UNSTRING, expecting Identifier
+prog.cob: 38: error: syntax error, unexpected DELIMITED, expecting Identifier
+prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
+])
+AT_CLEANUP
+
+

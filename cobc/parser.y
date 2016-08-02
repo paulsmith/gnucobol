@@ -9569,6 +9569,7 @@ string_statement:
   STRING
   {
 	begin_statement ("STRING", TERM_STRING);
+	save_tree = NULL;
   }
   string_body
   end_string
@@ -9577,19 +9578,39 @@ string_statement:
 string_body:
   string_item_list INTO identifier _with_pointer _on_overflow_phrases
   {
-	cb_emit_string ($1, $3, $4);
+	cb_emit_string (save_tree, $3, $4);
   }
 ;
 
 string_item_list:
-  string_item			{ $$ = CB_LIST_INIT ($1); }
-| string_item_list string_item	{ $$ = cb_list_add ($1, $2); }
+  string_item
+| string_item_list string_item
 ;
 
 string_item:
-  x				{ $$ = $1; }
-| DELIMITED _by SIZE		{ $$ = CB_BUILD_PAIR (cb_int0, NULL); }
-| DELIMITED _by x		{ $$ = CB_BUILD_PAIR ($3, NULL); }
+  x	_string_delimited	
+  {
+    if (!save_tree) {
+		save_tree = CB_LIST_INIT ($1);
+	} else {
+		save_tree = cb_list_add (save_tree, $1);
+	}
+	if ($2) {
+		save_tree = cb_list_add (save_tree, $2);
+	}
+  }
+
+;
+
+_string_delimited:
+  /* empty */			{ $$ = NULL; }
+| DELIMITED _by
+  string_delimiter	{ $$ = $3; }
+;
+
+string_delimiter:
+  SIZE		{ $$ = CB_BUILD_PAIR (cb_int0, NULL); }
+| x		{ $$ = CB_BUILD_PAIR ($1, NULL); }
 ;
 
 _with_pointer:

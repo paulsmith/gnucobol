@@ -8751,21 +8751,21 @@ cb_emit_string (cb_tree items, cb_tree into, cb_tree pointer)
 	cb_emit (CB_BUILD_FUNCALL_2 ("cob_string_init", into, pointer));
 	while (start) {
 
-		/* Find DELIMITED item */
+		/* Find next DELIMITED item */
 		for (end = start; end; end = CB_CHAIN (end)) {
 			if (CB_PAIR_P (CB_VALUE (end))) {
 				break;
 			}
 		}
 
-		/* cob_string_delimited */
+		/* generate cob_string_delimited from delimiter */
 		dlm = end ? CB_PAIR_X (CB_VALUE (end)) : NULL;
 		if (dlm == cb_int0) {
 			dlm = NULL;
 		}
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_string_delimited", dlm));
 
-		/* cob_string_append */
+		/* generate cob_string_append for all entries until delimiter */
 		for (l = start; l != end; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_string_append",
 						     CB_VALUE (l)));
