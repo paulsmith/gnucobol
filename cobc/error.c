@@ -106,7 +106,7 @@ print_error (const char *file, int line, const char *prefix,
 		}
 		err->msg = cobc_strdup (errmsg);
 
-		/* FIMXE: no listing produced if no file is available */
+		/* If we have a file, queue message for listing processing */
 		if (cb_current_file) {
 
 			/* set correct listing entry for this file */
@@ -132,6 +132,10 @@ print_error (const char *file, int line, const char *prefix,
 				cfile->err_head = err;
 			}
 			cfile->err_tail = err;
+
+		/* Otherwise, just write error to the listing file */
+		} else {
+			fprintf (cb_src_list_file, "%s\n", errmsg);
 		}
 	}
 }

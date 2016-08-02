@@ -2,11 +2,12 @@
 .TH COBC "1" "August 2016" "cobc (GnuCOBOL) 2.0.0" "User Commands"
 .SH NAME
 cobc \- manual page for cobc (GnuCOBOL) 2.0.0
+.SH SYNOPSIS
+.B lt-cobc
+[\fIoptions\fR]... \fIfile\fR...
 .SH DESCRIPTION
 GnuCOBOL compiler for most COBOL dialects with lots of extensions
-.PP
-usage: \fI/home/dpitts/src/opensource/gnu\-cobol\-2\fP.0/cobc/.libs/lt\-cobc [options]... file...
-.SS "options:"
+.SH OPTIONS
 .TP
 \fB\-h\fR, \fB\-help\fR
 display this help and exit
@@ -30,7 +31,7 @@ build an executable program
 \fB\-m\fR
 build a dynamically loadable module (default)
 .HP
-\fB\-j\fR(=<args>), \fB\-job\fR(=<args>) run job, with optional arguments passed to program/module
+\fB\-j\fR [<args>], \fB\-job[=\fR<args>] run program after build, passing <args>
 .TP
 \fB\-std=\fR<dialect>
 warnings/features for a specific dialect
@@ -74,15 +75,15 @@ compile only; output assembly file
 compile and assemble, but do not link
 .TP
 \fB\-T\fR <file>
-Generate and place a wide program listing into <file>
+generate and place a wide program listing into <file>
 .TP
 \fB\-t\fR <file>
-Generate and place a program listing into <file>
+generate and place a program listing into <file>
 .TP
 \fB\-\-tlines=\fR<lines>
-Specify lines per page in listing, default = 55
+specify lines per page in listing, default = 55
 .TP
-\fB\-P\fR(=<dir or file>)
+\fB\-P[=\fR<dir or file>]
 generate preprocessed program listing (.lst)
 .TP
 \fB\-Xref\fR
@@ -111,7 +112,7 @@ define <define> for COBOL compilation
 generate CALL to <entry> as static
 .TP
 \fB\-conf=\fR<file>
-user defined dialect configuration \- See \fB\-std=\fR
+user\-defined dialect configuration; see \fB\-std\fR
 .TP
 \fB\-cb_conf=\fR<tag:value>
 override configuration entry
@@ -128,18 +129,18 @@ display mnemonic names
 \fB\-list\-system\fR
 display system routines
 .TP
-\fB\-save\-temps\fR(=<dir>)
+\fB\-save\-temps[=\fR<dir>]
 save intermediate files
 \- default: current directory
 .TP
 \fB\-ext\fR <extension>
-add default file extension
+add file extension for resolving COPY
 .TP
 \fB\-W\fR
-enable ALL warnings
+enable all warnings
 .TP
 \fB\-Wall\fR
-enable all warnings except as noted below
+enable most warnings (all except as noted below)
 .TP
 \fB\-Wno\-\fR<feature>
 disable warning enabled by \fB\-W\fR or \fB\-Wall\fR
@@ -287,7 +288,7 @@ treat all files as OPTIONAL
 \- unless NOT OPTIONAL specified
 .SH AUTHOR
 Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart
-Built     Aug 01 2016 11:48:56
+Built     Aug 02 2016 14:05:29
 Packaged  Oct 25 2015 21:40:28 UTC
 C version "4.8.3 20140911 (Red Hat 4.8.3\-7)"
 .SH "REPORTING BUGS"

@@ -1666,6 +1666,7 @@ acucobol-literals:			unconformable
 word-continuation:			warning
 not-exception-before-exception:		ok
 accept-display-extensions:		ok
+renames-uncommon-levels:		ok
 
 # If yes, all the reserved words must be specified in a list of reserved:
 # entries; the default reserved word list will not be used.
@@ -2535,9 +2536,9 @@ Node: Appendix C42941
 Node: Appendix D43104
 Node: Appendix E43259
 Node: Appendix F43420
-Node: Appendix G48861
-Node: Appendix H49008
-Node: Appendix I58444
-Node: Index83569
+Node: Appendix G48890
+Node: Appendix H49037
+Node: Appendix I58473
+Node: Index83598
 
 End Tag Table

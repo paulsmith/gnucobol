@@ -1,3 +1,8 @@
+2016-08-02  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Added tests for non-existant file and
+	  copybook messages in the listing file.
+
 2016-07-24  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Fixed test for 32/64 bit pointers and 

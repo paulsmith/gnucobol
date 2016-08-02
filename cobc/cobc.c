@@ -5579,6 +5579,8 @@ main (int argc, char **argv)
 	char			*p;
 	struct cobc_mem_struct	*mptr;
 	struct cobc_mem_struct	*mptrt;
+	struct list_error	*err;
+	struct list_files	*newfile;
 	unsigned int		iparams;
 	unsigned int		local_level;
 	int			status;
@@ -5937,7 +5939,6 @@ main (int argc, char **argv)
 	local_level = 0;
 
 	while (iargs < argc) {
-		struct list_files *newfile;
 
 		/* Set up file parameters */
 		fn = process_filename (argv[iargs++]);
@@ -5955,6 +5956,7 @@ main (int argc, char **argv)
 		   cb_listing_files = newfile;
 		}
 		cb_current_file = newfile;
+		cb_current_file->name = cobc_strdup (fn->source);
 
 		cb_id = 1;
 		cb_pic_id = 1;
@@ -5982,6 +5984,11 @@ main (int argc, char **argv)
 		}
 
 		if (cb_compile_level < CB_LEVEL_TRANSLATE || fn->has_error) {
+			if (cb_current_file && cb_src_list_file) {
+				for (err = cb_current_file->err_head; err; err = err->next) {
+					fprintf (cb_src_list_file, "%s: %d: %s%s\n", cb_source_file, err->line, err->prefix, err->msg);
+				}
+			}
 			continue;
 		}
 		if (fn->need_translate) {

@@ -952,6 +952,36 @@ sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
 
+
+AT_CHECK([$COMPILE_ONLY -t crud.lst crud.cob], [1], [],
+[cobc: crud.cob: No such file or directory
+])
+AT_DATA([prog15.lst],
+[cobc: crud.cob: No such file or directory
+])
+AT_CHECK([diff prog15.lst crud.lst], [0], [], [])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 TEST-VAR PIC 9(2) VALUE 'F1F2'.
+       COPY 'CRUD.CPY'.
+       PROCEDURE        DIVISION.
+           DISPLAY TEST-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t crud.lst prog.cob], [1], [],
+[prog.cob: 7: error: CRUD.CPY: No such file or directory
+])
+AT_DATA([prog16.lst],
+[prog.cob: 7: error: CRUD.CPY: No such file or directory
+])
+AT_CHECK([diff prog16.lst crud.lst], [0], [], [])
+
 AT_CLEANUP
 
 

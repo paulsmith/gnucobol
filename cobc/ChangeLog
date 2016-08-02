@@ -1,3 +1,7 @@
+2016-08-02  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Fixes to put file not found into the listing file. Also, 
+	  changes to list the "file.i" preprocessed file.
 
 2016-08-01  Dave Pitts <dpitts@cozx.com>
 
