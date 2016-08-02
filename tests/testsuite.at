@@ -49,7 +49,7 @@ m4_include([syn_set.at])		# 14.8.35 SET statement
 m4_include([syn_functions.at])		# 15 Intrinsic functions
 
 ## Listings tests
-AT_BANNER([Listings tests])
+AT_BANNER([Listing tests])
 
 m4_include([listings.at])		# Listings
 
