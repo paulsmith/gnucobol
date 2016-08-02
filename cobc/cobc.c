@@ -164,6 +164,7 @@ int			cb_lines_per_page = CB_MAX_LINES;
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
 struct list_files	*cb_listing_files = NULL;
 struct list_files	*cb_current_file = NULL;
+#define CB_LIST_PICSIZE 40
 
 #if	0	/* RXWRXW - source format */
 char			*source_name = NULL;
@@ -3473,8 +3474,7 @@ check_filler_name (char *name)
 static int
 set_picture (struct cb_field *field, char *picture)
 {
-	int got_picture = 0;
-
+	/* Check non-picture information first */
 	switch (field->usage) {
 	case CB_USAGE_INDEX:
 	case CB_USAGE_LENGTH:
@@ -3496,72 +3496,75 @@ set_picture (struct cb_field *field, char *picture)
 	case CB_USAGE_UNSIGNED_INT:
 	case CB_USAGE_UNSIGNED_LONG:
 	case CB_USAGE_PROGRAM:
-		got_picture = 0;
+		return 0;
 		break;
+	}
+
+	/* check for invalid picture next */
+	if (field->pic && !field->pic->orig) {
+		strcpy (picture, "INVALID");
+		return 1;
+	}
+
+	/* set picture for the rest */
+	switch (field->usage) {
 	case CB_USAGE_BINARY:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 5);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP");
 		break;
 	case CB_USAGE_FLOAT:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-1");
 		break;
 	case CB_USAGE_DOUBLE:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-2");
 		break;
 	case CB_USAGE_PACKED:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-3");
 		break;
 	case CB_USAGE_COMP_5:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-5");
 		break;
 	case CB_USAGE_COMP_6:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-6");
 		break;
 	case CB_USAGE_COMP_X:
-		got_picture = 1;
 		if (field->pic) {
-			strcpy (picture, field->pic->orig);
+			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
 		}
 		strcat (picture, "COMP-X");
 		break;
 	default:
-		if (field->pic) {
-			got_picture = 1;
-			strcpy (picture, field->pic->orig);
+		if (!field->pic) {
+			return 0;
 		}
+		strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1);
 		break;
 	}
-	return got_picture;
+	return 1;
 }
 
 static void
@@ -3638,7 +3641,7 @@ print_fields (int lvl, struct cb_field *top)
 	int	got_picture;
 	int	old_level = 0;
 	char	type[20];
-	char	picture[40];
+	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[80];
 
         for (; top; top = top->sister) {

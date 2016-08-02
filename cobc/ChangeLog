@@ -1,6 +1,7 @@
+
 2016-08-01  Dave Pitts <dpitts@cozx.com>
 
-        * cobc.c, error.c pplex.l: Changes to change fixed sized character
+	* cobc.c, error.c pplex.l: Changes to change fixed sized character
 	  arrays to pointers. Allocate strings based on length.
 	* cobc.h: Moved structure declatations and added comments.
 
@@ -10,6 +11,10 @@
 	* error.c: extracted (configuration_error_head) from (configuration_error)
 	* error.c: adjusted (cb_perror) to receive a formatted message
 	* adjusted callers of (cb_perror)
+	* cobc.c (set_picture): fixed SIGSEGV on processing invalid
+	  picture definitions, print INVALID as picture instead
+	* error.c (print_error): fixed SIGSEGVs for empty prefix and
+	  missing source files
 
 2016-08-01  Edward Hart <edward.dan.hart@gmail.com>
 

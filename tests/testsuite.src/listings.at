@@ -1,5 +1,5 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## Copyright (C) 2015-2016 Free Software Foundation, Inc.
+## Written by Dave Pitts, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
 ## 
@@ -382,6 +382,7 @@ AT_CHECK([diff progl.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([COPY TRAILING replacement])
 AT_KEYWORDS([listing])
 
@@ -453,6 +454,7 @@ AT_CHECK([diff progr.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([COPY recursive replacement])
 AT_KEYWORDS([listing])
 
@@ -519,6 +521,7 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Eject page])
 AT_KEYWORDS([listing])
@@ -616,6 +619,7 @@ AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Wide listing])
 AT_KEYWORDS([listing])
 
@@ -712,6 +716,7 @@ AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Two source files])
 AT_KEYWORDS([listing])
 
@@ -789,6 +794,7 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Error/Warning messages])
 AT_KEYWORDS([listing])
@@ -947,6 +953,7 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Symbols])
 AT_KEYWORDS([listing])
@@ -1457,6 +1464,7 @@ AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Conditional compilation])
 AT_KEYWORDS([listing])
 
@@ -1522,6 +1530,7 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([LISTING ON/OFF])
 AT_KEYWORDS([listing])
@@ -1609,6 +1618,7 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([File descriptions])
 AT_KEYWORDS([listing])
@@ -1955,4 +1965,263 @@ AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([Invalid PICTURE strings])
+AT_KEYWORDS([listing])
+
+AT_DATA([sed.txt],
+[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  empty-pic PIC.
+       01  too-long-pic PIC XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+       01  mutiple-symbols.
+           03  PIC 9CRCR.
+           03  PIC SS99S.
+           03  PIC $+99$-.
+       01  non-symbols.
+           03  PIC 9K.
+       01  too-many-digits PIC 9(50).
+       01  too-long-number-in-parens PIC 9(11111111111111).
+       01  nested-parens PIC 9((100)).
+       01  unbalanced-parens PIC 9(.
+       01  multiple-pairs-of-parens PIC 9(5)(3).
+       01  no-digit-in-parens PIC 9().
+       01  mutually-exclusive-symbols.
+           03  PIC 9V.9.
+           03  PIC Z*.
+           03  PIC +(5)--.
+           03  PIC AN.
+           03  PIC SA.
+           03  PIC +++9+.
+           03  PIC +9(5)CR.
+       01 non-rightmost-leftmost-symbols.
+           03  PIC BBB+BB99.
+           03  PIC 99-B.
+           03  PIC 9CRB.
+           03  PIC DB9(5).
+           03  PIC 99$$$.
+           03  PIC 99$B.
+           03  PIC 0$99.
+           03  PIC PPPVP9.
+       01  missing-symbols.
+           03  PIC B(5).
+       01  valid-pics.
+           03  PIC VP9B.
+           03  PIC B9P(3).
+           03  PIC B$$$.
+           03  PIC 0000+B0+++0B,+.
+           03  PIC +(5)P(3).
+           03  PIC ++.++.
+])
+
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
+[prog.cob: 8: warning: continuation of COBOL words used
+prog.cob: 7: error: missing PICTURE string
+prog.cob: 8: error: PICTURE string may not contain more than 63 characters
+prog.cob: 11: error: CR or DB may only occur once in a PICTURE string
+prog.cob: 12: error: S may only occur once in a PICTURE string
+prog.cob: 12: error: S must be at start of PICTURE string
+prog.cob: 13: error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob: 13: error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob: 13: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 15: error: invalid PICTURE character 'K'
+prog.cob: 16: error: numeric field cannot be larger than 38 digits
+prog.cob: 17: error: only up to 9 significant digits are permitted within parentheses
+prog.cob: 18: error: only digits are permitted within parentheses
+prog.cob: 18: error: invalid PICTURE character ')'
+prog.cob: 19: error: unbalanced parenthesis
+prog.cob: 20: error: only one set of parentheses is permitted
+prog.cob: 21: error: parentheses must contain a number greater than zero
+prog.cob: 21: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 23: error: . cannot follow V
+prog.cob: 24: error: cannot have both Z and * in PICTURE string
+prog.cob: 25: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 25: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob: 26: error: N cannot follow A or X
+prog.cob: 27: error: A or X cannot follow S
+prog.cob: 28: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 29: error: CR or DB cannot follow a leading +/- sign
+prog.cob: 31: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 32: error: a leading +/- sign cannot follow 9
+prog.cob: 33: error: B, 0 or / cannot follow CR or DB
+prog.cob: 34: error: 9 cannot follow CR or DB
+prog.cob: 35: error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob: 36: error: a leading currency symbol cannot follow 9
+prog.cob: 37: error: a leading currency symbol cannot follow B, 0 or /
+prog.cob: 38: error: P must be at start or end of PICTURE string
+prog.cob: 38: error: V cannot follow a P which is after the decimal point
+prog.cob: 40: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+])
+
+
+AT_DATA([prog19.lst],
+[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog.
+000004
+000005         DATA DIVISION.
+000006         WORKING-STORAGE SECTION.
+000007         01  empty-pic PIC.
+error: missing PICTURE string
+000008         01  too-long-pic PIC XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+warning: continuation of COBOL words used
+error: PICTURE string may not contain more than 63 characters
+000009        -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+000010         01  mutiple-symbols.
+000011             03  PIC 9CRCR.
+error: CR or DB may only occur once in a PICTURE string
+000012             03  PIC SS99S.
+error: S may only occur once in a PICTURE string
+error: S must be at start of PICTURE string
+000013             03  PIC $+99$-.
+error: a leading +/- sign cannot follow a leading currency symbol
+error: a trailing currency symbol cannot follow a leading currency symbol
+error: a trailing +/- sign cannot follow a leading +/- sign
+000014         01  non-symbols.
+000015             03  PIC 9K.
+error: invalid PICTURE character 'K'
+000016         01  too-many-digits PIC 9(50).
+error: numeric field cannot be larger than 38 digits
+000017         01  too-long-number-in-parens PIC 9(11111111111111).
+error: only up to 9 significant digits are permitted within parentheses
+000018         01  nested-parens PIC 9((100)).
+error: only digits are permitted within parentheses
+error: invalid PICTURE character ')'
+000019         01  unbalanced-parens PIC 9(.
+error: unbalanced parenthesis
+000020         01  multiple-pairs-of-parens PIC 9(5)(3).
+error: only one set of parentheses is permitted
+000021         01  no-digit-in-parens PIC 9().
+error: parentheses must contain a number greater than zero
+error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+000022         01  mutually-exclusive-symbols.
+000023             03  PIC 9V.9.
+error: . cannot follow V
+000024             03  PIC Z*.
+error: cannot have both Z and * in PICTURE string
+000025             03  PIC +(5)--.
+error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+error: a trailing +/- sign may only occur once in a PICTURE string
+000026             03  PIC AN.
+error: N cannot follow A or X
+000027             03  PIC SA.
+error: A or X cannot follow S
+000028             03  PIC +++9+.
+error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+000029             03  PIC +9(5)CR.
+error: CR or DB cannot follow a leading +/- sign
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000030         01 non-rightmost-leftmost-symbols.
+000031             03  PIC BBB+BB99.
+error: a leading +/- sign cannot follow B, 0 or /
+000032             03  PIC 99-B.
+error: a leading +/- sign cannot follow 9
+000033             03  PIC 9CRB.
+error: B, 0 or / cannot follow CR or DB
+000034             03  PIC DB9(5).
+error: 9 cannot follow CR or DB
+000035             03  PIC 99$$$.
+error: a floating currency symbol string which is before the decimal point cannot follow 9
+000036             03  PIC 99$B.
+error: a leading currency symbol cannot follow 9
+000037             03  PIC 0$99.
+error: a leading currency symbol cannot follow B, 0 or /
+000038             03  PIC PPPVP9.
+error: P must be at start or end of PICTURE string
+error: V cannot follow a P which is after the decimal point
+000039         01  missing-symbols.
+000040             03  PIC B(5).
+error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+000041         01  valid-pics.
+000042             03  PIC VP9B.
+000043             03  PIC B9P(3).
+000044             03  PIC B$$$.
+000045             03  PIC 0000+B0+++0B,+.
+000046             03  PIC +(5)P(3).
+000047             03  PIC ++.++.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0000 ALPHANUMERIC   01   empty-pic                      INVALID
+
+0000 ALPHANUMERIC   01   too-long-pic                   INVALID
+
+0000 GROUP          01   mutiple-symbols
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+
+0000 GROUP          01   non-symbols
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+
+0050 ALPHANUMERIC   01   too-many-digits                9(50)
+
+0000 ALPHANUMERIC   01   too-long-number-in-parens      INVALID
+
+0000 ALPHANUMERIC   01   nested-parens                  INVALID
+
+0000 ALPHANUMERIC   01   unbalanced-parens              INVALID
+
+0000 ALPHANUMERIC   01   multiple-pairs-of-parens       INVALID
+
+0000 ALPHANUMERIC   01   no-digit-in-parens             INVALID
+
+0000 GROUP          01   mutually-exclusive-symbols
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+
+0000 GROUP          01   non-rightmost-leftmost-symbols
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+
+0000 GROUP          01   missing-symbols
+0000 ALPHANUMERIC   03     FILLER                       INVALID
+
+0032 GROUP          01   valid-pics
+0002 ALPHANUMERIC   03     FILLER                       VP9B
+0002 ALPHANUMERIC   03     FILLER                       B9P(3)
+0004 ALPHANUMERIC   03     FILLER                       B$$$
+0014 ALPHANUMERIC   03     FILLER                       0000+B0+++0B,+
+0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
+0005 ALPHANUMERIC   03     FILLER                       ++.++
+
+1 Warnings in program
+35 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
 

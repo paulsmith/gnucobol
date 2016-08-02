@@ -99,19 +99,32 @@ print_error (const char *file, int line, const char *prefix,
 		err = cobc_malloc (sizeof (struct list_error));
 		memset (err, 0, sizeof (struct list_error));
 		err->line = line;
-		err->prefix = cobc_strdup (prefix);
-		err->msg = cobc_strdup (errmsg);
-		cfile = cb_current_file;
-		if (strcmp (cfile->name, file)) {
-			cfile = cfile->copy_head;
-			while (cfile) {
-				if (!strcmp (cfile->name, file)) {
-					break;
-				}
-				cfile = cfile->next;
-			}
+		if (prefix) {
+			err->prefix = cobc_strdup (prefix);
+		} else {
+			err->prefix = NULL;
 		}
-		if (cfile) {
+		err->msg = cobc_strdup (errmsg);
+
+		/* FIMXE: no listing produced if no file is available */
+		if (cb_current_file) {
+
+			/* set correct listing entry for this file */
+			cfile = cb_current_file;
+			if (!cfile->name || strcmp (cfile->name, file)) {
+				cfile = cfile->copy_head;
+				while (cfile) {
+					if (cfile->name && !strcmp (cfile->name, file)) {
+						break;
+					}
+					cfile = cfile->next;
+				}
+			}
+			/* if file doesn't exist in the list then add to current file */
+			if (!cfile) {
+				cfile = cb_current_file;
+			}
+			/* add error to listing entry */
 			if (cfile->err_tail) {
 				cfile->err_tail->next = err;
 			}
