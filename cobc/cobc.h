@@ -292,6 +292,7 @@ struct list_files {
 	struct list_skip	*skip_tail;	/* Skip list tail */
 	int 			copy_line;	/* Line start for copy book */
 	int 			listing_on;	/* Listing flag for this file */
+	int			source_format;	/* source format for file */
 	char			*name;		/* Name of this file */
 };
 

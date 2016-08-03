@@ -168,6 +168,46 @@ sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [], [])
+
+AT_DATA([prog4.lst],
+[GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001  #line 1 "prog.cob"
+000002
+000003   IDENTIFICATION   DIVISION.
+000004   PROGRAM-ID. prog.
+000005   DATA DIVISION.
+000006   WORKING-STORAGE SECTION.
+000007
+000008
+000009
+000010  #line 1 "copy.inc"
+000011
+000012   01 FIRST-MATCH PIC X(2) VALUE "OK".
+000013  #line 8 "prog.cob"
+000014
+000015   PROCEDURE DIVISION.
+000016   DISPLAY FIRST-MATCH NO ADVANCING
+000017   END-DISPLAY.
+000018   STOP RUN.
+GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
+
+0 Warnings in program
+0 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
+
 AT_CLEANUP
 
 
@@ -974,13 +1014,36 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t crud.lst prog.cob], [1], [],
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [prog.cob: 7: error: CRUD.CPY: No such file or directory
 ])
+
 AT_DATA([prog16.lst],
-[prog.cob: 7: error: CRUD.CPY: No such file or directory
+[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         01 TEST-VAR PIC 9(2) VALUE 'F1F2'.
+000007         COPY 'CRUD.CPY'.
+error: CRUD.CPY: No such file or directory
+000008         PROCEDURE        DIVISION.
+000009             DISPLAY TEST-VAR NO ADVANCING
+000010             END-DISPLAY.
+000011             STOP RUN.
+
+0 Warnings in program
+1 Errors in program
 ])
-AT_CHECK([diff prog16.lst crud.lst], [0], [], [])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
@@ -2243,6 +2306,10 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0014 ALPHANUMERIC   03     FILLER                       0000+B0+++0B,+
 0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
 0005 ALPHANUMERIC   03     FILLER                       ++.++
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+SIZE TYPE           LVL  NAME                           PICTURE
 
 1 Warnings in program
 35 Errors in program

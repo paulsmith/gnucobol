@@ -1,4 +1,11 @@
 
+2016-08-03  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Redo listings when copybooks are missing. Changed replace
+	  string positioning in free format listings.
+	* cobc.h: Add list file source format field.
+	* pplex.l, ppparse.y: Record source format in the list file struct.
+
 2016-08-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (read_literal): Fix SIGSEGV for uncommon literals - bug 195

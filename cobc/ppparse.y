@@ -677,8 +677,10 @@ set_choice:
 	}
 	if (!strcasecmp (p, "FIXED")) {
 		cb_source_format = CB_FORMAT_FIXED;
+		cb_current_file->source_format = CB_FORMAT_FIXED;
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
+		cb_current_file->source_format = CB_FORMAT_FREE;
 	} else {
 		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
 	}

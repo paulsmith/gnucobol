@@ -1027,17 +1027,17 @@ static const yytype_uint16 yyrline[] =
 {
        0,   608,   608,   609,   613,   614,   615,   619,   620,   621,
      622,   623,   624,   626,   625,   631,   630,   635,   639,   646,
-     647,   651,   661,   662,   686,   690,   718,   721,   728,   732,
-     736,   740,   748,   752,   786,   795,   805,   813,   819,   820,
-     824,   831,   832,   835,   837,   838,   839,   843,   844,   848,
-     855,   862,   872,   887,   894,   895,   899,   912,   926,   930,
-     934,   938,   942,   946,   950,   954,   958,   962,   966,   973,
-     996,   999,  1006,  1007,  1010,  1011,  1016,  1019,  1026,  1030,
-    1037,  1041,  1045,  1049,  1056,  1060,  1067,  1071,  1075,  1082,
-    1089,  1093,  1100,  1104,  1111,  1115,  1122,  1129,  1144,  1148,
-    1156,  1160,  1170,  1173,  1181,  1184,  1192,  1195,  1203,  1206,
-    1212,  1212,  1213,  1213,  1214,  1214,  1215,  1215,  1216,  1216,
-    1217,  1217
+     647,   651,   661,   662,   688,   692,   720,   723,   730,   734,
+     738,   742,   750,   754,   788,   797,   807,   815,   821,   822,
+     826,   833,   834,   837,   839,   840,   841,   845,   846,   850,
+     857,   864,   874,   889,   896,   897,   901,   914,   928,   932,
+     936,   940,   944,   948,   952,   956,   960,   964,   968,   975,
+     998,  1001,  1008,  1009,  1012,  1013,  1018,  1021,  1028,  1032,
+    1039,  1043,  1047,  1051,  1058,  1062,  1069,  1073,  1077,  1084,
+    1091,  1095,  1102,  1106,  1113,  1117,  1124,  1131,  1146,  1150,
+    1158,  1162,  1172,  1175,  1183,  1186,  1194,  1197,  1205,  1208,
+    1214,  1214,  1215,  1215,  1216,  1216,  1217,  1217,  1218,  1218,
+    1219,  1219
 };
 #endif
 
@@ -2134,8 +2134,10 @@ yyreduce:
 	}
 	if (!strcasecmp (p, "FIXED")) {
 		cb_source_format = CB_FORMAT_FIXED;
+		cb_current_file->source_format = CB_FORMAT_FIXED;
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
+		cb_current_file->source_format = CB_FORMAT_FREE;
 	} else {
 		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
 	}
@@ -2144,7 +2146,7 @@ yyreduce:
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 687 "ppparse.y"
+#line 689 "ppparse.y"
     {
 	cb_fold_copy = 0;
   }
@@ -2152,7 +2154,7 @@ yyreduce:
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 691 "ppparse.y"
+#line 693 "ppparse.y"
     {
 	char	*p;
 	size_t	size;
@@ -2180,7 +2182,7 @@ yyreduce:
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 718 "ppparse.y"
+#line 720 "ppparse.y"
     {
 	fprintf (ppout, "#OPTION %s\n", (yyvsp[(0) - (0)].s));
   }
@@ -2188,7 +2190,7 @@ yyreduce:
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 722 "ppparse.y"
+#line 724 "ppparse.y"
     {
 	fprintf (ppout, "#OPTION %s %s\n", (yyvsp[(0) - (2)].s), (yyvsp[(2) - (2)].s));
   }
@@ -2196,7 +2198,7 @@ yyreduce:
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 733 "ppparse.y"
+#line 735 "ppparse.y"
     {
 	cb_source_format = CB_FORMAT_FIXED;
   }
@@ -2204,7 +2206,7 @@ yyreduce:
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 737 "ppparse.y"
+#line 739 "ppparse.y"
     {
 	cb_source_format = CB_FORMAT_FREE;
   }
@@ -2212,7 +2214,7 @@ yyreduce:
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 741 "ppparse.y"
+#line 743 "ppparse.y"
     {
 	cb_error (_("invalid %s directive"), "SOURCE");
 	YYERROR;
@@ -2221,7 +2223,7 @@ yyreduce:
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 749 "ppparse.y"
+#line 751 "ppparse.y"
     {
 	ppp_define_del ((yyvsp[(1) - (3)].s));
   }
@@ -2229,7 +2231,7 @@ yyreduce:
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 753 "ppparse.y"
+#line 755 "ppparse.y"
     {
 	char			*s;
 	char			*q;
@@ -2267,7 +2269,7 @@ yyreduce:
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 787 "ppparse.y"
+#line 789 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 
@@ -2280,7 +2282,7 @@ yyreduce:
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 796 "ppparse.y"
+#line 798 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 
@@ -2294,7 +2296,7 @@ yyreduce:
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 806 "ppparse.y"
+#line 808 "ppparse.y"
     {
 	cb_error (_("invalid %s directive"), "DEFINE/SET");
   }
@@ -2302,7 +2304,7 @@ yyreduce:
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 813 "ppparse.y"
+#line 815 "ppparse.y"
     {
 	CB_PENDING (_("PAGE directive"));
   }
@@ -2310,7 +2312,7 @@ yyreduce:
 
   case 40:
 /* Line 1792 of yacc.c  */
-#line 825 "ppparse.y"
+#line 827 "ppparse.y"
     {
 	CB_PENDING (_("TURN directive"));
   }
@@ -2318,7 +2320,7 @@ yyreduce:
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 849 "ppparse.y"
+#line 851 "ppparse.y"
     {
 	unsigned int		found;
 
@@ -2329,7 +2331,7 @@ yyreduce:
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 856 "ppparse.y"
+#line 858 "ppparse.y"
     {
 	unsigned int		found;
 
@@ -2340,7 +2342,7 @@ yyreduce:
 
   case 51:
 /* Line 1792 of yacc.c  */
-#line 863 "ppparse.y"
+#line 865 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 	unsigned int		found;
@@ -2354,7 +2356,7 @@ yyreduce:
 
   case 52:
 /* Line 1792 of yacc.c  */
-#line 873 "ppparse.y"
+#line 875 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 	unsigned int		found;
@@ -2373,7 +2375,7 @@ yyreduce:
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 888 "ppparse.y"
+#line 890 "ppparse.y"
     {
 	cb_error (_("invalid %s directive"), "IF/ELIF");
   }
@@ -2381,7 +2383,7 @@ yyreduce:
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 900 "ppparse.y"
+#line 902 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 
@@ -2398,7 +2400,7 @@ yyreduce:
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 913 "ppparse.y"
+#line 915 "ppparse.y"
     {
 	struct cb_define_struct	*p;
 
@@ -2413,7 +2415,7 @@ yyreduce:
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 927 "ppparse.y"
+#line 929 "ppparse.y"
     {
 	(yyval.ui) = COND_GE;
   }
@@ -2421,7 +2423,7 @@ yyreduce:
 
   case 59:
 /* Line 1792 of yacc.c  */
-#line 931 "ppparse.y"
+#line 933 "ppparse.y"
     {
 	(yyval.ui) = COND_GT;
   }
@@ -2429,7 +2431,7 @@ yyreduce:
 
   case 60:
 /* Line 1792 of yacc.c  */
-#line 935 "ppparse.y"
+#line 937 "ppparse.y"
     {
 	(yyval.ui) = COND_LE;
   }
@@ -2437,7 +2439,7 @@ yyreduce:
 
   case 61:
 /* Line 1792 of yacc.c  */
-#line 939 "ppparse.y"
+#line 941 "ppparse.y"
     {
 	(yyval.ui) = COND_LT;
   }
@@ -2445,7 +2447,7 @@ yyreduce:
 
   case 62:
 /* Line 1792 of yacc.c  */
-#line 943 "ppparse.y"
+#line 945 "ppparse.y"
     {
 	(yyval.ui) = COND_EQ;
   }
@@ -2453,7 +2455,7 @@ yyreduce:
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 947 "ppparse.y"
+#line 949 "ppparse.y"
     {
 	(yyval.ui) = COND_GE;
   }
@@ -2461,7 +2463,7 @@ yyreduce:
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 951 "ppparse.y"
+#line 953 "ppparse.y"
     {
 	(yyval.ui) = COND_GT;
   }
@@ -2469,7 +2471,7 @@ yyreduce:
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 955 "ppparse.y"
+#line 957 "ppparse.y"
     {
 	(yyval.ui) = COND_LE;
   }
@@ -2477,7 +2479,7 @@ yyreduce:
 
   case 66:
 /* Line 1792 of yacc.c  */
-#line 959 "ppparse.y"
+#line 961 "ppparse.y"
     {
 	(yyval.ui) = COND_LT;
   }
@@ -2485,7 +2487,7 @@ yyreduce:
 
   case 67:
 /* Line 1792 of yacc.c  */
-#line 963 "ppparse.y"
+#line 965 "ppparse.y"
     {
 	(yyval.ui) = COND_EQ;
   }
@@ -2493,7 +2495,7 @@ yyreduce:
 
   case 68:
 /* Line 1792 of yacc.c  */
-#line 967 "ppparse.y"
+#line 969 "ppparse.y"
     {
 	(yyval.ui) = COND_NE;
   }
@@ -2501,7 +2503,7 @@ yyreduce:
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 974 "ppparse.y"
+#line 976 "ppparse.y"
     {
 	fputc ('\n', ppout);
 	(yyvsp[(2) - (5)].s) = fix_filename ((yyvsp[(2) - (5)].s));
@@ -2524,7 +2526,7 @@ yyreduce:
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 996 "ppparse.y"
+#line 998 "ppparse.y"
     {
 	(yyval.s) = NULL;
   }
@@ -2532,7 +2534,7 @@ yyreduce:
 
   case 71:
 /* Line 1792 of yacc.c  */
-#line 1000 "ppparse.y"
+#line 1002 "ppparse.y"
     {
 	(yyval.s) = (yyvsp[(2) - (2)].s);
   }
@@ -2540,7 +2542,7 @@ yyreduce:
 
   case 76:
 /* Line 1792 of yacc.c  */
-#line 1016 "ppparse.y"
+#line 1018 "ppparse.y"
     {
 	(yyval.r) = NULL;
   }
@@ -2548,7 +2550,7 @@ yyreduce:
 
   case 77:
 /* Line 1792 of yacc.c  */
-#line 1020 "ppparse.y"
+#line 1022 "ppparse.y"
     {
 	(yyval.r) = (yyvsp[(2) - (2)].r);
   }
@@ -2556,7 +2558,7 @@ yyreduce:
 
   case 78:
 /* Line 1792 of yacc.c  */
-#line 1027 "ppparse.y"
+#line 1029 "ppparse.y"
     {
 	pp_set_replace_list ((yyvsp[(3) - (3)].r), (yyvsp[(2) - (3)].ui));
   }
@@ -2564,7 +2566,7 @@ yyreduce:
 
   case 79:
 /* Line 1792 of yacc.c  */
-#line 1031 "ppparse.y"
+#line 1033 "ppparse.y"
     {
 	pp_set_replace_list (NULL, (yyvsp[(2) - (3)].ui));
   }
@@ -2572,7 +2574,7 @@ yyreduce:
 
   case 80:
 /* Line 1792 of yacc.c  */
-#line 1038 "ppparse.y"
+#line 1040 "ppparse.y"
     {
 	(yyval.r) = ppp_replace_list_add (NULL, (yyvsp[(1) - (3)].l), (yyvsp[(3) - (3)].l), 0);
   }
@@ -2580,7 +2582,7 @@ yyreduce:
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 1042 "ppparse.y"
+#line 1044 "ppparse.y"
     {
 	(yyval.r) = ppp_replace_list_add (NULL, (yyvsp[(2) - (4)].l), (yyvsp[(4) - (4)].l), (yyvsp[(1) - (4)].ui));
   }
@@ -2588,7 +2590,7 @@ yyreduce:
 
   case 82:
 /* Line 1792 of yacc.c  */
-#line 1046 "ppparse.y"
+#line 1048 "ppparse.y"
     {
 	(yyval.r) = ppp_replace_list_add ((yyvsp[(1) - (4)].r), (yyvsp[(2) - (4)].l), (yyvsp[(4) - (4)].l), 0);
   }
@@ -2596,7 +2598,7 @@ yyreduce:
 
   case 83:
 /* Line 1792 of yacc.c  */
-#line 1050 "ppparse.y"
+#line 1052 "ppparse.y"
     {
 	(yyval.r) = ppp_replace_list_add ((yyvsp[(1) - (5)].r), (yyvsp[(3) - (5)].l), (yyvsp[(5) - (5)].l), (yyvsp[(2) - (5)].ui));
   }
@@ -2604,7 +2606,7 @@ yyreduce:
 
   case 84:
 /* Line 1792 of yacc.c  */
-#line 1057 "ppparse.y"
+#line 1059 "ppparse.y"
     {
 	(yyval.l) = (yyvsp[(2) - (3)].l);
   }
@@ -2612,7 +2614,7 @@ yyreduce:
 
   case 85:
 /* Line 1792 of yacc.c  */
-#line 1061 "ppparse.y"
+#line 1063 "ppparse.y"
     {
 	(yyval.l) = (yyvsp[(1) - (1)].l);
   }
@@ -2620,7 +2622,7 @@ yyreduce:
 
   case 86:
 /* Line 1792 of yacc.c  */
-#line 1068 "ppparse.y"
+#line 1070 "ppparse.y"
     {
 	(yyval.l) = NULL;
   }
@@ -2628,7 +2630,7 @@ yyreduce:
 
   case 87:
 /* Line 1792 of yacc.c  */
-#line 1072 "ppparse.y"
+#line 1074 "ppparse.y"
     {
 	(yyval.l) = (yyvsp[(2) - (3)].l);
   }
@@ -2636,7 +2638,7 @@ yyreduce:
 
   case 88:
 /* Line 1792 of yacc.c  */
-#line 1076 "ppparse.y"
+#line 1078 "ppparse.y"
     {
 	(yyval.l) = (yyvsp[(1) - (1)].l);
   }
@@ -2644,7 +2646,7 @@ yyreduce:
 
   case 89:
 /* Line 1792 of yacc.c  */
-#line 1083 "ppparse.y"
+#line 1085 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add (NULL, (yyvsp[(2) - (3)].s));
   }
@@ -2652,7 +2654,7 @@ yyreduce:
 
   case 90:
 /* Line 1792 of yacc.c  */
-#line 1090 "ppparse.y"
+#line 1092 "ppparse.y"
     {
 	(yyval.l) = NULL;
   }
@@ -2660,7 +2662,7 @@ yyreduce:
 
   case 91:
 /* Line 1792 of yacc.c  */
-#line 1094 "ppparse.y"
+#line 1096 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add (NULL, (yyvsp[(2) - (3)].s));
   }
@@ -2668,7 +2670,7 @@ yyreduce:
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 1101 "ppparse.y"
+#line 1103 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add (NULL, (yyvsp[(1) - (1)].s));
   }
@@ -2676,7 +2678,7 @@ yyreduce:
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 1105 "ppparse.y"
+#line 1107 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add ((yyvsp[(1) - (2)].l), (yyvsp[(2) - (2)].s));
   }
@@ -2684,7 +2686,7 @@ yyreduce:
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 1112 "ppparse.y"
+#line 1114 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add (NULL, (yyvsp[(1) - (1)].s));
   }
@@ -2692,7 +2694,7 @@ yyreduce:
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 1116 "ppparse.y"
+#line 1118 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add ((yyvsp[(1) - (3)].l), " ");
 	(yyval.l) = ppp_list_add ((yyval.l), "IN");
@@ -2703,7 +2705,7 @@ yyreduce:
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 1123 "ppparse.y"
+#line 1125 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add ((yyvsp[(1) - (3)].l), " ");
 	(yyval.l) = ppp_list_add ((yyval.l), "OF");
@@ -2714,7 +2716,7 @@ yyreduce:
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 1130 "ppparse.y"
+#line 1132 "ppparse.y"
     {
 	struct cb_text_list *l;
 
@@ -2730,7 +2732,7 @@ yyreduce:
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 1145 "ppparse.y"
+#line 1147 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add (NULL, (yyvsp[(1) - (1)].s));
   }
@@ -2738,7 +2740,7 @@ yyreduce:
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 1149 "ppparse.y"
+#line 1151 "ppparse.y"
     {
 	(yyval.l) = ppp_list_add ((yyvsp[(1) - (2)].l), " ");
 	(yyval.l) = ppp_list_add ((yyval.l), (yyvsp[(2) - (2)].s));
@@ -2747,7 +2749,7 @@ yyreduce:
 
   case 100:
 /* Line 1792 of yacc.c  */
-#line 1157 "ppparse.y"
+#line 1159 "ppparse.y"
     {
 	(yyval.ui) = CB_REPLACE_LEADING;
   }
@@ -2755,7 +2757,7 @@ yyreduce:
 
   case 101:
 /* Line 1792 of yacc.c  */
-#line 1161 "ppparse.y"
+#line 1163 "ppparse.y"
     {
 	(yyval.ui) = CB_REPLACE_TRAILING;
   }
@@ -2763,7 +2765,7 @@ yyreduce:
 
   case 102:
 /* Line 1792 of yacc.c  */
-#line 1170 "ppparse.y"
+#line 1172 "ppparse.y"
     {
 	(yyval.ui) = 0;
   }
@@ -2771,7 +2773,7 @@ yyreduce:
 
   case 103:
 /* Line 1792 of yacc.c  */
-#line 1174 "ppparse.y"
+#line 1176 "ppparse.y"
     {
 	(yyval.ui) = 1U;
   }
@@ -2779,7 +2781,7 @@ yyreduce:
 
   case 104:
 /* Line 1792 of yacc.c  */
-#line 1181 "ppparse.y"
+#line 1183 "ppparse.y"
     {
 	(yyval.ui) = 0;
   }
@@ -2787,7 +2789,7 @@ yyreduce:
 
   case 105:
 /* Line 1792 of yacc.c  */
-#line 1185 "ppparse.y"
+#line 1187 "ppparse.y"
     {
 	(yyval.ui) = 1U;
   }
@@ -2795,7 +2797,7 @@ yyreduce:
 
   case 106:
 /* Line 1792 of yacc.c  */
-#line 1192 "ppparse.y"
+#line 1194 "ppparse.y"
     {
 	(yyval.ui) = 0;
   }
@@ -2803,7 +2805,7 @@ yyreduce:
 
   case 107:
 /* Line 1792 of yacc.c  */
-#line 1196 "ppparse.y"
+#line 1198 "ppparse.y"
     {
 	(yyval.ui) = 1U;
   }
@@ -2811,7 +2813,7 @@ yyreduce:
 
   case 108:
 /* Line 1792 of yacc.c  */
-#line 1203 "ppparse.y"
+#line 1205 "ppparse.y"
     {
 	(yyval.ui) = 0;
   }
@@ -2819,7 +2821,7 @@ yyreduce:
 
   case 109:
 /* Line 1792 of yacc.c  */
-#line 1207 "ppparse.y"
+#line 1209 "ppparse.y"
     {
 	(yyval.ui) = 1U;
   }
@@ -2827,7 +2829,7 @@ yyreduce:
 
 
 /* Line 1792 of yacc.c  */
-#line 2831 "ppparse.c"
+#line 2833 "ppparse.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3059,5 +3061,5 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 1219 "ppparse.y"
+#line 1221 "ppparse.y"
 

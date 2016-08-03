@@ -3748,37 +3748,44 @@ print_program_trailer (void)
 		return;
 	}
 
-	/* Print file/symbol tables */
+	if ((p = current_program) != NULL) {
+		/* Print file/symbol tables */
 
-	strcpy (cb_listing_title,
-		"SIZE TYPE           LVL  NAME                           PICTURE");
-	force_new_page_for_next_line ();
-	print_program_header ();
+		strcpy (cb_listing_title,
+			"SIZE TYPE           LVL  NAME                           PICTURE");
+		force_new_page_for_next_line ();
+		print_program_header ();
 
-	p = current_program;
-	if (p->next_program) {
-		print_names = 1;
-	}
-
-	for (q = p; q; q = q->next_program) {
-		if (print_names) {
-			print_program_header ();
-			fprintf (cb_src_list_file, "     %-14s      %s\n",
-			 	 (q->prog_type == CB_FUNCTION_TYPE ?
-				 	"FUNCTION" : "PROGRAM"),
-			 	 q->program_name);
+		if (p->next_program) {
+			print_names = 1;
 		}
-		print_files_and_their_records (q->file_list);
-		print_fields_in_section (q->working_storage);
-		print_fields_in_section (q->local_storage);
-		print_fields_in_section (q->linkage_storage);
-		print_fields_in_section (q->screen_storage);
-		print_fields_in_section (q->report_storage);
+
+		for (q = p; q; q = q->next_program) {
+			if (print_names) {
+				print_program_header ();
+				fprintf (cb_src_list_file,
+					"     %-14s      %s\n",
+			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
+				 		"FUNCTION" : "PROGRAM"),
+			 	 	q->program_name);
+			}
+			print_files_and_their_records (q->file_list);
+			print_fields_in_section (q->working_storage);
+			print_fields_in_section (q->local_storage);
+			print_fields_in_section (q->linkage_storage);
+			print_fields_in_section (q->screen_storage);
+			print_fields_in_section (q->report_storage);
+		}
+	} else {
+		print_program_header ();
+		fputc ('\n', cb_src_list_file);
 	}
 
 	/* Print error counts */
 
+	print_program_header ();
 	fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
+	print_program_header ();
 	fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
 	force_new_page_for_next_line ();
 }
@@ -4190,9 +4197,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	i;
 	int	j;
 	int	k = 0;
-	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
-	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
-	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
+	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	int	first_col = get_first_col (fixed);
 	int	last;
 	int	multi_token;
@@ -4204,6 +4209,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	tokmatch = 0;
 	int	subword = 0;
 	int	ttix, ttlen, ftlen;
+	int	nextrec;
 	char	lterm[2];
 	char	fterm[2];
 	char	ftoken[CB_LINE_LENGTH + 2];
@@ -4212,8 +4218,6 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	char	cmp_line[CB_LINE_LENGTH + 2];
 	char	newline[CB_LINE_LENGTH + 2];
 	char	frm_line[CB_LINE_LENGTH + 2];
-
-	int	nextrec;
 
 	if (is_comment_line (pline[0], fixed)) {
 		return pline_cnt;
@@ -4486,7 +4490,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		} else {
 			fp = get_next_token (newline, ftoken, fterm);
 			for (k = 0; k < pline_cnt; k++) {
-				j = first_col;
+				for (j = first_col; pline[k][j] && pline[k][j] == ' '; j++) ;
 				pline[k][j] = 0;
 				while (fp) {
 					strcat (pline[k], ftoken);
@@ -4545,9 +4549,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	char	*tp;
 	struct list_replace	*rep;
 	int	i;
-	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
-	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
-	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
+	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	int	first_col;
 	int	is_copy;
 	int	is_replace;
@@ -4649,9 +4651,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 	struct list_error	*err;
 	int	i;
 	int	line_num;
-	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
-	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
-	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
+	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	int	done;
 	int	eof;
 	int	pline_cnt;
@@ -4778,9 +4778,21 @@ print_program_code (struct list_files *cfile, int in_copy)
 				}
 			}
 			fclose (fd);
-		/* Should never happen: */
+
+		/* Non-existant file, print errors to listing */
 		} else {
-			cobc_terminate (cfile->name);
+			if (cfile->err_head) {
+				for (err = cfile->err_head; err; err = err->next) {
+					print_program_header ();
+					fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
+				}
+			}
+			if (cfile->copy_head) {
+				cur = cfile->copy_head;
+				print_program_code (cur, 1);
+				cfile->copy_head = cur->next;
+				free (cur);
+			}
 		}
 	}
 
@@ -4811,28 +4823,6 @@ process_translate (struct filename *fn)
 	cb_source_file = NULL;
 	cb_source_line = 0;
 	errorcount = 0;
-
-	cb_listing_page = 0;
-	strcpy (cb_listing_filename, fn->source);
-	strcpy (cb_listing_title, "LINE    ");
-	if (cb_source_format == CB_FORMAT_FIXED) {
-		strcat (cb_listing_title,
-			"PG/LN  A...B......................................"
-			"......................");
-		if (cb_listing_wide) {
-			strcat (cb_listing_title, "SEQUENCE");
-		}
-	} else {
-		if (cb_listing_wide) {
-			strcat (cb_listing_title, "................................");
-		}
-		strcat (cb_listing_title,
-			".....................SOURCE......................."
-			"......................");
-		if (cb_listing_wide) {
-			strcat (cb_listing_title, "........");
-		}
-	}
 
 	/* Open the input file */
 	yyin = fopen (fn->preprocess, "r");
@@ -5963,6 +5953,7 @@ main (int argc, char **argv)
 		}
 		cb_current_file = newfile;
 		cb_current_file->name = cobc_strdup (fn->source);
+		cb_current_file->source_format = cb_source_format;
 
 		cb_id = 1;
 		cb_pic_id = 1;
@@ -5989,11 +5980,33 @@ main (int argc, char **argv)
 			putc ('\n', cb_listing_file);
 		}
 
+		cb_listing_page = 0;
+        	strcpy (cb_listing_filename, fn->source);
+		strcpy (cb_listing_title, "LINE    ");
+		if (cb_listing_files->source_format == CB_FORMAT_FIXED) {
+			strcat (cb_listing_title,
+				"PG/LN  A...B..............................."
+				".............................");
+			if (cb_listing_wide) {
+				strcat (cb_listing_title, "SEQUENCE");
+			}
+		} else {
+			if (cb_listing_wide) {
+				strcat (cb_listing_title,
+					"................................");
+			}
+			strcat (cb_listing_title,
+				".....................SOURCE..................."
+				"..........................");
+			if (cb_listing_wide) {
+				strcat (cb_listing_title, "........");
+			}
+		}
+
 		if (cb_compile_level < CB_LEVEL_TRANSLATE || fn->has_error) {
-			if (cb_current_file && cb_src_list_file) {
-				for (err = cb_current_file->err_head; err; err = err->next) {
-					fprintf (cb_src_list_file, "%s: %d: %s%s\n", cb_source_file, err->line, err->prefix, err->msg);
-				}
+			if (cb_listing_files && cb_src_list_file) {
+				print_program_code (cb_listing_files, 0);
+				print_program_trailer();
 			}
 			continue;
 		}
