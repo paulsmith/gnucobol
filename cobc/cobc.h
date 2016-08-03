@@ -1,6 +1,7 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch,
+   Edward Hart, Dave Pitts
 
    This file is part of GnuCOBOL.
 
@@ -238,13 +239,16 @@ struct cobc_mem_struct {
 
 #define CB_MAX_LINES	55
 
-#define CB_LINE_LENGTH 1024
-#define CB_READ_AHEAD 32
+#define CB_LINE_LENGTH	1024 /* hint: we only read PPLEX_BUF_LEN bytes */
+#define CB_READ_AHEAD	32 /* lines to read ahead */
 
+/* TODO: add new compiler configuration flags for this*/
 #define CB_INDICATOR	6
 #define CB_MARGIN_A	7
-#define CB_MARGIN_B	11
-#define CB_SEQUENCE	72
+#define CB_MARGIN_B	11	/* careful, for COBOL 85 this would be 11,
+						   for COBOL 2002 (removed it) would be 7 */
+#define CB_SEQUENCE	cb_text_column /* the only configuration available...*/
+#define CB_ENDLINE	cb_text_column + 8
 
 #define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
 #define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')

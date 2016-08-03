@@ -2,6 +2,8 @@
 2016-08-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (read_literal): Fix SIGSEGV for uncommon literals - bug 195
+	* cobc.c, cobc.h: changes to listfile generation: start use of compiler
+	  configurations (cb_tab_width, cb_text_col)
 
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 

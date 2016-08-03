@@ -2,7 +2,8 @@
    Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    Authors:
-   Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Brian Tiffin
+   Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Brian Tiffin,
+   Edward Hart, Dave Pitts
 
    This file is part of GnuCOBOL.
 
@@ -3645,7 +3646,7 @@ print_fields (int lvl, struct cb_field *top)
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[80];
 
-        for (; top; top = top->sister) {
+	for (; top; top = top->sister) {
 		if (!top->level) {
 			continue;
 		}
@@ -3836,19 +3837,15 @@ terminate_str_at_first_of_char (const char c, char * const str)
 
 /*
   Copies the next CB_LINE_LENGTH chars from fd into out_line. If fixed is true,
-  out_line is padded with spaces to column 80. The return value is either the
-  length of out_line, or -1 if the end of fd is reached.
+  out_line is padded with spaces to column CB_ENDLINE. The return value is
+  either the length of out_line, or -1 if the end of fd is reached.
 */
 static int
 get_next_listing_line (FILE *fd, char *out_line, int fixed)
 {
-	char	*out_char;
 	char	*in_char;
-	int	i;
-	int	j;
-	int	spaces_to_add;
+	int	i = 0;
 	char	in_line[CB_LINE_LENGTH + 2] =  { '\0' };
-	int	col;
 
 	if (!fgets (in_line, CB_LINE_LENGTH, fd)) {
 		return -1;
@@ -3857,29 +3854,27 @@ get_next_listing_line (FILE *fd, char *out_line, int fixed)
 	terminate_str_at_first_of_char ('\n', in_line);
 	terminate_str_at_first_of_char ('\r', in_line);
 
-	in_char = in_line;
-	out_char = out_line;
-	for (i = 0; *in_char; in_char++, i++) {
+	for (in_char = in_line; *in_char; in_char++) {
 		if (*in_char == '\t') {
-			spaces_to_add = 8 - (i % 8);
-			for (j = 0; j < spaces_to_add; j++) {
-				*out_char++ = ' ';
+			out_line[i++] = ' ';
+			while (i % cb_tab_width != 0) {
+				out_line[i++] = ' ';
 			}
 		} else {
-			*out_char++ = *in_char;
+			out_line[i++] = *in_char;
 		}
 	}
 
 	if (fixed) {
-		for (col = out_char - out_line; col < 80; col++) {
-			*out_char++ = ' ';
+		while (i < CB_ENDLINE) {
+			out_line[i++] = ' ';
 		}
 	} else {
-		*out_char++ = ' ';
+		out_line[i++] = ' ';
 	}
-	*out_char = 0;
+	out_line[i] = 0;
 
-	return strlen (out_line);
+	return i;
 }
 
 static int
@@ -4041,7 +4036,7 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy,
   pline[last_idx] into cmp_line, separated by a space. Tokens are copied from
   the first_col of each line and up to the end of line or the sequence area (if
   fixed is true).
-    Return the column to which pline[last_idx] was read up to.
+  Return the column to which pline[last_idx] was read up to.
 */
 static int
 compare_prepare (char *cmp_line, char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
@@ -4158,13 +4153,16 @@ is_continuation_line (char *line, int fixed)
 {
 	int i;
 
-	if (fixed && IS_CONTINUE_LINE(line)) {
-		return 1;
-	}
-
-	if (!fixed) {
+	if (fixed) {
+		/* check for "-" in column 7 */
+		if (IS_CONTINUE_LINE(line)) {
+			return 1;
+		}
+	} else {
+		/* check for "&" as last character */
+		/* CHECKME: does this work with inline comments after "&"? */
 		i = strlen (line) - 1;
-		for (; i && isspace (line[i]); i--);
+		while (i && isspace (line[i])) i--;
 		if (line[i] == '&') {
 			return 1;
 		}
@@ -4179,7 +4177,7 @@ get_first_col (const int fixed)
 	return fixed ? CB_MARGIN_A : 0;
 }
 
-/* TO-DO: Modularise! */
+/* TODO: Modularise! */
 static int
 print_replace_text (struct list_files *cfile, FILE *fd,
 		    struct list_replace *rep,
@@ -4192,6 +4190,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	i;
 	int	j;
 	int	k = 0;
+	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
+	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
 	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
 	int	first_col = get_first_col (fixed);
 	int	last;
@@ -4212,6 +4212,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	char	cmp_line[CB_LINE_LENGTH + 2];
 	char	newline[CB_LINE_LENGTH + 2];
 	char	frm_line[CB_LINE_LENGTH + 2];
+
+	int	nextrec;
 
 	if (is_comment_line (pline[0], fixed)) {
 		return pline_cnt;
@@ -4332,17 +4334,15 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			  line.
 			 */
 		next_rec:
-			if (!is_comment_line (pline[pline_cnt], fixed))
+			if (!is_comment_line (pline[pline_cnt], fixed)) {
 				pline_cnt++;
+			}
 			if (get_next_listing_line (fd, pline[pline_cnt], fixed) < 0) {
 				pline[pline_cnt][0] = 0;
 				eof = 1;
 			}
-			if (is_debug_line (pline[pline_cnt], fixed)) {
-				adjust_line_numbers (cfile, line_num,  -1);
-				goto next_rec;
-			}
-			if (is_comment_line (pline[pline_cnt], fixed)) {
+			if ( is_debug_line (pline[pline_cnt], fixed)
+				|| is_comment_line (pline[pline_cnt], fixed)) {
 				adjust_line_numbers (cfile, line_num,  -1);
 				goto next_rec;
 			}
@@ -4429,7 +4429,6 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				first_col = CB_MARGIN_B;
 			}
 			for (k = 0; k < pline_cnt; k++) {
-				int nextrec;
 				nextrec = 0;
 				j = first_col;
 				while (fp && !nextrec) {
@@ -4536,7 +4535,7 @@ copy_list_replace (struct list_replace *src, struct list_files *dst_file)
 	dst_file->replace_tail = copy;
 }
 
-/* TO-DO: Modularise! */
+/* TODO: Modularise! */
 static int
 print_replace_main (struct list_files *cfile, FILE *fd,
 		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
@@ -4546,6 +4545,8 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	char	*tp;
 	struct list_replace	*rep;
 	int	i;
+	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
+	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
 	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
 	int	first_col;
 	int	is_copy;
@@ -4638,7 +4639,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	return pline_cnt;
 }
 
-/* TO-DO: Modularise! */
+/* TODO: Modularise! */
 static void
 print_program_code (struct list_files *cfile, int in_copy)
 {
@@ -4648,11 +4649,14 @@ print_program_code (struct list_files *cfile, int in_copy)
 	struct list_error	*err;
 	int	i;
 	int	line_num;
+	/* FIXME: source format (and possbile CB_MARGIN_A / CB_MARGIN_B /
+	          CB_SEQUENCE) can vary per line by directive SOURCE FORMAT IS */
 	const int	fixed = (cb_source_format == CB_FORMAT_FIXED);
 	int	done;
 	int	eof;
 	int	pline_cnt;
 	char	pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2];
+	int	prec;
 
 	cfile->listing_on = 1;
 	if (cb_src_list_file) {
@@ -4701,10 +4705,8 @@ print_program_code (struct list_files *cfile, int in_copy)
 			eof = 0;
 			done = 0;
 			if (get_next_listing_line (fd, pline[pline_cnt], fixed) >= 0) {
-				int prec;
 
 				while (!done) {
-				next_rec:
 					if (get_next_listing_line (fd, pline[pline_cnt + 1], fixed) < 0) {
 						if (eof) {
 							done = 1;
@@ -4715,7 +4717,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 					pline_cnt++;
 					if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
 							      fixed)) {
-						goto next_rec;
+						continue;
 					}
 
 					if (!in_copy) {
@@ -4775,6 +4777,10 @@ print_program_code (struct list_files *cfile, int in_copy)
 					}
 				}
 			}
+			fclose (fd);
+		/* Should never happen: */
+		} else {
+			cobc_terminate (cfile->name);
 		}
 	}
 
@@ -4807,7 +4813,7 @@ process_translate (struct filename *fn)
 	errorcount = 0;
 
 	cb_listing_page = 0;
-        strcpy (cb_listing_filename, fn->source);
+	strcpy (cb_listing_filename, fn->source);
 	strcpy (cb_listing_title, "LINE    ");
 	if (cb_source_format == CB_FORMAT_FIXED) {
 		strcat (cb_listing_title,
