@@ -1088,6 +1088,8 @@ read_literal (const char mark)
 	literal_error = 0;
 
 	i = 0;
+	/* read until a not-escaped mark is found (see break)
+	   or (unliky) we reach EOF */
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
 			if (unlikely(i == plexsize)) {
@@ -1112,10 +1114,10 @@ read_literal (const char mark)
 		/* check literal size here as we have to adjust and check
 		   for (escaped) mark before checking the max length */
 		if (unlikely (i++ == cb_lit_length)) {
-			plexbuff[i] = 0;
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal length exceeds %d characters"),
 				cb_lit_length);
+			plexbuff[cb_lit_length] = 0; /* ensure valid C-string for error message */
 			error_literal ("", plexbuff);
 		}
 	}
@@ -1128,9 +1130,11 @@ read_literal (const char mark)
 	*/
 	if (!i) {
 		cb_warning (_("alphanumeric literal has zero length; a SPACE will be assumed"));
-		plexbuff[0] = ' ';
-		i = 1;
+		plexbuff[i++] = ' ';
+	} else if (i > cb_lit_length) {
+		i = cb_lit_length;
 	}
+	/* build literal with given size */
 	plexbuff[i] = 0;
 	yylval = cb_build_alphanumeric_literal (plexbuff, i);
 }

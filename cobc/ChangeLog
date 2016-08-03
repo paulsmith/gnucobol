@@ -1,4 +1,8 @@
 
+2016-08-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (read_literal): Fix SIGSEGV for uncommon literals - bug 195
+
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Fixes to put file not found into the listing file. Also, 
@@ -7,7 +11,7 @@
 2016-08-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (set_picture): fixed SIGSEGV on processing invalid
-	  picture definitions, print INVALID as picture instead
+	  picture definitions, print "INVALID" as picture instead
 	* error.c (print_error): fixed SIGSEGVs for empty prefix and
 	  missing source files
 	* parser.y: bug #259 - better checks for STRING syntax
