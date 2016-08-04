@@ -2865,7 +2865,8 @@ output_move (cb_tree src, cb_tree dst)
 /* INITIALIZE */
 
 static int
-initialize_type (struct cb_initialize *p, struct cb_field *f, const int topfield)
+deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
+			const int topfield)
 {
 	cb_tree		l;
 	int		type;
@@ -2895,13 +2896,19 @@ initialize_type (struct cb_initialize *p, struct cb_field *f, const int topfield
 		return INITIALIZE_ONE;
 	}
 
+	if (p->var && CB_REFERENCE_P (p->var)
+	    && CB_REFERENCE (p->var)->offset) {
+		/* Reference modified item */
+		return INITIALIZE_ONE;
+	}
+	
 	if (f->children) {
-		type = initialize_type (p, f->children, 0);
+		type = deduce_initialize_type (p, f->children, 0);
 		if (type == INITIALIZE_ONE) {
 			return INITIALIZE_COMPOUND;
 		}
 		for (f = f->children->sister; f; f = f->sister) {
-			if (type != initialize_type (p, f, 0)) {
+			if (type != deduce_initialize_type (p, f, 0)) {
 				return INITIALIZE_COMPOUND;
 			}
 		}
@@ -3354,6 +3361,7 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 		case CB_CATEGORY_NUMERIC_EDITED:
 			output_move (cb_zero, x);
 			break;
+		case CB_CATEGORY_ALPHANUMERIC:
 		case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		case CB_CATEGORY_NATIONAL:
 		case CB_CATEGORY_NATIONAL_EDITED:
@@ -3381,7 +3389,7 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 
 	ff = cb_code_field (x);
 	for (f = ff->children; f; f = f->sister) {
-		type = initialize_type (p, f, 0);
+		type = deduce_initialize_type (p, f, 0);
 		c = cb_build_field_reference (f, x);
 
 		switch (type) {
@@ -3400,7 +3408,7 @@ output_initialize_compound (struct cb_initialize *p, cb_tree x)
 
 				for (; f->sister; f = f->sister) {
 					if (!f->sister->redefines) {
-						if (initialize_type (p, f->sister, 0) != INITIALIZE_DEFAULT ||
+						if (deduce_initialize_type (p, f->sister, 0) != INITIALIZE_DEFAULT ||
 						    initialize_uniform_char (f->sister, p) != last_char) {
 							break;
 						}
@@ -3453,7 +3461,7 @@ output_initialize (struct cb_initialize *p)
 	int			type;
 
 	f = cb_code_field (p->var);
-	type = initialize_type (p, f, 1);
+	type = deduce_initialize_type (p, f, 1);
 	/* Check for non-standard OCCURS */
 	if ((f->level == 1 || f->level == 77) &&
 	    f->flag_occurs && !p->flag_init_statement) {

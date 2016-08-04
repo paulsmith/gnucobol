@@ -1,4 +1,10 @@
 
+2016-08-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (initialize_type): renamed to deduce_initialize_type.
+	* codegen.c (deduce_initialize_type): fixed bug #287, where reference-
+	  modified group item was not treated as an elementary item.
+
 2016-08-03  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Redo listings when copybooks are missing. Changed replace
@@ -14,7 +20,7 @@
 
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c: Fixes to put file not found into the listing file. Also, 
+	* cobc.c: Fixes to put file not found into the listing file. Also,
 	  changes to list the "file.i" preprocessed file.
 
 2016-08-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

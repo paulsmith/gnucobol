@@ -249,15 +249,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  MYFLD        PIC X(6) VALUE "ABCDEF".
+       01  MY-FLD       PIC X(6) VALUE "ABCDEF".
+       01  MY-OTHER-FLD PIC 9(4) VALUE ZERO.
        PROCEDURE        DIVISION.
        ASTART SECTION.
        A01.
-           INITIALIZE MYFLD (1:2).
-           IF MYFLD NOT = "  CDEF"
-              DISPLAY MYFLD
+           INITIALIZE MY-FLD (1:2).
+           IF MY-FLD NOT = "  CDEF"
+              DISPLAY "MY-FLD: " MY-FLD
               END-DISPLAY
-           END-IF.
+           END-IF
+
+           INITIALIZE MY-OTHER-FLD (2:2)
+           IF MY-OTHER-FLD NOT = "0  0"
+               DISPLAY "MY-OTHER-FLD: " MY-OTHER-FLD
+               END-DISPLAY
+           END-IF
+
            STOP RUN.
 ])
 
