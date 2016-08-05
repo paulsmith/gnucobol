@@ -3307,7 +3307,9 @@ preprocess (struct filename *fn)
 	int			save_fold_call;
 	int			ret;
 
-	errorcount = 0;
+	/* Initialize */
+	cb_source_file = NULL;
+	cb_source_line = 0;
 
 	ppout = fopen (fn->preprocess, "w");
 	if (!ppout) {
@@ -4822,7 +4824,6 @@ process_translate (struct filename *fn)
 	/* Initialize */
 	cb_source_file = NULL;
 	cb_source_line = 0;
-	errorcount = 0;
 
 	/* Open the input file */
 	yyin = fopen (fn->preprocess, "r");
@@ -4869,11 +4870,8 @@ process_translate (struct filename *fn)
 	if (ret) {
 		return 1;
 	}
-	if (cb_flag_syntax_only || current_program->entry_list == NULL) {
-		return 0;
-	}
-
-	if (current_program && current_program->entry_list == NULL) {
+	if (cb_flag_syntax_only || 
+		(current_program && current_program->entry_list == NULL)) {
 		return 0;
 	}
 
@@ -4958,7 +4956,6 @@ process_translate (struct filename *fn)
 		}
 	}
 
-	errorcount = 0;
 	/* Translate to C */
 	codegen (p, 0);
 
@@ -5955,6 +5952,8 @@ main (int argc, char **argv)
 		cb_current_file->name = cobc_strdup (fn->source);
 		cb_current_file->source_format = cb_source_format;
 
+		/* Initialize general vars */
+		errorcount = 0;
 		cb_id = 1;
 		cb_pic_id = 1;
 		cb_attr_id = 1;
@@ -5962,6 +5961,7 @@ main (int argc, char **argv)
 		cb_field_id = 1;
 		demangle_name = fn->demangle_source;
 		memset (optimize_defs, 0, sizeof(optimize_defs));
+
 		iparams++;
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
 			local_level = cb_compile_level;
@@ -5975,7 +5975,12 @@ main (int argc, char **argv)
 			/* Preprocess */
 			fn->has_error = preprocess (fn);
 			status |= fn->has_error;
+			/* If preprocessing raised errors go on but only check syntax */
+			if (fn->has_error) {
+				cb_flag_syntax_only = 1;
+			}
 		}
+
 		if (cobc_list_file) {
 			putc ('\n', cb_listing_file);
 		}
@@ -6003,7 +6008,7 @@ main (int argc, char **argv)
 			}
 		}
 
-		if (cb_compile_level < CB_LEVEL_TRANSLATE || fn->has_error) {
+		if (cb_compile_level < CB_LEVEL_TRANSLATE) {
 			if (cb_listing_files && cb_src_list_file) {
 				print_program_code (cb_listing_files, 0);
 				print_program_trailer();

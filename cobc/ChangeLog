@@ -1,4 +1,13 @@
 
+2016-08-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: don't stop if preprocessing errors but activate
+	  cb_flag_syntax_only and let the parser do further checks
+	* cobc.c: initialize errorcount only for each source file instead
+	  of for each processing stage
+	* pplex.l (ppinput): don't fake EOF on buffer overrun for
+	  continuation lines (still process all following lines)
+
 2016-08-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c (initialize_type): renamed to deduce_initialize_type.

@@ -1694,6 +1694,7 @@ NOFLOATING
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
 [prog2.cob: 11: error: invalid indicator '$' at column 7
+prog2.cob: 17: error: invalid symbol '|' - skipping word
 ])
 
 
@@ -1708,6 +1709,7 @@ NOFLOATING
 
 AT_CHECK([$COMPILE_ONLY -fmfcomment prog2.cob], [1], [],
 [prog2.cob: 11: error: invalid indicator '$' at column 7
+prog2.cob: 17: error: invalid symbol '|' - skipping word
 ])
 
 
@@ -1774,7 +1776,8 @@ prog3.cob: 13: error: syntax error, unexpected Literal
 prog3.cob: 16: error: syntax error, unexpected Identifier
 prog3.cob: 16: error: syntax error, unexpected Literal
 ])
-# Check that invalid indicator doesn't abort compilation completely
+# Check that invalid indicator and doesn't abort preprocessing
+# and that errors in preprocessing doesn't abort compilation
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
 [prog3.cob: 2: error: invalid indicator 'F' at column 7
 prog3.cob: 3: error: invalid indicator 'M' at column 7
@@ -1784,6 +1787,9 @@ prog3.cob: 7: error: invalid indicator 'G' at column 7
 prog3.cob: 8: error: invalid indicator 'U' at column 7
 prog3.cob: 11: error: invalid indicator '$' at column 7
 prog3.cob: 16: error: invalid indicator 'x' at column 7
+prog3.cob: 6: error: PROGRAM-ID header missing
+prog3.cob: 6: error: PROCEDURE DIVISION header missing
+prog3.cob: 6: error: syntax error, unexpected DIVISION
 ])
 
 AT_CLEANUP

@@ -1147,7 +1147,9 @@ start:
 		if (need_continuation || continuation) {
 			cb_plex_error (newline_count,
 					_("buffer overrun - too many continuation lines"));
-			return YY_NULL;
+#if 0		/* CHECKME: does anything breaks if we don't fake EOF here? */
+			return YY_NULL; /* fake eof (no further processing) */
+#endif
 		}
 		if (newline_count < max_size) {
 			memset (buff, '\n', newline_count);
