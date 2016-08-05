@@ -1,18 +1,18 @@
 ## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -170,19 +170,52 @@ AT_DATA([prog.cob], [
          02 X           PIC 99.
          02 FILLER      PIC X.
          02 Z           PIC 99.
+       01 MY-FILLER.
+         02 FILLER      PIC 9(6) VALUE 12345.
        PROCEDURE        DIVISION.
            MOVE ALL   'A' TO G1.
            INITIALIZE G1.
            IF G1 NOT = "00A00"
-              DISPLAY    G1
+              DISPLAY "G1 (INIT): " G1
               END-DISPLAY
            END-IF.
            MOVE ALL   'A' TO G1.
            INITIALIZE G1  WITH FILLER.
            IF G1 NOT = "00 00"
-              DISPLAY    G1
+              DISPLAY "G1 (INIT FILLER):"   G1
               END-DISPLAY
            END-IF.
+
+           INITIALIZE MY-FILLER
+           IF MY-FILLER NOT = "012345"
+              DISPLAY "MY-FILLER (INIT): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER WITH FILLER
+           IF MY-FILLER NOT = "000000"
+              DISPLAY "MY-FILLER (INIT FILLER): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER ALL TO VALUE
+           IF MY-FILLER NOT = "000000"
+              DISPLAY "MY-FILLER (INIT TO VAL): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER WITH FILLER ALL TO VALUE
+           IF MY-FILLER NOT = "012345"
+              DISPLAY "MY-FILLER (INIT FILLER TO VAL): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
+           INITIALIZE MY-FILLER (2:3)
+           IF MY-FILLER NOT = "0   45"
+              DISPLAY "MY-FILLER (REF-MOD): " MY-FILLER
+              END-DISPLAY
+           END-IF
+
            STOP RUN.
 ])
 
