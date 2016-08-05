@@ -1006,17 +1006,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01 TEST-VAR PIC 9(2) VALUE 'F1F2'.
+       01 TEST-VAR PIC 9(2) VALUE 12.
        COPY 'CRUD.CPY'.
        PROCEDURE        DIVISION.
            DISPLAY TEST-VAR NO ADVANCING
-           END-DISPLAY.
+           END-DISPLAY
+           MOVE 'AA' TO TEST-VAR
+           DISPLAY TEST-VAR NO ADVANCING
+           END-DISPLAY
            STOP RUN.
 ])
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [prog.cob: 7: error: CRUD.CPY: No such file or directory
+prog.cob: 12: warning: numeric value is expected
+prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 
 AT_DATA([prog16.lst],
@@ -1029,15 +1034,20 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-000006         01 TEST-VAR PIC 9(2) VALUE 'F1F2'.
+000006         01 TEST-VAR PIC 9(2) VALUE 12.
+warning: 'TEST-VAR' defined here as PIC 9(2)
 000007         COPY 'CRUD.CPY'.
 error: CRUD.CPY: No such file or directory
 000008         PROCEDURE        DIVISION.
 000009             DISPLAY TEST-VAR NO ADVANCING
-000010             END-DISPLAY.
-000011             STOP RUN.
+000010             END-DISPLAY
+000011             MOVE 'AA' TO TEST-VAR
+warning: numeric value is expected
+000012             DISPLAY TEST-VAR NO ADVANCING
+000013             END-DISPLAY
+000014             STOP RUN.
 
-0 Warnings in program
+2 Warnings in program
 1 Errors in program
 ])
 

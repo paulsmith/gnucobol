@@ -2036,7 +2036,7 @@ char *pptext;
 #line 1 "pplex.l"
 /*
    Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Dave Pitts
 
    This file is part of GnuCOBOL.
 
@@ -2684,32 +2684,36 @@ YY_RULE_SETUP
 #line 339 "pplex.l"
 {
 	yy_push_state (COPY_STATE);
-        get_new_listing_file ();
+	if (cb_src_list_file) {
+		get_new_listing_file ();
+	}
 	return COPY;
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 345 "pplex.l"
+#line 347 "pplex.l"
 {
 	yy_push_state (COPY_STATE);
-	get_new_listing_file ();
+	if (cb_src_list_file) {
+		get_new_listing_file ();
+	}
 	return COPY;
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 351 "pplex.l"
+#line 355 "pplex.l"
 {
 	yy_push_state (COPY_STATE);
 	return REPLACE;
 }
 	YY_BREAK
 case 34:
-#line 357 "pplex.l"
+#line 361 "pplex.l"
 case 35:
 YY_RULE_SETUP
-#line 357 "pplex.l"
+#line 361 "pplex.l"
 {
 	/* Allow comment sentences/paragraphs */
 	comment_allowed = 1;
@@ -2718,7 +2722,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 363 "pplex.l"
+#line 367 "pplex.l"
 {
 	/* Allow comment sentences/paragraphs */
 	comment_allowed = 1;
@@ -2727,7 +2731,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 369 "pplex.l"
+#line 373 "pplex.l"
 {
 	/* Disallow comment sentences/paragraphs */
 	comment_allowed = 0;
@@ -2736,7 +2740,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 375 "pplex.l"
+#line 379 "pplex.l"
 {
 	/* Disallow comment sentences/paragraphs */
 	comment_allowed = 0;
@@ -2745,48 +2749,48 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 381 "pplex.l"
+#line 385 "pplex.l"
 { check_comments ("AUTHOR", pptext); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 382 "pplex.l"
+#line 386 "pplex.l"
 { check_comments ("DATE-WRITTEN", pptext); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 383 "pplex.l"
+#line 387 "pplex.l"
 { check_comments ("DATE-MODIFIED", pptext); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 384 "pplex.l"
+#line 388 "pplex.l"
 { check_comments ("DATE-COMPILED", pptext); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 385 "pplex.l"
+#line 389 "pplex.l"
 { check_comments ("INSTALLATION", pptext); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 386 "pplex.l"
+#line 390 "pplex.l"
 { check_comments ("REMARKS", pptext); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 387 "pplex.l"
+#line 391 "pplex.l"
 { check_comments ("SECURITY", pptext); }
 	YY_BREAK
 case 46:
-#line 390 "pplex.l"
+#line 394 "pplex.l"
 case 47:
-#line 391 "pplex.l"
+#line 395 "pplex.l"
 case 48:
-#line 392 "pplex.l"
+#line 396 "pplex.l"
 case 49:
 YY_RULE_SETUP
-#line 392 "pplex.l"
+#line 396 "pplex.l"
 {
 	/* These words are comments in various COBOL dialects */
 	if (cb_verify (cb_eject_statement, pptext)) {
@@ -2798,10 +2802,10 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case 50:
-#line 403 "pplex.l"
+#line 407 "pplex.l"
 case 51:
 YY_RULE_SETUP
-#line 403 "pplex.l"
+#line 407 "pplex.l"
 {
 	/* Pick up early - Also activates debugging lines */
 	cb_flag_debugging_line = 1;
@@ -2811,7 +2815,7 @@ YY_RULE_SETUP
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 409 "pplex.l"
+#line 413 "pplex.l"
 {
 	ppecho ("\n", 0, 1);
 	cb_source_line++;
@@ -2819,14 +2823,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 414 "pplex.l"
+#line 418 "pplex.l"
 {
 	ppecho (" ", 1U, 1);
 }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 418 "pplex.l"
+#line 422 "pplex.l"
 {
 	if (inside_bracket) {
 		ppecho (", ", 0, 2);
@@ -2837,7 +2841,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 426 "pplex.l"
+#line 430 "pplex.l"
 {
 	inside_bracket++;
 	ppecho ("(", 0, 1);
@@ -2845,7 +2849,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 431 "pplex.l"
+#line 435 "pplex.l"
 {
 	if (inside_bracket) {
 		inside_bracket--;
@@ -2854,14 +2858,14 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case 57:
-#line 439 "pplex.l"
+#line 443 "pplex.l"
 case 58:
-#line 440 "pplex.l"
+#line 444 "pplex.l"
 case 59:
-#line 441 "pplex.l"
+#line 445 "pplex.l"
 case 60:
 YY_RULE_SETUP
-#line 441 "pplex.l"
+#line 445 "pplex.l"
 {
 	ppecho (pptext, 0, ppleng);
 }
@@ -2870,7 +2874,7 @@ YY_RULE_SETUP
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 446 "pplex.l"
+#line 450 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -2879,22 +2883,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 451 "pplex.l"
+#line 455 "pplex.l"
 { return ON; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 452 "pplex.l"
+#line 456 "pplex.l"
 { return OFF; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 453 "pplex.l"
+#line 457 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 454 "pplex.l"
+#line 458 "pplex.l"
 { }
 	YY_BREAK
 
@@ -2902,7 +2906,7 @@ YY_RULE_SETUP
 case 66:
 /* rule 66 can match eol */
 YY_RULE_SETUP
-#line 458 "pplex.l"
+#line 462 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -2911,32 +2915,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 463 "pplex.l"
+#line 467 "pplex.l"
 { return FORMAT; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 464 "pplex.l"
+#line 468 "pplex.l"
 { return IS; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 465 "pplex.l"
+#line 469 "pplex.l"
 { return FIXED; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 466 "pplex.l"
+#line 470 "pplex.l"
 { return FREE; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 467 "pplex.l"
+#line 471 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 468 "pplex.l"
+#line 472 "pplex.l"
 { }
 	YY_BREAK
 
@@ -2944,7 +2948,7 @@ YY_RULE_SETUP
 case 73:
 /* rule 73 can match eol */
 YY_RULE_SETUP
-#line 472 "pplex.l"
+#line 476 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -2953,44 +2957,44 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 477 "pplex.l"
+#line 481 "pplex.l"
 {
 	return CONSTANT;
   }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 480 "pplex.l"
+#line 484 "pplex.l"
 {
 	return AS;
   }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 483 "pplex.l"
+#line 487 "pplex.l"
 {
 	return OFF;
   }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 486 "pplex.l"
+#line 490 "pplex.l"
 {
 	return OVERRIDE;
   }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 489 "pplex.l"
+#line 493 "pplex.l"
 {
 	return PARAMETER;
   }
 	YY_BREAK
 case 79:
-#line 493 "pplex.l"
+#line 497 "pplex.l"
 case 80:
 YY_RULE_SETUP
-#line 493 "pplex.l"
+#line 497 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return LITERAL;
@@ -2998,7 +3002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 497 "pplex.l"
+#line 501 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return VARIABLE;
@@ -3006,12 +3010,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 501 "pplex.l"
+#line 505 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 502 "pplex.l"
+#line 506 "pplex.l"
 { }
 	YY_BREAK
 
@@ -3019,7 +3023,7 @@ YY_RULE_SETUP
 case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
-#line 506 "pplex.l"
+#line 510 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -3028,48 +3032,48 @@ YY_RULE_SETUP
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 511 "pplex.l"
+#line 515 "pplex.l"
 {
 	return CONSTANT;
   }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 514 "pplex.l"
+#line 518 "pplex.l"
 {
 	return SOURCEFORMAT;
   }
 	YY_BREAK
 case 87:
-#line 518 "pplex.l"
+#line 522 "pplex.l"
 case 88:
 YY_RULE_SETUP
-#line 518 "pplex.l"
+#line 522 "pplex.l"
 {
 	return FOLDCOPYNAME;
   }
 	YY_BREAK
 case 89:
-#line 522 "pplex.l"
+#line 526 "pplex.l"
 case 90:
 YY_RULE_SETUP
-#line 522 "pplex.l"
+#line 526 "pplex.l"
 {
 	return NOFOLDCOPYNAME;
   }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 525 "pplex.l"
+#line 529 "pplex.l"
 {
 	return AS;
   }
 	YY_BREAK
 case 92:
-#line 529 "pplex.l"
+#line 533 "pplex.l"
 case 93:
 YY_RULE_SETUP
-#line 529 "pplex.l"
+#line 533 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return LITERAL;
@@ -3077,7 +3081,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 533 "pplex.l"
+#line 537 "pplex.l"
 {
 	pptext[strlen (pptext) - 1] = 0;
 	pplval.s = cobc_plex_strdup (pptext + 1);
@@ -3086,7 +3090,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 538 "pplex.l"
+#line 542 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return VARIABLE;
@@ -3094,12 +3098,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 542 "pplex.l"
+#line 546 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 543 "pplex.l"
+#line 547 "pplex.l"
 { }
 	YY_BREAK
 
@@ -3107,7 +3111,7 @@ YY_RULE_SETUP
 case 98:
 /* rule 98 can match eol */
 YY_RULE_SETUP
-#line 547 "pplex.l"
+#line 551 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -3116,44 +3120,44 @@ YY_RULE_SETUP
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 552 "pplex.l"
+#line 556 "pplex.l"
 {
 	return ON;
   }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 555 "pplex.l"
+#line 559 "pplex.l"
 {
 	return OFF;
   }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 558 "pplex.l"
+#line 562 "pplex.l"
 {
 	return WITH;
   }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 561 "pplex.l"
+#line 565 "pplex.l"
 {
 	return LOCATION;
   }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 564 "pplex.l"
+#line 568 "pplex.l"
 {
 	return CHECKING;
   }
 	YY_BREAK
 case 104:
-#line 568 "pplex.l"
+#line 572 "pplex.l"
 case 105:
 YY_RULE_SETUP
-#line 568 "pplex.l"
+#line 572 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return LITERAL;
@@ -3161,7 +3165,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 572 "pplex.l"
+#line 576 "pplex.l"
 {
 	pptext[strlen (pptext) - 1] = 0;
 	pplval.s = cobc_plex_strdup (pptext + 1);
@@ -3170,7 +3174,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 577 "pplex.l"
+#line 581 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return VARIABLE;
@@ -3178,12 +3182,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 581 "pplex.l"
+#line 585 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 582 "pplex.l"
+#line 586 "pplex.l"
 { }
 	YY_BREAK
 
@@ -3191,7 +3195,7 @@ YY_RULE_SETUP
 case 110:
 /* rule 110 can match eol */
 YY_RULE_SETUP
-#line 586 "pplex.l"
+#line 590 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -3200,94 +3204,94 @@ YY_RULE_SETUP
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 591 "pplex.l"
+#line 595 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 592 "pplex.l"
+#line 596 "pplex.l"
 { return IS; }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 593 "pplex.l"
+#line 597 "pplex.l"
 { return NOT; }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 594 "pplex.l"
+#line 598 "pplex.l"
 { return EQUAL; }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 595 "pplex.l"
+#line 599 "pplex.l"
 { return TO; }
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 596 "pplex.l"
+#line 600 "pplex.l"
 { return OR; }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 597 "pplex.l"
+#line 601 "pplex.l"
 { return GREATER; }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 598 "pplex.l"
+#line 602 "pplex.l"
 { return LESS; }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 599 "pplex.l"
+#line 603 "pplex.l"
 { return THAN; }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 600 "pplex.l"
+#line 604 "pplex.l"
 { return DEFINED; }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 601 "pplex.l"
+#line 605 "pplex.l"
 { return SET; }
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 602 "pplex.l"
+#line 606 "pplex.l"
 { return GE; }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 603 "pplex.l"
+#line 607 "pplex.l"
 { return GT; }
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 604 "pplex.l"
+#line 608 "pplex.l"
 { return LE; }
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 605 "pplex.l"
+#line 609 "pplex.l"
 { return NE; }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 606 "pplex.l"
+#line 610 "pplex.l"
 { return LT; }
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 607 "pplex.l"
+#line 611 "pplex.l"
 { return EQ; }
 	YY_BREAK
 case 128:
-#line 609 "pplex.l"
+#line 613 "pplex.l"
 case 129:
 YY_RULE_SETUP
-#line 609 "pplex.l"
+#line 613 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return LITERAL;
@@ -3295,7 +3299,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 613 "pplex.l"
+#line 617 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return VARIABLE;
@@ -3303,7 +3307,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 617 "pplex.l"
+#line 621 "pplex.l"
 { }
 	YY_BREAK
 
@@ -3311,7 +3315,7 @@ YY_RULE_SETUP
 case 132:
 /* rule 132 can match eol */
 YY_RULE_SETUP
-#line 621 "pplex.l"
+#line 625 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -3320,7 +3324,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 626 "pplex.l"
+#line 630 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 
@@ -3328,7 +3332,7 @@ YY_RULE_SETUP
 case 134:
 /* rule 134 can match eol */
 YY_RULE_SETUP
-#line 630 "pplex.l"
+#line 634 "pplex.l"
 {
 	BEGIN INITIAL;
 	unput ('\n');
@@ -3337,7 +3341,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 635 "pplex.l"
+#line 639 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 
@@ -3345,7 +3349,7 @@ YY_RULE_SETUP
 case 136:
 /* rule 136 can match eol */
 YY_RULE_SETUP
-#line 639 "pplex.l"
+#line 643 "pplex.l"
 {
 	ECHO;
 	check_listing (pptext, 0);
@@ -3354,12 +3358,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 644 "pplex.l"
+#line 648 "pplex.l"
 { /* ignore */ }
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 645 "pplex.l"
+#line 649 "pplex.l"
 {
 	  yy_pop_state ();
 	  return DOT;
@@ -3367,83 +3371,83 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 649 "pplex.l"
+#line 653 "pplex.l"
 { yy_push_state (PSEUDO_STATE); return EQEQ; }
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 650 "pplex.l"
+#line 654 "pplex.l"
 { return '('; }
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 651 "pplex.l"
+#line 655 "pplex.l"
 { return ')'; }
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 652 "pplex.l"
+#line 656 "pplex.l"
 { return BY; }
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 653 "pplex.l"
+#line 657 "pplex.l"
 { return IN; }
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 654 "pplex.l"
+#line 658 "pplex.l"
 { return OF; }
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 655 "pplex.l"
+#line 659 "pplex.l"
 { return OFF; }
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 656 "pplex.l"
+#line 660 "pplex.l"
 { return SUPPRESS; }
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 657 "pplex.l"
+#line 661 "pplex.l"
 { return PRINTING; }
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 658 "pplex.l"
+#line 662 "pplex.l"
 { return REPLACING; }
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
-#line 659 "pplex.l"
+#line 663 "pplex.l"
 { return LEADING; }
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
-#line 660 "pplex.l"
+#line 664 "pplex.l"
 { return TRAILING; }
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 661 "pplex.l"
+#line 665 "pplex.l"
 { return ALSO; }
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 662 "pplex.l"
+#line 666 "pplex.l"
 { return LAST; }
 	YY_BREAK
 case 153:
-#line 664 "pplex.l"
+#line 668 "pplex.l"
 case 154:
-#line 665 "pplex.l"
+#line 669 "pplex.l"
 case 155:
-#line 666 "pplex.l"
+#line 670 "pplex.l"
 case 156:
 YY_RULE_SETUP
-#line 666 "pplex.l"
+#line 670 "pplex.l"
 { pplval.s = cobc_plex_strdup (pptext); return TOKEN; }
 	YY_BREAK
 
@@ -3451,7 +3455,7 @@ YY_RULE_SETUP
 case 157:
 /* rule 157 can match eol */
 YY_RULE_SETUP
-#line 670 "pplex.l"
+#line 674 "pplex.l"
 {
 	ECHO;
 	check_listing (pptext, 0);
@@ -3460,7 +3464,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
-#line 676 "pplex.l"
+#line 680 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (" ");
 	return TOKEN;
@@ -3468,21 +3472,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
-#line 681 "pplex.l"
+#line 685 "pplex.l"
 {
 	yy_pop_state ();
 	return EQEQ;
   }
 	YY_BREAK
 case 160:
-#line 687 "pplex.l"
+#line 691 "pplex.l"
 case 161:
-#line 688 "pplex.l"
+#line 692 "pplex.l"
 case 162:
-#line 689 "pplex.l"
+#line 693 "pplex.l"
 case 163:
 YY_RULE_SETUP
-#line 689 "pplex.l"
+#line 693 "pplex.l"
 {
 	pplval.s = cobc_plex_strdup (pptext);
 	return TOKEN;
@@ -3500,7 +3504,7 @@ case YY_STATE_EOF(TURN_DIRECTIVE_STATE):
 case YY_STATE_EOF(IF_DIRECTIVE_STATE):
 case YY_STATE_EOF(ELSE_DIRECTIVE_STATE):
 case YY_STATE_EOF(ENDIF_DIRECTIVE_STATE):
-#line 696 "pplex.l"
+#line 700 "pplex.l"
 {
 	struct copy_info *p;
 
@@ -3559,10 +3563,10 @@ case YY_STATE_EOF(ENDIF_DIRECTIVE_STATE):
 	YY_BREAK
 case 164:
 YY_RULE_SETUP
-#line 752 "pplex.l"
+#line 756 "pplex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3565 "pplex.c"
+#line 3569 "pplex.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4438,7 +4442,7 @@ void ppfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 752 "pplex.l"
+#line 756 "pplex.l"
 
 
 
@@ -4468,7 +4472,9 @@ pp_set_replace_list (struct cb_replace_list *list, const cob_u32_t is_pushpop)
 		list->prev = NULL;
 	}
 	base_replace_list = list;
-	set_print_replace_list (list);
+	if (cb_src_list_file) {
+		set_print_replace_list (list);
+	}
 }
 
 int
@@ -4502,8 +4508,6 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		return -1;
 	}
 
-	cb_current_file->name = cobc_strdup (name);
-
 	/* Check for BOM - *not* for input from stdin as rewind() clears the input
 	  buffer if used on stdin and output in console has normally no BOM at all */
 	if (strcmp(name, COB_DASH) != 0) {
@@ -4514,6 +4518,11 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		} else {
 			rewind (ppin);
 		}
+	}
+
+	/* save name for listing */
+	if (cb_current_file) {
+		cb_current_file->name = cobc_strdup (name);
 	}
 
 	/* Preserve the current buffer */
@@ -4530,7 +4539,11 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	p->next = copy_stack;
 	p->listfile = old_list_file;
 	copy_stack = p;
-	cb_current_file->copy_line = cb_source_line;
+
+	if (cb_current_file) {
+		cb_current_file->copy_line = cb_source_line;
+	}
+
 
 	/* Set replacing list */
 	if (replacing_list) {
@@ -4539,7 +4552,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 			replacing_list->last = current_replace_list->last;
 		}
 		current_replace_list = replacing_list;
-		set_print_replace_list (replacing_list);
+		if (cb_src_list_file) {
+			set_print_replace_list (replacing_list);
+		}
 	}
 
 	dname = cobc_strdup (name);
@@ -4562,7 +4577,10 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 	struct cb_text_list	*el;
 	const char		*s;
 
-	cb_current_file->copy_line = cb_source_line;
+	if (cb_current_file) {
+		cb_current_file->copy_line = cb_source_line;
+	}
+
 	/* Locate and open COPY file */
 	if (lib) {
 		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
@@ -4753,40 +4771,38 @@ set_print_replace_list (struct cb_replace_list *list)
 	struct list_replace		*repl;
 	int 				length;
 	
-	if (cb_src_list_file) {
-		for (r = list; r; r = r->next) {
-			repl = cobc_malloc (sizeof (struct list_replace));
-			memset (repl, 0, sizeof (struct list_replace));
-			repl->firstline = r->line_num;
-			repl->lead_trail = r->lead_trail;
-			repl->lastline = cb_source_line;
+	for (r = list; r; r = r->next) {
+		repl = cobc_malloc (sizeof (struct list_replace));
+		memset (repl, 0, sizeof (struct list_replace));
+		repl->firstline = r->line_num;
+		repl->lead_trail = r->lead_trail;
+		repl->lastline = cb_source_line;
 			
-			for (l = r->old_text, length = 0; l; l = l->next) {
-				length += strlen (l->text);
-			}
-			repl->from = cobc_malloc (length + 2);
-			memset (repl->from, 0, length + 2);
-			for (l = r->old_text; l; l = l->next) {
-				strcat (repl->from, l->text);
-			}
-
-			for (l = r->new_text, length = 0; l; l = l->next) {
-				length += strlen (l->text);
-			}
-			repl->to = cobc_malloc (length + 2);
-			memset (repl->to, 0, length + 2);
-			for (l = r->new_text; l; l = l->next) {
-				strcat (repl->to, l->text);
-			}
-
-			if (cb_current_file->replace_tail) {
-				cb_current_file->replace_tail->next = repl;
-			}
-			if (!cb_current_file->replace_head) {
-				cb_current_file->replace_head = repl;
-			}
-			cb_current_file->replace_tail = repl;
+		for (l = r->old_text, length = 0; l; l = l->next) {
+			length += strlen (l->text);
 		}
+		repl->from = cobc_malloc (length + 2);
+		memset (repl->from, 0, length + 2);
+		for (l = r->old_text; l; l = l->next) {
+			strcat (repl->from, l->text);
+		}
+
+		for (l = r->new_text, length = 0; l; l = l->next) {
+			length += strlen (l->text);
+		}
+		repl->to = cobc_malloc (length + 2);
+		memset (repl->to, 0, length + 2);
+		for (l = r->new_text; l; l = l->next) {
+			strcat (repl->to, l->text);
+		}
+
+		if (cb_current_file->replace_tail) {
+			cb_current_file->replace_tail->next = repl;
+		}
+		if (!cb_current_file->replace_head) {
+			cb_current_file->replace_head = repl;
+		}
+		cb_current_file->replace_tail = repl;
 	}
 }
 
@@ -4838,7 +4854,9 @@ start:
 		if (need_continuation || continuation) {
 			cb_plex_error (newline_count,
 					_("buffer overrun - too many continuation lines"));
-			return YY_NULL;
+#if 0		/* CHECKME: does anything breaks if we don't fake EOF here? */
+			return YY_NULL; /* fake eof (no further processing) */
+#endif
 		}
 		if (newline_count < max_size) {
 			memset (buff, '\n', newline_count);

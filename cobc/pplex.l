@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Dave Pitts
 
    This file is part of GnuCOBOL.
 
@@ -338,13 +338,17 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
 "COPY"			{
 	yy_push_state (COPY_STATE);
-        get_new_listing_file ();
+	if (cb_src_list_file) {
+		get_new_listing_file ();
+	}
 	return COPY;
 }
 
 "INCLUDE"		{
 	yy_push_state (COPY_STATE);
-	get_new_listing_file ();
+	if (cb_src_list_file) {
+		get_new_listing_file ();
+	}
 	return COPY;
 }
 
@@ -777,7 +781,9 @@ pp_set_replace_list (struct cb_replace_list *list, const cob_u32_t is_pushpop)
 		list->prev = NULL;
 	}
 	base_replace_list = list;
-	set_print_replace_list (list);
+	if (cb_src_list_file) {
+		set_print_replace_list (list);
+	}
 }
 
 int
@@ -811,8 +817,6 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		return -1;
 	}
 
-	cb_current_file->name = cobc_strdup (name);
-
 	/* Check for BOM - *not* for input from stdin as rewind() clears the input
 	  buffer if used on stdin and output in console has normally no BOM at all */
 	if (strcmp(name, COB_DASH) != 0) {
@@ -823,6 +827,11 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		} else {
 			rewind (ppin);
 		}
+	}
+
+	/* save name for listing */
+	if (cb_current_file) {
+		cb_current_file->name = cobc_strdup (name);
 	}
 
 	/* Preserve the current buffer */
@@ -839,7 +848,11 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	p->next = copy_stack;
 	p->listfile = old_list_file;
 	copy_stack = p;
-	cb_current_file->copy_line = cb_source_line;
+
+	if (cb_current_file) {
+		cb_current_file->copy_line = cb_source_line;
+	}
+
 
 	/* Set replacing list */
 	if (replacing_list) {
@@ -848,7 +861,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 			replacing_list->last = current_replace_list->last;
 		}
 		current_replace_list = replacing_list;
-		set_print_replace_list (replacing_list);
+		if (cb_src_list_file) {
+			set_print_replace_list (replacing_list);
+		}
 	}
 
 	dname = cobc_strdup (name);
@@ -871,7 +886,10 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 	struct cb_text_list	*el;
 	const char		*s;
 
-	cb_current_file->copy_line = cb_source_line;
+	if (cb_current_file) {
+		cb_current_file->copy_line = cb_source_line;
+	}
+
 	/* Locate and open COPY file */
 	if (lib) {
 		snprintf (plexbuff1, (size_t)COB_SMALL_MAX, "%s/%s", lib, name);
@@ -1062,40 +1080,38 @@ set_print_replace_list (struct cb_replace_list *list)
 	struct list_replace		*repl;
 	int 				length;
 	
-	if (cb_src_list_file) {
-		for (r = list; r; r = r->next) {
-			repl = cobc_malloc (sizeof (struct list_replace));
-			memset (repl, 0, sizeof (struct list_replace));
-			repl->firstline = r->line_num;
-			repl->lead_trail = r->lead_trail;
-			repl->lastline = cb_source_line;
+	for (r = list; r; r = r->next) {
+		repl = cobc_malloc (sizeof (struct list_replace));
+		memset (repl, 0, sizeof (struct list_replace));
+		repl->firstline = r->line_num;
+		repl->lead_trail = r->lead_trail;
+		repl->lastline = cb_source_line;
 			
-			for (l = r->old_text, length = 0; l; l = l->next) {
-				length += strlen (l->text);
-			}
-			repl->from = cobc_malloc (length + 2);
-			memset (repl->from, 0, length + 2);
-			for (l = r->old_text; l; l = l->next) {
-				strcat (repl->from, l->text);
-			}
-
-			for (l = r->new_text, length = 0; l; l = l->next) {
-				length += strlen (l->text);
-			}
-			repl->to = cobc_malloc (length + 2);
-			memset (repl->to, 0, length + 2);
-			for (l = r->new_text; l; l = l->next) {
-				strcat (repl->to, l->text);
-			}
-
-			if (cb_current_file->replace_tail) {
-				cb_current_file->replace_tail->next = repl;
-			}
-			if (!cb_current_file->replace_head) {
-				cb_current_file->replace_head = repl;
-			}
-			cb_current_file->replace_tail = repl;
+		for (l = r->old_text, length = 0; l; l = l->next) {
+			length += strlen (l->text);
 		}
+		repl->from = cobc_malloc (length + 2);
+		memset (repl->from, 0, length + 2);
+		for (l = r->old_text; l; l = l->next) {
+			strcat (repl->from, l->text);
+		}
+
+		for (l = r->new_text, length = 0; l; l = l->next) {
+			length += strlen (l->text);
+		}
+		repl->to = cobc_malloc (length + 2);
+		memset (repl->to, 0, length + 2);
+		for (l = r->new_text; l; l = l->next) {
+			strcat (repl->to, l->text);
+		}
+
+		if (cb_current_file->replace_tail) {
+			cb_current_file->replace_tail->next = repl;
+		}
+		if (!cb_current_file->replace_head) {
+			cb_current_file->replace_head = repl;
+		}
+		cb_current_file->replace_tail = repl;
 	}
 }
 

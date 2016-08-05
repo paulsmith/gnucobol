@@ -7,6 +7,12 @@
 	  of for each processing stage
 	* pplex.l (ppinput): don't fake EOF on buffer overrun for
 	  continuation lines (still process all following lines)
+	* cobc.c, pplex.l: only do listing specific parts if vars
+	  cb_src_list_file/cb_current_file are set
+	* cobc.c: moved code for listing titles to own functions
+	  (set_listing_title_code) and (set_listing_title_symbols)
+	* cobc.c (terminate_str_at_first_of_char): changed to terminate at
+	  passed char instead of '\n'
 
 2016-08-04  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -3434,6 +3434,39 @@ preprocess (struct filename *fn)
 /* Routines to generate program listing */
 
 static void
+set_listing_title_code (void)
+{
+	strcpy (cb_listing_title, "LINE    ");
+	if (cb_listing_files->source_format == CB_FORMAT_FIXED) {
+		strcat (cb_listing_title,
+			"PG/LN  A...B..............................."
+			".............................");
+		if (cb_listing_wide) {
+			strcat (cb_listing_title, "SEQUENCE");
+		}
+	} else {
+		if (cb_listing_wide) {
+			strcat (cb_listing_title,
+				"................................");
+		}
+		strcat (cb_listing_title,
+			".....................SOURCE..................."
+			"..........................");
+		if (cb_listing_wide) {
+			strcat (cb_listing_title, "........");
+		}
+	}
+}
+
+static void
+set_listing_title_symbols (void)
+{
+	strcpy (cb_listing_title,
+		"SIZE TYPE           LVL  NAME                           PICTURE");
+}
+
+
+static void
 print_program_header (void)
 {
 	char		version[20];
@@ -3701,11 +3734,11 @@ print_fields (int lvl, struct cb_field *top)
 }
 
 static void
-print_files_and_their_records (cb_tree file_list)
+print_files_and_their_records (cb_tree file_list_p)
 {
 	cb_tree	l;
 
-	if ((l = file_list) == NULL) {
+	if ((l = file_list_p) == NULL) {
 		return;
 	}
 
@@ -3746,15 +3779,11 @@ print_program_trailer (void)
 	struct cb_program	*q;
 	int			 print_names = 0;
 
-	if (!cb_src_list_file) {
-		return;
-	}
 
 	if ((p = current_program) != NULL) {
 		/* Print file/symbol tables */
 
-		strcpy (cb_listing_title,
-			"SIZE TYPE           LVL  NAME                           PICTURE");
+		set_listing_title_symbols();
 		force_new_page_for_next_line ();
 		print_program_header ();
 
@@ -3837,7 +3866,7 @@ get_next_token (char *bp, char *token, char *term)
 static void
 terminate_str_at_first_of_char (const char c, char * const str)
 {
-	char	*first_instance  = strchr (str, '\n');
+	char	*first_instance  = strchr (str, c);
 
 	if (first_instance != NULL) {
 		*first_instance = '\0';
@@ -4661,140 +4690,138 @@ print_program_code (struct list_files *cfile, int in_copy)
 	int	prec;
 
 	cfile->listing_on = 1;
-	if (cb_src_list_file) {
 #ifdef DEBUG_REPLACE
-		struct list_skip *skip;
+	struct list_skip *skip;
 
-		fprintf (stdout, "print_program_code: in_copy = %s\n",
-			 in_copy ? "YES" : "NO");
-		fprintf (stdout, "   name: %s\n", cfile->name);
-		fprintf (stdout, "   copy_line: %d\n", cfile->copy_line);
-		for (i = 0, cur = cfile->copy_head; cur; i++, cur = cur->next) {
-			if (i == 0) {
-				fprintf (stdout, "   copy_books: \n");
-			}
-			fprintf (stdout, "      name[%d]: %s\n", i, cur->name);
-			fprintf (stdout, "      line[%d]: %d\n", i, cur->copy_line);
+	fprintf (stdout, "print_program_code: in_copy = %s\n",
+		 in_copy ? "YES" : "NO");
+	fprintf (stdout, "   name: %s\n", cfile->name);
+	fprintf (stdout, "   copy_line: %d\n", cfile->copy_line);
+	for (i = 0, cur = cfile->copy_head; cur; i++, cur = cur->next) {
+		if (i == 0) {
+			fprintf (stdout, "   copy_books: \n");
 		}
-		for (i = 0, rep = cfile->replace_head; rep; i++, rep = rep->next) {
-			if (i == 0) {
-				fprintf (stdout, "   replace_list: \n");
-			}
-			fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
-			fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
-			fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+		fprintf (stdout, "      name[%d]: %s\n", i, cur->name);
+		fprintf (stdout, "      line[%d]: %d\n", i, cur->copy_line);
+	}
+	for (i = 0, rep = cfile->replace_head; rep; i++, rep = rep->next) {
+		if (i == 0) {
+			fprintf (stdout, "   replace_list: \n");
 		}
-		for (i = 0, err = cfile->err_head; err; i++, err = err->next) {
-			if (i == 0) {
-				fprintf (stdout, "   error_list: \n");
-			}
-			fprintf (stdout, "      line[%d]: %d\n", i, err->line);
-			fprintf (stdout, "      pref[%d]: '%s'\n", i, err->prefix);
-			fprintf (stdout, "      msg [%d]: '%s'\n", i, err->msg);
+		fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
+		fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
+		fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+	}
+	for (i = 0, err = cfile->err_head; err; i++, err = err->next) {
+		if (i == 0) {
+			fprintf (stdout, "   error_list: \n");
 		}
-		for (i = 0, skip = cfile->skip_head; skip; i++, skip = skip->next) {
-			if (i == 0) {
-				fprintf (stdout, "   skip_list: \n");
-			}
-			fprintf (stdout, "      line[%d]: %d\n", i, skip->skipline);
+		fprintf (stdout, "      line[%d]: %d\n", i, err->line);
+		fprintf (stdout, "      pref[%d]: '%s'\n", i, err->prefix);
+		fprintf (stdout, "      msg [%d]: '%s'\n", i, err->msg);
+	}
+	for (i = 0, skip = cfile->skip_head; skip; i++, skip = skip->next) {
+		if (i == 0) {
+			fprintf (stdout, "   skip_list: \n");
 		}
+		fprintf (stdout, "      line[%d]: %d\n", i, skip->skipline);
+	}
 #endif
-		fd = fopen (cfile->name, "r");
-		if (fd != NULL) {
-			line_num = 1;
-			pline_cnt = 0;
+	fd = fopen (cfile->name, "r");
+	if (fd != NULL) {
+		line_num = 1;
+		pline_cnt = 0;
 
-			eof = 0;
-			done = 0;
-			if (get_next_listing_line (fd, pline[pline_cnt], fixed) >= 0) {
+		eof = 0;
+		done = 0;
+		if (get_next_listing_line (fd, pline[pline_cnt], fixed) >= 0) {
 
-				while (!done) {
-					if (get_next_listing_line (fd, pline[pline_cnt + 1], fixed) < 0) {
-						if (eof) {
-							done = 1;
-							break;
+			while (!done) {
+				if (get_next_listing_line (fd, pline[pline_cnt + 1], fixed) < 0) {
+					if (eof) {
+						done = 1;
+						break;
+					}
+					eof = 1;
+				}
+				pline_cnt++;
+				if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
+						      fixed)) {
+					continue;
+				}
+
+				if (!in_copy) {
+					pline_cnt = print_replace_main (cfile, fd, pline, pline_cnt,
+								       line_num);
+				} else if (cfile->replace_head) {
+					rep = cfile->replace_head;
+					while (rep) {
+						pline_cnt = print_replace_text (cfile, fd, rep, pline,
+									       pline_cnt, line_num);
+						rep = rep->next;
+					}
+				}
+
+				prec = 0;
+				for (i = 0; i < pline_cnt; i++) {
+					if (pline[i][0]) {
+						if (pline[i][CB_INDICATOR] == '&') {
+							print_line (cfile, pline[i], line_num, in_copy, fixed);
+						} else {
+							print_line (cfile, pline[i], line_num + i, in_copy, fixed);
+							prec++;
 						}
-						eof = 1;
 					}
-					pline_cnt++;
-					if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
-							      fixed)) {
-						continue;
-					}
+				}
 
-					if (!in_copy) {
-						pline_cnt = print_replace_main (cfile, fd, pline, pline_cnt,
-									       line_num);
-					} else if (cfile->replace_head) {
+				if (cfile->copy_head) {
+					cur = cfile->copy_head;
+					if (cur->copy_line == line_num) {
+						struct list_replace *repl;
+
 						rep = cfile->replace_head;
-						while (rep) {
-							pline_cnt = print_replace_text (cfile, fd, rep, pline,
-										       pline_cnt, line_num);
+						/*  COPY in COPY, add replacement text to new COPY */
+						while (rep && in_copy) {
+							repl = cobc_malloc (sizeof (struct list_replace));
+							memcpy (repl, rep, sizeof (struct list_replace));
+							repl->next = NULL;
+							if (cur->replace_tail) {
+								cur->replace_tail->next = repl;
+							}
+							if (!cur->replace_head) {
+								cur->replace_head = repl;
+							}
+							cur->replace_tail = repl;
 							rep = rep->next;
 						}
-					}
-
-					prec = 0;
-					for (i = 0; i < pline_cnt; i++) {
-						if (pline[i][0]) {
-							if (pline[i][CB_INDICATOR] == '&') {
-								print_line (cfile, pline[i], line_num, in_copy, fixed);
-							} else {
-								print_line (cfile, pline[i], line_num + i, in_copy, fixed);
-								prec++;
-							}
-						}
-					}
-
-					if (cfile->copy_head) {
-						cur = cfile->copy_head;
-						if (cur->copy_line == line_num) {
-							struct list_replace *repl;
-
-							rep = cfile->replace_head;
-							/*  COPY in COPY, add replacement text to new COPY */
-							while (rep && in_copy) {
-								repl = cobc_malloc (sizeof (struct list_replace));
-								memcpy (repl, rep, sizeof (struct list_replace));
-								repl->next = NULL;
-								if (cur->replace_tail) {
-									cur->replace_tail->next = repl;
-								}
-								if (!cur->replace_head) {
-									cur->replace_head = repl;
-								}
-								cur->replace_tail = repl;
-								rep = rep->next;
-							}
-							print_program_code (cur, 1);
-							cfile->copy_head = cur->next;
-							free (cur);
-						}
-					}
-					strcpy (pline[0], pline[pline_cnt]);
-					line_num += prec;
-					pline_cnt = 0;
-					if (pline[0][0] == 0) {
-						eof = 1;
+						print_program_code (cur, 1);
+						cfile->copy_head = cur->next;
+						free (cur);
 					}
 				}
+				strcpy (pline[0], pline[pline_cnt]);
+				line_num += prec;
+				pline_cnt = 0;
+				if (pline[0][0] == 0) {
+					eof = 1;
+				}
 			}
-			fclose (fd);
+		}
+		fclose (fd);
 
 		/* Non-existant file, print errors to listing */
-		} else {
-			if (cfile->err_head) {
-				for (err = cfile->err_head; err; err = err->next) {
-					print_program_header ();
-					fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
-				}
+	} else {
+		if (cfile->err_head) {
+			for (err = cfile->err_head; err; err = err->next) {
+				print_program_header ();
+				fprintf (cb_src_list_file, "%s%s\n", err->prefix, err->msg);
 			}
-			if (cfile->copy_head) {
-				cur = cfile->copy_head;
-				print_program_code (cur, 1);
-				cfile->copy_head = cur->next;
-				free (cur);
-			}
+		}
+		if (cfile->copy_head) {
+			cur = cfile->copy_head;
+			print_program_code (cur, 1);
+			cfile->copy_head = cur->next;
+			free (cur);
 		}
 	}
 
@@ -4856,16 +4883,18 @@ process_translate (struct filename *fn)
 	}
 
 	/* Print the listing for this file */
-	cfile = cb_listing_files;
-	print_program_code (cfile, 0);
-	if ((struct list_files *) cb_listing_files == cb_current_file) {
-		cb_current_file = cb_current_file->next;
-	}
-	cb_listing_files = cb_listing_files->next;
-	free (cfile);
+	if (cb_src_list_file) {
+		cfile = cb_listing_files;
+		print_program_code (cfile, 0);
+		if ((struct list_files *) cb_listing_files == cb_current_file) {
+			cb_current_file = cb_current_file->next;
+		}
+		cb_listing_files = cb_listing_files->next;
+		free (cfile);
 
-	/* Print program trailer */
-	print_program_trailer();
+		/* Print program trailer */
+		print_program_trailer();
+	}
 
 	if (ret) {
 		return 1;
@@ -5572,7 +5601,6 @@ main (int argc, char **argv)
 	char			*p;
 	struct cobc_mem_struct	*mptr;
 	struct cobc_mem_struct	*mptrt;
-	struct list_error	*err;
 	struct list_files	*newfile;
 	unsigned int		iparams;
 	unsigned int		local_level;
@@ -5620,7 +5648,6 @@ main (int argc, char **argv)
 	cobc_ldflags_size = COB_MINI_MAX;
 
 	cb_source_file = NULL;
-	cb_listing_linecount = 100000;
 	save_temps_dir = NULL;
 	base_string = NULL;
 	cobc_objects_len = 0;
@@ -5940,17 +5967,22 @@ main (int argc, char **argv)
 			return 1;
 		}
 
-		newfile = cobc_malloc (sizeof (struct list_files));
-		memset (newfile, 0, sizeof (struct list_files));
-		if (cb_current_file) {
-			cb_current_file->next = newfile;
+		/* Initialize listing */
+		if (cb_src_list_file) {
+			newfile = cobc_malloc (sizeof (struct list_files));
+			memset (newfile, 0, sizeof (struct list_files));
+			if (cb_current_file) {
+				cb_current_file->next = newfile;
+			}
+			if (!cb_listing_files) {
+				cb_listing_files = newfile;
+			}
+			cb_current_file = newfile;
+			cb_current_file->name = cobc_strdup (fn->source);
+			cb_current_file->source_format = cb_source_format;
+			cb_current_file = cb_listing_files;
+			force_new_page_for_next_line();
 		}
-		if (!cb_listing_files) {
-		   cb_listing_files = newfile;
-		}
-		cb_current_file = newfile;
-		cb_current_file->name = cobc_strdup (fn->source);
-		cb_current_file->source_format = cb_source_format;
 
 		/* Initialize general vars */
 		errorcount = 0;
@@ -5968,7 +6000,7 @@ main (int argc, char **argv)
 			cb_compile_level = CB_LEVEL_ASSEMBLE;
 			cobc_flag_main = 0;
 		}
-		cb_current_file = cb_listing_files;
+
 
 		if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
 		    fn->need_preprocess) {
@@ -5985,27 +6017,11 @@ main (int argc, char **argv)
 			putc ('\n', cb_listing_file);
 		}
 
-		cb_listing_page = 0;
-        	strcpy (cb_listing_filename, fn->source);
-		strcpy (cb_listing_title, "LINE    ");
-		if (cb_listing_files->source_format == CB_FORMAT_FIXED) {
-			strcat (cb_listing_title,
-				"PG/LN  A...B..............................."
-				".............................");
-			if (cb_listing_wide) {
-				strcat (cb_listing_title, "SEQUENCE");
-			}
-		} else {
-			if (cb_listing_wide) {
-				strcat (cb_listing_title,
-					"................................");
-			}
-			strcat (cb_listing_title,
-				".....................SOURCE..................."
-				"..........................");
-			if (cb_listing_wide) {
-				strcat (cb_listing_title, "........");
-			}
+
+		if (cb_src_list_file) {
+			cb_listing_page = 0;
+			strcpy (cb_listing_filename, fn->source);
+			set_listing_title_code();
 		}
 
 		if (cb_compile_level < CB_LEVEL_TRANSLATE) {
