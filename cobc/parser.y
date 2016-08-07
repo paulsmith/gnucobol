@@ -962,7 +962,7 @@ set_current_field (cb_tree level, cb_tree name)
 	cb_tree	x  = cb_build_field_tree (level, name, current_field,
 					  current_storage, current_file, 0);
 	cobc_parse_free (level);
-	
+
 	if (CB_INVALID_TREE (x)) {
 	        return 1;
 	} else {
@@ -982,7 +982,7 @@ emit_duplicate_clause_message (const char *clause)
 		cb_error (_("duplicate %s clause"), clause);
 	}
 }
- 
+
 static void
 check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
 {
@@ -1263,7 +1263,7 @@ is_screen_field (cb_tree x)
 static void
 error_if_no_advancing_in_screen_display (cb_tree advancing)
 {
-	if (advancing_value != cb_int1) {
+	if (advancing != cb_int1) {
 		cb_error (_("cannot specify NO ADVANCING in screen DISPLAY"));
 	}
 }
@@ -4390,7 +4390,7 @@ renames_entry:
 	if (set_current_field ($1, $2)) {
 		YYERROR;
 	}
-	  
+
 	if (cb_ref ($4) != cb_error_node) {
 		error_if_invalid_level_for_renames ($4);
 		current_field->redefines = CB_FIELD (cb_ref ($4));
@@ -4692,11 +4692,11 @@ usage:
   }
 | SIGNED_LONG
   {
-	if (sizeof(long) == 4) {
-		check_set_usage (CB_USAGE_SIGNED_INT);
-	} else {
-		check_set_usage (CB_USAGE_SIGNED_LONG);
-	}
+#ifdef COB_32_BIT_LONG
+	check_set_usage (CB_USAGE_SIGNED_INT);
+#else
+	check_set_usage (CB_USAGE_SIGNED_LONG);
+#endif
   }
 | UNSIGNED_SHORT
   {
@@ -4708,11 +4708,11 @@ usage:
   }
 | UNSIGNED_LONG
   {
-	if (sizeof(long) == 4) {
-		check_set_usage (CB_USAGE_UNSIGNED_INT);
-	} else {
-		check_set_usage (CB_USAGE_UNSIGNED_LONG);
-	}
+#ifdef COB_32_BIT_LONG
+	check_set_usage (CB_USAGE_UNSIGNED_INT);
+#else
+	check_set_usage (CB_USAGE_UNSIGNED_LONG);
+#endif
   }
 | BINARY_CHAR _signed
   {
@@ -4748,19 +4748,19 @@ usage:
   }
 | BINARY_C_LONG _signed
   {
-	if (sizeof(long) == 4) {
-		check_set_usage (CB_USAGE_SIGNED_INT);
-	} else {
-		check_set_usage (CB_USAGE_SIGNED_LONG);
-	}
+#ifdef COB_32_BIT_LONG
+	check_set_usage (CB_USAGE_SIGNED_INT);
+#else
+	check_set_usage (CB_USAGE_SIGNED_LONG);
+#endif
   }
 | BINARY_C_LONG UNSIGNED
   {
-	if (sizeof(long) == 4) {
-		check_set_usage (CB_USAGE_UNSIGNED_INT);
-	} else {
-		check_set_usage (CB_USAGE_UNSIGNED_LONG);
-	}
+#ifdef COB_32_BIT_LONG
+	check_set_usage (CB_USAGE_UNSIGNED_INT);
+#else
+	check_set_usage (CB_USAGE_UNSIGNED_LONG);
+#endif
   }
 | FLOAT_BINARY_32
   {
@@ -9588,7 +9588,7 @@ string_item_list:
 ;
 
 string_item:
-  x	_string_delimited	
+  x _string_delimited
   {
     if (!save_tree) {
 		save_tree = CB_LIST_INIT ($1);

@@ -917,7 +917,7 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 
 		/* Put sign or currency symbol at the beginning */
 		if (sign_symbol || curr_symbol) {
-			if (floating_insertion) {			
+			if (floating_insertion) {
 				for (dst = end - 1; dst > f2->data; --dst) {
 					if (*dst == ' ') {
 						break;
@@ -1100,7 +1100,7 @@ indirect_move (void (*func) (cob_field *src, cob_field *dst),
 	cob_field	temp;
 	cob_field_attr	attr;
 
-	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, size, scale,
+	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, (unsigned short) size, (short) scale,
 			COB_FLAG_HAVE_SIGN, NULL);
 	temp.size = size;
 	temp.data = cob_malloc (size);

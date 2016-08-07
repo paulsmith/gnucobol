@@ -1435,7 +1435,7 @@ int_strncasecmp (const void *s1, const void *s2, size_t n)
 /* NUMVAL */
 
 static int
-in_last_n_chars (const cob_field *field, const size_t n, const int i)
+in_last_n_chars (const cob_field *field, const size_t n, const unsigned int i)
 {
 	return i >= (field->size - n);
 }
@@ -2239,7 +2239,7 @@ add_decimal_digits (int decimal_places, cob_decimal *second_fraction,
 	while (scale != 0 && decimal_places != 0) {
 		--scale;
 		power_of_ten = int_pow (10, scale);
-		buff[*buff_pos] = '0' + (fraction / power_of_ten);
+		buff[*buff_pos] = (char) ('0' + (fraction / power_of_ten));
 
 		fraction %= power_of_ten;
 		++*buff_pos;
@@ -2416,8 +2416,7 @@ split_around_t (const char *str, char *first, char *second)
 }
 
 static int
-try_get_valid_offset_time (const struct time_format time_format,
-			   cob_field *offset_time_field, int *offset_time)
+try_get_valid_offset_time (cob_field *offset_time_field, int *offset_time)
 {
 	if (offset_time_field != NULL) {
 		*offset_time = cob_get_int (offset_time_field);
@@ -6138,7 +6137,7 @@ cob_intr_formatted_time (const int offset, const int length,
 	if (use_system_offset) {
 		offset_time_ptr = get_system_offset_time_ptr (&offset_time);
 	} else {
-		if (try_get_valid_offset_time (format, offset_time_field,
+		if (try_get_valid_offset_time (offset_time_field,
 					       &offset_time)) {
 			goto invalid_args;
 		} else {
@@ -6236,7 +6235,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	if (use_system_offset) {
 		offset_time_ptr = get_system_offset_time_ptr (&offset_time);
 	} else {
-		if (try_get_valid_offset_time (time_fmt, offset_time_field,
+		if (try_get_valid_offset_time (offset_time_field,
 					       &offset_time)) {
 			goto invalid_args;
 		} else {

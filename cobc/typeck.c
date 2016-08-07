@@ -5452,7 +5452,6 @@ get_default_field_line_column (const int is_first_display_item)
 
 static void
 emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
-					     const enum cb_display_type display_type,
 					     const int is_first_display_list)
 {
 	cb_tree	l;
@@ -5477,7 +5476,6 @@ static void
 emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 			     cb_tree bgc, cb_tree scroll, cb_tree size_is,
 			     int disp_attrs,
-			     const enum cb_display_type display_type,
 			     const int is_first_display_list)
 {
 	cb_tree	l;
@@ -5567,11 +5565,9 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 
 	case FIELD_ON_SCREEN_DISPLAY:
 		emit_default_field_display_for_all_but_last (values, size_is,
-							     display_type,
 							     is_first_display_list);
 		emit_field_display_for_last (values, line_column, fgc, bgc,
 					     scroll, size_is, disp_attrs,
-					     display_type,
 					     is_first_display_list);
 
 		break;

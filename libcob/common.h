@@ -529,14 +529,16 @@
 
 /* Macro to prevent compiler warning "conditional expression is constant" */
 #if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
-#define ONCE_COB \
-__pragma( warning(push) ) \
-__pragma( warning(disable:4127) ) \
-while (0) \
-__pragma( warning(pop) )
+#define CONSTANT_EXPR(x)			\
+	__pragma( warning(push) )		\
+	__pragma( warning(disable:4127) )	\
+	x					\
+	__pragma( warning(pop) )
 #else
-#define ONCE_COB while (0)
+#define CONSTANT_EXPR(x) x
 #endif
+
+#define ONCE_COB while (CONSTANT_EXPR (0))
 
 /* Macro to prevent unused parameter warning */
 

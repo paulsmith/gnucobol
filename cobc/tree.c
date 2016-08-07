@@ -1130,7 +1130,7 @@ check_lit_length (const int size, const char *lit)
 			_("literal length %d exceeds maximum of %d digits"),
 			size, COB_MAX_DIGITS);
 		error_numeric_literal (lit);
-	} else if (unlikely(size > cb_numlit_length)) {
+	} else if (unlikely((unsigned int) size > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d digits"),
 			size, cb_numlit_length);
@@ -1346,7 +1346,7 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 		p->common.source_line = value->source_line;
 		p->common.source_column = value->source_column;
 	}
-	
+
 	return CB_TREE (p);
 }
 
@@ -1867,7 +1867,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 
 	*first = NULL;
 	*last = NULL;
-	
+
 	for (; str->symbol != '\0'; ++str) {
 		if (!*first && (str->symbol == '+' || str->symbol == '-'
 				|| str->symbol == current_program->currency_symbol)) {
@@ -2033,7 +2033,7 @@ char_to_precedence_idx (const cob_pic_symbol *str,
 			/*
 			  Invalid characters have already been detected, so no
 			  need to emit an error here.
-			*/ 
+			*/
 			return -1;
 		}
 	}
@@ -2110,7 +2110,7 @@ emit_precedence_error (const int preceding_idx, const int following_idx)
 	const char	*preceding_descr = get_char_type_description (preceding_idx);
 	const char	*following_descr = get_char_type_description (following_idx);
 
-	
+
 	if (following_descr && preceding_descr) {
 		if (preceding_idx == following_idx) {
 			cb_error (_("%s may only occur once in a PICTURE string"), preceding_descr);
@@ -2175,7 +2175,7 @@ valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 
 	chars_seen[17] = s_char_seen;
 	find_floating_insertion_str (str, &first_floating_sym, &last_floating_sym);
-	
+
 	for (s = str; s->symbol != '\0'; ++s) {
 		/* Perform the check twice if a character is repeated, e.g. to detect 9VV. */
 		repeated = s->times_repeated > 1;
@@ -2297,7 +2297,7 @@ repeat:
 						cb_error (_("only up to 9 significant digits are permitted within parentheses"));
 						error_detected = 1;
 					}
-					
+
 				}
 			}
 			if (!*p) {
@@ -2351,7 +2351,7 @@ repeat:
 				cb_error (_("S must be at start of PICTURE string"));
 				error_detected = 1;
 			}
-			
+
 			s_char_seen = 1;
 			continue;
 
@@ -2434,7 +2434,7 @@ repeat:
 				cb_error (_("cannot have both Z and * in PICTURE string"));
 				error_detected = 1;
 			}
-			
+
 			category |= PIC_NUMERIC_EDITED;
 			if (category & PIC_ALPHABETIC) {
 				error_detected = 1;
@@ -2460,7 +2460,7 @@ repeat:
 			} else {
 				p++;
 			}
-			
+
 			s_count++;
 			break;
 
@@ -2473,7 +2473,7 @@ repeat:
 			} else {
 				p++;
 			}
-			
+
 			s_count++;
 			break;
 
@@ -2516,7 +2516,7 @@ repeat:
 	if (!valid_char_order (pic_buff, s_char_seen)) {
 		error_detected = 1;
 	}
-	
+
 	if (error_detected) {
 		goto end;
 	}
@@ -3717,7 +3717,7 @@ cb_build_any_intrinsic (cb_tree args)
 {
 	struct cb_intrinsic_table	*cbp;
 
-	cbp = lookup_intrinsic ("LENGTH", 0, 0);
+	cbp = lookup_intrinsic ("LENGTH", 0);
 	return make_intrinsic (NULL, cbp, args, NULL, NULL, 0);
 }
 
@@ -3750,7 +3750,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		return make_intrinsic (name, &userbp, args, cb_int1, refmod, 1);
 	}
 
-	cbp = lookup_intrinsic (CB_NAME (name), 0, 1);
+	cbp = lookup_intrinsic (CB_NAME (name), 1);
 	if (!cbp) {
 		cb_error_x (name, _("FUNCTION '%s' unknown"), CB_NAME (name));
 		return cb_error_node;

@@ -331,22 +331,9 @@ cob_decimal_set_ullint (cob_decimal *d, const cob_u64_t n)
 #ifdef	COB_LI_IS_LL
 	mpz_set_ui (d->value, (cob_uli_t)n);
 #else
-	cob_u64_t	uval;
-	cob_u32_t	negative;
-
-	negative = 0;
-	if (n < 0) {
-		negative = 1;
-		uval = (cob_u64_t)-n;
-	} else {
-		uval = (cob_u64_t)n;
-	}
-	mpz_set_ui (d->value, (cob_uli_t)(uval >> 32));
+	mpz_set_ui (d->value, (cob_uli_t)(n >> 32));
 	mpz_mul_2exp (d->value, d->value, 32);
-	mpz_add_ui (d->value, d->value, (cob_uli_t)(uval & 0xFFFFFFFFU));
-	if (negative) {
-		mpz_neg (d->value, d->value);
-	}
+	mpz_add_ui (d->value, d->value, (cob_uli_t)(n & 0xFFFFFFFFU));
 #endif
 	d->scale = 0;
 }
@@ -1254,7 +1241,7 @@ cob_decimal_get_packed (cob_decimal *d, cob_field *f, const int opt)
 	for (i = diff, n = 0; i < size + diff; i++, n++) {
 		x = COB_D2I (q[n]);
 		if (i % 2 == 0) {
-			*p = x << 4;
+			*p = (unsigned char) x << 4;
 		} else {
 			*p++ |= x;
 		}

@@ -1541,7 +1541,6 @@ extern void			cb_insert_common_prog (struct cb_program *,
 
 
 extern struct cb_intrinsic_table	*lookup_intrinsic (const char *,
-							   const int,
 							   const int);
 
 extern cb_tree		cb_build_alphabet_name (cb_tree);

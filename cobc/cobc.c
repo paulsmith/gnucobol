@@ -1539,6 +1539,7 @@ cobc_abort_terminate (void)
 	exit (99);
 }
 
+/* TO-DO: Fix */
 static void
 cobc_sig_handler (int sig)
 {
@@ -1694,11 +1695,11 @@ cobc_print_info (void)
 	cobc_var_print ("COB_MODULE_EXT",	COB_MODULE_EXT, 0);
 	cobc_var_print ("COB_EXEEXT",		COB_EXEEXT, 0);
 
-	if (sizeof (void *) > 4U) {
-		cobc_var_print ("64bit-mode",	_("yes"), 0);
-	} else {
-		cobc_var_print ("64bit-mode",	_("no"), 0);
-	}
+#ifdef COB_64_BIT_POINTER
+	cobc_var_print ("64bit-mode",	_("yes"), 0);
+#else
+	cobc_var_print ("64bit-mode",	_("no"), 0);
+#endif
 
 #ifdef	COB_LI_IS_LL
 	cobc_var_print ("BINARY-C-LONG",	_("8 bytes"), 0);
@@ -1891,7 +1892,7 @@ cobc_deciph_funcs (const char *opt)
 	p = cobc_strdup (opt);
 	q = strtok (p, ",");
 	while (q) {
-		if (!lookup_intrinsic (q, 0, 1)) {
+		if (!lookup_intrinsic (q, 1)) {
 			cobc_err_exit (_("'%s' is not an intrinsic function"), q);
 		}
 		CB_TEXT_LIST_ADD (cb_intrinsic_list, q);
@@ -3738,11 +3739,7 @@ print_files_and_their_records (cb_tree file_list_p)
 {
 	cb_tree	l;
 
-	if ((l = file_list_p) == NULL) {
-		return;
-	}
-
-	for (; l; l = CB_CHAIN (l)) {
+	for (l = file_list_p; l; l = CB_CHAIN (l)) {
 		print_program_header ();
 		fprintf (cb_src_list_file, "%04d %-14.14s      %s\n",
 			 CB_FILE (CB_VALUE (l))->record_max,
@@ -3882,7 +3879,7 @@ static int
 get_next_listing_line (FILE *fd, char *out_line, int fixed)
 {
 	char	*in_char;
-	int	i = 0;
+	unsigned int	i = 0;
 	char	in_line[CB_LINE_LENGTH + 2] =  { '\0' };
 
 	if (!fgets (in_line, CB_LINE_LENGTH, fd)) {
@@ -4467,17 +4464,16 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				nextrec = 0;
 				j = first_col;
 				while (fp && !nextrec) {
-					int ftlen;
 					ftlen = strlen (ftoken);
 					i = 0;
-					if (ftlen >= (CB_SEQUENCE - first_col)) {
+					if ((unsigned int) ftlen >= (CB_SEQUENCE - first_col)) {
 #ifdef DEBUG_REPLACE
 						fprintf (stdout, "   ftlen = %d\n", ftlen);
 #endif
 						while (ftlen) {
 							pline[k][j++] = ftoken[i++];
 							ftlen--;
-							if (j == CB_SEQUENCE) {
+							if ((unsigned int) j == CB_SEQUENCE) {
 #ifdef DEBUG_REPLACE
 								fprintf (stdout, "   NEW pline[%2d] = %s\n",
 									 k, pline[k]);
@@ -4809,7 +4805,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 		}
 		fclose (fd);
 
-		/* Non-existant file, print errors to listing */
+		/* Non-existent file, print errors to listing */
 	} else {
 		if (cfile->err_head) {
 			for (err = cfile->err_head; err; err = err->next) {
@@ -4899,7 +4895,7 @@ process_translate (struct filename *fn)
 	if (ret) {
 		return 1;
 	}
-	if (cb_flag_syntax_only || 
+	if (cb_flag_syntax_only ||
 		(current_program && current_program->entry_list == NULL)) {
 		return 0;
 	}
@@ -5624,7 +5620,7 @@ main (int argc, char **argv)
 	yyout = NULL;
 
 
-	cob_reg_sighnd(&cobc_sig_handler);
+	cob_reg_sighnd (&cobc_sig_handler);
 
 	cb_saveargc = argc;
 	cb_saveargv = argv;

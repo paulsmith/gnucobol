@@ -378,10 +378,12 @@ cob_exit_common (void)
 	}
 	if (cobsetptr) {
 		if (cobsetptr->cob_config_file) {
-			for (i=0; i < cobsetptr->cob_config_num; i++) 
-				if (cobsetptr->cob_config_file[i])
+			for (i = 0; i < cobsetptr->cob_config_num; i++) {
+				if (cobsetptr->cob_config_file[i]) {
 					cob_free((void*)cobsetptr->cob_config_file[i]);
-			cob_free((void*)cobsetptr->cob_config_file);
+				}
+			}
+			cob_free ((void*)cobsetptr->cob_config_file);
 		}
 		/* Free all strings pointed to by cobsetptr */
 		for (i=0; i < NUM_CONFIG; i++) {
@@ -1115,7 +1117,7 @@ cob_rescan_env_vals (void)
 			if(*env != 0					/* If *env -> Nul then ignore this */
 			&& set_config_val(env,i)) {
 				gc_conf[i].data_type = old_type;
-				
+
 				/* Remove invalid setting */
 #if HAVE_SETENV
 				(void)unsetenv(gc_conf[i].env_name);
@@ -1772,7 +1774,7 @@ conf_runtime_error(const int finish_error, const char *fmt, ...)
 	}
 
 	/* Prefix */
-	if (cob_source_file != last_runtime_error_file 
+	if (cob_source_file != last_runtime_error_file
 	|| cob_source_line != last_runtime_error_line) {
 		last_runtime_error_file = cob_source_file;
 		last_runtime_error_line = cob_source_line;
@@ -2866,7 +2868,7 @@ cob_accept_time (cob_field *field)
 {
 	struct cob_time	time;
 	char		str[9] = { '\0' };
-	
+
 	time = cob_get_current_date_and_time ();
 	snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,
 		  time.second, time.nanosecond / 10000000);
@@ -3237,7 +3239,7 @@ cob_gettmpdir (void)
 #if !HAVE_SETENV
 	char	*put;
 #endif
-		
+
 	if ((tmpdir = getenv ("TMPDIR")) == NULL) {
 		tmp = NULL;
 #ifdef	_WIN32
@@ -3542,7 +3544,7 @@ cob_sys_hosted (void *p, const void *var)
 	}
 	return 1;
 }
-			
+
 int
 cob_sys_and (const void *p1, void *p2, const int length)
 {
@@ -3871,7 +3873,7 @@ cob_sys_calledby (void *data)
 	COB_CHK_PARMS (C$CALLEDBY, 1);
 
 	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
-		/* check what ACU ccbl/runcbl returns, 
+		/* TO-DO: check what ACU ccbl/runcbl returns,
 		   the documentation doesn't say anything about this */
 		return -1;
 	}
@@ -3921,7 +3923,7 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	size_t so_size = 0;
 	size_t lo_size = 0;
 	size_t optlen;
-	
+
 	unsigned int lo_amount;
 
 	int exit_status;
@@ -4016,11 +4018,11 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 
 	return_value = cob_getopt_long_long(cob_argc, cob_argv, shortoptions, longoptions, &longind, long_only);
 	temp = (char*) &return_value;
-	
+
 	/*
 	 * Write data back to COBOL
 	 */
-	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W' 
+	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W'
 		|| temp[0] == -1 || temp[0] == 0) exit_status = return_value;
 	else exit_status = 3;
 
@@ -4034,7 +4036,7 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 
 	if(cob_optarg != NULL) {
 		memset (opt_val, 0x00, opt_val_size);
-		
+
 		optlen = strlen (cob_optarg);
 		if (optlen > opt_val_size) {
 			/* Returncode 2 for "Optionvalue too long => cut" */
@@ -4442,71 +4444,88 @@ var_print (const char *msg, const char *val, const char *default_val,
 
 
 /*
-	Expand a string with environment variable in it
+ Expand a string with environment variable in it. Return malloced string.
 */
-char *				/* Return malloced string */
+char *
 cob_expand_env_string (char *strval)
 {
-	unsigned int	i,j,k,envlen = 1280;
-	char	*env,*str = strval;
-	char	ename[128],*penv;
-	env = cob_malloc(envlen);
-	if (env) {
-		for (j=k=0; strval[k] != 0; k++) {
-			if(j >= (envlen-128)) {		/* String almost full?; Expand it */
-				env = cob_realloc(env,envlen,envlen+256);
-				envlen += 256;
-			}
-			if (strval[k] == '$'
-			&& strval[k+1] == '{') {	/* ${envname:default} */
-				k += 2;
-				for (i=0; strval[k] != '}' 
-						&& strval[k] != 0
-						&& strval[k] != ':'; k++) {
-					ename[i++] = strval[k];
-				}
-				ename[i++] = 0;
-				penv = getenv(ename);
-				if (penv == NULL) {
-					if(strval[k] == ':') {	/* Copy 'default' value */
-						k++;
-						if (strval[k] == '-') k++;	/* ${name:-default} */
-						while (strval[k] != '}' && strval[k] != 0) {
-							if(j >= (envlen-50)) {
-								env = cob_realloc(env,envlen,envlen+128);
-								envlen += 128;
-							}
-							env[j++] = strval[k++];
-						}
-					} else if(strcmp(ename,"COB_CONFIG_DIR") == 0) {
-						penv = (char*)COB_CONFIG_DIR;
-					} else if(strcmp(ename,"COB_COPY_DIR") == 0) {
-						penv = (char*)COB_COPY_DIR;
-					}
-				}
-				if(penv != NULL) {
-					if((j + strlen(penv)) > (unsigned int)(envlen - 128)) {
-						env = cob_realloc(env,envlen, strlen(penv) + 256);
-						envlen = (unsigned int)strlen(penv) + 256;
-					}
-					j += sprintf(&env[j],"%s",penv);
-					penv = NULL;
-				}
-				while(strval[k] != '}' && strval[k] != 0)
-					k++;
-				if(strval[k] == '}')
-					k++;
-				k--;
-			} else if (!isspace ((unsigned char)strval[k])) {
-				env[j++] = strval[k];
-			} else {
-				env[j++] = ' ';
-			}
-		}
-		env[j] = 0;
-		str = cob_strdup(env);
-		cob_free(env);
+	unsigned int	i;
+	unsigned int	j = 0;
+	unsigned int	k = 0;
+	unsigned int	envlen = 1280;
+	char		*env = cob_malloc(envlen);
+	char		*str = strval;
+	char		ename[128] = { '\0' };
+	char		*penv;
+
+	if (!env) {
+		return str;
 	}
+
+	for (k = 0; strval[k] != 0; k++) {
+		/* String almost full?; Expand it */
+		if(j >= envlen - 128) {
+			env = cob_realloc(env, envlen, envlen+256);
+			envlen += 256;
+		}
+
+		/* ${envname:default} */
+		if (strval[k] == '$' && strval[k + 1] == '{') {
+			k += 2;
+			for (i = 0; strval[k] != '}'
+				     && strval[k] != 0
+				     && strval[k] != ':'; k++) {
+				ename[i++] = strval[k];
+			}
+			ename[i++] = 0;
+			penv = getenv (ename);
+			if (penv == NULL) {
+				/* Copy 'default' value */
+				if (strval[k] == ':') {
+					k++;
+					/* ${name:-default} */
+					if (strval[k] == '-') {
+						k++;
+					}
+					while (strval[k] != '}' && strval[k] != 0) {
+						if (j >= envlen - 50) {
+							env = cob_realloc (env, envlen, envlen + 128);
+							envlen += 128;
+						}
+						env[j++] = strval[k++];
+					}
+				} else if (strcmp (ename, "COB_CONFIG_DIR") == 0) {
+					penv = (char*)COB_CONFIG_DIR;
+				} else if (strcmp (ename, "COB_COPY_DIR") == 0) {
+					penv = (char*)COB_COPY_DIR;
+				}
+			}
+			if (penv != NULL) {
+				if ((j + strlen (penv)) > (unsigned int)(envlen - 128)) {
+					env = cob_realloc (env, envlen, strlen (penv) + 256);
+					envlen = (unsigned int)strlen (penv) + 256;
+				}
+				j += sprintf (&env[j], "%s", penv);
+				penv = NULL;
+			}
+			while (strval[k] != '}' && strval[k] != 0) {
+				k++;
+			}
+			if (strval[k] == '}') {
+				k++;
+			}
+			k--;
+		} else if (!isspace ((unsigned char)strval[k])) {
+			env[j++] = strval[k];
+		} else {
+			env[j++] = ' ';
+		}
+	}
+
+	env[j] = '\0';
+	str = cob_strdup (env);
+	cob_free (env);
+
 	return str;
 }
 
@@ -4618,13 +4637,13 @@ set_config_val (char *value, int pos)
 		if(gc_conf[pos].min_value > 0
 		&& numval < gc_conf[pos].min_value) {
 			conf_runtime_error_value(value, pos);
-			conf_runtime_error(1, _("minimum value: %lu"),gc_conf[pos].min_value); 
+			conf_runtime_error(1, _("minimum value: %lu"),gc_conf[pos].min_value);
 			return 1;
 		}
 		if(gc_conf[pos].max_value > 0
 		&& numval > gc_conf[pos].max_value) {
 			conf_runtime_error_value(value, pos);
-			conf_runtime_error(1, _("maximum value: %lu"),gc_conf[pos].max_value); 
+			conf_runtime_error(1, _("maximum value: %lu"),gc_conf[pos].max_value);
 			return 1;
 		}
 		set_value((char *)data,data_len,numval);
@@ -4633,7 +4652,7 @@ set_config_val (char *value, int pos)
 		numval = 2;
 		if(isdigit((unsigned char)*ptr)) {
 			numval = atoi(ptr);		/* 0 or 1 */
-		} else 
+		} else
 		if(strcasecmp(ptr,"true") == 0
 		|| strcasecmp(ptr,"t") == 0
 		|| strcasecmp(ptr,"on") == 0
@@ -4762,6 +4781,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 		else
 			strcpy(value,"false");
 
+	/* TO-DO: Consolidate copy-and-pasted code! */
 	} else if((data_type & ENV_STR)) {	/* String stored as a string */
 		memcpy(&str,data,sizeof(char *));
 		if(str == NULL)
@@ -4845,7 +4865,7 @@ cb_config_entry (char *buf, int line)
 	keyword[j] = 0;
 
 	while (buf[i] != 0 && ( isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=')) i++;
-	if (buf[i] == '"' 
+	if (buf[i] == '"'
 	||  buf[i] == '\'') {
 		qt = buf[i++];
 		for (j=0; buf[i] != qt && buf[i] != 0; )
@@ -4867,7 +4887,7 @@ cb_config_entry (char *buf, int line)
 			value[k] = 0;
 		}
 		while(isspace((unsigned char)buf[i]) || buf[i] == ':' || buf[i] == '=') i++;
-		if(buf[i] == '"' 
+		if(buf[i] == '"'
 		|| buf[i] == '\'') {
 			qt = buf[i++];
 			for (j=0; buf[i] != qt && buf[i] != 0; )
@@ -5124,7 +5144,7 @@ cob_load_config (void)
 	char		conf_file[COB_MEDIUM_BUFF];
 	int		isoptional = 1, sts, i, j;
 
-	
+
 	/* Get the name for the configuration file */
 	if ((env = getenv ("COB_RUNTIME_CONFIG")) != NULL && env[0]) {
 		strcpy (conf_file, env);
@@ -5159,13 +5179,13 @@ cob_load_config (void)
 	cob_rescan_env_vals(); 			/* Check for possible environment variables */
 
 	/* Set with default value if present and not set otherwise */
-	for (i=0; i < NUM_CONFIG; i++) {				
+	for (i=0; i < NUM_CONFIG; i++) {
 		if (gc_conf[i].default_val
 		&& !(gc_conf[i].data_type & STS_CNFSET)
 		&& !(gc_conf[i].data_type & STS_ENVSET)) {
 			for (j=0; j < NUM_CONFIG; j++) {	/* Any alias present? */
 				if(j != i
-				&& gc_conf[i].data_loc == gc_conf[j].data_loc) 
+				&& gc_conf[i].data_loc == gc_conf[j].data_loc)
 					break;
 			}
 			if(j < NUM_CONFIG) {
@@ -5259,11 +5279,11 @@ print_info (void)
 #endif
 #endif
 
-	if (sizeof (void *) > 4U) {
-		var_print ("64bit-mode",	_("yes"), "", 0);
-	} else {
-		var_print ("64bit-mode",	_("no"), "", 0);
-	}
+#ifdef COB_64_BIT_POINTER
+	var_print ("64bit-mode",	_("yes"), "", 0);
+#else
+	var_print ("64bit-mode",	_("no"), "", 0);
+#endif
 
 #ifdef	COB_LI_IS_LL
 	var_print ("BINARY-C-LONG",	_("8 bytes"), "", 0);
@@ -5428,7 +5448,7 @@ print_runtime_conf()
 		}
 	}
 
-	
+
 	/* checkme
 
 	var_print ("resolve_path",
@@ -5510,7 +5530,7 @@ cob_init (const int argc, char **argv)
 
 	/* Get global structure */
 	cobglobptr = cob_malloc (sizeof(cob_global));
-	
+
 	/* Get settings structure */
 	cobsetptr = cob_malloc (sizeof(cob_settings));
 
@@ -5570,7 +5590,7 @@ cob_init (const int argc, char **argv)
 #endif
 
 #ifdef	_WIN32
-	/* cob_unix_lf needs to be set before configuration load, 
+	/* cob_unix_lf needs to be set before configuration load,
 	   possible error messages would have wrong line endings otherwise */
 	if ((s = getenv("COB_UNIX_LF")) != NULL) {
 		set_config_val_by_name (s, "unix_lf", NULL);

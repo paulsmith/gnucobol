@@ -2699,7 +2699,7 @@ static void
 initialize_user_res_list_if_needed (void)
 {
 	const size_t	num_default_words = NUM_DEFAULT_RESERVED_WORDS;
-	int		i;
+	size_t		i;
 
 	if (likely (cobc_user_res_list || cb_specify_all_reserved)) {
 		return;
@@ -2747,7 +2747,7 @@ get_user_specified_reserved_word (struct reserved_word_list user_reserved)
 
 	if (!user_reserved.alias_for) {
 		cobc_reserved.context_sens
-			= user_reserved.is_context_sensitive;
+			= !!user_reserved.is_context_sensitive;
 	} else {
 		to_find = create_dummy_reserved (user_reserved.alias_for);
 		p = find_default_reserved_word (to_find);
@@ -2963,7 +2963,7 @@ lookup_reserved_word (const char *name)
 }
 
 struct cb_intrinsic_table *
-lookup_intrinsic (const char *name, const int checkres, const int checkimpl)
+lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
 

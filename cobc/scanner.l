@@ -767,7 +767,7 @@ H#[0-9A-Za-z]* {
 	/* Check Intrinsic FUNCTION name without keyword */
 	if ((cobc_in_procedure && (functions_are_all || cb_intrinsic_list ||
 	     current_program->function_spec_list)) || cobc_in_repository) {
-		cbp = lookup_intrinsic (yytext, 1, 0);
+		cbp = lookup_intrinsic (yytext, 0);
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
@@ -1006,7 +1006,7 @@ H#[0-9A-Za-z]* {
 			return USER_FUNCTION_NAME;
 		}
 	}
-	cbp = lookup_intrinsic (yytext, 1, 0);
+	cbp = lookup_intrinsic (yytext, 0);
 	if (cbp) {
 		return (enum yytokentype)(cbp->token);
 	}
@@ -2097,13 +2097,13 @@ cb_find_defined_program_by_name (const char *name)
 	int	(*cmp_func)(const char *, const char *);
 	cb_tree	l;
 	cb_tree	x;
-	
+
 	if (cb_fold_call) {
 		cmp_func = &strcasecmp;
 	} else {
 		cmp_func = &strcmp;
 	}
-	
+
 	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if ((*cmp_func)(name, CB_PROGRAM (x)->program_name) == 0) {
@@ -2119,7 +2119,7 @@ cb_find_defined_program_by_id (const char *orig_id)
 {
 	cb_tree	l;
 	cb_tree	x;
-	
+
 	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (strcmp (orig_id, CB_PROGRAM (x)->orig_program_id) == 0) {

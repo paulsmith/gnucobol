@@ -81,6 +81,8 @@ AH_TEMPLATE([COB_KEYWORD_INLINE], [Keyword for inline])
 AH_TEMPLATE([COB_NO_SELFOPEN], [Can not dlopen self])
 AH_TEMPLATE([COB_STRFTIME], [Can use strftime for timezone])
 AH_TEMPLATE([COB_LI_IS_LL], [long int is long long])
+AH_TEMPLATE([COB_32_BIT_LONG], [long int is 32 bits])
+AH_TEMPLATE([COB_64_BIT_POINTER], [Pointers are longer than 32 bits])
 AH_TEMPLATE([WITH_CURSES], [curses library for extended SCREEN I/O])
 AH_TEMPLATE([HAVE_COLOR_SET], [curses has color_set function])
 AH_TEMPLATE([HAVE_CURSES_FREEALL], [ncurses has _nc_freeall function])
@@ -812,6 +814,27 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	return 1;
 	]])],
 	[AC_DEFINE([COB_LI_IS_LL], [1]) AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])],
+	[])
+
+AC_MSG_CHECKING([if long is 32 bits])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	if (sizeof (long) == 4)
+		return 0;
+	return 1;
+	]])],
+	[AC_DEFINE([COB_32_BIT_LONG], [1]) AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])],
+	[])
+
+
+AC_MSG_CHECKING([if pointer is longer than 32 bits])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	if (sizeof (void *) > 4U)
+		return 0;
+	return 1;
+	]])],
+	[AC_DEFINE([COB_64_BIT_POINTER], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
 	[])
 
