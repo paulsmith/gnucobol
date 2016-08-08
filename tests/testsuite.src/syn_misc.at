@@ -336,7 +336,7 @@ AT_DATA([prog.cob], [
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 9(5).
-       
+
        PROCEDURE DIVISION.
            INSPECT "abcde" TALLYING x FOR ALL LEADING
                TRAILING ALL ALL ALL TRAILING
@@ -368,7 +368,7 @@ AT_DATA([prog.cob], [
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 9(5).
-       
+
        PROCEDURE DIVISION.
            INSPECT "abcde" TALLYING x FOR
            .
@@ -1956,7 +1956,7 @@ AT_DATA([prog2.cob], [
            *> Implementor-defined invalid literals
            DISPLAY 1,0E77 END-DISPLAY
            DISPLAY 1,0E-79 END-DISPLAY
-           
+
            STOP RUN.
 ])
 
@@ -2085,7 +2085,7 @@ AT_DATA([prog.cob], [
                O#11111111111111111111111 X#11111111111111111 H#22222222222222222
        >>SOURCE FIXED
            DISPLAY B#23 O#89 X#GG H#HH
-       
+
            STOP RUN.
 ])
 
@@ -2140,7 +2140,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  hello       PIC X.
        01  file        PIC X.
-       
+
        PROCEDURE       DIVISION.
            CONTINUE
            .
@@ -2182,7 +2182,7 @@ AT_DATA([prog.cob], [
        DATA           DIVISION.
        LINKAGE        SECTION.
        01  str        ANY LENGTH PIC X.
-       
+
        PROCEDURE DIVISION USING VALUE str.
            GOBACK
            .
@@ -2287,7 +2287,7 @@ AT_DATA([prog.cob], [
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC X.
-    
+
        PROCEDURE DIVISION.
            DISPLAY x CONVERSION.
            TRANSFORM x
@@ -2343,24 +2343,24 @@ AT_DATA([prog.cob], [
        77  a   PIC X.
        77  b   PIC X.
        77  c   PIC XXX.
-    
+
        PROCEDURE DIVISION.
-           STRING   DELIMITED BY SPACE INTO 
+           STRING   DELIMITED BY SPACE INTO
            END-STRING
            STRING a DELIMITED BY SPACE c
            END-STRING
            STRING a DELIMITED BY SPACE INTO
            END-STRING
-           STRING 
+           STRING
                   DELIMITED BY SPACE
                   INTO c
            END-STRING
            STRING a DELIMITED BY SPACE
-           
+
                   DELIMITED BY SIZE
                   INTO c
            END-STRING
-           STRING a DELIMITED BY SPACE 
+           STRING a DELIMITED BY SPACE
                   b DELIMITED BY SIZE
                   INTO c
            END-STRING
@@ -2396,3 +2396,24 @@ prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
 AT_CLEANUP
 
 
+AT_SETUP([Unexpected mnemonic-name location])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       SPECIAL-NAMES.
+           stdin IS my-stdin
+           .
+       PROCEDURE      DIVISION.
+           CALL "something" USING stdout
+           STOP RUN
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: invalid mnemonic identifier
+])
+AT_CLEANUP

@@ -11074,7 +11074,7 @@ x:
 	x = cb_ref ($1);
 	if (CB_VALID_TREE (x)) {
 		if (CB_SYSTEM_NAME (x)->category != CB_SWITCH_NAME) {
-			cb_error_x (x, _("invalid mnemonic identifier"));
+			cb_error_x ($1, _("invalid mnemonic identifier"));
 			$$ = cb_error_node;
 		} else {
 			switch_id = cb_int (CB_SYSTEM_NAME (x)->token);

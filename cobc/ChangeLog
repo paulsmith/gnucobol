@@ -1,4 +1,9 @@
 
+2016-08-08  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (x): fixed bug #209, where invalid mnemonic message had line
+	  number of mnemonic entry in SPECIAL-NAMES.
+
 2016-08-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: don't stop if preprocessing errors but activate
