@@ -1248,7 +1248,7 @@ has_relative_pos (struct cb_field const *field)
 static int
 is_recursive_call (cb_tree target)
 {
-	const char *target_name;
+	const char *target_name = "";
 
 	if (CB_LITERAL_P (target)) {
 		target_name = (const char *)(CB_LITERAL(target)->data);
@@ -7048,7 +7048,7 @@ id_or_lit_or_func_or_program_name:
   id_or_lit_or_func
 | PROGRAM_NAME
   {
-	cb_verify (cb_program_prototypes, _("CALL with program-prototype-name"));
+	cb_verify (cb_program_prototypes, _("CALL/CANCEL with program-prototype-name"));
   }
 ;
 
@@ -7289,7 +7289,7 @@ id_or_lit_or_program_name:
   id_or_lit
 | PROGRAM_NAME
   {
-	cb_verify (cb_program_prototypes, _("CANCEL with program-prototype-name"));
+	cb_verify (cb_program_prototypes, _("CALL/CANCEL with program-prototype-name"));
   }
 ;
 
