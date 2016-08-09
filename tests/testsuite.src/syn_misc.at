@@ -2417,3 +2417,30 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: invalid mnemonic identifier
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Use of program-prototypes])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       REPOSITORY.
+           PROGRAM test-prog
+           .
+       PROCEDURE       DIVISION.
+           CALL test-prog
+           CANCEL test-prog
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -cb_conf=program-prototypes:warning prog.cob], [0], [],
+[prog.cob: 9: warning: PROGRAM phrase used
+prog.cob: 8: warning: no definition/prototype seen for program 'test-prog'
+prog.cob: 11: warning: CALL with program-prototype-name used
+prog.cob: 12: warning: CANCEL with program-prototype-name used
+])
+AT_CLEANUP

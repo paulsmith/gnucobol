@@ -3657,60 +3657,83 @@ cb_build_set_attribute (const struct cb_field *fld,
 	return CB_TREE (p);
 }
 
-/* FUNCTION */
+/* Prototypes */
 
 static void
-check_prototype_seen (const struct cb_func_prototype *fp)
+warn_if_no_definition_seen_for_prototype (const struct cb_prototype *proto)
 {
-	struct cb_program		*program;
+	struct cb_program	*program;
+	const char		*error_msg;
 
-	program = cb_find_defined_program_by_id (fp->ext_name);
+	program = cb_find_defined_program_by_id (proto->ext_name);
 	if (program) {
 		return;
 	}
 
 	if (cb_warn_prototypes) {
-		if (strcmp (fp->name, fp->ext_name) == 0) {
-			cb_warning_x (CB_TREE (fp),
-				      _("no definition/prototype seen for function '%s'"),
-				      fp->name);
+		if (strcmp (proto->name, proto->ext_name) == 0) {
+			/*
+			  Warn if no definition seen for element with prototype-
+			  name.
+			*/
+			if (proto->type == CB_FUNCTION_TYPE) {
+				error_msg = _("no definition/prototype seen for function '%s'");
+			} else { /* PROGRAM_TYPE */
+				error_msg = _("no definition/prototype seen for program '%s'");
+			}
+			cb_warning_x (CB_TREE (proto), error_msg, proto->name);
 		} else {
-			cb_warning_x (CB_TREE (fp),
-				      _("no definition/prototype seen for function with external name '%s'"),
-				      fp->ext_name);
+			/*
+			  Warn if no definition seen for element with given
+			  external-name.
+			*/
+			if (proto->type == CB_FUNCTION_TYPE) {
+				error_msg = _("no definition/prototype seen for function with external name '%s'");
+			} else { /* PROGRAM_TYPE */
+				error_msg = _("no definition/prototype seen for program with external name '%s'");
+			}
+			cb_warning_x (CB_TREE (proto), error_msg, proto->ext_name);
 		}
 	}
 }
 
 cb_tree
-cb_build_func_prototype (const cb_tree prototype_name, const cb_tree ext_name)
+cb_build_prototype (const cb_tree prototype_name, const cb_tree ext_name,
+		    const int type)
 {
-	struct cb_func_prototype	*func_prototype;
+	struct cb_prototype	*prototype;
 
-	func_prototype = make_tree (CB_TAG_FUNC_PROTOTYPE, CB_CATEGORY_UNKNOWN,
-				    sizeof (struct cb_func_prototype));
-
+	prototype = make_tree (CB_TAG_PROTOTYPE, CB_CATEGORY_UNKNOWN,
+			       sizeof (struct cb_prototype));
+	CB_TREE (prototype)->source_line = prototype_name->source_line;
+	
+	/* Set prototype->name */
 	if (CB_LITERAL_P (prototype_name)) {
-		func_prototype->name
-			= (const char *) CB_LITERAL (prototype_name)->data;
-	} else {
-		func_prototype->name = (const char *) CB_NAME (prototype_name);
-	}
-
-	if (ext_name) {
-		func_prototype->ext_name =
-			(const char *) CB_LITERAL (ext_name)->data;
-	} else if (CB_LITERAL_P (prototype_name)) {
-		func_prototype->ext_name =
+		prototype->name =
 			(const char *) CB_LITERAL (prototype_name)->data;
 	} else {
-		func_prototype->ext_name = CB_NAME (prototype_name);
+		prototype->name = (const char *) CB_NAME (prototype_name);
 	}
 
-	check_prototype_seen (func_prototype);
+	/* Set prototype->ext_name */
+	if (ext_name) {
+		prototype->ext_name =
+			(const char *) CB_LITERAL (ext_name)->data;
+	} else if (CB_LITERAL_P (prototype_name)) {
+		prototype->ext_name =
+			(const char *) CB_LITERAL (prototype_name)->data;
+	} else {
+		prototype->ext_name = CB_NAME (prototype_name);
+	}
 
-	return CB_TREE (func_prototype);
+	prototype->type = type;
+	
+	warn_if_no_definition_seen_for_prototype (prototype);
+
+	return CB_TREE (prototype);
 }
+
+/* FUNCTION */
 
 cb_tree
 cb_build_any_intrinsic (cb_tree args)

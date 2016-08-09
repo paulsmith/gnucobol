@@ -1257,9 +1257,11 @@ cb_build_section_name (cb_tree name, const int sect_or_para)
 
 	if (CB_WORD_COUNT (name) > 0) {
 		x = CB_VALUE (CB_WORD_ITEMS (name));
-		/* Used as a non-label name or used as a section name.
-		   Duplicate paragraphs are allowed if not referenced;
-		   Checked in typeck.c */
+		/*
+		  Used as a non-label name or used as a section name.
+		  Duplicate paragraphs are allowed if not referenced;
+		  Checked in typeck.c
+		*/
 		if (!CB_LABEL_P (x) || sect_or_para == 0 ||
 		    (sect_or_para && CB_LABEL_P (x) &&
 		    CB_LABEL (x)->flag_section)) {
@@ -4416,7 +4418,7 @@ cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 	}
 }
 
-static int
+static COB_INLINE COB_A_INLINE int
 line_col_zero_is_supported (void)
 {
 	return cb_accept_display_extensions == CB_OK
@@ -4854,17 +4856,21 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	int				error_ind;
 	int				call_conv;
 	int				numargs;
+	const int			prog_is_literal_or_prototype
+		= CB_LITERAL_P (prog) || (CB_REFERENCE_P (prog)
+					  && CB_PROTOTYPE_P (cb_ref (prog)));
+
 
 	if (CB_INTRINSIC_P (prog)) {
-		if (CB_INTRINSIC(prog)->intr_tab->category != CB_CATEGORY_ALPHANUMERIC) {
+		if (CB_INTRINSIC (prog)->intr_tab->category != CB_CATEGORY_ALPHANUMERIC) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("only alphanumeric FUNCTION types are allowed here"));
 			return;
 		}
 	}
 	if (returning && returning != cb_null) {
-		if (CB_TREE_CLASS(returning) != CB_CLASS_NUMERIC &&
-		    CB_TREE_CLASS(returning) != CB_CLASS_POINTER) {
+		if (CB_TREE_CLASS (returning) != CB_CLASS_NUMERIC &&
+		    CB_TREE_CLASS (returning) != CB_CLASS_POINTER) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid RETURNING field"));
 			return;
@@ -4897,7 +4903,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		}
 	}
 #endif
-	if ((call_conv & CB_CONV_STATIC_LINK) && !CB_LITERAL_P (prog)) {
+	if ((call_conv & CB_CONV_STATIC_LINK)
+	    && !prog_is_literal_or_prototype) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("STATIC CALL convention requires a literal program name"));
 		error_ind = 1;
@@ -5028,17 +5035,21 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 
 	is_sys_call = 0;
-	if (CB_LITERAL_P(prog)) {
-		entry = NULL;
-		p = (const char *)CB_LITERAL(prog)->data;
+	if (prog_is_literal_or_prototype) {
+		if (CB_LITERAL_P (prog)) {
+			p = (const char *)CB_LITERAL(prog)->data;
+		} else { /* prototype */
+			p = CB_PROTOTYPE (cb_ref (prog))->ext_name;
+		}
+
+		entry = p;
 		for (; *p; ++p) {
 			if (*p == '/' || *p == '\\') {
 				entry = p + 1;
 			}
+
 		}
-		if (!entry) {
-			entry = (const char *)CB_LITERAL(prog)->data;
-		}
+
 		is_sys_idx = 1;
 		for (psyst = system_tab; psyst->syst_name; psyst++, is_sys_idx++) {
 			if (!strcmp(entry, (const char *)psyst->syst_name)) {
@@ -5057,11 +5068,13 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	if (error_ind) {
 		return;
 	}
+
 	if (numargs > current_program->max_call_param) {
 		current_program->max_call_param = numargs;
 	}
+
 	cb_emit (cb_build_call (prog, par_using, on_exception, not_on_exception,
-		 returning, is_sys_call, call_conv));
+				returning, is_sys_call, call_conv));
 }
 
 /* CANCEL statement */

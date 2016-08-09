@@ -351,7 +351,7 @@ prog.cob: 7: warning: 'A' previously defined here
 AT_CLEANUP
 
 
-AT_SETUP([Redefinition of program-name])
+AT_SETUP([Redefinition of program-name by other programs])
 AT_KEYWORDS([definition])
 
 AT_DATA([prog.cob], [
@@ -417,6 +417,36 @@ prog.cob: 31: error: redefinition of program ID 'prog'
 AT_CLEANUP
 
 
+AT_SETUP([Redefinition of program-name within program])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  prog        PIC 99 VALUE 0.
+           
+       PROCEDURE       DIVISION.
+       prog.
+           CONTINUE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: redefinition of 'prog'
+prog.cob: 7: error: 'prog' previously defined here
+])
+AT_CHECK([$COMPILE_ONLY -cb_conf=program-name-redefinition:no prog.cob], [1], [],
+[prog.cob: 7: warning: redefinition of 'prog'
+prog.cob: 3: warning: 'prog' previously defined here
+prog.cob: 10: error: redefinition of 'prog'
+prog.cob: 3: error: 'prog' previously defined here
+])
+AT_CLEANUP
+
+
 AT_SETUP([Redefinition of function-prototype name])
 AT_KEYWORDS([definition])
 
@@ -435,7 +465,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: warning: no definition/prototype seen for function 'func'
+[prog.cob: 8: warning: no definition/prototype seen for function 'func'
 prog.cob: 12: error: syntax error, unexpected User function name
 ])
 AT_CLEANUP

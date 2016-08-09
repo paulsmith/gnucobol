@@ -409,6 +409,7 @@ test.conf: missing definitions:
 	No definition of 'accept-update'
 	No definition of 'accept-auto'
 	No definition of 'console-is-crt'
+	No definition of 'program-name-redefinition'
 	No definition of 'specify-all-reserved'
 	No definition of 'comment-paragraphs'
 	No definition of 'memory-size-clause'
@@ -436,6 +437,7 @@ test.conf: missing definitions:
 	No definition of 'not-exception-before-exception'
 	No definition of 'accept-display-extensions'
 	No definition of 'renames-uncommon-levels'
+	No definition of 'program-prototypes'
 ])
 
 AT_CLEANUP

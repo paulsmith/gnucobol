@@ -1,4 +1,12 @@
 
+2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, typeck.c, codegen.c: added support for program-prototypes in
+	  REPOSITORY and CALL and CANCEL statements.
+	* tree.h (cb_func_prototype): renamed to cb_prototype.
+	* condig.def: added program-name-redefinition (thus fixing bug #268) and
+	  program-prototypes.
+
 2016-08-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (x): fixed bug #209, where invalid mnemonic message had line
@@ -53,7 +61,7 @@
 
 2016-08-01  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c, error.c pplex.l: Changes to change fixed sized character
+	* cobc.c, error.c, pplex.l: Changes to change fixed sized character
 	  arrays to pointers. Allocate strings based on length.
 	* cobc.h: Moved structure declatations and added comments.
 

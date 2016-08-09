@@ -1,18 +1,18 @@
 ## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart, Ron Norman
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -477,14 +477,14 @@ AT_DATA([prog.cob], [
       -                "iled " DST1
                END-DISPLAY
            END-IF.
-           
+
            MOVE SRC1 TO DST2.
            IF DST1 not = 11.55
                DISPLAY "error: move/compare FLOAT-LONG to FLOAT-LONG fai
       -                "led " DST2
                END-DISPLAY
            END-IF.
-           
+
            MOVE ZERO TO DST1.
            MOVE ZERO TO DST2.
 
@@ -494,25 +494,25 @@ AT_DATA([prog.cob], [
       -                "ailed: " DST1
                END-DISPLAY
            END-IF.
-           
+
            MOVE SRC2 TO DST2.
            IF DST2 not = 11.55
                DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-LONG fa
       -                "iled: " DST2
                END-DISPLAY
            END-IF.
-           
+
            MOVE ZERO TO DST1.
            IF not (DST1 = 0 AND 0.0)
                DISPLAY "Zero compare failed: " DST1 END-DISPLAY
            END-IF.
-           
+
            MOVE -0.0 TO DST1.
            IF not (DST1 = 0 AND 0.0)
                DISPLAY "Negative Zero compare failed: " DST1
                END-DISPLAY
            END-IF.
-           
+
            MOVE 1.1234567 TO DST1.
            MOVE DST1 TO DST2.
            IF DST2 not = 1.1234567
@@ -520,7 +520,7 @@ AT_DATA([prog.cob], [
                        DST1 " - " DST2
                END-DISPLAY
            END-IF.
-           
+
       * Check for Tolerance
            MOVE 1.1234567 TO DST1.
            MOVE 1.1234568 TO DST2.
@@ -529,7 +529,7 @@ AT_DATA([prog.cob], [
       -                "entical): " DST1 " - " DST2
                END-DISPLAY
            END-IF.
-           
+
       * Within tolerance by definition, therefore not checked
       *     MULTIPLY 10000000000 BY DST1 DST2 END-MULTIPLY.
       *     IF DST1 = DST2 THEN
@@ -537,7 +537,7 @@ AT_DATA([prog.cob], [
       *-                "entical): " DST1 " - " DST2
       *         END-DISPLAY
       *     END-IF.
-           
+
            MOVE 1.1234567 TO DST1.
            MOVE 1.1234569 TO DST2.
            IF DST1 = DST2 THEN
@@ -545,23 +545,23 @@ AT_DATA([prog.cob], [
       -                "ical): " DST1 " - " DST2
                END-DISPLAY
            END-IF.
-           
+
            MOVE 0.0001 TO DST1.
            MOVE 0.0000 TO DST2.
            IF DST1 = DST2 THEN
-               DISPLAY "move/compare of nearly equal very small numbers 
+               DISPLAY "move/compare of nearly equal very small numbers
       -                "failed  (identical): " DST1 " - " DST2
                END-DISPLAY
            END-IF.
-           
+
            MOVE 1000001.0 TO DST1.
            MOVE 1000000.0 TO DST2.
            IF DST1 = DST2 THEN
-               DISPLAY "move/compare of nearly equal big numbers failed 
+               DISPLAY "move/compare of nearly equal big numbers failed
       -                "(identical): " DST1 " - " DST2
                END-DISPLAY
            END-IF.
-      
+
       * Within tolerance by definition, therefore not checked
       *     MOVE 1000000000.0 TO DST1.
       *     MOVE 1000000001.0 TO DST2.
@@ -570,7 +570,7 @@ AT_DATA([prog.cob], [
       *-                "iled (identical): " DST1 " - " DST2
       *         END-DISPLAY
       *     END-IF.
-           
+
            STOP RUN.
 ])
 
@@ -615,23 +615,23 @@ AT_DATA([prog.cob], [
         PROCEDURE DIVISION.
         MOVE "Hallo" TO FIELD1.
         MOVE "1234567890" TO FIELD2.
-        
+
         MOVE FIELD2 TO STRUCTURE.
         IF FIELD1 not = "12345"
            DISPLAY "error: 1: " FIELD1
            END-DISPLAY
-        END-IF        
+        END-IF
         IF FIELD2 not = "67890     "
            DISPLAY "error: 2: " FIELD2
                END-DISPLAY
            END-IF
-           
-        
-        MOVE "Hallo" TO FIELD1.
-        MOVE "1234567890" TO FIELD2.        
 
-        CALL "subprog" USING BY REFERENCE FIELD2 STRUCTURE 
-        END-CALL        
+
+        MOVE "Hallo" TO FIELD1.
+        MOVE "1234567890" TO FIELD2.
+
+        CALL "subprog" USING BY REFERENCE FIELD2 STRUCTURE
+        END-CALL
 
            STOP RUN.
 ])
@@ -845,7 +845,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST-FILE
@@ -871,7 +871,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
         IDENTIFICATION   DIVISION.
         PROGRAM-ID.      prog2.
-        ENVIRONMENT      DIVISION. 
+        ENVIRONMENT      DIVISION.
         INPUT-OUTPUT     SECTION.
         FILE-CONTROL.
         SELECT TEST2-FILE
@@ -890,7 +890,7 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog3.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST3-FILE
@@ -905,7 +905,7 @@ AT_DATA([prog.cob], [
            DISPLAY 'in prog3'
            END-DISPLAY
            IF GLOB-PATH NOT = SPACES
-              DISPLAY GLOB-PATH 
+              DISPLAY GLOB-PATH
               END-DISPLAY
            END-IF
            EXIT PROGRAM.
@@ -1138,13 +1138,85 @@ AT_CHECK([./prog], [0],
 AT_CLEANUP
 
 
+AT_SETUP([CALL/CANCEL with program-prototype-name])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       REPOSITORY.
+           PROGRAM recursion-test
+           PROGRAM cancel-test
+           .
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  num         PIC 9 VALUE 0.
+
+       PROCEDURE       DIVISION.
+           CALL recursion-test USING num
+           DISPLAY "<"
+
+           CALL cancel-test
+           CALL cancel-test
+           CANCEL cancel-test
+           CALL cancel-test
+           DISPLAY "<"
+           .
+       END PROGRAM     prog.
+
+
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     recursion-test RECURSIVE.
+
+       DATA            DIVISION.
+       LINKAGE         SECTION.
+       01  x           PIC 9.
+
+       PROCEDURE       DIVISION USING x.
+           ADD 1 TO x
+           DISPLAY x NO ADVANCING
+           IF x = 1
+               CALL recursion-test USING x
+           END-IF
+           .
+       END PROGRAM     recursion-test.
+
+
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     cancel-test.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x           PIC 9 VALUE 1.
+
+       PROCEDURE       DIVISION.
+           DISPLAY x NO ADVANCING
+           ADD 1 TO x
+           .
+       END PROGRAM     cancel-test.
+])
+
+# TO-DO: Fix these warnings when program prototypes are added.
+AT_CHECK([$COMPILE -cb_conf=program-name-redefinition:no prog.cob], [0], [],
+[prog.cob: 8: warning: no definition/prototype seen for program 'recursion-test'
+prog.cob: 9: warning: no definition/prototype seen for program 'cancel-test'
+])
+AT_CHECK([./prog], [0],
+[12<
+121<
+])
+AT_CLEANUP
+
 AT_SETUP([START RELATIVE (1)])
 AT_KEYWORDS([fundamental])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT OPTIONAL TEST-FILE
@@ -1193,7 +1265,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT OPTIONAL TEST-FILE
@@ -1270,7 +1342,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST-FILE
@@ -1320,7 +1392,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST-FILE
@@ -1370,7 +1442,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST-FILE
@@ -1420,7 +1492,7 @@ AT_KEYWORDS([fundamental])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION. 
+       ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
        SELECT TEST-FILE
@@ -1803,10 +1875,10 @@ AT_SETUP([ROUNDED AWAY-FROM-ZERO])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -1866,10 +1938,10 @@ AT_SETUP([ROUNDED NEAREST-AWAY-FROM-ZERO])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -1929,10 +2001,10 @@ AT_SETUP([ROUNDED NEAREST-EVEN])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -1992,10 +2064,10 @@ AT_SETUP([ROUNDED NEAREST-TOWARD-ZERO])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -2055,10 +2127,10 @@ AT_SETUP([ROUNDED TOWARD-GREATER])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -2118,10 +2190,10 @@ AT_SETUP([ROUNDED TOWARD-LESSER])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -2181,10 +2253,10 @@ AT_SETUP([ROUNDED TRUNCATION])
 AT_KEYWORDS([fundamental compute])
 
 AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION. 
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       ENVIRONMENT DIVISION.     
-       DATA DIVISION. 
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  M                PIC S9.
        01  N                PIC S9.
@@ -3557,7 +3629,7 @@ AT_DATA([prog.cob], [
             END-DISPLAY
         END-IF
         CALL "dump" USING P-FIELD2 END-CALL
-        
+
         MOVE 0.00055 TO P-FIELD2.
         ADD 0.00300 TO P-FIELD2 END-ADD
         IF P-FIELD2 NOT = 0.00055
@@ -3912,7 +3984,7 @@ AT_DATA([prog.cob], [
        END-IF.
        STOP RUN.
 ])
-      
+
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
@@ -3960,7 +4032,7 @@ AT_DATA([prog.cob], [
        END-IF.
        STOP RUN.
 ])
-      
+
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob: 20: warning: no CORRESPONDING items found
 ])

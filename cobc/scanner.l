@@ -821,23 +821,34 @@ H#[0-9A-Za-z]* {
 		return resptr->token;
 	}
 
-	/* Check user function */
+	/* New user-defined word in REPOSITORY entry */
 	if (cobc_in_repository) {
 		yylval = cb_build_reference (yytext);
 		return WORD;
-	} else {
-		if (current_program->prog_type == CB_FUNCTION_TYPE &&
-		    !functions_are_all &&
-		    !strcasecmp (yytext, current_program->orig_program_id)) {
-			/* Direct recursive reference */
+	}
+
+	/* Direct recursive reference in function */
+	if (current_program->prog_type == CB_FUNCTION_TYPE
+		   && !functions_are_all
+		   && !strcasecmp (yytext, current_program->orig_program_id)) {
+		yylval = cb_build_reference (yytext);
+		return USER_FUNCTION_NAME;
+	}	
+
+	/* Check prototype names */
+	for (l = current_program->user_spec_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			yylval = cb_build_reference (yytext);
 			return USER_FUNCTION_NAME;
 		}
-		for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
+	}
+	if (cobc_allow_program_name) {
+		for (l = current_program->program_spec_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
-			if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
+			if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
-				return USER_FUNCTION_NAME;
+				return PROGRAM_NAME;
 			}
 		}
 	}
@@ -850,7 +861,7 @@ H#[0-9A-Za-z]* {
 			return PROGRAM_NAME;
 		}
 	}
-
+	
 	/* User word */
 
 	/* Check local, global and source global CONSTANT (78) items */
@@ -1002,7 +1013,7 @@ H#[0-9A-Za-z]* {
 	yylval = cb_build_reference (yytext);
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 		x = CB_VALUE (l);
-		if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
+		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			return USER_FUNCTION_NAME;
 		}
 	}

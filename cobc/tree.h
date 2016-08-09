@@ -101,7 +101,7 @@ enum cb_tag {
 	CB_TAG_DEBUG,		/* 34 Debug item set */
 	CB_TAG_DEBUG_CALL,	/* 35 Debug callback */
 	CB_TAG_PROGRAM,		/* 36 Program */
-	CB_TAG_FUNC_PROTOTYPE	/* 37 Function prototype */
+	CB_TAG_PROTOTYPE	/* 37 Prototype */
 };
 
 /* Alphabet type */
@@ -1343,16 +1343,18 @@ struct cb_program {
 #define CB_PROGRAM(x)	(CB_TREE_CAST (CB_TAG_PROGRAM, struct cb_program, x))
 
 /* Function prototype */
-struct cb_func_prototype {
+
+struct cb_prototype {
 	struct cb_tree_common	common;
 	/* Name of prototype in the REPOSITORY */
 	const char		*name;
 	/* External name of the prototype/definition */
 	const char		*ext_name;
+	int		        type;
 };
 
-#define CB_FUNC_PROTOTYPE(x)	(CB_TREE_CAST (CB_TAG_FUNC_PROTOTYPE, struct cb_func_prototype, x))
-#define CB_FUNC_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_FUNC_PROTOTYPE)
+#define CB_PROTOTYPE(x)		(CB_TREE_CAST (CB_TAG_PROTOTYPE, struct cb_prototype, x))
+#define CB_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_PROTOTYPE)
 
 /* DISPLAY type */
 
@@ -1496,8 +1498,8 @@ extern cb_tree			cb_build_assign (const cb_tree, const cb_tree);
 
 extern cb_tree			cb_build_intrinsic (cb_tree, cb_tree,
 						    cb_tree, const int);
-extern cb_tree			cb_build_func_prototype (const cb_tree,
-							 const cb_tree);
+extern cb_tree			cb_build_prototype (const cb_tree,
+						    const cb_tree, const int);
 extern cb_tree			cb_build_any_intrinsic (cb_tree);
 
 extern cb_tree			cb_build_search (const int,
@@ -1566,6 +1568,7 @@ extern unsigned int	cobc_in_procedure;
 extern unsigned int	cobc_in_repository;
 extern unsigned int	cobc_force_literal;
 extern unsigned int	cobc_cs_check;
+extern unsigned int	cobc_allow_program_name;
 
 /* reserved.c */
 extern int			is_reserved_word (const char *);

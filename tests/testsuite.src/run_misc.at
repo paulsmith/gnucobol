@@ -4863,3 +4863,59 @@ Program-Id: caller           Statement: STOP RUN               Line: 17
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([CALL with program prototypes])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+           CALL "c"
+           .
+       END PROGRAM prog.
+
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. a AS "blah?Sdk".
+
+       PROCEDURE DIVISION.
+           DISPLAY "Hello!"
+           .
+       END PROGRAM a.
+
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. b.
+
+       PROCEDURE DIVISION.
+           DISPLAY "Hello again!"
+           .
+       END PROGRAM b.
+
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. c.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           PROGRAM d AS "blah?Sdk"
+           PROGRAM b
+           .          
+
+       PROCEDURE DIVISION.
+           CALL d
+           CALL b
+           .
+       END PROGRAM c.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[Hello!
+Hello again!
+])
+AT_CLEANUP

@@ -1,4 +1,9 @@
 
+2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added program-name-redefinition and program-prototypes
+	  configuration options.
+
 2016-07-27  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added renames-uncommon-levels configuration option.

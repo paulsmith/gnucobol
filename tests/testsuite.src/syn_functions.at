@@ -114,12 +114,12 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Redundant REPOSITORY FUNCTION phrase])
+AT_SETUP([Redundant REPOSITORY entries])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
-       FUNCTION-ID. beta.
-       END FUNCTION beta.
+       PROGRAM-ID. beta.
+       END PROGRAM beta.
 
        IDENTIFICATION DIVISION.
        FUNCTION-ID. alpha.
@@ -131,9 +131,10 @@ AT_DATA([prog.cob], [
            .
        REPOSITORY.
            FUNCTION alpha
+           PROGRAM beta
+           PROGRAM beta
+           PROGRAM beta AS "alpha"
            FUNCTION beta
-           FUNCTION beta
-           FUNCTION beta AS "alpha"
            FUNCTION gamma
            .
        END FUNCTION alpha.
@@ -143,15 +144,16 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 14: warning: prototype has same name as current function and will be ignored
 prog.cob: 16: warning: duplicate REPOSITORY entry for 'beta'
 prog.cob: 17: error: duplicate REPOSITORY entries for 'beta' do not match
+prog.cob: 18: error: duplicate REPOSITORY entries for 'beta' do not match
 prog.cob: 19: warning: no definition/prototype seen for function 'gamma'
-prog.cob: 18: error: redefinition of 'gamma'
+prog.cob: 19: error: redefinition of 'gamma'
 prog.cob: 11: error: 'gamma' previously defined here
 ])
 AT_CLEANUP
 
 
-AT_SETUP([Missing function prototype/definition])
-AT_KEYWORDS([functions prototypes])
+AT_SETUP([Missing prototype/definition])
+AT_KEYWORDS([functions programs prototypes])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -160,8 +162,9 @@ AT_DATA([prog.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        REPOSITORY.
-           FUNCTION x.
-
+           FUNCTION x
+           PROGRAM y
+           .
        DATA DIVISION.
        LINKAGE SECTION.
        01  ret PIC X.
@@ -175,6 +178,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 8: warning: no definition/prototype seen for function 'x'
+prog.cob: 9: warning: no definition/prototype seen for program 'y'
 ])
 AT_CLEANUP
 

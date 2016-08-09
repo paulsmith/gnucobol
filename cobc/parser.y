@@ -137,6 +137,7 @@ unsigned int			cobc_in_procedure = 0;
 unsigned int			cobc_in_repository = 0;
 unsigned int			cobc_force_literal = 0;
 unsigned int			cobc_cs_check = 0;
+unsigned int			cobc_allow_program_name = 0;
 
 /* Local variables */
 
@@ -871,7 +872,7 @@ get_literal_or_word_name (const cb_tree x)
 
 /* Return 1 if the prototype name is the same as the current function's. */
 static int
-check_prototype_redefines_current_func (const cb_tree prototype_name)
+check_prototype_redefines_current_element (const cb_tree prototype_name)
 {
 	const char	*name = get_literal_or_word_name (prototype_name);
 
@@ -887,21 +888,22 @@ check_prototype_redefines_current_func (const cb_tree prototype_name)
 /* Returns 1 if the prototype has been duplicated. */
 static int
 check_for_duplicate_prototype (const cb_tree prototype_name,
-			       const cb_tree func_prototype)
+			       const cb_tree prototype)
 {
 	cb_tree	dup;
 
 	if (CB_WORD_COUNT (prototype_name) > 0) {
 		/* Make sure the duplicate is a prototype */
 		dup = cb_ref (prototype_name);
-		if (!CB_FUNC_PROTOTYPE_P (dup)) {
+		if (!CB_PROTOTYPE_P (dup)) {
 			redefinition_error (prototype_name);
 			return 1;
 		}
 
 		/* Check the duplicate prototypes match */
-		if (strcmp (CB_FUNC_PROTOTYPE (func_prototype)->ext_name,
-			    CB_FUNC_PROTOTYPE (dup)->ext_name)) {
+		if (strcmp (CB_PROTOTYPE (prototype)->ext_name,
+			    CB_PROTOTYPE (dup)->ext_name)
+		    || CB_PROTOTYPE (prototype)->type != CB_PROTOTYPE (dup)->type) {
 			cb_error_x (prototype_name,
 				    _("duplicate REPOSITORY entries for '%s' do not match"),
 				    get_literal_or_word_name (prototype_name));
@@ -917,30 +919,41 @@ check_for_duplicate_prototype (const cb_tree prototype_name,
 }
 
 static void
-set_up_func_prototype (cb_tree prototype_name, cb_tree ext_name, const int is_current_func)
+set_up_prototype (cb_tree prototype_name, cb_tree ext_name,
+		  const int type, const int is_current_element)
 {
-	cb_tree 	func_prototype;
+	cb_tree 	prototype;
+	int	        name_redefinition_allowed;
 
-	if (!is_current_func
-	    && check_prototype_redefines_current_func (prototype_name)) {
+	if (!is_current_element
+	    && check_prototype_redefines_current_element (prototype_name)) {
 		return;
 	}
 
-	func_prototype = cb_build_func_prototype (prototype_name, ext_name);
+	prototype = cb_build_prototype (prototype_name, ext_name, type);
 
-	if (!is_current_func
-	    && check_for_duplicate_prototype (prototype_name, func_prototype)) {
+	if (!is_current_element
+	    && check_for_duplicate_prototype (prototype_name, prototype)) {
 		return;
 	}
 
-	if (CB_REFERENCE_P (prototype_name)) {
-		cb_define (prototype_name, func_prototype);
-	} else { /* CB_LITERAL_P (prototype_name) */
-		cb_define (cb_build_reference ((const char *) CB_LITERAL (prototype_name)->data),
-			   func_prototype);
+	name_redefinition_allowed = type == CB_PROGRAM_TYPE
+		&& is_current_element && cb_program_name_redefinition;
+	if (!name_redefinition_allowed) {
+		if (CB_LITERAL_P (prototype_name)) {
+			cb_define (cb_build_reference ((const char *)CB_LITERAL (prototype_name)->data), prototype);
+		} else {
+			cb_define (prototype_name, prototype);
+		}
+
+		if (type == CB_PROGRAM_TYPE) {
+			current_program->program_spec_list =
+				cb_list_add (current_program->program_spec_list, prototype);
+		} else { /* CB_FUNCTION_TYPE */
+			current_program->user_spec_list =
+				cb_list_add (current_program->user_spec_list, prototype);
+		}
 	}
-	current_program->user_spec_list =
-		cb_list_add (current_program->user_spec_list, func_prototype);
 }
 
 static void
@@ -1230,6 +1243,21 @@ has_relative_pos (struct cb_field const *field)
 	return !!(field->screen_flag
 		  & (COB_SCREEN_LINE_PLUS | COB_SCREEN_LINE_MINUS
 		     | COB_SCREEN_COLUMN_PLUS | COB_SCREEN_COLUMN_MINUS));
+}
+
+static int
+is_recursive_call (cb_tree target)
+{
+	const char *target_name;
+
+	if (CB_LITERAL_P (target)) {
+		target_name = (const char *)(CB_LITERAL(target)->data);
+	} else if (CB_REFERENCE_P (target)
+		   && CB_PROTOTYPE_P (cb_ref (target))) {
+		target_name = CB_PROTOTYPE (cb_ref (target))->ext_name;
+	}
+
+	return !strcmp (target_name, current_program->orig_program_id);
 }
 
 static void
@@ -2175,6 +2203,8 @@ program_id_paragraph:
 	if (set_up_program ($4, $5, CB_PROGRAM_TYPE)) {
 		YYABORT;
 	}
+	
+	set_up_prototype ($4, $5, CB_PROGRAM_TYPE, 1);
   }
   _program_type TOK_DOT
   {
@@ -2193,7 +2223,7 @@ function_id_paragraph:
 	if (set_up_program ($4, $5, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
-	set_up_func_prototype ($4, $5, 1);
+	set_up_prototype ($4, $5, CB_FUNCTION_TYPE, 1);
 	cobc_cs_check = 0;
 	cobc_in_id = 0;
   }
@@ -2468,23 +2498,19 @@ repository_name:
   {
 	functions_are_all = 1;
   }
-| FUNCTION WORD _as_literal_intrinsic
+| FUNCTION WORD _as_literal
   {
 	if ($2 != cb_error_node) {
-		set_up_func_prototype ($2, $3, 0);
+		set_up_prototype ($2, $3, CB_FUNCTION_TYPE, 0);
 	}
   }
 | FUNCTION repository_name_list INTRINSIC
-;
-
-_as_literal_intrinsic:
-  /* empty */
+| PROGRAM WORD _as_literal
   {
-	$$ = NULL;
-  }
-| AS LITERAL
-  {
-	$$ = $2;
+	  if ($2 != cb_error_node
+	      && cb_verify (cb_program_prototypes, _("PROGRAM phrase"))) {
+		set_up_prototype ($2, $3, CB_PROGRAM_TYPE, 0);
+	}
   }
 ;
 
@@ -6299,7 +6325,7 @@ paragraph_header:
 		emit_statement (CB_TREE (current_section));
 	}
 	current_paragraph = CB_LABEL (cb_build_label ($1, current_section));
-	current_paragraph->flag_declaratives =!! in_declaratives;
+	current_paragraph->flag_declaratives = !!in_declaratives;
 	current_paragraph->flag_skip_label = !!skip_statements;
 	current_paragraph->flag_real_label = !in_debugging;
 	current_paragraph->segment = current_section->segment;
@@ -6950,22 +6976,24 @@ call_statement:
 	begin_statement ("CALL", TERM_CALL);
 	cobc_cs_check = CB_CS_CALL;
 	call_nothing = 0;
+	cobc_allow_program_name = 1;
   }
   call_body
   end_call
 ;
 
 call_body:
-  mnemonic_conv
-  id_or_lit_or_func
+  mnemonic_conv id_or_lit_or_func_or_program_name
+  {
+	cobc_allow_program_name = 0;
+  }
   call_using
   call_returning
   call_exception_phrases
   {
-	if (CB_LITERAL_P ($2) &&
-	    current_program->prog_type == CB_PROGRAM_TYPE &&
-	    !current_program->flag_recursive &&
-	    !strcmp ((const char *)(CB_LITERAL($2)->data), current_program->orig_program_id)) {
+	if (current_program->prog_type == CB_PROGRAM_TYPE
+	    && !current_program->flag_recursive
+	    && is_recursive_call ($2)) {
 		cb_warning_x ($2, _("recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
 	}
@@ -6977,7 +7005,7 @@ call_body:
 			$1 = cb_int (CB_CONV_NO_RET_UPD);
 		}
 	}
-	cb_emit_call ($2, $3, $4, CB_PAIR_X ($5), CB_PAIR_Y ($5), $1);
+	cb_emit_call ($2, $4, $5, CB_PAIR_X ($6), CB_PAIR_Y ($6), $1);
   }
 ;
 
@@ -7013,6 +7041,14 @@ mnemonic_conv:
 		$$ = NULL;
 	}
 	cobc_cs_check = 0;
+  }
+;
+
+id_or_lit_or_func_or_program_name:
+  id_or_lit_or_func
+| PROGRAM_NAME
+  {
+	cb_verify (cb_program_prototypes, _("CALL with program-prototype-name"));
   }
 ;
 
@@ -7230,21 +7266,32 @@ cancel_statement:
   CANCEL
   {
 	begin_statement ("CANCEL", 0);
+	cobc_allow_program_name = 1;
   }
   cancel_body
+  {
+	cobc_allow_program_name = 0;
+  }
 ;
 
 cancel_body:
-  id_or_lit
+  id_or_lit_or_program_name
   {
 	cb_emit_cancel ($1);
   }
-| cancel_body id_or_lit
+| cancel_body id_or_lit_or_program_name
   {
 	cb_emit_cancel ($2);
   }
 ;
 
+id_or_lit_or_program_name:
+  id_or_lit
+| PROGRAM_NAME
+  {
+	cb_verify (cb_program_prototypes, _("CANCEL with program-prototype-name"));
+  }
+;
 
 /* CLOSE statement */
 
