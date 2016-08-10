@@ -362,15 +362,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-COBCINFOSH = $(top_srcdir)/doc/cobcinfo.sh
+COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \
+	$(top_srcdir)/doc/cobcinfo.sh
+
 info_TEXINFOS = gnucobol.texi
 gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
-	 cbconf.tex cbchelp.tex cbrunt.tex
+	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi
 
-EXTRA_DIST = gnucobol.pdf cobcinfo.sh \
-	cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex cbconf.tex \
-	cbchelp.tex cbrunt.tex
-
+EXTRA_DIST = gnucobol.pdf cobcinfo.sh
 TEXINFO_TEX = ../texinfo.tex
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs
@@ -836,21 +835,26 @@ uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
 	uninstall-pdf-am uninstall-ps-am
 
 
-cbhelp.tex: $(top_srcdir)/cobc/cobc.c cobcinfo.sh $(top_srcdir)/configure.ac \
-	$(top_srcdir)/cobc/flag.def  $(top_srcdir)/cobc/warning.def
+cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
+	$(top_srcdir)/cobc/flag.def $(top_srcdir)/cobc/warning.def \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac cobcinfo.sh
+cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbconf.tex: $(top_srcdir)/config/default.conf cobcinfo.sh
+cbconf.tex: $(top_srcdir)/config/default.conf \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbrunt.tex: $(top_srcdir)/config/runtime.cfg cobcinfo.sh
+cbrunt.tex: $(top_srcdir)/config/runtime.cfg \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
-	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c cobcinfo.sh
+	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

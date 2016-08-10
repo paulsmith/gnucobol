@@ -23,7 +23,7 @@ COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal
 	$(top_srcdir)/doc/cobcinfo.sh
 info_TEXINFOS = gnucobol.texi
 gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
-	 cbconf.tex cbchelp.tex cbrunt.tex
+	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi
 
 cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
 	$(top_srcdir)/cobc/flag.def $(top_srcdir)/cobc/warning.def \
@@ -34,19 +34,20 @@ cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbconf.tex: $(top_srcdir)/config/default.conf $(top_srcdir)/doc/cobcinfo.sh
+cbconf.tex: $(top_srcdir)/config/default.conf \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-cbrunt.tex: $(top_srcdir)/config/runtime.cfg $(top_srcdir)/doc/cobcinfo.sh
+cbrunt.tex: $(top_srcdir)/config/runtime.cfg \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
-	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c $(top_srcdir)/doc/cobcinfo.sh
+	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c \
+	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
-EXTRA_DIST = gnucobol.pdf cobcinfo.sh \
-	cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex cbconf.tex \
-	cbchelp.tex cbrunt.tex
+EXTRA_DIST = gnucobol.pdf cobcinfo.sh
 
 TEXINFO_TEX = ../texinfo.tex
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
