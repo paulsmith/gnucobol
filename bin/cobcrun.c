@@ -37,7 +37,7 @@
 
 static int arg_shift = 1;
 
-static const char short_options[] = "+hirc:VM:";
+static const char short_options[] = "+hirc:VqM:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -46,6 +46,7 @@ static const char short_options[] = "+hirc:VM:";
 static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"info",		CB_NO_ARG, NULL, 'i'},
+	{"brief",		CB_NO_ARG, NULL, 'q'},
 	{"runtime-conf",		CB_NO_ARG, NULL, 'r'},
 	{"config",		CB_RQ_ARG, NULL, 'C'},
 	{"version",   		CB_NO_ARG, NULL, 'V'},
@@ -111,6 +112,9 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -h, -help                      display this help and exit"));
 	puts (_("  -V, -version                   display cobcrun and runtime version and exit"));
 	puts (_("  -i, -info                      display runtime information (build/environment)"));
+#if 0 /* Simon: currently only removing the path from cobcrun in output --> don't show */
+	puts (_("  -q, -brief                     reduced displays"));
+#endif
 	puts (_("  -c <file>, -config=<file>      set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-conf              display current runtime configuration\n"
 	        "                                 (value and origin for all settings)"));
@@ -294,6 +298,13 @@ process_command_line (int argc, char *argv[])
 			/* --info */
 			print_info ();
 			exit (0);
+
+		case 'q':
+			/* --brief : reduced reporting */
+			/* removes the path to cobc in argv[0] */
+			strcpy (argv[0], "cobcrun");	/* set for simple compare in test suite
+										   and other static output */
+			break;
 
 		case 'r':
 			/* --runtime-conf */

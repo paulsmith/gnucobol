@@ -1,4 +1,9 @@
 
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: added option --brief (-q) to remove the path to cobcrun
+	  in argv[0]
+
 2016-06-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
 
 	* cobcrun.c (cobcrun_initial_module) [_WIN32]: fixed setting of

@@ -399,7 +399,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivECScbmxjdFOPgwo:t:T:I:L:l:D:K:k:";
+static const char short_options[] = "hVivqECScbmxjdFOPgwo:t:T:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -409,6 +409,7 @@ static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"version",		CB_NO_ARG, NULL, 'V'},
 	{"verbose",		CB_NO_ARG, NULL, 'v'},
+	{"brief",		CB_NO_ARG, NULL, 'q'},
 	{"info",		CB_NO_ARG, NULL, 'i'},
 	{"list-reserved",	CB_NO_ARG, NULL, '5'},
 	{"list-intrinsics",	CB_NO_ARG, NULL, '6'},
@@ -1779,6 +1780,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -v, -verbose          display the commands invoked by the compiler"));
 	puts (_("  -vv                   display compiler version and the commands\n" \
 	        "                        invoked by the compiler"));
+	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
 	puts (_("  -j [<args>], -job[=<args>] run program after build, passing <args>"));
@@ -1918,7 +1920,6 @@ process_command_line (const int argc, char **argv)
 	char			ext[COB_MINI_BUFF];
 
 	int			conf_ret = 0;
-	int			sub_ret;
 
 #ifdef _WIN32
 	/* Translate command line arguments from WIN to UNIX style */
@@ -1989,6 +1990,14 @@ process_command_line (const int argc, char **argv)
 			exit_option = 1;
 			break;
 
+		case 'q':
+			/* --brief : reduced reporting */
+			/* resets -verbose and removes the path to cobc in argv[0] */
+			verbose_output = 0;
+			strcpy (argv[0], "cobc");	/* set for simple compare in test suite
+										   and other static output */
+			break;
+
 		case 'v':
 			/* --verbose : Verbose reporting */
 			/* VERY special case as we set different level by mutliple calls */
@@ -2015,8 +2024,7 @@ process_command_line (const int argc, char **argv)
 				if (strlen (cob_optarg) > COB_SMALL_MAX) {
 					cobc_err_exit (COBC_INV_PAR, "-conf");
 				}
-				sub_ret = cb_load_conf (cob_optarg, 0);
-				if (sub_ret != 0) conf_ret = sub_ret;
+				conf_ret |= cb_load_conf (cob_optarg, 0);
 			}
 			break;
 
@@ -2038,8 +2046,7 @@ process_command_line (const int argc, char **argv)
 			fputs (_("loading standard configuration file 'default.conf'"), stderr);
 			fputc ('\n', stderr);
 		}
-		sub_ret = cb_load_std ("default.conf");
-		if (sub_ret != 0) conf_ret = sub_ret;
+		conf_ret |= cb_load_std ("default.conf");
 	}
 
 	/* Exit for configuration errors resulting from -std/-conf/default.conf */

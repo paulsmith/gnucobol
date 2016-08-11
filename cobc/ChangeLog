@@ -1,4 +1,10 @@
 
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: use printf to do formatting instead of tabs
+	* cobc.c: added option --brief (-q) to reset -verbose and
+	  remove the path to cobc in argv[0]
+
 2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, typeck.c, codegen.c: added support for program-prototypes in
@@ -32,6 +38,10 @@
 	* codegen.c (initialize_type): renamed to deduce_initialize_type.
 	* codegen.c (deduce_initialize_type): fixed bug #287, where reference-
 	  modified group item was not treated as an elementary item.
+
+2016-08-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_command_line): save conf_ret via |= instead of extra var
 
 2016-08-03  Dave Pitts <dpitts@cozx.com>
 
