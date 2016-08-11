@@ -1,4 +1,8 @@
 
+2016-08-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* configure.ac: added -g3 to CFLAGS with --enable-debug and GCC.
+
 2016-08-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* general: revised all message strings

@@ -257,7 +257,7 @@ AC_ARG_ENABLE([param-check],
 
 AC_ARG_WITH([patch-level],
   [  --with-patch-level      (GnuCOBOL) Define a patch level (default 0)],
-  [case $with_patch_level in  
+  [case $with_patch_level in
     yes)	AC_MSG_ERROR([[You must give --with-patch-level an argument.]])
 		;;
     no)		AC_MSG_ERROR([[--without-patch-level not supported.]])
@@ -351,7 +351,7 @@ fi
 
 AC_ARG_WITH([dl],
   [  --with-dl               (GnuCOBOL) Use system dynamic loader (default)],
-  [case $with_dl in  
+  [case $with_dl in
     yes)
 		;;
     no)
@@ -363,7 +363,7 @@ AC_ARG_WITH([dl],
 
 AC_ARG_WITH([varseq],
   [  --with-varseq           (GnuCOBOL) Define variable sequential format (default 0)],
-  [case $with_varseq in  
+  [case $with_varseq in
     yes)	AC_MSG_ERROR([[You must give --with-varseq an argument.]])
 		;;
     no)		AC_MSG_ERROR([[--without-varseq not supported.]])
@@ -384,7 +384,7 @@ AC_CHECK_HEADERS([gmp.h], [], AC_MSG_ERROR([gmp.h (GMP) is required]), [])
 AC_CHECK_LIB([gmp], [__gmpz_init],
 	[LIBCOB_LIBS="$LIBCOB_LIBS -lgmp"],
 	AC_MSG_ERROR([GMP is required]), [])
-	
+
 # Check just major/minor levels between header and library
 MYOLDLIBS=$LIBS
 LIBS="$MYOLDLIBS -lgmp"
@@ -536,7 +536,7 @@ if test "$USE_NCURSES" = "ncursesw" -o "$USE_NCURSES" = "check"; then
       [AC_CHECK_HEADERS([ncursesw/curses.h], [USE_NCURSES="ncursesw"],
         [if test "$USE_NCURSES" = "ncursesw"; then
            USE_NCURSES="missing_header"
-         fi], [])], [])      
+         fi], [])], [])
     if test "$USE_NCURSES" = "ncursesw"; then
       LIBCOB_LIBS="$LIBCOB_LIBS -lncursesw"
     fi
@@ -923,10 +923,15 @@ COB_SHARED_OPT="-shared"
 COB_EXEEXT="$EXEEXT"
 
 if test "$enable_cflags_setting" = yes; then
-	# Remove -O2 option added by AC_PROG_CC and add -O0 
+	# Remove -O2 option added by AC_PROG_CC and add -O0
 	CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O@<:@0-9a-zA-Z@:>@* */ /g' -e 's/ $//' -e 's/^ //'`
 	if test "$COB_USES_GCC_ICC" = "yes"; then
 		CFLAGS="$CFLAGS -O0"
+	fi
+
+	# Add -g3 if using GCC.
+	if test "$COB_USES_GCC_ONLY" = "yes"; then
+		CFLAGS="$CFLAGS -g3"
 	fi
 fi
 
@@ -982,8 +987,8 @@ COB_FIX_LIBTOOL=""
 case $host_os in
   mingw*)
 	if test "$prefix" = "NONE"; then
-	COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
-	COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
+		COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
+		COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
 	fi
 	COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
 	COB_FIX_LIB=""
