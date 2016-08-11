@@ -3003,6 +3003,8 @@ fi
 
 
 
+
+
 #AH_TEMPLATE([HAVE_RAISE], [Has raise function])
 
 
@@ -17425,6 +17427,79 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if long is 32 bits" >&5
+$as_echo_n "checking if long is 32 bits... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+	if (sizeof (long) == 4)
+		return 0;
+	return 1;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  $as_echo "#define COB_32_BIT_LONG 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if pointer is longer than 32 bits" >&5
+$as_echo_n "checking if pointer is longer than 32 bits... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+	if (sizeof (void *) > 4U)
+		return 0;
+	return 1;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  $as_echo "#define COB_64_BIT_POINTER 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
 # Check gcc 4 pointer sign option
 if test "$COB_USES_GCC_ONLY" = "yes"; then
 	MYOLDCFLAGS="$CFLAGS"
@@ -17550,19 +17625,47 @@ if test "$enable_cflags_setting" = yes; then
 	if test "$COB_USES_GCC_ICC" = "yes"; then
 		CFLAGS="$CFLAGS -O0"
 	fi
+
+	# Add -g3 if using GCC.
+	if test "$COB_USES_GCC_ONLY" = "yes"; then
+		MYOLDCFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS -g3"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc -g3 option" >&5
+$as_echo_n "checking for gcc -g3 option... " >&6; }
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+int testint;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  CFLAGS="$MYOLDCFLAGS"; { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+		unset MYOLDCFLAGS
+	fi
 fi
 
 unset enable_cflags_setting
 
 if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/^ //' -e 's/ $//'`
+	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/^ //' -e 's/ $//'`
 fi
 
 # Include CFLAGS in COB_CFLAGS without optimization/debug options
 
 cob_temp_flags=""
 if test "x$CFLAGS" != "x"; then
-	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/ $//' -e 's/^ //'`
+	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/[+-]O[0-9s]//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fmessage-length=0//'`
@@ -17599,8 +17702,8 @@ COB_FIX_LIBTOOL=""
 case $host_os in
   mingw*)
 	if test "$prefix" = "NONE"; then
-	COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
-	COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
+		COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
+		COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
 	fi
 	COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
 	COB_FIX_LIB=""
