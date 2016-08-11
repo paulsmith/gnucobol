@@ -312,8 +312,8 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)		extern int var;
-#define CB_FLAG_RQ(var,pdok,name,def,opt,doc)	extern int var;
-#define CB_FLAG_NQ(pdok,name,opt,doc)
+#define CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	extern int var;
+#define CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -426,11 +426,11 @@ extern size_t			cobc_check_valid_name (const char *,
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
 
-#define	CB_CONFIG_ANY(type,var,name)	extern type var;
-#define	CB_CONFIG_INT(var,name)		extern unsigned int var;
-#define	CB_CONFIG_STRING(var,name)	extern const char *var;
-#define	CB_CONFIG_BOOLEAN(var,name)	extern unsigned int var;
-#define	CB_CONFIG_SUPPORT(var,name)	extern enum cb_support var;
+#define	CB_CONFIG_ANY(type,var,name,doc)	extern type var;
+#define	CB_CONFIG_INT(var,name,doc)			extern unsigned int var;
+#define	CB_CONFIG_STRING(var,name,doc)		extern const char *var;
+#define	CB_CONFIG_BOOLEAN(var,name,doc)		extern int var;
+#define	CB_CONFIG_SUPPORT(var,name,doc)		extern enum cb_support var;
 
 #include "config.def"
 

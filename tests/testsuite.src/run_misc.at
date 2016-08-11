@@ -916,7 +916,7 @@ AT_CHECK([./prog], [0],
 00000009
 00000004
 ])
-AT_CHECK([$COMPILE -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00000001
 00000009
@@ -1471,7 +1471,6 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  INDVAL       PIC 9(4).
        PROCEDURE        DIVISION.
-       A01.
            PERFORM VARYING INDVAL FROM 1
             BY 1 UNTIL INDVAL > 2
            END-PERFORM
@@ -1499,13 +1498,16 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  INDVAL       PIC 9(4).
        PROCEDURE        DIVISION.
-       A01.
            PERFORM VARYING INDVAL FROM 1
-            BY 1 UNTIL INDVAL > 2
+            BY 1 UNTIL INDVAL > 2.
+           IF INDVAL NOT = 3
+              DISPLAY INDVAL NO ADVANCING
+              END-DISPLAY
+           END-IF
            .
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [])
 
 AT_CLEANUP
@@ -1804,7 +1806,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -ftop-level-occurs-clause=ok prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
@@ -2140,7 +2142,7 @@ AT_DATA([prog.cob], [
            EXIT.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=perform-osvs:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fperform-osvs prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
@@ -2186,8 +2188,8 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE -cb_conf=sticky-linkage:yes callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=sticky-linkage:yes -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -fsticky-linkage callee.cob], [0], [], [])
+AT_CHECK([$COMPILE -fsticky-linkage -o caller caller.cob], [0], [], [])
 AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
@@ -4602,7 +4604,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE  -cb_conf=accept-display-extensions:error prog.cob], [0], [], [])
+AT_CHECK([$COMPILE  -faccept-display-extensions=error prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], ignore, [])
 
 AT_CLEANUP

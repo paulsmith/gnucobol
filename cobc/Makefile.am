@@ -30,7 +30,7 @@ cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/l
 
 dist_man_MANS = cobc.1
 
-cobc.1: cobc.c flag.def warning.def $(top_srcdir)/configure.ac
+cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac
 	$(MAKE) $(AM_MAKEFLAGS) cobc$(EXEEXT)
 	help2man --output=cobc.1  --info-page=gnucobol ./cobc$(EXEEXT)
 

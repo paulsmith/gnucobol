@@ -1,4 +1,9 @@
 
+2016-08-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* general: renamed relaxed-syntax-check to relax-syntax-checks
+	  for supporting the removed -frelax-syntax when set on command line
+
 2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added program-name-redefinition and program-prototypes

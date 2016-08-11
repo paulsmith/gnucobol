@@ -438,7 +438,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: redefinition of 'prog'
 prog.cob: 7: error: 'prog' previously defined here
 ])
-AT_CHECK([$COMPILE_ONLY -cb_conf=program-name-redefinition:no prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fno-program-name-redefinition prog.cob], [1], [],
 [prog.cob: 7: warning: redefinition of 'prog'
 prog.cob: 3: warning: 'prog' previously defined here
 prog.cob: 10: error: redefinition of 'prog'
@@ -740,7 +740,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=relax-level-hierarchy:yes prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -frelax-level-hierarchy prog.cob], [0], [],
 [prog.cob: 9: warning: no previous data item of level 04
 ])
 

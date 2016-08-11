@@ -343,6 +343,7 @@ AT_CHECK([$COMPILE_MODULE -jd prog.cob], [0], [job], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Run job with optional arguments])
 AT_KEYWORDS([runmisc job])
 
@@ -358,8 +359,35 @@ AT_DATA([prog.cob], [
            STOP RUN WITH NORMAL STATUS.
 ])
 
-AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ])
-AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ])
+AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ], [])
+AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ], [])
 AT_CHECK([$COMPILE_MODULE --job=job123 prog.cob], [0], [job123  ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Invalid cobc option])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+])
+
+# normal option
+AT_CHECK([$COMPILE --thisoptiondoesntexist prog.cob 2>/dev/null], [1], [], [])
+AT_CHECK([$COMPILE --thisoptiondoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+[cobc: unrecognized option '--thisoptiondoesntexist'
+], [])
+# normal flag
+AT_CHECK([$COMPILE -flagdoesntexist prog.cob 2>/dev/null], [1], [], [])
+AT_CHECK([$COMPILE -flagdoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+[cobc: unrecognized option '-flagdoesntexist'
+], [])
+# compiler configuration flag
+AT_CHECK([$COMPILE -fonfigdoesntexist prog.cob 2>/dev/null], [1], [], [])
+AT_CHECK([$COMPILE -fonfigdoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+[cobc: unrecognized option '-fonfigdoesntexist'
+], [])
 
 AT_CLEANUP

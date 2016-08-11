@@ -1200,7 +1200,7 @@ AT_DATA([prog.cob], [
 ])
 
 # TO-DO: Fix these warnings when program prototypes are added.
-AT_CHECK([$COMPILE -cb_conf=program-name-redefinition:no prog.cob], [0], [],
+AT_CHECK([$COMPILE -fno-program-name-redefinition prog.cob], [0], [],
 [prog.cob: 8: warning: no definition/prototype seen for program 'recursion-test'
 prog.cob: 9: warning: no definition/prototype seen for program 'cancel-test'
 ])

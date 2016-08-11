@@ -179,7 +179,7 @@ prog.cob: 14: error: FILE SECTION header missing
 prog.cob: 17: error: PROCEDURE DIVISION header missing
 ])
 
-AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
 [prog.cob: 2: warning: PROGRAM-ID header missing - assumed
 prog.cob: 2: warning: ENVIRONMENT DIVISION header missing - assumed
 prog.cob: 2: warning: CONFIGURATION SECTION header missing - assumed
@@ -665,7 +665,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=accept-update:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -faccept-update prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -690,7 +690,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=accept-auto:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -faccept-auto prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -1849,7 +1849,7 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COBC -fsyntax-only -free -W prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -free prog.cob], [1], [],
 [prog.cob: 11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog.cob: 12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
@@ -1865,7 +1865,7 @@ prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LON
 prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
-AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:45 prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -free -fword-length=45 prog.cob], [1], [],
 [prog.cob: 12: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
@@ -1877,7 +1877,7 @@ prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LON
 prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
-AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:60 prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog.cob], [1], [],
 [prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
 prog.cob: 23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
@@ -1885,7 +1885,7 @@ prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LON
 prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
-AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:45 -frelax-syntax prog2.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -free -fword-length=45 -frelax-syntax-checks prog2.cob], [0], [],
 [prog2.cob: 12: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
 prog2.cob: 20: warning: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
@@ -1893,9 +1893,20 @@ prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NA
 prog2.cob: 21: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 ])
 
-AT_CHECK([$COBC -fsyntax-only -free -W -cb_conf=word-length:60 -frelax-syntax prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog2.cob], [0], [], [])
 
-AT_CHECK([$COBC -fsyntax-only -free -frelax-syntax prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -free -frelax-syntax-checks prog2.cob], [0], [],
+[prog2.cob: 11: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog2.cob: 12: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-31':
+prog2.cob: 18: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
+prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
+prog2.cob: 19: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog2.cob: 20: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
+prog2.cob: 21: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+])
+AT_CHECK([$COMPILE_ONLY -free -frelax-syntax-checks -w prog2.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -2146,8 +2157,8 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=reserved:hello -cb_conf=not-reserved:file prog.cob], [1], [],
-[prog.cob: 7: error: 'hello' reserved word, but not supported
+AT_CHECK([$COMPILE_ONLY -freserved=hello -fnot-reserved=file prog.cob], [1], [],
+[prog.cob: 7: error: 'hello' is a reserved word, but isn't supported
 ])
 AT_CLEANUP
 
@@ -2164,11 +2175,13 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=reserved:FOO=DISPLAY* -cb_conf=reserved:BAR=FOO prog.cob], [0], [],
-[configuration warning: cb_conf: ignored asterisk at end of alias target
+AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR=FOO prog.cob], [1], [],
+[configuration warning: ignored asterisk at end of alias target
 configuration error:
 alias target 'FOO' is not a default reserved word
 ])
+
+AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
@@ -2409,12 +2422,16 @@ AT_DATA([prog.cob], [
            .
        PROCEDURE      DIVISION.
            CALL "something" USING stdout
+           CALL "something" USING stdin
+           CALL "something" USING my-stdin
            STOP RUN
            .
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: invalid mnemonic identifier
+prog.cob: 11: error: invalid mnemonic identifier
+prog.cob: 12: error: invalid mnemonic identifier
 ])
 AT_CLEANUP
 
@@ -2437,10 +2454,10 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -cb_conf=program-prototypes:warning prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -fprogram-prototypes=warning prog.cob], [0], [],
 [prog.cob: 9: warning: PROGRAM phrase used
 prog.cob: 8: warning: no definition/prototype seen for program 'test-prog'
-prog.cob: 11: warning: CALL with program-prototype-name used
-prog.cob: 12: warning: CANCEL with program-prototype-name used
+prog.cob: 11: warning: CALL/CANCEL with program-prototype-name used
+prog.cob: 12: warning: CALL/CANCEL with program-prototype-name used
 ])
 AT_CLEANUP

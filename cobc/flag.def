@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -25,36 +25,36 @@
 /* CB_FLAG    (var, help switch, name, help) */
 
 /* Flags with required parameter */
-/* CB_FLAG_RQ (var, help switch, name, default, getopt return, help) */
+/* CB_FLAG_RQ (var, help switch, name, default, getopt return, help, value help, default help) */
 
 /* Flags with required parameter and no associated variable */
-/* CB_FLAG_NQ (help switch, name, getopt return, help) */
+/* CB_FLAG_NQ (help switch, name, getopt return, help, value help, default help) */
 
 
 /* Flags with required parameter */
 
 CB_FLAG_RQ (cb_stack_size, 0, "stack-size", 255, 1,
-	 _("define PERFORM stack size\n\t\t\t- default: 255"))
+	 _("define PERFORM stack size"), _("<number>"), "255")
 
 CB_FLAG_RQ (cb_if_cutoff, 0, "if-cutoff", 3, 2,
-	 _("define cutoff depth for IF statements\n\t\t\t- default: 3"))
+	 _("define cutoff depth for IF statements"), _("<number>"), "3")
 
 CB_FLAG_RQ (cb_ebcdic_sign, 1, "sign", 0, 3,
-	 _("define display sign representation\n\t\t\t- ASCII or EBCDIC (default: machine native)"))
+	 _("define display sign representation"), "[ASCII|EBCDIC]", _("machine native"))
 
 CB_FLAG_RQ (cb_fold_copy, 1, "fold-copy", 0, 4,
-	 _("fold COPY subject to value\n\t\t\t- UPPER or LOWER (default: no transformation)"))
+	 _("fold COPY subject to value"), "[UPPER|LOWER]", _("no transformation"))
 
 CB_FLAG_RQ (cb_fold_call, 1, "fold-call", 0, 5,
-	 _("fold PROGRAM-ID, CALL, CANCEL subject to value\n\t\t\t- UPPER or LOWER (default: no transformation)"))
+	 _("fold PROGRAM-ID, CALL, CANCEL subject to value"), "[UPPER|LOWER]", _("no transformation"))
 
 CB_FLAG_RQ (cb_default_byte, 1, "defaultbyte", -1, 6,
-	 _("initialize fields without VALUE to decimal value\n\t\t\t- 0 to 255 (default: initialize to picture)"))
+	 _("initialize fields without VALUE to decimal value"), "0..255", _("initialize to picture"))
 
 /* Flags with required parameter and no associated variable */
 
 CB_FLAG_NQ (1, "intrinsics", 10,
-	 _("intrinsics to be used without FUNCTION keyword\n\t\t\t- ALL or intrinsic function name(,name,...)"))
+	 _("intrinsics to be used without FUNCTION keyword"), _("[ALL|intrinsic function name(,name,...)]"), NULL)
 
 /* Binary flags */
 
@@ -123,8 +123,10 @@ CB_FLAG (cb_flag_apostrophe, 1, "single-quote",
 CB_FLAG (cb_flag_recursive, 1, "recursive-check",
 	 _("check recursive program call"))
 
+#if 0 /* deactivated as -frelaxed-syntax (compiler configuration) is available */
 CB_FLAG (cb_flag_relaxed_syntax, 1, "relax-syntax",
 	 _("relax syntax checking\n\t\t\t- eg. REDEFINES position"))
+#endif
 
 CB_FLAG (cb_flag_optional_file, 1, "optional-file",
 	 _("treat all files as OPTIONAL\n\t\t\t- unless NOT OPTIONAL specified"))

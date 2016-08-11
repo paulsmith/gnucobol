@@ -41,8 +41,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:2-4-8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0001202020202020
 000c202020202020
@@ -156,8 +156,8 @@ fe4964b459cf0cb2
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:2-4-8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -228,8 +228,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:2-4-8 \
-                   -cb_conf=binary-byteorder:native  prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
+                   -fbinary-byteorder=native  prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0100202020202020
 0c00202020202020
@@ -343,8 +343,8 @@ b20ccf59b46449fe
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:2-4-8 \
-                   -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
+                   -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -411,8 +411,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:1-2-4-8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0120202020202020
 0c20202020202020
@@ -526,8 +526,8 @@ fe4964b459cf0cb2
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:1-2-4-8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -597,8 +597,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:1-2-4-8 \
-                   -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
+                   -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0120202020202020
 0c20202020202020
@@ -712,8 +712,8 @@ b20ccf59b46449fe
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:1-2-4-8 \
-                   -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
+                   -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -781,8 +781,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:1--8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1--8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0120202020202020
 0c20202020202020
@@ -896,8 +896,8 @@ fe4964b459cf0cb2
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:1--8 \
-                   -cb_conf=binary-byteorder:big-endian prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1--8 \
+                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -967,8 +967,8 @@ int dump (unsigned char *data)
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
-AT_CHECK([$COMPILE -cb_conf=binary-size:1--8 \
-                   -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1--8 \
+                   -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0120202020202020
 0c20202020202020
@@ -1082,8 +1082,8 @@ b20ccf59b46449fe
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:1--8 \
-                   -cb_conf=binary-byteorder:native prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1--8 \
+                   -fbinary-byteorder=native prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [1
 12
@@ -1136,8 +1136,8 @@ AT_KEYWORDS([binary])
 
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
-AT_CHECK([$COMPILE -cb_conf=binary-size:1--8 \
-                   -cb_conf=pretty-display:no prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fbinary-size=1--8 \
+                   -fno-pretty-display prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [001
 012

@@ -402,6 +402,7 @@ check_picture_item (cb_tree x, struct cb_field *f)
 		return 1;
 	}
 	vorint = (int)CB_LITERAL(CB_VALUE(f->values))->size;
+	/* Checkme: should we raise an error for !cb_relaxed_syntax_checks? */
 	if (warningopt) {
 		cb_warning_x (x, _("defining implicit picture size %d for '%s'"),
 			    vorint, cb_name (x));

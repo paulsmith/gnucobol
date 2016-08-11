@@ -752,7 +752,7 @@ cb_check_lit_subs (struct cb_reference *r, const int numsubs,
 	int			size;
 
 	/* Check for DPC and non-standard separator usage */
-	if (!cb_relaxed_syntax_check ||
+	if (!cb_relaxed_syntax_checks ||
 	    current_program->decimal_point != ',') {
 		return;
 	}
@@ -1383,7 +1383,7 @@ cb_build_address (cb_tree x)
 		if (refsubs > numsubs) {
 			goto subserror;
 		} else if (refsubs < numsubs) {
-			if (!cb_relaxed_syntax_check) {
+			if (!cb_relaxed_syntax_checks) {
 				goto subserror;
 			} else {
 				cb_warning_x (x,
@@ -1530,7 +1530,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 			if (refsubs > numsubs) {
 				goto refsubserr;
 			} else if (refsubs < numsubs) {
-				if (!cb_relaxed_syntax_check) {
+				if (!cb_relaxed_syntax_checks) {
 					goto refsubserr;
 				} else {
 					cb_warning_x (x,
@@ -2248,7 +2248,7 @@ cb_validate_program_environment (struct cb_program *prog)
 			}
 		}
 		if (dupls) {
-			if (!cb_relaxed_syntax_check) {
+			if (!cb_relaxed_syntax_checks) {
 				cb_error_x (CB_VALUE(l),
 					    _("duplicate values in class '%s'"),
 					    cb_name (CB_VALUE(l)));
@@ -2617,7 +2617,7 @@ cb_validate_program_body (struct cb_program *prog)
 		if (CB_LABEL_P (v)) {
 			if (CB_REFERENCE (x)->flag_in_decl &&
 			    !CB_LABEL (v)->flag_declaratives) {
-				if (!cb_relaxed_syntax_check) {
+				if (!cb_relaxed_syntax_checks) {
 					cb_error_x (x, _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
 				} else {
@@ -4739,7 +4739,7 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSIN:
-			if (!cb_relaxed_syntax_check) {
+			if (!cb_relaxed_syntax_checks) {
 				cb_warning_x (name, _("'%s' is not defined in SPECIAL-NAMES"), CB_NAME (name));
 			}
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
@@ -5629,12 +5629,12 @@ cb_build_display_name (cb_tree x)
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSOUT:
-			if (!cb_relaxed_syntax_check) {
+			if (!cb_relaxed_syntax_checks) {
 				cb_warning_x (x, _("'%s' is not defined in SPECIAL-NAMES"), name);
 			}
 			return cb_int0;
 		case CB_DEVICE_SYSERR:
-			if (!cb_relaxed_syntax_check) {
+			if (!cb_relaxed_syntax_checks) {
 				cb_warning_x (x, _("'%s' is not defined in SPECIAL-NAMES"), name);
 			}
 			return cb_int1;
@@ -6463,7 +6463,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 		if (src == cb_space) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
 			    (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
-				if (!cb_relaxed_syntax_check || is_value) {
+				if (!cb_relaxed_syntax_checks || is_value) {
 					goto invalid;
 				}
 				cb_warning_x (loc, _("source is non-numeric - substituting zero"));
@@ -6475,7 +6475,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 		} else if (src == cb_low || src == cb_high || src == cb_quote) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
 			    CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED) {
-				if (!cb_relaxed_syntax_check || is_value) {
+				if (!cb_relaxed_syntax_checks || is_value) {
 					goto invalid;
 				}
 				cb_warning_x (loc, _("source is non-numeric - substituting zero"));

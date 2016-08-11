@@ -500,7 +500,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=complex-odo:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fcomplex-odo prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [33331    22        333            444
 3333  3    22      111            000
@@ -566,7 +566,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=complex-odo:yes -fodoslide prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fcomplex-odo -fodoslide prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0909122333444
 1313  3  22111000
@@ -612,7 +612,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -cb_conf=complex-odo:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fcomplex-odo prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -652,7 +652,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -cb_conf=complex-odo:yes -fodoslide prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fcomplex-odo -fodoslide prog.cob], [0], [], [])
 AT_CHECK([./prog], [0])
 
 AT_CLEANUP
@@ -1084,7 +1084,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=assign-clause:mf prog.cob], [0], [],
+AT_CHECK([$COMPILE -fassign-clause=mf prog.cob], [0], [],
 [prog.cob: 12: warning: 'FILENAME' will be implicitly defined
 ])
 AT_CHECK([./prog], [0], [], [])
@@ -1111,7 +1111,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=assign-clause:ibm prog.cob], [0], [],
+AT_CHECK([$COMPILE -fassign-clause=ibm prog.cob], [0], [],
 [prog.cob: 7: warning: ASSIGN interpreted as FILENAME
 ])
 AT_CHECK([./prog], [0], [], [])
@@ -1156,12 +1156,12 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=filename-mapping:no prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fno-filename-mapping prog.cob], [0], [], [])
 AT_CHECK([DD_FILENAME="x" ./prog], [0], [], [])
 AT_CHECK([test -f "x"], [1])
 AT_CHECK([test -f "FILENAME"], [0], [], [])
 
-AT_CHECK([$COMPILE -cb_conf=filename-mapping:yes prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE -ffilename-mapping prog2.cob], [0], [], [])
 AT_CHECK([DD_FILENAME2="x" ./prog2], [0], [], [])
 AT_CHECK([test -f "FILENAME2"], [1])
 AT_CHECK([test -f "x"], [0], [], [])
@@ -1194,7 +1194,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=filename-mapping:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -ffilename-mapping prog.cob], [0], [], [])
 AT_CHECK([DIR="." ./prog], [0], [], [])
 AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0], [], [])
 
@@ -1220,7 +1220,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -cb_conf=filename-mapping:yes prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -ffilename-mapping prog.cob], [0], [], [])
 AT_CHECK([COB_FILE_PATH=".." ./prog], [0], [], [])
 AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
 
@@ -1720,8 +1720,8 @@ AT_KEYWORDS([extensions])
 # GC has an extension "SORT FILES always in memory" and therefore didn't
 # used the ASSIGN clause (which should be mandatory) for SORT files at all.
 # We should add an according test and change the test here after cleanup,
-# either officially removing the "ASSIGN clause not necessary for SORT FILES"
-# extension or enable it only with either a conf entry or frelax-syntax.
+# officially documenting the "ASSIGN clause not necessary for SORT FILES"
+# extension and enable it only with a conf entry (set only in default.conf).
 AT_XFAIL_IF(true)
 
 AT_DATA([TEST-FILE],
@@ -2333,7 +2333,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax prog.cob], [0], [],
+AT_CHECK([$COMPILE -flarger-redefines-ok prog.cob], [0], [],
 [prog.cob: 12: warning: size of 'XMAIN0502' larger than size of 'XMAIN0501'
 prog.cob: 21: warning: size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
 prog.cob: 23: warning: size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'

@@ -63,7 +63,7 @@ print_error (const char *file, int line, const char *prefix,
 	if (current_section != last_section) {
 		if (current_section && !current_section->flag_dummy_section) {
 			if (file)
-				fprintf (stderr, "%s: ", file);
+			fprintf (stderr, "%s: ", file);
 			fputs (_("in section"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_section->name);
@@ -73,7 +73,7 @@ print_error (const char *file, int line, const char *prefix,
 	if (current_paragraph != last_paragraph) {
 		if (current_paragraph && !current_paragraph->flag_dummy_paragraph) {
 			if (file)
-				fprintf (stderr, "%s: ", file);
+			fprintf (stderr, "%s: ", file);
 			fputs (_("in paragraph"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_paragraph->name);
@@ -143,11 +143,12 @@ print_error (const char *file, int line, const char *prefix,
 static void
 configuration_error_head (void)
 {
-	if (!conf_error_displayed) {
-		conf_error_displayed = 1;
-		fputs (_("configuration error:"), stderr);
-		putc ('\n', stderr);
+	if (conf_error_displayed) {
+		return;
 	}
+	conf_error_displayed = 1;
+	fputs (_("configuration error:"), stderr);
+	putc ('\n', stderr);
 }
 
 /* reentrant version of strerror */
@@ -218,8 +219,7 @@ cb_plex_warning (const size_t sline, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, (int)(cb_source_line + sline),
-	    _("warning: "), fmt, ap);
+	print_error (NULL, (int)(cb_source_line + sline), _("warning: "), fmt, ap);
 	va_end (ap);
 	warningcount++;
 }
@@ -230,8 +230,7 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, (int)(cb_source_line + sline),
-	    _("error: "), fmt, ap);
+	print_error (NULL, (int)(cb_source_line + sline), ("error: "), fmt, ap);
 	va_end (ap);
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
@@ -255,8 +254,6 @@ configuration_warning (const char *fname, const int line, const char *fmt, ...)
 		last_error_line = line;
 		if (fname) {
 			fprintf (stderr, "%s: ", fname);
-		} else {
-			fputs ("cb_conf: ", stderr);
 		}
 		if (line) {
 			fprintf (stderr, "%d: ", line);
@@ -271,9 +268,12 @@ configuration_warning (const char *fname, const int line, const char *fmt, ...)
 	/* Postfix */
 	putc('\n', stderr);
 	fflush(stderr);
+
+	warningcount++;
 }
 void
-configuration_error (const char *fname, const int line, const int finish_error, const char *fmt, ...)
+configuration_error (const char *fname, const int line,
+                     const int finish_error, const char *fmt, ...)
 {
 	va_list args;
 
@@ -286,8 +286,6 @@ configuration_error (const char *fname, const int line, const int finish_error, 
 		last_error_line = line;
 		if (fname) {
 			fprintf (stderr, "%s: ", fname);
-		} else {
-			fputs ("cb_conf: ", stderr);
 		}
 		if (line) {
 			fprintf (stderr, "%d: ", line);
@@ -308,6 +306,8 @@ configuration_error (const char *fname, const int line, const int finish_error, 
 		putc('\n', stderr);
 		fflush(stderr);
 	}
+
+	errorcount++;
 }
 
 /* Generic warning/error routines */
@@ -317,8 +317,7 @@ cb_warning_x (cb_tree x, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (x->source_file, x->source_line,
-	   _("warning: "), fmt, ap);
+	print_error (x->source_file, x->source_line, _("warning: "), fmt, ap);
 	va_end (ap);
 	warningcount++;
 }
@@ -329,8 +328,7 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (x->source_file, x->source_line,
-	    _("error: "), fmt, ap);
+	print_error (x->source_file, x->source_line, _("error: "), fmt, ap);
 	va_end (ap);
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();

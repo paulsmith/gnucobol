@@ -205,8 +205,8 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)	int var = 0;
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc)	int var = def;
-#define	CB_FLAG_NQ(pdok,name,opt,doc)
+#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	int var = def;
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -420,7 +420,6 @@ static const struct option long_options[] = {
 	{"save-temps",		CB_OP_ARG, NULL, '_'},
 	{"std",			CB_RQ_ARG, NULL, '$'},
 	{"conf",		CB_RQ_ARG, NULL, '&'},
-	{"cb_conf",		CB_RQ_ARG, NULL, '%'},
 	{"debug",		CB_NO_ARG, NULL, 'd'},
 	{"ext",			CB_RQ_ARG, NULL, 'e'},
 	{"free",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FREE},
@@ -443,14 +442,39 @@ static const struct option long_options[] = {
 #define	CB_FLAG(var,pdok,name,doc)			\
 	{"f"name,		CB_NO_ARG, &var, 1},	\
 	{"fno-"name,		CB_NO_ARG, &var, 0},
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc)		\
+#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)		\
 	{"f"name,		CB_RQ_ARG, NULL, opt},
-#define	CB_FLAG_NQ(pdok,name,opt,doc)			\
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)			\
 	{"f"name,		CB_RQ_ARG, NULL, opt},
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
+
+#undef	CB_CONFIG_ANY
+#undef	CB_CONFIG_INT
+#undef	CB_CONFIG_STRING
+#undef	CB_CONFIG_BOOLEAN
+#undef	CB_CONFIG_SUPPORT
+#define	CB_CONFIG_ANY(type,var,name,doc)	\
+	{"f"name,		CB_RQ_ARG, NULL, '%'},
+#define	CB_CONFIG_INT(var,name,doc)		\
+	{"f"name,		CB_RQ_ARG, NULL, '%'},
+#define	CB_CONFIG_STRING(var,name,doc)		\
+	{"f"name,		CB_RQ_ARG, NULL, '%'},
+#define	CB_CONFIG_BOOLEAN(var,name,doc)		\
+	{"f"name,		CB_NO_ARG, &var, 1},	\
+	{"fno-"name,		CB_NO_ARG, &var, 0},
+#define	CB_CONFIG_SUPPORT(var,name,doc)		\
+	{"f"name,		CB_RQ_ARG, NULL, '%'},
+#include "config.def"
+	{"freserved",	CB_RQ_ARG, NULL, '%'},
+	{"fnot-reserved",	CB_RQ_ARG, NULL, '%'},
+#undef	CB_CONFIG_ANY
+#undef	CB_CONFIG_INT
+#undef	CB_CONFIG_STRING
+#undef	CB_CONFIG_BOOLEAN
+#undef	CB_CONFIG_SUPPORT
 
 #undef	CB_WARNDEF
 #undef	CB_NOWARNDEF
@@ -1175,7 +1199,7 @@ cobc_check_valid_name (const char *name, const unsigned int prechk)
 		cobc_error_name (name, prechk, 1U);
 		return 1;
 	}
-	if (!cb_relaxed_syntax_check && len > 31) {
+	if (!cb_relaxed_syntax_checks && len > 31) {
 		cobc_error_name (name, prechk, 1U);
 		return 1;
 	}
@@ -1748,21 +1772,24 @@ cobc_print_warn (const char *name, const char *doc, const int wall)
 
 static void
 cobc_print_flag (const char *name, const char *doc,
-		 const int pdok, const int exten)
+		 const int pdok, const char *odoc, const char *def)
 {
 	const char	*bptr;
-	char		buff[32];
+	char		buff[78];
 
-	if (!pdok) {
+	if (!pdok || !doc) {
 		return;
 	}
-	if (!exten) {
+	if (!odoc) {
 		bptr = name;
 	} else {
-		snprintf (buff, sizeof(buff), "%s=<value>", name);
+		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
 		bptr = buff;
 	}
 	printf ("  -f%-19s %s\n", bptr, doc);
+	if (def) {
+		printf ("\t\t\t- %s: %s\n", _("default"), def);
+	}
 }
 
 static void
@@ -1815,7 +1842,6 @@ cobc_print_usage (char * prog)
 	puts (_("  -D <define>           define <define> for COBOL compilation"));
 	puts (_("  -K <entry>            generate CALL to <entry> as static"));
 	puts (_("  -conf=<file>          user-defined dialect configuration; see -std"));
-	puts (_("  -cb_conf=<tag:value>  override configuration entry"));
 	puts (_("  -list-reserved        display reserved words"));
 	puts (_("  -list-intrinsics      display intrinsic functions"));
 	puts (_("  -list-mnemonics       display mnemonic names"));
@@ -1845,17 +1871,45 @@ cobc_print_usage (char * prog)
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)		\
-	cobc_print_flag (name, doc, pdok, 0);
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc)	\
-	cobc_print_flag (name, doc, pdok, 1);
-#define	CB_FLAG_NQ(pdok,name,opt,doc)		\
-	cobc_print_flag (name, doc, pdok, 1);
+	cobc_print_flag (name, doc, pdok, NULL, NULL);
+#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	\
+	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)		\
+	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
 	putchar ('\n');
+
+#undef	CB_CONFIG_ANY
+#undef	CB_CONFIG_INT
+#undef	CB_CONFIG_STRING
+#undef	CB_CONFIG_BOOLEAN
+#undef	CB_CONFIG_SUPPORT
+#define	CB_CONFIG_STRING(var,name,doc)		\
+	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+#define	CB_CONFIG_INT(var,name,doc)		\
+	cobc_print_flag (name, doc, 1, _("<number>"), NULL);
+#define	CB_CONFIG_ANY(type,var,name,doc)		\
+	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+#define	CB_CONFIG_BOOLEAN(var,name,doc)		\
+	cobc_print_flag (name, doc, 1, NULL, NULL);
+#define	CB_CONFIG_SUPPORT(var,name,doc)		\
+	cobc_print_flag (name, doc, 1, _("<support>"), NULL);
+#include "config.def"
+#undef	CB_CONFIG_ANY
+#undef	CB_CONFIG_INT
+#undef	CB_CONFIG_STRING
+#undef	CB_CONFIG_BOOLEAN
+#undef	CB_CONFIG_SUPPORT
+	putchar ('\t');
+	puts(_("where <support> is one of the following:"));
+	puts("\t'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'");
+	cobc_print_flag ("not-reserved", _("word to be taken out of the reserved words list"), 1, _("<word>"), NULL);
+	cobc_print_flag ("reserved", _("word to be added to reserved words list"), 1, _("<word>"), NULL);
+	cobc_print_flag ("reserved", _("word to be added to reserved words list as alias"), 1, _("<word>:<alias>"), NULL);
 
 	putchar ('\n');
 
@@ -1918,6 +1972,7 @@ process_command_line (const int argc, char **argv)
 	enum cob_exception_id	i;
 	struct stat		st;
 	char			ext[COB_MINI_BUFF];
+	char			conf_entry[COB_MINI_BUFF];
 
 	int			conf_ret = 0;
 
@@ -2055,13 +2110,15 @@ process_command_line (const int argc, char **argv)
 		exit (1);
 	}
 
+#if 0 /* deactivated as -frelaxed-syntax-checks (compiler configuration) is available */
 	/* Set relaxed syntax configuration options if requested */
-	if (cb_flag_relaxed_syntax) {
-		cb_relaxed_syntax_check = 1;
+	if (cb_flag_relaxed_syntax_group) {
+		cb_relaxed_syntax_checks = 1;
 		cb_larger_redefines_ok = 1;
 		cb_relax_level_hierarchy = 1;
 		cb_top_level_occurs_clause = CB_OK;
 	}
+#endif
 
 	cob_optind = 1;
 	while ((c = cob_getopt_long_long (argc, argv, short_options,
@@ -2222,12 +2279,10 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case '%':
-			/* -cb_conf=<xx:yy> : Override configuration entry */
-			if (strlen (cob_optarg) > COB_SMALL_MAX) {
-				cobc_err_exit (COBC_INV_PAR , "-cb_conf");
-			}
-			sub_ret = cb_config_entry (cob_optarg, NULL, 0);
-			if (sub_ret != 0) conf_ret = sub_ret;
+			/* -f[no-]<tag>[=<value>] : Override configuration entry */
+			snprintf (conf_entry, COB_MINI_MAX, "%s=%s",
+				long_options[idx].name + 1, cob_optarg);
+			conf_ret |= cb_config_entry (conf_entry, NULL, 0);
 			break;
 
 		case 'd':

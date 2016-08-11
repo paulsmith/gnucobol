@@ -1,9 +1,20 @@
 
+2016-08-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.def: renamed compiler configuration relaxed-syntax-check to
+	  relax-syntax-checks for supporting the removed -frelax-syntax when set
+	  on command line
+	* general: renamed cb_relaxed_syntax_check to cb_relaxed_syntax_checks
+
 2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: use printf to do formatting instead of tabs
 	* cobc.c: added option --brief (-q) to reset -verbose and
 	  remove the path to cobc in argv[0]
+	* cobc.c, cobc.h: better help for compiler flags
+	* flag.def, cobc.c, cobc.h: added more parameters in flag.def for better
+	  help output; changed defines for CB_FLAG_RQ and CB_FLAG_NQ
+	* Makefile.am: add config.def as prerequisite for man-page 
 
 2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -624,6 +635,13 @@
 	* codegen.c, codeoptim.c: Changed code to generate cob_screen as a
 	  doubly linked list.
 	* reserved.c (reserved_words): added GRID as synonym for LEFTLINE.
+
+2015-12-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, config.c: changes for replacing -cb_conf=<tag>:<value> with
+	  additional flags -f<tag>=<value> including -f[no-]<tag> for binary confs
+	* config.def, cobc.c, cobc.h, config.c: added additional parameter in
+	  config.def for help output; changed defines for CB_CONFIG_*
 
 2015-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

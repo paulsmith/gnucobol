@@ -755,7 +755,7 @@ H#[0-9A-Za-z]* {
 			/* Absolute limit */
 			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
 				  COB_MAX_WORDLEN, yytext);
-		} else if (!cb_relaxed_syntax_check) {
+		} else if (!cb_relaxed_syntax_checks) {
 			cb_error (_("word length exceeds %d characters: '%s'"),
 				  cb_word_length, yytext);
 		} else if (warningopt) {

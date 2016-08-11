@@ -548,7 +548,7 @@ check_relaxed_syntax (const unsigned int lev)
 		s = "Unknown";
 		break;
 	}
-	if (cb_relaxed_syntax_check) {
+	if (cb_relaxed_syntax_checks) {
 		cb_warning (_("%s header missing - assumed"), s);
 	} else {
 		cb_error (_("%s header missing"), s);
@@ -989,7 +989,7 @@ set_current_field (cb_tree level, cb_tree name)
 static void
 emit_duplicate_clause_message (const char *clause)
 {
-	if (cb_relaxed_syntax_check) {
+	if (cb_relaxed_syntax_checks) {
 		cb_warning (_("duplicate %s clause"), clause);
 	} else {
 		cb_error (_("duplicate %s clause"), clause);
@@ -1041,7 +1041,7 @@ check_screen_attr (const char *clause, const int bitval)
 static void
 emit_conflicting_clause_message (const char *clause, const char *conflicting)
 {
-	if (cb_relaxed_syntax_check) {
+	if (cb_relaxed_syntax_checks) {
 		cb_warning (_("cannot specify both %s and %s; %s is ignored"),
 			    clause, conflicting, clause);
 	} else {
@@ -4545,7 +4545,7 @@ redefines_clause:
   {
 	check_repeated ("REDEFINES", SYN_CLAUSE_1, &check_pic_duplicate);
 	if ($0 != NULL) {
-		if (cb_relaxed_syntax_check) {
+		if (cb_relaxed_syntax_checks) {
 			cb_warning_x ($2, _("REDEFINES clause should follow entry-name"));
 		} else {
 			cb_error_x ($2, _("REDEFINES clause must follow entry-name"));
@@ -8744,7 +8744,7 @@ perform_body:
 end_perform:
   /* empty */	%prec SHIFT_PREFER
   {
-	if (cb_relaxed_syntax_check) {
+	if (cb_relaxed_syntax_checks) {
 		TERMINATOR_WARNING ($-4, PERFORM);
 	} else {
 		TERMINATOR_ERROR ($-4, PERFORM);
@@ -8763,7 +8763,7 @@ term_or_dot:
   }
 | TOK_DOT
   {
-	if (cb_relaxed_syntax_check) {
+	if (cb_relaxed_syntax_checks) {
 		TERMINATOR_WARNING ($-2, PERFORM);
 	} else {
 		TERMINATOR_ERROR ($-2, PERFORM);
