@@ -931,21 +931,27 @@ if test "$enable_cflags_setting" = yes; then
 
 	# Add -g3 if using GCC.
 	if test "$COB_USES_GCC_ONLY" = "yes"; then
+		MYOLDCFLAGS="$CFLAGS"		     
 		CFLAGS="$CFLAGS -g3"
+		AC_MSG_CHECKING([for gcc -g3 option])
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[int testint;]])],
+			[AC_MSG_RESULT([yes])],
+			[CFLAGS="$MYOLDCFLAGS"; AC_MSG_RESULT([no])])
+		unset MYOLDCFLAGS
 	fi
 fi
 
 unset enable_cflags_setting
 
 if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/^ //' -e 's/ $//'`
+	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/^ //' -e 's/ $//'`
 fi
 
 # Include CFLAGS in COB_CFLAGS without optimization/debug options
 
 cob_temp_flags=""
 if test "x$CFLAGS" != "x"; then
-	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/ $//' -e 's/^ //'`
+	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/@<:@+-@:>@O@<:@0-9s@:>@//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fmessage-length=0//'`
