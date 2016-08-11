@@ -1042,7 +1042,7 @@ static void
 emit_conflicting_clause_message (const char *clause, const char *conflicting)
 {
 	if (cb_relaxed_syntax_check) {
-		cb_warning (_("cannot specify both %s and %s, %s ignored"),
+		cb_warning (_("cannot specify both %s and %s; %s is ignored"),
 			    clause, conflicting, clause);
 	} else {
 		cb_error (_("cannot specify both %s and %s"),

@@ -120,8 +120,8 @@ cobcrun_print_usage (char * prog)
 	puts (_("                                 and any basename to the module preload list"));
 	puts (_("                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)"));
 	putchar ('\n');
-	printf (_("Report bugs to: %s or\n"
-			  "use the preferred issue tracker via home page"), "bug-gnucobol@gnu.org");
+	printf (_("Report bugs to: %s\n" 
+			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");
 	putchar ('\n');
 	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
 	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));

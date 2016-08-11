@@ -2635,7 +2635,7 @@ cb_validate_program_body (struct cb_program *prog)
 				CB_LABEL (v)->flag_return = 1;
 			}
 		} else if (v != cb_error_node) {
-			cb_error_x (x, _("'%s' not a procedure name"), cb_name (x));
+			cb_error_x (x, _("'%s' is not a procedure name"), cb_name (x));
 		}
 	}
 

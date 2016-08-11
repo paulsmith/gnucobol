@@ -379,12 +379,12 @@ prog.cob: 16: error: cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [1], [],
-[prog.cob: 8: warning: cannot specify both LOWLIGHT and HIGHLIGHT, LOWLIGHT ignored
-prog.cob: 9: warning: cannot specify both ERASE EOS and ERASE EOL, ERASE EOS ignored
-prog.cob: 10: warning: cannot specify both BLANK SCREEN and BLANK LINE, BLANK SCREEN ignored
-prog.cob: 13: warning: cannot specify both LOWLIGHT and HIGHLIGHT, LOWLIGHT ignored
-prog.cob: 14: warning: cannot specify both ERASE EOS and ERASE EOL, ERASE EOS ignored
-prog.cob: 15: warning: cannot specify both BLANK SCREEN and BLANK LINE, BLANK SCREEN ignored
+[prog.cob: 8: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 9: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 10: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob: 13: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 14: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 15: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
 prog.cob: 16: error: cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 

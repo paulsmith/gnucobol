@@ -2657,7 +2657,7 @@ static void
 add_reserved_word_without_init (const char *word, const char *fname,
 				const int line)
 {
-        struct reserved_word_list	*reserved;
+	struct reserved_word_list	*reserved;
 	size_t				size;
 	char				*equal_sign_pos;
 
@@ -2915,7 +2915,7 @@ lookup_reserved_word (const char *name)
 	if (unlikely(p->token <= 0)) {
 		/* Not implemented - If context sensitive, no error */
 		if (!p->context_sens) {
-			cb_error (_("'%s' reserved word, but not supported"), name);
+			cb_error (_("'%s' is a reserved word, but isn't supported"), name);
 		}
 		return NULL;
 	}
@@ -2978,46 +2978,28 @@ lookup_intrinsic (const char *name, const int checkimpl)
 void
 cb_list_reserved (void)
 {
-	const char	*s;
 	const char	*p;
 	size_t		i;
-	size_t		n;
 
 	initialize_reserved_words_if_needed ();
 
 	putchar ('\n');
-	printf (_("Reserved Words\t\t\tImplemented (Y/N)"));
-	puts ("\n");
+	printf ("%-32s%s\n", _("Reserved Words"), _("Implemented"));
 	for (i = 0; i < num_reserved_words; ++i) {
-		n = strlen (reserved_words[i].name);
-		switch (n / 8) {
-		case 0:
-			s = "\t\t\t\t";
-			break;
-		case 1:
-			s = "\t\t\t";
-			break;
-		case 2:
-			s = "\t\t";
-			break;
-		default:
-			s = "\t";
-			break;
-		}
 		if (reserved_words[i].token > 0) {
 			if (reserved_words[i].context_sens) {
-				p = _("Y (Context sensitive)");
+				p = _("Yes (Context sensitive)");
 			} else {
-				p = _("Y");
+				p = _("Yes");
 			}
 		} else {
 			if (reserved_words[i].context_sens) {
-				p = _("N (Context sensitive)");
+				p = _("No (Context sensitive)");
 			} else {
-				p = _("N");
+				p = _("No");
 			}
 		}
-		printf ("%s%s%s\n", reserved_words[i].name, s, p);
+		printf ("%-32s%s\n", reserved_words[i].name, p);
 	}
 	putchar ('\n');
 	puts (_("Extra (obsolete) context sensitive words"));
@@ -3029,92 +3011,60 @@ cb_list_reserved (void)
 	puts ("REMARKS");
 	puts ("SECURITY");
 	putchar ('\n');
-	puts (_("Extra internal registers\tDefinition"));
-	puts ("RETURN-CODE\t\t\tUSAGE BINARY-LONG");
-	puts ("SORT-RETURN\t\t\tUSAGE BINARY-LONG");
-	puts ("NUMBER-OF-CALL-PARAMETERS\tUSAGE BINARY-LONG");
-	puts ("COB-CRT-STATUS\t\t\tPIC 9(4)");
-	puts ("TALLY\t\t\t\tGLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
-	puts ("'LENGTH OF' phrase\t\tUSAGE BINARY-LONG");
+	printf ("%-32s%s\n", _("Extra internal registers"), _("Definition"));
+	printf ("%-32s%s\n", "RETURN-CODE", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "SORT-RETURN", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "COB-CRT-STATUS", "PIC 9(4)");
+	printf ("%-32s%s\n", "TALLY", "GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
+	printf ("%-32s%s\n", _("'LENGTH OF' phrase"), "USAGE BINARY-LONG");
 }
 
 void
 cb_list_intrinsics (void)
 {
-	const char	*s;
 	const char	*t;
-	char	*argnum;
+	char	argnum [20];
 	size_t		i;
-	size_t		n;
 
 	putchar ('\n');
-	puts (_("Intrinsic Function\t\tImplemented\tParameters"));
+	printf ("%-32s%-16s%s\n",
+		_("Intrinsic Function"), _("Implemented"), _("Parameters"));
 	for (i = 0; i < NUM_INTRINSICS; ++i) {
-		n = strlen (function_list[i].name);
-		switch (n / 8) {
-		case 0:
-			s = "\t\t\t\t";
-			break;
-		case 1:
-			s = "\t\t\t";
-			break;
-		case 2:
-			s = "\t\t";
-			break;
-		default:
-			s = "\t";
-			break;
-		}
 		if (function_list[i].implemented) {
-			t = _("Y");
+			t = _("Yes");
 		} else {
-			t = _("N");
+			t = _("No");
 		}
 		if (function_list[i].args == -1) {
-			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, _("Unlimited"));
+			snprintf (argnum, sizeof (argnum) - 1, "%s", _("Unlimited"));
+		} else if (function_list[i].args != function_list[i].min_args) {
+			snprintf (argnum, sizeof (argnum) - 1, "%d - %d",
+				(int)function_list[i].min_args, (int)function_list[i].args);
 		} else {
-			if (function_list[i].args != function_list[i].min_args) {
-				argnum = cob_malloc (7);
-				snprintf (argnum, 7, "%d - %d", (int)function_list[i].min_args,
-					(int)function_list[i].args);
-			} else {
-				argnum = cob_malloc (3);
-				snprintf (argnum, 3, "%d", (int)function_list[i].args);
-			}
-			printf ("%s%s%s\t\t%s\n", function_list[i].name, s, t, argnum);
-			cob_free (argnum);
+			snprintf (argnum, sizeof (argnum) - 1, "%d", (int)function_list[i].args);
 		}
+		printf ("%-32s%-16s%s\n", function_list[i].name, t, argnum);
 	}
 }
 
 void
 cb_list_mnemonics (void)
 {
-	const char	*tabs;
 	const char	*feature;
 	size_t		i;
 
 	putchar ('\n');
 	puts (_("Mnemonic names"));
 	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
-		if (strlen (system_table[i].name) < 8) {
-			tabs = "\t\t";
-		} else {
-			tabs = "\t";
-		}
 		feature = res_get_feature (system_table[i].category);
-		printf ("%s%s%s\n", system_table[i].name, tabs, feature);
+		printf ("%-32s%s\n", system_table[i].name, feature);
 	}
 	putchar ('\n');
 	puts (_("Extended mnemonic names (with -fsyntax-extension)"));
 	for (i = 0; i < EXT_SYSTEM_TAB_SIZE; ++i) {
-		if (strlen (ext_system_table[i].name) < 8) {
-			tabs = "\t\t";
-		} else {
-			tabs = "\t";
-		}
 		feature = res_get_feature (ext_system_table[i].category);
-		printf ("%s%s%s\n", ext_system_table[i].name, tabs, feature);
+		printf ("%-32s%s\n", ext_system_table[i].name, feature);
 	}
 }
 

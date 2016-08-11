@@ -60,8 +60,6 @@
 
 #include "lib/gettext.h"
 
-#include "libcob.h"
-
 #include "libcob/cobgetopt.h"
 
 struct strcache {
@@ -1525,7 +1523,7 @@ cobc_abort_msg (void)
 {
 	if (cb_source_file) {
 		cobc_err_msg (_("aborting compile of %s at line %d"),
-			cb_source_file, cb_source_line);
+			 cb_source_file, cb_source_line);
 	} else {
 		cobc_err_msg (_("aborting"));
 	}
@@ -1828,7 +1826,7 @@ cobc_print_usage (char * prog)
 
 	puts (_("  -W                    enable all warnings"));
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
-	puts (_("  -Wno-<feature>        disable warning enabled by -W or -Wall"));
+	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
 #undef	CB_WARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)		\
@@ -1858,8 +1856,10 @@ cobc_print_usage (char * prog)
 	putchar ('\n');
 
 	putchar ('\n');
-	printf (_("Report bugs to: %s or\n"
-			  "use the preferred issue tracker via home page."), "bug-gnucobol@gnu.org");
+
+	putchar ('\n');
+	printf (_("Report bugs to: %s\n" 
+			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");
 	putchar ('\n');
 	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
 	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
@@ -2224,7 +2224,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'd':
-			/* -debug : Turn on OC debugging */
+			/* -debug : Turn on all runtime checks */
 			cb_flag_source_location = 1;
 			cb_flag_trace = 1;
 			cb_flag_stack_check = 1;
@@ -2454,7 +2454,8 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'w':
-			/* -w(xx) : Turn off warnings */
+			/* -w : Turn off all warnings (disables -W/-Wall if passed later) */
+			warningopt = 0;
 #undef	CB_WARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 0;
@@ -2843,11 +2844,11 @@ line_contains (char* line_start, char* line_end, char* search_patterns) {
 				if (memcmp (line_pos, search_patterns + pattern_start, pattern_length) == 0) {
 					/* Exit if all patterns found, skip to next pattern otherwise */
 					if (pattern_start + pattern_length == full_length) {
-						return 1;
+					return 1;
 					} else {
 						break;
-					}
 				}
+			}
 			}
 			pattern_start = pattern_end + 1;
 		}
@@ -3197,7 +3198,7 @@ process_filtered (const char *cmd, struct filename *fn)
 		*/
 		output_name_temp = cobc_strdup (fn->source);
 		file_stripext(output_name_temp);
-	}
+			}
 
 	/* check for last path seperator as we only need the file name */
 	for (i = fn->translate_len; i > 0; i--) {
@@ -6012,7 +6013,7 @@ main (int argc, char **argv)
 			/* If preprocessing raised errors go on but only check syntax */
 			if (fn->has_error) {
 				cb_flag_syntax_only = 1;
-			}
+		}
 		}
 
 		if (cobc_list_file) {
@@ -6105,14 +6106,14 @@ main (int argc, char **argv)
 	cobc_objects_buffer = cobc_main_malloc (cobc_objects_len);
 
 	if (file_list) {
-		/* Link */
-		if (cb_compile_level == CB_LEVEL_LIBRARY) {
-			/* Multi-program module */
-			status = process_library (file_list);
-		} else {
-			/* Executable */
-			status = process_link (file_list);
-		}
+	/* Link */
+	if (cb_compile_level == CB_LEVEL_LIBRARY) {
+		/* Multi-program module */
+		status = process_library (file_list);
+	} else {
+		/* Executable */
+		status = process_link (file_list);
+	}
 	}
 
 	/* We have completed */
