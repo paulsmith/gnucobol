@@ -1952,6 +1952,7 @@ process_command_line (const int argc, char **argv)
 		case 'V':
 			/* --version */
 			cobc_print_version ();
+			cobc_free_mem ();
 			exit (0);
 
 		case 'i':
@@ -1967,6 +1968,7 @@ process_command_line (const int argc, char **argv)
 			  is loaded.
 			*/
 			list_reserved = 1;
+			exit_option = 1;
 			break;
 
 		case '6':
@@ -2025,7 +2027,7 @@ process_command_line (const int argc, char **argv)
 	}
 
 	/* Exit if list options were specified */
-	if (exit_option) {
+	if (exit_option && !list_reserved) {
 		cobc_free_mem ();
 		exit (0);
 	}
@@ -2499,6 +2501,10 @@ process_command_line (const int argc, char **argv)
 
 	if (list_reserved) {
 		cb_list_reserved ();
+	}
+
+	/* Exit if list options were specified */
+	if (exit_option) {
 		cobc_free_mem ();
 		exit (0);
 	}

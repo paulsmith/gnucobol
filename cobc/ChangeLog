@@ -463,6 +463,11 @@
 	* parser.y: disabled formal BY VALUE parameters, pending fix of bug
 	  #109.
 
+2016-02-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_command_line): Fix missing memory release for cobc -V,
+	  let --list-reserved work together with other --list-options again
+
 2016-02-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, config.c, reserved.c: added reserved and specify-all-
