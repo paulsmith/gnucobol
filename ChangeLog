@@ -1,23 +1,32 @@
 
+2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: added manual hook for creating a windows source zip
+	  (not possible with the dist-zip target as this is identical to
+	  dist-gzip), done with optional external shell create_win_dist.sh
+	* create_win_dist.sh: copy an existing source distribution folder,
+	  include build_windows from source tree, change line endings and
+	  create DISTNAME_win.zip
+
 2016-08-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* configure.ac: added -g3 to CFLAGS with --enable-debug and GCC.
 
-2016-08-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: revised all message strings
 
-2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-05-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: removed project files and references to Visual C < 2005
 	  (GC 2+ will not build with these versions) including define of
 	  COB_USE_VC2005_OR_GREATER
 
-2016-01-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-01-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: removed AC_FUNC_ALLOCA
 
-2016-01-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added targets "test" (running ANSI testsuite) and
 	  "checkall" (running both GnuCOBOL and ANSI testsuite), both do a
@@ -60,7 +69,7 @@
 	* libcob/termio.c:
 	* tests/testsuite.src/syn_misc.at:
 
-2015-02-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-02-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: removed "Experimental" marker from CISAM/DISAM/VBISAM
 	* configure.ac: define WITH_CURSES for printing library for screenio
@@ -77,7 +86,7 @@
 	* m4/progtest.m4: Upgrade to gettext-0.19.4.
 	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.4.
 
-2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: revised message strings (not all done yet);
 	  similar message strings combined (23 translatable strings removed);
@@ -94,7 +103,7 @@
 	* configure.ac : new check for mp_get_memory_functions in 
 	  libgmp and new preprocessor define HAVE_MP_GET_MEMORY_FUNCTIONS
 
-2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac : add new parameter --with-curses for explicit
 	  selection of used curses library (including "no");
@@ -107,7 +116,7 @@
 	* New folder build_windows
 	* Added project files for Visual Studio 2003 and newer
 
-2014-06-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-06-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* General: Win compatibility: define COB_OBJEXT in defaults.h
 
@@ -116,12 +125,12 @@
 	* moved cobgetopt.c from lib to libcob
 	* link cobc to libcob
 
-2014-04-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-04-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac : bugfix for systems with prototype for finite function
 	  in ieeefp.h instead of math.h
 
-2013-09-29  Brian Tiffin & Simon Sobisch <sf-mensch@users.sf.net>
+2013-09-29  Brian Tiffin & Simon Sobisch <simonsobisch@gnu.org>
 
 	* Change package name, and project to GNU Cobol
 	* GNU-ification of source code commencing

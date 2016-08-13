@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol
 #
-# Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -67,6 +67,10 @@ dist-hook:
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
 #	touch $(distdir)/libcob/libcob.3
+# Create dist_win manually (dist-zip would have the same content as dist-gzip)
+	if test -f create_win_dist.sh; then \
+		EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) ./create_win_dist.sh; \
+	fi
 
 defaults.h: Makefile.am $(top_builddir)/config.status
 	@echo "Creating defaults.h..."

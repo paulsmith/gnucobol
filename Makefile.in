@@ -17,7 +17,7 @@
 #
 # Makefile gnucobol
 #
-# Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -655,8 +655,8 @@ distdir: $(DISTFILES)
 	  if test "$$subdir" = .; then :; else \
 	    $(am__make_dryrun) \
 	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
+	    || $(MKDIR_P) "$(distdir)/$$subdir" \
+	    || exit 1; \
 	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
 	    $(am__relativize); \
 	    new_distdir=$$reldir; \
@@ -824,8 +824,8 @@ install-am: all-am
 installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
-	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
 	      install; \
 	else \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -973,6 +973,10 @@ dist-hook:
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
 #	touch $(distdir)/libcob/libcob.3
+# Create dist_win manually (dist-zip would have the same content as dist-gzip)
+	if test -f create_win_dist.sh; then \
+		EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) ./create_win_dist.sh; \
+	fi
 
 defaults.h: Makefile.am $(top_builddir)/config.status
 	@echo "Creating defaults.h..."
