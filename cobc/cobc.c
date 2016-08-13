@@ -2229,9 +2229,11 @@ process_command_line (const int argc, char **argv)
 			cb_source_format = CB_FORMAT_FREE;
 			break;
 
+		case 'q':
+			/* --brief : reduced reporting */
 		case 'v':
 			/* --verbose : Verbose reporting */
-			/* This option was processed in the first getopt-run */
+			/* These option were processed in the first getopt-run */
 			break;
 
 		case 'o':
