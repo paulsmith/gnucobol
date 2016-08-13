@@ -26,7 +26,7 @@
 
 # Check necessary vars:
 
-if test "x$EXTDISTDIR" == "x"; then
+if test "x$EXTDISTDIR" = "x"; then
 	echo "EXTDISTDIR" not set, aborting $0
 	exit 1
 fi
@@ -35,7 +35,7 @@ if test ! -d "$EXTDISTDIR"; then
 	exit 5
 fi
 
-if test "x$EXTSRCDIR" == "x"; then
+if test "x$EXTSRCDIR" = "x"; then
 	echo "EXTSRCDIR" not set, aborting $0
 	exit 1
 fi

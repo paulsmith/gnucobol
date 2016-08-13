@@ -155,13 +155,13 @@ case "$1" in
 	"fixtimestamps")
 		echo $0: touch tex-includes
 		for file in $docdir/*.tex; do
-			if test "$file" == "$docdir/texinfo.tex"; then continue; fi
+			if test "$file" = "$docdir/texinfo.tex"; then continue; fi
 			echo " touch $file"
 			touch $file
 		done
 		echo $0: touch tex-results
 		for file in $docdir/gnucobol.*; do
-			if test "$file" == "$docdir/gnucobol.texi"; then continue; fi
+			if test "$file" = "$docdir/gnucobol.texi"; then continue; fi
 			echo " touch $file"
 			touch $file
 		done
