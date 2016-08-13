@@ -6301,10 +6301,12 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 			} else {
 				cb_warning_x (loc, "%s", msg);
 			}
+			listprint_suppress ();
 			if (src_flag) {
 				warning_destination (src);
 			}
 			warning_destination (dst);
+			listprint_restore ();
 		}
 	}
 

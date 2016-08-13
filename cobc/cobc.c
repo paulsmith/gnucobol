@@ -3899,9 +3899,31 @@ print_program_trailer (void)
 	/* Print error counts */
 
 	print_program_header ();
-	fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
+	switch (warningcount) {
+	case 0:
+		fputs ("0 Warnings in program\n", cb_src_list_file);
+		break;
+	case 1:
+		/* FIXME: Change to P_, needs changes to Makevars and tests */
+		fputs ("1 Warning in program\n", cb_src_list_file);
+		break;
+	default:
+		fprintf (cb_src_list_file, "%d Warnings in program\n", warningcount);
+		break;
+	}
 	print_program_header ();
-	fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
+	switch (errorcount) {
+	case 0:
+		fputs ("0 Errors in program\n", cb_src_list_file);
+		break;
+	case 1:
+		/* FIXME: Change to P_, needs changes to Makevars and tests */
+		fputs ("1 Error in program\n", cb_src_list_file);
+		break;
+	default:
+		fprintf (cb_src_list_file, "%d Errors in program\n", errorcount);
+		break;
+	}
 	force_new_page_for_next_line ();
 }
 

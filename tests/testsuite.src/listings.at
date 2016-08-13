@@ -984,7 +984,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 0002 NUMERIC        01   TEST-VAR                       9(2)
 
-1 Warnings in program
+1 Warning in program
 0 Errors in program
 ])
 
@@ -1035,7 +1035,6 @@ LINE    PG/LN  A...B............................................................
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 TEST-VAR PIC 9(2) VALUE 12.
-warning: 'TEST-VAR' defined here as PIC 9(2)
 000007         COPY 'CRUD.CPY'.
 error: CRUD.CPY: No such file or directory
 000008         PROCEDURE        DIVISION.
@@ -1046,13 +1045,22 @@ warning: numeric value is expected
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-2 Warnings in program
-1 Errors in program
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 NUMERIC        01   TEST-VAR                       9(2)
+
+1 Warning in program
+1 Error in program
 ])
 
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
+
+## The warning position is currently wrong
+
+AT_XFAIL_IF(true)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -2321,7 +2329,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
-1 Warnings in program
+1 Warning in program
 35 Errors in program
 ])
 

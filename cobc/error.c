@@ -39,6 +39,7 @@ static struct cb_label	*last_paragraph = NULL;
 static int conf_error_displayed = 0;
 static int last_error_line = 0;
 static const char	*last_error_file = "Unknown";
+static FILE			*sav_lst_file = NULL;
 
 #define COBC_ERRBUF_SIZE		1024
 
@@ -173,6 +174,10 @@ cb_warning (const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (NULL, 0, _("warning: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	warningcount++;
 }
 
@@ -188,6 +193,10 @@ cb_error (const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (NULL, 0, _("error: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
 	}
@@ -221,6 +230,10 @@ cb_plex_warning (const size_t sline, const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (NULL, (int)(cb_source_line + sline), _("warning: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	warningcount++;
 }
 
@@ -232,6 +245,10 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (NULL, (int)(cb_source_line + sline), ("error: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
 	}
@@ -269,6 +286,9 @@ configuration_warning (const char *fname, const int line, const char *fmt, ...)
 	putc('\n', stderr);
 	fflush(stderr);
 
+	if (sav_lst_file) {
+		return;
+	}
 	warningcount++;
 }
 void
@@ -307,6 +327,9 @@ configuration_error (const char *fname, const int line,
 		fflush(stderr);
 	}
 
+	if (sav_lst_file) {
+		return;
+	}
 	errorcount++;
 }
 
@@ -319,6 +342,10 @@ cb_warning_x (cb_tree x, const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (x->source_file, x->source_line, _("warning: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	warningcount++;
 }
 
@@ -330,6 +357,10 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	va_start (ap, fmt);
 	print_error (x->source_file, x->source_line, _("error: "), fmt, ap);
 	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
 	if (++errorcount > 100) {
 		cobc_too_many_errors ();
 	}
@@ -393,8 +424,10 @@ redefinition_error (cb_tree x)
 	w = CB_REFERENCE (x)->word;
 	cb_error_x (x, _("redefinition of '%s'"), w->name);
 	if (w->items) {
+		listprint_suppress ();
 		cb_error_x (CB_VALUE (w->items),
 			    _("'%s' previously defined here"), w->name);
+		listprint_restore ();
 	}
 }
 
@@ -414,7 +447,9 @@ redefinition_warning (cb_tree x, cb_tree y)
 	}
 
 	if (z) {
+		listprint_suppress ();
 		cb_warning_x (z, _("'%s' previously defined here"), w->name);
+		listprint_restore ();
 	}
 }
 
@@ -497,7 +532,9 @@ ambiguous_error (cb_tree x)
 			default:
 				break;
 			}
+			listprint_suppress ();
 			cb_error_x (y, _("'%s' defined here"), errnamebuff);
+			listprint_restore ();
 		}
 	}
 }
@@ -560,5 +597,24 @@ level_except_error (cb_tree x, const char *clause)
 		cb_error_x (x, _("level %02d item '%s' can only have a %s clause"),
 			    f->level,
 			    s, clause);
+	}
+}
+
+/* routines for temporary disable listing output of warnings/errors */
+void
+listprint_suppress (void)
+{
+	if (cb_src_list_file) {
+		sav_lst_file = cb_src_list_file;
+		cb_src_list_file = NULL;
+	}
+}
+
+void
+listprint_restore (void)
+{
+	if (sav_lst_file) {
+		cb_src_list_file = sav_lst_file;
+		sav_lst_file = NULL;
 	}
 }
