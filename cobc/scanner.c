@@ -1,6 +1,5 @@
-#line 2 "scanner.c"
 
-#line 4 "scanner.c"
+#line 3 "scanner.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -9,7 +8,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -31,8 +30,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L \
-&&(!defined(_MSC_VER) || _MSC_VER >= 1800)
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -143,7 +141,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -155,12 +161,7 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
-extern yy_size_t yyleng;
+extern int yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -186,6 +187,11 @@ extern FILE *yyin, *yyout;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
@@ -203,7 +209,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -273,8 +279,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
-yy_size_t yyleng;
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+int yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
@@ -302,7 +308,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len  );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len  );
 
 void *yyalloc (yy_size_t  );
 void *yyrealloc (void *,yy_size_t  );
@@ -1528,7 +1534,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1531 "scanner.c"
+#line 1538 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1589,7 +1595,12 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1716,7 +1727,7 @@ YY_DECL
 
 
 
-#line 1719 "scanner.c"
+#line 1731 "scanner.c"
 
 	if ( !(yy_init) )
 		{
@@ -2642,7 +2653,7 @@ YY_RULE_SETUP
 			/* Absolute limit */
 			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
 				  COB_MAX_WORDLEN, yytext);
-		} else if (!cb_relaxed_syntax_check) {
+		} else if (!cb_relaxed_syntax_checks) {
 			cb_error (_("word length exceeds %d characters: '%s'"),
 				  cb_word_length, yytext);
 		} else if (warningopt) {
@@ -2654,7 +2665,7 @@ YY_RULE_SETUP
 	/* Check Intrinsic FUNCTION name without keyword */
 	if ((cobc_in_procedure && (functions_are_all || cb_intrinsic_list ||
 	     current_program->function_spec_list)) || cobc_in_repository) {
-		cbp = lookup_intrinsic (yytext, 1, 0);
+		cbp = lookup_intrinsic (yytext, 0);
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
@@ -2708,23 +2719,34 @@ YY_RULE_SETUP
 		return resptr->token;
 	}
 
-	/* Check user function */
+	/* New user-defined word in REPOSITORY entry */
 	if (cobc_in_repository) {
 		yylval = cb_build_reference (yytext);
 		return WORD;
-	} else {
-		if (current_program->prog_type == CB_FUNCTION_TYPE &&
-		    !functions_are_all &&
-		    !strcasecmp (yytext, current_program->orig_program_id)) {
-			/* Direct recursive reference */
+	}
+
+	/* Direct recursive reference in function */
+	if (current_program->prog_type == CB_FUNCTION_TYPE
+		   && !functions_are_all
+		   && !strcasecmp (yytext, current_program->orig_program_id)) {
+		yylval = cb_build_reference (yytext);
+		return USER_FUNCTION_NAME;
+	}	
+
+	/* Check prototype names */
+	for (l = current_program->user_spec_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			yylval = cb_build_reference (yytext);
 			return USER_FUNCTION_NAME;
 		}
-		for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
+	}
+	if (cobc_allow_program_name) {
+		for (l = current_program->program_spec_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
-			if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
+			if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
-				return USER_FUNCTION_NAME;
+				return PROGRAM_NAME;
 			}
 		}
 	}
@@ -2737,7 +2759,7 @@ YY_RULE_SETUP
 			return PROGRAM_NAME;
 		}
 	}
-
+	
 	/* User word */
 
 	/* Check local, global and source global CONSTANT (78) items */
@@ -2778,7 +2800,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 892 "scanner.l"
+#line 903 "scanner.l"
 {
 	yylval = NULL;
 	return LESS_OR_EQUAL;
@@ -2786,7 +2808,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 897 "scanner.l"
+#line 908 "scanner.l"
 {
 	yylval = NULL;
 	return GREATER_OR_EQUAL;
@@ -2794,7 +2816,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 902 "scanner.l"
+#line 913 "scanner.l"
 {
 	yylval = NULL;
 	return NOT_EQUAL;
@@ -2802,7 +2824,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 907 "scanner.l"
+#line 918 "scanner.l"
 {
 	yylval = NULL;
 	return EXPONENTIATION;
@@ -2811,7 +2833,7 @@ YY_RULE_SETUP
 case 114:
 /* rule 114 can match eol */
 YY_RULE_SETUP
-#line 912 "scanner.l"
+#line 923 "scanner.l"
 {
 	if (last_token_is_dot || strlen (yytext) > 1) {
 		cb_warning (_("ignoring redundant ."));
@@ -2826,7 +2848,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 924 "scanner.l"
+#line 935 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_AMPER;
@@ -2834,7 +2856,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 929 "scanner.l"
+#line 940 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_COLON;
@@ -2842,7 +2864,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 934 "scanner.l"
+#line 945 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_EQUAL;
@@ -2850,7 +2872,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 939 "scanner.l"
+#line 950 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_DIV;
@@ -2858,7 +2880,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 944 "scanner.l"
+#line 955 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MUL;
@@ -2866,7 +2888,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 949 "scanner.l"
+#line 960 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_PLUS;
@@ -2874,7 +2896,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 954 "scanner.l"
+#line 965 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_MINUS;
@@ -2882,7 +2904,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 959 "scanner.l"
+#line 970 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_LESS;
@@ -2890,7 +2912,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 964 "scanner.l"
+#line 975 "scanner.l"
 {
 	yylval = NULL;
 	return TOK_GREATER;
@@ -2898,7 +2920,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 969 "scanner.l"
+#line 980 "scanner.l"
 {
 	int	c;
 
@@ -2916,14 +2938,14 @@ YY_RULE_SETUP
 
 case 125:
 YY_RULE_SETUP
-#line 985 "scanner.l"
+#line 996 "scanner.l"
 {
 	/* Ignore */
   }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 988 "scanner.l"
+#line 999 "scanner.l"
 {
 	BEGIN INITIAL;
 	scan_picture (yytext);
@@ -2934,7 +2956,7 @@ YY_RULE_SETUP
 
 case 127:
 YY_RULE_SETUP
-#line 996 "scanner.l"
+#line 1007 "scanner.l"
 {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				l;
@@ -2944,11 +2966,11 @@ YY_RULE_SETUP
 	yylval = cb_build_reference (yytext);
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 		x = CB_VALUE (l);
-		if (!strcasecmp (yytext, CB_FUNC_PROTOTYPE (x)->name)) {
+		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			return USER_FUNCTION_NAME;
 		}
 	}
-	cbp = lookup_intrinsic (yytext, 1, 0);
+	cbp = lookup_intrinsic (yytext, 0);
 	if (cbp) {
 		return (enum yytokentype)(cbp->token);
 	}
@@ -2957,7 +2979,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 1015 "scanner.l"
+#line 1026 "scanner.l"
 {
 	yylval = NULL;
 	return yytext[0];
@@ -2969,7 +2991,7 @@ case YY_STATE_EOF(DECIMAL_IS_PERIOD):
 case YY_STATE_EOF(DECIMAL_IS_COMMA):
 case YY_STATE_EOF(PICTURE_STATE):
 case YY_STATE_EOF(FUNCTION_STATE):
-#line 1021 "scanner.l"
+#line 1032 "scanner.l"
 {
 	struct cb_level_78	*p78;
 	struct cb_level_78	*p782;
@@ -3002,10 +3024,10 @@ case YY_STATE_EOF(FUNCTION_STATE):
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 1051 "scanner.l"
-YY_FATAL_ERROR( "flex scanner jammed" );
+#line 1062 "scanner.l"
+ECHO;
 	YY_BREAK
-#line 3008 "scanner.c"
+#line 3031 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3190,21 +3212,21 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
 				(int) ((yy_c_buf_p) - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -3235,7 +3257,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), num_to_read );
+			(yy_n_chars), (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -3331,7 +3353,7 @@ static int yy_get_next_buffer (void)
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 834);
 
-		return yy_is_jam ? 0 : yy_current_state;
+	return yy_is_jam ? 0 : yy_current_state;
 }
 
     static void yyunput (int c, register char * yy_bp )
@@ -3346,7 +3368,7 @@ static int yy_get_next_buffer (void)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = (yy_n_chars) + 2;
+		register int number_to_move = (yy_n_chars) + 2;
 		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		register char *source =
@@ -3395,7 +3417,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -3669,7 +3691,7 @@ void yypop_buffer_state (void)
  */
 static void yyensure_buffer_stack (void)
 {
-	yy_size_t num_to_alloc;
+	int num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -3841,7 +3863,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 1051 "scanner.l"
+#line 1062 "scanner.l"
 
 
 
@@ -4892,13 +4914,13 @@ cb_find_defined_program_by_name (const char *name)
 	int	(*cmp_func)(const char *, const char *);
 	cb_tree	l;
 	cb_tree	x;
-	
+
 	if (cb_fold_call) {
 		cmp_func = &strcasecmp;
 	} else {
 		cmp_func = &strcmp;
 	}
-	
+
 	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if ((*cmp_func)(name, CB_PROGRAM (x)->program_name) == 0) {
@@ -4914,7 +4936,7 @@ cb_find_defined_program_by_id (const char *orig_id)
 {
 	cb_tree	l;
 	cb_tree	x;
-	
+
 	for (l = defined_prog_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (strcmp (orig_id, CB_PROGRAM (x)->orig_program_id) == 0) {

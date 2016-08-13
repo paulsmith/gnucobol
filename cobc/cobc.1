@@ -25,6 +25,9 @@ display the commands invoked by the compiler
 display compiler version and the commands
 invoked by the compiler
 .TP
+\fB\-q\fR, \fB\-brief\fR
+reduced displays, commands invoked not shown
+.TP
 \fB\-x\fR
 build an executable program
 .TP
@@ -39,6 +42,9 @@ warnings/features for a specific dialect
 cobol2014, cobol2002, cobol85, default,
 ibm, mvs, bs2000, mf, acu;
 see configuration files in directory config
+.TP
+\fB\-R\fR, \fB\-reserve\-all\fR
+allow all words that are not unreserved
 .TP
 \fB\-F\fR, \fB\-free\fR
 use free source format
@@ -114,9 +120,6 @@ generate CALL to <entry> as static
 \fB\-conf=\fR<file>
 user\-defined dialect configuration; see \fB\-std\fR
 .TP
-\fB\-cb_conf=\fR<tag:value>
-override configuration entry
-.TP
 \fB\-list\-reserved\fR
 display reserved words
 .TP
@@ -142,7 +145,7 @@ enable all warnings
 \fB\-Wall\fR
 enable most warnings (all except as noted below)
 .TP
-\fB\-Wno\-\fR<feature>
+\fB\-Wno\-\fR<warning>
 disable warning enabled by \fB\-W\fR or \fB\-Wall\fR
 .TP
 \fB\-Wobsolete\fR
@@ -202,24 +205,20 @@ warn dangling LINKAGE items
 warn unreachable statements
 \- NOT set with \fB\-Wall\fR
 .TP
-\fB\-fsign=\fR<value>
-define display sign representation
-\- ASCII or EBCDIC (default: machine native)
+\fB\-fsign\fR=\fI[ASCII\fR|EBCDIC] define display sign representation
+\- default: machine native
 .TP
-\fB\-ffold\-copy=\fR<value>
-fold COPY subject to value
-\- UPPER or LOWER (default: no transformation)
+\fB\-ffold\-copy\fR=\fI[UPPER\fR|LOWER] fold COPY subject to value
+\- default: no transformation
 .TP
-\fB\-ffold\-call=\fR<value>
-fold PROGRAM\-ID, CALL, CANCEL subject to value
-\- UPPER or LOWER (default: no transformation)
+\fB\-ffold\-call\fR=\fI[UPPER\fR|LOWER] fold PROGRAM\-ID, CALL, CANCEL subject to value
+\- default: no transformation
 .TP
-\fB\-fdefaultbyte=\fR<value> initialize fields without VALUE to decimal value
-\- 0 to 255 (default: initialize to picture)
-.TP
-\fB\-fintrinsics=\fR<value>
-intrinsics to be used without FUNCTION keyword
-\- ALL or intrinsic function name(,name,...)
+\fB\-fdefaultbyte\fR=\fI0\fR..255
+initialize fields without VALUE to decimal value
+\- default: initialize to picture
+.HP
+\fB\-fintrinsics\fR=\fI[ALL\fR|intrinsic function name(,name,...)] intrinsics to be used without FUNCTION keyword
 .TP
 \fB\-ftrace\fR
 generate trace code
@@ -279,21 +278,141 @@ use a single quote (apostrophe) for QUOTE
 \fB\-frecursive\-check\fR
 check recursive program call
 .TP
-\fB\-frelax\-syntax\fR
-relax syntax checking
-\- eg. REDEFINES position
-.TP
 \fB\-foptional\-file\fR
 treat all files as OPTIONAL
 \- unless NOT OPTIONAL specified
+.TP
+\fB\-ftab\-width=\fR<number>
+set number of spaces that are asumed for tabs
+.HP
+\fB\-ftext\-column=\fR<number> set right margin for source (fixed format only)
+.HP
+\fB\-fword\-length=\fR<number> maximum word\-length for COBOL words / Programmer defined words
+.HP
+\fB\-fliteral\-length=\fR<number> maximum literal size in general
+.HP
+\fB\-fnumeric\-literal\-length=\fR<number> maximum numeric literal size
+.HP
+\fB\-fassign\-clause=\fR<value> set way of interpreting ASSIGN
+.HP
+\fB\-fbinary\-size=\fR<value> binary byte size \- defines the allocated bytes according to PIC
+.HP
+\fB\-fbinary\-byteorder=\fR<value> binary byte order
+.HP
+\fB\-fstandard\-define=\fR<value>
+.TP
+\fB\-ffilename\-mapping\fR
+resolve file names at run time using environment variables.
+.TP
+\fB\-fpretty\-display\fR
+alternate formatting of numeric fields
+.TP
+\fB\-fbinary\-truncate\fR
+numeric truncation according to ANSI
+.TP
+\fB\-fcomplex\-odo\fR
+allow complex OCCURS DEPENDING ON
+.TP
+\fB\-findirect\-redefines\fR
+allow REDEFINES to other than last equal level number
+.HP
+\fB\-flarger\-redefines\-ok\fR allow larger REDEFINES items
+.HP
+\fB\-frelax\-syntax\-checks\fR allow certain syntax variations (eg. REDEFINES position)
+.TP
+\fB\-fperform\-osvs\fR
+exit point of any currently executing perform is recognized if reached
+.TP
+\fB\-fsticky\-linkage\fR
+linkage\-section items remain allocated between invocations
+.HP
+\fB\-frelax\-level\-hierarchy\fR allow non\-matching level numbers
+.TP
+\fB\-fhostsign\fR
+allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
+.TP
+\fB\-faccept\-update\fR
+set WITH UPDATE clause as default for ACCEPT dest\-item, except if WITH NO UPDATE clause is used
+.TP
+\fB\-faccept\-auto\fR
+set WITH AUTO clause as default for ACCEPT dest\-item, except if WITH TAB clause is used
+.TP
+\fB\-fconsole\-is\-crt\fR
+assume CONSOLE IS CRT if not set otherwise
+.HP
+\fB\-fprogram\-name\-redefinition\fR program names don't lead to a reserved identifier
+.HP
+\fB\-fcomment\-paragraphs=\fR<support> comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE\-WRITTEN, ...)
+.HP
+\fB\-fmemory\-size\-clause=\fR<support> MEMORY\-SIZE clause
+.HP
+\fB\-fmultiple\-file\-tape\-clause=\fR<support> MULTIPLE\-FILE\-TAPE clause
+.HP
+\fB\-flabel\-records\-clause=\fR<support> LABEL\-RECORDS clause
+.HP
+\fB\-fvalue\-of\-clause=\fR<support> VALUE\-OF clause
+.HP
+\fB\-fdata\-records\-clause=\fR<support> DATA\-RECORDS clause
+.HP
+\fB\-ftop\-level\-occurs\-clause=\fR<support> OCCURS clause on top\-level
+.HP
+\fB\-fsynchronized\-clause=\fR<support> SYNCHRONIZED clause
+.HP
+\fB\-fgoto\-statement\-without\-name=\fR<support> GOTO statement without name
+.HP
+\fB\-fstop\-literal\-statement=\fR<support> STOP\-LITERAL statement
+.HP
+\fB\-fdebugging\-line=\fR<support> DEBUGGING MODE and indicator 'D'
+.HP
+\fB\-fpadding\-character\-clause=\fR<support> PADDING CHARACTER clause
+.HP
+\fB\-fnext\-sentence\-phrase=\fR<support> NEXT SENTENCE phrase
+.HP
+\fB\-feject\-statement=\fR<support> EJECT statement
+.HP
+\fB\-fentry\-statement=\fR<support> ENTRY statement
+.HP
+\fB\-fmove\-noninteger\-to\-alphanumeric=\fR<support> move noninteger to alphanumeric
+.HP
+\fB\-fodo\-without\-to=\fR<support> OCCURS DEPENDING ON without to
+.HP
+\fB\-fsection\-segments=\fR<support> section segments
+.HP
+\fB\-falter\-statement=\fR<support> ALTER statement
+.HP
+\fB\-fcall\-overflow=\fR<support> OVERFLOW clause for CALL
+.HP
+\fB\-fnumeric\-boolean=\fR<support> boolean literals (b'0001')
+.HP
+\fB\-facucobol\-literals=\fR<support> ACUCOBOL\-GT literals (#B #O #H #X)
+.HP
+\fB\-fword\-continuation=\fR<support> continuation of COBOL words
+.HP
+\fB\-fnot\-exception\-before\-exception=\fR<support> NOT ON EXCEPTION before ON EXCEPTION
+.HP
+\fB\-faccept\-display\-extensions=\fR<support> extensions to ACCEPT and DISPLAY
+.HP
+\fB\-frenames\-uncommon\-levels=\fR<support> RENAMES of 01\-, 66\- and 77\-level items
+.HP
+\fB\-fprogram\-prototypes=\fR<support> CALL/CANCEL with program\-prototype\-name
+.IP
+where <support> is one of the following:
+\&'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
+.HP
+\fB\-fnot\-reserved=\fR<word> word to be taken out of the reserved words list
+.TP
+\fB\-freserved=\fR<word>
+word to be added to reserved words list
+.HP
+\fB\-freserved=\fR<word>:<alias> word to be added to reserved words list as alias
 .SH AUTHOR
 Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart
-Built     Aug 03 2016 15:58:25
+Built     Aug 14 2016 00:27:19
 Packaged  Oct 25 2015 21:40:28 UTC
-C version "4.8.3 20140911 (Red Hat 4.8.3\-7)"
+C version "4.8.4"
 .SH "REPORTING BUGS"
-Report bugs to: bug\-gnucobol@gnu.org or
-use the preferred issue tracker via home page.
+Report bugs to: bug\-gnucobol@gnu.org
+or (preferably) use the issue tracker via the home page.
 .br
 GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>
 .br

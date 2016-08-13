@@ -840,11 +840,11 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 228;listings.at:663;Wide listing;listing;
 229;listings.at:760;Two source files;listing;
 230;listings.at:839;Error/Warning messages;listing;
-231;listings.at:1061;Symbols;listing;
-232;listings.at:1571;Conditional compilation;listing;
-233;listings.at:1638;LISTING ON/OFF;listing;
-234;listings.at:1726;File descriptions;listing;
-235;listings.at:2073;Invalid PICTURE strings;listing;
+231;listings.at:1069;Symbols;listing;
+232;listings.at:1579;Conditional compilation;listing;
+233;listings.at:1646;LISTING ON/OFF;listing;
+234;listings.at:1734;File descriptions;listing;
+235;listings.at:2081;Invalid PICTURE strings;listing;
 236;run_fundamental.at:23;DISPLAY literals;fundamental;
 237;run_fundamental.at:79;DISPLAY literals, DECIMAL-POINT is COMMA;fundamental;
 238;run_fundamental.at:118;Hexadecimal literal;fundamental;
@@ -18453,7 +18453,7 @@ read at_status <"$at_status_file"
 #AT_START_230
 at_fn_group_banner 230 'listings.at:839' \
   "Error/Warning messages" "                         " 3
-at_xfail=no
+at_xfail=yes
 (
   $as_echo "230. $at_setup_line: testing $at_desc ..."
   $at_traceon
@@ -18680,7 +18680,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 0002 NUMERIC        01   TEST-VAR                       9(2)
 
-1 Warnings in program
+1 Warning in program
 0 Errors in program
 _ATEOF
 
@@ -18787,7 +18787,6 @@ LINE    PG/LN  A...B............................................................
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 TEST-VAR PIC 9(2) VALUE 12.
-warning: 'TEST-VAR' defined here as PIC 9(2)
 000007         COPY 'CRUD.CPY'.
 error: CRUD.CPY: No such file or directory
 000008         PROCEDURE        DIVISION.
@@ -18798,24 +18797,33 @@ warning: numeric value is expected
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-2 Warnings in program
-1 Errors in program
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 NUMERIC        01   TEST-VAR                       9(2)
+
+1 Warning in program
+1 Error in program
 _ATEOF
 
 
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
+
+## The warning position is currently wrong
+
+
 { set +x
-$as_echo "$at_srcdir/listings.at:1056: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1056"
+$as_echo "$at_srcdir/listings.at:1064: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1064"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1056"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1064"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -18827,7 +18835,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_230
 #AT_START_231
-at_fn_group_banner 231 'listings.at:1061' \
+at_fn_group_banner 231 'listings.at:1069' \
   "Symbols" "                                        " 3
 at_xfail=no
 (
@@ -18861,15 +18869,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1085: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1085"
+$as_echo "$at_srcdir/listings.at:1093: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1093"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1085"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1093"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -18919,15 +18927,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1130: diff prog15.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1130"
+$as_echo "$at_srcdir/listings.at:1138: diff prog15.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1138"
 ( $at_check_trace; diff prog15.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1130"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1138"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -18949,15 +18957,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1145: \$COMPILE_ONLY -t prog.lst prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog2.cob" "listings.at:1145"
+$as_echo "$at_srcdir/listings.at:1153: \$COMPILE_ONLY -t prog.lst prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog2.cob" "listings.at:1153"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1145"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1153"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -18997,15 +19005,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1179: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1179"
+$as_echo "$at_srcdir/listings.at:1187: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1187"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1179"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1187"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19027,15 +19035,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1194: \$COMPILE -o P64 P64.cob"
-at_fn_check_prepare_dynamic "$COMPILE -o P64 P64.cob" "listings.at:1194"
+$as_echo "$at_srcdir/listings.at:1202: \$COMPILE -o P64 P64.cob"
+at_fn_check_prepare_dynamic "$COMPILE -o P64 P64.cob" "listings.at:1202"
 ( $at_check_trace; $COMPILE -o P64 P64.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1194"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1202"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19092,15 +19100,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1244: \$COMPILE_ONLY -t prog.lst prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog3.cob" "listings.at:1244"
+$as_echo "$at_srcdir/listings.at:1252: \$COMPILE_ONLY -t prog.lst prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog3.cob" "listings.at:1252"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1244"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1252"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19306,8 +19314,8 @@ sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1443: ./P64"
-at_fn_check_prepare_trace "listings.at:1443"
+$as_echo "$at_srcdir/listings.at:1451: ./P64"
+at_fn_check_prepare_trace "listings.at:1451"
 ( $at_check_trace; ./P64
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -19316,19 +19324,19 @@ at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "X
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1443"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1451"
 if $at_failed; then :
   # Previous test "failed" --> P64 showed no 'X' --> 32 bit
 { set +x
-$as_echo "$at_srcdir/listings.at:1443: diff prog17-32.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1443"
+$as_echo "$at_srcdir/listings.at:1451: diff prog17-32.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1451"
 ( $at_check_trace; diff prog17-32.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1443"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1451"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19337,15 +19345,15 @@ $at_traceon; }
 else
   # Previous test "passed" --> P64 showed 'X' --> 64 bit
 { set +x
-$as_echo "$at_srcdir/listings.at:1443: diff prog17-64.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1443"
+$as_echo "$at_srcdir/listings.at:1451: diff prog17-64.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1451"
 ( $at_check_trace; diff prog17-64.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1443"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1451"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19403,15 +19411,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1497: \$COMPILE_ONLY -t prog.lst prog4.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog4.cob" "listings.at:1497"
+$as_echo "$at_srcdir/listings.at:1505: \$COMPILE_ONLY -t prog.lst prog4.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog4.cob" "listings.at:1505"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog4.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1497"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1505"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19486,15 +19494,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1566: diff prog18.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1566"
+$as_echo "$at_srcdir/listings.at:1574: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1574"
 ( $at_check_trace; diff prog18.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1566"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1574"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19506,7 +19514,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_231
 #AT_START_232
-at_fn_group_banner 232 'listings.at:1571' \
+at_fn_group_banner 232 'listings.at:1579' \
   "Conditional compilation" "                        " 3
 at_xfail=no
 (
@@ -19543,15 +19551,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1598: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1598"
+$as_echo "$at_srcdir/listings.at:1606: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1606"
 ( $at_check_trace; $COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1598"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1606"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -19591,15 +19599,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1633: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1633"
+$as_echo "$at_srcdir/listings.at:1641: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1641"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1633"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1641"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19611,7 +19619,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_232
 #AT_START_233
-at_fn_group_banner 233 'listings.at:1638' \
+at_fn_group_banner 233 'listings.at:1646' \
   "LISTING ON/OFF" "                                 " 3
 at_xfail=no
 (
@@ -19656,15 +19664,15 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1671: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1671"
+$as_echo "$at_srcdir/listings.at:1679: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1679"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1671"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1679"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -19719,15 +19727,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1721: diff prog17.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1721"
+$as_echo "$at_srcdir/listings.at:1729: diff prog17.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1729"
 ( $at_check_trace; diff prog17.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1721"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1729"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -19739,7 +19747,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_233
 #AT_START_234
-at_fn_group_banner 234 'listings.at:1726' \
+at_fn_group_banner 234 'listings.at:1734' \
   "File descriptions" "                              " 3
 at_xfail=no
 (
@@ -19870,8 +19878,8 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:1847: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1847"
+$as_echo "$at_srcdir/listings.at:1855: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1855"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -19887,7 +19895,7 @@ prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1847"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1855"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -20104,15 +20112,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2068: diff prog18.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2068"
+$as_echo "$at_srcdir/listings.at:2076: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2076"
 ( $at_check_trace; diff prog18.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2068"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2076"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -20124,7 +20132,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_234
 #AT_START_235
-at_fn_group_banner 235 'listings.at:2073' \
+at_fn_group_banner 235 'listings.at:2081' \
   "Invalid PICTURE strings" "                        " 3
 at_xfail=no
 (
@@ -20191,8 +20199,8 @@ _ATEOF
 
 daymon=`date +"%a %b %e"`
 { set +x
-$as_echo "$at_srcdir/listings.at:2130: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:2130"
+$as_echo "$at_srcdir/listings.at:2138: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:2138"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -20236,7 +20244,7 @@ prog.cob: 40: error: PICTURE string must contain at least one of the set A, N, X
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/listings.at:2130"
+at_fn_check_status 1 $at_status "$at_srcdir/listings.at:2138"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -20396,7 +20404,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
-1 Warnings in program
+1 Warning in program
 35 Errors in program
 _ATEOF
 
@@ -20404,15 +20412,15 @@ _ATEOF
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2330: diff prog19.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2330"
+$as_echo "$at_srcdir/listings.at:2338: diff prog19.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2338"
 ( $at_check_trace; diff prog19.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2330"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2338"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }

@@ -3,6 +3,12 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* long int is 32 bits */
+#undef COB_32_BIT_LONG
+
+/* Pointers are longer than 32 bits */
+#undef COB_64_BIT_POINTER
+
 /* Executable extension */
 #undef COB_EXEEXT
 
@@ -286,9 +292,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-#undef NO_MINUS_C_MINUS_O
-
 /* Name of package */
 #undef PACKAGE
 
@@ -382,6 +385,10 @@
 #  undef WORDS_BIGENDIAN
 # endif
 #endif
+
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#undef YYTEXT_POINTER
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX
