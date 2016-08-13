@@ -40,6 +40,14 @@
 	* condig.def: added program-name-redefinition (thus fixing bug #268) and
 	  program-prototypes.
 
+2016-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* error.c, tree.h, typeck.c, parser.y: suppress listing output and
+	  counting of warnings/errors with the new functions 
+	  listprint_suppress/listprint_restore
+	* cobc.c (print_program_trailer): correct grammar for 1 error/warning
+
+
 2016-08-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (x): fixed bug #209, where invalid mnemonic message had line
