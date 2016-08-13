@@ -30,36 +30,32 @@ _create_file () {
 	case "$1" in
 		"cbhelp.tex")
 			echo "@verbatim"               > $1.tmp
-			cobc --help \
-			| sed -e 's/\(: \).*\/\(cobc .\?options\)/\1\2/g' \
-			                               >>$1.tmp
+			cobc -q --help                 >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbchelp.tex")
 			echo "@verbatim"               > $1.tmp
-			cobcrun --help \
-			| sed -e 's/\(: \).*\/\(cobcrun .\?options\)/\1\2/g' \
-			                               >>$1.tmp
+			cobcrun -q --help              >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbrese.tex")
 			echo "@verbatim"               > $1.tmp
-			cobc --list-reserved           >>$1.tmp
+			cobc -q --list-reserved        >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbintr.tex")
 			echo "@verbatim"               > $1.tmp
-			cobc --list-intrinsics         >>$1.tmp
+			cobc -q --list-intrinsics      >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbsyst.tex")
 			echo "@verbatim"               > $1.tmp
-			cobc --list-system             >>$1.tmp
+			cobc -q --list-system          >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbmnem.tex")
 			echo "@verbatim"               > $1.tmp
-			cobc --list-mnemonics          >>$1.tmp
+			cobc -q --list-mnemonics       >>$1.tmp
 			echo "@end verbatim"           >>$1.tmp
 			;;
 		"cbconf.tex")
@@ -83,7 +79,7 @@ _create_file () {
 			      -e 's/  \([^ ].*\)$/ @code{\1}/g' \
 			      -e 's/^$/@\*/g' \
 			                               > $1.tmp
-            lines=$(expr 20 + $(cat $1.tmp | wc -l))
+			lines=$(expr 20 + $(cat $1.tmp | wc -l))
 			# All other sections
 			echo "@verbatim"               >>$1.tmp
 			tail -n +$lines $confdir/runtime.cfg \

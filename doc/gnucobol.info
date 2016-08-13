@@ -1,4 +1,4 @@
-This is gnucobol.info, produced by makeinfo version 5.1 from
+This is gnucobol.info, produced by makeinfo version 5.2 from
 gnucobol.texi.
 
 Permission is granted to make and distribute verbatim copies of this
@@ -1144,6 +1144,7 @@ from the screen.  Items accept by line and column positioning.
            [PROTECTED] SIZE [IS] variable-2 | literal-2
      END-ACCEPT.
 
+
 6.3.1 AUTO-SKIP
 ---------------
 
@@ -1286,6 +1287,7 @@ display on the screen.  Items display by line and column positioning.
              ERASE EOL | EOS
              SIZE [IS] variable-2 | literal-2
      END-DISPLAY.
+
 
 6.5.1 BELL
 ----------
@@ -1460,6 +1462,7 @@ division.
                  end-perform
                  stop run.
 
+
    The example shows how we initialize all parameters and call the
 routine until 'CBL_OC_GETOPT' runs out of options and returns -1.
 
@@ -1488,11 +1491,789 @@ File: gnucobol.info,  Node: Appendix A,  Next: Appendix B,  Prev: System routine
 Appendix A 'cobc --help'
 ************************
 
+GnuCOBOL compiler for most COBOL dialects with lots of extensions
+
+Usage: cobc [options]... file...
+
+Options:
+  -h, -help             display this help and exit
+  -V, -version          display compiler version and exit
+  -i, -info             display compiler information (build/environment)
+  -v, -verbose          display the commands invoked by the compiler
+  -vv                   display compiler version and the commands
+                        invoked by the compiler
+  -q, -brief            reduced displays, commands invoked not shown
+  -x                    build an executable program
+  -m                    build a dynamically loadable module (default)
+  -j [<args>], -job[=<args>] run program after build, passing <args>
+  -std=<dialect>        warnings/features for a specific dialect
+                        <dialect> can be one of:
+                        cobol2014, cobol2002, cobol85, default,
+                        ibm, mvs, bs2000, mf, acu;
+                        see configuration files in directory config
+  -R, -reserve-all      allow all words that are not unreserved
+  -F, -free             use free source format
+  -fixed                use fixed source format (default)
+  -O, -O2, -Os          enable optimization
+  -g                    enable C compiler debug / stack check / trace
+  -d, -debug            enable all run-time error checking
+  -o <file>             place the output into <file>
+  -b                    combine all input files into a single
+                        dynamically loadable module
+  -E                    preprocess only; do not compile or link
+  -C                    translation only; convert COBOL to C
+  -S                    compile only; output assembly file
+  -c                    compile and assemble, but do not link
+  -T <file>             generate and place a wide program listing into <file>
+  -t <file>             generate and place a program listing into <file>
+  --tlines=<lines>      specify lines per page in listing, default = 55
+  -P[=<dir or file>]    generate preprocessed program listing (.lst)
+  -Xref                 generate cross reference through 'cobxref'
+                        (V. Coen's 'cobxref' must be in path)
+  -I <directory>        add <directory> to copy/include search path
+  -L <directory>        add <directory> to library search path
+  -l <lib>              link the library <lib>
+  -A <options>          add <options> to the C compile phase
+  -Q <options>          add <options> to the C link phase
+  -D <define>           define <define> for COBOL compilation
+  -K <entry>            generate CALL to <entry> as static
+  -conf=<file>          user-defined dialect configuration; see -std
+  -list-reserved        display reserved words
+  -list-intrinsics      display intrinsic functions
+  -list-mnemonics       display mnemonic names
+  -list-system          display system routines
+  -save-temps[=<dir>]   save intermediate files
+                        - default: current directory
+  -ext <extension>      add file extension for resolving COPY
+
+  -W                    enable all warnings
+  -Wall                 enable most warnings (all except as noted below)
+  -Wno-<warning>        disable warning enabled by -W or -Wall
+  -Wobsolete            warn if obsolete features are used
+  -Warchaic             warn if archaic features are used
+  -Wredefinition        warn incompatible redefinition of data items
+  -Wconstant            warn inconsistent constant
+  -Woverlap             warn overlapping MOVE items
+  -Wparentheses         warn lack of parentheses around AND within OR
+  -Wstrict-typing       warn type mismatch strictly
+  -Wimplicit-define     warn implicitly defined data items
+  -Wcorresponding       warn CORRESPONDING with no matching items
+  -Wexternal-value      warn EXTERNAL item with VALUE clause
+  -Wprototypes          warn missing FUNCTION prototypes/definitions
+  -Wcall-params         warn non 01/77 items for CALL params
+			- NOT set with -Wall
+  -Wcolumn-overflow     warn text after program-text area, FIXED format
+			- NOT set with -Wall
+  -Wterminator          warn lack of scope terminator END-XXX
+			- NOT set with -Wall
+  -Wtruncate            warn possible field truncation
+			- NOT set with -Wall
+  -Wlinkage             warn dangling LINKAGE items
+			- NOT set with -Wall
+  -Wunreachable         warn unreachable statements
+			- NOT set with -Wall
+
+  -fsign=[ASCII|EBCDIC] define display sign representation
+			- default: machine native
+  -ffold-copy=[UPPER|LOWER] fold COPY subject to value
+			- default: no transformation
+  -ffold-call=[UPPER|LOWER] fold PROGRAM-ID, CALL, CANCEL subject to value
+			- default: no transformation
+  -fdefaultbyte=0..255  initialize fields without VALUE to decimal value
+			- default: initialize to picture
+  -fintrinsics=[ALL|intrinsic function name(,name,...)] intrinsics to be used without FUNCTION keyword
+  -ftrace               generate trace code
+			- executed SECTION/PARAGRAPH
+  -ftraceall            generate trace code
+			- executed SECTION/PARAGRAPH/STATEMENTS
+			- turned on by -debug
+  -fsyntax-only         syntax error checking only; don't emit any output
+  -fdebugging-line      enable debugging lines
+			- 'D' in indicator column or floating >>D
+  -fsource-location     generate source location code
+			- turned on by -debug/-g/-ftraceall
+  -fimplicit-init       automatic initialization of the COBOL runtime system
+  -fstack-check         PERFORM stack checking
+			- turned on by -debug or -g
+  -fsyntax-extension    allow syntax extensions
+			- eg. switch name SW1, etc.
+  -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL
+			- default: BEFORE 1
+  -fmfcomment           '*' or '/' in column 1 treated as comment
+			- FIXED format only
+  -facucomment          '$' in indicator area treated as '*',
+			'|' treated as floating comment
+  -fnotrunc             allow numeric field overflow
+			- non-ANSI behaviour
+  -fodoslide            adjust items following OCCURS DEPENDING
+			- requires implicit/explicit relaxed syntax
+  -fsingle-quote        use a single quote (apostrophe) for QUOTE
+			- default: double quote
+  -frecursive-check     check recursive program call
+  -foptional-file       treat all files as OPTIONAL
+			- unless NOT OPTIONAL specified
+
+  -ftab-width=<number>  set number of spaces that are asumed for tabs
+  -ftext-column=<number> set right margin for source (fixed format only)
+  -fword-length=<number> maximum word-length for COBOL words / Programmer defined words
+  -fliteral-length=<number> maximum literal size in general
+  -fnumeric-literal-length=<number> maximum numeric literal size
+  -fassign-clause=<value> set way of interpreting ASSIGN
+  -fbinary-size=<value> binary byte size - defines the allocated bytes according to PIC
+  -fbinary-byteorder=<value> binary byte order
+  -fstandard-define=<value>
+  -ffilename-mapping    resolve file names at run time using environment variables.
+  -fpretty-display      alternate formatting of numeric fields
+  -fbinary-truncate     numeric truncation according to ANSI
+  -fcomplex-odo         allow complex OCCURS DEPENDING ON
+  -findirect-redefines  allow REDEFINES to other than last equal level number
+  -flarger-redefines-ok allow larger REDEFINES items
+  -frelax-syntax-checks allow certain syntax variations (eg. REDEFINES position)
+  -fperform-osvs        exit point of any currently executing perform is recognized if reached
+  -fsticky-linkage      linkage-section items remain allocated between invocations
+  -frelax-level-hierarchy allow non-matching level numbers
+  -fhostsign            allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
+  -faccept-update       set WITH UPDATE clause as default for ACCEPT dest-item, except if WITH NO UPDATE clause is used
+  -faccept-auto         set WITH AUTO clause as default for ACCEPT dest-item, except if WITH TAB clause is used
+  -fconsole-is-crt      assume CONSOLE IS CRT if not set otherwise
+  -fprogram-name-redefinition program names don't lead to a reserved identifier
+  -fcomment-paragraphs=<support> comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)
+  -fmemory-size-clause=<support> MEMORY-SIZE clause
+  -fmultiple-file-tape-clause=<support> MULTIPLE-FILE-TAPE clause
+  -flabel-records-clause=<support> LABEL-RECORDS clause
+  -fvalue-of-clause=<support> VALUE-OF clause
+  -fdata-records-clause=<support> DATA-RECORDS clause
+  -ftop-level-occurs-clause=<support> OCCURS clause on top-level
+  -fsynchronized-clause=<support> SYNCHRONIZED clause
+  -fgoto-statement-without-name=<support> GOTO statement without name
+  -fstop-literal-statement=<support> STOP-LITERAL statement
+  -fdebugging-line=<support> DEBUGGING MODE and indicator 'D'
+  -fpadding-character-clause=<support> PADDING CHARACTER clause
+  -fnext-sentence-phrase=<support> NEXT SENTENCE phrase
+  -feject-statement=<support> EJECT statement
+  -fentry-statement=<support> ENTRY statement
+  -fmove-noninteger-to-alphanumeric=<support> move noninteger to alphanumeric
+  -fodo-without-to=<support> OCCURS DEPENDING ON without to
+  -fsection-segments=<support> section segments
+  -falter-statement=<support> ALTER statement
+  -fcall-overflow=<support> OVERFLOW clause for CALL
+  -fnumeric-boolean=<support> boolean literals (b'0001')
+  -facucobol-literals=<support> ACUCOBOL-GT literals (#B #O #H #X)
+  -fword-continuation=<support> continuation of COBOL words
+  -fnot-exception-before-exception=<support> NOT ON EXCEPTION before ON EXCEPTION
+  -faccept-display-extensions=<support> extensions to ACCEPT and DISPLAY
+  -frenames-uncommon-levels=<support> RENAMES of 01-, 66- and 77-level items
+  -fprogram-prototypes=<support> CALL/CANCEL with program-prototype-name
+	where <support> is one of the following:
+	'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
+  -fnot-reserved=<word> word to be taken out of the reserved words list
+  -freserved=<word>     word to be added to reserved words list
+  -freserved=<word>:<alias> word to be added to reserved words list as alias
+
+
+Report bugs to: bug-gnucobol@gnu.org
+or (preferably) use the issue tracker via the home page.
+GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>
+General help using GNU software: <http://www.gnu.org/gethelp/>
+
 
 File: gnucobol.info,  Node: Appendix B,  Next: Appendix C,  Prev: Appendix A,  Up: Top
 
 Appendix B 'cobc --list-reserved'
 *********************************
+
+
+Reserved Words                  Implemented
+ACCEPT                          Yes
+ACCESS                          Yes
+ACTIVE-CLASS                    No
+ADD                             Yes
+ADDRESS                         Yes
+ADVANCING                       Yes
+AFTER                           Yes
+ALIGNED                         No
+ALL                             Yes
+ALLOCATE                        Yes
+ALPHABET                        Yes
+ALPHABETIC                      Yes
+ALPHABETIC-LOWER                Yes
+ALPHABETIC-UPPER                Yes
+ALPHANUMERIC                    Yes
+ALPHANUMERIC-EDITED             Yes
+ALSO                            Yes
+ALTER                           Yes
+ALTERNATE                       Yes
+AND                             Yes
+ANY                             Yes
+ANYCASE                         No
+ARE                             Yes
+AREA                            Yes
+AREAS                           Yes
+ARGUMENT-NUMBER                 Yes
+ARGUMENT-VALUE                  Yes
+ARITHMETIC                      No (Context sensitive)
+AS                              Yes
+ASCENDING                       Yes
+ASCII                           Yes (Context sensitive)
+ASSIGN                          Yes
+AT                              Yes
+ATTRIBUTE                       Yes (Context sensitive)
+AUTO                            Yes
+AUTO-SKIP                       Yes
+AUTOMATIC                       Yes
+AUTOTERMINATE                   Yes
+AWAY-FROM-ZERO                  Yes (Context sensitive)
+B-AND                           No
+B-NOT                           No
+B-OR                            No
+B-XOR                           No
+BACKGROUND-COLOR                Yes
+BACKGROUND-COLOUR               Yes
+BASED                           Yes
+BEEP                            Yes
+BEFORE                          Yes
+BELL                            Yes
+BINARY                          Yes
+BINARY-C-LONG                   Yes
+BINARY-CHAR                     Yes
+BINARY-DOUBLE                   Yes
+BINARY-INT                      Yes
+BINARY-LONG                     Yes
+BINARY-LONG-LONG                Yes
+BINARY-SHORT                    Yes
+BIT                             No
+BLANK                           Yes
+BLINK                           Yes
+BLOCK                           Yes
+BOOLEAN                         No
+BOTTOM                          Yes
+BY                              Yes
+BYTE-LENGTH                     Yes (Context sensitive)
+CALL                            Yes
+CANCEL                          Yes
+CAPACITY                        Yes (Context sensitive)
+CENTER                          No (Context sensitive)
+CF                              Yes
+CH                              Yes
+CHAIN                           No
+CHAINING                        Yes
+CHARACTER                       Yes
+CHARACTERS                      Yes
+CLASS                           Yes
+CLASS-ID                        No
+CLASSIFICATION                  Yes (Context sensitive)
+CLOSE                           Yes
+CODE                            Yes
+CODE-SET                        Yes
+COL                             Yes
+COLLATING                       Yes
+COLS                            Yes
+COLUMN                          Yes
+COLUMNS                         Yes
+COMMA                           Yes
+COMMAND-LINE                    Yes
+COMMIT                          Yes
+COMMON                          Yes
+COMP                            Yes
+COMP-1                          Yes
+COMP-2                          Yes
+COMP-3                          Yes
+COMP-4                          Yes
+COMP-5                          Yes
+COMP-6                          Yes
+COMP-X                          Yes
+COMPUTATIONAL                   Yes
+COMPUTATIONAL-1                 Yes
+COMPUTATIONAL-2                 Yes
+COMPUTATIONAL-3                 Yes
+COMPUTATIONAL-4                 Yes
+COMPUTATIONAL-5                 Yes
+COMPUTATIONAL-X                 Yes
+COMPUTE                         Yes
+CONDITION                       Yes
+CONFIGURATION                   Yes
+CONSTANT                        Yes
+CONTAINS                        Yes
+CONTENT                         Yes
+CONTINUE                        Yes
+CONTROL                         Yes
+CONTROLS                        Yes
+CONVERSION                      Yes (Context sensitive)
+CONVERTING                      Yes
+COPY                            Yes
+CORR                            Yes
+CORRESPONDING                   Yes
+COUNT                           Yes
+CRT                             Yes
+CRT-UNDER                       Yes
+CURRENCY                        Yes
+CURSOR                          Yes
+CYCLE                           Yes (Context sensitive)
+DATA                            Yes
+DATA-POINTER                    No
+DATE                            Yes
+DAY                             Yes
+DAY-OF-WEEK                     Yes
+DE                              Yes
+DEBUGGING                       Yes
+DECIMAL-POINT                   Yes
+DECLARATIVES                    Yes
+DEFAULT                         Yes
+DELETE                          Yes
+DELIMITED                       Yes
+DELIMITER                       Yes
+DEPENDING                       Yes
+DESCENDING                      Yes
+DESTINATION                     No
+DETAIL                          Yes
+DISABLE                         No
+DISC                            Yes (Context sensitive)
+DISK                            Yes (Context sensitive)
+DISPLAY                         Yes
+DIVIDE                          Yes
+DIVISION                        Yes
+DOWN                            Yes
+DUPLICATES                      Yes
+DYNAMIC                         Yes
+EBCDIC                          Yes (Context sensitive)
+EC                              Yes
+ELSE                            Yes
+EMPTY-CHECK                     Yes
+END                             Yes
+END-ACCEPT                      Yes
+END-ADD                         Yes
+END-CALL                        Yes
+END-CHAIN                       No
+END-COMPUTE                     Yes
+END-DELETE                      Yes
+END-DISPLAY                     Yes
+END-DIVIDE                      Yes
+END-EVALUATE                    Yes
+END-IF                          Yes
+END-MULTIPLY                    Yes
+END-OF-PAGE                     Yes
+END-PERFORM                     Yes
+END-READ                        Yes
+END-RETURN                      Yes
+END-REWRITE                     Yes
+END-SEARCH                      Yes
+END-START                       Yes
+END-STRING                      Yes
+END-SUBTRACT                    Yes
+END-UNSTRING                    Yes
+END-WRITE                       Yes
+ENTRY                           Yes
+ENTRY-CONVENTION                No (Context sensitive)
+ENVIRONMENT                     Yes
+ENVIRONMENT-NAME                Yes
+ENVIRONMENT-VALUE               Yes
+EO                              No
+EOL                             Yes (Context sensitive)
+EOP                             Yes
+EOS                             Yes (Context sensitive)
+EQUAL                           Yes
+EQUALS                          Yes
+ERASE                           Yes
+ERROR                           Yes
+ESCAPE                          Yes
+EVALUATE                        Yes
+EXCEPTION                       Yes
+EXCEPTION-OBJECT                No
+EXCLUSIVE                       Yes
+EXIT                            Yes
+EXPANDS                         No (Context sensitive)
+EXTEND                          Yes
+EXTERNAL                        Yes
+F                               Yes
+FACTORY                         No
+FALSE                           Yes
+FD                              Yes
+FILE                            Yes
+FILE-CONTROL                    Yes
+FILE-ID                         Yes
+FILLER                          Yes
+FINAL                           Yes
+FIRST                           Yes
+FIXED                           Yes
+FLOAT-BINARY-128                No
+FLOAT-BINARY-32                 No
+FLOAT-BINARY-64                 No
+FLOAT-DECIMAL-16                Yes
+FLOAT-DECIMAL-34                Yes
+FLOAT-EXTENDED                  No
+FLOAT-INFINITY                  No
+FLOAT-LONG                      Yes
+FLOAT-NOT-A-NUMBER              No (Context sensitive)
+FLOAT-SHORT                     Yes
+FOOTING                         Yes
+FOR                             Yes
+FOREGROUND-COLOR                Yes
+FOREGROUND-COLOUR               Yes
+FOREVER                         Yes
+FORMAT                          No
+FREE                            Yes
+FROM                            Yes
+FULL                            Yes
+FUNCTION                        Yes
+FUNCTION-ID                     Yes
+FUNCTION-POINTER                No
+GENERATE                        Yes
+GET                             No
+GIVING                          Yes
+GLOBAL                          Yes
+GO                              Yes
+GOBACK                          Yes
+GREATER                         Yes
+GRID                            Yes
+GROUP                           Yes
+GROUP-USAGE                     No
+HEADING                         Yes
+HIGH-VALUE                      Yes
+HIGH-VALUES                     Yes
+HIGHLIGHT                       Yes
+I-O                             Yes
+I-O-CONTROL                     Yes
+ID                              Yes
+IDENTIFICATION                  Yes
+IF                              Yes
+IGNORE                          Yes
+IGNORING                        Yes
+IMPLEMENTS                      No (Context sensitive)
+IN                              Yes
+INDEX                           Yes
+INDEXED                         Yes
+INDICATE                        Yes
+INDIRECT                        No (Context sensitive)
+INHERITS                        No
+INITIAL                         Yes
+INITIALISE                      Yes
+INITIALISED                     Yes
+INITIALIZE                      Yes
+INITIALIZED                     Yes
+INITIATE                        Yes
+INPUT                           Yes
+INPUT-OUTPUT                    Yes
+INSPECT                         Yes
+INTERFACE                       No
+INTERFACE-ID                    No
+INTERMEDIATE                    No (Context sensitive)
+INTO                            Yes
+INTRINSIC                       Yes (Context sensitive)
+INVALID                         Yes
+INVOKE                          No
+IS                              Yes
+JUST                            Yes
+JUSTIFIED                       Yes
+KEPT                            Yes
+KEY                             Yes
+KEYBOARD                        Yes (Context sensitive)
+LABEL                           Yes
+LAST                            Yes
+LC_ALL                          No (Context sensitive)
+LC_COLLATE                      No (Context sensitive)
+LC_CTYPE                        No (Context sensitive)
+LC_MESSAGES                     No (Context sensitive)
+LC_MONETARY                     No (Context sensitive)
+LC_NUMERIC                      No (Context sensitive)
+LC_TIME                         No (Context sensitive)
+LEADING                         Yes
+LEFT                            Yes
+LEFT-JUSTIFY                    No
+LEFTLINE                        Yes
+LENGTH                          Yes
+LENGTH-CHECK                    Yes
+LESS                            Yes
+LIMIT                           Yes
+LIMITS                          Yes
+LINAGE                          Yes
+LINAGE-COUNTER                  Yes
+LINE                            Yes
+LINE-COUNTER                    Yes
+LINES                           Yes
+LINKAGE                         Yes
+LOCAL-STORAGE                   Yes
+LOCALE                          Yes
+LOCK                            Yes
+LOW-VALUE                       Yes
+LOW-VALUES                      Yes
+LOWER                           Yes (Context sensitive)
+LOWLIGHT                        Yes
+MANUAL                          Yes
+MEMORY                          Yes
+MERGE                           Yes
+METHOD                          No
+METHOD-ID                       No
+MINUS                           Yes
+MODE                            Yes
+MOVE                            Yes
+MULTIPLE                        Yes
+MULTIPLY                        Yes
+NAME                            Yes (Context sensitive)
+NATIONAL                        Yes
+NATIONAL-EDITED                 Yes
+NATIVE                          Yes
+NEAREST-AWAY-FROM-ZERO          Yes (Context sensitive)
+NEAREST-EVEN                    Yes (Context sensitive)
+NEAREST-TOWARD-ZERO             Yes (Context sensitive)
+NEGATIVE                        Yes
+NESTED                          No
+NEXT                            Yes
+NO                              Yes
+NO-ECHO                         Yes
+NONE                            No (Context sensitive)
+NORMAL                          Yes (Context sensitive)
+NOT                             Yes
+NOTHING                         Yes
+NULL                            Yes
+NULLS                           Yes
+NUMBER                          Yes
+NUMBERS                         Yes
+NUMERIC                         Yes
+NUMERIC-EDITED                  Yes
+OBJECT                          No
+OBJECT-COMPUTER                 Yes
+OBJECT-REFERENCE                No
+OCCURS                          Yes
+OF                              Yes
+OFF                             Yes
+OMITTED                         Yes
+ON                              Yes
+ONLY                            Yes
+OPEN                            Yes
+OPTIONAL                        Yes
+OPTIONS                         No
+OR                              Yes
+ORDER                           Yes
+ORGANISATION                    Yes
+ORGANIZATION                    Yes
+OTHER                           Yes
+OUTPUT                          Yes
+OVERFLOW                        Yes
+OVERLINE                        Yes
+OVERRIDE                        No
+PACKED-DECIMAL                  Yes
+PADDING                         Yes
+PAGE                            Yes
+PAGE-COUNTER                    Yes
+PARAGRAPH                       Yes (Context sensitive)
+PERFORM                         Yes
+PF                              Yes
+PH                              Yes
+PIC                             Yes
+PICTURE                         Yes
+PLUS                            Yes
+POINTER                         Yes
+POSITION                        Yes
+POSITIVE                        Yes
+PREFIXED                        No (Context sensitive)
+PRESENT                         Yes
+PREVIOUS                        Yes
+PRINT                           Yes (Context sensitive)
+PRINTER                         Yes (Context sensitive)
+PRINTER-1                       Yes (Context sensitive)
+PRINTING                        Yes
+PROCEDURE                       Yes
+PROCEDURE-POINTER               Yes
+PROCEDURES                      Yes
+PROCEED                         Yes
+PROGRAM                         Yes
+PROGRAM-ID                      Yes
+PROGRAM-POINTER                 Yes
+PROHIBITED                      Yes (Context sensitive)
+PROMPT                          Yes
+PROPERTY                        No
+PROTECTED                       Yes
+PROTOTYPE                       No
+QUOTE                           Yes
+QUOTES                          Yes
+RAISE                           No
+RAISING                         No
+RANDOM                          Yes
+RD                              Yes
+READ                            Yes
+RECORD                          Yes
+RECORDING                       Yes
+RECORDS                         Yes
+RECURSIVE                       Yes (Context sensitive)
+REDEFINES                       Yes
+REEL                            Yes
+REFERENCE                       Yes
+REFERENCES                      Yes
+RELATION                        No (Context sensitive)
+RELATIVE                        Yes
+RELEASE                         Yes
+REMAINDER                       Yes
+REMOVAL                         Yes
+RENAMES                         Yes
+REPLACE                         Yes
+REPLACING                       Yes
+REPORT                          Yes
+REPORTING                       Yes
+REPORTS                         Yes
+REPOSITORY                      Yes
+REQUIRED                        Yes
+RESERVE                         Yes
+RESET                           Yes
+RESUME                          No
+RETRY                           No
+RETURN                          Yes
+RETURNING                       Yes
+REVERSE-VIDEO                   Yes
+REVERSED                        Yes
+REWIND                          Yes
+REWRITE                         Yes
+RF                              Yes
+RH                              Yes
+RIGHT                           Yes
+RIGHT-JUSTIFY                   No
+ROLLBACK                        Yes
+ROUNDED                         Yes
+ROUNDING                        No (Context sensitive)
+RUN                             Yes
+S                               Yes
+SAME                            Yes
+SCREEN                          Yes
+SCROLL                          Yes (Context sensitive)
+SD                              Yes
+SEARCH                          Yes
+SECONDS                         No (Context sensitive)
+SECTION                         Yes
+SECURE                          Yes
+SEGMENT-LIMIT                   Yes
+SELECT                          Yes
+SELF                            No
+SENTENCE                        Yes
+SEPARATE                        Yes
+SEQUENCE                        Yes
+SEQUENTIAL                      Yes
+SET                             Yes
+SHARING                         Yes
+SIGN                            Yes
+SIGNED                          Yes
+SIGNED-INT                      Yes
+SIGNED-LONG                     Yes
+SIGNED-SHORT                    Yes
+SIZE                            Yes
+SORT                            Yes
+SORT-MERGE                      Yes
+SOURCE                          Yes
+SOURCE-COMPUTER                 Yes
+SOURCES                         No
+SPACE                           Yes
+SPACE-FILL                      No
+SPACES                          Yes
+SPECIAL-NAMES                   Yes
+STANDARD                        Yes
+STANDARD-1                      Yes
+STANDARD-2                      Yes
+STANDARD-BINARY                 No (Context sensitive)
+STANDARD-DECIMAL                No (Context sensitive)
+START                           Yes
+STATEMENT                       No (Context sensitive)
+STATIC                          Yes (Context sensitive)
+STATUS                          Yes
+STDCALL                         Yes (Context sensitive)
+STEP                            Yes
+STOP                            Yes
+STRING                          Yes
+STRONG                          No (Context sensitive)
+SUBTRACT                        Yes
+SUM                             Yes
+SUPER                           No
+SUPPRESS                        Yes
+SYMBOL                          No (Context sensitive)
+SYMBOLIC                        Yes
+SYNC                            Yes
+SYNCHRONISED                    Yes
+SYNCHRONIZED                    Yes
+SYSTEM-DEFAULT                  Yes
+SYSTEM-OFFSET                   Yes
+TAB                             Yes (Context sensitive)
+TABLE                           No
+TALLYING                        Yes
+TAPE                            Yes (Context sensitive)
+TERMINATE                       Yes
+TEST                            Yes
+THAN                            Yes
+THEN                            Yes
+THROUGH                         Yes
+THRU                            Yes
+TIME                            Yes
+TIME-OUT                        Yes (Context sensitive)
+TIMEOUT                         Yes
+TIMES                           Yes
+TO                              Yes
+TOP                             Yes
+TOWARD-GREATER                  Yes (Context sensitive)
+TOWARD-LESSER                   Yes (Context sensitive)
+TRAILING                        Yes
+TRAILING-SIGN                   No
+TRANSFORM                       Yes
+TRUE                            Yes
+TRUNCATION                      Yes (Context sensitive)
+TYPE                            Yes
+TYPEDEF                         No
+U                               Yes
+UCS-4                           No (Context sensitive)
+UNDERLINE                       Yes
+UNIT                            Yes
+UNIVERSAL                       No
+UNLOCK                          Yes
+UNSIGNED                        Yes
+UNSIGNED-INT                    Yes
+UNSIGNED-LONG                   Yes
+UNSIGNED-SHORT                  Yes
+UNSTRING                        Yes
+UNTIL                           Yes
+UP                              Yes
+UPDATE                          Yes
+UPON                            Yes
+UPPER                           Yes (Context sensitive)
+USAGE                           Yes
+USE                             Yes
+USER                            Yes (Context sensitive)
+USER-DEFAULT                    Yes
+USING                           Yes
+UTF-16                          No (Context sensitive)
+UTF-8                           No (Context sensitive)
+V                               Yes
+VAL-STATUS                      No
+VALID                           No
+VALIDATE                        No
+VALIDATE-STATUS                 No
+VALUE                           Yes
+VALUES                          Yes
+VARIABLE                        Yes
+VARYING                         Yes
+WAIT                            Yes
+WHEN                            Yes
+WITH                            Yes
+WORDS                           Yes
+WORKING-STORAGE                 Yes
+WRITE                           Yes
+YYYYDDD                         Yes (Context sensitive)
+YYYYMMDD                        Yes (Context sensitive)
+ZERO                            Yes
+ZERO-FILL                       No
+ZEROES                          Yes
+ZEROS                           Yes
+
+Extra (obsolete) context sensitive words
+AUTHOR
+DATE-COMPILED
+DATE-MODIFIED
+DATE-WRITTEN
+INSTALLATION
+REMARKS
+SECURITY
+
+Extra internal registers        Definition
+RETURN-CODE                     USAGE BINARY-LONG
+SORT-RETURN                     USAGE BINARY-LONG
+NUMBER-OF-CALL-PARAMETERS       USAGE BINARY-LONG
+COB-CRT-STATUS                  PIC 9(4)
+TALLY                           GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO
+'LENGTH OF' phrase              USAGE BINARY-LONG
 
 
 File: gnucobol.info,  Node: Appendix C,  Next: Appendix D,  Prev: Appendix B,  Up: Top
@@ -1500,17 +2281,318 @@ File: gnucobol.info,  Node: Appendix C,  Next: Appendix D,  Prev: Appendix B,  U
 Appendix C 'cobc --list-intrinsics'
 ***********************************
 
+
+Intrinsic Function              Implemented     Parameters
+ABS                             Yes             1
+ACOS                            Yes             1
+ANNUITY                         Yes             2
+ASIN                            Yes             1
+ATAN                            Yes             1
+BOOLEAN-OF-INTEGER              No              2
+BYTE-LENGTH                     Yes             1
+CHAR                            Yes             1
+CHAR-NATIONAL                   No              1
+COMBINED-DATETIME               Yes             2
+CONCATENATE                     Yes             Unlimited
+COS                             Yes             1
+CURRENCY-SYMBOL                 Yes             0
+CURRENT-DATE                    Yes             0
+DATE-OF-INTEGER                 Yes             1
+DATE-TO-YYYYMMDD                Yes             1 - 3
+DAY-OF-INTEGER                  Yes             1
+DAY-TO-YYYYDDD                  Yes             1 - 3
+DISPLAY-OF                      No              1 - 2
+E                               Yes             0
+EXCEPTION-FILE                  Yes             0
+EXCEPTION-FILE-N                No              0
+EXCEPTION-LOCATION              Yes             0
+EXCEPTION-LOCATION-N            No              0
+EXCEPTION-STATEMENT             Yes             0
+EXCEPTION-STATUS                Yes             0
+EXP                             Yes             1
+EXP10                           Yes             1
+FACTORIAL                       Yes             1
+FORMATTED-CURRENT-DATE          Yes             1
+FORMATTED-DATE                  Yes             2
+FORMATTED-DATETIME              Yes             4 - 5
+FORMATTED-TIME                  Yes             3 - 4
+FRACTION-PART                   Yes             1
+HIGHEST-ALGEBRAIC               Yes             1
+INTEGER                         Yes             1
+INTEGER-OF-BOOLEAN              No              1
+INTEGER-OF-DATE                 Yes             1
+INTEGER-OF-DAY                  Yes             1
+INTEGER-OF-FORMATTED-DATE       Yes             2
+INTEGER-PART                    Yes             1
+LENGTH                          Yes             1
+LENGTH-AN                       Yes             1
+LOCALE-COMPARE                  Yes             2 - 3
+LOCALE-DATE                     Yes             1 - 2
+LOCALE-TIME                     Yes             1 - 2
+LOCALE-TIME-FROM-SECONDS        Yes             1 - 2
+LOG                             Yes             1
+LOG10                           Yes             1
+LOWER-CASE                      Yes             1
+LOWEST-ALGEBRAIC                Yes             1
+MAX                             Yes             Unlimited
+MEAN                            Yes             Unlimited
+MEDIAN                          Yes             Unlimited
+MIDRANGE                        Yes             Unlimited
+MIN                             Yes             Unlimited
+MOD                             Yes             2
+MODULE-CALLER-ID                Yes             0
+MODULE-DATE                     Yes             0
+MODULE-FORMATTED-DATE           Yes             0
+MODULE-ID                       Yes             0
+MODULE-PATH                     Yes             0
+MODULE-SOURCE                   Yes             0
+MODULE-TIME                     Yes             0
+MONETARY-DECIMAL-POINT          Yes             0
+MONETARY-THOUSANDS-SEPARATOR    Yes             0
+NATIONAL-OF                     No              1 - 2
+NUMERIC-DECIMAL-POINT           Yes             0
+NUMERIC-THOUSANDS-SEPARATOR     Yes             0
+NUMVAL                          Yes             1
+NUMVAL-C                        Yes             2
+NUMVAL-F                        Yes             1
+ORD                             Yes             1
+ORD-MAX                         Yes             Unlimited
+ORD-MIN                         Yes             Unlimited
+PI                              Yes             0
+PRESENT-VALUE                   Yes             Unlimited
+RANDOM                          Yes             Unlimited
+RANGE                           Yes             Unlimited
+REM                             Yes             2
+REVERSE                         Yes             1
+SECONDS-FROM-FORMATTED-TIME     Yes             2
+SECONDS-PAST-MIDNIGHT           Yes             0
+SIGN                            Yes             1
+SIN                             Yes             1
+SQRT                            Yes             1
+STANDARD-COMPARE                No              2 - 4
+STANDARD-DEVIATION              Yes             Unlimited
+STORED-CHAR-LENGTH              Yes             1
+SUBSTITUTE                      Yes             Unlimited
+SUBSTITUTE-CASE                 Yes             Unlimited
+SUM                             Yes             Unlimited
+TAN                             Yes             1
+TEST-DATE-YYYYMMDD              Yes             1
+TEST-DAY-YYYYDDD                Yes             1
+TEST-FORMATTED-DATETIME         Yes             2
+TEST-NUMVAL                     Yes             1
+TEST-NUMVAL-C                   Yes             2
+TEST-NUMVAL-F                   Yes             1
+TRIM                            Yes             1 - 2
+UPPER-CASE                      Yes             1
+VARIANCE                        Yes             Unlimited
+WHEN-COMPILED                   Yes             0
+YEAR-TO-YYYY                    Yes             1 - 3
+
 
 File: gnucobol.info,  Node: Appendix D,  Next: Appendix E,  Prev: Appendix C,  Up: Top
 
 Appendix D 'cobc --list-system'
 *******************************
 
+
+System routine			Parameters
+
+SYSTEM				1
+CBL_AND				3
+CBL_CHANGE_DIR			1
+CBL_CHECK_FILE_EXIST		2
+CBL_CLOSE_FILE			1
+CBL_COPY_FILE			2
+CBL_CREATE_DIR			1
+CBL_CREATE_FILE			5
+CBL_DELETE_DIR			1
+CBL_DELETE_FILE			1
+CBL_EQ				3
+CBL_ERROR_PROC			2
+CBL_EXIT_PROC			2
+CBL_FLUSH_FILE			1
+CBL_GET_CSR_POS			1
+CBL_GET_CURRENT_DIR		3
+CBL_GET_SCR_SIZE		2
+CBL_IMP				3
+CBL_NIMP			3
+CBL_NOR				3
+CBL_NOT				2
+CBL_OC_GETOPT			6
+CBL_OC_HOSTED			2
+CBL_OC_NANOSLEEP		1
+CBL_OPEN_FILE			5
+CBL_OR				3
+CBL_READ_FILE			5
+CBL_RENAME_FILE			2
+CBL_TOLOWER			2
+CBL_TOUPPER			2
+CBL_WRITE_FILE			5
+CBL_XOR				3
+C$CALLEDBY			1
+C$CHDIR				2
+C$COPY				3
+C$DELETE			2
+C$FILEINFO			2
+C$GETPID			0
+C$JUSTIFY			1
+C$MAKEDIR			1
+C$NARG				1
+C$PARAMSIZE			1
+C$PRINTABLE			1
+C$SLEEP				1
+C$TOLOWER			2
+C$TOUPPER			2
+X"91"				2
+X"E4"				0
+X"E5"				0
+X"F4"				2
+X"F5"				2
+
 
 File: gnucobol.info,  Node: Appendix E,  Next: Appendix F,  Prev: Appendix D,  Up: Top
 
 Appendix E 'cobc --list-mnemonics'
 **********************************
+
+
+Mnemonic names
+SYSIN                           device name
+SYSIPT                          device name
+STDIN                           device name
+SYSOUT                          device name
+SYSLIST                         device name
+SYSLST                          device name
+STDOUT                          device name
+PRINT                           device name
+PRINTER                         device name
+PRINTER-1                       device name
+SYSERR                          device name
+STDERR                          device name
+CONSOLE                         device name
+C01                             feature name
+C02                             feature name
+C03                             feature name
+C04                             feature name
+C05                             feature name
+C06                             feature name
+C07                             feature name
+C08                             feature name
+C09                             feature name
+C10                             feature name
+C11                             feature name
+C12                             feature name
+CSP                             feature name
+FORMFEED                        feature name
+CALL-CONVENTION                 feature name
+SWITCH-0                        switch name
+SWITCH-1                        switch name
+SWITCH-2                        switch name
+SWITCH-3                        switch name
+SWITCH-4                        switch name
+SWITCH-5                        switch name
+SWITCH-6                        switch name
+SWITCH-7                        switch name
+SWITCH-8                        switch name
+SWITCH-9                        switch name
+SWITCH-10                       switch name
+SWITCH-11                       switch name
+SWITCH-12                       switch name
+SWITCH-13                       switch name
+SWITCH-14                       switch name
+SWITCH-15                       switch name
+SWITCH-16                       switch name
+SWITCH-17                       switch name
+SWITCH-18                       switch name
+SWITCH-19                       switch name
+SWITCH-20                       switch name
+SWITCH-21                       switch name
+SWITCH-22                       switch name
+SWITCH-23                       switch name
+SWITCH-24                       switch name
+SWITCH-25                       switch name
+SWITCH-26                       switch name
+SWITCH-27                       switch name
+SWITCH-28                       switch name
+SWITCH-29                       switch name
+SWITCH-30                       switch name
+SWITCH-31                       switch name
+SWITCH-32                       switch name
+SWITCH-33                       switch name
+SWITCH-34                       switch name
+SWITCH-35                       switch name
+SWITCH-36                       switch name
+
+Extended mnemonic names (with -fsyntax-extension)
+SW0                             switch name
+SW1                             switch name
+SW2                             switch name
+SW3                             switch name
+SW4                             switch name
+SW5                             switch name
+SW6                             switch name
+SW7                             switch name
+SW8                             switch name
+SW9                             switch name
+SW10                            switch name
+SW11                            switch name
+SW12                            switch name
+SW13                            switch name
+SW14                            switch name
+SW15                            switch name
+SWITCH 0                        switch name
+SWITCH 1                        switch name
+SWITCH 2                        switch name
+SWITCH 3                        switch name
+SWITCH 4                        switch name
+SWITCH 5                        switch name
+SWITCH 6                        switch name
+SWITCH 7                        switch name
+SWITCH 8                        switch name
+SWITCH 9                        switch name
+SWITCH 10                       switch name
+SWITCH 11                       switch name
+SWITCH 12                       switch name
+SWITCH 13                       switch name
+SWITCH 14                       switch name
+SWITCH 15                       switch name
+SWITCH 16                       switch name
+SWITCH 17                       switch name
+SWITCH 18                       switch name
+SWITCH 19                       switch name
+SWITCH 20                       switch name
+SWITCH 21                       switch name
+SWITCH 22                       switch name
+SWITCH 23                       switch name
+SWITCH 24                       switch name
+SWITCH 25                       switch name
+SWITCH 26                       switch name
+SWITCH A                        switch name
+SWITCH B                        switch name
+SWITCH C                        switch name
+SWITCH D                        switch name
+SWITCH E                        switch name
+SWITCH F                        switch name
+SWITCH G                        switch name
+SWITCH H                        switch name
+SWITCH I                        switch name
+SWITCH J                        switch name
+SWITCH K                        switch name
+SWITCH L                        switch name
+SWITCH M                        switch name
+SWITCH N                        switch name
+SWITCH O                        switch name
+SWITCH P                        switch name
+SWITCH Q                        switch name
+SWITCH R                        switch name
+SWITCH S                        switch name
+SWITCH T                        switch name
+SWITCH U                        switch name
+SWITCH V                        switch name
+SWITCH W                        switch name
+SWITCH X                        switch name
+SWITCH Y                        switch name
+SWITCH Z                        switch name
 
 
 File: gnucobol.info,  Node: Appendix F,  Next: Appendix G,  Prev: Appendix E,  Up: Top
@@ -1609,7 +2691,7 @@ binary-byteorder:		big-endian
 larger-redefines-ok:		no
 
 # Allow certain syntax variations (eg. REDEFINES position)
-relaxed-syntax-check:		no
+relax-syntax-checks:		no
 
 # Perform type OSVS - If yes, the exit point of any currently
 # executing perform is recognized if reached.
@@ -1636,6 +2718,10 @@ accept-auto:			no
 # If yes, DISPLAYs and ACCEPTs are, by default, done on the CRT (i.e., using
 # curses).
 console-is-crt:			no
+
+# If yes, allow redefinition of the current program's name. This prevents its
+# use in a prototype-format CALL/CANCEL statement.
+program-name-redefinition:	yes
 
 # Dialect features
 # Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
@@ -1667,6 +2753,7 @@ word-continuation:			warning
 not-exception-before-exception:		ok
 accept-display-extensions:		ok
 renames-uncommon-levels:		ok
+program-prototypes:			ok
 
 # If yes, all the reserved words must be specified in a list of reserved:
 # entries; the default reserved word list will not be used.
@@ -1706,6 +2793,29 @@ File: gnucobol.info,  Node: Appendix G,  Next: Appendix H,  Prev: Appendix F,  U
 Appendix G 'cobcrun --help'
 ***************************
 
+COBOL driver program for GnuCOBOL modules
+
+Usage: cobcrun [options] PROGRAM [parameter ...]
+  or:  cobcrun options
+
+Options:
+  -h, -help                      display this help and exit
+  -V, -version                   display cobcrun and runtime version and exit
+  -i, -info                      display runtime information (build/environment)
+  -c <file>, -config=<file>      set runtime configuration from <file>
+  -r, -runtime-conf              display current runtime configuration
+                                 (value and origin for all settings)
+  -M <module>, -module=<module>  set entry point module name and/or load path
+                                 where -M module prepends any directory to the
+                                 dynamic link loader library search path
+                                 and any basename to the module preload list
+                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)
+
+Report bugs to: bug-gnucobol@gnu.org
+or (preferably) use the issue tracker via the home page.
+GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>
+General help using GNU software: <http://www.gnu.org/gethelp/>
+
 
 File: gnucobol.info,  Node: Appendix H,  Next: Appendix I,  Prev: Appendix G,  Up: Top
 
@@ -1718,9 +2828,8 @@ H.1 General instructions
 ========================
 
 
-
-The initial runtime.cfg file is found in the '$COB_CONFIG_DIR/config' (
-'COB_CONFIG_DIR defaults to installdir/gnu-cobol ).' The environment
+The initial runtime.cfg file is found in the '$COB_CONFIG_DIR/config ' (
+'COB_CONFIG_DIR defaults to installdir/gnu-cobol ). ' The environment
 variable 'COB_RUNTIME_CONFIG' may define a different runtime
 configuration file to read.
 If settings are included in the runtime environment file multiple times
@@ -1732,20 +2841,20 @@ checked after completing processing of the runtime configuration file(s)
 All values set to string variables or environment variables are checked
 for '${envvar}' and replacement is done at the time of the setting.
 Any environment variable may be set with the directive 'setenv' .
-Example: 'setenv COB_LIBARAY_PATH ${LD_LIBRARY_PATH}'
-Any environment variable may be unset with the directive 'unsetenv' (one
-var per line).  Example: 'unsetenv COB_LIBRARY_PATH'
+Example: 'setenv COB_LIBARAY_PATH ${LD_LIBRARY_PATH} '
+Any environment variable may be unset with the directive 'unsetenv '
+(one var per line).  Example: 'unsetenv COB_LIBRARY_PATH '
 Runtime configuration files can include other files with the directive
-include.  Example: 'include my-runtime-configuration-file'
+include.  Example: 'include my-runtime-configuration-file '
 To include another configuration file only if it is present use the
 directive includeif.  You can also use '${envvar}' inside this.
-Example: 'includeif ${HOME}/mygc.cfg'
+Example: 'includeif ${HOME}/mygc.cfg '
 If you want to reset a parameter to its default value use: 'reset
-parametername'
+parametername '
 Most runtime variables have boolean values, some are switches, some have
 string values, integer values and some are size values.  The boolean
-values will be evaluated as following: to true: '1, Y, ON, YES, TRUE'
-(no matter of case) to false: '0, N, OFF' A 'size' value is an integer
+values will be evaluated as following:	to true:	'1, Y, ON, YES, TRUE'
+(no matter of case)	to false:	'0, N, OFF ' A 'size' value is an integer
 optionally followed by K, M, or G for kilo, mega or giga.
 For convenience a parameter in the runtime.cfg file may be defined by
 using either the environment variable name or the parameter name.  In
@@ -2455,17 +3564,17 @@ Index
 
 * 'ACCEPT' special keys:                 ACCEPT special.       (line  6)
 * Arrow keys:                            ACCEPT special.       (line 13)
-* 'AUTO':                                Extended ACCEPT.      (line 20)
-* 'AUTO-SKIP':                           Extended ACCEPT.      (line 20)
+* 'AUTO':                                Extended ACCEPT.      (line 21)
+* 'AUTO-SKIP':                           Extended ACCEPT.      (line 21)
 * Backspace key:                         ACCEPT special.       (line 32)
-* 'BELL':                                Extended DISPLAY.     (line 21)
-* 'BLANK LINE':                          Extended DISPLAY.     (line 26)
-* 'BLANK SCREEN':                        Extended DISPLAY.     (line 26)
+* 'BELL':                                Extended DISPLAY.     (line 22)
+* 'BLANK LINE':                          Extended DISPLAY.     (line 27)
+* 'BLANK SCREEN':                        Extended DISPLAY.     (line 27)
 * Copying:                               Appendix I.           (line  6)
 * Delete keys:                           ACCEPT special.       (line 38)
 * End keys:                              ACCEPT special.       (line 47)
-* 'ERASE EOL':                           Extended DISPLAY.     (line 40)
-* 'ERASE EOS':                           Extended DISPLAY.     (line 40)
+* 'ERASE EOL':                           Extended DISPLAY.     (line 41)
+* 'ERASE EOS':                           Extended DISPLAY.     (line 41)
 * Extended 'ACCEPT' statement:           Extended ACCEPT.      (line  6)
 * Extended 'DISPLAY' statement:          Extended DISPLAY.     (line  6)
 * Extensions:                            Extensions.           (line  6)
@@ -2475,11 +3584,11 @@ Index
 * Insert key:                            ACCEPT special.       (line 61)
 * Invoking:                              Compile.              (line  6)
 * Non-standard extensions:               Extensions.           (line  6)
-* 'PROTECTED':                           Extended ACCEPT.      (line 38)
+* 'PROTECTED':                           Extended ACCEPT.      (line 39)
 * 'SELECT':                              SELECT.               (line  6)
 * 'SELECT ASSIGN TO':                    SELECT.               (line  6)
-* 'SIZE':                                Extended ACCEPT.      (line 43)
-* 'SIZE' <1>:                            Extended DISPLAY.     (line 53)
+* 'SIZE':                                Extended ACCEPT.      (line 44)
+* 'SIZE' <1>:                            Extended DISPLAY.     (line 54)
 * Tab keys:                              ACCEPT special.       (line 78)
 
 
@@ -2526,19 +3635,19 @@ Node: Extensions30898
 Node: SELECT31335
 Node: Indexed31500
 Node: Extended ACCEPT31680
-Node: ACCEPT special33314
-Node: Extended DISPLAY35748
-Node: System routines38194
-Node: CBL_OC_GETOPT38464
-Node: Appendix A42636
-Node: Appendix B42782
-Node: Appendix C42941
-Node: Appendix D43104
-Node: Appendix E43259
-Node: Appendix F43420
-Node: Appendix G48890
-Node: Appendix H49037
-Node: Appendix I58473
-Node: Index83598
+Node: ACCEPT special33315
+Node: Extended DISPLAY35749
+Node: System routines38196
+Node: CBL_OC_GETOPT38466
+Node: Appendix A42639
+Node: Appendix B53061
+Node: Appendix C75644
+Node: Appendix D81248
+Node: Appendix E82237
+Node: Appendix F88377
+Node: Appendix G94032
+Node: Appendix H95331
+Node: Appendix I104775
+Node: Index129901
 
 End Tag Table
