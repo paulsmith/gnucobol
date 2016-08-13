@@ -63,7 +63,7 @@ CB_CONFIG_BOOLEAN (cb_accept_update, "accept-update", _("set WITH UPDATE clause 
 CB_CONFIG_BOOLEAN (cb_accept_auto, "accept-auto", _("set WITH AUTO clause as default for ACCEPT dest-item, except if WITH TAB clause is used"))
 CB_CONFIG_BOOLEAN (cb_console_is_crt, "console-is-crt", _("assume CONSOLE IS CRT if not set otherwise"))
 CB_CONFIG_BOOLEAN (cb_program_name_redefinition, "program-name-redefinition", _("program names don't lead to a reserved identifier"))
-CB_CONFIG_BOOLEAN (cb_specify_all_reserved, "specify-all-reserved", _("specify all reserved words"))
+CB_CONFIG_BOOLEAN (cb_specify_all_reserved, "specify-all-reserved", NULL) /* specify all reserved words */
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs", _("comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)"))
 CB_CONFIG_SUPPORT (cb_memory_size_clause, "memory-size-clause", _("MEMORY-SIZE clause"))
 CB_CONFIG_SUPPORT (cb_multiple_file_tape_clause, "multiple-file-tape-clause", _("MULTIPLE-FILE-TAPE clause"))

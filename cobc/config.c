@@ -121,47 +121,25 @@ static void
 invalid_value (const char *fname, const int line, const char *name, const char *val,
 			   const char *str, const int max, const int min)
 {
-	char *conf_name;
-
-	if (fname) {
-		conf_name = (char *) fname;
-	} else {
-		conf_name = cob_malloc (strlen (name) + 3);
-		sprintf (conf_name, "-f%s", name);
-	}
-	configuration_error (conf_name, line, 0,
+	configuration_error (fname, line, 0,
 		_("invalid value '%s' for configuration tag '%s'"), val, name);
 	if (str) {
-		configuration_error (conf_name, line, 1,
+		configuration_error (fname, line, 1,
 			_("should be one of the following values: %s"), str);
 	} else if (max == min && max == 0) {
-		configuration_error (conf_name, line, 1, _("must be numeric"));
+		configuration_error (fname, line, 1, _("must be numeric"));
 	} else if (max) {
-		configuration_error (conf_name, line, 1, _("maximum value: %lu"), (unsigned long)max);
+		configuration_error (fname, line, 1, _("maximum value: %lu"), (unsigned long)max);
 	} else {
-		configuration_error (conf_name, line, 1, _("minimum value: %lu"), (unsigned long)min);
-	}
-	if (!fname) {
-		cob_free (conf_name);
+		configuration_error (fname, line, 1, _("minimum value: %lu"), (unsigned long)min);
 	}
 }
 
 static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
-	char *conf_name;
-
-	if (fname) {
-		conf_name = (char *) fname;
-	} else {
-		conf_name = cob_malloc (strlen (name) + 3);
-		sprintf (conf_name, "-f%s", name);
-	}
-	configuration_error (conf_name, line, 1, 
+	configuration_error (fname, line, 1, 
 		_("unsupported value '%s' for configuration tag '%s'"), val, name);
-	if (!fname) {
-		cob_free (conf_name);
-	}
 }
 
 /* Global functions */
@@ -183,6 +161,8 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	size_t			i;
 	size_t			j;
 	int				v;
+
+	char word_buff[COB_MINI_BUFF];
 
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
@@ -329,7 +309,23 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (name, "not-reserved") == 0) {
 				remove_reserved_word (val);
 			} else if (strcmp (name, "reserved") == 0) {
-				add_reserved_word (val, fname, line);
+				/* Remove all possible white space, change : to = */
+				j = 0;
+				for (i = 0; val [i] && j < COB_MINI_MAX ; i++) {
+					switch (val [i]) {
+						case ' ':
+						case '\t':
+							break;
+						case ':':
+							word_buff[j++] = '=';
+							break;
+						default:
+							word_buff[j++] = val [i];
+							break;
+					}
+				}
+				word_buff[j] = 0;
+				add_reserved_word (word_buff, fname, line);
 			} else {
 				*((const char **)var) = val;
 			}

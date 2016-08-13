@@ -399,7 +399,7 @@ static const char	*const cob_csyns[] = {
 
 #define COB_NUM_CSYNS	sizeof(cob_csyns) / sizeof(char *)
 
-static const char short_options[] = "hVivqECScbmxjdFOPgwo:t:T:I:L:l:D:K:k:";
+static const char short_options[] = "hVivqECScbmxjdFROPgwo:t:T:I:L:l:D:K:k:";
 
 #define	CB_NO_ARG	no_argument
 #define	CB_RQ_ARG	required_argument
@@ -435,6 +435,7 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '#'},
+	{"reserve-all",		CB_NO_ARG, NULL, 'R'}, /* dirty workaround */
 
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -1816,6 +1817,7 @@ cobc_print_usage (char * prog)
 			"                        cobol2014, cobol2002, cobol85, default,\n"
 			"                        ibm, mvs, bs2000, mf, acu;\n"
 			"                        see configuration files in directory config"));
+	puts (_("  -R, -reserve-all      allow all words that are not unreserved"));
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
 	puts (_("  -O, -O2, -Os          enable optimization"));
@@ -1972,7 +1974,10 @@ process_command_line (const int argc, char **argv)
 	enum cob_exception_id	i;
 	struct stat		st;
 	char			ext[COB_MINI_BUFF];
-	char			conf_entry[COB_MINI_BUFF];
+	char			*conf_label;	/* we want a dynamic address for erroc.c, not a  static one */
+	char			*conf_entry;
+	time_t			curtime;		/* Compile time */
+
 
 	int			conf_ret = 0;
 
@@ -2278,11 +2283,24 @@ process_command_line (const int argc, char **argv)
 			/* These options were all processed in the first getopt-run */
 			break;
 
+		case 'R':
+			/* -reserve-all : allow all words not unreserved
+			   -> unsets specify-all-reserved in compiler configuration */
+			if (cb_specify_all_reserved) {
+				cb_specify_all_reserved = 0;
+				add_all_default_words ();
+			}
+			break;
+
 		case '%':
 			/* -f[no-]<tag>[=<value>] : Override configuration entry */
-			snprintf (conf_entry, COB_MINI_MAX, "%s=%s",
-				long_options[idx].name + 1, cob_optarg);
-			conf_ret |= cb_config_entry (conf_entry, NULL, 0);
+			conf_label = cobc_main_malloc (COB_MINI_BUFF);
+			conf_entry = cobc_malloc (COB_MINI_BUFF - 2);
+			snprintf (conf_label, COB_MINI_MAX, "-%s=%s",
+				long_options[idx].name, cob_optarg);
+			strncpy(conf_entry, conf_label + 2, COB_MINI_MAX - 2);
+			conf_ret |= cb_config_entry (conf_entry, conf_label, 0);
+			cobc_free (conf_entry);
 			break;
 
 		case 'd':
@@ -2314,13 +2332,11 @@ process_command_line (const int argc, char **argv)
 
 		case 't':
 			/* -t : Generate listing */
-			{
-			   time_t curtime;		/* Compile time */
-
-			   cb_listing_outputfile = cobc_strdup (cob_optarg);
-			   curtime = time(NULL);
-			   strcpy (cb_listing_date, ctime(&curtime));
-			   *strchr (cb_listing_date, '\n') = '\0';
+			if (!cb_listing_outputfile) {
+				cb_listing_outputfile = cobc_strdup (cob_optarg);
+				curtime = time(NULL);
+				strcpy (cb_listing_date, ctime(&curtime));
+				*strchr (cb_listing_date, '\n') = '\0';
 			}
 			break;
 

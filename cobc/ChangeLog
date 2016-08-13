@@ -1,4 +1,20 @@
 
+2016-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, reserved.c: temporarily added new command line option
+	  -R, -reserve-all for unsetting specify-all-reserved in compiler conf;
+	  FIXME: should be possible with -fno-specify-all-reserved-words
+
+2016-08-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c (is_invalid_word): new function for checking the words,
+	  currently only checks user defined words to be < COB_MAX_WORDLEN
+	* reserved.c: don't compare/print indicators and alias as part of the words
+	* config.c (cb_config_entry): reserved words handling - remove whitespace
+	  and translate : to =
+	* cobc, config.c: set output name for -f<tag>=<value> in cobc.c instead
+	  in multiple functions in confic.c and show the complete parameter
+
 2016-08-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def: renamed compiler configuration relaxed-syntax-check to

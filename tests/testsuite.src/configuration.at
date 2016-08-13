@@ -295,12 +295,12 @@ AT_CHECK([$COMPILE_ONLY \
 AT_CHECK([$COMPILE_ONLY \
 -fassign-clause=cobol2002 prog.cob], [1], [],
 [configuration error:
--fassign-clause: unsupported value 'cobol2002' for configuration tag 'assign-clause'
+-fassign-clause=cobol2002: unsupported value 'cobol2002' for configuration tag 'assign-clause'
 ])
 AT_CHECK([$COMPILE_ONLY \
 -fassign-clause=cobol-2002 prog.cob], [1], [],
 [configuration error:
--fassign-clause: invalid value 'cobol-2002' for configuration tag 'assign-clause';
+-fassign-clause=cobol-2002: invalid value 'cobol-2002' for configuration tag 'assign-clause';
 	should be one of the following values: cobol2002, mf, ibm
 ])
 

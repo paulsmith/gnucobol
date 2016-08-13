@@ -2175,13 +2175,48 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR=FOO prog.cob], [1], [],
-[configuration warning: ignored asterisk at end of alias target
+# FIXME: user defined words need to store a reference to the name originally defining the word
+#        otherwise we can't help the user to know where the error came from
+#        (command line is only a special sample, but even then it may be wrapped and not visible
+#        to the user)
+#AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob], [1], [],
+#[configuration warning: -freserved=FOO=DISPLAY*: ignored asterisk at end of alias target
+#configuration error:
+#-freserved=BAR:FOO: alias target 'FOO' is not a default reserved word
+#])
+
+AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob], [1], [],
+[configuration warning: -freserved=FOO=DISPLAY*: ignored asterisk at end of alias target
 configuration error:
 alias target 'FOO' is not a default reserved word
 ])
 
 AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -freserved=" FOO = DISPLAY  " prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([Complete specified word list])
+AT_KEYWORDS([misc extensions configuration])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.  prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  SQLCA.
+           03  SQLCABC         USAGE BINARY-LONG VALUE 136.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
+[prog.cob: 7: error: syntax error, unexpected Identifier
+prog.cob: 7: error: PICTURE clause required for 'SQLCABC'
+])
+AT_CHECK([$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob], [0], [], [])
+# currently not working, temporarily added -reserve-all as dirty workaround
+#AT_CHECK([$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=ibm -reserve-all prog.cob], [0], [], [])
 AT_CLEANUP
 
 
