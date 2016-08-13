@@ -285,9 +285,9 @@
 #define setenv(name,value,overwrite)	_putenv_s(name,value)
 #define unsetenv(name)					_putenv_s(name,"")
 #if defined COB_USE_VC2013_OR_GREATER
-#define timezone			_timezone
-#define tzname				_tzname
-#define daylight			_daylight
+#define timezone		_timezone
+#define tzname			_tzname
+#define daylight		_daylight
 #endif
 
 #define __attribute__(x)
@@ -320,6 +320,9 @@
 #define strcasecmp	stricmp
 #define _setmode	setmode
 #define _chdir		chdir
+#define timezone	_timezone
+#define tzname		_tzname
+#define daylight	_daylight
 #endif
 
 #include <setjmp.h>
@@ -360,18 +363,19 @@
 #define	COB_A_FORMAT23	__attribute__((format(printf, 2, 3)))
 #define	COB_A_FORMAT34	__attribute__((format(printf, 3, 4)))
 #define	COB_A_FORMAT45	__attribute__((format(printf, 4, 5)))
+#define	DECLNORET
 #else
 #define	COB_A_NORETURN
 #define	COB_A_FORMAT12
 #define	COB_A_FORMAT23
 #define	COB_A_FORMAT34
 #define	COB_A_FORMAT45
-#endif
 
-#ifdef	_MSC_VER
+#if defined	(_MSC_VER) || (defined (__BORLANDC__) && defined (_WIN32))
 #define	DECLNORET	__declspec(noreturn)
 #else
 #define	DECLNORET
+#endif
 #endif
 
 #if	defined(__GNUC__)
