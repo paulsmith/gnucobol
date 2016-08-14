@@ -1883,7 +1883,7 @@ extern struct cb_program	*cb_find_defined_program_by_id (const char *);
 #define CB_BUILD_CAST_LENGTH(x)		cb_build_cast (CB_CAST_LENGTH, x)
 #define CB_BUILD_CAST_PPOINTER(x)	cb_build_cast (CB_CAST_PROGRAM_POINTER, x)
 
-#define CB_BUILD_PARENTHESIS(x)		cb_build_binary_op (x, '@', NULL)
+#define CB_BUILD_PARENTHESES(x)		cb_build_binary_op (x, '@', NULL)
 #define CB_BUILD_NEGATION(x)		cb_build_binary_op (x, '!', NULL)
 
 #define CB_BUILD_STRING0(str)		cb_build_string (str, strlen ((char *)(str)))

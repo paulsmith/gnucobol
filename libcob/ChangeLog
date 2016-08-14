@@ -1617,7 +1617,7 @@
 
 	* All: Do malloc's through own new routine cob_malloc
 	  This will produce an error and terminate if memory
-	  can not be acquired.
+	  cannot be acquired.
 
 2005-07-02  Roger While <simrw@sim-basis.de>
 
@@ -1659,7 +1659,7 @@
 2005-05-27  Roger While <simrw@sim-basis.de>
 
 	* byteswap.h: u_int16_t etc. are not necessarily defined
-	  in sys/types.h (eg. MinGW). So ifndef on __BIT_TYPES_DEFINED__
+	  in sys/types.h (e.g. MinGW). So ifndef on __BIT_TYPES_DEFINED__
 	  and typedef them.
 	  fileio.c: Cater for extended DB headers db4/ db4.1/ db4.2/ db4.3/
 

@@ -1596,7 +1596,7 @@ Options:
   -fstack-check         PERFORM stack checking
 			- turned on by -debug or -g
   -fsyntax-extension    allow syntax extensions
-			- eg. switch name SW1, etc.
+			- e.g. switch name SW1, etc.
   -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL
 			- default: BEFORE 1
   -fmfcomment           '*' or '/' in column 1 treated as comment
@@ -1628,7 +1628,7 @@ Options:
   -fcomplex-odo         allow complex OCCURS DEPENDING ON
   -findirect-redefines  allow REDEFINES to other than last equal level number
   -flarger-redefines-ok allow larger REDEFINES items
-  -frelax-syntax-checks allow certain syntax variations (eg. REDEFINES position)
+  -frelax-syntax-checks allow certain syntax variations (e.g. REDEFINES position)
   -fperform-osvs        exit point of any currently executing perform is recognized if reached
   -fsticky-linkage      linkage-section items remain allocated between invocations
   -frelax-level-hierarchy allow non-matching level numbers
@@ -2395,59 +2395,60 @@ Appendix D 'cobc --list-system'
 *******************************
 
 
-System routine			Parameters
 
-SYSTEM				1
-CBL_AND				3
-CBL_CHANGE_DIR			1
-CBL_CHECK_FILE_EXIST		2
-CBL_CLOSE_FILE			1
-CBL_COPY_FILE			2
-CBL_CREATE_DIR			1
-CBL_CREATE_FILE			5
-CBL_DELETE_DIR			1
-CBL_DELETE_FILE			1
-CBL_EQ				3
-CBL_ERROR_PROC			2
-CBL_EXIT_PROC			2
-CBL_FLUSH_FILE			1
-CBL_GET_CSR_POS			1
-CBL_GET_CURRENT_DIR		3
-CBL_GET_SCR_SIZE		2
-CBL_IMP				3
-CBL_NIMP			3
-CBL_NOR				3
-CBL_NOT				2
-CBL_OC_GETOPT			6
-CBL_OC_HOSTED			2
-CBL_OC_NANOSLEEP		1
-CBL_OPEN_FILE			5
-CBL_OR				3
-CBL_READ_FILE			5
-CBL_RENAME_FILE			2
-CBL_TOLOWER			2
-CBL_TOUPPER			2
-CBL_WRITE_FILE			5
-CBL_XOR				3
-C$CALLEDBY			1
-C$CHDIR				2
-C$COPY				3
-C$DELETE			2
-C$FILEINFO			2
-C$GETPID			0
-C$JUSTIFY			1
-C$MAKEDIR			1
-C$NARG				1
-C$PARAMSIZE			1
-C$PRINTABLE			1
-C$SLEEP				1
-C$TOLOWER			2
-C$TOUPPER			2
-X"91"				2
-X"E4"				0
-X"E5"				0
-X"F4"				2
-X"F5"				2
+System routine                  Parameters
+
+SYSTEM                          1
+CBL_AND                         3
+CBL_CHANGE_DIR                  1
+CBL_CHECK_FILE_EXIST            2
+CBL_CLOSE_FILE                  1
+CBL_COPY_FILE                   2
+CBL_CREATE_DIR                  1
+CBL_CREATE_FILE                 5
+CBL_DELETE_DIR                  1
+CBL_DELETE_FILE                 1
+CBL_EQ                          3
+CBL_ERROR_PROC                  2
+CBL_EXIT_PROC                   2
+CBL_FLUSH_FILE                  1
+CBL_GET_CSR_POS                 1
+CBL_GET_CURRENT_DIR             3
+CBL_GET_SCR_SIZE                2
+CBL_IMP                         3
+CBL_NIMP                        3
+CBL_NOR                         3
+CBL_NOT                         2
+CBL_OC_GETOPT                   6
+CBL_OC_HOSTED                   2
+CBL_OC_NANOSLEEP                1
+CBL_OPEN_FILE                   5
+CBL_OR                          3
+CBL_READ_FILE                   5
+CBL_RENAME_FILE                 2
+CBL_TOLOWER                     2
+CBL_TOUPPER                     2
+CBL_WRITE_FILE                  5
+CBL_XOR                         3
+C$CALLEDBY                      1
+C$CHDIR                         2
+C$COPY                          3
+C$DELETE                        2
+C$FILEINFO                      2
+C$GETPID                        0
+C$JUSTIFY                       1
+C$MAKEDIR                       1
+C$NARG                          1
+C$PARAMSIZE                     1
+C$PRINTABLE                     1
+C$SLEEP                         1
+C$TOLOWER                       2
+C$TOUPPER                       2
+X"91"                           2
+X"E4"                           0
+X"E5"                           0
+X"F4"                           2
+X"F5"                           2
 
 
 File: gnucobol.info,  Node: Appendix E,  Next: Appendix F,  Prev: Appendix D,  Up: Top
@@ -3640,14 +3641,14 @@ Node: Extended DISPLAY35749
 Node: System routines38196
 Node: CBL_OC_GETOPT38466
 Node: Appendix A42639
-Node: Appendix B53061
-Node: Appendix C75644
-Node: Appendix D81248
-Node: Appendix E82237
-Node: Appendix F88377
-Node: Appendix G94032
-Node: Appendix H95331
-Node: Appendix I104775
-Node: Index129901
+Node: Appendix B53063
+Node: Appendix C75646
+Node: Appendix D81250
+Node: Appendix E83186
+Node: Appendix F89326
+Node: Appendix G94981
+Node: Appendix H96280
+Node: Appendix I105724
+Node: Index130850
 
 End Tag Table

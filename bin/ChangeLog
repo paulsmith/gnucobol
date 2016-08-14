@@ -107,5 +107,5 @@
 	  MF's cobrun and ACU's runcbl.
 	  In fact, you can run all three in the same
 	  directory and, if your scripts use an environment
-	  variable for the driver program (eg. $COBEXEC),
+	  variable for the driver program (e.g. $COBEXEC),
 	  then you can switch easily.

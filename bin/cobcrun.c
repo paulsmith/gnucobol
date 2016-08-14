@@ -118,11 +118,11 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -c <file>, -config=<file>      set runtime configuration from <file>"));
 	puts (_("  -r, -runtime-conf              display current runtime configuration\n"
 	        "                                 (value and origin for all settings)"));
-	puts (_("  -M <module>, -module=<module>  set entry point module name and/or load path"));
-	puts (_("                                 where -M module prepends any directory to the"));
-	puts (_("                                 dynamic link loader library search path"));
-	puts (_("                                 and any basename to the module preload list"));
-	puts (_("                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)"));
+	puts (_("  -M <module>, -module=<module>  set entry point module name and/or load path\n"
+			"                                 where -M module prepends any directory to the\n"
+			"                                 dynamic link loader library search path\n"
+			"                                 and any basename to the module preload list\n"
+			"                                 (COB_LIBRARY_PATH and/or COB_PRELOAD)"));
 	putchar ('\n');
 	printf (_("Report bugs to: %s\n" 
 			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");

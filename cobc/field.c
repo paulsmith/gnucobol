@@ -440,7 +440,7 @@ validate_field_1 (struct cb_field *f)
 			return 1;
 		}
 		if (f->flag_item_based || f->flag_external) {
-			cb_error_x (x, _("'%s' ANY LENGTH can not be BASED/EXTERNAL"), cb_name (x));
+			cb_error_x (x, _("'%s' ANY LENGTH cannot be BASED/EXTERNAL"), cb_name (x));
 			return 1;
 		}
 		if (f->flag_occurs || f->depending ||

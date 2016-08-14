@@ -5246,8 +5246,8 @@ print_info (void)
 
 	print_version ();
 	putchar ('\n');
-	puts (_("Build information"));
-	var_print (_("Build environment"),	COB_BLD_BUILD, "", 0);
+	puts (_("build information"));
+	var_print (_("build environment"),	COB_BLD_BUILD, "", 0);
 	var_print ("CC", COB_BLD_CC, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);
 	var_print ("CFLAGS", COB_BLD_CFLAGS, "", 0);

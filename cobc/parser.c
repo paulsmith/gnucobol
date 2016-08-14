@@ -121,7 +121,7 @@ do { \
 
 /* Defines for duplicate checks */
 /* Note - We use <= 16 for common item definitons and */
-/* > 16 for non-common item definitions eg. REPORT and SCREEN */
+/* > 16 for non-common item definitions e.g. REPORT and SCREEN */
 #define	SYN_CLAUSE_1		(1U << 0)
 #define	SYN_CLAUSE_2		(1U << 1)
 #define	SYN_CLAUSE_3		(1U << 2)
@@ -362,7 +362,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list)
 					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), cb_name (x));
 				}
 				if (f->flag_item_based || f->flag_external) {
-					cb_error_x (x, _("'%s' can not be BASED/EXTERNAL"), cb_name (x));
+					cb_error_x (x, _("'%s' cannot be BASED/EXTERNAL"), cb_name (x));
 				}
 				f->flag_is_pdiv_parm = 1;
 			} else {

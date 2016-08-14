@@ -1659,7 +1659,7 @@
 2008-05-23  Roger While <simrw@sim-basis.de>
 
 	* parser.y, typeck.c : Allow FUNCTION (obviously only alphanumeric) as the
-	  object of a CALL (eg. CALL FUNCTION UPPER-CASE (dataitem) ...
+	  object of a CALL (e.g. CALL FUNCTION UPPER-CASE (dataitem) ...
 	* parser.y, tree.h, codegen.c : Better display of POINTER items
 
 2008-05-22  Roger While <simrw@sim-basis.de>
@@ -1977,7 +1977,7 @@
 2007-06-21  Roger While <simrw@sim-basis.de>
 
 	* tree.c : Produce error for partial expression code on WHEN clause
-	* codegen.c : When calling a "system" function (eg. CBL_OPEN_FILE) with
+	* codegen.c : When calling a "system" function (e.g. CBL_OPEN_FILE) with
 	  implicit "sticky linkage" (ie. -std=mvs), do not extend the parameter list
 	  with NULL's
 	* cobc.c : Help was missing for -conf=
@@ -2559,7 +2559,7 @@
 2006-01-07  Roger While <simrw@sim-basis.de>
 
 	* cobc.c : Remove --verbose long option. getopt_long_only
-	  has a problem with eg. -mv
+	  has a problem with e.g. -mv
 	  Change 'Version' back to 'version'.
 
 2006-01-05  Roger While <simrw@sim-basis.de>
@@ -2719,7 +2719,7 @@
 	  Retrieval of 1 byte binary fields always optimized
 	  Optimize referencing linkage section items
 	  Test/set of 1 byte fields
-	* cobc.c : Print patch level for -V (eg. 0.33.0)
+	* cobc.c : Print patch level for -V (e.g. 0.33.0)
 
 2005-08-07  Roger While <simrw@sim-basis.de>
 
@@ -2753,7 +2753,7 @@
 	* parser.y : Check for START on SEQ file
 	* All : Do malloc's through own new routine cob_malloc
 	  This will produce an error and terminate if memory
-	  can not be acquired.
+	  cannot be acquired.
 
 2005-07-02  Roger While <simrw@sim-basis.de>
 
@@ -2816,8 +2816,8 @@
 2005-05-21  Roger While <simrw@sim-basis.de>
 
 	* New file call.def : Defines entry points that will be generated as
-	  static calls in Cobol programs.
-	  eg. own C routines or other software entry points that are
+	  static calls in COBOL programs.
+	  e.g. own C routines or other software entry points that are
 	  linked to the main program (or cobcrun).
 
 	* codegen.c : Inline cob_module_xxx, cater for above call.def
@@ -2846,7 +2846,7 @@
 	     -std=cobol2002 and -std=mf.
 	  config.def : New variables - larger-redefines-ok and
 	     relaxed-syntax-check.
-	  codegen.c :  Do not generate unnecessary code eg. switch
+	  codegen.c :  Do not generate unnecessary code e.g. switch
 	     statement for only one entry point, loop counters.
 	     Cater for NUMBER-OF-CALL-PARAMETERS.
 	     Initialize variables.

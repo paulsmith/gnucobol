@@ -832,52 +832,40 @@ void
 cb_list_system (void)
 {
 	const struct system_table	*psyst;
-	const char			*s;
-	size_t				n;
+	const char			*n;
 
 	putchar ('\n');
-	printf (_("System routine\t\t\tParameters"));
-	puts ("\n");
+
+	putchar ('\n');
+	printf ("%-32s%s\n", _("System routine"), _("Parameters"));
+	putchar ('\n');
+
 	for (psyst = system_tab; psyst->syst_name; psyst++) {
 		switch (*(unsigned char *)(psyst->syst_name)) {
 		case 'C':
 		case 'S':
-			printf ("%s", psyst->syst_name);
+			n = psyst->syst_name;
 			break;
 		case 0xF4:
-			printf ("X\"F4\"");
+			n = "X\"F4\"";
 			break;
 		case 0xF5:
-			printf ("X\"F5\"");
+			n = "X\"F5\"";
 			break;
 		case 0x91:
-			printf ("X\"91\"");
+			n = "X\"91\"";
 			break;
 		case 0xE4:
-			printf ("X\"E4\"");
+			n = "X\"E4\"";
 			break;
 		case 0xE5:
-			printf ("X\"E5\"");
+			n = "X\"E5\"";
 			break;
 		default:
+			n = "";
 			break;
 		}
-		n = strlen (psyst->syst_name);
-		switch (n / 8) {
-		case 0:
-			s = "\t\t\t\t";
-			break;
-		case 1:
-			s = "\t\t\t";
-			break;
-		case 2:
-			s = "\t\t";
-			break;
-		default:
-			s = "\t";
-			break;
-		}
-		printf ("%s%d\n", s, psyst->syst_params);
+		printf ("%-32s%d\n", n, psyst->syst_params);
 	}
 }
 
@@ -3055,7 +3043,7 @@ cb_expr_shift (int token, cb_tree value)
 		/* Enclosed by parentheses */
 		(void)expr_reduce (token);
 		if (TOKEN (-2) == '(') {
-			value = CB_BUILD_PARENTHESIS (VALUE (-1));
+			value = CB_BUILD_PARENTHESES (VALUE (-1));
 			expr_index -= 2;
 			cb_expr_shift ('x', value);
 			return;
@@ -3131,7 +3119,7 @@ expr_expand (cb_tree *x)
 	struct cb_binary_op	*p;
 
 start:
-	/* Remove parenthesis */
+	/* Remove parentheses */
 	if (CB_BINARY_OP_P (*x)) {
 		p = CB_BINARY_OP (*x);
 		if (p->op == '@') {
@@ -3277,7 +3265,7 @@ decimal_alloc (void)
 		cobc_err_msg (_("internal decimal structure size exceeded: %d"),
 				COB_MAX_DEC_STRUCT);
 		if (strcmp(current_statement->name, "COMPUTE") == 0) {
-			cobc_err_msg (_("Try to minimize the number of parenthesis "
+			cobc_err_msg (_("Try to minimize the number of parentheses "
 							 "or split into multiple computations."));
 		}
 		COBC_ABORT ();

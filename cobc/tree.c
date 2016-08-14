@@ -2301,7 +2301,7 @@ repeat:
 				}
 			}
 			if (!*p) {
-				cb_error (_("unbalanced parenthesis"));
+				cb_error (_("unbalanced parentheses"));
 				/* There are no more informative messages to display, so skip to end */
 				goto end;
 			} else if (i == 0) {
@@ -3800,7 +3800,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	}
 	if (refmod) {
 		if (!cbp->refmod) {
-			cb_error_x (name, _("FUNCTION '%s' can not have reference modification"), cbp->name);
+			cb_error_x (name, _("FUNCTION '%s' cannot have reference modification"), cbp->name);
 			return cb_error_node;
 		}
 		/* TODO: better check needed, see typeck.c (cb_build_identifier) */

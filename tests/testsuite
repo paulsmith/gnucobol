@@ -7621,7 +7621,7 @@ prog.cob: 22: error: numeric field cannot be larger than 38 digits
 prog.cob: 23: error: only up to 9 significant digits are permitted within parentheses
 prog.cob: 24: error: only digits are permitted within parentheses
 prog.cob: 24: error: invalid PICTURE character ')'
-prog.cob: 25: error: unbalanced parenthesis
+prog.cob: 25: error: unbalanced parentheses
 prog.cob: 26: error: only one set of parentheses is permitted
 prog.cob: 27: error: parentheses must contain a number greater than zero
 prog.cob: 27: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
@@ -20219,7 +20219,7 @@ prog.cob: 16: error: numeric field cannot be larger than 38 digits
 prog.cob: 17: error: only up to 9 significant digits are permitted within parentheses
 prog.cob: 18: error: only digits are permitted within parentheses
 prog.cob: 18: error: invalid PICTURE character ')'
-prog.cob: 19: error: unbalanced parenthesis
+prog.cob: 19: error: unbalanced parentheses
 prog.cob: 20: error: only one set of parentheses is permitted
 prog.cob: 21: error: parentheses must contain a number greater than zero
 prog.cob: 21: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
@@ -20288,7 +20288,7 @@ error: only up to 9 significant digits are permitted within parentheses
 error: only digits are permitted within parentheses
 error: invalid PICTURE character ')'
 000019         01  unbalanced-parens PIC 9(.
-error: unbalanced parenthesis
+error: unbalanced parentheses
 000020         01  multiple-pairs-of-parens PIC 9(5)(3).
 error: only one set of parentheses is permitted
 000021         01  no-digit-in-parens PIC 9().

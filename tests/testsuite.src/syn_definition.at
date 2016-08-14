@@ -972,7 +972,7 @@ prog.cob: 22: error: numeric field cannot be larger than 38 digits
 prog.cob: 23: error: only up to 9 significant digits are permitted within parentheses
 prog.cob: 24: error: only digits are permitted within parentheses
 prog.cob: 24: error: invalid PICTURE character ')'
-prog.cob: 25: error: unbalanced parenthesis
+prog.cob: 25: error: unbalanced parentheses
 prog.cob: 26: error: only one set of parentheses is permitted
 prog.cob: 27: error: parentheses must contain a number greater than zero
 prog.cob: 27: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol

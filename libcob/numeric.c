@@ -1985,7 +1985,7 @@ cob_div_quotient (cob_field *dividend, cob_field *divisor,
 	/* Note that cob_div_quotient and cob_div_remainder must remain */
 	/* separate because of COBOL rules. The quotient must be fully */
 	/* evaluated before the remainder item is evaluated */
-	/* eg. DIVIDE A BY B GIVING Z REMAINDER FLD (Z). */
+	/* e.g. DIVIDE A BY B GIVING Z REMAINDER FLD (Z). */
 
 	cob_decimal_set_field (&cob_d1, dividend);
 	cob_decimal_set_field (&cob_d2, divisor);
