@@ -1360,17 +1360,14 @@ deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
 		upon_value == NULL && get_default_display_device () == cb_null;
 
 	if (contains_only_screen_fields ((struct cb_list *) x_list)) {
-		if (!contains_one_screen_field ((struct cb_list *) x_list)) {
-			cb_error_x (x_list, _("each screen must have its own DISPLAY statement"));
+		if (!contains_one_screen_field ((struct cb_list *) x_list)
+		    || attr_ptr) {
+			cb_verify_x (x_list, cb_accept_display_extensions,
+				     _("non-standard DISPLAY"));
 		}
 
 		if (upon_value != NULL && upon_value != cb_null) {
 			cb_error_x (x_list, _("screens may only be displayed on CRT"));
-		}
-
-		if (attr_ptr) {
-			cb_verify_x (x_list, cb_accept_display_extensions,
-				     _("non-standard DISPLAY"));
 		}
 
 		return SCREEN_DISPLAY;

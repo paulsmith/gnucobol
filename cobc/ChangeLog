@@ -1,4 +1,9 @@
 
+2016-08-15  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, typeck.c: fixed bug #299 (cannot have multiple screens in
+	  one DISPLAY).
+
 2016-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, reserved.c: temporarily added new command line option

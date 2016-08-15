@@ -5431,6 +5431,35 @@ get_origin_line_column (void)
 	return get_integer_literal_pair ("1");
 }
 
+static void
+emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
+{
+	cb_tree	l;
+	cb_tree pos;
+	cb_tree	screen_ref;
+
+	gen_screen_ptr = 1;
+	
+	for (l = screen_list; l; l = CB_CHAIN (l)) {
+		/*
+		  LINE 1 COL 1 is assumed, not LINE 0 COL 0 as in field
+		  DISPLAYs. (This is RM-COBOL behaviour, who support multiple
+		  screens in one DISPLAY.)
+		*/
+		if (CB_CHAIN (l) || !line_col_for_last) {
+			pos = get_origin_line_column ();
+		} else {
+			pos = line_col_for_last;
+		}
+		
+		screen_ref = CB_VALUE (l);
+		output_screen_from (CB_FIELD (cb_ref (screen_ref)), 0);
+	        emit_screen_display (screen_ref, pos);
+	}
+
+	gen_screen_ptr = 0;
+}
+
 static cb_tree
 get_default_field_line_column (const int is_first_display_item)
 {
@@ -5521,7 +5550,6 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 		 int is_first_display_list,
 		 const enum cb_display_type display_type)
 {
-	cb_tree		x;
 	cb_tree		fgc;
 	cb_tree		bgc;
 	cb_tree		scroll;
@@ -5553,15 +5581,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 		break;
 
 	case SCREEN_DISPLAY:
-		/* Note we assume only one screen */
-		if (line_column == NULL) {
-			line_column = get_origin_line_column ();
-		}
-		x = CB_VALUE (values);
-		output_screen_from (CB_FIELD (cb_ref (x)), 0);
-		gen_screen_ptr = 1;
-	        emit_screen_display (x, line_column);
-		gen_screen_ptr = 0;
+		emit_screen_displays (values, line_column);
 		break;
 
 	case FIELD_ON_SCREEN_DISPLAY:
