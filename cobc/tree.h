@@ -686,8 +686,8 @@ struct cb_field {
 	int			step_count;	/* STEP in REPORT */
 	unsigned int		vaddr;		/* Variable address cache */
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
-									   could be direct ODO (check via depending)
-									   or via subordinate) */
+						   could be direct ODO (check via depending)
+						   or via subordinate) */
 	cob_u32_t		special_index;	/* Special field */
 
 	enum cb_storage		storage;	/* Storage section */

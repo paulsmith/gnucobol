@@ -5437,8 +5437,6 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 	cb_tree	l;
 	cb_tree pos;
 	cb_tree	screen_ref;
-
-	gen_screen_ptr = 1;
 	
 	for (l = screen_list; l; l = CB_CHAIN (l)) {
 		/*
@@ -5454,10 +5452,11 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 		
 		screen_ref = CB_VALUE (l);
 		output_screen_from (CB_FIELD (cb_ref (screen_ref)), 0);
+		
+		gen_screen_ptr = 1;
 	        emit_screen_display (screen_ref, pos);
+		gen_screen_ptr = 0;
 	}
-
-	gen_screen_ptr = 0;
 }
 
 static cb_tree

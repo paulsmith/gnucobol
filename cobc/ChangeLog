@@ -1,4 +1,9 @@
 
+2016-08-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (emit_screen_displays): fixed bug introduced in the previous
+	  commit where invalid MOVEs were generated (see discussion [eed1ec4a]).
+
 2016-08-15  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, typeck.c: fixed bug #299 (cannot have multiple screens in
