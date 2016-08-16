@@ -1984,7 +1984,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			p2 = COB_TERM_BUFF + count - scolumn;
 			move_char = *p2;
 			/* Field prompts. */
-			if (COB_FIELD_IS_NUMERIC (f)) {
+			if (f && COB_FIELD_IS_NUMERIC (f)) {
 				/* Numeric prompt zeros. */
 				if (move_char == '0') {
 					cob_move_cursor (cline, count);

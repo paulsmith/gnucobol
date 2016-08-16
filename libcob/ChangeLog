@@ -1,4 +1,9 @@
 
+2016-08-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (field_accept): fixed bug #300 (segfault on screen ACCEPT
+	  OMITTED).
+
 2016-08-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_runtime_error): reversed the prefix from runtime errors,

@@ -47,7 +47,7 @@ AT_DATA([prog.cob], [
            DISPLAY "foo" COL 1 HIGHLIGHT AT LINE 1 WITH UNDERLINE,
                "bar", "foo"
            DISPLAY "a" UPON CRT, "b" LINE 3 COL 3, "c" UPON CRT-UNDER
-           DISPLAY scr
+           DISPLAY scr, scr
 
            ACCEPT a-field LINE 5 SIZE 3 AT COL 1 WITH AUTO WITH
                REVERSE-VIDEO, BLINK
@@ -186,6 +186,8 @@ AT_DATA([prog.cob], [
            DISPLAY scr WITH UNDERLINE
            ACCEPT scr WITH HIGHLIGHT
 
+           DISPLAY scr, scr
+
            *> Valid statements
            DISPLAY scr UPON CRT-UNDER
            ACCEPT scr AT LINE 4 COLUMN 4
@@ -201,6 +203,7 @@ prog.cob: 16: error: non-standard DISPLAY used
 prog.cob: 17: error: non-standard ACCEPT used
 prog.cob: 19: error: non-standard DISPLAY used
 prog.cob: 20: error: non-standard ACCEPT used
+prog.cob: 22: error: non-standard DISPLAY used
 ])
 AT_CLEANUP
 
