@@ -1415,7 +1415,7 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 
 	if (type != MIXED_DISPLAY) {
 		if (type == SCREEN_DISPLAY || display_type == SCREEN_DISPLAY) {
-			cb_error_x (x_list, _("a screen must be displayed in its own DISPLAY statement"));
+			cb_error_x (x_list, _("cannot mix screens and fields in the same DISPLAY statement"));
 		} else {
 			/*
 			  The only other option is that there is a mix of

@@ -79,7 +79,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 31: error: cannot specify NO ADVANCING in screen DISPLAY
 prog.cob: 31: error: screens may only be displayed on CRT
-prog.cob: 32: error: a screen must be displayed in its own DISPLAY statement
+prog.cob: 32: error: cannot mix screens and fields in the same DISPLAY statement
 prog.cob: 33: error: ambiguous DISPLAY; put items to display on device in separate DISPLAY
 prog.cob: 34: error: screen clauses may only be used for DISPLAY on CRT
 prog.cob: 35: error: cannot mix screens and fields in the same DISPLAY statement
