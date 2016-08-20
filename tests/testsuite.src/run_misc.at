@@ -2569,6 +2569,7 @@ AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([CALL in from C, cob_call_params explicitly set])
 AT_KEYWORDS([runmisc])
 
@@ -2596,13 +2597,13 @@ int callee (char *);
 int
 main (int argc, char **argv)
 {
-    cob_global *cobol_global;
-    char *p1 = "A";
+	cob_global *cobol_global;
+	char *p1 = "A";
 
-    cob_init(argc, argv);
-    cobol_global = cob_get_global_ptr ();
-    cobol_global->cob_call_params = 1;
-    return callee (p1);
+	cob_init(argc, argv);
+	cobol_global = cob_get_global_ptr ();
+	cobol_global->cob_call_params = 1;
+	return callee (p1);
 }
 ])
 
@@ -2610,6 +2611,7 @@ AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
 AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([CALL in from C, cob_call_params unknown])
 AT_KEYWORDS([runmisc])
@@ -2641,11 +2643,11 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
-    char *p1 = "A";
-    char *p2 = "FROM C";
- 
-    cob_init(argc, argv);
-    return callee (p1, p2);
+	char *p1 = "A";
+	char *p2 = "FROM C";
+
+	cob_init(argc, argv);
+	return callee (p1, p2);
 }
 ])
 
@@ -2653,6 +2655,54 @@ AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
 AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([CALL in from C with init missing / implicit])
+AT_KEYWORDS([runmisc implicit-init])
+
+AT_DATA([callee.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callee.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            PIC X.
+       01 P2            PIC X(6).
+       PROCEDURE        DIVISION USING P1 P2.
+           IF P1 NOT EQUAL "A"
+              DISPLAY P1
+              END-DISPLAY
+           END-IF.
+           IF P2 NOT EQUAL "FROM C"
+              DISPLAY P2
+              END-DISPLAY
+           END-IF.
+           EXIT PROGRAM.
+])
+
+AT_DATA([caller.c], [
+int callee (char *, char *);
+
+int
+main (int argc, char **argv)
+{
+
+	char *p1 = "A";
+	char *p2 = "FROM C";
+
+	return callee (p1, p2);
+}
+])
+
+AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
+AT_CHECK([./caller], [1], [],
+[libcob: cob_init() has not been called
+])
+
+AT_CHECK([$COMPILE -fimplicit-init -o caller caller.c callee.cob], [0], [], [])
+AT_CHECK([./caller], [0], [], [])
+
+AT_CLEANUP
+
 
 AT_SETUP([ANY LENGTH (1)])
 AT_KEYWORDS([runmisc])

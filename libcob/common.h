@@ -1222,7 +1222,11 @@ typedef struct __cob_global {
 	char			*cob_locale_time;	/* Initial locale */
 
 	int			cob_exception_code;	/* Last exception code */
-	int			cob_call_params;	/* Current arguments */
+	int			cob_call_params;	/* Number of current arguments
+									   This is set to the actual number before a CALL
+									   and is stored directly on module entry to its
+									   cob_module structure within cob_module_enter().
+									*/
 	int			cob_initial_external;	/* First external ref */
 	unsigned int		cob_orig_line;		/* Program source line */
 	unsigned int		cob_got_exception;	/* Exception active */
@@ -1266,15 +1270,16 @@ struct cobjmp_buf {
 
 /*******************************/
 /* Functions in common.c */
-COB_EXPIMP void print_info(void);
-COB_EXPIMP void print_version(void);
-COB_EXPIMP int cob_load_config(void);
-COB_EXPIMP void print_runtime_conf(void);
+COB_EXPIMP void		print_info(void);
+COB_EXPIMP void		print_version(void);
+COB_EXPIMP int		cob_load_config(void);
+COB_EXPIMP void		print_runtime_conf(void);
 
-COB_EXPIMP void cob_set_exception(const int);
+COB_EXPIMP void		cob_set_exception(const int);
 
 /* General functions */
 
+COB_EXPIMP int		cob_is_initialized	(void);
 COB_EXPIMP cob_global		*cob_get_global_ptr	(void);
 
 COB_EXPIMP void	cob_init			(const int, char **);

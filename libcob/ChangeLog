@@ -1,4 +1,10 @@
 
+2016-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h: new routine (cob_is_initialized)
+	* common.c (cob_module_enter): activated storing module call parameters
+	  on module entry
+
 2016-08-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (field_accept): fixed bug #300 (segfault on screen ACCEPT

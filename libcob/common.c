@@ -408,13 +408,10 @@ cob_exit_common (void)
 static void
 cob_terminate_routines (void)
 {
-	if (!cob_initialized) {
-		return;
-	}
-	if (!cobglobptr) {
-		return;
-	}
 
+	if (!cob_initialized || !cobglobptr) {
+		return;
+	}
 	if (cob_trace_file && cob_trace_file != stderr) {
 		fclose (cob_trace_file);
 		cob_trace_file = NULL;
@@ -1805,6 +1802,12 @@ conf_runtime_error(const int finish_error, const char *fmt, ...)
 	}
 }
 
+int
+cob_is_initialized (void)
+{
+	return (cobglobptr != NULL);
+}
+
 cob_global *
 cob_get_global_ptr (void)
 {
@@ -1835,7 +1838,7 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 		*module = cob_cache_malloc (sizeof(cob_module));
 	}
 
-#if	0	/* RXWRXW - Params */
+#if	1	/* RXWRXW - Params */
 	/* Save parameter count */
 	(*module)->module_num_params = cobglobptr->cob_call_params;
 #endif
@@ -1877,7 +1880,7 @@ cob_save_func (cob_field **savefld, const int params,
 
 	/* Save values */
 	fl->save_module = COB_MODULE_PTR->next;
-	fl->save_call_params = cobglobptr->cob_call_params;
+ 	fl->save_call_params = cobglobptr->cob_call_params;
 	fl->save_proc_parms = COB_MODULE_PTR->cob_procedure_params;
 	fl->save_num_params = COB_MODULE_PTR->module_num_params;
 
@@ -5651,7 +5654,7 @@ cob_init (const int argc, char **argv)
 	}
 
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
-   /* Get function pointer for most precisise time function */
+   /* Get function pointer for most precise time function */
    kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
    if (kernel32_handle != NULL) {
        time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))

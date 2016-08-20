@@ -7111,6 +7111,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_module_init (prog);
 	}
 
+	/* Module Parameters */
 	output_line ("/* Set address of module parameter list */");
 	if (cb_flag_stack_on_heap || prog->flag_recursive) {
 		if (prog->max_call_param) {
@@ -7286,24 +7287,26 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Call parameters */
 	if (cb_code_field (prog->cb_call_params)->count) {
-		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS */");
+		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independant from LINKAGE) */");
 		output_prefix ();
 		output_integer (prog->cb_call_params);
 		output (" = cob_glob_ptr->cob_call_params;\n");
 		output_newline ();
 	}
 
+#if	0	/* RXWRXW - Params (in each module or in cob_module_enter) */
 	output_line ("/* Save number of call params */");
 	output_line ("module->module_num_params = cob_glob_ptr->cob_call_params;");
 	output_newline ();
-	
+#endif
+
 	if (!cb_sticky_linkage && !prog->flag_chained
 #if	0	/* RXWRXW USERFUNC */
 		&& prog->prog_type != CB_FUNCTION_TYPE
 #endif
 		&& prog->num_proc_params) {
 		output_line ("/* Set not passed parameter pointers to NULL */");
-		output_line ("switch (cob_glob_ptr->cob_call_params) {");
+		output_line ("switch (cob_call_params) {");
 		i = 0;
 		for (l = parameter_list; l; l = CB_CHAIN (l)) {
 			output_line ("case %d:", i++);
@@ -7329,7 +7332,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_param (CB_VALUE (l), i);
 			output_target = savetarget;
 
-			output_line ("if (cob_glob_ptr->cob_call_params > %d && %s%d%s)",
+			output_line ("if (cob_call_params > %d && %s%d%s)",
 				i, "module->next->cob_procedure_params[",
 				i, "]");
 			if (f->flag_any_numeric) {
@@ -7984,6 +7987,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 #endif
 		output (");\n");
+		output ("cob_call_params = cob_get_global_ptr ()->cob_call_params;\n");
 
 		output ("  floc->ret_fld = %s_ (0", prog->program_id);
 		if (parmnum != 0) {
@@ -8219,11 +8223,18 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			parmnum++;
 		}
-		output("  /* If the parameter count is unknown, set it to all */\n");
-		output("  if ((cob_get_global_ptr ()->cob_call_params == 0) &&\n");
-		output("      !(cob_get_global_ptr ()->cob_current_module)) {\n");
-		output("\tcob_get_global_ptr ()->cob_call_params = %d;\n", parmnum);
-		output("  };\n\n");
+		output("  /* Get current number of call parameters,\n");
+		output("     if the parameter count is unknown, set it to all */\n");
+		if (cb_flag_implicit_init) {
+			output("  if (cob_is_initialized() && cob_get_global_ptr()->cob_current_module) {\n");
+		} else {
+			output("  if (cob_get_global_ptr()->cob_current_module) {\n");
+		}
+		output ("\tcob_call_params = cob_get_global_ptr ()->cob_call_params;\n");
+		output("  } else {\n");
+		output ("\tcob_call_params = %d;\n", parmnum);
+		output("  };\n");
+		output_newline();
 	}
 
 	/* We have to cater for sticky-linkage here at the entry point site */
@@ -8319,7 +8330,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	if (cb_sticky_linkage && using_list) {
 		output("  /* Set the parameter list */\n");
 		parmnum = 0;
-		output ("  switch (cob_get_global_ptr ()->cob_call_params) {\n");
+		output ("  switch (cob_call_params) {\n");
 		for (l = using_list; l; l = CB_CHAIN (l), parmnum++) {
 			output ("  case %u:\n", parmnum);
 			for (n = 0; n < parmnum; ++n) {
@@ -8886,6 +8897,9 @@ codegen (struct cb_program *prog, const int subsequent_call)
 
 	output_storage ("\n/* Module path */\n");
 	output_storage ("static const char\t\t*cob_module_path = NULL;\n");
+
+	output_storage ("\n/* Number of call parameters */\n");
+	output_storage ("static int\t\tcob_call_params = 0;\n");
 
 	output_globext_cache ();
 	output_nonlocal_base_cache ();
