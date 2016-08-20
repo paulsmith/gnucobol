@@ -6084,6 +6084,10 @@ emit_invalid_target_error (const enum cb_inspect_clause clause)
 	case TRANSFORM_STATEMENT:
 		clause_name = "TRANSFORM";
 		break;
+
+	default:
+		cobc_err_msg (_("unexpected clause %d"), clause);
+		COBC_ABORT ();
 	}
 
 	cb_error_x (CB_TREE (current_statement), _("invalid target for %s"),
