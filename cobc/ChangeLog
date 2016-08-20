@@ -1,4 +1,14 @@
 
+2016-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (identifier): added check that identifier references a field.
+	* parser.y: added checks that INSPECT and TRANSFORM have USAGE DISPLAY
+	  operands.
+	* parser.y, scanner.l: split class-names into separate token from WORD,
+	  as they can only be referenced in class conditions.
+	* scanner.l: improved style.
+	* typeck.c: refactored checking of INSPECT/TRANSFORM targets.
+
 2016-08-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (emit_screen_displays): fixed bug introduced in the previous

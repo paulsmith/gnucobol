@@ -5973,7 +5973,7 @@ cb_emit_initialize (cb_tree vars, cb_tree fillinit, cb_tree value,
 /* INSPECT statement */
 
 static void
-validate_inspect (cb_tree x, cb_tree y, const unsigned int replconv)
+validate_inspect (cb_tree x, cb_tree y, const unsigned int replacing_or_converting)
 {
 	cb_tree			l;
 	struct cb_reference	*r;
@@ -6053,7 +6053,7 @@ validate_inspect (cb_tree x, cb_tree y, const unsigned int replconv)
 		break;
 	}
 	if (size1 && size2 && size1 != size2) {
-		if (replconv == 1) {
+		if (replacing_or_converting == 1) {
 			cb_error_x (CB_TREE (current_statement),
 					_("%s operands differ in size"), "REPLACING");
 		} else {
@@ -6063,48 +6063,72 @@ validate_inspect (cb_tree x, cb_tree y, const unsigned int replconv)
 	}
 }
 
-void
-cb_emit_inspect (cb_tree var, cb_tree body, cb_tree replacing,
-		 const unsigned int replconv)
+static void
+emit_invalid_target_error (const enum cb_inspect_clause clause)
 {
-	switch (CB_TREE_TAG(var)) {
+	const char	*clause_name;
+
+	switch (clause) {
+	case TALLYING_CLAUSE:
+		clause_name = "TALLYING";
+		break;
+
+	case REPLACING_CLAUSE:
+		clause_name = "REPLACING";
+		break;
+
+	case CONVERTING_CLAUSE:
+		clause_name = "CONVERTING";
+		break;
+
+	case TRANSFORM_STATEMENT:
+		clause_name = "TRANSFORM";
+		break;
+	}
+
+	cb_error_x (CB_TREE (current_statement), _("invalid target for %s"),
+		    clause_name);
+}
+
+void
+cb_emit_inspect (cb_tree var, cb_tree body, const enum cb_inspect_clause clause)
+{
+	int	replacing_or_converting =
+		clause == REPLACING_CLAUSE || clause == CONVERTING_CLAUSE;
+	cb_tree	replacing_flag = clause == REPLACING_CLAUSE ? cb_int1 : cb_int0;
+	
+	switch (CB_TREE_TAG (var)) {
 	case CB_TAG_REFERENCE:
 		break;
 	case CB_TAG_INTRINSIC:
-		if (replconv) {
-			goto rep_error;
+		if (replacing_or_converting) {
+		        goto error;
 		}
-		switch (CB_TREE_CATEGORY(var)) {
+		switch (CB_TREE_CATEGORY (var)) {
 		case CB_CATEGORY_ALPHABETIC:
 		case CB_CATEGORY_ALPHANUMERIC:
 		case CB_CATEGORY_NATIONAL:
 			break;
 		default:
-			cb_error_x (CB_TREE (current_statement),
-					_("invalid target for %s"), "CONVERTING");
-			return;
+			goto error;
 		}
 		break;
 	case CB_TAG_LITERAL:
-		if (replconv) {
-			goto rep_error;
+		if (replacing_or_converting) {
+			goto error;
 		}
 		break;
 	default:
-		goto rep_error;
+		goto error;
 	}
-	cb_emit (CB_BUILD_FUNCALL_2 ("cob_inspect_init", var, replacing));
+
+	cb_emit (CB_BUILD_FUNCALL_2 ("cob_inspect_init", var, replacing_flag));
 	cb_emit_list (body);
 	cb_emit (CB_BUILD_FUNCALL_0 ("cob_inspect_finish"));
 	return;
-rep_error:
-	if (replconv == 1) {
-		cb_error_x (CB_TREE (current_statement),
-				_("invalid target for %s"), "REPLACING");
-	} else {
-		cb_error_x (CB_TREE (current_statement),
-				_("invalid target for %s"), "CONVERTING");
-	}
+	
+ error:
+	emit_invalid_target_error (clause);
 }
 
 void

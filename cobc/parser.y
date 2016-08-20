@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -1428,6 +1428,21 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 	display_type = MIXED_DISPLAY;
 }
 
+static void
+error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
+{
+	const int	is_numeric_literal = CB_NUMERIC_LITERAL_P (x);
+	const int	is_field_with_usage_not_display =
+		CB_REFERENCE_P (x) && CB_FIELD_P (cb_ref (x))
+		&& CB_FIELD (cb_ref (x))->usage != CB_USAGE_DISPLAY;
+	
+	if (is_numeric_literal) {
+		cb_error_x (x, _("%s is not an alphanumeric literal"), CB_LITERAL (x)->data);
+	} else if (is_field_with_usage_not_display) {
+		cb_error_x (x, _("'%s' is not USAGE DISPLAY"), cb_name (x));
+	}
+}
+ 
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -1490,6 +1505,7 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 %token CHARACTERS
 %token CLASS
 %token CLASSIFICATION
+%token CLASS_NAME		"class-name"
 %token CLOSE
 %token CODE
 %token CODE_SET			"CODE-SET"
@@ -1704,7 +1720,7 @@ error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
 %token MEMORY
 %token MERGE
 %token MINUS
-%token MNEMONIC_NAME		"MNEMONIC NAME"
+%token MNEMONIC_NAME		"Mnemonic name"
 %token MODE
 %token MOVE
 %token MULTIPLE
@@ -6595,7 +6611,7 @@ accept_body:
   {
 	cb_emit_accept_environment ($1);
   }
-| identifier FROM ENVIRONMENT simple_value _accept_exception_phrases
+| identifier FROM ENVIRONMENT simple_display_value _accept_exception_phrases
   {
 	cb_emit_get_environment ($4, $1);
   }
@@ -7085,7 +7101,7 @@ call_param:
 	}
 	$$ = CB_BUILD_PAIR (cb_int (call_mode), cb_null);
   }
-| call_type _size_optional x
+| call_type _size_optional call_x
   {
 	int	save_mode;
 
@@ -8359,17 +8375,8 @@ inspect_body:
 
 send_identifier:
   identifier
-  {
-	$$ = $1;
-  }
 | literal
-  {
-	$$ = $1;
-  }
 | function
-  {
-	$$ = $1;
-  }
 ;
 
 inspect_list:
@@ -8393,7 +8400,7 @@ inspect_tallying:
 	      || previous_tallying_phrase == VALUE_REGION_PHRASE)) {
 		cb_error (_("TALLYING clause is incomplete"));
 	} else {
-		cb_emit_inspect ($0, $3, cb_int0, 0);
+		cb_emit_inspect ($0, $3, TALLYING_CLAUSE);
 	}
 
 	$$ = $0;
@@ -8405,7 +8412,7 @@ inspect_tallying:
 inspect_replacing:
   REPLACING replacing_list
   {
-	cb_emit_inspect ($0, $2, cb_int1, 1);
+	cb_emit_inspect ($0, $2, REPLACING_CLAUSE);
 	inspect_keyword = 0;
   }
 ;
@@ -8413,11 +8420,11 @@ inspect_replacing:
 /* INSPECT CONVERTING */
 
 inspect_converting:
-  CONVERTING simple_value TO simple_all_value inspect_region
+  CONVERTING simple_display_value TO simple_display_all_value inspect_region
   {
 	cb_tree		x;
 	x = cb_build_converting ($2, $4, $5);
-	cb_emit_inspect ($0, x, cb_int0, 2);
+	cb_emit_inspect ($0, x, CONVERTING_CLAUSE);
   }
 ;
 
@@ -8433,7 +8440,7 @@ tallying_list:
 ;
 
 tallying_item:
-  simple_value FOR
+  numeric_identifier FOR
   {
 	check_preceding_tallying_phrases (FOR_PHRASE);
 	$$ = cb_build_tallying_data ($1);
@@ -8458,7 +8465,7 @@ tallying_item:
 	check_preceding_tallying_phrases (ALL_LEADING_TRAILING_PHRASES);
 	$$ = cb_build_tallying_trailing ();
   }
-| simple_value inspect_region
+| simple_display_value inspect_region
   {
 	check_preceding_tallying_phrases (VALUE_REGION_PHRASE);
 	$$ = cb_build_tallying_value ($1, $2);
@@ -8471,7 +8478,7 @@ replacing_list:
 ;
 
 replacing_item:
-  CHARACTERS BY simple_value inspect_region
+  CHARACTERS BY simple_display_value inspect_region
   {
 	$$ = cb_build_replacing_characters ($3, $4);
 	inspect_keyword = 0;
@@ -8491,7 +8498,7 @@ rep_keyword:
 ;
 
 replacing_region:
-  simple_value BY simple_all_value inspect_region
+  simple_display_value BY simple_display_all_value inspect_region
   {
 	switch (inspect_keyword) {
 		case 1:
@@ -9177,7 +9184,7 @@ up_or_down:
 /* SET ENVIRONMENT ... TO ... */
 
 set_environment:
-  ENVIRONMENT simple_value TO simple_value
+  ENVIRONMENT simple_display_value TO simple_display_value
   {
 	cb_emit_setenv ($2, $4);
   }
@@ -9767,12 +9774,12 @@ transform_statement:
 ;
 
 transform_body:
-  identifier FROM simple_value TO simple_all_value
+  display_identifier FROM simple_display_value TO simple_display_all_value
   {
 	cb_tree		x;
 
 	x = cb_build_converting ($3, $5, cb_build_inspect_region_start ());
-	cb_emit_inspect ($1, x, cb_int0, 2);
+	cb_emit_inspect ($1, x, TRANSFORM_STATEMENT);
   }
 ;
 
@@ -9833,7 +9840,7 @@ unstring_delimited_list:
 ;
 
 unstring_delimited_item:
-  flag_all simple_value
+  flag_all simple_display_value
   {
 	$$ = cb_build_unstring_delimited ($1, $2);
   }
@@ -10607,14 +10614,8 @@ expr_tokens:
 ;
 
 expr_token:
-  x
-  {
-	if (CB_REFERENCE_P ($1) && CB_CLASS_NAME_P (cb_ref ($1))) {
-		push_expr ('C', $1);
-	} else {
-		push_expr ('x', $1);
-	}
-  }
+  x				{ push_expr ('x', $1); }
+| CLASS_NAME			{ push_expr ('C', $1); }
 /* Parentheses */
 | TOK_OPEN_PAREN		{ push_expr ('(', NULL); }
 | TOK_CLOSE_PAREN		{ push_expr (')', NULL); }
@@ -11089,7 +11090,16 @@ x_list:
 
 x:
   identifier
-| literal
+| x_common
+;
+
+call_x:
+  identifier_or_file_name
+| x_common
+;
+
+x_common:
+  literal
 | function
 | line_linage_page_counter
 | LENGTH_OF identifier_1
@@ -11178,22 +11188,30 @@ alnum_or_id:
 | LITERAL
 ;
 
+simple_display_value:
+  simple_value
+  {
+	error_if_not_usage_display_or_nonnumeric_lit ($1);
+  }
+;
+
+simple_display_all_value:
+  simple_all_value
+  {
+	error_if_not_usage_display_or_nonnumeric_lit ($1);
+  }
+;
+
 simple_value:
   identifier
 | basic_literal
+| function
 ;
 
 simple_all_value:
   identifier
 | literal
 ;
-
-/*
-numeric_value:
-  identifier
-| integer
-;
-*/
 
 id_or_lit:
   identifier
@@ -11264,8 +11282,58 @@ sub_identifier_1:
 | qualified_word subref		{ $$ = $1; }
 ;
 
+display_identifier:
+  identifier
+  {
+	error_if_not_usage_display_or_nonnumeric_lit ($1);
+  }
+;
+
+numeric_identifier:
+  identifier
+  {
+	if ($1 != cb_error_node
+	    && cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
+		cb_error_x ($1, _("'%s' is not numeric"), cb_name ($1));
+	}
+  }
+;
+
+identifier_or_file_name:
+  identifier_1
+  {
+	int     reference_to_existing_object;
+	  
+	if (CB_REFERENCE_P ($1) && (CB_FIELD_P (cb_ref ($1))
+				    || CB_FILE_P (cb_ref ($1)))) {
+		$$ = cb_build_identifier ($1, 0);
+	} else {
+	        reference_to_existing_object =
+			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
+		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
+			cb_error_x ($1, _("'%s' is not a field or file"), cb_name ($1));
+		}
+		$$ = cb_error_node;
+	}
+  }
+;
+
 identifier:
-  identifier_1			{ $$ = cb_build_identifier ($1, 0); }
+  identifier_1
+  {
+	int     reference_to_existing_object;
+	  
+	if (CB_REFERENCE_P ($1) && CB_FIELD_P (cb_ref ($1))) {
+		$$ = cb_build_identifier ($1, 0);
+	} else {
+	        reference_to_existing_object =
+			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
+		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
+			cb_error_x ($1, _("'%s' is not a field"), cb_name ($1));
+		}
+		$$ = cb_error_node;
+	}
+  }
 ;
 
 identifier_1:

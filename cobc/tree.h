@@ -1366,6 +1366,16 @@ enum cb_display_type {
 	MIXED_DISPLAY
 };
 
+/* INSPECT clauses */
+
+enum cb_inspect_clause {
+	TALLYING_CLAUSE,
+	REPLACING_CLAUSE,
+	CONVERTING_CLAUSE,
+	/* This is what happens when you support OS/VS COBOL. */
+	TRANSFORM_STATEMENT
+};
+
 /* Functions/variables */
 
 /* tree.c */
@@ -1721,7 +1731,7 @@ extern void		cb_emit_initialize (cb_tree, cb_tree,
 					    cb_tree);
 
 extern void		cb_emit_inspect (cb_tree, cb_tree,
-					 cb_tree, const unsigned int);
+					 const enum cb_inspect_clause);
 extern void		cb_init_tallying (void);
 extern cb_tree		cb_build_tallying_data (cb_tree);
 extern cb_tree		cb_build_tallying_characters (cb_tree);

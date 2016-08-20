@@ -226,7 +226,7 @@ static void	scan_options (const char *, const unsigned int);
 %%
 
 %{
-	if (likely(current_program)) {
+	if (likely (current_program)) {
 		if (current_program->decimal_point == '.') {
 			BEGIN DECIMAL_IS_PERIOD;
 		} else {
@@ -750,7 +750,7 @@ H#[0-9A-Za-z]* {
 	struct cb_program		*program;
 
 	/* Check word length */
-	if (unlikely(yyleng > cb_word_length)) {
+	if (unlikely (yyleng > cb_word_length)) {
 		if (yyleng > COB_MAX_WORDLEN) {
 			/* Absolute limit */
 			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
@@ -796,7 +796,7 @@ H#[0-9A-Za-z]* {
 	}
 
 	/* Bail early for (END) PROGRAM-ID when not a literal */
-	if (unlikely(cobc_force_literal)) {
+	if (unlikely (cobc_force_literal)) {
 		/* Force PROGRAM-ID / END PROGRAM */
 		cobc_force_literal = 0;
 		if (cb_fold_call) {
@@ -868,7 +868,7 @@ H#[0-9A-Za-z]* {
 
 	for (p78 = top78ptr; p78; p78 = p78->globnext) {
 		if (strcasecmp (yytext, p78->fld78->name) == 0) {
-			if (unlikely(non_const_word)) {
+			if (unlikely (non_const_word)) {
 				if (p78->prog == current_program) {
 					cb_error (_("a constant may not be used here - '%s'"), yytext);
 					yylval = cb_error_node;
@@ -894,6 +894,8 @@ H#[0-9A-Za-z]* {
 		x = CB_VALUE (CB_WORD_ITEMS (yylval));
 		if (CB_SYSTEM_NAME_P (x)) {
 			return MNEMONIC_NAME;
+		} else if (CB_CLASS_NAME_P (x)) {
+			return CLASS_NAME;
 		}
 	}
 
@@ -1103,7 +1105,7 @@ read_literal (const char mark)
 	   or (unliky) we reach EOF */
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely(i == plexsize)) {
+			if (unlikely (i == plexsize)) {
 				plexsize *= 2;
 				if (unlikely (plexsize > (cb_lit_length + 1))) {
 					plexsize = cb_lit_length + 1;
@@ -1164,7 +1166,7 @@ scan_x (const char *text)
 
 	/* currlen includes the terminating quote */
 	currlen = strlen (text);
-	if (unlikely(currlen - 1 > cb_lit_length)) {
+	if (unlikely (currlen - 1 > cb_lit_length)) {
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
@@ -1172,7 +1174,7 @@ scan_x (const char *text)
 		error_literal ("X", text);
 		goto error;
 	}
-	if (unlikely(currlen > plexsize)) {
+	if (unlikely (currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
@@ -1221,7 +1223,7 @@ scan_x (const char *text)
 		error_literal ("X", plexbuff);
 	}
 
-	if (unlikely(literal_error != 0)) {
+	if (unlikely (literal_error != 0)) {
 		goto error;
 	}
 
@@ -1242,7 +1244,7 @@ scan_z (const char *text, const cob_u32_t llit)
 
 	/* currlen includes the terminating quote */
 	currlen = strlen (text);
-	if (unlikely((currlen - 1) > cb_lit_length)) {
+	if (unlikely ((currlen - 1) > cb_lit_length)) {
 		currlen--;
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
@@ -1255,7 +1257,7 @@ scan_z (const char *text, const cob_u32_t llit)
 		yylval = cb_error_node;
 		return LITERAL;
 	}
-	if (unlikely(currlen > plexsize)) {
+	if (unlikely (currlen > plexsize)) {
 		plexsize = currlen;
 		plexbuff = cobc_realloc (plexbuff, plexsize);
 	}
@@ -1291,7 +1293,7 @@ scan_h (const char *text, const cob_u32_t with_mark)
 		currlen--;
 		plexbuff[currlen] = 0;
 	}
-	if (unlikely(currlen > 16)) {
+	if (unlikely (currlen > 16)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
 			  (int) currlen,  16);
@@ -1356,7 +1358,7 @@ scan_b (const char *text, const cob_u32_t with_mark)
 		currlen--;
 		plexbuff[currlen] = 0;
 	}
-	if (unlikely(currlen > 64)) {
+	if (unlikely (currlen > 64)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
 			  (int) currlen, 64);
@@ -1410,7 +1412,7 @@ scan_o (const char *text)
 
 	currlen = strlen (text);
 	memcpy (plexbuff, text, currlen + 1);
-	if (unlikely(currlen > 22)) {
+	if (unlikely (currlen > 22)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			  _("literal length %d exceeds %d characters"),
 			  (int) currlen, 22);
@@ -1489,14 +1491,14 @@ scan_numeric (const char *text)
 
 	/* Note that leading zeroes are not removed from the literal. */
 
-	if (unlikely(strlen (p) > COB_MAX_DIGITS)) {
+	if (unlikely (strlen (p) > COB_MAX_DIGITS)) {
 		/* Absolute limit */
 		snprintf (err_msg, COB_MINI_MAX,
 			  _("literal length %d exceeds maximum of %d digits"),
 			  (int) strlen (p), COB_MAX_DIGITS);
 		error_literal ("num", text);
 		yylval = cb_error_node;
-	} else if (unlikely(strlen (p) > cb_numlit_length)) {
+	} else if (unlikely (strlen (p) > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			  _("literal length %d exceeds %d digits"),
 			  (int) strlen (p), cb_numlit_length);
