@@ -36,6 +36,7 @@
 #endif
 
 static int arg_shift = 1;
+static int print_runtime_wanted = 0;
 
 static const char short_options[] = "+hirc:VqM:";
 
@@ -308,9 +309,9 @@ process_command_line (int argc, char *argv[])
 
 		case 'r':
 			/* --runtime-conf */
-			cob_init (0, &argv[0]);
-			print_runtime_conf ();
-			exit (0);
+			print_runtime_wanted = 1;
+			arg_shift++;
+			break;
 
 		case 'V':
 			/* --version */
@@ -353,16 +354,30 @@ main (int argc, char **argv)
 
 	/* At least one option or module name needed */
 	if (argc <= arg_shift) {
+		if (print_runtime_wanted) {
+			cob_init (0, &argv[0]);
+			print_runtime_conf ();
+			cob_stop_run (0);
+		}
 		cobcrun_print_usage (argv[0]);
-		exit (1);
+		return 1;
 	}
 
 	if (strlen (argv[arg_shift]) > 31) {
+		if (print_runtime_wanted) {
+			cob_init (0, &argv[0]);
+			print_runtime_conf ();
+			putc ('\n', stderr);
+		}
 		fputs (_("PROGRAM name exceeds 31 characters"), stderr);
 		putc ('\n', stderr);
-		return 1;
+		cob_stop_run (1);
 	}
 	cob_init (argc - arg_shift, &argv[arg_shift]);
+	if (print_runtime_wanted) {
+		print_runtime_conf ();
+		putc ('\n', stderr);
+	}
 	unifunc.funcvoid = cob_resolve (argv[arg_shift]);
 	if (unifunc.funcvoid == NULL) {
 		cob_call_error ();
