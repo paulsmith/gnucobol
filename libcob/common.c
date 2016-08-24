@@ -2710,7 +2710,7 @@ cob_get_current_date_and_time (void)
 	cb_time.hour = local_time.wHour;
 	cb_time.minute = local_time.wMinute;
 	cb_time.second = local_time.wSecond;
-	cb_time.nanosecond = local_time.wMilliseconds;
+	cb_time.nanosecond = local_time.wMilliseconds * 1000000;
 	cb_time.offset_known = 0;
 	cb_time.utc_offset = 0;
 
