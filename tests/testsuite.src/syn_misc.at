@@ -399,7 +399,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 11: error: syntax error, unexpected BEFORE
-prog.cob: 13: error: syntax error, unexpected end of file
 ])
 AT_CLEANUP
 
@@ -621,8 +620,7 @@ prog.cob: 49: error: 'SWIT1-ON' is not defined
 prog.cob: 56: error: 'SWIT2-ON' is not defined
 prog.cob: 63: error: 'SWITCH-B' is not defined
 prog.cob: 63: error: syntax error, unexpected OFF
-prog.cob: 64: error: syntax error, unexpected Identifier
-prog.cob: 66: error: syntax error, unexpected END-IF
+prog.cob: 64: error: 'SWIT2-ON' is not defined
 prog.cob: 70: error: 'SWIT26-ON' is not defined
 prog.cob: 76: error: 'SWIT32-OFF' is not defined
 ])
@@ -1738,43 +1736,28 @@ NOFLOATING
 AT_CHECK([$COMPILE_ONLY -free prog3.cob], [1], [],
 [prog3.cob: 11: warning: spurious '$' detected - ignored
 prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 9: error: syntax error, unexpected Literal
 prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 10: error: syntax error, unexpected Literal
 prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 12: error: syntax error, unexpected Literal
 prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 13: error: syntax error, unexpected Literal
 prog3.cob: 14: error: invalid symbol '|' - skipping word
 prog3.cob: 16: error: syntax error, unexpected Identifier
-prog3.cob: 16: error: syntax error, unexpected Literal
 ])
 AT_CHECK([$COMPILE_ONLY -free -fmfcomment prog3.cob], [1], [],
 [prog3.cob: 11: warning: spurious '$' detected - ignored
 prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 9: error: syntax error, unexpected Literal
 prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 10: error: syntax error, unexpected Literal
 prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 12: error: syntax error, unexpected Literal
 prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 13: error: syntax error, unexpected Literal
 prog3.cob: 14: error: invalid symbol '|' - skipping word
 prog3.cob: 16: error: syntax error, unexpected Identifier
-prog3.cob: 16: error: syntax error, unexpected Literal
 ])
 AT_CHECK([$COMPILE_ONLY -free -facucomment prog3.cob], [1], [],
 [prog3.cob: 11: warning: spurious '$' detected - ignored
 prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 9: error: syntax error, unexpected Literal
 prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 10: error: syntax error, unexpected Literal
 prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 12: error: syntax error, unexpected Literal
 prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 13: error: syntax error, unexpected Literal
 prog3.cob: 16: error: syntax error, unexpected Identifier
-prog3.cob: 16: error: syntax error, unexpected Literal
 ])
 # Check that invalid indicator and doesn't abort preprocessing
 # and that errors in preprocessing doesn't abort compilation

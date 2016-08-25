@@ -132,6 +132,7 @@ int				cb_exp_line = 0;
 cb_tree				cobc_printer_node = NULL;
 int				functions_are_all = 0;
 int				non_const_word = 0;
+unsigned int			cobc_repeat_last_token = 0;
 unsigned int			cobc_in_id = 0;
 unsigned int			cobc_in_procedure = 0;
 unsigned int			cobc_in_repository = 0;
@@ -11908,7 +11909,21 @@ flag_separate:
 
 error_stmt_recover:
   TOK_DOT
-| ACCEPT
+  {
+	cobc_repeat_last_token = 1;
+  }
+| verb
+  {
+	cobc_repeat_last_token = 1;
+  }
+| scope_terminator
+  {
+	cobc_repeat_last_token = 0;
+  }
+;
+
+verb:
+  ACCEPT
 | ADD
 | ALLOCATE
 | ALTER
@@ -11957,7 +11972,10 @@ error_stmt_recover:
 | UNLOCK
 | UNSTRING
 | WRITE
-| END_ACCEPT
+;
+  
+scope_terminator:
+  END_ACCEPT
 | END_ADD
 | END_CALL
 | END_COMPUTE

@@ -806,8 +806,6 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob: 10: error: syntax error, unexpected SPECIAL-NAMES
 prog.cob: 11: error: syntax error, unexpected DECIMAL-POINT
 prog.cob: 13: error: syntax error, unexpected SOURCE-COMPUTER
-prog.cob: 13: error: syntax error, unexpected Identifier
-prog.cob: 14: error: syntax error, unexpected end of file
 ])
 AT_CLEANUP
 

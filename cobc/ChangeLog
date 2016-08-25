@@ -1,4 +1,10 @@
 
+2016-08-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, scanner.l, tree.h: fixed bug #305, where the
+	  error_stmt_recover token was consumed when it was needed to resume
+	  normal parsing.
+
 2016-08-20  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (identifier): added check that identifier references a field.

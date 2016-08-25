@@ -1573,6 +1573,7 @@ extern cb_tree	cb_build_system_name (const enum cb_system_name_category,
 /* parser.y */
 extern cb_tree		cobc_printer_node;
 extern int		non_const_word;
+extern unsigned int	cobc_repeat_last_token;
 extern unsigned int	cobc_in_id;
 extern unsigned int	cobc_in_procedure;
 extern unsigned int	cobc_in_repository;

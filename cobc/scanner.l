@@ -55,27 +55,27 @@ static int yywrap (void) {
     return 1;
 }
 
-#define YY_INPUT(buf,result,max_size)	\
-	{	\
+#define YY_INPUT(buf,result,max_size)				\
+	{							\
 		if (fgets (buf, (int)max_size, yyin) == NULL) { \
-			result = YY_NULL; \
-		} else { \
-			result = strlen (buf); \
-		} \
+			result = YY_NULL;			\
+		} else {					\
+			result = strlen (buf);			\
+		}						\
 	}
 
-#define	YY_USER_INIT	\
+#define	YY_USER_INIT						\
 	if (!plexbuff) {					\
 		plexsize = COB_MINI_BUFF;			\
-		plexbuff = cobc_malloc (plexsize);	\
+		plexbuff = cobc_malloc (plexsize);		\
 	}							\
 	if (!picbuff1) {					\
 		pic1size = COB_MINI_BUFF;			\
-		picbuff1 = cobc_malloc (pic1size);	\
+		picbuff1 = cobc_malloc (pic1size);		\
 	}							\
 	if (!picbuff2) {					\
 		pic2size = COB_MINI_BUFF;			\
-		picbuff2 = cobc_malloc (pic2size);	\
+		picbuff2 = cobc_malloc (pic2size);		\
 	}
 
 #include "config.h"
@@ -94,6 +94,13 @@ static int yywrap (void) {
 
 #define YYSTYPE			cb_tree
 #include "parser.h"
+
+#define RETURN(expr)				\
+	do {					\
+		last_yylval = yylval;		\
+		last_token = (expr);		\
+		return last_token;		\
+	} ONCE_COB
 
 /* CONSTANT (78 level) structure */
 struct cb_level_78 {
@@ -115,6 +122,8 @@ struct cb_top_level_78 {
 };
 
 /* Local variables */
+static cb_tree			last_yylval;
+static int			last_token;
 static struct cb_level_78	*top78ptr = NULL;
 static struct cb_level_78	*const78ptr = NULL;
 static struct cb_level_78	*lev78ptr = NULL;
@@ -234,6 +243,12 @@ static void	scan_options (const char *, const unsigned int);
 		}
 	}
 
+	if (cobc_repeat_last_token) {
+		cobc_repeat_last_token = 0;
+		yylval = last_yylval;
+	        return last_token;
+	}
+
 	/* We treat integer literals immediately after '.' as labels;
 	   that is, they must be level numbers or section names. */
 	if (last_token_is_dot) {
@@ -295,7 +310,7 @@ static void	scan_options (const char *, const unsigned int);
 "FUNCTION" {
 	if (cobc_in_repository || cobc_cs_check == CB_CS_EXIT) {
 		yylval = NULL;
-		return FUNCTION;
+	        RETURN (FUNCTION);
 	}
 	BEGIN FUNCTION_STATE;
 }
@@ -304,42 +319,42 @@ static void	scan_options (const char *, const unsigned int);
 	/* String literal */
 	cobc_force_literal = 0;
 	read_literal (yytext[0]);
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 X\'[^\'\n]*\' |
 X\"[^\"\n]*\" {
 	/* X string literal */
 	cobc_force_literal = 0;
-	return scan_x (yytext + 2);
+	RETURN (scan_x (yytext + 2));
 }
 
 Z\'[^\'\n]*\' |
 Z\"[^\"\n]*\" {
 	/* Z string literal */
 	cobc_force_literal = 0;
-	return scan_z (yytext + 2, 0);
+	RETURN (scan_z (yytext + 2, 0));
 }
 
 L\'[^\'\n]*\' |
 L\"[^\"\n]*\" {
 	/* L string literal */
 	cobc_force_literal = 0;
-	return scan_z (yytext + 2, 1);
+	RETURN (scan_z (yytext + 2, 1));
 }
 
 H\'[^\'\n]*\' |
 H\"[^\"\n]*\" {
 	/* H numeric literal */
 	cobc_force_literal = 0;
-	return scan_h (yytext + 2, 1);
+	RETURN (scan_h (yytext + 2, 1));
 }
 
 B\'[^\'\n]*\' |
 B\"[^\"\n]*\" {
 	/* B boolean/numeric literal */
 	cobc_force_literal = 0;
-	return scan_b (yytext + 2, 1);
+	RETURN (scan_b (yytext + 2, 1));
 }
 
 B#[0-9]* {
@@ -350,32 +365,32 @@ B#[0-9]* {
 	*/
 	/* ACUCOBOL binary numeric literal */
 	cobc_force_literal = 0;
-	return scan_b (yytext + 2, 0);
+	RETURN (scan_b (yytext + 2, 0));
 }
 
 O#[0-9]* {
 	/* ACUCOBOL octal numeric literal */
 	cobc_force_literal = 0;
-	return scan_o (yytext + 2);
+	RETURN (scan_o (yytext + 2));
 }
 
 X#[0-9A-Za-z]* |
 H#[0-9A-Za-z]* {
 	/* ACUCOBOL hexadecimal numeric literal */
 	cobc_force_literal = 0;
-	return scan_h (yytext + 2, 0);
+	RETURN (scan_h (yytext + 2, 0));
 }
 
 \( {
 	inside_bracket++;
-	return TOK_OPEN_PAREN;
+	RETURN (TOK_OPEN_PAREN);
 }
 
 \) {
 	if (inside_bracket > 0) {
 		inside_bracket--;
 	}
-	return TOK_CLOSE_PAREN;
+	RETURN (TOK_CLOSE_PAREN);
 }
 
 [0-9]+ {
@@ -385,28 +400,28 @@ H#[0-9A-Za-z]* {
 		if (!cobc_in_procedure) {
 			if (!strcmp (yytext, "66")) {
 				/* Level number 66 */
-				return SIXTY_SIX;
+				RETURN (SIXTY_SIX);
 			} else if (!strcmp (yytext, "78")) {
 				/* Level number 78 */
-				return SEVENTY_EIGHT;
+				RETURN (SEVENTY_EIGHT);
 			} else if (!strcmp (yytext, "88")) {
 				/* Level number 88 */
-				return EIGHTY_EIGHT;
+				RETURN (EIGHTY_EIGHT);
 			}
 		}
 
 		/* Integer label or level number */
-		return WORD;
+		RETURN (WORD);
 	}
 	/* Numeric literal or referenced integer label */
 	/* All transformations/checks are postponed to tree.c */
 	yylval = cb_build_numeric_literal (0, yytext, 0);
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 [+-][0-9]+ {
 	/* Numeric literal (signed) */
-	return scan_numeric (yytext);
+	RETURN (scan_numeric (yytext));
 }
 
 <*>[ ]+ {
@@ -415,46 +430,46 @@ H#[0-9A-Za-z]* {
 
 <*>;+ {
 	if (inside_bracket) {
-		return SEMI_COLON;
+		RETURN (SEMI_COLON);
 	}
 	/* Ignore */
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
-	return scan_floating_numeric (yytext);
+	RETURN (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]*\.[0-9]+ {
 	/* Invalid numeric floating point literal */
-	return scan_floating_numeric (yytext);
+	RETURN (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+ {
 	/* Numeric literal */
-	return scan_numeric (yytext);
+	RETURN (scan_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>,+ {
 	if (inside_bracket) {
-		return COMMA_DELIM;
+		RETURN (COMMA_DELIM);
 	}
 	/* Ignore */
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
-	return scan_floating_numeric (yytext);
+	RETURN (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]*,[0-9]+ {
 	/* Invalid numeric floating point literal */
-	return scan_floating_numeric (yytext);
+	RETURN (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+ {
 	/* Numeric literal */
-	return scan_numeric (yytext);
+	RETURN (scan_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>,{2,} {
@@ -463,7 +478,7 @@ H#[0-9A-Za-z]* {
 
 <DECIMAL_IS_COMMA>, {
 	if (inside_bracket) {
-		return COMMA_DELIM;
+		RETURN (COMMA_DELIM);
 	}
 	/* Ignore */
 }
@@ -471,43 +486,43 @@ H#[0-9A-Za-z]* {
 "END"[ ,;\n]+"PROGRAM" {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	return END_PROGRAM;
+	RETURN (END_PROGRAM);
 }
 
 "END"[ ,;\n]+"FUNCTION" {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	return END_FUNCTION;
+	RETURN (END_FUNCTION);
 }
 
 "PICTURE"[ ,;\n]+"SYMBOL" {
 	count_lines (yytext);
-	return PICTURE_SYMBOL;
+	RETURN (PICTURE_SYMBOL);
 }
 
 "FROM"[ ,;\n]+"CRT" {
 	count_lines (yytext);
-	return FROM_CRT;
+	RETURN (FROM_CRT);
 }
 
 "SCREEN"[ ,;\n]+"CONTROL" {
 	count_lines (yytext);
-	return SCREEN_CONTROL;
+	RETURN (SCREEN_CONTROL);
 }
 
 "EVENT"[ ,;\n]+"STATUS" {
 	count_lines (yytext);
-	return EVENT_STATUS;
+	RETURN (EVENT_STATUS);
 }
 
 "READY"[ ,;\n]+"TRACE" {
 	count_lines (yytext);
-	return READY_TRACE;
+	RETURN (READY_TRACE);
 }
 
 "RESET"[ ,;\n]+"TRACE" {
 	count_lines (yytext);
-	return RESET_TRACE;
+	RETURN (RESET_TRACE);
 }
 
 "GREATER"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
@@ -515,12 +530,12 @@ H#[0-9A-Za-z]* {
 "GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
 "GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
 	count_lines (yytext);
-	return GREATER_OR_EQUAL;
+	RETURN (GREATER_OR_EQUAL);
 }
 
 "GREATER"[ ,;\n]+"THAN"[ ,;\n] {
 	count_lines (yytext);
-	return GREATER;
+	RETURN (GREATER);
 }
 
 "LESS"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
@@ -528,105 +543,105 @@ H#[0-9A-Za-z]* {
 "LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
 "LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
 	count_lines (yytext);
-	return LESS_OR_EQUAL;
+	RETURN (LESS_OR_EQUAL);
 }
 
 "LESS"[ ,;\n]+"THAN"[ ,;\n] {
 	count_lines (yytext);
-	return LESS;
+	RETURN (LESS);
 }
 
 "EQUAL"[ ,;\n]+"TO"[ ,;\n] {
 	count_lines (yytext);
-	return EQUAL;
+	RETURN (EQUAL);
 }
 
 "THEN"[ ,;\n]+"REPLACING"[ ,;\n] {
 	count_lines (yytext);
-	return REPLACING;
+	RETURN (REPLACING);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"TOP"[ ,;\n] |
 "LINES"[ ,;\n]+"TOP"[ ,;\n] |
 "AT"[ ,;\n]+"TOP"[ ,;\n] {
 	count_lines (yytext);
-	return TOP;
+	RETURN (TOP);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"BOTTOM"[ ,;\n] |
 "LINES"[ ,;\n]+"BOTTOM"[ ,;\n] |
 "AT"[ ,;\n]+"BOTTOM"[ ,;\n] {
 	count_lines (yytext);
-	return BOTTOM;
+	RETURN (BOTTOM);
 }
 
 "WITH"[ ,;\n]+"NO"[ ,;\n]+"ADVANCING" |
 "NO"[ ,;\n]+"ADVANCING" {
 	count_lines (yytext);
-	return NO_ADVANCING;
+	RETURN (NO_ADVANCING);
 }
 
 "ON"[ ,;\n]+"NEXT"[ ,;\n]+"PAGE"[ ,;\n] |
 "NEXT"[ ,;\n]+"PAGE"[ ,;\n] {
 	count_lines (yytext);
-	return NEXT_PAGE;
+	RETURN (NEXT_PAGE);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
 "NOT"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_SIZE_ERROR;
+	RETURN (NOT_SIZE_ERROR);
 }
 
 "ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
 "SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
 	count_lines (yytext);
-	return SIZE_ERROR;
+	RETURN (SIZE_ERROR);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"ESCAPE"[ ,;\n] |
 "NOT"[ ,;\n]+"ESCAPE"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_ESCAPE;
+	RETURN (NOT_ESCAPE);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"EXCEPTION"[ ,;\n] |
 "NOT"[ ,;\n]+"EXCEPTION"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_EXCEPTION;
+	RETURN (NOT_EXCEPTION);
 }
 
 "ON"[ ,;\n]+"ESCAPE"[ ,;\n] {
 	count_lines (yytext);
-	return ESCAPE;
+	RETURN (ESCAPE);
 }
 
 "ON"[ ,;\n]+"EXCEPTION"[ ,;\n] {
 	count_lines (yytext);
-	return EXCEPTION;
+	RETURN (EXCEPTION);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
 "NOT"[ ,;\n]+"OVERFLOW"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_OVERFLOW;
+	RETURN (NOT_OVERFLOW);
 }
 
 "NOT"[ ,;\n]+"AT"[ ,;\n]+"END"[ ,;\n] |
 "NOT"[ ,;\n]+"END"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_END;
+	RETURN (NOT_END);
 }
 
 "AT"[ ,;\n]+"END"[ ,;\n] {
 	count_lines (yytext);
-	return END;
+	RETURN (END);
 }
 
 "ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
 "OVERFLOW"[ ,;\n] {
 	count_lines (yytext);
-	return TOK_OVERFLOW;
+	RETURN (TOK_OVERFLOW);
 }
 
 "NOT"[ ,;\n]+"AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
@@ -634,7 +649,7 @@ H#[0-9A-Za-z]* {
 "NOT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
 "NOT"[ ,;\n]+"EOP"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_EOP;
+	RETURN (NOT_EOP);
 }
 
 "AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
@@ -642,67 +657,67 @@ H#[0-9A-Za-z]* {
 "END-OF-PAGE"[ ,;\n] |
 "EOP"[ ,;\n] {
 	count_lines (yytext);
-	return EOP;
+	RETURN (EOP);
 }
 
 "NOT"[ ,;\n]+"INVALID"[ ,;\n]+"KEY"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_INVALID_KEY;
+	RETURN (NOT_INVALID_KEY);
 }
 
 "NOT"[ ,;\n]+"INVALID"[ ,;\n] {
 	count_lines (yytext);
-	return NOT_INVALID_KEY;
+	RETURN (NOT_INVALID_KEY);
 }
 
 "INVALID"[ ,;\n]+"KEY"[ ,;\n] {
 	count_lines (yytext);
-	return INVALID_KEY;
+	RETURN (INVALID_KEY);
 }
 
 "INVALID"[ ,;\n] {
 	count_lines (yytext);
-	return INVALID_KEY;
+	RETURN (INVALID_KEY);
 }
 
 "UPON"[ ,;\n]+"ENVIRONMENT-NAME" {
 	count_lines (yytext);
-	return UPON_ENVIRONMENT_NAME;
+	RETURN (UPON_ENVIRONMENT_NAME);
 }
 
 "UPON"[ ,;\n]+"ENVIRONMENT-VALUE" {
 	count_lines (yytext);
-	return UPON_ENVIRONMENT_VALUE;
+	RETURN (UPON_ENVIRONMENT_VALUE);
 }
 
 "UPON"[ ,;\n]+"ARGUMENT-NUMBER" {
 	count_lines (yytext);
-	return UPON_ARGUMENT_NUMBER;
+	RETURN (UPON_ARGUMENT_NUMBER);
 }
 
 "UPON"[ ,;\n]+"COMMAND-LINE" {
 	count_lines (yytext);
-	return UPON_COMMAND_LINE;
+	RETURN (UPON_COMMAND_LINE);
 }
 
 "AFTER"[ ,;\n]+"EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
 	count_lines (yytext);
-	return EXCEPTION_CONDITION;
+	RETURN (EXCEPTION_CONDITION);
 }
 
 "EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
 	count_lines (yytext);
-	return EXCEPTION_CONDITION;
+	RETURN (EXCEPTION_CONDITION);
 }
 
 "AFTER"[ ,;\n]+"EC"[ ,;\n] {
 	count_lines (yytext);
-	return EC;
+	RETURN (EC);
 }
 
 "LENGTH"[ ,;\n]+"OF"[ ,;\n] {
 	count_lines (yytext);
-	return LENGTH_OF;
+	RETURN (LENGTH_OF);
 }
 
 "SWITCH"[ ]+([0-9][0-9]?|[A-Z])[ ,;\n] {
@@ -737,7 +752,7 @@ H#[0-9A-Za-z]* {
 		strcat(name, suffix);
 		yylval = cb_build_reference (name);
 	}
-	return WORD;
+	RETURN (WORD);
 }
 
 [A-Z0-9\x80-\xFF]([_A-Z0-9\x80-\xFF-]*[A-Z0-9\x80-\xFF]+)? {
@@ -771,16 +786,16 @@ H#[0-9A-Za-z]* {
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-				return FUNCTION_NAME;
+				RETURN (FUNCTION_NAME);
 			}
 			if (functions_are_all) {
 				yylval = cb_build_reference (yytext);
-				return (enum yytokentype)(cbp->token);
+				RETURN ((enum yytokentype)(cbp->token));
 			}
 			for (tlp = cb_intrinsic_list; tlp; tlp = tlp->next) {
 				if (!strcasecmp (yytext, tlp->text)) {
 					yylval = cb_build_reference (yytext);
-					return (enum yytokentype)(cbp->token);
+					RETURN ((enum yytokentype)(cbp->token));
 				}
 			}
 			l = current_program->function_spec_list;
@@ -789,7 +804,7 @@ H#[0-9A-Za-z]* {
 				if (!strcasecmp (yytext,
 						 (char *)(CB_LITERAL(x)->data))) {
 					yylval = cb_build_reference (yytext);
-					return (enum yytokentype)(cbp->token);
+					RETURN ((enum yytokentype)(cbp->token));
 				}
 			}
 		}
@@ -801,10 +816,10 @@ H#[0-9A-Za-z]* {
 		cobc_force_literal = 0;
 		if (cb_fold_call) {
 			yylval = cb_build_reference (yytext);
-			return PROGRAM_NAME;
+			RETURN (PROGRAM_NAME);
 		} else {
 			yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-			return LITERAL;
+			RETURN (LITERAL);
 		}
 	}
 
@@ -818,13 +833,13 @@ H#[0-9A-Za-z]* {
 		} else {
 			yylval = NULL;
 		}
-		return resptr->token;
+		RETURN (resptr->token);
 	}
 
 	/* New user-defined word in REPOSITORY entry */
 	if (cobc_in_repository) {
 		yylval = cb_build_reference (yytext);
-		return WORD;
+		RETURN (WORD);
 	}
 
 	/* Direct recursive reference in function */
@@ -832,15 +847,15 @@ H#[0-9A-Za-z]* {
 		   && !functions_are_all
 		   && !strcasecmp (yytext, current_program->orig_program_id)) {
 		yylval = cb_build_reference (yytext);
-		return USER_FUNCTION_NAME;
-	}	
+		RETURN (USER_FUNCTION_NAME);
+	}
 
 	/* Check prototype names */
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			yylval = cb_build_reference (yytext);
-			return USER_FUNCTION_NAME;
+			RETURN (USER_FUNCTION_NAME);
 		}
 	}
 	if (cobc_allow_program_name) {
@@ -848,7 +863,7 @@ H#[0-9A-Za-z]* {
 			x = CB_VALUE (l);
 			if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
-				return PROGRAM_NAME;
+				RETURN (PROGRAM_NAME);
 			}
 		}
 	}
@@ -858,10 +873,10 @@ H#[0-9A-Za-z]* {
 		program = cb_find_defined_program_by_name (yytext);
 		if (program) {
 			yylval = cb_build_reference (yytext);
-			return PROGRAM_NAME;
+			RETURN (PROGRAM_NAME);
 		}
 	}
-	
+
 	/* User word */
 
 	/* Check local, global and source global CONSTANT (78) items */
@@ -872,7 +887,7 @@ H#[0-9A-Za-z]* {
 				if (p78->prog == current_program) {
 					cb_error (_("a constant may not be used here - '%s'"), yytext);
 					yylval = cb_error_node;
-					return WORD;
+					RETURN (WORD);
 				}
 				if (p78->chk_const) {
 					p78->not_const = 1;
@@ -883,7 +898,7 @@ H#[0-9A-Za-z]* {
 				break;
 			}
 			yylval = CB_VALUE (p78->fld78->values);
-			return LITERAL;
+			RETURN (LITERAL);
 		}
 	}
 
@@ -893,33 +908,33 @@ H#[0-9A-Za-z]* {
 	if (CB_WORD_COUNT (yylval) > 0 && CB_WORD_ITEMS (yylval)) {
 		x = CB_VALUE (CB_WORD_ITEMS (yylval));
 		if (CB_SYSTEM_NAME_P (x)) {
-			return MNEMONIC_NAME;
+			RETURN (MNEMONIC_NAME);
 		} else if (CB_CLASS_NAME_P (x)) {
-			return CLASS_NAME;
+			RETURN (CLASS_NAME);
 		}
 	}
 
-	return WORD;
+	RETURN (WORD);
 }
 
 "<=" {
 	yylval = NULL;
-	return LESS_OR_EQUAL;
+	RETURN (LESS_OR_EQUAL);
 }
 
 ">=" {
 	yylval = NULL;
-	return GREATER_OR_EQUAL;
+	RETURN (GREATER_OR_EQUAL);
 }
 
 "<>" {
 	yylval = NULL;
-	return NOT_EQUAL;
+	RETURN (NOT_EQUAL);
 }
 
 "**" {
 	yylval = NULL;
-	return EXPONENTIATION;
+	RETURN (EXPONENTIATION);
 }
 
 "."([ \n]*".")* {
@@ -930,53 +945,53 @@ H#[0-9A-Za-z]* {
 	if (!last_token_is_dot) {
 		last_token_is_dot = 1;
 		yylval = NULL;
-		return TOK_DOT;
+		RETURN (TOK_DOT);
 	}
 }
 
 "&" {
 	yylval = NULL;
-	return TOK_AMPER;
+	RETURN (TOK_AMPER);
 }
 
 ":" {
 	yylval = NULL;
-	return TOK_COLON;
+	RETURN (TOK_COLON);
 }
 
 "=" {
 	yylval = NULL;
-	return TOK_EQUAL;
+	RETURN (TOK_EQUAL);
 }
 
 "/" {
 	yylval = NULL;
-	return TOK_DIV;
+	RETURN (TOK_DIV);
 }
 
 "*" {
 	yylval = NULL;
-	return TOK_MUL;
+	RETURN (TOK_MUL);
 }
 
 "+" {
 	yylval = NULL;
-	return TOK_PLUS;
+	RETURN (TOK_PLUS);
 }
 
 "-" {
 	yylval = NULL;
-	return TOK_MINUS;
+	RETURN (TOK_MINUS);
 }
 
 "<" {
 	yylval = NULL;
-	return TOK_LESS;
+	RETURN (TOK_LESS);
 }
 
 ">" {
 	yylval = NULL;
-	return TOK_GREATER;
+	RETURN (TOK_GREATER);
 }
 
 . {
@@ -1001,7 +1016,7 @@ H#[0-9A-Za-z]* {
   [^ \n;]+ {
 	BEGIN INITIAL;
 	scan_picture (yytext);
-	return PICTURE;
+	RETURN (PICTURE);
   }
 }
 
@@ -1016,18 +1031,18 @@ H#[0-9A-Za-z]* {
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
-			return USER_FUNCTION_NAME;
+			RETURN (USER_FUNCTION_NAME);
 		}
 	}
 	cbp = lookup_intrinsic (yytext, 0);
 	if (cbp) {
-		return (enum yytokentype)(cbp->token);
+		RETURN ((enum yytokentype)(cbp->token));
 	}
-	return FUNCTION_NAME;
+	RETURN (FUNCTION_NAME);
   }
   . {
 	yylval = NULL;
-	return yytext[0];
+	RETURN (yytext[0]);
   }
 }
 
@@ -1228,11 +1243,11 @@ scan_x (const char *text)
 	}
 
 	yylval = cb_build_alphanumeric_literal (plexbuff, (size_t)(dst - plexbuff));
-	return LITERAL;
+	RETURN (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1255,7 +1270,7 @@ scan_z (const char *text, const cob_u32_t llit)
 			error_literal ("Z", text);
 		}
 		yylval = cb_error_node;
-		return LITERAL;
+		RETURN (LITERAL);
 	}
 	if (unlikely (currlen > plexsize)) {
 		plexsize = currlen;
@@ -1267,7 +1282,7 @@ scan_z (const char *text, const cob_u32_t llit)
 	/* Count is correct here as the trailing quote is now a null */
 	yylval = cb_build_alphanumeric_literal (plexbuff, currlen);
 	CB_LITERAL(yylval)->llit = llit;
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1327,11 +1342,11 @@ scan_h (const char *text, const cob_u32_t with_mark)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	return LITERAL;
+	RETURN (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1389,11 +1404,11 @@ scan_b (const char *text, const cob_u32_t with_mark)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	return LITERAL;
+	RETURN (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1440,11 +1455,11 @@ scan_o (const char *text)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	return LITERAL;
+	RETURN (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1507,7 +1522,7 @@ scan_numeric (const char *text)
 	} else {
 		yylval = cb_build_numeric_literal (sign, p, scale);
 	}
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
@@ -1559,7 +1574,7 @@ scan_floating_numeric (const char *text)
 		this should never happen as the flex rule ensures this */
 	if (n == 0) {
 		yylval = cb_error_node;
-		return LITERAL;
+		RETURN (LITERAL);
 	}
 
 	/* Get signs and adjust string positions accordingly */
@@ -1607,7 +1622,7 @@ scan_floating_numeric (const char *text)
 		   this should never happen as the flex rule ensures this */
 		if (n == 0) {
 			yylval = cb_error_node;
-			return LITERAL;
+			RETURN (LITERAL);
 		}
 
 		if (exp_sign == -1) {
@@ -1641,7 +1656,7 @@ scan_floating_numeric (const char *text)
 
 	if (literal_error) {
 		yylval = cb_error_node;
-		return LITERAL;
+		RETURN (LITERAL);
 	}
 
 	/* Determine scale */
@@ -1682,7 +1697,7 @@ scan_floating_numeric (const char *text)
 
 	yylval = cb_build_numeric_literal (sig_sign, result,
 					   scale);
-	return LITERAL;
+	RETURN (LITERAL);
 }
 
 static int
