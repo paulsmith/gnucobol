@@ -4706,7 +4706,7 @@ cb_emit_accept_mnemonic (cb_tree var, cb_tree mnemonic)
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
 		break;
 	default:
-		cb_error_x (mnemonic, _("invalid input device '%s'"),
+		cb_error_x (mnemonic, _("'%s' is not an input device"),
 			    cb_name (mnemonic));
 		break;
 	}
@@ -4721,7 +4721,7 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 		return;
 	}
 
-	/* Allow direct reference to a device name */
+	/* Allow direct reference to a device name (not defined as mnemonic name) */
 	sys = lookup_system_name (CB_NAME (name));
 	if (sys) {
 		switch (CB_SYSTEM_NAME (sys)->token) {
@@ -4737,10 +4737,13 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 				    cb_name (name));
 			return;
 		}
-	}
-
-	cb_error_x (name, _("'%s' is not defined in SPECIAL-NAMES"),
+	} else if (is_default_reserved_word (CB_NAME (name))) {
+		cb_error_x (name, _("unknown device '%s'; it may exist in another dialect"),
+				    CB_NAME (name));
+	} else {
+		cb_error_x (name, _("unknown device '%s'; not defined in SPECIAL-NAMES"),
 		    CB_NAME (name));
+	}
 }
 
 /* ALLOCATE statement */
@@ -5615,7 +5618,7 @@ cb_build_display_mnemonic (cb_tree x)
 	case CB_DEVICE_SYSERR:
 		return cb_int1;
 	default:
-		cb_error_x (x, _("invalid output device"));
+		cb_error_x (x, _("'%s' is not an output device"), CB_NAME (x));
 		return cb_int0;
 	}
 }
@@ -5630,7 +5633,7 @@ cb_build_display_name (cb_tree x)
 		return cb_error_node;
 	}
 	name = CB_NAME (x);
-	/* Allow direct reference to a device name */
+	/* Allow direct reference to a device name (not defined as mnemonic name) */
 	sys = lookup_system_name (name);
 	if (sys) {
 		switch (CB_SYSTEM_NAME (sys)->token) {
@@ -5647,11 +5650,13 @@ cb_build_display_name (cb_tree x)
 			return cb_int1;
 		default:
 			cb_error_x (x, _("'%s' is not an output device"), name);
-			return cb_error_node;
 		}
+	} else if (is_default_reserved_word (CB_NAME (x))) {
+		cb_error_x (x, _("unknown device '%s'; it may exist in another dialect"),
+				    name);
+	} else {
+		cb_error_x (x, _("unknown device '%s'; not defined in SPECIAL-NAMES"), name);
 	}
-
-	cb_error_x (x, _("'%s' is not defined in SPECIAL-NAMES"), name);
 	return cb_error_node;
 }
 

@@ -643,6 +643,108 @@ prog.cob: 76: error: 'SWIT32-OFF' is not defined
 AT_CLEANUP
 
 
+AT_SETUP([Unexpected mnemonic-name location])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       SPECIAL-NAMES.
+           stdin IS my-stdin
+           .
+       PROCEDURE      DIVISION.
+           CALL "something" USING stdout
+           CALL "something" USING stdin
+           CALL "something" USING my-stdin
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 10: error: invalid mnemonic identifier
+prog.cob: 11: error: invalid mnemonic identifier
+prog.cob: 12: error: invalid mnemonic identifier
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Wrong device for mnemonic-name])
+AT_KEYWORDS([misc ACCEPT DISPLAY SPECIAL-NAMES])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       77 var          PIC x.
+       PROCEDURE       DIVISION.
+           ACCEPT  var FROM SYSOUT
+           DISPLAY var UPON SYSIN
+           ACCEPT  var FROM SYSIN
+           DISPLAY var UPON SYSOUT
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: 'SYSOUT' is not an input device
+prog.cob: 9: error: 'SYSIN' is not an output device
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Missing mnemonic-name declaration])
+AT_KEYWORDS([misc special-names])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       77 var          PIC x.
+       PROCEDURE       DIVISION.
+           ACCEPT var FROM mnemonic-name
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 8: error: unknown device 'mnemonic-name'; not defined in SPECIAL-NAMES
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Unknown device in dialect])
+AT_KEYWORDS([misc special-names])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       77 var          PIC x.
+       PROCEDURE       DIVISION.
+           ACCEPT var  FROM COMMAND-LINE
+           DISPLAY var UPON COMMAND-LINE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+# Checkme: Error should occur for UPON_COMMAND_LINE, too, shouldn't it?
+#AT_CHECK([$COMPILE_ONLY -fnot-reserved=COMMAND-LINE prog.cob], [1], [],
+#[prog.cob: 8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+#prog.cob: 9: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+#])
+AT_CHECK([$COMPILE_ONLY -fnot-reserved=COMMAND-LINE prog.cob], [1], [],
+[prog.cob: 8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([ACCEPT WITH ( NO ) UPDATE / DEFAULT])
 AT_KEYWORDS([misc extensions])
 
@@ -2423,33 +2525,6 @@ prog.cob: 34: error: syntax error, unexpected Identifier, expecting INTO
 prog.cob: 37: error: syntax error, unexpected END-UNSTRING, expecting Identifier
 prog.cob: 38: error: syntax error, unexpected DELIMITED, expecting Identifier
 prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
-])
-AT_CLEANUP
-
-
-AT_SETUP([Unexpected mnemonic-name location])
-AT_KEYWORDS([misc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID.    prog.
-       ENVIRONMENT    DIVISION.
-       CONFIGURATION  SECTION.
-       SPECIAL-NAMES.
-           stdin IS my-stdin
-           .
-       PROCEDURE      DIVISION.
-           CALL "something" USING stdout
-           CALL "something" USING stdin
-           CALL "something" USING my-stdin
-           STOP RUN
-           .
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: invalid mnemonic identifier
-prog.cob: 11: error: invalid mnemonic identifier
-prog.cob: 12: error: invalid mnemonic identifier
 ])
 AT_CLEANUP
 

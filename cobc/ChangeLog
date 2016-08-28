@@ -1,9 +1,23 @@
 
+2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: added hint to change dialect if a known system device
+	  is used which is not reserved in current dialect
+
 2016-08-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, scanner.l, tree.h: fixed bug #305, where the
 	  error_stmt_recover token was consumed when it was needed to resume
 	  normal parsing.
+
+2016-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_interal_function): deactivated storing module call
+	  parameters after module entry
+	* codegen.c: generating a local cob_call_params and using it for all
+	  parameter checks
+	* codegen.c (output_entry_function): don't generate a call to
+	  cob_get_global_ptr() without checking that the runtime is initialized
 
 2016-08-20  Edward Hart <edward.dan.hart@gmail.com>
 
