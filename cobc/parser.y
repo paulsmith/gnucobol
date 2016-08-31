@@ -279,6 +279,7 @@ void print_bits (unsigned int num)
 		num = num << 1;
  	}
 	fprintf (stderr, "\n");
+}
 #endif
 
 static void
