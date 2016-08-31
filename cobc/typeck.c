@@ -1198,7 +1198,7 @@ cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 	current_program->orig_program_id = (char *) name_str;
 	s = cb_encode_program_id (cobc_parse_strdup (name_str));
 
-	(void)cobc_check_valid_name (current_program->orig_program_id, 2U);
+	(void)cobc_check_valid_name (current_program->orig_program_id, PROGRAM_ID_NAME);
 
 	/* Convert function names to upper case */
 	if (is_func) {

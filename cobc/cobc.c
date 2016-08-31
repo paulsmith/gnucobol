@@ -1137,49 +1137,55 @@ cobc_bcompare (const void *p1, const void *p2)
 	return strcmp (p1, *tptr);
 }
 
+enum name_error_reason {
+	INVALID_LENGTH = 1,
+	SPACE_UNDERSCORE_FIRST_CHAR,
+	GNUCOBOL_PREFIX,
+	C_KEYWORD,
+	CONTAINS_DIRECTORY_SEPARATOR
+};
+
 static void
-cobc_error_name (const char *name, const unsigned int source,
-		 const unsigned int reason)
+cobc_error_name (const char *name, const enum cobc_name_type type,
+		 const enum name_error_reason reason)
 {
 	const char	*s;
 
 	switch (reason) {
-	case 1:
+	case INVALID_LENGTH:
 		s = _(" - length is < 1 or > 31");
 		break;
-	case 2:
+	case SPACE_UNDERSCORE_FIRST_CHAR:
 		s = _(" - name cannot begin with space or underscore");
 		break;
-	case 3:
+	case GNUCOBOL_PREFIX:
 		s = _(" - name cannot begin with 'cob_' or 'COB_'");
 		break;
-	case 4:
+	case C_KEYWORD:
 		s = _(" - name duplicates a 'C' keyword");
 		break;
-	case 5:
+	case CONTAINS_DIRECTORY_SEPARATOR:
 		s = _(" - name cannot contain a directory separator");
 		break;
 	default:
 		s = "";
 		break;
 	}
-	switch (source) {
-	case 0:
-		/* basename */
+	
+	switch (type) {
+	case FILE_BASE_NAME:
 		cobc_err_msg (_("invalid file base name '%s'%s"),
-				name, s);
+			      name, s);
 		break;
-	case 1:
-		/* ENTRY */
+	case ENTRY_NAME:
 		cb_error (_("invalid ENTRY '%s'%s"), name, s);
 		break;
-	case 2:
-		/* PROGRAM-ID */
+	case PROGRAM_ID_NAME:
 		cb_error (_("invalid PROGRAM-ID '%s'%s"), name, s);
 		break;
 	default:
 		cobc_err_msg (_("unknown name error '%s'%s"),
-				name, s);
+			      name, s);
 		break;
 	}
 }
@@ -1190,35 +1196,45 @@ cobc_check_valid_name (const char *name, const unsigned int prechk)
 	const char	*p;
 	size_t		len;
 
+	/* Check name doesn't contain path separator. */
 	for (p = name, len = 0; *p; p++, len++) {
 		if (*p == '/' || *p == '\\') {
-			cobc_error_name (name, prechk, 5U);
+			cobc_error_name (name, prechk,
+					 CONTAINS_DIRECTORY_SEPARATOR);
 			return 1;
 		}
 	}
+
+	/* Check name is of valid length. */
 	if (len < 1) {
-		cobc_error_name (name, prechk, 1U);
+		cobc_error_name (name, prechk, INVALID_LENGTH);
 		return 1;
 	}
 	if (!cb_relaxed_syntax_checks && len > 31) {
-		cobc_error_name (name, prechk, 1U);
+		cobc_error_name (name, prechk, INVALID_LENGTH);
 		return 1;
 	}
+	
 	if (*name == '_' || *name == ' ') {
-		cobc_error_name (name, prechk, 2U);
+		cobc_error_name (name, prechk, SPACE_UNDERSCORE_FIRST_CHAR);
 		return 1;
 	}
+
+	/* Check name does not begin with the libcob prefixes cob_ and COB_. */
 	if (prechk && len > 3 &&
 	    (!memcmp (name, "cob_", (size_t)4) ||
 	     !memcmp (name, "COB_", (size_t)4))) {
-		cobc_error_name (name, prechk, 3U);
+		cobc_error_name (name, prechk, GNUCOBOL_PREFIX);
 		return 1;
 	}
+	
+	/* Check name is not a C keyword. */
 	if (bsearch (name, cob_csyns, COB_NUM_CSYNS,
 		     sizeof (char *), cobc_bcompare)) {
-		cobc_error_name (name, prechk, 4U);
+		cobc_error_name (name, prechk, C_KEYWORD);
 		return 1;
 	}
+	
 	return 0;
 }
 

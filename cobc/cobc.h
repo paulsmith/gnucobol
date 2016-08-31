@@ -238,6 +238,13 @@ struct cobc_mem_struct {
 	size_t			memlen;
 };
 
+/* Type of name to check in cobc_check_valid_name */
+enum cobc_name_type {
+	FILE_BASE_NAME = 0,
+	ENTRY_NAME,
+	PROGRAM_ID_NAME
+};
+
 /* Listing structures and externals */
 
 #define CB_MAX_LINES	55
@@ -419,7 +426,7 @@ DECLNORET extern void		cobc_abort (const char *,
 DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
 
 extern size_t			cobc_check_valid_name (const char *,
-						       const unsigned int);
+						       const enum cobc_name_type);
 
 /* config.c */
 

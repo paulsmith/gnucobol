@@ -267,18 +267,18 @@ begin_implicit_statement (void)
 
 # if 0 /* activate only for debugging purposes for attribs */
 static
-void printBits(unsigned int num){
-	unsigned int size = sizeof(unsigned int);
-	unsigned int maxPow = 1<<(size*8-1);
-	int i=0;
+void print_bits (unsigned int num)
+{
+	unsigned int 	size = sizeof (unsigned int);
+	unsigned int	maxPow = 1 << (size * 8 - 1);
+	int 		i = 0;
 
-	for(;i<size*8;++i){
-		/* print last bit and shift left. */
-		fprintf(stderr, "%u ",num&maxPow ? 1 : 0);
-		num = num<<1;
-	}
-	fprintf(stderr, "\n");
-}
+	for(; i < size * 8; ++i){
+		/* Print last bit and shift left. */
+		fprintf (stderr, "%u ", num & maxPow ? 1 : 0);
+		num = num << 1;
+ 	}
+	fprintf (stderr, "\n");
 #endif
 
 static void
@@ -1436,14 +1436,14 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 	const int	is_field_with_usage_not_display =
 		CB_REFERENCE_P (x) && CB_FIELD_P (cb_ref (x))
 		&& CB_FIELD (cb_ref (x))->usage != CB_USAGE_DISPLAY;
-	
+
 	if (is_numeric_literal) {
 		cb_error_x (x, _("%s is not an alphanumeric literal"), CB_LITERAL (x)->data);
 	} else if (is_field_with_usage_not_display) {
 		cb_error_x (x, _("'%s' is not USAGE DISPLAY"), cb_name (x));
 	}
 }
- 
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -2217,7 +2217,7 @@ program_id_paragraph:
 	if (set_up_program ($4, $5, CB_PROGRAM_TYPE)) {
 		YYABORT;
 	}
-	
+
 	set_up_prototype ($4, $5, CB_PROGRAM_TYPE, 1);
   }
   _program_type TOK_DOT
@@ -7761,7 +7761,7 @@ entry_body:
 	} else if (current_program->prog_type == CB_FUNCTION_TYPE) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "ENTRY");
 	} else if (cb_verify (cb_entry_statement, "ENTRY")) {
-		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($1)->data), 1U)) {
+		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($1)->data), ENTRY_NAME)) {
 			emit_entry ((char *)(CB_LITERAL ($1)->data), 1, $2);
 		}
 	}
@@ -11304,7 +11304,7 @@ identifier_or_file_name:
   identifier_1
   {
 	int     reference_to_existing_object;
-	  
+
 	if (CB_REFERENCE_P ($1) && (CB_FIELD_P (cb_ref ($1))
 				    || CB_FILE_P (cb_ref ($1)))) {
 		$$ = cb_build_identifier ($1, 0);
@@ -11323,7 +11323,7 @@ identifier:
   identifier_1
   {
 	int     reference_to_existing_object;
-	  
+
 	if (CB_REFERENCE_P ($1) && CB_FIELD_P (cb_ref ($1))) {
 		$$ = cb_build_identifier ($1, 0);
 	} else {
@@ -11973,7 +11973,7 @@ verb:
 | UNSTRING
 | WRITE
 ;
-  
+
 scope_terminator:
   END_ACCEPT
 | END_ADD

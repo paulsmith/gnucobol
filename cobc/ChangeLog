@@ -1,4 +1,10 @@
 
+2016-08-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c (cobc_check_valid_name): refactored to take enum parameters
+	  instead of magic numbers.
+	* parser.y (brint_bits): improved style.
+
 2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: added hint to change dialect if a known system device
