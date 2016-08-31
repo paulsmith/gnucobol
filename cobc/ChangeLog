@@ -4,6 +4,7 @@
 	* cobc.c (cobc_check_valid_name): refactored to take enum parameters
 	  instead of magic numbers.
 	* parser.y (print_bits): improved style.
+	* tree.c (cb_build_picture): added warning message to PIC N.
 
 2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

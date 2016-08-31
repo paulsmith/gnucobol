@@ -2334,7 +2334,10 @@ repeat:
 			break;
 
 		case 'N':
-			category |= PIC_NATIONAL;
+			if (!(category & PIC_NATIONAL)) {
+				category |= PIC_NATIONAL;
+				CB_PENDING ("USAGE NATIONAL");
+			}
 			x_digits += n;
 			break;
 
