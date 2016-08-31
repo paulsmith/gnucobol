@@ -4280,7 +4280,7 @@ data_description:
   }
 | level_number error TOK_DOT
   {
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	yyerrok;
 	cb_unput_dot ();
@@ -4481,7 +4481,7 @@ constant_entry:
 
 	cobc_cs_check = 0;
 	level = cb_get_level ($1);
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	if (level != 1) {
 		cb_error (_("CONSTANT item not at 01 level"));
@@ -5582,7 +5582,7 @@ screen_description:
 
 	x = cb_build_field_tree ($1, $2, current_field, current_storage,
 				 current_file, 0);
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	check_pic_duplicate = 0;
 	if (CB_INVALID_TREE (x)) {
@@ -6157,9 +6157,9 @@ _procedure_returning:
 */
 		if (f->level != 1 && f->level != 77) {
 			cb_error (_("RETURNING item must have level 01"));
-		} else if(f->flag_occurs) {
+		} else if (f->flag_occurs) {
 			cb_error(_("RETURNING item should not have OCCURS"));
-		} else if(f->storage == CB_STORAGE_LOCAL) {
+		} else if (f->storage == CB_STORAGE_LOCAL) {
 			cb_error (_("RETURNING item should not be in LOCAL-STORAGE"));
 		} else {
 			if (current_program->prog_type == CB_FUNCTION_TYPE) {
@@ -6870,7 +6870,7 @@ end_accept:
 	TERMINATOR_CLEAR ($-2, ACCEPT);
 # if 0 /* activate only for debugging purposes for attribs */
 	if (current_statement->attr_ptr) {
-		printBits (current_statement->attr_ptr->dispattrs);
+		print_bits (current_statement->attr_ptr->dispattrs);
 	} else {
 		fprintf(stderr, "No Attribs\n");
 	}
@@ -7006,6 +7006,8 @@ call_body:
   call_returning
   call_exception_phrases
   {
+	cb_tree	call_conv_bit;
+	  
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
 	    && is_recursive_call ($2)) {
@@ -7015,12 +7017,16 @@ call_body:
 	/* For CALL ... RETURNING NOTHING, set the call convention bit */
 	if (call_nothing) {
 		if ($1 && CB_INTEGER_P ($1)) {
-			$1 = cb_int ((CB_INTEGER ($1)->val) | CB_CONV_NO_RET_UPD);
+			call_conv_bit = cb_int ((CB_INTEGER ($1)->val)
+						| CB_CONV_NO_RET_UPD);
 		} else {
-			$1 = cb_int (CB_CONV_NO_RET_UPD);
+			call_conv_bit = cb_int (CB_CONV_NO_RET_UPD);
 		}
+	} else {
+		call_conv_bit = $1;
 	}
-	cb_emit_call ($2, $4, $5, CB_PAIR_X ($6), CB_PAIR_Y ($6), $1);
+	cb_emit_call ($2, $4, $5, CB_PAIR_X ($6), CB_PAIR_Y ($6),
+		      call_conv_bit);
   }
 ;
 
