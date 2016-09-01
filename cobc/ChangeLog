@@ -1,4 +1,10 @@
 
+2016-09-01  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (validate_field_1), parser.y (sign_clause): fixed bug #305 by
+	  adding checks that elementary item with SIGN has S in PIC and is USAGE
+	  DISPLAY or NATIONAL.
+
 2016-08-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c (cobc_check_valid_name): refactored to take enum parameters
