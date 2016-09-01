@@ -744,6 +744,14 @@ validate_field_1 (struct cb_field *f)
 		}
 
 		/* Validate SIGN */
+		if (f->flag_sign_clause) {
+			if (!(f->pic && f->pic->have_sign)) {
+				cb_error_x (x, _("elementary items with SIGN clause must have S in PICTURE"));
+			} else if (f->usage != CB_USAGE_DISPLAY
+				   && f->usage != CB_USAGE_NATIONAL) {
+				cb_error_x (x, _("elementary items with SIGN clause must be USAGE DISPLAY or NATIONAL"));
+			}
+		}
 
 		/* Validate JUSTIFIED RIGHT */
 		if (f->flag_justified) {

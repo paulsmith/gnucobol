@@ -166,7 +166,9 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 7: warning: USAGE NATIONAL not implemented
+])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

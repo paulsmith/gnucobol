@@ -2567,12 +2567,12 @@ AT_DATA([prog.cob], [
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT f ASSIGN "A".
-           
+
        DATA            DIVISION.
        FILE            SECTION.
        FD  f.
        01  f-rec PIC X.
-       
+
        WORKING-STORAGE SECTION.
        01  not-display PIC 9(5) COMP.
        01  not-a-num   PIC X(5).
@@ -2596,5 +2596,30 @@ prog.cob: 22: error: 'f' is not a field
 prog.cob: 22: error: 3 is not an alphanumeric literal
 prog.cob: 22: error: 2 is not an alphanumeric literal
 prog.cob: 22: error: invalid target for TRANSFORM
+])
+AT_CLEANUP
+
+
+AT_SETUP([SIGN clause checks])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  valid-1     SIGN TRAILING.
+           03  x       PIC S999.
+           03  y       PIC S999.
+       01  valid-2     PIC S99.
+
+       01  invalid-1   PIC 99 SIGN LEADING.
+       01  invalid-2   PIC S99 SIGN TRAILING, USAGE BINARY.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 12: error: elementary items with SIGN clause must have S in PICTURE
+prog.cob: 13: error: elementary items with SIGN clause must be USAGE DISPLAY or NATIONAL
 ])
 AT_CLEANUP

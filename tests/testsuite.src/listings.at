@@ -2158,6 +2158,7 @@ prog.cob: 23: error: . cannot follow V
 prog.cob: 24: error: cannot have both Z and * in PICTURE string
 prog.cob: 25: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 prog.cob: 25: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob: 26: warning: USAGE NATIONAL not implemented
 prog.cob: 26: error: N cannot follow A or X
 prog.cob: 27: error: A or X cannot follow S
 prog.cob: 28: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
@@ -2228,17 +2229,18 @@ error: cannot have both Z and * in PICTURE string
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 error: a trailing +/- sign may only occur once in a PICTURE string
 000026             03  PIC AN.
+warning: USAGE NATIONAL not implemented
 error: N cannot follow A or X
 000027             03  PIC SA.
 error: A or X cannot follow S
 000028             03  PIC +++9+.
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 000029             03  PIC +9(5)CR.
-error: CR or DB cannot follow a leading +/- sign
 GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
+error: CR or DB cannot follow a leading +/- sign
 000030         01 non-rightmost-leftmost-symbols.
 000031             03  PIC BBB+BB99.
 error: a leading +/- sign cannot follow B, 0 or /
@@ -2329,7 +2331,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
-1 Warning in program
+2 Warnings in program
 35 Errors in program
 ])
 

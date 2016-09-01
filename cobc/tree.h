@@ -701,13 +701,14 @@ struct cb_field {
 
 	unsigned int flag_local		: 1;	/* Has local scope */
 	unsigned int flag_occurs	: 1;	/* OCCURS */
+	unsigned int flag_sign_clause	: 1;	/* Any SIGN clause */
 	unsigned int flag_sign_separate	: 1;	/* SIGN IS SEPARATE */
 	unsigned int flag_sign_leading	: 1;	/* SIGN IS LEADING */
 	unsigned int flag_blank_zero	: 1;	/* BLANK WHEN ZERO */
 	unsigned int flag_justified	: 1;	/* JUSTIFIED RIGHT */
 	unsigned int flag_binary_swap	: 1;	/* Binary byteswap */
+	
 	unsigned int flag_real_binary	: 1;	/* BINARY-CHAR/SHORT/LONG/DOUBLE */
-
 	unsigned int flag_is_pointer	: 1;	/* Is POINTER */
 	unsigned int flag_item_78	: 1;	/* Is 78 level */
 	unsigned int flag_any_length	: 1;	/* Is ANY LENGTH */
@@ -715,8 +716,8 @@ struct cb_field {
 	unsigned int flag_filler	: 1;	/* Implicit/explicit filler */
 	unsigned int flag_synchronized	: 1;	/* SYNCHRONIZED */
 	unsigned int flag_invalid	: 1;	/* Is broken */
+	
 	unsigned int flag_field		: 1;	/* Has been internally cached */
-
 	unsigned int flag_chained	: 1;	/* CHAINING item */
 	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
 	unsigned int flag_indexed_by	: 1;	/* INDEXED BY item */
@@ -724,9 +725,9 @@ struct cb_field {
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
 	unsigned int flag_is_pdiv_parm	: 1;	/* Is PROC DIV USING */
 	unsigned int flag_is_pdiv_opt	: 1;	/* Is PROC DIV USING OPTIONAL */
+	
 	unsigned int flag_local_alloced	: 1;	/* LOCAL storage is allocated */
 	unsigned int flag_no_init	: 1;	/* No initialize unless used */
-
 	unsigned int flag_vsize_done	: 1;	/* Variable size cached */
 	unsigned int flag_vaddr_done	: 1;	/* Variable address cached */
 	unsigned int flag_odo_relative	: 1;	/* complex-odo: item address depends
@@ -734,6 +735,7 @@ struct cb_field {
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_all_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */
+	
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 };

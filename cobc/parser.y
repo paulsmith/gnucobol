@@ -4846,12 +4846,14 @@ sign_clause:
   _sign_is LEADING flag_separate
   {
 	check_repeated ("SIGN", SYN_CLAUSE_6, &check_pic_duplicate);
+	current_field->flag_sign_clause = 1;
 	current_field->flag_sign_separate = ($3 ? 1 : 0);
 	current_field->flag_sign_leading  = 1;
   }
 | _sign_is TRAILING flag_separate
   {
 	check_repeated ("SIGN", SYN_CLAUSE_6, &check_pic_duplicate);
+	current_field->flag_sign_clause = 1;
 	current_field->flag_sign_separate = ($3 ? 1 : 0);
 	current_field->flag_sign_leading  = 0;
   }
