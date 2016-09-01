@@ -3635,7 +3635,6 @@ set_picture (struct cb_field *field, char *picture)
 	case CB_USAGE_UNSIGNED_SHORT:
 	case CB_USAGE_UNSIGNED_INT:
 	case CB_USAGE_UNSIGNED_LONG:
-	case CB_USAGE_PROGRAM:
 		return 0;
 	default:
 		break;
@@ -3648,68 +3647,36 @@ set_picture (struct cb_field *field, char *picture)
 	}
 
 	/* set picture for the rest */
-	switch (field->usage) {
-	case CB_USAGE_BINARY:
+	if (field->usage == CB_USAGE_BINARY) {
 		if (field->pic) {
 			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 5);
 			strcat (picture, " ");
 		}
-		strcat (picture, "COMP");
-		break;
-	case CB_USAGE_FLOAT:
+	} else if (field->usage == CB_USAGE_FLOAT
+		   || field->usage == CB_USAGE_DOUBLE
+		   || field->usage == CB_USAGE_PACKED
+		   || field->usage == CB_USAGE_COMP_5
+		   || field->usage == CB_USAGE_COMP_6
+		   || field->usage == CB_USAGE_COMP_X) {
 		if (field->pic) {
+			/* TO-DO: Where does the 7 come from? */
 			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
 			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-1");
-		break;
-	case CB_USAGE_DOUBLE:
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
-			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-2");
-		break;
-	case CB_USAGE_PACKED:
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
-			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-3");
-		break;
-	case CB_USAGE_COMP_5:
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
-			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-5");
-		break;
-	case CB_USAGE_COMP_6:
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
-			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-6");
-		break;
-	case CB_USAGE_COMP_X:
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
-			strcat (picture, " ");
-		}
-		strcat (picture, "COMP-X");
-		break;
-	default:
+		}		
+	} else {
 		if (!field->pic) {
 			return 0;
 		}
 		strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1);
-		break;
+		return 1;
 	}
+	
+	strcat (picture, cb_get_usage_string (field->usage));
 	return 1;
 }
 
 static void
-set_usage_type (int usage, char *type)
+set_category_from_usage (int usage, char *type)
 {
 	switch (usage) {
 	case CB_USAGE_INDEX:
@@ -3735,11 +3702,11 @@ set_usage_type (int usage, char *type)
 }
 
 static void
-set_type (int category, int usage, char *type)
+set_category (int category, int usage, char *type)
 {
 	switch (category) {
 	case CB_CATEGORY_UNKNOWN:
-		set_usage_type (usage, type);
+		set_category_from_usage (usage, type);
 		break;
 	case CB_CATEGORY_ALPHABETIC:
 		strcpy (type, "ALPHABETIC");
@@ -3763,7 +3730,7 @@ set_type (int category, int usage, char *type)
 		strcpy (type, "NUMERIC");
 		break;
 	case CB_CATEGORY_OBJECT_REFERENCE:
-		strcpy (type, "REFERENCE");
+		strcpy (type, "OBJECT REFERENCE");
 		break;
 	case CB_CATEGORY_DATA_POINTER:
 	case CB_CATEGORY_PROGRAM_POINTER:
@@ -3813,7 +3780,7 @@ print_fields (int lvl, struct cb_field *top)
 		}
 
 		if (get_cat) {
-			set_type (top->common.category, top->usage, type);
+			set_category (top->common.category, top->usage, type);
 			got_picture = set_picture (top, picture);
 		}
 

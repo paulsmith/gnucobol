@@ -266,24 +266,23 @@ enum cb_usage {
 	CB_USAGE_OBJECT,		/* 9 */
 	CB_USAGE_PACKED,		/* 10 */
 	CB_USAGE_POINTER,		/* 11 */
-	CB_USAGE_PROGRAM,		/* 12 */
-	CB_USAGE_LENGTH,		/* 13 */
-	CB_USAGE_PROGRAM_POINTER,	/* 14 */
-	CB_USAGE_UNSIGNED_CHAR,		/* 15 */
-	CB_USAGE_SIGNED_CHAR,		/* 16 */
-	CB_USAGE_UNSIGNED_SHORT,	/* 17 */
-	CB_USAGE_SIGNED_SHORT,		/* 18 */
-	CB_USAGE_UNSIGNED_INT,		/* 19 */
-	CB_USAGE_SIGNED_INT,		/* 20 */
-	CB_USAGE_UNSIGNED_LONG,		/* 21 */
-	CB_USAGE_SIGNED_LONG,		/* 22 */
-	CB_USAGE_COMP_6,		/* 23 */
-	CB_USAGE_FP_DEC64,		/* 24 */
-	CB_USAGE_FP_DEC128,		/* 25 */
-	CB_USAGE_FP_BIN32,		/* 26 */
-	CB_USAGE_FP_BIN64,		/* 27 */
-	CB_USAGE_FP_BIN128,		/* 28 */
-	CB_USAGE_LONG_DOUBLE		/* 29 */
+	CB_USAGE_LENGTH,		/* 12 */
+	CB_USAGE_PROGRAM_POINTER,	/* 13 */
+	CB_USAGE_UNSIGNED_CHAR,		/* 14 */
+	CB_USAGE_SIGNED_CHAR,		/* 15 */
+	CB_USAGE_UNSIGNED_SHORT,	/* 16 */
+	CB_USAGE_SIGNED_SHORT,		/* 17 */
+	CB_USAGE_UNSIGNED_INT,		/* 18 */
+	CB_USAGE_SIGNED_INT,		/* 19 */
+	CB_USAGE_UNSIGNED_LONG,		/* 20 */
+	CB_USAGE_SIGNED_LONG,		/* 21 */
+	CB_USAGE_COMP_6,		/* 22 */
+	CB_USAGE_FP_DEC64,		/* 23 */
+	CB_USAGE_FP_DEC128,		/* 24 */
+	CB_USAGE_FP_BIN32,		/* 25 */
+	CB_USAGE_FP_BIN64,		/* 26 */
+	CB_USAGE_FP_BIN128,		/* 27 */
+	CB_USAGE_LONG_DOUBLE		/* 28 */
 };
 
 
@@ -1571,6 +1570,8 @@ struct cb_literal	*build_literal (enum cb_category,
 
 extern cb_tree	cb_build_system_name (const enum cb_system_name_category,
 				      const int);
+
+extern const char	*cb_get_usage_string (const enum cb_usage);
 
 /* parser.y */
 extern cb_tree		cobc_printer_node;

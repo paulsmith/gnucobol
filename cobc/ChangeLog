@@ -4,6 +4,10 @@
 	* field.c (validate_field_1), parser.y (sign_clause): fixed bug #305 by
 	  adding checks that elementary item with SIGN has S in PIC and is USAGE
 	  DISPLAY or NATIONAL.
+	* tree.h (cb_usage): deleted unused CB_USAGE_PROGRAM.
+	* cobc.c: refactored (set_picture) and improved some function names.
+	* field.c (validate_field_1): refactored SIGN and BLANK ZERO checks.
+	* field.c: fixed bug #310 by adding cb_get_usage_string.
 
 2016-08-31  Edward Hart <edward.dan.hart@gmail.com>
 

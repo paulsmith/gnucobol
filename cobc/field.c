@@ -315,17 +315,11 @@ cb_resolve_redefines (struct cb_field *field, cb_tree redefines)
 	return f;
 }
 
-static void
-validate_field_clauses (cb_tree x, struct cb_field *f)
+static COB_INLINE COB_A_INLINE void
+emit_incompatible_pic_and_usage_error (cb_tree item, const enum cb_usage usage)
 {
-	if (f->flag_blank_zero) {
-		cb_error_x (x, _("%s clause not compatible with USAGE %d"),
-			"BLANK ZERO", f->usage);
-	}
-	if (f->flag_sign_leading || f->flag_sign_separate) {
-		cb_error_x (x, _("%s clause not compatible with USAGE %d"),
-			"SIGN", f->usage);
-	}
+	cb_error_x (item, _("PICTURE clause not compatible with USAGE %s"),
+		    cb_get_usage_string (usage));
 }
 
 static unsigned int
@@ -565,7 +559,7 @@ validate_field_1 (struct cb_field *f)
 	if (f->level == 66) {
 		return 0;
 	}
-	
+
 	if (f->children) {
 		/* Group item */
 
@@ -618,7 +612,6 @@ validate_field_1 (struct cb_field *f)
 		case CB_USAGE_UNSIGNED_SHORT:
 		case CB_USAGE_UNSIGNED_INT:
 		case CB_USAGE_UNSIGNED_LONG:
-		case CB_USAGE_PROGRAM:
 			need_picture = 0;
 			break;
 		default:
@@ -650,94 +643,66 @@ validate_field_1 (struct cb_field *f)
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 1);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_SIGNED_SHORT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 1);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_SIGNED_INT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 1);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_SIGNED_LONG:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 1);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_CHAR:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-CHAR", 2, 0);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_SHORT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-SHORT", 4, 0);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_INT:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-LONG", 9, 0);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_UNSIGNED_LONG:
 			f->usage = CB_USAGE_COMP_5;
 			f->pic = cb_build_binary_picture ("BINARY-DOUBLE", 18, 0);
 			f->flag_real_binary = 1;
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_BINARY:
 		case CB_USAGE_PACKED:
 		case CB_USAGE_BIT:
 			if (f->pic->category != CB_CATEGORY_NUMERIC) {
-				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
-					cb_name (x), f->usage);
+				emit_incompatible_pic_and_usage_error (x, f->usage);
 			}
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_COMP_6:
 			if (f->pic->category != CB_CATEGORY_NUMERIC) {
-				cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
-					cb_name (x), f->usage);
+				emit_incompatible_pic_and_usage_error (x, f->usage);
 			}
 			if (f->pic->have_sign) {
 				cb_warning_x (x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
 				f->usage = CB_USAGE_PACKED;
 			}
-			validate_field_clauses (x, f);
 			break;
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
 			if (f->pic) {
 				if (f->pic->category != CB_CATEGORY_NUMERIC &&
 				    f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
-					cb_error_x (x, _("'%s' PICTURE clause not compatible with USAGE %d"),
-						cb_name (x), f->usage);
+					emit_incompatible_pic_and_usage_error (x, f->usage);
 				}
 			}
-			validate_field_clauses (x, f);
-			break;
-		case CB_USAGE_POINTER:
-		case CB_USAGE_PROGRAM_POINTER:
-		case CB_USAGE_PROGRAM:
-		case CB_USAGE_FLOAT:
-		case CB_USAGE_DOUBLE:
-		case CB_USAGE_LONG_DOUBLE:
-		case CB_USAGE_FP_BIN32:
-		case CB_USAGE_FP_BIN64:
-		case CB_USAGE_FP_BIN128:
-		case CB_USAGE_FP_DEC64:
-		case CB_USAGE_FP_DEC128:
-		case CB_USAGE_INDEX:
-			validate_field_clauses (x, f);
 			break;
 		default:
 			break;
@@ -772,7 +737,12 @@ validate_field_1 (struct cb_field *f)
 			if (f->pic->have_sign
 			    && f->pic->category != CB_CATEGORY_NUMERIC_EDITED) {
 				cb_error_x (x, _("'%s' cannot have S in PICTURE string and BLANK WHEN ZERO"),
-					cb_name (x));
+					    cb_name (x));
+			}
+
+			if (f->usage != CB_USAGE_DISPLAY && f->usage != CB_USAGE_NATIONAL) {
+				cb_error_x (x, _("'%s' cannot have BLANK WHEN ZERO without being USAGE DISPLAY or NATIONAL"),
+					    cb_name (x));
 			}
 
 			switch (f->pic->category) {
@@ -1193,7 +1163,6 @@ compute_size (struct cb_field *f)
 					case CB_USAGE_OBJECT:
 					case CB_USAGE_POINTER:
 					case CB_USAGE_PROGRAM_POINTER:
-					case CB_USAGE_PROGRAM:
 						align_size = sizeof (void *);
 						break;
 					default:
@@ -1306,7 +1275,6 @@ compute_size (struct cb_field *f)
 		case CB_USAGE_OBJECT:
 		case CB_USAGE_POINTER:
 		case CB_USAGE_PROGRAM_POINTER:
-		case CB_USAGE_PROGRAM:
 			f->size = sizeof (void *);
 			break;
 		default:
@@ -1463,7 +1431,7 @@ get_next_record_field (const struct cb_field *f)
 			f = f->parent;
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -1548,7 +1516,7 @@ error_if_invalid_type_in_renames_range (const struct cb_field * const item)
 			cb_error_x (CB_TREE (item),
 				    _("RENAMES may not contain '%s' as it is an OCCURS DEPENDING table"),
 				    cb_name (CB_TREE (f)));
-				    
+
 		}
 
 		if (f == end) {
@@ -1616,4 +1584,76 @@ struct cb_field *
 cb_get_real_field (void)
 {
 	return last_real_field;
+}
+
+const char *
+cb_get_usage_string (const enum cb_usage usage)
+{
+	switch (usage) {
+	case CB_USAGE_BINARY:
+		return "COMP";
+	case CB_USAGE_BIT:
+		return "BIT";
+	case CB_USAGE_COMP_5:
+		return "COMP-5";
+	case CB_USAGE_COMP_X:
+		return "COMP-X";
+	case CB_USAGE_DISPLAY:
+		return "DISPLAY";
+	case CB_USAGE_FLOAT:
+		return "COMP-1";
+		/* return "FLOAT-SHORT"; */
+	case CB_USAGE_DOUBLE:
+		return "COMP-2";
+		/* return "FLOAT-LONG"; */
+	case CB_USAGE_INDEX:
+		return "INDEX";
+	case CB_USAGE_NATIONAL:
+		return "NATIONAL";
+	case CB_USAGE_OBJECT:
+		return "OBJECT REFERENCE";
+	case CB_USAGE_PACKED:
+		return "COMP-3";
+		/* return "PACKED-DECIMAL"; */
+	case CB_USAGE_POINTER:
+		return "POINTER";
+	case CB_USAGE_LENGTH:
+		/* Probably---generates a cob_u32_t item.*/
+		return "BINARY-LONG";
+	case CB_USAGE_PROGRAM_POINTER:
+		return "PROGRAM-POINTER";
+	case CB_USAGE_UNSIGNED_CHAR:
+		return "UNSIGNED-CHAR";
+	case CB_USAGE_SIGNED_CHAR:
+		return "SIGNED-CHAR";
+	case CB_USAGE_UNSIGNED_SHORT:
+		return "UNSIGNED-SHORT";
+	case CB_USAGE_SIGNED_SHORT:
+		return "SIGNED-SHORT";
+	case CB_USAGE_UNSIGNED_INT:
+		return "UNSIGNED-INT";
+	case CB_USAGE_SIGNED_INT:
+		return "SIGNED-INT";
+	case CB_USAGE_UNSIGNED_LONG:
+		return "UNSIGNED-LONG";
+	case CB_USAGE_SIGNED_LONG:
+		return "SIGNED-LONG";
+	case CB_USAGE_COMP_6:
+		return "COMP-6";
+	case CB_USAGE_FP_DEC64:
+		return "FLOAT-DECIMAL-16";
+	case CB_USAGE_FP_DEC128:
+		return "FLOAT-DECIMAL-34";
+	case CB_USAGE_FP_BIN32:
+		return "FLOAT-BINARY-32";
+	case CB_USAGE_FP_BIN64:
+		return "FLOAT-BINARY-64";
+	case CB_USAGE_FP_BIN128:
+		return "FLOAT-BINARY-128";
+	case CB_USAGE_LONG_DOUBLE:
+		return "FLOAT-EXTENDED";
+	default:
+		cb_error (_("unexpected usage %d"), usage);
+		COBC_ABORT ();
+	}
 }

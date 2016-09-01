@@ -1034,6 +1034,25 @@ prog.cob: 8: error: 'y' cannot have * in PICTURE string and BLANK WHEN ZERO
 ])
 AT_CLEANUP
 
+AT_SETUP([PICTURE strings invalid with USAGE])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC XXX, COMP-6.
+       01  y PIC +999, PACKED-DECIMAL.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: error: PICTURE clause not compatible with USAGE COMP-6
+prog.cob: 8: error: PICTURE clause not compatible with USAGE COMP-3
+])
+AT_CLEANUP
+
 
 AT_SETUP([Alphabet definition])
 AT_KEYWORDS([definition])
