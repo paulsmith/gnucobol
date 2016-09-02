@@ -1,4 +1,16 @@
 
+2016-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.h: added CB_UNFINISHED as replacement for CB_PENDING for code that
+	  compiles and "works somehow" (not necessarily according to specs)
+	* cobc.c, cobc.h, warning.def: CB_ONWARNDEF for warnings that default to on
+	* cobc.c. cobc.h, warning.def: new warning option "unfinished"
+	  (defaults to on) - don't warn if unfinished features are used
+	* tree.c, parser.y: marking "USAGE NATIONAL" and
+	  "parameters passed by VALUE" as UNFINISHED instead of PENDING
+	* parser.y: added more checks and pending messages to CURRENCY SIGN with
+	  and without PICTURE SYMBOL
+
 2016-09-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c (codegen, output_entry_function): modularised and shortened

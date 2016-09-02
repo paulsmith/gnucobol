@@ -872,6 +872,73 @@ get_literal_or_word_name (const cb_tree x)
 	}
 }
 
+/* verify and set picture sign for currency */
+static void
+set_currency_picture_symbol (const cb_tree x)
+{
+	unsigned char	*s		= CB_LITERAL (x)->data;
+
+	if (CB_LITERAL (x)->size != 1) {
+		cb_error_x (x, _("PICTURE SYMBOL for CURRENCY must be one character long"));
+		return;
+	}
+	switch (*s) {
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	case 'A':
+	case 'B':
+	case 'C':
+	case 'D':
+	case 'E':
+	case 'N':
+	case 'P':
+	case 'R':
+	case 'S':
+	case 'V':
+	case 'X':
+	case 'Z':
+	case 'a':
+	case 'b':
+	case 'c':
+	case 'd':
+	case 'e':
+	case 'n':
+	case 'p':
+	case 'r':
+	case 's':
+	case 'v':
+	case 'x':
+	case 'z':
+	case '+':
+	case '-':
+	case ',':
+	case '.':
+	case '*':
+	case '/':
+	case ';':
+	case '(':
+	case ')':
+	case '=':
+	case '\'':
+	case '"':
+	case ' ':
+		cb_error_x (x, _("invalid character '%c' in PICTURE SYMBOL for CURRENCY"), s[0]);
+		return;
+		break;
+	default:
+		break;
+	}
+	current_program->currency_symbol = s[0];
+}
+
 /* Return 1 if the prototype name is the same as the current function's. */
 static int
 check_prototype_redefines_current_element (const cb_tree prototype_name)
@@ -2994,77 +3061,70 @@ currency_sign_clause:
   {
 	unsigned char	*s = CB_LITERAL ($4)->data;
 	unsigned int	error_ind = 0;
+	unsigned int	char_seen = 0;
 
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
-		error_ind = 1;
-	}
-	check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
-	if ($5) {
-		CB_PENDING ("PICTURE SYMBOL");
-	}
-	if (CB_LITERAL ($4)->size != 1) {
-		cb_error_x ($4, _("invalid currency sign '%s'"), (char *)s);
-		error_ind = 1;
-	}
-	switch (*s) {
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	case 'A':
-	case 'B':
-	case 'C':
-	case 'D':
-	case 'E':
-	case 'N':
-	case 'P':
-	case 'R':
-	case 'S':
-	case 'V':
-	case 'X':
-	case 'Z':
-	case 'a':
-	case 'b':
-	case 'c':
-	case 'd':
-	case 'e':
-	case 'n':
-	case 'p':
-	case 'r':
-	case 's':
-	case 'v':
-	case 'x':
-	case 'z':
-	case '+':
-	case '-':
-	case ',':
-	case '.':
-	case '*':
-	case '/':
-	case ';':
-	case '(':
-	case ')':
-	case '=':
-	case '\'':
-	case '"':
-	case ' ':
-		cb_error_x ($4, _("invalid currency sign '%s'"), (char *)s);
-		break;
-	default:
-		if (!error_ind) {
-			current_program->currency_symbol = s[0];
+	} else {
+		check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
+		if (strcmp("$", (const char *)s) != 0) {
+			if ($5 && CB_LITERAL ($4)->size != 1) {
+				CB_PENDING_X ($4, _("CURRENCY SIGN longer than one character"));
+				error_ind = 1;
+			}
+			while (*s) {
+				switch (*s) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case '+':
+				case '-':
+				case ',':
+				case '.':
+				case '*':
+					error_ind = 2;
+					break;
+				case ' ':
+					break;
+				default:
+					char_seen = 1;
+					break;
+				}
+				s++;
+			}
+			if (!char_seen) {
+				error_ind = 2;
+			}
+		} else {
+			if (error_ind > 1) {;
+				CB_PENDING_X ($4, _("CURRENCY SIGN other than '$'"));
+			}
 		}
-		break;
+		switch (error_ind) {
+		case 0:
+		case 1:
+			/* FIXME: currency sign/symbol are currently mixed in cobc and libcob */
+			/* current_program->currency_sign = CB_LITERAL ($4); */
+			break;
+		default:
+			cb_error_x ($4, _("invalid CURRENCY SIGN '%s'"), (char*)CB_LITERAL ($4)->data);
+			break;
+		}
+		if ($5) {
+			set_currency_picture_symbol ($5);
+		} else {
+			set_currency_picture_symbol ($4);
+		}
 	}
   }
 ;

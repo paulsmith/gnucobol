@@ -516,6 +516,122 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([CURRENCY SIGN])
+AT_KEYWORDS([SPECIAL-NAMES misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY SIGN IS '*'.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY 'T'.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY 'DOLLAR'.
+])
+
+AT_DATA([prog4.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog4.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY 'DOLLAR'
+           WITH PICTURE SYMBOL '$'.
+])
+
+AT_DATA([prog5.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog5.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY '   '
+           PICTURE SYMBOL '*'.
+])
+
+AT_DATA([prog6.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog6.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY ' T '
+           PICTURE SYMBOL ' '.
+])
+
+AT_DATA([prog7.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog7.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY '+-'
+           PICTURE SYMBOL 'TT'.
+])
+
+AT_DATA([prog8.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog8.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY SIGN IS 'T'.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 SOME-CASH     PIC 9(04).99T.
+       PROCEDURE        DIVISION.
+           MOVE 123.4 TO SOME-CASH
+           DISPLAY SOME-CASH END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: error: invalid CURRENCY SIGN '*'
+prog.cob: 7: error: invalid character '*' in PICTURE SYMBOL for CURRENCY
+])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob: 7: error: PICTURE SYMBOL for CURRENCY must be one character long
+])
+AT_CHECK([$COMPILE_ONLY prog4.cob], [0], [],
+[prog4.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
+])
+AT_CHECK([$COMPILE_ONLY prog5.cob], [1], [],
+[prog5.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
+prog5.cob: 7: error: invalid CURRENCY SIGN '   '
+prog5.cob: 8: error: invalid character '*' in PICTURE SYMBOL for CURRENCY
+])
+AT_CHECK([$COMPILE_ONLY prog6.cob], [1], [],
+[prog6.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
+prog6.cob: 8: error: invalid character ' ' in PICTURE SYMBOL for CURRENCY
+])
+AT_CHECK([$COMPILE_ONLY prog7.cob], [1], [],
+[prog7.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
+prog7.cob: 7: error: invalid CURRENCY SIGN '+-'
+prog7.cob: 8: error: PICTURE SYMBOL for CURRENCY must be one character long
+])
+AT_CHECK([$COMPILE_ONLY prog8.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([SWITCHES])
 AT_KEYWORDS([runmisc extensions])
 
