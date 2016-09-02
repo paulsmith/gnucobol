@@ -1,4 +1,9 @@
 
+2016-09-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c (codegen, output_entry_function): modularised and shortened
+	  code.
+
 2016-09-01  Edward Hart <edward.dan.hart@gmail.com>
 
 	* field.c (validate_field_1), parser.y (sign_clause): fixed bug #305 by
