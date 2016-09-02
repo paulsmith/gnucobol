@@ -280,9 +280,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 9: warning: LEFTLINE not implemented
-prog.cob: 9: warning: OVERLINE not implemented
-prog.cob: 10: warning: GRID not implemented
+[prog.cob: 9: warning: LEFTLINE is not implemented
+prog.cob: 9: warning: OVERLINE is not implemented
+prog.cob: 10: warning: GRID is not implemented
 ])
 
 AT_CLEANUP

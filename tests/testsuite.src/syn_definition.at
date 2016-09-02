@@ -981,9 +981,9 @@ prog.cob: 32: error: a trailing +/- sign cannot follow a floating +/- string whi
 prog.cob: 32: error: a trailing +/- sign may only occur once in a PICTURE string
 prog.cob: 33: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
 prog.cob: 34: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point
-prog.cob: 35: warning: USAGE NATIONAL not implemented
+prog.cob: 35: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob: 35: error: A or X cannot follow N
-prog.cob: 36: warning: USAGE NATIONAL not implemented
+prog.cob: 36: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob: 36: error: N cannot follow A or X
 prog.cob: 37: error: a Z or * which is before the decimal point cannot follow A or X
 prog.cob: 38: error: A or X cannot follow .

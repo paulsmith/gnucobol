@@ -4826,7 +4826,7 @@ usage:
 | NATIONAL
   {
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
-	CB_PENDING ("USAGE NATIONAL");
+	CB_UNFINISHED ("USAGE NATIONAL");
   }
 ;
 
@@ -6021,7 +6021,7 @@ _procedure_type:
 	if (current_program->flag_chained) {
 		cb_error (_("%s not allowed in CHAINED programs"), "BY VALUE");
 	} else {
-		CB_PENDING (_("parameters passed BY VALUE"));
+		CB_UNFINISHED (_("parameters passed BY VALUE"));
 		call_mode = CB_CALL_BY_VALUE;
 	}
   }
@@ -9338,7 +9338,7 @@ sort_body:
 				cb_error (_("file sort requires KEY phrase"));
 			} else {
 				/* FIXME: use key definition from OCCURS */
-				cb_error (_("table sort without keys not implemented yet"));
+				cb_error (_("%s is not implemented"), _("table SORT without keys"));
 			}
 			$$ = NULL;
 		} else {

@@ -50,8 +50,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 11: warning: REPORT WRITER not implemented
-prog.cob: 13: warning: REPORT SECTION not implemented
+[prog.cob: 11: warning: REPORT WRITER is not implemented
+prog.cob: 13: warning: REPORT SECTION is not implemented
 prog.cob: 18: error: unsigned positive integer value expected
 prog.cob: 19: error: unsigned positive integer value expected
 prog.cob: 20: error: unsigned positive integer value expected

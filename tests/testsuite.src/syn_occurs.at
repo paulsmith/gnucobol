@@ -122,8 +122,8 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -fcomplex-odo prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -fcomplex-odo prog2.cob], [1], [],
-[prog2.cob: 12: error: reference to item containing nested ODO not implemented
-prog2.cob: 13: error: reference to item containing nested ODO not implemented
+[prog2.cob: 12: error: reference to item containing nested ODO is not implemented
+prog2.cob: 13: error: reference to item containing nested ODO is not implemented
 ])
 
 AT_CLEANUP

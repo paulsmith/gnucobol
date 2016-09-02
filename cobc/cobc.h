@@ -330,11 +330,14 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_FLAG_nQ
 
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	extern int var;
+#define	CB_ONWARNDEF(var,name,doc)	extern int var;
 #define	CB_NOWARNDEF(var,name,doc)	extern int var;
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_NOWARNDEF
 #undef	CB_NOWARNDEF
 
 #undef	CB_OPTIM_DEF
@@ -512,7 +515,12 @@ extern void		cob_gen_optim (const enum cb_optim);
 #define CB_MSG_STYLE_GCC	0
 #define CB_MSG_STYLE_MSC	1U
 
-#define CB_PENDING(x)		cb_warning (_("%s not implemented"), x)
+#define CB_PENDING(x)		cb_warning (_("%s is not implemented"), x)
+#define CB_PENDING_X(x,y)		cb_warning_x (x, _("%s is not implemented"), y)
+#define CB_UNFINISHED(x)		\
+	cb_warning (_("handling of %s is unfinished; implementation is likely to be changed"), x)
+#define CB_UNFINISHED_X(x,y)	\
+	cb_warning_x (x, _("handling of %s is unfinished; implementation is likely to be changed"), y)
 
 extern size_t		cb_msg_style;
 

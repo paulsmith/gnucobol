@@ -2336,7 +2336,7 @@ repeat:
 		case 'N':
 			if (!(category & PIC_NATIONAL)) {
 				category |= PIC_NATIONAL;
-				CB_PENDING ("USAGE NATIONAL");
+				CB_UNFINISHED ("USAGE NATIONAL");
 			}
 			x_digits += n;
 			break;
@@ -3782,7 +3782,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		return cb_error_node;
 	}
 	if (!cbp->implemented) {
-		cb_error_x (name, _("FUNCTION '%s' not implemented"),
+		cb_error_x (name, _("FUNCTION '%s' is not implemented"),
 			    cbp->name);
 		return cb_error_node;
 	}

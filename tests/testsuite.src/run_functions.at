@@ -167,7 +167,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 7: warning: USAGE NATIONAL not implemented
+[prog.cob: 7: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([./prog], [0], [], [])
 

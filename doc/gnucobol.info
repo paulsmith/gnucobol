@@ -1549,6 +1549,8 @@ Options:
   -W                    enable all warnings
   -Wall                 enable most warnings (all except as noted below)
   -Wno-<warning>        disable warning enabled by -W or -Wall
+  -Wno-unfinished       don't warn if unfinished features are used
+			- ALWAYS active
   -Wobsolete            warn if obsolete features are used
   -Warchaic             warn if archaic features are used
   -Wredefinition        warn incompatible redefinition of data items
@@ -3641,14 +3643,14 @@ Node: Extended DISPLAY35749
 Node: System routines38196
 Node: CBL_OC_GETOPT38466
 Node: Appendix A42639
-Node: Appendix B53063
-Node: Appendix C75646
-Node: Appendix D81250
-Node: Appendix E83186
-Node: Appendix F89326
-Node: Appendix G94981
-Node: Appendix H96280
-Node: Appendix I105724
-Node: Index130850
+Node: Appendix B53149
+Node: Appendix C75732
+Node: Appendix D81336
+Node: Appendix E83272
+Node: Appendix F89412
+Node: Appendix G95067
+Node: Appendix H96366
+Node: Appendix I105810
+Node: Index130936
 
 End Tag Table

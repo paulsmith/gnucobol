@@ -2322,7 +2322,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: warning: parameters passed BY VALUE not implemented
+[prog.cob: 9: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 prog.cob: 9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 ])
 AT_CLEANUP

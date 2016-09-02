@@ -569,7 +569,7 @@ cb_validate_one (cb_tree x)
 			}
 			/* check for nested ODO */
 			if (f->odo_level > 1) {
-				cb_error_x (x, _("%s not implemented"),
+				cb_error_x (x, _("%s is not implemented"),
 					_("reference to item containing nested ODO"));
 			}
 		}
@@ -8568,7 +8568,7 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 	} else {
 		if (keys == NULL) {
 			/* FIXME: use key defined in OCCURS */
-			cb_error_x (name, _("table sort without keys not implemented yet"));
+			cb_error_x (name, _("%s is not implemented"), _("table SORT without keys"));
 		}
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_table_sort_init",
 					     cb_int (cb_list_length (keys)), col));

@@ -2158,7 +2158,7 @@ prog.cob: 23: error: . cannot follow V
 prog.cob: 24: error: cannot have both Z and * in PICTURE string
 prog.cob: 25: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 prog.cob: 25: error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 26: warning: USAGE NATIONAL not implemented
+prog.cob: 26: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob: 26: error: N cannot follow A or X
 prog.cob: 27: error: A or X cannot follow S
 prog.cob: 28: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
@@ -2229,7 +2229,7 @@ error: cannot have both Z and * in PICTURE string
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 error: a trailing +/- sign may only occur once in a PICTURE string
 000026             03  PIC AN.
-warning: USAGE NATIONAL not implemented
+warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 error: N cannot follow A or X
 000027             03  PIC SA.
 error: A or X cannot follow S

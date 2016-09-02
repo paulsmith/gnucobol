@@ -388,10 +388,10 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 17: warning: ignoring CODE-SET 'A'
-prog.cob: 17: warning: CODE-SET not implemented
+prog.cob: 17: warning: CODE-SET is not implemented
 prog.cob: 20: error: 'foo' is not defined
 prog.cob: 20: error: 'foo' is not an alphabet-name
-prog.cob: 20: warning: CODE-SET not implemented
+prog.cob: 20: warning: CODE-SET is not implemented
 ])
 AT_CLEANUP
 
@@ -422,8 +422,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 16: warning: FOR sub-records not implemented
-prog.cob: 16: warning: CODE-SET not implemented
+[prog.cob: 16: warning: FOR sub-records is not implemented
+prog.cob: 16: warning: CODE-SET is not implemented
 prog.cob: 16: error: FOR item 'x' is a record
 prog.cob: 16: error: FOR item 'z' is in different record to 'x'
 ])

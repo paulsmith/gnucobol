@@ -213,11 +213,14 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_NQ
 
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	int var = 0;
+#define	CB_ONWARNDEF(var,name,doc)	int var = 1;
 #define	CB_NOWARNDEF(var,name,doc)	int var = 0;
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 
 /* Local variables */
@@ -478,8 +481,12 @@ static const struct option long_options[] = {
 #undef	CB_CONFIG_SUPPORT
 
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)			\
+	{"W"name,		CB_NO_ARG, &var, 1},	\
+	{"Wno-"name,		CB_NO_ARG, &var, 0},
+#define	CB_ONWARNDEF(var,name,doc)			\
 	{"W"name,		CB_NO_ARG, &var, 1},	\
 	{"Wno-"name,		CB_NO_ARG, &var, 0},
 #define	CB_NOWARNDEF(var,name,doc)			\
@@ -487,6 +494,7 @@ static const struct option long_options[] = {
 	{"Wno-"name,		CB_NO_ARG, &var, 0},
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 
 	{NULL,			0, NULL, 0}
@@ -1777,14 +1785,30 @@ cobc_print_info (void)
 }
 
 static void
-cobc_print_warn (const char *name, const char *doc, const int wall)
+cobc_print_warn (const char *name, const char *doc, const int warnopt)
 {
-	printf ("  -W%-19s %s", name, doc);
-	if (!wall) {
-		fputs ("\n\t\t\t", stdout);
+	switch (warnopt) {
+	case 0:
+		printf ("  -W%-19s %s\n", name, doc);
+		fputs ("\t\t\t", stdout);
 		fputs (_("- NOT set with -Wall"), stdout);
+		putchar ('\n');
+		break;
+	case 1:
+		printf ("  -W%-19s %s\n", name, doc);
+		break;
+	case 2:
+		printf ("  -Wno-%-16s %s\n", name, doc);
+		fputs ("\t\t\t", stdout);	
+		fputs (_("- ALWAYS active"), stdout);
+		putchar ('\n');
+		break;
+	default:
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cobc_print_warn", "warnopt");
+		COBC_ABORT ();
+		break;
 	}
-	putchar ('\n');
 }
 
 static void
@@ -1874,13 +1898,17 @@ cobc_print_usage (char * prog)
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
 	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)		\
 	cobc_print_warn (name, doc, 1);
+#define	CB_ONWARNDEF(var,name,doc)		\
+	cobc_print_warn (name, doc, 2);
 #define	CB_NOWARNDEF(var,name,doc)		\
 	cobc_print_warn (name, doc, 0);
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 
 	putchar ('\n');
@@ -2553,11 +2581,14 @@ process_command_line (const int argc, char **argv)
 			/* -w : Turn off all warnings (disables -W/-Wall if passed later) */
 			warningopt = 0;
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 0;
+#define	CB_ONWARNDEF(var,name,doc)	var = 0;
 #define	CB_NOWARNDEF(var,name,doc)	var = 0;
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 			break;
 
@@ -2565,11 +2596,14 @@ process_command_line (const int argc, char **argv)
 			/* -W : Turn on warnings */
 			warningopt = 1;
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 1;
+#define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 			break;
 
@@ -2577,11 +2611,14 @@ process_command_line (const int argc, char **argv)
 			/* -W : Turn on all warnings */
 			warningopt = 1;
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 1;
+#define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)	var = 1;
 #include "warning.def"
 #undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 			break;
 

@@ -21,8 +21,14 @@
 
 /* CB_WARNDEF (var, name, doc) */
 
+/* Always active, start doc with don't warn...  */
+/* CB_ONWARNDEF (var, name, doc) */
+
 /* Do not include warning with -Wall */
 /* CB_NOWARNDEF (var, name, doc) */
+
+CB_ONWARNDEF (cb_warn_unfinished, "unfinished",
+	    _("don't warn if unfinished features are used"))
 
 CB_WARNDEF (cb_warn_obsolete, "obsolete",
 	    _("warn if obsolete features are used"))
