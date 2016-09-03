@@ -53,6 +53,10 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
            DISPLAY -12.3E-2
            END-DISPLAY.
+           DISPLAY B'0101'
+           END-DISPLAY.
+           DISPLAY BX'EC'
+           END-DISPLAY.
            STOP RUN.
 ])
 
@@ -71,6 +75,8 @@ AT_CHECK([./prog], [0],
 .123
 +.123
 -.123
+5
+236
 ])
 
 AT_CLEANUP
