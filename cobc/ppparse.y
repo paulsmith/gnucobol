@@ -677,17 +677,13 @@ set_choice:
 		p[size] = 0;
 	}
 	if (!strcasecmp (p, "FIXED")) {
-		if (cb_2002_fixed_format) {
-			cb_source_format = CB_FORMAT_VARIABLE;
-			cb_current_file->source_format = CB_FORMAT_VARIABLE;
-		} else {
-			cb_source_format = CB_FORMAT_FIXED;
-			cb_current_file->source_format = CB_FORMAT_FIXED;
-		}
+		cb_source_format = CB_FORMAT_FIXED;
+		cb_current_file->source_format = CB_FORMAT_FIXED;
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
 		cb_current_file->source_format = CB_FORMAT_FREE;
 	} else if (!strcasecmp (p, "VARIABLE")) {
+		cb_verify (cb_variable_format, _("variable format"));
 		cb_source_format = CB_FORMAT_VARIABLE;
 		cb_current_file->source_format = CB_FORMAT_VARIABLE;
 	} else {
@@ -742,11 +738,7 @@ source_directive:
 format_type:
   FIXED
   {
-	if (cb_2002_fixed_format) {
-		cb_source_format = CB_FORMAT_VARIABLE;
-	} else {
-		cb_source_format = CB_FORMAT_FIXED;
-	}
+	cb_source_format = CB_FORMAT_FIXED;
   }
 | FREE
   {
@@ -754,6 +746,7 @@ format_type:
   }
 | VARIABLE
   {
+	cb_verify (cb_variable_format, _("variable format"));
 	cb_source_format = CB_FORMAT_VARIABLE;
   }
 | GARBAGE

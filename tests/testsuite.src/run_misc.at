@@ -553,11 +553,6 @@ AT_CHECK([./prog], [0],
 [Hello!
 ])
 
-AT_CHECK([$COMPILE -f2002-fixed-format prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
-[Hello!
-])
-
 AT_CLEANUP
 
 ## OCCURS clause

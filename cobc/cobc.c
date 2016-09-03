@@ -6057,10 +6057,6 @@ main (int argc, char **argv)
 		cobc_flag_library = 0;
 	}
 
-	if (cb_2002_fixed_format && cb_source_format == CB_FORMAT_FIXED) {
-		cb_source_format = CB_FORMAT_VARIABLE;
-	}
-
 	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&
 	    (argc - iargs) > 1) {
 		cobc_err_exit (_("%s option invalid in this combination"), "-o");

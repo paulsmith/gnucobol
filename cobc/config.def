@@ -63,7 +63,6 @@ CB_CONFIG_BOOLEAN (cb_accept_update, "accept-update", _("set WITH UPDATE clause 
 CB_CONFIG_BOOLEAN (cb_accept_auto, "accept-auto", _("set WITH AUTO clause as default for ACCEPT dest-item, except if WITH TAB clause is used"))
 CB_CONFIG_BOOLEAN (cb_console_is_crt, "console-is-crt", _("assume CONSOLE IS CRT if not set otherwise"))
 CB_CONFIG_BOOLEAN (cb_program_name_redefinition, "program-name-redefinition", _("program names don't lead to a reserved identifier"))
-CB_CONFIG_BOOLEAN (cb_2002_fixed_format, "2002-fixed-format", _("fixed format as in COBOL 2002: no program-name area and lines longer than 80 chars"))
 CB_CONFIG_BOOLEAN (cb_specify_all_reserved, "specify-all-reserved", NULL) /* specify all reserved words */
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs", _("comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)"))
 CB_CONFIG_SUPPORT (cb_memory_size_clause, "memory-size-clause", _("MEMORY-SIZE clause"))
@@ -95,3 +94,4 @@ CB_CONFIG_SUPPORT (cb_not_exception_before_exception, "not-exception-before-exce
 CB_CONFIG_SUPPORT (cb_accept_display_extensions, "accept-display-extensions", _("extensions to ACCEPT and DISPLAY"))
 CB_CONFIG_SUPPORT (cb_renames_uncommon_levels, "renames-uncommon-levels", _("RENAMES of 01-, 66- and 77-level items"))
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes", _("CALL/CANCEL with program-prototype-name"))
+CB_CONFIG_SUPPORT (cb_variable_format, "variable-format", _("Micro Focus' variable format"))
