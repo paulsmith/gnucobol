@@ -169,7 +169,7 @@ struct list_files	*cb_current_file = NULL;
 char			*source_name = NULL;
 #endif
 
-int			cb_source_format = CB_FORMAT_FIXED;	/* Default format */
+int			cb_source_format = CB_FORMAT_FIXED;
 int			cb_id = 0;
 int			cb_pic_id = 0;
 int			cb_attr_id = 0;
@@ -427,6 +427,7 @@ static const struct option long_options[] = {
 	{"ext",			CB_RQ_ARG, NULL, 'e'},
 	{"free",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FREE},
 	{"fixed",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FIXED},
+	{"variable",		CB_NO_ARG, &cb_source_format, CB_FORMAT_VARIABLE},
 	{"static",		CB_NO_ARG, &cb_flag_static_call, 1},
 	{"dynamic",		CB_NO_ARG, &cb_flag_static_call, 0},
 	{"job",			CB_OP_ARG, NULL, 'j'},
@@ -3577,12 +3578,17 @@ static void
 set_listing_title_code (void)
 {
 	strcpy (cb_listing_title, "LINE    ");
-	if (cb_listing_files->source_format == CB_FORMAT_FIXED) {
+	if (cb_listing_files->source_format != CB_FORMAT_FREE) {
 		strcat (cb_listing_title,
 			"PG/LN  A...B..............................."
 			".............................");
 		if (cb_listing_wide) {
-			strcat (cb_listing_title, "SEQUENCE");
+			if (cb_listing_files->source_format == CB_FORMAT_FIXED) {
+				strcat (cb_listing_title, "SEQUENCE");
+			} else {
+				strcat (cb_listing_title,
+					"........................................");
+			}
 		}
 	} else {
 		if (cb_listing_wide) {
@@ -4041,11 +4047,11 @@ get_next_listing_line (FILE *fd, char *out_line, int fixed)
 }
 
 static int
-line_has_page_eject (const char *line, const int fixed)
+line_has_page_eject (const char *line, const int fixed_or_variable)
 {
 	char	*directive_start;
 
-	if (fixed && line[CB_INDICATOR] == '/') {
+	if (fixed_or_variable && line[CB_INDICATOR] == '/') {
 		return 1;
 	} else {
 		directive_start = strchr (line, '>');
@@ -4107,7 +4113,37 @@ print_fixed_line (const int line_num, char pch, char *line)
 	terminate_str_at_first_trailing_space (buffer);
 
 	fprintf (cb_src_list_file, "%s\n", buffer);
+}
 
+static void
+print_variable_line (const int line_num, char pch, char *line)
+{
+	int		i;
+	int		len = strlen (line);
+	const int	max_chars_on_line = cb_listing_wide ? 112 : 72;
+	char		buffer[133];
+	const char	*format_str;
+
+	if (line[CB_INDICATOR] == '&') {
+		line[CB_INDICATOR] = '-';
+		pch = '+';
+	}
+
+	for (i = 0; len > 0; i += max_chars_on_line, len -= max_chars_on_line) {
+		print_program_header ();
+
+		if (cb_listing_wide) {
+			format_str = "%06d%c %-112.112s";
+		} else {
+			format_str = "%06d%c %-72.72s";
+		}
+		sprintf (buffer, format_str, line_num, pch, line + i);
+
+		terminate_str_at_first_trailing_space (buffer);
+
+		fprintf (cb_src_list_file, "%s\n", buffer);
+		pch = '+';
+	}
 }
 
 static void
@@ -4119,8 +4155,7 @@ print_free_line (const int line_num, char pch, char *line)
 	const char	*format_str;
 	char		buffer[133];
 
-	for (i = 0; len > 0;
-	     i += max_chars_on_line, len -= max_chars_on_line) {
+	for (i = 0; len > 0; i += max_chars_on_line, len -= max_chars_on_line) {
 		print_program_header ();
 
 		if (cb_listing_wide) {
@@ -4128,8 +4163,7 @@ print_free_line (const int line_num, char pch, char *line)
 		} else {
 			format_str = "%06d%c %-72.72s";
 		}
-		sprintf (buffer, format_str,
-			 line_num, pch, &line[i]);
+		sprintf (buffer, format_str, line_num, pch, line + i);
 
 		terminate_str_at_first_trailing_space (buffer);
 
@@ -4153,15 +4187,14 @@ print_errors_for_line (const struct list_error * const first_error,
 }
 
 static void
-print_line (struct list_files *cfile, char *line, int line_num, int in_copy,
-	    int fixed)
+print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
 {
 	struct list_skip	*skip;
 	int	do_print;
 	int	on_off;
 	char	pch;
 
-	if (line_has_page_eject (line, fixed)) {
+	if (line_has_page_eject (line, cfile->source_format != CB_FORMAT_FREE)) {
 		force_new_page_for_next_line ();
 	}
 
@@ -4181,9 +4214,11 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy,
 			}
 		}
 
-		if (fixed) {
+		if (cfile->source_format == CB_FORMAT_FIXED) {
 			print_fixed_line (line_num, pch, line);
-		} else {
+		} else if (cfile->source_format == CB_FORMAT_VARIABLE) {
+			print_variable_line (line_num, pch, line);
+		} else { /* CB_FORMAT_FREE */
 			print_free_line (line_num, pch, line);
 		}
 	}
@@ -4297,26 +4332,26 @@ adjust_line_numbers (struct list_files *cfile, int line_num, int adjust)
 }
 
 static COB_INLINE COB_A_INLINE int
-is_debug_line (char *line, int fixed)
+is_debug_line (char *line, int fixed_or_variable)
 {
 	return !cb_flag_debugging_line
-		&& ((fixed && IS_DEBUG_LINE (line))
-		    || (!fixed && !strncasecmp (line, "D ", 2)));
+		&& ((fixed_or_variable && IS_DEBUG_LINE (line))
+		    || (!fixed_or_variable && !strncasecmp (line, "D ", 2)));
 }
 
 static COB_INLINE COB_A_INLINE int
-is_comment_line (char *line, int fixed)
+is_comment_line (char *line, int fixed_or_variable)
 {
-	return (fixed && IS_COMMENT_LINE (line))
-		|| (!fixed && !strncmp (line, "*>", 2));
+	return (fixed_or_variable && IS_COMMENT_LINE (line))
+		|| (!fixed_or_variable && !strncmp (line, "*>", 2));
 }
 
 static int
-is_continuation_line (char *line, int fixed)
+is_continuation_line (char *line, int fixed_or_variable)
 {
 	int i;
 
-	if (fixed) {
+	if (fixed_or_variable) {
 		/* check for "-" in column 7 */
 		if (IS_CONTINUE_LINE(line)) {
 			return 1;
@@ -4334,12 +4369,6 @@ is_continuation_line (char *line, int fixed)
 	return 0;
 }
 
-static COB_INLINE COB_A_INLINE int
-get_first_col (const int fixed)
-{
-	return fixed ? CB_MARGIN_A : 0;
-}
-
 /* TODO: Modularise! */
 static int
 print_replace_text (struct list_files *cfile, FILE *fd,
@@ -4354,7 +4383,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	j;
 	int	k = 0;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
-	int	first_col = get_first_col (fixed);
+	const int	fixed_or_variable = cfile->source_format != CB_FORMAT_FREE;
+	int	first_col = fixed_or_variable ? CB_MARGIN_A : 0;
 	int	last;
 	int	multi_token;
 	int	match = 0;
@@ -4375,7 +4405,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	char	newline[CB_LINE_LENGTH + 2];
 	char	frm_line[CB_LINE_LENGTH + 2];
 
-	if (is_comment_line (pline[0], fixed)) {
+	if (is_comment_line (pline[0], fixed_or_variable)) {
 		return pline_cnt;
 	}
 
@@ -4480,11 +4510,11 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			  Overwrite the current line if it is a comment or debug
 			  line.
 			*/
-			if (is_comment_line (pline[pline_cnt], fixed)) {
+			if (is_comment_line (pline[pline_cnt], fixed_or_variable)) {
 				adjust_line_numbers (cfile, line_num,  -1);
 				overread = 1;
 			}
-			if (is_debug_line (pline[pline_cnt], fixed)) {
+			if (is_debug_line (pline[pline_cnt], fixed_or_variable)) {
 				adjust_line_numbers (cfile, line_num,  -1);
 				overread = 1;
 			}
@@ -4494,15 +4524,15 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			  line.
 			 */
 		next_rec:
-			if (!is_comment_line (pline[pline_cnt], fixed)) {
+			if (!is_comment_line (pline[pline_cnt], fixed_or_variable)) {
 				pline_cnt++;
 			}
 			if (get_next_listing_line (fd, pline[pline_cnt], fixed) < 0) {
 				pline[pline_cnt][0] = 0;
 				eof = 1;
 			}
-			if ( is_debug_line (pline[pline_cnt], fixed)
-				|| is_comment_line (pline[pline_cnt], fixed)) {
+			if (is_debug_line (pline[pline_cnt], fixed_or_variable)
+			    || is_comment_line (pline[pline_cnt], fixed_or_variable)) {
 				adjust_line_numbers (cfile, line_num,  -1);
 				goto next_rec;
 			}
@@ -4713,7 +4743,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	char	ttoken[CB_LINE_LENGTH + 2] = { '\0' };
 	char	cmp_line[CB_LINE_LENGTH + 2] = { '\0' };
 
-	if (is_comment_line (pline[0], fixed)) {
+	if (is_comment_line (pline[0], cfile->source_format != CB_FORMAT_FREE)) {
 		return pline_cnt;
 	}
 
@@ -4730,7 +4760,8 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	}
 #endif
 
-	compare_prepare (cmp_line, pline, 0, pline_cnt, first_col, fixed);
+	compare_prepare (cmp_line, pline, 0, pline_cnt, first_col,
+			 cfile->source_format);
 	tp = get_next_token (cmp_line, ttoken, tterm);
 	is_replace = !strcasecmp (ttoken, "REPLACE");
 	is_copy = !strcasecmp (ttoken, "COPY");
@@ -4766,7 +4797,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 
 					/* List all lines read so far and then discard them. */
 					for (i = 0; i < pline_cnt; i++) {
-						print_line (cfile, pline[i], line_num + i, 0, fixed);
+						print_line (cfile, pline[i], line_num + i, 0);
 						pline[i][0] = 0;
 					}
 
@@ -4870,7 +4901,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 				}
 				pline_cnt++;
 				if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
-						      fixed)) {
+							  cfile->source_format != CB_FORMAT_FREE)) {
 					continue;
 				}
 
@@ -4890,9 +4921,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 				for (i = 0; i < pline_cnt; i++) {
 					if (pline[i][0]) {
 						if (pline[i][CB_INDICATOR] == '&') {
-							print_line (cfile, pline[i], line_num, in_copy, fixed);
+							print_line (cfile, pline[i], line_num, in_copy);
 						} else {
-							print_line (cfile, pline[i], line_num + i, in_copy, fixed);
+							print_line (cfile, pline[i], line_num + i, in_copy);
 							prec++;
 						}
 					}
@@ -6024,6 +6055,10 @@ main (int argc, char **argv)
 		cobc_flag_main = 0;
 		cobc_flag_module = 0;
 		cobc_flag_library = 0;
+	}
+
+	if (cb_2002_fixed_format && cb_source_format == CB_FORMAT_FIXED) {
+		cb_source_format = CB_FORMAT_VARIABLE;
 	}
 
 	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&

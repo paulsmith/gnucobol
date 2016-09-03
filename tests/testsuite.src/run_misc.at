@@ -507,7 +507,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SOURCE FIXED/FREE directives])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -533,6 +533,32 @@ AT_CHECK([./prog], [0],
 
 AT_CLEANUP
 
+## COBOL 2002 fixed format / variable format
+
+AT_SETUP([Variable format])
+AT_KEYWORDS([COBOL 2002 runmisc])
+
+AT_DATA([prog.cob], [
+000010 IDENTIFICATION DIVISION.
+000020 PROGRAM-ID. prog.
+000030* blah blah blah
+000040 PROCEDURE DIVISION.
+000050                                                                  DISPLAY "Hello!"
+000060     .
+000070 END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -variable prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[Hello!
+])
+
+AT_CHECK([$COMPILE -f2002-fixed-format prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[Hello!
+])
+
+AT_CLEANUP
 
 ## OCCURS clause
 

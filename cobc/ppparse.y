@@ -536,6 +536,7 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token IS
 %token FIXED
 %token FREE
+%token VARIABLE
 
 %token DEFINE_DIRECTIVE
 %token AS
@@ -577,9 +578,9 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 
 %token TERMINATOR	"end of line"
 
-%token <s> TOKEN	"Identifier or Literal"
-%token <s> VARIABLE	"Variable"
-%token <s> LITERAL	"Literal"
+%token <s> TOKEN		"Identifier or Literal"
+%token <s> VARIABLE_NAME	"Variable"
+%token <s> LITERAL		"Literal"
 
 %type <s>	copy_in
 
@@ -648,7 +649,7 @@ set_directive:
 ;
 
 set_choice:
-  CONSTANT VARIABLE _as LITERAL
+  CONSTANT VARIABLE_NAME _as LITERAL
   {
 	struct cb_define_struct	*p;
 
@@ -658,7 +659,7 @@ set_choice:
 		fprintf (ppout, "#DEFLIT %s %s\n", $2, $4);
 	}
   }
-| VARIABLE set_options
+| VARIABLE_NAME set_options
 | SOURCEFORMAT _as LITERAL
   {
 	char	*p;
@@ -676,11 +677,19 @@ set_choice:
 		p[size] = 0;
 	}
 	if (!strcasecmp (p, "FIXED")) {
-		cb_source_format = CB_FORMAT_FIXED;
-		cb_current_file->source_format = CB_FORMAT_FIXED;
+		if (cb_2002_fixed_format) {
+			cb_source_format = CB_FORMAT_VARIABLE;
+			cb_current_file->source_format = CB_FORMAT_VARIABLE;
+		} else {
+			cb_source_format = CB_FORMAT_FIXED;
+			cb_current_file->source_format = CB_FORMAT_FIXED;
+		}
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
 		cb_current_file->source_format = CB_FORMAT_FREE;
+	} else if (!strcasecmp (p, "VARIABLE")) {
+		cb_source_format = CB_FORMAT_VARIABLE;
+		cb_current_file->source_format = CB_FORMAT_VARIABLE;
 	} else {
 		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
 	}
@@ -733,11 +742,19 @@ source_directive:
 format_type:
   FIXED
   {
-	cb_source_format = CB_FORMAT_FIXED;
+	if (cb_2002_fixed_format) {
+		cb_source_format = CB_FORMAT_VARIABLE;
+	} else {
+		cb_source_format = CB_FORMAT_FIXED;
+	}
   }
 | FREE
   {
 	cb_source_format = CB_FORMAT_FREE;
+  }
+| VARIABLE
+  {
+	cb_source_format = CB_FORMAT_VARIABLE;
   }
 | GARBAGE
   {
@@ -747,11 +764,11 @@ format_type:
 ;
 
 define_directive:
-  VARIABLE _as OFF
+  VARIABLE_NAME _as OFF
   {
 	ppp_define_del ($1);
   }
-| VARIABLE _as PARAMETER _override
+| VARIABLE_NAME _as PARAMETER _override
   {
 	char			*s;
 	char			*q;
@@ -785,7 +802,7 @@ define_directive:
 		}
 	}
   }
-| VARIABLE _as LITERAL _override
+| VARIABLE_NAME _as LITERAL _override
   {
 	struct cb_define_struct	*p;
 
@@ -794,7 +811,7 @@ define_directive:
 		ppp_setvar_list = p;
 	}
   }
-| CONSTANT VARIABLE _as LITERAL _override
+| CONSTANT VARIABLE_NAME _as LITERAL _override
   {
 	struct cb_define_struct	*p;
 
@@ -830,8 +847,8 @@ turn_directive:
 ;
 
 ec_list:
-  VARIABLE
-| ec_list VARIABLE
+  VARIABLE_NAME
+| ec_list VARIABLE_NAME
 ;
 
 on_or_off:
@@ -847,21 +864,21 @@ with_loc:
 ;
 
 if_directive:
-  VARIABLE _is _not DEFINED
+  VARIABLE_NAME _is _not DEFINED
   {
 	unsigned int		found;
 
 	found = (ppp_search_lists ($1) != NULL);
 	plex_action_directive (current_cmd, found ^ $3);
   }
-| VARIABLE _is _not SET
+| VARIABLE_NAME _is _not SET
   {
 	unsigned int		found;
 
 	found = ppp_search_comp_vars ($1);
 	plex_action_directive (current_cmd, found ^ $3);
   }
-| VARIABLE _is _not condition_clause object_id
+| VARIABLE_NAME _is _not condition_clause object_id
   {
 	struct cb_define_struct	*p;
 	unsigned int		found;
@@ -893,7 +910,7 @@ if_directive:
 ;
 
 variable_or_literal:
-  VARIABLE
+  VARIABLE_NAME
 | LITERAL
 ;
 
@@ -911,7 +928,7 @@ object_id:
 		$$ = p;
 	}
   }
-| VARIABLE
+| VARIABLE_NAME
   {
 	struct cb_define_struct	*p;
 

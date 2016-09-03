@@ -61,9 +61,12 @@
 
 #define COBC_ABORT()			cobc_abort(__FILE__, __LINE__)
 
-/* Source format defines */
-#define CB_FORMAT_FIXED			0
-#define CB_FORMAT_FREE			1
+/* Source format enum */
+enum cb_format {
+	CB_FORMAT_FIXED = 0,
+	CB_FORMAT_FREE,
+	CB_FORMAT_VARIABLE
+};
 
 /* COPY extended syntax defines */
 #define CB_REPLACE_LEADING		1U
@@ -302,7 +305,7 @@ struct list_files {
 	struct list_skip	*skip_tail;	/* Skip list tail */
 	int 			copy_line;	/* Line start for copy book */
 	int 			listing_on;	/* Listing flag for this file */
-	int			source_format;	/* source format for file */
+	enum cb_format		source_format;	/* source format for file */
 	char			*name;		/* Name of this file */
 };
 

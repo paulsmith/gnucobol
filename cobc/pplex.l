@@ -468,6 +468,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   "IS"			{ return IS; }
   "FIXED"		{ return FIXED; }
   "FREE"		{ return FREE; }
+  "VARIABLE"		{ return VARIABLE; }
   [ ,;]+		{ /* ignore */ }
   .			{ }
 }
@@ -500,7 +501,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   }
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
-	return VARIABLE;
+	return VARIABLE_NAME;
   }
   [ ,;]+		{ /* ignore */ }
   .			{ }
@@ -541,7 +542,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   }
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
-	return VARIABLE;
+	return VARIABLE_NAME;
   }
   [ ,;]+		{ /* ignore */ }
   .			{ }
@@ -580,7 +581,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   }
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
-	return VARIABLE;
+	return VARIABLE_NAME;
   }
   [ ,;]+		{ /* ignore */ }
   .			{ }
@@ -616,7 +617,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   }
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
-	return VARIABLE;
+	return VARIABLE_NAME;
   }
   .			{ }
 }
@@ -1270,7 +1271,9 @@ start:
 	}
 	buff[n] = 0;
 
-	if (cb_source_format == CB_FORMAT_FIXED) {
+	if (cb_source_format == CB_FORMAT_FREE) {
+		bp = buff;
+	} else {
 		if (n < 8) {
 			/* Line too short */
 			newline_count++;
@@ -1285,7 +1288,8 @@ start:
 		}
 
 		/* Check if text is longer than cb_text_column */
-		if (n > cb_text_column + 1) {
+		if (cb_source_format == CB_FORMAT_FIXED
+		    && n > cb_text_column + 1) {
 			/* Show warning if it is not whitespace
 			   (postponed after checking for comments by setting
 			    line_overflow to first column that leads to
@@ -1312,8 +1316,6 @@ start:
 		memset (buff, ' ', (size_t)6);
 		/* Note we allow directive lines to start at column 7 */
 		bp = &buff[6];
-	} else {
-		bp = buff;
 	}
 
 	/* Check for directives/floating comment at first non-space of line */
@@ -1321,12 +1323,12 @@ start:
 	i = 0;
 	for (; *bp; bp++) {
 		if (*bp != ' ') {
-			if ((*bp == '$' && !(cb_source_format == CB_FORMAT_FIXED && i == 0)) ||
-			    (*bp == '>' && bp[1] == '>'                                    )   ) {
+			if ((*bp == '$' && !(cb_source_format != CB_FORMAT_FREE && i == 0))
+			    || (*bp == '>' && bp[1] == '>')) {
 				/* Directive */
 				ipchar = 1;
-			} else if ((*bp == '*' && bp[1] == '>'      ) ||
-			           (cb_flag_acucomment && *bp == '|')   ) {
+			} else if ((*bp == '*' && bp[1] == '>')
+			           || (cb_flag_acucomment && *bp == '|')) {
 				/* Float comment */
 				newline_count++;
 				goto start;
@@ -1826,7 +1828,7 @@ check_listing (const char *text, const unsigned int comment)
 		fprintf (cb_listing_file, "%6d%c", ++listing_line, c);
 	}
 
-	if (requires_listing_line && cb_source_format == CB_FORMAT_FIXED &&
+	if (requires_listing_line && cb_source_format != CB_FORMAT_FREE &&
 	    strlen (text) > 6) {
 		s = &text[6];
 	} else {

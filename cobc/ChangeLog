@@ -1,4 +1,12 @@
 
+2016-09-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l, ppparse.y, cobc.c: added support for COBOL 2002 fixed format
+	  (AKA variable format).
+	* config.def, cobc.c: added 2002-fixed config option to interpret "fixed
+	  format" as "COBOL 2002 fixed format".
+	* cobc.h: moved CB_FORMAT defines into new cb_format enum.
+
 2016-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_concat_literals): allow concatenation of national and
