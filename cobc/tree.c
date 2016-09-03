@@ -1774,6 +1774,19 @@ cb_build_alphanumeric_literal (const void *data, const size_t size)
 }
 
 cb_tree
+cb_build_national_literal (const void *data, const size_t size)
+{
+	cb_tree			l;
+
+	l = CB_TREE (build_literal (CB_CATEGORY_NATIONAL, data, size));
+
+	l->source_file = cb_source_file;
+	l->source_line = cb_source_line;
+
+	return l;
+}
+
+cb_tree
 cb_concat_literals (const cb_tree x1, const cb_tree x2)
 {
 	struct cb_literal	*p;
@@ -1784,9 +1797,15 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 		return cb_error_node;
 	}
 
-	if ((x1->category != CB_CATEGORY_ALPHANUMERIC)
-		|| (x2->category != CB_CATEGORY_ALPHANUMERIC)) {
-		cb_error_x (x1, _("non-alphanumeric literals cannot be concatenated"));
+	if ((x1->category != x2->category)) {
+		cb_error_x (x1, _("only literals with the same category can be concatenated"));
+		return cb_error_node;
+	}
+
+	if ((x1->category != CB_CATEGORY_ALPHANUMERIC) &&
+		(x1->category != CB_CATEGORY_NATIONAL) &&
+		(x1->category != CB_CATEGORY_BOOLEAN)) {
+		cb_error_x (x1, _("only alpanumeric, national or boolean literals may be concatenated"));
 		return cb_error_node;
 	}
 

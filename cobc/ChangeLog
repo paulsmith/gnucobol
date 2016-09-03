@@ -1,4 +1,9 @@
 
+2016-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_concat_literals): allow concatenation of national and
+	  boolean literals
+
 2016-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.h: added CB_UNFINISHED as replacement for CB_PENDING for code that
@@ -32,6 +37,14 @@
 	  instead of magic numbers.
 	* parser.y (print_bits): improved style.
 	* tree.c (cb_build_picture): added warning message to PIC N.
+
+2016-08-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* scanner.l: added premature implementation of national-literals, 
+	  hexadecimal-national-literals, hexadecimal-boolean-literals
+	* tree.c, tree.h: new function cb_build_national_literal
+	* tree.c (cb_concat_literals): allow concatenation of national and
+	  boolean literals within the same category
 
 2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

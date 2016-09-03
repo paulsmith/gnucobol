@@ -2862,8 +2862,7 @@ process_filename (const char *filename)
 		/* Already compiled */
 		fn->need_preprocess = 0;
 		fn->need_translate = 0;
-	}
-	else if (
+	} else if (
 #if	defined(__OS400__)
 			extension[0] == 0
 #else
@@ -3008,17 +3007,17 @@ process_run (const char *name) {
 			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s %s",
 				file_basename(name), cobc_run_args);
 		} else {
-		snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
-			file_basename(name));
+			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
+				file_basename(name));
 		}
 	} else {  /* executable */
 		if (cobc_run_args) {
 			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s %s",
 				SLASH_CHAR, name, cobc_run_args);
 		} else {
-		snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
-			SLASH_CHAR, name);
-	}
+			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
+				SLASH_CHAR, name);
+		}
 	}
 	cobc_buffer[cobc_buffer_size] = 0;
 	if (verbose_output) {
@@ -3331,7 +3330,7 @@ process_filtered (const char *cmd, struct filename *fn)
 		*/
 		output_name_temp = cobc_strdup (fn->source);
 		file_stripext(output_name_temp);
-			}
+	}
 
 	/* check for last path seperator as we only need the file name */
 	for (i = fn->translate_len; i > 0; i--) {
@@ -6091,6 +6090,10 @@ main (int argc, char **argv)
 			cobc_clean_up (1);
 			return 1;
 		}
+#if 1 // checkme, changed by Sergey
+	}
+	for (fn = file_list; fn; fn = fn->next) {
+#endif
 
 		/* Initialize listing */
 		if (cb_src_list_file) {

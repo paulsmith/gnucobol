@@ -386,7 +386,13 @@ assume CONSOLE IS CRT if not set otherwise
 .HP
 \fB\-fcall\-overflow=\fR<support> OVERFLOW clause for CALL
 .HP
-\fB\-fnumeric\-boolean=\fR<support> boolean literals (b'0001')
+\fB\-fnumeric\-boolean=\fR<support> boolean literals (b'1010')
+.HP
+\fB\-fhexadecimal\-boolean=\fR<support> hexadecimal\-boolean literals (b'A')
+.HP
+\fB\-fnational\-literals=\fR<support> national literals (N'UTF\-16 string')
+.HP
+\fB\-fhexadecimal\-national\-literals=\fR<support> hexadecimal\-national literals (NX'265E')
 .HP
 \fB\-facucobol\-literals=\fR<support> ACUCOBOL\-GT literals (#B #O #H #X)
 .HP
@@ -411,7 +417,7 @@ word to be added to reserved words list
 \fB\-freserved=\fR<word>:<alias> word to be added to reserved words list as alias
 .SH AUTHOR
 Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart
-Built     Sep 03 2016 00:22:39
+Built     Sep 03 2016 01:25:33
 Packaged  Oct 25 2015 21:40:28 UTC
 C version "4.8.4"
 .SH "REPORTING BUGS"

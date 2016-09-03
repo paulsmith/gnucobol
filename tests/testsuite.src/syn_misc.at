@@ -812,7 +812,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Missing mnemonic-name declaration])
-AT_KEYWORDS([misc special-names])
+AT_KEYWORDS([misc ACCEPT SPECIAL-NAMES])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
@@ -833,7 +833,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Unknown device in dialect])
-AT_KEYWORDS([misc special-names])
+AT_KEYWORDS([misc ACCEPT DISPLAY SPECIAL-NAMES])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
@@ -849,7 +849,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
-# Checkme: Error should occur for UPON_COMMAND_LINE, too, shouldn't it?
+# Checkme: Error currently doesn't occur for UPON_COMMAND_LINE as this is already tokenized
+# in scanner.l. We just ignore this for now and maybe fix it later.
 #AT_CHECK([$COMPILE_ONLY -fnot-reserved=COMMAND-LINE prog.cob], [1], [],
 #[prog.cob: 8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
 #prog.cob: 9: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
@@ -2230,7 +2231,7 @@ AT_DATA([prog.cob], [
            *> invalid form
            DISPLAY X"GH"
                    X"1"
-           END-DISPLAY           .
+           END-DISPLAY.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -2240,6 +2241,75 @@ prog.cob: 9: error: literal contains invalid character 'H'
 prog.cob: 10: error: invalid X literal: '1'
 prog.cob: 10: error: literal does not have an even number of digits
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([national literals])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+           DISPLAY N"UTF-16 string".
+           DISPLAY N'0123456789ABCDEF'.
+           DISPLAY N"0123456789ABCDEF"-
+                   N"0123456789ABCDEF".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 5: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 6: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 7: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 8: warning: handling of national literal is unfinished; implementation is likely to be changed
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 5: error: national literal does not conform to COBOL 85
+prog.cob: 6: error: national literal does not conform to COBOL 85
+prog.cob: 7: error: national literal does not conform to COBOL 85
+prog.cob: 8: error: national literal does not conform to COBOL 85
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([NX literals])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+           *> Valid form 
+           DISPLAY NX"265E"
+           DISPLAY NX"0123456789ABCDEF"
+
+           *> invalid form
+           DISPLAY NX"GH"
+                   NX"1".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 6: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 7: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 10: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 10: error: invalid NX literal: 'GH'
+prog.cob: 10: error: literal contains invalid character 'G'
+prog.cob: 10: error: literal contains invalid character 'H'
+prog.cob: 11: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob: 11: error: invalid NX literal: '1'
+prog.cob: 11: error: literal does not have an even number of digits
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 6: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob: 7: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob: 10: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob: 11: error: hexadecimal-national literal does not conform to COBOL 85
+])
+
 AT_CLEANUP
 
 
@@ -2250,15 +2320,14 @@ AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           DISPLAY B"101010" END-DISPLAY
+           DISPLAY B"101010"
            DISPLAY B"111111111111111111111111111111111111111111111111111
       -             "1111111111111" *> " Syntax highlighting hack
 
-           DISPLAY B"23" END-DISPLAY
+           DISPLAY B"23"
            DISPLAY B"111111111111111111111111111111111111111111111111111
       -             "111111111111111111111111111111111111111111111111111
       -             "11111111111111111111111111111111111111111111111111"
-           END-DISPLAY
            STOP RUN.
 ])
 
@@ -2270,11 +2339,40 @@ prog.cob: 10: error: invalid B literal: '11111111111111111111111111111111111...'
 prog.cob: 10: error: literal length 152 exceeds 64 characters
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 5: error: numeric boolean literal does not conform to COBOL 2014
-prog.cob: 6: error: numeric boolean literal does not conform to COBOL 2014
-prog.cob: 9: error: numeric boolean literal does not conform to COBOL 2014
-prog.cob: 10: error: numeric boolean literal does not conform to COBOL 2014
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 5: error: numeric boolean literal does not conform to COBOL 85
+prog.cob: 6: error: numeric boolean literal does not conform to COBOL 85
+prog.cob: 9: error: numeric boolean literal does not conform to COBOL 85
+prog.cob: 10: error: numeric boolean literal does not conform to COBOL 85
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Binary-hexadecimal literals])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY BX"AB05CD0F"
+           DISPLAY        BX"0123456789ABCDEF0123456789ABCDEF0123456789A
+      -              "BCDEF" *> " Syntax highlighting hack
+
+           DISPLAY BX"A"
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 6: error: invalid BX literal: '0123456789ABCDEF0123456789ABCDEF012...'
+prog.cob: 6: error: literal length 192 exceeds 64 characters
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: 5: error: hexadecimal-boolean literal does not conform to COBOL 85
+prog.cob: 6: error: hexadecimal-boolean literal does not conform to COBOL 85
+prog.cob: 9: error: hexadecimal-boolean literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -2302,24 +2400,24 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
-[prog.cob: 11: error: invalid B literal: '11111111111111111111111111111111111...'
+[prog.cob: 11: error: invalid B# literal: '11111111111111111111111111111111111...'
 prog.cob: 11: error: literal length 65 exceeds 64 characters
-prog.cob: 12: error: invalid O literal: '11111111111111111111111'
+prog.cob: 12: error: invalid O# literal: '11111111111111111111111'
 prog.cob: 12: error: literal length 23 exceeds 22 characters
 prog.cob: 12: error: invalid hexadecimal literal: '11111111111111111'
 prog.cob: 12: error: literal length 17 exceeds 16 characters
 prog.cob: 12: error: invalid hexadecimal literal: '22222222222222222'
 prog.cob: 12: error: literal length 17 exceeds 16 characters
-prog.cob: 14: error: invalid B literal: '23'
+prog.cob: 14: error: invalid B# literal: '23'
 prog.cob: 14: error: literal contains invalid character '2'
 prog.cob: 14: error: literal contains invalid character '3'
-prog.cob: 14: error: invalid O literal: '89'
+prog.cob: 14: error: invalid O# literal: '89'
 prog.cob: 14: error: literal contains invalid character '8'
 prog.cob: 14: error: literal contains invalid character '9'
-prog.cob: 14: error: invalid hexadecimal literal: 'GG'
+prog.cob: 14: error: invalid X# literal: 'GG'
 prog.cob: 14: error: literal contains invalid character 'G'
 prog.cob: 14: error: literal contains invalid character 'G'
-prog.cob: 14: error: invalid hexadecimal literal: 'HH'
+prog.cob: 14: error: invalid H# literal: 'HH'
 prog.cob: 14: error: literal contains invalid character 'H'
 prog.cob: 14: error: literal contains invalid character 'H'
 ])
