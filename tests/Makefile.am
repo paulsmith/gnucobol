@@ -66,6 +66,8 @@ EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) \
 DISTCLEANFILES = atconfig
 
 check-local: $(TESTSUITE)
+	@echo testing for working diff && diff - "$(TESTSUITE)" < "$(TESTSUITE)" \
+		|| (echo "Error: no working 'diff' in PATH" && false)
 	@$(TESTSUITE) $(TESTSUITEFLAGS) || rm -f testsuite.dir/at-job-fifo
 	@rm -f testsuite.dir/at-job-fifo
 
@@ -73,6 +75,8 @@ clean-local:
 	rm -rf *.dir *.log
 
 test:
+	@echo testing for perl && perl -v 1>/dev/null \
+		|| (echo "Error: no working 'perl' in PATH" && false)
 	cd cobol85 && $(MAKE) $(AM_MAKEFLAGS) test
 
 checkall: check test
