@@ -1,3 +1,9 @@
+
+2016-08-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* Makefile.am: checking `diff` on start of target "check" and
+	  `perl` before running target "test" in cobol85
+
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Added tests for non-existant file and
