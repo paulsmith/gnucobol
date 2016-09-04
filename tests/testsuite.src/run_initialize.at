@@ -53,7 +53,7 @@ AT_CLEANUP
 
 
 AT_SETUP([INITIALIZE OCCURS with numeric edited])
-AT_KEYWORDS([initialize])
+AT_KEYWORDS([initialize editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

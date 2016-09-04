@@ -266,7 +266,7 @@ AT_CLEANUP
 
 
 AT_SETUP([MOVE to edited item (1)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -315,7 +315,7 @@ AT_CLEANUP
 
 
 AT_SETUP([MOVE to edited item (2)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -364,7 +364,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Move to item with simple and floating insertion])
-AT_KEYWORDS([fundamental edited])
+AT_KEYWORDS([fundamental edited editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.

@@ -35,7 +35,7 @@
 # 5) DONE
 
 AT_SETUP([MOVE SPACE TO numeric or numeric-edited item])
-AT_KEYWORDS([move])
+AT_KEYWORDS([move editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -144,7 +144,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 AT_SETUP([MOVE alphanumeric-edited TO x])
-AT_KEYWORDS([move])
+AT_KEYWORDS([move editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -234,7 +234,7 @@ prog.cob: 15: error: invalid MOVE statement
 AT_CLEANUP
 
 AT_SETUP([MOVE numeric-edited TO x])
-AT_KEYWORDS([move])
+AT_KEYWORDS([move editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

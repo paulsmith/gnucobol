@@ -109,9 +109,7 @@ struct cb_level_78 {
 	struct cb_level_78	*last;		/* Last in chain */
 	struct cb_field		*fld78;		/* Pointer to field */
 	struct cb_program	*prog;		/* Program where defined */
-	const char		*pic_replace;	/* Can replace in PICTURE */
 	cob_u32_t		name_len;	/* Length of name */
-	cob_u32_t		pic_len;	/* Length of pic_replace */
 	cob_u32_t		not_const;	/* Invalid usage check */
 	cob_u32_t		chk_const;	/* Check global level use */
 };
@@ -139,79 +137,6 @@ static unsigned int		integer_is_label = 0;
 static unsigned int		inside_bracket = 0;
 static unsigned int		literal_error;
 static char			err_msg[COB_MINI_BUFF];
-
-#ifdef	HAVE_DESIGNATED_INITS
-static const unsigned char	valid_char[256] = {
-	['-'] = 1,
-	['0'] = 1,
-	['1'] = 1,
-	['2'] = 1,
-	['3'] = 1,
-	['4'] = 1,
-	['5'] = 1,
-	['6'] = 1,
-	['7'] = 1,
-	['8'] = 1,
-	['9'] = 1,
-	['A'] = 1,
-	['B'] = 1,
-	['C'] = 1,
-	['D'] = 1,
-	['E'] = 1,
-	['F'] = 1,
-	['G'] = 1,
-	['H'] = 1,
-	['I'] = 1,
-	['J'] = 1,
-	['K'] = 1,
-	['L'] = 1,
-	['M'] = 1,
-	['N'] = 1,
-	['O'] = 1,
-	['P'] = 1,
-	['Q'] = 1,
-	['R'] = 1,
-	['S'] = 1,
-	['T'] = 1,
-	['U'] = 1,
-	['V'] = 1,
-	['W'] = 1,
-	['X'] = 1,
-	['Y'] = 1,
-	['Z'] = 1,
-	['_'] = 1,
-	['a'] = 1,
-	['b'] = 1,
-	['c'] = 1,
-	['d'] = 1,
-	['e'] = 1,
-	['f'] = 1,
-	['g'] = 1,
-	['h'] = 1,
-	['i'] = 1,
-	['j'] = 1,
-	['k'] = 1,
-	['l'] = 1,
-	['m'] = 1,
-	['n'] = 1,
-	['o'] = 1,
-	['p'] = 1,
-	['q'] = 1,
-	['r'] = 1,
-	['s'] = 1,
-	['t'] = 1,
-	['u'] = 1,
-	['v'] = 1,
-	['w'] = 1,
-	['x'] = 1,
-	['y'] = 1,
-	['z'] = 1
-};
-#else
-static unsigned char		valid_char[256];
-static const unsigned char	pvalid_char[] =
-	"-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
-#endif
 
 /* Function declarations */
 static void	read_literal (const char, const char *);
@@ -1824,69 +1749,10 @@ scan_floating_numeric (const char *text)
 	RETURN (LITERAL);
 }
 
-static int
-can_replace (const char *src1, const char *src2, const size_t size,
-	     const size_t iteration)
-{
-	const unsigned char	*p;
-
-	/* Check if we can do a replacement */
-	if (strncasecmp (src1, src2, size)) {
-		return 0;
-	}
-	p = (const unsigned char *)src1 + size;
-	if (valid_char[*p]) {
-		return 0;
-	}
-	if (iteration) {
-		p = (const unsigned char *)src1 - 1;
-		if (valid_char[*p]) {
-			return 0;
-		}
-	}
-	return 1;
-}
-
-static const char *
-check_78_replace (const cb_tree p)
-{
-	/* Check if we can do a constant replacement within PICTURE */
-	if (CB_LITERAL_P (p)) {
-		if (CB_LITERAL(p)->size > 50) {
-			return NULL;
-		}
-		return (const char *)(CB_LITERAL(p)->data);
-	}
-	if (p == cb_low) {
-		return "LOW-VALUE";
-	}
-	if (p == cb_high) {
-		return "HIGH-VALUE";
-	}
-	if (p == cb_space) {
-		return "SPACE";
-	}
-	if (p == cb_zero) {
-		return "ZERO";
-	}
-	if (p == cb_quote) {
-		return "QUOTE";
-	}
-	if (p == cb_null) {
-		return "NULL";
-	}
-	return NULL;
-}
-
 static void
 scan_picture (const char *text)
 {
 	unsigned char			*p;
-	const struct cb_level_78	*p78;
-	size_t				n;
-	size_t				i;
-	size_t				size;
-	size_t				sizep;
 
 	/* Scan a PICTURE clause */
 	/* Normalize the input */
@@ -1900,35 +1766,7 @@ scan_picture (const char *text)
 		*p = (unsigned char)toupper (*p);
 	}
 
-	if (!top78ptr) {
-		yylval = cb_build_picture (text);
-		return;
-	}
-
-	memset (picbuff1, 0, pic1size);
-	memset (picbuff2, 0, pic2size);
-	strcpy (picbuff1, text);
-	for (p78 = top78ptr; p78; p78 = p78->globnext) {
-		if (!p78->pic_replace) {
-			strcpy (picbuff2, picbuff1);
-			continue;
-		}
-		size = p78->name_len;
-		sizep = p78->pic_len;
-		i = 0;
-		for (n = 0; n < strlen (picbuff1); n++) {
-			if (can_replace (&picbuff1[n], p78->fld78->name, size, n)) {
-				memcpy (&picbuff2[i], p78->pic_replace, sizep);
-				n += size - 1;
-				i += sizep;
-			} else {
-				picbuff2[i++] = picbuff1[n];
-			}
-		}
-		picbuff2[i] = 0;
-		strcpy (picbuff1, picbuff2);
-	}
-	yylval = cb_build_picture (picbuff2);
+	yylval = cb_build_picture (text);
 }
 
 static void
@@ -1964,10 +1802,6 @@ cb_add_const_var (const char *name, cb_tree value)
 	p78 = cobc_malloc (sizeof(struct cb_level_78));
 	p78->fld78 = f;
 	p78->prog = NULL;
-	p78->pic_replace = check_78_replace (CB_VALUE(f->values));
-	if (p78->pic_replace) {
-		p78->pic_len = (cob_u32_t)strlen (p78->pic_replace);
-	}
 	p78->name_len = (cob_u32_t)strlen (f->name);
 	/* RXWRXW - Check this */
 	p78->chk_const = 0;
@@ -2180,10 +2014,6 @@ cb_add_78 (struct cb_field *f)
 	p78 = cobc_malloc (sizeof(struct cb_level_78));
 	p78->fld78 = f;
 	p78->prog = current_program;
-	p78->pic_replace = check_78_replace (CB_VALUE(f->values));
-	if (p78->pic_replace) {
-		p78->pic_len = (cob_u32_t)strlen (p78->pic_replace);
-	}
 	p78->name_len = (cob_u32_t)strlen (f->name);
 	if (f->flag_is_global) {
 		if (!globlev78ptr) {
@@ -2281,16 +2111,3 @@ cb_find_defined_program_by_id (const char *orig_id)
 
 	return NULL;
 }
-
-#ifndef	HAVE_DESIGNATED_INITS
-void
-cobc_init_scanner (void)
-{
-	const unsigned char	*p;
-
-	memset (valid_char, 0, sizeof(valid_char));
-	for (p = pvalid_char; *p; ++p) {
-		valid_char[*p] = 1;
-	}
-}
-#endif

@@ -2148,12 +2148,11 @@ prog.cob: 13: error: a trailing +/- sign cannot follow a leading +/- sign
 prog.cob: 15: error: invalid PICTURE character 'K'
 prog.cob: 16: error: numeric field cannot be larger than 38 digits
 prog.cob: 17: error: only up to 9 significant digits are permitted within parentheses
-prog.cob: 18: error: only digits are permitted within parentheses
+prog.cob: 18: error: '(100' is not defined
 prog.cob: 18: error: invalid PICTURE character ')'
 prog.cob: 19: error: unbalanced parentheses
 prog.cob: 20: error: only one set of parentheses is permitted
-prog.cob: 21: error: parentheses must contain a number greater than zero
-prog.cob: 21: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 21: error: parentheses must contain (a constant-name defined as) a positive integer
 prog.cob: 23: error: . cannot follow V
 prog.cob: 24: error: cannot have both Z and * in PICTURE string
 prog.cob: 25: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
@@ -2211,15 +2210,14 @@ error: numeric field cannot be larger than 38 digits
 000017         01  too-long-number-in-parens PIC 9(11111111111111).
 error: only up to 9 significant digits are permitted within parentheses
 000018         01  nested-parens PIC 9((100)).
-error: only digits are permitted within parentheses
+error: '(100' is not defined
 error: invalid PICTURE character ')'
 000019         01  unbalanced-parens PIC 9(.
 error: unbalanced parentheses
 000020         01  multiple-pairs-of-parens PIC 9(5)(3).
 error: only one set of parentheses is permitted
 000021         01  no-digit-in-parens PIC 9().
-error: parentheses must contain a number greater than zero
-error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+error: parentheses must contain (a constant-name defined as) a positive integer
 000022         01  mutually-exclusive-symbols.
 000023             03  PIC 9V.9.
 error: . cannot follow V
@@ -2236,11 +2234,11 @@ error: A or X cannot follow S
 000028             03  PIC +++9+.
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 000029             03  PIC +9(5)CR.
+error: CR or DB cannot follow a leading +/- sign
 GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
-error: CR or DB cannot follow a leading +/- sign
 000030         01 non-rightmost-leftmost-symbols.
 000031             03  PIC BBB+BB99.
 error: a leading +/- sign cannot follow B, 0 or /
@@ -2332,7 +2330,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 SIZE TYPE           LVL  NAME                           PICTURE
 
 2 Warnings in program
-35 Errors in program
+34 Errors in program
 ])
 
 sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis

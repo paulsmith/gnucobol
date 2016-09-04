@@ -1,4 +1,9 @@
 
+2016-09-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c, scanner.l: replaced code parsing constant-names in PICTURE
+          strings with new implementation containing more checks.
+
 2016-09-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l, ppparse.y, cobc.c: added support for Micro Focus' variable

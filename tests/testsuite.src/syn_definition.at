@@ -385,11 +385,11 @@ AT_DATA([prog.cob], [
        *> This should cause an error.
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-           
+
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  foo          PIC X.
-           
+
        PROCEDURE        DIVISION.
            CONTINUE
            .
@@ -427,7 +427,7 @@ AT_DATA([prog.cob], [
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  prog        PIC 99 VALUE 0.
-           
+
        PROCEDURE       DIVISION.
        prog.
            CONTINUE
@@ -484,9 +484,9 @@ AT_DATA([prog.cob], [
            .
        END FUNCTION x.
 
-           
+
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.           
+       PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  x            PIC 999 VALUE 134.
@@ -831,7 +831,7 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-1.
        PROCEDURE DIVISION.
-           
+
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-2.
        PROCEDURE DIVISION.
@@ -940,6 +940,17 @@ AT_DATA([prog.cob], [
            03  PIC B(5).
            03  PIC +.
            03  PIC $.
+
+       01  str-constant CONSTANT "hello".
+       01  float-constant CONSTANT 1.0.
+       01  signed-constant CONSTANT -1.
+       01  invalid-constant.
+           03  PIC X(str-constant).
+           03  PIC X(float-constant).
+           03  PIC X(signed-constant).
+           03  PIC X(unseen-constant).
+
+       01  integer-constant CONSTANT 5.
        01  valid-pics.
            03  PIC VP9B.
            03  PIC B9P(3).
@@ -947,10 +958,14 @@ AT_DATA([prog.cob], [
            03  PIC 0000+B0+++0B,+.
            03  PIC +(5)P(3).
            03  PIC ++.++.
+           03  PIC $(integer-constant).
+           03  PIC $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+      -(integer-constant).
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: warning: continuation of COBOL words used
+prog.cob: 76: warning: continuation of COBOL words used
 prog.cob: 7: error: missing PICTURE string
 prog.cob: 8: error: PICTURE string may not contain more than 63 characters
 prog.cob: 11: error: CR or DB may only occur once in a PICTURE string
@@ -968,18 +983,17 @@ prog.cob: 20: error: C must be followed by R
 prog.cob: 21: error: D must be followed by B
 prog.cob: 22: error: numeric field cannot be larger than 38 digits
 prog.cob: 23: error: only up to 9 significant digits are permitted within parentheses
-prog.cob: 24: error: only digits are permitted within parentheses
+prog.cob: 24: error: '(100' is not defined
 prog.cob: 24: error: invalid PICTURE character ')'
 prog.cob: 25: error: unbalanced parentheses
 prog.cob: 26: error: only one set of parentheses is permitted
-prog.cob: 27: error: parentheses must contain a number greater than zero
-prog.cob: 27: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 27: error: parentheses must contain (a constant-name defined as) a positive integer
 prog.cob: 29: error: . cannot follow a P which is after the decimal point
 prog.cob: 30: error: . cannot follow V
 prog.cob: 31: error: cannot have both Z and * in PICTURE string
 prog.cob: 32: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 prog.cob: 32: error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 33: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point                                                                                                                                  
+prog.cob: 33: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point
 prog.cob: 34: error: a Z or * which is before the decimal point cannot follow a floating currency symbol string which is before the decimal point
 prog.cob: 35: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob: 35: error: A or X cannot follow N
@@ -1008,6 +1022,10 @@ prog.cob: 52: error: V cannot follow a P which is after the decimal point
 prog.cob: 54: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 prog.cob: 55: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 prog.cob: 56: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob: 62: error: 'STR-CONSTANT' is not a numeric literal
+prog.cob: 63: error: 'FLOAT-CONSTANT' is not an integer
+prog.cob: 64: error: 'SIGNED-CONSTANT' is not unsigned
+prog.cob: 65: error: 'UNSEEN-CONSTANT' is not defined
 ])
 AT_CLEANUP
 
@@ -1189,4 +1207,3 @@ prog.cob: 11: error: RENAMES of 01-, 66- and 77-level items does not conform to 
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [0], [], [])
 
 AT_CLEANUP
-

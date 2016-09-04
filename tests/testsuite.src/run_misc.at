@@ -2080,7 +2080,7 @@ AT_CLEANUP
 
 
 AT_SETUP([PIC ZZZ-, ZZZ+])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -4991,4 +4991,29 @@ AT_CHECK([./prog], [0],
 [Hello!
 Hello again!
 ])
+AT_CLEANUP
+
+
+AT_SETUP([PICTURE with constant-name])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  foo-bar     CONSTANT 8.
+       01  x           PIC 9(foo-bar)9(foo-bar).
+       
+       PROCEDURE DIVISION.
+           IF FUNCTION LENGTH (x) <> 16
+               DISPLAY FUNCTION LENGTH (x)
+           END-IF
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [])
 AT_CLEANUP

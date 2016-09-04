@@ -231,7 +231,7 @@ AT_CLEANUP
 # 8) DONE
 
 AT_SETUP([Numeric-edited item])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -256,7 +256,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Alphanumeric-edited item])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value editing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

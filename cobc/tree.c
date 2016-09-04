@@ -2236,6 +2236,132 @@ valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 	return !error_detected;
 }
 
+static int
+get_pic_number_from_str (const unsigned char *str, int * const error_detected)
+{
+	cob_u32_t		num_sig_digits = 0;
+	int			value = 0;
+
+	/* Ignore leading zeroes */
+	for (; *str == '0' && *str; str++);
+
+	/* Get the value. */
+	for (; *str != ')' && *str; str++) {
+		if (!isdigit (*str)) {
+			cb_error (_("number or constant in parentheses is not an unsigned integer"));
+			*error_detected = 1;
+			break;
+		}
+			
+		num_sig_digits++;
+		if (num_sig_digits <= 9) {
+			value = value * 10 + (*str - '0');
+		} else if (num_sig_digits == 10) {
+			cb_error (_("only up to 9 significant digits are permitted within parentheses"));
+			*error_detected = 1;
+		}
+	}
+
+	if (value == 0) {
+		cb_error (_("number or constant in parentheses must be greater than zero"));
+		*error_detected = 1;
+	}
+	
+	return value;
+}
+
+/*
+  Return the number in parentheses. p should point to the opening parenthesis.
+  When the function returns, p will point to the closing parentheses or the null
+  terminator.
+*/
+static int
+get_number_in_parentheses (const unsigned char ** const p,
+			   int * const error_detected,
+			   int * const end_pic_processing)
+{
+	const unsigned char	*open_paren = *p;
+	const unsigned char	*close_paren;
+	const unsigned char	*c;
+	int			contains_name = 0;
+	size_t			name_length;
+        char			*name_buff;
+	cb_tree			item;
+	cb_tree			item_value;
+
+	for (close_paren = *p; *close_paren != ')' && *close_paren;
+	     ++close_paren);
+
+	if (!*close_paren) {
+		cb_error (_("unbalanced parentheses"));
+		*p = close_paren;
+		/* There are no more informative messages to display. */
+	        *end_pic_processing = 1;
+		return 1;
+	}
+	
+	/* Find out if the parens contain a number or a constant-name. */
+	for (c = open_paren + 1; c != close_paren; ++c) {
+		if (!(isdigit (*c) || *c == '.' || *c == '+'
+		      || *c == '-')) {
+			contains_name = 1;
+			break;
+		}
+	}
+
+	*p = close_paren;
+	
+	if (open_paren + 1 == close_paren) {
+		cb_error (_("parentheses must contain (a constant-name defined as) a positive integer"));
+		*error_detected = 1;
+		return 1;
+	}
+	
+	if (contains_name) {
+		/* Copy name */
+		name_length = close_paren - open_paren;
+		name_buff = cobc_parse_malloc (name_length);
+	        strncpy (name_buff, (char *) open_paren + 1, name_length);
+		name_buff[name_length - 1] = '\0';
+
+		/* Build reference to name */
+	        item = cb_ref (cb_build_reference (name_buff));
+		
+		if (item == cb_error_node) {
+			*error_detected = 1;
+			return 1;
+		} else if (!(CB_FIELD_P (item)
+			     && CB_FIELD (item)->flag_item_78)) {
+			cb_error (_("'%s' is not a constant-name"), name_buff);
+			*error_detected = 1;
+			return 1;
+		}
+		
+		item_value = CB_VALUE (CB_FIELD (item)->values);
+		if (!CB_NUMERIC_LITERAL_P (item_value)) {
+			cb_error (_("'%s' is not a numeric literal"), name_buff);
+			*error_detected = 1;
+			return 1;
+		} else if (CB_LITERAL (item_value)->scale != 0) {
+			cb_error (_("'%s' is not an integer"), name_buff);
+			*error_detected = 1;
+			return 1;
+		} else if (CB_LITERAL (item_value)->sign != 0) {
+			cb_error (_("'%s' is not unsigned"), name_buff);
+			*error_detected = 1;
+			return 1;
+		}
+
+		cobc_parse_free (name_buff);
+		
+		return get_pic_number_from_str (CB_LITERAL (item_value)->data,
+						error_detected);
+	} else {
+	        return get_pic_number_from_str (open_paren + 1,
+						error_detected);
+	}
+}
+
 cb_tree
 cb_build_picture (const char *str)
 {
@@ -2244,8 +2370,9 @@ cb_build_picture (const char *str)
 			     sizeof (struct cb_picture));
 	static cob_pic_symbol	*pic_buff = NULL;
 	const unsigned char	*p;
+	int			pic_str_len = 0;
 	size_t			idx = 0;
-	size_t			buffcnt = 0;
+	size_t			buff_cnt = 0;
 	cob_u32_t		at_beginning;
 	cob_u32_t		at_end;
 	cob_u32_t		s_char_seen = 0;
@@ -2253,27 +2380,23 @@ cb_build_picture (const char *str)
 	cob_u32_t		z_char_seen = 0;
 	cob_u32_t		s_count = 0;
 	cob_u32_t		v_count = 0;
-	cob_u32_t		allocated = 0;
 	cob_u32_t		digits = 0;
 	cob_u32_t		real_digits = 0;
 	cob_u32_t		x_digits = 0;
 	int			category = 0;
 	int			size = 0;
 	int			scale = 0;
-	int			i;
+	int			paren_num;
 	int			n;
+	int			end_immediately = 0;
 	unsigned char		c;
-	unsigned char		lastonechar = '\0';
-	unsigned char		lasttwochar = '\0';
+	unsigned char		first_last_char = '\0';
+	unsigned char		second_last_char = '\0';
 	int			error_detected = 0;
 
 
 	if (strlen (str) == 0) {
 		cb_error (_("missing PICTURE string"));
-		goto end;
-	} else if (strlen (str) > 63) {
-		/* Limit of 63 is from the 2014 standard. */
-		cb_error (_("PICTURE string may not contain more than %d characters"), 63);
 		goto end;
 	}
 
@@ -2287,47 +2410,35 @@ cb_build_picture (const char *str)
 repeat:
 		/* Count the number of repeated chars */
 		while (p[1] == c) {
-			p++, n++;
+			p++, n++, pic_str_len++;
 		}
-
+		
 		if (*p == ')' && p[1] == '(') {
 			cb_error (_("only one set of parentheses is permitted"));
 			error_detected = 1;
 
-			++p;
-			while (*p != ')' && *p != '\0') {
+			do {
 				++p;
-			}
+				++pic_str_len;
+			} while (*p != ')' && *p != '\0');
 		} else if (p[1] == '(') {
-			i = 0;
-			p += 2;
-			for (; *p == '0' && *p; p++) {
-				;
-			}
-			for (; *p != ')' && *p; p++) {
-				if (!isdigit (*p)) {
-					cb_error (_("only digits are permitted within parentheses"));
-					error_detected = 1;
-				} else {
-					allocated++;
-					if (allocated <= 9) {
-						i = i * 10 + (*p - '0');
-					} else if (allocated == 10) {
-						cb_error (_("only up to 9 significant digits are permitted within parentheses"));
-						error_detected = 1;
-					}
-
-				}
-			}
-			if (!*p) {
-				cb_error (_("unbalanced parentheses"));
-				/* There are no more informative messages to display, so skip to end */
+			++p;
+			++pic_str_len;
+			paren_num = get_number_in_parentheses (&p, &error_detected, &end_immediately);
+			if (end_immediately) {
 				goto end;
-			} else if (i == 0) {
-				cb_error (_("parentheses must contain a number greater than zero"));
-				error_detected = 1;
 			}
-			n += i - 1;
+			
+			n += paren_num - 1;
+			/*
+			  The number of digits of the number in parentheses is
+			  counted in the length of the PICTURE string (not the
+			  length of the constant-name, if one was used).
+			*/
+			for (; paren_num != 0; paren_num /= 10) {
+				++pic_str_len;
+			}
+			
 			goto repeat;
 		}
 
@@ -2396,7 +2507,7 @@ repeat:
 			category |= PIC_NUMERIC;
 			at_beginning = 0;
 			at_end = 0;
-			switch (buffcnt) {
+			switch (buff_cnt) {
 			case 0:
 				/* P..... */
 				at_beginning = 1;
@@ -2404,13 +2515,13 @@ repeat:
 			case 1:
 				/* VP.... */
 				/* SP.... */
-				if (lastonechar == 'V' || lastonechar == 'S') {
+				if (first_last_char == 'V' || first_last_char == 'S') {
 					at_beginning = 1;
 				}
 				break;
 			case 2:
 				/* SVP... */
-				if (lasttwochar == 'S' && lastonechar == 'V') {
+				if (second_last_char == 'S' && first_last_char == 'V') {
 					at_beginning = 1;
 				}
 				break;
@@ -2481,6 +2592,7 @@ repeat:
 				error_detected = 1;
 			} else {
 				p++;
+				pic_str_len++;
 			}
 
 			s_count++;
@@ -2494,6 +2606,7 @@ repeat:
 				error_detected = 1;
 			} else {
 				p++;
+				pic_str_len++;
 			}
 
 			s_count++;
@@ -2525,12 +2638,16 @@ repeat:
 		pic_buff[idx].symbol = c;
 		pic_buff[idx].times_repeated = n;
 		++idx;
-		lasttwochar = lastonechar;
-		lastonechar = c;
-		++buffcnt;
+		second_last_char = first_last_char;
+		first_last_char = c;
+		++buff_cnt;
 	}
 	pic_buff[idx].symbol = '\0';
 
+	if (pic_str_len > 63) {
+		cb_error (_("PICTURE string may not contain more than 63 characters"));
+		error_detected = 1;
+	}
 	if (digits == 0 && x_digits == 0) {
 		cb_error (_("PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol"));
 		error_detected = 1;
