@@ -461,8 +461,7 @@ extern int		cb_config_entry (char *, const char *, const int);
 extern int		cb_load_conf (const char *, const int);
 
 #ifndef	HAVE_DESIGNATED_INITS
-/* Initialization routines in scanner.l, typeck.c, reserved.c */
-extern void		cobc_init_scanner (void);
+/* Initialization routines in typeck.c and reserved.c */
 extern void		cobc_init_typeck (void);
 extern void		cobc_init_reserved (void);
 #endif

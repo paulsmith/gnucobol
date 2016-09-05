@@ -1,4 +1,9 @@
 
+2016-09-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c, cobc.h: delete references to cobc_init_scanner, which was
+	  deleted in [r1100].
+
 2016-09-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, scanner.l: replaced code parsing constant-names in PICTURE

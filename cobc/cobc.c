@@ -6069,7 +6069,6 @@ main (int argc, char **argv)
 
 	/* Compiler initialization II */
 #ifndef	HAVE_DESIGNATED_INITS
-	cobc_init_scanner ();
 	cobc_init_typeck ();
 #endif
 
