@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -69,111 +69,50 @@ extern int ppdebug;
     IS = 278,
     FIXED = 279,
     FREE = 280,
-    DEFINE_DIRECTIVE = 281,
-    AS = 282,
-    PARAMETER = 283,
-    OVERRIDE = 284,
-    SET_DIRECTIVE = 285,
-    CONSTANT = 286,
-    SOURCEFORMAT = 287,
-    FOLDCOPYNAME = 288,
-    NOFOLDCOPYNAME = 289,
-    IF_DIRECTIVE = 290,
-    ELSE_DIRECTIVE = 291,
-    ENDIF_DIRECTIVE = 292,
-    ELIF_DIRECTIVE = 293,
-    GE = 294,
-    LE = 295,
-    LT = 296,
-    GT = 297,
-    EQ = 298,
-    NE = 299,
-    NOT = 300,
-    THAN = 301,
-    TO = 302,
-    OR = 303,
-    EQUAL = 304,
-    GREATER = 305,
-    LESS = 306,
-    SET = 307,
-    DEFINED = 308,
-    TURN_DIRECTIVE = 309,
-    ON = 310,
-    CHECKING = 311,
-    WITH = 312,
-    LOCATION = 313,
-    TERMINATOR = 314,
-    TOKEN = 315,
-    VARIABLE = 316,
-    LITERAL = 317
+    VARIABLE = 281,
+    DEFINE_DIRECTIVE = 282,
+    AS = 283,
+    PARAMETER = 284,
+    OVERRIDE = 285,
+    SET_DIRECTIVE = 286,
+    CONSTANT = 287,
+    SOURCEFORMAT = 288,
+    FOLDCOPYNAME = 289,
+    NOFOLDCOPYNAME = 290,
+    IF_DIRECTIVE = 291,
+    ELSE_DIRECTIVE = 292,
+    ENDIF_DIRECTIVE = 293,
+    ELIF_DIRECTIVE = 294,
+    GE = 295,
+    LE = 296,
+    LT = 297,
+    GT = 298,
+    EQ = 299,
+    NE = 300,
+    NOT = 301,
+    THAN = 302,
+    TO = 303,
+    OR = 304,
+    EQUAL = 305,
+    GREATER = 306,
+    LESS = 307,
+    SET = 308,
+    DEFINED = 309,
+    TURN_DIRECTIVE = 310,
+    ON = 311,
+    CHECKING = 312,
+    WITH = 313,
+    LOCATION = 314,
+    TERMINATOR = 315,
+    TOKEN = 316,
+    VARIABLE_NAME = 317,
+    LITERAL = 318
   };
 #endif
-/* Tokens.  */
-#define TOKEN_EOF 0
-#define ALSO 258
-#define BY 259
-#define COPY 260
-#define EQEQ 261
-#define IN 262
-#define LAST 263
-#define LEADING 264
-#define OF 265
-#define OFF 266
-#define PRINTING 267
-#define REPLACE 268
-#define REPLACING 269
-#define SUPPRESS 270
-#define TRAILING 271
-#define DOT 272
-#define GARBAGE 273
-#define PAGE_DIRECTIVE 274
-#define LISTING_DIRECTIVE 275
-#define SOURCE_DIRECTIVE 276
-#define FORMAT 277
-#define IS 278
-#define FIXED 279
-#define FREE 280
-#define DEFINE_DIRECTIVE 281
-#define AS 282
-#define PARAMETER 283
-#define OVERRIDE 284
-#define SET_DIRECTIVE 285
-#define CONSTANT 286
-#define SOURCEFORMAT 287
-#define FOLDCOPYNAME 288
-#define NOFOLDCOPYNAME 289
-#define IF_DIRECTIVE 290
-#define ELSE_DIRECTIVE 291
-#define ENDIF_DIRECTIVE 292
-#define ELIF_DIRECTIVE 293
-#define GE 294
-#define LE 295
-#define LT 296
-#define GT 297
-#define EQ 298
-#define NE 299
-#define NOT 300
-#define THAN 301
-#define TO 302
-#define OR 303
-#define EQUAL 304
-#define GREATER 305
-#define LESS 306
-#define SET 307
-#define DEFINED 308
-#define TURN_DIRECTIVE 309
-#define ON 310
-#define CHECKING 311
-#define WITH 312
-#define LOCATION 313
-#define TERMINATOR 314
-#define TOKEN 315
-#define VARIABLE 316
-#define LITERAL 317
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 #line 502 "ppparse.y" /* yacc.c:1909  */
@@ -185,8 +124,10 @@ union YYSTYPE
 	unsigned int		ui;
 	int			si;
 
-#line 189 "ppparse.h" /* yacc.c:1909  */
+#line 128 "ppparse.h" /* yacc.c:1909  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
