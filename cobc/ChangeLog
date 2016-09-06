@@ -1,6 +1,11 @@
 
 2016-09-06  Dave Pitts <dpitts@cozx.com>
 
+	* cobc.c: Rearranged pline allocation and added some checks.
+	  Added pline_check_limit() function.
+
+2016-09-06  Dave Pitts <dpitts@cozx.com>
+
 	* cobc.c: Changed the pline array to an array of pointers.
 	  The lines are allocated and the allocation limits are checked.
 	  If the the CB_READ_AHEAD is exceeded an abort is issued.

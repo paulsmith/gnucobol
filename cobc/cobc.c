@@ -4016,16 +4016,18 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 	unsigned int	i = 0;
 	char	in_line[CB_LINE_LENGTH + 2];
 
+	if (*pline == NULL) {
+	   *pline = cobc_malloc (CB_LINE_LENGTH + 2);
+	}
+	out_line = *pline;
+
 	if (!fgets (in_line, CB_LINE_LENGTH, fd)) {
+		memset (out_line, 0, CB_LINE_LENGTH);
 		return -1;
 	}
 
 	terminate_str_at_first_of_char ('\n', in_line);
 	terminate_str_at_first_of_char ('\r', in_line);
-	if (*pline == NULL) {
-	   *pline = cobc_malloc (CB_LINE_LENGTH + 2);
-	}
-	out_line = *pline;
 
 	for (in_char = in_line; *in_char; in_char++) {
 		if (*in_char == '\t') {
@@ -4338,6 +4340,9 @@ adjust_line_numbers (struct list_files *cfile, int line_num, int adjust)
 static COB_INLINE COB_A_INLINE int
 is_debug_line (char *line, int fixed_or_variable)
 {
+	if (line == NULL || line[0] == 0) {
+		return 0;
+	}
 	return !cb_flag_debugging_line
 		&& ((fixed_or_variable && IS_DEBUG_LINE (line))
 		    || (!fixed_or_variable && !strncasecmp (line, "D ", 2)));
@@ -4346,6 +4351,9 @@ is_debug_line (char *line, int fixed_or_variable)
 static COB_INLINE COB_A_INLINE int
 is_comment_line (char *line, int fixed_or_variable)
 {
+	if (line == NULL || line[0] == 0) {
+		return 0;
+	}
 	return (fixed_or_variable && IS_COMMENT_LINE (line))
 		|| (!fixed_or_variable && !strncmp (line, "*>", 2));
 }
@@ -4355,6 +4363,9 @@ is_continuation_line (char *line, int fixed_or_variable)
 {
 	int i;
 
+	if (line == NULL || line[0] == 0) {
+		return 0;
+	}
 	if (fixed_or_variable) {
 		/* check for "-" in column 7 */
 		if (IS_CONTINUE_LINE(line)) {
@@ -4371,6 +4382,16 @@ is_continuation_line (char *line, int fixed_or_variable)
 	}
 
 	return 0;
+}
+
+static void
+pline_check_limit (int pline_cnt, char *filename, int line_num)
+{
+	if (pline_cnt >= CB_READ_AHEAD) {
+		cobc_err_msg (_("%s: %d: Too many continuation lines"),
+				filename, line_num);
+		cobc_abort_terminate ();
+	}
 }
 
 /* TODO: Modularise! */
@@ -4530,10 +4551,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			if (!is_comment_line (pline[pline_cnt], fixed_or_variable)) {
 				pline_cnt++;
 			}
-			if (pline_cnt >= CB_READ_AHEAD) {
-				cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
-				cobc_abort_terminate ();
-			}
+			pline_check_limit (pline_cnt, cfile->name, line_num);
 			if (get_next_listing_line (fd, &pline[pline_cnt], fixed) < 0) {
 				pline[pline_cnt][0] = 0;
 				eof = 1;
@@ -4646,6 +4664,10 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 								j = first_col;
 								k++;
 								if (k == pline_cnt) {
+									pline_check_limit (pline_cnt + 1, cfile->name, line_num);
+									if (pline[pline_cnt + 1] == NULL) {
+	   									pline[pline_cnt + 1] = cobc_malloc (CB_LINE_LENGTH + 2);
+									}
 									strcpy (pline[pline_cnt + 1], pline[pline_cnt]);
 									strcpy (pline[pline_cnt], pline[pline_cnt - 1]);
 									memset (&pline[pline_cnt][CB_MARGIN_A], ' ',
@@ -4896,17 +4918,11 @@ print_program_code (struct list_files *cfile, int in_copy)
 
 		eof = 0;
 		done = 0;
-		if (pline_cnt >= CB_READ_AHEAD) {
-			cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
-			cobc_abort_terminate ();
-		}
+		pline_check_limit (pline_cnt, cfile->name, line_num);
 		if (get_next_listing_line (fd, &pline[pline_cnt], fixed) >= 0) {
 
 			while (!done) {
-				if (pline_cnt >= CB_READ_AHEAD) {
-					cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
-					cobc_abort_terminate ();
-				}
+				pline_check_limit (pline_cnt, cfile->name, line_num);
 				if (get_next_listing_line (fd, &pline[pline_cnt + 1], fixed) < 0) {
 					if (eof) {
 						done = 1;
