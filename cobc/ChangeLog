@@ -1,4 +1,11 @@
 
+2016-09-06  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Changed the pline array to an array of pointers.
+	  The lines are allocated and the allocation limits are checked.
+	  If the the CB_READ_AHEAD is exceeded an abort is issued.
+	* cobc.h: Increase CB_READ_AHEAD to 800.
+
 2016-09-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c, cobc.h: delete references to cobc_init_scanner, which was

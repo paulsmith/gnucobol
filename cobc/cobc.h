@@ -253,7 +253,7 @@ enum cobc_name_type {
 #define CB_MAX_LINES	55
 
 #define CB_LINE_LENGTH	1024 /* hint: we only read PPLEX_BUF_LEN bytes */
-#define CB_READ_AHEAD	32 /* lines to read ahead */
+#define CB_READ_AHEAD	800 /* lines to read ahead */
 
 /* TODO: add new compiler configuration flags for this*/
 #define CB_INDICATOR	6

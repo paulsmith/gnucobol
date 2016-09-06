@@ -4010,11 +4010,11 @@ terminate_str_at_first_of_char (const char c, char * const str)
   either the length of out_line, or -1 if the end of fd is reached.
 */
 static int
-get_next_listing_line (FILE *fd, char *out_line, int fixed)
+get_next_listing_line (FILE *fd, char **pline, int fixed)
 {
-	char	*in_char;
+	char	*in_char, *out_line;
 	unsigned int	i = 0;
-	char	in_line[CB_LINE_LENGTH + 2] =  { '\0' };
+	char	in_line[CB_LINE_LENGTH + 2];
 
 	if (!fgets (in_line, CB_LINE_LENGTH, fd)) {
 		return -1;
@@ -4022,6 +4022,10 @@ get_next_listing_line (FILE *fd, char *out_line, int fixed)
 
 	terminate_str_at_first_of_char ('\n', in_line);
 	terminate_str_at_first_of_char ('\r', in_line);
+	if (*pline == NULL) {
+	   *pline = cobc_malloc (CB_LINE_LENGTH + 2);
+	}
+	out_line = *pline;
 
 	for (in_char = in_line; *in_char; in_char++) {
 		if (*in_char == '\t') {
@@ -4237,7 +4241,7 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
   Return the column to which pline[last_idx] was read up to.
 */
 static int
-compare_prepare (char *cmp_line, char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
+compare_prepare (char *cmp_line, char *pline[CB_READ_AHEAD],
 		 int first_idx, int last_idx, int first_col, int fixed)
 {
 	int	i;
@@ -4372,8 +4376,7 @@ is_continuation_line (char *line, int fixed_or_variable)
 /* TODO: Modularise! */
 static int
 print_replace_text (struct list_files *cfile, FILE *fd,
-		    struct list_replace *rep,
-		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
+		    struct list_replace *rep, char *pline[CB_READ_AHEAD],
 		    int pline_cnt, int line_num)
 {
 	char	*rfp = rep->from;
@@ -4527,7 +4530,11 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			if (!is_comment_line (pline[pline_cnt], fixed_or_variable)) {
 				pline_cnt++;
 			}
-			if (get_next_listing_line (fd, pline[pline_cnt], fixed) < 0) {
+			if (pline_cnt >= CB_READ_AHEAD) {
+				cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
+				cobc_abort_terminate ();
+			}
+			if (get_next_listing_line (fd, &pline[pline_cnt], fixed) < 0) {
 				pline[pline_cnt][0] = 0;
 				eof = 1;
 			}
@@ -4727,8 +4734,7 @@ copy_list_replace (struct list_replace *src, struct list_files *dst_file)
 /* TODO: Modularise! */
 static int
 print_replace_main (struct list_files *cfile, FILE *fd,
-		    char pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2],
-		    int pline_cnt, int line_num)
+		    char *pline[CB_READ_AHEAD], int pline_cnt, int line_num)
 {
 	static int	in_replace = 0;
 	char	*tp;
@@ -4841,10 +4847,11 @@ print_program_code (struct list_files *cfile, int in_copy)
 	int	done;
 	int	eof;
 	int	pline_cnt;
-	char	pline[CB_READ_AHEAD][CB_LINE_LENGTH + 2];
+	char	*pline[CB_READ_AHEAD];
 	int	prec;
 
 	cfile->listing_on = 1;
+	memset (pline, 0, sizeof(pline));
 #ifdef DEBUG_REPLACE
 	struct list_skip *skip;
 
@@ -4889,10 +4896,18 @@ print_program_code (struct list_files *cfile, int in_copy)
 
 		eof = 0;
 		done = 0;
-		if (get_next_listing_line (fd, pline[pline_cnt], fixed) >= 0) {
+		if (pline_cnt >= CB_READ_AHEAD) {
+			cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
+			cobc_abort_terminate ();
+		}
+		if (get_next_listing_line (fd, &pline[pline_cnt], fixed) >= 0) {
 
 			while (!done) {
-				if (get_next_listing_line (fd, pline[pline_cnt + 1], fixed) < 0) {
+				if (pline_cnt >= CB_READ_AHEAD) {
+					cobc_err_msg (_("%s: %d: Too many continuation lines"), cfile->name, line_num);
+					cobc_abort_terminate ();
+				}
+				if (get_next_listing_line (fd, &pline[pline_cnt + 1], fixed) < 0) {
 					if (eof) {
 						done = 1;
 						break;
@@ -4955,6 +4970,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 					}
 				}
 				strcpy (pline[0], pline[pline_cnt]);
+				for (i = 1; i < pline_cnt+1; i++) {
+				   memset (pline[i], 0, CB_LINE_LENGTH);
+				}
 				line_num += prec;
 				pline_cnt = 0;
 				if (pline[0][0] == 0) {
@@ -4980,6 +4998,12 @@ print_program_code (struct list_files *cfile, int in_copy)
 		}
 	}
 
+	for (i = 0; i < CB_READ_AHEAD; i++) {
+		if (pline[i] == NULL) {
+			break;
+		}
+		cobc_free (pline[i]);
+	}
 	while (cfile->err_head) {
 		err = cfile->err_head;
 		cfile->err_head = err->next;
