@@ -95,10 +95,10 @@ echo Setting environment for GnuCOBOL.
 set COB_MAIN_DIR=%~dp0
 
 :: Set the necessary folders for cobc
-set COB_CONFIG_DIR=%COB_MAIN_DIR%\config
-set COB_COPY_DIR=%COB_MAIN_DIR%\copy
+set COB_CONFIG_DIR=%COB_MAIN_DIR%config
+set COB_COPY_DIR=%COB_MAIN_DIR%copy
 
-SET LOCALEDIR=%COB_MAIN_DIR%\po
+SET LOCALEDIR=%COB_MAIN_DIR%po
 
 :: Set the necessary options for MSC compiler
 set COB_CFLAGS=/I "%COB_MAIN_DIR%include"
