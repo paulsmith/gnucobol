@@ -4628,16 +4628,12 @@ output_call (struct cb_call *p)
 					if (cb_fits_int (x)) {
 						output ("content_%u.dataint = ", n);
 						output ("%d", cb_get_int (x));
+					} else if (CB_LITERAL (x)->sign >= 0) {
+						output ("content_%u.dataull = ", n);
+						output (CB_FMT_LLU_F, cb_get_u_long_long (x));
 					} else {
-						if (CB_LITERAL (x)->sign >= 0) {
-							output ("content_%u.dataull = ", n);
-							output (CB_FMT_LLU_F,
-								cb_get_u_long_long (x));
-						} else {
-							output ("content_%u.datall = ", n);
-							output (CB_FMT_LLD_F,
-								cb_get_long_long (x));
-						}
+						output ("content_%u.datall = ", n);
+						output (CB_FMT_LLD_F, cb_get_long_long (x));
 					}
 					output (";\n");
 				} else if (CB_REF_OR_FIELD_P (x) &&
