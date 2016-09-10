@@ -32,7 +32,7 @@
 #define	cob_sli_t		long int
 #define	cob_uli_t		unsigned long int
 
-#if	defined(_WIN32) && !defined(__MINGW32__) && !defined(__MINGW64__)
+#if	defined(_WIN32) && !defined(__MINGW32__)
 
 #define	cob_s64_t		__int64
 #define	cob_u64_t		unsigned __int64
@@ -505,14 +505,13 @@
 
 
 
-#if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__)
+#if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__)
 #define PATHSEP_CHAR (char) ';'
 #define PATHSEP_STR (char *) ";"
 #else
 #define PATHSEP_CHAR (char) ':'
 #define PATHSEP_STR (char *) ":"
 #endif
-
 #ifndef	_WIN32
 #define SLASH_CHAR	(char) '/'
 #define SLASH_STR	(char *) "/"
