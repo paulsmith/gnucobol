@@ -179,10 +179,11 @@ cobcrun_split_path_file(char** p, char** f, char *pf)
 static int
 cobcrun_initial_module (char *module_argument)
 {
-	int envop_return;
 	char *pathname, *filename;
 	char env_space[COB_MEDIUM_BUFF], *envptr;
-#if !HAVE_SETENV
+#if HAVE_SETENV
+	int envop_return;
+#else
 	char	*put;
 #endif
 	/* FIXME: split in two functions (one setting module, one setting path)
