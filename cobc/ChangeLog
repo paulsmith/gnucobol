@@ -1,4 +1,9 @@
 
+2016-09-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l (ppinput): bug #312 don't ignore directives starting with $
+	  at column 7 when in fixed format (if acucomment doesn't apply)
+
 2016-09-11 Edward Hart <edward.dan.hart@gmail.com>
 
 	* ppparse.y, cobc.c: simplified implementation of variable format by
@@ -25,7 +30,7 @@
 2016-09-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, scanner.l: replaced code parsing constant-names in PICTURE
-          strings with new implementation containing more checks.
+	  strings with new implementation containing more checks.
 
 2016-09-03  Edward Hart <edward.dan.hart@gmail.com>
 

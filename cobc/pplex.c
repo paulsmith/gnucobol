@@ -5044,15 +5044,19 @@ start:
 		memset (buff, ' ', (size_t)6);
 		/* Note we allow directive lines to start at column 7 */
 		bp = &buff[6];
+	
+		/* Special case: acucomment must be checked here as we'd pass comments
+		   as directives otherwise */
+		if (cb_flag_acucomment && buff[6] == '$') {
+			buff[6] = '*';
+		}
 	}
 
 	/* Check for directives/floating comment at first non-space of line */
 	ipchar = 0;
-	i = 0;
 	for (; *bp; bp++) {
 		if (*bp != ' ') {
-			if ((*bp == '$' && !(cb_source_format != CB_FORMAT_FREE && i == 0))
-			    || (*bp == '>' && bp[1] == '>')) {
+			if (*bp == '$' || (*bp == '>' && bp[1] == '>')) {
 				/* Directive */
 				ipchar = 1;
 			} else if ((*bp == '*' && bp[1] == '>')
@@ -5063,7 +5067,6 @@ start:
 			}
 			break;
 		}
-		i = 1;
 	}
 	if (ipchar && (!plex_skip_input
 		       || is_condition_directive_clause (bp))) {
@@ -5112,9 +5115,6 @@ start:
 	/* Fixed format */
 
 	/* Check the indicator (column 7) */
-	if (cb_flag_acucomment && buff[6] == '$') {
-		buff[6] = '*';
-	}
 	switch (buff[6]) {
 	case ' ':
 		break;
