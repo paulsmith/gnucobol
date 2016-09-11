@@ -1,4 +1,10 @@
 
+2016-09-11 Edward Hart <edward.dan.hart@gmail.com>
+
+	* ppparse.y, cobc.c: simplified implementation of variable format by
+	  treating it as fixed-format with the program-text area ending at
+	  column 250.
+
 2016-09-06  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Rearranged pline allocation and added some checks.
@@ -25,7 +31,6 @@
 
 	* pplex.l, ppparse.y, cobc.c: added support for Micro Focus' variable
 	  format.
-	* config.def: added variable-format option.
 	* cobc.h: moved CB_FORMAT defines into new cb_format enum.
 
 2016-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

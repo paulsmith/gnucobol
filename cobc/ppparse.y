@@ -679,13 +679,15 @@ set_choice:
 	if (!strcasecmp (p, "FIXED")) {
 		cb_source_format = CB_FORMAT_FIXED;
 		cb_current_file->source_format = CB_FORMAT_FIXED;
+		cb_text_column = cb_config_text_column;
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
 		cb_current_file->source_format = CB_FORMAT_FREE;
 	} else if (!strcasecmp (p, "VARIABLE")) {
-		cb_verify (cb_variable_format, _("variable format"));
-		cb_source_format = CB_FORMAT_VARIABLE;
-		cb_current_file->source_format = CB_FORMAT_VARIABLE;
+		cb_source_format = CB_FORMAT_FIXED;
+		cb_current_file->source_format = CB_FORMAT_FIXED;
+		/* This is an arbitrary value; perhaps change later? */
+		cb_text_column = 500;
 	} else {
 		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
 	}
@@ -739,6 +741,7 @@ format_type:
   FIXED
   {
 	cb_source_format = CB_FORMAT_FIXED;
+	cb_text_column = cb_config_text_column;
   }
 | FREE
   {
@@ -746,8 +749,8 @@ format_type:
   }
 | VARIABLE
   {
-	cb_verify (cb_variable_format, _("variable format"));
-	cb_source_format = CB_FORMAT_VARIABLE;
+	cb_source_format = CB_FORMAT_FIXED;
+	cb_text_column = 500;
   }
 | GARBAGE
   {

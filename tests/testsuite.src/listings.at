@@ -2348,7 +2348,8 @@ AT_DATA([sed.txt],
 ])
 
 AT_DATA([prog.cob],
-[000010 IDENTIFICATION DIVISION.
+[000001 $SET SOURCEFORMAT "VARIABLE"
+000010 IDENTIFICATION DIVISION.
 000020 PROGRAM-ID. prog.
 000030* blah blah blah
 000040 PROCEDURE DIVISION.
@@ -2358,21 +2359,22 @@ AT_DATA([prog.cob],
 ])
 
 daymon=`date +"%a %b %e"`
-AT_CHECK([$COMPILE_ONLY -variable -t prog.lst prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog20.lst],
 [GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
-000001  000010 IDENTIFICATION DIVISION.
-000002  000020 PROGRAM-ID. prog.
-000003  000030* blah blah blah
-000004  000040 PROCEDURE DIVISION.
-000005  000050
-000005+ DISPLAY "Hello!"
-000006  000060     .
-000007  000070 END PROGRAM prog.
+000001  000001 $SET SOURCEFORMAT "VARIABLE"
+000002  000010 IDENTIFICATION DIVISION.
+000003  000020 PROGRAM-ID. prog.
+000004  000030* blah blah blah
+000005  000040 PROCEDURE DIVISION.
+000006  000050
+000006+ DISPLAY "Hello!"
+000007  000060     .
+000008  000070 END PROGRAM prog.
 GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE

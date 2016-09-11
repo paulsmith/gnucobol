@@ -437,7 +437,6 @@ test.conf: missing definitions:
 	No definition of 'accept-display-extensions'
 	No definition of 'renames-uncommon-levels'
 	No definition of 'program-prototypes'
-	No definition of 'variable-format'
 ])
 
 AT_CLEANUP

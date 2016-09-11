@@ -3782,3 +3782,24 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [])
 AT_CLEANUP
+
+AT_SETUP([Variable format])
+AT_KEYWORDS([extensions runmisc])
+
+AT_DATA([prog.cob], [
+       >>SOURCE FORMAT VARIABLE
+000010 IDENTIFICATION DIVISION.
+000020 PROGRAM-ID. prog.
+000030* blah blah blah
+000040 PROCEDURE DIVISION.
+000050                                                                  DISPLAY "Hello!"
+000060     .
+000070 END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[Hello!
+])
+
+AT_CLEANUP

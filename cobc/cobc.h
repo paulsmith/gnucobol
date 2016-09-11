@@ -64,8 +64,7 @@
 /* Source format enum */
 enum cb_format {
 	CB_FORMAT_FIXED = 0,
-	CB_FORMAT_FREE,
-	CB_FORMAT_VARIABLE
+	CB_FORMAT_FREE
 };
 
 /* COPY extended syntax defines */
@@ -314,6 +313,7 @@ extern struct list_files	*cb_current_file;
 
 
 extern int			cb_source_format;
+extern int			cb_text_column;
 
 extern struct cb_exception	cb_exception_table[];
 
