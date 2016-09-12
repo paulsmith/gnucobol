@@ -6726,6 +6726,10 @@ accept_clause:
 	  check_repeated ("MODE IS BLOCK", SYN_CLAUSE_2, &check_duplicate);
   }
 | _with accp_attr
+| _before TIME positive_id_or_lit
+  {
+	  check_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
+  }
 ;
 
 lines_or_number:
@@ -12076,6 +12080,7 @@ _are:		| ARE ;
 _area:		| AREA ;
 _as:		| AS ;
 _at:		| AT ;
+_before:	| BEFORE ;
 _binary:	| BINARY ;
 _by:		| BY ;
 _character:	| CHARACTER ;

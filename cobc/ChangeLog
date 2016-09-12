@@ -1,10 +1,14 @@
 
+2016-09-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (accept_clause): added ACCEPT ... BEFORE TIME extension.
+
 2016-09-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l (ppinput): bug #312 don't ignore directives starting with $
 	  at column 7 when in fixed format (if acucomment doesn't apply)
 
-2016-09-11 Edward Hart <edward.dan.hart@gmail.com>
+2016-09-11  Edward Hart <edward.dan.hart@gmail.com>
 
 	* ppparse.y, cobc.c: simplified implementation of variable format by
 	  treating it as fixed-format with the program-text area ending at
