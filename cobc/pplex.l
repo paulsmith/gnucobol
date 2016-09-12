@@ -1328,7 +1328,7 @@ start:
 	ipchar = 0;
 	for (; *bp; bp++) {
 		if (*bp != ' ') {
-			if (*bp == '$' || (*bp == '>' && bp[1] == '>')) {
+			if ((*bp == '$' && bp[1] != ' ') || (*bp == '>' && bp[1] == '>')) {
 				/* Directive */
 				ipchar = 1;
 			} else if ((*bp == '*' && bp[1] == '>')
