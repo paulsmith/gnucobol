@@ -1134,6 +1134,12 @@ is_condition_directive_clause (const char *buff)
 }
 
 static int
+is_cobol_word_char (const char c)
+{
+	return c == '-' || c == '_' || isalnum (c);
+}
+
+static int
 ppinput (char *buff, const size_t max_size)
 {
 	char	*bp;
@@ -1506,7 +1512,8 @@ start:
 			paragraph_name = NULL;
 		}
 
-		if (paragraph_name) {
+		if (paragraph_name
+		    && !is_cobol_word_char (bp[strlen (paragraph_name)])) {
 			cb_plex_verify (newline_count, cb_comment_paragraphs,
 					paragraph_name);
 			/* Skip comments until the end of line. */
