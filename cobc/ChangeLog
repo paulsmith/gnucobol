@@ -1,4 +1,10 @@
 
+2016-09-15  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l (ppinput): fixed bug #297 where quote marks were parsed in
+	  comment paragraphs.
+	* error.c, cobc.h: added (cb_plex_verify).
+
 2016-09-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (accept_clause): added ACCEPT ... BEFORE TIME extension.

@@ -149,7 +149,6 @@ static void	switch_to_buffer	(const int, const char *,
 static void	check_listing		(const char *, const unsigned int);
 static void	skip_to_eol		(void);
 static void	display_to_eol		(void);
-static void	check_comments		(const char *, const char *);
 static void	set_print_replace_list	(struct cb_replace_list *list);
 static void	get_new_listing_file	(void);
 
@@ -381,14 +380,6 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	comment_allowed = 0;
 	ppecho (yytext, 0, yyleng);
 }
-
-"AUTHOR"		{ check_comments ("AUTHOR", yytext); }
-"DATE-WRITTEN"		{ check_comments ("DATE-WRITTEN", yytext); }
-"DATE-MODIFIED"		{ check_comments ("DATE-MODIFIED", yytext); }
-"DATE-COMPILED"		{ check_comments ("DATE-COMPILED", yytext); }
-"INSTALLATION"		{ check_comments ("INSTALLATION", yytext); }
-"REMARKS"		{ check_comments ("REMARKS", yytext); }
-"SECURITY"		{ check_comments ("SECURITY", yytext); }
 
 "EJECT"\.? |
 "SKIP1"\.? |
@@ -1056,8 +1047,8 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 static void
 get_new_listing_file (void)
 {
-	struct list_files	*newfile = cobc_malloc (sizeof (struct list_files));	
-	
+	struct list_files	*newfile = cobc_malloc (sizeof (struct list_files));
+
 	if (cb_current_file->copy_tail) {
 		cb_current_file->copy_tail->next = newfile;
 	}
@@ -1080,14 +1071,14 @@ set_print_replace_list (struct cb_replace_list *list)
 	const struct cb_text_list	*l;
 	struct list_replace		*repl;
 	int 				length;
-	
+
 	for (r = list; r; r = r->next) {
 		repl = cobc_malloc (sizeof (struct list_replace));
 		memset (repl, 0, sizeof (struct list_replace));
 		repl->firstline = r->line_num;
 		repl->lead_trail = r->lead_trail;
 		repl->lastline = cb_source_line;
-			
+
 		for (l = r->old_text, length = 0; l; l = l->next) {
 			length += strlen (l->text);
 		}
@@ -1153,13 +1144,14 @@ ppinput (char *buff, const size_t max_size)
 	int	i;
 	int	n;
 	int	coln;
-	struct list_skip *skip;		
-	
+	struct list_skip *skip;
+	const char	*paragraph_name;
+
 	/* Read line(s) */
 
 	continuation = 0;
 start:
-	if (unlikely(buffer_overflow ||
+	if (unlikely (buffer_overflow ||
 		     (newline_count + PPLEX_BUFF_LEN) >= max_size)) {
 		if (need_continuation || continuation) {
 			cb_plex_error (newline_count,
@@ -1187,13 +1179,13 @@ start:
 	line_overflow = 0;
 	ipchar = 0;
 	for (n = 0; ipchar != '\n';) {
-		if (unlikely(n == PPLEX_BUFF_LEN)) {
+		if (unlikely (n == PPLEX_BUFF_LEN)) {
 			if (line_overflow != 2) {
 				line_overflow = 1;
 			}
 		}
 		ipchar = getc (ppin);
-		if (unlikely(ipchar == EOF)) {
+		if (unlikely (ipchar == EOF)) {
 			if (n > 0) {
 				/* No end of line at end of file */
 				break;
@@ -1208,37 +1200,37 @@ start:
 			return ipchar;
 		}
 #ifndef	COB_EBCDIC_MACHINE
-		if (unlikely(ipchar == 0x1A && !n)) {
+		if (unlikely (ipchar == 0x1A && !n)) {
 			continue;
 		}
 #endif
-		if (unlikely(gotcr)) {
+		if (unlikely (gotcr)) {
 			gotcr = 0;
 			if (ipchar != '\n') {
-				if (likely(line_overflow == 0)) {
+				if (likely (line_overflow == 0)) {
 					buff[n++] = '\r';
 				} else {
 					line_overflow = 2;
 				}
 			}
 		}
-		if (unlikely(ipchar == '\r')) {
+		if (unlikely (ipchar == '\r')) {
 			gotcr = 1;
 			continue;
 		}
-		if (unlikely(ipchar == '\t')) {
-			if (likely(line_overflow == 0)) {
+		if (unlikely (ipchar == '\t')) {
+			if (likely (line_overflow == 0)) {
 				buff[n++] = ' ';
 				while (n % cb_tab_width != 0) {
 					buff[n++] = ' ';
 				}
-				if (unlikely(n > PPLEX_BUFF_LEN)) {
+				if (unlikely (n > PPLEX_BUFF_LEN)) {
 					n = PPLEX_BUFF_LEN;
 				}
 			}
 			continue;
 		}
-		if (likely(line_overflow == 0)) {
+		if (likely (line_overflow == 0)) {
 			buff[n++] = (char)ipchar;
 		} else if ((char)ipchar != ' ' && (char)ipchar != '\n') {
 			line_overflow = 2;
@@ -1316,7 +1308,7 @@ start:
 		memset (buff, ' ', (size_t)6);
 		/* Note we allow directive lines to start at column 7 */
 		bp = &buff[6];
-	
+
 		/* Special case: acucomment must be checked here as we'd pass comments
 		   as directives otherwise */
 		if (cb_flag_acucomment && buff[6] == '$') {
@@ -1391,13 +1383,14 @@ start:
 	case ' ':
 		break;
 	case '-':
-		if (unlikely(within_comment)) {
+		if (unlikely (within_comment)) {
 			cb_plex_error (newline_count,
 					_("invalid continuation in comment entry"));
 			newline_count++;
 			goto start;
 		} else if (!need_continuation) {
-			cb_verify (cb_word_continuation, _("continuation of COBOL words"));
+			cb_plex_verify (newline_count, cb_word_continuation,
+					_("continuation of COBOL words"));
 		}
 		continuation = 1;
 		break;
@@ -1419,15 +1412,12 @@ start:
 		cb_plex_error (newline_count,
 				_("invalid indicator '%c' at column 7"), buff[6]);
 		newline_count++;
-#if 1 /* Simon: treat as comment line instead of aborting compilation */
+		/* Treat as comment line instead of aborting compilation */
 		goto start;
-#else
-		return YY_NULL;
-#endif
 	}
 
 	/* Skip comments that follow after AUTHORS, etc. */
-	if (unlikely(within_comment)) {
+	if (unlikely (within_comment)) {
 		/* Check all of "Area A" */
 		for (ipchar = 7; ipchar < (n - 1) && ipchar < 11; ++ipchar) {
 			if (buff[ipchar] != ' ') {
@@ -1455,7 +1445,7 @@ start:
 	buff[6] = ' ';
 	bp = buff + 7;
 
-	if (unlikely(continuation)) {
+	if (unlikely (continuation)) {
 		/* Line continuation */
 		need_continuation = 0;
 		for (; *bp == ' '; ++bp) {
@@ -1493,6 +1483,39 @@ start:
 		consecutive_quotation = 0;
 	}
 
+	/*
+	  Check that line isn't start of ID DIVISION comment paragraph.
+	  This check is done here to prevent parsing of quote marks.
+	*/
+	if (comment_allowed) {
+		if (!strncmp (bp, "AUTHOR", 6)) {
+			paragraph_name = "AUTHOR";
+		} else if (!strncmp (bp, "DATE-WRITTEN", 12)) {
+			paragraph_name = "DATE-WRITTEN";
+		} else if (!strncmp (bp, "DATE-MODIFIED", 13)) {
+			paragraph_name = "DATE-MODIFIED";
+		} else if (!strncmp (bp, "DATE-COMPILED", 13)) {
+			paragraph_name = "DATE-COMPILED";
+		} else if (!strncmp (bp, "INSTALLATION", 12)) {
+			paragraph_name = "INSTALLATION";
+		} else if (!strncmp (bp, "REMARKS", 7)) {
+			paragraph_name = "REMARKS";
+		} else if (!strncmp (bp, "SECURITY", 8)) {
+			paragraph_name = "SECURITY";
+		} else {
+			paragraph_name = NULL;
+		}
+
+		if (paragraph_name) {
+			cb_plex_verify (newline_count, cb_comment_paragraphs,
+					paragraph_name);
+			/* Skip comments until the end of line. */
+			within_comment = 1;
+			++newline_count;
+			goto start;
+		}
+	}
+
 	/* Check if string literal is to be continued */
 	for (i = bp - buff; buff[i] != '\n'; ++i) {
 		/* Pick up floating comment and force loop exit */
@@ -1523,7 +1546,7 @@ start:
 		}
 	}
 
-	if (unlikely(quotation_mark)) {
+	if (unlikely (quotation_mark)) {
 		/* Expecting continuation */
 		if (!consecutive_quotation) {
 			need_continuation = 1;
@@ -1552,11 +1575,11 @@ start:
 	   and not whitespace (postponed here) */
 	if (line_overflow != 0) {
 		cb_plex_warning (newline_count,
-					_("source text after program-text area (column %d)"),
+				 _("source text after program-text area (column %d)"),
 				cb_text_column);
 	}
 
-	if (unlikely(continuation)) {
+	if (unlikely (continuation)) {
 		gotcr = strlen (bp);
 		memmove (buff, bp, gotcr + 1);
 		newline_count++;
@@ -1778,20 +1801,6 @@ display_to_eol (void)
 	}
 	if (c != EOF) {
 		unput (c);
-	}
-}
-
-static void
-check_comments (const char *keyword, const char *text)
-{
-	/* Treated as comments when in Identification Division */
-	if (comment_allowed) {
-		cb_verify (cb_comment_paragraphs, keyword);
-		/* Skip comments until the end of line. */
-		within_comment = 1;
-		skip_to_eol ();
-	} else {
-		ppecho (text, 0, yyleng);
 	}
 }
 

@@ -2136,7 +2136,7 @@ AT_DATA([prog.cob], [
 
 daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
-[prog.cob: 8: warning: continuation of COBOL words used
+[prog.cob: 9: warning: continuation of COBOL words used
 prog.cob: 7: error: missing PICTURE string
 prog.cob: 8: error: PICTURE string may not contain more than 63 characters
 prog.cob: 11: error: CR or DB may only occur once in a PICTURE string
@@ -2189,9 +2189,9 @@ LINE    PG/LN  A...B............................................................
 000007         01  empty-pic PIC.
 error: missing PICTURE string
 000008         01  too-long-pic PIC XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-warning: continuation of COBOL words used
 error: PICTURE string may not contain more than 63 characters
 000009        -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+warning: continuation of COBOL words used
 000010         01  mutiple-symbols.
 000011             03  PIC 9CRCR.
 error: CR or DB may only occur once in a PICTURE string

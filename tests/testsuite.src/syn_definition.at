@@ -964,8 +964,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: warning: continuation of COBOL words used
-prog.cob: 76: warning: continuation of COBOL words used
+[prog.cob: 9: warning: continuation of COBOL words used
+prog.cob: 77: warning: continuation of COBOL words used
 prog.cob: 7: error: missing PICTURE string
 prog.cob: 8: error: PICTURE string may not contain more than 63 characters
 prog.cob: 11: error: CR or DB may only occur once in a PICTURE string

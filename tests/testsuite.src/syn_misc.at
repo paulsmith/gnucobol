@@ -1590,10 +1590,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [0], [],
-[prog.cob: 5: warning: continuation of COBOL words is archaic in COBOL 2014
+[prog.cob: 6: warning: continuation of COBOL words is archaic in COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 5: warning: continuation of COBOL words used
+[prog.cob: 6: warning: continuation of COBOL words used
 ])
 
 AT_CLEANUP

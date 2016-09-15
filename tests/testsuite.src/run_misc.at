@@ -4995,3 +4995,26 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [])
 AT_CLEANUP
+
+
+AT_SETUP([Quote marks in comment paragraphs])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       DATE-WRITTEN.  hello'".
+      * extra " to fix syntax highlighting
+       PROCEDURE      DIVISION.
+           DISPLAY "Hello, world!"
+           .
+
+])
+
+AT_CHECK([$COMPILE -o prog prog.cob], [0], [],
+[prog.cob: 4: warning: DATE-WRITTEN is obsolete in GnuCOBOL
+])
+AT_CHECK([./prog], [0],
+[Hello, world!
+])
+AT_CLEANUP

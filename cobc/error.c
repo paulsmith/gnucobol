@@ -254,6 +254,45 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	}
 }
 
+unsigned int
+cb_plex_verify (const size_t sline, const enum cb_support tag,
+		const char *feature)
+{
+	switch (tag) {
+	case CB_OK:
+		return 1;
+	case CB_WARNING:
+		cb_plex_warning (sline, _("%s used"), feature);
+		return 1;
+	case CB_ARCHAIC:
+		if (cb_warn_archaic) {
+			cb_plex_warning (sline, _("%s is archaic in %s"), feature, cb_config_name);
+		}
+		return 1;
+	case CB_OBSOLETE:
+		if (cb_warn_obsolete) {
+			cb_plex_warning (sline, _("%s is obsolete in %s"), feature, cb_config_name);
+		}
+		return 1;
+	case CB_SKIP:
+		return 0;
+	case CB_IGNORE:
+		if (warningopt) {
+			cb_plex_warning (sline, _("%s ignored"), feature);
+		}
+		return 0;
+	case CB_ERROR:
+		cb_plex_error (sline, _("%s used"), feature);
+		return 0;
+	case CB_UNCONFORMABLE:
+		cb_plex_error (sline, _("%s does not conform to %s"), feature, cb_config_name);
+		return 0;
+	default:
+		break;
+	}
+	return 0;
+}
+
 /* Warning/Error for config.c */
 void
 configuration_warning (const char *fname, const int line, const char *fmt, ...)
