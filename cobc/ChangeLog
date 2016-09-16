@@ -1,4 +1,9 @@
 
+2016-09-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (cb_build_move_literal): fixed bug #69 by forcing a call to
+	  cob_move when binary-truncate is in effect.
+
 2016-09-15  Edward Hart <edward.dan.hart@gmail.com>
 
 	* pplex.l (ppinput): fixed bug #297 where quote marks were parsed in

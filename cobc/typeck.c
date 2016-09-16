@@ -7390,15 +7390,12 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 
-	if ((cat == CB_CATEGORY_NUMERIC &&
-	    f->usage == CB_USAGE_DISPLAY &&
-	    f->pic->scale == l->scale &&
-	    !f->flag_sign_leading && !f->flag_sign_separate &&
-	    !f->flag_blank_zero) ||
-	   ((cat == CB_CATEGORY_ALPHABETIC ||
-	     cat == CB_CATEGORY_ALPHANUMERIC) &&
-	    f->size < (int) (l->size + 16) &&
-	    !cb_field_variable_size (f))) {
+	if ((cat == CB_CATEGORY_NUMERIC && f->usage == CB_USAGE_DISPLAY
+	     && f->pic->scale == l->scale && !f->flag_sign_leading
+	     && !f->flag_sign_separate && !f->flag_blank_zero)
+	    || ((cat == CB_CATEGORY_ALPHABETIC || cat == CB_CATEGORY_ALPHANUMERIC)
+		&& f->size < (int) (l->size + 16)
+		&& !cb_field_variable_size (f))) {
 		buff = cobc_parse_malloc ((size_t)f->size);
 		diff = (int) (f->size - l->size);
 		if (cat == CB_CATEGORY_NUMERIC) {
@@ -7478,6 +7475,10 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 	    f->usage == CB_USAGE_COMP_5 ||
 	    f->usage == CB_USAGE_COMP_X) &&
 	    cb_fits_int (src) && f->size <= 8) {
+		if (cb_binary_truncate) {
+			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
+		}
+		
 		val = cb_get_int (src);
 		n = f->pic->scale - l->scale;
 		if ((l->size + n) > 9) {
