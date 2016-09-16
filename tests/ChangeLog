@@ -1,4 +1,9 @@
 
+2016-09-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* atlocal.in, atlocal_win : fix unset of environment variables
+	  that are used in libcob for runtime configuration; bug #319
+
 2016-08-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* Makefile.am: checking `diff` on start of target "check" and
