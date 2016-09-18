@@ -932,7 +932,6 @@ set_currency_picture_symbol (const cb_tree x)
 	case ' ':
 		cb_error_x (x, _("invalid character '%c' in PICTURE SYMBOL for CURRENCY"), s[0]);
 		return;
-		break;
 	default:
 		break;
 	}
@@ -1537,6 +1536,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token ANY
 %token ARE
 %token AREA
+%token AREAS
 %token ARGUMENT_NUMBER		"ARGUMENT-NUMBER"
 %token ARGUMENT_VALUE		"ARGUMENT-VALUE"
 %token AS
@@ -2696,6 +2696,7 @@ mnemonic_choices:
 		}
 	}
   }
+/* CALL-CONVENTION n is ... */
 | integer _is undefined_word
   {
 	if (save_tree) {
@@ -3677,7 +3678,7 @@ relative_key_clause:
 /* RESERVE clause */
 
 reserve_clause:
-  RESERVE no_or_integer _area
+  RESERVE no_or_integer _areas
   {
 	check_repeated ("RESERVE", SYN_CLAUSE_11, &check_duplicate);
   }
@@ -12078,6 +12079,7 @@ _advancing:	| ADVANCING ;
 _after:		| AFTER ;
 _are:		| ARE ;
 _area:		| AREA ;
+_areas:		| AREA | AREAS ;
 _as:		| AS ;
 _at:		| AT ;
 _before:	| BEFORE ;
