@@ -1,4 +1,16 @@
 
+2016-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_validate_program_data): moved check for record depending
+	  to (validate_record_depending) and activated storage check - relax-syntax
+	  can be used to compile legacy programs
+
+2016-09-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (finalize_file): bug #278 move key field checks
+	  to (validate_key_field) and verify that variable record size
+	  is at least large enough to hold the keys
+
 2016-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_build_move_literal): fixed bug #69 by forcing a call to

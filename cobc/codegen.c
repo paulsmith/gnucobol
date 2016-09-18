@@ -213,13 +213,13 @@ static void output_funcall	(cb_tree);
 static struct cb_field *
 cb_code_field (cb_tree x)
 {
-        if (likely(CB_REFERENCE_P (x))) {
-                if (unlikely(!CB_REFERENCE (x)->value)) {
-                        return CB_FIELD (cb_ref (x));
-                }
-                return CB_FIELD (CB_REFERENCE (x)->value);
-        }
-        return CB_FIELD (x);
+	if (likely(CB_REFERENCE_P (x))) {
+		if (unlikely(!CB_REFERENCE (x)->value)) {
+			return CB_FIELD (cb_ref (x));
+		}
+		return CB_FIELD (CB_REFERENCE (x)->value);
+	}
+	return CB_FIELD (x);
 }
 
 static int

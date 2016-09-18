@@ -1,4 +1,9 @@
 
+2016-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* testsuite.src/syn_file.at: added tests for variable record size,
+	  depending on item and and key fields
+
 2016-09-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* atlocal.in, atlocal_win : fix unset of environment variables

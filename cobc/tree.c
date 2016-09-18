@@ -2959,6 +2959,47 @@ validate_file (struct cb_file *f, cb_tree name)
 	}
 }
 
+static void
+validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
+{
+	cb_tree			key_ref;
+	struct cb_field		*k;
+	struct cb_field		*p;
+	struct cb_field		*v;
+
+	int			field_end;
+
+	/* get reference (and check if it exists) */
+	key_ref = cb_ref (key);
+	if (key_ref == cb_error_node) {
+		return;
+	}
+	k = CB_FIELD_PTR (key_ref);
+
+	/* Check that key file is actual part of the file's records */
+	v = cb_field_founder (k);
+	for (p = records; p; p = p->sister) {
+		if (p == v) {
+			break;
+		}
+	}
+	if (!p) {
+		cb_error_x (CB_TREE(f), _("invalid KEY item '%s', not in file '%s'"),
+			  k->name, f->name);
+		return;
+	}
+
+	/* Validate minimum record size against key field's end */
+	/* FIXME: calculate minumum length for all keys first and only check the biggest */
+	if (f->record_min > 0) {
+		field_end = k->offset + k->size;
+		if (field_end > f->record_min) {
+			cb_error_x (CB_TREE(k), _("minimal record length %d can not hold the key item '%s';"
+				  " needs to be at least %d"), f->record_min, k->name, field_end);
+		}
+	}
+}
+
 void
 finalize_file (struct cb_file *f, struct cb_field *records)
 {
@@ -2976,35 +3017,13 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		f->assign = cb_build_alphanumeric_literal (f->name,
 							   strlen (f->name));
 	}
-
-	if (f->key && f->organization == COB_ORG_INDEXED &&
-	    (l = cb_ref (f->key)) != cb_error_node) {
-		v = cb_field_founder (CB_FIELD_PTR (l));
-		for (p = records; p; p = p->sister) {
-			if (p == v) {
-				break;
-			}
+	if (f->organization == COB_ORG_INDEXED) {
+		if (f->key) {
+			validate_key_field (f, records, f->key);
 		}
-		if (!p) {
-			cb_error (_("invalid KEY item '%s'"),
-				  CB_FIELD_PTR (l)->name);
-		}
-	}
-	if (f->alt_key_list) {
-		for (cbak = f->alt_key_list; cbak; cbak = cbak->next) {
-			l = cb_ref (cbak->key);
-			if (l == cb_error_node) {
-				continue;
-			}
-			v = cb_field_founder (CB_FIELD_PTR (l));
-			for (p = records; p; p = p->sister) {
-				if (p == v) {
-					break;
-				}
-			}
-			if (!p) {
-				cb_error (_("invalid KEY item '%s'"),
-					    CB_FIELD_PTR (l)->name);
+		if (f->alt_key_list) {
+			for (cbak = f->alt_key_list; cbak; cbak = cbak->next) {
+				validate_key_field (f, records, cbak->key);
 			}
 		}
 	}
@@ -3013,14 +3032,16 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	for (p = records; p; p = p->sister) {
 		if (f->record_min > 0) {
 			if (p->size < f->record_min) {
-				cb_error (_("file '%s': record size %d too small, file minimum %d"),
-					 p->name, p->size, f->record_min);
+				cb_error_x (CB_TREE(p),
+					_("size of record '%s' (%d) smaller than minimum of file '%s' (%d)"),
+					 p->name, p->size, f->name, f->record_min);
 			}
 		}
 		if (f->record_max > 0) {
 			if (p->size > f->record_max) {
-				cb_error (_("file '%s': record size %d too large, file maximum %d"),
-					 p->name, p->size, f->record_max);
+				cb_error_x (CB_TREE(p),
+					_("size of record '%s' (%d) larger than maximum of file '%s' (%d)"),
+					 p->name, p->size, f->name, f->record_max);
 			}
 		}
 	}

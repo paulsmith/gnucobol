@@ -2367,6 +2367,47 @@ cb_build_debug_item (void)
 	CB_FIELD_ADD (current_program->working_storage, CB_FIELD (assign));
 }
 
+static void
+validate_record_depending (cb_tree x)
+{
+	struct cb_field		*p;
+	cb_tree			r;
+
+	/* get reference (and check if it exists) */
+	r = cb_ref (x);
+	if (r == cb_error_node) {
+		return;
+	}
+#if 0 /* Simon: Why should we use a reference here? */
+	if (CB_REF_OR_FIELD_P(x)) {
+		cb_error_x (x, _("invalid RECORD DEPENDING item"));
+		return;
+	}
+#else
+	if (!CB_FIELD_P(r)) {
+		cb_error_x (x, _("RECORD DEPENDING must reference a data-item"));
+		return;
+	}
+#endif
+	p = CB_FIELD_PTR (x);
+	switch (p->storage) {
+	case CB_STORAGE_WORKING:
+	case CB_STORAGE_LOCAL:
+	case CB_STORAGE_LINKAGE:
+		break;
+	default:
+		/* RXWRXW - This breaks old legacy programs; FIXME: use compiler configuration */
+		/* FIXME: add explain_enum_storage, change to "should not be defined in %s */
+		if (cb_relaxed_syntax_checks) {
+			cb_warning_x (x, _("RECORD DEPENDING item '%s' should be defined in "
+				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"), p->name);
+		} else {
+			cb_error_x (x, _("RECORD DEPENDING item '%s' should be defined in "
+				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"), p->name);
+		}
+	}
+}
+
 void
 cb_validate_program_data (struct cb_program *prog)
 {
@@ -2381,6 +2422,8 @@ cb_validate_program_data (struct cb_program *prog)
 	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
 	unsigned int	odo_level;
+
+	current_program->report_list = cb_list_reverse (current_program->report_list);
 
 	for (l = current_program->report_list; l; l = CB_CHAIN (l)) {
 		/* Set up LINE-COUNTER / PAGE-COUNTER */
@@ -2404,6 +2447,8 @@ cb_validate_program_data (struct cb_program *prog)
 		rep->page_counter = cb_build_field_reference (CB_FIELD (x), NULL);
 		CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
 	}
+
+	current_program->file_list = cb_list_reverse (current_program->file_list);
 
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
 		f = CB_FILE (CB_VALUE (l));
@@ -2548,33 +2593,11 @@ cb_validate_program_data (struct cb_program *prog)
 	cb_depend_check = NULL;
 	cb_needs_01 = 0;
 
+	/* file definition checks */
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
 		f = CB_FILE (CB_VALUE (l));
 		if (CB_VALID_TREE(f->record_depending)) {
-			x = f->record_depending;
-			if (cb_ref (x) != cb_error_node) {
-#if	0			/* RXWRXW - This breaks old legacy programs */
-				/* FIXME: use compiler configuration */
-				if (CB_REF_OR_FIELD_P(x)) {
-					p = CB_FIELD_PTR (x);
-					switch (p->storage) {
-					case CB_STORAGE_WORKING:
-					case CB_STORAGE_LOCAL:
-					case CB_STORAGE_LINKAGE:
-						break;
-					default:
-						/* FIXME: add explain_enum_storage */
-						cb_error (_("RECORD DEPENDING item must be in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"));
-					}
-				} else {
-#endif
-				if (!CB_REF_OR_FIELD_P(x)) {
-					cb_error (_("invalid RECORD DEPENDING item"));
-				}
-#if	0			/* RXWRXW */
-				}
-#endif
-			}
+			validate_record_depending (f->record_depending);
 		}
 	}
 }
@@ -2733,7 +2756,6 @@ cb_validate_program_body (struct cb_program *prog)
 	current_paragraph = save_paragraph;
 	cobc_cs_check = 0;
 
-	prog->file_list = cb_list_reverse (prog->file_list);
 	prog->exec_list = cb_list_reverse (prog->exec_list);
 }
 
@@ -3304,7 +3326,7 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		func = "cob_decimal_pow";
 		break;
 	default:
-		cobc_err_msg (_("unexpected operation: %d"), op);
+		cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
 		COBC_ABORT ();
 	}
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
