@@ -8779,6 +8779,7 @@ perform_statement:
 	/* Turn off field debug - PERFORM is special */
 	save_debug = start_debug;
 	start_debug = 0;
+	cobc_cs_check = CB_CS_PERFORM;
   }
   perform_body
 ;
@@ -8989,10 +8990,6 @@ advancing_lock_or_retry:
 	CB_PENDING ("ADVANCING ON LOCK");
   }
 | retry_phrase
-  {
-	CB_PENDING ("RETRY");
-	cobc_cs_check = 0;
-  }
 ;
 
 _retry_phrase:
@@ -9001,6 +8998,14 @@ _retry_phrase:
 ;
 
 retry_phrase:
+  retry_options
+  {
+	CB_PENDING ("RETRY");
+	cobc_cs_check = 0;
+  }
+;
+
+retry_options:
   /* HACK: added _for to fix shift/reduce conflict. */
   RETRY _for exp TIMES
 | RETRY _for exp SECONDS
