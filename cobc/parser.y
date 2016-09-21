@@ -1897,6 +1897,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token RESERVE
 %token RESET
 %token RESET_TRACE		"RESET TRACE"
+%token RETRY
 %token RETURN
 %token RETURNING
 %token REVERSE_FUNC		"FUNCTION REVERSE"
@@ -1917,6 +1918,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SCROLL
 %token SD
 %token SEARCH
+%token SECONDS
 %token SECTION
 %token SECURE
 %token SEGMENT_LIMIT		"SEGMENT-LIMIT"
@@ -7483,7 +7485,7 @@ delete_statement:
 ;
 
 delete_body:
-  file_name _record _invalid_key_phrases
+  file_name _record _retry_phrase _invalid_key_phrases
   {
 	cb_emit_delete ($1);
   }
@@ -8715,45 +8717,30 @@ open_statement:
 ;
 
 open_body:
-  open_mode open_sharing file_name_list open_option
+  open_file_entry
+| open_body open_file_entry
+;
+
+open_file_entry:
+  open_mode open_sharing _retry_phrase file_name_list open_option
   {
 	cb_tree l;
 	cb_tree x;
 
-	if ($2 && $4) {
-		cb_error_x (CB_TREE (current_statement),
-			    _("%s and %s are mutually exclusive"), "SHARING", _("LOCK clauses"));
-	}
-	if ($4) {
-		x = $4;
-	} else {
-		x = $2;
-	}
-	for (l = $3; l; l = CB_CHAIN (l)) {
-		if (CB_VALID_TREE (CB_VALUE (l))) {
-			begin_implicit_statement ();
-			cb_emit_open (CB_VALUE (l), $1, x);
-		}
-	}
-  }
-| open_body open_mode open_sharing file_name_list open_option
-  {
-	cb_tree l;
-	cb_tree x;
-
-	if ($3 && $5) {
+	if ($2 && $5) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("%s and %s are mutually exclusive"), "SHARING", _("LOCK clauses"));
 	}
 	if ($5) {
 		x = $5;
 	} else {
-		x = $3;
+		x = $2;
 	}
+	
 	for (l = $4; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
 			begin_implicit_statement ();
-			cb_emit_open (CB_VALUE (l), $2, x);
+			cb_emit_open (CB_VALUE (l), $1, x);
 		}
 	}
   }
@@ -8800,13 +8787,15 @@ perform_body:
   perform_procedure perform_option
   {
 	cb_emit_perform ($2, $1);
-	start_debug = save_debug;
+	start_debug = save_debug;	
+	cobc_cs_check = 0;
   }
 | perform_option
   {
 	CB_ADD_TO_CHAIN ($1, perform_stack);
 	/* Restore field debug before inline statements */
 	start_debug = save_debug;
+	cobc_cs_check = 0;
   }
   statement_list end_perform
   {
@@ -8817,6 +8806,7 @@ perform_body:
   {
 	cb_emit_perform ($1, NULL);
 	start_debug = save_debug;
+	cobc_cs_check = 0;
   }
 ;
 
@@ -8936,8 +8926,10 @@ read_statement:
 ;
 
 read_body:
-  file_name _flag_next _record read_into with_lock read_key read_handler
+  file_name _flag_next _record read_into lock_phrases read_key read_handler
   {
+	cobc_cs_check = 0;
+	  
 	if (CB_VALID_TREE ($1)) {
 		struct cb_file	*cf;
 
@@ -8967,33 +8959,68 @@ read_into:
 | INTO identifier		{ $$ = $2; }
 ;
 
-with_lock:
-  /* empty */
+lock_phrases:
+  %prec SHIFT_PREFER /* empty */ 
   {
 	$$ = NULL;
   }
-| IGNORING LOCK
+| ignoring_lock
   {
 	$$ = cb_int3;
   }
-| _with LOCK
+| advancing_lock_or_retry _extended_with_lock
   {
-	$$ = cb_int1;
+	$$ = $2;
   }
+| extended_with_lock
+  {
+	$$ = $1;
+  }
+;
+
+ignoring_lock:
+  IGNORING LOCK
+| _with IGNORE LOCK
+;
+  
+advancing_lock_or_retry:
+  ADVANCING _on LOCK
+  {
+	CB_PENDING ("ADVANCING ON LOCK");
+  }
+| retry_phrase
+  {
+	CB_PENDING ("RETRY");
+	cobc_cs_check = 0;
+  }
+;
+
+_retry_phrase:
+  /* empty */
+| retry_phrase
+;
+
+retry_phrase:
+  /* HACK: added _for to fix shift/reduce conflict. */
+  RETRY _for exp TIMES
+| RETRY _for exp SECONDS
+| RETRY FOREVER
+;
+
+_extended_with_lock:
+  /* empty */
+| extended_with_lock
+;
+
+extended_with_lock:
+  with_lock
 | _with KEPT LOCK
   {
 	$$ = cb_int1;
   }
-| _with NO LOCK
-  {
-	$$ = cb_int2;
-  }
-| _with IGNORE LOCK
-  {
-	$$ = cb_int3;
-  }
 | _with WAIT
   {
+	/* TO-DO: Merge with RETRY phrase */
 	$$ = cb_int4;
   }
 ;
@@ -9103,19 +9130,23 @@ rewrite_statement:
 ;
 
 rewrite_body:
-  record_name from_option write_lock _invalid_key_phrases
+  record_name from_option _retry_phrase _with_lock _invalid_key_phrases
   {
-	cb_emit_rewrite ($1, $2, $3);
+	cb_emit_rewrite ($1, $2, $4);
 	start_debug = save_debug;
   }
 ;
 
-write_lock:
+_with_lock:
   /* empty */
   {
 	$$ = NULL;
   }
-| _with LOCK
+| with_lock
+;
+
+with_lock:
+  _with LOCK
   {
 	$$ = cb_int1;
   }
@@ -10241,10 +10272,10 @@ write_statement:
 ;
 
 write_body:
-  record_name from_option write_option write_lock write_handler
+  record_name from_option write_option _retry_phrase _with_lock write_handler
   {
 	if (CB_VALID_TREE ($1)) {
-		cb_emit_write ($1, $2, $3, $4);
+		cb_emit_write ($1, $2, $3, $5);
 	}
 	start_debug = save_debug;
   }

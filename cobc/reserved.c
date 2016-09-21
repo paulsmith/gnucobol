@@ -836,10 +836,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FLOAT-BINARY-64",		0, 0, -1,			/* 2011 */
 				0, 0
   },
-  { "FLOAT-DECIMAL-16",		0, 0, FLOAT_DECIMAL_16,		/* 2008 */
+  { "FLOAT-DECIMAL-16",		0, 0, FLOAT_DECIMAL_16,		/* 2014 */
 				0, 0
   },
-  { "FLOAT-DECIMAL-34",		0, 0, FLOAT_DECIMAL_34,		/* 2008 */
+  { "FLOAT-DECIMAL-34",		0, 0, FLOAT_DECIMAL_34,		/* 2014 */
 				0, 0
   },
 #if	0	/* RXWRXW - FP Decimal */
@@ -871,8 +871,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FOREGROUND-COLOR",		0, 0, FOREGROUND_COLOR,		/* 2002 (C/S) */
 				0, 0
   },
-  { "FOREVER",			0, 0, FOREVER,			/* 2002 (C/S) */
-				0, 0
+  { "FOREVER",			0, 1, FOREVER,			/* 2002 (C/S) */
+				0, CB_CS_PERFORM | CB_CS_RETRY
   },
   { "FORMAT",			0, 0, -1,			/* 2002 */
 				0, 0
@@ -955,8 +955,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "IGNORE",			0, 0, IGNORE,			/* Extension */
 				0, 0
   },
-  { "IGNORING",			0, 0, IGNORING,			/* 2002 (C/S) */
-				0, 0
+  { "IGNORING",			0, 1, IGNORING,			/* 2002 (C/S) */
+				0, CB_CS_READ
   },
   { "IMPLEMENTS",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
@@ -971,9 +971,6 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "INDICATE",			0, 0, INDICATE,			/* 2002 */
-				0, 0
-  },
-  { "INDIRECT",			0, 1, -1,			/* 2008 (C/S) */
 				0, 0
   },
   { "INHERITS",			0, 0, -1,			/* 2002 */
@@ -1007,7 +1004,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "INTERFACE-ID",		0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "INTERMEDIATE",		0, 1, -1,			/* 2008 (C/S) */
+  { "INTERMEDIATE",		0, 1, -1,			/* 2014 (C/S) */
 				0, 0
 	/* FIXME: 2014 Context-sensitive to OPTIONS paragraph */
   },
@@ -1173,13 +1170,13 @@ static struct cobc_reserved default_reserved_words[] = {
   { "NATIVE",			0, 0, NATIVE,			/* 2002 */
 				0, 0
   },
-  { "NEAREST-AWAY-FROM-ZERO",	0, 1, NEAREST_AWAY_FROM_ZERO,	/* 2008 (C/S) */
+  { "NEAREST-AWAY-FROM-ZERO",	0, 1, NEAREST_AWAY_FROM_ZERO,	/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
   },
-  { "NEAREST-EVEN",		0, 1, NEAREST_EVEN,		/* 2008 (C/S) */
+  { "NEAREST-EVEN",		0, 1, NEAREST_EVEN,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
   },
-  { "NEAREST-TOWARD-ZERO",	0, 1, NEAREST_TOWARD_ZERO,	/* 2008 (C/S) */
+  { "NEAREST-TOWARD-ZERO",	0, 1, NEAREST_TOWARD_ZERO,	/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
   },
   { "NEGATIVE",			0, 0, NEGATIVE,			/* 2002 */
@@ -1303,7 +1300,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_EXIT
   },
   { "PERFORM",			1, 0, PERFORM,			/* 2002 */
-				0, 0
+				CB_CS_PERFORM, 0
   },
   { "PF",			0, 0, PF,			/* 2002 */
 				0, 0
@@ -1329,7 +1326,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "POSITIVE",			0, 0, POSITIVE,			/* 2002 */
 				0, 0
   },
-  { "PREFIXED",			0, 1, -1,			/* 2008 (C/S) */
+  { "PREFIXED",			0, 1, -1,			/* 2014 (C/S) */
 				0, 0
 	/* FIXME: 2014 Context-sensitive to ANY LENGTH STRUCTURE clause */
   },
@@ -1372,7 +1369,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PROGRAM-POINTER",		0, 0, PROGRAM_POINTER,		/* 2002 */
 				0, 0
   },
-  { "PROHIBITED",		0, 1, PROHIBITED,		/* 2008 (C/S) */
+  { "PROHIBITED",		0, 1, PROHIBITED,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
   },
   { "PROMPT",			0, 0, PROMPT,			/* Extension */
@@ -1406,7 +1403,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "READ",			1, 0, READ,			/* 2002 */
-				0, 0
+				CB_CS_READ, 0
   },
   { "RECORD",			0, 0, RECORD,			/* 2002 */
 				0, 0
@@ -1480,8 +1477,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "RESUME",			0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "RETRY",			0, 0, -1,			/* 2002 */
-				0, 0
+  { "RETRY",			0, 0, RETRY,			/* 2002 */
+				CB_CS_RETRY, 0
   },
   { "RETURN",			1, 0, RETURN,			/* 2002 */
 				0, 0
@@ -1544,8 +1541,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SEARCH",			1, 0, SEARCH,			/* 2002 */
 				0, 0
   },
-  { "SECONDS",			0, 1, -1,			/* 2002 (C/S) */
-				0, 0
+  { "SECONDS",			0, 1, SECONDS,			/* 2002 (C/S) */
+				0, CB_CS_RETRY
   },
   { "SECTION",			0, 0, SECTION,			/* 2002 */
 				0, 0
@@ -1638,10 +1635,10 @@ static struct cobc_reserved default_reserved_words[] = {
 	/* Note EBCDIC! */
 #ifdef	COB_EBCDIC_MACHINE
 	/* FIXME: 2014 Both are Context-sensitive to ARITHMETIC clause */
-  { "STANDARD-BINARY",		0, 1, -1,			/* 2008 (C/S) */
+  { "STANDARD-BINARY",		0, 1, -1,			/* 2014 (C/S) */
 				0, 0
   },
-  { "STANDARD-DECIMAL",		0, 1, -1,			/* 2008 (C/S) */
+  { "STANDARD-DECIMAL",		0, 1, -1,			/* 2014 (C/S) */
 				0, 0
   },
 #endif
@@ -1653,10 +1650,10 @@ static struct cobc_reserved default_reserved_words[] = {
   },
 	/* Note EBCDIC! */
 #ifndef	COB_EBCDIC_MACHINE
-  { "STANDARD-BINARY",		0, 1, -1,			/* 2008 (C/S) */
+  { "STANDARD-BINARY",		0, 1, -1,			/* 2014 (C/S) */
 				0, 0
   },
-  { "STANDARD-DECIMAL",		0, 1, -1,			/* 2008 (C/S) */
+  { "STANDARD-DECIMAL",		0, 1, -1,			/* 2014 (C/S) */
 				0, 0
   },
 #endif
@@ -2978,10 +2975,7 @@ lookup_reserved_word (const char *name)
 	}
 
 	if (p->context_test) {
-#if	0	/* RXWRXW - CS check */
 		if (!(cobc_cs_check & p->context_test)) {
-#endif
-		if ((cobc_cs_check & p->context_test) != p->context_test) {
 			return NULL;
 		}
 		if (!cobc_in_procedure) {
