@@ -1,4 +1,12 @@
 
+2016-09-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: changed reserved and no-reserved options to generate
+	  amendments to the reserved word list so that specify-all-reserved can
+	  be examined at the end of configuration processing (allowing it to be
+	  unset after being set).
+	* cobc.c: removed -R/-reserve-all option.
+
 2016-09-21  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: added RETRY and ADVANCING ON LOCK as pending features.

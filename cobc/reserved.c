@@ -31,10 +31,6 @@
 #include "tree.h"
 #include "parser.h"
 
-/* Global variables */
-
-struct reserved_word_list	*cobc_user_res_list = NULL;
-
 /* Local variables */
 
 struct system_struct {
@@ -1924,6 +1920,19 @@ static size_t	num_reserved_words;
 #define NUM_DEFAULT_RESERVED_WORDS	\
 	sizeof (default_reserved_words) / sizeof (struct cobc_reserved)
 
+struct amendment_list {
+	struct amendment_list	*next;	/* next pointer */
+	char			*word;
+	char			*alias_for;
+#if 0 /* FIXME: store refence to origin */
+	char			*defined_by;
+#endif
+	int			is_context_sensitive;
+	int			to_add;
+};
+
+struct amendment_list	*amendment_list = NULL;
+
 /* Intrinsic Function List */
 /* Must be ordered on name for binary search */
 
@@ -2580,30 +2589,12 @@ create_dummy_reserved (const char *word)
 	return ret;
 }
 
-enum free_word_action {
-	FREE_WORD_STR,
-        DONT_FREE_WORD_STR
-};
-
 static void
-delete_reserved_word_from_list (struct reserved_word_list * const prev,
-				const enum free_word_action action,
-				struct reserved_word_list * to_delete)
+free_amendment (struct amendment_list *to_free)
 {
-	if (prev) {
-		prev->next = to_delete->next;
-	}
-	if (to_delete == cobc_user_res_list) {
-		cobc_user_res_list = to_delete->next;
-	}
-
-	if (action == FREE_WORD_STR) {
-		cobc_main_free (to_delete->word);
-	}
-
-	cobc_main_free (to_delete->alias_for);
-
-	cobc_main_free (to_delete);
+	cobc_main_free (to_free->word);
+	cobc_main_free (to_free->alias_for);
+	cobc_main_free (to_free);
 }
 
 static COB_INLINE COB_A_INLINE int
@@ -2613,7 +2604,8 @@ has_context_sensitive_indicator (const char *word, const size_t size)
 }
 
 static void
-allocate_str_removing_asterisk (const char *word, const size_t size, char ** const out_str)
+allocate_str_removing_asterisk (const char *word, const size_t size,
+				char ** const out_str)
 {
 	size_t	chars_to_copy;
 
@@ -2631,18 +2623,19 @@ allocate_str_removing_asterisk (const char *word, const size_t size, char ** con
 
 static COB_INLINE COB_A_INLINE void
 initialize_word (const char *word, const size_t size,
-		 struct reserved_word_list * const reserved)
+		 struct amendment_list * const reserved)
 {
 	allocate_str_removing_asterisk (word, size, &reserved->word);
 }
 
 static int
 is_invalid_word (const char *word, const int size,
-			const char *fname, const int line) {
+		 const char *fname, const int line)
+{
 	if (size > COB_MAX_WORDLEN) {
 		configuration_error (fname, line, 1,
-			_("reserved word must have less than %d characters"),
-			COB_MAX_WORDLEN);
+				     _("reserved word must have less than %d characters"),
+				     COB_MAX_WORDLEN);
 		return 1;
 	}
 	/* TO-DO: add more checks here */
@@ -2651,7 +2644,7 @@ is_invalid_word (const char *word, const int size,
 
 static void
 initialize_alias_for (const char *alias_for,
-		      struct reserved_word_list * const reserved,
+		      struct amendment_list * const reserved,
 		      const char *fname, const int line)
 {
 	size_t	size = strlen (alias_for);
@@ -2659,7 +2652,7 @@ initialize_alias_for (const char *alias_for,
 	if (has_context_sensitive_indicator (alias_for, size)) {
 		size--;
 		configuration_warning (fname, line,
-			_("ignored asterisk at end of alias target")); 
+			_("ignored asterisk at end of alias target"));
 	}
 	if (is_invalid_word (alias_for, size, fname, line)) {
 		reserved->alias_for = NULL;
@@ -2668,96 +2661,11 @@ initialize_alias_for (const char *alias_for,
 	}
 }
 
-/* add word to cobc_user_res_list */
-/* parameter *word has no white space, may include context sensitive indicator
-   and/or alias definition: a* a=b a*=b
-
-   *word is a static char * when line < 0 !
-*/
-static void
-add_reserved_word_without_init (char *word, const char *fname, const int line)
-{
-	struct reserved_word_list	*reserved;
-	size_t				size;
-	char				*equal_sign_pos;
-	int					cont_sens;
-
-	/* Check for alias and context sensitive indicator,
-	   get and check the length of the word */
-	equal_sign_pos = strchr (word, '=');
-	if (equal_sign_pos) {
-		size = equal_sign_pos - word;
-	} else {
-		size = strlen (word);
-	}
-	cont_sens = has_context_sensitive_indicator (word, size);
-	if (cont_sens) {
-		size--;
-	}
-
-	/* only verify entries that don't come from default word list */
-	if (line >= 0) {	/* line 0: from command line
-						       -1: loading from default word list */
-		word [size] = 0;
-		if (is_invalid_word (word, size , fname, line)) {
-			return;
-		}
-	}
-
-	/* Check that the word has not already been specified */
-	for (reserved = cobc_user_res_list; reserved; reserved = reserved->next)
-	{
-		if (cob_strcasecmp (reserved->word, word) == 0) {
-			return;
-		}
-	}
-
-	reserved = cobc_main_malloc (sizeof (struct reserved_word_list));
-	reserved->is_context_sensitive = cont_sens;
-	initialize_word (word, size, reserved);
-
-	/* If it is an alias, copy what it is an alias for */
-	if (equal_sign_pos) {
-		initialize_alias_for (equal_sign_pos + 1, reserved, fname,
-				      line);
-	} else {
-		reserved->alias_for = NULL;
-	}
-
-	/* Insert word at beginning of cobc_user_res_list. */
-	reserved->next = cobc_user_res_list;
-	cobc_user_res_list = reserved;
-}
-
-/* Add all the words from the default list. */
-void
-add_all_default_words (void)
-{
-	const size_t	num_default_words = NUM_DEFAULT_RESERVED_WORDS;
-	size_t		i;
-
-	for (i = 0; i < num_default_words; ++i) {
-		add_reserved_word_without_init (
-			(char *)default_reserved_words[i].name, NULL, -1);
-	}
-}
-
-static void
-initialize_user_res_list_if_needed (void)
-{
-	if (likely (cobc_user_res_list || cb_specify_all_reserved)) {
-		return;
-	}
-
-	/* Initialize the list with the words from the default list. */
-	add_all_default_words ();
-}
-
 static size_t
-get_length_of_user_res_list (void)
+get_length_of_amendment_list (void)
 {
-	struct reserved_word_list	*l = cobc_user_res_list;
-	size_t				length;
+	struct amendment_list	*l = amendment_list;
+	size_t			length;
 
 	for (length = 0; l; ++length, l = l->next);
 	return length;
@@ -2779,12 +2687,14 @@ find_default_reserved_word (struct cobc_reserved to_find)
 }
 
 static struct cobc_reserved
-get_user_specified_reserved_word (struct reserved_word_list user_reserved)
+get_user_specified_reserved_word (struct amendment_list user_reserved)
 {
+	struct cobc_reserved	cobc_reserved = create_dummy_reserved (NULL);
 	struct cobc_reserved	to_find;
-	struct cobc_reserved	cobc_reserved
-		= create_dummy_reserved (user_reserved.word);
 	struct cobc_reserved	*p;
+
+	cobc_reserved.name = cobc_main_malloc (strlen (user_reserved.word) + 1);
+	strcpy ((char *) cobc_reserved.name, user_reserved.word);
 
 	if (!user_reserved.alias_for) {
 		cobc_reserved.context_sens
@@ -2806,20 +2716,121 @@ get_user_specified_reserved_word (struct reserved_word_list user_reserved)
 	return cobc_reserved;
 }
 
-static COB_INLINE COB_A_INLINE void
-pop_reserved_word (const enum free_word_action action)
+static int
+followed_by_addition_for_same_word (const struct amendment_list * const addition)
 {
-	delete_reserved_word_from_list (NULL, action, cobc_user_res_list);
+	struct amendment_list	*l;
+
+	/* Walk through the list after the first addition. */
+	for (l = addition->next; l; l = l->next) {
+		/* Look for elements with the same word. */
+		if (!cob_strcasecmp (addition->word, l->word)
+		    && l->to_add) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/*
+  Returns 1 if a removal for the same word as addition is found (and removed).
+*/
+static int
+try_remove_removal (struct amendment_list * const addition)
+{
+	struct amendment_list	*l = addition->next;
+	struct amendment_list	*prev = addition;
+	
+	while (l) {
+		/* Look for elements with the same word. */
+		if (cob_strcasecmp (addition->word, l->word)) {
+			l = l->next;
+			prev = l;
+			continue;
+		}
+
+		if (!l->to_add) {
+			prev->next = l->next;
+		        free_amendment (l);
+			l = prev->next;
+
+		        return 1;
+		}
+	}
+
+	return 0;
+}
+
+/* Reduce the amendment list to a list of additions. */
+static void
+reduce_amendment_list (void)
+{
+	struct amendment_list	*l = amendment_list;
+	struct amendment_list	*prev = NULL;
+	struct amendment_list	*next;
+	int	delete_current_elt = 0;
+
+	while (l) {
+		if (l->to_add) {
+			/*
+			  Later duplicate additions take overwrite previous ones
+			  and a removal and the previous addition cancel each
+			  other out.
+			*/
+			delete_current_elt = followed_by_addition_for_same_word (l)
+				|| try_remove_removal (l);
+		} else {
+			delete_current_elt = 1;
+		}
+
+		if (delete_current_elt) {
+			next = l->next;
+			if (prev) {
+				prev->next = next;
+			}
+			if (l == amendment_list) {
+				amendment_list = next;
+			}
+		        free_amendment (l);
+			l = next;
+
+			delete_current_elt = 0;
+		} else {
+			prev = l;
+			l = l->next;
+		}
+	}
 }
 
 static void
-get_reserved_words_from_user_list (void)
+get_reserved_words_with_amendments (void)
 {
 	int	i;
+	struct amendment_list		*amendment;
 	struct cobc_reserved		to_find;
 	struct cobc_reserved		*p;
 
-	num_reserved_words = get_length_of_user_res_list ();
+	if (!cb_specify_all_reserved) {
+		/*
+		  Append the default reserved words to the amendment list as
+		  additions.
+		*/
+		for (i = 0; i < NUM_DEFAULT_RESERVED_WORDS; ++i) {
+			amendment = cobc_main_malloc (sizeof (struct amendment_list));
+			amendment->word = cobc_main_malloc (strlen (default_reserved_words[i].name) + 1);
+			strcpy (amendment->word, default_reserved_words[i].name);
+			amendment->to_add = 1;
+
+			/* Insert amendment at the beginning of the list. */
+			amendment->next = amendment_list;
+			amendment_list = amendment;
+		}
+	}
+
+	reduce_amendment_list ();
+
+	num_reserved_words = get_length_of_amendment_list ();
 	reserved_words = cobc_main_malloc (num_reserved_words
 					   * sizeof (struct cobc_reserved));
 
@@ -2827,33 +2838,25 @@ get_reserved_words_from_user_list (void)
 	  Populate reserved_words array with data from default_reserved_words,
 	  where possible. Free each word once processed.
 	*/
-	for (i = 0; cobc_user_res_list; ++i) {
-		to_find = create_dummy_reserved (cobc_user_res_list->word);
+	for (i = 0; amendment_list; ++i) {
+		to_find = create_dummy_reserved (amendment_list->word);
 		p = find_default_reserved_word (to_find);
 		if (p) {
 			reserved_words[i] = *p;
 			/*
 			  Note that we ignore if the user specified this word
-			  as context-sensitive.
+			  as context-sensitive or as an alias.
 			*/
-
-			/*
-			  We use the string literal in the default_reserved_
-			  words array.
-			*/
-			pop_reserved_word (FREE_WORD_STR);
 		} else {
-			reserved_words[i] = get_user_specified_reserved_word (*cobc_user_res_list);
-
-			/*
-			  We use the string copy allocated for cobc_user_res_
-			  list.
-			*/
-			pop_reserved_word (DONT_FREE_WORD_STR);
+			reserved_words[i] = get_user_specified_reserved_word (*amendment_list);
 		}
+
+		amendment = amendment_list->next;
+		free_amendment (amendment_list);
+		amendment_list = amendment;
 	}
 
-	/* Later code assumes the array to be sorted */
+	/* Later code assumes the array is sorted. */
 	qsort (reserved_words, num_reserved_words,
 	       sizeof (struct cobc_reserved), reserve_comp);
 }
@@ -2869,8 +2872,8 @@ static void
 initialize_reserved_words_if_needed (void)
 {
 	if (!reserved_words) {
-		if (cobc_user_res_list) {
-			get_reserved_words_from_user_list ();
+		if (amendment_list) {
+			get_reserved_words_with_amendments ();
 		} else {
 			get_reserved_words_from_default_list ();
 		}
@@ -2913,32 +2916,76 @@ lookup_system_name (const char *name)
 	return NULL;
 }
 
-void
-remove_reserved_word (const char *word)
+/*
+  parameter *word has no white space, may include context sensitive indicator
+  and/or alias definition: a* a=b a*=b
+
+  *word is a static char * when line < 0 !
+*/
+static void
+add_amendment (const char *word, const char *fname, const int line,
+	       const int to_add)
 {
-	struct reserved_word_list	*reserved;
-	struct reserved_word_list	*prev = NULL;
+	struct amendment_list	*amendment;
+	size_t			size;
+	char			*equal_sign_pos;
+	int			context_sensitive;
+	struct amendment_list	*l;
 
-	initialize_user_res_list_if_needed ();
+	/* Check for alias and context sensitive indicator,
+	   get and check the length of the word */
+	equal_sign_pos = strchr (word, '=');
+	if (equal_sign_pos) {
+		size = equal_sign_pos - word;
+	} else {
+		size = strlen (word);
+	}
+	context_sensitive = has_context_sensitive_indicator (word, size);
+	if (context_sensitive) {
+		size--;
+	}
 
-	for (reserved = cobc_user_res_list; reserved; reserved = reserved->next) {
-		/*
-		  We can only remove the word if it has already been specified.
-		*/
-		if (cob_strcasecmp (reserved->word, word) == 0) {
-		        delete_reserved_word_from_list (prev, FREE_WORD_STR,
-							reserved);
-			return;
-		}
-		prev = reserved;
+	/*
+	  Only verify entries that don't come from the default word list. Line 0
+	  means the entry came from the command line. Line -1 means it came from
+	  the default word list.
+	*/
+	if (line >= 0 && is_invalid_word (word, size, fname, line)) {
+		return;
+	}
+
+	amendment = cobc_main_malloc (sizeof (struct amendment_list));
+	amendment->is_context_sensitive = context_sensitive;
+	amendment->to_add = to_add;
+	initialize_word (word, size, amendment);
+
+	/* If it is an alias, copy what it is an alias for */
+	if (to_add && equal_sign_pos) {
+		initialize_alias_for (equal_sign_pos + 1, amendment, fname,
+				      line);
+	} else {
+		amendment->alias_for = NULL;
+	}
+
+	/* Insert amendment at the end of the amendment_list. */
+	for (l = amendment_list; l && l->next; l = l->next);
+	if (l) {
+		l->next = amendment;
+	} else {
+		amendment_list = amendment;
 	}
 }
 
 void
-add_reserved_word (char *word, const char *fname, const int line)
+add_reserved_word (const char *word, const char *fname, const int line)
 {
-	initialize_user_res_list_if_needed ();
-	add_reserved_word_without_init (word, fname, line);
+	add_amendment (word, fname, line, 1);
+}
+
+void
+remove_reserved_word (const char *word, const char *fname, const int line)
+{
+	add_amendment (word, fname, line, 0);
 }
 
 struct cobc_reserved *

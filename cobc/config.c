@@ -307,7 +307,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 					return 1;
 				}
 			} else if (strcmp (name, "not-reserved") == 0) {
-				remove_reserved_word (val);
+				remove_reserved_word (val, fname, line);
 			} else if (strcmp (name, "reserved") == 0) {
 				/* Remove all possible white space, change : to = */
 				j = 0;

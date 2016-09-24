@@ -225,17 +225,6 @@ struct cb_exception {
 	int		enable;			/* If turned on */
 };
 
-/* Structure for reserved words that have been reverted */
-struct reserved_word_list {
-	struct reserved_word_list	*next;	/* next pointer */
-	char				*word;
-	char				*alias_for;
-#if 0 /* FIXME: store refence to origin */
-	char				*defined_by;
-#endif
-	int				is_context_sensitive;
-};
-
 /* Basic memory structure */
 struct cobc_mem_struct {
 	struct	cobc_mem_struct	*next;			/* next pointer */
@@ -549,8 +538,8 @@ extern unsigned int	cb_verify (const enum cb_support, const char *);
 /* reserved.c */
 extern struct reserved_word_list	*cobc_user_res_list;
 
-extern void		remove_reserved_word (const char *);
-extern void		add_reserved_word (char *, const char *, const int);
+extern void		remove_reserved_word (const char *, const char *, const int);
+extern void		add_reserved_word (const char *, const char *, const int);
 extern void		add_all_default_words (void);
 
 #endif /* CB_COBC_H */

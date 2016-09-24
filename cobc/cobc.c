@@ -1858,7 +1858,6 @@ cobc_print_usage (char * prog)
 			"                        cobol2014, cobol2002, cobol85, default,\n"
 			"                        ibm, mvs, bs2000, mf, acu;\n"
 			"                        see configuration files in directory config"));
-	puts (_("  -R, -reserve-all      allow all words that are not unreserved"));
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
 	puts (_("  -O, -O2, -Os          enable optimization"));
@@ -2328,15 +2327,6 @@ process_command_line (const int argc, char **argv)
 		case '&':
 			/* -conf=<xx> : Specify dialect configuration file */
 			/* These options were all processed in the first getopt-run */
-			break;
-
-		case 'R':
-			/* -reserve-all : allow all words not unreserved
-			   -> unsets specify-all-reserved in compiler configuration */
-			if (cb_specify_all_reserved) {
-				cb_specify_all_reserved = 0;
-				add_all_default_words ();
-			}
 			break;
 
 		case '%':
