@@ -6153,9 +6153,7 @@ cob_intr_formatted_time (const int offset, const int length,
 
  invalid_args:
 	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-	if (format_str != NULL) {
-		memset (curr_field->data, ' ', strlen (format_str));
-	}
+	memset (curr_field->data, ' ', strlen (format_str));
 
  end_of_func:
 	if (unlikely (offset > 0)) {
@@ -6257,9 +6255,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 
  invalid_args:
 	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-	if (fmt_str != NULL) {
-		memset (curr_field->data, ' ', strlen (fmt_str));
-	}
+	memset (curr_field->data, ' ', strlen (fmt_str));
 
  end_of_func:
 	if (unlikely (offset > 0)) {

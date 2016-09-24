@@ -8177,7 +8177,7 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 				 cb_tree param_list_elt)
 {
 	const int	is_unsigned =
-		CB_SIZES (param_list_elt) && CB_SIZE_UNSIGNED;
+		CB_SIZES (param_list_elt) == CB_SIZE_UNSIGNED;
 	
 	if (usage == CB_USAGE_FLOAT) {
 		return "float";

@@ -125,7 +125,7 @@ static int			cob_initialized = 0;
 static int			cob_argc;
 static char			**cob_argv;
 static struct cob_alloc_cache	*cob_alloc_base;
-static const char		*cob_last_sfile;
+static char			*cob_last_sfile;
 
 static cob_global		*cobglobptr = NULL;
 static cob_settings		*cobsetptr = NULL;
@@ -1086,57 +1086,55 @@ cob_check_env_true (char* s)
 int
 cob_check_env_false (char* s)
 {
-	if (s) {
-		if (strlen(s) == 1 && (*s == 'N' || *s == 'n' || *s == '0')) return 1;
-		if (strcasecmp(s, "NO") == 0 || strcasecmp(s, "NONE") == 0 ||
-			strcasecmp(s, "OFF") == 0 || strcasecmp(s, "FALSE") == 0) {
-			return 1;
-		}
-	}
-	return 0;
+	return s && ((strlen(s) == 1 && (*s == 'N' || *s == 'n' || *s == '0'))
+		     || (strcasecmp(s, "NO") == 0 || strcasecmp(s, "NONE") == 0
+			 || strcasecmp(s, "OFF") == 0
+			 || strcasecmp(s, "FALSE") == 0));
 }
 
 static void
 cob_rescan_env_vals (void)
 {
-	int		i, j, old_type;
-	char		*env, *sv_src_file;
+	int	i;
+	int	j;
+	int	old_type;
+	char	*env;
+	char	*save_source_file = (char *) cob_source_file;
 
-	sv_src_file = (char*)cob_source_file;
 	cob_source_file = NULL;
 	cob_source_line = 0;
+
 	/* Check for possible environment variables */
-	for (i=0; i < NUM_CONFIG; i++) {
-		if(gc_conf[i].env_name
-		&& (env = getenv(gc_conf[i].env_name)) != NULL) {
+	for (i = 0; i < NUM_CONFIG; i++) {
+		if (gc_conf[i].env_name
+		    && (env = getenv (gc_conf[i].env_name)) != NULL) {
 			old_type = gc_conf[i].data_type;
 			gc_conf[i].data_type |= STS_ENVSET;
-			if(*env != 0					/* If *env -> Nul then ignore this */
-			&& set_config_val(env,i)) {
+
+			if (*env != '\0' && set_config_val (env, i)) {
 				gc_conf[i].data_type = old_type;
 
 				/* Remove invalid setting */
 #if HAVE_SETENV
-				(void)unsetenv(gc_conf[i].env_name);
+				(void)unsetenv (gc_conf[i].env_name);
 #else
-				env = cob_malloc(strlen(gc_conf[i].env_name)+2);
-				sprintf(env,"%s=",gc_conf[i].env_name);
-				(void)putenv(env);
+				env = cob_malloc (strlen (gc_conf[i].env_name)+2);
+				sprintf (env,"%s=",gc_conf[i].env_name);
+				(void)putenv (env);
 #endif
-			} else {
-				if(gc_conf[i].env_group == GRP_HIDE) {
-					for (j=0; j < NUM_CONFIG; j++) {/* Any alias present? */
-						if(j != i
-						&& gc_conf[i].data_loc == gc_conf[j].data_loc) {
-							gc_conf[j].data_type |= STS_ENVSET;
-							gc_conf[j].set_by = i;
-						}
+			} else if (gc_conf[i].env_group == GRP_HIDE) {
+				/* Any alias present? */
+				for (j = 0; j < NUM_CONFIG; j++) {
+					if (j != i
+					    && gc_conf[i].data_loc == gc_conf[j].data_loc) {
+						gc_conf[j].data_type |= STS_ENVSET;
+						gc_conf[j].set_by = i;
 					}
 				}
 			}
 		}
 	}
-	cob_source_file = sv_src_file;
+	cob_source_file = save_source_file;
 
 	/* Extended ACCEPT status returns */
 	if (cobsetptr->cob_extended_status == 0) {
@@ -1421,7 +1419,10 @@ cob_set_location (const char *sfile, const unsigned int sline,
 	if (cobsetptr->cob_line_trace) {
 		if (!cob_trace_file) {
 			cob_check_trace_file ();
-			if (!cob_trace_file) return; /* silence warnings */
+			/* silence warnings */
+			if (!cob_trace_file) {
+				return;
+			}
 		}
 		if (!cob_last_sfile || strcmp (cob_last_sfile, sfile)) {
 			if (cob_last_sfile) {
@@ -2767,7 +2768,7 @@ cob_get_current_date_and_time (void)
 
 	/* Get nanoseconds or microseconds, if possible */
 #if defined (HAVE_CLOCK_GETTIME)
-	cb_time.nanosecond = time_spec.tv_nsec;
+	cb_time.nanosecond = (int) time_spec.tv_nsec;
 #elif defined (HAVE_SYS_TIME_H) && defined (HAVE_GETTIMEOFDAY)
 	cb_time.nanosecond = tmv.tv_usec * 1000;
 #else

@@ -202,6 +202,7 @@ static const unsigned char	pvalid_char[] =
 	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 #endif
 
+#ifdef	COB_EBCDIC_MACHINE
 /* EBCDIC referring to ASCII */
 static const unsigned char	cob_refer_ascii[256] = {
 	0x00, 0x01, 0x02, 0x03, 0x37, 0x2D, 0x2E, 0x2F,
@@ -237,7 +238,7 @@ static const unsigned char	cob_refer_ascii[256] = {
 	0xE1, 0x8F, 0x46, 0x75, 0xFD, 0xEB, 0xEE, 0xED,
 	0x90, 0xEF, 0xB3, 0xFB, 0xB9, 0xEA, 0xBB, 0xFF
 };
-
+#else
 /* ASCII referring to EBCDIC */
 static const unsigned char	cob_refer_ebcdic[256] = {
 	0x00, 0x01, 0x02, 0x03, 0xEC, 0x09, 0xCA, 0x7F,
@@ -273,6 +274,7 @@ static const unsigned char	cob_refer_ebcdic[256] = {
 	0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
 	0x38, 0x39, 0xDB, 0xFB, 0x9A, 0xF4, 0xEA, 0xFF
 };
+#endif
 
 /* System routines */
 
@@ -4301,12 +4303,6 @@ output_screen_to (struct cb_field *p, const unsigned int sisters)
 }
 
 /* ACCEPT statement */
-
-static COB_INLINE COB_A_INLINE int
-is_less_than_four_or_is_six (int x)
-{
-	return x <= 4 || x == 6;
-}
 
 static COB_INLINE COB_A_INLINE int
 is_reference_with_value (cb_tree pos)
