@@ -1,4 +1,14 @@
 
+2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* codegen.c: fix bug #316 static linking with stdcall was broken
+	  * new struct static_call_list (including convention and 
+	    return-type), removing return-type from call_list
+	  * store call-convention and generate __stdcall modifiers if requested
+	* codegen.c (call_list_reverse, static_call_list_reverse): added for
+	  keeping the generated variables in the same order it has in COBOL,
+	  called in (codegen)
+
 2016-09-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: changed reserved and no-reserved options to generate
