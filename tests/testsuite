@@ -18316,7 +18316,8 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18385,7 +18386,8 @@ LINE    .....................SOURCE.............................................
 000006    *> COPY "copy.inc".
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18488,7 +18490,8 @@ LINE    PG/LN  A...B............................................................
 000010             DISPLAY FIRST-MATCH NO ADVANCING
 000011             END-DISPLAY.
 000012             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18555,7 +18558,8 @@ LINE    PG/LN  A...B............................................................
 000016   DISPLAY FIRST-MATCH NO ADVANCING
 000017   END-DISPLAY.
 000018   STOP RUN.
-GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18663,7 +18667,8 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY FIRST-MATCH NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18773,7 +18778,8 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY PAREN-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18885,7 +18891,8 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY SECOND-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -18997,7 +19004,8 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY TEST-VAR2 NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19109,7 +19117,8 @@ LINE    PG/LN  A...B............................................................
 000009             DISPLAY COPY-VAR NO ADVANCING
 000010             END-DISPLAY.
 000011             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19194,14 +19203,16 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
 000006        /
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19267,14 +19278,16 @@ LINE    .....................SOURCE.............................................
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................SOURCE.............................................
 
 000006  >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19358,14 +19371,16 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
 000006        /
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19431,14 +19446,16 @@ LINE    .....................................................SOURCE.............
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................................................SOURCE.....................................................
 
 000006    >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19538,14 +19555,16 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
 0 Errors in program
-GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -19557,7 +19576,8 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19661,7 +19681,8 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19738,7 +19759,8 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19813,7 +19835,8 @@ warning: numeric value is expected
 000008             DISPLAY TEST-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -19936,7 +19959,8 @@ warning: numeric value is expected
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20040,7 +20064,8 @@ LINE    PG/LN  A...B............................................................
 000012         01 WS-SEVEN  PIC $$,$$$,$$9.99 VALUE ZERO.
 000013         PROCEDURE        DIVISION.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20125,7 +20150,8 @@ LINE    PG/LN  A...B............................................................
 000008         01 WS-THREE  PIC X(4).
 000009         PROCEDURE        DIVISION.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20303,7 +20329,8 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20401,7 +20428,8 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20609,7 +20637,8 @@ LINE    PG/LN  A...B............................................................
 000038             END-IF.
 000039             STOP RUN.
 000040         END PROGRAM prog.
-GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20725,7 +20754,8 @@ LINE    PG/LN  A...B............................................................
 000015X            END-DISPLAY
 000016         >>END-IF
 000017             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -20838,7 +20868,8 @@ LINE    PG/LN  A...B............................................................
 000008             DISPLAY TEST1-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -21100,7 +21131,8 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000047                   88 ENDSET        VALUE "ENDSET".
 000048                   88 REMOVE        VALUE "REMOVE".
 000049                   88 ADDNEW        VALUE "INSERT".
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -21159,7 +21191,8 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000100
 000101         01  DISPLAY-MESSAGE.
 000102             02 FILLER              PICTURE X(2) VALUE SPACES.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................
 
@@ -21172,7 +21205,8 @@ LINE    PG/LN  A...B............................................................
 000109                  OUTPUT NEW-VERSION, COMMENTARY.
 000110             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
 000111             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -21230,7 +21264,8 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0001 ALPHANUMERIC   02     UPSI-BIT                     X
 
 0082 GROUP          01   MESSAGE-LOG
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -21449,7 +21484,8 @@ error: A or X cannot follow S
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 000029             03  PIC +9(5)CR.
 error: CR or DB cannot follow a leading +/- sign
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -21481,7 +21517,8 @@ error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and 
 000045             03  PIC 0000+B0+++0B,+.
 000046             03  PIC +(5)P(3).
 000047             03  PIC ++.++.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -21539,7 +21576,8 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
 0005 ALPHANUMERIC   03     FILLER                       ++.++
 
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -21626,7 +21664,8 @@ LINE    PG/LN  A...B............................................................
 000006+ DISPLAY "Hello!"
 000007  000060     .
 000008  000070 END PROGRAM prog.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
