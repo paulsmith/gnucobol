@@ -113,7 +113,11 @@ struct field_list {
 struct call_list {
 	struct call_list	*next;
 	const char		*call_name;
+	int			return_type;
 };
+#define COB_RETURN_INT		0
+#define COB_RETURN_ADDRESS_OF	1
+#define COB_RETURN_NULL		2
 
 struct base_list {
 	struct base_list	*next;
@@ -131,6 +135,7 @@ static struct field_list	*field_cache = NULL;
 static struct field_list	*local_field_cache = NULL;
 static struct call_list		*call_cache = NULL;
 static struct call_list		*func_call_cache = NULL;
+static struct call_list		*static_call_cache = NULL;
 static struct base_list		*base_cache = NULL;
 static struct base_list		*globext_cache = NULL;
 static struct base_list		*local_base_cache = NULL;
@@ -270,6 +275,23 @@ lookup_func_call (const char *p)
 	clp->call_name = p;
 	clp->next = func_call_cache;
 	func_call_cache = clp;
+}
+
+static void
+lookup_static_call (const char *p, int return_type)
+{
+	struct call_list *clp;
+
+	for (clp = static_call_cache; clp; clp = clp->next) {
+		if (strcmp (p, clp->call_name) == 0) {
+			return;
+		}
+	}
+	clp = cobc_parse_malloc (sizeof (struct call_list));
+	clp->call_name = p;
+	clp->next = static_call_cache;
+	static_call_cache = clp;
+	clp->return_type = return_type;
 }
 
 #define LIST_REVERSE_FUNC(list_struct)		      \
@@ -1212,6 +1234,18 @@ output_call_cache (void)
 	for (call = func_call_cache; call; call = call->next) {
 		output_local ("static cob_call_union\tfunc_%s;\n",
 			      call->call_name);
+	}
+	if (static_call_cache) {
+		output_local ("/* Define external subroutines being called statically */\n");
+		for (clp = static_call_cache; clp; clp = clp->next) {
+			if (clp->return_type == COB_RETURN_NULL) {
+				output_local ("extern void %s ();\n",clp->callname);
+			} else if (clp->return_type == COB_RETURN_ADDRESS_OF) {
+				output_local ("extern void * %s ();\n",clp->callname);
+			} else {
+				output_local ("extern int %s ();\n",clp->callname);
+			}
+		}
 	}
 	needs_unifunc = 0;
 }
@@ -4771,6 +4805,13 @@ output_call (struct cb_call *p)
 					nlp->nested_prog->toplev_count);
 			} else {
 				output ("%s", name_str);
+				if (p->call_returning == cb_null) {
+					lookup_static_call (name_str, COB_RETURN_NULL);
+				} else if (ret_ptr == 1) {
+					lookup_static_call (name_str, COB_RETURN_ADDRESS_OF);
+				} else {
+					lookup_static_call (name_str, COB_RETURN_INT);
+				}
 			}
 		}
 	} else {
