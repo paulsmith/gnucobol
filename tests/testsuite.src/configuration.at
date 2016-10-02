@@ -406,6 +406,7 @@ test.conf: missing definitions:
 	No definition of 'accept-auto'
 	No definition of 'console-is-crt'
 	No definition of 'program-name-redefinition'
+	No definition of 'no-echo-means-secure'
 	No definition of 'specify-all-reserved'
 	No definition of 'comment-paragraphs'
 	No definition of 'memory-size-clause'

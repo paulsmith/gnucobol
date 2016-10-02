@@ -427,6 +427,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COLLATING",		0, 0, COLLATING,		/* 2002 */
 				0, 0
   },
+  { "COLOR",			0, 0, -1,			/* Extension */
+				0, 0
+  },
   { "COLS",			0, 0, COLS,			/* 2002 */
 				0, 0
   },
@@ -654,6 +657,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "EC",			0, 0, EC,			/* 2002 */
 				0, 0
+  },
+  { "ECHO",			0, 0, ECHO,			/* Extension */
+    				0, 0
   },
   { "ELSE",			0, 0, ELSE,			/* 2002 */
 				0, 0
@@ -1480,6 +1486,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "RETURNING",		0, 0, RETURNING,		/* 2002 */
+				0, 0
+  },
+  { "REVERSE",			0, 0, REVERSE,			/* Extension */
 				0, 0
   },
   { "REVERSE-VIDEO",		0, 0, REVERSE_VIDEO,		/* 2002 (C/S) */

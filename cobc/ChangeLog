@@ -6,6 +6,8 @@
 	* codegen.c, parser.y, tree.h: introduced cob_flags_t typedef for
 	  variables made up of bit flags.
 	* parser.y: improved function names.
+	* parser.y: improved support for ACUCOBOL screen phrases.
+	* config.def: added no-echo-means-secure config option.
 
 2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

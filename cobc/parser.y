@@ -1651,6 +1651,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token DYNAMIC
 %token EBCDIC
 %token EC
+%token ECHO
 %token EIGHTY_EIGHT		"88"
 %token ELSE
 %token END
@@ -1908,6 +1909,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token RETRY
 %token RETURN
 %token RETURNING
+%token REVERSE
 %token REVERSE_FUNC		"FUNCTION REVERSE"
 %token REVERSE_VIDEO		"REVERSE-VIDEO"
 %token REVERSED
@@ -5770,7 +5772,7 @@ screen_option:
 	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
-| REVERSE_VIDEO
+| reverse_video
   {
 	set_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
   }
@@ -5795,11 +5797,27 @@ screen_option:
   }
 | AUTO
   {
-	set_screen_attr ("AUTO", COB_SCREEN_AUTO);
+	set_screen_attr_with_conflict ("AUTO", COB_SCREEN_AUTO,
+				       "TAB", COB_SCREEN_TAB);
+  }
+| TAB
+  {
+	set_screen_attr_with_conflict ("TAB", COB_SCREEN_TAB,
+				       "AUTO", COB_SCREEN_AUTO);
   }
 | SECURE
   {
-	set_screen_attr ("SECURE", COB_SCREEN_SECURE);
+	set_screen_attr_with_conflict ("SECURE", COB_SCREEN_SECURE,
+				       "NO-ECHO", COB_SCREEN_NO_ECHO);
+  }
+| no_echo
+  {
+	if (cb_no_echo_means_secure) {
+		set_screen_attr ("SECURE", COB_SCREEN_SECURE);
+	} else {
+		set_screen_attr_with_conflict ("NO-ECHO", COB_SCREEN_NO_ECHO,
+					       "SECURE", COB_SCREEN_SECURE);
+	}
   }
 | REQUIRED
   {
@@ -6868,10 +6886,16 @@ accp_attr:
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
-| NO_ECHO
+| no_echo
   {
-	check_repeated ("NO-ECHO", SYN_CLAUSE_15, &check_duplicate);
-	set_dispattr (COB_SCREEN_NO_ECHO);
+	if (cb_no_echo_means_secure) {
+		check_repeated ("SECURE", SYN_CLAUSE_20, &check_duplicate);
+		set_dispattr (COB_SCREEN_SECURE);
+	} else {
+		check_repeated ("NO-ECHO", SYN_CLAUSE_15, &check_duplicate);
+		set_dispattr_with_conflict ("NO-ECHO", COB_SCREEN_NO_ECHO,
+					    "SECURE", COB_SCREEN_SECURE);
+	}
   }
 | OVERLINE
   {
@@ -6893,7 +6917,7 @@ accp_attr:
 	check_repeated ("REQUIRED", SYN_CLAUSE_18, &check_duplicate);
 	set_dispattr (COB_SCREEN_REQUIRED);
   }
-| REVERSE_VIDEO
+| reverse_video
   {
 	check_repeated ("REVERSE-VIDEO", SYN_CLAUSE_19, &check_duplicate);
 	set_dispattr (COB_SCREEN_REVERSE);
@@ -6901,7 +6925,8 @@ accp_attr:
 | SECURE
   {
 	check_repeated ("SECURE", SYN_CLAUSE_20, &check_duplicate);
-	set_dispattr (COB_SCREEN_SECURE);
+	set_dispattr_with_conflict ("SECURE", COB_SCREEN_SECURE,
+				    "NO-ECHO", COB_SCREEN_NO_ECHO);
   }
 | PROTECTED SIZE _is num_id_or_lit
   {
@@ -6966,6 +6991,18 @@ accp_attr:
 			&check_duplicate);
 	set_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
+;
+
+no_echo:
+  NO ECHO
+| NO_ECHO
+| OFF
+;
+
+reverse_video:
+  REVERSE_VIDEO
+| REVERSED
+| REVERSE
 ;
 
 update_default:
@@ -7778,7 +7815,7 @@ disp_attr:
 	check_repeated ("OVERLINE", SYN_CLAUSE_13, &check_duplicate);
 	set_dispattr (COB_SCREEN_OVERLINE);
   }
-| REVERSE_VIDEO
+| reverse_video
   {
 	check_repeated ("REVERSE-VIDEO", SYN_CLAUSE_14, &check_duplicate);
 	set_dispattr (COB_SCREEN_REVERSE);
