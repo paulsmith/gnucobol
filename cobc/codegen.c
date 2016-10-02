@@ -6574,7 +6574,7 @@ output_file_initialization (struct cb_file *f)
 		     f->organization);
 	output_line ("%s%s->access_mode = %d;", CB_PREFIX_FILE, f->cname,
 		     f->access_mode);
-	output_line ("%s%s->lock_mode = %d;", CB_PREFIX_FILE, f->cname,
+	output_line ("%s%s->lock_mode = " CB_FMT_LLD ";", CB_PREFIX_FILE, f->cname,
 		     f->lock_mode);
 	output_line ("%s%s->open_mode = 0;", CB_PREFIX_FILE, f->cname);
 	output_line ("%s%s->flag_optional = %d;", CB_PREFIX_FILE, f->cname,
@@ -6736,7 +6736,7 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	output_prefix ();
 	output ("\t\t  ");
 
-	output ("%d, %d, 0x%x);\n", type, p->occurs_min, p->screen_flag);
+	output ("%d, %d, 0x" CB_FMT_LLX ");\n", type, p->occurs_min, p->screen_flag);
 
 	if (p->children) {
 		output_screen_init (p->children, NULL);

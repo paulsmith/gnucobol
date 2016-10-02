@@ -1,8 +1,16 @@
 
+2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y: improved checks for duplicate/conflicting clauses in ACCEPT
+	  and DISPLAY statements.
+	* codegen.c, parser.y, tree.h: introduced cob_flags_t typedef for
+	  variables made up of bit flags.
+	* parser.y: improved function names.
+
 2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* codegen.c: fix bug #316 static linking with stdcall was broken
-	  * new struct static_call_list (including convention and 
+	  * new struct static_call_list (including convention and
 	    return-type), removing return-type from call_list
 	  * store call-convention and generate __stdcall modifiers if requested
 	* codegen.c (call_list_reverse, static_call_list_reverse): added for
@@ -1077,7 +1085,7 @@
 2015-04-28  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c now emits extern <function prototype> ();
-	  for each subroutine called statically to avoid 
+	  for each subroutine called statically to avoid
 	  C compiler warnings
 
 2015-04-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

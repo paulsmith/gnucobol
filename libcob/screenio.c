@@ -1757,7 +1757,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 static void
 field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	       cob_field *bgc, cob_field *fscroll, cob_field *size_is,
-	       const int fattr)
+	       const cob_flags_t fattr)
 {
 	int	sline;
 	int	scolumn;
@@ -1832,7 +1832,7 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 static void
 field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	      cob_field *bgc, cob_field *fscroll, cob_field *ftimeout,
-	      cob_field *prompt, cob_field *size_is, const int fattr)
+	      cob_field *prompt, cob_field *size_is, const cob_flags_t fattr)
 {
 	unsigned char	*p;
 	unsigned char	*p2;
@@ -2411,7 +2411,7 @@ cob_screen_accept (cob_screen *s, cob_field *line, cob_field *column,
 void
 cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   cob_field *size_is, const int fattr)
+		   cob_field *size_is, const cob_flags_t fattr)
 {
 	int	sline;
 	int	scolumn;
@@ -2431,7 +2431,7 @@ void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
 		  cob_field *ftimeout, cob_field *prompt, cob_field *size_is,
-		  const int fattr)
+		  const cob_flags_t fattr)
 {
 	int	sline;
 	int	scolumn;
@@ -2500,7 +2500,7 @@ cob_exit_screen (void)
 void
 cob_field_display (cob_field *f, cob_field *line, cob_field *column,
 		   cob_field *fgc, cob_field *bgc, cob_field *fscroll,
-		   cob_field *size_is, const int fattr,
+		   cob_field *size_is, const cob_flags_t fattr,
 		   const int zero_line_col_allowed)
 {
 	COB_UNUSED (f);
@@ -2518,7 +2518,7 @@ void
 cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 		  cob_field *fgc, cob_field *bgc, cob_field *fscroll,
 		  cob_field *ftimeout, cob_field *prompt,
-		  cob_field *size_is, const int fattr,
+		  cob_field *size_is, const cob_flags_t fattr,
 		  const int zero_line_col_allowed)
 {
 	COB_UNUSED (f);
@@ -2535,7 +2535,8 @@ cob_field_accept (cob_field *f, cob_field *line, cob_field *column,
 }
 
 void
-cob_screen_display (cob_screen *s, cob_field *line, cob_field *column, const int zero_line_col_allowed)
+cob_screen_display (cob_screen *s, cob_field *line, cob_field *column,
+		    const int zero_line_col_allowed)
 {
 	COB_UNUSED (s);
 	COB_UNUSED (line);

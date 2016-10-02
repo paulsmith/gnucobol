@@ -189,21 +189,21 @@ static int			eval_inc2;
 static int			depth;
 static int			first_nested_program;
 static int			call_mode;
-static int			size_mode;
-static int			setattr_val_on;
-static int			setattr_val_off;
-static unsigned int		check_duplicate;
-static unsigned int		check_on_off_duplicate;
-static unsigned int		check_pic_duplicate;
-static unsigned int		check_comp_duplicate;
-static int			check_line_col_duplicate;
+static cob_flags_t		size_mode;
+static int			set_attr_val_on;
+static int			set_attr_val_off;
+static cob_flags_t		check_duplicate;
+static cob_flags_t		check_on_off_duplicate;
+static cob_flags_t		check_pic_duplicate;
+static cob_flags_t		check_comp_duplicate;
+static cob_flags_t		check_line_col_duplicate;
 static unsigned int		skip_statements;
 static unsigned int		start_debug;
 static unsigned int		save_debug;
 static unsigned int		needs_field_debug;
 static unsigned int		needs_debug_item;
 static unsigned int		env_div_seen;
-static unsigned int		header_check;
+static cob_flags_t		header_check;
 static unsigned int		call_nothing;
 static enum tallying_phrase	previous_tallying_phrase;
 
@@ -630,8 +630,8 @@ clear_initial_values (void)
 	header_check = 0;
 	next_label_id = 0;
 	current_linage = 0;
-	setattr_val_on = 0;
-	setattr_val_off = 0;
+	set_attr_val_on = 0;
+	set_attr_val_off = 0;
 	report_count = 0;
 	current_storage = CB_STORAGE_WORKING;
 	eval_level = 0;
@@ -990,8 +990,8 @@ static void
 set_up_prototype (cb_tree prototype_name, cb_tree ext_name,
 		  const int type, const int is_current_element)
 {
-	cb_tree 	prototype;
-	int	        name_redefinition_allowed;
+	cb_tree	prototype;
+	int	name_redefinition_allowed;
 
 	if (!is_current_element
 	    && check_prototype_redefines_current_element (prototype_name)) {
@@ -1065,7 +1065,7 @@ emit_duplicate_clause_message (const char *clause)
 }
 
 static void
-check_repeated (const char *clause, const unsigned int bitval, unsigned int *already_seen)
+check_repeated (const char *clause, const cob_flags_t bitval, cob_flags_t *already_seen)
 {
 	if (*already_seen & bitval) {
 		emit_duplicate_clause_message (clause);
@@ -1097,7 +1097,7 @@ check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
 }
 
 static void
-check_screen_attr (const char *clause, const int bitval)
+set_screen_attr (const char *clause, const cob_flags_t bitval)
 {
 	if (current_field->screen_flag & bitval) {
 		emit_duplicate_clause_message (clause);
@@ -1120,13 +1120,13 @@ emit_conflicting_clause_message (const char *clause, const char *conflicting)
 }
 
 static void
-check_attr_with_conflict (const char *clause, const int bitval,
-			  const char *confl_clause, const int confl_bit,
-			  int *flags)
+set_attr_with_conflict (const char *clause, const cob_flags_t bitval,
+			const char *confl_clause, const cob_flags_t confl_bit,
+			const int check_duplicate, cob_flags_t *flags)
 {
-	if (*flags & bitval) {
+	if (check_duplicate && (*flags & bitval)) {
 		emit_duplicate_clause_message (clause);
-	} else if (*flags & confl_bit) {
+        } else if (*flags & confl_bit) {
 		emit_conflicting_clause_message (clause, confl_clause);
 	} else {
 	        *flags |= bitval;
@@ -1134,29 +1134,19 @@ check_attr_with_conflict (const char *clause, const int bitval,
 }
 
 static COB_INLINE COB_A_INLINE void
-check_screen_attr_with_conflict (const char *clause, const int bitval,
-			  const char *confl_clause, const int confl_bit)
+set_screen_attr_with_conflict (const char *clause, const cob_flags_t bitval,
+			       const char *confl_clause,
+			       const cob_flags_t confl_bit)
 {
-	check_attr_with_conflict (clause, bitval, confl_clause, confl_bit,
-				  &current_field->screen_flag);
+	set_attr_with_conflict (clause, bitval, confl_clause, confl_bit, 1,
+				&current_field->screen_flag);
 }
 
-static COB_INLINE COB_A_INLINE void
-check_dispattr_with_conflict (const char *attrib_name, const int attrib,
-			      const char *confl_name, const int confl_attrib)
+static COB_INLINE COB_A_INLINE int
+has_dispattr (const cob_flags_t attrib)
 {
-	check_attr_with_conflict (attrib_name, attrib, confl_name, confl_attrib,
-				  &current_statement->attr_ptr->dispattrs);
-}
-
-static void
-bit_set_attr (const cb_tree onoff, const int attrval)
-{
-	if (onoff == cb_int1) {
-		setattr_val_on |= attrval;
-	} else {
-		setattr_val_off |= attrval;
-	}
+	return current_statement->attr_ptr
+		&& current_statement->attr_ptr->dispattrs & attrib;
 }
 
 static void
@@ -1168,9 +1158,36 @@ attach_attrib_to_cur_stmt (void)
 	}
 }
 
+static COB_INLINE COB_A_INLINE void
+set_dispattr (const cob_flags_t attrib)
+{
+	attach_attrib_to_cur_stmt ();
+	current_statement->attr_ptr->dispattrs |= COB_SCREEN_AUTO;
+}
+
+static COB_INLINE COB_A_INLINE void
+set_dispattr_with_conflict (const char *attrib_name, const cob_flags_t attrib,
+			    const char *confl_name,
+			    const cob_flags_t confl_attrib)
+{
+	attach_attrib_to_cur_stmt ();
+	set_attr_with_conflict (attrib_name, attrib, confl_name, confl_attrib, 0,
+				&current_statement->attr_ptr->dispattrs);
+}
+
 static void
-check_field_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
-		     cb_tree timeout, cb_tree prompt, cb_tree size_is)
+bit_set_attr (const cb_tree on_off, const cob_flags_t attr_val)
+{
+	if (on_off == cb_int1) {
+		set_attr_val_on |= attr_val;
+	} else {
+		set_attr_val_off |= attr_val;
+	}
+}
+
+static void
+set_field_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+		   cb_tree timeout, cb_tree prompt, cb_tree size_is)
 {
 	/* [WITH] FOREGROUND-COLOR [IS] */
 	if (fgc) {
@@ -1199,31 +1216,32 @@ check_field_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 }
 
 static void
-check_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
-	       cb_tree timeout, cb_tree prompt, cb_tree size_is,
-	       const int attrib)
+set_attribs (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+	     cb_tree timeout, cb_tree prompt, cb_tree size_is,
+	     const cob_flags_t attrib)
 {
 	attach_attrib_to_cur_stmt ();
-	check_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
+	set_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
 
 	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
 static void
-check_attribs_with_conflict (cb_tree fgc, cb_tree bgc, cb_tree scroll,
-			     cb_tree timeout, cb_tree prompt, cb_tree size_is,
-			     const char *attrib_name, const int attrib,
-			     const char *confl_name, const int confl_attrib)
+set_attribs_with_conflict  (cb_tree fgc, cb_tree bgc, cb_tree scroll,
+			    cb_tree timeout, cb_tree prompt, cb_tree size_is,
+			    const char *clause_name, const cob_flags_t attrib,
+			    const char *confl_name, const cob_flags_t confl_attrib)
 {
 	attach_attrib_to_cur_stmt ();
-	check_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
+	set_field_attribs (fgc, bgc, scroll, timeout, prompt, size_is);
 
-	check_dispattr_with_conflict (attrib_name, attrib, confl_name,
-				      confl_attrib);
+	set_dispattr_with_conflict (clause_name, attrib, confl_name,
+				    confl_attrib);
 }
 
 static int
-zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1, const int flag2)
+zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1,
+		       const int flag2)
 {
 	if (screen_flag & flag1) {
 		parent_flag &= ~flag2;
@@ -1251,17 +1269,7 @@ zero_conflicting_flags (const int screen_flag, int parent_flag)
 }
 
 static void
-remove_attrib (int attrib)
-{
-	/* Remove attribute from current_statement */
-	if (!current_statement->attr_ptr) {
-		return;
-	}
-	current_statement->attr_ptr->dispattrs ^= attrib;
-}
-
-static void
-check_set_usage (const enum cb_usage usage)
+check_and_set_usage (const enum cb_usage usage)
 {
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	current_field->usage = usage;
@@ -4730,161 +4738,161 @@ usage_clause:
 usage:
   BINARY
   {
-	check_set_usage (CB_USAGE_BINARY);
+	check_and_set_usage (CB_USAGE_BINARY);
   }
 | COMP
   {
-	check_set_usage (CB_USAGE_BINARY);
+	check_and_set_usage (CB_USAGE_BINARY);
   }
 | float_usage
   {
-	check_set_usage (CB_USAGE_FLOAT);
+	check_and_set_usage (CB_USAGE_FLOAT);
   }
 | double_usage
   {
-	check_set_usage (CB_USAGE_DOUBLE);
+	check_and_set_usage (CB_USAGE_DOUBLE);
   }
 | COMP_3
   {
-	check_set_usage (CB_USAGE_PACKED);
+	check_and_set_usage (CB_USAGE_PACKED);
   }
 | COMP_4
   {
-	check_set_usage (CB_USAGE_BINARY);
+	check_and_set_usage (CB_USAGE_BINARY);
   }
 | COMP_5
   {
-	check_set_usage (CB_USAGE_COMP_5);
+	check_and_set_usage (CB_USAGE_COMP_5);
   }
 | COMP_6
   {
-	check_set_usage (CB_USAGE_COMP_6);
+	check_and_set_usage (CB_USAGE_COMP_6);
   }
 | COMP_X
   {
-	check_set_usage (CB_USAGE_COMP_X);
+	check_and_set_usage (CB_USAGE_COMP_X);
   }
 | DISPLAY
   {
-	check_set_usage (CB_USAGE_DISPLAY);
+	check_and_set_usage (CB_USAGE_DISPLAY);
   }
 | INDEX
   {
-	check_set_usage (CB_USAGE_INDEX);
+	check_and_set_usage (CB_USAGE_INDEX);
   }
 | PACKED_DECIMAL
   {
-	check_set_usage (CB_USAGE_PACKED);
+	check_and_set_usage (CB_USAGE_PACKED);
   }
 | POINTER
   {
-	check_set_usage (CB_USAGE_POINTER);
+	check_and_set_usage (CB_USAGE_POINTER);
 	current_field->flag_is_pointer = 1;
   }
 | PROGRAM_POINTER
   {
-	check_set_usage (CB_USAGE_PROGRAM_POINTER);
+	check_and_set_usage (CB_USAGE_PROGRAM_POINTER);
 	current_field->flag_is_pointer = 1;
   }
 | SIGNED_SHORT
   {
-	check_set_usage (CB_USAGE_SIGNED_SHORT);
+	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
   }
 | SIGNED_INT
   {
-	check_set_usage (CB_USAGE_SIGNED_INT);
+	check_and_set_usage (CB_USAGE_SIGNED_INT);
   }
 | SIGNED_LONG
   {
 #ifdef COB_32_BIT_LONG
-	check_set_usage (CB_USAGE_SIGNED_INT);
+	check_and_set_usage (CB_USAGE_SIGNED_INT);
 #else
-	check_set_usage (CB_USAGE_SIGNED_LONG);
+	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
   }
 | UNSIGNED_SHORT
   {
-	check_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
   }
 | UNSIGNED_INT
   {
-	check_set_usage (CB_USAGE_UNSIGNED_INT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
   }
 | UNSIGNED_LONG
   {
 #ifdef COB_32_BIT_LONG
-	check_set_usage (CB_USAGE_UNSIGNED_INT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
 #else
-	check_set_usage (CB_USAGE_UNSIGNED_LONG);
+	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
   }
 | BINARY_CHAR _signed
   {
-	check_set_usage (CB_USAGE_SIGNED_CHAR);
+	check_and_set_usage (CB_USAGE_SIGNED_CHAR);
   }
 | BINARY_CHAR UNSIGNED
   {
-	check_set_usage (CB_USAGE_UNSIGNED_CHAR);
+	check_and_set_usage (CB_USAGE_UNSIGNED_CHAR);
   }
 | BINARY_SHORT _signed
   {
-	check_set_usage (CB_USAGE_SIGNED_SHORT);
+	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
   }
 | BINARY_SHORT UNSIGNED
   {
-	check_set_usage (CB_USAGE_UNSIGNED_SHORT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_SHORT);
   }
 | BINARY_LONG _signed
   {
-	check_set_usage (CB_USAGE_SIGNED_INT);
+	check_and_set_usage (CB_USAGE_SIGNED_INT);
   }
 | BINARY_LONG UNSIGNED
   {
-	check_set_usage (CB_USAGE_UNSIGNED_INT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
   }
 | BINARY_DOUBLE _signed
   {
-	check_set_usage (CB_USAGE_SIGNED_LONG);
+	check_and_set_usage (CB_USAGE_SIGNED_LONG);
   }
 | BINARY_DOUBLE UNSIGNED
   {
-	check_set_usage (CB_USAGE_UNSIGNED_LONG);
+	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
   }
 | BINARY_C_LONG _signed
   {
 #ifdef COB_32_BIT_LONG
-	check_set_usage (CB_USAGE_SIGNED_INT);
+	check_and_set_usage (CB_USAGE_SIGNED_INT);
 #else
-	check_set_usage (CB_USAGE_SIGNED_LONG);
+	check_and_set_usage (CB_USAGE_SIGNED_LONG);
 #endif
   }
 | BINARY_C_LONG UNSIGNED
   {
 #ifdef COB_32_BIT_LONG
-	check_set_usage (CB_USAGE_UNSIGNED_INT);
+	check_and_set_usage (CB_USAGE_UNSIGNED_INT);
 #else
-	check_set_usage (CB_USAGE_UNSIGNED_LONG);
+	check_and_set_usage (CB_USAGE_UNSIGNED_LONG);
 #endif
   }
 | FLOAT_BINARY_32
   {
-	check_set_usage (CB_USAGE_FP_BIN32);
+	check_and_set_usage (CB_USAGE_FP_BIN32);
   }
 | FLOAT_BINARY_64
   {
-	check_set_usage (CB_USAGE_FP_BIN64);
+	check_and_set_usage (CB_USAGE_FP_BIN64);
   }
 | FLOAT_BINARY_128
   {
-	check_set_usage (CB_USAGE_FP_BIN128);
+	check_and_set_usage (CB_USAGE_FP_BIN128);
   }
 | FLOAT_DECIMAL_16
   {
-	check_set_usage (CB_USAGE_FP_DEC64);
+	check_and_set_usage (CB_USAGE_FP_DEC64);
   }
 | FLOAT_DECIMAL_34
   {
-	check_set_usage (CB_USAGE_FP_DEC128);
+	check_and_set_usage (CB_USAGE_FP_DEC128);
   }
 | NATIONAL
   {
@@ -5726,93 +5734,93 @@ _screen_options:
 screen_option:
   BLANK LINE
   {
-	check_screen_attr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
-					 "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
+	set_screen_attr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
+				       "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
 | BLANK SCREEN
   {
-	check_screen_attr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
-					 "BLANK LINE", COB_SCREEN_BLANK_LINE);
+	set_screen_attr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
+				       "BLANK LINE", COB_SCREEN_BLANK_LINE);
   }
 | BELL
   {
-	check_screen_attr ("BELL", COB_SCREEN_BELL);
+	set_screen_attr ("BELL", COB_SCREEN_BELL);
   }
 | BLINK
   {
-	check_screen_attr ("BLINK", COB_SCREEN_BLINK);
+	set_screen_attr ("BLINK", COB_SCREEN_BLINK);
   }
 | ERASE eol
   {
-	check_screen_attr_with_conflict ("ERASE EOL", COB_SCREEN_ERASE_EOL,
-					 "ERASE EOS", COB_SCREEN_ERASE_EOS);
+	set_screen_attr_with_conflict ("ERASE EOL", COB_SCREEN_ERASE_EOL,
+				       "ERASE EOS", COB_SCREEN_ERASE_EOS);
   }
 | ERASE eos
   {
-	check_screen_attr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
-					 "ERASE EOL", COB_SCREEN_ERASE_EOL);
+	set_screen_attr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
+				       "ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
 | HIGHLIGHT
   {
-	check_screen_attr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
-					 "LOWLIGHT", COB_SCREEN_LOWLIGHT);
+	set_screen_attr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				       "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LOWLIGHT
   {
-	check_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
-					 "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | REVERSE_VIDEO
   {
-	check_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
+	set_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
   }
 | UNDERLINE
   {
-	check_screen_attr ("UNDERLINE", COB_SCREEN_UNDERLINE);
+	set_screen_attr ("UNDERLINE", COB_SCREEN_UNDERLINE);
   }
 | OVERLINE
   {
-	check_screen_attr ("OVERLINE", COB_SCREEN_OVERLINE);
+	set_screen_attr ("OVERLINE", COB_SCREEN_OVERLINE);
 	CB_PENDING ("OVERLINE");
   }
 | GRID
   {
-	check_screen_attr ("GRID", COB_SCREEN_GRID);
+	set_screen_attr ("GRID", COB_SCREEN_GRID);
 	CB_PENDING ("GRID");
   }
 | LEFTLINE
   {
-	check_screen_attr ("LEFTLINE", COB_SCREEN_LEFTLINE);
+	set_screen_attr ("LEFTLINE", COB_SCREEN_LEFTLINE);
 	CB_PENDING ("LEFTLINE");
   }
 | AUTO
   {
-	check_screen_attr ("AUTO", COB_SCREEN_AUTO);
+	set_screen_attr ("AUTO", COB_SCREEN_AUTO);
   }
 | SECURE
   {
-	check_screen_attr ("SECURE", COB_SCREEN_SECURE);
+	set_screen_attr ("SECURE", COB_SCREEN_SECURE);
   }
 | REQUIRED
   {
-	check_screen_attr ("REQUIRED", COB_SCREEN_REQUIRED);
+	set_screen_attr ("REQUIRED", COB_SCREEN_REQUIRED);
   }
 | FULL
   {
-	check_screen_attr ("FULL", COB_SCREEN_FULL);
+	set_screen_attr ("FULL", COB_SCREEN_FULL);
   }
 | PROMPT CHARACTER _is id_or_lit
   {
-	check_screen_attr ("PROMPT", COB_SCREEN_PROMPT);
+	set_screen_attr ("PROMPT", COB_SCREEN_PROMPT);
 	current_field->screen_prompt = $4;
   }
 | PROMPT
   {
-	check_screen_attr ("PROMPT", COB_SCREEN_PROMPT);
+	set_screen_attr ("PROMPT", COB_SCREEN_PROMPT);
   }
 | TOK_INITIAL
   {
-	check_screen_attr ("INITIAL", COB_SCREEN_INITIAL);
+	set_screen_attr ("INITIAL", COB_SCREEN_INITIAL);
   }
 | LINE _number _is _screen_line_plus_minus num_id_or_lit
   {
@@ -6591,12 +6599,6 @@ accept_statement:
   {
 	begin_statement ("ACCEPT", TERM_ACCEPT);
 	cobc_cs_check = CB_CS_ACCEPT;
-	if (cb_accept_update) {
-		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
-	}
-	if (cb_accept_auto) {
-		check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
-	}
   }
   accept_body
   end_accept
@@ -6612,11 +6614,18 @@ accept_body:
   _accept_clauses _accept_exception_phrases
   {
 	/* Check for invalid use of screen clauses */
-	  if (current_statement->attr_ptr
-	      || (!is_screen_field ($1) && line_column)) {
-		  cb_verify_x ($1, cb_accept_display_extensions,
-			       _("non-standard ACCEPT"));
-	  }
+	if (current_statement->attr_ptr
+	    || (!is_screen_field ($1) && line_column)) {
+		cb_verify_x ($1, cb_accept_display_extensions,
+			     _("non-standard ACCEPT"));
+	}
+
+	if (cb_accept_update && !has_dispattr (COB_SCREEN_NO_UPDATE)) {
+		set_dispattr (COB_SCREEN_UPDATE);
+	}
+	if (cb_accept_auto && !has_dispattr (COB_SCREEN_TAB)) {
+		set_dispattr (COB_SCREEN_AUTO);
+	}
 
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
@@ -6722,16 +6731,18 @@ accept_clause:
   at_line_column
 | FROM_CRT
   {
-	  check_repeated ("FROM CRT", SYN_CLAUSE_1, &check_duplicate);
+	  check_repeated ("FROM CRT", SYN_CLAUSE_2, &check_duplicate);
   }
 | mode_is_block
   {
-	  check_repeated ("MODE IS BLOCK", SYN_CLAUSE_2, &check_duplicate);
+	  check_repeated ("MODE IS BLOCK", SYN_CLAUSE_3, &check_duplicate);
   }
 | _with accp_attr
 | _before TIME positive_id_or_lit
   {
-	  check_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
+	check_repeated (_("TIME-OUT or BEFORE TIME clauses"), SYN_CLAUSE_4,
+			&check_duplicate);
+	set_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
 ;
 
@@ -6743,9 +6754,9 @@ lines_or_number:
 at_line_column:
   _at line_number
   {
-	check_attr_with_conflict ("LINE", SYN_CLAUSE_1,
-				  _("AT screen-location"), SYN_CLAUSE_3,
-				  &check_line_col_duplicate);
+	set_attr_with_conflict ("LINE", SYN_CLAUSE_1,
+				_("AT screen-location"), SYN_CLAUSE_3, 1,
+				&check_line_col_duplicate);
 
 	if ((CB_LITERAL_P ($2) && cb_get_int ($2) == 0) || $2 == cb_zero) {
 		cb_verify (cb_accept_display_extensions, "LINE 0");
@@ -6759,9 +6770,9 @@ at_line_column:
   }
 | _at column_number
   {
-	check_attr_with_conflict ("COLUMN", SYN_CLAUSE_2,
-				  _("AT screen-location"), SYN_CLAUSE_3,
-				  &check_line_col_duplicate);
+	set_attr_with_conflict ("COLUMN", SYN_CLAUSE_2,
+				_("AT screen-location"), SYN_CLAUSE_3, 1,
+				&check_line_col_duplicate);
 
 	if ((CB_LITERAL_P ($2) && cb_get_int ($2) == 0) || $2 == cb_zero) {
 		cb_verify (cb_accept_display_extensions, "COLUMN 0");
@@ -6775,9 +6786,9 @@ at_line_column:
   }
 | AT num_id_or_lit
   {
-	check_attr_with_conflict (_("AT screen-location"), SYN_CLAUSE_3,
-				  _("LINE or COLUMN"), SYN_CLAUSE_1 | SYN_CLAUSE_2,
-				  &check_line_col_duplicate);
+	set_attr_with_conflict (_("AT screen-location"), SYN_CLAUSE_3,
+				_("LINE or COLUMN"), SYN_CLAUSE_1 | SYN_CLAUSE_2,
+				1, &check_line_col_duplicate);
 
 	cb_verify (cb_accept_display_extensions, "AT clause");
 
@@ -6804,123 +6815,156 @@ mode_is_block:
 accp_attr:
   AUTO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_AUTO);
+	check_repeated ("AUTO", SYN_CLAUSE_5, &check_duplicate);
+	set_dispattr_with_conflict ("AUTO", COB_SCREEN_AUTO,
+				    "TAB", COB_SCREEN_TAB);
   }
 | TAB
   {
-	if (cb_accept_auto) {
-		remove_attrib (COB_SCREEN_AUTO);
-	}
+	check_repeated ("TAB", SYN_CLAUSE_6, &check_duplicate);
+	set_dispattr_with_conflict ("TAB", COB_SCREEN_TAB,
+				    "AUTO", COB_SCREEN_AUTO);
   }
 | BELL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
+	check_repeated ("BELL", SYN_CLAUSE_7, &check_duplicate);
+	set_dispattr (COB_SCREEN_BELL);
   }
 | BLINK
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
+        check_repeated ("BLINK", SYN_CLAUSE_8, &check_duplicate);
+	set_dispattr (COB_SCREEN_BLINK);
   }
 | CONVERSION
   {
+	check_repeated ("CONVERSION", SYN_CLAUSE_9, &check_duplicate);
 	CB_PENDING ("ACCEPT CONVERSION");
   }
 | FULL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_FULL);
+	check_repeated ("FULL", SYN_CLAUSE_10, &check_duplicate);
+	set_dispattr (COB_SCREEN_FULL);
   }
 | HIGHLIGHT
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
-				     "LOWLIGHT", COB_SCREEN_LOWLIGHT);
+	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
+	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LEFTLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LEFTLINE);
+	check_repeated ("LEFTLINE", SYN_CLAUSE_12, &check_duplicate);
+	set_dispattr (COB_SCREEN_LEFTLINE);
   }
 | LOWER
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_LOWER);
+	check_repeated ("LOWER", SYN_CLAUSE_13, &check_duplicate);
+	set_dispattr_with_conflict ("LOWER", COB_SCREEN_LOWER,
+				    "UPPER", COB_SCREEN_UPPER);
   }
 | LOWLIGHT
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "LOWLIGHT", COB_SCREEN_LOWLIGHT,
-				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+	check_repeated ("LOWLIGHT", SYN_CLAUSE_14, &check_duplicate);
+	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | NO_ECHO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_NO_ECHO);
+	check_repeated ("NO-ECHO", SYN_CLAUSE_15, &check_duplicate);
+	set_dispattr (COB_SCREEN_NO_ECHO);
   }
 | OVERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
+	check_repeated ("OVERLINE", SYN_CLAUSE_16, &check_duplicate);
+	set_dispattr (COB_SCREEN_OVERLINE);
   }
 | PROMPT CHARACTER _is id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, $4, NULL, COB_SCREEN_PROMPT);
+	check_repeated ("PROMPT", SYN_CLAUSE_17, &check_duplicate);
+	set_attribs (NULL, NULL, NULL, NULL, $4, NULL, COB_SCREEN_PROMPT);
   }
 | PROMPT
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_PROMPT);
+	check_repeated ("PROMPT", SYN_CLAUSE_17, &check_duplicate);
+	set_dispattr (COB_SCREEN_PROMPT);
   }
 | REQUIRED
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REQUIRED);
+	check_repeated ("REQUIRED", SYN_CLAUSE_18, &check_duplicate);
+	set_dispattr (COB_SCREEN_REQUIRED);
   }
 | REVERSE_VIDEO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
+	check_repeated ("REVERSE-VIDEO", SYN_CLAUSE_19, &check_duplicate);
+	set_dispattr (COB_SCREEN_REVERSE);
   }
 | SECURE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_SECURE);
+	check_repeated ("SECURE", SYN_CLAUSE_20, &check_duplicate);
+	set_dispattr (COB_SCREEN_SECURE);
   }
 | PROTECTED SIZE _is num_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
+	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
+	set_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
   }
 | SIZE _is num_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
+	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
+	set_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
   }
 | UNDERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
+	check_repeated ("UNDERLINE", SYN_CLAUSE_22, &check_duplicate);
+	set_dispattr (COB_SCREEN_UNDERLINE);
   }
 | NO update_default
   {
-	if (cb_accept_update) {
-		remove_attrib (COB_SCREEN_UPDATE);
-	}
+	check_repeated ("NO UPDATE", SYN_CLAUSE_23, &check_duplicate);
+	set_dispattr_with_conflict ("NO UPDATE", COB_SCREEN_NO_UPDATE,
+				    "UPDATE", COB_SCREEN_UPDATE);
   }
 | update_default
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPDATE);
+	check_repeated ("UPDATE", SYN_CLAUSE_24, &check_duplicate);
+	set_dispattr_with_conflict ("UPDATE", COB_SCREEN_UPDATE,
+				    "NO UPDATE", COB_SCREEN_NO_UPDATE);
   }
 | UPPER
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UPPER);
+	check_repeated ("UPPER", SYN_CLAUSE_25, &check_duplicate);
+	set_dispattr_with_conflict ("UPPER", COB_SCREEN_UPPER,
+				    "LOWER", COB_SCREEN_LOWER);
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_26, &check_duplicate);
+	set_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
   }
 | BACKGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_27, &check_duplicate);
+	set_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
 | SCROLL UP _scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, 0);
+	check_repeated ("SCROLL UP", SYN_CLAUSE_28, &check_duplicate);
+	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
+				   "SCROLL UP", COB_SCREEN_SCROLL_UP,
+				   "SCROLL DOWN", COB_SCREEN_SCROLL_DOWN);
   }
 | SCROLL DOWN _scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
+	check_repeated ("SCROLL DOWN", SYN_CLAUSE_19, &check_duplicate);
+	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
+				   "SCROLL DOWN", COB_SCREEN_SCROLL_DOWN,
+				   "SCROLL UP", COB_SCREEN_SCROLL_UP);
   }
 | TIME_OUT _after positive_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
+	check_repeated (_("TIME-OUT or BEFORE TIME clauses"), SYN_CLAUSE_4,
+			&check_duplicate);
+	set_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
 ;
 
@@ -7076,7 +7120,7 @@ call_body:
   call_exception_phrases
   {
 	cb_tree	call_conv_bit;
-	  
+
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
 	    && is_recursive_call ($2)) {
@@ -7680,83 +7724,98 @@ crt_under:
 disp_attr:
   BELL
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BELL);
+	check_repeated ("BELL", SYN_CLAUSE_4, &check_duplicate);
+	set_dispattr (COB_SCREEN_BELL);
   }
 | BLANK LINE
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "BLANK LINE", COB_SCREEN_BLANK_LINE,
-				     "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
+	check_repeated ("BLANK LINE", SYN_CLAUSE_5, &check_duplicate);
+	set_dispattr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
+				    "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
 | BLANK SCREEN
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
-				     "BLANK LINE", COB_SCREEN_BLANK_LINE);
+	check_repeated ("BLANK SCREEN", SYN_CLAUSE_6, &check_duplicate);
+	set_dispattr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
+				    "BLANK LINE", COB_SCREEN_BLANK_LINE);
   }
 | BLINK
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_BLINK);
+	check_repeated ("BLINK", SYN_CLAUSE_7, &check_duplicate);
+	set_dispattr (COB_SCREEN_BLINK);
   }
 | CONVERSION
   {
+	check_repeated ("CONVERSION", SYN_CLAUSE_8, &check_duplicate);
 	cb_warning (_("ignoring CONVERSION"));
   }
 | ERASE eol
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "ERASE EOL", COB_SCREEN_ERASE_EOL,
-				     "ERASE EOS", COB_SCREEN_ERASE_EOS);
+	check_repeated ("ERASE EOL", SYN_CLAUSE_9, &check_duplicate);
+	set_dispattr_with_conflict ("ERASE EOL", COB_SCREEN_ERASE_EOL,
+				    "ERASE EOS", COB_SCREEN_ERASE_EOS);
   }
 | ERASE eos
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "ERASE EOS", COB_SCREEN_ERASE_EOS,
-				     "ERASE EOL", COB_SCREEN_ERASE_EOL);
+	check_repeated ("ERASE EOS", SYN_CLAUSE_10, &check_duplicate);
+	set_dispattr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
+				    "ERASE EOL", COB_SCREEN_ERASE_EOL);
   }
 | HIGHLIGHT
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
-				     "LOWLIGHT", COB_SCREEN_LOWLIGHT);
+	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
+	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
   }
 | LOWLIGHT
   {
-	check_attribs_with_conflict (NULL, NULL, NULL, NULL, NULL, NULL,
-				     "LOWLIGHT", COB_SCREEN_LOWLIGHT,
-				     "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+	check_repeated ("LOWLIGHT", SYN_CLAUSE_12, &check_duplicate);
+	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
 | OVERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_OVERLINE);
+	check_repeated ("OVERLINE", SYN_CLAUSE_13, &check_duplicate);
+	set_dispattr (COB_SCREEN_OVERLINE);
   }
 | REVERSE_VIDEO
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_REVERSE);
+	check_repeated ("REVERSE-VIDEO", SYN_CLAUSE_14, &check_duplicate);
+	set_dispattr (COB_SCREEN_REVERSE);
   }
 | SIZE _is num_id_or_lit
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
+	check_repeated ("SIZE", SYN_CLAUSE_15, &check_duplicate);
+	set_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
   }
 | UNDERLINE
   {
-	check_attribs (NULL, NULL, NULL, NULL, NULL, NULL, COB_SCREEN_UNDERLINE);
+	check_repeated ("UNDERLINE", SYN_CLAUSE_16, &check_duplicate);
+	set_dispattr (COB_SCREEN_UNDERLINE);
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_17, &check_duplicate);
+	set_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
   }
 | BACKGROUND_COLOR _is num_id_or_lit
   {
-	check_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
+	set_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
   }
 | SCROLL UP _scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, 0);
+	check_repeated ("SCROLL UP", SYN_CLAUSE_19, &check_duplicate);
+	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
+				   "SCROLL UP", COB_SCREEN_SCROLL_UP,
+				   "SCROLL DOWN", COB_SCREEN_SCROLL_DOWN);
   }
 | SCROLL DOWN _scroll_lines
   {
-	check_attribs (NULL, NULL, $3, NULL, NULL, NULL, COB_SCREEN_SCROLL_DOWN);
+	check_repeated ("SCROLL DOWN", SYN_CLAUSE_20, &check_duplicate);
+	set_attribs_with_conflict (NULL, NULL, $3, NULL, NULL, NULL,
+				   "SCROLL DOWN", COB_SCREEN_SCROLL_DOWN,
+				   "SCROLL UP", COB_SCREEN_SCROLL_UP);
   }
 ;
 
@@ -8736,7 +8795,7 @@ open_file_entry:
 	} else {
 		x = $2;
 	}
-	
+
 	for (l = $4; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
 			begin_implicit_statement ();
@@ -8788,7 +8847,7 @@ perform_body:
   perform_procedure perform_option
   {
 	cb_emit_perform ($2, $1);
-	start_debug = save_debug;	
+	start_debug = save_debug;
 	cobc_cs_check = 0;
   }
 | perform_option
@@ -8930,7 +8989,7 @@ read_body:
   file_name _flag_next _record read_into lock_phrases read_key read_handler
   {
 	cobc_cs_check = 0;
-	  
+
 	if (CB_VALID_TREE ($1)) {
 		struct cb_file	*cf;
 
@@ -8961,7 +9020,7 @@ read_into:
 ;
 
 lock_phrases:
-  %prec SHIFT_PREFER /* empty */ 
+  %prec SHIFT_PREFER /* empty */
   {
 	$$ = NULL;
   }
@@ -8983,7 +9042,7 @@ ignoring_lock:
   IGNORING LOCK
 | _with IGNORE LOCK
 ;
-  
+
 advancing_lock_or_retry:
   ADVANCING _on LOCK
   {
@@ -9262,8 +9321,8 @@ set_statement:
   SET
   {
 	begin_statement ("SET", 0);
-	setattr_val_on = 0;
-	setattr_val_off = 0;
+	set_attr_val_on = 0;
+	set_attr_val_off = 0;
 	cobc_cs_check = CB_CS_SET;
   }
   set_body
@@ -9306,7 +9365,7 @@ set_environment:
 set_attr:
   sub_identifier ATTRIBUTE set_attr_clause
   {
-	cb_emit_set_attribute ($1, setattr_val_on, setattr_val_off);
+	cb_emit_set_attribute ($1, set_attr_val_on, set_attr_val_off);
   }
 ;
 
@@ -9327,13 +9386,13 @@ set_attr_one:
 | HIGHLIGHT on_or_off
   {
 	bit_set_attr ($2, COB_SCREEN_HIGHLIGHT);
-	check_not_highlight_and_lowlight (setattr_val_on | setattr_val_off,
+	check_not_highlight_and_lowlight (set_attr_val_on | set_attr_val_off,
 					  COB_SCREEN_HIGHLIGHT);
   }
 | LOWLIGHT on_or_off
   {
 	bit_set_attr ($2, COB_SCREEN_LOWLIGHT);
-	check_not_highlight_and_lowlight (setattr_val_on | setattr_val_off,
+	check_not_highlight_and_lowlight (set_attr_val_on | set_attr_val_off,
 					  COB_SCREEN_LOWLIGHT);
   }
 | REVERSE_VIDEO on_or_off

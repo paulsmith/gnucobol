@@ -1,4 +1,8 @@
 
+2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h: added cob_flags_t typedef for variables made of bit flags.
+
 2016-08-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.c (cob_get_current_date_and_time): fixed bug where milliseconds

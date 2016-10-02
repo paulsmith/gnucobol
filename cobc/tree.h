@@ -681,7 +681,7 @@ struct cb_field {
 	int			mem_offset;	/* Memory offset */
 	int			nkeys;		/* Number of keys */
 	int			param_num;	/* CHAINING param number */
-	int			screen_flag;	/* Flags used in SCREEN SECTION */
+	cob_flags_t		screen_flag;	/* Flags used in SCREEN SECTION */
 	int			step_count;	/* STEP in REPORT */
 	unsigned int		vaddr;		/* Variable address cache */
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
@@ -846,7 +846,7 @@ struct cb_file {
 	int			optional;		/* OPTIONAL */
 	int			organization;		/* ORGANIZATION */
 	int			access_mode;		/* ACCESS MODE */
-	int			lock_mode;		/* LOCK MODE */
+	cob_flags_t		lock_mode;		/* LOCK MODE */
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */
 	unsigned int		flag_finalized	: 1;	/* Is finalized */
@@ -1130,7 +1130,7 @@ struct cb_attr_struct {
 	cb_tree			timeout;	/* TIMEOUT */
 	cb_tree			prompt;		/* PROMPT */
 	cb_tree			size_is;        /* [PROTECTED] SIZE [IS] */
-	int			dispattrs;	/* Attributes */
+        cob_s64_t		dispattrs;	/* Attributes */
 };
 
 /* Exception handler type */

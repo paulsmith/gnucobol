@@ -41,6 +41,7 @@
 #define	COB_U64_C(x)		x ## UI64
 #define	CB_FMT_LLD		"%I64d"
 #define	CB_FMT_LLU		"%I64u"
+#define	CB_FMT_LLX		"%I64x"
 #define	CB_FMT_PLLD		"%+*.*I64d"
 #define	CB_FMT_PLLU		"%*.*I64u"
 #define	CB_FMT_LLD_F		"%I64dI64"
@@ -55,6 +56,7 @@
 #define	COB_U64_C(x)		x ## ULL
 #define	CB_FMT_LLD		"%lld"
 #define	CB_FMT_LLU		"%llu"
+#define	CB_FMT_LLX		"%llx"
 #define	CB_FMT_PLLD		"%+*.*lld"
 #define	CB_FMT_PLLU		"%*.*llu"
 #define	CB_FMT_LLD_F		"%lldLL"
@@ -905,37 +907,42 @@ enum cob_exception_id {
 #define COB_SCREEN_YELLOW		6
 #define COB_SCREEN_WHITE		7
 
-#define COB_SCREEN_LINE_PLUS		(1 << 0)
-#define COB_SCREEN_LINE_MINUS		(1 << 1)
-#define COB_SCREEN_COLUMN_PLUS		(1 << 2)
-#define COB_SCREEN_COLUMN_MINUS		(1 << 3)
-#define COB_SCREEN_AUTO			(1 << 4)
-#define COB_SCREEN_BELL			(1 << 5)
-#define COB_SCREEN_BLANK_LINE		(1 << 6)
-#define COB_SCREEN_BLANK_SCREEN		(1 << 7)
-#define COB_SCREEN_BLINK		(1 << 8)
-#define COB_SCREEN_ERASE_EOL		(1 << 9)
-#define COB_SCREEN_ERASE_EOS		(1 << 10)
-#define COB_SCREEN_FULL			(1 << 11)
-#define COB_SCREEN_HIGHLIGHT		(1 << 12)
-#define COB_SCREEN_LOWLIGHT		(1 << 13)
-#define COB_SCREEN_REQUIRED		(1 << 14)
-#define COB_SCREEN_REVERSE		(1 << 15)
-#define COB_SCREEN_SECURE		(1 << 16)
-#define COB_SCREEN_UNDERLINE		(1 << 17)
-#define COB_SCREEN_OVERLINE		(1 << 18)
-#define COB_SCREEN_PROMPT		(1 << 19)
-#define COB_SCREEN_UPDATE		(1 << 20)
-#define COB_SCREEN_INPUT		(1 << 21)
-#define COB_SCREEN_SCROLL_DOWN		(1 << 22)
-#define COB_SCREEN_INITIAL		(1 << 23)
-#define COB_SCREEN_NO_ECHO		(1 << 24)
-#define COB_SCREEN_LEFTLINE		(1 << 25)
-#define COB_SCREEN_NO_DISP		(1 << 26)
-#define COB_SCREEN_EMULATE_NL		(1 << 27)
-#define COB_SCREEN_UPPER		(1 << 28)
-#define COB_SCREEN_LOWER		(1 << 29)
-#define COB_SCREEN_GRID			(1 << 30)
+typedef cob_s64_t cob_flags_t;
+
+#define COB_SCREEN_LINE_PLUS		((cob_flags_t)1 << 0)
+#define COB_SCREEN_LINE_MINUS		((cob_flags_t)1 << 1)
+#define COB_SCREEN_COLUMN_PLUS		((cob_flags_t)1 << 2)
+#define COB_SCREEN_COLUMN_MINUS		((cob_flags_t)1 << 3)
+#define COB_SCREEN_AUTO			((cob_flags_t)1 << 4)
+#define COB_SCREEN_BELL			((cob_flags_t)1 << 5)
+#define COB_SCREEN_BLANK_LINE		((cob_flags_t)1 << 6)
+#define COB_SCREEN_BLANK_SCREEN		((cob_flags_t)1 << 7)
+#define COB_SCREEN_BLINK		((cob_flags_t)1 << 8)
+#define COB_SCREEN_ERASE_EOL		((cob_flags_t)1 << 9)
+#define COB_SCREEN_ERASE_EOS		((cob_flags_t)1 << 10)
+#define COB_SCREEN_FULL			((cob_flags_t)1 << 11)
+#define COB_SCREEN_HIGHLIGHT		((cob_flags_t)1 << 12)
+#define COB_SCREEN_LOWLIGHT		((cob_flags_t)1 << 13)
+#define COB_SCREEN_REQUIRED		((cob_flags_t)1 << 14)
+#define COB_SCREEN_REVERSE		((cob_flags_t)1 << 15)
+#define COB_SCREEN_SECURE		((cob_flags_t)1 << 16)
+#define COB_SCREEN_UNDERLINE		((cob_flags_t)1 << 17)
+#define COB_SCREEN_OVERLINE		((cob_flags_t)1 << 18)
+#define COB_SCREEN_PROMPT		((cob_flags_t)1 << 19)
+#define COB_SCREEN_UPDATE		((cob_flags_t)1 << 20)
+#define COB_SCREEN_INPUT		((cob_flags_t)1 << 21)
+#define COB_SCREEN_SCROLL_DOWN		((cob_flags_t)1 << 22)
+#define COB_SCREEN_INITIAL		((cob_flags_t)1 << 23)
+#define COB_SCREEN_NO_ECHO		((cob_flags_t)1 << 24)
+#define COB_SCREEN_LEFTLINE		((cob_flags_t)1 << 25)
+#define COB_SCREEN_NO_DISP		((cob_flags_t)1 << 26)
+#define COB_SCREEN_EMULATE_NL		((cob_flags_t)1 << 27)
+#define COB_SCREEN_UPPER		((cob_flags_t)1 << 28)
+#define COB_SCREEN_LOWER		((cob_flags_t)1 << 29)
+#define COB_SCREEN_GRID			((cob_flags_t)1 << 30)
+#define COB_SCREEN_TAB			((cob_flags_t)1 << 31) /* used for syntax checking */
+#define COB_SCREEN_NO_UPDATE		((cob_flags_t)1 << 32) /* used for syntax checking */
+#define COB_SCREEN_SCROLL_UP		((cob_flags_t)1 << 33) /* used for syntax checking */
 
 #define COB_SCREEN_TYPE_GROUP		0
 #define COB_SCREEN_TYPE_FIELD		1
@@ -1551,14 +1558,15 @@ COB_EXPIMP void cob_screen_line_col	(cob_field *, const int);
 COB_EXPIMP void cob_screen_display	(cob_screen *, cob_field *,
 					 cob_field *, const int);
 COB_EXPIMP void cob_screen_accept	(cob_screen *, cob_field *,
-					 cob_field *, cob_field *, const int);
+					 cob_field *, cob_field *,
+					 const int);
 COB_EXPIMP void cob_field_display	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
-					 cob_field *, const int);
+					 cob_field *, const cob_flags_t);
 COB_EXPIMP void cob_field_accept	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
-					 const int);
+					 const cob_flags_t);
 COB_EXPIMP void cob_accept_escape_key	(cob_field *);
 COB_EXPIMP int	cob_sys_clear_screen	(void);
 COB_EXPIMP int	cob_sys_sound_bell	(void);
