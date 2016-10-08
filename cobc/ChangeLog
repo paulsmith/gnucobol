@@ -1,4 +1,8 @@
 
+2016-10-08  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.c: let reserved and not-reserved accept comma-separated lists
+
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: improved checks for duplicate/conflicting clauses in ACCEPT

@@ -142,6 +142,46 @@ unsupported_value (const char *fname, const int line, const char *name, const ch
 		_("unsupported value '%s' for configuration tag '%s'"), val, name);
 }
 
+static void
+split_and_iterate_on_comma_separated_str (void (* const func)(const char *, const char *, const int),
+					  const int replace_colons,
+					  const char *val,
+					  const char *fname,
+					  const int line)
+{
+	int	i;
+	int	j = 0;
+	char	word_buff[COB_MINI_BUFF];
+	
+	for (i = 0; val[i] && j < COB_MINI_MAX; i++) {
+		switch (val[i]) {
+		case ' ':
+		case '\t':
+			/* Remove all possible whitespace. */
+			break;
+		case ',':
+			word_buff[j] = 0;
+			(*func) (word_buff, fname, line);
+			memset (word_buff, 0, COB_MINI_BUFF);
+			j = 0;
+			break;
+		case ':':
+			if (replace_colons) {
+				word_buff[j++] = '=';
+				break;
+			}
+		default:
+			word_buff[j++] = val[i];
+			break;
+		}
+	}
+	word_buff[j] = 0;
+	
+	if (j != 0) {
+		(*func) (word_buff, fname, line);
+	}
+}
+
 /* Global functions */
 
 int
@@ -160,15 +200,15 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	void			*var;
 	size_t			i;
 	size_t			j;
-	int				v;
-
-	char word_buff[COB_MINI_BUFF];
+	int			v;
 
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
 	if (!s) {
-		for (j=strlen(buff); buff[j-1] == '\r' || buff[j-1] == '\n'; )	/* Remove CR LF */
+		/* Remove CR LF */
+		for (j = strlen(buff); buff[j - 1] == '\r' || buff[j - 1] == '\n';) {
 			buff[--j] = 0;
+		}
 		configuration_error (fname, line, 1,
 			_("invalid configuration tag '%s'"), buff);
 		return -1;
@@ -307,25 +347,11 @@ cb_config_entry (char *buff, const char *fname, const int line)
 					return 1;
 				}
 			} else if (strcmp (name, "not-reserved") == 0) {
-				remove_reserved_word (val, fname, line);
+				split_and_iterate_on_comma_separated_str (&remove_reserved_word,
+									  0, val, fname, line);
 			} else if (strcmp (name, "reserved") == 0) {
-				/* Remove all possible white space, change : to = */
-				j = 0;
-				for (i = 0; val [i] && j < COB_MINI_MAX ; i++) {
-					switch (val [i]) {
-						case ' ':
-						case '\t':
-							break;
-						case ':':
-							word_buff[j++] = '=';
-							break;
-						default:
-							word_buff[j++] = val [i];
-							break;
-					}
-				}
-				word_buff[j] = 0;
-				add_reserved_word (word_buff, fname, line);
+				split_and_iterate_on_comma_separated_str (&add_reserved_word,
+									  1, val, fname, line);
 			} else {
 				*((const char **)var) = val;
 			}

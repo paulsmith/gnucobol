@@ -2449,6 +2449,8 @@ AT_DATA([prog.cob], [
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  hello       PIC X.
+       01  foo         PIC X.
+       01  bar         PIC X.
        01  file        PIC X.
 
        PROCEDURE       DIVISION.
@@ -2456,8 +2458,10 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -freserved=hello -fnot-reserved=file prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob], [1], [],
 [prog.cob: 7: error: 'hello' is a reserved word, but isn't supported
+prog.cob: 8: error: 'foo' is a reserved word, but isn't supported
+prog.cob: 9: error: 'bar' is a reserved word, but isn't supported
 ])
 AT_CLEANUP
 
