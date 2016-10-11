@@ -163,7 +163,9 @@ Extensions
 
 System routines
 
-* CBL_OC_GETOPT					GETOPT for Cobol
+* CBL_OC_GETOPT                 GETOPT for Cobol
+* CBL_OC_HOSTED                 Access to C hosted variables
+* CBL_OC_NANOSLEEP              Sleep for nanoseconds
 
 Appendix A
 
@@ -1409,6 +1411,8 @@ All other figurative constants display as a single character.
 
 
 @node System routines, Appendix A, Extended DISPLAY, Top
+
+
 @chapter System routines
 
 For a complete list of supported system routines
@@ -1416,6 +1420,8 @@ For a complete list of supported system routines
 
 @menu
 * CBL_OC_GETOPT::				CBL_OC_GETOPT
+* CBL_OC_HOSTED::				CBL_OC_HOSTED
+* CBL_OC_NANOSLEEP::				CBL_OC_NANOSLEEP
 @end menu
 
 @node CBL_OC_GETOPT, , System routines, System routines
@@ -1519,6 +1525,148 @@ The return-codes of @code{CBL_OC_GETOPT} are:
 @item 2 @ @ if we have got an truncated option value in opt-val (because opt-val was too small)
 @item 3 @ @ if we got a regular answer from getopt
 @end itemize
+
+
+@node CBL_OC_HOSTED, , System routines, System routines
+@section CBL_OC_HOSTED
+
+@code{CBL_OC_HOSTED} provides access to the following C hosted variables:
+@itemize @bullet
+@item @code{argc} @ to binary-long by value
+@item @code{argv} @ to pointer to char **
+@item @code{stdin}, @code{stdout}, @code{stderr} @ to pointer
+@item @code{errno} @ giving address of errno in pointer to binary-long, use based for more direct access
+@end itemize
+
+and conditional access to the following variables:
+@itemize @bullet
+@item @code{tzname} @ pointer to pointer to array of two char pointers
+@item @code{timezone} @ C long, will be seconds west of UTC
+@item @code{daylight} @ C int, will be 1 during daylight savings
+@end itemize
+
+System will need to HAVE_TIMEZONE defined for these to return anything meaningful.
+Attempts made when they are not available return 1 from CBL_OC_HOSTED.
+
+It returns 0 when match, 1 on failure, case matters as does length, "arg" won't match.
+
+The usage of this system routine is described by the following example.
+
+@example
+HOSTED identification division.
+       program-id. hosted.
+       data division.
+       working-storage section.
+       01 argc  usage binary-long.
+       01 argv  usage pointer.
+
+       01 stdin usage pointer.
+       01 stdout usage pointer.
+       01 stderr usage pointer.
+
+       01 errno usage pointer.
+       01 err   usage binary-long based.
+
+       01 domain usage float-long value 3.0.
+
+       01 tzname usage pointer.
+       01 tznames usage pointer based.
+          05 tzs usage pointer occurs 2 times.
+
+       01 timezone   usage binary-long.
+       01 daylight   usage binary-short.
+
+
+      *> Testing CBL_OC_HOSTED
+       procedure division.
+       call "CBL_OC_HOSTED" using stdin "stdin"
+       display "stdin                : " stdin
+       call "feof" using by value stdin
+       display "feof stdin           : " return-code
+
+       call "CBL_OC_HOSTED" using stdout "stdout"
+       display "stdout               : " stdout
+       call "fprintf" using by value stdout by content "Hello" & x"0a"
+
+       call "CBL_OC_HOSTED" using stderr "stderr"
+       display "stderr               : " stderr
+       call "fprintf" using by value stderr by content "on err" & x"0a"
+
+       call "CBL_OC_HOSTED" using argc "argc"
+       display "argc                 : " argc
+
+       call "CBL_OC_HOSTED" using argv "argv"
+       display "argv                 : " argv
+
+       call "args" using by value argc argv
+
+       call "CBL_OC_HOSTED" using errno "errno"
+       display "&errno               : " errno
+       set address of err to errno
+       display "errno                : " err
+       call "acos" using by value domain
+       display "errno after acos(3.0): " err ", EDOM is 33"
+
+       call "CBL_OC_HOSTED" using argc "arg"
+       display "'arg' lookup         : " return-code
+       call "CBL_OC_HOSTED" using null "argc"
+       display "null with argc       : " return-code
+       display "argc is still        : " argc
+
+
+       *> the following only returns zero if the system has HAVE_TIMEZONE set
+       
+       call "CBL_OC_HOSTED" using daylight "daylight "
+       display "'timezone' lookup    : " return-code
+
+       if return-code not = 0
+          display "system doesn't has timezone"
+       else
+          
+          display "timezone is          : " timezone
+          
+          call "CBL_OC_HOSTED" using daylight "daylight "
+          display "'daylight' lookup    : " return-code
+          display "daylight is          : " daylight
+       
+          set environment "TZ" to "PST8PDT"
+          call static "tzset" returning omitted on exception continue end-call
+          
+          call "CBL_OC_HOSTED" using tzname "tzname"
+          display "'tzname' lookup      : " return-code
+       
+          *> tzs(1) will point to z"PST" and tzs(2) to z"PDT"
+          if return-code equal 0 and tzname not equal null then
+              set address of tznames to tzname
+              if tzs(1) not equal null then
+                 display "tzs #1               : " tzs(1)
+              end-if
+              if tzs(2) not equal null then
+                 display "tzs #2               : " tzs(2)
+              end-if
+          end-if
+
+       end-if
+
+       goback.
+       end program hosted.
+@end example
+
+
+@node CBL_OC_NANOSLEEP, , System routines, System routines
+@section CBL_OC_NANOSLEEP
+
+@code{CBL_OC_NANOSLEEP} allows you to pause the program for nanoseconds.
+The actual precision depends on the system.
+
+@example
+      *> Waiting a half second
+       call "CBL_OC_NANOSLEEP" using "500000000" end-call
+
+      *> Waiting five seconds using compiler string catenation for readability
+       call "CBL_OC_NANOSLEEP" using "500" & "0000000"  end-call
+@end example
+
 
 @node Appendix A, Appendix B, System routines, Top
 @appendix @code{cobc --help}
