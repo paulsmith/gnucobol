@@ -116,7 +116,9 @@ Extensions
 
 System routines
 
-* CBL_OC_GETOPT					GETOPT for Cobol
+* CBL_OC_GETOPT                 GETOPT for Cobol
+* CBL_OC_HOSTED                 Access to C hosted variables
+* CBL_OC_NANOSLEEP              Sleep for nanoseconds
 
 Appendix A
 
@@ -1374,6 +1376,8 @@ For a complete list of supported system routines *Note cobc
 * Menu:
 
 * CBL_OC_GETOPT::				CBL_OC_GETOPT
+* CBL_OC_HOSTED::				CBL_OC_HOSTED
+* CBL_OC_NANOSLEEP::				CBL_OC_NANOSLEEP
 
 
 File: gnucobol.info,  Node: CBL_OC_GETOPT,  Prev: System routines,  Up: System routines
@@ -1481,6 +1485,147 @@ routine until 'CBL_OC_GETOPT' runs out of options and returns -1.
    * 2   if we have got an truncated option value in opt-val (because
      opt-val was too small)
    * 3   if we got a regular answer from getopt
+
+
+File: gnucobol.info,  Node: CBL_OC_HOSTED,  Prev: System routines,  Up: System routines
+
+7.2 CBL_OC_HOSTED
+=================
+
+'CBL_OC_HOSTED' provides access to the following C hosted variables:
+   * 'argc'  to binary-long by value
+   * 'argv'  to pointer to char **
+   * 'stdin', 'stdout', 'stderr'  to pointer
+   * 'errno'  giving address of errno in pointer to binary-long, use
+     based for more direct access
+
+   and conditional access to the following variables:
+   * 'tzname'  pointer to pointer to array of two char pointers
+   * 'timezone'  C long, will be seconds west of UTC
+   * 'daylight'  C int, will be 1 during daylight savings
+
+   System will need to HAVE_TIMEZONE defined for these to return
+anything meaningful.  Attempts made when they are not available return 1
+from CBL_OC_HOSTED.
+
+   It returns 0 when match, 1 on failure, case matters as does length,
+"arg" won't match.
+
+   The usage of this system routine is described by the following
+example.
+
+     HOSTED identification division.
+            program-id. hosted.
+            data division.
+            working-storage section.
+            01 argc  usage binary-long.
+            01 argv  usage pointer.
+
+            01 stdin usage pointer.
+            01 stdout usage pointer.
+            01 stderr usage pointer.
+
+            01 errno usage pointer.
+            01 err   usage binary-long based.
+
+            01 domain usage float-long value 3.0.
+
+            01 tzname usage pointer.
+            01 tznames usage pointer based.
+               05 tzs usage pointer occurs 2 times.
+
+            01 timezone   usage binary-long.
+            01 daylight   usage binary-short.
+
+
+           *> Testing CBL_OC_HOSTED
+            procedure division.
+            call "CBL_OC_HOSTED" using stdin "stdin"
+            display "stdin                : " stdin
+            call "feof" using by value stdin
+            display "feof stdin           : " return-code
+
+            call "CBL_OC_HOSTED" using stdout "stdout"
+            display "stdout               : " stdout
+            call "fprintf" using by value stdout by content "Hello" & x"0a"
+
+            call "CBL_OC_HOSTED" using stderr "stderr"
+            display "stderr               : " stderr
+            call "fprintf" using by value stderr by content "on err" & x"0a"
+
+            call "CBL_OC_HOSTED" using argc "argc"
+            display "argc                 : " argc
+
+            call "CBL_OC_HOSTED" using argv "argv"
+            display "argv                 : " argv
+
+            call "args" using by value argc argv
+
+            call "CBL_OC_HOSTED" using errno "errno"
+            display "&errno               : " errno
+            set address of err to errno
+            display "errno                : " err
+            call "acos" using by value domain
+            display "errno after acos(3.0): " err ", EDOM is 33"
+
+            call "CBL_OC_HOSTED" using argc "arg"
+            display "'arg' lookup         : " return-code
+            call "CBL_OC_HOSTED" using null "argc"
+            display "null with argc       : " return-code
+            display "argc is still        : " argc
+
+
+            *> the following only returns zero if the system has HAVE_TIMEZONE set
+
+            call "CBL_OC_HOSTED" using daylight "daylight "
+            display "'timezone' lookup    : " return-code
+
+            if return-code not = 0
+               display "system doesn't has timezone"
+            else
+
+               display "timezone is          : " timezone
+
+               call "CBL_OC_HOSTED" using daylight "daylight "
+               display "'daylight' lookup    : " return-code
+               display "daylight is          : " daylight
+
+               set environment "TZ" to "PST8PDT"
+               call static "tzset" returning omitted on exception continue end-call
+
+               call "CBL_OC_HOSTED" using tzname "tzname"
+               display "'tzname' lookup      : " return-code
+
+               *> tzs(1) will point to z"PST" and tzs(2) to z"PDT"
+               if return-code equal 0 and tzname not equal null then
+                   set address of tznames to tzname
+                   if tzs(1) not equal null then
+                      display "tzs #1               : " tzs(1)
+                   end-if
+                   if tzs(2) not equal null then
+                      display "tzs #2               : " tzs(2)
+                   end-if
+               end-if
+
+            end-if
+
+            goback.
+            end program hosted.
+
+
+File: gnucobol.info,  Node: CBL_OC_NANOSLEEP,  Prev: System routines,  Up: System routines
+
+7.3 CBL_OC_NANOSLEEP
+====================
+
+'CBL_OC_NANOSLEEP' allows you to pause the program for nanoseconds.  The
+actual precision depends on the system.
+
+           *> Waiting a half second
+            call "CBL_OC_NANOSLEEP" using "500000000" end-call
+
+           *> Waiting five seconds using compiler string catenation for readability
+            call "CBL_OC_NANOSLEEP" using "500" & "0000000"  end-call
 
 
 File: gnucobol.info,  Node: Appendix A,  Next: Appendix B,  Prev: System routines,  Up: Top
@@ -3609,59 +3754,61 @@ Index
 
 Tag Table:
 Node: Top1118
-Node: Getting started4019
-Node: Hello world!4197
-Node: Compile5649
-Node: Compiler options6007
-Node: Help options6717
-Ref: Help options-Footnote-18279
-Node: Build target8323
-Ref: Build target-Footnote-110842
-Node: Source format10895
-Ref: Source format-Footnote-111681
-Node: Warning options11755
-Node: Configuration options13209
-Node: Debug switches14140
-Node: Miscellaneous15240
-Node: Multiple sources16167
-Node: Static linking16807
-Node: Dynamic linking18298
-Ref: Dynamic linking-Footnote-119890
-Ref: Dynamic linking-Footnote-219951
-Node: Building library20012
-Node: Using library20395
-Node: C interface20966
-Node: Main C program21310
-Node: Static C to COBOL22226
-Node: Dynamic C to COBOL23723
-Node: Static COBOL to C25168
-Node: Dynamic COBOL to C26604
-Node: Customize27013
-Node: Customizing compiler27237
-Node: Customizing library27823
-Node: Optimize28581
-Node: Optimize options28884
-Node: Optimize call29421
-Node: Optimize binary29801
-Node: Debug30377
-Node: Debug options30536
-Node: Extensions30898
-Node: SELECT31335
-Node: Indexed31500
-Node: Extended ACCEPT31680
-Node: ACCEPT special33314
-Node: Extended DISPLAY35748
-Node: System routines38194
-Node: CBL_OC_GETOPT38464
-Node: Appendix A42636
-Node: Appendix B53378
-Node: Appendix C76055
-Node: Appendix D81659
-Node: Appendix E83595
-Node: Appendix F89735
-Node: Appendix G95589
-Node: Appendix H96888
-Node: Appendix I106395
-Node: Index131520
+Node: Getting started4146
+Node: Hello world!4324
+Node: Compile5776
+Node: Compiler options6134
+Node: Help options6844
+Ref: Help options-Footnote-18406
+Node: Build target8450
+Ref: Build target-Footnote-110969
+Node: Source format11022
+Ref: Source format-Footnote-111808
+Node: Warning options11882
+Node: Configuration options13336
+Node: Debug switches14267
+Node: Miscellaneous15367
+Node: Multiple sources16294
+Node: Static linking16934
+Node: Dynamic linking18425
+Ref: Dynamic linking-Footnote-120017
+Ref: Dynamic linking-Footnote-220078
+Node: Building library20139
+Node: Using library20522
+Node: C interface21093
+Node: Main C program21437
+Node: Static C to COBOL22353
+Node: Dynamic C to COBOL23850
+Node: Static COBOL to C25295
+Node: Dynamic COBOL to C26731
+Node: Customize27140
+Node: Customizing compiler27364
+Node: Customizing library27950
+Node: Optimize28708
+Node: Optimize options29011
+Node: Optimize call29548
+Node: Optimize binary29928
+Node: Debug30504
+Node: Debug options30663
+Node: Extensions31025
+Node: SELECT31462
+Node: Indexed31627
+Node: Extended ACCEPT31807
+Node: ACCEPT special33441
+Node: Extended DISPLAY35875
+Node: System routines38321
+Node: CBL_OC_GETOPT38667
+Node: CBL_OC_HOSTED42839
+Node: CBL_OC_NANOSLEEP47341
+Node: Appendix A47847
+Node: Appendix B58589
+Node: Appendix C81266
+Node: Appendix D86870
+Node: Appendix E88806
+Node: Appendix F94946
+Node: Appendix G100800
+Node: Appendix H102099
+Node: Appendix I111606
+Node: Index136731
 
 End Tag Table

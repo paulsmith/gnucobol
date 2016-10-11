@@ -1573,6 +1573,110 @@ sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       78  I   VALUE 20.
+       78  J   VALUE 5000.
+       78  M   VALUE 5.
+       01  SETUP-REC.
+           05  FL1       PIC X(04).
+           05  FL2       PIC ZZZZZ.
+           05  FL3       PIC 9(04).
+           05  FL4       PIC 9(08) COMP.
+           05  FL5       PIC 9(04) COMP-4.
+           05  FL6       PIC Z,ZZZ.99.
+           05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+           05  FL8       PIC X(04).
+           05  FL9 REDEFINES FL8 PIC 9(04).
+           05  FLA.
+               10  FLB OCCURS I TIMES.
+                   15  FLC PIC X(02).
+               10  FLD   PIC X(20).
+           05  FLD1      PIC X(100).
+           05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+               10  FILLER PIC X(01).
+           05  FLD3      PIC X(3).
+           05  FLD4      PIC X(4).
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+daymon=`date +"%a %b %e"`
+AT_CHECK([$COMPILE_ONLY -std=mf -t prog.lst prog.cob], [0], [], [])
+
+AT_DATA([prog19.lst],
+[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         ENVIRONMENT DIVISION.
+000005         CONFIGURATION SECTION.
+000006         DATA             DIVISION.
+000007         WORKING-STORAGE  SECTION.
+000008         78  I   VALUE 20.
+000009         78  J   VALUE 5000.
+000010         78  M   VALUE 5.
+000011         01  SETUP-REC.
+000012             05  FL1       PIC X(04).
+000013             05  FL2       PIC ZZZZZ.
+000014             05  FL3       PIC 9(04).
+000015             05  FL4       PIC 9(08) COMP.
+000016             05  FL5       PIC 9(04) COMP-4.
+000017             05  FL6       PIC Z,ZZZ.99.
+000018             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+000019             05  FL8       PIC X(04).
+000020             05  FL9 REDEFINES FL8 PIC 9(04).
+000021             05  FLA.
+000022                 10  FLB OCCURS I TIMES.
+000023                     15  FLC PIC X(02).
+000024                 10  FLD   PIC X(20).
+000025             05  FLD1      PIC X(100).
+000026             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+000027                 10  FILLER PIC X(01).
+000028             05  FLD3      PIC X(3).
+000029             05  FLD4      PIC X(4).
+000030         PROCEDURE        DIVISION.
+000031             STOP RUN.
+GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+5204 GROUP          01   SETUP-REC
+0004 ALPHANUMERIC   05     FL1                          X(04)
+0005 ALPHANUMERIC   05     FL2                          ZZZZZ
+0004 ALPHANUMERIC   05     FL3                          9(04)
+0004 NUMERIC        05     FL4                          9(08) COMP
+0002 NUMERIC        05     FL5                          9(04) COMP
+0008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
+0006 ALPHANUMERIC   05     FL7                          S9(05)
+0004 ALPHANUMERIC   05     FL8                          X(04)
+0004 ALPHANUMERIC-R 05     FL9                          9(04)
+0060 ALPHANUMERIC   05     FLA
+0040 ALPHANUMERIC   10       FLB                        OCCURS 1 TO 20
+0002 ALPHANUMERIC   15         FLC                      X(02)
+0020 ALPHANUMERIC   10       FLD                        X(20)
+0100 ALPHANUMERIC   05     FLD1                         X(100)
+5000 ALPHANUMERIC   05     FLD2                         OCCURS 5 TO 5000
+0001 ALPHANUMERIC   10       FILLER                     X(01)
+0003 ALPHANUMERIC   05     FLD3                         X(3)
+0004 ALPHANUMERIC   05     FLD4                         X(4)
+
+0 Warnings in program
+0 Errors in program
+])
+
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
+
 AT_CLEANUP
 
 
