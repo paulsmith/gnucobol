@@ -3763,7 +3763,7 @@ set_category (int category, int usage, char *type)
 		strcpy (type, "NUMERIC");
 		break;
 	case CB_CATEGORY_OBJECT_REFERENCE:
-		strcpy (type, "OBJECT REFERENCE");
+		strcpy (type, "OBJECT REF");
 		break;
 	case CB_CATEGORY_DATA_POINTER:
 	case CB_CATEGORY_PROGRAM_POINTER:
@@ -3781,6 +3781,7 @@ print_fields (int lvl, struct cb_field *top)
 	int	get_cat;
 	int	got_picture;
 	int	old_level = 0;
+	int	item_size;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[80];
@@ -3815,18 +3816,27 @@ print_fields (int lvl, struct cb_field *top)
 		if (get_cat) {
 			set_category (top->common.category, top->usage, type);
 			got_picture = set_picture (top, picture);
+			if (top->redefines)
+				strcat (type, "-R");
 		}
 
 		print_program_header ();
+		item_size = top->size;
 		if (got_picture) {
 			fprintf (cb_src_list_file,
 				"%04d %-14.14s %02d   %-30.30s %s\n",
-			 	top->size, type, top->level, lcl_name,
+			 	item_size, type, top->level, lcl_name,
 			 	picture);
+		} else if (top->flag_occurs) {
+		   	item_size *= top->occurs_max;
+			fprintf (cb_src_list_file,
+				"%04d %-14.14s %02d   %-30.30s OCCURS %d TO %d\n",
+			 	item_size, type, top->level, lcl_name,
+			 	top->occurs_min, top->occurs_max);
 		} else { /* Trailing spaces break testsuite AT_DATA */
 			fprintf (cb_src_list_file,
 				"%04d %-14.14s %02d   %s\n",
-			 	top->size, type, top->level, lcl_name);
+			 	item_size, type, top->level, lcl_name);
 		}
 		first = 0;
 		old_level = top->level;

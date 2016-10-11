@@ -1,4 +1,10 @@
 
+2016-10-11  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Added OCCURS <minimum> TO <maximum> to print_fields() and
+	  corrected length printout.
+	  Also added "-R" to TYPE field for REDEFINES.
+
 2016-10-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.c: let reserved and not-reserved accept comma-separated lists

@@ -636,14 +636,14 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 24;configuration.at:310;cobc configuration: conf missing;configuration misc;
 25;configuration.at:338;cobc configuration: conf optional;configuration misc;
 26;configuration.at:374;cobc configuration: incomplete;configuration misc;
-27;configuration.at:445;runtime configuration;configuration misc;
-28;configuration.at:464;runtime configuration file;configuration misc;
-29;configuration.at:499;runtime configuration: recursive include;configuration misc;
-30;configuration.at:528;runtime configuration: environment priority;configuration misc;
-31;configuration.at:541;runtime configuration: entries;configuration misc;
-32;configuration.at:579;runtime configuration: conf missing;configuration misc;
-33;configuration.at:608;runtime configuration: conf optional;configuration misc;
-34;configuration.at:620;COB_CONFIG_DIR test;environment variable;
+27;configuration.at:446;runtime configuration;configuration misc;
+28;configuration.at:465;runtime configuration file;configuration misc;
+29;configuration.at:500;runtime configuration: recursive include;configuration misc;
+30;configuration.at:529;runtime configuration: environment priority;configuration misc;
+31;configuration.at:542;runtime configuration: entries;configuration misc;
+32;configuration.at:580;runtime configuration: conf missing;configuration misc;
+33;configuration.at:609;runtime configuration: conf optional;configuration misc;
+34;configuration.at:621;COB_CONFIG_DIR test;environment variable;
 35;syn_copy.at:21;COPY: within comment;copy;
 36;syn_copy.at:49;COPY: file not found;copy;
 37;syn_copy.at:69;COPY: replacement order;copy;
@@ -790,17 +790,17 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 178;syn_misc.at:2352;Binary-hexadecimal literals;misc extensions;
 179;syn_misc.at:2381;ACUCOBOL literals;misc extensions;
 180;syn_misc.at:2442;Adding/removing reserved words;misc extensions configuration;
-181;syn_misc.at:2465;Adding aliases;misc extensions configuration;
-182;syn_misc.at:2499;Complete specified word list;misc extensions configuration;
-183;syn_misc.at:2520;ANY LENGTH item as BY VALUE formal parameter;misc by value;
-184;syn_misc.at:2543;Swapped SOURCE- and OBJECT-COMPUTER;misc extensions;
-185;syn_misc.at:2562;NOT ON EXCEPTION phrases before ON EXCEPTION;misc;
-186;syn_misc.at:2625;Wrong dialect hints;misc;
-187;syn_misc.at:2649;Redundant periods;misc;
-188;syn_misc.at:2679;STRING / UNSTRING with invalid syntax;misc;
-189;syn_misc.at:2744;Use of program-prototypes;misc;
-190;syn_misc.at:2771;Invalid INSPECT/TRANSFORM operands;misc inspect transform;
-191;syn_misc.at:2815;SIGN clause checks;misc;
+181;syn_misc.at:2469;Adding aliases;misc extensions configuration;
+182;syn_misc.at:2503;Complete specified word list;misc extensions configuration;
+183;syn_misc.at:2524;ANY LENGTH item as BY VALUE formal parameter;misc by value;
+184;syn_misc.at:2547;Swapped SOURCE- and OBJECT-COMPUTER;misc extensions;
+185;syn_misc.at:2566;NOT ON EXCEPTION phrases before ON EXCEPTION;misc;
+186;syn_misc.at:2629;Wrong dialect hints;misc;
+187;syn_misc.at:2653;Redundant periods;misc;
+188;syn_misc.at:2683;STRING / UNSTRING with invalid syntax;misc;
+189;syn_misc.at:2748;Use of program-prototypes;misc;
+190;syn_misc.at:2775;Invalid INSPECT/TRANSFORM operands;misc inspect transform;
+191;syn_misc.at:2819;SIGN clause checks;misc;
 192;syn_move.at:37;MOVE SPACE TO numeric or numeric-edited item;move editing;
 193;syn_move.at:63;MOVE ZERO TO alphabetic item;move;
 194;syn_move.at:89;MOVE alphabetic TO x;move;
@@ -826,9 +826,9 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 214;syn_screen.at:291;ACCEPT ON EXCEPTION/ESCAPE;screen;
 215;syn_screen.at:321;Referencing 88-level;screen;
 216;syn_screen.at:351;Conflicting screen clauses;screen;
-217;syn_screen.at:396;Redundant screen clauses;screen;
-218;syn_screen.at:418;Screen item OCCURS w-/wo relative LINE/COL;occurs;
-219;syn_screen.at:469;VALUE clause missing;screen;
+217;syn_screen.at:412;Redundant screen clauses;screen;
+218;syn_screen.at:445;Screen item OCCURS w-/wo relative LINE/COL;occurs;
+219;syn_screen.at:496;VALUE clause missing;screen;
 220;syn_set.at:24;SET: misc;set;
 221;syn_functions.at:22;ANY LENGTH as function RETURNING item;functions any length;
 222;syn_functions.at:46;REPOSITORY INTRINSIC phrase;functions;
@@ -4701,6 +4701,7 @@ test.conf: missing definitions:
 	No definition of 'accept-auto'
 	No definition of 'console-is-crt'
 	No definition of 'program-name-redefinition'
+	No definition of 'no-echo-means-secure'
 	No definition of 'specify-all-reserved'
 	No definition of 'comment-paragraphs'
 	No definition of 'memory-size-clause'
@@ -4746,7 +4747,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_26
 #AT_START_27
-at_fn_group_banner 27 'configuration.at:445' \
+at_fn_group_banner 27 'configuration.at:446' \
   "runtime configuration" "                          " 1
 at_xfail=no
 (
@@ -4758,15 +4759,15 @@ at_xfail=no
 # check if --runtime-conf exits without error
 # don't compare stdout
 { set +x
-$as_echo "$at_srcdir/configuration.at:450: \$COBCRUN --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN --runtime-conf" "configuration.at:450"
+$as_echo "$at_srcdir/configuration.at:451: \$COBCRUN --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN --runtime-conf" "configuration.at:451"
 ( $at_check_trace; $COBCRUN --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:450"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:451"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4775,9 +4776,9 @@ $at_traceon; }
 # use tr to remove newlines and spaces as the path likely is splitted
 # into two lines
 { set +x
-$as_echo "$at_srcdir/configuration.at:455: \$COBCRUN --runtime-conf | tr -d '\\n ' | \\
+$as_echo "$at_srcdir/configuration.at:456: \$COBCRUN --runtime-conf | tr -d '\\n ' | \\
 grep \"runtime_empty.cfg\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:455"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:456"
 ( $at_check_trace; $COBCRUN --runtime-conf | tr -d '\n ' | \
 grep "runtime_empty.cfg"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4785,14 +4786,14 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:455"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:456"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:457: export COB_RUNTIME_CONFIG=\"\"; \$COBCRUN --runtime-conf | tr -d '\\n ' \\
+$as_echo "$at_srcdir/configuration.at:458: export COB_RUNTIME_CONFIG=\"\"; \$COBCRUN --runtime-conf | tr -d '\\n ' \\
 | grep \"runtime.cfg\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:457"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:458"
 ( $at_check_trace; export COB_RUNTIME_CONFIG=""; $COBCRUN --runtime-conf | tr -d '\n ' \
 | grep "runtime.cfg"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4800,7 +4801,7 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:457"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:458"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4811,7 +4812,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_27
 #AT_START_28
-at_fn_group_banner 28 'configuration.at:464' \
+at_fn_group_banner 28 'configuration.at:465' \
   "runtime configuration file" "                     " 1
 at_xfail=no
 (
@@ -4841,9 +4842,9 @@ _ATEOF
 
 # check if default for physical cancel is still false
 { set +x
-$as_echo "$at_srcdir/configuration.at:481: \$COBCRUN --runtime-conf | \\
+$as_echo "$at_srcdir/configuration.at:482: \$COBCRUN --runtime-conf | \\
 grep \"COB_PHYSICAL_CANCEL\" | grep \"false\" | grep \"default\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:481"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:482"
 ( $at_check_trace; $COBCRUN --runtime-conf | \
 grep "COB_PHYSICAL_CANCEL" | grep "false" | grep "default"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4851,16 +4852,16 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:481"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:482"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 # check if override via -c works and if include works
 { set +x
-$as_echo "$at_srcdir/configuration.at:485: \$COBCRUN -c test2.cfg --runtime-conf | \\
+$as_echo "$at_srcdir/configuration.at:486: \$COBCRUN -c test2.cfg --runtime-conf | \\
 grep \"physical_cancel\" | grep \"true\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:485"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:486"
 ( $at_check_trace; $COBCRUN -c test2.cfg --runtime-conf | \
 grep "physical_cancel" | grep "true"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4868,14 +4869,14 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:485"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:486"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:487: \$COBCRUN -c test.cfg --runtime-conf | \\
+$as_echo "$at_srcdir/configuration.at:488: \$COBCRUN -c test.cfg --runtime-conf | \\
 grep \"physical_cancel\" | grep \"true\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:487"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:488"
 ( $at_check_trace; $COBCRUN -c test.cfg --runtime-conf | \
 grep "physical_cancel" | grep "true"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4883,14 +4884,14 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:487"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:488"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:489: \$COBCRUN -c test3.cfg --runtime-conf | \\
+$as_echo "$at_srcdir/configuration.at:490: \$COBCRUN -c test3.cfg --runtime-conf | \\
 grep \"COB_PHYSICAL_CANCEL\" | grep \"true\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:489"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:490"
 ( $at_check_trace; $COBCRUN -c test3.cfg --runtime-conf | \
 grep "COB_PHYSICAL_CANCEL" | grep "true"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -4898,22 +4899,22 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:489"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:490"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 # check if configuration file loading with full path works
 { set +x
-$as_echo "$at_srcdir/configuration.at:493: \$COBCRUN -c \"\$(_return_path \"\$(pwd)/test.cfg\")\" --runtime-conf"
-at_fn_check_prepare_notrace 'a $(...) command substitution' "configuration.at:493"
+$as_echo "$at_srcdir/configuration.at:494: \$COBCRUN -c \"\$(_return_path \"\$(pwd)/test.cfg\")\" --runtime-conf"
+at_fn_check_prepare_notrace 'a $(...) command substitution' "configuration.at:494"
 ( $at_check_trace; $COBCRUN -c "$(_return_path "$(pwd)/test.cfg")" --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:493"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:494"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4924,7 +4925,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_28
 #AT_START_29
-at_fn_group_banner 29 'configuration.at:499' \
+at_fn_group_banner 29 'configuration.at:500' \
   "runtime configuration: recursive include" "       " 1
 at_xfail=no
 (
@@ -4955,8 +4956,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:517: \$COBCRUN -c test.cfg -r"
-at_fn_check_prepare_dynamic "$COBCRUN -c test.cfg -r" "configuration.at:517"
+$as_echo "$at_srcdir/configuration.at:518: \$COBCRUN -c test.cfg -r"
+at_fn_check_prepare_dynamic "$COBCRUN -c test.cfg -r" "configuration.at:518"
 ( $at_check_trace; $COBCRUN -c test.cfg -r
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -4969,7 +4970,7 @@ test.cfg: 3: configuration file was included here
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:517"
+at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:518"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -4980,7 +4981,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_29
 #AT_START_30
-at_fn_group_banner 30 'configuration.at:528' \
+at_fn_group_banner 30 'configuration.at:529' \
   "runtime configuration: environment priority" "    " 1
 at_xfail=no
 (
@@ -4996,9 +4997,9 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:535: export COB_PHYSICAL_CANCEL=false; \$COBCRUN -c test.cfg --runtime-conf | \\
+$as_echo "$at_srcdir/configuration.at:536: export COB_PHYSICAL_CANCEL=false; \$COBCRUN -c test.cfg --runtime-conf | \\
 grep \"COB_PHYSICAL_CANCEL\" | grep \"false\""
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:535"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:536"
 ( $at_check_trace; export COB_PHYSICAL_CANCEL=false; $COBCRUN -c test.cfg --runtime-conf | \
 grep "COB_PHYSICAL_CANCEL" | grep "false"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -5006,7 +5007,7 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:535"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:536"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -5017,7 +5018,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_30
 #AT_START_31
-at_fn_group_banner 31 'configuration.at:541' \
+at_fn_group_banner 31 'configuration.at:542' \
   "runtime configuration: entries" "                 " 1
 at_xfail=no
 (
@@ -5042,8 +5043,8 @@ _ATEOF
 
 # conf entries must be clean
 { set +x
-$as_echo "$at_srcdir/configuration.at:557: \$COBCRUN -c defunc.cfg --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:557"
+$as_echo "$at_srcdir/configuration.at:558: \$COBCRUN -c defunc.cfg --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:558"
 ( $at_check_trace; $COBCRUN -c defunc.cfg --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -5067,7 +5068,7 @@ defunc.cfg: 10: invalid value '/tmp:/temp' for configuration tag 'trace_file';
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:557"
+at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:558"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -5078,7 +5079,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_31
 #AT_START_32
-at_fn_group_banner 32 'configuration.at:579' \
+at_fn_group_banner 32 'configuration.at:580' \
   "runtime configuration: conf missing" "            " 1
 at_xfail=no
 (
@@ -5100,8 +5101,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:590: \$COBCRUN -c notthere.cfg --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN -c notthere.cfg --runtime-conf" "configuration.at:590"
+$as_echo "$at_srcdir/configuration.at:591: \$COBCRUN -c notthere.cfg --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN -c notthere.cfg --runtime-conf" "configuration.at:591"
 ( $at_check_trace; $COBCRUN -c notthere.cfg --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -5111,13 +5112,13 @@ notthere.cfg: No such file or directory
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:590"
+at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:591"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:594: \$COBCRUN -c defunc.cfg --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:594"
+$as_echo "$at_srcdir/configuration.at:595: \$COBCRUN -c defunc.cfg --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:595"
 ( $at_check_trace; $COBCRUN -c defunc.cfg --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -5128,14 +5129,14 @@ defunc.cfg: 2: configuration file was included here
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:594"
+at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:595"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:600: \$COBCRUN -c defunc2.cfg --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN -c defunc2.cfg --runtime-conf" "configuration.at:600"
+$as_echo "$at_srcdir/configuration.at:601: \$COBCRUN -c defunc2.cfg --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN -c defunc2.cfg --runtime-conf" "configuration.at:601"
 ( $at_check_trace; $COBCRUN -c defunc2.cfg --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -5145,7 +5146,7 @@ defunc2.cfg: 2: 'include' without a value!
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:600"
+at_fn_check_status 1 $at_status "$at_srcdir/configuration.at:601"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -5156,7 +5157,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_32
 #AT_START_33
-at_fn_group_banner 33 'configuration.at:608' \
+at_fn_group_banner 33 'configuration.at:609' \
   "runtime configuration: conf optional" "           " 1
 at_xfail=no
 (
@@ -5173,15 +5174,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:616: \$COBCRUN -c defunc.cfg --runtime-conf"
-at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:616"
+$as_echo "$at_srcdir/configuration.at:617: \$COBCRUN -c defunc.cfg --runtime-conf"
+at_fn_check_prepare_dynamic "$COBCRUN -c defunc.cfg --runtime-conf" "configuration.at:617"
 ( $at_check_trace; $COBCRUN -c defunc.cfg --runtime-conf
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:616"
+at_fn_check_status 0 $at_status "$at_srcdir/configuration.at:617"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -5192,7 +5193,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_33
 #AT_START_34
-at_fn_group_banner 34 'configuration.at:620' \
+at_fn_group_banner 34 'configuration.at:621' \
   "COB_CONFIG_DIR test" "                            " 1
 at_xfail=no
 (
@@ -5211,9 +5212,9 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/configuration.at:630: export COB_CONFIG_DIR=/temp:/tmp; \\
+$as_echo "$at_srcdir/configuration.at:631: export COB_CONFIG_DIR=/temp:/tmp; \\
 \$COMPILE prog.cob"
-at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:630"
+at_fn_check_prepare_notrace 'an embedded newline' "configuration.at:631"
 ( $at_check_trace; export COB_CONFIG_DIR=/temp:/tmp; \
 $COMPILE prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -5224,7 +5225,7 @@ cobc: aborting
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 99 $at_status "$at_srcdir/configuration.at:630"
+at_fn_check_status 99 $at_status "$at_srcdir/configuration.at:631"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15141,6 +15142,8 @@ cat >prog.cob <<'_ATEOF'
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  hello       PIC X.
+       01  foo         PIC X.
+       01  bar         PIC X.
        01  file        PIC X.
 
        PROCEDURE       DIVISION.
@@ -15150,17 +15153,19 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2459: \$COMPILE_ONLY -freserved=hello -fnot-reserved=file prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=hello -fnot-reserved=file prog.cob" "syn_misc.at:2459"
-( $at_check_trace; $COMPILE_ONLY -freserved=hello -fnot-reserved=file prog.cob
+$as_echo "$at_srcdir/syn_misc.at:2461: \$COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob" "syn_misc.at:2461"
+( $at_check_trace; $COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo >>"$at_stderr"; $as_echo "prog.cob: 7: error: 'hello' is a reserved word, but isn't supported
+prog.cob: 8: error: 'foo' is a reserved word, but isn't supported
+prog.cob: 9: error: 'bar' is a reserved word, but isn't supported
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2459"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2461"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15170,7 +15175,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_180
 #AT_START_181
-at_fn_group_banner 181 'syn_misc.at:2465' \
+at_fn_group_banner 181 'syn_misc.at:2469' \
   "Adding aliases" "                                 " 2
 at_xfail=no
 (
@@ -15201,8 +15206,8 @@ _ATEOF
 #])
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2487: \$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob" "syn_misc.at:2487"
+$as_echo "$at_srcdir/syn_misc.at:2491: \$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob" "syn_misc.at:2491"
 ( $at_check_trace; $COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15213,47 +15218,47 @@ alias target 'FOO' is not a default reserved word
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2487"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2491"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2493: \$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob" "syn_misc.at:2493"
+$as_echo "$at_srcdir/syn_misc.at:2497: \$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob" "syn_misc.at:2497"
 ( $at_check_trace; $COMPILE_ONLY -freserved=FOO=DISPLAY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2493"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2497"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2494: \$COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob" "syn_misc.at:2494"
+$as_echo "$at_srcdir/syn_misc.at:2498: \$COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob" "syn_misc.at:2498"
 ( $at_check_trace; $COMPILE_ONLY -freserved=FOO:DISPLAY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2494"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2498"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2495: \$COMPILE_ONLY -freserved=\" FOO = DISPLAY  \" prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=\" FOO = DISPLAY  \" prog.cob" "syn_misc.at:2495"
+$as_echo "$at_srcdir/syn_misc.at:2499: \$COMPILE_ONLY -freserved=\" FOO = DISPLAY  \" prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freserved=\" FOO = DISPLAY  \" prog.cob" "syn_misc.at:2499"
 ( $at_check_trace; $COMPILE_ONLY -freserved=" FOO = DISPLAY  " prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2495"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2499"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15263,7 +15268,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_181
 #AT_START_182
-at_fn_group_banner 182 'syn_misc.at:2499' \
+at_fn_group_banner 182 'syn_misc.at:2503' \
   "Complete specified word list" "                   " 2
 at_xfail=no
 (
@@ -15284,8 +15289,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2511: \$COMPILE_ONLY -std=ibm prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm prog.cob" "syn_misc.at:2511"
+$as_echo "$at_srcdir/syn_misc.at:2515: \$COMPILE_ONLY -std=ibm prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm prog.cob" "syn_misc.at:2515"
 ( $at_check_trace; $COMPILE_ONLY -std=ibm prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15295,33 +15300,33 @@ prog.cob: 7: error: PICTURE clause required for 'SQLCABC'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2511"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2515"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2515: \$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob" "syn_misc.at:2515"
+$as_echo "$at_srcdir/syn_misc.at:2519: \$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob" "syn_misc.at:2519"
 ( $at_check_trace; $COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2515"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2519"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2516: \$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob" "syn_misc.at:2516"
+$as_echo "$at_srcdir/syn_misc.at:2520: \$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob" "syn_misc.at:2520"
 ( $at_check_trace; $COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2516"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2520"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15331,7 +15336,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_182
 #AT_START_183
-at_fn_group_banner 183 'syn_misc.at:2520' \
+at_fn_group_banner 183 'syn_misc.at:2524' \
   "ANY LENGTH item as BY VALUE formal parameter" "   " 2
 at_xfail=no
 (
@@ -15356,8 +15361,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2536: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2536"
+$as_echo "$at_srcdir/syn_misc.at:2540: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2540"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15367,7 +15372,7 @@ prog.cob: 9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2536"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2540"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15377,7 +15382,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_183
 #AT_START_184
-at_fn_group_banner 184 'syn_misc.at:2543' \
+at_fn_group_banner 184 'syn_misc.at:2547' \
   "Swapped SOURCE- and OBJECT-COMPUTER" "            " 2
 at_xfail=no
 (
@@ -15399,8 +15404,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2556: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2556"
+$as_echo "$at_srcdir/syn_misc.at:2560: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2560"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15409,7 +15414,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 8: warning: phrases in non-standard ord
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2556"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2560"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15419,7 +15424,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_184
 #AT_START_185
-at_fn_group_banner 185 'syn_misc.at:2562' \
+at_fn_group_banner 185 'syn_misc.at:2566' \
   "NOT ON EXCEPTION phrases before ON EXCEPTION" "   " 2
 at_xfail=no
 (
@@ -15484,8 +15489,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2618: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2618"
+$as_echo "$at_srcdir/syn_misc.at:2622: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2622"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15495,20 +15500,20 @@ prog.cob: 44: error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2618"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2622"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2622: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2622"
+$as_echo "$at_srcdir/syn_misc.at:2626: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2626"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2622"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2626"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15518,7 +15523,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_185
 #AT_START_186
-at_fn_group_banner 186 'syn_misc.at:2625' \
+at_fn_group_banner 186 'syn_misc.at:2629' \
   "Wrong dialect hints" "                            " 2
 at_xfail=no
 (
@@ -15544,8 +15549,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2642: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2642"
+$as_echo "$at_srcdir/syn_misc.at:2646: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2646"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15555,7 +15560,7 @@ prog.cob: 11: error: unknown statement 'TRANSFORM'; it may exist in another dial
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2642"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2646"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15565,7 +15570,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_186
 #AT_START_187
-at_fn_group_banner 187 'syn_misc.at:2649' \
+at_fn_group_banner 187 'syn_misc.at:2653' \
   "Redundant periods" "                              " 2
 at_xfail=no
 (
@@ -15599,8 +15604,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2672: \$COMPILE_ONLY -std=cobol85 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2672"
+$as_echo "$at_srcdir/syn_misc.at:2676: \$COMPILE_ONLY -std=cobol85 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol85 prog.cob" "syn_misc.at:2676"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol85 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15610,7 +15615,7 @@ prog.cob: 12: warning: ignoring redundant .
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2672"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2676"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15620,7 +15625,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_187
 #AT_START_188
-at_fn_group_banner 188 'syn_misc.at:2679' \
+at_fn_group_banner 188 'syn_misc.at:2683' \
   "STRING / UNSTRING with invalid syntax" "          " 2
 at_xfail=no
 (
@@ -15679,8 +15684,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2729: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2729"
+$as_echo "$at_srcdir/syn_misc.at:2733: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2733"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15698,7 +15703,7 @@ prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2729"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2733"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15708,7 +15713,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_188
 #AT_START_189
-at_fn_group_banner 189 'syn_misc.at:2744' \
+at_fn_group_banner 189 'syn_misc.at:2748' \
   "Use of program-prototypes" "                      " 2
 at_xfail=no
 (
@@ -15735,8 +15740,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2762: \$COMPILE_ONLY -fprogram-prototypes=warning prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -fprogram-prototypes=warning prog.cob" "syn_misc.at:2762"
+$as_echo "$at_srcdir/syn_misc.at:2766: \$COMPILE_ONLY -fprogram-prototypes=warning prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -fprogram-prototypes=warning prog.cob" "syn_misc.at:2766"
 ( $at_check_trace; $COMPILE_ONLY -fprogram-prototypes=warning prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15748,7 +15753,7 @@ prog.cob: 12: warning: CALL/CANCEL with program-prototype-name used
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2762"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_misc.at:2766"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15758,7 +15763,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_189
 #AT_START_190
-at_fn_group_banner 190 'syn_misc.at:2771' \
+at_fn_group_banner 190 'syn_misc.at:2775' \
   "Invalid INSPECT/TRANSFORM operands" "             " 2
 at_xfail=no
 (
@@ -15795,8 +15800,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2799: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2799"
+$as_echo "$at_srcdir/syn_misc.at:2803: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2803"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15815,7 +15820,7 @@ prog.cob: 22: error: invalid target for TRANSFORM
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2799"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2803"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -15825,7 +15830,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_190
 #AT_START_191
-at_fn_group_banner 191 'syn_misc.at:2815' \
+at_fn_group_banner 191 'syn_misc.at:2819' \
   "SIGN clause checks" "                             " 2
 at_xfail=no
 (
@@ -15852,8 +15857,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_misc.at:2833: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2833"
+$as_echo "$at_srcdir/syn_misc.at:2837: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_misc.at:2837"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -15863,7 +15868,7 @@ prog.cob: 13: error: elementary items with SIGN clause must be USAGE DISPLAY or 
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2833"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_misc.at:2837"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -17244,6 +17249,9 @@ cat >prog.cob <<'_ATEOF'
        PROGRAM-ID.      prog.
 
        DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 999.
+
        SCREEN           SECTION.
        01  scr.
            03  VALUE "foo" HIGHLIGHT, LOWLIGHT;
@@ -17253,52 +17261,65 @@ cat >prog.cob <<'_ATEOF'
        PROCEDURE        DIVISION.
            DISPLAY "blah" WITH HIGHLIGHT, LOWLIGHT;
                                ERASE EOL, ERASE EOS;
-                               BLANK LINE, BLANK SCREEN
+                               BLANK LINE, BLANK SCREEN;
+                               SCROLL UP, SCROLL DOWN;
+
+           ACCEPT x WITH AUTO, TAB; SCROLL UP, SCROLL DOWN;
+               UPDATE, NO UPDATE
+
            SET scr ATTRIBUTE HIGHLIGHT ON, LOWLIGHT OFF
            .
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:373: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:373"
+$as_echo "$at_srcdir/syn_screen.at:381: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:381"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo >>"$at_stderr"; $as_echo "prog.cob: 8: error: cannot specify both LOWLIGHT and HIGHLIGHT
-prog.cob: 9: error: cannot specify both ERASE EOS and ERASE EOL
-prog.cob: 10: error: cannot specify both BLANK SCREEN and BLANK LINE
-prog.cob: 13: error: cannot specify both LOWLIGHT and HIGHLIGHT
-prog.cob: 14: error: cannot specify both ERASE EOS and ERASE EOL
-prog.cob: 15: error: cannot specify both BLANK SCREEN and BLANK LINE
-prog.cob: 16: error: cannot specify both HIGHLIGHT and LOWLIGHT
+echo >>"$at_stderr"; $as_echo "prog.cob: 11: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob: 12: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob: 13: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob: 16: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob: 17: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob: 18: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob: 21: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob: 21: error: cannot specify both TAB and AUTO
+prog.cob: 22: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob: 22: error: cannot specify both NO UPDATE and UPDATE
+prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:373"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:381"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:383: \$COMPILE_ONLY -frelax-syntax-checks prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -frelax-syntax-checks prog.cob" "syn_screen.at:383"
+$as_echo "$at_srcdir/syn_screen.at:395: \$COMPILE_ONLY -frelax-syntax-checks prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -frelax-syntax-checks prog.cob" "syn_screen.at:395"
 ( $at_check_trace; $COMPILE_ONLY -frelax-syntax-checks prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo >>"$at_stderr"; $as_echo "prog.cob: 8: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
-prog.cob: 9: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
-prog.cob: 10: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
-prog.cob: 13: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
-prog.cob: 14: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
-prog.cob: 15: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
-prog.cob: 16: error: cannot specify both HIGHLIGHT and LOWLIGHT
+echo >>"$at_stderr"; $as_echo "prog.cob: 11: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 12: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 13: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob: 16: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob: 17: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob: 18: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob: 21: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob: 21: warning: cannot specify both TAB and AUTO; TAB is ignored
+prog.cob: 22: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob: 22: warning: cannot specify both NO UPDATE and UPDATE; NO UPDATE is ignored
+prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:383"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:395"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -17309,7 +17330,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_216
 #AT_START_217
-at_fn_group_banner 217 'syn_screen.at:396' \
+at_fn_group_banner 217 'syn_screen.at:412' \
   "Redundant screen clauses" "                       " 2
 at_xfail=no
 (
@@ -17324,26 +17345,37 @@ cat >prog.cob <<'_ATEOF'
        PROGRAM-ID.      prog.
 
        DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 999.
+
        SCREEN           SECTION.
        01  scr.
            03  HIGHLIGHT FULL.
                05  HIGHLIGHT FULL.
                    07  FULL FULL VALUE "foo".
+
+       PROCEDURE        DIVISION.
+           DISPLAY "hello" WITH BACKGROUND-COLOR 2, BACKGROUND-COLOR 2
+           ACCEPT x WITH HIGHLIGHT, HIGHLIGHT, UPDATE, DEFAULT
+           .
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:411: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:411"
+$as_echo "$at_srcdir/syn_screen.at:435: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:435"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo >>"$at_stderr"; $as_echo "prog.cob: 10: error: duplicate FULL clause
+echo >>"$at_stderr"; $as_echo "prog.cob: 13: error: duplicate FULL clause
+prog.cob: 16: error: duplicate BACKGROUND-COLOR clause
+prog.cob: 17: error: duplicate HIGHLIGHT clause
+prog.cob: 17: error: duplicate UPDATE clause
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:411"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:435"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -17354,7 +17386,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_217
 #AT_START_218
-at_fn_group_banner 218 'syn_screen.at:418' \
+at_fn_group_banner 218 'syn_screen.at:445' \
   "Screen item OCCURS w-/wo relative LINE/COL" "     " 2
 at_xfail=no
 (
@@ -17405,8 +17437,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:456: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:456"
+$as_echo "$at_srcdir/syn_screen.at:483: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:483"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -17415,14 +17447,14 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 7: error: relative LINE/COLUMN clause r
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:456"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:483"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:460: \$COMPILE_ONLY prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_screen.at:460"
+$as_echo "$at_srcdir/syn_screen.at:487: \$COMPILE_ONLY prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog2.cob" "syn_screen.at:487"
 ( $at_check_trace; $COMPILE_ONLY prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -17432,21 +17464,21 @@ prog2.cob: 9: error: relative LINE/COLUMN clause required with OCCURS
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:460"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:487"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:465: \$COMPILE_ONLY prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog3.cob" "syn_screen.at:465"
+$as_echo "$at_srcdir/syn_screen.at:492: \$COMPILE_ONLY prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog3.cob" "syn_screen.at:492"
 ( $at_check_trace; $COMPILE_ONLY prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_screen.at:465"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_screen.at:492"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -17457,7 +17489,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_218
 #AT_START_219
-at_fn_group_banner 219 'syn_screen.at:469' \
+at_fn_group_banner 219 'syn_screen.at:496' \
   "VALUE clause missing" "                           " 2
 at_xfail=no
 (
@@ -17483,8 +17515,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_screen.at:486: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:486"
+$as_echo "$at_srcdir/syn_screen.at:513: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_screen.at:513"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -17493,7 +17525,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 9: error: syntax error, unexpected Lite
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:486"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_screen.at:513"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -21193,10 +21225,10 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0006 ALPHANUMERIC   03       COMMAND                    X(6)
 0001 ALPHANUMERIC   03       FILLER                     X
 0005 ALPHANUMERIC   03       A-FIELD                    9(5)
-0005 ALPHANUMERIC   03       A-ALPHA                    X(5)
+0005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
 0004 ALPHANUMERIC   03       FILLER                     X(4)
 0005 ALPHANUMERIC   03       B-FIELD                    9(5)
-0005 ALPHANUMERIC   03       B-ALPHA                    X(5)
+0005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
 0054 ALPHANUMERIC   03       FILLER                     X(54)
 0005 ALPHANUMERIC   02     FILLER                       X(5)
 

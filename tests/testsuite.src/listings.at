@@ -2018,10 +2018,10 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0006 ALPHANUMERIC   03       COMMAND                    X(6)
 0001 ALPHANUMERIC   03       FILLER                     X
 0005 ALPHANUMERIC   03       A-FIELD                    9(5)
-0005 ALPHANUMERIC   03       A-ALPHA                    X(5)
+0005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
 0004 ALPHANUMERIC   03       FILLER                     X(4)
 0005 ALPHANUMERIC   03       B-FIELD                    9(5)
-0005 ALPHANUMERIC   03       B-ALPHA                    X(5)
+0005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
 0054 ALPHANUMERIC   03       FILLER                     X(54)
 0005 ALPHANUMERIC   02     FILLER                       X(5)
 
@@ -2050,7 +2050,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0002 ALPHANUMERIC   02     DISPOSITION                  X(2)
 0080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
 
-0008 GROUP          01   UPSI-BYTE                       
+0008 GROUP          01   UPSI-BYTE                      
 0001 ALPHANUMERIC   02     UPSI-BIT                     X
 
 0082 GROUP          01   MESSAGE-LOG                     
