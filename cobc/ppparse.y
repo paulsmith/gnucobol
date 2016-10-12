@@ -678,18 +678,18 @@ set_choice:
 	}
 	if (!strcasecmp (p, "FIXED")) {
 		cb_source_format = CB_FORMAT_FIXED;
-		cb_current_file->source_format = CB_FORMAT_FIXED;
 		cb_text_column = cb_config_text_column;
 	} else if (!strcasecmp (p, "FREE")) {
 		cb_source_format = CB_FORMAT_FREE;
-		cb_current_file->source_format = CB_FORMAT_FREE;
 	} else if (!strcasecmp (p, "VARIABLE")) {
 		cb_source_format = CB_FORMAT_FIXED;
-		cb_current_file->source_format = CB_FORMAT_FIXED;
 		/* This is an arbitrary value; perhaps change later? */
 		cb_text_column = 500;
 	} else {
 		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
+	}
+	if (cb_src_list_file) {
+		cb_current_file->source_format = cb_source_format;
 	}
   }
 | NOFOLDCOPYNAME

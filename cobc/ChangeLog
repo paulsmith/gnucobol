@@ -6,6 +6,10 @@
 	* parser.y (setup_occurs): check for TO without DEPENDING (allow for
 	  relaxed syntax)
 	* cobc.c (print_fields): print fixed size OCCURS without TO phrase
+	* ppparse.y (set_choice): fixed bug #328 SIGSEGV for SET SOURCEFORMAT
+	  directive without active listing
+	* parser.y (mnemonic_name_clause): fixed buffer overflow on long
+	  (unknown) system names
 
 2016-10-11  Dave Pitts <dpitts@cozx.com>
 

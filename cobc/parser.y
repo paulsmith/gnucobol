@@ -2729,6 +2729,7 @@ mnemonic_name_clause:
 	} else {
 		/* get system name and revert word-combination of scanner.l,
 		   if necessary (e.g. SWITCH A <--> SWITCH_A) */
+		system_name[15] = 0;
 		strncpy(system_name, CB_NAME ($1), 15);
 		if (system_name [6] == '_') {
 			system_name [6] = ' ';
