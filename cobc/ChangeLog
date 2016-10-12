@@ -1,9 +1,4 @@
 
-2016-10-11  Dave Pitts <dpitts@cozx.com>
-
-	* cobc.c: Changed OCCURS <minimum> TO <maximum> to print_fields() to
-	  only print with the DEPENDING clause.
-
 2016-10-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* parser.y: refactored handling of occurs to (setup_occurs) and

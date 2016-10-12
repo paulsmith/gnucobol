@@ -3829,17 +3829,10 @@ print_fields (int lvl, struct cb_field *top)
 			 	picture);
 		} else if (top->depending) {
 		   	item_size *= top->occurs_max;
-			if (top->depending) {
-				fprintf (cb_src_list_file,
-					"%04d %-14.14s %02d   %-30.30s OCCURS %d TO %d\n",
-			 		item_size, type, top->level, lcl_name,
-			 		top->occurs_min, top->occurs_max);
-			} else {
-				fprintf (cb_src_list_file,
-					"%04d %-14.14s %02d   %-30.30s OCCURS %d\n",
-			 		item_size, type, top->level, lcl_name,
-			 		top->occurs_max);
-			}
+			fprintf (cb_src_list_file,
+				"%04d %-14.14s %02d   %-30.30s OCCURS %d TO %d\n",
+			 	item_size, type, top->level, lcl_name,
+			 	top->occurs_min, top->occurs_max);
 		} else if (top->flag_occurs) {
 		   	item_size *= top->occurs_max;
 			fprintf (cb_src_list_file,
