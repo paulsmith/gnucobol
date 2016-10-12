@@ -1067,7 +1067,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Symbols])
-AT_KEYWORDS([listing])
+AT_KEYWORDS([listing OCCURS REDEFINES POINTER COMP error warning messages])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
@@ -1660,7 +1660,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0004 ALPHANUMERIC   05     FL8                          X(04)
 0004 ALPHANUMERIC-R 05     FL9                          9(04)
 0060 ALPHANUMERIC   05     FLA
-0040 ALPHANUMERIC   10       FLB                        OCCURS 1 TO 20
+0040 ALPHANUMERIC   10       FLB                        OCCURS 20
 0002 ALPHANUMERIC   15         FLC                      X(02)
 0020 ALPHANUMERIC   10       FLD                        X(20)
 0100 ALPHANUMERIC   05     FLD1                         X(100)
@@ -2445,7 +2445,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Variable format])
-AT_KEYWORDS([COBOL 2002 listing])
+AT_KEYWORDS([COBOL2002 listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g

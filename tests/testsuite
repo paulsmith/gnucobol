@@ -709,8 +709,8 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 97;syn_occurs.at:149;Nested OCCURS clause;occurs;
 98;syn_occurs.at:186;OCCURS DEPENDING with wrong size;occurs range;
 99;syn_occurs.at:222;OCCURS DEPENDING followed by another field;occurs extensions;
-100;syn_occurs.at:264;OCCURS DEPENDING without TO clause;occurs;
-101;syn_occurs.at:287;OCCURS size check;occurs;
+100;syn_occurs.at:263;OCCURS with unmatched DEPENDING / TO phrases;occurs;
+101;syn_occurs.at:297;OCCURS size check;occurs;
 102;syn_redefines.at:28;REDEFINES: not following entry-name;redefines;
 103;syn_redefines.at:49;REDEFINES: level 02 by 01;redefines;
 104;syn_redefines.at:70;REDEFINES: level 03 by 02;redefines;
@@ -853,12 +853,12 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 241;listings.at:663;Wide listing;listing;
 242;listings.at:760;Two source files;listing;
 243;listings.at:839;Error/Warning messages;listing;
-244;listings.at:1069;Symbols;listing;
+244;listings.at:1069;Symbols;listing occurs redefines pointer comp error warning messages;
 245;listings.at:1683;Conditional compilation;listing;
 246;listings.at:1750;LISTING ON/OFF;listing;
 247;listings.at:1838;File descriptions;listing;
 248;listings.at:2185;Invalid PICTURE strings;listing;
-249;listings.at:2447;Variable format;cobol 2002 listing;
+249;listings.at:2447;Variable format;cobol2002 listing;
 250;run_fundamental.at:23;DISPLAY literals;fundamental;
 251;run_fundamental.at:85;DISPLAY literals, DECIMAL-POINT is COMMA;fundamental;
 252;run_fundamental.at:124;Hexadecimal literal;fundamental;
@@ -8755,8 +8755,8 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_99
 #AT_START_100
-at_fn_group_banner 100 'syn_occurs.at:264' \
-  "OCCURS DEPENDING without TO clause" "             " 2
+at_fn_group_banner 100 'syn_occurs.at:263' \
+  "OCCURS with unmatched DEPENDING / TO phrases" "   " 2
 at_xfail=no
 (
   $as_echo "100. $at_setup_line: testing $at_desc ..."
@@ -8771,38 +8771,59 @@ cat >prog.cob <<'_ATEOF'
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01 Y             PIC 9.
-       01 XX.
+       01 XTAB.
           03 X  PIC X OCCURS 10 DEPENDING ON Y.
+       01 XTAB2.
+          03 X2 PIC X OCCURS 1 TO 10.
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_occurs.at:277: \$COMPILE_ONLY -std=cobol2014 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_occurs.at:277"
+$as_echo "$at_srcdir/syn_occurs.at:278: \$COMPILE_ONLY -std=cobol2014 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=cobol2014 prog.cob" "syn_occurs.at:278"
 ( $at_check_trace; $COMPILE_ONLY -std=cobol2014 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo >>"$at_stderr"; $as_echo "prog.cob: 8: error: ODO without TO clause does not conform to COBOL 2014
+echo >>"$at_stderr"; $as_echo "prog.cob: 8: error: ODO without TO phrase does not conform to COBOL 2014
+prog.cob: 10: error: TO phrase without DEPENDING phrase
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_occurs.at:277"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_occurs.at:278"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_occurs.at:280: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_occurs.at:280"
+$as_echo "$at_srcdir/syn_occurs.at:282: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_occurs.at:282"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
-echo >>"$at_stderr"; $as_echo "prog.cob: 8: warning: ODO without TO clause used
+echo >>"$at_stderr"; $as_echo "prog.cob: 8: warning: ODO without TO phrase used
+prog.cob: 10: error: TO phrase without DEPENDING phrase
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/syn_occurs.at:280"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_occurs.at:282"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/syn_occurs.at:286: \$COMPILE_ONLY -frelax-syntax prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -frelax-syntax prog.cob" "syn_occurs.at:286"
+( $at_check_trace; $COMPILE_ONLY -frelax-syntax prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "prog.cob: 8: warning: ODO without TO phrase used
+prog.cob: 10: warning: TO phrase without DEPENDING phrase
+prog.cob: 10: warning: maximum number of occurences assumed to be exact number
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_occurs.at:286"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -8813,7 +8834,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_100
 #AT_START_101
-at_fn_group_banner 101 'syn_occurs.at:287' \
+at_fn_group_banner 101 'syn_occurs.at:297' \
   "OCCURS size check" "                              " 2
 at_xfail=no
 (
@@ -8838,24 +8859,24 @@ _ATEOF
 
 
 # Don't check actual output here as the actual limit depends on INT_MAX, therefore
-# all entries may raise this error but the last "exceeds limit" is guaranteed.
+# all entries may raise this error but only the last error message is guaranteed.
 { set +x
-$as_echo "$at_srcdir/syn_occurs.at:305: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_occurs.at:305"
+$as_echo "$at_srcdir/syn_occurs.at:315: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_occurs.at:315"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_occurs.at:305"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_occurs.at:315"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/syn_occurs.at:306: \$COMPILE_ONLY prog.cob 2>&1 | \\
+$as_echo "$at_srcdir/syn_occurs.at:316: \$COMPILE_ONLY prog.cob 2>&1 | \\
 grep \"prog.cob: 11: error: numeric literal '9223372036854775808' exceeds limit\""
-at_fn_check_prepare_notrace 'an embedded newline' "syn_occurs.at:306"
+at_fn_check_prepare_notrace 'an embedded newline' "syn_occurs.at:316"
 ( $at_check_trace; $COMPILE_ONLY prog.cob 2>&1 | \
 grep "prog.cob: 11: error: numeric literal '9223372036854775808' exceeds limit"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -8863,7 +8884,7 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/syn_occurs.at:306"
+at_fn_check_status 0 $at_status "$at_srcdir/syn_occurs.at:316"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -20780,7 +20801,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0004 ALPHANUMERIC   05     FL8                          X(04)
 0004 ALPHANUMERIC-R 05     FL9                          9(04)
 0060 ALPHANUMERIC   05     FLA
-0040 ALPHANUMERIC   10       FLB                        OCCURS 1 TO 20
+0040 ALPHANUMERIC   10       FLB                        OCCURS 20
 0002 ALPHANUMERIC   15         FLC                      X(02)
 0020 ALPHANUMERIC   10       FLD                        X(20)
 0100 ALPHANUMERIC   05     FLD1                         X(100)

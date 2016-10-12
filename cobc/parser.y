@@ -493,6 +493,72 @@ setup_use_file (struct cb_file *fileptr)
 }
 
 static void
+emit_duplicate_clause_message (const char *clause)
+{
+	if (cb_relaxed_syntax_checks) {
+		cb_warning (_("duplicate %s clause"), clause);
+	} else {
+		cb_error (_("duplicate %s clause"), clause);
+	}
+}
+
+static void
+check_repeated (const char *clause, const cob_flags_t bitval, cob_flags_t *already_seen)
+{
+	if (*already_seen & bitval) {
+		emit_duplicate_clause_message (clause);
+	} else {
+		*already_seen |= bitval;
+	}
+}
+
+static void
+setup_occurs (void)
+{
+	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
+	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
+		cb_error (_ ("maximum OCCURS depth exceeded (%d)"),
+			COB_MAX_SUBSCRIPTS);
+	} else {
+		current_field->indexes++;
+	}
+	if (current_field->flag_item_based) {
+		cb_error (_ ("%s and %s are mutually exclusive"), "BASED", "OCCURS");
+	} else if (current_field->flag_external) {
+		cb_error (_ ("%s and %s are mutually exclusive"), "EXTERNAL", "OCCURS");
+	}
+	current_field->flag_occurs = 1;
+}
+
+static void
+setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
+{
+	if (occurs_max) {
+		current_field->occurs_min = cb_get_int (occurs_min);
+		current_field->occurs_max = cb_get_int (occurs_max);
+		if (!current_field->depending) {
+			if (cb_relaxed_syntax_checks) {
+				cb_warning (_ ("TO phrase without DEPENDING phrase"));
+				cb_warning (_ ("maximum number of occurences assumed to be exact number"));
+				current_field->occurs_min = 1; /* Checkme: why using 1 ? */
+			} else {
+				cb_error (_ ("TO phrase without DEPENDING phrase"));
+			}
+		}
+		if (current_field->occurs_max > 0 &&
+			current_field->occurs_max <= current_field->occurs_min) {
+			cb_error (_ ("OCCURS TO must be greater than OCCURS FROM"));
+		}
+	} else {
+		current_field->occurs_min = 1; /* Checkme: why using 1 ? */
+		current_field->occurs_max = cb_get_int (occurs_min);
+		if (current_field->depending) {
+			cb_verify (cb_odo_without_to, _ ("ODO without TO phrase"));
+		}
+	}
+}
+
+static void
 check_relaxed_syntax (const unsigned int lev)
 {
 	const char	*s;
@@ -1052,26 +1118,6 @@ set_current_field (cb_tree level, cb_tree name)
 	}
 
 	return 0;
-}
-
-static void
-emit_duplicate_clause_message (const char *clause)
-{
-	if (cb_relaxed_syntax_checks) {
-		cb_warning (_("duplicate %s clause"), clause);
-	} else {
-		cb_error (_("duplicate %s clause"), clause);
-	}
-}
-
-static void
-check_repeated (const char *clause, const cob_flags_t bitval, cob_flags_t *already_seen)
-{
-	if (*already_seen & bitval) {
-		emit_duplicate_clause_message (clause);
-	} else {
-		*already_seen |= bitval;
-	}
 }
 
 static void
@@ -4939,18 +4985,9 @@ report_occurs_clause:
   OCCURS integer _occurs_to_integer _times
   _occurs_depending _occurs_step
   {
-	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
-	if (current_field->depending && !($3)) {
-		cb_verify (cb_odo_without_to, _("ODO without TO clause"));
-	}
-	current_field->occurs_min = $3 ? cb_get_int ($2) : 1;
-	current_field->occurs_max = $3 ? cb_get_int ($3) : cb_get_int ($2);
-	current_field->indexes++;
-	if (current_field->indexes > COB_MAX_SUBSCRIPTS) {
-		cb_error (_("maximum OCCURS depth exceeded (%d)"),
-			  COB_MAX_SUBSCRIPTS);
-	}
-	current_field->flag_occurs = 1;
+	/* most of the field attributes are set when parsing the phrases */;
+	setup_occurs ();
+	setup_occurs_min_max ($2, $3);
   }
 ;
 
@@ -4965,52 +5002,16 @@ _occurs_step:
 
 occurs_clause:
   OCCURS integer _occurs_to_integer _times
-  _occurs_depending occurs_keys _occurs_indexed
+  _occurs_depending _occurs_keys _occurs_indexed
   {
-	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
-	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
-		cb_error (_("maximum OCCURS depth exceeded (%d)"),
-			  COB_MAX_SUBSCRIPTS);
-	} else {
-		current_field->indexes++;
-	}
-	if (current_field->flag_item_based) {
-		cb_error (_("%s and %s are mutually exclusive"), "BASED", "OCCURS");
-	} else if (current_field->flag_external) {
-		cb_error (_("%s and %s are mutually exclusive"), "EXTERNAL", "OCCURS");
-	}
-	if ($3) {
-		current_field->occurs_min = cb_get_int ($2);
-		current_field->occurs_max = cb_get_int ($3);
-		if (current_field->depending &&
-			current_field->occurs_max > 0 &&
-			current_field->occurs_max <= current_field->occurs_min) {
-			cb_error (_("OCCURS TO must be greater than OCCURS FROM"));
-		}
-	} else {
-		current_field->occurs_min = 1;
-		current_field->occurs_max = cb_get_int ($2);
-		if (current_field->depending) {
-			cb_verify (cb_odo_without_to, _("ODO without TO clause"));
-		}
-	}
-	current_field->flag_occurs = 1;
+	/* most of the field attributes are set when parsing the phrases */;
+	setup_occurs ();
+	setup_occurs_min_max ($2, $3);
   }
 | OCCURS DYNAMIC _capacity_in _occurs_from_integer
-  _occurs_to_integer _occurs_initialized occurs_keys _occurs_indexed
+  _occurs_to_integer _occurs_initialized _occurs_keys _occurs_indexed
   {
-	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
-	if (current_field->indexes == COB_MAX_SUBSCRIPTS) {
-		cb_error (_("maximum OCCURS depth exceeded (%d)"),
-			  COB_MAX_SUBSCRIPTS);
-	} else {
-		current_field->indexes++;
-	}
-	if (current_field->flag_item_based) {
-		cb_error (_("%s and %s are mutually exclusive"), "BASED", "OCCURS");
-	} else if (current_field->flag_external) {
-		cb_error (_("%s and %s are mutually exclusive"), "EXTERNAL", "OCCURS");
-	}
+	setup_occurs ();
 	current_field->occurs_min = $4 ? cb_get_int ($4) : 0;
 	if ($5) {
 		current_field->occurs_max = cb_get_int ($5);
@@ -5021,7 +5022,6 @@ occurs_clause:
 		current_field->occurs_max = 0;
 	}
 	CB_PENDING("OCCURS DYNAMIC");
-	current_field->flag_occurs = 1;
   }
 ;
 
@@ -5057,7 +5057,7 @@ _occurs_initialized:
   }
 ;
 
-occurs_keys:
+_occurs_keys:
   _occurs_key_list
   {
 	if ($1) {
