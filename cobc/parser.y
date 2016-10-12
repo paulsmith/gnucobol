@@ -466,7 +466,7 @@ literal_value (cb_tree x)
 }
 
 static void
-set_up_use_file (struct cb_file *fileptr)
+setup_use_file (struct cb_file *fileptr)
 {
 	struct cb_file	*newptr;
 
@@ -746,7 +746,7 @@ end_scope_of_program_name (struct cb_program *program)
 }
 
 static int
-set_up_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 {
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -987,7 +987,7 @@ check_for_duplicate_prototype (const cb_tree prototype_name,
 }
 
 static void
-set_up_prototype (cb_tree prototype_name, cb_tree ext_name,
+setup_prototype (cb_tree prototype_name, cb_tree ext_name,
 		  const int type, const int is_current_element)
 {
 	cb_tree	prototype;
@@ -2294,11 +2294,11 @@ program_id_paragraph:
   }
   TOK_DOT program_id_name _as_literal
   {
-	if (set_up_program ($4, $5, CB_PROGRAM_TYPE)) {
+	if (setup_program ($4, $5, CB_PROGRAM_TYPE)) {
 		YYABORT;
 	}
 
-	set_up_prototype ($4, $5, CB_PROGRAM_TYPE, 1);
+	setup_prototype ($4, $5, CB_PROGRAM_TYPE, 1);
   }
   _program_type TOK_DOT
   {
@@ -2314,10 +2314,10 @@ function_id_paragraph:
   }
   TOK_DOT program_id_name _as_literal TOK_DOT
   {
-	if (set_up_program ($4, $5, CB_FUNCTION_TYPE)) {
+	if (setup_program ($4, $5, CB_FUNCTION_TYPE)) {
 		YYABORT;
 	}
-	set_up_prototype ($4, $5, CB_FUNCTION_TYPE, 1);
+	setup_prototype ($4, $5, CB_FUNCTION_TYPE, 1);
 	cobc_cs_check = 0;
 	cobc_in_id = 0;
   }
@@ -2595,7 +2595,7 @@ repository_name:
 | FUNCTION WORD _as_literal
   {
 	if ($2 != cb_error_node) {
-		set_up_prototype ($2, $3, CB_FUNCTION_TYPE, 0);
+		setup_prototype ($2, $3, CB_FUNCTION_TYPE, 0);
 	}
   }
 | FUNCTION repository_name_list INTRINSIC
@@ -2603,7 +2603,7 @@ repository_name:
   {
 	  if ($2 != cb_error_node
 	      && cb_verify (cb_program_prototypes, _("PROGRAM phrase"))) {
-		set_up_prototype ($2, $3, CB_PROGRAM_TYPE, 0);
+		setup_prototype ($2, $3, CB_PROGRAM_TYPE, 0);
 	}
   }
 ;
@@ -10161,7 +10161,7 @@ use_file_exception_target:
 
 	for (l = $1; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
-			set_up_use_file (CB_FILE (cb_ref (CB_VALUE (l))));
+			setup_use_file (CB_FILE (cb_ref (CB_VALUE (l))));
 		}
 	}
   }

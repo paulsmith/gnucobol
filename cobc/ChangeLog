@@ -481,7 +481,7 @@
 	* parser.y, error.c: added hints to change dialect if an undefined word
 	  is used which is reserved in another dialect (see Wish List #107).
 	* parser.y (_identification_header): reinstate ID DIVISION option.
-	* parser.y (set_up_program): fixed bug #255, where function could be
+	* parser.y (setup_program): fixed bug #255, where function could be
 	  defined within a program.
 
 2016-06-21  Ron Norman <rjn@inglenet.com>
@@ -670,7 +670,6 @@
 	* tree.c (cb_build_repo_func_prototype): dropped repo_ from name.
 	* parser.y, tree.c (cb_build_func_prototype): made FUNCTION-ID
 	  generate implicit REPOSITORY entry to permit recursion.
-	* parser.y: corrected spelling: setup_* to set_up_*.
 	* scanner.l: moved code for finding program based on program-name to
 	  separate function (cb_find_defined_program).
 	* typeck.c: stopped function-names being converted to upper-case.
