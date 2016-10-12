@@ -1028,7 +1028,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Continuation Indicator - too many lines])
-AT_KEYWORDS([misc fixed literals])
+AT_KEYWORDS([misc fixed literals listing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1575,6 +1575,12 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 538: error: buffer overrun - too many continuation lines
 ])
 
+# extra test with listing as this is an edge case there
+AT_CAPTURE_FILE([prog.lst])
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
+[prog.cob: 538: error: buffer overrun - too many continuation lines
+])
+
 AT_CLEANUP
 
 
@@ -1600,7 +1606,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Literal too long])
-AT_KEYWORDS([misc literals literal-length continuation])
+AT_KEYWORDS([misc literals literal-length continuation listing])
 
 
 AT_DATA([prog.cob], [
@@ -1803,12 +1809,12 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=default prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: invalid literal: '                                   ...'
 prog.cob: 9: error: literal length exceeds 8191 characters
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=default -free prog2.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -free prog2.cob], [1], [],
 [prog2.cob: 9: error: invalid literal: '                                   ...'
 prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
 ])
@@ -1831,6 +1837,19 @@ prog.cob: 9: error: literal length exceeds 160 characters
 AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
 [prog.cob: 9: error: invalid literal: '                                   ...'
 prog.cob: 9: error: literal length exceeds 160 characters
+])
+
+# extra test with listing as this is an edge case there
+AT_CAPTURE_FILE([prog.lst])
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
+[prog.cob: 9: error: invalid literal: '                                   ...'
+prog.cob: 9: error: literal length exceeds 8191 characters
+])
+
+AT_CAPTURE_FILE([prog2.lst])
+AT_CHECK([$COMPILE_ONLY -free -t prog2.lst prog2.cob], [1], [],
+[prog2.cob: 9: error: invalid literal: '                                   ...'
+prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
 ])
 
 AT_CLEANUP
