@@ -2035,6 +2035,9 @@ process_command_line (const int argc, char **argv)
 	}
 #endif
 
+	/* Flags that are active by standard */
+	cb_flag_c_decl_for_static_call = 1;
+
 	/* First run of getopt: handle std/conf and all listing options
 	   We need to postpone single configuration flags as we need
 	   a full configuration to be loaded before */

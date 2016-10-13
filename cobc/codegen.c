@@ -4828,12 +4828,14 @@ output_call (struct cb_call *p)
 					nlp->nested_prog->toplev_count);
 			} else {
 				output ("%s", name_str);
-				if (p->call_returning == cb_null) {
-					lookup_static_call (name_str, p->convention, COB_RETURN_NULL);
-				} else if (ret_ptr == 1) {
-					lookup_static_call (name_str, p->convention, COB_RETURN_ADDRESS_OF);
-				} else {
-					lookup_static_call (name_str, p->convention, COB_RETURN_INT);
+				if (cb_flag_c_decl_for_static_call) {
+					if (p->call_returning == cb_null) {
+						lookup_static_call (name_str, p->convention, COB_RETURN_NULL);
+					} else if (ret_ptr == 1) {
+						lookup_static_call (name_str, p->convention, COB_RETURN_ADDRESS_OF);
+					} else {
+						lookup_static_call (name_str, p->convention, COB_RETURN_INT);
+					}
 				}
 			}
 		}

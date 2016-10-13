@@ -62,6 +62,9 @@ CB_FLAG_NQ (1, "intrinsics", 10,
 CB_FLAG (cb_flag_static_call, 0, "static-call",
 	 _("output static function calls for the CALL statement"))
 
+CB_FLAG (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
+	 _("generate C function declations for subroutines with static CALL"))
+
 CB_FLAG (cb_flag_computed_goto, 0, "computed-goto",
 	 _("generate computed goto C statements"))
 
