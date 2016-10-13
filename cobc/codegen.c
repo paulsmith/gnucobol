@@ -8757,6 +8757,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	last_section = NULL;
 	call_cache = NULL;
 	func_call_cache = NULL;
+	static_call_cache = NULL;
 	label_cache = NULL;
 	local_base_cache = NULL;
 	local_field_cache = NULL;

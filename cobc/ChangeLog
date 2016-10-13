@@ -1,4 +1,8 @@
 
+2016-10-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* codegen.c: fixed missing initialization of static_call_cache
+
 2016-10-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* parser.y: refactored handling of occurs to (setup_occurs) and
