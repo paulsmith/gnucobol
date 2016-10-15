@@ -1,4 +1,8 @@
 
+2016-10-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: re-fixed COB_ONCE
+
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h: added cob_flags_t typedef for variables made of bit flags.
