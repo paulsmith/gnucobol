@@ -73,9 +73,9 @@ COB_SYSTEM_GEN ("C$TOLOWER",		2, cob_sys_tolower)
 COB_SYSTEM_GEN ("C$TOUPPER",		2, cob_sys_toupper)
 
 
-COB_SYSTEM_GEN ("\221",			2, cob_sys_x91)
-COB_SYSTEM_GEN ("\344",			0, cob_sys_clear_screen)
-COB_SYSTEM_GEN ("\345",			0, cob_sys_sound_bell)
-COB_SYSTEM_GEN ("\364",			2, cob_sys_xf4)
-COB_SYSTEM_GEN ("\365",			2, cob_sys_xf5)
+COB_SYSTEM_GEN ("\x91",			2, cob_sys_x91)
+COB_SYSTEM_GEN ("\xE4",			0, cob_sys_clear_screen)
+COB_SYSTEM_GEN ("\xE5",			0, cob_sys_sound_bell)
+COB_SYSTEM_GEN ("\xF4",			2, cob_sys_xf4)
+COB_SYSTEM_GEN ("\xF5",			2, cob_sys_xf5)
 

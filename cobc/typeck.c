@@ -834,7 +834,6 @@ void
 cb_list_system (void)
 {
 	const struct system_table	*psyst;
-	const char			*n;
 
 	putchar ('\n');
 
@@ -843,31 +842,11 @@ cb_list_system (void)
 	putchar ('\n');
 
 	for (psyst = system_tab; psyst->syst_name; psyst++) {
-		switch (*(unsigned char *)(psyst->syst_name)) {
-		case 'C':
-		case 'S':
-			n = psyst->syst_name;
-			break;
-		case 0xF4:
-			n = "X\"F4\"";
-			break;
-		case 0xF5:
-			n = "X\"F5\"";
-			break;
-		case 0x91:
-			n = "X\"91\"";
-			break;
-		case 0xE4:
-			n = "X\"E4\"";
-			break;
-		case 0xE5:
-			n = "X\"E5\"";
-			break;
-		default:
-			n = "";
-			break;
+		if (strlen (psyst->syst_name) != 1) {
+			printf ("%-32s%d\n", psyst->syst_name, psyst->syst_params);
+		} else {
+			printf ("X\"%2X\"%-27s%d\n", (unsigned char)psyst->syst_name[0], "", psyst->syst_params);
 		}
-		printf ("%-32s%d\n", n, psyst->syst_params);
 	}
 }
 
