@@ -384,6 +384,7 @@ AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [1], [],
 test.conf: missing definitions:
 	No definition of 'tab-width'
 	No definition of 'text-column'
+	No definition of 'pic-length'
 	No definition of 'word-length'
 	No definition of 'literal-length'
 	No definition of 'numeric-literal-length'

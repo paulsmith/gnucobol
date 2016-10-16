@@ -48,6 +48,18 @@
 	* parser.y: improved support for ACUCOBOL screen phrases
 	* config.def: added no-echo-means-secure config option
 
+2016-09-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobc.c: use at least one tab for spacing between option and text in help
+	* config.c: check range (defined in config.def) for all integer flags
+
+2016-09-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* tree.c (cb_build_picture), config.def: feature-request #173
+	  compiler configuration pic-length for number of characters
+	  in PICTURE clause 
+	* config.c: check range (defined in config.def) for all integer flags
+
 2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* codegen.c: fix bug #316 static linking with stdcall was broken

@@ -74,6 +74,7 @@ enum cb_format {
 /* Stringify macros */
 #define CB_STRINGIFY(s)			#s
 #define CB_XSTRINGIFY(s)		CB_STRINGIFY(s)
+#define CB_XRANGE(min,max)		CB_XSTRINGIFY(min) ".." CB_XSTRINGIFY(max)
 
 /* ASSIGN clause interpretation */
 #define CB_ASSIGN_MF			0	/* Micro Focus compatibility */
@@ -434,11 +435,16 @@ extern size_t			cobc_check_valid_name (const char *,
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
 
-#define	CB_CONFIG_ANY(type,var,name,doc)	extern type var;
-#define	CB_CONFIG_INT(var,name,doc)			extern unsigned int var;
-#define	CB_CONFIG_STRING(var,name,doc)		extern const char *var;
-#define	CB_CONFIG_BOOLEAN(var,name,doc)		extern int var;
-#define	CB_CONFIG_SUPPORT(var,name,doc)		extern enum cb_support var;
+#define	CB_CONFIG_ANY(type,var,name,doc)	\
+extern type			var;
+#define	CB_CONFIG_INT(var,name,min,max,odoc,doc)	\
+extern unsigned int		var;
+#define	CB_CONFIG_STRING(var,name,doc)	\
+extern const char		*var;
+#define	CB_CONFIG_BOOLEAN(var,name,doc)	\
+extern int				var;
+#define	CB_CONFIG_SUPPORT(var,name,doc)	\
+extern enum				cb_support var;
 
 #include "config.def"
 

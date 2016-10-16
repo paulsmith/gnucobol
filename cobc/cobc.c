@@ -462,7 +462,7 @@ static const struct option long_options[] = {
 #undef	CB_CONFIG_SUPPORT
 #define	CB_CONFIG_ANY(type,var,name,doc)	\
 	{"f"name,		CB_RQ_ARG, NULL, '%'},
-#define	CB_CONFIG_INT(var,name,doc)		\
+#define	CB_CONFIG_INT(var,name,min,max,odoc,doc)	\
 	{"f"name,		CB_RQ_ARG, NULL, '%'},
 #define	CB_CONFIG_STRING(var,name,doc)		\
 	{"f"name,		CB_RQ_ARG, NULL, '%'},
@@ -1789,16 +1789,16 @@ cobc_print_warn (const char *name, const char *doc, const int warnopt)
 {
 	switch (warnopt) {
 	case 0:
-		printf ("  -W%-19s %s\n", name, doc);
+		printf ("  -W%-19s\t%s\n", name, doc);
 		fputs ("\t\t\t", stdout);
 		fputs (_("- NOT set with -Wall"), stdout);
 		putchar ('\n');
 		break;
 	case 1:
-		printf ("  -W%-19s %s\n", name, doc);
+		printf ("  -W%-19s\t%s\n", name, doc);
 		break;
 	case 2:
-		printf ("  -Wno-%-16s %s\n", name, doc);
+		printf ("  -Wno-%-16s\t%s\n", name, doc);
 		fputs ("\t\t\t", stdout);	
 		fputs (_("- ALWAYS active"), stdout);
 		putchar ('\n');
@@ -1827,7 +1827,7 @@ cobc_print_flag (const char *name, const char *doc,
 		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
 		bptr = buff;
 	}
-	printf ("  -f%-19s %s\n", bptr, doc);
+	printf ("  -f%-19s\t%s\n", bptr, doc);
 	if (def) {
 		printf ("\t\t\t- %s: %s\n", _("default"), def);
 	}
@@ -1851,7 +1851,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
-	puts (_("  -j [<args>], -job[=<args>] run program after build, passing <args>"));
+	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n"
 			"                        <dialect> can be one of:\n"
 			"                        cobol2014, cobol2002, cobol85, default,\n"
@@ -1935,8 +1935,8 @@ cobc_print_usage (char * prog)
 #undef	CB_CONFIG_SUPPORT
 #define	CB_CONFIG_STRING(var,name,doc)		\
 	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
-#define	CB_CONFIG_INT(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<number>"), NULL);
+#define	CB_CONFIG_INT(var,name,min,max,odoc,doc)		\
+	cobc_print_flag (name, doc, 1, odoc, NULL);
 #define	CB_CONFIG_ANY(type,var,name,doc)		\
 	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
 #define	CB_CONFIG_BOOLEAN(var,name,doc)		\
@@ -4057,7 +4057,7 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 	}
 
 	if (fixed) {
-		while (i < CB_ENDLINE) {
+		while (i < (unsigned int)CB_ENDLINE) {
 			out_line[i++] = ' ';
 		}
 	} else {
@@ -4639,14 +4639,14 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				while (fp && !nextrec) {
 					ftlen = strlen (ftoken);
 					i = 0;
-					if ((unsigned int) ftlen >= (CB_SEQUENCE - first_col)) {
+					if (ftlen >= (CB_SEQUENCE - first_col)) {
 #ifdef DEBUG_REPLACE
 						fprintf (stdout, "   ftlen = %d\n", ftlen);
 #endif
 						while (ftlen) {
 							pline[k][j++] = ftoken[i++];
 							ftlen--;
-							if ((unsigned int) j == CB_SEQUENCE) {
+							if (j == CB_SEQUENCE) {
 #ifdef DEBUG_REPLACE
 								fprintf (stdout, "   NEW pline[%2d] = %s\n",
 									 k, pline[k]);

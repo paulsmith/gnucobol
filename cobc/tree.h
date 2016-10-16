@@ -631,7 +631,7 @@ struct cb_picture {
 #define CB_PICTURE(x)	(CB_TREE_CAST (CB_TAG_PICTURE, struct cb_picture, x))
 #define CB_PICTURE_P(x)	(CB_TREE_TAG (x) == CB_TAG_PICTURE)
 
-/* Field */
+/* Key */
 
 struct cb_key {
 	cb_tree	key;			/* KEY */
@@ -639,6 +639,8 @@ struct cb_key {
 	cb_tree	val;			/* Value to be compared in SEARCH ALL */
 	int	dir;			/* ASCENDING or DESCENDING */
 };
+
+/* Field */
 
 struct cb_field {
 	struct cb_tree_common	common;		/* Common values */

@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "cobc.h"
 
@@ -48,7 +49,7 @@ enum cb_config_type {
 #undef	CB_CONFIG_SUPPORT
 
 #define CB_CONFIG_ANY(type,var,name,doc)	type		var = (type)0;
-#define CB_CONFIG_INT(var,name,doc)		unsigned int		var = 0;
+#define CB_CONFIG_INT(var,name,min,max,odoc,doc)	unsigned int		var = 0;
 #define CB_CONFIG_STRING(var,name,doc)	const char	*var = NULL;
 #define CB_CONFIG_BOOLEAN(var,name,doc)	int		var = 0;
 #define CB_CONFIG_SUPPORT(var,name,doc)	enum cb_support	var = CB_OK;
@@ -61,25 +62,30 @@ enum cb_config_type {
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
 
-#define CB_CONFIG_ANY(type,var,name,doc)	, {CB_ANY, name, (void *)&var, NULL, 1}
-#define CB_CONFIG_INT(var,name,doc)		, {CB_INT, name, (void *)&var, NULL, 1}
-#define CB_CONFIG_STRING(var,name,doc)	, {CB_STRING, name, (void *)&var, NULL, 1}
-#define CB_CONFIG_BOOLEAN(var,name,doc)	, {CB_BOOLEAN, name, (void *)&var, NULL, 1}
-#define CB_CONFIG_SUPPORT(var,name,doc)	, {CB_SUPPORT, name, (void *)&var, NULL, 1}
+#define CB_CONFIG_ANY(type,var,name,doc)	, {CB_ANY, name, (void *)&var}
+#define CB_CONFIG_INT(var,name,min,max,odoc,doc)	, {CB_INT, name, (void *)&var, NULL, min, max}
+#define CB_CONFIG_STRING(var,name,doc)	, {CB_STRING, name, (void *)&var}
+#define CB_CONFIG_BOOLEAN(var,name,doc)	, {CB_BOOLEAN, name, (void *)&var}
+#define CB_CONFIG_SUPPORT(var,name,doc)	, {CB_SUPPORT, name, (void *)&var}
 
 /* Local variables */
 
 static struct config_struct {
 	const enum cb_config_type	type;
-	const char			*name;
-	void				*var;
-	char				*val;
-	const int			doc;
+	const char			*name;		/* Print name set in compiler configuration */
+	void				*var;		/* Var name */
+	char				*val;		/* value from configuration / command line */
+#if 0 /* Currently not used */
+	const int			doc;		/* documented, 1 = yes */
+#endif
+	int					min_value;		/* Minimum accepted value */
+	long				max_value;		/* Maximum accepted value */
+
 } config_table[] = {
-	{CB_STRING, "include", NULL, NULL, 0},
-	{CB_STRING, "includeif", NULL, NULL, 0},
-	{CB_STRING, "not-reserved", NULL, NULL, 1},
-	{CB_STRING, "reserved", NULL, NULL, 1}
+	{CB_STRING, "include"},
+	{CB_STRING, "includeif"},
+	{CB_STRING, "not-reserved"},
+	{CB_STRING, "reserved"}
 #include "config.def"
 };
 
@@ -119,7 +125,7 @@ read_string (const char *text)
 
 static void
 invalid_value (const char *fname, const int line, const char *name, const char *val,
-			   const char *str, const int max, const int min)
+			   const char *str, const int min, const long max)
 {
 	configuration_error (fname, line, 0,
 		_("invalid value '%s' for configuration tag '%s'"), val, name);
@@ -131,8 +137,31 @@ invalid_value (const char *fname, const int line, const char *name, const char *
 	} else if (max) {
 		configuration_error (fname, line, 1, _("maximum value: %lu"), (unsigned long)max);
 	} else {
-		configuration_error (fname, line, 1, _("minimum value: %lu"), (unsigned long)min);
+		configuration_error (fname, line, 1, _("minimum value: %d"), min);
 	}
+}
+
+static int
+check_valid_value (const char *fname, const int line, const char *name, const char *val,
+				const void *var, const int min_value, const long max_value)
+{
+	int ret = 1;
+	long v;
+
+	v = atol (val);
+	
+	if (v < min_value) {
+		invalid_value (fname, line, name, val, NULL, min_value, 0);
+		ret = 0;
+	}
+	if (v > max_value) {
+		invalid_value (fname, line, name, val, NULL, 0, max_value);
+		ret = 0;
+	}
+	if (ret) {
+		*((int *)var) = v;
+	}
+	return ret;
 }
 
 static void
@@ -200,7 +229,6 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	void			*var;
 	size_t			i;
 	size_t			j;
-	int			v;
 
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
@@ -300,37 +328,13 @@ cb_config_entry (char *buff, const char *fname, const int line)
 					return -1;
 				}
 			}
-			v = atoi (val);
-			if (strcmp (name, "tab-width") == 0) {
-				if (v < 1) {
-					invalid_value (fname, line, name, val, NULL, 1, 0);
-					return -1;
-				}
-				if (v > 8) {
-					invalid_value (fname, line, name, val, NULL, 0, 8);
-					return -1;
-				}
-			} else if (strcmp (name, "text-column") == 0) {
-				if (v < 72) {
-					invalid_value (fname, line, name, val, NULL, 72, 0);
-					return -1;
-				}
-				if (v > 255) {
-					invalid_value (fname, line, name, val, NULL, 0, 255);
-					return -1;
-				}
-			} else if (strcmp (name, "word-length") == 0) {
-				if (v < 1) {
-					invalid_value (fname, line, name, val, NULL, 1, 0);
-					return -1;
-				}
-				if (v > COB_MAX_WORDLEN) {
-					invalid_value (fname, line, name, val, NULL, 0, COB_MAX_WORDLEN);
-					return -1;
-				}
+			
+			if (check_valid_value (fname, line, name, val, var,
+					config_table[i].min_value, config_table[i].max_value)) {
+				break;
+			} else {
+				return -1;
 			}
-			*((int *)var) = v;
-			break;
 		case CB_STRING:
 			val = read_string (val);
 

@@ -2401,7 +2401,7 @@ cb_build_picture (const char *str)
 	}
 
 	if (!pic_buff) {
-		pic_buff = cobc_main_malloc ((size_t)COB_SMALL_BUFF * sizeof(cob_pic_symbol));
+		pic_buff = cobc_main_malloc ((size_t)COB_MINI_BUFF * sizeof(cob_pic_symbol));
 	}
 
 	for (p = (const unsigned char *)str; *p; p++) {
@@ -2641,15 +2641,20 @@ repeat:
 		second_last_char = first_last_char;
 		first_last_char = c;
 		++buff_cnt;
+		if (unlikely(idx == COB_MINI_MAX)) {
+			break;
+		}
 	}
 	pic_buff[idx].symbol = '\0';
 
-	if (pic_str_len > 63) {
-		cb_error (_("PICTURE string may not contain more than 63 characters"));
+	if (pic_str_len > cb_pic_length) {
+		cb_error (_("PICTURE string may not contain more than %d characters; contains %d characters"),
+			cb_pic_length, pic_str_len);
 		error_detected = 1;
 	}
 	if (digits == 0 && x_digits == 0) {
-		cb_error (_("PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol"));
+		cb_error (_("PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; "
+					"or at least two of the set +, - and the currency symbol"));
 		error_detected = 1;
 	}
 	if (!valid_char_order (pic_buff, s_char_seen)) {
