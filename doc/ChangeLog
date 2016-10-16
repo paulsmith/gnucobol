@@ -1,4 +1,8 @@
 
+2016-10-16  Dave Pitts <dpitts@cozx.com>
+
+	* gnucobol.texi: Added a listing example.
+
 2016-10-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* gnucobol.texi: replaced cb_conf by samples of compiler configuration

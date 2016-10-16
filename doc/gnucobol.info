@@ -73,6 +73,7 @@ Compiler options
 * Source format::               Source format
 * Warning options::             Warning options
 * Configuration options::       Configuration options
+* Listing options::             Listing options
 * Debug switches::              Debug switches
 * Miscellaneous::               Miscellaneous
 
@@ -238,6 +239,7 @@ option.
 * Source format::               Source format
 * Warning options::             Warning options
 * Configuration options::       Configuration options
+* Listing options::             Listing options
 * Debug switches::              Debug switches
 * Miscellaneous::               Miscellaneous
 
@@ -451,7 +453,7 @@ File: gnucobol.info,  Node: Warning options,  Next: Configuration options,  Prev
      '-Wall'.
 
 
-File: gnucobol.info,  Node: Configuration options,  Next: Debug switches,  Prev: Warning options,  Up: Compiler options
+File: gnucobol.info,  Node: Configuration options,  Next: Listing options,  Prev: Warning options,  Up: Compiler options
 
 2.1.5 Configuration options
 ---------------------------
@@ -492,14 +494,117 @@ File: gnucobol.info,  Node: Configuration options,  Next: Debug switches,  Prev:
      User-defined dialect configuration.  See '-std=' above.
      *Note Compiler Configuration: Appendix F, and 'config/*.conf'.
 
-'-cb_conf=<tag:value>'
-     Override a single configuration entry.  *Note Compiler
-     Configuration: Appendix F.
+   You can override each single configuration entry found in *Note
+Compiler Configuration: Appendix F.  by using compiler configuration
+options on command line, see *Note 'cobc --help': Appendix A.  Examples:
+
+'-frelax-syntax-checks'
+'-frenames-uncommon-levels=warning'
+'-fnot-reserved=CHAIN,SCREEN'
+'-ftab-width=4'
 
 
-File: gnucobol.info,  Node: Debug switches,  Next: Miscellaneous,  Prev: Configuration options,  Up: Compiler options
+File: gnucobol.info,  Node: Listing options,  Next: Debug switches,  Prev: Configuration options,  Up: Compiler options
 
-2.1.6 Debug switches
+2.1.6 Listing options
+---------------------
+
+'-t=<file>'
+     Generate and place the standard print listing into '*.lst'.
+
+'-T=<file>'
+     Generate and place a wide print listing into '*.lst'.
+
+'--tlines=<lines>'
+     Specify lines per page in print listing, default = 55.  Set to zero
+     for no aditional page breaks.
+
+'-P(=<dir or file>)'
+     Generate and place a preprocessed listing (old format) into
+     '*.lst'.
+
+'-Xref'
+     Generate cross reference through 'cobxref' (V. Coen's 'cobxref'
+     must be in PATH).
+
+   Here is an example program listing with the -t option:
+
+     GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0001
+
+     LINE    PG/LN  A...B............................................................
+
+     000001         IDENTIFICATION   DIVISION.
+     000002         PROGRAM-ID.      prog.
+     000003         ENVIRONMENT DIVISION.
+     000004         CONFIGURATION SECTION.
+     000005         DATA             DIVISION.
+     000006         WORKING-STORAGE  SECTION.
+     000007         78  I   VALUE 20.
+     000008         78  J   VALUE 5000.
+     000009         78  M   VALUE 5.
+     000010         01  SETUP-REC.
+     000011             05  FL1       PIC X(04).
+     000012             05  FL2       PIC ZZZZZ.
+     000013             05  FL3       PIC 9(04).
+     000014             05  FL4       PIC 9(08) COMP.
+     000015             05  FL5       PIC 9(04) COMP-4.
+     000016             05  FL6       PIC Z,ZZZ.99.
+     000017             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+     000018             05  FL8       PIC X(04).
+     000019             05  FL9 REDEFINES FL8 PIC 9(04).
+     000020             05  FLA.
+     000021                 10  FLB OCCURS I TIMES.
+     000022                     15  FLC PIC X(02).
+     000023                 10  FLD   PIC X(20).
+     000024             05  FLD1      PIC X(100).
+     000025             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+     000026                 10  FILLER PIC X(01).
+     000027             05  FLD3      PIC X(3).
+     000028             05  FLD4      PIC X(4).
+     000029         PROCEDURE        DIVISION.
+     000030             STOP RUN.
+
+   The first part of the listing lists the program text.  If the program
+text is a COPY the line number reflects the COPY line number and is
+appended with a 'C'.
+
+   The second part of the listing file is the listing of the Symbol
+Table:
+
+     GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0002
+
+     SIZE TYPE           LVL  NAME                           PICTURE
+
+     5204 GROUP          01   SETUP-REC
+     0004 ALPHANUMERIC   05     FL1                          X(04)
+     0005 ALPHANUMERIC   05     FL2                          ZZZZZ
+     0004 ALPHANUMERIC   05     FL3                          9(04)
+     0004 NUMERIC        05     FL4                          9(08) COMP
+     0002 NUMERIC        05     FL5                          9(04) COMP
+     0008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
+     0006 ALPHANUMERIC   05     FL7                          S9(05)
+     0004 ALPHANUMERIC   05     FL8                          X(04)
+     0004 ALPHANUMERIC-R 05     FL9                          9(04)
+     0060 ALPHANUMERIC   05     FLA
+     0040 ALPHANUMERIC   10       FLB                        OCCURS 20
+     0002 ALPHANUMERIC   15         FLC                      X(02)
+     0020 ALPHANUMERIC   10       FLD                        X(20)
+     0100 ALPHANUMERIC   05     FLD1                         X(100)
+     5000 ALPHANUMERIC   05     FLD2                         OCCURS 5 TO 5000
+     0001 ALPHANUMERIC   10       FILLER                     X(01)
+     0003 ALPHANUMERIC   05     FLD3                         X(3)
+     0004 ALPHANUMERIC   05     FLD4                         X(4)
+
+     0 Warnings in program
+     0 Errors in program
+
+   If the symbol redefines another variable the TYPE is marked with 'R'.
+If the symbol is an array the OCCURS phrase is in the PICTURE field.
+
+
+File: gnucobol.info,  Node: Debug switches,  Next: Miscellaneous,  Prev: Listing options,  Up: Compiler options
+
+2.1.7 Debug switches
 --------------------
 
 '-debug, -d'
@@ -546,11 +651,8 @@ File: gnucobol.info,  Node: Debug switches,  Next: Miscellaneous,  Prev: Configu
 
 File: gnucobol.info,  Node: Miscellaneous,  Prev: Debug switches,  Up: Compiler options
 
-2.1.7 Miscellaneous
+2.1.8 Miscellaneous
 -------------------
-
-'-P(=<dir or file>)'
-     Generate and place a program listing into '*.lst'.
 
 '-ext <extension>'
      Add default file extension.
@@ -3754,61 +3856,62 @@ Index
 
 Tag Table:
 Node: Top1118
-Node: Getting started4146
-Node: Hello world!4324
-Node: Compile5776
-Node: Compiler options6134
-Node: Help options6844
-Ref: Help options-Footnote-18406
-Node: Build target8450
-Ref: Build target-Footnote-110969
-Node: Source format11022
-Ref: Source format-Footnote-111808
-Node: Warning options11882
-Node: Configuration options13336
-Node: Debug switches14267
-Node: Miscellaneous15367
-Node: Multiple sources16294
-Node: Static linking16934
-Node: Dynamic linking18425
-Ref: Dynamic linking-Footnote-120017
-Ref: Dynamic linking-Footnote-220078
-Node: Building library20139
-Node: Using library20522
-Node: C interface21093
-Node: Main C program21437
-Node: Static C to COBOL22353
-Node: Dynamic C to COBOL23850
-Node: Static COBOL to C25295
-Node: Dynamic COBOL to C26731
-Node: Customize27140
-Node: Customizing compiler27364
-Node: Customizing library27950
-Node: Optimize28708
-Node: Optimize options29011
-Node: Optimize call29548
-Node: Optimize binary29928
-Node: Debug30504
-Node: Debug options30663
-Node: Extensions31025
-Node: SELECT31462
-Node: Indexed31627
-Node: Extended ACCEPT31807
-Node: ACCEPT special33441
-Node: Extended DISPLAY35875
-Node: System routines38321
-Node: CBL_OC_GETOPT38667
-Node: CBL_OC_HOSTED42839
-Node: CBL_OC_NANOSLEEP47341
-Node: Appendix A47847
-Node: Appendix B58589
-Node: Appendix C81266
-Node: Appendix D86870
-Node: Appendix E88806
-Node: Appendix F94946
-Node: Appendix G100800
-Node: Appendix H102099
-Node: Appendix I111606
-Node: Index136731
+Node: Getting started4194
+Node: Hello world!4372
+Node: Compile5824
+Node: Compiler options6182
+Node: Help options6940
+Ref: Help options-Footnote-18502
+Node: Build target8546
+Ref: Build target-Footnote-111065
+Node: Source format11118
+Ref: Source format-Footnote-111904
+Node: Warning options11978
+Node: Configuration options13432
+Node: Listing options14565
+Node: Debug switches18719
+Node: Miscellaneous19813
+Node: Multiple sources20662
+Node: Static linking21302
+Node: Dynamic linking22793
+Ref: Dynamic linking-Footnote-124385
+Ref: Dynamic linking-Footnote-224446
+Node: Building library24507
+Node: Using library24890
+Node: C interface25461
+Node: Main C program25805
+Node: Static C to COBOL26721
+Node: Dynamic C to COBOL28218
+Node: Static COBOL to C29663
+Node: Dynamic COBOL to C31099
+Node: Customize31508
+Node: Customizing compiler31732
+Node: Customizing library32318
+Node: Optimize33076
+Node: Optimize options33379
+Node: Optimize call33916
+Node: Optimize binary34296
+Node: Debug34872
+Node: Debug options35031
+Node: Extensions35393
+Node: SELECT35830
+Node: Indexed35995
+Node: Extended ACCEPT36175
+Node: ACCEPT special37809
+Node: Extended DISPLAY40243
+Node: System routines42689
+Node: CBL_OC_GETOPT43035
+Node: CBL_OC_HOSTED47207
+Node: CBL_OC_NANOSLEEP51709
+Node: Appendix A52215
+Node: Appendix B62957
+Node: Appendix C85634
+Node: Appendix D91238
+Node: Appendix E93174
+Node: Appendix F99314
+Node: Appendix G105168
+Node: Appendix H106467
+Node: Appendix I115974
+Node: Index141099
 
 End Tag Table
