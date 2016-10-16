@@ -1,4 +1,9 @@
 
+2016-10-16  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at - Changed hardcoded listing version to a
+	  template.
+
 2016-10-11  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at - Added Symbols test with OCCURS.

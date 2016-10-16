@@ -24,6 +24,9 @@ AT_KEYWORDS([listing])
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
 ])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
+])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -39,7 +42,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog1.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -51,7 +54,7 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -60,7 +63,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
 
@@ -79,7 +82,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog2.lst],
-[GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................SOURCE.............................................
 
@@ -91,7 +94,7 @@ LINE    .....................SOURCE.............................................
 000006    *> COPY "copy.inc".
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -100,7 +103,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
 
@@ -112,6 +115,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -136,7 +142,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog3.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -154,7 +160,7 @@ LINE    PG/LN  A...B............................................................
 000010             DISPLAY FIRST-MATCH NO ADVANCING
 000011             END-DISPLAY.
 000012             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -164,7 +170,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 
@@ -172,7 +178,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [], [])
 
 AT_DATA([prog4.lst],
-[GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -194,7 +200,7 @@ LINE    PG/LN  A...B............................................................
 000016   DISPLAY FIRST-MATCH NO ADVANCING
 000017   END-DISPLAY.
 000018   STOP RUN.
-GnuCOBOL 2.0.0   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -204,7 +210,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
@@ -216,6 +222,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -242,7 +251,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog4.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -262,7 +271,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY FIRST-MATCH NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -272,7 +281,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
@@ -284,6 +293,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -311,7 +323,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog5.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -332,7 +344,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY PAREN-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -344,7 +356,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog5.lst prog.lis], [0], [], [])
 
@@ -356,6 +368,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -383,7 +398,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progl.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -404,7 +419,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY SECOND-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -416,7 +431,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff progl.lst prog.lis], [0], [], [])
 
@@ -428,6 +443,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -455,7 +473,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progr.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -476,7 +494,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY TEST-VAR2 NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -488,7 +506,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff progr.lst prog.lis], [0], [], [])
 
@@ -500,6 +518,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy-2.inc], [
@@ -527,7 +548,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog6.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -546,7 +567,7 @@ LINE    PG/LN  A...B............................................................
 000009             DISPLAY COPY-VAR NO ADVANCING
 000010             END-DISPLAY.
 000011             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -556,7 +577,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
 
@@ -568,6 +589,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -584,7 +608,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog7.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -593,14 +617,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
 000006        /
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -609,7 +633,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
 
@@ -628,7 +652,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog8.lst],
-[GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................SOURCE.............................................
 
@@ -637,14 +661,14 @@ LINE    .....................SOURCE.............................................
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................SOURCE.............................................
 
 000006  >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -653,7 +677,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
 
@@ -665,6 +689,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -681,7 +708,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -T prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog9.lst],
-[GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
@@ -690,14 +717,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
 000006        /
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -706,7 +733,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 
@@ -725,7 +752,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -T prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog10.lst],
-[GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................................................SOURCE.....................................................
 
@@ -734,14 +761,14 @@ LINE    .....................................................SOURCE.............
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................................................SOURCE.....................................................
 
 000006    >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -750,7 +777,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
@@ -762,6 +789,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -789,7 +819,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob prog1.cob], [0], [], [])
 
 AT_DATA([prog11.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -801,14 +831,14 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
 0 Errors in program
-GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+GnuCOBOL V.R.P   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -820,7 +850,7 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL 2.0.0   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -829,7 +859,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
 
@@ -841,6 +871,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -866,7 +899,7 @@ prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog12.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -884,7 +917,7 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -893,7 +926,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 2 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog12.lst prog.lis], [0], [], [])
 
@@ -916,7 +949,7 @@ prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog13.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -932,7 +965,7 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -941,7 +974,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 2 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog13.lst prog.lis], [0], [], [])
 
@@ -963,7 +996,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
 ])
 
 AT_DATA([prog14.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -978,7 +1011,7 @@ warning: numeric value is expected
 000008             DISPLAY TEST-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -988,7 +1021,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
 
@@ -1025,7 +1058,7 @@ prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1045,7 +1078,7 @@ warning: numeric value is expected
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1055,7 +1088,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 1 Error in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 
 ## The warning position is currently wrong
@@ -1071,6 +1104,9 @@ AT_KEYWORDS([listing OCCURS REDEFINES POINTER COMP error warning messages])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -1093,7 +1129,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog15.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1111,7 +1147,7 @@ LINE    PG/LN  A...B............................................................
 000012         01 WS-SEVEN  PIC $$,$$$,$$9.99 VALUE ZERO.
 000013         PROCEDURE        DIVISION.
 000014             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1133,7 +1169,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
@@ -1153,7 +1189,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog2.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1167,7 +1203,7 @@ LINE    PG/LN  A...B............................................................
 000008         01 WS-THREE  PIC X(4).
 000009         PROCEDURE        DIVISION.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1182,7 +1218,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
@@ -1252,7 +1288,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog3.cob], [0], [], [])
 
 AT_DATA([prog17-64.lst],
-[GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1301,7 +1337,7 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1349,7 +1385,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_DATA([prog17-32.lst],
-[GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1398,7 +1434,7 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL 2.0.0   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1445,7 +1481,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 
 AT_CHECK([./P64], [0], [X
@@ -1505,7 +1541,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog4.cob], [0], [], [])
 
 AT_DATA([prog18.lst],
-[GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1549,7 +1585,7 @@ LINE    PG/LN  A...B............................................................
 000038             END-IF.
 000039             STOP RUN.
 000040         END PROGRAM prog.
-GnuCOBOL 2.0.0   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1569,7 +1605,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
@@ -1610,7 +1646,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -std=mf -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog19.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1645,7 +1681,7 @@ LINE    PG/LN  A...B............................................................
 000029             05  FLD4      PIC X(4).
 000030         PROCEDURE        DIVISION.
 000031             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1673,7 +1709,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
@@ -1685,6 +1721,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -1710,7 +1749,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1731,7 +1770,7 @@ LINE    PG/LN  A...B............................................................
 000015X            END-DISPLAY
 000016         >>END-IF
 000017             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1740,7 +1779,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
@@ -1752,6 +1791,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([copy.inc], [
@@ -1783,7 +1825,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog17.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1804,7 +1846,7 @@ LINE    PG/LN  A...B............................................................
 000008             DISPLAY TEST1-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1828,7 +1870,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
@@ -1840,6 +1882,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -1969,7 +2014,7 @@ prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
 
 
 AT_DATA([prog18.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2028,7 +2073,7 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000047                   88 ENDSET        VALUE "ENDSET".
 000048                   88 REMOVE        VALUE "REMOVE".
 000049                   88 ADDNEW        VALUE "INSERT".
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -2087,7 +2132,7 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000100
 000101         01  DISPLAY-MESSAGE.
 000102             02 FILLER              PICTURE X(2) VALUE SPACES.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................
 
@@ -2100,7 +2145,7 @@ LINE    PG/LN  A...B............................................................
 000109                  OUTPUT NEW-VERSION, COMMENTARY.
 000110             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
 000111             STOP RUN.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2158,7 +2203,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0001 ALPHANUMERIC   02     UPSI-BIT                     X
 
 0082 GROUP          01   MESSAGE-LOG                     
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2175,7 +2220,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
@@ -2187,6 +2232,9 @@ AT_KEYWORDS([listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob], [
@@ -2280,7 +2328,7 @@ prog.cob: 40: error: PICTURE string must contain at least one of the set A, N, X
 
 
 AT_DATA([prog19.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2339,7 +2387,7 @@ error: A or X cannot follow S
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 000029             03  PIC +9(5)CR.
 error: CR or DB cannot follow a leading +/- sign
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -2371,7 +2419,7 @@ error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and 
 000045             03  PIC 0000+B0+++0B,+.
 000046             03  PIC +(5)P(3).
 000047             03  PIC ++.++.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2429,7 +2477,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
 0005 ALPHANUMERIC   03     FILLER                       ++.++
 
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2437,7 +2485,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 34 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
@@ -2449,6 +2497,9 @@ AT_KEYWORDS([COBOL2002 listing])
 
 AT_DATA([sed.txt],
 [s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
+])
+AT_DATA([sed1.txt],
+[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
 ])
 
 AT_DATA([prog.cob],
@@ -2466,7 +2517,7 @@ daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog20.lst],
-[GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2479,7 +2530,7 @@ LINE    PG/LN  A...B............................................................
 000006+ DISPLAY "Hello!"
 000007  000060     .
 000008  000070 END PROGRAM prog.
-GnuCOBOL 2.0.0   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2488,7 +2539,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt <prog.lst >prog.lis
+sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
