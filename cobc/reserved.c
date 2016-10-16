@@ -2648,6 +2648,7 @@ is_invalid_word (const char *word, const int size,
 		return 1;
 	}
 	/* TO-DO: add more checks here */
+	COB_UNUSED(word);
 	return 0;
 }
 

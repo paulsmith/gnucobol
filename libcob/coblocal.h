@@ -283,7 +283,7 @@ struct config_tbl {
 	unsigned int		data_len;		/* Length of referenced field */
 	unsigned int		config_num;		/* Set by which runtime.cfg file */
 	unsigned int		set_by;			/* value set by a different keyword */
-	unsigned long		min_value;		/* Minium accepted value */
+	unsigned long		min_value;		/* Minimum accepted value */
 	unsigned long		max_value;		/* Maximum accepted value */
 };
 

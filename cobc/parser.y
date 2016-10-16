@@ -189,7 +189,7 @@ static int			eval_inc2;
 static int			depth;
 static int			first_nested_program;
 static int			call_mode;
-static cob_flags_t		size_mode;
+static int			size_mode;
 static int			set_attr_val_on;
 static int			set_attr_val_off;
 static cob_flags_t		check_duplicate;
@@ -1208,7 +1208,7 @@ static COB_INLINE COB_A_INLINE void
 set_dispattr (const cob_flags_t attrib)
 {
 	attach_attrib_to_cur_stmt ();
-	current_statement->attr_ptr->dispattrs |= COB_SCREEN_AUTO;
+	current_statement->attr_ptr->dispattrs |= attrib;
 }
 
 static COB_INLINE COB_A_INLINE void
@@ -1285,9 +1285,9 @@ set_attribs_with_conflict  (cb_tree fgc, cb_tree bgc, cb_tree scroll,
 				    confl_attrib);
 }
 
-static int
-zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1,
-		       const int flag2)
+static cob_flags_t
+zero_conflicting_flag (const cob_flags_t screen_flag, cob_flags_t parent_flag,
+				const cob_flags_t flag1, const cob_flags_t flag2)
 {
 	if (screen_flag & flag1) {
 		parent_flag &= ~flag2;
@@ -1298,8 +1298,8 @@ zero_conflicting_flag (const int screen_flag, int parent_flag, const int flag1,
 	return parent_flag;
 }
 
-static int
-zero_conflicting_flags (const int screen_flag, int parent_flag)
+static cob_flags_t
+zero_conflicting_flags (const cob_flags_t screen_flag, cob_flags_t parent_flag)
 {
 	parent_flag = zero_conflicting_flag (screen_flag, parent_flag,
 					     COB_SCREEN_BLANK_LINE,
@@ -5674,7 +5674,7 @@ screen_description:
   }
   _screen_options
   {
-	int	flags;
+	cob_flags_t	flags;
 
 	if (current_field->parent) {
 		flags = current_field->parent->screen_flag;

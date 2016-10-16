@@ -160,7 +160,7 @@ cobcrun_split_path_file(char** p, char** f, char *pf)
 {
 	char *slash = pf, *next;
 	
-	while ((next = strpbrk(slash + 1, "\\/"))) slash = next;
+	while ((next = strpbrk(slash + 1, "\\/")) != NULL) slash = next;
 	if (pf != slash) slash++;
 	
 	/* *p = strndup(pf, slash - pf); */

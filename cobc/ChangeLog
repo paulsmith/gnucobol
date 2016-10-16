@@ -1,4 +1,9 @@
 
+2016-10-15  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* parser.y: improved checks for duplicate/conflicting clauses in ACCEPT
+	  and DISPLAY statements (finished Edwards changes from 2016-10-02)
+
 2016-10-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* codegen.c: fixed missing initialization of static_call_cache
@@ -31,12 +36,12 @@
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: improved checks for duplicate/conflicting clauses in ACCEPT
-	  and DISPLAY statements.
+	  and DISPLAY statements
 	* codegen.c, parser.y, tree.h: introduced cob_flags_t typedef for
-	  variables made up of bit flags.
-	* parser.y: improved function names.
-	* parser.y: improved support for ACUCOBOL screen phrases.
-	* config.def: added no-echo-means-secure config option.
+	  variables made up of bit flags
+	* parser.y: improved function names
+	* parser.y: improved support for ACUCOBOL screen phrases
+	* config.def: added no-echo-means-secure config option
 
 2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
