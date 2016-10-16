@@ -120,6 +120,7 @@ Compiler options
 * Source format::               Source format
 * Warning options::             Warning options
 * Configuration options::       Configuration options
+* Listing options::             Listing options
 * Debug switches::              Debug switches
 * Miscellaneous::               Miscellaneous
 
@@ -275,6 +276,7 @@ The compiler @code{cobc} accepts the options described in this section. The comp
 * Source format::               Source format
 * Warning options::             Warning options
 * Configuration options::       Configuration options
+* Listing options::             Listing options
 * Debug switches::              Debug switches
 * Miscellaneous::               Miscellaneous
 @end menu
@@ -461,7 +463,7 @@ Warn on possible field truncation. This is @emph{not} set with @code{-Wall}.
 Warn if statements are unreachable. This is @emph{not} set with @code{-Wall}.
 @end table
 
-@node Configuration options, Debug switches, Warning options, Compiler options
+@node Configuration options, Listing options, Warning options, Compiler options
 @subsection Configuration options
 
 @table @code
@@ -501,12 +503,47 @@ GnuCOBOL
 User-defined dialect configuration. See @code{-std=} above.@*
 @xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
 
-@item -cb_conf=<tag:value>
-Override a single configuration entry. @xref{Appendix F, Compiler Configuration}.
+@end table
+
+You can override each single configuration entry found in @xref{Appendix F, Compiler Configuration}
+by using compiler configuration options on command line,  see @xref{Appendix A, @code{cobc --help}}
+Examples:
+
+@table @code
+@item -frelax-syntax-checks
+@item -frenames-uncommon-levels=warning
+@item -fnot-reserved=CHAIN,SCREEN
+@item -ftab-width=4
 
 @end table
 
-@node Debug switches, Miscellaneous, Configuration options, Compiler options
+@node Listing options, Debug switches, Configuration options, Compiler options
+@subsection Listing options
+
+@table @code
+
+@item -t=<file>
+Generate and place the standard print listing into @file{*.lst}.
+
+@item -T=<file>
+Generate and place a wide print listing into @file{*.lst}.
+
+@item --tlines=<lines>
+Specify lines per page in print listing, default = 55.
+Set to zero for no aditional page breaks.
+
+@item -P(=<dir or file>)
+Generate and place a preprocessed listing (old format) into @file{*.lst}.
+
+@item -Xref
+Generate cross reference through 'cobxref' (V. Coen's `cobxref` must be in PATH).
+
+@end table
+
+TODO: add information about the format and maybe an @ example of some listing parts
+For the symbol table include the different options you may see (redefine, occurs, ...)
+
+@node Debug switches, Miscellaneous, Listing options, Compiler options
 @subsection Debug switches
 
 @table @code
@@ -556,9 +593,6 @@ Do not truncate binary fields according to PICTURE.
 @node Miscellaneous,  , Debug switches, Compiler options
 @subsection Miscellaneous
 @table @code
-
-@item -P(=<dir or file>)
-Generate and place a program listing into @file{*.lst}.
 
 @item -ext <extension>
 @comment{TODO: Clarify}
