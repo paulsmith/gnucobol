@@ -1,12 +1,21 @@
 
+2016-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* atlocal.in, atlocal_win: added UNIFY_LISTING
+	* testsuite.src/listings.at: moved simplified sed commands used to a single
+	  script listings-sed.sh and use this via UNIFY_LISTING
+	* testsuite.src/listings.at: split symbols test, added test for -tlines,
+	  use -tlines=0 to remove unforced page breaks
+	* atlocal_win: added missing COB_HAS_UTC_OFFSET
+
 2016-10-16  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Changed hardcoded listing version to a
-	  template.
+	* testsuite.src/listings.at: changed hardcoded listing version to a
+	  template
 
 2016-10-11  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at - Added Symbols test with OCCURS.
+	* testsuite.src/listings.at: added Symbols test with OCCURS
 
 2016-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

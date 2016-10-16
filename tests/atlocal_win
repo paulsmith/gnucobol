@@ -1,7 +1,10 @@
 #
-# atlocal gnucobol/tests
+# atlocal_win gnucobol/tests
 #
-# Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+# This script is a special variant of the atlocal script for testing
+# a not POSIX build (VisualStudio build for example) in a POSIX environment.
+#
+# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -25,6 +28,7 @@ COB_SRC_PATH="$(cd .. ; pwd)"
 COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/release"
 
 COB_BIGENDIAN="no"
+COB_HAS_UTC_OFFSET="yes"
 
 COBC="cobc"
 COBCRUN="cobcrun"
@@ -42,6 +46,9 @@ PATHSEP=";"
 
 PATH="$COB_WIN_BUILDPATH:${PATH}"
 export PATH
+
+# Helper script to unify listings (repleace version, date, time)
+UNIFY_LISTING="${TEMPLATE}/listings-sed.sh"
 
 # unset all environment variables that are used in libcob for runtime configuration
 for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); do unset $cobenv; done
@@ -64,6 +71,7 @@ export COB_COPY_DIR="$(_return_path "$COB_SRC_PATH/copy")"
 export COB_LIBRARY_PATH="$(_return_path "$COB_WIN_BUILDPATH"):$(_return_path ":$COB_LIBRARY_PATH")"
 export COB_UNIX_LF=YES
 export COB_MSG_FORMAT=GCC
+export COB_HAS_UTC_OFFSET
 export LC_ALL=C
 
 

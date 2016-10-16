@@ -21,13 +21,6 @@
 AT_SETUP([COPY within comment])
 AT_KEYWORDS([listing])
 
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
-
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -38,7 +31,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog1.lst],
@@ -63,7 +55,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
 
@@ -77,8 +69,6 @@ AT_DATA([prog2.cob], [
   STOP RUN.
 ])
 
-
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog2.lst],
@@ -103,7 +93,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
 
@@ -112,13 +102,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY replacement order])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01 TEST-VAR PIC X(2) VALUE "OK".
@@ -138,7 +121,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog3.lst],
@@ -170,11 +152,10 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [], [])
 
 AT_DATA([prog4.lst],
@@ -210,7 +191,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
@@ -219,13 +200,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY separators])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01 TEST-VAR PIC X(2) VALUE "OK".
@@ -247,7 +221,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog4.lst],
@@ -281,7 +254,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
@@ -290,13 +263,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY partial replacement])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01 :TEST:-VAR PIC X(2) VALUE "OK".
@@ -319,7 +285,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog5.lst],
@@ -356,7 +321,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog5.lst prog.lis], [0], [], [])
 
@@ -365,13 +330,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY LEADING replacement])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01  TEST-VAR PIC X(2) VALUE "OK".
@@ -394,7 +352,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progl.lst],
@@ -431,7 +388,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff progl.lst prog.lis], [0], [], [])
 
@@ -440,13 +397,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY TRAILING replacement])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01  TEST-FIRST  PIC X(2) VALUE "OK".
@@ -469,7 +419,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
+
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progr.lst],
@@ -506,7 +456,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff progr.lst prog.lis], [0], [], [])
 
@@ -515,13 +465,6 @@ AT_CLEANUP
 
 AT_SETUP([COPY recursive replacement])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy-2.inc], [
        01 TEST-VAR PIC X(2) VALUE "OK".
@@ -544,7 +487,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog6.lst],
@@ -577,7 +519,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
 
@@ -586,13 +528,6 @@ AT_CLEANUP
 
 AT_SETUP([Eject page])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -604,7 +539,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog7.lst],
@@ -633,7 +567,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
 
@@ -648,7 +582,6 @@ AT_DATA([prog2.cob], [
 ])
 
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog8.lst],
@@ -677,22 +610,158 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       
+       PROGRAM-ID.      prog3.
+       
+       
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 WS-VAR PIC X(2).
+      /
+       77 WS-VA2 PIC X(2).
+       
+       
+       LOCAL-STORAGE  SECTION.
+       77 LS-VAR PIC 9(2).
+       
+       
+       PROCEDURE        DIVISION.
+       
+           DISPLAY WS-VAR
+           MOVE 99 TO LS-VAR
+           
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog3.cob], [0], [], [])
+
+AT_DATA([prog9.lst],
+[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003
+000004         PROGRAM-ID.      prog3.
+000005
+000006
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         77 WS-VAR PIC X(2).
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000010        /
+000011         77 WS-VA2 PIC X(2).
+000012
+000013
+000014         LOCAL-STORAGE  SECTION.
+000015         77 LS-VAR PIC 9(2).
+000016
+000017
+000018         PROCEDURE        DIVISION.
+000019
+000020             DISPLAY WS-VAR
+000021             MOVE 99 TO LS-VAR
+000022
+000023             STOP RUN.
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 ALPHANUMERIC   77   WS-VAR                         X(2)
+0002 ALPHANUMERIC   77   WS-VA2                         X(2)
+
+0002 NUMERIC        77   LS-VAR                         9(2)
+
+0 Warnings in program
+0 Errors in program
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=5 prog3.cob], [0], [], [])
+
+AT_DATA([prog10.lst],
+[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003
+000004         PROGRAM-ID.      prog3.
+000005
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000006
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         77 WS-VAR PIC X(2).
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+LINE    PG/LN  A...B............................................................
+
+000010        /
+000011         77 WS-VA2 PIC X(2).
+000012
+000013
+000014         LOCAL-STORAGE  SECTION.
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+LINE    PG/LN  A...B............................................................
+
+000015         77 LS-VAR PIC 9(2).
+000016
+000017
+000018         PROCEDURE        DIVISION.
+000019
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+LINE    PG/LN  A...B............................................................
+
+000020             DISPLAY WS-VAR
+000021             MOVE 99 TO LS-VAR
+000022
+000023             STOP RUN.
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0006
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 ALPHANUMERIC   77   WS-VAR                         X(2)
+0002 ALPHANUMERIC   77   WS-VA2                         X(2)
+
+0002 NUMERIC        77   LS-VAR                         9(2)
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0007
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+
+0 Warnings in program
+0 Errors in program
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([Wide listing])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -704,7 +773,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -T prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog9.lst],
@@ -733,7 +801,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 
@@ -748,7 +816,6 @@ AT_DATA([prog2.cob], [
 ])
 
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -T prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog10.lst],
@@ -777,7 +844,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
@@ -786,13 +853,6 @@ AT_CLEANUP
 
 AT_SETUP([Two source files])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -814,8 +874,6 @@ AT_DATA([prog1.cob], [
            STOP RUN.
 ])
 
-
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob prog1.cob], [0], [], [])
 
 AT_DATA([prog11.lst],
@@ -859,7 +917,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
 
@@ -868,13 +926,6 @@ AT_CLEANUP
 
 AT_SETUP([Error/Warning messages])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        01 TEST-VAR PIC X(2) VULUE "OK".
@@ -892,7 +943,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
@@ -926,7 +976,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 2 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog12.lst prog.lis], [0], [], [])
 
@@ -942,7 +992,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
@@ -974,7 +1023,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 2 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog13.lst prog.lis], [0], [], [])
 
@@ -990,7 +1039,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
 [prog.cob: 6: warning: numeric value is expected
 ])
@@ -1021,7 +1069,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
 
@@ -1050,7 +1098,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [prog.cob: 7: error: CRUD.CPY: No such file or directory
 prog.cob: 12: warning: numeric value is expected
@@ -1088,7 +1135,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 1 Error in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 
 ## The warning position is currently wrong
@@ -1099,15 +1146,8 @@ AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Symbols])
-AT_KEYWORDS([listing OCCURS REDEFINES POINTER COMP error warning messages])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
+AT_SETUP([Symbols: simple])
+AT_KEYWORDS([listing COMP])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1125,7 +1165,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog15.lst],
@@ -1169,7 +1208,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
@@ -1185,7 +1224,6 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog2.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
@@ -1218,9 +1256,15 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Symbols: pointer])
+AT_KEYWORDS([listing])
 
 # Check for 32/64bit first
 AT_DATA([P64.cob], [
@@ -1284,7 +1328,6 @@ AT_DATA([prog3.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog3.cob], [0], [], [])
 
 AT_DATA([prog17-64.lst],
@@ -1481,7 +1524,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 
 AT_CHECK([./P64], [0], [X
@@ -1494,6 +1537,12 @@ AT_CHECK([diff prog17-32.lst prog.lis], [0], [], [])
 [# Previous test "passed" --> P64 showed 'X' --> 64 bit
 AT_CHECK([diff prog17-64.lst prog.lis], [0], [], [])
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([Symbols: mutliple programs/functions])
+AT_KEYWORDS([listing program function])
 
 AT_DATA([prog4.cob], [
        IDENTIFICATION   DIVISION.
@@ -1537,7 +1586,6 @@ AT_DATA([prog4.cob], [
        END PROGRAM prog.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog4.cob], [0], [], [])
 
 AT_DATA([prog18.lst],
@@ -1605,9 +1653,15 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Symbols: OCCURS/REDEFINES])
+AT_KEYWORDS([listing])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1642,7 +1696,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -std=mf -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog19.lst],
@@ -1709,7 +1762,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
@@ -1718,13 +1771,6 @@ AT_CLEANUP
 
 AT_SETUP([Conditional compilation])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1745,7 +1791,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
@@ -1779,7 +1824,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
@@ -1788,13 +1833,6 @@ AT_CLEANUP
 
 AT_SETUP([LISTING ON/OFF])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([copy.inc], [
        >>LISTING OFF
@@ -1821,7 +1859,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog17.lst],
@@ -1870,7 +1907,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
@@ -1879,13 +1916,6 @@ AT_CLEANUP
 
 AT_SETUP([File descriptions])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -2000,8 +2030,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-daymon=`date +"%a %b %e"`
-AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [0], [],
 [prog.cob: 21: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob: 23: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob: 30: warning: LABEL RECORDS is obsolete in GnuCOBOL
@@ -2073,10 +2102,6 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000047                   88 ENDSET        VALUE "ENDSET".
 000048                   88 REMOVE        VALUE "REMOVE".
 000049                   88 ADDNEW        VALUE "INSERT".
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
 000050                   88 CHANGE        VALUE "CHANGE".
 000051                   88 DISPLY        VALUE "DISPLY".
 000052                03 FILLER           PICTURE X.
@@ -2132,10 +2157,6 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000100
 000101         01  DISPLAY-MESSAGE.
 000102             02 FILLER              PICTURE X(2) VALUE SPACES.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
-
-LINE    PG/LN  A...B............................................................
-
 000103             02 DISPLAY-TEMP        PICTURE X(6).
 000104             02 FILLER              PICTURE X(2) VALUE SPACES.
 000105             02 DISPLAY-TEXT        PICTURE X(60).
@@ -2145,7 +2166,7 @@ LINE    PG/LN  A...B............................................................
 000109                  OUTPUT NEW-VERSION, COMMENTARY.
 000110             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
 000111             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2203,10 +2224,6 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0001 ALPHANUMERIC   02     UPSI-BIT                     X
 
 0082 GROUP          01   MESSAGE-LOG                     
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0005
-
-SIZE TYPE           LVL  NAME                           PICTURE
-
 0002 ALPHANUMERIC   02     FILLER                       X(2)
 0080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
 
@@ -2220,7 +2237,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
@@ -2229,13 +2246,6 @@ AT_CLEANUP
 
 AT_SETUP([Invalid PICTURE strings])
 AT_KEYWORDS([listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -2286,8 +2296,7 @@ AT_DATA([prog.cob], [
            03  PIC ++.++.
 ])
 
-daymon=`date +"%a %b %e"`
-AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [1], [],
 [prog.cob: 9: warning: continuation of COBOL words used
 prog.cob: 7: error: missing PICTURE string
 prog.cob: 8: error: PICTURE string may not contain more than 63 characters
@@ -2387,10 +2396,6 @@ error: A or X cannot follow S
 error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
 000029             03  PIC +9(5)CR.
 error: CR or DB cannot follow a leading +/- sign
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
 000030         01 non-rightmost-leftmost-symbols.
 000031             03  PIC BBB+BB99.
 error: a leading +/- sign cannot follow B, 0 or /
@@ -2419,7 +2424,7 @@ error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and 
 000045             03  PIC 0000+B0+++0B,+.
 000046             03  PIC +(5)P(3).
 000047             03  PIC ++.++.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2477,15 +2482,11 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
 0005 ALPHANUMERIC   03     FILLER                       ++.++
 
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0004
-
-SIZE TYPE           LVL  NAME                           PICTURE
-
 2 Warnings in program
 34 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
@@ -2494,13 +2495,6 @@ AT_CLEANUP
 
 AT_SETUP([Variable format])
 AT_KEYWORDS([COBOL2002 listing])
-
-AT_DATA([sed.txt],
-[s/@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@:@<:@0-9@:>@@<:@0-9@:>@ @<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@@<:@0-9@:>@/HH:MM:SS YYYY/g
-])
-AT_DATA([sed1.txt],
-[s/GnuCOBOL @<:@0-9@:>@.@<:@0-9@:>@.@<:@0-9@:>@/GnuCOBOL V.R.P/g
-])
 
 AT_DATA([prog.cob],
 [000001 $SET SOURCEFORMAT "VARIABLE"
@@ -2513,7 +2507,6 @@ AT_DATA([prog.cob],
 000070 END PROGRAM prog.
 ])
 
-daymon=`date +"%a %b %e"`
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog20.lst],
@@ -2539,7 +2532,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-sed -e 's/'"$daymon"'/DDD MMM dd/g' -f sed.txt -f sed1.txt <prog.lst >prog.lis
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
