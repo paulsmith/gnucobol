@@ -2,6 +2,7 @@
 2016-10-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* typeck.c (cb_list_system): simplified, removed hard-coded values
+	* cobc.c: listing: allow page break to be disabled with -tlines=0
 
 2016-10-15  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

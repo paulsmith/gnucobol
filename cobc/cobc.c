@@ -439,7 +439,6 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '#'},
-	{"reserve-all",		CB_NO_ARG, NULL, 'R'}, /* dirty workaround */
 
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -3612,9 +3611,16 @@ print_program_header (void)
 	char		version[20];
 	const char	*format_str;
 
+	/* early exit if page break is disabled and not forced */
+	if (cb_lines_per_page == 0 && cb_listing_linecount != 0) {
+		return;
+	}
+
 	if (++cb_listing_linecount >= cb_lines_per_page) {
 		sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
-		cb_listing_linecount = 0;
+		if (cb_lines_per_page != 0) {
+			cb_listing_linecount = 0;	
+		}
 		if (cb_listing_eject) {
 			fputs ("\f", cb_src_list_file);
 		} else {
@@ -3888,7 +3894,7 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 static COB_INLINE COB_A_INLINE void
 force_new_page_for_next_line (void)
 {
-	cb_listing_linecount = 100000;
+	cb_listing_linecount = cb_lines_per_page;
 }
 
 static void
