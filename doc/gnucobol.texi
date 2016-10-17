@@ -543,7 +543,7 @@ Generate cross reference through 'cobxref' (V. Coen's `cobxref` must be in PATH)
 Here is an example program listing with the -t option:
 
 @example
-GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0001
+GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -553,40 +553,45 @@ LINE    PG/LN  A...B............................................................
 000004         CONFIGURATION SECTION.
 000005         DATA             DIVISION.
 000006         WORKING-STORAGE  SECTION.
-000007         78  I   VALUE 20.
-000008         78  J   VALUE 5000.
-000009         78  M   VALUE 5.
-000010         01  SETUP-REC.
-000011             05  FL1       PIC X(04).
-000012             05  FL2       PIC ZZZZZ.
-000013             05  FL3       PIC 9(04).
-000014             05  FL4       PIC 9(08) COMP.
-000015             05  FL5       PIC 9(04) COMP-4.
-000016             05  FL6       PIC Z,ZZZ.99.
-000017             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
-000018             05  FL8       PIC X(04).
-000019             05  FL9 REDEFINES FL8 PIC 9(04).
-000020             05  FLA.
-000021                 10  FLB OCCURS I TIMES.
-000022                     15  FLC PIC X(02).
-000023                 10  FLD   PIC X(20).
-000024             05  FLD1      PIC X(100).
-000025             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
-000026                 10  FILLER PIC X(01).
-000027             05  FLD3      PIC X(3).
-000028             05  FLD4      PIC X(4).
-000029         PROCEDURE        DIVISION.
-000030             STOP RUN.
+000007         COPY 'values.cpy'.
+000001C        78  I   VALUE 20.
+000002C        78  J   VALUE 5000.
+000003C        78  M   VALUE 5.
+000008         01  SETUP-REC.
+000009             05  FL1       PIC X(04).
+000010             05  FL2       PIC ZZZZZ.
+000011             05  FL3       PIC 9(04).
+000012             05  FL4       PIC 9(08) COMP.
+000013             05  FL5       PIC 9(04) COMP-4.
+000014             05  FL6       PIC Z,ZZZ.99.
+000015             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+000016             05  FL8       PIC X(04).
+000017             05  FL9 REDEFINES FL8 PIC 9(04).
+000018             05  FLA.
+000019                 10  FLB OCCURS I TIMES.
+000020                     15  FLC PIC X(02).
+000021                 10  FLD   PIC X(20).
+000022             05  FLD1      PIC X(100).
+000023             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+000024                 10  FILLER PIC X(01).
+000025             05  FLD3      PIC X(3).
+000026             05  FLD4      PIC X(4).
+000027         PROCEDURE        DIVISION.
+000028             STOP RUN.
 @end example
 
 The first part of the listing lists the program text.  If the program text is
 a COPY the line number reflects the COPY line number and is appended with
 a 'C'. 
 
+When the wide list option is specified (-T), the SEQUENCE columns are included
+in the listing.
+
+
 The second part of the listing file is the listing of the Symbol Table:
 
 @example
-GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0002
+GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 

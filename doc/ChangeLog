@@ -1,4 +1,8 @@
 
+2016-10-17  Dave Pitts <dpitts@cozx.com>
+
+	* gnucobol.texi: Added a COPY to listing example.
+
 2016-10-16  Dave Pitts <dpitts@cozx.com>
 
 	* gnucobol.texi: Added a listing example.
