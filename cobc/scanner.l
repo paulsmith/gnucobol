@@ -95,7 +95,7 @@ static int yywrap (void) {
 #define YYSTYPE			cb_tree
 #include "parser.h"
 
-#define RETURN(expr)				\
+#define RETURN_TOK(expr)			\
 	do {					\
 		last_yylval = yylval;		\
 		last_token = (expr);		\
@@ -235,7 +235,7 @@ static void	scan_options (const char *, const unsigned int);
 "FUNCTION" {
 	if (cobc_in_repository || cobc_cs_check == CB_CS_EXIT) {
 		yylval = NULL;
-	        RETURN (FUNCTION);
+	        RETURN_TOK (FUNCTION);
 	}
 	BEGIN FUNCTION_STATE;
 }
@@ -244,14 +244,14 @@ static void	scan_options (const char *, const unsigned int);
 	/* String literal */
 	cobc_force_literal = 0;
 	read_literal (yytext[0], "");
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 X\'[^\'\n]*\' |
 X\"[^\"\n]*\" {
 	/* X string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 2, "X"));
+	RETURN_TOK (scan_x (yytext + 2, "X"));
 }
 
 N[\'\"] {
@@ -259,49 +259,49 @@ N[\'\"] {
 	cobc_force_literal = 0;
 	/* TODO: national string - needs different handling */
 	read_literal (yytext [1], "N");
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 NX\'[^\'\n]*\' |
 NX\"[^\"\n]*\" {
 	/* NX string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 3, "NX"));
+	RETURN_TOK (scan_x (yytext + 3, "NX"));
 }
 
 Z\'[^\'\n]*\' |
 Z\"[^\"\n]*\" {
 	/* Z string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_z (yytext + 2, "Z"));
+	RETURN_TOK (scan_z (yytext + 2, "Z"));
 }
 
 L\'[^\'\n]*\' |
 L\"[^\"\n]*\" {
 	/* L string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_z (yytext + 2, "L"));
+	RETURN_TOK (scan_z (yytext + 2, "L"));
 }
 
 H\'[^\'\n]*\' |
 H\"[^\"\n]*\" {
 	/* H hexdecimal/numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_h (yytext + 2, "H"));
+	RETURN_TOK (scan_h (yytext + 2, "H"));
 }
 
 B\'[^\'\n]*\' |
 B\"[^\"\n]*\" {
 	/* B boolean/numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_b (yytext + 2, "B"));
+	RETURN_TOK (scan_b (yytext + 2, "B"));
 }
 
 BX\'[^\'\n]*\' |
 BX\"[^\"\n]*\" {
 	/* BX boolean hexadecimal string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 3, "BX"));
+	RETURN_TOK (scan_x (yytext + 3, "BX"));
 }
 
 B#[0-9]* {
@@ -312,13 +312,13 @@ B#[0-9]* {
 	*/
 	/* ACUCOBOL binary numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_b (yytext + 2, "B#"));
+	RETURN_TOK (scan_b (yytext + 2, "B#"));
 }
 
 O#[0-9]* {
 	/* ACUCOBOL octal numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_o (yytext + 2, "O#"));
+	RETURN_TOK (scan_o (yytext + 2, "O#"));
 }
 
 X#[0-9A-Za-z]* |
@@ -327,19 +327,19 @@ H#[0-9A-Za-z]* {
 	char type[3] = "x#";
 	type[0] = yytext [0];
 	cobc_force_literal = 0;
-	RETURN (scan_h (yytext + 2, type));
+	RETURN_TOK (scan_h (yytext + 2, type));
 }
 
 \( {
 	inside_bracket++;
-	RETURN (TOK_OPEN_PAREN);
+	RETURN_TOK (TOK_OPEN_PAREN);
 }
 
 \) {
 	if (inside_bracket > 0) {
 		inside_bracket--;
 	}
-	RETURN (TOK_CLOSE_PAREN);
+	RETURN_TOK (TOK_CLOSE_PAREN);
 }
 
 [0-9]+ {
@@ -349,28 +349,28 @@ H#[0-9A-Za-z]* {
 		if (!cobc_in_procedure) {
 			if (!strcmp (yytext, "66")) {
 				/* Level number 66 */
-				RETURN (SIXTY_SIX);
+				RETURN_TOK (SIXTY_SIX);
 			} else if (!strcmp (yytext, "78")) {
 				/* Level number 78 */
-				RETURN (SEVENTY_EIGHT);
+				RETURN_TOK (SEVENTY_EIGHT);
 			} else if (!strcmp (yytext, "88")) {
 				/* Level number 88 */
-				RETURN (EIGHTY_EIGHT);
+				RETURN_TOK (EIGHTY_EIGHT);
 			}
 		}
 
 		/* Integer label or level number */
-		RETURN (WORD);
+		RETURN_TOK (WORD);
 	}
 	/* Numeric literal or referenced integer label */
 	/* All transformations/checks are postponed to tree.c */
 	yylval = cb_build_numeric_literal (0, yytext, 0);
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 [+-][0-9]+ {
 	/* Numeric literal (signed) */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 
 <*>[ ]+ {
@@ -379,46 +379,46 @@ H#[0-9A-Za-z]* {
 
 <*>;+ {
 	if (inside_bracket) {
-		RETURN (SEMI_COLON);
+		RETURN_TOK (SEMI_COLON);
 	}
 	/* Ignore */
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]*\.[0-9]+ {
 	/* Invalid numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+ {
 	/* Numeric literal */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 
 <DECIMAL_IS_PERIOD>,+ {
 	if (inside_bracket) {
-		RETURN (COMMA_DELIM);
+		RETURN_TOK (COMMA_DELIM);
 	}
 	/* Ignore */
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]*,[0-9]+ {
 	/* Invalid numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+ {
 	/* Numeric literal */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 
 <DECIMAL_IS_COMMA>,{2,} {
@@ -427,7 +427,7 @@ H#[0-9A-Za-z]* {
 
 <DECIMAL_IS_COMMA>, {
 	if (inside_bracket) {
-		RETURN (COMMA_DELIM);
+		RETURN_TOK (COMMA_DELIM);
 	}
 	/* Ignore */
 }
@@ -435,43 +435,43 @@ H#[0-9A-Za-z]* {
 "END"[ ,;\n]+"PROGRAM" {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	RETURN (END_PROGRAM);
+	RETURN_TOK (END_PROGRAM);
 }
 
 "END"[ ,;\n]+"FUNCTION" {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	RETURN (END_FUNCTION);
+	RETURN_TOK (END_FUNCTION);
 }
 
 "PICTURE"[ ,;\n]+"SYMBOL" {
 	count_lines (yytext);
-	RETURN (PICTURE_SYMBOL);
+	RETURN_TOK (PICTURE_SYMBOL);
 }
 
 "FROM"[ ,;\n]+"CRT" {
 	count_lines (yytext);
-	RETURN (FROM_CRT);
+	RETURN_TOK (FROM_CRT);
 }
 
 "SCREEN"[ ,;\n]+"CONTROL" {
 	count_lines (yytext);
-	RETURN (SCREEN_CONTROL);
+	RETURN_TOK (SCREEN_CONTROL);
 }
 
 "EVENT"[ ,;\n]+"STATUS" {
 	count_lines (yytext);
-	RETURN (EVENT_STATUS);
+	RETURN_TOK (EVENT_STATUS);
 }
 
 "READY"[ ,;\n]+"TRACE" {
 	count_lines (yytext);
-	RETURN (READY_TRACE);
+	RETURN_TOK (READY_TRACE);
 }
 
 "RESET"[ ,;\n]+"TRACE" {
 	count_lines (yytext);
-	RETURN (RESET_TRACE);
+	RETURN_TOK (RESET_TRACE);
 }
 
 "GREATER"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
@@ -479,12 +479,12 @@ H#[0-9A-Za-z]* {
 "GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
 "GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (GREATER_OR_EQUAL);
+	RETURN_TOK (GREATER_OR_EQUAL);
 }
 
 "GREATER"[ ,;\n]+"THAN"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (GREATER);
+	RETURN_TOK (GREATER);
 }
 
 "LESS"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
@@ -492,105 +492,105 @@ H#[0-9A-Za-z]* {
 "LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
 "LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (LESS_OR_EQUAL);
+	RETURN_TOK (LESS_OR_EQUAL);
 }
 
 "LESS"[ ,;\n]+"THAN"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (LESS);
+	RETURN_TOK (LESS);
 }
 
 "EQUAL"[ ,;\n]+"TO"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EQUAL);
+	RETURN_TOK (EQUAL);
 }
 
 "THEN"[ ,;\n]+"REPLACING"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (REPLACING);
+	RETURN_TOK (REPLACING);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"TOP"[ ,;\n] |
 "LINES"[ ,;\n]+"TOP"[ ,;\n] |
 "AT"[ ,;\n]+"TOP"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (TOP);
+	RETURN_TOK (TOP);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"BOTTOM"[ ,;\n] |
 "LINES"[ ,;\n]+"BOTTOM"[ ,;\n] |
 "AT"[ ,;\n]+"BOTTOM"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (BOTTOM);
+	RETURN_TOK (BOTTOM);
 }
 
 "WITH"[ ,;\n]+"NO"[ ,;\n]+"ADVANCING" |
 "NO"[ ,;\n]+"ADVANCING" {
 	count_lines (yytext);
-	RETURN (NO_ADVANCING);
+	RETURN_TOK (NO_ADVANCING);
 }
 
 "ON"[ ,;\n]+"NEXT"[ ,;\n]+"PAGE"[ ,;\n] |
 "NEXT"[ ,;\n]+"PAGE"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NEXT_PAGE);
+	RETURN_TOK (NEXT_PAGE);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
 "NOT"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_SIZE_ERROR);
+	RETURN_TOK (NOT_SIZE_ERROR);
 }
 
 "ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
 "SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (SIZE_ERROR);
+	RETURN_TOK (SIZE_ERROR);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"ESCAPE"[ ,;\n] |
 "NOT"[ ,;\n]+"ESCAPE"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_ESCAPE);
+	RETURN_TOK (NOT_ESCAPE);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"EXCEPTION"[ ,;\n] |
 "NOT"[ ,;\n]+"EXCEPTION"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_EXCEPTION);
+	RETURN_TOK (NOT_EXCEPTION);
 }
 
 "ON"[ ,;\n]+"ESCAPE"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (ESCAPE);
+	RETURN_TOK (ESCAPE);
 }
 
 "ON"[ ,;\n]+"EXCEPTION"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EXCEPTION);
+	RETURN_TOK (EXCEPTION);
 }
 
 "NOT"[ ,;\n]+"ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
 "NOT"[ ,;\n]+"OVERFLOW"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_OVERFLOW);
+	RETURN_TOK (NOT_OVERFLOW);
 }
 
 "NOT"[ ,;\n]+"AT"[ ,;\n]+"END"[ ,;\n] |
 "NOT"[ ,;\n]+"END"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_END);
+	RETURN_TOK (NOT_END);
 }
 
 "AT"[ ,;\n]+"END"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (END);
+	RETURN_TOK (END);
 }
 
 "ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
 "OVERFLOW"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (TOK_OVERFLOW);
+	RETURN_TOK (TOK_OVERFLOW);
 }
 
 "NOT"[ ,;\n]+"AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
@@ -598,7 +598,7 @@ H#[0-9A-Za-z]* {
 "NOT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
 "NOT"[ ,;\n]+"EOP"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_EOP);
+	RETURN_TOK (NOT_EOP);
 }
 
 "AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
@@ -606,67 +606,67 @@ H#[0-9A-Za-z]* {
 "END-OF-PAGE"[ ,;\n] |
 "EOP"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EOP);
+	RETURN_TOK (EOP);
 }
 
 "NOT"[ ,;\n]+"INVALID"[ ,;\n]+"KEY"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_INVALID_KEY);
+	RETURN_TOK (NOT_INVALID_KEY);
 }
 
 "NOT"[ ,;\n]+"INVALID"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (NOT_INVALID_KEY);
+	RETURN_TOK (NOT_INVALID_KEY);
 }
 
 "INVALID"[ ,;\n]+"KEY"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (INVALID_KEY);
+	RETURN_TOK (INVALID_KEY);
 }
 
 "INVALID"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (INVALID_KEY);
+	RETURN_TOK (INVALID_KEY);
 }
 
 "UPON"[ ,;\n]+"ENVIRONMENT-NAME" {
 	count_lines (yytext);
-	RETURN (UPON_ENVIRONMENT_NAME);
+	RETURN_TOK (UPON_ENVIRONMENT_NAME);
 }
 
 "UPON"[ ,;\n]+"ENVIRONMENT-VALUE" {
 	count_lines (yytext);
-	RETURN (UPON_ENVIRONMENT_VALUE);
+	RETURN_TOK (UPON_ENVIRONMENT_VALUE);
 }
 
 "UPON"[ ,;\n]+"ARGUMENT-NUMBER" {
 	count_lines (yytext);
-	RETURN (UPON_ARGUMENT_NUMBER);
+	RETURN_TOK (UPON_ARGUMENT_NUMBER);
 }
 
 "UPON"[ ,;\n]+"COMMAND-LINE" {
 	count_lines (yytext);
-	RETURN (UPON_COMMAND_LINE);
+	RETURN_TOK (UPON_COMMAND_LINE);
 }
 
 "AFTER"[ ,;\n]+"EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EXCEPTION_CONDITION);
+	RETURN_TOK (EXCEPTION_CONDITION);
 }
 
 "EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EXCEPTION_CONDITION);
+	RETURN_TOK (EXCEPTION_CONDITION);
 }
 
 "AFTER"[ ,;\n]+"EC"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (EC);
+	RETURN_TOK (EC);
 }
 
 "LENGTH"[ ,;\n]+"OF"[ ,;\n] {
 	count_lines (yytext);
-	RETURN (LENGTH_OF);
+	RETURN_TOK (LENGTH_OF);
 }
 
 "SWITCH"[ ]+([0-9][0-9]?|[A-Z])[ ,;\n] {
@@ -701,7 +701,7 @@ H#[0-9A-Za-z]* {
 		strcat(name, suffix);
 		yylval = cb_build_reference (name);
 	}
-	RETURN (WORD);
+	RETURN_TOK (WORD);
 }
 
 [A-Z0-9\x80-\xFF]([_A-Z0-9\x80-\xFF-]*[A-Z0-9\x80-\xFF]+)? {
@@ -735,16 +735,16 @@ H#[0-9A-Za-z]* {
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-				RETURN (FUNCTION_NAME);
+				RETURN_TOK (FUNCTION_NAME);
 			}
 			if (functions_are_all) {
 				yylval = cb_build_reference (yytext);
-				RETURN ((enum yytokentype)(cbp->token));
+				RETURN_TOK ((enum yytokentype)(cbp->token));
 			}
 			for (tlp = cb_intrinsic_list; tlp; tlp = tlp->next) {
 				if (!strcasecmp (yytext, tlp->text)) {
 					yylval = cb_build_reference (yytext);
-					RETURN ((enum yytokentype)(cbp->token));
+					RETURN_TOK ((enum yytokentype)(cbp->token));
 				}
 			}
 			l = current_program->function_spec_list;
@@ -753,7 +753,7 @@ H#[0-9A-Za-z]* {
 				if (!strcasecmp (yytext,
 						 (char *)(CB_LITERAL(x)->data))) {
 					yylval = cb_build_reference (yytext);
-					RETURN ((enum yytokentype)(cbp->token));
+					RETURN_TOK ((enum yytokentype)(cbp->token));
 				}
 			}
 		}
@@ -765,10 +765,10 @@ H#[0-9A-Za-z]* {
 		cobc_force_literal = 0;
 		if (cb_fold_call) {
 			yylval = cb_build_reference (yytext);
-			RETURN (PROGRAM_NAME);
+			RETURN_TOK (PROGRAM_NAME);
 		} else {
 			yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 	}
 
@@ -782,13 +782,13 @@ H#[0-9A-Za-z]* {
 		} else {
 			yylval = NULL;
 		}
-		RETURN (resptr->token);
+		RETURN_TOK (resptr->token);
 	}
 
 	/* New user-defined word in REPOSITORY entry */
 	if (cobc_in_repository) {
 		yylval = cb_build_reference (yytext);
-		RETURN (WORD);
+		RETURN_TOK (WORD);
 	}
 
 	/* Direct recursive reference in function */
@@ -796,7 +796,7 @@ H#[0-9A-Za-z]* {
 		   && !functions_are_all
 		   && !strcasecmp (yytext, current_program->orig_program_id)) {
 		yylval = cb_build_reference (yytext);
-		RETURN (USER_FUNCTION_NAME);
+		RETURN_TOK (USER_FUNCTION_NAME);
 	}
 
 	/* Check prototype names */
@@ -804,7 +804,7 @@ H#[0-9A-Za-z]* {
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			yylval = cb_build_reference (yytext);
-			RETURN (USER_FUNCTION_NAME);
+			RETURN_TOK (USER_FUNCTION_NAME);
 		}
 	}
 	if (cobc_allow_program_name) {
@@ -812,7 +812,7 @@ H#[0-9A-Za-z]* {
 			x = CB_VALUE (l);
 			if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
-				RETURN (PROGRAM_NAME);
+				RETURN_TOK (PROGRAM_NAME);
 			}
 		}
 	}
@@ -822,7 +822,7 @@ H#[0-9A-Za-z]* {
 		program = cb_find_defined_program_by_name (yytext);
 		if (program) {
 			yylval = cb_build_reference (yytext);
-			RETURN (PROGRAM_NAME);
+			RETURN_TOK (PROGRAM_NAME);
 		}
 	}
 
@@ -836,7 +836,7 @@ H#[0-9A-Za-z]* {
 				if (p78->prog == current_program) {
 					cb_error (_("a constant may not be used here - '%s'"), yytext);
 					yylval = cb_error_node;
-					RETURN (WORD);
+					RETURN_TOK (WORD);
 				}
 				if (p78->chk_const) {
 					p78->not_const = 1;
@@ -847,7 +847,7 @@ H#[0-9A-Za-z]* {
 				break;
 			}
 			yylval = CB_VALUE (p78->fld78->values);
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 	}
 
@@ -857,33 +857,33 @@ H#[0-9A-Za-z]* {
 	if (CB_WORD_COUNT (yylval) > 0 && CB_WORD_ITEMS (yylval)) {
 		x = CB_VALUE (CB_WORD_ITEMS (yylval));
 		if (CB_SYSTEM_NAME_P (x)) {
-			RETURN (MNEMONIC_NAME);
+			RETURN_TOK (MNEMONIC_NAME);
 		} else if (CB_CLASS_NAME_P (x)) {
-			RETURN (CLASS_NAME);
+			RETURN_TOK (CLASS_NAME);
 		}
 	}
 
-	RETURN (WORD);
+	RETURN_TOK (WORD);
 }
 
 "<=" {
 	yylval = NULL;
-	RETURN (LESS_OR_EQUAL);
+	RETURN_TOK (LESS_OR_EQUAL);
 }
 
 ">=" {
 	yylval = NULL;
-	RETURN (GREATER_OR_EQUAL);
+	RETURN_TOK (GREATER_OR_EQUAL);
 }
 
 "<>" {
 	yylval = NULL;
-	RETURN (NOT_EQUAL);
+	RETURN_TOK (NOT_EQUAL);
 }
 
 "**" {
 	yylval = NULL;
-	RETURN (EXPONENTIATION);
+	RETURN_TOK (EXPONENTIATION);
 }
 
 "."([ \n]*".")* {
@@ -894,53 +894,53 @@ H#[0-9A-Za-z]* {
 	if (!last_token_is_dot) {
 		last_token_is_dot = 1;
 		yylval = NULL;
-		RETURN (TOK_DOT);
+		RETURN_TOK (TOK_DOT);
 	}
 }
 
 "&" {
 	yylval = NULL;
-	RETURN (TOK_AMPER);
+	RETURN_TOK (TOK_AMPER);
 }
 
 ":" {
 	yylval = NULL;
-	RETURN (TOK_COLON);
+	RETURN_TOK (TOK_COLON);
 }
 
 "=" {
 	yylval = NULL;
-	RETURN (TOK_EQUAL);
+	RETURN_TOK (TOK_EQUAL);
 }
 
 "/" {
 	yylval = NULL;
-	RETURN (TOK_DIV);
+	RETURN_TOK (TOK_DIV);
 }
 
 "*" {
 	yylval = NULL;
-	RETURN (TOK_MUL);
+	RETURN_TOK (TOK_MUL);
 }
 
 "+" {
 	yylval = NULL;
-	RETURN (TOK_PLUS);
+	RETURN_TOK (TOK_PLUS);
 }
 
 "-" {
 	yylval = NULL;
-	RETURN (TOK_MINUS);
+	RETURN_TOK (TOK_MINUS);
 }
 
 "<" {
 	yylval = NULL;
-	RETURN (TOK_LESS);
+	RETURN_TOK (TOK_LESS);
 }
 
 ">" {
 	yylval = NULL;
-	RETURN (TOK_GREATER);
+	RETURN_TOK (TOK_GREATER);
 }
 
 . {
@@ -965,7 +965,7 @@ H#[0-9A-Za-z]* {
   [^ \n;]+ {
 	BEGIN INITIAL;
 	scan_picture (yytext);
-	RETURN (PICTURE);
+	RETURN_TOK (PICTURE);
   }
 }
 
@@ -980,18 +980,18 @@ H#[0-9A-Za-z]* {
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
-			RETURN (USER_FUNCTION_NAME);
+			RETURN_TOK (USER_FUNCTION_NAME);
 		}
 	}
 	cbp = lookup_intrinsic (yytext, 0);
 	if (cbp) {
-		RETURN ((enum yytokentype)(cbp->token));
+		RETURN_TOK ((enum yytokentype)(cbp->token));
 	}
-	RETURN (FUNCTION_NAME);
+	RETURN_TOK (FUNCTION_NAME);
   }
   . {
 	yylval = NULL;
-	RETURN (yytext[0]);
+	RETURN_TOK (yytext[0]);
   }
 }
 
@@ -1280,11 +1280,11 @@ scan_x (const char *text, const char *type)
 		}
 	}
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1303,7 +1303,7 @@ scan_z (const char *text, const char *type)
 			  (int) currlen, cb_lit_length);
 		error_literal (type, text);
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 	if (unlikely (currlen > plexsize)) {
 		plexsize = currlen;
@@ -1317,7 +1317,7 @@ scan_z (const char *text, const char *type)
 	if (type[0] == 'L') {
 		CB_LITERAL(yylval)->llit = 1;
 	}
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1380,11 +1380,11 @@ scan_h (const char *text, const char *type)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1453,11 +1453,11 @@ scan_b (const char *text, const char *type)
 	/* FIXME: we should likely build a boolean literal ... */
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1504,11 +1504,11 @@ scan_o (const char *text, const char *type)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1571,7 +1571,7 @@ scan_numeric (const char *text)
 	} else {
 		yylval = cb_build_numeric_literal (sign, p, scale);
 	}
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -1623,7 +1623,7 @@ scan_floating_numeric (const char *text)
 		this should never happen as the flex rule ensures this */
 	if (n == 0) {
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 
 	/* Get signs and adjust string positions accordingly */
@@ -1671,7 +1671,7 @@ scan_floating_numeric (const char *text)
 		   this should never happen as the flex rule ensures this */
 		if (n == 0) {
 			yylval = cb_error_node;
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 
 		if (exp_sign == -1) {
@@ -1705,7 +1705,7 @@ scan_floating_numeric (const char *text)
 
 	if (literal_error) {
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 
 	/* Determine scale */
@@ -1746,7 +1746,7 @@ scan_floating_numeric (const char *text)
 
 	yylval = cb_build_numeric_literal (sig_sign, result,
 					   scale);
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static void
