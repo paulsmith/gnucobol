@@ -8499,7 +8499,8 @@ cb_emit_set_false (cb_tree l)
 }
 
 void
-cb_emit_set_attribute (cb_tree x, const int val_on, const int val_off)
+cb_emit_set_attribute (cb_tree x, const cob_flags_t val_on,
+		       const cob_flags_t val_off)
 {
 	struct cb_field		*f;
 

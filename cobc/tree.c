@@ -3810,7 +3810,7 @@ cb_build_continue (void)
 
 cb_tree
 cb_build_set_attribute (const struct cb_field *fld,
-			const int val_on, const int val_off)
+			const cob_flags_t val_on, const cob_flags_t val_off)
 {
 	struct cb_set_attr *p;
 

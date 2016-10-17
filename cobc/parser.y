@@ -190,8 +190,8 @@ static int			depth;
 static int			first_nested_program;
 static int			call_mode;
 static int			size_mode;
-static int			set_attr_val_on;
-static int			set_attr_val_off;
+static cob_flags_t		set_attr_val_on;
+static cob_flags_t		set_attr_val_off;
 static cob_flags_t		check_duplicate;
 static cob_flags_t		check_on_off_duplicate;
 static cob_flags_t		check_pic_duplicate;
@@ -270,12 +270,12 @@ static
 void print_bits (unsigned int num)
 {
 	unsigned int 	size = sizeof (unsigned int);
-	unsigned int	maxPow = 1 << (size * 8 - 1);
+	unsigned int	max_pow = 1 << (size * 8 - 1);
 	int 		i = 0;
 
 	for(; i < size * 8; ++i){
 		/* Print last bit and shift left. */
-		fprintf (stderr, "%u ", num & maxPow ? 1 : 0);
+		fprintf (stderr, "%u ", num & max_pow ? 1 : 0);
 		num = num << 1;
  	}
 	fprintf (stderr, "\n");
@@ -624,8 +624,8 @@ check_relaxed_syntax (const unsigned int lev)
 }
 
 static void
-check_headers_present (const unsigned int lev1, const unsigned int lev2,
-		       const unsigned int lev3, const unsigned int lev4)
+check_headers_present (const cob_flags_t lev1, const cob_flags_t lev2,
+		       const cob_flags_t lev3, const cob_flags_t lev4)
 {
 	/* Lev1 is always present and checked */
 	/* Lev2/3/4, if non-zero (forced) may be present */
@@ -1121,9 +1121,9 @@ set_current_field (cb_tree level, cb_tree name)
 }
 
 static void
-check_not_both (const int flag1, const int flag2,
+check_not_both (const cob_flags_t flag1, const cob_flags_t flag2,
 		const char *flag1_name, const char *flag2_name,
-		const int flags, const int flag_to_set)
+		const cob_flags_t flags, const cob_flags_t flag_to_set)
 {
 	if (flag_to_set == flag1 && (flags & flag2)) {
 		cb_error (_("cannot specify both %s and %s"),
@@ -1136,7 +1136,8 @@ check_not_both (const int flag1, const int flag2,
 }
 
 static COB_INLINE COB_A_INLINE void
-check_not_highlight_and_lowlight (const int flags, const int flag_to_set)
+check_not_highlight_and_lowlight (const cob_flags_t flags,
+				  const cob_flags_t flag_to_set)
 {
 	check_not_both (COB_SCREEN_HIGHLIGHT, COB_SCREEN_LOWLIGHT,
 			"HIGHLIGHT", "LOWLIGHT", flags, flag_to_set);

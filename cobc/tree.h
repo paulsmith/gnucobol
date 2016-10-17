@@ -1187,8 +1187,8 @@ struct cb_continue {
 struct cb_set_attr {
 	struct cb_tree_common	common;		/* Common values */
 	struct cb_field		*fld;
-	int			val_on;
-	int			val_off;
+	cob_flags_t		val_on;
+	cob_flags_t		val_off;
 };
 
 #define CB_SET_ATTR(x)		(CB_TREE_CAST (CB_TAG_SET_ATTR, struct cb_set_attr, x))
@@ -1791,9 +1791,12 @@ extern void		cb_emit_set_up_down (cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_set_on_off (cb_tree, cb_tree);
 extern void		cb_emit_set_true (cb_tree);
 extern void		cb_emit_set_false (cb_tree);
-extern void		cb_emit_set_attribute (cb_tree, const int, const int);
+extern void		cb_emit_set_attribute (cb_tree,
+					       const cob_flags_t,
+					       const cob_flags_t);
 extern cb_tree		cb_build_set_attribute (const struct cb_field *,
-						const int, const int);
+						const cob_flags_t,
+						const cob_flags_t);
 extern void		cb_emit_set_last_exception_to_off (void);
 
 extern void		cb_emit_sort_init (cb_tree, cb_tree, cb_tree);
