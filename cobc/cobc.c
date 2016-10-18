@@ -4140,6 +4140,8 @@ print_fixed_line (const int line_num, char pch, char *line)
 		terminate_str_at_first_trailing_space (buffer);
 
 		fprintf (cb_src_list_file, "%s\n", buffer);
+		if (cb_text_column < 80)
+			break;
 		pch = '+';
 	}
 }

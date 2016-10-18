@@ -1,4 +1,8 @@
 
+2016-10-18  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: print_fixed_line() fixed SORCEFORMAT VARIABLE bug.
+
 2016-10-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* scanner.l (RETURN): renamed to RETURN_TOK (see bug #330).

@@ -529,7 +529,7 @@ File: gnucobol.info,  Node: Listing options,  Next: Debug switches,  Prev: Confi
 
    Here is an example program listing with the -t option:
 
-     GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0001
+     GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0001
 
      LINE    PG/LN  A...B............................................................
 
@@ -539,39 +539,43 @@ File: gnucobol.info,  Node: Listing options,  Next: Debug switches,  Prev: Confi
      000004         CONFIGURATION SECTION.
      000005         DATA             DIVISION.
      000006         WORKING-STORAGE  SECTION.
-     000007         78  I   VALUE 20.
-     000008         78  J   VALUE 5000.
-     000009         78  M   VALUE 5.
-     000010         01  SETUP-REC.
-     000011             05  FL1       PIC X(04).
-     000012             05  FL2       PIC ZZZZZ.
-     000013             05  FL3       PIC 9(04).
-     000014             05  FL4       PIC 9(08) COMP.
-     000015             05  FL5       PIC 9(04) COMP-4.
-     000016             05  FL6       PIC Z,ZZZ.99.
-     000017             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
-     000018             05  FL8       PIC X(04).
-     000019             05  FL9 REDEFINES FL8 PIC 9(04).
-     000020             05  FLA.
-     000021                 10  FLB OCCURS I TIMES.
-     000022                     15  FLC PIC X(02).
-     000023                 10  FLD   PIC X(20).
-     000024             05  FLD1      PIC X(100).
-     000025             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
-     000026                 10  FILLER PIC X(01).
-     000027             05  FLD3      PIC X(3).
-     000028             05  FLD4      PIC X(4).
-     000029         PROCEDURE        DIVISION.
-     000030             STOP RUN.
+     000007         COPY 'values.cpy'.
+     000001C        78  I   VALUE 20.
+     000002C        78  J   VALUE 5000.
+     000003C        78  M   VALUE 5.
+     000008         01  SETUP-REC.
+     000009             05  FL1       PIC X(04).
+     000010             05  FL2       PIC ZZZZZ.
+     000011             05  FL3       PIC 9(04).
+     000012             05  FL4       PIC 9(08) COMP.
+     000013             05  FL5       PIC 9(04) COMP-4.
+     000014             05  FL6       PIC Z,ZZZ.99.
+     000015             05  FL7       PIC S9(05) SIGN LEADING SEPARATE.
+     000016             05  FL8       PIC X(04).
+     000017             05  FL9 REDEFINES FL8 PIC 9(04).
+     000018             05  FLA.
+     000019                 10  FLB OCCURS I TIMES.
+     000020                     15  FLC PIC X(02).
+     000021                 10  FLD   PIC X(20).
+     000022             05  FLD1      PIC X(100).
+     000023             05  FLD2 OCCURS M TO J TIMES DEPENDING ON FL5.
+     000024                 10  FILLER PIC X(01).
+     000025             05  FLD3      PIC X(3).
+     000026             05  FLD4      PIC X(4).
+     000027         PROCEDURE        DIVISION.
+     000028             STOP RUN.
 
    The first part of the listing lists the program text.  If the program
 text is a COPY the line number reflects the COPY line number and is
 appended with a 'C'.
 
+   When the wide list option is specified (-T), the SEQUENCE columns are
+included in the listing.
+
    The second part of the listing file is the listing of the Symbol
 Table:
 
-     GnuCOBOL 2.0.0   test.cbl                   Sun Oct 16 15:28:38 2016  Page 0002
+     GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0002
 
      SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1749,7 +1753,7 @@ Options:
   -q, -brief            reduced displays, commands invoked not shown
   -x                    build an executable program
   -m                    build a dynamically loadable module (default)
-  -j [<args>], -job[=<args>] run program after build, passing <args>
+  -j [<args>], -job[=<args>]	run program after build, passing <args>
   -std=<dialect>        warnings/features for a specific dialect
                         <dialect> can be one of:
                         cobol2014, cobol2002, cobol85, default,
@@ -1792,132 +1796,132 @@ Options:
   -W                    enable all warnings
   -Wall                 enable most warnings (all except as noted below)
   -Wno-<warning>        disable warning enabled by -W or -Wall
-  -Wno-unfinished       don't warn if unfinished features are used
+  -Wno-unfinished      	don't warn if unfinished features are used
 			- ALWAYS active
-  -Wobsolete            warn if obsolete features are used
-  -Warchaic             warn if archaic features are used
-  -Wredefinition        warn incompatible redefinition of data items
-  -Wconstant            warn inconsistent constant
-  -Woverlap             warn overlapping MOVE items
-  -Wparentheses         warn lack of parentheses around AND within OR
-  -Wstrict-typing       warn type mismatch strictly
-  -Wimplicit-define     warn implicitly defined data items
-  -Wcorresponding       warn CORRESPONDING with no matching items
-  -Wexternal-value      warn EXTERNAL item with VALUE clause
-  -Wprototypes          warn missing FUNCTION prototypes/definitions
-  -Wcall-params         warn non 01/77 items for CALL params
+  -Wobsolete           	warn if obsolete features are used
+  -Warchaic            	warn if archaic features are used
+  -Wredefinition       	warn incompatible redefinition of data items
+  -Wconstant           	warn inconsistent constant
+  -Woverlap            	warn overlapping MOVE items
+  -Wparentheses        	warn lack of parentheses around AND within OR
+  -Wstrict-typing      	warn type mismatch strictly
+  -Wimplicit-define    	warn implicitly defined data items
+  -Wcorresponding      	warn CORRESPONDING with no matching items
+  -Wexternal-value     	warn EXTERNAL item with VALUE clause
+  -Wprototypes         	warn missing FUNCTION prototypes/definitions
+  -Wcall-params        	warn non 01/77 items for CALL params
 			- NOT set with -Wall
-  -Wcolumn-overflow     warn text after program-text area, FIXED format
+  -Wcolumn-overflow    	warn text after program-text area, FIXED format
 			- NOT set with -Wall
-  -Wterminator          warn lack of scope terminator END-XXX
+  -Wterminator         	warn lack of scope terminator END-XXX
 			- NOT set with -Wall
-  -Wtruncate            warn possible field truncation
+  -Wtruncate           	warn possible field truncation
 			- NOT set with -Wall
-  -Wlinkage             warn dangling LINKAGE items
+  -Wlinkage            	warn dangling LINKAGE items
 			- NOT set with -Wall
-  -Wunreachable         warn unreachable statements
+  -Wunreachable        	warn unreachable statements
 			- NOT set with -Wall
 
-  -fsign=[ASCII|EBCDIC] define display sign representation
+  -fsign=[ASCII|EBCDIC]	define display sign representation
 			- default: machine native
-  -ffold-copy=[UPPER|LOWER] fold COPY subject to value
+  -ffold-copy=[UPPER|LOWER]	fold COPY subject to value
 			- default: no transformation
-  -ffold-call=[UPPER|LOWER] fold PROGRAM-ID, CALL, CANCEL subject to value
+  -ffold-call=[UPPER|LOWER]	fold PROGRAM-ID, CALL, CANCEL subject to value
 			- default: no transformation
-  -fdefaultbyte=0..255  initialize fields without VALUE to decimal value
+  -fdefaultbyte=0..255 	initialize fields without VALUE to decimal value
 			- default: initialize to picture
-  -fintrinsics=[ALL|intrinsic function name(,name,...)] intrinsics to be used without FUNCTION keyword
-  -ftrace               generate trace code
+  -fintrinsics=[ALL|intrinsic function name(,name,...)]	intrinsics to be used without FUNCTION keyword
+  -ftrace              	generate trace code
 			- executed SECTION/PARAGRAPH
-  -ftraceall            generate trace code
+  -ftraceall           	generate trace code
 			- executed SECTION/PARAGRAPH/STATEMENTS
 			- turned on by -debug
-  -fsyntax-only         syntax error checking only; don't emit any output
-  -fdebugging-line      enable debugging lines
+  -fsyntax-only        	syntax error checking only; don't emit any output
+  -fdebugging-line     	enable debugging lines
 			- 'D' in indicator column or floating >>D
-  -fsource-location     generate source location code
+  -fsource-location    	generate source location code
 			- turned on by -debug/-g/-ftraceall
-  -fimplicit-init       automatic initialization of the COBOL runtime system
-  -fstack-check         PERFORM stack checking
+  -fimplicit-init      	automatic initialization of the COBOL runtime system
+  -fstack-check        	PERFORM stack checking
 			- turned on by -debug or -g
-  -fsyntax-extension    allow syntax extensions
+  -fsyntax-extension   	allow syntax extensions
 			- e.g. switch name SW1, etc.
-  -fwrite-after         use AFTER 1 for WRITE of LINE SEQUENTIAL
+  -fwrite-after        	use AFTER 1 for WRITE of LINE SEQUENTIAL
 			- default: BEFORE 1
-  -fmfcomment           '*' or '/' in column 1 treated as comment
+  -fmfcomment          	'*' or '/' in column 1 treated as comment
 			- FIXED format only
-  -facucomment          '$' in indicator area treated as '*',
+  -facucomment         	'$' in indicator area treated as '*',
 			'|' treated as floating comment
-  -fnotrunc             allow numeric field overflow
+  -fnotrunc            	allow numeric field overflow
 			- non-ANSI behaviour
-  -fodoslide            adjust items following OCCURS DEPENDING
+  -fodoslide           	adjust items following OCCURS DEPENDING
 			- requires implicit/explicit relaxed syntax
-  -fsingle-quote        use a single quote (apostrophe) for QUOTE
+  -fsingle-quote       	use a single quote (apostrophe) for QUOTE
 			- default: double quote
-  -frecursive-check     check recursive program call
-  -foptional-file       treat all files as OPTIONAL
+  -frecursive-check    	check recursive program call
+  -foptional-file      	treat all files as OPTIONAL
 			- unless NOT OPTIONAL specified
 
-  -ftab-width=<number>  set number of spaces that are asumed for tabs
-  -ftext-column=<number> set right margin for source (fixed format only)
-  -fword-length=<number> maximum word-length for COBOL words / Programmer defined words
-  -fliteral-length=<number> maximum literal size in general
-  -fnumeric-literal-length=<number> maximum numeric literal size
-  -fassign-clause=<value> set way of interpreting ASSIGN
-  -fbinary-size=<value> binary byte size - defines the allocated bytes according to PIC
-  -fbinary-byteorder=<value> binary byte order
-  -fstandard-define=<value>
-  -ffilename-mapping    resolve file names at run time using environment variables.
-  -fpretty-display      alternate formatting of numeric fields
-  -fbinary-truncate     numeric truncation according to ANSI
-  -fcomplex-odo         allow complex OCCURS DEPENDING ON
-  -findirect-redefines  allow REDEFINES to other than last equal level number
-  -flarger-redefines-ok allow larger REDEFINES items
-  -frelax-syntax-checks allow certain syntax variations (e.g. REDEFINES position)
-  -fperform-osvs        exit point of any currently executing perform is recognized if reached
-  -fsticky-linkage      linkage-section items remain allocated between invocations
-  -frelax-level-hierarchy allow non-matching level numbers
-  -fhostsign            allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
-  -faccept-update       set WITH UPDATE clause as default for ACCEPT dest-item, except if WITH NO UPDATE clause is used
-  -faccept-auto         set WITH AUTO clause as default for ACCEPT dest-item, except if WITH TAB clause is used
-  -fconsole-is-crt      assume CONSOLE IS CRT if not set otherwise
-  -fprogram-name-redefinition program names don't lead to a reserved identifier
-  -fno-echo-means-secure NO-ECHO hides input with asterisks like SECURE
-  -fcomment-paragraphs=<support> comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)
-  -fmemory-size-clause=<support> MEMORY-SIZE clause
-  -fmultiple-file-tape-clause=<support> MULTIPLE-FILE-TAPE clause
-  -flabel-records-clause=<support> LABEL-RECORDS clause
-  -fvalue-of-clause=<support> VALUE-OF clause
-  -fdata-records-clause=<support> DATA-RECORDS clause
-  -ftop-level-occurs-clause=<support> OCCURS clause on top-level
-  -fsynchronized-clause=<support> SYNCHRONIZED clause
-  -fgoto-statement-without-name=<support> GOTO statement without name
-  -fstop-literal-statement=<support> STOP-LITERAL statement
-  -fdebugging-line=<support> DEBUGGING MODE and indicator 'D'
-  -fpadding-character-clause=<support> PADDING CHARACTER clause
-  -fnext-sentence-phrase=<support> NEXT SENTENCE phrase
-  -feject-statement=<support> EJECT statement
-  -fentry-statement=<support> ENTRY statement
-  -fmove-noninteger-to-alphanumeric=<support> move noninteger to alphanumeric
-  -fodo-without-to=<support> OCCURS DEPENDING ON without to
-  -fsection-segments=<support> section segments
-  -falter-statement=<support> ALTER statement
-  -fcall-overflow=<support> OVERFLOW clause for CALL
-  -fnumeric-boolean=<support> boolean literals (b'1010')
-  -fhexadecimal-boolean=<support> hexadecimal-boolean literals (b'A')
-  -fnational-literals=<support> national literals (N'UTF-16 string')
-  -fhexadecimal-national-literals=<support> hexadecimal-national literals (NX'265E')
-  -facucobol-literals=<support> ACUCOBOL-GT literals (#B #O #H #X)
-  -fword-continuation=<support> continuation of COBOL words
-  -fnot-exception-before-exception=<support> NOT ON EXCEPTION before ON EXCEPTION
-  -faccept-display-extensions=<support> extensions to ACCEPT and DISPLAY
-  -frenames-uncommon-levels=<support> RENAMES of 01-, 66- and 77-level items
-  -fprogram-prototypes=<support> CALL/CANCEL with program-prototype-name
+  -ftab-width=1..12    	set number of spaces that are asumed for tabs
+  -ftext-column=72..255	set right margin for source (fixed format only)
+  -fpic-length=<number>	maximum number of characters allowed in the character-string
+  -fword-length=1..61  	maximum word-length for COBOL words / Programmer defined words
+  -fliteral-length=<number>	maximum literal size in general
+  -fnumeric-literal-length=1..38	maximum numeric literal size
+  -fassign-clause=<value>	set way of interpreting ASSIGN
+  -fbinary-size=<value>	binary byte size - defines the allocated bytes according to PIC
+  -fbinary-byteorder=<value>	binary byte order
+  -ffilename-mapping   	resolve file names at run time using environment variables.
+  -fpretty-display     	alternate formatting of numeric fields
+  -fbinary-truncate    	numeric truncation according to ANSI
+  -fcomplex-odo        	allow complex OCCURS DEPENDING ON
+  -findirect-redefines 	allow REDEFINES to other than last equal level number
+  -flarger-redefines-ok	allow larger REDEFINES items
+  -frelax-syntax-checks	allow certain syntax variations (e.g. REDEFINES position)
+  -fperform-osvs       	exit point of any currently executing perform is recognized if reached
+  -fsticky-linkage     	linkage-section items remain allocated between invocations
+  -frelax-level-hierarchy	allow non-matching level numbers
+  -fhostsign           	allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
+  -faccept-update      	set WITH UPDATE clause as default for ACCEPT dest-item, instead of WITH NO UPDATE
+  -faccept-auto        	set WITH AUTO clause as default for ACCEPT dest-item, instead of WITH TAB
+  -fconsole-is-crt     	assume CONSOLE IS CRT if not set otherwise
+  -fprogram-name-redefinition	program names don't lead to a reserved identifier
+  -fno-echo-means-secure	NO-ECHO hides input with asterisks like SECURE
+  -fcomment-paragraphs=<support>	comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)
+  -fmemory-size-clause=<support>	MEMORY-SIZE clause
+  -fmultiple-file-tape-clause=<support>	MULTIPLE-FILE-TAPE clause
+  -flabel-records-clause=<support>	LABEL-RECORDS clause
+  -fvalue-of-clause=<support>	VALUE-OF clause
+  -fdata-records-clause=<support>	DATA-RECORDS clause
+  -ftop-level-occurs-clause=<support>	OCCURS clause on top-level
+  -fsynchronized-clause=<support>	SYNCHRONIZED clause
+  -fgoto-statement-without-name=<support>	GOTO statement without name
+  -fstop-literal-statement=<support>	STOP-LITERAL statement
+  -fdebugging-line=<support>	DEBUGGING MODE and indicator 'D'
+  -fpadding-character-clause=<support>	PADDING CHARACTER clause
+  -fnext-sentence-phrase=<support>	NEXT SENTENCE phrase
+  -feject-statement=<support>	EJECT statement
+  -fentry-statement=<support>	ENTRY statement
+  -fmove-noninteger-to-alphanumeric=<support>	move noninteger to alphanumeric
+  -fodo-without-to=<support>	OCCURS DEPENDING ON without to
+  -fsection-segments=<support>	section segments
+  -falter-statement=<support>	ALTER statement
+  -fcall-overflow=<support>	OVERFLOW clause for CALL
+  -fnumeric-boolean=<support>	boolean literals (B'1010')
+  -fhexadecimal-boolean=<support>	hexadecimal-boolean literals (BX'A')
+  -fnational-literals=<support>	national literals (N'UTF-16 string')
+  -fhexadecimal-national-literals=<support>	hexadecimal-national literals (NX'265E')
+  -facucobol-literals=<support>	ACUCOBOL-GT literals (#B #O #H #X)
+  -fword-continuation=<support>	continuation of COBOL words
+  -fnot-exception-before-exception=<support>	NOT ON EXCEPTION before ON EXCEPTION
+  -faccept-display-extensions=<support>	extensions to ACCEPT and DISPLAY
+  -frenames-uncommon-levels=<support>	RENAMES of 01-, 66- and 77-level items
+  -fprogram-prototypes=<support>	CALL/CANCEL with program-prototype-name
 	where <support> is one of the following:
 	'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
-  -fnot-reserved=<word> word to be taken out of the reserved words list
-  -freserved=<word>     word to be added to reserved words list
-  -freserved=<word>:<alias> word to be added to reserved words list as alias
+  -fnot-reserved=<word>	word to be taken out of the reserved words list
+  -freserved=<word>    	word to be added to reserved words list
+  -freserved=<word>:<alias>	word to be added to reserved words list as alias
 
 
 Report bugs to: bug-gnucobol@gnu.org
@@ -2882,8 +2886,11 @@ word-length:			31
 # Maximum literal size in general
 literal-length:			8191
 
-# Maximum numeric literal size
-numeric-literal-length:	61
+# Maximum numeric literal size (absolute maximum: 38)
+numeric-literal-length:	38
+
+# Maximum number of characters allowed in the character-string (max. 255)
+pic-length:				255
 
 # Value: 'mf', 'ibm'
 #
@@ -3869,49 +3876,49 @@ Ref: Source format-Footnote-111904
 Node: Warning options11978
 Node: Configuration options13432
 Node: Listing options14565
-Node: Debug switches18719
-Node: Miscellaneous19813
-Node: Multiple sources20662
-Node: Static linking21302
-Node: Dynamic linking22793
-Ref: Dynamic linking-Footnote-124385
-Ref: Dynamic linking-Footnote-224446
-Node: Building library24507
-Node: Using library24890
-Node: C interface25461
-Node: Main C program25805
-Node: Static C to COBOL26721
-Node: Dynamic C to COBOL28218
-Node: Static COBOL to C29663
-Node: Dynamic COBOL to C31099
-Node: Customize31508
-Node: Customizing compiler31732
-Node: Customizing library32318
-Node: Optimize33076
-Node: Optimize options33379
-Node: Optimize call33916
-Node: Optimize binary34296
-Node: Debug34872
-Node: Debug options35031
-Node: Extensions35393
-Node: SELECT35830
-Node: Indexed35995
-Node: Extended ACCEPT36175
-Node: ACCEPT special37809
-Node: Extended DISPLAY40243
-Node: System routines42689
-Node: CBL_OC_GETOPT43035
-Node: CBL_OC_HOSTED47207
-Node: CBL_OC_NANOSLEEP51709
-Node: Appendix A52215
-Node: Appendix B62957
-Node: Appendix C85634
-Node: Appendix D91238
-Node: Appendix E93174
-Node: Appendix F99314
-Node: Appendix G105168
-Node: Appendix H106467
-Node: Appendix I115974
-Node: Index141099
+Node: Debug switches18857
+Node: Miscellaneous19951
+Node: Multiple sources20800
+Node: Static linking21440
+Node: Dynamic linking22931
+Ref: Dynamic linking-Footnote-124523
+Ref: Dynamic linking-Footnote-224584
+Node: Building library24645
+Node: Using library25028
+Node: C interface25599
+Node: Main C program25943
+Node: Static C to COBOL26859
+Node: Dynamic C to COBOL28356
+Node: Static COBOL to C29801
+Node: Dynamic COBOL to C31237
+Node: Customize31646
+Node: Customizing compiler31870
+Node: Customizing library32456
+Node: Optimize33214
+Node: Optimize options33517
+Node: Optimize call34054
+Node: Optimize binary34434
+Node: Debug35010
+Node: Debug options35169
+Node: Extensions35531
+Node: SELECT35968
+Node: Indexed36133
+Node: Extended ACCEPT36313
+Node: ACCEPT special37947
+Node: Extended DISPLAY40381
+Node: System routines42827
+Node: CBL_OC_GETOPT43173
+Node: CBL_OC_HOSTED47345
+Node: CBL_OC_NANOSLEEP51847
+Node: Appendix A52353
+Node: Appendix B63120
+Node: Appendix C85797
+Node: Appendix D91401
+Node: Appendix E93337
+Node: Appendix F99477
+Node: Appendix G105448
+Node: Appendix H106747
+Node: Appendix I116254
+Node: Index141379
 
 End Tag Table

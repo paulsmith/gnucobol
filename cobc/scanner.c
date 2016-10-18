@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 37
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -143,15 +143,7 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k.
- * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
- * Ditto for the __ia64__ case accordingly.
- */
-#define YY_BUF_SIZE 32768
-#else
 #define YY_BUF_SIZE 16384
-#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -177,7 +169,6 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -1425,7 +1416,7 @@ static int yywrap (void) {
 #define YYSTYPE			cb_tree
 #include "parser.h"
 
-#define RETURN(expr)				\
+#define RETURN_TOK(expr)			\
 	do {					\
 		last_yylval = yylval;		\
 		last_token = (expr);		\
@@ -1484,7 +1475,7 @@ static void	scan_options (const char *, const unsigned int);
 
 
 
-#line 1487 "scanner.c"
+#line 1478 "scanner.c"
 
 #define INITIAL 0
 #define DECIMAL_IS_PERIOD 1
@@ -1545,12 +1536,7 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k */
-#define YY_READ_BUF_SIZE 16384
-#else
 #define YY_READ_BUF_SIZE 8192
-#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -1654,33 +1640,6 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-	if ( !(yy_init) )
-		{
-		(yy_init) = 1;
-
-#ifdef YY_USER_INIT
-		YY_USER_INIT;
-#endif
-
-		if ( ! (yy_start) )
-			(yy_start) = 1;	/* first start state */
-
-		if ( ! yyin )
-			yyin = stdin;
-
-		if ( ! yyout )
-			yyout = stdout;
-
-		if ( ! YY_CURRENT_BUFFER ) {
-			yyensure_buffer_stack ();
-			YY_CURRENT_BUFFER_LVALUE =
-				yy_create_buffer(yyin,YY_BUF_SIZE );
-		}
-
-		yy_load_buffer_state( );
-		}
-
-	{
 #line 160 "scanner.l"
 
 
@@ -1710,7 +1669,33 @@ YY_DECL
 
 
 
-#line 1713 "scanner.c"
+#line 1672 "scanner.c"
+
+	if ( !(yy_init) )
+		{
+		(yy_init) = 1;
+
+#ifdef YY_USER_INIT
+		YY_USER_INIT;
+#endif
+
+		if ( ! (yy_start) )
+			(yy_start) = 1;	/* first start state */
+
+		if ( ! yyin )
+			yyin = stdin;
+
+		if ( ! yyout )
+			yyout = stdout;
+
+		if ( ! YY_CURRENT_BUFFER ) {
+			yyensure_buffer_stack ();
+			YY_CURRENT_BUFFER_LVALUE =
+				yy_create_buffer(yyin,YY_BUF_SIZE );
+		}
+
+		yy_load_buffer_state( );
+		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1729,7 +1714,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
+			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -1847,7 +1832,7 @@ YY_RULE_SETUP
 {
 	if (cobc_in_repository || cobc_cs_check == CB_CS_EXIT) {
 		yylval = NULL;
-	        RETURN (FUNCTION);
+	        RETURN_TOK (FUNCTION);
 	}
 	BEGIN FUNCTION_STATE;
 }
@@ -1859,7 +1844,7 @@ YY_RULE_SETUP
 	/* String literal */
 	cobc_force_literal = 0;
 	read_literal (yytext[0], "");
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 	YY_BREAK
 case 12:
@@ -1870,7 +1855,7 @@ YY_RULE_SETUP
 {
 	/* X string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 2, "X"));
+	RETURN_TOK (scan_x (yytext + 2, "X"));
 }
 	YY_BREAK
 case 14:
@@ -1881,7 +1866,7 @@ YY_RULE_SETUP
 	cobc_force_literal = 0;
 	/* TODO: national string - needs different handling */
 	read_literal (yytext [1], "N");
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 	YY_BREAK
 case 15:
@@ -1892,7 +1877,7 @@ YY_RULE_SETUP
 {
 	/* NX string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 3, "NX"));
+	RETURN_TOK (scan_x (yytext + 3, "NX"));
 }
 	YY_BREAK
 case 17:
@@ -1903,7 +1888,7 @@ YY_RULE_SETUP
 {
 	/* Z string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_z (yytext + 2, "Z"));
+	RETURN_TOK (scan_z (yytext + 2, "Z"));
 }
 	YY_BREAK
 case 19:
@@ -1914,7 +1899,7 @@ YY_RULE_SETUP
 {
 	/* L string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_z (yytext + 2, "L"));
+	RETURN_TOK (scan_z (yytext + 2, "L"));
 }
 	YY_BREAK
 case 21:
@@ -1925,7 +1910,7 @@ YY_RULE_SETUP
 {
 	/* H hexdecimal/numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_h (yytext + 2, "H"));
+	RETURN_TOK (scan_h (yytext + 2, "H"));
 }
 	YY_BREAK
 case 23:
@@ -1936,7 +1921,7 @@ YY_RULE_SETUP
 {
 	/* B boolean/numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_b (yytext + 2, "B"));
+	RETURN_TOK (scan_b (yytext + 2, "B"));
 }
 	YY_BREAK
 case 25:
@@ -1947,7 +1932,7 @@ YY_RULE_SETUP
 {
 	/* BX boolean hexadecimal string literal */
 	cobc_force_literal = 0;
-	RETURN (scan_x (yytext + 3, "BX"));
+	RETURN_TOK (scan_x (yytext + 3, "BX"));
 }
 	YY_BREAK
 case 27:
@@ -1961,7 +1946,7 @@ YY_RULE_SETUP
 	*/
 	/* ACUCOBOL binary numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_b (yytext + 2, "B#"));
+	RETURN_TOK (scan_b (yytext + 2, "B#"));
 }
 	YY_BREAK
 case 28:
@@ -1970,7 +1955,7 @@ YY_RULE_SETUP
 {
 	/* ACUCOBOL octal numeric literal */
 	cobc_force_literal = 0;
-	RETURN (scan_o (yytext + 2, "O#"));
+	RETURN_TOK (scan_o (yytext + 2, "O#"));
 }
 	YY_BREAK
 case 29:
@@ -1983,7 +1968,7 @@ YY_RULE_SETUP
 	char type[3] = "x#";
 	type[0] = yytext [0];
 	cobc_force_literal = 0;
-	RETURN (scan_h (yytext + 2, type));
+	RETURN_TOK (scan_h (yytext + 2, type));
 }
 	YY_BREAK
 case 31:
@@ -1991,7 +1976,7 @@ YY_RULE_SETUP
 #line 333 "scanner.l"
 {
 	inside_bracket++;
-	RETURN (TOK_OPEN_PAREN);
+	RETURN_TOK (TOK_OPEN_PAREN);
 }
 	YY_BREAK
 case 32:
@@ -2001,7 +1986,7 @@ YY_RULE_SETUP
 	if (inside_bracket > 0) {
 		inside_bracket--;
 	}
-	RETURN (TOK_CLOSE_PAREN);
+	RETURN_TOK (TOK_CLOSE_PAREN);
 }
 	YY_BREAK
 case 33:
@@ -2014,23 +1999,23 @@ YY_RULE_SETUP
 		if (!cobc_in_procedure) {
 			if (!strcmp (yytext, "66")) {
 				/* Level number 66 */
-				RETURN (SIXTY_SIX);
+				RETURN_TOK (SIXTY_SIX);
 			} else if (!strcmp (yytext, "78")) {
 				/* Level number 78 */
-				RETURN (SEVENTY_EIGHT);
+				RETURN_TOK (SEVENTY_EIGHT);
 			} else if (!strcmp (yytext, "88")) {
 				/* Level number 88 */
-				RETURN (EIGHTY_EIGHT);
+				RETURN_TOK (EIGHTY_EIGHT);
 			}
 		}
 
 		/* Integer label or level number */
-		RETURN (WORD);
+		RETURN_TOK (WORD);
 	}
 	/* Numeric literal or referenced integer label */
 	/* All transformations/checks are postponed to tree.c */
 	yylval = cb_build_numeric_literal (0, yytext, 0);
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 	YY_BREAK
 case 34:
@@ -2038,7 +2023,7 @@ YY_RULE_SETUP
 #line 371 "scanner.l"
 {
 	/* Numeric literal (signed) */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 	YY_BREAK
 case 35:
@@ -2053,7 +2038,7 @@ YY_RULE_SETUP
 #line 380 "scanner.l"
 {
 	if (inside_bracket) {
-		RETURN (SEMI_COLON);
+		RETURN_TOK (SEMI_COLON);
 	}
 	/* Ignore */
 }
@@ -2063,7 +2048,7 @@ YY_RULE_SETUP
 #line 387 "scanner.l"
 {
 	/* Numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 	YY_BREAK
 case 38:
@@ -2071,7 +2056,7 @@ YY_RULE_SETUP
 #line 392 "scanner.l"
 {
 	/* Invalid numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 	YY_BREAK
 case 39:
@@ -2079,7 +2064,7 @@ YY_RULE_SETUP
 #line 397 "scanner.l"
 {
 	/* Numeric literal */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 	YY_BREAK
 case 40:
@@ -2087,7 +2072,7 @@ YY_RULE_SETUP
 #line 402 "scanner.l"
 {
 	if (inside_bracket) {
-		RETURN (COMMA_DELIM);
+		RETURN_TOK (COMMA_DELIM);
 	}
 	/* Ignore */
 }
@@ -2097,7 +2082,7 @@ YY_RULE_SETUP
 #line 409 "scanner.l"
 {
 	/* Numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 	YY_BREAK
 case 42:
@@ -2105,7 +2090,7 @@ YY_RULE_SETUP
 #line 414 "scanner.l"
 {
 	/* Invalid numeric floating point literal */
-	RETURN (scan_floating_numeric (yytext));
+	RETURN_TOK (scan_floating_numeric (yytext));
 }
 	YY_BREAK
 case 43:
@@ -2113,7 +2098,7 @@ YY_RULE_SETUP
 #line 419 "scanner.l"
 {
 	/* Numeric literal */
-	RETURN (scan_numeric (yytext));
+	RETURN_TOK (scan_numeric (yytext));
 }
 	YY_BREAK
 case 44:
@@ -2128,7 +2113,7 @@ YY_RULE_SETUP
 #line 428 "scanner.l"
 {
 	if (inside_bracket) {
-		RETURN (COMMA_DELIM);
+		RETURN_TOK (COMMA_DELIM);
 	}
 	/* Ignore */
 }
@@ -2140,7 +2125,7 @@ YY_RULE_SETUP
 {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	RETURN (END_PROGRAM);
+	RETURN_TOK (END_PROGRAM);
 }
 	YY_BREAK
 case 47:
@@ -2150,7 +2135,7 @@ YY_RULE_SETUP
 {
 	cobc_force_literal = 1;
 	count_lines (yytext);
-	RETURN (END_FUNCTION);
+	RETURN_TOK (END_FUNCTION);
 }
 	YY_BREAK
 case 48:
@@ -2159,7 +2144,7 @@ YY_RULE_SETUP
 #line 447 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (PICTURE_SYMBOL);
+	RETURN_TOK (PICTURE_SYMBOL);
 }
 	YY_BREAK
 case 49:
@@ -2168,7 +2153,7 @@ YY_RULE_SETUP
 #line 452 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (FROM_CRT);
+	RETURN_TOK (FROM_CRT);
 }
 	YY_BREAK
 case 50:
@@ -2177,7 +2162,7 @@ YY_RULE_SETUP
 #line 457 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (SCREEN_CONTROL);
+	RETURN_TOK (SCREEN_CONTROL);
 }
 	YY_BREAK
 case 51:
@@ -2186,7 +2171,7 @@ YY_RULE_SETUP
 #line 462 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EVENT_STATUS);
+	RETURN_TOK (EVENT_STATUS);
 }
 	YY_BREAK
 case 52:
@@ -2195,7 +2180,7 @@ YY_RULE_SETUP
 #line 467 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (READY_TRACE);
+	RETURN_TOK (READY_TRACE);
 }
 	YY_BREAK
 case 53:
@@ -2204,7 +2189,7 @@ YY_RULE_SETUP
 #line 472 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (RESET_TRACE);
+	RETURN_TOK (RESET_TRACE);
 }
 	YY_BREAK
 case 54:
@@ -2222,7 +2207,7 @@ YY_RULE_SETUP
 #line 480 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (GREATER_OR_EQUAL);
+	RETURN_TOK (GREATER_OR_EQUAL);
 }
 	YY_BREAK
 case 58:
@@ -2231,7 +2216,7 @@ YY_RULE_SETUP
 #line 485 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (GREATER);
+	RETURN_TOK (GREATER);
 }
 	YY_BREAK
 case 59:
@@ -2249,7 +2234,7 @@ YY_RULE_SETUP
 #line 493 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (LESS_OR_EQUAL);
+	RETURN_TOK (LESS_OR_EQUAL);
 }
 	YY_BREAK
 case 63:
@@ -2258,7 +2243,7 @@ YY_RULE_SETUP
 #line 498 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (LESS);
+	RETURN_TOK (LESS);
 }
 	YY_BREAK
 case 64:
@@ -2267,7 +2252,7 @@ YY_RULE_SETUP
 #line 503 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EQUAL);
+	RETURN_TOK (EQUAL);
 }
 	YY_BREAK
 case 65:
@@ -2276,7 +2261,7 @@ YY_RULE_SETUP
 #line 508 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (REPLACING);
+	RETURN_TOK (REPLACING);
 }
 	YY_BREAK
 case 66:
@@ -2291,7 +2276,7 @@ YY_RULE_SETUP
 #line 515 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (TOP);
+	RETURN_TOK (TOP);
 }
 	YY_BREAK
 case 69:
@@ -2306,7 +2291,7 @@ YY_RULE_SETUP
 #line 522 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (BOTTOM);
+	RETURN_TOK (BOTTOM);
 }
 	YY_BREAK
 case 72:
@@ -2318,7 +2303,7 @@ YY_RULE_SETUP
 #line 528 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NO_ADVANCING);
+	RETURN_TOK (NO_ADVANCING);
 }
 	YY_BREAK
 case 74:
@@ -2330,7 +2315,7 @@ YY_RULE_SETUP
 #line 534 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NEXT_PAGE);
+	RETURN_TOK (NEXT_PAGE);
 }
 	YY_BREAK
 case 76:
@@ -2342,7 +2327,7 @@ YY_RULE_SETUP
 #line 540 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_SIZE_ERROR);
+	RETURN_TOK (NOT_SIZE_ERROR);
 }
 	YY_BREAK
 case 78:
@@ -2354,7 +2339,7 @@ YY_RULE_SETUP
 #line 546 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (SIZE_ERROR);
+	RETURN_TOK (SIZE_ERROR);
 }
 	YY_BREAK
 case 80:
@@ -2366,7 +2351,7 @@ YY_RULE_SETUP
 #line 552 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_ESCAPE);
+	RETURN_TOK (NOT_ESCAPE);
 }
 	YY_BREAK
 case 82:
@@ -2378,7 +2363,7 @@ YY_RULE_SETUP
 #line 558 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_EXCEPTION);
+	RETURN_TOK (NOT_EXCEPTION);
 }
 	YY_BREAK
 case 84:
@@ -2387,7 +2372,7 @@ YY_RULE_SETUP
 #line 563 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (ESCAPE);
+	RETURN_TOK (ESCAPE);
 }
 	YY_BREAK
 case 85:
@@ -2396,7 +2381,7 @@ YY_RULE_SETUP
 #line 568 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EXCEPTION);
+	RETURN_TOK (EXCEPTION);
 }
 	YY_BREAK
 case 86:
@@ -2408,7 +2393,7 @@ YY_RULE_SETUP
 #line 574 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_OVERFLOW);
+	RETURN_TOK (NOT_OVERFLOW);
 }
 	YY_BREAK
 case 88:
@@ -2420,7 +2405,7 @@ YY_RULE_SETUP
 #line 580 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_END);
+	RETURN_TOK (NOT_END);
 }
 	YY_BREAK
 case 90:
@@ -2429,7 +2414,7 @@ YY_RULE_SETUP
 #line 585 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (END);
+	RETURN_TOK (END);
 }
 	YY_BREAK
 case 91:
@@ -2441,7 +2426,7 @@ YY_RULE_SETUP
 #line 591 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (TOK_OVERFLOW);
+	RETURN_TOK (TOK_OVERFLOW);
 }
 	YY_BREAK
 case 93:
@@ -2459,7 +2444,7 @@ YY_RULE_SETUP
 #line 599 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_EOP);
+	RETURN_TOK (NOT_EOP);
 }
 	YY_BREAK
 case 97:
@@ -2477,7 +2462,7 @@ YY_RULE_SETUP
 #line 607 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EOP);
+	RETURN_TOK (EOP);
 }
 	YY_BREAK
 case 101:
@@ -2486,7 +2471,7 @@ YY_RULE_SETUP
 #line 612 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_INVALID_KEY);
+	RETURN_TOK (NOT_INVALID_KEY);
 }
 	YY_BREAK
 case 102:
@@ -2495,7 +2480,7 @@ YY_RULE_SETUP
 #line 617 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (NOT_INVALID_KEY);
+	RETURN_TOK (NOT_INVALID_KEY);
 }
 	YY_BREAK
 case 103:
@@ -2504,7 +2489,7 @@ YY_RULE_SETUP
 #line 622 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (INVALID_KEY);
+	RETURN_TOK (INVALID_KEY);
 }
 	YY_BREAK
 case 104:
@@ -2513,7 +2498,7 @@ YY_RULE_SETUP
 #line 627 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (INVALID_KEY);
+	RETURN_TOK (INVALID_KEY);
 }
 	YY_BREAK
 case 105:
@@ -2522,7 +2507,7 @@ YY_RULE_SETUP
 #line 632 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (UPON_ENVIRONMENT_NAME);
+	RETURN_TOK (UPON_ENVIRONMENT_NAME);
 }
 	YY_BREAK
 case 106:
@@ -2531,7 +2516,7 @@ YY_RULE_SETUP
 #line 637 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (UPON_ENVIRONMENT_VALUE);
+	RETURN_TOK (UPON_ENVIRONMENT_VALUE);
 }
 	YY_BREAK
 case 107:
@@ -2540,7 +2525,7 @@ YY_RULE_SETUP
 #line 642 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (UPON_ARGUMENT_NUMBER);
+	RETURN_TOK (UPON_ARGUMENT_NUMBER);
 }
 	YY_BREAK
 case 108:
@@ -2549,7 +2534,7 @@ YY_RULE_SETUP
 #line 647 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (UPON_COMMAND_LINE);
+	RETURN_TOK (UPON_COMMAND_LINE);
 }
 	YY_BREAK
 case 109:
@@ -2558,7 +2543,7 @@ YY_RULE_SETUP
 #line 652 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EXCEPTION_CONDITION);
+	RETURN_TOK (EXCEPTION_CONDITION);
 }
 	YY_BREAK
 case 110:
@@ -2567,7 +2552,7 @@ YY_RULE_SETUP
 #line 657 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EXCEPTION_CONDITION);
+	RETURN_TOK (EXCEPTION_CONDITION);
 }
 	YY_BREAK
 case 111:
@@ -2576,7 +2561,7 @@ YY_RULE_SETUP
 #line 662 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (EC);
+	RETURN_TOK (EC);
 }
 	YY_BREAK
 case 112:
@@ -2585,7 +2570,7 @@ YY_RULE_SETUP
 #line 667 "scanner.l"
 {
 	count_lines (yytext);
-	RETURN (LENGTH_OF);
+	RETURN_TOK (LENGTH_OF);
 }
 	YY_BREAK
 case 113:
@@ -2624,7 +2609,7 @@ YY_RULE_SETUP
 		strcat(name, suffix);
 		yylval = cb_build_reference (name);
 	}
-	RETURN (WORD);
+	RETURN_TOK (WORD);
 }
 	YY_BREAK
 case 114:
@@ -2661,16 +2646,16 @@ YY_RULE_SETUP
 		if (cbp) {
 			if (cobc_in_repository) {
 				yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-				RETURN (FUNCTION_NAME);
+				RETURN_TOK (FUNCTION_NAME);
 			}
 			if (functions_are_all) {
 				yylval = cb_build_reference (yytext);
-				RETURN ((enum yytokentype)(cbp->token));
+				RETURN_TOK ((enum yytokentype)(cbp->token));
 			}
 			for (tlp = cb_intrinsic_list; tlp; tlp = tlp->next) {
 				if (!strcasecmp (yytext, tlp->text)) {
 					yylval = cb_build_reference (yytext);
-					RETURN ((enum yytokentype)(cbp->token));
+					RETURN_TOK ((enum yytokentype)(cbp->token));
 				}
 			}
 			l = current_program->function_spec_list;
@@ -2679,7 +2664,7 @@ YY_RULE_SETUP
 				if (!strcasecmp (yytext,
 						 (char *)(CB_LITERAL(x)->data))) {
 					yylval = cb_build_reference (yytext);
-					RETURN ((enum yytokentype)(cbp->token));
+					RETURN_TOK ((enum yytokentype)(cbp->token));
 				}
 			}
 		}
@@ -2691,10 +2676,10 @@ YY_RULE_SETUP
 		cobc_force_literal = 0;
 		if (cb_fold_call) {
 			yylval = cb_build_reference (yytext);
-			RETURN (PROGRAM_NAME);
+			RETURN_TOK (PROGRAM_NAME);
 		} else {
 			yylval = cb_build_alphanumeric_literal (yytext, (size_t)yyleng);
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 	}
 
@@ -2708,13 +2693,13 @@ YY_RULE_SETUP
 		} else {
 			yylval = NULL;
 		}
-		RETURN (resptr->token);
+		RETURN_TOK (resptr->token);
 	}
 
 	/* New user-defined word in REPOSITORY entry */
 	if (cobc_in_repository) {
 		yylval = cb_build_reference (yytext);
-		RETURN (WORD);
+		RETURN_TOK (WORD);
 	}
 
 	/* Direct recursive reference in function */
@@ -2722,7 +2707,7 @@ YY_RULE_SETUP
 		   && !functions_are_all
 		   && !strcasecmp (yytext, current_program->orig_program_id)) {
 		yylval = cb_build_reference (yytext);
-		RETURN (USER_FUNCTION_NAME);
+		RETURN_TOK (USER_FUNCTION_NAME);
 	}
 
 	/* Check prototype names */
@@ -2730,7 +2715,7 @@ YY_RULE_SETUP
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 			yylval = cb_build_reference (yytext);
-			RETURN (USER_FUNCTION_NAME);
+			RETURN_TOK (USER_FUNCTION_NAME);
 		}
 	}
 	if (cobc_allow_program_name) {
@@ -2738,7 +2723,7 @@ YY_RULE_SETUP
 			x = CB_VALUE (l);
 			if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
 				yylval = cb_build_reference (yytext);
-				RETURN (PROGRAM_NAME);
+				RETURN_TOK (PROGRAM_NAME);
 			}
 		}
 	}
@@ -2748,7 +2733,7 @@ YY_RULE_SETUP
 		program = cb_find_defined_program_by_name (yytext);
 		if (program) {
 			yylval = cb_build_reference (yytext);
-			RETURN (PROGRAM_NAME);
+			RETURN_TOK (PROGRAM_NAME);
 		}
 	}
 
@@ -2762,7 +2747,7 @@ YY_RULE_SETUP
 				if (p78->prog == current_program) {
 					cb_error (_("a constant may not be used here - '%s'"), yytext);
 					yylval = cb_error_node;
-					RETURN (WORD);
+					RETURN_TOK (WORD);
 				}
 				if (p78->chk_const) {
 					p78->not_const = 1;
@@ -2773,7 +2758,7 @@ YY_RULE_SETUP
 				break;
 			}
 			yylval = CB_VALUE (p78->fld78->values);
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 	}
 
@@ -2783,13 +2768,13 @@ YY_RULE_SETUP
 	if (CB_WORD_COUNT (yylval) > 0 && CB_WORD_ITEMS (yylval)) {
 		x = CB_VALUE (CB_WORD_ITEMS (yylval));
 		if (CB_SYSTEM_NAME_P (x)) {
-			RETURN (MNEMONIC_NAME);
+			RETURN_TOK (MNEMONIC_NAME);
 		} else if (CB_CLASS_NAME_P (x)) {
-			RETURN (CLASS_NAME);
+			RETURN_TOK (CLASS_NAME);
 		}
 	}
 
-	RETURN (WORD);
+	RETURN_TOK (WORD);
 }
 	YY_BREAK
 case 115:
@@ -2797,7 +2782,7 @@ YY_RULE_SETUP
 #line 869 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (LESS_OR_EQUAL);
+	RETURN_TOK (LESS_OR_EQUAL);
 }
 	YY_BREAK
 case 116:
@@ -2805,7 +2790,7 @@ YY_RULE_SETUP
 #line 874 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (GREATER_OR_EQUAL);
+	RETURN_TOK (GREATER_OR_EQUAL);
 }
 	YY_BREAK
 case 117:
@@ -2813,7 +2798,7 @@ YY_RULE_SETUP
 #line 879 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (NOT_EQUAL);
+	RETURN_TOK (NOT_EQUAL);
 }
 	YY_BREAK
 case 118:
@@ -2821,7 +2806,7 @@ YY_RULE_SETUP
 #line 884 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (EXPONENTIATION);
+	RETURN_TOK (EXPONENTIATION);
 }
 	YY_BREAK
 case 119:
@@ -2836,7 +2821,7 @@ YY_RULE_SETUP
 	if (!last_token_is_dot) {
 		last_token_is_dot = 1;
 		yylval = NULL;
-		RETURN (TOK_DOT);
+		RETURN_TOK (TOK_DOT);
 	}
 }
 	YY_BREAK
@@ -2845,7 +2830,7 @@ YY_RULE_SETUP
 #line 901 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_AMPER);
+	RETURN_TOK (TOK_AMPER);
 }
 	YY_BREAK
 case 121:
@@ -2853,7 +2838,7 @@ YY_RULE_SETUP
 #line 906 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_COLON);
+	RETURN_TOK (TOK_COLON);
 }
 	YY_BREAK
 case 122:
@@ -2861,7 +2846,7 @@ YY_RULE_SETUP
 #line 911 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_EQUAL);
+	RETURN_TOK (TOK_EQUAL);
 }
 	YY_BREAK
 case 123:
@@ -2869,7 +2854,7 @@ YY_RULE_SETUP
 #line 916 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_DIV);
+	RETURN_TOK (TOK_DIV);
 }
 	YY_BREAK
 case 124:
@@ -2877,7 +2862,7 @@ YY_RULE_SETUP
 #line 921 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_MUL);
+	RETURN_TOK (TOK_MUL);
 }
 	YY_BREAK
 case 125:
@@ -2885,7 +2870,7 @@ YY_RULE_SETUP
 #line 926 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_PLUS);
+	RETURN_TOK (TOK_PLUS);
 }
 	YY_BREAK
 case 126:
@@ -2893,7 +2878,7 @@ YY_RULE_SETUP
 #line 931 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_MINUS);
+	RETURN_TOK (TOK_MINUS);
 }
 	YY_BREAK
 case 127:
@@ -2901,7 +2886,7 @@ YY_RULE_SETUP
 #line 936 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_LESS);
+	RETURN_TOK (TOK_LESS);
 }
 	YY_BREAK
 case 128:
@@ -2909,7 +2894,7 @@ YY_RULE_SETUP
 #line 941 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (TOK_GREATER);
+	RETURN_TOK (TOK_GREATER);
 }
 	YY_BREAK
 case 129:
@@ -2943,7 +2928,7 @@ YY_RULE_SETUP
 {
 	BEGIN INITIAL;
 	scan_picture (yytext);
-	RETURN (PICTURE);
+	RETURN_TOK (PICTURE);
   }
 	YY_BREAK
 
@@ -2961,14 +2946,14 @@ YY_RULE_SETUP
 	for (l = current_program->user_spec_list; l; l = CB_CHAIN(l)) {
 		x = CB_VALUE (l);
 		if (!strcasecmp (yytext, CB_PROTOTYPE (x)->name)) {
-			RETURN (USER_FUNCTION_NAME);
+			RETURN_TOK (USER_FUNCTION_NAME);
 		}
 	}
 	cbp = lookup_intrinsic (yytext, 0);
 	if (cbp) {
-		RETURN ((enum yytokentype)(cbp->token));
+		RETURN_TOK ((enum yytokentype)(cbp->token));
 	}
-	RETURN (FUNCTION_NAME);
+	RETURN_TOK (FUNCTION_NAME);
   }
 	YY_BREAK
 case 133:
@@ -2976,7 +2961,7 @@ YY_RULE_SETUP
 #line 992 "scanner.l"
 {
 	yylval = NULL;
-	RETURN (yytext[0]);
+	RETURN_TOK (yytext[0]);
   }
 	YY_BREAK
 
@@ -3021,7 +3006,7 @@ YY_RULE_SETUP
 #line 1028 "scanner.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3024 "scanner.c"
+#line 3009 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3151,7 +3136,6 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -3858,7 +3842,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 1027 "scanner.l"
+#line 1028 "scanner.l"
 
 
 
@@ -4115,11 +4099,11 @@ scan_x (const char *text, const char *type)
 		}
 	}
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4138,7 +4122,7 @@ scan_z (const char *text, const char *type)
 			  (int) currlen, cb_lit_length);
 		error_literal (type, text);
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 	if (unlikely (currlen > plexsize)) {
 		plexsize = currlen;
@@ -4152,7 +4136,7 @@ scan_z (const char *text, const char *type)
 	if (type[0] == 'L') {
 		CB_LITERAL(yylval)->llit = 1;
 	}
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4215,11 +4199,11 @@ scan_h (const char *text, const char *type)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
 error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4288,11 +4272,11 @@ scan_b (const char *text, const char *type)
 	/* FIXME: we should likely build a boolean literal ... */
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4339,11 +4323,11 @@ scan_o (const char *text, const char *type)
 	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
 	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
 
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 
  error:
 	yylval = cb_error_node;
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4406,7 +4390,7 @@ scan_numeric (const char *text)
 	} else {
 		yylval = cb_build_numeric_literal (sign, p, scale);
 	}
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static int
@@ -4458,7 +4442,7 @@ scan_floating_numeric (const char *text)
 		this should never happen as the flex rule ensures this */
 	if (n == 0) {
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 
 	/* Get signs and adjust string positions accordingly */
@@ -4506,7 +4490,7 @@ scan_floating_numeric (const char *text)
 		   this should never happen as the flex rule ensures this */
 		if (n == 0) {
 			yylval = cb_error_node;
-			RETURN (LITERAL);
+			RETURN_TOK (LITERAL);
 		}
 
 		if (exp_sign == -1) {
@@ -4540,7 +4524,7 @@ scan_floating_numeric (const char *text)
 
 	if (literal_error) {
 		yylval = cb_error_node;
-		RETURN (LITERAL);
+		RETURN_TOK (LITERAL);
 	}
 
 	/* Determine scale */
@@ -4581,7 +4565,7 @@ scan_floating_numeric (const char *text)
 
 	yylval = cb_build_numeric_literal (sig_sign, result,
 					   scale);
-	RETURN (LITERAL);
+	RETURN_TOK (LITERAL);
 }
 
 static void

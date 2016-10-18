@@ -33,8 +33,9 @@ build an executable program
 .TP
 \fB\-m\fR
 build a dynamically loadable module (default)
-.HP
-\fB\-j\fR [<args>], \fB\-job[=\fR<args>] run program after build, passing <args>
+.TP
+\fB\-j\fR [<args>], \fB\-job[=\fR<args>]
+run program after build, passing <args>
 .TP
 \fB\-std=\fR<dialect>
 warnings/features for a specific dialect
@@ -209,10 +210,12 @@ warn unreachable statements
 \fB\-fsign\fR=\fI[ASCII\fR|EBCDIC] define display sign representation
 \- default: machine native
 .TP
-\fB\-ffold\-copy\fR=\fI[UPPER\fR|LOWER] fold COPY subject to value
+\fB\-ffold\-copy\fR=\fI[UPPER\fR|LOWER]
+fold COPY subject to value
 \- default: no transformation
 .TP
-\fB\-ffold\-call\fR=\fI[UPPER\fR|LOWER] fold PROGRAM\-ID, CALL, CANCEL subject to value
+\fB\-ffold\-call\fR=\fI[UPPER\fR|LOWER]
+fold PROGRAM\-ID, CALL, CANCEL subject to value
 \- default: no transformation
 .TP
 \fB\-fdefaultbyte\fR=\fI0\fR..255
@@ -283,24 +286,29 @@ check recursive program call
 treat all files as OPTIONAL
 \- unless NOT OPTIONAL specified
 .TP
-\fB\-ftab\-width=\fR<number>
+\fB\-ftab\-width\fR=\fI1\fR..12
 set number of spaces that are asumed for tabs
 .HP
-\fB\-ftext\-column=\fR<number> set right margin for source (fixed format only)
+\fB\-ftext\-column\fR=\fI72\fR..255 set right margin for source (fixed format only)
 .HP
-\fB\-fword\-length=\fR<number> maximum word\-length for COBOL words / Programmer defined words
-.HP
-\fB\-fliteral\-length=\fR<number> maximum literal size in general
-.HP
-\fB\-fnumeric\-literal\-length=\fR<number> maximum numeric literal size
-.HP
-\fB\-fassign\-clause=\fR<value> set way of interpreting ASSIGN
+\fB\-fpic\-length=\fR<number> maximum number of characters allowed in the character\-string
+.TP
+\fB\-fword\-length\fR=\fI1\fR..61
+maximum word\-length for COBOL words / Programmer defined words
+.TP
+\fB\-fliteral\-length=\fR<number>
+maximum literal size in general
+.TP
+\fB\-fnumeric\-literal\-length\fR=\fI1\fR..38
+maximum numeric literal size
+.TP
+\fB\-fassign\-clause=\fR<value>
+set way of interpreting ASSIGN
 .HP
 \fB\-fbinary\-size=\fR<value> binary byte size \- defines the allocated bytes according to PIC
-.HP
-\fB\-fbinary\-byteorder=\fR<value> binary byte order
-.HP
-\fB\-fstandard\-define=\fR<value>
+.TP
+\fB\-fbinary\-byteorder=\fR<value>
+binary byte order
 .TP
 \fB\-ffilename\-mapping\fR
 resolve file names at run time using environment variables.
@@ -326,84 +334,112 @@ exit point of any currently executing perform is recognized if reached
 .TP
 \fB\-fsticky\-linkage\fR
 linkage\-section items remain allocated between invocations
-.HP
-\fB\-frelax\-level\-hierarchy\fR allow non\-matching level numbers
+.TP
+\fB\-frelax\-level\-hierarchy\fR
+allow non\-matching level numbers
 .TP
 \fB\-fhostsign\fR
 allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field
 .TP
 \fB\-faccept\-update\fR
-set WITH UPDATE clause as default for ACCEPT dest\-item, except if WITH NO UPDATE clause is used
+set WITH UPDATE clause as default for ACCEPT dest\-item, instead of WITH NO UPDATE
 .TP
 \fB\-faccept\-auto\fR
-set WITH AUTO clause as default for ACCEPT dest\-item, except if WITH TAB clause is used
+set WITH AUTO clause as default for ACCEPT dest\-item, instead of WITH TAB
 .TP
 \fB\-fconsole\-is\-crt\fR
 assume CONSOLE IS CRT if not set otherwise
-.HP
-\fB\-fprogram\-name\-redefinition\fR program names don't lead to a reserved identifier
-.HP
-\fB\-fno\-echo\-means\-secure\fR NO\-ECHO hides input with asterisks like SECURE
-.HP
-\fB\-fcomment\-paragraphs=\fR<support> comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE\-WRITTEN, ...)
-.HP
-\fB\-fmemory\-size\-clause=\fR<support> MEMORY\-SIZE clause
+.TP
+\fB\-fprogram\-name\-redefinition\fR
+program names don't lead to a reserved identifier
+.TP
+\fB\-fno\-echo\-means\-secure\fR
+NO\-ECHO hides input with asterisks like SECURE
+.TP
+\fB\-fcomment\-paragraphs=\fR<support>
+comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE\-WRITTEN, ...)
+.TP
+\fB\-fmemory\-size\-clause=\fR<support>
+MEMORY\-SIZE clause
 .HP
 \fB\-fmultiple\-file\-tape\-clause=\fR<support> MULTIPLE\-FILE\-TAPE clause
-.HP
-\fB\-flabel\-records\-clause=\fR<support> LABEL\-RECORDS clause
-.HP
-\fB\-fvalue\-of\-clause=\fR<support> VALUE\-OF clause
-.HP
-\fB\-fdata\-records\-clause=\fR<support> DATA\-RECORDS clause
-.HP
-\fB\-ftop\-level\-occurs\-clause=\fR<support> OCCURS clause on top\-level
-.HP
-\fB\-fsynchronized\-clause=\fR<support> SYNCHRONIZED clause
-.HP
-\fB\-fgoto\-statement\-without\-name=\fR<support> GOTO statement without name
-.HP
-\fB\-fstop\-literal\-statement=\fR<support> STOP\-LITERAL statement
-.HP
-\fB\-fdebugging\-line=\fR<support> DEBUGGING MODE and indicator 'D'
-.HP
-\fB\-fpadding\-character\-clause=\fR<support> PADDING CHARACTER clause
-.HP
-\fB\-fnext\-sentence\-phrase=\fR<support> NEXT SENTENCE phrase
-.HP
-\fB\-feject\-statement=\fR<support> EJECT statement
-.HP
-\fB\-fentry\-statement=\fR<support> ENTRY statement
-.HP
-\fB\-fmove\-noninteger\-to\-alphanumeric=\fR<support> move noninteger to alphanumeric
-.HP
-\fB\-fodo\-without\-to=\fR<support> OCCURS DEPENDING ON without to
-.HP
-\fB\-fsection\-segments=\fR<support> section segments
-.HP
-\fB\-falter\-statement=\fR<support> ALTER statement
-.HP
-\fB\-fcall\-overflow=\fR<support> OVERFLOW clause for CALL
-.HP
-\fB\-fnumeric\-boolean=\fR<support> boolean literals (b'1010')
-.HP
-\fB\-fhexadecimal\-boolean=\fR<support> hexadecimal\-boolean literals (b'A')
+.TP
+\fB\-flabel\-records\-clause=\fR<support>
+LABEL\-RECORDS clause
+.TP
+\fB\-fvalue\-of\-clause=\fR<support>
+VALUE\-OF clause
+.TP
+\fB\-fdata\-records\-clause=\fR<support>
+DATA\-RECORDS clause
+.TP
+\fB\-ftop\-level\-occurs\-clause=\fR<support>
+OCCURS clause on top\-level
+.TP
+\fB\-fsynchronized\-clause=\fR<support>
+SYNCHRONIZED clause
+.TP
+\fB\-fgoto\-statement\-without\-name=\fR<support>
+GOTO statement without name
+.TP
+\fB\-fstop\-literal\-statement=\fR<support>
+STOP\-LITERAL statement
+.TP
+\fB\-fdebugging\-line=\fR<support>
+DEBUGGING MODE and indicator 'D'
+.TP
+\fB\-fpadding\-character\-clause=\fR<support>
+PADDING CHARACTER clause
+.TP
+\fB\-fnext\-sentence\-phrase=\fR<support>
+NEXT SENTENCE phrase
+.TP
+\fB\-feject\-statement=\fR<support>
+EJECT statement
+.TP
+\fB\-fentry\-statement=\fR<support>
+ENTRY statement
+.TP
+\fB\-fmove\-noninteger\-to\-alphanumeric=\fR<support>
+move noninteger to alphanumeric
+.TP
+\fB\-fodo\-without\-to=\fR<support>
+OCCURS DEPENDING ON without to
+.TP
+\fB\-fsection\-segments=\fR<support>
+section segments
+.TP
+\fB\-falter\-statement=\fR<support>
+ALTER statement
+.TP
+\fB\-fcall\-overflow=\fR<support>
+OVERFLOW clause for CALL
+.TP
+\fB\-fnumeric\-boolean=\fR<support>
+boolean literals (B'1010')
+.TP
+\fB\-fhexadecimal\-boolean=\fR<support>
+hexadecimal\-boolean literals (BX'A')
 .HP
 \fB\-fnational\-literals=\fR<support> national literals (N'UTF\-16 string')
-.HP
-\fB\-fhexadecimal\-national\-literals=\fR<support> hexadecimal\-national literals (NX'265E')
+.TP
+\fB\-fhexadecimal\-national\-literals=\fR<support>
+hexadecimal\-national literals (NX'265E')
 .HP
 \fB\-facucobol\-literals=\fR<support> ACUCOBOL\-GT literals (#B #O #H #X)
 .HP
 \fB\-fword\-continuation=\fR<support> continuation of COBOL words
-.HP
-\fB\-fnot\-exception\-before\-exception=\fR<support> NOT ON EXCEPTION before ON EXCEPTION
+.TP
+\fB\-fnot\-exception\-before\-exception=\fR<support>
+NOT ON EXCEPTION before ON EXCEPTION
 .HP
 \fB\-faccept\-display\-extensions=\fR<support> extensions to ACCEPT and DISPLAY
-.HP
-\fB\-frenames\-uncommon\-levels=\fR<support> RENAMES of 01\-, 66\- and 77\-level items
-.HP
-\fB\-fprogram\-prototypes=\fR<support> CALL/CANCEL with program\-prototype\-name
+.TP
+\fB\-frenames\-uncommon\-levels=\fR<support>
+RENAMES of 01\-, 66\- and 77\-level items
+.TP
+\fB\-fprogram\-prototypes=\fR<support>
+CALL/CANCEL with program\-prototype\-name
 .IP
 where <support> is one of the following:
 \&'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
@@ -412,11 +448,12 @@ where <support> is one of the following:
 .TP
 \fB\-freserved=\fR<word>
 word to be added to reserved words list
-.HP
-\fB\-freserved=\fR<word>:<alias> word to be added to reserved words list as alias
+.TP
+\fB\-freserved=\fR<word>:<alias>
+word to be added to reserved words list as alias
 .SH AUTHOR
 Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart
-Built     Oct 11 2016 09:36:15
+Built     Oct 18 2016 09:01:40
 Packaged  Oct 25 2015 21:40:28 UTC
 C version "4.8.3 20140911 (Red Hat 4.8.3\-7)"
 .SH "REPORTING BUGS"
