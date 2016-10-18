@@ -18841,25 +18841,25 @@ at_xfail=no
 
 cat >copy.inc <<'_ATEOF'
 
-       01 TEST-VAR PIC X(2) VALUE "OK".
+       01 TEST-VAR PIC X(2) VALUE "OK".                                  COPY001
 _ATEOF
 
 
 cat >prog.cob <<'_ATEOF'
 
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       COPY "copy.inc"
-          REPLACING ==TEST-VAR==, BY ==FIRST-MATCH==,
-                 ,  ==TEST-VAR==; BY ==SECOND-MATCH==;
-                 ;  ==TEST-VAR== , BY ==THIRD-MATCH==
-                    ==TEST-VAR== ; BY ==FOURTH-MATCH==.
-       PROCEDURE        DIVISION.
-           DISPLAY FIRST-MATCH NO ADVANCING
-           END-DISPLAY.
-           STOP RUN.
+       IDENTIFICATION   DIVISION.                                        PROG001
+       PROGRAM-ID.      prog.                                            PROG002
+       DATA             DIVISION.                                        PROG003
+       WORKING-STORAGE  SECTION.                                         PROG004
+       COPY "copy.inc"                                                   PROG005
+          REPLACING ==TEST-VAR==, BY ==FIRST-MATCH==,                    PROG006
+                 ,  ==TEST-VAR==; BY ==SECOND-MATCH==;                   PROG007
+                 ;  ==TEST-VAR== , BY ==THIRD-MATCH==                    PROG008
+                    ==TEST-VAR== ; BY ==FOURTH-MATCH==.                  PROG009
+       PROCEDURE        DIVISION.                                        PROG010
+           DISPLAY FIRST-MATCH NO ADVANCING                              PROG011
+           END-DISPLAY.                                                  PROG012
+           STOP RUN.                                                     PROG013
 _ATEOF
 
 
@@ -19833,13 +19833,13 @@ at_xfail=no
 
 cat >prog.cob <<'_ATEOF'
 
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-      /
-       PROCEDURE        DIVISION.
-           STOP RUN.
+       IDENTIFICATION   DIVISION.                                        PROG001
+       PROGRAM-ID.      prog.                                            PROG002
+       DATA             DIVISION.                                        PROG003
+       WORKING-STORAGE  SECTION.                                         PROG004
+      /                                                                  PROG005
+       PROCEDURE        DIVISION.                                        PROG006
+           STOP RUN.                                                     PROG007
 _ATEOF
 
 
@@ -19863,17 +19863,17 @@ GnuCOBOL V.R.P   prog.cob                                                       
 LINE    PG/LN  A...B............................................................SEQUENCE
 
 000001
-000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
+000002         IDENTIFICATION   DIVISION.                                        PROG001
+000003         PROGRAM-ID.      prog.                                            PROG002
+000004         DATA             DIVISION.                                        PROG003
+000005         WORKING-STORAGE  SECTION.                                         PROG004
 GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000006        /
-000007         PROCEDURE        DIVISION.
-000008             STOP RUN.
+000006        /                                                                  PROG005
+000007         PROCEDURE        DIVISION.                                        PROG006
+000008             STOP RUN.                                                     PROG007
 GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE

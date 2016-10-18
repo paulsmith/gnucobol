@@ -1,5 +1,10 @@
 
-2016-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-18  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added some sequence numbers to a couple of
+	  examples. Would have caught the SOURCEFORMAT VARIABLE bug.
+
+2016-10-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* atlocal.in, atlocal_win: added UNIFY_LISTING
 	* testsuite.src/listings.at: moved simplified sed commands used to a single
