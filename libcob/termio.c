@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -97,7 +97,7 @@ pretty_display_numeric (cob_field *f, FILE *fp)
 	int		size = digits + !!COB_FIELD_HAVE_SIGN (f) + !!scale;
 	cob_field_attr	attr;
 	cob_field	temp;
-	cob_pic_symbol	pic[6] = { '\0' };
+	cob_pic_symbol	pic[6] = {{ '\0' }};
 
 
 	if (size > COB_MEDIUM_MAX) {

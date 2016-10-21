@@ -85,18 +85,10 @@
 	* move.c (cob_move_display_to_edited): fixed bug #220 - fixed insertion
 	  which float are now distinguished from those which don't.
 
-2016-05-23  Brian Tiffin <btiffin@gnu.org>
-
-	* termio.c: Reverted length truncation in cob_accept for numeric fields.
-
 2016-05-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h, move.c, termio.c: replaced PICTURE strings containing packed
 	  ints with array of (cob_pic_symbol) structs which are easier to use.
-
-2016-05-21  Brian Tiffin <btiffin@gnu.org>
-
-	* termio.c: Removed a length test from cob_accept for numeric fields.
 
 2016-04-26  Brian Tiffin <btiffin@gnu.org>
 

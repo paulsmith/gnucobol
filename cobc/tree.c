@@ -2179,7 +2179,7 @@ valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
 		{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
 	};
-	int		error_emitted[24][24] = { 0 };
+	int		error_emitted[24][24] = {{ 0 }};
 	int		chars_seen[24] = { 0 };
 	const cob_pic_symbol	*first_floating_sym;
 	const cob_pic_symbol	*last_floating_sym;
@@ -2370,7 +2370,7 @@ cb_build_picture (const char *str)
 			     sizeof (struct cb_picture));
 	static cob_pic_symbol	*pic_buff = NULL;
 	const unsigned char	*p;
-	int			pic_str_len = 0;
+	unsigned int			pic_str_len = 0;
 	size_t			idx = 0;
 	size_t			buff_cnt = 0;
 	cob_u32_t		at_beginning;
