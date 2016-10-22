@@ -1,4 +1,8 @@
 
+2016-10-22  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added --no_symbols test.
+
 2016-10-18  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added some sequence numbers to a couple of

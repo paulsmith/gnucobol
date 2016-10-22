@@ -519,6 +519,9 @@ File: gnucobol.info,  Node: Listing options,  Next: Debug switches,  Prev: Confi
      Specify lines per page in print listing, default = 55.  Set to zero
      for no aditional page breaks.
 
+'--no_symbols'
+     Do not generate symbol table in listing.
+
 '-P(=<dir or file>)'
      Generate and place a preprocessed listing (old format) into
      '*.lst'.
@@ -1774,6 +1777,7 @@ Options:
   -T <file>             generate and place a wide program listing into <file>
   -t <file>             generate and place a program listing into <file>
   --tlines=<lines>      specify lines per page in listing, default = 55
+  --no_symbols          specify no symbols in listing
   -P[=<dir or file>]    generate preprocessed program listing (.lst)
   -Xref                 generate cross reference through 'cobxref'
                         (V. Coen's 'cobxref' must be in path)
@@ -3876,49 +3880,49 @@ Ref: Source format-Footnote-111904
 Node: Warning options11978
 Node: Configuration options13432
 Node: Listing options14565
-Node: Debug switches18857
-Node: Miscellaneous19951
-Node: Multiple sources20800
-Node: Static linking21440
-Node: Dynamic linking22931
-Ref: Dynamic linking-Footnote-124523
-Ref: Dynamic linking-Footnote-224584
-Node: Building library24645
-Node: Using library25028
-Node: C interface25599
-Node: Main C program25943
-Node: Static C to COBOL26859
-Node: Dynamic C to COBOL28356
-Node: Static COBOL to C29801
-Node: Dynamic COBOL to C31237
-Node: Customize31646
-Node: Customizing compiler31870
-Node: Customizing library32456
-Node: Optimize33214
-Node: Optimize options33517
-Node: Optimize call34054
-Node: Optimize binary34434
-Node: Debug35010
-Node: Debug options35169
-Node: Extensions35531
-Node: SELECT35968
-Node: Indexed36133
-Node: Extended ACCEPT36313
-Node: ACCEPT special37947
-Node: Extended DISPLAY40381
-Node: System routines42827
-Node: CBL_OC_GETOPT43173
-Node: CBL_OC_HOSTED47345
-Node: CBL_OC_NANOSLEEP51847
-Node: Appendix A52353
-Node: Appendix B63120
-Node: Appendix C85797
-Node: Appendix D91401
-Node: Appendix E93337
-Node: Appendix F99477
-Node: Appendix G105448
-Node: Appendix H106747
-Node: Appendix I116254
-Node: Index141379
+Node: Debug switches18919
+Node: Miscellaneous20013
+Node: Multiple sources20862
+Node: Static linking21502
+Node: Dynamic linking22993
+Ref: Dynamic linking-Footnote-124585
+Ref: Dynamic linking-Footnote-224646
+Node: Building library24707
+Node: Using library25090
+Node: C interface25661
+Node: Main C program26005
+Node: Static C to COBOL26921
+Node: Dynamic C to COBOL28418
+Node: Static COBOL to C29863
+Node: Dynamic COBOL to C31299
+Node: Customize31708
+Node: Customizing compiler31932
+Node: Customizing library32518
+Node: Optimize33276
+Node: Optimize options33579
+Node: Optimize call34116
+Node: Optimize binary34496
+Node: Debug35072
+Node: Debug options35231
+Node: Extensions35593
+Node: SELECT36030
+Node: Indexed36195
+Node: Extended ACCEPT36375
+Node: ACCEPT special38009
+Node: Extended DISPLAY40443
+Node: System routines42889
+Node: CBL_OC_GETOPT43235
+Node: CBL_OC_HOSTED47407
+Node: CBL_OC_NANOSLEEP51909
+Node: Appendix A52415
+Node: Appendix B63236
+Node: Appendix C85913
+Node: Appendix D91517
+Node: Appendix E93453
+Node: Appendix F99593
+Node: Appendix G105564
+Node: Appendix H106863
+Node: Appendix I116370
+Node: Index141495
 
 End Tag Table

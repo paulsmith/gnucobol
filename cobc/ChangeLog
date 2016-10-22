@@ -1,4 +1,8 @@
 
+2016-10-22  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Added --no_symbols for symbol table listing.
+
 2016-10-18  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: print_fixed_line() fixed SORCEFORMAT VARIABLE bug.

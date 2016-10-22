@@ -160,6 +160,7 @@ FILE			*cb_src_list_file = NULL;
 int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
 int			cb_lines_per_page = CB_MAX_LINES;
+int			cb_no_symbols = 0;
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
 struct list_files	*cb_listing_files = NULL;
 struct list_files	*cb_current_file = NULL;
@@ -439,6 +440,7 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '#'},
+	{"no_symbols", 		CB_NO_ARG, NULL, '@'},
 
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
@@ -1872,6 +1874,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
+	puts (_("  --no_symbols          specify no symbols in listing"));
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
 			"                        (V. Coen's 'cobxref' must be in path)"));
@@ -2382,6 +2385,10 @@ process_command_line (const int argc, char **argv)
 		case '#':
 			/* --tlines=nn : Lines per page */
 			cb_lines_per_page = atoi(cob_optarg);
+			break;
+		case '@':
+			/* --no_symbols : No symbols in listing */
+			cb_no_symbols = 1;
 			break;
 
 		case 'P':
@@ -3905,7 +3912,7 @@ print_program_trailer (void)
 	int			 print_names = 0;
 
 
-	if ((p = current_program) != NULL) {
+	if (!cb_no_symbols && (p = current_program) != NULL) {
 		/* Print file/symbol tables */
 
 		set_listing_title_symbols();
@@ -6197,7 +6204,7 @@ main (int argc, char **argv)
 			/* If preprocessing raised errors go on but only check syntax */
 			if (fn->has_error) {
 				cb_flag_syntax_only = 1;
-		}
+			}
 		}
 
 		if (cobc_list_file) {

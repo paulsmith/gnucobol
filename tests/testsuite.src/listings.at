@@ -1260,6 +1260,52 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE(prog.lis)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
+AT_DATA([prog-1.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 WS-ONE    PIC 9(4) VALUE 37.
+       01 WS-TWO    PIC A(4) VALUE 'HIGH'.
+       01 WS-THREE  PIC X(4) VALUE 'BAR'.
+       01 WS-FOUR            COMP-1 VALUE 37.
+       01 WS-FIVE            COMP-2 VALUE 37.
+       01 WS-SIX    PIC S999 COMP-3 VALUE -37.
+       01 WS-SEVEN  PIC $$,$$$,$$9.99 VALUE ZERO.
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY --no_symbols -t prog.lst prog-1.cob], [0], [], [])
+
+AT_DATA([prog15-1.lst],
+[GnuCOBOL V.R.P   prog-1.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         01 WS-ONE    PIC 9(4) VALUE 37.
+000007         01 WS-TWO    PIC A(4) VALUE 'HIGH'.
+000008         01 WS-THREE  PIC X(4) VALUE 'BAR'.
+000009         01 WS-FOUR            COMP-1 VALUE 37.
+000010         01 WS-FIVE            COMP-2 VALUE 37.
+000011         01 WS-SIX    PIC S999 COMP-3 VALUE -37.
+000012         01 WS-SEVEN  PIC $$,$$$,$$9.99 VALUE ZERO.
+000013         PROCEDURE        DIVISION.
+000014             STOP RUN.
+
+0 Warnings in program
+0 Errors in program
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CAPTURE_FILE(prog.lis)
+AT_CHECK([diff prog15-1.lst prog.lis], [0], [], [])
+
 AT_CLEANUP
 
 

@@ -532,6 +532,9 @@ Generate and place a wide print listing into @file{*.lst}.
 Specify lines per page in print listing, default = 55.
 Set to zero for no aditional page breaks.
 
+@item --no_symbols
+Do not generate symbol table in listing.
+
 @item -P(=<dir or file>)
 Generate and place a preprocessed listing (old format) into @file{*.lst}.
 
