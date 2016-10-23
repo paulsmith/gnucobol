@@ -6,15 +6,15 @@
 
 2016-10-22  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c: Added --no_symbols for symbol table listing.
+	* cobc.c: added --no-symbols for symbol table listing
 
 2016-10-18  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c: print_fixed_line() fixed SOURCEFORMAT VARIABLE bug.
+	* cobc.c (print_fixed_line): fixed SOURCEFORMAT VARIABLE bug
 
 2016-10-17  Edward Hart <edward.dan.hart@gmail.com>
 
-	* scanner.l (RETURN): renamed to RETURN_TOK (see bug #330).
+	* scanner.l (RETURN): renamed to RETURN_TOK (see bug #330)
 
 2016-10-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 

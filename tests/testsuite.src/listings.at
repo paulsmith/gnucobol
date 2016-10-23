@@ -1276,7 +1276,7 @@ AT_DATA([prog-1.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY --no_symbols -t prog.lst prog-1.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob], [0], [], [])
 
 AT_DATA([prog15-1.lst],
 [GnuCOBOL V.R.P   prog-1.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001

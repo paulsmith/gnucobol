@@ -440,7 +440,7 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '#'},
-	{"no_symbols", 		CB_NO_ARG, NULL, '@'},
+	{"no-symbols", 		CB_NO_ARG, NULL, '@'},
 
 #undef	CB_FLAG
 #undef	CB_FLAG_RQ
