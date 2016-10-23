@@ -1,11 +1,16 @@
 
+2016-10-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* scanner.l: Fixed bug introduced in r1116 which broke lowercase comment
+	  paragraphs.
+
 2016-10-22  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Added --no_symbols for symbol table listing.
 
 2016-10-18  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c: print_fixed_line() fixed SORCEFORMAT VARIABLE bug.
+	* cobc.c: print_fixed_line() fixed SOURCEFORMAT VARIABLE bug.
 
 2016-10-17  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -69,7 +74,7 @@
 
 	* tree.c (cb_build_picture), config.def: feature-request #173
 	  compiler configuration pic-length for number of characters
-	  in PICTURE clause 
+	  in PICTURE clause
 	* config.c: check range (defined in config.def) for all integer flags
 
 2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
@@ -168,7 +173,7 @@
 2016-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_concat_literals): allow concatenation of national and
-	  boolean literals
+	  Boolean literals
 
 2016-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -266,7 +271,7 @@
 	* config.c (cb_config_entry): reserved words handling - remove whitespace
 	  and translate : to =
 	* cobc, config.c: set output name for -f<tag>=<value> in cobc.c instead
-	  in multiple functions in confic.c and show the complete parameter
+	  in multiple functions in config.c and show the complete parameter
 
 2016-08-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

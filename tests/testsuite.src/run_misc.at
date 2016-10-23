@@ -5067,7 +5067,8 @@ AT_KEYWORDS([runmisc])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID.    prog.
-       DATE-WRITTEN.  hello'".
+       DATE-written.  hello'".
+      * Written is intentionally lowercase.
       * extra " to fix syntax highlighting
        PROCEDURE      DIVISION.
            DISPLAY "Hello, world!"

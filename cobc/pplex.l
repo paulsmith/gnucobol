@@ -1494,19 +1494,19 @@ start:
 	  This check is done here to prevent parsing of quote marks.
 	*/
 	if (comment_allowed) {
-		if (!strncmp (bp, "AUTHOR", 6)) {
+		if (!strncasecmp (bp, "AUTHOR", 6)) {
 			paragraph_name = "AUTHOR";
-		} else if (!strncmp (bp, "DATE-WRITTEN", 12)) {
+		} else if (!strncasecmp (bp, "DATE-WRITTEN", 12)) {
 			paragraph_name = "DATE-WRITTEN";
-		} else if (!strncmp (bp, "DATE-MODIFIED", 13)) {
+		} else if (!strncasecmp (bp, "DATE-MODIFIED", 13)) {
 			paragraph_name = "DATE-MODIFIED";
-		} else if (!strncmp (bp, "DATE-COMPILED", 13)) {
+		} else if (!strncasecmp (bp, "DATE-COMPILED", 13)) {
 			paragraph_name = "DATE-COMPILED";
-		} else if (!strncmp (bp, "INSTALLATION", 12)) {
+		} else if (!strncasecmp (bp, "INSTALLATION", 12)) {
 			paragraph_name = "INSTALLATION";
-		} else if (!strncmp (bp, "REMARKS", 7)) {
+		} else if (!strncasecmp (bp, "REMARKS", 7)) {
 			paragraph_name = "REMARKS";
-		} else if (!strncmp (bp, "SECURITY", 8)) {
+		} else if (!strncasecmp (bp, "SECURITY", 8)) {
 			paragraph_name = "SECURITY";
 		} else {
 			paragraph_name = NULL;
