@@ -21,14 +21,17 @@
 
 /* Compiler flag defines */
 
-/* Normal binary flags */
+/* Normal binary flags (standard: off) */
 /* CB_FLAG    (var, help switch, name, help) */
 
-/* Flags with required parameter */
+/* Normal binary flags (standard: on) */
+/* CB_FLAG_ON (var, help switch, name, help) */
+
+/* Flags with required parameter (standard: default)*/
 /* CB_FLAG_RQ (var, help switch, name, default, getopt return, help, value help, default help) */
 
 /* Flags with required parameter and no associated variable */
-/* CB_FLAG_NQ (help switch, name, getopt return, help, value help, default help) */
+/* CB_FLAG_NQ (help switch, name, getopt return, help, value help) */
 
 
 /* Flags with required parameter */
@@ -54,7 +57,7 @@ CB_FLAG_RQ (cb_default_byte, 1, "defaultbyte", -1, 6,
 /* Flags with required parameter and no associated variable */
 
 CB_FLAG_NQ (1, "intrinsics", 10,
-	 _("intrinsics to be used without FUNCTION keyword"), _("[ALL|intrinsic function name(,name,...)]"), NULL)
+	 _("intrinsics to be used without FUNCTION keyword"), _("[ALL|intrinsic function name(,name,...)]"))
 
 /* Binary flags */
 
@@ -62,8 +65,8 @@ CB_FLAG_NQ (1, "intrinsics", 10,
 CB_FLAG (cb_flag_static_call, 0, "static-call",
 	 _("output static function calls for the CALL statement"))
 
-CB_FLAG (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
-	 _("generate C function declations for subroutines with static CALL"))
+CB_FLAG_ON (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
+	 _("disable generation of C function declations for subroutines with static CALL"))
 
 CB_FLAG (cb_flag_computed_goto, 0, "computed-goto",
 	 _("generate computed goto C statements"))

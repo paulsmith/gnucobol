@@ -1,7 +1,7 @@
 
 2016-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* cobc.c: removed multiple #undef of internal used macros
+	* cobc.c. cobc.h: moved multiple #undef of internal used macros to cobc.h
 	* config.def: added reference-out-of-declaratives config option
 	* typeck.c (cb_validate_program_body): use cb_reference_out_of_declaratives
 	* cobc.c (process_command_line): make sure cb_reference_out_of_declaratives

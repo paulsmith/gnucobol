@@ -141,24 +141,6 @@ struct strcache {
 #endif
 
 
-/* undef macros that are only for internal use with def-files */
-
-#undef	COB_EXCEPTION
-
-#undef	CB_FLAG
-#undef	CB_FLAG_RQ
-#undef	CB_FLAG_NQ
-
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
-
-#undef	CB_CONFIG_ANY
-#undef	CB_CONFIG_INT
-#undef	CB_CONFIG_STRING
-#undef	CB_CONFIG_BOOLEAN
-#undef	CB_CONFIG_SUPPORT
-
 /* Global variables */
 
 const char		*cb_source_file = NULL;
@@ -222,10 +204,12 @@ struct cb_exception cb_exception_table[] = {
 #undef	COB_EXCEPTION
 
 #define	CB_FLAG(var,pdok,name,doc)	int var = 0;
+#define	CB_FLAG_ON(var,pdok,name,doc)	int var = 1;
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	int var = def;
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)
 #include "flag.def"
 #undef	CB_FLAG
+#undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
@@ -457,12 +441,16 @@ static const struct option long_options[] = {
 #define	CB_FLAG(var,pdok,name,doc)			\
 	{"f"name,		CB_NO_ARG, &var, 1},	\
 	{"fno-"name,		CB_NO_ARG, &var, 0},
+#define	CB_FLAG_ON(var,pdok,name,doc)		\
+	{"f"name,		CB_NO_ARG, &var, 1},	\
+	{"fno-"name,		CB_NO_ARG, &var, 0},
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)		\
 	{"f"name,		CB_RQ_ARG, NULL, opt},
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)			\
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)			\
 	{"f"name,		CB_RQ_ARG, NULL, opt},
 #include "flag.def"
 #undef	CB_FLAG
+#undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
@@ -1202,7 +1190,7 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 }
 
 size_t
-cobc_check_valid_name (const char *name, const unsigned int prechk)
+cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 {
 	const char	*p;
 	size_t		len;
@@ -1818,19 +1806,19 @@ static void
 cobc_print_flag (const char *name, const char *doc,
 		 const int pdok, const char *odoc, const char *def)
 {
-	const char	*bptr;
 	char		buff[78];
 
 	if (!pdok || !doc) {
 		return;
 	}
 	if (!odoc) {
-		bptr = name;
+		snprintf (buff, sizeof (buff) - 1, "-f%s", name);
+	} else if (!strcmp(odoc, "no")) {
+		snprintf (buff, sizeof (buff) - 1, "-fno-%s", name);
 	} else {
-		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
-		bptr = buff;
+		snprintf (buff, sizeof (buff) - 1, "-f%s=%s", name, odoc);
 	}
-	printf ("  -f%-19s\t%s\n", bptr, doc);
+	printf ("  %-21s\t%s\n", buff, doc);
 	if (def) {
 		printf ("\t\t\t- %s: %s\n", _("default"), def);
 	}
@@ -1915,12 +1903,15 @@ cobc_print_usage (char * prog)
 
 #define	CB_FLAG(var,pdok,name,doc)		\
 	cobc_print_flag (name, doc, pdok, NULL, NULL);
+#define	CB_FLAG_ON(var,pdok,name,doc)		\
+	cobc_print_flag (name, doc, pdok, "no", NULL);
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	\
 	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)		\
-	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
+#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)		\
+	cobc_print_flag (name, doc, pdok, vdoc, NULL);
 #include "flag.def"
 #undef	CB_FLAG
+#undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
@@ -2026,16 +2017,6 @@ process_command_line (const int argc, char **argv)
 		}
 	}
 #endif
-
-	/* Flags that are active by standard */
-#define	CB_WARNDEF(var,name,doc) /* do nothing */
-#define	CB_ONWARNDEF(var,name,doc)		\
-	var = 1;
-#define	CB_NOWARNDEF(var,name,doc) /* do nothing */
-#include "warning.def"
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 
 	/* First run of getopt: handle std/conf and all listing options
 	   We need to postpone single configuration flags as we need
