@@ -4392,7 +4392,7 @@ valid_screen_pos (cb_tree pos)
 static void
 cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 		     cb_tree scroll, cb_tree timeout, cb_tree prompt,
-		     cb_tree size_is, int dispattrs)
+		     cb_tree size_is, cob_flags_t disp_attrs)
 {
 	cb_tree		line;
 	cb_tree		column;
@@ -4400,17 +4400,17 @@ cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 	if (!pos) {
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					      var, NULL, NULL, fgc, bgc, scroll,
-					      timeout, prompt, size_is, cb_int (dispattrs)));
+					      timeout, prompt, size_is, cb_flags_t (disp_attrs)));
 	} else if (CB_LIST_P (pos)) {
 		line = CB_PAIR_X (pos);
 		column = CB_PAIR_Y (pos);
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					      var, line, column, fgc, bgc, scroll,
-					      timeout, prompt, size_is, cb_int (dispattrs)));
+					      timeout, prompt, size_is, cb_flags_t (disp_attrs)));
 	} else if (valid_screen_pos (pos)) {
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					      var, pos, NULL, fgc, bgc, scroll,
-					      timeout, prompt, size_is, cb_int (dispattrs)));
+					      timeout, prompt, size_is, cb_flags_t (disp_attrs)));
 	}
 }
 
@@ -4434,7 +4434,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		timeout;
 	cb_tree		prompt;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	int		dispattrs;
+	cob_flags_t		disp_attrs;
 
 	if (cb_validate_one (var)) {
 		return;
@@ -4447,7 +4447,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		timeout = attr_ptr->timeout;
 		prompt = attr_ptr->prompt;
 		size_is = attr_ptr->size_is;
-		dispattrs = attr_ptr->dispattrs;
+		disp_attrs = attr_ptr->dispattrs;
 		if (cb_validate_one (pos)) {
 			return;
 		}
@@ -4476,7 +4476,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		timeout = NULL;
 		prompt = NULL;
 		size_is = NULL;
-		dispattrs = 0;
+		disp_attrs = 0;
 	}
 
 	if (prompt) {
@@ -4533,17 +4533,17 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 			if (var == cb_null) {
 				var = NULL;
 			}
-			if (pos || fgc || bgc || scroll || dispattrs) {
+			if (pos || fgc || bgc || scroll || disp_attrs) {
 				cb_gen_field_accept (var, pos, fgc, bgc, scroll,
-						     timeout, prompt, size_is, dispattrs);
+						     timeout, prompt, size_is, disp_attrs);
 			} else {
 				cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 							      var, NULL, NULL, fgc, bgc,
 							      scroll, timeout, prompt,
-							      size_is, cb_int (dispattrs)));
+							      size_is, cb_flags_t (disp_attrs)));
 			}
 		}
-	} else if (pos || fgc || bgc || scroll || dispattrs) {
+	} else if (pos || fgc || bgc || scroll || disp_attrs) {
 		/* Bump ref count to force CRT STATUS field generation */
 		if (current_program->crt_status) {
 			CB_FIELD_PTR (current_program->crt_status)->count++;
@@ -4552,7 +4552,7 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 			var = NULL;
 		}
 		cb_gen_field_accept (var, pos, fgc, bgc, scroll,
-				     timeout, prompt, size_is, dispattrs);
+				     timeout, prompt, size_is, disp_attrs);
 	} else {
 		if (var == cb_null) {
 			var = NULL;
@@ -5295,7 +5295,7 @@ static void
 initialize_attrs (const struct cb_attr_struct * const attr_ptr,
 		  cb_tree * const fgc, cb_tree * const bgc,
 		  cb_tree * const scroll, cb_tree * const size_is,
-		  int * const dispattrs)
+		  cob_flags_t * const dispattrs)
 {
 	if (attr_ptr) {
 		*fgc = attr_ptr->fgc;
@@ -5367,7 +5367,7 @@ emit_screen_display (const cb_tree x, const cb_tree pos)
 }
 
 static void
-process_special_values (cb_tree value, cb_tree size_is, int * const attrs)
+process_special_values (cb_tree value, cb_tree size_is, cob_flags_t * const attrs)
 {
 	/*
 	  The following are MF extensions. MF specifically
@@ -5410,7 +5410,7 @@ process_special_values (cb_tree value, cb_tree size_is, int * const attrs)
 static void
 emit_field_display (const cb_tree x, const cb_tree pos, const cb_tree fgc,
 		    const cb_tree bgc, const cb_tree scroll,
-		    const cb_tree size_is, const int dispattrs)
+		    const cb_tree size_is, const cob_flags_t disp_attrs)
 {
 	cb_tree	line = NULL;
 	cb_tree	column = NULL;
@@ -5419,7 +5419,7 @@ emit_field_display (const cb_tree x, const cb_tree pos, const cb_tree fgc,
 	cb_emit (CB_BUILD_FUNCALL_8 ("cob_field_display",
 				     x, line, column, fgc, bgc,
 				     scroll, size_is,
-				     cb_int (dispattrs)));
+				     cb_flags_t (disp_attrs)));
 }
 
 static cb_tree
@@ -5497,7 +5497,7 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 	cb_tree	l;
 	int	is_first_display_item = is_first_display_list;
 	cb_tree	pos;
-	int	attrs;
+	cob_flags_t	disp_attrs;
 	cb_tree	x;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l)) {
@@ -5505,17 +5505,17 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 		is_first_display_item = 0;
 
 		x = CB_VALUE (l);
-		attrs = 0;
-		process_special_values (x, size_is, &attrs);
+		disp_attrs = 0;
+		process_special_values (x, size_is, &disp_attrs);
 
-		emit_field_display (x, pos, NULL, NULL, NULL, NULL, attrs);
+		emit_field_display (x, pos, NULL, NULL, NULL, NULL, disp_attrs);
 	}
 }
 
 static void
 emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 			     cb_tree bgc, cb_tree scroll, cb_tree size_is,
-			     int disp_attrs,
+			     cob_flags_t disp_attrs,
 			     const int is_first_display_list)
 {
 	cb_tree	l;
@@ -5542,16 +5542,16 @@ cb_emit_display_omitted (cb_tree pos, struct cb_attr_struct *attr_ptr)
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	int		dispattrs;
+	cob_flags_t		disp_attrs;
 
-	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &dispattrs);
+	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &disp_attrs);
 	if (validate_attrs (pos, fgc, bgc, scroll, size_is)) {
 		return;
 	}
 
 	/* TODO: Implement */
 	/* Should we create a distinct omitted_display function in screenio.c? */
-	/* emit_field_display (NULL, pos, fgc, bgc, scroll, size_is, dispattrs); */
+	/* emit_field_display (NULL, pos, fgc, bgc, scroll, size_is, disp_attrs); */
 }
 
 void
@@ -5564,7 +5564,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	int		disp_attrs;
+	cob_flags_t		disp_attrs;
 
 	/* Validate upon and values */
 	if (upon == cb_error_node

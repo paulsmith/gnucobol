@@ -267,9 +267,9 @@ begin_implicit_statement (void)
 
 # if 0 /* activate only for debugging purposes for attribs */
 static
-void print_bits (unsigned int num)
+void print_bits (cob_flags_t num)
 {
-	unsigned int 	size = sizeof (unsigned int);
+	unsigned int 	size = sizeof (cob_flags_t);
 	unsigned int	max_pow = 1 << (size * 8 - 1);
 	int 		i = 0;
 
@@ -559,7 +559,7 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 }
 
 static void
-check_relaxed_syntax (const unsigned int lev)
+check_relaxed_syntax (const cob_flags_t lev)
 {
 	const char	*s;
 

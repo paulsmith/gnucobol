@@ -1544,7 +1544,8 @@ cb_int (const int n)
 		}
 	}
 
-	/* Do not use make_tree here */
+	/* Do not use make_tree here as we want a main_malloc
+	   instead of parse_malloc! */
 	x = cobc_main_malloc (sizeof (struct cb_integer));
 	x->common.tag = CB_TAG_INTEGER;
 	x->common.category = CB_CATEGORY_NUMERIC;
@@ -1580,6 +1581,26 @@ cb_build_string (const void *data, const size_t size)
 	p->size = size;
 	p->data = data;
 	return CB_TREE (p);
+}
+
+/* Flags */
+
+cb_tree
+cb_flags_t (const cob_flags_t n)
+{
+
+	/* FIXME:
+
+	   This ONLY works for the current version as we have two bit left before
+	   we actually need the 64bit cob_flags_t that we use internally
+	   in cobc (needed already for syntax checks) and in screenio
+	   (needed soon).
+
+	   Ideally we either store the flags as string here or mark them and
+	   output the flags in codegen as flags, making the code much more readable.
+	*/
+
+	return cb_int ((const int)n);
 }
 
 /* Code output and comment */

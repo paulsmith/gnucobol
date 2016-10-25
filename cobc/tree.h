@@ -1131,8 +1131,8 @@ struct cb_attr_struct {
 	cb_tree			scroll;		/* SCROLL */
 	cb_tree			timeout;	/* TIMEOUT */
 	cb_tree			prompt;		/* PROMPT */
-	cb_tree			size_is;        /* [PROTECTED] SIZE [IS] */
-        cob_s64_t		dispattrs;	/* Attributes */
+	cb_tree			size_is;	/* [PROTECTED] SIZE [IS] */
+	cob_flags_t		dispattrs;	/* Attributes */
 };
 
 /* Exception handler type */
@@ -1429,6 +1429,8 @@ extern cb_tree			cb_int (const int);
 extern cb_tree			cb_int_hex (const int);
 
 extern cb_tree			cb_build_string (const void *, const size_t);
+
+extern cb_tree			cb_flags_t (const cob_flags_t);
 
 extern cb_tree			cb_build_class_name (cb_tree, cb_tree);
 

@@ -7,6 +7,11 @@
 	* cobc.c (process_command_line): make sure cb_reference_out_of_declaratives
 	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
 
+2016-10-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* tree.h, tree.c, typeck.c, parser.y: fixed missing type changes
+	  from int to cob_flags_t for functions using disp_attrs
+
 2016-10-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* scanner.l: Fixed bug introduced in r1116 which broke lowercase comment
