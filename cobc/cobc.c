@@ -140,6 +140,25 @@ struct strcache {
 #define	CB_COPT_S	" -Os"
 #endif
 
+
+/* undef macros that are only for internal use with def-files */
+
+#undef	COB_EXCEPTION
+
+#undef	CB_FLAG
+#undef	CB_FLAG_RQ
+#undef	CB_FLAG_NQ
+
+#undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_NOWARNDEF
+
+#undef	CB_CONFIG_ANY
+#undef	CB_CONFIG_INT
+#undef	CB_CONFIG_STRING
+#undef	CB_CONFIG_BOOLEAN
+#undef	CB_CONFIG_SUPPORT
+
 /* Global variables */
 
 const char		*cb_source_file = NULL;
@@ -194,7 +213,6 @@ unsigned int		cobc_gen_listing = 0;
 
 cob_u32_t		optimize_defs[COB_OPTIM_MAX] = { 0 };
 
-#undef	COB_EXCEPTION
 #define	COB_EXCEPTION(code,tag,name,critical) {name, 0x##code, 0},
 struct cb_exception cb_exception_table[] = {
 	{NULL, 0, 0},		/* CB_EC_ZERO */
@@ -203,9 +221,6 @@ struct cb_exception cb_exception_table[] = {
 };
 #undef	COB_EXCEPTION
 
-#undef	CB_FLAG
-#undef	CB_FLAG_RQ
-#undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)	int var = 0;
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	int var = def;
 #define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc,ddoc)
@@ -214,9 +229,6 @@ struct cb_exception cb_exception_table[] = {
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	int var = 0;
 #define	CB_ONWARNDEF(var,name,doc)	int var = 1;
 #define	CB_NOWARNDEF(var,name,doc)	int var = 0;
@@ -442,9 +454,6 @@ static const struct option long_options[] = {
 	{"tlines", 		CB_RQ_ARG, NULL, '#'},
 	{"no-symbols", 		CB_NO_ARG, NULL, '@'},
 
-#undef	CB_FLAG
-#undef	CB_FLAG_RQ
-#undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)			\
 	{"f"name,		CB_NO_ARG, &var, 1},	\
 	{"fno-"name,		CB_NO_ARG, &var, 0},
@@ -457,11 +466,6 @@ static const struct option long_options[] = {
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
-#undef	CB_CONFIG_ANY
-#undef	CB_CONFIG_INT
-#undef	CB_CONFIG_STRING
-#undef	CB_CONFIG_BOOLEAN
-#undef	CB_CONFIG_SUPPORT
 #define	CB_CONFIG_ANY(type,var,name,doc)	\
 	{"f"name,		CB_RQ_ARG, NULL, '%'},
 #define	CB_CONFIG_INT(var,name,min,max,odoc,doc)	\
@@ -482,9 +486,6 @@ static const struct option long_options[] = {
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
 
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)			\
 	{"W"name,		CB_NO_ARG, &var, 1},	\
 	{"Wno-"name,		CB_NO_ARG, &var, 0},
@@ -1899,9 +1900,6 @@ cobc_print_usage (char * prog)
 	puts (_("  -W                    enable all warnings"));
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
 	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)		\
 	cobc_print_warn (name, doc, 1);
 #define	CB_ONWARNDEF(var,name,doc)		\
@@ -1915,9 +1913,6 @@ cobc_print_usage (char * prog)
 
 	putchar ('\n');
 
-#undef	CB_FLAG
-#undef	CB_FLAG_RQ
-#undef	CB_FLAG_NQ
 #define	CB_FLAG(var,pdok,name,doc)		\
 	cobc_print_flag (name, doc, pdok, NULL, NULL);
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	\
@@ -1931,11 +1926,6 @@ cobc_print_usage (char * prog)
 
 	putchar ('\n');
 
-#undef	CB_CONFIG_ANY
-#undef	CB_CONFIG_INT
-#undef	CB_CONFIG_STRING
-#undef	CB_CONFIG_BOOLEAN
-#undef	CB_CONFIG_SUPPORT
 #define	CB_CONFIG_STRING(var,name,doc)		\
 	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
 #define	CB_CONFIG_INT(var,name,min,max,odoc,doc)		\
@@ -2038,7 +2028,14 @@ process_command_line (const int argc, char **argv)
 #endif
 
 	/* Flags that are active by standard */
-	cb_flag_c_decl_for_static_call = 1;
+#define	CB_WARNDEF(var,name,doc) /* do nothing */
+#define	CB_ONWARNDEF(var,name,doc)		\
+	var = 1;
+#define	CB_NOWARNDEF(var,name,doc) /* do nothing */
+#include "warning.def"
+#undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_NOWARNDEF
 
 	/* First run of getopt: handle std/conf and all listing options
 	   We need to postpone single configuration flags as we need
@@ -2163,16 +2160,6 @@ process_command_line (const int argc, char **argv)
 		cobc_free_mem ();
 		exit (1);
 	}
-
-#if 0 /* deactivated as -frelaxed-syntax-checks (compiler configuration) is available */
-	/* Set relaxed syntax configuration options if requested */
-	if (cb_flag_relaxed_syntax_group) {
-		cb_relaxed_syntax_checks = 1;
-		cb_larger_redefines_ok = 1;
-		cb_relax_level_hierarchy = 1;
-		cb_top_level_occurs_clause = CB_OK;
-	}
-#endif
 
 	cob_optind = 1;
 	while ((c = cob_getopt_long_long (argc, argv, short_options,
@@ -2335,7 +2322,8 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case '%':
-			/* -f[no-]<tag>[=<value>] : Override configuration entry */
+			/* -f<tag>=<value> : Override configuration entry */
+			/* hint: -f[no-]<tag> sets the var directly */
 			conf_label = cobc_main_malloc (COB_MINI_BUFF);
 			conf_entry = cobc_malloc (COB_MINI_BUFF - 2);
 			snprintf (conf_label, COB_MINI_MAX, "-%s=%s",
@@ -2580,9 +2568,6 @@ process_command_line (const int argc, char **argv)
 		case 'w':
 			/* -w : Turn off all warnings (disables -W/-Wall if passed later) */
 			warningopt = 0;
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 0;
 #define	CB_ONWARNDEF(var,name,doc)	var = 0;
 #define	CB_NOWARNDEF(var,name,doc)	var = 0;
@@ -2595,9 +2580,6 @@ process_command_line (const int argc, char **argv)
 		case 'W':
 			/* -W : Turn on warnings */
 			warningopt = 1;
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 1;
 #define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)
@@ -2610,9 +2592,6 @@ process_command_line (const int argc, char **argv)
 		case 'Z':
 			/* -W : Turn on all warnings */
 			warningopt = 1;
-#undef	CB_WARNDEF
-#undef	CB_ONWARNDEF
-#undef	CB_NOWARNDEF
 #define	CB_WARNDEF(var,name,doc)	var = 1;
 #define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)	var = 1;
@@ -2627,11 +2606,29 @@ process_command_line (const int argc, char **argv)
 		}
 	}
 
-	/* Exit for configuration errors resulting from -cb_conf */
+	/* Exit for configuration errors resulting from -f<conf-tag>[=<value>] */
 	if (conf_ret != 0) {
 		cobc_free_mem ();
 		exit (1);
 	}
+
+	/* Set relaxed syntax configuration options if requested */
+	/* part 1: relaxed syntax compiler configuration option */ 
+	if (cb_relaxed_syntax_checks) {
+		if (cb_reference_out_of_declaratives > CB_WARNING) {
+			cb_reference_out_of_declaratives = CB_WARNING;
+		}
+	}
+#if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
+		 are available at command line - maybe re-add with another name */
+	/* 2: relaxed syntax group option from command line */ 
+	if (cb_flag_relaxed_syntax_group) {
+		cb_relaxed_syntax_checks = 1;
+		cb_larger_redefines_ok = 1;
+		cb_relax_level_hierarchy = 1;
+		cb_top_level_occurs_clause = CB_OK;
+	}
+#endif
 
 	if (list_reserved) {
 		cb_list_reserved ();

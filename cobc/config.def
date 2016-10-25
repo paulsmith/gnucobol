@@ -218,3 +218,6 @@ CB_CONFIG_SUPPORT (cb_renames_uncommon_levels, "renames-uncommon-levels",
 
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 	_("CALL/CANCEL with program-prototype-name"))
+
+CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declaratives",
+	_("references to sections not in DECLARATIVES from within DECLARATIVES"))

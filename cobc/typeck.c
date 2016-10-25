@@ -2608,20 +2608,31 @@ cb_validate_program_body (struct cb_program *prog)
 		/* Check refs in to / out of DECLARATIVES */
 		if (CB_LABEL_P (v)) {
 			if (CB_REFERENCE (x)->flag_in_decl &&
-			    !CB_LABEL (v)->flag_declaratives) {
-				if (!cb_relaxed_syntax_checks) {
+				!CB_LABEL (v)->flag_declaratives) {
+				/* verfify reference-out-of-declaratives  */
+				switch (cb_reference_out_of_declaratives) {
+				case CB_OK:
+					break;
+				case CB_ERROR:
 					cb_error_x (x, _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
-				} else {
+					break;
+				case CB_WARNING:
 					cb_warning_x (x, _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
+					break;
+				default:
+					break;
 				}
 			}
+
+			/* GO TO into DECLARATIVES is not allowed */
 			if (CB_LABEL (v)->flag_declaratives &&
 			    !CB_REFERENCE (x)->flag_in_decl &&
 			    !CB_REFERENCE (x)->flag_decl_ok) {
 				cb_error_x (x, _("invalid reference to '%s' (in DECLARATIVES)"), CB_LABEL (v)->name);
 			}
+
 			CB_LABEL (v)->flag_begin = 1;
 			if (CB_REFERENCE (x)->length) {
 				CB_LABEL (v)->flag_return = 1;
@@ -6390,6 +6401,8 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			goto overlapret;
 		}
 	}
+
+	/* Check for same parent field */
 	ff1 = cb_field_founder (src_f);
 	ff2 = cb_field_founder (dst_f);
 	if (ff1->redefines) {

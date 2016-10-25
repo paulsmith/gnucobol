@@ -567,7 +567,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 				if (ret == 0) {
 					configuration_error (fname, 0, 1, _("missing definitions:"));
 				}
-				configuration_error (fname, 0, 1, _("\tNo definition of '%s'"),
+				configuration_error (fname, 0, 1, _("\tno definition of '%s'"),
 						config_table[i].name);
 				ret = -1;
 			}

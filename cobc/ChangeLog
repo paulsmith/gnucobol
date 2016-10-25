@@ -1,4 +1,12 @@
 
+2016-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* cobc.c: removed multiple #undef of internal used macros
+	* config.def: added reference-out-of-declaratives config option
+	* typeck.c (cb_validate_program_body): use cb_reference_out_of_declaratives
+	* cobc.c (process_command_line): make sure cb_reference_out_of_declaratives
+	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
+
 2016-10-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* scanner.l: Fixed bug introduced in r1116 which broke lowercase comment
