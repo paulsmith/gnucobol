@@ -21,7 +21,7 @@ set COB_LIB_PATH="COB_RELEASE_PATH..\"
 :: clean dist and copy all files
 %~d0
 
-if exist "%1COB_DIST_PATH%" (
+if exist "%COB_DIST_PATH%" (
    rmdir /S /Q "%COB_DIST_PATH%"
 )
 
@@ -74,12 +74,12 @@ goto :end
 :copyrel
 if NOT "%1"=="x64" (
    set copyfrom="%COB_RELEASE_PATH%Win32\release"
-   set  copytobin=bin
-   set  copytolib=lib
+   set copytobin=bin
+   set copytolib=lib
 ) else (
-   set  copyfrom="%COB_RELEASE_PATH%x64\release"
-   set  copytobin=bin_x64
-   set  copytolib=lib_x64
+   set copyfrom="%COB_RELEASE_PATH%x64\release"
+   set copytobin=bin_x64
+   set copytolib=lib_x64
 )
 mkdir %copytobin%
 copy "%copyfrom%\cobc.exe"			%copytobin%\
@@ -90,8 +90,8 @@ copy "%copyfrom%\libcob.dll"			%copytobin%\
 copy "%copyfrom%\libcob.pdb"			%copytobin%\
 
 copy "%copyfrom%\libvbisam.dll"			%copytobin%\
-copy ""%copyfrom%\mpir.dll"			%copytobin%\
-copy ""%copyfrom%\pdcurses.dll"			%copytobin%\
+copy "%copyfrom%\mpir.dll"			%copytobin%\
+copy "%copyfrom%\pdcurses.dll"			%copytobin%\
 
 mkdir %copytolib%"
 copy "%copyfrom%\libcob.lib"			%copytolib%\
