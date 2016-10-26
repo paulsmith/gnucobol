@@ -4071,12 +4071,11 @@ static int
 line_has_listing_directive (const char *line, int *on_off)
 {
 	char	*directive_start;
+	char	token[32], term[2];
 
 	directive_start = strchr (line, '>');
-	if (directive_start != NULL
-		&& !strncasecmp (directive_start, ">>LISTING", 9)) {
-		char	token[32], term[2];
-
+	if (directive_start != NULL &&
+		!strncasecmp (directive_start, ">>LISTING", 9)) {
 		directive_start += 9;
 		*on_off = 1;
 		get_next_token (directive_start, token, term);

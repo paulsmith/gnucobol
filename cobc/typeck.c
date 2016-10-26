@@ -1553,10 +1553,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 						cb_error_x (x, _("subscript of '%s' out of bounds: %d"),
 								name, n);
 					}
-					if (p==f) {
-						/* Only valid for single subscript (!) */
-						f->mem_offset = f->size * (n - 1);
-					}
 				}
 
 				/* Run-time check for all non-literals */
@@ -6383,85 +6379,118 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 	struct cb_field	*f1;
 	struct cb_field	*ff1;
 	struct cb_field	*ff2;
-	struct cb_reference *r;
+	struct cb_reference *sr;
+	struct cb_reference *dr;
 	cb_tree		loc;
 	int		src_size;
 	int		dst_size;
 	int		src_off;
 	int		dst_off;
 
-	/* Check basic overlapping */
-	for (f1 = src_f->children; f1; f1 = f1->sister) {
-		if (f1 == dst_f) {
-			goto overlapret;
+	sr = CB_REFERENCE (src);
+	dr = CB_REFERENCE (dst);
+
+	/* Check for identical field */
+	if (src_f == dst_f) {
+		if (sr->subs) {
+			/* same fields with subs,
+			   overlapping possible, would need more checks
+			   (verify all subs of source and dest to be either identical or
+			   to be literal with the same integer value) */
+			return 1;
 		}
-	}
-	for (f1 = dst_f->children; f1; f1 = f1->sister) {
-		if (f1 == src_f) {
-			goto overlapret;
+
+		/* same fields, at least one without ref-mod -> overlapping */
+		if (!sr->offset || !dr->offset) {
+			goto overlap_ret;
 		}
+
+	} else {
+
+		/* Check basic overlapping */
+		for (f1 = src_f->children; f1; f1 = f1->sister) {
+			if (f1 == dst_f) {
+				goto overlap_ret;
+			}
+		}
+		for (f1 = dst_f->children; f1; f1 = f1->sister) {
+			if (f1 == src_f) {
+				goto overlap_ret;
+			}
+		}
+
+		/* Check for same parent field */
+		ff1 = cb_field_founder (src_f);
+		ff2 = cb_field_founder (dst_f);
+		if (ff1->redefines) {
+			ff1 = ff1->redefines;
+		}
+		if (ff2->redefines) {
+			ff2 = ff2->redefines;
+		}
+		if (ff1 != ff2) {
+			/* different field founder -> no overlapping
+			   [FIXME: if at least one of the vars has ever an assignment
+			   of a different address we must return 1] */
+			return 0;
+		}
+
 	}
 
-	/* Check for same parent field */
-	ff1 = cb_field_founder (src_f);
-	ff2 = cb_field_founder (dst_f);
-	if (ff1->redefines) {
-		ff1 = ff1->redefines;
-	}
-	if (ff2->redefines) {
-		ff2 = ff2->redefines;
-	}
-	if (ff1 != ff2) {
-		return 0;
+	src_off = src_f->offset;
+	dst_off = dst_f->offset;
+
+	/* Check for occurs */
+	if (sr->subs || dr->subs) {
+		/* overlapping possible, would need:
+		1: if all subs are integer literals: a full offset check of both fields
+		2: if at least one isn't an integer literal: check that all "upper" literals
+		   are either identical or numeric literals with the same integer value */
+		return 1;
 	}
 
 	src_size = cb_field_size (src);
 	dst_size = cb_field_size (dst);
 
-	if (src_size <= 0 || dst_size <= 0 ||
+	/* Adjusting offsets by reference modification */
+	if (sr->offset) {
+		/* field size -1 -> set via variable */
+		if (src_size == -1 ||
+			!CB_LITERAL_P (sr->offset)) { 
+			goto pos_overlap_ret;
+		}
+		src_off += cb_get_int (sr->offset) - 1;
+	}
+	if (dr->offset) {
+		if (dst_size == -1 ||
+			!CB_LITERAL_P (dr->offset)) {
+			goto pos_overlap_ret;
+		}
+		dst_off += cb_get_int (dr->offset) - 1;
+	}
+
+	if (src_size == 0 || dst_size == 0 ||
 	    cb_field_variable_size (src_f) ||
 	    cb_field_variable_size (dst_f)) {
-		return 1; /* overlapping possible, would need more checks */
-	}
-	/* Check literal occurs? */
-	if ((src_f->flag_occurs && !src_f->mem_offset) ||
-		(dst_f->flag_occurs && !dst_f->mem_offset)) {
-		return 1; /* overlapping possible, would need more checks */
-	}
-
-	/* Same field - Check offsets */
-	src_off = src_f->offset;
-	dst_off = dst_f->offset;
-
-	/* Adjusting offsets by occurs and reference modification */
-	src_off += src_f->mem_offset ;
-	r = CB_REFERENCE (src);
-	if (r->offset) {
-		if (CB_LITERAL_P (r->offset)) {
-			src_off += cb_get_int (r->offset) - 1;
-		} else {
-			goto overlapret;
-		}
-	}
-	dst_off += dst_f->mem_offset;
-	r = CB_REFERENCE (dst);
-	if (r->offset) {
-		if (CB_LITERAL_P (r->offset)) {
-			dst_off += cb_get_int (r->offset) - 1;
-		} else {
-			goto overlapret;
-		}
+		/* overlapping possible, would need more checks */
+		return 1;
 	}
 	if (src_off >= dst_off && src_off < (dst_off + dst_size)) {
-		goto overlapret;
+		goto overlap_ret;
 	}
 	if (src_off < dst_off && (src_off + src_size) > dst_off) {
-		goto overlapret;
+		goto overlap_ret;
 	}
 	return 0;
-overlapret:
+pos_overlap_ret:
 	loc = src->source_line ? src : dst;
-	if (cb_warn_overlap && !suppress_warn) {
+	if (cb_warn_pos_overlap && !suppress_warn) {
+		cb_warning_x (loc, _("overlapping MOVE may occur and produce unpredictable results"));
+	}
+	return 1;
+overlap_ret:
+	loc = src->source_line ? src : dst;
+	if ((cb_warn_overlap || cb_warn_pos_overlap) && !suppress_warn) {
 		cb_warning_x (loc, _("overlapping MOVE may produce unpredictable results"));
 	}
 	return 1;

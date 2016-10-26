@@ -45,6 +45,9 @@ CB_WARNDEF (cb_warn_constant, "constant",
 CB_WARNDEF (cb_warn_overlap, "overlap",
 	    _("warn overlapping MOVE items"))
 
+CB_NOWARNDEF (cb_warn_pos_overlap, "possible-overlap",
+	    _("warn MOVE items that may overlap depending on variables"))
+
 CB_WARNDEF (cb_warn_parentheses, "parentheses",
 	    _("warn lack of parentheses around AND within OR"))
 

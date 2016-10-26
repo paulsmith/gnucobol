@@ -1,4 +1,11 @@
 
+2015-10-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: fixed checks of overlapping MOVE and don't raise warnings for
+	  items in occurs as the check for this was borked
+	* warning.def, typeck.c: added new CB_NOWARNDEF -Wpossible-overlap for
+	  items that only *may* overlap (-Woverlap only warns if overlap is sure)
+
 2016-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* cobc.c. cobc.h: moved multiple #undef of internal used macros to cobc.h
