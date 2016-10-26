@@ -2589,9 +2589,11 @@ AT_DATA([callee.cob], [
        01 P2            PIC X(6).
        PROCEDURE        DIVISION USING P1 OPTIONAL P2.
            IF P2 NOT OMITTED
-              DISPLAY P2
+              DISPLAY 'UNEXPECTED P2: ' P2
               END-DISPLAY
-           END-IF.
+           END-IF
+           DISPLAY 'P1: ' P1 WITH NO ADVANCING
+           END-DISPLAY.
            EXIT PROGRAM.
 ])
 
@@ -2599,7 +2601,7 @@ AT_DATA([caller.c], [[
 #include <libcob.h>
 
 
-int callee (char *);
+int callee (char *, char *);
 
 int
 main (int argc, char **argv)
@@ -2610,12 +2612,12 @@ main (int argc, char **argv)
 	cob_init(argc, argv);
 	cobol_global = cob_get_global_ptr ();
 	cobol_global->cob_call_params = 1;
-	return callee (p1);
+	return callee (p1, NULL);
 }
 ]])
 
 AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
-AT_CHECK([./caller], [0], [], [])
+AT_CHECK([./caller], [0], [P1: A], [])
 
 AT_CLEANUP
 
@@ -2638,6 +2640,9 @@ AT_DATA([callee.cob], [
            IF P2 NOT EQUAL "FROM C"
               DISPLAY P2
               END-DISPLAY
+           ELSE
+              DISPLAY "OK" WITH NO ADVANCING
+              END-DISPLAY
            END-IF.
            EXIT PROGRAM.
 ])
@@ -2659,7 +2664,7 @@ main (int argc, char **argv)
 ]])
 
 AT_CHECK([$COMPILE -o caller caller.c callee.cob], [0], [], [])
-AT_CHECK([./caller], [0], [], [])
+AT_CHECK([./caller], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -2681,6 +2686,9 @@ AT_DATA([callee.cob], [
            END-IF.
            IF P2 NOT EQUAL "FROM C"
               DISPLAY P2
+              END-DISPLAY
+           ELSE
+              DISPLAY "OK" WITH NO ADVANCING
               END-DISPLAY
            END-IF.
            EXIT PROGRAM.
@@ -2706,7 +2714,7 @@ AT_CHECK([./caller], [1], [],
 ])
 
 AT_CHECK([$COMPILE -fimplicit-init -o caller caller.c callee.cob], [0], [], [])
-AT_CHECK([./caller], [0], [], [])
+AT_CHECK([./caller], [0], [OK], [])
 
 AT_CLEANUP
 
