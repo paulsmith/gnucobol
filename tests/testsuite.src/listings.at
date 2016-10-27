@@ -1080,7 +1080,8 @@ AT_CHECK([$COMPILE_ONLY -t crud.lst crud.cob], [1], [],
 AT_DATA([prog15.lst],
 [cobc: crud.cob: No such file or directory
 ])
-AT_CHECK([diff prog15.lst crud.lst], [0], [], [])
+AT_CHECK([$UNIFY_LISTING crud.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
