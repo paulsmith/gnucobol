@@ -64,6 +64,8 @@ Options:
   -Wredefinition       	warn incompatible redefinition of data items
   -Wconstant           	warn inconsistent constant
   -Woverlap            	warn overlapping MOVE items
+  -Wpossible-overlap   	warn MOVE items that may overlap depending on variables
+			- NOT set with -Wall
   -Wparentheses        	warn lack of parentheses around AND within OR
   -Wstrict-typing      	warn type mismatch strictly
   -Wimplicit-define    	warn implicitly defined data items
@@ -178,6 +180,7 @@ Options:
   -faccept-display-extensions=<support>	extensions to ACCEPT and DISPLAY
   -frenames-uncommon-levels=<support>	RENAMES of 01-, 66- and 77-level items
   -fprogram-prototypes=<support>	CALL/CANCEL with program-prototype-name
+  -freference-out-of-declaratives=<support>	references to sections not in DECLARATIVES from within DECLARATIVES
 	where <support> is one of the following:
 	'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
   -fnot-reserved=<word>	word to be taken out of the reserved words list

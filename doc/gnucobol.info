@@ -1807,6 +1807,8 @@ Options:
   -Wredefinition       	warn incompatible redefinition of data items
   -Wconstant           	warn inconsistent constant
   -Woverlap            	warn overlapping MOVE items
+  -Wpossible-overlap   	warn MOVE items that may overlap depending on variables
+			- NOT set with -Wall
   -Wparentheses        	warn lack of parentheses around AND within OR
   -Wstrict-typing      	warn type mismatch strictly
   -Wimplicit-define    	warn implicitly defined data items
@@ -1921,6 +1923,7 @@ Options:
   -faccept-display-extensions=<support>	extensions to ACCEPT and DISPLAY
   -frenames-uncommon-levels=<support>	RENAMES of 01-, 66- and 77-level items
   -fprogram-prototypes=<support>	CALL/CANCEL with program-prototype-name
+  -freference-out-of-declaratives=<support>	references to sections not in DECLARATIVES from within DECLARATIVES
 	where <support> is one of the following:
 	'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
   -fnot-reserved=<word>	word to be taken out of the reserved words list
@@ -3024,6 +3027,7 @@ not-exception-before-exception:		ok
 accept-display-extensions:		ok
 renames-uncommon-levels:		ok
 program-prototypes:			ok
+reference-out-of-declaratives:		error
 
 # If yes, all the reserved words must be specified in a list of reserved:
 # entries; the default reserved word list will not be used.
@@ -3915,14 +3919,14 @@ Node: CBL_OC_GETOPT43235
 Node: CBL_OC_HOSTED47407
 Node: CBL_OC_NANOSLEEP51909
 Node: Appendix A52415
-Node: Appendix B63236
-Node: Appendix C85913
-Node: Appendix D91517
-Node: Appendix E93453
-Node: Appendix F99593
-Node: Appendix G105564
-Node: Appendix H106863
-Node: Appendix I116370
-Node: Index141495
+Node: Appendix B63452
+Node: Appendix C86129
+Node: Appendix D91733
+Node: Appendix E93669
+Node: Appendix F99809
+Node: Appendix G105818
+Node: Appendix H107117
+Node: Appendix I116624
+Node: Index141749
 
 End Tag Table

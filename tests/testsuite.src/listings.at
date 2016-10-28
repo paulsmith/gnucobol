@@ -2494,7 +2494,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 0000 ALPHANUMERIC   01   empty-pic                      INVALID
 
-0077 ALPHANUMERIC   01   too-long-pic                   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+0077 ALPHANUMERIC   01   too-long-pic                   XXXXXXXXXXXXXXXXXXXXXXXX
 
 0000 ALPHANUMERIC   01   too-long-pic2                  INVALID
 

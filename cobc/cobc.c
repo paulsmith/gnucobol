@@ -165,7 +165,6 @@ int			cb_no_symbols = 0;
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
 struct list_files	*cb_listing_files = NULL;
 struct list_files	*cb_current_file = NULL;
-#define CB_LIST_PICSIZE 40
 
 #if	0	/* RXWRXW - source format */
 char			*source_name = NULL;
@@ -3639,8 +3638,13 @@ check_filler_name (char *name)
 }
 
 static int
-set_picture (struct cb_field *field, char *picture)
+set_picture (struct cb_field *field, char *picture, int picture_len)
 {
+	int usage_len;
+	char picture_usage[CB_LIST_PICSIZE];
+
+	memset (picture, 0, CB_LIST_PICSIZE);
+
 	/* Check non-picture information first */
 	switch (field->usage) {
 	case CB_USAGE_INDEX:
@@ -3673,32 +3677,31 @@ set_picture (struct cb_field *field, char *picture)
 		return 1;
 	}
 
+	/* Get usage for this picture */
+	strcpy (picture_usage, cb_get_usage_string (field->usage));
+	usage_len = strlen (picture_usage);
+
 	/* set picture for the rest */
-	if (field->usage == CB_USAGE_BINARY) {
-		if (field->pic) {
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 5);
-			strcat (picture, " ");
-		}
-	} else if (field->usage == CB_USAGE_FLOAT
+	if (field->usage == CB_USAGE_BINARY
+		   || field->usage == CB_USAGE_FLOAT
 		   || field->usage == CB_USAGE_DOUBLE
 		   || field->usage == CB_USAGE_PACKED
 		   || field->usage == CB_USAGE_COMP_5
 		   || field->usage == CB_USAGE_COMP_6
 		   || field->usage == CB_USAGE_COMP_X) {
 		if (field->pic) {
-			/* TO-DO: Where does the 7 come from? */
-			strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1 - 7);
+			strncpy (picture, field->pic->orig, picture_len - 1 - usage_len);
 			strcat (picture, " ");
-		}		
+		}
 	} else {
 		if (!field->pic) {
 			return 0;
 		}
-		strncpy (picture, field->pic->orig, CB_LIST_PICSIZE - 1);
+		strncpy (picture, field->pic->orig, picture_len - 1);
 		return 1;
 	}
 	
-	strcat (picture, cb_get_usage_string (field->usage));
+	strcat (picture, picture_usage);
 	return 1;
 }
 
@@ -3776,6 +3779,7 @@ print_fields (int lvl, struct cb_field *top)
 	int	got_picture;
 	int	old_level = 0;
 	int	item_size;
+	int	picture_len = cb_listing_wide ? 65 : 25;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[80];
@@ -3809,7 +3813,7 @@ print_fields (int lvl, struct cb_field *top)
 
 		if (get_cat) {
 			set_category (top->common.category, top->usage, type);
-			got_picture = set_picture (top, picture);
+			got_picture = set_picture (top, picture, picture_len);
 			if (top->redefines)
 				strcat (type, "-R");
 		}
@@ -4124,7 +4128,7 @@ print_fixed_line (const int line_num, char pch, char *line)
 		terminate_str_at_first_trailing_space (buffer);
 
 		fprintf (cb_src_list_file, "%s\n", buffer);
-		if (cb_text_column < 80)
+		if (cb_text_column == 72)
 			break;
 		pch = '+';
 	}

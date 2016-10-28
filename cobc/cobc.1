@@ -168,6 +168,10 @@ warn inconsistent constant
 \fB\-Woverlap\fR
 warn overlapping MOVE items
 .TP
+\fB\-Wpossible\-overlap\fR
+warn MOVE items that may overlap depending on variables
+\- NOT set with \fB\-Wall\fR
+.TP
 \fB\-Wparentheses\fR
 warn lack of parentheses around AND within OR
 .TP
@@ -443,6 +447,9 @@ RENAMES of 01\-, 66\- and 77\-level items
 .TP
 \fB\-fprogram\-prototypes=\fR<support>
 CALL/CANCEL with program\-prototype\-name
+.TP
+\fB\-freference\-out\-of\-declaratives=\fR<support>
+references to sections not in DECLARATIVES from within DECLARATIVES
 .IP
 where <support> is one of the following:
 \&'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'
@@ -456,7 +463,7 @@ word to be added to reserved words list
 word to be added to reserved words list as alias
 .SH AUTHOR
 Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart
-Built     Oct 22 2016 11:02:13
+Built     Oct 28 2016 09:34:39
 Packaged  Oct 25 2015 21:40:28 UTC
 C version "4.8.3 20140911 (Red Hat 4.8.3\-7)"
 .SH "REPORTING BUGS"

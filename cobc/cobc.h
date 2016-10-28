@@ -254,6 +254,7 @@ enum cobc_name_type {
 						   for COBOL 2002 (removed it) would be 7 */
 #define CB_SEQUENCE	cb_text_column /* the only configuration available...*/
 #define CB_ENDLINE	cb_text_column + 8
+#define CB_LIST_PICSIZE 80
 
 #define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
 #define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
