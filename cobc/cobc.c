@@ -2981,19 +2981,19 @@ process_run (const char *name) {
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
 		if (cobc_run_args) {
-			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s %s",
-				file_basename(name), cobc_run_args);
+			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s %s",
+				COB_EXEEXT, file_basename(name), cobc_run_args);
 		} else {
-			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun %s",
-				file_basename(name));
+			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s",
+				COB_EXEEXT, file_basename(name));
 		}
 	} else {  /* executable */
 		if (cobc_run_args) {
-			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s %s",
-				SLASH_CHAR, name, cobc_run_args);
+			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s %s",
+				SLASH_CHAR, name, COB_EXEEXT, cobc_run_args);
 		} else {
-			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
-				SLASH_CHAR, name);
+			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s",
+				SLASH_CHAR, name, COB_EXEEXT);
 		}
 	}
 	cobc_buffer[cobc_buffer_size] = 0;
