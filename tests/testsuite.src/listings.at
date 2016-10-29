@@ -56,7 +56,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
 
 AT_DATA([prog2.cob], [
@@ -94,7 +94,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -153,7 +153,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [], [])
@@ -192,7 +192,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -255,7 +255,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog4.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -322,7 +322,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog5.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -389,7 +389,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff progl.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -457,7 +457,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff progr.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -520,7 +520,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -568,7 +568,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
 
 AT_DATA([prog2.cob], [
@@ -611,7 +611,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
 
 AT_DATA([prog3.cob], [
@@ -687,7 +687,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=5 prog3.cob], [0], [], [])
@@ -754,7 +754,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -802,7 +802,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 
 AT_DATA([prog2.cob], [
@@ -845,7 +845,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -918,7 +918,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -977,7 +977,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog12.lst prog.lis], [0], [], [])
 
 AT_DATA([prog.cob], [
@@ -1024,7 +1024,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog13.lst prog.lis], [0], [], [])
 
 AT_DATA([prog.cob], [
@@ -1070,7 +1070,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog14.lst prog.lis], [0], [], [])
 
 
@@ -1137,7 +1137,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 
 ## The warning position is currently wrong
 
@@ -1210,7 +1210,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
 AT_DATA([prog2.cob], [
@@ -1258,7 +1258,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_DATA([prog-1.cob], [
@@ -1304,7 +1304,7 @@ LINE    PG/LN  A...B............................................................
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog15-1.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -1320,13 +1320,13 @@ AT_DATA([P64.cob], [
        DATA             DIVISION.
        PROCEDURE        DIVISION.
        >>IF P64 SET
-           DISPLAY 'X'
+           DISPLAY '64' WITH NO ADVANCING
            END-DISPLAY.
        >>END-IF
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o P64 P64.cob], [0], [], [])
+AT_CHECK([$COMPILE P64.cob], [0], [], [])
 
 AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
@@ -1377,102 +1377,12 @@ AT_DATA([prog3.cob], [
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog3.cob], [0], [], [])
 
-AT_DATA([prog17-64.lst],
-[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CAPTURE_FILE([prog.lis])
 
-LINE    PG/LN  A...B............................................................
+AT_CHECK([./P64], [0], [64], [],
 
-000001
-000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
-000006         77  WS-Where           pic x(512).
-000007
-000008         01  ws-mysql.
-000009             02  ws-mysql-cid                        usage pointer.
-000010             02  ws-mysql-result                     usage pointer.
-000011             02  ws-mysql-result-2                   usage pointer.
-000012             02  ws-mysql-result-3                   usage pointer.
-000013             02  ws-mysql-count-rows                 pic s9(9) comp.
-000014             02  ws-mysql-error-number               pic x(4).
-000015             02  ws-mysql-error-message              pic x(80).
-000016             02  ws-mysql-host-name                  pic x(64).
-000017             02  ws-mysql-implementation             pic x(64).
-000018             02  ws-mysql-password                   pic x(64).
-000019             02  ws-mysql-base-name                  pic x(64).
-000020             02  ws-mysql-port-number                pic x(4).
-000021             02  ws-mysql-socket                     pic x(64).
-000022             02  ws-mysql-command                    pic x(4096).
-000023
-000024         01  ws-No-Paragraph pic 9(4).
-000025
-000026         01  subscripts usage comp-5.
-000027             12 J                    pic s9(4).
-000028             12 K                    pic s9(4).
-000029             12 L                    pic s9(4).
-000030
-000031         SCREEN           SECTION.
-000032         01  Display-Message-1 foreground-color 2.
-000033             03  value "WS-Where=" line 23 col  1.
-000034             03  from WS-Where (1:J) pic x(69) col 10.
-000035         01  Display-Message-2 foreground-color 2.
-000036             03  value "ST004 SQL Err No.=" line 4 col  1.
-000037             03  using ws-mysql-error-number pic x(4) col 19.
-000038             03  value " Para=" col 23.
-000039             03  using WS-No-Paragraph pic 9(3) col 29.
-000040             03  value " SQL Cmd=" col 32.
-000041             03  using ws-mysql-command pic x(199) col 41.
-000042             03  value "SQL Err Msg=" line 7 col  1.
-000043             03  using ws-mysql-error-message pic x(67) col 13.
-000044         PROCEDURE        DIVISION.
-000045             STOP RUN.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-SIZE TYPE           LVL  NAME                           PICTURE
-
-0512 ALPHANUMERIC   77   WS-Where                       X(512)
-
-4540 GROUP          01   ws-mysql
-0008 POINTER        02     ws-mysql-cid
-0008 POINTER        02     ws-mysql-result
-0008 POINTER        02     ws-mysql-result-2
-0008 POINTER        02     ws-mysql-result-3
-0004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
-0004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
-0080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
-0064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
-0064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
-0064 ALPHANUMERIC   02     ws-mysql-password            X(64)
-0064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
-0004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
-0064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
-4096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
-
-0004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
-
-0006 GROUP          01   subscripts
-0002 NUMERIC        12     J                            S9(4) COMP-5
-0002 NUMERIC        12     K                            S9(4) COMP-5
-0002 NUMERIC        12     L                            S9(4) COMP-5
-
-0078 GROUP          01   Display-Message-1
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0069 ALPHANUMERIC   03     FILLER                       X(69)
-
-0318 GROUP          01   Display-Message-2
-0018 ALPHANUMERIC   03     FILLER                       X(18)
-0004 ALPHANUMERIC   03     FILLER                       X(4)
-0006 ALPHANUMERIC   03     FILLER                       X(6)
-0003 ALPHANUMERIC   03     FILLER                       9(3)
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0199 ALPHANUMERIC   03     FILLER                       X(199)
-0012 ALPHANUMERIC   03     FILLER                       X(12)
-0067 ALPHANUMERIC   03     FILLER                       X(67)
-
-0 Warnings in program
-0 Errors in program
-])
+# Previous test "failed" --> P64 did not show '64' --> 32 bit
 
 AT_DATA([prog17-32.lst],
 [GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
@@ -1571,19 +1481,113 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0 Errors in program
 ])
 
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+[AT_CHECK([diff prog17-32.lst prog.lis], [0], [], [])]
 
-AT_CHECK([./P64], [0], [X
-], [],
+,
 
-[# Previous test "failed" --> P64 showed no 'X' --> 32 bit
-AT_CHECK([diff prog17-32.lst prog.lis], [0], [], [])
-],
+# Previous test "passed" --> P64 showed '64' --> 64 bit
 
-[# Previous test "passed" --> P64 showed 'X' --> 64 bit
-AT_CHECK([diff prog17-64.lst prog.lis], [0], [], [])
+AT_DATA([prog17-64.lst],
+[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         77  WS-Where           pic x(512).
+000007
+000008         01  ws-mysql.
+000009             02  ws-mysql-cid                        usage pointer.
+000010             02  ws-mysql-result                     usage pointer.
+000011             02  ws-mysql-result-2                   usage pointer.
+000012             02  ws-mysql-result-3                   usage pointer.
+000013             02  ws-mysql-count-rows                 pic s9(9) comp.
+000014             02  ws-mysql-error-number               pic x(4).
+000015             02  ws-mysql-error-message              pic x(80).
+000016             02  ws-mysql-host-name                  pic x(64).
+000017             02  ws-mysql-implementation             pic x(64).
+000018             02  ws-mysql-password                   pic x(64).
+000019             02  ws-mysql-base-name                  pic x(64).
+000020             02  ws-mysql-port-number                pic x(4).
+000021             02  ws-mysql-socket                     pic x(64).
+000022             02  ws-mysql-command                    pic x(4096).
+000023
+000024         01  ws-No-Paragraph pic 9(4).
+000025
+000026         01  subscripts usage comp-5.
+000027             12 J                    pic s9(4).
+000028             12 K                    pic s9(4).
+000029             12 L                    pic s9(4).
+000030
+000031         SCREEN           SECTION.
+000032         01  Display-Message-1 foreground-color 2.
+000033             03  value "WS-Where=" line 23 col  1.
+000034             03  from WS-Where (1:J) pic x(69) col 10.
+000035         01  Display-Message-2 foreground-color 2.
+000036             03  value "ST004 SQL Err No.=" line 4 col  1.
+000037             03  using ws-mysql-error-number pic x(4) col 19.
+000038             03  value " Para=" col 23.
+000039             03  using WS-No-Paragraph pic 9(3) col 29.
+000040             03  value " SQL Cmd=" col 32.
+000041             03  using ws-mysql-command pic x(199) col 41.
+000042             03  value "SQL Err Msg=" line 7 col  1.
+000043             03  using ws-mysql-error-message pic x(67) col 13.
+000044         PROCEDURE        DIVISION.
+000045             STOP RUN.
+GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0512 ALPHANUMERIC   77   WS-Where                       X(512)
+
+4540 GROUP          01   ws-mysql
+0008 POINTER        02     ws-mysql-cid
+0008 POINTER        02     ws-mysql-result
+0008 POINTER        02     ws-mysql-result-2
+0008 POINTER        02     ws-mysql-result-3
+0004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
+0004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
+0080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
+0064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
+0064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
+0064 ALPHANUMERIC   02     ws-mysql-password            X(64)
+0064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
+0004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
+0064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
+4096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
+
+0004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
+
+0006 GROUP          01   subscripts
+0002 NUMERIC        12     J                            S9(4) COMP-5
+0002 NUMERIC        12     K                            S9(4) COMP-5
+0002 NUMERIC        12     L                            S9(4) COMP-5
+
+0078 GROUP          01   Display-Message-1
+0009 ALPHANUMERIC   03     FILLER                       X(9)
+0069 ALPHANUMERIC   03     FILLER                       X(69)
+
+0318 GROUP          01   Display-Message-2
+0018 ALPHANUMERIC   03     FILLER                       X(18)
+0004 ALPHANUMERIC   03     FILLER                       X(4)
+0006 ALPHANUMERIC   03     FILLER                       X(6)
+0003 ALPHANUMERIC   03     FILLER                       9(3)
+0009 ALPHANUMERIC   03     FILLER                       X(9)
+0199 ALPHANUMERIC   03     FILLER                       X(199)
+0012 ALPHANUMERIC   03     FILLER                       X(12)
+0067 ALPHANUMERIC   03     FILLER                       X(67)
+
+0 Warnings in program
+0 Errors in program
 ])
+
+[AT_CHECK([diff prog17-64.lst prog.lis], [0], [], [])]
+
+)
+
 
 AT_CLEANUP
 
@@ -1701,7 +1705,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -1810,7 +1814,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -1872,7 +1876,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -1955,7 +1959,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -2285,7 +2289,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -2553,7 +2557,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
@@ -2599,7 +2603,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CAPTURE_FILE(prog.lis)
+AT_CAPTURE_FILE([prog.lis])
 AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
 AT_CLEANUP

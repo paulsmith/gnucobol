@@ -42,6 +42,7 @@ COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
 OBJECT_EXT="obj"
 
+# Fix for testcases were cobc uses win32 paths internally
 PATHSEP=";"
 
 PATH="$COB_WIN_BUILDPATH:${PATH}"

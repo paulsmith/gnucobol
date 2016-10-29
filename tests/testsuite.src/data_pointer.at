@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -28,13 +28,13 @@ AT_DATA([P64.cob], [
        DATA             DIVISION.
        PROCEDURE        DIVISION.
        >>IF P64 SET
-           DISPLAY 'X'
+           DISPLAY '64' WITH NO ADVANCING
            END-DISPLAY.
        >>END-IF
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -o P64 P64.cob], [0], [], [])
+AT_CHECK([$COMPILE P64.cob], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -55,17 +55,20 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./P64], [0], [X
-], [],
+AT_CHECK([./P64], [0], [64], [],
 
-[# Previous test "failed" --> P64 showed no 'X' --> 32 bit
-AT_CHECK([./prog], [0], [0x00000000
+# Previous test "failed" --> P64 did not show '64' --> 32 bit
+
+[AT_CHECK([./prog], [0], [0x00000000
 0x00000001
 0x00000000
-])],
+])]
 
-[# Previous test "passed" --> P64 showed 'X' --> 64 bit
-AT_CHECK([./prog], [0], [0x0000000000000000
+,
+
+# Previous test "passed" --> P64 showed '64' --> 64 bit
+
+[AT_CHECK([./prog], [0], [0x0000000000000000
 0x0000000000000001
 0x0000000000000000
 ])])

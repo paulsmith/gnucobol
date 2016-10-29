@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2014-2016 Free Software Foundation, Inc.
 ## Written by Simon Sobisch, Brian Tiffin
 ##
 ## This file is part of GnuCOBOL.
@@ -375,19 +375,16 @@ AT_DATA([prog.cob], [
 ])
 
 # normal option
-AT_CHECK([$COMPILE --thisoptiondoesntexist prog.cob 2>/dev/null], [1], [], [])
-AT_CHECK([$COMPILE --thisoptiondoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+AT_CHECK([$COMPILE -q --thisoptiondoesntexist prog.cob], [1], [],
 [cobc: unrecognized option '--thisoptiondoesntexist'
-], [])
-# normal flag
-AT_CHECK([$COMPILE -flagdoesntexist prog.cob 2>/dev/null], [1], [], [])
-AT_CHECK([$COMPILE -flagdoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+])
+# flag
+AT_CHECK([$COMPILE -q -flagdoesntexist prog.cob], [1], [],
 [cobc: unrecognized option '-flagdoesntexist'
-], [])
-# compiler configuration flag
-AT_CHECK([$COMPILE -fonfigdoesntexist prog.cob 2>/dev/null], [1], [], [])
-AT_CHECK([$COMPILE -fonfigdoesntexist prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
-[cobc: unrecognized option '-fonfigdoesntexist'
-], [])
+])
+# warning
+AT_CHECK([$COMPILE -q -Wdoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '-Wdoesntexist'
+])
 
 AT_CLEANUP

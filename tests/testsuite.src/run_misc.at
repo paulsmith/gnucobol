@@ -2602,6 +2602,10 @@ AT_DATA([caller.c], [[
 
 
 int callee (char *, char *);
+  
+#ifndef NULL
+#define NULL (void*)0
+#endif
 
 int
 main (int argc, char **argv)

@@ -1,4 +1,15 @@
 
+2016-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* atlocal.in: pass COB_HAS_UTC_OFFSET, set PATHSEP and COB_HAS_CURSES
+    for MinGW
+	* testsuite.src/configuration.at, testsuite.src/used_binaries.at:
+    used `cobc -q` (instead of sed script) to simplify "unrecognized option"
+	* testsuite.src/run_misc.at: define NULL if needed
+	* testsuite.src/run_accept.at: evaluate COB_HAS_CURSES
+	* testsuite.src/run_functions.at: evaluate COB_HAS_UTC_OFFSET
+  * testsuite.src/configuration.at: evaluate PATHSEP
+
 2016-10-22  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added --no_symbols test.

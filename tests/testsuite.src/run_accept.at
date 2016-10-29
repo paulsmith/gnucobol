@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -67,8 +67,33 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([ACCEPT OMITTED])
+AT_SETUP([ACCEPT OMITTED (simple)])
 AT_KEYWORDS([accept extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+
+       PROCEDURE      DIVISION.
+           ACCEPT OMITTED
+           END-ACCEPT.
+])
+
+AT_DATA([input.txt], [
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog < input.txt], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ACCEPT OMITTED (SCREEN)])
+AT_KEYWORDS([accept extensions])
+
+AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -81,7 +106,7 @@ AT_DATA([prog.cob], [
 
        PROCEDURE      DIVISION.
            ACCEPT OMITTED
-           .
+           END-ACCEPT.
 ])
 
 AT_DATA([input.txt], [

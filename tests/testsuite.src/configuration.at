@@ -258,11 +258,11 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# -fcobcflag must work
+# configuration flags must work
 AT_CHECK([$COMPILE_ONLY \
 -fcomment-paragraphs=ok prog.cob], [0], [], [])
 
-# fccobcflag must override all (no matter where it's used)
+# configuration flag on command line must override all (no matter where it's used)
 AT_CHECK([$COMPILE_ONLY \
 -fcomment-paragraphs=ok -conf=test.conf prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY \
@@ -286,12 +286,10 @@ AT_DATA([prog.cob], [
 ])
 
 # conf entries must be clean
-AT_CHECK([$COMPILE_ONLY \
--fcomment-paragraphsok prog.cob 2>/dev/null], [1], [], [])
-AT_CHECK([$COMPILE_ONLY \
--fcomment-paragraphsok prog.cob 2>&1 | sed -e 's/.*\(cobc: \)/\1/g'], [0],
+AT_CHECK([$COMPILE_ONLY -q \
+-fcomment-paragraphsok prog.cob], [1], [],
 [cobc: unrecognized option '-fcomment-paragraphsok'
-], [])
+])
 AT_CHECK([$COMPILE_ONLY \
 -fassign-clause=cobol2002 prog.cob], [1], [],
 [configuration error:
@@ -544,6 +542,11 @@ AT_CLEANUP
 AT_SETUP([runtime configuration: entries])
 AT_KEYWORDS([configuration misc])
 
+AT_CHECK([echo "$PATHSEP"], [0], [;
+], [],
+
+# Previous test "failed" --> PATHSEP isn't ;
+
 AT_DATA([defunc.cfg], [
 novar
 physical_cancel notwithme
@@ -575,6 +578,44 @@ defunc.cfg: 9: WARNING - 'sort_chunk' without a value - ignored!
 defunc.cfg: 10: invalid value '/tmp:/temp' for configuration tag 'trace_file';
 	should not contain ':'
 ])
+
+,
+
+# Previous test "passed" --> PATHSEP is ;
+
+AT_DATA([defunc.cfg], [
+novar
+physical_cancel notwithme
+load_case  insensitive
+varseq_format big 
+sort_chunk 4K
+sort_memory 4G # too big by some byte
+setenv nothing
+sort_chunk
+trace_file C:\tmp;C:\temp
+])
+
+# conf entries must be clean
+AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [1], [],
+[configuration error:
+defunc.cfg: 2: unknown configuration tag 'novar'
+defunc.cfg: 3: invalid value 'notwithme' for configuration tag 'physical_cancel';
+	should be one of the following values: true, false
+defunc.cfg: 4: invalid value 'insensitive' for configuration tag 'load_case';
+	should be one of the following values: LOWER(1), UPPER(2), not set(0)
+defunc.cfg: 5: invalid value 'big' for configuration tag 'varseq_format';
+	should be one of the following values: 0, 1, 2, 3
+defunc.cfg: 6: invalid value '4K' for configuration tag 'sort_chunk';
+	minimum value: 131072
+defunc.cfg: 7: invalid value '4G' for configuration tag 'sort_memory';
+	maximum value: 4294967294
+defunc.cfg: 8: WARNING - 'setenv nothing' without a value - ignored!
+defunc.cfg: 9: WARNING - 'sort_chunk' without a value - ignored!
+defunc.cfg: 10: invalid value 'C:\tmp;C:\temp' for configuration tag 'trace_file';
+	should not contain ';'
+])
+
+)
 
 AT_CLEANUP
 
@@ -620,6 +661,7 @@ AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [0], ignore, [])
 
 AT_CLEANUP
 
+
 AT_SETUP([COB_CONFIG_DIR test])
 AT_KEYWORDS([environment variable])
 
@@ -630,10 +672,27 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([export COB_CONFIG_DIR=/temp:/tmp; \
+AT_CHECK([echo "$PATHSEP"], [0], [;
+], [],
+
+# Previous test "failed" --> PATHSEP isn't ;
+
+AT_CHECK([export COB_CONFIG_DIR="/temp:/tmp"; \
 $COMPILE prog.cob], [99], [],
 [cobc: environment variable 'COB_CONFIG_DIR' is '/temp:/tmp'; should not contain ':'
 cobc: aborting
 ])
+
+,
+
+# Previous test "passed" --> PATHSEP is ;
+
+AT_CHECK([export COB_CONFIG_DIR="C:\temp;C:\tmp"; \
+$COMPILE prog.cob], [99], [],
+[cobc: environment variable 'COB_CONFIG_DIR' is 'C:\temp;C:\tmp'; should not contain ';'
+cobc: aborting
+])
+
+)
 
 AT_CLEANUP
