@@ -3612,9 +3612,9 @@ print_program_header (void)
 		}
 
 		if (cb_listing_wide) {
-			format_str = "%s %-6.6s  %-65.65s  %s  Page %04d\n\n";
+			format_str = "%s %-9.9s %-65.65s %s  Page %04d\n\n";
 		} else {
-			format_str = "%s %-6.6s  %-25.25s  %s  Page %04d\n\n";
+			format_str = "%s %-9.9s %-25.25s %s  Page %04d\n\n";
 		}
 		fprintf (cb_src_list_file,
 			 format_str,

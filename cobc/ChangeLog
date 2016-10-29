@@ -1,4 +1,9 @@
 
+2016-10-29  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (print_program_header): Changed to allow for 9 character 
+	  version field (eg. VV.RR.PPP).
+
 2016-10-28  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.h: Moved CB_LIST_PICSIZE here and increased length to 80.

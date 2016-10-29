@@ -1,9 +1,14 @@
 
+2016-10-29  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings-sed.sh: Fixed for generic 9 character version.
+	* testsuite.src/listings.at: Fixed for generic 9 character version.
+
 2016-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* atlocal.in: pass COB_HAS_UTC_OFFSET, set PATHSEP and COB_HAS_CURSES
 	  for MinGW
-	* testsuite.src/lisstings-sed.sh: fix for patchlevel up to 999  
+	* testsuite.src/listings-sed.sh: fix for patchlevel up to 999  
 	* testsuite.src/configuration.at, testsuite.src/used_binaries.at:
 	  used `cobc -q` (instead of sed script) to simplify "unrecognized option"
 	* testsuite.src/run_misc.at: define NULL if needed

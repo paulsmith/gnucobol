@@ -34,7 +34,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog1.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -46,7 +46,7 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -72,7 +72,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog2.lst],
-[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................SOURCE.............................................
 
@@ -84,7 +84,7 @@ LINE    .....................SOURCE.............................................
 000006    *> COPY "copy.inc".
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -124,7 +124,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog3.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -142,7 +142,7 @@ LINE    PG/LN  A...B............................................................
 000010             DISPLAY FIRST-MATCH NO ADVANCING
 000011             END-DISPLAY.
 000012             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -159,7 +159,7 @@ AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [], [])
 
 AT_DATA([prog4.lst],
-[GnuCOBOL V.R.P   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.i                    DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -181,7 +181,7 @@ LINE    PG/LN  A...B............................................................
 000016   DISPLAY FIRST-MATCH NO ADVANCING
 000017   END-DISPLAY.
 000018   STOP RUN.
-GnuCOBOL V.R.P   prog.i                     DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.i                    DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -224,7 +224,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog4.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -244,7 +244,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY FIRST-MATCH NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -288,7 +288,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog5.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -309,7 +309,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY PAREN-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -355,7 +355,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progl.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -376,7 +376,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY SECOND-VAR NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -423,7 +423,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([progr.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -444,7 +444,7 @@ LINE    PG/LN  A...B............................................................
 000012             DISPLAY TEST-VAR2 NO ADVANCING
 000013             END-DISPLAY.
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -490,7 +490,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog6.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -509,7 +509,7 @@ LINE    PG/LN  A...B............................................................
 000009             DISPLAY COPY-VAR NO ADVANCING
 000010             END-DISPLAY.
 000011             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -542,7 +542,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog7.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -551,14 +551,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
 000006        /
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -585,7 +585,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog8.lst],
-[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................SOURCE.............................................
 
@@ -594,14 +594,14 @@ LINE    .....................SOURCE.............................................
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................SOURCE.............................................
 
 000006  >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -642,7 +642,7 @@ AT_DATA([prog3.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog3.cob], [0], [], [])
 
 AT_DATA([prog9.lst],
-[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -655,7 +655,7 @@ LINE    PG/LN  A...B............................................................
 000007         DATA             DIVISION.
 000008         WORKING-STORAGE  SECTION.
 000009         77 WS-VAR PIC X(2).
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -673,7 +673,7 @@ LINE    PG/LN  A...B............................................................
 000021             MOVE 99 TO LS-VAR
 000022
 000023             STOP RUN.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -693,7 +693,7 @@ AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=5 prog3.cob], [0], [], [])
 
 AT_DATA([prog10.lst],
-[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -702,7 +702,7 @@ LINE    PG/LN  A...B............................................................
 000003
 000004         PROGRAM-ID.      prog3.
 000005
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -710,7 +710,7 @@ LINE    PG/LN  A...B............................................................
 000007         DATA             DIVISION.
 000008         WORKING-STORAGE  SECTION.
 000009         77 WS-VAR PIC X(2).
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................
 
@@ -719,7 +719,7 @@ LINE    PG/LN  A...B............................................................
 000012
 000013
 000014         LOCAL-STORAGE  SECTION.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 LINE    PG/LN  A...B............................................................
 
@@ -728,7 +728,7 @@ LINE    PG/LN  A...B............................................................
 000017
 000018         PROCEDURE        DIVISION.
 000019
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0005
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 LINE    PG/LN  A...B............................................................
 
@@ -736,7 +736,7 @@ LINE    PG/LN  A...B............................................................
 000021             MOVE 99 TO LS-VAR
 000022
 000023             STOP RUN.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0006
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0006
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -744,7 +744,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0002 ALPHANUMERIC   77   WS-VA2                         X(2)
 
 0002 NUMERIC        77   LS-VAR                         9(2)
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0007
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0007
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -776,7 +776,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -T prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog9.lst],
-[GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
@@ -785,14 +785,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.                                            PROG002
 000004         DATA             DIVISION.                                        PROG003
 000005         WORKING-STORAGE  SECTION.                                         PROG004
-GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
 000006        /                                                                  PROG005
 000007         PROCEDURE        DIVISION.                                        PROG006
 000008             STOP RUN.                                                     PROG007
-GnuCOBOL V.R.P   prog.cob                                                           DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -819,7 +819,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -T prog.lst -free prog2.cob], [0], [], [])
 
 AT_DATA([prog10.lst],
-[GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                                                         DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    .....................................................SOURCE.....................................................
 
@@ -828,14 +828,14 @@ LINE    .....................................................SOURCE.............
 000003    PROGRAM-ID.      prog2.
 000004    DATA             DIVISION.
 000005    WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                                                         DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    .....................................................SOURCE.....................................................
 
 000006    >>PAGE
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
-GnuCOBOL V.R.P   prog2.cob                                                          DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P   prog2.cob                                                         DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -877,7 +877,7 @@ AT_DATA([prog1.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob prog1.cob], [0], [], [])
 
 AT_DATA([prog11.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -889,14 +889,14 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
 0 Errors in program
-GnuCOBOL V.R.P   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+GnuCOBOL V.R.P   prog1.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -908,7 +908,7 @@ LINE    PG/LN  A...B............................................................
 000006        *COPY "copy.inc".
 000007         PROCEDURE        DIVISION.
 000008             STOP RUN.
-GnuCOBOL V.R.P   prog1.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog1.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -949,7 +949,7 @@ prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog12.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -967,7 +967,7 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -998,7 +998,7 @@ prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog13.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1014,7 +1014,7 @@ error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 error: 'FIRST-MATCH' is not defined
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1044,7 +1044,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [],
 ])
 
 AT_DATA([prog14.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1059,7 +1059,7 @@ warning: numeric value is expected
 000008             DISPLAY TEST-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1106,7 +1106,7 @@ prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1126,7 +1126,7 @@ warning: numeric value is expected
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1169,7 +1169,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog15.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1187,7 +1187,7 @@ LINE    PG/LN  A...B............................................................
 000012         01 WS-SEVEN  PIC $$,$$$,$$9.99 VALUE ZERO.
 000013         PROCEDURE        DIVISION.
 000014             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1228,7 +1228,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog2.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1242,7 +1242,7 @@ LINE    PG/LN  A...B............................................................
 000008         01 WS-THREE  PIC X(4).
 000009         PROCEDURE        DIVISION.
 000010             STOP RUN.
-GnuCOBOL V.R.P   prog2.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog2.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1280,7 +1280,7 @@ AT_DATA([prog-1.cob], [
 AT_CHECK([$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob], [0], [], [])
 
 AT_DATA([prog15-1.lst],
-[GnuCOBOL V.R.P   prog-1.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog-1.cob                DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1385,7 +1385,7 @@ AT_CHECK([./P64], [0], [64], [],
 # Previous test "failed" --> P64 did not show '64' --> 32 bit
 
 AT_DATA([prog17-32.lst],
-[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1434,7 +1434,7 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1488,7 +1488,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 # Previous test "passed" --> P64 showed '64' --> 64 bit
 
 AT_DATA([prog17-64.lst],
-[GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1537,7 +1537,7 @@ LINE    PG/LN  A...B............................................................
 000043             03  using ws-mysql-error-message pic x(67) col 13.
 000044         PROCEDURE        DIVISION.
 000045             STOP RUN.
-GnuCOBOL V.R.P   prog3.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog3.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1640,7 +1640,7 @@ AT_DATA([prog4.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog4.cob], [0], [], [])
 
 AT_DATA([prog18.lst],
-[GnuCOBOL V.R.P   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog4.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1684,7 +1684,7 @@ LINE    PG/LN  A...B............................................................
 000038             END-IF.
 000039             STOP RUN.
 000040         END PROGRAM prog.
-GnuCOBOL V.R.P   prog4.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog4.cob                 DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1750,7 +1750,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -std=mf -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog19.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1785,7 +1785,7 @@ LINE    PG/LN  A...B............................................................
 000029             05  FLD4      PIC X(4).
 000030         PROCEDURE        DIVISION.
 000031             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1845,7 +1845,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog16.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1866,7 +1866,7 @@ LINE    PG/LN  A...B............................................................
 000015X            END-DISPLAY
 000016         >>END-IF
 000017             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -1913,7 +1913,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog17.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1934,7 +1934,7 @@ LINE    PG/LN  A...B............................................................
 000008             DISPLAY TEST1-VAR NO ADVANCING
 000009             END-DISPLAY.
 000010             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2094,7 +2094,7 @@ prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
 
 
 AT_DATA([prog18.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2217,7 +2217,7 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000109                  OUTPUT NEW-VERSION, COMMENTARY.
 000110             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
 000111             STOP RUN.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2396,7 +2396,7 @@ prog.cob: 45: error: PICTURE string must contain at least one of the set A, N, X
 ])
 
 AT_DATA([prog19.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2492,7 +2492,7 @@ error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and 
 000050             03  PIC 0000+B0+++0B,+.
 000051             03  PIC +(5)P(3).
 000052             03  PIC ++.++.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
@@ -2580,7 +2580,7 @@ AT_DATA([prog.cob],
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog20.lst],
-[GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2593,7 +2593,7 @@ LINE    PG/LN  A...B............................................................
 000006+ DISPLAY "Hello!"
 000007  000060     .
 000008  000070 END PROGRAM prog.
-GnuCOBOL V.R.P   prog.cob                   DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P   prog.cob                  DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 
