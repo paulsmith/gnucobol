@@ -1169,9 +1169,9 @@ emit_conflicting_clause_message (const char *clause, const char *conflicting)
 static void
 set_attr_with_conflict (const char *clause, const cob_flags_t bitval,
 			const char *confl_clause, const cob_flags_t confl_bit,
-			const int check_duplicate, cob_flags_t *flags)
+			const int local_check_duplicate, cob_flags_t *flags)
 {
-	if (check_duplicate && (*flags & bitval)) {
+	if (local_check_duplicate && (*flags & bitval)) {
 		emit_duplicate_clause_message (clause);
         } else if (*flags & confl_bit) {
 		emit_conflicting_clause_message (clause, confl_clause);
@@ -1476,11 +1476,11 @@ contains_fields_and_screens (struct cb_list *x_list)
 }
 
 static enum cb_display_type
-deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
+deduce_display_type (cb_tree x_list, cb_tree local_upon_value, cb_tree local_line_column,
 		     struct cb_attr_struct * const attr_ptr)
 {
 	int	using_default_device_which_is_crt =
-		upon_value == NULL && get_default_display_device () == cb_null;
+		local_upon_value == NULL && get_default_display_device () == cb_null;
 
 	if (contains_only_screen_fields ((struct cb_list *) x_list)) {
 		if (!contains_one_screen_field ((struct cb_list *) x_list)
@@ -1489,7 +1489,7 @@ deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
 				     _("non-standard DISPLAY"));
 		}
 
-		if (upon_value != NULL && upon_value != cb_null) {
+		if (local_upon_value != NULL && local_upon_value != cb_null) {
 			cb_error_x (x_list, _("screens may only be displayed on CRT"));
 		}
 
@@ -1497,8 +1497,8 @@ deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
 	} else if (contains_fields_and_screens ((struct cb_list *) x_list)) {
 		cb_error_x (x_list, _("cannot mix screens and fields in the same DISPLAY statement"));
 		return MIXED_DISPLAY;
-	} else if (line_column || attr_ptr) {
-		if (upon_value != NULL && upon_value != cb_null) {
+	} else if (local_line_column || attr_ptr) {
+		if (local_upon_value != NULL && local_upon_value != cb_null) {
 			cb_error_x (x_list, _("screen clauses may only be used for DISPLAY on CRT"));
 		}
 
@@ -1506,10 +1506,10 @@ deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
 			     _("non-standard DISPLAY"));
 
 		return FIELD_ON_SCREEN_DISPLAY;
-	} else if (upon_value == cb_null || using_default_device_which_is_crt) {
+	} else if (local_upon_value == cb_null || using_default_device_which_is_crt) {
 		/* This is the only format permitted by the standard */
 		return FIELD_ON_SCREEN_DISPLAY;
-	} else if (display_type == FIELD_ON_SCREEN_DISPLAY && upon_value == NULL) {
+	} else if (display_type == FIELD_ON_SCREEN_DISPLAY && local_upon_value == NULL) {
 		/* This is for when fields without clauses follow fields with screen clauses */
 		return FIELD_ON_SCREEN_DISPLAY;
 	} else {
@@ -1518,18 +1518,18 @@ deduce_display_type (cb_tree x_list, cb_tree upon_value, cb_tree line_column,
 }
 
 static void
-set_display_type (cb_tree x_list, cb_tree upon_value,
-		  cb_tree line_column, struct cb_attr_struct * const attr_ptr)
+set_display_type (cb_tree x_list, cb_tree local_upon_value,
+		  cb_tree local_line_column, struct cb_attr_struct * const attr_ptr)
 {
-	display_type = deduce_display_type (x_list, upon_value, line_column, attr_ptr);
+	display_type = deduce_display_type (x_list, local_upon_value, local_line_column, attr_ptr);
 }
 
 static void
-error_if_different_display_type (cb_tree x_list, cb_tree upon_value,
-				 cb_tree line_column, struct cb_attr_struct * const attr_ptr)
+error_if_different_display_type (cb_tree x_list, cb_tree local_upon_value,
+				 cb_tree local_line_column, struct cb_attr_struct * const attr_ptr)
 {
         const enum cb_display_type	type =
-		deduce_display_type (x_list, upon_value, line_column, attr_ptr);
+		deduce_display_type (x_list, local_upon_value, local_line_column, attr_ptr);
 
 	/* Avoid re-displaying the same error for mixed DISPLAYs */
 	if (type == display_type || display_type == MIXED_DISPLAY) {

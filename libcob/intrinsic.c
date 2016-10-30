@@ -1484,7 +1484,10 @@ numval (cob_field *srcfield, cob_field *currency, const enum numval_type type)
 		}
 
 		if (currency_data) {
-			if (!in_last_n_chars (srcfield, currency->size, i)
+			/* FIXME: only do so if i has a reasonable size [or at least is < INT_MAX]
+			          otherwise an overflow may occur
+			*/
+			if (!(in_last_n_chars (srcfield, currency->size, i))
 			    && !memcmp (&srcfield->data[i], currency_data,
 					currency->size)) {
 				i += (currency->size - 1);
@@ -2003,6 +2006,7 @@ valid_day_and_format (const int day, const char *format)
 	return valid_integer_date (day) && cob_valid_date_format (format);
 }
 
+/* FIXME: unlikely but may return a size_t, leading to a possible overflow */
 static int
 num_leading_nonspace (const char *str)
 {

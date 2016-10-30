@@ -3,6 +3,11 @@
 
 	* common.c: check "COB_UNIX_LF" before error COB_FERROR_INITIALIZED
 
+2016-10-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: added COB_UNUSED() for parameters of indexed file functions
+	  when configured --without-db
+
 2016-10-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: re-fixed COB_ONCE for MSC

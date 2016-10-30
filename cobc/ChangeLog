@@ -21,6 +21,8 @@
 2015-10-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process_run): use COB_EXEEXT for systems that need it
+	* parser.y: added "local_" prefix for function parameters that used
+	  identical names as static vars
 
 2015-10-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -2717,6 +2717,9 @@ indexed_file_delete (cob_file *f, const char *filename)
 		file_open_buff[COB_FILE_MAX] = 0;
 		unlink (file_open_buff);
 	}
+#else
+	COB_UNUSED (f);
+	COB_UNUSED (filename);
 #endif
 }
 
@@ -3223,6 +3226,10 @@ dobuild:
 	return 0;
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (filename);
+	COB_UNUSED (sharing);
+	COB_UNUSED (mode);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -3296,6 +3303,8 @@ indexed_close (cob_file *f, const int opt)
 	return COB_STATUS_00_SUCCESS;
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (opt);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 
@@ -3409,6 +3418,9 @@ indexed_start (cob_file *f, const int cond, cob_field *key)
 	return indexed_start_internal (f, cond, key, 0, 0);
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (cond);
+	COB_UNUSED (key);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -3532,6 +3544,9 @@ indexed_read (cob_file *f, cob_field *key, const int read_opts)
 	return COB_STATUS_00_SUCCESS;
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (key);
+	COB_UNUSED (read_opts);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -4060,6 +4075,8 @@ indexed_read_next (cob_file *f, const int read_opts)
 	return COB_STATUS_00_SUCCESS;
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (read_opts);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -4134,6 +4151,8 @@ indexed_write (cob_file *f, const int opt)
 	return indexed_write_internal (f, 0, opt);
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (opt);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -4189,6 +4208,7 @@ indexed_delete (cob_file *f)
 	return indexed_delete_internal (f, 0);
 
 #else
+	COB_UNUSED (f);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif
@@ -4356,6 +4376,8 @@ indexed_rewrite (cob_file *f, const int opt)
 	return ret;
 
 #else
+	COB_UNUSED (f);
+	COB_UNUSED (opt);
 
 	return COB_STATUS_91_NOT_AVAILABLE;
 #endif

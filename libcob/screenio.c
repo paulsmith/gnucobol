@@ -337,7 +337,7 @@ enum screen_statement {
 };
 
 static void
-cob_screen_attr (cob_field *fgc, cob_field *bgc, const int attr,
+cob_screen_attr (cob_field *fgc, cob_field *bgc, const cob_flags_t attr,
 		 const enum screen_statement stmt)
 {
 	int		i;
