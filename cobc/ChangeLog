@@ -3,6 +3,8 @@
 
 	* cobc.c: added cb_unix_lf to enable possible output of generated files
 	  with unix lf (especially for listing files and testsuite)
+	* codegen.c (output_entry_function): don't generate "return" for
+	  void functions
 
 2016-10-29  Dave Pitts <dpitts@cozx.com>
 

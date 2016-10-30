@@ -8558,9 +8558,10 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 
 
-	output ("  return ");
 	if (prog->flag_void) {
-		output ("(void)");
+		output ("  (void)");
+	} else {
+		output ("  return ");
 	}
 	if (!prog->nested_level) {
 		output ("%s_ (%d", prog->program_id, progid++);
