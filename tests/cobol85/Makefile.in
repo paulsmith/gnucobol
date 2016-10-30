@@ -17,7 +17,7 @@
 #
 # Makefile gnucobol/tests/cobol85
 #
-# Copyright (C) 2003-2012, 2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -507,7 +507,7 @@ uninstall-am:
 
 test: $(MODULES)
 	@for m in $(MODULES); do \
-	  (cd $$m && make test) \
+	  (cd $$m && $(MAKE) test) \
 	done
 	@echo
 	@perl $(srcdir)/summary.pl $(MODULES) > summary.log
@@ -541,28 +541,29 @@ clean-local:
 	rm -rf copy copyalt $(MODULES) EXEC85 summary.log EXEC85.cob
 
 $(MODULES): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
-	@echo -n "Building module directory $@ ..."
-	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > EXEC85.conf
-	@cat $(srcdir)/EXEC85.conf.in >> EXEC85.conf
-	@. ../atconfig; . ../atlocal; ./EXEC85
-	@perl $(srcdir)/expand.pl newcob.tmp $@
-	@rm -f newcob.tmp newcob.log EXEC85.conf
+	@echo "Building module directory $@ ..."
+	@mkdir -p ./$@
+	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
+	@cat $(srcdir)/EXEC85.conf.in >> ./$@/EXEC85.conf
+	@. ../atconfig && . ../atlocal && cd $@ && ../EXEC85
+	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
+#	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@echo "test:" > $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 	@echo "	@echo \"Performing tests for module directory $@\"" >> $@/Makefile
-	@echo "	@. ../../atconfig; . ../../atlocal; perl $(COB85DIR)/report.pl" >> $@/Makefile
+	@echo "	@. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 	@echo "	@echo \"Comparing test results for module directory $@\"" >> $@/Makefile
 	@echo "	diff $(COB85DIR)/$@.txt report.txt" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
-#	@echo "	. ../../atconfig; . ../../atlocal; perl $(COB85DIR)/report.pl -O" >> $@/Makefile
+#	@echo "	. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl -O" >> $@/Makefile
 #	@echo "	diff $(COB85DIR)/$@.txt report.txt" >> $@/Makefile
-	@echo " done"
+	@echo "Finished module directory $@."
 
 EXEC85: newcob.val
 	@echo "Extracting EXEC85 program"
 	@sed -e '/^\*END/,$$d' -e '1,/^\*HEADER/d' \
-	-e 's/^002700.*/           "newcob.val" ORGANIZATION LINE SEQUENTIAL./' \
+	-e 's/^002700.*/           "..\/newcob.val" ORGANIZATION LINE SEQUENTIAL./' \
 	-e 's/^003000.*/           "newcob.tmp" ORGANIZATION LINE SEQUENTIAL./' \
 	-e 's/^003100.*//' \
 	-e 's/^003400.*/           "unused"./' \

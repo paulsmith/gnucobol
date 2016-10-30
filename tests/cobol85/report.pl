@@ -1,8 +1,8 @@
 #
 # gnucobol/tests/cobol85/report.pl
 #
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While
+# Copyright (C) 2001-2012, 2016 Free Software Foundation, Inc.
+# Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
 #
@@ -29,14 +29,22 @@ my $opt = shift;
 my $compile;
 my $compile_module;
 
+# change to 1 if executable doesn't work / cobcrun test should be done
+my $force_cobcrun = 0;
+
+my $cobc = "";
+
 if ($opt) {
-	$compile = "cobc -std=cobol85 -x $opt";
-# 	$compile = "cobc -std=cobol85 $opt";
-	$compile_module = "cobc -std=cobol85 -m $opt";
+	$cobc = "cobc -std=cobol85 $opt"
 } else {
-	$compile = "cobc -std=cobol85 -x";
-# 	$compile = "cobc -std=cobol85";
-	$compile_module = "cobc -std=cobol85 -m";
+	$cobc = "cobc -std=cobol85"
+}
+
+$compile_module = "$cobc -m";
+if ($force_cobcrun) {
+	$compile = $compile_module;
+} else {
+	$compile = "$cobc -x";
 }
 
 my $num_progs = 0;
@@ -156,11 +164,17 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	$exe =~ s/\.CBL//;
 	$exe =~ s/\.SUB//;
 	if (-e "./$exe.DAT") {
-		$cmd = "./$exe < $exe.DAT";
-# 		$cmd = "cobcrun $exe < $exe.DAT";
+		if ($force_cobcrun) {
+			$cmd = "cobcrun $exe < $exe.DAT";
+		} else {
+			$cmd = "./$exe < $exe.DAT";
+		}
 	} else {
-		$cmd = "./$exe";
-#		$cmd = "cobcrun $exe";
+		if ($force_cobcrun) {
+			$cmd = "cobcrun $exe";
+		} else {
+			$cmd = "./$exe";
+		}
 	}
 	printf LOG "%-12s", $in;
 	if ($skip{$exe}) {
@@ -169,18 +183,18 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		next;
 	}
 	$num_progs++;
-	$copy = ($exe =~ /^SM/) ? "-I ../copy" : "";
+	$copy = ($exe =~ /^SM/) ? "-I ../copy " : "";
 	if ($componly{$exe}) {
-		print "$compile $copy $in\n";
+		print "$compile $copy$in\n";
 	} else {
-		print "$compile $copy $in && $cmd\n";
+		print "$compile $copy$in && $cmd\n";
 	}
 	if ($in eq "SM206A.CBL") {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -fdebugging-line $copy $in");
+		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -fdebugging-line $copy$in");
 	} elsif ($in eq "NC127A.CBL") {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -ffold-call=upper $copy $in");
+		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -ffold-call=upper $copy$in");
 	} else {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile $copy $in");
+		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile $copy$in");
 	}
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
