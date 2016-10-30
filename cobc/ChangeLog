@@ -1,4 +1,9 @@
 
+2015-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, cobc.h: added cb_unix_lf to enable possible output of generated
+	  files with unix lf (especially for listing files and testsuite)
+
 2016-10-29  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_program_header): Changed to allow for 9 character 
