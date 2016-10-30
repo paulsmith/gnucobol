@@ -1557,253 +1557,7 @@ cob_stop_run (const int status)
 	}
 	cob_terminate_routines ();
 	exit (status);
-}
-
-void
-cob_runtime_error (const char *fmt, ...)
-{
-	struct handlerlist	*h;
-	struct handlerlist	*hp;
-	char			*p;
-	va_list			ap;
-
-#if	1	/* RXWRXW - Exit screen */
-	/* Exit screen mode early */
-	cob_exit_screen ();
-#endif
-
-	if (hdlrs != NULL) {
-		if (runtime_err_str) {
-			p = runtime_err_str;
-			if (cob_source_file) {
-				sprintf (runtime_err_str, "%s: %u: ",
-					 cob_source_file, cob_source_line);
-				p = runtime_err_str + strlen (runtime_err_str);
-			}
-			va_start (ap, fmt);
-			vsprintf (p, fmt, ap);
-			va_end (ap);
-		}
-		h = hdlrs;
-		while (h != NULL) {
-			if (runtime_err_str) {
-				h->proc (runtime_err_str);
-			} else {
-				h->proc ((char *)_("malloc error"));
-			}
-			hp = h;
-			h = h->next;
-			cob_free (hp);
-		}
-		hdlrs = NULL;
-	}
-
-	/* Prefix */
-	fputs ("libcob: ", stderr);
-	if (cob_source_file) {
-		fprintf (stderr, "%s: ", cob_source_file);
-		if (cob_source_line) {
-			fprintf (stderr, "%u: ", cob_source_line);
-		}
-	}
-
-	/* Body */
-	va_start (ap, fmt);
-	vfprintf (stderr, fmt, ap);
-	va_end (ap);
-
-	/* Postfix */
-	putc ('\n', stderr);
-	fflush (stderr);
-}
-
-void
-cob_fatal_error (const int fatal_error)
-{
-	const char	*msg;
-	unsigned char	*file_status;
-	char		*err_cause;
-	int		status;
-
-	switch (fatal_error) {
-#if 0 /* Currently not in use, should enter unknown error */
-	case COB_FERROR_NONE:
-		cob_runtime_error (_("cob_init() has not been called"));
-		break;
-#endif
-	case COB_FERROR_CANCEL:
-		cob_runtime_error (_("attempt to CANCEL active program"));
-		break;
-	case COB_FERROR_INITIALIZED:
-		cob_runtime_error (_("cob_init() has not been called"));
-		break;
-	case COB_FERROR_CODEGEN:
-		cob_runtime_error (_("codegen error - Please report this!"));
-		break;
-	case COB_FERROR_CHAINING:
-		cob_runtime_error (_("recursive call of chained program"));
-		break;
-	case COB_FERROR_STACK:
-		cob_runtime_error (_("stack overflow, possible PERFORM depth exceeded"));
-		break;
-	case COB_FERROR_GLOBAL:
-		cob_runtime_error (_("invalid entry/exit in GLOBAL USE procedure"));
-		break;
-	case COB_FERROR_MEMORY:
-		cob_runtime_error (_("unable to allocate memory"));
-		break;
-	case COB_FERROR_MODULE:
-		cob_runtime_error (_("invalid entry into module"));
-		break;
-	case COB_FERROR_RECURSIVE:
-		cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
-				   COB_MODULE_PTR->module_name);
-		break;
-	case COB_FERROR_FREE:
-		cob_runtime_error (_("call to %s with NULL pointer"), "cob_free");
-		break;
-	case COB_FERROR_FILE:
-		file_status = cobglobptr->cob_error_file->file_status;
-		status = COB_D2I(file_status[0]) * 10 + COB_D2I(file_status[1]);
-		switch (status) {
-		case COB_STATUS_10_END_OF_FILE:
-			msg = _("end of file");
-			break;
-		case COB_STATUS_14_OUT_OF_KEY_RANGE:
-			msg = _("key out of range");
-			break;
-		case COB_STATUS_21_KEY_INVALID:
-			msg = _("key order not ascending");
-			break;
-		case COB_STATUS_22_KEY_EXISTS:
-			msg = _("record key already exists");
-			break;
-		case COB_STATUS_23_KEY_NOT_EXISTS:
-			msg = _("record key does not exist");
-			break;
-		case COB_STATUS_30_PERMANENT_ERROR:
-			msg = _("permanent file error");
-			break;
-		case COB_STATUS_35_NOT_EXISTS:
-			msg = _("file does not exist");
-			break;
-		case COB_STATUS_37_PERMISSION_DENIED:
-			msg = _("permission denied");
-			break;
-		case COB_STATUS_41_ALREADY_OPEN:
-			msg = _("file already open");
-			break;
-		case COB_STATUS_42_NOT_OPEN:
-			msg = _("file not open");
-			break;
-		case COB_STATUS_43_READ_NOT_DONE:
-			msg = _("READ must be executed first");
-			break;
-		case COB_STATUS_44_RECORD_OVERFLOW:
-			msg = _("record overflow");
-			break;
-		case COB_STATUS_46_READ_ERROR:
-			msg = _("READ after uncessful READ/START");
-			break;
-		case COB_STATUS_47_INPUT_DENIED:
-			msg = _("READ/START not allowed, file not open for input");
-			break;
-		case COB_STATUS_48_OUTPUT_DENIED:
-			msg = _("WRITE not allowed, file not open for output");
-			break;
-		case COB_STATUS_49_I_O_DENIED:
-			msg = _("DELETE/REWRITE not allowed, file not open for I-O");
-			break;
-		case COB_STATUS_51_RECORD_LOCKED:
-			msg = _("record locked by another file connector");
-			break;
-		case COB_STATUS_57_I_O_LINAGE:
-			msg = _("LINAGE values invalid");
-			break;
-		case COB_STATUS_61_FILE_SHARING:
-			msg = _("file sharing conflict");
-			break;
-		case COB_STATUS_91_NOT_AVAILABLE:
-			msg = _("runtime library is not configured for this operation");
-			break;
-		default:
-			msg = _("unknown file error");
-			break;
-		}
-		err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
-		cob_field_to_string (cobglobptr->cob_error_file->assign,
-				     err_cause, (size_t)COB_FILE_MAX);
-		cob_runtime_error (_("%s (status = %02d) file: '%s'"),
-				   msg, status, err_cause);
-		cob_free (err_cause);
-		break;
-	case COB_FERROR_FUNCTION:
-		cob_runtime_error (_("attempt to use non-implemented function"));
-		break;
-	default:
-		cob_runtime_error (_("unknown failure: %d"), fatal_error);
-		break;
-	}
-	cob_stop_run (1);
-}
-
-void
-conf_runtime_error_value(char *value, const int pos)
-{
-	const char *name = NULL;
-
-	if (gc_conf[pos].data_type & STS_CNFSET) {
-		name = gc_conf[pos].conf_name;
-	} else {
-		name = gc_conf[pos].env_name;
-	}
-	conf_runtime_error(0, _("invalid value '%s' for configuration tag '%s'"), value, name);
-}
-
-void
-conf_runtime_error(const int finish_error, const char *fmt, ...)
-{
-	va_list args;
-
-	if (!conf_runtime_error_displayed) {
-		conf_runtime_error_displayed = 1;
-		fputs(_("configuration error:"), stderr);
-		putc('\n', stderr);
-	}
-
-	/* Prefix */
-	if (cob_source_file != last_runtime_error_file
-	|| cob_source_line != last_runtime_error_line) {
-		last_runtime_error_file = cob_source_file;
-		last_runtime_error_line = cob_source_line;
-		if (cob_source_file) {
-			fprintf(stderr, "%s: ", cob_source_file);
-		} else {
-			fprintf(stderr, "%s", _("environment variables"));
-			fprintf(stderr, ": ");
-		}
-		if (cob_source_line) {
-			fprintf(stderr, "%u: ", cob_source_line);
-		}
-	}
-
-	/* Body */
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
-	va_end(args);
-
-	/* Postfix */
-	if (!finish_error) {
-		putc(';', stderr);
-		putc('\n', stderr);
-		putc('\t', stderr);
-	} else {
-		putc('\n', stderr);
-		fflush(stderr);
-	}
-}
-
-int
+}int
 cob_is_initialized (void)
 {
 	return (cobglobptr != NULL);
@@ -5204,6 +4958,269 @@ cob_load_config (void)
 	}
 
 	return sts;
+}
+
+void
+cob_runtime_error(const char *fmt, ...)
+{
+	struct handlerlist	*h;
+	struct handlerlist	*hp;
+	char			*p;
+	va_list			ap;
+
+#if	1	/* RXWRXW - Exit screen */
+	/* Exit screen mode early */
+	cob_exit_screen();
+#endif
+
+	if (hdlrs != NULL) {
+		if (runtime_err_str) {
+			p = runtime_err_str;
+			if (cob_source_file) {
+				sprintf(runtime_err_str, "%s: %u: ",
+					cob_source_file, cob_source_line);
+				p = runtime_err_str + strlen(runtime_err_str);
+			}
+			va_start(ap, fmt);
+			vsprintf(p, fmt, ap);
+			va_end(ap);
+		}
+		h = hdlrs;
+		while (h != NULL) {
+			if (runtime_err_str) {
+				h->proc(runtime_err_str);
+			}
+			else {
+				h->proc((char *)_("malloc error"));
+			}
+			hp = h;
+			h = h->next;
+			cob_free(hp);
+		}
+		hdlrs = NULL;
+	}
+
+	/* Prefix */
+	fputs("libcob: ", stderr);
+	if (cob_source_file) {
+		fprintf(stderr, "%s: ", cob_source_file);
+		if (cob_source_line) {
+			fprintf(stderr, "%u: ", cob_source_line);
+		}
+	}
+
+	/* Body */
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	/* Postfix */
+	putc('\n', stderr);
+	fflush(stderr);
+}
+
+void
+cob_fatal_error(const int fatal_error)
+{
+	const char	*msg;
+	unsigned char	*file_status;
+	char		*err_cause;
+	int		status;
+#ifdef	_WIN32
+	char		*p;
+#endif
+
+	switch (fatal_error) {
+#if 0 /* Currently not in use, should enter unknown error */
+	case COB_FERROR_NONE:
+		cob_runtime_error(_("attempt to CANCEL active program"));
+		break;
+#endif
+	case COB_FERROR_CANCEL:
+		cob_runtime_error(_("attempt to CANCEL active program"));
+		break;
+	case COB_FERROR_INITIALIZED:
+#ifdef	_WIN32
+		/* cob_unix_lf needs to be set before any error message is thrown,
+		as they would have wrong line endings otherwise */
+		p = getenv("COB_UNIX_LF");
+		if (p && (*p == 'Y' || *p == 'y' ||
+			*p == 'T' || *p == 't' ||
+			*p == '1')) {
+			(void)_setmode(_fileno(stdin), _O_BINARY);
+			(void)_setmode(_fileno(stdout), _O_BINARY);
+			(void)_setmode(_fileno(stderr), _O_BINARY);
+		}
+#endif
+		cob_runtime_error(_("cob_init() has not been called"));
+		break;
+	case COB_FERROR_CODEGEN:
+		cob_runtime_error(_("codegen error - Please report this!"));
+		break;
+	case COB_FERROR_CHAINING:
+		cob_runtime_error(_("recursive call of chained program"));
+		break;
+	case COB_FERROR_STACK:
+		cob_runtime_error(_("stack overflow, possible PERFORM depth exceeded"));
+		break;
+	case COB_FERROR_GLOBAL:
+		cob_runtime_error(_("invalid entry/exit in GLOBAL USE procedure"));
+		break;
+	case COB_FERROR_MEMORY:
+		cob_runtime_error(_("unable to allocate memory"));
+		break;
+	case COB_FERROR_MODULE:
+		cob_runtime_error(_("invalid entry into module"));
+		break;
+	case COB_FERROR_RECURSIVE:
+		cob_runtime_error(_("invalid recursive COBOL CALL to '%s'"),
+			COB_MODULE_PTR->module_name);
+		break;
+	case COB_FERROR_FREE:
+		cob_runtime_error(_("call to %s with NULL pointer"), "cob_free");
+		break;
+	case COB_FERROR_FILE:
+		file_status = cobglobptr->cob_error_file->file_status;
+		status = COB_D2I(file_status[0]) * 10 + COB_D2I(file_status[1]);
+		switch (status) {
+		case COB_STATUS_10_END_OF_FILE:
+			msg = _("end of file");
+			break;
+		case COB_STATUS_14_OUT_OF_KEY_RANGE:
+			msg = _("key out of range");
+			break;
+		case COB_STATUS_21_KEY_INVALID:
+			msg = _("key order not ascending");
+			break;
+		case COB_STATUS_22_KEY_EXISTS:
+			msg = _("record key already exists");
+			break;
+		case COB_STATUS_23_KEY_NOT_EXISTS:
+			msg = _("record key does not exist");
+			break;
+		case COB_STATUS_30_PERMANENT_ERROR:
+			msg = _("permanent file error");
+			break;
+		case COB_STATUS_35_NOT_EXISTS:
+			msg = _("file does not exist");
+			break;
+		case COB_STATUS_37_PERMISSION_DENIED:
+			msg = _("permission denied");
+			break;
+		case COB_STATUS_41_ALREADY_OPEN:
+			msg = _("file already open");
+			break;
+		case COB_STATUS_42_NOT_OPEN:
+			msg = _("file not open");
+			break;
+		case COB_STATUS_43_READ_NOT_DONE:
+			msg = _("READ must be executed first");
+			break;
+		case COB_STATUS_44_RECORD_OVERFLOW:
+			msg = _("record overflow");
+			break;
+		case COB_STATUS_46_READ_ERROR:
+			msg = _("READ after uncessful READ/START");
+			break;
+		case COB_STATUS_47_INPUT_DENIED:
+			msg = _("READ/START not allowed, file not open for input");
+			break;
+		case COB_STATUS_48_OUTPUT_DENIED:
+			msg = _("WRITE not allowed, file not open for output");
+			break;
+		case COB_STATUS_49_I_O_DENIED:
+			msg = _("DELETE/REWRITE not allowed, file not open for I-O");
+			break;
+		case COB_STATUS_51_RECORD_LOCKED:
+			msg = _("record locked by another file connector");
+			break;
+		case COB_STATUS_57_I_O_LINAGE:
+			msg = _("LINAGE values invalid");
+			break;
+		case COB_STATUS_61_FILE_SHARING:
+			msg = _("file sharing conflict");
+			break;
+		case COB_STATUS_91_NOT_AVAILABLE:
+			msg = _("runtime library is not configured for this operation");
+			break;
+		default:
+			msg = _("unknown file error");
+			break;
+		}
+		err_cause = cob_malloc((size_t)COB_FILE_BUFF);
+		cob_field_to_string(cobglobptr->cob_error_file->assign,
+			err_cause, (size_t)COB_FILE_MAX);
+		cob_runtime_error(_("%s (status = %02d) file: '%s'"),
+			msg, status, err_cause);
+		cob_free(err_cause);
+		break;
+	case COB_FERROR_FUNCTION:
+		cob_runtime_error(_("attempt to use non-implemented function"));
+		break;
+	default:
+		cob_runtime_error(_("unknown failure: %d"), fatal_error);
+		break;
+	}
+	cob_stop_run(1);
+}
+
+void
+conf_runtime_error_value(char *value, const int pos)
+{
+	const char *name = NULL;
+
+	if (gc_conf[pos].data_type & STS_CNFSET) {
+		name = gc_conf[pos].conf_name;
+	}
+	else {
+		name = gc_conf[pos].env_name;
+	}
+	conf_runtime_error(0, _("invalid value '%s' for configuration tag '%s'"), value, name);
+}
+
+void
+conf_runtime_error(const int finish_error, const char *fmt, ...)
+{
+	va_list args;
+
+	if (!conf_runtime_error_displayed) {
+		conf_runtime_error_displayed = 1;
+		fputs(_("configuration error:"), stderr);
+		putc('\n', stderr);
+	}
+
+	/* Prefix */
+	if (cob_source_file != last_runtime_error_file
+		|| cob_source_line != last_runtime_error_line) {
+		last_runtime_error_file = cob_source_file;
+		last_runtime_error_line = cob_source_line;
+		if (cob_source_file) {
+			fprintf(stderr, "%s: ", cob_source_file);
+		}
+		else {
+			fprintf(stderr, "%s", _("environment variables"));
+			fprintf(stderr, ": ");
+		}
+		if (cob_source_line) {
+			fprintf(stderr, "%u: ", cob_source_line);
+		}
+	}
+
+	/* Body */
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+
+	/* Postfix */
+	if (!finish_error) {
+		putc(';', stderr);
+		putc('\n', stderr);
+		putc('\t', stderr);
+	}
+	else {
+		putc('\n', stderr);
+		fflush(stderr);
+	}
 }
 
 
