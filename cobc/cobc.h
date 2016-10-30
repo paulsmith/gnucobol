@@ -374,7 +374,6 @@ extern int			cb_flag_functions_all;
 extern int			cb_flag_main;
 extern int			cobc_wants_debug;
 extern int			cobc_seen_stdin;
-extern int			cb_unix_lf;
 
 extern int			errorcount;
 extern int			warningcount;

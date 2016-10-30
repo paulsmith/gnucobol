@@ -182,6 +182,7 @@ int			cb_flag_main = 0;
 int			cobc_wants_debug = 0;
 int			cb_flag_functions_all = 0;
 int			cobc_seen_stdin = 0;
+int			cb_unix_lf = 0;
 
 int			errorcount = 0;
 int			warningcount = 0;
@@ -5851,7 +5852,6 @@ main (int argc, char **argv)
 #else
 	cb_ebcdic_sign = 0;
 #endif
-	cb_unix_lf = 0;
 
 #ifdef	_WIN32
 	/* Allows running tests under Win */
