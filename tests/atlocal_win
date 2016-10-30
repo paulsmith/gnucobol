@@ -85,9 +85,11 @@ fi
 export COB_HAS_ISAM
 
 COB_HAS_CURSES="no"
-if test "$OSTYPE" != "cygwin"; then
-   # using non-cygwin builds with pdcurses result in
+if test "$TERM" != "cygwin"; then # this is true for CYGWIN and MSYS
+   # using non-cygwin builds and MSYS builds results in
    # "Redirection is not supported"
+   # workaround until solved (likely via curses library):
+   # only activate when this isn't true
    if test $($COBC --info | grep -i -c "screen .*: .*curses") = 1; then
       COB_HAS_CURSES="yes"
    fi
