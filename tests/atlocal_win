@@ -77,7 +77,7 @@ export LC_ALL=C
 
 
 
-if test $($COBC --info | grep -i -c "ISAM .*:.*not available") = 0; then
+if test $($COBC --info | grep -i -c "ISAM.*disabled") = 0; then
    COB_HAS_ISAM="yes"
 else
    COB_HAS_ISAM="no"
