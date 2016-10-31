@@ -234,6 +234,7 @@ static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
 #define	COBC_HD_SCREEN_SECTION		(1U << 13)
 #define	COBC_HD_PROCEDURE_DIVISION	(1U << 14)
 #define	COBC_HD_PROGRAM_ID		(1U << 15)
+#define	COBC_HD_COMMUNICATION_SECTION		(1U << 16)
 
 /* Static functions */
 
@@ -611,6 +612,9 @@ check_relaxed_syntax (const cob_flags_t lev)
 		break;
 	case COBC_HD_PROGRAM_ID:
 		s = "PROGRAM-ID";
+		break;
+	case COBC_HD_COMMUNICATION_SECTION:
+		s = "COMMUNICATION SECTION";
 		break;
 	default:
 		s = "Unknown";
@@ -1622,6 +1626,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token CALL
 %token CANCEL
 %token CAPACITY
+%token CD
 %token CF
 %token CH
 %token CHAINING
@@ -1643,6 +1648,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token COMMA_DELIM		"comma delimiter"
 %token COMMIT
 %token COMMON
+%token COMMUNICATION
 %token COMP
 %token COMPUTE
 %token COMP_1			"COMP-1"
@@ -3865,6 +3871,7 @@ _data_division:
 	current_storage = CB_STORAGE_WORKING;
   }
   _working_storage_section
+  _communication_section
   _local_storage_section
   _linkage_section
   _report_section
@@ -4333,6 +4340,91 @@ rep_name_list:
 		report_instance = current_report;
 	}
 	report_count++;
+  }
+;
+
+/* COMMUNICATION SECTION */
+
+_communication_section:
+| COMMUNICATION SECTION TOK_DOT
+  {
+	current_storage = CB_STORAGE_COMMUNICATION;
+	check_headers_present (COBC_HD_DATA_DIVISION, 0, 0, 0);
+	header_check |= COBC_HD_COMMUNICATION_SECTION;
+	/* add a compiler configuration if either */
+	if (cb_std_define > CB_STD_85) {
+		cb_verify (CB_UNCONFORMABLE, _ ("COMMUNICATION SECTION"));
+	} else if (cb_verify (CB_OBSOLETE, _("COMMUNICATION SECTION"))) {
+		CB_PENDING ("COMMUNICATION SECTION");
+	}
+  }
+  _communication_description_sequence
+;
+
+_communication_description_sequence:
+| _communication_description_sequence communication_description
+;
+
+communication_description:
+  communication_description_entry
+  _record_description_list
+  {
+	if (CB_VALID_TREE (current_file)) {
+		if (CB_VALID_TREE ($2)) {
+			finalize_file (current_file, CB_FIELD ($2));
+		} else {
+			cb_error (_("RECORD description missing or invalid"));
+		}
+	}
+  }
+;
+
+/* File description entry */
+
+communication_description_entry:
+  CD undefined_word
+  {
+	/* CD internally defines a new file */
+	if (CB_VALID_TREE ($2)) {
+		/* Build new file */
+		current_file = build_file ($2);
+		current_file->organization = COB_ORG_MESSAGE;
+
+		/* Add file to current program list */
+		CB_ADD_TO_CHAIN (CB_TREE (current_file),
+				 current_program->file_list);
+	} else {
+		current_file = NULL;
+		if (current_program->file_list) {
+			current_program->file_list
+				= CB_CHAIN (current_program->file_list);
+		}
+	}
+	check_duplicate = 0;
+  }
+  _communication_description_clause_sequence TOK_DOT
+;
+
+_communication_description_clause_sequence:
+| _communication_description_clause_sequence communication_description_clause
+;
+
+communication_description_clause:
+/* unfinished, lots of clauses for each, if added then in a new
+   structure and this set in file->reports (maybe renamed to referrer)
+*/
+  _for _initial INPUT
+  {
+	current_file->lock_mode = COB_LOCK_MANUAL;
+  }
+| _for _initial OUTPUT
+  {
+	  current_file->sharing = cb_int (COB_LOCK_OPEN_EXCLUSIVE);
+  current_file->lock_mode = COB_LOCK_EXCLUSIVE;
+  }
+| _for _initial I_O
+  {
+	current_file->lock_mode = COB_LOCK_AUTOMATIC;
   }
 ;
 

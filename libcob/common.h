@@ -758,6 +758,7 @@ enum cob_exception_id {
 #define COB_ORG_INDEXED		3
 #define COB_ORG_SORT		4
 #define COB_ORG_MAX		5
+#define COB_ORG_MESSAGE	6 /* only for syntax checks */
 
 /* Access mode */
 

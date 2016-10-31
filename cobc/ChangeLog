@@ -5,6 +5,8 @@
 	  with unix lf (especially for listing files and testsuite)
 	* codegen.c (output_entry_function): don't generate "return" for
 	  void functions
+	* parser.y, reserved.c, cobc.h: added part of COMMUNICATION SECTION
+	  syntax for being able to check this in NIST
 
 2016-10-29  Dave Pitts <dpitts@cozx.com>
 

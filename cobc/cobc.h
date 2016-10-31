@@ -157,6 +157,7 @@ enum cb_std_def {
 	CB_STD_MVS,
 	CB_STD_BS2000,
 	CB_STD_ACU,
+	/* the following must contain ANSI/ISO standards in order */
 	CB_STD_85,
 	CB_STD_2002,
 	CB_STD_2014

@@ -75,7 +75,6 @@ $ENV{"COB_DISABLE_WARNINGS"} = "Y";
 
 # Skip programs using COMMUNICATION
 $skip{DB205A} = 1;
-$skip{DB304M} = 1;
 
 # Skip DB203A if no ISAM configured
 if ($ENV{'COB_HAS_ISAM'} eq "no") {

@@ -381,6 +381,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
 	/* FIXME: 2014 Context-sensitive to OCCURS clause */
   },
+  { "CD",			0, 0, CD,			/* Communication Section */
+				0, 0
+  },
   { "CENTER",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
 	/* FIXME + Check: 2014 Context-sensitive to COLUMN clause */
@@ -450,6 +453,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "COMMON",			0, 0, COMMON,			/* 2002 */
 				0, 0
+  },
+  { "COMMUNICATION",			0, 0, COMMUNICATION,			/* Communication Section */
+	  0, 0
   },
   { "COMP",			0, 0, COMP,			/* 2002 */
 				0, 0
@@ -625,8 +631,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DETAIL",			0, 0, DETAIL,			/* 2002 */
 				0, 0
   },
-  { "DISABLE",			0, 0, -1,			/* 2002 */
-				0, 0
+  { "DISABLE",			0, 0, -1,			/* Communication Section */
+					0, 0
   },
   { "DISC",			0, 1, DISC,			/* Extension */
 				0, CB_CS_ASSIGN
@@ -663,6 +669,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ELSE",			0, 0, ELSE,			/* 2002 */
 				0, 0
+  },
+  { "ENABLE",			0, 0, -1,			/* Communication Section */
+					0, 0
   },
   { "END",			0, 0, END,			/* 2002 */
 				0, 0
@@ -1730,6 +1739,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "TAPE",			0, 1, TAPE,			/* 85 */
 				0, CB_CS_ASSIGN
+  },
+  { "TERMINAL",			0, 0, -1,			/* Communication Section */
+	  0, 0
   },
   { "TERMINATE",		0, 0, TERMINATE,		/* 2002 */
 				0, 0

@@ -14,12 +14,12 @@ DB205A.CBL    ----- test skipped -----
 DB301M.CBL      1    1    0       0       0 OK
 DB302M.CBL      1    1    0       0       0 OK
 DB303M.CBL      1    1    0       0       0 OK
-DB304M.CBL    ----- test skipped -----
+DB304M.CBL      0    0    0       0       0 OK
 DB305M.CBL      1    1    0       0       0 OK
 --------    ----- ---- ---- ------- -------
 Total         415  386    0       4      25
 
-Number of programs:    13
-Successfully executed: 13
+Number of programs:    14
+Successfully executed: 14
 Compile error:          0
 Execute error:          0
