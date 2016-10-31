@@ -4755,8 +4755,8 @@ output_call (struct cb_call *p)
 
 #if	0	/* RXWRXW - Clear params */
 	/* Clear extra parameters */
-	if (n > COB_MAX_FIELD_PARAMS - 4) {
-		parmnum = COB_MAX_FIELD_PARAMS - n;
+	if (n > MAX_CALL_FIELD_PARAMS - 4) {
+		parmnum = MAX_CALL_FIELD_PARAMS - n;
 	} else {
 		parmnum = 4;
 	}
@@ -8367,11 +8367,11 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	const char		*s;
 	const char		*s2;
 	const char		*s_prefix;
-	const char		*s_type[COB_MAX_FIELD_PARAMS];
+	const char		*s_type[MAX_CALL_FIELD_PARAMS];
 	cob_u32_t		parmnum;
 	cob_u32_t		n;
-	int			sticky_ids[COB_MAX_FIELD_PARAMS] = { 0 };
-	int			sticky_nonp[COB_MAX_FIELD_PARAMS] = { 0 };
+	int			sticky_ids[MAX_CALL_FIELD_PARAMS] = { 0 };
+	int			sticky_nonp[MAX_CALL_FIELD_PARAMS] = { 0 };
 
 	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
 	using_list = CB_VALUE (entry);

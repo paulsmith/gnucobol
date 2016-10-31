@@ -59,6 +59,7 @@ AM_MAINTAINER_MODE
 AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
 AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
 AH_TEMPLATE([PATCH_LEVEL], [Define a patch level])
+AH_TEMPLATE([MAX_CALL_FIELD_PARAMS], [Define maximum parameters for CALL])
 AH_TEMPLATE([WITH_INDEX_EXTFH], [Compile with an external ISAM handler])
 AH_TEMPLATE([WITH_SEQRA_EXTFH], [Compile with an external SEQ/RAN handler])
 AH_TEMPLATE([WITH_DB], [Use Berkeley DB library as emulation of ISAM handler])
@@ -263,6 +264,9 @@ AC_ARG_WITH([patch-level],
     no)		AC_MSG_ERROR([[--without-patch-level not supported.]])
 		;;
     [[0-9]]*)
+		if test $with_patch_level -gt 999; then
+    		AC_MSG_ERROR([[Patch level cannot be greater than 999]])
+		fi
 		;;
     *)		AC_MSG_ERROR([[You must use a numeric patch level]])
 		;;
@@ -270,6 +274,22 @@ AC_ARG_WITH([patch-level],
   [with_patch_level=0])
 
 AC_DEFINE_UNQUOTED([PATCH_LEVEL], [$with_patch_level])
+
+AC_ARG_WITH([max-call-params],
+  [  --with-max-call-params  (GnuCOBOL) Define maximum number of parameters for CALL (default 192)],
+  [case $with_max_call_params in
+    yes)	AC_MSG_ERROR([[You must give --with-max-call-params an argument.]])
+		;;
+    no)		AC_MSG_ERROR([[--without-max-call-params not supported.]])
+		;;
+    16 | 36 | 56 | 76 | 96 | 192 | 252)
+		;;
+    *)		AC_MSG_ERROR([[Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252]])
+		;;
+  esac],
+  [with_max_call_params=192])
+
+AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
 
 AC_ARG_WITH([curses],
   [  --with-curses           (GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)],
@@ -1146,7 +1166,7 @@ else
 	COB_HAS_UTC_OFFSET="yes"
 fi
 AC_SUBST([COB_HAS_UTC_OFFSET])
-AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level])
+AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
 
 AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
 	cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile

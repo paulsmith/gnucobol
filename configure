@@ -814,6 +814,7 @@ enable_debug
 enable_experimental
 enable_param_check
 with_patch_level
+with_max_call_params
 with_curses
 with_seqra_extfh
 with_cisam
@@ -1488,6 +1489,7 @@ Optional Packages:
                           compiler's sysroot if not specified).
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-patch-level      (GnuCOBOL) Define a patch level (default 0)
+  --with-max-call-params  (GnuCOBOL) Define maximum number of parameters for CALL (default 192)
   --with-curses           (GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)
   --with-seqra-extfh      (GnuCOBOL) Use external SEQ/RAN file handler
   --with-cisam            (GnuCOBOL) Use CISAM for ISAM I/O
@@ -2970,6 +2972,7 @@ fi
 
 
 # Autoheader templates
+
 
 
 
@@ -13684,6 +13687,9 @@ if test "${with_patch_level+set}" = set; then :
     no)		as_fn_error $? "--without-patch-level not supported." "$LINENO" 5
 		;;
     [0-9]*)
+		if test $with_patch_level -gt 999; then
+    		as_fn_error $? "Patch level cannot be greater than 999" "$LINENO" 5
+		fi
 		;;
     *)		as_fn_error $? "You must use a numeric patch level" "$LINENO" 5
 		;;
@@ -13695,6 +13701,29 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define PATCH_LEVEL $with_patch_level
+_ACEOF
+
+
+
+# Check whether --with-max-call-params was given.
+if test "${with_max_call_params+set}" = set; then :
+  withval=$with_max_call_params; case $with_max_call_params in
+    yes)	as_fn_error $? "You must give --with-max-call-params an argument." "$LINENO" 5
+		;;
+    no)		as_fn_error $? "--without-max-call-params not supported." "$LINENO" 5
+		;;
+    16 | 36 | 56 | 76 | 96 | 192 | 252)
+		;;
+    *)		as_fn_error $? "Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252" "$LINENO" 5
+		;;
+  esac
+else
+  with_max_call_params=192
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define MAX_CALL_FIELD_PARAMS $with_max_call_params
 _ACEOF
 
 
@@ -17898,7 +17927,7 @@ else
 fi
 
 COB_PATCH_LEVEL=$with_patch_level
-
+ # needed for bin/cob-config
 
 ac_config_files="$ac_config_files bin/cob-config Makefile libcob/Makefile lib/Makefile cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile config/Makefile copy/Makefile tests/atlocal tests/Makefile tests/cobol85/Makefile extras/Makefile"
 

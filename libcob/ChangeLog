@@ -1,4 +1,11 @@
 
+
+2016-10-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* call.c (cob_call): fr #101 - allow more parameters for CALL:
+	  renamed COB_MAX_FIELD_PARAMS to MAX_CALL_FIELD_PARAMS (set in configure),
+	  allowed additional options 192 and 252, new default: 192
+
 2016-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c: check "COB_UNIX_LF" before error COB_FERROR_INITIALIZED

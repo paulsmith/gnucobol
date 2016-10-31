@@ -46,7 +46,7 @@ COB85DIR = "`cd $(srcdir) && pwd`"
 #
 
 test: $(MODULES)
-	# $(MAKE) would abort after the first fail!
+# $(MAKE) would abort after the first fail!
 	@for m in $(MODULES); do \
 	  (cd $$m && make test) \
 	done

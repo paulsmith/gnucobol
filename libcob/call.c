@@ -1086,7 +1086,7 @@ cob_call (const char *name, const int argc, void **argv)
 	if (unlikely(!cobglobptr)) {
 		cob_fatal_error (COB_FERROR_INITIALIZED);
 	}
-	if (argc < 0 || argc > COB_MAX_FIELD_PARAMS) {
+	if (argc < 0 || argc > MAX_CALL_FIELD_PARAMS) {
 		cob_runtime_error (_("invalid number of arguments passed to '%s'"), "cob_call");
 		cob_stop_run (1);
 	}
@@ -1095,48 +1095,90 @@ cob_call (const char *name, const int argc, void **argv)
 		cob_stop_run (1);
 	}
 	unifunc.funcvoid = cob_resolve_cobol (name, 0, 1);
-	pargv = cob_malloc (COB_MAX_FIELD_PARAMS * sizeof(void *));
+	pargv = cob_malloc (MAX_CALL_FIELD_PARAMS * sizeof(void *));
 	/* Set number of parameters */
 	cobglobptr->cob_call_params = argc;
 	for (i = 0; i < argc; ++i) {
 		pargv[i] = argv[i];
 	}
-#if	COB_MAX_FIELD_PARAMS == 16 || \
-	COB_MAX_FIELD_PARAMS == 36 || \
-	COB_MAX_FIELD_PARAMS == 56 || \
-	COB_MAX_FIELD_PARAMS == 76 || \
-	COB_MAX_FIELD_PARAMS == 96
+#if	MAX_CALL_FIELD_PARAMS == 16 || \
+	MAX_CALL_FIELD_PARAMS == 36 || \
+	MAX_CALL_FIELD_PARAMS == 56 || \
+	MAX_CALL_FIELD_PARAMS == 76 || \
+	MAX_CALL_FIELD_PARAMS == 96 || \
+    MAX_CALL_FIELD_PARAMS == 192 || \
+    MAX_CALL_FIELD_PARAMS == 252
 #else
-#error	"Invalid COB_MAX_FIELD_PARAMS value"
+#error	"Invalid MAX_CALL_FIELD_PARAMS value"
 #endif
 	i =  unifunc.funcint (pargv[0], pargv[1], pargv[2], pargv[3]
 				,pargv[4], pargv[5], pargv[6], pargv[7]
 				,pargv[8], pargv[9], pargv[10], pargv[11]
 				,pargv[12], pargv[13], pargv[14], pargv[15]
-#if	COB_MAX_FIELD_PARAMS > 16
+#if	MAX_CALL_FIELD_PARAMS > 16
 				,pargv[16], pargv[17], pargv[18], pargv[19]
 				,pargv[20], pargv[21], pargv[22], pargv[23]
 				,pargv[24], pargv[25], pargv[26], pargv[27]
 				,pargv[28], pargv[29], pargv[30], pargv[31]
 				,pargv[32], pargv[33], pargv[34], pargv[35]
-#if	COB_MAX_FIELD_PARAMS > 36
+#if	MAX_CALL_FIELD_PARAMS > 36
 				,pargv[36], pargv[37], pargv[38], pargv[39]
 				,pargv[40], pargv[41], pargv[42], pargv[43]
 				,pargv[44], pargv[45], pargv[46], pargv[47]
 				,pargv[48], pargv[49], pargv[50], pargv[51]
 				,pargv[52], pargv[53], pargv[54], pargv[55]
-#if	COB_MAX_FIELD_PARAMS > 56
+#if	MAX_CALL_FIELD_PARAMS > 56
 				,pargv[56], pargv[57], pargv[58], pargv[59]
 				,pargv[60], pargv[61], pargv[62], pargv[63]
 				,pargv[64], pargv[65], pargv[66], pargv[67]
 				,pargv[68], pargv[69], pargv[70], pargv[71]
 				,pargv[72], pargv[73], pargv[74], pargv[75]
-#if	COB_MAX_FIELD_PARAMS > 76
+#if	MAX_CALL_FIELD_PARAMS > 76
 				,pargv[76], pargv[77], pargv[78], pargv[79]
 				,pargv[80], pargv[81], pargv[82], pargv[83]
 				,pargv[84], pargv[85], pargv[86], pargv[87]
 				,pargv[88], pargv[89], pargv[90], pargv[91]
 				,pargv[92], pargv[93], pargv[94], pargv[95]
+#if	MAX_CALL_FIELD_PARAMS > 96
+				,pargv[96], pargv[97], pargv[98], pargv[99]
+				,pargv[100], pargv[101], pargv[102], pargv[103]
+				,pargv[104], pargv[105], pargv[106], pargv[107]
+				,pargv[108], pargv[109], pargv[110], pargv[111]
+				,pargv[112], pargv[113], pargv[114], pargv[115]
+				,pargv[116], pargv[117], pargv[118], pargv[119]
+				,pargv[120], pargv[121], pargv[122], pargv[123]
+				,pargv[124], pargv[125], pargv[126], pargv[127]
+				,pargv[128], pargv[129], pargv[130], pargv[131]
+				,pargv[132], pargv[133], pargv[134], pargv[135]
+				,pargv[136], pargv[137], pargv[138], pargv[139]
+				,pargv[140], pargv[141], pargv[142], pargv[143]
+				,pargv[144], pargv[145], pargv[146], pargv[147]
+				,pargv[148], pargv[149], pargv[130], pargv[131]
+				,pargv[152], pargv[153], pargv[154], pargv[155]
+				,pargv[160], pargv[161], pargv[162], pargv[163]
+				,pargv[164], pargv[165], pargv[166], pargv[167]
+				,pargv[168], pargv[169], pargv[170], pargv[171]
+				,pargv[172], pargv[173], pargv[174], pargv[175]
+				,pargv[176], pargv[177], pargv[178], pargv[179]
+				,pargv[180], pargv[181], pargv[182], pargv[183]
+				,pargv[184], pargv[185], pargv[186], pargv[187]
+				,pargv[188], pargv[189], pargv[190], pargv[191]
+#if	MAX_CALL_FIELD_PARAMS > 192
+				,pargv[192], pargv[193], pargv[194], pargv[195]
+				,pargv[200], pargv[201], pargv[202], pargv[203]
+				,pargv[204], pargv[205], pargv[206], pargv[207]
+				,pargv[208], pargv[209], pargv[210], pargv[211]
+				,pargv[212], pargv[213], pargv[214], pargv[215]
+				,pargv[216], pargv[217], pargv[218], pargv[219]
+				,pargv[220], pargv[221], pargv[222], pargv[223]
+				,pargv[224], pargv[225], pargv[226], pargv[227]
+				,pargv[228], pargv[229], pargv[230], pargv[231]
+				,pargv[232], pargv[233], pargv[234], pargv[235]
+				,pargv[240], pargv[241], pargv[242], pargv[243]
+				,pargv[244], pargv[245], pargv[246], pargv[247]
+				,pargv[248], pargv[249], pargv[250], pargv[251]
+#endif
+#endif
 #endif
 #endif
 #endif

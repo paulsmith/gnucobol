@@ -109,7 +109,7 @@ DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	build_aux/compile build_aux/config.guess \
 	build_aux/config.rpath build_aux/config.sub build_aux/depcomp \
 	build_aux/install-sh build_aux/mdate-sh build_aux/missing \
-	build_aux/mkinstalldirs build_aux/ltmain.sh \
+	build_aux/mkinstalldirs build_aux/ylwrap build_aux/ltmain.sh \
 	$(top_srcdir)/build_aux/compile \
 	$(top_srcdir)/build_aux/config.guess \
 	$(top_srcdir)/build_aux/config.rpath \
@@ -420,7 +420,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = libcob.h
-SUBDIRS_PREREQUISITES = libcob lib cobc bin config copy extras
 SUBDIRS = libcob lib cobc bin config copy po doc extras tests
 ACLOCAL_AMFLAGS = -I m4 --install
 BUILT_SOURCES = defaults.h
@@ -655,8 +654,8 @@ distdir: $(DISTFILES)
 	  if test "$$subdir" = .; then :; else \
 	    $(am__make_dryrun) \
 	      || test -d "$(distdir)/$$subdir" \
-	    || $(MKDIR_P) "$(distdir)/$$subdir" \
-	    || exit 1; \
+	      || $(MKDIR_P) "$(distdir)/$$subdir" \
+	      || exit 1; \
 	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
 	    $(am__relativize); \
 	    new_distdir=$$reldir; \
@@ -824,8 +823,8 @@ install-am: all-am
 installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
 	      install; \
 	else \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
