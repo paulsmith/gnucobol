@@ -1,4 +1,8 @@
 
+2016-10-31  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (cobc_terminate): Added calls to print header/trailer.
+
 2015-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: added cb_unix_lf to enable possible output of generated files

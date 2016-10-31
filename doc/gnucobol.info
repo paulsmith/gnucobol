@@ -2012,6 +2012,7 @@ BYTE-LENGTH                     Yes (Context sensitive)
 CALL                            Yes
 CANCEL                          Yes
 CAPACITY                        Yes (Context sensitive)
+CD                              Yes
 CENTER                          No (Context sensitive)
 CF                              Yes
 CH                              Yes
@@ -2035,6 +2036,7 @@ COMMA                           Yes
 COMMAND-LINE                    Yes
 COMMIT                          Yes
 COMMON                          Yes
+COMMUNICATION                   Yes
 COMP                            Yes
 COMP-1                          Yes
 COMP-2                          Yes
@@ -2101,6 +2103,7 @@ EC                              Yes
 ECHO                            Yes
 ELSE                            Yes
 EMPTY-CHECK                     Yes
+ENABLE                          No
 END                             Yes
 END-ACCEPT                      Yes
 END-ADD                         Yes
@@ -3037,6 +3040,7 @@ specify-all-reserved: no
 # Value: Word to be taken out of the reserved words list
 # (case independent)
 # Words that are in the (proposed) standard but may conflict
+not-reserved: TERMINAL
 
 # reserved:
 # Value: Word to make up reserved words list (case independent)
@@ -3920,13 +3924,13 @@ Node: CBL_OC_HOSTED47407
 Node: CBL_OC_NANOSLEEP51909
 Node: Appendix A52415
 Node: Appendix B63452
-Node: Appendix C86129
-Node: Appendix D91733
-Node: Appendix E93669
-Node: Appendix F99809
-Node: Appendix G105818
-Node: Appendix H107117
-Node: Appendix I116624
-Node: Index141749
+Node: Appendix C86236
+Node: Appendix D91840
+Node: Appendix E93776
+Node: Appendix F99916
+Node: Appendix G105948
+Node: Appendix H107247
+Node: Appendix I116754
+Node: Index141879
 
 End Tag Table

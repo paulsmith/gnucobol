@@ -499,6 +499,8 @@ static const struct option long_options[] = {
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
 static void	print_program_code (struct list_files *, int);
+static void	print_program_header (void);
+static void	print_program_trailer (void);
 
 /* cobc functions */
 
@@ -1554,7 +1556,15 @@ cobc_clean_up (const int status)
 DECLNORET static void COB_A_NORETURN
 cobc_terminate (const char *str)
 {
+	if (cb_src_list_file) {
+		cb_listing_linecount = cb_lines_per_page;
+		strcpy (cb_listing_filename, str);
+		print_program_header();
+	}
 	cb_perror (0, "cobc: %s: %s", str, cb_get_strerror ());
+	if (cb_src_list_file) {
+		print_program_trailer();
+	}
 	cobc_clean_up (1);
 	exit (1);
 }
@@ -6114,6 +6124,7 @@ main (int argc, char **argv)
 	cobc_init_typeck ();
 #endif
 
+	memset (cb_listing_title, 0, sizeof (cb_listing_title));
 	/* If -P=file specified, all lists go to this file */
 	if (cobc_list_file) {
 		if (cb_unix_lf) {
