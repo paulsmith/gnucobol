@@ -237,23 +237,54 @@ AT_DATA([prog.cob], [
          02 Y           PIC X(2) OCCURS 10.
        01 L             PIC 9(4).
        01 I             PIC 9(2) VALUE 10.
+       78 I-LEN         VALUE LENGTH OF I.
        PROCEDURE        DIVISION.
-           MOVE LENGTH OF X TO L.
+           MOVE LENGTH OF X TO L
            IF L NOT = 2
               DISPLAY "Length 1 " L
               END-DISPLAY
-           END-IF.
-           MOVE LENGTH OF Y TO L.
+           END-IF
+           MOVE LENGTH OF Y TO L
            IF L NOT = 2
               DISPLAY "Length 2 " L
               END-DISPLAY
-           END-IF.
-           MOVE LENGTH OF Y(1) TO L.
+           END-IF
+           MOVE LENGTH OF Y(1) TO L
            IF L NOT = 2
               DISPLAY "Length 3 " L
               END-DISPLAY
-           END-IF.
+           END-IF
+           IF I-LEN NOT = 2
+              DISPLAY "Length 4 " I-LEN
+              END-DISPLAY
+           END-IF
+           IF LENGTH OF L + 2 NOT = 6
+              ADD 2 TO LENGTH OF L GIVING L
+              DISPLAY "Length 5 " L
+              END-DISPLAY
+           END-IF
+           MOVE 0 TO L
+           PERFORM LENGTH OF L TIMES
+              ADD 1 TO L
+           END-PERFORM
+           IF L NOT = 4
+              DISPLAY "Length 6 " L
+              END-DISPLAY
+           END-IF
+           MOVE 0 TO L
+           PERFORM VARME
+                   VARYING I FROM LENGTH OF I
+                             BY   LENGTH OF X
+                   UNTIL   I > LENGTH OF L
+           IF ((L NOT = 2) OR 
+               (I NOT = 6)    )
+              DISPLAY "Length 7 " L " - " I
+              END-DISPLAY
+           END-IF
            STOP RUN.
+       VARME.
+           ADD 1 TO L
+           .
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])

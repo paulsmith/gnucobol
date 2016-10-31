@@ -5298,12 +5298,12 @@ value_item_list:
 ;
 
 value_item:
-  literal			{ $$ = $1; }
-| literal THRU literal		{ $$ = CB_BUILD_PAIR ($1, $3); }
+  lit_or_length			{ $$ = $1; }
+| lit_or_length THRU lit_or_length	{ $$ = CB_BUILD_PAIR ($1, $3); }
 ;
 
 _false_is:
-| _when_set_to TOK_FALSE _is literal
+| _when_set_to TOK_FALSE _is lit_or_length
   {
 	if (current_field->level != 88) {
 		cb_error (_("FALSE clause only allowed for 88 level"));
@@ -6139,9 +6139,9 @@ _procedure_using_chaining:
   }
   procedure_param_list
   {
-	if (cb_list_length ($3) > COB_MAX_FIELD_PARAMS) {
+	if (cb_list_length ($3) > MAX_CALL_FIELD_PARAMS) {
 		cb_error (_("number of parameters exceeds maximum %d"),
-			  COB_MAX_FIELD_PARAMS);
+			  MAX_CALL_FIELD_PARAMS);
 	}
 	$$ = $3;
   }
@@ -6156,9 +6156,9 @@ _procedure_using_chaining:
   }
   procedure_param_list
   {
-	if (cb_list_length ($3) > COB_MAX_FIELD_PARAMS) {
+	if (cb_list_length ($3) > MAX_CALL_FIELD_PARAMS) {
 		cb_error (_("number of parameters exceeds maximum %d"),
-			  COB_MAX_FIELD_PARAMS);
+			  MAX_CALL_FIELD_PARAMS);
 	}
 	$$ = $3;
   }
@@ -7329,10 +7329,10 @@ call_using:
   }
   call_param_list
   {
-	if (cb_list_length ($3) > COB_MAX_FIELD_PARAMS) {
+	if (cb_list_length ($3) > MAX_CALL_FIELD_PARAMS) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("number of parameters exceeds maximum %d"),
-			    COB_MAX_FIELD_PARAMS);
+			    MAX_CALL_FIELD_PARAMS);
 	}
 	$$ = $3;
   }
@@ -9056,7 +9056,7 @@ perform_option:
   {
 	$$ = cb_build_perform_once (NULL);
   }
-| id_or_lit_or_func TIMES
+| id_or_lit_or_length_or_func TIMES
   {
 	$$ = cb_build_perform_times ($1);
 	current_program->loop_counter++;
@@ -11528,6 +11528,15 @@ id_or_lit_or_func:
 	check_not_88_level ($1);
   }
 | LITERAL
+| function
+;
+
+id_or_lit_or_length_or_func:
+  identifier
+  {
+	check_not_88_level ($1);
+  }
+| lit_or_length
 | function
 ;
 
