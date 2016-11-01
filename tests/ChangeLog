@@ -1,4 +1,9 @@
 
+2016-11-01  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Changed preprocessed compile for new line
+	  number processing and added an error preprocessed test case.
+
 2016-10-31  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added header/trailer to file not found 

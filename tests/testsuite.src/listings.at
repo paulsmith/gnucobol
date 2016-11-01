@@ -164,23 +164,23 @@ AT_DATA([prog4.lst],
 LINE    PG/LN  A...B............................................................
 
 000001  #line 1 "prog.cob"
-000002
-000003   IDENTIFICATION   DIVISION.
-000004   PROGRAM-ID. prog.
-000005   DATA DIVISION.
-000006   WORKING-STORAGE SECTION.
+000001
+000002   IDENTIFICATION   DIVISION.
+000003   PROGRAM-ID. prog.
+000004   DATA DIVISION.
+000005   WORKING-STORAGE SECTION.
+000006
 000007
 000008
-000009
-000010  #line 1 "copy.inc"
-000011
-000012   01 FIRST-MATCH PIC X(2) VALUE "OK".
-000013  #line 8 "prog.cob"
-000014
-000015   PROCEDURE DIVISION.
-000016   DISPLAY FIRST-MATCH NO ADVANCING
-000017   END-DISPLAY.
-000018   STOP RUN.
+000001  #line 1 "copy.inc"
+000001
+000002   01 FIRST-MATCH PIC X(2) VALUE "OK".
+000008  #line 8 "prog.cob"
+000008
+000009   PROCEDURE DIVISION.
+000010   DISPLAY FIRST-MATCH NO ADVANCING
+000011   END-DISPLAY.
+000012   STOP RUN.
 GnuCOBOL V.R.P   prog.i                    DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
@@ -1090,6 +1090,75 @@ cobc: crud.cob: No such file or directory
 AT_CHECK([$UNIFY_LISTING crud.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
+AT_DATA([prog.cpy], [
+       78  I   VALUE 20.
+       78  J   VALUE 5000.
+       78  M   VALUE 5.
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 TEST-VAR PIC 9(2) VALUE 12.
+       COPY 'prog.cpy'.
+       PROCEDURE        DIVISION.
+           DISPLAY TEST-VAR NO ADVANCING
+           END-DISPLAY
+           MOVE 'AA' TO TEST-VAR
+           DISPLAY TEST-VAR NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_CHECK([$COBC $FLAGS -t prep.lst -E prog.cob && $COMPILE_ONLY -t prog.lst prog.i], [0], [],
+[prog.cob: 11: warning: numeric value is expected
+prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
+])
+
+AT_DATA([prog17.lst],
+[GnuCOBOL V.R.P   prog.i                    DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001  #line 1 "prog.cob"
+000001
+000002   IDENTIFICATION   DIVISION.
+000003   PROGRAM-ID. prog.
+000004   DATA DIVISION.
+000005   WORKING-STORAGE SECTION.
+000006   01 TEST-VAR PIC 9(2) VALUE 12.
+000007
+000001  #line 1 "prog.cpy"
+000001
+000002   78 I VALUE 20.
+000003   78 J VALUE 5000.
+000004   78 M VALUE 5.
+000007  #line 7 "prog.cob"
+000007
+000008   PROCEDURE DIVISION.
+000009   DISPLAY TEST-VAR NO ADVANCING
+000010   END-DISPLAY
+000011   MOVE 'AA' TO TEST-VAR
+warning: numeric value is expected
+000012   DISPLAY TEST-VAR NO ADVANCING
+000013   END-DISPLAY
+000014   STOP RUN.
+GnuCOBOL V.R.P   prog.i                    DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE TYPE           LVL  NAME                           PICTURE
+
+0002 NUMERIC        01   TEST-VAR                       9(2)
+
+1 Warning in program
+0 Errors in program
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CAPTURE_FILE([prog.lis])
+AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -1108,7 +1177,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 [prog.cob: 7: error: CRUD.CPY: No such file or directory
-prog.cob: 12: warning: numeric value is expected
+prog.cob: 11: warning: numeric value is expected
 prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 

@@ -4498,6 +4498,10 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 			}
 		}
 	}
+
+	/* COPY open error restore old file */
+	cb_current_file = old_list_file;
+
 	cb_error ("%s: %s", s, cb_get_strerror ());
 	return -1;
 }
@@ -4640,6 +4644,15 @@ get_new_listing_file (void)
 	cb_current_file->copy_tail = newfile;
 
 	memset (newfile, 0, sizeof (struct list_files));
+	newfile->next = NULL;
+	newfile->copy_head = NULL;
+	newfile->copy_tail = NULL;
+	newfile->err_head = NULL;
+	newfile->err_tail = NULL;
+	newfile->replace_head = NULL;
+	newfile->replace_tail = NULL;
+	newfile->skip_head = NULL;
+	newfile->skip_tail = NULL;
 	newfile->copy_line = cb_source_line;
 	newfile->source_format = cb_source_format;
 	old_list_file = cb_current_file;

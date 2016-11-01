@@ -4925,9 +4925,15 @@ print_program_code (struct list_files *cfile, int in_copy)
 					eof = 1;
 				}
 				pline_cnt++;
+				prec = 0;
 				if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
 							  cfile->source_format != CB_FORMAT_FREE)) {
 					continue;
+				}
+
+				if (!strncmp (pline[0], "#line ", 6)) {
+					line_num = atoi (&pline[0][6]);
+					prec = -1;
 				}
 
 				if (!in_copy) {
@@ -4942,7 +4948,6 @@ print_program_code (struct list_files *cfile, int in_copy)
 					}
 				}
 
-				prec = 0;
 				for (i = 0; i < pline_cnt; i++) {
 					if (pline[i][0]) {
 						if (pline[i][CB_INDICATOR] == '&') {
@@ -6190,6 +6195,15 @@ main (int argc, char **argv)
 		if (cb_src_list_file) {
 			newfile = cobc_malloc (sizeof (struct list_files));
 			memset (newfile, 0, sizeof (struct list_files));
+			newfile->next = NULL;
+			newfile->copy_head = NULL;
+			newfile->copy_tail = NULL;
+			newfile->err_head = NULL;
+			newfile->err_tail = NULL;
+			newfile->replace_head = NULL;
+			newfile->replace_tail = NULL;
+			newfile->skip_head = NULL;
+			newfile->skip_tail = NULL;
 			if (cb_current_file) {
 				cb_current_file->next = newfile;
 			}
