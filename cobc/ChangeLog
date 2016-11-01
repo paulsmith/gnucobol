@@ -3,7 +3,7 @@
 
 	* cobc.c (print_program_code): Scan for "#line " and set line number.
 	  (main): Set struct list_files pointer to NULL.
-	* pplex.l (ppcopy): Restore old list file.
+	* pplex.l (ppcopy): Restore old list file and emit "#line..." on error.
 	  (get_new_listing_file): Set struct list_files pointer to NULL.
 
 2016-10-31  Dave Pitts <dpitts@cozx.com>

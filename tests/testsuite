@@ -853,15 +853,15 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 241;listings.at:763;Wide listing;listing;
 242;listings.at:854;Two source files;listing;
 243;listings.at:927;Error/Warning messages;listing;
-244;listings.at:1226;Symbols: simple;listing comp;
-245;listings.at:1389;Symbols: pointer;listing;
-246;listings.at:1671;Symbols: mutliple programs/functions;listing program function;
-247;listings.at:1790;Symbols: OCCURS/REDEFINES;listing;
-248;listings.at:1899;Conditional compilation;listing;
-249;listings.at:1961;LISTING ON/OFF;listing;
-250;listings.at:2044;File descriptions;listing;
-251;listings.at:2374;Invalid PICTURE strings;listing;
-252;listings.at:2642;Variable format;cobol2002 listing;
+244;listings.at:1222;Symbols: simple;listing comp;
+245;listings.at:1385;Symbols: pointer;listing;
+246;listings.at:1667;Symbols: mutliple programs/functions;listing program function;
+247;listings.at:1786;Symbols: OCCURS/REDEFINES;listing;
+248;listings.at:1895;Conditional compilation;listing;
+249;listings.at:1957;LISTING ON/OFF;listing;
+250;listings.at:2040;File descriptions;listing;
+251;listings.at:2370;Invalid PICTURE strings;listing;
+252;listings.at:2638;Variable format;cobol2002 listing;
 253;run_fundamental.at:23;DISPLAY literals;fundamental;
 254;run_fundamental.at:85;DISPLAY literals, DECIMAL-POINT is COMMA;fundamental;
 255;run_fundamental.at:124;Hexadecimal literal;fundamental;
@@ -20244,7 +20244,7 @@ read at_status <"$at_status_file"
 #AT_START_243
 at_fn_group_banner 243 'listings.at:927' \
   "Error/Warning messages" "                         " 3
-at_xfail=yes
+at_xfail=no
 (
   $as_echo "243. $at_setup_line: testing $at_desc ..."
   $at_traceon
@@ -20777,20 +20777,16 @@ $at_failed && at_fn_log_failure  \
 $at_traceon; }
 
 
-
-## The warning position is currently wrong
-
-
 { set +x
-$as_echo "$at_srcdir/listings.at:1221: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1221"
+$as_echo "$at_srcdir/listings.at:1217: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1217"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1221"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1217"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -20802,7 +20798,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_243
 #AT_START_244
-at_fn_group_banner 244 'listings.at:1226' \
+at_fn_group_banner 244 'listings.at:1222' \
   "Symbols: simple" "                                " 3
 at_xfail=no
 (
@@ -20830,15 +20826,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1245: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1245"
+$as_echo "$at_srcdir/listings.at:1241: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1241"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1245"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1241"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -20886,29 +20882,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1288: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1288"
+$as_echo "$at_srcdir/listings.at:1284: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1284"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1288"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1284"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1290: diff prog15.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1290"
+$as_echo "$at_srcdir/listings.at:1286: diff prog15.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1286"
 ( $at_check_trace; diff prog15.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1290"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1286"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -20929,15 +20925,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1304: \$COMPILE_ONLY -t prog.lst prog2.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog2.cob" "listings.at:1304"
+$as_echo "$at_srcdir/listings.at:1300: \$COMPILE_ONLY -t prog.lst prog2.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog2.cob" "listings.at:1300"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog2.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1304"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1300"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -20975,30 +20971,30 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1336: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1336"
+$as_echo "$at_srcdir/listings.at:1332: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1332"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1336"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1332"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1338: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1338"
+$as_echo "$at_srcdir/listings.at:1334: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1334"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1338"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1334"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21023,15 +21019,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1356: \$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob" "listings.at:1356"
+$as_echo "$at_srcdir/listings.at:1352: \$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob" "listings.at:1352"
 ( $at_check_trace; $COMPILE_ONLY --no-symbols -t prog.lst prog-1.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1356"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1352"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21063,30 +21059,30 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1382: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1382"
+$as_echo "$at_srcdir/listings.at:1378: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1378"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1382"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1378"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1384: diff prog15-1.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1384"
+$as_echo "$at_srcdir/listings.at:1380: diff prog15-1.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1380"
 ( $at_check_trace; diff prog15-1.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1384"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1380"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21098,7 +21094,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_244
 #AT_START_245
-at_fn_group_banner 245 'listings.at:1389' \
+at_fn_group_banner 245 'listings.at:1385' \
   "Symbols: pointer" "                               " 3
 at_xfail=no
 (
@@ -21123,15 +21119,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1405: \$COMPILE P64.cob"
-at_fn_check_prepare_dynamic "$COMPILE P64.cob" "listings.at:1405"
+$as_echo "$at_srcdir/listings.at:1401: \$COMPILE P64.cob"
+at_fn_check_prepare_dynamic "$COMPILE P64.cob" "listings.at:1401"
 ( $at_check_trace; $COMPILE P64.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1405"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1401"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -21186,37 +21182,37 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1454: \$COMPILE_ONLY -t prog.lst prog3.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog3.cob" "listings.at:1454"
+$as_echo "$at_srcdir/listings.at:1450: \$COMPILE_ONLY -t prog.lst prog3.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog3.cob" "listings.at:1450"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog3.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1454"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1450"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1456: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1456"
+$as_echo "$at_srcdir/listings.at:1452: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1452"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1456"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1452"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1459: ./P64"
-at_fn_check_prepare_trace "listings.at:1459"
+$as_echo "$at_srcdir/listings.at:1455: ./P64"
+at_fn_check_prepare_trace "listings.at:1455"
 ( $at_check_trace; ./P64
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -21224,7 +21220,7 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "64" | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1459"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1455"
 if $at_failed; then :
   # Previous test "failed" --> P64 did not show '64' --> 32 bit
 
@@ -21327,15 +21323,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1459: diff prog17-32.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1459"
+$as_echo "$at_srcdir/listings.at:1455: diff prog17-32.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1455"
 ( $at_check_trace; diff prog17-32.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1459"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1455"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21444,15 +21440,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1459: diff prog17-64.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1459"
+$as_echo "$at_srcdir/listings.at:1455: diff prog17-64.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1455"
 ( $at_check_trace; diff prog17-64.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1459"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1455"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21472,7 +21468,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_245
 #AT_START_246
-at_fn_group_banner 246 'listings.at:1671' \
+at_fn_group_banner 246 'listings.at:1667' \
   "Symbols: mutliple programs/functions" "           " 3
 at_xfail=no
 (
@@ -21526,15 +21522,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1716: \$COMPILE_ONLY -t prog.lst prog4.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog4.cob" "listings.at:1716"
+$as_echo "$at_srcdir/listings.at:1712: \$COMPILE_ONLY -t prog.lst prog4.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog4.cob" "listings.at:1712"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog4.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1716"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1712"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -21606,29 +21602,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1783: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1783"
+$as_echo "$at_srcdir/listings.at:1779: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1779"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1783"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1779"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1785: diff prog18.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1785"
+$as_echo "$at_srcdir/listings.at:1781: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1781"
 ( $at_check_trace; diff prog18.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1785"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1781"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21640,7 +21636,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_246
 #AT_START_247
-at_fn_group_banner 247 'listings.at:1790' \
+at_fn_group_banner 247 'listings.at:1786' \
   "Symbols: OCCURS/REDEFINES" "                      " 3
 at_xfail=no
 (
@@ -21685,15 +21681,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1826: \$COMPILE_ONLY -std=mf -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf -t prog.lst prog.cob" "listings.at:1826"
+$as_echo "$at_srcdir/listings.at:1822: \$COMPILE_ONLY -std=mf -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -std=mf -t prog.lst prog.cob" "listings.at:1822"
 ( $at_check_trace; $COMPILE_ONLY -std=mf -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1826"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1822"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -21764,29 +21760,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1892: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1892"
+$as_echo "$at_srcdir/listings.at:1888: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1888"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1892"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1888"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1894: diff prog19.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1894"
+$as_echo "$at_srcdir/listings.at:1890: diff prog19.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1890"
 ( $at_check_trace; diff prog19.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1894"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1890"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21798,7 +21794,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_247
 #AT_START_248
-at_fn_group_banner 248 'listings.at:1899' \
+at_fn_group_banner 248 'listings.at:1895' \
   "Conditional compilation" "                        " 3
 at_xfail=no
 (
@@ -21829,15 +21825,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1921: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1921"
+$as_echo "$at_srcdir/listings.at:1917: \$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob" "listings.at:1917"
 ( $at_check_trace; $COMPILE_ONLY -DACTIVATE2 -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1921"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1917"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -21875,29 +21871,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1954: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1954"
+$as_echo "$at_srcdir/listings.at:1950: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:1950"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1954"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1950"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1956: diff prog16.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:1956"
+$as_echo "$at_srcdir/listings.at:1952: diff prog16.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:1952"
 ( $at_check_trace; diff prog16.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1956"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1952"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -21909,7 +21905,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_248
 #AT_START_249
-at_fn_group_banner 249 'listings.at:1961' \
+at_fn_group_banner 249 'listings.at:1957' \
   "LISTING ON/OFF" "                                 " 3
 at_xfail=no
 (
@@ -21948,15 +21944,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:1989: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1989"
+$as_echo "$at_srcdir/listings.at:1985: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:1985"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1989"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:1985"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -22009,29 +22005,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2037: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2037"
+$as_echo "$at_srcdir/listings.at:2033: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2033"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2037"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2033"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2039: diff prog17.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2039"
+$as_echo "$at_srcdir/listings.at:2035: diff prog17.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2035"
 ( $at_check_trace; diff prog17.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2039"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2035"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -22043,7 +22039,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_249
 #AT_START_250
-at_fn_group_banner 250 'listings.at:2044' \
+at_fn_group_banner 250 'listings.at:2040' \
   "File descriptions" "                              " 3
 at_xfail=no
 (
@@ -22168,8 +22164,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2160: \$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob" "listings.at:2160"
+$as_echo "$at_srcdir/listings.at:2156: \$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob" "listings.at:2156"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst -tlines=0 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -22185,7 +22181,7 @@ prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2160"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2156"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -22388,29 +22384,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2367: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2367"
+$as_echo "$at_srcdir/listings.at:2363: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2363"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2367"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2363"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2369: diff prog18.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2369"
+$as_echo "$at_srcdir/listings.at:2365: diff prog18.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2365"
 ( $at_check_trace; diff prog18.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2369"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2365"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -22422,7 +22418,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_250
 #AT_START_251
-at_fn_group_banner 251 'listings.at:2374' \
+at_fn_group_banner 251 'listings.at:2370' \
   "Invalid PICTURE strings" "                        " 3
 at_xfail=no
 (
@@ -22488,8 +22484,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2431: \$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob" "listings.at:2431"
+$as_echo "$at_srcdir/listings.at:2427: \$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob" "listings.at:2427"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst -tlines=0 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -22537,7 +22533,7 @@ prog.cob: 45: error: PICTURE string must contain at least one of the set A, N, X
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/listings.at:2431"
+at_fn_check_status 1 $at_status "$at_srcdir/listings.at:2427"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -22705,29 +22701,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2635: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2635"
+$as_echo "$at_srcdir/listings.at:2631: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2631"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2635"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2631"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2637: diff prog19.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2637"
+$as_echo "$at_srcdir/listings.at:2633: diff prog19.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2633"
 ( $at_check_trace; diff prog19.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2637"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2633"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }
@@ -22739,7 +22735,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_251
 #AT_START_252
-at_fn_group_banner 252 'listings.at:2642' \
+at_fn_group_banner 252 'listings.at:2638' \
   "Variable format" "                                " 3
 at_xfail=no
 (
@@ -22761,15 +22757,15 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2656: \$COMPILE_ONLY -t prog.lst prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:2656"
+$as_echo "$at_srcdir/listings.at:2652: \$COMPILE_ONLY -t prog.lst prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -t prog.lst prog.cob" "listings.at:2652"
 ( $at_check_trace; $COMPILE_ONLY -t prog.lst prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2656"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2652"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -22799,29 +22795,29 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2681: \$UNIFY_LISTING prog.lst prog.lis"
-at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2681"
+$as_echo "$at_srcdir/listings.at:2677: \$UNIFY_LISTING prog.lst prog.lis"
+at_fn_check_prepare_dynamic "$UNIFY_LISTING prog.lst prog.lis" "listings.at:2677"
 ( $at_check_trace; $UNIFY_LISTING prog.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2681"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2677"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/listings.at:2683: diff prog20.lst prog.lis"
-at_fn_check_prepare_trace "listings.at:2683"
+$as_echo "$at_srcdir/listings.at:2679: diff prog20.lst prog.lis"
+at_fn_check_prepare_trace "listings.at:2679"
 ( $at_check_trace; diff prog20.lst prog.lis
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2683"
+at_fn_check_status 0 $at_status "$at_srcdir/listings.at:2679"
 $at_failed && at_fn_log_failure  \
 "prog.lis"
 $at_traceon; }

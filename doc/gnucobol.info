@@ -1777,7 +1777,7 @@ Options:
   -T <file>             generate and place a wide program listing into <file>
   -t <file>             generate and place a program listing into <file>
   --tlines=<lines>      specify lines per page in listing, default = 55
-  --no_symbols          specify no symbols in listing
+  --no-symbols          specify no symbols in listing
   -P[=<dir or file>]    generate preprocessed program listing (.lst)
   -Xref                 generate cross reference through 'cobxref'
                         (V. Coen's 'cobxref' must be in path)

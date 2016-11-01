@@ -1873,7 +1873,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-	puts (_("  --no_symbols          specify no symbols in listing"));
+	puts (_("  --no-symbols          specify no symbols in listing"));
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
 			"                        (V. Coen's 'cobxref' must be in path)"));
@@ -2366,7 +2366,7 @@ process_command_line (const int argc, char **argv)
 			cb_lines_per_page = atoi(cob_optarg);
 			break;
 		case '@':
-			/* --no_symbols : No symbols in listing */
+			/* --no-symbols : No symbols in listing */
 			cb_no_symbols = 1;
 			break;
 

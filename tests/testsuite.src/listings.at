@@ -1214,10 +1214,6 @@ SIZE TYPE           LVL  NAME                           PICTURE
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CAPTURE_FILE([prog.lis])
-
-## The warning position is currently wrong
-
-AT_XFAIL_IF(true)
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CLEANUP

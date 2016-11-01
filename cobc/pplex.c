@@ -4501,6 +4501,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 
 	/* COPY open error restore old file */
 	cb_current_file = old_list_file;
+	fprintf (ppout, "#line %d \"%s\"\n", cb_source_line, cb_source_file);
 
 	cb_error ("%s: %s", s, cb_get_strerror ());
 	return -1;
