@@ -4730,7 +4730,7 @@ free_replace_list (struct list_files *cfile, const int line_num)
 	       && cfile->replace_head->firstline < line_num) {
 		rep = cfile->replace_head;
 		cfile->replace_head = rep->next;
-		free (rep);
+		cobc_free (rep);
 	}
 }
 
@@ -4834,7 +4834,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					}
 					print_program_code (cur, 1);
 					cfile->copy_head = cur->next;
-					free (cur);
+					cobc_free (cur);
 				}
 			} else {
 				for (rep = cfile->replace_head;
@@ -4981,7 +4981,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 						}
 						print_program_code (cur, 1);
 						cfile->copy_head = cur->next;
-						free (cur);
+						cobc_free (cur);
 					}
 				}
 				strcpy (pline[0], pline[pline_cnt]);
@@ -5009,7 +5009,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 			cur = cfile->copy_head;
 			print_program_code (cur, 1);
 			cfile->copy_head = cur->next;
-			free (cur);
+			cobc_free (cur);
 		}
 	}
 
@@ -5022,7 +5022,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 	while (cfile->err_head) {
 		err = cfile->err_head;
 		cfile->err_head = err->next;
-		free (err);
+		cobc_free (err);
 	}
 }
 
@@ -5084,7 +5084,7 @@ process_translate (struct filename *fn)
 			cb_current_file = cb_current_file->next;
 		}
 		cb_listing_files = cb_listing_files->next;
-		free (cfile);
+		cobc_free (cfile);
 
 		/* Print program trailer */
 		print_program_trailer();
@@ -6195,15 +6195,6 @@ main (int argc, char **argv)
 		if (cb_src_list_file) {
 			newfile = cobc_malloc (sizeof (struct list_files));
 			memset (newfile, 0, sizeof (struct list_files));
-			newfile->next = NULL;
-			newfile->copy_head = NULL;
-			newfile->copy_tail = NULL;
-			newfile->err_head = NULL;
-			newfile->err_tail = NULL;
-			newfile->replace_head = NULL;
-			newfile->replace_tail = NULL;
-			newfile->skip_head = NULL;
-			newfile->skip_tail = NULL;
 			if (cb_current_file) {
 				cb_current_file->next = newfile;
 			}

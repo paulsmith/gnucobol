@@ -1,4 +1,11 @@
 
+2016-11-02  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (main): Revert struct list_files pointer to NULL changes.
+	  Change calls from free() to cobc_free().
+	* pplex.l (get_new_listing_file): Revert struct list_files pointer to
+	  NULL changes.
+
 2016-11-01  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_program_code): Scan for "#line " and set line number.
