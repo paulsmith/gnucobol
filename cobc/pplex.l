@@ -1375,6 +1375,39 @@ start:
 		goto start;
 	}
 
+	/*
+	  Check that line isn't start of ID DIVISION comment paragraph.
+	*/
+	if (comment_allowed) {
+		if (!strncasecmp (bp, "AUTHOR", 6)) {
+			paragraph_name = "AUTHOR";
+		} else if (!strncasecmp (bp, "DATE-WRITTEN", 12)) {
+			paragraph_name = "DATE-WRITTEN";
+		} else if (!strncasecmp (bp, "DATE-MODIFIED", 13)) {
+			paragraph_name = "DATE-MODIFIED";
+		} else if (!strncasecmp (bp, "DATE-COMPILED", 13)) {
+			paragraph_name = "DATE-COMPILED";
+		} else if (!strncasecmp (bp, "INSTALLATION", 12)) {
+			paragraph_name = "INSTALLATION";
+		} else if (!strncasecmp (bp, "REMARKS", 7)) {
+			paragraph_name = "REMARKS";
+		} else if (!strncasecmp (bp, "SECURITY", 8)) {
+			paragraph_name = "SECURITY";
+		} else {
+			paragraph_name = NULL;
+		}
+
+		if (paragraph_name
+		    && !is_cobol_word_char (bp[strlen (paragraph_name)])) {
+			cb_plex_verify (newline_count, cb_comment_paragraphs,
+					paragraph_name);
+			/* Skip comments until the end of line. */
+			within_comment = 1;
+			++newline_count;
+			goto start;
+		}
+	}
+	
 	/* Return when free format (no floating comments removed!) */
 	if (cb_source_format == CB_FORMAT_FREE) {
 		within_comment = 0;
@@ -1492,40 +1525,6 @@ start:
 		}
 		quotation_mark = 0;
 		consecutive_quotation = 0;
-	}
-
-	/*
-	  Check that line isn't start of ID DIVISION comment paragraph.
-	  This check is done here to prevent parsing of quote marks.
-	*/
-	if (comment_allowed) {
-		if (!strncasecmp (bp, "AUTHOR", 6)) {
-			paragraph_name = "AUTHOR";
-		} else if (!strncasecmp (bp, "DATE-WRITTEN", 12)) {
-			paragraph_name = "DATE-WRITTEN";
-		} else if (!strncasecmp (bp, "DATE-MODIFIED", 13)) {
-			paragraph_name = "DATE-MODIFIED";
-		} else if (!strncasecmp (bp, "DATE-COMPILED", 13)) {
-			paragraph_name = "DATE-COMPILED";
-		} else if (!strncasecmp (bp, "INSTALLATION", 12)) {
-			paragraph_name = "INSTALLATION";
-		} else if (!strncasecmp (bp, "REMARKS", 7)) {
-			paragraph_name = "REMARKS";
-		} else if (!strncasecmp (bp, "SECURITY", 8)) {
-			paragraph_name = "SECURITY";
-		} else {
-			paragraph_name = NULL;
-		}
-
-		if (paragraph_name
-		    && !is_cobol_word_char (bp[strlen (paragraph_name)])) {
-			cb_plex_verify (newline_count, cb_comment_paragraphs,
-					paragraph_name);
-			/* Skip comments until the end of line. */
-			within_comment = 1;
-			++newline_count;
-			goto start;
-		}
 	}
 
 	/* Check if string literal is to be continued */

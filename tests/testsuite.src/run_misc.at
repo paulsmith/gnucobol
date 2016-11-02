@@ -5080,16 +5080,18 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID.    prog.
        DATE-written.  hello'".
-      * Written is intentionally lowercase.
-      * extra " to fix syntax highlighting
+      *> Written is intentionally lowercase.
+      *> extra " to fix syntax highlighting
        PROCEDURE      DIVISION.
            DISPLAY "Hello, world!"
            .
-
 ])
 
 AT_CHECK([$COMPILE -o prog prog.cob], [0], [],
 [prog.cob: 4: warning: DATE-WRITTEN is obsolete in GnuCOBOL
+])
+AT_CHECK([$COMPILE -free -o prog prog.cob], [0], [],
+[prog.cob: 3: warning: DATE-WRITTEN is obsolete in GnuCOBOL
 ])
 AT_CHECK([./prog], [0],
 [Hello, world!

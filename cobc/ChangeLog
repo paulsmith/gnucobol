@@ -1,4 +1,9 @@
 
+2016-11-02  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l (ppinput): fixed comment paragraphs being rejected in free
+	  format (see bug #297).
+
 2016-11-02  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (main): Revert struct list_files pointer to NULL changes.
