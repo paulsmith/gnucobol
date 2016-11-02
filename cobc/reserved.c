@@ -2767,8 +2767,8 @@ try_remove_removal (struct amendment_list * const addition)
 	while (l) {
 		/* Look for elements with the same word. */
 		if (cob_strcasecmp (addition->word, l->word)) {
-			l = l->next;
 			prev = l;
+			l = l->next;
 			continue;
 		}
 

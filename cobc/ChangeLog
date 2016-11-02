@@ -3,6 +3,7 @@
 
 	* pplex.l (ppinput): fixed comment paragraphs being rejected in free
 	  format (see bug #297).
+	* reserved.c (try_remove_removal): stopped freed memory being read.
 
 2016-11-02  Dave Pitts <dpitts@cozx.com>
 
