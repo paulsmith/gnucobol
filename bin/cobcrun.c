@@ -198,10 +198,11 @@ cobcrun_initial_module (char *module_argument)
 		memset (env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_LIBRARY_PATH");
 		if (envptr) {
-			snprintf (env_space, COB_MEDIUM_BUFF, "%s%c%s", pathname, PATHSEP_CHAR, envptr);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", pathname, PATHSEP_CHAR, envptr);
 		} else {
-			snprintf (env_space, COB_MEDIUM_BUFF, "%s", pathname);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s", pathname);
 		}
+		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
 #if HAVE_SETENV
 		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
 		if (envop_return) {
@@ -223,10 +224,11 @@ cobcrun_initial_module (char *module_argument)
 		memset(env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_PRE_LOAD");
 		if (envptr) {
-			snprintf (env_space, COB_MEDIUM_BUFF, "%s%c%s", filename, PATHSEP_CHAR, envptr);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", filename, PATHSEP_CHAR, envptr);
 		} else {
-			snprintf (env_space, COB_MEDIUM_BUFF, "%s", filename);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s", filename);
 		}
+		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
 #if HAVE_SETENV
 		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
 		if (envop_return) {
