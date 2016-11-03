@@ -105,17 +105,17 @@ static struct includelist {
 
 /* Local functions */
 
-static char *
+static char const *
 read_string (const char *text)
 {
-	char			*p;
-	char			*s;
+	char			*p = (char *) text;
+	char			const *s;
 
-	s = cobc_main_strdup (text);
-	if (*s == '\"') {
-		s++;
+	if (*p == '\"') {
+		p++;
 	}
-	for (p = s; *p; p++) {
+	s = cobc_main_strdup (p);
+	for (p = (char *)s; *p; p++) {
 		if (*p == '\"') {
 			*p = '\0';
 		}
@@ -342,7 +342,9 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				strcmp (name, "includeif") == 0) {
 				/* Include another conf file */
 				s = cob_expand_env_string((char *)val);
-				strcpy (buff, s);
+				strncpy (buff, s, COB_SMALL_MAX);
+				/* special case: use cob_free (libcob) here as the memory
+				   was allocated in cob_expand_env_string -> libcob */
 				cob_free (s);
 				cobc_main_free ((void *) val);
 				if (strcmp (name, "includeif") == 0) {

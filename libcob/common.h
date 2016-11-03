@@ -443,7 +443,7 @@
 #define	COB_NOINLINE	__declspec(noinline)
 #define	COB_A_INLINE	__forceinline
 #define	COB_A_COLD
-#define	COB_HAVE_STEXPR	1
+/* #undef	COB_HAVE_STEXPR */
 
 #else
 

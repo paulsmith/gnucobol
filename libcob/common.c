@@ -4211,15 +4211,12 @@ cob_expand_env_string (char *strval)
 	unsigned int	j = 0;
 	unsigned int	k = 0;
 	unsigned int	envlen = 1280;
-	char		*env = cob_malloc(envlen);
+	char		*env;
 	char		*str = strval;
 	char		ename[128] = { '\0' };
 	char		*penv;
 
-	if (!env) {
-		return str;
-	}
-
+	env = cob_malloc(envlen);
 	for (k = 0; strval[k] != 0; k++) {
 		/* String almost full?; Expand it */
 		if(j >= envlen - 128) {
@@ -4919,8 +4916,9 @@ cob_load_config (void)
 		} else {
 			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%s%s", COB_CONFIG_DIR, SLASH_STR, "runtime.cfg");
 		}
+		conf_file[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
 		isoptional = 1;			/* If not present, then just use env vars */
-		if(strchr(conf_file,PATHSEP_CHAR) != NULL) {
+		if (strchr(conf_file,PATHSEP_CHAR) != NULL) {
 			conf_runtime_error(0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_CONFIG_DIR");
 			conf_runtime_error(1, _("should not contain '%c'"),PATHSEP_CHAR);
 			return -1;

@@ -3710,6 +3710,7 @@ set_picture (struct cb_field *field, char *picture, int picture_len)
 		   || field->usage == CB_USAGE_COMP_X) {
 		if (field->pic) {
 			strncpy (picture, field->pic->orig, picture_len - 1 - usage_len);
+			picture[CB_LIST_PICSIZE - 1] = 0;
 			strcat (picture, " ");
 		}
 	} else {
@@ -6327,14 +6328,14 @@ main (int argc, char **argv)
 	cobc_objects_buffer = cobc_main_malloc (cobc_objects_len);
 
 	if (file_list) {
-	/* Link */
-	if (cb_compile_level == CB_LEVEL_LIBRARY) {
-		/* Multi-program module */
-		status = process_library (file_list);
-	} else {
-		/* Executable */
-		status = process_link (file_list);
-	}
+		/* Link */
+		if (cb_compile_level == CB_LEVEL_LIBRARY) {
+			/* Multi-program module */
+			status = process_library (file_list);
+		} else {
+			/* Executable */
+			status = process_link (file_list);
+		}
 	}
 
 	/* We have completed */

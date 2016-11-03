@@ -5496,6 +5496,12 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 	cob_flags_t	disp_attrs;
 	cb_tree	x;
 
+	if (!values) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"emit_default_field_display_for_all_but_last", "values");
+		COBC_ABORT ();
+	}
+
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l)) {
 		pos = get_default_field_line_column (is_first_display_item);
 		is_first_display_item = 0;
@@ -5519,6 +5525,11 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 	int	is_first_item;
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
+	if (!l) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"emit_field_display_for_last", "values");
+		COBC_ABORT ();
+	}
 	last_elt = CB_VALUE (l);
 
 	if (line_column == NULL) {

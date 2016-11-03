@@ -2614,7 +2614,9 @@ static void
 free_amendment (struct amendment_list *to_free)
 {
 	cobc_main_free (to_free->word);
-	cobc_main_free (to_free->alias_for);
+	if (to_free->alias_for) {
+		cobc_main_free (to_free->alias_for);
+	}
 	cobc_main_free (to_free);
 }
 
