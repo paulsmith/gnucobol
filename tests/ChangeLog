@@ -1,4 +1,11 @@
 
+2016-11-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* listings-sed.sh: moved from testsuite.src/listings-sed.sh
+	* listings-sed.sh: adjustment for exotic shells
+	* atlocal.in, atlocal_win: adjusted listings-sed.sh path in UNIFY_LISTING
+	* Makefile.am: added listings-sed.sh to EXTRA_DIST
+
 2016-11-01  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Changed preprocessed compile for new line

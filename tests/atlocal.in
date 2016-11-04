@@ -39,7 +39,7 @@ OBJECT_EXT="@COB_OBJECT_EXT@"
 PATHSEP=":"
 
 # Helper script to unify listings (repleace version, date, time)
-UNIFY_LISTING="${TEMPLATE}/listings-sed.sh"
+UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 
 # unset all environment variables that are used in libcob for runtime configuration
 for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); do unset $cobenv; done

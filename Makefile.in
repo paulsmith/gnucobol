@@ -964,6 +964,7 @@ dist-hook:
 	chmod 644 $(distdir)/TODO
 	chmod 644 $(distdir)/gnu-cobol.spec
 	chmod 755 $(distdir)/doc/cobcinfo.sh
+	chmod 755 $(distdir)/tests/listings-sed.sh
 	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
 	touch $(distdir)/bin/cobcrun.1
 	touch $(distdir)/cobc/cobc.1

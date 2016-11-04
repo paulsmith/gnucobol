@@ -49,7 +49,7 @@ PATH="$COB_WIN_BUILDPATH:${PATH}"
 export PATH
 
 # Helper script to unify listings (repleace version, date, time)
-UNIFY_LISTING="${TEMPLATE}/listings-sed.sh"
+UNIFY_LISTING="$COB_SRC_PATH/tests/listings-sed.sh"
 
 # unset all environment variables that are used in libcob for runtime configuration
 for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); do unset $cobenv; done

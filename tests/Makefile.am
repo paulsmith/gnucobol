@@ -60,7 +60,7 @@ testsuite_sources = \
 	testsuite.src/numeric-display.cob
 
 EXTRA_DIST = $(srcdir)/package.m4 $(TESTSUITE) \
-	$(srcdir)/testsuite.at \
+	$(srcdir)/testsuite.at $(srcdir)/listings-sed.sh \
 	$(testsuite_sources)
 
 DISTCLEANFILES = atconfig
