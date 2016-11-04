@@ -101,10 +101,10 @@ $(MODULES): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
 	@echo "	@. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 	@echo "	@echo \"Comparing test results for module directory $@\"" >> $@/Makefile
-	@echo "	diff $(COB85DIR)/$@.txt report.txt" >> $@/Makefile
+	@echo "	diff $(COB85DIR)/$@.txt report.txt || true" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 #	@echo "	. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl -O" >> $@/Makefile
-#	@echo "	diff $(COB85DIR)/$@.txt report.txt" >> $@/Makefile
+#	@echo "	diff $(COB85DIR)/$@.txt report.txt || true" >> $@/Makefile
 	@echo "Finished module directory $@."
 
 EXEC85: newcob.val

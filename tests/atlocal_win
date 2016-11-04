@@ -24,7 +24,7 @@
 
 # CC="gcc -std=gnu99"
 
-COB_SRC_PATH="$(cd .. ; pwd)"
+COB_SRC_PATH="$(cd ${abs_srcdir}/.. ; pwd)"
 COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/release"
 
 COB_BIGENDIAN="no"
