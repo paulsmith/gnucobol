@@ -746,10 +746,10 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 134;syn_file.at:370;variable record length DEPENDING item;file;
 135;syn_file.at:452;DECLARATIVES invalid procedure reference (1);file;
 136;syn_file.at:492;DECLARATIVES invalid procedure reference (2);file;
-137;syn_file.at:532;DECLARATIVES invalid procedure reference (3);file;
-138;syn_file.at:572;RECORDING MODE;file extensions;
-139;syn_file.at:601;CODE-SET clause;file;
-140;syn_file.at:637;CODE-SET FOR clause;file extensions;
+137;syn_file.at:557;DECLARATIVES invalid procedure reference (3);file;
+138;syn_file.at:598;RECORDING MODE;file extensions;
+139;syn_file.at:627;CODE-SET clause;file;
+140;syn_file.at:663;CODE-SET FOR clause;file extensions;
 141;syn_reportwriter.at:23;REPORT SECTION clause numbers;report;
 142;syn_misc.at:22;Ambiguous AND/OR;misc expression;
 143;syn_misc.at:48;invalid expression;misc;
@@ -1043,7 +1043,7 @@ at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
 431;run_misc.at:4995;CALL with program prototypes;runmisc;
 432;run_misc.at:5051;PICTURE with constant-name;runmisc;
 433;run_misc.at:5076;Quote marks in comment paragraphs;runmisc;
-434;run_misc.at:5099;MOVE with -fbinary-truncate;runmisc;
+434;run_misc.at:5101;MOVE with -fbinary-truncate;runmisc;
 435;run_file.at:21;READ INTO AT-END sequence;runfile;
 436;run_file.at:58;First READ on empty SEQUENTIAL INDEXED file;runfile;
 437;run_file.at:98;REWRITE a RELATIVE file with RANDOM access;runfile;
@@ -11114,32 +11114,93 @@ cat >prog.cob <<'_ATEOF'
        P02.
            DISPLAY "OK"
            END-DISPLAY.
+      * programs may do this -> nothing happens there with TEST-FILE
+           PERFORM PPOK.
+      * programs should not do this
+      * (the compiler currently cannot distinguish this)
            PERFORM PP02.
        END DECLARATIVES.
        PP01 SECTION.
        PP02.
            OPEN  INPUT TEST-FILE.
            CLOSE TEST-FILE.
+       PP03.
+           DISPLAY 'LOG OUTPUT HERE'.
+       PPOK.
            STOP RUN.
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_file.at:523: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:523"
+$as_echo "$at_srcdir/syn_file.at:530: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:530"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo >>"$at_stderr"; $as_echo "prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 20: error: 'PP02' is not in DECLARATIVES
+prog.cob: 21: error: 'PPOK' is not in DECLARATIVES
+prog.cob: 24: error: 'PP02' is not in DECLARATIVES
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:523"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:530"
 $at_failed && at_fn_log_failure
 $at_traceon; }
+
+
+{ set +x
+$as_echo "$at_srcdir/syn_file.at:537: \$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob" "syn_file.at:537"
+( $at_check_trace; $COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_file.at:537"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+{ set +x
+$as_echo "$at_srcdir/syn_file.at:539: \$COMPILE_ONLY -freference-out-of-declaratives=warning prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -freference-out-of-declaratives=warning prog.cob" "syn_file.at:539"
+( $at_check_trace; $COMPILE_ONLY -freference-out-of-declaratives=warning prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "prog.cob: in section 'P01':
+prog.cob: in paragraph 'P02':
+prog.cob: 21: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 24: warning: 'PP02' is not in DECLARATIVES
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_file.at:539"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+{ set +x
+$as_echo "$at_srcdir/syn_file.at:546: \$COMPILE_ONLY -frelax-syntax prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY -frelax-syntax prog.cob" "syn_file.at:546"
+( $at_check_trace; $COMPILE_ONLY -frelax-syntax prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "prog.cob: in section 'P01':
+prog.cob: in paragraph 'P02':
+prog.cob: 21: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 24: warning: 'PP02' is not in DECLARATIVES
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/syn_file.at:546"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
 
 
   set +x
@@ -11148,7 +11209,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_136
 #AT_START_137
-at_fn_group_banner 137 'syn_file.at:532' \
+at_fn_group_banner 137 'syn_file.at:557' \
   "DECLARATIVES invalid procedure reference (3)" "   " 2
 at_xfail=no
 (
@@ -11182,25 +11243,26 @@ cat >prog.cob <<'_ATEOF'
        PP02.
            OPEN  INPUT TEST-FILE.
            CLOSE TEST-FILE.
+           PERFORM P02.
            GO TO P02.
            STOP RUN.
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_file.at:563: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:563"
+$as_echo "$at_srcdir/syn_file.at:589: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:589"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo >>"$at_stderr"; $as_echo "prog.cob: in section 'PP01':
 prog.cob: in paragraph 'PP02':
-prog.cob: 25: error: invalid reference to 'P02' (in DECLARATIVES)
+prog.cob: 26: error: invalid reference to 'P02' (in DECLARATIVES)
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:563"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:589"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11211,7 +11273,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_137
 #AT_START_138
-at_fn_group_banner 138 'syn_file.at:572' \
+at_fn_group_banner 138 'syn_file.at:598' \
   "RECORDING MODE" "                                 " 2
 at_xfail=no
 (
@@ -11243,8 +11305,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_file.at:595: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:595"
+$as_echo "$at_srcdir/syn_file.at:621: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:621"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11253,7 +11315,7 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 12: error: RECORDING MODE U or S can on
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:595"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:621"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11263,7 +11325,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_138
 #AT_START_139
-at_fn_group_banner 139 'syn_file.at:601' \
+at_fn_group_banner 139 'syn_file.at:627' \
   "CODE-SET clause" "                                " 2
 at_xfail=no
 (
@@ -11298,8 +11360,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_file.at:627: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:627"
+$as_echo "$at_srcdir/syn_file.at:653: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:653"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11312,7 +11374,7 @@ prog.cob: 20: warning: CODE-SET is not implemented
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:627"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:653"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -11322,7 +11384,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_139
 #AT_START_140
-at_fn_group_banner 140 'syn_file.at:637' \
+at_fn_group_banner 140 'syn_file.at:663' \
   "CODE-SET FOR clause" "                            " 2
 at_xfail=no
 (
@@ -11356,8 +11418,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/syn_file.at:662: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:662"
+$as_echo "$at_srcdir/syn_file.at:688: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "syn_file.at:688"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -11369,7 +11431,7 @@ prog.cob: 16: error: FOR item 'z' is in different record to 'x'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:662"
+at_fn_check_status 1 $at_status "$at_srcdir/syn_file.at:688"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -39723,18 +39785,17 @@ cat >prog.cob <<'_ATEOF'
        IDENTIFICATION DIVISION.
        PROGRAM-ID.    prog.
        DATE-written.  hello'".
-      * Written is intentionally lowercase.
-      * extra " to fix syntax highlighting
+      *> Written is intentionally lowercase.
+      *> extra " to fix syntax highlighting
        PROCEDURE      DIVISION.
            DISPLAY "Hello, world!"
            .
-
 _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5091: \$COMPILE -o prog prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -o prog prog.cob" "run_misc.at:5091"
+$as_echo "$at_srcdir/run_misc.at:5090: \$COMPILE -o prog prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -o prog prog.cob" "run_misc.at:5090"
 ( $at_check_trace; $COMPILE -o prog prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -39743,13 +39804,28 @@ echo >>"$at_stderr"; $as_echo "prog.cob: 4: warning: DATE-WRITTEN is obsolete in
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5091"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5090"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5094: ./prog"
-at_fn_check_prepare_trace "run_misc.at:5094"
+$as_echo "$at_srcdir/run_misc.at:5093: \$COMPILE -free -o prog prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -free -o prog prog.cob" "run_misc.at:5093"
+( $at_check_trace; $COMPILE -free -o prog prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "prog.cob: 3: warning: DATE-WRITTEN is obsolete in GnuCOBOL
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5093"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/run_misc.at:5096: ./prog"
+at_fn_check_prepare_trace "run_misc.at:5096"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -39758,7 +39834,7 @@ at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "Hello, world!
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5094"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5096"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -39768,7 +39844,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_433
 #AT_START_434
-at_fn_group_banner 434 'run_misc.at:5099' \
+at_fn_group_banner 434 'run_misc.at:5101' \
   "MOVE with -fbinary-truncate" "                    " 4
 at_xfail=no
 (
@@ -39816,21 +39892,21 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5138: \$COMPILE prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE prog.cob" "run_misc.at:5138"
+$as_echo "$at_srcdir/run_misc.at:5140: \$COMPILE prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE prog.cob" "run_misc.at:5140"
 ( $at_check_trace; $COMPILE prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5138"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5140"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5139: ./prog"
-at_fn_check_prepare_trace "run_misc.at:5139"
+$as_echo "$at_srcdir/run_misc.at:5141: ./prog"
+at_fn_check_prepare_trace "run_misc.at:5141"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -39841,27 +39917,27 @@ x IS ZERO
 x IS ZERO
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5139"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5141"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5145: \$COMPILE -fno-binary-truncate prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -fno-binary-truncate prog.cob" "run_misc.at:5145"
+$as_echo "$at_srcdir/run_misc.at:5147: \$COMPILE -fno-binary-truncate prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -fno-binary-truncate prog.cob" "run_misc.at:5147"
 ( $at_check_trace; $COMPILE -fno-binary-truncate prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5145"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5147"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:5146: ./prog"
-at_fn_check_prepare_trace "run_misc.at:5146"
+$as_echo "$at_srcdir/run_misc.at:5148: ./prog"
+at_fn_check_prepare_trace "run_misc.at:5148"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -39872,7 +39948,7 @@ x >= 10000
 x >= 10000
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5146"
+at_fn_check_status 0 $at_status "$at_srcdir/run_misc.at:5148"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
