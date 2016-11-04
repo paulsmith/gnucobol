@@ -162,6 +162,8 @@ int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
 int			cb_lines_per_page = CB_MAX_LINES;
 int			cb_no_symbols = 0;
+#define		CB_LISTING_DATE_BUFF	48
+#define		CB_LISTING_DATE_MAX		(CB_LISTING_DATE_BUFF - 1)
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
 struct list_files	*cb_listing_files = NULL;
 struct list_files	*cb_current_file = NULL;
@@ -2355,7 +2357,7 @@ process_command_line (const int argc, char **argv)
 			/* -t : Generate listing */
 			if (!cb_listing_outputfile) {
 				cb_listing_outputfile = cobc_strdup (cob_optarg);
-				curtime = time(NULL);
+				curtime = time (NULL);
 				strcpy (cb_listing_date, ctime(&curtime));
 				*strchr (cb_listing_date, '\n') = '\0';
 			}
@@ -2569,7 +2571,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'W':
-			/* -W : Turn on warnings */
+			/* -Wall : Turn on most warnings */
 			warningopt = 1;
 #define	CB_WARNDEF(var,name,doc)	var = 1;
 #define	CB_ONWARNDEF(var,name,doc)
@@ -2581,7 +2583,7 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'Z':
-			/* -W : Turn on all warnings */
+			/* -W : Turn on every warning */
 			warningopt = 1;
 #define	CB_WARNDEF(var,name,doc)	var = 1;
 #define	CB_ONWARNDEF(var,name,doc)
@@ -4854,7 +4856,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 static void
 print_program_code (struct list_files *cfile, int in_copy)
 {
-	FILE			*fd;
+	FILE			*fd = NULL;
 	struct list_replace	*rep;
 	struct list_files	*cur;
 	struct list_error	*err;
@@ -4906,7 +4908,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 		fprintf (stdout, "      line[%d]: %d\n", i, skip->skipline);
 	}
 #endif
-	fd = fopen (cfile->name, "r");
+	if (cfile->name) {
+		fd = fopen (cfile->name, "r");
+	}
 	if (fd != NULL) {
 		line_num = 1;
 		pline_cnt = 0;
