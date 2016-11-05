@@ -409,28 +409,42 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
-		if (cb_warn_terminator) {
-			cb_warning_x (stmt,
-				_("%s statement not terminated by END-%s"),
-				name, name);
-		}
+	} else {
+		cobc_err_msg ("call to '%s' without any open term for %s",
+			"terminator_warning", name);
+		COBC_ABORT ();
 	}
+	if (cb_warn_terminator) {
+		cb_warning_x (CB_TREE (current_statement),
+			_("%s statement not terminated by END-%s"),
+			name, name);
+	}
+
 	/* Free tree associated with terminator */
-	cobc_parse_free (stmt);
+	if (stmt) {
+		cobc_parse_free (stmt);
+	}
 }
 
 static void
 terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 {
 	check_unreached = 0;
-	cb_error_x (CB_TREE (current_statement),
-			_("%s statement not terminated by END-%s"),
-			name, name);
 	if (term_array[termid]) {
 		term_array[termid]--;
+	} else {
+		cobc_err_msg ("call to '%s' without any open term for %s",
+			"terminator_error", name);
+		COBC_ABORT ();
 	}
+	cb_error_x (CB_TREE (current_statement),
+		_("%s statement not terminated by END-%s"),
+		name, name);
+
 	/* Free tree associated with terminator */
-	cobc_parse_free (stmt);
+	if (stmt) {
+		cobc_parse_free (stmt);
+	}
 }
 
 static void
@@ -439,9 +453,15 @@ terminator_clear (cb_tree stmt, const unsigned int termid)
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
+	} else {
+		cobc_err_msg ("call to '%s' without any open term for %s",
+			"terminator_warning", current_statement->name);
+		COBC_ABORT ();
 	}
 	/* Free tree associated with terminator */
-	cobc_parse_free (stmt);
+	if (stmt) {
+		cobc_parse_free (stmt);
+	}
 }
 
 static int
