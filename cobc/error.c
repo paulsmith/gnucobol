@@ -578,6 +578,14 @@ ambiguous_error (cb_tree x)
 	}
 }
 
+/* error routine for flex */
+void
+flex_fatal_error (const char *msg, const char * filename, const int line_num)
+{
+	cobc_err_msg (_ ("fatal error: %s"), msg);
+	cobc_abort (filename, line_num);
+}
+
 void
 group_error (cb_tree x, const char *clause)
 {

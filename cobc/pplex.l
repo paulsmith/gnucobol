@@ -88,6 +88,13 @@ static int ppwrap (void) {
 #include "cobc.h"
 #include "ppparse.h"
 
+/* ignore unused functions here as flex generates unused ones */
+#ifdef	__GNUC__
+#if	__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+#endif
+
 #define PLEX_COND_DEPTH		16
 
 struct copy_info {

@@ -34,9 +34,6 @@ cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac
 	$(MAKE) $(AM_MAKEFLAGS) cobc$(EXEEXT)
 	help2man --output=cobc.1  --info-page=gnucobol ./cobc$(EXEEXT)
 
-SEDS = \(\#if defined (__STDC_VERSION__) \&\& __STDC_VERSION__ >= 199901L\)\n\n
-SEDE = \1 \\\n\&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)\n\n
-
 BUILT_SOURCES = parser.c parser.h scanner.c ppparse.c ppparse.h pplex.c
 EXTRA_DIST = ppparse.y pplex.l parser.y scanner.l
 CLEANFILES = parser.output ppparse.output
@@ -45,8 +42,9 @@ CLEANFILES = parser.output ppparse.output
 # "sed -i" isn't supported on all systems --> use sed && mv
 .l.c:
 	LC_CTYPE=C flex -s -o$@ $< && \
-	sed -e ':a;N;$$!ba;s/$(SEDS)/$(SEDE)/g' $@ > $@.tmp && mv -f $@.tmp $@
-
+	sed -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' \
+	  $@ > $@.tmp && mv -f $@.tmp $@
+  
 .y.c:
 	bison -o $@ $<
 

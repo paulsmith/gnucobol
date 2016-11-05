@@ -60,6 +60,8 @@
 #endif
 
 #define COBC_ABORT()			cobc_abort(__FILE__, __LINE__)
+#define YY_FATAL_ERROR(msg)		\
+	flex_fatal_error (msg, __FILE__, __LINE__)
 
 /* Source format enum */
 enum cb_format {
@@ -544,7 +546,7 @@ extern void		cb_perror (const int, const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_warning (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern void		cb_plex_error (const size_t,
-				       const char *, ...) COB_A_FORMAT23;
+					 const char *, ...) COB_A_FORMAT23;
 extern unsigned int	cb_plex_verify (const size_t, const enum cb_support,
 					const char *);
 extern void		configuration_warning (const char *, const int,
@@ -552,7 +554,8 @@ extern void		configuration_warning (const char *, const int,
 extern void		configuration_error (const char *, const int,
 					 const int, const char *, ...) COB_A_FORMAT45;
 extern char *		cb_get_strerror (void);
-
+DECLNORET extern void		flex_fatal_error (const char *, const char *,
+					 const int) COB_A_NORETURN;
 extern unsigned int	cb_verify (const enum cb_support, const char *);
 
 /* reserved.c */
