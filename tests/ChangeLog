@@ -1,5 +1,5 @@
 
-2016-11-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* listings-sed.sh: moved from testsuite.src/listings-sed.sh
 	* listings-sed.sh: adjustment for exotic shells
@@ -16,7 +16,7 @@
 	* testsuite.src/listings.at: Added header/trailer to file not found 
 	  test case.
 
-2016-10-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol85/Makefile.am, cobol85/report.pl: added support for make with
 	  multiple jobs (only done when building the test directories)
@@ -26,7 +26,7 @@
 	* testsuite.src/listings-sed.sh: Fixed for generic 9 character version.
 	* testsuite.src/listings.at: Fixed for generic 9 character version.
 
-2016-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in: pass COB_HAS_UTC_OFFSET, set PATHSEP and COB_HAS_CURSES
 	  for MinGW
@@ -47,7 +47,7 @@
 	* testsuite.src/listings.at: Added some sequence numbers to a couple of
 	  examples. Would have caught the SOURCEFORMAT VARIABLE bug.
 
-2016-10-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_win: added UNIFY_LISTING
 	* testsuite.src/listings.at: moved simplified sed commands used to a single
@@ -65,17 +65,17 @@
 
 	* testsuite.src/listings.at: added Symbols test with OCCURS
 
-2016-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/syn_file.at: added tests for variable record size,
 	  depending on item and and key fields
 
-2016-09-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_win : fix unset of environment variables
 	  that are used in libcob for runtime configuration; bug #319
 
-2016-08-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: checking `diff` on start of target "check" and
 	  `perl` before running target "test" in cobol85
@@ -146,17 +146,17 @@
 	* testsuite.src/data_binary.at: added test for binary-double unsigned
 	  compare when high bit set.
 
-2016-02-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at, tests/syn_reportwriter.at: RW checks earlier skipped are
 	  now only comments - will be added back in 2.1 with more and better checks
 
-2016-01-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added targets "test" (running ANSI testsuite) and
 	  "checkall" (running both GnuCOBOL and ANSI testsuite)
 
-2015-12-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: remove -std=cobol2002 for compiling (effectively using default),
 	  checked with cobol2014 where checking for standard behaviour,
@@ -176,7 +176,7 @@
 
 	* testsuite.src/data_display.at: add unsigned numeric display tests
 
-2015-11-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-11-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: skip tests that need a curses build if not available
 	* general: use new internal shell function _return_path for resolving paths
@@ -185,7 +185,7 @@
 	* atlocal_win: set tests to skip (via COB_HAS_ISAM / COB_HAS_CURSES)
 	  depending on available features (parsing cobc --info)
 
-2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/configuration.at: mayor update including runtime
 	  configuration
@@ -194,21 +194,21 @@
 
 	* testsuite.src/run_misc.at: compile from stdin, run after compile
 
-2015-05-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_functions.at : revised all tests from ACOS to LENGTH
 
-2015-04-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-04-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_file.at : (new) moved testsuite entries for
 	  file handling to their own test definition (origin: run_misc.at)
 
-2015-03-19  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/syn_functions.at : (new) moved testsuite entries for
 	  FUNCTIONs to their own test definition (origin: syn_misc.at)
 
-2015-03-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_win: Added setting of COB_RUNTIME_CONFIG
 	* moved tests for checking used binaries (cobc, cobcrun, extras) from
@@ -217,27 +217,27 @@
 	  testsuite.src/syn_misc.at to testsuite.src/configuration.at, updated
 	  tests and added new ones
 
-2015-02-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-02-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol85/Makefile.am: added target for decompressing newcob.val.Z and
 	  download it
 
-2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-12-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/syn_screen.at : (new) Added first testsuite entries for
 	  SCREEN section
 
-2014-09-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* support spaces in testsuite
 	* changed atlocal_win, removing the need for a configured source
 	  (works with build_windows out of the box)
 
-2014-08-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in : unset all environmental vars that are used by libcob
 
-2014-04-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-04-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/*.at: Added check for cobc's exit code and stderr
 		where missing
@@ -246,7 +246,7 @@
 
 	* testsuite.src/run_extensions.at: Added tests for getopt.
 
-2014-01-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-01-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_reportwriter.at, testsuite.src/syn_reportwriter.at:
 	  Added first testsuite entries for REPORT WRITER

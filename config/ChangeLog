@@ -1,5 +1,5 @@
 
-2016-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added reference-out-of-declaratives option
 
@@ -8,16 +8,16 @@
 	* general: added no-echo-means-secure option
 	* acu.conf: added aliases for ACCEPT/DISPLAY clauses
 
-2016-09-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: feature-request #173 added pic-length configuration option
 
-2016-08-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-08-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added national-literals, hexadecimal-national-literals and
 	  hexadecimal-boolean configuration options
 
-2016-08-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-08-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: renamed relaxed-syntax-check to relax-syntax-checks
 	  for supporting the removed -frelax-syntax when set on command line
@@ -53,7 +53,7 @@
 	* general: updated comment for reserved to describe how to specify
 	  aliases
 
-2016-03-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-03-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* acu.conf: added ASSIGN TO devices as context-sensitive words
 
@@ -66,11 +66,11 @@
 	* general: added reserved and specify-all-reserved
 	* general: removed cobol85-reserved
 
-2015-12-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-12-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added call-overflow
 
-2015-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* runtime.cfg: update for documentation
 	* runtime_empty.cfg: new empty file for faster startup (used in testsuite)
@@ -79,7 +79,7 @@
 
 	* general: added numeric-boolean and acucobol-literals
 
-2015-07-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-07-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol2014.conf: added new configuration for COBOL 2014 (most values
 	  marked as not verified yet)
@@ -89,19 +89,19 @@
 
 	* runtime.cfg: added all configuration options with documentation
 
-2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* runtime.cfg: added new configuration type "runtime configuration",
 	  runtime.cfg will include all runtime flags and short documentation
 	  of these (TODO)
 
-2014-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* acu.conf: added new configuration for ACUCOBOL-GT (most values marked as
 	  not verified yet)
 	* general: added word-length
 
-2014-07-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added accept-update and accept-auto (set to "no" in all
 	  configuration files)

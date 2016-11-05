@@ -10,7 +10,7 @@
 	* cobcrun.c: added option --brief (-q) to remove the path to cobcrun
 	  in argv[0]
 
-2016-06-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2016-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
 
 	* cobcrun.c (cobcrun_initial_module) [_WIN32]: fixed setting of
 	  COB_PRE_LOAD and COB_LIBRARY_PATH to use PATHSEP_CHAR
@@ -30,16 +30,16 @@
 	  if module (no slash) found, prepend to COB_PRE_LOAD
 	  may set both.
 
-2016-01-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2016-01-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
 
 	* cobcrun.c (cobcrun_print_version): changed generation of build stamp
 
-2015-03-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2015-03-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
 
 	* cobcrun.c : new option --config=<file> / -c <file> for setting the
 	  runtime configuration file to be loaded during initialisation
 
-2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2014-08-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
 
 	* cobcrun.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
@@ -50,13 +50,13 @@
 	  --version shows both version numbers of cobcrun (new) and libcob.;
 	  moved print_info (along with print_var) to libcob/common.c
 
-2014-02-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net> 
+2014-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org> 
 
 	* cobcrun.c : Tweaked --info for showing current settings (environment) along
 	  with settings hard-wired during build (COB_xyz),
 	  removed entries in output that belongs to cobc only
 
-2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2012-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c : Added conversion for enabling options in WIN style;
 	  Use getopt for option parsing;

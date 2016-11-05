@@ -69,7 +69,7 @@
 	* warning.def, typeck.c: added new CB_NOWARNDEF -Wpossible-overlap for
 	  items that only *may* overlap (-Woverlap only warns if overlap is sure)
 
-2016-10-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c. cobc.h: moved multiple #undef of internal used macros to cobc.h
 	* config.def: added reference-out-of-declaratives config option
@@ -77,7 +77,7 @@
 	* cobc.c (process_command_line): make sure cb_reference_out_of_declaratives
 	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
 
-2016-10-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h, tree.c, typeck.c, parser.y: fixed missing type changes
 	  from int to cob_flags_t for functions using disp_attrs
@@ -99,24 +99,24 @@
 
 	* scanner.l (RETURN): renamed to RETURN_TOK (see bug #330)
 
-2016-10-16  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_list_system): simplified, removed hard-coded values
 	* cobc.c: listing: allow page break to be disabled with -tlines=0
 
-2016-10-15  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: improved checks for duplicate/conflicting clauses in ACCEPT
 	  and DISPLAY statements (finished Edwards changes from 2016-10-02)
 
-2016-10-13  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: fixed missing initialization of static_call_cache
 	* flags.def, cobc.c, codegen.c: added new cb_flag_c_decl_for_static_call,
 	  normally active, to create the option to disable the auto-generation of
 	  C function declarations for static CALLs
 
-2016-10-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-10-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: refactored handling of occurs to (setup_occurs) and
 	 (setup_occurs_min_max)
@@ -148,19 +148,19 @@
 	* parser.y: improved support for ACUCOBOL screen phrases
 	* config.def: added no-echo-means-secure config option
 
-2016-09-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: use at least one tab for spacing between option and text in help
 	* config.c: check range (defined in config.def) for all integer flags
 
-2016-09-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_build_picture), config.def: feature-request #173
 	  compiler configuration pic-length for number of characters
 	  in PICTURE clause
 	* config.c: check range (defined in config.def) for all integer flags
 
-2016-09-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-09-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: fix bug #316 static linking with stdcall was broken
 	  * new struct static_call_list (including convention and
@@ -292,7 +292,7 @@
 	* parser.y (print_bits): improved style.
 	* tree.c (cb_build_picture): added warning message to PIC N.
 
-2016-08-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-08-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: added premature implementation of national-literals,
 	  hexadecimal-national-literals, hexadecimal-boolean-literals
@@ -1063,7 +1063,7 @@
 	* reserved.c: set correct min/max values in function_list,
 	  (cb_list_intrinsics): output min/max value
 
-2015-12-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-12-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def: new configuration "call-overflow"
 	* parser.y: split exception_or_overflow to value cb_call_overflow
@@ -1260,7 +1260,7 @@
 
 	* cobc.c: replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
 
-2015-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c: support for multiple inclusion of conf files while
 	  checking for recursion
@@ -1294,7 +1294,7 @@
 	* codegen.c: fix for bug #52 incorrect premature memory release (CANCEL)
 	  of INITIAL programs
 
-2014-12-01  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-12-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fix bug #108 figurative constants not accepted in screen items
 
@@ -1302,22 +1302,22 @@
 
 	* field.c: fix bug #89 incorrect LENGTH OF redefined
 
-2014-11-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (decimal_expand): fix bug #106 allocating cob_decimal too often
 
-2014-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.c (cb_config_entry): remove inline comments from entry
 	* config.def, scanner.l: check maximum word length depending on new
 	  configuration word-length
 	* cobc.c: added std=acu
 
-2014-10-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-10-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: added SUPPRESS clause as PENDING, see request #23
 
-2014-09-18  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l: bug #96 prevent line overflow, add warning "Source text too long"
 	* pplex.l: only show warning "Source text after column ..." if no comment was
@@ -1330,7 +1330,7 @@
 	* tree.c: added compile time checking of date/time formats and offset
 	  time presence.
 
-2014-09-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [_MSC_VER]: correct handling of -l (add .lib and pass to linker)
 	* cobc.c, cobc.h, error.c: message style change according to C compiler,
@@ -1352,21 +1352,21 @@
 	* cobc.c (process) [_MSC_VER]: cob_malloc() to cobc_malloc()
 	* cobc.c: use COB_PIC_FLAGS for CB_LEVEL_ASSEMBLE
 
-2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-08-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: never warn ENTRY as unreachable
 
-2014-08-25  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-08-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: Changed output of --help for help2man
 	* Makefile.am: Added manpage generation + install
 
-2014-07-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-07-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l, flag.def: new flag acucomment:
 	  '$' in indicator area treated as '*', '|' treated as floating comment
 
-2014-07-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, config.c: new option -cb_conf for overriding configuration
 	  options
@@ -1381,7 +1381,7 @@
 	  for setting WITH AUTO clause as standard, adding new extension
 	  WITH TAB to disable this behaviour explicit
 
-2014-07-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-07-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fix #88 false unreachable warning after END DECLARATIVES
 	  without main section/paragraph
@@ -1397,21 +1397,21 @@
 	  (line_contains)
 	* cobc.c [_MSC_VER]: remove temporary object files after building
 
-2014-06-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-06-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: move cobc's (cobc_temp_name) to libcob as (cob_temp_name)
 	* cobc.c: use (cob_sys_getpid) everywhere instead of (getpid)
 
-2014-06-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: Detect missing ASSIGN at compile time
 
-2014-06-19  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-06-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: Fixing compilers (like MSC) that don't HAVE_DESIGNATED_INITS
 	  cobc_init_reserved() has to be called before process_command_line()
 
-2014-05-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-05-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: Fixing #71 Referencing GLOBAL 78/CONSTANT in SELECT
 	  causes internal error
@@ -1420,12 +1420,12 @@
 
 	* typeck.c: use memmove for move of LINKAGE items
 
-2014-05-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-05-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l : Fixing #71 Referencing GLOBAL 78/CONSTANT in SELECT causes
 	  internal error
 
-2014-05-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-05-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: Added extension "USE AT PROGRAM START/END" as not implemented
 
@@ -1438,7 +1438,7 @@
 
 	* typeck.c: use memmove for move of LINKAGE items
 
-2014-04-30  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-04-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: Added extension "GOBACK/EXIT PROGRAM RETURNING/GIVING x"
 
@@ -1448,25 +1448,25 @@
 	  Computing COMP-3 failed in MSVC-build versions,
 	  in output_storage() calls '%' should be '%%'.
 
-2014-03-10  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: support for user-defined LOCALEDIR via environment
 
-2014-03-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-03-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* field.c: Added check for maximum size of group/alphanumeric items
 
-2014-02-17  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: Tweaked --info for showing current settings (environment) along
 	  with settings hard-wired during build (COB_xyz)
 
-2014-01-07  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: Bugfix: no exception check for NULL address on FREE statement
 	  (as this is explicit allowed)
 
-2014-01-02  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: Fixing Bug #55
 	  UDF with no parameters do not compile
@@ -1477,7 +1477,7 @@
 	  Computing COMP-3 failed in MSVC-build versions,
 	  in output_storage() calls '%' should be '%%'.
 
-2012-05-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2012-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: Added conversion for enabling options in WIN style
 
@@ -1507,7 +1507,7 @@
 	* parser.y, typeck.c (cb_emit_accept_escape_key): Implementing
 	  ACCEPT .. FROM ESCAPE KEY
 
-20??-??-??  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+20??-??-??  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c : Simplify by handling stuff for different compilers
 	  by general define (COB_ALIGN)
@@ -1519,7 +1519,7 @@
 	  added parsing step and source name to verbose messages,
 	  added some comments
 
-20??-??-??  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+20??-??-??  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, cobc.h, tree.c, typeck.c : adjustments for MSC,
 	  fix some compiler warnings, support possible spaces in different
@@ -1531,11 +1531,11 @@
 	* typeck.c : Added validate_inspect for check of operands in
 	  INSPECT REPLACING/CONVERTING
 
-2009-10-29  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2009-10-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c : Warn if -Debug is used (because likely -debug was intended)
 
-2009-10-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2009-10-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* error.c, field.c, typeck.c : Fix field names "WORK$"->"FILLER"
 	  in warning/error messages
@@ -1553,7 +1553,7 @@
 
 	* parser.y : exclude level 77 from "Item requires a data name" check
 
-2009-08-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2009-08-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y : Add output of unreachable statement to -Wunreachable
 

@@ -1,4 +1,9 @@
 
+2016-11-05  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.19.8.1.
+	* Rules-quot: Upgrade to gettext-0.19.8.1.
+
 2016-08-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makevars: addded --no-wrap to MSGMERGE_OPTIONS (upon request of TP)
@@ -14,7 +19,7 @@
 
 	* gettext extra message catalogues en@quot and en@boldquot added
 
-2013-10-11  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2013-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* added Dutch  (translated by Ed Borchert and Ronald Heirbaut)
 
