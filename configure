@@ -800,6 +800,11 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
+enable_debug
+enable_experimental
+enable_param_check
+with_patch_level
+with_max_call_params
 enable_dependency_tracking
 enable_shared
 enable_static
@@ -810,11 +815,6 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_rpath
-enable_debug
-enable_experimental
-enable_param_check
-with_patch_level
-with_max_call_params
 with_curses
 with_seqra_extfh
 with_cisam
@@ -1461,6 +1461,11 @@ Optional Features:
   --enable-maintainer-mode
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
+  --enable-debug          (GnuCOBOL) Enable -g C compiler debug option
+  --enable-experimental   (GnuCOBOL) Enable experimental code (Developers
+                          only!)
+  --enable-param-check    (GnuCOBOL) Enable minimum parameter check for system
+                          libraries (default no)
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -1471,14 +1476,15 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-rpath         do not hardcode runtime library paths
-  --enable-debug          (GnuCOBOL) Enable -g C compiler debug option
-  --enable-experimental   (GnuCOBOL) Enable experimental code (Developers only!)
-  --enable-param-check    (GnuCOBOL) Enable minimum parameter check for system libraries (default no)
   --disable-nls           do not use Native Language Support
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-patch-level      (GnuCOBOL) Define a patch level (default 0),
+                          numeric, max. 8 digits
+  --with-max-call-params  (GnuCOBOL) Define maximum number of parameters for
+                          CALL (default 192)
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
   --with-aix-soname=aix|svr4|both
@@ -1488,17 +1494,18 @@ Optional Packages:
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
-  --with-patch-level      (GnuCOBOL) Define a patch level (default 0)
-  --with-max-call-params  (GnuCOBOL) Define maximum number of parameters for CALL (default 192)
-  --with-curses           (GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)
+  --with-curses           (GnuCOBOL) Used curses library for extended SCREEN
+                          I/O (default=check)
   --with-seqra-extfh      (GnuCOBOL) Use external SEQ/RAN file handler
   --with-cisam            (GnuCOBOL) Use CISAM for ISAM I/O
   --with-disam            (GnuCOBOL) Use DISAM for ISAM I/O
   --with-vbisam           (GnuCOBOL) Use VBISAM for ISAM I/O
   --with-index-extfh      (GnuCOBOL) Use external ISAM file handler
-  --with-db               (GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)
+  --with-db               (GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O
+                          (default)
   --with-dl               (GnuCOBOL) Use system dynamic loader (default)
-  --with-varseq           (GnuCOBOL) Define variable sequential format (default 0)
+  --with-varseq           (GnuCOBOL) Define variable sequential format
+                          (default 0)
   --with-libiconv-prefix[=DIR]  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
   --with-libintl-prefix[=DIR]  search for libintl in DIR/include and DIR/lib
@@ -3067,6 +3074,84 @@ $as_echo_n "checking whether CFLAGS can be modified... " >&6; }
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cflags_setting" >&5
 $as_echo "$enable_cflags_setting" >&6; }
 fi
+
+# Configure options part I (not needing any compilation)
+
+# Check whether --enable-debug was given.
+if test "${enable_debug+set}" = set; then :
+  enableval=$enable_debug;
+else
+  enable_debug=no
+fi
+
+
+# Check whether --enable-experimental was given.
+if test "${enable_experimental+set}" = set; then :
+  enableval=$enable_experimental; if test "$enable_experimental" = "yes"; then
+	$as_echo "#define COB_EXPERIMENTAL 1" >>confdefs.h
+
+   fi
+fi
+
+
+# Check whether --enable-param-check was given.
+if test "${enable_param_check+set}" = set; then :
+  enableval=$enable_param_check; if test "$enable_param_check" = "yes"; then
+	$as_echo "#define COB_PARAM_CHECK 1" >>confdefs.h
+
+   fi
+fi
+
+
+
+# Check whether --with-patch-level was given.
+if test "${with_patch_level+set}" = set; then :
+  withval=$with_patch_level; case $with_patch_level in
+    yes)	as_fn_error $? "You must give --with-patch-level an argument." "$LINENO" 5
+		;;
+    no)		as_fn_error $? "--without-patch-level not supported." "$LINENO" 5
+		;;
+    [0-9]*)
+		if test $with_patch_level -gt 99999999; then
+    		as_fn_error $? "Patch level must not contain more than 8 digits" "$LINENO" 5
+		fi
+		;;
+    *)		as_fn_error $? "You must use a numeric patch level" "$LINENO" 5
+		;;
+  esac
+else
+  with_patch_level=0
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define PATCH_LEVEL $with_patch_level
+_ACEOF
+
+
+
+# Check whether --with-max-call-params was given.
+if test "${with_max_call_params+set}" = set; then :
+  withval=$with_max_call_params; case $with_max_call_params in
+    yes)	as_fn_error $? "You must give --with-max-call-params an argument." "$LINENO" 5
+		;;
+    no)		as_fn_error $? "--without-max-call-params not supported." "$LINENO" 5
+		;;
+    16 | 36 | 56 | 76 | 96 | 192 | 252)
+		;;
+    *)		as_fn_error $? "Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252" "$LINENO" 5
+		;;
+  esac
+else
+  with_max_call_params=192
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define MAX_CALL_FIELD_PARAMS $with_max_call_params
+_ACEOF
+
+
 
 # Basic capability tests
 
@@ -12907,6 +12992,7 @@ fi
 
 
 
+
 # Checks for header files.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
@@ -13033,6 +13119,7 @@ _ACEOF
 fi
 
 done
+
 
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -13437,6 +13524,7 @@ done
 $as_echo "$cob_keyw" >&6; }
 unset cob_keyw
 
+
 # Checks for library functions.
 for ac_func in vprintf
 do :
@@ -13523,6 +13611,7 @@ else
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 
 # Check gcc/icc
 COB_USES_GCC_ICC=no
@@ -13626,83 +13715,8 @@ else
 	LIBCOB_LIBS="-lm"
 fi
 
-# Configure options.
 
-# Check whether --enable-debug was given.
-if test "${enable_debug+set}" = set; then :
-  enableval=$enable_debug;
-else
-  enable_debug=no
-fi
-
-
-# Check whether --enable-experimental was given.
-if test "${enable_experimental+set}" = set; then :
-  enableval=$enable_experimental; if test "$enable_experimental" = "yes"; then
-	$as_echo "#define COB_EXPERIMENTAL 1" >>confdefs.h
-
-   fi
-fi
-
-
-# Check whether --enable-param-check was given.
-if test "${enable_param_check+set}" = set; then :
-  enableval=$enable_param_check; if test "$enable_param_check" = "yes"; then
-	$as_echo "#define COB_PARAM_CHECK 1" >>confdefs.h
-
-   fi
-fi
-
-
-
-# Check whether --with-patch-level was given.
-if test "${with_patch_level+set}" = set; then :
-  withval=$with_patch_level; case $with_patch_level in
-    yes)	as_fn_error $? "You must give --with-patch-level an argument." "$LINENO" 5
-		;;
-    no)		as_fn_error $? "--without-patch-level not supported." "$LINENO" 5
-		;;
-    [0-9]*)
-		if test $with_patch_level -gt 999; then
-    		as_fn_error $? "Patch level cannot be greater than 999" "$LINENO" 5
-		fi
-		;;
-    *)		as_fn_error $? "You must use a numeric patch level" "$LINENO" 5
-		;;
-  esac
-else
-  with_patch_level=0
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define PATCH_LEVEL $with_patch_level
-_ACEOF
-
-
-
-# Check whether --with-max-call-params was given.
-if test "${with_max_call_params+set}" = set; then :
-  withval=$with_max_call_params; case $with_max_call_params in
-    yes)	as_fn_error $? "You must give --with-max-call-params an argument." "$LINENO" 5
-		;;
-    no)		as_fn_error $? "--without-max-call-params not supported." "$LINENO" 5
-		;;
-    16 | 36 | 56 | 76 | 96 | 192 | 252)
-		;;
-    *)		as_fn_error $? "Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252" "$LINENO" 5
-		;;
-  esac
-else
-  with_max_call_params=192
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define MAX_CALL_FIELD_PARAMS $with_max_call_params
-_ACEOF
-
-
+# Configure options part II (needing compilation)
 
 # Check whether --with-curses was given.
 if test "${with_curses+set}" = set; then :
@@ -13994,6 +14008,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define WITH_VARSEQ $with_varseq
 _ACEOF
+
 
 
 # Checks for gmp.

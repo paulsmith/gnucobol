@@ -1,4 +1,10 @@
 
+2016-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* listings-sed.sh, testsuite.src/listing.at: adjustment for new maximum
+	  of 14 digits in version string
+	* testsuite.src/listing.at: capture original listing, instead of unified one
+
 2016-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* listings-sed.sh: moved from testsuite.src/listings-sed.sh

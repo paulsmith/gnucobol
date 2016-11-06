@@ -1,4 +1,9 @@
 
+2016-11-06 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: limit PATCH_LEVEL to numeric, max 8 digits
+	* configure.ac: use AS_HELP_STRING for all options
+
 2016-11-05 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Bootstrap up to libtool 2.4.6 / automake 1.15

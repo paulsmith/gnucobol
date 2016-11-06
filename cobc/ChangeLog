@@ -1,4 +1,9 @@
 
+2015-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc/cobc.c (print_program_header): changed the version string limit
+	  (including patchlevel) to 14 digits
+
 2015-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (terminator_warning, terminator_error, terminator_clear):

@@ -58,7 +58,7 @@ AM_MAINTAINER_MODE
 # Autoheader templates
 AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
 AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
-AH_TEMPLATE([PATCH_LEVEL], [Define a patch level])
+AH_TEMPLATE([PATCH_LEVEL], [Define a patch level (numeric, max. 8 digits)])
 AH_TEMPLATE([MAX_CALL_FIELD_PARAMS], [Define maximum parameters for CALL])
 AH_TEMPLATE([WITH_INDEX_EXTFH], [Compile with an external ISAM handler])
 AH_TEMPLATE([WITH_SEQRA_EXTFH], [Compile with an external SEQ/RAN handler])
@@ -109,6 +109,68 @@ if test "$enable_debug" = "yes"; then
 	AC_MSG_RESULT([$enable_cflags_setting])
 fi
 
+# Configure options part I (not needing any compilation)
+
+AC_ARG_ENABLE([debug],
+  [AS_HELP_STRING([--enable-debug],
+    [(GnuCOBOL) Enable -g C compiler debug option])],
+  [],
+  [enable_debug=no])
+
+AC_ARG_ENABLE([experimental],
+  [AS_HELP_STRING([--enable-experimental],
+    [(GnuCOBOL) Enable experimental code (Developers only!)])],
+  [if test "$enable_experimental" = "yes"; then
+	AC_DEFINE([COB_EXPERIMENTAL], [1])
+   fi],
+  [])
+
+AC_ARG_ENABLE([param-check],
+  [AS_HELP_STRING([--enable-param-check],
+    [(GnuCOBOL) Enable minimum parameter check for system libraries (default no)])],
+  [if test "$enable_param_check" = "yes"; then
+	AC_DEFINE([COB_PARAM_CHECK], [1])
+   fi],
+  [])
+
+AC_ARG_WITH([patch-level],
+  [AS_HELP_STRING([--with-patch-level],
+    [(GnuCOBOL) Define a patch level (default 0), numeric, max. 8 digits])],
+  [case $with_patch_level in
+    yes)	AC_MSG_ERROR([[You must give --with-patch-level an argument.]])
+		;;
+    no)		AC_MSG_ERROR([[--without-patch-level not supported.]])
+		;;
+    [[0-9]]*)
+		if test $with_patch_level -gt 99999999; then
+    		AC_MSG_ERROR([[Patch level must not contain more than 8 digits]])
+		fi
+		;;
+    *)		AC_MSG_ERROR([[You must use a numeric patch level]])
+		;;
+  esac],
+  [with_patch_level=0])
+
+AC_DEFINE_UNQUOTED([PATCH_LEVEL], [$with_patch_level])
+
+AC_ARG_WITH([max-call-params],
+  [AS_HELP_STRING([--with-max-call-params],
+    [(GnuCOBOL) Define maximum number of parameters for CALL (default 192)])],
+  [case $with_max_call_params in
+    yes)	AC_MSG_ERROR([[You must give --with-max-call-params an argument.]])
+		;;
+    no)		AC_MSG_ERROR([[--without-max-call-params not supported.]])
+		;;
+    16 | 36 | 56 | 76 | 96 | 192 | 252)
+		;;
+    *)		AC_MSG_ERROR([[Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252]])
+		;;
+  esac],
+  [with_max_call_params=192])
+
+AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
+
+
 # Basic capability tests
 
 AC_PROG_CC([gcc xlc cc])
@@ -135,10 +197,12 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_LIB_RPATH
 
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdint.h sys/types.h signal.h fcntl.h malloc.h locale.h \
 	stddef.h wchar.h dlfcn.h sys/time.h])
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -169,6 +233,7 @@ done
 AC_MSG_RESULT([$cob_keyw])
 unset cob_keyw
 
+
 # Checks for library functions.
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
@@ -192,6 +257,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
 	]])],
 	[AC_DEFINE([HAVE_DESIGNATED_INITS], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
+
 
 # Check gcc/icc
 COB_USES_GCC_ICC=no
@@ -235,64 +301,11 @@ else
 	LIBCOB_LIBS="-lm"
 fi
 
-# Configure options.
 
-AC_ARG_ENABLE([debug],
-  [  --enable-debug          (GnuCOBOL) Enable -g C compiler debug option],
-  [],
-  [enable_debug=no])
-
-AC_ARG_ENABLE([experimental],
-  [  --enable-experimental   (GnuCOBOL) Enable experimental code (Developers only!)],
-  [if test "$enable_experimental" = "yes"; then
-	AC_DEFINE([COB_EXPERIMENTAL], [1])
-   fi],
-  [])
-
-AC_ARG_ENABLE([param-check],
-  [  --enable-param-check    (GnuCOBOL) Enable minimum parameter check for system libraries (default no)],
-  [if test "$enable_param_check" = "yes"; then
-	AC_DEFINE([COB_PARAM_CHECK], [1])
-   fi],
-  [])
-
-AC_ARG_WITH([patch-level],
-  [  --with-patch-level      (GnuCOBOL) Define a patch level (default 0)],
-  [case $with_patch_level in
-    yes)	AC_MSG_ERROR([[You must give --with-patch-level an argument.]])
-		;;
-    no)		AC_MSG_ERROR([[--without-patch-level not supported.]])
-		;;
-    [[0-9]]*)
-		if test $with_patch_level -gt 999; then
-    		AC_MSG_ERROR([[Patch level cannot be greater than 999]])
-		fi
-		;;
-    *)		AC_MSG_ERROR([[You must use a numeric patch level]])
-		;;
-  esac],
-  [with_patch_level=0])
-
-AC_DEFINE_UNQUOTED([PATCH_LEVEL], [$with_patch_level])
-
-AC_ARG_WITH([max-call-params],
-  [  --with-max-call-params  (GnuCOBOL) Define maximum number of parameters for CALL (default 192)],
-  [case $with_max_call_params in
-    yes)	AC_MSG_ERROR([[You must give --with-max-call-params an argument.]])
-		;;
-    no)		AC_MSG_ERROR([[--without-max-call-params not supported.]])
-		;;
-    16 | 36 | 56 | 76 | 96 | 192 | 252)
-		;;
-    *)		AC_MSG_ERROR([[Maximum number of parameters for CALL must be one of 16/36/56/76/96/192/252]])
-		;;
-  esac],
-  [with_max_call_params=192])
-
-AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
-
+# Configure options part II (needing compilation)
 AC_ARG_WITH([curses],
-  [  --with-curses           (GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)],
+  [AS_HELP_STRING([--with-curses],
+    [(GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)])],
   [case "$with_curses" in
     ncursesw | ncurses | pdcurses | curses | check | no)
 		USE_NCURSES="$with_curses"
@@ -307,14 +320,16 @@ AC_ARG_WITH([curses],
   [USE_NCURSES="check"])
 
 AC_ARG_WITH([seqra-extfh],
-  [  --with-seqra-extfh      (GnuCOBOL) Use external SEQ/RAN file handler],
+  [AS_HELP_STRING([--with-seqra-extfh],
+    [(GnuCOBOL) Use external SEQ/RAN file handler])],
   [ if test "$with_seqra_extfh" = "yes"; then
 	AC_DEFINE([WITH_SEQRA_EXTFH], [1])
     fi ],
   [])
 
 AC_ARG_WITH([cisam],
-  [  --with-cisam            (GnuCOBOL) Use CISAM for ISAM I/O],
+  [AS_HELP_STRING([--with-cisam],
+    [(GnuCOBOL) Use CISAM for ISAM I/O])],
   [ if test "$with_cisam" = "yes"; then
 	AC_CHECK_HEADERS([isam.h], [],
 		AC_MSG_ERROR([isam.h is required for CISAM]))
@@ -327,7 +342,8 @@ AC_ARG_WITH([cisam],
 
 if test "$with_cisam" != "yes"; then
   AC_ARG_WITH([disam],
-  [  --with-disam            (GnuCOBOL) Use DISAM for ISAM I/O],
+  [AS_HELP_STRING([--with-disam],
+    [(GnuCOBOL) Use DISAM for ISAM I/O])],
   [ if test "$with_disam" = "yes"; then
 	AC_CHECK_HEADERS([disam.h], [],
 		AC_MSG_ERROR([disam.h is required for DISAM]))
@@ -341,7 +357,8 @@ fi
 
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
   AC_ARG_WITH([vbisam],
-  [  --with-vbisam           (GnuCOBOL) Use VBISAM for ISAM I/O],
+  [AS_HELP_STRING([--with-vbisam],
+    [(GnuCOBOL) Use VBISAM for ISAM I/O])],
   [ if test "$with_vbisam" = "yes"; then
 	AC_CHECK_HEADERS([vbisam.h], [],
 		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
@@ -355,7 +372,8 @@ fi
 
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes"; then
   AC_ARG_WITH([index-extfh],
-  [  --with-index-extfh      (GnuCOBOL) Use external ISAM file handler],
+  [AS_HELP_STRING([--with-index-extfh],
+    [(GnuCOBOL) Use external ISAM file handler])],
   [ if test "$with_index_extfh" = "yes"; then
 	AC_DEFINE([WITH_INDEX_EXTFH], [1])
     fi ],
@@ -364,13 +382,15 @@ fi
 
 if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes"; then
   AC_ARG_WITH([db],
-  [  --with-db               (GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)],
+  [AS_HELP_STRING([--with-db],
+    [(GnuCOBOL) Use Berkeley DB >= 4.1 for ISAM I/O (default)])],
   [],
   [with_db=yes])
 fi
 
 AC_ARG_WITH([dl],
-  [  --with-dl               (GnuCOBOL) Use system dynamic loader (default)],
+  [AS_HELP_STRING([--with-dl],
+    [(GnuCOBOL) Use system dynamic loader (default)])],
   [case $with_dl in
     yes)
 		;;
@@ -382,7 +402,8 @@ AC_ARG_WITH([dl],
   [with_dl=yes])
 
 AC_ARG_WITH([varseq],
-  [  --with-varseq           (GnuCOBOL) Define variable sequential format (default 0)],
+  [AS_HELP_STRING([--with-varseq],
+    [(GnuCOBOL) Define variable sequential format (default 0)])],
   [case $with_varseq in
     yes)	AC_MSG_ERROR([[You must give --with-varseq an argument.]])
 		;;
@@ -396,6 +417,7 @@ AC_ARG_WITH([varseq],
   [with_varseq=0])
 
 AC_DEFINE_UNQUOTED([WITH_VARSEQ], [$with_varseq])
+
 
 # Checks for gmp.
 AC_MSG_NOTICE([Checks for GMP ...])
