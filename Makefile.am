@@ -60,13 +60,13 @@ dist-hook:
 	chmod 644 $(distdir)/gnu-cobol.spec
 	chmod 755 $(distdir)/doc/cobcinfo.sh
 	chmod 755 $(distdir)/tests/listings-sed.sh
-	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
-	touch $(distdir)/bin/cobcrun.1
-	touch $(distdir)/cobc/cobc.1
 	touch $(distdir)/cobc/ppparse.c
 	touch $(distdir)/cobc/parser.c
 	touch $(distdir)/cobc/pplex.c
 	touch $(distdir)/cobc/scanner.c
+	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
+	touch $(distdir)/bin/cobcrun.1
+	touch $(distdir)/cobc/cobc.1
 #	touch $(distdir)/libcob/libcob.3
 # Create dist_win manually (dist-zip would have the same content as dist-gzip)
 	if test -f create_win_dist.sh; then \
