@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -233,3 +233,57 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([SEARCH ALL with OCCURS DEPENDING ON])
+AT_KEYWORDS([runsubscripts subscripts ODO])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      *
+       77  SCREEN-AKT         PIC 9(02) VALUE 0.
+       01  SCREEN-TAB.
+           03 SCREEN-ENTRY    OCCURS 0  TO  20
+                              DEPENDING ON  SCREEN-AKT
+                              ASCENDING KEY SCREEN-NAME
+                              INDEXED   BY  SCREEN-IDX.
+             05 SCREEN-NAME     PIC X(02).
+
+       PROCEDURE DIVISION.
+
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'AB'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           MOVE 1 TO SCREEN-AKT
+           MOVE 'AB' TO  SCREEN-NAME (1)
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'AB'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           MOVE 2 TO SCREEN-AKT
+           MOVE 'CD' TO  SCREEN-NAME (2)
+           SEARCH ALL SCREEN-ENTRY
+              AT END
+                 DISPLAY 'END'
+              WHEN SCREEN-NAME (SCREEN-IDX) = 'CD'
+                 DISPLAY 'FOUND'
+           END-SEARCH
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [END
+FOUND
+FOUND
+], [])
+
+AT_CLEANUP
+

@@ -3825,14 +3825,11 @@ output_occurs (struct cb_field *p)
 }
 
 static void
-output_search_whens (cb_tree table, cb_tree var, cb_tree stmt, cb_tree whens)
+output_search_whens (cb_tree table, struct cb_field *p, cb_tree stmt,
+						cb_tree var, cb_tree whens)
 {
 	cb_tree		l;
-	struct cb_field *p;
-	cb_tree		idx;
-
-	idx = NULL;
-	p = cb_code_field (table);
+	cb_tree		idx = NULL;
 
 	if (!p->index_list) {
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
@@ -3890,12 +3887,11 @@ output_search_whens (cb_tree table, cb_tree var, cb_tree stmt, cb_tree whens)
 }
 
 static void
-output_search_all (cb_tree table, cb_tree stmt, cb_tree cond, cb_tree when)
+output_search_all (cb_tree table, struct cb_field *p, cb_tree stmt,
+					cb_tree cond, cb_tree when)
 {
-	struct cb_field *p;
 	cb_tree		idx;
 
-	p = cb_code_field (table);
 	idx = CB_VALUE (p->index_list);
 	/* Header */
 	output_indent ("{");
@@ -3905,6 +3901,12 @@ output_search_all (cb_tree table, cb_tree stmt, cb_tree cond, cb_tree when)
 	output ("int tail = ");
 	output_occurs (p);
 	output (" + 1;\n");
+
+	/* Check for at least one entry */
+	output_prefix ();
+	output ("if (");
+	output_occurs (p);
+	output (" == 0) head = tail;\n");
 
 	/* Start loop */
 	output_line ("for (;;)");
@@ -3954,11 +3956,15 @@ output_search_all (cb_tree table, cb_tree stmt, cb_tree cond, cb_tree when)
 static void
 output_search (struct cb_search *p)
 {
+	struct cb_field *fp = cb_code_field (p->table);
+
+	/* TODO: Add run-time checks for the table, including ODO */
+
 	if (p->flag_all) {
-		output_search_all (p->table, p->end_stmt,
+		output_search_all (p->table, fp, p->end_stmt,
 				   CB_IF (p->whens)->test, CB_IF (p->whens)->stmt1);
 	} else {
-		output_search_whens (p->table, p->var, p->end_stmt, p->whens);
+		output_search_whens (p->table, fp, p->end_stmt, p->var, p->whens);
 	}
 }
 
