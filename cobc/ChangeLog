@@ -1,4 +1,9 @@
 
+2016-11-07  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (print_88_values): Added to print 88 level values.
+	(print_fields): call print_88_values for a variable.
+
 2015-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc/cobc.c (print_program_header): changed the version string limit

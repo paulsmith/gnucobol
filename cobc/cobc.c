@@ -3794,6 +3794,32 @@ set_category (int category, int usage, char *type)
 }
 
 static void
+print_88_values (int lvl, struct cb_field *field)
+{
+	struct cb_field *f;
+	struct cb_word *w;
+	size_t index;
+	char lcl_name[80];
+
+	for (index = 0; index < CB_WORD_HASH_SIZE; index++) {
+		for (w = current_program->word_table[index]; w; w = w->next) {
+			if (w->items && CB_FIELD_P(CB_LIST(w->items)->value)) {
+				f = CB_FIELD(CB_LIST (w->items)->value);
+				if (f->level == 88 && f->parent == field) {
+					memset (lcl_name, 0, sizeof(lcl_name));
+					memset (lcl_name, ' ', lvl * 2);
+					strcat (lcl_name, (char *)f->name);
+					print_program_header ();
+					fprintf (cb_src_list_file,
+						"     %-14.14s %02d   %s\n",
+			 			"CONDITIONAL", f->level, lcl_name);
+				}
+			}
+		}
+	}
+}
+
+static void
 print_fields (int lvl, struct cb_field *top)
 {
 	int	first = 1;
@@ -3866,6 +3892,7 @@ print_fields (int lvl, struct cb_field *top)
 		}
 		first = 0;
 		old_level = top->level;
+		print_88_values (lvl+1, top);
 
 		if (top->children) {
 			print_fields (lvl + 1, top->children);
