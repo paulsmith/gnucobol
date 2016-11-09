@@ -6383,10 +6383,11 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 		cobsetptr->cob_sort_chunk = cobsetptr->cob_sort_memory / 2;
 	}
 
-	if(cobsetptr->cob_varseq_type == 3)
+	if (cobsetptr->cob_varseq_type == 3) {
 		cob_vsq_len = 2;
-	else
+	} else {
 		cob_vsq_len = 4;
+	}
 
 	runtime_buffer = cob_fast_malloc ((size_t)(4 * COB_FILE_BUFF));
 	file_open_env = runtime_buffer + COB_FILE_BUFF;

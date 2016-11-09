@@ -1635,7 +1635,7 @@ cob_save_func (cob_field **savefld, const int params,
 
 	/* Save values */
 	fl->save_module = COB_MODULE_PTR->next;
- 	fl->save_call_params = cobglobptr->cob_call_params;
+	fl->save_call_params = cobglobptr->cob_call_params;
 	fl->save_proc_parms = COB_MODULE_PTR->cob_procedure_params;
 	fl->save_num_params = COB_MODULE_PTR->module_num_params;
 

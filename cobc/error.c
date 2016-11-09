@@ -63,8 +63,9 @@ print_error (const char *file, int line, const char *prefix,
 	/* Print section and/or paragraph name */
 	if (current_section != last_section) {
 		if (current_section && !current_section->flag_dummy_section) {
-			if (file)
-			fprintf (stderr, "%s: ", file);
+			if (file) {
+				fprintf (stderr, "%s: ", file);
+			}
 			fputs (_("in section"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_section->name);
@@ -73,8 +74,9 @@ print_error (const char *file, int line, const char *prefix,
 	}
 	if (current_paragraph != last_paragraph) {
 		if (current_paragraph && !current_paragraph->flag_dummy_paragraph) {
-			if (file)
-			fprintf (stderr, "%s: ", file);
+			if (file) {
+				fprintf (stderr, "%s: ", file);
+			}
 			fputs (_("in paragraph"), stderr);
 			fprintf (stderr, " '%s':\n",
 				(char *)current_paragraph->name);
