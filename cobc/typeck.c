@@ -562,6 +562,7 @@ cb_validate_one (cb_tree x)
 		}
 		if (CB_FIELD_P (y)) {
 			f = CB_FIELD (y);
+			cobc_xref_link (&f->xref, current_statement->common.source_line);
 			if (f->level == 88) {
 				cb_error_x (x, _("invalid use of 88 level item"));
 				return 1;
@@ -1439,6 +1440,9 @@ cb_build_identifier (cb_tree x, const int subchk)
 		return x;
 	}
 	f = CB_FIELD (v);
+	if (current_statement) {
+		cobc_xref_link (&f->xref, current_statement->common.source_line);
+	}
 
 	/* BASED check and check for OPTIONAL LINKAGE items */
 	if (current_statement &&
@@ -2603,6 +2607,7 @@ cb_validate_program_body (struct cb_program *prog)
 		v = cb_ref (x);
 		/* Check refs in to / out of DECLARATIVES */
 		if (CB_LABEL_P (v)) {
+			cobc_xref_link (&CB_LABEL(v)->xref, CB_TREE(x)->source_line);
 			if (CB_REFERENCE (x)->flag_in_decl &&
 				!CB_LABEL (v)->flag_declaratives) {
 				/* verfify reference-out-of-declaratives  */
@@ -3625,6 +3630,7 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	}
 
 	f = CB_FIELD_PTR (p->x);
+	cobc_xref_link (&f->xref, current_statement->common.source_line);
 #if	0	/* RXWRXW - SI */
 	if (f->special_index) {
 		return CB_BUILD_FUNCALL_2 ("cob_cmp_special",
@@ -5099,6 +5105,7 @@ cb_emit_close (cb_tree file, cb_tree opt)
 	}
 	current_statement->file = file;
 	f = CB_FILE (file);
+	cobc_xref_link (&f->xref, cb_source_line);
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
@@ -7819,6 +7826,7 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 	}
 	current_statement->file = file;
 	f = CB_FILE (file);
+	cobc_xref_link (&f->xref, cb_source_line);
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
@@ -7958,6 +7966,7 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 		return;
 	}
 	f = CB_FILE (file);
+	cobc_xref_link (&f->xref, current_statement->common.source_line);
 
 	rec = cb_build_field_reference (f->record, ref);
 	if (f->organization == COB_ORG_SORT) {
@@ -8979,6 +8988,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	}
 	current_statement->file = file;
 	f = CB_FILE (file);
+	cobc_xref_link (&f->xref, current_statement->common.source_line);
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),

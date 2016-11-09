@@ -661,6 +661,7 @@ struct cb_field {
 	struct cb_picture	*pic;		/* PICTURE */
 	struct cb_field		*vsize;		/* Variable size cache */
 	struct cb_label		*debug_section;	/* DEBUG section */
+	struct cb_xref		xref;		/* xref elements */
 
 	cb_tree			screen_line;	/* LINE */
 	cb_tree			screen_column;	/* COLUMN */
@@ -772,6 +773,7 @@ struct cb_label {
 	struct cb_label		*section;		/* Parent SECTION */
 	struct cb_label		*debug_section;		/* DEBUG SECTION */
 	struct cb_para_label	*para_label;		/* SECTION Paragraphs */
+	struct cb_xref		xref;			/* xref elements */
 	cb_tree			exit_label;		/* EXIT label */
 	struct cb_alter_id	*alter_gotos;		/* ALTER ids */
 	int			id;			/* Unique id */
@@ -843,6 +845,7 @@ struct cb_file {
 	struct cb_label		*debug_section;		/* DEBUG SECTION */
 	struct cb_alphabet_name	*code_set;		/* CODE-SET */
 	struct cb_list		*code_set_items;	/* CODE-SET FOR items */
+	struct cb_xref		xref;			/* xref elements */
 	int			record_min;		/* RECORD CONTAINS */
 	int			record_max;		/* RECORD CONTAINS */
 	int			optional;		/* OPTIONAL */

@@ -539,7 +539,8 @@ Do not generate symbol table in listing.
 Generate and place a preprocessed listing (old format) into @file{*.lst}.
 
 @item -Xref
-Generate cross reference through 'cobxref' (V. Coen's `cobxref` must be in PATH).
+@item -X
+Generate cross reference in the listing.
 
 @end table
 

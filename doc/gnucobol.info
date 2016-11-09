@@ -1,4 +1,4 @@
-This is gnucobol.info, produced by makeinfo version 6.3 from
+This is gnucobol.info, produced by makeinfo version 5.1 from
 gnucobol.texi.
 
 Permission is granted to make and distribute verbatim copies of this
@@ -252,7 +252,7 @@ File: gnucobol.info,  Node: Help options,  Next: Build target,  Prev: Compiler o
 The following switches display information about the compiler:
 
 '--help, -h'
-     Display help screen (*note cobc -help: Appendix A.). No further
+     Display help screen (*note cobc -help: Appendix A.).  No further
      actions will be taken.
 
 '--version'
@@ -269,17 +269,17 @@ The following switches display information about the compiler:
      Verbosely display the programs invoked during compilation.
 
 '--list-reserved'
-     Display reserved words (*note cobc -list-reserved: Appendix B.). A
+     Display reserved words (*note cobc -list-reserved: Appendix B.).  A
      Y/N field shows if the word is supported.  (1) No further actions
      will be taken except for further display options.
 
 '--list-intrinsics'
      Display intrinsic functions (*note cobc -list-intrinsics: Appendix
-     C.). A Y/N field shows if the function is implemented.  No further
+     C.).  A Y/N field shows if the function is implemented.  No further
      actions will be taken except for further display options.
 
 '--list-system'
-     Display system routines (*note cobc -list-system: Appendix D.). No
+     Display system routines (*note cobc -list-system: Appendix D.).  No
      further actions will be taken except for further display options.
 
 '--list-mnemonics'
@@ -495,8 +495,8 @@ File: gnucobol.info,  Node: Configuration options,  Next: Listing options,  Prev
      *Note Compiler Configuration: Appendix F, and 'config/*.conf'.
 
    You can override each single configuration entry found in *Note
-Compiler Configuration: Appendix F. by using compiler configuration
-options on command line, see *Note 'cobc --help': Appendix A. Examples:
+Compiler Configuration: Appendix F.  by using compiler configuration
+options on command line, see *Note 'cobc --help': Appendix A.  Examples:
 
 '-frelax-syntax-checks'
 '-frenames-uncommon-levels=warning'
@@ -527,8 +527,8 @@ File: gnucobol.info,  Node: Listing options,  Next: Debug switches,  Prev: Confi
      '*.lst'.
 
 '-Xref'
-     Generate cross reference through 'cobxref' (V. Coen's 'cobxref'
-     must be in PATH).
+'-X'
+     Generate cross reference in the listing.
 
    Here is an example program listing with the -t option:
 
@@ -786,7 +786,7 @@ library directory:
 directory, and run the main program:
      $ export COB_LIBRARY_PATH=/your/cobol/lib
    (Note: You may set the variable via a runtime configuration file,
-*note Runtime Configuration: Appendix H. You may also set the variable
+*note Runtime Configuration: Appendix H.  You may also set the variable
 to directly point to the directory where you compiled the sources.)
 
    Now execute your program:
@@ -1255,7 +1255,6 @@ from the screen.  Items accept by line and column positioning.
            [PROTECTED] SIZE [IS] variable-2 | literal-2
      END-ACCEPT.
 
-
 6.3.1 AUTO-SKIP
 ---------------
 
@@ -1366,7 +1365,7 @@ characters to the right.  When it is off, typed characters type over
 existing characters.
 
    The default insert mode is set by the 'COB_INSERT_MODE' variable,
-*Note Runtime Configuration: Appendix H. This must be set before the
+*Note Runtime Configuration: Appendix H.  This must be set before the
 first extended 'ACCEPT', 'DISPLAY', or any routine that gets information
 from the screen.
 
@@ -1398,7 +1397,6 @@ display on the screen.  Items display by line and column positioning.
              ERASE EOL | EOS
              SIZE [IS] variable-2 | literal-2
      END-DISPLAY.
-
 
 6.5.1 BELL
 ----------
@@ -1574,7 +1572,6 @@ division.
                      display opt-val     end-display
                  end-perform
                  stop run.
-
 
    The example shows how we initialize all parameters and call the
 routine until 'CBL_OC_GETOPT' runs out of options and returns -1.
@@ -1782,8 +1779,7 @@ Options:
   --tlines=<lines>      specify lines per page in listing, default = 55
   --no-symbols          specify no symbols in listing
   -P[=<dir or file>]    generate preprocessed program listing (.lst)
-  -Xref                 generate cross reference through 'cobxref'
-                        (V. Coen's 'cobxref' must be in path)
+  -Xref                 specify cross reference in listing
   -I <directory>        add <directory> to copy/include search path
   -L <directory>        add <directory> to library search path
   -l <lib>              link the library <lib>
@@ -3134,14 +3130,13 @@ If you want to reset a parameter to its default value use: 'reset
 parametername '
 Most runtime variables have boolean values, some are switches, some have
 string values, integer values and some are size values.  The boolean
-values will be evaluated as following:	to true:	'1, Y, ON, YES, TRUE'
-(no matter of case)	to false:	'0, N, OFF ' A 'size' value is an integer
+values will be evaluated as following: to true: '1, Y, ON, YES, TRUE'
+(no matter of case) to false: '0, N, OFF ' A 'size' value is an integer
 optionally followed by K, M, or G for kilo, mega or giga.
 For convenience a parameter in the runtime.cfg file may be defined by
 using either the environment variable name or the parameter name.  In
 most cases the environment variable name is the parameter name (in upper
 case) with the prefix 'COB_' .
-
 
 
 
@@ -3844,21 +3839,21 @@ Index
  [index ]
 * Menu:
 
-* ACCEPT special keys:                   ACCEPT special.       (line  6)
+* 'ACCEPT' special keys:                 ACCEPT special.       (line  6)
 * Arrow keys:                            ACCEPT special.       (line 13)
-* AUTO:                                  Extended ACCEPT.      (line 21)
-* AUTO-SKIP:                             Extended ACCEPT.      (line 21)
+* 'AUTO':                                Extended ACCEPT.      (line 20)
+* 'AUTO-SKIP':                           Extended ACCEPT.      (line 20)
 * Backspace key:                         ACCEPT special.       (line 32)
-* BELL:                                  Extended DISPLAY.     (line 22)
-* BLANK LINE:                            Extended DISPLAY.     (line 27)
-* BLANK SCREEN:                          Extended DISPLAY.     (line 27)
+* 'BELL':                                Extended DISPLAY.     (line 21)
+* 'BLANK LINE':                          Extended DISPLAY.     (line 26)
+* 'BLANK SCREEN':                        Extended DISPLAY.     (line 26)
 * Copying:                               Appendix I.           (line  6)
 * Delete keys:                           ACCEPT special.       (line 38)
 * End keys:                              ACCEPT special.       (line 47)
-* ERASE EOL:                             Extended DISPLAY.     (line 41)
-* ERASE EOS:                             Extended DISPLAY.     (line 41)
-* Extended ACCEPT statement:             Extended ACCEPT.      (line  6)
-* Extended DISPLAY statement:            Extended DISPLAY.     (line  6)
+* 'ERASE EOL':                           Extended DISPLAY.     (line 40)
+* 'ERASE EOS':                           Extended DISPLAY.     (line 40)
+* Extended 'ACCEPT' statement:           Extended ACCEPT.      (line  6)
+* Extended 'DISPLAY' statement:          Extended DISPLAY.     (line  6)
 * Extensions:                            Extensions.           (line  6)
 * Home keys:                             ACCEPT special.       (line 54)
 * Indexed:                               Indexed.              (line  6)
@@ -3866,11 +3861,11 @@ Index
 * Insert key:                            ACCEPT special.       (line 61)
 * Invoking:                              Compile.              (line  6)
 * Non-standard extensions:               Extensions.           (line  6)
-* PROTECTED:                             Extended ACCEPT.      (line 39)
-* SELECT:                                SELECT.               (line  6)
-* SELECT ASSIGN TO:                      SELECT.               (line  6)
-* SIZE:                                  Extended ACCEPT.      (line 44)
-* SIZE <1>:                              Extended DISPLAY.     (line 54)
+* 'PROTECTED':                           Extended ACCEPT.      (line 38)
+* 'SELECT':                              SELECT.               (line  6)
+* 'SELECT ASSIGN TO':                    SELECT.               (line  6)
+* 'SIZE':                                Extended ACCEPT.      (line 43)
+* 'SIZE' <1>:                            Extended DISPLAY.     (line 53)
 * Tab keys:                              ACCEPT special.       (line 78)
 
 
@@ -3882,57 +3877,57 @@ Node: Hello world!4372
 Node: Compile5824
 Node: Compiler options6182
 Node: Help options6940
-Ref: Help options-Footnote-18498
-Node: Build target8542
-Ref: Build target-Footnote-111061
-Node: Source format11114
-Ref: Source format-Footnote-111900
-Node: Warning options11974
-Node: Configuration options13428
-Node: Listing options14559
-Node: Debug switches18913
-Node: Miscellaneous20007
-Node: Multiple sources20856
-Node: Static linking21496
-Node: Dynamic linking22987
-Ref: Dynamic linking-Footnote-124578
-Ref: Dynamic linking-Footnote-224639
-Node: Building library24700
-Node: Using library25083
-Node: C interface25654
-Node: Main C program25998
-Node: Static C to COBOL26914
-Node: Dynamic C to COBOL28411
-Node: Static COBOL to C29856
-Node: Dynamic COBOL to C31292
-Node: Customize31701
-Node: Customizing compiler31925
-Node: Customizing library32511
-Node: Optimize33269
-Node: Optimize options33572
-Node: Optimize call34109
-Node: Optimize binary34489
-Node: Debug35065
-Node: Debug options35224
-Node: Extensions35586
-Node: SELECT36023
-Node: Indexed36188
-Node: Extended ACCEPT36368
-Node: ACCEPT special38003
-Node: Extended DISPLAY40436
-Node: System routines42883
-Node: CBL_OC_GETOPT43229
-Node: CBL_OC_HOSTED47402
-Node: CBL_OC_NANOSLEEP51904
-Node: Appendix A52410
-Node: Appendix B63447
-Node: Appendix C86231
-Node: Appendix D91835
-Node: Appendix E93771
-Node: Appendix F99911
-Node: Appendix G105943
-Node: Appendix H107242
-Node: Appendix I116757
-Node: Index141883
+Ref: Help options-Footnote-18502
+Node: Build target8546
+Ref: Build target-Footnote-111065
+Node: Source format11118
+Ref: Source format-Footnote-111904
+Node: Warning options11978
+Node: Configuration options13432
+Node: Listing options14565
+Node: Debug switches18878
+Node: Miscellaneous19972
+Node: Multiple sources20821
+Node: Static linking21461
+Node: Dynamic linking22952
+Ref: Dynamic linking-Footnote-124544
+Ref: Dynamic linking-Footnote-224605
+Node: Building library24666
+Node: Using library25049
+Node: C interface25620
+Node: Main C program25964
+Node: Static C to COBOL26880
+Node: Dynamic C to COBOL28377
+Node: Static COBOL to C29822
+Node: Dynamic COBOL to C31258
+Node: Customize31667
+Node: Customizing compiler31891
+Node: Customizing library32477
+Node: Optimize33235
+Node: Optimize options33538
+Node: Optimize call34075
+Node: Optimize binary34455
+Node: Debug35031
+Node: Debug options35190
+Node: Extensions35552
+Node: SELECT35989
+Node: Indexed36154
+Node: Extended ACCEPT36334
+Node: ACCEPT special37968
+Node: Extended DISPLAY40402
+Node: System routines42848
+Node: CBL_OC_GETOPT43194
+Node: CBL_OC_HOSTED47366
+Node: CBL_OC_NANOSLEEP51868
+Node: Appendix A52374
+Node: Appendix B63341
+Node: Appendix C86125
+Node: Appendix D91729
+Node: Appendix E93665
+Node: Appendix F99805
+Node: Appendix G105837
+Node: Appendix H107136
+Node: Appendix I116650
+Node: Index141775
 
 End Tag Table

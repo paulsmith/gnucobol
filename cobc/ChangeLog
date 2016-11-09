@@ -1,4 +1,9 @@
 
+2016-11-09  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c, cobc.h, parser.y, tree.h, typeck.c: Added internal cross
+	  reference support.
+
 2016-11-07  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_88_values): Added to print 88 level values.

@@ -304,6 +304,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list)
 	}
 	CB_LABEL (label)->flag_begin = 1;
 	CB_LABEL (label)->flag_entry = 1;
+	CB_LABEL (label)->xref.skip = 1;
 	label->source_file = cb_source_file;
 	label->source_line = cb_source_line;
 	emit_statement (label);
@@ -3954,6 +3955,7 @@ file_description_entry:
 		YYERROR;
 	}
 	current_file = CB_FILE (cb_ref ($2));
+	cobc_xref_link (&current_file->xref, cb_source_line);
 	if (CB_VALID_TREE (current_file)) {
 		if ($1) {
 			current_file->organization = COB_ORG_SORT;
@@ -6131,6 +6133,7 @@ _procedure_division:
 	current_section->flag_dummy_section = 1;
 	current_section->flag_skip_label = !!skip_statements;
 	current_section->flag_declaratives = !!in_declaratives;
+	current_section->xref.skip = 1;
 	CB_TREE (current_section)->source_file = cb_source_file;
 	CB_TREE (current_section)->source_line = cb_source_line;
 	emit_statement (CB_TREE (current_section));
@@ -6139,6 +6142,7 @@ _procedure_division:
 	current_paragraph->flag_declaratives = !!in_declaratives;
 	current_paragraph->flag_skip_label = !!skip_statements;
 	current_paragraph->flag_dummy_paragraph = 1;
+	current_paragraph->xref.skip = 1;
 	CB_TREE (current_paragraph)->source_file = cb_source_file;
 	CB_TREE (current_paragraph)->source_line = cb_source_line;
 	emit_statement (CB_TREE (current_paragraph));
@@ -6540,6 +6544,7 @@ paragraph_header:
 		current_section->flag_dummy_section = 1;
 		current_section->flag_declaratives = !!in_declaratives;
 		current_section->flag_skip_label = !!skip_statements;
+		current_section->xref.skip = 1;
 		CB_TREE (current_section)->source_file = cb_source_file;
 		CB_TREE (current_section)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_section));
@@ -6626,6 +6631,7 @@ statements:
 		current_section->flag_dummy_section = 1;
 		current_section->flag_skip_label = !!skip_statements;
 		current_section->flag_declaratives = !!in_declaratives;
+		current_section->xref.skip = 1;
 		CB_TREE (current_section)->source_file = cb_source_file;
 		CB_TREE (current_section)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_section));
@@ -6636,6 +6642,7 @@ statements:
 		current_paragraph->flag_declaratives = !!in_declaratives;
 		current_paragraph->flag_skip_label = !!skip_statements;
 		current_paragraph->flag_dummy_paragraph = 1;
+		current_paragraph->xref.skip = 1;
 		CB_TREE (current_paragraph)->source_file = cb_source_file;
 		CB_TREE (current_paragraph)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_paragraph));

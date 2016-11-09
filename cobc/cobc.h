@@ -308,6 +308,17 @@ struct list_files {
 extern struct list_files	*cb_listing_files;
 extern struct list_files	*cb_current_file;
 
+struct cb_xref_elem {
+	struct cb_xref_elem	*next;
+	int			line;
+};
+
+struct cb_xref {
+	struct cb_xref_elem	*head;
+	struct cb_xref_elem	*tail;
+	int			skip;
+};
+
 
 extern int			cb_source_format;
 extern int			cb_text_column;
@@ -448,6 +459,8 @@ DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
 
 extern size_t			cobc_check_valid_name (const char *,
 						       const enum cobc_name_type);
+
+extern void			cobc_xref_link (struct cb_xref *, int);
 
 /* config.c */
 

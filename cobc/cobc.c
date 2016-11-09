@@ -22,6 +22,7 @@
 */
 
 /*#define DEBUG_REPLACE*/
+#define COB_INTERNAL_XREF
 
 #include "config.h"
 #include "defaults.h"
@@ -162,6 +163,7 @@ int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
 int			cb_lines_per_page = CB_MAX_LINES;
 int			cb_no_symbols = 0;
+int			cb_listing_xref = 0;
 #define		CB_LISTING_DATE_BUFF	48
 #define		CB_LISTING_DATE_MAX		(CB_LISTING_DATE_BUFF - 1)
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
@@ -1877,8 +1879,12 @@ cobc_print_usage (char * prog)
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
 	puts (_("  --no-symbols          specify no symbols in listing"));
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
+#ifndef COB_INTERNAL_XREF
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
 			"                        (V. Coen's 'cobxref' must be in path)"));
+#else
+	puts (_("  -Xref                 specify cross reference in listing"));
+#endif
 	puts (_("  -I <directory>        add <directory> to copy/include search path"));
 	puts (_("  -L <directory>        add <directory> to library search path"));
 	puts (_("  -l <lib>              link the library <lib>"));
@@ -2387,8 +2393,19 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'X':
+#ifndef COB_INTERNAL_XREF
 			/* -Xref : Generate listing through 'cobxref' */
 			cobc_gen_listing = 2;
+			/* temporary: check if we run the testsuite and skip
+			   the run if we don't have the internal xref */
+			cb_listing_outputfile = getenv ("TEMPLATE");
+			if (cb_listing_outputfile) {
+				exit (77);
+			}
+#else
+			/* -Xref : Generate internal listing */
+			cb_listing_xref = 1;
+#endif
 			break;
 
 		case 'D':
@@ -2936,8 +2953,10 @@ process_filename (const char *filename)
 		} else {
 			fn->listing_file = cobc_stradd_dup (fbasename, ".lst");
 		}
+#ifndef COB_INTERNAL_XREF
 	} else if (cobc_gen_listing > 1) {
 		fn->listing_file = cobc_stradd_dup (fbasename, ".xrf");
+#endif
 	}
 
 	cob_incr_temp_iteration();
@@ -3435,7 +3454,9 @@ preprocess (struct filename *fn)
 	int			save_source_format;
 	int			save_fold_copy;
 	int			save_fold_call;
+#ifndef COB_INTERNAL_XREF
 	int			ret;
+#endif
 
 	/* Initialize */
 	cb_source_file = NULL;
@@ -3526,6 +3547,7 @@ preprocess (struct filename *fn)
 		if (unlikely(fclose (cb_listing_file) != 0)) {
 			cobc_terminate(fn->listing_file);
 		}
+#ifndef COB_INTERNAL_XREF
 		if (cobc_gen_listing > 1) {
 			snprintf (cobc_buffer, cobc_buffer_size,
 				 "cobxref %s -R", fn->listing_file);
@@ -3558,6 +3580,7 @@ preprocess (struct filename *fn)
 			}
 			unlink (fn->listing_file);
 		}
+#endif
 		cb_listing_file = NULL;
 	}
 
@@ -3609,6 +3632,22 @@ set_listing_title_symbols (void)
 		"SIZE TYPE           LVL  NAME                           PICTURE");
 }
 
+#ifdef COB_INTERNAL_XREF
+static void
+set_listing_title_xref (int select)
+{
+	if (select)
+		strcpy (cb_listing_title, "LABEL");
+	else
+		strcpy (cb_listing_title, "NAME ");
+	strcat (cb_listing_title,
+		"                          DEFINED                ");
+	if (cb_listing_wide) {
+		strcat (cb_listing_title, "                    ");
+	}
+	strcat (cb_listing_title, "REFERENCES");
+}
+#endif
 
 static void
 print_program_header (void)
@@ -3929,6 +3968,167 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 	}
 }
 
+void
+cobc_xref_link (struct cb_xref *list, int line)
+{
+#ifdef COB_INTERNAL_XREF
+	struct cb_xref_elem *elem;
+
+	if (!cb_listing_xref)
+		return;
+
+	for (elem = list->head; elem; elem = elem->next) {
+		if (elem->line == line)
+			return;
+	}
+
+	elem = cobc_parse_malloc (sizeof (struct cb_xref_elem));
+	elem->line = line;
+
+	if (list->head == NULL) {
+		list->head = elem;
+	}
+	if (list->tail != NULL) {
+		list->tail->next = elem;
+	}
+	list->tail = elem;
+#endif
+}
+
+#ifdef COB_INTERNAL_XREF
+static void
+xref_print (struct cb_xref *xref)
+{
+	struct cb_xref_elem 	*elem;
+	int     		cnt;
+	int     		maxcnt = cb_listing_wide ? 10 : 5;
+
+	if (xref->head == NULL) {
+		fprintf (cb_src_list_file, "\n");
+		return;
+	}
+
+	cnt = 0;
+	for (elem = xref->head; elem; elem = elem->next) {
+		fprintf (cb_src_list_file, "  %06d", elem->line);
+		if (++cnt >= maxcnt) {
+			cnt = 0;
+			fprintf (cb_src_list_file, "\n");
+			if (elem->next) {
+				print_program_header ();
+				fprintf (cb_src_list_file, "%38.38s", " ");
+			}
+		}
+	}
+	if (cnt) {
+		fprintf (cb_src_list_file, "\n");
+	}
+}
+
+static void
+xref_88_values (struct cb_field *field)
+{
+	struct cb_field *f;
+	struct cb_word *w;
+	size_t index;
+	char lcl_name[80];
+
+	for (index = 0; index < CB_WORD_HASH_SIZE; index++) {
+		for (w = current_program->word_table[index]; w; w = w->next) {
+			if (w->items && CB_FIELD_P(CB_LIST(w->items)->value)) {
+				f = CB_FIELD(CB_LIST (w->items)->value);
+				if (f->level == 88 && f->parent == field) {
+					strcpy (lcl_name, (char *)f->name);
+					print_program_header ();
+					fprintf (cb_src_list_file,
+						"%-30.30s  %06d",
+			 			lcl_name, f->common.source_line);
+					xref_print (&f->xref);
+				}
+			}
+		}
+	}
+}
+
+static void
+xref_fields (struct cb_field *top)
+{
+	char			lcl_name[80];
+
+	for (; top; top = top->sister) {
+		if (!top->level) {
+			continue;
+		}
+
+		strcpy (lcl_name, check_filler_name((char *)top->name));
+		if (!strcmp (lcl_name, "FILLER")) {
+			continue;
+		}
+
+		print_program_header ();
+		fprintf (cb_src_list_file, "%-30.30s  %06d",
+			 lcl_name, top->common.source_line);
+
+		xref_print (&top->xref);
+		xref_88_values (top);
+
+		if (top->children) {
+			xref_fields (top->children);
+		}
+	}
+}
+
+static void
+xref_files_and_their_records (cb_tree file_list_p)
+{
+	cb_tree	l;
+
+	for (l = file_list_p; l; l = CB_CHAIN (l)) {
+		print_program_header ();
+		fprintf (cb_src_list_file, "%-30.30s  %06d",
+			 CB_FILE (CB_VALUE (l))->name,
+			 CB_FILE (CB_VALUE (l))->common.source_line);
+		xref_print (&CB_FILE (CB_VALUE (l))->xref);
+		if (CB_FILE (CB_VALUE (l))->record) {
+			xref_fields (CB_FILE (CB_VALUE (l))->record);
+		}
+		print_program_header ();
+		fprintf (cb_src_list_file, "\n");
+	}
+}
+
+static void
+xref_fields_in_section (struct cb_field *first_field_in_section)
+{
+	if (first_field_in_section != NULL) {
+		xref_fields (first_field_in_section);
+		print_program_header ();
+		fprintf (cb_src_list_file, "\n");
+	}
+}
+
+static void
+xref_labels (cb_tree label_list_p)
+{
+	cb_tree	l;
+	struct cb_label *lab;
+
+	for (l = label_list_p; l; l = CB_CHAIN (l)) {
+		if (CB_LABEL_P(CB_VALUE(l))) {
+			lab = CB_LABEL (CB_VALUE (l));
+			if (lab->xref.skip)
+				continue;
+			print_program_header ();
+			fprintf (cb_src_list_file, "%-30.30s  %06d",
+			 	lab->name, lab->common.source_line);
+			xref_print (&lab->xref);
+		}
+	}
+	print_program_header ();
+	fprintf (cb_src_list_file, "\n");
+}
+#endif
+
 static COB_INLINE COB_A_INLINE void
 force_new_page_for_next_line (void)
 {
@@ -3940,19 +4140,21 @@ print_program_trailer (void)
 {
 	struct cb_program	*p;
 	struct cb_program	*q;
-	int			 print_names = 0;
+	int			print_names = 0;
+	int			print_break = 1;
 
 
-	if (!cb_no_symbols && (p = current_program) != NULL) {
+	p = current_program;
+	if (p && p->next_program) {
+		print_names = 1;
+	}
+
+	if (!cb_no_symbols && p != NULL) {
 		/* Print file/symbol tables */
 
 		set_listing_title_symbols();
 		force_new_page_for_next_line ();
 		print_program_header ();
-
-		if (p->next_program) {
-			print_names = 1;
-		}
 
 		for (q = p; q; q = q->next_program) {
 			if (print_names) {
@@ -3970,7 +4172,44 @@ print_program_trailer (void)
 			print_fields_in_section (q->screen_storage);
 			print_fields_in_section (q->report_storage);
 		}
-	} else {
+		print_break = 0;
+	}
+
+#ifdef COB_INTERNAL_XREF
+	if (cb_listing_xref && p != NULL) {
+		/* Print cross reference */
+
+		for (q = p; q; q = q->next_program) {
+
+			set_listing_title_xref(0);
+			force_new_page_for_next_line ();
+			print_program_header ();
+
+			if (print_names) {
+				print_program_header ();
+				fprintf (cb_src_list_file, "%s %s\n",
+			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
+				 		"FUNCTION" : "PROGRAM"),
+			 	 	q->program_name);
+			}
+			xref_files_and_their_records (q->file_list);
+			xref_fields_in_section (q->working_storage);
+			xref_fields_in_section (q->local_storage);
+			xref_fields_in_section (q->linkage_storage);
+			xref_fields_in_section (q->screen_storage);
+			xref_fields_in_section (q->report_storage);
+
+			set_listing_title_xref(1);
+			force_new_page_for_next_line ();
+			print_program_header ();
+
+			xref_labels (q->exec_list);
+		}
+		print_break = 0;
+	}
+#endif
+
+	if (print_break) {
 		print_program_header ();
 		fputc ('\n', cb_src_list_file);
 	}
@@ -6175,6 +6414,11 @@ main (int argc, char **argv)
 	}
 
 	/* Open source listing file */
+#ifdef COB_INTERNAL_XREF
+	if (cb_listing_xref && !cb_listing_outputfile) {
+		cobc_err_exit (_("%s option requires a listing file"), "-Xref");
+	}
+#endif
 	if (cb_listing_outputfile) {
 		if (cb_unix_lf) {
 			cb_src_list_file = fopen (cb_listing_outputfile, "wb");

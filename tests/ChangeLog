@@ -1,4 +1,8 @@
 
+2016-11-09  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added cross reference tests.
+
 2016-11-07  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added 88 values to printed symbol listing.
