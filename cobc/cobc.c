@@ -3836,25 +3836,16 @@ static void
 print_88_values (int lvl, struct cb_field *field)
 {
 	struct cb_field *f;
-	struct cb_word *w;
-	size_t index;
 	char lcl_name[80];
 
-	for (index = 0; index < CB_WORD_HASH_SIZE; index++) {
-		for (w = current_program->word_table[index]; w; w = w->next) {
-			if (w->items && CB_FIELD_P(CB_LIST(w->items)->value)) {
-				f = CB_FIELD(CB_LIST (w->items)->value);
-				if (f->level == 88 && f->parent == field) {
-					memset (lcl_name, 0, sizeof(lcl_name));
-					memset (lcl_name, ' ', lvl * 2);
-					strcat (lcl_name, (char *)f->name);
-					print_program_header ();
-					fprintf (cb_src_list_file,
-						"     %-14.14s %02d   %s\n",
-			 			"CONDITIONAL", f->level, lcl_name);
-				}
-			}
-		}
+	for (f = field->validation; f; f = f->sister) {
+		memset (lcl_name, 0, sizeof(lcl_name));
+		memset (lcl_name, ' ', lvl * 2);
+		strcat (lcl_name, (char *)f->name);
+		print_program_header ();
+		fprintf (cb_src_list_file,
+			"     %-14.14s %02d   %s\n",
+			"CONDITIONAL", f->level, lcl_name);
 	}
 }
 
@@ -4029,24 +4020,15 @@ static void
 xref_88_values (struct cb_field *field)
 {
 	struct cb_field *f;
-	struct cb_word *w;
-	size_t index;
 	char lcl_name[80];
 
-	for (index = 0; index < CB_WORD_HASH_SIZE; index++) {
-		for (w = current_program->word_table[index]; w; w = w->next) {
-			if (w->items && CB_FIELD_P(CB_LIST(w->items)->value)) {
-				f = CB_FIELD(CB_LIST (w->items)->value);
-				if (f->level == 88 && f->parent == field) {
-					strcpy (lcl_name, (char *)f->name);
-					print_program_header ();
-					fprintf (cb_src_list_file,
-						"%-30.30s  %06d",
-			 			lcl_name, f->common.source_line);
-					xref_print (&f->xref);
-				}
-			}
-		}
+	for (f = field->validation; f; f = f->sister) {
+		strcpy (lcl_name, (char *)f->name);
+		print_program_header ();
+		fprintf (cb_src_list_file,
+			"%-30.30s  %06d",
+			lcl_name, f->common.source_line);
+		xref_print (&f->xref);
 	}
 }
 

@@ -22439,11 +22439,11 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0080 GROUP          01   UPDATE-ORDER
 0075 ALPHANUMERIC   02     INSERTION
 0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ADDNEW
      CONDITIONAL    88         ENDSET
      CONDITIONAL    88         REMOVE
+     CONDITIONAL    88         ADDNEW
+     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         DISPLY
 0001 ALPHANUMERIC   03       FILLER                     X
 0005 ALPHANUMERIC   03       A-FIELD                    9(5)
@@ -23723,11 +23723,11 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0080 GROUP          01   UPDATE-ORDER
 0075 ALPHANUMERIC   02     INSERTION
 0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ADDNEW
      CONDITIONAL    88         ENDSET
      CONDITIONAL    88         REMOVE
+     CONDITIONAL    88         ADDNEW
+     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         DISPLY
 0001 ALPHANUMERIC   03       FILLER                     X
 0005 NUMERIC        03       A-FIELD                    9(5)
@@ -23827,11 +23827,11 @@ MODIFICATION                    000036  000063  000158  000178  000229  000326
 UPDATE-ORDER                    000068  000182
 INSERTION                       000069  000240
 COMMAND                         000070
-CHANGE                          000075  000191
 ENDJOB                          000071  000195
-ADDNEW                          000074  000196
 ENDSET                          000072  000233
 REMOVE                          000073  000192
+ADDNEW                          000074  000196
+CHANGE                          000075  000191
 DISPLY                          000076  000193
 A-FIELD                         000078  000185  000187
 A-ALPHA                         000079
@@ -24383,11 +24383,11 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0080 GROUP          01   UPDATE-ORDER
 0075 ALPHANUMERIC   02     INSERTION
 0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ADDNEW
      CONDITIONAL    88         ENDSET
      CONDITIONAL    88         REMOVE
+     CONDITIONAL    88         ADDNEW
+     CONDITIONAL    88         CHANGE
      CONDITIONAL    88         DISPLY
 0001 ALPHANUMERIC   03       FILLER                     X
 0005 NUMERIC        03       A-FIELD                    9(5)
@@ -24484,11 +24484,11 @@ MODIFICATION                    000036  000063  000158  000178  000229  000326
 UPDATE-ORDER                    000068  000182
 INSERTION                       000069  000240
 COMMAND                         000070
-CHANGE                          000075  000191
 ENDJOB                          000071  000195
-ADDNEW                          000074  000196
 ENDSET                          000072  000233
 REMOVE                          000073  000192
+ADDNEW                          000074  000196
+CHANGE                          000075  000191
 DISPLY                          000076  000193
 A-FIELD                         000078  000185  000187
 A-ALPHA                         000079

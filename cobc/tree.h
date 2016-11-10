@@ -652,6 +652,7 @@ struct cb_field {
 	cb_tree			index_list;	/* INDEXED BY */
 	struct cb_field		*parent;	/* Upper level field (if any) */
 	struct cb_field		*children;	/* Top of lower level fields */
+	struct cb_field		*validation;	/* First level 88 field (if any) */
 	struct cb_field		*sister;	/* Fields at the same level */
 	struct cb_field		*redefines;	/* REDEFINES */
 	struct cb_field		*rename_thru;	/* RENAMES THRU */

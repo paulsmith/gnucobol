@@ -186,6 +186,14 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 	} else if (f->level == 88) {
 		/* Level 88 */
 		f->parent = last_field;
+		if (last_real_field && last_real_field->level == 88) {
+			/* Level 88 sister */
+			last_real_field->sister = f;
+		} else {
+			/* First Level 88 on this item */
+			last_field->validation = f;
+			last_field = f;
+		}
 	} else if (f->level > last_field->level) {
 		/* Lower level */
 		last_field->children = f;
