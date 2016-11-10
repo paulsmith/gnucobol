@@ -1,4 +1,4 @@
-:: Batch for preparing distribution folder
+:: Batch for preparing windows binary distribution folder
 
 @echo off
 setlocal
@@ -22,26 +22,61 @@ set COB_LIB_PATH="COB_RELEASE_PATH..\"
 %~d0
 
 if exist "%COB_DIST_PATH%" (
-   rmdir /S /Q "%COB_DIST_PATH%"
+   rmdir /S /Q "%COB_DIST_PATH%" 1>NUL
 )
 
 mkdir "%COB_DIST_PATH%"
 cd "%COB_DIST_PATH%"
 
+if exist "%COB_RELEASE_PATH%Win32\Release\cobc.exe" (
+   set HAVE32=1
+) else (
+   set HAVE32=0
+)
+
+if exist "%COB_RELEASE_PATH%x64\Release\cobc.exe" (
+   set HAVE64=1
+) else (
+   set HAVE64=0
+)
+
+if "%HAVE32%"=="1" (
+   echo 32bit binaries found.
+   if "%HAVE64%"=="1" (
+      echo 64bit binaries found.
+   ) else (
+      echo No 64bit binaries found.
+   )
+) else (
+   echo No 32bit binaries found.
+   if "%HAVE64%"=="1" (
+      echo 64bit binaries found.
+   ) else (
+      echo No 64bit binaries found.
+      echo No binaries available, ABORT!
+      goto :over
+   )
+)
 
 
-copy "%COB_SOURCE_PATH%AUTHORS"			.
-copy "%COB_SOURCE_PATH%COPYING*"		.
-copy "%COB_SOURCE_PATH%NEWS"			.
-copy "%COB_SOURCE_PATH%README"			.
-copy "%COB_SOURCE_PATH%THANKS"			.
-copy "%COB_SOURCE_PATH%TODO"			.
+copy "%COB_SOURCE_PATH%AUTHORS"			.\AUTHORS.TXT
+copy "%COB_SOURCE_PATH%COPYING"			.\COPYING.TXT
+copy "%COB_SOURCE_PATH%COPYING.LESSER"	.\COPYING.LESSER.TXT
+copy "%COB_SOURCE_PATH%COPYING.DOC"		.\COPYING.DOC.TXT
+copy "%COB_SOURCE_PATH%NEWS"			.\NEWS.TXT
+copy "%COB_SOURCE_PATH%README"			.\README.TXT
+copy "%COB_SOURCE_PATH%THANKS"			.\THANKS.TXT
+copy "%COB_SOURCE_PATH%TODO"			.\TODO.TXT
 
-copy "%COB_RELEASE_PATH%set_env_vs_dist.bat"	set_env_vs.bat
-copy "%COB_RELEASE_PATH%set_env_vs_dist_x64.bat"	set_env_vs_x64.bat
+if "%HAVE32%"=="1" (
+   copy "%COB_RELEASE_PATH%set_env_vs_dist.bat"	set_env_vs.bat
+   call :copyrel
+)
+if "%HAVE64%"=="1" (
+   copy "%COB_RELEASE_PATH%set_env_vs_dist_x64.bat"	set_env_vs_x64.bat
+   call :copyrel x64
+)
 
-call :copyrel
-call :copyrel x64
 
 mkdir config
 copy "%COB_SOURCE_PATH%config\*.conf"		config\
@@ -102,23 +137,27 @@ goto :eof
 :: must be last as we compile with the dist itself
 mkdir extras
 copy "%COB_SOURCE_PATH%extras\*.cob"		extras\
-copy "%COB_SOURCE_PATH%extras\README"		extras\
+copy "%COB_SOURCE_PATH%extras\README"		extras\README.txt
 
-echo.
-echo.
-echo Using created GnuCOBOL distribution (Win32) to compile extras
-cd "%COB_DIST_PATH%bin"
-call ..\set_env_vs.bat
-cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
+if "%HAVE32%"=="1" (
+   echo.
+   echo.
+   echo Using created GnuCOBOL distribution -Win32- to compile extras
+   cd "%COB_DIST_PATH%bin"
+   call ..\set_env_vs.bat
+   cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
+   cd ..
+)
 
-echo.
-echo.
-echo Using created GnuCOBOL distribution (x64) to compile extras
-cd "%COB_DIST_PATH%bin_x64"
-call ..\set_env_vs_x64.bat
-cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
-
-cd ..
+if "%HAVE64%"=="1" (
+   echo.
+   echo.
+   echo Using created GnuCOBOL distribution -x64- to compile extras
+   cd "%COB_DIST_PATH%bin_x64"
+   call ..\set_env_vs_x64.bat
+   cobc -m -Wall -std=mf ..\extras\CBL_OC_DUMP.cob -v
+   cd ..
+)
 
 echo.
 echo.
@@ -133,5 +172,7 @@ if exist "%ProgramFiles%\7-Zip\7z.exe" (
    echo 7-zip not found, "GnuCOBOL.7z" not created
 )
 
+
+:over
 pause
 endlocal

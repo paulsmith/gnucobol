@@ -3,6 +3,11 @@
 
 	* config.h.in, defaults.h.in: renamed from config.h.tmpl, defaults.h.tmpl
 
+2016-11-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makedist.bat: cater for build with and w/o 32bit/64bit,
+	  rename text files in the win dist package to .TXT
+
 2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* vc7: removed (GC 2+ will not build with Visual C compiler < 2005)
