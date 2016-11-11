@@ -50,7 +50,7 @@ LINE    PG/LN  A...B............................................................
 000008             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -87,7 +87,7 @@ LINE    .....................SOURCE.............................................
 000008    STOP RUN.
 GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -146,9 +146,9 @@ LINE    PG/LN  A...B............................................................
 000012             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
+00002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -184,9 +184,9 @@ LINE    PG/LN  A...B............................................................
 000012   STOP RUN.
 GnuCOBOL V.R.P          prog.i               DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
+00002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -248,9 +248,9 @@ LINE    PG/LN  A...B............................................................
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
+00002 ALPHANUMERIC   01   FIRST-MATCH                    X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -314,11 +314,11 @@ LINE    PG/LN  A...B............................................................
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   COLON-VAR                      X(2)
+00002 ALPHANUMERIC   01   COLON-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   PAREN-VAR                      X(2)
+00002 ALPHANUMERIC   01   PAREN-VAR                      X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -382,11 +382,11 @@ LINE    PG/LN  A...B............................................................
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   FIRST-VAR                      X(2)
+00002 ALPHANUMERIC   01   FIRST-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   SECOND-VAR                     X(2)
+00002 ALPHANUMERIC   01   SECOND-VAR                     X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -451,11 +451,11 @@ LINE    PG/LN  A...B............................................................
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   TEST-VAR1                      X(2)
+00002 ALPHANUMERIC   01   TEST-VAR1                      X(2)
 
-0002 ALPHANUMERIC   01   TEST-VAR2                      X(2)
+00002 ALPHANUMERIC   01   TEST-VAR2                      X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -517,9 +517,9 @@ LINE    PG/LN  A...B............................................................
 000011             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   COPY-VAR                       X(2)
+00002 ALPHANUMERIC   01   COPY-VAR                       X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -567,7 +567,7 @@ LINE    PG/LN  A...B............................................................
 000008             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -609,7 +609,7 @@ LINE    .....................SOURCE.............................................
 000008    STOP RUN.
 GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -680,12 +680,12 @@ LINE    PG/LN  A...B............................................................
 000023             STOP RUN.
 GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   77   WS-VAR                         X(2)
-0002 ALPHANUMERIC   77   WS-VA2                         X(2)
+00002 ALPHANUMERIC   77   WS-VAR                         X(2)
+00002 ALPHANUMERIC   77   WS-VA2                         X(2)
 
-0002 NUMERIC        77   LS-VAR                         9(2)
+00002 NUMERIC        77   LS-VAR                         9(2)
 
 0 Warnings in program
 0 Errors in program
@@ -742,15 +742,15 @@ LINE    PG/LN  A...B............................................................
 000023             STOP RUN.
 GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   77   WS-VAR                         X(2)
-0002 ALPHANUMERIC   77   WS-VA2                         X(2)
+00002 ALPHANUMERIC   77   WS-VAR                         X(2)
+00002 ALPHANUMERIC   77   WS-VA2                         X(2)
 
-0002 NUMERIC        77   LS-VAR                         9(2)
+00002 NUMERIC        77   LS-VAR                         9(2)
 GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0007
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -799,7 +799,7 @@ LINE    PG/LN  A...B............................................................
 000008             STOP RUN.                                                     PROG007
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0003
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -840,7 +840,7 @@ LINE    .....................................................SOURCE.............
 000008    STOP RUN.
 GnuCOBOL V.R.P          prog2.cob                                                    DDD MMM dd HH:MM:SS YYYY  Page 0003
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -895,7 +895,7 @@ LINE    PG/LN  A...B............................................................
 000008             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -914,7 +914,7 @@ LINE    PG/LN  A...B............................................................
 000008             STOP RUN.
 GnuCOBOL V.R.P          prog1.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -974,7 +974,7 @@ error: 'FIRST-MATCH' is not defined
 000010             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -1020,7 +1020,7 @@ error: 'FIRST-MATCH' is not defined
 000010             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -1064,9 +1064,9 @@ warning: numeric value is expected
 000010             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 NUMERIC        01   TEST-VAR                       9(2)
+00002 NUMERIC        01   TEST-VAR                       9(2)
 
 1 Warning in program
 0 Errors in program
@@ -1151,9 +1151,9 @@ warning: numeric value is expected
 000014   STOP RUN.
 GnuCOBOL V.R.P          prog.i               DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 NUMERIC        01   TEST-VAR                       9(2)
+00002 NUMERIC        01   TEST-VAR                       9(2)
 
 1 Warning in program
 0 Errors in program
@@ -1207,9 +1207,9 @@ warning: numeric value is expected
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 NUMERIC        01   TEST-VAR                       9(2)
+00002 NUMERIC        01   TEST-VAR                       9(2)
 
 1 Warning in program
 1 Error in program
@@ -1265,21 +1265,21 @@ LINE    PG/LN  A...B............................................................
 000014             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0004 NUMERIC        01   WS-ONE                         9(4)
+00004 NUMERIC        01   WS-ONE                         9(4)
 
-0004 ALPHABETIC     01   WS-TWO                         A(4)
+00004 ALPHABETIC     01   WS-TWO                         A(4)
 
-0004 ALPHANUMERIC   01   WS-THREE                       X(4)
+00004 ALPHANUMERIC   01   WS-THREE                       X(4)
 
-0004 NUMERIC        01   WS-FOUR                        S9(7)V9(8) COMP-1
+00004 NUMERIC        01   WS-FOUR                        S9(7)V9(8) COMP-1
 
-0008 NUMERIC        01   WS-FIVE                        S9(17)V9(17) COMP-2
+00008 NUMERIC        01   WS-FIVE                        S9(17)V9(17) COMP-2
 
-0002 NUMERIC        01   WS-SIX                         S999 COMP-3
+00002 NUMERIC        01   WS-SIX                         S999 COMP-3
 
-0013 NUMERIC        01   WS-SEVEN                       $$,$$$,$$9.99
+00013 NUMERIC        01   WS-SEVEN                       $$,$$$,$$9.99
 
 0 Warnings in program
 0 Errors in program
@@ -1319,14 +1319,14 @@ LINE    PG/LN  A...B............................................................
 000010             STOP RUN.
 GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
-0004 ALPHANUMERIC   01   WS-ONE                         9(4)
+00004 ALPHANUMERIC   01   WS-ONE                         9(4)
 
-0004 ALPHANUMERIC   01   WS-TWO                         A(4)
+00004 ALPHANUMERIC   01   WS-TWO                         A(4)
 
-0004 ALPHANUMERIC   01   WS-THREE                       X(4)
+00004 ALPHANUMERIC   01   WS-THREE                       X(4)
 
 0 Warnings in program
 0 Errors in program
@@ -1510,46 +1510,46 @@ LINE    PG/LN  A...B............................................................
 000045             STOP RUN.
 GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0512 ALPHANUMERIC   77   WS-Where                       X(512)
+00512 ALPHANUMERIC   77   WS-Where                       X(512)
 
-4524 GROUP          01   ws-mysql
-0004 POINTER        02     ws-mysql-cid
-0004 POINTER        02     ws-mysql-result
-0004 POINTER        02     ws-mysql-result-2
-0004 POINTER        02     ws-mysql-result-3
-0004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
-0004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
-0080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
-0064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
-0064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
-0064 ALPHANUMERIC   02     ws-mysql-password            X(64)
-0064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
-0004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
-0064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
-4096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
+04524 GROUP          01   ws-mysql
+00004 POINTER        02     ws-mysql-cid
+00004 POINTER        02     ws-mysql-result
+00004 POINTER        02     ws-mysql-result-2
+00004 POINTER        02     ws-mysql-result-3
+00004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
+00004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
+00080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
+00064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
+00064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
+00064 ALPHANUMERIC   02     ws-mysql-password            X(64)
+00064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
+00004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
+00064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
+04096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
 
-0004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
+00004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
 
-0006 GROUP          01   subscripts
-0002 NUMERIC        12     J                            S9(4) COMP-5
-0002 NUMERIC        12     K                            S9(4) COMP-5
-0002 NUMERIC        12     L                            S9(4) COMP-5
+00006 GROUP          01   subscripts
+00002 NUMERIC        12     J                            S9(4) COMP-5
+00002 NUMERIC        12     K                            S9(4) COMP-5
+00002 NUMERIC        12     L                            S9(4) COMP-5
 
-0078 GROUP          01   Display-Message-1
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0069 ALPHANUMERIC   03     FILLER                       X(69)
+00078 GROUP          01   Display-Message-1
+00009 ALPHANUMERIC   03     FILLER                       X(9)
+00069 ALPHANUMERIC   03     FILLER                       X(69)
 
-0318 GROUP          01   Display-Message-2
-0018 ALPHANUMERIC   03     FILLER                       X(18)
-0004 ALPHANUMERIC   03     FILLER                       X(4)
-0006 ALPHANUMERIC   03     FILLER                       X(6)
-0003 ALPHANUMERIC   03     FILLER                       9(3)
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0199 ALPHANUMERIC   03     FILLER                       X(199)
-0012 ALPHANUMERIC   03     FILLER                       X(12)
-0067 ALPHANUMERIC   03     FILLER                       X(67)
+00318 GROUP          01   Display-Message-2
+00018 ALPHANUMERIC   03     FILLER                       X(18)
+00004 ALPHANUMERIC   03     FILLER                       X(4)
+00006 ALPHANUMERIC   03     FILLER                       X(6)
+00003 ALPHANUMERIC   03     FILLER                       9(3)
+00009 ALPHANUMERIC   03     FILLER                       X(9)
+00199 ALPHANUMERIC   03     FILLER                       X(199)
+00012 ALPHANUMERIC   03     FILLER                       X(12)
+00067 ALPHANUMERIC   03     FILLER                       X(67)
 
 0 Warnings in program
 0 Errors in program
@@ -1613,46 +1613,46 @@ LINE    PG/LN  A...B............................................................
 000045             STOP RUN.
 GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0512 ALPHANUMERIC   77   WS-Where                       X(512)
+00512 ALPHANUMERIC   77   WS-Where                       X(512)
 
-4540 GROUP          01   ws-mysql
-0008 POINTER        02     ws-mysql-cid
-0008 POINTER        02     ws-mysql-result
-0008 POINTER        02     ws-mysql-result-2
-0008 POINTER        02     ws-mysql-result-3
-0004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
-0004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
-0080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
-0064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
-0064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
-0064 ALPHANUMERIC   02     ws-mysql-password            X(64)
-0064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
-0004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
-0064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
-4096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
+04540 GROUP          01   ws-mysql
+00008 POINTER        02     ws-mysql-cid
+00008 POINTER        02     ws-mysql-result
+00008 POINTER        02     ws-mysql-result-2
+00008 POINTER        02     ws-mysql-result-3
+00004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
+00004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
+00080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
+00064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
+00064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
+00064 ALPHANUMERIC   02     ws-mysql-password            X(64)
+00064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
+00004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
+00064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
+04096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
 
-0004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
+00004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
 
-0006 GROUP          01   subscripts
-0002 NUMERIC        12     J                            S9(4) COMP-5
-0002 NUMERIC        12     K                            S9(4) COMP-5
-0002 NUMERIC        12     L                            S9(4) COMP-5
+00006 GROUP          01   subscripts
+00002 NUMERIC        12     J                            S9(4) COMP-5
+00002 NUMERIC        12     K                            S9(4) COMP-5
+00002 NUMERIC        12     L                            S9(4) COMP-5
 
-0078 GROUP          01   Display-Message-1
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0069 ALPHANUMERIC   03     FILLER                       X(69)
+00078 GROUP          01   Display-Message-1
+00009 ALPHANUMERIC   03     FILLER                       X(9)
+00069 ALPHANUMERIC   03     FILLER                       X(69)
 
-0318 GROUP          01   Display-Message-2
-0018 ALPHANUMERIC   03     FILLER                       X(18)
-0004 ALPHANUMERIC   03     FILLER                       X(4)
-0006 ALPHANUMERIC   03     FILLER                       X(6)
-0003 ALPHANUMERIC   03     FILLER                       9(3)
-0009 ALPHANUMERIC   03     FILLER                       X(9)
-0199 ALPHANUMERIC   03     FILLER                       X(199)
-0012 ALPHANUMERIC   03     FILLER                       X(12)
-0067 ALPHANUMERIC   03     FILLER                       X(67)
+00318 GROUP          01   Display-Message-2
+00018 ALPHANUMERIC   03     FILLER                       X(18)
+00004 ALPHANUMERIC   03     FILLER                       X(4)
+00006 ALPHANUMERIC   03     FILLER                       X(6)
+00003 ALPHANUMERIC   03     FILLER                       9(3)
+00009 ALPHANUMERIC   03     FILLER                       X(9)
+00199 ALPHANUMERIC   03     FILLER                       X(199)
+00012 ALPHANUMERIC   03     FILLER                       X(12)
+00067 ALPHANUMERIC   03     FILLER                       X(67)
 
 0 Warnings in program
 0 Errors in program
@@ -1762,19 +1762,19 @@ LINE    PG/LN  A...B............................................................
 000040         END PROGRAM prog.
 GnuCOBOL V.R.P          prog4.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-     PROGRAM             prog
+      PROGRAM             prog
 
-     FUNCTION            WITHOUTPAR
+      FUNCTION            WITHOUTPAR
 
-0001 NUMERIC        01   PAR                            9
+00001 NUMERIC        01   PAR                            9
 
-     FUNCTION            WITHPAR
+      FUNCTION            WITHPAR
 
-0001 NUMERIC        01   PAR-IN                         9
+00001 NUMERIC        01   PAR-IN                         9
 
-0001 NUMERIC        01   PAR-OUT                        9
+00001 NUMERIC        01   PAR-OUT                        9
 
 0 Warnings in program
 0 Errors in program
@@ -1864,27 +1864,27 @@ LINE    PG/LN  A...B............................................................
 000031             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-5204 GROUP          01   SETUP-REC
-0004 ALPHANUMERIC   05     FL1                          X(04)
-0005 ALPHANUMERIC   05     FL2                          ZZZZZ
-0004 ALPHANUMERIC   05     FL3                          9(04)
-0004 NUMERIC        05     FL4                          9(08) COMP
-0002 NUMERIC        05     FL5                          9(04) COMP
-0008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
-0006 ALPHANUMERIC   05     FL7                          S9(05)
-0004 ALPHANUMERIC   05     FL8                          X(04)
-0004 ALPHANUMERIC-R 05     FL9                          9(04)
-0060 ALPHANUMERIC   05     FLA
-0040 ALPHANUMERIC   10       FLB                        OCCURS 20
-0002 ALPHANUMERIC   15         FLC                      X(02)
-0020 ALPHANUMERIC   10       FLD                        X(20)
-0100 ALPHANUMERIC   05     FLD1                         X(100)
-5000 ALPHANUMERIC   05     FLD2                         OCCURS 5 TO 5000
-0001 ALPHANUMERIC   10       FILLER                     X(01)
-0003 ALPHANUMERIC   05     FLD3                         X(3)
-0004 ALPHANUMERIC   05     FLD4                         X(4)
+05204 GROUP          01   SETUP-REC
+00004 ALPHANUMERIC   05     FL1                          X(04)
+00005 ALPHANUMERIC   05     FL2                          ZZZZZ
+00004 ALPHANUMERIC   05     FL3                          9(04)
+00004 NUMERIC        05     FL4                          9(08) COMP
+00002 NUMERIC        05     FL5                          9(04) COMP
+00008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
+00006 ALPHANUMERIC   05     FL7                          S9(05)
+00004 ALPHANUMERIC   05     FL8                          X(04)
+00004 ALPHANUMERIC-R 05     FL9                          9(04)
+00060 ALPHANUMERIC   05     FLA
+00040 ALPHANUMERIC   10       FLB                        OCCURS 20
+00002 ALPHANUMERIC   15         FLC                      X(02)
+00020 ALPHANUMERIC   10       FLD                        X(20)
+00100 ALPHANUMERIC   05     FLD1                         X(100)
+05000 ALPHANUMERIC   05     FLD2                         OCCURS 5 TO 5000
+00001 ALPHANUMERIC   10       FILLER                     X(01)
+00003 ALPHANUMERIC   05     FLD3                         X(3)
+00004 ALPHANUMERIC   05     FLD4                         X(4)
 
 0 Warnings in program
 0 Errors in program
@@ -1946,7 +1946,7 @@ LINE    PG/LN  A...B............................................................
 000017             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -2015,23 +2015,23 @@ LINE    PG/LN  A...B............................................................
 000010             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   01   TEST1-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST1-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST2-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST2-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST3-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST3-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST4-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST4-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST5-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST5-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST6-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST6-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
 
-0002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
+00002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
 
 0 Warnings in program
 0 Errors in program
@@ -2299,78 +2299,78 @@ warning: DATA RECORDS is obsolete in GnuCOBOL
 000111             STOP RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0080 FILE                OLD-VERSION
-0080 GROUP          01   OLD-RECORD
-0075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00080 FILE                OLD-VERSION
+00080 GROUP          01   OLD-RECORD
+00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
 
-0080 FILE                NEW-VERSION
-0080 GROUP          01   NEW-RECORD
-0075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00080 FILE                NEW-VERSION
+00080 GROUP          01   NEW-RECORD
+00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
 
-0032 FILE                PRT-VERSION
+00032 FILE                PRT-VERSION
 
-0080 FILE                MODIFICATION
-0080 GROUP          01   UPDATE-ORDER
-0075 ALPHANUMERIC   02     INSERTION
-0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ENDSET
-     CONDITIONAL    88         REMOVE
-     CONDITIONAL    88         ADDNEW
-     CONDITIONAL    88         CHANGE
-     CONDITIONAL    88         DISPLY
-0001 ALPHANUMERIC   03       FILLER                     X
-0005 ALPHANUMERIC   03       A-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-     CONDITIONAL    88         A-BLANK
-0004 ALPHANUMERIC   03       FILLER                     X(4)
-0005 ALPHANUMERIC   03       B-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-     CONDITIONAL    88         B-BLANK
-0054 ALPHANUMERIC   03       FILLER                     X(54)
-0005 ALPHANUMERIC   02     FILLER                       X(5)
+00080 FILE                MODIFICATION
+00080 GROUP          01   UPDATE-ORDER
+00075 ALPHANUMERIC   02     INSERTION
+00006 ALPHANUMERIC   03       COMMAND                    X(6)
+      CONDITIONAL    88         ENDJOB
+      CONDITIONAL    88         ENDSET
+      CONDITIONAL    88         REMOVE
+      CONDITIONAL    88         ADDNEW
+      CONDITIONAL    88         CHANGE
+      CONDITIONAL    88         DISPLY
+00001 ALPHANUMERIC   03       FILLER                     X
+00005 ALPHANUMERIC   03       A-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
+      CONDITIONAL    88         A-BLANK
+00004 ALPHANUMERIC   03       FILLER                     X(4)
+00005 ALPHANUMERIC   03       B-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
+      CONDITIONAL    88         B-BLANK
+00054 ALPHANUMERIC   03       FILLER                     X(54)
+00005 ALPHANUMERIC   02     FILLER                       X(5)
 
-0082 FILE                COMMENTARY
-0082 GROUP          01   COMMENT-LINE
-0082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 FILE                COMMENTARY
+00082 GROUP          01   COMMENT-LINE
+00082 ALPHANUMERIC   02     FILLER                       X(82)
 
-0080 GROUP          01   HEADINGS-LINE
-0015 ALPHANUMERIC   02     FILLER                       X(15)
-0020 ALPHANUMERIC   02     FILLER                       X(20)
-0017 ALPHANUMERIC   02     PHASE                        X(17)
-0002 ALPHANUMERIC   02     MONTH-RUN                    XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     DAY-RUN                      XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     YEAR-RUN                     XX
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00080 GROUP          01   HEADINGS-LINE
+00015 ALPHANUMERIC   02     FILLER                       X(15)
+00020 ALPHANUMERIC   02     FILLER                       X(20)
+00017 ALPHANUMERIC   02     PHASE                        X(17)
+00002 ALPHANUMERIC   02     MONTH-RUN                    XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     DAY-RUN                      XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     YEAR-RUN                     XX
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00004 NUMERIC        02     PAGE-NUMBER                  9(4)
 
-0082 GROUP          01   COMMAND-LISTING
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00082 GROUP          01   COMMAND-LISTING
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
 
-0082 GROUP          01   ACTIVITIES-LISTING
-0002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-0080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00082 GROUP          01   ACTIVITIES-LISTING
+00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
+00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
 
-0008 GROUP          01   UPSI-BYTE
-0001 ALPHANUMERIC   02     UPSI-BIT                     X
+00008 GROUP          01   UPSI-BYTE
+00001 ALPHANUMERIC   02     UPSI-BIT                     X
 
-0082 GROUP          01   MESSAGE-LOG
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00082 GROUP          01   MESSAGE-LOG
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
 
-0070 GROUP          01   DISPLAY-MESSAGE
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00070 GROUP          01   DISPLAY-MESSAGE
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
 
 8 Warnings in program
 0 Errors in program
@@ -2583,63 +2583,63 @@ error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and 
 000052             03  PIC ++.++.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0000 ALPHANUMERIC   01   empty-pic                      INVALID
+00000 ALPHANUMERIC   01   empty-pic                      INVALID
 
-0077 ALPHANUMERIC   01   too-long-pic                   XXXXXXXXXXXXXXXXXXXXXXXX
+00077 ALPHANUMERIC   01   too-long-pic                   XXXXXXXXXXXXXXXXXXXXXXX
 
-0000 ALPHANUMERIC   01   too-long-pic2                  INVALID
+00000 ALPHANUMERIC   01   too-long-pic2                  INVALID
 
-0000 GROUP          01   mutiple-symbols
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 GROUP          01   mutiple-symbols
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
 
-0000 GROUP          01   non-symbols
-0000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 GROUP          01   non-symbols
+00000 ALPHANUMERIC   03     FILLER                       INVALID
 
-0050 ALPHANUMERIC   01   too-many-digits                9(50)
+00050 ALPHANUMERIC   01   too-many-digits                9(50)
 
-0000 ALPHANUMERIC   01   too-long-number-in-parens      INVALID
+00000 ALPHANUMERIC   01   too-long-number-in-parens      INVALID
 
-0000 ALPHANUMERIC   01   nested-parens                  INVALID
+00000 ALPHANUMERIC   01   nested-parens                  INVALID
 
-0000 ALPHANUMERIC   01   unbalanced-parens              INVALID
+00000 ALPHANUMERIC   01   unbalanced-parens              INVALID
 
-0000 ALPHANUMERIC   01   multiple-pairs-of-parens       INVALID
+00000 ALPHANUMERIC   01   multiple-pairs-of-parens       INVALID
 
-0000 ALPHANUMERIC   01   no-digit-in-parens             INVALID
+00000 ALPHANUMERIC   01   no-digit-in-parens             INVALID
 
-0000 GROUP          01   mutually-exclusive-symbols
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 GROUP          01   mutually-exclusive-symbols
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
 
-0000 GROUP          01   non-rightmost-leftmost-symbols
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
-0000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 GROUP          01   non-rightmost-leftmost-symbols
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03     FILLER                       INVALID
 
-0000 GROUP          01   missing-symbols
-0000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 GROUP          01   missing-symbols
+00000 ALPHANUMERIC   03     FILLER                       INVALID
 
-0032 GROUP          01   valid-pics
-0002 ALPHANUMERIC   03     FILLER                       VP9B
-0002 ALPHANUMERIC   03     FILLER                       B9P(3)
-0004 ALPHANUMERIC   03     FILLER                       B$$$
-0014 ALPHANUMERIC   03     FILLER                       0000+B0+++0B,+
-0005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
-0005 ALPHANUMERIC   03     FILLER                       ++.++
+00032 GROUP          01   valid-pics
+00002 ALPHANUMERIC   03     FILLER                       VP9B
+00002 ALPHANUMERIC   03     FILLER                       B9P(3)
+00004 ALPHANUMERIC   03     FILLER                       B$$$
+00014 ALPHANUMERIC   03     FILLER                       0000+B0+++0B,+
+00005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
+00005 ALPHANUMERIC   03     FILLER                       ++.++
 
 6 Warnings in program
 34 Errors in program
@@ -2685,7 +2685,7 @@ LINE    PG/LN  A...B............................................................
 000008  000070 END PROGRAM prog.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
 
 0 Warnings in program
@@ -2706,10 +2706,6 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.                                         EDIT0001
        PROGRAM-ID.                                                      EDIT0002
            EDITOR.                                                      EDIT0003
-       AUTHOR.                                                          EDIT0004
-           J H FORTNER.                                                 EDIT0005
-       DATE-WRITTEN.                                                    EDIT0006
-           07/23/72.                                                    EDIT0007
                                                                         EDIT0008
       *NOTE.                                                            EDIT0009
       *    THIS VERSION OF EDITOR 1 COMPRISES AN ENTIRE RE_WRITE        EDIT0010
@@ -3034,24 +3030,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst prog.cob], [0], [],
-[prog.cob: 5: warning: AUTHOR is obsolete in GnuCOBOL
-prog.cob: 7: warning: DATE-WRITTEN is obsolete in GnuCOBOL
-prog.cob: 46: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 48: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 55: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 57: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 89: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 91: warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob: 202: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 203: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob: 224: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 225: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob: 258: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
@@ -3064,589 +3058,583 @@ LINE    PG/LN  A...B............................................................
 000002         IDENTIFICATION DIVISION.
 000003         PROGRAM-ID.
 000004             EDITOR.
-000005         AUTHOR.
-warning: AUTHOR is obsolete in GnuCOBOL
-000006             J H FORTNER.
-000007         DATE-WRITTEN.
-warning: DATE-WRITTEN is obsolete in GnuCOBOL
-000008             07/23/72.
-000009
-000010        *NOTE.
-000011        *    THIS VERSION OF EDITOR 1 COMPRISES AN ENTIRE RE_WRITE
-000012        *    OF THE BASIC EDITOR WITH ONLY ONE CHANGE IN THE COMMAND
-000013        *    STRUCTURE, THAT BEING THE ADDITION OF A "CHANGE" COMMAND
-000014        *    TO SERVE IN PLACE OF THE INSERT-DELETE COMBINATION WHICH
-000015        *    WAS REQUIRED IN PREVIOUS VERSIONS. RECORD NUMBER FIELDS
-000016        *    HAVE ALSO BEEN REDUCED FROM 5 DIGITS TO 4.
-000017        *    CHANGE 1.
-000018        *       MODIFY TO RUN ON TI-990.
-000019        *    CHANGE 2.
-000020        *       MODIFY TO RUN ON GNUCOBOL.
-000021
-000022         ENVIRONMENT DIVISION.
-000023         CONFIGURATION SECTION.
-000024         SOURCE-COMPUTER.
-000025             IBM-360.
-000026         OBJECT-COMPUTER.
-000027             IBM-360.
-000028         INPUT-OUTPUT SECTION.
-000029         FILE-CONTROL.
-000030             SELECT OLD-VERSION  ASSIGN TO "SYSUT1"
+000005
+000006        *NOTE.
+000007        *    THIS VERSION OF EDITOR 1 COMPRISES AN ENTIRE RE_WRITE
+000008        *    OF THE BASIC EDITOR WITH ONLY ONE CHANGE IN THE COMMAND
+000009        *    STRUCTURE, THAT BEING THE ADDITION OF A "CHANGE" COMMAND
+000010        *    TO SERVE IN PLACE OF THE INSERT-DELETE COMBINATION WHICH
+000011        *    WAS REQUIRED IN PREVIOUS VERSIONS. RECORD NUMBER FIELDS
+000012        *    HAVE ALSO BEEN REDUCED FROM 5 DIGITS TO 4.
+000013        *    CHANGE 1.
+000014        *       MODIFY TO RUN ON TI-990.
+000015        *    CHANGE 2.
+000016        *       MODIFY TO RUN ON GNUCOBOL.
+000017
+000018         ENVIRONMENT DIVISION.
+000019         CONFIGURATION SECTION.
+000020         SOURCE-COMPUTER.
+000021             IBM-360.
+000022         OBJECT-COMPUTER.
+000023             IBM-360.
+000024         INPUT-OUTPUT SECTION.
+000025         FILE-CONTROL.
+000026             SELECT OLD-VERSION  ASSIGN TO "SYSUT1"
+000027                                 ORGANIZATION LINE SEQUENTIAL.
+000028             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
+000029                                 ORGANIZATION LINE SEQUENTIAL.
+000030             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
 000031                                 ORGANIZATION LINE SEQUENTIAL.
-000032             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
+000032             SELECT MODIFICATION ASSIGN TO "SYSIN1"
 000033                                 ORGANIZATION LINE SEQUENTIAL.
-000034             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
+000034             SELECT COMMENTARY   ASSIGN TO "SYSOU1"
 000035                                 ORGANIZATION LINE SEQUENTIAL.
-000036             SELECT MODIFICATION ASSIGN TO "SYSIN1"
-000037                                 ORGANIZATION LINE SEQUENTIAL.
-000038             SELECT COMMENTARY   ASSIGN TO "SYSOU1"
-000039                                 ORGANIZATION LINE SEQUENTIAL.
+000036
+000037         DATA DIVISION.
+000038
+000039         FILE SECTION.
 000040
-000041         DATA DIVISION.
-000042
-000043         FILE SECTION.
-000044
-000045         FD  OLD-VERSION
-000046             LABEL RECORDS ARE STANDARD
+000041         FD  OLD-VERSION
+000042             LABEL RECORDS ARE STANDARD
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000047             BLOCK CONTAINS 80 CHARACTERS
-000048             DATA RECORD IS OLD-RECORD.
+000043             BLOCK CONTAINS 80 CHARACTERS
+000044             DATA RECORD IS OLD-RECORD.
 warning: DATA RECORDS is obsolete in GnuCOBOL
+000045
+000046         01  OLD-RECORD.
+000047             02 OLD-STATEMENT       PICTURE X(75).
+000048             02 OLD-NUMBER          PICTURE X(5).
 000049
-000050         01  OLD-RECORD.
-000051             02 OLD-STATEMENT       PICTURE X(75).
+000050         FD  NEW-VERSION
+000051             LABEL RECORDS ARE STANDARD
+warning: LABEL RECORDS is obsolete in GnuCOBOL
+000052             BLOCK CONTAINS 80 CHARACTERS
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
-000052             02 OLD-NUMBER          PICTURE X(5).
-000053
-000054         FD  NEW-VERSION
-000055             LABEL RECORDS ARE STANDARD
-warning: LABEL RECORDS is obsolete in GnuCOBOL
-000056             BLOCK CONTAINS 80 CHARACTERS
-000057             DATA RECORD IS NEW-RECORD.
+000053             DATA RECORD IS NEW-RECORD.
 warning: DATA RECORDS is obsolete in GnuCOBOL
+000054
+000055         01  NEW-RECORD.
+000056             02 NEW-STATEMENT       PICTURE X(75).
+000057             02 NEW-NUMBER          PICTURE X(5).
 000058
-000059         01  NEW-RECORD.
-000060             02 NEW-STATEMENT       PICTURE X(75).
-000061             02 NEW-NUMBER          PICTURE X(5).
-000062
-000063         FD  MODIFICATION
-000064             LABEL RECORDS ARE OMITTED
+000059         FD  MODIFICATION
+000060             LABEL RECORDS ARE OMITTED
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000065             BLOCK CONTAINS 80 CHARACTERS
-000066             DATA RECORD IS UPDATE-ORDER.
+000061             BLOCK CONTAINS 80 CHARACTERS
+000062             DATA RECORD IS UPDATE-ORDER.
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000067
-000068         01  UPDATE-ORDER.
-000069             02 INSERTION.
-000070                03 COMMAND          PICTURE X(6).
-000071                   88 ENDJOB        VALUE "ENDJOB".
-000072                   88 ENDSET        VALUE "ENDSET".
-000073                   88 REMOVE        VALUE "REMOVE".
-000074                   88 ADDNEW        VALUE "INSERT".
-000075                   88 CHANGE        VALUE "CHANGE".
-000076                   88 DISPLY        VALUE "DISPLY".
-000077                03 FILLER           PICTURE X.
-000078                03 A-FIELD          PICTURE 9(5).
-000079                03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).
-000080                   88 A-BLANK       VALUE SPACES.
-000081                03 FILLER           PICTURE X(4).
-000082                03 B-FIELD          PICTURE 9(5).
-000083                03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).
-000084                   88 B-BLANK       VALUE SPACES.
-000085                03 FILLER           PICTURE X(54).
-000086             02 FILLER              PICTURE X(5).
-000087
-000088         FD  COMMENTARY
-000089             LABEL RECORDS ARE OMITTED
+000063
+000064         01  UPDATE-ORDER.
+000065             02 INSERTION.
+000066                03 COMMAND          PICTURE X(6).
+000067                   88 ENDJOB        VALUE "ENDJOB".
+000068                   88 ENDSET        VALUE "ENDSET".
+000069                   88 REMOVE        VALUE "REMOVE".
+000070                   88 ADDNEW        VALUE "INSERT".
+000071                   88 CHANGE        VALUE "CHANGE".
+000072                   88 DISPLY        VALUE "DISPLY".
+000073                03 FILLER           PICTURE X.
+000074                03 A-FIELD          PICTURE 9(5).
+000075                03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).
+000076                   88 A-BLANK       VALUE SPACES.
+000077                03 FILLER           PICTURE X(4).
+000078                03 B-FIELD          PICTURE 9(5).
+000079                03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).
+000080                   88 B-BLANK       VALUE SPACES.
+000081                03 FILLER           PICTURE X(54).
+000082             02 FILLER              PICTURE X(5).
+000083
+000084         FD  COMMENTARY
+000085             LABEL RECORDS ARE OMITTED
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000090             BLOCK CONTAINS 82 CHARACTERS
-000091             DATA RECORD IS COMMENT-LINE.
+000086             BLOCK CONTAINS 82 CHARACTERS
+000087             DATA RECORD IS COMMENT-LINE.
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000092
-000093         01  COMMENT-LINE.
-000094             02 FILLER              PICTURE X(82).
-000095
-000096         WORKING-STORAGE SECTION.
-000097
-000098         77  COMMAND-ADDITIONS      PICTURE 9(3) COMPUTATIONAL VALUE 0.
-000099         77  COMMAND-SUBTRACTIONS   PICTURE 9(3) COMPUTATIONAL VALUE 0.
-000100         77  TOTAL-INSERTED         PICTURE 9(3) COMPUTATIONAL VALUE 0.
+000088
+000089         01  COMMENT-LINE.
+000090             02 FILLER              PICTURE X(82).
+000091
+000092         WORKING-STORAGE SECTION.
+000093
+000094         77  COMMAND-ADDITIONS      PICTURE 9(3) COMPUTATIONAL VALUE 0.
+000095         77  COMMAND-SUBTRACTIONS   PICTURE 9(3) COMPUTATIONAL VALUE 0.
+000096         77  TOTAL-INSERTED         PICTURE 9(3) COMPUTATIONAL VALUE 0.
+000097         77  TOTAL-DELETED          PICTURE 9(3) COMPUTATIONAL VALUE 0.
+000098         77  OUTPUT-COUNT           PICTURE 9(5) COMPUTATIONAL VALUE 0.
+000099         77  LINE-COUNT             PICTURE 9(2) COMPUTATIONAL VALUE 0.
+000100         77  FIELDA                 PICTURE 9(5) VALUE 0.
+000101         77  FIELDB                 PICTURE 9(5) VALUE 0.
+000102         77  BLANK-LINE             PICTURE X(82) VALUE SPACES.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................
 
-000101         77  TOTAL-DELETED          PICTURE 9(3) COMPUTATIONAL VALUE 0.
-000102         77  OUTPUT-COUNT           PICTURE 9(5) COMPUTATIONAL VALUE 0.
-000103         77  LINE-COUNT             PICTURE 9(2) COMPUTATIONAL VALUE 0.
-000104         77  FIELDA                 PICTURE 9(5) VALUE 0.
-000105         77  FIELDB                 PICTURE 9(5) VALUE 0.
-000106         77  BLANK-LINE             PICTURE X(82) VALUE SPACES.
-000107
-000108         01  DATE-FROM-SYS.
-000109             02 DFSYS OCCURS 3 TIMES PICTURE 99.
-000110
-000111         01  HEADINGS-LINE.
-000112             02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION".
-000113             02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".
-000114             02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF".
-000115             02 MONTH-RUN           PICTURE XX.
-000116             02 FILLER              PICTURE X VALUE "/".
-000117             02 DAY-RUN             PICTURE XX.
-000118             02 FILLER              PICTURE X VALUE "/".
-000119             02 YEAR-RUN            PICTURE XX.
-000120             02 FILLER              PICTURE X(8) VALUE SPACES.
-000121             02 FILLER              PICTURE X(8) VALUE "  PAGE: ".
-000122             02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.
+000103
+000104         01  DATE-FROM-SYS.
+000105             02 DFSYS OCCURS 3 TIMES PICTURE 99.
+000106
+000107         01  HEADINGS-LINE.
+000108             02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION".
+000109             02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".
+000110             02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF".
+000111             02 MONTH-RUN           PICTURE XX.
+000112             02 FILLER              PICTURE X VALUE "/".
+000113             02 DAY-RUN             PICTURE XX.
+000114             02 FILLER              PICTURE X VALUE "/".
+000115             02 YEAR-RUN            PICTURE XX.
+000116             02 FILLER              PICTURE X(8) VALUE SPACES.
+000117             02 FILLER              PICTURE X(8) VALUE "  PAGE: ".
+000118             02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.
+000119
+000120         01  COMMAND-LISTING.
+000121             02 FILLER              PICTURE X(2) VALUE SPACES.
+000122             02 COMMAND-IMAGE       PICTURE X(80).
 000123
-000124         01  COMMAND-LISTING.
-000125             02 FILLER              PICTURE X(2) VALUE SPACES.
-000126             02 COMMAND-IMAGE       PICTURE X(80).
+000124         01  ACTIVITIES-LISTING.
+000125             02 DISPOSITION         PICTURE X(2).
+000126             02 ACTIVE-IMAGE        PICTURE X(80).
 000127
-000128         01  ACTIVITIES-LISTING.
-000129             02 DISPOSITION         PICTURE X(2).
-000130             02 ACTIVE-IMAGE        PICTURE X(80).
-000131
-000132         01  UPSI-BYTE.
-000133             02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.
+000128         01  UPSI-BYTE.
+000129             02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.
+000130
+000131         01  MESSAGE-LOG.
+000132             02 FILLER              PICTURE X(2) VALUE SPACES.
+000133             02 MESSAGE-TEXT        PICTURE X(80).
 000134
-000135         01  MESSAGE-LOG.
+000135         01  DISPLAY-MESSAGE.
 000136             02 FILLER              PICTURE X(2) VALUE SPACES.
-000137             02 MESSAGE-TEXT        PICTURE X(80).
-000138
-000139         01  DISPLAY-MESSAGE.
-000140             02 FILLER              PICTURE X(2) VALUE SPACES.
-000141             02 DISPLAY-TEMP        PICTURE X(6).
-000142             02 FILLER              PICTURE X(2) VALUE SPACES.
-000143             02 DISPLAY-TEXT        PICTURE X(60).
-000144
-000145         77  END-JOB-PROCESS        PICTURE 9 VALUE 0.
-000146         77  DELETE-PROCESS         PICTURE 9 VALUE 1.
-000147         77  INSERT-PROCESS         PICTURE 9 VALUE 2.
-000148         77  WRITE-PROCESS          PICTURE 9 VALUE 3.
+000137             02 DISPLAY-TEMP        PICTURE X(6).
+000138             02 FILLER              PICTURE X(2) VALUE SPACES.
+000139             02 DISPLAY-TEXT        PICTURE X(60).
+000140
+000141         77  END-JOB-PROCESS        PICTURE 9 VALUE 0.
+000142         77  DELETE-PROCESS         PICTURE 9 VALUE 1.
+000143         77  INSERT-PROCESS         PICTURE 9 VALUE 2.
+000144         77  WRITE-PROCESS          PICTURE 9 VALUE 3.
+000145
+000146         01  SELECTORS.
+000147             02 RETURN-SELECT       PICTURE 9 VALUE 0.
+000148             02 NEXT-JOB-SELECT     PICTURE 9 VALUE 0.
 000149
-000150         01  SELECTORS.
-000151             02 RETURN-SELECT       PICTURE 9 VALUE 0.
-000152             02 NEXT-JOB-SELECT     PICTURE 9 VALUE 0.
-000153
-000154         PROCEDURE DIVISION.
-000155
+000150         PROCEDURE DIVISION.
+000151
+000152         START-SECTION.
+000153             OPEN INPUT OLD-VERSION, MODIFICATION,
+000154                  OUTPUT NEW-VERSION, COMMENTARY.
+000155             MOVE "F" TO UPSI-BIT (1), UPSI-BIT (2).
+000156             ACCEPT DATE-FROM-SYS FROM DATE.
+000157             MOVE DFSYS (1) TO YEAR-RUN.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 LINE    PG/LN  A...B............................................................
 
-000156         START-SECTION.
-000157             OPEN INPUT OLD-VERSION, MODIFICATION,
-000158                  OUTPUT NEW-VERSION, COMMENTARY.
-000159             MOVE "F" TO UPSI-BIT (1), UPSI-BIT (2).
-000160             ACCEPT DATE-FROM-SYS FROM DATE.
-000161             MOVE DFSYS (1) TO YEAR-RUN.
-000162             MOVE DFSYS (2) TO MONTH-RUN.
-000163             MOVE DFSYS (3) TO DAY-RUN.
-000164             READ OLD-VERSION AT END
-000165                MOVE "NO OLD VERSION FOUND" TO MESSAGE-TEXT
-000166                WRITE COMMENT-LINE FROM MESSAGE-LOG
-000167                GO TO END-JOB.
-000168             MOVE OLD-STATEMENT TO NEW-STATEMENT.
-000169             PERFORM OUTPUT-A-RECORD.
-000170
-000171         TOP-OF-PAGE-ROUTINE.
-000172             ADD 1 TO PAGE-NUMBER.
-000173             MOVE ZERO TO LINE-COUNT.
-000174             WRITE COMMENT-LINE FROM HEADINGS-LINE AFTER PAGE.
-000175             WRITE COMMENT-LINE FROM BLANK-LINE.
-000176
-000177         READ-A-COMMAND.
-000178             READ MODIFICATION AT END
-000179                MOVE "MODIFICATION FILE ENDED " TO MESSAGE-TEXT
-000180                WRITE COMMENT-LINE FROM MESSAGE-LOG
-000181                GO TO FINISH-JOB.
-000182             MOVE UPDATE-ORDER TO COMMAND-IMAGE.
-000183             WRITE COMMENT-LINE FROM COMMAND-LISTING.
-000184             ADD 2 TO LINE-COUNT.
-000185             IF A-BLANK MOVE ZEROES TO A-FIELD.
-000186             IF B-BLANK MOVE ZEROES TO B-FIELD.
-000187             MOVE A-FIELD TO FIELDA.
-000188             MOVE B-FIELD TO FIELDB.
-000189
-000190         TEST-COMMAND-TYPE.
-000191             IF CHANGE GO TO CHANGE-A-RECORD.
-000192             IF REMOVE GO TO DELETE-A-RECORD.
-000193             IF DISPLY MOVE "T" TO UPSI-BIT (2)
-000194                GO TO FINISH-JOB.
-000195             IF ENDJOB GO TO FINISH-JOB.
-000196             IF ADDNEW GO TO INSERT-A-RECORD.
-000197             MOVE "INVALID COMMAND IGNORED." TO MESSAGE-TEXT.
-000198             WRITE COMMENT-LINE FROM MESSAGE-LOG.
-000199             GO TO READ-A-COMMAND.
+000158             MOVE DFSYS (2) TO MONTH-RUN.
+000159             MOVE DFSYS (3) TO DAY-RUN.
+000160             READ OLD-VERSION AT END
+000161                MOVE "NO OLD VERSION FOUND" TO MESSAGE-TEXT
+000162                WRITE COMMENT-LINE FROM MESSAGE-LOG
+000163                GO TO END-JOB.
+000164             MOVE OLD-STATEMENT TO NEW-STATEMENT.
+000165             PERFORM OUTPUT-A-RECORD.
+000166
+000167         TOP-OF-PAGE-ROUTINE.
+000168             ADD 1 TO PAGE-NUMBER.
+000169             MOVE ZERO TO LINE-COUNT.
+000170             WRITE COMMENT-LINE FROM HEADINGS-LINE AFTER PAGE.
+000171             WRITE COMMENT-LINE FROM BLANK-LINE.
+000172
+000173         READ-A-COMMAND.
+000174             READ MODIFICATION AT END
+000175                MOVE "MODIFICATION FILE ENDED " TO MESSAGE-TEXT
+000176                WRITE COMMENT-LINE FROM MESSAGE-LOG
+000177                GO TO FINISH-JOB.
+000178             MOVE UPDATE-ORDER TO COMMAND-IMAGE.
+000179             WRITE COMMENT-LINE FROM COMMAND-LISTING.
+000180             ADD 2 TO LINE-COUNT.
+000181             IF A-BLANK MOVE ZEROES TO A-FIELD.
+000182             IF B-BLANK MOVE ZEROES TO B-FIELD.
+000183             MOVE A-FIELD TO FIELDA.
+000184             MOVE B-FIELD TO FIELDB.
+000185
+000186         TEST-COMMAND-TYPE.
+000187             IF CHANGE GO TO CHANGE-A-RECORD.
+000188             IF REMOVE GO TO DELETE-A-RECORD.
+000189             IF DISPLY MOVE "T" TO UPSI-BIT (2)
+000190                GO TO FINISH-JOB.
+000191             IF ENDJOB GO TO FINISH-JOB.
+000192             IF ADDNEW GO TO INSERT-A-RECORD.
+000193             MOVE "INVALID COMMAND IGNORED." TO MESSAGE-TEXT.
+000194             WRITE COMMENT-LINE FROM MESSAGE-LOG.
+000195             GO TO READ-A-COMMAND.
+000196
+000197         CHANGE-A-RECORD.
+000198             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.
+warning: ALTER is obsolete in GnuCOBOL
+000199             ALTER NEXT-JOB-STEP TO PROCEED TO DELETION-PROCESS.
+warning: ALTER is obsolete in GnuCOBOL
 000200
-000201         CHANGE-A-RECORD.
-000202             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.
-warning: ALTER is obsolete in GnuCOBOL
-000203             ALTER NEXT-JOB-STEP TO PROCEED TO DELETION-PROCESS.
-warning: ALTER is obsolete in GnuCOBOL
-000204
-000205         FIND-FIELDA.
-000206             IF OLD-NUMBER IS GREATER THAN FIELDA
-000207                MOVE "RECORD ALREADY PASSED" TO MESSAGE-TEXT
-000208                WRITE COMMENT-LINE FROM MESSAGE-LOG
+000201         FIND-FIELDA.
+000202             IF OLD-NUMBER IS GREATER THAN FIELDA
+000203                MOVE "RECORD ALREADY PASSED" TO MESSAGE-TEXT
+000204                WRITE COMMENT-LINE FROM MESSAGE-LOG
+000205                GO TO READ-A-COMMAND.
+000206             READ OLD-VERSION AT END
+000207                MOVE "NOT FOUND IN OLD VERSION" TO DISPLAY-TEXT
+000208                MOVE FIELDA TO DISPLAY-TEMP
+000209                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
+000210                GO TO END-JOB.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 LINE    PG/LN  A...B............................................................
 
-000209                GO TO READ-A-COMMAND.
-000210             READ OLD-VERSION AT END
-000211                MOVE "NOT FOUND IN OLD VERSION" TO DISPLAY-TEXT
-000212                MOVE FIELDA TO DISPLAY-TEMP
-000213                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
-000214                GO TO END-JOB.
-000215             IF OLD-NUMBER IS LESS THAN FIELDA
-000216                MOVE OLD-STATEMENT TO NEW-STATEMENT
-000217                PERFORM OUTPUT-A-RECORD
-000218                GO TO FIND-FIELDA.
-000219
-000220         RETURN-TO-USER.
-000221             GO TO END-JOB.
-000222
-000223         INSERT-A-RECORD.
-000224             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.
+000211             IF OLD-NUMBER IS LESS THAN FIELDA
+000212                MOVE OLD-STATEMENT TO NEW-STATEMENT
+000213                PERFORM OUTPUT-A-RECORD
+000214                GO TO FIND-FIELDA.
+000215
+000216         RETURN-TO-USER.
+000217             GO TO END-JOB.
+000218
+000219         INSERT-A-RECORD.
+000220             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.
 warning: ALTER is obsolete in GnuCOBOL
-000225             ALTER NEXT-JOB-STEP TO PROCEED TO FORCED-WRITE.
+000221             ALTER NEXT-JOB-STEP TO PROCEED TO FORCED-WRITE.
 warning: ALTER is obsolete in GnuCOBOL
-000226             GO TO FIND-FIELDA.
-000227
-000228         INSERTION-PROCESS.
-000229             READ MODIFICATION AT END
-000230                MOVE "NO ENDSET FOUND" TO MESSAGE-TEXT
-000231                WRITE COMMENT-LINE FROM MESSAGE-LOG
-000232                GO TO END-JOB.
-000233             IF ENDSET
-000234                MOVE COMMAND-ADDITIONS TO DISPLAY-TEMP
-000235                MOVE "RECORDS INSERTED." TO DISPLAY-TEXT
-000236                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
-000237                ADD COMMAND-ADDITIONS TO TOTAL-INSERTED
-000238                MOVE ZEROES TO COMMAND-ADDITIONS
-000239                GO TO NEXT-JOB-STEP.
-000240             MOVE INSERTION TO NEW-STATEMENT, ACTIVE-IMAGE.
-000241             MOVE "I " TO DISPOSITION.
-000242             PERFORM OUTPUT-A-RECORD.
-000243             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
-000244             ADD 1 TO COMMAND-ADDITIONS.
-000245             ADD 1 TO LINE-COUNT.
-000246             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
-000247             GO TO INSERTION-PROCESS.
-000248
-000249         NEXT-JOB-STEP.
-000250             GO TO END-JOB.
-000251
-000252         FORCED-WRITE.
-000253             MOVE OLD-STATEMENT TO NEW-STATEMENT.
-000254             PERFORM OUTPUT-A-RECORD.
-000255             GO TO READ-A-COMMAND.
+000222             GO TO FIND-FIELDA.
+000223
+000224         INSERTION-PROCESS.
+000225             READ MODIFICATION AT END
+000226                MOVE "NO ENDSET FOUND" TO MESSAGE-TEXT
+000227                WRITE COMMENT-LINE FROM MESSAGE-LOG
+000228                GO TO END-JOB.
+000229             IF ENDSET
+000230                MOVE COMMAND-ADDITIONS TO DISPLAY-TEMP
+000231                MOVE "RECORDS INSERTED." TO DISPLAY-TEXT
+000232                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
+000233                ADD COMMAND-ADDITIONS TO TOTAL-INSERTED
+000234                MOVE ZEROES TO COMMAND-ADDITIONS
+000235                GO TO NEXT-JOB-STEP.
+000236             MOVE INSERTION TO NEW-STATEMENT, ACTIVE-IMAGE.
+000237             MOVE "I " TO DISPOSITION.
+000238             PERFORM OUTPUT-A-RECORD.
+000239             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
+000240             ADD 1 TO COMMAND-ADDITIONS.
+000241             ADD 1 TO LINE-COUNT.
+000242             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
+000243             GO TO INSERTION-PROCESS.
+000244
+000245         NEXT-JOB-STEP.
+000246             GO TO END-JOB.
+000247
+000248         FORCED-WRITE.
+000249             MOVE OLD-STATEMENT TO NEW-STATEMENT.
+000250             PERFORM OUTPUT-A-RECORD.
+000251             GO TO READ-A-COMMAND.
+000252
+000253         DELETE-A-RECORD.
+000254             ALTER RETURN-TO-USER TO PROCEED TO DELETION-PROCESS.
+warning: ALTER is obsolete in GnuCOBOL
+000255             GO TO FIND-FIELDA.
 000256
-000257         DELETE-A-RECORD.
-000258             ALTER RETURN-TO-USER TO PROCEED TO DELETION-PROCESS.
-warning: ALTER is obsolete in GnuCOBOL
-000259             GO TO FIND-FIELDA.
-000260
+000257         DELETION-PROCESS.
+000258             MOVE OLD-RECORD TO ACTIVE-IMAGE.
+000259             MOVE "D " TO DISPOSITION.
+000260             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
+000261             ADD 1 TO LINE-COUNT.
+000262             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0006
 
 LINE    PG/LN  A...B............................................................
 
-000261         DELETION-PROCESS.
-000262             MOVE OLD-RECORD TO ACTIVE-IMAGE.
-000263             MOVE "D " TO DISPOSITION.
-000264             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
-000265             ADD 1 TO LINE-COUNT.
-000266             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
-000267             ADD 1 TO COMMAND-SUBTRACTIONS.
-000268             IF OLD-NUMBER IS NOT LESS THAN FIELDB
-000269                MOVE COMMAND-SUBTRACTIONS TO DISPLAY-TEMP
-000270                MOVE "RECORDS DELETED." TO DISPLAY-TEXT
-000271                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
-000272                ADD COMMAND-SUBTRACTIONS TO TOTAL-DELETED
-000273                MOVE OLD-STATEMENT TO NEW-STATEMENT
-000274                MOVE ZEROES TO COMMAND-SUBTRACTIONS
-000275                GO TO READ-A-COMMAND.
-000276             READ OLD-VERSION AT END
-000277                MOVE "NOT FOUND IN OLD VERSION DOING DELETE"
-000278                      TO DISPLAY-TEXT
-000279                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
-000280                GO TO END-JOB.
-000281             GO TO DELETION-PROCESS.
-000282
-000283         OUTPUT-A-RECORD.
-000284             ADD 1 TO OUTPUT-COUNT.
-000285             MOVE OUTPUT-COUNT TO NEW-NUMBER.
-000286             WRITE NEW-RECORD.
-000287
-000288         FINISH-JOB.
-000289             READ OLD-VERSION AT END GO TO TEST-FOR-LISTING.
-000290             MOVE OLD-STATEMENT TO NEW-STATEMENT.
-000291             GO TO OUTPUT-A-RECORD.
-000292
-000293         TEST-FOR-LISTING.
-000294             PERFORM TOP-OF-PAGE-ROUTINE.
-000295             MOVE OLD-NUMBER TO DISPLAY-TEMP.
-000296             MOVE "RECORDS READ." TO DISPLAY-TEXT.
-000297             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
-000298             MOVE TOTAL-INSERTED TO DISPLAY-TEMP.
-000299             MOVE "RECORDS ADDED." TO DISPLAY-TEXT.
-000300             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
-000301             MOVE TOTAL-DELETED TO DISPLAY-TEMP.
-000302             MOVE "RECORDS DROPPED." TO DISPLAY-TEXT.
-000303             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
-000304             MOVE OUTPUT-COUNT TO DISPLAY-TEMP.
-000305             MOVE "RECORDS IN NEW FILE." TO DISPLAY-TEXT.
-000306             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
-000307             IF UPSI-BIT (2) EQUAL "F" GO TO END-JOB.
-000308             CLOSE NEW-VERSION.
-000309             OPEN INPUT NEW-VERSION.
-000310             MOVE "UPDATED LISTING" TO PHASE.
-000311             MOVE ZEROES TO PAGE-NUMBER.
-000312             PERFORM TOP-OF-PAGE-ROUTINE.
-000313             MOVE SPACES TO DISPOSITION.
-000314
-000315         LISTING-LOOP.
+000263             ADD 1 TO COMMAND-SUBTRACTIONS.
+000264             IF OLD-NUMBER IS NOT LESS THAN FIELDB
+000265                MOVE COMMAND-SUBTRACTIONS TO DISPLAY-TEMP
+000266                MOVE "RECORDS DELETED." TO DISPLAY-TEXT
+000267                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
+000268                ADD COMMAND-SUBTRACTIONS TO TOTAL-DELETED
+000269                MOVE OLD-STATEMENT TO NEW-STATEMENT
+000270                MOVE ZEROES TO COMMAND-SUBTRACTIONS
+000271                GO TO READ-A-COMMAND.
+000272             READ OLD-VERSION AT END
+000273                MOVE "NOT FOUND IN OLD VERSION DOING DELETE"
+000274                      TO DISPLAY-TEXT
+000275                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE
+000276                GO TO END-JOB.
+000277             GO TO DELETION-PROCESS.
+000278
+000279         OUTPUT-A-RECORD.
+000280             ADD 1 TO OUTPUT-COUNT.
+000281             MOVE OUTPUT-COUNT TO NEW-NUMBER.
+000282             WRITE NEW-RECORD.
+000283
+000284         FINISH-JOB.
+000285             READ OLD-VERSION AT END GO TO TEST-FOR-LISTING.
+000286             MOVE OLD-STATEMENT TO NEW-STATEMENT.
+000287             GO TO OUTPUT-A-RECORD.
+000288
+000289         TEST-FOR-LISTING.
+000290             PERFORM TOP-OF-PAGE-ROUTINE.
+000291             MOVE OLD-NUMBER TO DISPLAY-TEMP.
+000292             MOVE "RECORDS READ." TO DISPLAY-TEXT.
+000293             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
+000294             MOVE TOTAL-INSERTED TO DISPLAY-TEMP.
+000295             MOVE "RECORDS ADDED." TO DISPLAY-TEXT.
+000296             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
+000297             MOVE TOTAL-DELETED TO DISPLAY-TEMP.
+000298             MOVE "RECORDS DROPPED." TO DISPLAY-TEXT.
+000299             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
+000300             MOVE OUTPUT-COUNT TO DISPLAY-TEMP.
+000301             MOVE "RECORDS IN NEW FILE." TO DISPLAY-TEXT.
+000302             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.
+000303             IF UPSI-BIT (2) EQUAL "F" GO TO END-JOB.
+000304             CLOSE NEW-VERSION.
+000305             OPEN INPUT NEW-VERSION.
+000306             MOVE "UPDATED LISTING" TO PHASE.
+000307             MOVE ZEROES TO PAGE-NUMBER.
+000308             PERFORM TOP-OF-PAGE-ROUTINE.
+000309             MOVE SPACES TO DISPOSITION.
+000310
+000311         LISTING-LOOP.
+000312             READ NEW-VERSION AT END GO TO END-JOB.
+000313             MOVE NEW-RECORD TO ACTIVE-IMAGE.
+000314             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
+000315             ADD 1 TO LINE-COUNT.
+000316             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
+000317             GO TO LISTING-LOOP.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0007
 
 LINE    PG/LN  A...B............................................................
 
-000316             READ NEW-VERSION AT END GO TO END-JOB.
-000317             MOVE NEW-RECORD TO ACTIVE-IMAGE.
-000318             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.
-000319             ADD 1 TO LINE-COUNT.
-000320             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.
-000321             GO TO LISTING-LOOP.
-000322
-000323         END-JOB.
-000324             MOVE "PROGRAM TERMINATION" TO MESSAGE-TEXT.
-000325             WRITE COMMENT-LINE FROM MESSAGE-LOG.
-000326             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
-000327             STOP RUN.
-000328
-000329         END PROGRAM EDITOR.
+000318
+000319         END-JOB.
+000320             MOVE "PROGRAM TERMINATION" TO MESSAGE-TEXT.
+000321             WRITE COMMENT-LINE FROM MESSAGE-LOG.
+000322             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.
+000323             STOP RUN.
+000324
+000325         END PROGRAM EDITOR.
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0008
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0080 FILE                OLD-VERSION
-0080 GROUP          01   OLD-RECORD
-0075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00080 FILE                OLD-VERSION
+00080 GROUP          01   OLD-RECORD
+00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
 
-0080 FILE                NEW-VERSION
-0080 GROUP          01   NEW-RECORD
-0075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00080 FILE                NEW-VERSION
+00080 GROUP          01   NEW-RECORD
+00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
 
-0032 FILE                PRT-VERSION
+00032 FILE                PRT-VERSION
 
-0080 FILE                MODIFICATION
-0080 GROUP          01   UPDATE-ORDER
-0075 ALPHANUMERIC   02     INSERTION
-0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ENDSET
-     CONDITIONAL    88         REMOVE
-     CONDITIONAL    88         ADDNEW
-     CONDITIONAL    88         CHANGE
-     CONDITIONAL    88         DISPLY
-0001 ALPHANUMERIC   03       FILLER                     X
-0005 NUMERIC        03       A-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-     CONDITIONAL    88         A-BLANK
-0004 ALPHANUMERIC   03       FILLER                     X(4)
-0005 NUMERIC        03       B-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-     CONDITIONAL    88         B-BLANK
-0054 ALPHANUMERIC   03       FILLER                     X(54)
-0005 ALPHANUMERIC   02     FILLER                       X(5)
+00080 FILE                MODIFICATION
+00080 GROUP          01   UPDATE-ORDER
+00075 ALPHANUMERIC   02     INSERTION
+00006 ALPHANUMERIC   03       COMMAND                    X(6)
+      CONDITIONAL    88         ENDJOB
+      CONDITIONAL    88         ENDSET
+      CONDITIONAL    88         REMOVE
+      CONDITIONAL    88         ADDNEW
+      CONDITIONAL    88         CHANGE
+      CONDITIONAL    88         DISPLY
+00001 ALPHANUMERIC   03       FILLER                     X
+00005 NUMERIC        03       A-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
+      CONDITIONAL    88         A-BLANK
+00004 ALPHANUMERIC   03       FILLER                     X(4)
+00005 NUMERIC        03       B-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
+      CONDITIONAL    88         B-BLANK
+00054 ALPHANUMERIC   03       FILLER                     X(54)
+00005 ALPHANUMERIC   02     FILLER                       X(5)
 
-0082 FILE                COMMENTARY
-0082 GROUP          01   COMMENT-LINE
-0082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 FILE                COMMENTARY
+00082 GROUP          01   COMMENT-LINE
+00082 ALPHANUMERIC   02     FILLER                       X(82)
 
-0002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
-0002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
-0002 NUMERIC        77   TOTAL-INSERTED                 9(3) COMP
-0002 NUMERIC        77   TOTAL-DELETED                  9(3) COMP
-0004 NUMERIC        77   OUTPUT-COUNT                   9(5) COMP
-0001 NUMERIC        77   LINE-COUNT                     9(2) COMP
-0005 NUMERIC        77   FIELDA                         9(5)
-0005 NUMERIC        77   FIELDB                         9(5)
-0082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
+00002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
+00002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
+00002 NUMERIC        77   TOTAL-INSERTED                 9(3) COMP
+00002 NUMERIC        77   TOTAL-DELETED                  9(3) COMP
+00004 NUMERIC        77   OUTPUT-COUNT                   9(5) COMP
+00001 NUMERIC        77   LINE-COUNT                     9(2) COMP
+00005 NUMERIC        77   FIELDA                         9(5)
+00005 NUMERIC        77   FIELDB                         9(5)
+00082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
 
-0006 GROUP          01   DATE-FROM-SYS
-0002 NUMERIC        02     DFSYS                        99
+00006 GROUP          01   DATE-FROM-SYS
+00002 NUMERIC        02     DFSYS                        99
 
-0080 GROUP          01   HEADINGS-LINE
-0015 ALPHANUMERIC   02     FILLER                       X(15)
-0020 ALPHANUMERIC   02     FILLER                       X(20)
-0017 ALPHANUMERIC   02     PHASE                        X(17)
+00080 GROUP          01   HEADINGS-LINE
+00015 ALPHANUMERIC   02     FILLER                       X(15)
+00020 ALPHANUMERIC   02     FILLER                       X(20)
+00017 ALPHANUMERIC   02     PHASE                        X(17)
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0009
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   02     MONTH-RUN                    XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     DAY-RUN                      XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     YEAR-RUN                     XX
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00002 ALPHANUMERIC   02     MONTH-RUN                    XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     DAY-RUN                      XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     YEAR-RUN                     XX
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00004 NUMERIC        02     PAGE-NUMBER                  9(4)
 
-0082 GROUP          01   COMMAND-LISTING
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00082 GROUP          01   COMMAND-LISTING
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
 
-0082 GROUP          01   ACTIVITIES-LISTING
-0002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-0080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00082 GROUP          01   ACTIVITIES-LISTING
+00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
+00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
 
-0008 GROUP          01   UPSI-BYTE
-0001 ALPHANUMERIC   02     UPSI-BIT                     X
+00008 GROUP          01   UPSI-BYTE
+00001 ALPHANUMERIC   02     UPSI-BIT                     X
 
-0082 GROUP          01   MESSAGE-LOG
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00082 GROUP          01   MESSAGE-LOG
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
 
-0070 GROUP          01   DISPLAY-MESSAGE
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00070 GROUP          01   DISPLAY-MESSAGE
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
 
-0001 NUMERIC        77   END-JOB-PROCESS                9
-0001 NUMERIC        77   DELETE-PROCESS                 9
-0001 NUMERIC        77   INSERT-PROCESS                 9
-0001 NUMERIC        77   WRITE-PROCESS                  9
+00001 NUMERIC        77   END-JOB-PROCESS                9
+00001 NUMERIC        77   DELETE-PROCESS                 9
+00001 NUMERIC        77   INSERT-PROCESS                 9
+00001 NUMERIC        77   WRITE-PROCESS                  9
 
-0002 GROUP          01   SELECTORS
-0001 NUMERIC        02     RETURN-SELECT                9
-0001 NUMERIC        02     NEXT-JOB-SELECT              9
+00002 GROUP          01   SELECTORS
+00001 NUMERIC        02     RETURN-SELECT                9
+00001 NUMERIC        02     NEXT-JOB-SELECT              9
 
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0010
 
 NAME                           DEFINED                REFERENCES
 
-OLD-VERSION                     000030  000045  000158  000164  000210  000276
-                                        000289  000326
-OLD-RECORD                      000050  000262
-OLD-STATEMENT                   000051  000168  000216  000253  000273  000290
-OLD-NUMBER                      000052  000206  000215  000268  000295
+OLD-VERSION                    26       41      154     160     206     272   
+                                        285     322   
+OLD-RECORD                     46       258   
+OLD-STATEMENT                  47       164     212     249     269     286   
+OLD-NUMBER                     48       202     211     264     291   
 
-NEW-VERSION                     000032  000054  000158  000286  000308  000309
-                                        000316  000326
-NEW-RECORD                      000059  000286  000317
-NEW-STATEMENT                   000060  000168  000216  000240  000253  000273
-                                        000290
-NEW-NUMBER                      000061  000285
+NEW-VERSION                    28       50      154     282     304     305   
+                                        312     322   
+NEW-RECORD                     55       282     313   
+NEW-STATEMENT                  56       164     212     236     249     269   
+                                        286   
+NEW-NUMBER                     57       281   
 
-PRT-VERSION                     000034
+PRT-VERSION                    30     not referenced
 
-MODIFICATION                    000036  000063  000158  000178  000229  000326
-UPDATE-ORDER                    000068  000182
-INSERTION                       000069  000240
-COMMAND                         000070
-ENDJOB                          000071  000195
-ENDSET                          000072  000233
-REMOVE                          000073  000192
-ADDNEW                          000074  000196
-CHANGE                          000075  000191
-DISPLY                          000076  000193
-A-FIELD                         000078  000185  000187
-A-ALPHA                         000079
-A-BLANK                         000080  000185
-B-FIELD                         000082  000186  000188
-B-ALPHA                         000083
-B-BLANK                         000084  000186
+MODIFICATION                   32       59      154     174     225     322   
+UPDATE-ORDER                   64       178   
+INSERTION                      65       236   
+COMMAND                        66     not referenced
+ENDJOB                         67       191   
+ENDSET                         68       229   
+REMOVE                         69       188   
+ADDNEW                         70       192   
+CHANGE                         71       187   
+DISPLY                         72       189   
+A-FIELD                        74       181     183   
+A-ALPHA                        75     not referenced
+A-BLANK                        76       181   
+B-FIELD                        78       182     184   
+B-ALPHA                        79     not referenced
+B-BLANK                        80       182   
 
-COMMENTARY                      000038  000088  000158  000166  000174  000175
-                                        000180  000183  000198  000208  000213
-                                        000231  000236  000243  000264  000271
-                                        000279  000297  000300  000303  000306
-                                        000318  000325  000326
-COMMENT-LINE                    000093  000166  000174  000175  000180  000183
-                                        000198  000208  000213  000231  000236
-                                        000243  000264  000271  000279  000297
-                                        000300  000303  000306  000318  000325
+COMMENTARY                     34       84      154     162     170     171   
+                                        176     179     194     204     209   
+                                        227     232     239     260     267   
+                                        275     293     296     299     302   
+                                        314     321     322   
+COMMENT-LINE                   89       162     170     171     176     179   
+                                        194     204     209     227     232   
+                                        239     260     267     275     293   
+                                        296     299     302     314     321   
 
-COMMAND-ADDITIONS               000098  000234  000237  000238  000244
-COMMAND-SUBTRACTIONS            000099  000267  000269  000272  000274
-TOTAL-INSERTED                  000100  000237  000298
-TOTAL-DELETED                   000101  000272  000301
-OUTPUT-COUNT                    000102  000284  000285  000304
-LINE-COUNT                      000103  000173  000184  000245  000246  000265
-                                        000266  000319  000320
-FIELDA                          000104  000187  000206  000212  000215
-FIELDB                          000105  000188  000268
-BLANK-LINE                      000106  000175
-DATE-FROM-SYS                   000108  000160
-DFSYS                           000109  000161  000162  000163
+COMMAND-ADDITIONS              94       230     233     234     240   
+COMMAND-SUBTRACTIONS           95       263     265     268     270   
+TOTAL-INSERTED                 96       233     294   
+TOTAL-DELETED                  97       268     297   
+OUTPUT-COUNT                   98       280     281     300   
+LINE-COUNT                     99       169     180     241     242     261   
+                                        262     315     316   
+FIELDA                         100      183     202     208     211   
+FIELDB                         101      184     264   
+BLANK-LINE                     102      171   
+DATE-FROM-SYS                  104      156   
+DFSYS                          105      157     158     159   
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0011
 
 NAME                           DEFINED                REFERENCES
 
-HEADINGS-LINE                   000111  000174
-PHASE                           000114  000310
-MONTH-RUN                       000115  000162
-DAY-RUN                         000117  000163
-YEAR-RUN                        000119  000161
-PAGE-NUMBER                     000122  000172  000311
-COMMAND-LISTING                 000124  000183
-COMMAND-IMAGE                   000126  000182
-ACTIVITIES-LISTING              000128  000243  000264  000318
-DISPOSITION                     000129  000241  000263  000313
-ACTIVE-IMAGE                    000130  000240  000262  000317
-UPSI-BYTE                       000132
-UPSI-BIT                        000133  000159  000193  000307
-MESSAGE-LOG                     000135  000166  000180  000198  000208  000231
-                                        000325
-MESSAGE-TEXT                    000137  000165  000179  000197  000207  000230
-                                        000324
-DISPLAY-MESSAGE                 000139  000213  000236  000271  000279  000297
-                                        000300  000303  000306
-DISPLAY-TEMP                    000141  000212  000234  000269  000295  000298
-                                        000301  000304
-DISPLAY-TEXT                    000143  000211  000235  000270  000277  000296
-                                        000299  000302  000305
-END-JOB-PROCESS                 000145
-DELETE-PROCESS                  000146
-INSERT-PROCESS                  000147
-WRITE-PROCESS                   000148
-SELECTORS                       000150
-RETURN-SELECT                   000151
-NEXT-JOB-SELECT                 000152
+HEADINGS-LINE                  107      170   
+PHASE                          110      306   
+MONTH-RUN                      111      158   
+DAY-RUN                        113      159   
+YEAR-RUN                       115      157   
+PAGE-NUMBER                    118      168     307   
+COMMAND-LISTING                120      179   
+COMMAND-IMAGE                  122      178   
+ACTIVITIES-LISTING             124      239     260     314   
+DISPOSITION                    125      237     259     309   
+ACTIVE-IMAGE                   126      236     258     313   
+UPSI-BYTE                      128    not referenced
+UPSI-BIT                       129      155     189     303   
+MESSAGE-LOG                    131      162     176     194     204     227   
+                                        321   
+MESSAGE-TEXT                   133      161     175     193     203     226   
+                                        320   
+DISPLAY-MESSAGE                135      209     232     267     275     293   
+                                        296     299     302   
+DISPLAY-TEMP                   137      208     230     265     291     294   
+                                        297     300   
+DISPLAY-TEXT                   139      207     231     266     273     292   
+                                        295     298     301   
+END-JOB-PROCESS                141    not referenced
+DELETE-PROCESS                 142    not referenced
+INSERT-PROCESS                 143    not referenced
+WRITE-PROCESS                  144    not referenced
+SELECTORS                      146    not referenced
+RETURN-SELECT                  147    not referenced
+NEXT-JOB-SELECT                148    not referenced
 
 GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0012
 
 LABEL                          DEFINED                REFERENCES
 
-START-SECTION                   000156
-TOP-OF-PAGE-ROUTINE             000171  000246  000266  000294  000312  000320
-READ-A-COMMAND                  000177  000199  000209  000255  000275
-TEST-COMMAND-TYPE               000190
-CHANGE-A-RECORD                 000201  000191
-FIND-FIELDA                     000205  000218  000226  000259
-RETURN-TO-USER                  000220  000202  000224  000258
-INSERT-A-RECORD                 000223  000196
-INSERTION-PROCESS               000228  000202  000224  000247
-NEXT-JOB-STEP                   000249  000203  000225  000239
-FORCED-WRITE                    000252  000225
-DELETE-A-RECORD                 000257  000192
-DELETION-PROCESS                000261  000203  000258  000281
-OUTPUT-A-RECORD                 000283  000169  000217  000242  000254  000291
-FINISH-JOB                      000288  000181  000194  000195
-TEST-FOR-LISTING                000293  000289
-LISTING-LOOP                    000315  000321
-END-JOB                         000323  000167  000214  000221  000232  000250
-                                        000280  000307  000316
+START-SECTION                  152    not referenced
+TOP-OF-PAGE-ROUTINE            167      242     262     290     308     316   
+READ-A-COMMAND                 173      195     205     251     271   
+TEST-COMMAND-TYPE              186    not referenced
+CHANGE-A-RECORD                197      187   
+FIND-FIELDA                    201      214     222     255   
+RETURN-TO-USER                 216      198     220     254   
+INSERT-A-RECORD                219      192   
+INSERTION-PROCESS              224      198     220     243   
+NEXT-JOB-STEP                  245      199     221     235   
+FORCED-WRITE                   248      221   
+DELETE-A-RECORD                253      188   
+DELETION-PROCESS               257      199     254     277   
+OUTPUT-A-RECORD                279      165     213     238     250     287   
+FINISH-JOB                     284      177     190     191   
+TEST-FOR-LISTING               289      285   
+LISTING-LOOP                   311      317   
+END-JOB                        319      163     210     217     228     246   
+                                        276     303     312   
 
-15 Warnings in program
+13 Warnings in program
 0 Errors in program
 ])
 
@@ -3654,24 +3642,22 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst prog.cob], [0], [],
-[prog.cob: 5: warning: AUTHOR is obsolete in GnuCOBOL
-prog.cob: 7: warning: DATE-WRITTEN is obsolete in GnuCOBOL
-prog.cob: 46: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 48: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 55: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 57: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 89: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 91: warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob: 202: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 203: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob: 224: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 225: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob: 258: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
@@ -3684,575 +3670,569 @@ LINE    PG/LN  A...B............................................................
 000002         IDENTIFICATION DIVISION.                                         EDIT0001
 000003         PROGRAM-ID.                                                      EDIT0002
 000004             EDITOR.                                                      EDIT0003
-000005         AUTHOR.                                                          EDIT0004
-warning: AUTHOR is obsolete in GnuCOBOL
-000006             J H FORTNER.                                                 EDIT0005
-000007         DATE-WRITTEN.                                                    EDIT0006
-warning: DATE-WRITTEN is obsolete in GnuCOBOL
-000008             07/23/72.                                                    EDIT0007
-000009                                                                          EDIT0008
-000010        *NOTE.                                                            EDIT0009
-000011        *    THIS VERSION OF EDITOR 1 COMPRISES AN ENTIRE RE_WRITE        EDIT0010
-000012        *    OF THE BASIC EDITOR WITH ONLY ONE CHANGE IN THE COMMAND      EDIT0011
-000013        *    STRUCTURE, THAT BEING THE ADDITION OF A "CHANGE" COMMAND     EDIT0012
-000014        *    TO SERVE IN PLACE OF THE INSERT-DELETE COMBINATION WHICH     EDIT0013
-000015        *    WAS REQUIRED IN PREVIOUS VERSIONS. RECORD NUMBER FIELDS      EDIT0014
-000016        *    HAVE ALSO BEEN REDUCED FROM 5 DIGITS TO 4.                   EDIT0015
-000017        *    CHANGE 1.                                                    EDIT0016
-000018        *       MODIFY TO RUN ON TI-990.                                  EDIT0017
-000019        *    CHANGE 2.                                                    EDIT0018
-000020        *       MODIFY TO RUN ON GNUCOBOL.                                EDIT0019
-000021                                                                          EDIT0020
-000022         ENVIRONMENT DIVISION.                                            EDIT0021
-000023         CONFIGURATION SECTION.                                           EDIT0022
-000024         SOURCE-COMPUTER.                                                 EDIT0023
-000025             IBM-360.                                                     EDIT0024
-000026         OBJECT-COMPUTER.                                                 EDIT0025
-000027             IBM-360.                                                     EDIT0026
-000028         INPUT-OUTPUT SECTION.                                            EDIT0027
-000029         FILE-CONTROL.                                                    EDIT0028
-000030             SELECT OLD-VERSION  ASSIGN TO "SYSUT1"                       EDIT0029
-000031                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0030
-000032             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"                       EDIT0031
-000033                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0032
-000034             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"                       EDIT0033
-000035                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0034
-000036             SELECT MODIFICATION ASSIGN TO "SYSIN1"                       EDIT0035
-000037                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0036
-000038             SELECT COMMENTARY   ASSIGN TO "SYSOU1"                       EDIT0037
-000039                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0038
-000040                                                                          EDIT0039
-000041         DATA DIVISION.                                                   EDIT0040
-000042                                                                          EDIT0041
-000043         FILE SECTION.                                                    EDIT0042
-000044                                                                          EDIT0043
-000045         FD  OLD-VERSION                                                  EDIT0044
-000046             LABEL RECORDS ARE STANDARD                                   EDIT0045
+000005                                                                          EDIT0008
+000006        *NOTE.                                                            EDIT0009
+000007        *    THIS VERSION OF EDITOR 1 COMPRISES AN ENTIRE RE_WRITE        EDIT0010
+000008        *    OF THE BASIC EDITOR WITH ONLY ONE CHANGE IN THE COMMAND      EDIT0011
+000009        *    STRUCTURE, THAT BEING THE ADDITION OF A "CHANGE" COMMAND     EDIT0012
+000010        *    TO SERVE IN PLACE OF THE INSERT-DELETE COMBINATION WHICH     EDIT0013
+000011        *    WAS REQUIRED IN PREVIOUS VERSIONS. RECORD NUMBER FIELDS      EDIT0014
+000012        *    HAVE ALSO BEEN REDUCED FROM 5 DIGITS TO 4.                   EDIT0015
+000013        *    CHANGE 1.                                                    EDIT0016
+000014        *       MODIFY TO RUN ON TI-990.                                  EDIT0017
+000015        *    CHANGE 2.                                                    EDIT0018
+000016        *       MODIFY TO RUN ON GNUCOBOL.                                EDIT0019
+000017                                                                          EDIT0020
+000018         ENVIRONMENT DIVISION.                                            EDIT0021
+000019         CONFIGURATION SECTION.                                           EDIT0022
+000020         SOURCE-COMPUTER.                                                 EDIT0023
+000021             IBM-360.                                                     EDIT0024
+000022         OBJECT-COMPUTER.                                                 EDIT0025
+000023             IBM-360.                                                     EDIT0026
+000024         INPUT-OUTPUT SECTION.                                            EDIT0027
+000025         FILE-CONTROL.                                                    EDIT0028
+000026             SELECT OLD-VERSION  ASSIGN TO "SYSUT1"                       EDIT0029
+000027                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0030
+000028             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"                       EDIT0031
+000029                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0032
+000030             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"                       EDIT0033
+000031                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0034
+000032             SELECT MODIFICATION ASSIGN TO "SYSIN1"                       EDIT0035
+000033                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0036
+000034             SELECT COMMENTARY   ASSIGN TO "SYSOU1"                       EDIT0037
+000035                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0038
+000036                                                                          EDIT0039
+000037         DATA DIVISION.                                                   EDIT0040
+000038                                                                          EDIT0041
+000039         FILE SECTION.                                                    EDIT0042
+000040                                                                          EDIT0043
+000041         FD  OLD-VERSION                                                  EDIT0044
+000042             LABEL RECORDS ARE STANDARD                                   EDIT0045
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000047             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0046
-000048             DATA RECORD IS OLD-RECORD.                                   EDIT0047
+000043             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0046
+000044             DATA RECORD IS OLD-RECORD.                                   EDIT0047
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000049                                                                          EDIT0048
-000050         01  OLD-RECORD.                                                  EDIT0049
-000051             02 OLD-STATEMENT       PICTURE X(75).                        EDIT0050
+000045                                                                          EDIT0048
+000046         01  OLD-RECORD.                                                  EDIT0049
+000047             02 OLD-STATEMENT       PICTURE X(75).                        EDIT0050
+000048             02 OLD-NUMBER          PICTURE X(5).                         EDIT0051
+000049                                                                          EDIT0052
+000050         FD  NEW-VERSION                                                  EDIT0053
+000051             LABEL RECORDS ARE STANDARD                                   EDIT0054
+warning: LABEL RECORDS is obsolete in GnuCOBOL
+000052             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0055
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000052             02 OLD-NUMBER          PICTURE X(5).                         EDIT0051
-000053                                                                          EDIT0052
-000054         FD  NEW-VERSION                                                  EDIT0053
-000055             LABEL RECORDS ARE STANDARD                                   EDIT0054
-warning: LABEL RECORDS is obsolete in GnuCOBOL
-000056             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0055
-000057             DATA RECORD IS NEW-RECORD.                                   EDIT0056
+000053             DATA RECORD IS NEW-RECORD.                                   EDIT0056
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000058                                                                          EDIT0057
-000059         01  NEW-RECORD.                                                  EDIT0058
-000060             02 NEW-STATEMENT       PICTURE X(75).                        EDIT0059
-000061             02 NEW-NUMBER          PICTURE X(5).                         EDIT0060
-000062                                                                          EDIT0061
-000063         FD  MODIFICATION                                                 EDIT0062
-000064             LABEL RECORDS ARE OMITTED                                    EDIT0063
+000054                                                                          EDIT0057
+000055         01  NEW-RECORD.                                                  EDIT0058
+000056             02 NEW-STATEMENT       PICTURE X(75).                        EDIT0059
+000057             02 NEW-NUMBER          PICTURE X(5).                         EDIT0060
+000058                                                                          EDIT0061
+000059         FD  MODIFICATION                                                 EDIT0062
+000060             LABEL RECORDS ARE OMITTED                                    EDIT0063
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000065             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0064
-000066             DATA RECORD IS UPDATE-ORDER.                                 EDIT0065
+000061             BLOCK CONTAINS 80 CHARACTERS                                 EDIT0064
+000062             DATA RECORD IS UPDATE-ORDER.                                 EDIT0065
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000067                                                                          EDIT0066
-000068         01  UPDATE-ORDER.                                                EDIT0067
-000069             02 INSERTION.                                                EDIT0068
-000070                03 COMMAND          PICTURE X(6).                         EDIT0069
-000071                   88 ENDJOB        VALUE "ENDJOB".                       EDIT0070
-000072                   88 ENDSET        VALUE "ENDSET".                       EDIT0071
-000073                   88 REMOVE        VALUE "REMOVE".                       EDIT0072
-000074                   88 ADDNEW        VALUE "INSERT".                       EDIT0073
-000075                   88 CHANGE        VALUE "CHANGE".                       EDIT0074
-000076                   88 DISPLY        VALUE "DISPLY".                       EDIT0075
-000077                03 FILLER           PICTURE X.                            EDIT0076
-000078                03 A-FIELD          PICTURE 9(5).                         EDIT0077
-000079                03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).             EDIT0078
-000080                   88 A-BLANK       VALUE SPACES.                         EDIT0079
-000081                03 FILLER           PICTURE X(4).                         EDIT0080
-000082                03 B-FIELD          PICTURE 9(5).                         EDIT0081
-000083                03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).             EDIT0082
-000084                   88 B-BLANK       VALUE SPACES.                         EDIT0083
-000085                03 FILLER           PICTURE X(54).                        EDIT0084
-000086             02 FILLER              PICTURE X(5).                         EDIT0085
-000087                                                                          EDIT0086
-000088         FD  COMMENTARY                                                   EDIT0087
-000089             LABEL RECORDS ARE OMITTED                                    EDIT0088
+000063                                                                          EDIT0066
+000064         01  UPDATE-ORDER.                                                EDIT0067
+000065             02 INSERTION.                                                EDIT0068
+000066                03 COMMAND          PICTURE X(6).                         EDIT0069
+000067                   88 ENDJOB        VALUE "ENDJOB".                       EDIT0070
+000068                   88 ENDSET        VALUE "ENDSET".                       EDIT0071
+000069                   88 REMOVE        VALUE "REMOVE".                       EDIT0072
+000070                   88 ADDNEW        VALUE "INSERT".                       EDIT0073
+000071                   88 CHANGE        VALUE "CHANGE".                       EDIT0074
+000072                   88 DISPLY        VALUE "DISPLY".                       EDIT0075
+000073                03 FILLER           PICTURE X.                            EDIT0076
+000074                03 A-FIELD          PICTURE 9(5).                         EDIT0077
+000075                03 A-ALPHA REDEFINES A-FIELD    PICTURE X(5).             EDIT0078
+000076                   88 A-BLANK       VALUE SPACES.                         EDIT0079
+000077                03 FILLER           PICTURE X(4).                         EDIT0080
+000078                03 B-FIELD          PICTURE 9(5).                         EDIT0081
+000079                03 B-ALPHA REDEFINES B-FIELD    PICTURE X(5).             EDIT0082
+000080                   88 B-BLANK       VALUE SPACES.                         EDIT0083
+000081                03 FILLER           PICTURE X(54).                        EDIT0084
+000082             02 FILLER              PICTURE X(5).                         EDIT0085
+000083                                                                          EDIT0086
+000084         FD  COMMENTARY                                                   EDIT0087
+000085             LABEL RECORDS ARE OMITTED                                    EDIT0088
 warning: LABEL RECORDS is obsolete in GnuCOBOL
-000090             BLOCK CONTAINS 82 CHARACTERS                                 EDIT0089
-000091             DATA RECORD IS COMMENT-LINE.                                 EDIT0090
+000086             BLOCK CONTAINS 82 CHARACTERS                                 EDIT0089
+000087             DATA RECORD IS COMMENT-LINE.                                 EDIT0090
 warning: DATA RECORDS is obsolete in GnuCOBOL
-000092                                                                          EDIT0091
-000093         01  COMMENT-LINE.                                                EDIT0092
-000094             02 FILLER              PICTURE X(82).                        EDIT0093
-000095                                                                          EDIT0094
-000096         WORKING-STORAGE SECTION.                                         EDIT0095
-000097                                                                          EDIT0096
-000098         77  COMMAND-ADDITIONS      PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0097
-000099         77  COMMAND-SUBTRACTIONS   PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0098
-000100         77  TOTAL-INSERTED         PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0099
+000088                                                                          EDIT0091
+000089         01  COMMENT-LINE.                                                EDIT0092
+000090             02 FILLER              PICTURE X(82).                        EDIT0093
+000091                                                                          EDIT0094
+000092         WORKING-STORAGE SECTION.                                         EDIT0095
+000093                                                                          EDIT0096
+000094         77  COMMAND-ADDITIONS      PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0097
+000095         77  COMMAND-SUBTRACTIONS   PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0098
+000096         77  TOTAL-INSERTED         PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0099
+000097         77  TOTAL-DELETED          PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0100
+000098         77  OUTPUT-COUNT           PICTURE 9(5) COMPUTATIONAL VALUE 0.   EDIT0101
+000099         77  LINE-COUNT             PICTURE 9(2) COMPUTATIONAL VALUE 0.   EDIT0102
+000100         77  FIELDA                 PICTURE 9(5) VALUE 0.                 EDIT0103
+000101         77  FIELDB                 PICTURE 9(5) VALUE 0.                 EDIT0104
+000102         77  BLANK-LINE             PICTURE X(82) VALUE SPACES.           EDIT0105
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000101         77  TOTAL-DELETED          PICTURE 9(3) COMPUTATIONAL VALUE 0.   EDIT0100
-000102         77  OUTPUT-COUNT           PICTURE 9(5) COMPUTATIONAL VALUE 0.   EDIT0101
-000103         77  LINE-COUNT             PICTURE 9(2) COMPUTATIONAL VALUE 0.   EDIT0102
-000104         77  FIELDA                 PICTURE 9(5) VALUE 0.                 EDIT0103
-000105         77  FIELDB                 PICTURE 9(5) VALUE 0.                 EDIT0104
-000106         77  BLANK-LINE             PICTURE X(82) VALUE SPACES.           EDIT0105
-000107                                                                          EDIT0106
-000108         01  DATE-FROM-SYS.                                               EDIT0107
-000109             02 DFSYS OCCURS 3 TIMES PICTURE 99.                          EDIT0108
-000110                                                                          EDIT0109
-000111         01  HEADINGS-LINE.                                               EDIT0110
-000112             02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION". EDIT0111
-000113             02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".   EDIT0112
-000114             02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF". EDIT0113
-000115             02 MONTH-RUN           PICTURE XX.                           EDIT0114
-000116             02 FILLER              PICTURE X VALUE "/".                  EDIT0115
-000117             02 DAY-RUN             PICTURE XX.                           EDIT0116
-000118             02 FILLER              PICTURE X VALUE "/".                  EDIT0117
-000119             02 YEAR-RUN            PICTURE XX.                           EDIT0118
-000120             02 FILLER              PICTURE X(8) VALUE SPACES.            EDIT0119
-000121             02 FILLER              PICTURE X(8) VALUE "  PAGE: ".        EDIT0120
-000122             02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.                 EDIT0121
-000123                                                                          EDIT0122
-000124         01  COMMAND-LISTING.                                             EDIT0123
-000125             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0124
-000126             02 COMMAND-IMAGE       PICTURE X(80).                        EDIT0125
-000127                                                                          EDIT0126
-000128         01  ACTIVITIES-LISTING.                                          EDIT0127
-000129             02 DISPOSITION         PICTURE X(2).                         EDIT0128
-000130             02 ACTIVE-IMAGE        PICTURE X(80).                        EDIT0129
-000131                                                                          EDIT0130
-000132         01  UPSI-BYTE.                                                   EDIT0131
-000133             02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.                       EDIT0132
-000134                                                                          EDIT0133
-000135         01  MESSAGE-LOG.                                                 EDIT0134
-000136             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0135
-000137             02 MESSAGE-TEXT        PICTURE X(80).                        EDIT0136
-000138                                                                          EDIT0137
-000139         01  DISPLAY-MESSAGE.                                             EDIT0138
-000140             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0139
-000141             02 DISPLAY-TEMP        PICTURE X(6).                         EDIT0140
-000142             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0141
-000143             02 DISPLAY-TEXT        PICTURE X(60).                        EDIT0142
-000144                                                                          EDIT0143
-000145         77  END-JOB-PROCESS        PICTURE 9 VALUE 0.                    EDIT0144
-000146         77  DELETE-PROCESS         PICTURE 9 VALUE 1.                    EDIT0145
-000147         77  INSERT-PROCESS         PICTURE 9 VALUE 2.                    EDIT0146
-000148         77  WRITE-PROCESS          PICTURE 9 VALUE 3.                    EDIT0147
-000149                                                                          EDIT0148
-000150         01  SELECTORS.                                                   EDIT0149
-000151             02 RETURN-SELECT       PICTURE 9 VALUE 0.                    EDIT0150
-000152             02 NEXT-JOB-SELECT     PICTURE 9 VALUE 0.                    EDIT0151
-000153                                                                          EDIT0152
-000154         PROCEDURE DIVISION.                                              EDIT0153
-000155                                                                          EDIT0154
+000103                                                                          EDIT0106
+000104         01  DATE-FROM-SYS.                                               EDIT0107
+000105             02 DFSYS OCCURS 3 TIMES PICTURE 99.                          EDIT0108
+000106                                                                          EDIT0109
+000107         01  HEADINGS-LINE.                                               EDIT0110
+000108             02 FILLER              PICTURE X(15) VALUE "EDITOR VERSION". EDIT0111
+000109             02 FILLER              PICTURE X(20) VALUE "1.1 - 206/72".   EDIT0112
+000110             02 PHASE               PICTURE X(17) VALUE "UPDATING AS OF". EDIT0113
+000111             02 MONTH-RUN           PICTURE XX.                           EDIT0114
+000112             02 FILLER              PICTURE X VALUE "/".                  EDIT0115
+000113             02 DAY-RUN             PICTURE XX.                           EDIT0116
+000114             02 FILLER              PICTURE X VALUE "/".                  EDIT0117
+000115             02 YEAR-RUN            PICTURE XX.                           EDIT0118
+000116             02 FILLER              PICTURE X(8) VALUE SPACES.            EDIT0119
+000117             02 FILLER              PICTURE X(8) VALUE "  PAGE: ".        EDIT0120
+000118             02 PAGE-NUMBER         PICTURE 9(4) VALUE 0.                 EDIT0121
+000119                                                                          EDIT0122
+000120         01  COMMAND-LISTING.                                             EDIT0123
+000121             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0124
+000122             02 COMMAND-IMAGE       PICTURE X(80).                        EDIT0125
+000123                                                                          EDIT0126
+000124         01  ACTIVITIES-LISTING.                                          EDIT0127
+000125             02 DISPOSITION         PICTURE X(2).                         EDIT0128
+000126             02 ACTIVE-IMAGE        PICTURE X(80).                        EDIT0129
+000127                                                                          EDIT0130
+000128         01  UPSI-BYTE.                                                   EDIT0131
+000129             02 UPSI-BIT OCCURS 8 TIMES  PICTURE X.                       EDIT0132
+000130                                                                          EDIT0133
+000131         01  MESSAGE-LOG.                                                 EDIT0134
+000132             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0135
+000133             02 MESSAGE-TEXT        PICTURE X(80).                        EDIT0136
+000134                                                                          EDIT0137
+000135         01  DISPLAY-MESSAGE.                                             EDIT0138
+000136             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0139
+000137             02 DISPLAY-TEMP        PICTURE X(6).                         EDIT0140
+000138             02 FILLER              PICTURE X(2) VALUE SPACES.            EDIT0141
+000139             02 DISPLAY-TEXT        PICTURE X(60).                        EDIT0142
+000140                                                                          EDIT0143
+000141         77  END-JOB-PROCESS        PICTURE 9 VALUE 0.                    EDIT0144
+000142         77  DELETE-PROCESS         PICTURE 9 VALUE 1.                    EDIT0145
+000143         77  INSERT-PROCESS         PICTURE 9 VALUE 2.                    EDIT0146
+000144         77  WRITE-PROCESS          PICTURE 9 VALUE 3.                    EDIT0147
+000145                                                                          EDIT0148
+000146         01  SELECTORS.                                                   EDIT0149
+000147             02 RETURN-SELECT       PICTURE 9 VALUE 0.                    EDIT0150
+000148             02 NEXT-JOB-SELECT     PICTURE 9 VALUE 0.                    EDIT0151
+000149                                                                          EDIT0152
+000150         PROCEDURE DIVISION.                                              EDIT0153
+000151                                                                          EDIT0154
+000152         START-SECTION.                                                   EDIT0155
+000153             OPEN INPUT OLD-VERSION, MODIFICATION,                        EDIT0156
+000154                  OUTPUT NEW-VERSION, COMMENTARY.                         EDIT0157
+000155             MOVE "F" TO UPSI-BIT (1), UPSI-BIT (2).                      EDIT0158
+000156             ACCEPT DATE-FROM-SYS FROM DATE.                              EDIT0159
+000157             MOVE DFSYS (1) TO YEAR-RUN.                                  EDIT0160
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000156         START-SECTION.                                                   EDIT0155
-000157             OPEN INPUT OLD-VERSION, MODIFICATION,                        EDIT0156
-000158                  OUTPUT NEW-VERSION, COMMENTARY.                         EDIT0157
-000159             MOVE "F" TO UPSI-BIT (1), UPSI-BIT (2).                      EDIT0158
-000160             ACCEPT DATE-FROM-SYS FROM DATE.                              EDIT0159
-000161             MOVE DFSYS (1) TO YEAR-RUN.                                  EDIT0160
-000162             MOVE DFSYS (2) TO MONTH-RUN.                                 EDIT0161
-000163             MOVE DFSYS (3) TO DAY-RUN.                                   EDIT0162
-000164             READ OLD-VERSION AT END                                      EDIT0163
-000165                MOVE "NO OLD VERSION FOUND" TO MESSAGE-TEXT               EDIT0164
-000166                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0165
-000167                GO TO END-JOB.                                            EDIT0166
-000168             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0167
-000169             PERFORM OUTPUT-A-RECORD.                                     EDIT0168
-000170                                                                          EDIT0169
-000171         TOP-OF-PAGE-ROUTINE.                                             EDIT0170
-000172             ADD 1 TO PAGE-NUMBER.                                        EDIT0171
-000173             MOVE ZERO TO LINE-COUNT.                                     EDIT0172
-000174             WRITE COMMENT-LINE FROM HEADINGS-LINE AFTER PAGE.            EDIT0173
-000175             WRITE COMMENT-LINE FROM BLANK-LINE.                          EDIT0174
-000176                                                                          EDIT0175
-000177         READ-A-COMMAND.                                                  EDIT0176
-000178             READ MODIFICATION AT END                                     EDIT0177
-000179                MOVE "MODIFICATION FILE ENDED " TO MESSAGE-TEXT           EDIT0178
-000180                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0179
-000181                GO TO FINISH-JOB.                                         EDIT0180
-000182             MOVE UPDATE-ORDER TO COMMAND-IMAGE.                          EDIT0181
-000183             WRITE COMMENT-LINE FROM COMMAND-LISTING.                     EDIT0182
-000184             ADD 2 TO LINE-COUNT.                                         EDIT0183
-000185             IF A-BLANK MOVE ZEROES TO A-FIELD.                           EDIT0184
-000186             IF B-BLANK MOVE ZEROES TO B-FIELD.                           EDIT0185
-000187             MOVE A-FIELD TO FIELDA.                                      EDIT0186
-000188             MOVE B-FIELD TO FIELDB.                                      EDIT0187
-000189                                                                          EDIT0188
-000190         TEST-COMMAND-TYPE.                                               EDIT0189
-000191             IF CHANGE GO TO CHANGE-A-RECORD.                             EDIT0190
-000192             IF REMOVE GO TO DELETE-A-RECORD.                             EDIT0191
-000193             IF DISPLY MOVE "T" TO UPSI-BIT (2)                           EDIT0192
-000194                GO TO FINISH-JOB.                                         EDIT0193
-000195             IF ENDJOB GO TO FINISH-JOB.                                  EDIT0194
-000196             IF ADDNEW GO TO INSERT-A-RECORD.                             EDIT0195
-000197             MOVE "INVALID COMMAND IGNORED." TO MESSAGE-TEXT.             EDIT0196
-000198             WRITE COMMENT-LINE FROM MESSAGE-LOG.                         EDIT0197
-000199             GO TO READ-A-COMMAND.                                        EDIT0198
-000200                                                                          EDIT0199
-000201         CHANGE-A-RECORD.                                                 EDIT0200
-000202             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.        EDIT0201
+000158             MOVE DFSYS (2) TO MONTH-RUN.                                 EDIT0161
+000159             MOVE DFSYS (3) TO DAY-RUN.                                   EDIT0162
+000160             READ OLD-VERSION AT END                                      EDIT0163
+000161                MOVE "NO OLD VERSION FOUND" TO MESSAGE-TEXT               EDIT0164
+000162                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0165
+000163                GO TO END-JOB.                                            EDIT0166
+000164             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0167
+000165             PERFORM OUTPUT-A-RECORD.                                     EDIT0168
+000166                                                                          EDIT0169
+000167         TOP-OF-PAGE-ROUTINE.                                             EDIT0170
+000168             ADD 1 TO PAGE-NUMBER.                                        EDIT0171
+000169             MOVE ZERO TO LINE-COUNT.                                     EDIT0172
+000170             WRITE COMMENT-LINE FROM HEADINGS-LINE AFTER PAGE.            EDIT0173
+000171             WRITE COMMENT-LINE FROM BLANK-LINE.                          EDIT0174
+000172                                                                          EDIT0175
+000173         READ-A-COMMAND.                                                  EDIT0176
+000174             READ MODIFICATION AT END                                     EDIT0177
+000175                MOVE "MODIFICATION FILE ENDED " TO MESSAGE-TEXT           EDIT0178
+000176                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0179
+000177                GO TO FINISH-JOB.                                         EDIT0180
+000178             MOVE UPDATE-ORDER TO COMMAND-IMAGE.                          EDIT0181
+000179             WRITE COMMENT-LINE FROM COMMAND-LISTING.                     EDIT0182
+000180             ADD 2 TO LINE-COUNT.                                         EDIT0183
+000181             IF A-BLANK MOVE ZEROES TO A-FIELD.                           EDIT0184
+000182             IF B-BLANK MOVE ZEROES TO B-FIELD.                           EDIT0185
+000183             MOVE A-FIELD TO FIELDA.                                      EDIT0186
+000184             MOVE B-FIELD TO FIELDB.                                      EDIT0187
+000185                                                                          EDIT0188
+000186         TEST-COMMAND-TYPE.                                               EDIT0189
+000187             IF CHANGE GO TO CHANGE-A-RECORD.                             EDIT0190
+000188             IF REMOVE GO TO DELETE-A-RECORD.                             EDIT0191
+000189             IF DISPLY MOVE "T" TO UPSI-BIT (2)                           EDIT0192
+000190                GO TO FINISH-JOB.                                         EDIT0193
+000191             IF ENDJOB GO TO FINISH-JOB.                                  EDIT0194
+000192             IF ADDNEW GO TO INSERT-A-RECORD.                             EDIT0195
+000193             MOVE "INVALID COMMAND IGNORED." TO MESSAGE-TEXT.             EDIT0196
+000194             WRITE COMMENT-LINE FROM MESSAGE-LOG.                         EDIT0197
+000195             GO TO READ-A-COMMAND.                                        EDIT0198
+000196                                                                          EDIT0199
+000197         CHANGE-A-RECORD.                                                 EDIT0200
+000198             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.        EDIT0201
 warning: ALTER is obsolete in GnuCOBOL
-000203             ALTER NEXT-JOB-STEP TO PROCEED TO DELETION-PROCESS.          EDIT0202
+000199             ALTER NEXT-JOB-STEP TO PROCEED TO DELETION-PROCESS.          EDIT0202
 warning: ALTER is obsolete in GnuCOBOL
-000204                                                                          EDIT0205
-000205         FIND-FIELDA.                                                     EDIT0206
-000206             IF OLD-NUMBER IS GREATER THAN FIELDA                         EDIT0207
-000207                MOVE "RECORD ALREADY PASSED" TO MESSAGE-TEXT              EDIT0208
-000208                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0209
+000200                                                                          EDIT0205
+000201         FIND-FIELDA.                                                     EDIT0206
+000202             IF OLD-NUMBER IS GREATER THAN FIELDA                         EDIT0207
+000203                MOVE "RECORD ALREADY PASSED" TO MESSAGE-TEXT              EDIT0208
+000204                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0209
+000205                GO TO READ-A-COMMAND.                                     EDIT0210
+000206             READ OLD-VERSION AT END                                      EDIT0211
+000207                MOVE "NOT FOUND IN OLD VERSION" TO DISPLAY-TEXT           EDIT0212
+000208                MOVE FIELDA TO DISPLAY-TEMP                               EDIT0213
+000209                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0214
+000210                GO TO END-JOB.                                            EDIT0215
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000209                GO TO READ-A-COMMAND.                                     EDIT0210
-000210             READ OLD-VERSION AT END                                      EDIT0211
-000211                MOVE "NOT FOUND IN OLD VERSION" TO DISPLAY-TEXT           EDIT0212
-000212                MOVE FIELDA TO DISPLAY-TEMP                               EDIT0213
-000213                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0214
-000214                GO TO END-JOB.                                            EDIT0215
-000215             IF OLD-NUMBER IS LESS THAN FIELDA                            EDIT0216
-000216                MOVE OLD-STATEMENT TO NEW-STATEMENT                       EDIT0217
-000217                PERFORM OUTPUT-A-RECORD                                   EDIT0218
-000218                GO TO FIND-FIELDA.                                        EDIT0219
-000219                                                                          EDIT0220
-000220         RETURN-TO-USER.                                                  EDIT0221
-000221             GO TO END-JOB.                                               EDIT0223
-000222                                                                          EDIT0228
-000223         INSERT-A-RECORD.                                                 EDIT0229
-000224             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.        EDIT0230
+000211             IF OLD-NUMBER IS LESS THAN FIELDA                            EDIT0216
+000212                MOVE OLD-STATEMENT TO NEW-STATEMENT                       EDIT0217
+000213                PERFORM OUTPUT-A-RECORD                                   EDIT0218
+000214                GO TO FIND-FIELDA.                                        EDIT0219
+000215                                                                          EDIT0220
+000216         RETURN-TO-USER.                                                  EDIT0221
+000217             GO TO END-JOB.                                               EDIT0223
+000218                                                                          EDIT0228
+000219         INSERT-A-RECORD.                                                 EDIT0229
+000220             ALTER RETURN-TO-USER TO PROCEED TO INSERTION-PROCESS.        EDIT0230
 warning: ALTER is obsolete in GnuCOBOL
-000225             ALTER NEXT-JOB-STEP TO PROCEED TO FORCED-WRITE.              EDIT0231
+000221             ALTER NEXT-JOB-STEP TO PROCEED TO FORCED-WRITE.              EDIT0231
 warning: ALTER is obsolete in GnuCOBOL
-000226             GO TO FIND-FIELDA.                                           EDIT0234
-000227                                                                          EDIT0235
-000228         INSERTION-PROCESS.                                               EDIT0236
-000229             READ MODIFICATION AT END                                     EDIT0237
-000230                MOVE "NO ENDSET FOUND" TO MESSAGE-TEXT                    EDIT0238
-000231                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0239
-000232                GO TO END-JOB.                                            EDIT0240
-000233             IF ENDSET                                                    EDIT0241
-000234                MOVE COMMAND-ADDITIONS TO DISPLAY-TEMP                    EDIT0242
-000235                MOVE "RECORDS INSERTED." TO DISPLAY-TEXT                  EDIT0243
-000236                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0244
-000237                ADD COMMAND-ADDITIONS TO TOTAL-INSERTED                   EDIT0245
-000238                MOVE ZEROES TO COMMAND-ADDITIONS                          EDIT0246
-000239                GO TO NEXT-JOB-STEP.                                      EDIT0247
-000240             MOVE INSERTION TO NEW-STATEMENT, ACTIVE-IMAGE.               EDIT0248
-000241             MOVE "I " TO DISPOSITION.                                    EDIT0249
-000242             PERFORM OUTPUT-A-RECORD.                                     EDIT0250
-000243             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0251
-000244             ADD 1 TO COMMAND-ADDITIONS.                                  EDIT0252
-000245             ADD 1 TO LINE-COUNT.                                         EDIT0253
-000246             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0254
-000247             GO TO INSERTION-PROCESS.                                     EDIT0255
-000248                                                                          EDIT0256
-000249         NEXT-JOB-STEP.                                                   EDIT0257
-000250             GO TO END-JOB.                                               EDIT0259
-000251                                                                          EDIT0264
-000252         FORCED-WRITE.                                                    EDIT0265
-000253             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0266
-000254             PERFORM OUTPUT-A-RECORD.                                     EDIT0267
-000255             GO TO READ-A-COMMAND.                                        EDIT0268
-000256                                                                          EDIT0269
-000257         DELETE-A-RECORD.                                                 EDIT0270
-000258             ALTER RETURN-TO-USER TO PROCEED TO DELETION-PROCESS.         EDIT0271
+000222             GO TO FIND-FIELDA.                                           EDIT0234
+000223                                                                          EDIT0235
+000224         INSERTION-PROCESS.                                               EDIT0236
+000225             READ MODIFICATION AT END                                     EDIT0237
+000226                MOVE "NO ENDSET FOUND" TO MESSAGE-TEXT                    EDIT0238
+000227                WRITE COMMENT-LINE FROM MESSAGE-LOG                       EDIT0239
+000228                GO TO END-JOB.                                            EDIT0240
+000229             IF ENDSET                                                    EDIT0241
+000230                MOVE COMMAND-ADDITIONS TO DISPLAY-TEMP                    EDIT0242
+000231                MOVE "RECORDS INSERTED." TO DISPLAY-TEXT                  EDIT0243
+000232                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0244
+000233                ADD COMMAND-ADDITIONS TO TOTAL-INSERTED                   EDIT0245
+000234                MOVE ZEROES TO COMMAND-ADDITIONS                          EDIT0246
+000235                GO TO NEXT-JOB-STEP.                                      EDIT0247
+000236             MOVE INSERTION TO NEW-STATEMENT, ACTIVE-IMAGE.               EDIT0248
+000237             MOVE "I " TO DISPOSITION.                                    EDIT0249
+000238             PERFORM OUTPUT-A-RECORD.                                     EDIT0250
+000239             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0251
+000240             ADD 1 TO COMMAND-ADDITIONS.                                  EDIT0252
+000241             ADD 1 TO LINE-COUNT.                                         EDIT0253
+000242             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0254
+000243             GO TO INSERTION-PROCESS.                                     EDIT0255
+000244                                                                          EDIT0256
+000245         NEXT-JOB-STEP.                                                   EDIT0257
+000246             GO TO END-JOB.                                               EDIT0259
+000247                                                                          EDIT0264
+000248         FORCED-WRITE.                                                    EDIT0265
+000249             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0266
+000250             PERFORM OUTPUT-A-RECORD.                                     EDIT0267
+000251             GO TO READ-A-COMMAND.                                        EDIT0268
+000252                                                                          EDIT0269
+000253         DELETE-A-RECORD.                                                 EDIT0270
+000254             ALTER RETURN-TO-USER TO PROCEED TO DELETION-PROCESS.         EDIT0271
 warning: ALTER is obsolete in GnuCOBOL
-000259             GO TO FIND-FIELDA.                                           EDIT0273
-000260                                                                          EDIT0274
+000255             GO TO FIND-FIELDA.                                           EDIT0273
+000256                                                                          EDIT0274
+000257         DELETION-PROCESS.                                                EDIT0275
+000258             MOVE OLD-RECORD TO ACTIVE-IMAGE.                             EDIT0276
+000259             MOVE "D " TO DISPOSITION.                                    EDIT0277
+000260             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0278
+000261             ADD 1 TO LINE-COUNT.                                         EDIT0279
+000262             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0280
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0006
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000261         DELETION-PROCESS.                                                EDIT0275
-000262             MOVE OLD-RECORD TO ACTIVE-IMAGE.                             EDIT0276
-000263             MOVE "D " TO DISPOSITION.                                    EDIT0277
-000264             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0278
-000265             ADD 1 TO LINE-COUNT.                                         EDIT0279
-000266             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0280
-000267             ADD 1 TO COMMAND-SUBTRACTIONS.                               EDIT0281
-000268             IF OLD-NUMBER IS NOT LESS THAN FIELDB                        EDIT0282
-000269                MOVE COMMAND-SUBTRACTIONS TO DISPLAY-TEMP                 EDIT0283
-000270                MOVE "RECORDS DELETED." TO DISPLAY-TEXT                   EDIT0284
-000271                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0285
-000272                ADD COMMAND-SUBTRACTIONS TO TOTAL-DELETED                 EDIT0286
-000273                MOVE OLD-STATEMENT TO NEW-STATEMENT                       EDIT0287
-000274                MOVE ZEROES TO COMMAND-SUBTRACTIONS                       EDIT0288
-000275                GO TO READ-A-COMMAND.                                     EDIT0289
-000276             READ OLD-VERSION AT END                                      EDIT0290
-000277                MOVE "NOT FOUND IN OLD VERSION DOING DELETE"              EDIT0291
-000278                      TO DISPLAY-TEXT                                     EDIT0292
-000279                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0293
-000280                GO TO END-JOB.                                            EDIT0294
-000281             GO TO DELETION-PROCESS.                                      EDIT0295
-000282                                                                          EDIT0296
-000283         OUTPUT-A-RECORD.                                                 EDIT0297
-000284             ADD 1 TO OUTPUT-COUNT.                                       EDIT0298
-000285             MOVE OUTPUT-COUNT TO NEW-NUMBER.                             EDIT0299
-000286             WRITE NEW-RECORD.                                            EDIT0300
-000287                                                                          EDIT0301
-000288         FINISH-JOB.                                                      EDIT0302
-000289             READ OLD-VERSION AT END GO TO TEST-FOR-LISTING.              EDIT0303
-000290             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0304
-000291             GO TO OUTPUT-A-RECORD.                                       EDIT0305
-000292                                                                          EDIT0306
-000293         TEST-FOR-LISTING.                                                EDIT0307
-000294             PERFORM TOP-OF-PAGE-ROUTINE.                                 EDIT0308
-000295             MOVE OLD-NUMBER TO DISPLAY-TEMP.                             EDIT0309
-000296             MOVE "RECORDS READ." TO DISPLAY-TEXT.                        EDIT0310
-000297             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0311
-000298             MOVE TOTAL-INSERTED TO DISPLAY-TEMP.                         EDIT0312
-000299             MOVE "RECORDS ADDED." TO DISPLAY-TEXT.                       EDIT0313
-000300             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0314
-000301             MOVE TOTAL-DELETED TO DISPLAY-TEMP.                          EDIT0315
-000302             MOVE "RECORDS DROPPED." TO DISPLAY-TEXT.                     EDIT0316
-000303             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0317
-000304             MOVE OUTPUT-COUNT TO DISPLAY-TEMP.                           EDIT0318
-000305             MOVE "RECORDS IN NEW FILE." TO DISPLAY-TEXT.                 EDIT0319
-000306             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0320
-000307             IF UPSI-BIT (2) EQUAL "F" GO TO END-JOB.                     EDIT0321
-000308             CLOSE NEW-VERSION.                                           EDIT0322
-000309             OPEN INPUT NEW-VERSION.                                      EDIT0323
-000310             MOVE "UPDATED LISTING" TO PHASE.                             EDIT0324
-000311             MOVE ZEROES TO PAGE-NUMBER.                                  EDIT0325
-000312             PERFORM TOP-OF-PAGE-ROUTINE.                                 EDIT0326
-000313             MOVE SPACES TO DISPOSITION.                                  EDIT0327
-000314                                                                          EDIT0328
-000315         LISTING-LOOP.                                                    EDIT0329
+000263             ADD 1 TO COMMAND-SUBTRACTIONS.                               EDIT0281
+000264             IF OLD-NUMBER IS NOT LESS THAN FIELDB                        EDIT0282
+000265                MOVE COMMAND-SUBTRACTIONS TO DISPLAY-TEMP                 EDIT0283
+000266                MOVE "RECORDS DELETED." TO DISPLAY-TEXT                   EDIT0284
+000267                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0285
+000268                ADD COMMAND-SUBTRACTIONS TO TOTAL-DELETED                 EDIT0286
+000269                MOVE OLD-STATEMENT TO NEW-STATEMENT                       EDIT0287
+000270                MOVE ZEROES TO COMMAND-SUBTRACTIONS                       EDIT0288
+000271                GO TO READ-A-COMMAND.                                     EDIT0289
+000272             READ OLD-VERSION AT END                                      EDIT0290
+000273                MOVE "NOT FOUND IN OLD VERSION DOING DELETE"              EDIT0291
+000274                      TO DISPLAY-TEXT                                     EDIT0292
+000275                WRITE COMMENT-LINE FROM DISPLAY-MESSAGE                   EDIT0293
+000276                GO TO END-JOB.                                            EDIT0294
+000277             GO TO DELETION-PROCESS.                                      EDIT0295
+000278                                                                          EDIT0296
+000279         OUTPUT-A-RECORD.                                                 EDIT0297
+000280             ADD 1 TO OUTPUT-COUNT.                                       EDIT0298
+000281             MOVE OUTPUT-COUNT TO NEW-NUMBER.                             EDIT0299
+000282             WRITE NEW-RECORD.                                            EDIT0300
+000283                                                                          EDIT0301
+000284         FINISH-JOB.                                                      EDIT0302
+000285             READ OLD-VERSION AT END GO TO TEST-FOR-LISTING.              EDIT0303
+000286             MOVE OLD-STATEMENT TO NEW-STATEMENT.                         EDIT0304
+000287             GO TO OUTPUT-A-RECORD.                                       EDIT0305
+000288                                                                          EDIT0306
+000289         TEST-FOR-LISTING.                                                EDIT0307
+000290             PERFORM TOP-OF-PAGE-ROUTINE.                                 EDIT0308
+000291             MOVE OLD-NUMBER TO DISPLAY-TEMP.                             EDIT0309
+000292             MOVE "RECORDS READ." TO DISPLAY-TEXT.                        EDIT0310
+000293             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0311
+000294             MOVE TOTAL-INSERTED TO DISPLAY-TEMP.                         EDIT0312
+000295             MOVE "RECORDS ADDED." TO DISPLAY-TEXT.                       EDIT0313
+000296             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0314
+000297             MOVE TOTAL-DELETED TO DISPLAY-TEMP.                          EDIT0315
+000298             MOVE "RECORDS DROPPED." TO DISPLAY-TEXT.                     EDIT0316
+000299             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0317
+000300             MOVE OUTPUT-COUNT TO DISPLAY-TEMP.                           EDIT0318
+000301             MOVE "RECORDS IN NEW FILE." TO DISPLAY-TEXT.                 EDIT0319
+000302             WRITE COMMENT-LINE FROM DISPLAY-MESSAGE.                     EDIT0320
+000303             IF UPSI-BIT (2) EQUAL "F" GO TO END-JOB.                     EDIT0321
+000304             CLOSE NEW-VERSION.                                           EDIT0322
+000305             OPEN INPUT NEW-VERSION.                                      EDIT0323
+000306             MOVE "UPDATED LISTING" TO PHASE.                             EDIT0324
+000307             MOVE ZEROES TO PAGE-NUMBER.                                  EDIT0325
+000308             PERFORM TOP-OF-PAGE-ROUTINE.                                 EDIT0326
+000309             MOVE SPACES TO DISPOSITION.                                  EDIT0327
+000310                                                                          EDIT0328
+000311         LISTING-LOOP.                                                    EDIT0329
+000312             READ NEW-VERSION AT END GO TO END-JOB.                       EDIT0330
+000313             MOVE NEW-RECORD TO ACTIVE-IMAGE.                             EDIT0331
+000314             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0332
+000315             ADD 1 TO LINE-COUNT.                                         EDIT0333
+000316             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0334
+000317             GO TO LISTING-LOOP.                                          EDIT0335
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0007
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
-000316             READ NEW-VERSION AT END GO TO END-JOB.                       EDIT0330
-000317             MOVE NEW-RECORD TO ACTIVE-IMAGE.                             EDIT0331
-000318             WRITE COMMENT-LINE FROM ACTIVITIES-LISTING.                  EDIT0332
-000319             ADD 1 TO LINE-COUNT.                                         EDIT0333
-000320             IF LINE-COUNT EQUAL 56 PERFORM TOP-OF-PAGE-ROUTINE.          EDIT0334
-000321             GO TO LISTING-LOOP.                                          EDIT0335
-000322                                                                          EDIT0336
-000323         END-JOB.                                                         EDIT0337
-000324             MOVE "PROGRAM TERMINATION" TO MESSAGE-TEXT.                  EDIT0338
-000325             WRITE COMMENT-LINE FROM MESSAGE-LOG.                         EDIT0339
-000326             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.    EDIT0340
-000327             STOP RUN.                                                    EDIT0341
-000328                                                                          EDIT0342
-000329         END PROGRAM EDITOR.                                              EDIT0343
+000318                                                                          EDIT0336
+000319         END-JOB.                                                         EDIT0337
+000320             MOVE "PROGRAM TERMINATION" TO MESSAGE-TEXT.                  EDIT0338
+000321             WRITE COMMENT-LINE FROM MESSAGE-LOG.                         EDIT0339
+000322             CLOSE OLD-VERSION, NEW-VERSION, MODIFICATION, COMMENTARY.    EDIT0340
+000323             STOP RUN.                                                    EDIT0341
+000324                                                                          EDIT0342
+000325         END PROGRAM EDITOR.                                              EDIT0343
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0008
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0080 FILE                OLD-VERSION
-0080 GROUP          01   OLD-RECORD
-0075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00080 FILE                OLD-VERSION
+00080 GROUP          01   OLD-RECORD
+00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
 
-0080 FILE                NEW-VERSION
-0080 GROUP          01   NEW-RECORD
-0075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-0005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00080 FILE                NEW-VERSION
+00080 GROUP          01   NEW-RECORD
+00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
+00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
 
-0032 FILE                PRT-VERSION
+00032 FILE                PRT-VERSION
 
-0080 FILE                MODIFICATION
-0080 GROUP          01   UPDATE-ORDER
-0075 ALPHANUMERIC   02     INSERTION
-0006 ALPHANUMERIC   03       COMMAND                    X(6)
-     CONDITIONAL    88         ENDJOB
-     CONDITIONAL    88         ENDSET
-     CONDITIONAL    88         REMOVE
-     CONDITIONAL    88         ADDNEW
-     CONDITIONAL    88         CHANGE
-     CONDITIONAL    88         DISPLY
-0001 ALPHANUMERIC   03       FILLER                     X
-0005 NUMERIC        03       A-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-     CONDITIONAL    88         A-BLANK
-0004 ALPHANUMERIC   03       FILLER                     X(4)
-0005 NUMERIC        03       B-FIELD                    9(5)
-0005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-     CONDITIONAL    88         B-BLANK
-0054 ALPHANUMERIC   03       FILLER                     X(54)
-0005 ALPHANUMERIC   02     FILLER                       X(5)
+00080 FILE                MODIFICATION
+00080 GROUP          01   UPDATE-ORDER
+00075 ALPHANUMERIC   02     INSERTION
+00006 ALPHANUMERIC   03       COMMAND                    X(6)
+      CONDITIONAL    88         ENDJOB
+      CONDITIONAL    88         ENDSET
+      CONDITIONAL    88         REMOVE
+      CONDITIONAL    88         ADDNEW
+      CONDITIONAL    88         CHANGE
+      CONDITIONAL    88         DISPLY
+00001 ALPHANUMERIC   03       FILLER                     X
+00005 NUMERIC        03       A-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
+      CONDITIONAL    88         A-BLANK
+00004 ALPHANUMERIC   03       FILLER                     X(4)
+00005 NUMERIC        03       B-FIELD                    9(5)
+00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
+      CONDITIONAL    88         B-BLANK
+00054 ALPHANUMERIC   03       FILLER                     X(54)
+00005 ALPHANUMERIC   02     FILLER                       X(5)
 
-0082 FILE                COMMENTARY
-0082 GROUP          01   COMMENT-LINE
-0082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 FILE                COMMENTARY
+00082 GROUP          01   COMMENT-LINE
+00082 ALPHANUMERIC   02     FILLER                       X(82)
 
-0002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
-0002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
-0002 NUMERIC        77   TOTAL-INSERTED                 9(3) COMP
-0002 NUMERIC        77   TOTAL-DELETED                  9(3) COMP
-0004 NUMERIC        77   OUTPUT-COUNT                   9(5) COMP
-0001 NUMERIC        77   LINE-COUNT                     9(2) COMP
-0005 NUMERIC        77   FIELDA                         9(5)
-0005 NUMERIC        77   FIELDB                         9(5)
-0082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
+00002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
+00002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
+00002 NUMERIC        77   TOTAL-INSERTED                 9(3) COMP
+00002 NUMERIC        77   TOTAL-DELETED                  9(3) COMP
+00004 NUMERIC        77   OUTPUT-COUNT                   9(5) COMP
+00001 NUMERIC        77   LINE-COUNT                     9(2) COMP
+00005 NUMERIC        77   FIELDA                         9(5)
+00005 NUMERIC        77   FIELDB                         9(5)
+00082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
 
-0006 GROUP          01   DATE-FROM-SYS
-0002 NUMERIC        02     DFSYS                        99
+00006 GROUP          01   DATE-FROM-SYS
+00002 NUMERIC        02     DFSYS                        99
 
-0080 GROUP          01   HEADINGS-LINE
-0015 ALPHANUMERIC   02     FILLER                       X(15)
-0020 ALPHANUMERIC   02     FILLER                       X(20)
-0017 ALPHANUMERIC   02     PHASE                        X(17)
+00080 GROUP          01   HEADINGS-LINE
+00015 ALPHANUMERIC   02     FILLER                       X(15)
+00020 ALPHANUMERIC   02     FILLER                       X(20)
+00017 ALPHANUMERIC   02     PHASE                        X(17)
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0009
 
-SIZE TYPE           LVL  NAME                           PICTURE
+SIZE  TYPE           LVL  NAME                           PICTURE
 
-0002 ALPHANUMERIC   02     MONTH-RUN                    XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     DAY-RUN                      XX
-0001 ALPHANUMERIC   02     FILLER                       X
-0002 ALPHANUMERIC   02     YEAR-RUN                     XX
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0008 ALPHANUMERIC   02     FILLER                       X(8)
-0004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00002 ALPHANUMERIC   02     MONTH-RUN                    XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     DAY-RUN                      XX
+00001 ALPHANUMERIC   02     FILLER                       X
+00002 ALPHANUMERIC   02     YEAR-RUN                     XX
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00008 ALPHANUMERIC   02     FILLER                       X(8)
+00004 NUMERIC        02     PAGE-NUMBER                  9(4)
 
-0082 GROUP          01   COMMAND-LISTING
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00082 GROUP          01   COMMAND-LISTING
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
 
-0082 GROUP          01   ACTIVITIES-LISTING
-0002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-0080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00082 GROUP          01   ACTIVITIES-LISTING
+00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
+00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
 
-0008 GROUP          01   UPSI-BYTE
-0001 ALPHANUMERIC   02     UPSI-BIT                     X
+00008 GROUP          01   UPSI-BYTE
+00001 ALPHANUMERIC   02     UPSI-BIT                     X
 
-0082 GROUP          01   MESSAGE-LOG
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00082 GROUP          01   MESSAGE-LOG
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
 
-0070 GROUP          01   DISPLAY-MESSAGE
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-0002 ALPHANUMERIC   02     FILLER                       X(2)
-0060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00070 GROUP          01   DISPLAY-MESSAGE
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
+00002 ALPHANUMERIC   02     FILLER                       X(2)
+00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
 
-0001 NUMERIC        77   END-JOB-PROCESS                9
-0001 NUMERIC        77   DELETE-PROCESS                 9
-0001 NUMERIC        77   INSERT-PROCESS                 9
-0001 NUMERIC        77   WRITE-PROCESS                  9
+00001 NUMERIC        77   END-JOB-PROCESS                9
+00001 NUMERIC        77   DELETE-PROCESS                 9
+00001 NUMERIC        77   INSERT-PROCESS                 9
+00001 NUMERIC        77   WRITE-PROCESS                  9
 
-0002 GROUP          01   SELECTORS
-0001 NUMERIC        02     RETURN-SELECT                9
-0001 NUMERIC        02     NEXT-JOB-SELECT              9
+00002 GROUP          01   SELECTORS
+00001 NUMERIC        02     RETURN-SELECT                9
+00001 NUMERIC        02     NEXT-JOB-SELECT              9
 
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0010
 
 NAME                           DEFINED                                    REFERENCES
 
-OLD-VERSION                     000030  000045  000158  000164  000210  000276  000289  000326
-OLD-RECORD                      000050  000262
-OLD-STATEMENT                   000051  000168  000216  000253  000273  000290
-OLD-NUMBER                      000052  000206  000215  000268  000295
+OLD-VERSION                    26       41      154     160     206     272     285     322
+OLD-RECORD                     46       258
+OLD-STATEMENT                  47       164     212     249     269     286
+OLD-NUMBER                     48       202     211     264     291
 
-NEW-VERSION                     000032  000054  000158  000286  000308  000309  000316  000326
-NEW-RECORD                      000059  000286  000317
-NEW-STATEMENT                   000060  000168  000216  000240  000253  000273  000290
-NEW-NUMBER                      000061  000285
+NEW-VERSION                    28       50      154     282     304     305     312     322
+NEW-RECORD                     55       282     313
+NEW-STATEMENT                  56       164     212     236     249     269     286
+NEW-NUMBER                     57       281
 
-PRT-VERSION                     000034
+PRT-VERSION                    30     not referenced
 
-MODIFICATION                    000036  000063  000158  000178  000229  000326
-UPDATE-ORDER                    000068  000182
-INSERTION                       000069  000240
-COMMAND                         000070
-ENDJOB                          000071  000195
-ENDSET                          000072  000233
-REMOVE                          000073  000192
-ADDNEW                          000074  000196
-CHANGE                          000075  000191
-DISPLY                          000076  000193
-A-FIELD                         000078  000185  000187
-A-ALPHA                         000079
-A-BLANK                         000080  000185
-B-FIELD                         000082  000186  000188
-B-ALPHA                         000083
-B-BLANK                         000084  000186
+MODIFICATION                   32       59      154     174     225     322
+UPDATE-ORDER                   64       178
+INSERTION                      65       236
+COMMAND                        66     not referenced
+ENDJOB                         67       191
+ENDSET                         68       229
+REMOVE                         69       188
+ADDNEW                         70       192
+CHANGE                         71       187
+DISPLY                         72       189
+A-FIELD                        74       181     183
+A-ALPHA                        75     not referenced
+A-BLANK                        76       181
+B-FIELD                        78       182     184
+B-ALPHA                        79     not referenced
+B-BLANK                        80       182
 
-COMMENTARY                      000038  000088  000158  000166  000174  000175  000180  000183  000198  000208  000213
-                                        000231  000236  000243  000264  000271  000279  000297  000300  000303  000306
-                                        000318  000325  000326
-COMMENT-LINE                    000093  000166  000174  000175  000180  000183  000198  000208  000213  000231  000236
-                                        000243  000264  000271  000279  000297  000300  000303  000306  000318  000325
+COMMENTARY                     34       84      154     162     170     171     176     179     194     204     209
+                                        227     232     239     260     267     275     293     296     299     302
+                                        314     321     322
+COMMENT-LINE                   89       162     170     171     176     179     194     204     209     227     232
+                                        239     260     267     275     293     296     299     302     314     321
 
-COMMAND-ADDITIONS               000098  000234  000237  000238  000244
-COMMAND-SUBTRACTIONS            000099  000267  000269  000272  000274
-TOTAL-INSERTED                  000100  000237  000298
-TOTAL-DELETED                   000101  000272  000301
-OUTPUT-COUNT                    000102  000284  000285  000304
-LINE-COUNT                      000103  000173  000184  000245  000246  000265  000266  000319  000320
-FIELDA                          000104  000187  000206  000212  000215
-FIELDB                          000105  000188  000268
-BLANK-LINE                      000106  000175
-DATE-FROM-SYS                   000108  000160
-DFSYS                           000109  000161  000162  000163
-HEADINGS-LINE                   000111  000174
-PHASE                           000114  000310
-MONTH-RUN                       000115  000162
-DAY-RUN                         000117  000163
-YEAR-RUN                        000119  000161
-PAGE-NUMBER                     000122  000172  000311
-COMMAND-LISTING                 000124  000183
-COMMAND-IMAGE                   000126  000182
+COMMAND-ADDITIONS              94       230     233     234     240
+COMMAND-SUBTRACTIONS           95       263     265     268     270
+TOTAL-INSERTED                 96       233     294
+TOTAL-DELETED                  97       268     297
+OUTPUT-COUNT                   98       280     281     300
+LINE-COUNT                     99       169     180     241     242     261     262     315     316
+FIELDA                         100      183     202     208     211
+FIELDB                         101      184     264
+BLANK-LINE                     102      171
+DATE-FROM-SYS                  104      156
+DFSYS                          105      157     158     159
+HEADINGS-LINE                  107      170
+PHASE                          110      306
+MONTH-RUN                      111      158
+DAY-RUN                        113      159
+YEAR-RUN                       115      157
+PAGE-NUMBER                    118      168     307
+COMMAND-LISTING                120      179
+COMMAND-IMAGE                  122      178
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0011
 
 NAME                           DEFINED                                    REFERENCES
 
-ACTIVITIES-LISTING              000128  000243  000264  000318
-DISPOSITION                     000129  000241  000263  000313
-ACTIVE-IMAGE                    000130  000240  000262  000317
-UPSI-BYTE                       000132
-UPSI-BIT                        000133  000159  000193  000307
-MESSAGE-LOG                     000135  000166  000180  000198  000208  000231  000325
-MESSAGE-TEXT                    000137  000165  000179  000197  000207  000230  000324
-DISPLAY-MESSAGE                 000139  000213  000236  000271  000279  000297  000300  000303  000306
-DISPLAY-TEMP                    000141  000212  000234  000269  000295  000298  000301  000304
-DISPLAY-TEXT                    000143  000211  000235  000270  000277  000296  000299  000302  000305
-END-JOB-PROCESS                 000145
-DELETE-PROCESS                  000146
-INSERT-PROCESS                  000147
-WRITE-PROCESS                   000148
-SELECTORS                       000150
-RETURN-SELECT                   000151
-NEXT-JOB-SELECT                 000152
+ACTIVITIES-LISTING             124      239     260     314
+DISPOSITION                    125      237     259     309
+ACTIVE-IMAGE                   126      236     258     313
+UPSI-BYTE                      128    not referenced
+UPSI-BIT                       129      155     189     303
+MESSAGE-LOG                    131      162     176     194     204     227     321
+MESSAGE-TEXT                   133      161     175     193     203     226     320
+DISPLAY-MESSAGE                135      209     232     267     275     293     296     299     302
+DISPLAY-TEMP                   137      208     230     265     291     294     297     300
+DISPLAY-TEXT                   139      207     231     266     273     292     295     298     301
+END-JOB-PROCESS                141    not referenced
+DELETE-PROCESS                 142    not referenced
+INSERT-PROCESS                 143    not referenced
+WRITE-PROCESS                  144    not referenced
+SELECTORS                      146    not referenced
+RETURN-SELECT                  147    not referenced
+NEXT-JOB-SELECT                148    not referenced
 
 GnuCOBOL V.R.P          prog.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0012
 
 LABEL                          DEFINED                                    REFERENCES
 
-START-SECTION                   000156
-TOP-OF-PAGE-ROUTINE             000171  000246  000266  000294  000312  000320
-READ-A-COMMAND                  000177  000199  000209  000255  000275
-TEST-COMMAND-TYPE               000190
-CHANGE-A-RECORD                 000201  000191
-FIND-FIELDA                     000205  000218  000226  000259
-RETURN-TO-USER                  000220  000202  000224  000258
-INSERT-A-RECORD                 000223  000196
-INSERTION-PROCESS               000228  000202  000224  000247
-NEXT-JOB-STEP                   000249  000203  000225  000239
-FORCED-WRITE                    000252  000225
-DELETE-A-RECORD                 000257  000192
-DELETION-PROCESS                000261  000203  000258  000281
-OUTPUT-A-RECORD                 000283  000169  000217  000242  000254  000291
-FINISH-JOB                      000288  000181  000194  000195
-TEST-FOR-LISTING                000293  000289
-LISTING-LOOP                    000315  000321
-END-JOB                         000323  000167  000214  000221  000232  000250  000280  000307  000316
+START-SECTION                  152    not referenced
+TOP-OF-PAGE-ROUTINE            167      242     262     290     308     316
+READ-A-COMMAND                 173      195     205     251     271
+TEST-COMMAND-TYPE              186    not referenced
+CHANGE-A-RECORD                197      187
+FIND-FIELDA                    201      214     222     255
+RETURN-TO-USER                 216      198     220     254
+INSERT-A-RECORD                219      192
+INSERTION-PROCESS              224      198     220     243
+NEXT-JOB-STEP                  245      199     221     235
+FORCED-WRITE                   248      221
+DELETE-A-RECORD                253      188
+DELETION-PROCESS               257      199     254     277
+OUTPUT-A-RECORD                279      165     213     238     250     287
+FINISH-JOB                     284      177     190     191
+TEST-FOR-LISTING               289      285
+LISTING-LOOP                   311      317
+END-JOB                        319      163     210     217     228     246     276     303     312
 
-15 Warnings in program
+13 Warnings in program
 0 Errors in program
 ])
 

@@ -22,7 +22,6 @@
 */
 
 /*#define DEBUG_REPLACE*/
-#define COB_INTERNAL_XREF
 
 #include "config.h"
 #include "defaults.h"
@@ -62,6 +61,10 @@
 #include "lib/gettext.h"
 
 #include "libcob/cobgetopt.h"
+
+#ifdef COB_EXPERIMENTAL
+#define COB_INTERNAL_XREF
+#endif
 
 struct strcache {
 	struct strcache	*next;
@@ -2373,6 +2376,7 @@ process_command_line (const int argc, char **argv)
 			/* --tlines=nn : Lines per page */
 			cb_lines_per_page = atoi(cob_optarg);
 			break;
+
 		case '@':
 			/* --no-symbols : No symbols in listing */
 			cb_no_symbols = 1;
@@ -3629,7 +3633,7 @@ static void
 set_listing_title_symbols (void)
 {
 	strcpy (cb_listing_title,
-		"SIZE TYPE           LVL  NAME                           PICTURE");
+		"SIZE  TYPE           LVL  NAME                           PICTURE");
 }
 
 #ifdef COB_INTERNAL_XREF
@@ -3833,6 +3837,16 @@ set_category (int category, int usage, char *type)
 }
 
 static void
+terminate_str_at_first_trailing_space (char * const str)
+{
+	int	i;
+
+	for (i = strlen (str) - 1; i && isspace (str[i]); i--) {
+		str[i] = '\0';
+	}
+}
+
+static void
 print_88_values (int lvl, struct cb_field *field)
 {
 	struct cb_field *f;
@@ -3844,7 +3858,7 @@ print_88_values (int lvl, struct cb_field *field)
 		strcat (lcl_name, (char *)f->name);
 		print_program_header ();
 		fprintf (cb_src_list_file,
-			"     %-14.14s %02d   %s\n",
+			"      %-14.14s %02d   %s\n",
 			"CONDITIONAL", f->level, lcl_name);
 	}
 }
@@ -3857,7 +3871,7 @@ print_fields (int lvl, struct cb_field *top)
 	int	got_picture;
 	int	old_level = 0;
 	int	item_size;
-	int	picture_len = cb_listing_wide ? 65 : 25;
+	int	picture_len = cb_listing_wide ? 64 : 24;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[80];
@@ -3900,24 +3914,24 @@ print_fields (int lvl, struct cb_field *top)
 		item_size = top->size;
 		if (got_picture) {
 			fprintf (cb_src_list_file,
-				"%04d %-14.14s %02d   %-30.30s %s\n",
+				"%05d %-14.14s %02d   %-30.30s %s\n",
 			 	item_size, type, top->level, lcl_name,
 			 	picture);
 		} else if (top->depending) {
 		   	item_size *= top->occurs_max;
 			fprintf (cb_src_list_file,
-				"%04d %-14.14s %02d   %-30.30s OCCURS %d TO %d\n",
+				"%05d %-14.14s %02d   %-30.30s OCCURS %d TO %d\n",
 			 	item_size, type, top->level, lcl_name,
 			 	top->occurs_min, top->occurs_max);
 		} else if (top->flag_occurs) {
 		   	item_size *= top->occurs_max;
 			fprintf (cb_src_list_file,
-				"%04d %-14.14s %02d   %-30.30s OCCURS %d\n",
+				"%05d %-14.14s %02d   %-30.30s OCCURS %d\n",
 			 	item_size, type, top->level, lcl_name,
 			 	top->occurs_max);
 		} else { /* Trailing spaces break testsuite AT_DATA */
 			fprintf (cb_src_list_file,
-				"%04d %-14.14s %02d   %s\n",
+				"%05d %-14.14s %02d   %s\n",
 			 	item_size, type, top->level, lcl_name);
 		}
 		first = 0;
@@ -3937,7 +3951,7 @@ print_files_and_their_records (cb_tree file_list_p)
 
 	for (l = file_list_p; l; l = CB_CHAIN (l)) {
 		print_program_header ();
-		fprintf (cb_src_list_file, "%04d %-14.14s      %s\n",
+		fprintf (cb_src_list_file, "%05d %-14.14s      %s\n",
 			 CB_FILE (CB_VALUE (l))->record_max,
 			 "FILE",
 			 CB_FILE (CB_VALUE (l))->name);
@@ -3993,26 +4007,33 @@ xref_print (struct cb_xref *xref)
 	struct cb_xref_elem 	*elem;
 	int     		cnt;
 	int     		maxcnt = cb_listing_wide ? 10 : 5;
+	char			buffer[CB_PRINT_LEN];
+	char			numbuf[8];
 
 	if (xref->head == NULL) {
-		fprintf (cb_src_list_file, "\n");
+		fprintf (cb_src_list_file, "not referenced\n");
 		return;
 	}
 
 	cnt = 0;
+	buffer[0] = 0;
 	for (elem = xref->head; elem; elem = elem->next) {
-		fprintf (cb_src_list_file, "  %06d", elem->line);
+		sprintf (numbuf, "  %-6d", elem->line);
+		strcat (buffer, numbuf);
 		if (++cnt >= maxcnt) {
 			cnt = 0;
-			fprintf (cb_src_list_file, "\n");
+			terminate_str_at_first_trailing_space (buffer);
+			fprintf (cb_src_list_file, "%s\n", buffer);
 			if (elem->next) {
 				print_program_header ();
 				fprintf (cb_src_list_file, "%38.38s", " ");
 			}
+			buffer[0] = 0;
 		}
 	}
 	if (cnt) {
-		fprintf (cb_src_list_file, "\n");
+		terminate_str_at_first_trailing_space (buffer);
+		fprintf (cb_src_list_file, "%s\n", buffer);
 	}
 }
 
@@ -4026,7 +4047,7 @@ xref_88_values (struct cb_field *field)
 		strcpy (lcl_name, (char *)f->name);
 		print_program_header ();
 		fprintf (cb_src_list_file,
-			"%-30.30s  %06d",
+			"%-30.30s %-6d ",
 			lcl_name, f->common.source_line);
 		xref_print (&f->xref);
 	}
@@ -4048,7 +4069,7 @@ xref_fields (struct cb_field *top)
 		}
 
 		print_program_header ();
-		fprintf (cb_src_list_file, "%-30.30s  %06d",
+		fprintf (cb_src_list_file, "%-30.30s %-6d ",
 			 lcl_name, top->common.source_line);
 
 		xref_print (&top->xref);
@@ -4067,7 +4088,7 @@ xref_files_and_their_records (cb_tree file_list_p)
 
 	for (l = file_list_p; l; l = CB_CHAIN (l)) {
 		print_program_header ();
-		fprintf (cb_src_list_file, "%-30.30s  %06d",
+		fprintf (cb_src_list_file, "%-30.30s %-6d ",
 			 CB_FILE (CB_VALUE (l))->name,
 			 CB_FILE (CB_VALUE (l))->common.source_line);
 		xref_print (&CB_FILE (CB_VALUE (l))->xref);
@@ -4101,7 +4122,7 @@ xref_labels (cb_tree label_list_p)
 			if (lab->xref.skip)
 				continue;
 			print_program_header ();
-			fprintf (cb_src_list_file, "%-30.30s  %06d",
+			fprintf (cb_src_list_file, "%-30.30s %-6d ",
 			 	lab->name, lab->common.source_line);
 			xref_print (&lab->xref);
 		}
@@ -4142,7 +4163,7 @@ print_program_trailer (void)
 			if (print_names) {
 				print_program_header ();
 				fprintf (cb_src_list_file,
-					"     %-14s      %s\n",
+					"      %-14s      %s\n",
 			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
 				 		"FUNCTION" : "PROGRAM"),
 			 	 	q->program_name);
@@ -4361,24 +4382,13 @@ line_has_listing_directive (const char *line, int *on_off)
 }
 
 static void
-terminate_str_at_first_trailing_space (char * const str)
-{
-	int	i;
-
-	for (i = strlen (str) - 1; i && isspace (str[i]); i--) {
-		str[i] = '\0';
-	}
-}
-
-static void
 print_fixed_line (const int line_num, char pch, char *line)
 {
 	int		i;
 	int		len = strlen (line);
 	const int	max_chars_on_line = cb_listing_wide ? 112 : 72;
 	const char	*format_str;
-#define BUFFER_LEN 133
-	char		buffer[BUFFER_LEN];
+	char		buffer[CB_PRINT_LEN];
 
 	if (line[CB_INDICATOR] == '&') {
 		line[CB_INDICATOR] = '-';

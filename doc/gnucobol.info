@@ -1779,7 +1779,8 @@ Options:
   --tlines=<lines>      specify lines per page in listing, default = 55
   --no-symbols          specify no symbols in listing
   -P[=<dir or file>]    generate preprocessed program listing (.lst)
-  -Xref                 specify cross reference in listing
+  -Xref                 generate cross reference through 'cobxref'
+                        (V. Coen's 'cobxref' must be in path)
   -I <directory>        add <directory> to copy/include search path
   -L <directory>        add <directory> to library search path
   -l <lib>              link the library <lib>
@@ -3920,14 +3921,14 @@ Node: CBL_OC_GETOPT43194
 Node: CBL_OC_HOSTED47366
 Node: CBL_OC_NANOSLEEP51868
 Node: Appendix A52374
-Node: Appendix B63341
-Node: Appendix C86125
-Node: Appendix D91729
-Node: Appendix E93665
-Node: Appendix F99805
-Node: Appendix G105837
-Node: Appendix H107136
-Node: Appendix I116650
-Node: Index141775
+Node: Appendix B63411
+Node: Appendix C86195
+Node: Appendix D91799
+Node: Appendix E93735
+Node: Appendix F99875
+Node: Appendix G105907
+Node: Appendix H107206
+Node: Appendix I116720
+Node: Index141845
 
 End Tag Table

@@ -1,4 +1,9 @@
 
+2016-11-11  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c, cobc.h: Multiple changes to support 5 digit variable size and
+	  cross reference changes.
+
 2016-11-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h: added cb_field->validation (First level 88 field, if any)

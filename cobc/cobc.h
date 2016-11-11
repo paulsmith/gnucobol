@@ -258,6 +258,7 @@ enum cobc_name_type {
 #define CB_SEQUENCE	cb_text_column /* the only configuration available...*/
 #define CB_ENDLINE	cb_text_column + 8
 #define CB_LIST_PICSIZE 80
+#define CB_PRINT_LEN	132
 
 #define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
 #define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
