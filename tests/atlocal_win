@@ -95,3 +95,11 @@ if test "$TERM" != "cygwin"; then # this is true for CYGWIN and MSYS
    fi
 fi
 export COB_HAS_CURSES
+
+
+# For rare cases where cobc/libcob may need to know if they're running in test mode:
+if test "$0" = "./testsuite"; then
+	export COB_IS_RUNNING_IN_TESTMODE=1
+else
+	unset COB_IS_RUNNING_IN_TESTMODE
+fi

@@ -1,4 +1,8 @@
 
+2016-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_win: added COB_IS_RUNNING_IN_TESTMODE
+
 2016-11-11  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Changed for new spacing.

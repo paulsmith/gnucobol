@@ -2402,7 +2402,7 @@ process_command_line (const int argc, char **argv)
 			cobc_gen_listing = 2;
 			/* temporary: check if we run the testsuite and skip
 			   the run if we don't have the internal xref */
-			cb_listing_outputfile = getenv ("TEMPLATE");
+			cb_listing_outputfile = getenv ("COB_IS_RUNNING_IN_TESTMODE");
 			if (cb_listing_outputfile) {
 				exit (77);
 			}
