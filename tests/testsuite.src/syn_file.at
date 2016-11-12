@@ -449,7 +449,7 @@ prog.cob: 40: warning: RECORD DEPENDING item 'RECORDSIZE4' should be defined in 
 AT_CLEANUP
 
 
-AT_SETUP([DECLARATIVES invalid procedure reference (1)])
+AT_SETUP([DECLARATIVES invalid procedure reference])
 AT_KEYWORDS([file])
 
 AT_DATA([prog.cob], [
@@ -458,96 +458,79 @@ AT_DATA([prog.cob], [
        ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+       SELECT GO-FILE   ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS LINE SEQUENTIAL.
+       SELECT PERF-FILE ASSIGN       "./TEST-FILE"
                         ORGANIZATION IS LINE SEQUENTIAL.
        DATA             DIVISION.
        FILE             SECTION.
-       FD TEST-FILE.
-       01 TEST-REC      PIC X(4).
+       FD GO-FILE.
+       01 GO-REC      PIC X(4).
+       FD PERF-FILE.
+       01 PERF-REC      PIC X(4).
        PROCEDURE        DIVISION.
        DECLARATIVES.
+       G01 SECTION.
+           USE AFTER ERROR PROCEDURE ON GO-FILE.
+       G02.
+           DISPLAY "OK"
+           END-DISPLAY.
+           GO TO GG02.
        P01 SECTION.
-           USE AFTER ERROR PROCEDURE ON TEST-FILE.
+           USE AFTER ERROR PROCEDURE ON PERF-FILE.
        P02.
            DISPLAY "OK"
            END-DISPLAY.
-           GO TO PP02.
-       END DECLARATIVES.
-       PP01 SECTION.
-       PP02.
-           OPEN  INPUT TEST-FILE.
-           CLOSE TEST-FILE.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: in section 'P01':
-prog.cob: in paragraph 'P02':
-prog.cob: 20: error: 'PP02' is not in DECLARATIVES
-])
-
-AT_CLEANUP
-
-
-AT_SETUP([DECLARATIVES invalid procedure reference (2)])
-AT_KEYWORDS([file])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION.
-       INPUT-OUTPUT     SECTION.
-       FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
-                        ORGANIZATION IS LINE SEQUENTIAL.
-       DATA             DIVISION.
-       FILE             SECTION.
-       FD TEST-FILE.
-       01 TEST-REC      PIC X(4).
-       PROCEDURE        DIVISION.
-       DECLARATIVES.
-       P01 SECTION.
-           USE AFTER ERROR PROCEDURE ON TEST-FILE.
-       P02.
-           DISPLAY "OK"
-           END-DISPLAY.
-      * programs may do this -> nothing happens there with TEST-FILE
+      * programs may do this -> nothing happens there with PERF-FILE
            PERFORM PPOK.
       * programs should not do this
       * (the compiler currently cannot distinguish this)
            PERFORM PP02.
        END DECLARATIVES.
+       GG01 SECTION.
+       GG02.
+           OPEN  INPUT GO-FILE.
+           CLOSE GO-FILE.
        PP01 SECTION.
        PP02.
-           OPEN  INPUT TEST-FILE.
-           CLOSE TEST-FILE.
+           OPEN  INPUT PERF-FILE.
+           CLOSE PERF-FILE.
        PP03.
            DISPLAY 'LOG OUTPUT HERE'.
        PPOK.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: in section 'P01':
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 21: error: 'PPOK' is not in DECLARATIVES
-prog.cob: 24: error: 'PP02' is not in DECLARATIVES
+prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
 ])
 
 AT_CHECK([$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -freference-out-of-declaratives=warning prog.cob], [0], [],
-[prog.cob: in section 'P01':
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: error: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 21: warning: 'PPOK' is not in DECLARATIVES
-prog.cob: 24: warning: 'PP02' is not in DECLARATIVES
+prog.cob: 31: error: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: error: 'PP02' is not in DECLARATIVES
 ])
 
-AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [],
-[prog.cob: in section 'P01':
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 -frelax-syntax prog.cob], [0], [],
+[prog.cob: in section 'G01':
+prog.cob: in paragraph 'G02':
+prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 21: warning: 'PPOK' is not in DECLARATIVES
-prog.cob: 24: warning: 'PP02' is not in DECLARATIVES
+prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
 ])
 
 
