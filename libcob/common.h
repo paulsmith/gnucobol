@@ -286,11 +286,11 @@
 /* remark: _putenv_s always overwrites, add a check for overwrite = 1 if necessary later*/
 #define setenv(name,value,overwrite)	_putenv_s(name,value)
 #define unsetenv(name)					_putenv_s(name,"")
-#if defined COB_USE_VC2013_OR_GREATER
+/* only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
 #define tzname			_tzname
 #define daylight		_daylight
-#endif
+/* only usable with COB_USE_VC2013_OR_GREATER - End */
 
 #define __attribute__(x)
 
