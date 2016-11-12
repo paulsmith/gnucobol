@@ -1,4 +1,11 @@
 
+2016-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: fixed extended_with_lock by differentiating between WITH
+	  LOCK / NO LOCK / KEPT LOCK
+	* typeck.c (cb_emit_read): set read_opts COB_READ_LOCK and 
+	  COB_READ_KEPT_LOCK for I/O statements with KEPT LOCK
+
 2016-11-11  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c, cobc.h: Multiple changes to support 5 digit variable size and

@@ -9236,9 +9236,12 @@ _extended_with_lock:
 
 extended_with_lock:
   with_lock
+  {
+	$$ = $1;
+  }
 | _with KEPT LOCK
   {
-	$$ = cb_int1;
+   $$ = cb_int5;
   }
 | _with WAIT
   {

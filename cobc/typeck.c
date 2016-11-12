@@ -7957,6 +7957,8 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 		read_opts = COB_READ_IGNORE_LOCK;
 	} else if (lock_opts == cb_int4) {
 		read_opts = COB_READ_WAIT_LOCK;
+	} else if (lock_opts == cb_int5) {
+		read_opts = COB_READ_LOCK | COB_READ_KEPT_LOCK;
 	}
 	if (ref == cb_error_node) {
 		return;
