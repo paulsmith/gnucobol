@@ -3654,17 +3654,17 @@ lock_mode_clause:
 lock_mode:
   MANUAL _lock_with
   {
-	current_file->lock_mode = COB_LOCK_MANUAL;
+	current_file->lock_mode |= COB_LOCK_MANUAL;
 	cobc_cs_check = 0;
   }
 | AUTOMATIC _lock_with
   {
-	current_file->lock_mode = COB_LOCK_AUTOMATIC;
+	current_file->lock_mode |= COB_LOCK_AUTOMATIC;
 	cobc_cs_check = 0;
   }
 | EXCLUSIVE
   {
-	current_file->lock_mode = COB_LOCK_EXCLUSIVE;
+	current_file->lock_mode |= COB_LOCK_EXCLUSIVE;
 	cobc_cs_check = 0;
   }
 ;

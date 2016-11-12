@@ -17,6 +17,11 @@
 	* cobc.c, cobc.h, parser.y, tree.h, typeck.c: Added internal cross
 	  reference support.
 
+2016-11-07  Jim Rinn <jimrinn1@gmail.com>
+
+	* parser.y (lock_mode): OR-ing SELECT settings into file->lock_mode as they
+	  would override COB_LOCK_MULTIPLE (set in _lock_with) otherwise
+
 2016-11-07  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_88_values): Added to print 88 level values.
