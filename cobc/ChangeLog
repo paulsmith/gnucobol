@@ -1,4 +1,10 @@
 
+2016-11-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y. typeck.c (cb_trim_program_id), tree.h: added code to warn
+	  if SPACES are used in a PROGRAM-ID or CALL 'literal' plus the SPACES
+	  are removed
+
 2016-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fixed extended_with_lock by differentiating between WITH

@@ -2410,11 +2410,17 @@ program_id_name:
 	$$ = $1;
   }
 | LITERAL
+  {
+	cb_trim_program_id ($1);
+  }
 ;
 
 end_program_name:
   PROGRAM_NAME
 | LITERAL
+  {
+	cb_trim_program_id ($1);
+  }
 ;
 
 _as_literal:
@@ -7338,6 +7344,11 @@ mnemonic_conv:
 
 id_or_lit_or_func_or_program_name:
   id_or_lit_or_func
+  {
+	if (CB_LITERAL_P ($1)) {
+		cb_trim_program_id ($1);
+	}
+  }
 | PROGRAM_NAME
   {
 	cb_verify (cb_program_prototypes, _("CALL/CANCEL with program-prototype-name"));

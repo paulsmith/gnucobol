@@ -5152,3 +5152,51 @@ x >= 10000
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([CALL literal with spaces])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  MYRTN  PIC X(9) VALUE "SUB  ".
+       
+       PROCEDURE DIVISION.
+           CALL " SUB " USING 'X'.
+           MOVE x'00' TO MYRTN (6:1).
+           CALL MYRTN   USING 'Y'.
+           CALL "SUB"   USING 'Z'.
+           STOP RUN.
+       END PROGRAM prog.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. "SUB ".
+       
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  x  PIC X.
+       
+       PROCEDURE DIVISION USING x.
+            DISPLAY "SUB GOT " X
+            END-DISPLAY.
+       END PROGRAM " SUB".
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 10: warning: ' SUB ' literal includes leading/trailing spaces which are omitted
+prog.cob: 18: warning: 'SUB ' literal includes leading/trailing spaces which are omitted
+prog.cob: 27: warning: ' SUB' literal includes leading/trailing spaces which are omitted
+])
+
+AT_CHECK([./prog], [0],
+[SUB GOT X
+SUB GOT Y
+SUB GOT Z
+], [])
+
+AT_CLEANUP
+
