@@ -4,6 +4,7 @@
 	* common.c, coblocal.h, fileio.c: moved common code parts of fileio.c as
 	  function (cob_runtime_warning) to common.c;
 	  reformatted message and include source location, if known
+	* call.c (cob_call_field): warn and remove leading spaces for CALL
 
 2016-10-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

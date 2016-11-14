@@ -963,6 +963,7 @@ cob_call_field (const cob_field *f, const struct cob_call_struct *cs,
 	char				*buff;
 	char				*entry;
 	char				*dirent;
+	int					len;
 
 	if (unlikely(!cobglobptr)) {
 		cob_fatal_error (COB_FERROR_INITIALIZED);
@@ -970,6 +971,18 @@ cob_call_field (const cob_field *f, const struct cob_call_struct *cs,
 
 	buff = cob_get_buff (f->size + 1);
 	cob_field_to_string (f, buff, f->size);
+
+	/* check for uncommon leading space - trim it */
+	if (*buff == ' ') {
+		/* same warning as in cobc/typeck.c */
+		cob_runtime_warning (
+			_("'%s' literal includes leading spaces which are omitted"), buff);
+		len = strlen(buff);
+		while (*buff == ' ') {
+			memmove (buff, buff + 1, --len);
+		}
+		buff[len] = 0;
+	}
 
 	entry = cob_chk_call_path (buff, &dirent);
 

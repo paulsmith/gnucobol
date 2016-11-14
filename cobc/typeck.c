@@ -1105,18 +1105,28 @@ cb_trim_program_id (cb_tree id_literal)
 	int		len;
 
 	s = (char *)(CB_LITERAL (id_literal)->data);
-	if (strchr(s, ' ')) {
-		cb_warning_x (id_literal,
-			_("'%s' literal includes leading/trailing spaces which are omitted"), s);
-		len = strlen(s);
-		while (*s == ' ') {
-			memmove(s, s+1, len--);
-		}
-		while (s[len-1] == ' ' && len > 0) {
-			s[--len] = 0;
-		}
-		CB_LITERAL (id_literal)->size = len;
+	if (!strchr(s, ' ')) {
+		return;
 	}
+	
+	len = strlen(s);
+	if (*s == ' ') {
+		/* same warning as in libcob/common.c */
+		cb_warning_x (id_literal,
+			_("'%s' literal includes leading spaces which are omitted"), s);
+	}
+	if (s[len-1] == ' ') {
+		cb_warning_x (id_literal,
+			_("'%s' literal includes trailing spaces which are omitted"), s);
+	}
+	while (*s == ' ') {
+		memmove(s, s+1, len--);
+	}
+	while (s[len-1] == ' ' && len > 0) {
+		len--;
+	}
+	s[len] = 0;
+	CB_LITERAL (id_literal)->size = len;
 }
 
 char *

@@ -1,7 +1,12 @@
 
+2016-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_trim_program_id): change warning message for remove of
+	  spaces in program-id to be more specific and don't warn embedded spaces
+
 2016-11-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* parser.y. typeck.c (cb_trim_program_id), tree.h: added code to warn
+	* parser.y, typeck.c (cb_trim_program_id), tree.h: added code to warn
 	  if SPACES are used in a PROGRAM-ID or CALL 'literal' plus the SPACES
 	  are removed
 
