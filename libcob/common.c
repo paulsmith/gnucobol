@@ -284,10 +284,10 @@ static struct config_tbl gc_conf[] = {
 #define FUNC_NAME_IN_DEFAULT NUM_CONFIG + 1
 
 /* Local functions */
-static int	set_config_val(char *value, int pos);
-static char *	get_config_val(char *value, int pos, char *orgvalue);
-void conf_runtime_error_value(char *value, const int conf_pos);
-void conf_runtime_error(const int finish_error, const char *fmt, ...);
+static int		set_config_val	(char *value, int pos);
+static char		*get_config_val	(char *value, int pos, char *orgvalue);
+void		conf_runtime_error_value	(const char *value, const int conf_pos);
+void		conf_runtime_error	(const int finish_error, const char *fmt, ...);
 
 static void
 cob_exit_common (void)
@@ -4959,7 +4959,36 @@ cob_load_config (void)
 }
 
 void
-cob_runtime_error(const char *fmt, ...)
+cob_runtime_warning (const char *fmt, ...)
+{
+	va_list args;
+
+	if (!cobsetptr->cob_display_warn) {
+		return;
+	}
+
+	/* Prefix */
+	fprintf(stderr, "libcob: ");
+	if (cob_source_file) {
+		fprintf(stderr, "%s: ", cob_source_file);
+	}
+	if (cob_source_line) {
+		fprintf(stderr, "%u: ", cob_source_line);
+	}
+	fprintf(stderr, "warning: ");
+
+	/* Body */
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+
+	/* Postfix */
+	putc('\n', stderr);
+	fflush(stderr);
+}
+
+void
+cob_runtime_error (const char *fmt, ...)
 {
 	struct handlerlist	*h;
 	struct handlerlist	*hp;
@@ -5163,7 +5192,7 @@ cob_fatal_error(const int fatal_error)
 }
 
 void
-conf_runtime_error_value(char *value, const int pos)
+conf_runtime_error_value (const char *value, const int pos)
 {
 	const char *name = NULL;
 

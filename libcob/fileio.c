@@ -5031,11 +5031,7 @@ open_cbl_file (unsigned char *file_name, unsigned char *file_access,
 			flag |= O_RDWR;
 			break;
 		default:
-			if (cobsetptr->cob_display_warn) {
-				fprintf (stderr, _("WARNING - Call to CBL_OPEN_FILE with wrong access mode: %d"), *file_access & 0x3F);
-				putc ('\n', stderr);
-				fflush (stderr);
-			}
+			cob_runtime_warning (_("call to CBL_OPEN_FILE with wrong access mode: %d"), *file_access & 0x3F);
 			memset (file_handle, -1, (size_t)4);
 			return -1;
 	}
@@ -5075,15 +5071,11 @@ cob_sys_create_file (unsigned char *file_name, unsigned char *file_access,
 	 * @param: file_dev : not implemented, set 0
 	 */
 
-	if (*file_lock != 0 && cobsetptr->cob_display_warn) {
-		fprintf (stderr, _("WARNING - Call to CBL_CREATE_FILE with wrong file_lock: %d"), *file_lock);
-		putc ('\n', stderr);
-		fflush (stderr);
+	if (*file_lock != 0) {
+		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_lock: %d"), *file_lock);
 	}
-	if (*file_dev != 0 && cobsetptr->cob_display_warn) {
-		fprintf (stderr, _("WARNING - Call to CBL_CREATE_FILE with wrong file_dev: %d"), *file_dev);
-		putc ('\n', stderr);
-		fflush (stderr);
+	if (*file_dev != 0) {
+		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_dev: %d"), *file_dev);
 	}
 
 	COB_CHK_PARMS (CBL_CREATE_FILE, 5);
@@ -6325,10 +6317,8 @@ cob_exit_fileio (void)
 				cob_field_to_string (l->file->assign,
 						     runtime_buffer,
 						     (size_t)COB_FILE_MAX);
-				fprintf (stderr, _("WARNING - Implicit CLOSE of %s ('%s')"),
+				cob_runtime_warning (_("implicit CLOSE of %s ('%s')"),
 					l->file->select_name, runtime_buffer);
-				putc ('\n', stderr);
-				fflush (stderr);
 			}
 		}
 	}
