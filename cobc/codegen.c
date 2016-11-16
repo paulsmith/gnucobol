@@ -1258,6 +1258,7 @@ output_call_cache (void)
 			} else {
 				convention_modifier = "";
 			}
+			output_local ("#ifndef %s\n", static_call->call_name);
 			if (static_call->return_type == COB_RETURN_NULL) {
 				output_local ("extern void %s%s ();\n", convention_modifier,
 					static_call->call_name);
@@ -1268,6 +1269,7 @@ output_call_cache (void)
 				output_local ("extern int %s%s ();\n", convention_modifier,
 					static_call->call_name);
 			}
+			output_local ("#endif\n");
 		}
 	}
 	needs_unifunc = 0;
@@ -2799,12 +2801,12 @@ output_param (cb_tree x, int id)
 						CB_PREFIX_FIELD, f->id);
 				} else {
 #endif
-				output ("COB_SET_DATA (%s%d, ",
-					CB_PREFIX_FIELD, f->id);
-				output_data (x);
-				output (")");
+					output ("COB_SET_DATA (%s%d, ",
+						CB_PREFIX_FIELD, f->id);
+					output_data (x);
+					output (")");
 #if	0	/* RXWRXW - Any data pointer */
-				f->flag_anylen_done = 1;
+					f->flag_anylen_done = 1;
 				}
 #endif
 			} else {

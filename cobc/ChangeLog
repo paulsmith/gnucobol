@@ -1,4 +1,9 @@
 
+2016-11-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_call_cache): fix bug #341 added generation of macro
+	  check in C function declarations for static CALLs
+
 2016-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_trim_program_id): change warning message for remove of
