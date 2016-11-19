@@ -2804,7 +2804,7 @@ cb_field_add (struct cb_field *f, struct cb_field *p)
 }
 
 struct cb_field *
-cb_field_founder (const struct cb_field *f)
+cb_field_founder (const struct cb_field * const f)
 {
 	const struct cb_field	*ff;
 
@@ -3173,6 +3173,40 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 }
 
+/* Communication description */
+
+struct cb_cd *
+cb_build_cd (cb_tree name)
+{
+	struct cb_cd	*p = make_tree (CB_TAG_CD, CB_CATEGORY_UNKNOWN,
+					sizeof (struct cb_cd));
+
+	p->name = cb_define (name, CB_TREE (p));
+
+	return p;
+}
+
+void
+cb_finalize_cd (struct cb_cd *cd, struct cb_field *records)
+{
+	struct cb_field	*p;
+	
+	if (cd->record) {
+		cd->record->sister = records;
+	} else {
+		cd->record = records;
+	}
+
+	for (p = records; p; p = p->sister) {
+		/* Check record size is exactly 87 chars */
+
+		p->cd = cd;
+		if (p != cd->record) {
+			p->redefines = cd->record;
+		}
+	}
+}
+
 /* Reference */
 
 cb_tree
@@ -3256,6 +3290,22 @@ cb_set_system_names (void)
 	cb_define_system_name ("FORMFEED");
 }
 
+static COB_INLINE COB_A_INLINE int
+field_is_in_file_record (const cb_tree file,
+			 const struct cb_field * const field)
+{
+	return CB_FILE_P (file)
+		&& CB_FILE (file) == cb_field_founder (field)->file;
+}
+
+static COB_INLINE COB_A_INLINE int
+field_is_in_cd_record (const cb_tree cd,
+		       const struct cb_field * const field)
+{
+	return CB_CD_P (cd)
+		&& CB_CD (cd) == cb_field_founder (field)->cd;
+}
+
 cb_tree
 cb_ref (cb_tree x)
 {
@@ -3308,11 +3358,11 @@ cb_ref (cb_tree x)
 				}
 			}
 
-			/* Resolve by file */
-			if (c && CB_REFERENCE (c)->chain == NULL) {
-				if (CB_WORD_COUNT (c) == 1 &&
-				    CB_FILE_P (cb_ref (c)) &&
-				    (CB_FILE (cb_ref (c)) == cb_field_founder (CB_FIELD (v))->file)) {
+			/* Resolve by file or CD */
+			if (c && CB_REFERENCE (c)->chain == NULL
+			    && CB_WORD_COUNT (c) == 1) {
+				if (field_is_in_file_record (cb_ref (c), CB_FIELD (v))
+				    || field_is_in_cd_record (cb_ref (c), CB_FIELD (v))) {
 					c = CB_REFERENCE (c)->chain;
 				}
 			}

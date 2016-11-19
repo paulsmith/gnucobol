@@ -1,4 +1,8 @@
 
+2016-11-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added use-for-debugging config option.
+
 2016-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: feature-request #179 added reference-out-of-declaratives option
@@ -85,7 +89,7 @@
 	  marked as not verified yet)
 	* general: added literal-length, numeric-literal-length
 
-2015-03-14  Ron Norman <rjn@inglenet.com> 
+2015-03-14  Ron Norman <rjn@inglenet.com>
 
 	* runtime.cfg: added all configuration options with documentation
 
@@ -176,7 +180,7 @@
 	* default.conf, mvs.conf :
 	  New variable - not-reserved
 	  Document in default.conf
-	  CYCLE as not reserved in mvs.conf 
+	  CYCLE as not reserved in mvs.conf
 
 2003-08-30  Keisuke Nishida  <kxn30@yahoo.co.jp>
 

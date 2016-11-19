@@ -2377,7 +2377,7 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Obsolete 85 keywords])
+AT_SETUP([Obsolete 2002 keywords])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
@@ -2393,7 +2393,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OKOK
 ])

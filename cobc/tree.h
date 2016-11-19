@@ -73,35 +73,36 @@ enum cb_tag {
 	CB_TAG_FIELD,		/* 9 User-defined variable */
 	CB_TAG_FILE,		/* 10 File description */
 	CB_TAG_REPORT,		/* 11 Report description */
+	CB_TAG_CD,		/* 12 Communication description */
 	/* Expressions */
-	CB_TAG_REFERENCE,	/* 12 Reference to a field, file, or label */
-	CB_TAG_BINARY_OP,	/* 13 Binary operation */
-	CB_TAG_FUNCALL,		/* 14 Run-time function call */
-	CB_TAG_CAST,		/* 15 Type cast */
-	CB_TAG_INTRINSIC,	/* 16 Intrinsic function */
+	CB_TAG_REFERENCE,	/* 13 Reference to a field, file, or label */
+	CB_TAG_BINARY_OP,	/* 14 Binary operation */
+	CB_TAG_FUNCALL,		/* 15 Run-time function call */
+	CB_TAG_CAST,		/* 16 Type cast */
+	CB_TAG_INTRINSIC,	/* 17 Intrinsic function */
 	/* Statements */
-	CB_TAG_LABEL,		/* 17 Label statement */
-	CB_TAG_ASSIGN,		/* 18 Assignment statement */
-	CB_TAG_INITIALIZE,	/* 19 INITIALIZE statement */
-	CB_TAG_SEARCH,		/* 20 SEARCH statement */
-	CB_TAG_CALL,		/* 21 CALL statement */
-	CB_TAG_GOTO,		/* 22 GO TO statement */
-	CB_TAG_IF,		/* 23 IF statement */
-	CB_TAG_PERFORM,		/* 24 PERFORM statement */
-	CB_TAG_STATEMENT,	/* 25 General statement */
-	CB_TAG_CONTINUE,	/* 26 CONTINUE statement */
-	CB_TAG_CANCEL,		/* 27 CANCEL statement */
-	CB_TAG_ALTER,		/* 28 ALTER statement */
-	CB_TAG_SET_ATTR,	/* 29 SET ATTRIBUTE statement */
+	CB_TAG_LABEL,		/* 18 Label statement */
+	CB_TAG_ASSIGN,		/* 19 Assignment statement */
+	CB_TAG_INITIALIZE,	/* 20 INITIALIZE statement */
+	CB_TAG_SEARCH,		/* 21 SEARCH statement */
+	CB_TAG_CALL,		/* 22 CALL statement */
+	CB_TAG_GOTO,		/* 23 GO TO statement */
+	CB_TAG_IF,		/* 24 IF statement */
+	CB_TAG_PERFORM,		/* 25 PERFORM statement */
+	CB_TAG_STATEMENT,	/* 26 General statement */
+	CB_TAG_CONTINUE,	/* 27 CONTINUE statement */
+	CB_TAG_CANCEL,		/* 28 CANCEL statement */
+	CB_TAG_ALTER,		/* 29 ALTER statement */
+	CB_TAG_SET_ATTR,	/* 30 SET ATTRIBUTE statement */
 	/* Miscellaneous */
-	CB_TAG_PERFORM_VARYING,	/* 30 PERFORM VARYING parameter */
-	CB_TAG_PICTURE,		/* 31 PICTURE clause */
-	CB_TAG_LIST,		/* 32 List */
-	CB_TAG_DIRECT,		/* 33 Code output or comment */
-	CB_TAG_DEBUG,		/* 34 Debug item set */
-	CB_TAG_DEBUG_CALL,	/* 35 Debug callback */
-	CB_TAG_PROGRAM,		/* 36 Program */
-	CB_TAG_PROTOTYPE	/* 37 Prototype */
+	CB_TAG_PERFORM_VARYING,	/* 31 PERFORM VARYING parameter */
+	CB_TAG_PICTURE,		/* 32 PICTURE clause */
+	CB_TAG_LIST,		/* 33 List */
+	CB_TAG_DIRECT,		/* 34 Code output or comment */
+	CB_TAG_DEBUG,		/* 35 Debug item set */
+	CB_TAG_DEBUG_CALL,	/* 36 Debug callback */
+	CB_TAG_PROGRAM,		/* 37 Program */
+	CB_TAG_PROTOTYPE	/* 38 Prototype */
 };
 
 /* Alphabet type */
@@ -658,6 +659,7 @@ struct cb_field {
 	struct cb_field		*rename_thru;	/* RENAMES THRU */
 	struct cb_field		*index_qual;	/* INDEXED BY qualifier */
 	struct cb_file		*file;		/* FD section file name */
+	struct cb_cd		*cd;		/* CD name */ 
 	struct cb_key 		*keys;		/* SEARCH key */
 	struct cb_picture	*pic;		/* PICTURE */
 	struct cb_field		*vsize;		/* Variable size cache */
@@ -825,7 +827,7 @@ struct cb_alt_key {
 struct cb_file {
 	struct cb_tree_common	common;			/* Common values */
 	const char		*name;			/* Original name */
-	char			*cname;			/* Name used in C */
+	char	 		*cname;			/* Name used in C */
 	/* SELECT */
 	cb_tree			assign;			/* ASSIGN */
 	cb_tree			file_status;		/* FILE STATUS */
@@ -866,6 +868,19 @@ struct cb_file {
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))
 #define CB_FILE_P(x)	(CB_TREE_TAG (x) == CB_TAG_FILE)
+
+/* Communication description */
+
+struct cb_cd {
+	struct cb_tree_common	common;			/* Common values */
+	const char		*name;			/* Name */
+	struct cb_field		*record;		/* Record descriptions */
+	struct cb_label		*debug_section;		/* DEBUG section */
+	int			flag_field_debug;	/* DEBUGGING */
+};
+
+#define CB_CD(x)	(CB_TREE_CAST (CB_TAG_CD, struct cb_cd, x))
+#define CB_CD_P(x)	(CB_TREE_TAG (x) == CB_TAG_CD)
 
 /* Reference */
 
@@ -1272,6 +1287,7 @@ struct cb_program {
 	struct nested_list	*common_prog_list;	/* COMMON contained */
 	cb_tree			entry_list;		/* Entry point list */
 	cb_tree			file_list;		/* File list */
+	cb_tree			cd_list;		/* CD list */
 	cb_tree			exec_list;		/* Executable statements */
 	cb_tree			label_list;		/* Label list */
 	cb_tree			reference_list;		/* Reference list */
@@ -1476,7 +1492,7 @@ extern void			cb_build_symbolic_chars (const cb_tree,
 
 extern struct cb_field		*cb_field_add (struct cb_field *,
 					       struct cb_field *);
-extern struct cb_field		*cb_field_founder (const struct cb_field *);
+extern struct cb_field		*cb_field_founder (const struct cb_field * const);
 extern struct cb_field		*cb_field_variable_size (const struct cb_field *);
 extern unsigned int		cb_field_variable_address (const struct cb_field *);
 extern int			cb_field_subordinate (const struct cb_field *,
@@ -1488,6 +1504,10 @@ extern struct cb_file		*build_file (cb_tree);
 extern void			validate_file (struct cb_file *, cb_tree);
 extern void			finalize_file (struct cb_file *,
 					       struct cb_field *);
+
+extern struct cb_cd *		cb_build_cd (cb_tree name);
+extern void			cb_finalize_cd (struct cb_cd *,
+						struct cb_field *);
 
 extern cb_tree			cb_build_filler (void);
 extern cb_tree			cb_build_reference (const char *);

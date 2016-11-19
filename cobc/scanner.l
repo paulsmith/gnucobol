@@ -636,6 +636,16 @@ H#[0-9A-Za-z]* {
 	RETURN_TOK (INVALID_KEY);
 }
 
+"NO"[ ,;\n]+"DATA"[ ,;\n] {
+	count_lines (yytext);
+	RETURN_TOK (NO_DATA);
+}
+
+"WITH"[ ,;\n]+"DATA"[ ,;\n] {
+	count_lines (yytext);
+	RETURN_TOK (DATA);
+}
+
 "UPON"[ ,;\n]+"ENVIRONMENT-NAME" {
 	count_lines (yytext);
 	RETURN_TOK (UPON_ENVIRONMENT_NAME);

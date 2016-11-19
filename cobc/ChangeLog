@@ -1,4 +1,10 @@
 
+2016-11-19 Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, reserved.c, etc.: added complete recognition of all
+	  COMMUNICATION SECTION syntax.
+	* config.def: added use-for-debugging config option.
+
 2016-11-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_call_cache): fix bug #341 added generation of macro
@@ -19,7 +25,7 @@
 
 	* parser.y: fixed extended_with_lock by differentiating between WITH
 	  LOCK / NO LOCK / KEPT LOCK
-	* typeck.c (cb_emit_read): set read_opts COB_READ_LOCK and 
+	* typeck.c (cb_emit_read): set read_opts COB_READ_LOCK and
 	  COB_READ_KEPT_LOCK for I/O statements with KEPT LOCK
 
 2016-11-11  Dave Pitts <dpitts@cozx.com>
@@ -111,7 +117,7 @@
 
 2016-10-29  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c (print_program_header): Changed to allow for 9 character 
+	* cobc.c (print_program_header): Changed to allow for 9 character
 	  version field (eg. VV.RR.PPP).
 
 2016-10-28  Dave Pitts <dpitts@cozx.com>

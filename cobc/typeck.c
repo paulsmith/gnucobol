@@ -2702,6 +2702,7 @@ cb_validate_program_body (struct cb_program *prog)
 			CB_LABEL (v)->flag_debugging_mode = 1;
 			break;
 		case CB_TAG_FILE:
+		case CB_TAG_CD:
 			break;
 		case CB_TAG_FIELD:
 			if (CB_FIELD (v)->size > size) {

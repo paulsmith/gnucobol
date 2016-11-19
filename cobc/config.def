@@ -162,6 +162,9 @@ CB_CONFIG_SUPPORT (cb_stop_literal_statement, "stop-literal-statement",
 CB_CONFIG_SUPPORT (cb_debugging_line, "debugging-line",
 	_("DEBUGGING MODE and indicator 'D'"))
 
+CB_CONFIG_SUPPORT (cb_use_for_debugging, "use-for-debugging",
+	_("USE FOR DEBUGGING"))
+
 CB_CONFIG_SUPPORT (cb_padding_character_clause, "padding-character-clause",
 	_("PADDING CHARACTER clause"))
 

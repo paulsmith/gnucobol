@@ -418,6 +418,7 @@ test.conf: missing definitions:
 	no definition of 'goto-statement-without-name'
 	no definition of 'stop-literal-statement'
 	no definition of 'debugging-line'
+	no definition of 'use-for-debugging'
 	no definition of 'padding-character-clause'
 	no definition of 'next-sentence-phrase'
 	no definition of 'eject-statement'
