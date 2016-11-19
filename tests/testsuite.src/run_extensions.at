@@ -3333,6 +3333,51 @@ AT_CHECK([./prog5 --static], [1], [],
 AT_CLEANUP
 
 
+AT_SETUP([System routines CBL_GC_FORK and CBL_GC_WAITPID])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 CHILD-PID   PIC 9(9) BINARY.
+       01 MY-PID      PIC 9(9) BINARY VALUE 1.
+       01 WAIT-STS    PIC S9(9) BINARY VALUE -3.
+       01 NANO-TIME   PIC 9(18) BINARY VALUE 10000.
+       PROCEDURE DIVISION.
+
+           CALL "CBL_GC_FORK" RETURNING CHILD-PID.
+           IF CHILD-PID = ZERO
+               PERFORM CHILD-CODE
+           ELSE
+               PERFORM PARENT-CODE
+           END-IF.
+
+           STOP RUN.
+
+       CHILD-CODE.
+           CALL "C$GETPID" RETURNING MY-PID.
+           CALL "C$SLEEP"  USING 1 .
+           DISPLAY "Hello, I am the child".
+
+       PARENT-CODE.
+           CALL "C$GETPID" RETURNING MY-PID.
+           DISPLAY "Hello, I am the parent".
+           CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS.
+           DISPLAY "Child ended status " WAIT-STS.
+
+])
+
+AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [Hello, I am the parent
+Hello, I am the child
+Child ended status +0000000000
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([System routine CBL_COPY_FILE])
 
 AT_DATA([prog.cob], [

@@ -1,4 +1,8 @@
 
+2016-11-17  Ron Norman <rjn@inglenet.com>
+
+	* configure.ac: check for sys/wait.h (for CBL_GC_WAITPID)
+
 2016-11-06 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: limit PATCH_LEVEL to numeric, max 8 digits

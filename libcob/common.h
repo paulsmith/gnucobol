@@ -1370,6 +1370,8 @@ COB_EXPIMP int	cob_sys_oc_nanosleep	(const void *);
 COB_EXPIMP int	cob_sys_getpid		(void);
 COB_EXPIMP int	cob_sys_return_args	(void *);
 COB_EXPIMP int	cob_sys_parameter_size	(void *);
+COB_EXPIMP int	cob_sys_fork(void);
+COB_EXPIMP int	cob_sys_waitpid(const void *);
 
 /*
  * cob_sys_getopt_long_long

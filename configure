@@ -13107,7 +13107,7 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 for ac_header in stdint.h sys/types.h signal.h fcntl.h malloc.h locale.h \
-	stddef.h wchar.h dlfcn.h sys/time.h
+	stddef.h wchar.h dlfcn.h sys/time.h sys/wait.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16171,7 +16171,7 @@ fi
   fi
   if test "X$ltrpathdirs" != "X"; then
             for found_dir in $ltrpathdirs; do
-      LTLIBINTL="${LTLIBINTL}${LTLIBINTL:+ }-R$found_dir"
+      LTLIBINTL="${LTLIBINTL}${LTLIBINTL:+ }-L$found_dir"
     done
   fi
 

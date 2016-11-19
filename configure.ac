@@ -201,7 +201,7 @@ AC_LIB_RPATH
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdint.h sys/types.h signal.h fcntl.h malloc.h locale.h \
-	stddef.h wchar.h dlfcn.h sys/time.h])
+	stddef.h wchar.h dlfcn.h sys/time.h sys/wait.h])
 
 
 # Checks for typedefs, structures, and compiler characteristics.

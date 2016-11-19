@@ -44,6 +44,9 @@
 #ifdef	HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#ifdef	HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #ifdef	_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -3606,6 +3609,49 @@ cob_sys_getpid (void)
 		cob_process_id = (int)getpid ();
 	}
 	return cob_process_id;
+}
+
+int
+cob_sys_fork (void)
+{
+#ifdef	_WIN32
+	cob_runtime_error (_("Error CBL_GC_FORK is not supported on this platform"));
+	cob_stop_run (1);
+#else
+	int	pid;
+	if ( (pid = fork()) == 0 ) {
+		return 0;		/* child process just returns */
+	}
+	if (pid < 0) {			/* Some error happened */
+		cob_runtime_error (_("Error '%s' during CBL_GC_FORK"),strerror(errno));
+		cob_stop_run (1);
+	}
+	return pid;			/* parent gets process id of child */
+#endif
+}
+
+int
+cob_sys_waitpid (const void *p_id)
+{
+#ifdef	HAVE_SYS_WAIT_H
+	int	pid, sts, status, wait_sts;
+	COB_UNUSED (p_id);
+	sts = 0;
+	if (COB_MODULE_PTR->cob_procedure_params[0]) {
+		pid = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
+		wait_sts = waitpid(pid, &status, 0);
+		if (wait_sts < 0) {			/* Some error happened */
+			cob_runtime_error (_("Error '%s' for P%d during CBL_GC_WAITPID"),strerror(errno),pid);
+			cob_stop_run (1);
+		}
+		sts = WEXITSTATUS(status);
+	}
+	return sts;
+#else
+	COB_UNUSED (p_id);
+	cob_runtime_error (_("Error CBL_GC_WAITPID is not supported on this platform"));
+	cob_stop_run (1);
+#endif
 }
 
 int
