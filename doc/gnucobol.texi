@@ -164,9 +164,9 @@ Extensions
 
 System routines
 
-* CBL_OC_GETOPT                 GETOPT for Cobol
-* CBL_OC_HOSTED                 Access to C hosted variables
-* CBL_OC_NANOSLEEP              Sleep for nanoseconds
+* CBL_GC_GETOPT                 GETOPT for Cobol
+* CBL_GC_HOSTED                 Access to C hosted variables
+* CBL_GC_NANOSLEEP              Sleep for nanoseconds
 
 Appendix A
 
@@ -1536,15 +1536,15 @@ For a complete list of supported system routines
 @xref{Appendix D, ,cobc --list-system}.
 
 @menu
-* CBL_OC_GETOPT::				CBL_OC_GETOPT
-* CBL_OC_HOSTED::				CBL_OC_HOSTED
-* CBL_OC_NANOSLEEP::				CBL_OC_NANOSLEEP
+* CBL_GC_GETOPT::				CBL_GC_GETOPT
+* CBL_GC_HOSTED::				CBL_GC_HOSTED
+* CBL_GC_NANOSLEEP::				CBL_GC_NANOSLEEP
 @end menu
 
-@node CBL_OC_GETOPT, , System routines, System routines
-@section CBL_OC_GETOPT
+@node CBL_GC_GETOPT, , System routines, System routines
+@section CBL_GC_GETOPT
 
-@code{CBL_OC_GETOPT} realises the quite well-known option parser, getopt, for
+@code{CBL_GC_GETOPT} realises the quite well-known option parser, getopt, for
 GnuCOBOL. The usage of this system routine is described by the
 following example.
 
@@ -1596,7 +1596,7 @@ point to a @code{PIC X(4)} field.
 @end itemize
 The longoption structure is immutable! You can only vary the number of records.
 
-Now we have the tools to run @code{CBL_OC_GETOPT} within the procedure division.
+Now we have the tools to run @code{CBL_GC_GETOPT} within the procedure division.
 
 @example
         procedure division.
@@ -1609,7 +1609,7 @@ Now we have the tools to run @code{CBL_OC_GETOPT} within the procedure division.
             move "V"       to return-value (2).
 
             perform with test after until return-code = -1
-                call 'CBL_OC_GETOPT' using
+                call 'CBL_GC_GETOPT' using
                    by reference shortoptions longoptions longind
                    by value long-only
                    by reference return-char opt-val
@@ -1623,7 +1623,7 @@ Now we have the tools to run @code{CBL_OC_GETOPT} within the procedure division.
 @end example
 
 The example shows how we initialize all parameters and call the routine until
-@code{CBL_OC_GETOPT} runs out of options and returns -1.
+@code{CBL_GC_GETOPT} runs out of options and returns -1.
 
 The return-char might contain the following:
 @itemize @bullet
@@ -1634,7 +1634,7 @@ The return-char might contain the following:
 @item '-1' @ if we don't have any more options (or reach the first non-option  if first byte of so is '+')
 @end itemize
 
-The return-codes of @code{CBL_OC_GETOPT} are:
+The return-codes of @code{CBL_GC_GETOPT} are:
 @itemize @bullet
 @item 1 @ @ if we've got a non-option (only if first byte of so is '-')
 @item 0 @ @ if valpoint != @code{NULL} and we are writing the return value to the specified address
@@ -1644,10 +1644,10 @@ The return-codes of @code{CBL_OC_GETOPT} are:
 @end itemize
 
 
-@node CBL_OC_HOSTED, , System routines, System routines
-@section CBL_OC_HOSTED
+@node CBL_GC_HOSTED, , System routines, System routines
+@section CBL_GC_HOSTED
 
-@code{CBL_OC_HOSTED} provides access to the following C hosted variables:
+@code{CBL_GC_HOSTED} provides access to the following C hosted variables:
 @itemize @bullet
 @item @code{argc} @ to binary-long by value
 @item @code{argv} @ to pointer to char **
@@ -1663,7 +1663,7 @@ and conditional access to the following variables:
 @end itemize
 
 System will need to HAVE_TIMEZONE defined for these to return anything meaningful.
-Attempts made when they are not available return 1 from CBL_OC_HOSTED.
+Attempts made when they are not available return 1 from CBL_GC_HOSTED.
 
 It returns 0 when match, 1 on failure, case matters as does length, "arg" won't match.
 
@@ -1694,46 +1694,46 @@ HOSTED identification division.
        01 daylight   usage binary-short.
 
 
-      *> Testing CBL_OC_HOSTED
+      *> Testing CBL_GC_HOSTED
        procedure division.
-       call "CBL_OC_HOSTED" using stdin "stdin"
+       call "CBL_GC_HOSTED" using stdin "stdin"
        display "stdin                : " stdin
        call "feof" using by value stdin
        display "feof stdin           : " return-code
 
-       call "CBL_OC_HOSTED" using stdout "stdout"
+       call "CBL_GC_HOSTED" using stdout "stdout"
        display "stdout               : " stdout
        call "fprintf" using by value stdout by content "Hello" & x"0a"
 
-       call "CBL_OC_HOSTED" using stderr "stderr"
+       call "CBL_GC_HOSTED" using stderr "stderr"
        display "stderr               : " stderr
        call "fprintf" using by value stderr by content "on err" & x"0a"
 
-       call "CBL_OC_HOSTED" using argc "argc"
+       call "CBL_GC_HOSTED" using argc "argc"
        display "argc                 : " argc
 
-       call "CBL_OC_HOSTED" using argv "argv"
+       call "CBL_GC_HOSTED" using argv "argv"
        display "argv                 : " argv
 
        call "args" using by value argc argv
 
-       call "CBL_OC_HOSTED" using errno "errno"
+       call "CBL_GC_HOSTED" using errno "errno"
        display "&errno               : " errno
        set address of err to errno
        display "errno                : " err
        call "acos" using by value domain
        display "errno after acos(3.0): " err ", EDOM is 33"
 
-       call "CBL_OC_HOSTED" using argc "arg"
+       call "CBL_GC_HOSTED" using argc "arg"
        display "'arg' lookup         : " return-code
-       call "CBL_OC_HOSTED" using null "argc"
+       call "CBL_GC_HOSTED" using null "argc"
        display "null with argc       : " return-code
        display "argc is still        : " argc
 
 
        *> the following only returns zero if the system has HAVE_TIMEZONE set
        
-       call "CBL_OC_HOSTED" using daylight "daylight "
+       call "CBL_GC_HOSTED" using daylight "daylight "
        display "'timezone' lookup    : " return-code
 
        if return-code not = 0
@@ -1742,14 +1742,14 @@ HOSTED identification division.
           
           display "timezone is          : " timezone
           
-          call "CBL_OC_HOSTED" using daylight "daylight "
+          call "CBL_GC_HOSTED" using daylight "daylight "
           display "'daylight' lookup    : " return-code
           display "daylight is          : " daylight
        
           set environment "TZ" to "PST8PDT"
           call static "tzset" returning omitted on exception continue end-call
           
-          call "CBL_OC_HOSTED" using tzname "tzname"
+          call "CBL_GC_HOSTED" using tzname "tzname"
           display "'tzname' lookup      : " return-code
        
           *> tzs(1) will point to z"PST" and tzs(2) to z"PDT"
@@ -1770,18 +1770,18 @@ HOSTED identification division.
 @end example
 
 
-@node CBL_OC_NANOSLEEP, , System routines, System routines
-@section CBL_OC_NANOSLEEP
+@node CBL_GC_NANOSLEEP, , System routines, System routines
+@section CBL_GC_NANOSLEEP
 
-@code{CBL_OC_NANOSLEEP} allows you to pause the program for nanoseconds.
+@code{CBL_GC_NANOSLEEP} allows you to pause the program for nanoseconds.
 The actual precision depends on the system.
 
 @example
       *> Waiting a half second
-       call "CBL_OC_NANOSLEEP" using "500000000" end-call
+       call "CBL_GC_NANOSLEEP" using "500000000" end-call
 
       *> Waiting five seconds using compiler string catenation for readability
-       call "CBL_OC_NANOSLEEP" using "500" & "0000000"  end-call
+       call "CBL_GC_NANOSLEEP" using "500" & "0000000"  end-call
 @end example
 
 
