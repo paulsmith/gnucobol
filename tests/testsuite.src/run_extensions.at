@@ -3333,86 +3333,103 @@ AT_CHECK([./prog5 --static], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([System routines CBL_GC_FORK and CBL_GC_WAITPID])
+AT_SETUP([System routine CBL_GC_FORK])
 AT_KEYWORDS([extensions])
 
-AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       DATA DIVISION.
-       WORKING-STORAGE SECTION.
-       01 CHILD-PID   PIC 9(9) BINARY.
-       01 MY-PID      PIC 9(9) BINARY VALUE 1.
-       01 WAIT-STS    PIC S9(9) BINARY VALUE -3.
-       01 NANO-TIME   PIC 9(18) BINARY VALUE 10000.
        PROCEDURE DIVISION.
 
-           CALL "CBL_GC_FORK" RETURNING CHILD-PID.
-           IF CHILD-PID = ZERO
-               PERFORM CHILD-CODE
-           ELSE
-               PERFORM PARENT-CODE
-           END-IF.
+           CALL "CBL_GC_FORK" END-CALL
+           EVALUATE RETURN-CODE
+              WHEN ZERO
+                 PERFORM CHILD-CODE
+              WHEN -1
+                 STOP RUN RETURNING 77 *> skip test
+              WHEN OTHER
+                 PERFORM PARENT-CODE
+           END-EVALUATE
 
            STOP RUN.
 
        CHILD-CODE.
-           CALL "C$GETPID" RETURNING MY-PID.
-           CALL "C$SLEEP"  USING 1 .
+           CALL "C$SLEEP"  USING 1.
            DISPLAY "Hello, I am the child".
 
        PARENT-CODE.
-           CALL "C$GETPID" RETURNING MY-PID.
            DISPLAY "Hello, I am the parent".
-           CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS.
-           DISPLAY "Child ended status " WAIT-STS.
-
+           CALL "C$SLEEP"  USING 2.
+           DISPLAY "Parent again".
 ])
 
-AT_CHECK([cobc -x -std=mf -debug -Wall prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0], [Hello, I am the parent
 Hello, I am the child
-Child ended status +0000000000
+Parent again
 ], [])
 
 AT_CLEANUP
 
 
-AT_SETUP([System routine CBL_COPY_FILE])
+# Placed as extra routine as we should find a way to test this 
+# without CBL_GC_FORK (which isn't available on all systems where-
+# CBL_GC_WAITPID is available, for example MINGW)
+AT_SETUP([System routine CBL_GC_WAITPID])
+AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
-        IDENTIFICATION DIVISION.
-        PROGRAM-ID. prog.
-        DATA DIVISION.
-        WORKING-STORAGE SECTION.
-        PROCEDURE DIVISION.
-        DISPLAY "test" END-DISPLAY
-        STOP RUN.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 CHILD-PID   PIC S9(9) BINARY.
+       01 WAIT-STS    PIC S9(9) BINARY VALUE -3.
+       PROCEDURE DIVISION.
+
+           CALL "CBL_GC_FORK" RETURNING CHILD-PID.
+           EVALUATE CHILD-PID
+              WHEN ZERO
+                 PERFORM CHILD-CODE
+              WHEN -1
+                 STOP RUN RETURNING 77 *> skip test
+              WHEN OTHER
+                 PERFORM PARENT-CODE
+           END-EVALUATE.
+
+           STOP RUN.
+
+       CHILD-CODE.
+           CALL "C$SLEEP" USING 1.
+           DISPLAY "Hello, I am the child".
+           MOVE 2 TO RETURN-CODE.
+
+       PARENT-CODE.
+           DISPLAY "Hello, I am the parent".
+           CALL "CBL_GC_WAITPID" USING CHILD-PID
+              RETURNING WAIT-STS
+           END-CALL
+           MOVE 0 TO RETURN-CODE
+           IF WAIT-STS = -1
+              STOP RUN RETURNING 77 *> skip test
+           END-IF
+           DISPLAY "Child ended status " WAIT-STS
+           END-DISPLAY.
 ])
 
-AT_DATA([prog2.cob], [
-        IDENTIFICATION DIVISION.
-        PROGRAM-ID. prog2.
-        DATA DIVISION.
-        WORKING-STORAGE SECTION.
-        01 FILE1 PIC X(8) VALUE 'prog.cob'.
-        01 FILE2 PIC X(9) VALUE 'prog3.cob'.
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-        PROCEDURE DIVISION.
-        CALL 'CBL_COPY_FILE' USING
-        FILE1 FILE2
-        END-CALL
-        STOP RUN.
-])
-
-AT_CHECK([$COMPILE prog2.cob], [0], [], [])
-AT_CHECK([./prog2], [0], [], [])
-AT_CHECK([diff prog.cob prog3.cob], [0], [], [])
+AT_CHECK([./prog], [0], [Hello, I am the parent
+Hello, I am the child
+Child ended status +000000002
+], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([System routine CBL_GC_HOSTED])
+AT_KEYWORDS([extensions])
 
 AT_DATA([test_errno.c], [
 #include <errno.h>
@@ -3534,6 +3551,7 @@ AT_CLEANUP
 
 
 AT_SETUP([System routines for directories])
+AT_KEYWORDS([extensions CBL_CREATE_DIR CBL_CHANGE_DIR CBL_DELETE_DIR])
 
 AT_DATA([prog.cob], [
         IDENTIFICATION DIVISION.
@@ -3575,6 +3593,8 @@ AT_CLEANUP
 
 
 AT_SETUP([System routines for files])
+AT_KEYWORDS([extensions CBL_CREATE_FILE CBL_WRITE_FILE CBL_FLUSH_FILE
+CBL_OPEN_FILE CBL_READ_FILE CBL_CLOSE_FILE CBL_RENAME_FILE CBL_DELETE_FILE])
 
 AT_DATA([prog.cob], [
         IDENTIFICATION DIVISION.
@@ -3689,7 +3709,43 @@ AT_CHECK([./prog2], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([System routine CBL_COPY_FILE])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        PROCEDURE DIVISION.
+        DISPLAY "test" END-DISPLAY
+        STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog2.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 FILE1 PIC X(8) VALUE 'prog.cob'.
+        01 FILE2 PIC X(9) VALUE 'prog3.cob'.
+
+        PROCEDURE DIVISION.
+        CALL 'CBL_COPY_FILE' USING
+        FILE1 FILE2
+        END-CALL
+        STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([./prog2], [0], [], [])
+AT_CHECK([diff prog.cob prog3.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([Conditional/define directives (1)])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3714,7 +3770,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Conditional/define directives (2)])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3739,7 +3795,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Conditional/define directives (3)])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3767,7 +3823,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Conditional/define directives (4)])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3793,7 +3849,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Conditional/define directives (5)])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3817,6 +3873,7 @@ AT_CHECK([$COMPILE -DACTIVATE2 prog.cob], [0],
 AT_CLEANUP
 
 AT_SETUP([Conditional/define directives (6)])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3841,6 +3898,7 @@ AT_CHECK([$COMPILE prog.cob], [0],
 AT_CLEANUP
 
 AT_SETUP([Conditional/define directives (7)])
+AT_KEYWORDS([extensions directive])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3859,6 +3917,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [])
 AT_CLEANUP
+
 
 AT_SETUP([Variable format])
 AT_KEYWORDS([extensions runmisc])

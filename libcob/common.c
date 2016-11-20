@@ -429,6 +429,20 @@ cob_terminate_routines (void)
 	cob_exit_common ();
 }
 
+/* reentrant version of strerror */
+static char *
+cob_get_strerror (void)
+{
+	char * msg;
+	msg = cob_cache_malloc ((size_t)COB_ERRBUF_SIZE);
+#ifdef HAVE_STRERROR
+	strncpy (msg, strerror (errno), COB_ERRBUF_SIZE - 1);
+#else
+	snprintf (msg, COB_ERRBUF_SIZE - 1, _("system error %d"), errno);
+#endif
+	return msg;
+}
+
 #ifdef	HAVE_SIGNAL_H
 DECLNORET static void COB_A_NORETURN
 cob_sig_handler_ex (int sig)
@@ -1172,7 +1186,7 @@ set_cob_time_ns_from_filetime (const FILETIME filetime, struct cob_time *cb_time
 }
 #endif
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
+#if defined (_WIN32) /* cygwin does not define _WIN32 */
 static void
 set_cob_time_offset (struct cob_time *cb_time)
 {
@@ -2439,7 +2453,7 @@ cob_ctoi (const char digit)
 	return (int) (digit - '0');
 }
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
+#if defined (_WIN32) /* cygwin does not define _WIN32 */
 struct cob_time
 cob_get_current_date_and_time (void)
 {
@@ -3614,43 +3628,105 @@ cob_sys_getpid (void)
 int
 cob_sys_fork (void)
 {
-#ifdef	_WIN32
-	cob_runtime_error (_("Error CBL_GC_FORK is not supported on this platform"));
-	cob_stop_run (1);
+#ifdef	_WIN32  /* cygwin does not define _WIN32, but implements fork() */
+	cob_runtime_warning (_("'%s' is not supported on this platform"), "CBL_GC_FORK");
+	return -1;
 #else
 	int	pid;
 	if ( (pid = fork()) == 0 ) {
 		return 0;		/* child process just returns */
 	}
 	if (pid < 0) {			/* Some error happened */
-		cob_runtime_error (_("Error '%s' during CBL_GC_FORK"),strerror(errno));
-		cob_stop_run (1);
+		cob_runtime_warning (_("Error '%s' during CBL_GC_FORK"), cob_get_strerror());
+		return -2;
 	}
 	return pid;			/* parent gets process id of child */
 #endif
 }
 
+
+/* wait for a pid to end and return its exit code
+   error codes are returned as negative value
+*/
 int
 cob_sys_waitpid (const void *p_id)
 {
 #ifdef	HAVE_SYS_WAIT_H
-	int	pid, sts, status, wait_sts;
+	int	pid, status, wait_sts;
+
 	COB_UNUSED (p_id);
-	sts = 0;
+
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		pid = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
-		wait_sts = waitpid(pid, &status, 0);
-		if (wait_sts < 0) {			/* Some error happened */
-			cob_runtime_error (_("Error '%s' for P%d during CBL_GC_WAITPID"),strerror(errno),pid);
-			cob_stop_run (1);
+		if (pid == cob_sys_getpid ()) {
+			status = 0 - EINVAL;
+			return status;
 		}
-		sts = WEXITSTATUS(status);
+		wait_sts = waitpid (pid, &status, 0);
+		if (wait_sts < 0) {			/* Some error happened */
+			status = 0 - errno;
+			cob_runtime_warning (_("error '%s' for P%d during CBL_GC_WAITPID"),
+				cob_get_strerror (), pid);
+			return status;
+		}
+		status = WEXITSTATUS (status);
+	} else {
+		status = 0 - EINVAL;
 	}
-	return sts;
+	return status;
+#elif defined (_WIN32)
+	int	pid, status;
+	HANDLE process = NULL;
+	DWORD ret;
+
+	COB_UNUSED (p_id);
+
+	status = 0;
+	if (COB_MODULE_PTR->cob_procedure_params[0]) {
+		pid = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
+		if (pid == cob_sys_getpid ()) {
+			status = 0 - ERROR_INVALID_DATA;
+			return status;
+		}
+		process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+#if 0  /* TODO: check what happens on WinXP / 2003 as PROCESS_QUERY_LIMITED_INFORMATION isn't available there */
+		if (!process && GetLastError () == UNKNOWN_CONSTANT) {
+			OpenProcess (SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, pid);
+		}
+#endif
+		/* if we don't get access to query the process' exit status try to get at least
+			access to the process end (needed for WaitForSingleObject)
+		*/
+		if (!process && GetLastError () == ERROR_ACCESS_DENIED) {
+			OpenProcess (SYNCHRONIZE, FALSE, pid);
+			status = -2;
+		}
+		if (process) {
+			/* wait until process exit */
+			ret = WaitForSingleObject (process, INFINITE);
+			if (ret == WAIT_FAILED) {
+				status = 0 - GetLastError ();
+			/* get exit code, if possible */
+			} else if (status != -2) { 
+				if (!GetExitCodeProcess (process, &ret)) {
+					status = 0 - GetLastError ();
+				} else {
+					status = (int) ret;
+				}
+			}
+			CloseHandle (process);
+		} else {
+			status = 0 - GetLastError ();
+		}
+	} else {
+		status = 0 - ERROR_INVALID_DATA;
+	}
+	return status;
 #else
 	COB_UNUSED (p_id);
-	cob_runtime_error (_("Error CBL_GC_WAITPID is not supported on this platform"));
-	cob_stop_run (1);
+
+	cob_runtime_warning (_("'%s' is not supported on this platform"), "CBL_GC_WAITPID");
+	return -1;
 #endif
 }
 
@@ -4147,20 +4223,6 @@ cob_strjoin (char** strarray, int size, char* separator)
 	}
 
 	return result;
-}
-
-/* reentrant version of strerror */
-static char *
-cob_get_strerror (void)
-{
-	char * msg;
-	msg = cob_cache_malloc ((size_t)COB_ERRBUF_SIZE);
-#ifdef HAVE_STRERROR
-	strncpy (msg, strerror (errno), COB_ERRBUF_SIZE - 1);
-#else
-	snprintf (msg, COB_ERRBUF_SIZE - 1, _("system error %d"), errno);
-#endif
-	return msg;
 }
 
 char *

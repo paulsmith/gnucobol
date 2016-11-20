@@ -167,6 +167,8 @@ System routines
 * CBL_GC_GETOPT                 GETOPT for Cobol
 * CBL_GC_HOSTED                 Access to C hosted variables
 * CBL_GC_NANOSLEEP              Sleep for nanoseconds
+* CBL_GC_FORK                   Fork the current COBOL process to a new one
+* CBL_GC_WAITPID                Wait for a system process to end
 
 Appendix A
 
@@ -1539,6 +1541,8 @@ For a complete list of supported system routines
 * CBL_GC_GETOPT::				CBL_GC_GETOPT
 * CBL_GC_HOSTED::				CBL_GC_HOSTED
 * CBL_GC_NANOSLEEP::				CBL_GC_NANOSLEEP
+* CBL_GC_FORK::					CBL_GC_FORK
+* CBL_GC_WAITPID::				CBL_GC_WAITPID
 @end menu
 
 @node CBL_GC_GETOPT, , System routines, System routines
@@ -1782,6 +1786,106 @@ The actual precision depends on the system.
 
       *> Waiting five seconds using compiler string catenation for readability
        call "CBL_GC_NANOSLEEP" using "500" & "0000000"  end-call
+@end example
+
+
+@node CBL_GC_FORK, , System routines, System routines
+@section CBL_GC_FORK
+
+@code{CBL_GC_FORK} allows you to fork the current COBOL process to a new one.
+The current content of the process' storage (including @code{LOCAL-STORAGE})
+will be identical, any file handles get invalid in the new process, positions
+and file / record locks are only available to the original process.
+
+This system routine is not available on Windows (exception: GCC on Cygwin).
+
+Parameters:	none
+Returns:	PID (the child process gets '0' returned, the calling process gets
+the PID of the created children).
+Negative values are returned for system dependand error codes and -1 if the function
+is not available on the current system.
+
+@example
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 CHILD-PID   PIC S9(9) BINARY.
+       01 WAIT-STS    PIC S9(9) BINARY.
+       PROCEDURE DIVISION.
+
+           CALL "CBL_GC_FORK" RETURNING CHILD-PID END-CALL
+           EVALUATE TRUE
+              WHEN CHILD-PID = ZERO
+                 PERFORM CHILD-CODE
+              WHEN CHILD-PID > ZERO 
+                 PERFORM PARENT-CODE
+              WHEN CHILD-PID = -1
+                 DISPLAY 'CBL_GC_FORK is not available '
+                         'on the current system!'
+                 END-DISPLAY
+                 PERFORM CHILD-CODE
+                 MOVE 0 TO CHILD-PID
+                 PERFORM PARENT-CODE
+              WHEN OTHER
+                 MULTIPLY CHILD-PID BY -1 END-MULTIPLY
+                 DISPLAY 'CBL_GC_FORK returned system error: '
+                         CHILD-PID
+                 END-DISPLAY
+           END-EVALUATE
+
+           STOP RUN.
+
+       CHILD-CODE.
+           CALL "C$SLEEP" USING 1 END-CALL
+           DISPLAY "Hello, I am the child"
+           END-DISPLAY
+           MOVE 2 TO RETURN-CODE
+
+           CONTINUE.
+
+       PARENT-CODE.
+           DISPLAY "Hello, I am the parent"
+           END-DISPLAY
+           CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS
+           END-CALL
+           MOVE 0 TO RETURN-CODE
+           EVALUATE TRUE
+              WHEN WAIT-STS >= 0
+                 DISPLAY 'Child ended with status: '
+                         WAIT-STS
+                 END-DISPLAY
+              WHEN WAIT-STS = -1
+                 DISPLAY 'CBL_GC_WAITPID is not available '
+                         'on the current system!'
+                 END-DISPLAY
+              WHEN WAIT-STS < -1
+                 MULTIPLY -1 BY WAIT-STS END-MULTIPLY
+                 DISPLAY 'CBL_GC_WAITPID returned system error: ' WAIT-STS
+                 END-DISPLAY
+           END-EVALUATE
+
+           CONTINUE.
+@end example
+
+
+@node CBL_GC_WAITPID, , System routines, System routines
+@section CBL_GC_WAITPID
+
+@code{CBL_GC_WAITPID} allows you to wait until another system process ended.
+Additional you can check the process' return code.
+
+Parameters:	none
+Returns:	function-status / child-status
+Negative values are returned for system dependand error codes and -1 if the function
+is not available on the current system.
+
+@example
+        CALL "CBL_GC_WAITPID" USING CHILD-PID RETURNING WAIT-STS
+        END-CALL
+        MOVE 0 TO RETURN-CODE
+        DISPLAY 'CBL_GC_WAITPID ended with status: ' WAIT-STS
+        END-DISPLAY
 @end example
 
 

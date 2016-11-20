@@ -1,9 +1,17 @@
 
+2016-11-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_fork, cob_sys_waitpid): don't abort if necessary
+	  functions aren't available on the sysytem or fail, return -1 or
+	  the system specific error code instead
+	* common.c (cob_sys_waitpid): added [_WIN32] implementation
+
 2016-11-17 Ron Norman <rjn@inglenet.com>
 
-	* common.c,common.h,system.def: added cob_sys_fork for CBL_GC_FORK
-	  and cob_sys_waitpid for CBL_GC_WAITPID. This is to implement the
-	  ability to fork a new process and then wait for its completion
+	* common.c, common.h, system.def: added cob_sys_fork for CBL_GC_FORK
+	  (fork a new COBOL process) and cob_sys_waitpid for CBL_GC_WAITPID
+	  (wait for completion of another process)
+	* system.def: Add CBL_GC_xxx as alias for CBL_OC_xxx
 
 2016-11-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
