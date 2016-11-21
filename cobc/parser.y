@@ -806,29 +806,40 @@ end_scope_of_program_name (struct cb_program *program)
 
 	/* Remove any subprograms */
 	l = CB_LIST (defined_prog_list);
-        while (l) {
+	while (l) {
 		if (CB_PROGRAM (l->value)->nested_level > program->nested_level) {
 			remove_program_name (l, prev);
-			l = CB_LIST (prev->chain);
 		} else {
 			prev = l;
-			l = CB_LIST (l->chain);
+		}
+		if (prev->chain != NULL) {
+			l = CB_LIST (prev->chain);
+		} else {
+			l = NULL;
 		}
 	}
 
 	/* Remove the specified program, if it is not COMMON */
 	if (!program->flag_common) {
 		l = (struct cb_list *) defined_prog_list;
-	        while (l) {
+		while (l) {
 			if (strcmp (program->orig_program_id,
 				    CB_PROGRAM (l->value)->orig_program_id)
 			    == 0) {
 				remove_program_name (l, prev);
-				l = CB_LIST (prev->chain);
+				if (prev->chain != NULL) {
+					l = CB_LIST (prev->chain);
+				} else {
+					l = NULL;
+				}
 				break;
 			} else {
 				prev = l;
-				l = CB_LIST (l->chain);
+				if (l->chain != NULL) {
+					l = CB_LIST (l->chain);
+				} else {
+					l = NULL;
+				}
 			}
 		}
 	}
@@ -4310,22 +4321,24 @@ code_set_clause:
 
 	check_repeated ("CODE SET", SYN_CLAUSE_10, &check_duplicate);
 
-	al = CB_ALPHABET_NAME (cb_ref ($3));
-	switch (al->alphabet_type) {
+	if (CB_VALID_TREE ($3)) {
+		al = CB_ALPHABET_NAME (cb_ref ($3));
+		switch (al->alphabet_type) {
 #ifdef	COB_EBCDIC_MACHINE
-	case CB_ALPHABET_ASCII:
+		case CB_ALPHABET_ASCII:
 #else
-	case CB_ALPHABET_EBCDIC:
+		case CB_ALPHABET_EBCDIC:
 #endif
-	case CB_ALPHABET_CUSTOM:
-		current_file->code_set = al;
-		break;
-	default:
-		if (warningopt && CB_VALID_TREE ($3)) {
-			cb_warning_x ($3, _("ignoring CODE-SET '%s'"),
-				      cb_name ($3));
+		case CB_ALPHABET_CUSTOM:
+			current_file->code_set = al;
+			break;
+		default:
+			if (warningopt && CB_VALID_TREE ($3)) {
+				cb_warning_x ($3, _("ignoring CODE-SET '%s'"),
+						  cb_name ($3));
+			}
+			break;
 		}
-		break;
 	}
 
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&

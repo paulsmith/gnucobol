@@ -236,6 +236,7 @@ check_code_set_items_are_subitems_of_records (struct cb_file * const file)
 	  same record.
 	 */
 	for (l = file->code_set_items; l; l = CB_LIST (l->chain)) {
+
 		r = CB_VALUE (l);
 		f = CB_FIELD (cb_ref (r));
 
@@ -260,6 +261,10 @@ check_code_set_items_are_subitems_of_records (struct cb_file * const file)
 		if (current_record->file != file) {
 			cb_error_x (r, _("FOR item '%s' is not in a record associated with '%s'"),
 				    cb_name (r), cb_name (CB_TREE (file)));
+		}
+
+		if (!l->chain) {
+			break;
 		}
 	}
 }

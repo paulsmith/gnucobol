@@ -1,4 +1,8 @@
 
+2016-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c, parser.y: fixing tree cast errors (found by COB_TREE_DEBUG)
+
 2016-11-19 Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, reserved.c, etc.: added complete recognition of all
