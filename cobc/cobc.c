@@ -170,7 +170,6 @@ int			cb_listing_xref = 0;
 #define		CB_LISTING_DATE_BUFF	48
 #define		CB_LISTING_DATE_MAX		(CB_LISTING_DATE_BUFF - 1)
 char			cb_listing_date[48]; /* Date/Time buffer for listing */
-struct list_files	*cb_listing_files = NULL;
 struct list_files	*cb_current_file = NULL;
 
 #if	0	/* RXWRXW - source format */
@@ -297,6 +296,7 @@ static int		cb_listing_eject = 0;
 static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
 static char		cb_listing_title[133];	/* Listing subtitle */
+static struct list_files	*cb_listing_file_struct = NULL;
 
 #ifdef	_MSC_VER
 static const char	*manicmd;
@@ -505,9 +505,9 @@ static const struct option long_options[] = {
 
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
-static void	print_program_code (struct list_files *, int);
-static void	print_program_header (void);
-static void	print_program_trailer (void);
+static void	print_program_code		(struct list_files *, int);
+static void	print_program_header	(void);
+static void	print_program_trailer	(void);
 
 /* cobc functions */
 
@@ -528,6 +528,10 @@ cobc_free_mem (void)
 	if (cobc_list_file) {
 		cobc_free (cobc_list_file);
 		cobc_list_file = NULL;
+	}
+	if (cb_listing_file_struct) {
+		cobc_free (cb_listing_file_struct);
+		cb_listing_file_struct = NULL;
 	}
 	if (cobc_run_args) {
 		cobc_free (cobc_run_args);
@@ -706,7 +710,7 @@ cobc_malloc (const size_t size)
 }
 
 void
-cobc_free(void * mptr)
+cobc_free (void * mptr)
 {
 #ifdef	COB_TREE_DEBUG
 	if (unlikely(!mptr)) {
@@ -2365,7 +2369,7 @@ process_command_line (const int argc, char **argv)
 		case 't':
 			/* -t : Generate listing */
 			if (!cb_listing_outputfile) {
-				cb_listing_outputfile = cobc_strdup (cob_optarg);
+				cb_listing_outputfile = cobc_main_strdup (cob_optarg);
 				curtime = time (NULL);
 				strcpy (cb_listing_date, ctime(&curtime));
 				*strchr (cb_listing_date, '\n') = '\0';
@@ -2404,6 +2408,7 @@ process_command_line (const int argc, char **argv)
 			   the run if we don't have the internal xref */
 			cb_listing_outputfile = getenv ("COB_IS_RUNNING_IN_TESTMODE");
 			if (cb_listing_outputfile) {
+				cobc_free_mem ();
 				exit (77);
 			}
 #else
@@ -3602,12 +3607,12 @@ static void
 set_listing_title_code (void)
 {
 	strcpy (cb_listing_title, "LINE    ");
-	if (cb_listing_files->source_format != CB_FORMAT_FREE) {
+	if (cb_listing_file_struct->source_format != CB_FORMAT_FREE) {
 		strcat (cb_listing_title,
 			"PG/LN  A...B..............................."
 			".............................");
 		if (cb_listing_wide) {
-			if (cb_listing_files->source_format == CB_FORMAT_FIXED
+			if (cb_listing_file_struct->source_format == CB_FORMAT_FIXED
 			    && cb_text_column == 72) {
 				strcat (cb_listing_title, "SEQUENCE");
 			} else {
@@ -3855,7 +3860,7 @@ print_88_values (int lvl, struct cb_field *field)
 	for (f = field->validation; f; f = f->sister) {
 		memset (lcl_name, 0, sizeof(lcl_name));
 		memset (lcl_name, ' ', lvl * 2);
-		strcat (lcl_name, (char *)f->name);
+		strncat (lcl_name, (char *)f->name, sizeof(lcl_name) - lvl * 2 - 1);
 		print_program_header ();
 		fprintf (cb_src_list_file,
 			"      %-14.14s %02d   %s\n",
@@ -4325,11 +4330,14 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 	terminate_str_at_first_of_char ('\n', in_line);
 	terminate_str_at_first_of_char ('\r', in_line);
 
-	for (in_char = in_line; *in_char; in_char++) {
+	for (in_char = in_line; i != CB_LINE_LENGTH && *in_char; in_char++) {
 		if (*in_char == '\t') {
 			out_line[i++] = ' ';
 			while (i % cb_tab_width != 0) {
 				out_line[i++] = ' ';
+				if (i == CB_LINE_LENGTH) {
+					break;
+				}
 			}
 		} else {
 			out_line[i++] = *in_char;
@@ -4646,7 +4654,7 @@ is_continuation_line (char *line, int fixed)
 }
 
 static void
-pline_check_limit (int pline_cnt, char *filename, int line_num)
+pline_check_limit (int pline_cnt, const char *filename, int line_num)
 {
 	if (pline_cnt >= CB_READ_AHEAD) {
 		cobc_err_msg (_("%s: %d: Too many continuation lines"),
@@ -5021,6 +5029,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	static int	in_replace = 0;
 	char	*tp;
 	struct list_replace	*rep;
+	struct list_files *cur;
 	int	i;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	const int	first_col = fixed ? CB_MARGIN_A : 0;
@@ -5076,7 +5085,6 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 		} else {
 			if (is_copy) {
 				if (cfile->copy_head) {
-					struct list_files *cur;
 
 					/* List all lines read so far and then discard them. */
 					for (i = 0; i < pline_cnt; i++) {
@@ -5116,6 +5124,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 {
 	FILE			*fd = NULL;
 	struct list_replace	*rep;
+	struct list_replace *repl;
 	struct list_files	*cur;
 	struct list_error	*err;
 	int	i;
@@ -5225,8 +5234,6 @@ print_program_code (struct list_files *cfile, int in_copy)
 				if (cfile->copy_head) {
 					cur = cfile->copy_head;
 					if (cur->copy_line == line_num) {
-						struct list_replace *repl;
-
 						rep = cfile->replace_head;
 						/*  COPY in COPY, add replacement text to new COPY */
 						while (rep && in_copy) {
@@ -5244,6 +5251,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 						}
 						print_program_code (cur, 1);
 						cfile->copy_head = cur->next;
+						if (cur->name) {
+							cobc_free ((void *)cur->name);
+						}
 						cobc_free (cur);
 					}
 				}
@@ -5272,6 +5282,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 			cur = cfile->copy_head;
 			print_program_code (cur, 1);
 			cfile->copy_head = cur->next;
+			if (cur->name) {
+				cobc_free ((void *)cur->name);
+			}
 			cobc_free (cur);
 		}
 	}
@@ -5285,8 +5298,29 @@ print_program_code (struct list_files *cfile, int in_copy)
 	while (cfile->err_head) {
 		err = cfile->err_head;
 		cfile->err_head = err->next;
+		if (err->prefix) {
+			cobc_free (err->prefix);
+		}
+		if (err->msg) {
+			cobc_free (err->msg);
+		}
 		cobc_free (err);
 	}
+}
+
+
+/* Print the listing for the current file */
+static void
+print_program_listing (void)
+{
+	/* Print program listing */
+	print_program_code (cb_listing_file_struct, 0);
+
+	/* Print program trailer */
+	print_program_trailer();
+
+	/* Free source name */
+	cobc_free ((void *)cb_listing_file_struct->name);
 }
 
 /* Create single-element C source */
@@ -5301,7 +5335,6 @@ process_translate (struct filename *fn)
 	struct handler_struct	*hstr1;
 	struct handler_struct	*hstr2;
 	struct local_filename	*lf;
-	struct list_files       *cfile;
 	int			ret;
 	int			i;
 
@@ -5337,20 +5370,6 @@ process_translate (struct filename *fn)
 		fputs (_("return status:"), stderr);
 		fprintf (stderr, "\t%d\n", ret);
 		fflush (stderr);
-	}
-
-	/* Print the listing for this file */
-	if (cb_src_list_file) {
-		cfile = cb_listing_files;
-		print_program_code (cfile, 0);
-		if ((struct list_files *) cb_listing_files == cb_current_file) {
-			cb_current_file = cb_current_file->next;
-		}
-		cb_listing_files = cb_listing_files->next;
-		cobc_free (cfile);
-
-		/* Print program trailer */
-		print_program_trailer();
 	}
 
 	if (ret) {
@@ -6070,7 +6089,6 @@ main (int argc, char **argv)
 	char			*p;
 	struct cobc_mem_struct	*mptr;
 	struct cobc_mem_struct	*mptrt;
-	struct list_files	*newfile;
 	unsigned int		iparams;
 	unsigned int		local_level;
 	int			status;
@@ -6417,8 +6435,11 @@ main (int argc, char **argv)
 		} else {
 			cb_src_list_file = fopen (cb_listing_outputfile, "w");
 		}
-		if (!cb_src_list_file)
+		if (!cb_src_list_file) {
 			cobc_terminate (cb_listing_outputfile);
+	}
+		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
+		memset (cb_listing_file_struct, 0, sizeof (struct list_files));
 	}
 
 	if (verbose_output) {
@@ -6461,18 +6482,9 @@ main (int argc, char **argv)
 
 		/* Initialize listing */
 		if (cb_src_list_file) {
-			newfile = cobc_malloc (sizeof (struct list_files));
-			memset (newfile, 0, sizeof (struct list_files));
-			if (cb_current_file) {
-				cb_current_file->next = newfile;
-			}
-			if (!cb_listing_files) {
-				cb_listing_files = newfile;
-			}
-			cb_current_file = newfile;
-			cb_current_file->name = cobc_strdup (fn->source);
-			cb_current_file->source_format = cb_source_format;
-			cb_current_file = cb_listing_files;
+			cb_listing_file_struct->name = cobc_strdup (fn->source);
+			cb_listing_file_struct->source_format = cb_source_format;
+			cb_current_file = cb_listing_file_struct;
 			force_new_page_for_next_line();
 		}
 
@@ -6517,9 +6529,8 @@ main (int argc, char **argv)
 		}
 
 		if (cb_compile_level < CB_LEVEL_TRANSLATE) {
-			if (cb_listing_files && cb_src_list_file) {
-				print_program_code (cb_listing_files, 0);
-				print_program_trailer();
+			if (cb_src_list_file) {
+				print_program_listing ();
 			}
 			continue;
 		}
@@ -6527,6 +6538,9 @@ main (int argc, char **argv)
 			/* Parse / Translate (to C code) */
 			fn->has_error = process_translate (fn);
 			status |= fn->has_error;
+			if (cb_src_list_file) {
+				print_program_listing ();
+			}
 			/* Free parse memory */
 			for (mptr = cobc_parsemem_base; mptr; ) {
 				mptrt = mptr;
@@ -6534,6 +6548,10 @@ main (int argc, char **argv)
 				cobc_free (mptrt);
 			}
 			cobc_parsemem_base = NULL;
+		} else {
+			if (cb_src_list_file) {
+				print_program_listing ();
+			}
 		}
 		if (cb_compile_level < CB_LEVEL_COMPILE ||
 		    cb_flag_syntax_only || fn->has_error) {

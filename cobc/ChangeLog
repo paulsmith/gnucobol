@@ -2,6 +2,10 @@
 2016-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c, parser.y: fixing tree cast errors (found by COB_TREE_DEBUG)
+	* cobc.c (print_88_values, get_next_listing_line): fix SIGSEGV for uncommon
+	  long names / lines
+	* cobc.c: fix minor memory leaks in listing code
+	* pplex.l, cobc.h: commented copy_tail as it doesn't seem to be used
 
 2016-11-19 Edward Hart <edward.dan.hart@gmail.com>
 

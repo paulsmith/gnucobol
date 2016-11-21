@@ -293,7 +293,9 @@ struct list_skip {
 struct list_files {
 	struct list_files	*next;
 	struct list_files	*copy_head;	/* COPY book list head */
+#if 0 /* lstings - doesn't seem to be used */
 	struct list_files	*copy_tail;	/* COPY book list tail */
+#endif
 	struct list_error	*err_head;	/* Error message list head */
 	struct list_error	*err_tail;	/* Error message list tail */
 	struct list_replace	*replace_head;	/* REPLACE list head */
@@ -303,7 +305,7 @@ struct list_files {
 	int 			copy_line;	/* Line start for copy book */
 	int 			listing_on;	/* Listing flag for this file */
 	enum cb_format		source_format;	/* source format for file */
-	char			*name;		/* Name of this file */
+	const char			*name;		/* Name of this file */
 };
 
 extern struct list_files	*cb_listing_files;
