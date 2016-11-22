@@ -829,7 +829,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	}
 
 	/* save name for listing */
-	if (cb_current_file) {
+	if (cb_current_file && !cb_current_file->name) {
 		cb_current_file->name = cobc_strdup (name);
 	}
 

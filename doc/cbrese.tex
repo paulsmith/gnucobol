@@ -144,9 +144,9 @@ DELIMITED                       Yes
 DELIMITER                       Yes
 DEPENDING                       Yes
 DESCENDING                      Yes
-DESTINATION                     No
+DESTINATION                     Yes
 DETAIL                          Yes
-DISABLE                         No
+DISABLE                         Yes
 DISC                            Yes (Context sensitive)
 DISK                            Yes (Context sensitive)
 DISPLAY                         Yes
@@ -158,9 +158,11 @@ DYNAMIC                         Yes
 EBCDIC                          Yes (Context sensitive)
 EC                              Yes
 ECHO                            Yes
+EGI                             Yes
 ELSE                            Yes
+EMI                             Yes
 EMPTY-CHECK                     Yes
-ENABLE                          No
+ENABLE                          Yes
 END                             Yes
 END-ACCEPT                      Yes
 END-ADD                         Yes
@@ -176,6 +178,7 @@ END-MULTIPLY                    Yes
 END-OF-PAGE                     Yes
 END-PERFORM                     Yes
 END-READ                        Yes
+END-RECEIVE                     Yes
 END-RETURN                      Yes
 END-REWRITE                     Yes
 END-SEARCH                      Yes
@@ -198,6 +201,7 @@ EQUALS                          Yes
 ERASE                           Yes
 ERROR                           Yes
 ESCAPE                          Yes
+ESI                             Yes
 EVALUATE                        Yes
 EXCEPTION                       Yes
 EXCEPTION-OBJECT                No
@@ -322,6 +326,7 @@ LOWLIGHT                        Yes
 MANUAL                          Yes
 MEMORY                          Yes
 MERGE                           Yes
+MESSAGE                         Yes
 METHOD                          No
 METHOD-ID                       No
 MINUS                           Yes
@@ -405,6 +410,8 @@ PROMPT                          Yes
 PROPERTY                        No
 PROTECTED                       Yes
 PROTOTYPE                       No
+PURGE                           Yes
+QUEUE                           Yes
 QUOTE                           Yes
 QUOTES                          Yes
 RAISE                           No
@@ -412,6 +419,7 @@ RAISING                         No
 RANDOM                          Yes
 RD                              Yes
 READ                            Yes
+RECEIVE                         Yes
 RECORD                          Yes
 RECORDING                       Yes
 RECORDS                         Yes
@@ -461,9 +469,11 @@ SEARCH                          Yes
 SECONDS                         Yes (Context sensitive)
 SECTION                         Yes
 SECURE                          Yes
+SEGMENT                         Yes
 SEGMENT-LIMIT                   Yes
 SELECT                          Yes
 SELF                            No
+SEND                            Yes
 SENTENCE                        Yes
 SEPARATE                        Yes
 SEQUENCE                        Yes
@@ -499,6 +509,9 @@ STEP                            Yes
 STOP                            Yes
 STRING                          Yes
 STRONG                          No (Context sensitive)
+SUB-QUEUE-1                     Yes
+SUB-QUEUE-2                     Yes
+SUB-QUEUE-3                     Yes
 SUBTRACT                        Yes
 SUM                             Yes
 SUPER                           No
@@ -511,11 +524,12 @@ SYNCHRONIZED                    Yes
 SYSTEM-DEFAULT                  Yes
 SYSTEM-OFFSET                   Yes
 TAB                             Yes (Context sensitive)
-TABLE                           No
+TABLE                           Yes
 TALLYING                        Yes
 TAPE                            Yes (Context sensitive)
 TERMINATE                       Yes
 TEST                            Yes
+TEXT                            Yes
 THAN                            Yes
 THEN                            Yes
 THROUGH                         Yes

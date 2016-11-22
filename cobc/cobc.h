@@ -305,7 +305,7 @@ struct list_files {
 	int 			copy_line;	/* Line start for copy book */
 	int 			listing_on;	/* Listing flag for this file */
 	enum cb_format		source_format;	/* source format for file */
-	const char			*name;		/* Name of this file */
+	const char		*name;		/* Name of this file */
 };
 
 extern struct list_files	*cb_listing_files;

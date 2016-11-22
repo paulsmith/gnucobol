@@ -1,4 +1,10 @@
 
+2016-11-22  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (print_program_code): Free replace text. Realloc replace text
+	  instead of memcpy of source.
+	* pplex.l (ppopen): Only strdup filename if NULL.
+
 2016-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c, parser.y: fixing tree cast errors (found by COB_TREE_DEBUG)

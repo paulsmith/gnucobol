@@ -28,7 +28,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 37
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -161,15 +161,7 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k.
- * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
- * Ditto for the __ia64__ case accordingly.
- */
-#define YY_BUF_SIZE 32768
-#else
 #define YY_BUF_SIZE 16384
-#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -195,7 +187,6 @@ extern FILE *ppin, *ppout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -2096,7 +2087,7 @@ static void	get_new_listing_file	(void);
 
 
 
-#line 2100 "pplex.c"
+#line 2091 "pplex.c"
 
 #define INITIAL 0
 #define COPY_STATE 1
@@ -2171,12 +2162,7 @@ static int input (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
-#ifdef __ia64__
-/* On IA-64, the buffer size is 16k, not 8k */
-#define YY_READ_BUF_SIZE 16384
-#else
 #define YY_READ_BUF_SIZE 8192
-#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -2280,6 +2266,14 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
+#line 181 "pplex.l"
+
+
+
+
+
+#line 2276 "pplex.c"
+
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -2306,15 +2300,6 @@ YY_DECL
 		pp_load_buffer_state( );
 		}
 
-	{
-#line 181 "pplex.l"
-
-
-
-
-
-#line 2317 "pplex.c"
-
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
@@ -2332,7 +2317,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
+			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -3470,7 +3455,7 @@ YY_RULE_SETUP
 #line 755 "pplex.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 3474 "pplex.c"
+#line 3459 "pplex.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3600,7 +3585,6 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of pplex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -4347,7 +4331,7 @@ void ppfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 754 "pplex.l"
+#line 755 "pplex.l"
 
 
 
@@ -4426,7 +4410,7 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	}
 
 	/* save name for listing */
-	if (cb_current_file) {
+	if (cb_current_file && !cb_current_file->name) {
 		cb_current_file->name = cobc_strdup (name);
 	}
 
@@ -4658,13 +4642,15 @@ get_new_listing_file (void)
 {
 	struct list_files	*newfile = cobc_malloc (sizeof (struct list_files));
 
-	if (cb_current_file->copy_tail) {
-		cb_current_file->copy_tail->next = newfile;
-	}
 	if (!cb_current_file->copy_head) {
 		cb_current_file->copy_head = newfile;
 	}
+#if 0 /* lstings - doesn't seem to be used */
+	if (cb_current_file->copy_tail) {
+		cb_current_file->copy_tail->next = newfile;
+	}
 	cb_current_file->copy_tail = newfile;
+#endif
 
 	memset (newfile, 0, sizeof (struct list_files));
 	newfile->copy_line = cb_source_line;

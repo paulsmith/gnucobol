@@ -5241,7 +5241,12 @@ print_program_code (struct list_files *cfile, int in_copy)
 						/*  COPY in COPY, add replacement text to new COPY */
 						while (rep && in_copy) {
 							repl = cobc_malloc (sizeof (struct list_replace));
-							memcpy (repl, rep, sizeof (struct list_replace));
+							memset (repl, 0, sizeof (struct list_replace));
+							repl->firstline = rep->firstline;
+							repl->lastline = rep->lastline;
+							repl->lead_trail = rep->lead_trail;
+							repl->to = cobc_strdup (rep->to);
+							repl->from = cobc_strdup (rep->from);
 							repl->next = NULL;
 							if (cur->replace_tail) {
 								cur->replace_tail->next = repl;
@@ -5298,6 +5303,20 @@ print_program_code (struct list_files *cfile, int in_copy)
 		}
 		cobc_free (pline[i]);
 	}
+
+	/* Free replace data */
+	while (cfile->replace_head) {
+		rep = cfile->replace_head;
+		cfile->replace_head = rep->next;
+		if (rep->to) {
+			cobc_free (rep->to);
+		}
+		if (rep->from) {
+			cobc_free (rep->from);
+		}
+		cobc_free (rep);
+	}
+
 	while (cfile->err_head) {
 		err = cfile->err_head;
 		cfile->err_head = err->next;
@@ -6485,9 +6504,9 @@ main (int argc, char **argv)
 
 		/* Initialize listing */
 		if (cb_src_list_file) {
-			cb_listing_file_struct->name = cobc_strdup (fn->source);
-			cb_listing_file_struct->source_format = cb_source_format;
 			cb_current_file = cb_listing_file_struct;
+			cb_current_file->name = cobc_strdup (fn->source);
+			cb_current_file->source_format = cb_source_format;
 			force_new_page_for_next_line();
 		}
 
