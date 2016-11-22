@@ -3688,17 +3688,24 @@ cob_sys_waitpid (const void *p_id)
 			status = 0 - ERROR_INVALID_DATA;
 			return status;
 		}
+		/* get process handle with least necessary rights
+		   PROCESS_QUERY_LIMITED_INFORMATION is available since OS-version Vista / Server 2008
+		                                     and always leads to ERROR_ACCESS_DENIED on older systems
+		   PROCESS_QUERY_INFORMATION         needs more rights
+		   SYNCHRONIZE                       necessary for WaitForSingleObject
+		*/
 		process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-#if 0  /* TODO: check what happens on WinXP / 2003 as PROCESS_QUERY_LIMITED_INFORMATION isn't available there */
-		if (!process && GetLastError () == UNKNOWN_CONSTANT) {
-			OpenProcess (SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, pid);
+#if !defined(_MSC_VER) || !COB_USE_VC2012_OR_GREATER /* only try a higher level if we possibly compile on XP/2003 */
+		/* TODO: check what happens on WinXP / 2003 as PROCESS_QUERY_LIMITED_INFORMATION isn't available there */
+		if (!process && GetLastError () == ERROR_ACCESS_DENIED) {
+			process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, pid);
 		}
 #endif
 		/* if we don't get access to query the process' exit status try to get at least
 			access to the process end (needed for WaitForSingleObject)
 		*/
 		if (!process && GetLastError () == ERROR_ACCESS_DENIED) {
-			OpenProcess (SYNCHRONIZE, FALSE, pid);
+			process = OpenProcess (SYNCHRONIZE, FALSE, pid);
 			status = -2;
 		}
 		if (process) {
@@ -5793,12 +5800,12 @@ cob_init (const int argc, char **argv)
 
 	/* Get user name if not set via environment already */
 	if (cobsetptr->cob_user_name == NULL || !strcmp(cobsetptr->cob_user_name, "Unknown")) {
-#if defined	(_WIN32) && (!defined(_MSC_VER) || COB_USE_VC2008_OR_GREATER) /*  Needs SDK for earlier versions */
+#if defined	(_WIN32) && (COB_USE_VC2008_OR_GREATER /* Needs SDK for earlier versions */ || !defined(_MSC_VER)) 
 		unsigned long bsiz = COB_ERRBUF_SIZE;
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");
 		}
-#elif	!defined(__OS400__) && !defined(_MSC_VER)
+#elif !defined(__OS400__) && !defined(_MSC_VER)
 		s = getlogin ();
 		if (s) {
 			set_config_val_by_name(s, "username", "getlogin()");
@@ -5807,15 +5814,18 @@ cob_init (const int argc, char **argv)
 	}
 
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
-   /* Get function pointer for most precise time function */
-   kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
-   if (kernel32_handle != NULL) {
-       time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))
+	/* Get function pointer for most precise time function
+	   GetSystemTimePreciseAsFileTime is available since OS-version 8 / Server 2012
+	   GetSystemTimeAsFileTime        is available since OS-version 8 / Server 2012
+	*/
+	kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
+	if (kernel32_handle != NULL) {
+		time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))
            GetProcAddress (kernel32_handle, "GetSystemTimePreciseAsFileTime");
-   }
-   if (time_as_filetime_func == NULL) {
-       time_as_filetime_func = GetSystemTimeAsFileTime;
-   }
+	}
+	if (time_as_filetime_func == NULL) {
+		time_as_filetime_func = GetSystemTimeAsFileTime;
+	}
 #endif
 
 	/* This must be last in this function as we do early return */
