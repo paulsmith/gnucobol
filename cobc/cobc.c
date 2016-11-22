@@ -4002,6 +4002,9 @@ cobc_xref_link (struct cb_xref *list, int line)
 		list->tail->next = elem;
 	}
 	list->tail = elem;
+#else
+	COB_UNUSED (list);
+	COB_UNUSED (line);
 #endif
 }
 
