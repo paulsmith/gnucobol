@@ -1,6 +1,5 @@
 \input texinfo
 @setfilename gnucobol.info
-@setcontentsaftertitlepage
 @settitle GnuCOBOL Manual
 @setchapternewpage on
 @footnotestyle end
@@ -63,17 +62,16 @@ COBOL programs to C code and compiles it using GCC or other native
 operating system C compiler.
 @sp 2
 This manual corresponds to GnuCOBOL @value{VERSION}.
-@sp 1
-Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.@*
-Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 @page
-GnuCOBOL 2.0
 @vskip 0pt plus 1filll
-@insertcopying
-@sp 2
 Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.@*
 Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
+
+@insertcopying
+@sp 2
 @end titlepage
+
+@contents
 
 @node Top
 
@@ -507,8 +505,9 @@ User-defined dialect configuration. See @code{-std=} above.@*
 
 @end table
 
-You can override each single configuration entry found in @xref{Appendix F, Compiler Configuration}
-by using compiler configuration options on command line,  see @xref{Appendix A, @code{cobc --help}}
+You can override each single configuration entry by using compiler configuration
+options on the command line.
+
 Examples:
 
 @table @code
@@ -516,8 +515,8 @@ Examples:
 @item -frenames-uncommon-levels=warning
 @item -fnot-reserved=CHAIN,SCREEN
 @item -ftab-width=4
-
 @end table
+@xref{Appendix A, @code{cobc --help}}.
 
 @node Listing options, Debug switches, Configuration options, Compiler options
 @subsection Listing options

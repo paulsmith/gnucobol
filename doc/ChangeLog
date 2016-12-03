@@ -1,15 +1,19 @@
 
+2016-12-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: fixed texinfo warnings
+
 2016-10-22  Dave Pitts <dpitts@cozx.com>
 
-	* gnucobol.texi: Added --no_symbols option.
+	* gnucobol.texi: added --no-symbols option
 
 2016-10-17  Dave Pitts <dpitts@cozx.com>
 
-	* gnucobol.texi: Added a COPY to listing example.
+	* gnucobol.texi: added a COPY to listing example
 
 2016-10-16  Dave Pitts <dpitts@cozx.com>
 
-	* gnucobol.texi: Added a listing example.
+	* gnucobol.texi: added listing example
 
 2016-10-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
