@@ -4183,8 +4183,13 @@ cob_int_to_formatted_bytestring (int i, char* number)
 }
 #endif
 
+/* concatenate two strings allocating a new one
+   and optionally free one of the strings
+   set str_to_free if the result is assigned to
+   one of the two original strings
+*/
 char *
-cob_strcat (char* str1, char* str2)
+cob_strcat (char* str1, char* str2, int str_to_free)
 {
 	size_t		l;
 	char		*temp1, *temp2;
@@ -4212,6 +4217,13 @@ cob_strcat (char* str1, char* str2)
 	strbuff = (char*) cob_fast_malloc(l);
 
 	sprintf (strbuff, "%s%s", temp1, temp2);
+	switch (str_to_free) {
+		case 1: cob_free (temp1);
+		        break;
+		case 2: cob_free (temp2);
+		        break;
+		default: break;
+	}
 	return strbuff;
 }
 
@@ -4223,10 +4235,10 @@ cob_strjoin (char** strarray, int size, char* separator)
 
 	if(!strarray || size <= 0 || !separator) return NULL;
 
-	result = strarray[0];
+	result = cob_strdup (strarray[0]);
 	for (i = 1; i < size; i++) {
-		result = cob_strcat(result, separator);
-		result = cob_strcat(result, strarray[i]);
+		result = cob_strcat(result, separator, 1);
+		result = cob_strcat(result, strarray[i], 1);
 	}
 
 	return result;
@@ -4279,7 +4291,7 @@ var_print (const char *msg, const char *val, const char *default_val,
 		putchar('\n');
 		return;
 	} else if (val && default_val && ((format != 2 && val[0] == 0x30) || strcmp(val, default_val) == 0)) {
-		val = cob_strcat((char*) default_val, (char*) _(" (default)"));
+		val = cob_strcat((char*) default_val, (char*) _(" (default)"), 0);
 	} else if (!val && default_val) {
 		val = default_val;
 	}

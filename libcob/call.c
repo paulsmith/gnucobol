@@ -494,10 +494,9 @@ cache_preload (const char *path)
 	 * in the same order as we save them to COB_PRE_LOAD due to issues
 	 * if we have got two modules with equal entry points.
 	 */
-	if(last_elem) {
+	if (last_elem) {
 		last_elem->next = preptr;
-	}
-	else {
+	} else {
 		preptr->next = NULL;
 		base_preload_ptr = preptr;
 	}
@@ -507,12 +506,11 @@ cache_preload (const char *path)
 #endif
 
 
-	if(!cobsetptr->cob_preload_str) {
+	if (!cobsetptr->cob_preload_str) {
 		cobsetptr->cob_preload_str = cob_strdup(path);
-	}
-	else {
-		cobsetptr->cob_preload_str = cob_strcat((char*) PATHSEP_STR, cobsetptr->cob_preload_str);
-		cobsetptr->cob_preload_str = cob_strcat((char*) path, cobsetptr->cob_preload_str);
+	} else {
+		cobsetptr->cob_preload_str = cob_strcat((char*) PATHSEP_STR, cobsetptr->cob_preload_str, 2);
+		cobsetptr->cob_preload_str = cob_strcat((char*) path, cobsetptr->cob_preload_str, 2);
 	}
 
 	return 1;
