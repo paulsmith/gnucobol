@@ -32,13 +32,30 @@ my $compile_module;
 # change to 1 if executable doesn't work / cobcrun test should be done
 my $force_cobcrun = 0;
 
-my $cobc = "";
+my $cobc = $ENV{"COBC"};
+my $cobcrun = $ENV{"COBCRUN"};
+my $cobcrun_direct = $ENV{"COBCRUN_DIRECT"};
 
 if ($opt) {
-	$cobc = "cobc -std=cobol85 $opt"
+	$opt = "-std=cobol85 $opt"
 } else {
-	$cobc = "cobc -std=cobol85"
+	$opt = "-std=cobol85"
 }
+
+if ($cobc ne "") {
+	$cobc = "$cobc $opt";
+} else {
+	$cobc = "cobc $opt";
+}
+
+if ($cobcrun eq "") {
+	$cobcrun = "cobcrun";
+}
+
+if ($cobcrun_direct ne "") {
+	$cobcrun_direct = "$cobcrun_direct ";
+}
+
 
 $compile_module = "$cobc -m";
 if ($force_cobcrun) {
@@ -164,15 +181,15 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	$exe =~ s/\.SUB//;
 	if (-e "./$exe.DAT") {
 		if ($force_cobcrun) {
-			$cmd = "cobcrun $exe < $exe.DAT";
+			$cmd = "$cobcrun $exe < $exe.DAT";
 		} else {
-			$cmd = "./$exe < $exe.DAT";
+			$cmd = "$cobcrun_direct./$exe < $exe.DAT";
 		}
 	} else {
 		if ($force_cobcrun) {
-			$cmd = "cobcrun $exe";
+			$cmd = "$cobcrun $exe";
 		} else {
-			$cmd = "./$exe";
+			$cmd = "$cobcrun_direct./$exe";
 		}
 	}
 	printf LOG "%-12s", $in;
