@@ -2873,8 +2873,11 @@ process_filename (const char *filename)
 	if (strcmp (extension, "i") == 0) {
 		/* Already preprocessed */
 		fn->need_preprocess = 0;
-	} else if (strcmp (extension, "c") == 0 ||
-		   strcmp (extension, "s") == 0) {
+	} else if (strcmp (extension, "c") == 0
+#if	defined(_WIN32)
+			|| strcmp(extension, "asm") == 0
+#endif
+			|| strcmp (extension, "s") == 0) {
 		/* Already compiled */
 		fn->need_preprocess = 0;
 		fn->need_translate = 0;
@@ -2887,9 +2890,9 @@ process_filename (const char *filename)
 			|| strcmp(extension, "lib") == 0
 #endif
 #if	!defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
-		    || strcmp(extension, "a") == 0
-		    || strcmp(extension, "so") == 0
-		    || strcmp(extension, "dylib") == 0
+			|| strcmp(extension, "a") == 0
+			|| strcmp(extension, "so") == 0
+			|| strcmp(extension, "dylib") == 0
 			|| strcmp(extension, "sl") == 0
 #endif
 #endif
@@ -5563,8 +5566,13 @@ process_compile (struct filename *fn)
 			cobc_cflags, cobc_include, fn->translate);
 	return process (cobc_buffer);
 #else
-	sprintf (cobc_buffer, "%s -S -o \"%s\" %s %s %s", cobc_cc, name,
+	if (!cb_flag_main) {
+		sprintf (cobc_buffer, "%s -S -o \"%s\" %s %s %s \"%s\"", cobc_cc, name,
+			cobc_cflags, cobc_include, COB_PIC_FLAGS, fn->translate);
+	} else {
+		sprintf (cobc_buffer, "%s -S -o \"%s\" %s %s \"%s\"", cobc_cc, name,
 			cobc_cflags, cobc_include, fn->translate);
+	}
 	return process(cobc_buffer);
 #endif
 

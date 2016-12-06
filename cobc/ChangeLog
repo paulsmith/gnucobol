@@ -1,4 +1,10 @@
 
+2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_filename) [_WIN32]: check extension .asm along to .s
+	* cobc.c (process_compile) [!_MSC_VER]: use COB_PIC_FLAGS when compiling
+	  to a module, surround the translation name by quotes
+
 2016-11-22  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_program_code): Free replace text. Realloc replace text
