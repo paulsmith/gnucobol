@@ -772,9 +772,7 @@ cob_resolve_internal (const char *name, const char *dirent,
 		} else {
 			snprintf (call_filename_buff, (size_t)COB_NORMAL_MAX,
 				  "%s%c%s.%s", resolve_path[i],
-				  SLASH_CHAR,
-				  (char *)s,
-				  COB_MODULE_EXT);
+				  SLASH_CHAR, (char *)s, COB_MODULE_EXT);
 		}
 		call_filename_buff[COB_NORMAL_MAX] = 0;
 		if (access (call_filename_buff, R_OK) == 0) {

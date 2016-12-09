@@ -45,6 +45,7 @@
 #ifdef	_WIN32
 #define	WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#undef MOUSE_MOVED
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -1704,13 +1705,15 @@ static void
 cobc_print_info (void)
 {
 	char	buff[16];
+	char	versbuff[56];
 	char	*s;
 
 	cobc_print_version ();
 	putchar ('\n');
 	puts (_("build information"));
 	cobc_var_print (_("build environment"),	COB_BLD_BUILD, 0);
-	cobc_var_print ("CC",			COB_BLD_CC, 0);
+	snprintf (versbuff, 55, "%s\tC version %s%s", COB_BLD_CC, OC_C_VERSION_PRF, OC_C_VERSION);
+	cobc_var_print ("CC", versbuff, 0);
 	cobc_var_print ("CPPFLAGS",		COB_BLD_CPPFLAGS, 0);
 	cobc_var_print ("CFLAGS",		COB_BLD_CFLAGS, 0);
 	cobc_var_print ("LD",			COB_BLD_LD, 0);
@@ -1744,11 +1747,12 @@ cobc_print_info (void)
 	if ((s = getenv ("COBCPY")) != NULL) {
 		cobc_var_print ("COBCPY",	s, 1);
 	}
-	if (cb_msg_style == CB_MSG_STYLE_MSC) {
-		cobc_var_print ("COB_MSG_FORMAT",	"MSC", 0);
-	} else {
-		cobc_var_print ("COB_MSG_FORMAT",	"GCC", 0);
+#if defined (_MSC_VER)
+	cobc_var_print ("COB_MSG_FORMAT",	"MSC", 0);
+#else
+	cobc_var_print ("COB_MSG_FORMAT",	"GCC", 0);
 	}
+#endif
 	if ((s = getenv ("COB_MSG_FORMAT")) != NULL) {
 		cobc_var_print ("COB_MSG_FORMAT",	s, 1);
 	}
@@ -1793,6 +1797,12 @@ cobc_print_info (void)
 	cobc_var_print (_("ISAM handler"),		"VBISAM", 0);
 #else
 	cobc_var_print (_("ISAM handler"),		_("disabled"), 0);
+#endif
+
+#if defined(__MPIR_VERSION)
+	cobc_var_print (_("mathematical library"),		"MPIR - GMP", 0);
+#else
+	cobc_var_print (_("mathematical library"),		"GMP", 0);
 #endif
 }
 

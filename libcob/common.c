@@ -51,6 +51,7 @@
 #ifdef	_WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#undef MOUSE_MOVED
 #include <process.h>
 #include <io.h>
 #include <fcntl.h>
@@ -63,6 +64,29 @@
 #ifdef	HAVE_LOCALE_H
 #include <locale.h>
 #endif
+
+/* library headers for version output */
+#define __GMP_LIBGMP_DLL 1
+#include <gmp.h>
+
+#ifdef	WITH_DB
+#include <db.h>
+#endif
+
+#if defined(HAVE_NCURSESW_NCURSES_H)
+#include <ncursesw/ncurses.h>
+#elif defined(HAVE_NCURSESW_CURSES_H)
+#include <ncursesw/curses.h>
+#elif defined(HAVE_NCURSES_H)
+#include <ncurses.h>
+#elif defined(HAVE_NCURSES_NCURSES_H)
+#include <ncurses/ncurses.h>
+#elif defined(HAVE_PDCURSES_H)
+#include <pdcurses.h>
+#elif defined(HAVE_CURSES_H)
+#include <curses.h>
+#endif
+/* end of library headers */
 
 #include "lib/gettext.h"
 
@@ -4270,7 +4294,7 @@ var_print (const char *msg, const char *val, const char *default_val,
 	case 0:
 		printf("%-*.*s : ", CB_IMSG_SIZE, CB_IMSG_SIZE, msg);
 		break;
-		case 1: {
+	case 1: {
 		printf("  %s: ", _("env"));
 		lablen = CB_IMSG_SIZE - 2 - (int)strlen(_("env")) - 2;
 		printf("%-*.*s : ", lablen, lablen, msg);
@@ -4287,10 +4311,11 @@ var_print (const char *msg, const char *val, const char *default_val,
 		break;
 	}
 
-	if (!val && !default_val) {
+	if (!val && (!default_val || default_val[0] == 0)) {
 		putchar('\n');
 		return;
-	} else if (val && default_val && ((format != 2 && val[0] == 0x30) || strcmp(val, default_val) == 0)) {
+	} else if (format != 0 && val && default_val &&
+		((format != 2 && val[0] == 0x30) || strcmp(val, default_val) == 0)) {
 		val = cob_strcat((char*) default_val, (char*) _(" (default)"), 0);
 	} else if (!val && default_val) {
 		val = default_val;
@@ -5417,19 +5442,23 @@ void
 print_info (void)
 {
 	char	buff[16];
+	char	versbuff[56];
 	char	*s;
+	int major, minor, patch;
+#if defined(mpir_version)
+	char	versbuff2[111];
+#endif
 
 	print_version ();
 	putchar ('\n');
 	puts (_("build information"));
 	var_print (_("build environment"),	COB_BLD_BUILD, "", 0);
-	var_print ("CC", COB_BLD_CC, "", 0);
+	snprintf (versbuff, 55, "%s\tC version %s%s", COB_BLD_CC, OC_C_VERSION_PRF, OC_C_VERSION);
+	var_print ("CC", versbuff, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);
 	var_print ("CFLAGS", COB_BLD_CFLAGS, "", 0);
 	var_print ("LD", COB_BLD_LD, "", 0);
 	var_print ("LDFLAGS", COB_BLD_LDFLAGS, "", 0);
-	putchar ('\n');
-	printf (_("C version %s%s"), OC_C_VERSION_PRF, OC_C_VERSION);
 	putchar ('\n');
 
 	puts (_("GnuCOBOL information"));
@@ -5437,13 +5466,13 @@ print_info (void)
 	var_print ("COB_MODULE_EXT", COB_MODULE_EXT, "", 0);
 #if 0 /* only relevant for cobc */
 	var_print ("COB_OBJECT_EXT", COB_OBJECT_EXT, "", 0);
-	var_print ("COB_EXEEXT", COB_EXEEXT, "", 0);
+	var_print ("COB_EXE_EXT", COB_EXE_EXT, "", 0);
 #endif
 
 #if	defined(USE_LIBDL) || defined(_WIN32)
-	var_print (_("Dynamic loading"),	"system", "", 0);
+	var_print (_("dynamic loading"),	"system", "", 0);
 #else
-	var_print (_("Dynamic loading"),	"libtool", "", 0);
+	var_print (_("dynamic loading"),	"libtool", "", 0);
 #endif
 
 #if 0 /* Simon: only a marginal performance influence - removed from output */
@@ -5466,24 +5495,37 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
-	var_print (_("Extended screen I/O"),	WITH_CURSES, "", 0);
+#if defined (NCURSES_VERSION) || defined (__PDCURSES__)
+	snprintf (versbuff, 55, "%s: %s", WITH_CURSES, curses_version());
+	var_print (_("extended screen I/O"),	versbuff, "", 0);
+#else
+	var_print (_("extended screen I/O"),	WITH_CURSES, "", 0);
+#endif
 
 	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
-	var_print (_("Variable format"), buff, "", 0);
+	var_print (_("variable format"), buff, "", 0);
 	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
 		var_print ("COB_VARSEQ_FORMAT", s, "", 1);
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	var_print (_("Sequential handler"),	_("EXTFH"), "", 0);
+	var_print (_("sequential handler"),	_("EXTFH"), "", 0);
 #else
-	var_print (_("Sequential handler"), _("built-in"), "", 0);
+	var_print (_("sequential handler"), _("built-in"), "", 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
 	var_print (_("ISAM handler"),		_("EXTFH"), "", 0);
 #elif defined	(WITH_DB)
-	var_print (_("ISAM handler"),		"BDB", "", 0);
+	major = 0, minor = 0, patch = 0;
+	db_version (&major, &minor, &patch);
+	if (major == DB_VERSION_MAJOR && minor == DB_VERSION_MINOR) {
+		snprintf(versbuff, 55, "%s, version %d.%d%d", "BDB", major, minor, patch);
+	} else {
+		snprintf(versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
+			"BDB", major, minor, patch, DB_VERSION_MAJOR, DB_VERSION_MINOR);
+	}
+	var_print (_("ISAM handler"),		versbuff, "", 0);
 #elif defined	(WITH_CISAM)
 	var_print (_("ISAM handler"),		"C-ISAM" "", 0);
 #elif defined	(WITH_DISAM)
@@ -5492,6 +5534,30 @@ print_info (void)
 	var_print (_("ISAM handler"),		"VBISAM", "", 0);
 #else
 	var_print (_("ISAM handler"),		_("disabled"), "", 0);
+#endif
+
+	major = 0, minor = 0, patch = 0;
+	sscanf (gmp_version, "%d.%d.%d", &major, &minor, &patch);
+	if (major == __GNU_MP_VERSION && minor == __GNU_MP_VERSION_MINOR) {
+		snprintf (versbuff, 55, "%s, version %d.%d%d", "GMP", major, minor, patch);
+	} else {
+		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
+			"GMP", major, minor, patch, __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
+	}
+#if defined(mpir_version)
+	major = 0, minor = 0, patch = 0;
+	sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
+	if (major == __MPIR_VERSION && minor == __MPIR_VERSION_MINOR) {
+		snprintf (versbuff2, 52, "%s, version %d.%d%d", "MPIR", major, minor, patch);
+	} else {
+		snprintf (versbuff2, 52, "%s, version %d.%d%d (compiled with %d.%d)",
+			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
+	}
+	strncat (versbuff2, " - ", 3);
+	strncat (versbuff2, versbuff, 55);
+	var_print (_("mathematical library"),		versbuff2, "", 0);
+#else
+	var_print (_("mathematical library"),		versbuff, "", 0);
 #endif
 }
 

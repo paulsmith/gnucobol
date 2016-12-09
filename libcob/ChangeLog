@@ -1,7 +1,14 @@
 
+2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info): FR #169 output exact versions of GMP/MPIR and
+	  BDB that were used for building libcob and the versions that are in
+	  the loaded libraries if they differ, add output of curses_version()
+	* common.c (var_print): fixed empty/zero string
+
 2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* common.c coblocal.h (cob_strcat): fixing minor memory leak by adding a
+	* common.c, coblocal.h (cob_strcat): fixing minor memory leak by adding a
 	  third parameter which should be set if the result is assigned to one of
 	  the original strings
 

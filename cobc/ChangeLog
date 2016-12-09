@@ -1,4 +1,9 @@
 
+2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_print_info): output exact C compiler which was used
+	  to build cobc and if GMP/MPIR header was used
+
 2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process_filename) [_WIN32]: check extension .asm along to .s
