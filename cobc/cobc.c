@@ -1751,7 +1751,6 @@ cobc_print_info (void)
 	cobc_var_print ("COB_MSG_FORMAT",	"MSC", 0);
 #else
 	cobc_var_print ("COB_MSG_FORMAT",	"GCC", 0);
-	}
 #endif
 	if ((s = getenv ("COB_MSG_FORMAT")) != NULL) {
 		cobc_var_print ("COB_MSG_FORMAT",	s, 1);
