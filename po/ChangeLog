@@ -1,4 +1,10 @@
 
+2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* update_linguas.sh: added shell for updating the translations
+	  before a release, used version from nano-project as template
+	* Makevars: set DIST_DEPENDS_ON_UPDATE_PO to no
+
 2016-11-05  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* Makefile.in.in: Upgrade to gettext-0.19.8.1.
