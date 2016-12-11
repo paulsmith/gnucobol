@@ -1,7 +1,7 @@
 #!/bin/sh
 # cobcinfo.sh gnucobol/doc
 #
-# Copyright (C) 2010,2012, 2015 Free Software Foundation, Inc.
+# Copyright (C) 2010,2012, 2016 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -91,8 +91,7 @@ _create_file () {
 			;;
 	esac
 	echo ""                                >>$1.tmp
-	diff -N -q "$1.tmp" "$docdir/$1" 1>/dev/null
-	if test $? -eq 0; then
+	if $(diff -N -q "$1.tmp" "$docdir/$1" 1>/dev/null); then
 		rm -f "$1.tmp"
 		echo "$0: $1 unchanged"
 	else

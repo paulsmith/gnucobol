@@ -604,25 +604,26 @@ at_change_dir=false
 # Whether to enable colored test results.
 at_color=auto
 # List of the tested programs.
-at_tested='cobc'
+at_tested='cobc
+cobcrun'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
 at_format='???'
 # Description of all the test groups.
 at_help_all="1;used_binaries.at:21;Compiler outputs;runmisc cobc;
-2;used_binaries.at:46;Source file not found;cobc runmisc;
-3;used_binaries.at:55;Compiler help and information;runmisc cobc;
-4;used_binaries.at:68;Using full path for cobc;runmisc;
-5;used_binaries.at:88;cobcrun validation;runmisc;
-6;used_binaries.at:128;cobcrun -M DSO entry argument;runmisc;
-7;used_binaries.at:183;cobcrun -M directory/ default;runmisc;
-8;used_binaries.at:221;cobcrun -M directory/dso alternate;runmisc;
-9;used_binaries.at:272;cobcrun -M DSO entry multiple arguments;runmisc;
-10;used_binaries.at:307;Compile from stdin;runmisc stdin;
-11;used_binaries.at:328;Run job after compilation;runmisc job;
-12;used_binaries.at:347;Run job with optional arguments;runmisc job;
-13;used_binaries.at:369;Invalid cobc option;runmisc;
+2;used_binaries.at:54;Source file not found;cobc runmisc;
+3;used_binaries.at:63;Compiler help and information;runmisc cobc;
+4;used_binaries.at:76;Using full path for cobc;runmisc;
+5;used_binaries.at:96;cobcrun validation;runmisc;
+6;used_binaries.at:136;cobcrun -M DSO entry argument;runmisc;
+7;used_binaries.at:191;cobcrun -M directory/ default;runmisc;
+8;used_binaries.at:229;cobcrun -M directory/dso alternate;runmisc;
+9;used_binaries.at:280;cobcrun -M DSO entry multiple arguments;runmisc;
+10;used_binaries.at:315;Compile from stdin;runmisc stdin;
+11;used_binaries.at:336;Run job after compilation;runmisc job;
+12;used_binaries.at:355;Run job with optional arguments;runmisc job;
+13;used_binaries.at:377;Invalid cobc option;runmisc;
 14;configuration.at:22;cobc with standard configuration file;configuration misc;
 15;configuration.at:43;cobc dialect features for all -std;configuration misc;
 16;configuration.at:87;cobc with configuration file via -std;configuration misc;
@@ -1592,8 +1593,8 @@ Execution tuning:
 _ATEOF
 cat <<_ATEOF || at_write_fail=1
 
-Report bugs to <open-cobol-list@lists.sourceforge.net>.
-GnuCOBOL home page: <http://www.opencobol.org>.
+Report bugs to <bug-gnucobol@gnu.org>.
+GnuCOBOL home page: <https://www.gnu.org/software/gnucobol/>.
 _ATEOF
   exit $at_write_fail
 fi
@@ -1601,7 +1602,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF || at_write_fail=1
-GnuCOBOL 2.0 test suite: GnuCOBOL Tests test groups:
+GnuCOBOL 2.0-rc3 test suite: GnuCOBOL Tests test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -1642,7 +1643,7 @@ _ATEOF
   exit $at_write_fail
 fi
 if $at_version_p; then
-  $as_echo "$as_me (GnuCOBOL 2.0)" &&
+  $as_echo "$as_me (GnuCOBOL 2.0-rc3)" &&
   cat <<\_ATEOF || at_write_fail=1
 
 
@@ -1853,13 +1854,13 @@ fi
 exec 5>>"$at_suite_log"
 
 # Banners and logs.
-$as_echo "## ---------------------------------------- ##
-## GnuCOBOL 2.0 test suite: GnuCOBOL Tests. ##
-## ---------------------------------------- ##"
+$as_echo "## -------------------------------------------- ##
+## GnuCOBOL 2.0-rc3 test suite: GnuCOBOL Tests. ##
+## -------------------------------------------- ##"
 {
-  $as_echo "## ---------------------------------------- ##
-## GnuCOBOL 2.0 test suite: GnuCOBOL Tests. ##
-## ---------------------------------------- ##"
+  $as_echo "## -------------------------------------------- ##
+## GnuCOBOL 2.0-rc3 test suite: GnuCOBOL Tests. ##
+## -------------------------------------------- ##"
   echo
 
   $as_echo "$as_me: command line was:"
@@ -2283,7 +2284,7 @@ at_fn_group_postprocess ()
     sed "s/^ */$as_me: WARNING: /" <<_ATEOF
       A failure happened in a test group before any test could be
       run. This means that test suite is improperly designed.  Please
-      report this failure to <open-cobol-list@lists.sourceforge.net>.
+      report this failure to <bug-gnucobol@gnu.org>.
 _ATEOF
     $as_echo "$at_setup_line" >"$at_check_line_file"
     at_status=99
@@ -2701,8 +2702,8 @@ _ASBOX
   fi
   $as_echo "Please send $at_msg and all information you think might help:
 
-   To: <open-cobol-list@lists.sourceforge.net>
-   Subject: [GnuCOBOL 2.0] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
+   To: <bug-gnucobol@gnu.org>
+   Subject: [GnuCOBOL 2.0-rc3] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
 
 You may investigate any problem if you feel able to do so, in which
 case the test suite provides a good starting point.  Its output may
@@ -2766,9 +2767,9 @@ $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:37: \$COBC prog.\$OBJECT_EXT"
-at_fn_check_prepare_dynamic "$COBC prog.$OBJECT_EXT" "used_binaries.at:37"
-( $at_check_trace; $COBC prog.$OBJECT_EXT
+$as_echo "$at_srcdir/used_binaries.at:37: \$COBC prog.\$COB_OBJECT_EXT"
+at_fn_check_prepare_dynamic "$COBC prog.$COB_OBJECT_EXT" "used_binaries.at:37"
+( $at_check_trace; $COBC prog.$COB_OBJECT_EXT
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2805,24 +2806,37 @@ at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:39"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
-#AT_CHECK([$COBC prog.$ASM_EXT]) Currently breaking with MSC, deactivated
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:41: \$COBC -E prog.cob"
-at_fn_check_prepare_dynamic "$COBC -E prog.cob" "used_binaries.at:41"
-( $at_check_trace; $COBC -E prog.cob
+$as_echo "$at_srcdir/used_binaries.at:40: \$COBC prog.s"
+at_fn_check_prepare_dynamic "$COBC prog.s" "used_binaries.at:40"
+( $at_check_trace; $COBC prog.s
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:40"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:41: \$COBCRUN prog"
+at_fn_check_prepare_dynamic "$COBCRUN prog" "used_binaries.at:41"
+( $at_check_trace; $COBCRUN prog
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "bluBb" | \
+  $at_diff - "$at_stdout" || at_failed=:
 at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:41"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:42: test -f prog.i"
-at_fn_check_prepare_trace "used_binaries.at:42"
-( $at_check_trace; test -f prog.i
+$as_echo "$at_srcdir/used_binaries.at:42: \$COBC -x -C prog.cob"
+at_fn_check_prepare_dynamic "$COBC -x -C prog.cob" "used_binaries.at:42"
+( $at_check_trace; $COBC -x -C prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -2832,13 +2846,119 @@ at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:42"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:43: \$COBC -x -c prog.c"
+at_fn_check_prepare_dynamic "$COBC -x -c prog.c" "used_binaries.at:43"
+( $at_check_trace; $COBC -x -c prog.c
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:43"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:44: \$COBC -x prog.\$COB_OBJECT_EXT"
+at_fn_check_prepare_dynamic "$COBC -x prog.$COB_OBJECT_EXT" "used_binaries.at:44"
+( $at_check_trace; $COBC -x prog.$COB_OBJECT_EXT
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:44"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:45: ./prog"
+at_fn_check_prepare_trace "used_binaries.at:45"
+( $at_check_trace; ./prog
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "bluBb" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:45"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:46: \$COBC -x -S prog.cob"
+at_fn_check_prepare_dynamic "$COBC -x -S prog.cob" "used_binaries.at:46"
+( $at_check_trace; $COBC -x -S prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:46"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:47: \$COBC -x prog.s"
+at_fn_check_prepare_dynamic "$COBC -x prog.s" "used_binaries.at:47"
+( $at_check_trace; $COBC -x prog.s
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:47"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:48: ./prog"
+at_fn_check_prepare_trace "used_binaries.at:48"
+( $at_check_trace; ./prog
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "bluBb" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:48"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:49: \$COBC -E prog.cob"
+at_fn_check_prepare_dynamic "$COBC -E prog.cob" "used_binaries.at:49"
+( $at_check_trace; $COBC -E prog.cob
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:49"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/used_binaries.at:50: test -f prog.i"
+at_fn_check_prepare_trace "used_binaries.at:50"
+( $at_check_trace; test -f prog.i
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:50"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
 #AT_STOP_1
 #AT_START_2
-at_fn_group_banner 2 'used_binaries.at:46' \
+at_fn_group_banner 2 'used_binaries.at:54' \
   "Source file not found" "                          " 1
 at_xfail=no
 (
@@ -2848,8 +2968,8 @@ at_xfail=no
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:49: \$COMPILE_ONLY prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "used_binaries.at:49"
+$as_echo "$at_srcdir/used_binaries.at:57: \$COMPILE_ONLY prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_ONLY prog.cob" "used_binaries.at:57"
 ( $at_check_trace; $COMPILE_ONLY prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -2858,7 +2978,7 @@ echo >>"$at_stderr"; $as_echo "cobc: prog.cob: No such file or directory
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:49"
+at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:57"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2869,7 +2989,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_2
 #AT_START_3
-at_fn_group_banner 3 'used_binaries.at:55' \
+at_fn_group_banner 3 'used_binaries.at:63' \
   "Compiler help and information" "                  " 1
 at_xfail=no
 (
@@ -2879,93 +2999,93 @@ at_xfail=no
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:58: \$COBC --version"
-at_fn_check_prepare_dynamic "$COBC --version" "used_binaries.at:58"
+$as_echo "$at_srcdir/used_binaries.at:66: \$COBC --version"
+at_fn_check_prepare_dynamic "$COBC --version" "used_binaries.at:66"
 ( $at_check_trace; $COBC --version
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:58"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:66"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:59: \$COBC --help"
-at_fn_check_prepare_dynamic "$COBC --help" "used_binaries.at:59"
+$as_echo "$at_srcdir/used_binaries.at:67: \$COBC --help"
+at_fn_check_prepare_dynamic "$COBC --help" "used_binaries.at:67"
 ( $at_check_trace; $COBC --help
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:59"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:67"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:60: \$COBC --info"
-at_fn_check_prepare_dynamic "$COBC --info" "used_binaries.at:60"
+$as_echo "$at_srcdir/used_binaries.at:68: \$COBC --info"
+at_fn_check_prepare_dynamic "$COBC --info" "used_binaries.at:68"
 ( $at_check_trace; $COBC --info
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:60"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:68"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:61: \$COBC --list-reserved"
-at_fn_check_prepare_dynamic "$COBC --list-reserved" "used_binaries.at:61"
+$as_echo "$at_srcdir/used_binaries.at:69: \$COBC --list-reserved"
+at_fn_check_prepare_dynamic "$COBC --list-reserved" "used_binaries.at:69"
 ( $at_check_trace; $COBC --list-reserved
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:61"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:69"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:62: \$COBC --list-intrinsics"
-at_fn_check_prepare_dynamic "$COBC --list-intrinsics" "used_binaries.at:62"
+$as_echo "$at_srcdir/used_binaries.at:70: \$COBC --list-intrinsics"
+at_fn_check_prepare_dynamic "$COBC --list-intrinsics" "used_binaries.at:70"
 ( $at_check_trace; $COBC --list-intrinsics
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:62"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:70"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:63: \$COBC --list-mnemonics"
-at_fn_check_prepare_dynamic "$COBC --list-mnemonics" "used_binaries.at:63"
+$as_echo "$at_srcdir/used_binaries.at:71: \$COBC --list-mnemonics"
+at_fn_check_prepare_dynamic "$COBC --list-mnemonics" "used_binaries.at:71"
 ( $at_check_trace; $COBC --list-mnemonics
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:63"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:71"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:64: \$COBC --list-system"
-at_fn_check_prepare_dynamic "$COBC --list-system" "used_binaries.at:64"
+$as_echo "$at_srcdir/used_binaries.at:72: \$COBC --list-system"
+at_fn_check_prepare_dynamic "$COBC --list-system" "used_binaries.at:72"
 ( $at_check_trace; $COBC --list-system
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:64"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:72"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2975,7 +3095,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_3
 #AT_START_4
-at_fn_group_banner 4 'used_binaries.at:68' \
+at_fn_group_banner 4 'used_binaries.at:76' \
   "Using full path for cobc" "                       " 1
 at_xfail=no
 (
@@ -2998,21 +3118,21 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:82: \$COMPILE \"\$(_return_path \"\$(pwd)/prog.cob\")\""
-at_fn_check_prepare_notrace 'a $(...) command substitution' "used_binaries.at:82"
+$as_echo "$at_srcdir/used_binaries.at:90: \$COMPILE \"\$(_return_path \"\$(pwd)/prog.cob\")\""
+at_fn_check_prepare_notrace 'a $(...) command substitution' "used_binaries.at:90"
 ( $at_check_trace; $COMPILE "$(_return_path "$(pwd)/prog.cob")"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:82"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:90"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:83: ./prog"
-at_fn_check_prepare_trace "used_binaries.at:83"
+$as_echo "$at_srcdir/used_binaries.at:91: ./prog"
+at_fn_check_prepare_trace "used_binaries.at:91"
 ( $at_check_trace; ./prog
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3020,7 +3140,7 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "OK" | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:83"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:91"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3031,7 +3151,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_4
 #AT_START_5
-at_fn_group_banner 5 'used_binaries.at:88' \
+at_fn_group_banner 5 'used_binaries.at:96' \
   "cobcrun validation" "                             " 1
 at_xfail=no
 (
@@ -3075,34 +3195,34 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:121: \$COMPILE_MODULE callee.cob"
-at_fn_check_prepare_dynamic "$COMPILE_MODULE callee.cob" "used_binaries.at:121"
+$as_echo "$at_srcdir/used_binaries.at:129: \$COMPILE_MODULE callee.cob"
+at_fn_check_prepare_dynamic "$COMPILE_MODULE callee.cob" "used_binaries.at:129"
 ( $at_check_trace; $COMPILE_MODULE callee.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:121"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:129"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:122: \$COMPILE_MODULE caller.cob"
-at_fn_check_prepare_dynamic "$COMPILE_MODULE caller.cob" "used_binaries.at:122"
+$as_echo "$at_srcdir/used_binaries.at:130: \$COMPILE_MODULE caller.cob"
+at_fn_check_prepare_dynamic "$COMPILE_MODULE caller.cob" "used_binaries.at:130"
 ( $at_check_trace; $COMPILE_MODULE caller.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:122"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:130"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:123: \$COBCRUN caller"
-at_fn_check_prepare_dynamic "$COBCRUN caller" "used_binaries.at:123"
+$as_echo "$at_srcdir/used_binaries.at:131: \$COBCRUN caller"
+at_fn_check_prepare_dynamic "$COBCRUN caller" "used_binaries.at:131"
 ( $at_check_trace; $COBCRUN caller
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3110,7 +3230,7 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "HelloWorld" | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:123"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:131"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3121,7 +3241,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_5
 #AT_START_6
-at_fn_group_banner 6 'used_binaries.at:128' \
+at_fn_group_banner 6 'used_binaries.at:136' \
   "cobcrun -M DSO entry argument" "                  " 1
 at_xfail=no
 (
@@ -3176,34 +3296,34 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:172: \${COMPILE_MODULE} callee.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:172"
+$as_echo "$at_srcdir/used_binaries.at:180: \${COMPILE_MODULE} callee.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:180"
 ( $at_check_trace; ${COMPILE_MODULE} callee.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:172"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:180"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:173: \${COMPILE_MODULE} caller.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:173"
+$as_echo "$at_srcdir/used_binaries.at:181: \${COMPILE_MODULE} caller.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:181"
 ( $at_check_trace; ${COMPILE_MODULE} caller.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:173"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:181"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:174: \${COBCRUN} -M ./caller inside again"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:174"
+$as_echo "$at_srcdir/used_binaries.at:182: \${COBCRUN} -M ./caller inside again"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:182"
 ( $at_check_trace; ${COBCRUN} -M ./caller inside again
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3214,7 +3334,7 @@ World
 again
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:174"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:182"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3225,7 +3345,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_6
 #AT_START_7
-at_fn_group_banner 7 'used_binaries.at:183' \
+at_fn_group_banner 7 'used_binaries.at:191' \
   "cobcrun -M directory/ default" "                  " 1
 at_xfail=no
 (
@@ -3264,34 +3384,34 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:211: \${COMPILE_MODULE} callee.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:211"
+$as_echo "$at_srcdir/used_binaries.at:219: \${COMPILE_MODULE} callee.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:219"
 ( $at_check_trace; ${COMPILE_MODULE} callee.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:211"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:219"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:212: \${COMPILE_MODULE} caller.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:212"
+$as_echo "$at_srcdir/used_binaries.at:220: \${COMPILE_MODULE} caller.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:220"
 ( $at_check_trace; ${COMPILE_MODULE} caller.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:212"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:220"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:213: \${COBCRUN} -M ./ caller"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:213"
+$as_echo "$at_srcdir/used_binaries.at:221: \${COBCRUN} -M ./ caller"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:221"
 ( $at_check_trace; ${COBCRUN} -M ./ caller
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3301,7 +3421,7 @@ echo >>"$at_stdout"; $as_echo "Hello
 World
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:213"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:221"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3312,7 +3432,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_7
 #AT_START_8
-at_fn_group_banner 8 'used_binaries.at:221' \
+at_fn_group_banner 8 'used_binaries.at:229' \
   "cobcrun -M directory/dso alternate" "             " 1
 at_xfail=no
 (
@@ -3364,34 +3484,34 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:262: \${COMPILE_MODULE} callee.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:262"
+$as_echo "$at_srcdir/used_binaries.at:270: \${COMPILE_MODULE} callee.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:270"
 ( $at_check_trace; ${COMPILE_MODULE} callee.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:262"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:270"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:263: \${COMPILE_MODULE} caller.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:263"
+$as_echo "$at_srcdir/used_binaries.at:271: \${COMPILE_MODULE} caller.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:271"
 ( $at_check_trace; ${COMPILE_MODULE} caller.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:263"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:271"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:264: \${COBCRUN} -M ./caller inside"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:264"
+$as_echo "$at_srcdir/used_binaries.at:272: \${COBCRUN} -M ./caller inside"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:272"
 ( $at_check_trace; ${COBCRUN} -M ./caller inside
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3401,7 +3521,7 @@ echo >>"$at_stdout"; $as_echo "Aloha
 World
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:264"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:272"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3412,7 +3532,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_8
 #AT_START_9
-at_fn_group_banner 9 'used_binaries.at:272' \
+at_fn_group_banner 9 'used_binaries.at:280' \
   "cobcrun -M DSO entry multiple arguments" "        " 1
 at_xfail=no
 (
@@ -3450,21 +3570,21 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:299: \${COBC} -b \${FLAGS} mainer.cob called.cob"
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:299"
+$as_echo "$at_srcdir/used_binaries.at:307: \${COBC} -b \${FLAGS} mainer.cob called.cob"
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:307"
 ( $at_check_trace; ${COBC} -b ${FLAGS} mainer.cob called.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:299"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:307"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:300: \${COBCRUN} -M ./mainer called \"first argument\" \"second\" \"third\""
-at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:300"
+$as_echo "$at_srcdir/used_binaries.at:308: \${COBCRUN} -M ./mainer called \"first argument\" \"second\" \"third\""
+at_fn_check_prepare_notrace 'a ${...} parameter expansion' "used_binaries.at:308"
 ( $at_check_trace; ${COBCRUN} -M ./mainer called "first argument" "second" "third"
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3473,7 +3593,7 @@ at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "first argument second third:second
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:300"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:308"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3484,7 +3604,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_9
 #AT_START_10
-at_fn_group_banner 10 'used_binaries.at:307' \
+at_fn_group_banner 10 'used_binaries.at:315' \
   "Compile from stdin" "                             " 1
 at_xfail=no
 (
@@ -3505,55 +3625,55 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:319: cat prog.cob | \$COMPILE -"
-at_fn_check_prepare_notrace 'a shell pipeline' "used_binaries.at:319"
+$as_echo "$at_srcdir/used_binaries.at:327: cat prog.cob | \$COMPILE -"
+at_fn_check_prepare_notrace 'a shell pipeline' "used_binaries.at:327"
 ( $at_check_trace; cat prog.cob | $COMPILE -
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:319"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:327"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:320: ./a.out"
-at_fn_check_prepare_trace "used_binaries.at:320"
+$as_echo "$at_srcdir/used_binaries.at:328: ./a.out"
+at_fn_check_prepare_trace "used_binaries.at:328"
 ( $at_check_trace; ./a.out
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:320"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:328"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:322: cat prog.cob | \$COMPILE_MODULE -"
-at_fn_check_prepare_notrace 'a shell pipeline' "used_binaries.at:322"
+$as_echo "$at_srcdir/used_binaries.at:330: cat prog.cob | \$COMPILE_MODULE -"
+at_fn_check_prepare_notrace 'a shell pipeline' "used_binaries.at:330"
 ( $at_check_trace; cat prog.cob | $COMPILE_MODULE -
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:322"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:330"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:323: \$COBCRUN a"
-at_fn_check_prepare_dynamic "$COBCRUN a" "used_binaries.at:323"
+$as_echo "$at_srcdir/used_binaries.at:331: \$COBCRUN a"
+at_fn_check_prepare_dynamic "$COBCRUN a" "used_binaries.at:331"
 ( $at_check_trace; $COBCRUN a
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:323"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:331"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3564,7 +3684,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_10
 #AT_START_11
-at_fn_group_banner 11 'used_binaries.at:328' \
+at_fn_group_banner 11 'used_binaries.at:336' \
   "Run job after compilation" "                      " 1
 at_xfail=no
 (
@@ -3586,8 +3706,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:341: \$COMPILE -jd prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -jd prog.cob" "used_binaries.at:341"
+$as_echo "$at_srcdir/used_binaries.at:349: \$COMPILE -jd prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -jd prog.cob" "used_binaries.at:349"
 ( $at_check_trace; $COMPILE -jd prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3595,13 +3715,13 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "job" | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:341"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:349"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:342: \$COMPILE_MODULE -jd prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_MODULE -jd prog.cob" "used_binaries.at:342"
+$as_echo "$at_srcdir/used_binaries.at:350: \$COMPILE_MODULE -jd prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_MODULE -jd prog.cob" "used_binaries.at:350"
 ( $at_check_trace; $COMPILE_MODULE -jd prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3609,7 +3729,7 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "job" | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:342"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:350"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3620,7 +3740,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_11
 #AT_START_12
-at_fn_group_banner 12 'used_binaries.at:347' \
+at_fn_group_banner 12 'used_binaries.at:355' \
   "Run job with optional arguments" "                " 1
 at_xfail=no
 (
@@ -3644,8 +3764,8 @@ _ATEOF
 
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:362: \$COMPILE -j=\"job 123\" prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -j=\"job 123\" prog.cob" "used_binaries.at:362"
+$as_echo "$at_srcdir/used_binaries.at:370: \$COMPILE -j=\"job 123\" prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -j=\"job 123\" prog.cob" "used_binaries.at:370"
 ( $at_check_trace; $COMPILE -j="job 123" prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3653,13 +3773,13 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "job 123 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:362"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:370"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:363: \$COMPILE -jdg prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -jdg prog.cob" "used_binaries.at:363"
+$as_echo "$at_srcdir/used_binaries.at:371: \$COMPILE -jdg prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -jdg prog.cob" "used_binaries.at:371"
 ( $at_check_trace; $COMPILE -jdg prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3667,13 +3787,13 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "        " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:363"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:371"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:364: \$COMPILE_MODULE --job=job123 prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE_MODULE --job=job123 prog.cob" "used_binaries.at:364"
+$as_echo "$at_srcdir/used_binaries.at:372: \$COMPILE_MODULE --job=job123 prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE_MODULE --job=job123 prog.cob" "used_binaries.at:372"
 ( $at_check_trace; $COMPILE_MODULE --job=job123 prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3681,7 +3801,7 @@ $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo >>"$at_stdout"; $as_echo "job123  " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:364"
+at_fn_check_status 0 $at_status "$at_srcdir/used_binaries.at:372"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -3692,7 +3812,7 @@ $at_traceon; }
 read at_status <"$at_status_file"
 #AT_STOP_12
 #AT_START_13
-at_fn_group_banner 13 'used_binaries.at:369' \
+at_fn_group_banner 13 'used_binaries.at:377' \
   "Invalid cobc option" "                            " 1
 at_xfail=no
 (
@@ -3710,8 +3830,8 @@ _ATEOF
 
 # normal option
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:378: \$COMPILE -q --thisoptiondoesntexist prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -q --thisoptiondoesntexist prog.cob" "used_binaries.at:378"
+$as_echo "$at_srcdir/used_binaries.at:386: \$COMPILE -q --thisoptiondoesntexist prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -q --thisoptiondoesntexist prog.cob" "used_binaries.at:386"
 ( $at_check_trace; $COMPILE -q --thisoptiondoesntexist prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3720,14 +3840,14 @@ echo >>"$at_stderr"; $as_echo "cobc: unrecognized option '--thisoptiondoesntexis
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:378"
+at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:386"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 # flag
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:382: \$COMPILE -q -flagdoesntexist prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -q -flagdoesntexist prog.cob" "used_binaries.at:382"
+$as_echo "$at_srcdir/used_binaries.at:390: \$COMPILE -q -flagdoesntexist prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -q -flagdoesntexist prog.cob" "used_binaries.at:390"
 ( $at_check_trace; $COMPILE -q -flagdoesntexist prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3736,14 +3856,14 @@ echo >>"$at_stderr"; $as_echo "cobc: unrecognized option '-flagdoesntexist'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:382"
+at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:390"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
 # warning
 { set +x
-$as_echo "$at_srcdir/used_binaries.at:386: \$COMPILE -q -Wdoesntexist prog.cob"
-at_fn_check_prepare_dynamic "$COMPILE -q -Wdoesntexist prog.cob" "used_binaries.at:386"
+$as_echo "$at_srcdir/used_binaries.at:394: \$COMPILE -q -Wdoesntexist prog.cob"
+at_fn_check_prepare_dynamic "$COMPILE -q -Wdoesntexist prog.cob" "used_binaries.at:394"
 ( $at_check_trace; $COMPILE -q -Wdoesntexist prog.cob
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3752,7 +3872,7 @@ echo >>"$at_stderr"; $as_echo "cobc: unrecognized option '-Wdoesntexist'
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:386"
+at_fn_check_status 1 $at_status "$at_srcdir/used_binaries.at:394"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -33887,9 +34007,9 @@ $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/run_misc.at:664: \$COMPILE -o prog caller.\$OBJECT_EXT callee.\$OBJECT_EXT"
-at_fn_check_prepare_dynamic "$COMPILE -o prog caller.$OBJECT_EXT callee.$OBJECT_EXT" "run_misc.at:664"
-( $at_check_trace; $COMPILE -o prog caller.$OBJECT_EXT callee.$OBJECT_EXT
+$as_echo "$at_srcdir/run_misc.at:664: \$COMPILE -o prog caller.\$COB_OBJECT_EXT callee.\$COB_OBJECT_EXT"
+at_fn_check_prepare_dynamic "$COMPILE -o prog caller.$COB_OBJECT_EXT callee.$COB_OBJECT_EXT" "run_misc.at:664"
+( $at_check_trace; $COMPILE -o prog caller.$COB_OBJECT_EXT callee.$COB_OBJECT_EXT
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter

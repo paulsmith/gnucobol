@@ -25,22 +25,23 @@
 # CC="gcc -std=gnu99"
 
 COB_SRC_PATH="$(cd ${abs_srcdir}/.. ; pwd)"
-COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/release"
+COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/Release"
 
 COB_BIGENDIAN="no"
 COB_HAS_UTC_OFFSET="yes"
 
-COBC="cobc"
-COBCRUN="cobcrun"
+export COBC="cobc.exe"
+export COBCRUN="cobcrun.exe"
 
-TEMPLATE="$COB_SRC_PATH/tests/testsuite.src"
+TEMPLATE="${abs_srcdir}/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"
 COMPILE="${COBC} -x ${FLAGS}"
 COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
 COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
-OBJECT_EXT="obj"
+COB_OBJECT_EXT="obj"
+COB_EXE_EXT="@COB_EXE_EXT@"
 
 # Fix for testcases were cobc uses win32 paths internally
 PATHSEP=";"
@@ -62,7 +63,12 @@ _return_path () {
 	if test "$OSTYPE" = "cygwin"; then
 	   cygpath -pw "$1"
 	else
-	   echo "$1"
+	   # check for WSL / Bash on Windows; ignore error messages (file not available)
+	   if $(grep -q "Microsoft" /proc/sys/kernel/osrelease 2>/dev/null); then
+	      echo "$1" | sed -E 's+^/mnt/(.{1})+\1:+' | sed 's+:$+:/+1'
+	   else
+	      echo "$1"
+	   fi
 	fi
 }
 

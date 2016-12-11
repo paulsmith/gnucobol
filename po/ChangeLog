@@ -4,6 +4,7 @@
 	* update_linguas.sh: added shell for updating the translations
 	  before a release, used version from nano-project as template
 	* Makevars: set DIST_DEPENDS_ON_UPDATE_PO to no
+	* en.translate: removed
 
 2016-11-05  gettextize  <bug-gnu-gettext@gnu.org>
 

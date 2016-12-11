@@ -1755,8 +1755,9 @@ cobc_print_info (void)
 	if ((s = getenv ("COB_MSG_FORMAT")) != NULL) {
 		cobc_var_print ("COB_MSG_FORMAT",	s, 1);
 	}
+	cobc_var_print ("COB_OBJECT_EXT",	COB_OBJECT_EXT, 0);
 	cobc_var_print ("COB_MODULE_EXT",	COB_MODULE_EXT, 0);
-	cobc_var_print ("COB_EXEEXT",		COB_EXEEXT, 0);
+	cobc_var_print ("COB_EXE_EXT",		COB_EXE_EXT, 0);
 
 #ifdef COB_64_BIT_POINTER
 	cobc_var_print ("64bit-mode",	_("yes"), 0);
@@ -3035,18 +3036,18 @@ process_run (const char *name) {
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
 		if (cobc_run_args) {
 			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s %s",
-				COB_EXEEXT, file_basename(name), cobc_run_args);
+				COB_EXE_EXT, file_basename(name), cobc_run_args);
 		} else {
 			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s",
-				COB_EXEEXT, file_basename(name));
+				COB_EXE_EXT, file_basename(name));
 		}
 	} else {  /* executable */
 		if (cobc_run_args) {
 			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s %s",
-				SLASH_CHAR, name, COB_EXEEXT, cobc_run_args);
+				SLASH_CHAR, name, COB_EXE_EXT, cobc_run_args);
 		} else {
 			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s",
-				SLASH_CHAR, name, COB_EXEEXT);
+				SLASH_CHAR, name, COB_EXE_EXT);
 		}
 	}
 	cobc_buffer[cobc_buffer_size] = 0;
@@ -6098,7 +6099,7 @@ process_link (struct filename *l)
 #ifdef	__hpux
 	if (ret == 0) {
 		sprintf (cobc_buffer, "chatr -s +s enable \"%s%s\" 1>/dev/null 2>&1",
-			 name, COB_EXEEXT);
+			 name, COB_EXE_EXT);
 		process (cobc_buffer);
 	}
 #endif
@@ -6106,7 +6107,7 @@ process_link (struct filename *l)
 #ifdef	COB_STRIP_CMD
 	if (strip_output && ret == 0) {
 		sprintf (cobc_buffer, "%s \"%s%s\"",
-			 COB_STRIP_CMD, name, COB_EXEEXT);
+			 COB_STRIP_CMD, name, COB_EXE_EXT);
 		ret = process (cobc_buffer);
 	}
 #endif

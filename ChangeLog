@@ -1,4 +1,14 @@
 
+2016-12-06 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: changed package-name to gnucobol
+	* configure.ac: fixing bug #339 added COB_MODULE_EXT to config.h,
+	  renamed COB_OBJEXT->COB_OBJECT_EXT, COB_EXEEXT->COB_EXE_EXT,
+	* configure.ac: exported COB_EXE_EXT to makefiles (used in testsuite)
+	* Makefile.am: fixing bug #339 removed COB_MODULE_EXT and COB_OBJECT_EXT
+	  from being generated in defaults.h
+	* Makefile.am: cleanup of EXTRA_DIST
+
 2016-11-17  Ron Norman <rjn@inglenet.com>
 
 	* configure.ac: check for sys/wait.h (for CBL_GC_WAITPID)

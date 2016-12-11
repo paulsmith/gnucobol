@@ -23,10 +23,11 @@
 AC_PREREQ([2.64])
 
 AC_INIT([GnuCOBOL],
-	[2.0],
-	[open-cobol-list@lists.sourceforge.net],
-	[gnu-cobol],
-	[http://www.opencobol.org])
+	[2.0-rc3],
+	[bug-gnucobol@gnu.org],
+	[gnucobol],
+	[https://www.gnu.org/software/gnucobol/])
+AC_REVISION([GnuCOBOL snapshot $Revision: 1286 $])
 AC_CONFIG_SRCDIR([libcob.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_TESTDIR([tests])
@@ -76,8 +77,9 @@ AH_TEMPLATE([WITH_VARSEQ], [Define variable sequential file format])
 AH_TEMPLATE([HAVE_PSIGN_OPT], [Has -Wno-pointer-sign])
 AH_TEMPLATE([HAVE_ATTRIBUTE_ALIGNED], [Has __attribute__((aligned))])
 AH_TEMPLATE([HAVE_TIMEZONE], [Has timezone variable])
-AH_TEMPLATE([COB_EXEEXT], [Executable extension])
-AH_TEMPLATE([COB_OBJEXT], [Object extension])
+AH_TEMPLATE([COB_OBJECT_EXT], [Object extension])
+AH_TEMPLATE([COB_MODULE_EXT], [Module extension])
+AH_TEMPLATE([COB_EXE_EXT], [Executable extension])
 AH_TEMPLATE([COB_KEYWORD_INLINE], [Keyword for inline])
 AH_TEMPLATE([COB_NO_SELFOPEN], [Can not dlopen self])
 AH_TEMPLATE([COB_STRFTIME], [Can use strftime for timezone])
@@ -956,13 +958,13 @@ fi
 COB_CONFIG_DIR="$datadir/$PACKAGE_TARNAME/config"
 COB_COPY_DIR="$datadir/$PACKAGE_TARNAME/copy"
 COB_LIBRARY_PATH="$libdir/$PACKAGE_TARNAME"
-COB_MODULE_EXT=`echo "$acl_cv_shlibext" | sed -e 's/dll\.a/dll/'`
 COB_OBJECT_EXT="$OBJEXT"
+COB_MODULE_EXT=`echo "$acl_cv_shlibext" | sed -e 's/dll\.a/dll/'`
+COB_EXE_EXT="$EXEEXT"
 LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
-COB_EXEEXT="$EXEEXT"
 
 if test "$enable_cflags_setting" = yes; then
 	# Remove -O2 option added by AC_PROG_CC and add -O0
@@ -1157,7 +1159,9 @@ AM_CONDITIONAL([COB_MAKE_IX], [test "$COB_HAS_ISAM" = yes])
 AC_DEFINE_UNQUOTED([COB_EXPORT_DYN], ["$COB_EXPORT_DYN"])
 AC_DEFINE_UNQUOTED([COB_PIC_FLAGS], ["$COB_PIC_FLAGS"])
 AC_DEFINE_UNQUOTED([COB_SHARED_OPT], ["$COB_SHARED_OPT"])
-AC_DEFINE_UNQUOTED([COB_EXEEXT], ["$COB_EXEEXT"])
+AC_DEFINE_UNQUOTED([COB_OBJECT_EXT], ["$COB_OBJECT_EXT"])
+AC_DEFINE_UNQUOTED([COB_MODULE_EXT], ["$COB_MODULE_EXT"])
+AC_DEFINE_UNQUOTED([COB_EXE_EXT], ["$COB_EXE_EXT"])
 if test "x$striplib" != "x"; then
 	AC_DEFINE_UNQUOTED([COB_STRIP_CMD], ["$striplib"])
 fi
@@ -1168,8 +1172,9 @@ AC_SUBST([COB_LIBS])
 AC_SUBST([COB_CONFIG_DIR])
 AC_SUBST([COB_COPY_DIR])
 AC_SUBST([COB_LIBRARY_PATH])
-AC_SUBST([COB_MODULE_EXT])
 AC_SUBST([COB_OBJECT_EXT])
+AC_SUBST([COB_MODULE_EXT])
+AC_SUBST([COB_EXE_EXT])
 AC_SUBST([COBC_LIBS])
 AC_SUBST([LIBCOB_LIBS])
 AC_SUBST([COB_EXPORT_DYN])
@@ -1196,9 +1201,10 @@ AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
 	tests/atlocal tests/Makefile tests/cobol85/Makefile
 	extras/Makefile])
 
-AC_CONFIG_COMMANDS([chmod1], [chmod +x bin/cob-config])
-AC_CONFIG_COMMANDS([chmod2], [chmod +x tests/atconfig])
-AC_CONFIG_COMMANDS([chmod3], [chmod +x tests/atlocal])
+AC_CONFIG_COMMANDS([chmod],
+[chmod +x bin/cob-config;
+chmod +x tests/atconfig;
+chmod +x tests/atlocal])
 
 AC_OUTPUT
 
@@ -1215,8 +1221,9 @@ AC_MSG_NOTICE([ COB_LIBS          ${COB_LIBS}])
 AC_MSG_NOTICE([ COB_CONFIG_DIR    ${COB_CONFIG_DIR}])
 AC_MSG_NOTICE([ COB_COPY_DIR      ${COB_COPY_DIR}])
 AC_MSG_NOTICE([ COB_LIBRARY_PATH  ${COB_LIBRARY_PATH}])
-AC_MSG_NOTICE([ COB_MODULE_EXT    ${COB_MODULE_EXT}])
 AC_MSG_NOTICE([ COB_OBJECT_EXT    ${COB_OBJECT_EXT}])
+AC_MSG_NOTICE([ COB_MODULE_EXT    ${COB_MODULE_EXT}])
+AC_MSG_NOTICE([ COB_EXE_EXT       ${COB_EXE_EXT}])
 AC_MSG_NOTICE([ COB_SHARED_OPT    ${COB_SHARED_OPT}])
 AC_MSG_NOTICE([ COB_PIC_FLAGS     ${COB_PIC_FLAGS}])
 AC_MSG_NOTICE([ COB_EXPORT_DYN    ${COB_EXPORT_DYN}])

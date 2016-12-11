@@ -1,5 +1,5 @@
 #
-# Makefile gnu-cobol/doc
+# Makefile gnucobol/doc
 #
 # Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch

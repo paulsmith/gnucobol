@@ -661,7 +661,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE -c callee.cob], [0], [], [])
 AT_CHECK([$COMPILE -c caller.cob], [0], [], [])
-AT_CHECK([$COMPILE -o prog caller.$OBJECT_EXT callee.$OBJECT_EXT], [0], [], [])
+AT_CHECK([$COMPILE -o prog caller.$COB_OBJECT_EXT callee.$COB_OBJECT_EXT], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

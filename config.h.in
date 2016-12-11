@@ -10,7 +10,7 @@
 #undef COB_64_BIT_POINTER
 
 /* Executable extension */
-#undef COB_EXEEXT
+#undef COB_EXE_EXT
 
 /* Enable experimental code (Developers only!) */
 #undef COB_EXPERIMENTAL
@@ -24,11 +24,14 @@
 /* long int is long long */
 #undef COB_LI_IS_LL
 
+/* Module extension */
+#undef COB_MODULE_EXT
+
 /* Can not dlopen self */
 #undef COB_NO_SELFOPEN
 
 /* Object extension */
-#undef COB_OBJEXT
+#undef COB_OBJECT_EXT
 
 /* Enable minimum parameter check for system libraries */
 #undef COB_PARAM_CHECK

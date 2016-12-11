@@ -28,8 +28,7 @@ BUILT_SOURCES = defaults.h
 DISTCLEANFILES = $(BUILT_SOURCES)
 # CLEANFILES = $(bin_SCRIPTS)
 
-EXTRA_DIST = gnu-cobol.spec po/en.translate \
-	lib/Makefile.am lib/ChangeLog lib/dummymac.c lib/gettext.h
+EXTRA_DIST = gnucobol.spec po/update_linguas.sh
 
 dist-hook:
 	echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $(distdir)/tarstamp.h
@@ -57,7 +56,7 @@ dist-hook:
 	chmod 644 $(distdir)/README
 	chmod 644 $(distdir)/THANKS
 	chmod 644 $(distdir)/TODO
-	chmod 644 $(distdir)/gnu-cobol.spec
+	chmod 644 $(distdir)/gnucobol.spec
 	chmod 755 $(distdir)/doc/cobcinfo.sh
 	chmod 755 $(distdir)/tests/listings-sed.sh
 	touch $(distdir)/cobc/ppparse.c
@@ -84,8 +83,6 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define COB_CONFIG_DIR   \"$(COB_CONFIG_DIR)\"";	\
 	  echo "#define COB_COPY_DIR     \"$(COB_COPY_DIR)\"";		\
 	  echo "#define COB_LIBRARY_PATH \"$(COB_LIBRARY_PATH)\"";	\
-	  echo "#define COB_MODULE_EXT   \"$(COB_MODULE_EXT)\"";	\
-	  echo "#define COB_OBJECT_EXT   \"$(COB_OBJECT_EXT)\"";	\
 	  echo "#define COB_BLD_CC       \"$(CC)\"";			\
 	  echo "#define COB_BLD_CPPFLAGS \"$(CPPFLAGS)\"";		\
 	  echo "#define COB_BLD_CFLAGS   \"$(CFLAGS)\"";		\
