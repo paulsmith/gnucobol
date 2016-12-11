@@ -16,6 +16,7 @@
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
 
 /* long int is 32 bits */
+/* always true for MSC - even on x64 */
 #define COB_32_BIT_LONG 1
 
 /* Pointers are longer than 32 bits */
@@ -26,7 +27,7 @@
 #endif
 
 /* Executable extension */
-#define COB_EXEEXT ".exe"
+#define COB_EXE_EXT ".exe"
 
 /* Enable experimental code (Developers only!) */
 /* #undef COB_EXPERIMENTAL */
@@ -40,11 +41,14 @@
 /* long int is long long */
 /* #undef COB_LI_IS_LL */
 
+/* Module extension */
+#define COB_MODULE_EXT "dll"
+
 /* Can not dlopen self */
 #define COB_NO_SELFOPEN 1
 
 /* Object extension */
-#define COB_OBJEXT ".obj"
+#define COB_OBJECT_EXT "obj"
 
 /* Enable minimum parameter check for system libraries */
 /* #undef COB_PARAM_CHECK */
@@ -71,11 +75,11 @@
 /* Define to 1 if you have the `canonicalize_file_name' function. */
 /* #undef HAVE_CANONICALIZE_FILE_NAME */
 
-/* Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the
+/* Define to 1 if you have the Mac OS X function CFLocaleCopyCurrent in the
    CoreFoundation framework. */
 /* #undef HAVE_CFLOCALECOPYCURRENT */
 
-/* Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in
+/* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
    the CoreFoundation framework. */
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
 
@@ -306,6 +310,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
+/* Define to 1 if you have the <sys/wait.h> header file. */
+/* #undef HAVE_SYS_WAIT_H */
+
 /* Has timezone variable */
 #define HAVE_TIMEZONE 1
 
@@ -334,14 +341,11 @@
 /* Define maximum parameters for CALL */
 #define MAX_CALL_FIELD_PARAMS 192
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
-
 /* Name of package */
-#define PACKAGE "gnu-cobol"
+#define PACKAGE "gnucobol"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "open-cobol-list@lists.sourceforge.net"
+#define PACKAGE_BUGREPORT "bug-gnucobol@gnu.org"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "GnuCOBOL"
@@ -350,10 +354,10 @@
 #define PACKAGE_STRING "GnuCOBOL 2.0"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "gnu-cobol"
+#define PACKAGE_TARNAME "gnucobol"
 
 /* Define to the home page for this package. */
-#define PACKAGE_URL "http://www.opencobol.org"
+#define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "2.0"

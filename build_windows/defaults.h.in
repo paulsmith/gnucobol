@@ -3,7 +3,7 @@
 
 // define MAKE_DIST to 1 for using C:\GnuCOBOL
 
-#define COB_CC           "cl"
+#define COB_CC           "cl.exe"
 #ifdef MAKE_DIST
 #define COB_MAIN_DIR     "C:\\" PACKAGE_STRING
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\\include\""
@@ -34,11 +34,9 @@
 #define COB_COPY_DIR     COB_MAIN_DIR "\\copy"
 
 #define COB_LIBRARY_PATH "."
-#define COB_MODULE_EXT   "dll"
-#define COB_OBJECT_EXT   "obj"
 
 // /* try to use compile defines for that:
-#define COB_BLD_CC       "cl"
+#define COB_BLD_CC       "cl.exe"
 #define COB_BLD_CPPFLAGS ""
 #if defined (_MSC_VER)
 #if _MSC_VER > 1900
