@@ -93,10 +93,10 @@ NC252A.CBL     75   75    0       0       0 OK
 NC253A.CBL     61   61    0       0       0 OK
 NC254A.CBL      9    9    0       0       0 OK
 NC302M.CBL      1    1    0       0       0 OK
-NC303M.CBL      1    1    0       0       0 OK
+NC303M.CBL      0    0    0       0       0 OK
 NC401M.CBL      1    1    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total        4401 4371    0       4      26
+Total        4400 4370    0       4      26
 
 Number of programs:    95
 Successfully executed: 95

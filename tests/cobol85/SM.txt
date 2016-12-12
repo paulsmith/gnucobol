@@ -15,10 +15,10 @@ SM205A.CBL      9    9    0       0       0 OK
 SM206A.CBL     16   14    0       2       0 OK
 SM207A.CBL      2    2    0       0       0 OK
 SM208A.CBL      9    9    0       0       0 OK
-SM301M.CBL      1    1    0       0       0 OK
-SM401M.CBL      1    1    0       0       0 OK
+SM301M.CBL      0    0    0       0       0 OK
+SM401M.CBL      0    0    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total         296  293    0       2       1
+Total         294  291    0       2       1
 
 Number of programs:    17
 Successfully executed: 17

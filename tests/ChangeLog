@@ -1,4 +1,9 @@
 
+2016-12-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobol85/report.pl: updated and annotated the list of compile-only
+	  tests.
+
 2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at: added cobcrun to tested programs

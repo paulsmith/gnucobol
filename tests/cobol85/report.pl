@@ -96,40 +96,31 @@ if ($ENV{'COB_HAS_ISAM'} eq "no") {
 }
 
 # Compile only programs
+
+# OBNC1M tests the STOP literal statement and requires user input.
+# TO-DO: provide "\n\n\n\n\n\n\n\n" to stdin then kill program (as requested).
 $componly{OBNC1M} = 1;
 
+# NC302M tests the compiler flagging of obsolete features, including STOP literal.
+# TO-DO: provide "\n" to stdin.
+# TO-DO: automatically check cobc emits 7 warnings with -Wobsolete.
 $componly{NC302M} = 1;
-$componly{NC303M} = 1;
+
+# The following tests are for compiler flagging and cannot run without abends.
+# TO-DO: automatically check cobc emits the right number of warnings with
+# -Wobsolete (ignore high subset checking).
 $componly{NC401M} = 1;
-
 $componly{RL301M} = 1;
-$componly{RL302M} = 1;
 $componly{RL401M} = 1;
-
-$componly{SM301M} = 1;
-$componly{SM401M} = 1;
-
 $componly{IC401M} = 1;
-
-$componly{IF401M} = 1;
-$componly{IF403M} = 1;
-
 $componly{IX301M} = 1;
-$componly{IX302M} = 1;
 $componly{IX401M} = 1;
-
-$componly{SG302M} = 1;
-$componly{SG303M} = 1;
-$componly{SG401M} = 1;
-
-$componly{SQ302M} = 1;
 $componly{SQ303M} = 1;
 $componly{SQ401M} = 1;
-
 $componly{ST301M} = 1;
 
-$componly{RW301M} = 1;
-$componly{RW302M} = 1;
+# $componly{RW301M} = 1;
+# $componly{RW302M} = 1;
 
 # Until RECEIVE is implemented, DB205A contains an infinite loop.
 $componly{DB205A} = 1;

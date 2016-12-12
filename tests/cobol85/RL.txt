@@ -33,10 +33,10 @@ RL211A.CBL    501  501    0       0       0 OK
 RL212A.CBL      1    1    0       0       0 OK
 RL213A.SUB    521  521    0       0       0 OK
 RL301M.CBL      1    1    0       0       0 OK
-RL302M.CBL      1    1    0       0       0 OK
+RL302M.CBL      0    0    0       0       0 OK
 RL401M.CBL      1    1    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total        1835 1830    0       5       0
+Total        1834 1829    0       5       0
 
 Number of programs:    35
 Successfully executed: 35
