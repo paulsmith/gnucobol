@@ -90,9 +90,6 @@ $ENV{"COB_DISABLE_WARNINGS"} = "Y";
 # NC113M does not adhere to the test convention
 # Dealt with lower down in the code
 
-# Skip programs using COMMUNICATION
-$skip{DB205A} = 1;
-
 # Skip DB203A if no ISAM configured
 if ($ENV{'COB_HAS_ISAM'} eq "no") {
 	$skip{DB203A} = 1;
@@ -133,6 +130,9 @@ $componly{ST301M} = 1;
 
 $componly{RW301M} = 1;
 $componly{RW302M} = 1;
+
+# Until RECEIVE is implemented, DB205A contains an infinite loop.
+$componly{DB205A} = 1;
 
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
