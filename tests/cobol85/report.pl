@@ -254,7 +254,7 @@ fi");
 	system ("exec 9<&-; rm exe_input");
         
 	if ($ret != 0 && !($ret == 9 && $kill_me{$exe})) {
-		if (($ret << 8) == 77) {
+		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
 		$execute_error++;
