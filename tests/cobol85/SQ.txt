@@ -83,10 +83,10 @@ SQ228A.CBL      1    1    0       0       0 OK
 SQ229A.CBL      1    1    0       0       0 OK
 SQ230A.CBL      1    1    0       0       0 OK
 SQ302M.CBL      0    0    0       0       0 OK
-SQ303M.CBL      1    1    0       0       0 OK
-SQ401M.CBL      1    1    0       0       0 OK
+SQ303M.CBL      0    0    0       0       0 OK
+SQ401M.CBL      0    0    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total         609  520    0       0      89
+Total         607  518    0       0      89
 
 Number of programs:    85
 Successfully executed: 85

@@ -39,9 +39,9 @@ ST140A.CBL     11   11    0       0       0 OK
 ST144A.CBL     11   11    0       0       0 OK
 ST146A.CBL      4    4    0       0       0 OK
 ST147A.CBL     26   26    0       0       0 OK
-ST301M.CBL      1    1    0       0       0 OK
+ST301M.CBL      0    0    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total         289  289    0       0       0
+Total         288  288    0       0       0
 
 Number of programs:    40
 Successfully executed: 40

@@ -39,11 +39,11 @@ IX215A.CBL     33   33    0       0       0 OK
 IX216A.CBL     15   14    0       1       0 OK
 IX217A.CBL      6    6    0       0       0 OK
 IX218A.CBL      6    6    0       0       0 OK
-IX301M.CBL      1    1    0       0       0 OK
+IX301M.CBL      0    0    0       0       0 OK
 IX302M.CBL      0    0    0       0       0 OK
-IX401M.CBL      1    1    0       0       0 OK
+IX401M.CBL      0    0    0       0       0 OK
 --------    ----- ---- ---- ------- -------
-Total         510  509    0       1       0
+Total         508  507    0       1       0
 
 Number of programs:    42
 Successfully executed: 42

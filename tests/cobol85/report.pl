@@ -98,13 +98,12 @@ if ($ENV{'COB_HAS_ISAM'} eq "no") {
 # Compile only programs
 
 # OBNC1M tests the STOP literal statement and requires user input.
-# TO-DO: provide "\n\n\n\n\n\n\n\n" to stdin then kill program (as requested).
-$componly{OBNC1M} = 1;
+$raw_input{OBNC1M} = "\n\n\n\n\n\n\n";
+$kill_me{OBNC1M} = 1;
 
 # NC302M tests the compiler flagging of obsolete features, including STOP literal.
-# TO-DO: provide "\n" to stdin.
 # TO-DO: automatically check cobc emits 7 warnings with -Wobsolete.
-$componly{NC302M} = 1;
+$raw_input{NC302M} = "\n";
 
 # The following tests are for compiler flagging and cannot run without abends.
 # TO-DO: automatically check cobc emits the right number of warnings with
@@ -118,9 +117,6 @@ $componly{IX401M} = 1;
 $componly{SQ303M} = 1;
 $componly{SQ401M} = 1;
 $componly{ST301M} = 1;
-
-# $componly{RW301M} = 1;
-# $componly{RW302M} = 1;
 
 # Until RECEIVE is implemented, DB205A contains an infinite loop.
 $componly{DB205A} = 1;
@@ -212,9 +208,7 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		next;
 	}
 	if ($componly{$exe}) {
-		printf LOG ("    1    1    0       0       0 OK\n");
-		$total_all++;
-		$total_pass++;
+		printf LOG ("    0    0    0       0       0 OK\n");
 		$total_ok++;
 		next;
 	}
@@ -240,9 +234,27 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		$ENV{"DD_XXXXX049"} = "$exe.rep";
 	}
 testrepeat:
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
-	if ($ret != 0) {
-		if (($ret >> 8) == 77) {
+        if ($raw_input{$exe}) {
+		$cmd = $cmd . " < exe_input"
+        }
+	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE
+mkfifo exe_input
+exec 9<>exe_input
+$cmd > $exe.out &
+echo \"$raw_input{$exe}\" > exe_input
+
+if [ \"$kill_me{$exe}\" = \"1\" ]
+then
+	echo \"Killing...\"
+	pkill -9 -f $exe
+else
+	wait \$!
+fi");
+	# Free resources used to send input.
+	system ("exec 9<&-; rm exe_input");
+        
+	if ($ret != 0 && !($ret == 9 && $kill_me{$exe})) {
+		if (($ret << 8) == 77) {
 			die "Interrupted\n";
 		}
 		$execute_error++;
