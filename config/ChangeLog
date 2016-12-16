@@ -1,4 +1,9 @@
 
+2016-12-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* acu.conf, mf.conf: removed CONSOLE as it is internally used as
+	  mnemonic device and therefore should not be in reserved list
+
 2016-11-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added use-for-debugging config option.
