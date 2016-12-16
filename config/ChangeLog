@@ -3,6 +3,7 @@
 
 	* acu.conf, mf.conf: removed CONSOLE as it is internally used as
 	  mnemonic device and therefore should not be in reserved list
+	* mf.conf: added COMMAND-LINE as it is in parser
 
 2016-11-19  Edward Hart <edward.dan.hart@gmail.com>
 
