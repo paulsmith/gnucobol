@@ -1,4 +1,10 @@
 
+2016-12-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l: limit for ACUCOBOL literals: UINT_MAX
+	* tree.c: check for LLONG_MAX and define it if it is defined as
+	  LONG_LONG_MAX / _I64_MAX
+
 2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_info): output exact C compiler which was used

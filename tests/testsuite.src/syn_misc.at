@@ -2458,6 +2458,39 @@ prog.cob: 14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
 
 AT_CLEANUP
 
+
+
+AT_SETUP([ACUCOBOL 32bit literal size])
+# ACUCOBOL literal max - the result is system dependent on size of unsigned long int
+AT_SKIP_IF(true)
+
+AT_KEYWORDS([extensions literals])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+
+       >>SOURCE FREE
+           DISPLAY B#1111111111111111111111111111111111111111111111111111111111111111
+               O#1111111111111111111111 X#1111111111111111
+
+           STOP RUN.
+])
+
+#AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
+# TODO check the result according to COB_32_BIT_LONG --> 1 should result in the following
+AT_CHECK([$COMPILE -std=acu prog.cob], [1], [],
+[prog.cob: 7: error: invalid B# literal: '11111111111111111111111111111111111...'
+prog.cob: 7: error: literal exceeds limit 4294967295
+prog.cob: 8: error: invalid O# literal: '1111111111111111111111'
+prog.cob: 8: error: literal exceeds limit 4294967295
+prog.cob: 8: error: invalid X# literal: '1111111111111111'
+prog.cob: 8: error: literal exceeds limit 4294967295
+])
+AT_CLEANUP
+
+
 AT_SETUP([Adding/removing reserved words])
 AT_KEYWORDS([misc extensions configuration])
 

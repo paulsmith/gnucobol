@@ -107,9 +107,9 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
            DISPLAY B#101 UPON STDOUT
-           DISPLAY O#1777777777777777777777 UPON STDOUT
-           DISPLAY X#ffffffffffffffff UPON STDOUT
-           DISPLAY H#ffffffffffffffff UPON STDOUT
+           DISPLAY O#17777777777 UPON STDOUT
+           DISPLAY X#ffffffff UPON STDOUT
+           DISPLAY H#ffffffff UPON STDOUT
 
            STOP RUN.
 ])
@@ -117,9 +117,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [5
-18446744073709551615
-18446744073709551615
-18446744073709551615
+2147483647
+4294967295
+4294967295
 ])
 
 AT_CLEANUP

@@ -27,6 +27,17 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#ifndef LLONG_MAX
+#ifdef LONG_LONG_MAX
+#define LLONG_MAX LONG_LONG_MAX
+#define ULLONG_MAX ULONG_LONG_MAX
+#elif defined _I64_MAX
+#define LLONG_MAX _I64_MAX
+#define ULLONG_MAX _UI64_MAX
+#else
+#error compiler misses maximum for 64bit integer
+#endif
+#endif
 
 #include "cobc.h"
 #include "tree.h"
