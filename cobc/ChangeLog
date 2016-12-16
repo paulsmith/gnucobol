@@ -4,6 +4,8 @@
 	* scanner.l: limit for ACUCOBOL literals: UINT_MAX
 	* tree.c: check for LLONG_MAX and define it if it is defined as
 	  LONG_LONG_MAX / _I64_MAX
+	* parser.y, reserved.c: added ACUCOBOL line sequential
+	  device names for ASSIGN
 
 2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

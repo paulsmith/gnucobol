@@ -299,7 +299,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "AUTO",			0, 0, AUTO,			/* 2002 (C/S) */
 				0, 0
   },
-  { "AUTOMATIC",		0, 0, AUTOMATIC,		/* 2002 (C/S) */
+  { "AUTOMATIC",		0, 0, AUTOMATIC,		/* 2002 */
 				0, 0
   },
   { "AWAY-FROM-ZERO",		0, 1, AWAY_FROM_ZERO,		/* 2014 (C/S) */
@@ -380,6 +380,15 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CAPACITY",			0, 1, CAPACITY,			/* 2014 (C/S) */
 				0, 0
 	/* FIXME: 2014 Context-sensitive to OCCURS clause */
+  },
+  { "CARD-PUNCH",			0, 1, CARD_PUNCH,			/* Extension */
+				0, CB_CS_ASSIGN
+  },
+  { "CARD-READER",			0, 1, CARD_READER,			/* Extension */
+				0, CB_CS_ASSIGN
+  },
+  { "CASSETTE",			0, 1, CASSETTE,			/* Extension */
+				0, CB_CS_ASSIGN
   },
   { "CD",			0, 0, CD,			/* Communication Section */
 				0, 0
@@ -665,7 +674,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "ECHO",			0, 0, ECHO,			/* Extension */
-    				0, 0
+				0, 0
   },
   { "EGI",			0, 0, EGI,			/* Communication Section */
 				0, 0
@@ -802,7 +811,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXCEPTION-OBJECT",		0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "EXCLUSIVE",		0, 0, EXCLUSIVE,		/* Extension */
+  { "EXCLUSIVE",		0, 0, EXCLUSIVE,		/* 2002 */
 				0, 0
   },
   { "EXIT",			0, 0, EXIT,			/* 2002 */
@@ -818,7 +827,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "F",			0, 0, F,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "FACTORY",			0, 0, -1,			/* 2002 */
 				0, 0
@@ -848,7 +857,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "FIXED",			0, 0, FIXED,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "FLOAT-BINARY-128",		0, 0, -1,			/* 2011 */
 				0, 0
@@ -940,7 +949,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "GRID",			0, 0, GRID,			/* Extension */
-    				0, 0
+				0, 0
   },
   { "GROUP",			0, 0, GROUP,			/* 2002 */
 				0, 0
@@ -1151,7 +1160,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LOWLIGHT",			0, 0, LOWLIGHT,			/* 2002 (C/S) */
 				0, 0
   },
-  { "MANUAL",			0, 0, MANUAL,			/* 2002 (C/S) */
+  { "MAGNETIC-TAPE",			0, 1, MAGNETIC_TAPE,			/* Extension */
+				0, CB_CS_ASSIGN
+  },
+  { "MANUAL",			0, 0, MANUAL,			/* 2002 */
 				0, 0
   },
   { "MEMORY",			0, 0, MEMORY,			/* 85 */
@@ -1562,7 +1574,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "S",			0, 0, S,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "SAME",			0, 0, SAME,			/* 2002 */
 				0, 0
@@ -1846,7 +1858,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "U",			0, 0, U,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
@@ -1915,7 +1927,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "V",			0, 0, V,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "VAL-STATUS",		0, 0, -1,			/* 2002 */
 				0, 0
@@ -1936,7 +1948,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "VARIABLE",			0, 0, VARIABLE,			/* Extension */
-    				0, CB_CS_RECORDING
+				0, CB_CS_RECORDING
   },
   { "VARYING",			0, 0, VARYING,			/* 2002 */
 				0, 0

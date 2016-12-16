@@ -1656,6 +1656,9 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token CALL
 %token CANCEL
 %token CAPACITY
+%token CARD_PUNCH		"CARD-PUNCH"
+%token CARD_READER		"CARD-READER"
+%token CASSETTE
 %token CD
 %token CF
 %token CH
@@ -1885,6 +1888,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token LOWLIGHT
 %token LOW_VALUE		"LOW-VALUE"
 %token MANUAL
+%token MAGNETIC_TAPE		"MAGNETIC-TAPE"
 %token MEMORY
 %token MERGE
 %token MESSAGE
@@ -3480,10 +3484,21 @@ assign_clause:
 	cobc_cs_check = 0;
 	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
-| ASSIGN _to_using _ext_clause device_name _assignment_name
+| ASSIGN _to_using _ext_clause general_device_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
 	cobc_cs_check = 0;
+	if ($5) {
+		current_file->assign = cb_build_assignment_name (current_file, $5);
+	} else {
+		current_file->flag_fileid = 1;
+	}
+  }
+| ASSIGN _to_using _ext_clause line_seq_device_name _assignment_name
+  {
+	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
+	cobc_cs_check = 0;
+	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
 	} else {
@@ -3542,17 +3557,34 @@ assign_clause:
   }
 ;
 
+
+/* Indicates a print-file */
+/* Hint: R/M-COBOL has PRINTER01 thru PRINTER99 !
+         MF-COBOL handles these identical to PRINTER-1,
+         with an optional file name PRINTER01 thru PRINTER99
+*/
 printer_name:
   PRINTER	{ $$ = cb_int0; }
 | PRINTER_1	{ $$ = cb_int1; }
 | PRINT		{ $$ = cb_int4; }
 ;
 
-device_name:
+/* Indicates no special processing */
+general_device_name:
   DISC
 | DISK
 | TAPE
 | RANDOM
+;
+
+line_seq_device_name:
+  CARD_PUNCH
+| CARD_READER
+| CASSETTE
+| INPUT
+| INPUT_OUTPUT
+| MAGNETIC_TAPE
+| OUTPUT
 ;
 
 _line_adv_file:
