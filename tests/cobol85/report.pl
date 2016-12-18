@@ -2,7 +2,7 @@
 # gnucobol/tests/cobol85/report.pl
 #
 # Copyright (C) 2001-2012, 2016 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While, Simon Sobisch
+# Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
 #
@@ -56,6 +56,18 @@ if ($cobcrun_direct ne "") {
 	$cobcrun_direct = "$cobcrun_direct ";
 }
 
+# temporary directory (used for fifos)
+my $tmpdir = $ENV{"TMPDIR"};
+if ($tmpdir eq "") {
+	$tmpdir = $ENV{"TEMP"};
+	if ($tmpdir eq "") {
+		$tmpdir = $ENV{"TMP"};
+		if ($tmpdir eq "") {
+			$tmpdir = "/tmp";
+		}
+	}
+}
+
 
 $compile_module = "$cobc -m";
 if ($force_cobcrun) {
@@ -87,39 +99,39 @@ $ENV{"COB_DISABLE_WARNINGS"} = "Y";
 # runtime DEBUG switch.
 # Dealt with lower down in the code
 
-# NC113M does not adhere to the test convention
-# Dealt with lower down in the code
-
 # Skip DB203A if no ISAM configured
 if ($ENV{'COB_HAS_ISAM'} eq "no") {
 	$skip{DB203A} = 1;
 }
 
-# Compile only programs
-
 # OBNC1M tests the STOP literal statement and requires user input.
-$raw_input{OBNC1M} = "\n\n\n\n\n\n\n";
+$raw_input{OBNC1M} = "\n\n\n\n\n\n\n"; # a raw_input entry emits 1 additional newline
 $kill_me{OBNC1M} = 1;
 
+# NC114M test the compiler listing along to other parts.
+$cobc_flags{NC114M} = "-t NC114M.lst --no-symbols";
+
 # NC302M tests the compiler flagging of obsolete features, including STOP literal.
-# TO-DO: automatically check cobc emits 7 warnings with -Wobsolete.
-$raw_input{NC302M} = "\n";
+$cobc_flags{NC302M} = "-Wobsolete";
+$raw_input{NC302M} = ""; # a raw_input entry emits 1 additional newline
+
+# Compile only programs
 
 # The following tests are for compiler flagging and cannot run without abends.
 # TO-DO: automatically check cobc emits the right number of warnings with
 # -Wobsolete (ignore high subset checking).
-$componly{NC401M} = 1;
-$componly{RL301M} = 1;
-$componly{RL401M} = 1;
-$componly{IC401M} = 1;
-$componly{IX301M} = 1;
-$componly{IX401M} = 1;
-$componly{SQ303M} = 1;
-$componly{SQ401M} = 1;
-$componly{ST301M} = 1;
+$comp_only{NC401M} = 1;
+$comp_only{RL301M} = 1;
+$comp_only{RL401M} = 1;
+$comp_only{IC401M} = 1;
+$comp_only{IX301M} = 1;
+$comp_only{IX401M} = 1;
+$comp_only{SQ303M} = 1;
+$comp_only{SQ401M} = 1;
+$comp_only{ST301M} = 1;
 
 # Until RECEIVE is implemented, DB205A contains an infinite loop.
-$componly{DB205A} = 1;
+$comp_only{DB205A} = 1;
 
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
@@ -143,6 +155,12 @@ $nooutput{DB303M} = 1;
 $nooutput{DB305M} = 1;
 $nooutput{IF402M} = 1;
 
+$cobc_flags{SM206A} = "-fdebugging-line";
+
+# Programs that need to be "visual" inspected
+# NC113M: inspected additional to normal tests for output of hex values
+# SQ101M, SQ201M, SQ207M, SQ208M, SQ209M, SQ210M: send report.log to printer and check result
+# 
 
 open (LOG, "> report.txt") or die;
 print LOG "Filename    total pass fail deleted inspect\n";
@@ -166,6 +184,14 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 
 	$exe =~ s/\.CBL//;
 	$exe =~ s/\.SUB//;
+	
+	printf LOG "%-12s", $in;
+	if ($skip{$exe}) {
+		$test_skipped++;
+		print LOG "  ----- test skipped -----\n";
+		next;
+	}
+
 	if (-e "./$exe.DAT") {
 		if ($force_cobcrun) {
 			$cmd = "$cobcrun $exe < $exe.DAT";
@@ -179,26 +205,30 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 			$cmd = "$cobcrun_direct./$exe";
 		}
 	}
-	printf LOG "%-12s", $in;
-	if ($skip{$exe}) {
-		$test_skipped++;
-		print LOG "  ----- test skipped -----\n";
-		next;
-	}
+
 	$num_progs++;
-	$copy = ($exe =~ /^SM/) ? "-I ../copy " : "";
-	if ($componly{$exe}) {
-		print "$compile $copy$in\n";
-	} else {
-		print "$compile $copy$in && $cmd\n";
+	my $compile_current = $compile;
+	if ($cobc_flags{$exe}) {
+		$compile_current = "$compile_current $cobc_flags{$exe}";
 	}
-	if ($in eq "SM206A.CBL") {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -fdebugging-line $copy$in");
-	} elsif ($in eq "NC127A.CBL") {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile -ffold-call=upper $copy$in");
-	} else {
-		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile $copy$in");
+	if ($exe =~ /^SM/) {
+		$compile_current = "$compile_current -I ../copy";
 	}
+	$compile_current = "$compile_current $in";
+	if ($comp_only{$exe}) {
+		print "$compile_current\n";
+	} else {
+		print "$compile_current && $cmd\n";
+	}
+	$compile_current = "$compile_current 1> $exe.cobc.out 2>&1";
+
+	my $total = 0;
+	my $pass= 0;
+	my $fail= 0;
+	my $deleted = 0;
+	my $inspect = 0;
+
+	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_current");
 	if ($ret != 0) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
@@ -207,11 +237,28 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		print LOG "  ===== compile error =====\n";
 		next;
 	}
-	if ($componly{$exe}) {
+
+	# NC302M needs to checked for compiler warnings
+	if ($exe eq "NC302M") {
+		#$total = 7;
+		open (my $COBC_OUT, '<', "$exe.cobc.out");
+		while (<$COBC_OUT>) {
+			if (/ warning: ([A-Z-]+) .* obsolete /) {
+		#		$pass += 1;
+				next;
+			}
+		}
+	}
+
+	unlink "$exe.cobc.out" if (-s "$exe.cobc.out" == 0);
+
+	if ($comp_only{$exe}) {
 		printf LOG ("    0    0    0       0       0 OK\n");
 		$total_ok++;
 		next;
 	}
+	
+	
 	if ($in =~ /\.CBL/) {
 		if ($ENV{'DB_HOME'}) {
 			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*; rm -f $ENV{'DB_HOME'}/XXXXX*");
@@ -222,6 +269,7 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 			die "Interrupted\n";
 		}
 	}
+
 	$subt = substr($exe, 0, 2);
 	if ($exe eq "DB102A") {
 		$ENV{"COB_SET_DEBUG"} = "N";
@@ -233,26 +281,30 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	if ($subt eq "RW") {
 		$ENV{"DD_XXXXX049"} = "$exe.rep";
 	}
+	$ENV{"report.log"} = "$exe.log";
+	my $exe_input = "\"$tmpdir/$exe.fifo\"";
+	if ($raw_input{$exe}) {
+		$cmd = "$cmd < $exe_input";
+	}
+
 testrepeat:
-        if ($raw_input{$exe}) {
-		$cmd = $cmd . " < exe_input"
-        }
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE
-mkfifo exe_input
-exec 9<>exe_input
+	$ret = system ("\
+trap 'exit 77' INT QUIT TERM PIPE
+mkfifo $exe_input
+exec 9<>$exe_input
 $cmd > $exe.out &
-echo \"$raw_input{$exe}\" > exe_input
+echo \"$raw_input{$exe}\" > $exe_input
 
 if [ \"$kill_me{$exe}\" = \"1\" ]
 then
-	echo \"Killing...\"
+	echo \"Killing $exe...\"
 	pkill -9 -f $exe
 else
 	wait \$!
 fi");
-	# Free resources used to send input.
-	system ("exec 9<&-; rm exe_input");
-        
+# Free resources used to send input.
+	system ("exec 9<&-; rm $exe_input");
+
 	if ($ret != 0 && !($ret == 9 && $kill_me{$exe})) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
@@ -261,31 +313,135 @@ fi");
 		print LOG "***** execute error *****\n";
 		next;
 	}
-	my $total = 0;
-	my $pass= 0;
-	my $fail= 0;
-	my $deleted = 0;
-	my $inspect = 0;
 	if ($nooutput{$exe}) {
 		$total = 1;
 		$pass = 1;
-	} elsif (open (PRT, "report.log")) {
-		while (<PRT>) {
-			if (/^ *([0-9]+) *OF *([0-9]+) *TESTS WERE/) {
-				$total += $2;
-				$pass += $1;
-			} elsif (/^ *([0-9NO]+) *TEST\(S\) ([A-Z]+)/) {
-				my $num = $1 eq "NO" ? 0 : $1;
-				if ($2 eq "FAILED") {
-					$fail += $num;
-				} elsif ($2 eq "DELETED") {
-					$deleted += $num;
-				} elsif ($2 eq "REQUIRE") {
-					$inspect += $num;
+	} elsif (open (my $PRT, '<', "$exe.log")) {
+
+		# NC107A: check hex values in report
+		if ($exe eq "NC107A") {
+			binmode($PRT);
+			while (<$PRT>) {
+				if (/^ *([0-9]+) *OF *([0-9]+) *TESTS WERE/) {
+					$total += $2;
+					$pass += $1;
+				} elsif (/^ *([0-9NO]+) *TEST\(S\) ([A-Z]+)/) {
+					my $num = $1 eq "NO" ? 0 : $1;
+					if ($2 eq "FAILED") {
+						$fail += $num;
+					} elsif ($2 eq "DELETED") {
+						$deleted += $num;
+					}
+				} elsif (/^\*\*\* INFORMATION \*\*\*        (.{20})     ([A-Z-]+) /) {
+					if (("$2" eq "ZERO"       && "$1" eq " 000000000000000000 ") ||
+					    ("$2" eq "SPACE"      && "$1" eq "                    ") ||
+					    ("$2" eq "QUOTE"      && "$1" eq "\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"") ||
+					    ("$2" eq "HIGH-VALUE" && "$1" eq "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377") ||
+					    ("$2" eq "LOW-VALUE"  && "$1" eq "\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000") ) {
+						$pass += 1;
+					} else {
+						$fail += 1;
+					}
 				}
-			} elsif (/^ *([0-9]+) *TESTS REQUIRE VISUAL INSPECTION/) {
-				$total += $1;
-				$inspect += $1;
+			}
+
+		# NC113M needs to be "visual" inspected for tests being sequential
+		} elsif ($exe eq "NC113M") {
+			my $seqcount = 0;
+			while (<$PRT>) {
+				if (/^ MARGIN TESTING *MAR-TEST-([0-9]+) /) {
+					$seqcount += 1;
+					if ($seqcount eq $1) {
+						$pass += 1;
+					} else {
+						$fail += 1;
+						$seqcount = $1;
+					}
+				} elsif (/^ *([0-9]+) *TESTS REQUIRE VISUAL INSPECTION/) {
+					$total += $1;
+				}
+			}
+
+		# NC114M TODO: check the listing, removing the "inspect" entries
+
+		# NC121M/NC220M: needs to be inspected for identical display output
+		} elsif ($exe eq "NC121M" || $exe eq "NC220M") {
+			my $line = my $line2 ="";
+			if (open (my $fh, '<', "$exe.out")) {
+				<$fh>;
+				$line = <$fh>;
+				$line2 = <$fh>;
+			}
+			while (<$PRT>) {
+				if (/^ *([0-9]+) *OF *([0-9]+) *TESTS WERE/) {
+					$total += $2;
+					$pass += $1;
+				} elsif (/^ *([0-9NO]+) *TEST\(S\) ([A-Z]+)/) {
+					my $num = $1 eq "NO" ? 0 : $1;
+					if ($2 eq "FAILED") {
+						$fail += $num;
+					} elsif ($2 eq "DELETED") {
+						$deleted += $num;
+					}
+				} elsif (/^\*\*\* INFORMATION \*\*\* *([0-9A-Z-]+) /) {
+					chomp $line;
+					if ($line eq $1) {
+						$pass += 1;
+					} else {
+						$fail += 1;
+					}
+					$line = $line2;
+				}
+			}
+
+		# NC135A: needs to be inspected for table output
+		} elsif ($exe eq "NC135A") {
+			my $seqcount = 0;
+			while (<$PRT>) {
+				if (/^ *([0-9]+) *OF *([0-9]+) *TESTS WERE/) {
+					$total += $2;
+					$pass += $1;
+				} elsif (/^ *([0-9NO]+) *TEST\(S\) ([A-Z]+)/) {
+					my $num = $1 eq "NO" ? 0 : $1;
+					if ($2 eq "FAILED") {
+						$fail += $num;
+					} elsif ($2 eq "DELETED") {
+						$deleted += $num;
+					}
+				} elsif (/^   (\d+  )+/) {
+					while ($_ =~ /(\d+)  /g) {
+						$seqcount += 1;
+						if ($seqcount != $1) {
+							$fail += 1;
+							last;
+						}
+						if ($seqcount == 300) {
+							$pass += 1;
+						}
+					}
+					
+				}
+			}
+
+		# normal test procedure
+		} else {
+			while (<$PRT>) {
+				if (/^ *([0-9]+) *OF *([0-9]+) *TESTS WERE/) {
+					$total += $2;
+					$pass += $1;
+				} elsif (/^ *([0-9NO]+) *TEST\(S\) ([A-Z]+)/) {
+					my $num = $1 eq "NO" ? 0 : $1;
+					if ($2 eq "FAILED") {
+						$fail += $num;
+					} elsif ($2 eq "DELETED") {
+						$deleted += $num;
+					} elsif ($2 eq "REQUIRE") {
+						$inspect += $num;
+					}
+				} elsif (/^ *([0-9]+) *TESTS REQUIRE VISUAL INSPECTION/) {
+					$total += $1;
+					$inspect += $1;
+				}
 			}
 		}
 	}
@@ -306,7 +462,6 @@ fi");
 		printf LOG "%-12s", $in;
 		goto testrepeat;
 	}
-	rename ("report.log", "$exe.log");
 	unlink "$exe.out" if (-s "$exe.out" == 0);
 }
 

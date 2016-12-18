@@ -1,15 +1,24 @@
 
+2016-12-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobol85/report.pl: fixing running the suite from shared file systems by
+	  moving fifo to tempdir (where creation of fifo should always be possible)
+	* cobol85/report.pl, cobol85/NC.txt: automated "manual investigations"
+	* cobol85/report.pl: moved test specific compilation flags to $cobc_flags
+	  and show them on command line,
+	  create report.log directly with test specific name
+
 2016-12-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobol85/report.pl, cobol85/*.txt: compile only tests no longer
-	  increment the successful test counter, as this is for runtime tests.
+	  increment the successful test counter, as this is for runtime tests
 	* cobol85/report.pl: allow passing input to programs (e.g. for those
-	  with STOP literal).
+	  with STOP literal)
 
 2016-12-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobol85/report.pl: updated and annotated the list of compile-only
-	  tests.
+	  tests
 
 2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
