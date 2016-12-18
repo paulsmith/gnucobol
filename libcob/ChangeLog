@@ -1,4 +1,9 @@
 
+2016-12-18 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (lock_record, test_record_lock): initialize DBT structure
+	  before using it to prevent memory corruption
+
 2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_info): FR #169 output exact versions of GMP/MPIR and
