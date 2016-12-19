@@ -1,4 +1,8 @@
 
+2016-12-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck.c: stricter syntax checking for WRITE|REWRITE FILE
+
 2016-12-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: limit for ACUCOBOL literals: UINT_MAX
@@ -17,6 +21,10 @@
 	* cobc.c (process_filename) [_WIN32]: check extension .asm along to .s
 	* cobc.c (process_compile) [!_MSC_VER]: use COB_PIC_FLAGS when compiling
 	  to a module, surround the translation name by quotes
+
+2016-11-30  Ron Norman <rjn@inglenet.com>
+
+	* parser.y, typeck.c: FR #170 implement WRITE|REWRITE FILE filename
 
 2016-11-22  Dave Pitts <dpitts@cozx.com>
 
