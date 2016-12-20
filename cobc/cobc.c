@@ -93,8 +93,11 @@ struct strcache {
 #define OC_C_VERSION_PRF	""
 #define OC_C_VERSION	CB_XSTRINGIFY(__VERSION__)
 #elif	defined(__xlc__)
-#define OC_C_VERSION_PRF	"(IBM) "
+#define OC_C_VERSION_PRF	"(IBM XL C/C++) "
 #define OC_C_VERSION	CB_XSTRINGIFY(__xlc__)
+#elif	defined(__SUNPRO_CC)
+#define OC_C_VERSION_PRF	"(Sun C++) "
+#define OC_C_VERSION	CB_XSTRINGIFY(__SUNPRO_CC)
 #elif	defined(_MSC_VER)
 #define OC_C_VERSION_PRF	"(Microsoft) "
 #define OC_C_VERSION	CB_XSTRINGIFY(_MSC_VER)
