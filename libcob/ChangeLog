@@ -1,4 +1,9 @@
 
+2016-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: added compatibility define for cobclear and corrected
+	  cobrescanenv to always return zero.
+
 2016-12-18 Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (lock_record, test_record_lock): initialize DBT structure

@@ -1817,12 +1817,13 @@ COB_EXPIMP cob_field *cob_intr_integer_of_formatted_date	(cob_field *,
 
 #define	cobgetenv(x)			cob_getenv (x)
 #define	cobputenv(x)			cob_putenv (x)
-#define cobrescanenv()	/* not necessary as GnuCOBOL always reads the process environment */
+#define cobrescanenv()	0 /* not necessary as GnuCOBOL always reads the process environment */
 #define	cobtidy()			cob_tidy ()
 #define	cobinit()			cob_extern_init ()
 #define	cobexit(x)			cob_stop_run (x)
 #define	cobcommandline(v,w,x,y,z)	cob_command_line (v,w,x,y,z)
 
+#define cobclear()			(void) cob_sys_clear_screen ()
 #define	cobcols()			cob_get_scr_cols ()
 #define	coblines()			cob_get_scr_lines ()
 /*******************************/
