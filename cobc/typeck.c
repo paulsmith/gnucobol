@@ -5583,25 +5583,6 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 }
 
 void
-cb_emit_display_omitted (cb_tree pos, struct cb_attr_struct *attr_ptr)
-{
-	cb_tree		fgc;
-	cb_tree		bgc;
-	cb_tree		scroll;
-	cb_tree		size_is;	/* WITH SIZE IS */
-	cob_flags_t		disp_attrs;
-
-	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &disp_attrs);
-	if (validate_attrs (pos, fgc, bgc, scroll, size_is)) {
-		return;
-	}
-
-	/* TODO: Implement */
-	/* Should we create a distinct omitted_display function in screenio.c? */
-	/* emit_field_display (NULL, pos, fgc, bgc, scroll, size_is, disp_attrs); */
-}
-
-void
 cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 		 cb_tree line_column, struct cb_attr_struct *attr_ptr,
 		 int is_first_display_list,

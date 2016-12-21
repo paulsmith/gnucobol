@@ -1737,8 +1737,6 @@ extern void		cb_emit_commit (void);
 extern void		cb_emit_continue (void);
 extern void		cb_emit_delete (cb_tree);
 extern void		cb_emit_delete_file (cb_tree);
-extern void		cb_emit_display_omitted (cb_tree,
-						 struct cb_attr_struct *);
 extern void		cb_emit_display (cb_tree, cb_tree,
 					 cb_tree, cb_tree,
 					 struct cb_attr_struct *,

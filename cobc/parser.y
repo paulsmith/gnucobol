@@ -7966,33 +7966,33 @@ display_atom:
   {
 	if ($1 == cb_null) {
 		/* Emit DISPLAY OMITTED. */
+		CB_UNFINISHED ("DISPLAY OMITTED");
 		error_if_no_advancing_in_screen_display (advancing_value);
-		cb_emit_display_omitted (line_column,
-					 current_statement->attr_ptr);
-	} else {
-		/* Emit device or screen DISPLAY. */
-
-		/*
-		  Check that disp_list does not contain an invalid mix of fields.
-		*/
-		if (display_type == UNKNOWN_DISPLAY) {
-			set_display_type ($1, upon_value, line_column,
-					  current_statement->attr_ptr);
-		} else {
-		        error_if_different_display_type ($1, upon_value,
-							 line_column,
-							 current_statement->attr_ptr);
-		}
-
-		if (display_type == SCREEN_DISPLAY
-		    || display_type == FIELD_ON_SCREEN_DISPLAY) {
-			error_if_no_advancing_in_screen_display (advancing_value);
-		}
-
-		cb_emit_display ($1, upon_value, advancing_value, line_column,
-				 current_statement->attr_ptr,
-				 is_first_display_item, display_type);
+		$1 = cb_low;
 	}
+
+	/* Emit device or screen DISPLAY. */
+
+	/*
+	  Check that disp_list does not contain an invalid mix of fields.
+	*/
+	if (display_type == UNKNOWN_DISPLAY) {
+		set_display_type ($1, upon_value, line_column,
+				  current_statement->attr_ptr);
+	} else {
+		error_if_different_display_type ($1, upon_value,
+						 line_column,
+						 current_statement->attr_ptr);
+	}
+
+	if (display_type == SCREEN_DISPLAY
+	    || display_type == FIELD_ON_SCREEN_DISPLAY) {
+		error_if_no_advancing_in_screen_display (advancing_value);
+	}
+
+	cb_emit_display ($1, upon_value, advancing_value, line_column,
+			 current_statement->attr_ptr,
+			 is_first_display_item, display_type);
 
 	is_first_display_item = 0;
   }
