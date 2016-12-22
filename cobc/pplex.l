@@ -90,7 +90,7 @@ static int ppwrap (void) {
 
 /* ignore unused functions here as flex generates unused ones */
 #ifdef	__GNUC__
-#if	__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+#if	defined (__clang__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 #endif
