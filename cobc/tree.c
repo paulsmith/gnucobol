@@ -793,9 +793,15 @@ char *
 cb_name (cb_tree x)
 {
 	char	*s;
+	char	tmp[COB_NORMAL_BUFF] = { 0 };
+	int		tlen;
 
-	s = cobc_parse_malloc ((size_t)COB_NORMAL_BUFF);
-	(void)cb_name_1 (s, x);
+	(void)cb_name_1 (tmp, x);
+
+	tlen = strlen (tmp);
+	s = cobc_parse_malloc (tlen + 1);
+	strncpy (s, tmp, tlen);
+
 	return s;
 }
 

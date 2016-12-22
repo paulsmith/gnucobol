@@ -671,6 +671,7 @@ void
 cobc_abort (const char *filename, const int line_num)
 {
 	cobc_err_msg (_("%s: %d: internal compiler error"), filename, line_num);
+	cobc_err_msg (_("Please report this!"));
 	cobc_abort_terminate ();
 }
 
@@ -1587,9 +1588,21 @@ cobc_terminate (const char *str)
 static void
 cobc_abort_msg (void)
 {
+	char *prog_id;
+
 	if (cb_source_file) {
-		cobc_err_msg (_("aborting compile of %s at line %d"),
-			 cb_source_file, cb_source_line);
+		if (current_program && current_program->program_id) {
+			prog_id = (char *)current_program->program_id;
+		} else {
+			prog_id = _("unknown");
+		}
+		if (!cb_source_line) {
+			cobc_err_msg (_("aborting codegen for %s (PROGRAM-ID: %s)"),
+				cb_source_file, prog_id);
+		} else {
+			cobc_err_msg (_("aborting compile of %s at line %d (PROGRAM-ID: %s)"),
+				cb_source_file, cb_source_line, prog_id);
+		}
 	} else {
 		cobc_err_msg (_("aborting"));
 	}
@@ -1608,6 +1621,7 @@ static void
 cobc_sig_handler (int sig)
 {
 	cobc_abort_msg ();
+	cobc_err_msg (_("Please report this!"));
 	save_temps = 0;
 	cobc_clean_up (1);
 }
@@ -5511,7 +5525,11 @@ process_translate (struct filename *fn)
 		}
 	}
 
-	/* Translate to C */
+/* Translate to C */
+	current_section = NULL;
+	current_paragraph = NULL;
+	current_statement = NULL;
+	cb_source_line = 0;
 	codegen (p, 0);
 
 	/* Close files */

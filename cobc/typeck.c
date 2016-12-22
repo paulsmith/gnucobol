@@ -7789,6 +7789,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 	cb_tree		x;
 	cb_tree		m;
 	unsigned int	tempval;
+	struct cb_reference	*r;
 
 	if (cb_validate_one (src)) {
 		return;
@@ -7801,8 +7802,12 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 
 	tempval = 0;
 	if (cb_list_length (dsts) > 1) {
-		if (CB_INTRINSIC_P (src) || (CB_REFERENCE_P (src) &&
-		    (CB_REFERENCE (src)->subs || CB_REFERENCE (src)->offset))) {
+		if (CB_REFERENCE_P (src)) {
+			r = CB_REFERENCE (src);
+		} else {
+			r = NULL;
+		}
+		if (CB_INTRINSIC_P (src) || (r && (r->subs || r->offset))) {
 			tempval = 1;
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_put_indirect_field",
 						     src));
@@ -7811,7 +7816,13 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 
 	for (l = dsts; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
-		if (CB_LITERAL_P (x) || CB_CONST_P (x)) {
+		if (CB_REFERENCE_P (x)) {
+			r = CB_REFERENCE (x);
+		} else {
+			r = NULL;
+		}
+		if (CB_LITERAL_P (x) || CB_CONST_P (x) || 
+			(r && (CB_LABEL_P (r->value) || CB_PROTOTYPE_P (r->value)))) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid MOVE target: %s"), cb_name (x));
 			continue;

@@ -50,7 +50,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: invalid MOVE statement
 prog.cob: 10: error: invalid MOVE statement
 ])
@@ -74,7 +74,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: invalid MOVE statement
 ])
 
@@ -109,12 +109,13 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 16: error: invalid MOVE statement
 prog.cob: 17: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([MOVE alphanumeric TO x])
 AT_KEYWORDS([move])
@@ -143,6 +144,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([MOVE alphanumeric-edited TO x])
 AT_KEYWORDS([move editing])
 
@@ -166,12 +168,13 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 16: error: invalid MOVE statement
 prog.cob: 17: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([MOVE numeric (integer) TO x])
 AT_KEYWORDS([move])
@@ -196,11 +199,12 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 13: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([MOVE numeric (non-integer) TO x])
 AT_KEYWORDS([move])
@@ -225,13 +229,14 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 13: error: invalid MOVE statement
 prog.cob: 14: error: invalid MOVE statement
 prog.cob: 15: error: invalid MOVE statement
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([MOVE numeric-edited TO x])
 AT_KEYWORDS([move editing])
@@ -256,7 +261,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 13: error: invalid MOVE statement
 ])
 
@@ -288,7 +293,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 11: error: 'X' is not a group name
 prog.cob: 12: error: 'X' is not a group name
 prog.cob: 13: error: 'G-1 (1:1)' is not a group name
@@ -296,6 +301,7 @@ prog.cob: 14: error: 'G-2 (1:1)' is not a group name
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([CORRESPONDING - Target has no matching items])
 AT_KEYWORDS([move])
@@ -323,8 +329,7 @@ AT_CLEANUP
 
 # 11) DONE
 
-
-AT_SETUP([MOVE: misc])
+AT_SETUP([MOVE to errornous field])
 AT_KEYWORDS([move])
 
 AT_DATA([prog.cob], [
@@ -340,14 +345,14 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 6: error: PICTURE clause required for 'INVALID-ITEM'
 ])
 
 AT_CLEANUP
 
 
-AT_SETUP([MOVE: Overlapping])
+AT_SETUP([Overlapping MOVE])
 AT_KEYWORDS([move])
 
 AT_DATA([prog.cob], [
@@ -423,5 +428,71 @@ prog.cob: 32: warning: overlapping MOVE may produce unpredictable results
 prog.cob: 34: warning: overlapping MOVE may produce unpredictable results
 ])
 AT_CHECK([./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid source for MOVE])
+AT_KEYWORDS([move label program-prototype])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           PROGRAM repo-prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 MAIN-VAR      PIC X(3).
+       PROCEDURE        DIVISION.
+       MAIN.
+           MOVE MAIN TO MAIN-VAR.
+           MOVE repo-prog TO MAIN.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: warning: no definition/prototype seen for program 'repo-prog'
+prog.cob: in paragraph 'MAIN':
+prog.cob: 13: error: 'MAIN' is not a field
+prog.cob: 14: error: 'repo-prog' is not a field
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([invalid target for MOVE])
+AT_KEYWORDS([move constant label program-prototype])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       REPOSITORY.
+           PROGRAM repo-prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       78 DEFINED-CONST VALUE 'A'.
+       77 MAIN-VAR      PIC X(3).
+       PROCEDURE        DIVISION.
+       MAIN.
+           MOVE 'A' TO MAIN-VAR.
+           MOVE 'B' TO MAIN.
+           MOVE 'C' TO repo-prog.
+           MOVE 'D' TO QUOTE.
+           MOVE 'E' TO DEFINED-CONST.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 7: warning: no definition/prototype seen for program 'repo-prog'
+prog.cob: in paragraph 'MAIN':
+prog.cob: 15: error: invalid MOVE target: MAIN
+prog.cob: 16: error: invalid MOVE target: repo-prog
+prog.cob: 17: error: invalid MOVE target: QUOTE
+prog.cob: 18: error: invalid MOVE target: "A"
+])
 
 AT_CLEANUP

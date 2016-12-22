@@ -1,4 +1,16 @@
 
+2016-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c: use global current_program instead of local current_prog
+	* cobc.c (cobc_abort_msg): part of fixing bug #344
+	  distinguish between compilation and final code generation
+	* cobc.c: added message for internal compiler errors to report them
+	* codegen.c (output_param): part of fixing bug #344
+	  check for field reference to prevent SIGSEGV
+	* typeck.c (cb_emit_move): fixing bug #344 check that MOVE target is
+	  no label or program prototypes
+	* tree.c (cb_name): only use as much parsing memory for names as necessary
+
 2016-12-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, typeck.c: stricter syntax checking for WRITE|REWRITE FILE
