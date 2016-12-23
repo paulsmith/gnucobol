@@ -2088,9 +2088,39 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 		/* extension: ACCEPT OMITTED */
 		if (unlikely(!f)) {
-			(void)flushinp ();
-			cob_beep ();
-			continue;
+			/* special keys for ACCEPT OMITTED */
+			switch (keyp) {
+			case KEY_LEFT:
+				fret = 2009;
+				goto field_return;
+			case KEY_RIGHT:
+				fret = 2010;
+				goto field_return;
+			case KEY_IC:
+				/* Insert key. */
+				fret = 2011;
+				goto field_return;
+			case KEY_DC:
+				/* Delete key. */
+				fret = 2012;
+				goto field_return;
+			case KEY_BACKSPACE:
+				/* Backspace key. */
+				fret = 2013;
+				goto field_return;
+			case KEY_HOME:
+				/* Home key. */
+				fret = 2014;
+				goto field_return;
+			case KEY_END:
+				/* End key. */
+				fret = 2015;
+				goto field_return;
+			default:
+				(void)flushinp ();
+				cob_beep ();
+				continue;
+			}
 		}
 
 		/* Positioning keys */

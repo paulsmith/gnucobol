@@ -1,4 +1,11 @@
 
+2016-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (field_accept): changes for ACCEPT OMITTED:
+	  return COB-SCR-KEY-LEFT and COB-SCR-KEY-RIGHT, additional return
+	  the new keycodes COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
+	  COB-SCR-KEY-HOME, COB-SCR-KEY-END (*only* for ACCEPT OMITTED!)
+
 2016-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added compatibility define for cobclear and corrected

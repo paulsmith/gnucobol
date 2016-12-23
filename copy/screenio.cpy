@@ -1,4 +1,4 @@
-      *>  Copyright (C) 2008-2012 Free Software Foundation, Inc.
+      *>  Copyright (C) 2008-2012, 2015-2016  Free Software Foundation, Inc.
       *>  Written by Roger While
       *>
       *>  This file is part of GnuCOBOL.
@@ -100,8 +100,8 @@
        78  COB-SCR-F63         VALUE 1063.
        78  COB-SCR-F64         VALUE 1064.
       *>  Exception keys - Values 2xxx
-       78  COB-SCR-PAGE_UP     VALUE 2001.
-       78  COB-SCR-PAGE_DOWN   VALUE 2002.
+       78  COB-SCR-PAGE-UP     VALUE 2001.
+       78  COB-SCR-PAGE-DOWN   VALUE 2002.
        78  COB-SCR-KEY-UP      VALUE 2003.
        78  COB-SCR-KEY-DOWN    VALUE 2004.
        78  COB-SCR-ESC         VALUE 2005.
@@ -110,6 +110,13 @@
        78  COB-SCR-BACK-TAB    VALUE 2008.
        78  COB-SCR-KEY-LEFT    VALUE 2009.
        78  COB-SCR-KEY-RIGHT   VALUE 2010.
+      *>  The following exception keys are currently *only* returned
+      *>  on ACCEPT OMITTED
+       78  COB-SCR-INSERT      VALUE 2011.
+       78  COB-SCR-DELETE      VALUE 2012.
+       78  COB-SCR-BACKSPACE   VALUE 2013.
+       78  COB-SCR-KEY-HOME    VALUE 2014.
+       78  COB-SCR-KEY-END     VALUE 2015.      
       *>  Input validation - Values 8xxx
        78  COB-SCR-NO-FIELD    VALUE 8000.
        78  COB-SCR-TIME-OUT    VALUE 8001.
