@@ -13617,10 +13617,11 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
-# Check gcc/icc
+# Check gcc/icc/clang
 COB_USES_GCC_ICC=no
 COB_USES_GCC_ONLY=no
 COB_USES_ICC_ONLY=no
+COB_USES_CLANG_ONLY=no
 
 if test "$cross_compiling" = yes; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
@@ -13706,6 +13707,36 @@ main ()
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   COB_USES_ICC_ONLY=yes
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+	#ifdef __clang__
+	return 0;
+	#else
+	return 1;
+	#endif
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  COB_USES_CLANG_ONLY=yes
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
@@ -17692,6 +17723,11 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 		unset MYOLDCFLAGS
 	fi
+
+        # Add -Qunused-arguments if using clang.
+	if test "$COB_USES_CLANG_ONLY" = "yes"; then
+		CFLAGS="$CFLAGS -Qunused-arguments"
+	fi
 fi
 
 unset enable_cflags_setting
@@ -17872,6 +17908,7 @@ fi
 unset COB_USES_GCC_ICC
 unset COB_USES_GCC_ONLY
 unset COB_USES_ICC_ONLY
+unset COB_USES_CLANG_ONLY
 unset MYOLDCFLAGS
 unset MYOLDLIBS
 unset MYOCLIBS

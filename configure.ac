@@ -261,10 +261,11 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
 	[AC_MSG_RESULT([no])])
 
 
-# Check gcc/icc
+# Check gcc/icc/clang
 COB_USES_GCC_ICC=no
 COB_USES_GCC_ONLY=no
 COB_USES_ICC_ONLY=no
+COB_USES_CLANG_ONLY=no
 
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	#ifdef __GNUC__
@@ -296,6 +297,16 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	[],
 	[])
 
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	#ifdef __clang__
+	return 0;
+	#else
+	return 1;
+	#endif]])],
+	[COB_USES_CLANG_ONLY=yes],
+	[],
+	[])
+                                      
 COB_CC="$CC"
 if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
@@ -983,6 +994,11 @@ if test "$enable_cflags_setting" = yes; then
 			[CFLAGS="$MYOLDCFLAGS"; AC_MSG_RESULT([no])])
 		unset MYOLDCFLAGS
 	fi
+
+        # Add -Qunused-arguments if using clang.
+	if test "$COB_USES_CLANG_ONLY" = "yes"; then
+		CFLAGS="$CFLAGS -Qunused-arguments"
+	fi
 fi
 
 unset enable_cflags_setting
@@ -1148,6 +1164,7 @@ fi
 unset COB_USES_GCC_ICC
 unset COB_USES_GCC_ONLY
 unset COB_USES_ICC_ONLY
+unset COB_USES_CLANG_ONLY
 unset MYOLDCFLAGS
 unset MYOLDLIBS
 unset MYOCLIBS
