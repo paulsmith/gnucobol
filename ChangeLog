@@ -1,13 +1,18 @@
 
+2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: #bugs 346 moved compiler specific COB_CFLAGS from
+	  cobc/cobc.c to configure, removes the use of HAVE_PSIGN_OPT, too
+
 2016-12-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* configure.ac: added -Qunused-arguments to clang CFLAGS.
 
-2016-12-22 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: additional test for libdisam names
 
-2016-12-06 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: changed package-name to gnucobol
 	* configure.ac: fixing bug #339 added COB_MODULE_EXT to config.h,
@@ -21,12 +26,12 @@
 
 	* configure.ac: check for sys/wait.h (for CBL_GC_WAITPID)
 
-2016-11-06 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: limit PATCH_LEVEL to numeric, max 8 digits
 	* configure.ac: use AS_HELP_STRING for all options
 
-2016-11-05 Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Bootstrap up to libtool 2.4.6 / automake 1.15
 

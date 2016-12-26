@@ -74,7 +74,6 @@ AH_TEMPLATE([COB_STRIP_CMD], [Strip command])
 AH_TEMPLATE([USE_LIBDL], [Use system dynamic loader])
 AH_TEMPLATE([HAVE_DLADDR], [Has dladdr function])
 AH_TEMPLATE([WITH_VARSEQ], [Define variable sequential file format])
-AH_TEMPLATE([HAVE_PSIGN_OPT], [Has -Wno-pointer-sign])
 AH_TEMPLATE([HAVE_ATTRIBUTE_ALIGNED], [Has __attribute__((aligned))])
 AH_TEMPLATE([HAVE_TIMEZONE], [Has timezone variable])
 AH_TEMPLATE([COB_OBJECT_EXT], [Object extension])
@@ -262,10 +261,12 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
 
 
 # Check gcc/icc/clang
-COB_USES_GCC_ICC=no
-COB_USES_GCC_ONLY=no
+COB_USES_GCC=no
+COB_USES_GCC_NO_ICC=no
 COB_USES_ICC_ONLY=no
 COB_USES_CLANG_ONLY=no
+COB_USES_XLC_ONLY=no
+COB_USES_WATCOMC_ONLY=no
 
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	#ifdef __GNUC__
@@ -273,7 +274,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	#else
 	return 1;
 	#endif]])],
-	[COB_USES_GCC_ICC=yes],
+	[COB_USES_GCC=yes],
 	[],
 	[])
 
@@ -283,7 +284,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	#else
 	return 1;
 	#endif]])],
-	[COB_USES_GCC_ONLY=yes],
+	[COB_USES_GCC_NO_ICC=yes],
 	[],
 	[])
 
@@ -304,6 +305,26 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	return 1;
 	#endif]])],
 	[COB_USES_CLANG_ONLY=yes],
+	[],
+	[])
+
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	#ifdef __xlc__
+	return 0;
+	#else
+	return 1;
+	#endif]])],
+	[COB_USES_XLC_ONLY=yes],
+	[],
+	[])
+
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	#ifdef __WATCOMC__
+	return 0;
+	#else
+	return 1;
+	#endif]])],
+	[COB_USES_WATCOMC_ONLY=yes],
 	[],
 	[])
                                       
@@ -906,18 +927,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	[AC_MSG_RESULT([no])],
 	[])
 
-# Check gcc 4 pointer sign option
-if test "$COB_USES_GCC_ONLY" = "yes"; then
-	MYOLDCFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -Wno-pointer-sign"
-	AC_MSG_CHECKING([for gcc pointer sign option])
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[int testint;]])],
-		[AC_DEFINE([HAVE_PSIGN_OPT], [1]) AC_MSG_RESULT([yes])],
-		[AC_MSG_RESULT([no])])
-	CFLAGS="$MYOLDCFLAGS"
-fi
-
-#if test "$enable_debug" != "yes" -a "$COB_USES_GCC_ONLY" = "yes"; then
+#if test "$enable_debug" != "yes" -a "$COB_USES_GCC_NO_ICC" = "yes"; then
 #	MYOLDCFLAGS="$CFLAGS"
 #	CFLAGS="$CFLAGS -fno-asynchronous-unwind-tables"
 #	AC_MSG_CHECKING([for gcc unwind tables option])
@@ -928,8 +938,8 @@ fi
 #fi
 
 # Check gcc wrapv option
-# We MAY need this eventually for >= 4.4. 4.3 appears to be OK.
-#if test "$COB_USES_GCC_ONLY" = "yes"; then
+# We likely don't need this and remove it before 3.0 final release
+#if test "$COB_USES_GCC_NO_ICC" = "yes"; then
 #	MYOLDCFLAGS="$CFLAGS"
 #	CFLAGS="$CFLAGS -fwrapv"
 #	AC_MSG_CHECKING([for gcc -fwrapv option])
@@ -949,28 +959,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
 	[AC_MSG_RESULT([no])])
 
 # GnuCOBOL Configuration
-
-if test "x$prefix" = "xNONE"; then
-  if test "x$includedir" = "x\${prefix}/include"; then
-    COB_CFLAGS="-I${ac_default_prefix}/include"
-  else
-    COB_CFLAGS="-I${includedir}"
-  fi
-else
-  if test "x$includedir" = "x\${prefix}/include"; then
-    if test "x$prefix" = "x/usr"; then
-      COB_CFLAGS=""
-    else
-      COB_CFLAGS="-I${prefix}/include"
-    fi
-  else
-    COB_CFLAGS="-I${includedir}"
-  fi
-fi
-
-if test "x$CPPFLAGS" != "x"; then
-	COB_CFLAGS="$COB_CFLAGS $CPPFLAGS"
-fi
 
 COB_LIBS="-L$libdir -lcob ${LIBCOB_LIBS}"
 COB_LDFLAGS=""
@@ -993,12 +981,12 @@ COB_SHARED_OPT="-shared"
 if test "$enable_cflags_setting" = yes; then
 	# Remove -O2 option added by AC_PROG_CC and add -O0
 	CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O@<:@0-9a-zA-Z@:>@* */ /g' -e 's/ $//' -e 's/^ //'`
-	if test "$COB_USES_GCC_ICC" = "yes"; then
+	if test "$COB_USES_GCC" = "yes"; then
 		CFLAGS="$CFLAGS -O0"
 	fi
 
 	# Add -g3 if using GCC.
-	if test "$COB_USES_GCC_ONLY" = "yes"; then
+	if test "$COB_USES_GCC" = "yes"; then
 		MYOLDCFLAGS="$CFLAGS"		     
 		CFLAGS="$CFLAGS -g3"
 		AC_MSG_CHECKING([for gcc -g3 option])
@@ -1006,11 +994,6 @@ if test "$enable_cflags_setting" = yes; then
 			[AC_MSG_RESULT([yes])],
 			[CFLAGS="$MYOLDCFLAGS"; AC_MSG_RESULT([no])])
 		unset MYOLDCFLAGS
-	fi
-
-        # Add -Qunused-arguments if using clang.
-	if test "$COB_USES_CLANG_ONLY" = "yes"; then
-		CFLAGS="$CFLAGS -Qunused-arguments"
 	fi
 fi
 
@@ -1020,11 +1003,92 @@ if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
 	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/^ //' -e 's/ $//'`
 fi
 
-# Include CFLAGS in COB_CFLAGS without optimization/debug options
+if test "$COB_USES_GCC" = "yes"; then
+	if test "x$CFLAGS" != "x"; then
+		CFLAGS="$CFLAGS -pipe"
+	else
+		CFLAGS="-pipe"
+	fi
+fi
 
-cob_temp_flags=""
+
+# include directory (install dir)
+
+if test "x$prefix" = "xNONE"; then
+  if test "x$includedir" = "x\${prefix}/include"; then
+    COB_CFLAGS="-I${ac_default_prefix}/include"
+  else
+    COB_CFLAGS="-I${includedir}"
+  fi
+else
+  if test "x$includedir" = "x\${prefix}/include"; then
+    if test "x$prefix" = "x/usr"; then
+      COB_CFLAGS=""
+    else
+      COB_CFLAGS="-I${prefix}/include"
+    fi
+  else
+    COB_CFLAGS="-I${includedir}"
+  fi
+fi
+
+
+# compiler specific general options for COB_CFLAGS, originating from cobc.c (main)
+
+if test "$COB_USES_ICC_ONLY" = "yes"; then
+	# these are deprecated...
+	COB_CFLAGS="$COB_CFLAGS -vec-report0 -opt-report 0"
+elif test "$COB_USES_WATCOMC_ONLY" = "yes"; then
+	# -s = no overflow checks, otherwise need to code/link a CHK routine
+	COB_CFLAGS="$COB_CFLAGS -s -wcd=118"
+elif test "$COB_USES_XLC_ONLY" = "yes"; then
+	# use read-only memory for string literals and constants
+	COB_CFLAGS="$COB_CFLAGS -qro -qroconst"
+	# allow nonstandard usage - CHECKME where do we need this ???
+	# do we need the additional check for __IBMC__ >= 700 we had in cobc?
+	COB_CFLAGS="$COB_CFLAGS -qlanglvl=extended"
+fi
+
+if test "$COB_USES_GCC_NO_ICC" = "yes"; then
+	# comment from cobc.c:	--param max-goto-duplication-insns=100000
+	# /* RXWRXW - gcse */
+	# COB_CFLAGS="$COB_CFLAGS -Wno-unused -fsigned-char -fno-gcse"
+	COB_CFLAGS="$COB_CFLAGS -Wno-unused -fsigned-char"
+fi
+
+# Check gcc 4 pointer sign option (at least available with "recent" clang, too)
+#if test "$COB_USES_GCC_NO_ICC" = "yes"; then
+	MYOLDCFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -Wno-pointer-sign"
+	AC_MSG_CHECKING([for gcc pointer sign option])
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[int testint;]])],
+		[COB_CFLAGS="$COB_CFLAGS -Wno-pointer-sign"; AC_MSG_RESULT([yes])],
+		[AC_MSG_RESULT([no])])
+	CFLAGS="$MYOLDCFLAGS"
+#fi
+
+if test "$COB_USES_CLANG_ONLY" = "yes"; then
+	# don't warn if cobc uses arguments which aren't picked up (likely because of the translation phase)
+	COB_CFLAGS="$COB_CFLAGS -Qunused-arguments"
+fi
+
+
+# Include CFLAGS / CPPFLAGS in COB_CFLAGS without optimization/debug options.
+
 if test "x$CFLAGS" != "x"; then
-	cob_temp_flags=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/ $//' -e 's/^ //'`
+	cob_temp_flags="$CFLAGS"
+else
+	cob_temp_flags=""
+fi
+if test "x$CPPFLAGS" != "x"; then
+	if test "x$cob_temp_flags" != "x"; then
+		cob_temp_flags="$CPPFLAGS $cob_temp_flags"
+	else
+		cob_temp_flags="$CPPFLAGS"
+	fi
+fi
+if test "x$cob_temp_flags" != "x"; then
+	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-g//' -e 's/-g3//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/@<:@+-@:>@O@<:@0-9s@:>@//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fmessage-length=0//'`
@@ -1040,18 +1104,6 @@ if test "x$cob_temp_flags" != "x"; then
 fi
 unset cob_temp_flags
 
-if test "$COB_USES_GCC_ICC" = "yes"; then
-	if test "x$CFLAGS" != "x"; then
-		CFLAGS="$CFLAGS -pipe"
-	else
-		CFLAGS="-pipe"
-	fi
-	if test "x$COB_CFLAGS" != "x"; then
-		COB_CFLAGS="$COB_CFLAGS -pipe"
-	else
-		COB_CFLAGS="-pipe"
-	fi
-fi
 
 # Special stuff
 
@@ -1082,7 +1134,7 @@ case $host_os in
 	COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"
 	;;
   hpux*)
-	if test "$COB_USES_GCC_ICC" != "yes"; then
+	if test "$COB_USES_GCC" != "yes"; then
 		COB_SHARED_OPT="-b"
 		AC_DEFINE([_XOPEN_SOURCE_EXTENDED], [1])
 		rm -f hptest*
@@ -1107,7 +1159,7 @@ case $host_os in
 	;;
   aix*)
 	COB_EXPORT_DYN="-Wl,-bexpfull -Wl,-brtl"
-	if test "$COB_USES_GCC_ICC" != "yes"; then
+	if test "$COB_USES_GCC" != "yes"; then
 		CFLAGS="$CFLAGS -Q -qro -qroconst"
 		if test "$enable_debug" = "yes"; then
 			CFLAGS="$CFLAGS -qnoopt"
@@ -1124,7 +1176,7 @@ case $host_os in
 	fi
 	;;
   solaris*)
-	if test "$COB_USES_GCC_ICC" != "yes"; then
+	if test "$COB_USES_GCC" != "yes"; then
 		CFLAGS="$CFLAGS -xstrconst"
 		if test "$enable_debug" != "yes"; then
 			CFLAGS="$CFLAGS -xO2"
@@ -1135,7 +1187,12 @@ case $host_os in
 	;;
 esac
 
-if test "$COB_USES_GCC_ONLY" = "yes" && test "$with_gnu_ld" = "yes"; then
+if test "$COB_USES_ICC_ONLY" = "yes"; then
+	if test "$enable_debug" != "yes"; then
+		CFLAGS="$CFLAGS -finline-functions"
+	fi
+	CFLAGS="$CFLAGS -Wall -wd1419 -vec-report0 -opt-report 0"
+elif test "$COB_USES_GCC" = "yes" && test "$with_gnu_ld" = "yes"; then
 	MYOLDLDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS -Wl,-z,relro,-z,now,-O1"
 	AC_MSG_CHECKING([for ld bind now option])
@@ -1151,11 +1208,6 @@ if test "$COB_USES_GCC_ONLY" = "yes" && test "$with_gnu_ld" = "yes"; then
 	if test "$enable_debug" != "yes"; then
 		CFLAGS="$CFLAGS -U_FORTIFY_SOURCE"
 	fi
-elif test "$COB_USES_ICC_ONLY" = "yes"; then
-	if test "$enable_debug" != "yes"; then
-		CFLAGS="$CFLAGS -finline-functions"
-	fi
-	CFLAGS="$CFLAGS -Wall -wd1419 -vec-report0 -opt-report 0"
 fi
 
 if test "x$lt_cv_dlopen_self" != "xyes"; then
@@ -1174,10 +1226,12 @@ else
 	COB_HAS_CURSES=yes
 fi
 
-unset COB_USES_GCC_ICC
-unset COB_USES_GCC_ONLY
+unset COB_USES_GCC
+unset COB_USES_GCC_NO_ICC
 unset COB_USES_ICC_ONLY
 unset COB_USES_CLANG_ONLY
+unset COB_USES_XLC_ONLY
+unset COB_USES_WATCOM_ONLY
 unset MYOLDCFLAGS
 unset MYOLDLIBS
 unset MYOCLIBS

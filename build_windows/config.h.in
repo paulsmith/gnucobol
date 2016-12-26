@@ -228,9 +228,6 @@
 /* Define to 1 if you have the <pdcurses.h> header file. */
 /* #undef HAVE_PDCURSES_H */
 
-/* Has -Wno-pointer-sign */
-/* #undef HAVE_PSIGN_OPT */
-
 /* Define to 1 if you have the `raise' function. */
 #define HAVE_RAISE 1
 

@@ -6325,36 +6325,6 @@ main (int argc, char **argv)
 	cb_flag_computed_goto = 1;
 #elif	defined(__xlc__) && defined(__IBMC__) && __IBMC__ >= 700
 	cb_flag_computed_goto = 1;
-	COBC_ADD_STR (cobc_cflags, " -qlanglvl=extended",
-		      NULL, NULL);
-#endif
-
-	/* Compiler special options */
-
-#ifdef	__WATCOMC__
-	/* -s = no overflow checks, otherwise need to code/link a CHK routine */
-	COBC_ADD_STR (cobc_cflags, " -s -wcd=118", NULL, NULL);
-#endif
-
-#ifdef	__INTEL_COMPILER
-	COBC_ADD_STR (cobc_cflags, " -vec-report0 -opt-report 0",
-		      NULL, NULL);
-#elif	defined(__GNUC__)
-#if	0	/* RXWRXW - gcse */
-	COBC_ADD_STR (cobc_cflags, " -Wno-unused -fsigned-char -fno-gcse",
-		      NULL, NULL);
-#else
-	COBC_ADD_STR (cobc_cflags, " -Wno-unused -fsigned-char",
-		      NULL, NULL);
-#endif
-	/* --param max-goto-duplication-insns=100000 */
-#ifdef	HAVE_PSIGN_OPT
-	COBC_ADD_STR (cobc_cflags, " -Wno-pointer-sign", NULL, NULL);
-#endif
-
-#elif defined(__xlc__)
-	COBC_ADD_STR (cobc_cflags, " -qro -qroconst",
-		      NULL, NULL);
 #endif
 
 	/* Enable default I/O exceptions */
