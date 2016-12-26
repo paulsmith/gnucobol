@@ -2673,11 +2673,14 @@ cob_exit_screen (void)
 	}
 	if (cobglobptr->cob_screen_initialized) {
 		if (pending_accept && cobsetptr->cob_exit_wait) {
-			snprintf (exit_msg, COB_MINI_BUFF, "\n%s\n", cobsetptr->cob_exit_msg);
-			cob_display_text (exit_msg);
-			cob_free (exit_msg);
+			if (cobsetptr->cob_exit_msg[0] != 0) {
+				snprintf (exit_msg, COB_MINI_BUFF, "\n%s ", cobsetptr->cob_exit_msg);
+				cob_display_text (exit_msg);
+			} else {
+				cob_display_text (" ");
+			}
 			flags = COB_SCREEN_NO_ECHO;
-			field_accept (NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, flags);
+			field_accept_from_curpos (NULL, NULL, NULL, NULL, NULL, NULL, NULL, flags);
 		}
 		cobglobptr->cob_screen_initialized = 0;
 		clear ();
