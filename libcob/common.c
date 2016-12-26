@@ -308,6 +308,8 @@ static struct config_tbl gc_conf[] = {
 	{"DB_HOME","db_home",			NULL,	NULL,GRP_FILE,ENV_FILE,SETPOS(bdb_home)},
 #endif
 	{"COB_LEGACY","legacy",			NULL,	NULL,GRP_SCREEN,ENV_BOOL,SETPOS(cob_legacy)},
+	{"COB_EXIT_WAIT","exit_wait",		"1",	NULL,GRP_SCREEN,ENV_BOOL,SETPOS(cob_exit_wait)},
+	{"COB_EXIT_MSG","exit_msg",		_("end of program, please press a key to exit"), NULL,GRP_SCREEN,ENV_STR,SETPOS(cob_exit_msg)},
 	{NULL,NULL,0,0}
 };
 #define NUM_CONFIG (sizeof(gc_conf)/sizeof(struct config_tbl)-1)

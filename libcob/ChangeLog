@@ -1,4 +1,23 @@
 
+2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c, common.h: C interface addons including FR #187:
+	  typedef cobchar_t, (cob_set_cursor_pos) / cobmove to set cursor position,
+	  (cob_display_text) / cobaddstrc to display text at current cursor pos.,
+	  (cob_display_formatted_text) / cobprintf to printf to current cursor
+	  position, (cob_get_char) / cobgetch to get a single character or
+	  function key, (cob_get_text) to get a text input and function keys with
+	  a given size from current cursor position
+	* screenio.c, common.h, system.def: renamed cob_sys_get_csr_pos /
+	  CBL_GET_CSR_POS to cob_sys_get_scr_pos / CBL_GET_SCR_POS
+	* screenio.c, common.h, system.def: added system routine
+	  CBL_PUT_SCR_POS / cob_sys_put_scr_pos to set the cursor position
+	  and for compatibility: CBL_READ_KBD_CHAR / cob_sys_get_char to get
+	  a single character (better use ACCEPT one-byte-var)
+	* common.c, common.h, coblocal.h, screenio.c: FR #191 added runtime
+	  configuration COB_EXIT_WAIT and COB_EXIT_MSG for waiting if
+	  extended ACCEPT after last extended DISPLAY (if any) is missing
+
 2016-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (field_accept): changes for ACCEPT OMITTED:
@@ -686,7 +705,7 @@
 
 2009-10-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* common.c, common.h , system.def: Added new system routine C$GETPID
+	* common.c, common.h, system.def: Added new system routine C$GETPID
 
 2009-08-28  Roger While <simrw@sim-basis.de>
 

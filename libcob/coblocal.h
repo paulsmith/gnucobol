@@ -220,9 +220,9 @@ typedef struct __cob_settings {
 	char		*cob_preload_str;
 	char		*cob_library_path;
 
-	size_t* resolve_size;	/* Array size of resolve_path*/
-	char* cob_preload_resolved;
-	char* cob_preload_env;
+	size_t		*resolve_size;	/* Array size of resolve_path*/
+	char		*cob_preload_resolved;
+	char		*cob_preload_env;
 
 	/* fileio.c */
 	unsigned int	cob_unix_lf;		/* Use POSIX LF */
@@ -245,8 +245,11 @@ typedef struct __cob_settings {
 	unsigned int	cob_beep_value;		/* Bell disposition */
 	unsigned int	cob_extended_status;	/* Extended status */
 	unsigned int	cob_use_esc;		/* Check ESC key */
-	int		cob_timeout_scale;	/* timeout scale */
-	int		cob_insert_mode;	/* insert toggle, 0=off, 1=on */
+	unsigned int	cob_timeout_scale;	/* timeout scale */
+	unsigned int	cob_insert_mode;	/* insert toggle, 0=off, 1=on */
+	unsigned int	cob_exit_wait;		/* wait on program exit if no ACCEPT came after last DISPLAY */
+	char			*cob_exit_msg;		/* message for cob_exit_wait */
+
 } cob_settings;
 
 

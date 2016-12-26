@@ -111,6 +111,8 @@ static int			display_cursor_y;
 static int			display_cursor_x;
 static int			accept_cursor_y;
 static int			accept_cursor_x;
+static int			pending_accept;
+static int			got_sys_char;
 #endif
 
 /* Local function prototypes when screenio activated */
@@ -318,6 +320,13 @@ cob_move_cursor (const int line, const int column)
 	}
 }
 
+void
+cob_set_cursor_pos (int line, int column)
+{
+	init_cob_screen_if_needed ();
+	(void) move (line, column);
+}
+
 static void
 cob_move_to_beg_of_last_line (void)
 {
@@ -504,6 +513,8 @@ cob_screen_init (void)
 	display_cursor_x = 0;
 	accept_cursor_y = 0;
 	accept_cursor_x = 0;
+	pending_accept = 0;
+	got_sys_char = 0;
 
 	fflush (stdout);
 	fflush (stderr);
@@ -584,6 +595,9 @@ cob_check_pos_status (const int fret)
 		cob_set_exception (COB_EC_IMP_ACCEPT);
 	}
 	COB_ACCEPT_STATUS = fret;
+	if (!COB_MODULE_PTR) {
+		return;
+	}
 	if (COB_MODULE_PTR->crt_status) {
 		if (COB_FIELD_IS_NUMERIC (COB_MODULE_PTR->crt_status)) {
 			cob_set_int (COB_MODULE_PTR->crt_status, fret);
@@ -1108,6 +1122,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 	int			ungetched = 0;
 	chtype			promptchar;
 
+	pending_accept = 0;
 	cob_move_cursor (sline, scolumn);
 	cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
 
@@ -1773,6 +1788,7 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 
 	origin_y = 0;
 	origin_x = 0;
+	pending_accept = 1;
 
 	/* Field size to display */
 	size_display = (int)f->size;
@@ -1868,6 +1884,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 	origin_y = 0;
 	origin_x = 0;
+	pending_accept = 0;
 
 	/* Set the default prompt character */
 	if (prompt) {
@@ -2413,6 +2430,35 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	cob_move (&temp, f);
 }
 
+static void
+field_accept_from_curpos (cob_field *f, cob_field *fgc,
+	      cob_field *bgc, cob_field *fscroll, cob_field *ftimeout,
+	      cob_field *prompt, cob_field *size_is, const cob_flags_t fattr)
+{
+	int		cline;
+	size_t		ccolumn;
+
+	/* Get current line, column. */
+	getyx (stdscr, cline, ccolumn);
+
+	/* accept field */
+	field_accept (f, cline, ccolumn, fgc, bgc, fscroll, ftimeout, prompt, size_is, fattr);
+}
+
+static void
+field_display_at_curpos (cob_field *f,
+	cob_field *fgc, cob_field *bgc, cob_field *fscroll,
+	cob_field *size_is, const cob_flags_t fattr)
+{
+	int		cline;
+	size_t		ccolumn;
+
+	/* Get current line, column. */
+	getyx (stdscr, cline, ccolumn);
+
+	field_display (f, cline, ccolumn, fgc, bgc, fscroll, size_is, fattr);
+}
+
 /* Global functions */
 
 void
@@ -2497,13 +2543,142 @@ cob_screen_set_mode (const cob_u32_t smode)
 	}
 }
 
+/* display a C string without auto-newline */
+int
+cob_display_text (const char *text)
+{
+	cob_field	field;
+	cob_field_attr		attr;
+
+	if (text[0] == 0) return 0;
+
+	COB_FIELD_INIT (strlen (text), (unsigned char *)text, &attr);
+	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
+
+	field_display_at_curpos (&field, NULL, NULL, NULL, NULL, 0);
+
+	return 0;
+}
+
+/* COBOL: get a char (or x'00' for function keys)
+   call a second time when getting x'00' leads to the function keys
+   1001-1199 as x'01' - x'C7', 2001 - 2055 as x'C9' - x'FF'
+   No implementation of MF function tables so far.
+*/
+int
+cob_sys_get_char (char c)
+{
+	int ret;
+
+	COB_CHK_PARMS (CBL_READ_KBD_CHAR, 1);
+
+	if (!got_sys_char) {
+		ret = cob_get_char ();
+		if (ret > 255) {
+			c = 0;
+			got_sys_char = 1;
+		} else {
+			c = (char) ret;
+		}
+	} else {
+		got_sys_char = 0;
+		if (COB_ACCEPT_STATUS == 0) {
+			return cob_sys_get_char (c);
+		} else if (COB_ACCEPT_STATUS > 1000 && COB_ACCEPT_STATUS < 1201) {
+			c = (char) (COB_ACCEPT_STATUS - 1000);
+		} else if (COB_ACCEPT_STATUS > 2000 && COB_ACCEPT_STATUS < 2056) {
+			c = (char) (COB_ACCEPT_STATUS - 1800);
+		} else {
+			return -1;
+		}
+	}
+	return 0;
+}
+
+/* C: get a char x'01' thru x'255' or keyboard status > 1000  (or 0) */
+int
+cob_get_char (void)
+{
+	cob_field	field;
+	unsigned char	c = ' ';
+	cob_field_attr		attr;
+	const cob_flags_t flags = COB_SCREEN_AUTO;
+
+	COB_FIELD_INIT (1, &c, &attr);
+	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
+
+	field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL, flags);
+	if (c != ' ') {
+		return (int)c;
+	} else {
+		return COB_ACCEPT_STATUS;
+	}
+}
+
+/* get a C string with given max-length - returns keyboard status */
+int
+cob_get_text (char *text, int size)
+{
+	cob_field	field;
+	cob_field_attr		attr;
+
+	if (size > 0) {
+		COB_FIELD_INIT (size, (unsigned char *)text, &attr);
+		COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
+		field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+	} else {
+		field_accept (NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+	}
+
+	return COB_ACCEPT_STATUS;
+}
+
+/* display a formatted C string without auto-newline */
+int
+cob_display_formatted_text (const char *fmt, ...)
+{
+	cob_field		field;
+	cob_field_attr	attr;
+
+	va_list			ap;
+	char			buff [COB_NORMAL_BUFF];
+
+	va_start (ap, fmt);
+	field.size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
+	va_end (ap);
+
+	if (field.size < 0) return -1;
+	if (buff[0] == 0) return 0;
+
+	if (field.size > COB_NORMAL_MAX) {
+		field.size = COB_NORMAL_MAX;
+	}
+
+	field.data = (unsigned char *)&buff;
+	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
+	field.attr = &attr;
+
+	field_display_at_curpos (&field, NULL, NULL, NULL, NULL, 0);
+
+	return 0;
+}
+
 void
 cob_exit_screen (void)
 {
+	cob_flags_t	flags;
+	char	exit_msg [COB_MINI_BUFF];
 	if (!cobglobptr) {
 		return;
 	}
 	if (cobglobptr->cob_screen_initialized) {
+		if (pending_accept && cobsetptr->cob_exit_wait) {
+			snprintf (exit_msg, COB_MINI_BUFF, "\n%s\n", cobsetptr->cob_exit_msg);
+			cob_display_text (exit_msg);
+			cob_free (exit_msg);
+			flags = COB_SCREEN_NO_ECHO;
+			field_accept (NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, flags);
+		}
 		cobglobptr->cob_screen_initialized = 0;
 		clear ();
 		cob_move_to_beg_of_last_line ();
@@ -2642,14 +2817,14 @@ cob_accept_escape_key (cob_field *f)
 }
 
 int
-cob_sys_get_csr_pos (unsigned char *fld)
+cob_sys_get_scr_pos (unsigned char *fld)
 {
 #ifdef	COB_GEN_SCREENIO
 	int	cline;
 	int	ccol;
 #endif
 
-	COB_CHK_PARMS (CBL_GET_CSR_POS, 1);
+	COB_CHK_PARMS (CBL_GET_SCR_POS, 1);
 
 #ifdef	COB_GEN_SCREENIO
 	getyx (stdscr, cline, ccol);
@@ -2664,11 +2839,32 @@ cob_sys_get_csr_pos (unsigned char *fld)
 }
 
 int
+cob_sys_put_scr_pos (unsigned char *fld)
+{
+#ifdef	COB_GEN_SCREENIO
+	int	cline;
+	int	ccol;
+#endif
+
+	COB_CHK_PARMS (CBL_PUT_SCR_POS, 1);
+
+#ifdef	COB_GEN_SCREENIO
+	init_cob_screen_if_needed ();
+	cline = fld[0];
+	ccol= fld[1];
+	return move (cline, ccol);
+#else
+	return 0;
+#endif
+}
+
+int
 cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 {
 	COB_CHK_PARMS (CBL_GET_SCR_SIZE, 2);
 
 #ifdef	COB_GEN_SCREENIO
+	init_cob_screen_if_needed ();
 	*line = (unsigned char)LINES;
 	*col = (unsigned char)COLS;
 #else

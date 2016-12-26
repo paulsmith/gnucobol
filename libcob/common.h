@@ -1569,26 +1569,33 @@ COB_EXPIMP void		cob_longjmp		(struct cobjmp_buf *);
 /*******************************/
 /* Functions in screenio.c */
 
-COB_EXPIMP void cob_screen_line_col	(cob_field *, const int);
-COB_EXPIMP void cob_screen_display	(cob_screen *, cob_field *,
+COB_EXPIMP void		cob_screen_line_col	(cob_field *, const int);
+COB_EXPIMP void		cob_screen_display	(cob_screen *, cob_field *,
 					 cob_field *, const int);
-COB_EXPIMP void cob_screen_accept	(cob_screen *, cob_field *,
+COB_EXPIMP void		cob_screen_accept	(cob_screen *, cob_field *,
 					 cob_field *, cob_field *,
 					 const int);
-COB_EXPIMP void cob_field_display	(cob_field *, cob_field *, cob_field *,
+COB_EXPIMP void		cob_field_display	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, const cob_flags_t);
 COB_EXPIMP void cob_field_accept	(cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 cob_field *, cob_field *, cob_field *,
 					 const cob_flags_t);
-COB_EXPIMP void cob_accept_escape_key	(cob_field *);
-COB_EXPIMP int	cob_sys_clear_screen	(void);
-COB_EXPIMP int	cob_sys_sound_bell	(void);
-COB_EXPIMP int	cob_sys_get_csr_pos	(unsigned char *);
-COB_EXPIMP int	cob_sys_get_scr_size	(unsigned char *, unsigned char *);
-COB_EXPIMP int	cob_get_scr_cols	(void);
-COB_EXPIMP int	cob_get_scr_lines	(void);
+COB_EXPIMP int		cob_display_text (const char *);
+COB_EXPIMP int		cob_display_formatted_text (const char *, ...);
+COB_EXPIMP int		cob_get_char	(void);
+COB_EXPIMP void		cob_set_cursor_pos	(int, int);
+COB_EXPIMP void		cob_accept_escape_key	(cob_field *);
+COB_EXPIMP int		cob_sys_clear_screen	(void);
+COB_EXPIMP int		cob_sys_sound_bell	(void);
+COB_EXPIMP int		cob_sys_get_scr_pos	(unsigned char *);
+COB_EXPIMP int		cob_sys_get_scr_size	(unsigned char *, unsigned char *);
+COB_EXPIMP int		cob_sys_put_scr_pos	(unsigned char *);
+COB_EXPIMP int		cob_sys_get_char	(char);
+COB_EXPIMP int		cob_get_text 		(char *, int);
+COB_EXPIMP int		cob_get_scr_cols	(void);
+COB_EXPIMP int		cob_get_scr_lines	(void);
 
 /*******************************/
 /* Functions in termio.c */
@@ -1807,6 +1814,8 @@ COB_EXPIMP cob_field *cob_intr_integer_of_formatted_date	(cob_field *,
 
 /*******************************/
 /* defines for MicroFocus C -> COBOL API */
+typedef	char *	cobchar_t;
+
 #define	cobsetjmp(x)	setjmp (cob_savenv (x))
 #define	coblongjmp(x)	cob_longjmp (x)
 #define	cobsavenv(x)	cob_savenv (x)
@@ -1824,8 +1833,12 @@ COB_EXPIMP cob_field *cob_intr_integer_of_formatted_date	(cob_field *,
 #define	cobcommandline(v,w,x,y,z)	cob_command_line (v,w,x,y,z)
 
 #define cobclear()			(void) cob_sys_clear_screen ()
+#define cobmove(y,x)		cob_set_cursor_pos (y, x)
 #define	cobcols()			cob_get_scr_cols ()
 #define	coblines()			cob_get_scr_lines ()
+#define cobaddstrc(x)		cob_display_text (x) /* no limit [MF=255] */
+#define cobprintf			cob_display_formatted_text	/* limit of 2047 [MF=255] */
+#define cobgetch()			cob_get_char ()
 /*******************************/
 
 #endif	/* COB_COMMON_H */
