@@ -13866,13 +13866,19 @@ fi
 
 done
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for isopen in -ldisam" >&5
-$as_echo_n "checking for isopen in -ldisam... " >&6; }
-if ${ac_cv_lib_disam_isopen+:} false; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DISAM library" >&5
+$as_echo_n "checking for DISAM library... " >&6; }
+	for cobdisam in disam disam8 disam72 disam71 disam7
+	do
+		as_ac_Lib=`$as_echo "ac_cv_lib_$cobdisam''_isopen" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for isopen in -l$cobdisam" >&5
+$as_echo_n "checking for isopen in -l$cobdisam... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldisam  $LIBS"
+LIBS="-l$cobdisam  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -13892,24 +13898,36 @@ return isopen ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_disam_isopen=yes
+  eval "$as_ac_Lib=yes"
 else
-  ac_cv_lib_disam_isopen=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_disam_isopen" >&5
-$as_echo "$ac_cv_lib_disam_isopen" >&6; }
-if test "x$ac_cv_lib_disam_isopen" = xyes; then :
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
   $as_echo "#define WITH_DISAM 1" >>confdefs.h
 
-		LIBCOB_LIBS="$LIBCOB_LIBS -ldisam"
-else
-  as_fn_error $? "libdisam is required for DISAM" "$LINENO" 5
+			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"
+			cob_got_disam=yes
+			break
 fi
 
+	done
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cob_got_disam" >&5
+$as_echo "$cob_got_disam" >&6; }
+	if test "$cob_got_disam" = "yes"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: DISAM library found as -l$cobdisam" >&5
+$as_echo "$as_me: DISAM library found as -l$cobdisam" >&6;}
+	else
+		as_fn_error $? "DISAM library not found" "$LINENO" 5
+	fi
+	unset cobdisam
+	unset cob_got_disam
     fi
 fi
 

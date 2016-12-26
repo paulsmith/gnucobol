@@ -6,6 +6,11 @@
 	  the new keycodes COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
 	  COB-SCR-KEY-HOME, COB-SCR-KEY-END (*only* for ACCEPT OMITTED!)
 
+2016-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: include isconfig.h (if not available define DISAM_NO_ISCONFIG)
+	  and don't use isstat1/isstat2 if not available
+
 2016-12-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added compatibility define for cobclear and corrected

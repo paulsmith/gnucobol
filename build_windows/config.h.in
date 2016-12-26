@@ -417,7 +417,7 @@
 #endif
 
 /* Use DISAM as ISAM handler */
-#if CONFIGURED_ISAM == BDB
+#if CONFIGURED_ISAM == DISAM
 #define WITH_DISAM 1
 #else
 /* #undef WITH_DISAM */

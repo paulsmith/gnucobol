@@ -115,6 +115,12 @@
 #endif
 
 #ifdef	WITH_DISAM
+#ifndef DISAM_NO_ISCONFIG
+#include <isconfig.h>
+#ifndef ISCOBOL_STATS
+#undef	COB_WITH_STATUS_02
+#endif
+#endif
 #include <disam.h>
 #define	isfullclose(x)	isclose (x)
 #endif

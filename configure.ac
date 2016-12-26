@@ -360,10 +360,23 @@ if test "$with_cisam" != "yes"; then
   [ if test "$with_disam" = "yes"; then
 	AC_CHECK_HEADERS([disam.h], [],
 		AC_MSG_ERROR([disam.h is required for DISAM]))
-	AC_CHECK_LIB([disam], [isopen],
-		[AC_DEFINE([WITH_DISAM], [1])
-		LIBCOB_LIBS="$LIBCOB_LIBS -ldisam"],
-		AC_MSG_ERROR([libdisam is required for DISAM]), [])
+
+	for cobdisam in disam disam8 disam72 disam71 disam7
+	do
+		AC_CHECK_LIB([$cobdisam], [isopen],
+			[AC_DEFINE([WITH_DISAM], [1])
+			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdisam"]
+			cob_got_disam=yes
+			break,
+			[], [])
+	done
+	if test "$cob_got_disam" = "yes"; then
+		AC_MSG_NOTICE([DISAM library found as -l$cobdisam])
+	else
+		AC_MSG_ERROR([DISAM library not found])
+	fi
+	unset cobdisam
+	unset cob_got_disam
     fi ],
   [])
 fi
