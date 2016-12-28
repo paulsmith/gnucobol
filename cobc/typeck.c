@@ -570,11 +570,14 @@ cb_validate_one (cb_tree x)
 			if (f->flag_invalid) {
 				return 1;
 			}
+#if 0 /* Simon: deactivated completely, see FR #99 */
 			/* check for nested ODO */
 			if (f->odo_level > 1) {
+				/* to enable this take care of the FIXME entries in (output_size) */
 				cb_error_x (x, _("%s is not implemented"),
 					_("reference to item containing nested ODO"));
 			}
+#endif
 		}
 	}
 	return 0;
@@ -2571,8 +2574,18 @@ cb_validate_program_data (struct cb_program *prog)
 		/* The data item that contains a OCCURS DEPENDING clause must be
 		   the last data item in the group */
 		odo_level = 0;
+
 		for (p = q; ; p = p->parent) {
-			if (p->depending) odo_level++;
+			if (p->depending) {
+#if 1 /* Simon: nested ODO deactivated completely, see FR #99 */
+				if (odo_level) {
+					cb_error_x (x,
+						_ ("'%s' cannot have OCCURS DEPENDING"),
+						cb_name (x));
+				}
+#endif
+				odo_level++;
+			}
 			p->odo_level = odo_level;
 			if (!p->parent) {
 				break;
@@ -2586,8 +2599,8 @@ cb_validate_program_data (struct cb_program *prog)
 				if (!p->sister->redefines) {
 					if (!cb_complex_odo) {
 						cb_error_x (x,
-							    _("'%s' cannot have OCCURS DEPENDING"),
-							    cb_name (x));
+							_ ("'%s' cannot have OCCURS DEPENDING"),
+							cb_name (x));
 						break;
 					}
 					p->flag_odo_relative = 1;
