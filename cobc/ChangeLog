@@ -1,4 +1,13 @@
 
+2016-12-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: changes for -verbose, optional argument for verbose level,
+	  -vv output shows information from the compiler, -vvv from linker,
+	  -v -help shows help from compiler/linker,
+	  -### shows external commands but doesn't execute them
+	* cobc.c (cobc_sig_handler): only ask for bug report if the signal isn't
+	  a user-requested one
+
 2016-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: disabled nested ODO as the current implementation

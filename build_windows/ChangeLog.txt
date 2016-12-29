@@ -1,4 +1,8 @@
 
+2016-12-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* defaults.h.in: added "/incremental:no" to COB_LDFLAGS
+
 2016-11-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.h.in, defaults.h.in: renamed from config.h.tmpl, defaults.h.tmpl

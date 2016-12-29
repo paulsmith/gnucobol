@@ -292,7 +292,7 @@ static char		*cobc_run_args;
 static size_t		save_temps = 0;
 static size_t		save_all_src = 0;
 static size_t		save_c_src = 0;
-static size_t		verbose_output = 0;
+static signed int	verbose_output = 0;
 static size_t		cob_optimize = 0;
 
 static int		cb_listing_linecount;
@@ -420,8 +420,9 @@ static const char short_options[] = "hVivqECScbmxjdFROPgwo:t:T:I:L:l:D:K:k:";
 static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"version",		CB_NO_ARG, NULL, 'V'},
-	{"verbose",		CB_NO_ARG, NULL, 'v'},
+	{"verbose",		CB_OP_ARG, NULL, 'v'},
 	{"brief",		CB_NO_ARG, NULL, 'q'},
+	{"###",			CB_NO_ARG, NULL, '#'},
 	{"info",		CB_NO_ARG, NULL, 'i'},
 	{"list-reserved",	CB_NO_ARG, NULL, '5'},
 	{"list-intrinsics",	CB_NO_ARG, NULL, '6'},
@@ -446,7 +447,7 @@ static const struct option long_options[] = {
 	{"Xref",		CB_NO_ARG, NULL, 'X'},
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
-	{"tlines", 		CB_RQ_ARG, NULL, '#'},
+	{"tlines", 		CB_RQ_ARG, NULL, '*'},
 	{"no-symbols", 		CB_NO_ARG, NULL, '@'},
 
 #define	CB_FLAG(var,pdok,name,doc)			\
@@ -512,6 +513,7 @@ DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
 static void	print_program_code		(struct list_files *, int);
 static void	print_program_header	(void);
 static void	print_program_trailer	(void);
+static int	process					(const char *);
 
 /* cobc functions */
 
@@ -1266,6 +1268,9 @@ cobc_chk_buff_size (const size_t bufflen)
 	}
 }
 
+/* decipher a positive int from option argument,
+   if allow_quote is set and quotes are used set int from char,
+   returns -1 on error */
 static int
 cobc_deciph_optarg (const char *p, const int allow_quote)
 {
@@ -1620,8 +1625,21 @@ cobc_abort_terminate (void)
 static void
 cobc_sig_handler (int sig)
 {
+	int ret = 0;
+
 	cobc_abort_msg ();
-	cobc_err_msg (_("Please report this!"));
+#ifdef SIGINT
+	if (sig == SIGINT) ret = 1;
+#endif
+#ifdef SIGQUIT
+	if (sig == SIGQUIT) ret = 1;
+#endif
+#ifdef SIGTERM
+	if (sig == SIGTERM) ret = 1;
+#endif
+	if (!ret) {
+		cobc_err_msg (_("Please report this!"));
+	}
 	save_temps = 0;
 	cobc_clean_up (1);
 }
@@ -1647,6 +1665,19 @@ cobc_print_version (void)
 }
 
 static void
+cobc_print_shortversion (void)
+{
+	printf ("cobc (%s) %s.%d\n",
+		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
+	printf (_("Built     %s"), cb_oc_build_stamp);
+	putchar ('\t');
+	printf (_("Packaged  %s"), COB_TAR_DATE);
+	putchar ('\n');
+	printf (_("C version %s%s"), OC_C_VERSION_PRF, OC_C_VERSION);
+	putchar ('\n');
+}
+
+static void
 cobc_cmd_print (const char *cmd)
 {
 	char	*p;
@@ -1654,7 +1685,11 @@ cobc_cmd_print (const char *cmd)
 	size_t	n;
 	size_t	toklen;
 
-	fputs (_("executing:"), stderr);
+	if (verbose_output >= 0) {
+		fputs (_("executing:"), stderr);
+	} else {
+		fputs (_("to be executed:"), stderr);
+	}
 	/* Check if it fits in 80 characters */
 	if (strlen (cmd) < 64) {
 		fprintf (stderr, "\t%s\n", (char *)cmd);
@@ -1884,10 +1919,14 @@ cobc_print_usage (char * prog)
 	puts (_("  -h, -help             display this help and exit"));
 	puts (_("  -V, -version          display compiler version and exit"));
 	puts (_("  -i, -info             display compiler information (build/environment)"));
-	puts (_("  -v, -verbose          display the commands invoked by the compiler"));
-	puts (_("  -vv                   display compiler version and the commands\n" \
+	puts (_("  -v, -verbose          display compiler version and the commands\n" \
 	        "                        invoked by the compiler"));
+	puts (_("  -vv, -verbose=2       like -v but additional pass verbose option\n" \
+	        "                        to assembler/compiler"));
+	puts (_("  -vvv, -verbose=3      like -vv but additional pass verbose option\n" \
+	        "                        to linker"));
 	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
+	puts (_ ("  -###                 like -v but commands not executed"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
 	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
@@ -2000,7 +2039,6 @@ cobc_print_usage (char * prog)
 	putchar ('\n');
 	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
 	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
-
 }
 
 static void
@@ -2086,6 +2124,29 @@ process_command_line (const int argc, char **argv)
 		case 'h':
 			/* --help */
 			cobc_print_usage (argv[0]);
+			if (verbose_output) {
+				puts ("\n");
+				fflush (stdout);
+#ifdef _MSC_VER
+				process ("cl.exe /help");
+				puts ("\n");
+				fflush (stdout);
+				process ("link.exe /help");
+#else
+				cobc_buffer_size = strlen (cobc_cc) + 11;
+				cobc_buffer = cobc_malloc (cobc_buffer_size);
+				snprintf (cobc_buffer, cobc_buffer_size, "%s --help", cobc_cc);
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+				if (verbose_output > 1) {
+					snprintf (cobc_buffer, cobc_buffer_size, "%s -v --help", cobc_cc);
+				}
+#endif
+				cobc_buffer[cobc_buffer_size] = 0;
+				process (cobc_buffer);
+				cobc_free (cobc_buffer);
+				cobc_buffer = NULL;
+#endif
+			}
 			cobc_free_mem ();
 			exit (0);
 
@@ -2137,12 +2198,33 @@ process_command_line (const int argc, char **argv)
 										   and other static output */
 			break;
 
+		case '#':
+			/* --### : verbose output of commands, but don't execute them */
+			if (!verbose_output) {
+				cobc_print_shortversion ();
+			}
+			verbose_output = -1;
+			break;
+
 		case 'v':
 			/* --verbose : Verbose reporting */
 			/* VERY special case as we set different level by mutliple calls */
-			/* Output version information when running very verbose */
-			if (++verbose_output == 2) {
-				cobc_print_version ();
+			/* output version information when running very verbose -vv */
+			/* pass verbose switch to invoked commands when running very very verbose -vvv */
+			if (cob_optarg) {
+				n = cobc_deciph_optarg (cob_optarg, 0);
+				if (n == -1) {
+					cobc_err_exit (COBC_INV_PAR, "-verbose");
+				}
+				verbose_output = n;
+				if (verbose_output >= 1) {
+					cobc_print_shortversion ();
+				}
+			} else {
+				verbose_output++;
+				if (verbose_output == 1) {
+					cobc_print_shortversion ();
+				}
 			}
 			break;
 
@@ -2151,8 +2233,7 @@ process_command_line (const int argc, char **argv)
 			if (!exit_option) {
 				snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
 				if (cb_load_std (ext) != 0) {
-					cobc_err_exit (_("invalid option -std=%s"),
-							   cob_optarg);
+					cobc_err_exit (_("invalid parameter -std=%s"), cob_optarg);
 				}
 			}
 			break;
@@ -2300,9 +2381,11 @@ process_command_line (const int argc, char **argv)
 
 		case 'q':
 			/* --brief : reduced reporting */
+		case '#':
+			/* --### : verbose output of commands, but don't execute them */
 		case 'v':
 			/* --verbose : Verbose reporting */
-			/* These option were processed in the first getopt-run */
+			/* these options were processed in the first getopt-run */
 			break;
 
 		case 'o':
@@ -2403,7 +2486,7 @@ process_command_line (const int argc, char **argv)
 			}
 			break;
 
-		case '#':
+		case '*':
 			/* --tlines=nn : Lines per page */
 			cb_lines_per_page = atoi(cob_optarg);
 			break;
@@ -3071,6 +3154,9 @@ process_run (const char *name) {
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
 	}
+	if (verbose_output < 0) {
+		return 0;
+	}
 	status = system (cobc_buffer);
 #ifdef WEXITSTATUS
 	if (WIFEXITED(status)) {
@@ -3265,11 +3351,15 @@ process (char *cmd)
 		if (verbose_output) {
 			cobc_cmd_print (buffptr);
 		}
-		ret = system (buffptr);
-		if (verbose_output) {
-			fputs (_("return status:"), stderr);
-			fprintf (stderr, "\t%d\n", ret);
-			fflush (stderr);
+		if (verbose_output >= 0) {
+			ret = system (buffptr);
+			if (verbose_output) {
+				fputs (_("return status:"), stderr);
+				fprintf (stderr, "\t%d\n", ret);
+				fflush (stderr);
+			}
+		} else {
+			ret = 0;
 		}
 		if (comp_only || ret != 0) {
 			cobc_free (buffptr);
@@ -3320,11 +3410,15 @@ process (char *cmd)
 	if (verbose_output) {
 		cobc_cmd_print (buffptr);
 	}
-	ret = system (buffptr);
-	if (verbose_output) {
-		fputs (_("return status:"), stderr);
-		fprintf (stderr, "\t%d\n", ret);
-		fflush (stderr);
+	if (verbose_output >= 0) {
+		ret = system (buffptr);
+		if (verbose_output) {
+			fputs (_("return status:"), stderr);
+			fprintf (stderr, "\t%d\n", ret);
+			fflush (stderr);
+		}
+	} else {
+		ret = 0;
 	}
 	cobc_free (buffptr);
 
@@ -3342,6 +3436,9 @@ process (const char *cmd)
 
 	if (verbose_output) {
 		cobc_cmd_print (cmd);
+	}
+	if (verbose_output < 0) {
+		return 0;
 	}
 	ret = system (cmd);
 	if (verbose_output) {
@@ -3361,6 +3458,14 @@ process_filtered (const char *cmd, struct filename *fn)
 	char* search_pattern, *search_pattern2 = NULL;
 	char* output_name_temp;
 	int i;
+	int ret;
+
+	if (verbose_output) {
+		cobc_cmd_print (cmd);
+	}
+	if (verbose_output < 0) {
+		return 0;
+	}
 
 	/* Open pipe to catch output of cl.exe */
 	pipe = _popen(cmd, "r");
@@ -3419,7 +3524,14 @@ process_filtered (const char *cmd, struct filename *fn)
 	if (!output_name) cobc_free (output_name_temp);
 
 	/* close pipe and get return code of cl.exe */
-	return !!_pclose (pipe);
+	ret = !!_pclose (pipe);
+
+	if (verbose_output) {
+		fputs (_("return status:"), stderr);
+		fprintf (stderr, "\t%d\n", ret);
+		fflush (stderr);
+	}
+	return ret;
 }
 
 #else
@@ -3606,7 +3718,7 @@ preprocess (struct filename *fn)
 				putc ('\n', stderr);
 #ifdef	_WIN32
 				fprintf (stderr, _("check that 'cobxref' is in %s"),
-					"%%PATH%%");
+					"%PATH%");
 #else
 				fprintf (stderr, _("check that 'cobxref' is in %s"),
 					"$PATH");
@@ -5587,7 +5699,7 @@ process_compile (struct filename *fn)
 		"%s /c %s %s /MD /c /Fa\"%s\" /Fo\"%s\" \"%s\"",
 			cobc_cc, cobc_cflags, cobc_include, name,
 			name, fn->translate);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		return process (cobc_buffer);
 	} else {
 		return process_filtered (cobc_buffer, fn);
@@ -5634,7 +5746,7 @@ process_assemble (struct filename *fn)
 		"%s /c %s %s     /MD          /Fo\"%s\" \"%s\"",
 			cobc_cc, cobc_cflags, cobc_include,
 			fn->object, fn->translate);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		return process (cobc_buffer);
 	} else {
 		return process_filtered (cobc_buffer, fn);
@@ -5752,7 +5864,7 @@ process_module_direct (struct filename *fn)
 			cobc_cc, cobc_cflags, cobc_include, exename, name,
 			fn->translate,
 			manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
 		ret = process_filtered (cobc_buffer, fn);
@@ -5862,7 +5974,7 @@ process_module (struct filename *fn)
 		"%s     /MD  /LD          /Fe\"%s\" \"%s\" %s %s %s %s",
 		cobc_cc, exename, fn->object,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
 		ret = process_filtered (cobc_buffer, fn);
@@ -5972,7 +6084,7 @@ process_library (struct filename *l)
 		"%s     /MD  /LD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, exename, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
 		ret = process_filtered (cobc_buffer, l);
@@ -6090,7 +6202,7 @@ process_link (struct filename *l)
 		"%s     /MD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, exename, cobc_objects_buffer,
 		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
-	if (verbose_output) {
+	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
 		ret = process_filtered (cobc_buffer, l);
@@ -6345,17 +6457,34 @@ main (int argc, char **argv)
 		cobc_err_exit (_("no input files"));
 	}
 
-	/* Windows stuff reliant upon verbose option */
-#ifdef	_MSC_VER
-	if (!verbose_output) {
-		COBC_ADD_STR (cobc_cflags, " /nologo", NULL, NULL);
+#if defined(__GNUC__)
+	if (verbose_output > 1) {
+		COBC_ADD_STR (cobc_cflags,  " -v", NULL, NULL);
+#if	!defined (__INTEL_COMPILER)
+		if (verbose_output > 2) {
+			COBC_ADD_STR (cobc_ldflags, " -t", NULL, NULL);
+		}
+#endif
 	}
-	if (!verbose_output) {
+#elif defined(_MSC_VER)
+	/* MSC stuff reliant upon verbose option */
+	switch (verbose_output) {
+	case 0:
+	/* -v */
+	case 1:
+		COBC_ADD_STR (cobc_cflags, " /nologo", NULL, NULL);
 		manicmd = "mt /nologo";
-		manilink = "/link /nologo /manifest";
-	} else {
+		manilink = "/link /manifest /nologo";
+		break;
+	/* -vv */
+	case 2:
 		manicmd = "mt";
 		manilink = "/link /manifest";
+		break;
+	/* -vvv */
+	default:
+		manicmd = "mt /verbose";
+		manilink = "/link /manifest /verbose";
 	}
 	manilink_len = strlen (manilink);
 #endif

@@ -7,7 +7,7 @@
 #ifdef MAKE_DIST
 #define COB_MAIN_DIR     "C:\\" PACKAGE_STRING
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\\include\""
-#define COB_LDFLAGS      "/LIBPATH:\"" COB_MAIN_DIR "\\libs\""
+#define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\libs\""
 #else  // no MAKE_DIST
 #define COB_MAIN_DIR     "C:\\GnuCOBOL"
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\" -I \"" COB_MAIN_DIR "\\build_windows\""
@@ -24,7 +24,7 @@
 #define TARGET_CONFIG "release"
 #endif
 
-#define COB_LDFLAGS      "/LIBPATH:\"" COB_MAIN_DIR "\\build_windows\\" TARGET_PLATFORM "\\" TARGET_CONFIG "\""
+#define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\build_windows\\" TARGET_PLATFORM "\\" TARGET_CONFIG "\""
 
 #endif // no MAKE_DIST
 #define COB_LIBS         "libcob.lib"
