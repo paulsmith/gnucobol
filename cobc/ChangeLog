@@ -7,6 +7,8 @@
 	  -### shows external commands but doesn't execute them
 	* cobc.c (cobc_sig_handler): only ask for bug report if the signal isn't
 	  a user-requested one
+	* codegen.c (codegen): reset pic_cache pointer
+	* cobc.c (xref_print): corrected size of numbuf
 
 2016-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

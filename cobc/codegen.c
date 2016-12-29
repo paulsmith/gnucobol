@@ -8799,6 +8799,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 		gen_figurative = 0;
 		non_nested_count = 0;
 		working_mem = 0;
+		pic_cache = NULL;
 		attr_cache = NULL;
 		base_cache = NULL;
 		globext_cache = NULL;

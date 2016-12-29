@@ -4158,7 +4158,7 @@ xref_print (struct cb_xref *xref)
 	int     		cnt;
 	int     		maxcnt = cb_listing_wide ? 10 : 5;
 	char			buffer[CB_PRINT_LEN];
-	char			numbuf[8];
+	char			numbuf[9];
 
 	if (xref->head == NULL) {
 		fprintf (cb_src_list_file, "not referenced\n");
