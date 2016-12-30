@@ -6457,6 +6457,7 @@ main (int argc, char **argv)
 		cobc_err_exit (_("no input files"));
 	}
 
+	/* compiler specific options for (non/very) verbose output */
 #if defined(__GNUC__)
 	if (verbose_output > 1) {
 		COBC_ADD_STR (cobc_cflags,  " -v", NULL, NULL);
@@ -6487,31 +6488,10 @@ main (int argc, char **argv)
 		manilink = "/link /manifest /verbose";
 	}
 	manilink_len = strlen (manilink);
-#endif
-
-#ifdef	__WATCOMC__
-	if (!verbose_output) {
+#elif defined(__WATCOMC__)
+	if (verbose_output < 2) {
 		COBC_ADD_STR (cobc_cflags, " -q", NULL, NULL);
 	}
-#endif
-
-#if	0	/* gcc opts */
-
-#if	defined(__GNUC__) && !defined (__INTEL_COMPILER)
-	if (!gflag_set && !cobc_wants_debug && !aflag_set) {
-		COBC_ADD_STR (cobc_cflags, " -fomit-frame-pointer",
-			      " -fno-asynchronous-unwind-tables",
-			      " -U_FORTIFY_SOURCE");
-#if	0	/* RXWRXW - Default opt */
-		if (!cob_optimize) {
-			COBC_ADD_STR (cobc_cflags, CB_COPT_1, NULL, NULL);
-		}
-#endif
-#ifdef	HAVE_UNWIND_OPT
-#endif
-	}
-#endif
-
 #endif
 
 	/* Append default extensions */
