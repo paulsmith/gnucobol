@@ -1323,6 +1323,12 @@
 	  integer with 6 digits or less than 4 digits.
 	* parser.y: improved error messages of integer and report_integer.
 
+2015-08-19  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c: swapped order of parameters for C compiler and linking so that
+	  -L options come before -l 
+	  Otherwise the linker does not find things correctly on Linux
+
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h, cobc.c, pplex.l: allow compiles from stdin

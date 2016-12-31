@@ -5901,12 +5901,12 @@ process_module_direct (struct filename *fn)
 	sprintf (cobc_buffer, "%s %s %s %s %s %s -fe=\"%s\" \"%s\" %s %s %s",
 		 cobc_cc, cobc_cflags, cobc_include, COB_SHARED_OPT,
 		 COB_PIC_FLAGS, COB_EXPORT_DYN, name,
-		 fn->translate, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 fn->translate, cobc_ldflags, cobc_lib_paths, cobc_libs);
 #else
 	sprintf (cobc_buffer, "%s %s %s %s %s %s -o \"%s\" \"%s\" %s %s %s",
 		 cobc_cc, cobc_cflags, cobc_include, COB_SHARED_OPT,
 		 COB_PIC_FLAGS, COB_EXPORT_DYN, name,
-		 fn->translate, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 fn->translate, cobc_ldflags, cobc_lib_paths, cobc_libs);
 #endif
 	ret = process (cobc_buffer);
 #ifdef	COB_STRIP_CMD
@@ -5998,11 +5998,11 @@ process_module (struct filename *fn)
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s %s %s -fe=\"%s\" \"%s\" %s %s %s",
 		 cobc_cc, COB_SHARED_OPT, COB_PIC_FLAGS, COB_EXPORT_DYN,
-		 name, fn->object, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 name, fn->object, cobc_ldflags, cobc_lib_paths, cobc_libs);
 #else
 	sprintf (cobc_buffer, "%s %s %s %s -o \"%s\" \"%s\" %s %s %s",
 		 cobc_cc, COB_SHARED_OPT, COB_PIC_FLAGS, COB_EXPORT_DYN,
-		 name, fn->object, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 name, fn->object, cobc_ldflags, cobc_lib_paths, cobc_libs);
 #endif
 	ret = process (cobc_buffer);
 #ifdef	COB_STRIP_CMD
@@ -6113,12 +6113,12 @@ process_library (struct filename *l)
 	sprintf (cobc_buffer, "%s %s %s %s -fe=\"%s\" %s %s %s %s",
 		 cobc_cc, COB_SHARED_OPT, COB_PIC_FLAGS,
 		 COB_EXPORT_DYN, name, cobc_objects_buffer,
-		 cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 cobc_ldflags, cobc_lib_paths, cobc_libs);
 #else
 	sprintf (cobc_buffer, "%s %s %s %s -o \"%s\" %s %s %s %s",
 		 cobc_cc, COB_SHARED_OPT, COB_PIC_FLAGS,
 		 COB_EXPORT_DYN, name, cobc_objects_buffer,
-		 cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 cobc_ldflags, cobc_lib_paths, cobc_libs);
 #endif
 	ret = process (cobc_buffer);
 #ifdef	COB_STRIP_CMD
@@ -6220,11 +6220,11 @@ process_link (struct filename *l)
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s -fe=\"%s\" %s %s %s %s",
 		 cobc_cc, COB_EXPORT_DYN, name, cobc_objects_buffer,
-		 cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 cobc_ldflags, cobc_lib_paths, cobc_libs);
 #else
 	sprintf (cobc_buffer, "%s %s -o \"%s\" %s %s %s %s",
 		 cobc_cc, COB_EXPORT_DYN, name, cobc_objects_buffer,
-		 cobc_ldflags, cobc_libs, cobc_lib_paths);
+		 cobc_ldflags, cobc_lib_paths, cobc_libs);
 #endif
 
 	ret = process (cobc_buffer);
