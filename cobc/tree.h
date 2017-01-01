@@ -679,8 +679,8 @@ struct cb_field {
 	int			level;		/* Level number */
 	int			memory_size;	/* Memory size */
 	int			offset;		/* Byte offset from 01 level */
-	int			occurs_min;	/* OCCURS <max> (without <min> TO )*/
-	int			occurs_max;	/* OCCURS <min> TO <max> */
+	int			occurs_min;	/* OCCURS <min> */
+	int			occurs_max;	/* OCCURS [... TO] <max> */
 	int			indexes;	/* Indices count (OCCURS) */
 
 	int			count;		/* Reference count */
@@ -712,7 +712,7 @@ struct cb_field {
 	unsigned int flag_blank_zero	: 1;	/* BLANK WHEN ZERO */
 	unsigned int flag_justified	: 1;	/* JUSTIFIED RIGHT */
 	unsigned int flag_binary_swap	: 1;	/* Binary byteswap */
-	
+
 	unsigned int flag_real_binary	: 1;	/* BINARY-CHAR/SHORT/LONG/DOUBLE */
 	unsigned int flag_is_pointer	: 1;	/* Is POINTER */
 	unsigned int flag_item_78	: 1;	/* Is 78 level */
@@ -721,7 +721,7 @@ struct cb_field {
 	unsigned int flag_filler	: 1;	/* Implicit/explicit filler */
 	unsigned int flag_synchronized	: 1;	/* SYNCHRONIZED */
 	unsigned int flag_invalid	: 1;	/* Is broken */
-	
+
 	unsigned int flag_field		: 1;	/* Has been internally cached */
 	unsigned int flag_chained	: 1;	/* CHAINING item */
 	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
@@ -730,7 +730,7 @@ struct cb_field {
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
 	unsigned int flag_is_pdiv_parm	: 1;	/* Is PROC DIV USING */
 	unsigned int flag_is_pdiv_opt	: 1;	/* Is PROC DIV USING OPTIONAL */
-	
+
 	unsigned int flag_local_alloced	: 1;	/* LOCAL storage is allocated */
 	unsigned int flag_no_init	: 1;	/* No initialize unless used */
 	unsigned int flag_vsize_done	: 1;	/* Variable size cached */
@@ -740,7 +740,7 @@ struct cb_field {
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_all_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */
-	
+
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 };

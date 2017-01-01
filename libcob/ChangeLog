@@ -1890,29 +1890,29 @@
 2004-09-17  Keisuke Nishida  <knishida@opencobol.org>
 
 	* numeric.h (COB_STORE_TRUNC_ON_OVERFLOW): Define as 0x04, not 0x02.
-	(Thanks to Roger While)
+	  (Thanks to Roger While)
 
 2004-07-06  Keisuke Nishida  <knishida@opencobol.org>
 
 	* numeric.h (COB_STORE_ROUND, COB_STORE_KEEP_ON_OVERFLOW)
-	(COB_STORE_TRUNC_ON_OVERFLOW): New macros.
+	  (COB_STORE_TRUNC_ON_OVERFLOW): New macros.
 	* numeric.h, numeric.c (cob_decimal_get_display)
-	(cob_decimal_get_binary, cob_decimal_get_field, cob_add, cob_sub)
-	(cob_div_quotient, cob_div_remainder): New arg 'opt'.
+	  (cob_decimal_get_binary, cob_decimal_get_field, cob_add, cob_sub)
+	  (cob_div_quotient, cob_div_remainder): New arg 'opt'.
 	* numeric.c (cob_decimal_get_field_round): Removed.
-	Integrated into 'cob_decimal_get_field'.
-	(cob_display_add_int): Renamed from cob_add_int_to_display.
-	(cob_add_round, cob_sub_round): Removed.
+	  Integrated into 'cob_decimal_get_field'.
+	  (cob_display_add_int): Renamed from cob_add_int_to_display.
+	  (cob_add_round, cob_sub_round): Removed.
 
 2004-07-05  Keisuke Nishida  <knishida@opencobol.org>
 
 	* fileio.c (sort_read): Set field size for varying records.
-	(Thanks to Roger While!)
+	  (Thanks to Roger While!)
 
 2004-06-12  Keisuke Nishida  <knishida@opencobol.org>
 
 	* termio.c (display): Display full digits of binary item
-	when pretty-display is off, not when binary-truncate is off.
+	  when pretty-display is off, not when binary-truncate is off.
 
 2004-05-21  Keisuke Nishida  <knishida@opencobol.org>
 
@@ -1923,7 +1923,7 @@
 2004-05-16  Keisuke Nishida  <knishida@opencobol.org>
 
 	* common.c (cob_cmp): Compare non-display numeric and alphanumeric
-	correctly.
+	  correctly.
 
 2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
 
@@ -1932,7 +1932,7 @@
 2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
 
 	* byteswap.h (COB_BSWAP_32_IA32): Always use bswap.
-	(We no longer support i386.)
+	  (We no longer support i386.)
 
 2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
 
@@ -1945,12 +1945,12 @@
 2004-04-07  Keisuke Nishida  <knishida@opencobol.org>
 
 	* common.h, common.c (cob_table_sort_init, cob_table_sort_init_key)
-	(cob_table_sort): New functions.
+	  (cob_table_sort): New functions.
 
 2004-04-07  Keisuke Nishida  <knishida@opencobol.org>
 
 	* strings.c (cob_inspect_converting): Do not convert repeatedly.
-	(Thanks to Richard Smith <rich@theforest.plus.com>)
+	  (Thanks to Richard Smith <rich@theforest.plus.com>)
 
 2004-03-12  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
@@ -1963,18 +1963,18 @@
 2004-03-10  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
 	* fileio.c (cob_sort_init): Use temporary sort file.
-	(cob_sort_finish): Delete sort file.
-	(cob_open): No filename mapping for SORT files.
+	  (cob_sort_finish): Delete sort file.
+	  (cob_open): No filename mapping for SORT files.
 
 2004-03-09  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
 	* move.c (cob_binary_set_int, cob_binary_set_int64): Reimplemented.
-	(Thanks to Roger While)
+	  (Thanks to Roger While)
 
 2004-03-06  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
 	* fileio.c (file_open): Open files in the text mode for line
-	sequential files.
+	  sequential files.
 
 2004-03-06  Keisuke Nishida  <knishida@wind.sannet.ne.jp>
 
@@ -1992,18 +1992,18 @@
 2003-08-30  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
 	* common.h (cob_module): Replace 'flag_binary_print_full' by
-	'flag_binary_truncate'.  Related functions updated.
+	  'flag_binary_truncate'.  Related functions updated.
 
 2003-08-29  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
 	* termio.h (COB_SYSIN, COB_SYSOUT, COB_SYSERR): Removed.
 	* termio.h, termio.c (cob_display_error): New function.
-	(cob_newline_error): New function.
+	  (cob_newline_error): New function.
 
 2003-08-27  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
 	* fileio.c: Compile indexed and sort i/o only when either of
-	HAVE_DBOPEN or WITH_DB is defined.
+	  HAVE_DBOPEN or WITH_DB is defined.
 
 2003-08-26  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
@@ -2021,7 +2021,7 @@
 2003-08-25  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
 	* fileio.h, fileio.c (cob_sort_init): 3rd argument 'sequence'.
-	(cob_sort_finish): New function.
+	  (cob_sort_finish): New function.
 
 2003-08-22  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
@@ -2037,7 +2037,7 @@
 2003-08-21  Keisuke Nishida  <kxn30@yahoo.co.jp>
 
 	* common.h (cob_display_sign): New enum.
-	(cob_module): New entry 'display_sign'.
+	  (cob_module): New entry 'display_sign'.
 	* common.c (cob_real_get_sign, cob_real_put_sign): Check display_sign.
 
 2003-08-19  Keisuke Nishida  <knishida@netlab.jp>
@@ -2047,7 +2047,7 @@
 2003-08-17  Keisuke Nishida  <knishida@netlab.jp>
 
 	* termio.h, termio.c (cob_display_environment): New function.
-	(cob_accept_environment): Remove the second argument.
+	  (cob_accept_environment): Remove the second argument.
 
 2003-08-12  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2062,15 +2062,15 @@
 
 	* common.h (COB_FLAG_BINARY_SWAP): New macro.
 	* move.h, move.c (cob_binary_get_int): New function.
-	(cob_binary_get_int64): New function.
-	(cob_binary_set_int): New function.
-	(cob_binary_set_int64): New function.
+	  (cob_binary_get_int64): New function.
+	  (cob_binary_set_int): New function.
+	  (cob_binary_set_int64): New function.
 	* common.h (COB_TYPE_NUMERIC_NATIVE): Removed.
 	* common.h, common.c (cob_binary_convert): Removed.
 	* move.c (cob_move_display_to_native): Removed.
-	(cob_move_native_to_display): Removed.
+	  (cob_move_native_to_display): Removed.
 	* numeric.c (cob_decimal_set_native): Removed.
-	(cob_decimal_get_native): Removed.
+	  (cob_decimal_get_native): Removed.
 
 2003-08-09  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2082,18 +2082,18 @@
 	* common.h (COB_TYPE_NUMERIC_NATIVE): New macro.
 	* common.h, common.c (cob_binary_convert): New function.
 	* move.c (cob_move_display_to_native): New function.
-	(cob_move_native_to_display): New function.
+	  (cob_move_native_to_display): New function.
 	* numeric.c (cob_decimal_set_native): New function.
-	(cob_decimal_get_native): New function.
+	  (cob_decimal_get_native): New function.
 
 2003-08-05  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.h (COB_WRITE_MASK, COB_WRITE_LINES, COB_WRITE_PAGE)
-	(COB_WRITE_AFTER, COB_WRITE_BEFORE): New macros.
+	  (COB_WRITE_AFTER, COB_WRITE_BEFORE): New macros.
 	* fileio.h, fileio.c (cob_write_page, cob_write_lines): Removed.
-	(cob_write): Take third argument.
+	  (cob_write): Take third argument.
 	* fileio.c (file_write_opt): New function.
-	(FILE_WRITE_AFTER, FILE_WRITE_BEFORE): New macros.
+	  (FILE_WRITE_AFTER, FILE_WRITE_BEFORE): New macros.
 
 2003-07-28  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2102,7 +2102,7 @@
 2003-06-29  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.h, fileio.c (cob_sort_init): Removed the 3rd argument.
-	(cob_sort_init_key): New function.
+	  (cob_sort_init_key): New function.
 
 2003-06-28  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2115,12 +2115,12 @@
 2003-06-19  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.c, common.h (cob_check_odo): New function.
-	(cob_check_subscript_depending): Removed.
+	  (cob_check_subscript_depending): Removed.
 
 2003-06-18  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.c (relative_rewrite): Refer to the relative key unless
-	the access mode is sequential.
+	  the access mode is sequential.
 
 2003-06-12  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2145,16 +2145,16 @@
 2003-05-27  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h (cob_module): Renamed from cob_environment.
-	(cob_current_module): Renamed from cob_env.
-	(cob_module_enter): Renamed from cob_push_environment.
-	(cob_module_leave): Renamed from cob_pop_environment.
-	(cob_module_init): Removed.
+	  (cob_current_module): Renamed from cob_env.
+	  (cob_module_enter): Renamed from cob_push_environment.
+	  (cob_module_leave): Renamed from cob_pop_environment.
+	  (cob_module_init): Removed.
 	* call.c (cob_resolve): Do not call cob_module_init.
 
 2003-05-20  Keisuke Nishida  <knishida@netlab.jp>
 
 	* strings.c (cob_string_delimited): New function.
-	(cob_string_append): Take only one argument.
+	  (cob_string_append): Take only one argument.
 
 2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2163,10 +2163,10 @@
 2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.c: Large file system support.
-	(_LFS64_LARGEFILE) [WITH_LFS64]: Defined.
-	(_LFS64_STDIO) [WITH_LFS64]: Defined.
-	(_FILE_OFFSET_BITS) [WITH_LFS64]: Defined.
-	(_LARGEFILE64_SOURCE) [WITH_LFS64]: Defined.
+	  (_LFS64_LARGEFILE) [WITH_LFS64]: Defined.
+	  (_LFS64_STDIO) [WITH_LFS64]: Defined.
+	  (_FILE_OFFSET_BITS) [WITH_LFS64]: Defined.
+	  (_LARGEFILE64_SOURCE) [WITH_LFS64]: Defined.
 
 2003-05-18  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2175,51 +2175,51 @@
 2003-05-15  Keisuke Nishida  <knishida@netlab.jp>
 
 	* move.c (COPY_COMMON_REGION): Removed.
-	(store_common_region): New function.
-	(cob_display_to_int): New function.
-	(cob_binary_to_int): New function.
-	(cob_get_int): Optimized.
+	  (store_common_region): New function.
+	  (cob_display_to_int): New function.
+	  (cob_binary_to_int): New function.
+	  (cob_get_int): Optimized.
 
 2003-05-13  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.c (INITIAL_FLAGS): Set to O_BINARY when _WIN32 is defined
-	rather than __MINGW32__.
-	(file_open): Open in binary mode.
-	(cob_open): Make sure that errno == ENOENT after stat.
+	  rather than __MINGW32__.
+	  (file_open): Open in binary mode.
+	  (cob_open): Make sure that errno == ENOENT after stat.
 
 2003-05-06  Keisuke Nishida  <knishida@netlab.jp>
 
 	* exception.def (COB_EC_ALL): Added.
 	* common.h (COB_SET_EXCEPTION): New macro.
-	(cob_exception_table): New variable.
-	(cob_exception_id): New enum.
-	(cob_exception_code): Removed.
+	  (cob_exception_table): New variable.
+	  (cob_exception_id): New enum.
+	  (cob_exception_code): Removed.
 
 2003-05-04  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.c: Optimized cob_add_int/cob_sub_int for DISPLAY.
-	(digit_table): New variable.
-	(init_digit_table): New function.
-	(display_add_int, display_sub_int): New functions.
-	(cob_add_int_to_display): New function.
-	(cob_add_int): Call 'cob_add_int_to_display'.
-	(cob_sub_int): Call 'cob_add_int'.
-	(Thanks to David Korn <dgk@research.att.com>)
+	  (digit_table): New variable.
+	  (init_digit_table): New function.
+	  (display_add_int, display_sub_int): New functions.
+	  (cob_add_int_to_display): New function.
+	  (cob_add_int): Call 'cob_add_int_to_display'.
+	  (cob_sub_int): Call 'cob_add_int'.
+	  (Thanks to David Korn <dgk@research.att.com>)
 
 2003-05-04  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h (cob_get_sign, cob_put_sign): Redefined as macros.
 	* common.c (cob_real_get_sign, cob_real_put_sign): Called from
-	the above macros.
+	  the above macros.
 
 2003-05-03  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.h (COB_OPEN_NONE, COB_OPEN_LOCKED): New macros.
-	(COB_CLOSE_REEL, COB_CLOSE_REEL_REMOVAL): Removed.
-	(COB_FILE_CLOSED_WITH_LOCK): New macro.
+	  (COB_CLOSE_REEL, COB_CLOSE_REEL_REMOVAL): Removed.
+	  (COB_FILE_CLOSED_WITH_LOCK): New macro.
 	* fileio.c (sequential_close): Close with lock.
-	(sequential_open): Seek to the end for extend file.
-	(cob_open): Return COB_FILE_CLOSED_WITH_LOCK when file is locked.
+	  (sequential_open): Seek to the end for extend file.
+	  (cob_open): Return COB_FILE_CLOSED_WITH_LOCK when file is locked.
 
 2003-05-03  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2228,7 +2228,7 @@
 2003-04-26  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h, common.c (cob_uint_attr, cob_sint_attr): Removed.
-	(cob_ubin_attr, cob_sbin_attr): Removed.
+	  (cob_ubin_attr, cob_sbin_attr): Removed.
 	* move.c: Do not use them.
 
 2003-04-03  Keisuke Nishida  <knishida@netlab.jp>
@@ -2238,7 +2238,7 @@
 2003-03-30  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.c (cob_decimal_set_int): Remove the 3rd argument 'decimals'.
-	(cob_decimal_set_int64): Removed.
+	  (cob_decimal_set_int64): Removed.
 
 2003-03-25  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2263,18 +2263,18 @@
 2003-01-20  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h (COB_FLAG_HAVE_SIGN): New macro.
-	(COB_FLAG_SIGN_SEPARATE): New macro.
-	(COB_FLAG_SIGN_LEADING): New macro.
-	(COB_FLAG_BLANK_ZERO): New macro.
-	(COB_FLAG_JUSTFIED): New macro.
-	(COB_FIELD_HAVE_SIGN): New macro.
-	(COB_FIELD_SIGN_SEPARATE): New macro.
-	(COB_FIELD_SIGN_LEADING): New macro.
-	(COB_FIELD_BLANK_ZERO): New macro.
-	(COB_FIELD_JUSTIFIED): New macro.
-	(cob_field_attr): Remove members 'have_sign', 'sign_separate',
-	'sign_leading', 'blank_zero', and 'justified'.  New member
-	'flags'.  All files updated.
+	  (COB_FLAG_SIGN_SEPARATE): New macro.
+	  (COB_FLAG_SIGN_LEADING): New macro.
+	  (COB_FLAG_BLANK_ZERO): New macro.
+	  (COB_FLAG_JUSTFIED): New macro.
+	  (COB_FIELD_HAVE_SIGN): New macro.
+	  (COB_FIELD_SIGN_SEPARATE): New macro.
+	  (COB_FIELD_SIGN_LEADING): New macro.
+	  (COB_FIELD_BLANK_ZERO): New macro.
+	  (COB_FIELD_JUSTIFIED): New macro.
+	  (cob_field_attr): Remove members 'have_sign', 'sign_separate',
+	  'sign_leading', 'blank_zero', and 'justified'.  New member
+	  'flags'.  All files updated.
 
 2003-01-20  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2283,32 +2283,32 @@
 2003-01-15  Keisuke Nishida  <knishida@netlab.jp>
 
 	* move.c (cob_move_all): New function.
-	(cob_move): Call cob_move_all.
+	  (cob_move): Call cob_move_all.
 
 2002-12-10  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h (cob_environment, cob_env): New.
-	(cob_decimal_point, cob_currency_symbol, cob_numeric_separator):
-	Replaced by cob_env.  All files updated.
+	  (cob_decimal_point, cob_currency_symbol, cob_numeric_separator):
+	  Replaced by cob_env.  All files updated.
 	* common.c (cob_decimal_point, cob_currency_symbol): Removed.
 
 2002-12-05  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.c (cob_index, cob_index_depending): Exit when index is
-	out of range.
+	  out of range.
 
 2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.c (cob_decimal_get, cob_decimal_get_r): Copy decimal
-	before modifying it.
+	  before modifying it.
 
 2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
 
 	* strings.h (cob_inspect_init): Take second argument 'replacing'.
-	(cob_inspect_characters): New function.
-	(cob_inspect_all): New function.
-	(cob_inspect_leading): New function.
-	(cob_inspect_first): New function.
+	  (cob_inspect_characters): New function.
+	  (cob_inspect_all): New function.
+	  (cob_inspect_leading): New function.
+	  (cob_inspect_first): New function.
 
 2002-11-25  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2321,11 +2321,11 @@
 	* fileio.h (COB_ASCENDING, COB_DESCENDING): Moved from common.h.
 
 	* common.h (cob_field_attr): Remove member 'all'.
-	(COB_TYPE_*): New macros.
-	(COB_FIELD_IS_NUMERIC): New macro.
+	  (COB_TYPE_*): New macros.
+	  (COB_FIELD_IS_NUMERIC): New macro.
 
 	* numeric.h (cob_d1, cob_d2, cob_d3, cob_d4, cob_dt): Removed.
-	(cob_decimal_set_int64): Removed.
+	  (cob_decimal_set_int64): Removed.
 	* numeric.h, numeric.c (cob_numeric_cmp): New function.
 	* common.c (cob_cmp): Call 'cob_numeric_cmp' for numeric comparison.
 	* fileio.c (sort_compare): Always call cob_cmp.
@@ -2333,7 +2333,7 @@
 2002-11-23  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.h, numeric.c (cob_add_r, cob_sub_r): New functions.
-	(cob_decimal_get_r): Renamed from 'cob_decimal_get_rounded'.
+	  (cob_decimal_get_r): Renamed from 'cob_decimal_get_rounded'.
 
 2002-11-22  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2347,7 +2347,7 @@
 2002-11-21  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.h, numeric.c (cob_add, cob_sub, cob_add_int, cob_sub_int):
-	Don't take parameter 'round'.  All caller updated.
+	  Don't take parameter 'round'.  All caller updated.
 
 2002-11-19  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2356,60 +2356,60 @@
 2002-11-19  Keisuke Nishida  <knishida@netlab.jp>
 
 	* strings.h, strings.c: Divide string functions.
-	(cob_inspect, cob_string, cob_unstring): Removed.
-	(cob_inspect_init): New function.
-	(cob_inspect_start): New function.
-	(cob_inspect_before): New function.
-	(cob_inspect_after): New function.
-	(cob_inspect_tallying_characters): New function.
-	(cob_inspect_tallying_all): New function.
-	(cob_inspect_tallying_leading): New function.
-	(cob_inspect_replacing_characters): New function.
-	(cob_inspect_replacing_all): New function.
-	(cob_inspect_replacing_leading): New function.
-	(cob_inspect_replacing_first): New function.
-	(cob_inspect_converting): New function.
-	(cob_inspect_finish): New function.
-	(cob_string_init): New function.
-	(cob_string_append): New function.
-	(cob_string_finish): New function.
-	(cob_unstring_init): New function.
-	(cob_unstring_delimited): New function.
-	(cob_unstring_init): New function.
-	(cob_unstring_tallying): New function.
-	(cob_unstring_finish): New function.
+	  (cob_inspect, cob_string, cob_unstring): Removed.
+	  (cob_inspect_init): New function.
+	  (cob_inspect_start): New function.
+	  (cob_inspect_before): New function.
+	  (cob_inspect_after): New function.
+	  (cob_inspect_tallying_characters): New function.
+	  (cob_inspect_tallying_all): New function.
+	  (cob_inspect_tallying_leading): New function.
+	  (cob_inspect_replacing_characters): New function.
+	  (cob_inspect_replacing_all): New function.
+	  (cob_inspect_replacing_leading): New function.
+	  (cob_inspect_replacing_first): New function.
+	  (cob_inspect_converting): New function.
+	  (cob_inspect_finish): New function.
+	  (cob_string_init): New function.
+	  (cob_string_append): New function.
+	  (cob_string_finish): New function.
+	  (cob_unstring_init): New function.
+	  (cob_unstring_delimited): New function.
+	  (cob_unstring_init): New function.
+	  (cob_unstring_tallying): New function.
+	  (cob_unstring_finish): New function.
 	* strings.h (COB_INSPECT_*, COB_STRING_*, COB_UNSTRING_*): Removed.
 
 2002-11-13  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h, common.c (cob_all_attr): New variable.
-	(cob_just_attr): Renamed from 'cob_alnum_justified_attr'.
-	(cob_cmp): New function.
-	(cob_cmp_zero, cob_cmp_space, cob_cmp_low): Removed.
-	(cob_cmp_high, cob_cmp_quote, cob_cmp_field): Removed.
+	  (cob_just_attr): Renamed from 'cob_alnum_justified_attr'.
+	  (cob_cmp): New function.
+	  (cob_cmp_zero, cob_cmp_space, cob_cmp_low): Removed.
+	  (cob_cmp_high, cob_cmp_quote, cob_cmp_field): Removed.
 	* common.c (cmp_char): Renamed from 'cmp_figurative'.
-	(cob_cmp_alnum): Renamed from 'cmp_field'.
+	  (cob_cmp_alnum): Renamed from 'cmp_field'.
 	* fileio.c (sort_compare): Updated.
 
 2002-11-13  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.h (cob_status): Removed.
-	(cob_error_code): New variable.
-	(COB_STATUS_SUCCESS, COB_STATUS_OVERFLOW): Removed.
-	(COB_EC_*): New macros.
-	All files updated.
+	  (cob_error_code): New variable.
+	  (COB_STATUS_SUCCESS, COB_STATUS_OVERFLOW): Removed.
+	  (COB_EC_*): New macros.
+	  All files updated.
 
 	* strings.h (COB_STRING_WITH_POINTER): Removed.
-	(COB_UNSTRING_WITH_POINTER): Removed.
+	  (COB_UNSTRING_WITH_POINTER): Removed.
 	* strings.h, strings.c (cob_string, cob_unstring): Take second
-	argument 'ptr'.
+	  argument 'ptr'.
 	* strings.c (set_int, add_int): Removed.
 
 2002-11-11  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.h (COB_FILE_OUT_OF_KEY_RANGE): New macro.
 	* fileio.c (relative_read_next): Use COB_FILE_OUT_OF_KEY_RANGE.
-	(cob_default_error_handle): Add COB_FILE_OUT_OF_KEY_RANGE.
+	  (cob_default_error_handle): Add COB_FILE_OUT_OF_KEY_RANGE.
 
 2002-11-08  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2425,13 +2425,13 @@
 2002-11-07  Keisuke Nishida  <knishida@netlab.jp>
 
 	* numeric.c, numeric.h (cob_add_int, cob_sub_int): Do not take
-	argument 'decimals'.  All callers updated.
+	  argument 'decimals'.  All callers updated.
 
 2002-10-21  Keisuke Nishida  <knishida@netlab.jp>
 
 	* common.c (cmp_figurative): New function.
 	* common.c, common.h (cob_cmp_zero, cob_cmp_space): New functions.
-	(cob_cmp_low, cob_cmp_high, cob_cmp_quote): New functions.
+	  (cob_cmp_low, cob_cmp_high, cob_cmp_quote): New functions.
 
 2002-10-18  Keisuke Nishida  <knishida@netlab.jp>
 
@@ -2440,8 +2440,8 @@
 2002-10-13  Keisuke Nishida  <knishida@netlab.jp>
 
 	* fileio.h (cob_file): New member 'record', replacing
-	'record_size' and 'record_data'.
-	(cob_file): Rename 'record_depending' to 'record_size'.
+	  'record_size' and 'record_data'.
+	  (cob_file): Rename 'record_depending' to 'record_size'.
 	* fileio.c: Updated.
 
 2002-10-13  Keisuke Nishida  <knishida@netlab.jp>
@@ -2450,7 +2450,7 @@
 	* fileio.h (cob_file_key, cob_file, cob_fileio_funcs): New typedef.
 	* numeric.h (cob_decimal): New typedef.
 	* screenio.h (cob_screen): New typedef.
-	(cob_screen_type, cob_screen_data, cob_screen_position): New typedef.
+	  (cob_screen_type, cob_screen_data, cob_screen_position): New typedef.
 	* support.h (cob_frame): New typedef.
 
 2002-10-08  Keisuke Nishida  <knishida@netlab.jp>
