@@ -1,4 +1,8 @@
 
+2017-01-02 Brian Tiffin <btiffin@gnu.org>
+
+	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
+
 2016-12-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: changes for -verbose, optional argument for verbose level,
