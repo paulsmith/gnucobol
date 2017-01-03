@@ -398,9 +398,11 @@ extern int			warningopt;
 extern int			no_physical_cancel;
 extern cob_u32_t		optimize_defs[];
 
-extern char			*cb_oc_build_stamp;
+extern const char		*cb_cobc_build_stamp;
 extern const char		*cb_source_file;
 extern int			cb_source_line;
+
+extern struct cob_time		current_compile_time;
 
 extern const char		*cob_config_dir;
 

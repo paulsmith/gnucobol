@@ -152,7 +152,7 @@ struct strcache {
 /* Global variables */
 
 const char		*cb_source_file = NULL;
-char			*cb_oc_build_stamp = NULL;
+const char		*cb_cobc_build_stamp = NULL;
 const char		*demangle_name = NULL;
 const char		*cb_storage_file_name = NULL;
 struct cb_text_list	*cb_include_list = NULL;
@@ -173,8 +173,12 @@ int			cb_no_symbols = 0;
 int			cb_listing_xref = 0;
 #define		CB_LISTING_DATE_BUFF	48
 #define		CB_LISTING_DATE_MAX		(CB_LISTING_DATE_BUFF - 1)
-char			cb_listing_date[48]; /* Date/Time buffer for listing */
+char			cb_listing_date[CB_LISTING_DATE_BUFF]; /* Date/Time buffer for listing */
 struct list_files	*cb_current_file = NULL;
+
+/* compilation date/time of current source file */
+struct cob_time		current_compile_time = { 0 };
+struct tm			current_compile_tm = { 0 };
 
 #if	0	/* RXWRXW - source format */
 char			*source_name = NULL;
@@ -1656,7 +1660,7 @@ cobc_print_version (void)
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart");
-	printf (_("Built     %s"), cb_oc_build_stamp);
+	printf (_("Built     %s"), cb_cobc_build_stamp);
 	putchar ('\n');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
 	putchar ('\n');
@@ -1669,7 +1673,7 @@ cobc_print_shortversion (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	printf (_("Built     %s"), cb_oc_build_stamp);
+	printf (_("Built     %s"), cb_cobc_build_stamp);
 	putchar ('\t');
 	printf (_("Packaged  %s"), COB_TAR_DATE);
 	putchar ('\n');
@@ -2093,8 +2097,6 @@ process_command_line (const int argc, char **argv)
 	char			ext[COB_MINI_BUFF];
 	char			*conf_label;	/* we want a dynamic address for erroc.c, not a  static one */
 	char			*conf_entry;
-	time_t			curtime;		/* Compile time */
-
 
 	int			conf_ret = 0;
 
@@ -6254,21 +6256,108 @@ process_link (struct filename *l)
 	return ret;
 }
 
+/* Set up build time stamp */
+static void
+set_const_cobc_build_stamp (void)
+{
+	int			year;
+	int			day;
+	char		month[32];
+
+	memset (month, 0, sizeof(month));
+	day = 0;
+	year = 0;
+	if (sscanf (__DATE__, "%s %d %d", month, &day, &year) == 3) {
+		snprintf (cobc_buffer, (size_t)COB_MINI_MAX,
+			"%s %2.2d %4.4d %s", month, day, year, __TIME__);
+	} else {
+		snprintf (cobc_buffer, (size_t)COB_MINI_MAX,
+			"%s %s", __DATE__, __TIME__);
+	}
+	cb_cobc_build_stamp = (const char *)cobc_main_strdup (cobc_buffer);
+}
+
+/* Set up compiler defaults from environment/builtin */
+static void
+set_cobc_defaults (void)
+{
+	char			*p;
+
+	cobc_cc = cobc_getenv_path ("COB_CC");
+	if (cobc_cc == NULL) {
+		cobc_cc = COB_CC;
+	}
+
+	cob_config_dir = cobc_getenv_path ("COB_CONFIG_DIR");
+	if (cob_config_dir == NULL) {
+		cob_config_dir = COB_CONFIG_DIR;
+	}
+
+	p = cobc_getenv ("COB_CFLAGS");
+	if (p) {
+		COBC_ADD_STR (cobc_cflags, p, NULL, NULL);
+	} else {
+		COBC_ADD_STR (cobc_cflags, COB_CFLAGS, NULL, NULL);
+	}
+
+	p = cobc_getenv ("COB_LDFLAGS");
+	if (p) {
+		COBC_ADD_STR (cobc_ldflags, p, NULL, NULL);
+	} else {
+		COBC_ADD_STR (cobc_ldflags, COB_LDFLAGS, NULL, NULL);
+	}
+
+	p = cobc_getenv ("COB_LIBS");
+	if (p) {
+		COBC_ADD_STR (cobc_libs, p, NULL, NULL);
+	} else {
+		COBC_ADD_STR (cobc_libs, COB_LIBS, NULL, NULL);
+	}
+
+	p = cobc_getenv ("COB_LDADD");
+	if (p) {
+		COBC_ADD_STR (cobc_libs, " ", p, NULL);
+	}
+
+	p = cobc_getenv ("COB_LIB_PATHS");
+	if (p) {
+		COBC_ADD_STR (cobc_lib_paths, p, NULL, NULL);
+	} else {
+		COBC_ADD_STR (cobc_lib_paths, " ", NULL, NULL);
+	}
+
+	/* Different styles for warning/error messages */
+	p = cobc_getenv ("COB_MSG_FORMAT");
+#if defined (_MSC_VER)
+	if (p && strcasecmp(p, "GCC") == 0) {
+		cb_msg_style = CB_MSG_STYLE_GCC;
+	} else {
+		cb_msg_style = CB_MSG_STYLE_MSC;
+	}
+#else
+	if (p && strcasecmp(p, "MSC") == 0) {
+		cb_msg_style = CB_MSG_STYLE_MSC;
+	} else {
+		cb_msg_style = CB_MSG_STYLE_GCC;
+	}
+#endif
+}
+
 /* Main function */
 int
 main (int argc, char **argv)
 {
 	struct filename		*fn;
-	char			*p;
 	struct cobc_mem_struct	*mptr;
 	struct cobc_mem_struct	*mptrt;
 	unsigned int		iparams;
 	unsigned int		local_level;
 	int			status;
-	int			year;
-	int			day;
 	int			i;
-	char			month[32];
+
+#ifdef	_WIN32
+	char			*p;
+#endif
 
 #ifdef	ENABLE_NLS
 	struct stat	localest;
@@ -6355,80 +6444,10 @@ main (int argc, char **argv)
 
 	/* Initialize variables */
 
-	/* Set up build time stamp */
-	memset (month, 0, sizeof(month));
-	day = 0;
-	year = 0;
-	status = sscanf (__DATE__, "%s %d %d", month, &day, &year);
-	if (status == 3) {
-		snprintf (cobc_buffer, (size_t)COB_MINI_MAX,
-			  "%s %2.2d %4.4d %s", month, day, year, __TIME__);
-	} else {
-		snprintf (cobc_buffer, (size_t)COB_MINI_MAX,
-			  "%s %s", __DATE__, __TIME__);
-	}
-	cb_oc_build_stamp = cobc_main_strdup (cobc_buffer);
+	set_const_cobc_build_stamp();
+	set_cobc_defaults();
 
 	output_name = NULL;
-
-	cobc_cc = cobc_getenv_path ("COB_CC");
-	if (cobc_cc == NULL) {
-		cobc_cc = COB_CC;
-	}
-
-	cob_config_dir = cobc_getenv_path ("COB_CONFIG_DIR");
-	if (cob_config_dir == NULL) {
-		cob_config_dir = COB_CONFIG_DIR;
-	}
-
-	p = cobc_getenv ("COB_CFLAGS");
-	if (p) {
-		COBC_ADD_STR (cobc_cflags, p, NULL, NULL);
-	} else {
-		COBC_ADD_STR (cobc_cflags, COB_CFLAGS, NULL, NULL);
-	}
-
-	p = cobc_getenv ("COB_LDFLAGS");
-	if (p) {
-		COBC_ADD_STR (cobc_ldflags, p, NULL, NULL);
-	} else {
-		COBC_ADD_STR (cobc_ldflags, COB_LDFLAGS, NULL, NULL);
-	}
-
-	p = cobc_getenv ("COB_LIBS");
-	if (p) {
-		COBC_ADD_STR (cobc_libs, p, NULL, NULL);
-	} else {
-		COBC_ADD_STR (cobc_libs, COB_LIBS, NULL, NULL);
-	}
-
-	p = cobc_getenv ("COB_LDADD");
-	if (p) {
-		COBC_ADD_STR (cobc_libs, " ", p, NULL);
-	}
-
-	p = cobc_getenv ("COB_LIB_PATHS");
-	if (p) {
-		COBC_ADD_STR (cobc_lib_paths, p, NULL, NULL);
-	} else {
-		COBC_ADD_STR (cobc_lib_paths, " ", NULL, NULL);
-	}
-
-	/* Different styles for warning/error messages */
-	p = cobc_getenv ("COB_MSG_FORMAT");
-#if defined (_MSC_VER)
-	if (p && strcasecmp(p, "GCC") == 0) {
-		cb_msg_style = CB_MSG_STYLE_GCC;
-	} else {
-		cb_msg_style = CB_MSG_STYLE_MSC;
-	}
-#else
-	if (p && strcasecmp(p, "MSC") == 0) {
-		cb_msg_style = CB_MSG_STYLE_MSC;
-	} else {
-		cb_msg_style = CB_MSG_STYLE_GCC;
-	}
-#endif
 
 	/* Set default computed goto usage if appropriate */
 #if	defined(__GNUC__) && !defined(__clang__)
@@ -6607,21 +6626,33 @@ main (int argc, char **argv)
 	iparams = 0;
 	local_level = 0;
 
+	/* Set up file parameters, if any are missing: abort */
 	while (iargs < argc) {
-
-		/* Set up file parameters */
 		fn = process_filename (argv[iargs++]);
 		if (!fn) {
 			cobc_clean_up (1);
 			return 1;
 		}
-#if 1 // checkme, changed by Sergey
 	}
+
+	/* process all files */
 	for (fn = file_list; fn; fn = fn->next) {
-#endif
 
 		/* Initialize listing */
 		if (cb_src_list_file) {
+			current_compile_time = cob_get_current_date_and_time();
+			/* the following code is likely to get replaced by a self-written format */
+			current_compile_tm.tm_sec = current_compile_time.second;
+			current_compile_tm.tm_min = current_compile_time.minute;
+			current_compile_tm.tm_hour = current_compile_time.hour;
+			current_compile_tm.tm_mday = current_compile_time.day_of_month;
+			current_compile_tm.tm_mon = current_compile_time.month - 1;
+			current_compile_tm.tm_year = current_compile_time.year - 1900;
+			current_compile_tm.tm_wday = current_compile_time.day_of_week;
+			current_compile_tm.tm_yday = current_compile_time.day_of_year;
+			current_compile_tm.tm_isdst = current_compile_time.is_daylight_saving_time;
+			strcpy (cb_listing_date, asctime(&current_compile_tm));
+			*strchr (cb_listing_date, '\n') = '\0';
 			cb_current_file = cb_listing_file_struct;
 			cb_current_file->name = cobc_strdup (fn->source);
 			cb_current_file->source_format = cb_source_format;

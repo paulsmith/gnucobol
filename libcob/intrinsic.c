@@ -1861,9 +1861,11 @@ valid_offset_time (const int offset)
 	return abs (offset) < minutes_in_day;
 }
 
+/* calculate date from days since 1601 */
 static void
-date_of_integer (int days, int *year, int *month, int *day)
+date_of_integer (const int day_num, int *year, int *month, int *day)
 {
+	int days = day_num;
 	int baseyear = 1601;
 	int leapyear = 365;
 	int i;
@@ -1892,10 +1894,12 @@ date_of_integer (int days, int *year, int *month, int *day)
 	*day = days;
 }
 
+/* set year and day-of-year from integer */
 static void
-day_of_integer (int days, int *year, int *day)
+day_of_integer (const int day_num, int *year, int *day)
 {
 	int leapyear = 365;
+	int days = day_num;
 
 	*year = 1601;
 
@@ -1908,6 +1912,7 @@ day_of_integer (int days, int *year, int *day)
 	*day = days;
 }
 
+/* calculate number of days between 1601 and given year */
 static cob_u32_t
 days_up_to_year (const int year)
 {
@@ -1921,6 +1926,7 @@ days_up_to_year (const int year)
 	return totaldays;
 }
 
+/* calculate number of days between 1601/01/01 and given date */
 static cob_u32_t
 integer_of_date (const int year, const int month, const int days)
 {
@@ -1938,6 +1944,7 @@ integer_of_date (const int year, const int month, const int days)
 	return totaldays;
 }
 
+/* calculate number of days between 1601/01/01 and given year + day-of-year */
 static cob_u32_t
 integer_of_day (const int year, const int days)
 {

@@ -259,22 +259,6 @@ struct config_enum {
 };
 
 /* Format of table for capturing run-time config information */
-
-/* Datetime structure */
-struct cob_time
-{
-	int	year;
-	int	month; /* 1 = Jan ... 12 = Dec */
-	int	day_of_month; /* 1 ... 31 */
-	int	day_of_week; /* 1 = Monday ... 7 = Sunday */
-	int	hour;
-	int	minute;
-	int	second;
-	int	nanosecond;
-	int	offset_known;
-	int	utc_offset; /* in minutes */
-};
-
 struct config_tbl {
 	const char	*env_name;		/* Env Var name */
 	const char	*conf_name;		/* Name used in run-time config file */
@@ -363,8 +347,6 @@ COB_HIDDEN char*	cob_save_env_value	(char*, char*);
 COB_HIDDEN cob_settings *cob_get_settings_ptr	(void);
 
 COB_HIDDEN int		cob_ctoi		(const char);
-
-COB_HIDDEN struct cob_time cob_get_current_date_and_time	(void);
 
 #if 0 /* currently not used */
 COB_HIDDEN char		*cob_int_to_string		(int, char*);

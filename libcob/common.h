@@ -1419,6 +1419,24 @@ COB_EXPIMP void			*cob_get_prog_pointer	(const void *);
 COB_EXPIMP void			cob_ready_trace		(void);
 COB_EXPIMP void			cob_reset_trace		(void);
 
+/* Datetime structure */
+struct cob_time
+{
+	int	year;
+	int	month; /* 1 = Jan ... 12 = Dec */
+	int	day_of_month; /* 1 ... 31 */
+	int	day_of_week; /* 1 = Monday ... 7 = Sunday */
+	int day_of_year; /* -1 on _WIN32! */
+	int	hour;
+	int	minute;
+	int	second;
+	int	nanosecond;
+	int	offset_known;
+	int	utc_offset; /* in minutes */
+	int is_daylight_saving_time;
+};
+
+COB_EXPIMP struct cob_time cob_get_current_date_and_time	(void);
 
 /* Registration of external handlers */
 COB_EXPIMP void	cob_reg_sighnd	(void (*sighnd) (int));

@@ -8729,7 +8729,7 @@ output_header (FILE *fp, const char *locbuff, const struct cb_program *cp)
 			 PACKAGE_VERSION, PATCH_LEVEL);
 		fprintf (fp, "/* Generated from         %s */\n", cb_source_file);
 		fprintf (fp, "/* Generated at           %s */\n", locbuff);
-		fprintf (fp, "/* GnuCOBOL build date    %s */\n", cb_oc_build_stamp);
+		fprintf (fp, "/* GnuCOBOL build date    %s */\n", cb_cobc_build_stamp);
 		fprintf (fp, "/* GnuCOBOL package date  %s */\n", COB_TAR_DATE);
 		fprintf (fp, "/* Compile command        ");
 		for (i = 0; i < cb_saveargc; i++) {

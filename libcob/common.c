@@ -1194,12 +1194,14 @@ one_indexed_day_of_week_from_monday(int zero_indexed_from_sunday)
 	return ((zero_indexed_from_sunday + 6) % 7) + 1;
 }
 
+#if !defined (_BSD_SOURCE)
 static void
 set_unknown_offset(struct cob_time *time)
 {
 	time->offset_known = 0;
 	time->utc_offset = 0;
 }
+#endif
 
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
 static void
@@ -1220,14 +1222,16 @@ static void
 set_cob_time_offset (struct cob_time *cb_time)
 {
 	DWORD	time_zone_result;
-	TIME_ZONE_INFORMATION	time_zone_info;
+	TIME_ZONE_INFORMATION	time_zone_info = {0};
 
 	time_zone_result = GetTimeZoneInformation (&time_zone_info);
 	if (time_zone_result != TIME_ZONE_ID_INVALID) {
 		cb_time->offset_known = 1;
 		cb_time->utc_offset = time_zone_info.Bias;
+		cb_time->is_daylight_saving_time = time_zone_result - 1;
 	} else {
 		set_unknown_offset (cb_time);
+		cb_time->is_daylight_saving_time = -1;
 	}
 }
 #endif
@@ -2365,7 +2369,7 @@ cob_check_linkage (const unsigned char *x, const char *name, const int check_typ
 {
 	if (!x) {
 		/* name includes '' already and can be ... 'x' of 'y' */
-		switch(check_type) {
+		switch (check_type) {
 		case 0: /* check for passed items and size on module entry */
 			cob_runtime_error (_("LINKAGE item %s not passed by caller"), name);
 			break;
@@ -2482,6 +2486,28 @@ cob_ctoi (const char digit)
 	return (int) (digit - '0');
 }
 
+#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+
+/* Get function pointer for most precise time function
+   GetSystemTimePreciseAsFileTime is available since OS-version Windows 2000
+   GetSystemTimeAsFileTime        is available since OS-version Windows 8 / Server 2012
+*/
+static void
+get_function_ptr_for_precise_time (void)
+{
+	HMODULE		kernel32_handle;
+
+	kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
+	if (kernel32_handle != NULL) {
+		time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))
+			GetProcAddress (kernel32_handle, "GetSystemTimePreciseAsFileTime");
+	}
+	if (time_as_filetime_func == NULL) {
+		time_as_filetime_func = GetSystemTimeAsFileTime;
+	}
+}
+#endif
+
 #if defined (_WIN32) /* cygwin does not define _WIN32 */
 struct cob_time
 cob_get_current_date_and_time (void)
@@ -2494,31 +2520,32 @@ cob_get_current_date_and_time (void)
 	struct cob_time	cb_time;
 
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
+	if (!time_as_filetime_func) {
+		get_function_ptr_for_precise_time ();
+	}
 	(time_as_filetime_func) (&filetime);
 	/* use fallback to GetLocalTime if one of the following does not work */
 	if (!(FileTimeToSystemTime (&filetime, &utc_time) &&
 		SystemTimeToTzSpecificLocalTime (NULL, &utc_time, &local_time))) {
 		GetLocalTime (&local_time);
-	}
+	} 
 #else
 	GetLocalTime (&local_time);
 #endif
 
-	cb_time.year = local_time.wYear;
+	cb_time.year = local_time.wYear;	
 	cb_time.month = local_time.wMonth;
 	cb_time.day_of_month = local_time.wDay;
 	cb_time.day_of_week = one_indexed_day_of_week_from_monday (local_time.wDayOfWeek);
+	cb_time.day_of_year = -1 /* calculate similar to intrinsic.c if needed */;
 	cb_time.hour = local_time.wHour;
 	cb_time.minute = local_time.wMinute;
 	cb_time.second = local_time.wSecond;
 	cb_time.nanosecond = local_time.wMilliseconds * 1000000;
-	cb_time.offset_known = 0;
-	cb_time.utc_offset = 0;
-
+	cb_time.is_daylight_saving_time = -1;
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
 	set_cob_time_ns_from_filetime (filetime, &cb_time);
 #endif
-
 	set_cob_time_offset (&cb_time);
 
 	return cb_time;
@@ -2535,7 +2562,7 @@ cob_get_current_date_and_time (void)
 	time_t		curtime;
 	struct tm	*tmptr;
 	struct cob_time	cb_time;
-#if defined(COB_STRFTIME)
+#if !defined (_BSD_SOURCE) && defined(COB_STRFTIME)
 	char		iso_timezone[6] = { '\0' };
 #endif
 
@@ -2559,12 +2586,14 @@ cob_get_current_date_and_time (void)
 	cb_time.month = tmptr->tm_mon + 1;
 	cb_time.day_of_month = tmptr->tm_mday;
 	cb_time.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
+	cb_time.day_of_year = tmptr->tm_yday;
 	cb_time.hour = tmptr->tm_hour;
 	cb_time.minute = tmptr->tm_min;
 	cb_time.second = tmptr->tm_sec;
 	cb_time.nanosecond = 0;
 	cb_time.offset_known = 0;
 	cb_time.utc_offset = 0;
+	cb_time.is_daylight_saving_time = tmptr->tm_isdst;
 
 	/* Get nanoseconds or microseconds, if possible */
 #if defined (HAVE_CLOCK_GETTIME)
@@ -2576,7 +2605,10 @@ cob_get_current_date_and_time (void)
 #endif
 
 	/* Get the offset from UTC */
-#if defined (COB_STRFTIME)
+#if defined (_BSD_SOURCE)
+	cb_time.offset_known = 1;
+	cb_time.utc_offset = tmptr->tm_gmtoff / 60;
+#elif defined (COB_STRFTIME)
 	strftime (iso_timezone, (size_t) 6, "%z", tmptr);
 
 	if (iso_timezone[0] == '0') {
@@ -5733,9 +5765,6 @@ cob_init (const int argc, char **argv)
 #ifdef	ENABLE_NLS
 	const char* localedir;
 #endif
-#if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
-	HMODULE		kernel32_handle;
-#endif
 	int		i;
 
 #if 0	/* Simon: Should not happen - is it neccessary anywhere?
@@ -5897,18 +5926,7 @@ cob_init (const int argc, char **argv)
 	}
 
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
-	/* Get function pointer for most precise time function
-	   GetSystemTimePreciseAsFileTime is available since OS-version 8 / Server 2012
-	   GetSystemTimeAsFileTime        is available since OS-version 8 / Server 2012
-	*/
-	kernel32_handle = GetModuleHandle (TEXT ("kernel32.dll"));
-	if (kernel32_handle != NULL) {
-		time_as_filetime_func = (VOID (WINAPI *) (LPFILETIME))
-           GetProcAddress (kernel32_handle, "GetSystemTimePreciseAsFileTime");
-	}
-	if (time_as_filetime_func == NULL) {
-		time_as_filetime_func = GetSystemTimeAsFileTime;
-	}
+	get_function_ptr_for_precise_time ();
 #endif
 
 	/* This must be last in this function as we do early return */

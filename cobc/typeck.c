@@ -1022,14 +1022,9 @@ cb_check_field_debug (cb_tree fld)
 void
 cb_build_registers (void)
 {
-#if !defined(__linux__) && !defined(__CYGWIN__) && defined(HAVE_TIMEZONE)
-	long	contz;
-#endif
 	cb_tree         r;
 	cb_tree		x;
-	struct tm	*tlt;
-	time_t		t;
-	char		buff[48];
+	char		buff[22];
 
 	/* RETURN-CODE */
 	if (!current_program->nested_level) {
@@ -1066,36 +1061,33 @@ cb_build_registers (void)
 		CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
 	}
 
-	t = time (NULL);
-	tlt = localtime (&t);
-	/* Leap seconds ? */
-	if (tlt->tm_sec >= 60) {
-		tlt->tm_sec = 59;
-	}
-
 	/* WHEN-COMPILED */
-	memset (buff, 0, sizeof (buff));
-	strftime (buff, (size_t)17, "%m/%d/%y%H.%M.%S", tlt);
+	snprintf (buff, (size_t)17, "%02d/%02d/%d%02d%c%02d%c%02d\n",
+		current_compile_time.day_of_month,
+		current_compile_time.month,
+		current_compile_time.year,
+		current_compile_time.hour, '.',
+		current_compile_time.minute, '.',
+		current_compile_time.second);
 	cb_build_constant (cb_build_reference ("WHEN-COMPILED"),
 			   cb_build_alphanumeric_literal (buff, (size_t)16));
 
 	/* FUNCTION WHEN-COMPILED */
-	memset (buff, 0, sizeof (buff));
-#if defined(__linux__) || defined(__CYGWIN__)
-	strftime (buff, (size_t)22, "%Y%m%d%H%M%S00%z", tlt);
-#elif defined(HAVE_TIMEZONE)
-	strftime (buff, (size_t)17, "%Y%m%d%H%M%S00", tlt);
-	if (timezone <= 0) {
-		contz = -timezone;
-		buff[16] = '+';
+	snprintf (buff, (size_t)17, "%d%02d%02d%02d%02d%02d%02d",
+		current_compile_time.year,
+		current_compile_time.month,
+		current_compile_time.day_of_month,
+		current_compile_time.hour,
+		current_compile_time.minute,
+		current_compile_time.second,
+		current_compile_time.nanosecond / 10000000);
+	if (current_compile_time.offset_known) {
+		snprintf (buff + 16, (size_t)6, "%+03d%02d",
+			current_compile_time.utc_offset / 60,
+			current_compile_time.utc_offset % 60);
 	} else {
-		contz = timezone;
-		buff[16] = '-';
+		snprintf (buff + 16, (size_t)6, "00000");
 	}
-	sprintf (&buff[17], "%2.2ld%2.2ld", contz / 3600, contz % 60);
-#else
-	strftime (buff, (size_t)22, "%Y%m%d%H%M%S0000000", tlt);
-#endif
 	cb_intr_whencomp = cb_build_alphanumeric_literal (buff, (size_t)21);
 
 }

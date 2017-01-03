@@ -1,4 +1,14 @@
 
+2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* coblocal.h, common.h: move (cob_get_current_date_and_time) and
+	  its data definition cob_time from coblocal.h to common.h
+	* common.c [_MSC_VER]: moved initialization of function pointer to
+	  (get_function_ptr_for_precise_time), for call in
+	  (cob_get_current_date_and_time)
+	* common.h: extended cob_time with is_daylight_saving_time and day_of_year
+	* common.c [_BSD_SOURCE]: get utc_offset directly from tm_gmtoff
+
 2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c, common.h: C interface addons including FR #187:

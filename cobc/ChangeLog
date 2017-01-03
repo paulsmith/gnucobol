@@ -1,4 +1,14 @@
 
+2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, cobc.h: new variable current_compile_time for resolving all
+	  compilation dates, set by call to libcob's cob_get_current_date_and_time
+	* typeck.c (cb_build_registers): use time from current_compile_time
+	  providing a higher precision and is identical to the listing which is
+	  requested by COBOL 2002+
+	* cobc.c, cobc.h, codegen.h: renamed cb_oc_build_stamp to
+	  cb_cobc_build_stamp
+
 2017-01-02 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
