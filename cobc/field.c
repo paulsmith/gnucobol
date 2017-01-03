@@ -821,11 +821,15 @@ validate_field_1 (struct cb_field *f)
 
 			/* ISO+IEC+1989-2002: 13.16.42.2-10 */
 			for (p = f; p; p = p->parent) {
-				if (p->redefines) {
-					cb_error_x (x, _("entries under REDEFINES cannot have a VALUE clause"));
-				}
-				if (p->flag_external && cb_warn_external_val) {
-					cb_warning_x (x, _("initial VALUE clause ignored for EXTERNAL item"));
+				if (cb_warn_ignored_initial_val) {
+					if (p->flag_external) {
+						cb_warning_x (x, _("initial VALUE clause ignored for %s item"),
+										"EXTERNAL");
+				} else
+					if (p->redefines) {
+						cb_warning_x (x, _("initial VALUE clause ignored for %s item"),
+										"REDEFINES");
+					}
 				}
 			}
 		}

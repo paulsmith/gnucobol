@@ -349,10 +349,14 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 7: error: entries under REDEFINES cannot have a VALUE clause
-prog.cob: 9: error: entries under REDEFINES cannot have a VALUE clause
+# FIXME: add a compiler configuration as the COBOL standard forbids this
+#        default.conf will allow it (with a warning)
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 7: warning: initial VALUE clause ignored for REDEFINES item
+prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item
 ])
+AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [], [])
 
 AT_CLEANUP
 

@@ -5048,6 +5048,59 @@ Hello again!
 AT_CLEANUP
 
 
+AT_SETUP([REDEFINES values on FILLER and INITIALIZE])
+AT_KEYWORDS([runmisc INITIALIZE])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TSRDF.
+           05  WS-ASK-ID-DATE                PIC X(10) VALUE ALL '*'.
+           05  WS-ASK-ID-DATE-R              REDEFINES WS-ASK-ID-DATE.
+               10  WS-ASK-ID-DATE-YYYY       PIC 9(4) VALUE 2017.
+               10  FILLER                    PIC X VALUE '-'.
+               10  WS-ASK-ID-DATE-MM         PIC 9(2).
+               10  FILLER                    PIC X VALUE '-'.
+               10  WS-ASK-ID-DATE-DD         PIC 9(2).
+       PROCEDURE DIVISION.
+           MOVE 2015 TO WS-ASK-ID-DATE-YYYY
+           MOVE 08 TO WS-ASK-ID-DATE-MM
+           MOVE 21 TO WS-ASK-ID-DATE-DD
+           DISPLAY "The date is " WS-ASK-ID-DATE " Compiled".
+
+           INITIALIZE WS-ASK-ID-DATE-R.
+           MOVE 08 TO WS-ASK-ID-DATE-MM
+           MOVE 21 TO WS-ASK-ID-DATE-DD
+           DISPLAY "The date is " WS-ASK-ID-DATE " INITIALIZE".
+
+           INITIALIZE WS-ASK-ID-DATE-R WITH FILLER.
+           MOVE 08 TO WS-ASK-ID-DATE-MM
+           MOVE 21 TO WS-ASK-ID-DATE-DD
+           DISPLAY "The date is " WS-ASK-ID-DATE " WITH FILLER".
+
+           INITIALIZE WS-ASK-ID-DATE-R WITH FILLER ALL TO VALUE.
+           MOVE 08 TO WS-ASK-ID-DATE-MM
+           MOVE 21 TO WS-ASK-ID-DATE-DD
+           DISPLAY "The date is " WS-ASK-ID-DATE " ALL TO VALUE".
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 8: warning: initial VALUE clause ignored for REDEFINES item
+prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item
+prog.cob: 11: warning: initial VALUE clause ignored for REDEFINES item
+])
+
+AT_CHECK([./prog], [0], [The date is 2015*08*21 Compiled
+The date is 0000*08*21 INITIALIZE
+The date is 0000 08 21 WITH FILLER
+The date is 2017-08-21 ALL TO VALUE
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([PICTURE with constant-name])
 AT_KEYWORDS([runmisc])
 

@@ -60,8 +60,8 @@ CB_WARNDEF (cb_warn_implicit_define, "implicit-define",
 CB_WARNDEF (cb_warn_corresponding, "corresponding",
 	    _("warn CORRESPONDING with no matching items"))
 
-CB_WARNDEF (cb_warn_external_val, "external-value",
-	    _("warn EXTERNAL item with VALUE clause"))
+CB_WARNDEF (cb_warn_ignored_initial_val, "initial-value",
+	    _("warn Initial VALUE clause ignored"))
 
 CB_WARNDEF (cb_warn_prototypes, "prototypes",
 	    _("warn missing FUNCTION prototypes/definitions"))

@@ -13,6 +13,11 @@
 
 	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
 
+2017-01-02  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c, warning.def:
+	  renamed cb_warn_external_val to cb_warn_ignored_initial_val
+
 2016-12-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: changes for -verbose, optional argument for verbose level,
@@ -1342,6 +1347,8 @@
 	* cobc.c: swapped order of parameters for C compiler and linking so that
 	  -L options come before -l 
 	  Otherwise the linker does not find things correctly on Linux
+	* field.c (validate_field_1): warning instead of an error for VALUEs in
+	  REDEFINES with -frelax-syntax as some legacy COBOL code does this
 
 2015-08-03  Brian Tiffin <btiffin@gnu.org>
 
