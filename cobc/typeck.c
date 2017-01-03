@@ -1062,10 +1062,10 @@ cb_build_registers (void)
 	}
 
 	/* WHEN-COMPILED */
-	snprintf (buff, (size_t)17, "%02d/%02d/%d%02d%c%02d%c%02d\n",
+	snprintf (buff, (size_t)17, "%02d/%02d/%02d%02d%c%02d%c%02d",
 		current_compile_time.day_of_month,
 		current_compile_time.month,
-		current_compile_time.year,
+		current_compile_time.year % 100,
 		current_compile_time.hour, '.',
 		current_compile_time.minute, '.',
 		current_compile_time.second);

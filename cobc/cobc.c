@@ -1577,11 +1577,33 @@ cobc_clean_up (const int status)
 	cobc_free_mem ();
 	file_list = NULL;
 }
+static void
+set_listing_date (void)
+{
+	if (!current_compile_time.year) {
+		current_compile_time = cob_get_current_date_and_time();
+	}
+
+	/* the following code is likely to get replaced by a self-written format */
+	current_compile_tm.tm_sec = current_compile_time.second;
+	current_compile_tm.tm_min = current_compile_time.minute;
+	current_compile_tm.tm_hour = current_compile_time.hour;
+	current_compile_tm.tm_mday = current_compile_time.day_of_month;
+	current_compile_tm.tm_mon = current_compile_time.month - 1;
+	current_compile_tm.tm_year = current_compile_time.year - 1900;
+	current_compile_tm.tm_wday = current_compile_time.day_of_week;
+	current_compile_tm.tm_yday = current_compile_time.day_of_year;
+	current_compile_tm.tm_isdst = current_compile_time.is_daylight_saving_time;
+	strcpy (cb_listing_date, asctime(&current_compile_tm));
+	*strchr (cb_listing_date, '\n') = '\0';
+}
+
 
 DECLNORET static void COB_A_NORETURN
 cobc_terminate (const char *str)
 {
 	if (cb_src_list_file) {
+		set_listing_date ();
 		cb_listing_linecount = cb_lines_per_page;
 		strcpy (cb_listing_filename, str);
 		print_program_header();
@@ -2482,9 +2504,6 @@ process_command_line (const int argc, char **argv)
 			/* -t : Generate listing */
 			if (!cb_listing_outputfile) {
 				cb_listing_outputfile = cobc_main_strdup (cob_optarg);
-				curtime = time (NULL);
-				strcpy (cb_listing_date, ctime(&curtime));
-				*strchr (cb_listing_date, '\n') = '\0';
 			}
 			break;
 
@@ -6638,21 +6657,12 @@ main (int argc, char **argv)
 	/* process all files */
 	for (fn = file_list; fn; fn = fn->next) {
 
+		current_compile_time = cob_get_current_date_and_time();
+
 		/* Initialize listing */
 		if (cb_src_list_file) {
-			current_compile_time = cob_get_current_date_and_time();
-			/* the following code is likely to get replaced by a self-written format */
-			current_compile_tm.tm_sec = current_compile_time.second;
-			current_compile_tm.tm_min = current_compile_time.minute;
-			current_compile_tm.tm_hour = current_compile_time.hour;
-			current_compile_tm.tm_mday = current_compile_time.day_of_month;
-			current_compile_tm.tm_mon = current_compile_time.month - 1;
-			current_compile_tm.tm_year = current_compile_time.year - 1900;
-			current_compile_tm.tm_wday = current_compile_time.day_of_week;
-			current_compile_tm.tm_yday = current_compile_time.day_of_year;
-			current_compile_tm.tm_isdst = current_compile_time.is_daylight_saving_time;
-			strcpy (cb_listing_date, asctime(&current_compile_tm));
-			*strchr (cb_listing_date, '\n') = '\0';
+			set_listing_date();
+
 			cb_current_file = cb_listing_file_struct;
 			cb_current_file->name = cobc_strdup (fn->source);
 			cb_current_file->source_format = cb_source_format;
