@@ -4583,7 +4583,8 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 							      size_is, cb_flags_t (disp_attrs)));
 			}
 		}
-	} else if (pos || fgc || bgc || scroll || disp_attrs) {
+	} else if (pos || fgc || bgc || scroll || disp_attrs
+			|| timeout || prompt || size_is) {
 		/* Bump ref count to force CRT STATUS field generation */
 		if (current_program->crt_status) {
 			CB_FIELD_PTR (current_program->crt_status)->count++;

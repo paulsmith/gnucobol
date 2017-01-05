@@ -1207,10 +1207,10 @@ set_attr_with_conflict (const char *clause, const cob_flags_t bitval,
 {
 	if (local_check_duplicate && (*flags & bitval)) {
 		emit_duplicate_clause_message (clause);
-        } else if (*flags & confl_bit) {
+	} else if (*flags & confl_bit) {
 		emit_conflicting_clause_message (clause, confl_clause);
 	} else {
-	        *flags |= bitval;
+	*flags |= bitval;
 	}
 }
 
@@ -6902,7 +6902,16 @@ accept_body:
 	if (cb_accept_auto && !has_dispattr (COB_SCREEN_TAB)) {
 		set_dispattr (COB_SCREEN_AUTO);
 	}
-
+	if ($1 == cb_null && current_statement->attr_ptr) {
+		if (current_statement->attr_ptr->prompt) {
+			emit_conflicting_clause_message ("ACCEPT OMITTED",
+				_("PROMPT clause"));
+		}
+		if (current_statement->attr_ptr->size_is) {
+			emit_conflicting_clause_message ("ACCEPT OMITTED",
+				_("SIZE IS clause"));
+		}
+	}
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
   }

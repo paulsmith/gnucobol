@@ -1855,8 +1855,8 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	size_t		count;
 	int		keyp;
 	int		fret;
-	int		cline;
-	size_t		ccolumn;
+	int		cline = 0;
+	size_t		ccolumn = 0;
 	size_t		rightpos;
 	int		ateof;
 	unsigned char	move_char;      /* data shift character */
@@ -1984,66 +1984,68 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 	/* Get characters from keyboard, processing each one. */
 	for (; ;) {
-		/* Get current line, column. */
-		getyx (stdscr, cline, ccolumn);
-		/* Trailing prompts. */
-		if (fattr & COB_SCREEN_NO_ECHO) {
-			prompt_char = COB_CH_SP;
-		} else if (f && COB_FIELD_IS_NUMERIC (f)) {
-			prompt_char = '0';
-		} else if (fattr & COB_SCREEN_PROMPT) {
-			prompt_char = promptchar;
-		} else {
-			prompt_char = COB_CH_SP;
-		}
-		for (count = rightpos; (int) count > scolumn - 1; count--) {
-			/* Get character */
-			p2 = COB_TERM_BUFF + count - scolumn;
-			move_char = *p2;
-			/* Field prompts. */
-			if (f && COB_FIELD_IS_NUMERIC (f)) {
-				/* Numeric prompt zeros. */
-				if (move_char == '0') {
-					cob_move_cursor (cline, count);
-					cob_addch (prompt_char);
-				} else {
-					/* Switch to remove prompts from within field. */
-					if (fattr & COB_SCREEN_NO_ECHO) {
-						prompt_char = COB_CH_SP;
-					} else if (fattr & COB_SCREEN_SECURE) {
-						prompt_char = COB_CH_AS;
-					} else {
-						prompt_char = '0';
-					}
-				}
+		if (f) {
+			/* Get current line, column. */
+			getyx (stdscr, cline, ccolumn);
+			/* Trailing prompts. */
+			if (fattr & COB_SCREEN_NO_ECHO) {
+				prompt_char = COB_CH_SP;
+			} else if (COB_FIELD_IS_NUMERIC (f)) {
+				prompt_char = '0';
+			} else if (fattr & COB_SCREEN_PROMPT) {
+				prompt_char = promptchar;
 			} else {
-				/* Alpha prompts. */
-				if (move_char == ' ') {
-					cob_move_cursor (cline, count);
-					cob_addch (prompt_char);
-				} else {
-					/* Switch to remove prompts from within field. */
-					if (fattr & COB_SCREEN_NO_ECHO) {
-						prompt_char = COB_CH_SP;
-					} else if (fattr & COB_SCREEN_SECURE) {
-						prompt_char = COB_CH_AS;
+				prompt_char = COB_CH_SP;
+			}
+			for (count = rightpos; (int)count > scolumn - 1; count--) {
+				/* Get character */
+				p2 = COB_TERM_BUFF + count - scolumn;
+				move_char = *p2;
+				/* Field prompts. */
+				if (COB_FIELD_IS_NUMERIC (f)) {
+					/* Numeric prompt zeros. */
+					if (move_char == '0') {
+						cob_move_cursor (cline, count);
+						cob_addch (prompt_char);
 					} else {
-						prompt_char = COB_CH_SP;
+						/* Switch to remove prompts from within field. */
+						if (fattr & COB_SCREEN_NO_ECHO) {
+							prompt_char = COB_CH_SP;
+						} else if (fattr & COB_SCREEN_SECURE) {
+							prompt_char = COB_CH_AS;
+						} else {
+							prompt_char = '0';
+						}
+					}
+				} else {
+					/* Alpha prompts. */
+					if (move_char == ' ') {
+						cob_move_cursor (cline, count);
+						cob_addch (prompt_char);
+					} else {
+						/* Switch to remove prompts from within field. */
+						if (fattr & COB_SCREEN_NO_ECHO) {
+							prompt_char = COB_CH_SP;
+						} else if (fattr & COB_SCREEN_SECURE) {
+							prompt_char = COB_CH_AS;
+						} else {
+							prompt_char = COB_CH_SP;
+						}
 					}
 				}
 			}
+			/* Cursor to current column. */
+			cob_move_cursor (cline, ccolumn);
+			/* Refresh screen. */
+			refresh ();
 		}
-		/* Cursor to current column. */
-		cob_move_cursor (cline, ccolumn);
-		/* Refresh screen. */
-		refresh ();
 		errno = 0;
 		timeout (gettimeout);
 
 		/* Get a character. */
 		keyp = getch ();
 
-		/* Key error. */
+		/* Key error - time out. */
 		if (keyp == ERR) {
 			fret = 8001;
 			goto field_return;

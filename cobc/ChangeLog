@@ -1,4 +1,11 @@
 
+2017-01-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (accept_body): check that PROMPT and SIZE clauses are not set
+	  for ACCEPT OMITTED (as these are ignored at run-time)
+	* typeck.c (cb_emit_accept): bugfix - extended ACCEPT wasn't used if the 
+	  only attributes set were: timeout || prompt || size_is
+
 2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, cobc.h: new variable current_compile_time for resolving all
