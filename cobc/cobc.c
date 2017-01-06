@@ -1647,13 +1647,15 @@ cobc_abort_terminate (void)
 	exit (99);
 }
 
-/* TO-DO: Fix */
 static void
 cobc_sig_handler (int sig)
 {
+#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM)
 	int ret = 0;
+#endif
 
 	cobc_abort_msg ();
+#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM)
 #ifdef SIGINT
 	if (sig == SIGINT) ret = 1;
 #endif
@@ -1666,6 +1668,9 @@ cobc_sig_handler (int sig)
 	if (!ret) {
 		cobc_err_msg (_("Please report this!"));
 	}
+#else
+	COB_UNUSED (sig);
+#endif
 	save_temps = 0;
 	cobc_clean_up (1);
 }
@@ -3598,12 +3603,12 @@ process (const char *cmd)
 	if (WIFSIGNALED(ret)) {
 #ifdef	SIGINT
 		if (WTERMSIG(ret) == SIGINT) {
-			cobc_sig_handler (SIGINT);
+			cob_raise (SIGINT);
 		}
 #endif
 #ifdef	SIGQUIT
 		if (WTERMSIG(ret) == SIGQUIT) {
-			cobc_sig_handler (SIGQUIT);
+			cob_raise (SIGQUIT);
 		}
 #endif
 	}

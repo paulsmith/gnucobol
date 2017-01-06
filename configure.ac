@@ -522,7 +522,7 @@ COB_GMP_LIB_MINOR=$(echo "$COB_GMP_LIB" | cut -d. -f2)
 if test "$COB_GMP_HEADER" == "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR"; then
 	AC_MSG_RESULT([yes ($COB_GMP_HEADER)])
 else
-	AC_MSG_RESULT([no ($COB_GMP_HEADER / $COB_GMP_LIB)])
+	AC_MSG_RESULT([no (header: $COB_GMP_HEADER / library: $COB_GMP_LIB)])
 	AC_MSG_ERROR([Unable to use GMP - Please check config.log])
 fi
 LIBS=$MYOLDLIBS

@@ -5,6 +5,8 @@
 	  for ACCEPT OMITTED (as these are ignored at run-time)
 	* typeck.c (cb_emit_accept): bugfix - extended ACCEPT wasn't used if the 
 	  only attributes set were: timeout || prompt || size_is
+	* cobc.c (cobc_sig_handler): fixed TODO about unused var
+	* cobc.c (process)[WIFSIGNALED]: use cob_raise instead of cobc_sig_handler
 
 2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
