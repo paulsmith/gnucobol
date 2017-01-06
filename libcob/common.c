@@ -66,7 +66,9 @@
 #endif
 
 /* library headers for version output */
+#ifdef _WIN32
 #define __GMP_LIBGMP_DLL 1
+#endif
 #include <gmp.h>
 
 #ifdef	WITH_DB
