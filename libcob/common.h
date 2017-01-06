@@ -1441,6 +1441,9 @@ COB_EXPIMP struct cob_time cob_get_current_date_and_time	(void);
 /* Registration of external handlers */
 COB_EXPIMP void	cob_reg_sighnd	(void (*sighnd) (int));
 
+/* Raise signal (run both internal and external handlers) */
+COB_EXPIMP void	cob_raise		(int);
+
 /* Switch */
 
 COB_EXPIMP int	cob_get_switch		(const int);

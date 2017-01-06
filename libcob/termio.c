@@ -296,6 +296,8 @@ cob_accept (cob_field *f)
 			ipchr = getchar ();
 			if (ipchr == '\n' || ipchr == EOF) {
 				break;
+			} else if (ipchr == 03) {
+				cob_raise (2);
 			}
 		}
 		return;
@@ -315,6 +317,8 @@ cob_accept (cob_field *f)
 				p[1] = 0;
 			}
 			break;
+		} else if (ipchr == 03) {
+			cob_raise (2);
 		} else if (ipchr == '\n') {
 			break;
 		}

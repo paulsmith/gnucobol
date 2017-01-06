@@ -592,6 +592,28 @@ cob_sig_handler (int sig)
 }
 #endif /* HAVE_SIGNAL_H */
 
+/* Raise signal (run both internal and external handlers) 
+   may return, depending on the signal
+*/
+void
+cob_raise (int sig)
+{
+#ifdef	HAVE_SIGNAL_H
+	/* let the registered signal handlers do their work */
+#ifdef	HAVE_RAISE
+	raise (sig);
+#else
+	kill (cob_sys_getpid(), sig);
+#endif
+	/* else: at least call external signal handler if registered */
+#else
+	if (cob_ext_sighdl != NULL) {
+		(*cob_ext_sighdl) (sig);
+		cob_ext_sighdl = NULL;
+	}
+#endif
+}
+
 static void
 cob_set_signal (void)
 {

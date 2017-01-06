@@ -1,7 +1,7 @@
 #
 # gnucobol/tests/cobol85/report.pl
 #
-# Copyright (C) 2001-2012, 2016 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2016-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -104,16 +104,19 @@ if ($ENV{'COB_HAS_ISAM'} eq "no") {
 	$skip{DB203A} = 1;
 }
 
-# OBNC1M tests the STOP literal statement and requires user input.
-$raw_input{OBNC1M} = "\n\n\n\n\n\n\n"; # a raw_input entry emits 1 additional newline
-$kill_me{OBNC1M} = 1;
+# OBNC1M tests the STOP literal statement and requires user input with a final kill.
+$raw_input{OBNC1M} = "\n\n\n\n\n\n\n\n\003"; # 8 newlines + kill character
+$to_kill{OBNC1M} = 1;
 
 # NC114M test the compiler listing along to other parts.
 $cobc_flags{NC114M} = "-t NC114M.lst --no-symbols";
 
 # NC302M tests the compiler flagging of obsolete features, including STOP literal.
 $cobc_flags{NC302M} = "-Wobsolete";
-$raw_input{NC302M} = ""; # a raw_input entry emits 1 additional newline
+$raw_input{NC302M} = "\n";
+
+# DB304M tests the compiler flagging of obsolete features
+$cobc_flags{DB304M} = "-Wobsolete";
 
 # Compile only programs
 
@@ -238,17 +241,18 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		next;
 	}
 
-	# NC302M needs to checked for compiler warnings
-	if ($exe eq "NC302M") {
-		#$total = 7;
-		open (my $COBC_OUT, '<', "$exe.cobc.out");
-		while (<$COBC_OUT>) {
-			if (/ warning: ([A-Z-]+) .* obsolete /) {
-		#		$pass += 1;
-				next;
-			}
-		}
-	}
+	# Some programs need to be checked for compiler warnings
+	#if ($exe eq "NC302M" || $exe eq "DB304M") {
+	#	$total = 7; --> aus Quelle übernehmen
+	#	open (my $COBC_OUT, '<', "$exe.cobc.out");
+	#	while (<$COBC_OUT>) {
+	#		if 
+	#		if (/ warning: ([A-Z-]+) .* obsolete /) {
+	#			$pass += 1;
+	#			next;
+	#		}
+	#	}
+	#}
 
 	unlink "$exe.cobc.out" if (-s "$exe.cobc.out" == 0);
 
@@ -282,30 +286,15 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		$ENV{"DD_XXXXX049"} = "$exe.rep";
 	}
 	$ENV{"report.log"} = "$exe.log";
-	my $exe_input = "\"$tmpdir/$exe.fifo\"";
 	if ($raw_input{$exe}) {
-		$cmd = "$cmd < $exe_input";
+		$cmd = "$cmd < $exe.inp";
+		system ("echo \"$raw_input{$exe}\" > $exe.inp");
 	}
 
 testrepeat:
-	$ret = system ("\
-trap 'exit 77' INT QUIT TERM PIPE
-mkfifo $exe_input
-exec 9<>$exe_input
-$cmd > $exe.out &
-echo \"$raw_input{$exe}\" > $exe_input
+	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
 
-if [ \"$kill_me{$exe}\" = \"1\" ]
-then
-	echo \"Killing $exe...\"
-	pkill -9 -f $exe
-else
-	wait \$!
-fi");
-# Free resources used to send input.
-	system ("exec 9<&-; rm $exe_input");
-
-	if ($ret != 0 && !($ret == 9 && $kill_me{$exe})) {
+	if ($ret != 0 && !($ret >> 130 && $to_kill{$exe})) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
@@ -458,7 +447,7 @@ fi");
 		$db103m = 1;
 		$ENV{"COB_SET_DEBUG"} = "N";
 		$num_progs++;
-		print "Reexecution with runtime DEBUG off  ./DB103M\n";
+		print "Reexecution with runtime DEBUG off ./DB103M\n";
 		printf LOG "%-12s", $in;
 		goto testrepeat;
 	}

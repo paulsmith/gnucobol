@@ -6,6 +6,10 @@
 
 2017-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* common.c, common.h: new exported function cob_raise to raise a signal,
+	  running both external and internal signal handlers
+	* termio.c (cob_accept_field): handle input code of ctrl-C as termination
+	  command and cob_stop_run with 128 + 2 (fatal error 2)
 	* coblocal.h, common.h: move (cob_get_current_date_and_time) and
 	  its data definition cob_time from coblocal.h to common.h
 	* common.c [_MSC_VER]: moved initialization of function pointer to
