@@ -294,12 +294,12 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 testrepeat:
 	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
 
-	if ($ret != 0 && !($ret >> 130 && $to_kill{$exe})) {
+	if ($ret != 0 && !($ret >> 2 && $to_kill{$exe})) {
 		if (($ret >> 8) == 77) {
 			die "Interrupted\n";
 		}
 		$execute_error++;
-		print LOG "***** execute error *****\n";
+		print LOG "***** execute error $ret *****\n";
 		next;
 	}
 	if ($nooutput{$exe}) {
