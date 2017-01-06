@@ -733,6 +733,9 @@ output_data (cb_tree x)
 			output_string (l->data, (int) l->size, l->llit);
 		}
 		break;
+	case CB_TAG_FIELD:
+		output_base (CB_FIELD(x), 0);
+		break;
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
 		f = CB_FIELD (r->value);

@@ -1,4 +1,12 @@
 
+2017-01-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: always emit an internal move for WRITE/REWRITE if the FROM
+	  clause consist of a literal
+	* typeck.c (cb_check_overlapping): fixed handling when called with a field
+	  instead of with a reference (which is the case for level 88 validation)
+	* codegen.c (output_data): added resolve of CB_TAG_FIELD
+
 2017-01-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (accept_body): check that PROMPT and SIZE clauses are not set

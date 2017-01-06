@@ -6425,11 +6425,25 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 	int		src_off;
 	int		dst_off;
 
-	sr = CB_REFERENCE (src);
-	dr = CB_REFERENCE (dst);
+	if (CB_REFERENCE_P(src)) {
+		sr = CB_REFERENCE (src);
+	} else {
+		sr = NULL;
+	}
+
+	if (CB_REFERENCE_P(dst)) {
+		dr = CB_REFERENCE (dst);
+	} else {
+		dr = NULL;
+	}
 
 	/* Check for identical field */
 	if (src_f == dst_f) {
+		if (!sr || !dr) {
+			/* same fields, no information about sub/refmod,
+			   overlapping possible */
+			return 1;
+		}
 		if (sr->subs) {
 			/* same fields with subs,
 			   overlapping possible, would need more checks
@@ -6472,7 +6486,12 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			   of a different address we must return 1] */
 			return 0;
 		}
+	}
 
+	/* check if both fields are references, otherwise we can't check further */
+	if (!sr || !dr) {
+		/* overlapping possible as they have the same field founder */
+		return 1;
 	}
 
 	src_off = src_f->offset;
@@ -8163,7 +8182,7 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		opts = COB_WRITE_LOCK;
 	}
 
-	if (from && (CB_FIELD_PTR (from) != CB_FIELD_PTR (record))) {
+	if (from && (!CB_FIELD_P(from) || (CB_FIELD_PTR (from) != CB_FIELD_PTR (record)))) {
 		cb_emit (cb_build_move (from, record));
 	}
 
@@ -9074,7 +9093,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 		}
 	}
 
-	if (from && (CB_FIELD_PTR (from) != CB_FIELD_PTR (record))) {
+	if (from && (!CB_FIELD_P(from) || (CB_FIELD_PTR (from) != CB_FIELD_PTR (record)))) {
 		cb_emit (cb_build_move (from, record));
 	}
 
