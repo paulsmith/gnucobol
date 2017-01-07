@@ -31,6 +31,14 @@
 #include "cobc.h"
 #include "tree.h"
 
+/* sanity checks */
+#if COB_MAX_FIELD_SIZE > INT_MAX
+#error COB_MAX_FIELD_SIZE is too big, must be less than INT_MAX
+#endif
+#if COB_MAX_UNBOUNDED_SIZE > INT_MAX
+#error COB_MAX_UNBOUNDED_SIZE is too big, must be less than INT_MAX
+#endif
+
 /* Global variables */
 
 cb_tree			cb_depend_check = NULL;
@@ -1091,6 +1099,8 @@ compute_size (struct cb_field *f)
 	cob_u64_t	size_check;
 	int		align_size;
 	int		pad;
+	int		unbounded_items = 0;
+	int		unbounded_parts = 1;
 
 	int maxsz;
 	struct cb_field *c0;
@@ -1112,6 +1122,7 @@ compute_size (struct cb_field *f)
 			cb_warning_x (CB_TREE(f), _("ignoring SYNCHRONIZED for group item '%s'"),
 				    cb_name (CB_TREE (f)));
 		}
+unbounded_again:
 		size_check = 0;
 		occur_align_size = 1;
 		for (c = f->children; c; c = c->sister) {
@@ -1143,7 +1154,12 @@ compute_size (struct cb_field *f)
 				}
 			} else {
 				c->offset = f->offset + (int) size_check;
-				size_check += compute_size (c) * c->occurs_max;
+				compute_size (c);
+				if (c->flag_unbounded) {
+					unbounded_items++;
+					c->occurs_max = (COB_MAX_UNBOUNDED_SIZE / c->size / unbounded_parts) - 1;
+				}
+				size_check += c->size * c->occurs_max;
 
 				/* Word alignment */
 				if (c->flag_synchronized &&
@@ -1197,7 +1213,17 @@ compute_size (struct cb_field *f)
 			f->offset += pad;
 		}
 		/* size check for group items */
-		if (size_check > COB_MAX_FIELD_SIZE) {
+		if (unbounded_items) {
+			if (size_check > COB_MAX_UNBOUNDED_SIZE) {
+				/* Hack: run again for finding the correct max_occurs for unbounded items */
+				if (unbounded_parts == 1 && unbounded_items != 1) {
+					unbounded_parts = unbounded_items;
+				} else {
+					unbounded_parts++;
+				}
+				goto unbounded_again;
+			}
+		} else if (size_check > COB_MAX_FIELD_SIZE) {
 			cb_error_x (CB_TREE (f),
 					_("'%s' cannot be larger than %d bytes"),
 					f->name, COB_MAX_FIELD_SIZE);

@@ -590,8 +590,13 @@ _MSC_VER == 2000 (Visual Studio 2017) since OS-Version 7  / 2012 R2
 /* Maximum digits in binary field */
 #define	COB_MAX_BINARY		39
 
-/* Maximum bytes in a single field (on 01/77 level) */
+/* Maximum bytes in a single/group field,
+  which doesn't contain UNBOUNDED items */
 #define	COB_MAX_FIELD_SIZE	268435456
+
+/* Maximum bytes in an unbounded table entry
+   (IBM: 999999998) */
+#define	COB_MAX_UNBOUNDED_SIZE	999999998
 
 /* Maximum number of cob_decimal structures */
 #define	COB_MAX_DEC_STRUCT	32
@@ -1477,9 +1482,9 @@ COB_EXPIMP void	cob_check_based		(const unsigned char *,
 COB_EXPIMP void	cob_check_linkage	(const unsigned char *,
 					 const char *, const int);
 COB_EXPIMP void	cob_check_odo		(const int, const int,
-					 const int, const char *);
+					 const int, const char *, const char *);
 COB_EXPIMP void	cob_check_subscript	(const int, const int,
-					 const int, const char *);
+					 const int, const char *, const int);
 COB_EXPIMP void	cob_check_ref_mod	(const int, const int,
 					 const int, const char *);
 

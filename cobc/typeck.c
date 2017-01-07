@@ -1472,7 +1472,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 
 	/* BASED check and check for OPTIONAL LINKAGE items */
-	if (current_statement &&
+	if (current_statement && !suppress_data_exceptions &&
 	    (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) ||
 	     CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED))) {
 		p = cb_field_founder (f);
@@ -1490,7 +1490,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 		    !current_statement->flag_no_based) {
 			if (p->flag_item_based ||
 			   (p->storage == CB_STORAGE_LINKAGE &&
-				  !p->flag_is_pdiv_parm)) {
+				  (!p->flag_is_pdiv_parm || p->flag_is_pdiv_opt))) {
 				current_statement->null_check = CB_BUILD_FUNCALL_2 (
 					"cob_check_based",
 					cb_build_address (cb_build_field_reference (p, NULL)),
@@ -1547,12 +1547,12 @@ cb_build_identifier (cb_tree x, const int subchk)
 		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->odo_level != 0) {
 			for (p = f; p; p = p->children) {
 				if (p->depending) {
-					e1 = CB_BUILD_FUNCALL_4 ("cob_check_odo",
+					e1 = CB_BUILD_FUNCALL_5 ("cob_check_odo",
 						 cb_build_cast_int (p->depending),
 						 cb_int (p->occurs_min),
 						 cb_int (p->occurs_max),
-						 CB_BUILD_STRING0
-						 ((CB_FIELD_PTR (p->depending)->name)));
+						 CB_BUILD_STRING0 (p->name),
+						 CB_BUILD_STRING0 (CB_FIELD_PTR (p->depending)->name));
 					r->check = cb_list_add (r->check, e1);
 				}
 			}
@@ -1580,7 +1580,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 				/* Compile-time check for all literals */
 				if (CB_LITERAL_P (sub)) {
 					n = cb_get_int (sub);
-					if (n < 1 || n > p->occurs_max) {
+					if (n < p->occurs_min || (!p->flag_unbounded && n > p->occurs_max)) {
 						cb_error_x (x, _("subscript of '%s' out of bounds: %d"),
 								name, n);
 					}
@@ -1589,19 +1589,21 @@ cb_build_identifier (cb_tree x, const int subchk)
 				/* Run-time check for all non-literals */
 				if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
 					if (p->depending) {
-						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
+						e1 = CB_BUILD_FUNCALL_5 ("cob_check_subscript",
 							 cb_build_cast_int (sub),
-							 cb_int1,
+							 cb_int (p->occurs_min),
 							 cb_build_cast_int (p->depending),
-							 CB_BUILD_STRING0 (name));
+							 CB_BUILD_STRING0 (name),
+							 cb_int1);
 						r->check = cb_list_add (r->check, e1);
 					} else {
 						if (!CB_LITERAL_P (sub)) {
-							e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
+							e1 = CB_BUILD_FUNCALL_5 ("cob_check_subscript",
 								 cb_build_cast_int (sub),
-								 cb_int1,
+								 cb_int (p->occurs_min),
 								 cb_int (p->occurs_max),
-								 CB_BUILD_STRING0 (name));
+								 CB_BUILD_STRING0 (name),
+								cb_int0);
 							r->check = cb_list_add (r->check, e1);
 						}
 					}

@@ -695,6 +695,50 @@ AT_CHECK([./prog], [0])
 AT_CLEANUP
 
 
+AT_SETUP([OCCURS UNBOUNDED])
+AT_KEYWORDS([extensions runsubscripts subscripts])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  n            PIC 9(03)  VALUE 123.
+       01  p            USAGE POINTER.
+
+       LINKAGE SECTION.
+       01  a-table.
+           03  rows     OCCURS 0 TO UNBOUNDED TIMES
+                        DEPENDING ON n.
+               05 col1  PIC X.
+               05 col2  PIC X(02).
+
+       PROCEDURE DIVISION.
+           IF FUNCTION LENGTH (a-table) NOT = 369
+              DISPLAY 'WRONG LENGTH: ' FUNCTION LENGTH (a-table)
+              END-DISPLAY
+           END-IF
+           ALLOCATE FUNCTION LENGTH (a-table) CHARACTERS
+                    INITIALIZED TO ALL "ABCDE"
+                    RETURNING p
+           SET ADDRESS OF a-table TO p
+           IF col2(1) NOT = "BC"
+              DISPLAY "col2(1) wrong: " col2(1)
+              END-DISPLAY
+           END-IF
+           IF rows(2) NOT = "DEA"
+              DISPLAY "rows(2) wrong: " rows(2)
+              END-DISPLAY
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0])
+
+AT_CLEANUP
+
+
 AT_SETUP([INITIALIZE level 01])
 AT_KEYWORDS([initialize])
 

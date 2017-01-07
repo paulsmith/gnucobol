@@ -18,6 +18,15 @@
 	* common.h: extended cob_time with is_daylight_saving_time and day_of_year
 	* common.c [_BSD_SOURCE]: get utc_offset directly from tm_gmtoff
 
+2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: added COB_MAX_UNBOUNDED_SIZE
+	* common.c (cob_allocate): check for COB_EC_STORAGE_IMP
+	  returned when requested to allocate more than the maximum possible size
+	* common.h, common.c (cob_check_odo, cob_check_subscript): additional
+	  parameters for table name in DEPENDING ON and flag for ODO, additional
+	  runtime error line with the (current) minimum/maximum of the table
+
 2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c, common.h: C interface addons including FR #187:

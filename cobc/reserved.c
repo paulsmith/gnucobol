@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
 
    This file is part of GnuCOBOL.
@@ -222,7 +222,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "ALLOCATE",			0, 0, ALLOCATE,			/* 2002 */
-				0, 0
+				CB_CS_ALLOCATE, 0
   },
   { "ALPHABET",			0, 0, ALPHABET,			/* 2002 */
 				CB_CS_ALPHABET, 0
@@ -377,9 +377,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CANCEL",			0, 0, CANCEL,			/* 2002 */
 				0, 0
   },
-  { "CAPACITY",			0, 1, CAPACITY,			/* 2014 (C/S) */
-				0, 0
-	/* FIXME: 2014 Context-sensitive to OCCURS clause */
+  { "CAPACITY",			0, 1, CAPACITY,			/* 2014 */
+				0, CB_CS_OCCURS
   },
   { "CARD-PUNCH",			0, 1, CARD_PUNCH,			/* Extension */
 				0, CB_CS_ASSIGN
@@ -1015,8 +1014,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "INITIALIZED",		0, 0, INITIALIZED,		/* 2002 */
-				0, 0
-	/* FIXME: 2014 Context-sensitive to ALLOCATE statement and OCCURS clause */
+				0, CB_CS_ALLOCATE | CB_CS_OCCURS
   },
   { "INITIATE",			0, 0, INITIATE,			/* 2002 */
 				0, 0
@@ -1272,7 +1270,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "OCCURS",			0, 0, OCCURS,			/* 2002 */
-				0, 0
+				CB_CS_OCCURS, 0
   },
   { "OF",			0, 0, OF,			/* 2002 */
 				0, 0
@@ -1863,6 +1861,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
   },
+  { "UNBOUNDED",		0, 1, UNBOUNDED,			/* IBM V5 */
+				0, CB_CS_OCCURS
+  },
   { "UNDERLINE",		0, 0, UNDERLINE,		/* 2002 (C/S) */
 				0, 0
   },
@@ -2048,7 +2049,7 @@ static const struct cb_intrinsic_table function_list[] = {
 					CB_CATEGORY_NUMERIC, 0
   },
   { "BYTE-LENGTH",			"cob_intr_byte_length",
-					CB_INTR_BYTE_LENGTH, FUNCTION_NAME, 1,
+					CB_INTR_BYTE_LENGTH, LENGTH_FUNC, 1,
 					1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
@@ -2225,12 +2226,12 @@ static const struct cb_intrinsic_table function_list[] = {
 					CB_CATEGORY_NUMERIC, 0
   },
   { "LENGTH",				"cob_intr_length",
-					CB_INTR_LENGTH, FUNCTION_NAME, 1,
+					CB_INTR_LENGTH, LENGTH_FUNC, 1,
 					1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "LENGTH-AN",			"cob_intr_byte_length",
-					CB_INTR_BYTE_LENGTH, FUNCTION_NAME, 1,
+					CB_INTR_BYTE_LENGTH, LENGTH_FUNC, 1,
 					1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },

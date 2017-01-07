@@ -132,6 +132,7 @@ int				cb_exp_line = 0;
 cb_tree				cobc_printer_node = NULL;
 int				functions_are_all = 0;
 int				non_const_word = 0;
+int				suppress_data_exceptions = 0;
 unsigned int			cobc_repeat_last_token = 0;
 unsigned int			cobc_in_id = 0;
 unsigned int			cobc_in_procedure = 0;
@@ -544,6 +545,14 @@ setup_occurs (void)
 	} else {
 		current_field->indexes++;
 	}
+
+	if (current_field->flag_unbounded) {
+		if (current_field->storage != CB_STORAGE_LINKAGE) {
+			cb_error_x (CB_TREE(current_field), _("'%s' is not in LINKAGE SECTION"),
+				cb_name (CB_TREE(current_field)));
+		}
+	}
+
 	if (current_field->flag_item_based) {
 		cb_error (_ ("%s and %s are mutually exclusive"), "BASED", "OCCURS");
 	} else if (current_field->flag_external) {
@@ -557,19 +566,22 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 {
 	if (occurs_max) {
 		current_field->occurs_min = cb_get_int (occurs_min);
-		current_field->occurs_max = cb_get_int (occurs_max);
-		if (!current_field->depending) {
-			if (cb_relaxed_syntax_checks) {
-				cb_warning (_ ("TO phrase without DEPENDING phrase"));
-				cb_warning (_ ("maximum number of occurences assumed to be exact number"));
-				current_field->occurs_min = 1; /* Checkme: why using 1 ? */
-			} else {
-				cb_error (_ ("TO phrase without DEPENDING phrase"));
+		if (occurs_max != cb_int0) {
+			current_field->occurs_max = cb_get_int (occurs_max);
+			if (!current_field->depending) {
+				if (cb_relaxed_syntax_checks) {
+					cb_warning (_ ("TO phrase without DEPENDING phrase"));
+					cb_warning (_ ("maximum number of occurences assumed to be exact number"));
+					current_field->occurs_min = 1; /* Checkme: why using 1 ? */
+				} else {
+					cb_error (_ ("TO phrase without DEPENDING phrase"));
+				}
 			}
-		}
-		if (current_field->occurs_max > 0 &&
-			current_field->occurs_max <= current_field->occurs_min) {
-			cb_error (_ ("OCCURS TO must be greater than OCCURS FROM"));
+			if (current_field->occurs_max <= current_field->occurs_min) {
+				cb_error (_ ("OCCURS TO must be greater than OCCURS FROM"));
+			}
+		} else {
+			current_field->occurs_max = 0;
 		}
 	} else {
 		current_field->occurs_min = 1; /* Checkme: why using 1 ? */
@@ -732,6 +744,7 @@ clear_initial_values (void)
 	cobc_in_repository = 0;
 	cobc_force_literal = 0;
 	non_const_word = 0;
+	suppress_data_exceptions = 0;
 	same_area = 1;
 	memset ((void *)eval_check, 0, sizeof(eval_check));
 	memset ((void *)term_array, 0, sizeof(term_array));
@@ -1865,6 +1878,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token LEFT
 %token LEFTLINE
 %token LENGTH
+%token LENGTH_FUNC		"FUNCTION LENGTH/BYTE-LENGTH"
 %token LENGTH_OF		"LENGTH OF"
 %token LESS
 %token LESS_OR_EQUAL		"LESS OR EQUAL"
@@ -2118,6 +2132,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TRUNCATION
 %token TYPE
 %token U
+%token UNBOUNDED
 %token UNDERLINE
 %token UNIT
 %token UNLOCK
@@ -5256,6 +5271,18 @@ occurs_clause:
 	setup_occurs ();
 	setup_occurs_min_max ($2, $3);
   }
+| OCCURS _occurs_integer_to UNBOUNDED _times
+  DEPENDING _on reference _occurs_keys _occurs_indexed
+  {
+	current_field->flag_unbounded = 1;
+	if (current_field->parent) {
+		current_field->parent->flag_unbounded = 1;
+	}
+	current_field->depending = $7;
+	/* most of the field attributes are set when parsing the phrases */;
+	setup_occurs ();
+	setup_occurs_min_max ($2, cb_int0);
+  }
 | OCCURS DYNAMIC _capacity_in _occurs_from_integer
   _occurs_to_integer _occurs_initialized _occurs_keys _occurs_indexed
   {
@@ -5283,13 +5310,17 @@ _occurs_from_integer:
 | FROM integer			{ $$ = $2; }
 ;
 
+_occurs_integer_to:
+  /* empty */			{ $$ = NULL; }
+| integer TO			{ $$ = $1; }
+;
+
 _occurs_depending:
 | DEPENDING _on reference
   {
 	current_field->depending = $3;
   }
 ;
-
 _capacity_in:
 | CAPACITY _in WORD
   {
@@ -8811,6 +8842,13 @@ initialize_category:
 | NUMERIC_EDITED	{ $$ = cb_int (CB_CATEGORY_NUMERIC_EDITED); }
 | NATIONAL		{ $$ = cb_int (CB_CATEGORY_NATIONAL); }
 | NATIONAL_EDITED	{ $$ = cb_int (CB_CATEGORY_NATIONAL_EDITED); }
+/* missing, needs test when added: 
+| BOOLEAN		{ $$ = cb_int (CB_CATEGORY_BOOLEAN); }
+| DATA_POINTER		{ $$ = cb_int (CB_CATEGORY_DATA_POINTER); }
+| FUNCTION_POINTER		{ $$ = cb_int (CB_CATEGORY_FUNCTION_POINTER); }
+| PROGRAM_POINTER		{ $$ = cb_int (CB_CATEGORY_PROGRAM_POINTER); }
+| OBJECT_REFERENCE		{ $$ = cb_int (CB_CATEGORY_OBJECT_REFERENCE); }
+*/
 ;
 
 initialize_default:
@@ -11996,7 +12034,7 @@ identifier_or_file_name:
 				    || CB_FILE_P (cb_ref ($1)))) {
 		$$ = cb_build_identifier ($1, 0);
 	} else {
-	        reference_to_existing_object =
+		reference_to_existing_object =
 			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
 		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
 			cb_error_x ($1, _("'%s' is not a field or file"), cb_name ($1));
@@ -12014,7 +12052,7 @@ identifier:
 	if (CB_REFERENCE_P ($1) && CB_FIELD_P (cb_ref ($1))) {
 		$$ = cb_build_identifier ($1, 0);
 	} else {
-	        reference_to_existing_object =
+		reference_to_existing_object =
 			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
 		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
 			cb_error_x ($1, _("'%s' is not a field"), cb_name ($1));
@@ -12284,6 +12322,10 @@ function:
   {
 	$$ = cb_build_intrinsic ($1, $3, $5, 0);
   }
+| LENGTH_FUNC TOK_OPEN_PAREN length_arg TOK_CLOSE_PAREN
+  {
+	$$ = cb_build_intrinsic ($1, $3, NULL, 0);
+  }
 | NUMVALC_FUNC TOK_OPEN_PAREN numvalc_args TOK_CLOSE_PAREN
   {
 	$$ = cb_build_intrinsic ($1, $3, NULL, 0);
@@ -12387,6 +12429,17 @@ trim_args:
 
 	x = CB_LIST_INIT ($1);
 	$$ = cb_list_add (x, cb_int2);
+  }
+;
+
+length_arg:
+  {
+	suppress_data_exceptions = 1;
+  }
+  expr_x
+  {		
+	suppress_data_exceptions = 0;
+	$$ = CB_LIST_INIT ($2);
   }
 ;
 

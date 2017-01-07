@@ -31,6 +31,10 @@
 	* general: added national-literals, hexadecimal-national-literals and
 	  hexadecimal-boolean configuration options
 
+2016-08-13  Frank Swarbrick <infocat@@users.sf.net>
+
+	* ibm.conf, mf.conf: patch #50 added UNBOUNDED as context sensitive keyword
+
 2016-08-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: renamed relaxed-syntax-check to relax-syntax-checks

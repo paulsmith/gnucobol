@@ -743,6 +743,7 @@ struct cb_field {
 
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
+	unsigned int flag_unbounded : 1;	/* OCCURS UNBOUNDED */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))
@@ -1606,6 +1607,7 @@ extern const char	*cb_get_usage_string (const enum cb_usage);
 /* parser.y */
 extern cb_tree		cobc_printer_node;
 extern int		non_const_word;
+extern int		suppress_data_exceptions;
 extern unsigned int	cobc_repeat_last_token;
 extern unsigned int	cobc_in_id;
 extern unsigned int	cobc_in_procedure;

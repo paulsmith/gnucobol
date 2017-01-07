@@ -134,6 +134,12 @@
 #define OC_C_VERSION	"unknown"
 #endif
 
+#if COB_MAX_UNBOUNDED_SIZE > COB_MAX_FIELD_SIZE
+#define COB_MAX_ALLOC_SIZE COB_MAX_UNBOUNDED_SIZE
+#else
+#define COB_MAX_ALLOC_SIZE COB_MAX_FIELD_SIZE
+#endif
+
 struct cob_alloc_cache {
 	struct cob_alloc_cache	*next;		/* Pointer to next */
 	void			*cob_pointer;	/* Pointer to malloced space */
@@ -2433,24 +2439,42 @@ cob_check_numeric (const cob_field *f, const char *name)
 
 void
 cob_check_odo (const int i, const int min,
-	       const int max, const char *name)
+	       const int max, const char *name, const char *dep_name)
 {
 	/* Check OCCURS DEPENDING ON item */
-	if (i < min || max < i) {
+	if (i < min || i > max) {
 		cob_set_exception (COB_EC_BOUND_ODO);
-		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"), name, i);
+		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"), dep_name, i);
+		if (i > max) {
+			cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
+		} else {
+			cob_runtime_error (_("minimum subscript for '%s': %d"), name, min);
+		}
 		cob_stop_run (1);
 	}
 }
 
 void
 cob_check_subscript (const int i, const int min,
-		     const int max, const char *name)
+		     const int max, const char *name, const int odo_item)
 {
 	/* Check subscript */
-	if (i < min || max < i) {
+	if (i < min || i > max) {
 		cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
 		cob_runtime_error (_("subscript of '%s' out of bounds: %d"), name, i);
+		if (odo_item) {
+			if (i > max) {
+				cob_runtime_error (_("current maximum subscript for '%s': %d"), name, max);
+			} else {
+				cob_runtime_error (_("current minimum subscript for '%s': %d"), name, min);
+			}
+		} else {
+			if (i > max) {
+				cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
+			} else {
+				cob_runtime_error (_("minimum subscript for '%s': %d"), name, min);
+			}
+		}
 		cob_stop_run (1);
 	}
 }
@@ -2983,7 +3007,10 @@ cob_allocate (unsigned char **dataptr, cob_field *retptr,
 	cobglobptr->cob_exception_code = 0;
 	mptr = NULL;
 	fsize = cob_get_int (sizefld);
-	if (fsize > 0) {
+	/* FIXME: doesn't work correctly if fsize is > INT_MAX */
+	if (fsize > COB_MAX_ALLOC_SIZE) {
+		cob_set_exception (COB_EC_STORAGE_IMP);
+	} else if (fsize > 0) {
 		cache_ptr = cob_malloc (sizeof (struct cob_alloc_cache));
 		mptr = malloc ((size_t)fsize);
 		if (!mptr) {

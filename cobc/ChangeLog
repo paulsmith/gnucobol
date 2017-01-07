@@ -1,4 +1,10 @@
 
+2017-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.h: added CB_CS_ALLOCATE
+	* reserved.c: set context sensitivity: CAPACITY -> OCCURS,
+	  INITIALIZED -> ALLOCATE, OCCURS
+
 2017-01-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: always emit an internal move for WRITE/REWRITE if the FROM
@@ -50,6 +56,16 @@
 
 	* typeck.c: disabled nested ODO as the current implementation
 	  has too many flaws (see re-opened FR #99)
+
+2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	integrating patch #50 by Frank Swarbrick and make sure it works
+	* parser.y: finished OCCURS ... TO UNBOUNDED
+	* reserved.c: new token LENGTH_FUNC for BYTE-LENGTH, LENGTH, LENGTH-AN
+	* parser.y, tree.h, typeck.c: new var suppress_data_exceptions used with
+	  LENGTH_FUNC for suppressing checks for fields are allocation
+	* typeck.c: passing additional parameters for table name / flag for ODO
+	  in generation of cob_check_odo and cob_check_subscript
 
 2016-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -524,6 +540,15 @@
 
 	* parser.y, typeck.c: fixed bug #299 (cannot have multiple screens in
 	  one DISPLAY).
+
+2016-08-13  Frank Swarbrick <infocat@@users.sf.net>
+
+	patch #50 adding IBM extension OCCURS ... TO UNBOUNDED
+	* tree.h:  new field flag_unbounded for OCCURS ... TO UNBOUNDED
+	* cobc.h: added CB_CS_OCCURS
+	* reserved.c: added UNBOUNDED as context sensitive reserved word for OCCURS
+	* parser.y: added token UNBOUNDED and first attemt for adding
+	  OCCURS ... TO UNBOUNDED in the parser
 
 2016-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
