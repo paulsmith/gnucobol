@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -2551,7 +2551,7 @@ int
 cob_display_text (const char *text)
 {
 	cob_field	field;
-	cob_field_attr		attr;
+	cob_field_attr	attr;
 
 	if (text[0] == 0) return 0;
 
@@ -2602,19 +2602,19 @@ cob_sys_get_char (char c)
 int
 cob_get_char (void)
 {
-	cob_field	field;
-	unsigned char	c = ' ';
+	cob_field		field;
+	unsigned char		c = ' ';
 	cob_field_attr		attr;
-	const cob_flags_t flags = COB_SCREEN_AUTO;
 
 	COB_FIELD_INIT (1, &c, &attr);
 	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
 
-	field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL, flags);
-	if (c != ' ') {
-		return (int)c;
-	} else {
+	field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL,
+				  COB_SCREEN_AUTO);
+	if (c == ' ') {
 		return COB_ACCEPT_STATUS;
+	} else {
+		return (int)c;
 	}
 }
 
@@ -2623,7 +2623,7 @@ int
 cob_get_text (char *text, int size)
 {
 	cob_field	field;
-	cob_field_attr		attr;
+	cob_field_attr	attr;
 
 	if (size > 0) {
 		COB_FIELD_INIT (size, (unsigned char *)text, &attr);
@@ -2640,18 +2640,18 @@ cob_get_text (char *text, int size)
 int
 cob_display_formatted_text (const char *fmt, ...)
 {
-	cob_field		field;
+	cob_field	field;
 	cob_field_attr	attr;
-
-	va_list			ap;
-	char			buff [COB_NORMAL_BUFF];
+	va_list		ap;
+	char		buff [COB_NORMAL_BUFF];
 
 	va_start (ap, fmt);
 	field.size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
 	va_end (ap);
 
-	if (field.size < 0) return -1;
-	if (buff[0] == 0) return 0;
+	if (buff[0] == 0) {
+		return 0;
+	}
 
 	if (field.size > COB_NORMAL_MAX) {
 		field.size = COB_NORMAL_MAX;
@@ -2670,7 +2670,8 @@ void
 cob_exit_screen (void)
 {
 	cob_flags_t	flags;
-	char	exit_msg [COB_MINI_BUFF];
+	char		exit_msg[COB_MINI_BUFF];
+
 	if (!cobglobptr) {
 		return;
 	}
