@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -1102,7 +1102,7 @@ cb_trim_program_id (cb_tree id_literal)
 	if (!strchr(s, ' ')) {
 		return;
 	}
-	
+
 	len = strlen(s);
 	if (*s == ' ') {
 		/* same warning as in libcob/common.c */
@@ -3090,6 +3090,7 @@ cb_expr_shift (int token, cb_tree value)
 	case ')':
 		/* Enclosed by parentheses */
 		(void)expr_reduce (token);
+		expr_lh = NULL;
 		if (TOKEN (-2) == '(') {
 			value = CB_BUILD_PARENTHESES (VALUE (-1));
 			expr_index -= 2;
@@ -5487,7 +5488,7 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 	cb_tree	l;
 	cb_tree pos;
 	cb_tree	screen_ref;
-	
+
 	for (l = screen_list; l; l = CB_CHAIN (l)) {
 		/*
 		  LINE 1 COL 1 is assumed, not LINE 0 COL 0 as in field
@@ -5499,10 +5500,10 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 		} else {
 			pos = line_col_for_last;
 		}
-		
+
 		screen_ref = CB_VALUE (l);
 		output_screen_from (CB_FIELD (cb_ref (screen_ref)), 0);
-		
+
 		gen_screen_ptr = 1;
 	        emit_screen_display (screen_ref, pos);
 		gen_screen_ptr = 0;
@@ -6144,7 +6145,7 @@ cb_emit_inspect (cb_tree var, cb_tree body, const enum cb_inspect_clause clause)
 	int	replacing_or_converting =
 		clause == REPLACING_CLAUSE || clause == CONVERTING_CLAUSE;
 	cb_tree	replacing_flag = clause == REPLACING_CLAUSE ? cb_int1 : cb_int0;
-	
+
 	switch (CB_TREE_TAG (var)) {
 	case CB_TAG_REFERENCE:
 		break;
@@ -6174,7 +6175,7 @@ cb_emit_inspect (cb_tree var, cb_tree body, const enum cb_inspect_clause clause)
 	cb_emit_list (body);
 	cb_emit (CB_BUILD_FUNCALL_0 ("cob_inspect_finish"));
 	return;
-	
+
  error:
 	emit_invalid_target_error (clause);
 }
@@ -6510,7 +6511,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 	if (sr->offset) {
 		/* field size -1 -> set via variable */
 		if (src_size == -1 ||
-			!CB_LITERAL_P (sr->offset)) { 
+			!CB_LITERAL_P (sr->offset)) {
 			goto pos_overlap_ret;
 		}
 		src_off += cb_get_int (sr->offset) - 1;
@@ -7572,7 +7573,7 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 		if (cb_binary_truncate) {
 			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 		}
-		
+
 		val = cb_get_int (src);
 		n = f->pic->scale - l->scale;
 		if ((l->size + n) > 9) {
@@ -7843,7 +7844,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 		} else {
 			r = NULL;
 		}
-		if (CB_LITERAL_P (x) || CB_CONST_P (x) || 
+		if (CB_LITERAL_P (x) || CB_CONST_P (x) ||
 			(r && (CB_LABEL_P (r->value) || CB_PROTOTYPE_P (r->value)))) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid MOVE target: %s"), cb_name (x));

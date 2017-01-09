@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -8840,7 +8840,7 @@ initialize_category:
 | NUMERIC_EDITED	{ $$ = cb_int (CB_CATEGORY_NUMERIC_EDITED); }
 | NATIONAL		{ $$ = cb_int (CB_CATEGORY_NATIONAL); }
 | NATIONAL_EDITED	{ $$ = cb_int (CB_CATEGORY_NATIONAL_EDITED); }
-/* missing, needs test when added: 
+/* missing, needs test when added:
 | BOOLEAN		{ $$ = cb_int (CB_CATEGORY_BOOLEAN); }
 | DATA_POINTER		{ $$ = cb_int (CB_CATEGORY_DATA_POINTER); }
 | FUNCTION_POINTER		{ $$ = cb_int (CB_CATEGORY_FUNCTION_POINTER); }
@@ -10661,7 +10661,7 @@ use_debugging:
 	char		name[64];
 
 	cb_verify (cb_use_for_debugging, "USE FOR DEBUGGING");
-	
+
 	if (!in_declaratives) {
 		cb_error (_("USE statement must be within DECLARATIVES"));
 	} else if (current_program->nested_level) {
@@ -10726,7 +10726,7 @@ debugging_target:
 			case CB_TAG_FILE:
 				CB_FILE (l)->debug_section = current_section;
 				CB_FILE (l)->flag_fl_debug = 1;
-				break; 
+				break;
 			case CB_TAG_FIELD:
 				x = cb_ref ($1);
 				if (CB_INVALID_TREE (x)) {
@@ -11288,13 +11288,16 @@ partial_expr:
 
 expr_tokens:
   expr_token
-| expr_tokens IS
 | expr_tokens expr_token
 ;
 
 expr_token:
   x				{ push_expr ('x', $1); }
-| CLASS_NAME			{ push_expr ('C', $1); }
+| _is condition_or_class
+  /* This case is separate because _is _not causes a shift/reduce error. */
+| IS not condition_or_class
+  /* This case is not in condition_or_class as x contains ZERO. */
+| IS _not ZERO			{ push_expr ('x', cb_zero); }
 /* Parentheses */
 | TOK_OPEN_PAREN		{ push_expr ('(', NULL); }
 | TOK_CLOSE_PAREN		{ push_expr (')', NULL); }
@@ -11304,6 +11307,22 @@ expr_token:
 | TOK_MUL			{ push_expr ('*', NULL); }
 | TOK_DIV			{ push_expr ('/', NULL); }
 | EXPONENTIATION		{ push_expr ('^', NULL); }
+/* Logical operators */
+| not
+| AND				{ push_expr ('&', NULL); }
+| OR				{ push_expr ('|', NULL); }
+;
+
+_not:
+  /* empty */
+| not
+;
+
+not:
+  NOT				{ push_expr ('!', NULL); }
+
+condition_or_class:
+  CLASS_NAME			{ push_expr ('C', $1); }
 /* Conditional operators */
 | eq				{ push_expr ('=', NULL); }
 | gt				{ push_expr ('>', NULL); }
@@ -11311,10 +11330,6 @@ expr_token:
 | ge				{ push_expr (']', NULL); }
 | le				{ push_expr ('[', NULL); }
 | NOT_EQUAL			{ push_expr ('~', NULL); }
-/* Logical operators */
-| NOT				{ push_expr ('!', NULL); }
-| AND				{ push_expr ('&', NULL); }
-| OR				{ push_expr ('|', NULL); }
 /* Class condition */
 | OMITTED			{ push_expr ('O', NULL); }
 | NUMERIC			{ push_expr ('9', NULL); }
@@ -11588,7 +11603,7 @@ cd_name:
 	}
   }
 ;
-  
+
 /* Report name */
 
 /* RXWRXW - Report list
@@ -12435,7 +12450,7 @@ length_arg:
 	suppress_data_exceptions = 1;
   }
   expr_x
-  {		
+  {
 	suppress_data_exceptions = 0;
 	$$ = CB_LIST_INIT ($2);
   }

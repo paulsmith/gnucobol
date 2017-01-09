@@ -1,4 +1,11 @@
 
+2017-01-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (cb_expr_shift): fixed bug #321 - parentheses now terminate
+	  abbreviated conditions.
+	* parser.y (expr_token): restricted IS to before ZERO/classes/condition
+	  words.
+
 2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_build_identifier): corrected minimum check for OCCURS
@@ -209,7 +216,7 @@
 2016-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc/cobc.c (print_program_header): changed the version string limit
-	  (including patchlevel) to 14 digits
+	  (including patch level) to 14 digits
 
 2016-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1407,7 +1414,7 @@
 2015-08-19  Ron Norman <rjn@inglenet.com>
 
 	* cobc.c: swapped order of parameters for C compiler and linking so that
-	  -L options come before -l 
+	  -L options come before -l
 	  Otherwise the linker does not find things correctly on Linux
 	* field.c (validate_field_1): warning instead of an error for VALUEs in
 	  REDEFINES with -frelax-syntax as some legacy COBOL code does this
