@@ -735,6 +735,11 @@ set_options:
 
 source_directive:
   _format _is format_type
+  {
+	  if (cb_src_list_file) {
+		  cb_current_file->source_format = cb_source_format;
+	  }
+  }
 ;
 
 format_type:

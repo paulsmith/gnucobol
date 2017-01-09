@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -466,6 +466,17 @@ typedef struct cb_tree_common	*cb_tree;
 #define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
 
+/* xref entries */
+struct cb_xref_elem {
+	struct cb_xref_elem	*next;
+	int			line;
+};
+
+struct cb_xref {
+	struct cb_xref_elem	*head;
+	struct cb_xref_elem	*tail;
+	int			skip;
+};
 
 /* Constant */
 
@@ -1873,6 +1884,10 @@ extern struct cb_field	*check_level_78 (const char *);
 
 extern struct cb_program	*cb_find_defined_program_by_name (const char *);
 extern struct cb_program	*cb_find_defined_program_by_id (const char *);
+
+/* cobc.c */
+extern void			cobc_xref_link (struct cb_xref *, const int);
+extern void			cobc_xref_link_parent (const struct cb_field *);
 
 /* Function defines */
 

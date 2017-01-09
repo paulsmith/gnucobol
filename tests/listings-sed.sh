@@ -2,7 +2,7 @@
 #
 # listings-sed.sh gnucobol/tests
 #
-# Copyright (C) 2016 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017 Free Software Foundation, Inc.
 # Written by Simon Sobisch, David Pitts
 #
 # This file is part of GnuCOBOL.
@@ -27,10 +27,20 @@
 # Note: We replace the date two times, as not all systems have %e modifier in C
 #       and use %E in this case ("Mon Feb 04" instead of "Mon Feb  4").
 
+if test "$3" = "once"; then
+	sed \
+	-e 's/GnuCOBOL [0-9][0-9]*\.[0-9][0-9]*[-devalphabetarc]*[0-9]*\.[0-9][0-9]*  */GnuCOBOL V.R.P               /g' \
+	-e 's/[0-2][0-9]:[0-6][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]$/HH:MM:SS YYYY/g' \
+	-e 's/'"$(date +"%a %b %e")"'/DDD MMM dd/g' \
+	-e 's/'"$(date +"%a %b %d")"'/DDD MMM dd/g' \
+	<"$1" >"$2"
+else
+	sed \
+	-e 's/GnuCOBOL [0-9][0-9]*\.[0-9][0-9]*[-devalphabetarc]*[0-9]*\.[0-9][0-9]*  */GnuCOBOL V.R.P          /g' \
+	-e 's/[0-2][0-9]:[0-6][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]/HH:MM:SS YYYY/g' \
+	-e 's/'"$(date +"%a %b %e")"'/DDD MMM dd/g' \
+	-e 's/'"$(date +"%a %b %d")"'/DDD MMM dd/g' \
+	<"$1" >"$2"
+fi
 
-sed \
--e 's/GnuCOBOL [0-9][0-9]*\.[0-9][0-9]*[-devalphabetarc]*[0-9]*\.[0-9][0-9]*  */GnuCOBOL V.R.P          /g' \
--e 's/[0-2][0-9]:[0-6][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]/HH:MM:SS YYYY/g' \
--e 's/'"$(date +"%a %b %e")"'/DDD MMM dd/g' \
--e 's/'"$(date +"%a %b %d")"'/DDD MMM dd/g' \
-<"$1" >"$2"
+

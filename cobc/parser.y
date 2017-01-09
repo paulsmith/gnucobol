@@ -305,7 +305,6 @@ emit_entry (const char *name, const int encode, cb_tree using_list)
 	}
 	CB_LABEL (label)->flag_begin = 1;
 	CB_LABEL (label)->flag_entry = 1;
-	CB_LABEL (label)->xref.skip = 1;
 	label->source_file = cb_source_file;
 	label->source_line = cb_source_line;
 	emit_statement (label);
@@ -1603,7 +1602,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 {
 	const int	is_numeric_literal = CB_NUMERIC_LITERAL_P (x);
 	const int	is_field_with_usage_not_display =
-		CB_REFERENCE_P (x) && CB_FIELD_P (cb_ref (x))
+		CB_REFERENCE_P (x) && CB_FIELD (cb_ref (x))
 		&& CB_FIELD (cb_ref (x))->usage != CB_USAGE_DISPLAY;
 
 	if (is_numeric_literal) {
@@ -4042,7 +4041,6 @@ file_description_entry:
 		YYERROR;
 	}
 	current_file = CB_FILE (cb_ref ($2));
-	cobc_xref_link (&current_file->xref, cb_source_line);
 	if (CB_VALID_TREE (current_file)) {
 		if ($1) {
 			current_file->organization = COB_ORG_SORT;

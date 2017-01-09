@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch,
    Edward Hart, Dave Pitts
 
@@ -247,26 +247,6 @@ enum cobc_name_type {
 
 /* Listing structures and externals */
 
-#define CB_MAX_LINES	55
-
-#define CB_LINE_LENGTH	1024 /* hint: we only read PPLEX_BUF_LEN bytes */
-#define CB_READ_AHEAD	800 /* lines to read ahead */
-
-/* TODO: add new compiler configuration flags for this*/
-#define CB_INDICATOR	6
-#define CB_MARGIN_A	7
-#define CB_MARGIN_B	11	/* careful, for COBOL 85 this would be 11,
-						   for COBOL 2002 (removed it) would be 7 */
-#define CB_SEQUENCE	cb_text_column /* the only configuration available...*/
-#define CB_ENDLINE	cb_text_column + 8
-#define CB_LIST_PICSIZE 80
-#define CB_PRINT_LEN	132
-
-#define IS_DEBUG_LINE(line) ((line)[CB_INDICATOR] == 'D')
-#define IS_CONTINUE_LINE(line) ((line)[CB_INDICATOR] == '-')
-#define IS_COMMENT_LINE(line) \
-   ((line)[CB_INDICATOR] == '*' || (line)[CB_INDICATOR] == '/')
-
 /* List of error messages */
 struct list_error {
 	struct list_error	*next;
@@ -312,18 +292,6 @@ struct list_files {
 
 extern struct list_files	*cb_listing_files;
 extern struct list_files	*cb_current_file;
-
-struct cb_xref_elem {
-	struct cb_xref_elem	*next;
-	int			line;
-};
-
-struct cb_xref {
-	struct cb_xref_elem	*head;
-	struct cb_xref_elem	*tail;
-	int			skip;
-};
-
 
 extern int			cb_source_format;
 extern int			cb_text_column;
@@ -392,6 +360,7 @@ extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
 extern int			cb_flag_main;
 extern int			cobc_wants_debug;
+extern int			cb_listing_xref;
 extern int			cobc_seen_stdin;
 
 extern int			errorcount;
@@ -405,6 +374,7 @@ extern const char		*cb_source_file;
 extern int			cb_source_line;
 
 extern struct cob_time		current_compile_time;
+extern struct tm			current_compile_tm;
 
 extern const char		*cob_config_dir;
 
@@ -466,8 +436,6 @@ DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
 
 extern size_t			cobc_check_valid_name (const char *,
 						       const enum cobc_name_type);
-
-extern void			cobc_xref_link (struct cb_xref *, int);
 
 /* config.c */
 

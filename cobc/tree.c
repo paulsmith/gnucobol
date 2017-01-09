@@ -3488,6 +3488,17 @@ end:
 		CB_LABEL (candidate)->flag_alter = 1;
 	}
 
+	if (cb_listing_xref) {
+		if (CB_FIELD_P (candidate)) {
+			cobc_xref_link (&CB_FIELD (candidate)->xref, r->common.source_line);
+			cobc_xref_link_parent (CB_FIELD (candidate));
+		} else if (CB_LABEL_P (candidate)) {
+			cobc_xref_link (&CB_LABEL(candidate)->xref, r->common.source_line);
+		} else if (CB_FILE_P (candidate)) {
+			cobc_xref_link (&CB_FILE (candidate)->xref, r->common.source_line);
+		}
+	}
+
 	r->value = candidate;
 	return r->value;
 

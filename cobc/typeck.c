@@ -562,7 +562,6 @@ cb_validate_one (cb_tree x)
 		}
 		if (CB_FIELD_P (y)) {
 			f = CB_FIELD (y);
-			cobc_xref_link (&f->xref, current_statement->common.source_line);
 			if (f->level == 88) {
 				cb_error_x (x, _("invalid use of 88 level item"));
 				return 1;
@@ -1467,9 +1466,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 		return x;
 	}
 	f = CB_FIELD (v);
-	if (current_statement) {
-		cobc_xref_link (&f->xref, current_statement->common.source_line);
-	}
 
 	/* BASED check and check for OPTIONAL LINKAGE items */
 	if (current_statement && !suppress_data_exceptions &&
@@ -2646,7 +2642,6 @@ cb_validate_program_body (struct cb_program *prog)
 		v = cb_ref (x);
 		/* Check refs in to / out of DECLARATIVES */
 		if (CB_LABEL_P (v)) {
-			cobc_xref_link (&CB_LABEL(v)->xref, CB_TREE(x)->source_line);
 			if (CB_REFERENCE (x)->flag_in_decl &&
 				!CB_LABEL (v)->flag_declaratives) {
 				/* verfify reference-out-of-declaratives  */
@@ -3670,7 +3665,9 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	}
 
 	f = CB_FIELD_PTR (p->x);
+#if 0 /* CHECKME, if needed */
 	cobc_xref_link (&f->xref, current_statement->common.source_line);
+#endif
 #if	0	/* RXWRXW - SI */
 	if (f->special_index) {
 		return CB_BUILD_FUNCALL_2 ("cob_cmp_special",

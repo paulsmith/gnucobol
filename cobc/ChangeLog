@@ -1,4 +1,13 @@
 
+2017-01-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (print_program_header): print only one page header when -tlines=0
+	  is used and removed the " Page 0001" that would always be printed
+	* cobc.c: new function print_program_data for output of data to the list
+	  file - needed for suppressing empty lines after page header and for
+	  correct counting of lines per page
+	* cobc.h, cobc.c: moved all listing #define from cobc.h to cobc.c
+
 2017-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.h: added CB_CS_ALLOCATE
@@ -17,7 +26,7 @@
 
 	* parser.y (accept_body): check that PROMPT and SIZE clauses are not set
 	  for ACCEPT OMITTED (as these are ignored at run-time)
-	* typeck.c (cb_emit_accept): bugfix - extended ACCEPT wasn't used if the 
+	* typeck.c (cb_emit_accept): bugfix - extended ACCEPT wasn't used if the
 	  only attributes set were: timeout || prompt || size_is
 	* cobc.c (cobc_sig_handler): fixed TODO about unused var
 	* cobc.c (process)[WIFSIGNALED]: use cob_raise instead of cobc_sig_handler
@@ -31,6 +40,13 @@
 	  requested by COBOL 2002+
 	* cobc.c, cobc.h, codegen.h: renamed cb_oc_build_stamp to
 	  cb_cobc_build_stamp
+	* cobc.c: if -t listing_file is passed multiple times use the last option
+	  value instead of the first one
+	* cobc.c, cobc.h, tree.c, tree.h, parser.y: numerous changes for generation
+	  of internal symbol-table and cross-reference listing - nearly all
+	  references are now stored in tree.c (cb_ref), ANY LENGTH/NUMERIC, OCCURS
+	  with PICTURE or UNBOUNDED are shown correctly now,
+	  references by parent/child only are shown, too
 
 2017-01-02 Brian Tiffin <btiffin@gnu.org>
 
@@ -59,7 +75,7 @@
 
 2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	integrating patch #50 by Frank Swarbrick and make sure it works
+	integrating patch #30 by Frank Swarbrick and make sure it works
 	* parser.y: finished OCCURS ... TO UNBOUNDED
 	* reserved.c: new token LENGTH_FUNC for BYTE-LENGTH, LENGTH, LENGTH-AN
 	* parser.y, tree.h, typeck.c: new var suppress_data_exceptions used with
@@ -543,7 +559,7 @@
 
 2016-08-13  Frank Swarbrick <infocat@@users.sf.net>
 
-	patch #50 adding IBM extension OCCURS ... TO UNBOUNDED
+	patch #30 adding IBM extension OCCURS ... TO UNBOUNDED
 	* tree.h:  new field flag_unbounded for OCCURS ... TO UNBOUNDED
 	* cobc.h: added CB_CS_OCCURS
 	* reserved.c: added UNBOUNDED as context sensitive reserved word for OCCURS
