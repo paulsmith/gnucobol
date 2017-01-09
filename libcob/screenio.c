@@ -2640,23 +2640,25 @@ cob_get_text (char *text, int size)
 int
 cob_display_formatted_text (const char *fmt, ...)
 {
+	int		size;
 	cob_field	field;
 	cob_field_attr	attr;
 	va_list		ap;
 	char		buff [COB_NORMAL_BUFF];
 
 	va_start (ap, fmt);
-	field.size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
+	size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
 	va_end (ap);
+
+	if (size < 0) {
+		return -1;
+	}
 
 	if (buff[0] == 0) {
 		return 0;
 	}
 
-	if (field.size > COB_NORMAL_MAX) {
-		field.size = COB_NORMAL_MAX;
-	}
-
+	field.size = cob_min_int (size, COB_NORMAL_MAX);
 	field.data = (unsigned char *)&buff;
 	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
 	field.attr = &attr;
