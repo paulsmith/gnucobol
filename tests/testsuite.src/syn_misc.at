@@ -1,4 +1,4 @@
-## Copyright (C) 2007-2012, 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -77,6 +77,10 @@ AT_DATA([prog.cob], [
               CONTINUE
               CONTINUE
            END-IF.
+           IF (V = 1) OR 2
+               CONTINUE
+               CONTINUE
+           END-IF.
            EVALUATE TRUE
               WHEN FUNCTION TRIM (' ')
                  CONTINUE
@@ -129,14 +133,15 @@ prog.cob: 18: error: invalid expression
 prog.cob: 22: error: invalid expression
 prog.cob: 26: error: invalid expression
 prog.cob: 31: error: invalid expression
-prog.cob: 34: error: invalid expression
-prog.cob: 37: error: invalid expression
-prog.cob: 40: error: invalid expression
-prog.cob: 43: error: invalid expression
-prog.cob: 50: error: invalid expression
-prog.cob: 56: error: invalid expression
-prog.cob: 62: error: invalid expression
-prog.cob: 68: error: invalid expression
+prog.cob: 35: error: invalid expression
+prog.cob: 38: error: invalid expression
+prog.cob: 41: error: invalid expression
+prog.cob: 44: error: invalid expression
+prog.cob: 47: error: invalid expression
+prog.cob: 54: error: invalid expression
+prog.cob: 60: error: invalid expression
+prog.cob: 66: error: invalid expression
+prog.cob: 72: error: invalid expression
 ])
 
 AT_CLEANUP
