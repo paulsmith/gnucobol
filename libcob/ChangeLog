@@ -1,4 +1,8 @@
 
+2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h, common.c (cob_check_subscript): corrected minimum check
+
 2017-01-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (field_accept): don't write anything on the screen for
@@ -25,7 +29,7 @@
 	  returned when requested to allocate more than the maximum possible size
 	* common.h, common.c (cob_check_odo, cob_check_subscript): additional
 	  parameters for table name in DEPENDING ON and flag for ODO, additional
-	  runtime error line with the (current) minimum/maximum of the table
+	  runtime error line with the (current) maximum of the table
 
 2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

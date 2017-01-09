@@ -1,4 +1,8 @@
 
+2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_identifier): corrected minimum check for OCCURS
+
 2017-01-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (print_program_header): print only one page header when -tlines=0

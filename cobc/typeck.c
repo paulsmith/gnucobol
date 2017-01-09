@@ -1576,7 +1576,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 				/* Compile-time check for all literals */
 				if (CB_LITERAL_P (sub)) {
 					n = cb_get_int (sub);
-					if (n < p->occurs_min || (!p->flag_unbounded && n > p->occurs_max)) {
+					if (n < 1 || (!p->flag_unbounded && n > p->occurs_max)) {
 						cb_error_x (x, _("subscript of '%s' out of bounds: %d"),
 								name, n);
 					}
@@ -1585,18 +1585,16 @@ cb_build_identifier (cb_tree x, const int subchk)
 				/* Run-time check for all non-literals */
 				if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
 					if (p->depending) {
-						e1 = CB_BUILD_FUNCALL_5 ("cob_check_subscript",
+						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
 							 cb_build_cast_int (sub),
-							 cb_int (p->occurs_min),
 							 cb_build_cast_int (p->depending),
 							 CB_BUILD_STRING0 (name),
 							 cb_int1);
 						r->check = cb_list_add (r->check, e1);
 					} else {
 						if (!CB_LITERAL_P (sub)) {
-							e1 = CB_BUILD_FUNCALL_5 ("cob_check_subscript",
+							e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
 								 cb_build_cast_int (sub),
-								 cb_int (p->occurs_min),
 								 cb_int (p->occurs_max),
 								 CB_BUILD_STRING0 (name),
 								cb_int0);

@@ -2439,12 +2439,13 @@ cob_check_numeric (const cob_field *f, const char *name)
 
 void
 cob_check_odo (const int i, const int min,
-	       const int max, const char *name, const char *dep_name)
+			const int max, const char *name, const char *dep_name)
 {
 	/* Check OCCURS DEPENDING ON item */
 	if (i < min || i > max) {
 		cob_set_exception (COB_EC_BOUND_ODO);
-		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"), dep_name, i);
+		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"),
+					dep_name, i);
 		if (i > max) {
 			cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
 		} else {
@@ -2455,24 +2456,20 @@ cob_check_odo (const int i, const int min,
 }
 
 void
-cob_check_subscript (const int i, const int min,
-		     const int max, const char *name, const int odo_item)
+cob_check_subscript (const int i, const int max,
+			const char *name, const int odo_item)
 {
 	/* Check subscript */
-	if (i < min || i > max) {
+	if (i < 1 || i > max) {
 		cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
 		cob_runtime_error (_("subscript of '%s' out of bounds: %d"), name, i);
-		if (odo_item) {
-			if (i > max) {
-				cob_runtime_error (_("current maximum subscript for '%s': %d"), name, max);
+		if (i >= 1) {
+			if (odo_item) {
+				cob_runtime_error (_("current maximum subscript for '%s': %d"),
+							name, max);
 			} else {
-				cob_runtime_error (_("current minimum subscript for '%s': %d"), name, min);
-			}
-		} else {
-			if (i > max) {
-				cob_runtime_error (_("maximum subscript for '%s': %d"), name, max);
-			} else {
-				cob_runtime_error (_("minimum subscript for '%s': %d"), name, min);
+				cob_runtime_error (_("maximum subscript for '%s': %d"),
+							name, max);
 			}
 		}
 		cob_stop_run (1);
