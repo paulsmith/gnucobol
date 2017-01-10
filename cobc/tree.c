@@ -248,7 +248,7 @@ check_code_set_items_are_subitems_of_records (struct cb_file * const file)
 	 */
 	for (l = file->code_set_items; l; l = CB_LIST (l->chain)) {
 
-		r = CB_VALUE (l);
+		r = l->value;
 		f = CB_FIELD (cb_ref (r));
 
 		if (f->level == 1) {
