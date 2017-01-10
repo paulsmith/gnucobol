@@ -3018,7 +3018,10 @@ dobuild:
 #endif
 
 	COB_UNUSED (sharing);
-
+	if (cobsetptr->bdb_home != NULL
+	 && bdb_env == NULL) {		/* Join BDB, on first OPEN of INDEXED file */
+		join_environment ();
+	}
 	cob_chk_file_mapping ();
 
 #if	0	/* RXWRXW - Access check BDB Human */
@@ -3586,14 +3589,6 @@ indexed_read_next (cob_file *f, const int read_opts)
 	fh = f->file;
 	ret = COB_STATUS_00_SUCCESS;
 	lmode = 0;
-
-	if (f->flag_nonexistent) {
-		if (f->flag_first_read == 0) {
-			return COB_STATUS_23_KEY_NOT_EXISTS;
-		}
-		f->flag_first_read = 0;
-		return COB_STATUS_10_END_OF_FILE;
-	}
 
 	if (fh->curkey == -1) {
 		/* Switch to primary index */
@@ -4744,7 +4739,7 @@ cob_read_next (cob_file *f, cob_field *fnstatus, const int read_opts)
 
 	if (unlikely(f->flag_nonexistent)) {
 		if (f->flag_first_read == 0) {
-			save_status (f, fnstatus, COB_STATUS_23_KEY_NOT_EXISTS);
+			save_status (f, fnstatus, COB_STATUS_46_READ_ERROR);
 			return;
 		}
 		f->flag_first_read = 0;
@@ -6395,7 +6390,6 @@ cob_init_fileio (cob_global *lptr, cob_settings *sptr)
 #ifdef	WITH_DB
 	bdb_env = NULL;
 	bdb_data_dir = NULL;
-	join_environment ();
 	record_lock_object = cob_malloc ((size_t)1024);
 	bdb_buff = cob_malloc ((size_t)COB_SMALL_BUFF);
 	rlo_size = 1024;

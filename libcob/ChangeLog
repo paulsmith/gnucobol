@@ -22,6 +22,12 @@
 	* common.h: extended cob_time with is_daylight_saving_time and day_of_year
 	* common.c [_BSD_SOURCE]: get utc_offset directly from tm_gmtoff
 
+2017-01-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (cob_read_next): change to return 46 on 2nd read on an optional
+	  missing file, removed some redundant code
+	* fileio.c [WITH_DB]: moved call to join_environment to indexed_open
+
 2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added COB_MAX_UNBOUNDED_SIZE
