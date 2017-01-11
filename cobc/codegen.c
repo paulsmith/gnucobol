@@ -8456,6 +8456,16 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	output ("{\n");
 
+	/* By value pointer fields */
+	for (l2 = using_list; l2; l2 = CB_CHAIN (l2)) {
+		f2 = cb_code_field (CB_VALUE (l2));
+		if (CB_PURPOSE_INT (l2) == CB_CALL_BY_VALUE &&
+		    (f2->usage == CB_USAGE_POINTER ||
+		     f2->usage == CB_USAGE_PROGRAM_POINTER)) {
+			output ("  unsigned char\t\t*ptr_%d;\n", f2->id);
+		}
+	}
+
 	/* For calling into a module, cob_call_params may not be known */
 	if (using_list) {
 		parmnum = 0;
@@ -8502,16 +8512,6 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 					sticky_nonp[parmnum] = 1;
 				}
 			}
-		}
-	}
-
-	/* By value pointer fields */
-	for (l2 = using_list; l2; l2 = CB_CHAIN (l2)) {
-		f2 = cb_code_field (CB_VALUE (l2));
-		if (CB_PURPOSE_INT (l2) == CB_CALL_BY_VALUE &&
-		    (f2->usage == CB_USAGE_POINTER ||
-		     f2->usage == CB_USAGE_PROGRAM_POINTER)) {
-			output ("  unsigned char\t\t*ptr_%d;\n", f2->id);
 		}
 	}
 

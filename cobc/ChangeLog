@@ -1,4 +1,10 @@
 
+2017-01-11  Mario Matos <matosma@users.sf.net>
+
+	* codegen.c (output_entry_function):
+	  fixed bug #349 (compatibility for C89 / _MSC_VER < 1800) - moved
+	  generation of pointer fields for BY VALUE items before any code
+
 2017-01-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_expr_shift): fixed bug #321 - parentheses now terminate
@@ -59,7 +65,7 @@
 	  with PICTURE or UNBOUNDED are shown correctly now,
 	  references by parent/child only are shown, too
 
-2017-01-02 Brian Tiffin <btiffin@gnu.org>
+2017-01-02  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
 
@@ -1529,7 +1535,7 @@
 	* reserved.c: set TEST-FORMATTED-DATETIME and INTEGER-OF-FORMATTED-DATE
 	  to implemented
 
-2015-01-06  Brian Tiffin <btiffin@users.sf.net>
+2015-01-06  Brian Tiffin <btiffin@gnu.org>
 
 	* parser.y: fixed segfault with STOP "literal" with the ACCEPT OMITTED
 	  feature attempting to generate code with null pointer
