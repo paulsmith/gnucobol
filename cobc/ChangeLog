@@ -1,5 +1,9 @@
 
-2017-01-11  Mario Matos <matosma@users.sf.net>
+2017-01-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_name_1): output name for USER FUNCTIONs
+
+2017-01-11  Mário Matos <matosma@users.sf.net>
 
 	* codegen.c (output_entry_function):
 	  fixed bug #349 (compatibility for C89 / _MSC_VER < 1800) - moved
