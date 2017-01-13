@@ -1,4 +1,11 @@
 
+2017-01-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c [_MSC_VER]: swapped order of parameters for C compiler
+	  and linking so that -L options come before -l
+	* cobc.c: swapped order of setting and size calculation of compiler/linker
+	  options to match the order used for the actual call
+
 2017-01-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_name_1): output name for USER FUNCTIONs

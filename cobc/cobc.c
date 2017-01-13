@@ -6091,13 +6091,14 @@ process_module_direct (struct filename *fn)
 #endif
 
 	bufflen = cobc_cc_len + cobc_cflags_len
-			+ cobc_export_dyn_len + cobc_shared_opt_len
+			+ cobc_include_len + cobc_shared_opt_len
+			+ cobc_pic_flags_len + cobc_export_dyn_len
 			+ size + fn->translate_len
-			+ cobc_libs_len + cobc_ldflags_len + cobc_include_len
 #ifdef	_MSC_VER
 			+ manilink_len
 #endif
-			+ cobc_lib_paths_len + cobc_pic_flags_len + 128U;
+			+ cobc_ldflags_len + cobc_lib_paths_len + cobc_libs_len
+			+ 128U;
 
 	cobc_chk_buff_size (bufflen);
 
@@ -6107,7 +6108,7 @@ process_module_direct (struct filename *fn)
 		"%s %s %s     /MD  /LD          /Fe\"%s\" /Fo\"%s\" \"%s\" %s %s %s %s",
 			cobc_cc, cobc_cflags, cobc_include, exename, name,
 			fn->translate,
-			manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
+			manilink, cobc_ldflags, cobc_lib_paths, cobc_libs);
 	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
@@ -6202,13 +6203,15 @@ process_module (struct filename *fn)
 #endif
 
 	size = strlen (name);
-	bufflen = cobc_cc_len + cobc_ldflags_len
-			+ cobc_export_dyn_len + cobc_shared_opt_len
-			+ size + fn->object_len + cobc_libs_len
+	bufflen = cobc_cc_len 
+			+ cobc_shared_opt_len
+			+ cobc_pic_flags_len + cobc_export_dyn_len
+			+ size + fn->object_len
 #ifdef	_MSC_VER
 			+ manilink_len
 #endif
-			+ cobc_lib_paths_len + cobc_pic_flags_len + 128U;
+			+ cobc_ldflags_len + cobc_lib_paths_len + cobc_libs_len
+			+ 128U;
 
 	cobc_chk_buff_size (bufflen);
 
@@ -6312,13 +6315,14 @@ process_library (struct filename *l)
 #endif
 
 	size = strlen (name);
-	bufflen = cobc_cc_len + cobc_ldflags_len
-			+ cobc_export_dyn_len + cobc_shared_opt_len
+	bufflen = cobc_cc_len + cobc_shared_opt_len
+			+ cobc_pic_flags_len + cobc_export_dyn_len
 			+ size + cobc_objects_len + cobc_libs_len
 #ifdef	_MSC_VER
 			+ manilink_len
 #endif
-			+ cobc_lib_paths_len + cobc_pic_flags_len + 64U;
+			+ cobc_ldflags_len + cobc_lib_paths_len
+			+ 64U;
 
 	cobc_chk_buff_size (bufflen);
 
@@ -6327,7 +6331,7 @@ process_library (struct filename *l)
 		"%s /Od /MDd /LDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
 		"%s     /MD  /LD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, exename, cobc_objects_buffer,
-		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		manilink, cobc_ldflags, cobc_lib_paths, cobc_libs);
 	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
@@ -6430,13 +6434,13 @@ process_link (struct filename *l)
 #endif
 
 	size = strlen (name);
-	bufflen = cobc_cc_len + cobc_ldflags_len
-			+ cobc_export_dyn_len + size
-			+ cobc_objects_len + cobc_libs_len
+	bufflen = cobc_cc_len + cobc_export_dyn_len
+			+ size + cobc_objects_len
 #ifdef	_MSC_VER
 			+ manilink_len
 #endif
-			+ cobc_lib_paths_len + 64U;
+			+ cobc_ldflags_len + cobc_libs_len + cobc_lib_paths_len
+			+ 64U;
 
 	cobc_chk_buff_size (bufflen);
 
@@ -6445,7 +6449,7 @@ process_link (struct filename *l)
 		"%s /Od /MDd /Zi /FR /Fe\"%s\" %s %s %s %s %s" :
 		"%s     /MD          /Fe\"%s\" %s %s %s %s %s",
 		cobc_cc, exename, cobc_objects_buffer,
-		manilink, cobc_ldflags, cobc_libs, cobc_lib_paths);
+		manilink, cobc_ldflags, cobc_lib_paths, cobc_libs);
 	if (verbose_output > 1) {
 		ret = process (cobc_buffer);
 	} else {
@@ -6855,13 +6859,13 @@ main (int argc, char **argv)
 
 	cobc_cc_len = strlen (cobc_cc);
 	cobc_cflags_len = strlen (cobc_cflags);
-	cobc_libs_len = strlen (cobc_libs);
-	cobc_lib_paths_len = strlen (cobc_lib_paths);
 	cobc_include_len = strlen (cobc_include);
-	cobc_ldflags_len = strlen (cobc_ldflags);
-	cobc_export_dyn_len = strlen (COB_EXPORT_DYN);
 	cobc_shared_opt_len = strlen (COB_SHARED_OPT);
 	cobc_pic_flags_len = strlen (COB_PIC_FLAGS);
+	cobc_export_dyn_len = strlen (COB_EXPORT_DYN);
+	cobc_ldflags_len = strlen (cobc_ldflags);
+	cobc_lib_paths_len = strlen (cobc_lib_paths);
+	cobc_libs_len = strlen (cobc_libs);
 
 	/* Process input files */
 	status = 0;
