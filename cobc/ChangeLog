@@ -1,4 +1,10 @@
 
+2017-01-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (userbp): fixed bug #350 - caused by userbp initialisation not
+	  matching current cb_intrinsic_table layout.
+	* tree.c (userbp), tree.h: made cb_intrinsic_table pointers const.
+
 2017-01-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [_MSC_VER]: swapped order of parameters for C compiler

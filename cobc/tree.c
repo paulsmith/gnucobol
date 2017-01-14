@@ -41,6 +41,7 @@
 
 #include "cobc.h"
 #include "tree.h"
+#include "parser.h"
 
 #define PIC_ALPHABETIC		0x01
 #define PIC_NUMERIC		0x02
@@ -119,10 +120,10 @@ static const char		* const cb_const_subs[] = {
 	NULL
 };
 
-static struct cb_intrinsic_table	userbp =
-	{ "USER FUNCTION", "cob_user_function", -1, 1,
-	  CB_INTR_USER_FUNCTION, CB_CATEGORY_NUMERIC,
-	  0, 0, 0 };
+static const struct cb_intrinsic_table	userbp =
+	{ "USER FUNCTION", "cob_user_function", 
+	  CB_INTR_USER_FUNCTION, USER_FUNCTION_NAME, 1, 0, 0, CB_CATEGORY_NUMERIC,
+	  0 };
 
 /* Global variables */
 
@@ -472,7 +473,7 @@ cb_name_1 (char *s, cb_tree x)
 }
 
 static cb_tree
-make_intrinsic (cb_tree name, struct cb_intrinsic_table *cbp, cb_tree args,
+make_intrinsic (cb_tree name, const struct cb_intrinsic_table *cbp, cb_tree args,
 		cb_tree field, cb_tree refmod, const int isuser)
 {
 	struct cb_intrinsic *x;

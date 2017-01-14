@@ -1028,7 +1028,7 @@ struct cb_intrinsic {
 	cb_tree				name;		/* INTRINSIC name */
 	cb_tree				args;		/* Arguments */
 	cb_tree				intr_field;	/* Field to use */
-	struct cb_intrinsic_table	*intr_tab;	/* Table pointer */
+	const struct cb_intrinsic_table	*intr_tab;	/* Table pointer */
 	cb_tree				offset;		/* Reference mod */
 	cb_tree				length;		/* Reference mod */
 	int				isuser;		/* User function */

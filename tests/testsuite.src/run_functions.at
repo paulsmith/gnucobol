@@ -3854,3 +3854,45 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([UDF in COMPUTE])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. func.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  num PIC 999 VALUE 100.
+       
+       PROCEDURE DIVISION RETURNING num.
+           CONTINUE
+           .
+       END FUNCTION func.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION func.
+           
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 999.
+       
+       PROCEDURE DIVISION.
+           COMPUTE x = 101 + FUNCTION func
+           DISPLAY x
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_XFAIL_IF([true])
+AT_CHECK([./prog], [0], [], [])
+
+AT_CLEANUP
