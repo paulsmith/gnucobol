@@ -3865,10 +3865,10 @@ AT_DATA([prog.cob], [
 
        DATA DIVISION.
        LINKAGE SECTION.
-       01  num PIC 999 VALUE 100.
+       01  num PIC 999.
        
        PROCEDURE DIVISION RETURNING num.
-           CONTINUE
+           MOVE 100 TO num
            .
        END FUNCTION func.
 
@@ -3892,7 +3892,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_XFAIL_IF([true])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([./prog], [0],
+[201
+])
 
 AT_CLEANUP
