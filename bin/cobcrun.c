@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2004-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2004-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Brian Tiffin
 
    This file is part of GnuCOBOL.
@@ -88,7 +88,7 @@ cobcrun_print_version (void)
 
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2016 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2017 Free Software Foundation, Inc.");
 	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
@@ -198,7 +198,8 @@ cobcrun_initial_module (char *module_argument)
 		memset (env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_LIBRARY_PATH");
 		if (envptr) {
-			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", pathname, PATHSEP_CHAR, envptr);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s",
+				pathname, PATHSEP_CHAR, envptr);
 		} else {
 			snprintf (env_space, COB_MEDIUM_MAX, "%s", pathname);
 		}
@@ -206,7 +207,8 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
 		if (envop_return) {
-			fprintf (stderr, _("problem with setenv %s: %d"), "COB_LIBRARY_PATH", errno);
+			fprintf (stderr, _("problem with setenv %s: %d"),
+				"COB_LIBRARY_PATH", errno);
 			fputc ('\n', stderr);
 			return 1;
 		}
@@ -224,7 +226,8 @@ cobcrun_initial_module (char *module_argument)
 		memset(env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_PRE_LOAD");
 		if (envptr) {
-			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", filename, PATHSEP_CHAR, envptr);
+			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", filename,
+				PATHSEP_CHAR, envptr);
 		} else {
 			snprintf (env_space, COB_MEDIUM_MAX, "%s", filename);
 		}
@@ -232,7 +235,8 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
 		if (envop_return) {
-			fprintf (stderr, _("problem with setenv %s: %d"), "COB_PRE_LOAD", errno);
+			fprintf (stderr, _("problem with setenv %s: %d"),
+				"COB_PRE_LOAD", errno);
 			fputc ('\n', stderr);
 			return 1;
 		}

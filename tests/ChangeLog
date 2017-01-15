@@ -1,4 +1,9 @@
 
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at: minimized the output of testsuite --version while adding
+	  core authors to it
+
 2017-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol85/report.pl: replaced fifo by sysin redirection and

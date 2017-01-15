@@ -1,4 +1,8 @@
 
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: Copyright year 2017
+
 2016-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: fixed missing cob_stop_run() for --print-runtime-conf,

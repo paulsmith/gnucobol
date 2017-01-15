@@ -22,6 +22,10 @@
 	  fixed bug #349 (compatibility for C89 / _MSC_VER < 1800) - moved
 	  generation of pointer fields for BY VALUE items before any code
 
+2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: Copyright year 2017
+
 2017-01-10  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c:
@@ -90,7 +94,7 @@
 	  with PICTURE or UNBOUNDED are shown correctly now,
 	  references by parent/child only are shown, too
 
-2017-01-02  Brian Tiffin <btiffin@gnu.org>
+2017-01-02 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
 
@@ -1560,7 +1564,7 @@
 	* reserved.c: set TEST-FORMATTED-DATETIME and INTEGER-OF-FORMATTED-DATE
 	  to implemented
 
-2015-01-06  Brian Tiffin <btiffin@gnu.org>
+2015-01-06  Brian Tiffin <btiffin@users.sf.net>
 
 	* parser.y: fixed segfault with STOP "literal" with the ACCEPT OMITTED
 	  feature attempting to generate code with null pointer
