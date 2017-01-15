@@ -1,4 +1,9 @@
 
+2017-01-10  Ron Norman <rjn@inglenet.com>
+
+	* move.c, call.c, common.h: New routines added to provide
+	  application C code access to COBOL data fields.
+
 2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h, common.c (cob_check_subscript): corrected minimum check

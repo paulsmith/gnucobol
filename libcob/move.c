@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1672,4 +1672,631 @@ cob_init_move (cob_global *lptr, cob_settings *sptr)
 {
 	cobglobptr = lptr;
 	cobsetptr  = sptr;
+}
+
+/*
+ * Routines for C application code to access COBOL data follow
+ */
+void
+cob_put_u64_compx(cob_u64_t val, void *mem, int len)
+{
+	cob_u64_t	ulong;
+	cob_u32_t	uint;
+	cob_u16_t	ushort;
+#if defined(WORDS_BIGENDIAN) 
+	switch (len) {
+	case sizeof(int):
+		uint = ((cob_u32_t)val);
+		memcpy(mem,((cob_u8_t*)&uint),sizeof(int));
+		return;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(mem,((cob_u8_t*)&val),sizeof(cob_s64_t));
+		return val;
+	case sizeof(short):
+		ushort = ((cob_u16_t)val);
+		memcpy(mem,((cob_u8_t*)&ushort),sizeof(short));
+		return;
+	case 1:
+		*((cob_u8_t*)mem) = ((cob_u8_t)val);
+		return;
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		memcpy(mem,((cob_u8_t*)&val)+(sizeof(cob_s64_t)-len),len);
+	}
+#else
+	switch (len) {
+	case sizeof(int):
+		uint = COB_BSWAP_32 ((cob_u32_t)val);
+		memcpy(mem,((cob_u8_t*)&uint),sizeof(int));
+		return;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		ulong = COB_BSWAP_64 ((cob_u64_t)val);
+		memcpy(mem,((cob_u8_t*)&ulong),sizeof(cob_s64_t));
+		return;
+	case sizeof(short):
+		ushort = COB_BSWAP_16 ((cob_u16_t)val);
+		memcpy(mem,((cob_u8_t*)&ushort),sizeof(short));
+		return;
+	case 1:
+		*((cob_u8_t*)mem) = ((cob_u8_t)val);
+		return;
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		ulong = COB_BSWAP_64 (val);
+		memcpy(mem,((cob_u8_t*)&ulong)+(sizeof(cob_s64_t)-len),len);
+	}
+#endif
+	return;
+}
+
+void
+cob_put_u64_comp5(cob_u64_t val, void *mem, int len)
+{
+	cob_u32_t	uint;
+	cob_u16_t	ushort;
+	switch (len) {
+	case sizeof(int):
+		uint = ((cob_u32_t)val);
+		memcpy(mem,((cob_u8_t*)&uint),sizeof(int));
+		return;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(mem,((cob_u8_t*)&val),sizeof(cob_s64_t));
+		return;
+	case sizeof(short):
+		ushort = ((cob_u16_t)val);
+		memcpy(mem,((cob_u8_t*)&ushort),sizeof(short));
+		return;
+	case 1:
+		*((cob_u8_t*)mem) = ((cob_u8_t)val);
+		return;
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+#if defined(WORDS_BIGENDIAN) 
+	memcpy(mem,((cob_u8_t*)&val)+(sizeof(cob_s64_t)-len),len);
+#else
+	memcpy(mem,((cob_u8_t*)&val),len);
+#endif
+	return;
+}
+
+void
+cob_put_s64_comp5(cob_s64_t val, void *mem, int len)
+{
+	cob_s32_t	sint;
+	cob_s16_t	sshort;
+	switch (len) {
+	case sizeof(int):
+		sint = ((cob_s32_t)val);
+		memcpy(mem,((cob_u8_t*)&sint),sizeof(int));
+		return;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(mem,((cob_u8_t*)&val),sizeof(cob_s64_t));
+		return;
+	case sizeof(short):
+		sshort = ((cob_u16_t)val);
+		memcpy(mem,((cob_u8_t*)&sshort),sizeof(short));
+		return;
+	case 1:
+		*((cob_u8_t*)mem) = ((cob_u8_t)val);
+		return;
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+#if defined(WORDS_BIGENDIAN) 
+	memcpy(mem,((cob_u8_t*)&val)+(sizeof(cob_s64_t)-len),len);
+#else
+	memcpy(mem,((cob_u8_t*)&val),len);
+#endif
+	return;
+}
+
+cob_u64_t
+cob_get_u64_compx(void *mem, int len)
+{
+	cob_u64_t	ulong;
+	cob_u32_t	uint;
+	cob_u16_t	ushort;
+#if defined(WORDS_BIGENDIAN) 
+	switch (len) {
+	case sizeof(int):
+		memcpy(((cob_u8_t*)&uint),mem,sizeof(int));
+		return uint;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((cob_u8_t*)&ulong),mem,sizeof(cob_s64_t));
+		return ulong;
+	case sizeof(short):
+		memcpy(((cob_u8_t*)&ushort),mem,sizeof(short));
+		return ushort;
+	case 1:
+		return *((cob_u8_t*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	ulong = 0;
+	memcpy(((cob_u8_t*)&ulong)+(sizeof(cob_s64_t)-len),mem,len);
+	return ulong;
+#else
+	switch (len) {
+	case sizeof(int):
+		memcpy(((cob_u8_t*)&uint),mem,sizeof(int));
+		return COB_BSWAP_32(uint);
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((cob_u8_t*)&ulong),mem,sizeof(cob_s64_t));
+		return COB_BSWAP_64(ulong);
+	case sizeof(short):
+		memcpy(((cob_u8_t*)&ushort),mem,sizeof(short));
+		return COB_BSWAP_16(ushort);
+	case 1:
+		return (*(cob_u8_t*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	ulong = 0;
+	memcpy(((cob_u8_t*)&ulong)+(sizeof(cob_s64_t)-len),mem,len);
+	return COB_BSWAP_64(ulong);
+#endif
+}
+
+cob_u64_t
+cob_get_u64_comp5(void *mem, int len)
+{
+	cob_u64_t	ulong;
+	cob_u32_t	uint;
+	cob_u16_t	ushort;
+	switch (len) {
+	case sizeof(int):
+		memcpy(((cob_u8_t*)&uint),mem,sizeof(int));
+		return uint;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((cob_u8_t*)&ulong),mem,sizeof(cob_s64_t));
+		return ulong;
+	case sizeof(short):
+		memcpy(((cob_u8_t*)&ushort),mem,sizeof(short));
+		return ushort;
+	case 1:
+		return *((cob_u8_t*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	ulong = 0;
+#if defined(WORDS_BIGENDIAN) 
+	memcpy(((cob_u8_t*)&ulong)+(sizeof(cob_s64_t)-len),mem,len);
+#else
+	memcpy(((cob_u8_t*)&ulong),mem,len);
+#endif
+	return ulong;
+}
+
+cob_s64_t
+cob_get_s64_comp5(void *mem, int len)
+{
+	cob_s64_t	slong;
+	int		sint;
+	short		sshort;
+	switch (len) {
+	case sizeof(int):
+		memcpy(((void *)&sint),mem,sizeof(int));
+		return sint;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((void*)&slong),mem,sizeof(cob_s64_t));
+		return slong;
+	case sizeof(short):
+		memcpy(((void*)&sshort),mem,sizeof(short));
+		return sshort;
+	case 1:
+		return *((signed char*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	slong = 0;
+#if defined(WORDS_BIGENDIAN) 
+	if (((cob_u8_t*)mem)[0] & 0x80)		/* Negative value */
+		slong = -1;
+	memcpy(((cob_u8_t*)&slong)+(sizeof(cob_s64_t)-len),mem,len);
+#else
+	if (((cob_u8_t*)mem)[len-1] & 0x80)	/* Negative value; 2s complement */
+		slong = -1;
+	memcpy(((void*)&slong),mem,len);
+#endif
+	return slong;
+}
+
+cob_s64_t
+cob_get_s64_compx(void *mem, int len)
+{
+	cob_s64_t slong;
+	int	sint;
+	short	sshort;
+#if defined(WORDS_BIGENDIAN) 
+	switch (len) {
+	case sizeof(int):
+		memcpy(((cob_u8_t*)&sint),mem,sizeof(int));
+		return sint;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((cob_u8_t*)&slong),mem,sizeof(cob_s64_t));
+		return slong;
+	case sizeof(short):
+		memcpy(((cob_u8_t*)&sshort),mem,sizeof(short));
+		return sshort;
+	case 1:
+		return *((signed char*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	slong = 0;
+	if (((cob_u8_t*)mem)[0] & 0x80)		/* Negative value */
+		slong = -1;
+	memcpy(((cob_u8_t*)&slong)+(sizeof(cob_s64_t)-len),mem,len);
+	return slong;
+#else
+	switch (len) {
+	case sizeof(int):
+		memcpy(((cob_u8_t*)&sint),mem,sizeof(int));
+		sint = COB_BSWAP_32(sint);
+		return (cob_s64_t)sint;
+	default:	/* Assume 64 bit value */
+	case sizeof(cob_s64_t):
+		memcpy(((cob_u8_t*)&slong),mem,sizeof(cob_s64_t));
+		slong =  COB_BSWAP_64(slong);
+		return (cob_s64_t)slong;
+	case sizeof(short):
+		memcpy(((cob_u8_t*)&sshort),mem,sizeof(short));
+		sshort = COB_BSWAP_16(sshort);
+		return (cob_s64_t)(sshort);
+	case 1:
+		return (*(signed char*)mem);
+	case 3:
+	case 5:
+	case 6:
+	case 7:
+		break;
+	}
+	slong = 0;
+	if (((cob_u8_t*)mem)[0] & 0x80)	/* Negative value; 2s complement */
+		slong = -1;
+	memcpy(((cob_u8_t*)&slong)+(sizeof(cob_s64_t)-len),mem,len);
+	return (cob_s64_t)COB_BSWAP_64(slong);
+#endif
+}
+
+void
+cob_put_s64_comp3(cob_s64_t val, void *mem, int len)
+{
+	int		sign, dig1, dig2;
+	cob_s64_t	num;
+	cob_u8_t	*p = mem;
+
+	if (val < 0) {
+		num = -val;
+		sign = 0x0D;
+	} else {
+		num = val;
+		sign = 0x0C;
+	}
+	memset (mem, 0, len);
+	p[--len] =  (cob_u8_t)( ( ((num%10)<<4) | sign) & 0xFF );
+	num = num / 10;
+	while (num > 0
+	    && len-- > 0) {
+		dig1 = num % 10;
+		num = num / 10;
+		dig2 = num % 10;
+		num = num / 10;
+		p[len] = (cob_u8_t) ((dig2 << 4) | dig1);
+	}
+
+	return;
+}
+
+void
+cob_put_u64_comp3(cob_u64_t val, void *mem, int len)
+{
+	int		dig1, dig2;
+	cob_u64_t	num = val;
+	cob_u8_t 	*p = mem;
+
+	memset (mem, 0, len);
+	p[--len] =  (cob_u8_t)( ( ((num%10)<<4) | 0x0F) & 0xFF );
+	num = num / 10;
+	while (num > 0
+	    && len-- > 0) {
+		dig1 = num % 10;
+		num = num / 10;
+		dig2 = num % 10;
+		num = num / 10;
+		p[len] = (cob_u8_t) ((dig2 << 4) | dig1);
+	}
+
+	return;
+}
+
+cob_s64_t
+cob_get_s64_comp3(void *mem, int len)
+{
+	int		sign, j;
+	cob_s64_t	val = 0;
+	cob_u8_t	*p = mem;
+
+	if ((p[len-1] & 0x0F) == 0x0D)
+		sign = -1;
+	else
+		sign = 1;
+	for (j=0; j < len-1; j++) {
+		val = val * 10 + ((unsigned int)(p[j]&0xf0)>>4);
+		val = val * 10 + (p[j]&0x0f);
+	}
+	val = val * 10 + ((unsigned int)(p[len-1] & 0xf0)>>4);
+
+	return val * sign;
+}
+
+cob_u64_t
+cob_get_u64_comp3(void *mem, int len)
+{
+	int		j;
+	cob_u64_t	val = 0;
+	cob_u8_t	*p = mem;
+
+	for (j=0; j < len-1; j++) {
+		val = val * 10 + ((unsigned int)(p[j]&0xF0)>>4);
+		val = val * 10 + (p[j]&0x0F);
+	}
+	val = val * 10 + ((unsigned int)(p[len-1] & 0xF0)>>4);
+
+	return val;
+}
+
+void
+cob_put_u64_comp6(cob_u64_t val, void *mem, int len)
+{
+	int		dig1, dig2;
+	cob_u64_t	num = val;
+	cob_u8_t 	*p = mem;
+
+	memset (mem, 0, len);
+	while (num > 0
+	    && len-- > 0) {
+		dig1 = num % 10;
+		num = num / 10;
+		dig2 = num % 10;
+		num = num / 10;
+		p[len] = (cob_u8_t) ((dig2 << 4) | dig1);
+	}
+
+	return;
+}
+
+cob_u64_t
+cob_get_u64_comp6(void *mem, int len)
+{
+	int		j;
+	cob_u64_t	val = 0;
+	cob_u8_t	*p = mem;
+
+	for (j=0; j < len; j++) {
+		val = val * 10 + ((unsigned int)(p[j]&0xF0)>>4);
+		val = val * 10 + (p[j]&0x0F);
+	}
+
+	return val;
+}
+
+static char ebcdic_pos[10] = "{ABCDEFGHI";
+static char ebcdic_neg[10] = "}JKLMNOPQR";
+
+void
+cob_put_s64_pic9(cob_s64_t val, void *mem, int len)
+{
+	cob_s64_t	num;
+	cob_u8_t	*p = mem;
+
+	if (!cobglobptr && COB_MODULE_PTR) {
+		return;
+	}
+
+	memset (mem, '0', len);
+	if (val < 0) {
+		num = -val;
+		if (COB_MODULE_PTR->ebcdic_sign)
+			p[--len] = (cob_u8_t)ebcdic_neg[num%10];
+		else
+			p[--len] = (cob_u8_t)('0' + (num%10)) | 0x40;
+	} else {
+		num = val;
+		if (COB_MODULE_PTR->ebcdic_sign)
+			p[--len] = (cob_u8_t)ebcdic_pos[num%10];
+		else
+			p[--len] =  (cob_u8_t)('0' + (num%10));
+	}
+	num = num / 10;
+	while (num > 0
+	    && len-- > 0) {
+		p[len] = (cob_u8_t) ('0' + num % 10);
+		num = num / 10;
+	}
+
+	return;
+}
+
+cob_s64_t
+cob_get_s64_pic9(void *mem, int len)
+{
+	cob_s64_t	val = 0;
+	cob_u8_t	*p = mem;
+	int		sign = 1;
+
+	while (len-- > 1) {
+		if (isdigit(*p)) {
+			val = val * 10 + (*p - '0');
+		} else if (*p == '-') {
+			sign = -1;
+		}
+		p++;
+	}
+	if (isdigit(*p)) {
+		val = val * 10 + (*p - '0');
+	} else if (*p == '-') {
+		sign = -1;
+	} else if (*p == '+') {
+		sign = 1;
+	} else if (COB_MODULE_PTR->ebcdic_sign) {
+		switch(*p) {
+		case '{': val = val * 10 + 0; sign =  1; break;
+		case 'A': val = val * 10 + 1; sign =  1; break;
+		case 'B': val = val * 10 + 2; sign =  1; break;
+		case 'C': val = val * 10 + 3; sign =  1; break;
+		case 'D': val = val * 10 + 4; sign =  1; break;
+		case 'E': val = val * 10 + 5; sign =  1; break;
+		case 'F': val = val * 10 + 6; sign =  1; break;
+		case 'G': val = val * 10 + 7; sign =  1; break;
+		case 'H': val = val * 10 + 8; sign =  1; break;
+		case 'I': val = val * 10 + 9; sign =  1; break;
+		case '}': val = val * 10 + 0; sign = -1; break;
+		case 'J': val = val * 10 + 1; sign = -1; break;
+		case 'K': val = val * 10 + 2; sign = -1; break;
+		case 'L': val = val * 10 + 3; sign = -1; break;
+		case 'M': val = val * 10 + 4; sign = -1; break;
+		case 'N': val = val * 10 + 5; sign = -1; break;
+		case 'O': val = val * 10 + 6; sign = -1; break;
+		case 'P': val = val * 10 + 7; sign = -1; break;
+		case 'Q': val = val * 10 + 8; sign = -1; break;
+		case 'R': val = val * 10 + 9; sign = -1; break;
+		}
+	} else if ( isdigit(*p & 0x3F) ) {
+		val = val * 10 + (*p & 0x0F);
+		if (*p & 0x40)
+			sign = -1;
+	} 
+
+	return val * sign;
+}
+
+void
+cob_put_u64_pic9(cob_u64_t val, void *mem, int len)
+{
+	cob_u64_t	num = val;
+	cob_u8_t	*p = mem;
+
+	memset (mem, '0', len);
+	while (num > 0
+	    && len-- > 0) {
+		p[len] = (cob_u8_t) ('0' + num % 10);
+		num = num / 10;
+	}
+
+	return;
+}
+
+cob_u64_t
+cob_get_u64_pic9(void *mem, int len)
+{
+	cob_u64_t	val = 0;
+	cob_u8_t	*p = mem;
+
+	while (len-- > 0) {
+		if (isdigit(*p)) {
+			val = val * 10 + (*p - '0');
+		}
+		p++;
+	}
+
+	return val;
+}
+
+void
+cob_put_comp1(float val, void *mem)
+{
+	memcpy(mem, &val, sizeof(float));
+}
+void
+cob_put_comp2(double val, void *mem)
+{
+	memcpy(mem, &val, sizeof(double));
+}
+float
+cob_get_comp1(void *mem)
+{
+	float val;
+	memcpy(&val, mem, sizeof(float));
+	return val;
+}
+double
+cob_get_comp2(void *mem)
+{
+	double val;
+	memcpy(&val, mem, sizeof(double));
+	return val;
+}
+
+void
+cob_put_pointer(void *val, void *mem)
+{
+	memcpy(mem, &val, sizeof(void *));
+}
+
+char *
+cob_get_picx( void *cbldata, int len, void *charfld, int charlen)
+{
+	int	i;
+	cob_u8_t	*p = cbldata;
+	for (i = len-1; i >= 0 && (p[i] == ' ' || p[i] == 0x00); i--);
+	i++;
+	if (charfld == NULL) {
+		charfld = calloc(1, i+1);
+		charlen = i + 1;
+	}
+	if (i > charlen-1 )
+		i = charlen - 1;
+	memcpy(charfld, cbldata, i);
+	((char*)charfld)[i] = 0;
+	return (char*)charfld;
+}
+
+void 
+cob_put_picx( void *cbldata, int len, void *string)
+{
+	int	i,j;
+	cob_u8_t	*p = cbldata;
+	j = strlen((char*)string);
+	if (j > len)
+		j = len;
+	memcpy(cbldata, string, j);
+	for (i=j; i < len; i++)
+		p[i] = ' ';
+	return;
 }

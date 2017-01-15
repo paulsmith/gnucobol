@@ -22,6 +22,14 @@
 	  fixed bug #349 (compatibility for C89 / _MSC_VER < 1800) - moved
 	  generation of pointer fields for BY VALUE items before any code
 
+2017-01-10  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c:
+	  For CALL statements parameters passed BY VALUE or CONTENT are copied
+	  to a temporary variable with the attribute of COB_FLAG_CONSTANT.
+	  This is done so that the subroutine will not accidentally try to
+	  overwrite these parameter fields.
+
 2017-01-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_expr_shift): fixed bug #321 - parentheses now terminate
