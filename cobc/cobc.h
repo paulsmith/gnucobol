@@ -493,8 +493,6 @@ extern void		plex_action_directive (const unsigned int,
 					       const unsigned int);
 
 /* parser (in scanner.l, parser.y) */
-extern char		*cobc_glob_line;
-
 #if	!defined (COB_IN_SCANNER ) && !defined (COB_IN_PPLEX) && \
 	!defined (COB_IN_PPPARSE)
 extern FILE		*yyin;

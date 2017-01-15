@@ -1184,7 +1184,6 @@ enum cb_handler_type {
 struct cb_statement {
 	struct cb_tree_common	common;			/* Common values */
 	const char		*name;			/* Statement name */
-	const char		*statement;		/* Statement line */
 	cb_tree			body;			/* Statement body */
 	cb_tree			file;			/* File reference */
 	cb_tree			ex_handler;		/* Exception handler */

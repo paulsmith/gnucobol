@@ -1,4 +1,9 @@
 
+2017-01-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.h, cobc.h, parser.y: removed unused cb_statement->statement and
+	  its assignment from cobc_glob_line which wasn't set at all
+
 2017-01-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (userbp): fixed bug #350 - caused by userbp initialisation not

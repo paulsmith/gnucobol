@@ -126,7 +126,6 @@ struct cb_statement		*current_statement = NULL;
 struct cb_label			*current_section = NULL;
 struct cb_label			*current_paragraph = NULL;
 cb_tree				defined_prog_list = NULL;
-char				*cobc_glob_line = NULL;
 int				cb_exp_line = 0;
 
 cb_tree				cobc_printer_node = NULL;
@@ -249,7 +248,6 @@ begin_statement (const char *name, const unsigned int term)
 	current_statement = cb_build_statement (name);
 	CB_TREE (current_statement)->source_file = cb_source_file;
 	CB_TREE (current_statement)->source_line = cb_source_line;
-	current_statement->statement = cobc_glob_line;
 	current_statement->flag_in_debug = in_debugging;
 	emit_statement (CB_TREE (current_statement));
 	if (term) {
@@ -753,10 +751,6 @@ clear_initial_values (void)
 	current_report = NULL;
 	report_instance = NULL;
 	next_label_list = NULL;
-	if (cobc_glob_line) {
-		cobc_free (cobc_glob_line);
-		cobc_glob_line = NULL;
-	}
 }
 
 /*
