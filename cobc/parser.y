@@ -256,11 +256,17 @@ begin_statement (const char *name, const unsigned int term)
 	main_statement = current_statement;
 }
 
+/* create a new statement with base attributes of current_statement
+   and set this as new current_statement */
 static void
 begin_implicit_statement (void)
 {
-	current_statement = cb_build_statement (NULL);
-	current_statement->flag_in_debug = !!in_debugging;
+	struct cb_statement	*new_statement;
+	new_statement = cb_build_statement (NULL);
+	new_statement->common = current_statement->common;
+	new_statement->name = current_statement->name;
+	new_statement->flag_in_debug = !!in_debugging;
+	current_statement = new_statement;
 	main_statement->body = cb_list_add (main_statement->body,
 					    CB_TREE (current_statement));
 }

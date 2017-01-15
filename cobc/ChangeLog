@@ -3,6 +3,8 @@
 
 	* tree.h, cobc.h, parser.y: removed unused cb_statement->statement and
 	  its assignment from cobc_glob_line which wasn't set at all
+	* parser.y (begin_implicit_statement): copy attributes common and name
+	  from current_statement when creating an implicit new current_statement
 
 2017-01-14  Edward Hart <edward.dan.hart@gmail.com>
 
