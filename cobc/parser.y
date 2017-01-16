@@ -1799,7 +1799,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token EXCEPTION_CONDITION	"EXCEPTION CONDITION"
 %token EXCLUSIVE
 %token EXIT
-%token EXPONENTIATION		"Exponentiation operator"
+%token EXPONENTIATION		"exponentiation operator"
 %token EXTEND
 %token EXTERNAL
 %token F
@@ -1832,7 +1832,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token FULL
 %token FUNCTION
 %token FUNCTION_ID		"FUNCTION-ID"
-%token FUNCTION_NAME		"Intrinsic function name"
+%token FUNCTION_NAME		"intrinsic function name"
 %token GENERATE
 %token GIVING
 %token GLOBAL
@@ -1920,6 +1920,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token NEAREST_EVEN		"NEAREST-EVEN"
 %token NEAREST_TOWARD_ZERO	"NEAREST-TOWARD-ZERO"
 %token NEGATIVE
+%token NESTED
 %token NEXT
 %token NEXT_PAGE		"NEXT PAGE"
 %token NO
@@ -1982,7 +1983,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PROCEED
 %token PROGRAM
 %token PROGRAM_ID		"PROGRAM-ID"
-%token PROGRAM_NAME		"Program name"
+%token PROGRAM_NAME		"program name"
 %token PROGRAM_POINTER		"PROGRAM-POINTER"
 %token PROHIBITED
 %token PROMPT
@@ -2154,7 +2155,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token USE
 %token USER
 %token USER_DEFAULT		"USER-DEFAULT"
-%token USER_FUNCTION_NAME	"User function name"
+%token USER_FUNCTION_NAME	"user function name"
 %token USING
 %token V
 %token VALUE
@@ -7448,7 +7449,7 @@ call_statement:
 ;
 
 call_body:
-  mnemonic_conv id_or_lit_or_func_or_program_name
+  mnemonic_conv program_or_prototype
   {
 	cobc_allow_program_name = 0;
   }
@@ -7515,17 +7516,52 @@ mnemonic_conv:
   }
 ;
 
-id_or_lit_or_func_or_program_name:
+program_or_prototype:
   id_or_lit_or_func
   {
 	if (CB_LITERAL_P ($1)) {
 		cb_trim_program_id ($1);
 	}
   }
-| PROGRAM_NAME
+| _id_or_lit_or_func_as nested_or_prototype
   {
 	cb_verify (cb_program_prototypes, _("CALL/CANCEL with program-prototype-name"));
+	/* hack to push the prototype name */
+	if ($2 && CB_REFERENCE_P ($2)) {
+		if ($1) {
+			cb_warning_x ($1, _("id/literal ignored, using prototype name"));
+		}
+		$$ = $2;
+	} else if ($1 && CB_LITERAL_P ($1)) {
+		$$ = $1;
+	} else {
+		cb_error (_("NESTED phrase is only valid with literal"));
+		$$ = cb_error_node;
+	}
   }
+;
+
+_id_or_lit_or_func_as:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+|
+  id_or_lit_or_func AS
+  {
+	if (CB_LITERAL_P ($1)) {
+		cb_trim_program_id ($1);
+	}
+	$$ = $1;
+  }
+;
+
+nested_or_prototype:
+  NESTED
+  {
+	CB_PENDING ("NESTED phrase for CALL statement");
+  }
+| PROGRAM_NAME
 ;
 
 call_using:

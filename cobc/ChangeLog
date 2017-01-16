@@ -1,4 +1,9 @@
 
+2017-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c: some work on program-prototypes,
+	  added parsing of COBOL 2002 NESTED phrase for CALL
+
 2017-01-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h, cobc.h, parser.y: removed unused cb_statement->statement and

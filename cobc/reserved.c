@@ -1218,7 +1218,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "NEGATIVE",			0, 0, NEGATIVE,			/* 2002 */
 				0, 0
   },
-  { "NESTED",			0, 0, -1,			/* 2002 */
+  { "NESTED",			0, 0, NESTED,			/* 2002 */
 				0, 0
   },
   { "NEXT",			0, 0, NEXT,			/* 2002 */
