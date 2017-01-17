@@ -2125,7 +2125,7 @@ cob_put_s64_pic9(cob_s64_t val, void *mem, int len)
 	cob_s64_t	num;
 	cob_u8_t	*p = mem;
 
-	if (!cobglobptr && COB_MODULE_PTR) {
+	if (!cobglobptr || !COB_MODULE_PTR) {
 		return;
 	}
 
@@ -2277,8 +2277,8 @@ cob_get_picx( void *cbldata, int len, void *charfld, int charlen)
 	for (i = len-1; i >= 0 && (p[i] == ' ' || p[i] == 0x00); i--);
 	i++;
 	if (charfld == NULL) {
-		charfld = calloc(1, i+1);
 		charlen = i + 1;
+		charfld = cob_malloc(charlen);
 	}
 	if (i > charlen-1 )
 		i = charlen - 1;

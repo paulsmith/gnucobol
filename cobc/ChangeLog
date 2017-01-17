@@ -3,6 +3,11 @@
 
 	* parser.y, reserved.c: some work on program-prototypes,
 	  added parsing of COBOL 2002 NESTED phrase for CALL
+	* cobc.c, cobc.h, errror.c: removed error_tail and copy_tail
+	* cobc.c: fixed SIGSEGV in listing on machines where char is signed
+	  and COBOL sources contain characters > 127
+	* cobc.c: fixed SIGSEGV in listing when compiling from multiple sources
+	  which all show errors
 
 2017-01-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -128,13 +128,8 @@ print_error (const char *file, int line, const char *prefix,
 				cfile = cb_current_file;
 			}
 			/* add error to listing entry */
-			if (cfile->err_tail) {
-				cfile->err_tail->next = err;
-			}
-			if (!cfile->err_head) {
-				cfile->err_head = err;
-			}
-			cfile->err_tail = err;
+			err->next = cfile->err_head;
+			cfile->err_head = err;
 
 		/* Otherwise, just write error to the listing file */
 		} else {

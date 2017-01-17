@@ -5622,22 +5622,24 @@ print_info (void)
 #endif
 
 	major = 0, minor = 0, patch = 0;
-	sscanf (gmp_version, "%d.%d.%d", &major, &minor, &patch);
+	(void)sscanf (gmp_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __GNU_MP_VERSION && minor == __GNU_MP_VERSION_MINOR) {
 		snprintf (versbuff, 55, "%s, version %d.%d%d", "GMP", major, minor, patch);
 	} else {
 		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"GMP", major, minor, patch, __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
 	}
+	versbuff[56] = 0;
 #if defined(mpir_version)
 	major = 0, minor = 0, patch = 0;
-	sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
+	(void)sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __MPIR_VERSION && minor == __MPIR_VERSION_MINOR) {
-		snprintf (versbuff2, 52, "%s, version %d.%d%d", "MPIR", major, minor, patch);
+		snprintf (versbuff2, 55, "%s, version %d.%d%d", "MPIR", major, minor, patch);
 	} else {
-		snprintf (versbuff2, 52, "%s, version %d.%d%d (compiled with %d.%d)",
+		snprintf (versbuff2, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
+	versbuff2[56] = 0;
 	strncat (versbuff2, " - ", 3);
 	strncat (versbuff2, versbuff, 55);
 	var_print (_("mathematical library"),		versbuff2, "", 0);

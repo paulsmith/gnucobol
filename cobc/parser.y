@@ -824,7 +824,7 @@ end_scope_of_program_name (struct cb_program *program)
 		} else {
 			prev = l;
 		}
-		if (prev->chain != NULL) {
+		if (prev && prev->chain != NULL) {
 			l = CB_LIST (prev->chain);
 		} else {
 			l = NULL;
