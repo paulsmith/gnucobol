@@ -1,4 +1,9 @@
 
+2017-01-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: fixed output of error messages (result of previous change)
+	  by adding and using (list_error_reverse)
+
 2017-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c: some work on program-prototypes,

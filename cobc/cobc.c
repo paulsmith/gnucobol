@@ -5506,6 +5506,21 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	return pline_cnt;
 }
 
+static struct list_error *
+list_error_reverse (struct list_error *p)
+{
+	struct list_error	*next;
+	struct list_error	*last;
+
+	last = NULL;
+	for (; p; p = next) {
+		next = p->next;
+		p->next = last;
+		last = p;
+	}
+	return last;
+}
+
 /* TODO: Modularise! */
 static void
 print_program_code (struct list_files *cfile, int in_copy)
@@ -5524,6 +5539,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 	char	*pline[CB_READ_AHEAD];
 	int	prec;
 
+	if (cfile->err_head) {
+		cfile->err_head = list_error_reverse (cfile->err_head);
+	}
 	cfile->listing_on = 1;
 	memset (pline, 0, sizeof(pline));
 #ifdef DEBUG_REPLACE
