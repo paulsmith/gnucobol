@@ -454,10 +454,10 @@ cb_name_1 (char *s, cb_tree x)
 	case CB_TAG_INTRINSIC:
 		cbit = CB_INTRINSIC (x);
 		if (!cbit->isuser) {
-			sprintf (s, "FUNCTION '%s'", cbit->intr_tab->name);
+			sprintf (s, "FUNCTION %s", cbit->intr_tab->name);
 		} else if (cbit->name && CB_REFERENCE_P(cbit->name)
 				&& CB_REFERENCE(cbit->name)->word) {
-			sprintf (s, "USER FUNCTION '%s'", CB_REFERENCE(cbit->name)->word->name);
+			sprintf (s, "USER FUNCTION %s", CB_REFERENCE(cbit->name)->word->name);
 		} else {
 			sprintf (s, "USER FUNCTION");
 		}

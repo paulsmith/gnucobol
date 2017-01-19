@@ -7644,56 +7644,56 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	i = 0;
 	if (anyseen) {
 		output_line ("/* Initialize ANY LENGTH parameters */");
-	}
-	for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
-		f = cb_code_field (CB_VALUE (l));
-		if (f->flag_any_length) {
-			/* Force field cache */
-			savetarget = output_target;
-			output_target = NULL;
-			output_param (CB_VALUE (l), i);
-			output_target = savetarget;
+		for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
+			f = cb_code_field (CB_VALUE (l));
+			if (f->flag_any_length) {
+				/* Force field cache */
+				savetarget = output_target;
+				output_target = NULL;
+				output_param (CB_VALUE (l), i);
+				output_target = savetarget;
 
-			output_line ("if (cob_call_params > %d && %s%d%s)",
-				i, "module->next->cob_procedure_params[",
-				i, "]");
-			if (f->flag_any_numeric) {
-				/* Copy complete structure */
-				output_line ("  %s%d = *(%s%d%s);",
-					     CB_PREFIX_FIELD, f->id,
-					     "module->next->cob_procedure_params[",
-					     i, "]");
-			} else {
-				/* Copy size */
-				output_line ("  %s%d.size = %s%d%s;",
-					     CB_PREFIX_FIELD, f->id,
-					     "module->next->cob_procedure_params[",
-					     i, "]->size");
-			}
-			output_prefix ();
-			output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
-			output_data (CB_VALUE (l));
-			output (";\n");
+				output_line ("if (cob_call_params > %d && %s%d%s)",
+					i, "module->next->cob_procedure_params[",
+					i, "]");
+				if (f->flag_any_numeric) {
+					/* Copy complete structure */
+					output_line ("  %s%d = *(%s%d%s);",
+							 CB_PREFIX_FIELD, f->id,
+							 "module->next->cob_procedure_params[",
+							 i, "]");
+				} else {
+					/* Copy size */
+					output_line ("  %s%d.size = %s%d%s;",
+							 CB_PREFIX_FIELD, f->id,
+							 "module->next->cob_procedure_params[",
+							 i, "]->size");
+				}
+				output_prefix ();
+				output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
+				output_data (CB_VALUE (l));
+				output (";\n");
 #if	0	/* RXWRXW - Num check */
-			if (CB_EXCEPTION_ENABLE (COB_EC_DATA_INCOMPATIBLE) &&
-			    f->flag_any_numeric &&
-			    (f->usage == CB_USAGE_DISPLAY ||
-			     f->usage == CB_USAGE_PACKED ||
-			     f->usage == CB_USAGE_COMP_6)) {
-				output_line ("cob_check_numeric (&%s%d, %s%d);",
-					     CB_PREFIX_FIELD
-					     f->id,
-					     CB_PREFIX_STRING,
-					     lookup_string (f->name));
-			}
+				if (CB_EXCEPTION_ENABLE (COB_EC_DATA_INCOMPATIBLE) &&
+					f->flag_any_numeric &&
+					(f->usage == CB_USAGE_DISPLAY ||
+					 f->usage == CB_USAGE_PACKED ||
+					 f->usage == CB_USAGE_COMP_6)) {
+					output_line ("cob_check_numeric (&%s%d, %s%d);",
+							 CB_PREFIX_FIELD
+							 f->id,
+							 CB_PREFIX_STRING,
+							 lookup_string (f->name));
+				}
 #endif
+			}
 		}
-	}
-	if (anyseen) {
 		output_newline ();
 	}
 
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == CB_FUNCTION_TYPE &&
+		CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {
+		output_line ("/* Storage for returning item */");
 		output_prefix ();
 		output_data (prog->returning);
 		output (" = cob_malloc (");

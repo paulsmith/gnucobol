@@ -6521,12 +6521,11 @@ _procedure_returning:
 
 	if (cb_ref ($2) != cb_error_node) {
 		f = CB_FIELD_PTR ($2);
-/* RXWRXW
+		/* standard rule: returning item is allocated in the
+		   activating runtime element */
 		if (f->storage != CB_STORAGE_LINKAGE) {
 			cb_error (_("RETURNING item is not defined in LINKAGE SECTION"));
 		} else if (f->level != 1 && f->level != 77) {
-*/
-		if (f->level != 1 && f->level != 77) {
 			cb_error (_("RETURNING item must have level 01"));
 		} else if (f->flag_occurs) {
 			cb_error (_("RETURNING item should not have OCCURS"));
