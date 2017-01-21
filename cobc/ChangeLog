@@ -1,4 +1,12 @@
 
+2017-01-20  Brian Tiffin <btiffin@gnu.org>
+
+	* tree.h: add PROCEDURE DIVISION entry convention types
+	* cobc.h: add CB_CS_PROCEDURE context test value
+	* parser.y: PROCEDURE DIVISION EXTERN support
+	* reserved.c: EXTERN, COBOL, WINAPI context sensitive words
+	* codegen.c: EXTERN program entry
+
 2017-01-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: fixed output of error messages (result of previous change)

@@ -2674,6 +2674,68 @@ AT_CHECK([./caller], [0], [OK], [])
 AT_CLEANUP
 
 
+AT_SETUP([CALL C with callback, PROCEDURE DIVISION EXTERN])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 CB            USAGE PROGRAM-POINTER.
+       PROCEDURE        DIVISION COBOL.
+           SET CB TO ENTRY "callback"
+           CALL STATIC "cprog" USING BY VALUE CB
+           END-CALL
+           EXIT PROGRAM.
+       END PROGRAM prog.
+
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      callback.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 P1            USAGE POINTER.
+       01 P2            USAGE BINARY-LONG.
+       01 P3            PIC X(8).
+       PROCEDURE        DIVISION EXTERN USING 
+                        BY VALUE P1 P2 BY REFERENCE P3.
+           IF P1 NOT EQUAL ADDRESS OF P3
+              DISPLAY P1
+              END-DISPLAY
+           END-IF
+           IF P2 NOT EQUAL 42
+              DISPLAY P2
+              END-DISPLAY
+           END-IF
+           IF P3 NOT EQUAL "CALLBACK"
+              DISPLAY P3
+              END-DISPLAY
+           END-IF
+           EXIT PROGRAM. 
+])
+
+AT_DATA([cprog.c], [[
+#include <libcob.h>
+
+int
+cprog(void *cb)
+{
+    char *p1;
+    int p2 = 42;
+    char *p3 = "CALLBACK";
+
+    p1 = p3;
+    ((int (*)(char *, int, char *))cb)(p1, p2, p3);
+	return 0;
+}
+]])
+
+AT_CHECK([$COMPILE -Wno-unfinished -o prog prog.cob cprog.c], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([CALL in from C with init missing / implicit])
 AT_KEYWORDS([runmisc implicit-init])
 

@@ -136,6 +136,11 @@ enum cb_tag {
 #define CB_CONV_THUNK_16	(1 << 5)
 #define CB_CONV_STDCALL		(1 << 6)
 
+/* Entry convention types */
+#define CB_ENTRY_COBOL		0
+#define CB_ENTRY_EXTERN		1
+#define CB_ENTRY_WINAPI		2
+
 /* System category */
 enum cb_system_name_category {
 	CB_DEVICE_NAME = 0,
@@ -1350,6 +1355,7 @@ struct cb_program {
 	unsigned char	currency_symbol;		/* '$' or user-specified */
 	unsigned char	numeric_separator;		/* ',' or '.' */
 	unsigned char	prog_type;			/* Program type */
+	unsigned char	entry_convention;		/* PROCEDURE convention */
 
 	unsigned int	flag_main		: 1;	/* Gen main function */
 	unsigned int	flag_common		: 1;	/* COMMON PROGRAM */

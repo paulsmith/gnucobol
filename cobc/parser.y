@@ -1681,6 +1681,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token CLASSIFICATION
 %token CLASS_NAME		"class-name"
 %token CLOSE
+%token COBOL
 %token CODE
 %token CODE_SET			"CODE-SET"
 %token COLLATING
@@ -2111,6 +2112,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TOK_DIV			"/"
 %token TOK_DOT			"."
 %token TOK_EQUAL		"="
+%token TOK_EXTERN		"EXTERN"
 %token TOK_FALSE		"FALSE"
 %token TOK_FILE			"FILE"
 %token TOK_GREATER		">"
@@ -2164,6 +2166,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token WAIT
 %token WHEN
 %token WHEN_COMPILED_FUNC	"FUNCTION WHEN-COMPILED"
+%token WINAPI
 %token WITH
 %token WORD			"Identifier"
 %token WORDS
@@ -6242,7 +6245,7 @@ global_screen_opt:
 /* PROCEDURE DIVISION */
 
 _procedure_division:
-| PROCEDURE DIVISION _procedure_using_chaining _procedure_returning TOK_DOT
+| PROCEDURE DIVISION _entry_convention _procedure_using_chaining _procedure_returning TOK_DOT
   {
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -6254,14 +6257,14 @@ _procedure_division:
   }
   _procedure_declaratives
   {
-	if (current_program->flag_main && !current_program->flag_chained && $3) {
+	if (current_program->flag_main && !current_program->flag_chained && $4) {
 		cb_error (_("executable program requested but PROCEDURE/ENTRY has USING clause"));
 	}
 	/* Main entry point */
-	emit_entry (current_program->program_id, 0, $3);
-	current_program->num_proc_params = cb_list_length ($3);
+	emit_entry (current_program->program_id, 0, $4);
+	current_program->num_proc_params = cb_list_length ($4);
 	if (current_program->source_name) {
-		emit_entry (current_program->source_name, 1, $3);
+		emit_entry (current_program->source_name, 1, $4);
 	}
   }
   _procedure_list
@@ -6311,6 +6314,35 @@ _procedure_division:
 	cb_set_system_names ();
   }
   statements TOK_DOT _procedure_list
+;
+
+_entry_convention:
+  /* empty */
+  {
+	current_program->entry_convention = CB_ENTRY_COBOL;
+	cobc_cs_check = 0;
+  }
+| convention_type
+;
+
+convention_type:
+  COBOL
+  {
+	current_program->entry_convention = CB_ENTRY_COBOL;
+	cobc_cs_check = 0;
+  }
+
+| TOK_EXTERN
+  {
+	current_program->entry_convention = CB_ENTRY_EXTERN;
+	cobc_cs_check = 0;
+  }
+| WINAPI
+  {
+	CB_PENDING("WINAPI entry convention");
+	current_program->entry_convention = CB_ENTRY_WINAPI;
+	cobc_cs_check = 0;
+  }
 ;
 
 _procedure_using_chaining:
@@ -10126,6 +10158,7 @@ sort_input:
 			cb_emit_sort_input ($4);
 		}
 	}
+	cobc_cs_check = 0;
   }
 ;
 
@@ -10155,6 +10188,7 @@ sort_output:
 			cb_emit_sort_output ($4);
 		}
 	}
+	cobc_cs_check = 0;
   }
 ;
 

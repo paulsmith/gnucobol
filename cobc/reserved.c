@@ -426,6 +426,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CLOSE",			0, 0, CLOSE,			/* 2002 */
 				0, 0
   },
+  { "COBOL",			0, 1, COBOL,			/* Extension */
+        			0, CB_CS_PROCEDURE
+  },
   { "CODE",			0, 0, CODE,			/* 2002 */
 				0, 0
   },
@@ -821,6 +824,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "EXTEND",			0, 0, EXTEND,			/* 2002 */
 				0, 0
+  },
+  { "EXTERN",			0, 1, TOK_EXTERN,		/* Extension */
+        			0, CB_CS_PROCEDURE
   },
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
 				0, 0
@@ -1385,7 +1391,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "PROCEDURE",		0, 0, PROCEDURE,		/* 2002 */
-				0, 0
+				CB_CS_PROCEDURE, 0
   },
   { "PROCEDURE-POINTER",	0, 0, PROGRAM_POINTER,		/* Extension */
 				0, 0
@@ -1959,6 +1965,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WHEN",			0, 0, WHEN,			/* 2002 */
 				0, 0
+  },
+  { "WINAPI",			0, 1, WINAPI,			/* Extension */
+        			0, CB_CS_PROCEDURE
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
 				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY

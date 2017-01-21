@@ -8490,15 +8490,19 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 		output("  /* Get current number of call parameters,\n");
 		output("     if the parameter count is unknown, set it to all */\n");
-		if (cb_flag_implicit_init) {
-			output("  if (cob_is_initialized () && cob_get_global_ptr ()->cob_current_module) {\n");
+		if (prog->entry_convention == CB_ENTRY_EXTERN) {
+			output("  cob_call_params = %d;\n", parmnum);
 		} else {
-			output("  if (cob_get_global_ptr ()->cob_current_module) {\n");
+			if (cb_flag_implicit_init) {
+				output("  if (cob_is_initialized () && cob_get_global_ptr ()->cob_current_module) {\n");
+			} else {
+				output("  if (cob_get_global_ptr ()->cob_current_module) {\n");
+			}
+			output ("\tcob_call_params = cob_get_global_ptr ()->cob_call_params;\n");
+			output("  } else {\n");
+			output ("\tcob_call_params = %d;\n", parmnum);
+			output("  };\n");
 		}
-		output ("\tcob_call_params = cob_get_global_ptr ()->cob_call_params;\n");
-		output("  } else {\n");
-		output ("\tcob_call_params = %d;\n", parmnum);
-		output("  };\n");
 		output_newline();
 	}
 
