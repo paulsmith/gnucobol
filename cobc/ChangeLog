@@ -1,4 +1,14 @@
 
+2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	FR #194: generate a WinMain() function instead of main
+	* flag.def: new cb_flag_winmain / -fwinmain for generating a WinMain()
+	  function instead of main when compiling as executable
+	* codegen.c (output_standard_includes): generate additional include
+	  "windows.h" if cb_flag_winmain is active
+	* codegen.c (output_main_function): generate WinMain instead of main
+	  if cb_flag_winmain is active
+
 2017-01-20  Brian Tiffin <btiffin@gnu.org>
 
 	* tree.h: add PROCEDURE DIVISION entry convention types

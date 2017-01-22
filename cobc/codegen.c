@@ -1176,23 +1176,26 @@ static void
 output_standard_includes (void)
 {
 #if !defined (_GNU_SOURCE) && defined (_XOPEN_SOURCE_EXTENDED)
-		output ("#ifndef\t_XOPEN_SOURCE_EXTENDED\n");
-		output ("#define\t_XOPEN_SOURCE_EXTENDED 1\n");
-		output ("#endif\n");
+	output ("#ifndef\t_XOPEN_SOURCE_EXTENDED\n");
+	output ("#define\t_XOPEN_SOURCE_EXTENDED 1\n");
+	output ("#endif\n");
 #endif		
-		output ("#include <stdio.h>\n");
-		output ("#include <stdlib.h>\n");
-		output ("#include <stddef.h>\n");
-		output ("#include <string.h>\n");
-		output ("#include <math.h>\n");		
+	output ("#include <stdio.h>\n");
+	output ("#include <stdlib.h>\n");
+	output ("#include <stddef.h>\n");
+	output ("#include <string.h>\n");
+	output ("#include <math.h>\n");		
 #ifdef	WORDS_BIGENDIAN
-		output ("#define  WORDS_BIGENDIAN 1\n");
+	output ("#define  WORDS_BIGENDIAN 1\n");
 #endif
 #ifdef	COB_KEYWORD_INLINE
-		output ("#define  COB_KEYWORD_INLINE %s\n",
-			CB_XSTRINGIFY(COB_KEYWORD_INLINE));
+	output ("#define  COB_KEYWORD_INLINE %s\n",
+		CB_XSTRINGIFY(COB_KEYWORD_INLINE));
 #endif
-		output ("#include <libcob.h>\n\n");
+	if (cb_flag_winmain) {
+		output ("#include <windows.h>\n");
+	}
+	output ("#include <libcob.h>\n\n");
 }
 
 /* GnuCOBOL defines */
@@ -8734,10 +8737,17 @@ static void
 output_main_function (struct cb_program *prog)
 {
 	output_line ("/* Main function */");
-	output_line ("int");
-	output_line ("main (int argc, char **argv)");
-	output_indent ("{");
-	output_line ("cob_init (argc, argv);");
+	if (!cb_flag_winmain) {
+		output_line ("int");
+		output_line ("main (int argc, char **argv)");
+		output_indent ("{");
+		output_line ("cob_init (argc, argv);");
+	} else {
+		output_line ("int WINAPI");
+		output_line ("WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow)");
+		output_indent ("{");
+		output_line ("cob_init (__argc, __argv);");
+	}
 	output_line ("cob_stop_run (%s ());", prog->program_id);
 	output_indent ("}\n");
 }
