@@ -1,4 +1,8 @@
 
+2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: work on SIZE IS for items passed BY VALUE
+
 2017-01-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.h: added CB_CS_OPTIONS.

@@ -6535,38 +6535,20 @@ _size_optional:
 		size_mode = CB_SIZE_AUTO | CB_SIZE_UNSIGNED;
 	}
   }
-| UNSIGNED SIZE _is integer
+| UNSIGNED size_is_integer
   {
-	unsigned char *s = CB_LITERAL ($4)->data;
-
-	if (call_mode != CB_CALL_BY_VALUE) {
-		cb_error (_("SIZE only allowed for BY VALUE items"));
-	} else if (CB_LITERAL ($4)->size != 1) {
-		cb_error_x ($4, _("invalid value for SIZE"));
-	} else {
-		size_mode = CB_SIZE_UNSIGNED;
-		switch (*s) {
-		case '1':
-			size_mode |= CB_SIZE_1;
-			break;
-		case '2':
-			size_mode |= CB_SIZE_2;
-			break;
-		case '4':
-			size_mode |= CB_SIZE_4;
-			break;
-		case '8':
-			size_mode |= CB_SIZE_8;
-			break;
-		default:
-			cb_error_x ($4, _("invalid value for SIZE"));
-			break;
-		}
+	if (size_mode) {
+		size_mode |= CB_SIZE_UNSIGNED;
 	}
   }
-| SIZE _is integer
+| size_is_integer
+;
+
+size_is_integer:
+  SIZE _is integer
   {
 	unsigned char *s = CB_LITERAL ($3)->data;
+	size_mode = 0;
 
 	if (call_mode != CB_CALL_BY_VALUE) {
 		cb_error (_("SIZE only allowed for BY VALUE items"));

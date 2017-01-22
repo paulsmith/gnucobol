@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -1042,8 +1042,6 @@ AT_CLEANUP
 AT_SETUP([CALL BY VALUE alphanumeric item])
 AT_KEYWORDS([extensions])
 
-AT_XFAIL_IF(true)
-
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -1071,10 +1069,115 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob: 8: warning: BY CONTENT assumed for alphanumeric item
+prog.cob: 19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
-AT_CHECK([./prog], [0], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([CALL BY VALUE numeric literal WITH SIZE])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           *> Test of auto size, identical to SIZE AUTO
+           CALL "prog2" USING BY VALUE 4 0 0 1 0
+           END-CALL
+           
+           *> Test of explicit SIZE syntax
+           CALL "prog2" USING BY VALUE 1 SIZE 1 2 0 0 0
+           END-CALL                   
+           CALL "prog2" USING BY VALUE 2 0 SIZE 2 3 0 0
+           END-CALL                   
+           CALL "prog2" USING BY VALUE 4 0 0 SIZE 4 4 0
+           END-CALL                   
+           CALL "prog2" USING BY VALUE 8 0 0 0 SIZE 8 5
+           END-CALL
+           CALL "prog2" USING BY VALUE 4 0 0 SIZE DEFAULT 6 0
+           END-CALL          
+           CALL "prog2" USING BY VALUE 4 0 0 SIZE AUTO    7 0
+           END-CALL
+           *> test for SIZE AUTO with VALUE > INT_MAX is non-portable
+           
+           *> Test of explicit UNSIGNED SIZE syntax
+           CALL "prog2" USING BY VALUE 1 UNSIGNED SIZE 1 2 0 0 0
+           END-CALL          
+           CALL "prog2" USING BY VALUE 2 0 UNSIGNED SIZE 2 3 0 0
+           END-CALL          
+           CALL "prog2" USING BY VALUE 4 0 0 UNSIGNED SIZE 4 4 0
+           END-CALL          
+           CALL "prog2" USING BY VALUE 8 0 0 0 UNSIGNED SIZE 8 5 0
+           END-CALL
+           CALL "prog2" USING BY VALUE 4 0 0 UNSIGNED SIZE AUTO 6 0
+           END-CALL
+           *> test for SIZE AUTO with VALUE > INT_MAX is non-portable
+           
+           *> Test of MF size syntax
+           *>CALL "prog2" USING BY VALUE 2 SIZE 1
+           *>END-CALL                    
+           *>CALL "prog2" USING BY VALUE 3 SIZE 2
+           *>END-CALL                    
+           *>CALL "prog2" USING BY VALUE 4 SIZE 4
+           *>END-CALL                    
+           *>CALL "prog2" USING BY VALUE 5 SIZE 8
+           *>END-CALL
+           
+           STOP RUN.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01  LEN          USAGE BINARY-LONG.
+       01  VAR-1        USAGE BINARY-CHAR.
+       01  VAR-2        USAGE BINARY-SHORT.
+       01  VAR-4        USAGE BINARY-LONG.
+       01  VAR-8        USAGE BINARY-DOUBLE.
+       PROCEDURE        DIVISION USING BY VALUE LEN
+                                                SIZE 1 VAR-1
+                                                SIZE 2 VAR-2
+                                                SIZE 4 VAR-4
+                                                SIZE 8 VAR-8.
+           EVALUATE len
+              WHEN 1
+                 DISPLAY '1: ' VAR-1 END-DISPLAY
+              WHEN 2
+                 DISPLAY '2: ' VAR-2 END-DISPLAY
+              WHEN 4
+                 DISPLAY '4: ' VAR-4 END-DISPLAY
+              WHEN 8
+                 DISPLAY '8: ' VAR-8 END-DISPLAY
+           END-EVALUATE
+           EXIT PROGRAM.
+       END PROGRAM prog2.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], ignore)
+#AT_CHECK([$COMPILE prog.cob], [0], [], 
+# hack for now: ignore
+#[prog.cob: 58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+#])
+AT_CHECK([./prog], [0],
+[4: +0000000001
+1: +002
+2: +00003
+4: +0000000004
+8: +00000000000000000005
+4: +0000000006
+4: +0000000007
+1: +002
+2: +00003
+4: +0000000004
+8: +00000000000000000005
+4: +0000000006
+], [])
+
+AT_CLEANUP
+
 
 AT_SETUP([Case-sensitive PROGRAM-ID])
 AT_KEYWORDS([extensions])
@@ -1396,8 +1499,6 @@ AT_CLEANUP
 AT_SETUP([PROCEDURE DIVISION USING BY ...])
 AT_KEYWORDS([extensions])
 
-AT_XFAIL_IF(true)
-
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      callee.
@@ -1440,7 +1541,9 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [],
+[callee.cob: 10: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+])
 AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
