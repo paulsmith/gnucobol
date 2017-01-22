@@ -5527,11 +5527,11 @@ void
 print_info (void)
 {
 	char	buff[16];
-	char	versbuff[56];
+	char	versbuff[56] = { '\0' };
 	char	*s;
 	int major, minor, patch;
 #if defined(mpir_version)
-	char	versbuff2[111];
+	char	versbuff2[111] = { '\0' };
 #endif
 
 	print_version ();
@@ -5629,7 +5629,6 @@ print_info (void)
 		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"GMP", major, minor, patch, __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
 	}
-	versbuff[56] = 0;
 #if defined(mpir_version)
 	major = 0, minor = 0, patch = 0;
 	(void)sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
@@ -5639,7 +5638,6 @@ print_info (void)
 		snprintf (versbuff2, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
-	versbuff2[56] = 0;
 	strncat (versbuff2, " - ", 3);
 	strncat (versbuff2, versbuff, 55);
 	var_print (_("mathematical library"),		versbuff2, "", 0);
