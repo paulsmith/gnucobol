@@ -128,6 +128,7 @@ enum cb_format {
 #define	CB_CS_OCCURS			(1U << 20)
 #define CB_CS_ALLOCATE			(1U << 21)
 #define CB_CS_PROCEDURE			(1U << 22)
+#define CB_CS_OPTIONS			(1U << 23)
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

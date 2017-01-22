@@ -2896,3 +2896,22 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob: 13: error: elementary items with SIGN clause must be USAGE DISPLAY or NATIONAL
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Conflicting entry conventions])
+AT_KEYWORDS([misc ENTRY-CONVENTION])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       OPTIONS.
+           ENTRY-CONVENTION COBOL.
+
+       PROCEDURE       DIVISION EXTERN.
+           CONTINUE
+           .
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 7: warning: overriding convention specified in ENTRY-CONVENTION
+])
+AT_CLEANUP

@@ -207,6 +207,7 @@ static unsigned int		env_div_seen;
 static cob_flags_t		header_check;
 static unsigned int		call_nothing;
 static enum tallying_phrase	previous_tallying_phrase;
+static cb_tree			default_rounded_mode;
 
 static enum cb_display_type	display_type;
 static int			is_first_display_item;
@@ -757,6 +758,7 @@ clear_initial_values (void)
 	current_report = NULL;
 	report_instance = NULL;
 	next_label_list = NULL;
+	default_rounded_mode = cb_int (COB_STORE_ROUND);
 }
 
 /*
@@ -1612,6 +1614,15 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 	}
 }
 
+static void
+override_entry_convention (const enum cb_entry_convention convention)
+{
+	if (current_program->entry_convention != CB_ENTRY_UNSET) {
+		cb_warning (_("overriding convention specified in ENTRY-CONVENTION"));
+	}
+	current_program->entry_convention = convention;
+}
+ 
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -1783,6 +1794,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token END_UNSTRING		"END-UNSTRING"
 %token END_WRITE		"END-WRITE"
 %token ENTRY
+%token ENTRY_CONVENTION		"ENTRY-CONVENTION"
 %token ENVIRONMENT
 %token ENVIRONMENT_NAME		"ENVIRONMENT-NAME"
 %token ENVIRONMENT_VALUE	"ENVIRONMENT-VALUE"
@@ -1861,6 +1873,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token INPUT
 %token INPUT_OUTPUT		"INPUT-OUTPUT"
 %token INSPECT
+%token INTERMEDIATE
 %token INTO
 %token INTRINSIC
 %token INVALID
@@ -1953,6 +1966,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token ONLY
 %token OPEN
 %token OPTIONAL
+%token OPTIONS
 %token OR
 %token ORDER
 %token ORGANIZATION
@@ -2033,6 +2047,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token RIGHT
 %token ROLLBACK
 %token ROUNDED
+%token ROUNDING
 %token RUN
 %token S
 %token SAME
@@ -2362,6 +2377,7 @@ simple_prog:
 program_definition:
   _identification_header
   program_id_paragraph
+  _options_paragraph
   _program_body
   /*
     The list is so a program which contains a nested program can have an end
@@ -2373,6 +2389,7 @@ program_definition:
 function_definition:
   _identification_header
   function_id_paragraph
+  _options_paragraph
   _program_body
   end_function
 ;
@@ -2530,6 +2547,68 @@ init_or_recurse:
   }
 ;
 
+_options_paragraph:
+  /* empty */
+| OPTIONS TOK_DOT
+  _options_clauses
+  {
+	cobc_cs_check = 0;
+  }
+;
+
+_options_clauses:
+  _default_rounded_clause
+  _entry_convention_clause
+  _intermediate_rounding_clause
+  TOK_DOT
+;
+
+_default_rounded_clause:
+  /* empty */
+  {
+	default_rounded_mode = cb_int (COB_STORE_ROUND);
+  }
+| DEFAULT ROUNDED _mode _is round_choice
+  {
+	if ($5) {
+		default_rounded_mode = $5;
+	} else {
+		default_rounded_mode = cb_int (COB_STORE_ROUND);
+	}
+  }
+;
+
+_entry_convention_clause:
+  /* empty */
+| ENTRY_CONVENTION _is convention_type
+;
+
+_intermediate_rounding_clause:
+  /* empty */
+| INTERMEDIATE ROUNDING _is intermediate_rounding_choice
+  {
+	CB_PENDING ("INTERMEDIATE ROUNDING");
+  }
+;
+
+intermediate_rounding_choice:
+  NEAREST_AWAY_FROM_ZERO
+  {
+	$$ = cb_int (COB_STORE_ROUND | COB_STORE_NEAR_AWAY_FROM_ZERO);
+  }
+| NEAREST_EVEN
+  {
+	$$ = cb_int (COB_STORE_ROUND | COB_STORE_NEAR_EVEN);
+  }
+| PROHIBITED
+  {
+	$$ = cb_int (COB_STORE_ROUND | COB_STORE_PROHIBITED);
+  }
+| TRUNCATION
+  {
+	$$ = cb_int (COB_STORE_ROUND | COB_STORE_TRUNCATION);
+  }
+;
 
 /* ENVIRONMENT DIVISION */
 
@@ -6319,29 +6398,31 @@ _procedure_division:
 _entry_convention:
   /* empty */
   {
-	current_program->entry_convention = CB_ENTRY_COBOL;
+	if (current_program->entry_convention == CB_ENTRY_UNSET) {
+		current_program->entry_convention = CB_ENTRY_COBOL;
+	}
 	cobc_cs_check = 0;
   }
 | convention_type
+  {
+	cobc_cs_check = 0;
+  }
 ;
 
 convention_type:
   COBOL
   {
-	current_program->entry_convention = CB_ENTRY_COBOL;
-	cobc_cs_check = 0;
+	override_entry_convention (CB_ENTRY_COBOL);
   }
 
 | TOK_EXTERN
   {
-	current_program->entry_convention = CB_ENTRY_EXTERN;
-	cobc_cs_check = 0;
+	override_entry_convention (CB_ENTRY_EXTERN);
   }
 | WINAPI
   {
 	CB_PENDING("WINAPI entry convention");
-	current_program->entry_convention = CB_ENTRY_WINAPI;
-	cobc_cs_check = 0;
+	override_entry_convention (CB_ENTRY_WINAPI);
   }
 ;
 
@@ -12668,7 +12749,7 @@ flag_rounded:
 	if ($2) {
 		$$ = $2;
 	} else {
-		$$ = cb_int (COB_STORE_ROUND);
+		$$ = default_rounded_mode;
 	}
 	cobc_cs_check = 0;
   }

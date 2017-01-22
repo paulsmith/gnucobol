@@ -427,7 +427,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "COBOL",			0, 1, COBOL,			/* Extension */
-        			0, CB_CS_PROCEDURE
+        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
   },
   { "CODE",			0, 0, CODE,			/* 2002 */
 				0, 0
@@ -765,8 +765,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ENTRY",			0, 0, ENTRY,			/* Extension */
 				0, 0
   },
-  { "ENTRY-CONVENTION",		0, 1, -1,			/* 2002 (C/S) */
-				0, 0
+  { "ENTRY-CONVENTION",		0, 1, ENTRY_CONVENTION,		/* 2002 (C/S) */
+				0, CB_CS_OPTIONS
   },
   { "ENVIRONMENT",		0, 0, ENVIRONMENT,		/* 2002 */
 				0, 0
@@ -826,7 +826,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "EXTERN",			0, 1, TOK_EXTERN,		/* Extension */
-        			0, CB_CS_PROCEDURE
+        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
   },
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
 				0, 0
@@ -1040,9 +1040,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "INTERFACE-ID",		0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "INTERMEDIATE",		0, 1, -1,			/* 2014 (C/S) */
-				0, 0
-	/* FIXME: 2014 Context-sensitive to OPTIONS paragraph */
+  { "INTERMEDIATE",		0, 1, INTERMEDIATE,		/* 2014 (C/S) */
+				0, CB_CS_OPTIONS
   },
   { "INTO",			0, 0, INTO,			/* 2002 */
 				0, 0
@@ -1299,8 +1298,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "OPTIONAL",			0, 0, OPTIONAL,			/* 2002 */
 				0, 0
   },
-  { "OPTIONS",			0, 0, -1,			/* 2002 */
-				0, 0
+  { "OPTIONS",			0, 0, OPTIONS,			/* 2002 */
+				CB_CS_OPTIONS, 0
   },
   { "OR",			0, 0, OR,			/* 2002 */
 				0, 0
@@ -1570,9 +1569,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ROUNDED",			0, 0, ROUNDED,			/* 2002 */
 				CB_CS_ROUNDED, 0
   },
-  { "ROUNDING",			0, 1, -1,			/* 2002 (C/S) */
-				0, 0
-	/* FIXME: 2014 Context-sensitive to OPTIONS paragraph */
+  { "ROUNDING",			0, 1, ROUNDING,			/* 2002 (C/S) */
+				0, CB_CS_OPTIONS
   },
   { "RUN",			0, 0, RUN,			/* 2002 */
 				0, 0
@@ -1967,7 +1965,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "WINAPI",			0, 1, WINAPI,			/* Extension */
-        			0, CB_CS_PROCEDURE
+        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
 				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY
@@ -3113,7 +3111,15 @@ lookup_reserved_word (const char *name)
 		if (!(cobc_cs_check & p->context_test)) {
 			return NULL;
 		}
-		if (!cobc_in_procedure) {
+		/*
+		  The only context-sensitive phrase outside the procedure
+		  division we expect to reset cobc_cs_check is OPTIONS.
+
+		  TO-DO: Change !cobc_in_procedure to cobc_in_data. (Everything
+		  in the environment and identification division can (and does)
+		  reset cobc-cs_check.)
+		*/
+		if (!cobc_in_procedure && !(cobc_cs_check & CB_CS_OPTIONS)) {
 			cobc_cs_check = 0;
 		}
 		return p;
