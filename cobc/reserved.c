@@ -426,8 +426,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CLOSE",			0, 0, CLOSE,			/* 2002 */
 				0, 0
   },
-  { "COBOL",			0, 1, COBOL,			/* Extension */
-        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
+  { "COBOL",			0, 1, COBOL,			/* 2002,
+												Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "CODE",			0, 0, CODE,			/* 2002 */
 				0, 0
@@ -825,8 +826,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXTEND",			0, 0, EXTEND,			/* 2002 */
 				0, 0
   },
-  { "EXTERN",			0, 1, TOK_EXTERN,		/* Extension */
-        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
+  { "EXTERN",			0, 1, TOK_EXTERN,			/* 2002 Implementor specific ENTRY-CONVENTION,
+											Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
 				0, 0
@@ -1390,7 +1392,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "PROCEDURE",		0, 0, PROCEDURE,		/* 2002 */
-				CB_CS_PROCEDURE, 0
+				0, 0
   },
   { "PROCEDURE-POINTER",	0, 0, PROGRAM_POINTER,		/* Extension */
 				0, 0
@@ -1721,14 +1723,14 @@ static struct cobc_reserved default_reserved_words[] = {
   { "STATEMENT",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
   },
-  { "STATIC",			0, 1, STATIC,			/* Extension */
+  { "STATIC",			0, 1, STATIC,			/* Extension: implicit defined CALL-CONVENTION */
 				0, CB_CS_CALL
   },
   { "STATUS",			0, 0, STATUS,			/* 2002 */
 				0, 0
   },
-  { "STDCALL",			0, 1, STDCALL,			/* Extension */
-				0, CB_CS_CALL
+  { "STDCALL",			0, 1, STDCALL,			/* Extension: implicit defined CALL-CONVENTION */
+				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "STEP",			0, 0, STEP,			/* 2002 (C/S) */
 				0, 0
@@ -1963,9 +1965,6 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WHEN",			0, 0, WHEN,			/* 2002 */
 				0, 0
-  },
-  { "WINAPI",			0, 1, WINAPI,			/* Extension */
-        			0, CB_CS_OPTIONS | CB_CS_PROCEDURE
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
 				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY

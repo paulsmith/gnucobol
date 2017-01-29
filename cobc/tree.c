@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -1519,6 +1519,7 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 		p->decimal_point = last_program->decimal_point;
 		p->numeric_separator = last_program->numeric_separator;
 		p->currency_symbol = last_program->currency_symbol;
+		p->entry_convention = last_program->entry_convention;
 		p->flag_trailing_separate = last_program->flag_trailing_separate;
 		p->flag_console_is_crt = last_program->flag_console_is_crt;
 		/* RETURN-CODE is global for contained programs */

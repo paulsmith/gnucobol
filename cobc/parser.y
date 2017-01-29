@@ -290,11 +290,12 @@ void print_bits (cob_flags_t num)
 #endif
 
 static void
-emit_entry (const char *name, const int encode, cb_tree using_list)
+emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree convention)
 {
 	cb_tree		l;
 	cb_tree		label;
 	cb_tree		x;
+	cb_tree		entry_conv;
 	struct cb_field	*f;
 	int		parmnum;
 	char		buff[COB_MINI_BUFF];
@@ -392,9 +393,15 @@ emit_entry (const char *name, const int encode, cb_tree using_list)
 		}
 	}
 
+	if (convention) {
+		entry_conv = convention;
+	} else {
+		entry_conv = current_program->entry_convention;
+	}
+
 	current_program->entry_list =
 		cb_list_append (current_program->entry_list,
-				CB_BUILD_PAIR (label, using_list));
+				CB_BUILD_PAIR (label, CB_BUILD_PAIR(entry_conv, using_list)));
 }
 
 static size_t
@@ -1613,15 +1620,6 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 		cb_error_x (x, _("'%s' is not USAGE DISPLAY"), cb_name (x));
 	}
 }
-
-static void
-override_entry_convention (const enum cb_entry_convention convention)
-{
-	if (current_program->entry_convention != CB_ENTRY_UNSET) {
-		cb_warning (_("overriding convention specified in ENTRY-CONVENTION"));
-	}
-	current_program->entry_convention = convention;
-}
  
 %}
 
@@ -2181,7 +2179,6 @@ override_entry_convention (const enum cb_entry_convention convention)
 %token WAIT
 %token WHEN
 %token WHEN_COMPILED_FUNC	"FUNCTION WHEN-COMPILED"
-%token WINAPI
 %token WITH
 %token WORD			"Identifier"
 %token WORDS
@@ -2331,7 +2328,7 @@ start:
 		YYABORT;
 	}
 	if (!current_program->entry_list) {
-		emit_entry (current_program->program_id, 0, NULL);
+		emit_entry (current_program->program_id, 0, NULL, NULL);
 	}
   }
 ;
@@ -2581,6 +2578,26 @@ _default_rounded_clause:
 _entry_convention_clause:
   /* empty */
 | ENTRY_CONVENTION _is convention_type
+  {
+	current_program->entry_convention = $3;
+	current_program->entry_convention->source_file = cb_source_file;
+	current_program->entry_convention->source_line = cb_source_line;
+  }
+;
+
+convention_type:
+  COBOL
+  {
+	$$ = cb_int (CB_CONV_COBOL);
+  }
+| TOK_EXTERN
+  {
+	$$ = cb_int (0);
+  }
+| STDCALL
+  {
+	$$ = cb_int (CB_CONV_STDCALL);
+  }
 ;
 
 _intermediate_rounding_clause:
@@ -2935,6 +2952,14 @@ mnemonic_choices:
 			cb_define ($3, save_tree);
 			CB_CHAIN_PAIR (current_program->mnemonic_spec_list,
 					$3, save_tree);
+#if 0 /* FIXME */
+			/* remove non-standard context-sensitive words when identical to mnemonic */
+			if (strcasemp (CB_NAME($3), "EXTERN") == 0 ||
+			    strcasemp (CB_NAME($3), "STDCALL") == 0 ||
+			    strcasemp (CB_NAME($3), "STATIC") == 0) {
+				remove_context_from_reserved_word(CB_NAME($3), CB_CS_CALL);
+			}
+#endif
 		}
 	}
   }
@@ -6324,7 +6349,7 @@ global_screen_opt:
 /* PROCEDURE DIVISION */
 
 _procedure_division:
-| PROCEDURE DIVISION _entry_convention _procedure_using_chaining _procedure_returning TOK_DOT
+| PROCEDURE DIVISION _mnemonic_conv _procedure_using_chaining _procedure_returning TOK_DOT
   {
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -6332,6 +6357,14 @@ _procedure_division:
 	check_duplicate = 0;
 	cobc_in_procedure = 1U;
 	cb_set_system_names ();
+	if ($3) {
+		if (current_program->entry_convention) {
+			cb_warning (_("overriding convention specified in ENTRY-CONVENTION"));
+		}
+		current_program->entry_convention = $3;
+	} else if (!current_program->entry_convention) {
+		current_program->entry_convention = cb_int (CB_CONV_COBOL);
+	}
 	header_check |= COBC_HD_PROCEDURE_DIVISION;
   }
   _procedure_declaratives
@@ -6340,10 +6373,10 @@ _procedure_division:
 		cb_error (_("executable program requested but PROCEDURE/ENTRY has USING clause"));
 	}
 	/* Main entry point */
-	emit_entry (current_program->program_id, 0, $4);
+	emit_entry (current_program->program_id, 0, $4, NULL);
 	current_program->num_proc_params = cb_list_length ($4);
 	if (current_program->source_name) {
-		emit_entry (current_program->source_name, 1, $4);
+		emit_entry (current_program->source_name, 1, $4, NULL);
 	}
   }
   _procedure_list
@@ -6393,37 +6426,6 @@ _procedure_division:
 	cb_set_system_names ();
   }
   statements TOK_DOT _procedure_list
-;
-
-_entry_convention:
-  /* empty */
-  {
-	if (current_program->entry_convention == CB_ENTRY_UNSET) {
-		current_program->entry_convention = CB_ENTRY_COBOL;
-	}
-	cobc_cs_check = 0;
-  }
-| convention_type
-  {
-	cobc_cs_check = 0;
-  }
-;
-
-convention_type:
-  COBOL
-  {
-	override_entry_convention (CB_ENTRY_COBOL);
-  }
-
-| TOK_EXTERN
-  {
-	override_entry_convention (CB_ENTRY_EXTERN);
-  }
-| WINAPI
-  {
-	CB_PENDING("WINAPI entry convention");
-	override_entry_convention (CB_ENTRY_WINAPI);
-  }
 ;
 
 _procedure_using_chaining:
@@ -7543,7 +7545,7 @@ call_statement:
 ;
 
 call_body:
-  mnemonic_conv program_or_prototype
+  _mnemonic_conv program_or_prototype
   {
 	cobc_allow_program_name = 0;
   }
@@ -7551,7 +7553,7 @@ call_body:
   call_returning
   call_exception_phrases
   {
-	cb_tree	call_conv_bit;
+	int call_conv = 0;
 
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
@@ -7559,36 +7561,47 @@ call_body:
 		cb_warning_x ($2, _("recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
 	}
+	call_conv = current_call_convention;
+	if ($1 && CB_INTEGER_P ($1)) {
+		call_conv |= CB_INTEGER ($1)->val;
+		if (CB_INTEGER ($1)->val & CB_CONV_COBOL) {
+			call_conv &= ~CB_CONV_STDCALL;
+		} else {
+			call_conv &= ~CB_CONV_COBOL;
+		}
+	}
 	/* For CALL ... RETURNING NOTHING, set the call convention bit */
 	if (call_nothing) {
-		if ($1 && CB_INTEGER_P ($1)) {
-			call_conv_bit = cb_int ((CB_INTEGER ($1)->val)
-						| CB_CONV_NO_RET_UPD);
-		} else {
-			call_conv_bit = cb_int (CB_CONV_NO_RET_UPD);
-		}
-	} else {
-		call_conv_bit = $1;
+		call_conv |= CB_CONV_NO_RET_UPD;
 	}
 	cb_emit_call ($2, $4, $5, CB_PAIR_X ($6), CB_PAIR_Y ($6),
-		      call_conv_bit);
+		      cb_int (call_conv));
   }
 ;
 
-mnemonic_conv:
+_mnemonic_conv:
   /* empty */
   {
 	$$ = NULL;
 	cobc_cs_check = 0;
   }
-| STATIC
+| STATIC	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
-	$$ = cb_int (CB_CONV_STATIC_LINK);
+	if (current_call_convention & CB_CONV_COBOL) {
+		$$ = cb_int (CB_CONV_STATIC_LINK | CB_CONV_COBOL);
+	} else {
+		$$ = cb_int (CB_CONV_STATIC_LINK);
+	}
 	cobc_cs_check = 0;
   }
-| STDCALL
+| STDCALL	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
 	$$ = cb_int (CB_CONV_STDCALL);
+	cobc_cs_check = 0;
+  }
+| TOK_EXTERN	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
+  {
+	$$ = cb_int (0);
 	cobc_cs_check = 0;
   }
 | MNEMONIC_NAME
@@ -8404,15 +8417,15 @@ entry_statement:
 ;
 
 entry_body:
-  LITERAL call_using
+  _mnemonic_conv LITERAL call_using
   {
 	if (current_program->nested_level) {
 		cb_error (_("%s is invalid in nested program"), "ENTRY");
 	} else if (current_program->prog_type == CB_FUNCTION_TYPE) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "ENTRY");
 	} else if (cb_verify (cb_entry_statement, "ENTRY")) {
-		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($1)->data), ENTRY_NAME)) {
-			emit_entry ((char *)(CB_LITERAL ($1)->data), 1, $2);
+		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($2)->data), ENTRY_NAME)) {
+			emit_entry ((char *)(CB_LITERAL ($2)->data), 1, $3, $1);
 		}
 	}
   }
@@ -10927,13 +10940,13 @@ program_start_end:
   START
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM START"));
-	/* emit_entry ("_START", 0, NULL); */
+	/* emit_entry ("_START", 0, NULL, NULL); */
 	CB_PENDING ("USE AT PROGRAM START");
   }
 | END
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM END"));
-	/* emit_entry ("_END", 0, NULL); */
+	/* emit_entry ("_END", 0, NULL, NULL); */
 	CB_PENDING ("USE AT PROGRAM END");
   }
 ;

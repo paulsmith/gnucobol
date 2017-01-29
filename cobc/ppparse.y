@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2012, 2015 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While
+   Copyright (C) 2001-2012, 2015-2017 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
 
@@ -37,6 +37,7 @@
 
 #define	COB_IN_PPPARSE	1
 #include "cobc.h"
+#include "tree.h"
 
 #ifndef	_STDLIB_H
 #define	_STDLIB_H 1
@@ -50,6 +51,10 @@
 #define COND_LE		3U
 #define COND_GE		4U
 #define COND_NE		5U
+
+/* Global variables */
+
+int				current_call_convention;
 
 /* Local variables */
 
@@ -495,6 +500,8 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 						  q->name,
 						  q->value, 0);
 	}
+	/* reset CALL CONVENTION */
+	current_call_convention = CB_CONV_COBOL;
 }
 
 %}
@@ -537,6 +544,12 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token FIXED
 %token FREE
 %token VARIABLE
+
+%token CALL_DIRECTIVE
+%token COBOL
+%token TOK_EXTERN		"EXTERN"
+%token STDCALL
+%token STATIC
 
 %token DEFINE_DIRECTIVE
 %token AS
@@ -641,6 +654,17 @@ directive:
   {
 	plex_action_directive (PLEX_ACT_END, 0);
   }
+| CALL_DIRECTIVE
+  {
+	current_call_convention = 0;
+  }
+  call_directive
+  {
+	if (current_call_convention == CB_CONV_STATIC_LINK) {
+		current_call_convention |= CB_CONV_COBOL;
+	};
+  }
+  
 ;
 
 set_directive:
@@ -862,6 +886,33 @@ on_or_off:
 with_loc:
   WITH LOCATION
 | LOCATION
+;
+
+call_directive:
+  call_choice
+| call_directive call_choice
+;
+
+call_choice:
+  COBOL
+  {
+	current_call_convention |= CB_CONV_COBOL;
+	current_call_convention &= ~CB_CONV_STDCALL;
+  }
+| TOK_EXTERN
+  {
+	current_call_convention &= ~CB_CONV_STDCALL;
+	current_call_convention &= ~CB_CONV_COBOL;
+  }
+| STDCALL
+  {
+	current_call_convention |= CB_CONV_STDCALL;
+	current_call_convention &= ~CB_CONV_COBOL;
+  }
+| STATIC
+  {
+	current_call_convention |= CB_CONV_STATIC_LINK;
+  }
 ;
 
 if_directive:

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Dave Pitts
 
    This file is part of GnuCOBOL.
@@ -167,6 +167,7 @@ ALNUM_LITERAL	\"[^\"\n]*\"|\'[^\'\n]*\'
 SET_PAREN_LIT	\([^()\n]*\)
 DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
+%x CALL_DIRECTIVE_STATE
 %x COPY_STATE
 %x PSEUDO_STATE
 %x SOURCE_DIRECTIVE_STATE
@@ -266,6 +267,11 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 		cb_plex_warning (newline_count, _("ignoring LEAP-SECOND directive"));
 	}
 	skip_to_eol ();
+}
+
+^[ ]*">>"[ ]?"CALL-CONVENTION"	{
+	BEGIN CALL_DIRECTIVE_STATE;
+	return CALL_DIRECTIVE;
 }
 
 ^[ ]*">>"[ ]*\n		{
@@ -469,6 +475,19 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
   "VARIABLE"		{ return VARIABLE; }
   [ ,;]+		{ /* ignore */ }
   .			{ }
+}
+
+<CALL_DIRECTIVE_STATE>{
+  \n			{
+	BEGIN INITIAL;
+	unput ('\n');
+	return TERMINATOR;
+  }
+  "COBOL"		{ return COBOL; }
+  "EXTERN"		{ return TOK_EXTERN; }
+  "STDCALL"		{ return STDCALL; }
+  "STATIC"		{ return STATIC; }
+  [ ,;]+		{ /* ignore */ }
 }
 
 <DEFINE_DIRECTIVE_STATE>{

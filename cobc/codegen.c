@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -8407,9 +8407,10 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	cob_u32_t		n;
 	int			sticky_ids[MAX_CALL_FIELD_PARAMS] = { 0 };
 	int			sticky_nonp[MAX_CALL_FIELD_PARAMS] = { 0 };
+	int			entry_convention = 0;
 
 	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
-	using_list = CB_VALUE (entry);
+	using_list = CB_VALUE (CB_VALUE (entry));
 
 	if (gencode) {
 		output ("/* ENTRY '%s' */\n\n", entry_name);
@@ -8427,17 +8428,33 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		return;
 	}
 
+	/* entry convention */
+	l = CB_PURPOSE (CB_VALUE (entry));
+	if (!l || !(CB_INTEGER (l) || CB_NUMERIC_LITERAL_P (l))) {
+		/* not translated as it is a fatal abort, remove the check later */
+		cobc_err_msg ("Missing /wrong internal entry convention!");
+		cobc_err_msg (_("Please report this!"));
+		COBC_ABORT ();
+	} else if (CB_INTEGER_P (l)) {
+		entry_convention = CB_INTEGER (l)->val;
+	} else if (CB_NUMERIC_LITERAL_P (l)) {
+		entry_convention = cb_get_int (l);
+	}
+
 	/* Output return type. */
 	if ((prog->nested_level && !prog->flag_void)
 	    || (prog->flag_main && !prog->flag_recursive
 		&& !strcmp(prog->program_id, entry_name))) {
 		output ("static ");
-	}	
+	}
 	if (prog->flag_void) {
 		output ("void");
 	} else {
 		output ("int");
-	}		
+	}
+	if (entry_convention & CB_CONV_STDCALL) {
+		output (" __stdcall");
+	}
 	if (gencode) {
 		output ("\n");
 	} else {
@@ -8491,11 +8508,9 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			parmnum++;
 		}
-		output("  /* Get current number of call parameters,\n");
-		output("     if the parameter count is unknown, set it to all */\n");
-		if (prog->entry_convention == CB_ENTRY_EXTERN) {
-			output("  cob_call_params = %d;\n", parmnum);
-		} else {
+		if (entry_convention & CB_CONV_COBOL) {
+			output("  /* Get current number of call parameters,\n");
+			output("     if the parameter count is unknown, set it to all */\n");
 			if (cb_flag_implicit_init) {
 				output("  if (cob_is_initialized () && cob_get_global_ptr ()->cob_current_module) {\n");
 			} else {
@@ -8505,6 +8520,9 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 			output("  } else {\n");
 			output ("\tcob_call_params = %d;\n", parmnum);
 			output("  };\n");
+		} else {
+			output("  /* Set current number of call parameters to max */\n");
+			output("  cob_call_params = %d;\n", parmnum);
 		}
 		output_newline();
 	}
@@ -8671,7 +8689,7 @@ output_function_prototypes (struct cb_program *prog)
 		  header and ENTRY statements in the parameter list.
 		*/
 		for (entry = cp->entry_list; entry; entry = CB_CHAIN (entry)) {
-			for (entry_param = CB_VALUE (entry); entry_param;
+			for (entry_param = CB_VALUE (CB_VALUE (entry)); entry_param;
 			     entry_param = CB_CHAIN (entry_param)) {
 				for (prog_param = cp->parameter_list; prog_param;
 				     prog_param = CB_CHAIN (prog_param)) {

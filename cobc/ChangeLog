@@ -1,4 +1,15 @@
 
+2017-01-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.h: removed CB_CS_PROCEDURE, alphabetical order for CB_CS_...
+	* pplex.l, ppparse.y, cobc.h, parser.y, tree.c:
+	  implemented CALL-CONVENTION directive
+	* parser.y, tree.h: removed cb_entry_convention - stored as
+	  call-convention now
+	* parser.y, codegen.c: implemented entry-convention for entry points
+	  including stdcall generation
+	* reserved.c, parser.y: removed WINAPI
+
 2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: work on SIZE IS for items passed BY VALUE

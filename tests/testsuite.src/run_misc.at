@@ -2675,7 +2675,7 @@ AT_CLEANUP
 
 
 AT_SETUP([CALL C with callback, PROCEDURE DIVISION EXTERN])
-AT_KEYWORDS([runmisc extensions])
+AT_KEYWORDS([runmisc extensions call-convention])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -2683,7 +2683,7 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01 CB            USAGE PROGRAM-POINTER.
-       PROCEDURE        DIVISION COBOL.
+       PROCEDURE        DIVISION.
            SET CB TO ENTRY "callback"
            CALL STATIC "cprog" USING BY VALUE CB
            END-CALL
@@ -2692,6 +2692,10 @@ AT_DATA([prog.cob], [
 
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      callback.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CALL-CONVENTION 0 IS EXTERN.
        DATA             DIVISION.
        LINKAGE          SECTION.
        01 P1            USAGE POINTER.
