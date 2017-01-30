@@ -1471,7 +1471,7 @@ static cob_field *
 cob_get_param_field (int n, const char *caller_name)
 {
 	if (cobglobptr == NULL
-	 || Cob_MODULE_PTR == NULL) {
+	 || COB_MODULE_PTR == NULL) {
 		cob_runtime_warning (_("%s: COBOL runtime is not initialized"), caller_name);
 		return NULL;
 	}
@@ -1591,15 +1591,13 @@ cob_get_s64_param (int n)
 {
 	void		*cbl_data;
 	int		size;
-	cob_s64_t	val;
-	double		dbl;
 	cob_field	*f = cob_get_param_field (n, "cob_get_s64_param");
 
 	if (f == NULL) {
 		return -1;
 	}
 	cbl_data = f->data;
-	size    = f->size;
+	size = f->size;
 
 	switch (f->attr->type) {
 	case COB_TYPE_NUMERIC_DISPLAY:
@@ -1630,8 +1628,6 @@ cob_get_u64_param (int n)
 {
 	void		*cbl_data;
 	int		size;
-	cob_u64_t	val;
-	double		dbl;
 	cob_field	*f = cob_get_param_field (n, "cob_get_u64_param");
 
 	if (f == NULL) {
@@ -1697,7 +1693,7 @@ cob_put_s64_param (int n, cob_s64_t val)
 	}
 
 	cbl_data = f->data;
-	size    = f->size;
+	size = f->size;
 	if (COB_FIELD_CONSTANT (f)) {
 		cob_runtime_warning (_("%s: attempt to over-write constant param %d with %lld"),
 						"cob_put_s64_param", n, val);
@@ -1713,8 +1709,9 @@ cob_put_s64_param (int n, cob_s64_t val)
 #ifndef WORDS_BIGENDIAN
 		if (COB_FIELD_BINARY_SWAP (f)) {
 			cob_put_u64_compx (val, cbl_data, size);
+		} else {
+			cob_put_s64_comp5 (val, cbl_data, size);
 		}
-		cob_put_s64_comp5 (val, cbl_data, size);
 #else
 		cob_put_s64_compx (val, cbl_data, size);
 #endif
