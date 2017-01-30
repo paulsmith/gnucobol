@@ -2952,14 +2952,12 @@ mnemonic_choices:
 			cb_define ($3, save_tree);
 			CB_CHAIN_PAIR (current_program->mnemonic_spec_list,
 					$3, save_tree);
-#if 0 /* FIXME */
 			/* remove non-standard context-sensitive words when identical to mnemonic */
-			if (strcasemp (CB_NAME($3), "EXTERN") == 0 ||
-			    strcasemp (CB_NAME($3), "STDCALL") == 0 ||
-			    strcasemp (CB_NAME($3), "STATIC") == 0) {
-				remove_context_from_reserved_word(CB_NAME($3), CB_CS_CALL);
+			if (strcasecmp (CB_NAME($3), "EXTERN") == 0 ||
+			    strcasecmp (CB_NAME($3), "STDCALL") == 0 ||
+			    strcasecmp (CB_NAME($3), "STATIC") == 0) {
+				remove_context_sensitivity (CB_NAME($3), CB_CS_CALL);
 			}
-#endif
 		}
 	}
   }

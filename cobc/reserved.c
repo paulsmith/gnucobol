@@ -2979,6 +2979,17 @@ is_default_reserved_word (const char *word)
 	return !!find_default_reserved_word (create_dummy_reserved (word));
 }
 
+void
+remove_context_sensitivity (const char *word, const int context)
+{
+	struct cobc_reserved *reserved =
+		find_default_reserved_word (create_dummy_reserved (word));
+
+	if (reserved) {
+		reserved->context_test ^= context;
+	}
+}
+
 cb_tree
 lookup_system_name (const char *name)
 {

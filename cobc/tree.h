@@ -1652,6 +1652,8 @@ extern unsigned int	cobc_allow_program_name;
 /* reserved.c */
 extern int			is_reserved_word (const char *);
 extern int			is_default_reserved_word (const char *);
+extern void			remove_context_sensitivity (const char *,
+							    const int);
 extern struct cobc_reserved	*lookup_reserved_word (const char *);
 extern cb_tree			lookup_system_name (const char *);
 extern void			cb_list_reserved (void);
