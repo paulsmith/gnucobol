@@ -55,10 +55,8 @@
 	  position, (cob_get_char) / cobgetch to get a single character or
 	  function key, (cob_get_text) to get a text input and function keys with
 	  a given size from current cursor position
-	* screenio.c, common.h, system.def: renamed cob_sys_get_csr_pos /
-	  CBL_GET_CSR_POS to cob_sys_get_scr_pos / CBL_GET_SCR_POS
 	* screenio.c, common.h, system.def: added system routine
-	  CBL_PUT_SCR_POS / cob_sys_put_scr_pos to set the cursor position
+	  CBL_PUT_CSR_POS / cob_sys_put_csr_pos to set the cursor position
 	  and for compatibility: CBL_READ_KBD_CHAR / cob_sys_get_char to get
 	  a single character (better use ACCEPT one-byte-var)
 	* common.c, common.h, coblocal.h, screenio.c: FR #191 added runtime

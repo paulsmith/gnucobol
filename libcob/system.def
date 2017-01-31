@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2006-2012, 2014, 2016 Free Software Foundation, Inc.
+   Copyright (C) 2006-2012, 2014, 2016-2017 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -37,8 +37,8 @@ COB_SYSTEM_GEN ("CBL_EQ",		3, cob_sys_eq)
 COB_SYSTEM_GEN ("CBL_ERROR_PROC",	2, cob_sys_error_proc)
 COB_SYSTEM_GEN ("CBL_EXIT_PROC",	2, cob_sys_exit_proc)
 COB_SYSTEM_GEN ("CBL_FLUSH_FILE",	1, cob_sys_flush_file)
+COB_SYSTEM_GEN ("CBL_GET_CSR_POS",	1, cob_sys_get_csr_pos)
 COB_SYSTEM_GEN ("CBL_GET_CURRENT_DIR",	3, cob_sys_get_current_dir)
-COB_SYSTEM_GEN ("CBL_GET_SCR_POS",	1, cob_sys_get_scr_pos)
 COB_SYSTEM_GEN ("CBL_GET_SCR_SIZE",	2, cob_sys_get_scr_size)
 COB_SYSTEM_GEN ("CBL_IMP",		3, cob_sys_imp)
 COB_SYSTEM_GEN ("CBL_NIMP",		3, cob_sys_nimp)
@@ -46,7 +46,7 @@ COB_SYSTEM_GEN ("CBL_NOR",		3, cob_sys_nor)
 COB_SYSTEM_GEN ("CBL_NOT",		2, cob_sys_not)
 COB_SYSTEM_GEN ("CBL_OPEN_FILE",	5, cob_sys_open_file)
 COB_SYSTEM_GEN ("CBL_OR",		3, cob_sys_or)
-COB_SYSTEM_GEN ("CBL_PUT_SCR_POS",	1, cob_sys_put_scr_pos)
+COB_SYSTEM_GEN ("CBL_PUT_CSR_POS",	1, cob_sys_put_csr_pos)
 COB_SYSTEM_GEN ("CBL_READ_FILE",	5, cob_sys_read_file)
 COB_SYSTEM_GEN ("CBL_READ_KBD_CHAR",	1, cob_sys_get_char)
 COB_SYSTEM_GEN ("CBL_RENAME_FILE",	2, cob_sys_rename_file)
