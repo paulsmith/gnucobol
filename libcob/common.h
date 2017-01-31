@@ -1671,7 +1671,7 @@ COB_EXPIMP int		cob_get_text 		(char *, int);
 COB_EXPIMP int		cob_get_scr_cols	(void);
 COB_EXPIMP int		cob_get_scr_lines	(void);
 COB_EXPIMP int		cob_sys_get_csr_pos	(unsigned char *);
-COB_EXPIMP int		cob_sys_put_csr_pos	(unsigned char *);
+COB_EXPIMP int		cob_sys_put_scr_pos	(unsigned char *);
 
 /*******************************/
 /* Functions in termio.c */

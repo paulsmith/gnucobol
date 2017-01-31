@@ -2826,6 +2826,7 @@ cob_accept_escape_key (cob_field *f)
 }
 
 /* get cursor position */
+/* "CSR" is the correct abbreviation */
 int
 cob_sys_get_csr_pos (unsigned char *fld)
 {
@@ -2848,16 +2849,17 @@ cob_sys_get_csr_pos (unsigned char *fld)
 	return 0;
 }
 
-/* set cursor position */
+/* set position of cursor on screen */
+/* "SCR" is the correct abbreviation */
 int
-cob_sys_put_csr_pos (unsigned char *fld)
+cob_sys_put_scr_pos (unsigned char *fld)
 {
 #ifdef	COB_GEN_SCREENIO
 	int	cline;
 	int	ccol;
 #endif
 
-	COB_CHK_PARMS (CBL_PUT_CSR_POS, 1);
+	COB_CHK_PARMS (CBL_PUT_SCR_POS, 1);
 
 #ifdef	COB_GEN_SCREENIO
 	init_cob_screen_if_needed ();
