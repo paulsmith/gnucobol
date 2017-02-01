@@ -1738,6 +1738,9 @@ extern cb_tree		cb_build_sub (cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_corresponding (
 				cb_tree (*) (cb_tree, cb_tree, cb_tree),
 				cb_tree, cb_tree, cb_tree);
+extern void		cb_emit_tab_arithmetic (
+	cb_tree (*) (cb_tree, cb_tree, cb_tree),
+	cb_tree, cb_tree, cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_move_corresponding (cb_tree, cb_tree);
 
 extern void		cb_emit_accept (cb_tree, cb_tree,

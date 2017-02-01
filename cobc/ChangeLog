@@ -232,6 +232,10 @@
 	* parser.y, reserved.c: added ACUCOBOL line sequential
 	  device names for ASSIGN
 
+2016-12-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck.c, tree.h: FR#182 added ADD|SUBTRACT TABLE as pending
+
 2016-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_info): output exact C compiler which was used

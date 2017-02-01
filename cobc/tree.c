@@ -383,7 +383,7 @@ cb_name_1 (char *s, cb_tree x)
 		} else {
 			s += sprintf (s, "%s", p->word->name);
 		}
-		if (p->subs) {
+		if (p->subs && CB_VALUE(p->subs) != cb_int1) {
 			s += sprintf (s, " (");
 			p->subs = cb_list_reverse (p->subs);
 			for (l = p->subs; l; l = CB_CHAIN (l)) {
@@ -800,9 +800,8 @@ cb_name (cb_tree x)
 	char	tmp[COB_NORMAL_BUFF] = { 0 };
 	int		tlen;
 
-	(void)cb_name_1 (tmp, x);
+	tlen = cb_name_1 (tmp, x);
 
-	tlen = strlen (tmp);
 	s = cobc_parse_malloc (tlen + 1);
 	strncpy (s, tmp, tlen);
 

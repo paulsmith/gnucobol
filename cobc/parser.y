@@ -7448,6 +7448,11 @@ add_body:
   {
 	cb_emit_corresponding (cb_build_add, $4, $2, $5);
   }
+| TABLE table_identifier TO table_identifier flag_rounded _from_idx_to_idx _dest_index on_size_error_phrases
+  {
+	CB_PENDING ("ADD TABLE");
+	cb_emit_tab_arithmetic (cb_build_add, $4, $2, $5, $6, $7);
+  }
 ;
 
 _add_to:
@@ -10132,7 +10137,7 @@ sort_statement:
 ;
 
 sort_body:
-  sort_identifier sort_key_list _sort_duplicates sort_collating
+  table_identifier sort_key_list _sort_duplicates sort_collating
   {
 	cb_tree		x;
 
@@ -10521,6 +10526,11 @@ subtract_body:
 | CORRESPONDING identifier FROM identifier flag_rounded on_size_error_phrases
   {
 	cb_emit_corresponding (cb_build_sub, $4, $2, $5);
+  }
+| TABLE table_identifier FROM table_identifier flag_rounded _from_idx_to_idx _dest_index on_size_error_phrases
+  {
+	CB_PENDING ("SUBTRACT TABLE");
+	cb_emit_tab_arithmetic (cb_build_sub, $4, $2, $5, $6, $7);
   }
 ;
 
@@ -12155,7 +12165,7 @@ sub_identifier:
   sub_identifier_1		{ $$ = cb_build_identifier ($1, 0); }
 ;
 
-sort_identifier:
+table_identifier:
   sub_identifier_1		{ $$ = cb_build_identifier ($1, 1); }
 ;
 
@@ -12801,6 +12811,25 @@ flag_separate:
 | SEPARATE _character		{ $$ = cb_int1; }
 ;
 
+_from_idx_to_idx:
+/* empty */			{ $$ = NULL; }
+| FROM _index pos_num_id_or_lit TO pos_num_id_or_lit
+  {
+	cb_tree	x;
+
+	x = CB_LIST_INIT ($2);
+	$$ = cb_list_add (x, $4);
+  }
+;
+
+_dest_index:
+/* empty */			{ $$ = NULL; }
+| DESTINATION _index pos_num_id_or_lit
+  {
+	$$ = $3;
+  }
+;
+
 /* Error recovery */
 
 error_stmt_recover:
@@ -12919,6 +12948,7 @@ _for:		| FOR ;
 _from:		| FROM ;
 _in:		| IN ;
 _in_order:	| ORDER | IN ORDER ;
+_index:		| INDEX ;
 _indicate:	| INDICATE ;
 _initial:	| TOK_INITIAL ;
 _into:		| INTO ;

@@ -1521,7 +1521,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	} else {
 		numsubs = f->indexes;
 	}
-	if (unlikely(!r->flag_all)) {
+	if (likely(!r->flag_all)) {
 		if (refsubs != numsubs) {
 			if (refsubs > numsubs) {
 				goto refsubserr;
@@ -4229,6 +4229,27 @@ cb_emit_corresponding (cb_tree (*func) (cb_tree f1, cb_tree f2, cb_tree f3),
 			cb_warning_x (x2, _("no CORRESPONDING items found"));
 		}
 	}
+}
+
+void
+cb_emit_tab_arithmetic (cb_tree (*func) (cb_tree f1, cb_tree f2, cb_tree f3),
+	cb_tree x1, cb_tree x2, cb_tree opt, cb_tree from_to_idx, cb_tree dest_idx)
+{
+	if (cb_validate_one (x1)) {
+		return;
+	}
+	if (cb_tree_category (x1) != CB_CATEGORY_NUMERIC) {
+		cb_error_x (x1, _("'%s' is not numeric"), cb_name (x1));
+	}
+
+	if (cb_validate_one (x2)) {
+		return;
+	}
+	if (cb_tree_category (x2) != CB_CATEGORY_NUMERIC) {
+		cb_error_x (x2, _("'%s' is not numeric"), cb_name (x2));
+	}
+
+	/* TODO pending, no actual code generation */
 }
 
 static unsigned int
