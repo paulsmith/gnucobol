@@ -1,6 +1,10 @@
 
 2017-02-02 Brian Tiffin <btiffin@gnu.org>
 
+	* cobc.h: Updated CB_PENDING CB_UNIFINISHED macros with quieter ONCE_COB
+
+2017-02-02 Brian Tiffin <btiffin@gnu.org>
+
 	* cobc.h, warning.def: test cb_warn_pending in CB_PENDING message macro.
 
 2017-01-30  Edward Hart <edward.dan.hart@gmail.com>

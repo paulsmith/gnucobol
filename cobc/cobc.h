@@ -515,22 +515,22 @@ extern void		cob_gen_optim (const enum cb_optim);
 #define CB_MSG_STYLE_GCC	0
 #define CB_MSG_STYLE_MSC	1U
 
-#define CB_PENDING(x)\
-	do {if (cb_warn_pending) {\
-		cb_warning (_("%s is not implemented"), x);\
-	}} while (0)
-#define CB_PENDING_X(x,y)\
-	do {if (cb_warn_pending) {\
-		cb_warning_x (x, _("%s is not implemented"), y);\
-	}} while (0)
-#define CB_UNFINISHED(x)		\
-	do {if (cb_warn_unfinished) {\
-		cb_warning (_("handling of %s is unfinished; implementation is likely to be changed"), x);\
-	}} while (0)
-#define CB_UNFINISHED_X(x,y)		\
-	do {if (cb_warn_unfinished) {\
-		cb_warning_x (x, _("handling of %s is unfinished; implementation is likely to be changed"), y);\
-	}} while (0)
+#define CB_PENDING(x) \
+	do {if (cb_warn_pending) { \
+		cb_warning (_("%s is not implemented"), x); \
+	}} ONCE_COB
+#define CB_PENDING_X(x,y) \
+	do {if (cb_warn_pending) { \
+		cb_warning_x (x, _("%s is not implemented"), y); \
+	}} ONCE_COB
+#define CB_UNFINISHED(x) \
+	do {if (cb_warn_unfinished) { \
+		cb_warning (_("handling of %s is unfinished; implementation is likely to be changed"), x); \
+	}} ONCE_COB
+#define CB_UNFINISHED_X(x,y) \
+	do {if (cb_warn_unfinished) { \
+		cb_warning_x (x, _("handling of %s is unfinished; implementation is likely to be changed"), y); \
+	}} ONCE_COB
 
 extern size_t		cb_msg_style;
 
