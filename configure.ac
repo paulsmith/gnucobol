@@ -1000,7 +1000,7 @@ fi
 unset enable_cflags_setting
 
 if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g//' -e 's/-g3//' -e 's/^ //' -e 's/ $//'`
+	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g3//' -e 's/-g//' -e 's/^ //' -e 's/ $//'`
 fi
 
 if test "$COB_USES_GCC" = "yes"; then
@@ -1088,7 +1088,7 @@ if test "x$CPPFLAGS" != "x"; then
 	fi
 fi
 if test "x$cob_temp_flags" != "x"; then
-	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-g//' -e 's/-g3//' -e 's/ $//' -e 's/^ //'`
+	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-g3//' -e 's/-g//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/@<:@+-@:>@O@<:@0-9s@:>@//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fmessage-length=0//'`
