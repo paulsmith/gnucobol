@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1671,7 +1671,7 @@ COB_EXPIMP int		cob_get_text 		(char *, int);
 COB_EXPIMP int		cob_get_scr_cols	(void);
 COB_EXPIMP int		cob_get_scr_lines	(void);
 COB_EXPIMP int		cob_sys_get_csr_pos	(unsigned char *);
-COB_EXPIMP int		cob_sys_put_scr_pos	(unsigned char *);
+COB_EXPIMP int		cob_sys_set_csr_pos	(unsigned char *);
 
 /*******************************/
 /* Functions in termio.c */
