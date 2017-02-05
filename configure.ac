@@ -242,11 +242,17 @@ AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	readlink getexecname canonicalize_file_name realpath \
 	strcoll strxfrm setenv raise])
 
+# Checks for UTC offset (init)
+# FIXME: set to yes if C compiler defines _BSD_SOURCE
+COB_HAS_UTC_OFFSET="no"
+
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
 	[[timezone = 3600;]])],
-	[AC_DEFINE([HAVE_TIMEZONE], [1]) AC_MSG_RESULT([yes])],
+	[AC_DEFINE([HAVE_TIMEZONE], [1])
+		COB_HAS_UTC_OFFSET="yes"
+		AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
 
 # Check for designated initializers
@@ -891,7 +897,9 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 		return 1;
 	}
 	return 0;]])],
-	[AC_DEFINE([COB_STRFTIME], [1]) AC_MSG_RESULT([yes])],
+	[AC_DEFINE([COB_STRFTIME], [1])
+		COB_HAS_UTC_OFFSET="yes"
+		AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
 	[])
 
@@ -1271,11 +1279,6 @@ AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
 AC_SUBST([COB_HAS_CURSES])
-if test "$COB_STRFTIME" = "no" -a "$COB_TIMEZONE" = "no"; then
-	COB_HAS_UTC_OFFSET="no"
-else
-	COB_HAS_UTC_OFFSET="yes"
-fi
 AC_SUBST([COB_HAS_UTC_OFFSET])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
 

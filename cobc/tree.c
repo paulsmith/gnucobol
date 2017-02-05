@@ -659,7 +659,7 @@ get_last_elt (cb_tree l)
 	return l;
 }
 
-#if !defined (COB_STRFTIME) && !defined (COB_TIMEZONE)
+#if !defined(_BSD_SOURCE) && !defined (COB_STRFTIME) && !defined (HAVE_TIMEZONE)
 static void
 warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
 		     cb_tree args)
@@ -4093,7 +4093,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		if (!valid_const_date_time_args (name, cbp, args)) {
 			return cb_error_node;
 		}
-#if !defined (COB_STRFTIME) && !defined (COB_TIMEZONE)
+#if !defined(_BSD_SOURCE) && !defined (COB_STRFTIME) && !defined (HAVE_TIMEZONE)
 		warn_cannot_get_utc (name, cbp->intr_enum, args);
 #endif
 	}

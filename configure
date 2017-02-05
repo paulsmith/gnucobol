@@ -13564,6 +13564,10 @@ fi
 done
 
 
+# Checks for UTC offset (init)
+# FIXME: set to yes if C compiler defines _BSD_SOURCE
+COB_HAS_UTC_OFFSET="no"
+
 # Check for timezone
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for timezone variable access" >&5
 $as_echo_n "checking for timezone variable access... " >&6; }
@@ -13580,7 +13584,9 @@ timezone = 3600;
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   $as_echo "#define HAVE_TIMEZONE 1" >>confdefs.h
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+
+		COB_HAS_UTC_OFFSET="yes"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -17524,7 +17530,9 @@ main ()
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   $as_echo "#define COB_STRFTIME 1" >>confdefs.h
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+
+		COB_HAS_UTC_OFFSET="yes"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -18083,11 +18091,6 @@ COB_BIGENDIAN="$ac_cv_c_bigendian"
 
 
 
-if test "$COB_STRFTIME" = "no" -a "$COB_TIMEZONE" = "no"; then
-	COB_HAS_UTC_OFFSET="no"
-else
-	COB_HAS_UTC_OFFSET="yes"
-fi
 
 COB_PATCH_LEVEL=$with_patch_level
  # needed for bin/cob-config

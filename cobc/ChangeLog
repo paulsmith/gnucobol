@@ -1,4 +1,8 @@
 
+2017-02-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: fixed use of warn_cannot_get_utc while available
+
 2017-02-02 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: Updated CB_PENDING CB_UNIFINISHED macros with quieter ONCE_COB
