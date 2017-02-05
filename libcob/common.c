@@ -3806,12 +3806,16 @@ cob_sys_waitpid (const void *p_id)
 		   PROCESS_QUERY_INFORMATION         needs more rights
 		   SYNCHRONIZE                       necessary for WaitForSingleObject
 		*/
+#if defined(PROCESS_QUERY_LIMITED_INFORMATION)
 		process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
 #if !defined(_MSC_VER) || !COB_USE_VC2012_OR_GREATER /* only try a higher level if we possibly compile on XP/2003 */
 		/* TODO: check what happens on WinXP / 2003 as PROCESS_QUERY_LIMITED_INFORMATION isn't available there */
 		if (!process && GetLastError () == ERROR_ACCESS_DENIED) {
 			process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, pid);
 		}
+#endif
+#else
+		process = OpenProcess (SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, pid);
 #endif
 		/* if we don't get access to query the process' exit status try to get at least
 			access to the process end (needed for WaitForSingleObject)

@@ -1665,7 +1665,7 @@ cobc_abort_msg (void)
 		if (current_program && current_program->program_id) {
 			prog_id = (char *)current_program->program_id;
 		} else {
-			prog_id = _("unknown");
+			prog_id = (char *) _("unknown");
 		}
 		if (!cb_source_line) {
 			cobc_err_msg (_("aborting codegen for %s (PROGRAM-ID: %s)"),

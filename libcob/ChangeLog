@@ -1,4 +1,11 @@
 
+2017-02-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h, call.c: [__MINGW32__] fixes for mixed printf
+	  format modifiers for long long
+	* common.c: [WIN32] check if PROCESS_QUERY_LIMITED_INFORMATION is
+	  actually defined (not the case for MINGW and old VC versions)
+
 2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c: Copyright year 2017

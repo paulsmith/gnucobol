@@ -39,13 +39,6 @@
 
 #define	COB_S64_C(x)		x ## I64
 #define	COB_U64_C(x)		x ## UI64
-#define	CB_FMT_LLD		"%I64d"
-#define	CB_FMT_LLU		"%I64u"
-#define	CB_FMT_LLX		"%I64x"
-#define	CB_FMT_PLLD		"%+*.*I64d"
-#define	CB_FMT_PLLU		"%*.*I64u"
-#define	CB_FMT_LLD_F		"%I64dI64"
-#define	CB_FMT_LLU_F		"%I64uUI64"
 
 #else
 
@@ -54,6 +47,27 @@
 
 #define	COB_S64_C(x)		x ## LL
 #define	COB_U64_C(x)		x ## ULL
+
+#endif
+
+#if	defined(_WIN32)
+
+#define	CB_FMT_LLD		"%I64d"
+#define	CB_FMT_LLU		"%I64u"
+#define	CB_FMT_LLX		"%I64x"
+#define	CB_FMT_PLLD		"%+*.*I64d"
+#define	CB_FMT_PLLU		"%*.*I64u"
+
+#if defined (__MINGW32__)
+#define	CB_FMT_LLD_F		"%I64dLL"
+#define	CB_FMT_LLU_F		"%I64uULL"
+#else
+#define	CB_FMT_LLD_F		"%I64dI64"
+#define	CB_FMT_LLU_F		"%I64uUI64"
+#endif
+
+#else
+
 #define	CB_FMT_LLD		"%lld"
 #define	CB_FMT_LLU		"%llu"
 #define	CB_FMT_LLX		"%llx"
