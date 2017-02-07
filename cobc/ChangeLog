@@ -1,4 +1,13 @@
 
+2017-02-06  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c:
+	  Emit routines cob_file_external_addr,cob_file_malloc,cob_file_free
+	  so that 'cob_file' is allocated within libcob
+	  This will allow the stucture have fields added to the end
+	  without forcing a recompile. COB_FILE_VERSION is unchanged
+	  Emit cob_module_free so that structure gets freed within libcob
+
 2017-02-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: fixed use of warn_cannot_get_utc while available

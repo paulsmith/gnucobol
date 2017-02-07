@@ -766,9 +766,6 @@ enum cob_exception_id {
 
 /* File attributes */
 
-/* File version */
-#define	COB_FILE_VERSION	1
-
 /* Start conditions */
 /* Note that COB_NE is disallowed */
 #define COB_EQ			1	/* x == y */
@@ -1168,8 +1165,16 @@ typedef struct {
 } cob_file_key;
 
 
+/* File version (likely can be removed from cob_file in the future) */
+#define	COB_FILE_VERSION	1
+
 /* File structure */
 
+/*NOTE: *** Add new fields to end  ***
+ *       cob_file is now allocated by cob_file_malloc in common.c
+ *       so as long as you add new fields to the end there should be no 
+ *       need to change COB_FILE_VERSION
+ */
 typedef struct {
 	const char		*select_name;		/* Name in SELECT */
 	unsigned char		*file_status;		/* FILE STATUS */
@@ -1327,6 +1332,8 @@ COB_EXPIMP void	cob_init			(const int, char **);
 COB_EXPIMP void	cob_module_enter		(cob_module **, cob_global **,
 						 const int);
 COB_EXPIMP void	cob_module_leave		(cob_module *);
+
+COB_EXPIMP void	cob_module_free(cob_module **);
 
 DECLNORET COB_EXPIMP void	cob_stop_run	(const int) COB_A_NORETURN;
 DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
@@ -1695,6 +1702,13 @@ COB_EXPIMP void cob_accept	(cob_field *);
 
 /*******************************/
 /* Functions in fileio.c */
+
+COB_EXPIMP void	cob_file_external_addr (const char *, 
+				 cob_file **, cob_file_key **, 
+				 const int nkeys, const int linage);
+COB_EXPIMP void	cob_file_malloc (cob_file **, cob_file_key **, 
+				 const int nkeys, const int linage);
+COB_EXPIMP void	cob_file_free   (cob_file **, cob_file_key **);
 
 COB_EXPIMP void cob_open	(cob_file *, const int, const int, cob_field *);
 COB_EXPIMP void cob_close	(cob_file *, cob_field *, const int, const int);

@@ -1,4 +1,14 @@
 
+2017-02-06  Ron Norman <rjn@inglenet.com>
+
+	* common.c, common.h:
+	  added cob_module_free so that structure gets freed within libcob
+	* fileio.c, common.h:
+	  Added new routines cob_file_external_addr,cob_file_malloc,cob_file_free
+	  so that 'cob_file' is allocated within libcob
+	  This will allow the stucture have fields added to the end
+	  without forcing a recompile.
+
 2017-02-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, common.h, call.c: [__MINGW32__] fixes for mixed printf

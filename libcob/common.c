@@ -1691,6 +1691,15 @@ cob_module_leave (cob_module *module)
 	COB_MODULE_PTR = COB_MODULE_PTR->next;
 }
 
+void
+cob_module_free (cob_module **module)
+{
+	if (*module != NULL) {
+		cob_cache_free (*module);
+		*module = NULL;
+	}
+}
+
 void *
 cob_save_func (cob_field **savefld, const int params,
 	       const int eparams, ...)
