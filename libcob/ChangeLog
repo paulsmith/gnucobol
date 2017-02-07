@@ -1,4 +1,9 @@
 
+2017-02-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: [!COB_GEN_SCREENIO] fixed zero_line_col_allowed
+	  missing / superfluous in function declarations
+
 2017-02-06  Ron Norman <rjn@inglenet.com>
 
 	* common.c, common.h:
