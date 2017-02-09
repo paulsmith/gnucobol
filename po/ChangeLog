@@ -13,7 +13,7 @@
 
 2016-08-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* Makevars: addded --no-wrap to MSGMERGE_OPTIONS (upon request of TP)
+	* Makevars: added --no-wrap to MSGMERGE_OPTIONS (upon request of TP)
 	* POTFILES.in: Changed bison/flex sources to the generated sources
 	 (same strings but no "looks like a string, but isn't one")
 
@@ -28,7 +28,7 @@
 
 2013-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* added Dutch  (translated by Ed Borchert and Ronald Heirbaut)
+	* nl.po: added Dutch  (translated by Ed Borchert and Ronald Heirbaut)
 
 2010-06-28  Roger While <simrw@sim-basis.de>
 

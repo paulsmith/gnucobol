@@ -1,4 +1,9 @@
 
+2017-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* HACKING, README: moved instructions for development/svn-builds
+	  from README to new file HACKING and added missing information
+
 2017-02-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: fixed use of undefined COB_TIMEZONE

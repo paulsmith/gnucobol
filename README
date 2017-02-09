@@ -147,12 +147,6 @@ Installation
 ============
 
 ** NOTE **
-   Due to deficiencies in the tools used to prepare GnuCOBOL
-   (autoconf/automake/libtool), it is NOT generally possible
-   to use path names with spaces embedded within them
-   (Mainly Cygwin/MingW/Windows ports).
- 
-** NOTE **
    The default installation path for GnuCOBOL is /usr/local.
    The installation path may be changed by specifying --prefix=<dir>
    as a parameter to the configure.
@@ -179,11 +173,12 @@ To generate/install GnuCOBOL :
 
 ** NOTE **
    The language interpreter "perl" is required to run COBOL85 tests.
+   If you build in Cygwin/MSYS you must use a Cygwin/MSYS version of perl.
  
 ** NOTE **
    Running "make test" will try to download the COBOL85
    testsuite if it is missing.
- For details see tests/cobol85/README.
+   For details see tests/cobol85/README.
 
  If you want to run both tests you can run
     make checkall 
@@ -287,31 +282,4 @@ these are the most important ones:
 Development
 ============
 
-If you wish to hack the GnuCOBOL source code, proceed as follows.
-
-Before changing/building GnuCOBOL, you need to install the
-following extra packages with versions equal or greater :
-
-For compiling (when changing flex/bison sources) :
-  o Bison 2.3
-  o Flex 2.5.35
-
-If you reconfigure and/or prepare a distribution
-  o autoconf 2.64
-  o automake 1.10.1
-  o libtool 2.2.6
-  o m4 1.4.12
-  o gettext 0.17
-  o help2man 0.17
-  o texinfo 4.12 (with texinfo-tex)
-  o texlive (latest, texlive-collection-latex suffices)
-
-If you modify top-level configure.ac or Makefile.am in any directory then
-you will need to run "autoreconf -I m4" to regenerate the necessary files.
-
-If you want to update to a newer automake/libtool version or get errors
-about wrong version numbers in m4 run "autoreconf -vfi -I m4" instead.
-
-For more information about some of the internals and a coding guideline see
-https://sourceforge.net/p/open-cobol/wiki/Style%20guide/ and
-https://sourceforge.net/p/open-cobol/wiki/For%20Maintainers/
+If you wish to hack the GnuCOBOL source or build from svn, see HACKING.
