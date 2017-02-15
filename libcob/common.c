@@ -3381,6 +3381,9 @@ cob_sys_system (const void *cmdline)
 	return 1;
 }
 
+/**
+* Return some hosted C variables, argc, argv, stdin, stdout, stderr.
+*/
 int
 cob_sys_hosted (void *p, const void *var)
 {
@@ -3388,7 +3391,7 @@ cob_sys_hosted (void *p, const void *var)
 	cob_u8_ptr		data = p;
 	size_t			i;
 
-	COB_CHK_PARMS (CBL_OC_HOSTED, 2);
+	COB_CHK_PARMS (CBL_GC_HOSTED, 2);
 
 	if (!data) {
 		return 1;
@@ -3704,7 +3707,7 @@ cob_sys_oc_nanosleep (const void *data)
 
 	COB_UNUSED (data);
 
-	COB_CHK_PARMS (CBL_OC_NANOSLEEP, 1);
+	COB_CHK_PARMS (CBL_GC_NANOSLEEP, 1);
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		nsecs = cob_get_llint (COB_MODULE_PTR->cob_procedure_params[0]);
@@ -3937,7 +3940,6 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	size_t optlen;
 
 	unsigned int lo_amount;
-
 	int exit_status;
 
 	char* shortoptions;
@@ -3956,7 +3958,7 @@ cob_sys_getopt_long_long (void* so, void* lo, void* idx, const int long_only, vo
 	COB_UNUSED (lo);
 	COB_UNUSED (so);
 
-	COB_CHK_PARMS (CBL_OC_GETOPT, 6);
+	COB_CHK_PARMS (CBL_GC_GETOPT, 6);
 
 	/*
 	 * Read in sizes of some parameters
