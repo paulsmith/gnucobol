@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
 
@@ -712,6 +712,7 @@ validate_field_1 (struct cb_field *f)
 			}
 			break;
 		case CB_USAGE_COMP_5:
+			f->flag_real_binary = 1;
 		case CB_USAGE_COMP_X:
 			if (f->pic) {
 				if (f->pic->category != CB_CATEGORY_NUMERIC &&
@@ -899,6 +900,7 @@ setup_parameters (struct cb_field *f)
 			break;
 
 		case CB_USAGE_COMP_5:
+			f->flag_real_binary = 1;
 		case CB_USAGE_COMP_X:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				if (f->pic->size > 8) {

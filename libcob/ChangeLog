@@ -21,6 +21,15 @@
 	* common.c: [WIN32] check if PROCESS_QUERY_LIMITED_INFORMATION is
 	  actually defined (not the case for MINGW and old VC versions)
 
+2017-01-18  Ron Norman <rjn@inglenet.com>
+
+	* call.c (cob_get_param_type): added check for COB_FIELD_REAL_BINARY
+
+2017-01-17  Ron Norman <rjn@inglenet.com>
+
+	* call.c: added code to handle default data field types by using cob_move
+	* move.c: added missing cob_put_s64_compx routine
+
 2017-01-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c: Copyright year 2017

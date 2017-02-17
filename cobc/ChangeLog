@@ -73,6 +73,12 @@
 	* codegen.c (output_internal_function): only allocate UDF RETURNING items
 	  when in LINKAGE SECTION
 
+2017-01-18  Ron Norman <rjn@inglenet.com>
+
+	* field.c: set COB_FLAG_REAL_BINARY to on for COMP-5
+	* codegen.c: for numeric literals passed on CALL, COB_FLAG_REAL_BINARY is
+	  not set on since the internal field is actually S9(9) COMP-4
+
 2017-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c: some work on program-prototypes,

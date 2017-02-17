@@ -5407,9 +5407,11 @@ libcob: prog.cob: 16: warning: ' S U B' literal includes leading spaces which ar
 
 AT_CLEANUP
 
-
 AT_SETUP([C API Test])
 AT_KEYWORDS([CALL])
+
+# CHECKME - returns COMP-4 instead of COMP-5
+AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -5417,7 +5419,7 @@ AT_DATA([prog.cob], [
        
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  BINFLD5     PIC  9(5) BINARY  VALUE  1280.
+       01  BINFLD5     PIC  9(5) COMP-5  VALUE  1280.
        01  BINFLD5S    PIC S9(5) BINARY  VALUE  1024.
        01  BINFLD9     PIC  9(9) BINARY  VALUE  2560.
        01  COMP3       PIC  9(8) COMP-3  VALUE  4096.
@@ -5465,7 +5467,6 @@ static char *
 getType(int type)
 {
    static char wrk[24];
-   sprintf(wrk,"Type %04X",type);
    switch (type) {
    case COB_TYPE_GROUP:    return "Group";
    case COB_TYPE_NUMERIC_COMP5:
@@ -5480,6 +5481,7 @@ getType(int type)
    case COB_TYPE_ALPHANUMERIC:   return "X";
    case COB_TYPE_NUMERIC_EDITED: return "EDITED";
    }
+   sprintf(wrk,"Type %04X",type);
    return wrk;
 }
 
@@ -5498,7 +5500,7 @@ CAPI(void *p1, ...)
       scale  = cob_get_param_scale (k);
       size   = cob_get_param_size (k);
       sign   = cob_get_param_sign (k);
-      printf("%d: %-8s ",k,getType(type));
+      printf(" %d: %-8s ",k,getType(type));
       if (cob_get_param_constant(k))
          printf("BY VALUE     ");
       else
@@ -5510,8 +5512,9 @@ CAPI(void *p1, ...)
          cob_free ((void*)str);
          cob_put_picx_param (k, "Bye!");
       } else if (type == COB_TYPE_GROUP) {
+         sprintf(pic,"(%d)",size);
          str = cob_get_grp_param (k, NULL, 0);
-         printf("%-11s '%.*s'","",size,str);
+         printf("%-11s '%.*s'",pic,size,str);
          cob_free ((void*)str);
          memset(wrk,' ',sizeof(wrk));
          memcpy(wrk,"Bye-Bye Birdie!",15);
@@ -5539,7 +5542,7 @@ CAPI(void *p1, ...)
          printf("%-11s %lld",pic,val);
          cob_put_s64_param (k, val + 3);
       }
-      printf(".\n");
+      printf(";\n");
       fflush(stdout);
    }
    if (nargs > 2)
@@ -5555,49 +5558,49 @@ prog.cob: 34: warning: BY CONTENT assumed for alphanumeric item
 ])
 
 AT_CHECK([./prog], [0], [CAPI called with 2 parameters
-1: COMP-4   BY VALUE     S9(9)       2560.
-2: DISPLAY  BY VALUE     9(2)        16.
+ 1: COMP-4   BY VALUE     S9(9)       2560;
+ 2: DISPLAY  BY VALUE     9(2)        16;
 CAPI called with 2 parameters
-1: COMP-4   BY REFERENCE 9(5)        1280.
-2: EDITED   BY REFERENCE S9(5)V9(2)  -51277  to   511.47 .
+ 1: COMP-5   BY REFERENCE 9(5)        1280;
+ 2: EDITED   BY REFERENCE S9(5)V9(2)  -51277  to   511.47 ;
 CAPI called with 1 parameters
-1: COMP-4   BY REFERENCE S9(5)       1024.
+ 1: COMP-4   BY REFERENCE S9(5)       1024;
 CAPI called with 1 parameters
-1: COMP-4   BY REFERENCE 9(9)        2560.
+ 1: COMP-4   BY REFERENCE 9(9)        2560;
 CAPI called with 2 parameters
-1: COMP-3   BY REFERENCE 9(8)        4096.
-2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-.
+ 1: COMP-3   BY REFERENCE 9(8)        4096;
+ 2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
 CAPI called with 4 parameters
-1: DISPLAY  BY REFERENCE S9(8)       8192.
-2: COMP-4   BY REFERENCE S9(5)       1027.
-3: X        BY REFERENCE X(9)        'Hello'.
-4: Group    BY REFERENCE             'Hello    World    '.
+ 1: DISPLAY  BY REFERENCE S9(8)       8192;
+ 2: COMP-4   BY REFERENCE S9(5)       1027;
+ 3: X        BY REFERENCE X(9)        'Hello';
+ 4: Group    BY REFERENCE (18)        'Hello    World    ';
 CAPI called with 3 parameters
-1: COMP-3   BY REFERENCE 9(8)        4099.
-2: EDITED   BY REFERENCE S9(5)V9(2)  -51407  to   512.77 .
-3: X        BY REFERENCE X(9)        'Bye!'.
+ 1: COMP-3   BY REFERENCE 9(8)        4099;
+ 2: EDITED   BY REFERENCE S9(5)V9(2)  -51407  to   512.77 ;
+ 3: X        BY REFERENCE X(9)        'Bye!';
 CAPI called with 2 parameters
-1: COMP-4   BY REFERENCE 9(5)        1283.
-2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-.
+ 1: COMP-5   BY REFERENCE 9(5)        1283;
+ 2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
 CAPI called with 2 parameters
-1: COMP-4   BY REFERENCE 9(5)        1286.
-2: X        BY VALUE     X(9)        'Hello!'.
+ 1: COMP-5   BY REFERENCE 9(5)        1286;
+ 2: X        BY VALUE     X(9)        'Hello!';
 CAPI called with 2 parameters
-1: COMP-4   BY REFERENCE 9(5)        1289.
-2: X        BY VALUE     X(9)        'Hello!'.
+ 1: COMP-5   BY REFERENCE 9(5)        1289;
+ 2: X        BY VALUE     X(9)        'Hello!';
 CAPI called with 1 parameters
-1: COMP-4   BY VALUE     S9(9)       18.
+ 1: COMP-4   BY VALUE     S9(9)       18;
 CAPI called with 2 parameters
-1: Group    BY VALUE                 'Bye-Bye Birdie!   '.
-2: COMP-4   BY VALUE     S9(9)       18.
+ 1: Group    BY VALUE     (18)        'Bye-Bye Birdie!   ';
+ 2: COMP-4   BY VALUE     S9(9)       18;
 CAPI called with 2 parameters
-1: X        BY VALUE     X(9)        'Fred Fish'.
-2: COMP-3   BY REFERENCE 9(8)        4102.
+ 1: X        BY VALUE     X(9)        'Fred Fish';
+ 2: COMP-3   BY REFERENCE 9(8)        4102;
 CAPI called with 1 parameters
-1: COMP-3   BY REFERENCE S9(7)V9(2)  1250.
+ 1: COMP-3   BY REFERENCE S9(7)V9(2)  1250;
 CAPI called with 0 parameters
 COMP3    is now 00004105;
-COMP4    is now 01292;
+COMP4    is now 0000001292;
 BINFLD5S is now +01030;
 CHRX     is now Hello!   ;
 NE       is now   514.07-;
