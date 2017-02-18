@@ -178,7 +178,8 @@ static unsigned int		in_declaratives;
 static unsigned int		in_debugging;
 static unsigned int		current_linage;
 static unsigned int		report_count;
-static unsigned int		prog_end;
+static unsigned int		first_prog;
+static unsigned int		setup_from_identification;
 static unsigned int		use_global_ind;
 static unsigned int		same_area;
 static unsigned int		inspect_keyword;
@@ -668,34 +669,42 @@ check_relaxed_syntax (const cob_flags_t lev)
 	}
 }
 
-static void
+/* check if headers are present - return 0 if fine, 1 if missing
+   Lev1 must always be present and is checked
+   Lev2/3/4, if non-zero (forced) may be present
+*/
+static int
 check_headers_present (const cob_flags_t lev1, const cob_flags_t lev2,
 		       const cob_flags_t lev3, const cob_flags_t lev4)
 {
-	/* Lev1 is always present and checked */
-	/* Lev2/3/4, if non-zero (forced) may be present */
+	int ret = 0;
 	if (!(header_check & lev1)) {
 		header_check |= lev1;
 		check_relaxed_syntax (lev1);
+		ret = 1;
 	}
 	if (lev2) {
 		if (!(header_check & lev2)) {
 			header_check |= lev2;
 			check_relaxed_syntax (lev2);
+			ret = 1;
 		}
 	}
 	if (lev3) {
 		if (!(header_check & lev3)) {
 			header_check |= lev3;
 			check_relaxed_syntax (lev3);
+			ret = 1;
 		}
 	}
 	if (lev4) {
 		if (!(header_check & lev4)) {
 			header_check |= lev4;
 			check_relaxed_syntax (lev4);
+			ret = 1;
 		}
 	}
+	return ret;
 }
 
 static void
@@ -816,10 +825,19 @@ remove_program_name (struct cb_list *l, struct cb_list *prev)
 
 /* Remove the program from defined_prog_list, if necessary. */
 static void
-end_scope_of_program_name (struct cb_program *program)
+end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 {
 	struct	cb_list	*prev = NULL;
 	struct	cb_list *l = (struct cb_list *) defined_prog_list;
+
+	/* create empty entry if the program has no PROCEDURE DIVISION, error for UDF */
+	if (!program->entry_list) {
+		if (type == CB_FUNCTION_TYPE) {
+			cb_error (_("function '%s' has no PROCEDURE DIVISION"), program->program_name);
+		} else {
+			emit_entry (program->program_id, 0, NULL, NULL);
+		}
+	}
 
 	if (program->nested_level == 0) {
 		return;
@@ -866,29 +884,24 @@ end_scope_of_program_name (struct cb_program *program)
 	}
 }
 
-static int
-setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+static void
+setup_program_start (void)
 {
+	if (setup_from_identification) {
+		setup_from_identification = 0;
+		return;
+	}
 	current_section = NULL;
 	current_paragraph = NULL;
 
-	if (CB_LITERAL_P (id)) {
-		stack_progid[depth] = (char *)(CB_LITERAL (id)->data);
-	} else {
-		stack_progid[depth] = (char *)(CB_NAME (id));
-	}
-
-	if (depth > 0) {
-		if (first_nested_program) {
+	if (depth != 0 && first_nested_program) {
 		check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0);
-	}
-		if (type == CB_FUNCTION_TYPE) {
-			cb_error ("functions may not be defined within a program/function");
-		}
 	}
 	first_nested_program = 1;
 
-	if (prog_end) {
+	if (first_prog) {
+		first_prog = 0;
+	} else {
 		if (!current_program->flag_validated) {
 			current_program->flag_validated = 1;
 			cb_validate_program_body (current_program);
@@ -898,12 +911,26 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		current_program = cb_build_program (current_program, depth);
 		build_nested_special (depth);
 		cb_build_registers ();
+	}
+}
+
+static int
+setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+{
+	setup_program_start();
+
+	if (CB_LITERAL_P (id)) {
+		stack_progid[depth] = (char *)(CB_LITERAL (id)->data);
 	} else {
-		prog_end = 1;
+		stack_progid[depth] = (char *)(CB_NAME (id));
+	}
+
+	if (depth != 0 && type == CB_FUNCTION_TYPE) {
+		cb_error ("functions may not be defined within a program/function");
 	}
 
 	if (increment_depth ()) {
-	        return 1;
+		return 1;
 	}
 
 	current_program->program_id = cb_build_program_id (id, as_literal, type == CB_FUNCTION_TYPE);
@@ -965,15 +992,17 @@ clean_up_program (cb_tree name, const unsigned char type)
 {
 	char		*s;
 
-	end_scope_of_program_name (current_program);
+	end_scope_of_program_name (current_program, type);
 
-	if (CB_LITERAL_P (name)) {
-		s = (char *)(CB_LITERAL (name)->data);
-	} else {
-		s = (char *)(CB_NAME (name));
+	if (name) {
+		if (CB_LITERAL_P (name)) {
+			s = (char *)(CB_LITERAL (name)->data);
+		} else {
+			s = (char *)(CB_NAME (name));
+		}
+
+		decrement_depth (s, type);
 	}
-
-	decrement_depth (s, type);
 
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -2306,13 +2335,11 @@ start:
 	current_program = NULL;
 	defined_prog_list = NULL;
 	cobc_cs_check = 0;
-	prog_end = 0;
-	depth = 0;
 	main_flag_set = 0;
 	current_program = cb_build_program (NULL, 0);
 	cb_build_registers ();
   }
-  nested_list
+  compilation_group
   {
 	if (!current_program->flag_validated) {
 		current_program->flag_validated = 1;
@@ -2333,9 +2360,18 @@ start:
   }
 ;
 
+compilation_group:
+  simple_prog	/* extension: single program without PROCEDURE DIVISION */
+| nested_list
+;
+
 nested_list:
-  simple_prog
-| source_element_list
+  {
+	first_prog = 1;
+	depth = 0;
+	setup_from_identification = 0;
+  }
+  source_element_list
 ;
 
 source_element_list:
@@ -2354,10 +2390,6 @@ simple_prog:
 
 	current_section = NULL;
 	current_paragraph = NULL;
-	prog_end = 1;
-	if (increment_depth ()) {
-		YYABORT;
-	}
 	l = cb_build_alphanumeric_literal (demangle_name,
 					   strlen (demangle_name));
 	current_program->program_id = cb_build_program_id (l, NULL, 0);
@@ -2369,6 +2401,10 @@ simple_prog:
 	check_relaxed_syntax (COBC_HD_PROGRAM_ID);
   }
   _program_body
+  /* do cleanup */
+  {
+	clean_up_program (NULL, CB_PROGRAM_TYPE);
+  }
 ;
 
 program_definition:
@@ -2392,6 +2428,10 @@ function_definition:
 ;
 
 _end_program_list:
+  /* empty (still do cleanup) */
+  {
+	clean_up_program (NULL, CB_PROGRAM_TYPE);
+  }
 | end_program_list
 ;
 
@@ -2411,7 +2451,7 @@ end_program:
 end_function:
   END_FUNCTION end_program_name TOK_DOT
   {
-	  clean_up_program ($2, CB_FUNCTION_TYPE);
+	clean_up_program ($2, CB_FUNCTION_TYPE);
   }
 ;
 
@@ -2427,8 +2467,16 @@ _program_body:
 
 _identification_header:
   %prec SHIFT_PREFER
-| IDENTIFICATION DIVISION TOK_DOT
-| ID DIVISION TOK_DOT
+| identification_or_id DIVISION TOK_DOT
+  {
+	setup_program_start();
+	setup_from_identification = 1;
+}
+;
+
+
+identification_or_id:
+  IDENTIFICATION | ID
 ;
 
 program_id_paragraph:
@@ -6903,7 +6951,11 @@ statements:
 		CB_TREE (current_paragraph)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_paragraph));
 	}
-	check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0);
+	if (check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0) == 1) {
+		if (current_program->prog_type == CB_PROGRAM_TYPE) {
+			emit_entry (current_program->program_id, 0, NULL, NULL);
+		}
+	}
   }
   statement
   {

@@ -1,4 +1,4 @@
-## Copyright (C) 2007-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -148,6 +148,7 @@ prog.cob: 18: error: duplicate REPOSITORY entries for 'beta' do not match
 prog.cob: 19: warning: no definition/prototype seen for function 'gamma'
 prog.cob: 19: error: redefinition of 'gamma'
 prog.cob: 11: error: 'gamma' previously defined here
+prog.cob: 21: error: function 'alpha' has no PROCEDURE DIVISION
 ])
 AT_CLEANUP
 
@@ -183,6 +184,33 @@ prog.cob: 9: warning: no definition/prototype seen for program 'y'
 AT_CLEANUP
 
 
+AT_SETUP([Empty function])
+AT_KEYWORDS([functions])
+
+# Note: Test case for "Function without END FUNCTION" in syn_definition
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. func.
+       
+       END FUNCTION func.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 999 VALUE 124.
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 5: error: function 'func' has no PROCEDURE DIVISION
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Function definition inside program])
 AT_KEYWORDS([functions])
 
@@ -201,6 +229,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: functions may not be defined within a program/function
+prog.cob: 11: error: function 'f' has no PROCEDURE DIVISION
 ])
 AT_CLEANUP
 
@@ -446,7 +475,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [1], [],
+AT_CHECK([$COMPILE prog.cob], [1], [],
 [prog.cob: 6: error: cannot specify offset and SYSTEM-OFFSET at the same time
 prog.cob: 9: error: cannot specify offset and SYSTEM-OFFSET at the same time
 ])

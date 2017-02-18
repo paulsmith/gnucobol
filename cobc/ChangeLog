@@ -1,4 +1,9 @@
 
+2017-02-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: do (setup_program_start) early in IDENTIFICATION DIVISION
+	  if given, otherwise in PROGRAM ID / FUNCTION ID as we did before
+
 2017-02-06  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c:
@@ -38,7 +43,10 @@
 
 2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* parser.y: fix bug #271 by raising an error on UDF without PROCEDURE
+	  DIVISION and generating a minimal entry when this occurs with a program
 	* parser.y: work on SIZE IS for items passed BY VALUE
+	* cobc.c (cobc_abort_msg): output "FUNCTION-ID" if we abort in a UDF
 
 2017-01-22  Edward Hart <edward.dan.hart@gmail.com>
 

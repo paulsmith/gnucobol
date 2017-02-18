@@ -1660,19 +1660,27 @@ static void
 cobc_abort_msg (void)
 {
 	char *prog_id;
+	const char *prog_type;
 
 	if (cb_source_file) {
-		if (current_program && current_program->program_id) {
-			prog_id = (char *)current_program->program_id;
-		} else {
-			prog_id = (char *) _("unknown");
+		if (current_program) {
+			if (current_program->prog_type == CB_FUNCTION_TYPE) {
+				prog_type = "FUNCTION-ID";
+			} else {
+				prog_type = "PROGRAM-ID";
+			}
+			if (current_program->program_id) {
+				prog_id = (char *)current_program->program_id;
+			} else {
+				prog_id = _("unknown");
+			}
 		}
 		if (!cb_source_line) {
-			cobc_err_msg (_("aborting codegen for %s (PROGRAM-ID: %s)"),
-				cb_source_file, prog_id);
+			cobc_err_msg (_("aborting codegen for %s (%s: %s)"),
+				cb_source_file, prog_type, prog_id);
 		} else {
-			cobc_err_msg (_("aborting compile of %s at line %d (PROGRAM-ID: %s)"),
-				cb_source_file, cb_source_line, prog_id);
+			cobc_err_msg (_("aborting compile of %s at line %d (%s: %s)"),
+				cb_source_file, cb_source_line, prog_type, prog_id);
 		}
 	} else {
 		cobc_err_msg (_("aborting"));
@@ -5801,8 +5809,7 @@ process_translate (struct filename *fn)
 	if (ret) {
 		return 1;
 	}
-	if (cb_flag_syntax_only ||
-		(current_program && current_program->entry_list == NULL)) {
+	if (cb_flag_syntax_only) {
 		return 0;
 	}
 
