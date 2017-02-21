@@ -3372,7 +3372,6 @@ warning: ALTER is obsolete in GnuCOBOL
 000324
 000325         END PROGRAM EDITOR.
 
-
 SIZE  TYPE           LVL  NAME                           PICTURE
 
 00080 FILE                OLD-VERSION
@@ -3471,83 +3470,85 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 NAME                           DEFINED                REFERENCES
 
-OLD-VERSION                    26       41      154     160     206     272   
-                                        285     322   
-OLD-RECORD                     46       258   
-OLD-STATEMENT                  47       164     212     249     269     286   
-OLD-NUMBER                     48       202     211     264     291   
+OLD-VERSION                    26       41      153     154     160     206
+                                        272     285     322
+OLD-RECORD                     46       44      258
+OLD-STATEMENT                  47       164     212     249     269     286
+OLD-NUMBER                     48       202     211     264     291
 
-NEW-VERSION                    28       50      154     282     304     305   
-                                        312     322   
-NEW-RECORD                     55       282     313   
-NEW-STATEMENT                  56       164     212     236     249     269   
-                                        286   
-NEW-NUMBER                     57       281   
+NEW-VERSION                    28       50      154     282     304     305
+                                        312     322
+NEW-RECORD                     55       53      282     313
+NEW-STATEMENT                  56       164     212     236     249     269
+                                        286
+NEW-NUMBER                     57       281
 
 PRT-VERSION                    30     not referenced
 
-MODIFICATION                   32       59      154     174     225     322   
-UPDATE-ORDER                   64       178   
-INSERTION                      65       236   
-COMMAND                        66     not referenced
-ENDJOB                         67       191   
-ENDSET                         68       229   
-REMOVE                         69       188   
-ADDNEW                         70       192   
-CHANGE                         71       187   
-DISPLY                         72       189   
-A-FIELD                        74       181     183   
-A-ALPHA                        75     not referenced
-A-BLANK                        76       181   
-B-FIELD                        78       182     184   
-B-ALPHA                        79     not referenced
-B-BLANK                        80       182   
+MODIFICATION                   32       59      153     154     174     225
+                                        322
+UPDATE-ORDER                   64       62      178
+INSERTION                      65       236
+COMMAND                        66     referenced by parent/child
+ENDJOB                         67       191
+ENDSET                         68       229
+REMOVE                         69       188
+ADDNEW                         70       192
+CHANGE                         71       187
+DISPLY                         72       189
+A-FIELD                        74       181     183
+A-ALPHA                        75     referenced by parent/child
+A-BLANK                        76       181
+B-FIELD                        78       182     184
+B-ALPHA                        79     referenced by parent/child
+B-BLANK                        80       182
 
-COMMENTARY                     34       84      154     162     170     171   
-                                        176     179     194     204     209   
-                                        227     232     239     260     267   
-                                        275     293     296     299     302   
-                                        314     321     322   
-COMMENT-LINE                   89       162     170     171     176     179   
-                                        194     204     209     227     232   
-                                        239     260     267     275     293   
-                                        296     299     302     314     321   
+COMMENTARY                     34       84      154     162     170     171
+                                        176     179     194     204     209
+                                        227     232     239     260     267
+                                        275     293     296     299     302
+                                        314     321     322
+COMMENT-LINE                   89       87      162     170     171     176
+                                        179     194     204     209     227
+                                        232     239     260     267     275
+                                        293     296     299     302     314
+                                        321
 
-COMMAND-ADDITIONS              94       230     233     234     240   
-COMMAND-SUBTRACTIONS           95       263     265     268     270   
-TOTAL-INSERTED                 96       233     294   
-TOTAL-DELETED                  97       268     297   
-OUTPUT-COUNT                   98       280     281     300   
-LINE-COUNT                     99       169     180     241     242     261   
-                                        262     315     316   
-FIELDA                         100      183     202     208     211   
-FIELDB                         101      184     264   
-BLANK-LINE                     102      171   
-DATE-FROM-SYS                  104      156   
-DFSYS                          105      157     158     159   
-HEADINGS-LINE                  107      170   
-PHASE                          110      306   
-MONTH-RUN                      111      158   
-DAY-RUN                        113      159   
-YEAR-RUN                       115      157   
-PAGE-NUMBER                    118      168     307   
-COMMAND-LISTING                120      179   
-COMMAND-IMAGE                  122      178   
-ACTIVITIES-LISTING             124      239     260     314   
-DISPOSITION                    125      237     259     309   
-ACTIVE-IMAGE                   126      236     258     313   
-UPSI-BYTE                      128    not referenced
-UPSI-BIT                       129      155     189     303   
-MESSAGE-LOG                    131      162     176     194     204     227   
-                                        321   
-MESSAGE-TEXT                   133      161     175     193     203     226   
-                                        320   
-DISPLAY-MESSAGE                135      209     232     267     275     293   
-                                        296     299     302   
-DISPLAY-TEMP                   137      208     230     265     291     294   
-                                        297     300   
-DISPLAY-TEXT                   139      207     231     266     273     292   
-                                        295     298     301   
+COMMAND-ADDITIONS              94       230     233     234     240
+COMMAND-SUBTRACTIONS           95       263     265     268     270
+TOTAL-INSERTED                 96       233     294
+TOTAL-DELETED                  97       268     297
+OUTPUT-COUNT                   98       280     281     300
+LINE-COUNT                     99       169     180     241     242     261
+                                        262     315     316
+FIELDA                         100      183     202     208     211
+FIELDB                         101      184     264
+BLANK-LINE                     102      171
+DATE-FROM-SYS                  104      156
+DFSYS                          105      157     158     159
+HEADINGS-LINE                  107      170
+PHASE                          110      306
+MONTH-RUN                      111      158
+DAY-RUN                        113      159
+YEAR-RUN                       115      157
+PAGE-NUMBER                    118      168     307
+COMMAND-LISTING                120      179
+COMMAND-IMAGE                  122      178
+ACTIVITIES-LISTING             124      239     260     314
+DISPOSITION                    125      237     259     309
+ACTIVE-IMAGE                   126      236     258     313
+UPSI-BYTE                      128    referenced by child
+UPSI-BIT                       129      155     189     303
+MESSAGE-LOG                    131      162     176     194     204     227
+                                        321
+MESSAGE-TEXT                   133      161     175     193     203     226
+                                        320
+DISPLAY-MESSAGE                135      209     232     267     275     293
+                                        296     299     302
+DISPLAY-TEMP                   137      208     230     265     291     294
+                                        297     300
+DISPLAY-TEXT                   139      207     231     266     274     292
+                                        295     298     301
 END-JOB-PROCESS                141    not referenced
 DELETE-PROCESS                 142    not referenced
 INSERT-PROCESS                 143    not referenced
@@ -3578,8 +3579,7 @@ P FINISH-JOB                   284     177     190     191
 P TEST-FOR-LISTING             289     285
 P LISTING-LOOP                 311     317
 P END-JOB                      319     163     210     217     228     246
-                                       276     303     312
-
+                                        276     303     312
 
 13 warnings in compilation group
 0 errors in compilation group
@@ -3609,7 +3609,7 @@ prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
 
 
 AT_DATA([prog19.lst],
-[GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P               prog.cob                                                           DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
@@ -3952,7 +3952,6 @@ warning: ALTER is obsolete in GnuCOBOL
 000324                                                                          EDIT0342
 000325         END PROGRAM EDITOR.                                              EDIT0343
 
-
 SIZE  TYPE           LVL  NAME                           PICTURE
 
 00080 FILE                OLD-VERSION
@@ -4003,7 +4002,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
 
 00006 GROUP          01   DATE-FROM-SYS
-00002 NUMERIC        02     DFSYS                        99
+00002 NUMERIC        02     DFSYS                        99, OCCURS 3
 
 00080 GROUP          01   HEADINGS-LINE
 00015 ALPHANUMERIC   02     FILLER                       X(15)
@@ -4051,80 +4050,81 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 NAME                           DEFINED                                    REFERENCES
 
-OLD-VERSION                    26      41      154     160     206     272     285     322
-OLD-RECORD                     46      258
-OLD-STATEMENT                  47      164     212     249     269     286
-OLD-NUMBER                     48      202     211     264     291
-                                       
-NEW-VERSION                    28      50      154     282     304     305     312     322
-NEW-RECORD                     55      282     313
-NEW-STATEMENT                  56      164     212     236     249     269     286
-NEW-NUMBER                     57      281
-                                       
-PRT-VERSION                    30    not referenced
-                                       
-MODIFICATION                   32      59      154     174     225     322
-UPDATE-ORDER                   64      178
-INSERTION                      65      236
-COMMAND                        66    not referenced
-ENDJOB                         67      191
-ENDSET                         68      229
-REMOVE                         69      188
-ADDNEW                         70      192
-CHANGE                         71      187
-DISPLY                         72      189
-A-FIELD                        74      181     183
-A-ALPHA                        75    not referenced
-A-BLANK                        76      181
-B-FIELD                        78      182     184
-B-ALPHA                        79    not referenced
-B-BLANK                        80      182
-                                       
-COMMENTARY                     34      84      154     162     170     171     176     179     194     204     209
-                                       227     232     239     260     267     275     293     296     299     302
-                                       314     321     322
-COMMENT-LINE                   89      162     170     171     176     179     194     204     209     227     232
-                                       239     260     267     275     293     296     299     302     314     321
-                                       
-COMMAND-ADDITIONS              94      230     233     234     240
-COMMAND-SUBTRACTIONS           95      263     265     268     270
-TOTAL-INSERTED                 96      233     294
-TOTAL-DELETED                  97      268     297
-OUTPUT-COUNT                   98      280     281     300
-LINE-COUNT                     99      169     180     241     242     261     262     315     316
-FIELDA                         100     183     202     208     211
-FIELDB                         101     184     264
-BLANK-LINE                     102     171
-DATE-FROM-SYS                  104     156
-DFSYS                          105     157     158     159
-HEADINGS-LINE                  107     170
-PHASE                          110     306
-MONTH-RUN                      111     158
-DAY-RUN                        113     159
-YEAR-RUN                       115     157
-PAGE-NUMBER                    118     168     307
-COMMAND-LISTING                120     179
-COMMAND-IMAGE                  122     178
-ACTIVITIES-LISTING             124     239     260     314
-DISPOSITION                    125     237     259     309
-ACTIVE-IMAGE                   126     236     258     313
-UPSI-BYTE                      128   not referenced
-UPSI-BIT                       129     155     189     303
-MESSAGE-LOG                    131     162     176     194     204     227     321
-MESSAGE-TEXT                   133     161     175     193     203     226     320
-DISPLAY-MESSAGE                135     209     232     267     275     293     296     299     302
-DISPLAY-TEMP                   137     208     230     265     291     294     297     300
-DISPLAY-TEXT                   139     207     231     266     273     292     295     298     301
-END-JOB-PROCESS                141   not referenced
-DELETE-PROCESS                 142   not referenced
-INSERT-PROCESS                 143   not referenced
-WRITE-PROCESS                  144   not referenced
-SELECTORS                      146   not referenced
-RETURN-SELECT                  147   not referenced
-NEXT-JOB-SELECT                148   not referenced
+OLD-VERSION                    26       41      153     154     160     206     272     285     322
+OLD-RECORD                     46       44      258
+OLD-STATEMENT                  47       164     212     249     269     286
+OLD-NUMBER                     48       202     211     264     291
+
+NEW-VERSION                    28       50      154     282     304     305     312     322
+NEW-RECORD                     55       53      282     313
+NEW-STATEMENT                  56       164     212     236     249     269     286
+NEW-NUMBER                     57       281
+
+PRT-VERSION                    30     not referenced
+
+MODIFICATION                   32       59      153     154     174     225     322
+UPDATE-ORDER                   64       62      178
+INSERTION                      65       236
+COMMAND                        66     referenced by parent/child
+ENDJOB                         67       191
+ENDSET                         68       229
+REMOVE                         69       188
+ADDNEW                         70       192
+CHANGE                         71       187
+DISPLY                         72       189
+A-FIELD                        74       181     183
+A-ALPHA                        75     referenced by parent/child
+A-BLANK                        76       181
+B-FIELD                        78       182     184
+B-ALPHA                        79     referenced by parent/child
+B-BLANK                        80       182
+
+COMMENTARY                     34       84      154     162     170     171     176     179     194     204     209
+                                        227     232     239     260     267     275     293     296     299     302
+                                        314     321     322
+COMMENT-LINE                   89       87      162     170     171     176     179     194     204     209     227
+                                        232     239     260     267     275     293     296     299     302     314
+                                        321
+
+COMMAND-ADDITIONS              94       230     233     234     240
+COMMAND-SUBTRACTIONS           95       263     265     268     270
+TOTAL-INSERTED                 96       233     294
+TOTAL-DELETED                  97       268     297
+OUTPUT-COUNT                   98       280     281     300
+LINE-COUNT                     99       169     180     241     242     261     262     315     316
+FIELDA                         100      183     202     208     211
+FIELDB                         101      184     264
+BLANK-LINE                     102      171
+DATE-FROM-SYS                  104      156
+DFSYS                          105      157     158     159
+HEADINGS-LINE                  107      170
+PHASE                          110      306
+MONTH-RUN                      111      158
+DAY-RUN                        113      159
+YEAR-RUN                       115      157
+PAGE-NUMBER                    118      168     307
+COMMAND-LISTING                120      179
+COMMAND-IMAGE                  122      178
+ACTIVITIES-LISTING             124      239     260     314
+DISPOSITION                    125      237     259     309
+ACTIVE-IMAGE                   126      236     258     313
+UPSI-BYTE                      128    referenced by child
+UPSI-BIT                       129      155     189     303
+MESSAGE-LOG                    131      162     176     194     204     227     321
+MESSAGE-TEXT                   133      161     175     193     203     226     320
+DISPLAY-MESSAGE                135      209     232     267     275     293     296     299     302
+DISPLAY-TEMP                   137      208     230     265     291     294     297     300
+DISPLAY-TEXT                   139      207     231     266     274     292     295     298     301
+END-JOB-PROCESS                141    not referenced
+DELETE-PROCESS                 142    not referenced
+INSERT-PROCESS                 143    not referenced
+WRITE-PROCESS                  144    not referenced
+SELECTORS                      146    not referenced
+RETURN-SELECT                  147    not referenced
+NEXT-JOB-SELECT                148    not referenced
 
 
-LABEL                          DEFINED                REFERENCES
+LABEL                          DEFINED                                    REFERENCES
 
 E EDITOR                       152
 P START-SECTION                152   not referenced
@@ -4145,7 +4145,6 @@ P FINISH-JOB                   284     177     190     191
 P TEST-FOR-LISTING             289     285
 P LISTING-LOOP                 311     317
 P END-JOB                      319     163     210     217     228     246     276     303     312
-
 
 13 warnings in compilation group
 0 errors in compilation group

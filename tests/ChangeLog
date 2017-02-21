@@ -1,4 +1,8 @@
 
+2017-02-21  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Fixed to pass internal cross reference.
+
 2017-02-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_file.at: fixed generation with old autoconf

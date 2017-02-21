@@ -7,10 +7,14 @@ Options:
   -h, -help             display this help and exit
   -V, -version          display compiler version and exit
   -i, -info             display compiler information (build/environment)
-  -v, -verbose          display the commands invoked by the compiler
-  -vv                   display compiler version and the commands
+  -v, -verbose          display compiler version and the commands
                         invoked by the compiler
+  -vv, -verbose=2       like -v but additional pass verbose option
+                        to assembler/compiler
+  -vvv, -verbose=3      like -vv but additional pass verbose option
+                        to linker
   -q, -brief            reduced displays, commands invoked not shown
+  -###                 like -v but commands not executed
   -x                    build an executable program
   -m                    build a dynamically loadable module (default)
   -j [<args>], -job[=<args>]	run program after build, passing <args>
@@ -56,7 +60,9 @@ Options:
   -W                    enable all warnings
   -Wall                 enable most warnings (all except as noted below)
   -Wno-<warning>        disable warning enabled by -W or -Wall
-  -Wno-unfinished      	don't warn if unfinished features are used
+  -Wno-unfinished      	do not warn if unfinished features are used
+			- ALWAYS active
+  -Wno-pending         	do not warn if pending features are mentioned
 			- ALWAYS active
   -Wobsolete           	warn if obsolete features are used
   -Warchaic            	warn if archaic features are used
@@ -69,7 +75,7 @@ Options:
   -Wstrict-typing      	warn type mismatch strictly
   -Wimplicit-define    	warn implicitly defined data items
   -Wcorresponding      	warn CORRESPONDING with no matching items
-  -Wexternal-value     	warn EXTERNAL item with VALUE clause
+  -Winitial-value      	warn Initial VALUE clause ignored
   -Wprototypes         	warn missing FUNCTION prototypes/definitions
   -Wcall-params        	warn non 01/77 items for CALL params
 			- NOT set with -Wall
