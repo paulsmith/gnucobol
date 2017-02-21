@@ -1,4 +1,9 @@
 
+2017-02-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_file.at: fixed generation with old autoconf
+	  that trips on the string AT_DATA in AT_DATA definitions
+
 2017-01-20  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_misc.at: add PROCEDURE DIVISION EXTERN test
