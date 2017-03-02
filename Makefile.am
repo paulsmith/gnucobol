@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol
 #
-# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -34,8 +34,8 @@ dist-hook:
 	echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $(distdir)/tarstamp.h
 	echo "#define COB_NUM_TAR_DATE `date -u +'%Y%m%d'`" >> $(distdir)/tarstamp.h
 	echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $(distdir)/tarstamp.h
-	find $(distdir) -type d -print | xargs chmod 777
-	chmod 644 $(distdir)/bin/cob-config.in
+	find $(distdir) -type d -print | xargs chmod 755
+	find $(distdir) -type f -print | xargs chmod 644
 	chmod 755 $(distdir)/build_aux/compile
 	chmod 755 $(distdir)/build_aux/config.guess
 	chmod 755 $(distdir)/build_aux/config.sub
@@ -46,27 +46,20 @@ dist-hook:
 	chmod 755 $(distdir)/build_aux/mdate-sh
 	chmod 755 $(distdir)/build_aux/missing
 	chmod 755 $(distdir)/build_aux/mkinstalldirs
-	chmod 644 $(distdir)/ABOUT-NLS
-	chmod 644 $(distdir)/AUTHORS
-	chmod 644 $(distdir)/COPYING
-	chmod 644 $(distdir)/COPYING.DOC
-	chmod 644 $(distdir)/COPYING.LESSER
-	chmod 644 $(distdir)/INSTALL
-	chmod 644 $(distdir)/NEWS
-	chmod 644 $(distdir)/README
-	chmod 644 $(distdir)/THANKS
-	chmod 644 $(distdir)/TODO
-	chmod 644 $(distdir)/gnucobol.spec
+	chmod 755 $(distdir)/build_aux/ylwrap
+	chmod 755 $(distdir)/configure
 	chmod 755 $(distdir)/doc/cobcinfo.sh
+	chmod 755 $(distdir)/tests/testsuite
 	chmod 755 $(distdir)/tests/listings-sed.sh
-	touch $(distdir)/cobc/ppparse.c
-	touch $(distdir)/cobc/parser.c
-	touch $(distdir)/cobc/pplex.c
-	touch $(distdir)/cobc/scanner.c
-	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
-	touch $(distdir)/bin/cobcrun.1
-	touch $(distdir)/cobc/cobc.1
+	chmod 755 $(distdir)/po/update_linguas.sh
+#	touch $(distdir)/cobc/ppparse.c
+#	touch $(distdir)/cobc/parser.c
+#	touch $(distdir)/cobc/pplex.c
+#	touch $(distdir)/cobc/scanner.c
+#	$(distdir)/doc/cobcinfo.sh "fixtimestamps"
 #	touch $(distdir)/libcob/libcob.3
+#	touch $(distdir)/bin/cobcrun.1
+#	touch $(distdir)/cobc/cobc.1
 # Create dist_win manually (dist-zip would have the same content as dist-gzip)
 	if test -f create_win_dist.sh; then \
 		EXTSRCDIR=$(srcdir) EXTDISTDIR=$(distdir) ./create_win_dist.sh; \

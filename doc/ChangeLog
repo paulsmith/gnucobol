@@ -1,4 +1,10 @@
 
+2017-02-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* texinfo.tex: moved to ../build_aux
+	* Makefile.am, cobcinfo.sh: changes to cater for move of texinfo.tex
+	* general: always regenerate tex include files when building gnucobol.texi
+
 2016-12-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* gnucobol.texi: fixed texinfo warnings

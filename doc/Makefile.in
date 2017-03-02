@@ -17,7 +17,7 @@
 #
 # Makefile gnucobol/doc
 #
-# Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -170,7 +170,8 @@ am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
 am__v_texidevnull_0 = > /dev/null
 am__v_texidevnull_1 = 
 INFO_DEPS = $(srcdir)/gnucobol.info
-am__TEXINFO_TEX_DIR = $(srcdir)/..
+TEXINFO_TEX = $(top_srcdir)/build_aux/texinfo.tex
+am__TEXINFO_TEX_DIR = $(top_srcdir)/build_aux
 DVIS = gnucobol.dvi
 PDFS = gnucobol.pdf
 PSS = gnucobol.ps
@@ -215,8 +216,7 @@ am__uninstall_files_from_dir = { \
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(gnucobol_TEXINFOS) $(srcdir)/Makefile.in \
 	$(top_srcdir)/build_aux/mdate-sh \
-	$(top_srcdir)/build_aux/mkinstalldirs ChangeLog mdate-sh \
-	texinfo.tex
+	$(top_srcdir)/build_aux/mkinstalldirs ChangeLog mdate-sh
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -383,7 +383,6 @@ gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
 	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi
 
 EXTRA_DIST = gnucobol.pdf cobcinfo.sh
-TEXINFO_TEX = ../texinfo.tex
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs
 TEXI2DVI = texi2dvi -I $(srcdir)

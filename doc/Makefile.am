@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/doc
 #
-# Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -49,7 +49,6 @@ cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 
 EXTRA_DIST = gnucobol.pdf cobcinfo.sh
 
-TEXINFO_TEX = ../texinfo.tex
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs
 TEXI2DVI = texi2dvi -I $(srcdir)
