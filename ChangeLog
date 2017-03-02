@@ -1,4 +1,11 @@
 
+2017-02-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* HACKING: added info how to prepare a distribution
+	* Makefile.am: don't touch any generated files, see HACKING
+	* Makefile.am: chmod for all files to 644,
+	  executable scripts and directories get 755
+
 2017-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* HACKING, README: moved instructions for development/svn-builds

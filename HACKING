@@ -11,7 +11,7 @@ Development
 ============
 
 If you wish to hack the GnuCOBOL source code, proceed as follows.
-If you build from svn the first 3 tools are always needed.
+If you build from VCS the first 3 tools are always needed.
 
 Before changing/building GnuCOBOL, you need to install the
 following extra packages with versions equal or greater :
@@ -55,3 +55,16 @@ about wrong version numbers in m4 run "autoreconf -vfi -I m4" instead.
 For more information about some of the internals and a coding guideline see
 https://sourceforge.net/p/open-cobol/wiki/Style%20guide/ and
 https://sourceforge.net/p/open-cobol/wiki/For%20Maintainers/
+
+
+For preparing a distribution do the following steps:
+  ./configure           # check that the current environment is ok and
+                        # generate Makefiles for distclean
+  make distclean        # only needed if it isn't a direct VCS checkout
+                        # --> start with a clean directory
+  ./configure && make   # build, needed for re-generating bison/flex sources
+                        # and for generating the texi-includes later
+  po/update_linguas.sh  # get latest translations
+  make distcheck        # generate a distribution tarball and check
+                        # that it will work in a VPATH environment
+						# including make targets uninstall, distclean and dist
