@@ -990,8 +990,8 @@ typedef cob_s64_t cob_flags_t;
 /* Picture symbol structure */
 
 typedef struct {
-        char	symbol;
-	int     times_repeated;
+	char	symbol;
+	int 	times_repeated;
 } cob_pic_symbol;
 
 /* Field attribute structure */

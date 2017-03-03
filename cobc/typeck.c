@@ -2113,7 +2113,7 @@ cb_validate_program_environment (struct cb_program *prog)
 							sprintf(&errmsg[i], ", ...");
 							i = i + 5;
 							break;
-			}
+						}
 						if (i) {
 							sprintf(&errmsg[i], ", ");
 							i = i + 2;
@@ -2129,12 +2129,12 @@ cb_validate_program_environment (struct cb_program *prog)
 				errmsg[i] = 0;
 				cb_error_x (CB_VALUE(l),
 					_("duplicate character values in alphabet '%s': %s"),
-					ap->name, errmsg);
+					    ap->name, errmsg);
 			}
 			if (unvals) {
 				cb_error_x (CB_VALUE(l),
 					_("invalid character values in alphabet '%s', starting at position %d"),
-					ap->name, pos);
+					    ap->name, pos);
 			}
 			ap->low_val_char = 0;
 			ap->high_val_char = 255;
