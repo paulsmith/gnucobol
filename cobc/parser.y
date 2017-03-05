@@ -6449,6 +6449,9 @@ _procedure_division:
 	/* Thereafter, sections/paragraphs may be used */
 	check_pic_duplicate = 0;
 	check_duplicate = 0;
+	if (!current_program->entry_convention) {
+		current_program->entry_convention = cb_int (CB_CONV_COBOL);
+	}
 	cobc_in_procedure = 1U;
 	label = cb_build_reference ("MAIN SECTION");
 	current_section = CB_LABEL (cb_build_label (label, NULL));

@@ -19,7 +19,7 @@
 ### GnuCOBOL Test Suite
 
 
-AT_SETUP([Ambiguous AND/OR])
+AT_SETUP([ambiguous AND/OR])
 AT_KEYWORDS([misc expression])
 
 AT_DATA([prog.cob], [
@@ -147,7 +147,7 @@ prog.cob: 72: error: invalid expression
 AT_CLEANUP
 
 
-AT_SETUP([Missing headers])
+AT_SETUP([missing headers])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -197,7 +197,26 @@ prog.cob: 17: warning: PROCEDURE DIVISION header missing - assumed
 AT_CLEANUP
 
 
-AT_SETUP([Empty program])
+AT_SETUP([one line program])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [           DISPLAY "minimal".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 1: error: PROGRAM-ID header missing
+prog.cob: 1: error: PROCEDURE DIVISION header missing
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob: 1: warning: PROGRAM-ID header missing - assumed
+prog.cob: 1: warning: PROCEDURE DIVISION header missing - assumed
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([empty program])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -448,7 +467,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([Maximum data size])
+AT_SETUP([maximum data size])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -477,7 +496,7 @@ prog.cob: 9: error: 'GROUP-ITEM2' cannot be larger than 268435456 bytes
 AT_CLEANUP
 
 
-AT_SETUP([Unreachable statement])
+AT_SETUP([unreachable statement])
 AT_KEYWORDS([misc extensions])
 
 AT_DATA([prog.cob], [
@@ -804,7 +823,7 @@ prog.cob: 76: error: 'SWIT32-OFF' is not defined
 AT_CLEANUP
 
 
-AT_SETUP([Unexpected mnemonic-name location])
+AT_SETUP([unexpected mnemonic-name location])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -831,7 +850,7 @@ prog.cob: 12: error: invalid mnemonic identifier
 AT_CLEANUP
 
 
-AT_SETUP([Wrong device for mnemonic-name])
+AT_SETUP([wrong device for mnemonic-name])
 AT_KEYWORDS([misc ACCEPT DISPLAY SPECIAL-NAMES])
 
 AT_DATA([prog.cob], [
@@ -856,7 +875,7 @@ prog.cob: 9: error: 'SYSIN' is not an output device
 AT_CLEANUP
 
 
-AT_SETUP([Missing mnemonic-name declaration])
+AT_SETUP([missing mnemonic-name declaration])
 AT_KEYWORDS([misc ACCEPT SPECIAL-NAMES])
 
 AT_DATA([prog.cob], [
@@ -877,7 +896,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([Unknown device in dialect])
+AT_SETUP([unknown device in dialect])
 AT_KEYWORDS([misc ACCEPT DISPLAY SPECIAL-NAMES])
 
 AT_DATA([prog.cob], [
@@ -1003,7 +1022,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Source text after program-text area])
+AT_SETUP([source text after program-text area])
 AT_KEYWORDS([misc fixed])
 
 AT_DATA([prog.cob], [
@@ -1024,7 +1043,7 @@ AT_CHECK([$COMPILE_ONLY -W prog.cob], [0], [],
 AT_CLEANUP
 
 
-AT_SETUP([Line overflow in Fixed-form / Free-form])
+AT_SETUP([line overflow in Fixed-form / Free-form])
 AT_KEYWORDS([misc])
 
 # We're testing trailing tabs and whitespace (should not lead to warning)
@@ -1072,7 +1091,7 @@ prog.cob: 8: error: unknown statement 'This'
 AT_CLEANUP
 
 
-AT_SETUP([Continuation Indicator - too many lines])
+AT_SETUP([continuation Indicator - too many lines])
 AT_KEYWORDS([misc fixed literals listing])
 
 AT_DATA([prog.cob], [
@@ -1629,7 +1648,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([Continuation of COBOL words])
+AT_SETUP([continuation of COBOL words])
 AT_KEYWORDS([misc fixed literals])
 
 AT_DATA([prog.cob], [
@@ -1650,7 +1669,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 AT_CLEANUP
 
 
-AT_SETUP([Literal too long])
+AT_SETUP([literal too long])
 AT_KEYWORDS([misc literals literal-length continuation listing])
 
 
@@ -1900,7 +1919,7 @@ prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
 AT_CLEANUP
 
 
-AT_SETUP([Line and floating comments])
+AT_SETUP([line and floating comments])
 AT_KEYWORDS([misc extensions indicator])
 
 AT_DATA([prog.cob], [
@@ -2177,7 +2196,7 @@ AT_CHECK([$COMPILE_ONLY -free -frelax-syntax-checks -w prog2.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Floating-point literals])
+AT_SETUP([floating-point literals])
 # Refer to Section 8.3.1.2.2.2 of the COBOL 2010 FCD.
 AT_KEYWORDS([misc])
 
@@ -2377,7 +2396,7 @@ prog.cob: 11: error: hexadecimal-national literal does not conform to COBOL 85
 AT_CLEANUP
 
 
-AT_SETUP([Binary literals])
+AT_SETUP([binary literals])
 AT_KEYWORDS([misc extensions])
 
 AT_DATA([prog.cob], [
@@ -2413,7 +2432,7 @@ prog.cob: 10: error: numeric boolean literal does not conform to COBOL 85
 AT_CLEANUP
 
 
-AT_SETUP([Binary-hexadecimal literals])
+AT_SETUP([binary-hexadecimal literals])
 AT_KEYWORDS([misc extensions])
 
 AT_DATA([prog.cob], [
@@ -2536,7 +2555,7 @@ prog.cob: 8: error: literal exceeds limit 4294967295
 AT_CLEANUP
 
 
-AT_SETUP([Adding/removing reserved words])
+AT_SETUP([adding/removing reserved words])
 AT_KEYWORDS([misc extensions configuration])
 
 AT_DATA([prog.cob], [
@@ -2563,7 +2582,7 @@ prog.cob: 9: error: 'bar' is a reserved word, but isn't supported
 AT_CLEANUP
 
 
-AT_SETUP([Adding aliases])
+AT_SETUP([adding aliases])
 AT_KEYWORDS([misc extensions configuration])
 
 AT_DATA([prog.cob], [
@@ -2597,7 +2616,7 @@ AT_CHECK([$COMPILE_ONLY -freserved=" FOO = DISPLAY  " prog.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Complete specified word list])
+AT_SETUP([complete specified word list])
 AT_KEYWORDS([misc extensions configuration])
 
 AT_DATA([prog.cob], [
@@ -2641,7 +2660,7 @@ prog.cob: 9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 AT_CLEANUP
 
 
-AT_SETUP([Swapped SOURCE- and OBJECT-COMPUTER])
+AT_SETUP([swapped SOURCE- and OBJECT-COMPUTER])
 AT_KEYWORDS([misc extensions])
 
 AT_DATA([prog.cob], [
@@ -2723,7 +2742,8 @@ prog.cob: 44: error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
-AT_SETUP([Wrong dialect hints])
+
+AT_SETUP([wrong dialect hints])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -2747,7 +2767,7 @@ prog.cob: 11: error: unknown statement 'TRANSFORM'; it may exist in another dial
 AT_CLEANUP
 
 
-AT_SETUP([Redundant periods])
+AT_SETUP([redundant periods])
 AT_KEYWORDS([misc])
 
 AT_DATA([a.cpy], [
@@ -2842,7 +2862,7 @@ prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
 AT_CLEANUP
 
 
-AT_SETUP([Use of program-prototypes])
+AT_SETUP([use of program-prototypes])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -2869,7 +2889,7 @@ prog.cob: 12: warning: CALL/CANCEL with program-prototype-name used
 AT_CLEANUP
 
 
-AT_SETUP([Invalid INSPECT/TRANSFORM operands])
+AT_SETUP([invalid INSPECT/TRANSFORM operands])
 AT_KEYWORDS([misc INSPECT TRANSFORM])
 
 AT_DATA([prog.cob], [
@@ -2938,7 +2958,7 @@ prog.cob: 13: error: elementary items with SIGN clause must be USAGE DISPLAY or 
 AT_CLEANUP
 
 
-AT_SETUP([Conflicting entry conventions])
+AT_SETUP([conflicting entry conventions])
 AT_KEYWORDS([misc ENTRY-CONVENTION])
 
 AT_DATA([prog.cob], [
