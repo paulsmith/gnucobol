@@ -1,18 +1,18 @@
 ## Copyright (C) 2015-2017 Free Software Foundation, Inc.
 ## Written by Dave Pitts, Simon Sobisch
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -610,26 +610,26 @@ AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
 
 AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
-       
+
        PROGRAM-ID.      prog3.
-       
-       
+
+
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        77 WS-VAR PIC X(2).
       /
        77 WS-VA2 PIC X(2).
-       
-       
+
+
        LOCAL-STORAGE  SECTION.
        77 LS-VAR PIC 9(2).
-       
-       
+
+
        PROCEDURE        DIVISION.
-       
+
            DISPLAY WS-VAR
            MOVE 99 TO LS-VAR
-           
+
            STOP RUN.
 ])
 
@@ -1413,13 +1413,13 @@ AT_DATA([prog3.cob], [
            03  value "WS-Where=" line 23 col  1.
            03  from WS-Where (1:J) pic x(69) col 10.
        01  Display-Message-2 foreground-color 2.
-           03  value "ST004 SQL Err No.=" line 4 col  1. 
+           03  value "ST004 SQL Err No.=" line 4 col  1.
            03  using ws-mysql-error-number pic x(4) col 19.
            03  value " Para=" col 23.
            03  using WS-No-Paragraph pic 9(3) col 29.
            03  value " SQL Cmd=" col 32.
            03  using ws-mysql-command pic x(199) col 41.
-           03  value "SQL Err Msg=" line 7 col  1.   
+           03  value "SQL Err Msg=" line 7 col  1.
            03  using ws-mysql-error-message pic x(67) col 13.
        PROCEDURE        DIVISION.
            STOP RUN.
@@ -3470,8 +3470,8 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 NAME                           DEFINED                REFERENCES
 
-OLD-VERSION                    26       41      153     154     160     206
-                                        272     285     322
+OLD-VERSION                    26       41      153     160     206     272
+                                        285     322
 OLD-RECORD                     46       44      258
 OLD-STATEMENT                  47       164     212     249     269     286
 OLD-NUMBER                     48       202     211     264     291
@@ -3485,8 +3485,7 @@ NEW-NUMBER                     57       281
 
 PRT-VERSION                    30     not referenced
 
-MODIFICATION                   32       59      153     154     174     225
-                                        322
+MODIFICATION                   32       59      153     174     225     322
 UPDATE-ORDER                   64       62      178
 INSERTION                      65       236
 COMMAND                        66     referenced by parent/child
@@ -3561,24 +3560,24 @@ NEXT-JOB-SELECT                148    not referenced
 LABEL                          DEFINED                REFERENCES
 
 E EDITOR                       152
-P START-SECTION                152   not referenced
-P TOP-OF-PAGE-ROUTINE          167     242     262     290     308     316
-P READ-A-COMMAND               173     195     205     251     271
-P TEST-COMMAND-TYPE            186   not referenced
-P CHANGE-A-RECORD              197     187
-P FIND-FIELDA                  201     214     222     255
-P RETURN-TO-USER               216     198     220     254
-P INSERT-A-RECORD              219     192
-P INSERTION-PROCESS            224     198     220     243
-P NEXT-JOB-STEP                245     199     221     235
-P FORCED-WRITE                 248     221
-P DELETE-A-RECORD              253     188
-P DELETION-PROCESS             257     199     254     277
-P OUTPUT-A-RECORD              279     165     213     238     250     287
-P FINISH-JOB                   284     177     190     191
-P TEST-FOR-LISTING             289     285
-P LISTING-LOOP                 311     317
-P END-JOB                      319     163     210     217     228     246
+P START-SECTION                152    not referenced
+P TOP-OF-PAGE-ROUTINE          167      242     262     290     308     316
+P READ-A-COMMAND               173      195     205     251     271
+P TEST-COMMAND-TYPE            186    not referenced
+P CHANGE-A-RECORD              197      187
+P FIND-FIELDA                  201      214     222     255
+P RETURN-TO-USER               216      198     220     254
+P INSERT-A-RECORD              219      192
+P INSERTION-PROCESS            224      198     220     243
+P NEXT-JOB-STEP                245      199     221     235
+P FORCED-WRITE                 248      221
+P DELETE-A-RECORD              253      188
+P DELETION-PROCESS             257      199     254     277
+P OUTPUT-A-RECORD              279      165     213     238     250     287
+P FINISH-JOB                   284      177     190     191
+P TEST-FOR-LISTING             289      285
+P LISTING-LOOP                 311      317
+P END-JOB                      319      163     210     217     228     246
                                         276     303     312
 
 13 warnings in compilation group
@@ -4050,7 +4049,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 NAME                           DEFINED                                    REFERENCES
 
-OLD-VERSION                    26       41      153     154     160     206     272     285     322
+OLD-VERSION                    26       41      153     160     206     272     285     322
 OLD-RECORD                     46       44      258
 OLD-STATEMENT                  47       164     212     249     269     286
 OLD-NUMBER                     48       202     211     264     291
@@ -4062,7 +4061,7 @@ NEW-NUMBER                     57       281
 
 PRT-VERSION                    30     not referenced
 
-MODIFICATION                   32       59      153     154     174     225     322
+MODIFICATION                   32       59      153     174     225     322
 UPDATE-ORDER                   64       62      178
 INSERTION                      65       236
 COMMAND                        66     referenced by parent/child
@@ -4127,24 +4126,24 @@ NEXT-JOB-SELECT                148    not referenced
 LABEL                          DEFINED                                    REFERENCES
 
 E EDITOR                       152
-P START-SECTION                152   not referenced
-P TOP-OF-PAGE-ROUTINE          167     242     262     290     308     316
-P READ-A-COMMAND               173     195     205     251     271
-P TEST-COMMAND-TYPE            186   not referenced
-P CHANGE-A-RECORD              197     187
-P FIND-FIELDA                  201     214     222     255
-P RETURN-TO-USER               216     198     220     254
-P INSERT-A-RECORD              219     192
-P INSERTION-PROCESS            224     198     220     243
-P NEXT-JOB-STEP                245     199     221     235
-P FORCED-WRITE                 248     221
-P DELETE-A-RECORD              253     188
-P DELETION-PROCESS             257     199     254     277
-P OUTPUT-A-RECORD              279     165     213     238     250     287
-P FINISH-JOB                   284     177     190     191
-P TEST-FOR-LISTING             289     285
-P LISTING-LOOP                 311     317
-P END-JOB                      319     163     210     217     228     246     276     303     312
+P START-SECTION                152    not referenced
+P TOP-OF-PAGE-ROUTINE          167      242     262     290     308     316
+P READ-A-COMMAND               173      195     205     251     271
+P TEST-COMMAND-TYPE            186    not referenced
+P CHANGE-A-RECORD              197      187
+P FIND-FIELDA                  201      214     222     255
+P RETURN-TO-USER               216      198     220     254
+P INSERT-A-RECORD              219      192
+P INSERTION-PROCESS            224      198     220     243
+P NEXT-JOB-STEP                245      199     221     235
+P FORCED-WRITE                 248      221
+P DELETE-A-RECORD              253      188
+P DELETION-PROCESS             257      199     254     277
+P OUTPUT-A-RECORD              279      165     213     238     250     287
+P FINISH-JOB                   284      177     190     191
+P TEST-FOR-LISTING             289      285
+P LISTING-LOOP                 311      317
+P END-JOB                      319      163     210     217     228     246     276     303     312
 
 13 warnings in compilation group
 0 errors in compilation group

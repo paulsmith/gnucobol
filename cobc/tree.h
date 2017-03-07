@@ -491,6 +491,7 @@ typedef struct cb_tree_common	*cb_tree;
 struct cb_xref_elem {
 	struct cb_xref_elem	*next;
 	int			line;
+	int			receive;
 };
 
 struct cb_xref {
@@ -1913,8 +1914,9 @@ extern struct cb_program	*cb_find_defined_program_by_name (const char *);
 extern struct cb_program	*cb_find_defined_program_by_id (const char *);
 
 /* cobc.c */
-extern void			cobc_xref_link (struct cb_xref *, const int);
+extern void			cobc_xref_link (struct cb_xref *, const int, const int);
 extern void			cobc_xref_link_parent (const struct cb_field *);
+extern void			cobc_xref_set_receiving (const cb_tree);
 
 /* Function defines */
 

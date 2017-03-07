@@ -3356,6 +3356,14 @@ cb_ref (cb_tree x)
 	/* If this reference has already been resolved (and the value
 	   has been cached), then just return the value */
 	if (r->value) {
+		if (cb_listing_xref && r->flag_receiving) {
+			/* adjust the receiving flag as this will often be set on later calls only */
+			if (CB_FIELD_P (r->value)) {
+				cobc_xref_link (&CB_FIELD (r->value)->xref, r->common.source_line, 1);
+			} else if (CB_FILE_P (r->value)) {
+				cobc_xref_link (&CB_FILE (r->value)->xref, r->common.source_line, 1);
+			}
+		}
 		return r->value;
 	}
 
@@ -3494,12 +3502,12 @@ end:
 
 	if (cb_listing_xref) {
 		if (CB_FIELD_P (candidate)) {
-			cobc_xref_link (&CB_FIELD (candidate)->xref, r->common.source_line);
+			cobc_xref_link (&CB_FIELD (candidate)->xref, r->common.source_line, r->flag_receiving);
 			cobc_xref_link_parent (CB_FIELD (candidate));
 		} else if (CB_LABEL_P (candidate)) {
-			cobc_xref_link (&CB_LABEL(candidate)->xref, r->common.source_line);
+			cobc_xref_link (&CB_LABEL(candidate)->xref, r->common.source_line, 0);
 		} else if (CB_FILE_P (candidate)) {
-			cobc_xref_link (&CB_FILE (candidate)->xref, r->common.source_line);
+			cobc_xref_link (&CB_FILE (candidate)->xref, r->common.source_line, r->flag_receiving);
 		}
 	}
 

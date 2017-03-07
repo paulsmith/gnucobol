@@ -4260,19 +4260,23 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 
 /* create xref_elem with line number for existing xref entry */
 void
-cobc_xref_link (struct cb_xref *list, const int line)
+cobc_xref_link (struct cb_xref *list, const int line, const int receiving)
 {
 #ifdef COB_INTERNAL_XREF
 	struct cb_xref_elem *elem;
 
 	for (elem = list->head; elem; elem = elem->next) {
 		if (elem->line == line) {
+			if (receiving) {
+				elem->receive = 1;
+			}
 			return;
 		}
 	}
 
 	elem = cobc_parse_malloc (sizeof (struct cb_xref_elem));
 	elem->line = line;
+	elem->receive = receiving;
 
 	/* add xref_elem to head/tail
 	   remark: if head == NULL, then tail may contain reference to child's
@@ -4287,6 +4291,7 @@ cobc_xref_link (struct cb_xref *list, const int line)
 #else
 	COB_UNUSED (list);
 	COB_UNUSED (line);
+	COB_UNUSED (receiving);
 #endif
 }
 
@@ -4310,6 +4315,32 @@ cobc_xref_link_parent (const struct cb_field *field)
 #else
 	COB_UNUSED (field);
 #endif
+}
+
+/* add a "receiving" entry for a given field reference */
+void
+cobc_xref_set_receiving (const cb_tree target_ext)
+{
+	cb_tree	target = target_ext;
+	struct cb_field		*target_fld;
+	int				xref_line;
+
+	if (CB_CAST_P (target)) {
+		target = CB_CAST (target)->val;
+	}
+	if (CB_REF_OR_FIELD_P (target)) {
+		target_fld = CB_FIELD_PTR (target);
+	} else {
+		return;
+	}
+	if (CB_REFERENCE_P (target)) {
+		xref_line = CB_REFERENCE (target)->common.source_line;
+	} else if (current_statement) {
+		xref_line = current_statement->common.source_line;
+	} else {
+		xref_line = cb_source_line;
+	}
+	cobc_xref_link (&target_fld->xref, xref_line, 1);
 }
 
 #ifdef COB_INTERNAL_XREF
@@ -4385,7 +4416,10 @@ xref_fields (struct cb_field *top)
 	int			found = 0;
 
 	for (; top; top = top->sister) {
-		if (!top->level) {
+
+		/* no entry for internal generated fields
+		   other than used special indexes */
+		if (!top->level || (top->special_index && !top->count)) {
 			continue;
 		}
 
@@ -4464,20 +4498,18 @@ xref_labels (cb_tree label_list_p)
 			}
 			if (lab->flag_entry) {
 				label_type = 'E';
+				sprintf (print_data, "E %-28.28s %d",
+					lab->name, lab->common.source_line);
+				print_program_data (print_data);
+				continue;
 			} else if (lab->flag_section) {
 				label_type = 'S';
 			} else {
 				label_type = 'P';
 			}
-			if (label_type != 'E') {
-				pd_off = sprintf (print_data, "%c %-28.28s %-6d",
-					label_type, lab->name, lab->common.source_line);
-				xref_print (&lab->xref, XREF_LABEL, NULL);
-			} else {
-				sprintf (print_data, "E %-28.28s %d",
-					lab->name, lab->common.source_line);
-				print_program_data (print_data);
-			}
+			pd_off = sprintf (print_data, "%c %-28.28s %-6d ",
+				label_type, lab->name, lab->common.source_line);
+			xref_print (&lab->xref, XREF_LABEL, NULL);
 		}
 	}
 	if (label_type == ' ') {
@@ -5913,7 +5945,14 @@ process_translate (struct filename *fn)
 	current_paragraph = NULL;
 	current_statement = NULL;
 	cb_source_line = 0;
-	codegen (p, 0);
+	/* Temporarily disable cross-reference during C generation */
+	if (cb_listing_xref) {
+		cb_listing_xref = 0;
+		codegen (p, 0);
+		cb_listing_xref = 1;
+	} else {
+		codegen (p, 0);
+	}
 
 	/* Close files */
 	if(unlikely(fclose (cb_storage_file) != 0)) {

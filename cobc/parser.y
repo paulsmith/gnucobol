@@ -298,7 +298,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	cb_tree		x;
 	cb_tree		entry_conv;
 	struct cb_field	*f;
-	int		parmnum;
+	int			param_num;
 	char		buff[COB_MINI_BUFF];
 
 	snprintf (buff, (size_t)COB_MINI_MAX, "E$%s", name);
@@ -321,14 +321,11 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 						"START PROGRAM", NULL));
 	}
 
-	parmnum = 1;
+	param_num = 1;
 	for (l = using_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
 			f = CB_FIELD (cb_ref (x));
-			if (f->level != 01 && f->level != 77) {
-				cb_error_x (x, _("'%s' not level 01 or 77"), cb_name (x));
-			}
 			if (!current_program->flag_chained) {
 				if (f->storage != CB_STORAGE_LINKAGE) {
 					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), cb_name (x));
@@ -342,12 +339,17 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), cb_name (x));
 				}
 				f->flag_chained = 1;
-				f->param_num = parmnum;
-				parmnum++;
+				f->param_num = param_num;
+				param_num++;
+			}
+			if (f->level != 01 && f->level != 77) {
+				cb_error_x (x, _("'%s' not level 01 or 77"), cb_name (x));
 			}
 			if (f->redefines) {
 				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), cb_name (x));
 			}
+			/* add a "receiving" entry for the USING parameter */
+			cobc_xref_link (&f->xref, CB_REFERENCE (x)->common.source_line, 1);
 		}
 	}
 

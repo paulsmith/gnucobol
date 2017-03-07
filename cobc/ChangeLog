@@ -153,6 +153,7 @@
 2017-01-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_build_identifier): corrected minimum check for OCCURS
+	* cobc.c: updates for generation of cross reference / symbol listing
 
 2017-01-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -162,6 +163,8 @@
 	  file - needed for suppressing empty lines after page header and for
 	  correct counting of lines per page
 	* cobc.h, cobc.c: moved all listing #define from cobc.h to cobc.c
+	* cobc.c, tree.h, tree.c, parser.y: added receiving flag to cb_xref_elem,
+	  set it on appropriate places (especially from references)
 
 2017-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
