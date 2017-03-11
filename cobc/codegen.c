@@ -4756,11 +4756,13 @@ output_call (struct cb_call *p)
 			}
 			/* Fall through */
 		case CB_TAG_FIELD:
-		case CB_TAG_INTRINSIC:
 			if (CB_PURPOSE_INT (l) == CB_CALL_BY_CONTENT) {
 				output ("&content_%s%u", CB_PREFIX_FIELD, n + 1);
 				break;
 			}
+			output_param (x, -1);
+			break;
+		case CB_TAG_INTRINSIC:
 			output_param (x, -1);
 			break;
 		case CB_TAG_REFERENCE:
