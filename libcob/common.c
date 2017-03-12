@@ -4699,12 +4699,13 @@ set_config_val (char *value, int pos)
 			cob_free((void*)str);
 		}
 		str = cob_expand_env_string(value);
-			if((data_type & ENV_FILE)
+		if((data_type & ENV_FILE)
 			&& strchr(str,PATHSEP_CHAR) != NULL) {
-				conf_runtime_error_value(value, pos);
-				conf_runtime_error(1, _("should not contain '%c'"),PATHSEP_CHAR);
-				return 1;
-			}
+			conf_runtime_error_value(value, pos);
+			conf_runtime_error(1, _("should not contain '%c'"),PATHSEP_CHAR);
+			cob_free (str);
+			return 1;
+		}
 		memcpy(data,&str,sizeof(char *));
 
 	} else if((data_type & ENV_CHAR)) {	/* 'char' field inline */
@@ -4860,6 +4861,9 @@ static int
 cb_config_entry (char *buf, int line)
 {
 	int	i,j,k, old_type;
+#if !HAVE_SETENV
+	int	len;
+#endif
 	void	*data;
 	char	*env,*str,qt;
 	char	keyword[COB_MINI_BUFF],value[COB_SMALL_BUFF],value2[COB_SMALL_BUFF];
@@ -4914,9 +4918,15 @@ cb_config_entry (char *buf, int line)
 		}
 		/* check additional value for inline env vars ${varname:-default} */
 		str = cob_expand_env_string(value2);
-		env = cob_malloc(strlen(value)+strlen(str)+2);
-		sprintf(env,"%s=%s",value,str);
-		(void)putenv(env);
+
+#if HAVE_SETENV
+		(void)setenv (value, str, 1);
+#else
+		len = strlen (value) + strlen (str) + 2U;
+		env = cob_fast_malloc (len);
+		sprintf (env, "%s=%s", value, str);
+		(void)putenv (env);
+#endif
 		cob_free(str);
 		for (i=0; i < NUM_CONFIG; i++) {		/* Set value from config file */
 			if(gc_conf[i].env_name
@@ -4944,10 +4954,10 @@ cb_config_entry (char *buf, int line)
 #if HAVE_SETENV
 			(void)unsetenv(value);
 #else
-			env = cob_malloc(strlen(value)+2);
-			sprintf(env,"%s=",value);
-			(void)putenv(env);
-
+			len = strlen (value) 2U;
+			env = cob_fast_malloc (len);
+			sprintf (env, "%s=", value);
+			(void)putenv (env);
 #endif
 		}
 		return 0;
@@ -5153,13 +5163,13 @@ cob_load_config (void)
 {
 	char		*env;
 	char		conf_file[COB_MEDIUM_BUFF];
-	int		isoptional = 1, sts, i, j;
+	int		is_optional = 1, sts, i, j;
 
 
 	/* Get the name for the configuration file */
 	if ((env = getenv ("COB_RUNTIME_CONFIG")) != NULL && env[0]) {
 		strcpy (conf_file, env);
-		isoptional = 0;			/* If declared then it is NOT optional */
+		is_optional = 0;			/* If declared then it is NOT optional */
 		if(strchr(conf_file,PATHSEP_CHAR) != NULL) {
 			conf_runtime_error(0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_RUNTIME_CONFIG");
 			conf_runtime_error(1, _("should not contain '%c'"),PATHSEP_CHAR);
@@ -5173,7 +5183,7 @@ cob_load_config (void)
 			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%s%s", COB_CONFIG_DIR, SLASH_STR, "runtime.cfg");
 		}
 		conf_file[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
-		isoptional = 1;			/* If not present, then just use env vars */
+		is_optional = 1;			/* If not present, then just use env vars */
 		if (strchr(conf_file,PATHSEP_CHAR) != NULL) {
 			conf_runtime_error(0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_CONFIG_DIR");
 			conf_runtime_error(1, _("should not contain '%c'"),PATHSEP_CHAR);
@@ -5186,8 +5196,10 @@ cob_load_config (void)
 		gc_conf[i].data_type &= ~(STS_ENVSET|STS_CNFSET|STS_ENVCLR);	/* Clear status */
 	}
 
-	sts = cob_load_config_file (conf_file, isoptional);
-
+	sts = cob_load_config_file (conf_file, is_optional);
+	if (sts < 0) {
+		return sts;
+	}
 	cob_rescan_env_vals(); 			/* Check for possible environment variables */
 
 	/* Set with default value if present and not set otherwise */
@@ -5211,7 +5223,7 @@ cob_load_config (void)
 		}
 	}
 
-	return sts;
+	return 0;
 }
 
 void

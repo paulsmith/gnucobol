@@ -2973,8 +2973,8 @@ file_basename (const char *filename)
 		basename_len = len + 16;
 		basename_buffer = cobc_main_realloc (basename_buffer, basename_len);
 	}
-	/* Copy base name */
-	memcpy (basename_buffer, startp, len);
+	/* Copy base name (possiby done before -> memmove) */
+	memmove (basename_buffer, startp, len);
 	basename_buffer[len] = 0;
 	return basename_buffer;
 }

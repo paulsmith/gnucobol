@@ -99,18 +99,19 @@ print_error (const char *file, int line, const char *prefix,
 	fprintf (stderr, "%s\n", errmsg);
 
 	if (cb_src_list_file) {
-		err = cobc_malloc (sizeof (struct list_error));
-		memset (err, 0, sizeof (struct list_error));
-		err->line = line;
-		if (prefix) {
-			err->prefix = cobc_strdup (prefix);
-		} else {
-			err->prefix = NULL;
-		}
-		err->msg = cobc_strdup (errmsg);
 
 		/* If we have a file, queue message for listing processing */
 		if (cb_current_file) {
+
+			/* set up listing error */
+			err = cobc_malloc (sizeof (struct list_error));
+			err->line = line;
+			if (prefix) {
+				err->prefix = cobc_strdup (prefix);
+			} else {
+				err->prefix = NULL;
+			}
+			err->msg = cobc_strdup (errmsg);
 
 			/* set correct listing entry for this file */
 			cfile = cb_current_file;
