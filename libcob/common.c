@@ -4954,7 +4954,7 @@ cb_config_entry (char *buf, int line)
 #if HAVE_SETENV
 			(void)unsetenv(value);
 #else
-			len = strlen (value) 2U;
+			len = strlen (value) + 2U;
 			env = cob_fast_malloc (len);
 			sprintf (env, "%s=", value);
 			(void)putenv (env);
