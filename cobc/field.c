@@ -765,16 +765,19 @@ validate_field_1 (struct cb_field *f)
 			switch (f->pic->category) {
 			case CB_CATEGORY_NUMERIC:
 				/* Reconstruct the picture string */
-				n = 0;
 				if (f->pic->scale > 0) {
-					/* Enough for genned string */
-					f->pic->str = cobc_parse_malloc ((size_t)5 * sizeof (cob_pic_symbol));
+					/* Size for genned string */
+					if (f->pic->have_sign) {
+						n = 4;
+					} else {
+						n = 3;
+					}
+					f->pic->str = cobc_parse_malloc ((size_t)n * sizeof (cob_pic_symbol));
 					pstr = f->pic->str;
 					if (f->pic->have_sign) {
 						pstr->symbol = '+';
-					        pstr->times_repeated = 1;
+						pstr->times_repeated = 1;
 						++pstr;
-						n = 5;
 					}
 					pstr->symbol = '9';
 					pstr->times_repeated = (int)f->pic->digits - f->pic->scale;
@@ -789,20 +792,22 @@ validate_field_1 (struct cb_field *f)
 					++pstr;
 
 					f->pic->size++;
-					n += 15;
 				} else {
-					/* Enough for genned string */
-					f->pic->str = cobc_parse_malloc ((size_t)3 * sizeof(cob_pic_symbol));
+					/* Size for genned string */
+					if (f->pic->have_sign) {
+						n = 2;
+					} else {
+						n = 1;
+					}
+					f->pic->str = cobc_parse_malloc ((size_t)n * sizeof(cob_pic_symbol));
 					pstr = f->pic->str;
 					if (f->pic->have_sign) {
 						pstr->symbol = '+';
 						pstr->times_repeated = 1;
 						++pstr;
-						n = 5;
 					}
 					pstr->symbol = '9';
 					pstr->times_repeated = f->pic->digits;
-					n += 5;
 				}
 				f->pic->lenstr = n;
 				f->pic->category = CB_CATEGORY_NUMERIC_EDITED;
