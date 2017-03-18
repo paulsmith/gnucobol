@@ -6490,6 +6490,7 @@ count_pic_alphanumeric_edited (struct cb_field *field)
 	return count;
 }
 
+/* check if data of two fields may overlap */
 static size_t
 cb_check_overlapping (cb_tree src, cb_tree dst,
 		      struct cb_field *src_f, struct cb_field *dst_f)
@@ -6525,11 +6526,19 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			return 1;
 		}
 		if (sr->subs) {
-			/* same fields with subs,
-			   overlapping possible, would need more checks
-			   (verify all subs of source and dest to be either identical or
-			   to be literal with the same integer value) */
+			/* same fields with subs, overlapping possible */
+#if 0		/* FIXME: more checks needed:
+			   1: are all subs of source and dest identical ?
+			   2: are all subs of source and dest literals with the same integer value ?
+			*/
+			if (...) {
+				goto pos_overlap_ret;
+			} else {
+				return 0;
+			}
+#else
 			return 1;
+#endif
 		}
 
 		/* same fields, at least one without ref-mod -> overlapping */
@@ -6561,10 +6570,15 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			ff2 = ff2->redefines;
 		}
 		if (ff1 != ff2) {
-			/* different field founder -> no overlapping
-			   [FIXME: if at least one of the vars has ever an assignment
-			   of a different address we must return 1] */
-			return 0;
+			/* different field founder -> no overlapping */
+			/* if at least one of the vars can have an assignment
+			   of a different address we must return 1 */
+			if (ff1->flag_local_storage || ff1->flag_item_based ||
+				ff2->flag_local_storage || ff2->flag_item_based) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
 
@@ -6579,11 +6593,19 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 
 	/* Check for occurs */
 	if (sr->subs || dr->subs) {
-		/* overlapping possible, would need:
+		/* overlapping possible */
+#if 0	/* FIXME: more checks needed:
 		1: if all subs are integer literals: a full offset check of both fields
 		2: if at least one isn't an integer literal: check that all "upper" literals
 		   are either identical or numeric literals with the same integer value */
+		if (...) {
+			goto pos_overlap_ret;
+		} else {
+			return 0;
+		}
+#else
 		return 1;
+#endif
 	}
 
 	src_size = cb_field_size (src);

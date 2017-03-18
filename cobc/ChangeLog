@@ -1,4 +1,9 @@
 
+2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_check_overlapping): return a possible overlap if at least
+	  one of the vars can have an assignment of a different address
+
 2017-03-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, error.c: fix minor memory leaks in listing / configuration code
