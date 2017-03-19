@@ -3608,12 +3608,9 @@ file_control_entry:
 		/* Add file to current program list */
 		CB_ADD_TO_CHAIN (CB_TREE (current_file),
 				 current_program->file_list);
-	} else {
-		current_file = NULL;
-		if (current_program->file_list) {
-			current_program->file_list
-				= CB_CHAIN (current_program->file_list);
-		}
+	} else if (current_program->file_list) {
+		current_program->file_list
+			= CB_CHAIN (current_program->file_list);
 	}
   }
   _select_clause_sequence TOK_DOT
@@ -3714,13 +3711,13 @@ assign_clause:
 		current_file->flag_ext_assign = 0;
 		if ($4 == cb_int0) {
 			current_file->assign =
-				cb_build_alphanumeric_literal ("PRINTER",	(size_t)7);
+				cb_build_alphanumeric_literal ("PRINTER", (size_t)7);
 		} else if ($4 == cb_int1) {
 			current_file->assign =
-				cb_build_alphanumeric_literal ("PRINTER-1",	(size_t)9);
+				cb_build_alphanumeric_literal ("PRINTER-1", (size_t)9);
 		} else {
 			current_file->assign =
-				cb_build_alphanumeric_literal ("LPT1",	(size_t)4);
+				cb_build_alphanumeric_literal ("LPT1", (size_t)4);
 		}
 
 	}
@@ -11965,11 +11962,11 @@ undefined_word:
 		$$ = $1;
 	}
   }
-|  error
+| error
   {
-	  yyclearin;
-	  yyerrok;
-	  $$ = cb_error_node;
+	yyclearin;
+	yyerrok;
+	$$ = cb_error_node;
   }
 ;
 

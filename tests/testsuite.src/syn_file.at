@@ -783,3 +783,28 @@ prog.cob: 36: error: 'TEST-REC' is not a file name
 prog.cob: 37: error: REWRITE FILE requires a FROM clause
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Clauses following invalid ACCESS clause])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    syntax.
+
+       ENVIRONMENT    DIVISION.
+       INPUT-OUTPUT   SECTION.
+       FILE-CONTROL.
+           SELECT testfile
+               ASSIGN TO filename
+               ORGANIZATION RELATIVE
+               ACCESS IS sequentia
+               STATUS IS stat.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+prog.cob: 9: error: 'filename' is not defined
+prog.cob: 12: error: 'stat' is not defined
+])
+AT_CLEANUP
