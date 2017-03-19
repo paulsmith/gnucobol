@@ -2579,7 +2579,9 @@ cob_get_current_date_and_time (void)
 	if (!time_as_filetime_func) {
 		get_function_ptr_for_precise_time ();
 	}
+#if defined(_MSC_VER)
 #pragma warning(suppress: 6011) // the function pointer is always set by get_function_ptr_for_precise_time
+#endif
 	(time_as_filetime_func) (&filetime);
 	/* use fallback to GetLocalTime if one of the following does not work */
 	if (!(FileTimeToSystemTime (&filetime, &utc_time) &&
@@ -5571,7 +5573,7 @@ print_info (void)
 	char	*s;
 	int major, minor, patch;
 #if defined(mpir_version)
-	char	versbuff2[111] = { '\0' };
+	char	versbuff2[115] = { '\0' };
 #endif
 
 	print_version ();
@@ -5678,6 +5680,7 @@ print_info (void)
 		snprintf (versbuff2, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
+	versbuff[55] = versbuff2[55] = 0; /* silence VS analyzer */
 	strncat (versbuff2, " - ", 3);
 	strncat (versbuff2, versbuff, 55);
 	var_print (_("mathematical library"),		versbuff2, "", 0);
