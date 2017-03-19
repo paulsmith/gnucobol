@@ -1673,10 +1673,8 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 		*module = cob_cache_malloc (sizeof(cob_module));
 	}
 
-#if	1	/* RXWRXW - Params */
 	/* Save parameter count */
 	(*module)->module_num_params = cobglobptr->cob_call_params;
-#endif
 
 	/* Push module pointer */
 	(*module)->next = COB_MODULE_PTR;
@@ -3648,7 +3646,10 @@ cob_sys_x91 (void *p1, const void *p2, void *p3)
 		*result = 0;
 		break;
 	case 16:
-		/* Return number of call parameters */
+		/* Return number of call parameters
+		   according to the docs this is only set for programs CALLed from COBOL
+		   NOT for main programs in contrast to C$NARG (cob_sys_return_args)
+		*/
 		*parm = (unsigned char)COB_MODULE_PTR->module_num_params;
 		*result = 0;
 		break;
@@ -3867,6 +3868,10 @@ cob_sys_waitpid (const void *p_id)
 #endif
 }
 
+/* set the number of parameters passed to the current program;
+   works both for main programs and called sub programs
+   Implemented according to ACUCOBOL-GT -> returns the number of parameters that were passed,
+   not like in MF implementation the number of parameters that were received */
 int
 cob_sys_return_args (void *data)
 {
@@ -3875,8 +3880,13 @@ cob_sys_return_args (void *data)
 	COB_CHK_PARMS (C$NARG, 1);
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		cob_set_int (COB_MODULE_PTR->cob_procedure_params[0],
-			     COB_MODULE_PTR->module_num_params);
+		/* get number from argc if main program */
+		if (COB_MODULE_PTR->next) {
+			cob_set_int (COB_MODULE_PTR->cob_procedure_params[0],
+				COB_MODULE_PTR->module_num_params);
+		} else {
+			cob_set_int (COB_MODULE_PTR->cob_procedure_params[0], cob_argc - 1);
+		}
 	}
 	return 0;
 }

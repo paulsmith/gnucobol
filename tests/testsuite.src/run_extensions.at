@@ -2603,7 +2603,7 @@ AT_CLEANUP
 
 
 AT_SETUP([System routine C$NARG])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions narg])
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
@@ -2615,11 +2615,11 @@ AT_DATA([callee.cob], [
        01  Y            PIC   X.
        PROCEDURE        DIVISION USING Y.
            CALL "C$NARG" USING X
-           END-CALL.
+           END-CALL
            IF X NOT = 1
-              DISPLAY "NOTOK"  X
+              DISPLAY "NOTOK callee " X
               END-DISPLAY
-           END-IF.
+           END-IF
            EXIT PROGRAM.
 ])
 
@@ -2629,15 +2629,52 @@ AT_DATA([caller.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  X            PIC X VALUE "X".
+       01  N            PIC 9 USAGE BINARY.
+       LINKAGE SECTION.
+       77  Y            PIC X.
+       77  Z            PIC X.
        PROCEDURE        DIVISION.
+           CALL "C$NARG" USING N
+           END-CALL
+           IF N NOT = 2
+              DISPLAY "NOTOK caller (1) " N
+              END-DISPLAY
+           END-IF
            CALL "callee" USING X
-           END-CALL.
+           END-CALL
+           CALL "C$NARG" USING N
+           END-CALL
+           IF N NOT = 2
+              DISPLAY "NOTOK caller (2) " N
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  N            PIC 9 USAGE BINARY.
+       LINKAGE SECTION.
+       77  X            PIC X.
+       77  Y            PIC X.
+       77  Z            PIC X.
+       PROCEDURE        DIVISION.
+           CALL "C$NARG" USING N
+           END-CALL
+           DISPLAY N WITH NO ADVANCING
+           END-DISPLAY
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([./caller], [0], [], [])
+AT_CHECK([./caller 1 2], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog "1 2"], [0], [1], [])
+AT_CHECK([./prog 1 2 3], [0], [3], [])
 
 AT_CLEANUP
 
