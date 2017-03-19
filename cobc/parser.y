@@ -3613,11 +3613,19 @@ file_control_entry:
 			= CB_CHAIN (current_program->file_list);
 	}
   }
-  _select_clause_sequence TOK_DOT
+  _select_clauses_or_error
   {
 	if (CB_VALID_TREE ($3)) {
 		validate_file (current_file, $3);
 	}
+  }
+;
+
+_select_clauses_or_error:
+  _select_clause_sequence TOK_DOT
+| error TOK_DOT
+  {
+	yyerrok;
   }
 ;
 

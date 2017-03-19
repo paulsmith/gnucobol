@@ -804,7 +804,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
-prog.cob: 9: error: 'filename' is not defined
-prog.cob: 12: error: 'stat' is not defined
+prog.cob: 13: warning: 'filename' will be implicitly defined
 ])
 AT_CLEANUP

@@ -6,6 +6,8 @@
 	  redefinition (see bug #271).
 	* parser.y (file_control_entry): fixed bug #352 by not setting
 	  current_file to NULL in invalid SELECT entries.
+	* parser.y (file_control_entry): added parser error handler so typos
+	  don't define an erroneous SELECT entry.
 
 2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
