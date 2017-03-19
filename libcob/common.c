@@ -2577,6 +2577,7 @@ cob_get_current_date_and_time (void)
 	if (!time_as_filetime_func) {
 		get_function_ptr_for_precise_time ();
 	}
+#pragma warning(suppress: 6011) // the function pointer is always set by get_function_ptr_for_precise_time
 	(time_as_filetime_func) (&filetime);
 	/* use fallback to GetLocalTime if one of the following does not work */
 	if (!(FileTimeToSystemTime (&filetime, &utc_time) &&

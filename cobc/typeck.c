@@ -6561,6 +6561,9 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		}
 
 		/* Check for same parent field */
+#ifdef _MSC_VER
+#pragma warning(disable: 6011) // cb_field_founder always returns a valid pointer
+#endif
 		ff1 = cb_field_founder (src_f);
 		ff2 = cb_field_founder (dst_f);
 		if (ff1->redefines) {
@@ -6581,6 +6584,9 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			}
 		}
 	}
+#ifdef _MSC_VER
+#pragma warning(enable: 6011)
+#endif
 
 	/* check if both fields are references, otherwise we can't check further */
 	if (!sr || !dr) {

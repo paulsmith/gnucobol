@@ -868,7 +868,7 @@ end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 				    CB_PROGRAM (l->value)->orig_program_id)
 			    == 0) {
 				remove_program_name (l, prev);
-				if (prev->chain != NULL) {
+				if (prev && prev->chain != NULL) {
 					l = CB_LIST (prev->chain);
 				} else {
 					l = NULL;

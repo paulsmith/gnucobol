@@ -3,6 +3,8 @@
 
 	* typeck.c (cb_check_overlapping): return a possible overlap if at least
 	  one of the vars can have an assignment of a different address
+	* parser.y (end_scope_of_program_name): fix possible access of NULL var
+	* typeck.c [_MSC_VER] (cb_check_overlapping): silence wrong warning 6011
 
 2017-03-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
