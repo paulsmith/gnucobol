@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+use warnings;
+
 $SIG{INT} = sub { die "\nInterrupted\n" };
 $SIG{QUIT} = sub { die "\nInterrupted\n" };
 $SIG{PIPE} = sub { die "\nInterrupted\n" };
@@ -42,27 +44,29 @@ if ($opt) {
 	$opt = "-std=cobol85"
 }
 
-if ($cobc ne "") {
+if (defined $cobc) {
 	$cobc = "$cobc $opt";
 } else {
 	$cobc = "cobc $opt";
 }
 
-if ($cobcrun eq "") {
+if (!defined $cobcrun) {
 	$cobcrun = "cobcrun";
 }
 
-if ($cobcrun_direct ne "") {
-	$cobcrun_direct = "$cobcrun_direct ";
+if (defined $cobcrun_direct) {
+    	$cobcrun_direct = "$cobcrun_direct ";
+} else {
+	$cobcrun_direct = "";
 }
 
 # temporary directory (used for fifos)
 my $tmpdir = $ENV{"TMPDIR"};
-if ($tmpdir eq "") {
+if (!defined $tmpdir) {
 	$tmpdir = $ENV{"TEMP"};
-	if ($tmpdir eq "") {
+	if (!defined $tmpdir) {
 		$tmpdir = $ENV{"TMP"};
-		if ($tmpdir eq "") {
+		if (!defined $tmpdir) {
 			$tmpdir = "/tmp";
 		}
 	}
@@ -139,31 +143,31 @@ $comp_only{DB205A} = 1;
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
 
-$nooutput{NC110M} = 1;
-$nooutput{NC214M} = 1;
-$nooutput{OBSQ3A} = 1;
-$nooutput{ST102A} = 1;
-$nooutput{ST109A} = 1;
-$nooutput{ST110A} = 1;
-$nooutput{ST112M} = 1;
-$nooutput{ST113M} = 1;
-$nooutput{ST115A} = 1;
-$nooutput{ST116A} = 1;
-$nooutput{ST120A} = 1;
-$nooutput{ST122A} = 1;
-$nooutput{ST123A} = 1;
-$nooutput{DB301M} = 1;
-$nooutput{DB302M} = 1;
-$nooutput{DB303M} = 1;
-$nooutput{DB305M} = 1;
-$nooutput{IF402M} = 1;
+$no_output{NC110M} = 1;
+$no_output{NC214M} = 1;
+$no_output{OBSQ3A} = 1;
+$no_output{ST102A} = 1;
+$no_output{ST109A} = 1;
+$no_output{ST110A} = 1;
+$no_output{ST112M} = 1;
+$no_output{ST113M} = 1;
+$no_output{ST115A} = 1;
+$no_output{ST116A} = 1;
+$no_output{ST120A} = 1;
+$no_output{ST122A} = 1;
+$no_output{ST123A} = 1;
+$no_output{DB301M} = 1;
+$no_output{DB302M} = 1;
+$no_output{DB303M} = 1;
+$no_output{DB305M} = 1;
+$no_output{IF402M} = 1;
 
 $cobc_flags{SM206A} = "-fdebugging-line";
 
 # Programs that need to be "visual" inspected
 # NC113M: inspected additional to normal tests for output of hex values
 # SQ101M, SQ201M, SQ207M, SQ208M, SQ209M, SQ210M: send report.log to printer and check result
-# 
+#
 
 open (LOG, "> report.txt") or die;
 print LOG "Filename    total pass fail deleted inspect\n";
@@ -187,7 +191,7 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 
 	$exe =~ s/\.CBL//;
 	$exe =~ s/\.SUB//;
-	
+
 	printf LOG "%-12s", $in;
 	if ($skip{$exe}) {
 		$test_skipped++;
@@ -226,8 +230,8 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	$compile_current = "$compile_current 1> $exe.cobc.out 2>&1";
 
 	my $total = 0;
-	my $pass= 0;
-	my $fail= 0;
+	my $pass = 0;
+	my $fail = 0;
 	my $deleted = 0;
 	my $inspect = 0;
 
@@ -246,7 +250,7 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	#	$total = 7; --> aus Quelle übernehmen
 	#	open (my $COBC_OUT, '<', "$exe.cobc.out");
 	#	while (<$COBC_OUT>) {
-	#		if 
+	#		if
 	#		if (/ warning: ([A-Z-]+) .* obsolete /) {
 	#			$pass += 1;
 	#			next;
@@ -261,8 +265,8 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 		$total_ok++;
 		next;
 	}
-	
-	
+
+
 	if ($in =~ /\.CBL/) {
 		if ($ENV{'DB_HOME'}) {
 			$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; rm -f XXXXX*; rm -f $ENV{'DB_HOME'}/XXXXX*");
@@ -285,7 +289,7 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	if ($subt eq "RW") {
 		$ENV{"DD_XXXXX049"} = "$exe.rep";
 	}
-	$ENV{"report.log"} = "$exe.log";
+	$ENV{"REPORT"} = "$exe.log";
 	if ($raw_input{$exe}) {
 		$cmd = "$cmd < $exe.inp";
 		system ("echo \"$raw_input{$exe}\" > $exe.inp");
@@ -302,10 +306,10 @@ testrepeat:
 		print LOG "***** execute error $ret *****\n";
 		next;
 	}
-	if ($nooutput{$exe}) {
+	if ($no_output{$exe}) {
 		$total = 1;
 		$pass = 1;
-	} elsif (open (my $PRT, '<', "$exe.log")) {
+	} elsif (open (my $PRT, '<', $ENV{"REPORT"})) {
 
 		# NC107A: check hex values in report
 		if ($exe eq "NC107A") {
@@ -408,7 +412,6 @@ testrepeat:
 							$pass += 1;
 						}
 					}
-					
 				}
 			}
 
