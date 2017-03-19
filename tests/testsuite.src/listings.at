@@ -526,6 +526,218 @@ AT_CHECK([diff prog6.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([COPY multiple files])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([copy-fd-1.inc], [
+       FD  TEXTFILE-1        RECORD VARYING 1 TO 999 CHARACTERS
+                                 DEPENDING ON TEXTFILE-1-SIZE.
+       01  TEXTRECD-1.
+           03 FILLER         PIC X(999).
+      *
+])
+
+AT_DATA([copy-fd-2.inc], [
+       FD  TEXTFILE-2        RECORD VARYING 1 TO 999 CHARACTERS
+                                 DEPENDING ON TEXTFILE-2-SIZE.
+       01  TEXTRECD-2.
+           03 FILLER         PIC X(999).
+      *
+])
+
+AT_DATA([copy-ws-1.inc], [
+       01  TEXTFILE-1-NAME          PIC X(080)     VALUE "TEXTFILE.1".
+       01  TEXTFILE-1-OCFG          PIC X(001)     VALUE "C".
+           88 TEXTFILE-1-NOTOPEN    VALUE "C".
+           88 TEXTFILE-1-IS-OPEN    VALUE "I", "O", "U".
+       01  TEXTFILE-1-SIZE          PIC 9(004).
+      *
+])
+
+AT_DATA([copy-ws-2.inc], [
+       01  TEXTFILE-2-NAME          PIC X(080)     VALUE "TEXTFILE.2".
+       01  TEXTFILE-2-OCFG          PIC X(001)     VALUE "C".
+           88 TEXTFILE-2-NOTOPEN    VALUE "C".
+           88 TEXTFILE-2-IS-OPEN    VALUE "I", "O", "U".
+       01  TEXTFILE-2-SIZE          PIC 9(004).
+      *
+])
+
+AT_DATA([copy-sl-1.inc], [
+           SELECT TEXTFILE-1   ASSIGN TO DISK    TEXTFILE-1-NAME
+                               ORGANIZATION      LINE SEQUENTIAL
+                               ACCESS MODE       SEQUENTIAL.
+      *
+])
+
+AT_DATA([copy-sl-2.inc], [
+           SELECT TEXTFILE-2   ASSIGN TO DISK    TEXTFILE-2-NAME
+                               ORGANIZATION      LINE SEQUENTIAL
+                               ACCESS MODE       SEQUENTIAL.
+      *
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. tstcpybk.
+      *
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      *
+       SOURCE-COMPUTER. LINUX.
+       OBJECT-COMPUTER. LINUX.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           COPY "copy-sl-1.inc".
+           COPY "copy-sl-2.inc".
+
+       DATA DIVISION.
+       FILE SECTION.
+           COPY "copy-fd-1.inc".
+           COPY "copy-fd-2.inc".
+
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+           03 FILLER         PIC X(016)     VALUE 'FCSI CodeWerks:'.
+           03 FILLER         PIC X(064)     VALUE
+              'Name:tstcpybk.cbl  Version:1.7.1  Date:2017-03-15'.
+           03 FILLER         PIC X(002)     VALUE LOW-VALUES.
+      *
+           COPY "copy-ws-1.inc".
+           COPY "copy-ws-2.inc".
+
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE SECTION.
+       MAIN-PROCEDURE-0000.
+           CONTINUE.
+       MAIN-PROCEDURE-EXIT.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [0], [], [])
+
+AT_DATA([prog3.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. tstcpybk.
+000004        *
+000005         ENVIRONMENT DIVISION.
+000006         CONFIGURATION SECTION.
+000007        *
+000008         SOURCE-COMPUTER. LINUX.
+000009         OBJECT-COMPUTER. LINUX.
+000010
+000011         INPUT-OUTPUT SECTION.
+000012         FILE-CONTROL.
+000013             COPY "copy-sl-1.inc".
+000001C
+000002C            SELECT TEXTFILE-1   ASSIGN TO DISK    TEXTFILE-1-NAME
+000003C                                ORGANIZATION      LINE SEQUENTIAL
+000004C                                ACCESS MODE       SEQUENTIAL.
+000005C       *
+000014             COPY "copy-sl-2.inc".
+000001C
+000002C            SELECT TEXTFILE-2   ASSIGN TO DISK    TEXTFILE-2-NAME
+000003C                                ORGANIZATION      LINE SEQUENTIAL
+000004C                                ACCESS MODE       SEQUENTIAL.
+000005C       *
+000015
+000016         DATA DIVISION.
+000017         FILE SECTION.
+000018             COPY "copy-fd-1.inc".
+000001C
+000002C        FD  TEXTFILE-1        RECORD VARYING 1 TO 999 CHARACTERS
+000003C                                  DEPENDING ON TEXTFILE-1-SIZE.
+000004C        01  TEXTRECD-1.
+000005C            03 FILLER         PIC X(999).
+000006C       *
+000019             COPY "copy-fd-2.inc".
+000001C
+000002C        FD  TEXTFILE-2        RECORD VARYING 1 TO 999 CHARACTERS
+000003C                                  DEPENDING ON TEXTFILE-2-SIZE.
+000004C        01  TEXTRECD-2.
+000005C            03 FILLER         PIC X(999).
+000006C       *
+000020
+000021         WORKING-STORAGE SECTION.
+000022         01  FILLER.
+000023             03 FILLER         PIC X(016)     VALUE 'FCSI CodeWerks:'.
+000024             03 FILLER         PIC X(064)     VALUE
+000025                'Name:tstcpybk.cbl  Version:1.7.1  Date:2017-03-15'.
+000026             03 FILLER         PIC X(002)     VALUE LOW-VALUES.
+000027        *
+000028             COPY "copy-ws-1.inc".
+000001C
+000002C        01  TEXTFILE-1-NAME          PIC X(080)     VALUE "TEXTFILE.1".
+000003C        01  TEXTFILE-1-OCFG          PIC X(001)     VALUE "C".
+000004C            88 TEXTFILE-1-NOTOPEN    VALUE "C".
+000005C            88 TEXTFILE-1-IS-OPEN    VALUE "I", "O", "U".
+000006C        01  TEXTFILE-1-SIZE          PIC 9(004).
+000007C       *
+000029             COPY "copy-ws-2.inc".
+000001C
+000002C        01  TEXTFILE-2-NAME          PIC X(080)     VALUE "TEXTFILE.2".
+000003C        01  TEXTFILE-2-OCFG          PIC X(001)     VALUE "C".
+000004C            88 TEXTFILE-2-NOTOPEN    VALUE "C".
+000005C            88 TEXTFILE-2-IS-OPEN    VALUE "I", "O", "U".
+000006C        01  TEXTFILE-2-SIZE          PIC 9(004).
+000007C       *
+000030
+000031         PROCEDURE DIVISION.
+000032         MAIN-PROCEDURE SECTION.
+000033         MAIN-PROCEDURE-0000.
+000034             CONTINUE.
+000035         MAIN-PROCEDURE-EXIT.
+000036             STOP RUN.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+00999 FILE                TEXTFILE-1
+00999 GROUP          01   TEXTRECD-1
+00999 ALPHANUMERIC   03     FILLER                       X(999)
+
+00999 FILE                TEXTFILE-2
+00999 GROUP          01   TEXTRECD-2
+00999 ALPHANUMERIC   03     FILLER                       X(999)
+
+00082 GROUP          01   FILLER
+00016 ALPHANUMERIC   03     FILLER                       X(016)
+00064 ALPHANUMERIC   03     FILLER                       X(064)
+00002 ALPHANUMERIC   03     FILLER                       X(002)
+
+00080 ALPHANUMERIC   01   TEXTFILE-1-NAME                X(080)
+
+00001 ALPHANUMERIC   01   TEXTFILE-1-OCFG                X(001)
+      CONDITIONAL    88     TEXTFILE-1-NOTOPEN
+      CONDITIONAL    88     TEXTFILE-1-IS-OPEN
+
+00004 ALPHANUMERIC   01   TEXTFILE-1-SIZE                9(004)
+
+00080 ALPHANUMERIC   01   TEXTFILE-2-NAME                X(080)
+
+00001 ALPHANUMERIC   01   TEXTFILE-2-OCFG                X(001)
+      CONDITIONAL    88     TEXTFILE-2-NOTOPEN
+      CONDITIONAL    88     TEXTFILE-2-IS-OPEN
+
+00004 ALPHANUMERIC   01   TEXTFILE-2-SIZE                9(004)
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
 AT_SETUP([Eject page])
 AT_KEYWORDS([listing])
 

@@ -1,4 +1,9 @@
 
+2017-03-19  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.h, pplex.l: Restored copy_tail functionality. The copy books were
+	  not being chained for the listing processor.
+
 2017-03-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (setup_program_start): moved call to (cb_build_program) to

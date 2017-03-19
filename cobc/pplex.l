@@ -1083,6 +1083,11 @@ get_new_listing_file (void)
 	if (!cb_current_file->copy_head) {
 		cb_current_file->copy_head = newfile;
 	}
+	if (cb_current_file->copy_tail) {
+		cb_current_file->copy_tail->next = newfile;
+	}
+	cb_current_file->copy_tail = newfile;
+	   
 	memset (newfile, 0, sizeof (struct list_files));
 	newfile->copy_line = cb_source_line;
 	newfile->source_format = cb_source_format;
