@@ -1,4 +1,9 @@
 
+2017-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_chain_setup): only set field's value if given on
+	  command line, preserve program internal initialization otherwise
+
 2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_module_enter): set cob_call_params from argc
@@ -1530,9 +1535,9 @@
 
 2006-05-08  Roger While <simrw@sim-basis.de>
 
-	* common.c, common.h: cob_chain_setup - Setp CHAINING params from
+	* common.c, common.h: cob_chain_setup - setup CHAINING params from
 	  command line
-	* strings.c, strings.h: Implement TRAILING syntax in INSPECT clause
+	* strings.c, strings.h: implement TRAILING syntax in INSPECT clause
 
 2006-05-05  Roger While <simrw@sim-basis.de>
 

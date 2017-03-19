@@ -3187,10 +3187,6 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 		COBC_ABORT ();
 	}
 
-	if (f->flag_chained) {
-		return INITIALIZE_ONE;
-	}
-
 	if (f->flag_external && !p->flag_init_statement) {
 		return INITIALIZE_NONE;
 	}
@@ -3436,6 +3432,23 @@ output_initialize_uniform (cb_tree x, const int c, const int size)
 }
 
 static void
+output_initialize_chaining (struct cb_field *f, struct cb_initialize *p)
+{
+	/* only handle CHAINING for program initialization*/
+	if (p->flag_init_statement) {
+		return;
+	}
+	/* Note: CHAINING must be an extra initialization step as parameters not passed
+	         must have standard initialization */
+	if (f->flag_chained) {
+		output_prefix ();
+		output ("cob_chain_setup (");
+		output_data (p->var);
+		output (", %d, %d);\n", f->param_num, f->size);
+	}
+}
+
+static void
 output_initialize_one (struct cb_initialize *p, cb_tree x)
 {
 	struct cb_field		*f;
@@ -3453,14 +3466,6 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 
 	f = cb_code_field (x);
 
-	/* CHAINING */
-	if (f->flag_chained) {
-		output_prefix ();
-		output ("cob_chain_setup (");
-		output_data (x);
-		output (", %d, %d);\n", f->param_num, f->size);
-		return;
-	}
 	/* Initialize by value */
 	if (p->val && f->values) {
 		value = CB_VALUE (f->values);
@@ -3781,11 +3786,13 @@ output_initialize (struct cb_initialize *p)
 			return;
 		case INITIALIZE_ONE:
 			output_initialize_one (p, p->var);
+			output_initialize_chaining (f, p);
 			return;
 		case INITIALIZE_DEFAULT:
 			c = initialize_uniform_char (f, p);
 			if (c != -1) {
 				output_initialize_uniform (p->var, c, f->occurs_max);
+				output_initialize_chaining (f, p);
 				return;
 			}
 			/* Fall through */
@@ -3800,6 +3807,7 @@ output_initialize (struct cb_initialize *p)
 			CB_REFERENCE (x)->subs =
 				CB_CHAIN (CB_REFERENCE (x)->subs);
 			output_indent ("}");
+			output_initialize_chaining (f, p);
 			return;
 		default:
 			break;
@@ -3810,16 +3818,19 @@ output_initialize (struct cb_initialize *p)
 		return;
 	case INITIALIZE_ONE:
 		output_initialize_one (p, p->var);
+		output_initialize_chaining (f, p);
 		return;
 	case INITIALIZE_DEFAULT:
 		c = initialize_uniform_char (f, p);
 		if (c != -1) {
 			output_initialize_uniform (p->var, c, f->size);
+			output_initialize_chaining (f, p);
 			return;
 		}
 		/* Fall through */
 	case INITIALIZE_COMPOUND:
 		output_initialize_compound (p, p->var);
+		output_initialize_chaining (f, p);
 		return;
 	default:
 		break;
@@ -7410,6 +7421,14 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		      cb_flag_implicit_init);
 	output_newline ();
 
+	if (prog->flag_chained) {
+		output_line ("/* Check program with CHAINING being main program */");
+		output_line ("if (cob_glob_ptr->cob_current_module->next) {");
+		output_line ("\tcob_fatal_error (COB_FERROR_CHAINING);");
+		output_line ("}");
+		output_newline ();
+	}
+
 	/* Check INITIAL programms being non-recursive */
 	if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_RECURSIVE_CALL)
 		&& prog->flag_initial) {
@@ -7523,10 +7542,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_line ("/* Initialize rest of program */");
 	output_line ("if (unlikely(initialized == 0)) {");
 	output_line ("\tgoto P_initialize;");
-	if (prog->flag_chained) {
-		output_line ("} else {");
-		output_line ("\tcob_fatal_error (COB_FERROR_CHAINING);");
-	}
 	output_line ("}");
 	output_line ("P_ret_initialize:");
 	output_newline ();

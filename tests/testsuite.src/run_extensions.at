@@ -1548,8 +1548,8 @@ AT_CHECK([./caller], [0], [], [])
 
 AT_CLEANUP
 
-AT_SETUP([PROCEDURE DIVISION CHAINING ...])
-AT_KEYWORDS([extensions])
+AT_SETUP([PROCEDURE DIVISION CHAINING])
+AT_KEYWORDS([extensions CALL INITIALIZE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1558,19 +1558,110 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  X            PIC X.
        01  ABCD         PIC X(4).
+       01  NUM          PIC 9 VALUE 7.
        PROCEDURE        DIVISION
-                        CHAINING X ABCD.
-           IF X    NOT = "X" OR
+                        CHAINING X ABCD NUM.
+           IF X    NOT = "X"    OR
               ABCD NOT = "ABCD"
               DISPLAY "X = " X " ABCD = " ABCD
               END-DISPLAY
-           END-IF.
+           END-IF
+           IF NUM  NOT = 7
+              DISPLAY "NUM not INITIALIZED: " NUM
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  VAR.
+           03  X            PIC X VALUE 'a'.
+           03  ABCD         PIC X(4).
+           03  NUM          PIC 9 VALUE 7.
+       PROCEDURE        DIVISION
+                        CHAINING VAR.
+           DISPLAY '-' VAR '-' WITH NO ADVANCING
+           END-DISPLAY
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC X.
+       01  ABCD         PIC X(4).
+       01  NUM          PIC 9 VALUE 7.
+       PROCEDURE        DIVISION
+                        CHAINING X ABCD NUM.
+           IF X    NOT = "X"    OR
+              ABCD NOT = "ABCD"
+              DISPLAY "X = " X " ABCD = " ABCD
+              END-DISPLAY
+           END-IF
+           IF NUM  NOT = 7
+              DISPLAY "NUM not INITIALIZED: " NUM
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_DATA([caller.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION.
+           CALL "prog3" USING "X ABCD" END-CALL
+           STOP RUN.
+])
+
+AT_DATA([init.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      init.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  VAR.
+           03  X            PIC X VALUE 'a'.
+           03  ABCD         PIC X(4).
+           03  NUM          PIC 9  VALUE 7.
+       77  NUM2             PIC 99 VALUE 2.
+       PROCEDURE        DIVISION
+                        CHAINING VAR.
+           DISPLAY '-' VAR NUM2 '-' WITH NO ADVANCING
+           END-DISPLAY
+           INITIALIZE  VAR NUM2
+           DISPLAY '-' VAR NUM2 '-' WITH NO ADVANCING
+           MOVE 'XXXX' TO ABCD
+           INITIALIZE  VAR NUM2 ALL TO VALUE
+           DISPLAY '-' VAR NUM2 '-' WITH NO ADVANCING
+           MOVE ALL 'b' TO ABCD
+           INITIALIZE  VAR NUM2 ALL TO VALUE THEN TO DEFAULT
+           DISPLAY '-' VAR NUM2 '-' WITH NO ADVANCING
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-
 AT_CHECK([./prog X ABCD], [0], [], [])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([./prog2 X], [0], [-X     -], [])
+AT_CHECK([./prog2], [0], [-a    7-], [])
+
+AT_CHECK([$COMPILE_MODULE prog3.cob], [0], [], [])
+AT_CHECK([$COBCRUN prog3 X ABCD], [0], [], [])
+
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([./caller X ABCD], [1], [],
+[libcob: caller.cob: 6: CALL of program with CHAINING clause
+])
+
+AT_CHECK([$COMPILE init.cob], [0], [], [])
+AT_CHECK([./init X], [0], [-X     02--     000--aXXXX702--a    702-], [])
 
 AT_CLEANUP
 

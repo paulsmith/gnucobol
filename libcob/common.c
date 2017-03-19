@@ -2991,16 +2991,16 @@ cob_chain_setup (void *data, const size_t parm, const size_t size)
 {
 	size_t	len;
 
-	memset (data, ' ', size);
+	/* only set if given on command-line, otherwise use normal 
+	   program internal initialization */
 	if (parm <= (size_t)cob_argc - 1) {
+		memset (data, ' ', size);
 		len = strlen (cob_argv[parm]);
 		if (len <= size) {
 			memcpy (data, cob_argv[parm], len);
 		} else {
 			memcpy (data, cob_argv[parm], size);
 		}
-	} else {
-		memset (data, ' ', size);
 	}
 }
 
@@ -5364,7 +5364,7 @@ cob_fatal_error(const int fatal_error)
 		cob_runtime_error(_("codegen error - Please report this!"));
 		break;
 	case COB_FERROR_CHAINING:
-		cob_runtime_error(_("recursive call of chained program"));
+		cob_runtime_error(_("CALL of program with CHAINING clause"));
 		break;
 	case COB_FERROR_STACK:
 		cob_runtime_error(_("stack overflow, possible PERFORM depth exceeded"));
