@@ -4,6 +4,8 @@
 	* parser.y (setup_program_start): moved call to (cb_build_program) to
 	  (setup_program), after the PROGRAM-ID has been checked for
 	  redefinition (see bug #271).
+	* parser.y (file_control_entry): fixed bug #352 by not setting
+	  current_file to NULL in invalid SELECT entries.
 
 2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
