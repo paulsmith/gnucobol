@@ -1,8 +1,9 @@
 
 2017-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* common.c (cob_sys_return_args): C$NARG - set number from argc
+	* common.c (cob_module_enter): set cob_call_params from argc
 	  for main programs
+	* common.c (cob_chain_setup): don't set cob_call_params any more
 	* common.c [_MSC_VER] (cob_get_current_date_and_time):
 	  silence wrong warning 6011
 

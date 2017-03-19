@@ -1673,7 +1673,11 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 		*module = cob_cache_malloc (sizeof(cob_module));
 	}
 
-	/* Save parameter count */
+	/* Save parameter count, get number from argc if main program */
+	if (!COB_MODULE_PTR) {
+		cobglobptr->cob_call_params = cob_argc - 1;
+	}
+
 	(*module)->module_num_params = cobglobptr->cob_call_params;
 
 	/* Push module pointer */
@@ -2996,7 +3000,6 @@ cob_chain_setup (void *data, const size_t parm, const size_t size)
 	} else {
 		memset (data, ' ', size);
 	}
-	cobglobptr->cob_call_params = cob_argc - 1;
 }
 
 void
@@ -3880,13 +3883,8 @@ cob_sys_return_args (void *data)
 	COB_CHK_PARMS (C$NARG, 1);
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
-		/* get number from argc if main program */
-		if (COB_MODULE_PTR->next) {
-			cob_set_int (COB_MODULE_PTR->cob_procedure_params[0],
-				COB_MODULE_PTR->module_num_params);
-		} else {
-			cob_set_int (COB_MODULE_PTR->cob_procedure_params[0], cob_argc - 1);
-		}
+		cob_set_int (COB_MODULE_PTR->cob_procedure_params[0],
+			COB_MODULE_PTR->module_num_params);
 	}
 	return 0;
 }
