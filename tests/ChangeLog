@@ -3,7 +3,8 @@
 
 	* report.pl, EXEC85.conf.in: fixed bug #363: redefining filename (viz.
 	  "report.log") as variable is not portable.
-	* report.pl: fixed warnings and added "use warnings;" directive.
+	* report.pl, summary.pl: fixed warnings and added "use warnings;" and
+	  "use strict;" directives.
 
 2017-03-19  Dave Pitts <dpitts@cozx.com>
 

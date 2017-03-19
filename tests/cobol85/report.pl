@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+use strict;
 use warnings;
 
 $SIG{INT} = sub { die "\nInterrupted\n" };
@@ -104,15 +105,19 @@ $ENV{"COB_DISABLE_WARNINGS"} = "Y";
 # Dealt with lower down in the code
 
 # Skip DB203A if no ISAM configured
+my %skip;
 if ($ENV{'COB_HAS_ISAM'} eq "no") {
 	$skip{DB203A} = 1;
 }
 
 # OBNC1M tests the STOP literal statement and requires user input with a final kill.
+my %raw_input;
 $raw_input{OBNC1M} = "\n\n\n\n\n\n\n\n\003"; # 8 newlines + kill character
+my %to_kill;
 $to_kill{OBNC1M} = 1;
 
 # NC114M test the compiler listing along to other parts.
+my %cobc_flags;
 $cobc_flags{NC114M} = "-t NC114M.lst --no-symbols";
 
 # NC302M tests the compiler flagging of obsolete features, including STOP literal.
@@ -127,6 +132,7 @@ $cobc_flags{DB304M} = "-Wobsolete";
 # The following tests are for compiler flagging and cannot run without abends.
 # TO-DO: automatically check cobc emits the right number of warnings with
 # -Wobsolete (ignore high subset checking).
+my %comp_only;
 $comp_only{NC401M} = 1;
 $comp_only{RL301M} = 1;
 $comp_only{RL401M} = 1;
@@ -143,6 +149,7 @@ $comp_only{DB205A} = 1;
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
 
+my %no_output;
 $no_output{NC110M} = 1;
 $no_output{NC214M} = 1;
 $no_output{OBSQ3A} = 1;
@@ -173,6 +180,7 @@ open (LOG, "> report.txt") or die;
 print LOG "Filename    total pass fail deleted inspect\n";
 print LOG "--------    ----- ---- ---- ------- -------\n";
 
+my $in;
 foreach $in (glob("lib/*.CBL")) {
 	print "$compile_module $in\n";
 	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $compile_module $in");

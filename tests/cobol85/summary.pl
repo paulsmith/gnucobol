@@ -1,7 +1,7 @@
 #
 # gnucobol/tests/cobol85/summary.pl
 #
-# Copyright (C) 2002-2012 Free Software Foundation, Inc.
+# Copyright (C) 2002-2012, 2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While
 #
 # This file is part of GnuCOBOL.
@@ -19,6 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+use strict;
+use warnings;
+
 my $total_progs = 0;
 my $total_executed = 0;
 my $total_error = 0;
@@ -33,37 +36,48 @@ print ("------ Directory Information -------   --- Total Tests Information ---\n
 print ("Module Programs Executed Error Crash   Pass Fail Deleted Inspect Total\n");
 print ("------ -------- -------- ----- -----  ----- ---- ------- ------- -----\n");
 
+my $module;
 while ($module = shift) {
-  open(IN, "$module/report.txt") or die;
-  while (<IN>) {
-    if (/^Total *(\d+) *(\d+) *(\d+) *(\d+) *(\d+)/) {
-      ($test, $pass, $fail, $delete, $inspect) = ($1, $2, $3, $4, $5);
-    } elsif (/^Number of programs: *(\d+)/) {
-      $progs = $1;
-    } elsif (/^Successfully executed: *(\d+)/) {
-      $executed = $1;
-    } elsif (/^Compile error: *(\d+)/) {
-      $error = $1;
-    } elsif (/^Execute error: *(\d+)/) {
-      $crash = $1;
-    }
-  }
-  printf "%-6s %8d %8d %5d %5d   %4d %4d %7d %7d %5d\n",
-	  $module, $progs, $executed, $error, $crash,
-	  $pass, $fail, $delete, $inspect, $test;
-  $total_progs += $progs;
-  $total_executed += $executed;
-  $total_error += $error;
-  $total_crash += $crash;
-  $total_pass += $pass;
-  $total_fail += $fail;
-  $total_del += $delete;
-  $total_insp += $inspect;
-  $total_total += $test;
+	open(IN, "$module/report.txt") or die;
+        my $test;
+        my $pass;
+        my $fail;
+        my $delete;
+        my $inspect;
+        my $progs;
+        my $executed;
+        my $error;
+        my $crash;
+
+	while (<IN>) {
+		if (/^Total *(\d+) *(\d+) *(\d+) *(\d+) *(\d+)/) {
+			($test, $pass, $fail, $delete, $inspect) = ($1, $2, $3, $4, $5);
+		} elsif (/^Number of programs: *(\d+)/) {
+			$progs = $1;
+		} elsif (/^Successfully executed: *(\d+)/) {
+			$executed = $1;
+		} elsif (/^Compile error: *(\d+)/) {
+			$error = $1;
+		} elsif (/^Execute error: *(\d+)/) {
+			$crash = $1;
+		}
+	}
+	printf "%-6s %8d %8d %5d %5d   %4d %4d %7d %7d %5d\n",
+	$module, $progs, $executed, $error, $crash,
+	$pass, $fail, $delete, $inspect, $test;
+	$total_progs += $progs;
+	$total_executed += $executed;
+	$total_error += $error;
+	$total_crash += $crash;
+	$total_pass += $pass;
+	$total_fail += $fail;
+	$total_del += $delete;
+	$total_insp += $inspect;
+	$total_total += $test;
 }
 
 print ("------ -------- -------- ----- -----  ----- ---- ------- ------- -----\n");
 printf "Total  %8d %8d %5d %5d  %5d %4d %7d %7d %5d\n",
-	$total_progs, $total_executed, $total_error, $total_crash,
-	$total_pass, $total_fail, $total_del, $total_insp, $total_total;
-print {"STDERR"} "Total executed programs : $total_executed - Total performed tests : $total_total\n\n";
+    $total_progs, $total_executed, $total_error, $total_crash,
+    $total_pass, $total_fail, $total_del, $total_insp, $total_total;
+print STDERR "Total executed programs : $total_executed - Total performed tests : $total_total\n\n";
