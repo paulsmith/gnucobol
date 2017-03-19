@@ -900,6 +900,12 @@ setup_program_start (void)
 		check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0);
 	}
 	first_nested_program = 1;
+}
+
+static int
+setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
+{
+	setup_program_start ();
 
 	if (first_prog) {
 		first_prog = 0;
@@ -914,12 +920,6 @@ setup_program_start (void)
 		build_nested_special (depth);
 		cb_build_registers ();
 	}
-}
-
-static int
-setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
-{
-	setup_program_start();
 
 	if (CB_LITERAL_P (id)) {
 		stack_progid[depth] = (char *)(CB_LITERAL (id)->data);
@@ -1651,7 +1651,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 		cb_error_x (x, _("'%s' is not USAGE DISPLAY"), cb_name (x));
 	}
 }
- 
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -2471,9 +2471,9 @@ _identification_header:
   %prec SHIFT_PREFER
 | identification_or_id DIVISION TOK_DOT
   {
-	setup_program_start();
+	setup_program_start ();
 	setup_from_identification = 1;
-}
+  }
 ;
 
 

@@ -1096,27 +1096,27 @@ void
 cb_trim_program_id (cb_tree id_literal)
 {
 	char	*s;
-	int		len;
+	int	len;
 
-	s = (char *)(CB_LITERAL (id_literal)->data);
-	if (!strchr(s, ' ')) {
+	s = (char *) (CB_LITERAL (id_literal)->data);
+	if (!strchr (s, ' ')) {
 		return;
 	}
 
-	len = strlen(s);
+	len = strlen (s);
 	if (*s == ' ') {
 		/* same warning as in libcob/common.c */
 		cb_warning_x (id_literal,
 			_("'%s' literal includes leading spaces which are omitted"), s);
 	}
-	if (s[len-1] == ' ') {
+	if (s[len - 1] == ' ') {
 		cb_warning_x (id_literal,
 			_("'%s' literal includes trailing spaces which are omitted"), s);
 	}
 	while (*s == ' ') {
-		memmove(s, s+1, len--);
+		memmove (s, s + 1, len--);
 	}
-	while (s[len-1] == ' ' && len > 0) {
+	while (s[len - 1] == ' ' && len > 0) {
 		len--;
 	}
 	s[len] = 0;
@@ -1185,7 +1185,7 @@ char *
 cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
 {
 	const char	*name_str;
-	char			*s;
+	char		*s;
 	unsigned char	*p;
 
 	/* Set the program name */
@@ -1480,7 +1480,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 		} else {
 			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
 		}
-		xr = cb_build_reference(full_name);
+		xr = cb_build_reference (full_name);
 
 		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) &&
 		    !current_statement->flag_no_based) {
@@ -2642,7 +2642,7 @@ cb_validate_program_body (struct cb_program *prog)
 		if (CB_LABEL_P (v)) {
 			if (CB_REFERENCE (x)->flag_in_decl &&
 				!CB_LABEL (v)->flag_declaratives) {
-				/* verfify reference-out-of-declaratives  */
+				/* verify reference-out-of-declaratives  */
 				switch (cb_reference_out_of_declaratives) {
 				case CB_OK:
 					break;
