@@ -1,4 +1,8 @@
 
+2017-03-21  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Changed variable indentation and redefines.
+
 2017-03-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* report.pl, EXEC85.conf.in: fixed bug #363: redefining filename (viz.

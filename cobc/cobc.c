@@ -4125,9 +4125,7 @@ print_88_values (int lvl, struct cb_field *field)
 	char lcl_name[80];
 
 	for (f = field->validation; f; f = f->sister) {
-		memset (lcl_name, 0, sizeof(lcl_name));
-		memset (lcl_name, ' ', lvl * 2);
-		strncat (lcl_name, (char *)f->name, sizeof(lcl_name) - lvl * 2 - 1);
+		strcpy (lcl_name, (char *)f->name);
 		snprintf (print_data, CB_PRINT_LEN,
 			"      %-14.14s %02d   %s",
 			"CONDITIONAL", f->level, lcl_name);
@@ -4155,9 +4153,7 @@ print_fields (int indent, struct cb_field *top)
 		}
 		found = 1;
 
-		memset (lcl_name, 0, sizeof(lcl_name));
-		memset (lcl_name, ' ', indent * 2);
-		strcat (lcl_name, check_filler_name((char *)top->name));
+		strcpy (lcl_name, check_filler_name((char *)top->name));
 		get_cat = 1;
 		got_picture = 1;
 
@@ -4183,8 +4179,6 @@ print_fields (int indent, struct cb_field *top)
 				picture[0] = 0;
 			}
 			got_picture = set_picture (top, picture, picture_len);
-			if (top->redefines)
-				strcat (type, "-R");
 		}
 
 		if (top->flag_any_length || top->flag_unbounded) {
@@ -4212,6 +4206,9 @@ print_fields (int indent, struct cb_field *top)
 			} else {
 				pd_off += sprintf (print_data + pd_off, "OCCURS %d", top->occurs_max);
 			}
+		}
+		if (top->redefines && !top->file) {
+			pd_off += sprintf (print_data + pd_off, ", REDEFINES %s", top->redefines->name);
 		}
 		print_program_data (print_data);
 
@@ -4413,7 +4410,7 @@ static int
 xref_fields (struct cb_field *top)
 {
 	char		lcl_name[80];
-	int			found = 0;
+	int		found = 0;
 
 	for (; top; top = top->sister) {
 

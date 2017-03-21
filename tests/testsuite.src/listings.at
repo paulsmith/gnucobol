@@ -701,30 +701,30 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00999 FILE                TEXTFILE-1
 00999 GROUP          01   TEXTRECD-1
-00999 ALPHANUMERIC   03     FILLER                       X(999)
+00999 ALPHANUMERIC   03   FILLER                         X(999)
 
 00999 FILE                TEXTFILE-2
 00999 GROUP          01   TEXTRECD-2
-00999 ALPHANUMERIC   03     FILLER                       X(999)
+00999 ALPHANUMERIC   03   FILLER                         X(999)
 
 00082 GROUP          01   FILLER
-00016 ALPHANUMERIC   03     FILLER                       X(016)
-00064 ALPHANUMERIC   03     FILLER                       X(064)
-00002 ALPHANUMERIC   03     FILLER                       X(002)
+00016 ALPHANUMERIC   03   FILLER                         X(016)
+00064 ALPHANUMERIC   03   FILLER                         X(064)
+00002 ALPHANUMERIC   03   FILLER                         X(002)
 
 00080 ALPHANUMERIC   01   TEXTFILE-1-NAME                X(080)
 
 00001 ALPHANUMERIC   01   TEXTFILE-1-OCFG                X(001)
-      CONDITIONAL    88     TEXTFILE-1-NOTOPEN
-      CONDITIONAL    88     TEXTFILE-1-IS-OPEN
+      CONDITIONAL    88   TEXTFILE-1-NOTOPEN
+      CONDITIONAL    88   TEXTFILE-1-IS-OPEN
 
 00004 ALPHANUMERIC   01   TEXTFILE-1-SIZE                9(004)
 
 00080 ALPHANUMERIC   01   TEXTFILE-2-NAME                X(080)
 
 00001 ALPHANUMERIC   01   TEXTFILE-2-OCFG                X(001)
-      CONDITIONAL    88     TEXTFILE-2-NOTOPEN
-      CONDITIONAL    88     TEXTFILE-2-IS-OPEN
+      CONDITIONAL    88   TEXTFILE-2-NOTOPEN
+      CONDITIONAL    88   TEXTFILE-2-IS-OPEN
 
 00004 ALPHANUMERIC   01   TEXTFILE-2-SIZE                9(004)
 
@@ -1701,41 +1701,41 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00512 ALPHANUMERIC   77   WS-Where                       X(512)
 
 04524 GROUP          01   ws-mysql
-00004 POINTER        02     ws-mysql-cid
-00004 POINTER        02     ws-mysql-result
-00004 POINTER        02     ws-mysql-result-2
-00004 POINTER        02     ws-mysql-result-3
-00004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
-00004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
-00080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
-00064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
-00064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
-00064 ALPHANUMERIC   02     ws-mysql-password            X(64)
-00064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
-00004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
-00064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
-04096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
+00004 POINTER        02   ws-mysql-cid
+00004 POINTER        02   ws-mysql-result
+00004 POINTER        02   ws-mysql-result-2
+00004 POINTER        02   ws-mysql-result-3
+00004 NUMERIC        02   ws-mysql-count-rows            S9(9) COMP
+00004 ALPHANUMERIC   02   ws-mysql-error-number          X(4)
+00080 ALPHANUMERIC   02   ws-mysql-error-message         X(80)
+00064 ALPHANUMERIC   02   ws-mysql-host-name             X(64)
+00064 ALPHANUMERIC   02   ws-mysql-implementation        X(64)
+00064 ALPHANUMERIC   02   ws-mysql-password              X(64)
+00064 ALPHANUMERIC   02   ws-mysql-base-name             X(64)
+00004 ALPHANUMERIC   02   ws-mysql-port-number           X(4)
+00064 ALPHANUMERIC   02   ws-mysql-socket                X(64)
+04096 ALPHANUMERIC   02   ws-mysql-command               X(4096)
 
 00004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
 
 00006 GROUP          01   subscripts
-00002 NUMERIC        12     J                            S9(4) COMP-5
-00002 NUMERIC        12     K                            S9(4) COMP-5
-00002 NUMERIC        12     L                            S9(4) COMP-5
+00002 NUMERIC        12   J                              S9(4) COMP-5
+00002 NUMERIC        12   K                              S9(4) COMP-5
+00002 NUMERIC        12   L                              S9(4) COMP-5
 
 00078 GROUP          01   Display-Message-1
-00009 ALPHANUMERIC   03     FILLER                       X(9)
-00069 ALPHANUMERIC   03     FILLER                       X(69)
+00009 ALPHANUMERIC   03   FILLER                         X(9)
+00069 ALPHANUMERIC   03   FILLER                         X(69)
 
 00318 GROUP          01   Display-Message-2
-00018 ALPHANUMERIC   03     FILLER                       X(18)
-00004 ALPHANUMERIC   03     FILLER                       X(4)
-00006 ALPHANUMERIC   03     FILLER                       X(6)
-00003 ALPHANUMERIC   03     FILLER                       9(3)
-00009 ALPHANUMERIC   03     FILLER                       X(9)
-00199 ALPHANUMERIC   03     FILLER                       X(199)
-00012 ALPHANUMERIC   03     FILLER                       X(12)
-00067 ALPHANUMERIC   03     FILLER                       X(67)
+00018 ALPHANUMERIC   03   FILLER                         X(18)
+00004 ALPHANUMERIC   03   FILLER                         X(4)
+00006 ALPHANUMERIC   03   FILLER                         X(6)
+00003 ALPHANUMERIC   03   FILLER                         9(3)
+00009 ALPHANUMERIC   03   FILLER                         X(9)
+00199 ALPHANUMERIC   03   FILLER                         X(199)
+00012 ALPHANUMERIC   03   FILLER                         X(12)
+00067 ALPHANUMERIC   03   FILLER                         X(67)
 
 
 0 warnings in compilation group
@@ -1804,41 +1804,41 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00512 ALPHANUMERIC   77   WS-Where                       X(512)
 
 04540 GROUP          01   ws-mysql
-00008 POINTER        02     ws-mysql-cid
-00008 POINTER        02     ws-mysql-result
-00008 POINTER        02     ws-mysql-result-2
-00008 POINTER        02     ws-mysql-result-3
-00004 NUMERIC        02     ws-mysql-count-rows          S9(9) COMP
-00004 ALPHANUMERIC   02     ws-mysql-error-number        X(4)
-00080 ALPHANUMERIC   02     ws-mysql-error-message       X(80)
-00064 ALPHANUMERIC   02     ws-mysql-host-name           X(64)
-00064 ALPHANUMERIC   02     ws-mysql-implementation      X(64)
-00064 ALPHANUMERIC   02     ws-mysql-password            X(64)
-00064 ALPHANUMERIC   02     ws-mysql-base-name           X(64)
-00004 ALPHANUMERIC   02     ws-mysql-port-number         X(4)
-00064 ALPHANUMERIC   02     ws-mysql-socket              X(64)
-04096 ALPHANUMERIC   02     ws-mysql-command             X(4096)
+00008 POINTER        02   ws-mysql-cid
+00008 POINTER        02   ws-mysql-result
+00008 POINTER        02   ws-mysql-result-2
+00008 POINTER        02   ws-mysql-result-3
+00004 NUMERIC        02   ws-mysql-count-rows            S9(9) COMP
+00004 ALPHANUMERIC   02   ws-mysql-error-number          X(4)
+00080 ALPHANUMERIC   02   ws-mysql-error-message         X(80)
+00064 ALPHANUMERIC   02   ws-mysql-host-name             X(64)
+00064 ALPHANUMERIC   02   ws-mysql-implementation        X(64)
+00064 ALPHANUMERIC   02   ws-mysql-password              X(64)
+00064 ALPHANUMERIC   02   ws-mysql-base-name             X(64)
+00004 ALPHANUMERIC   02   ws-mysql-port-number           X(4)
+00064 ALPHANUMERIC   02   ws-mysql-socket                X(64)
+04096 ALPHANUMERIC   02   ws-mysql-command               X(4096)
 
 00004 ALPHANUMERIC   01   ws-No-Paragraph                9(4)
 
 00006 GROUP          01   subscripts
-00002 NUMERIC        12     J                            S9(4) COMP-5
-00002 NUMERIC        12     K                            S9(4) COMP-5
-00002 NUMERIC        12     L                            S9(4) COMP-5
+00002 NUMERIC        12   J                              S9(4) COMP-5
+00002 NUMERIC        12   K                              S9(4) COMP-5
+00002 NUMERIC        12   L                              S9(4) COMP-5
 
 00078 GROUP          01   Display-Message-1
-00009 ALPHANUMERIC   03     FILLER                       X(9)
-00069 ALPHANUMERIC   03     FILLER                       X(69)
+00009 ALPHANUMERIC   03   FILLER                         X(9)
+00069 ALPHANUMERIC   03   FILLER                         X(69)
 
 00318 GROUP          01   Display-Message-2
-00018 ALPHANUMERIC   03     FILLER                       X(18)
-00004 ALPHANUMERIC   03     FILLER                       X(4)
-00006 ALPHANUMERIC   03     FILLER                       X(6)
-00003 ALPHANUMERIC   03     FILLER                       9(3)
-00009 ALPHANUMERIC   03     FILLER                       X(9)
-00199 ALPHANUMERIC   03     FILLER                       X(199)
-00012 ALPHANUMERIC   03     FILLER                       X(12)
-00067 ALPHANUMERIC   03     FILLER                       X(67)
+00018 ALPHANUMERIC   03   FILLER                         X(18)
+00004 ALPHANUMERIC   03   FILLER                         X(4)
+00006 ALPHANUMERIC   03   FILLER                         X(6)
+00003 ALPHANUMERIC   03   FILLER                         9(3)
+00009 ALPHANUMERIC   03   FILLER                         X(9)
+00199 ALPHANUMERIC   03   FILLER                         X(199)
+00012 ALPHANUMERIC   03   FILLER                         X(12)
+00067 ALPHANUMERIC   03   FILLER                         X(67)
 
 
 0 warnings in compilation group
@@ -2057,24 +2057,24 @@ LINE    PG/LN  A...B............................................................
 SIZE  TYPE           LVL  NAME                           PICTURE
 
 05204 GROUP          01   SETUP-REC
-00004 ALPHANUMERIC   05     FL1                          X(04)
-00005 ALPHANUMERIC   05     FL2                          ZZZZZ
-00004 ALPHANUMERIC   05     FL3                          9(04)
-00004 NUMERIC        05     FL4                          9(08) COMP
-00002 NUMERIC        05     FL5                          9(04) COMP
-00008 ALPHANUMERIC   05     FL6                          Z,ZZZ.99
-00006 ALPHANUMERIC   05     FL7                          S9(05)
-00004 ALPHANUMERIC   05     FL8                          X(04)
-00004 ALPHANUMERIC-R 05     FL9                          9(04)
-00060 GROUP          05     FLA
-00040 GROUP          10       FLB                        OCCURS 20
-00002 ALPHANUMERIC   15         FLC                      X(02)
-00020 ALPHANUMERIC   10       FLD                        X(20)
-00100 ALPHANUMERIC   05     FLD1                         X(100)
-05000 GROUP          05     FLD2                         OCCURS 5 TO 5000
-00001 ALPHANUMERIC   10       FILLER                     X(01)
-00003 ALPHANUMERIC   05     FLD3                         X(3)
-00004 ALPHANUMERIC   05     FLD4                         X(4)
+00004 ALPHANUMERIC   05   FL1                            X(04)
+00005 ALPHANUMERIC   05   FL2                            ZZZZZ
+00004 ALPHANUMERIC   05   FL3                            9(04)
+00004 NUMERIC        05   FL4                            9(08) COMP
+00002 NUMERIC        05   FL5                            9(04) COMP
+00008 ALPHANUMERIC   05   FL6                            Z,ZZZ.99
+00006 ALPHANUMERIC   05   FL7                            S9(05)
+00004 ALPHANUMERIC   05   FL8                            X(04)
+00004 ALPHANUMERIC   05   FL9                            9(04), REDEFINES FL8
+00060 GROUP          05   FLA
+00040 GROUP          10   FLB                            OCCURS 20
+00002 ALPHANUMERIC   15   FLC                            X(02)
+00020 ALPHANUMERIC   10   FLD                            X(20)
+00100 ALPHANUMERIC   05   FLD1                           X(100)
+05000 GROUP          05   FLD2                           OCCURS 5 TO 5000
+00001 ALPHANUMERIC   10   FILLER                         X(01)
+00003 ALPHANUMERIC   05   FLD3                           X(3)
+00004 ALPHANUMERIC   05   FLD4                           X(4)
 
 
 0 warnings in compilation group
@@ -2490,74 +2490,74 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00080 FILE                OLD-VERSION
 00080 GROUP          01   OLD-RECORD
-00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   OLD-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   OLD-NUMBER                     X(5)
 
 00080 FILE                NEW-VERSION
 00080 GROUP          01   NEW-RECORD
-00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   NEW-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   NEW-NUMBER                     X(5)
 
 00032 FILE                PRT-VERSION
 
 00080 FILE                MODIFICATION
 00080 GROUP          01   UPDATE-ORDER
-00075 GROUP          02     INSERTION
-00006 ALPHANUMERIC   03       COMMAND                    X(6)
-      CONDITIONAL    88         ENDJOB
-      CONDITIONAL    88         ENDSET
-      CONDITIONAL    88         REMOVE
-      CONDITIONAL    88         ADDNEW
-      CONDITIONAL    88         CHANGE
-      CONDITIONAL    88         DISPLY
-00001 ALPHANUMERIC   03       FILLER                     X
-00005 ALPHANUMERIC   03       A-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-      CONDITIONAL    88         A-BLANK
-00004 ALPHANUMERIC   03       FILLER                     X(4)
-00005 ALPHANUMERIC   03       B-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-      CONDITIONAL    88         B-BLANK
-00054 ALPHANUMERIC   03       FILLER                     X(54)
-00005 ALPHANUMERIC   02     FILLER                       X(5)
+00075 GROUP          02   INSERTION
+00006 ALPHANUMERIC   03   COMMAND                        X(6)
+      CONDITIONAL    88   ENDJOB
+      CONDITIONAL    88   ENDSET
+      CONDITIONAL    88   REMOVE
+      CONDITIONAL    88   ADDNEW
+      CONDITIONAL    88   CHANGE
+      CONDITIONAL    88   DISPLY
+00001 ALPHANUMERIC   03   FILLER                         X
+00005 ALPHANUMERIC   03   A-FIELD                        9(5)
+00005 ALPHANUMERIC   03   A-ALPHA                        X(5), REDEFINES A-FIELD
+      CONDITIONAL    88   A-BLANK
+00004 ALPHANUMERIC   03   FILLER                         X(4)
+00005 ALPHANUMERIC   03   B-FIELD                        9(5)
+00005 ALPHANUMERIC   03   B-ALPHA                        X(5), REDEFINES B-FIELD
+      CONDITIONAL    88   B-BLANK
+00054 ALPHANUMERIC   03   FILLER                         X(54)
+00005 ALPHANUMERIC   02   FILLER                         X(5)
 
 00082 FILE                COMMENTARY
 00082 GROUP          01   COMMENT-LINE
-00082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 ALPHANUMERIC   02   FILLER                         X(82)
 
 00080 GROUP          01   HEADINGS-LINE
-00015 ALPHANUMERIC   02     FILLER                       X(15)
-00020 ALPHANUMERIC   02     FILLER                       X(20)
-00017 ALPHANUMERIC   02     PHASE                        X(17)
-00002 ALPHANUMERIC   02     MONTH-RUN                    XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     DAY-RUN                      XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     YEAR-RUN                     XX
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00015 ALPHANUMERIC   02   FILLER                         X(15)
+00020 ALPHANUMERIC   02   FILLER                         X(20)
+00017 ALPHANUMERIC   02   PHASE                          X(17)
+00002 ALPHANUMERIC   02   MONTH-RUN                      XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   DAY-RUN                        XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   YEAR-RUN                       XX
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00004 NUMERIC        02   PAGE-NUMBER                    9(4)
 
 00082 GROUP          01   COMMAND-LISTING
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   COMMAND-IMAGE                  X(80)
 
 00082 GROUP          01   ACTIVITIES-LISTING
-00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00002 ALPHANUMERIC   02   DISPOSITION                    X(2)
+00080 ALPHANUMERIC   02   ACTIVE-IMAGE                   X(80)
 
 00008 GROUP          01   UPSI-BYTE
-00001 ALPHANUMERIC   02     UPSI-BIT                     X, OCCURS 8
+00001 ALPHANUMERIC   02   UPSI-BIT                       X, OCCURS 8
 
 00082 GROUP          01   MESSAGE-LOG
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   MESSAGE-TEXT                   X(80)
 
 00070 GROUP          01   DISPLAY-MESSAGE
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00006 ALPHANUMERIC   02   DISPLAY-TEMP                   X(6)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00060 ALPHANUMERIC   02   DISPLAY-TEXT                   X(60)
 
 
 8 warnings in compilation group
@@ -2785,12 +2785,12 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00000 ALPHANUMERIC   01   too-long-pic2                  INVALID
 
 00000 GROUP          01   mutiple-symbols
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
 
 00000 GROUP          01   non-symbols
-00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
 
 00050 ALPHANUMERIC   01   too-many-digits                9(50)
 
@@ -2805,34 +2805,34 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00000 ALPHANUMERIC   01   no-digit-in-parens             INVALID
 
 00000 GROUP          01   mutually-exclusive-symbols
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
 
 00000 GROUP          01   non-rightmost-leftmost-symbols
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
-00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
 
 00000 GROUP          01   missing-symbols
-00000 ALPHANUMERIC   03     FILLER                       INVALID
+00000 ALPHANUMERIC   03   FILLER                         INVALID
 
 00032 GROUP          01   valid-pics
-00002 ALPHANUMERIC   03     FILLER                       VP9B
-00002 ALPHANUMERIC   03     FILLER                       B9P(3)
-00004 ALPHANUMERIC   03     FILLER                       B$$$
-00014 ALPHANUMERIC   03     FILLER                       0000+B0+++0B,+
-00005 ALPHANUMERIC   03     FILLER                       +(5)P(3)
-00005 ALPHANUMERIC   03     FILLER                       ++.++
+00002 ALPHANUMERIC   03   FILLER                         VP9B
+00002 ALPHANUMERIC   03   FILLER                         B9P(3)
+00004 ALPHANUMERIC   03   FILLER                         B$$$
+00014 ALPHANUMERIC   03   FILLER                         0000+B0+++0B,+
+00005 ALPHANUMERIC   03   FILLER                         +(5)P(3)
+00005 ALPHANUMERIC   03   FILLER                         ++.++
 
 
 6 warnings in compilation group
@@ -3588,40 +3588,40 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00080 FILE                OLD-VERSION
 00080 GROUP          01   OLD-RECORD
-00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   OLD-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   OLD-NUMBER                     X(5)
 
 00080 FILE                NEW-VERSION
 00080 GROUP          01   NEW-RECORD
-00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   NEW-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   NEW-NUMBER                     X(5)
 
 00032 FILE                PRT-VERSION
 
 00080 FILE                MODIFICATION
 00080 GROUP          01   UPDATE-ORDER
-00075 GROUP          02     INSERTION
-00006 ALPHANUMERIC   03       COMMAND                    X(6)
-      CONDITIONAL    88         ENDJOB
-      CONDITIONAL    88         ENDSET
-      CONDITIONAL    88         REMOVE
-      CONDITIONAL    88         ADDNEW
-      CONDITIONAL    88         CHANGE
-      CONDITIONAL    88         DISPLY
-00001 ALPHANUMERIC   03       FILLER                     X
-00005 NUMERIC        03       A-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-      CONDITIONAL    88         A-BLANK
-00004 ALPHANUMERIC   03       FILLER                     X(4)
-00005 NUMERIC        03       B-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-      CONDITIONAL    88         B-BLANK
-00054 ALPHANUMERIC   03       FILLER                     X(54)
-00005 ALPHANUMERIC   02     FILLER                       X(5)
+00075 GROUP          02   INSERTION
+00006 ALPHANUMERIC   03   COMMAND                        X(6)
+      CONDITIONAL    88   ENDJOB
+      CONDITIONAL    88   ENDSET
+      CONDITIONAL    88   REMOVE
+      CONDITIONAL    88   ADDNEW
+      CONDITIONAL    88   CHANGE
+      CONDITIONAL    88   DISPLY
+00001 ALPHANUMERIC   03   FILLER                         X
+00005 NUMERIC        03   A-FIELD                        9(5)
+00005 ALPHANUMERIC   03   A-ALPHA                        X(5), REDEFINES A-FIELD
+      CONDITIONAL    88   A-BLANK
+00004 ALPHANUMERIC   03   FILLER                         X(4)
+00005 NUMERIC        03   B-FIELD                        9(5)
+00005 ALPHANUMERIC   03   B-ALPHA                        X(5), REDEFINES B-FIELD
+      CONDITIONAL    88   B-BLANK
+00054 ALPHANUMERIC   03   FILLER                         X(54)
+00005 ALPHANUMERIC   02   FILLER                         X(5)
 
 00082 FILE                COMMENTARY
 00082 GROUP          01   COMMENT-LINE
-00082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 ALPHANUMERIC   02   FILLER                         X(82)
 
 00002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
 00002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
@@ -3634,41 +3634,41 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
 
 00006 GROUP          01   DATE-FROM-SYS
-00002 NUMERIC        02     DFSYS                        99, OCCURS 3
+00002 NUMERIC        02   DFSYS                          99, OCCURS 3
 
 00080 GROUP          01   HEADINGS-LINE
-00015 ALPHANUMERIC   02     FILLER                       X(15)
-00020 ALPHANUMERIC   02     FILLER                       X(20)
-00017 ALPHANUMERIC   02     PHASE                        X(17)
-00002 ALPHANUMERIC   02     MONTH-RUN                    XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     DAY-RUN                      XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     YEAR-RUN                     XX
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00015 ALPHANUMERIC   02   FILLER                         X(15)
+00020 ALPHANUMERIC   02   FILLER                         X(20)
+00017 ALPHANUMERIC   02   PHASE                          X(17)
+00002 ALPHANUMERIC   02   MONTH-RUN                      XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   DAY-RUN                        XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   YEAR-RUN                       XX
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00004 NUMERIC        02   PAGE-NUMBER                    9(4)
 
 00082 GROUP          01   COMMAND-LISTING
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   COMMAND-IMAGE                  X(80)
 
 00082 GROUP          01   ACTIVITIES-LISTING
-00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00002 ALPHANUMERIC   02   DISPOSITION                    X(2)
+00080 ALPHANUMERIC   02   ACTIVE-IMAGE                   X(80)
 
 00008 GROUP          01   UPSI-BYTE
-00001 ALPHANUMERIC   02     UPSI-BIT                     X, OCCURS 8
+00001 ALPHANUMERIC   02   UPSI-BIT                       X, OCCURS 8
 
 00082 GROUP          01   MESSAGE-LOG
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   MESSAGE-TEXT                   X(80)
 
 00070 GROUP          01   DISPLAY-MESSAGE
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00006 ALPHANUMERIC   02   DISPLAY-TEMP                   X(6)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00060 ALPHANUMERIC   02   DISPLAY-TEXT                   X(60)
 
 00001 NUMERIC        77   END-JOB-PROCESS                9
 00001 NUMERIC        77   DELETE-PROCESS                 9
@@ -3676,8 +3676,8 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00001 NUMERIC        77   WRITE-PROCESS                  9
 
 00002 GROUP          01   SELECTORS
-00001 NUMERIC        02     RETURN-SELECT                9
-00001 NUMERIC        02     NEXT-JOB-SELECT              9
+00001 NUMERIC        02   RETURN-SELECT                  9
+00001 NUMERIC        02   NEXT-JOB-SELECT                9
 
 
 NAME                           DEFINED                REFERENCES
@@ -4167,40 +4167,40 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00080 FILE                OLD-VERSION
 00080 GROUP          01   OLD-RECORD
-00075 ALPHANUMERIC   02     OLD-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     OLD-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   OLD-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   OLD-NUMBER                     X(5)
 
 00080 FILE                NEW-VERSION
 00080 GROUP          01   NEW-RECORD
-00075 ALPHANUMERIC   02     NEW-STATEMENT                X(75)
-00005 ALPHANUMERIC   02     NEW-NUMBER                   X(5)
+00075 ALPHANUMERIC   02   NEW-STATEMENT                  X(75)
+00005 ALPHANUMERIC   02   NEW-NUMBER                     X(5)
 
 00032 FILE                PRT-VERSION
 
 00080 FILE                MODIFICATION
 00080 GROUP          01   UPDATE-ORDER
-00075 GROUP          02     INSERTION
-00006 ALPHANUMERIC   03       COMMAND                    X(6)
-      CONDITIONAL    88         ENDJOB
-      CONDITIONAL    88         ENDSET
-      CONDITIONAL    88         REMOVE
-      CONDITIONAL    88         ADDNEW
-      CONDITIONAL    88         CHANGE
-      CONDITIONAL    88         DISPLY
-00001 ALPHANUMERIC   03       FILLER                     X
-00005 NUMERIC        03       A-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       A-ALPHA                    X(5)
-      CONDITIONAL    88         A-BLANK
-00004 ALPHANUMERIC   03       FILLER                     X(4)
-00005 NUMERIC        03       B-FIELD                    9(5)
-00005 ALPHANUMERIC-R 03       B-ALPHA                    X(5)
-      CONDITIONAL    88         B-BLANK
-00054 ALPHANUMERIC   03       FILLER                     X(54)
-00005 ALPHANUMERIC   02     FILLER                       X(5)
+00075 GROUP          02   INSERTION
+00006 ALPHANUMERIC   03   COMMAND                        X(6)
+      CONDITIONAL    88   ENDJOB
+      CONDITIONAL    88   ENDSET
+      CONDITIONAL    88   REMOVE
+      CONDITIONAL    88   ADDNEW
+      CONDITIONAL    88   CHANGE
+      CONDITIONAL    88   DISPLY
+00001 ALPHANUMERIC   03   FILLER                         X
+00005 NUMERIC        03   A-FIELD                        9(5)
+00005 ALPHANUMERIC   03   A-ALPHA                        X(5), REDEFINES A-FIELD
+      CONDITIONAL    88   A-BLANK
+00004 ALPHANUMERIC   03   FILLER                         X(4)
+00005 NUMERIC        03   B-FIELD                        9(5)
+00005 ALPHANUMERIC   03   B-ALPHA                        X(5), REDEFINES B-FIELD
+      CONDITIONAL    88   B-BLANK
+00054 ALPHANUMERIC   03   FILLER                         X(54)
+00005 ALPHANUMERIC   02   FILLER                         X(5)
 
 00082 FILE                COMMENTARY
 00082 GROUP          01   COMMENT-LINE
-00082 ALPHANUMERIC   02     FILLER                       X(82)
+00082 ALPHANUMERIC   02   FILLER                         X(82)
 
 00002 NUMERIC        77   COMMAND-ADDITIONS              9(3) COMP
 00002 NUMERIC        77   COMMAND-SUBTRACTIONS           9(3) COMP
@@ -4213,41 +4213,41 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00082 ALPHANUMERIC   77   BLANK-LINE                     X(82)
 
 00006 GROUP          01   DATE-FROM-SYS
-00002 NUMERIC        02     DFSYS                        99, OCCURS 3
+00002 NUMERIC        02   DFSYS                          99, OCCURS 3
 
 00080 GROUP          01   HEADINGS-LINE
-00015 ALPHANUMERIC   02     FILLER                       X(15)
-00020 ALPHANUMERIC   02     FILLER                       X(20)
-00017 ALPHANUMERIC   02     PHASE                        X(17)
-00002 ALPHANUMERIC   02     MONTH-RUN                    XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     DAY-RUN                      XX
-00001 ALPHANUMERIC   02     FILLER                       X
-00002 ALPHANUMERIC   02     YEAR-RUN                     XX
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00008 ALPHANUMERIC   02     FILLER                       X(8)
-00004 NUMERIC        02     PAGE-NUMBER                  9(4)
+00015 ALPHANUMERIC   02   FILLER                         X(15)
+00020 ALPHANUMERIC   02   FILLER                         X(20)
+00017 ALPHANUMERIC   02   PHASE                          X(17)
+00002 ALPHANUMERIC   02   MONTH-RUN                      XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   DAY-RUN                        XX
+00001 ALPHANUMERIC   02   FILLER                         X
+00002 ALPHANUMERIC   02   YEAR-RUN                       XX
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00008 ALPHANUMERIC   02   FILLER                         X(8)
+00004 NUMERIC        02   PAGE-NUMBER                    9(4)
 
 00082 GROUP          01   COMMAND-LISTING
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     COMMAND-IMAGE                X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   COMMAND-IMAGE                  X(80)
 
 00082 GROUP          01   ACTIVITIES-LISTING
-00002 ALPHANUMERIC   02     DISPOSITION                  X(2)
-00080 ALPHANUMERIC   02     ACTIVE-IMAGE                 X(80)
+00002 ALPHANUMERIC   02   DISPOSITION                    X(2)
+00080 ALPHANUMERIC   02   ACTIVE-IMAGE                   X(80)
 
 00008 GROUP          01   UPSI-BYTE
-00001 ALPHANUMERIC   02     UPSI-BIT                     X, OCCURS 8
+00001 ALPHANUMERIC   02   UPSI-BIT                       X, OCCURS 8
 
 00082 GROUP          01   MESSAGE-LOG
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00080 ALPHANUMERIC   02     MESSAGE-TEXT                 X(80)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00080 ALPHANUMERIC   02   MESSAGE-TEXT                   X(80)
 
 00070 GROUP          01   DISPLAY-MESSAGE
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00006 ALPHANUMERIC   02     DISPLAY-TEMP                 X(6)
-00002 ALPHANUMERIC   02     FILLER                       X(2)
-00060 ALPHANUMERIC   02     DISPLAY-TEXT                 X(60)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00006 ALPHANUMERIC   02   DISPLAY-TEMP                   X(6)
+00002 ALPHANUMERIC   02   FILLER                         X(2)
+00060 ALPHANUMERIC   02   DISPLAY-TEXT                   X(60)
 
 00001 NUMERIC        77   END-JOB-PROCESS                9
 00001 NUMERIC        77   DELETE-PROCESS                 9
@@ -4255,8 +4255,8 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00001 NUMERIC        77   WRITE-PROCESS                  9
 
 00002 GROUP          01   SELECTORS
-00001 NUMERIC        02     RETURN-SELECT                9
-00001 NUMERIC        02     NEXT-JOB-SELECT              9
+00001 NUMERIC        02   RETURN-SELECT                  9
+00001 NUMERIC        02   NEXT-JOB-SELECT                9
 
 
 NAME                           DEFINED                                    REFERENCES
