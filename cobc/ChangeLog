@@ -3,6 +3,8 @@
 
 	* cobc.c, cobc.h: Added Error/Warning summary to listings.
 	* error.c: Added filename to error struct for summary.
+	* cobc.c: Added code to close and open append the listing file when 
+	  calling the external cross reference, cobxref.
 
 2017-03-21  Dave Pitts <dpitts@cozx.com>
 

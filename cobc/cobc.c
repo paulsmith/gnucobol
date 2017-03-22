@@ -2595,8 +2595,7 @@ process_command_line (const int argc, char **argv)
 			cobc_gen_listing = 2;
 			/* temporary: check if we run the testsuite and skip
 			   the run if we don't have the internal xref */
-			cb_listing_outputfile = getenv ("COB_IS_RUNNING_IN_TESTMODE");
-			if (cb_listing_outputfile) {
+			if (getenv ("COB_IS_RUNNING_IN_TESTMODE")) {
 				cobc_free_mem ();
 				exit (77);
 			}
@@ -3675,6 +3674,12 @@ process (const char *cmd)
 }
 #endif
 
+static COB_INLINE COB_A_INLINE void
+force_new_page_for_next_line (void)
+{
+	cb_listing_linecount = cb_lines_per_page;
+}
+
 /* Preprocess source */
 
 static int
@@ -3782,6 +3787,10 @@ preprocess (struct filename *fn)
 		}
 #ifndef COB_INTERNAL_XREF
 		if (cobc_gen_listing > 1) {
+			if (cb_src_list_file) {
+				fclose (cb_src_list_file);
+			}
+
 			snprintf (cobc_buffer, cobc_buffer_size,
 				 "cobxref %s -R", fn->listing_file);
 			cobc_buffer[cobc_buffer_size] = 0;
@@ -3804,6 +3813,18 @@ preprocess (struct filename *fn)
 					stderr);
 				putc ('\n', stderr);
 				fflush (stderr);
+			}
+			if (cb_listing_outputfile) {
+				if (cb_unix_lf) {
+					cb_src_list_file = fopen (cb_listing_outputfile, "ab");
+				} else {
+					cb_src_list_file = fopen (cb_listing_outputfile, "a");
+				}
+				if (!cb_src_list_file) {
+					cobc_terminate (cb_listing_outputfile);
+				}
+				cb_listing_eject = 1;
+				force_new_page_for_next_line ();
 			}
 			unlink (fn->listing_file);
 		}
@@ -4518,12 +4539,6 @@ xref_labels (cb_tree label_list_p)
 	}
 }
 #endif
-
-static COB_INLINE COB_A_INLINE void
-force_new_page_for_next_line (void)
-{
-	cb_listing_linecount = cb_lines_per_page;
-}
 
 static void
 print_program_trailer (void)
@@ -6934,7 +6949,7 @@ main (int argc, char **argv)
 		}
 		if (!cb_src_list_file) {
 			cobc_terminate (cb_listing_outputfile);
-	}
+		}
 		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
 		memset (cb_listing_file_struct, 0, sizeof (struct list_files));
 	}
