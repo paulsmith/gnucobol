@@ -335,6 +335,8 @@ static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
 static char		cb_listing_title[133];	/* Listing subtitle */
 static struct list_files	*cb_listing_file_struct = NULL;
+static struct list_error	*cb_listing_error_head = NULL;
+static struct list_error	*cb_listing_error_tail = NULL;
 
 #ifdef	_MSC_VER
 static const char	*manicmd;
@@ -4528,9 +4530,11 @@ print_program_trailer (void)
 {
 	struct cb_program	*p;
 	struct cb_program	*q;
+	struct list_error	*err;
 	int			print_names = 0;
 	int			print_break = 1;
 	int			found;
+	char			errmsg[BUFSIZ];
 
 #if 0 /* checkme: needed for syntax-checks-only? */
 	p = program_list_reverse (current_program);
@@ -4638,6 +4642,30 @@ print_program_trailer (void)
 	set_listing_title_none();
 	print_program_data ("");
 	if (print_break) {
+		print_program_data ("");
+	}
+
+	/* Print error/warning summary */
+	if (cb_listing_error_head) {
+		force_new_page_for_next_line ();
+		print_program_data (_("Error/Warning summary:"));
+		print_program_data ("");
+		while (cb_listing_error_head) {
+			err = cb_listing_error_head;
+			cb_listing_error_head = err->next;
+			snprintf (errmsg, BUFSIZ, "%s: %d: %s%s", err->file, err->line, err->prefix, err->msg);
+			print_program_data (errmsg);
+			if (err->file) {
+				cobc_free (err->file);
+			}
+			if (err->prefix) {
+				cobc_free (err->prefix);
+			}
+			if (err->msg) {
+				cobc_free (err->msg);
+			}
+			cobc_free (err);
+		}
 		print_program_data ("");
 	}
 
@@ -5760,16 +5788,17 @@ print_program_code (struct list_files *cfile, int in_copy)
 		cobc_free (rep);
 	}
 
+	/* Put errors on summary list */
 	while (cfile->err_head) {
 		err = cfile->err_head;
 		cfile->err_head = err->next;
-		if (err->prefix) {
-			cobc_free (err->prefix);
+		if (cb_listing_error_tail) {
+			cb_listing_error_tail->next = err;
 		}
-		if (err->msg) {
-			cobc_free (err->msg);
+		if (!cb_listing_error_head) {
+			cb_listing_error_head = err;
 		}
-		cobc_free (err);
+		cb_listing_error_tail = err;
 	}
 }
 

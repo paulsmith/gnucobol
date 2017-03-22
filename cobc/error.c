@@ -106,6 +106,11 @@ print_error (const char *file, int line, const char *prefix,
 			/* set up listing error */
 			err = cobc_malloc (sizeof (struct list_error));
 			err->line = line;
+			if (file) {
+				err->file = cobc_strdup (file);
+			} else {
+				err->file = NULL;
+			}
 			if (prefix) {
 				err->prefix = cobc_strdup (prefix);
 			} else {

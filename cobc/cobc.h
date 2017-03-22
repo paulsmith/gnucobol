@@ -252,6 +252,7 @@ enum cobc_name_type {
 struct list_error {
 	struct list_error	*next;
 	int			line;		/* Line number for error */
+	char			*file;		/* File name */
 	char			*prefix;	/* Error prefix */
 	char			*msg;		/* Error Message text */
 };

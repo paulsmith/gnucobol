@@ -1161,6 +1161,13 @@ SIZE  TYPE           LVL  NAME                           PICTURE
       No fields defined.
 
 
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+Error/Warning summary:
+
+copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 8: error: 'FIRST-MATCH' is not defined
+
 0 warnings in compilation group
 2 errors in compilation group
 ])
@@ -1209,6 +1216,13 @@ SIZE  TYPE           LVL  NAME                           PICTURE
       No fields defined.
 
 
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+Error/Warning summary:
+
+prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 8: error: 'FIRST-MATCH' is not defined
+
 0 warnings in compilation group
 2 errors in compilation group
 ])
@@ -1254,6 +1268,12 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00002 NUMERIC        01   TEST-VAR                       9(2)
 
+
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+Error/Warning summary:
+
+prog.cob: 6: warning: numeric value is expected
 
 1 warning in compilation group
 0 errors in compilation group
@@ -1342,6 +1362,11 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00002 NUMERIC        01   TEST-VAR                       9(2)
 
 
+
+Error/Warning summary:
+
+prog.cob: 11: warning: numeric value is expected
+
 1 warning in compilation group
 0 errors in compilation group
 ])
@@ -1397,6 +1422,12 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00002 NUMERIC        01   TEST-VAR                       9(2)
 
+
+
+Error/Warning summary:
+
+prog.cob: 7: error: CRUD.CPY: No such file or directory
+prog.cob: 11: warning: numeric value is expected
 
 1 warning in compilation group
 1 error in compilation group
@@ -2560,6 +2591,18 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00060 ALPHANUMERIC   02   DISPLAY-TEXT                   X(60)
 
 
+
+Error/Warning summary:
+
+prog.cob: 21: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 23: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 30: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 32: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 39: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 41: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
+
 8 warnings in compilation group
 0 errors in compilation group
 ])
@@ -2834,6 +2877,50 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00005 ALPHANUMERIC   03   FILLER                         +(5)P(3)
 00005 ALPHANUMERIC   03   FILLER                         ++.++
 
+
+
+Error/Warning summary:
+
+prog.cob: 9: warning: continuation of COBOL words used
+prog.cob: 11: warning: continuation of COBOL words used
+prog.cob: 12: warning: continuation of COBOL words used
+prog.cob: 13: warning: continuation of COBOL words used
+prog.cob: 14: warning: continuation of COBOL words used
+prog.cob: 7: error: missing PICTURE string
+prog.cob: 10: error: PICTURE string may not contain more than 255 characters; contains 301 characters
+prog.cob: 16: error: CR or DB may only occur once in a PICTURE string
+prog.cob: 17: error: S may only occur once in a PICTURE string
+prog.cob: 17: error: S must be at start of PICTURE string
+prog.cob: 18: error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob: 18: error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob: 18: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob: 20: error: invalid PICTURE character 'K'
+prog.cob: 21: error: numeric field cannot be larger than 38 digits
+prog.cob: 22: error: only up to 9 significant digits are permitted within parentheses
+prog.cob: 23: error: '(100' is not defined
+prog.cob: 23: error: invalid PICTURE character ')'
+prog.cob: 24: error: unbalanced parentheses
+prog.cob: 25: error: only one set of parentheses is permitted
+prog.cob: 26: error: parentheses must contain (a constant-name defined as) a positive integer
+prog.cob: 28: error: . cannot follow V
+prog.cob: 29: error: cannot have both Z and * in PICTURE string
+prog.cob: 30: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 30: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob: 31: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob: 31: error: N cannot follow A or X
+prog.cob: 32: error: A or X cannot follow S
+prog.cob: 33: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob: 34: error: CR or DB cannot follow a leading +/- sign
+prog.cob: 36: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob: 37: error: a leading +/- sign cannot follow 9
+prog.cob: 38: error: B, 0 or / cannot follow CR or DB
+prog.cob: 39: error: 9 cannot follow CR or DB
+prog.cob: 40: error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob: 41: error: a leading currency symbol cannot follow 9
+prog.cob: 42: error: a leading currency symbol cannot follow B, 0 or /
+prog.cob: 43: error: P must be at start or end of PICTURE string
+prog.cob: 43: error: V cannot follow a P which is after the decimal point
+prog.cob: 45: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 
 6 warnings in compilation group
 34 errors in compilation group
@@ -3792,6 +3879,23 @@ P LISTING-LOOP                 311      317
 P END-JOB                      319      163     210     217     228     246
                                         276     303     312
 
+
+Error/Warning summary:
+
+prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
+
 13 warnings in compilation group
 0 errors in compilation group
 ])
@@ -4356,6 +4460,23 @@ P FINISH-JOB                   284      177     190     191
 P TEST-FOR-LISTING             289      285
 P LISTING-LOOP                 311      317
 P END-JOB                      319      163     210     217     228     246     276     303     312
+
+
+Error/Warning summary:
+
+prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
 0 errors in compilation group

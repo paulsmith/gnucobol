@@ -1,4 +1,8 @@
 
+2017-03-22  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added Error/Warning summary to listings.
+
 2017-03-21  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Changed variable indentation and redefines.

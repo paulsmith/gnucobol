@@ -1,4 +1,9 @@
 
+2017-03-22  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c, cobc.h: Added Error/Warning summary to listings.
+	* error.c: Added filename to error struct for summary.
+
 2017-03-21  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Changed symbol listing indentation and added redefines clause
