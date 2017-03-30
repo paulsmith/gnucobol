@@ -603,7 +603,7 @@ cob_move_display_to_binary (cob_field *f1, cob_field *f2)
 
 	if (COB_FIELD_HAVE_SIGN (f2)) {
 		if (sign < 0) {
-			val2 = -(cob_s64_t)val;
+			val2 = -val;
 		} else {
 			val2 = val;
 		}

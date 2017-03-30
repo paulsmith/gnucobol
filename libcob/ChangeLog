@@ -1,4 +1,9 @@
 
+2017-03-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* move.c (cob_move_binary_to_display): removed cast which could cause
+	  overflow in negating -9223372036854775808.
+
 2017-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_chain_setup): only set field's value if given on

@@ -1098,6 +1098,19 @@ compute_binary_size (struct cb_field *f, const int size)
 	}
 }
 
+static struct cb_field *
+get_last_child (struct cb_field *f)
+{
+	do {
+		f = f->children;
+		while (f->sister) {
+			f = f->sister;
+		}
+	} while (f->children);
+
+	return f;
+}
+
 static int
 compute_size (struct cb_field *f)
 {
@@ -1214,10 +1227,24 @@ unbounded_again:
 				}
 			}
 		}
+		/* Ensure items within OCCURS are aligned correctly. */
 		if (f->occurs_max > 1 && (size_check % occur_align_size) != 0) {
 			pad = occur_align_size - (size_check % occur_align_size);
 			size_check += pad;
-			f->offset += pad;
+			/*
+			  Add padding to last item, which will be (partly)
+			  responsible for misalignment. If the item is not SYNC,
+			  we have no problem. If it is SYNC, then it has been
+			  aligned on a smaller boundary than occur_align_size: a
+			  2-, 4- or 8-byte boundary. The needed padding will
+			  be a multiple of 2, 4 or 8 bytes, so adding extra
+			  padding will not break its alignment.
+			*/
+			if (f->children) {
+			        get_last_child (f)->offset += pad;
+			} else {
+				COBC_ABORT ();
+			}
 		}
 		/* size check for group items */
 		if (unbounded_items) {
@@ -1362,6 +1389,23 @@ validate_field_value (struct cb_field *f)
 	return 0;
 }
 
+static void
+check_for_misaligned_pointers (const struct cb_field * const f)
+{
+	struct cb_field	*c;
+
+	if (f->children) {
+		for (c = f->children; c; c = c->sister) {
+			check_for_misaligned_pointers (c);
+		}
+	} else if (f->flag_is_pointer) {
+		if (f->offset % sizeof (void *) != 0) {
+			cb_warning (_("misaligned pointer '%s' may cause undefined behaviour"),
+				    f->name);
+		}
+	}
+}
+
 void
 cb_validate_field (struct cb_field *f)
 {
@@ -1407,6 +1451,9 @@ cb_validate_field (struct cb_field *f)
 			c->count++;
 		}
 	}
+
+	check_for_misaligned_pointers (f);
+
 	f->flag_is_verified = 1;
 }
 
@@ -1447,19 +1494,6 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 		cb_add_78 (f);
 	}
 	return last_real_field;
-}
-
-static const struct cb_field *
-get_last_child (const struct cb_field *f)
-{
-	do {
-		f = f->children;
-		while (f->sister) {
-			f = f->sister;
-		}
-	} while (f->children);
-
-	return f;
 }
 
 static struct cb_field *

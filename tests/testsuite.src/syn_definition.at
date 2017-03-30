@@ -1225,7 +1225,7 @@ AT_DATA([prog.cob], [
                05  k   PIC X.
                05  l   PIC X.
            03  m       PIC 9.
-           03  n       POINTER.
+           03  n       POINTER, SYNC.
            03  o.
                05  p   PIC X OCCURS 1 TO 10 DEPENDING ON l.
 

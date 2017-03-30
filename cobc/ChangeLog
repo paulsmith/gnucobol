@@ -1,9 +1,15 @@
 
+2017-03-30  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (compute_size): padding for aligned OCCURS items should go
+	  after the last item, not the beginning of the group (bug #155).
+	* field.c (validate_field): added warning for misaligned pointers.
+
 2017-03-22  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c, cobc.h: Added Error/Warning summary to listings.
 	* error.c: Added filename to error struct for summary.
-	* cobc.c: Added code to close and open append the listing file when 
+	* cobc.c: Added code to close and open append the listing file when
 	  calling the external cross reference, cobxref.
 
 2017-03-21  Dave Pitts <dpitts@cozx.com>
