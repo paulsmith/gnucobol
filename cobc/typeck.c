@@ -8559,15 +8559,6 @@ cb_emit_setenv (cb_tree x, cb_tree y)
 	cb_emit (CB_BUILD_FUNCALL_2 ("cob_set_environment", x, y));
 }
 
-static COB_INLINE COB_A_INLINE int
-is_unchangeable_address_of (const struct cb_cast * const p)
-{
-	return p->cast_type == CB_CAST_ADDRESS
-		&& !(CB_FIELD (cb_ref (p->val))->flag_base
-		     || CB_FIELD (cb_ref (p->val))->level == 1);
-
-}
-
 void
 cb_emit_set_to (cb_tree vars, cb_tree x)
 {
