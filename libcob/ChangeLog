@@ -1,4 +1,9 @@
 
+2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c: fixed minor buffer overflows in the formatted-date
+	  functions (see bug #357).
+
 2017-03-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* move.c (cob_move_binary_to_display): removed cast which could cause

@@ -3106,6 +3106,12 @@ AT_DATA([prog.cob], [
             IF RESULT <> 1
                DISPLAY "Test 4 failed: " RESULT END-DISPLAY
             END-IF
+            MOVE FUNCTION TEST-FORMATTED-DATETIME
+                    ("YYYYMMDDThhmmss", "16010101T      ")
+              TO RESULT
+            IF RESULT <> 10
+               DISPLAY "Test 5 failed: " RESULT END-DISPLAY
+            END-IF
 
             STOP RUN
             .
