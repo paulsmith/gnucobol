@@ -8559,6 +8559,15 @@ cb_emit_setenv (cb_tree x, cb_tree y)
 	cb_emit (CB_BUILD_FUNCALL_2 ("cob_set_environment", x, y));
 }
 
+static COB_INLINE COB_A_INLINE int
+is_unchangeable_address_of (const struct cb_cast * const p)
+{
+	return p->cast_type == CB_CAST_ADDRESS
+		&& !(CB_FIELD (cb_ref (p->val))->flag_base
+		     || CB_FIELD (cb_ref (p->val))->level == 1);
+
+}
+
 void
 cb_emit_set_to (cb_tree vars, cb_tree x)
 {
@@ -8574,24 +8583,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 		return;
 	}
 
-#if	0	/* RXWRXW - target check */
-	/* Determine class of targets */
-	for (l = vars; l; l = CB_CHAIN (l)) {
-		if (CB_TREE_CLASS (CB_VALUE (l)) != CB_CLASS_UNKNOWN) {
-			if (class == CB_CLASS_UNKNOWN) {
-				class = CB_TREE_CLASS (CB_VALUE (l));
-			} else if (class != CB_TREE_CLASS (CB_VALUE (l))) {
-				break;
-			}
-		}
-	}
-	if (l || (class != CB_CLASS_INDEX && class != CB_CLASS_POINTER)) {
-		cb_error_x (CB_TREE (current_statement),
-			    _("the targets of SET must be either indexes or pointers"));
-		return;
-	}
-#endif
-
+	/* Check PROGRAM-POINTERs are the target for SET ... TO ENTRY. */
 	if (CB_CAST_P (x)) {
 		p = CB_CAST (x);
 		if (p->cast_type == CB_CAST_PROGRAM_POINTER) {
@@ -8599,35 +8591,40 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 				v = CB_VALUE (l);
 				if (!CB_REFERENCE_P (v)) {
 					cb_error_x (CB_TREE (current_statement),
-					_("SET targets must be PROGRAM-POINTER"));
+						    _("SET targets must be PROGRAM-POINTER"));
 					CB_VALUE (l) = cb_error_node;
 				} else if (CB_FIELD(cb_ref(v))->usage != CB_USAGE_PROGRAM_POINTER) {
 					cb_error_x (CB_TREE (current_statement),
-					_("SET targets must be PROGRAM-POINTER"));
+						    _("SET targets must be PROGRAM-POINTER"));
 					CB_VALUE (l) = cb_error_node;
 				}
 			}
 		}
 	}
-	/* Validate the targets */
+	
+	/* Check ADDRESS OF targets can be modified. */
 	for (l = vars; l; l = CB_CHAIN (l)) {
 		v = CB_VALUE (l);
 		if (!CB_CAST_P (v)) {
 			continue;
 		}
 		p = CB_CAST (v);
-		if (p->cast_type == CB_CAST_ADDRESS &&
-		    !CB_FIELD (cb_ref (p->val))->flag_item_based &&
-		    CB_FIELD (cb_ref (p->val))->storage != CB_STORAGE_LINKAGE) {
-			cb_error_x (p->val, _("the address of '%s' cannot be changed"),
+		if (p->cast_type != CB_CAST_ADDRESS) {
+			continue;
+		}
+		if (CB_FIELD (cb_ref (p->val))->level != 1
+		    && CB_FIELD (cb_ref (p->val))->level != 77) {
+			cb_error_x (p->val, _("cannot change address of '%s', which is not level 1 or 77"),
+				    cb_name (p->val));
+			CB_VALUE (l) = cb_error_node;
+		} else if (!CB_FIELD (cb_ref (p->val))->flag_base) {
+			cb_error_x (p->val, _("cannot change address of '%s', which is not BASED or a linkage item"),
 				    cb_name (p->val));
 			CB_VALUE (l) = cb_error_node;
 		}
 	}
-	if (cb_validate_list (vars)) {
-		return;
-	}
 
+	/* Emit statements if targets have the correct class. */
 	for (l = vars; l; l = CB_CHAIN (l)) {
 		class = cb_tree_class (CB_VALUE (l));
 		switch (class) {
@@ -8638,9 +8635,11 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 			cb_emit (cb_build_move (x, CB_VALUE (l)));
 			break;
 		default:
-			cb_error_x (CB_TREE (current_statement),
-				    _("SET target is invalid: '%s'"),
-				    cb_name (CB_VALUE(l)));
+			if (CB_VALUE (l) != cb_error_node) {
+				cb_error_x (CB_TREE (current_statement),
+					    _("SET target '%s' is not numeric, an index or a pointer"),
+					    cb_name (CB_VALUE(l)));
+			}
 			break;
 		}
 	}

@@ -1,4 +1,9 @@
 
+2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (cb_emit_set_to): added error when trying to set address of a
+	  non-01/77-level linkage item. Also improved error messages.
+
 2017-03-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* field.c (compute_size): padding for aligned OCCURS items should go
