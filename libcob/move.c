@@ -602,10 +602,10 @@ cob_move_display_to_binary (cob_field *f1, cob_field *f2)
 	}
 
 	if (COB_FIELD_HAVE_SIGN (f2)) {
+		/* Could this cast cause overflows? */
+		val2 = (cob_s64_t)val;
 		if (sign < 0) {
-			val2 = -val;
-		} else {
-			val2 = val;
+			val2 *= -1;
 		}
 		cob_binary_mset_sint64 (f2, val2);
 	} else {
