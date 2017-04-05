@@ -1,5 +1,5 @@
 The following was written for using the Microsoft Visual C++ compiler in the
-rare circumstances where a GCC build (for example via MinGW) cannot be used.
+rare circumstances where a GCC build (for example via MSYS/MinGW) cannot be used.
 
 Most of this applies to other C compilers for Microsoft Windows, too - please
 report any issues and working solutions with other compilers.
@@ -21,6 +21,15 @@ How to build in native Windows environments:
 * copy build_windows\defaults.h.in to build_windows\defaults.h,
   change COB_MAIN_DIR according to your local path and/or MAKE_DIST
 * you may want to change version information in build_windows\version_*.rc
+* if you compile from a development snapshot or changed these files you need
+  to (re-)generate the bison and flex sources, example commands for
+  https://sourceforge.net/projects/winflexbison/files/win_flex_bison-latest.zip
+    set PATH=X:\path\to\winflexbison;%PATH%
+    cd X:\path\to\gnu-cobol\cobc
+    win_flex -o pplex.c pplex.l
+    win_flex -o scanner.c scanner.l
+    win_bison -o ppparse.c ppparse.y
+    win_bison -o parser.c parser.y
 * compile with your environment, for example via IDE by opening the solution
   and click "build" or by starting the VS/WinSDK command prompt and calling
   msbuild "GnuCOBOL.sln" /p:Platform=x64 /Configuration=Release
