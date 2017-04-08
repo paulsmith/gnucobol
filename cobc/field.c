@@ -1389,23 +1389,6 @@ validate_field_value (struct cb_field *f)
 	return 0;
 }
 
-static void
-check_for_misaligned_pointers (const struct cb_field * const f)
-{
-	struct cb_field	*c;
-
-	if (f->children) {
-		for (c = f->children; c; c = c->sister) {
-			check_for_misaligned_pointers (c);
-		}
-	} else if (f->flag_is_pointer) {
-		if (f->offset % sizeof (void *) != 0) {
-			cb_warning (_("misaligned pointer '%s' may cause undefined behaviour"),
-				    f->name);
-		}
-	}
-}
-
 void
 cb_validate_field (struct cb_field *f)
 {
@@ -1451,8 +1434,6 @@ cb_validate_field (struct cb_field *f)
 			c->count++;
 		}
 	}
-
-	check_for_misaligned_pointers (f);
 
 	f->flag_is_verified = 1;
 }
