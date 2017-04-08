@@ -753,9 +753,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
 	/* Close the current file */
 	fclose (ppin);
+	ppin = NULL;
 
 	if (p->listfile) {
-	   cb_current_file = p->listfile;
+		cb_current_file = p->listfile;
 	}
 
 	/* Switch to previous buffer */
@@ -871,7 +872,6 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 		cb_current_file->copy_line = cb_source_line;
 	}
 
-
 	/* Set replacing list */
 	if (replacing_list) {
 		if (current_replace_list) {
@@ -943,7 +943,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 		}
 	}
 
-	/* COPY open error restore old file */
+	/* On COPY, open error restore old file */
 	cb_current_file = old_list_file;
 	fprintf (yyout, "#line %d \"%s\"\n", cb_source_line, cb_source_file);
 
@@ -1087,11 +1087,11 @@ get_new_listing_file (void)
 		cb_current_file->copy_tail->next = newfile;
 	}
 	cb_current_file->copy_tail = newfile;
-	   
+
 	memset (newfile, 0, sizeof (struct list_files));
 	newfile->copy_line = cb_source_line;
 	newfile->source_format = cb_source_format;
-	old_list_file = cb_current_file;
+	old_list_file = cb_current_file; /* TO-DO: What is the purpose of old_list_file? */
 	cb_current_file = newfile;
 }
 
@@ -1393,10 +1393,11 @@ start:
 			if (cb_current_file->skip_tail) {
 				cb_current_file->skip_tail->next = skip;
 			}
+			cb_current_file->skip_tail = skip;
+			
 			if (!cb_current_file->skip_head) {
 				cb_current_file->skip_head = skip;
 			}
-			cb_current_file->skip_tail = skip;
 		}
 		goto start;
 	}
@@ -1433,7 +1434,7 @@ start:
 			goto start;
 		}
 	}
-	
+
 	/* Return when free format (no floating comments removed!) */
 	if (cb_source_format == CB_FORMAT_FREE) {
 		within_comment = 0;

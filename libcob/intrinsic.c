@@ -1437,7 +1437,7 @@ int_strncasecmp (const void *s1, const void *s2, size_t n)
 static int
 in_last_n_chars (const cob_field *field, const size_t n, const unsigned int i)
 {
-	return i >= (field->size - n);
+	return i + n >= field->size;
 }
 
 static int

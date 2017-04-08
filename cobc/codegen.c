@@ -3921,7 +3921,7 @@ output_search_all (cb_tree table, struct cb_field *p, cb_tree stmt,
 	/* Header */
 	output_indent ("{");
 	output_line ("int ret;");
-	output_line ("int head = %d - 1;", p->occurs_min);
+	output_line ("int head = 0;");
 	output_prefix ();
 	output ("int tail = ");
 	output_occurs (p);

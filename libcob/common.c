@@ -1637,7 +1637,9 @@ cob_stop_run (const int status)
 	}
 	cob_terminate_routines ();
 	exit (status);
-}int
+}
+
+int
 cob_is_initialized (void)
 {
 	return (cobglobptr != NULL);

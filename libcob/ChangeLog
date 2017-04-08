@@ -1,4 +1,10 @@
 
+2017-04-08  Edward Hart <edward.dan.hart@gmail.com>
+
+	* intrinsic.c (in_last_n_chars): fixed underflow when field->size was
+	  less than n, ultimately causing an invalid read.
+	* fileio.c (indexed_open): fixed minor memory leak.
+
 2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c: fixed minor buffer overflows in the formatted-date

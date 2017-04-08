@@ -546,11 +546,12 @@ static const struct option long_options[] = {
 
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
-static void	print_program_code		(struct list_files *, int);
+static void	free_list_file		(struct list_files *);
+static void	print_program_code	(struct list_files *, int);
 static void	print_program_header	(void);
-static void	print_program_data		(const char *);
+static void	print_program_data	(const char *);
 static void	print_program_trailer	(void);
-static int	process					(const char *);
+static int	process			(const char *);
 
 /* cobc functions */
 
@@ -573,7 +574,7 @@ cobc_free_mem (void)
 		cobc_list_file = NULL;
 	}
 	if (cb_listing_file_struct) {
-		cobc_free (cb_listing_file_struct);
+		free_list_file (cb_listing_file_struct);
 		cb_listing_file_struct = NULL;
 	}
 	if (cobc_run_args) {
@@ -680,6 +681,90 @@ cobc_enum_explain (const enum cb_tag tag)
 		break;
 	}
 	return "UNKNOWN";
+}
+
+static void
+free_error_list (struct list_error *err)
+{
+	struct list_error	*next;
+
+	do {
+		if (err->file) {
+			cobc_free (err->file);
+		}
+		if (err->prefix) {
+			cobc_free (err->prefix);
+		}
+		if (err->msg) {
+			cobc_free (err->msg);
+		}
+
+		next = err->next;
+		cobc_free (err);
+		err = next;
+	} while (err);
+}
+
+static void
+free_replace_list (struct list_replace *replace)
+{
+	struct list_replace	*next;
+
+	do {
+		if (replace->from) {
+			cobc_free (replace->from);
+		}
+		if (replace->to) {
+			cobc_free (replace->to);
+		}
+
+		next = replace->next;
+		cobc_free (replace);
+		replace = next;
+	} while (replace);
+}
+
+static void
+free_list_skip (struct list_skip *skip)
+{
+	struct list_skip	*next;
+
+	do {
+		next = skip->next;
+		cobc_free (skip);
+		skip = next;
+	} while (skip);
+
+}
+
+static void
+free_list_file (struct list_files *list_files_struct)
+{
+	struct list_files	*next;
+
+	do {
+		/* Delete the resources held by the struct. */
+		if (list_files_struct->copy_head) {
+			free_list_file (list_files_struct->copy_head);
+		}
+		if (list_files_struct->err_head) {
+			free_error_list (list_files_struct->err_head);
+		}
+		if (list_files_struct->replace_head) {
+			free_replace_list (list_files_struct->replace_head);
+		}
+		if (list_files_struct->skip_head) {
+			free_list_skip (list_files_struct->skip_head);
+		}
+		if (list_files_struct->name) {
+			cobc_free ((char *) list_files_struct->name);
+		}
+
+		/* Delete the struct itself */
+		next = list_files_struct->next;
+		cobc_free (list_files_struct);
+		list_files_struct = next;
+	} while (list_files_struct);
 }
 
 /* Global functions */
@@ -1227,7 +1312,7 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 		s = "";
 		break;
 	}
-	
+
 	switch (type) {
 	case FILE_BASE_NAME:
 		cobc_err_msg (_("invalid file base name '%s'%s"),
@@ -1270,7 +1355,7 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 		cobc_error_name (name, prechk, INVALID_LENGTH);
 		return 1;
 	}
-	
+
 	if (*name == '_' || *name == ' ') {
 		cobc_error_name (name, prechk, SPACE_UNDERSCORE_FIRST_CHAR);
 		return 1;
@@ -1283,14 +1368,14 @@ cobc_check_valid_name (const char *name, const enum cobc_name_type prechk)
 		cobc_error_name (name, prechk, GNUCOBOL_PREFIX);
 		return 1;
 	}
-	
+
 	/* Check name is not a C keyword. */
 	if (bsearch (name, cob_csyns, COB_NUM_CSYNS,
 		     sizeof (char *), cobc_bcompare)) {
 		cobc_error_name (name, prechk, C_KEYWORD);
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -1956,7 +2041,7 @@ cobc_print_warn (const char *name, const char *doc, const int warnopt)
 		break;
 	case 2:
 		printf ("  -Wno-%-16s\t%s\n", name, doc);
-		fputs ("\t\t\t", stdout);	
+		fputs ("\t\t\t", stdout);
 		fputs (_("- ALWAYS active"), stdout);
 		putchar ('\n');
 		break;
@@ -2117,7 +2202,7 @@ cobc_print_usage (char * prog)
 	putchar ('\n');
 
 	putchar ('\n');
-	printf (_("Report bugs to: %s\n" 
+	printf (_("Report bugs to: %s\n"
 			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");
 	putchar ('\n');
 	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
@@ -2820,7 +2905,7 @@ process_command_line (const int argc, char **argv)
 	}
 
 	/* Set relaxed syntax configuration options if requested */
-	/* part 1: relaxed syntax compiler configuration option */ 
+	/* part 1: relaxed syntax compiler configuration option */
 	if (cb_relaxed_syntax_checks) {
 		if (cb_reference_out_of_declaratives > CB_WARNING) {
 			cb_reference_out_of_declaratives = CB_WARNING;
@@ -2830,7 +2915,7 @@ process_command_line (const int argc, char **argv)
 	}
 #if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
 		 are available at command line - maybe re-add with another name */
-	/* 2: relaxed syntax group option from command line */ 
+	/* 2: relaxed syntax group option from command line */
 	if (cb_flag_relaxed_syntax_group) {
 		cb_relaxed_syntax_checks = 1;
 		cb_larger_redefines_ok = 1;
@@ -3984,7 +4069,7 @@ print_program_data (const char *data)
 static char *
 check_filler_name (char *name)
 {
-	if (!memcmp (name, "FILLER", 6)) {
+	if (strlen (name) >= 6 && memcmp (name, "FILLER", 6) == 0) {
 		name = (char *)"FILLER";
 	}
 	return name;
@@ -4060,7 +4145,7 @@ set_picture (struct cb_field *field, char *picture, int picture_len)
 		strncpy (picture, field->pic->orig, picture_len - 1);
 		return 1;
 	}
-	
+
 	strcat (picture, picture_usage);
 	return 1;
 }
@@ -4665,23 +4750,16 @@ print_program_trailer (void)
 		force_new_page_for_next_line ();
 		print_program_data (_("Error/Warning summary:"));
 		print_program_data ("");
-		while (cb_listing_error_head) {
-			err = cb_listing_error_head;
-			cb_listing_error_head = err->next;
+		err = cb_listing_error_head;
+		do {
 			snprintf (errmsg, BUFSIZ, "%s: %d: %s%s", err->file, err->line, err->prefix, err->msg);
 			print_program_data (errmsg);
-			if (err->file) {
-				cobc_free (err->file);
-			}
-			if (err->prefix) {
-				cobc_free (err->prefix);
-			}
-			if (err->msg) {
-				cobc_free (err->msg);
-			}
-			cobc_free (err);
-		}
+			err = err->next;
+		} while (err);
 		print_program_data ("");
+
+		free_error_list (cb_listing_error_head);
+		cb_listing_error_tail = NULL;
 	}
 
 	/* Print error counts */
@@ -5461,7 +5539,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 }
 
 static void
-free_replace_list (struct list_files *cfile, const int line_num)
+remove_file_replace_entries_before_line (struct list_files *cfile, const int line_num)
 {
 	struct list_replace	*rep;
 
@@ -5469,6 +5547,13 @@ free_replace_list (struct list_files *cfile, const int line_num)
 	       && cfile->replace_head->firstline < line_num) {
 		rep = cfile->replace_head;
 		cfile->replace_head = rep->next;
+		
+		if (rep->from) {
+			cobc_free (rep->from);
+		}
+		if (rep->to) {
+			cobc_free (rep->to);
+		}
 		cobc_free (rep);
 	}
 }
@@ -5496,19 +5581,19 @@ static int
 print_replace_main (struct list_files *cfile, FILE *fd,
 		    char *pline[CB_READ_AHEAD], int pline_cnt, int line_num)
 {
-	static int	in_replace = 0;
-	char	*tp;
+	static int		in_replace = 0;
+	char			*tp;
 	struct list_replace	*rep;
-	struct list_files *cur;
-	int	i;
+	struct list_files 	*cur;
+	int    		i;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	const int	first_col = fixed ? CB_MARGIN_A : 0;
-	int	is_copy;
-	int	is_replace;
-	int	is_off;
-	char	tterm[2] = { '\0' };
-	char	ttoken[CB_LINE_LENGTH + 2] = { '\0' };
-	char	cmp_line[CB_LINE_LENGTH + 2] = { '\0' };
+	int		is_copy;
+	int		is_replace;
+	int		is_off;
+	char		tterm[2] = { '\0' };
+	char		ttoken[CB_LINE_LENGTH + 2] = { '\0' };
+	char		cmp_line[CB_LINE_LENGTH + 2] = { '\0' };
 
 	if (is_comment_line (pline[0], cfile->source_format != CB_FORMAT_FREE)) {
 		return pline_cnt;
@@ -5551,11 +5636,10 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	} else if (in_replace) {
 		if (is_replace && is_off) {
 			in_replace = 0;
-			free_replace_list (cfile, line_num);
+			remove_file_replace_entries_before_line (cfile, line_num);
 		} else {
 			if (is_copy) {
 				if (cfile->copy_head) {
-
 					/* List all lines read so far and then discard them. */
 					for (i = 0; i < pline_cnt; i++) {
 						print_line (cfile, pline[i], line_num + i, 0);
@@ -5791,16 +5875,9 @@ print_program_code (struct list_files *cfile, int in_copy)
 	}
 
 	/* Free replace data */
-	while (cfile->replace_head) {
-		rep = cfile->replace_head;
-		cfile->replace_head = rep->next;
-		if (rep->to) {
-			cobc_free (rep->to);
-		}
-		if (rep->from) {
-			cobc_free (rep->from);
-		}
-		cobc_free (rep);
+	if (cfile->replace_head) {
+		free_replace_list (cfile->replace_head);
+		cfile->replace_head = NULL;
 	}
 
 	/* Put errors on summary list */
@@ -5826,10 +5903,11 @@ print_program_listing (void)
 	print_program_code (cb_listing_file_struct, 0);
 
 	/* Print program trailer */
-	print_program_trailer();
+	print_program_trailer ();
 
 	/* Free source name */
 	cobc_free ((void *)cb_listing_file_struct->name);
+	cb_listing_file_struct->name = NULL;
 }
 
 /* Create single-element C source */
@@ -6310,7 +6388,7 @@ process_module (struct filename *fn)
 #endif
 
 	size = strlen (name);
-	bufflen = cobc_cc_len 
+	bufflen = cobc_cc_len
 			+ cobc_shared_opt_len
 			+ cobc_pic_flags_len + cobc_export_dyn_len
 			+ size + fn->object_len
@@ -6769,7 +6847,7 @@ main (int argc, char **argv)
 	p = getenv ("COB_UNIX_LF");
 	if (p && (*p == 'Y' || *p == 'y' ||
 		*p == 'O' || *p == 'o' ||
-		*p == 'T' || *p == 't' || 
+		*p == 'T' || *p == 't' ||
 		*p == '1')) {
 		cb_unix_lf = 1;
 		(void)_setmode (_fileno (stdin), _O_BINARY);
@@ -6823,7 +6901,7 @@ main (int argc, char **argv)
 	iargs = process_command_line (argc, argv);
 
 	cb_text_column = cb_config_text_column;
-	
+
 	/* Check the filename */
 	if (iargs == argc) {
 		cobc_err_exit (_("no input files"));
@@ -6990,17 +7068,16 @@ main (int argc, char **argv)
 
 	/* process all files */
 	for (fn = file_list; fn; fn = fn->next) {
-
-		current_compile_time = cob_get_current_date_and_time();
+		current_compile_time = cob_get_current_date_and_time ();
 
 		/* Initialize listing */
 		if (cb_src_list_file) {
-			set_listing_date();
+			set_listing_date ();
 
 			cb_current_file = cb_listing_file_struct;
 			cb_current_file->name = cobc_strdup (fn->source);
 			cb_current_file->source_format = cb_source_format;
-			force_new_page_for_next_line();
+			force_new_page_for_next_line ();
 		}
 
 		/* Initialize general vars */
@@ -7015,7 +7092,7 @@ main (int argc, char **argv)
 		cb_literal_id = 1;
 		cb_field_id = 1;
 		demangle_name = fn->demangle_source;
-		memset (optimize_defs, 0, sizeof(optimize_defs));
+		memset (optimize_defs, 0, sizeof (optimize_defs));
 
 		iparams++;
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
@@ -7044,7 +7121,7 @@ main (int argc, char **argv)
 		if (cb_src_list_file) {
 			cb_listing_page = 0;
 			strcpy (cb_listing_filename, fn->source);
-			set_listing_title_code();
+			set_listing_title_code ();
 		}
 
 		if (cb_compile_level < CB_LEVEL_TRANSLATE) {
