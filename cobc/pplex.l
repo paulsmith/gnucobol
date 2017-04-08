@@ -1091,7 +1091,7 @@ get_new_listing_file (void)
 	memset (newfile, 0, sizeof (struct list_files));
 	newfile->copy_line = cb_source_line;
 	newfile->source_format = cb_source_format;
-	old_list_file = cb_current_file; /* TO-DO: What is the purpose of old_list_file? */
+	old_list_file = cb_current_file;
 	cb_current_file = newfile;
 }
 
@@ -1394,7 +1394,7 @@ start:
 				cb_current_file->skip_tail->next = skip;
 			}
 			cb_current_file->skip_tail = skip;
-			
+
 			if (!cb_current_file->skip_head) {
 				cb_current_file->skip_head = skip;
 			}

@@ -4759,6 +4759,7 @@ print_program_trailer (void)
 		print_program_data ("");
 
 		free_error_list (cb_listing_error_head);
+		cb_listing_error_head = NULL;
 		cb_listing_error_tail = NULL;
 	}
 
@@ -5547,7 +5548,7 @@ remove_file_replace_entries_before_line (struct list_files *cfile, const int lin
 	       && cfile->replace_head->firstline < line_num) {
 		rep = cfile->replace_head;
 		cfile->replace_head = rep->next;
-		
+
 		if (rep->from) {
 			cobc_free (rep->from);
 		}
