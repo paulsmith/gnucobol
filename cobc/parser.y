@@ -3191,7 +3191,7 @@ space_or_zero:
 /* SYMBOLIC characters clause */
 
 symbolic_characters_clause:
-  _symbolic_collection _sym_in_word
+  symbolic_collection _sym_in_word
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
@@ -3215,7 +3215,7 @@ _sym_in_word:
   }
 ;
 
-_symbolic_collection:
+symbolic_collection:
   %prec SHIFT_PREFER
   SYMBOLIC _characters symbolic_chars_list
   {
@@ -6168,6 +6168,7 @@ screen_description:
 ;
 
 _screen_options:
+  /* empty */
 | _screen_options screen_option
 ;
 
@@ -6278,15 +6279,13 @@ screen_option:
   {
 	set_screen_attr ("INITIAL", COB_SCREEN_INITIAL);
   }
-| LINE _number _is _screen_line_plus_minus num_id_or_lit
+| LINE screen_line_number
   {
 	check_repeated ("LINE", SYN_CLAUSE_16, &check_pic_duplicate);
-	current_field->screen_line = $5;
   }
-| column_or_col _number _is _screen_col_plus_minus num_id_or_lit
+| column_or_col screen_col_number
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_17, &check_pic_duplicate);
-	current_field->screen_column = $5;
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
@@ -6300,7 +6299,7 @@ screen_option:
   }
 | usage_clause
 | blank_clause
-| global_screen_opt
+| screen_global_clause;
 | justified_clause
 | sign_clause
 | value_clause
@@ -6350,6 +6349,15 @@ minus_minus:
 | TOK_MINUS
 ;
 
+screen_line_number:
+  _number _is _screen_line_plus_minus num_id_or_lit
+  {
+	if ($4) {
+		current_field->screen_line = $4;
+	}
+  }
+;
+
 _screen_line_plus_minus:
   /* empty */
   {
@@ -6362,6 +6370,15 @@ _screen_line_plus_minus:
 | minus_minus
   {
 	current_field->screen_flag |= COB_SCREEN_LINE_MINUS;
+  }
+;
+
+screen_col_number:
+  _number _is _screen_col_plus_minus num_id_or_lit
+  {
+	if ($4) {
+		current_field->screen_column = $4;
+	}
   }
 ;
 
@@ -6380,7 +6397,6 @@ _screen_col_plus_minus:
   }
 ;
 
-
 screen_occurs_clause:
   OCCURS integer _times
   {
@@ -6392,10 +6408,10 @@ screen_occurs_clause:
   }
 ;
 
-global_screen_opt:
+screen_global_clause:
   _is GLOBAL
   {
-	cb_error (_("GLOBAL is not allowed with screen items"));
+	CB_PENDING (_("GLOBAL screen items"));
   }
 ;
 
