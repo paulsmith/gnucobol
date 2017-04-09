@@ -4838,14 +4838,13 @@ level_number:
   }
 ;
 
-_entry_name:
+_filler:
   /* empty */
-  {
-	$$ = cb_build_filler ();
-	qualifier = NULL;
-	non_const_word = 0;
-  }
 | FILLER
+;
+
+_entry_name:
+  _filler
   {
 	$$ = cb_build_filler ();
 	qualifier = NULL;
@@ -5543,7 +5542,11 @@ ascending_or_descending:
 ;
 
 _occurs_indexed:
-| INDEXED _by occurs_index_list
+  /* empty */
+| occurs_indexed
+;
+occurs_indexed:
+ INDEXED _by occurs_index_list
   {
 	current_field->index_list = $3;
   }
@@ -5647,6 +5650,7 @@ value_item:
 ;
 
 _false_is:
+  /* empty */
 | _when_set_to TOK_FALSE _is lit_or_length
   {
 	if (current_field->level != 88) {
@@ -6418,6 +6422,16 @@ screen_global_clause:
 /* PROCEDURE DIVISION */
 
 _procedure_division:
+  /* empty */
+  {
+	current_section = NULL;
+	current_paragraph = NULL;
+	check_pic_duplicate = 0;
+	check_duplicate = 0;
+	if (!current_program->entry_convention) {
+		current_program->entry_convention = cb_int (CB_CONV_COBOL);
+	}
+  }
 | PROCEDURE DIVISION _mnemonic_conv _procedure_using_chaining _procedure_returning TOK_DOT
   {
 	current_section = NULL;
