@@ -169,6 +169,7 @@ static enum cb_storage		current_storage;
 
 static cb_tree			perform_stack;
 static cb_tree			qualifier;
+static cb_tree			keys_list;
 
 static cb_tree			save_tree;
 static cb_tree			start_tree;
@@ -4848,6 +4849,7 @@ _entry_name:
   {
 	$$ = cb_build_filler ();
 	qualifier = NULL;
+	keys_list = NULL;
 	non_const_word = 0;
   }
 | user_entry_name
@@ -4858,6 +4860,7 @@ user_entry_name:
   {
 	$$ = $1;
 	qualifier = $1;
+	keys_list = NULL;
 	non_const_word = 0;
   }
 ;
@@ -5423,14 +5426,14 @@ _occurs_step:
 
 occurs_clause:
   OCCURS integer _occurs_to_integer _times
-  _occurs_depending _occurs_keys _occurs_indexed
+  _occurs_depending _occurs_keys_and_indexed
   {
 	/* most of the field attributes are set when parsing the phrases */;
 	setup_occurs ();
 	setup_occurs_min_max ($2, $3);
   }
 | OCCURS _occurs_integer_to UNBOUNDED _times
-  DEPENDING _on reference _occurs_keys _occurs_indexed
+  DEPENDING _on reference _occurs_keys_and_indexed
   {
 	current_field->flag_unbounded = 1;
 	if (current_field->parent) {
@@ -5442,7 +5445,7 @@ occurs_clause:
 	setup_occurs_min_max ($2, cb_int0);
   }
 | OCCURS DYNAMIC _capacity_in _occurs_from_integer
-  _occurs_to_integer _occurs_initialized _occurs_keys _occurs_indexed
+  _occurs_to_integer _occurs_initialized _occurs_keys_and_indexed
   {
 	setup_occurs ();
 	current_field->occurs_min = $4 ? cb_get_int ($4) : 0;
@@ -5494,8 +5497,24 @@ _occurs_initialized:
   }
 ;
 
-_occurs_keys:
-  _occurs_key_list
+_occurs_keys_and_indexed:
+  /* empty */
+| occurs_keys occurs_indexed
+| occurs_indexed
+  {
+	if (!cb_relaxed_syntax_checks) {
+		cb_error (_("INDEXED should follow ASCENDING/DESCENDING"));
+	} else if(warningopt) {
+		cb_warning (_("INDEXED should follow ASCENDING/DESCENDING"));
+	}
+  }
+  occurs_keys
+| occurs_indexed
+| occurs_keys
+;
+
+occurs_keys:
+  occurs_key_list
   {
 	if ($1) {
 		cb_tree		l;
@@ -5518,21 +5537,25 @@ _occurs_keys:
   }
 ;
 
-_occurs_key_list:
-  /* empty */			{ $$ = NULL; }
-| _occurs_key_list
+occurs_key_list:
+  occurs_key_field
+| occurs_key_field occurs_key_list
+;
+
+occurs_key_field:
   ascending_or_descending _key _is reference_list
   {
 	cb_tree l;
 
-	for (l = $5; l; l = CB_CHAIN (l)) {
-		CB_PURPOSE (l) = $2;
+	for (l = $4; l; l = CB_CHAIN (l)) {
+		CB_PURPOSE (l) = $1;
 		if (qualifier && !CB_REFERENCE(CB_VALUE(l))->chain &&
 		    strcasecmp (CB_NAME(CB_VALUE(l)), CB_NAME(qualifier))) {
 			CB_REFERENCE(CB_VALUE(l))->chain = qualifier;
 		}
 	}
-	$$ = cb_list_append ($1, $5);
+	keys_list = cb_list_append (keys_list, $4);
+	$$ = keys_list;
   }
 ;
 

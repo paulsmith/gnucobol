@@ -10,6 +10,11 @@
 	  frees in listing code, SORT of table with OCCURS DEPENDING 0 TO n
 	  and when aborting compilation in the lexer.
 
+2017-03-31  Ron Norman <rjn@inglenet.com>
+
+	* parser.y: allow ASCENDING/DESCENING and INDEXED BY to follow OCCURS
+	  in any order with -frelax-syntax
+
 2017-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_emit_set_to): added error when trying to set address of a
