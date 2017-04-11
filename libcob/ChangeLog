@@ -1,4 +1,9 @@
 
+2017-04-10 Brian Tiffin <btiffin@gnu.org>
+
+	* common.c, common.h: remove cob_get_prog_pointer in preference to
+	  cob_get_pointer.
+
 2017-04-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* intrinsic.c (in_last_n_chars): fixed underflow when field->size was

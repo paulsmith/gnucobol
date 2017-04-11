@@ -2109,20 +2109,9 @@ output_integer (cb_tree x)
 			return;
 
 		case CB_USAGE_POINTER:
-#ifdef	COB_NON_ALIGNED
-			output ("(cob_get_pointer (");
-			output_data (x);
-			output ("))");
-#else
-			output ("(*(unsigned char **) (");
-			output_data (x);
-			output ("))");
-#endif
-			return;
-
 		case CB_USAGE_PROGRAM_POINTER:
 #ifdef	COB_NON_ALIGNED
-			output ("(cob_get_prog_pointer (");
+			output ("(cob_get_pointer (");
 			output_data (x);
 			output ("))");
 #else
@@ -2375,24 +2364,13 @@ output_long_integer (cb_tree x)
 			return;
 
 		case CB_USAGE_POINTER:
+		case CB_USAGE_PROGRAM_POINTER:
 #ifdef	COB_NON_ALIGNED
 			output ("(cob_get_pointer (");
 			output_data (x);
 			output ("))");
 #else
 			output ("(*(unsigned char **) (");
-			output_data (x);
-			output ("))");
-#endif
-			return;
-
-		case CB_USAGE_PROGRAM_POINTER:
-#ifdef	COB_NON_ALIGNED
-			output ("(cob_get_prog_pointer (");
-			output_data (x);
-			output ("))");
-#else
-			output ("(*(void **) (");
 			output_data (x);
 			output ("))");
 #endif

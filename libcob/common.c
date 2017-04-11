@@ -1579,15 +1579,6 @@ cob_get_pointer (const void *srcptr)
 	return (cob_u8_ptr)tmptr;
 }
 
-void *
-cob_get_prog_pointer (const void *srcptr)
-{
-	void	*tmptr;
-
-	memcpy (&tmptr, srcptr, sizeof (void *));
-	return tmptr;
-}
-
 void
 cob_field_to_string (const cob_field *f, void *str, const size_t maxsize)
 {
