@@ -5728,7 +5728,7 @@ AT_DATA([prog.cob], [
            SEARCH DBX-RECORD-NAMES
            AT END
                DISPLAY 'B ' REC-NAME ' is invalid.'
-           WHEN REC-NAME = DBX-RECORD-NAME (REC-NAME-IDX)
+           WHEN REC-NAME = DBX-RECORD-NAME (REC-NAME-DBX)
                DISPLAY 'B ' REC-NAME ' is code '
                          DBX-RECORD-CODE (REC-NAME-DBX) '.'.
 ])
@@ -5739,7 +5739,7 @@ AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob ], [0], [],
 
 AT_CHECK([./prog], [0],
 [A A-F-GEN-LEDGER-ZGL             is code 0305.
-B A-F-GEN-LEDGER-ZGL             is code 0315.
+B A-F-GEN-LEDGER-ZGL             is code 0305.
 A JUNK                           is invalid.
 B JUNK                           is invalid.
 ], [])
