@@ -286,7 +286,7 @@ void print_bits (cob_flags_t num)
 		/* Print last bit and shift left. */
 		fprintf (stderr, "%u ", num & max_pow ? 1 : 0);
 		num = num << 1;
- 	}
+	}
 	fprintf (stderr, "\n");
 }
 #endif
@@ -2033,6 +2033,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PROHIBITED
 %token PROMPT
 %token PROTECTED		"PROTECTED"
+%token PURGE
 %token QUEUE
 %token QUOTE
 %token RANDOM
@@ -2093,6 +2094,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SEGMENT_LIMIT		"SEGMENT-LIMIT"
 %token SELECT
 %token SEMI_COLON		"semi-colon"
+%token SEND
 %token SENTENCE
 %token SEPARATE
 %token SEQUENCE
@@ -2415,11 +2417,11 @@ program_definition:
   program_id_paragraph
   _options_paragraph
   _program_body
-  /*
-    The list is so a program which contains a nested program can have an end
-    marker.
-  */
   _end_program_list
+  /*
+     The _end_program_list above is used for allowing an end marker
+     in a program which contains a nested program.
+  */
 ;
 
 function_definition:
@@ -3828,9 +3830,7 @@ alternative_record_key_clause:
 		current_file->alt_key_list = p;
 	} else {
 		l = current_file->alt_key_list;
-		for (; l->next; l = l->next) {
-			;
-		}
+		for (; l->next; l = l->next) { ; }
 		l->next = p;
 	}
   }
@@ -4780,7 +4780,8 @@ _record_description_list:
   {
 	$$ = NULL;
   }
-| {
+|
+  {
 	current_field = NULL;
 	description_field = NULL;
 	cb_clear_real_field ();
@@ -5569,7 +5570,7 @@ _occurs_indexed:
 | occurs_indexed
 ;
 occurs_indexed:
- INDEXED _by occurs_index_list
+  INDEXED _by occurs_index_list
   {
 	current_field->index_list = $3;
   }
@@ -6326,7 +6327,7 @@ screen_option:
   }
 | usage_clause
 | blank_clause
-| screen_global_clause;
+| screen_global_clause
 | justified_clause
 | sign_clause
 | value_clause
@@ -6504,7 +6505,7 @@ _procedure_division:
   {
 	cb_tree label;
 
-	/* No PROCEDURE DIVISION header ! */
+	/* No PROCEDURE DIVISION header here */
 	/* Only a statement is allowed as first element */
 	/* Thereafter, sections/paragraphs may be used */
 	check_pic_duplicate = 0;
@@ -7085,7 +7086,8 @@ statement:
 | unlock_statement
 | unstring_statement
 | write_statement
-| %prec SHIFT_PREFER NEXT SENTENCE
+| %prec SHIFT_PREFER
+  NEXT SENTENCE
   {
 	if (cb_verify (cb_next_sentence_phrase, "NEXT SENTENCE")) {
 		cb_tree label;
@@ -8257,7 +8259,7 @@ display_atom:
   {
 	check_duplicate = 0;
 	check_line_col_duplicate = 0;
-  	advancing_value = cb_int1;
+	advancing_value = cb_int1;
 	upon_value = NULL;
 	line_column = NULL;
   }
@@ -8321,7 +8323,7 @@ display_clause:
   }
 | _with NO_ADVANCING
   {
- 	check_repeated ("NO ADVANCING", SYN_CLAUSE_2, &check_duplicate);
+	check_repeated ("NO ADVANCING", SYN_CLAUSE_2, &check_duplicate);
 	advancing_value = cb_int0;
   }
 | mode_is_block
@@ -8631,7 +8633,8 @@ evaluate_condition_list:
   {
 	$$ = cb_list_add ($1, $2);
   }
-| evaluate_case_list %prec SHIFT_PREFER
+| evaluate_case_list
+  %prec SHIFT_PREFER
   {
 	$$ = $1;
   }
@@ -9684,7 +9687,7 @@ read_into:
 ;
 
 lock_phrases:
-  %prec SHIFT_PREFER /* empty */
+  /* empty */ %prec SHIFT_PREFER
   {
 	$$ = NULL;
   }
@@ -10587,7 +10590,6 @@ string_item:
 		save_tree = cb_list_add (save_tree, $2);
 	}
   }
-
 ;
 
 _string_delimited:
