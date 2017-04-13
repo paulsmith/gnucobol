@@ -8036,7 +8036,7 @@ cb_emit_perform (cb_tree perform, cb_tree body)
 		return;
 	}
 	if (current_program->flag_debugging &&
-	    !current_statement->flag_in_debug && CB_PAIR_P (body)) {
+	    !current_statement->flag_in_debug && body && CB_PAIR_P (body)) {
 		cb_emit (cb_build_debug (cb_debug_contents, "PERFORM LOOP", NULL));
 	}
 	CB_PERFORM (perform)->body = body;
