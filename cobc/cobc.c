@@ -21,7 +21,7 @@
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*#define DEBUG_REPLACE*/
+/* #define DEBUG_REPLACE */
 
 #include "config.h"
 #include "defaults.h"
@@ -201,14 +201,16 @@ int			cb_listing_wide = 0;
 int			cb_lines_per_page = CB_MAX_LINES;
 int			cb_no_symbols = 0;
 int			cb_listing_xref = 0;
-#define		CB_LISTING_DATE_BUFF	48
-#define		CB_LISTING_DATE_MAX		(CB_LISTING_DATE_BUFF - 1)
+#define			CB_LISTING_DATE_BUFF 48
+#define			CB_LISTING_DATE_MAX (CB_LISTING_DATE_BUFF - 1)
 char			cb_listing_date[CB_LISTING_DATE_BUFF]; /* Date/Time buffer for listing */
 struct list_files	*cb_current_file = NULL;
+#define			LCL_NAME_LEN 80
+#define			LCL_NAME_MAX (LCL_NAME_LEN - 1)
 
 /* compilation date/time of current source file */
 struct cob_time		current_compile_time = { 0 };
-struct tm			current_compile_tm = { 0 };
+struct tm		current_compile_tm = { 0 };
 
 #if	0	/* RXWRXW - source format */
 char			*source_name = NULL;
@@ -4230,10 +4232,10 @@ static void
 print_88_values (int lvl, struct cb_field *field)
 {
 	struct cb_field *f;
-	char lcl_name[80];
+	char lcl_name[LCL_NAME_LEN] = { '\0' };
 
 	for (f = field->validation; f; f = f->sister) {
-		strcpy (lcl_name, (char *)f->name);
+		strncpy (lcl_name, (char *)f->name, LCL_NAME_MAX);
 		snprintf (print_data, CB_PRINT_LEN,
 			"      %-14.14s %02d   %s",
 			"CONDITIONAL", f->level, lcl_name);
@@ -4241,7 +4243,7 @@ print_88_values (int lvl, struct cb_field *field)
 	}
 }
 
-/* print fields with given indentation*/
+/* print fields with given indentation */
 static int
 print_fields (int indent, struct cb_field *top)
 {
@@ -4252,7 +4254,7 @@ print_fields (int indent, struct cb_field *top)
 	int	picture_len = cb_listing_wide ? 64 : 24;
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
-	char	lcl_name[80];
+	char	lcl_name[LCL_NAME_LEN];
 	int	found = 0;
 
 	for (; top; top = top->sister) {
@@ -4261,7 +4263,8 @@ print_fields (int indent, struct cb_field *top)
 		}
 		found = 1;
 
-		strcpy (lcl_name, check_filler_name((char *)top->name));
+		strncpy (lcl_name, check_filler_name ((char *)top->name),
+			 LCL_NAME_MAX);
 		get_cat = 1;
 		got_picture = 1;
 
@@ -4502,10 +4505,10 @@ static void
 xref_88_values (struct cb_field *field)
 {
 	struct cb_field *f;
-	char lcl_name[80];
+	char lcl_name[LCL_NAME_LEN] = { '\0' };
 
 	for (f = field->validation; f; f = f->sister) {
-		strcpy (lcl_name, (char *)f->name);
+		strncpy (lcl_name, (char *)f->name, LCL_NAME_MAX);
 		pd_off = sprintf (print_data,
 			"%-30.30s %-6d ",
 			lcl_name, f->common.source_line);
@@ -4517,7 +4520,7 @@ xref_88_values (struct cb_field *field)
 static int
 xref_fields (struct cb_field *top)
 {
-	char		lcl_name[80];
+	char		lcl_name[LCL_NAME_LEN] = { '\0' };
 	int		found = 0;
 
 	for (; top; top = top->sister) {
@@ -4528,7 +4531,8 @@ xref_fields (struct cb_field *top)
 			continue;
 		}
 
-		strcpy (lcl_name, check_filler_name((char *)top->name));
+		strncpy (lcl_name, check_filler_name ((char *)top->name),
+			 LCL_NAME_MAX);
 		if (!strcmp (lcl_name, "FILLER") && !top->validation) {
 			if (top->children) {
 				found += xref_fields (top->children);
@@ -4795,7 +4799,7 @@ print_program_trailer (void)
 }
 
 /*
-  Find next token after bp, copy it to token and store the token terminator in
+  Find next token after bp, copy it to token and copy the token terminator to
   term. Return pointer to the character after the terminator.
 */
 static char *
@@ -5059,6 +5063,8 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
   the first_col of each line and up to the end of line or the sequence area (if
   fixed is true).
   Return the column to which pline[last_idx] was read up to.
+
+  first_col is zero-indexed.
 */
 static int
 compare_prepare (char *cmp_line, char *pline[CB_READ_AHEAD],
@@ -5076,22 +5082,22 @@ compare_prepare (char *cmp_line, char *pline[CB_READ_AHEAD],
 	/* Collapse pline into a string of tokens separated by spaces */
 	for (line_idx = first_idx; line_idx < last_idx; line_idx++) {
 		if (!fixed) {
-			last_col = strlen (pline[line_idx]);
+			last_col = strlen (pline[line_idx]) - 1;
 		}
 
-		/* Go the last non-space character */
+		/* Go to the last non-space character */
 		for (last_nonspace = last_col;
-		     isspace ((unsigned char)pline[line_idx][last_nonspace - 1]) && last_nonspace > first_col;
+		     isspace ((unsigned char)pline[line_idx][last_nonspace]) && last_nonspace > first_col;
 		     last_nonspace--);
 		/* Go to first non-space character */
-		for (i = first_col; (i < last_nonspace) && isspace ((unsigned char)pline[line_idx][i]); i++);
+		for (i = first_col; (i <= last_nonspace) && isspace ((unsigned char)pline[line_idx][i]); i++);
 
 		/* Copy chars between the first and last non-space characters */
-		while (i < last_nonspace) {
+		while (i <= last_nonspace) {
 			if (isspace ((unsigned char)pline[line_idx][i])) {
 				cmp_line[out_pos++] = ' ';
-				for (i++; (i < last_nonspace) && isspace ((unsigned char)pline[line_idx][i]); i++);
-				if (i == last_nonspace) {
+				for (i++; (i <= last_nonspace) && isspace ((unsigned char)pline[line_idx][i]); i++);
+				if (i > last_nonspace) {
 					break;
 				}
 			} else if (pline[line_idx][i] == '"') {
@@ -5107,14 +5113,14 @@ compare_prepare (char *cmp_line, char *pline[CB_READ_AHEAD],
 					in_string = 1;
 				}
 
-				for (; (i < last_nonspace) && (pline[line_idx][i] != '"'); ) {
+				for (; (i <= last_nonspace) && (pline[line_idx][i] != '"'); ) {
 					cmp_line[out_pos++] = pline[line_idx][i++];
 				}
 				if (pline[line_idx][i] == '"') {
 					cmp_line[out_pos++] = pline[line_idx][i++];
 					in_string = 0;
 				}
-				if (i == last_nonspace) {
+				if (i > last_nonspace) {
 					break;
 				}
 			} else {
@@ -5186,7 +5192,7 @@ is_continuation_line (char *line, int fixed)
 	}
 	if (fixed) {
 		/* check for "-" in column 7 */
-		if (IS_CONTINUE_LINE(line)) {
+		if (IS_CONTINUE_LINE (line)) {
 			return 1;
 		}
 	} else {
@@ -5203,7 +5209,7 @@ is_continuation_line (char *line, int fixed)
 }
 
 static void
-pline_check_limit (int pline_cnt, const char *filename, int line_num)
+abort_if_too_many_continuation_lines (int pline_cnt, const char *filename, int line_num)
 {
 	if (pline_cnt >= CB_READ_AHEAD) {
 		cobc_err_msg (_("%s: %d: Too many continuation lines"),
@@ -5212,18 +5218,216 @@ pline_check_limit (int pline_cnt, const char *filename, int line_num)
 	}
 }
 
+static void
+make_new_continuation_line (const char *cfile_name, char *pline[CB_READ_AHEAD],
+			    int * const pline_cnt, int line_num)
+{
+	abort_if_too_many_continuation_lines (*pline_cnt + 1, cfile_name,
+					      line_num);
+	if (pline[*pline_cnt + 1] == NULL) {
+		pline[*pline_cnt + 1] = cobc_malloc (CB_LINE_LENGTH + 2);
+	}
+	strcpy (pline[*pline_cnt + 1], pline[*pline_cnt]);
+	strcpy (pline[*pline_cnt], pline[*pline_cnt - 1]);
+	memset (&pline[*pline_cnt][CB_MARGIN_A], ' ',
+		CB_SEQUENCE - CB_MARGIN_A);
+	pline[*pline_cnt][CB_INDICATOR] = '&';
+	
+        (*pline_cnt)++;
+}
+
+static void
+add_token_over_multiple_lines (const char *cfile_name,
+			       char *pline[CB_READ_AHEAD],
+			       int * const pline_cnt,
+			       const int line_num,
+			       const char *new_token,
+			       const int first_col,
+			       int new_token_len,
+			       int * const out_line,
+			       int * const out_col)
+{
+	int	tok_char = 0;
+	
+#ifdef DEBUG_REPLACE
+	fprintf (stdout, "   new_token_len = %d\n", new_token_len);
+#endif
+	
+	while (new_token_len) {
+		/* Copy the token one character at a time. */
+		pline[*out_line][(*out_col)++] = new_token[tok_char++];
+		new_token_len--;
+
+		/*
+		  Move to the next line when reach the end of the current one.
+		*/
+		if (*out_col == CB_SEQUENCE) {
+#ifdef DEBUG_REPLACE
+			fprintf (stdout, "   NEW pline[%2d] = %s\n",
+				 *out_line, pline[*out_line]);
+#endif
+			
+			*out_col = first_col;
+			(*out_line)++;
+			
+			/*
+			  Allocate a new out_line if we are on the last
+			  out_line.
+			*/
+			if (*out_line == *pline_cnt) {
+				make_new_continuation_line (cfile_name, pline,
+							    pline_cnt, line_num);
+			}
+		}
+	}
+	
+	pline[*out_line][(*out_col)++] = ' ';
+}
+
+static void
+reflow_replaced_fixed_format_text (const char *cfile_name, char *pline[CB_READ_AHEAD],
+				   int * const pline_cnt, const int line_num,
+				   char *newline, int first_col, const int last)
+{
+	int	first_nonspace;
+	char	*new_line_ptr;
+	char	new_token[CB_LINE_LENGTH + 2];
+	char	token_terminator[2];
+	int	out_col;
+	int	out_line;
+	int	force_next_line;
+	int	new_token_len;
+	
+	new_line_ptr = get_next_token (newline, new_token, token_terminator);
+
+	/*
+	  Start adding tokens from margin B or the first non-space character.
+	*/
+	for (first_nonspace = first_col;
+	     (first_nonspace < last) && isspace (pline[0][first_nonspace]);
+	     first_nonspace++);
+	if (first_nonspace >= CB_MARGIN_B) {
+		first_col = CB_MARGIN_B;
+	}
+			
+	/* For each line,  */
+	for (out_line = 0; out_line < *pline_cnt; out_line++) {
+		force_next_line = 0;
+		out_col = first_col;
+
+		/* Add as many token as possible to the current line. */
+		while (new_line_ptr && !force_next_line) {
+			new_token_len = strlen (new_token);
+			if (new_token_len >= (CB_SEQUENCE - first_col)) {
+				/*
+				  If the new token does not fit on this line,
+				  reflow it onto the next line.
+				*/
+			        add_token_over_multiple_lines (cfile_name, pline, pline_cnt, line_num,
+							       new_token, first_col, new_token_len,
+							       &out_line, &out_col);
+			} else if ((out_col + 2 + new_token_len) < last) {
+				/*
+				  If the new token *and* its terminator fits,
+				  copy it all onto the current line.
+				*/
+				strcpy (&pline[out_line][out_col], new_token);
+				out_col += strlen (new_token);
+
+				if (token_terminator[0]) {
+					pline[out_line][out_col++] = token_terminator[0];
+				} else {
+				        pline[out_line][out_col++] = ' ';
+				}
+				if (token_terminator[0] == '.') {
+					pline[out_line][out_col++] = ' ';
+				}
+			} else {
+				force_next_line = 1;
+			}
+			new_line_ptr = get_next_token (new_line_ptr, new_token, token_terminator);
+		}
+
+		if (out_col == first_col) {
+			pline[out_line][CB_INDICATOR] = ' ';
+		}
+		while (out_col < last) {
+			pline[out_line][out_col++] = ' ';
+		}
+		
+#ifdef DEBUG_REPLACE
+		fprintf (stdout, "   NEW pline[%2d] = %s\n", out_line, pline[out_line]);
+#endif
+	}
+}
+
+static void
+reflow_replaced_free_format_text (char *pline[CB_READ_AHEAD],
+				  const int pline_cnt, char *newline,
+				  const int first_col)
+{
+	char	*new_line_ptr;
+	char	new_token[CB_LINE_LENGTH + 2];
+	char	token_terminator[2];
+	int	i;
+	int	j;
+	
+	new_line_ptr = get_next_token (newline, new_token, token_terminator);
+	
+	for (i = 0; i < pline_cnt; i++) {
+		/*
+		  Terminate the line at null or the first non-space character.
+		*/
+		for (j = first_col; pline[i][j] && pline[i][j] == ' '; j++);
+		pline[i][j] = '\0';
+
+		/*
+		  If the text has not been copied yet, copy it to the start of
+		  the line.
+		*/
+		while (new_line_ptr) {
+			/* TO-DO: Replace with strncat? */
+			strcat (pline[i], new_token);
+			strcat (pline[i], token_terminator);
+			j++;
+			new_line_ptr = get_next_token (new_line_ptr, new_token,
+						       token_terminator);
+		}
+		
+		if (j == first_col) {
+			strcat (pline[i], " ");
+		}
+	}	
+}
+
+static int
+reflow_replaced_text (const char *cfile_name, char *pline[CB_READ_AHEAD],
+		      int pline_cnt, int line_num, char *newline, int first_col,
+		      int last_col, int fixed)
+{
+	if (fixed) {
+	        reflow_replaced_fixed_format_text (cfile_name, pline,
+						   &pline_cnt, line_num,
+						   newline, first_col,
+						   last_col);
+	} else {
+		reflow_replaced_free_format_text (pline, pline_cnt, newline,
+						  first_col);
+	}
+
+	return pline_cnt;
+}
+
 /* TODO: Modularise! */
+
 static int
 print_replace_text (struct list_files *cfile, FILE *fd,
 		    struct list_replace *rep, char *pline[CB_READ_AHEAD],
 		    int pline_cnt, int line_num)
 {
 	char	*rfp = rep->from;
-	char	*fp;
-	char	*tp;
-	int	i;
-	int	j;
-	int	k = 0;
+	char	*from_ptr;
+	char	*to_ptr;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	int	first_col = fixed ? CB_MARGIN_A : 0;
 	int	last;
@@ -5235,8 +5439,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	overread = 0;
 	int	tokmatch = 0;
 	int	subword = 0;
-	int	ttix, ttlen, ftlen;
-	int	nextrec;
+	int	ttix, ttlen, from_token_len;
 	char	lterm[2];
 	char	fterm[2];
 	char	ftoken[CB_LINE_LENGTH + 2];
@@ -5244,12 +5447,13 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	char	ttoken[CB_LINE_LENGTH + 2];
 	char	cmp_line[CB_LINE_LENGTH + 2];
 	char	newline[CB_LINE_LENGTH + 2];
-	char	frm_line[CB_LINE_LENGTH + 2];
+	char	from_line[CB_LINE_LENGTH + 2];
 
 	if (is_comment_line (pline[0], fixed)) {
 		return pline_cnt;
 	}
 
+	/* Trim the string to search and replace */
 	terminate_str_at_first_trailing_space (rfp);
 	while (*rfp && isspace (*rfp)) {
 		rfp++;
@@ -5281,16 +5485,16 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 		  replaced.
 		*/
 
-		strcpy (frm_line, rfp);
-		fp = get_next_token (frm_line, ftoken, fterm);
-	next_line:
-		tp = get_next_token (cmp_line, ttoken, tterm);
+		strcpy (from_line, rfp);
+		from_ptr = get_next_token (from_line, ftoken, fterm);
+	force_next_line:
+		to_ptr = get_next_token (cmp_line, ttoken, tterm);
 
 		/*
 		  Read tokens until the match is complete or until a match
 		  fails.
 		*/
-		while (tp && fp) {
+		while (to_ptr && from_ptr) {
 			if (!strcasecmp (ttoken, ftoken)) {
 				/*
 				  Mark two tokens as matched, then read next
@@ -5303,8 +5507,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 					lterm[0] = tterm[0];
 				}
 				lterm[1] = tterm[1];
-				tp = get_next_token (tp, ttoken, tterm);
-				fp = get_next_token (fp, ftoken, fterm);
+				to_ptr = get_next_token (to_ptr, ttoken, tterm);
+				from_ptr = get_next_token (from_ptr, ftoken, fterm);
 			} else {
 				/* Discard partial match. */
 				if (seccount == 0) {
@@ -5314,13 +5518,13 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				submatch = 0;
 
 				/* Start matching from beginning of from_line again. */
-				strcpy (frm_line, rfp);
-				fp = get_next_token (frm_line, ftoken, fterm);
-				tp = get_next_token (tp, ttoken, tterm);
+				strcpy (from_line, rfp);
+				from_ptr = get_next_token (from_line, ftoken, fterm);
+				to_ptr = get_next_token (to_ptr, ttoken, tterm);
 				break;
 			}
 		}
-		if (!fp && submatch) {
+		if (!from_ptr && submatch) {
 			/*
 			  If the match is complete, output the match's
 			  replacement.
@@ -5328,13 +5532,12 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			match = 1;
 			strcat (newline, rep->to);
 			strcat (newline, lterm);
-			if (tp) {
+			if (to_ptr) {
 				strcat (newline, ttoken);
 				strcat (newline, tterm);
-				strcat (newline, tp);
+				strcat (newline, to_ptr);
 			}
-		}
-		else if (!tp && submatch) {
+		} else if (!to_ptr && submatch) {
 			/*
 			  If we run out of chars from the original source, get
 			  more.
@@ -5368,7 +5571,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			if (!is_comment_line (pline[pline_cnt], fixed)) {
 				pline_cnt++;
 			}
-			pline_check_limit (pline_cnt, cfile->name, line_num);
+			abort_if_too_many_continuation_lines (pline_cnt, cfile->name, line_num);
 			if (get_next_listing_line (fd, &pline[pline_cnt], fixed) < 0) {
 				pline[pline_cnt][0] = 0;
 				eof = 1;
@@ -5391,22 +5594,22 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			last = compare_prepare (cmp_line, pline, pline_cnt - 1, pline_cnt,
 						first_col, fixed);
 			strcat (newline, " ");
-			goto next_line;
+			goto force_next_line;
 		}
 	} else {
-		strcpy (frm_line, rfp);
-		fp = get_next_token (frm_line, ftoken, fterm);
+		strcpy (from_line, rfp);
+		from_ptr = get_next_token (from_line, ftoken, fterm);
 		if (ftoken[0] == ':' || ftoken[0] == '(') {
 			subword = 1;
 		}
-		ftlen = strlen (ftoken);
+		from_token_len = strlen (ftoken);
 
 		/*
 		  For each token in cmp_line, try to match it with the token in
 		  from_line.
 		 */
-		for (tp = get_next_token (cmp_line, ttoken, tterm); tp;
-		     tp = get_next_token (tp, ttoken, tterm)) {
+		for (to_ptr = get_next_token (cmp_line, ttoken, tterm); to_ptr;
+		     to_ptr = get_next_token (to_ptr, ttoken, tterm)) {
 #ifdef DEBUG_REPLACE
 			fprintf (stdout, "   tterm = '%s', ttoken = '%s', ftoken = '%s'\n",
 				 tterm, ttoken, ftoken);
@@ -5416,14 +5619,14 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			if (rep->lead_trail == CB_REPLACE_LEADING) {
 				subword = 1;
 			} else if (rep->lead_trail == CB_REPLACE_TRAILING) {
-				if (ttlen >= ftlen) {
+				if (ttlen >= from_token_len) {
 					subword = 1;
-					ttix = ttlen - ftlen;
+					ttix = ttlen - from_token_len;
 					ttlen = ttix;
 				}
 			}
 			if (subword) {
-				tokmatch = !strncasecmp (&ttoken[ttix], ftoken, ftlen);
+				tokmatch = !strncasecmp (&ttoken[ttix], ftoken, from_token_len);
 			} else {
 				tokmatch = !strcasecmp (ttoken, ftoken);
 			}
@@ -5431,7 +5634,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				if (subword) {
 					if (rep->lead_trail == CB_REPLACE_LEADING) {
 						strcat (newline, rep->to);
-						strcat (newline, &ttoken[ftlen]);
+						strcat (newline, &ttoken[from_token_len]);
 					} else if (rep->lead_trail == CB_REPLACE_TRAILING) {
 						strncat (newline, ttoken, ttlen);
 						strcat (newline, rep->to);
@@ -5453,94 +5656,17 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	if (match) {
 #ifdef DEBUG_REPLACE
 		fprintf (stdout, "   match = TRUE\n   newline = %s\n", newline);
-#endif
-		if (fixed) {
-			fp = get_next_token (newline, ftoken, fterm);
-			for (j = first_col; (j < last) && isspace (pline[k][j]); j++);
-			if (j >= CB_MARGIN_B) {
-				first_col = CB_MARGIN_B;
-			}
-			for (k = 0; k < pline_cnt; k++) {
-				nextrec = 0;
-				j = first_col;
-				while (fp && !nextrec) {
-					ftlen = strlen (ftoken);
-					i = 0;
-					if (ftlen >= (CB_SEQUENCE - first_col)) {
-#ifdef DEBUG_REPLACE
-						fprintf (stdout, "   ftlen = %d\n", ftlen);
-#endif
-						while (ftlen) {
-							pline[k][j++] = ftoken[i++];
-							ftlen--;
-							if (j == CB_SEQUENCE) {
-#ifdef DEBUG_REPLACE
-								fprintf (stdout, "   NEW pline[%2d] = %s\n",
-									 k, pline[k]);
-#endif
-								j = first_col;
-								k++;
-								if (k == pline_cnt) {
-									pline_check_limit (pline_cnt + 1, cfile->name, line_num);
-									if (pline[pline_cnt + 1] == NULL) {
-	   									pline[pline_cnt + 1] = cobc_malloc (CB_LINE_LENGTH + 2);
-									}
-									strcpy (pline[pline_cnt + 1], pline[pline_cnt]);
-									strcpy (pline[pline_cnt], pline[pline_cnt - 1]);
-									memset (&pline[pline_cnt][CB_MARGIN_A], ' ',
-										CB_SEQUENCE - CB_MARGIN_A);
-									pline[pline_cnt][CB_INDICATOR] = '&';
-									pline_cnt++;
-								}
-							}
-						}
-						pline[k][j++] = ' ';
-					} else {
-						if ((j + 2 + ftlen) < last) {
-							for (i = 0; i < (int)strlen (ftoken); i++)
-								pline[k][j++] = ftoken[i];
-							pline[k][j++] = fterm[0] ? fterm[0] : ' ';
-							if (fterm[0] == '.')
-								pline[k][j++] = ' ';
-						} else {
-							nextrec = 1;
-						}
-					}
-					fp = get_next_token (fp, ftoken, fterm);
-				}
-				if (j == first_col) {
-					pline[k][CB_INDICATOR] = ' ';
-				}
-				while (j < last) {
-					pline[k][j++] = ' ';
-				}
-#ifdef DEBUG_REPLACE
-				fprintf (stdout, "   NEW pline[%2d] = %s\n", k, pline[k]);
-#endif
-			}
-		} else {
-			fp = get_next_token (newline, ftoken, fterm);
-			for (k = 0; k < pline_cnt; k++) {
-				for (j = first_col; pline[k][j] && pline[k][j] == ' '; j++) ;
-				pline[k][j] = 0;
-				while (fp) {
-					strcat (pline[k], ftoken);
-					strcat (pline[k], fterm);
-					j++;
-					fp = get_next_token (fp, ftoken, fterm);
-				}
-				if (j == first_col) {
-					strcat (pline[k], " ");
-				}
-			}
-		}
+#endif		
+		pline_cnt = reflow_replaced_text (cfile->name, pline, pline_cnt,
+						  line_num, newline, first_col,
+						  last, fixed);
 	}
 
 	return pline_cnt;
 }
 
 static void
-remove_file_replace_entries_before_line (struct list_files *cfile, const int line_num)
+remove_replace_entries_before_line (struct list_files *cfile, const int line_num)
 {
 	struct list_replace	*rep;
 
@@ -5560,7 +5686,7 @@ remove_file_replace_entries_before_line (struct list_files *cfile, const int lin
 }
 
 static void
-copy_list_replace (struct list_replace *src, struct list_files *dst_file)
+shallow_copy_list_replace (struct list_replace *src, struct list_files *dst_file)
 {
 	struct list_replace	*copy;
 
@@ -5577,21 +5703,25 @@ copy_list_replace (struct list_replace *src, struct list_files *dst_file)
 	dst_file->replace_tail = copy;
 }
 
-/* TODO: Modularise! */
+/* TO-DO: Modularise! */
+/*
+  Applies active REPLACE statements to the source lines in pline. Returns the
+  number of lines after the replacement has been performed.
+*/
 static int
 print_replace_main (struct list_files *cfile, FILE *fd,
 		    char *pline[CB_READ_AHEAD], int pline_cnt, int line_num)
 {
-	static int		in_replace = 0;
-	char			*tp;
+	static int		active_replace_stmt = 0;
+	char			*to_ptr;
 	struct list_replace	*rep;
 	struct list_files 	*cur;
 	int    		i;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	const int	first_col = fixed ? CB_MARGIN_A : 0;
-	int		is_copy;
-	int		is_replace;
-	int		is_off;
+	int		is_copy_line;
+	int		is_replace_line;
+	int		is_replace_off = 0;
 	char		tterm[2] = { '\0' };
 	char		ttoken[CB_LINE_LENGTH + 2] = { '\0' };
 	char		cmp_line[CB_LINE_LENGTH + 2] = { '\0' };
@@ -5610,18 +5740,23 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 
 	compare_prepare (cmp_line, pline, 0, pline_cnt, first_col,
 			 cfile->source_format);
-	tp = get_next_token (cmp_line, ttoken, tterm);
-	is_replace = !strcasecmp (ttoken, "REPLACE");
-	is_copy = !strcasecmp (ttoken, "COPY");
-	is_off = 0;
-	if (is_replace) {
-		tp = get_next_token (tp, ttoken, tterm);
-		is_off = !strcasecmp (ttoken, "OFF");
+
+	/* Check whether we're given a COPY or REPLACE statement. */
+	to_ptr = get_next_token (cmp_line, ttoken, tterm);
+	is_copy_line = !strcasecmp (ttoken, "COPY");
+	is_replace_line = !strcasecmp (ttoken, "REPLACE");
+	if (is_replace_line) {
+		to_ptr = get_next_token (to_ptr, ttoken, tterm);
+		is_replace_off = !strcasecmp (ttoken, "OFF");
 	}
 
-	if (!in_replace && is_replace) {
-		if (!is_off) {
-			in_replace = 1;
+	/*
+	  If no REPLACE is active, print nothing. If one is active, perform
+	  replacements on the text.
+	*/
+	if (!active_replace_stmt && is_replace_line) {
+		if (!is_replace_off) {
+			active_replace_stmt = 1;
 #ifdef DEBUG_REPLACE
 			for (i = 0, rep = cfile->replace_head; rep; i++, rep = rep->next) {
 				if (rep->firstline < (line_num + 10)) {
@@ -5634,42 +5769,52 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 			}
 #endif
 		}
-	} else if (in_replace) {
-		if (is_replace && is_off) {
-			in_replace = 0;
-			remove_file_replace_entries_before_line (cfile, line_num);
-		} else {
-			if (is_copy) {
-				if (cfile->copy_head) {
-					/* List all lines read so far and then discard them. */
-					for (i = 0; i < pline_cnt; i++) {
-						print_line (cfile, pline[i], line_num + i, 0);
-						pline[i][0] = 0;
-					}
+	} else if (active_replace_stmt) {
+		if (is_replace_line && is_replace_off) {
+			active_replace_stmt = 0;
+			remove_replace_entries_before_line (cfile, line_num);
+		} else if (is_copy_line) {
+			if (cfile->copy_head) {
+				/* List all lines read so far and then discard them. */
+				for (i = 0; i < pline_cnt; i++) {
+					print_line (cfile, pline[i], line_num + i, 0);
+					pline[i][0] = 0;
+				}
 
-					/* Print copy file */
-					cur = cfile->copy_head;
-					if (!cur->replace_head) {
-						for (rep = cfile->replace_head;
-						     rep && rep->firstline <= line_num;
-						     rep = rep->next) {
-							copy_list_replace (rep, cur);
-						}
+				/* Print copybook, with REPLACE'd text. */
+				cur = cfile->copy_head;
+				if (!cur->replace_head) {
+					for (rep = cfile->replace_head;
+					     rep && rep->firstline <= line_num;
+					     rep = rep->next) {
+						shallow_copy_list_replace (rep, cur);
 					}
-					print_program_code (cur, 1);
-					cfile->copy_head = cur->next;
-					cobc_free (cur);
 				}
-			} else {
-				for (rep = cfile->replace_head;
-				     rep && rep->firstline < line_num;
-				     rep = rep->next) {
-					pline_cnt = print_replace_text (cfile, fd, rep, pline,
-								       pline_cnt, line_num);
+				print_program_code (cur, 1);
+				cfile->copy_head = cur->next;
+
+				/* Discard copybook reference */
+				while (cur->replace_head) {
+					rep = cur->replace_head;
+					cur->replace_head = rep->next;
+					cobc_free (rep);
 				}
+				if (cur->name) {
+					cobc_free ((char *)cur->name);
+				}
+				cobc_free (cur);
+			}
+		} else {
+			/* Print text with replacements */
+			for (rep = cfile->replace_head;
+			     rep && rep->firstline < line_num;
+			     rep = rep->next) {
+				pline_cnt = print_replace_text (cfile, fd, rep, pline,
+								pline_cnt, line_num);
 			}
 		}
 	}
+
 	return pline_cnt;
 }
 
@@ -5688,29 +5833,30 @@ list_error_reverse (struct list_error *p)
 	return last;
 }
 
-/* TODO: Modularise! */
+/*
+  Print the listing for the file in cfile, with copybooks expanded and
+  after text has been REPLACE'd.
+*/
 static void
 print_program_code (struct list_files *cfile, int in_copy)
 {
 	FILE			*fd = NULL;
 	struct list_replace	*rep;
-	struct list_replace *repl;
 	struct list_files	*cur;
 	struct list_error	*err;
 	int	i;
-	int	line_num;
+	int	line_num = 1;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
-	int	done;
-	int	eof;
-	int	pline_cnt;
-	char	*pline[CB_READ_AHEAD];
-	int	prec;
+	int	eof = 0;
+	int	pline_cnt = 0;
+	char	*pline[CB_READ_AHEAD] = { '\0' };
+	int	lines_read;
 
 	if (cfile->err_head) {
 		cfile->err_head = list_error_reverse (cfile->err_head);
 	}
 	cfile->listing_on = 1;
-	memset (pline, 0, sizeof(pline));
+	
 #ifdef DEBUG_REPLACE
 	struct list_skip *skip;
 
@@ -5748,39 +5894,33 @@ print_program_code (struct list_files *cfile, int in_copy)
 		fprintf (stdout, "      line[%d]: %d\n", i, skip->skipline);
 	}
 #endif
+	
 	if (cfile->name) {
 		fd = fopen (cfile->name, "r");
 	}
 	if (fd != NULL) {
-		line_num = 1;
-		pline_cnt = 0;
-
-		eof = 0;
-		done = 0;
-		pline_check_limit (pline_cnt, cfile->name, line_num);
+		abort_if_too_many_continuation_lines (pline_cnt, cfile->name, line_num);
 		if (get_next_listing_line (fd, &pline[pline_cnt], fixed) >= 0) {
-
-			while (!done) {
-				pline_check_limit (pline_cnt, cfile->name, line_num);
+		        do {
+				abort_if_too_many_continuation_lines (pline_cnt, cfile->name, line_num);
 				if (get_next_listing_line (fd, &pline[pline_cnt + 1], fixed) < 0) {
-					if (eof) {
-						done = 1;
-						break;
-					}
 					eof = 1;
 				}
 				pline_cnt++;
-				prec = 0;
+				lines_read = 0;
+
+				/* Collect all adjacent continuation lines */
 				if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
 							  cfile->source_format != CB_FORMAT_FREE)) {
 					continue;
 				}
-
+				/* Set line number as specified by #line directive. */
 				if (!strncmp (pline[0], "#line ", 6)) {
 					line_num = atoi (&pline[0][6]);
-					prec = -1;
+					lines_read = -1;
 				}
 
+				/* Perform text replacement on the lines. */
 				if (!in_copy) {
 					pline_cnt = print_replace_main (cfile, fd, pline, pline_cnt,
 								       line_num);
@@ -5793,58 +5933,50 @@ print_program_code (struct list_files *cfile, int in_copy)
 					}
 				}
 
+				/* Print each line except the last. */
 				for (i = 0; i < pline_cnt; i++) {
 					if (pline[i][0]) {
 						if (pline[i][CB_INDICATOR] == '&') {
 							print_line (cfile, pline[i], line_num, in_copy);
 						} else {
 							print_line (cfile, pline[i], line_num + i, in_copy);
-							prec++;
+							lines_read++;
 						}
 					}
 				}
 
-				if (cfile->copy_head) {
+				/* Output copybooks which are COPY'd at the current line */
+				if (cfile->copy_head
+				    && cfile->copy_head->copy_line == line_num) {
+					/* Add the current text replacements to the copybook */
 					cur = cfile->copy_head;
-					if (cur->copy_line == line_num) {
-						rep = cfile->replace_head;
-						/*  COPY in COPY, add replacement text to new COPY */
-						while (rep && in_copy) {
-							repl = cobc_malloc (sizeof (struct list_replace));
-							memset (repl, 0, sizeof (struct list_replace));
-							repl->firstline = rep->firstline;
-							repl->lastline = rep->lastline;
-							repl->lead_trail = rep->lead_trail;
-							repl->to = cobc_strdup (rep->to);
-							repl->from = cobc_strdup (rep->from);
-							repl->next = NULL;
-							if (cur->replace_tail) {
-								cur->replace_tail->next = repl;
-							}
-							if (!cur->replace_head) {
-								cur->replace_head = repl;
-							}
-							cur->replace_tail = repl;
-							rep = rep->next;
-						}
-						print_program_code (cur, 1);
-						cfile->copy_head = cur->next;
-						if (cur->name) {
-							cobc_free ((void *)cur->name);
-						}
-						cobc_free (cur);
+					for (rep = cfile->replace_head; rep && in_copy;
+					     rep = rep->next) {
+						shallow_copy_list_replace (rep, cur);
 					}
+
+					print_program_code (cur, 1);
+
+					/* Delete the copybook reference when done */
+					cfile->copy_head = cur->next;
+					if (cur->name) {
+						cobc_free ((void *)cur->name);
+					}
+					cobc_free (cur);
 				}
+
+				/* Delete all but the last line. */
 				strcpy (pline[0], pline[pline_cnt]);
-				for (i = 1; i < pline_cnt+1; i++) {
+				for (i = 1; i < pline_cnt + 1; i++) {
 				   memset (pline[i], 0, CB_LINE_LENGTH);
 				}
-				line_num += prec;
+				
+				line_num += lines_read;
 				pline_cnt = 0;
 				if (pline[0][0] == 0) {
 					eof = 1;
-				}
-			}
+				}	
+			} while (!eof);
 		}
 		fclose (fd);
 
@@ -5875,12 +6007,6 @@ print_program_code (struct list_files *cfile, int in_copy)
 		cobc_free (pline[i]);
 	}
 
-	/* Free replace data */
-	if (cfile->replace_head) {
-		free_replace_list (cfile->replace_head);
-		cfile->replace_head = NULL;
-	}
-
 	/* Put errors on summary list */
 	while (cfile->err_head) {
 		err = cfile->err_head;
@@ -5900,13 +6026,11 @@ print_program_code (struct list_files *cfile, int in_copy)
 static void
 print_program_listing (void)
 {
-	/* Print program listing */
 	print_program_code (cb_listing_file_struct, 0);
 
-	/* Print program trailer */
 	print_program_trailer ();
 
-	/* Free source name */
+	/* TO-DO: Should this be here? */
 	cobc_free ((void *)cb_listing_file_struct->name);
 	cb_listing_file_struct->name = NULL;
 }
@@ -7087,6 +7211,7 @@ main (int argc, char **argv)
 		cb_source_line = 0;
 		current_section = NULL;
 		current_paragraph = NULL;
+		current_program = NULL;
 		cb_id = 1;
 		cb_pic_id = 1;
 		cb_attr_id = 1;
@@ -7117,7 +7242,6 @@ main (int argc, char **argv)
 		if (cobc_list_file) {
 			putc ('\n', cb_listing_file);
 		}
-
 
 		if (cb_src_list_file) {
 			cb_listing_page = 0;

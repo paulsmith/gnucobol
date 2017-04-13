@@ -1,10 +1,16 @@
 
+2017-04-13  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c: fixed buffer overflows and memory leaks in listing code.
+	* cobc.c, pplex.l: refactored listing code: added comments,
+	  improved variable names and modularised code.
+
 2017-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: don't generate DEBUGGING code for empty PERFORMs,
 	  fixes #368 (SIGSEGV)
 
-2017-04-10 Brian Tiffin <btiffin@gnu.org>
+2017-04-10  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: remove use of cob_get_prog_pointer.
 

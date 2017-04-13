@@ -99,10 +99,8 @@ print_error (const char *file, int line, const char *prefix,
 	fprintf (stderr, "%s\n", errmsg);
 
 	if (cb_src_list_file) {
-
 		/* If we have a file, queue message for listing processing */
 		if (cb_current_file) {
-
 			/* set up listing error */
 			err = cobc_malloc (sizeof (struct list_error));
 			err->line = line;
