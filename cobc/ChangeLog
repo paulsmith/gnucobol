@@ -9,6 +9,7 @@
 
 	* typeck.c: don't generate DEBUGGING code for empty PERFORMs,
 	  fixes #368 (SIGSEGV)
+	* cobc.c (cobc_sig_handler): don't ask for bug report on SIGPIPE
 
 2017-04-10  Brian Tiffin <btiffin@gnu.org>
 

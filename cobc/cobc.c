@@ -1789,12 +1789,12 @@ cobc_abort_terminate (void)
 static void
 cobc_sig_handler (int sig)
 {
-#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM)
+#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
 	int ret = 0;
 #endif
 
 	cobc_abort_msg ();
-#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM)
+#if defined (SIGINT) ||defined (SIGQUIT) || defined (SIGTERM) || defined (SIGPIPE)
 #ifdef SIGINT
 	if (sig == SIGINT) ret = 1;
 #endif
@@ -1803,6 +1803,9 @@ cobc_sig_handler (int sig)
 #endif
 #ifdef SIGTERM
 	if (sig == SIGTERM) ret = 1;
+#endif
+#ifdef SIGPIPE
+	if (sig == SIGPIPE) ret = 1;
 #endif
 	if (!ret) {
 		cobc_err_msg (_("Please report this!"));
