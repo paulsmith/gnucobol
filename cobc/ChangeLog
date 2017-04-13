@@ -1451,6 +1451,12 @@
 	* parser.y: fixed bug #178 - added check that certain identifiers are
 	  not 88-level items.
 
+2016-01-02  Ron Norman
+
+	* codegen.c (output_index): If subscript is unsigned then output the
+	  code as if it was signed. This is to avoid a core dump when an
+	  unsigned binary subscript has a value of ZERO.
+
 2016-01-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: moved SET_LOCALATION to tree.c (cb_build_xyz)

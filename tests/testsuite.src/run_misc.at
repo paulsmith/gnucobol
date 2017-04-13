@@ -5745,3 +5745,67 @@ B JUNK                           is invalid.
 ], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([ZERO unsigned and negative binary subscript])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       77  UBIN        PIC  9(8) BINARY.
+       77  SBIN        PIC S9(8) BINARY.
+       77  UNUP        PIC  9(8).
+       77  SNUP        PIC S9(8).
+
+       01  TSTREC.
+           05  TSTX PIC X(4) OCCURS 3 TIMES.
+           05  TSTY PIC X(4) OCCURS 3 TIMES.
+
+       PROCEDURE DIVISION.
+           MOVE ALL 'A' TO TSTX(1).
+           MOVE ALL 'B' TO TSTX(2).
+           MOVE ALL 'C' TO TSTX(3).
+           MOVE ALL '1' TO TSTY(1).
+           MOVE ALL '2' TO TSTY(2).
+           MOVE ALL '3' TO TSTY(3).
+           MOVE 0  TO UNUP.
+           DISPLAY "UNUP: " UNUP " is :" TSTY(UNUP) ":" UPON CONSOLE.
+           MOVE 0  TO SNUP.
+           DISPLAY "SNUP: " SNUP " is :" TSTY(SNUP) ":" UPON CONSOLE.
+           MOVE 0  TO SBIN.
+           DISPLAY "SBIN: " SBIN " is :" TSTY(SBIN) ":" UPON CONSOLE.
+           MOVE -1 TO SBIN.
+           DISPLAY "SBIN: " SBIN " is :" TSTY(SBIN) ":" UPON CONSOLE.
+           MOVE 'xxx'   TO TSTY(SBIN).
+           DISPLAY "SBIN: " SBIN " is :" TSTY(SBIN) ":" UPON CONSOLE.
+      * The following would often core dump
+           MOVE 0 TO UBIN.
+           DISPLAY "UBIN: " UBIN " is :" TSTY(UBIN) ":" UPON CONSOLE.
+           MOVE 'xxx'   TO TSTY(UBIN).
+           MOVE 1 TO UBIN.
+           DISPLAY "UBIN: " UBIN " is :" TSTY(UBIN) ":" UPON CONSOLE.
+           STOP RUN.
+])
+
+# Safe run with runtime checks
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [1], [], [libcob: prog.cob: 23: subscript of 'TSTY' out of bounds: 0
+])
+
+# Runtime checks disable, subscript may be zero or even negative
+AT_CHECK([$COBC -x prog.cob -o prog_unsafe], [0], [], [])
+AT_CHECK([./prog_unsafe], [0],
+[UNUP: 00000000 is :CCCC:
+SNUP: +00000000 is :CCCC:
+SBIN: +00000000 is :CCCC:
+SBIN: -00000001 is :BBBB:
+SBIN: -00000001 is :xxx :
+UBIN: 00000000 is :CCCC:
+UBIN: 00000001 is :1111:
+], [])
+
+AT_CLEANUP
+

@@ -2505,6 +2505,7 @@ output_long_integer (cb_tree x)
 static void
 output_index (cb_tree x)
 {
+	struct cb_field		*f;
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_INTEGER:
 		output ("%d", CB_INTEGER (x)->val - 1);
@@ -2514,7 +2515,19 @@ output_index (cb_tree x)
 		break;
 	default:
 		output ("(");
-		output_integer (x);
+		if(CB_TREE_TAG (x) == CB_TAG_REFERENCE) {
+			f = cb_code_field (x);
+			if(f->pic
+			&& f->pic->have_sign == 0) {	/* Avoid ((unsigned int)(0 - 1)) */
+				f->pic->have_sign = 1;	/* Handle subscript as signed */
+				output_integer (x);
+				f->pic->have_sign = 0;	/* Restore to unsigned */
+			} else {
+				output_integer (x);
+			}
+		} else {
+			output_integer (x);
+		}
 		output (" - 1)");
 		break;
 	}
