@@ -3023,3 +3023,29 @@ prog.cob: 24: error: 'tab2b-entry' is not numeric
 ])
 AT_CLEANUP
 
+
+AT_SETUP([Empty PERFORM with DEBUGGING MODE])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SOURCE-COMPUTER.
+            whatever   WITH DEBUGGING MODE.
+           
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  i           PIC 9.
+       
+       PROCEDURE DIVISION.
+           PERFORM VARYING i FROM 1 BY 1
+                   UNTIL i = 5
+           END-PERFORM
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
