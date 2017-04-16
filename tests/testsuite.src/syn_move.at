@@ -329,7 +329,7 @@ AT_CLEANUP
 
 # 11) DONE
 
-AT_SETUP([MOVE to errornous field])
+AT_SETUP([MOVE to erroneous field])
 AT_KEYWORDS([move])
 
 AT_DATA([prog.cob], [
