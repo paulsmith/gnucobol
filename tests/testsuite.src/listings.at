@@ -4487,3 +4487,65 @@ AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
+AT_SETUP([Multiple programs in one file])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-1.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  blah PIC x.
+
+       END PROGRAM prog-1.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-2.
+       END PROGRAM prog-2.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
+
+AT_DATA([prog20.lst],
+[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog-1.
+000004
+000005         DATA DIVISION.
+000006         WORKING-STORAGE SECTION.
+000007         01  blah PIC x.
+000008
+000009         END PROGRAM prog-1.
+000010
+000011         IDENTIFICATION DIVISION.
+000012         PROGRAM-ID. prog-2.
+000013         END PROGRAM prog-2.
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      PROGRAM             prog-2
+
+      No fields defined.
+
+      PROGRAM             prog-1
+
+00001 ALPHANUMERIC   01   blah                           X
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
+
+AT_CLEANUP

@@ -1,4 +1,12 @@
 
+2017-04-17  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c: reinstated local variable current_prog removed in
+	  r1309. (codegen) leaves current_prog pointing to the last program in a
+	  file, from which you cannot get the first program. This caused the
+	  listing code to break (bug #265) because it assumed current_program
+	  would point to the first program in the file.
+
 2017-04-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c: fixed buffer overflows and memory leaks in listing code.

@@ -4641,7 +4641,7 @@ print_program_trailer (void)
 	int			print_names = 0;
 	int			print_break = 1;
 	int			found;
-	char			errmsg[BUFSIZ];
+	char			err_msg[BUFSIZ];
 
 #if 0 /* checkme: needed for syntax-checks-only? */
 	p = program_list_reverse (current_program);
@@ -4759,8 +4759,8 @@ print_program_trailer (void)
 		print_program_data ("");
 		err = cb_listing_error_head;
 		do {
-			snprintf (errmsg, BUFSIZ, "%s: %d: %s%s", err->file, err->line, err->prefix, err->msg);
-			print_program_data (errmsg);
+			snprintf (err_msg, BUFSIZ, "%s: %d: %s%s", err->file, err->line, err->prefix, err->msg);
+			print_program_data (err_msg);
 			err = err->next;
 		} while (err);
 		print_program_data ("");

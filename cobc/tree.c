@@ -1485,6 +1485,7 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 	cb_clear_real_field ();
 
 	p = cobc_parse_malloc (sizeof (struct cb_program));
+	memset (p, 0, sizeof (struct cb_program));
 	p->word_table = cobc_parse_malloc (CB_WORD_TABLE_SIZE);
 
 	p->common.tag = CB_TAG_PROGRAM;
