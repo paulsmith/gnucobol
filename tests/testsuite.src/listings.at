@@ -4508,7 +4508,9 @@ AT_DATA([prog.cob], [
        END PROGRAM prog-2.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [0], [], [])
+# Do not change $COMPILE to $COMPILE_ONLY. This tests whether codegen
+# affects the listing.
+AT_CHECK([$COMPILE -t prog.lst prog.cob], [0], [], [])
 
 AT_DATA([prog20.lst],
 [GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
@@ -4532,13 +4534,13 @@ LINE    PG/LN  A...B............................................................
 
 SIZE  TYPE           LVL  NAME                           PICTURE
 
-      PROGRAM             prog-2
-
-      No fields defined.
-
       PROGRAM             prog-1
 
 00001 ALPHANUMERIC   01   blah                           X
+
+      PROGRAM             prog-2
+
+      No fields defined.
 
 
 0 warnings in compilation group

@@ -1,11 +1,13 @@
 
 2017-04-17  Edward Hart <edward.dan.hart@gmail.com>
 
+	* cobc.c (process_translate): reverse program list in place so that
+	  current_program doesn't point to last program in file (see bug #265).
 	* codegen.c: reinstated local variable current_prog removed in
-	  r1309. (codegen) leaves current_prog pointing to the last program in a
-	  file, from which you cannot get the first program. This caused the
-	  listing code to break (bug #265) because it assumed current_program
-	  would point to the first program in the file.
+	  r1309. (codegen) would leave current_program pointing to the last
+	  program in a file, from which you cannot get the first program. This
+	  caused the listing code to break (bug #265) because it assumed
+	  current_program would point to the first program in the file.
 
 2017-04-13  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -6158,7 +6158,8 @@ process_translate (struct filename *fn)
 		cobc_terminate (cb_storage_file_name);
 	}
 
-	p = program_list_reverse (current_program);
+	current_program = program_list_reverse (current_program);
+	p = current_program;
 
 	/* Set up local storage files */
 	lf = NULL;
