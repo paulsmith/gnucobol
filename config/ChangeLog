@@ -1,4 +1,8 @@
 
+2017-04-22  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added stop-identifier config option.
+
 2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* runtime.conf: FR #191 added COB_EXIT_WAIT and COB_EXIT_MSG

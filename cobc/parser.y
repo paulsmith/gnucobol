@@ -10488,10 +10488,9 @@ stop_statement:
 	check_unreached = 1;
 	cobc_cs_check = 0;
   }
-| STOP stop_literal
+| STOP stop_argument
   {
 	begin_statement ("STOP", 0);
-	cb_verify (cb_stop_literal_statement, "STOP literal");
 	cb_emit_display (CB_LIST_INIT ($2), cb_int0, cb_int1, NULL,
 			 NULL, 1, DEVICE_DISPLAY);
 	cb_emit_accept (cb_null, NULL, NULL);
@@ -10538,6 +10537,17 @@ _status_x:
 | x
   {
 	$$ = $1;
+  }
+;
+
+stop_argument:
+  stop_literal
+  {
+	cb_verify (cb_stop_literal_statement, _("STOP literal"));
+  }
+| identifier
+  {
+	cb_verify (cb_stop_identifier_statement, _("STOP identifier"));
   }
 ;
 

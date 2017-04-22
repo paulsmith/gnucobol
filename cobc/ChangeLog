@@ -1,10 +1,14 @@
 
+2017-04-22  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (stop_statement): added support for STOP identifier.
+
 2017-04-22  Brian Tiffin <btiffin@gnu.org>
 
-	* error.c, cobc.h, cobc.c, field.c, parser.y, ppparse.y,
-	  tree.h scanner.l tree.c pplex.l:
-	  cb_warning[_x] change with preference argument, refactor
-	  undefined_error to account for new prototype.
+	* error.c, cobc.h, cobc.c, field.c, parser.y, ppparse.y, tree.h,
+	  scanner.l, tree.c, pplex.l: cb_warning[_x] change with
+	  preference argument, refactor undefined_error to account for new
+	  prototype.
 
 2017-04-17  Edward Hart <edward.dan.hart@gmail.com>
 

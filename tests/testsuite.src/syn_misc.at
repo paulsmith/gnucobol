@@ -3049,3 +3049,29 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
+
+
+AT_SETUP([STOP identifier])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x           PIC 9(5) VALUE 1.
+       01  y           CONSTANT "ab".
+
+       PROCEDURE       DIVISION.
+           STOP x
+           STOP y
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 12: warning: STOP identifier is obsolete in GnuCOBOL
+prog.cob: 12: warning: STOP literal is obsolete in GnuCOBOL
+])
+AT_CHECK([$COMPILE_ONLY -fstop-identifier=ok -fstop-literal=ok prog.cob], [0], [], [])
+AT_CLEANUP
