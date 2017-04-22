@@ -177,7 +177,9 @@ cb_warning (int pref, const char *fmt, ...)
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, 0, _("warning: "), fmt, ap);
+	print_error (NULL, 0,
+		(pref == COBC_WARN_AS_ERROR) ? _("error [-Werror]: ") : _("warning: "),
+		fmt, ap);
 	va_end (ap);
 
 	if (sav_lst_file) {
