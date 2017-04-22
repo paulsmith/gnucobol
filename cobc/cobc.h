@@ -154,6 +154,9 @@ enum cb_support {
 	CB_UNCONFORMABLE
 };
 
+#define COBC_WARN_FILLER -1
+#define COBC_WARN_AS_ERROR 2
+
 /* Config dialect support types */
 enum cb_std_def {
 	CB_STD_OC = 0,
@@ -518,29 +521,25 @@ extern void		cob_gen_optim (const enum cb_optim);
 #define CB_MSG_STYLE_MSC	1U
 
 #define CB_PENDING(x) \
-	do {if (cb_warn_pending) { \
-		cb_warning (_("%s is not implemented"), x); \
-	}} ONCE_COB
+	do { cb_warning (cb_warn_pending, _("%s is not implemented"), x); } ONCE_COB
 #define CB_PENDING_X(x,y) \
-	do {if (cb_warn_pending) { \
-		cb_warning_x (x, _("%s is not implemented"), y); \
-	}} ONCE_COB
+	do { cb_warning_x (cb_warn_pending, x, _("%s is not implemented"), y); } ONCE_COB
 #define CB_UNFINISHED(x) \
-	do {if (cb_warn_unfinished) { \
-		cb_warning (_("handling of %s is unfinished; implementation is likely to be changed"), x); \
-	}} ONCE_COB
+	do { cb_warning (cb_warn_unfinished, \
+		_("handling of %s is unfinished; implementation is likely to be changed"), x); \
+	} ONCE_COB
 #define CB_UNFINISHED_X(x,y) \
-	do {if (cb_warn_unfinished) { \
-		cb_warning_x (x, _("handling of %s is unfinished; implementation is likely to be changed"), y); \
-	}} ONCE_COB
+	do { cb_warning_x (cb_warn_unfinished, x, \
+		_("handling of %s is unfinished; implementation is likely to be changed"), y); \
+	} ONCE_COB
 
 extern size_t		cb_msg_style;
 
-extern void		cb_warning (const char *, ...) COB_A_FORMAT12;
+extern void		cb_warning (int, const char *, ...) COB_A_FORMAT23;
 extern void		cb_error (const char *, ...) COB_A_FORMAT12;
 extern void		cb_perror (const int, const char *, ...) COB_A_FORMAT23;
-extern void		cb_plex_warning (const size_t,
-					 const char *, ...) COB_A_FORMAT23;
+extern void		cb_plex_warning (int, const size_t,
+					 const char *, ...) COB_A_FORMAT34;
 extern void		cb_plex_error (const size_t,
 					 const char *, ...) COB_A_FORMAT23;
 extern unsigned int	cb_plex_verify (const size_t, const enum cb_support,

@@ -245,7 +245,7 @@ static void
 begin_statement (const char *name, const unsigned int term)
 {
 	if (cb_warn_unreachable && check_unreached) {
-		cb_warning (_("unreachable statement '%s'"), name);
+		cb_warning (cb_warn_unreachable, _("unreachable statement '%s'"), name);
 	}
 	current_paragraph->flag_statement = 1;
 	current_statement = cb_build_statement (name);
@@ -373,7 +373,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 				}
 			}
 			if (!l && !f->redefines) {
-				cb_warning (_("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
+				cb_warning (COBC_WARN_FILLER, _("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
 			}
 		}
 	}
@@ -431,11 +431,9 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 			"terminator_warning", name);
 		COBC_ABORT ();
 	}
-	if (cb_warn_terminator) {
-		cb_warning_x (CB_TREE (current_statement),
-			_("%s statement not terminated by END-%s"),
-			name, name);
-	}
+	cb_warning_x (cb_warn_terminator, CB_TREE (current_statement),
+		_("%s statement not terminated by END-%s"),
+		name, name);
 
 	/* Free tree associated with terminator */
 	if (stmt) {
@@ -534,7 +532,7 @@ static void
 emit_duplicate_clause_message (const char *clause)
 {
 	if (cb_relaxed_syntax_checks) {
-		cb_warning (_("duplicate %s clause"), clause);
+		cb_warning (COBC_WARN_FILLER, _("duplicate %s clause"), clause);
 	} else {
 		cb_error (_("duplicate %s clause"), clause);
 	}
@@ -585,8 +583,8 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 			current_field->occurs_max = cb_get_int (occurs_max);
 			if (!current_field->depending) {
 				if (cb_relaxed_syntax_checks) {
-					cb_warning (_ ("TO phrase without DEPENDING phrase"));
-					cb_warning (_ ("maximum number of occurences assumed to be exact number"));
+					cb_warning (COBC_WARN_FILLER, _ ("TO phrase without DEPENDING phrase"));
+					cb_warning (COBC_WARN_FILLER, _ ("maximum number of occurences assumed to be exact number"));
 					current_field->occurs_min = 1; /* Checkme: why using 1 ? */
 				} else {
 					cb_error (_ ("TO phrase without DEPENDING phrase"));
@@ -666,7 +664,7 @@ check_relaxed_syntax (const cob_flags_t lev)
 		break;
 	}
 	if (cb_relaxed_syntax_checks) {
-		cb_warning (_("%s header missing - assumed"), s);
+		cb_warning (COBC_WARN_FILLER, _("%s header missing - assumed"), s);
 	} else {
 		cb_error (_("%s header missing"), s);
 	}
@@ -929,7 +927,7 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 	}
 
 	if (depth != 0 && type == CB_FUNCTION_TYPE) {
-		cb_error ("functions may not be defined within a program/function");
+		cb_error (_("functions may not be defined within a program/function"));
 	}
 
 	if (increment_depth ()) {
@@ -1098,7 +1096,7 @@ check_prototype_redefines_current_element (const cb_tree prototype_name)
 	const char	*name = get_literal_or_word_name (prototype_name);
 
 	if (strcasecmp (name, current_program->program_name) == 0) {
-		cb_warning_x (prototype_name,
+		cb_warning_x (COBC_WARN_FILLER, prototype_name,
 			_("prototype has same name as current function and will be ignored"));
 		return 1;
 	}
@@ -1129,7 +1127,7 @@ check_for_duplicate_prototype (const cb_tree prototype_name,
 				    _("duplicate REPOSITORY entries for '%s' do not match"),
 				    get_literal_or_word_name (prototype_name));
 		} else {
-			cb_warning_x (prototype_name,
+			cb_warning_x (COBC_WARN_FILLER, prototype_name,
 				      _("duplicate REPOSITORY entry for '%s'"),
 				      get_literal_or_word_name (prototype_name));
 		}
@@ -1244,7 +1242,7 @@ static void
 emit_conflicting_clause_message (const char *clause, const char *conflicting)
 {
 	if (cb_relaxed_syntax_checks) {
-		cb_warning (_("cannot specify both %s and %s; %s is ignored"),
+		cb_warning (COBC_WARN_FILLER, _("cannot specify both %s and %s; %s is ignored"),
 			    clause, conflicting, clause);
 	} else {
 		cb_error (_("cannot specify both %s and %s"),
@@ -2723,7 +2721,7 @@ _source_object_computer_paragraphs:
 | object_computer_paragraph source_computer_paragraph
   {
 	if (warningopt && (check_comp_duplicate & SYN_CLAUSE_2)) {
-		cb_warning (_("phrases in non-standard order"));
+		cb_warning (warningopt, _("phrases in non-standard order"));
 	}
   }
 ;
@@ -4289,9 +4287,7 @@ record_clause:
   {
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
-		if (warningopt) {
-			cb_warning (_("RECORD clause ignored for LINE SEQUENTIAL"));
-		}
+		cb_warning (warningopt, _("RECORD clause ignored for LINE SEQUENTIAL"));
 	} else {
 		current_file->record_max = cb_get_int ($3);
 		if (current_file->record_max < 1)  {
@@ -4311,9 +4307,7 @@ record_clause:
 
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	if (current_file->organization == COB_ORG_LINE_SEQUENTIAL) {
-		if (warningopt) {
-			cb_warning (_("RECORD clause ignored for LINE SEQUENTIAL"));
-		}
+		cb_warning (warningopt, _("RECORD clause ignored for LINE SEQUENTIAL"));
 	} else {
 		current_file->record_min = cb_get_int ($3);
 		current_file->record_max = cb_get_int ($5);
@@ -4541,7 +4535,7 @@ code_set_clause:
 			break;
 		default:
 			if (warningopt && CB_VALID_TREE ($3)) {
-				cb_warning_x ($3, _("ignoring CODE-SET '%s'"),
+				cb_warning_x (warningopt, $3, _("ignoring CODE-SET '%s'"),
 						  cb_name ($3));
 			}
 			break;
@@ -5105,7 +5099,7 @@ redefines_clause:
 	check_repeated ("REDEFINES", SYN_CLAUSE_1, &check_pic_duplicate);
 	if ($0 != NULL) {
 		if (cb_relaxed_syntax_checks) {
-			cb_warning_x ($2, _("REDEFINES clause should follow entry-name"));
+			cb_warning_x (COBC_WARN_FILLER, $2, _("REDEFINES clause should follow entry-name"));
 		} else {
 			cb_error_x ($2, _("REDEFINES clause must follow entry-name"));
 		}
@@ -5505,8 +5499,8 @@ _occurs_keys_and_indexed:
   {
 	if (!cb_relaxed_syntax_checks) {
 		cb_error (_("INDEXED should follow ASCENDING/DESCENDING"));
-	} else if(warningopt) {
-		cb_warning (_("INDEXED should follow ASCENDING/DESCENDING"));
+	} else {
+		cb_warning (warningopt, _("INDEXED should follow ASCENDING/DESCENDING"));
 	}
   }
   occurs_keys
@@ -6466,7 +6460,7 @@ _procedure_division:
 	cb_set_system_names ();
 	if ($3) {
 		if (current_program->entry_convention) {
-			cb_warning (_("overriding convention specified in ENTRY-CONVENTION"));
+			cb_warning (COBC_WARN_FILLER, _("overriding convention specified in ENTRY-CONVENTION"));
 		}
 		current_program->entry_convention = $3;
 	} else if (!current_program->entry_convention) {
@@ -7678,7 +7672,7 @@ call_body:
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
 	    && is_recursive_call ($2)) {
-		cb_warning_x ($2, _("recursive program call - assuming RECURSIVE attribute"));
+		cb_warning_x (COBC_WARN_FILLER, $2, _("recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
 	}
 	call_conv = current_call_convention;
@@ -7756,7 +7750,7 @@ program_or_prototype:
 	/* hack to push the prototype name */
 	if ($2 && CB_REFERENCE_P ($2)) {
 		if ($1) {
-			cb_warning_x ($1, _("id/literal ignored, using prototype name"));
+			cb_warning_x (COBC_WARN_FILLER, $1, _("id/literal ignored, using prototype name"));
 		}
 		$$ = $2;
 	} else if ($1 && CB_LITERAL_P ($1)) {
@@ -7839,7 +7833,7 @@ call_param:
 				    _("invalid file name reference"));
 		} else if (call_mode == CB_CALL_BY_VALUE) {
 			if (cb_category_is_alpha ($3)) {
-				cb_warning_x ($3,
+				cb_warning_x (COBC_WARN_FILLER, $3,
 					      _("BY CONTENT assumed for alphanumeric item"));
 				save_mode = CB_CALL_BY_CONTENT;
 			}
@@ -8384,7 +8378,7 @@ disp_attr:
 | CONVERSION
   {
 	check_repeated ("CONVERSION", SYN_CLAUSE_8, &check_duplicate);
-	cb_warning (_("ignoring CONVERSION"));
+	cb_warning (COBC_WARN_FILLER, _("ignoring CONVERSION"));
   }
 | ERASE eol
   {

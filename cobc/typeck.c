@@ -1106,11 +1106,11 @@ cb_trim_program_id (cb_tree id_literal)
 	len = strlen (s);
 	if (*s == ' ') {
 		/* same warning as in libcob/common.c */
-		cb_warning_x (id_literal,
+		cb_warning_x (COBC_WARN_FILLER, id_literal,
 			_("'%s' literal includes leading spaces which are omitted"), s);
 	}
 	if (s[len - 1] == ' ') {
-		cb_warning_x (id_literal,
+		cb_warning_x (COBC_WARN_FILLER, id_literal,
 			_("'%s' literal includes trailing spaces which are omitted"), s);
 	}
 	while (*s == ' ') {
@@ -1318,9 +1318,7 @@ org:
 				s = strchr (s, '-') + 1;
 			}
 			/* Convert the name into literal */
-			if (warningopt) {
-				cb_warning (_("ASSIGN interpreted as %s"), s);
-			}
+			cb_warning (warningopt, _("ASSIGN interpreted as %s"), s);
 			return cb_build_alphanumeric_literal (s, strlen (s));
 		}
 		/* Fall through for CB_ASSIGN_COBOL2002 */
@@ -1382,7 +1380,7 @@ cb_build_address (cb_tree x)
 			if (!cb_relaxed_syntax_checks) {
 				goto subserror;
 			} else {
-				cb_warning_x (x,
+				cb_warning_x (COBC_WARN_FILLER, x,
 					    _("subscript missing for '%s' - defaulting to 1"),
 					    name);
 				for (; refsubs < numsubs; ++refsubs) {
@@ -1529,7 +1527,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 				if (!cb_relaxed_syntax_checks) {
 					goto refsubserr;
 				} else {
-					cb_warning_x (x,
+					cb_warning_x (COBC_WARN_FILLER, x,
 							_("subscript missing for '%s' - defaulting to 1"),
 							name);
 					for (; refsubs < numsubs; ++refsubs) {
@@ -2245,7 +2243,7 @@ cb_validate_program_environment (struct cb_program *prog)
 					    _("duplicate values in class '%s'"),
 					    cb_name (CB_VALUE(l)));
 			} else {
-				cb_warning_x (CB_VALUE(l),
+				cb_warning_x (COBC_WARN_FILLER, CB_VALUE(l),
 					    _("duplicate values in class '%s'"),
 					    cb_name (CB_VALUE(l)));
 			}
@@ -2403,7 +2401,7 @@ validate_record_depending (cb_tree x)
 		/* RXWRXW - This breaks old legacy programs; FIXME: use compiler configuration */
 		/* FIXME: add explain_enum_storage, change to "should not be defined in %s */
 		if (cb_relaxed_syntax_checks) {
-			cb_warning_x (x, _("RECORD DEPENDING item '%s' should be defined in "
+			cb_warning_x (COBC_WARN_FILLER, x, _("RECORD DEPENDING item '%s' should be defined in "
 				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"), p->name);
 		} else {
 			cb_error_x (x, _("RECORD DEPENDING item '%s' should be defined in "
@@ -2485,7 +2483,8 @@ cb_validate_program_data (struct cb_program *prog)
 			if (CB_REFERENCE_P (assign) &&
 			    CB_WORD_COUNT (assign) == 0) {
 				if (cb_warn_implicit_define) {
-					cb_warning (_("'%s' will be implicitly defined"), CB_NAME (assign));
+					cb_warning (cb_warn_implicit_define,
+						_("'%s' will be implicitly defined"), CB_NAME (assign));
 				}
 				x = cb_build_implicit_field (assign, COB_SMALL_BUFF);
 				CB_FIELD (x)->count++;
@@ -2651,7 +2650,7 @@ cb_validate_program_body (struct cb_program *prog)
 						    CB_LABEL (v)->name);
 					break;
 				case CB_WARNING:
-					cb_warning_x (x, _("'%s' is not in DECLARATIVES"),
+					cb_warning_x (COBC_WARN_FILLER, x, _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
 					break;
 				default:
@@ -2930,7 +2929,7 @@ expr_reduce (int token)
 				     CB_BINARY_OP (VALUE (-3))->op == '&') ||
 				    (CB_BINARY_OP_P (VALUE (-1)) &&
 				     CB_BINARY_OP (VALUE (-1))->op == '&')) {
-					cb_warning (_("suggest parentheses around AND within OR"));
+					cb_warning (cb_warn_parentheses, _("suggest parentheses around AND within OR"));
 				}
 			}
 			TOKEN (-3) = 'x';
@@ -4225,9 +4224,7 @@ cb_emit_corresponding (cb_tree (*func) (cb_tree f1, cb_tree f2, cb_tree f3),
 	}
 
 	if (!emit_corresponding (func, x1, x2, opt)) {
-		if (cb_warn_corresponding) {
-			cb_warning_x (x2, _("no CORRESPONDING items found"));
-		}
+		cb_warning_x (cb_warn_corresponding, x2, _("no CORRESPONDING items found"));
 	}
 }
 
@@ -4299,9 +4296,7 @@ cb_emit_move_corresponding (cb_tree source, cb_tree target_list)
 			return;
 		}
 		if (!emit_move_corresponding (source, target)) {
-			if (cb_warn_corresponding) {
-				cb_warning_x (target, _("no CORRESPONDING items found"));
-			}
+			cb_warning_x (cb_warn_corresponding, target, _("no CORRESPONDING items found"));
 		} else if (cb_listing_xref) {
 			cobc_xref_set_receiving (target);
 		}
@@ -4849,7 +4844,8 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSIN:
 			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (name, _("'%s' is not defined in SPECIAL-NAMES"), CB_NAME (name));
+				cb_warning_x (COBC_WARN_FILLER, name,
+					_("'%s' is not defined in SPECIAL-NAMES"), CB_NAME (name));
 			}
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
 			return;
@@ -5010,15 +5006,11 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 #ifndef	_WIN32
 	if (call_conv & CB_CONV_STDCALL) {
 		call_conv &= ~CB_CONV_STDCALL;
-		if (warningopt) {
-			cb_warning (_("STDCALL not available on this platform"));
-		}
+		cb_warning (warningopt, _("STDCALL not available on this platform"));
 	}
 #elif	defined(_WIN64)
 	if (call_conv & CB_CONV_STDCALL) {
-		if (warningopt) {
-			cb_warning (_("STDCALL used on 64-bit Windows platform"));
-		}
+		cb_warning (warningopt_("STDCALL used on 64-bit Windows platform"));
 	}
 #endif
 	if ((call_conv & CB_CONV_STATIC_LINK)
@@ -5146,7 +5138,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 			if (cb_warn_call_params &&
 			    CB_PURPOSE_INT (l) == CB_CALL_BY_REFERENCE) {
 				if (f->level != 01 && f->level != 77) {
-					cb_warning_x (x, _("'%s' is not a 01 or 77 level item"), CB_NAME (x));
+					cb_warning_x (cb_warn_call_params, x,
+						_("'%s' is not a 01 or 77 level item"), CB_NAME (x));
 				}
 			}
 		}
@@ -5762,12 +5755,14 @@ cb_build_display_name (cb_tree x)
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSOUT:
 			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (x, _("'%s' is not defined in SPECIAL-NAMES"), name);
+				cb_warning_x (COBC_WARN_FILLER, x,
+					_("'%s' is not defined in SPECIAL-NAMES"), name);
 			}
 			return cb_int0;
 		case CB_DEVICE_SYSERR:
 			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (x, _("'%s' is not defined in SPECIAL-NAMES"), name);
+				cb_warning_x (COBC_WARN_FILLER, x,
+					_("'%s' is not defined in SPECIAL-NAMES"), name);
 			}
 			return cb_int1;
 		default:
@@ -6400,40 +6395,40 @@ warning_destination (cb_tree x)
 	if (!strcmp (f->name, "RETURN-CODE") ||
 	    !strcmp (f->name, "SORT-RETURN") ||
 	    !strcmp (f->name, "NUMBER-OF-CALL-PARAMETERS")) {
-		cb_warning (_("internal register '%s' defined as BINARY-LONG"),
+		cb_warning (COBC_WARN_FILLER, _("internal register '%s' defined as BINARY-LONG"),
 			    f->name);
 	} else if (f->flag_real_binary) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, f->pic->orig);
 	} else if (f->usage == CB_USAGE_FLOAT) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT");
 	} else if (f->usage == CB_USAGE_DOUBLE) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "DOUBLE");
 	} else if (f->usage == CB_USAGE_LONG_DOUBLE) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT EXTENDED");
 	} else if (f->usage == CB_USAGE_FP_BIN32) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-7");
 	} else if (f->usage == CB_USAGE_FP_BIN64) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-16");
 	} else if (f->usage == CB_USAGE_FP_BIN128) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-34");
 	} else if (f->usage == CB_USAGE_FP_DEC64) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-DECIMAL-16");
 	} else if (f->usage == CB_USAGE_FP_DEC128) {
-		cb_warning_x (loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-DECIMAL-34");
 	} else if (f->pic) {
-		cb_warning_x (loc, _("'%s' defined here as PIC %s"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as PIC %s"),
 			      cb_name (loc), f->pic->orig);
 	} else {
-		cb_warning_x (loc, _("'%s' defined here as a group of length %d"),
+		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as a group of length %d"),
 			      cb_name (loc), f->size);
 	}
 }
@@ -6451,17 +6446,17 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 	if (value_flag) {
 		/* VALUE clause */
 		if (CB_LITERAL_P (src)) {
-			cb_warning_x (dst, "%s", msg);
+			cb_warning_x (COBC_WARN_FILLER, dst, "%s", msg);
 		} else {
-			cb_warning_x (loc, "%s", msg);
+			cb_warning_x (COBC_WARN_FILLER, loc, "%s", msg);
 		}
 	} else {
 		/* MOVE statement */
 		if (flag) {
 			if (CB_LITERAL_P (src)) {
-				cb_warning_x (dst, "%s", msg);
+				cb_warning_x (COBC_WARN_FILLER, dst, "%s", msg);
 			} else {
-				cb_warning_x (loc, "%s", msg);
+				cb_warning_x (COBC_WARN_FILLER, loc, "%s", msg);
 			}
 			listprint_suppress ();
 			if (src_flag) {
@@ -6652,13 +6647,15 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 pos_overlap_ret:
 	loc = src->source_line ? src : dst;
 	if (cb_warn_pos_overlap && !suppress_warn) {
-		cb_warning_x (loc, _("overlapping MOVE may occur and produce unpredictable results"));
+		cb_warning_x (COBC_WARN_FILLER, loc,
+			_("overlapping MOVE may occur and produce unpredictable results"));
 	}
 	return 1;
 overlap_ret:
 	loc = src->source_line ? src : dst;
 	if ((cb_warn_overlap || cb_warn_pos_overlap) && !suppress_warn) {
-		cb_warning_x (loc, _("overlapping MOVE may produce unpredictable results"));
+		cb_warning_x (COBC_WARN_FILLER, loc,
+			_("overlapping MOVE may produce unpredictable results"));
 	}
 	return 1;
 }
@@ -6714,7 +6711,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				if (!cb_relaxed_syntax_checks || is_value) {
 					goto invalid;
 				}
-				cb_warning_x (loc, _("source is non-numeric - substituting zero"));
+				cb_warning_x (COBC_WARN_FILLER, loc,
+					_("source is non-numeric - substituting zero"));
 			}
 		} else if (src == cb_zero) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_ALPHABETIC) {
@@ -6726,7 +6724,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				if (!cb_relaxed_syntax_checks || is_value) {
 					goto invalid;
 				}
-				cb_warning_x (loc, _("source is non-numeric - substituting zero"));
+				cb_warning_x (COBC_WARN_FILLER, loc,
+					_("source is non-numeric - substituting zero"));
 			}
 		}
 		break;
@@ -6811,7 +6810,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				}
 #if	1	/* RXWRXW - Initialize warn */
 				if (warningopt) {
-					cb_warning_x (loc, _("numeric move to ALPHABETIC"));
+					cb_warning_x (COBC_WARN_FILLER, loc,
+						_("numeric move to ALPHABETIC"));
 				}
 #endif
 				break;
@@ -6829,7 +6829,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 					return -1;
 				}
 				if (cb_warn_constant) {
-					cb_warning_x (loc, _("ignoring sign"));
+					cb_warning_x (COBC_WARN_FILLER, loc, _("ignoring sign"));
 				}
 			}
 
@@ -7181,7 +7181,7 @@ numlit_overflow:
 		return -1;
 	}
 	if (cb_warn_constant && !suppress_warn) {
-		cb_warning_x (loc, _("numeric literal exceeds data size"));
+		cb_warning_x (cb_warn_constant, loc, _("numeric literal exceeds data size"));
 	}
 	return 0;
 
@@ -7190,7 +7190,7 @@ non_integer_move:
 		goto invalid;
 	}
 	if (!suppress_warn) {
-		cb_warning_x (loc, _("MOVE of non-integer to alphanumeric"));
+		cb_warning_x (COBC_WARN_FILLER, loc, _("MOVE of non-integer to alphanumeric"));
 	}
 	return 0;
 
@@ -8161,7 +8161,7 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 			read_opts |= COB_READ_NEXT;
 		}
 		if (key) {
-			cb_warning (_("KEY ignored with sequential READ"));
+			cb_warning (COBC_WARN_FILLER, _("KEY ignored with sequential READ"));
 		}
 		cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
 			 f->file_status,

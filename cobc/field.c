@@ -226,7 +226,7 @@ same_level:
 		&& p /* <- silence warnings */) {
 			dummy_fill = cb_build_filler ();
 			field_fill = CB_FIELD (cb_build_field (dummy_fill));
-			cb_warning_x (name,
+			cb_warning_x (COBC_WARN_FILLER, name,
 				      _("no previous data item of level %02d"),
 				      f->level);
 			field_fill->level = f->level;
@@ -413,10 +413,8 @@ check_picture_item (cb_tree x, struct cb_field *f)
 	}
 	vorint = (int)CB_LITERAL(CB_VALUE(f->values))->size;
 	/* Checkme: should we raise an error for !cb_relaxed_syntax_checks? */
-	if (warningopt) {
-		cb_warning_x (x, _("defining implicit picture size %d for '%s'"),
-			    vorint, cb_name (x));
-	}
+	cb_warning_x (warningopt, x, _("defining implicit picture size %d for '%s'"),
+		    vorint, cb_name (x));
 	sprintf (pic, "X(%d)", vorint);
 	f->pic = CB_PICTURE (cb_build_picture (pic));
 	f->pic->category = CB_CATEGORY_ALPHANUMERIC;
@@ -549,7 +547,8 @@ validate_field_1 (struct cb_field *f)
 	if (f->redefines && f->level != 66) {
 		/* Check OCCURS */
 		if (f->redefines->flag_occurs) {
-			cb_warning_x (x, _("the original definition '%s' should not have OCCURS clause"),
+			cb_warning_x (COBC_WARN_FILLER, x,
+				      _("the original definition '%s' should not have OCCURS clause"),
 				      f->redefines->name);
 		}
 
@@ -566,8 +565,7 @@ validate_field_1 (struct cb_field *f)
 			cb_error_x (x, _("'%s' cannot be variable length"), f->name);
 		}
 		if (cb_field_variable_size (f->redefines)) {
-			cb_error_x (x,
-				    _("the original definition '%s' cannot be variable length"),
+			cb_error_x (x, _("the original definition '%s' cannot be variable length"),
 				    f->redefines->name);
 		}
 	}
@@ -707,7 +705,7 @@ validate_field_1 (struct cb_field *f)
 				emit_incompatible_pic_and_usage_error (x, f->usage);
 			}
 			if (f->pic->have_sign) {
-				cb_warning_x (x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
+				cb_warning_x (COBC_WARN_FILLER, x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
 				f->usage = CB_USAGE_PACKED;
 			}
 			break;
@@ -837,11 +835,11 @@ validate_field_1 (struct cb_field *f)
 			for (p = f; p; p = p->parent) {
 				if (cb_warn_ignored_initial_val) {
 					if (p->flag_external) {
-						cb_warning_x (x, _("initial VALUE clause ignored for %s item"),
+						cb_warning_x (COBC_WARN_FILLER, x, _("initial VALUE clause ignored for %s item"),
 										"EXTERNAL");
 				} else
 					if (p->redefines) {
-						cb_warning_x (x, _("initial VALUE clause ignored for %s item"),
+						cb_warning_x (COBC_WARN_FILLER, x, _("initial VALUE clause ignored for %s item"),
 										"REDEFINES");
 					}
 				}
@@ -1139,7 +1137,7 @@ compute_size (struct cb_field *f)
 	if (f->children) {
 		/* Groups */
 		if (f->flag_synchronized && warningopt) {
-			cb_warning_x (CB_TREE(f), _("ignoring SYNCHRONIZED for group item '%s'"),
+			cb_warning_x (COBC_WARN_FILLER, CB_TREE(f), _("ignoring SYNCHRONIZED for group item '%s'"),
 				    cb_name (CB_TREE (f)));
 		}
 unbounded_again:
@@ -1154,7 +1152,7 @@ unbounded_again:
 				    c->size * c->occurs_max >
 				    c->redefines->size * c->redefines->occurs_max) {
 					if (cb_larger_redefines_ok) {
-						cb_warning_x (CB_TREE (c),
+						cb_warning_x (COBC_WARN_FILLER, CB_TREE (c),
 							      _("size of '%s' larger than size of '%s'"),
 							      c->name, c->redefines->name);
 						maxsz = c->redefines->size * c->redefines->occurs_max;
@@ -1362,7 +1360,7 @@ unbounded_again:
 	if (f->redefines && f->redefines->flag_external &&
 	    (f->size * f->occurs_max > f->redefines->size * f->redefines->occurs_max)) {
 		if (cb_larger_redefines_ok) {
-			cb_warning_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),
+			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f), _("size of '%s' larger than size of '%s'"),
 				      f->name, f->redefines->name);
 		} else {
 			cb_error_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),

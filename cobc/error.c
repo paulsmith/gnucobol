@@ -168,8 +168,12 @@ cb_get_strerror (void)
 }
 
 void
-cb_warning (const char *fmt, ...)
+cb_warning (int pref, const char *fmt, ...)
 {
+	if (!pref) {
+		return;
+	}
+
 	va_list ap;
 
 	va_start (ap, fmt);
@@ -179,7 +183,13 @@ cb_warning (const char *fmt, ...)
 	if (sav_lst_file) {
 		return;
 	}
-	warningcount++;
+	if (pref == COBC_WARN_AS_ERROR) {
+		if (++errorcount > 100) {
+			cobc_too_many_errors ();
+		}
+	} else {
+		warningcount++;
+	}
 }
 
 void
@@ -224,18 +234,30 @@ cb_perror (const int config_error, const char *fmt, ...)
 /* cb_source_line needs to be adjusted by newline_count in pplex.l */
 
 void
-cb_plex_warning (const size_t sline, const char *fmt, ...)
+cb_plex_warning (int pref, const size_t sline, const char *fmt, ...)
 {
+	if (!pref) {
+		return;
+	}
+
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (NULL, (int)(cb_source_line + sline), _("warning: "), fmt, ap);
+	print_error (NULL, (int)(cb_source_line + sline),
+		(pref == COBC_WARN_AS_ERROR) ? _("error [-Werror]: ") : _("warning: "),
+		fmt, ap);
 	va_end (ap);
 
 	if (sav_lst_file) {
 		return;
 	}
-	warningcount++;
+	if (pref == COBC_WARN_AS_ERROR) {
+		if (++errorcount > 100) {
+			cobc_too_many_errors ();
+		}
+	} else {
+		warningcount++;
+	}
 }
 
 void
@@ -263,30 +285,27 @@ cb_plex_verify (const size_t sline, const enum cb_support tag,
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
-		cb_plex_warning (sline, _("%s used"), feature);
+		cb_plex_warning (COBC_WARN_FILLER, sline, _("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
-		if (cb_warn_archaic) {
-			cb_plex_warning (sline, _("%s is archaic in %s"), feature, cb_config_name);
-		}
+		cb_plex_warning (cb_warn_archaic, sline, _("%s is archaic in %s"),
+			feature, cb_config_name);
 		return 1;
 	case CB_OBSOLETE:
-		if (cb_warn_obsolete) {
-			cb_plex_warning (sline, _("%s is obsolete in %s"), feature, cb_config_name);
-		}
+		cb_plex_warning (cb_warn_obsolete, sline, _("%s is obsolete in %s"),
+			feature, cb_config_name);
 		return 1;
 	case CB_SKIP:
 		return 0;
 	case CB_IGNORE:
-		if (warningopt) {
-			cb_plex_warning (sline, _("%s ignored"), feature);
-		}
+		cb_plex_warning (warningopt, sline, _("%s ignored"), feature);
 		return 0;
 	case CB_ERROR:
 		cb_plex_error (sline, _("%s used"), feature);
 		return 0;
 	case CB_UNCONFORMABLE:
-		cb_plex_error (sline, _("%s does not conform to %s"), feature, cb_config_name);
+		cb_plex_error (sline, _("%s does not conform to %s"),
+			feature, cb_config_name);
 		return 0;
 	default:
 		break;
@@ -375,18 +394,30 @@ configuration_error (const char *fname, const int line,
 
 /* Generic warning/error routines */
 void
-cb_warning_x (cb_tree x, const char *fmt, ...)
+cb_warning_x (int pref, cb_tree x, const char *fmt, ...)
 {
+	if (!pref) {
+		return;
+	}
+
 	va_list ap;
 
 	va_start (ap, fmt);
-	print_error (x->source_file, x->source_line, _("warning: "), fmt, ap);
+	print_error (x->source_file, x->source_line,
+		(pref == COBC_WARN_AS_ERROR) ? _("error [-Werror]: ") : _("warning: "),
+		fmt, ap);
 	va_end (ap);
 
 	if (sav_lst_file) {
 		return;
 	}
-	warningcount++;
+	if (pref == COBC_WARN_AS_ERROR) {
+		if (++errorcount > 100) {
+			cobc_too_many_errors ();
+		}
+	} else {
+		warningcount++;
+	}
 }
 
 void
@@ -419,24 +450,20 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
-		cb_warning_x (x, _("%s used"), feature);
+		cb_warning_x (COBC_WARN_FILLER, x, _("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
-		if (cb_warn_archaic) {
-			cb_warning_x (x, _("%s is archaic in %s"), feature, cb_config_name);
-		}
+		cb_warning_x (cb_warn_archaic, x, _("%s is archaic in %s"),
+			feature, cb_config_name);
 		return 1;
 	case CB_OBSOLETE:
-		if (cb_warn_obsolete) {
-			cb_warning_x (x, _("%s is obsolete in %s"), feature, cb_config_name);
-		}
+		cb_warning_x (cb_warn_obsolete, x, _("%s is obsolete in %s"),
+			feature, cb_config_name);
 		return 1;
 	case CB_SKIP:
 		return 0;
 	case CB_IGNORE:
-		if (warningopt) {
-			cb_warning_x (x, _("%s ignored"), feature);
-		}
+		cb_warning_x (warningopt, x, _("%s ignored"), feature);
 		return 0;
 	case CB_ERROR:
 		cb_error_x (x, _("%s used"), feature);
@@ -478,7 +505,7 @@ redefinition_warning (cb_tree x, cb_tree y)
 	cb_tree		z;
 
 	w = CB_REFERENCE (x)->word;
-	cb_warning_x (x, _("redefinition of '%s'"), w->name);
+	cb_warning_x (COBC_WARN_FILLER, x, _("redefinition of '%s'"), w->name);
 	z = NULL;
 	if (y) {
 		z = y;
@@ -488,7 +515,7 @@ redefinition_warning (cb_tree x, cb_tree y)
 
 	if (z) {
 		listprint_suppress ();
-		cb_warning_x (z, _("'%s' previously defined here"), w->name);
+		cb_warning_x (COBC_WARN_FILLER, z, _("'%s' previously defined here"), w->name);
 		listprint_restore ();
 	}
 }
@@ -498,8 +525,10 @@ undefined_error (cb_tree x)
 {
 	struct cb_reference	*r = CB_REFERENCE (x);
 	cb_tree			c;
-	void (* const emit_error_func)(cb_tree, const char *, ...)
+	/* TO BE REMOVED
+	void (* const emit_error_func)(int, cb_tree, const char *, ...)
 		= r->flag_optional ? &cb_warning_x : &cb_error_x;
+	*/
 	const char		*error_message;
 
 	if (!errnamebuff) {
@@ -522,7 +551,11 @@ undefined_error (cb_tree x)
 		error_message = _("'%s' is not defined");
 	}
 
-	(*emit_error_func) (x, error_message, errnamebuff);
+	if (r->flag_optional) {
+		cb_warning_x (COBC_WARN_FILLER, x, error_message, errnamebuff);
+	} else {
+		cb_error_x (x, error_message, errnamebuff);
+	}
 }
 
 void
@@ -603,11 +636,9 @@ level_redundant_error (cb_tree x, const char *clause)
 	s = cb_name (x);
 	f = CB_FIELD_PTR (x);
 	if (f->flag_item_78) {
-		cb_error_x (x, _("constant item '%s' cannot have a %s clause"),
-			    s, clause);
+		cb_error_x (x, _("constant item '%s' cannot have a %s clause"), s, clause);
 	} else {
-		cb_error_x (x, _("level %02d item '%s' cannot have a %s clause"),
-			    f->level,
+		cb_error_x (x, _("level %02d item '%s' cannot have a %s clause"), f->level,
 			    s, clause);
 	}
 }
@@ -621,11 +652,9 @@ level_require_error (cb_tree x, const char *clause)
 	s = cb_name (x);
 	f = CB_FIELD_PTR (x);
 	if (f->flag_item_78) {
-		cb_error_x (x, _("constant item '%s' requires a %s clause"),
-			    s, clause);
+		cb_error_x (x, _("constant item '%s' requires a %s clause"), s, clause);
 	} else {
-		cb_error_x (x, _("level %02d item '%s' requires a %s clause"),
-			    f->level,
+		cb_error_x (x, _("level %02d item '%s' requires a %s clause"), f->level,
 			    s, clause);
 	}
 }
@@ -639,11 +668,9 @@ level_except_error (cb_tree x, const char *clause)
 	s = cb_name (x);
 	f = CB_FIELD_PTR (x);
 	if (f->flag_item_78) {
-		cb_error_x (x, _("constant item '%s' can only have a %s clause"),
-			    s, clause);
+		cb_error_x (x, _("constant item '%s' can only have a %s clause"), s, clause);
 	} else {
-		cb_error_x (x, _("level %02d item '%s' can only have a %s clause"),
-			    f->level,
+		cb_error_x (x, _("level %02d item '%s' can only have a %s clause"), f->level,
 			    s, clause);
 	}
 }

@@ -740,8 +740,8 @@ H#[0-9A-Za-z]* {
 		} else if (!cb_relaxed_syntax_checks) {
 			cb_error (_("word length exceeds %d characters: '%s'"),
 				  cb_word_length, yytext);
-		} else if (warningopt) {
-			cb_warning (_("word length exceeds %d characters: '%s'"),
+		} else {
+			cb_warning (warningopt, _("word length exceeds %d characters: '%s'"),
 				  cb_word_length, yytext);
 		}
 	}
@@ -906,7 +906,7 @@ H#[0-9A-Za-z]* {
 
 "."([ \n]*".")* {
 	if (last_token_is_dot || strlen (yytext) > 1) {
-		cb_warning (_("ignoring redundant ."));
+		cb_warning (COBC_WARN_FILLER, _("ignoring redundant ."));
 	}
 
 	if (!last_token_is_dot) {
@@ -1135,7 +1135,8 @@ read_literal (const char mark, const char *type)
 	*/
 
 	if (!i) {
-		cb_warning (_("alphanumeric literal has zero length; a SPACE will be assumed"));
+		cb_warning (COBC_WARN_FILLER,
+			_("alphanumeric literal has zero length; a SPACE will be assumed"));
 		plexbuff[i++] = ' ';
 	} else if (i > cb_lit_length) {
 		i = cb_lit_length;

@@ -1250,7 +1250,7 @@ cobc_set_value (struct cb_define_struct *p, const char *value)
 	if (*s || size <= (dot_seen + sign_seen)) {
 		/* Not numeric */
 #if	0	/* RXWRXW - Lit warn */
-		cb_warning (_("assuming literal for unquoted '%s'"),
+		cb_warning (COBC_WARN_FILLER, _("assuming literal for unquoted '%s'"),
 				value);
 #endif
 		size = strlen (value);

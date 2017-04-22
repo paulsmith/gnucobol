@@ -264,7 +264,8 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
 ^[ ]*">>"[ ]?"LEAP-SECOND"	{
 	if (warningopt) {
-		cb_plex_warning (newline_count, _("ignoring LEAP-SECOND directive"));
+		cb_plex_warning (warningopt, newline_count,
+			_("ignoring LEAP-SECOND directive"));
 	}
 	skip_to_eol ();
 }
@@ -275,7 +276,8 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 ^[ ]*">>"[ ]*\n		{
-	cb_plex_warning (newline_count, _("ignoring empty directive"));
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+			_("ignoring empty directive"));
 	unput ('\n');
 }
 
@@ -283,12 +285,14 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	char	*s;
 
 	s = strchr (yytext, '>');
-	cb_plex_warning (newline_count, _("ignoring invalid directive: '%s'"), s);
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+			_("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
 
 ^[ ]*">>"		{
-	cb_plex_warning (newline_count, _("ignoring invalid directive"));
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+			_("ignoring invalid directive"));
 	skip_to_eol ();
 }
 
@@ -326,25 +330,29 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	char	*s;
 
 	s = strchr (yytext, '$');
-	cb_plex_warning (newline_count, _("ignoring invalid directive: '%s'"), s);
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+			_("ignoring invalid directive: '%s'"), s);
 	skip_to_eol ();
 }
 
 ^......"$"		{
 	/* Allow $ in column 7 for acucomment in fixed format */
 	if (cb_source_format == CB_FORMAT_FREE) {
-		cb_plex_warning (newline_count, _("spurious '$' detected - ignored"));
+		cb_plex_warning (COBC_WARN_FILLER, newline_count,
+			_("spurious '$' detected - ignored"));
 		skip_to_eol ();
 	}
 }
 
 ^[ ]*"$"		{
-	cb_plex_warning (newline_count, _("spurious '$' detected - ignored"));
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+		_("spurious '$' detected - ignored"));
 	skip_to_eol ();
 }
 
 "PROCESS"		{
-	cb_plex_warning (newline_count, _("PROCESS statement ignored"));
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+		_("PROCESS statement ignored"));
 	skip_to_eol ();
 }
 
@@ -1280,18 +1288,18 @@ start:
 		*/
 		if (cb_source_format == CB_FORMAT_FREE) {
 			if (line_overflow == 0) {
-				cb_plex_warning (newline_count + 1,
+				cb_plex_warning (COBC_WARN_FILLER, newline_count + 1,
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
-				cb_plex_warning (newline_count + 1,
+				cb_plex_warning (COBC_WARN_FILLER, newline_count + 1,
 						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
 			}
 		} else {
 			if (line_overflow == 0) {
-				cb_plex_warning (newline_count,
+				cb_plex_warning (COBC_WARN_FILLER, newline_count,
 						 _("line not terminated by a newline"));
 			} else if (line_overflow == 2) {
-				cb_plex_warning (newline_count,
+				cb_plex_warning (COBC_WARN_FILLER, newline_count,
 						 _("source text exceeds %d bytes, will be truncated"), PPLEX_BUFF_LEN);
 			}
 		}
@@ -1611,7 +1619,7 @@ start:
 	/* Show warning if text is longer than cb_text_column
 	   and not whitespace (postponed here) */
 	if (line_overflow != 0) {
-		cb_plex_warning (newline_count,
+		cb_plex_warning (COBC_WARN_FILLER, newline_count,
 				 _("source text after program-text area (column %d)"),
 				cb_text_column);
 	}

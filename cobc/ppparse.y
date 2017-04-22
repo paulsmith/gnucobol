@@ -247,7 +247,7 @@ ppp_compare_vals (const struct cb_define_struct *p1,
 		return 0;
 	}
 	if (p1->deftype != p2->deftype) {
-		cb_warning (_("directive comparison on different types"));
+		cb_warning (COBC_WARN_FILLER, _("directive comparison on different types"));
 		return 0;
 	}
 	if (p1->deftype == PLEX_DEF_LIT) {
