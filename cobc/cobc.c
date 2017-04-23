@@ -198,7 +198,7 @@ int	pd_off;
 FILE			*cb_src_list_file = NULL;
 int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
-int			cb_lines_per_page = CB_MAX_LINES;
+unsigned int		cb_lines_per_page = CB_MAX_LINES;
 int			cb_no_symbols = 0;
 int			cb_listing_xref = 0;
 #define			CB_LISTING_DATE_BUFF 48
@@ -331,7 +331,7 @@ static size_t		save_c_src = 0;
 static signed int	verbose_output = 0;
 static size_t		cob_optimize = 0;
 
-static int		cb_listing_linecount;
+static unsigned int		cb_listing_linecount;
 static int		cb_listing_eject = 0;
 static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
@@ -4232,7 +4232,7 @@ terminate_str_at_first_trailing_space (char * const str)
 }
 
 static void
-print_88_values (int lvl, struct cb_field *field)
+print_88_values (struct cb_field *field)
 {
 	struct cb_field *f;
 	char lcl_name[LCL_NAME_LEN] = { '\0' };
@@ -4248,7 +4248,7 @@ print_88_values (int lvl, struct cb_field *field)
 
 /* print fields with given indentation */
 static int
-print_fields (int indent, struct cb_field *top)
+print_fields (struct cb_field *top)
 {
 	int	first = 1;
 	int	get_cat;
@@ -4328,10 +4328,10 @@ print_fields (int indent, struct cb_field *top)
 
 		first = 0;
 		old_level = top->level;
-		print_88_values (indent + 1, top);
+		print_88_values (top);
 
 		if (top->children) {
-			print_fields (indent + 1, top->children);
+			print_fields (top->children);
 		}
 	}
 	return found;
@@ -4350,7 +4350,7 @@ print_files_and_their_records (cb_tree file_list_p)
 			 CB_FILE (CB_VALUE (l))->name);
 		print_program_data (print_data);
 		if (CB_FILE (CB_VALUE (l))->record) {
-			print_fields (0, CB_FILE (CB_VALUE (l))->record);
+			print_fields (CB_FILE (CB_VALUE (l))->record);
 			print_program_data ("");
 		}
 	}
@@ -4361,7 +4361,7 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 {
 	int found = 0;
 	if (first_field_in_section != NULL) {
-		found = !!print_fields (0, first_field_in_section);
+		found = !!print_fields (first_field_in_section);
 		if (found) {
 			print_program_data ("");
 		}
