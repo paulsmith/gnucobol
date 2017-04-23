@@ -100,13 +100,13 @@
 #if defined(_MSC_VER)
 
 /*
-_MSC_VER == 1400 (Visual Studio 2005, vc8) since OS-Version 2000
-_MSC_VER == 1500 (Visual Studio 2008, vc9) since OS-Version XP / 2003
-_MSC_VER == 1600 (Visual Studio 2010, vc10) since OS-Version XP / 2003
-_MSC_VER == 1700 (Visual Studio 2012, vc11) since OS-Version 7  / 2008 R2
-_MSC_VER == 1800 (Visual Studio 2013, vc12) since OS-Version 7  / 2008 R2
-_MSC_VER == 1900 (Visual Studio 2015, vc14) since OS-Version 7  / 2008 R2
-_MSC_VER == 1910 (Visual Studio 2017, vc14_1) since OS-Version 7  / 2012 R2
+_MSC_VER == 1400 (Visual Studio 2005, VS8) since OS-Version 2000
+_MSC_VER == 1500 (Visual Studio 2008, VS9) since OS-Version XP / 2003
+_MSC_VER == 1600 (Visual Studio 2010, VS10) since OS-Version XP / 2003
+_MSC_VER == 1700 (Visual Studio 2012, VS11) since OS-Version 7  / 2008 R2
+_MSC_VER == 1800 (Visual Studio 2013, VS12) since OS-Version 7  / 2008 R2
+_MSC_VER == 1900 (Visual Studio 2015, VS14) since OS-Version 7  / 2008 R2
+_MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 */
 
 #if _MSC_VER >= 1500
@@ -114,7 +114,7 @@ _MSC_VER == 1910 (Visual Studio 2017, vc14_1) since OS-Version 7  / 2012 R2
 #else
 #define COB_USE_VC2008_OR_GREATER 0
 #if _MSC_VER < 1400
-#error Support for Visual Studio 2003 and earlier dropped with GnuCOBOL 2.0
+#error Support for Visual Studio 2003 and older Visual C++ compilers dropped with GnuCOBOL 2.0
 #endif
 #endif
 

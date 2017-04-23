@@ -33,13 +33,16 @@ How to build in native Windows environments:
   For convinience you can run makebisonflex.bat after setting the PATH which
   will check for the executables and invoke them.
 * compile with your environment, for example via IDE by opening the solution
-  and click "build" or by starting the VS/WinSDK command prompt and calling
-  msbuild "GnuCOBOL.sln" /p:Platform=x64 /Configuration=Release
+  and click "build" or by starting the VS/WinSDK command prompt and doing
+    pushd X:\path\to\gnu-cobol\build_windows\vsYYYY
+    msbuild "GnuCOBOL.sln" /p:Platform=x64 /Configuration=Release
+  replace YYYY with the Visual Studio version you've used and with using the
+  platform/configuration you want to build
 
 How to create the dist package:
 
 * set up the above
-* compile the release version you want (Win32 and/or x64)
+* compile the release version you want (x86/Win32 and/or x64)
 * sign the binaries if needed
 * if you want a 7z and have a non-standard installation: change "makedist.bat"
 * call "makedist.bat" (uses the last build from Win32\release and x64\release)

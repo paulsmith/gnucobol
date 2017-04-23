@@ -1,7 +1,9 @@
 
 2017-04-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added subfolder vc14_1 (Visual Studio 2017)
+	* added subfolder vs2017
+	* renamed subfolder for VisualC++ builds vc8 -> vs2005, vc9 -> vs2008,
+	  vc10 -> vs2010, vc11 -> vs2012, vc12 -> vs2013, vc14 -> vs2015
 	* makedist.bat: only pause when started by double click
 	* makebisonflex.bat: new batch for (re-)generating bison/flex files
 

@@ -178,16 +178,15 @@
     <None Include="..\..\libcob\ChangeLog" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\version_libcob.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\config.h" />
     <ClInclude Include="..\defaults.h" />
     <ClInclude Include="..\..\cobc\tree.h" />
     <ClInclude Include="..\..\libcob\cobgetopt.h" />
     <ClInclude Include="..\..\libcob\coblocal.h" />
-    <ClInclude Include="..\..\libcob\codegen.h" />
     <ClInclude Include="..\..\libcob\common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\version_libcob.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
