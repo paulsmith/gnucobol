@@ -1,5 +1,10 @@
 
-2017-04-10 Brian Tiffin <btiffin@gnu.org>
+2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: always use COB_KEYWORD_INLINE (set by configure)
+	  for COB_INLINE
+
+2017-04-10  Brian Tiffin <btiffin@gnu.org>
 
 	* common.c, common.h: remove cob_get_prog_pointer in preference to
 	  cob_get_pointer.

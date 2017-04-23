@@ -369,19 +369,7 @@ _MSC_VER == 2000 (Visual Studio 2017) since OS-Version 7  / 2012 R2
 	#define COB_EXPIMP	extern
 #endif
 
-#if	defined(__370__) || defined(_MSC_VER) || defined(__DECC) || \
-	defined(__BORLANDC__) || defined(__WATCOMC__)
-	#define COB_INLINE	__inline
-#elif	defined(__INTEL_COMPILER)
-	/* icc */
-	#define COB_INLINE	inline
-#elif	defined(__GNUC__)
-	/* gcc */
-	#define COB_INLINE	__inline__
-#elif	defined(__STDC_VERSION__) && __STDC_VERSION__ > 199900L
-	/* C99 and C++ */
-	#define COB_INLINE	inline
-#elif	defined(COB_KEYWORD_INLINE)
+#if	defined(COB_KEYWORD_INLINE)
 	#define COB_INLINE	COB_KEYWORD_INLINE
 #else
 	#define COB_INLINE
