@@ -170,11 +170,11 @@ cb_get_strerror (void)
 void
 cb_warning (int pref, const char *fmt, ...)
 {
+	va_list ap;
+
 	if (!pref) {
 		return;
 	}
-
-	va_list ap;
 
 	va_start (ap, fmt);
 	print_error (NULL, 0,
@@ -238,11 +238,11 @@ cb_perror (const int config_error, const char *fmt, ...)
 void
 cb_plex_warning (int pref, const size_t sline, const char *fmt, ...)
 {
+	va_list ap;
+
 	if (!pref) {
 		return;
 	}
-
-	va_list ap;
 
 	va_start (ap, fmt);
 	print_error (NULL, (int)(cb_source_line + sline),
@@ -398,11 +398,11 @@ configuration_error (const char *fname, const int line,
 void
 cb_warning_x (int pref, cb_tree x, const char *fmt, ...)
 {
+	va_list ap;
+
 	if (!pref) {
 		return;
 	}
-
-	va_list ap;
 
 	va_start (ap, fmt);
 	print_error (x->source_file, x->source_line,
