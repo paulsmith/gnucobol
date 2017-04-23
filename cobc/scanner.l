@@ -732,7 +732,7 @@ H#[0-9A-Za-z]* {
 	struct cb_program		*program;
 
 	/* Check word length */
-	if (unlikely (yyleng > cb_word_length)) {
+	if (unlikely (yyleng > (signed int) cb_word_length)) {
 		if (yyleng > COB_MAX_WORDLEN) {
 			/* Absolute limit */
 			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
