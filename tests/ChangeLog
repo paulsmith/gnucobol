@@ -1,4 +1,8 @@
 
+2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobol85/Makefile.am: HACK for newcob.val in sourcedir during VPATH build
+
 2017-03-22  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added Error/Warning summary to listings.

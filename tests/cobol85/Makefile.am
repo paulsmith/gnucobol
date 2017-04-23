@@ -108,6 +108,10 @@ $(MODULES): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
 	@echo "Finished module directory $@."
 
 EXEC85: newcob.val
+# hack for case "newcob.val in source directory during VPATH build" (there must be a better solution)
+	if ! test -f "newcob.val"; then \
+	   cp "$(srcdir)/newcob.val" newcob.val; \
+	fi
 	@echo "Extracting EXEC85 program"
 	@sed -e '/^\*END/,$$d' -e '1,/^\*HEADER/d' \
 	-e 's/^002700.*/           "..\/newcob.val" ORGANIZATION LINE SEQUENTIAL./' \
