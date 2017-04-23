@@ -1,4 +1,4 @@
-/* config.h, tested with Win32/x64 VS2005-2015 */
+/* config.h, tested with x86/x64 VS2005-2017 */
 
 #define NOISAM 0
 #define BDB    1

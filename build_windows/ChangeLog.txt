@@ -1,4 +1,10 @@
 
+2017-04-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added subfolder vc14_1 (Visual Studio 2017)
+	* makedist.bat: only pause when started by double click
+	* makebisonflex.bat: new batch for (re-)generating bison/flex files
+
 2016-12-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* defaults.h.in: added "/incremental:no" to COB_LDFLAGS
@@ -30,7 +36,7 @@
 
 2015-10-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
-	* added subfolder vc14
+	* added subfolder vc14 (Visual Studio 2015)
 	* updated all project files
 	* updated all batch files
 	* updated version_cobc.rc, version_libcob.rc, version_cobcrun.rc

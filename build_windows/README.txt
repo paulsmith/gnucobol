@@ -14,12 +14,12 @@ How to build in native Windows environments:
   For convinience you can get them (MPIR, pdcurses, VBISAM, BDB) from 
   https://sourceforge.net/projects/open-cobol/files/win_prerequisites/
 * if you want to build against CISAM/DISAM get the additional necessary files
-  from the vendor and change linker input in libcob.sln
+  from the vendor and change linker input in libcob.vc[x]proj
 * copy build_windows\config.h.in to build_windows\config.h,
   if you don't want to build with VBISAM change the define CONFIGURED_ISAM
   accordingly; you may want to change the PATCHLEVEL, too
 * copy build_windows\defaults.h.in to build_windows\defaults.h,
-  change COB_MAIN_DIR according to your local path and/or MAKE_DIST
+  change COB_MAIN_DIR according to your local path and/or set MAKE_DIST
 * you may want to change version information in build_windows\version_*.rc
 * if you compile from a development snapshot or changed these files you need
   to (re-)generate the bison and flex sources, example commands for
@@ -30,6 +30,8 @@ How to build in native Windows environments:
     win_flex -o scanner.c scanner.l
     win_bison -o ppparse.c ppparse.y
     win_bison -o parser.c parser.y
+  For convinience you can run makebisonflex.bat after setting the PATH which
+  will check for the executables and invoke them.
 * compile with your environment, for example via IDE by opening the solution
   and click "build" or by starting the VS/WinSDK command prompt and calling
   msbuild "GnuCOBOL.sln" /p:Platform=x64 /Configuration=Release
@@ -53,8 +55,8 @@ How to test the native builds:
 
 * currently you will need a GNU/Linux-like environment for running the
   testsuite (normally Cygwin or MinGW with MSYS)
-* if you want to run the NIST testsuite you need a perl binary installed
-  and in PATH (either a normal Windows installation or within Cygwin/MSYS)
+* if you want to run the NIST testsuite you need a perl binary installed and
+  in PATH (a Cygwin/MSYS version is needed, a normal Windows binary won't work)
 * do the following commands:
   cd $yourfolder
   ./configure (add --without-db --without-curses if your system does not have

@@ -39,13 +39,13 @@
 #define COB_BLD_CC       "cl.exe"
 #define COB_BLD_CPPFLAGS ""
 #if defined (_MSC_VER)
-#if _MSC_VER > 1900
+#if _MSC_VER > 1910
 #ifdef _DEBUG
 #define COB_BLD_CFLAGS   "unknown MSC DEBUG generation"
 #else
 #define COB_BLD_CFLAGS   "unknown MSC RELEASE generation"
 #endif
-#elif _MSC_VER == 1900
+#elif _MSC_VER == 1900 || _MSC_VER == 1910
 #ifdef _DEBUG
 #define COB_BLD_CFLAGS	"/GS /analyze- /W3 /Zc:wchar_t /ZI /Gm /Od /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /Oy- /MDd /EHsc"
 #else

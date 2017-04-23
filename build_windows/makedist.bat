@@ -3,6 +3,14 @@
 @echo off
 setlocal
 
+:: check if started directly
+echo %cmdcmdline% | find /i "%~0" >nul
+if errorlevel 1 (
+   set interactive=1
+) else (
+   set interactive=0
+)
+
 :: Set distribution folder
 set COB_DIST_PATH="%~dp0\dist\"
 
@@ -174,5 +182,8 @@ if exist "%ProgramFiles%\7-Zip\7z.exe" (
 
 
 :over
-pause
+if _%interactive%_==_0_ (
+   echo.
+   pause
+)
 endlocal
