@@ -1,4 +1,11 @@
 
+2017-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (print_fields, print_88_values): removed indent parameter as
+	  we no longer indent by level number
+	* cobc.c: cb_listing_linecount and cb_lines_per_page as unsigned int
+	* cobc.c: finished implementation of -Werror
+
 2017-04-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (stop_statement): added support for STOP identifier.

@@ -484,6 +484,7 @@ static const struct option long_options[] = {
 	{"P",			CB_OP_ARG, NULL, 'P'},
 	{"Xref",		CB_NO_ARG, NULL, 'X'},
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
+	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
 	{"no-symbols", 		CB_NO_ARG, NULL, '@'},
@@ -2162,6 +2163,8 @@ cobc_print_usage (char * prog)
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+	puts (_("  -Werror               treat all warnings as errors"));
+	puts (_("  -Werror=<warning>     treat specified <warning> as error"));
 
 	putchar ('\n');
 
@@ -2268,6 +2271,7 @@ process_command_line (const int argc, char **argv)
 	char			*conf_entry;
 
 	int			conf_ret = 0;
+	int			error_all_warnings = 0;
 
 #ifdef _WIN32
 	/* Translate command line arguments from WIN to UNIX style */
@@ -2886,6 +2890,31 @@ process_command_line (const int argc, char **argv)
 #undef	CB_NOWARNDEF
 			break;
 
+		case 'Y':
+			/* -Werror[=warning] : Treat all/single warnings as errors */
+			if (cob_optarg) {
+				if (0) {} // dummy place holder
+#define CB_CHECK_WARNING(var,name)  \
+				else if (strcmp(cob_optarg,name) == 0) {	\
+					var = COBC_WARN_AS_ERROR;		\
+				}
+#define	CB_WARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
+#define	CB_ONWARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
+#define	CB_NOWARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
+#include "warning.def"
+#undef	CB_CHECK_WARNING
+#undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_NOWARNDEF
+				else if (verbose_output) {
+					cobc_err_msg (_("unknown warning option '%s'"),
+						cob_optarg);
+				}
+			} else {
+				error_all_warnings = 1;
+			}
+			break;
+
 		case 'Z':
 			/* -W : Turn on every warning */
 			warningopt = 1;
@@ -2928,6 +2957,22 @@ process_command_line (const int argc, char **argv)
 		cb_top_level_occurs_clause = CB_OK;
 	}
 #endif
+
+	/* Set active warnings to errors, if requested */
+	if (error_all_warnings) {
+#define CB_CHECK_WARNING(var)  \
+		if (var == COBC_WARN_ENABLED) {	\
+				var = COBC_WARN_AS_ERROR;		\
+		}
+#define	CB_WARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
+#define	CB_ONWARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
+#define	CB_NOWARNDEF(var,name,doc)	CB_CHECK_WARNING(var)
+#include "warning.def"
+#undef	CB_CHECK_WARNING
+#undef	CB_WARNDEF
+#undef	CB_ONWARNDEF
+#undef	CB_NOWARNDEF
+	}
 
 	if (list_reserved) {
 		cb_list_reserved ();

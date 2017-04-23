@@ -154,7 +154,9 @@ enum cb_support {
 	CB_UNCONFORMABLE
 };
 
-#define COBC_WARN_FILLER -1
+#define COBC_WARN_FILLER  -1
+#define COBC_WARN_DISABLED 0
+#define COBC_WARN_ENABLED  1
 #define COBC_WARN_AS_ERROR 2
 
 /* Config dialect support types */
