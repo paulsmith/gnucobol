@@ -4247,6 +4247,10 @@ cb_emit_tab_arithmetic (cb_tree (*func) (cb_tree f1, cb_tree f2, cb_tree f3),
 	}
 
 	/* TODO pending, no actual code generation */
+	COB_UNUSED (func);
+	COB_UNUSED (opt);
+	COB_UNUSED (from_to_idx);
+	COB_UNUSED (dest_idx);
 }
 
 static unsigned int
