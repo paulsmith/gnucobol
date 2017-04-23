@@ -5010,7 +5010,7 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 #elif	defined(_WIN64)
 	if (call_conv & CB_CONV_STDCALL) {
-		cb_warning (warningopt_("STDCALL used on 64-bit Windows platform"));
+		cb_warning (warningopt, _("STDCALL used on 64-bit Windows platform"));
 	}
 #endif
 	if ((call_conv & CB_CONV_STATIC_LINK)
