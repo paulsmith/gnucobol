@@ -1,4 +1,9 @@
 
+2017-04-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h [!_MSC_VAR]: fixed not getting forward slash in directories
+	  with MinGW.
+
 2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: always use COB_KEYWORD_INLINE (set by configure)
