@@ -1,6 +1,7 @@
 
 2017-04-27 Sergey Kashyrin <ska@kiska.net>
 
+	* parser.y: Fix for CALL-CONVENTION (was broken) 
 	* codegen.c: on Windows we need to output entries prototypes
 	  with dllexport, otherwise they will not be seen.
 	* cobc.c: print_error_for_line cut continuation

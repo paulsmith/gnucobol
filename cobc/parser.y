@@ -7676,12 +7676,16 @@ call_body:
 		current_program->flag_recursive = 1;
 	}
 	call_conv = current_call_convention;
-	if ($1 && CB_INTEGER_P ($1)) {
-		call_conv |= CB_INTEGER ($1)->val;
-		if (CB_INTEGER ($1)->val & CB_CONV_COBOL) {
-			call_conv &= ~CB_CONV_STDCALL;
+	if ($1) {
+		if (CB_INTEGER_P ($1)) {
+			call_conv |= CB_INTEGER ($1)->val;
+			if (CB_INTEGER ($1)->val & CB_CONV_COBOL) {
+				call_conv &= ~CB_CONV_STDCALL;
+			} else {
+				call_conv &= ~CB_CONV_COBOL;
+			}
 		} else {
-			call_conv &= ~CB_CONV_COBOL;
+			call_conv = cb_get_int($1);
 		}
 	}
 	/* For CALL ... RETURNING NOTHING, set the call convention bit */
