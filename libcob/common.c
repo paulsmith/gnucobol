@@ -2585,7 +2585,7 @@ cob_get_current_date_and_time (void)
 	GetLocalTime (&local_time);
 #endif
 
-	cb_time.year = local_time.wYear;	
+	cb_time.year = local_time.wYear;
 	cb_time.month = local_time.wMonth;
 	cb_time.day_of_month = local_time.wDay;
 	cb_time.day_of_week = one_indexed_day_of_week_from_monday (local_time.wDayOfWeek);
@@ -4546,48 +4546,49 @@ cob_expand_env_string (char *strval)
 
 /* Store 'integer' value in field for correct length */
 static void
-set_value (char *data, int len, long val)
+set_value (char *data, int len, cob_s64_t val)
 {
-	if(len == sizeof(int)) {
-		*(int*)data = (int)val;
-	} else if(len == sizeof(short)) {
-		*(short*)data = (short)val;
-	} else if(len == sizeof(long)) {
-		*(long*)data = val;
+	if(len == sizeof(short)) {
+		*(short *)data = (short)val;
+	} else if(len == sizeof(int)) {
+		*(int *)data = (int)val;
+	} else if(len == sizeof(cob_s64_t)) {
+		*(cob_s64_t *)data = val;
 	} else {
-		*(char*)data = (char)val;
+		*data = (char)val;
 	}
 }
 
 /* Get 'integer' value from field */
-static long
+static cob_s64_t
 get_value (char *data, int len)
 {
-	if(len == sizeof(int)) {
-		return (long)*(int*)data;
-	} else if(len == sizeof(short)) {
-		return (long)*(short*)data;
-	} else if(len == sizeof(long)) {
-		return (long)*(long*)data;
-	} else {
-		return (long)*(char*)data;
+	if(len == sizeof(short)) {
+		return *(short *)data;
 	}
+	if(len == sizeof(int)) {
+		return *(int *)data;
+	}
+	if(len == sizeof(cob_s64_t)) {
+		return *(cob_s64_t *)data;
+	}
+	return *data;
 }
 
 /* Set runtime setting with given value */
 static int					/* returns 1 if any error, else 0 */
 set_config_val (char *value, int pos)
 {
-	void 	*data;
+	char 	*data;
 	char	*ptr = value,*str;
-	unsigned long	numval = 0;
+	cob_s64_t	numval = 0;
 	int	i,data_type,data_loc,data_len,slen;
 
 	data_type = gc_conf[pos].data_type;
 	data_loc  = gc_conf[pos].data_loc;
 	data_len  = gc_conf[pos].data_len;
 
-	data = (void*)((char *)cobsetptr + data_loc);
+	data = ((char *)cobsetptr) + data_loc;
 
 	if(gc_conf[pos].enums) {		/* Translate 'word' into alternate 'value' */
 
@@ -4661,7 +4662,7 @@ set_config_val (char *value, int pos)
 			conf_runtime_error(1, _("maximum value: %lu"),gc_conf[pos].max_value);
 			return 1;
 		}
-		set_value((char *)data,data_len,numval);
+		set_value(data, data_len, numval);
 
 	} else if((data_type & ENV_BOOL)) {	/* Boolean: Yes/No,True/False,... */
 		numval = 2;
@@ -4692,7 +4693,7 @@ set_config_val (char *value, int pos)
 			if ((data_type & ENV_NOT)) {	/* Negate logic for actual setting */
 				numval = !numval;
 			}
-			set_value((char *)data,data_len,numval);
+			set_value(data, data_len, numval);
 		}
 
 	} else if((data_type & ENV_STR)
@@ -4748,27 +4749,27 @@ set_config_val_by_name (char *value, const char *name, const char *func)
 static char *
 get_config_val (char *value, int pos, char *orgvalue)
 {
-	void 	*data;
+	char 	*data;
 	char	*str;
 	double	dval;
-	long	numval = 0;
+	cob_s64_t	numval = 0;
 	int	i,data_type,data_loc,data_len;
 
 	data_type	= gc_conf[pos].data_type;
 	data_loc	= gc_conf[pos].data_loc;
 	data_len	= gc_conf[pos].data_len;
 
-	data = (void*)((char *)cobsetptr + data_loc);
+	data = ((char *)cobsetptr) + data_loc;
 
 	strcpy(value,"Unknown");
 	strcpy(orgvalue,"");
 	if((data_type & ENV_INT)) {				/* Integer data */
-		numval = get_value((char *)data,data_len);
+		numval = get_value(data, data_len);
 		sprintf(value,"%ld",numval);
 
 	} else if((data_type & ENV_SIZE)) {			/* Size: integer with K, M, G */
-		numval = get_value((char *)data,data_len);
-		dval = numval;
+		numval = get_value(data, data_len);
+		dval = (double) numval;
 		if(numval > (1024 * 1024 * 1024)) {
 			if((numval % (1024 * 1024 * 1024)) == 0)
 				sprintf(value,"%ld GB",numval/(1024 * 1024 * 1024));
@@ -4789,7 +4790,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 		}
 
 	} else if((data_type & ENV_BOOL)) {	/* Boolean: Yes/No,True/False,... */
-		numval = get_value((char *)data,data_len);
+		numval = get_value(data, data_len);
 		if((data_type & ENV_NOT))
 			numval = !numval;
 		if(numval)
@@ -4926,7 +4927,7 @@ cb_config_entry (char *buf, int line)
 #if HAVE_SETENV
 		(void)setenv (value, str, 1);
 #else
-		len = strlen (value) + strlen (str) + 2U;
+		len = (int) strlen (value) + (int) strlen (str) + 2;
 		env = cob_fast_malloc (len);
 		sprintf (env, "%s=%s", value, str);
 		(void)putenv (env);
@@ -4958,7 +4959,7 @@ cb_config_entry (char *buf, int line)
 #if HAVE_SETENV
 			(void)unsetenv(value);
 #else
-			len = strlen (value) + 2U;
+			len = (int) strlen (value) + 2;
 			env = cob_fast_malloc (len);
 			sprintf (env, "%s=", value);
 			(void)putenv (env);

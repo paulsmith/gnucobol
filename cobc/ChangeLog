@@ -1,4 +1,11 @@
 
+2017-04-27 Sergey Kashyrin <ska@kiska.net>
+
+	* codegen.c: on Windows we need to output entries prototypes
+	  with dllexport, otherwise they will not be seen.
+	* cobc.c: print_error_for_line cut continuation
+	  snprintf returns -1 in MSC and on HPUX if max is reached
+
 2017-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (print_fields, print_88_values): removed indent parameter as

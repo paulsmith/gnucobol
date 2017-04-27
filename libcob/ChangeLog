@@ -1,4 +1,9 @@
 
+2017-04-27  Sergey Kashyrin <ska@kiska.net>
+
+	* common.c: correcting config set_value/get_value
+	  as SORT was broken on Windows
+
 2017-04-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h [!_MSC_VAR]: fixed not getting forward slash in directories

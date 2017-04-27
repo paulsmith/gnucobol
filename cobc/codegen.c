@@ -1181,12 +1181,12 @@ output_standard_includes (void)
 	output ("#ifndef\t_XOPEN_SOURCE_EXTENDED\n");
 	output ("#define\t_XOPEN_SOURCE_EXTENDED 1\n");
 	output ("#endif\n");
-#endif		
+#endif
 	output ("#include <stdio.h>\n");
 	output ("#include <stdlib.h>\n");
 	output ("#include <stddef.h>\n");
 	output ("#include <string.h>\n");
-	output ("#include <math.h>\n");		
+	output ("#include <math.h>\n");
 #ifdef	WORDS_BIGENDIAN
 	output ("#define  WORDS_BIGENDIAN 1\n");
 #endif
@@ -1236,7 +1236,7 @@ output_call_cache (void)
 	struct call_list	*call;
 	struct static_call_list	*static_call;
 	const char			*convention_modifier;
-	
+
 	if (needs_unifunc || call_cache || func_call_cache) {
 		output_local ("\n/* Call pointers */\n");
 	}
@@ -1286,7 +1286,7 @@ static void
 output_nested_call_table (struct cb_program *prog)
 {
 	struct nested_list	*nlp;
-	
+
 	if (!(prog->nested_prog_list && gen_nested_tab)) {
 		return;
 	}
@@ -1455,7 +1455,7 @@ output_local_base_cache (void)
 	}
 
 	output_local ("\n/* Data storage */\n");
-	
+
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
 	for (blp = local_base_cache; blp; blp = blp->next) {
 		if (blp->f->special_index > 1) {
@@ -6908,7 +6908,7 @@ static void
 output_class_names (struct cb_program *prog)
 {
 	cb_tree	l;
-	
+
 	if (!prog->nested_level && prog->class_name_list) {
 		output ("/* Class names */\n");
 		for (l = prog->class_name_list; l; l = CB_CHAIN (l)) {
@@ -8195,7 +8195,7 @@ output_function_entry_function (struct cb_program *prog, const int gencode,
 	cob_u32_t	parmnum = 0;
 	cob_u32_t	n;
 	cb_tree		l;
-	
+
 	if (gencode) {
 		output ("cob_field *\n");
 	} else {
@@ -8238,7 +8238,7 @@ output_function_entry_function (struct cb_program *prog, const int gencode,
 	for (n = 0; n < parmnum; ++n) {
 		output (", f%u", n);
 	}
-	
+
 	output (");\n");
 	output ("cob_call_params = cob_get_global_ptr ()->cob_call_params;\n");
 
@@ -8256,7 +8256,7 @@ output_function_entry_function (struct cb_program *prog, const int gencode,
 	output ("  **cob_fret = *floc->ret_fld;\n");
 	output ("  /* Restore environment */\n");
 	output ("  cob_restore_func (floc);\n");
-	output ("  return *cob_fret;\n}\n\n");	
+	output ("  return *cob_fret;\n}\n\n");
 }
 
 /* Returns NULL if it could not deduce the parameter type. */
@@ -8266,7 +8266,7 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 {
 	const int	is_unsigned =
 		CB_SIZES (param_list_elt) == CB_SIZE_UNSIGNED;
-	
+
 	if (usage == CB_USAGE_FLOAT) {
 		return "float";
 	} else if (usage == CB_USAGE_DOUBLE) {
@@ -8291,28 +8291,28 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 			} else {
 				return "cob_c8_t";
 			}
-			
+
 		case CB_SIZE_2:
 			if (is_unsigned) {
 				return "cob_u16_t";
 			} else {
 				return "cob_s16_t";
 			}
-			
+
 		case CB_SIZE_4:
 			if (is_unsigned) {
 				return "cob_u32_t";
 			} else {
 				return "cob_s32_t";
 			}
-			
+
 		case CB_SIZE_8:
 			if (is_unsigned) {
 				return "cob_u64_t";
 			} else {
 				return "cob_s64_t";
 			}
-			
+
 		default:
 			break;
 		}
@@ -8350,7 +8350,7 @@ output_program_entry_function_parameters (cb_tree using_list, const int gencode,
 				}
 				break;
 			}
-			
+
 			/* Fall through */
 		case CB_CALL_BY_REFERENCE:
 		case CB_CALL_BY_CONTENT:
@@ -8362,11 +8362,11 @@ output_program_entry_function_parameters (cb_tree using_list, const int gencode,
 			}
 			s_type[n] = "";
 			break;
-			
+
 		default:
 			break;
 		}
-		
+
 		if (CB_CHAIN (l)) {
 			output (", ");
 		}
@@ -8455,12 +8455,12 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 
 	/* Output parameter list */
-	
+
 	if (prog->flag_chained) {
 		using_list = NULL;
 		parameter_list = NULL;
 	}
-	
+
 	if (!gencode && !using_list) {
 		output ("void);\n");
 		return;
@@ -8532,7 +8532,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 				} else {
 					s2 = "0";
 				}
-				
+
 				if (s) {
 					output ("  static %s\tcob_parm_l_%d = %s;\n",
 						s, f->id, s2);
@@ -8699,6 +8699,15 @@ output_function_prototypes (struct cb_program *prog)
 				output ("int\t\t\t%s ();\n",
 					cp->program_id);
 			}
+#if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
+			for (l = cp->entry_list; l; l = CB_CHAIN (l)) {
+				const char * entry_name = CB_LABEL (CB_PURPOSE (l))->name;
+				if(0 == strcmp (entry_name, cp->program_id)) {
+					continue;
+				}
+				output_entry_function (cp, l, cp->parameter_list, 0);
+			}
+#endif
 		} else {
 			/* Output implementation of other program wrapper. */
 			for (l = cp->entry_list; l; l = CB_CHAIN (l)) {

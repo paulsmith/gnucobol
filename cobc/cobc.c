@@ -5044,6 +5044,10 @@ print_errors_for_line (const struct list_error * const first_error,
 	for (err = first_error; err; err = err->next) {
 		if (err->line == line_num) {
 			pd_off = snprintf (print_data, max_chars_on_line, "%s%s", err->prefix, err->msg);
+			if (pd_off == -1) {	/* snprintf returns -1 in MS and on HPUX if max is reached */
+				pd_off = max_chars_on_line;
+				print_data[max_chars_on_line - 1] = 0;
+			}
 			if (pd_off >= max_chars_on_line) {
 				/* trim on last space */
 				pd_off = strlen (print_data) - 1;
