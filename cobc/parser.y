@@ -2081,7 +2081,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token S
 %token SAME
 %token SCREEN
-%token SCREEN_CONTROL		"SCREEN-CONTROL"
+%token SCREEN_CONTROL		"SCREEN CONTROL"
 %token SCROLL
 %token SD
 %token SEARCH
@@ -2146,6 +2146,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TEST
 %token THAN
 %token THEN
+%token THEN_REPLACING
 %token THRU
 %token TIME
 %token TIME_OUT			"TIME-OUT"
@@ -4780,7 +4781,7 @@ _record_description_list:
 	description_field = NULL;
 	cb_clear_real_field ();
   }
-  record_description_list_2
+  record_description_list
   {
 	struct cb_field *p;
 
@@ -4791,9 +4792,9 @@ _record_description_list:
   }
 ;
 
-record_description_list_2:
+record_description_list:
   data_description TOK_DOT
-| record_description_list_2 data_description TOK_DOT
+| record_description_list data_description TOK_DOT
 ;
 
 data_description:
@@ -9046,30 +9047,30 @@ initialize_statement:
 ;
 
 initialize_body:
-  target_x_list initialize_filler initialize_value
-  initialize_replacing initialize_default
+  target_x_list _initialize_filler _initialize_value
+  _initialize_replacing _initialize_default
   {
 	cb_emit_initialize ($1, $2, $3, $4, $5);
   }
 ;
 
-initialize_filler:
+_initialize_filler:
   /* empty */			{ $$ = NULL; }
 | _with FILLER			{ $$ = cb_true; }
 ;
 
-initialize_value:
+_initialize_value:
   /* empty */			{ $$ = NULL; }
 | ALL _to VALUE			{ $$ = cb_true; }
 | initialize_category _to VALUE	{ $$ = $1; }
 ;
 
-initialize_replacing:
+_initialize_replacing:
   /* empty */
   {
 	$$ = NULL;
   }
-| REPLACING initialize_replacing_list
+| THEN_REPLACING initialize_replacing_list
   {
 	$$ = $2;
   }
@@ -9111,7 +9112,7 @@ initialize_category:
 */
 ;
 
-initialize_default:
+_initialize_default:
   /* empty */
   {
 	$$ = NULL;

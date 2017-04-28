@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
 
    This file is part of GnuCOBOL.
@@ -515,7 +515,7 @@ H#[0-9A-Za-z]* {
 
 "THEN"[ ,;\n]+"REPLACING"[ ,;\n] {
 	count_lines (yytext);
-	RETURN_TOK (REPLACING);
+	RETURN_TOK (THEN_REPLACING);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"TOP"[ ,;\n] |
