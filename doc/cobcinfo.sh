@@ -19,6 +19,24 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+# use GREP from configure, passed when called from Makefile
+GREP_ORIG="$GREP";
+if test "x$GREP" = "x"; then GREP=grep; fi
+
+# test for grep -A
+if test "$1" != "fixtimestamps"; then
+   $GREP -A2 test /dev/null 2>/dev/null
+   if test "$?" -ne 1; then
+      GREP=ggrep
+      $GREP -A2 test /dev/null 2>/dev/null
+      if test "$?" -ne 1; then
+         echo "error: grep not working, re-run with GREP=/path/to/gnu-grep"
+         echo "       GREP is currently \"$GREP_ORIG\""
+         exit 1
+      fi
+   fi
+fi
+
 
 # Make sure to source atconfig/atlocal before running this shell
 # to use the currently compiled version of cobc
@@ -61,7 +79,7 @@ _create_file () {
 		"cbconf.tex")
 			echo "@verbatim"               > $1
 			cat $confdir/default.conf \
-			| grep -A9999 "http://www.gnu.org/licenses/" \
+			| $GREP -A9999 "http://www.gnu.org/licenses/" \
 			| tail -n +2 \
 			                               >>$1
 			echo "@end verbatim"           >>$1
@@ -69,7 +87,7 @@ _create_file () {
 		"cbrunt.tex")
 			# First section, as it is formatted different
 			cat $confdir/runtime.cfg \
-			| grep -A400 -m1 "##" \
+			| $GREP -A400 -m1 "##" \
 			| cut -b2- \
 			| sed -e 's/^#\( .*\)/@section\1\n/g' \
 			      -e 's/^ //g' \

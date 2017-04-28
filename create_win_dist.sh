@@ -1,7 +1,7 @@
 #!/bin/sh
 # create_win_dist.sh gnucobol
 #
-# Copyright (C) 2016 Free Software Foundation, Inc.
+# Copyright (C) 2016-2017 Free Software Foundation, Inc.
 # Written by Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -46,15 +46,17 @@ fi
 
 
 # Create temporary folder as we don't want to change the EXTDISTDIR's content
-rm -r -f ./tmp/win-dist
-mkdir -p ./tmp/win-dist
+WINTMP=/tmp/win-dist-$(date +%s)
 
-cp -p -r --parents $EXTDISTDIR ./tmp/win-dist || exit 1
+rm -r -f $WINTMP
+mkdir $WINTMP
+
+cp -p -r --parents $EXTDISTDIR $WINTMP || exit 1
 
 # Add content only necessary for windows dist zip
-cp -p -r --parents $EXTSRCDIR/build_windows ./tmp/win-dist/$EXTDISTDIR || exit 2
+cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR || exit 2
 
-cd ./tmp/win-dist/$EXTDISTDIR || exit 3
+pushd $WINTMP/$EXTDISTDIR || exit 3
 
 # Remove content not necessary for windows dist zip --> breaks make dist[check]
 # rm -r -f m4
@@ -70,11 +72,18 @@ touch ./bin/cobcrun.1
 touch ./cobc/cobc.1
 touch ./cobc/ppparse.c
 touch ./cobc/parser.c
-touch ./cobc/pplex.c
-touch ./cobc/scanner.c
+#touch ./cobc/pplex.c
+#touch ./cobc/scanner.c
 #touch ./libcob/libcob.3
 
-cd .. # back in win-dist
+# bugfix for old _MSC versions that define __STDC_VERSION__ >= 199901L but don't work correct
+for file in ./cobc/pplex.c ./cobc/scanner.c; do
+# "sed -i" isn't supported on all systems --> maybe use sed && mv - do we actually want to care for this here?
+#	sed -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' \
+#	  $file > $file.tmp && mv -f $file.tmp $file
+	sed -i -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' $file
+done
+popd # back in win-dist
 
 
 # Create windows dist zip
@@ -82,6 +91,5 @@ rm -f $EXTDISTDIR"_win.zip"
 zip -rq ../../$EXTDISTDIR"_win.zip" $EXTDISTDIR
 
 # Remove temporary folder
-cd ../..
-rm -r -f ./tmp
+rm -r -f $WINTMP
 

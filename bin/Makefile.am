@@ -30,5 +30,5 @@ cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.l
 
 cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac
 	$(MAKE) $(AM_MAKEFLAGS) cobcrun$(EXEEXT)
-	help2man --output=cobcrun.1  --info-page=gnucobol ./cobcrun$(EXEEXT)
+	$(HELP2MAN) --output=cobcrun.1  --info-page=gnucobol ./cobcrun$(EXEEXT)
 

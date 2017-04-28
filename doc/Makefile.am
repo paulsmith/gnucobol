@@ -20,7 +20,7 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \
-	$(top_srcdir)/doc/cobcinfo.sh
+	GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
 info_TEXINFOS = gnucobol.texi
 gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
 	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi

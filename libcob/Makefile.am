@@ -32,7 +32,7 @@ AM_LDFLAGS = $(COB_FIX_LIB)
 
 #libcob.3: cobcrun.c $(top_srcdir)/configure.ac
 #	$(MAKE) $(AM_MAKEFLAGS) cobcrun$(EXEEXT)
-#	help2man --output=libcob.3  --info-page=gnucobol ./cobcrun$(EXEEXT)
+#	$(HELP2MAN) --output=libcob.3  --info-page=gnucobol ./cobcrun$(EXEEXT)
 
 EXTRA_DIST = coblocal.h system.def
 pkgincludedir = $(includedir)/libcob

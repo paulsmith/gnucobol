@@ -1,5 +1,11 @@
 NEWS - user visible changes				-*- outline -*-
 
+* build scripts:
+** removed maintainer mode - if files need a rebuild because of a change
+   they are always rebuild
+** help2man, bison and flex are checked during configure,
+   if they need to be invoked and are missing a useful error message is given
+
 * 20160813 GnuCOBOL 2.0rc1
 
 ** User Defined Functions

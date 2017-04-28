@@ -26,10 +26,10 @@ How to build in native Windows environments:
   https://sourceforge.net/projects/winflexbison/files/win_flex_bison-latest.zip
     set PATH=X:\path\to\winflexbison;%PATH%
     cd X:\path\to\gnu-cobol\cobc
-    win_flex -o pplex.c pplex.l
-    win_flex -o scanner.c scanner.l
+    win_flex  -o pplex.c   pplex.l
+    win_flex  -o scanner.c scanner.l
     win_bison -o ppparse.c ppparse.y
-    win_bison -o parser.c parser.y
+    win_bison -o parser.c  parser.y
   For convinience you can run makebisonflex.bat after setting the PATH which
   will check for the executables and invoke them.
 * compile with your environment, for example via IDE by opening the solution

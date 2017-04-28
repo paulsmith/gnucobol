@@ -2,7 +2,7 @@
 # Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -54,7 +54,6 @@ if echo $CFLAGS | grep 'aix64' 1>/dev/null 2>&1; then
 fi
 
 AM_INIT_AUTOMAKE([gnu no-texinfo.tex])
-AM_MAINTAINER_MODE
 
 # Autoheader templates
 AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
@@ -185,6 +184,10 @@ LT_INIT([dlopen win32-dll])
 
 AC_PROG_EGREP
 AM_PROG_CC_C_O
+
+AM_PROG_LEX
+AC_PROG_YACC
+
 # Stop tests for C++ and Fortran
 AC_DEFUN([AC_PROG_F77], [])
 AC_DEFUN([AC_PROG_CXX], [])
@@ -1292,6 +1295,8 @@ AC_CONFIG_COMMANDS([chmod],
 [chmod +x bin/cob-config;
 chmod +x tests/atconfig;
 chmod +x tests/atlocal])
+
+AM_MISSING_PROG([HELP2MAN], [help2man])
 
 AC_OUTPUT
 

@@ -22,6 +22,7 @@
 %option 8bit
 %option case-insensitive
 %option never-interactive
+%option nodefault
 
 %option noyy_scan_buffer
 %option noyy_scan_bytes

@@ -1,4 +1,9 @@
 
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ylwrap: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/ylwrap
+
 2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: updated to versions from automake 1.15

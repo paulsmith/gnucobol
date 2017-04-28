@@ -1,4 +1,9 @@
 
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: passed GREP from configure to cobcinfo.sh
+	* cobcinfo.sh: use GREP from configure, check for working grep -A
+
 2017-02-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* texinfo.tex: moved to ../build_aux
