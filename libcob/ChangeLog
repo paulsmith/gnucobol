@@ -1,13 +1,13 @@
 
+2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (set_value, get_value): using correcting format modifier
+	  for cob_s64_t (CB_FMT_LLD)
+
 2017-04-27  Sergey Kashyrin <ska@kiska.net>
 
-	* common.c: correcting config set_value/get_value
+	* common.c (set_value, get_value): changed type long to cob_s64_t
 	  as SORT was broken on Windows
-
-2017-04-25  Edward Hart <edward.dan.hart@gmail.com>
-
-	* common.h [!_MSC_VAR]: fixed not getting forward slash in directories
-	  with MinGW.
 
 2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

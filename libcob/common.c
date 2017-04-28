@@ -4544,15 +4544,16 @@ cob_expand_env_string (char *strval)
 	return str;
 }
 
-/* Store 'integer' value in field for correct length */
+/* Store 'integer' value in field for correct length (computed with sizeof (fieldtype)) */
 static void
 set_value (char *data, int len, cob_s64_t val)
 {
-	if(len == sizeof(short)) {
-		*(short *)data = (short)val;
-	} else if(len == sizeof(int)) {
+	/* keep in order of occurence in data types, last nanoseconds for startup... */
+	if (len == sizeof(int)) {
 		*(int *)data = (int)val;
-	} else if(len == sizeof(cob_s64_t)) {
+	} else if (len == sizeof(short)) {
+		*(short *)data = (short)val;
+	} else if (len == sizeof(cob_s64_t)) {
 		*(cob_s64_t *)data = val;
 	} else {
 		*data = (char)val;
@@ -4563,16 +4564,15 @@ set_value (char *data, int len, cob_s64_t val)
 static cob_s64_t
 get_value (char *data, int len)
 {
-	if(len == sizeof(short)) {
-		return *(short *)data;
-	}
-	if(len == sizeof(int)) {
+	if (len == sizeof(int)) {
 		return *(int *)data;
-	}
-	if(len == sizeof(cob_s64_t)) {
+	} else if (len == sizeof(short)) {
+		return *(short *)data;
+	} else if (len == sizeof(cob_s64_t)) {
 		return *(cob_s64_t *)data;
+	} else {
+		return *data;
 	}
-	return *data;
 }
 
 /* Set runtime setting with given value */
@@ -4765,28 +4765,28 @@ get_config_val (char *value, int pos, char *orgvalue)
 	strcpy(orgvalue,"");
 	if((data_type & ENV_INT)) {				/* Integer data */
 		numval = get_value(data, data_len);
-		sprintf(value,"%ld",numval);
+		sprintf(value,CB_FMT_LLD,numval);
 
 	} else if((data_type & ENV_SIZE)) {			/* Size: integer with K, M, G */
 		numval = get_value(data, data_len);
 		dval = (double) numval;
 		if(numval > (1024 * 1024 * 1024)) {
 			if((numval % (1024 * 1024 * 1024)) == 0)
-				sprintf(value,"%ld GB",numval/(1024 * 1024 * 1024));
+				sprintf(value,CB_FMT_LLD" GB",numval/(1024 * 1024 * 1024));
 			else
 				sprintf(value,"%.2f GB",dval/(1024.0 * 1024.0 * 1024.0));
 		} else if(numval > (1024 * 1024)) {
 			if((numval % (1024 * 1024)) == 0)
-				sprintf(value,"%ld MB",numval/(1024 * 1024));
+				sprintf(value,CB_FMT_LLD" MB",numval/(1024 * 1024));
 			else
 				sprintf(value,"%.2f MB",dval/(1024.0 * 1024.0));
 		} else if(numval > 1024) {
 			if((numval % 1024) == 0)
-				sprintf(value,"%ld KB",numval/1024);
+				sprintf(value,CB_FMT_LLD" KB",numval/1024);
 			else
 				sprintf(value,"%.2f KB",dval/1024.0);
 		} else {
-			sprintf(value,"%ld",numval);
+			sprintf(value,CB_FMT_LLD,numval);
 		}
 
 	} else if((data_type & ENV_BOOL)) {	/* Boolean: Yes/No,True/False,... */

@@ -532,7 +532,7 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define PATHSEP_CHAR (char) ':'
 #define PATHSEP_STR (char *) ":"
 #endif
-#if    	!defined(_WIN32) || defined(__MINGW32__)
+#ifndef	_WIN32 /* note: needs to be \ for MinGW, needed for cobc -j */
 #define SLASH_CHAR	(char) '/'
 #define SLASH_STR	(char *) "/"
 #else
