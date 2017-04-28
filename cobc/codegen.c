@@ -8416,7 +8416,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	/* entry convention */
 	l = CB_PURPOSE (CB_VALUE (entry));
-	if (!l || !(CB_INTEGER (l) || CB_NUMERIC_LITERAL_P (l))) {
+	if (!l || !(CB_INTEGER_P (l) || CB_NUMERIC_LITERAL_P (l))) {
 		/* not translated as it is an unlikely internal abort, remove the check later */
 		cobc_err_msg ("Missing/wrong internal entry convention!");
 		cobc_err_msg (_("Please report this!"));
