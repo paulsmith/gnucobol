@@ -109,6 +109,9 @@
 /* Define to 1 if you have the `fdatasync' function. */
 #undef HAVE_FDATASYNC
 
+/* Declaration of isfinite function in math.h */
+#undef HAVE_ISFINITE
+
 /* Declaration of finite function in ieeefp.h instead of math.h */
 #undef HAVE_FINITE_IEEEFP_H
 

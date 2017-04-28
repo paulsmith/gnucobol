@@ -91,6 +91,7 @@ AH_TEMPLATE([HAVE_USE_LEGACY_CODING], [ncurses has use_legacy_coding function])
 AH_TEMPLATE([HAVE_DESIGNATED_INITS], [Has designated initializers])
 AH_TEMPLATE([HAVE_NANO_SLEEP], [Has nanosleep function])
 AH_TEMPLATE([HAVE_CLOCK_GETTIME], [Has clock_gettime function and CLOCK_REALTIME])
+AH_TEMPLATE([HAVE_ISFINITE], [Has isfinite function])
 AH_TEMPLATE([HAVE_MP_GET_MEMORY_FUNCTIONS], [Do we have mp_get_memory_functions in gmp])
 #AH_TEMPLATE([HAVE_RAISE], [Has raise function])
 AH_TEMPLATE([HAVE_FINITE_IEEEFP_H],
@@ -567,6 +568,12 @@ AC_MSG_CHECKING([for clock_gettime and CLOCK_REALTIME])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
   [[clock_gettime (CLOCK_REALTIME, NULL);]])],
   [AC_DEFINE([HAVE_CLOCK_GETTIME], [1]) AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([for isfinite ])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]],
+  [[isfinite ( 1.0 );]])],
+  [AC_DEFINE([HAVE_ISFINITE], [1]) AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
 # Check for raise (optional) --> done via AC_CHECK_FUNCS

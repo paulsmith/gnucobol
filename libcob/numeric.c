@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2015 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -848,7 +848,7 @@ cob_decimal_set_double (cob_decimal *d, const double v)
 
 	memset (&t1, ' ', sizeof(t1));
 	ud.d1 = v;
-	if (ud.l1 == 0 || ud.l1 == t1 || !finite (v)) {
+	if (ud.l1 == 0 || ud.l1 == t1 || !ISFINITE (v)) {
 		mpz_set_ui (d->value, 0UL);
 		d->scale = 0;
 		return;
@@ -913,7 +913,7 @@ cob_decimal_get_double (cob_decimal *d)
 	}
 
 	v = mpf_get_d (cob_mpft);
-	if (!finite (v)) {
+	if (!ISFINITE (v)) {
 		v = 0.0;
 	}
 	return v;

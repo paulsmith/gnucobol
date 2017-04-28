@@ -2253,10 +2253,10 @@ cob_is_numeric (const cob_field *f)
 		return 1;
 	case COB_TYPE_NUMERIC_FLOAT:
 		memcpy (&fval.fpf, f->data, sizeof(float));
-		return !finite ((double)fval.fpf);
+		return !ISFINITE ((double)fval.fpf);
 	case COB_TYPE_NUMERIC_DOUBLE:
 		memcpy (&fval.fpd, f->data, sizeof(double));
-		return !finite (fval.fpd);
+		return !ISFINITE (fval.fpd);
 	case COB_TYPE_NUMERIC_PACKED:
 		/* Check digits */
 		for (i = 0; i < f->size - 1; ++i) {
