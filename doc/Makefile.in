@@ -478,7 +478,7 @@ $(srcdir)/gnucobol.info: gnucobol.texi $(srcdir)/version.texi $(gnucobol_TEXINFO
 gnucobol.dvi: gnucobol.texi $(srcdir)/version.texi $(gnucobol_TEXINFOS)
 gnucobol.pdf: gnucobol.texi $(srcdir)/version.texi $(gnucobol_TEXINFOS)
 gnucobol.html: gnucobol.texi $(srcdir)/version.texi $(gnucobol_TEXINFOS)
-$(srcdir)/version.texi: @MAINTAINER_MODE_TRUE@ $(srcdir)/stamp-vti
+$(srcdir)/version.texi:  $(srcdir)/stamp-vti
 $(srcdir)/stamp-vti: gnucobol.texi $(top_srcdir)/configure
 	@(dir=.; test -f ./gnucobol.texi || dir=$(srcdir); \
 	set `$(SHELL) $(top_srcdir)/build_aux/mdate-sh $$dir/gnucobol.texi`; \
@@ -497,7 +497,7 @@ mostlyclean-vti:
 	-rm -f vti.tmp* $(srcdir)/version.texi.tmp*
 
 maintainer-clean-vti:
-@MAINTAINER_MODE_TRUE@	-rm -f $(srcdir)/stamp-vti $(srcdir)/version.texi
+	-rm -f $(srcdir)/stamp-vti $(srcdir)/version.texi
 .dvi.ps:
 	$(AM_V_DVIPS)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	$(DVIPS) $(AM_V_texinfo) -o $@ $<

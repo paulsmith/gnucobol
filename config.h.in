@@ -109,9 +109,6 @@
 /* Define to 1 if you have the `fdatasync' function. */
 #undef HAVE_FDATASYNC
 
-/* Declaration of isfinite function in math.h */
-#undef HAVE_ISFINITE
-
 /* Declaration of finite function in ieeefp.h instead of math.h */
 #undef HAVE_FINITE_IEEEFP_H
 
@@ -135,6 +132,9 @@
 
 /* Define to 1 if you have the <isam.h> header file. */
 #undef HAVE_ISAM_H
+
+/* Has isfinite function */
+#undef HAVE_ISFINITE
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 #undef HAVE_LANGINFO_CODESET
