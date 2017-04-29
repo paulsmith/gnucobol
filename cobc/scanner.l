@@ -516,7 +516,7 @@ H#[0-9A-Za-z]* {
 
 "THEN"[ ,;\n]+"REPLACING"[ ,;\n] {
 	count_lines (yytext);
-	RETURN_TOK (THEN_REPLACING);
+	RETURN_TOK (REPLACING);
 }
 
 "LINES"[ ,;\n]+"AT"[ ,;\n]+"TOP"[ ,;\n] |

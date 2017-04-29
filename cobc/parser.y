@@ -2146,7 +2146,6 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TEST
 %token THAN
 %token THEN
-%token THEN_REPLACING
 %token THRU
 %token TIME
 %token TIME_OUT			"TIME-OUT"
@@ -9070,7 +9069,7 @@ _initialize_replacing:
   {
 	$$ = NULL;
   }
-| THEN_REPLACING initialize_replacing_list
+| REPLACING initialize_replacing_list
   {
 	$$ = $2;
   }
