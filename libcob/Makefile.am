@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/libcob
 #
-# Copyright (C) 2003-2012, 2014 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014, 2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -24,15 +24,15 @@ libcob_la_SOURCES = common.c move.c numeric.c strings.c \
 	fileio.c call.c intrinsic.c termio.c screenio.c cobgetopt.c
 #ToDo Man Page
 #dist_man_MANS = libcob.3
+#COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 
 libcob_la_CFLAGS = $(AM_CFLAGS) -I$(top_srcdir)
 libcob_la_LIBADD = $(LIBCOB_LIBS)
 libcob_la_LDFLAGS = $(COB_FIX_LIBTOOL) -version-info 4:0:0 -no-undefined
 AM_LDFLAGS = $(COB_FIX_LIB)
 
-#libcob.3: cobcrun.c $(top_srcdir)/configure.ac
-#	$(MAKE) $(AM_MAKEFLAGS) cobcrun$(EXEEXT)
-#	$(HELP2MAN) --output=libcob.3  --info-page=gnucobol ./cobcrun$(EXEEXT)
+#libcob.3: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac | $(COBCRUN)
+#	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN) -specialflag
 
 EXTRA_DIST = coblocal.h system.def
 pkgincludedir = $(includedir)/libcob

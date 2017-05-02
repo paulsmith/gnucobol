@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/bin
 #
-# Copyright (C) 2001-2012, 2014 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014, 2017 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -23,12 +23,12 @@ bin_SCRIPTS = cob-config
 bin_PROGRAMS = cobcrun
 cobcrun_SOURCES = cobcrun.c
 dist_man_MANS = cobcrun.1
+#COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)
 cobcrun_CFLAGS = $(AM_CFLAGS) -I$(top_srcdir)
 cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la
 
-cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac
-	$(MAKE) $(AM_MAKEFLAGS) cobcrun$(EXEEXT)
-	$(HELP2MAN) --output=cobcrun.1  --info-page=gnucobol ./cobcrun$(EXEEXT)
+cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  $(COBCRUN)
+	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)
 

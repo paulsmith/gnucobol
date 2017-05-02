@@ -30,10 +30,10 @@ cobc_CFLAGS = -I$(top_srcdir)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a
 
 dist_man_MANS = cobc.1
+COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
 
-cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac
-	$(MAKE) $(AM_MAKEFLAGS) cobc$(EXEEXT)
-	$(HELP2MAN) --output=cobc.1  --info-page=gnucobol ./cobc$(EXEEXT)
+cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)
+	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)
 
 BUILT_SOURCES = pplex.c scanner.c
 EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
