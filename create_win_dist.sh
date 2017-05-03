@@ -56,7 +56,8 @@ cp -p -r --parents $EXTDISTDIR $WINTMP || exit 1
 # Add content only necessary for windows dist zip
 cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR || exit 2
 
-pushd $WINTMP/$EXTDISTDIR || exit 3
+olddir=$(pwd)
+cd $WINTMP/$EXTDISTDIR || exit 3
 
 # Remove content not necessary for windows dist zip --> breaks make dist[check]
 # rm -r -f m4
@@ -83,7 +84,7 @@ for file in ./cobc/pplex.c ./cobc/scanner.c; do
 #	  $file > $file.tmp && mv -f $file.tmp $file
 	sed -i -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' $file
 done
-popd # back in win-dist
+cd $olddir # back in win-dist
 
 
 # Create windows dist zip
