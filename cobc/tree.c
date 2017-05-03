@@ -1784,16 +1784,18 @@ cb_build_numeric_literal (int sign, const void *data, const int scale)
 {
 	struct cb_literal *p;
 	cb_tree			l;
-	const char	*data_ptr = data;
+	/* using an intermediate char pointer for pointer arithmetic */
+	const char	*data_chr_ptr = data;
 
-	if (*data_ptr == '-') {
+	if (*data_chr_ptr == '-') {
 		sign = -1;
-		data_ptr++;
-	} else if (*data_ptr == '+') {
+		data_chr_ptr++;
+	} else if (*data_chr_ptr == '+') {
 		sign = 1;
-		data_ptr++;
+		data_chr_ptr++;
 	}
-	p = build_literal (CB_CATEGORY_NUMERIC, data_ptr, strlen (data));
+	data = data_chr_ptr;
+	p = build_literal (CB_CATEGORY_NUMERIC, data, strlen (data));
 	p->sign = (short)sign;
 	p->scale = scale;
 
