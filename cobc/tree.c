@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -26,6 +27,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
+#include <errno.h>
 #include <limits.h>
 #ifndef LLONG_MAX
 #ifdef LONG_LONG_MAX
@@ -38,6 +41,7 @@
 #error compiler misses maximum for 64bit integer
 #endif
 #endif
+
 
 #include "cobc.h"
 #include "tree.h"
@@ -1774,11 +1778,18 @@ cb_build_system_name (const enum cb_system_name_category category, const int tok
 /* Literal */
 
 cb_tree
-cb_build_numeric_literal (const int sign, const void *data, const int scale)
+cb_build_numeric_literal (int sign, const void *data, const int scale)
 {
 	struct cb_literal *p;
 	cb_tree			l;
 
+	if (*(char*)data == '-') {
+		sign = -1;
+		data++;
+	} else if (*(char*)data == '+') {
+		sign = 1;
+		data++;
+	}
 	p = build_literal (CB_CATEGORY_NUMERIC, data, strlen (data));
 	p->sign = (short)sign;
 	p->scale = scale;
@@ -1887,6 +1898,19 @@ cb_build_decimal (const int id)
 	struct cb_decimal *p;
 
 	p = make_tree (CB_TAG_DECIMAL, CB_CATEGORY_NUMERIC,
+		       sizeof (struct cb_decimal));
+	p->id = id;
+	return CB_TREE (p);
+}
+
+/* Decimal Literal */
+
+cb_tree
+cb_build_decimal_literal (const int id)
+{
+	struct cb_decimal *p;
+
+	p = make_tree (CB_TAG_DECIMAL_LITERAL, CB_CATEGORY_NUMERIC,
 		       sizeof (struct cb_decimal));
 	p->id = id;
 	return CB_TREE (p);
@@ -3531,7 +3555,13 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 {
 	struct cb_binary_op	*p;
 	enum cb_category	category = CB_CATEGORY_UNKNOWN;
+	cob_s64_t		xval,yval,rslt;
+	char			result[48];
+	int			i,j,xscale,yscale,rscale;
+	struct cb_literal *xl, *yl;
+	cb_tree				relop;
 
+	relop = cb_any;
 	switch (op) {
 	case '+':
 	case '-':
@@ -3548,6 +3578,104 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		y = cb_check_numeric_value (y);
 		if (x == cb_error_node || y == cb_error_node) {
 			return cb_error_node;
+		}
+		/*
+		 * If this is an operation between two simple integer numerics
+		 * then resolve the value here at compile time
+		 */
+		if (CB_NUMERIC_LITERAL_P(x) 
+		&&  CB_NUMERIC_LITERAL_P(y)) {
+			xl = (void*)x;
+			yl = (void*)y;
+
+			if(xl->llit == 0
+			&& xl->size - xl->scale >= 0
+			&& yl->llit == 0
+			&& yl->size - yl->scale >= 0
+			&& xl->all == 0
+			&& yl->all == 0) {
+				xval = atoll((const char*)xl->data);
+				if(xl->sign == -1) xval = -xval;
+				yval = atoll((const char*)yl->data);
+				if(yl->sign == -1) yval = -yval;
+				xscale = xl->scale;
+				yscale = yl->scale;
+				rscale = 0;
+				rslt = 0;
+				if (op == '+' || op == '-') {
+					while (xscale < yscale) {
+						xval = xval * 10;
+						xscale++;
+					}
+					while (xscale > yscale) {
+						yval = yval * 10;
+						yscale++;
+					}
+					rscale = xscale;
+					if (op == '+')
+						rslt = xval + yval;
+					else
+						rslt = xval - yval;
+				} else if (op == '*') {
+					rscale = xscale + yscale;
+					rslt = xval * yval;
+				} else if (op == '/' && yval != 0) {
+					while (yscale > 0) {
+						xval = xval * 10;
+						yscale--;
+					}
+					rscale = xscale;
+					if((xval % yval) == 0) {
+						rslt = xval / yval;
+					}
+				}
+				while (rscale > 0
+				    && rslt != 0
+				    && (rslt % 10) == 0) {
+					rslt = rslt / 10;
+					rscale--;
+				}
+				switch(op) {
+				case '+':
+				case '-':
+				case '*':
+					sprintf(result, CB_FMT_LLD, rslt);
+					return cb_build_numeric_literal (0, result, rscale);
+					break;
+				case '/':
+					if(yval == 0) {				/* Avoid Divide by ZERO */
+						cb_warning_x (COBC_WARN_FILLER, x, _("Divide by constant ZERO"));
+						break;
+					}
+					if(rslt != 0) {
+						sprintf(result, CB_FMT_LLD, rslt);
+						return cb_build_numeric_literal (0, result, rscale);
+					}
+					if (xl->scale != 0 || yl->scale != 0)
+						break;
+					if((xval % yval) == 0) {
+						sprintf(result, CB_FMT_LLD, xval / yval);
+						return cb_build_numeric_literal (0, result, rscale);
+					}
+					break;
+				case '^':
+					if (xl->scale != 0 || yl->scale != 0)
+						break;
+					if(yval == 0
+					|| xval == 1) {
+						strcpy(result,"1");
+					} else {
+						errno = 0;
+						sprintf (result, CB_FMT_LLD, (cob_s64_t)pow((double)xval,(double)yval));
+						if (errno != 0)	/* 'pow' raised some error */ {
+							break;
+						}
+					}
+					return cb_build_numeric_literal (0, result, 0);
+				default:
+					break;
+				}
+			}
 		}
 		category = CB_CATEGORY_NUMERIC;
 		break;
@@ -3569,7 +3697,183 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			cb_error_x (y, _("invalid expression"));
 			return cb_error_node;
 		}
-		category = CB_CATEGORY_BOOLEAN;
+		xl = (void*)x;
+		yl = (void*)y;
+		if (CB_REF_OR_FIELD_P (y)
+		&&  CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
+		&&  !CB_FIELD (cb_ref (y))->flag_any_length
+		&&  CB_FIELD (cb_ref (y))->pic
+		&&  CB_FIELD (cb_ref (y))->pic->scale == 0
+		&&  CB_LITERAL_P(x) 
+		&&  xl->all == 0
+		&&  xl->scale == 0) {
+			for(i = strlen((const char *)xl->data); i>0 && xl->data[i-1] == ' '; i--);
+			if(CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC
+			|| CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+				for(j=0; xl->data[j] == '0'; j++,i--);
+			}
+			if (i > CB_FIELD (cb_ref (y))->size) {
+				cb_warning_x (cb_warn_constant_expr, y, _("literal is longer than field"));
+				switch(op) {
+				case '=':
+					relop = cb_false;
+					break;
+				case '~':
+					relop = cb_true;
+					break;
+				}
+			}
+		} else
+		if (CB_REF_OR_FIELD_P (x)
+		&&  CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
+		&&  !CB_FIELD (cb_ref (x))->flag_any_length
+		&&  CB_FIELD (cb_ref (x))->pic
+		&&  CB_FIELD (cb_ref (x))->pic->scale == 0
+		&&  CB_LITERAL_P(y)
+		&&  yl->all == 0
+		&&  yl->scale == 0) {
+			for(i = strlen((const char *)yl->data); i>0 && yl->data[i-1] == ' '; i--)
+			if(CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
+			|| CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+				for(j=0; yl->data[j] == '0'; j++,i--);
+			}
+			if (i > CB_FIELD (cb_ref (x))->size) {
+				cb_warning_x (cb_warn_constant_expr, x, _("literal is longer than field"));
+				switch(op) {
+				case '=':
+					relop = cb_false;
+					break;
+				case '~':
+					relop = cb_true;
+					break;
+				}
+			}
+		} else
+		/*
+		 * If this is an operation between two simple integer numerics
+		 * then resolve the value here at compile time
+		 */
+		if (CB_NUMERIC_LITERAL_P(x) 
+		&&  CB_NUMERIC_LITERAL_P(y)) {
+			xl = (void*)x;
+			yl = (void*)y;
+			if(xl->llit == 0
+			&& xl->scale == 0
+			&& yl->llit == 0
+			&& yl->scale == 0
+			&& xl->sign == 0
+			&& yl->sign == 0
+			&& xl->all == 0
+			&& yl->all == 0) {
+				xval = atoll((const char*)xl->data);
+				yval = atoll((const char*)yl->data);
+				switch(op) {
+				case '=':
+					if(xval == yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				case '~':
+					if(xval != yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				case '>':
+					if(xval > yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				case '<':
+					if(xval < yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				case ']':
+					if(xval >= yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				case '[':
+					if(xval <= yval)
+						relop = cb_true;
+					else
+						relop = cb_false;
+					break;
+				default:
+					/* never happens */
+					break;
+				}
+			}
+		} else
+		/*
+		 * If this is an operation between two literal strings 
+		 * then resolve the value here at compile time
+		 */
+		if (CB_LITERAL_P(x) 
+		&&  CB_LITERAL_P(y)
+		&& !CB_NUMERIC_LITERAL_P(x) 
+		&& !CB_NUMERIC_LITERAL_P(y)) {
+			xl = (void*)x;
+			yl = (void*)y;
+			for(i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
+				if(xl->data[i] != yl->data[j])
+					break;
+			}
+			if(xl->data[i] == 0
+			&& yl->data[j] == ' ') {
+				while(yl->data[j] == ' ') j++;
+			} else
+			if(xl->data[i] == ' '
+			&& yl->data[j] == 0) {
+				while(xl->data[i] == ' ') i++;
+			}
+			switch(op) {
+			case '=':
+				if(xl->data[i] == yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			case '~':
+				if(xl->data[i] != yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			case '>':
+				if(xl->data[i] > yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			case '<':
+				if(xl->data[i] < yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			case ']':
+				if(xl->data[i] >= yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			case '[':
+				if(xl->data[i] <= yl->data[j])
+					relop = cb_true;
+				else
+					relop = cb_false;
+				break;
+			default:
+				/* never happens */
+				break;
+			}
+		}
 		break;
 
 	case '!':
@@ -3580,6 +3884,21 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		    (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
 			cb_error_x (x, _("invalid expression"));
 			return cb_error_node;
+		}
+		if((x == cb_true || x == cb_false)
+		&& (y == cb_true || y == cb_false)) {
+			if(op == '&') {
+				if(x == cb_true && y == cb_true)
+					relop = cb_true;
+				else
+					relop = cb_false;
+			} else
+			if(op == '|') {
+				if(x == cb_true || y == cb_true)
+					relop = cb_true;
+				else
+					relop = cb_false;
+			}
 		}
 		category = CB_CATEGORY_BOOLEAN;
 		break;
@@ -3592,6 +3911,17 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	default:
 		cobc_err_msg (_("unexpected operator: %d"), op);
 		COBC_ABORT ();
+	}
+
+	if (relop == cb_true) {
+		cb_warning_x (cb_warn_constant_expr, x, _("expression is always TRUE"));
+		category = CB_CATEGORY_BOOLEAN;
+		return cb_true;
+	}
+	if (relop == cb_false) {
+		cb_warning_x (cb_warn_constant_expr, x, _("expression is always FALSE"));
+		category = CB_CATEGORY_BOOLEAN;
+		return cb_false;
 	}
 
 	p = make_tree (CB_TAG_BINARY_OP, category, sizeof (struct cb_binary_op));

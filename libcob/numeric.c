@@ -324,6 +324,15 @@ cob_decimal_init (cob_decimal *d)
 	d->scale = 0;
 }
 
+void
+cob_decimal_clear (cob_decimal *d)
+{
+	if (d) {
+		mpz_clear (d->value);
+		d->scale = 0;
+	}
+}
+
 /** setting a decimal field from an unsigned binary long int */
 void
 cob_decimal_set_ullint (cob_decimal *d, const cob_u64_t n)

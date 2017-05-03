@@ -72,6 +72,9 @@ CB_WARNDEF (cb_warn_prototypes, "prototypes",
 CB_NOWARNDEF (cb_warn_call_params, "call-params",
 	    _("warn non 01/77 items for CALL params"))
 
+CB_WARNDEF (cb_warn_constant_expr, "constant-expression",
+	    _("warn expressions that always resolve to true/false"))
+
 CB_NOWARNDEF (cb_warn_column_overflow, "column-overflow",
 	    _("warn text after program-text area, FIXED format"))
 

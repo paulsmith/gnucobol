@@ -22,6 +22,38 @@
 AT_SETUP([ambiguous AND/OR])
 AT_KEYWORDS([misc expression])
 
+# Note: we use variables here as constants would be resolved before the warning
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 ONE   PIC 9 VALUE 1.
+       01 TWO   PIC 9 VALUE 2.
+       01 THREE PIC 9 VALUE 3.
+       PROCEDURE        DIVISION.
+           IF THREE = ONE AND TWO OR THREE
+               DISPLAY "OK"
+               END-DISPLAY
+           END-IF.
+           IF THREE = ONE OR TWO AND THREE
+               DISPLAY "NO"
+               END-DISPLAY
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 11: warning: suggest parentheses around AND within OR
+prog.cob: 15: warning: suggest parentheses around AND within OR
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([warn constant expressions])
+AT_KEYWORDS([misc expression])
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -37,10 +69,102 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 6: warning: suggest parentheses around AND within OR
-prog.cob: 10: warning: suggest parentheses around AND within OR
+# FIXME positions broken
+AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
+[prog.cob: 5: warning: expression is always FALSE
+prog.cob: 5: warning: expression is always FALSE
+prog.cob: 6: warning: expression is always FALSE
+prog.cob: 5: warning: expression is always TRUE
+prog.cob: 6: warning: expression is always TRUE
+prog.cob: 9: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always TRUE
+prog.cob: 10: warning: expression is always FALSE
+prog.cob: 10: warning: expression is always FALSE
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([warn literal size])
+AT_KEYWORDS([numeric constant expresssio])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-LINE-NUMBER PIC 9(3) VALUE ZERO.
+       01 WS-NUMBER      PIC 9(3)V99 VALUE ZERO.
+       01 WS-TEXT        PIC X(5) VALUE 'CAT'.
+       78 CONST1         VALUE 'CAT     '.
+       01 CONST2         CONSTANT AS 00000001234.
+       PROCEDURE DIVISION.
+       IF WS-LINE-NUMBER > '123'
+          CONTINUE.
+       IF WS-TEXT > 'DOGGY'
+          CONTINUE.
+       IF WS-NUMBER > 123.999
+          CONTINUE.
+       IF WS-LINE-NUMBER > 1234
+          CONTINUE.
+       IF WS-LINE-NUMBER > '1234'
+          CONTINUE.
+       IF WS-TEXT > 'DOGGY++'
+          CONTINUE.
+       IF WS-TEXT > 3141596
+          CONTINUE.
+       IF 'DOG+CAT' NOT = WS-TEXT
+          CONTINUE.
+       IF WS-TEXT = 'CAT+DOG'
+          CONTINUE.
+       EVALUATE TRUE
+          WHEN 'DOG+CAT' = WS-TEXT
+             CONTINUE
+          WHEN CONST1 = 'CAT+DOG'
+             CONTINUE
+          WHEN CONST1 = 'CAT'
+             CONTINUE
+          WHEN CONST2 = 1234
+             CONTINUE
+       END-EVALUATE
+       STOP RUN RETURNING 0.
+])
+
+#AT_CHECK([$COMPILE prog.cob], [0], [],
+#AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+#[prog.cob: 18: warning: literal is longer than field
+#prog.cob: 20: warning: literal is longer than field
+#prog.cob: 22: warning: literal is longer than field
+#prog.cob: 24: warning: literal is longer than field
+#prog.cob: 26: warning: literal is longer than field
+#prog.cob: 26: warning: expression is always TRUE
+#prog.cob: 28: warning: literal is longer than field
+#prog.cob: 28: warning: expression is always FALSE
+#prog.cob: 31: warning: literal is longer than field
+#prog.cob: 31: warning: expression is always FALSE
+#prog.cob: 33: warning: expression is always FALSE
+#prog.cob: 35: warning: expression is always TRUE
+#prog.cob: 37: warning: expression is always TRUE
+#])
+#FIXME - positions broken !!!
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 18: warning: literal is longer than field
+prog.cob: 20: warning: literal is longer than field
+prog.cob: 22: warning: literal is longer than field
+prog.cob: 24: warning: literal is longer than field
+prog.cob: 26: warning: literal is longer than field
+prog.cob: 26: warning: expression is always TRUE
+prog.cob: 28: warning: literal is longer than field
+prog.cob: 28: warning: expression is always FALSE
+prog.cob: 31: warning: literal is longer than field
+prog.cob: 31: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always TRUE
+prog.cob: 10: warning: expression is always TRUE
+])
+
+#AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 

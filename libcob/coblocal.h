@@ -36,6 +36,7 @@
 #define ISFINITE finite
 #endif
 #if	defined(_MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__)
+
 #include <float.h>
 #undef ISFINITE
 #define	ISFINITE		_finite

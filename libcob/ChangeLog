@@ -223,6 +223,10 @@
 	* common.h: re-fixed COB_ONCE for MSC
 	* system.def: replaced octal by hex strings for hex-system routines
 
+2016-09-19  Ron Norman <rjn@inglenet.com>
+
+	* numeric.c: added cob_decimal_clear
+
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h: added cob_flags_t typedef for variables made of bit flags.

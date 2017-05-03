@@ -31,6 +31,8 @@
 #define CB_PREFIX_BASE		"b_"	/* Base address (unsigned char *) */
 #define CB_PREFIX_CONST		"c_"	/* Constant or literal (cob_field) */
 #define CB_PREFIX_DECIMAL	"d_"	/* Decimal number (cob_decimal) */
+#define CB_PREFIX_DEC_FIELD	"kc_"	/* Decimal Constant for literal (cob_field) */
+#define CB_PREFIX_DEC_CONST	"dc_"	/* Decimal Contant (cob_decimal) */
 #define CB_PREFIX_FIELD		"f_"	/* Field (cob_field) */
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
 #define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
@@ -102,7 +104,8 @@ enum cb_tag {
 	CB_TAG_DEBUG,		/* 35 Debug item set */
 	CB_TAG_DEBUG_CALL,	/* 36 Debug callback */
 	CB_TAG_PROGRAM,		/* 37 Program */
-	CB_TAG_PROTOTYPE	/* 38 Prototype */
+	CB_TAG_PROTOTYPE,	/* 38 Prototype */
+	CB_TAG_DECIMAL_LITERAL	/* 39 Decimal Literal */
 };
 
 /* Alphabet type */
@@ -1505,6 +1508,8 @@ extern cb_tree			cb_concat_literals (const cb_tree,
 						    const cb_tree);
 
 extern cb_tree			cb_build_decimal (const int);
+extern cb_tree			cb_build_decimal_literal (const int);
+extern int 			cb_lookup_literal (cb_tree x, int make_decimal);
 
 extern cb_tree			cb_build_picture (const char *);
 extern cb_tree			cb_build_comment (const char *);

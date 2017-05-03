@@ -3426,10 +3426,17 @@ decimal_expand (cb_tree d, cb_tree x)
 		 * OP d, t */
 		p = CB_BINARY_OP (x);
 		decimal_expand (d, p->x);
-		t = decimal_alloc ();
-		decimal_expand (t, p->y);
-		decimal_compute (p->op, d, t);
-		decimal_free ();
+
+		if (CB_TREE_TAG (p->y) == CB_TAG_LITERAL
+		&&  CB_TREE_CATEGORY (p->y) == CB_CATEGORY_NUMERIC) {
+			t = cb_build_decimal_literal (cb_lookup_literal(p->y,1));
+			decimal_compute (p->op, d, t);
+		} else {
+			t = decimal_alloc ();
+			decimal_expand (t, p->y);
+			decimal_compute (p->op, d, t);
+			decimal_free ();
+		}
 		break;
 	case CB_TAG_INTRINSIC:
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));

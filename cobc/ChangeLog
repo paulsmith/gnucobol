@@ -1,4 +1,9 @@
 
+2017-05-01  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: improved resolving constant expressions at compile time:
+	  now handles cases with decimal constants, too
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: using builtin rule for bison and cleaned rule for
@@ -93,6 +98,10 @@
 
 	* cobc.c: Changed symbol listing indentation and added redefines clause
 	  to symbol listing.
+
+2017-03-19  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: fixed emission of decimal constants to go into  program.c.h
 
 2017-03-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -702,6 +711,11 @@
 	* reserved.c (lookup_reserved_word): changed to allow context-sensitive
 	  words to be activated by different words.
 
+2016-09-19  Ron Norman <rjn@inglenet.com>
+
+	* codgen.c, tree.c, tree.h:  added code to optimize handling of
+	  'decimal constants' in expressions
+
 2016-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_validate_program_data): moved check for record depending
@@ -1260,6 +1274,20 @@
 2016-05-15 Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: correct process_run return code for systems with WEXITSTATUS
+
+2016-05-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* warning.def, tree.c: added cb_warn_constant_expr for warnings added
+	  by Ron Norman on 2016-05-01
+	* tree.c: resolve the value at compile time if literal size differs
+	  and checks are for = or !=
+
+2016-05-01  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: for binary (arithmetic & relational) operations between integer constants
+	  resolve the value at compile time and reduce the expression down to the
+	  computed value
+	* tree.c Also, added checks to validate resolving contant expressions
 
 2016-04-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

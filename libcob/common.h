@@ -316,11 +316,19 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 /* remark: _putenv_s always overwrites, add a check for overwrite = 1 if necessary later*/
 #define setenv(name,value,overwrite)	_putenv_s(name,value)
 #define unsetenv(name)					_putenv_s(name,"")
+#if COB_USE_VC2013_OR_GREATER
 /* only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
 #define tzname			_tzname
 #define daylight		_daylight
 /* only usable with COB_USE_VC2013_OR_GREATER - End */
+#else
+#define atoll			atoi64
+#endif
+
+#if !COB_USE_VC2013_OR_GREATER
+#define atoll			_atoi64
+#endif
 
 #define __attribute__(x)
 
@@ -1567,6 +1575,7 @@ COB_EXPIMP void		cob_put_pointer(void *val, void *cbldata);
 /* Functions in numeric.c */
 
 COB_EXPIMP void	cob_decimal_init	(cob_decimal *);
+COB_EXPIMP void	cob_decimal_clear	(cob_decimal *);
 COB_EXPIMP void cob_decimal_set_llint	(cob_decimal *, const cob_s64_t);
 COB_EXPIMP void cob_decimal_set_ullint	(cob_decimal *, const cob_u64_t);
 COB_EXPIMP void	cob_decimal_set_field	(cob_decimal *, cob_field *);

@@ -168,7 +168,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -Wno-constant-expression prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [OK], [])
 
 AT_CLEANUP
@@ -287,7 +287,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -Wno-constant-expression prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
@@ -2608,7 +2608,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -flarger-redefines-ok prog.cob], [0], [],
+AT_CHECK([$COMPILE -flarger-redefines-ok -Wno-constant-expression prog.cob], [0], [],
 [prog.cob: 12: warning: size of 'XMAIN0502' larger than size of 'XMAIN0501'
 prog.cob: 21: warning: size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
 prog.cob: 23: warning: size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'
