@@ -1495,7 +1495,7 @@ extern cb_tree			cb_build_class_name (cb_tree, cb_tree);
 
 extern cb_tree			cb_build_locale_name (cb_tree, cb_tree);
 
-extern cb_tree			cb_build_numeric_literal (const int,
+extern cb_tree			cb_build_numeric_literal (int,
 							  const void *,
 							  const int);
 extern cb_tree			cb_build_alphanumeric_literal (const void *,

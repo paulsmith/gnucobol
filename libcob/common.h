@@ -322,8 +322,6 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define tzname			_tzname
 #define daylight		_daylight
 /* only usable with COB_USE_VC2013_OR_GREATER - End */
-#else
-#define atoll			atoi64
 #endif
 
 #if !COB_USE_VC2013_OR_GREATER
