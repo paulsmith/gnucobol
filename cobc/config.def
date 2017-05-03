@@ -104,6 +104,9 @@ CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
 CB_CONFIG_BOOLEAN (cb_arithmetic_osvs, "arithmetic-osvs",
 	_("limit precision in intermediate results to precision of final result (less accurate)"))
 
+CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",
+	_("MOVE operates as on IBM (left to right, byte by byte)"))
+
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 

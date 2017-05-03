@@ -1154,6 +1154,20 @@ cob_move_all (cob_field *src, cob_field *dst)
 	cob_free (p);
 }
 
+/*
+ * Move data the same way as 'MVC' instruction on IBM works, 
+ * left to right, byte by byte
+ */
+void
+cob_move_ibm (void *dst, void *src, const int len)
+{
+	char	*dest = dst;
+	char	*srce = src;
+	int	i;
+	for(i=0; i < len; i++)
+		dest[i] = srce[i];
+}
+
 void
 cob_move (cob_field *src, cob_field *dst)
 {

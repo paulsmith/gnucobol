@@ -5810,7 +5810,7 @@ UBIN: 00000001 is :1111:
 AT_CLEANUP
 
 
-AT_SETUP([Default Arithmetic Test])
+AT_SETUP([Default Arithmetic])
 AT_KEYWORDS([Runtime])
 
 AT_DATA([prog.cob], [
@@ -5914,7 +5914,7 @@ Not Using ARITHMETIC-OSVS
 AT_CLEANUP
 
 
-AT_SETUP([OSVS Arithmetic Test])
+AT_SETUP([OSVS Arithmetic])
 AT_KEYWORDS([Runtime])
 
 AT_DATA([prog.cob], [
@@ -5992,8 +5992,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -farithmetic-osvs prog.cob], [0], [],
-[prog.cob: In paragraph 'MAIN':
-prog.cob: 15: warning: precision of result may change with arithmetic-osvs
+[prog.cob: in paragraph 'MAIN':
 prog.cob: 17: warning: precision of result may change with arithmetic-osvs
 prog.cob: 19: warning: precision of result may change with arithmetic-osvs
 prog.cob: 21: warning: precision of result may change with arithmetic-osvs

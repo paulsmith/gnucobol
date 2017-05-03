@@ -6640,6 +6640,9 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		dr = NULL;
 	}
 
+	if (cb_move_ibm) 		/* This MOVE result is exactly as on IBM */
+		return 0;
+
 	/* Check for identical field */
 	if (src_f == dst_f) {
 		if (!sr || !dr) {
@@ -7374,7 +7377,13 @@ cb_build_move_copy (cb_tree src, cb_tree dst)
 	if (size == 1) {
 		return CB_BUILD_FUNCALL_2 ("$F", dst, src);
 	}
-	if (overlapping
+	if (cb_move_ibm) {
+		overlapping = 0;
+		return CB_BUILD_FUNCALL_3 ("cob_move_ibm",
+					   CB_BUILD_CAST_ADDRESS (dst),
+					   CB_BUILD_CAST_ADDRESS (src),
+					   CB_BUILD_CAST_LENGTH (dst));
+	} else if (overlapping 
 	|| CB_FIELD_PTR (src)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (dst)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (src)->flag_item_based

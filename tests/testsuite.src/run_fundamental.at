@@ -687,6 +687,87 @@ AT_CHECK([./prog2], [0],
 AT_CLEANUP
 
 
+AT_SETUP([Overlapping MOVE])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTMOV1 PIC X(479).
+         05  TSTMOV2 PIC X(10).
+       PROCEDURE DIVISION.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (2:9) TO TSTMOV2 (1:9)
+           IF TSTMOV2 NOT = "1234567899"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (1:8) TO TSTMOV2 (2:8)
+           IF TSTMOV2 = "0000000009"
+              DISPLAY "IBM style MOVE: " TSTMOV2
+           ELSE IF TSTMOV2 NOT = "0012345679"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 11: warning: overlapping MOVE may produce unpredictable results
+prog.cob: 17: warning: overlapping MOVE may produce unpredictable results
+])
+
+AT_CHECK([./prog], [0],
+[  OK with MOVE: 1234567899
+  OK with MOVE: 0012345679
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([IBM MOVE])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTMOV1 PIC X(479).
+         05  TSTMOV2 PIC X(10).
+       PROCEDURE DIVISION.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (2:9) TO TSTMOV2 (1:9)
+           IF TSTMOV2 NOT = "1234567899"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           MOVE "0123456789" TO TSTMOV2.
+           MOVE TSTMOV2 (1:8) TO TSTMOV2 (2:8)
+           IF TSTMOV2 = "0000000009"
+              DISPLAY "IBM style MOVE: " TSTMOV2
+           ELSE IF TSTMOV2 NOT = "0012345679"
+              DISPLAY "  PROBLEM MOVE: " TSTMOV2
+           ELSE
+              DISPLAY "  OK with MOVE: " TSTMOV2.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0],
+[  OK with MOVE: 1234567899
+IBM style MOVE: 0000000009
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([ALPHABETIC test])
 AT_KEYWORDS([fundamental])
 
