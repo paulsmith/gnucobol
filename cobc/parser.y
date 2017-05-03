@@ -2285,7 +2285,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %nonassoc NOT_END END
 %nonassoc NOT_EOP EOP
 %nonassoc NOT_INVALID_KEY INVALID_KEY
-%nonassoc NOT_OVERFLOW OVERFLOW TOK_OVERFLOW
+%nonassoc NOT_OVERFLOW TOK_OVERFLOW
 %nonassoc NOT_SIZE_ERROR SIZE_ERROR
 %nonassoc NOT_EXCEPTION EXCEPTION NOT_ESCAPE ESCAPE
 %nonassoc NO_DATA DATA
