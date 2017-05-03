@@ -216,7 +216,7 @@ am__uninstall_files_from_dir = { \
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(gnucobol_TEXINFOS) $(srcdir)/Makefile.in \
 	$(top_srcdir)/build_aux/mdate-sh \
-	$(top_srcdir)/build_aux/mkinstalldirs ChangeLog mdate-sh
+	$(top_srcdir)/build_aux/mkinstalldirs ChangeLog
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@

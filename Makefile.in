@@ -228,9 +228,9 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	COPYING COPYING.DOC COPYING.LESSER ChangeLog INSTALL NEWS \
 	README THANKS TODO build_aux/ChangeLog build_aux/compile \
 	build_aux/config.guess build_aux/config.rpath \
-	build_aux/config.sub build_aux/depcomp build_aux/install-sh \
-	build_aux/ltmain.sh build_aux/mdate-sh build_aux/missing \
-	build_aux/mkinstalldirs build_aux/texinfo.tex build_aux/ylwrap
+	build_aux/config.sub build_aux/install-sh build_aux/ltmain.sh \
+	build_aux/mdate-sh build_aux/missing build_aux/mkinstalldirs \
+	build_aux/texinfo.tex build_aux/ylwrap
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
