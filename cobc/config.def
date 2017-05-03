@@ -101,8 +101,11 @@ CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
 	_("exit point of any currently executing perform is recognized if reached"))
 
+CB_CONFIG_BOOLEAN (cb_arithmetic_osvs, "arithmetic-osvs",
+	_("limit precision in intermediate results to precision of final result (less accurate)"))
+
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
-	_("linkage-section items remain allocated between invocations"))
+	_("LINKAGE-SECTION items remain allocated between invocations"))
 
 CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
 	_("allow non-matching level numbers"))

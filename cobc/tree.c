@@ -151,6 +151,7 @@ cb_tree cb_int2;
 cb_tree cb_int3;
 cb_tree cb_int4;
 cb_tree cb_int5;
+cb_tree cb_int6;
 cb_tree cb_i[COB_MAX_SUBSCRIPTS];
 cb_tree cb_error_node;
 
@@ -1349,6 +1350,7 @@ cb_init_constants (void)
 	cb_int3 = cb_int (3);
 	cb_int4 = cb_int (4);
 	cb_int5 = cb_int (5);
+	cb_int6 = cb_int (6);
 	for (i = 0; i < COB_MAX_SUBSCRIPTS; i++) {
 		cb_i[i] = make_constant (CB_CATEGORY_NUMERIC, cb_const_subs[i]);
 	}

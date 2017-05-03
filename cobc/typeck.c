@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -98,6 +99,9 @@ static cb_tree			inspect_data;
 
 static int			expr_op;		/* Last operator */
 static cb_tree			expr_lh;		/* Last left hand */
+static int			expr_dmax = -1;		/* Max scale for expression result */
+static int			expr_line = 0;		/* Line holding expression for warnings */
+static cb_tree			expr_rslt = NULL;	/* Expression result */
 
 static size_t			initialized = 0;
 static size_t			overlapping = 0;
@@ -3333,7 +3337,8 @@ decimal_free (void)
 static void
 decimal_compute (const int op, cb_tree x, cb_tree y)
 {
-	const char *func;
+	const char	*func;
+	cb_tree		expr_dec = NULL;	/* Int value for decimal_align */
 
 	switch (op) {
 	case '+':
@@ -3356,6 +3361,42 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		COBC_ABORT ();
 	}
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
+
+	if (expr_dmax >= 0) {
+		switch(expr_dmax) {
+		case 0:
+			expr_dec = cb_int0;
+			break;
+		case 1:
+			expr_dec = cb_int1;
+			break;
+		case 2:
+			expr_dec = cb_int2;
+			break;
+		case 3:
+			expr_dec = cb_int3;
+			break;
+		case 4:
+			expr_dec = cb_int4;
+			break;
+		case 5:
+			expr_dec = cb_int5;
+			break;
+		case 6:
+			expr_dec = cb_int6;
+			break;
+		default:
+			expr_dec = cb_int(expr_dmax);
+			break;
+		}
+		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_align", x, expr_dec));
+		if (cb_warn_arithmetic_osvs
+		&&  expr_line != cb_source_line) {
+			expr_line = cb_source_line;
+			cb_warning_x (cb_warn_arithmetic_osvs, expr_rslt,
+				_("precision of result may change with arithmetic-osvs"));
+		}
+	}
 }
 
 static void
@@ -3501,11 +3542,28 @@ cb_build_div (cb_tree v, cb_tree n, cb_tree round_opt)
 static cb_tree
 build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 {
+	struct cb_field	*f;
 	cb_tree	l;
 	cb_tree	t;
 	cb_tree	s1;
 	cb_tree	s2;
 	cb_tree	d;
+
+	if(cb_arithmetic_osvs) {
+		/* ARITHMETIC-OSVS: Determine largest scale used in result field */
+		expr_dmax = -1;
+		expr_rslt = CB_VALUE(vars);
+		for (l = vars; l; l = CB_CHAIN (l)) {
+			if (CB_FIELD_P (cb_ref (CB_VALUE(l)))) {
+				f = CB_FIELD_PTR (CB_VALUE(l));
+				if(f->pic->scale > expr_dmax) {
+					expr_dmax = f->pic->scale;
+				}
+			}
+		}
+	} else {
+		expr_dmax = -1;
+	}
 
 	d = decimal_alloc ();
 
@@ -3547,6 +3605,7 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 	}
 
 	decimal_free ();
+	expr_dmax = -1;
 
 	return s1;
 }
@@ -3826,6 +3885,44 @@ cb_chk_alpha_cond (cb_tree x)
 	return 1;
 }
 
+static void
+cb_walk_cond (cb_tree x)
+{
+	struct cb_binary_op	*p;
+	struct cb_field		*f;
+
+	if (x == NULL)
+		return;
+
+	switch (CB_TREE_TAG (x)) {
+	case CB_TAG_REFERENCE:
+		if (!CB_FIELD_P (cb_ref (x))) {
+			return;
+		}
+
+		f = CB_FIELD_PTR (x);
+
+		if (f->level == 88) {
+			return ;
+		}
+		if(f->pic
+		&& f->pic->scale > expr_dmax) {
+			expr_dmax = f->pic->scale;
+		}
+
+		break;
+
+	case CB_TAG_BINARY_OP:
+		p = CB_BINARY_OP (x);
+		cb_walk_cond (p->x);
+		cb_walk_cond (p->y);
+		break;
+
+	default:
+		return;
+	}
+}
+
 cb_tree
 cb_build_cond (cb_tree x)
 {
@@ -3839,6 +3936,17 @@ cb_build_cond (cb_tree x)
 	if (x == cb_error_node) {
 		return cb_error_node;
 	}
+
+	if(cb_arithmetic_osvs) {
+		/* ARITHMETIC-OSVS: Determine largest scale used in condition */
+		if (expr_dmax == -1) {
+			expr_rslt = CB_VALUE(x);
+			cb_walk_cond (x);
+		}
+	} else {
+		expr_dmax = -1;
+	}
+
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
 		if (x != cb_any && x != cb_true && x != cb_false) {
@@ -3882,12 +3990,13 @@ cb_build_cond (cb_tree x)
 			if (!p->y || p->y == cb_error_node) {
 				return cb_error_node;
 			}
-			if (CB_INDEX_P (p->x) || CB_INDEX_P (p->y) ||
-			    CB_TREE_CLASS (p->x) == CB_CLASS_POINTER ||
-			    CB_TREE_CLASS (p->y) == CB_CLASS_POINTER) {
+			if (CB_INDEX_P (p->x) 
+			||  CB_INDEX_P (p->y) 
+			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER 
+			||  CB_TREE_CLASS (p->y) == CB_CLASS_POINTER) {
 				x = cb_build_binary_op (p->x, '-', p->y);
-			} else if (CB_BINARY_OP_P (p->x) ||
-				   CB_BINARY_OP_P (p->y)) {
+			} else if (CB_BINARY_OP_P (p->x) 
+				|| CB_BINARY_OP_P (p->y)) {
 				/* Decimal comparison */
 				d1 = decimal_alloc ();
 				d2 = decimal_alloc ();
@@ -3961,6 +4070,13 @@ cb_build_cond (cb_tree x)
 	}
 	cb_error_x (x, _("invalid expression"));
 	return cb_error_node;
+}
+
+/* Reset at end of emiting code for condition */
+void
+cb_end_cond (void)
+{
+	expr_dmax = -1;
 }
 
 /* ADD/SUBTRACT CORRESPONDING */

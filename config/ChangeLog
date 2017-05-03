@@ -21,6 +21,10 @@
 
 	* general: feature-request #179 added reference-out-of-declaratives option
 
+2016-10-13  Ron Norman <rjn@inglenet.com>
+
+	* general: added arithmetic-osvs option
+
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added no-echo-means-secure option

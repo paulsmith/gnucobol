@@ -1586,6 +1586,7 @@ COB_EXPIMP void	cob_decimal_mul		(cob_decimal *, cob_decimal *);
 COB_EXPIMP void	cob_decimal_div		(cob_decimal *, cob_decimal *);
 COB_EXPIMP void	cob_decimal_pow		(cob_decimal *, cob_decimal *);
 COB_EXPIMP int	cob_decimal_cmp		(cob_decimal *, cob_decimal *);
+COB_EXPIMP void	cob_decimal_align(cob_decimal *, const int);
 
 COB_EXPIMP void	cob_add			(cob_field *, cob_field *, const int);
 COB_EXPIMP void	cob_sub			(cob_field *, cob_field *, const int);

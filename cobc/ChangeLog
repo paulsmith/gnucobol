@@ -3,6 +3,8 @@
 
 	* tree.c: improved resolving constant expressions at compile time:
 	  now handles cases with decimal constants, too
+	* parser.y, typeck.c, tree.h: Implement arithmetic-osvs for conditions;
+	  compute intermediate results to precision of variables used in expression
 
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -661,6 +663,11 @@
 2016-10-08  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.c: let reserved and not-reserved accept comma-separated lists
+
+2016-10-13  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c, config.def: added code for 'arithmetic-osvs' option
+	  which computes intermediate results similar to IBM OSVS & MVS
 
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 

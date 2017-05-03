@@ -1459,6 +1459,7 @@ extern cb_tree			cb_int2;
 extern cb_tree			cb_int3;
 extern cb_tree			cb_int4;
 extern cb_tree			cb_int5;
+extern cb_tree			cb_int6;
 extern cb_tree			cb_i[COB_MAX_SUBSCRIPTS];
 extern cb_tree			cb_error_node;
 
@@ -1737,6 +1738,7 @@ extern void		cb_validate_program_body (struct cb_program *);
 
 extern cb_tree		cb_build_expr (cb_tree);
 extern cb_tree		cb_build_cond (cb_tree);
+extern void		cb_end_cond (void);
 
 extern void		cb_emit_arithmetic (cb_tree, const int, cb_tree);
 extern cb_tree		cb_build_add (cb_tree, cb_tree, cb_tree);

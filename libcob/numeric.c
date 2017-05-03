@@ -1949,6 +1949,20 @@ cob_decimal_cmp (cob_decimal *d1, cob_decimal *d2)
 	return mpz_cmp (d1->value, d2->value);
 }
 
+/*
+ * Shift 'd1' to have same scale as 'd2'
+ */
+void
+cob_decimal_align (cob_decimal *d1, const int scale)
+{
+	if (d1->scale > scale) {
+		shift_decimal (d1, scale - d1->scale);
+	} else if (d1->scale < scale) {
+		shift_decimal (d1, d1->scale - scale);
+	}
+	return;
+}
+
 /* Convenience functions */
 
 void

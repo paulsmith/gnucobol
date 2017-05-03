@@ -5809,3 +5809,229 @@ UBIN: 00000001 is :1111:
 
 AT_CLEANUP
 
+
+AT_SETUP([Default Arithmetic Test])
+AT_KEYWORDS([Runtime])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 NUM-A   PIC 9(3) VALUE 399.
+       01 NUM-B   PIC 9(3) VALUE 211.
+       01 NUM-C   PIC 9(3)V99 VALUE 212.34.
+       01 NUMV1   PIC 9(3)V9.
+       01 PICX    PIC X VALUE 'A'.
+       01 RSLT    PIC 9(3).
+       01 RSLTV1  PIC 9(3).9.
+       01 RSLTV2  PIC 9(3).99.
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           COMPUTE RSLT = NUM-A + 1.1.
+           DISPLAY 'Simple Compute  RSLT IS ' RSLT
+           COMPUTE RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Single Variable RSLT IS ' RSLT
+           COMPUTE RSLTV2, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Compute  RSLT    IS ' RSLT
+           DISPLAY 'Compute  RSLTv99 IS ' RSLTV2
+           COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Compute  RSLT    IS ' RSLT
+           DISPLAY 'Compute  RSLTv9  IS ' RSLTV1
+           MOVE 0 TO RSLT 
+           ADD NUM-C TO RSLT.
+           DISPLAY 'Add      RSLT    IS ' RSLT.
+           MOVE 0 TO RSLT 
+           ADD NUM-A NUM-C 10 TO RSLT.
+           DISPLAY 'Add      RSLT    IS ' RSLT.
+           SUBTRACT NUM-C FROM RSLT.
+           DISPLAY 'Subtract RSLT    IS ' RSLT.
+           SUBTRACT NUM-A -10 FROM RSLT.
+           DISPLAY 'Subtract RSLT    IS ' RSLT.
+           MOVE 0 TO RSLT 
+           ADD NUM-A NUM-C TO RSLT GIVING RSLTV1.
+           DISPLAY 'Add      RSLTv9  IS ' RSLTV1
+           MULTIPLY NUM-A BY NUM-C GIVING RSLT.
+           DISPLAY 'Multiply RSLT    IS ' RSLT.
+           MULTIPLY RSLT BY NUM-C.
+           DISPLAY 'Multiply RSLT    IS ' RSLT.
+           DIVIDE NUM-A BY 10 GIVING RSLT.
+           DISPLAY 'Divide   RSLT    IS ' RSLT.
+           DIVIDE RSLT BY 4 GIVING RSLTV1.
+           DISPLAY 'Divide   RSLTv9  IS ' RSLTV1.
+           DIVIDE RSLT BY 4 GIVING RSLT.
+           DISPLAY 'Divide   RSLT    IS ' RSLT.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Simple   RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550)) 
+                                -  (NUM-B / (10.11 * 10 - 1.1)))
+                                  * (220 / 2.2)
+           DISPLAY 'Complex  RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1)) 
+                                -  (NUM-B / (10 * 10))) * (200 / 2)
+           DISPLAY 'Reduced  RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+           MOVE NUM-A TO NUMV1.
+           IF ((NUMV1 / (101 - 1)) 
+              -  (NUM-B / (10 * 10))) * (200 / 2) EQUAL 188
+              DISPLAY "Not Using ARITHMETIC-OSVS" 
+           ELSE
+              DISPLAY "Using ARITHMETIC-OSVS" 
+           END-IF.
+           STOP RUN.
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0],
+[Simple Compute  RSLT IS 400
+Single Variable RSLT IS 188
+Compute  RSLT    IS 188
+Compute  RSLTv99 IS 188.00
+Compute  RSLT    IS 188
+Compute  RSLTv9  IS 188.0
+Add      RSLT    IS 212
+Add      RSLT    IS 621
+Subtract RSLT    IS 408
+Subtract RSLT    IS 019
+Add      RSLTv9  IS 611.3
+Multiply RSLT    IS 723
+Multiply RSLT    IS 723
+Divide   RSLT    IS 039
+Divide   RSLTv9  IS 009.7
+Divide   RSLT    IS 009
+Simple   RSLT    IS 188 RSLTv9  IS 188.0
+Complex  RSLT    IS 188 RSLTv9  IS 188.0
+Reduced  RSLT    IS 188 RSLTv9  IS 188.0
+Not Using ARITHMETIC-OSVS
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([OSVS Arithmetic Test])
+AT_KEYWORDS([Runtime])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 NUM-A   PIC 9(3) VALUE 399.
+       01 NUM-B   PIC 9(3) VALUE 211.
+       01 NUM-C   PIC 9(3)V99 VALUE 212.34.
+       01 NUMV1   PIC 9(3)V9.
+       01 PICX    PIC X VALUE 'A'.
+       01 RSLT    PIC 9(3).
+       01 RSLTV1  PIC 9(3).9.
+       01 RSLTV2  PIC 9(3).99.
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           COMPUTE RSLT = NUM-A + 1.1.
+           DISPLAY 'Simple Compute  RSLT IS ' RSLT
+           COMPUTE RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Single Variable RSLT IS ' RSLT
+           COMPUTE RSLTV2, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Compute  RSLT    IS ' RSLT
+           DISPLAY 'Compute  RSLTv99 IS ' RSLTV2
+           COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Compute  RSLT    IS ' RSLT
+           DISPLAY 'Compute  RSLTv9  IS ' RSLTV1
+           MOVE 0 TO RSLT 
+           ADD NUM-C TO RSLT.
+           DISPLAY 'Add      RSLT    IS ' RSLT.
+           MOVE 0 TO RSLT 
+           ADD NUM-A NUM-C 10 TO RSLT.
+           DISPLAY 'Add      RSLT    IS ' RSLT.
+           SUBTRACT NUM-C FROM RSLT.
+           DISPLAY 'Subtract RSLT    IS ' RSLT.
+           SUBTRACT NUM-A -10 FROM RSLT.
+           DISPLAY 'Subtract RSLT    IS ' RSLT.
+           MOVE 0 TO RSLT 
+           ADD NUM-A NUM-C TO RSLT GIVING RSLTV1.
+           DISPLAY 'Add      RSLTv9  IS ' RSLTV1
+           MULTIPLY NUM-A BY NUM-C GIVING RSLT.
+           DISPLAY 'Multiply RSLT    IS ' RSLT.
+           MULTIPLY RSLT BY NUM-C.
+           DISPLAY 'Multiply RSLT    IS ' RSLT.
+           DIVIDE NUM-A BY 10 GIVING RSLT.
+           DISPLAY 'Divide   RSLT    IS ' RSLT.
+           DIVIDE RSLT BY 4 GIVING RSLTV1.
+           DISPLAY 'Divide   RSLTv9  IS ' RSLTV1.
+           DIVIDE RSLT BY 4 GIVING RSLT.
+           DISPLAY 'Divide   RSLT    IS ' RSLT.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
+           DISPLAY 'Simple   RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550)) 
+                                -  (NUM-B / (10.11 * 10 - 1.1)))
+                                  * (220 / 2.2)
+           DISPLAY 'Complex  RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1)) 
+                                -  (NUM-B / (10 * 10))) * (200 / 2)
+           DISPLAY 'Reduced  RSLT    IS ' RSLT
+                           ' RSLTv9  IS ' RSLTV1.
+           MOVE NUM-A TO NUMV1.
+           IF ((NUMV1 / (101 - 1)) 
+              -  (NUM-B / (10 * 10))) * (200 / 2) EQUAL 188
+              DISPLAY "Not Using ARITHMETIC-OSVS" 
+           ELSE
+              DISPLAY "Using ARITHMETIC-OSVS" 
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -farithmetic-osvs prog.cob], [0], [],
+[prog.cob: In paragraph 'MAIN':
+prog.cob: 15: warning: precision of result may change with arithmetic-osvs
+prog.cob: 17: warning: precision of result may change with arithmetic-osvs
+prog.cob: 19: warning: precision of result may change with arithmetic-osvs
+prog.cob: 21: warning: precision of result may change with arithmetic-osvs
+prog.cob: 24: warning: precision of result may change with arithmetic-osvs
+prog.cob: 31: warning: precision of result may change with arithmetic-osvs
+prog.cob: 35: warning: precision of result may change with arithmetic-osvs
+prog.cob: 38: warning: precision of result may change with arithmetic-osvs
+prog.cob: 40: warning: precision of result may change with arithmetic-osvs
+prog.cob: 44: warning: precision of result may change with arithmetic-osvs
+prog.cob: 46: warning: precision of result may change with arithmetic-osvs
+prog.cob: 48: warning: precision of result may change with arithmetic-osvs
+prog.cob: 51: warning: precision of result may change with arithmetic-osvs
+prog.cob: 55: warning: precision of result may change with arithmetic-osvs
+prog.cob: 61: warning: precision of result may change with arithmetic-osvs
+prog.cob: 67: warning: precision of result may change with arithmetic-osvs
+])
+
+AT_CHECK([./prog], [0],
+[Simple Compute  RSLT IS 400
+Single Variable RSLT IS 100
+Compute  RSLT    IS 188
+Compute  RSLTv99 IS 188.00
+Compute  RSLT    IS 180
+Compute  RSLTv9  IS 180.0
+Add      RSLT    IS 212
+Add      RSLT    IS 621
+Subtract RSLT    IS 408
+Subtract RSLT    IS 019
+Add      RSLTv9  IS 611.3
+Multiply RSLT    IS 723
+Multiply RSLT    IS 723
+Divide   RSLT    IS 039
+Divide   RSLTv9  IS 009.7
+Divide   RSLT    IS 009
+Simple   RSLT    IS 180 RSLTv9  IS 180.0
+Complex  RSLT    IS 180 RSLTv9  IS 180.0
+Reduced  RSLT    IS 180 RSLTv9  IS 180.0
+Using ARITHMETIC-OSVS
+], [])
+
+AT_CLEANUP
