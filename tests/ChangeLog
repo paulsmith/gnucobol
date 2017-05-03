@@ -1,8 +1,8 @@
 
 2017-05-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* testsuite.src/listings.sed: simplified (more likely to run in
-	  exotic environments)
+	* listings-sed.sh: simplified (more likely to run in non GNU/Linux
+	  environments)
 
 2017-04-25  Brian Tiffin <btiffin@gnu.org>
 
@@ -82,7 +82,7 @@
 	* testsuite.at: added cobcrun to tested programs
 	* atlocal_win: changes for allowing test of Windows binaries with
 	  WSL / Bash on Windows
-	* testsuite.src/listings.sed: adjustment for optional package suffixes
+	* listings-sed.sh: adjustment for optional package suffixes
 
 2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
