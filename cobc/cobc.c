@@ -234,6 +234,7 @@ int			errorcount = 0;
 int			warningcount = 0;
 int			exit_option = 0;
 int			warningopt = 0;
+int			fatal_errors_flag = 0;
 int			no_physical_cancel = 0;
 int			cb_source_line = 0;
 int			cb_saveargc = 0;
@@ -487,7 +488,7 @@ static const struct option long_options[] = {
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
-	{"no-symbols", 		CB_NO_ARG, NULL, '@'},
+	{"no-symbols", 		CB_NO_ARG, &cb_no_symbols, 1},
 
 #define	CB_FLAG(var,pdok,name,doc)			\
 	{"f"name,		CB_NO_ARG, &var, 1},	\
@@ -517,13 +518,13 @@ static const struct option long_options[] = {
 #define	CB_CONFIG_SUPPORT(var,name,doc)		\
 	{"f"name,		CB_RQ_ARG, NULL, '%'},
 #include "config.def"
-	{"freserved",	CB_RQ_ARG, NULL, '%'},
-	{"fnot-reserved",	CB_RQ_ARG, NULL, '%'},
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
 #undef	CB_CONFIG_STRING
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
+	{"freserved",	CB_RQ_ARG, NULL, '%'},
+	{"fnot-reserved",	CB_RQ_ARG, NULL, '%'},
 
 #define	CB_WARNDEF(var,name,doc)			\
 	{"W"name,		CB_NO_ARG, &var, 1},	\
@@ -538,6 +539,8 @@ static const struct option long_options[] = {
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+	{"Wfatal-errors",	CB_NO_ARG, &fatal_errors_flag, 1},
+	{"Wno-fatal-errors",	CB_NO_ARG, &fatal_errors_flag, 0},
 
 	{NULL,			0, NULL, 0}
 };
@@ -1782,9 +1785,13 @@ cobc_abort_msg (void)
 DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
+	/* note we returned 99 for aborts earlier but autotest will
+	   "recognize" status 99 as failure (you cannot "expect" the return 99 */ 
+	const int ret_code = 97;
+
 	cobc_abort_msg ();
-	cobc_clean_up (99);
-	exit (99);
+	cobc_clean_up (ret_code);
+	exit (ret_code);
 }
 
 static void
@@ -2661,12 +2668,7 @@ process_command_line (const int argc, char **argv)
 
 		case '*':
 			/* --tlines=nn : Lines per page */
-			cb_lines_per_page = atoi(cob_optarg);
-			break;
-
-		case '@':
-			/* --no-symbols : No symbols in listing */
-			cb_no_symbols = 1;
+			cb_lines_per_page = atoi (cob_optarg);
 			break;
 
 		case 'P':
@@ -2850,6 +2852,15 @@ process_command_line (const int argc, char **argv)
 			cb_default_byte = n;
 			break;
 
+		case 7:
+			/* -fmax-errors=<xx> : maximum errors until abort */
+			n = cobc_deciph_optarg (cob_optarg, 0);
+			if (n < 0 || n > 99999) {
+				cobc_err_exit (COBC_INV_PAR, "-max-errors");
+			}
+			cb_max_errors = n;
+			break;
+
 		case 10:
 			/* -fintrinsics=<xx> : Intrinsic name or ALL */
 			cobc_deciph_funcs (cob_optarg);
@@ -2958,6 +2969,16 @@ process_command_line (const int argc, char **argv)
 	}
 #endif
 
+	if (list_reserved) {
+		cb_list_reserved ();
+	}
+
+	/* Exit if list options were specified */
+	if (exit_option) {
+		cobc_free_mem ();
+		exit (0);
+	}
+
 	/* Set active warnings to errors, if requested */
 	if (error_all_warnings) {
 #define CB_CHECK_WARNING(var)  \
@@ -2973,15 +2994,8 @@ process_command_line (const int argc, char **argv)
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 	}
-
-	if (list_reserved) {
-		cb_list_reserved ();
-	}
-
-	/* Exit if list options were specified */
-	if (exit_option) {
-		cobc_free_mem ();
-		exit (0);
+	if (fatal_errors_flag) {
+		cb_max_errors = 0;
 	}
 
 	/* debug: Turn on all exception conditions */

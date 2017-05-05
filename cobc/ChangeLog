@@ -6,6 +6,17 @@
 	* parser.y, typeck.c, tree.h: Implement arithmetic-osvs for conditions;
 	  compute intermediate results to precision of variables used in expression
 
+2017-04-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, error.c, flag.def: added -fmax-errors / cb_max_errors
+	  for early/late aborting depending on number of errors, defaulting
+	  to the old value: 100
+	* cobc.c: added -W[no-]fatal-errors for aborting on first error
+	  note: this option takes precedence over -fmax-errors
+	* cobc.c: return 97 for aborts, not 99 as autotest recognizes 99
+	  as hard failure and we may want to check for aborts
+	* cobc.c: simplified --no-symbols option handling
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: using builtin rule for bison and cleaned rule for

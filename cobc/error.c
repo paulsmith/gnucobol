@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -186,7 +186,7 @@ cb_warning (int pref, const char *fmt, ...)
 		return;
 	}
 	if (pref == COBC_WARN_AS_ERROR) {
-		if (++errorcount > 100) {
+		if (++errorcount > cb_max_errors) {
 			cobc_too_many_errors ();
 		}
 	} else {
@@ -210,7 +210,7 @@ cb_error (const char *fmt, ...)
 	if (sav_lst_file) {
 		return;
 	}
-	if (++errorcount > 100) {
+	if (++errorcount > cb_max_errors) {
 		cobc_too_many_errors ();
 	}
 }
@@ -228,7 +228,10 @@ cb_perror (const int config_error, const char *fmt, ...)
 	print_error (NULL, 0, "", fmt, ap);
 	va_end (ap);
 
-	++errorcount;
+
+	if (++errorcount > cb_max_errors) {
+		cobc_too_many_errors ();
+	}
 }
 
 /* Warning/error for pplex.l input routine */
@@ -254,7 +257,7 @@ cb_plex_warning (int pref, const size_t sline, const char *fmt, ...)
 		return;
 	}
 	if (pref == COBC_WARN_AS_ERROR) {
-		if (++errorcount > 100) {
+		if (++errorcount > cb_max_errors) {
 			cobc_too_many_errors ();
 		}
 	} else {
@@ -274,7 +277,7 @@ cb_plex_error (const size_t sline, const char *fmt, ...)
 	if (sav_lst_file) {
 		return;
 	}
-	if (++errorcount > 100) {
+	if (++errorcount > cb_max_errors) {
 		cobc_too_many_errors ();
 	}
 }
@@ -391,7 +394,10 @@ configuration_error (const char *fname, const int line,
 	if (sav_lst_file) {
 		return;
 	}
-	errorcount++;
+
+	if (++errorcount > cb_max_errors) {
+		cobc_too_many_errors ();
+	}
 }
 
 /* Generic warning/error routines */
@@ -414,7 +420,7 @@ cb_warning_x (int pref, cb_tree x, const char *fmt, ...)
 		return;
 	}
 	if (pref == COBC_WARN_AS_ERROR) {
-		if (++errorcount > 100) {
+		if (++errorcount > cb_max_errors) {
 			cobc_too_many_errors ();
 		}
 	} else {
@@ -434,7 +440,7 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	if (sav_lst_file) {
 		return;
 	}
-	if (++errorcount > 100) {
+	if (++errorcount > cb_max_errors) {
 		cobc_too_many_errors ();
 	}
 }

@@ -1110,7 +1110,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Error/Warning messages])
-AT_KEYWORDS([listing])
+AT_KEYWORDS([listing error warning])
 
 AT_CAPTURE_FILE([prog.lst])
 
@@ -1435,6 +1435,53 @@ prog.cob: 11: warning: numeric value is expected
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -fmax-errors=0 prog.cob], [97], [],
+[prog.cob: 7: error: CRUD.CPY: No such file or directory
+cobc: too many errors
+cobc: aborting compile of prog.cob at line 7 (unknown: unknown)
+])
+
+AT_DATA([prog17.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         01 TEST-VAR PIC 9(2) VALUE 12.
+000007         COPY 'CRUD.CPY'.
+error: CRUD.CPY: No such file or directory
+000008         PROCEDURE        DIVISION.
+000009             DISPLAY TEST-VAR NO ADVANCING
+000010             END-DISPLAY
+000011             MOVE 'AA' TO TEST-VAR
+000012             DISPLAY TEST-VAR NO ADVANCING
+000013             END-DISPLAY
+000014             STOP RUN.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+00002 NUMERIC        01   TEST-VAR                       9(2)
+
+
+
+Error/Warning summary:
+
+prog.cob: 7: error: CRUD.CPY: No such file or directory
+cobc: too many errors
+cobc: aborting compile of prog.cob at line 7 (unknown: unknown)
+
+0 warnings in compilation group
+1 error in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+
 
 AT_CLEANUP
 
