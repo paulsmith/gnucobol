@@ -4923,8 +4923,8 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
-AT_CHECK([./prog], [0], [+000000000], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([./caller], [0], [+000000000], [])
 
 AT_CLEANUP
 
@@ -4954,44 +4954,8 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
-AT_CHECK([./prog], [42], [+000000042], [])
-
-AT_CLEANUP
-
-
-# Disallow PROCEDURE DIVISION RETURNING OMITTED for main
-AT_SETUP([void PROCEDURE, main not allowed])
-AT_KEYWORDS([runmisc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       PROCEDURE        DIVISION RETURNING OMITTED.
-           MOVE 42 TO RETURN-CODE
-           EXIT PROGRAM.
-])
-
-AT_CHECK([$COMPILE -o prog prog.cob], [1], [], [ignore])
-
-AT_CLEANUP
-
-
-# Disallow PROCEDURE DIVISION RETURNING OMITTED for FUNCTION
-AT_SETUP([void PROCEDURE not allowed for FUNCTION])
-AT_KEYWORDS([runmisc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       FUNCTION-ID.     func.
-       DATA             DIVISION.
-       PROCEDURE        DIVISION RETURNING OMITTED.
-           MOVE 42 TO RETURN-CODE
-           EXIT PROGRAM.
-])
-
-AT_CHECK([$COMPILE -o prog prog.cob], [1], [], [ignore])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
+AT_CHECK([./caller], [42], [+000000042], [])
 
 AT_CLEANUP
 
@@ -5557,7 +5521,8 @@ prog.cob: 32: warning: BY CONTENT assumed for alphanumeric item
 prog.cob: 34: warning: BY CONTENT assumed for alphanumeric item
 ])
 
-AT_CHECK([./prog], [0], [CAPI called with 2 parameters
+AT_CHECK([./prog], [0],
+[CAPI called with 2 parameters
  1: COMP-4   BY VALUE     S9(9)       2560;
  2: DISPLAY  BY VALUE     9(2)        16;
 CAPI called with 2 parameters

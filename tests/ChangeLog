@@ -14,6 +14,12 @@
 
 	* cobol85/Makefile.am: HACK for newcob.val in sourcedir during VPATH build
 
+2017-04-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at, testsuite.src/syn_definition.at: moved
+	  and renamed syntax tests for RETURNING to syn_defintion,
+	  added checks for RETURNING item
+
 2017-03-22  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Added Error/Warning summary to listings.

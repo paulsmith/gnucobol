@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2016-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While
 ## 
 ## This file is part of GnuCOBOL.
@@ -37,8 +37,12 @@ AT_DATA([prog.cob], [
        01 Y             PIC 9 REDEFINES X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 7: error: REDEFINES clause must follow entry-name
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob: 7: warning: REDEFINES clause should follow entry-name
 ])
 
 AT_CLEANUP
@@ -61,7 +65,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: level number of REDEFINES entries must be identical
 ])
 
@@ -83,7 +87,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: 'X' is not defined in 'G1'
 ])
 
@@ -105,7 +109,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: syntax error, unexpected REDEFINES, expecting RENAMES
 ])
 
@@ -126,7 +130,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: syntax error, unexpected REDEFINES, expecting VALUE
 ])
 
@@ -157,7 +161,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: 'X' is not defined in 'G3'
 ])
 
@@ -203,7 +207,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: 'X' cannot be subscripted here
 ])
 
@@ -233,7 +237,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: 'Y' cannot be variable length
 prog.cob: 11: error: 'Y' cannot be variable length
 prog.cob: 16: error: the original definition 'X' cannot be variable length
@@ -261,7 +265,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: 'X' cannot be qualified here
 ])
 
@@ -287,7 +291,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: 'B' is not the original definition
 ])
 
@@ -320,7 +324,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: size of 'A' larger than size of 'X'
 prog.cob: 11: error: size of 'A' larger than size of 'X'
 prog.cob: 15: error: size of 'EXT-X-REDEF' larger than size of 'EXT-X'
@@ -382,7 +386,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 8: error: REDEFINES must follow the original definition
 prog.cob: 12: error: REDEFINES must follow the original definition
 ])

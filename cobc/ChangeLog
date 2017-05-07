@@ -1,4 +1,9 @@
 
+2017-05-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (emit_entry): checked RETURNING item for not having
+	  REDEFINES clause, use field name instead of cb_name(reference)
+
 2017-05-01  Ron Norman <rjn@inglenet.com>
 
 	* tree.c: improved resolving constant expressions at compile time:
@@ -24,7 +29,7 @@
 
 2017-04-27 Sergey Kashyrin <ska@kiska.net>
 
-	* parser.y: Fix for CALL-CONVENTION (was broken) 
+	* parser.y: Fix for CALL-CONVENTION (was broken)
 	* codegen.c: on Windows we need to output entries prototypes
 	  with dllexport, otherwise they will not be seen.
 	* cobc.c: print_error_for_line cut continuation
@@ -474,7 +479,7 @@
 2016-11-07  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c, cobc.c, config.def: added code for 'move-ibm' option which does
-	  MOVE same as IBM MVC instruction 
+	  MOVE same as IBM MVC instruction
 
 2016-11-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

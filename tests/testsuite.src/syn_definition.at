@@ -470,6 +470,142 @@ prog.cob: 12: error: syntax error, unexpected user function name
 ])
 AT_CLEANUP
 
+
+# Disallow PROCEDURE DIVISION RETURNING OMITTED for main
+AT_SETUP([PROCEDURE DIVISION RETURNING OMITTED: main])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           GOBACK.
+])
+
+
+AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 4: error: RETURNING clause cannot be OMITTED for main program
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([PROCEDURE DIVISION RETURNING OMITTED: FUNCTION])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       PROCEDURE        DIVISION RETURNING OMITTED.
+           MOVE 42 TO RETURN-CODE
+           GOBACK.
+       END FUNCTION     func.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 4: error: RETURNING clause cannot be OMITTED for a FUNCTION
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([PROCEDURE DIVISION RETURNING item])
+AT_KEYWORDS([runmisc])
+
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-OUT       PIC 9.
+       PROCEDURE        DIVISION RETURNING PAR-OUT.
+           MOVE 4 TO PAR-OUT
+           GOBACK.
+       END FUNCTION     func.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 PAR-OUT       PIC 9.
+       PROCEDURE        DIVISION RETURNING PAR-OUT.
+           MOVE 4 TO PAR-OUT
+           GOBACK.
+       END FUNCTION     func.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-OUT       PIC 9 OCCURS 10.
+       PROCEDURE        DIVISION RETURNING PAR-OUT.
+           MOVE 4 TO PAR-OUT (1)
+           GOBACK.
+       END FUNCTION     func.
+])
+
+AT_DATA([prog4.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR.
+          02 PAR-OUT    PIC 9.
+       PROCEDURE        DIVISION RETURNING PAR-OUT.
+           MOVE 4 TO PAR-OUT
+           GOBACK.
+       END FUNCTION     func.
+])
+
+AT_DATA([prog5.cob], [
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR           PIC 9.
+       PROCEDURE        DIVISION USING PAR RETURNING PAR.
+           MOVE 4 TO PAR
+           GOBACK.
+       END FUNCTION     func.
+
+       IDENTIFICATION   DIVISION.
+       FUNCTION-ID.     func2.
+       DATA             DIVISION.
+       LINKAGE          SECTION.
+       01 PAR-IN        PIC 9.
+       01 PAR-OUT       REDEFINES PAR-IN PIC 9.
+       PROCEDURE        DIVISION USING PAR-IN RETURNING PAR-OUT.
+           MOVE 4 TO PAR-OUT
+           GOBACK.
+       END FUNCTION     func2.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 7: error: RETURNING item is not defined in LINKAGE SECTION
+])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob: 7: error: RETURNING item should not have OCCURS
+prog3.cob: 9: error: 'PAR-OUT' requires one subscript
+])
+AT_CHECK([$COMPILE_ONLY prog4.cob], [1], [],
+[prog4.cob: 8: error: RETURNING item must have level 01
+])
+AT_CHECK([$COMPILE_ONLY prog5.cob], [1], [],
+[prog5.cob: 7: error: 'PAR' USING item duplicates RETURNING item
+prog5.cob: 18: error: 'PAR-OUT' REDEFINES field not allowed here
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Data item with same name as program-name])
 AT_KEYWORDS([definition])
 

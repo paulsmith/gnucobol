@@ -298,7 +298,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	cb_tree		label;
 	cb_tree		x;
 	cb_tree		entry_conv;
-	struct cb_field	*f;
+	struct cb_field	*f, *ret_f;
 	int			param_num;
 	char		buff[COB_MINI_BUFF];
 
@@ -329,40 +329,47 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 			f = CB_FIELD (cb_ref (x));
 			if (!current_program->flag_chained) {
 				if (f->storage != CB_STORAGE_LINKAGE) {
-					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), cb_name (x));
+					cb_error_x (x, _("'%s' is not in LINKAGE SECTION"), f->name);
 				}
 				if (f->flag_item_based || f->flag_external) {
-					cb_error_x (x, _("'%s' cannot be BASED/EXTERNAL"), cb_name (x));
+					cb_error_x (x, _("'%s' cannot be BASED/EXTERNAL"), f->name);
 				}
 				f->flag_is_pdiv_parm = 1;
 			} else {
 				if (f->storage != CB_STORAGE_WORKING) {
-					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), cb_name (x));
+					cb_error_x (x, _("'%s' is not in WORKING-STORAGE SECTION"), f->name);
 				}
 				f->flag_chained = 1;
 				f->param_num = param_num;
 				param_num++;
 			}
 			if (f->level != 01 && f->level != 77) {
-				cb_error_x (x, _("'%s' not level 01 or 77"), cb_name (x));
+				cb_error_x (x, _("'%s' not level 01 or 77"), f->name);
 			}
 			if (f->redefines) {
-				cb_error_x (x, _("'%s' REDEFINES field not allowed here"), cb_name (x));
+				cb_error_x (x, _ ("'%s' REDEFINES field not allowed here"), f->name);
 			}
 			/* add a "receiving" entry for the USING parameter */
 			cobc_xref_link (&f->xref, CB_REFERENCE (x)->common.source_line, 1);
 		}
 	}
 
+
+	if (current_program->returning &&
+		cb_ref (current_program->returning) != cb_error_node) {
+		ret_f = CB_FIELD (cb_ref (current_program->returning));
+		if (ret_f->redefines) {
+			cb_error_x (current_program->returning, _("'%s' REDEFINES field not allowed here"), ret_f->name);
+		}
+	} else {
+		ret_f = NULL;
+	}
+
 	/* Check dangling LINKAGE items */
 	if (cb_warn_linkage) {
 		for (f = current_program->linkage_storage; f; f = f->sister) {
-			if (current_program->returning) {
-				if (cb_ref (current_program->returning) != cb_error_node) {
-					if (f == CB_FIELD (cb_ref (current_program->returning))) {
-						continue;
-					}
-				}
+			if (f == ret_f) {
+				continue;
 			}
 			for (l = using_list; l; l = CB_CHAIN (l)) {
 				x = CB_VALUE (l);
@@ -379,12 +386,14 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	/* Check returning item against using items when FUNCTION */
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == CB_FUNCTION_TYPE && current_program->returning) {
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
-			if (CB_VALID_TREE (x) && current_program->returning &&
-			    cb_ref (x) == cb_ref (current_program->returning)) {
-				cb_error_x (x, _("'%s' USING item duplicates RETURNING item"), cb_name (x));
+			if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+				f = CB_FIELD (cb_ref (x));
+				if (ret_f == f) {
+					cb_error_x (x, _("'%s' USING item duplicates RETURNING item"), f->name);
+				}
 			}
 		}
 	}
@@ -1437,8 +1446,8 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 		break;
 
 	default:
-		/* This should never happen */
-		cb_error (_("unexpected tallying phrase"));
+		/* This should never happen (and therefore doesn't get a translation) */
+		cb_error ("unexpected tallying phrase");
 		COBC_ABORT();
 	}
 
@@ -6730,8 +6739,6 @@ _procedure_returning:
 			cb_error (_("RETURNING item must have level 01"));
 		} else if (f->flag_occurs) {
 			cb_error (_("RETURNING item should not have OCCURS"));
-		} else if (f->storage == CB_STORAGE_LOCAL) {
-			cb_error (_("RETURNING item should not be in LOCAL-STORAGE"));
 		} else {
 			if (current_program->prog_type == CB_FUNCTION_TYPE) {
 				if (f->flag_any_length) {
