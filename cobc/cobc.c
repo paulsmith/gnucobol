@@ -63,7 +63,7 @@
 
 #include "libcob/cobgetopt.h"
 
-#if defined (COB_EXPERIMENTAL)
+#if defined (COB_EXPERIMENTAL) || 1
 #define COB_INTERNAL_XREF
 enum xref_type {
 	XREF_FIELD,
@@ -1725,10 +1725,11 @@ set_listing_date (void)
 	current_compile_tm.tm_isdst = current_compile_time.is_daylight_saving_time;
 	time_buff = asctime (&current_compile_tm);
 	if (!time_buff) {
-		time_buff = (char *)"DATE BUG, PLEASE REPORT";
+		strncpy (cb_listing_date, "DATE BUG, PLEASE REPORT", CB_LISTING_DATE_MAX);
+		return;
 	}
+	*strchr (time_buff, '\n') = '\0';
 	strncpy (cb_listing_date, time_buff, CB_LISTING_DATE_MAX);
-	*strchr (cb_listing_date, '\n') = '\0';
 }
 
 
