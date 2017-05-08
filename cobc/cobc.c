@@ -557,6 +557,7 @@ static void	print_program_code	(struct list_files *, int);
 static void	print_program_header	(void);
 static void	print_program_data	(const char *);
 static void	print_program_trailer	(void);
+static void	print_program_listing	(void);
 static int	process			(const char *);
 
 /* cobc functions */
@@ -1790,6 +1791,9 @@ cobc_abort_terminate (void)
 	   "recognize" status 99 as failure (you cannot "expect" the return 99 */ 
 	const int ret_code = 97;
 
+	if (cb_src_list_file) {
+		print_program_listing ();
+	}
 	cobc_abort_msg ();
 	cobc_clean_up (ret_code);
 	exit (ret_code);
@@ -7305,6 +7309,12 @@ main (int argc, char **argv)
 			cobc_flag_main = 0;
 		}
 
+		if (cb_src_list_file) {
+			cb_listing_page = 0;
+			strcpy (cb_listing_filename, fn->source);
+			set_listing_title_code ();
+		}
+
 
 		if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
 		    fn->need_preprocess) {
@@ -7319,12 +7329,6 @@ main (int argc, char **argv)
 
 		if (cobc_list_file) {
 			putc ('\n', cb_listing_file);
-		}
-
-		if (cb_src_list_file) {
-			cb_listing_page = 0;
-			strcpy (cb_listing_filename, fn->source);
-			set_listing_title_code ();
 		}
 
 		if (cb_compile_level < CB_LEVEL_TRANSLATE) {

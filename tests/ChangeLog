@@ -1,4 +1,8 @@
 
+2017-05-08  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Correct max error count test.
+
 2017-05-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* listings-sed.sh: simplified (more likely to run in non GNU/Linux
