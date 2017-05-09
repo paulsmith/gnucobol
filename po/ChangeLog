@@ -1,4 +1,8 @@
 
+2017-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pt.po: added Portuguese (translated by Jum Currey and his team)
+
 2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* update_linguas.sh: added shell for updating the translations
