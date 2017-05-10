@@ -1,4 +1,8 @@
 
+2017-05-10  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Added "Too many errors" message.
+
 2017-05-08  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Correct max error count test.

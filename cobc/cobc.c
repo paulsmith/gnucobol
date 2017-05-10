@@ -4862,6 +4862,10 @@ print_program_trailer (void)
 		print_program_data (print_data);
 		break;
 	}
+	if (errorcount > cb_max_errors) {
+		snprintf (print_data, CB_PRINT_LEN, _("Too many errors in compilation group: %d maximum errors"), cb_max_errors);
+		print_program_data (print_data);
+	}
 	force_new_page_for_next_line ();
 }
 

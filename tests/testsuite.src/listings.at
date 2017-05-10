@@ -1471,6 +1471,7 @@ prog.cob: 7: error: CRUD.CPY: No such file or directory
 
 0 warnings in compilation group
 1 error in compilation group
+Too many errors in compilation group: 0 maximum errors
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])

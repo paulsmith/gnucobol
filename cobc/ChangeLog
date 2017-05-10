@@ -1,4 +1,8 @@
 
+2017-05-10  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c: Added "Too many errors" message to listing.
+
 2017-05-08  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c: Added code to generate listing when max error count exceeded.
