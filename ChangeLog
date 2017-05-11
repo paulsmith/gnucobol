@@ -1,4 +1,11 @@
 
+2017-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: change in library check for BDB - prefer library
+	  with version number from db.h included (-ldb-6.1 over -ldb) to
+	  prevent errors on system with multiple versions that linked
+	  against wrong version, see bug #100
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: removed AM_MAINTAINER_MODE, added AM_PROG_LEX,

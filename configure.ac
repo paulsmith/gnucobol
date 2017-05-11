@@ -816,7 +816,9 @@ if test "$with_db" = "yes"; then
 	MYOLDLIBS="$LIBS"
 	cob_got_db=no
 	AC_MSG_CHECKING([for Berkeley DB library with version $COB_BDB_HEADER])
-	for cobdb in db db-$COB_BDB_HEADER
+	# prefer library with version number included as some systems link against s wrong version
+	# of the library and to not break when a newer BDB version is installed, see bug #100
+	for cobdb in db-$COB_BDB_HEADER db
 	do
 		LIBS="$MYOLDLIBS -l$cobdb"
 		AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>

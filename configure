@@ -17300,7 +17300,9 @@ $as_echo "no ($COB_BDB_HEADER)" >&6; }
 	cob_got_db=no
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB library with version $COB_BDB_HEADER" >&5
 $as_echo_n "checking for Berkeley DB library with version $COB_BDB_HEADER... " >&6; }
-	for cobdb in db db-$COB_BDB_HEADER
+	# prefer library with version number included as some systems link against s wrong version
+	# of the library and to not break when a newer BDB version is installed, see bug #100
+	for cobdb in db-$COB_BDB_HEADER db
 	do
 		LIBS="$MYOLDLIBS -l$cobdb"
 		if test "$cross_compiling" = yes; then :
