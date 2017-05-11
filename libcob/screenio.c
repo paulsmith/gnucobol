@@ -1668,6 +1668,7 @@ screen_display (cob_screen *s, const int line, const int column)
 
 	origin_y = line;
 	origin_x = column;
+	pending_accept = 1;
 
 	cob_move_cursor (line, column);
 	cob_screen_iterate (s);

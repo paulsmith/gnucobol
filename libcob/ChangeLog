@@ -1,4 +1,9 @@
 
+2017-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (screen_display): FR #191 set flag pending_accept
+	  for DISPLAY screen, too
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (set_value, get_value): using correcting format modifier
