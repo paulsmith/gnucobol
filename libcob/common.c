@@ -3698,9 +3698,7 @@ int
 cob_sys_oc_nanosleep (const void *data)
 {
 	cob_s64_t	nsecs;
-#if	defined(_WIN32) || defined(__370__) || defined(__OS400__)
-	unsigned int	msecs;
-#elif	defined(HAVE_NANO_SLEEP)
+#ifdef	HAVE_NANO_SLEEP	
 	struct timespec	tsec;
 #else
 	unsigned int	msecs;
@@ -3713,20 +3711,20 @@ cob_sys_oc_nanosleep (const void *data)
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		nsecs = cob_get_llint (COB_MODULE_PTR->cob_procedure_params[0]);
 		if (nsecs > 0) {
-#ifdef	_WIN32
-			msecs = (unsigned int)(nsecs / 1000000);
-			if (msecs > 0) {
-				Sleep (msecs);
-			}
+#ifdef	HAVE_NANO_SLEEP
+			tsec.tv_sec = nsecs / 1000000000;
+			tsec.tv_nsec = nsecs % 1000000000;
+			nanosleep (&tsec, NULL);
 #elif	defined(__370__) || defined(__OS400__)
 			msecs = (unsigned int)(nsecs / 1000000000);
 			if (msecs > 0) {
 				sleep (msecs);
 			}
-#elif	defined(HAVE_NANO_SLEEP)
-			tsec.tv_sec = nsecs / 1000000000;
-			tsec.tv_nsec = nsecs % 1000000000;
-			nanosleep (&tsec, NULL);
+#elif	defined(_WIN32)
+			msecs = (unsigned int)(nsecs / 1000000);
+			if (msecs > 0) {
+				Sleep (msecs);
+			}
 #else
 			msecs = (unsigned int)(nsecs / 1000000000);
 			if (msecs > 0) {
