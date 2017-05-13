@@ -233,3 +233,6 @@ CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 
 CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declaratives",
 	_("references to sections not in DECLARATIVES from within DECLARATIVES"))
+
+CB_CONFIG_SUPPORT (cb_numeric_value_for_edited_item, "numeric-value-for-edited-item",
+	_("numeric literals in VALUE clause of numeric-edited items"))

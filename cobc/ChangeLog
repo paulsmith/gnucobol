@@ -1,8 +1,9 @@
 
 2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
 
-	* typeck.c (validate_move): allow numeric literals in VALUE clause of
-	  numeric-edited items (patch thanks to David Newall).
+	* typeck.c (validate_move): make warning on numeric literals in VALUE
+	  clause of numeric-edited items configurable (original patch thanks to
+	  David Newall).
 
 2017-05-10  Dave Pitts <dpitts@cozx.com>
 

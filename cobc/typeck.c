@@ -6910,8 +6910,11 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 					goto expect_alphanumeric;
 				}
 				goto non_integer_move;
-			case CB_CATEGORY_NUMERIC:
 			case CB_CATEGORY_NUMERIC_EDITED:
+				cb_verify_x (loc, cb_numeric_value_for_edited_item,
+					   _("numeric literal in VALUE clause of numeric-edited item"));
+				/* Fall-through */
+			case CB_CATEGORY_NUMERIC:
 				if (fdst->pic->scale < 0) {
 					/* Check for PIC 9(n)P(m) */
 					if (least_significant < -fdst->pic->scale) {
