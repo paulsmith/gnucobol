@@ -6911,6 +6911,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				}
 				goto non_integer_move;
 			case CB_CATEGORY_NUMERIC:
+			case CB_CATEGORY_NUMERIC_EDITED:
 				if (fdst->pic->scale < 0) {
 					/* Check for PIC 9(n)P(m) */
 					if (least_significant < -fdst->pic->scale) {
@@ -6922,13 +6923,6 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 						goto value_mismatch;
 					}
 				}
-				break;
-			case CB_CATEGORY_NUMERIC_EDITED:
-				if (is_value) {
-					goto expect_alphanumeric;
-				}
-
-				/* TODO */
 				break;
 			case CB_CATEGORY_ALPHABETIC:
 				if (is_value) {

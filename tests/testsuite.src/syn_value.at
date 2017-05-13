@@ -248,8 +248,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 7: warning: alphanumeric value is expected
-prog.cob: 10: warning: value size exceeds data size
+[prog.cob: 10: warning: value size exceeds data size
 ])
 
 AT_CLEANUP

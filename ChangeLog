@@ -1,4 +1,9 @@
 
+2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (validate_move): allow numeric literals in VALUE clause of
+	  numeric-edited items (patch thanks to David Newall).
+
 2017-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: change in library check for BDB - prefer library
