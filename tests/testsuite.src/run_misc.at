@@ -4825,7 +4825,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], ignore, [])
+AT_CHECK([COB_EXIT_WAIT=0 ./prog], [0], ignore, [])
 
 AT_CLEANUP
 
@@ -4863,7 +4863,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE  -faccept-display-extensions=error prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], ignore, [])
+AT_CHECK([COB_EXIT_WAIT=0 ./prog], [0], ignore, [])
 
 AT_CLEANUP
 

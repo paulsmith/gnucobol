@@ -1,11 +1,16 @@
 
+2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at: set COB_EXIT_WAIT=0 in all testcases
+	  where we do extended screenio
+
 2017-05-10  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at: Added "Too many errors" message.
+	* testsuite.src/listings.at: added "Too many errors" message
 
 2017-05-08  Dave Pitts <dpitts@cozx.com>
 
-	* testsuite.src/listings.at: Correct max error count test.
+	* testsuite.src/listings.at: corrected max error count test
 
 2017-05-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

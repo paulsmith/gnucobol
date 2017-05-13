@@ -311,7 +311,7 @@ raise_ec_on_invalid_line_or_col (const int line, const int column)
 	}
 }
 
-static void
+static int
 cob_move_cursor (const int line, const int column)
 {
 	int status = move (line, column);
@@ -319,6 +319,7 @@ cob_move_cursor (const int line, const int column)
 	if (status == ERR) {
 		raise_ec_on_invalid_line_or_col (line, column);
 	}
+	return status;
 }
 
 void
@@ -1121,10 +1122,13 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 	int			ateof = 0;
 	int			gotbacksp = 0;
 	int			ungetched = 0;
+	int			status;
 	chtype			promptchar;
 
-	pending_accept = 0;
-	cob_move_cursor (sline, scolumn);
+	status = cob_move_cursor (sline, scolumn);
+	if (status != ERR) {
+		pending_accept = 0;
+	}
 	cob_screen_attr (s->foreg, s->backg, s->attr, ACCEPT_STATEMENT);
 
 	for (; ;) {
@@ -1664,13 +1668,16 @@ extract_line_and_col_vals (cob_field *line, cob_field *column,
 static void
 screen_display (cob_screen *s, const int line, const int column)
 {
+	int		status;
 	init_cob_screen_if_needed ();
 
 	origin_y = line;
 	origin_x = column;
-	pending_accept = 1;
 
-	cob_move_cursor (line, column);
+	status = cob_move_cursor (line, column);
+	if (status != ERR) {
+		pending_accept = 1;
+	}
 	cob_screen_iterate (s);
 	refresh ();
 }
@@ -1776,10 +1783,11 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	       cob_field *bgc, cob_field *fscroll, cob_field *size_is,
 	       const cob_flags_t fattr)
 {
-	int	sline;
-	int	scolumn;
-	int	ssize_is = 0;	/* WITH SIZE IS */
-	int	size_display;	/* final size to display */
+	int		sline;
+	int		scolumn;
+	int		ssize_is = 0;	/* WITH SIZE IS */
+	int		size_display;	/* final size to display */
+	int		status;
 	char	fig_const;	/* figurative constant character */
 
 	if (unlikely(!f)) {
@@ -1790,7 +1798,6 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 
 	origin_y = 0;
 	origin_x = 0;
-	pending_accept = 1;
 
 	/* Field size to display */
 	size_display = (int)f->size;
@@ -1818,7 +1825,10 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 
 	sline = line;
 	scolumn = column;
-	cob_move_cursor (sline, scolumn);
+	status = cob_move_cursor (sline, scolumn);
+	if (status != ERR) {
+		pending_accept = 1;
+	}
 
 	cob_screen_attr (fgc, bgc, fattr, DISPLAY_STATEMENT);
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
@@ -1864,6 +1874,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	unsigned char	move_char;      /* data shift character */
 	int		prompt_char;    /* prompt character */
 	int		gettimeout;
+	int		status;
 	chtype		promptchar;
 	int		ssize_is = 0;	/* WITH SIZE IS */
 	size_t		size_accept = 0;	/* final size to accept */
@@ -1886,7 +1897,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 	origin_y = 0;
 	origin_x = 0;
-	pending_accept = 0;
 
 	/* Set the default prompt character */
 	if (prompt) {
@@ -1917,7 +1927,10 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	cobglobptr->cob_exception_code = 0;
 
-	cob_move_cursor (sline, scolumn);
+	status = cob_move_cursor (sline, scolumn);
+	if (status != ERR) {
+		pending_accept = 0;
+	}
 
 	cob_screen_attr (fgc, bgc, fattr, ACCEPT_STATEMENT);
 

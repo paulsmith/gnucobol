@@ -1,4 +1,10 @@
 
+2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_move): return the status returned by (move)
+	* screenio.c: FR #191 only set flag pending_accept when cob_move
+	  returns no error
+
 2017-05-12	Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_oc_nanosleep): prefer HAVE_NANO_SLEEP over _WIN32
