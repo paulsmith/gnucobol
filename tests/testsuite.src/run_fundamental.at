@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2015, 2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart, Ron Norman
 ##
 ## This file is part of GnuCOBOL.
@@ -3773,7 +3773,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Numeric operations (7)])
-AT_KEYWORDS([fundamental add compute])
+AT_KEYWORDS([fundamental add compute literal])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -4059,6 +4059,54 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric operations (8)])
+AT_KEYWORDS([fundamental compute literal])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+          1 COMPUTE-DATA.
+           2 COMPUTE-8             PICTURE 999       VALUE ZERO.
+       PROCEDURE        DIVISION.
+           COMPUTE COMPUTE-8 = (((24.0 + 1) * (60 - 10)) / 125) ** 2
+           IF COMPUTE-8 NOT = 100
+              DISPLAY 'COMPUTE with wrong result: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 55 / (1 - 2 + 1)
+              NOT ON SIZE ERROR
+                 DISPLAY 'SIZE ERROR not set from divide by zero!'
+                 END-DISPLAY
+           END-COMPUTE
+           COMPUTE COMPUTE-8 = 0 ** 1
+           IF COMPUTE-8 NOT = 0
+              DISPLAY '0 ** 1 <> 0: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 55 ** 0
+           IF COMPUTE-8 NOT = 1
+              DISPLAY '55 ** 0 <> 1: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           COMPUTE COMPUTE-8 = 1 ** 55
+           IF COMPUTE-8 NOT = 1
+              DISPLAY '11 ** 55 <> 1: ' COMPUTE-8
+              END-DISPLAY
+           END-IF
+           
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: 14: warning: divide by constant ZERO
+])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP

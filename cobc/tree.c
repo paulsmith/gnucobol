@@ -3647,7 +3647,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					break;
 				case '/':
 					if (yval == 0) {				/* Avoid Divide by ZERO */
-						cb_warning_x (COBC_WARN_FILLER, x, _("Divide by constant ZERO"));
+						cb_warning_x (COBC_WARN_FILLER, x, _("divide by constant ZERO"));
 						break;
 					}
 					if (rslt != 0) {
