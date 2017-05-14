@@ -3664,7 +3664,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					break;
 				case '^':
 					/* only calculate simple integer numerics */
-					if (xl->scale != 0 || yl->scale != 0)
+					if (xl->scale != 0 
+					 || yl->scale != 0
+					 || yval < 0)
 						break;
 					if(yval == 0
 					|| xval == 1) {
