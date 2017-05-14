@@ -1,4 +1,9 @@
 
+2017-05-14  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c (cb_build_binary_op): use integer arithmetic for compile
+	  time configuration instead of (pow)
+
 2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (validate_move): make warning on numeric literals in VALUE

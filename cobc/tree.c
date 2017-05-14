@@ -27,8 +27,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
-#include <errno.h>
 #include <limits.h>
 #ifndef LLONG_MAX
 #ifdef LONG_LONG_MAX
@@ -3590,8 +3588,8 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 */
 		if (CB_NUMERIC_LITERAL_P(x) 
 		&&  CB_NUMERIC_LITERAL_P(y)) {
-			xl = (void*)x;
-			yl = (void*)y;
+			xl = CB_LITERAL(x);
+			yl = CB_LITERAL(y);
 
 			if(xl->llit == 0
 			&& xl->size - xl->scale >= 0
@@ -3648,14 +3646,15 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					return cb_build_numeric_literal (0, result, rscale);
 					break;
 				case '/':
-					if(yval == 0) {				/* Avoid Divide by ZERO */
+					if (yval == 0) {				/* Avoid Divide by ZERO */
 						cb_warning_x (COBC_WARN_FILLER, x, _("Divide by constant ZERO"));
 						break;
 					}
-					if(rslt != 0) {
+					if (rslt != 0) {
 						sprintf(result, CB_FMT_LLD, rslt);
 						return cb_build_numeric_literal (0, result, rscale);
 					}
+					/* only calculate simple integer numerics */
 					if (xl->scale != 0 || yl->scale != 0)
 						break;
 					if((xval % yval) == 0) {
@@ -3664,17 +3663,18 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '^':
+					/* only calculate simple integer numerics */
 					if (xl->scale != 0 || yl->scale != 0)
 						break;
 					if(yval == 0
 					|| xval == 1) {
 						strcpy(result,"1");
 					} else {
-						errno = 0;
-						sprintf (result, CB_FMT_LLD, (cob_s64_t)pow((double)xval,(double)yval));
-						if (errno != 0)	/* 'pow' raised some error */ {
-							break;
+						rslt = xval;
+						while (--yval > 0) {
+							rslt = rslt * xval;
 						}
+						sprintf (result, CB_FMT_LLD, rslt);
 					}
 					return cb_build_numeric_literal (0, result, 0);
 				default:
