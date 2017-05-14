@@ -6911,8 +6911,10 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				}
 				goto non_integer_move;
 			case CB_CATEGORY_NUMERIC_EDITED:
-				cb_verify_x (loc, cb_numeric_value_for_edited_item,
-					   _("numeric literal in VALUE clause of numeric-edited item"));
+				if (is_value) {
+					cb_verify_x (loc, cb_numeric_value_for_edited_item,
+						_ ("numeric literal in VALUE clause of numeric-edited item"));
+				}
 				/* Fall-through */
 			case CB_CATEGORY_NUMERIC:
 				if (fdst->pic->scale < 0) {
