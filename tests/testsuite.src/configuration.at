@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2014-2017 Free Software Foundation, Inc.
 ## Written by Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -442,6 +442,7 @@ test.conf: missing definitions:
 	no definition of 'renames-uncommon-levels'
 	no definition of 'program-prototypes'
 	no definition of 'reference-out-of-declaratives'
+	no definition of 'numeric-value-for-edited-item'
 ])
 
 AT_CLEANUP
