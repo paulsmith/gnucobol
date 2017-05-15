@@ -244,7 +244,7 @@ static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
 static void
 begin_statement (const char *name, const unsigned int term)
 {
-	if (cb_warn_unreachable && check_unreached) {
+	if (check_unreached) {
 		cb_warning (cb_warn_unreachable, _("unreachable statement '%s'"), name);
 	}
 	current_paragraph->flag_statement = 1;
@@ -380,7 +380,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 				}
 			}
 			if (!l && !f->redefines) {
-				cb_warning (COBC_WARN_FILLER, _("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
+				cb_warning (cb_warn_linkage, _("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
 			}
 		}
 	}
@@ -540,6 +540,8 @@ setup_use_file (struct cb_file *fileptr)
 static void
 emit_duplicate_clause_message (const char *clause)
 {
+	/* FIXME: replace by a new warning level that is set
+	   to warn/error depending on cb_relaxed_syntax_checks */
 	if (cb_relaxed_syntax_checks) {
 		cb_warning (COBC_WARN_FILLER, _("duplicate %s clause"), clause);
 	} else {
@@ -594,7 +596,7 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 				if (cb_relaxed_syntax_checks) {
 					cb_warning (COBC_WARN_FILLER, _ ("TO phrase without DEPENDING phrase"));
 					cb_warning (COBC_WARN_FILLER, _ ("maximum number of occurences assumed to be exact number"));
-					current_field->occurs_min = 1; /* Checkme: why using 1 ? */
+					current_field->occurs_min = 1; /* CHECKME: why using 1 ? */
 				} else {
 					cb_error (_ ("TO phrase without DEPENDING phrase"));
 				}
@@ -606,7 +608,7 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 			current_field->occurs_max = 0;
 		}
 	} else {
-		current_field->occurs_min = 1; /* Checkme: why using 1 ? */
+		current_field->occurs_min = 1; /* CHECKME: why using 1 ? */
 		current_field->occurs_max = cb_get_int (occurs_min);
 		if (current_field->depending) {
 			cb_verify (cb_odo_without_to, _ ("ODO without TO phrase"));
@@ -1252,10 +1254,10 @@ emit_conflicting_clause_message (const char *clause, const char *conflicting)
 {
 	if (cb_relaxed_syntax_checks) {
 		cb_warning (COBC_WARN_FILLER, _("cannot specify both %s and %s; %s is ignored"),
-			    clause, conflicting, clause);
+			clause, conflicting, clause);
 	} else {
 		cb_error (_("cannot specify both %s and %s"),
-			  clause, conflicting);
+			clause, conflicting);
 	}
 
 }
@@ -2729,7 +2731,7 @@ _source_object_computer_paragraphs:
 | source_computer_paragraph object_computer_paragraph
 | object_computer_paragraph source_computer_paragraph
   {
-	if (warningopt && (check_comp_duplicate & SYN_CLAUSE_2)) {
+	if (check_comp_duplicate & SYN_CLAUSE_2) {
 		cb_warning (warningopt, _("phrases in non-standard order"));
 	}
   }
@@ -4543,7 +4545,7 @@ code_set_clause:
 			current_file->code_set = al;
 			break;
 		default:
-			if (warningopt && CB_VALID_TREE ($3)) {
+			if (CB_VALID_TREE ($3)) {
 				cb_warning_x (warningopt, $3, _("ignoring CODE-SET '%s'"),
 						  cb_name ($3));
 			}
@@ -4889,6 +4891,7 @@ lit_or_length:
   literal				{ $$ = $1; }
 | LENGTH_OF con_identifier		{ $$ = cb_build_const_length ($2); }
 | LENGTH con_identifier			{ $$ = cb_build_const_length ($2); }
+/* note: only reserved in context of CB_CS_CONSTANT: */
 | BYTE_LENGTH _of con_identifier	{ $$ = cb_build_const_length ($3); }
 ;
 
@@ -5050,7 +5053,8 @@ constant_entry:
 		YYERROR;
 	}
   }
-  _global_clause value_clause
+  _global_clause
+  VALUE _is constant_78_source
   {
 	/* Reset to last non-78 item */
 	current_field = cb_validate_78_item (current_field, 0);
@@ -5062,11 +5066,32 @@ constant_source:
   {
 	$$ = $2;
   }
+/* TODO: add expression later, see bug #373
+| _as expr
+  {
+	CB_PENDING ("CONSTANT with expression value");
+	$$ = cb_build_cond($2);
+  }
+*/
 | FROM WORD
   {
 	CB_PENDING ("CONSTANT FROM");
 	$$ = NULL;
   }
+;
+
+constant_78_source:
+  lit_or_length
+  {
+	current_field->values = CB_LIST_INIT ($1);
+  }
+/* TODO: add expression later, see bug #373
+| expr
+  {
+	CB_PENDING ("CONSTANT with expression value");
+	current_field->values = cb_build_cond($1);
+  }
+*/
 ;
 
 _data_description_clause_sequence:
