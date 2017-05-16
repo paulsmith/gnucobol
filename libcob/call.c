@@ -1646,7 +1646,6 @@ cob_get_s64_param (int n)
 		cob_move (f, &temp);
 		return val;
 	}
-	return -1;
 }
 
 cob_u64_t
@@ -1700,7 +1699,6 @@ cob_get_u64_param (int n)
 		cob_move (f, &temp);
 		return val;
 	}
-	return 0;
 }
 
 char *
