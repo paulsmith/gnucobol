@@ -562,6 +562,7 @@
 
 2015-07-07  Ron Norman
 
+	* common.c (cb_config_entry): keyword "reset": reset data pointer in gc_conf
 	* common.c (cob_expand_env_string): copy SPACE, LR, CR, HT, VT as spaces,
 	  the first implementation dropped them completely
 	* fileio.c fixed to avoid core dump when COB_SYNC and using BDB

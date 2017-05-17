@@ -4998,10 +4998,12 @@ cb_config_entry (char *buf, int line)
 			|| (gc_conf[i].data_type & ENV_FILE)
 			|| (gc_conf[i].data_type & ENV_PATH)) {	/* String/Path stored as a string */
 			data = (void*)((char *)cobsetptr + gc_conf[i].data_loc);
-			memcpy(&str,data,sizeof(char *));
-			if( str != NULL) {
+			memcpy (&str, data, sizeof(char *));
+			if (str != NULL) {
 				cob_free((void*)str);
 			}
+			str = NULL;
+			memcpy (data, &str, sizeof(char *));	/* Reset pointer to NULL */
 		} else {
 			set_config_val((char*)"0",i);
 		}
