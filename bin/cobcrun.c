@@ -65,6 +65,9 @@ static const struct option long_options[] = {
 #endif
 
 
+/**
+ * Display cobcrun build and version date
+ */
 static void
 cobcrun_print_version (void)
 {
@@ -99,6 +102,9 @@ cobcrun_print_version (void)
 	putchar ('\n');
 }
 
+/**
+ * Display cobcrun help
+ */
 static void
 cobcrun_print_usage (char * prog)
 {
@@ -380,6 +386,9 @@ main (int argc, char **argv)
 		putc ('\n', stderr);
 		cob_stop_run (1);
 	}
+
+	/* Initialize the COBOL system, resolve the PROGRAM name */
+	/*   and invoke, wrapped in a STOP RUN, if found */
 	cob_init (argc - arg_shift, &argv[arg_shift]);
 	if (print_runtime_wanted) {
 		print_runtime_conf ();
