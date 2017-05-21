@@ -5776,7 +5776,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Default Arithmetic])
-AT_KEYWORDS([Runtime])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -5880,7 +5880,7 @@ AT_CLEANUP
 
 
 AT_SETUP([OSVS Arithmetic])
-AT_KEYWORDS([Runtime])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.

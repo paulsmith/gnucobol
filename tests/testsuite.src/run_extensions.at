@@ -238,6 +238,10 @@ AT_DATA([prog.cob], [
        01 L             PIC 9(4).
        01 I             PIC 9(2) VALUE 10.
        78 I-LEN         VALUE LENGTH OF I.
+       01 TSTDISP.
+         02 FILLER OCCURS 5000.
+           10 T1        PIC X(11).
+           10 T2        PIC X(22).
        PROCEDURE        DIVISION.
            MOVE LENGTH OF X TO L
            IF L NOT = 2
@@ -281,6 +285,9 @@ AT_DATA([prog.cob], [
               DISPLAY "Length 7 " L " - " I
               END-DISPLAY
            END-IF
+           *> one display test
+           DISPLAY LENGTH OF TSTDISP WITH NO ADVANCING
+           END-DISPLAY
            STOP RUN.
        VARME.
            ADD 1 TO L
@@ -288,6 +295,43 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -Wno-constant-expression prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [165000], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SET TO SIZE OF])
+AT_KEYWORDS([extensions acu LENGTH])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TST    PIC X(10) VALUE "abcdefghij".
+       01  TST2.
+           05  FILLER OCCURS 5000.
+               10 T2-1    PIC X(11).
+               10 T2-2    PIC X(22).
+       01  LN     PIC 9(06).
+
+       PROCEDURE DIVISION.
+           SET LN TO SIZE OF TST
+           IF LN NOT = 10
+              DISPLAY "SIZE OF TST is " LN UPON SYSERR
+              END-DISPLAY
+           END-IF
+           SET LN TO SIZE OF TST2
+           IF LN NOT = 165000
+              DISPLAY "SIZE OF TST2 is " LN UPON SYSERR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob ], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
