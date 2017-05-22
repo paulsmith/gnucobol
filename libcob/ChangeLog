@@ -560,8 +560,13 @@
 	* call.c (cob_init_call): Don't add the current directory "." to resolve_path
 	  if it's already set (either via runtime configuration or default value)
 
-2015-07-07  Ron Norman
+2015-07-07  Ron Norman <rjn@inglenet.com>
 
+	* Accept env var COB_CURRENT_DATE/COB_DATE and runtime.cfg current_date
+	  to specify a date override for the application.
+	  All ACCEPT FROM DATE, DAY, TIME will the use the value defined
+	  rather than the current system time.
+	  This will be a useful feature for application testing.
 	* common.c (cb_config_entry): keyword "reset": reset data pointer in gc_conf
 	* common.c (cob_expand_env_string): copy SPACE, LR, CR, HT, VT as spaces,
 	  the first implementation dropped them completely
