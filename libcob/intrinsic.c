@@ -467,12 +467,6 @@ make_field_entry (cob_field *f)
 }
 
 static int
-leap_year (const int year)
-{
-	return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 1 : 0;
-}
-
-static int
 comp_field (const void *m1, const void *m2)
 {
 	cob_field	*f1;

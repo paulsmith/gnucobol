@@ -221,15 +221,8 @@ typedef struct __cob_settings {
 	char		*cob_sys_term;		/* TERM setting from env */
 	char		*cob_sys_type;		/* OSTYPE setting from env */
 	char		*cob_debug_log;
-	char		*cob_date;		/* Date override for testing purposes */
-	short		cob_cyear;
-	short		cob_cmonth;
-	short		cob_cday;
-	short		cob_chour;
-	short		cob_cminute;
-	short		cob_csecond;
-	short		cob_cjul;
-	short		cob_cwday;
+	char		*cob_date;		/* Date override for testing purposes / UTC hint */
+	struct cob_time	cob_time_constant;
 
 	/* call.c */
 	unsigned int	cob_physical_cancel;
@@ -374,6 +367,8 @@ COB_HIDDEN char		*cob_strjoin		(char**, int, char*);
 
 COB_HIDDEN int		cob_min_int		(const int, const int);
 COB_HIDDEN int		cob_max_int		(const int, const int);
+
+COB_HIDDEN int		leap_year		(const int);
 
 #ifdef __cplusplus
 }

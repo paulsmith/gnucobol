@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -19,8 +19,39 @@
 ### GnuCOBOL Test Suite
 
 ### ISO+IEC+1989-2002 14.8.1 ACCEPT statement
+### ISO+IEC+1989-2014 14.9.1 ACCEPT statement
 
-AT_SETUP([ACCEPT FROM DATE/DAY])
+# Format 1: hardware / device
+
+## TODO - only omitted tested so far
+
+AT_SETUP([ACCEPT OMITTED (simple)])
+AT_KEYWORDS([accept extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+
+       PROCEDURE      DIVISION.
+           ACCEPT OMITTED
+           END-ACCEPT.
+])
+
+AT_DATA([input.txt], [
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog < input.txt], [0], [], [])
+
+AT_CLEANUP
+
+#
+## Format 2: chronological / temporal
+#
+
+AT_SETUP([ACCEPT FROM DATE / DAY])
 AT_KEYWORDS([accept])
 
 AT_DATA([prog.cob], [
@@ -63,57 +94,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([ACCEPT OMITTED (simple)])
-AT_KEYWORDS([accept extensions])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID.    prog.
-
-       DATA           DIVISION.
-
-       PROCEDURE      DIVISION.
-           ACCEPT OMITTED
-           END-ACCEPT.
-])
-
-AT_DATA([input.txt], [
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog < input.txt], [0], [], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([ACCEPT OMITTED (SCREEN)])
-AT_KEYWORDS([accept extensions])
-
-AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID.    prog.
-
-       DATA           DIVISION.
-       SCREEN         SECTION.
-       01  scr.
-           03  VALUE "Hello!" LINE 3 COL 3.
-
-       PROCEDURE      DIVISION.
-           ACCEPT OMITTED
-           END-ACCEPT.
-])
-
-AT_DATA([input.txt], [
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog < input.txt], [0], ignore, [])
 
 AT_CLEANUP
 
@@ -180,3 +160,37 @@ Julian DATE: 2015091
 ], [])
 
 AT_CLEANUP
+
+#
+## Format 3: screen
+#
+
+## TODO - only omitted tested so far
+
+AT_SETUP([ACCEPT OMITTED (SCREEN)])
+AT_KEYWORDS([accept extensions])
+
+AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+
+       DATA           DIVISION.
+       SCREEN         SECTION.
+       01  scr.
+           03  VALUE "Hello!" LINE 3 COL 3.
+
+       PROCEDURE      DIVISION.
+           ACCEPT OMITTED
+           END-ACCEPT.
+])
+
+AT_DATA([input.txt], [
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog < input.txt], [0], ignore, [])
+
+AT_CLEANUP
+

@@ -330,7 +330,6 @@ static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
 void		conf_runtime_error_value	(const char *value, const int conf_pos);
 void		conf_runtime_error	(const int finish_error, const char *fmt, ...);
-static void	check_current_date();
 
 static void
 cob_exit_common (void)
@@ -1189,6 +1188,8 @@ cob_rescan_env_vals (void)
 		    && (env = getenv (gc_conf[i].env_name)) != NULL) {
 			old_type = gc_conf[i].data_type;
 			gc_conf[i].data_type |= STS_ENVSET;
+
+			// FIXME: call check_current_date here, if needed
 
 			if (*env != '\0' && set_config_val (env, i)) {
 				gc_conf[i].data_type = old_type;
@@ -2538,6 +2539,12 @@ cob_ctoi (const char digit)
 	return (int) (digit - '0');
 }
 
+int
+leap_year (const int year)
+{
+	return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 1 : 0;
+}
+
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
 
 /* Get function pointer for most precise time function
@@ -2561,8 +2568,8 @@ get_function_ptr_for_precise_time (void)
 #endif
 
 #if defined (_WIN32) /* cygwin does not define _WIN32 */
-struct cob_time
-cob_get_current_date_and_time (void)
+static struct cob_time
+cob_get_current_date_and_time_from_os (void)
 {
 	SYSTEMTIME	local_time;
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
@@ -2591,13 +2598,12 @@ cob_get_current_date_and_time (void)
 	cb_time.year = local_time.wYear;
 	cb_time.month = local_time.wMonth;
 	cb_time.day_of_month = local_time.wDay;
-	cb_time.day_of_week = one_indexed_day_of_week_from_monday (local_time.wDayOfWeek);
-	cb_time.day_of_year = -1 /* calculate similar to intrinsic.c if needed */;
+	/* day_of_week, day_of_year and is_daylight_saving_time
+	   are set in cob_get_current_date_and_time */
 	cb_time.hour = local_time.wHour;
 	cb_time.minute = local_time.wMinute;
 	cb_time.second = local_time.wSecond;
 	cb_time.nanosecond = local_time.wMilliseconds * 1000000;
-	cb_time.is_daylight_saving_time = -1;
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
 	set_cob_time_ns_from_filetime (filetime, &cb_time);
 #endif
@@ -2606,8 +2612,8 @@ cob_get_current_date_and_time (void)
 	return cb_time;
 }
 #else
-struct cob_time
-cob_get_current_date_and_time (void)
+static struct cob_time
+cob_get_current_date_and_time_from_os (void)
 {
 #if defined (HAVE_CLOCK_GETTIME)
 	struct timespec	time_spec;
@@ -2632,10 +2638,6 @@ cob_get_current_date_and_time (void)
 	curtime = time (NULL);
 #endif
 	tmptr = localtime (&curtime);
-	/* Leap seconds ? */
-	if (tmptr->tm_sec >= 60) {
-		tmptr->tm_sec = 59;
-	}
 
 	cb_time.year = tmptr->tm_year + 1900;
 	cb_time.month = tmptr->tm_mon + 1;
@@ -2691,191 +2693,471 @@ cob_get_current_date_and_time (void)
 }
 #endif
 
+struct cob_time
+cob_get_current_date_and_time (void)
+{
+	int			needs_calculation = 0;
+	time_t		t;
+	struct		tm *tmptr;
+	struct		cob_time	cb_time = cob_get_current_date_and_time_from_os ();
+
+#if _WIN32
+	needs_calculation = 1;	/* WIN32 allways needs a recalculation (doesn't set all items) */
+#endif
+
+	/* do we have a constant time? */
+	if(cobsetptr != NULL
+	&& cobsetptr->cob_time_constant.year != 0) {
+		if (cobsetptr->cob_time_constant.hour != -1) {
+			cb_time.hour = cobsetptr->cob_time_constant.hour;
+		}
+		if (cobsetptr->cob_time_constant.minute != -1) {
+			cb_time.minute = cobsetptr->cob_time_constant.minute;
+		}
+		if (cobsetptr->cob_time_constant.second != -1) {
+			cb_time.second = cobsetptr->cob_time_constant.second;
+		}
+		if (cobsetptr->cob_time_constant.nanosecond != -1) {
+			cb_time.nanosecond = cobsetptr->cob_time_constant.nanosecond;
+		}
+		if (cobsetptr->cob_time_constant.year != -1) {
+			cb_time.year = cobsetptr->cob_time_constant.year;
+			needs_calculation = 1;
+		}
+		if (cobsetptr->cob_time_constant.month != -1) {
+			cb_time.month = cobsetptr->cob_time_constant.month;
+			needs_calculation = 1;
+		}
+		if (cobsetptr->cob_time_constant.day_of_month != -1) {
+			cb_time.day_of_month = cobsetptr->cob_time_constant.day_of_month;
+			needs_calculation = 1;
+		}
+		if (cobsetptr->cob_time_constant.offset_known) {
+			cb_time.offset_known = cobsetptr->cob_time_constant.offset_known;
+			cb_time.utc_offset = cobsetptr->cob_time_constant.utc_offset;
+		}
+	}
+
+	/* Leap seconds ? */
+	if (cb_time.second >= 60) {
+		cb_time.second = 59;
+	}
+
+	/* set day_of_week, day_of_year, is_daylight_saving_time, if necessary */
+	if (needs_calculation) {
+		/* allocate tmptr (needs a correct time) */
+		time(&t);
+		tmptr = localtime (&t);
+		tmptr->tm_isdst = -1;
+		tmptr->tm_sec	= cb_time.second;
+		tmptr->tm_min	= cb_time.minute;
+		tmptr->tm_hour	= cb_time.hour;
+		tmptr->tm_year	= cb_time.year - 1900;
+		tmptr->tm_mon	= cb_time.month - 1;
+		tmptr->tm_mday	= cb_time.day_of_month;
+		tmptr->tm_wday	= -1;
+		tmptr->tm_yday	= -1;
+		(void)mktime(tmptr);
+		cobsetptr->cob_time_constant.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
+		cobsetptr->cob_time_constant.day_of_year = tmptr->tm_yday + 1;
+		cobsetptr->cob_time_constant.is_daylight_saving_time = tmptr->tm_isdst;
+	}
+
+	return cb_time;
+}
+
 static void
 check_current_date()
 {
-	int	yr,mm,dd,hh,mi,ss;
-	int	i,j;
-	time_t	t;
-	struct tm *tim;
+	int			yr, mm, dd, hh, mi, ss, ns = -1;
+	int			offset = 9999;
+	int			i, j, ret;
+	time_t		t;
+	struct		tm *tmptr;
+	char		iso_timezone[7] = { '\0' };
+	char		nanoseconds[10];
+	char		*iso_timezone_ptr = (char *)&iso_timezone;
 
 	if(cobsetptr == NULL
 	|| cobsetptr->cob_date == NULL) {
-		cobsetptr->cob_cyear	= 0;
-		cobsetptr->cob_cmonth	= 0;
-		cobsetptr->cob_cday	= 0;
-		cobsetptr->cob_chour	= 0;
-		cobsetptr->cob_cminute	= 0;
-		cobsetptr->cob_csecond	= 0;
-		cobsetptr->cob_cjul	= 0;
-		cobsetptr->cob_cwday	= 0;
 		return;
 	}
-	yr = mm = dd = hh = mi = ss = 0;
-	for(i=j=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			yr = yr * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 4)
-			break;
+
+	j = ret = 0;
+	/* skip non-digits like quotes */
+	while (cobsetptr->cob_date[j] != 0
+	&&     cobsetptr->cob_date[j] != 'Y'
+	&&     !isdigit(cobsetptr->cob_date[j])) {
+		 j++;
 	}
-	while(cobsetptr->cob_date[j] == '/'
-	||    cobsetptr->cob_date[j] == '-')
-		j++;
-	for(i=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			mm = mm * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 2)
-			break;
+
+	/* extract date */
+	if (cobsetptr->cob_date[j] != 0) {
+		yr = 0;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+			 	yr = yr * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 4) {
+				j++;
+				break;
+			}
+		}
+		if (i != 2 && i != 4) {
+			if (cobsetptr->cob_date[j] == 'Y') {
+				while(cobsetptr->cob_date[j] == 'Y') j++;
+			} else {
+				ret = 1;
+			}
+			yr = -1;
+		} else if (yr < 100) {
+			yr += 2000;
+		}
+		while(cobsetptr->cob_date[j] == '/'
+		||    cobsetptr->cob_date[j] == '-')
+			j++;
 	}
-	while(cobsetptr->cob_date[j] == '/'
-	||    cobsetptr->cob_date[j] == '-')
-		j++;
-	for(i=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			dd = dd * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 2)
-			break;
+	if (cobsetptr->cob_date[j] != 0) {
+		mm = 0;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				mm = mm * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 2) {
+				j++;
+				break;
+			}
+		}
+		if (i != 2) {
+			if (cobsetptr->cob_date[j] == 'M') {
+				while(cobsetptr->cob_date[j] == 'M') j++;
+			} else {
+				ret = 1;
+			}
+			mm = -1;
+		} else if (mm < 1 || mm > 12) {
+			ret = 1;
+		}
+		while(cobsetptr->cob_date[j] == '/'
+		||    cobsetptr->cob_date[j] == '-')
+			j++;
 	}
-	while(isspace(cobsetptr->cob_date[j]))
-		j++;
-	for(i=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			hh = hh * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 2)
-			break;
+	if (cobsetptr->cob_date[j] != 0) {
+		dd = 0;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				dd = dd * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 2) {
+				j++;
+				break;
+			}
+		}
+		if (i != 2) {
+			if (cobsetptr->cob_date[j] == 'D') {
+				while(cobsetptr->cob_date[j] == 'D') j++;
+			} else {
+				ret = 1;
+			}
+			dd = -1;
+		} else if (dd < 1 || dd > 31) {
+			ret = 1;
+		}
 	}
-	while(cobsetptr->cob_date[j] == ':'
-	||    cobsetptr->cob_date[j] == '-')
-		j++;
-	for(i=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			mi = mi * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 2)
-			break;
+
+	/* extract time */
+	if (cobsetptr->cob_date[j] != 0) {
+		hh = 0;
+		while(isspace(cobsetptr->cob_date[j])) j++;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				hh = hh * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 2) {
+				j++;
+				break;
+			}
+		}
+		
+		if (i != 2) {
+			if (cobsetptr->cob_date[j] == 'H') {
+				while(cobsetptr->cob_date[j] == 'H') j++;
+			} else {
+				ret = 1;
+			}
+			hh = -1;
+		} else if (hh > 23) {
+			ret = 1;
+		}
+		while(cobsetptr->cob_date[j] == ':'
+		||    cobsetptr->cob_date[j] == '-')
+			j++;
 	}
-	while(cobsetptr->cob_date[j] == ':'
-	||    cobsetptr->cob_date[j] == '-')
-		j++;
-	for(i=0; cobsetptr->cob_date[j] != 0; j++) {
-		if(isdigit(cobsetptr->cob_date[j]))
-			ss = ss * 10 + cobsetptr->cob_date[j] - '0';
-		if(i++ >= 2)
-			break;
+	if (cobsetptr->cob_date[j] != 0) {
+		mi = 0;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				mi = mi * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 2) {
+				j++;
+				break;
+			}
+		}
+		if (i != 2) {
+			if (cobsetptr->cob_date[j] == 'M') {
+				while (cobsetptr->cob_date[j] == 'M') j++;
+			} else {
+				ret = 1;
+			}
+			mi = -1;
+		} else if (mi > 59) {
+			ret = 1;
+		}
+		while(cobsetptr->cob_date[j] == ':'
+		||    cobsetptr->cob_date[j] == '-')
+			j++;
 	}
-	if(mm < 1 || mm > 12) {
-		cob_runtime_error (_("COB_CURRENT_DATE '%s' is invalid"),cobsetptr->cob_date);
-		mm = 1;
+
+	if (cobsetptr->cob_date[j] != 0
+	&&	cobsetptr->cob_date[j] != 'Z'
+	&&	cobsetptr->cob_date[j] != '+'
+	&&	cobsetptr->cob_date[j] != '-') {
+		ss = 0;
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				ss = ss * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			} else {
+				break;
+			}
+			if (++i == 2) {
+				j++;
+				break;
+			}
+		}
+		if (i != 2) {
+			if (cobsetptr->cob_date[j] == 'S') {
+				while(cobsetptr->cob_date[j] == 'S') j++;
+			} else {
+				ret = 1;
+			}
+			ss = -1;
+		/* leap second would be 60 */
+		} else  if (ss > 60) {
+			ret = 1;
+		}
 	}
-	if(dd < 1 || dd > 31) {
-		cob_runtime_error (_("COB_CURRENT_DATE '%s' is invalid"),cobsetptr->cob_date);
-		dd = 1;
+
+	if (cobsetptr->cob_date[j] != 0
+	&&	cobsetptr->cob_date[j] != 'Z'
+	&&	cobsetptr->cob_date[j] != '+'
+	&&	cobsetptr->cob_date[j] != '-') {
+		ns = 0;
+		if (cobsetptr->cob_date[j] == '.'
+		||  cobsetptr->cob_date[j] == ':') {
+			j++;
+		}
+		strcpy(nanoseconds, "000000000");
+		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
+			if (isdigit(cobsetptr->cob_date[j])) {
+				nanoseconds[i] = cobsetptr->cob_date[j];
+			} else {
+				break;
+			}
+			if (++i == 9) {
+				j++;
+				break;
+			}
+		}
+		ns = atoi(nanoseconds);
 	}
-	if(yr < 100)
-		yr += 2000;
-	cobsetptr->cob_cyear	= yr;
-	cobsetptr->cob_cmonth	= mm;
-	cobsetptr->cob_cday	= dd;
-	cobsetptr->cob_chour	= hh;
-	cobsetptr->cob_cminute	= mi;
-	cobsetptr->cob_csecond	= ss;
+
+	/* extract UTC offset */
+	if (cobsetptr->cob_date[j] == 'Z') {
+		offset = 0;
+		iso_timezone[0] = 'Z';
+	} else if (cobsetptr->cob_date[j] == '+'
+		|| cobsetptr->cob_date[j] == '-') {
+		strncpy (iso_timezone_ptr, cobsetptr->cob_date + j, 6);
+		if (strlen (iso_timezone_ptr) == 3) {
+			strcpy (iso_timezone_ptr + 3, "00");
+		} else if (iso_timezone[3] == ':') {
+			strncpy (iso_timezone_ptr + 3, cobsetptr->cob_date + j + 4, 3);
+		}
+		for (i=1; iso_timezone[i] != 0; i++) {
+			if (!isdigit(iso_timezone[i])) {
+				break;
+			}
+			if (++i == 4) {
+				break;
+			}
+		}
+		if (i == 4) {
+			offset = cob_ctoi (iso_timezone[1]) * 60 * 10
+				+ cob_ctoi (iso_timezone[2]) * 60
+				+ cob_ctoi (iso_timezone[3]) * 10
+				+ cob_ctoi (iso_timezone[4]);
+			if (iso_timezone[0] == '-') {
+				offset *= -1;
+			}
+		} else {
+			ret = 1;
+			iso_timezone[0] = '\0';
+		}
+	}
+
+	if (ret != 0) {
+		cob_runtime_error (_("COB_CURRENT_DATE '%s' is invalid"), cobsetptr->cob_date);
+	}
+
+	/* get local time, allocate tmptr */
 	time(&t);
-	tim = localtime (&t);
-	tim->tm_sec	= ss;
-	tim->tm_min	= mi;
-	tim->tm_hour	= hh;
-	tim->tm_year	= yr - 1900;
-	tim->tm_mon	= mm - 1;
-	tim->tm_mday	= dd;
-	t = mktime( tim );
-	cobsetptr->cob_cjul	= tim->tm_yday + 1;
-	if (tim->tm_wday == 0) {
-		cobsetptr->cob_cwday = 7;
+	tmptr = localtime (&t);
+
+	/* override given parts in time */
+	if (ss != -1) {
+		tmptr->tm_sec	= ss;
+	}
+	if (mi != -1) {
+		tmptr->tm_min	= mi;
+	}
+	if (hh != -1) {
+		tmptr->tm_hour	= hh;
+	}
+	if (yr != -1) {
+		tmptr->tm_year	= yr - 1900;
+	}
+	if (mm != -1) {
+		tmptr->tm_mon	= mm - 1;
+	}
+	if (dd != -1) {
+		tmptr->tm_mday	= dd;
+	}
+	tmptr->tm_isdst = -1;
+
+	/* nornmalize if needed (for example 40 October is changed into 9 November),
+	   set tm_wday, tm_yday and tm_isdst */
+	t = mktime (tmptr);
+
+	/* set datetime constant */
+	
+	if (hh != -1) {
+		cobsetptr->cob_time_constant.hour	= tmptr->tm_hour;
 	} else {
-		cobsetptr->cob_cwday = tim->tm_wday + 1;
+		cobsetptr->cob_time_constant.hour	= -1;
+	}
+	if (mi != -1) {
+		cobsetptr->cob_time_constant.minute	= tmptr->tm_min;
+	} else {
+		cobsetptr->cob_time_constant.minute	= -1;
+	}
+	if (ss != -1) {
+		cobsetptr->cob_time_constant.second	= tmptr->tm_sec;
+	} else {
+		cobsetptr->cob_time_constant.second	= -1;
+	}
+	if (ns != -1) {
+		cobsetptr->cob_time_constant.nanosecond	= ns;
+	} else {
+		cobsetptr->cob_time_constant.nanosecond	= -1;
+	}
+	if (yr != -1) {
+		cobsetptr->cob_time_constant.year = tmptr->tm_year + 1900;
+	} else {
+		cobsetptr->cob_time_constant.year = -1;
+	}
+	if (mm != -1) {
+		cobsetptr->cob_time_constant.month = tmptr->tm_mon + 1;
+	} else {
+		cobsetptr->cob_time_constant.month = -1;
+	}
+	if (dd != -1) {
+		cobsetptr->cob_time_constant.day_of_month = tmptr->tm_mday;
+	} else {
+		cobsetptr->cob_time_constant.day_of_month = -1;
+	}
+
+	/* the following are only set in "current" instances, not in the constant */
+	cobsetptr->cob_time_constant.day_of_week = -1;
+	cobsetptr->cob_time_constant.day_of_year = -1;
+	cobsetptr->cob_time_constant.is_daylight_saving_time = -1;
+
+	if (iso_timezone[0] != '\0') {
+		cobsetptr->cob_time_constant.offset_known = 1;
+		cobsetptr->cob_time_constant.utc_offset = offset;
+	} else {
+		cobsetptr->cob_time_constant.offset_known = 0;
+		cobsetptr->cob_time_constant.utc_offset = 0;
 	}
 }
 
 /* Extended ACCEPT/DISPLAY */
 
 void
-cob_accept_date (cob_field *f)
+cob_accept_date (cob_field *field)
 {
-	time_t	t;
-	char	s[8];
+	struct cob_time	time;
+	char		str[7] = { '\0' };
 
-	if(cobsetptr->cob_cyear > 0) {
-		sprintf(s,"%02d%02d%02d",cobsetptr->cob_cyear%100,cobsetptr->cob_cmonth,cobsetptr->cob_cday);
-	} else {
-		t = time (NULL);
-		strftime (s, (size_t)7, "%y%m%d", localtime (&t));
-	}
-	cob_memcpy (f, s, (size_t)6);
+	time = cob_get_current_date_and_time ();
+
+	snprintf(str, 6, "%02d%02d%02d", time.year % 100, time.month, time.day_of_month);
+	cob_memcpy (field, str, (size_t)6);
 }
 
 void
-cob_accept_date_yyyymmdd (cob_field *f)
+cob_accept_date_yyyymmdd (cob_field *field)
 {
-	time_t	t;
-	char	s[12];
+	struct cob_time	time;
+	char		str[9] = { '\0' };
 
-	if(cobsetptr->cob_cyear > 0) {
-		sprintf(s,"%04d%02d%02d",cobsetptr->cob_cyear,cobsetptr->cob_cmonth,cobsetptr->cob_cday);
-	} else {
-		t = time (NULL);
-		strftime (s, (size_t)9, "%Y%m%d", localtime (&t));
-	}
-	cob_memcpy (f, s, (size_t)8);
+	time = cob_get_current_date_and_time ();
+
+	snprintf (str, 8, "%04d%02d%02d", time.year, time.month, time.day_of_month);
+	cob_memcpy (field, str, (size_t)8);
 }
 
 void
-cob_accept_day (cob_field *f)
+cob_accept_day (cob_field *field)
 {
-	time_t	t;
-	char	s[8];
+	struct cob_time	time;
+	char		str[6] = { '\0' };
 
-	if(cobsetptr->cob_cyear > 0) {
-		sprintf(s,"%02d%03d",cobsetptr->cob_cyear%100,cobsetptr->cob_cjul);
-	} else {
-		t = time (NULL);
-		strftime (s, (size_t)6, "%y%j", localtime (&t));
-	}
-	cob_memcpy (f, s, (size_t)5);
+	time = cob_get_current_date_and_time ();
+	snprintf (str, 5, "%02d%03d", time.year % 100, time.day_of_year);
+	cob_memcpy (field, str, (size_t)5);
 }
 
 void
-cob_accept_day_yyyyddd (cob_field *f)
+cob_accept_day_yyyyddd (cob_field *field)
 {
-	time_t	t;
-	char	s[12];
+	struct cob_time	time;
+	char		str[8] = { '\0' };
 
-	if(cobsetptr->cob_cyear > 0) {
-		sprintf(s,"%04d%03d",cobsetptr->cob_cyear,cobsetptr->cob_cjul);
-	} else {
-		t = time (NULL);
-		strftime (s, (size_t)8, "%Y%j", localtime (&t));
-	}
-	cob_memcpy (f, s, (size_t)7);
+	time = cob_get_current_date_and_time ();
+	snprintf (str, 8, "%04d%03d", time.year, time.day_of_year);
+	cob_memcpy (field, str, (size_t)7);
 }
 
 void
-cob_accept_day_of_week (cob_field *f)
+cob_accept_day_of_week (cob_field *field)
 {
-	struct tm	*tm;
-	time_t		t;
-	unsigned char	s[4];
+	struct cob_time	time;
+	unsigned char		day;
 
-	if(cobsetptr->cob_cwday > 0) {
-		sprintf((char*)s,"%d",cobsetptr->cob_cwday);
-	} else {
-		t = time (NULL);
-		tm = localtime (&t);
-		if (tm->tm_wday == 0) {
-			s[0] = (unsigned char)'7';
-		} else {
-			s[0] = (unsigned char)(tm->tm_wday + '0');
-		}
-	}
-	cob_memcpy (f, s, (size_t)1);
+	time = cob_get_current_date_and_time ();
+	day = (unsigned char)(time.day_of_week + '0');
+	cob_memcpy (field, &day, (size_t)1);
 }
 
 void
@@ -2885,14 +3167,8 @@ cob_accept_time (cob_field *field)
 	char		str[9] = { '\0' };
 
 	time = cob_get_current_date_and_time ();
-	if(cobsetptr->cob_chour + cobsetptr->cob_cminute + cobsetptr->cob_csecond > 0) {
-		snprintf (str, 9, "%02d%02d%02d%02d", 
-				cobsetptr->cob_chour, cobsetptr->cob_cminute,
-			  	cobsetptr->cob_csecond, time.nanosecond / 10000000);
-	} else {
-		snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,
-			  time.second, time.nanosecond / 10000000);
-	}
+	snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,
+		  time.second, time.nanosecond / 10000000);
 
 	cob_memcpy (field, str, (size_t)8);
 }
