@@ -2752,9 +2752,9 @@ cob_get_current_date_and_time (void)
 		tmptr->tm_wday	= -1;
 		tmptr->tm_yday	= -1;
 		(void)mktime(tmptr);
-		cobsetptr->cob_time_constant.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
-		cobsetptr->cob_time_constant.day_of_year = tmptr->tm_yday + 1;
-		cobsetptr->cob_time_constant.is_daylight_saving_time = tmptr->tm_isdst;
+		cb_time.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
+		cb_time.day_of_year = tmptr->tm_yday + 1;
+		cb_time.is_daylight_saving_time = tmptr->tm_isdst;
 	}
 
 	return cb_time;
@@ -2763,7 +2763,7 @@ cob_get_current_date_and_time (void)
 static void
 check_current_date()
 {
-	int			yr, mm, dd, hh, mi, ss, ns = -1;
+	int			yr, mm, dd, hh, mi, ss, ns;
 	int			offset = 9999;
 	int			i, j, ret;
 	time_t		t;
@@ -2778,6 +2778,8 @@ check_current_date()
 	}
 
 	j = ret = 0;
+	yr = mm = dd = hh = mi = ss = ns = -1;
+
 	/* skip non-digits like quotes */
 	while (cobsetptr->cob_date[j] != 0
 	&&     cobsetptr->cob_date[j] != 'Y'
@@ -3101,11 +3103,11 @@ void
 cob_accept_date (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[7] = { '\0' };
+	char		str[8];
 
 	time = cob_get_current_date_and_time ();
 
-	snprintf(str, 6, "%02d%02d%02d", time.year % 100, time.month, time.day_of_month);
+	snprintf(str, 7, "%02d%02d%02d", time.year % 100, time.month, time.day_of_month);
 	cob_memcpy (field, str, (size_t)6);
 }
 
@@ -3113,11 +3115,11 @@ void
 cob_accept_date_yyyymmdd (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[9] = { '\0' };
+	char		str[10];
 
 	time = cob_get_current_date_and_time ();
 
-	snprintf (str, 8, "%04d%02d%02d", time.year, time.month, time.day_of_month);
+	snprintf (str, 9, "%04d%02d%02d", time.year, time.month, time.day_of_month);
 	cob_memcpy (field, str, (size_t)8);
 }
 
@@ -3125,10 +3127,10 @@ void
 cob_accept_day (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[6] = { '\0' };
+	char		str[7];
 
 	time = cob_get_current_date_and_time ();
-	snprintf (str, 5, "%02d%03d", time.year % 100, time.day_of_year);
+	snprintf (str, 6, "%02d%03d", time.year % 100, time.day_of_year);
 	cob_memcpy (field, str, (size_t)5);
 }
 
@@ -3136,7 +3138,7 @@ void
 cob_accept_day_yyyyddd (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[8] = { '\0' };
+	char		str[9];
 
 	time = cob_get_current_date_and_time ();
 	snprintf (str, 8, "%04d%03d", time.year, time.day_of_year);
@@ -3158,7 +3160,7 @@ void
 cob_accept_time (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[9] = { '\0' };
+	char		str[10] = { '\0' };
 
 	time = cob_get_current_date_and_time ();
 	snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,

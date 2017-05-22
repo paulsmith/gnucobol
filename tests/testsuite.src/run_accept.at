@@ -51,7 +51,7 @@ AT_CLEANUP
 ## Format 2: chronological / temporal
 #
 
-AT_SETUP([ACCEPT FROM DATE / DAY])
+AT_SETUP([ACCEPT FROM TIME / DATE / DAY / DAY-OF-WEEK (1)])
 AT_KEYWORDS([accept])
 
 AT_DATA([prog.cob], [
@@ -59,36 +59,56 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01 X             PIC X(8).
+       *> one byte longer to make sure there is no garbage in
+       01 X             PIC X(9).
        PROCEDURE        DIVISION.
+           ACCEPT X FROM TIME
+           END-ACCEPT
+           IF X (1:2) >= "00" AND <= "23" AND
+              X (3:2) >= "00" AND <= "59" AND
+              X (5:2) >= "00" AND <= "60" AND
+              X (7:2) >= "00" AND <= "99" AND
+              X (9: )  = SPACE
+              CONTINUE
+           ELSE
+              DISPLAY "TIME " X "!"
+              END-DISPLAY
+           END-IF
            ACCEPT X FROM DATE
-           END-ACCEPT.
-           INSPECT X CONVERTING "012345678" TO "999999999".
-           IF X NOT = "999999  "
-              DISPLAY "DATE " X
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "999999"
+              DISPLAY "DATE " X "!"
               END-DISPLAY
-           END-IF.
+           END-IF
            ACCEPT X FROM DATE YYYYMMDD
-           END-ACCEPT.
-           INSPECT X CONVERTING "012345678" TO "999999999".
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
            IF X NOT = "99999999"
-              DISPLAY "YYYYMMDD " X
+              DISPLAY "YYYYMMDD " X "!"
               END-DISPLAY
-           END-IF.
+           END-IF
            ACCEPT X FROM DAY
-           END-ACCEPT.
-           INSPECT X CONVERTING "012345678" TO "999999999".
-           IF X NOT = "99999   "
-              DISPLAY "DAY " X
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "99999"
+              DISPLAY "DAY " X "!"
               END-DISPLAY
-           END-IF.
+           END-IF
            ACCEPT X FROM DAY YYYYDDD
-           END-ACCEPT.
-           INSPECT X CONVERTING "012345678" TO "999999999".
-           IF X NOT = "9999999 "
-              DISPLAY "YYYYDDD " X
+           END-ACCEPT
+           INSPECT X CONVERTING "012345678" TO "999999999"
+           IF X NOT = "9999999"
+              DISPLAY "YYYYDDD " X "!"
               END-DISPLAY
-           END-IF.
+           END-IF
+           ACCEPT X FROM DAY-OF-WEEK
+           END-ACCEPT
+           INSPECT X CONVERTING "1234567" TO "9999999"
+           IF X NOT = "9"
+              DISPLAY "DAY-OF-WEEK " X "!"
+              END-DISPLAY
+           END-IF
            STOP RUN.
 ])
 
@@ -98,16 +118,18 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([ACCEPT DATE / TIME])
-AT_KEYWORDS([accept configuration])
+AT_SETUP([ACCEPT FROM TIME / DATE / DAY / DAY-OF-WEEK (2)])
+AT_KEYWORDS([accept configuration COB_CURRENT_DATE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  WS-YYYYMMDD   PIC X(8).
-       01  WS-YYYYDDD    PIC X(7).
+       *> one byte longer to make sure there is no garbage in
+       01  WS-YYYYMMDD   PIC X(9).
+       01  WS-YYYYDDD    PIC X(8).
+       01  WS-DAYOFWEEK  PIC X(2).
        01  WS-DATE-TODAY.
            05  WS-TODAYS-YY            PIC 9(02) VALUE 0.
            05  WS-TODAYS-MM            PIC 9(02) VALUE 0.
@@ -134,30 +156,45 @@ AT_DATA([prog.cob], [
            05  WS-TIME-SS              PIC 9(02) VALUE 0.
 
        PROCEDURE DIVISION.
-           ACCEPT WS-DATE-TODAY FROM DATE.
-           ACCEPT WS-TIME-NOW FROM TIME.
-           MOVE WS-TODAYS-YY TO WS-DATE-YY.
-           MOVE WS-TODAYS-MM TO WS-DATE-MM.
-           MOVE WS-TODAYS-DD TO WS-DATE-DD.
-           MOVE WS-NOW-HH    TO WS-TIME-HH.
-           MOVE WS-NOW-MM    TO WS-TIME-MM.
-           MOVE WS-NOW-SS    TO WS-TIME-SS.
+           ACCEPT WS-DATE-TODAY FROM DATE
+           ACCEPT WS-TIME-NOW   FROM TIME
+           MOVE WS-TODAYS-YY TO WS-DATE-YY
+           MOVE WS-TODAYS-MM TO WS-DATE-MM
+           MOVE WS-TODAYS-DD TO WS-DATE-DD
+           MOVE WS-NOW-HH    TO WS-TIME-HH
+           MOVE WS-NOW-MM    TO WS-TIME-MM
+           MOVE WS-NOW-SS    TO WS-TIME-SS
            DISPLAY 'PROCESS DATE/TIME : ' WS-DATE ' ' WS-TIME
-                                                    UPON CONSOLE.
-           ACCEPT WS-YYYYMMDD FROM DATE YYYYMMDD.
-           ACCEPT WS-YYYYDDD FROM DAY YYYYDDD.
-           DISPLAY '  FULL DATE: ' WS-YYYYMMDD UPON CONSOLE.
-           DISPLAY 'Julian DATE: ' WS-YYYYDDD UPON CONSOLE.
-           STOP RUN RETURNING 0.
+                   WITH NO ADVANCING
+           END-DISPLAY
+           ACCEPT WS-YYYYMMDD   FROM DATE YYYYMMDD
+           IF WS-YYYYMMDD not = "20150405"
+              DISPLAY 'Wrong date DATE YYYYMMDD: ' WS-YYYYMMDD
+                      ' expected: 20150405'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           ACCEPT WS-YYYYDDD    FROM DAY  YYYYDDD
+           IF WS-YYYYDDD  not = "2015095"
+              DISPLAY 'Wrong date YYYYDDD:  '      WS-YYYYDDD
+                      ' expected: 2015095'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           ACCEPT WS-DAYOFWEEK    FROM DAY-OF-WEEK
+           IF WS-DAYOFWEEK  not = "7"
+              DISPLAY 'Wrong date DAYOFWEEK: '     WS-DAYOFWEEK
+                      ' expected: 7'
+                      UPON SYSERR
+              END-DISPLAY
+           END-IF
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export COB_CURRENT_DATE='2015/04/01 18:45:22' 
-./prog], [0], [PROCESS DATE/TIME : 04/01/15 18:45:22
-  FULL DATE: 20150401
-Julian DATE: 2015091
-], [])
+AT_CHECK([COB_CURRENT_DATE='2015/04/05 18:45:22' \
+./prog], [0], [PROCESS DATE/TIME : 04/05/15 18:45:22], [])
 
 AT_CLEANUP
 
