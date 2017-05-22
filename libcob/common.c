@@ -2539,12 +2539,6 @@ cob_ctoi (const char digit)
 	return (int) (digit - '0');
 }
 
-int
-leap_year (const int year)
-{
-	return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 1 : 0;
-}
-
 #if defined(_MSC_VER) && COB_USE_VC2008_OR_GREATER
 
 /* Get function pointer for most precise time function

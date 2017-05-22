@@ -368,8 +368,6 @@ COB_HIDDEN char		*cob_strjoin		(char**, int, char*);
 COB_HIDDEN int		cob_min_int		(const int, const int);
 COB_HIDDEN int		cob_max_int		(const int, const int);
 
-COB_HIDDEN int		leap_year		(const int);
-
 #ifdef __cplusplus
 }
 #endif
