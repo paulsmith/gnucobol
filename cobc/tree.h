@@ -695,7 +695,7 @@ struct cb_field {
 	struct cb_field		*rename_thru;	/* RENAMES THRU */
 	struct cb_field		*index_qual;	/* INDEXED BY qualifier */
 	struct cb_file		*file;		/* FD section file name */
-	struct cb_cd		*cd;		/* CD name */ 
+	struct cb_cd		*cd;		/* CD name */
 	struct cb_key 		*keys;		/* SEARCH key */
 	struct cb_picture	*pic;		/* PICTURE */
 	struct cb_field		*vsize;		/* Variable size cache */

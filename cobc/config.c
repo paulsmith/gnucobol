@@ -167,7 +167,7 @@ check_valid_value (const char *fname, const int line, const char *name, const ch
 static void
 unsupported_value (const char *fname, const int line, const char *name, const char *val)
 {
-	configuration_error (fname, line, 1, 
+	configuration_error (fname, line, 1,
 		_("unsupported value '%s' for configuration tag '%s'"), val, name);
 }
 
@@ -391,7 +391,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			} else if (strcmp (val, "unconformable") == 0) {
 				*((enum cb_support *)var) = CB_UNCONFORMABLE;
 			} else {
-				invalid_value (fname, line, name, val, 
+				invalid_value (fname, line, name, val,
 					"ok, warning, archaic, obsolete, skip, ignore, error, unconformable", 0, 0);
 				return -1;
 			}
@@ -541,7 +541,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 	/* Warn if we drop the configuration read already */
 	if (unlikely(cb_config_name != NULL)) {
 		configuration_warning (fname, 0,
-			_("The previous loaded configuration '%s' will be discarded."), 
+			_("The previous loaded configuration '%s' will be discarded."),
 			cb_config_name);
 	}
 

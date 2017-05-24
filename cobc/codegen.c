@@ -4627,8 +4627,8 @@ output_call (struct cb_call *p)
 					output_indent ("{");
 				}
 				output_line ("void *ptr_%u;", n);
-			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC 
-				&& x != cb_null 
+			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC
+				&& x != cb_null
 				&& !(CB_CAST_P (x))) {
 				if (!need_brace) {
 					need_brace = 1;
@@ -6483,15 +6483,15 @@ output_file_initialization (struct cb_file *f)
 		strcpy(key_ptr,"NULL");
 	}
 	if (f->flag_external) {
-		output_line ("cob_file_external_addr (\"%s\", &%s%s, %s, %d, %d);", 
+		output_line ("cob_file_external_addr (\"%s\", &%s%s, %s, %d, %d);",
 							f->cname,
-							CB_PREFIX_FILE, f->cname, 
+							CB_PREFIX_FILE, f->cname,
 							key_ptr, nkeys, f->linage?1:0);
 		output_line ("if (cob_glob_ptr->cob_initial_external)");
 		output_indent ("{");
 	} else {
-		output_line ("cob_file_malloc (&%s%s, %s, %d, %d);", 
-							CB_PREFIX_FILE, f->cname, 
+		output_line ("cob_file_malloc (&%s%s, %s, %d, %d);",
+							CB_PREFIX_FILE, f->cname,
 							key_ptr, nkeys, f->linage?1:0);
 	}
 	nkeys = 1;
@@ -6919,7 +6919,7 @@ output_class_names (struct cb_program *prog)
 		}
 	}
 }
- 
+
 static void
 output_initial_values (struct cb_field *f)
 {
@@ -8346,7 +8346,7 @@ try_get_by_value_parameter_type (const enum cb_usage usage,
 
 	return NULL;
 }
- 
+
 static void
 output_program_entry_function_parameters (cb_tree using_list, const int gencode,
 					  const char ** const s_type)
@@ -8398,7 +8398,7 @@ output_program_entry_function_parameters (cb_tree using_list, const int gencode,
 		}
 	}
 }
- 
+
 static void
 output_entry_function (struct cb_program *prog, cb_tree entry,
 		       cb_tree parameter_list, const int gencode)

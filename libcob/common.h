@@ -1166,7 +1166,7 @@ typedef struct {
 
 /*NOTE: *** Add new fields to end  ***
  *       cob_file is now allocated by cob_file_malloc in common.c
- *       so as long as you add new fields to the end there should be no 
+ *       so as long as you add new fields to the end there should be no
  *       need to change COB_FILE_VERSION
  */
 typedef struct {
@@ -1697,10 +1697,10 @@ COB_EXPIMP void cob_accept	(cob_field *);
 /*******************************/
 /* Functions in fileio.c */
 
-COB_EXPIMP void	cob_file_external_addr (const char *, 
-				 cob_file **, cob_file_key **, 
+COB_EXPIMP void	cob_file_external_addr (const char *,
+				 cob_file **, cob_file_key **,
 				 const int nkeys, const int linage);
-COB_EXPIMP void	cob_file_malloc (cob_file **, cob_file_key **, 
+COB_EXPIMP void	cob_file_malloc (cob_file **, cob_file_key **,
 				 const int nkeys, const int linage);
 COB_EXPIMP void	cob_file_free   (cob_file **, cob_file_key **);
 

@@ -1788,7 +1788,7 @@ DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
 	/* note we returned 99 for aborts earlier but autotest will
-	   "recognize" status 99 as failure (you cannot "expect" the return 99 */ 
+	   "recognize" status 99 as failure (you cannot "expect" the return 99 */
 	const int ret_code = 97;
 
 	if (cb_src_list_file) {

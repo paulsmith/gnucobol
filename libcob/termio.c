@@ -279,7 +279,7 @@ cob_accept (cob_field *f)
 
 	if (cobglobptr->cob_screen_initialized) {
 		cob_field_accept (f, NULL, NULL, NULL, NULL,
-				  NULL, NULL, NULL, NULL, 
+				  NULL, NULL, NULL, NULL,
 				  COB_SCREEN_PROMPT);
 		return;
 	}

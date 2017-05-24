@@ -1618,7 +1618,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "SEND",			0, 0, SEND,			/* Communication Section */
 				0, 0
-  },  
+  },
   { "SENTENCE",			0, 0, SENTENCE,			/* 2002 */
 				0, 0
   },

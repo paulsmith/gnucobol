@@ -3144,7 +3144,7 @@ dobuild:
 					bdb_env->dbremove (bdb_env, NULL, runtime_buffer, NULL, 0);
 				} else {
 					/* FIXME: test "First READ on empty SEQUENTIAL INDEXED file ..."
-					   on OPEN-OUTPUT results with MinGW & BDB 6 in 
+					   on OPEN-OUTPUT results with MinGW & BDB 6 in
 					   BDB1565 DB->pget: method not permitted before handle's open method
 					*/
 					p->db[i]->remove (p->db[i], runtime_buffer, NULL, 0);
@@ -3162,7 +3162,7 @@ dobuild:
 		/* Open db */
 		if (!ret) {
 			/* FIXME: test "First READ on empty SEQUENTIAL INDEXED file ..."
-			   on OPEN-OUTPUT results with MinGW & BDB 6 in 
+			   on OPEN-OUTPUT results with MinGW & BDB 6 in
 			   BDB0588 At least one secondary cursor must be specified to DB->join
 			*/
 			ret = p->db[i]->open (p->db[i], NULL, runtime_buffer, NULL,

@@ -1155,7 +1155,7 @@ cob_move_all (cob_field *src, cob_field *dst)
 }
 
 /*
- * Move data the same way as 'MVC' instruction on IBM works, 
+ * Move data the same way as 'MVC' instruction on IBM works,
  * left to right, byte by byte
  */
 void
@@ -1789,7 +1789,7 @@ cob_put_s64_compx (cob_s64_t val, void *mem, int len)
 	cob_s64_t	slong;
 	cob_s32_t	sint;
 	cob_s16_t	sshort;
-#if defined(WORDS_BIGENDIAN) 
+#if defined(WORDS_BIGENDIAN)
 	switch (len) {
 	case sizeof(int):
 		sint = ((cob_s32_t)val);

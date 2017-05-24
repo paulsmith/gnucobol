@@ -123,7 +123,7 @@ static const char		* const cb_const_subs[] = {
 };
 
 static const struct cb_intrinsic_table	userbp =
-	{ "USER FUNCTION", "cob_user_function", 
+	{ "USER FUNCTION", "cob_user_function",
 	  CB_INTR_USER_FUNCTION, USER_FUNCTION_NAME, 1, 0, 0, CB_CATEGORY_NUMERIC,
 	  0 };
 
@@ -3586,7 +3586,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 * If this is an operation between two simple integer numerics
 		 * then resolve the value here at compile time
 		 */
-		if (CB_NUMERIC_LITERAL_P(x) 
+		if (CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
 			xl = CB_LITERAL(x);
 			yl = CB_LITERAL(y);
@@ -3664,7 +3664,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					break;
 				case '^':
 					/* only calculate simple integer numerics */
-					if (xl->scale != 0 
+					if (xl->scale != 0
 					 || yl->scale != 0
 					 || yval < 0)
 						break;
@@ -3711,7 +3711,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  !CB_FIELD (cb_ref (y))->flag_any_length
 		&&  CB_FIELD (cb_ref (y))->pic
 		&&  CB_FIELD (cb_ref (y))->pic->scale == 0
-		&&  CB_LITERAL_P(x) 
+		&&  CB_LITERAL_P(x)
 		&&  xl->all == 0
 		&&  xl->scale == 0) {
 			for(i = strlen((const char *)xl->data); i>0 && xl->data[i-1] == ' '; i--);
@@ -3760,7 +3760,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 * If this is an operation between two simple integer numerics
 		 * then resolve the value here at compile time
 		 */
-		if (CB_NUMERIC_LITERAL_P(x) 
+		if (CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
 			xl = (void*)x;
 			yl = (void*)y;
@@ -3818,12 +3818,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			}
 		} else
 		/*
-		 * If this is an operation between two literal strings 
+		 * If this is an operation between two literal strings
 		 * then resolve the value here at compile time
 		 */
-		if (CB_LITERAL_P(x) 
+		if (CB_LITERAL_P(x)
 		&&  CB_LITERAL_P(y)
-		&& !CB_NUMERIC_LITERAL_P(x) 
+		&& !CB_NUMERIC_LITERAL_P(x)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
 			xl = (void*)x;
 			yl = (void*)y;

@@ -3990,12 +3990,12 @@ cb_build_cond (cb_tree x)
 			if (!p->y || p->y == cb_error_node) {
 				return cb_error_node;
 			}
-			if (CB_INDEX_P (p->x) 
-			||  CB_INDEX_P (p->y) 
-			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER 
+			if (CB_INDEX_P (p->x)
+			||  CB_INDEX_P (p->y)
+			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER
 			||  CB_TREE_CLASS (p->y) == CB_CLASS_POINTER) {
 				x = cb_build_binary_op (p->x, '-', p->y);
-			} else if (CB_BINARY_OP_P (p->x) 
+			} else if (CB_BINARY_OP_P (p->x)
 				|| CB_BINARY_OP_P (p->y)) {
 				/* Decimal comparison */
 				d1 = decimal_alloc ();
@@ -7382,7 +7382,7 @@ cb_build_move_copy (cb_tree src, cb_tree dst)
 					   CB_BUILD_CAST_ADDRESS (dst),
 					   CB_BUILD_CAST_ADDRESS (src),
 					   CB_BUILD_CAST_LENGTH (dst));
-	} else if (overlapping 
+	} else if (overlapping
 	|| CB_FIELD_PTR (src)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (dst)->storage == CB_STORAGE_LINKAGE
 	|| CB_FIELD_PTR (src)->flag_item_based
