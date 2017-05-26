@@ -244,7 +244,7 @@
                  move byte to show (byline:1)
               end-perform
               *> Check printable characters
-              call "C$PRINTABLE" using show dots
+              call "CBL_GC_PRINTABLE" using show dots
               end-call
               move counter to offset
               display disp-line

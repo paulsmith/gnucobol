@@ -4509,7 +4509,7 @@ cob_sys_printable (void *p1, ...)
 	unsigned char		dotrep;
 	va_list			args;
 
-	COB_CHK_PARMS (C$PRINTABLE, 1);
+	COB_CHK_PARMS (CBL_GC_PRINTABLE, 1);
 
 	if (!COB_MODULE_PTR->cob_procedure_params[0]) {
 		return 0;
