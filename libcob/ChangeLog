@@ -10,6 +10,16 @@
 	* common.c: fixed minor style issues, mostly missing spaces around
 	  operators.
 
+2017-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* system.def: added maximum call parameters for system library calls
+
+2017-05-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: correctly update file status for DELETE FILE statement
+	  (we always returned 00 until now)
+	* fileio.c: 
+
 2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (cob_move): return the status returned by (move)

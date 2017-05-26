@@ -66,6 +66,7 @@ struct sort_list {
 struct system_table {
 	const char		*syst_name;
 	const char		*syst_call;
+	const int		syst_max_params;
 };
 
 struct label_list {
@@ -199,11 +200,11 @@ static unsigned int		inside_stack[COB_INSIDE_SIZE];
 static unsigned int		i_counters[COB_MAX_SUBSCRIPTS];
 
 #undef	COB_SYSTEM_GEN
-#define	COB_SYSTEM_GEN(x, y, z)	{ x, #z },
+#define	COB_SYSTEM_GEN(cob_name, pmin, pmax, c_name)	{ cob_name, #c_name, pmax },
 
 static const struct system_table	system_tab[] = {
 #include "libcob/system.def"
-	{ NULL, NULL }
+	{ NULL, NULL, 0 }
 };
 
 #undef	COB_SYSTEM_GEN
@@ -4520,8 +4521,7 @@ output_call (struct cb_call *p)
 	cb_tree				l;
 	const char			*name_str;
 	struct nested_list		*nlp;
-	char				*system_call = NULL;
-	const struct system_table	*psyst;
+	const struct system_table	*psyst = NULL;
 	const char			*convention;
 	struct cb_text_list		*ctl;
 	const char			*s;
@@ -4554,7 +4554,6 @@ output_call (struct cb_call *p)
 	/* System routine entry points */
 	if (p->is_system) {
 		psyst = &system_tab[p->is_system - 1];
-		system_call = (char *)psyst->syst_call;
 		dynamic_link = 0;
 	}
 
@@ -4856,8 +4855,8 @@ output_call (struct cb_call *p)
 				output ("(void)");
 			}
 		}
-		if (system_call) {
-			output ("%s", system_call);
+		if (psyst) {
+			output ("%s", (char *)psyst->syst_call);
 		} else {
 			s = get_program_id_str (p->name);
 			name_str = cb_encode_program_id (s);
@@ -5036,6 +5035,13 @@ output_call (struct cb_call *p)
 			output_call_by_value_args (x, l);
 			break;
 		default:
+			break;
+		}
+		/* early exit if call parameters don't match, this is actually
+		needed for all static calls, but only possible with an
+		external program repository, so just do so for system calls
+		*/
+		if (psyst && psyst->syst_max_params == n) {
 			break;
 		}
 		if (CB_CHAIN (l)) {

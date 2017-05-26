@@ -4,8 +4,19 @@
 	* parser.y: accept ACUCOBOL SET var TO SIZE OF field, handle as
 	  MOVE LENGTH OF field TO var
 
-2017-05-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* codegen.c (output_call): for static calls only generate parameters
+	  up to the maximum number of the call, otherwise the static calls
+	  cannot be resolved at compile time.
+	  Note: currently only done for system library calls, we'd need an
+	  external repository for doing this with other calls, too.
+	* typeck.c (cb_emit_call): warn if more than the max parameters is
+	  used for system library calls
+	* typeck.c (cb_list_system): output min/max parameters for system
+	  library entries
+
+2017-05-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: bug #373 - level 78 constants: only allow a single value
 	  and no optional ARE

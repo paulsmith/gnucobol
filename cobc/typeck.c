@@ -46,7 +46,8 @@
 
 struct system_table {
 	const char		*const syst_name;
-	const int		syst_params;
+	const int		syst_params_min;
+	const int		syst_params_max;
 };
 
 struct optim_table {
@@ -283,11 +284,11 @@ static const unsigned char	cob_refer_ebcdic[256] = {
 /* System routines */
 
 #undef	COB_SYSTEM_GEN
-#define	COB_SYSTEM_GEN(x, y, z)	{ x, y },
+#define	COB_SYSTEM_GEN(cob_name, pmin, pmax, c_name)	{ cob_name, pmin, pmax },
 
 static const struct system_table	system_tab[] = {
 #include "libcob/system.def"
-	{ NULL, 0 }
+	{ NULL, 0, 0 }
 };
 
 #undef	COB_SYSTEM_GEN
@@ -850,10 +851,16 @@ cb_list_system (void)
 
 	for (psyst = system_tab; psyst->syst_name; psyst++) {
 		if (strlen (psyst->syst_name) != 1) {
-			printf ("%-32s%d\n", psyst->syst_name, psyst->syst_params);
+			printf ("%-32s", psyst->syst_name);
 		} else {
-			printf ("X\"%2X\"%-27s%d\n", (unsigned char)psyst->syst_name[0], "", psyst->syst_params);
+			printf ("X\"%2X\"%-27s", (unsigned char)psyst->syst_name[0], "");
 		}
+		if (psyst->syst_params_min != psyst->syst_params_max) {
+			printf ("%d - %d", psyst->syst_params_min, psyst->syst_params_max);
+		} else {
+			printf ("%d", psyst->syst_params_min);
+		}
+		putchar ('\n');
 	}
 }
 
@@ -5119,7 +5126,6 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 
 	error_ind = 0;
-	numargs = 0;
 
 	if (convention) {
 		if (CB_INTEGER_P (convention)) {
@@ -5146,6 +5152,8 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 			    _("STATIC CALL convention requires a literal program name"));
 		error_ind = 1;
 	}
+
+	numargs = 0;
 
 	for (l = par_using; l; l = CB_CHAIN (l), numargs++) {
 		x = CB_VALUE (l);
@@ -5291,11 +5299,15 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		is_sys_idx = 1;
 		for (psyst = system_tab; psyst->syst_name; psyst++, is_sys_idx++) {
 			if (!strcmp(entry, (const char *)psyst->syst_name)) {
-				if (psyst->syst_params > cb_list_length (par_using)) {
+				if (psyst->syst_params_min > numargs) {
 					cb_error_x (CB_TREE (current_statement),
-						    _("wrong number of CALL parameters for '%s'"),
-						    (char *)psyst->syst_name);
+						    _("wrong number of CALL parameters for '%s', %d given, %d expected"),
+						    (char *)psyst->syst_name, numargs, psyst->syst_params_min);
 					return;
+				} else if (psyst->syst_params_max < numargs) {
+					cb_warning_x (COBC_WARN_FILLER, CB_TREE (current_statement),
+						_("wrong number of CALL parameters for '%s', %d given, %d expected"),
+						(char *)psyst->syst_name, numargs, psyst->syst_params_max);
 				}
 				is_sys_call = is_sys_idx;
 				break;
@@ -5307,6 +5319,7 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		return;
 	}
 
+	/* adjust maximum call parameters for later generation */
 	if (numargs > current_program->max_call_param) {
 		current_program->max_call_param = numargs;
 	}

@@ -181,11 +181,8 @@ static cob_field_attr	const_binull_attr =
 			{COB_TYPE_NUMERIC_BINARY, 18, 0, 0, NULL};
 
 #undef	COB_SYSTEM_GEN
-#if 0
-#define	COB_SYSTEM_GEN(x,y,z)		{ x, {(void *(*)())z} },
-#else
-#define	COB_SYSTEM_GEN(x,y,z)		{ x, {(void *(*)(void *))z} },
-#endif
+#define	COB_SYSTEM_GEN(cob_name, pmin, pmax, c_name)	\
+	{ cob_name, {(void *(*)(void *))c_name} },
 
 static const struct system_table	system_tab[] = {
 #include "system.def"
