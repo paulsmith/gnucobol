@@ -866,13 +866,13 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FIXED",			0, 0, FIXED,			/* Extension */
 				0, CB_CS_RECORDING
   },
-  { "FLOAT-BINARY-128",		0, 0, -1,			/* 2011 */
+  { "FLOAT-BINARY-128",		0, 0, -1,			/* 2014 */
 				0, 0
   },
-  { "FLOAT-BINARY-32",		0, 0, -1,			/* 2011 */
+  { "FLOAT-BINARY-32",		0, 0, -1,			/* 2014 */
 				0, 0
   },
-  { "FLOAT-BINARY-64",		0, 0, -1,			/* 2011 */
+  { "FLOAT-BINARY-64",		0, 0, -1,			/* 2014 */
 				0, 0
   },
   { "FLOAT-DECIMAL-16",		0, 0, FLOAT_DECIMAL_16,		/* 2014 */
@@ -889,13 +889,13 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FLOAT-EXTENDED",		0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "FLOAT-INFINITY",		0, 0, -1,			/* 2011 */
+  { "FLOAT-INFINITY",		0, 0, -1,			/* 2014 */
 				0, 0
   },
   { "FLOAT-LONG",		0, 0, FLOAT_LONG,		/* 2002 */
 				0, 0
   },
-  { "FLOAT-NOT-A-NUMBER",	0, 1, -1,			/* 2011 */
+  { "FLOAT-NOT-A-NUMBER",	0, 1, -1,			/* 2014 */
 				0, 0
   },
   { "FLOAT-SHORT",		0, 0, FLOAT_SHORT,		/* 2002 */
