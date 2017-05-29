@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
 
@@ -780,6 +780,9 @@ struct cb_field {
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 	unsigned int flag_unbounded : 1;	/* OCCURS UNBOUNDED */
+
+	unsigned int flag_constant	: 1;	/* Is 01 AS CONSTANT */
+	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))
@@ -1729,6 +1732,9 @@ extern cb_tree		cb_build_index (cb_tree, cb_tree,
 extern cb_tree		cb_build_identifier (cb_tree, const int);
 extern cb_tree		cb_build_length (cb_tree);
 extern cb_tree		cb_build_const_length (cb_tree);
+extern cb_tree		cb_build_const_from (cb_tree);
+extern cb_tree		cb_build_const_start (struct cb_field *, cb_tree);
+extern cb_tree		cb_build_const_next (struct cb_field *);
 extern cb_tree		cb_build_address (cb_tree);
 extern cb_tree		cb_build_ppointer (cb_tree);
 

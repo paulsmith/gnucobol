@@ -606,6 +606,7 @@ cobc_free_mem (void)
 		cobc_free (repsl);
 	}
 	cobc_mainmem_base = NULL;
+	ppp_clear_lists ();
 }
 
 static const char *
@@ -3839,8 +3840,6 @@ force_new_page_for_next_line (void)
 static int
 preprocess (struct filename *fn)
 {
-	struct cobc_mem_struct	*m;
-	struct cobc_mem_struct	*ml;
 	const char		*sourcename;
 	int			save_source_format;
 	int			save_fold_copy;
@@ -3927,13 +3926,6 @@ preprocess (struct filename *fn)
 
 	/* Release flex buffers - After file close */
 	plex_call_destroy ();
-
-	for (m = cobc_plexmem_base; m; ) {
-		ml = m;
-		m = m->next;
-		cobc_free (ml);
-	}
-	cobc_plexmem_base = NULL;
 
 	if (cobc_gen_listing && !cobc_list_file) {
 		if (unlikely(fclose (cb_listing_file) != 0)) {

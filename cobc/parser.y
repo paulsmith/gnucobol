@@ -5036,15 +5036,19 @@ constant_entry:
 	if (level != 1) {
 		cb_error (_("CONSTANT item not at 01 level"));
 	} else if ($5) {
-		x = cb_build_constant ($2, $5);
-		CB_FIELD (x)->flag_item_78 = 1;
-		CB_FIELD (x)->level = 1;
-		cb_needs_01 = 1;
-		if ($4) {
-			CB_FIELD (x)->flag_is_global = 1;
+		if (cb_verify(cb_constant_01, "01 CONSTANT")) {
+			x = cb_build_constant ($2, $5);
+			CB_FIELD (x)->flag_item_78 = 1;
+			CB_FIELD (x)->flag_constant = 1;
+			CB_FIELD (x)->level = 1;
+			CB_FIELD (x)->values = $5;
+			cb_needs_01 = 1;
+			if ($4) {
+				CB_FIELD (x)->flag_is_global = 1;
+			}
+			/* Ignore return value */
+			(void)cb_validate_78_item (CB_FIELD (x), 0);
 		}
-		/* Ignore return value */
-		(void)cb_validate_78_item (CB_FIELD (x), 0);
 	}
   }
 | SEVENTY_EIGHT user_entry_name
@@ -5062,36 +5066,47 @@ constant_entry:
 ;
 
 constant_source:
-  _as lit_or_length
+  _as value_item_list 
   {
 	$$ = $2;
   }
-/* TODO: add expression later, see bug #373
-| _as expr
-  {
-	CB_PENDING ("CONSTANT with expression value");
-	$$ = cb_build_cond($2);
-  }
-*/
-| FROM WORD
-  {
-	CB_PENDING ("CONSTANT FROM");
-	$$ = NULL;
+| FROM WORD	
+  { 
+	$$ = CB_LIST_INIT(cb_build_const_from ($2));
   }
 ;
 
 constant_78_source:
-  lit_or_length
+  constant_expression_list
   {
-	current_field->values = CB_LIST_INIT ($1);
+	current_field->values = $1;
   }
-/* TODO: add expression later, see bug #373
-| expr
+| START _of identifier
   {
-	CB_PENDING ("CONSTANT with expression value");
-	current_field->values = cb_build_cond($1);
+	current_field->values = CB_LIST_INIT (cb_build_const_start (current_field, $3));
   }
-*/
+| NEXT
+  {
+	current_field->values = CB_LIST_INIT (cb_build_const_next (current_field));
+  }
+;
+
+constant_expression_list:
+  constant_expression			{ $$ = CB_LIST_INIT ($1); }
+| constant_expression_list constant_expression	{ $$ = cb_list_add ($1, $2); }
+;
+
+constant_expression:
+  lit_or_length			{ $$ = $1; }
+| TOK_OPEN_PAREN		{ $$ = cb_build_alphanumeric_literal ("(", 1); }
+| TOK_CLOSE_PAREN		{ $$ = cb_build_alphanumeric_literal (")", 1); }
+| TOK_PLUS				{ $$ = cb_build_alphanumeric_literal ("+", 1); }
+| TOK_MINUS				{ $$ = cb_build_alphanumeric_literal ("-", 1); }
+| TOK_MUL				{ $$ = cb_build_alphanumeric_literal ("*", 1); }
+| TOK_DIV				{ $$ = cb_build_alphanumeric_literal ("/", 1); }
+| AND					{ $$ = cb_build_alphanumeric_literal ("&", 1); }
+| OR					{ $$ = cb_build_alphanumeric_literal ("|", 1); }
+| EXPONENTIATION		{ $$ = cb_build_alphanumeric_literal ("^", 1); }
 ;
 
 _data_description_clause_sequence:
@@ -5697,8 +5712,8 @@ value_item_list:
 ;
 
 value_item:
-  lit_or_length				{ $$ = $1; }
-| lit_or_length THRU lit_or_length	{ $$ = CB_BUILD_PAIR ($1, $3); }
+  lit_or_length THRU lit_or_length		{ $$ = CB_BUILD_PAIR ($1, $3); }
+| constant_expression
 ;
 
 _false_is:

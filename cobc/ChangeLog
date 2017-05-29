@@ -1,4 +1,35 @@
 
+2017-05-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck.c: adjustments of constant value changes
+
+2017-05-28  Ron Norman <rjn@inglenet.com>
+
+	* field.c, typeck.c: check for misplaced operators in constant expressions
+
+2017-05-26  Ron Norman <rjn@inglenet.com>
+
+	Work on constant values:
+	* checks for application 78 versus internal 78 and allow internal 78
+	  to get handled
+	* add constant-01 and constant-78 compile options
+
+2017-05-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	Work on constant values:
+	* parser.y, typeck.c, tree.h: tightened syntax checks for NEXT /
+	  START OF as 78 VALUE
+	* typeck.c: set correct values for NEXT / START OF as 78 VALUE
+
+2017-05-24  Ron Norman <rjn@inglenet.com>
+
+	Work on constant values:
+	* parser.y, typeck.c, tree.h: 78/CONSTANT accepts VALUE expression
+	* parser.y, typeck.c, tree.h: implemented NEXT / START OF as 78 VALUE
+	* ppparse.y, cobc.c, cobc.h: allow define list to be
+	  searched outside of ppparse
+	* parser.y, typeck.c: implemented CONSTANT FROM
+
 2017-05-21  Ron Norman <rjn@inglenet.com>
 
 	* parser.y: accept ACUCOBOL SET var TO SIZE OF field, handle as

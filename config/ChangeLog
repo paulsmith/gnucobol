@@ -3,6 +3,11 @@
 
 	* general: added numeric-value-for-edited-item.
 
+2017-04-26  Ron Norman <rjn@inglenet.com>
+
+	* general: added 'constant-78' to indicate if 78 is allowed and
+	  'constant-01' to indicate if 01 CONSTANT is allowed
+
 2017-04-22  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added stop-identifier config option.

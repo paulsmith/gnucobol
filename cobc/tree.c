@@ -2947,6 +2947,7 @@ cb_build_symbolic_chars (const cb_tree sym_list, const cb_tree alphabet)
 		x = cb_build_constant (CB_VALUE (l), x2);
 		CB_FIELD (x)->flag_item_78 = 1;
 		CB_FIELD (x)->flag_is_global = 1;
+		CB_FIELD (x)->flag_internal_constant = 1;
 		CB_FIELD (x)->level = 1;
 		(void)cb_validate_78_item (CB_FIELD (x), 0);
 	}

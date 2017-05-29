@@ -1784,6 +1784,172 @@ cb_build_const_length (cb_tree x)
 }
 
 cb_tree
+cb_build_const_from (cb_tree x)
+{
+	struct cb_define_struct *p;
+
+	if (x == cb_error_node) {
+		return cb_error_node;
+	}
+	p = ppp_search_lists (CB_NAME(x));
+	if (p == NULL
+	 || p->deftype == PLEX_DEF_DEL) {
+		cb_error (_("'%s' has not been DEFINEd"), CB_NAME(x));
+		return cb_error_node;
+	}
+
+	return cb_build_alphanumeric_literal (p->value, (size_t)strlen(p->value));
+}
+
+/**
+ * build numeric literal for level 78 VALUE START OF with the offset
+ * of the given item
+ *
+ * Note: we don't return an error node even if an error occurs as this would
+ * trigger a "needs a VALUE clause" error
+ */
+cb_tree
+cb_build_const_start (struct cb_field *f, cb_tree x)
+{
+	struct cb_field		*target, *p;
+	char			buff[32];
+
+	if (x == cb_error_node) {
+		return cb_error_node;
+	}
+	if (CB_REFERENCE_P (x)) {
+		if (cb_ref (x) == cb_error_node) {
+			return cb_error_node;
+		}
+		if (CB_REFERENCE (x)->offset) {
+			cb_error (_("reference modification not allowed here"));
+			return cb_build_numeric_literal (0, "1", 0);
+		}
+	} else {
+		cb_error (_("only field names allowed here"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+
+	target = CB_FIELD (cb_ref (x));
+	if (!target->flag_external 
+	 && target->storage != CB_STORAGE_FILE
+	 && target->storage != CB_STORAGE_LINKAGE) {
+		cb_error (_("VALUE of '%s': %s target '%s' is invalid"),
+					f->name, "START OF", target->name);
+		cb_error (_("target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+
+	if (target->flag_any_length) {
+		cb_error (_("ANY LENGTH item not allowed here"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+	if (target->level == 88) {
+		cb_error (_("88 level item not allowed here"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+	if (cb_field_variable_size (target)) {
+		cb_error (_("Variable length item not allowed here"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+	for (p = target; p; p = p->parent) {
+		p->flag_is_verified = 0;		/* Force redo compute_size */
+		p->flag_invalid = 0;
+		cb_validate_field (p);
+		if (cb_field_variable_size (p)) {
+			cb_error (_("Variable length item not allowed here"));
+			return cb_build_numeric_literal (0, "1", 0);
+		}
+	}
+	snprintf (buff, sizeof(buff), "%d", target->offset);
+	for (p = target; p; p = p->parent) {
+		p->flag_is_verified = 0;		/* Force redo compute_size */
+		p->flag_invalid = 0;
+	}
+	return cb_build_numeric_literal (0, buff, 0);
+}
+
+/**
+ * build numeric literal for level 78 VALUE NEXT with the offset
+ * at which the NEXT byte of storage occurs after the previous data declaration
+ *
+ * Important: this is NOT identical with START OF the next item as SYNC may
+ * set a different offset for it and when the previous data declaration has
+ * an OCCURS clause, the value returned by NEXT is the offset at which the next
+ * byte of storage occurs *after the first element* of the table
+ *
+ * Note: we don't return an error node even if an error occurs as this would
+ * trigger a "needs a VALUE clause" error
+ */
+cb_tree
+cb_build_const_next (struct cb_field *f)
+{
+	struct cb_field		*p;
+	char			buff[32];
+	struct cb_field *previous;
+	int				sav_min, sav_max;
+	
+	previous = cb_get_real_field ();
+
+	if (!previous) {
+		cb_error (_("VALUE of '%s': %s target is invalid"),
+			f->name, "NEXT");
+		cb_error (_("no previous data-item found"));
+		return cb_build_numeric_literal (0, "1", 0);
+	}
+
+	if (previous->storage != CB_STORAGE_FILE 
+	 && previous->storage != CB_STORAGE_LINKAGE) {
+		p = previous;
+		while (p->parent) {
+			p = p->parent;
+		}
+		if (!p->flag_external) {
+			cb_error (_("VALUE of '%s': %s target is invalid"), f->name, "NEXT");
+			cb_error (_("target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause"));
+			return cb_build_numeric_literal (0, "1", 0);
+		}
+	}
+
+	/*
+	 * Compute the size of the last and all its parent fields,
+	 * later fields aren't parsed yet and are therefore not counted
+	*/
+	if (previous->level != 1) {
+		sav_min = previous->occurs_min;
+		sav_max = previous->occurs_max;
+		previous->occurs_min = previous->occurs_max = 1;
+		for (p = previous; p; p = p->parent) {
+			p->flag_is_verified = 0;	/* Force compute_size */
+			p->flag_invalid = 0;
+			cb_validate_field (p);
+			if (cb_field_variable_size (p)) {
+				cb_error (_("Variable length item not allowed here"));
+				p->size = 0;
+				break;
+			}
+			if (!p->parent) {
+				break;
+			}
+		}
+		previous->occurs_min = sav_min;
+		previous->occurs_max = sav_max;
+	} else {
+		p = previous;
+	}
+
+	snprintf (buff, sizeof (buff), "%d", p->size);
+
+	/* Force compute_size for later access */
+	for (p = previous; p; p = p->parent) {
+		p->flag_is_verified = 0;
+		p->flag_invalid = 0;
+	}
+
+	return cb_build_numeric_literal (0, buff, 0);
+}
+
+cb_tree
 cb_build_length (cb_tree x)
 {
 	struct cb_field		*f;

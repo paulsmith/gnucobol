@@ -1840,6 +1840,7 @@ cb_add_const_var (const char *name, cb_tree value)
 	f = CB_FIELD (x);
 	f->flag_item_78 = 1;
 	f->flag_is_global = 1;
+	f->flag_internal_constant = 1;
 	f->level = 1;
 	(void)cb_validate_78_item (f, 1);
 

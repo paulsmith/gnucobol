@@ -1,5 +1,6 @@
 ## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
+## Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -2914,7 +2915,7 @@ AT_DATA([prog.cob], [
           .
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 6: warning: ignoring redundant .
 prog.cob: 12: warning: ignoring redundant .
 ])
@@ -3199,3 +3200,140 @@ prog.cob: 12: warning: STOP literal is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE_ONLY -fstop-identifier=ok -fstop-literal=ok prog.cob], [0], [], [])
 AT_CLEANUP
+
+
+AT_SETUP([01 CONSTANT])
+AT_KEYWORDS([CONSTANT])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  NUM2      CONSTANT 3.
+       01  CON3      CONSTANT ((1 + 2) * NUM2 - 4.
+       01  CON4      CONSTANT (1 + 2) * NUM2 - 4).
+       01  CON5      CONSTANT (1 + 2) // NUM2.
+       01  CON6      CONSTANT (1 + 2 + 3 + (4)) / (NUM2).
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 7: error: missing right parenthesis
+prog.cob: 8: error: missing left parenthesis
+prog.cob: 9: error: '/' operator misplaced
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [1], [],
+[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 7: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 8: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 9: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 10: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+])
+
+AT_CHECK([$COMPILE -std=mf -freserved=CONSTANT prog.cob], [1], [],
+[prog.cob: 6: error: 01 CONSTANT does not conform to Micro Focus COBOL
+prog.cob: 7: error: 01 CONSTANT does not conform to Micro Focus COBOL
+prog.cob: 7: error: syntax error, unexpected Identifier, expecting .
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([78 VALUE])
+AT_KEYWORDS([CONSTANT])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       78  NUM2      VALUE   3.
+       78  NEG1      VALUE   -1.
+       78  CON3      VALUE   ((1 + 2) * NUM2 - 4.
+       78  CON4      VALUE   (1 + 2) * NUM2 - 4).
+       78  CON5      VALUE   (1 + 2) // NUM2.
+       78  CON6      VALUE   (1 + 2 + 3 + (4)) / (NUM2).
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 8: error: missing right parenthesis
+prog.cob: 9: error: missing left parenthesis
+prog.cob: 10: error: '/' operator misplaced
+])
+
+AT_CHECK([$COMPILE -std=ibm prog.cob ], [1], [],
+[prog.cob: 6: error: 78 VALUE does not conform to IBM COBOL
+prog.cob: 7: error: 78 VALUE does not conform to IBM COBOL
+prog.cob: 8: error: 78 VALUE does not conform to IBM COBOL
+prog.cob: 8: error: syntax error, unexpected Identifier, expecting .
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([level 78 NEXT / START OF])
+AT_KEYWORDS([extensions constant])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       78  POS0      VALUE NEXT.
+       01  MYREC.
+          05  FLD1   PIC 9(2).
+          05  FLD2   PIC X(7).
+             78  POS3    VALUE NEXT.
+          05  FLD3   PIC X(2) OCCURS 5 TIMES.
+             78  POS4    VALUE NEXT.
+          05  FLD4   PIC X(4).
+             78  POS-NEXT   VALUE NEXT.
+       77  MYREC2 PIC X.
+       01  MYREC3 EXTERNAL.
+          05  FLD5   PIC X(4).
+             78  POS5    VALUE NEXT.
+          05  FLD6   PIC X(4).
+       01  PICX      PIC XXX VALUE 'Abc'.
+       78  HUN       VALUE 10 * (10 + LENGTH OF PICX) + 12.35-2+3.
+       78  HUN2      VALUE HUN * (10 + LENGTH OF PICX) -4.
+       78  DIV1      VALUE 100 / 3.
+       78  STRT4     VALUE START OF FLD4.
+       LINKAGE SECTION.
+       01  XMYREC.
+          05  XFLD1   PIC 9(2).
+          05  XFLD2   PIC X(7).
+             78  XPOS3    VALUE NEXT.
+          05  XFLD3   PIC X(2) OCCURS 5 TIMES.
+             78  XPOS4    VALUE NEXT.
+          05  XFLD4   PIC X(4).
+          05  XFLD5   PIC X(4).
+       78  XSTRT4     VALUE START OF XFLD4.
+      *
+       PROCEDURE DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 6: error: VALUE of 'POS0': NEXT target is invalid
+prog.cob: 6: error: no previous data-item found
+prog.cob: 10: error: VALUE of 'POS3': NEXT target is invalid
+prog.cob: 10: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob: 12: error: VALUE of 'POS4': NEXT target is invalid
+prog.cob: 12: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob: 14: error: VALUE of 'POS-NEXT': NEXT target is invalid
+prog.cob: 14: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob: 24: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
+prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+])
+
+AT_CLEANUP
+

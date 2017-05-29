@@ -491,6 +491,8 @@ extern void		pp_set_replace_list (struct cb_replace_list *,
 					     const cob_u32_t);
 extern void		ppparse_error (const char *);
 extern void		ppparse_clear_vars (const struct cb_define_struct *);
+extern struct cb_define_struct *ppp_search_lists (const char *name);
+extern void		ppp_clear_lists (void);
 extern void		plex_clear_vars (void);
 extern void		plex_clear_all (void);
 extern void		plex_call_destroy (void);

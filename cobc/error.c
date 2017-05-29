@@ -445,6 +445,11 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 	}
 }
 
+/**
+ * verify if the given compiler option is supported by the current std/configuration
+ * \param	x	tree whose position is used for raising warning/errors
+ * \return	1 = ok/warning/obsolete, 0 = skip/ignore/error/unconformable
+ */
 unsigned int
 cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 {
@@ -484,6 +489,12 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 	}
 	return 0;
 }
+
+/**
+ * verify if the given compiler option is supported by the current std/configuration
+ * current position is used for raising warning/errors
+ * \returns	1 = ok/warning/obsolete, 0 = skip/ignore/error/unconformable
+ */
 
 unsigned int
 cb_verify (const enum cb_support tag, const char *feature)
