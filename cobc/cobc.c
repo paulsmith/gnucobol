@@ -1468,7 +1468,7 @@ cb_define_list_add (struct cb_define_struct *list, const char *text)
 	/* Check duplicate */
 	for (l = list; l; l = l->next) {
 		if (!strcasecmp (s, l->name)) {
-			cobc_err_msg (_("duplicate define '%s' - ignored"), s);
+			cobc_err_msg (_("duplicate DEFINE '%s' - ignored"), s);
 			cobc_free (x);
 			return list;
 		}

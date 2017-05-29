@@ -320,14 +320,14 @@ ppp_define_add (struct cb_define_struct *list, const char *name,
 	for (l = list; l; l = l->next) {
 		if (!strcasecmp (name, l->name)) {
 			if (!override && l->deftype != PLEX_DEF_DEL) {
-				cb_error (_("duplicate define"));
+				cb_error (_("duplicate DEFINE directive '%s'"), name);
 				return NULL;
 			}
 			if (l->value) {
 				l->value = NULL;
 			}
 			if (ppp_set_value (l, text)) {
-				cb_error (_("invalid constant"));
+				cb_error (_("invalid constant in DEFINE directive"));
 				return NULL;
 			}
 			return list;
@@ -337,7 +337,7 @@ ppp_define_add (struct cb_define_struct *list, const char *name,
 	p = cobc_plex_malloc (sizeof (struct cb_define_struct));
 	p->name = cobc_plex_strdup (name);
 	if (ppp_set_value (p, text)) {
-		cb_error (_("invalid constant"));
+		cb_error (_("invalid constant in DEFINE directive"));
 		return NULL;
 	}
 
@@ -794,9 +794,14 @@ format_type:
 ;
 
 define_directive:
-  VARIABLE_NAME _as OFF
+  VARIABLE_NAME _as LITERAL _override
   {
-	ppp_define_del ($1);
+	struct cb_define_struct	*p;
+
+	p = ppp_define_add (ppp_setvar_list, $1, $3, $4);
+	if (p) {
+		ppp_setvar_list = p;
+	}
   }
 | VARIABLE_NAME _as PARAMETER _override
   {
@@ -832,14 +837,9 @@ define_directive:
 		}
 	}
   }
-| VARIABLE_NAME _as LITERAL _override
+| VARIABLE_NAME _as OFF
   {
-	struct cb_define_struct	*p;
-
-	p = ppp_define_add (ppp_setvar_list, $1, $3, $4);
-	if (p) {
-		ppp_setvar_list = p;
-	}
+	ppp_define_del ($1);
   }
 | CONSTANT VARIABLE_NAME _as LITERAL _override
   {
