@@ -1,4 +1,8 @@
 
+2017-05-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobol85/report.pl: redirect stderr to /dev/null if to_kill is requested
+
 2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_misc.at: set COB_EXIT_WAIT=0 in all testcases

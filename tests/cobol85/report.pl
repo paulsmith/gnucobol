@@ -304,7 +304,11 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	}
 
 testrepeat:
-	$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
+	if (!$to_kill{$exe}) {
+		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out");
+	} else {
+		$ret = system ("trap 'exit 77' INT QUIT TERM PIPE; $cmd > $exe.out 2>/dev/null");
+	}
 
 	if ($ret != 0 && !($ret >> 2 && $to_kill{$exe})) {
 		if (($ret >> 8) == 77) {
