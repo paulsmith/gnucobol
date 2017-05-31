@@ -1107,14 +1107,14 @@ void
 cb_trim_program_id (cb_tree id_literal)
 {
 	char	*s;
-	int	len;
+	cob_u32_t	len;
 
 	s = (char *) (CB_LITERAL (id_literal)->data);
 	if (!strchr (s, ' ')) {
 		return;
 	}
 
-	len = strlen (s);
+	len = (cob_u32_t) strlen (s);
 	if (*s == ' ') {
 		/* same warning as in libcob/common.c */
 		cb_warning_x (COBC_WARN_FILLER, id_literal,
