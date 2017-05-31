@@ -687,14 +687,15 @@ set_directive:
 ;
 
 set_choice:
-  CONSTANT VARIABLE_NAME _as LITERAL
+  CONSTANT VARIABLE_NAME LITERAL
   {
+	/* note: the old version was _as LITERAL but MF doesn't supports this */
 	struct cb_define_struct	*p;
 
-	p = ppp_define_add (ppp_setvar_list, $2, $4, 1);
+	p = ppp_define_add (ppp_setvar_list, $2, $3, 1);
 	if (p) {
 		ppp_setvar_list = p;
-		fprintf (ppout, "#DEFLIT %s %s\n", $2, $4);
+		fprintf (ppout, "#DEFLIT %s %s\n", $2, $3);
 	}
   }
 | VARIABLE_NAME set_options
@@ -849,16 +850,6 @@ define_directive:
 | VARIABLE_NAME _as OFF
   {
 	ppp_define_del ($1);
-  }
-| CONSTANT VARIABLE_NAME _as LITERAL _override
-  {
-	struct cb_define_struct	*p;
-
-	p = ppp_define_add (ppp_setvar_list, $2, $4, $5);
-	if (p) {
-		ppp_setvar_list = p;
-		fprintf (ppout, "#DEFLIT %s %s\n", $2, $4);
-	}
   }
 | variable_or_literal
   {

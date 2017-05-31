@@ -6001,6 +6001,81 @@ Using ARITHMETIC-OSVS
 AT_CLEANUP
 
 
+AT_SETUP([SET CONSTANT directive])
+AT_KEYWORDS([misc directives extensions])
+
+# The SET CONSTANT directive defines a level78 variable
+# for the current compilation unit
+
+# original MF extension: $SET CONSTANT
+# (and MF extensions $IF/ELSE/END)
+AT_DATA([prog.cob], [
+       $SET CONSTANT DOGGY "Barky"
+       $SET CONSTANT PONY "Blacky"
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  THEDOG    PIC X(6) VALUE DOGGY.
+       77  MYHORSE   PIC X(7) VALUE PONY.
+       $SET CONSTANT PONY "White"
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           DISPLAY "Your Dog's name is " DOGGY ";".
+           DISPLAY "The Dog's name is " THEDOG ";".
+           DISPLAY "My Horse is " MYHORSE ";".
+           DISPLAY "My little pony is " PONY ".".
+           STOP RUN.
+])
+
+# OpenCOBOL/GnuCOBOL extension: >>SET CONSTANT
+# (and 2002 standard >>IF/ELSE/END-IF)
+AT_DATA([prog2.cob], [
+       >>SET CONSTANT DOGGY "Barky"
+       >>SET CONSTANT PONY "Blacky"
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  THEDOG    PIC X(6) VALUE DOGGY.
+       77  MYHORSE   PIC X(7) VALUE PONY.
+       >>SET CONSTANT PONY "White"
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           DISPLAY "Your Dog's name is " DOGGY ";".
+           DISPLAY "The Dog's name is " THEDOG ";".
+           DISPLAY "My Horse is " MYHORSE ";".
+           DISPLAY "My little pony is " PONY ".".
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+
+# Note: MF does not redefine a value via SET CONSTANT
+# the first definitions wins (we should add a warning)
+AT_CHECK([./prog], [0],
+[Your Dog's name is Barky;
+The Dog's name is Barky ;
+My Horse is Blacky ;
+My little pony is Blacky.
+], [])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+
+# Note: MF does not redefine a value via SET CONSTANT
+# the first definitions wins (we should add a warning)
+AT_CHECK([./prog2], [0],
+[Your Dog's name is Barky;
+The Dog's name is Barky ;
+My Horse is Blacky ;
+My little pony is Blacky.
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([78 VALUE])
 AT_KEYWORDS([CONSTANT misc])
 
@@ -6008,9 +6083,8 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        DATA DIVISION.
-       >>DEFINE CONSTANT MYDOG AS "Piper"
-       >>SET CONSTANT DOGGY AS "Barky"
        WORKING-STORAGE SECTION.
+       78  DOGGY     VALUE "Barky".
        01  MYREC.
           05  FLD1   PIC 9(2).
           05  FLD2   PIC X(7).
@@ -6048,7 +6122,6 @@ AT_DATA([prog.cob], [
            DISPLAY "XFLD3 starts at " XPOS3.
            DISPLAY "XFLD4 starts at " XSTRT4.
            DISPLAY "XFLD4 starts at " XPOS4.
-           DISPLAY "My Dog's name is " MYDOG ";".
            DISPLAY "Your Dog's name is " DOGGY ";".
            DISPLAY "The Dog's name is " THEDOG ";".
            STOP RUN.
@@ -6064,7 +6137,6 @@ NUM2 is 9 left to right precedence.
 XFLD3 starts at 9
 XFLD4 starts at 19
 XFLD4 starts at 11
-My Dog's name is Piper;
 Your Dog's name is Barky;
 The Dog's name is Barky ;
 ], [])
@@ -6076,11 +6148,10 @@ AT_SETUP([01 CONSTANT])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
+       >>DEFINE MYDOG AS "Piper"
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        DATA DIVISION.
-       >>DEFINE MYDOG AS "Piper"
-       >>SET CONSTANT DOGGY AS "Barky"
        WORKING-STORAGE SECTION.
        01  MYREC.
           05  FLD1   PIC 9(2).
@@ -6088,25 +6159,18 @@ AT_DATA([prog.cob], [
           05  FLD3   PIC X(2) OCCURS 5 TIMES.
           05  FLD4   PIC X(4).
           05  FLD5   PIC X(4).
-       >>IF HORSE = "WHITE"
-       >>SET CONSTANT PONY AS "White"
-       >>ELSE
-       >>SET CONSTANT PONY AS "Dusty"
-       >>END-IF
        01  PICX      PIC XXX VALUE 'Abc'.
        01  CAT       CONSTANT  'Cat '.
        01  DOG       CONSTANT  'Dog '.
        01  YARD      CONSTANT  CAT & "& " & DOG.
        78  HUN       VALUE 10 * (10 + LENGTH OF PICX) + 12.35-2+3.
        78  HUN2      VALUE HUN * (10 + LENGTH OF PICX) -4.
-       01  THEDOG    PIC X(6) VALUE DOGGY.
        78  DIV1      VALUE 100 / 3.
        78  NUM2      VALUE 1 + 2 * 3.
        01  CON3      CONSTANT (((1 + 2) * NUM2) - 4).
        01  CON4      CONSTANT 3.1416 + CON3.
        01  CON5      CONSTANT 1 + 2 * 3.
        01  DOGNAME   CONSTANT FROM MYDOG.
-       77  MYHORSE   PIC X(7) VALUE PONY.
        LINKAGE SECTION.
        01  XMYREC.
           05  XFLD1   PIC 9(2).
@@ -6144,13 +6208,6 @@ AT_DATA([prog.cob], [
            DISPLAY "XFLD4 starts at " XSTRT4.
            DISPLAY "XFLD4 starts at " XPOS4.
            DISPLAY "My Dog's name is " DOGNAME ";".
-           DISPLAY "Your Dog's name is " DOGGY ";".
-           DISPLAY "The Dog's name is " THEDOG ";".
-           DISPLAY "My Horse is " MYHORSE ";".
-       >>DEFINE CONSTANT PONYX AS "Purple" OVERRIDE
-       >>IF PONYX IS DEFINED
-           DISPLAY "My little pony is " PONYX.
-       >>END-IF
            STOP RUN.
 ])
 
@@ -6170,10 +6227,6 @@ XFLD3 starts at 9
 XFLD4 starts at 19
 XFLD4 starts at 11
 My Dog's name is Piper;
-Your Dog's name is Barky;
-The Dog's name is Barky ;
-My Horse is Dusty  ;
-My little pony is Purple
 ], [])
 
 AT_CLEANUP
