@@ -1,10 +1,25 @@
 
 2017-05-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* pplex.l, ppparse.y: removed PAGE_DIRECTIVE (checked in pplex.l,
+	  processed in cobc.c)
+	* pplex.l: don't skip separator period in directives,
+	  combined common parts for directives in a single place,
+	  better error handling for directives
+	* pplex.l: added MF extension $DISPLAY VCS = version string as PENDING
+	* cobc.c: directly pass the source_format to (line_has_page_eject),
+	  (line_has_listing_directive) and process it there
+	* cobc.c: added (get_directive_start) to correctly process listing
+	  related directives
+
+2017-05-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
 	* pplex.l, ppparse.y: removed undocumented extensions
 	  >> DEFINE CONSTANT (use 01 CONSTANT with/without FROM clause instead)
 	  and the optional AS in $SET CONSTANT VAR AS VAL - as MF doesn't allow
 	  the AS at all
+	* pplex.l, ppparse.y: implemented >> LEAP-SECOND directive (while keeping
+	  the ON setting as PENDING)
 
 2017-05-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

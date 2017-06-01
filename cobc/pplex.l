@@ -172,7 +172,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 %x PSEUDO_STATE
 %x SOURCE_DIRECTIVE_STATE
 %x DEFINE_DIRECTIVE_STATE
-%x LISTING_DIRECTIVE_STATE
+%x ON_OFF_DIRECTIVE_STATE
 %x SET_DIRECTIVE_STATE
 %x TURN_DIRECTIVE_STATE
 %x IF_DIRECTIVE_STATE
@@ -193,7 +193,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	#endif
 }
 
-^[ ]*">>"[ ]?"DEFINE "	{
+^[ ]*">>"[ ]?"DEFINE"	{
 	/* 2002+: definition of compiler constants display message during compilation */
 	/* Define here to preempt next debug rule below */
 	BEGIN DEFINE_DIRECTIVE_STATE;
@@ -216,45 +216,44 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 ^[ ]*">>"[ ]?"PAGE"	{
-	/* 2002+: listing directive for page eject with optional comment */
+	/* 2002+: listing directive for page eject with optional comment
+	   Note: processed in cobc.c */
 	skip_to_eol ();
 }
 
-^[ ]*">>"[ ]?"LISTING "	{
+^[ ]*">>"[ ]?"LISTING"	{
 	/* 2002+: listing directive for (de-)activating the listing,
-	   ON implied for empty value */
-	BEGIN LISTING_DIRECTIVE_STATE;
+	   ON implied for empty value
+	   Note: further checks in ppparse.y, processed in cobc.c */
+	BEGIN ON_OFF_DIRECTIVE_STATE;
 	return LISTING_DIRECTIVE;
 }
-^[ ]*">>"[ ]?"LISTING"	{
-	skip_to_eol ();
-}
 
-^[ ]*">>"[ ]?"SOURCE "	{
+^[ ]*">>"[ ]?"SOURCE"	{
 	/* 2002+: directive for setting source format */
 	BEGIN SOURCE_DIRECTIVE_STATE;
 	return SOURCE_DIRECTIVE;
 }
 
-^[ ]*">>"[ ]?"SET "	{
+^[ ]*">>"[ ]?"SET"	{
 	/* OpenCOBOL/GnuCOBOL 2.0 extension: MF SET directive in 2002+ style format */
 	BEGIN SET_DIRECTIVE_STATE;
 	return SET_DIRECTIVE;
 }
 
-^[ ]*">>"[ ]?"TURN "	{
+^[ ]*">>"[ ]?"TURN"	{
 	/* 2002+: directive for (de-)activating exception checks */
 	BEGIN TURN_DIRECTIVE_STATE;
 	return TURN_DIRECTIVE;
 }
 
-^[ ]*">>"[ ]?"IF "	{
+^[ ]*">>"[ ]?"IF"	{
 	/* 2002+: conditional compilation */
 	BEGIN IF_DIRECTIVE_STATE;
 	return IF_DIRECTIVE;
 }
-^[ ]*">>"[ ]?"ELIF " |
-^[ ]*">>"[ ]?"ELSE-IF "	{
+^[ ]*">>"[ ]?"ELIF" |
+^[ ]*">>"[ ]?"ELSE-IF"	{
 	/* OpenCOBOL extension: conditional compilation combined ELSE IF,
 	   2002+ style format */
 	BEGIN IF_DIRECTIVE_STATE;
@@ -272,12 +271,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 ^[ ]*">>"[ ]?"LEAP-SECOND"	{
-	/* 2002+: more then 60 seconds per minute */
-	if (warningopt) {
-		cb_plex_warning (warningopt, newline_count,
-			_("ignoring LEAP-SECOND directive"));
-	}
-	skip_to_eol ();
+	/* 2002+: more then 60 seconds per minute (currently always set to off),
+	          OFF implied for empty value */
+	BEGIN ON_OFF_DIRECTIVE_STATE;
+	return LEAP_SECOND_DIRECTIVE;
 }
 
 ^[ ]*">>"[ ]?"CALL-CONVENTION"	{
@@ -309,24 +306,31 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	skip_to_eol ();
 }
 
+^[ ]*"$DISPLAY"[ ]+"VCS"[ ]+"="[ ]+	{
+	/* MF extension: include @(#)text\0 in the object file */
+	/* we just add a warning for now, maybe implement it later */
+	CB_PENDING (_("VCS directive"));
+	skip_to_eol ();
+}
+
 ^[ ]*"$DISPLAY "		{
 	/* MF extension: display message during compilation */
 	display_to_eol ();
 }
 
-^[ ]*"$SET "		{
+^[ ]*"$SET"		{
 	/* MF extension: SET directive */
 	BEGIN SET_DIRECTIVE_STATE;
 	return SET_DIRECTIVE;
 }
 
-^[ ]*"$IF "		{
+^[ ]*"$IF"		{
 	/* MF extension: conditional compilation */
 	BEGIN IF_DIRECTIVE_STATE;
 	return IF_DIRECTIVE;
 }
-^[ ]*"$ELIF " |
-^[ ]*"$ELSE-IF "		{
+^[ ]*"$ELIF" |
+^[ ]*"$ELSE-IF"		{
 	/* OpenCOBOL/GnuCOBOL 2.0 extension: conditional compilation combined ELSE IF,
 	   MF style format */
 	BEGIN IF_DIRECTIVE_STATE;
@@ -383,8 +387,8 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 "INCLUDE"		{
-	/* Note: ++INCLUDE/-INC (include only the data records, must be specified in column 8/1)
-	   are not implemented yet */
+	/* Note: ++INCLUDE/-INC (include only the data records,
+	   must be specified in column 8/1) are not implemented yet */
 	yy_push_state (COPY_STATE);
 	if (cb_src_list_file) {
 		get_new_listing_file ();
@@ -478,44 +482,44 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	ppecho (yytext, 0, yyleng);
 }
 
-<LISTING_DIRECTIVE_STATE>{
+<CALL_DIRECTIVE_STATE,
+SOURCE_DIRECTIVE_STATE,
+DEFINE_DIRECTIVE_STATE,
+ON_OFF_DIRECTIVE_STATE,
+SET_DIRECTIVE_STATE,
+TURN_DIRECTIVE_STATE,
+IF_DIRECTIVE_STATE,
+ELSE_DIRECTIVE_STATE,
+ENDIF_DIRECTIVE_STATE>{
   \n			{
 	BEGIN INITIAL;
 	unput ('\n');
 	return TERMINATOR;
   }
+  [ ,;]+		{ /* ignore */ }
+  "." {
+	return DOT;
+  }
+}
+
+<ON_OFF_DIRECTIVE_STATE>{
   "ON"			{ return ON; }
   "OFF"			{ return OFF; }
-  [ ,;]+		{ /* ignore */ }
-  .			{ }
 }
 
 <SOURCE_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
   "FORMAT"		{ return FORMAT; }
   "IS"			{ return IS; }
   "FIXED"		{ return FIXED; }
   "FREE"		{ return FREE; }
   "VARIABLE"		{ return VARIABLE; }
-  [ ,;]+		{ /* ignore */ }
-  .			{ }
 }
 
 <CALL_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
   "COBOL"		{ return COBOL; }
   "EXTERN"		{ return TOK_EXTERN; }
   "STDCALL"		{ return STDCALL; }
   "STATIC"		{ return STATIC; }
-  [ ,;]+		{ /* ignore */ }
 }
 
 <DEFINE_DIRECTIVE_STATE>{
@@ -524,12 +528,6 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	unput ('\n');
 	return TERMINATOR;
   }
-  /* OpenCOBOL/GnuCOBOL 2.0 extension: MF $SET CONSTANT in 2002+ style as
-     >> DEFINE CONSTANT (removed - use 01 CONSTANT with/without FROM clause instead!)
-  "CONSTANT"		{
-	return CONSTANT;
-  }
-  */
   "AS"			{
 	return AS;
   }
@@ -551,16 +549,9 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
   }
-  [ ,;]+		{ /* ignore */ }
-  .			{ }
 }
 
 <SET_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
   "CONSTANT"		{
 	return CONSTANT;
   }
@@ -592,16 +583,9 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
   }
-  [ ,;]+		{ /* ignore */ }
-  .			{ }
 }
 
 <TURN_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
   "ON"			{
 	return ON;
   }
@@ -631,17 +615,23 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
   }
-  [ ,;]+		{ /* ignore */ }
-  .			{ }
+}
+
+<CALL_DIRECTIVE_STATE,
+SOURCE_DIRECTIVE_STATE,
+ON_OFF_DIRECTIVE_STATE,
+ELSE_DIRECTIVE_STATE,
+ENDIF_DIRECTIVE_STATE>{
+  {NUMRIC_LITERAL} |
+  {ALNUM_LITERAL}	{
+	return LITERAL;
+  }
+  {WORD}		{
+	return GARBAGE;
+  }
 }
 
 <IF_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
-  [ ,;]+		{ /* ignore */ }
   "IS"			{ return IS; }
   "NOT"			{ return NOT; }
   "EQUAL"		{ return EQUAL; }
@@ -667,25 +657,6 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
   }
-  .			{ }
-}
-
-<ELSE_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
-  .+			{ /* ignore */ }
-}
-
-<ENDIF_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
-  .+			{ /* ignore */ }
 }
 
 <COPY_STATE>{

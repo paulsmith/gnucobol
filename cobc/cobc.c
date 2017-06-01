@@ -4964,33 +4964,59 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 	return i;
 }
 
+static char *
+get_directive_start (const char *line, const enum cb_format source_format)
+{
+	char	*curr_pos;
+
+	if (source_format != CB_FORMAT_FREE) {
+		curr_pos = (char *)line + CB_INDICATOR + 1;
+	} else {
+		curr_pos = (char *)line;
+	}
+	while (*curr_pos != 0) {
+		if (*curr_pos != ' ') {
+			break;
+		}
+		curr_pos++;
+	}
+	if (*curr_pos == '>' && *++curr_pos == '>') {
+		while (*++curr_pos != 0) {
+			if (*curr_pos != ' ') {
+				return curr_pos;
+			}
+		}
+	}
+	return NULL;
+}
+
 static int
-line_has_page_eject (const char *line, const int fixed)
+line_has_page_eject (const char *line, const enum cb_format source_format)
 {
 	char	*directive_start;
 
-	if (fixed && line[CB_INDICATOR] == '/') {
+	if (source_format != CB_FORMAT_FREE && line[CB_INDICATOR] == '/') {
 		return 1;
 	} else {
-		directive_start = strchr (line, '>');
+		directive_start = get_directive_start (line, source_format);
 		return directive_start != NULL
-			&& !strncasecmp (directive_start, ">>PAGE", 6);
+			&& !strncasecmp (directive_start, "PAGE", 4);
 	}
 }
 
 static int
-line_has_listing_directive (const char *line, int *on_off)
+line_has_listing_directive (const char *line, const enum cb_format source_format, int *on_off)
 {
 	char	*directive_start;
 	char	token[32], term[2];
 
-	directive_start = strchr (line, '>');
+	directive_start = get_directive_start (line, source_format);
 	if (directive_start != NULL &&
-		!strncasecmp (directive_start, ">>LISTING", 9)) {
-		directive_start += 9;
+		!strncasecmp (directive_start, "LISTING", 7)) {
+		directive_start += 7;
 		*on_off = 1;
 		get_next_token (directive_start, token, term);
-		if (!strcasecmp (token, "OFF"))
+		if (token != NULL && !strcasecmp (token, "OFF"))
 			*on_off = 0;
 		return 1;
 	}
@@ -5090,12 +5116,12 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
 	int	on_off;
 	char	pch;
 
-	if (line_has_page_eject (line, cfile->source_format != CB_FORMAT_FREE)) {
+	if (line_has_page_eject (line, cfile->source_format)) {
 		force_new_page_for_next_line ();
 	}
 
 	do_print = cfile->listing_on;
-	if (line_has_listing_directive (line, &on_off)) {
+	if (line_has_listing_directive (line, cfile->source_format, &on_off)) {
 		cfile->listing_on = on_off;
 		/* always print the directive itself */
 		do_print = 1;

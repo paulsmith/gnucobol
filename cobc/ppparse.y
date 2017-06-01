@@ -549,8 +549,9 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 
 %token GARBAGE		"word"
 
-%token PAGE_DIRECTIVE
 %token LISTING_DIRECTIVE
+
+%token LEAP_SECOND_DIRECTIVE
 
 %token SOURCE_DIRECTIVE
 %token FORMAT
@@ -648,8 +649,8 @@ directive:
 | DEFINE_DIRECTIVE define_directive
 | SET_DIRECTIVE set_directive
 | TURN_DIRECTIVE turn_directive
-| PAGE_DIRECTIVE page_directive
 | LISTING_DIRECTIVE listing_directive
+| LEAP_SECOND_DIRECTIVE leap_second_directive
 | IF_DIRECTIVE
   {
 	current_cmd = PLEX_ACT_IF;
@@ -858,14 +859,19 @@ define_directive:
 ;
 
 
-page_directive:
-  {
-	CB_PENDING (_("PAGE directive"));
-  }
+listing_directive:
+  /*  Note: processed in cobc.c */
+  /* empty (ON implied) */
+| ON
+| OFF
 ;
 
-listing_directive:
-  ON
+leap_second_directive:
+/* empty (OFF implied) */
+| ON
+  {
+	CB_PENDING (_("LEAP-SECOND ON directive"));
+  }
 | OFF
 ;
 
