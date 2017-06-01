@@ -738,8 +738,9 @@ AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Eject page])
-AT_KEYWORDS([listing])
+AT_KEYWORDS([listing directive])
 
 AT_CAPTURE_FILE([prog.lst])
 
@@ -995,7 +996,7 @@ AT_DATA([prog2.cob], [
   PROGRAM-ID.      prog2.
   DATA             DIVISION.
   WORKING-STORAGE  SECTION.
-  >>PAGE
+  >> PAGE  page  feed  comment
   PROCEDURE        DIVISION.
   STOP RUN.
 ])
@@ -1016,7 +1017,7 @@ LINE    .....................................................SOURCE.............
 
 LINE    .....................................................SOURCE.....................................................
 
-000006    >>PAGE
+000006    >> PAGE  page  feed  comment
 000007    PROCEDURE        DIVISION.
 000008    STOP RUN.
 
@@ -2220,7 +2221,7 @@ AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([LISTING ON/OFF])
+AT_SETUP([LISTING directive])
 AT_KEYWORDS([listing])
 
 AT_CAPTURE_FILE([prog.lst])
@@ -2238,12 +2239,19 @@ AT_DATA([copy.inc], [
        01 TEST8-VAR PIC X(2) VALUE "OK".
 ])
 
+AT_DATA([copy2.inc], [       >> LISTING OFF
+       01 TEST9-VAR PIC X(2) VALUE "OK".
+       >>LISTING
+       01 TESTA-VAR PIC X(2) VALUE "OK".
+])
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        COPY "copy.inc".
+       COPY "copy2.inc".
        PROCEDURE        DIVISION.
            DISPLAY TEST1-VAR NO ADVANCING
            END-DISPLAY.
@@ -2270,10 +2278,14 @@ LINE    PG/LN  A...B............................................................
 000009C        01 TEST6-VAR PIC X(2) VALUE "OK".
 000010C        01 TEST7-VAR PIC X(2) VALUE "OK".
 000011C        01 TEST8-VAR PIC X(2) VALUE "OK".
-000007         PROCEDURE        DIVISION.
-000008             DISPLAY TEST1-VAR NO ADVANCING
-000009             END-DISPLAY.
-000010             STOP RUN.
+000007         COPY "copy2.inc".
+000001C        >> LISTING OFF
+000003C        >>LISTING
+000004C        01 TESTA-VAR PIC X(2) VALUE "OK".
+000008         PROCEDURE        DIVISION.
+000009             DISPLAY TEST1-VAR NO ADVANCING
+000010             END-DISPLAY.
+000011             STOP RUN.
 
 SIZE  TYPE           LVL  NAME                           PICTURE
 
@@ -2292,6 +2304,10 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 00002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
 
 00002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST9-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TESTA-VAR                      X(2)
 
 
 0 warnings in compilation group
