@@ -2259,6 +2259,47 @@ AT_DATA([prog2.cob], [
            STOP RUN.
 ])
 
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 COUNTER       PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+
+       00000000000000000000000000000000000000000000000000000000000
+       SECTION.
+       000000000000000000000000000000000000000000000000000000000000.
+           ADD 1 TO COUNTER END-ADD
+           EVALUATE COUNTER
+           WHEN 1
+           PERFORM
+           00000000000000000000000000000000000000000000000000000000000
+           WHEN 2
+           PERFORM
+           000000000000000000000000000000000000000000000000000000000000
+           WHEN 3
+           MOVE 0 TO COUNTER
+           END-EVALUATE.
+
+       100000000000000000000000000000000000000000000000000000000001
+       SECTION.
+       20000000000000000000000000000000000000000000000000000000002.
+           ADD 1 TO COUNTER END-ADD
+           EVALUATE COUNTER
+           WHEN 1
+           PERFORM
+           100000000000000000000000000000000000000000000000000000000001
+           WHEN 2
+           PERFORM
+           20000000000000000000000000000000000000000000000000000000002
+           WHEN 3
+           MOVE 0 TO COUNTER
+           END-EVALUATE.
+
+           STOP RUN.
+])
+
 AT_CHECK([$COMPILE_ONLY -free prog.cob], [1], [],
 [prog.cob: 11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog.cob: 12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
@@ -2316,7 +2357,192 @@ prog2.cob: 20: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WIT
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
 prog2.cob: 21: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 ])
-AT_CHECK([$COMPILE_ONLY -free -frelax-syntax-checks -w prog2.cob], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -fword-length=59 prog3.cob], [1], [],
+[prog3.cob: in section '00000000000000000000000000000000000000000000000000000000000':
+prog3.cob: 11: error: word length exceeds 59 characters: '000000000000000000000000000000000000000000000000000000000000'
+prog3.cob: in paragraph '000000000000000000000000000000000000000000000000000000000000':
+prog3.cob: 25: error: word length exceeds 59 characters: '100000000000000000000000000000000000000000000000000000000001'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Numeric literals])
+AT_KEYWORDS([misc numeric-literal-length])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 COUNTER       PIC 9 VALUE 0.
+       PROCEDURE        DIVISION.
+
+      *> No literals at all
+       00000000000000000000000000000000000000000000000000000000000
+       SECTION.
+       000000000000000000000000000000000000000000000000000000000000.
+           ADD 1 TO COUNTER END-ADD
+           EVALUATE COUNTER
+           WHEN 1
+           PERFORM
+           00000000000000000000000000000000000000000000000000000000000
+           WHEN 2
+           PERFORM
+           000000000000000000000000000000000000000000000000000000000000
+           WHEN 3
+           MOVE 0 TO COUNTER
+           END-EVALUATE.
+
+       100000000000000000000000000000000000000000000000000000000001
+       SECTION.
+       20000000000000000000000000000000000000000000000000000000002.
+           ADD 1 TO COUNTER END-ADD
+           EVALUATE COUNTER
+           WHEN 1
+           PERFORM
+           100000000000000000000000000000000000000000000000000000000001
+           WHEN 2
+           PERFORM
+           20000000000000000000000000000000000000000000000000000000002
+           WHEN 3
+           MOVE 0 TO COUNTER
+           END-EVALUATE.
+
+           STOP RUN.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+       PROCEDURE        DIVISION.
+
+           *> Valid literals, depending on numeric literal size
+           DISPLAY 1.0076, +100000.03, +1.0, -0078,
+               +.1234567890123456789012345678901234
+               .123456789012345678901234567890123450
+           END-DISPLAY
+
+           *> Invalid literals
+           DISPLAY 1.03.0     END-DISPLAY
+           DISPLAY --123      END-DISPLAY
+           DISPLAY -123-      END-DISPLAY
+           DISPLAY -123-456   END-DISPLAY
+           DISPLAY -123-4.56  END-DISPLAY
+           DISPLAY -12.3-456  END-DISPLAY
+           DISPLAY -12.3-4.56 END-DISPLAY
+           DISPLAY 1000003+   END-DISPLAY
+           DISPLAY 1.000003+  END-DISPLAY
+           DISPLAY .3+        END-DISPLAY
+           DISPLAY 3.+        END-DISPLAY
+           
+           STOP RUN.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog3.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES. DECIMAL-POINT IS COMMA.
+       PROCEDURE        DIVISION.
+
+           *> Valid literals, depending on numeric literal size
+           DISPLAY 1,0076, +100000,03, +1,0, -0078,
+               +,1234567890123456789012345678901234
+               ,123456789012345678901234567890123450
+           END-DISPLAY
+
+           *> Invalid literals
+           DISPLAY 1,03,0     END-DISPLAY
+           DISPLAY --123      END-DISPLAY
+           DISPLAY -123-      END-DISPLAY
+           DISPLAY -123-456   END-DISPLAY
+           DISPLAY -123-4,56  END-DISPLAY
+           DISPLAY -12,3-456  END-DISPLAY
+           DISPLAY -12,3-4,56 END-DISPLAY
+           DISPLAY 1000003+   END-DISPLAY
+           DISPLAY 1,000003+  END-DISPLAY
+           DISPLAY ,3+        END-DISPLAY
+           DISPLAY 3,+        END-DISPLAY
+           
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -fliteral-length=1 -fnumeric-literal-length=1 -fword-length=60 prog.cob], [0], [], [])
+
+# result with extended scanner for wrong numeric literals:
+#AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+#[prog2.cob: 16: error: invalid numeric literal: '1.03.0'
+#prog2.cob: 16: error: literal with more than one decimal point
+#prog2.cob: 17: error: invalid numeric literal: '--123'
+#prog2.cob: 17: error: literal with more than one sign character
+#prog2.cob: 18: error: invalid numeric literal: '-123-'
+#prog2.cob: 18: error: literal with more than one sign character
+#prog2.cob: 19: error: invalid numeric literal: '-123-456'
+#prog2.cob: 19: error: literal with more than one sign character
+#prog2.cob: 20: error: invalid numeric literal: '-123-4.56'
+#prog2.cob: 20: error: literal with more than one sign character
+#prog2.cob: 21: error: invalid numeric literal: '-12.3-456'
+#prog2.cob: 21: error: literal with more than one sign character
+#prog2.cob: 22: error: invalid numeric literal: '-12.3-4.56'
+#prog2.cob: 22: error: literal with more than one sign character
+#prog2.cob: 22: error: literal with more than one decimal point
+#prog2.cob: 23: error: invalid numeric literal: '1000003+'
+#prog2.cob: 23: error: sign must appear as leftmost character
+#prog2.cob: 24: error: invalid numeric literal: '1.000003+'
+#prog2.cob: 24: error: sign must appear as leftmost character
+#prog2.cob: 25: error: invalid numeric literal: '.3+'
+#prog2.cob: 25: error: sign must appear as leftmost character
+#prog2.cob: 26: error: invalid numeric literal: '3.+'
+#prog2.cob: 26: error: sign must appear as leftmost character
+#])
+#AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+#[prog3.cob: 16: error: invalid numeric literal: '1,03,0'
+#prog3.cob: 16: error: literal with more than one decimal point
+#prog3.cob: 17: error: invalid numeric literal: '--123'
+#prog3.cob: 17: error: literal with more than one sign character
+#prog3.cob: 18: error: invalid numeric literal: '-123-'
+#prog3.cob: 18: error: literal with more than one sign character
+#prog3.cob: 19: error: invalid numeric literal: '-123-456'
+#prog3.cob: 19: error: literal with more than one sign character
+#prog3.cob: 20: error: invalid numeric literal: '-123-4,56'
+#prog3.cob: 20: error: literal with more than one sign character
+#prog3.cob: 21: error: invalid numeric literal: '-12,3-456'
+#prog3.cob: 21: error: literal with more than one sign character
+#prog3.cob: 22: error: invalid numeric literal: '-12,3-4,56'
+#prog3.cob: 22: error: literal with more than one sign character
+#prog3.cob: 22: error: literal with more than one decimal point
+#prog3.cob: 23: error: invalid numeric literal: '1000003+'
+#prog3.cob: 23: error: sign must appear as leftmost character
+#prog3.cob: 24: error: invalid numeric literal: '1,000003+'
+#prog3.cob: 24: error: sign must appear as leftmost character
+#prog3.cob: 25: error: invalid numeric literal: ',3+'
+#prog3.cob: 25: error: sign must appear as leftmost character
+#prog3.cob: 26: error: invalid numeric literal: '3,+'
+#prog3.cob: 26: error: sign must appear as leftmost character
+#])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 17: error: syntax error, unexpected -
+prog2.cob: 18: error: syntax error, unexpected -
+prog2.cob: 23: error: syntax error, unexpected +
+prog2.cob: 24: error: syntax error, unexpected +
+prog2.cob: 25: error: syntax error, unexpected +
+prog2.cob: 26: error: syntax error, unexpected +
+])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
+[prog3.cob: 17: error: syntax error, unexpected -
+prog3.cob: 18: error: syntax error, unexpected -
+prog3.cob: 23: error: syntax error, unexpected +
+prog3.cob: 24: error: syntax error, unexpected +
+prog3.cob: 25: error: syntax error, unexpected +
+prog3.cob: 26: error: syntax error, unexpected +
+])
 
 AT_CLEANUP
 

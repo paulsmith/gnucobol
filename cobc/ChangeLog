@@ -1549,6 +1549,12 @@
 	* cobc.h (noreserve): renamed to reserved_word_list.
 	* tree.h (cobc_reserved): removed const qualifiers from members.
 
+2016-02-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, typeck.c (cb_check_word_length), tree.h: moved word length
+	  check out of scanner.l to also check numeric-only words that bypass
+	  the checks in scanner.l
+
 2016-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (read_literal): Fix wrong error about max-literal length

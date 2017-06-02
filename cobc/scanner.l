@@ -371,8 +371,11 @@ H#[0-9A-Za-z]* {
 		/* Integer label or level number */
 		RETURN_TOK (WORD);
 	}
-	/* Numeric literal or referenced integer label */
-	/* All transformations/checks are postponed to tree.c */
+	/* Numeric literal or referenced integer label
+	remark: all transformations/checks are postponed:
+	literals to tree.c,
+	integer label to typeck.c (cb_build_section_name)
+	*/
 	yylval = cb_build_numeric_literal (0, yytext, 0);
 	RETURN_TOK (LITERAL);
 }
@@ -732,20 +735,7 @@ H#[0-9A-Za-z]* {
 	cb_tree				l;
 	struct cb_program		*program;
 
-	/* Check word length */
-	if (unlikely (yyleng > (signed int) cb_word_length)) {
-		if (yyleng > COB_MAX_WORDLEN) {
-			/* Absolute limit */
-			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
-				  COB_MAX_WORDLEN, yytext);
-		} else if (!cb_relaxed_syntax_checks) {
-			cb_error (_("word length exceeds %d characters: '%s'"),
-				  cb_word_length, yytext);
-		} else {
-			cb_warning (warningopt, _("word length exceeds %d characters: '%s'"),
-				  cb_word_length, yytext);
-		}
-	}
+	cb_check_word_length (yyleng, yytext);
 
 	/* Check Intrinsic FUNCTION name without keyword */
 	if ((cobc_in_procedure && (functions_are_all || cb_intrinsic_list ||

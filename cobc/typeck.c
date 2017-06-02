@@ -1253,13 +1253,46 @@ cb_define_switch_name (cb_tree name, cb_tree sname, const int flag)
 	return value;
 }
 
+void
+cb_check_word_length (int length, const char *word) {
+	if (unlikely (length > cb_word_length)) {
+		if (length > COB_MAX_WORDLEN) {
+			/* Absolute limit */
+			cb_error (_("word length exceeds maximum of %d characters: '%s'"),
+				  COB_MAX_WORDLEN, word);
+		} else if (!cb_relaxed_syntax_checks) {
+			cb_error (_("word length exceeds %d characters: '%s'"),
+				  cb_word_length, word);
+		} else {
+			cb_warning (warningopt, _("word length exceeds %d characters: '%s'"),
+				  cb_word_length, word);
+		}
+	}
+}
+
 cb_tree
 cb_build_section_name (cb_tree name, const int sect_or_para)
 {
 	cb_tree x;
+	struct cb_word	*w;
+	int			nwlength;
 
 	if (name == cb_error_node) {
 		return cb_error_node;
+	}
+
+	/* Check word length
+	needed here for numeric-only words that bypass the checks
+	in scanner.l */
+	w = CB_REFERENCE (name)->word;
+	for (nwlength = 0; w->name[nwlength] != 0; nwlength++) {
+		if (!isdigit ((int)w->name[nwlength])) {
+			nwlength = 0;
+			break;
+		}
+	}
+	if (nwlength != 0) {
+		cb_check_word_length(nwlength, w->name);
 	}
 
 	if (CB_WORD_COUNT (name) > 0) {
