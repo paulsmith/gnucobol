@@ -411,7 +411,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CHARACTER",		0, 0, CHARACTER,		/* 2002 */
 				0, 0
   },
-  { "CHARACTERS",		0, 0, CHARACTERS,		/* 2002 */
+  { "CHARACTERS",		0, 0, CHARACTERS,		/* 85 (OBJECT-COMPUTER) 2002 */
 				0, 0
   },
   { "CLASS",			0, 0, CLASS,			/* 2002 */
@@ -1172,7 +1172,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "MEMORY",			0, 0, MEMORY,			/* 85 */
-				0, 0
+				0, CB_CS_OBJECT_COMPUTER
   },
   { "MERGE",			0, 0, MERGE,			/* 2002 */
 				0, 0
@@ -1191,6 +1191,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "MODE",			0, 0, MODE,			/* 2002 */
 				0, 0
+  },
+  { "MODULES",		0, 0, MODULES,			/* 85 */
+				0, CB_CS_OBJECT_COMPUTER
   },
   { "MOVE",			0, 0, MOVE,			/* 2002 */
 				0, 0
@@ -1271,7 +1274,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "OBJECT-COMPUTER",		0, 0, OBJECT_COMPUTER,		/* 2002 */
-				0, 0
+				CB_CS_OBJECT_COMPUTER, 0
   },
   { "OBJECT-REFERENCE",		0, 0, -1,			/* 2002 */
 				0, 0

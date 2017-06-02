@@ -1961,6 +1961,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token MINUS
 %token MNEMONIC_NAME		"Mnemonic name"
 %token MODE
+%token MODULES
 %token MOVE
 %token MULTIPLE
 %token MULTIPLY
@@ -2776,6 +2777,9 @@ object_computer_paragraph:
 	check_repeated ("OBJECT-COMPUTER", SYN_CLAUSE_2, &check_comp_duplicate);
   }
   _object_computer_entry
+  {
+	cobc_cs_check = 0;
+  }
 ;
 
 _object_computer_entry:
@@ -2798,7 +2802,7 @@ object_clauses:
 ;
 
 object_computer_memory:
-  MEMORY SIZE _is integer object_char_or_word
+  MEMORY _size _is integer object_char_or_word_or_modules
   {
 	cb_verify (cb_memory_size_clause, "MEMORY SIZE");
   }
@@ -2815,6 +2819,15 @@ object_computer_sequence:
 object_computer_segment:
   SEGMENT_LIMIT _is integer
   {
+	int segnum;
+	
+	if (cb_verify (cb_section_segments, "SEGMENT LIMIT")) {
+		segnum = cb_get_int ($3);
+		if (segnum == 0 || segnum > 49) {
+			cb_error (_("segment-number must be in range of values 1 to 49"));
+			$$ = NULL;
+		}
+	}
 	/* Ignore */
   }
 ;
@@ -6866,7 +6879,7 @@ procedure:
 /* Section/Paragraph */
 
 section_header:
-  WORD SECTION _segment TOK_DOT
+  WORD SECTION
   {
 	non_const_word = 0;
 	check_unreached = 0;
@@ -6898,9 +6911,6 @@ section_header:
 
 	/* Begin a new section */
 	current_section = CB_LABEL (cb_build_label ($1, NULL));
-	if ($3) {
-		current_section->segment = cb_get_int ($3);
-	}
 	current_section->flag_section = 1;
 	/* Careful here, one negation */
 	current_section->flag_real_label = !in_debugging;
@@ -6910,6 +6920,7 @@ section_header:
 	CB_TREE (current_section)->source_line = cb_source_line;
 	current_paragraph = NULL;
   }
+  _segment TOK_DOT
   _use_statement
   {
 	emit_statement (CB_TREE (current_section));
@@ -6995,14 +7006,25 @@ _segment:
   }
 | integer
   {
-	if (in_declaratives) {
-		cb_error (_("SECTION segment invalid within DECLARATIVE"));
-	}
-	if (cb_verify (cb_section_segments, _("SECTION segment"))) {
-		current_program->flag_segments = 1;
-		$$ = $1;
-	} else {
-		$$ = NULL;
+	int segnum = cb_get_int ($1);
+	
+	$$ = NULL;
+	if (cb_verify (cb_section_segments, "SECTION segment")) {
+		if (segnum > 99) {
+			cb_error (_("SECTION segment-number must be less than or equal to 99"));
+		} else {
+			if (in_declaratives && segnum > 49) {
+				cb_error (_("SECTION segment-number in DECLARATIVES must be less than 50"));
+			}
+			if (!in_declaratives) {
+				current_program->flag_segments = 1;
+				current_section->segment = segnum;
+			} else {
+				/* Simon: old version did not allow segments in declaratives at all
+					ToDo: check codegen for possible missing parts */
+				CB_PENDING (_("SECTION segment within DECLARATIVES"));
+			}
+		}
 	}
   }
 ;
@@ -8830,6 +8852,7 @@ exit_statement:
 
 exit_body:
   /* empty */	%prec SHIFT_PREFER
+  /* TODO: add warning/error if there's another statement in the paragraph */
 | PROGRAM exit_program_returning
   {
 	if (in_declaratives && use_global_ind) {
@@ -13178,7 +13201,7 @@ in_of:			IN | OF ;
 label_option:		STANDARD | OMITTED ;
 line_or_lines:		LINE | LINES ;
 lock_records:		RECORD | RECORDS ;
-object_char_or_word:	CHARACTERS | WORDS ;
+object_char_or_word_or_modules:	CHARACTERS | WORDS | MODULES;
 records:		RECORD _is | RECORDS _are ;
 reel_or_unit:		REEL | UNIT ;
 scroll_line_or_lines:	LINE | LINES ;
