@@ -836,15 +836,15 @@ data
 
 AT_DATA([prog.cob], [
         IDENTIFICATION DIVISION.
-        PROGRAM-ID. prog.
+        PROGRAM-ID.     prog.
         DATA DIVISION.
         WORKING-STORAGE SECTION.
-        01 FNAME PIC X(256) VALUE 'testtext.txt'.
-        01 ACCESS-MODE PIC X USAGE COMP-X VALUE 2.
-        01 HANDLE PIC X(4) USAGE COMP-X.
+        01 FNAME        PIC X(256) VALUE 'testtext.txt'.
+        01 ACCESS-MODE  PIC X      USAGE COMP-X VALUE 2.
+        01 HANDLE       PIC X(4)   USAGE COMP-X.
 
-        01 OFFSET PIC X(8) USAGE COMP-X.
-        01 NBYTES PIC X(4) USAGE COMP-X.
+        01 OFFSET       PIC X(8)   USAGE COMP-X.
+        01 NBYTES       PIC X(4)   USAGE COMP-X.
         01 WRITE-BUFFER PIC X(20).
 
         PROCEDURE DIVISION.
@@ -853,12 +853,14 @@ AT_DATA([prog.cob], [
         IF RETURN-CODE NOT = -1
            DISPLAY 'Wrong return codes ...' END-DISPLAY
         END-IF
+        MOVE 0 TO RETURN-CODE
 
         CALL 'CBL_CREATE_FILE' USING
         FNAME ACCESS-MODE 0 0 HANDLE
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error creating file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         MOVE 'TestText.ABCD' TO WRITE-BUFFER.
@@ -870,16 +872,19 @@ AT_DATA([prog.cob], [
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error writing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         CALL 'CBL_FLUSH_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error flushing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         CALL 'CBL_CLOSE_FILE' USING HANDLE END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error closing file ...' END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         STOP RUN.
@@ -887,16 +892,16 @@ AT_DATA([prog.cob], [
 
 AT_DATA([prog2.cob], [
         IDENTIFICATION DIVISION.
-        PROGRAM-ID. prog2.
+        PROGRAM-ID.     prog2.
         DATA DIVISION.
         WORKING-STORAGE SECTION.
-        01 FNAME PIC X(256) VALUE 'testtext.txt'.
-        01 RET PIC -9.
-        01 HANDLE PIC X(4) USAGE COMP-X.
+        01 FNAME        PIC X(256) VALUE 'testtext.txt'.
+        01 RET          PIC -9.
+        01 HANDLE       PIC X(4)   USAGE COMP-X.
 
-        01 OFFSET PIC X(8) USAGE COMP-X.
-        01 NBYTES PIC X(4) USAGE COMP-X.
-        01 READ-BUFFER PIC X(10).
+        01 OFFSET       PIC X(8)   USAGE COMP-X.
+        01 NBYTES       PIC X(4)   USAGE COMP-X.
+        01 READ-BUFFER  PIC X(10).
 
         PROCEDURE DIVISION.
         CALL 'CBL_OPEN_FILE' USING FNAME 1 0 0 HANDLE
@@ -916,6 +921,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 'error reading file ...'
                    return-code
            END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
         IF READ-BUFFER NOT = 'stText.' *> text from first test
            DISPLAY 'Wrong readbuffer ...' END-DISPLAY
@@ -926,6 +932,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 'error closing file ...'
                    return-code
            END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         CALL 'CBL_RENAME_FILE' USING FNAME 'foo.txt' END-CALL
@@ -933,6 +940,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 'error renaming file ...'
                    return-code
            END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
 
         CALL 'CBL_DELETE_FILE' USING 'file1' END-CALL
@@ -940,6 +948,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 'error deleting file1 ...'
                    return-code
            END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
         CALL 'CBL_DELETE_FILE' USING 'file1' END-CALL
         IF RETURN-CODE = 0
@@ -947,19 +956,22 @@ AT_DATA([prog2.cob], [
                    return-code
            END-DISPLAY
         END-IF
+        MOVE 0 TO RETURN-CODE
 
         CALL 'C$DELETE' USING 'file2' 'S' END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error deleting file2 ...'
                    return-code
            END-DISPLAY
+           MOVE 0 TO RETURN-CODE
         END-IF
         CALL 'CBL_DELETE_FILE' USING 'file2' END-CALL
-        IF RETURN-CODE NOT = 1   *> only returns 0 or 1
+        IF RETURN-CODE = 0   *> note: should only return 0 or 1 when in ACUCOBOL mode
            DISPLAY 'no error on deleting file2 for the second time...'
                    return-code
            END-DISPLAY
         END-IF
+        MOVE 0 TO RETURN-CODE
 
         STOP RUN.
 ])
