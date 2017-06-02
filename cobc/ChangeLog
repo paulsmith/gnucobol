@@ -9,8 +9,8 @@
 	* pplex.l: added MF extension $DISPLAY VCS = version string as PENDING
 	* cobc.c: directly pass the source_format to (line_has_page_eject),
 	  (line_has_listing_directive) and process it there
-	* cobc.c: added (get_directive_start) to correctly process listing
-	  related directives
+	* cobc.c: added (get_first_nonspace, get_directive_start) to correctly
+	  process listing related directives
 
 2017-05-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -4964,8 +4964,11 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 	return i;
 }
 
+/*
+  return position of first nonspace (ignoring sequence area)
+*/
 static char *
-get_directive_start (const char *line, const enum cb_format source_format)
+get_first_nonspace (const char *line, const enum cb_format source_format)
 {
 	char	*curr_pos;
 
@@ -4980,7 +4983,24 @@ get_directive_start (const char *line, const enum cb_format source_format)
 		}
 		curr_pos++;
 	}
-	if (*curr_pos == '>' && *++curr_pos == '>') {
+	if (*curr_pos != 0) {
+		return curr_pos;
+	} else {
+		return NULL;
+	}
+}
+
+/*
+  check for compiler directive indicator and return
+  position of compiler instruction
+*/
+static char *
+get_directive_start (const char *line, const enum cb_format source_format)
+{
+	char	*curr_pos;
+
+	curr_pos = get_first_nonspace (line, source_format);
+	if (curr_pos != NULL && *curr_pos == '>' && *++curr_pos == '>') {
 		while (*++curr_pos != 0) {
 			if (*curr_pos != ' ') {
 				return curr_pos;
@@ -4990,20 +5010,9 @@ get_directive_start (const char *line, const enum cb_format source_format)
 	return NULL;
 }
 
-static int
-line_has_page_eject (const char *line, const enum cb_format source_format)
-{
-	char	*directive_start;
-
-	if (source_format != CB_FORMAT_FREE && line[CB_INDICATOR] == '/') {
-		return 1;
-	} else {
-		directive_start = get_directive_start (line, source_format);
-		return directive_start != NULL
-			&& !strncasecmp (directive_start, "PAGE", 4);
-	}
-}
-
+/*
+  check for >> LISTING directive and set on_off value
+*/
 static int
 line_has_listing_directive (const char *line, const enum cb_format source_format, int *on_off)
 {
@@ -5016,11 +5025,28 @@ line_has_listing_directive (const char *line, const enum cb_format source_format
 		directive_start += 7;
 		*on_off = 1;
 		get_next_token (directive_start, token, term);
-		if (token != NULL && !strcasecmp (token, "OFF"))
+		if (token != NULL && !strncasecmp (token, "OFF", 3))
 			*on_off = 0;
 		return 1;
 	}
 	return 0;
+}
+
+/*
+  check for >> PAGE directive and page eject indicator
+*/
+static int
+line_has_page_eject (const char *line, const enum cb_format source_format)
+{
+	char	*directive_start;
+
+	if (source_format != CB_FORMAT_FREE && line[CB_INDICATOR] == '/') {
+		return 1;
+	} else {
+		directive_start = get_directive_start (line, source_format);
+		return directive_start != NULL
+			&& !strncasecmp (directive_start, "PAGE", 4);
+	}
 }
 
 static void
@@ -5116,15 +5142,13 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
 	int	on_off;
 	char	pch;
 
-	if (line_has_page_eject (line, cfile->source_format)) {
-		force_new_page_for_next_line ();
-	}
-
 	do_print = cfile->listing_on;
 	if (line_has_listing_directive (line, cfile->source_format, &on_off)) {
 		cfile->listing_on = on_off;
 		/* always print the directive itself */
 		do_print = 1;
+	} else if (line_has_page_eject (line, cfile->source_format)) {
+		force_new_page_for_next_line ();
 	}
 
 	if (do_print) {
