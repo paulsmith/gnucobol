@@ -4862,20 +4862,29 @@ print_program_trailer (void)
 }
 
 /*
+  return pointer to next non-space character
+*/
+static COB_INLINE COB_A_INLINE char *
+get_next_nonspace (char * pos)
+{
+	while (*pos != '\0' && isspace ((unsigned char)*pos)) {
+		pos++;
+	}
+	return pos;
+}
+
+/*
   Find next token after bp, copy it to token and copy the token terminator to
   term. Return pointer to the character after the terminator.
 */
 static char *
 get_next_token (char *bp, char *token, char *term)
 {
-	char *token_start = token;
+	char	*token_start = token;
 
 	/* Repeat until a token is found */
 	do {
-		/* Find first non-space character */
-		while (*bp && isspace ((unsigned char)*bp)) {
-			bp++;
-		}
+		bp = get_next_nonspace (bp);
 
 		term[0] = '\0';
 		term[1] = '\0';
@@ -4965,46 +4974,32 @@ get_next_listing_line (FILE *fd, char **pline, int fixed)
 }
 
 /*
-  return position of first nonspace (ignoring sequence area)
+  return pointer to first non-space character (ignoring sequence area)
 */
-static char *
-get_first_nonspace (const char *line, const enum cb_format source_format)
+static COB_INLINE COB_A_INLINE char *
+get_first_nonspace (char *line, const enum cb_format source_format)
 {
-	char	*curr_pos;
-
 	if (source_format != CB_FORMAT_FREE) {
-		curr_pos = (char *)line + CB_INDICATOR + 1;
+		return get_next_nonspace (line + CB_INDICATOR + 1);
 	} else {
-		curr_pos = (char *)line;
-	}
-	while (*curr_pos != 0) {
-		if (*curr_pos != ' ') {
-			break;
-		}
-		curr_pos++;
-	}
-	if (*curr_pos != 0) {
-		return curr_pos;
-	} else {
-		return NULL;
+		return get_next_nonspace (line);
 	}
 }
 
 /*
   check for compiler directive indicator and return
-  position of compiler instruction
+  position of compiler instruction or NULL if not found
 */
 static char *
-get_directive_start (const char *line, const enum cb_format source_format)
+get_directive_start (char *line, const enum cb_format source_format)
 {
 	char	*curr_pos;
 
 	curr_pos = get_first_nonspace (line, source_format);
-	if (curr_pos != NULL && *curr_pos == '>' && *++curr_pos == '>') {
-		while (*++curr_pos != 0) {
-			if (*curr_pos != ' ') {
-				return curr_pos;
-			}
+	if (*curr_pos == '>' && *++curr_pos == '>') {
+		curr_pos = get_next_nonspace (++curr_pos);
+		if (*curr_pos != 0) {
+			return curr_pos;
 		}
 	}
 	return NULL;
@@ -5014,18 +5009,18 @@ get_directive_start (const char *line, const enum cb_format source_format)
   check for >> LISTING directive and set on_off value
 */
 static int
-line_has_listing_directive (const char *line, const enum cb_format source_format, int *on_off)
+line_has_listing_directive (char *line, const enum cb_format source_format, int *on_off)
 {
-	char	*directive_start;
-	char	token[32], term[2];
+	char	*token;
 
-	directive_start = get_directive_start (line, source_format);
-	if (directive_start != NULL &&
-		!strncasecmp (directive_start, "LISTING", 7)) {
-		directive_start += 7;
+	token = get_directive_start (line, source_format);
+	
+	if (token != NULL &&
+		!strncasecmp (token, "LISTING", 7)) {
+		token += 7;
 		*on_off = 1;
-		get_next_token (directive_start, token, term);
-		if (token != NULL && !strncasecmp (token, "OFF", 3))
+		token = get_next_nonspace (token);
+		if (!strncasecmp (token, "OFF", 3))
 			*on_off = 0;
 		return 1;
 	}
@@ -5036,7 +5031,7 @@ line_has_listing_directive (const char *line, const enum cb_format source_format
   check for >> PAGE directive and page eject indicator
 */
 static int
-line_has_page_eject (const char *line, const enum cb_format source_format)
+line_has_page_eject (char *line, const enum cb_format source_format)
 {
 	char	*directive_start;
 
