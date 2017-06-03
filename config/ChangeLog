@@ -1,4 +1,8 @@
 
+2017-06-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* rm.conf: added config file for RM-COBOL.
+
 2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added numeric-value-for-edited-item.
