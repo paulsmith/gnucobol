@@ -2680,11 +2680,11 @@ process_command_line (const int argc, char **argv)
 		case 't':
 			/* -t : Generate listing */
 			if (cb_listing_outputfile) {
-				cobc_free (cb_listing_outputfile);
+				cobc_main_free (cb_listing_outputfile);
 			}
 			/* FIXME: add option to place each source in a single listing 
 			          by specifying a directory (similar to -P) */
-			cb_listing_outputfile = cobc_strdup (cob_optarg);
+			cb_listing_outputfile = cobc_main_strdup (cob_optarg);
 			break;
 
 		case '*':
@@ -7397,8 +7397,6 @@ main (int argc, char **argv)
 		if (!cb_src_list_file) {
 			cobc_terminate (cb_listing_outputfile);
 		}
-		cobc_free (cb_listing_outputfile);
-		cb_listing_outputfile = NULL;
 		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
 		memset (cb_listing_file_struct, 0, sizeof (struct list_files));
 	}
