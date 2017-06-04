@@ -299,13 +299,13 @@ static size_t		cobc_export_dyn_len;
 static size_t		cobc_shared_opt_len;
 static size_t		cobc_pic_flags_len;
 
-static char		*save_temps_dir;
+static char		*save_temps_dir = NULL;
 static struct strcache	*base_string;
 
-static char		*cobc_list_dir;
-static char		*cobc_list_file;
+static char		*cobc_list_dir = NULL;
+static char		*cobc_list_file = NULL;
 
-static char		*output_name;
+static char		*output_name = NULL;
 static char		*cobc_buffer;
 static char		*cobc_objects_buffer;
 static char		*output_name_buff;
@@ -325,7 +325,7 @@ static size_t		wants_nonfinal = 0;
 static size_t		cobc_flag_module = 0;
 static size_t		cobc_flag_library = 0;
 static size_t		cobc_flag_run = 0;
-static char		*cobc_run_args;
+static char		*cobc_run_args = NULL;
 static size_t		save_temps = 0;
 static size_t		save_all_src = 0;
 static size_t		save_c_src = 0;
@@ -2560,6 +2560,9 @@ process_command_line (const int argc, char **argv)
 			/* -j : Run job; compile, link and go, either by ./ or cobcrun */
 			/* allows optional arguments, passed to program */
 			cobc_flag_run = 1;
+			if (cobc_run_args) {
+				cobc_free (cobc_run_args);
+			}
 			if (cob_optarg) {
 				cobc_run_args = cobc_strdup (cob_optarg);
 			}
@@ -2584,6 +2587,10 @@ process_command_line (const int argc, char **argv)
 			osize = strlen (cob_optarg);
 			if (osize > COB_SMALL_MAX) {
 				cobc_err_exit (_("invalid output file name"));
+			}
+			if (output_name) {
+				cobc_main_free (output_name);
+				cobc_main_free (output_name_buff);
 			}
 			output_name = cobc_main_strdup (cob_optarg);
 			/* Allocate buffer plus extension reserve */
@@ -2657,6 +2664,9 @@ process_command_line (const int argc, char **argv)
 					cobc_err_msg (_("warning: '%s' is not a directory, defaulting to current directory"),
 						cob_optarg);
 				} else {
+					if (save_temps_dir) {
+						cobc_free (save_temps_dir);
+					}
 					save_temps_dir = cobc_strdup (cob_optarg);
 				}
 			}
@@ -2670,9 +2680,11 @@ process_command_line (const int argc, char **argv)
 		case 't':
 			/* -t : Generate listing */
 			if (cb_listing_outputfile) {
-				cobc_main_free (cb_listing_outputfile);
+				cobc_free (cb_listing_outputfile);
 			}
-			cb_listing_outputfile = cobc_main_strdup (cob_optarg);
+			/* FIXME: add option to place each source in a single listing 
+			          by specifying a directory (similar to -P) */
+			cb_listing_outputfile = cobc_strdup (cob_optarg);
 			break;
 
 		case '*':
@@ -2683,6 +2695,14 @@ process_command_line (const int argc, char **argv)
 		case 'P':
 			/* -P : Generate preproc listing */
 			if (cob_optarg) {
+				if (cobc_list_dir) {
+					cobc_free (cobc_list_dir);
+					cobc_list_dir = NULL;
+				}
+				if (cobc_list_file) {
+					cobc_free (cobc_list_file);
+					cobc_list_file = NULL;
+				}
 				if (!stat (cob_optarg, &st) && S_ISDIR (st.st_mode)) {
 					cobc_list_dir = cobc_strdup (cob_optarg);
 				} else {
@@ -7377,6 +7397,8 @@ main (int argc, char **argv)
 		if (!cb_src_list_file) {
 			cobc_terminate (cb_listing_outputfile);
 		}
+		cobc_free (cb_listing_outputfile);
+		cb_listing_outputfile = NULL;
 		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
 		memset (cb_listing_file_struct, 0, sizeof (struct list_files));
 	}
