@@ -1,4 +1,10 @@
 
+2017-06-04  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Improved 'cobcrun -r' display for when
+	  unsetenv is used in runtime.cfg to show environment variable
+	  was removed and runtime.cfg variable was then present
+
 2017-05-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* system.def: replaced misleading name C$PRINTABLE (OC-extension,
