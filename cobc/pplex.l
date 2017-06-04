@@ -178,6 +178,8 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 %x IF_DIRECTIVE_STATE
 %x ELSE_DIRECTIVE_STATE
 %x ENDIF_DIRECTIVE_STATE
+%x ALNUM_LITERAL_STATE
+%x CONTROL_STATEMENT_STATE
 
 %%
 
@@ -401,6 +403,12 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	return REPLACE;
 }
 
+^[ ]*"*CONTROL"		|
+^[ ]*"*CBL"		{
+	BEGIN CONTROL_STATEMENT_STATE;
+	return CONTROL_STATEMENT;
+}
+
 "ID"[ ,;]+"DIVISION" |
 "IDENTIFICATION"[ ,;]+"DIVISION" {
 	/* Allow comment sentences/paragraphs */
@@ -426,16 +434,45 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	ppecho (yytext, 0, yyleng);
 }
 
-"EJECT"\.? |
-"SKIP1"\.? |
-"SKIP2"\.? |
-"SKIP3"\.?	{
-	/* These words are comments in various COBOL dialects */
-	if (cb_verify (cb_eject_statement, yytext)) {
-		/* Ignore */
-	} else {
+^[ ]*"EJECT"([ ]*\.)? |
+^[ ]*"SKIP1"([ ]*\.)? |
+^[ ]*"SKIP2"([ ]*\.)? |
+^[ ]*"SKIP3"([ ]*\.)?	{
+	/* These words can either be a listing-directive statement,
+	   a reserved word, or a user-defined word...
+	   some implementations (dis-)allow the (optional) "."
+	   some start column 8+ some column 12+
+	   We ignore the detailed rules and just do the parsing. */
+	if (cb_verify (cb_listing_statements, yytext)) {
+		/* handle as listing-directive statement */
+		skip_to_eol();
+		return LISTING_STATEMENT;
+	} else if (cb_listing_statements == CB_SKIP) {
+		/* handle later (normal reserved / user defined word) */
 		ECHO;
 		check_listing (yytext, 0);
+	} else {
+		/* Ignore */
+	}
+}
+
+^[ ]*"TITLE"	{
+	/* This word can either be a listing-directive statement,
+	   a reserved word, or a user-defined word...
+	   some implementations (dis-)allow the (optional) "."
+	   some start column 8+ some column 12+,
+	   most limit the literal length (we cut in cobc.c)
+	   We ignore the detailed rules and just do the parsing. */
+	if (cb_verify (cb_title_statement, yytext)) {
+		/* handle as listing-directive statement */
+		BEGIN ALNUM_LITERAL_STATE;
+		return TITLE_STATEMENT;
+	} else if (cb_title_statement == CB_SKIP) {
+		/* handle later (normal reserved / user defined word) */
+		ECHO;
+		check_listing (yytext, 0);
+	} else {
+		/* Ignore */
 	}
 }
 
@@ -490,7 +527,9 @@ SET_DIRECTIVE_STATE,
 TURN_DIRECTIVE_STATE,
 IF_DIRECTIVE_STATE,
 ELSE_DIRECTIVE_STATE,
-ENDIF_DIRECTIVE_STATE>{
+ENDIF_DIRECTIVE_STATE,
+ALNUM_LITERAL_STATE,
+CONTROL_STATEMENT_STATE>{
   \n			{
 	BEGIN INITIAL;
 	unput ('\n');
@@ -522,12 +561,16 @@ ENDIF_DIRECTIVE_STATE>{
   "STATIC"		{ return STATIC; }
 }
 
+<CONTROL_STATEMENT_STATE>{
+  "SOURCE"		{ return SOURCE; }
+  "NOSOURCE"	{ return NOSOURCE; }
+  "LIST"		{ return LIST; }
+  "NOLIST"		{ return NOLIST; }
+  "MAP"			{ return MAP; }
+  "NOMAP"		{ return NOMAP; }
+}
+
 <DEFINE_DIRECTIVE_STATE>{
-  \n			{
-	BEGIN INITIAL;
-	unput ('\n');
-	return TERMINATOR;
-  }
   "AS"			{
 	return AS;
   }
@@ -656,6 +699,12 @@ ENDIF_DIRECTIVE_STATE>{
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
+  }
+}
+
+<ALNUM_LITERAL_STATE>{
+  {ALNUM_LITERAL}	{
+	return LITERAL;
   }
 }
 

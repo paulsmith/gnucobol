@@ -550,6 +550,16 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token GARBAGE		"word"
 
 %token LISTING_DIRECTIVE
+%token LISTING_STATEMENT
+%token TITLE_STATEMENT
+
+%token CONTROL_STATEMENT
+%token SOURCE
+%token NOSOURCE
+%token LIST
+%token NOLIST
+%token MAP
+%token NOMAP
 
 %token LEAP_SECOND_DIRECTIVE
 
@@ -642,6 +652,11 @@ statement:
   copy_statement DOT
 | replace_statement DOT
 | directive TERMINATOR
+| listing_statement
+| CONTROL_STATEMENT control_options _dot TERMINATOR
+  {
+	CB_PENDING (_("*CONTROL statement"));
+  }
 ;
 
 directive:
@@ -864,6 +879,29 @@ listing_directive:
   /* empty (ON implied) */
 | ON
 | OFF
+;
+
+listing_statement:
+  LISTING_STATEMENT
+| TITLE_STATEMENT LITERAL _dot TERMINATOR
+;
+
+control_options:
+  control_option
+| control_options control_option
+;
+
+control_option:
+  SOURCE
+| NOSOURCE
+| LIST
+| NOLIST
+| MAP
+| NOMAP
+;
+
+_dot:
+| DOT
 ;
 
 leap_second_directive:

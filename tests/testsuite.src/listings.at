@@ -739,299 +739,6 @@ AT_CHECK([diff prog3.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Eject page])
-AT_KEYWORDS([listing directive])
-
-AT_CAPTURE_FILE([prog.lst])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-      /
-       PROCEDURE        DIVISION.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols prog.cob], [0], [], [])
-
-AT_DATA([prog7.lst],
-[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    PG/LN  A...B............................................................
-
-000001
-000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
-000006        /
-000007         PROCEDURE        DIVISION.
-000008             STOP RUN.
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
-
-AT_DATA([prog2.cob], [
-  IDENTIFICATION   DIVISION.
-  PROGRAM-ID.      prog2.
-  DATA             DIVISION.
-  WORKING-STORAGE  SECTION.
->>PAGE
-  PROCEDURE        DIVISION.
-  STOP RUN.
-])
-
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols -free prog2.cob], [0], [], [])
-
-AT_DATA([prog8.lst],
-[GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    .....................SOURCE.............................................
-
-000001
-000002    IDENTIFICATION   DIVISION.
-000003    PROGRAM-ID.      prog2.
-000004    DATA             DIVISION.
-000005    WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    .....................SOURCE.............................................
-
-000006  >>PAGE
-000007    PROCEDURE        DIVISION.
-000008    STOP RUN.
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
-
-AT_DATA([prog3.cob], [
-       IDENTIFICATION   DIVISION.
-
-       PROGRAM-ID.      prog3.
-
-
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       77 WS-VAR PIC X(2).
-      /
-       77 WS-VA2 PIC X(2).
-
-
-       LOCAL-STORAGE  SECTION.
-       77 LS-VAR PIC 9(2).
-
-
-       PROCEDURE        DIVISION.
-
-           DISPLAY WS-VAR
-           MOVE 99 TO LS-VAR
-
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols prog3.cob], [0], [], [])
-
-AT_DATA([prog9.lst],
-[GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    PG/LN  A...B............................................................
-
-000001
-000002         IDENTIFICATION   DIVISION.
-000003
-000004         PROGRAM-ID.      prog3.
-000005
-000006
-000007         DATA             DIVISION.
-000008         WORKING-STORAGE  SECTION.
-000009         77 WS-VAR PIC X(2).
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
-000010        /
-000011         77 WS-VA2 PIC X(2).
-000012
-000013
-000014         LOCAL-STORAGE  SECTION.
-000015         77 LS-VAR PIC 9(2).
-000016
-000017
-000018         PROCEDURE        DIVISION.
-000019
-000020             DISPLAY WS-VAR
-000021             MOVE 99 TO LS-VAR
-000022
-000023             STOP RUN.
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=8 --no-symbols prog3.cob], [0], [], [])
-
-AT_DATA([prog10.lst],
-[GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    PG/LN  A...B............................................................
-
-000001
-000002         IDENTIFICATION   DIVISION.
-000003
-000004         PROGRAM-ID.      prog3.
-000005
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
-000006
-000007         DATA             DIVISION.
-000008         WORKING-STORAGE  SECTION.
-000009         77 WS-VAR PIC X(2).
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
-
-LINE    PG/LN  A...B............................................................
-
-000010        /
-000011         77 WS-VA2 PIC X(2).
-000012
-000013
-000014         LOCAL-STORAGE  SECTION.
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
-
-LINE    PG/LN  A...B............................................................
-
-000015         77 LS-VAR PIC 9(2).
-000016
-000017
-000018         PROCEDURE        DIVISION.
-000019
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
-
-LINE    PG/LN  A...B............................................................
-
-000020             DISPLAY WS-VAR
-000021             MOVE 99 TO LS-VAR
-000022
-000023             STOP RUN.
-
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([Wide listing])
-AT_KEYWORDS([listing])
-
-AT_CAPTURE_FILE([prog.lst])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.                                       PROG001
-       PROGRAM-ID.      prog.                                           PROG002
-       DATA             DIVISION.                                       PROG003
-       WORKING-STORAGE  SECTION.                                        PROG004
-      /                                                                 PROG005
-       PROCEDURE        DIVISION.                                       PROG006
-           STOP RUN.                                                    PROG007
-])
-
-AT_CHECK([$COMPILE_ONLY -T prog.lst --no-symbols prog.cob], [0], [], [])
-
-AT_DATA([prog9.lst],
-[GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    PG/LN  A...B............................................................SEQUENCE
-
-000001
-000002         IDENTIFICATION   DIVISION.                                       PROG001
-000003         PROGRAM-ID.      prog.                                           PROG002
-000004         DATA             DIVISION.                                       PROG003
-000005         WORKING-STORAGE  SECTION.                                        PROG004
-GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................SEQUENCE
-
-000006        /                                                                 PROG005
-000007         PROCEDURE        DIVISION.                                       PROG006
-000008             STOP RUN.                                                    PROG007
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
-
-AT_DATA([prog2.cob], [
-  IDENTIFICATION   DIVISION.
-  PROGRAM-ID.      prog2.
-  DATA             DIVISION.
-  WORKING-STORAGE  SECTION.
-  >> PAGE  page  feed  comment
-  PROCEDURE        DIVISION.
-  STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -T prog.lst --no-symbols -free prog2.cob], [0], [], [])
-
-AT_DATA([prog10.lst],
-[GnuCOBOL V.R.P          prog2.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    .....................................................SOURCE.....................................................
-
-000001
-000002    IDENTIFICATION   DIVISION.
-000003    PROGRAM-ID.      prog2.
-000004    DATA             DIVISION.
-000005    WORKING-STORAGE  SECTION.
-GnuCOBOL V.R.P          prog2.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    .....................................................SOURCE.....................................................
-
-000006    >> PAGE  page  feed  comment
-000007    PROCEDURE        DIVISION.
-000008    STOP RUN.
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([Two source files])
 AT_KEYWORDS([listing])
 
@@ -1106,6 +813,71 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog11.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Multiple programs in one file])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-1.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  blah PIC x.
+
+       END PROGRAM prog-1.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-2.
+       END PROGRAM prog-2.
+])
+
+# Do not change $COMPILE to $COMPILE_ONLY. This tests whether codegen
+# affects the listing.
+AT_CHECK([$COMPILE -t prog.lst prog.cob], [0], [], [])
+
+AT_DATA([prog20.lst],
+[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog-1.
+000004
+000005         DATA DIVISION.
+000006         WORKING-STORAGE SECTION.
+000007         01  blah PIC x.
+000008
+000009         END PROGRAM prog-1.
+000010
+000011         IDENTIFICATION DIVISION.
+000012         PROGRAM-ID. prog-2.
+000013         END PROGRAM prog-2.
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      PROGRAM             prog-1
+
+00001 ALPHANUMERIC   01   blah                           X
+
+      PROGRAM             prog-2
+
+      No fields defined.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
@@ -1478,6 +1250,90 @@ Too many errors in compilation group: 0 maximum errors
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
 
+
+AT_CLEANUP
+
+
+AT_SETUP([Wide listing])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.                                       PROG001
+       PROGRAM-ID.      prog.                                           PROG002
+       DATA             DIVISION.                                       PROG003
+       WORKING-STORAGE  SECTION.                                        PROG004
+      /                                                                 PROG005
+       PROCEDURE        DIVISION.                                       PROG006
+           STOP RUN.                                                    PROG007
+])
+
+AT_CHECK([$COMPILE_ONLY -T prog.lst --no-symbols prog.cob], [0], [], [])
+
+AT_DATA([prog9.lst],
+[GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................SEQUENCE
+
+000001
+000002         IDENTIFICATION   DIVISION.                                       PROG001
+000003         PROGRAM-ID.      prog.                                           PROG002
+000004         DATA             DIVISION.                                       PROG003
+000005         WORKING-STORAGE  SECTION.                                        PROG004
+GnuCOBOL V.R.P          prog.cob                                                      DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................SEQUENCE
+
+000006        /                                                                 PROG005
+000007         PROCEDURE        DIVISION.                                       PROG006
+000008             STOP RUN.                                                    PROG007
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
+
+AT_DATA([prog2.cob], [
+  IDENTIFICATION   DIVISION.
+  PROGRAM-ID.      prog2.
+  DATA             DIVISION.
+  WORKING-STORAGE  SECTION.
+  >> PAGE  page  feed  comment
+  PROCEDURE        DIVISION.
+  STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -T prog.lst --no-symbols -free prog2.cob], [0], [], [])
+
+AT_DATA([prog10.lst],
+[GnuCOBOL V.R.P          prog2.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    .....................................................SOURCE.....................................................
+
+000001
+000002    IDENTIFICATION   DIVISION.
+000003    PROGRAM-ID.      prog2.
+000004    DATA             DIVISION.
+000005    WORKING-STORAGE  SECTION.
+GnuCOBOL V.R.P          prog2.cob                                                     DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    .....................................................SOURCE.....................................................
+
+000006    >> PAGE  page  feed  comment
+000007    PROCEDURE        DIVISION.
+000008    STOP RUN.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
 
@@ -2221,105 +2077,6 @@ AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([LISTING directive])
-AT_KEYWORDS([listing])
-
-AT_CAPTURE_FILE([prog.lst])
-
-AT_DATA([copy.inc], [
-       >>LISTING OFF
-       01 TEST1-VAR PIC X(2) VALUE "OK".
-       01 TEST2-VAR PIC X(2) VALUE "OK".
-       01 TEST3-VAR PIC X(2) VALUE "OK".
-       01 TEST4-VAR PIC X(2) VALUE "OK".
-       >>LISTING ON
-       01 TEST5-VAR PIC X(2) VALUE "OK".
-       01 TEST6-VAR PIC X(2) VALUE "OK".
-       01 TEST7-VAR PIC X(2) VALUE "OK".
-       01 TEST8-VAR PIC X(2) VALUE "OK".
-])
-
-AT_DATA([copy2.inc], [       >> LISTING OFF
-       01 TEST9-VAR PIC X(2) VALUE "OK".
-       >>LISTING
-       01 TESTA-VAR PIC X(2) VALUE "OK".
-])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       COPY "copy.inc".
-       COPY "copy2.inc".
-       PROCEDURE        DIVISION.
-           DISPLAY TEST1-VAR NO ADVANCING
-           END-DISPLAY.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [0], [], [])
-
-AT_DATA([prog17.lst],
-[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
-
-LINE    PG/LN  A...B............................................................
-
-000001
-000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
-000004         DATA             DIVISION.
-000005         WORKING-STORAGE  SECTION.
-000006         COPY "copy.inc".
-000001C
-000002C        >>LISTING OFF
-000007C        >>LISTING ON
-000008C        01 TEST5-VAR PIC X(2) VALUE "OK".
-000009C        01 TEST6-VAR PIC X(2) VALUE "OK".
-000010C        01 TEST7-VAR PIC X(2) VALUE "OK".
-000011C        01 TEST8-VAR PIC X(2) VALUE "OK".
-000007         COPY "copy2.inc".
-000001C        >> LISTING OFF
-000003C        >>LISTING
-000004C        01 TESTA-VAR PIC X(2) VALUE "OK".
-000008         PROCEDURE        DIVISION.
-000009             DISPLAY TEST1-VAR NO ADVANCING
-000010             END-DISPLAY.
-000011             STOP RUN.
-
-SIZE  TYPE           LVL  NAME                           PICTURE
-
-00002 ALPHANUMERIC   01   TEST1-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST2-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST3-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST4-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST5-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST6-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TEST9-VAR                      X(2)
-
-00002 ALPHANUMERIC   01   TESTA-VAR                      X(2)
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
-AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([File descriptions])
 AT_KEYWORDS([listing])
 
@@ -3032,6 +2789,376 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([LISTING directive])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([copy.inc], [
+       >>LISTING OFF
+       01 TEST1-VAR PIC X(2) VALUE "OK".
+       01 TEST2-VAR PIC X(2) VALUE "OK".
+       01 TEST3-VAR PIC X(2) VALUE "OK".
+       01 TEST4-VAR PIC X(2) VALUE "OK".
+       >>LISTING ON
+       01 TEST5-VAR PIC X(2) VALUE "OK".
+       01 TEST6-VAR PIC X(2) VALUE "OK".
+       01 TEST7-VAR PIC X(2) VALUE "OK".
+       01 TEST8-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([copy2.inc], [       >> LISTING OFF
+       01 TEST9-VAR PIC X(2) VALUE "OK".
+       >>LISTING
+       01 TESTA-VAR PIC X(2) VALUE "OK".
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       COPY "copy.inc".
+       COPY "copy2.inc".
+       PROCEDURE        DIVISION.
+           DISPLAY TEST1-VAR NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [0], [], [])
+
+AT_DATA([prog17.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+000006         COPY "copy.inc".
+000001C
+000002C        >>LISTING OFF
+000007C        >>LISTING ON
+000008C        01 TEST5-VAR PIC X(2) VALUE "OK".
+000009C        01 TEST6-VAR PIC X(2) VALUE "OK".
+000010C        01 TEST7-VAR PIC X(2) VALUE "OK".
+000011C        01 TEST8-VAR PIC X(2) VALUE "OK".
+000007         COPY "copy2.inc".
+000001C        >> LISTING OFF
+000003C        >>LISTING
+000004C        01 TESTA-VAR PIC X(2) VALUE "OK".
+000008         PROCEDURE        DIVISION.
+000009             DISPLAY TEST1-VAR NO ADVANCING
+000010             END-DISPLAY.
+000011             STOP RUN.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+00002 ALPHANUMERIC   01   TEST1-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST2-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST3-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST4-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST5-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST6-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST7-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST8-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TEST9-VAR                      X(2)
+
+00002 ALPHANUMERIC   01   TESTA-VAR                      X(2)
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff prog17.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Listing-directive statements])
+AT_KEYWORDS([listing directive EJECT SKIP1 SKIP2 SKIP3 TITLE])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [           TITLE "GnuCOBOL lists IBM"
+       IDENTIFICATION   DIVISION.
+           SKIP1
+       PROGRAM-ID.      prog.
+           SKIP2
+       DATA             DIVISION.
+           SKIP3
+       WORKING-STORAGE  SECTION.
+           TITLE "here goes the code"
+       PROCEDURE        DIVISION.
+       EJECT
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols -std=ibm prog.cob], [0], [], [])
+
+AT_DATA([expect.lst],
+[GnuCOBOL lists IBM      prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000002         IDENTIFICATION   DIVISION.
+
+
+000004         PROGRAM-ID.      prog.
+
+
+
+000006         DATA             DIVISION.
+
+
+
+
+000008         WORKING-STORAGE  SECTION.
+here goes the code      prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000010         PROCEDURE        DIVISION.
+here goes the code      prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+LINE    PG/LN  A...B............................................................
+
+000012             STOP RUN.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff expect.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Eject page])
+AT_KEYWORDS([listing directive])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+      /
+       PROCEDURE        DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols prog.cob], [0], [], [])
+
+AT_DATA([prog7.lst],
+[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003         PROGRAM-ID.      prog.
+000004         DATA             DIVISION.
+000005         WORKING-STORAGE  SECTION.
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000006        /
+000007         PROCEDURE        DIVISION.
+000008             STOP RUN.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog7.lst prog.lis], [0], [], [])
+
+AT_DATA([prog2.cob], [
+  IDENTIFICATION   DIVISION.
+  PROGRAM-ID.      prog2.
+  DATA             DIVISION.
+  WORKING-STORAGE  SECTION.
+>>PAGE
+  PROCEDURE        DIVISION.
+  STOP RUN.
+])
+
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols -free prog2.cob], [0], [], [])
+
+AT_DATA([prog8.lst],
+[GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    .....................SOURCE.............................................
+
+000001
+000002    IDENTIFICATION   DIVISION.
+000003    PROGRAM-ID.      prog2.
+000004    DATA             DIVISION.
+000005    WORKING-STORAGE  SECTION.
+GnuCOBOL V.R.P          prog2.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    .....................SOURCE.............................................
+
+000006  >>PAGE
+000007    PROCEDURE        DIVISION.
+000008    STOP RUN.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog8.lst prog.lis], [0], [], [])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION   DIVISION.
+
+       PROGRAM-ID.      prog3.
+
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 WS-VAR PIC X(2).
+      /
+       77 WS-VA2 PIC X(2).
+
+
+       LOCAL-STORAGE  SECTION.
+       77 LS-VAR PIC 9(2).
+
+
+       PROCEDURE        DIVISION.
+
+           DISPLAY WS-VAR
+           MOVE 99 TO LS-VAR
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst --no-symbols prog3.cob], [0], [], [])
+
+AT_DATA([prog9.lst],
+[GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003
+000004         PROGRAM-ID.      prog3.
+000005
+000006
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         77 WS-VAR PIC X(2).
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000010        /
+000011         77 WS-VA2 PIC X(2).
+000012
+000013
+000014         LOCAL-STORAGE  SECTION.
+000015         77 LS-VAR PIC 9(2).
+000016
+000017
+000018         PROCEDURE        DIVISION.
+000019
+000020             DISPLAY WS-VAR
+000021             MOVE 99 TO LS-VAR
+000022
+000023             STOP RUN.
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=8 --no-symbols prog3.cob], [0], [], [])
+
+AT_DATA([prog10.lst],
+[GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION   DIVISION.
+000003
+000004         PROGRAM-ID.      prog3.
+000005
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+LINE    PG/LN  A...B............................................................
+
+000006
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         77 WS-VAR PIC X(2).
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+LINE    PG/LN  A...B............................................................
+
+000010        /
+000011         77 WS-VA2 PIC X(2).
+000012
+000013
+000014         LOCAL-STORAGE  SECTION.
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+LINE    PG/LN  A...B............................................................
+
+000015         77 LS-VAR PIC 9(2).
+000016
+000017
+000018         PROCEDURE        DIVISION.
+000019
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+LINE    PG/LN  A...B............................................................
+
+000020             DISPLAY WS-VAR
+000021             MOVE 99 TO LS-VAR
+000022
+000023             STOP RUN.
+
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff prog10.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
 
 AT_SETUP([Cross reference])
 AT_KEYWORDS([listing])
@@ -4542,70 +4669,5 @@ prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([Multiple programs in one file])
-AT_KEYWORDS([listing])
-
-AT_CAPTURE_FILE([prog.lst])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog-1.
-
-       DATA DIVISION.
-       WORKING-STORAGE SECTION.
-       01  blah PIC x.
-
-       END PROGRAM prog-1.
-
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog-2.
-       END PROGRAM prog-2.
-])
-
-# Do not change $COMPILE to $COMPILE_ONLY. This tests whether codegen
-# affects the listing.
-AT_CHECK([$COMPILE -t prog.lst prog.cob], [0], [], [])
-
-AT_DATA([prog20.lst],
-[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
-
-LINE    PG/LN  A...B............................................................
-
-000001
-000002         IDENTIFICATION DIVISION.
-000003         PROGRAM-ID. prog-1.
-000004
-000005         DATA DIVISION.
-000006         WORKING-STORAGE SECTION.
-000007         01  blah PIC x.
-000008
-000009         END PROGRAM prog-1.
-000010
-000011         IDENTIFICATION DIVISION.
-000012         PROGRAM-ID. prog-2.
-000013         END PROGRAM prog-2.
-GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-SIZE  TYPE           LVL  NAME                           PICTURE
-
-      PROGRAM             prog-1
-
-00001 ALPHANUMERIC   01   blah                           X
-
-      PROGRAM             prog-2
-
-      No fields defined.
-
-
-0 warnings in compilation group
-0 errors in compilation group
-])
-
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
-AT_CHECK([diff prog20.lst prog.lis], [0], [], [])
 
 AT_CLEANUP

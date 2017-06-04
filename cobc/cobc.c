@@ -201,7 +201,7 @@ int			cb_listing_wide = 0;
 unsigned int		cb_lines_per_page = CB_MAX_LINES;
 int			cb_no_symbols = 0;
 int			cb_listing_xref = 0;
-#define			CB_LISTING_DATE_BUFF 48
+#define			CB_LISTING_DATE_BUFF 26
 #define			CB_LISTING_DATE_MAX (CB_LISTING_DATE_BUFF - 1)
 char			cb_listing_date[CB_LISTING_DATE_BUFF]; /* Date/Time buffer for listing */
 struct list_files	*cb_current_file = NULL;
@@ -336,7 +336,8 @@ static unsigned int		cb_listing_linecount;
 static int		cb_listing_eject = 0;
 static char		cb_listing_filename[FILENAME_MAX];
 static char		*cb_listing_outputfile = NULL;
-static char		cb_listing_title[133];	/* Listing subtitle */
+static char		cb_listing_title[81];	/* Listing title (defaults to PACKAGE_NAME + Version */
+static char		cb_listing_header[133];	/* Listing header */
 static struct list_files	*cb_listing_file_struct = NULL;
 static struct list_error	*cb_listing_error_head = NULL;
 static struct list_error	*cb_listing_error_tail = NULL;
@@ -554,6 +555,7 @@ static const struct option long_options[] = {
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
 static void	free_list_file		(struct list_files *);
 static void	print_program_code	(struct list_files *, int);
+static void	set_standard_title	(void);
 static void	print_program_header	(void);
 static void	print_program_data	(const char *);
 static void	print_program_trailer	(void);
@@ -1740,6 +1742,7 @@ cobc_terminate (const char *str)
 {
 	if (cb_src_list_file) {
 		set_listing_date ();
+		set_standard_title ();
 		cb_listing_linecount = cb_lines_per_page;
 		strcpy (cb_listing_filename, str);
 		print_program_header ();
@@ -3004,6 +3007,12 @@ process_command_line (const int argc, char **argv)
 		cb_max_errors = 0;
 	}
 
+	/* Set implied options */
+	if (cb_title_statement <= CB_OBSOLETE
+	&&  cb_listing_statements > CB_OBSOLETE) {
+		cb_listing_statements = cb_title_statement;
+	}
+
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {
 		for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
@@ -3988,77 +3997,86 @@ preprocess (struct filename *fn)
 
 /* Routines to generate program listing */
 
+
 static void
-set_listing_title_code (void)
+set_listing_header_code (void)
 {
-	strcpy (cb_listing_title, "LINE    ");
+	strcpy (cb_listing_header, "LINE    ");
 	if (cb_listing_file_struct->source_format != CB_FORMAT_FREE) {
-		strcat (cb_listing_title,
+		strcat (cb_listing_header,
 			"PG/LN  A...B..............................."
 			".............................");
 		if (cb_listing_wide) {
 			if (cb_listing_file_struct->source_format == CB_FORMAT_FIXED
 			    && cb_text_column == 72) {
-				strcat (cb_listing_title, "SEQUENCE");
+				strcat (cb_listing_header, "SEQUENCE");
 			} else {
-				strcat (cb_listing_title,
+				strcat (cb_listing_header,
 					"........................................");
 			}
 		}
 	} else {
 		if (cb_listing_wide) {
-			strcat (cb_listing_title,
+			strcat (cb_listing_header,
 				"................................");
 		}
-		strcat (cb_listing_title,
+		strcat (cb_listing_header,
 			".....................SOURCE..................."
 			"..........................");
 		if (cb_listing_wide) {
-			strcat (cb_listing_title, "........");
+			strcat (cb_listing_header, "........");
 		}
 	}
 }
 
 static void
-set_listing_title_symbols (void)
+set_listing_header_symbols (void)
 {
-	strcpy (cb_listing_title,
+	strcpy (cb_listing_header,
 		"SIZE  TYPE           LVL  NAME                           PICTURE");
 }
 
 #ifdef COB_INTERNAL_XREF
 static void
-set_listing_title_xref (const enum xref_type type)
+set_listing_header_xref (const enum xref_type type)
 {
 	if (type == XREF_LABEL) {
-		strcpy (cb_listing_title, "LABEL");
+		strcpy (cb_listing_header, "LABEL");
 	} else {
-		strcpy (cb_listing_title, "NAME ");
+		strcpy (cb_listing_header, "NAME ");
 	}
-	strcat (cb_listing_title,
+	strcat (cb_listing_header,
 		"                          DEFINED                ");
 	if (cb_listing_wide) {
-		strcat (cb_listing_title, "                    ");
+		strcat (cb_listing_header, "                    ");
 	}
-	strcat (cb_listing_title, "REFERENCES");
+	strcat (cb_listing_header, "REFERENCES");
 }
 #endif
 
 static void
-set_listing_title_none (void)
+set_listing_header_none (void)
 {
-	cb_listing_title[0] = 0;
+	cb_listing_header[0] = 0;
+}
+
+static void
+set_standard_title (void)
+{
+	char		version[20];
+	sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
+	snprintf (cb_listing_title, 80, "%s %s",
+		PACKAGE_NAME,
+		version);
 }
 
 /* print header */
 static void
 print_program_header (void)
 {
-	char		version[20];
 	const char	*format_str;
 
 	cb_listing_linecount = 1;
-	sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
 
 	/* header for print listing (with page breaks) */
 	if (cb_lines_per_page != 0) {
@@ -4068,14 +4086,13 @@ print_program_header (void)
 			cb_listing_eject = 1;
 		}
 		if (cb_listing_wide) {
-			format_str = "%s %-14.14s %-61.61s %s  Page %04d\n\n";
+			format_str = "%-23.23s %-61.61s %s  Page %04d\n";
 		} else {
-			format_str = "%s %-14.14s %-20.20s %s  Page %04d\n\n";
+			format_str = "%-23.23s %-20.20s %s  Page %04d\n";
 		}
 		fprintf (cb_src_list_file,
 			 format_str,
-			 PACKAGE_NAME,
-			 version,
+			 cb_listing_title,
 			 cb_listing_filename,
 			 cb_listing_date,
 			 ++cb_listing_page);
@@ -4086,24 +4103,23 @@ print_program_header (void)
 		if (cb_listing_page == 0) {
 			cb_listing_page = 1;
 			if (cb_listing_wide) {
-				format_str = "%s %-19.19s %-66.66s %s\n\n";
+				format_str = "%-28.28s %-66.66s %s\n";
 			} else {
-				format_str = "%s %-19.19s %-26.26s %s\n\n";
+				format_str = "%-28.28s %-26.26s %s\n";
 			}
 			fprintf (cb_src_list_file,
 				 format_str,
-				 PACKAGE_NAME,
-				 version,
+				 cb_listing_title,
 				 cb_listing_filename,
 				 cb_listing_date);
 		} else {
-			fputc ('\n', cb_src_list_file);
 		}
 	}
+	fputc ('\n', cb_src_list_file);
 
 	/* print second header if set */
-	if (cb_listing_title[0]) {
-		print_program_data (cb_listing_title);
+	if (cb_listing_header[0]) {
+		print_program_data (cb_listing_header);
 		print_program_data ("");
 	}
 }
@@ -4711,7 +4727,7 @@ print_program_trailer (void)
 	if (!cb_no_symbols && p != NULL) {
 		/* Print file/symbol tables */
 
-		set_listing_title_symbols();
+		set_listing_header_symbols();
 		force_new_page_for_next_line ();
 		print_program_header ();
 
@@ -4750,7 +4766,7 @@ print_program_trailer (void)
 
 		for (q = p; q; q = q->next_program) {
 
-			set_listing_title_xref (XREF_FIELD);
+			set_listing_header_xref (XREF_FIELD);
 			force_new_page_for_next_line ();
 			print_program_header ();
 
@@ -4779,7 +4795,7 @@ print_program_trailer (void)
 				print_program_data ("");
 			}
 
-			set_listing_title_xref (XREF_LABEL);
+			set_listing_header_xref (XREF_LABEL);
 			force_new_page_for_next_line ();
 			print_program_header ();
 
@@ -4802,7 +4818,7 @@ print_program_trailer (void)
 	}
 #endif
 
-	set_listing_title_none();
+	set_listing_header_none();
 	print_program_data ("");
 	if (print_break) {
 		print_program_data ("");
@@ -5043,6 +5059,89 @@ line_has_page_eject (char *line, const enum cb_format source_format)
 			&& !strncasecmp (directive_start, "PAGE", 4);
 	}
 }
+/*
+  check for listing statements in current line and handle them
+*/
+static int
+line_has_listing_statement (char *line, const enum cb_format source_format)
+{
+	char	*statement_start, *curr_pos;
+	int		size;
+
+	/* check if we actually want to process any listing statement */
+	if (cb_listing_statements > CB_OBSOLETE) {
+		return 0;
+	}
+
+	curr_pos = get_first_nonspace (line, source_format);
+
+	if (curr_pos == NULL) {
+		return 0;
+	}
+
+	statement_start = curr_pos++;
+
+	/* extract first word with max. length of 6 */
+	for (size = 1; size < 6 && curr_pos != 0; size++, curr_pos++) {
+		if ((*curr_pos == ' ' )
+			||  (*curr_pos == '.' )
+			||  (*curr_pos == '*' && (*(curr_pos + 1) == '>' ) )) {
+			break;
+		}
+	}
+
+	/* compare word against listing statements */
+	if (size != 5) {
+		return 0;
+	}
+	if ((strncasecmp (statement_start, "EJECT", 5))
+	&&  (strncasecmp (statement_start, "SKIP1", 5))
+	&&  (strncasecmp (statement_start, "SKIP2", 5))
+	&&  (strncasecmp (statement_start, "SKIP3", 5))
+	&&  (strncasecmp (statement_start, "TITLE", 5))) {
+		return 0;
+	}
+
+	/* handle statements */
+	if (!strncasecmp (statement_start, "TITLE", 5)) {
+		/* check if we actually want to process TITLE as a statement 
+		   note: the title statement is an extra listing-directive statement */
+		if (cb_title_statement > CB_OBSOLETE) {
+			return 0;
+		}
+
+		/* FIXME: the title should be handled correctly as literal */
+		while (*curr_pos != 0) {
+			if (*++curr_pos != ' ') {
+				curr_pos++; /* skip start of literal */
+				break;
+			}
+		}
+		statement_start = curr_pos;
+		for (size = 1; size < 80 && curr_pos != 0; size++, curr_pos++) {
+			if ((*curr_pos == '.' )
+				||  (*curr_pos == '*' && (*(curr_pos + 1) == '>' ) )) {
+				break;
+			}
+		}
+		snprintf (print_data, size, "%s", statement_start);
+		terminate_str_at_first_trailing_space (print_data);
+		size = strlen (print_data);
+		snprintf (cb_listing_title, size, "%s", print_data);
+		force_new_page_for_next_line ();
+	} else {
+		if (!strncasecmp (statement_start, "EJECT", 5)) {
+			force_new_page_for_next_line ();
+		} else if (!strncasecmp (statement_start, "SKIP1", 5))  {
+			print_program_data ("\n");
+		} else if (!strncasecmp (statement_start, "SKIP2", 5)) {
+			print_program_data ("\n\n");
+		} else if (!strncasecmp (statement_start, "SKIP3", 5)) {
+			print_program_data ("\n\n\n");
+		}
+	}
+	return 1;
+}
 
 static void
 print_fixed_line (const int line_num, char pch, char *line)
@@ -5144,6 +5243,8 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
 		do_print = 1;
 	} else if (line_has_page_eject (line, cfile->source_format)) {
 		force_new_page_for_next_line ();
+	} else if (line_has_listing_statement (line, cfile->source_format)) {
+		do_print = 0;
 	}
 
 	if (do_print) {
@@ -7248,7 +7349,7 @@ main (int argc, char **argv)
 	cobc_init_typeck ();
 #endif
 
-	memset (cb_listing_title, 0, sizeof (cb_listing_title));
+	memset (cb_listing_header, 0, sizeof (cb_listing_header));
 	/* If -P=file specified, all lists go to this file */
 	if (cobc_list_file) {
 		if (cb_unix_lf) {
@@ -7321,6 +7422,7 @@ main (int argc, char **argv)
 		/* Initialize listing */
 		if (cb_src_list_file) {
 			set_listing_date ();
+			set_standard_title ();
 
 			cb_current_file = cb_listing_file_struct;
 			cb_current_file->name = cobc_strdup (fn->source);
@@ -7353,7 +7455,7 @@ main (int argc, char **argv)
 		if (cb_src_list_file) {
 			cb_listing_page = 0;
 			strcpy (cb_listing_filename, fn->source);
-			set_listing_title_code ();
+			set_listing_header_code ();
 		}
 
 

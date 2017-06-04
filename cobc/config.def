@@ -180,8 +180,11 @@ CB_CONFIG_SUPPORT (cb_padding_character_clause, "padding-character-clause",
 CB_CONFIG_SUPPORT (cb_next_sentence_phrase, "next-sentence-phrase",
 	_("NEXT SENTENCE phrase"))
 
-CB_CONFIG_SUPPORT (cb_eject_statement, "eject-statement",
-	_("EJECT statement"))
+CB_CONFIG_SUPPORT (cb_listing_statements, "listing-statements",
+	_("listing-directive statements EJECT, SKIP1, SKIP2, SKIP3"))
+
+CB_CONFIG_SUPPORT (cb_title_statement, "title-statement",
+	_("listing-directive statement TITLE"))
 
 CB_CONFIG_SUPPORT (cb_entry_statement, "entry-statement",
 	_("ENTRY statement"))
