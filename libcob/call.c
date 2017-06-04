@@ -1442,6 +1442,10 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 	if (cobsetptr->cob_preload_str != NULL) {
 
 		p = cob_strdup (cobsetptr->cob_preload_str);
+
+		cob_free (cobsetptr->cob_preload_str);
+		cobsetptr->cob_preload_str = NULL;
+
 		s = strtok (p, PATHSEP_STR);
 		for (; s; s = strtok (NULL, PATHSEP_STR)) {
 #ifdef __OS400__

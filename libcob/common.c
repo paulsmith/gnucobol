@@ -441,6 +441,9 @@ cob_exit_common (void)
 				}
 			}
 		}
+		if (cobsetptr->cob_preload_str_set) {
+			cob_free((void*)(cobsetptr->cob_preload_str_set));
+		}
 		cob_free (cobsetptr);
 		cobsetptr = NULL;
 	}
@@ -5042,14 +5045,18 @@ set_config_val (char *value, int pos)
 				if (numval < 4001) {
 					numval = numval * 1024 * 1024;
 				} else {
-					numval = 4294967295; /* max. guaranteed value for unsigned long */
+					/* use max. guaranteed value for unsigned long
+					   to raise a warning as max value is limit to one less */
+					numval = 4294967295;
 				}
 				break;
 			case 'G':
 				if (numval < 4) {
 					numval = numval * 1024 * 1024 * 1024;
 				} else {
-					numval = 4294967295; /* max. guaranteed value for unsigned long */
+					/* use max. guaranteed value for unsigned long
+					   to raise a warning as max value is limit to one less */
+					numval = 4294967295;
 				}
 				break;
 			}
@@ -5116,6 +5123,9 @@ set_config_val (char *value, int pos)
 			return 1;
 		}
 		memcpy (data, &str, sizeof (char *));
+		if (data_loc == offsetof(cob_settings,cob_preload_str)) {
+			cobsetptr->cob_preload_str_set = cob_strdup(str);
+		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */
 		memset (data, 0, data_len);
@@ -5300,6 +5310,28 @@ cb_config_entry (char *buf, int line)
 	}
 
 	value[j] = 0;
+	if (strcasecmp (keyword, "reset") != 0
+	&&  strcasecmp (keyword, "include") != 0
+	&&  strcasecmp (keyword, "includeif") != 0
+	&&  strcasecmp (keyword, "setenv") != 0
+	&&  strcasecmp (keyword, "unsetenv") != 0) {
+		i = cb_lookup_config(keyword);
+
+		if (i >= NUM_CONFIG) {
+			conf_runtime_error (1,_("unknown configuration tag '%s'"), keyword);
+			return -1;
+		}
+	}
+	if (strcmp (value, "") == 0) {
+		if (strcasecmp (keyword, "include") != 0
+		&&  strcasecmp (keyword, "includeif")) {
+			conf_runtime_error(1, _("WARNING - '%s' without a value - ignored!"), keyword);
+			return 2;
+		} else {
+			conf_runtime_error (1, _("'%s' without a value!"), keyword);
+			return -1;
+		}
+	}
 
 	if (strcasecmp (keyword, "setenv") == 0 ) {
 		/* collect additional value and push into environment */
@@ -5348,10 +5380,6 @@ cb_config_entry (char *buf, int line)
 	}
 
 	if (strcasecmp (keyword, "unsetenv") == 0) {
-		if (strcmp (value, "") == 0) {
-			conf_runtime_error (1, _("WARNING - '%s' without a value - ignored!"), keyword);
-			return 2;
-		}
 		if ((env = getenv (value)) != NULL ) {
 			for (i = 0; i < NUM_CONFIG; i++) {		/* Set value from config file */
 				if (gc_conf[i].env_name
@@ -5374,10 +5402,6 @@ cb_config_entry (char *buf, int line)
 
 	if (strcasecmp (keyword, "include") == 0 ||
 		strcasecmp (keyword, "includeif") == 0) {
-		if (strcmp (value, "") == 0) {
-			conf_runtime_error (1, _("'%s' without a value!"), keyword);
-			return -1;
-		}
 		str = cob_expand_env_string (value);
 		strcpy (buf, str);
 		cob_free (str);
@@ -5421,10 +5445,6 @@ cb_config_entry (char *buf, int line)
 	if (i >= NUM_CONFIG) {
 		conf_runtime_error (1, _("unknown configuration tag '%s'"), keyword);
 		return -1;
-	}
-	if (strcmp (value, "") == 0) {
-		conf_runtime_error (1, _("WARNING - '%s' without a value - ignored!"), keyword);
-		return 2;
 	}
 
 	old_type = gc_conf[i].data_type;
@@ -6159,6 +6179,12 @@ print_runtime_conf ()
 						printf ("Ovr");
 					} else {
 						printf ("env");
+						if (gc_conf[i].data_loc == offsetof(cob_settings,cob_preload_str)
+						&& cobsetptr->cob_preload_str_set != NULL) {
+							printf(": %-*s : ",hdlen,gc_conf[i].env_name);
+							printf("%s\n",cobsetptr->cob_preload_str_set);
+							printf("eval");
+						}
 					}
 					printf (": %-*s : ", hdlen, gc_conf[i].env_name);
 				} else if ((gc_conf[i].data_type & STS_CNFSET)) {
@@ -6166,6 +6192,14 @@ print_runtime_conf ()
 						printf ("  %d ", gc_conf[i].config_num);
 					} else {
 						printf ("    ");
+					}
+					if (gc_conf[i].data_loc == offsetof(cob_settings,cob_preload_str)
+					&& cobsetptr->cob_preload_str_set != NULL) {
+						printf(": %-*s : ",hdlen,
+							gc_conf[i].set_by > 0 ? gc_conf[i].env_name
+							: gc_conf[i].conf_name);
+						printf("%s\n",cobsetptr->cob_preload_str_set);
+						printf("eval");
 					}
 					if (gc_conf[i].set_by > 0) {
 						printf (": %-*s : ", hdlen, gc_conf[i].env_name);

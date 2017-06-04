@@ -229,6 +229,7 @@ typedef struct __cob_settings {
 	unsigned int	name_convert;
 	char		*cob_preload_str;
 	char		*cob_library_path;
+	char		*cob_preload_str_set;
 
 	size_t		*resolve_size;	/* Array size of resolve_path*/
 	char		*cob_preload_resolved;
