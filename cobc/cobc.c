@@ -3340,7 +3340,7 @@ process_filename (const char *filename)
 			fn->listing_file = cobc_stradd_dup (fbasename, ".lst");
 		}
 #ifndef COB_INTERNAL_XREF
-	} else if (cobc_gen_listing > 1) {
+	} else if (cobc_gen_listing == 2) {
 		fn->listing_file = cobc_stradd_dup (fbasename, ".xrf");
 #endif
 	}
@@ -3961,7 +3961,8 @@ preprocess (struct filename *fn)
 			cobc_terminate(fn->listing_file);
 		}
 #ifndef COB_INTERNAL_XREF
-		if (cobc_gen_listing > 1) {
+		/* external cross-reference with cobxref */
+		if (cobc_gen_listing == 2) {
 			if (cb_src_list_file) {
 				fclose (cb_src_list_file);
 			}
@@ -4057,6 +4058,7 @@ set_listing_header_symbols (void)
 }
 
 #ifdef COB_INTERNAL_XREF
+/* listing header for internal xref */
 static void
 set_listing_header_xref (const enum xref_type type)
 {
@@ -4074,12 +4076,15 @@ set_listing_header_xref (const enum xref_type type)
 }
 #endif
 
+/* listing header empty */
 static void
 set_listing_header_none (void)
 {
 	cb_listing_header[0] = 0;
 }
 
+/* standard title for listing
+   (TODO: option to set by directive and/or command line option) */
 static void
 set_standard_title (void)
 {
@@ -4735,18 +4740,19 @@ print_program_trailer (void)
 	int			found;
 	char			err_msg[BUFSIZ];
 
-#if 0 /* checkme: needed for syntax-checks-only? */
-	p = program_list_reverse (current_program);
-#else
-	p = current_program;
-#endif
+	/* needed for syntax-checks-only as codegen reverses the program list */
+	if (cb_flag_syntax_only) {
+		p = program_list_reverse (current_program);
+	} else {
+		p = current_program;
+	}
+
 	if (p && p->next_program) {
 		print_names = 1;
 	}
 
 	if (!cb_no_symbols && p != NULL) {
 		/* Print file/symbol tables */
-
 		set_listing_header_symbols();
 		force_new_page_for_next_line ();
 		print_program_header ();
@@ -4782,7 +4788,7 @@ print_program_trailer (void)
 
 #ifdef COB_INTERNAL_XREF
 	if (cb_listing_xref && p != NULL) {
-		/* Print cross reference */
+		/* Print internal cross reference */
 
 		for (q = p; q; q = q->next_program) {
 
@@ -7382,7 +7388,7 @@ main (int argc, char **argv)
 		}
 	}
 
-	/* Open source listing file */
+	/* internal complete source listing file */
 #ifdef COB_INTERNAL_XREF
 	if (cb_listing_xref && !cb_listing_outputfile) {
 		cobc_err_exit (_("%s option requires a listing file"), "-Xref");
