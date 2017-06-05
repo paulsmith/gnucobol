@@ -6334,6 +6334,9 @@ process_translate (struct filename *fn)
 	}
 
 	if (ret) {
+		/* If processing raised errors set syntax-only flag to not
+		   loose the information "no codegen occurred" */
+		cb_flag_syntax_only = 1;
 		return 1;
 	}
 	if (cb_flag_syntax_only) {
