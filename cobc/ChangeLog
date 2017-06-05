@@ -4,6 +4,12 @@
 	* cobc.c: prevent memory leak when options are specified multiple times
 	* cobc.c (print_program_trailer): correct program order in listing
 	  for both with/without code generation
+	* cobc.c (process_translate): on processing errors set cb_flag_syntax_only
+	  to not loose the information "no codegen occured"
+	* cobc.c: replaced --no-symbols (cb_no_symbols) by
+	  -tsymbols (cb_listing_symbols)
+	* cobc.c: added (cobc_enum_explain_storage) to output
+	  storage note in symbol listing
 
 2017-06-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

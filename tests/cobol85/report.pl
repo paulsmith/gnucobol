@@ -118,7 +118,7 @@ $to_kill{OBNC1M} = 1;
 
 # NC114M test the compiler listing along to other parts.
 my %cobc_flags;
-$cobc_flags{NC114M} = "-t NC114M.lst --no-symbols";
+$cobc_flags{NC114M} = "-t NC114M.lst";
 
 # NC302M tests the compiler flagging of obsolete features, including STOP literal.
 $cobc_flags{NC302M} = "-Wobsolete";

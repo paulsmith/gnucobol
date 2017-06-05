@@ -1906,7 +1906,7 @@ check_listing (const char *text, const unsigned int comment)
 	if (!text) {
 		return;
 	}
-	if (cobc_gen_listing > 1) {
+	if (cobc_gen_listing == 2) {
 		/* Passed to cobxref */
 		fputs (text, cb_listing_file);
 		return;

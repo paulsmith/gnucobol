@@ -199,7 +199,7 @@ FILE			*cb_src_list_file = NULL;
 int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
 unsigned int		cb_lines_per_page = CB_MAX_LINES;
-int			cb_no_symbols = 0;
+int			cb_listing_symbols = 0;
 int			cb_listing_xref = 0;
 #define			CB_LISTING_DATE_BUFF 26
 #define			CB_LISTING_DATE_MAX (CB_LISTING_DATE_BUFF - 1)
@@ -489,7 +489,7 @@ static const struct option long_options[] = {
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
-	{"no-symbols", 		CB_NO_ARG, &cb_no_symbols, 1},
+	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},
 
 #define	CB_FLAG(var,pdok,name,doc)			\
 	{"f"name,		CB_NO_ARG, &var, 1},	\
@@ -687,6 +687,32 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "DEBUG";
 	case CB_TAG_DEBUG_CALL:
 		return "DEBUG CALL";
+	default:
+		break;
+	}
+	return "UNKNOWN";
+}
+
+static const char *
+cobc_enum_explain_storage (const enum cb_storage storage)
+{
+	switch (storage) {
+	case CB_STORAGE_CONSTANT:
+		return "Constants";
+	case CB_STORAGE_FILE:
+		return "FILE SECTION";
+	case CB_STORAGE_WORKING:
+		return "WORKING-STORAGE SECTION";
+	case CB_STORAGE_LOCAL:
+		return "LOCAL-STORAGE SECTION";
+	case CB_STORAGE_LINKAGE:
+		return "LINKAGE SECTION";
+	case CB_STORAGE_SCREEN:
+		return "SCREEN SECTION";
+	case CB_STORAGE_REPORT:
+		return "REPORT SECTION";
+	case CB_STORAGE_COMMUNICATION:
+		return "COMMUNICATION SECTION";
 	default:
 		break;
 	}
@@ -2140,7 +2166,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-	puts (_("  --no-symbols          specify no symbols in listing"));
+	puts (_("  --tsymbols            specify symbols in listing"));
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 #ifndef COB_INTERNAL_XREF
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
@@ -4343,9 +4369,9 @@ print_88_values (struct cb_field *field)
 	}
 }
 
-/* print fields with given indentation */
-static int
-print_fields (struct cb_field *top)
+/* print all fields including sister and child elements */
+static void
+print_fields (struct cb_field *top, int *found)
 {
 	int	first = 1;
 	int	get_cat;
@@ -4355,13 +4381,19 @@ print_fields (struct cb_field *top)
 	char	type[20];
 	char	picture[CB_LIST_PICSIZE];
 	char	lcl_name[LCL_NAME_LEN];
-	int	found = 0;
 
 	for (; top; top = top->sister) {
 		if (!top->level) {
 			continue;
 		}
-		found = 1;
+		if (*found == 0) {
+			*found = 1;
+			/* MAYBE use a second header line and a forced page break instead */
+			snprintf (print_data, CB_PRINT_LEN,
+				"      %s", cobc_enum_explain_storage(top->storage));
+			print_program_data (print_data);
+			print_program_data ("");
+		}
 
 		strncpy (lcl_name, check_filler_name ((char *)top->name),
 			 LCL_NAME_MAX);
@@ -4428,16 +4460,16 @@ print_fields (struct cb_field *top)
 		print_88_values (top);
 
 		if (top->children) {
-			print_fields (top->children);
+			print_fields (top->children, found);
 		}
 	}
-	return found;
 }
 
 static void
 print_files_and_their_records (cb_tree file_list_p)
 {
 	cb_tree	l;
+	int dummy = 1;
 
 	for (l = file_list_p; l; l = CB_CHAIN (l)) {
 		snprintf (print_data, CB_PRINT_LEN,
@@ -4447,7 +4479,7 @@ print_files_and_their_records (cb_tree file_list_p)
 			 CB_FILE (CB_VALUE (l))->name);
 		print_program_data (print_data);
 		if (CB_FILE (CB_VALUE (l))->record) {
-			print_fields (CB_FILE (CB_VALUE (l))->record);
+			print_fields (CB_FILE (CB_VALUE (l))->record, &dummy);
 			print_program_data ("");
 		}
 	}
@@ -4458,7 +4490,7 @@ print_fields_in_section (struct cb_field *first_field_in_section)
 {
 	int found = 0;
 	if (first_field_in_section != NULL) {
-		found = !!print_fields (first_field_in_section);
+		print_fields (first_field_in_section, &found);
 		if (found) {
 			print_program_data ("");
 		}
@@ -4747,102 +4779,107 @@ print_program_trailer (void)
 		p = current_program;
 	}
 
-	if (p && p->next_program) {
-		print_names = 1;
-	}
+	if (p != NULL) {
 
-	if (!cb_no_symbols && p != NULL) {
-		/* Print file/symbol tables */
-		set_listing_header_symbols();
-		force_new_page_for_next_line ();
-		print_program_header ();
-
-		for (q = p; q; q = q->next_program) {
-			if (print_names) {
-				sprintf (print_data,
-					"      %-14s      %s",
-			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
-				 		"FUNCTION" : "PROGRAM"),
-			 	 	q->program_name);
-				print_program_data (print_data);
-				print_program_data ("");
-			}
-			found = 0;
-			if (q->file_list) {
-				print_files_and_their_records (q->file_list);
-				found++;
-			}
-			found += print_fields_in_section (q->working_storage);
-			found += print_fields_in_section (q->local_storage);
-			found += print_fields_in_section (q->linkage_storage);
-			found += print_fields_in_section (q->screen_storage);
-			found += print_fields_in_section (q->report_storage);
-			if (!found) {
-				snprintf (print_data, CB_PRINT_LEN, "      %s", _("No fields defined."));
-				print_program_data (print_data);
-				print_program_data ("");
-			}
+	/* Print program in symbol table / cross-reference if more than one program */
+	/* MAYBE use a second header line and a forced page break instead */
+		if (p->next_program) {
+			print_names = 1;
 		}
-		print_break = 0;
-	}
+	
+		/* Print file/symbol tables if requested */
+		if (cb_listing_symbols) {
+			set_listing_header_symbols();
+			force_new_page_for_next_line ();
+			print_program_header ();
+
+			for (q = p; q; q = q->next_program) {
+				if (print_names) {
+					sprintf (print_data,
+						"      %-14s      %s",
+			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+				 			"FUNCTION" : "PROGRAM"),
+			 	 		q->program_name);
+					print_program_data (print_data);
+					print_program_data ("");
+				}
+				found = 0;
+				if (q->file_list) {
+					print_files_and_their_records (q->file_list);
+					found++;
+				}
+				found += print_fields_in_section (q->working_storage);
+				found += print_fields_in_section (q->local_storage);
+				found += print_fields_in_section (q->linkage_storage);
+				found += print_fields_in_section (q->screen_storage);
+				found += print_fields_in_section (q->report_storage);
+				if (!found) {
+					snprintf (print_data, CB_PRINT_LEN, "      %s", _("No fields defined."));
+					print_program_data (print_data);
+					print_program_data ("");
+				}
+			}
+			print_break = 0;
+		}
 
 #ifdef COB_INTERNAL_XREF
-	if (cb_listing_xref && p != NULL) {
-		/* Print internal cross reference */
+		/* Print internal cross reference if requested */
+		if (cb_listing_xref) {
 
-		for (q = p; q; q = q->next_program) {
+			for (q = p; q; q = q->next_program) {
 
-			set_listing_header_xref (XREF_FIELD);
-			force_new_page_for_next_line ();
-			print_program_header ();
+				set_listing_header_xref (XREF_FIELD);
+				force_new_page_for_next_line ();
+				print_program_header ();
 
-			if (print_names) {
-				sprintf (print_data,
-					 "%s %s",
-			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
-				 		"FUNCTION" : "PROGRAM"),
-			 	 	q->program_name);
-				print_program_data (print_data);
-				print_program_data ("");
+				if (print_names) {
+					sprintf (print_data,
+						 "%s %s",
+			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+				 			"FUNCTION" : "PROGRAM"),
+			 	 		q->program_name);
+					print_program_data (print_data);
+					print_program_data ("");
+				}
+				found = 0;
+				if (q->file_list) {
+					xref_files_and_their_records (q->file_list);
+					found++;
+				}
+				found += xref_fields_in_section (q->working_storage);
+				found += xref_fields_in_section (q->local_storage);
+				found += xref_fields_in_section (q->linkage_storage);
+				found += xref_fields_in_section (q->screen_storage);
+				found += xref_fields_in_section (q->report_storage);
+				if (!found) {
+					snprintf (print_data, CB_PRINT_LEN, "      %s", _("No fields defined."));
+					print_program_data (print_data);
+					print_program_data ("");
+				}
+
+				set_listing_header_xref (XREF_LABEL);
+				force_new_page_for_next_line ();
+				print_program_header ();
+
+				if (print_names) {
+					sprintf (print_data,
+						 "%s %s",
+			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+				 			"FUNCTION" : "PROGRAM"),
+			 	 		q->program_name);
+					print_program_data (print_data);
+					print_program_data ("");
+				}
+				if (!xref_labels (q->exec_list)) {
+					snprintf (print_data, CB_PRINT_LEN, "      %s", _("No labels defined."));
+					print_program_data (print_data);
+					print_program_data ("");
+				};
 			}
-			found = 0;
-			if (q->file_list) {
-				xref_files_and_their_records (q->file_list);
-				found++;
-			}
-			found += xref_fields_in_section (q->working_storage);
-			found += xref_fields_in_section (q->local_storage);
-			found += xref_fields_in_section (q->linkage_storage);
-			found += xref_fields_in_section (q->screen_storage);
-			found += xref_fields_in_section (q->report_storage);
-			if (!found) {
-				snprintf (print_data, CB_PRINT_LEN, "      %s", _("No fields defined."));
-				print_program_data (print_data);
-				print_program_data ("");
-			}
-
-			set_listing_header_xref (XREF_LABEL);
-			force_new_page_for_next_line ();
-			print_program_header ();
-
-			if (print_names) {
-				sprintf (print_data,
-					 "%s %s",
-			 	 	(q->prog_type == CB_FUNCTION_TYPE ?
-				 		"FUNCTION" : "PROGRAM"),
-			 	 	q->program_name);
-				print_program_data (print_data);
-				print_program_data ("");
-			}
-			if (!xref_labels (q->exec_list)) {
-				snprintf (print_data, CB_PRINT_LEN, "      %s", _("No labels defined."));
-				print_program_data (print_data);
-				print_program_data ("");
-			};
+			print_break = 0;
 		}
-		print_break = 0;
-	}
 #endif
+	}
 
 	set_listing_header_none();
 	print_program_data ("");

@@ -350,7 +350,9 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 				cb_error_x (x, _ ("'%s' REDEFINES field not allowed here"), f->name);
 			}
 			/* add a "receiving" entry for the USING parameter */
-			cobc_xref_link (&f->xref, CB_REFERENCE (x)->common.source_line, 1);
+			if (cb_listing_xref) {
+				cobc_xref_link (&f->xref, CB_REFERENCE (x)->common.source_line, 1);
+			}
 		}
 	}
 

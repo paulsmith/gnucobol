@@ -2609,13 +2609,12 @@ validate_record_depending (cb_tree x)
 		break;
 	default:
 		/* RXWRXW - This breaks old legacy programs; FIXME: use compiler configuration */
-		/* FIXME: add explain_enum_storage, change to "should not be defined in %s */
 		if (cb_relaxed_syntax_checks) {
 			cb_warning_x (COBC_WARN_FILLER, x, _("RECORD DEPENDING item '%s' should be defined in "
-				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"), p->name);
+				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
 		} else {
 			cb_error_x (x, _("RECORD DEPENDING item '%s' should be defined in "
-				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE section"), p->name);
+				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
 		}
 	}
 }
@@ -3936,7 +3935,9 @@ cb_build_optim_cond (struct cb_binary_op *p)
 
 	f = CB_FIELD_PTR (p->x);
 #if 0 /* CHECKME, if needed */
-	cobc_xref_link (&f->xref, current_statement->common.source_line);
+	if (cb_listing_xref) {
+		cobc_xref_link (&f->xref, current_statement->common.source_line);
+	}
 #endif
 #if	0	/* RXWRXW - SI */
 	if (f->special_index) {
@@ -5606,8 +5607,10 @@ cb_emit_delete (cb_tree file)
 	current_statement->file = file;
 	f = CB_FILE (file);
 
-	/* add a "receiving" entry for the file */
-	cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	if (cb_listing_xref) {
+		/* add a "receiving" entry for the file */
+		cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	}
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
@@ -8623,8 +8626,10 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 	f = CB_FILE (file);
 	opts = 0;
 
-	/* add a "receiving" entry for the file */
-	cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	if (cb_listing_xref) {
+		/* add a "receiving" entry for the file */
+		cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	}
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
@@ -9528,8 +9533,10 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	current_statement->file = file;
 	f = CB_FILE (file);
 
-	/* add a "receiving" entry for the file */
-	cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	if (cb_listing_xref) {
+		/* add a "receiving" entry for the file */
+		cobc_xref_link (&f->xref, current_statement->common.source_line, 1);
+	}
 
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
