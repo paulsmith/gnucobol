@@ -449,6 +449,7 @@ test.conf: missing definitions:
 	no definition of 'program-prototypes'
 	no definition of 'reference-out-of-declaratives'
 	no definition of 'numeric-value-for-edited-item'
+	no definition of 'incorrect-conf-sec-order'
 ])
 
 AT_CLEANUP

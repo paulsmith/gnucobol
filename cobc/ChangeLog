@@ -1,4 +1,12 @@
 
+2017-05-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, config.def: part reverted r837 - allow incorrect
+	  configuration section paragraph order with
+	  incorrect-conf-sec-order option (see bug #224).
+	* parser.y (check_comp_duplicate): removed redundant code checking
+	  for duplicate SOURCE-/OBJECT-COMPUTER paragraphs.
+
 2017-06-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: prevent memory leak when options are specified multiple times

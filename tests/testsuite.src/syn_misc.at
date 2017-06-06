@@ -347,7 +347,7 @@ AT_KEYWORDS([misc])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 999 VALUE 124.
@@ -359,7 +359,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_DATA([prog2.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 999 VALUE 124.
@@ -2439,7 +2439,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 1.000003+  END-DISPLAY
            DISPLAY .3+        END-DISPLAY
            DISPLAY 3.+        END-DISPLAY
-           
+
            STOP RUN.
 ])
 
@@ -2469,7 +2469,7 @@ AT_DATA([prog3.cob], [
            DISPLAY 1,000003+  END-DISPLAY
            DISPLAY ,3+        END-DISPLAY
            DISPLAY 3,+        END-DISPLAY
-           
+
            STOP RUN.
 ])
 
@@ -2716,7 +2716,7 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID.    prog.
        PROCEDURE      DIVISION.
-           *> Valid form 
+           *> Valid form
            DISPLAY NX"265E"
            DISPLAY NX"0123456789ABCDEF"
 
@@ -3116,7 +3116,74 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: warning: phrases in non-standard order
+[prog.cob: 8: warning: incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs used
+])
+AT_CLEANUP
+
+
+AT_SETUP([CONF. SECTION paragraphs in wrong order])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog1.
+
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       REPOSITORY.
+       SOURCE-COMPUTER. b.
+       OBJECT-COMPUTER. a.
+       SPECIAL-NAMES.
+
+       END PROGRAM prog1.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog2.
+
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       SOURCE-COMPUTER. b.
+       OBJECT-COMPUTER. a.
+       REPOSITORY.
+       SPECIAL-NAMES.
+
+       END PROGRAM prog2.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog3.
+
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       REPOSITORY.
+       SOURCE-COMPUTER. b.
+       OBJECT-COMPUTER. a.
+
+       END PROGRAM prog3.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog4.
+
+       ENVIRONMENT    DIVISION.
+       CONFIGURATION  SECTION.
+       REPOSITORY.
+       SPECIAL-NAMES.
+       SOURCE-COMPUTER. b.
+       OBJECT-COMPUTER. a.
+
+       END PROGRAM prog4.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 12: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 45: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+])
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
+[prog.cob: 12: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 24: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 35: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob: 45: error: incorrect order of CONFIGURATION SECTION paragraphs used
 ])
 AT_CLEANUP
 
@@ -3477,11 +3544,11 @@ AT_DATA([prog.cob], [
        CONFIGURATION   SECTION.
        SOURCE-COMPUTER.
             whatever   WITH DEBUGGING MODE.
-           
+
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  i           PIC 9.
-       
+
        PROCEDURE DIVISION.
            PERFORM VARYING i FROM 1 BY 1
                    UNTIL i = 5
@@ -3653,4 +3720,3 @@ prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have t
 ])
 
 AT_CLEANUP
-

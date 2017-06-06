@@ -198,7 +198,6 @@ static cob_flags_t		set_attr_val_off;
 static cob_flags_t		check_duplicate;
 static cob_flags_t		check_on_off_duplicate;
 static cob_flags_t		check_pic_duplicate;
-static cob_flags_t		check_comp_duplicate;
 static cob_flags_t		check_line_col_duplicate;
 static unsigned int		skip_statements;
 static unsigned int		start_debug;
@@ -754,7 +753,6 @@ clear_initial_values (void)
 	use_global_ind = 0;
 	check_duplicate = 0;
 	check_pic_duplicate = 0;
-	check_comp_duplicate = 0;
 	skip_statements = 0;
 	start_debug = 0;
 	save_debug = 0;
@@ -2711,10 +2709,37 @@ _environment_header:
 
 _configuration_section:
   _configuration_header
-  _source_object_computer_paragraphs
-  _special_names_paragraph
-  _special_names_sentence_list
-  _repository_paragraph
+  _configuration_paragraphs
+;
+
+_configuration_paragraphs:
+| standard_order_conf_section
+| nonstandard_order_conf_section
+  {
+	cb_verify (cb_incorrect_conf_sec_order,
+		   _("incorrect order of CONFIGURATION SECTION paragraphs"));
+  }
+;
+
+/*
+  We explicitly list all of the possible permutations to preclude shift/reduce
+  and reduce/reduce errors.
+*/
+
+standard_order_conf_section:
+  source_object_computer_paragraphs special_names_paragraph _repository_paragraph
+| source_object_computer_paragraphs repository_paragraph
+| source_object_computer_paragraphs
+| special_names_paragraph _repository_paragraph
+| repository_paragraph
+;
+
+nonstandard_order_conf_section:
+  source_object_computer_paragraphs repository_paragraph special_names_paragraph
+| repository_paragraph source_object_computer_paragraphs _special_names_paragraph
+| repository_paragraph special_names_paragraph _source_object_computer_paragraphs
+| special_names_paragraph source_object_computer_paragraphs _repository_paragraph
+| special_names_paragraph repository_paragraph source_object_computer_paragraphs
 ;
 
 _configuration_header:
@@ -2729,14 +2754,17 @@ _configuration_header:
 ;
 
 _source_object_computer_paragraphs:
-| source_computer_paragraph
+| source_object_computer_paragraphs
+;
+
+source_object_computer_paragraphs:
+  source_computer_paragraph
 | object_computer_paragraph
 | source_computer_paragraph object_computer_paragraph
 | object_computer_paragraph source_computer_paragraph
   {
-	if (check_comp_duplicate & SYN_CLAUSE_2) {
-		cb_warning (warningopt, _("phrases in non-standard order"));
-	}
+	cb_verify (cb_incorrect_conf_sec_order,
+		   _("incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs"));
   }
 ;
 
@@ -2748,7 +2776,6 @@ source_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
-	check_repeated ("SOURCE-COMPUTER", SYN_CLAUSE_1, &check_comp_duplicate);
   }
   _source_computer_entry
 ;
@@ -2776,7 +2803,6 @@ object_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
-	check_repeated ("OBJECT-COMPUTER", SYN_CLAUSE_2, &check_comp_duplicate);
   }
   _object_computer_entry
   {
@@ -2872,7 +2898,11 @@ computer_words:
 /* REPOSITORY paragraph */
 
 _repository_paragraph:
-| REPOSITORY TOK_DOT
+| repository_paragraph
+;
+
+repository_paragraph:
+  REPOSITORY TOK_DOT
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
@@ -2934,7 +2964,16 @@ repository_name_list:
 /* SPECIAL-NAMES paragraph */
 
 _special_names_paragraph:
-| SPECIAL_NAMES TOK_DOT
+| special_names_paragraph
+;
+
+special_names_paragraph:
+  special_names_header _special_names_sentence_list
+| special_names_sentence_list
+;
+
+special_names_header:
+  SPECIAL_NAMES TOK_DOT
   {
 	check_duplicate = 0;
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
@@ -2947,6 +2986,7 @@ _special_names_paragraph:
 ;
 
 _special_names_sentence_list:
+  /* empty */
 | special_names_sentence_list
 ;
 

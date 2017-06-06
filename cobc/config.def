@@ -245,3 +245,6 @@ CB_CONFIG_SUPPORT (cb_reference_out_of_declaratives, "reference-out-of-declarati
 
 CB_CONFIG_SUPPORT (cb_numeric_value_for_edited_item, "numeric-value-for-edited-item",
 	_("numeric literals in VALUE clause of numeric-edited items"))
+
+CB_CONFIG_SUPPORT (cb_incorrect_conf_sec_order, "incorrect-conf-sec-order",
+	_("incorrect order of CONFIGURATOIN SECTION paragraphs"))
