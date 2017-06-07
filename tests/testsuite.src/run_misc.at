@@ -6008,7 +6008,6 @@ AT_KEYWORDS([misc directives extensions])
 # for the current compilation unit
 
 # original MF extension: $SET CONSTANT
-# (and MF extensions $IF/ELSE/END)
 AT_DATA([prog.cob], [
        $SET CONSTANT DOGGY "Barky"
        $SET CONSTANT PONY "Blacky"
@@ -6030,7 +6029,6 @@ AT_DATA([prog.cob], [
 ])
 
 # OpenCOBOL/GnuCOBOL extension: >>SET CONSTANT
-# (and 2002 standard >>IF/ELSE/END-IF)
 AT_DATA([prog2.cob], [
        >>SET CONSTANT DOGGY "Barky"
        >>SET CONSTANT PONY "Blacky"
@@ -6041,6 +6039,27 @@ AT_DATA([prog2.cob], [
        01  THEDOG    PIC X(6) VALUE DOGGY.
        77  MYHORSE   PIC X(7) VALUE PONY.
        >>SET CONSTANT PONY "White"
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           DISPLAY "Your Dog's name is " DOGGY ";".
+           DISPLAY "The Dog's name is " THEDOG ";".
+           DISPLAY "My Horse is " MYHORSE ";".
+           DISPLAY "My little pony is " PONY ".".
+           STOP RUN.
+])
+
+# OpenCOBOL/GnuCOBOL extension: >>DEFINE CONSTANT
+AT_DATA([prog3.cob], [
+       >>DEFINE CONSTANT DOGGY "Barky"
+       >>DEFINE CONSTANT PONY "Blacky"
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  THEDOG    PIC X(6) VALUE DOGGY.
+       77  MYHORSE   PIC X(7) VALUE PONY.
+       >>DEFINE CONSTANT PONY "White" OVERRIDE
       *
        PROCEDURE DIVISION.
        MAIN.
@@ -6067,6 +6086,17 @@ AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 # Note: MF does not redefine a value via SET CONSTANT
 # the first definitions wins (we should add a warning)
 AT_CHECK([./prog2], [0],
+[Your Dog's name is Barky;
+The Dog's name is Barky ;
+My Horse is Blacky ;
+My little pony is Blacky.
+], [])
+
+AT_CHECK([$COMPILE -fdefine-constant-directive=ok prog3.cob], [0], [], [])
+
+# Note: MF does not redefine a value via SET CONSTANT
+# the first definitions wins (if we remove OVERRIDE we get an error)
+AT_CHECK([./prog3], [0],
 [Your Dog's name is Barky;
 The Dog's name is Barky ;
 My Horse is Blacky ;

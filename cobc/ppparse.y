@@ -867,6 +867,23 @@ define_directive:
   {
 	ppp_define_del ($1);
   }
+| CONSTANT VARIABLE_NAME _as LITERAL _override
+  {
+  /* OpenCOBOL/GnuCOBOL 2.0 extension: MF $SET CONSTANT in 2002+ style as
+     >> DEFINE CONSTANT var [AS] literal  archaic extension:
+     use plain  >> DEFINE var [AS] literal  for conditional compilation and
+     use        01 CONSTANT with/without FROM clause  for constant definitions */
+	struct cb_define_struct	*p;
+
+	
+	if (cb_verify (cb_define_constant_directive, ">> DEFINE CONSTANT var")) {
+		p = ppp_define_add (ppp_setvar_list, $2, $4, $5);
+		if (p) {
+			ppp_setvar_list = p;
+			fprintf (ppout, "#DEFLIT %s %s\n", $2, $4);
+		}
+	}
+  }
 | variable_or_literal
   {
 	cb_error (_("invalid %s directive"), "DEFINE/SET");

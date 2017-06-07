@@ -571,6 +571,13 @@ CONTROL_STATEMENT_STATE>{
 }
 
 <DEFINE_DIRECTIVE_STATE>{
+  /* OpenCOBOL/GnuCOBOL 2.0 extension: MF $SET CONSTANT in 2002+ style as
+     >> DEFINE CONSTANT var [AS] literal  archaic extension:
+     use plain  >> DEFINE var [AS] literal  for conditional compilation and
+     use        01 CONSTANT with/without FROM clause  for constant definitions */
+  "CONSTANT"		{
+	return CONSTANT;
+  }
   "AS"			{
 	return AS;
   }

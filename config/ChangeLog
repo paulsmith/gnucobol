@@ -1,7 +1,11 @@
 
+2017-06-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: added define-constant-directive option
+
 2017-06-05  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added incorrect-conf-sec-order option.
+	* general: added incorrect-conf-sec-order option
 
 2017-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -10,11 +14,11 @@
 
 2017-06-04  Edward Hart <edward.dan.hart@gmail.com>
 
-	* rm.conf: added config file for RM-COBOL.
+	* rm.conf: added config file for RM-COBOL
 
 2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added numeric-value-for-edited-item.
+	* general: added numeric-value-for-edited-item
 
 2017-04-26  Ron Norman <rjn@inglenet.com>
 
@@ -23,7 +27,7 @@
 
 2017-04-22  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added stop-identifier config option.
+	* general: added stop-identifier config option
 
 2016-12-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -37,11 +41,11 @@
 
 2016-11-19  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added use-for-debugging config option.
+	* general: added use-for-debugging config option
 
 2016-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* general: feature-request #179 added reference-out-of-declaratives option
+	* general: FR #179 added reference-out-of-declaratives option
 
 2016-10-13  Ron Norman <rjn@inglenet.com>
 
@@ -73,20 +77,20 @@
 2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added program-name-redefinition and program-prototypes
-	  configuration options.
+	  configuration options
 
 2016-07-27  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added renames-uncommon-levels configuration option.
+	* general: added renames-uncommon-levels configuration option
 
 2016-07-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added accept-display-extensions and console-is-crt
-	  configuration options.
+	  configuration options
 
 2016-06-14  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: moved uncommon aliases from reserved.c to config files.
+	* general: moved uncommon aliases from reserved.c to config files
 
 2016-06-03  Edward Hart <edward.dan.hart@gmail.com>
 

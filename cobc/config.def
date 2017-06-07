@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -235,7 +235,7 @@ CB_CONFIG_SUPPORT (cb_constant_78, "constant-78",
 	_("constant with level 78 item (note: has left to right precedence in expressions)"))
 
 CB_CONFIG_SUPPORT (cb_constant_01, "constant-01",
-	_("constant with level 01 CONSTANT AS item"))
+	_("constant with level 01 CONSTANT AS/FROM item")) /* COBOL 2002+ */
 
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 	_("CALL/CANCEL with program-prototype-name"))
@@ -247,4 +247,7 @@ CB_CONFIG_SUPPORT (cb_numeric_value_for_edited_item, "numeric-value-for-edited-i
 	_("numeric literals in VALUE clause of numeric-edited items"))
 
 CB_CONFIG_SUPPORT (cb_incorrect_conf_sec_order, "incorrect-conf-sec-order",
-	_("incorrect order of CONFIGURATOIN SECTION paragraphs"))
+	_("incorrect order of CONFIGURATOIN SECTION paragraphs")) /* OpenCOBOL/GnuCOBOL extension */
+
+CB_CONFIG_SUPPORT (cb_define_constant_directive, "define-constant-directive",
+	_("allow >> DEFINE CONSTANT var AS literal")) /* OpenCOBOL/GnuCOBOL extension */

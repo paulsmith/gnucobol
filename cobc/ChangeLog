@@ -1,4 +1,11 @@
 
+2017-06-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ppparse.y, config.def: only allow extension ">> DEFINE CONSTANT var [AS]"
+	  depending on configuration option define-constant-directive
+      --> use plain  >> DEFINE var [AS] literal for conditional compilation
+      and use        01 CONSTANT with/without FROM clause  for constant definitions
+
 2017-05-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, config.def: part reverted r837 - allow incorrect
@@ -51,10 +58,9 @@
 
 2017-05-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* pplex.l, ppparse.y: removed undocumented extensions
-	  >> DEFINE CONSTANT (use 01 CONSTANT with/without FROM clause instead)
-	  and the optional AS in $SET CONSTANT VAR AS VAL - as MF doesn't allow
-	  the AS at all
+	* pplex.l, ppparse.y: removed undocumented extension
+	  "optional AS in $SET CONSTANT VAR [AS] VAL" - as this is a MF extension
+	  MF doesn't allow the AS at all
 	* pplex.l, ppparse.y: implemented >> LEAP-SECOND directive (while keeping
 	  the ON setting as PENDING)
 
