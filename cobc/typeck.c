@@ -1831,7 +1831,11 @@ cb_build_const_from (cb_tree x)
 		return cb_error_node;
 	}
 
-	return cb_build_alphanumeric_literal (p->value, (size_t)strlen(p->value));
+	if (p->deftype == PLEX_DEF_NUM) {
+		return cb_build_numeric_literal (0, p->value, 0);
+	} else {
+		return cb_build_alphanumeric_literal (p->value, (size_t)strlen(p->value));
+	}
 }
 
 /**

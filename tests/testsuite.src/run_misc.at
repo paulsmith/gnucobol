@@ -6179,6 +6179,7 @@ AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
        >>DEFINE MYDOG AS "Piper"
+       >>DEFINE MYNUM1 AS 11
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        DATA DIVISION.
@@ -6198,19 +6199,14 @@ AT_DATA([prog.cob], [
        78  DIV1      VALUE 100 / 3.
        78  NUM2      VALUE 1 + 2 * 3.
        01  CON3      CONSTANT (((1 + 2) * NUM2) - 4).
-       01  CON4      CONSTANT 3.1416 + CON3.
+       01  CON4      CONSTANT AS 3.1416 + CON3.
        01  CON5      CONSTANT 1 + 2 * 3.
        01  DOGNAME   CONSTANT FROM MYDOG.
-       LINKAGE SECTION.
-       01  XMYREC.
-          05  XFLD1   PIC 9(2).
-          05  XFLD2   PIC X(7).
-             78  XPOS3    VALUE NEXT.
-          05  XFLD3   PIC X(2) OCCURS 5 TIMES.
-             78  XPOS4    VALUE NEXT.
-          05  XFLD4   PIC X(4).
-          05  XFLD5   PIC X(4).
-       78  XSTRT4     VALUE START OF XFLD4.
+       01  NUM1      CONSTANT FROM MYNUM1.
+       01  CON6      CONSTANT AS CON5 + NUM1.
+       >> IF NUM2 DEFINED  *> optional passed from command line
+       01  NUM2      CONSTANT FROM MYNUM2.
+       >> END-IF
       *
        PROCEDURE DIVISION.
        MAIN.
@@ -6234,9 +6230,7 @@ AT_DATA([prog.cob], [
            DISPLAY "CON3 is " CON3.
            DISPLAY "CON4 is " CON4 " vs " 3.141596 
                    " & " -2.189 " & " +12.
-           DISPLAY "XFLD3 starts at " XPOS3.
-           DISPLAY "XFLD4 starts at " XSTRT4.
-           DISPLAY "XFLD4 starts at " XPOS4.
+           DISPLAY "CON6 is " CON6 "."
            DISPLAY "My Dog's name is " DOGNAME ";".
            STOP RUN.
 ])
@@ -6253,9 +6247,7 @@ HUN2 is 1855
 01 CONSTANT has normal operator precedence.
 CON3 is 23
 CON4 is 26 vs 3.141596 & -2.189 & +12
-XFLD3 starts at 9
-XFLD4 starts at 19
-XFLD4 starts at 11
+CON6 is 18.
 My Dog's name is Piper;
 ], [])
 

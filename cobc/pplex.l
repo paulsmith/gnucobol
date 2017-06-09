@@ -137,6 +137,8 @@ static int			listing_line = 0;
 static int			requires_listing_line;
 static int			requires_new_line = 0;
 
+static char	msg[PPLEX_BUFF_LEN];
+
 static struct cb_replace_list	*current_replace_list = NULL;
 static struct cb_replace_list	*save_current_replace = NULL;
 static struct cb_replace_list	*base_replace_list = NULL;
@@ -155,7 +157,7 @@ static void	switch_to_buffer	(const int, const char *,
 					 const YY_BUFFER_STATE);
 static void	check_listing		(const char *, const unsigned int);
 static void	skip_to_eol		(void);
-static void	display_to_eol		(void);
+static void display_finish		(void);
 static void	set_print_replace_list	(struct cb_replace_list *list);
 static void	get_new_listing_file	(void);
 
@@ -180,6 +182,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 %x ENDIF_DIRECTIVE_STATE
 %x ALNUM_LITERAL_STATE
 %x CONTROL_STATEMENT_STATE
+%x DISPLAY_DIRECTIVE_STATE
 
 %%
 
@@ -202,10 +205,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	return DEFINE_DIRECTIVE;
 }
 
-^[ ]*">>"[ ]?"DISPLAY "	{
-	/* 2002+: display message during compilation */
-	/* Define here to preempt next debug rule below */
-	display_to_eol ();
+^[ ]*">>"[ ]?"DISPLAY"[ ]+ {
+	/* OpenCOBOL/GnuCOBOL 1.0 extension: display message during compilation */
+	msg[0] = 0;
+	BEGIN DISPLAY_DIRECTIVE_STATE;
 }
 
 ^[ ]*">>D"		{
@@ -315,9 +318,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	skip_to_eol ();
 }
 
-^[ ]*"$DISPLAY "		{
+^[ ]*"$DISPLAY"[ ]+		{
 	/* MF extension: display message during compilation */
-	display_to_eol ();
+	msg[0] = 0;
+	BEGIN DISPLAY_DIRECTIVE_STATE;
 }
 
 ^[ ]*"$SET"		{
@@ -541,6 +545,23 @@ CONTROL_STATEMENT_STATE>{
   }
 }
 
+<DISPLAY_DIRECTIVE_STATE>{
+  \n			{
+	BEGIN INITIAL;
+	display_finish();
+  }
+
+  {ALNUM_LITERAL} {
+	yytext[yyleng - 1] = 0;
+	strncat (msg, yytext + 1, (size_t)(PPLEX_BUFF_LEN - 1));
+  }
+
+  [x21-\xFF]	|
+  [ #A-Z0-9\x80-\xFF]+ {
+	strncat (msg, yytext, (size_t)(PPLEX_BUFF_LEN - 1));
+  }
+}
+
 <ON_OFF_DIRECTIVE_STATE>{
   "ON"			{ return ON; }
   "OFF"			{ return OFF; }
@@ -625,7 +646,7 @@ CONTROL_STATEMENT_STATE>{
 	return LITERAL;
   }
   {SET_PAREN_LIT}	{
-	yytext[strlen (yytext) - 1] = 0;
+	yytext[yyleng - 1] = 0;
 	pplval.s = cobc_plex_strdup (yytext + 1);
 	return LITERAL;
   }
@@ -657,7 +678,7 @@ CONTROL_STATEMENT_STATE>{
 	return LITERAL;
   }
   {SET_PAREN_LIT}	{
-	yytext[strlen (yytext) - 1] = 0;
+	yytext[yyleng - 1] = 0;
 	pplval.s = cobc_plex_strdup (yytext + 1);
 	return LITERAL;
   }
@@ -1879,24 +1900,17 @@ skip_to_eol (void)
 }
 
 static void
-display_to_eol (void)
-{
-	int	c;
-
-	while ((c = input ()) != EOF) {
-		if (c == '\n') {
-			break;
-		}
-		if (!plex_skip_input) {
-			putchar (c);
-		}
-	}
+display_finish (void) {
+	int msglen;
 	if (!plex_skip_input) {
-		putchar ('\n');
+		msglen = strlen (msg) - 1;
+		while (msglen != 0 && msg[msglen] == ' ') {
+			msg[msglen--] = 0;
+		}
+		puts (msg);
+		msg[0] = 0;
 	}
-	if (c != EOF) {
-		unput (c);
-	}
+	unput ('\n');
 }
 
 static void
