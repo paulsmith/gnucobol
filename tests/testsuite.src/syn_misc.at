@@ -74,14 +74,14 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
 [prog.cob: 5: warning: expression is always FALSE
 prog.cob: 5: warning: expression is always FALSE
-prog.cob: 6: warning: expression is always FALSE
+prog.cob: 5: warning: expression is always FALSE
 prog.cob: 5: warning: expression is always TRUE
-prog.cob: 6: warning: expression is always TRUE
+prog.cob: 5: warning: expression is always TRUE
 prog.cob: 9: warning: expression is always FALSE
 prog.cob: 9: warning: expression is always FALSE
 prog.cob: 9: warning: expression is always TRUE
-prog.cob: 10: warning: expression is always FALSE
-prog.cob: 10: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always FALSE
+prog.cob: 9: warning: expression is always FALSE
 ])
 
 AT_CLEANUP
@@ -132,23 +132,6 @@ AT_DATA([prog.cob], [
        STOP RUN RETURNING 0.
 ])
 
-#AT_CHECK([$COMPILE prog.cob], [0], [],
-#AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-#[prog.cob: 18: warning: literal is longer than field
-#prog.cob: 20: warning: literal is longer than field
-#prog.cob: 22: warning: literal is longer than field
-#prog.cob: 24: warning: literal is longer than field
-#prog.cob: 26: warning: literal is longer than field
-#prog.cob: 26: warning: expression is always TRUE
-#prog.cob: 28: warning: literal is longer than field
-#prog.cob: 28: warning: expression is always FALSE
-#prog.cob: 31: warning: literal is longer than field
-#prog.cob: 31: warning: expression is always FALSE
-#prog.cob: 33: warning: expression is always FALSE
-#prog.cob: 35: warning: expression is always TRUE
-#prog.cob: 37: warning: expression is always TRUE
-#])
-#FIXME - positions broken !!!
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 18: warning: literal is longer than field
 prog.cob: 20: warning: literal is longer than field
@@ -160,12 +143,10 @@ prog.cob: 28: warning: literal is longer than field
 prog.cob: 28: warning: expression is always FALSE
 prog.cob: 31: warning: literal is longer than field
 prog.cob: 31: warning: expression is always FALSE
-prog.cob: 9: warning: expression is always FALSE
-prog.cob: 9: warning: expression is always TRUE
-prog.cob: 10: warning: expression is always TRUE
+prog.cob: 33: warning: expression is always FALSE
+prog.cob: 35: warning: expression is always TRUE
+prog.cob: 37: warning: expression is always TRUE
 ])
-
-#AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -257,7 +238,7 @@ prog.cob: 14: error: invalid expression
 prog.cob: 18: error: invalid expression
 prog.cob: 22: error: invalid expression
 prog.cob: 26: error: invalid expression
-prog.cob: 31: error: invalid expression
+prog.cob: 30: error: invalid expression
 prog.cob: 35: error: invalid expression
 prog.cob: 38: error: invalid expression
 prog.cob: 41: error: invalid expression

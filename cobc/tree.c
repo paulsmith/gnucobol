@@ -3563,9 +3563,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	char			result[48];
 	int			i,j,xscale,yscale,rscale;
 	struct cb_literal *xl, *yl;
-	cb_tree				relop;
+	cb_tree				relop, e;
 
-	relop = cb_any;
+	e = relop = cb_any;
+	e->source_file = NULL;
+	e->source_line = cb_exp_line;
+
 	switch (op) {
 	case '+':
 	case '-':
@@ -3697,12 +3700,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		/* Relational operators */
 		if ((CB_REF_OR_FIELD_P (x)) &&
 		    CB_FIELD (cb_ref (x))->level == 88) {
-			cb_error_x (x, _("invalid expression"));
+			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
 		if ((CB_REF_OR_FIELD_P (y)) &&
 		    CB_FIELD (cb_ref (y))->level == 88) {
-			cb_error_x (y, _("invalid expression"));
+			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
 		xl = (void*)x;
@@ -3721,7 +3724,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				for(j=0; xl->data[j] == '0'; j++,i--);
 			}
 			if (i > CB_FIELD (cb_ref (y))->size) {
-				cb_warning_x (cb_warn_constant_expr, y, _("literal is longer than field"));
+				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
 				switch(op) {
 				case '=':
 					relop = cb_false;
@@ -3746,7 +3749,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				for(j=0; yl->data[j] == '0'; j++,i--);
 			}
 			if (i > CB_FIELD (cb_ref (x))->size) {
-				cb_warning_x (cb_warn_constant_expr, x, _("literal is longer than field"));
+				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
 				switch(op) {
 				case '=':
 					relop = cb_false;
@@ -3890,7 +3893,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		/* Logical operators */
 		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN ||
 		    (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
-			cb_error_x (x, _("invalid expression"));
+			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
 		if((x == cb_true || x == cb_false)
@@ -3922,12 +3925,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	}
 
 	if (relop == cb_true) {
-		cb_warning_x (cb_warn_constant_expr, x, _("expression is always TRUE"));
+		cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
 		category = CB_CATEGORY_BOOLEAN;
 		return cb_true;
 	}
 	if (relop == cb_false) {
-		cb_warning_x (cb_warn_constant_expr, x, _("expression is always FALSE"));
+		cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
 		category = CB_CATEGORY_BOOLEAN;
 		return cb_false;
 	}

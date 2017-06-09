@@ -1448,6 +1448,11 @@
 
 	* cobc.c: correct process_run return code for systems with WEXITSTATUS
 
+2016-05-05  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* tree.c: give correct error position (cb_source_file + cb_exp_line)
+	  for expression warnings (did not work with constants before)
+
 2016-05-03  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* warning.def, tree.c: added cb_warn_constant_expr for warnings added
