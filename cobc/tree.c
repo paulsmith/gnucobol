@@ -3559,12 +3559,14 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 {
 	struct cb_binary_op	*p;
 	enum cb_category	category = CB_CATEGORY_UNKNOWN;
-	cob_s64_t		xval,yval,rslt;
+	cob_s64_t		xval, yval, rslt;
 	char			result[48];
-	int			i,j,xscale,yscale,rscale;
+	int			i, j, xscale,yscale, rscale;
 	struct cb_literal *xl, *yl;
 	cb_tree				relop, e;
 
+	/* setting an error tree to point to the correct expression
+	   instead of the literal/var definition / current line */
 	e = relop = cb_any;
 	e->source_file = NULL;
 	e->source_line = cb_exp_line;
@@ -3743,7 +3745,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(y)
 		&&  yl->all == 0
 		&&  yl->scale == 0) {
-			for(i = strlen((const char *)yl->data); i>0 && yl->data[i-1] == ' '; i--)
+			for (i = strlen ((const char *)yl->data); i>0 && yl->data[i-1] == ' '; i--)
 			if(CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
 			|| CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
 				for(j=0; yl->data[j] == '0'; j++,i--);
@@ -3766,8 +3768,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 */
 		if (CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
-			xl = (void*)x;
-			yl = (void*)y;
 			if(xl->llit == 0
 			&& xl->scale == 0
 			&& yl->llit == 0
@@ -3780,40 +3780,46 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				yval = atoll((const char*)yl->data);
 				switch(op) {
 				case '=':
-					if(xval == yval)
+					if (xval == yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				case '~':
-					if(xval != yval)
+					if (xval != yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				case '>':
-					if(xval > yval)
+					if (xval > yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				case '<':
-					if(xval < yval)
+					if (xval < yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				case ']':
-					if(xval >= yval)
+					if (xval >= yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				case '[':
-					if(xval <= yval)
+					if (xval <= yval) {
 						relop = cb_true;
-					else
+					} else {
 						relop = cb_false;
+					}
 					break;
 				default:
 					/* never happens */
@@ -3829,56 +3835,61 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(y)
 		&& !CB_NUMERIC_LITERAL_P(x)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
-			xl = (void*)x;
-			yl = (void*)y;
-			for(i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
-				if(xl->data[i] != yl->data[j])
+			for (i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
+				if (xl->data[i] != yl->data[j]) {
 					break;
+				}
 			}
 			if(xl->data[i] == 0
 			&& yl->data[j] == ' ') {
-				while(yl->data[j] == ' ') j++;
+				while (yl->data[j] == ' ') j++;
 			} else
 			if(xl->data[i] == ' '
 			&& yl->data[j] == 0) {
-				while(xl->data[i] == ' ') i++;
+				while (xl->data[i] == ' ') i++;
 			}
 			switch(op) {
 			case '=':
-				if(xl->data[i] == yl->data[j])
+				if (xl->data[i] == yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			case '~':
-				if(xl->data[i] != yl->data[j])
+				if (xl->data[i] != yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			case '>':
-				if(xl->data[i] > yl->data[j])
+				if (xl->data[i] > yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			case '<':
-				if(xl->data[i] < yl->data[j])
+				if (xl->data[i] < yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			case ']':
-				if(xl->data[i] >= yl->data[j])
+				if (xl->data[i] >= yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			case '[':
-				if(xl->data[i] <= yl->data[j])
+				if (xl->data[i] <= yl->data[j]) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 				break;
 			default:
 				/* never happens */
@@ -3898,17 +3909,19 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		}
 		if((x == cb_true || x == cb_false)
 		&& (y == cb_true || y == cb_false)) {
-			if(op == '&') {
-				if(x == cb_true && y == cb_true)
+			if (op == '&') {
+				if (x == cb_true && y == cb_true) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 			} else
-			if(op == '|') {
-				if(x == cb_true || y == cb_true)
+			if (op == '|') {
+				if (x == cb_true || y == cb_true) {
 					relop = cb_true;
-				else
+				} else {
 					relop = cb_false;
+				}
 			}
 		}
 		category = CB_CATEGORY_BOOLEAN;
