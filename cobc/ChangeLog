@@ -1,4 +1,9 @@
 
+2017-06-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l: error on $SET var lit OVERRIDE (as this isn't available it was
+	  interpreted as unknown SET OPTION)
+
 2017-06-09  Ron Norman <rjn@inglenet.com>
 
 	* ppparse.y, scanner.l: pass OVERRIDE thru the

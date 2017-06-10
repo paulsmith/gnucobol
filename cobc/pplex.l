@@ -640,6 +640,11 @@ CONTROL_STATEMENT_STATE>{
   /*"AS"			{ - not available with MF compilers -
 	return AS;
   }*/
+  "OVERRIDE"		{
+	  /* not valid, only in for error checking as it would
+	     result in a variable name otherwise */
+	  return OVERRIDE;
+  }
   {DEFNUM_LITERAL} |
   {ALNUM_LITERAL}	{
 	pplval.s = cobc_plex_strdup (yytext);
