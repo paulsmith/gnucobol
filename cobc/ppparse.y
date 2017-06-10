@@ -880,7 +880,7 @@ define_directive:
 		p = ppp_define_add (ppp_setvar_list, $2, $4, $5);
 		if (p) {
 			ppp_setvar_list = p;
-			fprintf (ppout, "#DEFLIT %s %s\n", $2, $4);
+			fprintf (ppout, "#DEFLIT %s %s%s\n", $2, $4, $5 ? " OVERRIDE" : "");
 		}
 	}
   }

@@ -1877,10 +1877,23 @@ scan_define_options (const char *text)
 	cb_tree				x;
 	size_t				size;
 	int				scale;
-	int				sign;
+	int				sign, override;
 
 	/* Scan a source inline define */
 	p = cobc_strdup (text);
+
+	q = &p[strlen(p)-1];
+	while(q != p 
+	   && (isspace(*q) || *q == '\n' || *q == '\r'))
+		q--;
+	q = q - 7;
+	if (memcmp(q,"OVERRIDE",8) == 0) {
+		override = 1;
+		while (q[-1] == ' ') q--;
+		strcpy(q,"\n");
+	} else {
+		override = 0;
+	}
 
 	/* Ignore first part */
 	s = strtok (p, " ");
@@ -1893,10 +1906,12 @@ scan_define_options (const char *text)
 	}
 
 	/* Check for already defined constant */
-	for (p78 = top78ptr; p78; p78 = p78->globnext) {
-		if (strcasecmp (s, p78->fld78->name) == 0) {
-			cobc_free (p);
-			return;
+	if (!override) {
+		for (p78 = top78ptr; p78; p78 = p78->globnext) {
+			if (strcasecmp (s, p78->fld78->name) == 0) {
+				cobc_free (p);
+				return;
+			}
 		}
 	}
 

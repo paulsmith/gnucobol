@@ -1,4 +1,9 @@
 
+2017-06-09  Ron Norman <rjn@inglenet.com>
+
+	* ppparse.y, scanner.l: pass OVERRIDE thru the
+	  preprocessor to allow variables to be redefined
+
 2017-06-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l: remove trailing spaces and inline comments
