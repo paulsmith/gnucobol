@@ -1,4 +1,13 @@
 
+2017-06-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.def: renamed "debugging-line" option (cb_debugging_line)
+	  to "debugging-mode" (cb_debugging_mode) because of name conflict
+	  with option -fdebugging-line to activate these lines
+	* parser.y, pplex.l: moved compiler verification for DEBUGGING MODE
+	  from parser.y to pplex.l
+	* pplex.l: actual compiler verification for debugging indicators
+
 2017-06-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l: error on $SET var lit OVERRIDE (as this isn't available it was

@@ -2788,7 +2788,6 @@ _source_computer_entry:
 _with_debugging_mode:
 | _with DEBUGGING MODE
   {
-	cb_verify (cb_debugging_line, "DEBUGGING MODE");
 	current_program->flag_debugging = 1;
 	needs_debug_item = 1;
 	cobc_cs_check = 0;

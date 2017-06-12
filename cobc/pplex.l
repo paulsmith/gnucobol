@@ -212,9 +212,10 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 }
 
 ^[ ]*">>D"		{
-	/* OpenCOBOL/GnuCOBOL 1.0 extension for floating debug line */
+	/* 2002 (only) floating debug line */
 	/* Remove line if debugging lines not activated */
 	/* Otherwise ignore the directive part of the line */
+	(void) cb_verify (cb_debugging_mode, _("debugging indicator"));
 	if (!cb_flag_debugging_line) {
 		skip_to_eol ();
 	}
@@ -483,6 +484,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 "WITH"[ ,;]+"DEBUGGING"[ ,;]+"MODE" |
 "DEBUGGING"[ ,;]+"MODE"	{
 	/* Pick up early - Also activates debugging lines */
+	cb_verify (cb_debugging_mode, "DEBUGGING MODE");
 	cb_flag_debugging_line = 1;
 	ppecho (yytext, 0, yyleng);
 }
@@ -1551,6 +1553,7 @@ start:
 	case 'd':
 	case 'D':
 		/* Debugging line */
+		(void) cb_verify (cb_debugging_mode, _("debugging indicator"));
 		if (cb_flag_debugging_line) {
 			break;
 		}
