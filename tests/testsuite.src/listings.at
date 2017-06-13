@@ -94,6 +94,68 @@ AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([replacement w/o strings])
+AT_KEYWORDS([listing symbols])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       REPLACE   =="SOME"== BY =="MANY"==
+                 =='SOME'== BY =="VERY MUCH"==
+                 ==STUFF==  BY ==NEWSTUFF==.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 NEWSTUFF PIC X(80).
+       PROCEDURE        DIVISION.
+           DISPLAY STUFF " BENEFITS SOME PARTS FROM "
+                   "SOME" "STUFF" ", " 'SOME' "GOOD" STUFF "AND STUFF !"
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [], [])
+
+AT_DATA([expected.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         REPLACE   =="SOME"== BY =="MANY"==
+000003                   =='SOME'== BY =="VERY MUCH"==
+000004                   ==STUFF==  BY ==NEWSTUFF==.
+000005         IDENTIFICATION   DIVISION.
+000006         PROGRAM-ID.      prog.
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         01 NEWSTUFF PIC X(80).
+000010         PROCEDURE        DIVISION.
+000011             DISPLAY NEWSTUFF " BENEFITS SOME PARTS FROM "
+000012                     "MANY" "STUFF" ", " "VERY MUCH" "GOOD" NEWSTUFF "AND STUFF !"
+000013                     NO ADVANCING
+000014             END-DISPLAY.
+000015             STOP RUN.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      WORKING-STORAGE SECTION
+
+00080 ALPHANUMERIC   01   NEWSTUFF                       X(80)
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([COPY replacement order])
 AT_KEYWORDS([listing symbols])
 
