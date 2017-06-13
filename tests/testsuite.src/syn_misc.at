@@ -3701,3 +3701,56 @@ prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have t
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Invalid Expression])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 WRKN  PIC S999 VALUE 123.
+        01 WRKX  PIC X(8) VALUE 'House'.
+        PROCEDURE DIVISION.
+        MAIN.
+            EVALUATE WRKN
+              GREATER ZERO
+              < 0
+              > 0
+            WHEN TRUE
+              DISPLAY "WHAT IS IT?"
+            END-EVALUATE.
+            IF WRKN = 123 EQUAL 456
+              DISPLAY "Strange brew! " WRKN
+            END-IF.
+            IF WRKN NOT EQUAL 123 NOT = 456
+              DISPLAY "Strange brew! " WRKN
+            END-IF.
+            IF WRKN = 123 OR 456
+              DISPLAY "Home brew! " WRKN
+            END-IF.
+            IF WRKX = "Red" OR "White"
+              DISPLAY "Home wine! " WRKX
+            END-IF.
+            IF WRKX <= "Red" = "White"
+              DISPLAY "Home wine! " WRKX
+            END-IF.
+            IF WRKX = "Red" NOT "White"
+              DISPLAY "Home wine! " WRKX
+            END-IF.
+            STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob: 10: error: GREATER operator may be misplaced
+prog.cob: 17: error: EQUAL operator may be misplaced
+prog.cob: 20: error: NOT EQUAL operator may be misplaced
+prog.cob: 29: error: LESS OR EQUAL operator may be misplaced
+prog.cob: 32: error: invalid expression
+])
+
+AT_CLEANUP
+
