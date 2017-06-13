@@ -4960,6 +4960,7 @@ static char *
 get_next_token (char *bp, char *token, char *term)
 {
 	char	*token_start = token;
+	int	in_string = 0;
 
 	/* Repeat until a token is found */
 	do {
@@ -4973,8 +4974,14 @@ get_next_token (char *bp, char *token, char *term)
 
 		/* Copy characters into token until a terminator is found. */
 		while (*bp) {
-			if (*bp == '&') {
-				bp++;
+			/* Return character strings as a single token */
+			if (*bp == '"' || *bp == '\'') {
+				in_string = !in_string;
+				*token++ = *bp++;
+				continue;
+			}
+			if (in_string) {
+				*token++ = *bp++;
 				continue;
 			}
 			if (*bp == '.' && isdigit((unsigned char)*(bp + 1))) {
@@ -5741,7 +5748,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	fprintf (stdout, ", multi_token = %s, fixed = %s\n",
 		 multi_token ? "TRUE" : "FALSE", fixed ? "TRUE" : "FALSE");
 	fprintf (stdout, "   pline_cnt = %d\n", pline_cnt);
-	for (i = 0; i < pline_cnt; i++) {
+	for (int i = 0; i < pline_cnt; i++) {
 		fprintf (stdout, "   pline[%2d]: %s\n", i, pline[i]);
 	}
 	fprintf (stdout, "   rep: first = %d, last = %d, lead_trail = %d\n",
