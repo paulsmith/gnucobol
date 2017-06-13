@@ -3,6 +3,10 @@
 
 	* cobc.c: get_next_token(): Keep string as a single token.
 
+2017-06-13  Ron Norman <rjn@inglenet.com>
+ 
+  	* typeck.c: #306 check for misplaced operators and report error
+
 2017-06-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def: renamed "debugging-line" option (cb_debugging_line)
