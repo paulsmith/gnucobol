@@ -1526,6 +1526,8 @@ AT_DATA([prog2.cob], [
   WORKING-STORAGE  SECTION.
   >> PAGE  page  feed  comment
   PROCEDURE        DIVISION.
+ DISPLAY
+ '3456&'. 
   STOP RUN.
 ])
 
@@ -1547,7 +1549,9 @@ LINE    .....................................................SOURCE.............
 
 000006    >> PAGE  page  feed  comment
 000007    PROCEDURE        DIVISION.
-000008    STOP RUN.
+000008   DISPLAY
+000009   '3456&'. 
+000010    STOP RUN.
 
 
 0 warnings in compilation group
