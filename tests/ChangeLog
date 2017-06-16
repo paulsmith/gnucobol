@@ -1,4 +1,8 @@
 
+2017-06-16  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: Corrected Replacement w/o strings test.
+
 2017-05-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol85/report.pl: redirect stderr to /dev/null if to_kill is requested

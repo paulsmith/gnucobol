@@ -94,7 +94,7 @@ AT_CHECK([diff prog2.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([replacement w/o strings])
+AT_SETUP([Replacement w/o strings])
 AT_KEYWORDS([listing symbols])
 
 AT_CAPTURE_FILE([prog.lst])
@@ -134,7 +134,8 @@ LINE    PG/LN  A...B............................................................
 000009         01 NEWSTUFF PIC X(80).
 000010         PROCEDURE        DIVISION.
 000011             DISPLAY NEWSTUFF " BENEFITS SOME PARTS FROM "
-000012                     "MANY" "STUFF" ", " "VERY MUCH" "GOOD" NEWSTUFF "AND STUFF !"
+000012             "MANY" "STUFF" ", " "VERY MUCH" "GOOD" NEWSTUFF
+000012+       -    "AND STUFF !"
 000013                     NO ADVANCING
 000014             END-DISPLAY.
 000015             STOP RUN.

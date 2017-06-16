@@ -1,4 +1,9 @@
 
+2017-06-16  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c (reflow_replaced_fixed_format_text): listings: Fixed multiple
+	  line output.
+
 2017-06-13  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (get_next_token): listings: Keep string as a single token.
