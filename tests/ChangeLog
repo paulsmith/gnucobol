@@ -3,9 +3,9 @@
 
 	* testsuite.src/listings.at: Corrected Replacement w/o strings test.
 
-2017-05-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* cobol85/report.pl: redirect stderr to /dev/null if to_kill is requested
+	* ChangeLog: moved cobol85 entries to cobol85/ChangeLog
 
 2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -31,10 +31,6 @@
 	  rule exists, non-zero means rule exists, testing for bad value is
 	  pointless.
 
-2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
-	* cobol85/Makefile.am: HACK for newcob.val in sourcedir during VPATH build
-
 2017-04-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_misc.at, testsuite.src/syn_definition.at: moved
@@ -48,13 +44,6 @@
 2017-03-21  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: Changed variable indentation and redefines.
-
-2017-03-19  Edward Hart <edward.dan.hart@gmail.com>
-
-	* report.pl, EXEC85.conf.in: fixed bug #363: redefining filename (viz.
-	  "report.log") as variable is not portable.
-	* report.pl, summary.pl: fixed warnings and added "use warnings;" and
-	  "use strict;" directives.
 
 2017-03-19  Dave Pitts <dpitts@cozx.com>
 
@@ -78,32 +67,6 @@
 	* testsuite.at: minimized the output of testsuite --version while adding
 	  core authors to it
 
-2017-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
-	* cobol85/report.pl: replaced fifo by sysin redirection and
-	  new kill sequence
-
-2016-12-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
-	* cobol85/report.pl: fixing running the suite from shared file systems by
-	  moving fifo to tempdir (where creation of fifo should always be possible)
-	* cobol85/report.pl, cobol85/NC.txt: automated "manual investigations"
-	* cobol85/report.pl: moved test specific compilation flags to $cobc_flags
-	  and show them on command line,
-	  create report.log directly with test specific name
-
-2016-12-14  Edward Hart <edward.dan.hart@gmail.com>
-
-	* cobol85/report.pl, cobol85/*.txt: compile only tests no longer
-	  increment the successful test counter, as this is for runtime tests
-	* cobol85/report.pl: allow passing input to programs (e.g. for those
-	  with STOP literal), implemented by mkfifo, asynchron run and kill
-
-2016-12-12  Edward Hart <edward.dan.hart@gmail.com>
-
-	* cobol85/report.pl: updated and annotated the list of compile-only
-	  tests
-
 2016-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at: added cobcrun to tested programs
@@ -115,8 +78,6 @@
 
 	* atlocal_valgrind: sample configuration for running testsuites
 	  with valgrind
-	* cobol85/report.pl: check environment for COBC/COBCRUN to override
-	  the called binaries (useful for testing with valgrind)
 
 2016-11-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -165,11 +126,6 @@
 
 	* testsuite.src/listings.at: Added header/trailer to file not found
 	  test case.
-
-2016-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
-	* cobol85/Makefile.am, cobol85/report.pl: added support for make with
-	  multiple jobs (only done when building the test directories)
 
 2016-10-29  Dave Pitts <dpitts@cozx.com>
 
@@ -227,8 +183,7 @@
 
 2016-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* Makefile.am: checking `diff` on start of target "check" and
-	  `perl` before running target "test" in cobol85
+	* Makefile.am: checking `diff` on start of target "check"
 
 2016-08-02  Dave Pitts <dpitts@cozx.com>
 
@@ -367,11 +322,6 @@
 	  testsuite.src/syn_misc.at to testsuite.src/configuration.at, updated
 	  tests and added new ones
 
-2015-02-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
-
-	* cobol85/Makefile.am: added target for decompressing newcob.val.Z and
-	  download it
-
 2014-12-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/syn_screen.at : (new) Added first testsuite entries for
@@ -406,10 +356,6 @@
 	* MARK - Version 2.0
 	* Move to GPL/LGPL 3
 
-2009-07-01  Roger While <simrw@sim-basis.de>
-
-	* Include some extra 85 compile only programs
-
 2009-06-09  Roger While <simrw@sim-basis.de>
 
 	* New OC tests for edited moves
@@ -423,43 +369,17 @@
 	* Fix for newest development software
 	* Use minimum quadrigraphs in autotests for compatibility
 
-2009-03-05  Roger While <simrw@sim-basis.de>
-
-	* Clean up 85 test scripts
-
 2009-01-20  Roger While <simrw@sim-basis.de>
 
 	* OC tests for DPC and 78 levels
-
-2008-12-02  Roger While <simrw@sim-basis.de>
-
-	* Activate some more ANSI85 tests
-
-2008-11-28  Roger While <simrw@sim-basis.de>
-
-	* Adjust ANSI85 results; USE GLOBAL tests now run
-	* Adjust ANSI85 report output
-
-2008-11-25  Roger While <simrw@sim-basis.de>
-
-	* cobol85/*.pl : Fix warning when running perl with -w
-
-2008-11-07  Roger While <simrw@sim-basis.de>
-
-	* Adjust ANSI85 results; we successfully execute one of the GLOBAL tests
 
 2008-10-17  Roger While <simrw@sim-basis.de>
 
 	* Add test for non-ALLOCATED BASED item
 
-2008-10-11  Roger While <simrw@sim-basis.de>
-
-	* cobol85/Makefile.am : Refix out of source directory builds
-
 2008-09-30  Roger While <simrw@sim-basis.de>
 
 	* Makefile.am : Fix out of source directory builds
-	* cobol85/Makefile.am : Ditto
 
 2008-08-09  Roger While <simrw@sim-basis.de>
 
@@ -490,10 +410,6 @@
 
 	* BY CONTENT not allowed in PROCEDURE header
 
-2008-01-02  Roger While <simrw@sim-basis.de>
-
-	*  Cobol85 tests rechanged to cater for unsupported ALTER
-
 2007-12-27  Roger While <simrw@sim-basis.de>
 
 	** Mark 1.0 RELEASE
@@ -501,10 +417,6 @@
 2007-12-27  Roger While <simrw@sim-basis.de>
 
 	* Add OC test for WHEN-COMPILED
-
-2007-12-21  Roger While <simrw@sim-basis.de>
-
-	*  Cobol85 tests changed to cater for unsupported ALTER
 
 2007-10-27  Roger While <simrw@sim-basis.de>
 
@@ -541,22 +453,18 @@
 
 2006-07-23  Roger While <simrw@sim-basis.de>
 
-	* run.src, atlocal.in, cobol85/report.pl : Remove SWITCH settings from
-		atlocal and insert directly into the tests
+	* run.src, atlocal.in: Remove SWITCH settings from
+	  atlocal and insert directly into the tests
 
 2006-07-19  Roger While <simrw@sim-basis.de>
 
 	* syntax.src, run.src : Change tests to accomodate revised
-		messages
-
-2006-07-06  Roger While <simrw@sim-basis.de>
-
-	cobol85/report.pl : Cater for DB_HOME (BDB >= 4.1)
+	  messages
 
 2006-05-18  Roger While <simrw@sim-basis.de>
 
 	* OC tests for FUNCTION's EXCEPTION-FILE,
-		EXCEPTION-LOCATION, EXCEPTION-STATEMENT, EXCEPTION-STATUS
+	  EXCEPTION-LOCATION, EXCEPTION-STATEMENT, EXCEPTION-STATUS
 
 2006-05-08  Roger While <simrw@sim-basis.de>
 
@@ -571,11 +479,6 @@
 
 	* OC test for 88 level FALSE IS clause and
 	  SET TO FALSE.
-
-2006-02-08  Roger While <simrw@sim-basis.de>
-
-	* Adjust results for cobol85 suite. We now pass
-	  some nested program tests.
 
 2006-01-29  Roger While <simrw@sim-basis.de>
 
@@ -593,9 +496,6 @@
 
 	* General : Bootstrap up to new libtool / automake
 	  atlocal.in : More fixes for HP/IBM/Sun
-	  cobol85/ifedit.sh : Fix up test IX110A -
-	  This has an incorrect PIC clause in the
-	  compressed file newcob.val.Z.
 
 2005-12-30  Roger While <simrw@sim-basis.de>
 
@@ -609,14 +509,11 @@
 
 2005-12-09  Roger While <simrw@sim-basis.de>
 
-	* atlocal.in, run.src/*, cobol85/report.pl, cobol85/Makefile.am :
-	  Changes for '-x' option
+	* atlocal.in, run.src/*.at: Changes for '-x' option
 
 2005-12-05  Roger While <simrw@sim-basis.de>
 
-	* atlocal.in : Include libcob/.libs in PATH
-		       Needed for Win
-	* cobol85/report.pl, cobol85/Makefile.am : Fix perl usage
+	* atlocal.in : Include libcob/.libs in PATH, needed for Win32
 
 2005-12-04  Roger While <simrw@sim-basis.de>
 
@@ -625,10 +522,6 @@
 2005-11-25  Roger While <simrw@sim-basis.de>
 
 	* New OC test for sticky-linkage
-
-2005-11-09  Roger While <simrw@sim-basis.de>
-
-	* Adjust Cobol85 test results for SAME RECORD implementation.
 
 2005-11-07  Roger While <simrw@sim-basis.de>
 
@@ -657,10 +550,6 @@
 2005-10-13  Roger While <simrw@sim-basis.de>
 
 	* Fix various tests for GCC 4
-
-2005-10-01  Roger While <simrw@sim-basis.de>
-
-	* cobol85/Makefile.am : Include IF.txt, ifedit.sh
 
 2005-07-31  Roger While <simrw@sim-basis.de>
 
@@ -704,21 +593,18 @@
 
 2005-05-03  Roger While <simrw@sim-basis.de>
 
-	* tests/cobol85/* :    Allow to run without a "make install".
-			       Update expected results.
-			       EXEC85.conf.in - Change 2 params.
-	  Makexx :	       Due to autoreconf.
-	  run-O, data-rep-O :  Use -O instead of -fruntime-inlining
-	  run.src,syntax.src : Add tests for duplicate paras and larger
-			       redefines.
-			       Adjust for endianness.
+	* Makexx :	       Due to autoreconf.
+	* run-O, data-rep-O :  Use -O instead of -fruntime-inlining
+	* run.src,syntax.src : Add tests for duplicate paras and larger
+	  redefines.
+	  Adjust for endianness.
 
 2005-04-15  Keisuke Nishida  <knishida@opencobol.org>
 
 	* atlocal.in (BIGENDIAN): New variable.
 	* data-rep.src/binary.at: Don't test native binary on big-endian
-	machines.
-	(COMP-5): Moved from run.src/extensions.at.
+	  machines.
+	  (COMP-5): Moved from run.src/extensions.at.
 
 2005-04-13  Keisuke Nishida  <knishida@opencobol.org>
 
@@ -726,12 +612,9 @@
 
 2005-03-03  Roger While <simrw@sim-basis.de>
 
-	* cobol85/SQ.txt, cobol85/summary.txt :
-	  We now pass the LINAGE tests
 	* run.src/extensions.at :
 	  Fix a dangling file in /tmp
-
-	  Small cleanups in other files
+	* general: Small cleanups in other files
 
 2005-02-22  Roger While <simrw@sim-basis.de>
 
