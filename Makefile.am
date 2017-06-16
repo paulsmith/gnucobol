@@ -21,7 +21,16 @@
 
 include_HEADERS = libcob.h
 
-SUBDIRS = libcob lib cobc bin config copy po doc extras tests
+SUBDIRS = lib libcob cobc bin config copy po doc extras tests
+
+# define prerequisites to fix parallel builds
+libcob: lib
+cobc: libcob
+bin: libcob
+po: cobc
+doc: cobc
+extras: cobc
+tests: bin cobc
 
 ACLOCAL_AMFLAGS = -I m4 --install
 BUILT_SOURCES = defaults.h
@@ -85,9 +94,11 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define LOCALEDIR        \"$(datadir)/locale\"";	\
 	} > defaults.h
 
-test: all test-only
 
-test-only:
+# targets that are only logical targets instead of files
+.PHONY: test checkall
+
+test: all
 	cd tests && $(MAKE) $(AM_MAKEFLAGS) test
 
-checkall: check test-only
+checkall: check test

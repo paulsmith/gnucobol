@@ -436,7 +436,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = libcob.h
-SUBDIRS = libcob lib cobc bin config copy po doc extras tests
+SUBDIRS = lib libcob cobc bin config copy po doc extras tests
 ACLOCAL_AMFLAGS = -I m4 --install
 BUILT_SOURCES = defaults.h
 DISTCLEANFILES = $(BUILT_SOURCES)
@@ -958,6 +958,15 @@ uninstall-am: uninstall-includeHEADERS
 .PRECIOUS: Makefile
 
 
+# define prerequisites to fix parallel builds
+libcob: lib
+cobc: libcob
+bin: libcob
+po: cobc
+doc: cobc
+extras: cobc
+tests: bin cobc
+
 dist-hook:
 	echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $(distdir)/tarstamp.h
 	echo "#define COB_NUM_TAR_DATE `date -u +'%Y%m%d'`" >> $(distdir)/tarstamp.h
@@ -1013,12 +1022,13 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define LOCALEDIR        \"$(datadir)/locale\"";	\
 	} > defaults.h
 
-test: all test-only
+# targets that are only logical targets instead of files
+.PHONY: test checkall
 
-test-only:
+test: all
 	cd tests && $(MAKE) $(AM_MAKEFLAGS) test
 
-checkall: check test-only
+checkall: check test
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

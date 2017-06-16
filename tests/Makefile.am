@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/tests
 #
-# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -73,6 +73,10 @@ check-local: $(TESTSUITE)
 
 clean-local:
 	rm -rf *.dir *.log
+
+
+# targets that are only logical targets instead of files
+.PHONY: test checkall
 
 test:
 	@echo testing for perl && perl -v 1>/dev/null \

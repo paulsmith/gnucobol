@@ -1,7 +1,16 @@
 
-2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-06-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* ChangeLog: moved cobol85 entries from .. to this new file
+	* Makefile.am: added .PHONY to correctly declare logical targets that
+	  always have to be executed and don't result in a file
+	* Makefile.am: fixing tests with newcob.val in all possible VPATH
+	  entries by using the prerequisite's path directly in the Makefile
+	  and with ASSIGN variable for EXEC85
+	* Makefile.am: always build all test module folders,
+	  even if they aren't tested
+	* Makefile.am: allow parallel testing of modules
+	* Makefile.am, summary.txt: moved IX to end of tests to have the same
+	  order with DBNOIX
 
 2017-05-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
