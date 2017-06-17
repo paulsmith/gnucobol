@@ -2624,6 +2624,6 @@ cob_gen_optim (const enum cb_optim val)
 		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected optimization value: %d"), val);
 		COBC_ABORT ();
-		/* LCOV_EXCL_END */
+		/* LCOV_EXCL_STOP */
 	}
 }
