@@ -432,7 +432,6 @@ cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.c parser.y scanner.c config.c \
 
 #cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.l parser.y scanner.l config.c
 cobc_CFLAGS = -I$(top_srcdir) $(CODE_COVERAGE_CFLAGS)
-#cobc_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS)
 cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a \
 	$(CODE_COVERAGE_LIBS)
 
@@ -1021,7 +1020,7 @@ uninstall-man: uninstall-man1
 .PRECIOUS: Makefile
 
 
-# Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
+# Add rules for code-coverage testing, as provided by AX_CODE_COVERAGE
 @CODE_COVERAGE_RULES@
 
 cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)

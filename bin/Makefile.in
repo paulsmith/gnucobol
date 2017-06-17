@@ -417,7 +417,6 @@ dist_man_MANS = cobcrun.1
 COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 AM_LDFLAGS = $(COB_EXPORT_DYN)
 cobcrun_CFLAGS = $(AM_CFLAGS) -I$(top_srcdir) $(CODE_COVERAGE_CFLAGS)
-#cobcrun_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS)
 cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la \
 	$(CODE_COVERAGE_LIBS)
 
@@ -851,7 +850,7 @@ uninstall-man: uninstall-man1
 .PRECIOUS: Makefile
 
 
-# Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
+# Add rules for code-coverage testing, as provided AX_CODE_COVERAGE
 @CODE_COVERAGE_RULES@
 
 cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  $(COBCRUN)
