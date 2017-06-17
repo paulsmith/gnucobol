@@ -85,8 +85,10 @@ cobcrun_print_version (void)
 		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
 			  "%s %2.2d %4.4d %s", month, day, year, __TIME__);
 	} else {
+		/* LCOV_EXCL_START */
 		snprintf (cob_build_stamp, (size_t)COB_MINI_MAX,
-			  "%s %s", __DATE__, __TIME__);
+			"%s %s", __DATE__, __TIME__);
+		/* LCOV_EXCL_STOP */
 	}
 
 	printf ("cobcrun (%s) %s.%d\n",
@@ -213,10 +215,12 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
 		if (envop_return) {
+			/* LCOV_EXCL_START */
 			fprintf (stderr, _("problem with setenv %s: %d"),
 				"COB_LIBRARY_PATH", errno);
 			fputc ('\n', stderr);
 			return 1;
+			/* LCOV_EXCL_STOP */
 		}
 #else
 		put = cob_fast_malloc (strlen (env_space) + 19U);
@@ -241,10 +245,12 @@ cobcrun_initial_module (char *module_argument)
 #if HAVE_SETENV
 		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
 		if (envop_return) {
+			/* LCOV_EXCL_START */
 			fprintf (stderr, _("problem with setenv %s: %d"),
 				"COB_PRE_LOAD", errno);
 			fputc ('\n', stderr);
 			return 1;
+			/* LCOV_EXCL_STOP */
 		}
 #else
 		put = cob_fast_malloc (strlen (env_space) + 15U);
@@ -290,10 +296,12 @@ process_command_line (int argc, char *argv[])
 		case 'C':
 			/* --config=<file> */
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
+				/* LCOV_EXCL_START */
 				fputs (_("invalid configuration file name"), stderr);
 				putc ('\n', stderr);
 				fflush (stderr);
 				exit (1);
+				/* LCOV_EXCL_STOP */
 			}
 			arg_shift++;
 			cobcrun_setenv ("COB_RUNTIME_CONFIG");
@@ -377,11 +385,6 @@ main (int argc, char **argv)
 	}
 
 	if (strlen (argv[arg_shift]) > 31) {
-		if (print_runtime_wanted) {
-			cob_init (0, &argv[0]);
-			print_runtime_conf ();
-			putc ('\n', stderr);
-		}
 		fputs (_("PROGRAM name exceeds 31 characters"), stderr);
 		putc ('\n', stderr);
 		cob_stop_run (1);

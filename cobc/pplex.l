@@ -1082,9 +1082,11 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 	case PLEX_ACT_IF:
 		/* Push stack - First occurrence is dummy */
 		if (++plex_nest_depth >= PLEX_COND_DEPTH) {
+			/* LCOV_EXCL_START */
 			cobc_err_msg (_("directive nest depth exceeded: %d"),
 					PLEX_COND_DEPTH);
 			COBC_ABORT ();
+			/* LCOV_EXCL_STOP */
 		}
 		plex_cond_stack[plex_nest_depth].cmd = 1U;
 		/* Intersection with previous - first is always 0 */
@@ -1152,9 +1154,11 @@ plex_action_directive (const unsigned int cmdtype, const unsigned int is_true)
 		plex_skip_input = plex_cond_stack[plex_nest_depth - 1].skip | n;
 		return;
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid internal case: %u"),
 				cmdtype);
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1936,9 +1940,11 @@ check_listing (const char *text, const unsigned int comment)
 		return;
 	}
 	if (cobc_gen_listing == 2) {
+		/* LCOV_EXCL_START */
 		/* Passed to cobxref */
 		fputs (text, cb_listing_file);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 	if (comment) {
 		c = '*';

@@ -837,9 +837,11 @@ cb_tree_category (cb_tree x)
 			x->category = CB_CATEGORY_PROGRAM_POINTER;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected cast type: %d"),
 					(int)(p->cast_type));
 			COBC_ABORT ();
+			/* LCOV_EXCL_END */
 		}
 		break;
 	case CB_TAG_REFERENCE:
@@ -958,9 +960,11 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		case CB_USAGE_FP_DEC128:
 			return COB_TYPE_NUMERIC_FP_DEC128;
 		default:
+			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected numeric USAGE: %d"),
 					(int)f->usage);
 			COBC_ABORT ();
+			/* LCOV_EXCL_END */
 		}
 	case CB_CATEGORY_NUMERIC_EDITED:
 		return COB_TYPE_NUMERIC_EDITED;
@@ -969,13 +973,15 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 	case CB_CATEGORY_PROGRAM_POINTER:
 		return COB_TYPE_NUMERIC_BINARY;
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected category: %d"),
 				(int)CB_TREE_CATEGORY (x));
 		COBC_ABORT ();
+		/* LCOV_EXCL_END */
 	}
 	/* NOT REACHED */
 #ifndef _MSC_VER
-	return 0;
+	return 0;	/* LCOV_EXCL_LINE */
 #endif
 }
 
@@ -1176,8 +1182,10 @@ cb_get_int (const cb_tree x)
 	int			val;
 
 	if (!CB_LITERAL_P (x)) {
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
+		/* LCOV_EXCL_END */
 	}
 	l = CB_LITERAL (x);
 
@@ -1250,8 +1258,10 @@ cb_get_long_long (const cb_tree x)
 	cob_s64_t		val;
 
 	if (!CB_LITERAL_P (x)) {
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
+		/* LCOV_EXCL_END */
 	}
 	l = CB_LITERAL (x);
 
@@ -3933,8 +3943,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		break;
 
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected operator: %d"), op);
 		COBC_ABORT ();
+		/* LCOV_EXCL_END */
 	}
 
 	if (relop == cb_true) {

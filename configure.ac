@@ -100,15 +100,13 @@ AH_TEMPLATE([HAVE_FINITE_IEEEFP_H],
 save_libs="$LIBS"
 
 enable_cflags_setting=no
-if test "$enable_debug" = "yes"; then
-	AC_MSG_CHECKING([whether CFLAGS can be modified])
-	# Enable setting if the user has not specified the optimisation in CFLAGS.
-	echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
-	if test $? != 0; then
-		enable_cflags_setting=yes
-	fi
-	AC_MSG_RESULT([$enable_cflags_setting])
+AC_MSG_CHECKING([whether CFLAGS can be modified])
+# Enable setting if the user has not specified the optimisation in CFLAGS.
+echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
+if test $? != 0; then
+	enable_cflags_setting=yes
 fi
+AC_MSG_RESULT([$enable_cflags_setting])
 
 # Configure options part I (not needing any compilation)
 
@@ -337,12 +335,19 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	[COB_USES_WATCOMC_ONLY=yes],
 	[],
 	[])
-                                      
+
 COB_CC="$CC"
 if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
 else
 	LIBCOB_LIBS="-lm"
+fi
+
+# Add --enable-code-coverage and test for code-coverage tools if enabled
+AX_CODE_COVERAGE
+
+if test "$COB_USES_GCC_NO_ICC" != yes -a "$enable_code_coverage" = "yes"; then
+	AC_MSG_ERROR([Code coverage checks are only usable with GCC!])
 fi
 
 
@@ -998,16 +1003,19 @@ COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
 
-if test "$enable_cflags_setting" = yes; then
+if test "$enable_cflags_setting" = "yes"; then
+
 	# Remove -O2 option added by AC_PROG_CC and add -O0
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O@<:@0-9a-zA-Z@:>@* */ /g' -e 's/ $//' -e 's/^ //'`
-	if test "$COB_USES_GCC" = "yes"; then
-		CFLAGS="$CFLAGS -O0"
+	if test "$enable_debug" = "yes" -o "$enable_code_coverage" = "yes"; then
+		CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O@<:@0-9a-zA-Z@:>@* */ /g' -e 's/ $//' -e 's/^ //'`
+		if test "$COB_USES_GCC" = "yes"; then
+			CFLAGS="$CFLAGS -O0"
+		fi
 	fi
 
-	# Add -g3 if using GCC.
-	if test "$COB_USES_GCC" = "yes"; then
-		MYOLDCFLAGS="$CFLAGS"		     
+	# For debugging: add -g3 if using GCC.
+	if test "$enable_debug" = "yes" -a "$COB_USES_GCC" = "yes"; then
+		MYOLDCFLAGS="$CFLAGS"
 		CFLAGS="$CFLAGS -g3"
 		AC_MSG_CHECKING([for gcc -g3 option])
 		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[int testint;]])],
@@ -1030,7 +1038,6 @@ if test "$COB_USES_GCC" = "yes"; then
 		CFLAGS="-pipe"
 	fi
 fi
-
 
 # include directory (install dir)
 

@@ -635,8 +635,10 @@ ambiguous_error (cb_tree x)
 void
 flex_fatal_error (const char *msg, const char * filename, const int line_num)
 {
+	/* LCOV_EXCL_START */
 	cobc_err_msg (_ ("fatal error: %s"), msg);
 	cobc_abort (filename, line_num);
+	/* LCOV_EXCL_END */
 }
 
 void

@@ -681,6 +681,18 @@ GMSGFMT
 MSGFMT
 GETTEXT_MACRO_VERSION
 USE_NLS
+CODE_COVERAGE_RULES
+CODE_COVERAGE_LDFLAGS
+CODE_COVERAGE_LIBS
+CODE_COVERAGE_CXXFLAGS
+CODE_COVERAGE_CFLAGS
+CODE_COVERAGE_CPPFLAGS
+GENHTML
+LCOV
+GCOV
+CODE_COVERAGE_ENABLED
+CODE_COVERAGE_ENABLED_FALSE
+CODE_COVERAGE_ENABLED_TRUE
 YFLAGS
 YACC
 LEXLIB
@@ -819,6 +831,8 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_rpath
+with_gcov
+enable_code_coverage
 with_curses
 with_seqra_extfh
 with_cisam
@@ -1479,6 +1493,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-rpath         do not hardcode runtime library paths
+  --enable-code-coverage  Whether to enable code coverage support
   --disable-nls           do not use Native Language Support
 
 Optional Packages:
@@ -1497,6 +1512,7 @@ Optional Packages:
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
+  --with-gcov=GCOV        use given GCOV for coverage (GCOV=gcov).
   --with-curses           (GnuCOBOL) Used curses library for extended SCREEN
                           I/O (default=check)
   --with-seqra-extfh      (GnuCOBOL) Use external SEQ/RAN file handler
@@ -3051,17 +3067,15 @@ fi
 save_libs="$LIBS"
 
 enable_cflags_setting=no
-if test "$enable_debug" = "yes"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether CFLAGS can be modified" >&5
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether CFLAGS can be modified" >&5
 $as_echo_n "checking whether CFLAGS can be modified... " >&6; }
-	# Enable setting if the user has not specified the optimisation in CFLAGS.
-	echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
-	if test $? != 0; then
-		enable_cflags_setting=yes
-	fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cflags_setting" >&5
-$as_echo "$enable_cflags_setting" >&6; }
+# Enable setting if the user has not specified the optimisation in CFLAGS.
+echo "$CFLAGS" | grep "\-O.*\( \|$\)" 1>/dev/null 2>/dev/null
+if test $? != 0; then
+	enable_cflags_setting=yes
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cflags_setting" >&5
+$as_echo "$enable_cflags_setting" >&6; }
 
 # Configure options part I (not needing any compilation)
 
@@ -14009,6 +14023,382 @@ else
 	LIBCOB_LIBS="-lm"
 fi
 
+# Add --enable-code-coverage and test for code-coverage tools if enabled
+
+
+
+	# allow to override gcov location
+
+# Check whether --with-gcov was given.
+if test "${with_gcov+set}" = set; then :
+  withval=$with_gcov; _AX_CODE_COVERAGE_GCOV_PROG_WITH=$with_gcov
+else
+  _AX_CODE_COVERAGE_GCOV_PROG_WITH=gcov
+fi
+
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with code coverage support" >&5
+$as_echo_n "checking whether to build with code coverage support... " >&6; }
+	# Check whether --enable-code-coverage was given.
+if test "${enable_code_coverage+set}" = set; then :
+  enableval=$enable_code_coverage;
+else
+  enable_code_coverage=no
+fi
+
+
+	 if test x$enable_code_coverage = xyes; then
+  CODE_COVERAGE_ENABLED_TRUE=
+  CODE_COVERAGE_ENABLED_FALSE='#'
+else
+  CODE_COVERAGE_ENABLED_TRUE='#'
+  CODE_COVERAGE_ENABLED_FALSE=
+fi
+
+	CODE_COVERAGE_ENABLED=$enable_code_coverage
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_code_coverage" >&5
+$as_echo "$enable_code_coverage" >&6; }
+
+	if  test "$enable_code_coverage" = "yes" ; then :
+
+		# check for gcov
+		if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}$_AX_CODE_COVERAGE_GCOV_PROG_WITH", so it can be a program name with args.
+set dummy ${ac_tool_prefix}$_AX_CODE_COVERAGE_GCOV_PROG_WITH; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_GCOV+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$GCOV"; then
+  ac_cv_prog_GCOV="$GCOV" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_GCOV="${ac_tool_prefix}$_AX_CODE_COVERAGE_GCOV_PROG_WITH"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+GCOV=$ac_cv_prog_GCOV
+if test -n "$GCOV"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GCOV" >&5
+$as_echo "$GCOV" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_prog_GCOV"; then
+  ac_ct_GCOV=$GCOV
+  # Extract the first word of "$_AX_CODE_COVERAGE_GCOV_PROG_WITH", so it can be a program name with args.
+set dummy $_AX_CODE_COVERAGE_GCOV_PROG_WITH; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_ac_ct_GCOV+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$ac_ct_GCOV"; then
+  ac_cv_prog_ac_ct_GCOV="$ac_ct_GCOV" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_ac_ct_GCOV="$_AX_CODE_COVERAGE_GCOV_PROG_WITH"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_ct_GCOV=$ac_cv_prog_ac_ct_GCOV
+if test -n "$ac_ct_GCOV"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ct_GCOV" >&5
+$as_echo "$ac_ct_GCOV" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_ct_GCOV" = x; then
+    GCOV=":"
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    GCOV=$ac_ct_GCOV
+  fi
+else
+  GCOV="$ac_cv_prog_GCOV"
+fi
+
+		if test "X$GCOV" = "X:"; then :
+  as_fn_error $? "gcov is needed to do coverage" "$LINENO" 5
+fi
+
+
+				if  test "$GCC" = "no" ; then :
+
+			as_fn_error $? "not compiling with gcc, which is required for gcov code coverage" "$LINENO" 5
+
+fi
+
+		# Extract the first word of "lcov", so it can be a program name with args.
+set dummy lcov; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_LCOV+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$LCOV"; then
+  ac_cv_prog_LCOV="$LCOV" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_LCOV="lcov"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+LCOV=$ac_cv_prog_LCOV
+if test -n "$LCOV"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LCOV" >&5
+$as_echo "$LCOV" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+		# Extract the first word of "genhtml", so it can be a program name with args.
+set dummy genhtml; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_GENHTML+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$GENHTML"; then
+  ac_cv_prog_GENHTML="$GENHTML" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_GENHTML="genhtml"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+GENHTML=$ac_cv_prog_GENHTML
+if test -n "$GENHTML"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GENHTML" >&5
+$as_echo "$GENHTML" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+
+		if  test -z "$LCOV" ; then :
+
+			as_fn_error $? "To enable code coverage reporting you must have lcov installed" "$LINENO" 5
+
+fi
+
+		if  test -z "$GENHTML" ; then :
+
+			as_fn_error $? "Could not find genhtml from the lcov package" "$LINENO" 5
+
+fi
+
+						CODE_COVERAGE_CPPFLAGS="-DNDEBUG"
+		CODE_COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+		CODE_COVERAGE_CXXFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+		CODE_COVERAGE_LIBS="-lgcov"
+		CODE_COVERAGE_LDFLAGS="$CODE_COVERAGE_LIBS"
+
+
+
+
+
+
+
+		CODE_COVERAGE_RULES_CHECK='
+	-$(A''M_V_at)$(MAKE) $(AM_MAKEFLAGS) -k check
+	$(A''M_V_at)$(MAKE) $(AM_MAKEFLAGS) code-coverage-capture
+'
+		CODE_COVERAGE_RULES_CAPTURE='
+	$(code_coverage_v_lcov_cap)$(LCOV) $(code_coverage_quiet) $(addprefix --directory ,$(CODE_COVERAGE_DIRECTORY)) --capture --output-file "$(CODE_COVERAGE_OUTPUT_FILE).tmp" --test-name "$(call code_coverage_sanitize,$(PACKAGE_NAME)-$(PACKAGE_VERSION))" --no-checksum --compat-libtool $(CODE_COVERAGE_LCOV_SHOPTS) $(CODE_COVERAGE_LCOV_OPTIONS)
+	$(code_coverage_v_lcov_ign)$(LCOV) $(code_coverage_quiet) $(addprefix --directory ,$(CODE_COVERAGE_DIRECTORY)) --remove "$(CODE_COVERAGE_OUTPUT_FILE).tmp" "/tmp/*" $(CODE_COVERAGE_IGNORE_PATTERN) --output-file "$(CODE_COVERAGE_OUTPUT_FILE)" $(CODE_COVERAGE_LCOV_SHOPTS) $(CODE_COVERAGE_LCOV_RMOPTS)
+	-@rm -f $(CODE_COVERAGE_OUTPUT_FILE).tmp
+	$(code_coverage_v_genhtml)LANG=C $(GENHTML) $(code_coverage_quiet) $(addprefix --prefix ,$(CODE_COVERAGE_DIRECTORY)) --output-directory "$(CODE_COVERAGE_OUTPUT_DIRECTORY)" --title "$(PACKAGE_NAME)-$(PACKAGE_VERSION) Code Coverage" --legend --show-details "$(CODE_COVERAGE_OUTPUT_FILE)" $(CODE_COVERAGE_GENHTML_OPTIONS)
+	@echo "file://$(abs_builddir)/$(CODE_COVERAGE_OUTPUT_DIRECTORY)/index.html"
+'
+		CODE_COVERAGE_RULES_CLEAN='
+clean: code-coverage-clean
+distclean: code-coverage-clean
+code-coverage-clean:
+	-$(LCOV) --directory $(top_builddir) -z
+	-rm -rf $(CODE_COVERAGE_OUTPUT_FILE) $(CODE_COVERAGE_OUTPUT_FILE).tmp $(CODE_COVERAGE_OUTPUT_DIRECTORY)
+	-find . \( -name "*.gcda" -o -name "*.gcno" -o -name "*.gcov" \) -delete
+'
+
+else
+
+		CODE_COVERAGE_RULES_CHECK='
+	@echo "Need to reconfigure with --enable-code-coverage"
+'
+		CODE_COVERAGE_RULES_CAPTURE="$CODE_COVERAGE_RULES_CHECK"
+		CODE_COVERAGE_RULES_CLEAN=''
+
+fi
+
+CODE_COVERAGE_RULES='
+# Code coverage
+#
+# Optional:
+#  - CODE_COVERAGE_DIRECTORY: Top-level directory for code coverage reporting.
+#    Multiple directories may be specified, separated by whitespace.
+#    (Default: $(top_builddir))
+#  - CODE_COVERAGE_OUTPUT_FILE: Filename and path for the .info file generated
+#    by lcov for code coverage. (Default:
+#    $(PACKAGE_NAME)-$(PACKAGE_VERSION)-coverage.info)
+#  - CODE_COVERAGE_OUTPUT_DIRECTORY: Directory for generated code coverage
+#    reports to be created. (Default:
+#    $(PACKAGE_NAME)-$(PACKAGE_VERSION)-coverage)
+#  - CODE_COVERAGE_BRANCH_COVERAGE: Set to 1 to enforce branch coverage,
+#    set to 0 to disable it and leave empty to stay with the default.
+#    (Default: empty)
+#  - CODE_COVERAGE_LCOV_SHOPTS_DEFAULT: Extra options shared between both lcov
+#    instances. (Default: based on $CODE_COVERAGE_BRANCH_COVERAGE)
+#  - CODE_COVERAGE_LCOV_SHOPTS: Extra options to shared between both lcov
+#    instances. (Default: $CODE_COVERAGE_LCOV_SHOPTS_DEFAULT)
+#  - CODE_COVERAGE_LCOV_OPTIONS_GCOVPATH: --gcov-tool pathtogcov
+#  - CODE_COVERAGE_LCOV_OPTIONS_DEFAULT: Extra options to pass to the
+#    collecting lcov instance. (Default: $CODE_COVERAGE_LCOV_OPTIONS_GCOVPATH)
+#  - CODE_COVERAGE_LCOV_OPTIONS: Extra options to pass to the collecting lcov
+#    instance. (Default: $CODE_COVERAGE_LCOV_OPTIONS_DEFAULT)
+#  - CODE_COVERAGE_LCOV_RMOPTS_DEFAULT: Extra options to pass to the filtering
+#    lcov instance. (Default: empty)
+#  - CODE_COVERAGE_LCOV_RMOPTS: Extra options to pass to the filtering lcov
+#    instance. (Default: $CODE_COVERAGE_LCOV_RMOPTS_DEFAULT)
+#  - CODE_COVERAGE_GENHTML_OPTIONS_DEFAULT: Extra options to pass to the
+#    genhtml instance. (Default: based on $CODE_COVERAGE_BRANCH_COVERAGE)
+#  - CODE_COVERAGE_GENHTML_OPTIONS: Extra options to pass to the genhtml
+#    instance. (Default: $CODE_COVERAGE_GENHTML_OPTIONS_DEFAULT)
+#  - CODE_COVERAGE_IGNORE_PATTERN: Extra glob pattern of files to ignore
+#
+# The generated report will be titled using the $(PACKAGE_NAME) and
+# $(PACKAGE_VERSION). In order to add the current git hash to the title,
+# use the git-version-gen script, available online.
+
+# Optional variables
+CODE_COVERAGE_DIRECTORY ?= $(top_builddir)
+CODE_COVERAGE_OUTPUT_FILE ?= $(PACKAGE_NAME)-$(PACKAGE_VERSION)-coverage.info
+CODE_COVERAGE_OUTPUT_DIRECTORY ?= $(PACKAGE_NAME)-$(PACKAGE_VERSION)-coverage
+CODE_COVERAGE_BRANCH_COVERAGE ?=
+CODE_COVERAGE_LCOV_SHOPTS_DEFAULT ?= $(if $(CODE_COVERAGE_BRANCH_COVERAGE),\
+--rc lcov_branch_coverage=$(CODE_COVERAGE_BRANCH_COVERAGE))
+CODE_COVERAGE_LCOV_SHOPTS ?= $(CODE_COVERAGE_LCOV_SHOPTS_DEFAULT)
+CODE_COVERAGE_LCOV_OPTIONS_GCOVPATH ?= --gcov-tool "$(GCOV)"
+CODE_COVERAGE_LCOV_OPTIONS_DEFAULT ?= $(CODE_COVERAGE_LCOV_OPTIONS_GCOVPATH)
+CODE_COVERAGE_LCOV_OPTIONS ?= $(CODE_COVERAGE_LCOV_OPTIONS_DEFAULT)
+CODE_COVERAGE_LCOV_RMOPTS_DEFAULT ?=
+CODE_COVERAGE_LCOV_RMOPTS ?= $(CODE_COVERAGE_LCOV_RMOPTS_DEFAULT)
+CODE_COVERAGE_GENHTML_OPTIONS_DEFAULT ?=\
+$(if $(CODE_COVERAGE_BRANCH_COVERAGE),\
+--rc genhtml_branch_coverage=$(CODE_COVERAGE_BRANCH_COVERAGE))
+CODE_COVERAGE_GENHTML_OPTIONS ?= $(CODE_COVERAGE_GENHTML_OPTIONS_DEFAULT)
+CODE_COVERAGE_IGNORE_PATTERN ?=
+
+code_coverage_v_lcov_cap = $(code_coverage_v_lcov_cap_$(V))
+code_coverage_v_lcov_cap_ = $(code_coverage_v_lcov_cap_$(AM_DEFAULT_VERBOSITY))
+code_coverage_v_lcov_cap_0 = @echo "  LCOV   --capture"\
+ $(CODE_COVERAGE_OUTPUT_FILE);
+code_coverage_v_lcov_ign = $(code_coverage_v_lcov_ign_$(V))
+code_coverage_v_lcov_ign_ = $(code_coverage_v_lcov_ign_$(AM_DEFAULT_VERBOSITY))
+code_coverage_v_lcov_ign_0 = @echo "  LCOV   --remove /tmp/*"\
+ $(CODE_COVERAGE_IGNORE_PATTERN);
+code_coverage_v_genhtml = $(code_coverage_v_genhtml_$(V))
+code_coverage_v_genhtml_ = $(code_coverage_v_genhtml_$(AM_DEFAULT_VERBOSITY))
+code_coverage_v_genhtml_0 = @echo "  GEN   " $(CODE_COVERAGE_OUTPUT_DIRECTORY);
+code_coverage_quiet = $(code_coverage_quiet_$(V))
+code_coverage_quiet_ = $(code_coverage_quiet_$(AM_DEFAULT_VERBOSITY))
+code_coverage_quiet_0 = --quiet
+
+# sanitizes the test-name: replaces with underscores: dashes and dots
+code_coverage_sanitize = $(subst -,_,$(subst .,_,$(1)))
+
+# Use recursive makes in order to ignore errors during check
+check-code-coverage:'"$CODE_COVERAGE_RULES_CHECK"'
+
+# Capture code coverage data
+code-coverage-capture: code-coverage-capture-hook'"$CODE_COVERAGE_RULES_CAPTURE"'
+
+# Hook rule executed before code-coverage-capture, overridable by the user
+code-coverage-capture-hook:
+
+'"$CODE_COVERAGE_RULES_CLEAN"'
+
+GITIGNOREFILES ?=
+GITIGNOREFILES += $(CODE_COVERAGE_OUTPUT_FILE) $(CODE_COVERAGE_OUTPUT_DIRECTORY)
+
+A''M_DISTCHECK_CONFIGURE_FLAGS ?=
+A''M_DISTCHECK_CONFIGURE_FLAGS += --disable-code-coverage
+
+.PHONY: check-code-coverage code-coverage-capture code-coverage-capture-hook code-coverage-clean
+'
+
+
+
+
+
+if test "$COB_USES_GCC_NO_ICC" != yes -a "$enable_code_coverage" = "yes"; then
+	as_fn_error $? "Code coverage checks are only usable with GCC!" "$LINENO" 5
+fi
+
 
 # Configure options part II (needing compilation)
 
@@ -17939,15 +18329,18 @@ COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
 COB_SHARED_OPT="-shared"
 
-if test "$enable_cflags_setting" = yes; then
+if test "$enable_cflags_setting" = "yes"; then
+
 	# Remove -O2 option added by AC_PROG_CC and add -O0
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O[0-9a-zA-Z]* */ /g' -e 's/ $//' -e 's/^ //'`
-	if test "$COB_USES_GCC" = "yes"; then
-		CFLAGS="$CFLAGS -O0"
+	if test "$enable_debug" = "yes" -o "$enable_code_coverage" = "yes"; then
+		CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-O[0-9a-zA-Z]* */ /g' -e 's/ $//' -e 's/^ //'`
+		if test "$COB_USES_GCC" = "yes"; then
+			CFLAGS="$CFLAGS -O0"
+		fi
 	fi
 
-	# Add -g3 if using GCC.
-	if test "$COB_USES_GCC" = "yes"; then
+	# For debugging: add -g3 if using GCC.
+	if test "$enable_debug" = "yes" -a "$COB_USES_GCC" = "yes"; then
 		MYOLDCFLAGS="$CFLAGS"
 		CFLAGS="$CFLAGS -g3"
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc -g3 option" >&5
@@ -17988,7 +18381,6 @@ if test "$COB_USES_GCC" = "yes"; then
 		CFLAGS="-pipe"
 	fi
 fi
-
 
 # include directory (install dir)
 
@@ -18457,6 +18849,10 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
+if test -z "${CODE_COVERAGE_ENABLED_TRUE}" && test -z "${CODE_COVERAGE_ENABLED_FALSE}"; then
+  as_fn_error $? "conditional \"CODE_COVERAGE_ENABLED\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${COB_MAKE_IX_TRUE}" && test -z "${COB_MAKE_IX_FALSE}"; then
   as_fn_error $? "conditional \"COB_MAKE_IX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5

@@ -1527,7 +1527,8 @@ unbounded_again:
 			if (f->children) {
 			        get_last_child (f)->offset += pad;
 			} else {
-				COBC_ABORT ();
+				/* ToDo: add appropriate message (untranslated) */
+				COBC_ABORT ();	/* LCOV_EXCL_LINE */
 			}
 		}
 		/* size check for group items */
@@ -1634,9 +1635,11 @@ unbounded_again:
 			f->size = sizeof (void *);
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected USAGE: %d"),
 					(int)f->usage);
 			COBC_ABORT ();
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -2012,7 +2015,9 @@ cb_get_usage_string (const enum cb_usage usage)
 	case CB_USAGE_LONG_DOUBLE:
 		return "FLOAT-EXTENDED";
 	default:
-		cb_error (_("unexpected usage %d"), usage);
+		/* LCOV_EXCL_START */
+		cb_error (_("unexpected USAGE: %d"), usage);
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 }

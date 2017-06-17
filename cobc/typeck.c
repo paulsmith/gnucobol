@@ -828,12 +828,14 @@ cb_field_size (const cb_tree x)
 			return f->size;
 		}
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 	/* NOT REACHED */
 #ifndef _MSC_VER
-	return 0;
+	return 0;	/* LCOV_EXCL_LINE */
 #endif
 }
 
@@ -3524,6 +3526,7 @@ decimal_alloc (void)
 	x = cb_build_decimal (current_program->decimal_index);
 	current_program->decimal_index++;
 	if (current_program->decimal_index >= COB_MAX_DEC_STRUCT) {
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("internal decimal structure size exceeded: %d"),
 				COB_MAX_DEC_STRUCT);
 		if (strcmp(current_statement->name, "COMPUTE") == 0) {
@@ -3531,6 +3534,7 @@ decimal_alloc (void)
 							 "or split into multiple computations."));
 		}
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 	if (current_program->decimal_index > current_program->decimal_index_max) {
 		current_program->decimal_index_max = current_program->decimal_index;
@@ -3593,8 +3597,10 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 			cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
 			return;
 		}
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
 
@@ -3651,8 +3657,10 @@ decimal_expand (cb_tree d, cb_tree x)
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
 				cb_int0));
 		} else {
+			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected constant expansion"));
 			COBC_ABORT ();
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case CB_TAG_LITERAL:
@@ -3721,8 +3729,10 @@ decimal_expand (cb_tree d, cb_tree x)
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -5991,9 +6001,11 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 	cb_tree	x;
 
 	if (!values) {
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"emit_default_field_display_for_all_but_last", "values");
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l)) {
@@ -6020,9 +6032,11 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 
 	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
 	if (!l) {
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"emit_field_display_for_last", "values");
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 	last_elt = CB_VALUE (l);
 
@@ -6583,8 +6597,10 @@ emit_invalid_target_error (const enum cb_inspect_clause clause)
 		break;
 
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected clause %d"), clause);
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 
 	cb_error_x (CB_TREE (current_statement), _("invalid target for %s"),
@@ -7537,9 +7553,11 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 		/* TODO: check this */
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"),
 				(int)CB_TREE_TAG (src));
 		COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
 	}
 	return 0;
 

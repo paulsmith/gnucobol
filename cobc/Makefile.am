@@ -24,20 +24,25 @@ cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.c parser.y scanner.c config.c \
 	reserved.c error.c tree.c tree.h field.c typeck.c codegen.c \
 	config.def flag.def warning.def codeoptim.def ppparse.def codeoptim.c
 
-#cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.l parser.y scanner.l config.c 
+#cobc_SOURCES = cobc.c cobc.h ppparse.y pplex.l parser.y scanner.l config.c
 
-cobc_CFLAGS = -I$(top_srcdir)
-cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a
+cobc_CFLAGS = -I$(top_srcdir) $(CODE_COVERAGE_CFLAGS)
+cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/libsupport.a \
+	$(CODE_COVERAGE_LIBS)
 
 dist_man_MANS = cobc.1
 COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
 
-cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)
-	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)
-
 BUILT_SOURCES = pplex.c scanner.c
 EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
 
+# Add rules for code-coverage testing, as provided by AX_CODE_COVERAGE
+@CODE_COVERAGE_RULES@
+CODE_COVERAGE_BRANCH_COVERAGE=1
+CODE_COVERAGE_LCOV_OPTIONS =  --no-external
+
+cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)
+	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)
+
 .l.c:
 	LC_CTYPE=C $(LEX) -o$@ $<
-
