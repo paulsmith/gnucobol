@@ -2455,7 +2455,7 @@ cb_build_picture (const char *str)
 			     sizeof (struct cb_picture));
 	static cob_pic_symbol	*pic_buff = NULL;
 	const unsigned char	*p;
-	unsigned int			pic_str_len = 0;
+	unsigned int		pic_str_len = 0;
 	size_t			idx = 0;
 	size_t			buff_cnt = 0;
 	cob_u32_t		at_beginning;
@@ -3608,11 +3608,11 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			yl = CB_LITERAL(y);
 
 			if(xl->llit == 0
-			&& xl->size - xl->scale >= 0
-			&& yl->llit == 0
-			&& yl->size - yl->scale >= 0
-			&& xl->all == 0
-			&& yl->all == 0) {
+			   && xl->size >= xl->scale
+			   && yl->llit == 0
+			   && yl->size >= yl->scale
+			   && xl->all == 0
+			   && yl->all == 0) {
 				xval = atoll((const char*)xl->data);
 				if(xl->sign == -1) xval = -xval;
 				yval = atoll((const char*)yl->data);
