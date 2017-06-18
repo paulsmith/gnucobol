@@ -492,15 +492,15 @@ static const struct option long_options[] = {
 	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},
 
 #define	CB_FLAG(var,pdok,name,doc)			\
-	{"f"name,		CB_NO_ARG, &var, 1},	\
-	{"fno-"name,		CB_NO_ARG, &var, 0},
+	{"f" name,		CB_NO_ARG, &var, 1},	\
+	{"fno-" name,		CB_NO_ARG, &var, 0},
 #define	CB_FLAG_ON(var,pdok,name,doc)		\
-	{"f"name,		CB_NO_ARG, &var, 1},	\
-	{"fno-"name,		CB_NO_ARG, &var, 0},
+	{"f" name,		CB_NO_ARG, &var, 1},	\
+	{"fno-" name,		CB_NO_ARG, &var, 0},
 #define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)		\
-	{"f"name,		CB_RQ_ARG, NULL, opt},
+	{"f" name,		CB_RQ_ARG, NULL, opt},
 #define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)			\
-	{"f"name,		CB_RQ_ARG, NULL, opt},
+	{"f" name,		CB_RQ_ARG, NULL, opt},
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
@@ -508,16 +508,16 @@ static const struct option long_options[] = {
 #undef	CB_FLAG_NQ
 
 #define	CB_CONFIG_ANY(type,var,name,doc)	\
-	{"f"name,		CB_RQ_ARG, NULL, '%'},
+	{"f" name,		CB_RQ_ARG, NULL, '%'},
 #define	CB_CONFIG_INT(var,name,min,max,odoc,doc)	\
-	{"f"name,		CB_RQ_ARG, NULL, '%'},
+	{"f" name,		CB_RQ_ARG, NULL, '%'},
 #define	CB_CONFIG_STRING(var,name,doc)		\
-	{"f"name,		CB_RQ_ARG, NULL, '%'},
+	{"f" name,		CB_RQ_ARG, NULL, '%'},
 #define	CB_CONFIG_BOOLEAN(var,name,doc)		\
-	{"f"name,		CB_NO_ARG, &var, 1},	\
-	{"fno-"name,		CB_NO_ARG, &var, 0},
+	{"f" name,		CB_NO_ARG, &var, 1},	\
+	{"fno-" name,		CB_NO_ARG, &var, 0},
 #define	CB_CONFIG_SUPPORT(var,name,doc)		\
-	{"f"name,		CB_RQ_ARG, NULL, '%'},
+	{"f" name,		CB_RQ_ARG, NULL, '%'},
 #include "config.def"
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
@@ -528,14 +528,14 @@ static const struct option long_options[] = {
 	{"fnot-reserved",	CB_RQ_ARG, NULL, '%'},
 
 #define	CB_WARNDEF(var,name,doc)			\
-	{"W"name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-"name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, 1},	\
+	{"Wno-" name,		CB_NO_ARG, &var, 0},
 #define	CB_ONWARNDEF(var,name,doc)			\
-	{"W"name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-"name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, 1},	\
+	{"Wno-" name,		CB_NO_ARG, &var, 0},
 #define	CB_NOWARNDEF(var,name,doc)			\
-	{"W"name,		CB_NO_ARG, &var, 1},	\
-	{"Wno-"name,		CB_NO_ARG, &var, 0},
+	{"W" name,		CB_NO_ARG, &var, 1},	\
+	{"Wno-" name,		CB_NO_ARG, &var, 0},
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
@@ -829,7 +829,7 @@ cobc_too_many_errors (void)
 /* Output cobc source/line where an internal error occurs and exit */
 /* LCOV_EXCL_START */
 void
-cobc_abort (const char *filename, const int line_num)
+cobc_abort (const char * filename, const int line_num)
 {
 	cobc_err_msg (_("%s: %d: internal compiler error"), filename, line_num);
 	cobc_err_msg (_("Please report this!"));
@@ -840,7 +840,7 @@ cobc_abort (const char *filename, const int line_num)
 /* Output cobc source/line where a tree cast error occurs and exit */
 /* LCOV_EXCL_START */
 void
-cobc_tree_cast_error (const cb_tree x, const char *filename, const int line_num,
+cobc_tree_cast_error (const cb_tree x, const char * filename, const int line_num,
 		      const enum cb_tag tagnum)
 {
 	cobc_err_msg (_("%s: %d: invalid cast from '%s' type %s to type %s"),
@@ -855,7 +855,7 @@ cobc_tree_cast_error (const cb_tree x, const char *filename, const int line_num,
 #if	!defined(__GNUC__) && defined(COB_TREE_DEBUG)
 /* LCOV_EXCL_START */
 cb_tree
-cobc_tree_cast_check (const cb_tree x, const char *file,
+cobc_tree_cast_check (const cb_tree x, const char * file,
 		      const int line, const enum cb_tag tag)
 {
 	if (!x || x == cb_error_node || CB_TREE_TAG (x) != tag) {
@@ -885,14 +885,12 @@ cobc_malloc (const size_t size)
 void
 cobc_free (void * mptr)
 {
-#ifdef	COB_TREE_DEBUG
 	if (unlikely(!mptr)) {
 		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
 		cobc_abort_terminate ();
 		/* LCOV_EXCL_STOP */
 	}
-#endif
 	free(mptr);
 }
 
@@ -947,7 +945,7 @@ cobc_main_malloc (const size_t size)
 		/* LCOV_EXCL_STOP */
 	}
 	m->next = cobc_mainmem_base;
-	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
+	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->memlen = size;
 	cobc_mainmem_base = m;
 	return m->memptr;
@@ -986,7 +984,7 @@ cobc_main_realloc (void *prevptr, const size_t size)
 		cobc_abort_terminate ();
 		/* LCOV_EXCL_STOP */
 	}
-	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
+	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->memlen = size;
 
 	prev = NULL;
@@ -1178,7 +1176,7 @@ cobc_plex_malloc (const size_t size)
 		cobc_abort_terminate ();
 		/* LCOV_EXCL_STOP */
 	}
-	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
+	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->next = cobc_plexmem_base;
 	cobc_plexmem_base = m;
 	return m->memptr;
@@ -1384,7 +1382,7 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	switch (type) {
 	case FILE_BASE_NAME:
 		cobc_err_msg (_("invalid file base name '%s'%s"),
-			      name, s);
+			name, s);
 		break;
 	case ENTRY_NAME:
 		cb_error (_("invalid ENTRY '%s'%s"), name, s);
@@ -1395,7 +1393,7 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	default:
 		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unknown name error '%s'%s"),
-			      name, s);
+			name, s);
 		break;
 		/* LCOV_EXCL_STOP */
 	}
@@ -1565,9 +1563,9 @@ cobc_stradd_dup (const char *str1, const char *str2)
 	size_t	m, n;
 
 	if (unlikely(!str1 || !str2)) {
-		/* LCOV_EXCL_START 
+		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
-		cobc_abort_terminate ();*/
+		cobc_abort_terminate ();
 		/* LCOV_EXCL_STOP */
 	}
 	m = strlen (str1);
