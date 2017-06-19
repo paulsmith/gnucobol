@@ -5683,6 +5683,9 @@ reflow_replaced_fixed_format_text (const char *cfile_name, char *pline[CB_READ_A
 				}
 			} else {
 				force_next_line = 1;
+				make_new_continuation_line (cfile_name, pline,
+							    pline_cnt, line_num);
+				continue;
 			}
 			new_line_ptr = get_next_token (new_line_ptr, new_token, token_terminator);
 		}
