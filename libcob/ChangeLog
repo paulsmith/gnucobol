@@ -38,7 +38,7 @@
 	* screenio.c: FR #191 only set flag pending_accept when cob_move
 	  returns no error
 
-2017-05-12	Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-05-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_oc_nanosleep): prefer HAVE_NANO_SLEEP over _WIN32
 
@@ -46,6 +46,11 @@
 
 	* screenio.c (screen_display): FR #191 set flag pending_accept
 	  for DISPLAY screen, too
+
+2017-05-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sig_handler, cob_set_signal): added code for SIGBUS
+	  in correspondence to SIGSEGV code
 
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

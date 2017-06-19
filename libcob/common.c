@@ -555,6 +555,11 @@ cob_sig_handler (int sig)
 		signal_name = "SIGSEGV";
 		break;
 #endif
+#ifdef	SIGBUS
+	case SIGBUS:
+		signal_name = "SIGBUS";
+		break;
+#endif
 	default:
 		signal_name = _("unknown");
 		fprintf (stderr, _("cob_sig_handler caught not handled signal: %d"), sig);
@@ -581,15 +586,21 @@ cob_sig_handler (int sig)
 		}
 	}
 
+	switch (sig) {
 #ifdef	SIGSEGV
-	if (sig == SIGSEGV) {
+	case SIGSEGV:
 		fprintf (stderr, _("attempt to reference unallocated memory"));
-	} else {
-		fprintf (stderr, _("caught signal"));
-	}
-#else
-	fprintf (stderr, _("caught signal"));
+		break;
 #endif
+#ifdef	SIGBUS
+	case SIGBUS:
+		fprintf (stderr, _("bus error"));
+		break;
+#endif
+	default:
+		fprintf (stderr, _("caught signal"));
+		break;
+	}
 	fprintf (stderr, " (");
 	fprintf (stderr, _("signal %s"), signal_name);
 	fprintf (stderr, ")\n");
@@ -687,6 +698,11 @@ cob_set_signal (void)
 	(void)sigemptyset (&sa.sa_mask);
 	(void)sigaction (SIGSEGV, &sa, NULL);
 #endif
+#ifdef	SIGBUS
+	/* Take direct control of bus error */
+	(void)sigemptyset (&sa.sa_mask);
+	(void)sigaction (SIGBUS, &sa, NULL);
+#endif
 
 #else
 
@@ -718,6 +734,10 @@ cob_set_signal (void)
 #ifdef	SIGSEGV
 	/* Take direct control of segmentation violation */
 	(void)signal (SIGSEGV, cob_sig_handler);
+#endif
+#ifdef	SIGBUS
+	/* Take direct control of bus error */
+	(void)signal (SIGBUS, cob_sig_handler);
 #endif
 
 #endif
