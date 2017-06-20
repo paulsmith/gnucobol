@@ -68,7 +68,8 @@
 enum xref_type {
 	XREF_FIELD,
 	XREF_FILE,
-	XREF_LABEL
+	XREF_LABEL,
+	XREF_FUNCTION
 };
 #endif
 
@@ -4136,13 +4137,20 @@ set_listing_header_symbols (void)
 static void
 set_listing_header_xref (const enum xref_type type)
 {
-	if (type == XREF_LABEL) {
-		strcpy (cb_listing_header, "LABEL");
+	if (type == XREF_FUNCTION) {
+		strcpy (cb_listing_header, "FUNCTION");
+	} else if (type == XREF_LABEL) {
+		strcpy (cb_listing_header, "LABEL   ");
 	} else {
-		strcpy (cb_listing_header, "NAME ");
+		strcpy (cb_listing_header, "NAME    ");
 	}
-	strcat (cb_listing_header,
-		"                          DEFINED                ");
+	if (type == XREF_FUNCTION) {
+		strcat (cb_listing_header,
+			"                       TYPE                   ");
+	} else {
+		strcat (cb_listing_header,
+			"                       DEFINED                ");
+	}
 	if (cb_listing_wide) {
 		strcat (cb_listing_header, "                    ");
 	}
@@ -4609,6 +4617,7 @@ cobc_xref_link_parent (const struct cb_field *field)
 void
 cobc_xref_set_receiving (const cb_tree target_ext)
 {
+#ifdef COB_INTERNAL_XREF
 	cb_tree	target = target_ext;
 	struct cb_field		*target_fld;
 	int				xref_line;
@@ -4629,6 +4638,41 @@ cobc_xref_set_receiving (const cb_tree target_ext)
 		xref_line = cb_source_line;
 	}
 	cobc_xref_link (&target_fld->xref, xref_line, 1);
+#else
+	COB_UNUSED (target_ext);
+#endif
+}
+
+void
+cobc_xref_call (const char *name, const int line, const int is_ident, const int is_sys)
+{
+#ifdef COB_INTERNAL_XREF
+	struct cb_call_elem	*elem;
+
+	for (elem = current_program->call_xref.head; elem; elem = elem->next) {
+		if (!strcmp (name, elem->name)) {
+			cobc_xref_link (&elem->xref, line, 0);
+			return;
+		}
+	}
+
+	elem = cobc_parse_malloc (sizeof (struct cb_call_elem));
+	elem->name = cobc_strdup (name);
+	elem->is_identifier = is_ident;
+	elem->is_system = is_sys;
+	cobc_xref_link (&elem->xref, line, 0);
+
+	if (current_program->call_xref.head == NULL) {
+		current_program->call_xref.head = elem;
+	} else if (current_program->call_xref.tail != NULL) {
+		current_program->call_xref.tail->next = elem;
+	}
+	current_program->call_xref.tail = elem;
+#else
+	COB_UNUSED (name);
+	COB_UNUSED (line);
+	COB_UNUSED (is_ident);
+#endif
 }
 
 #ifdef COB_INTERNAL_XREF
@@ -4807,6 +4851,29 @@ xref_labels (cb_tree label_list_p)
 		return 1;
 	}
 }
+
+static int
+xref_calls (struct cb_call_xref *list)
+{
+	struct cb_call_elem *elem;
+	int gotone = 0;
+
+	if (list->head) {
+		set_listing_header_xref (XREF_FUNCTION);
+		force_new_page_for_next_line ();
+		print_program_header ();
+	}
+
+	for (elem = list->head; elem; elem = elem->next) {
+		gotone = 1;
+		pd_off = sprintf (print_data, "%c %-28.28s %-6.6s ",
+			elem->is_identifier ? 'I' : 'L',
+			elem->name,
+			elem->is_system ? "SYSTEM" : "EXTERN");
+		xref_print (&elem->xref, XREF_FUNCTION, NULL);
+	}
+	return gotone;
+}
 #endif
 
 static void
@@ -4926,6 +4993,8 @@ print_program_trailer (void)
 					print_program_data (print_data);
 					print_program_data ("");
 				};
+
+				xref_calls (&q->call_xref);
 			}
 			print_break = 0;
 		}

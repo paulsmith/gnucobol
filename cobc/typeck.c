@@ -44,6 +44,8 @@
 #include "cobc.h"
 #include "tree.h"
 
+extern int call_line_number; 
+
 struct system_table {
 	const char		*const syst_name;
 	const int		syst_params_min;
@@ -5556,6 +5558,13 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 				break;
 			}
 		}
+		if (cb_listing_xref) {
+			cobc_xref_call (entry, call_line_number, 0, is_sys_call);
+		}
+	}
+	else if (cb_listing_xref && CB_REFERENCE_P(prog)) {
+		entry = CB_FIELD(CB_REFERENCE(prog)->value)->name;
+		cobc_xref_call (entry, call_line_number, 1, 0);
 	}
 
 	if (error_ind) {

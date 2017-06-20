@@ -503,6 +503,19 @@ struct cb_xref {
 	int			skip;
 };
 
+struct cb_call_elem {
+	struct cb_call_elem	*next;
+	char		        *name;
+	struct cb_xref		xref;
+	int			is_identifier;
+	int			is_system;
+};
+
+struct cb_call_xref {
+	struct cb_call_elem	*head;
+	struct cb_call_elem	*tail;
+};
+
 /* Constant */
 
 struct cb_const {
@@ -1365,6 +1378,7 @@ struct cb_program {
 	cb_tree			crt_status;		/* CRT STATUS */
 	cb_tree			returning;		/* RETURNING */
 	struct cb_label		*all_procedure;		/* DEBUGGING */
+	struct cb_call_xref	call_xref;		/* CALL Xref list */
 
 	/* Internal variables */
 	int		loop_counter;			/* Loop counters */
@@ -1932,6 +1946,7 @@ extern struct cb_program	*cb_find_defined_program_by_id (const char *);
 extern void			cobc_xref_link (struct cb_xref *, const int, const int);
 extern void			cobc_xref_link_parent (const struct cb_field *);
 extern void			cobc_xref_set_receiving (const cb_tree);
+extern void			cobc_xref_call (const char *, const int, const int, const int);
 
 /* Function defines */
 
