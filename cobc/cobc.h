@@ -468,6 +468,7 @@ extern enum				cb_support var;
 extern int		cb_load_std (const char *);
 extern int		cb_config_entry (char *, const char *, const int);
 extern int		cb_load_conf (const char *, const int);
+extern int		cb_load_words (void);
 
 #ifndef	HAVE_DESIGNATED_INITS
 /* Initialization routines in typeck.c and reserved.c */

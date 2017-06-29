@@ -43,6 +43,8 @@
 /* String (label) flags */
 CB_CONFIG_STRING (cb_config_name, "name", NULL) /* Configuration Name, any value */
 
+CB_CONFIG_STRING (cb_reserved_words, "reserved-words", _("use of complete/fixed reserved words")) /* Reserved word list, filename */
+
 /* Integer flags */
 CB_CONFIG_INT (cb_tab_width, "tab-width", 1, 12, CB_XRANGE(1,12),
 	_("set number of spaces that are asumed for tabs"))
@@ -130,8 +132,6 @@ CB_CONFIG_BOOLEAN (cb_program_name_redefinition, "program-name-redefinition",
 
 CB_CONFIG_BOOLEAN (cb_no_echo_means_secure, "no-echo-means-secure",
 	_("NO-ECHO hides input with asterisks like SECURE"))
-
-CB_CONFIG_BOOLEAN (cb_specify_all_reserved, "specify-all-reserved", NULL) /* specify all reserved words */
 
 
 /* Support flags */

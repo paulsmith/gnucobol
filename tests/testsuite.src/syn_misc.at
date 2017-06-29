@@ -3056,7 +3056,7 @@ AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
 prog.cob: 7: error: PICTURE clause required for 'SQLCABC'
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob], [0], [], [])
-AT_CHECK([$COMPILE_ONLY -std=ibm -fno-specify-all-reserved prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=ibm -freserved-words=off prog.cob], [0], [], [])
 AT_CLEANUP
 
 

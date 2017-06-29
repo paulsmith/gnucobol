@@ -2488,7 +2488,7 @@ process_command_line (const int argc, char **argv)
 
 		case '$':
 			/* -std=<xx> : Specify dialect */
-			if (!exit_option) {
+			if (!exit_option || list_reserved) {
 				snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
 				if (cb_load_std (ext) != 0) {
 					cobc_err_exit (_("invalid parameter -std=%s"), cob_optarg);
@@ -2498,7 +2498,7 @@ process_command_line (const int argc, char **argv)
 
 		case '&':
 			/* -conf=<xx> : Specify dialect configuration file */
-			if (!exit_option) {
+			if (!exit_option || list_reserved) {
 				if (strlen (cob_optarg) > COB_SMALL_MAX) {
 					cobc_err_exit (COBC_INV_PAR, "-conf");
 				}
@@ -3037,6 +3037,11 @@ process_command_line (const int argc, char **argv)
 		default:
 			cobc_err_exit (_("invalid option detected"));
 		}
+	}
+	
+	/* Load reserved words from fixed word-list if specified */
+	if (cb_reserved_words != NULL) {
+		cb_load_words();
 	}
 
 	/* Exit for configuration errors resulting from -f<conf-tag>[=<value>] */

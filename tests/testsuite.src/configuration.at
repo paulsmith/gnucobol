@@ -376,13 +376,14 @@ AT_SETUP([cobc configuration: incomplete])
 AT_KEYWORDS([configuration misc])
 
 AT_DATA([test.conf], [
-name: "Sample Conf"
+name: "Empty Conf"
 ])
 
 # check if incomplete configuration result in error
 AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [1], [],
 [configuration error:
 test.conf: missing definitions:
+	no definition of 'reserved-words'
 	no definition of 'tab-width'
 	no definition of 'text-column'
 	no definition of 'pic-length'
@@ -411,7 +412,6 @@ test.conf: missing definitions:
 	no definition of 'console-is-crt'
 	no definition of 'program-name-redefinition'
 	no definition of 'no-echo-means-secure'
-	no definition of 'specify-all-reserved'
 	no definition of 'comment-paragraphs'
 	no definition of 'memory-size-clause'
 	no definition of 'multiple-file-tape-clause'

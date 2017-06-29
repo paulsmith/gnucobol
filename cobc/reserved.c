@@ -2899,7 +2899,7 @@ get_reserved_words_with_amendments (void)
 	struct cobc_reserved		to_find;
 	struct cobc_reserved		*p;
 
-	if (!cb_specify_all_reserved) {
+	if (cb_reserved_words == NULL) {
 		/*
 		  Append the default reserved words to the amendment list as
 		  additions.
