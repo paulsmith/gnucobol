@@ -110,7 +110,7 @@ endif
 
 newcob.val.Z:
 	@echo "Trying to download newcob.val.Z..."
-	@wget "http://www.itl.nist.gov/div89a7/ctg/suites/newcob.val.Z";
+	@wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";
 
 newcob.val: newcob.val.Z
 	@if test "$(<D)" != "."; then \
