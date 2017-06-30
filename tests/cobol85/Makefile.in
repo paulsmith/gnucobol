@@ -585,7 +585,7 @@ test: $(MODULES_RUN)
 
 diff:
 	@for m in $(MODULES); do \
-	  (diff $(srcdir)/$$m.txt $$m/report.txt) \
+		(diff $(srcdir)/$$m.txt $$m/report.txt) \
 	done
 	$(MAKE) diff-summary
 
@@ -595,31 +595,32 @@ diff-summary:
 @COB_MAKE_IX_FALSE@	diff $(srcdir)/summarynoix.txt summary.log
 	@echo
 
-newcob.val:
-	if ! test -f "newcob.val"; then \
-	   if ! test -f "newcob.val.Z"; then \
-	      wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"; \
-	   fi; \
-	   if test -f "newcob.val.Z"; then \
-	      gunzip newcob.val.Z || gzip -d newcob.val.Z || uncompress newcob.val.Z; \
-	   fi; \
-	   if ! test -f "newcob.val"; then \
-	      echo "newcob.val missing, automatic download and uncompress did not work"; \
-	      exit 1; \
-	   fi; \
+newcob.val.Z:
+	@echo "Trying to download newcob.val.Z..."
+	@wget "http://www.itl.nist.gov/div89a7/ctg/suites/newcob.val.Z";
+
+newcob.val: newcob.val.Z
+	@if test "$(<D)" != "."; then \
+		echo "Copying $< to current directory..." && cp "$<" .; \
+	fi
+	@echo "Unpacking newcob.val.Z..."
+	@gunzip "$(<F)" || gzip -d "$(<F)" || uncompress "$(<F)";
+	@if ! test -f "newcob.val"; then \
+		echo "newcob.val missing, automatic download and uncompress did not work"; \
+		exit 1; \
 	fi
 
 clean-local:
 	rm -rf copy copyalt $(MODULES_ALL) EXEC85 summary.log EXEC85.cob
 
-$(MODULES_ALL): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
+$(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	@echo "Building module directory $@ ..."
 	@mkdir -p ./$@
 	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
 	@cat $(srcdir)/EXEC85.conf.in >> ./$@/EXEC85.conf
-#	setting NEWCOB_VAL to correct directory
-	@if test "$<D" = "."; then \
-		epxort NEWCOB_VAL=../$(<F); \
+#	setting NEWCOB_VAL to the full name for EXEC85
+	@if test "$(<D)" = "."; then \
+		export NEWCOB_VAL=../$(<F); \
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
@@ -638,7 +639,7 @@ $(MODULES_ALL): newcob.val EXEC85 $(srcdir)/EXEC85.conf.in
 #	@echo "	diff $(COB85DIR)/$@.txt report.txt || true" >> $@/Makefile
 	@echo "Finished module directory $@."
 
-EXEC85: newcob.val
+EXEC85$(EXEEXT): newcob.val
 	@echo "Extracting EXEC85 program from newcob.val"
 	@sed -e '/^\*END/,$$d' -e '1,/^\*HEADER/d' \
 	-e 's/^002700.*/           "NEWCOB_VAL" ORGANIZATION LINE SEQUENTIAL./' \

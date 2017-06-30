@@ -1,4 +1,10 @@
 
+2017-06-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: separated rule for newcob.val.Z and make sure that
+	  out-of-path newcob.val.Z is copied before uncompress;
+	  corrected rule for EXEC85 to include executable extension
+
 2017-06-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added .PHONY to correctly declare logical targets that
