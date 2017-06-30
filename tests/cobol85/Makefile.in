@@ -596,15 +596,19 @@ diff-summary:
 	@echo
 
 newcob.val.Z:
-	@echo "Trying to download newcob.val.Z..."
-	@wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";
+	@if ! test -f "newcob.val"; then \
+		echo "Trying to download newcob.val.Z...";  \
+		wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";  \
+	fi
 
 newcob.val: newcob.val.Z
-	@if test "$(<D)" != "."; then \
-		echo "Copying $< to current directory..." && cp "$<" .; \
+	@if ! test -f "newcob.val"; then \
+		if test "$(<D)" != "."; then \
+			echo "Copying $< to current directory..." && cp "$<" .; \
+		fi; \
+		echo "Unpacking newcob.val.Z..."; \
+		gunzip "$(<F)" || gzip -d "$(<F)" || uncompress "$(<F)"; \
 	fi
-	@echo "Unpacking newcob.val.Z..."
-	@gunzip "$(<F)" || gzip -d "$(<F)" || uncompress "$(<F)";
 	@if ! test -f "newcob.val"; then \
 		echo "newcob.val missing, automatic download and uncompress did not work"; \
 		exit 1; \
