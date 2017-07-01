@@ -2190,7 +2190,9 @@ cobc_print_usage (char * prog)
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n"
 			"                        <dialect> can be one of:\n"
 			"                        cobol2014, cobol2002, cobol85, default,\n"
-			"                        ibm, mvs, bs2000, mf, acu;\n"
+			"                        ibm-strict, ibm, mvs-strict, mvs,\n"
+			"                        mf-strict, mf, bs2000-strict, bs2000,\n"
+			"                        acu-strict, acu, rm-strict, rm;\n"
 			"                        see configuration files in directory config"));
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));

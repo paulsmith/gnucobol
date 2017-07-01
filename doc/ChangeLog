@@ -1,4 +1,9 @@
 
+2017-07-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: added -std=rm and all strict variants,
+	  added explanations for -std
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: passed GREP from configure to cobcinfo.sh

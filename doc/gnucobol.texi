@@ -64,7 +64,7 @@ operating system C compiler.
 This manual corresponds to GnuCOBOL @value{VERSION}.
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2002-2012, 2014-2016 Free Software Foundation, Inc.@*
+Copyright @copyright{} 2002-2012, 2014-2017 Free Software Foundation, Inc.@*
 Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
 
 @insertcopying
@@ -76,7 +76,7 @@ Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
 @node Top
 
 @ifinfo
-Welcome to the GnuCOBOL 2.0 manual.
+Welcome to the GnuCOBOL @value{VERSION} manual.
 @end ifinfo
 
 @menu
@@ -230,7 +230,8 @@ $ ./hello-world
 Hello, world!
 @end example
 
-@*The program can be written in a more modern style, with free format code, inline comments, the @code{GOBACK} verb and an optional @code{END-DISPLAY} terminator:
+@*The program can be written in a more modern style, with free format code,
+inline comments, the @code{GOBACK} verb and an optional @code{END-DISPLAY} terminator:
 
 @example
 ---- hellonew.cob ----------------
@@ -268,7 +269,10 @@ This chapter describes how to compile COBOL programs using GnuCOBOL.
 @node Compiler options, Multiple sources, Compile, Compile
 @section Compiler options
 
-The compiler @code{cobc} accepts the options described in this section. The compiler arguments follow the general syntax @code{cobc} [options] file [file @dots{}]. A complete list of options can be displayed by using the help option.
+The compiler @code{cobc} accepts the options described in this section.
+The compiler arguments follow the general syntax @code{cobc} [options]
+file [file @dots{}].
+A complete list of options can be displayed by using the help option.
 
 @menu
 * Help options::                Help options
@@ -288,14 +292,16 @@ The following switches display information about the compiler:
 
 @table @code
 @item --help, -h
-Display help screen (@pxref{Appendix A, ,cobc --help}). No further actions will be taken.
+Display help screen (@pxref{Appendix A, ,cobc --help}).
+No further actions will be taken.
 
 @item --version
 Display compiler version, author package date and executable build
 date.  @code{-V} will also display version. No further actions will be taken.
 
 @item --info
-Display build information along with the default and current compiler configurations. No further actions will be taken except for further display options.
+Display build information along with the default and current compiler
+configurations. No further actions will be taken except for further display options.
 
 @item -v
 Verbosely display the programs invoked during compilation.
@@ -304,6 +310,8 @@ Verbosely display the programs invoked during compilation.
 Display reserved words (@pxref{Appendix B, ,cobc --list-reserved}).
 A Y/N field shows if the word is supported.
 @footnote{Support may be partial or complete.}
+The given options for reserved words specified for example by @code{-std}
+will be taken into account.
 No further actions will be taken except for further display options.
 
 @item --list-intrinsics
@@ -327,7 +335,8 @@ No further actions will be taken except for further display options.
 The @code{cobc} compiler treats files like @file{*.cob}, @file{*.cbl} as
 COBOL source code, @file{*.c} as C source code, @file{*.o} as
 object code, @file{*.i} as preprocessed code and @file{*.so}
-as dynamic modules and knows how to handle such files in the generation, compilation, and linking steps.
+as dynamic modules and knows how to handle such files in the generation,
+compilation, and linking steps.
 
 The special input name @file{-} takes input from @file{stdin} which is
 assumed to be COBOL source, and uses a default output name of
@@ -340,21 +349,26 @@ The following options specify the target type produced by the compiler:
 @table @code
 @item -E
 Preprocess only: compiler directives are executed, comment lines are
-removed and @code{COPY} statements are expanded. The output is saved in file @file{*.i}.
+removed and @code{COPY} statements are expanded.
+The output is saved in file @file{*.i}.
 
 @item -C
-Translation only.  COBOL source files are translated into C files. The output is saved in file @file{*.c}.
+Translation only.  COBOL source files are translated into C files.
+The output is saved in file @file{*.c}.
 
 @item -S
 Compile only.  Translated C files are compiled by the C compiler
 to assembler code. The output is saved in file @file{*.s}.
 
 @item -c
-Compile and assemble.  This is equivalent to @code{cc -c}. The output is saved in file @file{*.o}.
+Compile and assemble.  This is equivalent to @code{cc -c}.
+The output is saved in file @file{*.o}.
 
 @item -m
 Compile, assemble, and build a dynamically loadable module (i.e.,
-a shared library). The output is saved in file @file{*.so}.@footnote{The extension varies depending on your host.} This is the default behaviour.
+a shared library). The output is saved in file @file{*.so}.
+@footnote{The extension varies depending on your host.}
+This is the default behaviour.
 
 @item -b
 Compile, assemble, and combine all input files into a single
@@ -394,7 +408,11 @@ Place the output into <file>.
 @node Source format, Warning options, Build target, Compiler options
 @subsection Source format
 
-GnuCOBOL supports both fixed and free source format. The default format is the fixed format. This can be overriden either by the @code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}} directive, or by one of the following options:
+GnuCOBOL supports both fixed and free source format.
+The default format is the fixed format.
+This can be overriden either by the
+@code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}} directive,
+or by one of the following options:
 
 @table @code
 @item -free, -F
@@ -470,34 +488,47 @@ Warn if statements are unreachable. This is @emph{not} set with @code{-Wall}.
 @item -std=<dialect>
 Compiler uses the given dialect to determine certain compiler features
 and warnings.@*
-@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
-
-@item -std=cobol2002
-COBOL 2002
-
-@item -std=cobol2014
-COBOL 2014
-
-@item -std=cobol85
-COBOL-85
-
-@item -std=ibm
-IBM compatible
-
-@item -std=mvs
-MVS compatible
-
-@item -std=bs2000
-BS2000 compatible
-
-@item -std=mf
-Micro Focus compatible
-
-@item -std=acu
-ACUCOBOL-GT compatible
+@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.@*
+Note: The GnuCOBOL compiler tries to limit both the feature-set and reserved words
+to the specified compiler when the "strict" dialects are used.
+COBOL sources compiled with these dialects are therefore likely to compile with
+the specified compiler and vice versa: sources that were compiled on the
+specified compiler should compile without any issues with GnuCOBOL.@*
+With the "non-strict" dialects GnuCOBOL will activate the complete feature-set
+where it doesn't directly conflict with the specified dialect, including reserved words.
+COBOL sources compiled with these dialects therefore may work only with GnuCOBOL.
+COBOL sources may need a change because of reserved words in GnuCOBOL, otherwise
+offending words may be removed by @code{-fno-reserved=word}.@*
+COBOL-85, @w{COBOL 2002} and @w{COBOL 2014} are always "strict".
 
 @item -std=default
-GnuCOBOL
+GnuCOBOL dialect, supporting many of the @w{COBOL 2002} and @w{COBOL 2014} features,
+many extensions found in other dialects and its own feature-set
+
+@item -std=cobol85
+COBOL-85 without any extensions, source compiled with this dialect is likely to compile with most COBOL compilers
+
+@item -std=cobol2002, -std=cobol2014
+COBOL 2002 / COBOL 2014 without any extensions, use @code{-Warchaic} and @code{-Wobsolete} if
+archaic/obsolete features should be flagged
+
+@item -std=ibm-strict, -std=ibm
+IBM compatible
+
+@item -std=mvs-strict, -std=mvs
+MVS compatible
+
+@item -std=mf-strict, -std=mf
+Micro Focus compatible
+
+@item -std=bs2000-strict, -std=bs2000
+BS2000 compatible
+
+@item -std=acu-strict, -std=acu
+ACUCOBOL-GT compatible
+
+@item -std=rm-strict, -std=rm
+RM/COBOL compatible
 
 @item -conf=<file>
 User-defined dialect configuration. See @code{-std=} above.@*
