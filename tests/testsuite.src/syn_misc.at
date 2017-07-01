@@ -1984,29 +1984,14 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob: 9: error: literal length exceeds 8191 characters
 ])
 
+AT_CHECK([$COMPILE_ONLY -fliteral-length=160 prog.cob], [1], [],
+[prog.cob: 9: error: invalid literal: '                                   ...'
+prog.cob: 9: error: literal length exceeds 160 characters
+])
+
 AT_CHECK([$COMPILE_ONLY -free prog2.cob], [1], [],
 [prog2.cob: 9: error: invalid literal: '                                   ...'
 prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
-])
-
-AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 8192 characters
-])
-
-AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 4096 characters
-])
-
-AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 160 characters
-])
-
-AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 160 characters
 ])
 
 # extra test with listing as this is an edge case there
@@ -3051,12 +3036,12 @@ AT_DATA([prog.cob], [
            03  SQLCABC         USAGE BINARY-LONG VALUE 136.
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
 [prog.cob: 7: error: syntax error, unexpected Identifier
 prog.cob: 7: error: PICTURE clause required for 'SQLCABC'
 ])
-AT_CHECK([$COMPILE_ONLY -std=ibm -freserved=BINARY-LONG prog.cob], [0], [], [])
-AT_CHECK([$COMPILE_ONLY -std=ibm -freserved-words=off prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict -freserved=BINARY-LONG prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
 AT_CLEANUP
 
 
@@ -3160,7 +3145,7 @@ prog.cob: 24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 45: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 ])
-AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: 12: error: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 24: error: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 35: error: incorrect order of CONFIGURATION SECTION paragraphs used
@@ -3592,7 +3577,7 @@ prog.cob: 8: error: missing left parenthesis
 prog.cob: 9: error: '/' operator misplaced
 ])
 
-AT_CHECK([$COMPILE -std=mf prog.cob], [1], [],
+AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
 [prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 prog.cob: 7: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 prog.cob: 8: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
@@ -3600,10 +3585,16 @@ prog.cob: 9: error: syntax error, unexpected Identifier, expecting EXTERNAL or G
 prog.cob: 10: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
 ])
 
-AT_CHECK([$COMPILE -std=mf -freserved=CONSTANT prog.cob], [1], [],
+AT_CHECK([$COMPILE -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],
 [prog.cob: 6: error: 01 CONSTANT does not conform to Micro Focus COBOL
 prog.cob: 7: error: 01 CONSTANT does not conform to Micro Focus COBOL
 prog.cob: 7: error: syntax error, unexpected Identifier, expecting .
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [1], [],
+[prog.cob: 7: error: missing right parenthesis
+prog.cob: 8: error: missing left parenthesis
+prog.cob: 9: error: '/' operator misplaced
 ])
 
 AT_CLEANUP
@@ -3635,11 +3626,17 @@ prog.cob: 9: error: missing left parenthesis
 prog.cob: 10: error: '/' operator misplaced
 ])
 
-AT_CHECK([$COMPILE -std=ibm prog.cob ], [1], [],
+AT_CHECK([$COMPILE -std=ibm-strict prog.cob ], [1], [],
 [prog.cob: 6: error: 78 VALUE does not conform to IBM COBOL
 prog.cob: 7: error: 78 VALUE does not conform to IBM COBOL
 prog.cob: 8: error: 78 VALUE does not conform to IBM COBOL
 prog.cob: 8: error: syntax error, unexpected Identifier, expecting .
+])
+
+AT_CHECK([$COMPILE -std=ibm prog.cob], [1], [],
+[prog.cob: 8: error: missing right parenthesis
+prog.cob: 9: error: missing left parenthesis
+prog.cob: 10: error: '/' operator misplaced
 ])
 
 AT_CLEANUP

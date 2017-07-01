@@ -61,7 +61,7 @@ prog.cob: 21: error: unsigned positive integer value expected
 AT_CLEANUP
 
 
-# Temporarily removed RW tests, they will be added back in 2.1
+# Temporarily removed RW tests, they will be added back in 3.0
 # AT_SETUP([Check REPORT error/warning])
 # AT_KEYWORDS([report])
 # 

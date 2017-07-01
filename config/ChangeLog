@@ -1,4 +1,12 @@
 
+2017-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: created a "strict" set of vendor dialect configurations,
+	  laxed "normal" vendor dialect configurations by allowing *all*
+	  words GnuCOBOL can handle *additional* to the not-implemented
+	  vendor specific extensions and by allowing use of most features
+	  Note: COBOL85, COBOL2002 and COBOL2014 are always "strict"
+
 2017-06-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: moved reserved words list from conf files to seperate files,

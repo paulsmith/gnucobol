@@ -434,6 +434,8 @@ static void
 terminator_warning (cb_tree stmt, const unsigned int termid,
 		    const char *name)
 {
+	char		terminator[32];
+
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
@@ -442,9 +444,11 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 			"terminator_warning", name);
 		COBC_ABORT ();
 	}
-	cb_warning_x (cb_warn_terminator, CB_TREE (current_statement),
-		_("%s statement not terminated by END-%s"),
-		name, name);
+	snprintf (terminator, 32, "END-%s", name);
+	if (is_reserved_word (terminator)) {
+		cb_warning_x (cb_warn_terminator, CB_TREE (current_statement),
+			_("%s statement not terminated by %s"), name, terminator);
+	}
 
 	/* Free tree associated with terminator */
 	if (stmt) {
@@ -455,6 +459,8 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 static void
 terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 {
+	char		terminator[32];
+
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
@@ -463,9 +469,14 @@ terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 			"terminator_error", name);
 		COBC_ABORT ();
 	}
-	cb_error_x (CB_TREE (current_statement),
-		_("%s statement not terminated by END-%s"),
-		name, name);
+	snprintf (terminator, 32, "END-%s", name);
+	if (is_reserved_word (terminator)) {
+		cb_error_x (CB_TREE (current_statement),
+			_("%s statement not terminated by %s"), name, terminator);
+	} else {
+		cb_error_x (CB_TREE (current_statement),
+			_("%s statement not terminated"), name);
+	}
 
 	/* Free tree associated with terminator */
 	if (stmt) {

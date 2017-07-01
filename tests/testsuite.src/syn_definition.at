@@ -1419,6 +1419,6 @@ AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 prog.cob: 8: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
 prog.cob: 11: error: RENAMES of 01-, 66- and 77-level items does not conform to COBOL 2014
 ])
-AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -frenames-uncommon-levels=ok prog.cob], [0], [], [])
 
 AT_CLEANUP

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -459,6 +459,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	char			*e;
 	const char		*val;
 	void			*var;
+	enum cb_support	support_val;
 	size_t			i;
 	size_t			j;
 
@@ -639,27 +640,41 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			}
 			break;
 		case CB_SUPPORT:
-			if (strcmp (val, "ok") == 0) {
-				*((enum cb_support *)var) = CB_OK;
-			} else if (strcmp (val, "warning") == 0) {
-				*((enum cb_support *)var) = CB_WARNING;
-			} else if (strcmp (val, "archaic") == 0) {
-				*((enum cb_support *)var) = CB_ARCHAIC;
-			} else if (strcmp (val, "obsolete") == 0) {
-				*((enum cb_support *)var) = CB_OBSOLETE;
-			} else if (strcmp (val, "skip") == 0) {
-				*((enum cb_support *)var) = CB_SKIP;
-			} else if (strcmp (val, "ignore") == 0) {
-				*((enum cb_support *)var) = CB_IGNORE;
-			} else if (strcmp (val, "error") == 0) {
-				*((enum cb_support *)var) = CB_ERROR;
-			} else if (strcmp (val, "unconformable") == 0) {
-				*((enum cb_support *)var) = CB_UNCONFORMABLE;
+			/* check if we are in "minimal mode" */
+			s = (char *)val;
+			if (*s == '+') s++;
+			if (strcmp (s, "ok") == 0) {
+				support_val = CB_OK;
+			} else if (strcmp (s, "warning") == 0) {
+				support_val = CB_WARNING;
+			} else if (strcmp (s, "archaic") == 0) {
+				support_val = CB_ARCHAIC;
+			} else if (strcmp (s, "obsolete") == 0) {
+				support_val = CB_OBSOLETE;
+			} else if (strcmp (s, "skip") == 0) {
+				support_val = CB_SKIP;
+			} else if (strcmp (s, "ignore") == 0) {
+				support_val = CB_IGNORE;
+			} else if (strcmp (s, "error") == 0) {
+				support_val = CB_ERROR;
+			} else if (strcmp (s, "unconformable") == 0) {
+				support_val = CB_UNCONFORMABLE;
 			} else {
-				invalid_value (fname, line, name, val,
+				invalid_value (fname, line, name, s,
 					"ok, warning, archaic, obsolete, skip, ignore, error, unconformable", 0, 0);
 				return -1;
 			}
+			/* handling of special "adjust" mode */
+			if (s != val) {
+				if (*((enum cb_support *)var) != CB_SKIP
+				&&  *((enum cb_support *)var) != CB_IGNORE
+				&&  *((enum cb_support *)var) > support_val) {
+					*((enum cb_support *)var) = support_val;
+				}
+				break;
+			}
+			/* normal handling */
+			*((enum cb_support *)var) = support_val;
 			break;
 		default:
 			configuration_error (fname, line, 1, _("invalid type for '%s'"), name);

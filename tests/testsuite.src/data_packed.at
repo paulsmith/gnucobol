@@ -584,6 +584,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
+# TODO: Check what actual option is tested here and directly use it
 AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OK

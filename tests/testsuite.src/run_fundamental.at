@@ -363,7 +363,7 @@ AT_CHECK([./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([Move to item with simple and floating insertion])
+AT_SETUP([MOVE to item with simple and floating insertion])
 AT_KEYWORDS([fundamental edited editing])
 
 AT_DATA([prog.cob], [
@@ -758,7 +758,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fmove-ibm prog.cob], [0], [], [])
 
 AT_CHECK([./prog], [0],
 [  OK with MOVE: 1234567899
@@ -1693,7 +1693,7 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
            STOP RUN.
 ])
-
+# TODO: check what we actually test and replace -std by specific switch
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [+0+00+0+])
 

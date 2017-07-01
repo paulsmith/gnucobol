@@ -89,7 +89,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [21
 18446744073709551615
@@ -114,7 +114,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -facucobol-literals=ok prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [5
 2147483647
@@ -509,7 +509,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=mf -fodoslide prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fcomplex-odo -fodoslide prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [0606122333
 1010  3  22111
@@ -1851,7 +1851,8 @@ AT_DATA([hello.cob], [
 ])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([$COMPILE_MODULE -std=mvs hello.cob], [0], [], [])
+# TODO: Doesn't work without sticky-linkage which is likely a bug!
+AT_CHECK([$COMPILE_MODULE -fentry-statement=ok -fsticky-linkage hello.cob], [0], [], [])
 AT_CHECK([./caller], [0],
 [Hello, COBOL!
 Bye, COBOL!
@@ -2419,16 +2420,16 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
-           DISPLAY "OK" NO ADVANCING UPON STDOUT
-           END-DISPLAY.
       D    DISPLAY "KO" NO ADVANCING UPON STDOUT
       D    END-DISPLAY.
+           DISPLAY "OK" NO ADVANCING UPON STDOUT
+           END-DISPLAY.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
-[OKKO])
+[KOOK])
 
 AT_CLEANUP
 
@@ -2665,7 +2666,7 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Obsolete 2002 keywords])
+AT_SETUP([Obsolete 2002 keywords with COBOL2014])
 AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [

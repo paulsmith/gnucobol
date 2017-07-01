@@ -251,8 +251,12 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 10: warning: value size exceeds data size
 ])
-AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
 [prog.cob: 7: error: numeric literal in VALUE clause of numeric-edited item used
+prog.cob: 10: warning: value size exceeds data size
+])
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [],
+[prog.cob: 7: warning: numeric literal in VALUE clause of numeric-edited item used
 prog.cob: 10: warning: value size exceeds data size
 ])
 
