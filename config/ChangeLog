@@ -1,4 +1,8 @@
 
+2017-07-02  Ron Norman <rjn@inglenet.com>
+
+	* mf.conf: corrected to have synchronized-clause: ignore
+
 2017-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: created a "strict" set of vendor dialect configurations,
@@ -33,6 +37,10 @@
 2017-06-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* rm.conf: added config file for RM-COBOL
+
+2017-05-22  Ron Norman <rjn@inglenet.com>
+
+	* mf.conf: corrected to have pretty-display: yes
 
 2017-05-13  Edward Hart <edward.dan.hart@gmail.com>
 

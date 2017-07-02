@@ -732,8 +732,9 @@ output_data (cb_tree x)
 	case CB_TAG_LITERAL:
 		l = CB_LITERAL (x);
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
-			output ("(cob_u8_ptr)\"%s%s\"", (char *)l->data,
-				(l->sign < 0) ? "-" : (l->sign > 0) ? "+" : "");
+			output ("(cob_u8_ptr)\"%s%s\"", 
+					(l->sign < 0) ? "-" : (l->sign > 0) ? "+" : "",
+					(char *)l->data);
 		} else {
 			output ("(cob_u8_ptr)");
 			output_string (l->data, (int) l->size, l->llit);
@@ -1026,7 +1027,7 @@ output_attr (const cb_tree x)
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			flags = COB_FLAG_CONSTANT;
 			if (l->sign != 0) {
-				flags = COB_FLAG_HAVE_SIGN | COB_FLAG_SIGN_SEPARATE;
+				flags = COB_FLAG_HAVE_SIGN | COB_FLAG_SIGN_SEPARATE | COB_FLAG_SIGN_LEADING;
 			}
 			id = lookup_attr (COB_TYPE_NUMERIC_DISPLAY,
 					  l->size, l->scale, flags, NULL, 0);

@@ -1693,9 +1693,10 @@ AT_DATA([prog.cob], [
            END-DISPLAY.
            STOP RUN.
 ])
-# TODO: check what we actually test and replace -std by specific switch
-AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -fpretty-display prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [+0+00+0+])
+AT_CHECK([$COBCRUN prog], [0], [+0+00+0+])
 
 AT_CLEANUP
 
