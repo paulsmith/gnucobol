@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -112,9 +112,14 @@ pretty_display_numeric (cob_field *f, FILE *fp)
 	p = pic;
 
 	if (COB_FIELD_HAVE_SIGN (f)) {
-		p->symbol = '+';
-		p->times_repeated = 1;
-		++p;
+		if (COB_FIELD_SIGN_SEPARATE (f)
+		 && !COB_FIELD_SIGN_LEADING(f)) {
+			/* done later */
+		} else {
+			p->symbol = '+';
+			p->times_repeated = 1;
+			++p;
+		}
 	}
 	if (scale > 0) {
 		if (digits - scale > 0) {
@@ -134,6 +139,14 @@ pretty_display_numeric (cob_field *f, FILE *fp)
 		p->symbol = '9';
 		p->times_repeated = digits;
 		++p;
+	}
+	if (COB_FIELD_HAVE_SIGN (f)) {
+		if (COB_FIELD_SIGN_SEPARATE (f)
+		 && !COB_FIELD_SIGN_LEADING(f)) {
+			p->symbol = '+';
+			p->times_repeated = 1;
+			++p;
+		}
 	}
 	p->symbol = '\0';
 

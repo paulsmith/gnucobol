@@ -22,6 +22,11 @@
 	* common.c: fixed minor style issues, mostly missing spaces around
 	  operators.
 
+2017-05-22  Ron Norman <rjn@inglenet.com>
+
+	* termio.c (pretty_display_numeric):  handle
+	  SIGN_SEPARATE  TRAILING & LEADING
+
 2017-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* system.def: added maximum call parameters for system library calls
