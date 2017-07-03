@@ -112,19 +112,18 @@ static int cb_read_conf (const char *, FILE *);
 
 /* Local functions */
 
-static char const *
-read_string (const char *text)
+static char *
+read_string (char *text)
 {
-	char			*p = (char *) text;
-	char			const *s;
+	char	*s;
 
-	if (*p == '\"') {
-		p++;
+	if (*text == '\"') {
+		text++;
 	}
-	s = cobc_main_strdup (p);
-	for (p = (char *)s; *p; p++) {
-		if (*p == '\"') {
-			*p = '\0';
+	s = cobc_main_strdup (text);
+	for (text = s; *text; text++) {
+		if (*text == '\"') {
+			*text = '\0';
 		}
 	}
 	return s;
@@ -132,7 +131,7 @@ read_string (const char *text)
 
 static void
 invalid_value (const char *fname, const int line, const char *name, const char *val,
-			   const char *str, const int min, const long max)
+	       const char *str, const int min, const long max)
 {
 	configuration_error (fname, line, 0,
 		_("invalid value '%s' for configuration tag '%s'"), val, name);
@@ -150,7 +149,7 @@ invalid_value (const char *fname, const int line, const char *name, const char *
 
 static int
 check_valid_value (const char *fname, const int line, const char *name, const char *val,
-				const void *var, const int min_value, const long max_value)
+		   const void *var, const int min_value, const long max_value)
 {
 	int ret = 1;
 	long v;
@@ -222,12 +221,12 @@ static int
 cb_load_conf_file (const char *conf_file, const enum cb_include_type include_type)
 {
 	FILE	*fp;
-	char			buff[COB_SMALL_BUFF];
-	char			filename[COB_NORMAL_BUFF];
+	char	buff[COB_SMALL_BUFF];
+	char	filename[COB_NORMAL_BUFF];
 	struct includelist	*c, *cc;
-	int		i, ret;
+	int	i, ret;
 
-	for (i=0; conf_file[i] != 0 && conf_file[i] != SLASH_CHAR; i++);
+	for (i = 0; conf_file[i] != 0 && conf_file[i] != SLASH_CHAR; i++);
 	if (conf_file[i] == 0) {			/* Just a name, No directory */
 		if (access(conf_file, F_OK) != 0) {	/* and file does not exist */
 			/* check for path of previous configuration file (for includes) */
@@ -276,10 +275,7 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 	/* Special "check only" type */
 	if (include_type == CB_INCLUDE_RESOLVE_WORDS) {
 		words_file = cobc_main_strdup (conf_file);
-		if (!access(words_file, F_OK) == 0) {
-			return -1;
-		}
-		return 0;
+		return access (words_file, F_OK);
 	}
 
 	/* Open the configuration file */
@@ -294,7 +290,7 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 	}
 
 	/* add current entry to list*/
-	c = cob_malloc (sizeof(struct includelist));
+	c = cob_malloc (sizeof (struct includelist));
 	c->next = NULL;
 	c->name = conf_file;
 	if (cc != NULL) {
@@ -349,7 +345,6 @@ cb_read_conf (const char *conf_file, FILE *fp)
 		if (!*x) {
 			continue;
 		}
-
 		
 		sub_ret = cb_config_entry (buff, conf_file, line);
 		if (sub_ret == 1 || sub_ret == 3) {
@@ -377,15 +372,14 @@ cb_read_conf (const char *conf_file, FILE *fp)
 int
 cb_load_std (const char *name)
 {
-	int ret = cb_load_conf (name, CB_INCLUDE_MANDATORY);
-	return ret;
+	return cb_load_conf (name, CB_INCLUDE_MANDATORY);
 }
 
 int
 cb_load_conf (const char *fname, const int prefix_dir)
 {
 	const char	*name;
-	int			ret;
+	int		ret;
 	size_t		i;
 	char		buff[COB_NORMAL_BUFF];
 
@@ -454,14 +448,14 @@ cb_load_words (void)
 int
 cb_config_entry (char *buff, const char *fname, const int line)
 {
-	char			*s;
-	const char		*name;
-	char			*e;
-	const char		*val;
-	void			*var;
+	char		*s;
+	const char	*name;
+	char		*e;
+	char		*val;
+	void		*var;
 	enum cb_support	support_val;
-	size_t			i;
-	size_t			j;
+	size_t		i;
+	size_t		j;
 
 	/* Get tag */
 	s = strpbrk (buff, " \t:=");
