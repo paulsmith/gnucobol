@@ -114,7 +114,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -facucobol-literals=ok prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -facu-literals=ok prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [5
 2147483647

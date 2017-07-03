@@ -1341,7 +1341,7 @@ scan_h (const char *text, const char *type)
 	literal_error = 0;
 
 	if (type[1] == '#' &&
-		!cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"))) {
+		!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
 		goto error; /* early exit possible as complete literal is consumed */
 	}
 
@@ -1430,7 +1430,7 @@ scan_b (const char *text, const char *type)
 			goto error; /* early exit possible as complete literal is consumed */
 		}
 	} else {
-		if (!cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"))) {
+		if (!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
 			goto error; /* early exit possible as complete literal is consumed */
 		}
 	};
@@ -1499,7 +1499,7 @@ scan_o (const char *text, const char *type)
 
 	literal_error = 0;
 
-	if (!cb_verify (cb_acucobol_literals, _("ACUCOBOL numeric literal"))) {
+	if (!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
 		goto error; /* early exit possible as complete literal is consumed */
 	}
 

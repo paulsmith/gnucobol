@@ -2,6 +2,7 @@
 2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added constant-folding option
+	* general: renamed acucobol-literals option to acu-literals
 
 2017-07-02  Ron Norman <rjn@inglenet.com>
 
@@ -159,7 +160,7 @@
 
 2015-09-23  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added numeric-boolean and acucobol-literals
+	* general: added numeric-boolean and acu-literals
 
 2015-07-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

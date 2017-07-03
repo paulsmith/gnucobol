@@ -87,7 +87,7 @@ numeric-boolean:			ok
 hexadecimal-boolean:		ok
 national-literals:			ok
 hexadecimal-national-literals:		ok
-acucobol-literals:			ok
+acu-literals:			ok
 word-continuation:			ok
 not-exception-before-exception:		+warning
 accept-display-extensions:		ok
