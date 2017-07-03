@@ -2189,7 +2189,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n"
 			"                        <dialect> can be one of:\n"
-			"                        cobol2014, cobol2002, cobol85, default,\n"
+			"                        default, cobol2014, cobol2002, cobol85, xopen,\n"
 			"                        ibm-strict, ibm, mvs-strict, mvs,\n"
 			"                        mf-strict, mf, bs2000-strict, bs2000,\n"
 			"                        acu-strict, acu, rm-strict, rm;\n"

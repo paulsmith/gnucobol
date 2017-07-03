@@ -506,10 +506,13 @@ GnuCOBOL dialect, supporting many of the @w{COBOL 2002} and @w{COBOL 2014} featu
 many extensions found in other dialects and its own feature-set
 
 @item -std=cobol85
-COBOL-85 without any extensions, source compiled with this dialect is likely to compile with most COBOL compilers
+COBOL-85 without any extensions other than the amendment Intrinsic Function Module (1989), source compiled with this dialect is likely to compile with most COBOL compilers
+
+@item -std=xopen
+X/Open COBOL (based on COBOL-85) without any vendor extensions, source compiled with this dialect is likely to compile with most COBOL compilers, will warn items that "should not be used in a conforming X/Open COBOL source program"
 
 @item -std=cobol2002, -std=cobol2014
-COBOL 2002 / COBOL 2014 without any extensions, use @code{-Warchaic} and @code{-Wobsolete} if
+COBOL 2002 / COBOL 2014 without any vendor extensions, use @code{-Warchaic} and @code{-Wobsolete} if
 archaic/obsolete features should be flagged
 
 @item -std=ibm-strict, -std=ibm

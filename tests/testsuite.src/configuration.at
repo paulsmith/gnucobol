@@ -65,6 +65,9 @@ AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: 4: error: AUTHOR does not conform to COBOL 2014
 ])
+AT_CHECK([$COMPILE_ONLY -std=xopen prog.cob], [0], [],
+[prog.cob: 4: warning: AUTHOR used
+])
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
 [prog.cob: 4: warning: AUTHOR is obsolete in ACUCOBOL-GT
 ])
