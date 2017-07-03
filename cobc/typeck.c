@@ -7230,9 +7230,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 					cb_error_x (loc, _("data item not signed"));
 					return -1;
 				}
-				if (cb_warn_constant) {
-					cb_warning_x (COBC_WARN_FILLER, loc, _("ignoring sign"));
-				}
+				cb_warning_x (cb_warn_truncate, loc, _("ignoring sign"));
 			}
 
 			/* Size check */
@@ -7584,8 +7582,8 @@ numlit_overflow:
 		cb_error_x (loc, _("literal exceeds data size"));
 		return -1;
 	}
-	if (cb_warn_constant && !suppress_warn) {
-		cb_warning_x (cb_warn_constant, loc, _("numeric literal exceeds data size"));
+	if (cb_warn_truncate && !suppress_warn) {
+		cb_warning_x (cb_warn_truncate, loc, _("numeric literal exceeds data size"));
 	}
 	return 0;
 
@@ -7609,22 +7607,22 @@ expect_alphanumeric:
 	return 0;
 
 value_mismatch:
-	move_warning (src, dst, is_value, cb_warn_constant, 0,
+	move_warning (src, dst, is_value, cb_warn_truncate, 0,
 		    _("value does not fit the picture string"));
 	return 0;
 
 size_overflow:
-	move_warning (src, dst, is_value, cb_warn_constant, 0,
+	move_warning (src, dst, is_value, cb_warn_truncate, 0,
 		    _("value size exceeds data size"));
 	return 0;
 
 size_overflow_1:
-	move_warning (src, dst, is_value, cb_warn_truncate, 1,
+	move_warning (src, dst, is_value, cb_warn_pos_truncate, 1,
 		    _("sending field larger than receiving field"));
 	return 0;
 
 size_overflow_2:
-	move_warning (src, dst, is_value, cb_warn_truncate, 1,
+	move_warning (src, dst, is_value, cb_warn_pos_truncate, 1,
 		    _("some digits may be truncated"));
 	return 0;
 }

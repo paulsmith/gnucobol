@@ -3600,9 +3600,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		}
 		/*
 		 * If this is an operation between two simple integer numerics
-		 * then resolve the value here at compile time
+		 * then resolve the value here at compile time -> "constant folding"
 		 */
-		if (CB_NUMERIC_LITERAL_P(x)
+		if (cb_constant_folding
+		&&  CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
 			xl = CB_LITERAL(x);
 			yl = CB_LITERAL(y);
@@ -3746,8 +3747,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					break;
 				}
 			}
-		} else
-		if (CB_REF_OR_FIELD_P (x)
+		} else if (CB_REF_OR_FIELD_P (x)
 		&&  CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
 		&&  !CB_FIELD (cb_ref (x))->flag_any_length
 		&&  CB_FIELD (cb_ref (x))->pic
@@ -3774,9 +3774,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		} else
 		/*
 		 * If this is an operation between two simple integer numerics
-		 * then resolve the value here at compile time
+		 * then resolve the value here at compile time -> "constant folding"
 		 */
-		if (CB_NUMERIC_LITERAL_P(x)
+		if (cb_constant_folding
+		&&  CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
 			if(xl->llit == 0
 			&& xl->scale == 0
@@ -3839,9 +3840,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		} else
 		/*
 		 * If this is an operation between two literal strings
-		 * then resolve the value here at compile time
+		 * then resolve the value here at compile time -> "constant folding"
 		 */
-		if (CB_LITERAL_P(x)
+		if (cb_constant_folding
+		&&  CB_LITERAL_P(x)
 		&&  CB_LITERAL_P(y)
 		&& !CB_NUMERIC_LITERAL_P(x)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
@@ -3942,6 +3944,11 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		category = CB_TREE_CATEGORY (x);
 		break;
 
+	case 0:
+		/* Operation on invalid elements */
+		cb_error_x (e, _("invalid expression"));
+		return cb_error_node;
+
 	default:
 		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected operator: %d"), op);
@@ -3951,12 +3958,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 
 	if (relop == cb_true) {
 		cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
-		category = CB_CATEGORY_BOOLEAN;
 		return cb_true;
 	}
 	if (relop == cb_false) {
 		cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
-		category = CB_CATEGORY_BOOLEAN;
 		return cb_false;
 	}
 

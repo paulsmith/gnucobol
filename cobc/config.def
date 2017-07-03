@@ -100,23 +100,29 @@ CB_CONFIG_BOOLEAN (cb_larger_redefines_ok, "larger-redefines-ok", /* TO-DO: chan
 CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
 	_("allow certain syntax variations (e.g. REDEFINES position)"))
 
+CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
+	_("allow non-matching level numbers"))
+
+CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
+	_("LINKAGE-SECTION items remain allocated between invocations"))
+
+CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",
+	_("MOVE operates as on IBM (left to right, byte by byte)"))
+
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",
 	_("exit point of any currently executing perform is recognized if reached"))
 
 CB_CONFIG_BOOLEAN (cb_arithmetic_osvs, "arithmetic-osvs",
 	_("limit precision in intermediate results to precision of final result (less accurate)"))
 
-CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",
-	_("MOVE operates as on IBM (left to right, byte by byte)"))
-
-CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
-	_("LINKAGE-SECTION items remain allocated between invocations"))
-
-CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
-	_("allow non-matching level numbers"))
+CB_CONFIG_BOOLEAN (cb_constant_folding, "constant-folding",
+	_("evaluate constant expressions at compile time"))
 
 CB_CONFIG_BOOLEAN (cb_host_sign, "hostsign",
 	_("allow hexadecimal value 'F' for NUMERIC test of signed PACKED DECIMAL field"))
+
+CB_CONFIG_BOOLEAN (cb_program_name_redefinition, "program-name-redefinition",
+	_("program names don't lead to a reserved identifier"))
 
 CB_CONFIG_BOOLEAN (cb_accept_update, "accept-update",
 	_("set WITH UPDATE clause as default for ACCEPT dest-item, instead of WITH NO UPDATE"))
@@ -126,9 +132,6 @@ CB_CONFIG_BOOLEAN (cb_accept_auto, "accept-auto",
 
 CB_CONFIG_BOOLEAN (cb_console_is_crt, "console-is-crt",
 	_("assume CONSOLE IS CRT if not set otherwise"))
-
-CB_CONFIG_BOOLEAN (cb_program_name_redefinition, "program-name-redefinition",
-	_("program names don't lead to a reserved identifier"))
 
 CB_CONFIG_BOOLEAN (cb_no_echo_means_secure, "no-echo-means-secure",
 	_("NO-ECHO hides input with asterisks like SECURE"))

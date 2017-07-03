@@ -1,4 +1,16 @@
 
+2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cb_build_binary_op): raise "invalid expression" for
+	  invalid elements instead of COBC_ABORT
+	* config.def, cobc.c (cb_build_binary_op): added cb_constant_folding
+	  "constant-folding" configuration option to provide a way to disable
+	  this optimization (which is active in nearly all conf-files)
+	* config.def: reordered for nicer help output
+	* warning.def, typeck.c (validate_move): renamed cb_warn_truncate
+	  "-Wtruncate" to cb_warn_pos_truncate "-Wpossible-truncate" and
+	  cb_warn_constant "-Wconstant" to cb_warn_truncate "-Wtruncate"
+
 2017-07-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_usage): added -std=rm and all strict variants

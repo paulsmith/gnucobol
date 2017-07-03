@@ -1,4 +1,8 @@
 
+2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: added constant-folding option
+
 2017-07-02  Ron Norman <rjn@inglenet.com>
 
 	* mf.conf: corrected to have synchronized-clause: ignore

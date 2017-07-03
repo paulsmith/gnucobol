@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -43,6 +43,7 @@ m4_include([syn_redefines.at])		# 13.16.42 REDEFINES clause
 m4_include([syn_value.at])		# 13.16.61 VALUE clause
 m4_include([syn_file.at])		# Files (SELECT, ASSIGN, ...) without RW
 m4_include([syn_reportwriter.at])		# REPORT WRITER
+m4_include([syn_refmod.at])		# 8.4.2.3 Reference-modification
 m4_include([syn_misc.at])		# Miscellaneous
 m4_include([syn_move.at])		# 14.8.24 MOVE statement
 m4_include([syn_multiply.at])		# 14.8.25 MULTIPLY statement

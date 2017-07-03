@@ -274,7 +274,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Intrinsic functions: reference modification])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions refmod])
 
 # the following should be checked, currently doesn't work
 #AT_DATA([prog.cob], [

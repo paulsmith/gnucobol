@@ -42,8 +42,11 @@ CB_WARNDEF (cb_warn_archaic, "archaic",
 CB_WARNDEF (cb_warn_redefinition, "redefinition",
 	    _("warn incompatible redefinition of data items"))
 
-CB_WARNDEF (cb_warn_constant, "constant",
-	    _("warn inconsistent constant"))
+CB_WARNDEF (cb_warn_truncate, "truncate",
+	    _("warn field truncation from constant assignments"))
+
+CB_NOWARNDEF (cb_warn_pos_truncate, "possible-truncate",
+	    _("warn possible field truncation"))
 
 CB_WARNDEF (cb_warn_overlap, "overlap",
 	    _("warn overlapping MOVE items"))
@@ -83,9 +86,6 @@ CB_NOWARNDEF (cb_warn_column_overflow, "column-overflow",
 
 CB_NOWARNDEF (cb_warn_terminator, "terminator",
 	    _("warn lack of scope terminator END-XXX"))
-
-CB_NOWARNDEF (cb_warn_truncate, "truncate",
-	    _("warn possible field truncation"))
 
 CB_NOWARNDEF (cb_warn_linkage, "linkage",
 	    _("warn dangling LINKAGE items"))

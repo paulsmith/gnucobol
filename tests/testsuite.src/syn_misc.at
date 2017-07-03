@@ -23,30 +23,26 @@
 AT_SETUP([ambiguous AND/OR])
 AT_KEYWORDS([misc expression])
 
-# Note: we use variables here as constants would be resolved before the warning
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01 ONE   PIC 9 VALUE 1.
-       01 TWO   PIC 9 VALUE 2.
-       01 THREE PIC 9 VALUE 3.
        PROCEDURE        DIVISION.
-           IF THREE = ONE AND TWO OR THREE
+           IF 3 = 1 AND 2 OR 3
                DISPLAY "OK"
                END-DISPLAY
            END-IF.
-           IF THREE = ONE OR TWO AND THREE
+           IF 3 = 1 OR 2 AND 3
                DISPLAY "NO"
                END-DISPLAY
            END-IF.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 11: warning: suggest parentheses around AND within OR
-prog.cob: 15: warning: suggest parentheses around AND within OR
+# Note: we disable constant folding here as constants would otherwise be resolved before the warning
+# TODO: add the warning to constant folding code, too
+AT_CHECK([$COMPILE_ONLY -fno-constant-folding prog.cob], [0], [],
+[prog.cob: 6: warning: suggest parentheses around AND within OR
+prog.cob: 10: warning: suggest parentheses around AND within OR
 ])
 
 AT_CLEANUP
@@ -229,6 +225,10 @@ AT_DATA([prog.cob], [
               CONTINUE
               CONTINUE
            END-PERFORM.
+           IF NOTDEFINED = 1 OR 2
+              CONTINUE
+           END-IF.
+
            STOP RUN.
 ])
 
@@ -248,6 +248,8 @@ prog.cob: 54: error: invalid expression
 prog.cob: 60: error: invalid expression
 prog.cob: 66: error: invalid expression
 prog.cob: 72: error: invalid expression
+prog.cob: 76: error: 'NOTDEFINED' is not defined
+prog.cob: 76: error: invalid expression
 ])
 
 AT_CLEANUP
