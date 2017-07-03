@@ -26,8 +26,13 @@ AT_KEYWORDS([misc expression])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 ONE   PIC 9 VALUE 1.
+       01 TWO   PIC 9 VALUE 2.
+       01 THREE PIC 9 VALUE 3.
        PROCEDURE        DIVISION.
-           IF 3 = 1 AND 2 OR 3
+           IF THREE = ONE AND TWO OR THREE
                DISPLAY "OK"
                END-DISPLAY
            END-IF.
@@ -38,11 +43,9 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# Note: we disable constant folding here as constants would otherwise be resolved before the warning
-# TODO: add the warning to constant folding code, too
-AT_CHECK([$COMPILE_ONLY -fno-constant-folding prog.cob], [0], [],
-[prog.cob: 6: warning: suggest parentheses around AND within OR
-prog.cob: 10: warning: suggest parentheses around AND within OR
+AT_CHECK([$COMPILE_ONLY -Wno-constant-expr prog.cob], [0], [],
+[prog.cob: 11: warning: suggest parentheses around AND within OR
+prog.cob: 15: warning: suggest parentheses around OR within AND
 ])
 
 AT_CLEANUP

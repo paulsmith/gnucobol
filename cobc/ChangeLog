@@ -1,4 +1,10 @@
 
+2017-07-03  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c: Move check for cb_warn_parentheses to cb_build_expr routine
+	  so that the check is done before constant expressions get folded
+
+
 2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cb_build_binary_op): raise "invalid expression" for

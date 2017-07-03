@@ -3140,16 +3140,6 @@ expr_reduce (int token)
 					VALUE (-3) = cb_build_binary_op (expr_lh, expr_op, VALUE (-3));
 				}
 			}
-			/* Warning for complex expressions without explicit parentheses
-			   (i.e., "a OR b AND c" or "a AND b OR c") */
-			if (cb_warn_parentheses && op == '|') {
-				if ((CB_BINARY_OP_P (VALUE (-3)) &&
-				     CB_BINARY_OP (VALUE (-3))->op == '&') ||
-				    (CB_BINARY_OP_P (VALUE (-1)) &&
-				     CB_BINARY_OP (VALUE (-1))->op == '&')) {
-					cb_warning (cb_warn_parentheses, _("suggest parentheses around AND within OR"));
-				}
-			}
 			TOKEN (-3) = 'x';
 			VALUE (-3) = cb_build_binary_op (VALUE (-3), op,
 							 VALUE (-1));
@@ -3474,6 +3464,19 @@ cb_build_expr (cb_tree list)
 			cb_expr_shift_class (CB_CLASS_NAME (cb_ref (CB_VALUE (l)))->cname);
 			break;
 		default:
+			/* Warning for complex expressions without explicit parentheses
+			   (i.e., "a OR b AND c" or "a AND b OR c") */
+			if (cb_warn_parentheses 
+			 && expr_index > 3) {
+				if (op == '|' && expr_stack[expr_index-2].token == '&') {
+					cb_warning (cb_warn_parentheses,
+						_("suggest parentheses around %s within %s"), "AND", "OR");
+				} else
+				if (op == '&' && expr_stack[expr_index-2].token == '|') {
+					cb_warning (cb_warn_parentheses,
+						_("suggest parentheses around %s within %s"), "OR", "AND");
+				}
+			}
 			cb_expr_shift (op, CB_VALUE (l));
 			break;
 		}
