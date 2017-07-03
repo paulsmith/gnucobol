@@ -10,6 +10,9 @@
 	* warning.def, typeck.c (validate_move): renamed cb_warn_truncate
 	  "-Wtruncate" to cb_warn_pos_truncate "-Wpossible-truncate" and
 	  cb_warn_constant "-Wconstant" to cb_warn_truncate "-Wtruncate"
+	* config.def, scanner.l: renamed cb_acucobol_literals
+	  "acucobol-literals" option to cb_acu_literals "acu-literals"
+	* parser.y: set context CB_CS_ALLOCATE and CB_CS_READ
 
 2017-07-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

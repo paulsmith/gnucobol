@@ -7713,6 +7713,7 @@ allocate_statement:
   ALLOCATE
   {
 	begin_statement ("ALLOCATE", 0);
+	cobc_cs_check = CB_CS_ALLOCATE;
 	current_statement->flag_no_based = 1;
   }
   allocate_body
@@ -9769,13 +9770,14 @@ read_statement:
   READ
   {
 	begin_statement ("READ", TERM_READ);
+	cobc_cs_check = CB_CS_READ;
   }
   read_body
   end_read
 ;
 
 read_body:
-  file_name _flag_next _record read_into lock_phrases read_key read_handler
+  file_name _flag_next _record _read_into _lock_phrases _read_key read_handler
   {
 	cobc_cs_check = 0;
 
@@ -9803,12 +9805,12 @@ read_body:
   }
 ;
 
-read_into:
+_read_into:
   /* empty */			{ $$ = NULL; }
 | INTO identifier		{ $$ = $2; }
 ;
 
-lock_phrases:
+_lock_phrases:
   /* empty */ %prec SHIFT_PREFER
   {
 	$$ = NULL;
@@ -9881,7 +9883,7 @@ extended_with_lock:
   }
 ;
 
-read_key:
+_read_key:
   /* empty */			{ $$ = NULL; }
 | KEY _is identifier		{ $$ = $3; }
 ;
@@ -10009,7 +10011,7 @@ return_statement:
 ;
 
 return_body:
-  file_name _record read_into return_at_end
+  file_name _record _read_into return_at_end
   {
 	cb_emit_return ($1, $3);
   }
