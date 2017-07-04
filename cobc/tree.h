@@ -1808,7 +1808,7 @@ extern void		cb_emit_alter (cb_tree, cb_tree);
 extern void		cb_emit_free (cb_tree);
 
 extern void		cb_emit_call (cb_tree, cb_tree, cb_tree, cb_tree,
-				      cb_tree, cb_tree);
+				      cb_tree, cb_tree, cb_tree, cb_tree);
 
 extern void		cb_emit_cancel (cb_tree);
 extern void		cb_emit_close (cb_tree, cb_tree);
@@ -1865,7 +1865,7 @@ extern void		cb_emit_move (cb_tree, cb_tree);
 
 extern void		cb_emit_open (cb_tree, cb_tree, cb_tree);
 
-extern void		cb_emit_perform (cb_tree, cb_tree);
+extern void		cb_emit_perform (cb_tree, cb_tree, cb_tree, cb_tree);
 extern cb_tree		cb_build_perform_once (cb_tree);
 extern cb_tree		cb_build_perform_times (cb_tree);
 extern cb_tree		cb_build_perform_until (cb_tree, cb_tree);

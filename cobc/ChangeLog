@@ -4,8 +4,8 @@
 	* error.c: don't output "[re]defined here" messages when there
 	  is no actual location to reference
 	* parser.y, reserved.c: added ACU extension USAGE HANDLE (both generic
-	  and typed variants), added first parser part for ACU THREADs
-	  (statements SET THREAD PRIORITY, and STOP THREAD)
+	  and typed variants), added parser part for ACU THREADs (started via
+	  CALL/PERFORM) and THREAD statements (SET THREAD PRIORITY and STOP THREAD)
 	  [nothing done in libcob yet]
 	* codegen.c, field.c: changes for USAGE HANDLE
 

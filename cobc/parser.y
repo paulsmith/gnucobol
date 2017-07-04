@@ -7852,10 +7852,11 @@ call_statement:
 ;
 
 call_body:
-  _mnemonic_conv program_or_prototype
+  _mnemonic_conv _thread_start program_or_prototype
   {
 	cobc_allow_program_name = 0;
   }
+  _thread_handle
   call_using
   call_returning
   call_exception_phrases
@@ -7864,8 +7865,8 @@ call_body:
 
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
-	    && is_recursive_call ($2)) {
-		cb_warning_x (COBC_WARN_FILLER, $2, _("recursive program call - assuming RECURSIVE attribute"));
+	    && is_recursive_call ($3)) {
+		cb_warning_x (COBC_WARN_FILLER, $3, _("recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
 	}
 	call_conv = current_call_convention;
@@ -7885,8 +7886,8 @@ call_body:
 	if (call_nothing) {
 		call_conv |= CB_CONV_NO_RET_UPD;
 	}
-	cb_emit_call ($2, $4, $5, CB_PAIR_X ($6), CB_PAIR_Y ($6),
-		      cb_int (call_conv));
+	cb_emit_call ($3, $6, $7, CB_PAIR_X ($8), CB_PAIR_Y ($8),
+		      cb_int (call_conv), $2, $5);
   }
 ;
 
@@ -9695,15 +9696,20 @@ perform_statement:
 ;
 
 perform_body:
-  perform_procedure perform_option
+  _thread_start
+  perform_procedure
+  _thread_handle
+  perform_option
   {
-	cb_emit_perform ($2, $1);
+	cb_emit_perform ($4, $2, $1, $3);
 	start_debug = save_debug;
 	cobc_cs_check = 0;
   }
-| perform_option
+| _thread_start
+  perform_option
+  _thread_handle
   {
-	CB_ADD_TO_CHAIN ($1, perform_stack);
+	CB_ADD_TO_CHAIN ($2, perform_stack);
 	/* Restore field debug before inline statements */
 	start_debug = save_debug;
 	cobc_cs_check = 0;
@@ -9711,11 +9717,14 @@ perform_body:
   statement_list end_perform
   {
 	perform_stack = CB_CHAIN (perform_stack);
-	cb_emit_perform ($1, $3);
+	cb_emit_perform ($2, $5, $1, $3);
   }
-| perform_option term_or_dot
+| _thread_start
+  perform_option
+  _thread_handle
+  term_or_dot
   {
-	cb_emit_perform ($1, NULL);
+	cb_emit_perform ($2, NULL, $1, $3);
 	start_debug = save_debug;
 	cobc_cs_check = 0;
   }
@@ -10719,7 +10728,7 @@ stop_statement:
 	begin_statement ("STOP THREAD", 0);
 	cb_emit_stop_thread ($2);
 	cobc_cs_check = 0;
-	cb_warning (COBC_WARN_FILLER, _("'%s' is replaced by '%s'"), "STOP THREAD", "STOP RUN");
+	cb_warning_x (COBC_WARN_FILLER, $2, _("%s is replaced by %s"), "STOP THREAD", "STOP RUN");
   }
 ;
 
@@ -11745,6 +11754,30 @@ not_invalid_key_sentence:
 ;
 
 /* THREAD constructs */
+
+_thread_start:
+  /* empty */
+{
+	$$ = NULL;
+}
+| _in THREAD
+{
+	$$ = cb_int1;
+	CB_PENDING ("THREAD");
+}
+;
+
+_thread_handle:
+/* empty */
+{
+	$$ = NULL;
+}
+| HANDLE _in identifier
+{
+	$$ = $3;
+	CB_PENDING ("THREAD");
+}
+;
 
 thread_reference_optional:
   THREAD identifier

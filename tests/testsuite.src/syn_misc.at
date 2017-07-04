@@ -2973,7 +2973,7 @@ AT_KEYWORDS([misc acu extensions])
 # TODO: need a better test here
 # TODO: maybe add a compiler support configuration to provide better messages
 
-AT_DATA([prog.cob], [       REPLACE ==perform thread== BY ==perform==.
+AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        DATA             DIVISION.
@@ -2999,7 +2999,7 @@ AT_DATA([prog.cob], [       REPLACE ==perform thread== BY ==perform==.
       * returned in any particular order.  Filenames may be
       * sorted on some machines and not on others.
            perform thread with test after until filename = spaces
-      *      handle in mythread
+             handle in mywindow
               call "C$LIST-DIRECTORY"
                  using listdir-next, mydir, filename
            end-perform.
@@ -3007,20 +3007,26 @@ AT_DATA([prog.cob], [       REPLACE ==perform thread== BY ==perform==.
       * Call LISTDIR-CLOSE to close the directory and deallocate
       * memory. Omitting this call will result in memory leaks.
            call "C$LIST-DIRECTORY" using listdir-close, mydir.
+      *
+           CALL IN THREAD 'NOTHERE'
+                HANDLE IN mywindow
+                USING  'STUFF'
+              NOT ON EXCEPTION  DISPLAY 'called in THREAD'
+           END-CALL
+      *
            STOP RUN.
 ])
 
-#AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
-#[prog.cob: in paragraph 'MAIN':
-#prog.cob: 26: warning: 'THREAD' not implemented
-#prog.cob: 28: warning: 'THREAD' not implemented
-#prog.cob: 34: error: HANDLE must be either a generic or a thread handle
-#prog.cob: 34: warning: 'STOP THREAD' is replaced by 'STOP RUN'
-#])
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 34: error: HANDLE must be either a generic or a thread handle
-prog.cob: 34: warning: 'STOP THREAD' is replaced by 'STOP RUN'
+prog.cob: 26: warning: THREAD is not implemented
+prog.cob: 28: warning: THREAD is not implemented
+prog.cob: 27: error: HANDLE must be either a generic or a thread handle
+prog.cob: 31: error: HANDLE must be either a generic or a thread handle
+prog.cob: 31: warning: STOP THREAD is replaced by STOP RUN
+prog.cob: 36: warning: THREAD is not implemented
+prog.cob: 38: warning: THREAD is not implemented
+prog.cob: 37: error: HANDLE must be either a generic or a thread handle
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
@@ -3029,8 +3035,14 @@ prog.cob: 13: error: syntax error, unexpected Identifier
 prog.cob: 14: error: syntax error, unexpected Identifier
 prog.cob: 14: error: PICTURE clause required for 'mywindow'
 prog.cob: in paragraph 'MAIN':
+prog.cob: 27: error: 'handle IN mywindow' is not defined, but is a reserved word in another dialect
+prog.cob: 26: error: invalid expression
+prog.cob: 30: error: syntax error, unexpected END-PERFORM
 prog.cob: 31: error: 'thread' is not defined, but is a reserved word in another dialect
 prog.cob: 31: error: syntax error, unexpected Identifier
+prog.cob: 36: error: syntax error, unexpected Identifier, expecting THREAD
+prog.cob: 40: error: syntax error, unexpected END-CALL
+prog.cob: 26: error: 'thread' is not defined, but is a reserved word in another dialect
 ])
 
 AT_CLEANUP

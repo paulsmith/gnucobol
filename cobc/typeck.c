@@ -5418,7 +5418,7 @@ cb_emit_alter (cb_tree source, cb_tree target)
 void
 cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	      cb_tree on_exception, cb_tree not_on_exception,
-	      cb_tree convention)
+	      cb_tree convention, cb_tree newthread, cb_tree handle)
 {
 	cb_tree				l;
 	cb_tree				x;
@@ -5480,6 +5480,11 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	    && !prog_is_literal_or_prototype) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("STATIC CALL convention requires a literal program name"));
+		error_ind = 1;
+	}
+
+	if (handle && !usage_is_thread_handle(handle)) {
+		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
 		error_ind = 1;
 	}
 
@@ -5661,6 +5666,17 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		current_program->max_call_param = numargs;
 	}
 
+#if 0 /* TODO: implement THREADs in libcob */
+	  /* remark: this won't work as the CALL has to be started in the new thread
+	if (newthread) {
+		cb_emit (CB_BUILD_FUNCALL_0 ("cob_threadstart"));
+	}
+	if (handle) {
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_get_threadhandle", handle));
+	} */
+#else
+	COB_UNUSED (newthread);
+#endif
 	cb_emit (cb_build_call (prog, par_using, on_exception, not_on_exception,
 				returning, is_sys_call, call_conv));
 }
@@ -8525,15 +8541,31 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 /* PERFORM statement */
 
 void
-cb_emit_perform (cb_tree perform, cb_tree body)
+cb_emit_perform (cb_tree perform, cb_tree body, cb_tree newthread, cb_tree handle)
 {
 	if (perform == cb_error_node) {
+		return;
+	}
+	if (handle && !usage_is_thread_handle (handle)) {
+		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
 		return;
 	}
 	if (current_program->flag_debugging &&
 	    !current_statement->flag_in_debug && body && CB_PAIR_P (body)) {
 		cb_emit (cb_build_debug (cb_debug_contents, "PERFORM LOOP", NULL));
 	}
+
+#if 0 /* TODO: implement THREADs in libcob */
+	  /* remark: this won't work as the CALL has to be started in the new thread
+	if (newthread) {
+		cb_emit (CB_BUILD_FUNCALL_0 ("cob_threadstart"));
+	}
+	if (handle) {
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_get_threadhandle", handle));
+	} */
+#else
+	COB_UNUSED (newthread);
+#endif
 	CB_PERFORM (perform)->body = body;
 	cb_emit (perform);
 }
@@ -9551,8 +9583,7 @@ cb_emit_stop_thread (cb_tree handle)
 	cb_tree used_handle;
 
 	if (handle && handle != cb_null && !usage_is_thread_handle (handle)) {
-		cb_error_x (CB_TREE (current_statement),
-			_ ("HANDLE must be either a generic or a thread handle"));
+		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
 		return;
 	}
 	used_handle = handle;
