@@ -76,7 +76,7 @@ do { \
 #define TERM_SUBTRACT		19U
 #define TERM_UNSTRING		20U
 #define TERM_WRITE		21U
-#define TERM_MAX		22U
+#define TERM_MAX		22U	/* Always last entry, used for array size */
 
 #define	TERMINATOR_WARNING(x,z)	terminator_warning (x, TERM_##z, #z)
 #define	TERMINATOR_ERROR(x,z)	terminator_error (x, TERM_##z, #z)
@@ -1797,6 +1797,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token DECIMAL_POINT		"DECIMAL-POINT"
 %token DECLARATIVES
 %token DEFAULT
+%token DEFAULT_FONT			"DEFAULT-FONT"
 %token DELETE
 %token DELIMITED
 %token DELIMITER
@@ -1824,15 +1825,15 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token EMI
 %token END
 %token END_ACCEPT		"END-ACCEPT"
-%token END_ADD			"END-ADD"
-%token END_CALL			"END-CALL"
+%token END_ADD  		"END-ADD"
+%token END_CALL 		"END-CALL"
 %token END_COMPUTE		"END-COMPUTE"
 %token END_DELETE		"END-DELETE"
 %token END_DISPLAY		"END-DISPLAY"
 %token END_DIVIDE		"END-DIVIDE"
 %token END_EVALUATE		"END-EVALUATE"
 %token END_FUNCTION		"END FUNCTION"
-%token END_IF			"END-IF"
+%token END_IF   		"END-IF"
 %token END_MULTIPLY		"END-MULTIPLY"
 %token END_PERFORM		"END-PERFORM"
 %token END_PROGRAM		"END PROGRAM"
@@ -1876,6 +1877,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token FINAL
 %token FIRST
 %token FIXED
+%token FIXED_FONT		"FIXED-FONT"
 %token FLOAT_BINARY_128		"FLOAT-BINARY-128"
 %token FLOAT_BINARY_32		"FLOAT-BINARY-32"
 %token FLOAT_BINARY_64		"FLOAT-BINARY-64"
@@ -1885,6 +1887,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token FLOAT_EXTENDED		"FLOAT-EXTENDED"
 %token FLOAT_LONG		"FLOAT-LONG"
 %token FLOAT_SHORT		"FLOAT-SHORT"
+%token FONT
 %token FOOTING
 %token FOR
 %token FOREGROUND_COLOR		"FOREGROUND-COLOR"
@@ -1908,6 +1911,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token GREATER_OR_EQUAL		"GREATER OR EQUAL"
 %token GRID
 %token GROUP
+%token HANDLE
 %token HEADING
 %token HIGHLIGHT
 %token HIGH_VALUE		"HIGH-VALUE"
@@ -1939,7 +1943,9 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token KEY
 %token KEYBOARD
 %token LABEL
+%token LARGE_FONT			"LARGE-FONT"
 %token LAST
+%token LAYOUT_MANAGER		"LAYOUT-MANAGER"
 %token LEADING
 %token LEFT
 %token LEFTLINE
@@ -1957,6 +1963,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token LINES
 %token LINKAGE
 %token LITERAL			"Literal"
+%token LM_RESIZE			"LM-RESIZE"
 %token LOCALE
 %token LOCALE_DATE_FUNC		"FUNCTION LOCALE-DATE"
 %token LOCALE_TIME_FUNC		"FUNCTION LOCALE-TIME"
@@ -1970,6 +1977,8 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token MANUAL
 %token MAGNETIC_TAPE		"MAGNETIC-TAPE"
 %token MEMORY
+%token MEDIUM_FONT			"MEDIUM-FONT"
+%token MENU
 %token MERGE
 %token MESSAGE
 %token MINUS
@@ -2047,6 +2056,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PRINTER
 %token PRINTER_1
 %token PRINTING
+%token PRIORITY
 %token PROCEDURE
 %token PROCEDURES
 %token PROCEED
@@ -2134,6 +2144,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SIXTY_SIX		"66"
 %token SIZE
 %token SIZE_ERROR		"SIZE ERROR"
+%token SMALL_FONT			"SMALL-FONT"
 %token SORT
 %token SORT_MERGE		"SORT-MERGE"
 %token SOURCE
@@ -2156,6 +2167,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SUBSTITUTE_FUNC		"FUNCTION SUBSTITUTE"
 %token SUBSTITUTE_CASE_FUNC	"FUNCTION SUBSTITUTE-CASE"
 %token SUBTRACT
+%token SUBWINDOW
 %token SUM
 %token SUPPRESS
 %token SYMBOLIC
@@ -2172,6 +2184,8 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TEST
 %token THAN
 %token THEN
+%token THREAD
+%token THREADS
 %token THRU
 %token TIME
 %token TIME_OUT			"TIME-OUT"
@@ -2199,6 +2213,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TOP
 %token TOWARD_GREATER		"TOWARD-GREATER"
 %token TOWARD_LESSER		"TOWARD-LESSER"
+%token TRADITIONAL_FONT		"TRADITIONAL-FONT"
 %token TRAILING
 %token TRANSFORM
 %token TRIM_FUNC		"FUNCTION TRIM"
@@ -2233,10 +2248,12 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token V
 %token VALUE
 %token VARIABLE
+%token VARIANT
 %token VARYING
 %token WAIT
 %token WHEN
 %token WHEN_COMPILED_FUNC	"FUNCTION WHEN-COMPILED"
+%token WINDOW
 %token WITH
 %token WORD			"Identifier"
 %token WORDS
@@ -5378,6 +5395,41 @@ usage:
 	check_and_set_usage (CB_USAGE_PROGRAM_POINTER);
 	current_field->flag_is_pointer = 1;
   }
+| HANDLE
+  {
+	check_and_set_usage (CB_USAGE_HNDL);
+  }
+| HANDLE _of WINDOW
+  {
+	check_and_set_usage (CB_USAGE_HNDL_WINDOW);
+  }
+| HANDLE _of SUBWINDOW
+  {
+	check_and_set_usage (CB_USAGE_HNDL_SUBWINDOW);
+  }
+| HANDLE _of FONT _font_name
+  {
+	check_and_set_usage (CB_USAGE_HNDL_FONT);
+	CB_PENDING ("HANDLE OF FONT");
+  }
+| HANDLE _of THREAD
+  {
+	check_and_set_usage (CB_USAGE_HNDL_THREAD);
+  }
+| HANDLE _of MENU
+  {
+	check_and_set_usage (CB_USAGE_HNDL_MENU);
+	CB_PENDING ("HANDLE OF MENU");
+  }
+| HANDLE _of VARIANT
+  {
+	check_and_set_usage (CB_USAGE_HNDL_VARIANT);
+  }
+| HANDLE _of LAYOUT_MANAGER _layout_name
+  {
+	check_and_set_usage (CB_USAGE_HNDL_LM);
+	CB_PENDING ("HANDLE OF LAYOUT-MANAGER");
+  }
 | SIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);
@@ -5493,6 +5545,21 @@ float_usage:
 double_usage:
   COMP_2
 | FLOAT_LONG
+;
+
+_font_name:
+  /* empty */
+  DEFAULT_FONT
+| FIXED_FONT
+| TRADITIONAL_FONT
+| SMALL_FONT
+| MEDIUM_FONT
+| LARGE_FONT
+;
+
+_layout_name:
+  /* empty */
+| LM_RESIZE
 ;
 
 /* SIGN clause */
@@ -10236,6 +10303,7 @@ set_body:
 | set_to_on_off_sequence
 | set_to_true_false_sequence
 | set_last_exception_to_off
+| set_thread_priority
 ;
 
 on_or_off:
@@ -10376,6 +10444,17 @@ set_last_exception_to_off:
 	  cb_emit_set_last_exception_to_off ();
   }
 ;
+
+/* SET THREAD thread-handle PRIORITY TO priority */
+
+set_thread_priority:
+  thread_reference_optional PRIORITY TO pos_num_id_or_lit
+  {
+	cb_emit_set_thread_priority ($1, $4);
+	CB_PENDING ("THREAD");
+  }
+;
+
 
 /* SORT statement */
 
@@ -10634,6 +10713,13 @@ stop_statement:
 			 NULL, 1, DEVICE_DISPLAY);
 	cb_emit_accept (cb_null, NULL, NULL);
 	cobc_cs_check = 0;
+  }
+| STOP thread_reference_optional
+  {
+	begin_statement ("STOP THREAD", 0);
+	cb_emit_stop_thread ($2);
+	cobc_cs_check = 0;
+	cb_warning (COBC_WARN_FILLER, _("'%s' is replaced by '%s'"), "STOP THREAD", "STOP RUN");
   }
 ;
 
@@ -11656,6 +11742,19 @@ not_invalid_key_sentence:
 	current_statement->handler_type = INVALID_KEY_HANDLER;
 	current_statement->not_ex_handler = $2;
   }
+;
+
+/* THREAD constructs */
+
+thread_reference_optional:
+  THREAD identifier
+{
+	$$ = $2;
+}
+| THREAD
+{
+	$$ = NULL;
+}
 ;
 
 /* Common Constructs */

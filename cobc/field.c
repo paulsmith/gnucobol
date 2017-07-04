@@ -892,6 +892,14 @@ validate_field_1 (struct cb_field *f)
 		/* Validate PICTURE */
 		switch (f->usage) {
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 		case CB_USAGE_OBJECT:
 		case CB_USAGE_POINTER:
@@ -1162,6 +1170,14 @@ setup_parameters (struct cb_field *f)
 			break;
 
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 			f->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
 			break;
 
@@ -1489,6 +1505,14 @@ unbounded_again:
 						}
 						break;
 					case CB_USAGE_INDEX:
+					case CB_USAGE_HNDL:
+					case CB_USAGE_HNDL_WINDOW:
+					case CB_USAGE_HNDL_SUBWINDOW:
+					case CB_USAGE_HNDL_FONT:
+					case CB_USAGE_HNDL_THREAD:
+					case CB_USAGE_HNDL_MENU:
+					case CB_USAGE_HNDL_VARIANT:
+					case CB_USAGE_HNDL_LM:
 					case CB_USAGE_LENGTH:
 						align_size = sizeof (int);
 						break;
@@ -1606,6 +1630,14 @@ unbounded_again:
 			f->size = (f->pic->size + 1) / 2;
 			break;
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			f->size = sizeof (int);
 			break;
@@ -2014,6 +2046,22 @@ cb_get_usage_string (const enum cb_usage usage)
 		return "FLOAT-BINARY-128";
 	case CB_USAGE_LONG_DOUBLE:
 		return "FLOAT-EXTENDED";
+	case CB_USAGE_HNDL:
+		return "HANDLE";
+	case CB_USAGE_HNDL_WINDOW:
+		return "HANDLE OF WINDOW";
+	case CB_USAGE_HNDL_SUBWINDOW:
+		return "HANDLE OF SUBWINDOW";
+	case CB_USAGE_HNDL_FONT:
+		return "HANDLE OF FONT";
+	case CB_USAGE_HNDL_THREAD:
+		return "HANDLE OF THREAD";
+	case CB_USAGE_HNDL_MENU:
+		return "HANDLE OF MENU";
+	case CB_USAGE_HNDL_VARIANT:
+		return "VARIANT";
+	case CB_USAGE_HNDL_LM:
+		return "HANDLE OF LAYOUT-MANAGER";
 	default:
 		/* LCOV_EXCL_START */
 		cb_error (_("unexpected USAGE: %d"), usage);

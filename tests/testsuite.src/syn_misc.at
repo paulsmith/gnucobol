@@ -2783,7 +2783,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACUCOBOL literals])
-AT_KEYWORDS([misc extensions])
+AT_KEYWORDS([misc acu extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -2964,6 +2964,75 @@ prog.cob: 8: error: literal exceeds limit 4294967295
 prog.cob: 8: error: invalid X# literal: '1111111111111111'
 prog.cob: 8: error: literal exceeds limit 4294967295
 ])
+AT_CLEANUP
+
+
+AT_SETUP([ACUCOBOL USAGE HANDLE])
+AT_KEYWORDS([misc acu extensions])
+
+# TODO: need a better test here
+# TODO: maybe add a compiler support configuration to provide better messages
+
+AT_DATA([prog.cob], [       REPLACE ==perform thread== BY ==perform==.
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       78  listdir-open  value 1.
+       78  listdir-next  value 2.
+       78  listdir-close value 3.
+       77  pattern       pic x(5) value "*.cob".
+       77  directory     pic x(5) value ".".
+       77  filename      pic x(256).
+       77  mydir         usage handle.
+       77  mythread      usage handle of thread.
+       77  mywindow      usage handle of window.
+       PROCEDURE DIVISION.
+       MAIN.
+      * Call LISTDIR-OPEN to get a directory handle.
+           call "C$LIST-DIRECTORY"
+              using listdir-open, directory, pattern.
+           move return-code to mydir.
+      * Call LISTDIR-NEXT to get the names of the files.
+      * Repeat this operation until a filename containing only
+      * spaces is returned.  The filenames are not necessarily
+      * returned in any particular order.  Filenames may be
+      * sorted on some machines and not on others.
+           perform thread with test after until filename = spaces
+      *      handle in mythread
+              call "C$LIST-DIRECTORY"
+                 using listdir-next, mydir, filename
+           end-perform.
+           stop thread mywindow
+      * Call LISTDIR-CLOSE to close the directory and deallocate
+      * memory. Omitting this call will result in memory leaks.
+           call "C$LIST-DIRECTORY" using listdir-close, mydir.
+           STOP RUN.
+])
+
+#AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+#[prog.cob: in paragraph 'MAIN':
+#prog.cob: 26: warning: 'THREAD' not implemented
+#prog.cob: 28: warning: 'THREAD' not implemented
+#prog.cob: 34: error: HANDLE must be either a generic or a thread handle
+#prog.cob: 34: warning: 'STOP THREAD' is replaced by 'STOP RUN'
+#])
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob: 34: error: HANDLE must be either a generic or a thread handle
+prog.cob: 34: warning: 'STOP THREAD' is replaced by 'STOP RUN'
+])
+
+AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
+[prog.cob: 12: error: syntax error, unexpected Identifier
+prog.cob: 13: error: syntax error, unexpected Identifier
+prog.cob: 14: error: syntax error, unexpected Identifier
+prog.cob: 14: error: PICTURE clause required for 'mywindow'
+prog.cob: in paragraph 'MAIN':
+prog.cob: 31: error: 'thread' is not defined, but is a reserved word in another dialect
+prog.cob: 31: error: syntax error, unexpected Identifier
+])
+
 AT_CLEANUP
 
 

@@ -2677,11 +2677,15 @@ AT_DATA([prog.cob], [
        01  TERMINAL     PIC XX VALUE "OK".
        01  SEND         PIC XX VALUE "OK".
        PROCEDURE        DIVISION.
-           DISPLAY TERMINAL SEND
-           END-DISPLAY.
+           DISPLAY TERMINAL SEND.
            STOP RUN.
 ])
 
+AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [1], [],
+[prog.cob: 6: error: syntax error, unexpected TERMINAL
+prog.cob: 7: error: syntax error, unexpected SEND
+prog.cob: 9: error: syntax error, unexpected TERMINAL
+])
 AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [OKOK

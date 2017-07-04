@@ -307,7 +307,15 @@ enum cb_usage {
 	CB_USAGE_FP_BIN32,		/* 25 */
 	CB_USAGE_FP_BIN64,		/* 26 */
 	CB_USAGE_FP_BIN128,		/* 27 */
-	CB_USAGE_LONG_DOUBLE		/* 28 */
+	CB_USAGE_LONG_DOUBLE,		/* 28 */
+	CB_USAGE_HNDL,			/* 29 */
+	CB_USAGE_HNDL_WINDOW,		/* 30 */
+	CB_USAGE_HNDL_SUBWINDOW,	/* 31 */
+	CB_USAGE_HNDL_FONT,		/* 32 */
+	CB_USAGE_HNDL_THREAD,	/* 33 */
+	CB_USAGE_HNDL_MENU,		/* 34 */
+	CB_USAGE_HNDL_VARIANT,	/* 35 */
+	CB_USAGE_HNDL_LM		/* 36 */
 };
 
 
@@ -809,7 +817,7 @@ struct cb_field {
 
 /* Index */
 
-#define CB_INDEX_P(x)		cb_check_index_p (x)
+#define CB_INDEX_OR_HANDLE_P(x)		cb_check_index_or_handle_p (x)
 
 /* Label */
 
@@ -1731,7 +1739,7 @@ extern struct cb_program	*cb_build_program (struct cb_program *,
 						   const int);
 
 extern cb_tree		cb_check_numeric_value (cb_tree);
-extern size_t		cb_check_index_p (cb_tree x);
+extern size_t		cb_check_index_or_handle_p (cb_tree x);
 
 extern void		cb_build_registers (void);
 extern void		cb_build_debug_item (void);
@@ -1887,6 +1895,7 @@ extern void		cb_emit_set_up_down (cb_tree, cb_tree, cb_tree);
 extern void		cb_emit_set_on_off (cb_tree, cb_tree);
 extern void		cb_emit_set_true (cb_tree);
 extern void		cb_emit_set_false (cb_tree);
+extern void		cb_emit_set_thread_priority (cb_tree, cb_tree);
 extern void		cb_emit_set_attribute (cb_tree,
 					       const cob_flags_t,
 					       const cob_flags_t);
@@ -1905,6 +1914,8 @@ extern void		cb_emit_sort_finish (cb_tree);
 extern void		cb_emit_start (cb_tree, cb_tree, cb_tree, cb_tree);
 
 extern void		cb_emit_stop_run (cb_tree);
+
+extern void		cb_emit_stop_thread (cb_tree);
 
 extern void		cb_emit_string (cb_tree, cb_tree, cb_tree);
 

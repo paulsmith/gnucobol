@@ -583,8 +583,26 @@ cb_validate_one (cb_tree x)
 				/* to enable this take care of the FIXME entries in (output_size) */
 				cb_error_x (x, _("%s is not implemented"),
 					_("reference to item containing nested ODO"));
+				return 1;
 			}
 #endif
+			/* validate use of handles depending on the statement */
+			if (f->usage == CB_USAGE_HNDL ||
+				f->usage == CB_USAGE_HNDL_WINDOW ||
+				f->usage == CB_USAGE_HNDL_SUBWINDOW ||
+				f->usage == CB_USAGE_HNDL_FONT ||
+				f->usage == CB_USAGE_HNDL_THREAD ||
+				f->usage == CB_USAGE_HNDL_MENU ||
+				f->usage == CB_USAGE_HNDL_VARIANT ||
+				f->usage == CB_USAGE_HNDL_LM) {
+				/* valid statements: CALL, MOVE, DISPLAY + expressions
+				   the only statements reaching this are MOVE and DISPLAY */
+				if (strcmp (current_statement->name, "MOVE") != 0 &&
+					strcmp (current_statement->name, "DISPLAY") != 0) {
+						cb_error_x (x, _ ("invalid use of HANDLE item"));
+					return 1;
+				}
+			}
 		}
 	}
 	return 0;
@@ -841,6 +859,28 @@ cb_field_size (const cb_tree x)
 #endif
 }
 
+static int
+usage_is_thread_handle (cb_tree x)
+{
+	struct cb_field *f;
+	f = CB_FIELD_PTR (x);
+
+	return (f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_THREAD);
+}
+#if 0 /* Simon: not used yet, needed for DISPLAY (SUB)WINDOW later on */
+static int
+usage_is_window_handle (cb_tree x)
+{
+	struct cb_field *f;
+	f = CB_FIELD_PTR (x);
+
+	return (f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_WINDOW ||
+		f->usage == CB_USAGE_HNDL_SUBWINDOW);
+}
+#endif
+
 /* List system routines */
 
 void
@@ -871,7 +911,7 @@ cb_list_system (void)
 
 /* Check if tree is an INDEX */
 size_t
-cb_check_index_p (cb_tree x)
+cb_check_index_or_handle_p (cb_tree x)
 {
 	struct cb_field	*f;
 
@@ -879,7 +919,18 @@ cb_check_index_p (cb_tree x)
 		return 0;
 	}
 	f = CB_FIELD_PTR (x);
-	if (f->usage == CB_USAGE_INDEX && !f->children) {
+	if (f->children) {
+		return 0;
+	}
+	if (f->usage == CB_USAGE_INDEX ||
+		f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_WINDOW ||
+		f->usage == CB_USAGE_HNDL_SUBWINDOW ||
+		f->usage == CB_USAGE_HNDL_FONT ||
+		f->usage == CB_USAGE_HNDL_THREAD ||
+		f->usage == CB_USAGE_HNDL_MENU ||
+		f->usage == CB_USAGE_HNDL_VARIANT ||
+		f->usage == CB_USAGE_HNDL_LM) {
 		return 1;
 	}
 	return 0;
@@ -3702,6 +3753,14 @@ decimal_expand (cb_tree d, cb_tree x)
 		if ((f->usage == CB_USAGE_BINARY ||
 		    f->usage == CB_USAGE_COMP_5 ||
 		    f->usage == CB_USAGE_INDEX ||
+		    f->usage == CB_USAGE_HNDL ||
+		    f->usage == CB_USAGE_HNDL_WINDOW ||
+		    f->usage == CB_USAGE_HNDL_SUBWINDOW ||
+		    f->usage == CB_USAGE_HNDL_FONT ||
+		    f->usage == CB_USAGE_HNDL_THREAD ||
+		    f->usage == CB_USAGE_HNDL_MENU ||
+		    f->usage == CB_USAGE_HNDL_VARIANT ||
+		    f->usage == CB_USAGE_HNDL_LM ||
 		    f->usage == CB_USAGE_COMP_X) &&
 		    !f->pic->scale &&
 		    (f->size == 1 || f->size == 2 || f->size == 4 ||
@@ -3759,7 +3818,7 @@ cb_build_mul (cb_tree v, cb_tree n, cb_tree round_opt)
 	cb_tree		opt;
 	struct cb_field	*f;
 
-	if (CB_INDEX_P (v)) {
+	if (CB_INDEX_OR_HANDLE_P (v)) {
 		return cb_build_move (cb_build_binary_op (v, '*', n), v);
 	}
 
@@ -3781,7 +3840,7 @@ cb_build_div (cb_tree v, cb_tree n, cb_tree round_opt)
 	cb_tree		opt;
 	struct cb_field	*f;
 
-	if (CB_INDEX_P (v)) {
+	if (CB_INDEX_OR_HANDLE_P (v)) {
 		return cb_build_move (cb_build_binary_op (v, '/', n), v);
 	}
 
@@ -4035,6 +4094,14 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	if (f->usage == CB_USAGE_BINARY ||
 	    f->usage == CB_USAGE_COMP_5 ||
 	    f->usage == CB_USAGE_INDEX ||
+		f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_WINDOW ||
+		f->usage == CB_USAGE_HNDL_SUBWINDOW ||
+		f->usage == CB_USAGE_HNDL_FONT ||
+		f->usage == CB_USAGE_HNDL_THREAD ||
+		f->usage == CB_USAGE_HNDL_MENU ||
+		f->usage == CB_USAGE_HNDL_VARIANT ||
+		f->usage == CB_USAGE_HNDL_LM ||
 	    f->usage == CB_USAGE_COMP_X) {
 		n = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 			(16 * (f->flag_binary_swap ? 1 : 0));
@@ -4251,8 +4318,8 @@ cb_build_cond (cb_tree x)
 			if (!p->y || p->y == cb_error_node) {
 				return cb_error_node;
 			}
-			if (CB_INDEX_P (p->x)
-			||  CB_INDEX_P (p->y)
+			if (CB_INDEX_OR_HANDLE_P (p->x)
+			||  CB_INDEX_OR_HANDLE_P (p->y)
 			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER
 			||  CB_TREE_CLASS (p->y) == CB_CLASS_POINTER) {
 				x = cb_build_binary_op (p->x, '-', p->y);
@@ -4505,7 +4572,7 @@ cb_build_add (cb_tree v, cb_tree n, cb_tree round_opt)
 		return CB_BUILD_FUNCALL_3 ("cob_pointer_manip", v, n, cb_int0);
 	}
 #else
-	if (CB_INDEX_P (v) || CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
+	if (CB_INDEX_OR_HANDLE_P (v) || CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
 		return cb_build_move (cb_build_binary_op (v, '+', n), v);
 	}
 #endif
@@ -4548,7 +4615,7 @@ cb_build_sub (cb_tree v, cb_tree n, cb_tree round_opt)
 		return CB_BUILD_FUNCALL_3 ("cob_pointer_manip", v, n, cb_int1);
 	}
 #else
-	if (CB_INDEX_P (v) || CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
+	if (CB_INDEX_OR_HANDLE_P (v) || CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
 		return cb_build_move (cb_build_binary_op (v, '-', n), v);
 	}
 #endif
@@ -8307,14 +8374,14 @@ cb_build_move (cb_tree src, cb_tree dst)
 	    CB_ALPHABET_NAME_P(CB_REFERENCE(src)->value)) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
-	if (CB_INDEX_P (dst)) {
+	if (CB_INDEX_OR_HANDLE_P (dst)) {
 		if (src == cb_null) {
 			return cb_build_assign (dst, cb_zero);
 		}
 		return cb_build_assign (dst, src);
 	}
 
-	if (CB_INDEX_P (src)) {
+	if (CB_INDEX_OR_HANDLE_P (src)) {
 		return CB_BUILD_FUNCALL_2 ("cob_set_int", dst,
 					   cb_build_cast_int (src));
 	}
@@ -9168,6 +9235,34 @@ cb_emit_set_false (cb_tree l)
 }
 
 void
+cb_emit_set_thread_priority (cb_tree handle, cb_tree priority)
+{
+	cb_tree used_handle;
+
+	if (handle && handle != cb_null && !usage_is_thread_handle (handle)) {
+		cb_error (_("HANDLE must be either a generic or a thread handle"));
+		return;
+	}
+	used_handle = handle;
+	if (used_handle && used_handle == cb_null) {
+		used_handle = CB_BUILD_FUNCALL_1 ("cob_get_threadhandle", NULL);
+	}
+
+	if (cb_validate_one (priority)) {
+		return;
+	}
+	if (CB_LITERAL_P (priority)) {
+		if (cb_get_int (priority) > 32767) {
+			cb_error (_("THREAD-priority must be between 1 and 32767"));
+		}
+	}
+#if 0 /* TODO: implement THREADs in libcob */
+	cb_emit (CB_BUILD_FUNCALL_2 ("set_thread_priority",
+			used_handle, cb_build_cast_int (priority)));
+#endif
+}
+
+void
 cb_emit_set_attribute (cb_tree x, const cob_flags_t val_on,
 		       const cob_flags_t val_off)
 {
@@ -9448,6 +9543,27 @@ void
 cb_emit_stop_run (cb_tree x)
 {
 	cb_emit (CB_BUILD_FUNCALL_1 ("cob_stop_run", cb_build_cast_int (x)));
+}
+
+void
+cb_emit_stop_thread (cb_tree handle)
+{
+	cb_tree used_handle;
+
+	if (handle && handle != cb_null && !usage_is_thread_handle (handle)) {
+		cb_error_x (CB_TREE (current_statement),
+			_ ("HANDLE must be either a generic or a thread handle"));
+		return;
+	}
+	used_handle = handle;
+	if (used_handle && used_handle == cb_null) {
+		used_handle = CB_BUILD_FUNCALL_1 ("cob_get_threadhandle", NULL);
+	}
+#if 0 /* TODO: implement THREADs in libcob */
+	cb_emit (CB_BUILD_FUNCALL_1 ("cob_stop_thread", used_handle));
+#else
+	cb_emit (CB_BUILD_FUNCALL_1 ("cob_stop_run", cb_int (0)));
+#endif
 }
 
 /* STRING statement */

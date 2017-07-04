@@ -938,6 +938,14 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			return COB_TYPE_NUMERIC_BINARY;
 		case CB_USAGE_FLOAT:
@@ -1028,6 +1036,14 @@ cb_fits_int (const cb_tree x)
 		}
 		switch (f->usage) {
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			return 1;
 		case CB_USAGE_BINARY:
@@ -1105,6 +1121,14 @@ cb_fits_long_long (const cb_tree x)
 		}
 		switch (f->usage) {
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			return 1;
 		case CB_USAGE_BINARY:

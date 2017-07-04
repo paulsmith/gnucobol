@@ -327,7 +327,8 @@ LIST_REVERSE_FUNC (attr_list)
 LIST_REVERSE_FUNC (string_list)
 LIST_REVERSE_FUNC (literal_list)
 
-static int field_cache_cmp (const void *mp1, const void *mp2) {
+static int field_cache_cmp (const void *mp1, const void *mp2)
+{
 	const struct field_list	*fl1;
 	const struct field_list	*fl2;
 	int			ret;
@@ -341,7 +342,8 @@ static int field_cache_cmp (const void *mp1, const void *mp2) {
 	return fl1->f->id - fl2->f->id;
 }
 
-static int base_cache_cmp (const void *mp1, const void *mp2) {
+static int base_cache_cmp (const void *mp1, const void *mp2)
+{
 	const struct base_list	*fl1;
 	const struct base_list	*fl2;
 
@@ -2119,6 +2121,14 @@ output_integer (cb_tree x)
 				return;
 			}
 			/* Fall through */
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			output ("(*(int *) (");
 			output_data (x);
@@ -2378,6 +2388,14 @@ output_long_integer (cb_tree x)
 				return;
 			}
 			/* Fall through */
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 			output ("(cob_s64_t)(*(int *) (");
 			output_data (x);
@@ -4453,6 +4471,14 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 			output (")");
 			return;
 		case CB_USAGE_INDEX:
+		case CB_USAGE_HNDL:
+		case CB_USAGE_HNDL_WINDOW:
+		case CB_USAGE_HNDL_SUBWINDOW:
+		case CB_USAGE_HNDL_FONT:
+		case CB_USAGE_HNDL_THREAD:
+		case CB_USAGE_HNDL_MENU:
+		case CB_USAGE_HNDL_VARIANT:
+		case CB_USAGE_HNDL_LM:
 		case CB_USAGE_LENGTH:
 		case CB_USAGE_POINTER:
 		case CB_USAGE_PROGRAM_POINTER:

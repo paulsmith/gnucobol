@@ -622,6 +622,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DEFAULT",			0, 0, DEFAULT,			/* 2002 */
 				0, 0
   },
+  { "DEFAULT-FONT",			0, 0, DEFAULT_FONT,			/* ACU extension */
+				0, 0					/* Checkme: likely context sensitive */
+  },
   { "DELETE",			1, 0, DELETE,			/* 2002 */
 				0, 0
   },
@@ -866,6 +869,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FIXED",			0, 0, FIXED,			/* Extension */
 				0, CB_CS_RECORDING
   },
+  { "FIXED-FONT",			0, 0, FIXED_FONT,			/* ACU extension */
+					0, 0					/* Checkme: likely context sensitive */
+  },
   { "FLOAT-BINARY-128",		0, 0, -1,			/* 2014 */
 				0, 0
   },
@@ -900,6 +906,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "FLOAT-SHORT",		0, 0, FLOAT_SHORT,		/* 2002 */
 				0, 0
+  },
+  { "FONT",			0, 0, FONT,			/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
   },
   { "FOOTING",			0, 0, FOOTING,			/* 2002 */
 				0, 0
@@ -963,6 +972,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "GROUP-USAGE",		0, 0, -1,			/* 2002 */
 				0, 0
+  },
+  { "HANDLE",			0, 0, HANDLE,			/* ACU extension */
+	  0, 0
   },
   { "HEADING",			0, 0, HEADING,			/* 2002 */
 				0, 0
@@ -1078,8 +1090,14 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LABEL",			0, 0, LABEL,			/* 85 */
 				0, 0
   },
+  { "LARGE-FONT",			0, 0, LARGE_FONT,			/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
+  },
   { "LAST",			0, 0, LAST,			/* 2002 */
 				0, 0
+  },
+  { "LAYOUT-MANAGER",		0, 0, LAYOUT_MANAGER,		/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
   },
   { "LC_ALL",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
@@ -1144,6 +1162,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LINKAGE",			0, 0, LINKAGE,			/* 2002 */
 				0, 0
   },
+  { "LM-RESIZE",			0, 0, LM_RESIZE,			/* ACU extension */
+					0, 0					/* Checkme: likely context sensitive */
+  },
   { "LOCAL-STORAGE",		0, 0, LOCAL_STORAGE,		/* 2002 */
 				0, 0
   },
@@ -1171,8 +1192,14 @@ static struct cobc_reserved default_reserved_words[] = {
   { "MANUAL",			0, 0, MANUAL,			/* 2002 */
 				0, 0
   },
-  { "MEMORY",			0, 0, MEMORY,			/* 85 */
+  { "MEDIUM-FONT",			0, 0, MEDIUM_FONT,			/* ACU extension */
+		  0, 0					/* Checkme: likely context sensitive */
+  },
+  { "MEMORY",			0, 1, MEMORY,			/* 85 */
 				0, CB_CS_OBJECT_COMPUTER
+  },
+  { "MENU",			0, 0, MENU,			/* ACU extension */
+					0, 0					/* Checkme: likely context sensitive */
   },
   { "MERGE",			0, 0, MERGE,			/* 2002 */
 				0, 0
@@ -1393,6 +1420,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "PRINTING",			0, 0, PRINTING,			/* 2002 */
 				0, 0
+  },
+  { "PRIORITY",			0, 0, PRIORITY,			/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
   },
   { "PROCEDURE",		0, 0, PROCEDURE,		/* 2002 */
 				0, 0
@@ -1665,6 +1695,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SIZE",			0, 0, SIZE,			/* 2002 */
 				0, 0
   },
+  { "SMALL-FONT",			0, 0, SMALL_FONT,			/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
+  },
   { "SORT",			0, 0, SORT,			/* 2002 */
 				0, 0
   },
@@ -1759,6 +1792,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SUBTRACT",			1, 0, SUBTRACT,			/* 2002 */
 				0, 0
   },
+  { "SUBWINDOW",			0, 0, SUBWINDOW,			/* ACU extension */
+	  0, 0					/* Checkme: likely context sensitive */
+  },
   { "SUM",			0, 0, SUM,			/* 2002 */
 				0, 0
   },
@@ -1816,6 +1852,12 @@ static struct cobc_reserved default_reserved_words[] = {
   { "THEN",			0, 0, THEN,			/* 2002 */
 				0, 0
   },
+  { "THREAD",			0, 0, THREAD,			/* ACU extension */
+					0, 0
+  },
+  { "THREADS",			0, 0, THREADS,			/* ACU extension */
+					0, 0
+  },
   { "THROUGH",			0, 0, THRU,			/* 2002 */
 				0, 0
   },
@@ -1842,6 +1884,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "TOWARD-LESSER",		0, 1, TOWARD_LESSER,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+  },
+  { "TRADITIONAL-FONT",		0, 0, TRADITIONAL_FONT,		/* ACU extension */
+					0, 0					/* Checkme: likely context sensitive */
   },
   { "TRAILING",			0, 0, TRAILING,			/* 2002 */
 				0, 0
@@ -1960,6 +2005,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VARIABLE",			0, 0, VARIABLE,			/* Extension */
 				0, CB_CS_RECORDING
   },
+  { "VARIANT",			0, 0, VARIANT,			/* ACU extension */
+					0, 0
+  },
   { "VARYING",			0, 0, VARYING,			/* 2002 */
 				0, 0
   },
@@ -1968,6 +2016,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WHEN",			0, 0, WHEN,			/* 2002 */
 				0, 0
+  },
+  { "WINDOW",			0, 0, WINDOW,			/* ACU extension */
+					0, 0
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
 				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY

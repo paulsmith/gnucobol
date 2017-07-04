@@ -18,6 +18,7 @@
 
 ### GnuCOBOL Test Suite
 
+
 AT_SETUP([READ INTO AT-END sequence])
 AT_KEYWORDS([runfile])
 
@@ -841,14 +842,14 @@ AT_DATA([prog.cob], [
         WORKING-STORAGE SECTION.
         01 FNAME        PIC X(256) VALUE 'testtext.txt'.
         01 ACCESS-MODE  PIC X      USAGE COMP-X VALUE 2.
-        01 HANDLE       PIC X(4)   USAGE COMP-X.
+        01 FHANDLE      PIC X(4)   USAGE COMP-X.
 
         01 OFFSET       PIC X(8)   USAGE COMP-X.
         01 NBYTES       PIC X(4)   USAGE COMP-X.
         01 WRITE-BUFFER PIC X(20).
 
         PROCEDURE DIVISION.
-        CALL 'CBL_CREATE_FILE' USING FNAME 55 11 22 HANDLE
+        CALL 'CBL_CREATE_FILE' USING FNAME 55 11 22 FHANDLE
         END-CALL
         IF RETURN-CODE NOT = -1
            DISPLAY 'Wrong return codes ...' END-DISPLAY
@@ -856,7 +857,7 @@ AT_DATA([prog.cob], [
         MOVE 0 TO RETURN-CODE
 
         CALL 'CBL_CREATE_FILE' USING
-        FNAME ACCESS-MODE 0 0 HANDLE
+        FNAME ACCESS-MODE 0 0 FHANDLE
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error creating file ...' END-DISPLAY
@@ -868,20 +869,20 @@ AT_DATA([prog.cob], [
         MOVE 9 TO NBYTES.
 
         CALL 'CBL_WRITE_FILE' USING
-        HANDLE OFFSET NBYTES '0' WRITE-BUFFER
+        FHANDLE OFFSET NBYTES '0' WRITE-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error writing file ...' END-DISPLAY
            MOVE 0 TO RETURN-CODE
         END-IF
 
-        CALL 'CBL_FLUSH_FILE' USING HANDLE END-CALL
+        CALL 'CBL_FLUSH_FILE' USING FHANDLE END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error flushing file ...' END-DISPLAY
            MOVE 0 TO RETURN-CODE
         END-IF
 
-        CALL 'CBL_CLOSE_FILE' USING HANDLE END-CALL
+        CALL 'CBL_CLOSE_FILE' USING FHANDLE END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error closing file ...' END-DISPLAY
            MOVE 0 TO RETURN-CODE
@@ -897,14 +898,14 @@ AT_DATA([prog2.cob], [
         WORKING-STORAGE SECTION.
         01 FNAME        PIC X(256) VALUE 'testtext.txt'.
         01 RET          PIC -9.
-        01 HANDLE       PIC X(4)   USAGE COMP-X.
+        01 FHANDLE      PIC X(4)   USAGE COMP-X.
 
         01 OFFSET       PIC X(8)   USAGE COMP-X.
         01 NBYTES       PIC X(4)   USAGE COMP-X.
         01 READ-BUFFER  PIC X(10).
 
         PROCEDURE DIVISION.
-        CALL 'CBL_OPEN_FILE' USING FNAME 1 0 0 HANDLE
+        CALL 'CBL_OPEN_FILE' USING FNAME 1 0 0 FHANDLE
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error opening file ...' END-DISPLAY
@@ -915,7 +916,7 @@ AT_DATA([prog2.cob], [
         MOVE 9 TO NBYTES.
 
         CALL 'CBL_READ_FILE' USING
-        HANDLE OFFSET NBYTES 0 READ-BUFFER
+        FHANDLE OFFSET NBYTES 0 READ-BUFFER
         END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error reading file ...'
@@ -927,7 +928,7 @@ AT_DATA([prog2.cob], [
            DISPLAY 'Wrong readbuffer ...' END-DISPLAY
         END-IF
 
-        CALL 'CBL_CLOSE_FILE' USING HANDLE END-CALL
+        CALL 'CBL_CLOSE_FILE' USING FHANDLE END-CALL
         IF RETURN-CODE NOT = 0
            DISPLAY 'error closing file ...'
                    return-code
