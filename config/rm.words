@@ -108,7 +108,7 @@ reserved:	COMPUTATIONAL-5
 reserved:	COMPUTATIONAL-6
 reserved:	COMPUTE
 reserved:	CONFIGURATION
-# reserved:	CONSOLE*   --> mnemonic device should not be in reserved list
+# reserved:	CONSOLE*	--> mnemonic device should not be in reserved list
 reserved:	CONTAINS
 reserved:	CONTENT
 reserved:	CONTINUE
@@ -363,7 +363,7 @@ reserved:	RERUN
 reserved:	RESERVE
 reserved:	RESET
 reserved:	RETURN
-reserved:	RETURN-CODE
+#reserved:	RETURN-CODE   --> (implemented) registers should not be in reserved list
 reserved:	RETURNING
 reserved:	REVERSE
 reserved:	REVERSE-VIDEO
