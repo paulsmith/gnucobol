@@ -510,6 +510,9 @@ redefinition_error (cb_tree x)
 	w = CB_REFERENCE (x)->word;
 	cb_error_x (x, _("redefinition of '%s'"), w->name);
 	if (w->items) {
+		if (CB_VALUE (w->items)->source_line == 0) {
+			return;
+		}
 		listprint_suppress ();
 		cb_error_x (CB_VALUE (w->items),
 			    _("'%s' previously defined here"), w->name);
@@ -533,6 +536,9 @@ redefinition_warning (cb_tree x, cb_tree y)
 	}
 
 	if (z) {
+		if (z->source_line == 0) {
+			return;
+		}
 		listprint_suppress ();
 		cb_warning_x (COBC_WARN_FILLER, z, _("'%s' previously defined here"), w->name);
 		listprint_restore ();
@@ -623,6 +629,9 @@ ambiguous_error (cb_tree x)
 				break;
 			default:
 				break;
+			}
+			if (y->source_line == 0) {
+				return;
 			}
 			listprint_suppress ();
 			cb_error_x (y, _("'%s' defined here"), errnamebuff);
