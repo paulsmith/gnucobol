@@ -43,7 +43,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-constant-expr prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -Wno-constant-expression prog.cob], [0], [],
 [prog.cob: 11: warning: suggest parentheses around AND within OR
 prog.cob: 15: warning: suggest parentheses around OR within AND
 ])
@@ -58,29 +58,27 @@ AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           IF 3 = 1 AND 2 OR 3
-               DISPLAY "OK"
-               END-DISPLAY
+           IF 3 = 1
+           AND 2 OR 3
+              DISPLAY "OK"
+              END-DISPLAY
            END-IF.
-           IF 3 = 1 OR 2 AND 3
-               DISPLAY "NO"
-               END-DISPLAY
+           IF 3 = 1 OR
+              2 AND 3
+              DISPLAY "NO"
+              END-DISPLAY
            END-IF.
            STOP RUN.
 ])
 
-# FIXME positions broken
-AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
+# Note: we always get the same line number a
+AT_CHECK([$COMPILE_ONLY -Wno-parentheses prog.cob], [0], [],
 [prog.cob: 5: warning: expression is always FALSE
-prog.cob: 5: warning: expression is always FALSE
-prog.cob: 5: warning: expression is always FALSE
-prog.cob: 5: warning: expression is always TRUE
-prog.cob: 5: warning: expression is always TRUE
-prog.cob: 9: warning: expression is always FALSE
-prog.cob: 9: warning: expression is always FALSE
-prog.cob: 9: warning: expression is always TRUE
-prog.cob: 9: warning: expression is always FALSE
-prog.cob: 9: warning: expression is always FALSE
+prog.cob: 6: warning: expression is always FALSE
+prog.cob: 6: warning: expression is always TRUE
+prog.cob: 10: warning: expression is always FALSE
+prog.cob: 11: warning: expression is always FALSE
+prog.cob: 11: warning: expression is always TRUE
 ])
 
 AT_CLEANUP
@@ -235,6 +233,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
+# FIXME: expression line numbers currently wrong in EVALUATE
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: invalid expression
 prog.cob: 14: error: invalid expression

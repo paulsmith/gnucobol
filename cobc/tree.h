@@ -742,7 +742,8 @@ struct cb_field {
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
 						   could be direct ODO (check via depending)
 						   or via subordinate) */
-	cob_u32_t		special_index;	/* Special field */
+	cob_u32_t		special_index;	/* Special field,
+						   generated as int (2=>non-static) */
 
 	enum cb_storage		storage;	/* Storage section */
 	enum cb_usage		usage;		/* USAGE */

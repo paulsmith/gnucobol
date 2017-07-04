@@ -3575,11 +3575,18 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	struct cb_literal *xl, *yl;
 	cb_tree				relop, e;
 
+	relop = cb_any;
 	/* setting an error tree to point to the correct expression
 	   instead of the literal/var definition / current line */
-	e = relop = cb_any;
-	e->source_file = NULL;
-	e->source_line = cb_exp_line;
+	if (y && y->source_line >= cb_exp_line - 1) {
+		e = y;
+	} else if (x && (x->source_line == 0 || x->source_line >= CB_TREE(current_statement)->source_line)) {
+		e = x;
+	} else {
+		e = cb_any;
+		e->source_file = NULL;
+		e->source_line = cb_exp_line;
+	}
 
 	switch (op) {
 	case '+':
@@ -3738,13 +3745,15 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			}
 			if (i > CB_FIELD (cb_ref (y))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
-				switch(op) {
-				case '=':
-					relop = cb_false;
-					break;
-				case '~':
-					relop = cb_true;
-					break;
+				if (cb_constant_folding) {
+					switch(op) {
+					case '=':
+						relop = cb_false;
+						break;
+					case '~':
+						relop = cb_true;
+						break;
+					}
 				}
 			}
 		} else if (CB_REF_OR_FIELD_P (x)
@@ -3762,13 +3771,15 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			}
 			if (i > CB_FIELD (cb_ref (x))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
-				switch(op) {
-				case '=':
-					relop = cb_false;
-					break;
-				case '~':
-					relop = cb_true;
-					break;
+				if (cb_constant_folding) {
+					switch(op) {
+					case '=':
+						relop = cb_false;
+						break;
+					case '~':
+						relop = cb_true;
+						break;
+					}
 				}
 			}
 		} else
@@ -3957,11 +3968,17 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	}
 
 	if (relop == cb_true) {
-		cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
+		/* don't warn on the internal expressions */
+		if (e->source_line != 0) {
+			cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
+		}
 		return cb_true;
 	}
 	if (relop == cb_false) {
-		cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
+		/* don't warn on the internal expressions */
+		if (e->source_line != 0) {
+			cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
+		}
 		return cb_false;
 	}
 

@@ -640,7 +640,7 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 	/* Base storage */
 
 	if (!f01->flag_base) {
-		if (f01->special_index > 1U) {
+		if (f01->special_index == 2U) {
 			bl = cobc_parse_malloc (sizeof (struct base_list));
 			bl->f = f01;
 			bl->curr_prog = excp_current_program_id;
@@ -1469,7 +1469,7 @@ output_local_base_cache (void)
 
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
 	for (blp = local_base_cache; blp; blp = blp->next) {
-		if (blp->f->special_index > 1) {
+		if (blp->f->special_index == 2U) {
 			output_local ("int		%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if (blp->f->special_index) {
@@ -2811,7 +2811,7 @@ output_param (cb_tree x, int id)
 				fl->x = x;
 				fl->f = f;
 				fl->curr_prog = excp_current_program_id;
-				if (f->special_index != 2 && (f->flag_is_global ||
+				if (f->special_index != 2U && (f->flag_is_global ||
 				    current_prog->flag_file_global)) {
 					fl->next = field_cache;
 					field_cache = fl;

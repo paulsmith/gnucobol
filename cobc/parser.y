@@ -49,7 +49,9 @@ do { \
 }  ONCE_COB
 
 #define push_expr(type, node) \
-  current_expr = cb_build_list (cb_int (type), node, current_expr)
+  current_expr = cb_build_list (cb_int (type), node, current_expr); \
+  current_expr->source_file = cb_source_file;	\
+  current_expr->source_line = cb_source_line	\
 
 /* Statement terminator definitions */
 #define TERM_NONE		0
@@ -5596,7 +5598,7 @@ _capacity_in:
 | CAPACITY _in WORD
   {
 	$$ = cb_build_index ($3, cb_zero, 0, current_field);
-	CB_FIELD_PTR ($$)->special_index = 1;
+	CB_FIELD_PTR ($$)->special_index = 1U;
   }
 ;
 
@@ -5695,7 +5697,7 @@ occurs_index:
   WORD
   {
 	$$ = cb_build_index ($1, cb_int1, 1U, current_field);
-	CB_FIELD_PTR ($$)->special_index = 1;
+	CB_FIELD_PTR ($$)->special_index = 1U;
   }
 ;
 
@@ -8814,6 +8816,9 @@ evaluate_object:
 	cb_tree	e2;
 	cb_tree	x;
 	cb_tree	parm1;
+
+	/* FIXME: partial_expr sets cb_exp_line correctly - but as the expression generation is done later
+	          we need to store it here next to the whens for later extraction */
 
 	not0 = cb_int0;
 	e2 = $2;

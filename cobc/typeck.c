@@ -1045,7 +1045,7 @@ cb_build_registers (void)
 	if (!current_program->nested_level) {
 		x = cb_build_index (cb_build_reference ("RETURN-CODE"),
 				    cb_zero, 0, NULL);
-		CB_FIELD_PTR (x)->special_index = 1;
+		CB_FIELD_PTR (x)->special_index = 1U;
 		current_program->cb_return_code = x;
 	}
 
@@ -1055,12 +1055,12 @@ cb_build_registers (void)
 	CB_FIELD_PTR (x)->flag_no_init = 1;
 	current_program->cb_sort_return = x;
 
-	/* NUMBER-OF-CALL-PARAMETERS */
+	/* NUMBER-OF-CALL-PARAMETERS (OpenCOBOL/GnuCOBOL extension) */
 	x = cb_build_index (cb_build_reference ("NUMBER-OF-CALL-PARAMETERS"),
 			    cb_zero, 0, NULL);
 	CB_FIELD_PTR (x)->flag_no_init = 1;
 	CB_FIELD_PTR (x)->flag_local = 1;
-	CB_FIELD_PTR (x)->special_index = 2;
+	CB_FIELD_PTR (x)->special_index = 2U;
 	current_program->cb_call_params = x;
 
 	/* TALLY */
@@ -3396,20 +3396,25 @@ cb_expr_finish (void)
 	(void)expr_reduce (0);
 
 	if (!expr_stack[3].value) {
+		/* TODO: Add test case for this to syn_misc.at invalid expression */
 		cb_error (_("invalid expression"));
 		return cb_error_node;
 	}
 
+#if 0
 	expr_stack[3].value->source_file = cb_source_file;
 	expr_stack[3].value->source_line = cb_exp_line;
+#endif
 
 	if (expr_index != 4) {
+		/* TODO: Add test case for this to syn_misc.at invalid expression */
 		cb_error_x (expr_stack[3].value, _("invalid expression"));
 		return cb_error_node;
 	}
 
 	expr_expand (&expr_stack[3].value);
 	if (expr_stack[3].token != 'x') {
+		/* TODO: Add test case for this to syn_misc.at invalid expression */
 		cb_error_x (expr_stack[3].value, _("invalid expression"));
 		return cb_error_node;
 	}
@@ -4205,6 +4210,7 @@ cb_build_cond (cb_tree x)
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
 		if (x != cb_any && x != cb_true && x != cb_false) {
+			/* TODO: Add test case for this to syn_misc.at invalid expression */
 			cb_error_x (CB_TREE(current_statement),
 				    _("invalid expression"));
 			return cb_error_node;
@@ -4323,6 +4329,15 @@ cb_build_cond (cb_tree x)
 	default:
 		break;
 	}
+#if 0	/* FIMXE: doesn't work with EVALUATE as we loose cb_exp_line there */
+	if (x->source_line == 0 || x->source_line < cb_exp_line) {
+		x->source_line = cb_exp_line;
+	}
+#else /* workaround to get at least some numbers correct */
+	if (x->source_line == 0 || x->source_line < CB_TREE(current_statement)->source_line) {
+		x->source_line = cb_exp_line;
+	}
+#endif
 	cb_error_x (x, _("invalid expression"));
 	return cb_error_node;
 }
@@ -6293,6 +6308,8 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	stmt = CB_VALUE (whens);
 	whens = CB_CHAIN (whens);
 	c1 = NULL;
+
+	/* FIXME: set cb_exp_line here as we lost in in gathering the whens */
 
 	/* For each WHEN sequence */
 	for (; whens; whens = CB_CHAIN (whens)) {
