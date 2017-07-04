@@ -631,7 +631,7 @@ ambiguous_error (cb_tree x)
 				break;
 			}
 			if (y->source_line == 0) {
-				return;
+				continue;
 			}
 			listprint_suppress ();
 			cb_error_x (y, _("'%s' defined here"), errnamebuff);
