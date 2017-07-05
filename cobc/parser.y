@@ -5549,7 +5549,7 @@ double_usage:
 
 _font_name:
   /* empty */
-  DEFAULT_FONT
+| DEFAULT_FONT
 | FIXED_FONT
 | TRADITIONAL_FONT
 | SMALL_FONT
@@ -5989,11 +5989,6 @@ control_clause:
 
 control_field_list:
   _final identifier_list
-;
-
-identifier_list:
-  identifier
-| identifier_list identifier
 ;
 
 /* PAGE clause */
@@ -8235,19 +8230,23 @@ close_statement:
 ;
 
 close_body:
-  file_name close_option
+  close_files
+;
+
+close_files:
+  file_name _close_option
   {
 	begin_implicit_statement ();
 	cb_emit_close ($1, $2);
   }
-| close_body file_name close_option
+| close_files file_name _close_option
   {
 	begin_implicit_statement ();
 	cb_emit_close ($2, $3);
   }
 ;
 
-close_option:
+_close_option:
   /* empty */			{ $$ = cb_int (COB_CLOSE_NORMAL); }
 | reel_or_unit			{ $$ = cb_int (COB_CLOSE_UNIT); }
 | reel_or_unit _for REMOVAL	{ $$ = cb_int (COB_CLOSE_UNIT_REMOVAL); }
@@ -11757,37 +11756,37 @@ not_invalid_key_sentence:
 
 _thread_start:
   /* empty */
-{
+  {
 	$$ = NULL;
-}
+  }
 | _in THREAD
-{
+  {
 	$$ = cb_int1;
 	CB_PENDING ("THREAD");
-}
+  }
 ;
 
 _thread_handle:
-/* empty */
-{
+  /* empty */
+  {
 	$$ = NULL;
-}
+  }
 | HANDLE _in identifier
-{
+  {
 	$$ = $3;
 	CB_PENDING ("THREAD");
-}
+  }
 ;
 
 thread_reference_optional:
   THREAD identifier
-{
+  {
 	$$ = $2;
-}
+  }
 | THREAD
-{
+  {
 	$$ = NULL;
-}
+  }
 ;
 
 /* Common Constructs */
@@ -12649,6 +12648,17 @@ identifier_1:
 	if (start_debug) {
 		cb_check_field_debug ($1);
 	}
+  }
+;
+
+identifier_list:
+  identifier
+  {
+	$$ = CB_LIST_INIT ($1);
+  }
+| identifier_list identifier
+  {
+	$$ = cb_list_add ($1, $2);
   }
 ;
 
