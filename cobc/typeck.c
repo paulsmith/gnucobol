@@ -4564,7 +4564,7 @@ cb_build_add (cb_tree v, cb_tree n, cb_tree round_opt)
 	struct cb_field	*f;
 
 #ifdef	COB_NON_ALIGNED
-	if (CB_INDEX_P (v)) {
+	if (CB_INDEX_OR_HANDLE_P (v)) {
 		return cb_build_move (cb_build_binary_op (v, '+', n), v);
 	}
 	if (CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
@@ -4607,7 +4607,7 @@ cb_build_sub (cb_tree v, cb_tree n, cb_tree round_opt)
 	struct cb_field	*f;
 
 #ifdef	COB_NON_ALIGNED
-	if (CB_INDEX_P (v)) {
+	if (CB_INDEX_OR_HANDLE_P (v)) {
 		return cb_build_move (cb_build_binary_op (v, '-', n), v);
 	}
 	if (CB_TREE_CLASS (v) == CB_CLASS_POINTER) {
