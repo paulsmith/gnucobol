@@ -1405,9 +1405,9 @@ cb_build_list (cb_tree purpose, cb_tree value, cb_tree chain)
 
 	/* Set location to that of initial element. */
 	if (value) {
-		p->common.source_file = value->source_file;
-		p->common.source_line = value->source_line;
-		p->common.source_column = value->source_column;
+		CB_TREE(p)->source_file = value->source_file;
+		CB_TREE(p)->source_line = value->source_line;
+		CB_TREE(p)->source_column = value->source_column;
 	}
 
 	return CB_TREE (p);
@@ -3132,6 +3132,14 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		f->assign = cb_build_alphanumeric_literal (f->name,
 							   strlen (f->name));
 	}
+
+	/* associate records to file (seperate and first for being able
+	   to resolve references, for example in validate_key_field */
+	for (p = records; p; p = p->sister) {
+		p->file = f;
+	}
+
+	/* validate key fields */
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->key) {
 			validate_key_field (f, records, f->key);
@@ -3234,7 +3242,6 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	for (p = records; p; p = p->sister) {
-		p->file = f;
 		p->redefines = f->record;
 #if	1	/* RXWRXW - Global/External */
 		if (p->flag_is_global) {
