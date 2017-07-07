@@ -2,6 +2,11 @@
 2017-07-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: RECORD KEY in SELECT does not support FD in name bug #331
+	* tree.h: added cb_feature_mode for compiler features we can have
+	  activated, disabled (by compiler configuration), or not implemented;
+	  (cb_intrinsic_table): replaced "const int implemented" by
+	  "enum cb_feature_mode active"
+	* reserved.c, tree.c: adjusted cb_intrinsic_table to use cb_feature_mode
 
 2017-07-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

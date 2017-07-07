@@ -4479,7 +4479,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		cb_error_x (name, _("FUNCTION '%s' unknown"), CB_NAME (name));
 		return cb_error_node;
 	}
-	if (!cbp->implemented) {
+	if (cbp->active == CB_FEATURE_DISABLED) {
 		cb_error_x (name, _("FUNCTION '%s' is not implemented"),
 			    cbp->name);
 		return cb_error_node;

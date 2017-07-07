@@ -1060,6 +1060,14 @@ struct cb_assign {
 #define CB_ASSIGN(x)		(CB_TREE_CAST (CB_TAG_ASSIGN, struct cb_assign, x))
 #define CB_ASSIGN_P(x)		(CB_TREE_TAG (x) == CB_TAG_ASSIGN)
 
+/* Compiler features like directives, functions, mnemonics and registers */
+
+enum cb_feature_mode {
+	CB_FEATURE_ACTIVE = 0,	/* 0 Feature is implemented and not disabled */
+	CB_FEATURE_DISABLED,		/* 1 Feature disabled */
+	CB_FEATURE_NOT_IMPLEMENTED	/* 2 Feature known but not yet implemented */
+};
+
 /* Intrinsic FUNCTION */
 
 struct cb_intrinsic_table {
@@ -1067,7 +1075,7 @@ struct cb_intrinsic_table {
 	const char		*intr_routine;	/* Routine name */
 	const enum cb_intr_enum	intr_enum;	/* Enum intrinsic */
 	const int		token;		/* Token value */
-	const int		implemented;	/* Have we implemented it? */
+	enum cb_feature_mode	active;	/* Have we implemented it? Is it active? */
 	const int		args;		/* Maximum number of arguments, -1 = unlimited */
 	const int		min_args;	/* Minimum number of arguments */
 	const enum cb_category	category;	/* Category */
