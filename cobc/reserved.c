@@ -3019,6 +3019,48 @@ initialize_reserved_words_if_needed (void)
 	}
 }
 
+static void
+list_aliases (const struct cobc_reserved * const word)
+{
+	int	i;
+	int     alias_found = 0;
+
+	if (word->token <= 0) {
+		return;
+	}
+	
+	for (i = 0; i < num_reserved_words; ++i) {
+		if (&reserved_words[i] == word
+		    || reserved_words[i].token != word->token) {
+			continue;
+		}
+		if (!alias_found) {
+		        fputs (" (aliased with ", stdout);
+			alias_found = 1;
+		} else {
+		        fputs (", ", stdout);
+		}
+	        fputs (reserved_words[i].name, stdout);
+	}
+
+	if (alias_found) {
+		putchar (')');
+	}
+}
+
+static void
+list_registers (void)
+{
+	/* Work in progress Simon: implement setting CB_FUNC_DISABLED by user-specified list */
+	printf ("%-32s%s\n", _("Extra internal registers"), _("Definition"));
+	printf ("%-32s%s\n", "RETURN-CODE", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "SORT-RETURN", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG");
+	printf ("%-32s%s\n", "COB-CRT-STATUS", "PIC 9(4)");
+	printf ("%-32s%s\n", "TALLY", "GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
+	printf ("%-32s%s\n", _("'LENGTH OF' phrase"), "USAGE BINARY-LONG");
+}
+
 /* Global functions */
 
 int
@@ -3219,7 +3261,6 @@ lookup_intrinsic (const char *name, const int checkimpl)
 	return NULL;
 }
 
-static void cb_list_registers (void);
 
 void
 cb_list_reserved (void)
@@ -3245,7 +3286,9 @@ cb_list_reserved (void)
 				p = _("No");
 			}
 		}
-		printf ("%-32s%s\n", reserved_words[i].name, p);
+		printf ("%-32s%s", reserved_words[i].name, p);
+		list_aliases (&reserved_words[i]);
+		putchar ('\n');
 	}
 	putchar ('\n');
 	puts (_("Extra (obsolete) context sensitive words"));
@@ -3257,20 +3300,7 @@ cb_list_reserved (void)
 	puts ("REMARKS");
 	puts ("SECURITY");
 	putchar ('\n');
-	cb_list_registers ();
-}
-
-void
-cb_list_registers (void)
-{
-	/* Work in progress Simon: implement setting CB_FUNC_DISABLED by user-specified list */
-	printf ("%-32s%s\n", _("Extra internal registers"), _("Definition"));
-	printf ("%-32s%s\n", "RETURN-CODE", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "SORT-RETURN", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "COB-CRT-STATUS", "PIC 9(4)");
-	printf ("%-32s%s\n", "TALLY", "GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
-	printf ("%-32s%s\n", _("'LENGTH OF' phrase"), "USAGE BINARY-LONG");
+	list_registers ();
 }
 
 void
