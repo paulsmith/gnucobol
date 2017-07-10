@@ -127,30 +127,37 @@ struct strcache {
 #ifdef	_MSC_VER
 #define	CB_COPT_1	" /O1"
 #define	CB_COPT_2	" /O2"
+#define	CB_COPT_3	" /Ox"
 #define	CB_COPT_S	" /Os"
 #elif   defined(__BORLANDC__)
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
+#define	CB_COPT_3	" -O3"
 #define	CB_COPT_S	" -O1"
 #elif defined(__hpux) && !defined(__GNUC__)
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" +O2"
+#define	CB_COPT_3	" +O3"
 #define	CB_COPT_S	" +O2 +Osize"
 #elif   defined(__WATCOMC__)
 #define	CB_COPT_1	" -ot"
 #define	CB_COPT_2	" -ox"
+#define	CB_COPT_3	" -ox -oh"
 #define	CB_COPT_S	" -os"
 #elif   defined(__SUNPRO_C)
 #define	CB_COPT_1	" -xO1"
 #define	CB_COPT_2	" -xO2"
+#define	CB_COPT_3	" -xO2"	/* Oracle docs are confusing, is -xO3 working? */
 #define	CB_COPT_S	" -xO1 -xspace"
 #elif	defined(__xlc__)
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
+#define	CB_COPT_2	" -O3"
 #define	CB_COPT_S	" -O"
 #else
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
+#define	CB_COPT_3	" -O3"
 #define	CB_COPT_S	" -Os"
 #endif
 
@@ -469,7 +476,8 @@ static const struct option long_options[] = {
 	{"list-intrinsics",	CB_NO_ARG, NULL, '6'},
 	{"list-mnemonics",	CB_NO_ARG, NULL, '7'},
 	{"list-system",		CB_NO_ARG, NULL, '8'},
-	{"O2",			CB_NO_ARG, NULL, '9'},
+	{"O2",			CB_NO_ARG, NULL, '2'},
+	{"O3",			CB_NO_ARG, NULL, '3'},
 	{"Os",			CB_NO_ARG, NULL, 's'},
 	{"save-temps",		CB_OP_ARG, NULL, '_'},
 	{"std",			CB_RQ_ARG, NULL, '$'},
@@ -2196,7 +2204,7 @@ cobc_print_usage (char * prog)
 			"                        see configuration files in directory config"));
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
-	puts (_("  -O, -O2, -Os          enable optimization"));
+	puts (_("  -O, -O2, -O3, -Os     enable optimization"));
 	puts (_("  -g                    enable C compiler debug / stack check / trace"));
 	puts (_("  -d, -debug            enable all run-time error checking"));
 	puts (_("  -o <file>             place the output into <file>"));
@@ -2673,11 +2681,18 @@ process_command_line (const int argc, char **argv)
 			COBC_ADD_STR (cobc_cflags, CB_COPT_1, NULL, NULL);
 			break;
 
-		case '9':
+		case '2':
 			/* -O2 : Optimize */
 			cob_optimize = 1;
 			strip_output = 1;
 			COBC_ADD_STR (cobc_cflags, CB_COPT_2, NULL, NULL);
+			break;
+
+		case '3':
+			/* -O3 : Optimize */
+			cob_optimize = 1;
+			strip_output = 1;
+			COBC_ADD_STR (cobc_cflags, CB_COPT_3, NULL, NULL);
 			break;
 
 		case 's':

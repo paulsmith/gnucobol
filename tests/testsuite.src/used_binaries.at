@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2014-2017 Free Software Foundation, Inc.
 ## Written by Simon Sobisch, Brian Tiffin
 ##
 ## This file is part of GnuCOBOL.
@@ -60,6 +60,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 
 AT_CLEANUP
 
+
 AT_SETUP([Compiler help and information])
 AT_KEYWORDS([runmisc cobc])
 
@@ -89,6 +90,59 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE "$(_return_path "$(pwd)/prog.cob")"], [0], [], [])
 AT_CHECK([./prog], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([C Compiler optimizations])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+           EXIT PROGRAM.
+])
+
+AT_CHECK([$COMPILE -O  -o prog  prog.cob], [0], [], [])
+AT_CHECK([./prog],  [0], [OK], [])
+
+AT_CHECK([$COMPILE -O2 -o prog2 prog.cob], [0], [], [])
+AT_CHECK([./prog2], [0], [OK], [])
+
+AT_CHECK([$COMPILE -Os -o progs prog.cob], [0], [], [])
+AT_CHECK([./progs], [0], [OK], [])
+
+AT_CHECK([$COMPILE -O3 -o prog3 prog.cob], [0], [], [])
+AT_CHECK([./prog3], [0], [OK], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Invalid cobc option])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+])
+
+# normal option
+AT_CHECK([$COMPILE -q --thisoptiondoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '--thisoptiondoesntexist'
+])
+# flag
+AT_CHECK([$COMPILE -q -flagdoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '-flagdoesntexist'
+])
+# warning
+AT_CHECK([$COMPILE -q -Wdoesntexist prog.cob], [1], [],
+[cobc: unrecognized option '-Wdoesntexist'
+])
 
 AT_CLEANUP
 
@@ -370,29 +424,5 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -j="job 123" prog.cob], [0], [job 123 ], [])
 AT_CHECK([$COMPILE -jdg prog.cob], [0], [        ], [])
 AT_CHECK([$COMPILE_MODULE --job=job123 prog.cob], [0], [job123  ], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([Invalid cobc option])
-AT_KEYWORDS([runmisc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-])
-
-# normal option
-AT_CHECK([$COMPILE -q --thisoptiondoesntexist prog.cob], [1], [],
-[cobc: unrecognized option '--thisoptiondoesntexist'
-])
-# flag
-AT_CHECK([$COMPILE -q -flagdoesntexist prog.cob], [1], [],
-[cobc: unrecognized option '-flagdoesntexist'
-])
-# warning
-AT_CHECK([$COMPILE -q -Wdoesntexist prog.cob], [1], [],
-[cobc: unrecognized option '-Wdoesntexist'
-])
 
 AT_CLEANUP

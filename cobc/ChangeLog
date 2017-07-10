@@ -1,4 +1,8 @@
 
+2017-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: FR #206 added -O3 option
+
 2017-07-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: output a reserved word's aliases during --list-reserved
