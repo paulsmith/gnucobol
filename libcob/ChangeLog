@@ -17,6 +17,16 @@
 	  not a C$ -> ACUCOBOL extension!) by CBL_GC_PRINTABLE (old name
 	  still supported for legacy reasons)
 
+2017-05-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: renamed cob_get_current_date_and_time to
+	  cob_get_current_date_and_time_from_os
+	* common.c, coblocal.c: store datetime from COB_CURRENT_DATE as
+	  cob_time and check for this in cob_get_current_date_and_time
+	  instead of in every function
+	* common.c: allow partial replace of datetime (including offset only)
+	  by COB_CURRENT_DATE
+
 2017-05-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.c: fixed minor style issues, mostly missing spaces around
