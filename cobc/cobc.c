@@ -2361,7 +2361,7 @@ process_command_line (const int argc, char **argv)
 	enum cob_exception_id	i;
 	struct stat		st;
 	char			ext[COB_MINI_BUFF];
-	char			*conf_label;	/* we want a dynamic address for erroc.c, not a  static one */
+	char			*conf_label;	/* we want a dynamic address for erroc.c, not a static one */
 	char			*conf_entry;
 
 	int			conf_ret = 0;
