@@ -363,6 +363,8 @@ cb_name_1 (char *s, cb_tree x)
 		break;
 
 	case CB_TAG_LITERAL:
+		/* TODO: for warning/error messages (do we use this for other parts?):
+		   use cb_word_length as max-length for the output */
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
 			strcpy (s, (char *)CB_LITERAL (x)->data);
 		} else {
