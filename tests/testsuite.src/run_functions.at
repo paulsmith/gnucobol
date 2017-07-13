@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -3936,6 +3936,49 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [201
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([UDF replacing intrinsic function])
+AT_KEYWORDS([functions SUBSTITUTE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. SUBSTITUTE.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  func-in  PIC X(15).
+       01  func-sub PIC X.
+       01  func-out PIC X(15).
+
+       PROCEDURE DIVISION USING func-in, func-sub RETURNING func-out.
+           MOVE func-in TO func-out
+           INSPECT func-out REPLACING ALL '%' BY func-sub
+           .
+       END FUNCTION SUBSTITUTE.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION SUBSTITUTE
+           .
+       PROCEDURE DIVISION.
+           DISPLAY '"' FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "_") '"' 
+           DISPLAY '"' FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "-") '"' 
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE -fnot-intrinsic=substitute prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[" _ C_O_B_O_L _ "
+" - C-O-B-O-L - "
 ])
 
 AT_CLEANUP

@@ -148,7 +148,7 @@ prog.cob: 18: error: duplicate REPOSITORY entries for 'beta' do not match
 prog.cob: 19: warning: no definition/prototype seen for function 'gamma'
 prog.cob: 19: error: redefinition of 'gamma'
 prog.cob: 11: error: 'gamma' previously defined here
-prog.cob: 21: error: function 'alpha' has no PROCEDURE DIVISION
+prog.cob: 21: error: FUNCTION 'alpha' has no PROCEDURE DIVISION
 ])
 AT_CLEANUP
 
@@ -205,7 +205,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 5: error: function 'func' has no PROCEDURE DIVISION
+[prog.cob: 5: error: FUNCTION 'func' has no PROCEDURE DIVISION
 ])
 
 AT_CLEANUP
@@ -229,9 +229,79 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: functions may not be defined within a program/function
-prog.cob: 11: error: function 'f' has no PROCEDURE DIVISION
+prog.cob: 11: error: FUNCTION 'f' has no PROCEDURE DIVISION
 ])
 AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: dialect])
+AT_KEYWORDS([functions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION ABS (1).
+           DISPLAY FUNCTION TRIM (" some text here").
+           DISPLAY FUNCTION SUBSTITUTE ('some text' 'some' 'nice').
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: 9: error: FUNCTION 'TRIM' unknown
+prog.cob: 10: error: FUNCTION 'SUBSTITUTE' unknown
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Intrinsic functions: replaced])
+AT_KEYWORDS([functions SUBSTITUTE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. SUBSTITUTE.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  func-in  PIC X(15).
+       01  func-sub PIC X.
+       01  func-out PIC X(15).
+
+       PROCEDURE DIVISION USING func-in, func-sub RETURNING func-out.
+           MOVE func-in TO func-out
+           INSPECT func-out REPLACING ALL '%' BY func-sub
+           .
+       END FUNCTION SUBSTITUTE.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION SUBSTITUTE
+           .
+       PROCEDURE DIVISION.
+           DISPLAY FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "_")
+           DISPLAY FUNCTION SUBSTITUTE(" % C%O%B%O%L % ", "-")
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE_ONLY -fnot-intrinsic=substitute prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 24: error: syntax error, unexpected ., expecting intrinsic function name or INTRINSIC
+prog.cob: 26: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+prog.cob: 27: error: FUNCTION 'SUBSTITUTE' has wrong number of arguments
+])
+
+AT_CLEANUP
+
 
 AT_SETUP([Intrinsic functions: number of arguments])
 AT_KEYWORDS([functions])

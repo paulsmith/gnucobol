@@ -884,7 +884,7 @@ usage_is_window_handle (cb_tree x)
 /* List system routines */
 
 void
-cb_list_system (void)
+cb_list_system_routines (void)
 {
 	const struct system_table	*psyst;
 
@@ -1088,57 +1088,78 @@ cb_check_field_debug (cb_tree fld)
 void
 cb_build_registers (void)
 {
+	/* TODO: get words *and* their definition from reserved.c /
+	         compiler configuration and
+	         build fields accordingly here */
 	cb_tree         r;
 	cb_tree		x;
 	char		buff[22];
 
 	/* RETURN-CODE */
-	if (!current_program->nested_level) {
-		x = cb_build_index (cb_build_reference ("RETURN-CODE"),
-				    cb_zero, 0, NULL);
-		CB_FIELD_PTR (x)->special_index = 1U;
-		current_program->cb_return_code = x;
+	if (cb_get_register_definition ("RETURN-CODE") != NULL) {
+		if (!current_program->nested_level) {
+			x = cb_build_index (cb_build_reference ("RETURN-CODE"),
+						cb_zero, 0, NULL);
+			CB_FIELD_PTR (x)->special_index = 1U;
+			current_program->cb_return_code = x;
+		}
 	}
 
 	/* SORT-RETURN */
-	x = cb_build_index (cb_build_reference ("SORT-RETURN"),
-			    cb_zero, 0, NULL);
-	CB_FIELD_PTR (x)->flag_no_init = 1;
-	current_program->cb_sort_return = x;
-
-	/* NUMBER-OF-CALL-PARAMETERS (OpenCOBOL/GnuCOBOL extension) */
-	x = cb_build_index (cb_build_reference ("NUMBER-OF-CALL-PARAMETERS"),
-			    cb_zero, 0, NULL);
-	CB_FIELD_PTR (x)->flag_no_init = 1;
-	CB_FIELD_PTR (x)->flag_local = 1;
-	CB_FIELD_PTR (x)->special_index = 2U;
-	current_program->cb_call_params = x;
-
-	/* TALLY */
-	if (current_program->nested_level == 0) {
-		r = cb_build_reference ("TALLY");
-		x = cb_build_field (r);
-		CB_FIELD_PTR (x)->usage = CB_USAGE_BINARY;
-		CB_FIELD_PTR (x)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
-		cb_validate_field (CB_FIELD_PTR (x));
-		CB_FIELD_PTR (x)->values = CB_LIST_INIT (cb_zero);
+	if (cb_get_register_definition ("SORT-RETURN") != NULL) {
+		x = cb_build_index (cb_build_reference ("SORT-RETURN"),
+					cb_zero, 0, NULL);
 		CB_FIELD_PTR (x)->flag_no_init = 1;
-		CB_FIELD_PTR (x)->flag_is_global = 1;
-		CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
+		current_program->cb_sort_return = x;
 	}
 
-	/* WHEN-COMPILED */
-	snprintf (buff, (size_t)17, "%02d/%02d/%02d%02d%c%02d%c%02d",
-		current_compile_time.day_of_month,
-		current_compile_time.month,
-		current_compile_time.year % 100,
-		current_compile_time.hour, '.',
-		current_compile_time.minute, '.',
-		current_compile_time.second);
-	cb_build_constant (cb_build_reference ("WHEN-COMPILED"),
-			   cb_build_alphanumeric_literal (buff, (size_t)16));
+	/* NUMBER-OF-CALL-PARAMETERS (OpenCOBOL/GnuCOBOL extension 1.0+) */
+	if (cb_get_register_definition ("NUMBER-OF-CALL-PARAMETERS") != NULL) {
+		x = cb_build_index (cb_build_reference ("NUMBER-OF-CALL-PARAMETERS"),
+					cb_zero, 0, NULL);
+		CB_FIELD_PTR (x)->flag_no_init = 1;
+		CB_FIELD_PTR (x)->flag_local = 1;
+		CB_FIELD_PTR (x)->special_index = 2U;
+		current_program->cb_call_params = x;
+	}
+
+	/* TALLY */
+	if (cb_get_register_definition ("TALLY") != NULL) {
+		if (current_program->nested_level == 0) {
+			r = cb_build_reference ("TALLY");
+			x = cb_build_field (r);
+			CB_FIELD_PTR (x)->usage = CB_USAGE_BINARY;
+			CB_FIELD_PTR (x)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
+			cb_validate_field (CB_FIELD_PTR (x));
+			CB_FIELD_PTR (x)->values = CB_LIST_INIT (cb_zero);
+			CB_FIELD_PTR (x)->flag_no_init = 1;
+			CB_FIELD_PTR (x)->flag_is_global = 1;
+			CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
+		}
+	}
+
+	/* WHEN-COMPILED, FIXME: the actual content is different for at least OSVS,
+	  as this uses "hh.mm.ssMMM DD, YYYY", we may assume this if the register
+	  will later be defined as X(20) ! */
+	if (cb_get_register_definition ("WHEN-COMPILED") != NULL) {
+		snprintf (buff, (size_t)17, "%02d/%02d/%02d%02d%c%02d%c%02d",
+			current_compile_time.day_of_month,
+			current_compile_time.month,
+			current_compile_time.year % 100,
+			current_compile_time.hour, '.',
+			current_compile_time.minute, '.',
+			current_compile_time.second);
+		cb_build_constant (cb_build_reference ("WHEN-COMPILED"),
+			cb_build_alphanumeric_literal (buff, (size_t)16));
+	}
+
+	/* LENGTH OF (different results depending on compiler configuration!) and
+	   ADDRESS OF should likely be added, too */
 
 	/* FUNCTION WHEN-COMPILED */
+	/* TODO: build on first reference (we have the compile time which is
+	         the reason that it was placed here in the first place
+			 available fixed in current_compile_time now) */
 	snprintf (buff, (size_t)17, "%d%02d%02d%02d%02d%02d%02d",
 		current_compile_time.year,
 		current_compile_time.month,
@@ -1310,7 +1331,8 @@ cb_define_switch_name (cb_tree name, cb_tree sname, const int flag)
 }
 
 void
-cb_check_word_length (int length, const char *word) {
+cb_check_word_length (int length, const char *word)
+{
 	if (unlikely (length > cb_word_length)) {
 		if (length > COB_MAX_WORDLEN) {
 			/* Absolute limit */
@@ -4264,7 +4286,7 @@ cb_build_cond (cb_tree x)
 		return cb_error_node;
 	}
 
-	if(cb_arithmetic_osvs) {
+	if (cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in condition */
 		if (expr_dmax == -1) {
 			expr_rslt = CB_VALUE(x);
@@ -5302,7 +5324,7 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 	}
 
 	/* Allow direct reference to a device name (not defined as mnemonic name) */
-	sys = lookup_system_name (CB_NAME (name));
+	sys = get_system_name (CB_NAME (name));
 	if (sys) {
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
@@ -6248,7 +6270,7 @@ cb_build_display_name (cb_tree x)
 	}
 	name = CB_NAME (x);
 	/* Allow direct reference to a device name (not defined as mnemonic name) */
-	sys = lookup_system_name (name);
+	sys = get_system_name (name);
 	if (sys) {
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
@@ -9355,7 +9377,9 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 		if (CB_FILE (cb_ref (name))->organization != COB_ORG_SORT) {
 			cb_error_x (name, _("invalid SORT filename"));
 		}
-		CB_FIELD_PTR (current_program->cb_sort_return)->count++;
+		if (current_program->cb_sort_return) {
+			CB_FIELD_PTR (current_program->cb_sort_return)->count++;
+		}
 		cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
 					     cb_int (cb_list_length (keys)), col,
 					     CB_BUILD_CAST_ADDRESS (current_program->cb_sort_return),

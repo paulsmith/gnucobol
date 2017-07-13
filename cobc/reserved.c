@@ -33,156 +33,164 @@
 
 /* Local variables */
 
-struct system_struct {
+struct system_name_struct {
 	const char				*name;
 	const enum cb_system_name_category	category;
 	const int				token;
+	enum cb_feature_mode	active;
 };
 
-static const struct system_struct	system_table[] = {
-	{"SYSIN",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN},
-	{"SYSIPT",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN},
-	{"STDIN",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN},
-	{"SYSOUT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"SYSLIST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"SYSLST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"STDOUT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"PRINT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"PRINTER",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"PRINTER-1",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT},
-	{"SYSERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR},
-	{"STDERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR},
-	{"CONSOLE",		CB_DEVICE_NAME,  CB_DEVICE_CONSOLE},
-	{"C01",			CB_FEATURE_NAME, CB_FEATURE_C01},
-	{"C02",			CB_FEATURE_NAME, CB_FEATURE_C02},
-	{"C03",			CB_FEATURE_NAME, CB_FEATURE_C03},
-	{"C04",			CB_FEATURE_NAME, CB_FEATURE_C04},
-	{"C05",			CB_FEATURE_NAME, CB_FEATURE_C05},
-	{"C06",			CB_FEATURE_NAME, CB_FEATURE_C06},
-	{"C07",			CB_FEATURE_NAME, CB_FEATURE_C07},
-	{"C08",			CB_FEATURE_NAME, CB_FEATURE_C08},
-	{"C09",			CB_FEATURE_NAME, CB_FEATURE_C09},
-	{"C10",			CB_FEATURE_NAME, CB_FEATURE_C10},
-	{"C11",			CB_FEATURE_NAME, CB_FEATURE_C11},
-	{"C12",			CB_FEATURE_NAME, CB_FEATURE_C12},
-	{"CSP",			CB_FEATURE_NAME, CB_FEATURE_FORMFEED},
-	{"FORMFEED",		CB_FEATURE_NAME, CB_FEATURE_FORMFEED},
-	{"CALL-CONVENTION",	CB_FEATURE_NAME, CB_FEATURE_CONVENTION},
-	{"SWITCH-0",		CB_SWITCH_NAME,  CB_SWITCH_0},
-	{"SWITCH-1",		CB_SWITCH_NAME,  CB_SWITCH_1},
-	{"SWITCH-2",		CB_SWITCH_NAME,  CB_SWITCH_2},
-	{"SWITCH-3",		CB_SWITCH_NAME,  CB_SWITCH_3},
-	{"SWITCH-4",		CB_SWITCH_NAME,  CB_SWITCH_4},
-	{"SWITCH-5",		CB_SWITCH_NAME,  CB_SWITCH_5},
-	{"SWITCH-6",		CB_SWITCH_NAME,  CB_SWITCH_6},
-	{"SWITCH-7",		CB_SWITCH_NAME,  CB_SWITCH_7},
-	{"SWITCH-8",		CB_SWITCH_NAME,  CB_SWITCH_8},
-	{"SWITCH-9",		CB_SWITCH_NAME,  CB_SWITCH_9},
-	{"SWITCH-10",		CB_SWITCH_NAME,  CB_SWITCH_10},
-	{"SWITCH-11",		CB_SWITCH_NAME,  CB_SWITCH_11},
-	{"SWITCH-12",		CB_SWITCH_NAME,  CB_SWITCH_12},
-	{"SWITCH-13",		CB_SWITCH_NAME,  CB_SWITCH_13},
-	{"SWITCH-14",		CB_SWITCH_NAME,  CB_SWITCH_14},
-	{"SWITCH-15",		CB_SWITCH_NAME,  CB_SWITCH_15},
-	{"SWITCH-16",		CB_SWITCH_NAME,  CB_SWITCH_16},
-	{"SWITCH-17",		CB_SWITCH_NAME,  CB_SWITCH_17},
-	{"SWITCH-18",		CB_SWITCH_NAME,  CB_SWITCH_18},
-	{"SWITCH-19",		CB_SWITCH_NAME,  CB_SWITCH_19},
-	{"SWITCH-20",		CB_SWITCH_NAME,  CB_SWITCH_20},
-	{"SWITCH-21",		CB_SWITCH_NAME,  CB_SWITCH_21},
-	{"SWITCH-22",		CB_SWITCH_NAME,  CB_SWITCH_22},
-	{"SWITCH-23",		CB_SWITCH_NAME,  CB_SWITCH_23},
-	{"SWITCH-24",		CB_SWITCH_NAME,  CB_SWITCH_24},
-	{"SWITCH-25",		CB_SWITCH_NAME,  CB_SWITCH_25},
-	{"SWITCH-26",		CB_SWITCH_NAME,  CB_SWITCH_26},
-	{"SWITCH-27",		CB_SWITCH_NAME,  CB_SWITCH_27},
-	{"SWITCH-28",		CB_SWITCH_NAME,  CB_SWITCH_28},
-	{"SWITCH-29",		CB_SWITCH_NAME,  CB_SWITCH_29},
-	{"SWITCH-30",		CB_SWITCH_NAME,  CB_SWITCH_30},
-	{"SWITCH-31",		CB_SWITCH_NAME,  CB_SWITCH_31},
-	{"SWITCH-32",		CB_SWITCH_NAME,  CB_SWITCH_32},
-	{"SWITCH-33",		CB_SWITCH_NAME,  CB_SWITCH_33},
-	{"SWITCH-34",		CB_SWITCH_NAME,  CB_SWITCH_34},
-	{"SWITCH-35",		CB_SWITCH_NAME,  CB_SWITCH_35},
-	{"SWITCH-36",		CB_SWITCH_NAME,  CB_SWITCH_36}
+/* TODO: allow these to not only be enabled/disabled but defined by compiler configuration
+         removing duplicates from this list (especially concerning the switches) */
+static struct system_name_struct	system_name_table[] = {
+	{"SYSIN",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN, CB_FEATURE_ACTIVE},
+	{"SYSIPT",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN, CB_FEATURE_ACTIVE},
+	{"STDIN",		CB_DEVICE_NAME,  CB_DEVICE_SYSIN, CB_FEATURE_ACTIVE},
+	{"SYSOUT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"SYSLIST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"SYSLST",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"STDOUT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"PRINT",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"PRINTER",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"PRINTER-1",		CB_DEVICE_NAME,  CB_DEVICE_SYSOUT, CB_FEATURE_ACTIVE},
+	{"SYSERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR, CB_FEATURE_ACTIVE},
+	{"STDERR",		CB_DEVICE_NAME,  CB_DEVICE_SYSERR, CB_FEATURE_ACTIVE},
+	{"CONSOLE",		CB_DEVICE_NAME,  CB_DEVICE_CONSOLE, CB_FEATURE_ACTIVE},
+	{"C01",			CB_FEATURE_NAME, CB_FEATURE_C01, CB_FEATURE_ACTIVE},
+	{"C02",			CB_FEATURE_NAME, CB_FEATURE_C02, CB_FEATURE_ACTIVE},
+	{"C03",			CB_FEATURE_NAME, CB_FEATURE_C03, CB_FEATURE_ACTIVE},
+	{"C04",			CB_FEATURE_NAME, CB_FEATURE_C04, CB_FEATURE_ACTIVE},
+	{"C05",			CB_FEATURE_NAME, CB_FEATURE_C05, CB_FEATURE_ACTIVE},
+	{"C06",			CB_FEATURE_NAME, CB_FEATURE_C06, CB_FEATURE_ACTIVE},
+	{"C07",			CB_FEATURE_NAME, CB_FEATURE_C07, CB_FEATURE_ACTIVE},
+	{"C08",			CB_FEATURE_NAME, CB_FEATURE_C08, CB_FEATURE_ACTIVE},
+	{"C09",			CB_FEATURE_NAME, CB_FEATURE_C09, CB_FEATURE_ACTIVE},
+	{"C10",			CB_FEATURE_NAME, CB_FEATURE_C10, CB_FEATURE_ACTIVE},
+	{"C11",			CB_FEATURE_NAME, CB_FEATURE_C11, CB_FEATURE_ACTIVE},
+	{"C12",			CB_FEATURE_NAME, CB_FEATURE_C12, CB_FEATURE_ACTIVE},
+	{"CSP",			CB_FEATURE_NAME, CB_FEATURE_FORMFEED, CB_FEATURE_ACTIVE},
+	{"FORMFEED",		CB_FEATURE_NAME, CB_FEATURE_FORMFEED, CB_FEATURE_ACTIVE},
+	{"CALL-CONVENTION",	CB_FEATURE_NAME, CB_FEATURE_CONVENTION, CB_FEATURE_ACTIVE},
+	{"SWITCH-0",		CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_ACTIVE},
+	{"SWITCH-1",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_ACTIVE},
+	{"SWITCH-2",		CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_ACTIVE},
+	{"SWITCH-3",		CB_SWITCH_NAME,  CB_SWITCH_3, CB_FEATURE_ACTIVE},
+	{"SWITCH-4",		CB_SWITCH_NAME,  CB_SWITCH_4, CB_FEATURE_ACTIVE},
+	{"SWITCH-5",		CB_SWITCH_NAME,  CB_SWITCH_5, CB_FEATURE_ACTIVE},
+	{"SWITCH-6",		CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_ACTIVE},
+	{"SWITCH-7",		CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_ACTIVE},
+	{"SWITCH-8",		CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_ACTIVE},
+	{"SWITCH-9",		CB_SWITCH_NAME,  CB_SWITCH_9, CB_FEATURE_ACTIVE},
+	{"SWITCH-10",		CB_SWITCH_NAME,  CB_SWITCH_10, CB_FEATURE_ACTIVE},
+	{"SWITCH-11",		CB_SWITCH_NAME,  CB_SWITCH_11, CB_FEATURE_ACTIVE},
+	{"SWITCH-12",		CB_SWITCH_NAME,  CB_SWITCH_12, CB_FEATURE_ACTIVE},
+	{"SWITCH-13",		CB_SWITCH_NAME,  CB_SWITCH_13, CB_FEATURE_ACTIVE},
+	{"SWITCH-14",		CB_SWITCH_NAME,  CB_SWITCH_14, CB_FEATURE_ACTIVE},
+	{"SWITCH-15",		CB_SWITCH_NAME,  CB_SWITCH_15, CB_FEATURE_ACTIVE},
+	{"SWITCH-16",		CB_SWITCH_NAME,  CB_SWITCH_16, CB_FEATURE_ACTIVE},
+	{"SWITCH-17",		CB_SWITCH_NAME,  CB_SWITCH_17, CB_FEATURE_ACTIVE},
+	{"SWITCH-18",		CB_SWITCH_NAME,  CB_SWITCH_18, CB_FEATURE_ACTIVE},
+	{"SWITCH-19",		CB_SWITCH_NAME,  CB_SWITCH_19, CB_FEATURE_ACTIVE},
+	{"SWITCH-20",		CB_SWITCH_NAME,  CB_SWITCH_20, CB_FEATURE_ACTIVE},
+	{"SWITCH-21",		CB_SWITCH_NAME,  CB_SWITCH_21, CB_FEATURE_ACTIVE},
+	{"SWITCH-22",		CB_SWITCH_NAME,  CB_SWITCH_22, CB_FEATURE_ACTIVE},
+	{"SWITCH-23",		CB_SWITCH_NAME,  CB_SWITCH_23, CB_FEATURE_ACTIVE},
+	{"SWITCH-24",		CB_SWITCH_NAME,  CB_SWITCH_24, CB_FEATURE_ACTIVE},
+	{"SWITCH-25",		CB_SWITCH_NAME,  CB_SWITCH_25, CB_FEATURE_ACTIVE},
+	{"SWITCH-26",		CB_SWITCH_NAME,  CB_SWITCH_26, CB_FEATURE_ACTIVE},
+	{"SWITCH-27",		CB_SWITCH_NAME,  CB_SWITCH_27, CB_FEATURE_ACTIVE},
+	{"SWITCH-28",		CB_SWITCH_NAME,  CB_SWITCH_28, CB_FEATURE_ACTIVE},
+	{"SWITCH-29",		CB_SWITCH_NAME,  CB_SWITCH_29, CB_FEATURE_ACTIVE},
+	{"SWITCH-30",		CB_SWITCH_NAME,  CB_SWITCH_30, CB_FEATURE_ACTIVE},
+	{"SWITCH-31",		CB_SWITCH_NAME,  CB_SWITCH_31, CB_FEATURE_ACTIVE},
+	{"SWITCH-32",		CB_SWITCH_NAME,  CB_SWITCH_32, CB_FEATURE_ACTIVE},
+	{"SWITCH-33",		CB_SWITCH_NAME,  CB_SWITCH_33, CB_FEATURE_ACTIVE},
+	{"SWITCH-34",		CB_SWITCH_NAME,  CB_SWITCH_34, CB_FEATURE_ACTIVE},
+	{"SWITCH-35",		CB_SWITCH_NAME,  CB_SWITCH_35, CB_FEATURE_ACTIVE},
+	{"SWITCH-36",		CB_SWITCH_NAME,  CB_SWITCH_36, CB_FEATURE_ACTIVE},
+	{"SW0",			CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_DISABLED},
+	{"SW1",			CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_DISABLED},
+	{"SW2",			CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_DISABLED},
+	{"SW3",			CB_SWITCH_NAME,  CB_SWITCH_3, CB_FEATURE_DISABLED},
+	{"SW4",			CB_SWITCH_NAME,  CB_SWITCH_4, CB_FEATURE_DISABLED},
+	{"SW5",			CB_SWITCH_NAME,  CB_SWITCH_5, CB_FEATURE_DISABLED},
+	{"SW6",			CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_DISABLED},
+	{"SW7",			CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_DISABLED},
+	{"SW8",			CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_DISABLED},
+	{"SW9",			CB_SWITCH_NAME,  CB_SWITCH_9, CB_FEATURE_DISABLED},
+	{"SW10",		CB_SWITCH_NAME,  CB_SWITCH_10, CB_FEATURE_DISABLED},
+	{"SW11",		CB_SWITCH_NAME,  CB_SWITCH_11, CB_FEATURE_DISABLED},
+	{"SW12",		CB_SWITCH_NAME,  CB_SWITCH_12, CB_FEATURE_DISABLED},
+	{"SW13",		CB_SWITCH_NAME,  CB_SWITCH_13, CB_FEATURE_DISABLED},
+	{"SW14",		CB_SWITCH_NAME,  CB_SWITCH_14, CB_FEATURE_DISABLED},
+	{"SW15",		CB_SWITCH_NAME,  CB_SWITCH_15, CB_FEATURE_DISABLED},
+	{"SWITCH 0",		CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_DISABLED},
+	{"SWITCH 1",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_DISABLED},
+	{"SWITCH 2",		CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_DISABLED},
+	{"SWITCH 3",		CB_SWITCH_NAME,  CB_SWITCH_3, CB_FEATURE_DISABLED},
+	{"SWITCH 4",		CB_SWITCH_NAME,  CB_SWITCH_4, CB_FEATURE_DISABLED},
+	{"SWITCH 5",		CB_SWITCH_NAME,  CB_SWITCH_5, CB_FEATURE_DISABLED},
+	{"SWITCH 6",		CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_DISABLED},
+	{"SWITCH 7",		CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_DISABLED},
+	{"SWITCH 8",		CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_DISABLED},
+	{"SWITCH 9",		CB_SWITCH_NAME,  CB_SWITCH_9, CB_FEATURE_DISABLED},
+	{"SWITCH 10",		CB_SWITCH_NAME,  CB_SWITCH_10, CB_FEATURE_DISABLED},
+	{"SWITCH 11",		CB_SWITCH_NAME,  CB_SWITCH_11, CB_FEATURE_DISABLED},
+	{"SWITCH 12",		CB_SWITCH_NAME,  CB_SWITCH_12, CB_FEATURE_DISABLED},
+	{"SWITCH 13",		CB_SWITCH_NAME,  CB_SWITCH_13, CB_FEATURE_DISABLED},
+	{"SWITCH 14",		CB_SWITCH_NAME,  CB_SWITCH_14, CB_FEATURE_DISABLED},
+	{"SWITCH 15",		CB_SWITCH_NAME,  CB_SWITCH_15, CB_FEATURE_DISABLED},
+	{"SWITCH 16",		CB_SWITCH_NAME,  CB_SWITCH_16, CB_FEATURE_DISABLED},
+	{"SWITCH 17",		CB_SWITCH_NAME,  CB_SWITCH_17, CB_FEATURE_DISABLED},
+	{"SWITCH 18",		CB_SWITCH_NAME,  CB_SWITCH_18, CB_FEATURE_DISABLED},
+	{"SWITCH 19",		CB_SWITCH_NAME,  CB_SWITCH_19, CB_FEATURE_DISABLED},
+	{"SWITCH 20",		CB_SWITCH_NAME,  CB_SWITCH_20, CB_FEATURE_DISABLED},
+	{"SWITCH 21",		CB_SWITCH_NAME,  CB_SWITCH_21, CB_FEATURE_DISABLED},
+	{"SWITCH 22",		CB_SWITCH_NAME,  CB_SWITCH_22, CB_FEATURE_DISABLED},
+	{"SWITCH 23",		CB_SWITCH_NAME,  CB_SWITCH_23, CB_FEATURE_DISABLED},
+	{"SWITCH 24",		CB_SWITCH_NAME,  CB_SWITCH_24, CB_FEATURE_DISABLED},
+	{"SWITCH 25",		CB_SWITCH_NAME,  CB_SWITCH_25, CB_FEATURE_DISABLED},
+	{"SWITCH 26",		CB_SWITCH_NAME,  CB_SWITCH_26, CB_FEATURE_DISABLED},
+	{"SWITCH A",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_DISABLED},
+	{"SWITCH B",		CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_DISABLED},
+	{"SWITCH C",		CB_SWITCH_NAME,  CB_SWITCH_3, CB_FEATURE_DISABLED},
+	{"SWITCH D",		CB_SWITCH_NAME,  CB_SWITCH_4, CB_FEATURE_DISABLED},
+	{"SWITCH E",		CB_SWITCH_NAME,  CB_SWITCH_5, CB_FEATURE_DISABLED},
+	{"SWITCH F",		CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_DISABLED},
+	{"SWITCH G",		CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_DISABLED},
+	{"SWITCH H",		CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_DISABLED},
+	{"SWITCH I",		CB_SWITCH_NAME,  CB_SWITCH_9, CB_FEATURE_DISABLED},
+	{"SWITCH J",		CB_SWITCH_NAME,  CB_SWITCH_10, CB_FEATURE_DISABLED},
+	{"SWITCH K",		CB_SWITCH_NAME,  CB_SWITCH_11, CB_FEATURE_DISABLED},
+	{"SWITCH L",		CB_SWITCH_NAME,  CB_SWITCH_12, CB_FEATURE_DISABLED},
+	{"SWITCH M",		CB_SWITCH_NAME,  CB_SWITCH_13, CB_FEATURE_DISABLED},
+	{"SWITCH N",		CB_SWITCH_NAME,  CB_SWITCH_14, CB_FEATURE_DISABLED},
+	{"SWITCH O",		CB_SWITCH_NAME,  CB_SWITCH_15, CB_FEATURE_DISABLED},
+	{"SWITCH P",		CB_SWITCH_NAME,  CB_SWITCH_16, CB_FEATURE_DISABLED},
+	{"SWITCH Q",		CB_SWITCH_NAME,  CB_SWITCH_17, CB_FEATURE_DISABLED},
+	{"SWITCH R",		CB_SWITCH_NAME,  CB_SWITCH_18, CB_FEATURE_DISABLED},
+	{"SWITCH S",		CB_SWITCH_NAME,  CB_SWITCH_19, CB_FEATURE_DISABLED},
+	{"SWITCH T",		CB_SWITCH_NAME,  CB_SWITCH_20, CB_FEATURE_DISABLED},
+	{"SWITCH U",		CB_SWITCH_NAME,  CB_SWITCH_21, CB_FEATURE_DISABLED},
+	{"SWITCH V",		CB_SWITCH_NAME,  CB_SWITCH_22, CB_FEATURE_DISABLED},
+	{"SWITCH W",		CB_SWITCH_NAME,  CB_SWITCH_23, CB_FEATURE_DISABLED},
+	{"SWITCH X",		CB_SWITCH_NAME,  CB_SWITCH_24, CB_FEATURE_DISABLED},
+	{"SWITCH Y",		CB_SWITCH_NAME,  CB_SWITCH_25, CB_FEATURE_DISABLED},
+	{"SWITCH Z",		CB_SWITCH_NAME,  CB_SWITCH_26, CB_FEATURE_DISABLED},
+	{"UPSI-0",		CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_DISABLED},
+	{"UPSI-1",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_DISABLED},
+	{"UPSI-2",		CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_DISABLED},
+	{"UPSI-3",		CB_SWITCH_NAME,  CB_SWITCH_3, CB_FEATURE_DISABLED},
+	{"UPSI-4",		CB_SWITCH_NAME,  CB_SWITCH_4, CB_FEATURE_DISABLED},
+	{"UPSI-5",		CB_SWITCH_NAME,  CB_SWITCH_5, CB_FEATURE_DISABLED},
+	{"UPSI-6",		CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_DISABLED},
+	{"UPSI-7",		CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_DISABLED},
+	{"UPSI-8",		CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_DISABLED}
 };
 
-#define	SYSTEM_TAB_SIZE	sizeof(system_table) / sizeof(struct system_struct)
+#define	SYSTEM_TAB_SIZE	sizeof(system_name_table) / sizeof(struct system_name_struct)
 
-static const struct system_struct	ext_system_table[] = {
-	{"SW0",			CB_SWITCH_NAME,  CB_SWITCH_0},
-	{"SW1",			CB_SWITCH_NAME,  CB_SWITCH_1},
-	{"SW2",			CB_SWITCH_NAME,  CB_SWITCH_2},
-	{"SW3",			CB_SWITCH_NAME,  CB_SWITCH_3},
-	{"SW4",			CB_SWITCH_NAME,  CB_SWITCH_4},
-	{"SW5",			CB_SWITCH_NAME,  CB_SWITCH_5},
-	{"SW6",			CB_SWITCH_NAME,  CB_SWITCH_6},
-	{"SW7",			CB_SWITCH_NAME,  CB_SWITCH_7},
-	{"SW8",			CB_SWITCH_NAME,  CB_SWITCH_8},
-	{"SW9",			CB_SWITCH_NAME,  CB_SWITCH_9},
-	{"SW10",		CB_SWITCH_NAME,  CB_SWITCH_10},
-	{"SW11",		CB_SWITCH_NAME,  CB_SWITCH_11},
-	{"SW12",		CB_SWITCH_NAME,  CB_SWITCH_12},
-	{"SW13",		CB_SWITCH_NAME,  CB_SWITCH_13},
-	{"SW14",		CB_SWITCH_NAME,  CB_SWITCH_14},
-	{"SW15",		CB_SWITCH_NAME,  CB_SWITCH_15},
-	{"SWITCH 0",		CB_SWITCH_NAME,  CB_SWITCH_0},
-	{"SWITCH 1",		CB_SWITCH_NAME,  CB_SWITCH_1},
-	{"SWITCH 2",		CB_SWITCH_NAME,  CB_SWITCH_2},
-	{"SWITCH 3",		CB_SWITCH_NAME,  CB_SWITCH_3},
-	{"SWITCH 4",		CB_SWITCH_NAME,  CB_SWITCH_4},
-	{"SWITCH 5",		CB_SWITCH_NAME,  CB_SWITCH_5},
-	{"SWITCH 6",		CB_SWITCH_NAME,  CB_SWITCH_6},
-	{"SWITCH 7",		CB_SWITCH_NAME,  CB_SWITCH_7},
-	{"SWITCH 8",		CB_SWITCH_NAME,  CB_SWITCH_8},
-	{"SWITCH 9",		CB_SWITCH_NAME,  CB_SWITCH_9},
-	{"SWITCH 10",		CB_SWITCH_NAME,  CB_SWITCH_10},
-	{"SWITCH 11",		CB_SWITCH_NAME,  CB_SWITCH_11},
-	{"SWITCH 12",		CB_SWITCH_NAME,  CB_SWITCH_12},
-	{"SWITCH 13",		CB_SWITCH_NAME,  CB_SWITCH_13},
-	{"SWITCH 14",		CB_SWITCH_NAME,  CB_SWITCH_14},
-	{"SWITCH 15",		CB_SWITCH_NAME,  CB_SWITCH_15},
-	{"SWITCH 16",		CB_SWITCH_NAME,  CB_SWITCH_16},
-	{"SWITCH 17",		CB_SWITCH_NAME,  CB_SWITCH_17},
-	{"SWITCH 18",		CB_SWITCH_NAME,  CB_SWITCH_18},
-	{"SWITCH 19",		CB_SWITCH_NAME,  CB_SWITCH_19},
-	{"SWITCH 20",		CB_SWITCH_NAME,  CB_SWITCH_20},
-	{"SWITCH 21",		CB_SWITCH_NAME,  CB_SWITCH_21},
-	{"SWITCH 22",		CB_SWITCH_NAME,  CB_SWITCH_22},
-	{"SWITCH 23",		CB_SWITCH_NAME,  CB_SWITCH_23},
-	{"SWITCH 24",		CB_SWITCH_NAME,  CB_SWITCH_24},
-	{"SWITCH 25",		CB_SWITCH_NAME,  CB_SWITCH_25},
-	{"SWITCH 26",		CB_SWITCH_NAME,  CB_SWITCH_26},
-	{"SWITCH A",		CB_SWITCH_NAME,  CB_SWITCH_1},
-	{"SWITCH B",		CB_SWITCH_NAME,  CB_SWITCH_2},
-	{"SWITCH C",		CB_SWITCH_NAME,  CB_SWITCH_3},
-	{"SWITCH D",		CB_SWITCH_NAME,  CB_SWITCH_4},
-	{"SWITCH E",		CB_SWITCH_NAME,  CB_SWITCH_5},
-	{"SWITCH F",		CB_SWITCH_NAME,  CB_SWITCH_6},
-	{"SWITCH G",		CB_SWITCH_NAME,  CB_SWITCH_7},
-	{"SWITCH H",		CB_SWITCH_NAME,  CB_SWITCH_8},
-	{"SWITCH I",		CB_SWITCH_NAME,  CB_SWITCH_9},
-	{"SWITCH J",		CB_SWITCH_NAME,  CB_SWITCH_10},
-	{"SWITCH K",		CB_SWITCH_NAME,  CB_SWITCH_11},
-	{"SWITCH L",		CB_SWITCH_NAME,  CB_SWITCH_12},
-	{"SWITCH M",		CB_SWITCH_NAME,  CB_SWITCH_13},
-	{"SWITCH N",		CB_SWITCH_NAME,  CB_SWITCH_14},
-	{"SWITCH O",		CB_SWITCH_NAME,  CB_SWITCH_15},
-	{"SWITCH P",		CB_SWITCH_NAME,  CB_SWITCH_16},
-	{"SWITCH Q",		CB_SWITCH_NAME,  CB_SWITCH_17},
-	{"SWITCH R",		CB_SWITCH_NAME,  CB_SWITCH_18},
-	{"SWITCH S",		CB_SWITCH_NAME,  CB_SWITCH_19},
-	{"SWITCH T",		CB_SWITCH_NAME,  CB_SWITCH_20},
-	{"SWITCH U",		CB_SWITCH_NAME,  CB_SWITCH_21},
-	{"SWITCH V",		CB_SWITCH_NAME,  CB_SWITCH_22},
-	{"SWITCH W",		CB_SWITCH_NAME,  CB_SWITCH_23},
-	{"SWITCH X",		CB_SWITCH_NAME,  CB_SWITCH_24},
-	{"SWITCH Y",		CB_SWITCH_NAME,  CB_SWITCH_25},
-	{"SWITCH Z",		CB_SWITCH_NAME,  CB_SWITCH_26}
-};
-
-#define	EXT_SYSTEM_TAB_SIZE	\
-	sizeof(ext_system_table) / sizeof(struct system_struct)
+static struct system_name_struct *lookup_system_name (const char *, const int);
 
 /* Reserved word table */
 /* Must be ordered on word for binary search */
@@ -2069,6 +2077,27 @@ struct amendment_list {
 
 struct amendment_list	*amendment_list = NULL;
 
+struct register_struct {
+	const char				*name;
+	const char				*definition;
+	enum cb_feature_mode	active;
+};
+
+static struct register_struct	register_list[] = {
+	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
+	{"SORT-RETURN", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
+	{"NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* OpenCOBOL / GnuCOBOL extension, at least from 1.0+ */
+	{"COB-CRT-STATUS", "PICTURE 9(4) USAGE DISPLAY VALUE ZERO", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
+	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
+#if 0 /* FIXME: should be handled as register */
+	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},
+#endif
+	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},
+	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
+};
+
+#define	NUM_REGISTERS	sizeof(register_list) / sizeof(struct register_struct)
+
 /* Intrinsic Function List */
 /* Must be ordered on name for binary search */
 
@@ -2077,10 +2106,16 @@ struct amendment_list	*amendment_list = NULL;
 /*	Implemented, Number of arguments: Max [-1 = unlimited], Min,	*/
 /*	Category,	Can refmod							*/
 
-static const struct cb_intrinsic_table function_list[] = {
+static struct cb_intrinsic_table function_list[] = {
   { "ABS",				"cob_intr_abs",
 					CB_INTR_ABS, FUNCTION_NAME,
 					CB_FEATURE_ACTIVE,	1, 1,
+					CB_CATEGORY_NUMERIC, 0
+  },
+  /* ACUCOBOL-extension (synonym for ABS) */
+  { "ABSOLUTE-VALUE",		"cob_intr_abs",
+					CB_INTR_ABS, FUNCTION_NAME,
+					CB_FEATURE_DISABLED,	1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "ACOS",				"cob_intr_acos",
@@ -2770,6 +2805,8 @@ static int
 is_invalid_word (const char *word, const int size,
 		 const char *fname, const int line)
 {
+	/* FIXME: Should use the current (dialect specific) maximum word length,
+	          not the absolute maximum, check order of reading and add test case */
 	if (size > COB_MAX_WORDLEN) {
 		configuration_error (fname, line, 1,
 				     _("reserved word must have less than %d characters"),
@@ -3022,7 +3059,7 @@ initialize_reserved_words_if_needed (void)
 static void
 list_aliases (const struct cobc_reserved * const word)
 {
-	int	i;
+	size_t	i;
 	int     alias_found = 0;
 
 	if (word->token <= 0) {
@@ -3046,19 +3083,6 @@ list_aliases (const struct cobc_reserved * const word)
 	if (alias_found) {
 		putchar (')');
 	}
-}
-
-static void
-list_registers (void)
-{
-	/* Work in progress Simon: implement setting CB_FUNC_DISABLED by user-specified list */
-	printf ("%-32s%s\n", _("Extra internal registers"), _("Definition"));
-	printf ("%-32s%s\n", "RETURN-CODE", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "SORT-RETURN", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG");
-	printf ("%-32s%s\n", "COB-CRT-STATUS", "PIC 9(4)");
-	printf ("%-32s%s\n", "TALLY", "GLOBAL PIC 9(5) USAGE BINARY VALUE ZERO");
-	printf ("%-32s%s\n", _("'LENGTH OF' phrase"), "USAGE BINARY-LONG");
 }
 
 /* Global functions */
@@ -3087,23 +3111,14 @@ remove_context_sensitivity (const char *word, const int context)
 }
 
 cb_tree
-lookup_system_name (const char *name)
+get_system_name (const char *name)
 {
-	size_t	i;
 
-	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
-		if (cob_strcasecmp (name, system_table[i].name) == 0) {
-			return cb_build_system_name (system_table[i].category,
-						      system_table[i].token);
-		}
-	}
-	if (cb_flag_syntax_extension) {
-		for (i = 0; i < EXT_SYSTEM_TAB_SIZE; ++i) {
-			if (cob_strcasecmp (name, ext_system_table[i].name) == 0) {
-				return cb_build_system_name (ext_system_table[i].category,
-							      ext_system_table[i].token);
-			}
-		}
+	struct system_name_struct *system_name = lookup_system_name (name, 0);
+	
+	if (system_name != NULL) {
+		return cb_build_system_name (system_name->category,
+			system_name->token);
 	}
 	return NULL;
 }
@@ -3254,11 +3269,302 @@ lookup_intrinsic (const char *name, const int checkimpl)
 	struct cb_intrinsic_table	*cbp;
 
 	cbp = bsearch (name, function_list, NUM_INTRINSICS,
-			sizeof (struct cb_intrinsic_table), intrinsic_comp);
+		sizeof (struct cb_intrinsic_table), intrinsic_comp);
 	if (cbp && (checkimpl || cbp->active == CB_FEATURE_ACTIVE)) {
 		return cbp;
 	}
 	return NULL;
+}
+
+static void
+set_intrinsic_mode (struct cb_intrinsic_table *cbp, enum cb_feature_mode mode)
+{
+	/* FIXME: doesn't cater for not implemented -> disabled -> active [should be not implemented again] */
+	if (cbp->active == CB_FEATURE_NOT_IMPLEMENTED && mode == CB_FEATURE_ACTIVE) {
+		return;
+	}
+	cbp->active = mode;
+}
+
+static void
+change_intrinsic (const char *name, const char *fname, const int line, enum cb_feature_mode mode)
+{
+	struct cb_intrinsic_table *cbp;
+	size_t		i;
+	
+	/* Group "ALL" intrinsics */
+	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+		for (i = 0; i < NUM_INTRINSICS; ++i) {
+			set_intrinsic_mode (&function_list[i], mode);
+		}
+		return;
+	}
+
+	cbp = lookup_intrinsic (name, 1);
+	if (!cbp) {
+		if (mode == CB_FEATURE_ACTIVE) {
+			configuration_error (fname, line, 1, _("intrinsic function %s is unknown"), name);
+		}
+		return;
+	}
+	set_intrinsic_mode (cbp, mode);
+}
+
+void
+activate_intrinsic (const char *name, const char *fname, const int line)
+{
+	change_intrinsic (name, fname, line, CB_FEATURE_ACTIVE);
+}
+
+void
+deactivate_intrinsic (const char *name, const char *fname, const int line)
+{
+	change_intrinsic (name, fname, line, CB_FEATURE_DISABLED);
+}
+
+void
+cb_list_intrinsics (void)
+{
+	const char	*t;
+	char	argnum [20];
+	size_t		i;
+
+	putchar ('\n');
+	printf ("%-32s%-16s%s\n",
+		_("Intrinsic Function"), _("Implemented"), _("Parameters"));
+	for (i = 0; i < NUM_INTRINSICS; ++i) {
+		switch (function_list[i].active) {
+		case CB_FEATURE_ACTIVE:
+			t = _("Yes");
+			break;
+		case CB_FEATURE_NOT_IMPLEMENTED:
+			t = _("No");
+			break;
+		default: /* CB_FEATURE_DISABLED */
+			continue;
+		}
+		if (function_list[i].args == -1) {
+			snprintf (argnum, sizeof (argnum) - 1, "%s", _("Unlimited"));
+		} else if (function_list[i].args != function_list[i].min_args) {
+			snprintf (argnum, sizeof (argnum) - 1, "%d - %d",
+				(int)function_list[i].min_args, (int)function_list[i].args);
+		} else {
+			snprintf (argnum, sizeof (argnum) - 1, "%d", (int)function_list[i].args);
+		}
+		printf ("%-32s%-16s%s\n", function_list[i].name, t, argnum);
+	}
+}
+
+static struct register_struct *
+lookup_register (const char *name, const int checkimpl)
+{
+	size_t		i;
+
+	for (i = 0; i < NUM_REGISTERS; ++i) {
+		if (cob_strcasecmp (register_list[i].name, name) == 0) {
+			if (checkimpl || register_list[i].active != CB_FEATURE_DISABLED) {
+				return &register_list[i];
+			}
+			break;
+		}
+	}
+	return NULL;
+}
+
+/* add an entry to the register list, currently the definition is ignored,
+   TODO: check definition and add a new special register accordingly */
+
+void
+add_register (const char *name_and_definition, const char *fname, const int line)
+{
+	const char *name = name_and_definition;
+	char *definition;
+
+	struct register_struct *special_register;
+
+	/* note: we don't break at space as this would kill "ADDRESS OF"
+	         and "PIC 9(05) USAGE ..." */
+	definition = strpbrk (name_and_definition, "\t:=");
+	if (definition) {
+		*definition++ = 0;
+		/* TODO: parse definition here (and start from first non-space) */
+	}
+
+	special_register = lookup_register (name, 1);
+	if (!special_register) {
+		if (!definition || *definition == 0) {
+			configuration_error (fname, line, 1,
+				_("special register %s is unknown, needs a defintion"), name);
+			return;
+		}
+		/* TODO: add register here */
+		configuration_error (fname, line, 1, _("special register %s is unknown"), name);
+		return;
+	}
+	special_register->active = CB_FEATURE_ACTIVE;
+}
+
+void
+remove_register (const char *name, const char *fname, const int line)
+{
+	struct register_struct *special_register = lookup_register (name, 1);
+
+	COB_UNUSED (fname);
+	COB_UNUSED (line);
+
+	if (!special_register) {
+		return;
+	}
+	/* TODO: when user-defined registers are possible: do memory cleanup here */
+	special_register->active = CB_FEATURE_DISABLED;
+}
+
+const char *
+cb_get_register_definition (const char *name)
+{
+	struct register_struct *special_register = lookup_register (name, 0);
+
+	if (!special_register) {
+		return NULL;
+	}
+	return special_register->definition;
+}
+
+void
+cb_list_registers (void)
+{
+	size_t		i;
+	const char	*name, *t;
+
+	/* TODO: implement creation from user-specified list (currently only enable/disable)
+	   Note: will still be able to be referenced if not implemented, 
+	         but not set/read by libcob [still helps compilation but should raise a warning]
+	*/
+
+	putchar ('\n');
+	printf ("%-32s%-16s%s\n",
+		_("Internal registers"), _("Implemented"), _("Definition"));
+	for (i = 0; i < NUM_REGISTERS; ++i) {
+		switch (register_list[i].active) {
+		case CB_FEATURE_ACTIVE:
+			t = _("Yes");
+			break;
+		case CB_FEATURE_NOT_IMPLEMENTED:
+			t = _("No");
+			break;
+		default: /* CB_FEATURE_DISABLED */
+			continue;
+		}
+		if (strcmp (register_list[i].name, "LENGTH OF") != 0) {
+			name = register_list[i].name;
+		} else {
+			name = _("'LENGTH OF' phrase");
+		}
+		printf ("%-32s%-16s%s\n", name, t, register_list[i].definition);
+	}
+}
+
+static struct system_name_struct *
+lookup_system_name (const char *name, const int checkimpl)
+{
+	size_t		i;
+
+	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+		if (cob_strcasecmp (system_name_table[i].name, name) == 0) {
+			if (checkimpl || system_name_table[i].active != CB_FEATURE_DISABLED) {
+				return &system_name_table[i];
+			}
+			break;
+		}
+	}
+	return NULL;
+}
+
+
+
+static void
+set_system_name_mode (struct system_name_struct *system_name, enum cb_feature_mode mode)
+{
+	/* FIXME: doesn't cater for not implemented -> disabled -> active [should be not implemented again] */
+	if (system_name->active == CB_FEATURE_NOT_IMPLEMENTED && mode == CB_FEATURE_ACTIVE) {
+		return;
+	}
+	system_name->active = mode;
+}
+
+static void
+change_system_name (const char *name, const char *fname, const int line, enum cb_feature_mode mode)
+{
+	struct system_name_struct *system_name;
+	size_t		i;
+
+
+	/* some predefined groups first */
+	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+			set_system_name_mode (&system_name_table[i], mode);
+		}
+		return;
+	} else if (cob_strcasecmp (name, "DIALECT-ALL-DEVICES") == 0) {
+		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+			if (system_name_table[i].category == CB_DEVICE_NAME) {
+				set_system_name_mode (&system_name_table[i], mode);
+			}
+		}
+		return;
+	} else if (cob_strcasecmp (name, "DIALECT-ALL-SWITCHES") == 0) {
+		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+			if (system_name_table[i].category == CB_SWITCH_NAME) {
+				set_system_name_mode (&system_name_table[i], mode);
+			}
+		}
+		return;
+	} else if (cob_strcasecmp (name, "DIALECT-ALL-FEATURES") == 0) {
+		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+			if (system_name_table[i].category == CB_FEATURE_NAME) {
+				set_system_name_mode (&system_name_table[i], mode);
+			}
+		}
+		return;
+	} 
+
+	system_name = lookup_system_name (name, 1);
+	if (!system_name) {
+		if (mode == CB_FEATURE_ACTIVE) {
+			configuration_error (fname, line, 1, _("system name %s is unknown"), name);
+		}
+		return;
+	}
+	set_system_name_mode (system_name, mode);
+}
+
+void
+activate_system_name (const char *name, const char *fname, const int line)
+{
+	change_system_name (name, fname, line, CB_FEATURE_ACTIVE);
+}
+
+void
+deactivate_system_name (const char *name, const char *fname, const int line)
+{
+	change_system_name (name, fname, line, CB_FEATURE_DISABLED);
+}
+
+void
+cb_list_system_names (void)
+{
+	const char	*feature;
+	size_t		i;
+
+	putchar ('\n');
+	puts (_("System names"));
+	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
+		if (system_name_table[i].active == CB_FEATURE_DISABLED) {
+			continue;
+		}
+		feature = res_get_feature (system_name_table[i].category);
+		printf ("%-32s%s\n", system_name_table[i].name, feature);
+	}
 }
 
 
@@ -3291,6 +3597,8 @@ cb_list_reserved (void)
 		putchar ('\n');
 	}
 	putchar ('\n');
+	/* FIXME: handle these as normal context sensitive words by
+	          checking in scanner.l if these are reserved */
 	puts (_("Extra (obsolete) context sensitive words"));
 	puts ("AUTHOR");
 	puts ("DATE-COMPILED");
@@ -3300,64 +3608,7 @@ cb_list_reserved (void)
 	puts ("REMARKS");
 	puts ("SECURITY");
 	putchar ('\n');
-	list_registers ();
-}
-
-void
-cb_list_intrinsics (void)
-{
-	/* TODO: implement setting CB_FUNC_DISABLED by user-specified list */
-	const char	*t;
-	char	argnum [20];
-	size_t		i;
-
-	putchar ('\n');
-	printf ("%-32s%-16s%s\n",
-		_("Intrinsic Function"), _("Implemented"), _("Parameters"));
-	for (i = 0; i < NUM_INTRINSICS; ++i) {
-		switch (function_list[i].active) {
-		case CB_FEATURE_ACTIVE:
-			t = _("Yes");
-			break;
-		case CB_FEATURE_NOT_IMPLEMENTED:
-			t = _("No");
-			break;
-		default: /* CB_FEATURE_DISABLED */
-			continue;
-		}
-		if (function_list[i].args == -1) {
-			snprintf (argnum, sizeof (argnum) - 1, "%s", _("Unlimited"));
-		} else if (function_list[i].args != function_list[i].min_args) {
-			snprintf (argnum, sizeof (argnum) - 1, "%d - %d",
-				(int)function_list[i].min_args, (int)function_list[i].args);
-		} else {
-			snprintf (argnum, sizeof (argnum) - 1, "%d", (int)function_list[i].args);
-		}
-		printf ("%-32s%-16s%s\n", function_list[i].name, t, argnum);
-	}
-}
-
-void
-cb_list_mnemonics (void)
-{
-	const char	*feature;
-	size_t		i;
-
-	/* TODO: implement list from user-specified list, using cb_feature_mode
-	         instead of -fsyntax-extension */
-
-	putchar ('\n');
-	puts (_("Mnemonic names"));
-	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
-		feature = res_get_feature (system_table[i].category);
-		printf ("%-32s%s\n", system_table[i].name, feature);
-	}
-	putchar ('\n');
-	puts (_("Extended mnemonic names (with -fsyntax-extension)"));
-	for (i = 0; i < EXT_SYSTEM_TAB_SIZE; ++i) {
-		feature = res_get_feature (ext_system_table[i].category);
-		printf ("%-32s%s\n", ext_system_table[i].name, feature);
-	}
+	cb_list_registers ();
 }
 
 #ifndef	HAVE_DESIGNATED_INITS

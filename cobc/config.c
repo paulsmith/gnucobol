@@ -79,7 +79,13 @@ static struct config_struct {
 	{CB_STRING, "include"},
 	{CB_STRING, "includeif"},
 	{CB_STRING, "not-reserved"},
-	{CB_STRING, "reserved"}
+	{CB_STRING, "reserved"},
+	{CB_STRING, "not-intrinsic-function"},
+	{CB_STRING, "intrinsic-function"},
+	{CB_STRING, "not-system-name"},
+	{CB_STRING, "system-name"},
+	{CB_STRING, "not-register"},
+	{CB_STRING, "register"}
 #include "config.def"
 };
 
@@ -178,21 +184,29 @@ unsupported_value (const char *fname, const int line, const char *name, const ch
 }
 
 static void
-split_and_iterate_on_comma_separated_str (void (* const func)(const char *, const char *, const int),
-					  const int replace_colons,
-					  const char *val,
-					  const char *fname,
-					  const int line)
+split_and_iterate_on_comma_separated_str (
+	void (* const func)(const char *, const char *, const int),
+	const int transform_case, const int replace_colons,
+	const char *val, const char *fname, const int line)
 {
-	int	i;
-	int	j = 0;
+	unsigned int	i;
+	unsigned int	j = 0;
 	char	word_buff[COB_MINI_BUFF];
 	
 	for (i = 0; val[i] && j < COB_MINI_MAX; i++) {
+		/* note: we actually want spaces in,
+		   especially for mnemonics "SWITCH A" and registers "LENGTH OF"
+		*/
 		switch (val[i]) {
 		case ' ':
+			/* Remove spaces if not escaped, espacially needed for
+			   mnemonics "SWITCH A" and registers "LENGTH OF" */
+			if (j > 0 && word_buff[j - 1] == '\\') {
+				word_buff[j - 1] = ' ';
+			}
+			break;
 		case '\t':
-			/* Remove all possible whitespace. */
+			/* Tabs are always removed. */
 			break;
 		case ',':
 			word_buff[j] = 0;
@@ -206,7 +220,13 @@ split_and_iterate_on_comma_separated_str (void (* const func)(const char *, cons
 				break;
 			}
 		default:
-			word_buff[j++] = val[i];
+			if (transform_case == 1) {
+				word_buff[j++] = toupper ((int)val[i]);
+			} else if (transform_case == 2) {
+				word_buff[j++] = tolower ((int)val[i]);
+			} else {;
+				word_buff[j++] = val[i];
+			}
 			break;
 		}
 	}
@@ -408,7 +428,7 @@ cb_load_conf (const char *fname, const int prefix_dir)
 
 	/* Checks for missing definitions */
 	if (ret == 0) {
-		for (i = 4U; i < CB_CONFIG_SIZE; i++) {
+		for (i = 10U; i < CB_CONFIG_SIZE; i++) {
 			if (config_table[i].val == NULL) {
 				/* as there are likely more than one definition missing group it */
 				if (ret == 0) {
@@ -494,7 +514,13 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	/* Check for reserved word tag, if requested */
 	if (fname == words_file) {
 		if (strcmp (buff, "reserved")
-		&&  strcmp (buff, "not-reserved")) {
+		&&  strcmp (buff, "not-reserved")
+		&&  strcmp (buff, "intrinsic-function")
+		&&  strcmp (buff, "not-intrinsic-function")
+		&&  strcmp (buff, "system-name")
+		&&  strcmp (buff, "not-system-name")
+		&&  strcmp (buff, "register")
+		&&  strcmp (buff, "not-register")) {
 			configuration_error (fname, line, 1,
 				_("invalid configuration tag '%s' in word-list"), buff);
 			return -1;
@@ -613,11 +639,21 @@ cb_config_entry (char *buff, const char *fname, const int line)
 					};
 				}
 			} else if (strcmp (name, "not-reserved") == 0) {
-				split_and_iterate_on_comma_separated_str (&remove_reserved_word,
-									  0, val, fname, line);
+				split_and_iterate_on_comma_separated_str (&remove_reserved_word, 0, 0, val, fname, line);
 			} else if (strcmp (name, "reserved") == 0) {
-				split_and_iterate_on_comma_separated_str (&add_reserved_word,
-									  1, val, fname, line);
+				split_and_iterate_on_comma_separated_str (&add_reserved_word, 0, 1, val, fname, line);
+			} else if (strcmp (name, "not-intrinsic-function") == 0) {
+				split_and_iterate_on_comma_separated_str (&deactivate_intrinsic, 1, 0, val, fname, line);
+			} else if (strcmp (name, "intrinsic-function") == 0) {
+				split_and_iterate_on_comma_separated_str (&activate_intrinsic, 1, 1, val, fname, line);
+			} else if (strcmp (name, "not-system-name") == 0) {
+				split_and_iterate_on_comma_separated_str (&deactivate_system_name, 1, 0, val, fname, line);
+			} else if (strcmp (name, "system-name") == 0) {
+				split_and_iterate_on_comma_separated_str (&activate_system_name, 1, 1, val, fname, line);
+			} else if (strcmp (name, "not-register") == 0) {
+				split_and_iterate_on_comma_separated_str (&remove_register, 1, 0, val, fname, line);
+			} else if (strcmp (name, "register") == 0) {
+				split_and_iterate_on_comma_separated_str (&add_register, 1, 1, val, fname, line);
 			} else {
 				*((const char **)var) = val;
 			}

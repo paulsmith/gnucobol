@@ -4,6 +4,12 @@
 	* general: added move-figurative-constant-to-numeric and
 	  move-figurative-quote-to-numeric option
 
+2017-07-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: added settings for registers. mnemonic names and
+	  intrinsic functions
+	* acu.conf: added (non-standard) mnemonic names for switches
+
 2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added constant-folding option

@@ -655,3 +655,75 @@ reserved:	ZERO
 reserved:	ZERO-FILL
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+# disable all functions
+not-intrinsic-function:	DIALECT-ALL
+
+# add all that are supported by MF COBOL
+intrinsic-function:	ABS
+intrinsic-function:	ACOS
+intrinsic-function:	ANNUITY
+intrinsic-function:	ASIN
+intrinsic-function:	ATAN
+intrinsic-function:	BOOLEAN-OF-INTEGER
+intrinsic-function:	BYTE-LENGTH
+intrinsic-function:	CHAR
+intrinsic-function:	CHAR-NATIONAL
+intrinsic-function:	COMBINED-DATETIME
+intrinsic-function:	COS
+intrinsic-function:	CURRENT-DATE
+intrinsic-function:	DATE-OF-INTEGER
+intrinsic-function:	DATE-TO-YYYYMMDD
+intrinsic-function:	DAY-OF-INTEGER
+intrinsic-function:	DAY-TO-YYYYDDD
+intrinsic-function:	DISPLAY-OF
+intrinsic-function:	E
+intrinsic-function:	EXP
+intrinsic-function:	EXP10
+intrinsic-function:	FACTORIAL
+intrinsic-function:	FRACTION-PART
+intrinsic-function:	INTEGER
+intrinsic-function:	INTEGER-OF-DATE
+intrinsic-function:	INTEGER-OF-DAY
+intrinsic-function:	INTEGER-OF-FORMATTED-DATE 
+intrinsic-function:	INTEGER-PART
+intrinsic-function:	LENGTH
+intrinsic-function:	LENGTH-AN
+intrinsic-function:	LOG
+intrinsic-function:	LOG10
+intrinsic-function:	LOWER-CASE
+intrinsic-function:	LOWEST-ALGEBRAIC
+intrinsic-function:	MAX
+intrinsic-function:	MEAN
+intrinsic-function:	MEDIAN
+intrinsic-function:	MIDRANGE
+intrinsic-function:	MIN
+intrinsic-function:	MOD
+intrinsic-function:	NATIONAL-OF
+intrinsic-function:	NUMVAL
+intrinsic-function:	NUMVAL-C
+intrinsic-function:	ORD
+intrinsic-function:	ORD-MAX
+intrinsic-function:	ORD-MIN
+intrinsic-function:	PI
+intrinsic-function:	PRESENT-VALUE
+intrinsic-function:	RANDOM
+intrinsic-function:	RANGE
+intrinsic-function:	REM
+intrinsic-function:	REVERSE
+intrinsic-function:	SIGN
+intrinsic-function:	SIN
+intrinsic-function:	SQRT
+intrinsic-function:	STANDARD-DEVIATION
+intrinsic-function:	SUM
+intrinsic-function:	TAN
+#intrinsic-function:	ULENGTH		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UPOS		# IBM extension, not known to GnuCOBOL
+intrinsic-function:	UPPER-CASE
+#intrinsic-function:	USUBSTR		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	USUPPLEMENTARY		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UVALID		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UWIDTH		# IBM extension, not known to GnuCOBOL
+intrinsic-function:	VARIANCE
+intrinsic-function:	WHEN-COMPILED
+intrinsic-function:	YEAR-TO-YYYY

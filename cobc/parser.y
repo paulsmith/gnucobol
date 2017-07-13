@@ -859,7 +859,7 @@ end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 	/* create empty entry if the program has no PROCEDURE DIVISION, error for UDF */
 	if (!program->entry_list) {
 		if (type == CB_FUNCTION_TYPE) {
-			cb_error (_("function '%s' has no PROCEDURE DIVISION"), program->program_name);
+			cb_error (_("FUNCTION '%s' has no PROCEDURE DIVISION"), program->program_name);
 		} else {
 			emit_entry (program->program_id, 0, NULL, NULL);
 		}
@@ -2975,6 +2975,10 @@ repository_name:
 		setup_prototype ($2, $3, CB_PROGRAM_TYPE, 0);
 	}
   }
+| FUNCTION repository_name_list error
+  {
+	  yyerrok;
+  }
 ;
 
 repository_name_list:
@@ -3068,7 +3072,7 @@ mnemonic_name_clause:
 			system_name [6] = ' ';
 		}
 		/* lookup system name */
-		save_tree = lookup_system_name (system_name);
+		save_tree = get_system_name (system_name);
 		if (!save_tree) {
 			cb_error_x ($1, _("invalid system-name '%s'"), system_name);
 		}
@@ -8995,7 +8999,7 @@ exit_body:
 	} else {
 		check_unreached = 1;
 	}
-	if ($2 != NULL) {
+	if ($2 != NULL && current_program->cb_return_code) {
 		cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
 	}
 	current_statement->name = (const char *)"EXIT PROGRAM";
@@ -9186,7 +9190,7 @@ goback_statement:
   {
 	begin_statement ("GOBACK", 0);
 	check_unreached = 1;
-	if ($2 != NULL) {
+	if ($2 != NULL && current_program->cb_return_code) {
 		cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
 	}
 	cb_emit_exit (1U);

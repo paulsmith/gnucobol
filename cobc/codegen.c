@@ -4902,7 +4902,8 @@ output_call (struct cb_call *p)
 #endif
 			output (" = cob_unifunc.funcptr");
 		} else {
-			if (p->convention & CB_CONV_NO_RET_UPD) {
+			if (p->convention & CB_CONV_NO_RET_UPD
+			||  !current_prog->cb_return_code) {
 				output ("(void)cob_unifunc.funcint");
 			} else {
 				output_integer (current_prog->cb_return_code);
@@ -4919,7 +4920,8 @@ output_call (struct cb_call *p)
 				output_integer (p->call_returning);
 #endif
 				output (" = (void *)");
-			} else if (!(p->convention & CB_CONV_NO_RET_UPD)) {
+			} else if (!(p->convention & CB_CONV_NO_RET_UPD)
+			       &&  current_prog->cb_return_code) {
 				output_integer (current_prog->cb_return_code);
 				output (" = ");
 			} else {
@@ -5014,7 +5016,8 @@ output_call (struct cb_call *p)
 			output (" = ((void *(*)");
 		} else {
 			if (p->call_returning != cb_null) {
-				if (p->convention & CB_CONV_NO_RET_UPD) {
+				if (p->convention & CB_CONV_NO_RET_UPD
+				|| !current_prog->cb_return_code) {
 					output ("((int (*)");
 				} else {
 					output_integer (current_prog->cb_return_code);
@@ -5122,7 +5125,9 @@ output_call (struct cb_call *p)
 
 	output (");\n");
 
-	if (p->call_returning && (!(p->convention & CB_CONV_NO_RET_UPD))) {
+	if (p->call_returning
+	&& (!(p->convention & CB_CONV_NO_RET_UPD))
+	&& current_prog->cb_return_code) {
 		if (p->call_returning == cb_null) {
 			output_prefix ();
 			output_integer (current_prog->cb_return_code);
@@ -7702,7 +7707,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* Call parameters */
-	if (cb_code_field (prog->cb_call_params)->count) {
+	if (prog->cb_call_params && cb_code_field (prog->cb_call_params)->count) {
 		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independant from LINKAGE) */");
 		output_prefix ();
 		output_integer (prog->cb_call_params);
@@ -7968,7 +7973,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	output_line ("/* Program return */");
 #if	1	/* RXWRXW - PROCRET */
-	if (prog->returning) {
+	if (prog->returning && prog->cb_return_code) {
 		output_move (prog->returning, prog->cb_return_code);
 	}
 #endif
@@ -7976,7 +7981,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output ("return ");
 	if (prog->prog_type == CB_FUNCTION_TYPE) {
 		output_param (prog->returning, -1);
-	} else {
+	} else if (prog->cb_return_code) {
 		output_integer (prog->cb_return_code);
 	}
 	output (";\n");
@@ -8270,7 +8275,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* Clear RETURN-CODE */
-	if (!prog->nested_level) {
+	if (!prog->nested_level && prog->cb_return_code) {
 		output_prefix ();
 		output_integer (current_prog->cb_return_code);
 		output (" = 0;\n");

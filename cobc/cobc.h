@@ -566,4 +566,13 @@ extern struct reserved_word_list	*cobc_user_res_list;
 extern void		remove_reserved_word (const char *, const char *, const int);
 extern void		add_reserved_word (const char *, const char *, const int);
 
+extern void		remove_register (const char *, const char *, const int);
+extern void		add_register (const char *, const char *, const int);
+
+extern void		deactivate_intrinsic (const char *, const char *, const int);
+extern void		activate_intrinsic (const char *, const char *, const int);
+
+extern void		deactivate_system_name (const char *, const char *, const int);
+extern void		activate_system_name (const char *, const char *, const int);
+
 #endif /* CB_COBC_H */

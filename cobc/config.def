@@ -106,7 +106,7 @@ CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 
-CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* pendant to MF's BYTE-MODE-MOVE */
+CB_CONFIG_BOOLEAN (cb_move_ibm, "move-ibm",	/* counterpart for MF's BYTE-MODE-MOVE */
 	_("MOVE operates as on IBM (left to right, byte by byte)"))
 
 CB_CONFIG_BOOLEAN (cb_perform_osvs, "perform-osvs",

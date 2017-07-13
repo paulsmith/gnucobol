@@ -688,6 +688,11 @@ H#[0-9A-Za-z]* {
 
 "LENGTH"[ ,;\n]+"OF"[ ,;\n] {
 	count_lines (yytext);
+	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
+	          if we actually want to do this,
+			  otherwise return 2 (!) WORD tokens (by adding a que
+			  of tokens to be returned)
+	*/
 	RETURN_TOK (LENGTH_OF);
 }
 
@@ -697,6 +702,12 @@ H#[0-9A-Za-z]* {
 	char name[10] = "";
 
 	unput (yytext[yyleng-1]); /* unput seperator */
+	/* FIXME: move the code for filling "name" here and first
+	          check with "lookup_system_name (name) != NULL"
+	          if we actually want to do this,
+			  otherwise return 2 (!) WORD tokens (by adding a que
+			  of tokens to be returned)
+	*/
 	if (cobc_in_procedure) {
 		 /* unput characters */
 		yylval = cb_build_reference ("SWITCH");

@@ -19,7 +19,7 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# Word list for dialect:ACUCOBOL-GT
+# Word list for dialect: ACUCOBOL-GT
 
 # Note: only used for strict dialect and when
 #       requested by compiler directive >> IMP WORDS ACU
@@ -382,7 +382,7 @@ reserved:	PADDING
 reserved:	PAGE
 reserved:	PARAGRAPH
 reserved:	PERFORM
-reserved:	PIC
+reserved:	PIC=PICTURE
 reserved:	PICTURE
 reserved:	PIXEL
 reserved:	PIXELS
@@ -432,7 +432,7 @@ reserved:	RESERVE
 reserved:	RESIDENT
 reserved:	RESIZABLE
 reserved:	RETURN
-reserved:	RETURN-UNSIGNED
+reserved:	RETURN-UNSIGNED	# note: this is a register, move as soon as supported
 reserved:	RETURNING
 reserved:	REVERSE-VIDEO
 reserved:	REVERSE
@@ -553,3 +553,108 @@ reserved:	ZERO
 reserved:	ZERO-FILL
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+
+# list of (non-standard) system names:
+system-name:	"SWITCH\ 1"
+system-name:	"SWITCH\ 2"
+system-name:	"SWITCH\ 3"
+system-name:	"SWITCH\ 4"
+system-name:	"SWITCH\ 5"
+system-name:	"SWITCH\ 6"
+system-name:	"SWITCH\ 7"
+system-name:	"SWITCH\ 8"
+system-name:	"SWITCH\ 9"
+system-name:	"SWITCH\ 10"
+system-name:	"SWITCH\ 11"
+system-name:	"SWITCH\ 12"
+system-name:	"SWITCH\ 13"
+system-name:	"SWITCH\ 14"
+system-name:	"SWITCH\ 15"
+system-name:	"SWITCH\ 16"
+system-name:	"SWITCH\ 17"
+system-name:	"SWITCH\ 18"
+system-name:	"SWITCH\ 19"
+system-name:	"SWITCH\ 20"
+system-name:	"SWITCH\ 21"
+system-name:	"SWITCH\ 22"
+system-name:	"SWITCH\ 23"
+system-name:	"SWITCH\ 24"
+system-name:	"SWITCH\ 25"
+system-name:	"SWITCH\ 26"
+system-name:	"SWITCH\ A"
+system-name:	"SWITCH\ B"
+system-name:	"SWITCH\ C"
+system-name:	"SWITCH\ D"
+system-name:	"SWITCH\ E"
+system-name:	"SWITCH\ F"
+system-name:	"SWITCH\ G"
+system-name:	"SWITCH\ H"
+system-name:	"SWITCH\ I"
+system-name:	"SWITCH\ J"
+system-name:	"SWITCH\ K"
+system-name:	"SWITCH\ L"
+system-name:	"SWITCH\ M"
+system-name:	"SWITCH\ N"
+system-name:	"SWITCH\ O"
+system-name:	"SWITCH\ P"
+system-name:	"SWITCH\ Q"
+system-name:	"SWITCH\ R"
+system-name:	"SWITCH\ S"
+system-name:	"SWITCH\ T"
+system-name:	"SWITCH\ U"
+system-name:	"SWITCH\ V"
+system-name:	"SWITCH\ W"
+system-name:	"SWITCH\ X"
+system-name:	"SWITCH\ Y"
+system-name:	"SWITCH\ Z"
+
+
+# disable all functions
+not-intrinsic-function:	DIALECT-ALL
+
+# add all that are supported by ACUCOBOL-GT
+intrinsic-function:	ABSOLUTE-VALUE	# ACUCOBOL-GT extension (alias for ABS)
+intrinsic-function:	ABS
+intrinsic-function:	ACOS
+intrinsic-function:	ANNUITY
+intrinsic-function:	ASIN
+intrinsic-function:	ATAN
+intrinsic-function:	CHAR
+intrinsic-function:	COS
+intrinsic-function:	CURRENT-DATE
+intrinsic-function:	DATE-OF-INTEGER
+intrinsic-function:	DAY-OF-INTEGER
+intrinsic-function:	FACTORIAL
+intrinsic-function:	INTEGER
+intrinsic-function:	INTEGER-OF-DATE
+intrinsic-function:	INTEGER-OF-DAY
+intrinsic-function:	INTEGER-PART
+intrinsic-function:	LENGTH
+intrinsic-function:	LOG
+intrinsic-function:	LOG10
+intrinsic-function:	LOWER-CASE
+intrinsic-function:	MAX
+intrinsic-function:	MEAN
+intrinsic-function:	MEDIAN
+intrinsic-function:	MIDRANGE
+intrinsic-function:	MIN
+intrinsic-function:	MOD
+intrinsic-function:	NUMVAL
+intrinsic-function:	NUMVAL-C
+intrinsic-function:	ORD
+intrinsic-function:	ORD-MAX
+intrinsic-function:	ORD-MIN
+intrinsic-function:	PRESENT-VALUE
+intrinsic-function:	RANDOM
+intrinsic-function:	RANGE
+intrinsic-function:	REM
+intrinsic-function:	REVERSE
+intrinsic-function:	SIN
+intrinsic-function:	SQRT
+intrinsic-function:	STANDARD-DEVIATION
+intrinsic-function:	SUM
+intrinsic-function:	TAN
+intrinsic-function:	UPPER-CASE
+intrinsic-function:	VARIANCE
+intrinsic-function:	WHEN-COMPILED

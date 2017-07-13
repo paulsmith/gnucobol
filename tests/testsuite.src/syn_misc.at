@@ -858,17 +858,17 @@ AT_DATA([prog.cob], [
               END-DISPLAY
            END-IF.
            IF SWIT1-ON
-              DISPLAY "ON" NO ADVANCING
+              DISPLAY "ON"
               END-DISPLAY
            ELSE
-              DISPLAY "OFF" NO ADVANCING
+              DISPLAY "OFF"
               END-DISPLAY
            END-IF.
            IF SWIT2-ON
-              DISPLAY " ON" NO ADVANCING
+              DISPLAY " ON"
               END-DISPLAY
            ELSE
-              DISPLAY " OFF" NO ADVANCING
+              DISPLAY " OFF"
               END-DISPLAY
            END-IF.
            SET SWITCH-B TO OFF
@@ -918,7 +918,7 @@ prog.cob: 76: error: 'SWIT32-OFF' is not defined
 #prog.cob: 19: error: duplicate definition of 'SWITCH-25'
 #prog.cob: 15: error: 'SWITCH-25' previously defined here
 #
-AT_CHECK([$COMPILE_ONLY -fsyntax-extension prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=acu-strict -fsystem-name=SW1 -fno-relax-syntax-checks prog.cob], [1], [],
 [prog.cob: 33: error: duplicate ON clause
 prog.cob: 76: error: 'SWIT32-OFF' is not defined
 ])

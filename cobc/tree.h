@@ -1696,11 +1696,13 @@ extern int			is_default_reserved_word (const char *);
 extern void			remove_context_sensitivity (const char *,
 							    const int);
 extern struct cobc_reserved	*lookup_reserved_word (const char *);
-extern cb_tree			lookup_system_name (const char *);
+extern cb_tree			get_system_name (const char *);
+extern const char	*cb_get_register_definition (const char *);
 extern void			cb_list_reserved (void);
 extern void			cb_list_intrinsics (void);
-extern void			cb_list_mnemonics (void);
-extern void			cb_list_system (void);
+extern void			cb_list_system_names (void);
+extern void			cb_list_registers (void);
+extern void			cb_list_system_routines (void);
 extern void			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
 
 /* error.c */

@@ -240,7 +240,6 @@ int			cb_unix_lf = 0;
 
 int			errorcount = 0;
 int			warningcount = 0;
-int			exit_option = 0;
 int			warningopt = 0;
 int			fatal_errors_flag = 0;
 int			no_physical_cancel = 0;
@@ -476,6 +475,7 @@ static const struct option long_options[] = {
 	{"list-intrinsics",	CB_NO_ARG, NULL, '6'},
 	{"list-mnemonics",	CB_NO_ARG, NULL, '7'},
 	{"list-system",		CB_NO_ARG, NULL, '8'},
+	{"list-registers",		CB_NO_ARG, NULL, '9'},
 	{"O2",			CB_NO_ARG, NULL, '2'},
 	{"O3",			CB_NO_ARG, NULL, '3'},
 	{"Os",			CB_NO_ARG, NULL, 's'},
@@ -535,6 +535,12 @@ static const struct option long_options[] = {
 #undef	CB_CONFIG_SUPPORT
 	{"freserved",	CB_RQ_ARG, NULL, '%'},
 	{"fnot-reserved",	CB_RQ_ARG, NULL, '%'},
+	{"fintrinsic-function",	CB_RQ_ARG, NULL, '%'},
+	{"fnot-intrinsic-function",	CB_RQ_ARG, NULL, '%'},
+	{"fsystem-name",	CB_RQ_ARG, NULL, '%'},
+	{"fnot-system-name",	CB_RQ_ARG, NULL, '%'},
+	{"fregister",	CB_RQ_ARG, NULL, '%'},
+	{"fnot-register",	CB_RQ_ARG, NULL, '%'},
 
 #define	CB_WARNDEF(var,name,doc)			\
 	{"W" name,		CB_NO_ARG, &var, 1},	\
@@ -2183,7 +2189,8 @@ cobc_print_usage (char * prog)
 	puts (_("Options:"));
 	puts (_("  -h, -help             display this help and exit"));
 	puts (_("  -V, -version          display compiler version and exit"));
-	puts (_("  -i, -info             display compiler information (build/environment)"));
+	puts (_("  -i, -info             display compiler information (build/environment)\n" \
+	        "                        and exit"));
 	puts (_("  -v, -verbose          display compiler version and the commands\n" \
 	        "                        invoked by the compiler"));
 	puts (_("  -vv, -verbose=2       like -v but additional pass verbose option\n" \
@@ -2354,7 +2361,12 @@ process_command_line (const int argc, char **argv)
 	int			c;
 	int			idx;
 	int			n;
+	int			exit_option = 0;
 	int			list_reserved = 0;
+	int			list_registers = 0;
+	int			list_intrinsics = 0;
+	int			list_system_names = 0;
+	int			list_system_routines = 0;
 #ifdef _WIN32
 	int 			argnum;
 #endif
@@ -2428,34 +2440,39 @@ process_command_line (const int argc, char **argv)
 		case 'i':
 			/* --info */
 			cobc_print_info ();
-			exit_option = 1;
-			break;
+			exit (0);
 
+		/*
+			The following list options are postponed until
+			until the configuration and exceptions are processed.
+		*/
 		case '5':
 			/* --list-reserved */
-			/*
-			  This must be postponed until after the configuration
-			  is loaded.
-			*/
 			list_reserved = 1;
 			exit_option = 1;
 			break;
 
 		case '6':
 			/* --list-intrinsics */
-			cb_list_intrinsics ();
+			list_intrinsics = 1;
 			exit_option = 1;
 			break;
 
 		case '7':
 			/* --list-mnemonics */
-			cb_list_mnemonics ();
+			list_system_names = 1;
 			exit_option = 1;
 			break;
 
 		case '8':
 			/* --list-system */
-			cb_list_system ();
+			list_system_routines = 1;
+			exit_option = 1;
+			break;
+
+		case '9':
+			/* --list-registers */
+			list_system_names = 1;
 			exit_option = 1;
 			break;
 
@@ -2499,34 +2516,24 @@ process_command_line (const int argc, char **argv)
 
 		case '$':
 			/* -std=<xx> : Specify dialect */
-			if (!exit_option || list_reserved) {
-				snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
-				if (cb_load_std (ext) != 0) {
-					cobc_err_exit (_("invalid parameter -std=%s"), cob_optarg);
-				}
+			snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
+			if (cb_load_std (ext) != 0) {
+				cobc_err_exit (_("invalid parameter -std=%s"), cob_optarg);
 			}
 			break;
 
 		case '&':
 			/* -conf=<xx> : Specify dialect configuration file */
-			if (!exit_option || list_reserved) {
-				if (strlen (cob_optarg) > COB_SMALL_MAX) {
-					cobc_err_exit (COBC_INV_PAR, "-conf");
-				}
-				conf_ret |= cb_load_conf (cob_optarg, 0);
+			if (strlen (cob_optarg) > COB_SMALL_MAX) {
+				cobc_err_exit (COBC_INV_PAR, "-conf");
 			}
+			conf_ret |= cb_load_conf (cob_optarg, 0);
 			break;
 
 		default:
 			/* as we postpone most options simply skip everything other here */
 			break;
 		}
-	}
-
-	/* Exit if list options were specified */
-	if (exit_option && !list_reserved) {
-		cobc_free_mem ();
-		exit (0);
 	}
 
 	/* Load default configuration file if necessary */
@@ -2566,6 +2573,8 @@ process_command_line (const int argc, char **argv)
 			/* --list-mnemonics */
 		case '8':
 			/* --list-system */
+		case '9':
+			/* --list-registers */
 			/* These options were all processed in the first getopt-run */
 			break;
 
@@ -3089,7 +3098,19 @@ process_command_line (const int argc, char **argv)
 #endif
 
 	if (list_reserved) {
+		/* includes register listing */
 		cb_list_reserved ();
+	} else if (list_registers) {
+		cb_list_registers ();
+	}
+	if (list_intrinsics) {
+		cb_list_intrinsics ();
+	}
+	if (list_system_names) {
+		cb_list_system_names ();
+	}
+	if (list_system_routines) {
+		cb_list_system_routines ();
 	}
 
 	/* Exit if list options were specified */

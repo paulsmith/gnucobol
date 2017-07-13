@@ -1513,7 +1513,7 @@ AT_CLEANUP
 # TALLY
 
 AT_SETUP([TALLY])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions register])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1529,6 +1529,13 @@ AT_DATA([prog.cob], [
            DISPLAY tally END-DISPLAY
            STOP RUN.
        END PROGRAM      nested.
+])
+
+#FIXME: Should get a dialect check in syntax checks,
+#       along with all other special registers
+AT_CHECK([$COMPILE_ONLY -fnot-register=TALLY prog.cob], [1], [],
+[prog.cob: 5: error: 'TALLY' is not defined
+prog.cob: 12: error: 'tally' is not defined
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
@@ -2574,7 +2581,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -fsyntax-extension prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fsystem-name="sw1, SwItCh\ b, SWITCH\ 25" \
+-fsystem-name=SWITCH-32 -fsystem-name="SWITCH\ Z" prog.cob], [0], [], [])
 AT_CHECK([COB_SWITCH_2=1 COB_SWITCH_26=1 COB_SWITCH_32=1 ./prog], [0],
 [OFF ON OFF OFF ON ON], [])
 

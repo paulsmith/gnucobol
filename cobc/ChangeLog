@@ -8,6 +8,32 @@
 	  edited fields, cater for new compiler support flags
 	  cb_move_fig_constant_to_numeric and cb_move_fig_quote_to_numeric;
 	  removed the explicit internal change in this case to ALL ZERO
+	* typeck.c, cobc.h, cobc.c: renamed cb_list_system
+	  to cb_list_system_routines
+	* reserved.c, cobc.h, cobc.c: renamed cb_list_mnemonics
+	  to cb_list_system_names
+	* reserved.c: added switch alias-names UPSI-0 to UPSI-8
+
+2017-07-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c, parser.y, tree.c, codegen.c: checked the now optional fields
+	  cb_return_code, cb_call_params, cb_sort_return before accessing them
+	* flag.def: removed -fsyntax-extension "cb_syntax_extension" because
+	  there's no actual use any more as non-standard switches can now be
+	  activated by compiler configuration and/or command line option
+	  -fsystem-name=SW1
+	* reserved.c: added ACUCOBOL synonym ABSOLUTE-VALUE for function ABS
+
+2017-07-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: added functions for (de)activating registers, system names,
+	  intrinsics; removed ext_system_table and added its entries as deactived
+	  to system_table
+	* config.c: added options to (de)activate registers, system names,
+	  intrinsics
+	* cobc.c: added --list-registers and -f[no-]intrinsic-function,
+	  -f[no-]system-name, -f[no-]register
+	* parser.y: don't stop parsing on wrong entries in REPOSITORY
 
 2017-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

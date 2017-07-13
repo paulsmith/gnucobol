@@ -78,14 +78,11 @@ reserved:	CASE-SENSITIVE*
 reserved:	CD
 reserved:	CENTURY-DATE
 reserved:	CENTURY-DAY
-reserved:	CF
-reserved:	CH
 reserved:	CHARACTER
 reserved:	CHARACTERS
 reserved:	CLASS
 reserved:	CLOCK-UNITS
 reserved:	CLOSE
-reserved:	COBOL
 reserved:	CODE
 reserved:	CODE-SET
 reserved:	COL
@@ -108,12 +105,11 @@ reserved:	COMPUTATIONAL-5
 reserved:	COMPUTATIONAL-6
 reserved:	COMPUTE
 reserved:	CONFIGURATION
-# reserved:	CONSOLE*	--> mnemonic device should not be in reserved list
 reserved:	CONTAINS
 reserved:	CONTENT
 reserved:	CONTINUE
 reserved:	CONTROL
-reserved:	CONTROLS
+reserved:	COBOL
 reserved:	CONVERT
 reserved:	CONVERTING
 reserved:	COPY
@@ -134,8 +130,6 @@ reserved:	DATE-COMPILED
 reserved:	DATE-WRITTEN
 reserved:	DAY
 reserved:	DAY-AND-TIME
-reserved:	DAY-OF-WEEK
-reserved:	DE
 reserved:	DEBUGGING
 reserved:	DECIMAL-POINT
 reserved:	DECLARATIVES
@@ -146,7 +140,6 @@ reserved:	DELIMITER
 reserved:	DEPENDING
 reserved:	DESCENDING
 reserved:	DESTINATION
-reserved:	DETAIL
 reserved:	DISABLE
 reserved:	DISPLAY
 reserved:	DIVIDE
@@ -205,7 +198,7 @@ reserved:	FD
 reserved:	FILE
 reserved:	FILE-CONTROL
 reserved:	FILLER
-reserved:	FINAL
+reserved:	DAY-OF-WEEK
 reserved:	FIRST
 reserved:	FIXED
 reserved:	FOOTING
@@ -214,15 +207,11 @@ reserved:	FOREGROUND*=FOREGROUND-COLOR
 reserved:	FOREGROUND-COLOR*
 reserved:	FROM
 reserved:	FULL*
-reserved:	FUNCTION
-reserved:	GENERATE
 reserved:	GIVING
 reserved:	GLOBAL
 reserved:	GO
 reserved:	GOBACK
 reserved:	GREATER
-reserved:	GROUP
-reserved:	HEADING
 reserved:	HIGH
 reserved:	HIGH-VALUE
 reserved:	HIGH-VALUES=HIGH-VALUE
@@ -242,7 +231,6 @@ reserved:	INDICATE
 reserved:	INITIAL
 reserved:	INITIAL-VALUE
 reserved:	INITIALIZE
-reserved:	INITIATE
 reserved:	INPUT
 reserved:	INPUT-OUTPUT
 reserved:	INSPECT
@@ -260,12 +248,10 @@ reserved:	LEFT
 reserved:	LENGTH
 reserved:	LESS
 reserved:	LIKE
-reserved:	LIMIT
 reserved:	LIMITS
 reserved:	LINAGE
 reserved:	LINAGE-COUNTER
 reserved:	LINE
-reserved:	LINE-COUNTER
 reserved:	LINES
 reserved:	LINKAGE
 reserved:	LOCK
@@ -312,12 +298,9 @@ reserved:	OVERFLOW
 reserved:	PACKED-DECIMAL
 reserved:	PADDING
 reserved:	PAGE
-reserved:	PAGE-COUNTER
 reserved:	PARAGRAPH*
 reserved:	PERFORM
-reserved:	PF
-reserved:	PH
-reserved:	PIC
+reserved:	PIC=PICTURE
 reserved:	PICTURE
 reserved:	PLUS
 reserved:	POINTER
@@ -327,7 +310,6 @@ reserved:	PREVIOUS*
 reserved:	PRINTING
 reserved:	PROCEDURE
 reserved:	PROCEDURE-NAME
-reserved:	PROCEDURES
 reserved:	PROCEED
 reserved:	PROGRAM
 reserved:	PROGRAM-ID
@@ -337,16 +319,13 @@ reserved:	QUEUE
 reserved:	QUOTE
 reserved:	QUOTES
 reserved:	RANDOM
-reserved:	RD
 reserved:	READ
 reserved:	RECEIVE
 reserved:	RECORD
-reserved:	RECORDING
 reserved:	RECORDS
 reserved:	REDEFINES
 reserved:	REEL
 reserved:	REFERENCE
-reserved:	REFERENCES
 reserved:	RELATIVE
 reserved:	RELEASE
 reserved:	REMAINDER
@@ -355,23 +334,16 @@ reserved:	REMOVAL
 reserved:	RENAMES
 reserved:	REPLACE
 reserved:	REPLACING
-reserved:	REPORT
-reserved:	REPORTING
-reserved:	REPORTS
 reserved:	REQUIRED*
 reserved:	RERUN
 reserved:	RESERVE
-reserved:	RESET
 reserved:	RETURN
-#reserved:	RETURN-CODE   --> (implemented) registers should not be in reserved list
 reserved:	RETURNING
 reserved:	REVERSE
 reserved:	REVERSE-VIDEO
 reserved:	REVERSED
 reserved:	REWIND
 reserved:	REWRITE
-reserved:	RF
-reserved:	RH
 reserved:	RIGHT
 reserved:	ROUNDED
 reserved:	RUN
@@ -411,7 +383,6 @@ reserved:	SUB-QUEUE-1
 reserved:	SUB-QUEUE-2
 reserved:	SUB-QUEUE-3
 reserved:	SUBTRACT
-reserved:	SUM
 reserved:	SUPPRESS
 reserved:	SYMBOLIC
 reserved:	SYNC
@@ -421,7 +392,6 @@ reserved:	TABLE
 reserved:	TALLYING
 reserved:	TAPE
 reserved:	TERMINAL
-reserved:	TERMINATE
 reserved:	TEST
 reserved:	TEXT
 reserved:	THAN
@@ -435,7 +405,6 @@ reserved:	TOP
 reserved:	TRAILING
 reserved:	TRIMMED*
 reserved:	TRUE
-reserved:	TYPE
 reserved:	UNDERLINE*
 reserved:	UNIT
 reserved:	UNLOCK
@@ -449,7 +418,6 @@ reserved:	USE
 reserved:	USING
 reserved:	VALUE
 reserved:	VALUES=VALUE
-reserved:	VARIABLE
 reserved:	VARYING
 reserved:	WHEN
 reserved:	WHEN-COMPILED
@@ -463,3 +431,75 @@ reserved:	YYYYMMDD*
 reserved:	ZERO
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+# registered "unused" words because these are reserved words in
+# unsupported modules of ANSI 85 or other COBOL dialects:
+
+reserved:	CF
+reserved:	CH
+reserved:	CONTROLS
+reserved:	DE
+reserved:	DEBUG-CONTENTS
+reserved:	DEBUG-ITEM
+reserved:	DEBUG-LINE
+reserved:	DEBUG-NAME
+reserved:	DEBUG-SUB-1
+reserved:	DEBUG-SUB-2
+reserved:	DEBUG-SUB-3
+reserved:	DETAIL
+reserved:	FINAL
+reserved:	FUNCTION
+reserved:	GENERATE
+reserved:	GROUP
+reserved:	HEADING
+reserved:	INITIATE
+reserved:	LIMIT
+reserved:	LINE-COUNTER
+reserved:	PAGE-COUNTER
+reserved:	PF
+reserved:	PH
+reserved:	PROCEDURES
+reserved:	RD
+reserved:	RECORDING
+reserved:	REFERENCES
+reserved:	REPORT
+reserved:	REPORTING
+reserved:	REPORTS
+reserved:	RESET
+reserved:	RF
+reserved:	RH
+reserved:	SUM
+reserved:	TERMINATE
+reserved:	TYPE
+reserved:	VARIABLE
+
+
+not-register:	DIALECT-ALL	# disable all registers, specify used below
+#register:	"ADDRESS\ OF"	# not yet handled as register in GnuCOBOL
+#register:	"DEBUG-ITEM"	# not yet handled as register in GnuCOBOL
+
+
+# list of system names:
+not-system-name:	DIALECT-ALL-SWITCHES
+system-name:	SWITCH-1
+system-name:	SWITCH-2
+system-name:	SWITCH-3
+system-name:	SWITCH-4
+system-name:	SWITCH-5
+system-name:	SWITCH-6
+system-name:	SWITCH-7
+system-name:	SWITCH-8
+system-name:	UPSI-0
+system-name:	UPSI-1
+system-name:	UPSI-2
+system-name:	UPSI-3
+system-name:	UPSI-4
+system-name:	UPSI-5
+system-name:	UPSI-6
+system-name:	UPSI-7
+
+system-name:	CONSOLE
+
+
+# Intrinsic Functions - explicit not supported by RM-COBOL
+not-intrinsic-function:	DIALECT-ALL

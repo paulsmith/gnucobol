@@ -1563,8 +1563,10 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 		p->flag_trailing_separate = last_program->flag_trailing_separate;
 		p->flag_console_is_crt = last_program->flag_console_is_crt;
 		/* RETURN-CODE is global for contained programs */
-		p->cb_return_code = last_program->cb_return_code;
-		CB_FIELD_PTR (last_program->cb_return_code)->flag_is_global = 1;
+		if (last_program->cb_return_code) {
+			p->cb_return_code = last_program->cb_return_code;
+			CB_FIELD_PTR (last_program->cb_return_code)->flag_is_global = 1;
+		}
 		p->toplev_count = last_program->toplev_count;
 		/* Add program to itself for possible recursion */
 		p->nested_prog_list = add_contained_prog (p->nested_prog_list, p);
@@ -3364,7 +3366,7 @@ cb_define_system_name (const char *name)
 
 	x = cb_build_reference (name);
 	if (CB_WORD_COUNT (x) == 0) {
-		y = lookup_system_name (name);
+		y = get_system_name (name);
 		/* Paranoid */
 		if (y) {
 			cb_define (x, y);
@@ -4438,12 +4440,13 @@ cb_build_prototype (const cb_tree prototype_name, const cb_tree ext_name,
 
 /* FUNCTION */
 
+/* Build an internal reference to FUNCTION BYTE-LENGTH for resolving LENGTH OF special-register */
 cb_tree
 cb_build_any_intrinsic (cb_tree args)
 {
 	struct cb_intrinsic_table	*cbp;
 
-	cbp = lookup_intrinsic ("LENGTH", 0);
+	cbp = lookup_intrinsic ("BYTE-LENGTH", 1);
 	return make_intrinsic (NULL, cbp, args, NULL, NULL, 0);
 }
 
@@ -4477,11 +4480,11 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	}
 
 	cbp = lookup_intrinsic (CB_NAME (name), 1);
-	if (!cbp) {
+	if (!cbp || cbp->active == CB_FEATURE_DISABLED) {
 		cb_error_x (name, _("FUNCTION '%s' unknown"), CB_NAME (name));
 		return cb_error_node;
 	}
-	if (cbp->active == CB_FEATURE_DISABLED) {
+	if (cbp->active == CB_FEATURE_NOT_IMPLEMENTED) {
 		cb_error_x (name, _("FUNCTION '%s' is not implemented"),
 			    cbp->name);
 		return cb_error_node;
