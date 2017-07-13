@@ -888,6 +888,13 @@
 
 	* fileio.c (cob_new_item): cleanup
 
+2010-10-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (!COB_GEN_SCREENIO): Make cob_sys_sound_bell usable via
+	  cob_speaker_beep
+	* common.c:  Add possibility to disable the bell via
+	  COB_BELL=NO/NONE/0/OFF (currently only the first char is checked)
+
 2010-09-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c: Added cob_convert_key for converting keys according to used
@@ -901,6 +908,14 @@
 2010-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
    * strings.c: Fixing cob_unstring_into bug (#139)
+
+2010-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, screenio.c: New env var COB_BELL for controlling WITH BEEP,
+	  possible values (standard BEEP):
+	  BEEP    (curses beep on soundcard/pc-speaker, fallback terminal flash)
+	  FLASH   (curses terminal flash, fallback beep on soundcard/pc-speaker)
+	  SPEAKER (printf("\a"))
 
 20??-??-??  Roger While <simrw@sim-basis.de>
 
