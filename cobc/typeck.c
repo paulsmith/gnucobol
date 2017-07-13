@@ -3637,8 +3637,11 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 	const char	*func;
 	cb_tree		expr_dec = NULL;	/* Int value for decimal_align */
 
-	if (error_statement == current_statement)
+	/* skip if the actual statement can't be generated any more 
+	   to prevent multiple errors here */
+	if (error_statement == current_statement) {
 		return;
+	}
 	switch (op) {
 	case '+':
 		func = "cob_decimal_add";
@@ -3724,6 +3727,9 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 	}
 }
 
+/**
+ * expand tree x to the previously allocated decimal tree d
+ */
 static void
 decimal_expand (cb_tree d, cb_tree x)
 {
@@ -3732,8 +3738,11 @@ decimal_expand (cb_tree d, cb_tree x)
 	struct cb_binary_op	*p;
 	cb_tree			t;
 
-	if (error_statement == current_statement)
+	/* skip if the actual statement can't be generated any more 
+	   to prevent multiple errors here */
+	if (error_statement == current_statement) {
 		return;
+	}
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
 		if (x == cb_zero) {
