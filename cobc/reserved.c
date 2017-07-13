@@ -651,6 +651,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DESTINATION",		0, 0, DESTINATION,		/* 2002 */
 				0, 0
   },
+  { "DESTROY",		0, 0, DESTROY,		/* ACU extension */
+				0, 0
+  },
   { "DETAIL",			0, 0, DETAIL,			/* 2002 */
 				0, 0
   },
@@ -915,6 +918,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FLOAT-SHORT",		0, 0, FLOAT_SHORT,		/* 2002 */
 				0, 0
   },
+  { "FLOATING",		0, 0, FLOATING,		/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "FONT",			0, 0, FONT,			/* ACU extension */
 	  0, 0					/* Checkme: likely context sensitive */
   },
@@ -969,6 +975,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "GOBACK",			0, 0, GOBACK,			/* 2002 */
 				0, 0
   },
+  { "GRAPHICAL",		0, 0, GRAPHICAL,		/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "GREATER",			0, 0, GREATER,			/* 2002 */
 				0, 0
   },
@@ -1022,6 +1031,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "IN",			0, 0, IN,			/* 2002 */
 				0, 0
+  },
+  { "INDEPENDENT",		0, 0, INDEPENDENT,		/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "INDEX",			0, 0, INDEX,			/* 2002 */
 				0, 0
@@ -1399,6 +1411,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "POINTER",			0, 0, POINTER,			/* 2002 */
+				0, 0
+  },
+  { "POP-UP",		0, 0, POP_UP,		/* ACU extension */
 				0, 0
   },
   { "POSITION",			0, 0, POSITION,			/* 85 */

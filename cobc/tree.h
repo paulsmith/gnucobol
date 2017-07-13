@@ -1826,12 +1826,20 @@ extern void		cb_emit_commit (void);
 extern void		cb_emit_continue (void);
 extern void		cb_emit_delete (cb_tree);
 extern void		cb_emit_delete_file (cb_tree);
+
+
+extern void		cb_emit_display_window (cb_tree, cb_tree, cb_tree,
+					 cb_tree, struct cb_attr_struct *);
+extern void		cb_emit_close_window (cb_tree);
+extern void		cb_emit_destroy (cb_tree);
+
 extern void		cb_emit_display (cb_tree, cb_tree,
 					 cb_tree, cb_tree,
 					 struct cb_attr_struct *,
 					 int, enum cb_display_type);
 extern cb_tree		cb_build_display_mnemonic (cb_tree);
 extern cb_tree		cb_build_display_name (cb_tree);
+
 extern void		cb_emit_env_name (cb_tree);
 extern void		cb_emit_env_value (cb_tree);
 extern void		cb_emit_arg_number (cb_tree);

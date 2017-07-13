@@ -1804,6 +1804,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token DEPENDING
 %token DESCENDING
 %token DESTINATION
+%token DESTROY
 %token DETAIL
 %token DISABLE
 %token DISC
@@ -1887,6 +1888,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token FLOAT_EXTENDED		"FLOAT-EXTENDED"
 %token FLOAT_LONG		"FLOAT-LONG"
 %token FLOAT_SHORT		"FLOAT-SHORT"
+%token FLOATING
 %token FONT
 %token FOOTING
 %token FOR
@@ -1907,6 +1909,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token GLOBAL
 %token GO
 %token GOBACK
+%token GRAPHICAL
 %token GREATER
 %token GREATER_OR_EQUAL		"GREATER OR EQUAL"
 %token GRID
@@ -1921,6 +1924,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token IGNORE
 %token IGNORING
 %token IN
+%token INDEPENDENT
 %token INDEX
 %token INDEXED
 %token INDICATE
@@ -2048,6 +2052,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PICTURE_SYMBOL		"PICTURE SYMBOL"
 %token PLUS
 %token POINTER
+%token POP_UP			"POP-UP"
 %token POSITION
 %token POSITIVE
 %token PRESENT
@@ -2280,6 +2285,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %nonassoc COMPUTE
 %nonassoc CONTINUE
 %nonassoc DELETE
+%nonassoc DESTROY
 %nonassoc DISABLE
 %nonassoc DISPLAY
 %nonassoc DIVIDE
@@ -7227,6 +7233,7 @@ statement:
 | compute_statement
 | continue_statement
 | delete_statement
+| destroy_statement
 | disable_statement
 | display_statement
 | divide_statement
@@ -8235,6 +8242,7 @@ close_statement:
 
 close_body:
   close_files
+| close_window
 ;
 
 close_files:
@@ -8256,6 +8264,27 @@ _close_option:
 | reel_or_unit _for REMOVAL	{ $$ = cb_int (COB_CLOSE_UNIT_REMOVAL); }
 | _with NO REWIND		{ $$ = cb_int (COB_CLOSE_NO_REWIND); }
 | _with LOCK			{ $$ = cb_int (COB_CLOSE_LOCK); }
+;
+
+close_window:
+  WINDOW
+  {
+	CB_PENDING ("GRAPHICAL WINDOW");
+	current_statement->name = "DISPLAY WINDOW";
+  }
+  identifier _close_display_option
+  {
+	if ($3) {
+		cb_emit_close_window ($2);
+	} else {
+		cb_emit_destroy ($2);
+	}
+  }
+;
+
+_close_display_option:
+  /* empty */			{ $$ = NULL; }
+| _with NO DISPLAY		{ $$ = cb_int0; }
 ;
 
 
@@ -8313,6 +8342,32 @@ continue_statement:
 	begin_statement ("CONTINUE", 0);
 	cb_emit_continue ();
 	check_unreached = (unsigned int) save_unreached;
+  }
+;
+
+
+/* DESTROY statement */
+
+destroy_statement:
+  DESTROY
+  {
+	begin_statement ("DESTROY", 0);
+	CB_PENDING ("GRAPHICAL CONTROL");
+  }
+  destroy_body
+;
+
+destroy_body:
+  ALL _controls
+  {
+	cb_emit_destroy (NULL);
+  }
+/* TODO for later: add Format 3, mixing identifier_list
+   with positions like in DISPLAY
+   (and error on this, destroy on position is bad...) */
+| identifier_list
+  {
+	cb_emit_destroy ($1);
   }
 ;
 
@@ -8425,6 +8480,9 @@ display_body:
 	cb_emit_command_line ($1);
   }
 | screen_or_device_display _display_exception_phrases
+| display_window
+| display_floating_window
+| display_initial_window
 ;
 
 screen_or_device_display:
@@ -8551,6 +8609,146 @@ display_upon:
 crt_under:
   CRT
 | CRT_UNDER
+;
+
+display_window:
+  sub_or_window
+  {
+	CB_PENDING ("GRAPHICAL WINDOW");
+	current_statement->name = "DISPLAY WINDOW";
+  }
+  _upon_window_handle
+  {
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+	upon_value = NULL; /* Hack: stores the POP-UP AREA */
+  }
+  display_window_clauses
+  {
+	cb_emit_display_window (NULL, upon_value, $2, line_column,
+			 current_statement->attr_ptr);
+  }
+;
+
+sub_or_window:
+  WINDOW
+| SUBWINDOW
+;
+
+display_floating_window:
+  FLOATING _graphical WINDOW
+  {
+	CB_PENDING ("GRAPHICAL WINDOW");
+	current_statement->name = "DISPLAY FLOATING WINDOW";
+  }
+  _upon_window_handle
+  {
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+	upon_value = NULL; /* Hack: stores the POP-UP AREA */
+  }
+  display_window_clauses
+  {
+	if ($2) {
+		/* TODO: set "CELL WIDTH" and "CELL HEIGHT" to "LABEL FONT" */
+		/* if not set already */
+	}
+	cb_emit_display_window (cb_int0, upon_value, $4, line_column,
+			 current_statement->attr_ptr);
+  }
+;
+
+display_initial_window:
+  intial_type _graphical WINDOW
+  {
+	CB_PENDING ("GRAPHICAL WINDOW");
+	current_statement->name = "DISPLAY INITIAL WINDOW";
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+	upon_value = NULL; /* Hack: stores the POP-UP AREA */
+  }
+  display_window_clauses
+  {
+	if ($2) {
+		/* TODO: set "CELL WIDTH" and "CELL HEIGHT" to "LABEL FONT" */
+		/* if not set already */
+	}
+	cb_emit_display_window ($1, upon_value, NULL, line_column,
+			 current_statement->attr_ptr);
+  }
+;
+
+intial_type:
+  TOK_INITIAL	{$$ = cb_int1;}
+| STANDARD	{$$ = cb_int2;}
+| INDEPENDENT	{$$ = cb_int3;}
+;
+
+_graphical:
+  /* empty */	{$$ = NULL;}
+| GRAPHICAL	{$$ = cb_int1;}
+;
+
+_upon_window_handle:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| UPON identifier
+  {
+	$$ = $2;
+  }
+;
+
+display_window_clauses:
+  display_window_clause
+| display_window_clauses display_window_clause
+;
+
+/* FIXME: has different clauses (some additional while some aren't in)
+          SCREEN is optional(=implied) for ERASE here */
+display_window_clause:
+  pop_up_or_handle	/* DISPLAY WINDOW actually only takes POP-UP */
+| LINES integer
+  {
+	/* TODO: store */
+  }
+| at_line_column
+| _with disp_attr
+;
+
+pop_up_or_handle:
+  pop_up_area
+| handle_is_in
+;
+
+pop_up_area:
+  POP_UP _area _is identifier
+  {
+	if (upon_value) {
+		emit_duplicate_clause_message("POP-UP AREA");
+	}
+	upon_value = $4;
+  }
+;
+
+handle_is_in:
+  HANDLE _is_in identifier
+  {
+	if (strcmp (current_statement->name, "DISPLAY WINDOW")) {
+		cb_error_x ($1, _("HANDLE clause invalid for %s"), 
+			current_statement->name);
+		upon_value = cb_error_node;
+	} else{
+		if (upon_value) {
+			emit_duplicate_clause_message("POP-UP AREA / HANDLE IN");
+		}
+		upon_value = $3;
+	}
+  }
 ;
 
 disp_attr:
@@ -13347,6 +13545,7 @@ _by:		| BY ;
 _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
 _contains:	| CONTAINS ;
+_controls:	| CONTROLS ;
 _data:		| DATA ;
 _end_of:	| END _of ;
 _file:		| TOK_FILE ;
@@ -13361,6 +13560,7 @@ _initial:	| TOK_INITIAL ;
 _into:		| INTO ;
 _is:		| IS ;
 _is_are:	| IS | ARE ;
+_is_in:		| IS | IN ;
 _key:		| KEY ;
 _left_or_right:	| LEFT | RIGHT ;
 _line:		| LINE ;

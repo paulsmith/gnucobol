@@ -3073,12 +3073,12 @@ AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob: 26: warning: THREAD is not implemented
 prog.cob: 28: warning: THREAD is not implemented
-prog.cob: 27: error: HANDLE must be either a generic or a thread handle
-prog.cob: 31: error: HANDLE must be either a generic or a thread handle
+prog.cob: 27: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob: 31: error: HANDLE must be either a generic or a THREAD HANDLE
 prog.cob: 31: warning: STOP THREAD is replaced by STOP RUN
 prog.cob: 36: warning: THREAD is not implemented
 prog.cob: 38: warning: THREAD is not implemented
-prog.cob: 37: error: HANDLE must be either a generic or a thread handle
+prog.cob: 37: error: HANDLE must be either a generic or a THREAD HANDLE
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
@@ -3095,6 +3095,57 @@ prog.cob: 31: error: syntax error, unexpected Identifier
 prog.cob: 36: error: syntax error, unexpected Identifier, expecting THREAD
 prog.cob: 40: error: syntax error, unexpected END-CALL
 prog.cob: 26: error: 'thread' is not defined, but is a reserved word in another dialect
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([ACUCOBOL WINDOW statements])
+AT_KEYWORDS([misc acu extensions])
+
+# TODO: need a better tests when we implement this,
+#       likely splitted into multiple ones
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       77  myhandle      usage handle.
+       77  mythread      usage handle of thread.
+       77  WINDOW-HANDLE usage handle of window.
+       PROCEDURE DIVISION.
+       MAIN.
+           DISPLAY WINDOW, LINE 1, COLUMN 29, SIZE 51, LINES 12,
+               ERASE, POP-UP AREA IS WINDOW-HANDLE
+           END-DISPLAY
+           DISPLAY "THIS IS TEXT IN A WINDOW"
+           DISPLAY FLOATING WINDOW UPON WINDOW-HANDLE,
+               LINE 5, COLUMN 10, SIZE 20, LINES 2,
+               ERASE SCREEN, POP-UP AREA IS myhandle
+           END-DISPLAY
+           DISPLAY "Some text for the floating window"
+           CLOSE WINDOW myhandle
+           DISPLAY FLOATING WINDOW,
+               LINE 5, COLUMN 10, SIZE 20, LINES 2,
+               ERASE SCREEN, POP-UP AREA IS mythread
+           END-DISPLAY
+           DESTROY WINDOW-HANDLE
+      *
+           STOP RUN.
+])
+
+# FIXME: line 12 is actually a parser error (ignore for now)
+
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob: 11: warning: GRAPHICAL WINDOW is not implemented
+prog.cob: 12: error: syntax error, unexpected POP-UP, expecting LINE or SCREEN
+prog.cob: 15: warning: GRAPHICAL WINDOW is not implemented
+prog.cob: 20: warning: GRAPHICAL WINDOW is not implemented
+prog.cob: 21: warning: GRAPHICAL WINDOW is not implemented
+prog.cob: 23: error: HANDLE must be either a generic or a WINDOW HANDLE
+prog.cob: 25: warning: GRAPHICAL CONTROL is not implemented
 ])
 
 AT_CLEANUP

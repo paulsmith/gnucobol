@@ -598,7 +598,8 @@ cb_validate_one (cb_tree x)
 				/* valid statements: CALL, MOVE, DISPLAY + expressions
 				   the only statements reaching this are MOVE and DISPLAY */
 				if (strcmp (current_statement->name, "MOVE") != 0 &&
-					strcmp (current_statement->name, "DISPLAY") != 0) {
+					strcmp (current_statement->name, "DISPLAY") != 0 &&
+					strcmp (current_statement->name, "DESTROY") != 0) {
 						cb_error_x (x, _ ("invalid use of HANDLE item"));
 					return 1;
 				}
@@ -868,18 +869,18 @@ usage_is_thread_handle (cb_tree x)
 	return (f->usage == CB_USAGE_HNDL ||
 		f->usage == CB_USAGE_HNDL_THREAD);
 }
-#if 0 /* Simon: not used yet, needed for DISPLAY (SUB)WINDOW later on */
+
 static int
 usage_is_window_handle (cb_tree x)
 {
 	struct cb_field *f;
 	f = CB_FIELD_PTR (x);
 
+	/* FIXME: may also be a PIC X(10) item */
 	return (f->usage == CB_USAGE_HNDL ||
 		f->usage == CB_USAGE_HNDL_WINDOW ||
 		f->usage == CB_USAGE_HNDL_SUBWINDOW);
 }
-#endif
 
 /* List system routines */
 
@@ -5515,7 +5516,7 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	}
 
 	if (handle && !usage_is_thread_handle(handle)) {
-		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
+		cb_error_x (handle, _("HANDLE must be either a generic or a THREAD HANDLE"));
 		error_ind = 1;
 	}
 
@@ -5846,6 +5847,128 @@ cb_emit_delete_file (cb_tree file)
 				     CB_FILE(file)->file_status));
 }
 
+
+static int
+validate_attrs (cb_tree pos, cb_tree fgc, cb_tree bgc, cb_tree scroll, cb_tree size_is)
+{
+	return 	cb_validate_one (pos)
+		|| cb_validate_one (fgc)
+		|| cb_validate_one (bgc)
+		|| cb_validate_one (scroll)
+		|| cb_validate_one (size_is);
+}
+
+static void
+initialize_attrs (const struct cb_attr_struct * const attr_ptr,
+		  cb_tree * const fgc, cb_tree * const bgc,
+		  cb_tree * const scroll, cb_tree * const size_is,
+		  cob_flags_t * const dispattrs)
+{
+	if (attr_ptr) {
+		*fgc = attr_ptr->fgc;
+		*bgc = attr_ptr->bgc;
+		*scroll = attr_ptr->scroll;
+		*size_is = attr_ptr->size_is;
+		*dispattrs = attr_ptr->dispattrs;
+	} else {
+		*fgc = NULL;
+		*bgc = NULL;
+		*scroll = NULL;
+		*size_is = NULL;
+		*dispattrs = 0;
+	}
+}
+
+
+/* DISPLAY [FLOATING | INITIAL] WINDOW statement */
+
+void
+cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
+		 cb_tree line_column, struct cb_attr_struct *attr_ptr)
+{
+	cb_tree		fgc;
+	cb_tree		bgc;
+	cb_tree		scroll;
+	cb_tree		size_is;	/* WITH SIZE IS */
+	cob_flags_t		disp_attrs;
+
+	/* type may be: NULL     --> normal WINDOW, 
+	                cb_int0  --> FLOATING WINDOW
+	   otherwise it is an INITIAL WINDOW type: 
+	   cb_int1 = INITIAL, cb_int2 = STANDARD, cb_int3 = INDEPENDENT */
+	if ((type == cb_int1 || type == cb_int2) && line_column != NULL) {
+			cb_error_x (line_column, _("positions cannot be specified for main windows"));		
+	}
+
+	/* Validate line_column and the attributes */
+	initialize_attrs (attr_ptr, &fgc, &bgc, &scroll, &size_is, &disp_attrs);
+	if (validate_attrs (line_column, fgc, bgc, scroll, size_is)) {
+		return;
+	}
+
+	if (own_handle && !usage_is_window_handle(own_handle)) {
+		cb_error_x (own_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	}
+	if (upon_handle && !usage_is_window_handle(upon_handle)) {
+		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	}
+	
+#if 0 /* TODO, likely as multiple functions */
+	cb_emit (CB_BUILD_FUNCALL_2 ("cob_display_window", own_handle, upon_handle));
+#endif
+}
+
+
+/* CLOSE WINDOW statement (WITH NO DISPLAY)
+   Note: CLOSE WINDOW without WITH NO DISPLAY is resolved as cb_emit_destroy
+*/
+
+void
+cb_emit_close_window (cb_tree handle)
+{
+	if (handle && !usage_is_window_handle(handle)) {
+		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW handle"));
+	}
+	cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
+}
+
+
+/* DESTROY statement */
+
+void
+cb_emit_destroy (cb_tree controls)
+{
+#if 0 /* TODO */
+	cb_tree		l;
+	struct cb_field	*f;
+	int		i;
+#endif
+
+	/* DESTROY ALL CONTROLS */
+	if (!controls) {
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_destroy_control", NULL));
+		return;
+	}
+
+	/* DESTROY list-of-controls */
+	if (cb_validate_list (controls)) {
+		return;
+	}
+#if 0 /* TODO */
+	for (l = controls, i = 1; l; l = CB_CHAIN (l), i++) {
+		if (CB_REF_OR_FIELD_P (CB_VALUE (l))) {
+			f = CB_FIELD_PTR (CB_VALUE (l));
+			if (!f->...checks) {
+				...
+			}
+			cb_emit (CB_BUILD_FUNCALL_1 ("cob_destroy_control", CB_VALUE (l)));
+		} else {
+			...
+		}
+	}
+#endif
+}
+
 /* DISPLAY statement */
 
 void
@@ -5920,37 +6043,6 @@ validate_types_of_display_values (cb_tree values)
 	}
 
 	return 0;
-}
-
-static int
-validate_attrs (cb_tree pos, cb_tree fgc, cb_tree bgc, cb_tree scroll, cb_tree size_is)
-{
-	return 	cb_validate_one (pos)
-		|| cb_validate_one (fgc)
-		|| cb_validate_one (bgc)
-		|| cb_validate_one (scroll)
-		|| cb_validate_one (size_is);
-}
-
-static void
-initialize_attrs (const struct cb_attr_struct * const attr_ptr,
-		  cb_tree * const fgc, cb_tree * const bgc,
-		  cb_tree * const scroll, cb_tree * const size_is,
-		  cob_flags_t * const dispattrs)
-{
-	if (attr_ptr) {
-		*fgc = attr_ptr->fgc;
-		*bgc = attr_ptr->bgc;
-		*scroll = attr_ptr->scroll;
-		*size_is = attr_ptr->size_is;
-		*dispattrs = attr_ptr->dispattrs;
-	} else {
-		*fgc = NULL;
-		*bgc = NULL;
-		*scroll = NULL;
-		*size_is = NULL;
-		*dispattrs = 0;
-	}
 }
 
 static void
@@ -8585,7 +8677,7 @@ cb_emit_perform (cb_tree perform, cb_tree body, cb_tree newthread, cb_tree handl
 		return;
 	}
 	if (handle && !usage_is_thread_handle (handle)) {
-		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
+		cb_error_x (handle, _("HANDLE must be either a generic or a THREAD HANDLE"));
 		return;
 	}
 	if (current_program->flag_debugging &&
@@ -9310,7 +9402,7 @@ cb_emit_set_thread_priority (cb_tree handle, cb_tree priority)
 	cb_tree used_handle;
 
 	if (handle && handle != cb_null && !usage_is_thread_handle (handle)) {
-		cb_error (_("HANDLE must be either a generic or a thread handle"));
+		cb_error_x (handle, _("HANDLE must be either a generic or a THREAD HANDLE"));
 		return;
 	}
 	used_handle = handle;
@@ -9623,7 +9715,7 @@ cb_emit_stop_thread (cb_tree handle)
 	cb_tree used_handle;
 
 	if (handle && handle != cb_null && !usage_is_thread_handle (handle)) {
-		cb_error_x (handle, _("HANDLE must be either a generic or a thread handle"));
+		cb_error_x (handle, _("HANDLE must be either a generic or a THREAD HANDLE"));
 		return;
 	}
 	used_handle = handle;
