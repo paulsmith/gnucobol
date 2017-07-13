@@ -7211,27 +7211,32 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	fdst = CB_FIELD_PTR (dst);
 	switch (CB_TREE_TAG (src)) {
 	case CB_TAG_CONST:
-		if (src == cb_space) {
+		if (src == cb_space) {	/* error because SPACE is category alphabetic */
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
-			    (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
-				if (!cb_relaxed_syntax_checks || is_value) {
-					goto invalid;
-				}
-				cb_warning_x (COBC_WARN_FILLER, loc,
-					_("source is non-numeric - substituting zero"));
+			   (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+				goto invalid;
 			}
 		} else if (src == cb_zero) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_ALPHABETIC) {
 				goto invalid;
 			}
-		} else if (src == cb_low || src == cb_high || src == cb_quote) {
-			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
-			    CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED) {
-				if (!cb_relaxed_syntax_checks || is_value) {
-					goto invalid;
+		} else if (src == cb_quote) {	/* remark: no error because QUOTE is category alphanumeric */
+			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC) {
+				if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
+					_ ("MOVE of figurative constant to numeric item"))) {
+					return -1;
 				}
-				cb_warning_x (COBC_WARN_FILLER, loc,
-					_("source is non-numeric - substituting zero"));
+				if (!cb_verify_x (loc, cb_move_fig_quote_to_numeric,
+					_ ("MOVE of figurative constant QUOTE to numeric item"))) {
+					return -1;
+				}
+			}
+		} else if (src == cb_low || src == cb_high) {
+			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC) {
+				if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
+					_ ("MOVE of figurative constant to numeric item"))) {
+					return -1;
+				}
 			}
 		}
 		break;
@@ -8374,12 +8379,14 @@ cb_build_move (cb_tree src, cb_tree dst)
 		cobc_xref_set_receiving (dst);
 	}
 
+#if 0 /* Simon: no explicit internal change of the source !!! */
 	if ((src == cb_space || src == cb_low ||
 	     src == cb_high || src == cb_quote) &&
 	    (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
 	     CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED)) {
 		src = cb_zero;
 	}
+#endif
 
 	if (CB_TREE_CLASS (dst) == CB_CLASS_POINTER ||
 	    CB_TREE_CLASS (src) == CB_CLASS_POINTER) {

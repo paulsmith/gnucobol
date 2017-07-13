@@ -1,4 +1,13 @@
 
+2017-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.def: added support options cb_move_fig_constant_to_numeric
+	  "move-figurative-constant-to-numeric" and cb_move_fig_quote_to_numeric
+	  "move-figurative-quote-to-numeric"
+	* typeck.c: re-allow move of figurative constants to numeric/numeric
+	  edited fields, cater for new compiler support flags
+	  cb_move_fig_constant_to_numeric and cb_move_fig_quote_to_numeric
+
 2017-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: FR #206 added -O3 option

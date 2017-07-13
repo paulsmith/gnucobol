@@ -441,6 +441,8 @@ test.conf: missing definitions:
 	no definition of 'title-statement'
 	no definition of 'entry-statement'
 	no definition of 'move-noninteger-to-alphanumeric'
+	no definition of 'move-figurative-constant-to-numeric'
+	no definition of 'move-figurative-quote-to-numeric'
 	no definition of 'odo-without-to'
 	no definition of 'section-segments'
 	no definition of 'alter-statement'
