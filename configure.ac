@@ -245,8 +245,17 @@ AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	strcoll strxfrm setenv raise])
 
 # Checks for UTC offset (init)
-# FIXME: set to yes if C compiler defines _BSD_SOURCE
 COB_HAS_UTC_OFFSET="no"
+
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
+	#ifdef _BSD_SOURCE
+	return 0;
+	#else
+	return 1;
+	#endif]])],
+	[COB_HAS_UTC_OFFSET="yes"],
+	[],
+	[])
 
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])
