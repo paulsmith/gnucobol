@@ -17666,6 +17666,7 @@ done
 
 	# BDB header exists. Extract major/minor number pair
 	COB_BDB_HEADER=''
+	COB_BDB_HEADER_STR=''
 	if test "$cross_compiling" = yes; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
@@ -17680,14 +17681,17 @@ else
 		int main (int argc, char **argv)
 		{
 			(void)argv;
-			if (argc > 1)
+			if (argc == 2)
 				printf ("%d.%d\n", DB_VERSION_MAJOR, DB_VERSION_MINOR);
+			if (argc == 3)
+				printf ("-%s-\n", DB_VERSION_STRING);
 			return 0;
 		}
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   COB_BDB_HEADER=`./conftest$ac_exeext x`
+		COB_BDB_HEADER_STR=`./conftest$ac_exeext x y`
 else
   as_fn_error $? "Unable to extract Berkeley DB version information from db.h" "$LINENO" 5
 fi
@@ -17697,6 +17701,10 @@ fi
 
 	if test "x$COB_BDB_HEADER" = "x"; then
 		as_fn_error $? "Unable to extract Berkeley DB version information" "$LINENO" 5
+	fi
+	if test "x$COB_BDB_HEADER_STR" != "x"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: db.h reports version \"$COB_BDB_HEADER_STR\"" >&5
+$as_echo "$as_me: db.h reports version \"$COB_BDB_HEADER_STR\"" >&6;}
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Berkeley DB db.h version >= 4.1" >&5
 $as_echo_n "checking for Berkeley DB db.h version >= 4.1... " >&6; }

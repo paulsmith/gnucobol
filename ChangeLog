@@ -3,6 +3,7 @@
 
 	* configure.ac [_BSD_SOURCE]: set COB_HAS_UTC_OFFSET to "yes" if C compiler
 	  defines _BSD_SOURCE as we can access the offset directly in this case
+	* configure.ac: output detailed version information for BDB, if available
 
 2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

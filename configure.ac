@@ -797,22 +797,29 @@ if test "$with_db" = "yes"; then
 
 	# BDB header exists. Extract major/minor number pair
 	COB_BDB_HEADER=''
+	COB_BDB_HEADER_STR=''
 	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 		#include <stdio.h>
 		#include <db.h>
 		int main (int argc, char **argv)
 		{
 			(void)argv;
-			if (argc > 1)
+			if (argc == 2)
 				printf ("%d.%d\n", DB_VERSION_MAJOR, DB_VERSION_MINOR);
+			if (argc == 3)
+				printf ("-%s-\n", DB_VERSION_STRING);
 			return 0;
 		}
 		]])],
-		[COB_BDB_HEADER=`./conftest$ac_exeext x`],
+		[COB_BDB_HEADER=`./conftest$ac_exeext x`]
+		[COB_BDB_HEADER_STR=`./conftest$ac_exeext x y`],
 		[AC_MSG_ERROR([Unable to extract Berkeley DB version information from db.h])],
 		[])
 	if test "x$COB_BDB_HEADER" = "x"; then
 		AC_MSG_ERROR([Unable to extract Berkeley DB version information])
+	fi
+	if test "x$COB_BDB_HEADER_STR" != "x"; then
+		AC_MSG_NOTICE([db.h reports version "$COB_BDB_HEADER_STR"])
 	fi
 	AC_MSG_CHECKING([for Berkeley DB db.h version >= 4.1])
 	COB_BDB_HEADER_MAJOR=$(echo "$COB_BDB_HEADER" | cut -d. -f1)
