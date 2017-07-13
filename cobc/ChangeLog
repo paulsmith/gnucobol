@@ -6,7 +6,8 @@
 	  "move-figurative-quote-to-numeric"
 	* typeck.c: re-allow move of figurative constants to numeric/numeric
 	  edited fields, cater for new compiler support flags
-	  cb_move_fig_constant_to_numeric and cb_move_fig_quote_to_numeric
+	  cb_move_fig_constant_to_numeric and cb_move_fig_quote_to_numeric;
+	  removed the explicit internal change in this case to ALL ZERO
 
 2017-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
