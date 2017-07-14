@@ -136,8 +136,9 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	@echo "*SELECT-MODULE `echo $@ | sed 's/\(..\).*/\1/'`" > ./$@/EXEC85.conf
 	@cat $(srcdir)/EXEC85.conf.in >> ./$@/EXEC85.conf
 #	setting NEWCOB_VAL to the full name for EXEC85
-	@if test "$(<D)" = "."; then \
-		export NEWCOB_VAL=../$(<F); \
+#	(for make not supporting $(<D) this would be empty -> guess newcob.val is in builddir)
+	@if test "$(<D)" = "." -o "$(<D)" = ""; then \
+		export NEWCOB_VAL=../newcob.val; \
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
@@ -158,14 +159,20 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 
 EXEC85$(EXEEXT): newcob.val
 	@echo "Extracting EXEC85 program from newcob.val"
-	@sed -e '/^\*END/,$$d' -e '1,/^\*HEADER/d' \
+#	setting NEWCOB_VAL to the full name for the sed invocation
+#	(for make not supporting $< this would be empty -> guess newcob.val is in builddir)
+	@if test "$(<D)" = "." -o "$(<D)" = ""; then \
+		NEWCOB_VAL=newcob.val; \
+	else \
+		NEWCOB_VAL=$<; \
+	fi; \
+	sed -e '/^\*END/,$$d' -e '1,/^\*HEADER/d' \
 	-e 's/^002700.*/           "NEWCOB_VAL" ORGANIZATION LINE SEQUENTIAL./' \
 	-e 's/^003000.*/           "newcob.tmp" ORGANIZATION LINE SEQUENTIAL./' \
 	-e 's/^003100.*//' \
 	-e 's/^003400.*/           "unused"./' \
 	-e 's/^003700.*/           "newcob.log"./' \
 	-e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
-	$< > EXEC85.cob
+	"$$NEWCOB_VAL" > EXEC85.cob
 	@echo "Compiling EXEC85 program"
 	@. ../atconfig; . ../atlocal; cobc -std=cobol85 -x EXEC85.cob
-#	@rm -f EXEC85.cob
