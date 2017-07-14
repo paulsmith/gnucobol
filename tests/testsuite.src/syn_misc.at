@@ -126,7 +126,7 @@ AT_DATA([prog.cob], [
           WHEN CONST2 = 1234
              CONTINUE
        END-EVALUATE
-       STOP RUN RETURNING 0.
+       STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],

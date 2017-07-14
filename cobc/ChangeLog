@@ -1,4 +1,10 @@
 
+2017-07-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: only allow RETURNING/GIVING in EXIT PROGRAM/GOBACK
+	  if RETURN-CODE register is not disabled; always return 0 on
+	  STOP RUN if no RETURN-CODE register is available
+
 2017-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def: added support options cb_move_fig_constant_to_numeric

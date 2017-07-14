@@ -9197,8 +9197,12 @@ exit_body:
 	} else {
 		check_unreached = 1;
 	}
-	if ($2 != NULL && current_program->cb_return_code) {
-		cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
+	if ($2) {
+		if (!current_program->cb_return_code) {
+			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning sources"));
+		} else {
+			cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
+		}
 	}
 	current_statement->name = (const char *)"EXIT PROGRAM";
 	cb_emit_exit (0);
@@ -9388,8 +9392,12 @@ goback_statement:
   {
 	begin_statement ("GOBACK", 0);
 	check_unreached = 1;
-	if ($2 != NULL && current_program->cb_return_code) {
-		cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
+	if ($2) {
+		if (!current_program->cb_return_code) {
+			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning sources"));
+		} else {
+			cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
+		}
 	}
 	cb_emit_exit (1U);
   }
@@ -10936,7 +10944,11 @@ stop_statement:
 stop_returning:
   /* empty */
   {
-	$$ = current_program->cb_return_code;
+	if (current_program->cb_return_code) {
+		$$ = current_program->cb_return_code;
+	} else {
+		$$ = cb_int0;
+	}
   }
 | return_give x	/* common extension, should error with -std=cobolX */
   {

@@ -1746,9 +1746,7 @@ AT_DATA([prog3.cob], [
        PROGRAM-ID.      prog3.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       77  RET          PIC 99 USAGE BINARY.
        PROCEDURE        DIVISION.
-           MOVE 33 TO RET
            STOP RUN 33.
 ])
 
