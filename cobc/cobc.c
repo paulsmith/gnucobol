@@ -648,6 +648,8 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "LITERAL";
 	case CB_TAG_DECIMAL:
 		return "DECIMAL";
+	case CB_TAG_DECIMAL_LITERAL:
+		return "DECIMAL_LITERAL";
 	case CB_TAG_FIELD:
 		return "FIELD";
 	case CB_TAG_FILE:

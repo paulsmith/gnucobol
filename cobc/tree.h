@@ -671,6 +671,9 @@ struct cb_decimal {
 #define CB_DECIMAL(x)	(CB_TREE_CAST (CB_TAG_DECIMAL, struct cb_decimal, x))
 #define CB_DECIMAL_P(x)	(CB_TREE_TAG (x) == CB_TAG_DECIMAL)
 
+#define CB_DECIMAL_LITERAL(x)	(CB_TREE_CAST (CB_TAG_DECIMAL_LITERAL, struct cb_decimal, x))
+#define CB_DECIMAL_LITERAL_P(x)	(CB_TREE_TAG (x) == CB_TAG_DECIMAL_LITERAL)
+
 /* Picture */
 
 struct cb_picture {

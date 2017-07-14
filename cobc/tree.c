@@ -467,9 +467,11 @@ cb_name_1 (char *s, cb_tree x)
 			sprintf (s, "USER FUNCTION");
 		}
 		break;
+
 	case CB_TAG_FILE:
 		sprintf (s, "FILE %s", CB_FILE (x)->name);
 		break;
+
 	default:
 		sprintf (s, _("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 	}

@@ -2700,7 +2700,7 @@ output_param (cb_tree x, int id)
 		output ("d%d", CB_DECIMAL (x)->id);
 		break;
 	case CB_TAG_DECIMAL_LITERAL:
-		output ("%s%d", CB_PREFIX_DEC_CONST, CB_DECIMAL (x)->id);
+		output ("%s%d", CB_PREFIX_DEC_CONST, CB_DECIMAL_LITERAL (x)->id);
 		break;
 	case CB_TAG_FILE:
 		output ("%s%s", CB_PREFIX_FILE, CB_FILE (x)->cname);
