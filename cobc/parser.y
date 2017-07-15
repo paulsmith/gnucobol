@@ -441,11 +441,13 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
+	/* LCOV_EXCL_START */
 	} else {
 		cobc_err_msg ("call to '%s' without any open term for %s",
 			"terminator_warning", name);
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_END */
 	snprintf (terminator, 32, "END-%s", name);
 	if (is_reserved_word (terminator)) {
 		cb_warning_x (cb_warn_terminator, CB_TREE (current_statement),
@@ -466,11 +468,13 @@ terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
+	/* LCOV_EXCL_START */
 	} else {
 		cobc_err_msg ("call to '%s' without any open term for %s",
 			"terminator_error", name);
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_END */
 	snprintf (terminator, 32, "END-%s", name);
 	if (is_reserved_word (terminator)) {
 		cb_error_x (CB_TREE (current_statement),
@@ -492,11 +496,13 @@ terminator_clear (cb_tree stmt, const unsigned int termid)
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
+	/* LCOV_EXCL_START */
 	} else {
 		cobc_err_msg ("call to '%s' without any open term for %s",
 			"terminator_warning", current_statement->name);
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_END */
 	/* Free tree associated with terminator */
 	if (stmt) {
 		cobc_parse_free (stmt);
@@ -1462,10 +1468,12 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 		}
 		break;
 
+		/* LCOV_EXCL_START */
 	default:
 		/* This should never happen (and therefore doesn't get a translation) */
 		cb_error ("unexpected tallying phrase");
 		COBC_ABORT();
+		/* LCOV_EXCL_END */
 	}
 
 	previous_tallying_phrase = phrase;
