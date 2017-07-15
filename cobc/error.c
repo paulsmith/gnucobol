@@ -550,10 +550,6 @@ undefined_error (cb_tree x)
 {
 	struct cb_reference	*r = CB_REFERENCE (x);
 	cb_tree			c;
-	/* TO BE REMOVED
-	void (* const emit_error_func)(int, cb_tree, const char *, ...)
-		= r->flag_optional ? &cb_warning_x : &cb_error_x;
-	*/
 	const char		*error_message;
 
 	if (!errnamebuff) {
