@@ -1,4 +1,10 @@
 
+2017-07-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.guess, config.sub, compile: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+	* texinfo.tex: updated from https://ftp.gnu.org/gnu/texinfo
+
 2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* ylwrap: updated to recent version from

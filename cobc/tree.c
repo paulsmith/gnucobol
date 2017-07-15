@@ -2436,11 +2436,11 @@ get_number_in_parentheses (const unsigned char ** const p,
 		/* Copy name */
 		name_length = close_paren - open_paren;
 		name_buff = cobc_parse_malloc (name_length);
-	        strncpy (name_buff, (char *) open_paren + 1, name_length);
+		strncpy (name_buff, (char *) open_paren + 1, name_length);
 		name_buff[name_length - 1] = '\0';
 
 		/* Build reference to name */
-	        item = cb_ref (cb_build_reference (name_buff));
+		item = cb_ref (cb_build_reference (name_buff));
 
 		if (item == cb_error_node) {
 			*error_detected = 1;
