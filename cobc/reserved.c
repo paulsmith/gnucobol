@@ -2098,16 +2098,16 @@ struct register_struct {
 	enum cb_feature_mode	active;
 };
 
+static size_t current_register = 0;
+
 static struct register_struct	register_list[] = {
 	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"SORT-RETURN", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* OpenCOBOL / GnuCOBOL extension, at least from 1.0+ */
 	{"COB-CRT-STATUS", "PICTURE 9(4) USAGE DISPLAY VALUE ZERO", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
-#if 0 /* FIXME: should be handled as register */
-	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},
-#endif
-	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},
+	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},		/* FIXME: currently not handled the "normal" register way */
+	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
 };
 
@@ -3432,6 +3432,25 @@ remove_register (const char *name, const char *fname, const int line)
 	}
 	/* TODO: when user-defined registers are possible: do memory cleanup here */
 	special_register->active = CB_FEATURE_DISABLED;
+}
+
+const char *
+cb_register_list_get_first (const char *definition)
+{
+	current_register = 0;
+	return cb_register_list_get_next (definition);
+}
+
+const char *
+cb_register_list_get_next (const char *definition)
+{
+	for (; current_register < NUM_REGISTERS; ++current_register) {
+		if (register_list[current_register].active == CB_FEATURE_ACTIVE) {
+			definition = register_list[current_register].definition;
+			return register_list[current_register++].name;
+		}
+	}
+	return NULL;
 }
 
 const char *

@@ -350,9 +350,12 @@ AT_DATA([prog.cob], [
            MOVE WHEN-COMPILED TO X.
            INSPECT X CONVERTING "0123456789" TO "9999999999".
            IF X NOT = "99/99/9999.99.99    "
-              DISPLAY X NO ADVANCING
-              END-DISPLAY
-           END-IF.
+              CALL 'CBL_OC_DUMP' USING X 
+                 ON EXCEPTION
+                    DISPLAY X NO ADVANCING
+                    END-DISPLAY
+              END-CALL
+           END-IF
            STOP RUN.
 ])
 
@@ -969,6 +972,7 @@ AT_CHECK([test -e TESTFILE], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([CALL unusual PROGRAM-ID.])
 AT_KEYWORDS([extensions])
 
@@ -1032,6 +1036,7 @@ AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 AT_CHECK([./caller], [0], [P1P2P3P4])
 
 AT_CLEANUP
+
 
 AT_SETUP([CALL / GOBACK with LOCAL-STORAGE])
 AT_KEYWORDS([extensions])
@@ -1245,6 +1250,7 @@ AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([PROGRAM-ID AS clause])
 AT_KEYWORDS([extensions])
 
@@ -1266,6 +1272,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Quoted PROGRAM-ID])
 AT_KEYWORDS([extensions])
@@ -1319,6 +1326,7 @@ AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([ASSIGN clause IBM])
 AT_KEYWORDS([extensions])
 
@@ -1346,6 +1354,7 @@ AT_CHECK([./prog], [0], [], [])
 AT_CHECK([test -f FILENAME], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([ASSIGN mapping])
 AT_KEYWORDS([extensions])
@@ -1402,6 +1411,7 @@ AT_CHECK([test -f "FILENAME2"], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([ASSIGN expansion])
 AT_KEYWORDS([extensions])
 
@@ -1427,6 +1437,7 @@ AT_CHECK([DIR="." ./prog], [0], [], [])
 AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([ASSIGN with COB_FILE_PATH])
 AT_KEYWORDS([extensions])
@@ -1454,7 +1465,6 @@ AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
 
 AT_CLEANUP
 
-# Number of call parameters
 
 AT_SETUP([NUMBER-OF-CALL-PARAMETERS])
 AT_KEYWORDS([extensions])
@@ -1510,7 +1520,6 @@ AT_CHECK([./caller], [0],
 
 AT_CLEANUP
 
-# TALLY
 
 AT_SETUP([TALLY])
 AT_KEYWORDS([extensions register])
@@ -1541,6 +1550,40 @@ prog.cob: 12: error: 'tally' is not defined
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [0],
 [00001
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Redefining TALLY])
+AT_KEYWORDS([extensions register])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  tally PIC 999 VALUE 1.
+
+       PROCEDURE DIVISION.
+           ADD 1 TO tally
+           DISPLAY tally UPON SYSOUT
+           .
+])
+
+
+#FIXME: Should get a dialect check in syntax checks,
+#       along with all other special registers
+AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [1], [], [ignore])
+AT_CHECK([$COMPILE -std=acu-strict prog.cob], [0], [], [])
+#AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
+#AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [1], [],
+#[prog.cob: 7: error: redefinition of register 'TALLY'
+#])
+#AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[002
 ])
 
 AT_CLEANUP
@@ -4104,6 +4147,7 @@ AT_CHECK([$COMPILE prog.cob], [0],
 [X not defined
 ])
 AT_CLEANUP
+
 
 AT_SETUP([Conditional/define directives (7)])
 AT_KEYWORDS([extensions directive])

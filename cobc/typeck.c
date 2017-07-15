@@ -1086,77 +1086,198 @@ cb_check_field_debug (cb_tree fld)
 
 /* Program registers */
 
-void
-cb_build_registers (void)
+
+/* RETURN-CODE */
+static void
+cb_build_register_return_code (const char *name, const char *definition)
 {
-	/* TODO: get words *and* their definition from reserved.c /
-	         compiler configuration and
-	         build fields accordingly here */
-	cb_tree         r;
-	cb_tree		x;
-	char		buff[22];
+	cb_tree field;
 
-	/* RETURN-CODE */
-	if (cb_get_register_definition ("RETURN-CODE") != NULL) {
-		if (!current_program->nested_level) {
-			x = cb_build_index (cb_build_reference ("RETURN-CODE"),
-						cb_zero, 0, NULL);
-			CB_FIELD_PTR (x)->special_index = 1U;
-			current_program->cb_return_code = x;
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
 		}
 	}
 
-	/* SORT-RETURN */
-	if (cb_get_register_definition ("SORT-RETURN") != NULL) {
-		x = cb_build_index (cb_build_reference ("SORT-RETURN"),
-					cb_zero, 0, NULL);
-		CB_FIELD_PTR (x)->flag_no_init = 1;
-		current_program->cb_sort_return = x;
+	/* take care of GLOBAL */
+	if (current_program->nested_level) {
+		return;
 	}
 
-	/* NUMBER-OF-CALL-PARAMETERS (OpenCOBOL/GnuCOBOL extension 1.0+) */
-	if (cb_get_register_definition ("NUMBER-OF-CALL-PARAMETERS") != NULL) {
-		x = cb_build_index (cb_build_reference ("NUMBER-OF-CALL-PARAMETERS"),
-					cb_zero, 0, NULL);
-		CB_FIELD_PTR (x)->flag_no_init = 1;
-		CB_FIELD_PTR (x)->flag_local = 1;
-		CB_FIELD_PTR (x)->special_index = 2U;
-		current_program->cb_call_params = x;
-	}
+	field = cb_build_index (cb_build_reference (name), cb_zero, 0, NULL);
+	CB_FIELD_PTR (field)->special_index = 1U;
+	current_program->cb_return_code = field;
+}
 
-	/* TALLY */
-	if (cb_get_register_definition ("TALLY") != NULL) {
-		if (current_program->nested_level == 0) {
-			r = cb_build_reference ("TALLY");
-			x = cb_build_field (r);
-			CB_FIELD_PTR (x)->usage = CB_USAGE_BINARY;
-			CB_FIELD_PTR (x)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
-			cb_validate_field (CB_FIELD_PTR (x));
-			CB_FIELD_PTR (x)->values = CB_LIST_INIT (cb_zero);
-			CB_FIELD_PTR (x)->flag_no_init = 1;
-			CB_FIELD_PTR (x)->flag_is_global = 1;
-			CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (x));
+/* SORT-RETURN */
+static void
+cb_build_register_sort_return (const char *name, const char *definition)
+{
+	cb_tree field;
+
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
 		}
 	}
 
-	/* WHEN-COMPILED, FIXME: the actual content is different for at least OSVS,
-	  as this uses "hh.mm.ssMMM DD, YYYY", we may assume this if the register
-	  will later be defined as X(20) ! */
-	if (cb_get_register_definition ("WHEN-COMPILED") != NULL) {
-		snprintf (buff, (size_t)17, "%02d/%02d/%02d%02d%c%02d%c%02d",
+	field = cb_build_index (cb_build_reference (name), cb_zero, 0, NULL);
+	CB_FIELD_PTR (field)->flag_no_init = 1;
+	current_program->cb_sort_return = field;
+}
+
+/* NUMBER-OF-CALL-PARAMETERS (OpenCOBOL/GnuCOBOL extension 1.0+) */
+static void
+cb_build_register_number_parameters (const char *name, const char *definition)
+{
+	cb_tree field;
+
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
+		}
+	}
+
+	field = cb_build_index (cb_build_reference (name), cb_zero, 0, NULL);
+	CB_FIELD_PTR (field)->flag_no_init = 1;
+	CB_FIELD_PTR (field)->flag_local = 1;
+	CB_FIELD_PTR (field)->special_index = 2U;
+	current_program->cb_call_params = field;
+}
+
+/* WHEN-COMPILED */
+static void
+cb_build_register_when_compiled (const char *name, const char *definition)
+{
+	char		buff[21];
+	size_t lit_size;
+	
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
+		}
+	}
+
+	/* FIXME: the actual content is different for at least OSVS,
+	   as this uses "hh.mm.ssMMM DD, YYYY", we should  assume this
+	   if the register's definition contains X(20)! */
+#if 0
+	if (doesn_t_contain_X_20(definition)) {
+#endif
+		lit_size = 16;
+		snprintf (buff, lit_size + 1, "%02d/%02d/%02d%02d.%02d.%02d",
 			current_compile_time.day_of_month,
 			current_compile_time.month,
 			current_compile_time.year % 100,
-			current_compile_time.hour, '.',
-			current_compile_time.minute, '.',
+			current_compile_time.hour,
+			current_compile_time.minute,
 			current_compile_time.second);
-		cb_build_constant (cb_build_reference ("WHEN-COMPILED"),
-			cb_build_alphanumeric_literal (buff, (size_t)16));
+#if 0
+	} else {
+		lit_size = 20;
+		snprintf (buff, lit_size + 1, "%02d\.%02d\.%02d%s %02d, %04d",
+			current_compile_time.hour,
+			current_compile_time.minute,
+			current_compile_time.second,
+			current_compile_time.month,
+			current_compile_time.day_of_month,
+			current_compile_time.year);
+	}
+#endif
+	(void)cb_build_constant (cb_build_reference (name),
+		cb_build_alphanumeric_literal (buff, lit_size));
+}
+
+/* TALLY */
+/* TODO: change to generic function */
+static void
+cb_build_register_tally (const char *name, const char *definition)
+{
+	cb_tree field;
+	
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
+		}
 	}
 
-	/* LENGTH OF (different results depending on compiler configuration!) and
-	   ADDRESS OF should likely be added, too */
+	/* take care of GLOBAL */
+	if (current_program->nested_level) {
+		return;
+	}
 
+	field = cb_build_field (cb_build_reference (name));
+	CB_FIELD_PTR (field)->usage = CB_USAGE_BINARY;
+	CB_FIELD_PTR (field)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
+	cb_validate_field (CB_FIELD_PTR (field));
+	CB_FIELD_PTR (field)->values = CB_LIST_INIT (cb_zero);
+	CB_FIELD_PTR (field)->flag_no_init = 1;
+	CB_FIELD_PTR (field)->flag_is_global = 1;
+	CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (field));
+}
+
+/* build a concrete register */
+static void
+cb_build_single_register (const char *name, const char *definition)
+{
+	/* TODO: parse definition here or in sub-functions */
+
+	/* registers that are currently created elsewhere 
+	   TODO: move them here */
+	/* FIXME: LENGTH OF (must have different results depending on compiler configuration) */
+	if (!strcasecmp (name, "ADDRESS OF")
+	 || !strcasecmp (name, "LENGTH OF")
+	 || !strcasecmp (name, "COB-CRT-STATUS")) {
+		return;
+	}
+
+	/* registers that need a special handling / internal registration */
+	if (!strcasecmp (name, "RETURN-CODE")) {
+		cb_build_register_return_code (name, definition);
+		return;
+	}
+	if (!strcasecmp (name, "SORT-RETURN")) {
+		cb_build_register_sort_return (name, definition);
+		return;
+	}
+	if (!strcasecmp (name, "NUMBER-OF-CALL-PARAMETERS")) {
+		cb_build_register_number_parameters (name, definition);
+		return;
+	}
+	if (!strcasecmp (name, "WHEN-COMPILED")) {
+		cb_build_register_when_compiled (name, definition);
+		return;
+	}
+
+	/* "normal" registers */
+	if (!strcasecmp (name, "TALLY")) {
+		cb_build_register_tally (name, definition);
+		return;
+	}
+
+	/* This should never happen (and therefore doesn't get a translation) */
+	/* LCOV_EXCL_START */
+	cb_error ("unexpected register %s, defined as \"%s\"", name, definition);
+	COBC_ABORT();
+	/* LCOV_EXCL_END */
+}
+
+/* get all active registers and build them */
+void
+cb_build_registers (void)
+{
+	const char *name, *definition = NULL;
+
+	name = cb_register_list_get_first (definition);
+	while (name) {
+		cb_build_single_register (name, definition);
+		name = cb_register_list_get_next (definition);
+	}
 }
 
 /*
