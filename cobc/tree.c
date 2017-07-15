@@ -805,7 +805,7 @@ cb_name (cb_tree x)
 {
 	char	*s;
 	char	tmp[COB_NORMAL_BUFF] = { 0 };
-	int		tlen;
+	int	tlen;
 
 	tlen = cb_name_1 (tmp, x);
 
@@ -2367,7 +2367,7 @@ get_pic_number_from_str (const unsigned char *str, int * const error_detected)
 			*error_detected = 1;
 			break;
 		}
-			
+
 		num_sig_digits++;
 		if (num_sig_digits <= 9) {
 			value = value * 10 + (*str - '0');
@@ -2381,7 +2381,7 @@ get_pic_number_from_str (const unsigned char *str, int * const error_detected)
 		cb_error (_("number or constant in parentheses must be greater than zero"));
 		*error_detected = 1;
 	}
-	
+
 	return value;
 }
 
@@ -2414,7 +2414,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 	        *end_pic_processing = 1;
 		return 1;
 	}
-	
+
 	/* Find out if the parens contain a number or a constant-name. */
 	for (c = open_paren + 1; c != close_paren; ++c) {
 		if (!(isdigit (*c) || *c == '.' || *c == '+'
@@ -2425,13 +2425,13 @@ get_number_in_parentheses (const unsigned char ** const p,
 	}
 
 	*p = close_paren;
-	
+
 	if (open_paren + 1 == close_paren) {
 		cb_error (_("parentheses must contain (a constant-name defined as) a positive integer"));
 		*error_detected = 1;
 		return 1;
 	}
-	
+
 	if (contains_name) {
 		/* Copy name */
 		name_length = close_paren - open_paren;
@@ -2441,7 +2441,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 
 		/* Build reference to name */
 	        item = cb_ref (cb_build_reference (name_buff));
-		
+
 		if (item == cb_error_node) {
 			*error_detected = 1;
 			return 1;
@@ -2451,7 +2451,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 			*error_detected = 1;
 			return 1;
 		}
-		
+
 		item_value = CB_VALUE (CB_FIELD (item)->values);
 		if (!CB_NUMERIC_LITERAL_P (item_value)) {
 			cb_error (_("'%s' is not a numeric literal"), name_buff);
@@ -2468,7 +2468,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 		}
 
 		cobc_parse_free (name_buff);
-		
+
 		return get_pic_number_from_str (CB_LITERAL (item_value)->data,
 						error_detected);
 	} else {
@@ -2527,7 +2527,7 @@ repeat:
 		while (p[1] == c) {
 			p++, n++, pic_str_len++;
 		}
-		
+
 		if (*p == ')' && p[1] == '(') {
 			cb_error (_("only one set of parentheses is permitted"));
 			error_detected = 1;
@@ -2543,7 +2543,7 @@ repeat:
 			if (end_immediately) {
 				goto end;
 			}
-			
+
 			n += paren_num - 1;
 			/*
 			  The number of digits of the number in parentheses is
@@ -2553,7 +2553,7 @@ repeat:
 			for (; paren_num != 0; paren_num /= 10) {
 				++pic_str_len;
 			}
-			
+
 			goto repeat;
 		}
 
@@ -3292,7 +3292,7 @@ void
 cb_finalize_cd (struct cb_cd *cd, struct cb_field *records)
 {
 	struct cb_field	*p;
-	
+
 	if (cd->record) {
 		cd->record->sister = records;
 	} else {
@@ -3609,8 +3609,8 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	cob_s64_t		xval, yval, rslt;
 	char			result[48];
 	int			i, j, xscale,yscale, rscale;
-	struct cb_literal *xl, *yl;
-	cb_tree				relop, e;
+	struct cb_literal 	*xl, *yl;
+	cb_tree			relop, e;
 
 	relop = cb_any;
 	/* setting an error tree to point to the correct expression
@@ -4413,7 +4413,7 @@ cb_build_prototype (const cb_tree prototype_name, const cb_tree ext_name,
 	prototype = make_tree (CB_TAG_PROTOTYPE, CB_CATEGORY_UNKNOWN,
 			       sizeof (struct cb_prototype));
 	CB_TREE (prototype)->source_line = prototype_name->source_line;
-	
+
 	/* Set prototype->name */
 	if (CB_LITERAL_P (prototype_name)) {
 		prototype->name =
@@ -4434,7 +4434,7 @@ cb_build_prototype (const cb_tree prototype_name, const cb_tree ext_name,
 	}
 
 	prototype->type = type;
-	
+
 	warn_if_no_definition_seen_for_prototype (prototype);
 
 	return CB_TREE (prototype);

@@ -7708,7 +7708,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Call parameters */
 	if (prog->cb_call_params && cb_code_field (prog->cb_call_params)->count) {
-		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independant from LINKAGE) */");
+		output_line ("/* Set NUMBER-OF-CALL-PARAMETERS (independent from LINKAGE) */");
 		output_prefix ();
 		output_integer (prog->cb_call_params);
 		output (" = cob_glob_ptr->cob_call_params;\n");
@@ -7972,11 +7972,10 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	output_line ("/* Program return */");
-#if	1	/* RXWRXW - PROCRET */
 	if (prog->returning && prog->cb_return_code) {
 		output_move (prog->returning, prog->cb_return_code);
 	}
-#endif
+
 	output_prefix ();
 	output ("return ");
 	if (prog->prog_type == CB_FUNCTION_TYPE) {

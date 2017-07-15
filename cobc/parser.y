@@ -942,6 +942,7 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		clear_initial_values ();
 		current_program = cb_build_program (current_program, depth);
 		build_nested_special (depth);
+		cb_set_intr_when_compiled ();
 		cb_build_registers ();
 	}
 
@@ -2389,6 +2390,7 @@ start:
 	cobc_cs_check = 0;
 	main_flag_set = 0;
 	current_program = cb_build_program (NULL, 0);
+	cb_set_intr_when_compiled ();
 	cb_build_registers ();
   }
   compilation_group

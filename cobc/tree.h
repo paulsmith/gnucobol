@@ -1754,6 +1754,7 @@ extern struct cb_program	*cb_build_program (struct cb_program *,
 extern cb_tree		cb_check_numeric_value (cb_tree);
 extern size_t		cb_check_index_or_handle_p (cb_tree x);
 
+extern void		cb_set_intr_when_compiled (void);
 extern void		cb_build_registers (void);
 extern void		cb_build_debug_item (void);
 extern void		cb_check_field_debug (cb_tree);

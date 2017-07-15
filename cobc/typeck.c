@@ -44,7 +44,7 @@
 #include "cobc.h"
 #include "tree.h"
 
-extern int call_line_number; 
+extern int call_line_number;
 
 struct system_table {
 	const char		*const syst_name;
@@ -1157,10 +1157,18 @@ cb_build_registers (void)
 	/* LENGTH OF (different results depending on compiler configuration!) and
 	   ADDRESS OF should likely be added, too */
 
-	/* FUNCTION WHEN-COMPILED */
-	/* TODO: build on first reference (we have the compile time which is
-	         the reason that it was placed here in the first place
-			 available fixed in current_compile_time now) */
+}
+
+/*
+  TODO: build on first reference (we have the compile time which is the reason
+  that it was placed here in the first place available fixed in
+  current_compile_time now).
+*/
+void
+cb_set_intr_when_compiled (void)
+{
+	char	buff[22];
+
 	snprintf (buff, (size_t)17, "%d%02d%02d%02d%02d%02d%02d",
 		current_compile_time.year,
 		current_compile_time.month,
@@ -1177,7 +1185,6 @@ cb_build_registers (void)
 		snprintf (buff + 16, (size_t)6, "00000");
 	}
 	cb_intr_whencomp = cb_build_alphanumeric_literal (buff, (size_t)21);
-
 }
 
 /* check program-id literal and trim, if necessary */
@@ -1947,7 +1954,7 @@ cb_build_const_start (struct cb_field *f, cb_tree x)
 	}
 
 	target = CB_FIELD (cb_ref (x));
-	if (!target->flag_external 
+	if (!target->flag_external
 	 && target->storage != CB_STORAGE_FILE
 	 && target->storage != CB_STORAGE_LINKAGE) {
 		cb_error (_("VALUE of '%s': %s target '%s' is invalid"),
@@ -2004,7 +2011,7 @@ cb_build_const_next (struct cb_field *f)
 	char			buff[32];
 	struct cb_field *previous;
 	int				sav_min, sav_max;
-	
+
 	previous = cb_get_real_field ();
 
 	if (!previous) {
@@ -2014,7 +2021,7 @@ cb_build_const_next (struct cb_field *f)
 		return cb_build_numeric_literal (0, "1", 0);
 	}
 
-	if (previous->storage != CB_STORAGE_FILE 
+	if (previous->storage != CB_STORAGE_FILE
 	 && previous->storage != CB_STORAGE_LINKAGE) {
 		p = previous;
 		while (p->parent) {
@@ -3545,7 +3552,7 @@ cb_build_expr (cb_tree list)
 		default:
 			/* Warning for complex expressions without explicit parentheses
 			   (i.e., "a OR b AND c" or "a AND b OR c") */
-			if (cb_warn_parentheses 
+			if (cb_warn_parentheses
 			 && expr_index > 3) {
 				if (op == '|' && expr_stack[expr_index-2].token == '&') {
 					cb_warning (cb_warn_parentheses,
@@ -3638,7 +3645,7 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 	const char	*func;
 	cb_tree		expr_dec = NULL;	/* Int value for decimal_align */
 
-	/* skip if the actual statement can't be generated any more 
+	/* skip if the actual statement can't be generated any more
 	   to prevent multiple errors here */
 	if (error_statement == current_statement) {
 		return;
@@ -3739,7 +3746,7 @@ decimal_expand (cb_tree d, cb_tree x)
 	struct cb_binary_op	*p;
 	cb_tree			t;
 
-	/* skip if the actual statement can't be generated any more 
+	/* skip if the actual statement can't be generated any more
 	   to prevent multiple errors here */
 	if (error_statement == current_statement) {
 		return;
@@ -5892,12 +5899,12 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 	cb_tree		size_is;	/* WITH SIZE IS */
 	cob_flags_t		disp_attrs;
 
-	/* type may be: NULL     --> normal WINDOW, 
+	/* type may be: NULL     --> normal WINDOW,
 	                cb_int0  --> FLOATING WINDOW
-	   otherwise it is an INITIAL WINDOW type: 
+	   otherwise it is an INITIAL WINDOW type:
 	   cb_int1 = INITIAL, cb_int2 = STANDARD, cb_int3 = INDEPENDENT */
 	if ((type == cb_int1 || type == cb_int2) && line_column != NULL) {
-			cb_error_x (line_column, _("positions cannot be specified for main windows"));		
+			cb_error_x (line_column, _("positions cannot be specified for main windows"));
 	}
 
 	/* Validate line_column and the attributes */
@@ -5912,7 +5919,7 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 	if (upon_handle && !usage_is_window_handle(upon_handle)) {
 		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
 	}
-	
+
 #if 0 /* TODO, likely as multiple functions */
 	cb_emit (CB_BUILD_FUNCALL_2 ("cob_display_window", own_handle, upon_handle));
 #endif
@@ -9251,7 +9258,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 			}
 		}
 	}
-	
+
 	/* Check ADDRESS OF targets can be modified. */
 	for (l = vars; l; l = CB_CHAIN (l)) {
 		v = CB_VALUE (l);
@@ -9480,17 +9487,22 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 		}
 		if (current_program->cb_sort_return) {
 			CB_FIELD_PTR (current_program->cb_sort_return)->count++;
+			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
+						     cb_int (cb_list_length (keys)), col,
+						     CB_BUILD_CAST_ADDRESS (current_program->cb_sort_return),
+						     CB_FILE(cb_ref (name))->file_status));
+		} else {
+			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
+						     cb_int (cb_list_length (keys)), col,
+						     cb_null, CB_FILE(cb_ref (name))->file_status));
+
 		}
-		cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
-					     cb_int (cb_list_length (keys)), col,
-					     CB_BUILD_CAST_ADDRESS (current_program->cb_sort_return),
-					     CB_FILE(cb_ref (name))->file_status));
 		for (l = keys; l; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_4 ("cob_file_sort_init_key",
-					cb_ref (name),
-					CB_VALUE (l),
-					CB_PURPOSE (l),
-					cb_int (CB_FIELD_PTR (CB_VALUE(l))->offset)));
+						     cb_ref (name),
+						     CB_VALUE (l),
+						     CB_PURPOSE (l),
+						     cb_int (CB_FIELD_PTR (CB_VALUE(l))->offset)));
 		}
 	} else {
 		if (keys == NULL) {
