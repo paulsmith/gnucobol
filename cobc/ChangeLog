@@ -2136,6 +2136,10 @@
 	* parser.y: bug #83 - added check for relative LINE/COLUMN clauses in
 	  screen section occurs items.
 
+2015-05-29  Ron Norman <rjn@inglenet.com>
+
+	* parser.y fixed so UNSTRING works with identifier/literal/function
+
 2015-05-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: bug #136 added check for duplicate on/off clauses for switches

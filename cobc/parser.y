@@ -11225,7 +11225,8 @@ unstring_statement:
 ;
 
 unstring_body:
-  identifier _unstring_delimited unstring_into
+  /* Note: using an literal here is an extension */
+  id_or_lit_or_func _unstring_delimited unstring_into
   _with_pointer _unstring_tallying _on_overflow_phrases
   {
 	cb_emit_unstring ($1, $2, $3, $4, $5);

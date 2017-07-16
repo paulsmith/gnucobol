@@ -1820,6 +1820,76 @@ AT_CHECK([./prog], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([UNSTRING with FUNCTION / literal])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  FILLER.
+         05  TSTUNS PIC X(479).
+         05  PRM    PIC X(16) OCCURS 4 TIMES.
+       PROCEDURE DIVISION.
+           MOVE "The,Quick,Brown,Fox" TO TSTUNS.
+           UNSTRING TSTUNS DELIMITED BY ',' 
+              INTO  PRM(1), PRM(2), PRM(3), PRM(4).
+           DISPLAY "PRM(1) is " PRM(1) ":".
+           DISPLAY "PRM(2) is " PRM(2) ":".
+           DISPLAY "PRM(3) is " PRM(3) ":".
+           DISPLAY "PRM(4) is " PRM(4) ":".
+           UNSTRING FUNCTION UPPER-CASE(TSTUNS) DELIMITED BY ',' 
+              INTO  PRM(1), PRM(2), PRM(3), PRM(4).
+           DISPLAY "Now using UPPER-CASE"
+           DISPLAY "PRM(1) is " PRM(1) ":".
+           DISPLAY "PRM(2) is " PRM(2) ":".
+           DISPLAY "PRM(3) is " PRM(3) ":".
+           DISPLAY "PRM(4) is " PRM(4) ":".
+           UNSTRING "Daddy,was,a,Rolling stone" DELIMITED BY ',' 
+              INTO  PRM(1), PRM(2), PRM(3), PRM(4).
+           DISPLAY "Now using Literal"
+           DISPLAY "PRM(1) is " PRM(1) ":".
+           DISPLAY "PRM(2) is " PRM(2) ":".
+           DISPLAY "PRM(3) is " PRM(3) ":".
+           DISPLAY "PRM(4) is " PRM(4) ":".
+           UNSTRING FUNCTION LOWER-CASE("Daddy,was,a,Rolling stone")
+                DELIMITED BY ',' 
+              INTO  PRM(1), PRM(2), PRM(3), PRM(4).
+           DISPLAY "Now using Literal + LOWER-CASE"
+           DISPLAY "PRM(1) is " PRM(1) ":".
+           DISPLAY "PRM(2) is " PRM(2) ":".
+           DISPLAY "PRM(3) is " PRM(3) ":".
+           DISPLAY "PRM(4) is " PRM(4) ":".
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0],
+[PRM(1) is The             :
+PRM(2) is Quick           :
+PRM(3) is Brown           :
+PRM(4) is Fox             :
+Now using UPPER-CASE
+PRM(1) is THE             :
+PRM(2) is QUICK           :
+PRM(3) is BROWN           :
+PRM(4) is FOX             :
+Now using Literal
+PRM(1) is Daddy           :
+PRM(2) is was             :
+PRM(3) is a               :
+PRM(4) is Rolling stone   :
+Now using Literal + LOWER-CASE
+PRM(1) is daddy           :
+PRM(2) is was             :
+PRM(3) is a               :
+PRM(4) is rolling stone   :
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([SORT: table sort])
 AT_KEYWORDS([runmisc])
 
