@@ -19,8 +19,8 @@
 ### GnuCOBOL Test Suite
 
 
-AT_SETUP([ANY LENGTH as function RETURNING item])
-AT_KEYWORDS([functions ANY LENGTH])
+AT_SETUP([ANY LENGTH / NUMERIC as function RETURNING item])
+AT_KEYWORDS([functions extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -28,7 +28,7 @@ AT_DATA([prog.cob], [
 
        DATA           DIVISION.
        LINKAGE        SECTION.
-       01  any-len    PIC 9 ANY LENGTH.
+       01  any-len    PIC X ANY LENGTH.
 
        PROCEDURE      DIVISION RETURNING any-len.
            CONTINUE
@@ -38,6 +38,24 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 9: error: function RETURNING item may not be ANY LENGTH
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID.   func.
+
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       01  any-len    PIC 9 ANY NUMERIC.
+
+       PROCEDURE      DIVISION RETURNING any-len.
+           CONTINUE
+           .
+       END FUNCTION   func.
+])
+
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 9: error: function RETURNING item may not be ANY LENGTH
 ])
 
 AT_CLEANUP

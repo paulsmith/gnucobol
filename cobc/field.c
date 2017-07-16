@@ -471,7 +471,6 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 		return cb_error_node;
 	} else if (f->level == 66) {
 		/* Level 66 */
-		/* Check no segfault when 66 is first field */
 		f->parent = cb_field_founder (last_field);
 		for (p = f->parent->children; p && p->sister; p = p->sister) ;
 		if (p) {
@@ -748,13 +747,19 @@ validate_field_1 (struct cb_field *f)
 			} else {
 				f->pic = CB_PICTURE (cb_build_picture ("X"));
 			}
-#if	0	/* RXWRXW - ANY length */
-			cb_error_x (x, _("'%s' ANY LENGTH must have a PICTURE"), cb_name (x));
-			return 1;
-#endif
+		} else if (f->flag_any_numeric) {
+			if (f->pic->category != CB_CATEGORY_NUMERIC) 
+				cb_error (_("'%s' ANY NUMERIC must be PIC 9"),f->name);
+		} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC
+			&& f->pic->category != CB_CATEGORY_ALPHABETIC) {
+			cb_error (_("'%s' ANY LENGTH must be PIC X or PIC A"),f->name);
 		}
 		if (f->pic->size != 1 || f->usage != CB_USAGE_DISPLAY) {
-			cb_error_x (x, _("'%s' ANY LENGTH has invalid definition"), cb_name (x));
+			if (f->flag_any_numeric) {
+				cb_error_x (x, _("'%s' ANY NUMERIC has invalid definition"), cb_name (x));
+			} else {
+				cb_error_x (x, _("'%s' ANY LENGTH has invalid definition"), cb_name (x));
+			}
 			return 1;
 		}
 		f->count++;
