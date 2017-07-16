@@ -245,23 +245,23 @@ COB_EXCEPTION  (0803, COB_EC_OO_FINALIZABLE,
 		"EC-OO-FINALIZABLE", 1)
 
 /* Implementation-defined OO exception */
-COB_EXCEPTION  (0803, COB_EC_OO_IMP,
+COB_EXCEPTION  (0804, COB_EC_OO_IMP,
 		"EC-OO-IMP", 0)
 
 /* Requested method is not available */
-COB_EXCEPTION  (0804, COB_EC_OO_METHOD,
+COB_EXCEPTION  (0805, COB_EC_OO_METHOD,
 		"EC-OO-METHOD", 1)
 
 /* Method invocation was attempted with a null object reference */
-COB_EXCEPTION  (0805, COB_EC_OO_NULL,
+COB_EXCEPTION  (0806, COB_EC_OO_NULL,
 		"EC-OO-NULL", 1)
 
 /* Insufficient system resources to create the object or expand the object */
-COB_EXCEPTION  (0806, COB_EC_OO_RESOURCE,
+COB_EXCEPTION  (0807, COB_EC_OO_RESOURCE,
 		"EC-OO-RESOURCE", 1)
 
 /* A runtime type check failed */
-COB_EXCEPTION  (0807, COB_EC_OO_UNIVERSAL,
+COB_EXCEPTION  (0808, COB_EC_OO_UNIVERSAL,
 		"EC-OO-UNIVERSAL", 1)
 
 
