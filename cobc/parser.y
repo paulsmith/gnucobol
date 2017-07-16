@@ -9426,17 +9426,29 @@ if_statement:
 ;
 
 if_else_statements:
-  statement_list ELSE statement_list
+  if_true statement_list ELSE if_false statement_list
   {
-	cb_emit_if ($-1, $1, $3);
+	cb_emit_if ($-1, $2, $5);
   }
-| ELSE statement_list
+| ELSE if_false statement_list
   {
-	cb_emit_if ($-1, NULL, $2);
+	cb_emit_if ($-1, NULL, $3);
   }
-| statement_list %prec SHIFT_PREFER
+| if_true statement_list %prec SHIFT_PREFER
   {
-	cb_emit_if ($-1, $1, NULL);
+	cb_emit_if ($-1, $2, NULL);
+  }
+;
+
+if_true:
+  {
+	  cb_if_true();
+  }
+;
+
+if_false:
+  {
+	  cb_if_false();
   }
 ;
 
@@ -9444,10 +9456,12 @@ end_if:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-4, IF);
+	cb_if_end();
   }
 | END_IF
   {
 	TERMINATOR_CLEAR ($-4, IF);
+	cb_if_end();
   }
 ;
 
@@ -10020,6 +10034,8 @@ perform_option:
 	if (!$3) {
 		$$ = cb_build_perform_forever (NULL);
 	} else {
+		if ($1 == CB_AFTER)
+			cb_build_perform_after_until();
 		varying = CB_LIST_INIT (cb_build_perform_varying (NULL, NULL, NULL, $3));
 		$$ = cb_build_perform_until ($1, varying);
 	}
@@ -12034,7 +12050,7 @@ condition:
   expr
   {
 	$$ = cb_build_cond ($1);
-	cb_end_cond ();
+	cb_end_cond ($$);
   }
 ;
 

@@ -67,6 +67,13 @@
 	* parser.y, reserved.c, typeck.c, tree.h: added parsing for ACU
 	  extensions DISPLAY WINDOW, CLOSE WINDOW and DESTROY statements
 
+2017-07-05  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c, typeck.c, error.c, parser.y, tree.c, tree.h:
+	  Updates to skip emiting code for IF, WHEN in cases where
+	  the condition is resolved down to TRUE or FALSE at compile time
+	  cb_error reports as 'Error (ignored)' when code is not being emitted
+
 2017-07-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* error.c: don't output "[re]defined here" messages when there

@@ -3886,3 +3886,106 @@ prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have t
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Constant Expressions])
+AT_KEYWORDS([conditions refmod])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var       PIC X(200).
+       01  OTHERvar  PIC X(115).
+       01  A         PIC 9 VALUE 1.
+       01  B         PIC 9 VALUE 2.
+       01  C         PIC 9 VALUE 3.
+       78  var-len value 115.
+
+       PROCEDURE DIVISION.
+
+           IF var-len < 16
+               move othervar (1:var-len - 8)
+                 to var (17 - var-len:var-len - 8)
+           ELSE
+               move othervar to var
+           END-IF
+
+           IF (2 = 3)
+               move othervar to var
+           ELSE
+              IF 1 = 1
+                 move var to othervar
+              ELSE
+                 move othervar (1:var-len - 8)
+                   to var (17 - var-len:var-len - 8)
+                 IF 1 = 1
+                    move var to othervar
+                 END-IF
+              END-IF
+              move A to B
+           .
+
+           PERFORM WITH TEST BEFORE UNTIL 1 = 3
+               move othervar to var
+           END-PERFORM
+
+           PERFORM WITH TEST BEFORE UNTIL 1 = 1
+               move othervar to var
+           END-PERFORM
+
+           PERFORM WITH TEST AFTER UNTIL 1 = 3
+               move othervar to var
+           END-PERFORM
+
+           PERFORM WITH TEST AFTER UNTIL 1 = 1
+               move othervar to var
+           END-PERFORM
+
+           EVALUATE TRUE
+           WHEN var-len < 16
+               move othervar to var
+           WHEN var-len > 16
+               move othervar to var
+           WHEN OTHER
+               move othervar to var
+           END-EVALUATE
+
+           EVALUATE var-len
+           WHEN  15
+           WHEN 115
+               move A to B
+               move B to C
+           WHEN  > 16
+               move othervar to var
+           WHEN OTHER
+               move othervar to var
+           END-EVALUATE
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob ], [0], [],
+[prog.cob: 15: warning: expression is always FALSE
+prog.cob: 17: error (ignored): offset of 'var' out of bounds: -98
+prog.cob: 22: warning: expression is always FALSE
+prog.cob: 25: warning: expression is always TRUE
+prog.cob: 29: error (ignored): offset of 'var' out of bounds: -98
+prog.cob: 30: warning: expression is always TRUE
+prog.cob: 37: warning: expression is always FALSE
+prog.cob: 37: warning: PERFORM FOREVER since UNTIL is always FALSE
+prog.cob: 41: warning: expression is always TRUE
+prog.cob: 41: warning: PERFORM NEVER since UNTIL is always TRUE
+prog.cob: 45: warning: expression is always FALSE
+prog.cob: 45: warning: PERFORM FOREVER since UNTIL is always FALSE
+prog.cob: 49: warning: expression is always TRUE
+prog.cob: 49: warning: PERFORM ONCE since UNTIL is always TRUE
+prog.cob: 54: warning: expression is always FALSE
+prog.cob: 56: warning: expression is always TRUE
+prog.cob: 67: warning: expression is always TRUE
+prog.cob: 67: warning: expression is always FALSE
+prog.cob: 67: warning: expression is always TRUE
+])
+
+AT_CLEANUP
+

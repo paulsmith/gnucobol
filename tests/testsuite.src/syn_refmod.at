@@ -80,7 +80,7 @@ AT_CLEANUP
 
 
 AT_SETUP([constant-folding out of bounds])
-AT_KEYWORDS([refmod])
+AT_KEYWORDS([refmod conditions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -103,11 +103,11 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-constant-expr prog.cob], [1], [],
-[prog.cob: 10: error: offset of 'X' out of bounds: 0
-prog.cob: 12: error: length of 'X' out of bounds: 0
-prog.cob: 14: error: offset of 'X' out of bounds: 5
-prog.cob: 16: error: length of 'X' out of bounds: 5
+AT_CHECK([$COMPILE_ONLY -Wno-constant-expr prog.cob], [0], [],
+[prog.cob: 10: error (ignored): offset of 'X' out of bounds: 0
+prog.cob: 12: error (ignored): length of 'X' out of bounds: 0
+prog.cob: 14: error (ignored): offset of 'X' out of bounds: 5
+prog.cob: 16: error (ignored): length of 'X' out of bounds: 5
 ])
 AT_CHECK([$COMPILE_ONLY -Wno-constant-expr  -fno-constant-folding prog.cob],
 [0], [], [])

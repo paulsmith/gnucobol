@@ -100,6 +100,7 @@ static char			*scratch_buff = NULL;
 static int			filler_id = 1;
 static int			class_id = 0;
 static int			toplev_count;
+static int			after_until = 0;
 static char			err_msg[COB_MINI_BUFF];
 static struct cb_program	*container_progs[64];
 static const char		* const cb_const_subs[] = {
@@ -4267,6 +4268,11 @@ cb_build_if (const cb_tree test, const cb_tree stmt1, const cb_tree stmt2,
 	p->test = test;
 	p->stmt1 = stmt1;
 	p->stmt2 = stmt2;
+	if (test == cb_true) {	/* Always TRUE so skip 'else code' */
+		p->stmt2 = NULL;
+	} else if (test == cb_false) {	/* Always FALSE, so skip 'true code' */
+		p->stmt1 = NULL;
+	}
 	p->is_if = is_if;
 	return CB_TREE (p);
 }
@@ -4284,6 +4290,12 @@ cb_build_perform (const enum cb_perform_type type)
 	return CB_TREE (p);
 }
 
+void
+cb_build_perform_after_until(void)
+{
+	after_until = 1;
+}
+
 cb_tree
 cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 {
@@ -4296,6 +4308,20 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 	p->name = name;
 	p->from = from;
 	p->until = until;
+	if (warningopt) {
+		cb_source_line--;
+		if (until == cb_false) {
+			cb_warning (COBC_WARN_FILLER, _("PERFORM FOREVER since UNTIL is always FALSE"));
+		} else if (until == cb_true) {
+			if (after_until) {
+				cb_warning (COBC_WARN_FILLER, _("PERFORM ONCE since UNTIL is always TRUE"));
+			} else {
+				cb_warning (COBC_WARN_FILLER, _("PERFORM NEVER since UNTIL is always TRUE"));
+			}
+		}
+		cb_source_line++;
+	}
+	after_until = 0;
 	if (name) {
 		if (name == cb_error_node) {
 			p->step = NULL;

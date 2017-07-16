@@ -104,6 +104,10 @@ struct cb_statement		*error_statement = NULL;
 static int			expr_op;		/* Last operator */
 static cb_tree			expr_lh;		/* Last left hand */
 static int			expr_dmax = -1;		/* Max scale for expression result */
+static int			cond_fixed = -1;	/* 0 means TRUE, 1 means FALSE, -1 unknown */
+#define MAX_NESTED_IF	128
+static int			if_nest = 0;
+static int			if_cond[MAX_NESTED_IF];
 static int			expr_line = 0;		/* Line holding expression for warnings */
 static cb_tree			expr_rslt = NULL;	/* Expression result */
 
@@ -4571,9 +4575,56 @@ cb_build_cond (cb_tree x)
 
 /* Reset at end of emiting code for condition */
 void
-cb_end_cond (void)
+cb_end_cond (cb_tree rslt)
 {
 	expr_dmax = -1;
+	if (rslt == cb_true) {
+		cond_fixed = 0;
+	} else
+	if (rslt == cb_false) {
+		cond_fixed = 1;
+	} else {
+		cond_fixed = -1;
+	}
+	if (if_nest < MAX_NESTED_IF) {
+		if_cond[if_nest++] = cond_fixed;
+	} else {
+		cb_warning (COBC_WARN_FILLER, _("'IF' nested more than %d deep"), MAX_NESTED_IF);
+	}
+}
+
+/* TRUE side of IF condition */
+void
+cb_if_true(void)
+{
+	if (cond_fixed == 1) {
+		cb_set_ignore_error (1);
+	}
+}
+
+/* FALSE side of IF condition */
+void
+cb_if_false(void)
+{
+	if (cond_fixed == 0) {
+		cb_set_ignore_error (1);
+	} else {
+		cb_set_ignore_error (0);
+	}
+}
+
+/* END of IF statement */
+void
+cb_if_end(void)
+{
+	if_nest--;
+	if (if_nest <= 0) {
+		cond_fixed = -1;
+		cb_set_ignore_error (0);
+		if_nest = 0;
+	} else {
+		cond_fixed = if_cond[if_nest];
+	}
 }
 
 /* ADD/SUBTRACT CORRESPONDING */

@@ -1724,6 +1724,7 @@ extern void		group_error (cb_tree, const char *);
 extern void		level_redundant_error (cb_tree, const char *);
 extern void		level_require_error (cb_tree, const char *);
 extern void		level_except_error (cb_tree, const char *);
+extern int		cb_set_ignore_error (int state);
 
 /* field.c */
 extern size_t		cb_needs_01;
@@ -1785,7 +1786,10 @@ extern void		cb_validate_program_body (struct cb_program *);
 
 extern cb_tree		cb_build_expr (cb_tree);
 extern cb_tree		cb_build_cond (cb_tree);
-extern void		cb_end_cond (void);
+extern void		cb_end_cond (cb_tree);
+extern void		cb_if_true (void);
+extern void		cb_if_false (void);
+extern void		cb_if_end (void);
 
 extern void		cb_emit_arithmetic (cb_tree, const int, cb_tree);
 extern cb_tree		cb_build_add (cb_tree, cb_tree, cb_tree);
@@ -1895,6 +1899,7 @@ extern cb_tree		cb_build_perform_times (cb_tree);
 extern cb_tree		cb_build_perform_until (cb_tree, cb_tree);
 extern cb_tree		cb_build_perform_forever (cb_tree);
 extern cb_tree		cb_build_perform_exit (struct cb_label *);
+extern void		cb_build_perform_after_until(void);
 
 extern void		cb_emit_read (cb_tree, cb_tree, cb_tree,
 				      cb_tree, cb_tree);
