@@ -87,21 +87,17 @@ COB_EXCEPTION  (0302, COB_EC_DATA_IMP,
 COB_EXCEPTION  (0303, COB_EC_DATA_INCOMPATIBLE,
 		"EC-DATA-INCOMPATIBLE", 1)
 
-/* Variable length internal format is corrupt */
-COB_EXCEPTION  (0304, COB_EC_DATA_INTEGRITY,
-		"EC-DATA-INTEGRITY", 1)
+/* Using floating-point usage data item which is NaN or an infinity */
+COB_EXCEPTION  (0304, COB_EC_DATA_NOT_FINITE,
+		"EC-DATA-NOT-FINITE", 1)
+
+/* Exponent overflow during MOVE to item with floating-point usage */
+COB_EXCEPTION  (0305, COB_EC_DATA_OVERFLOW,
+		"EC-DATA-OVERFLOW", 1)
 
 /* Based item data-pointer is set to NULL when referenced */
-COB_EXCEPTION  (0305, COB_EC_DATA_PTR_NULL,
+COB_EXCEPTION  (0306, COB_EC_DATA_PTR_NULL,
 		"EC-DATA-PTR-NULL", 1)
-
-/* NaN / infinity cannot be assigned to the receiving data item */
-COB_EXCEPTION  (0306, COB_EC_DATA_NOT_DECIMAL_ENCODING,
-		"EC-DATA-NOT-DECIMAL-ENCODING", 1)
-
-/* NaN / infinity /other cannot be assigned to the receiving data item */
-COB_EXCEPTION  (0307, COB_EC_DATA_NOT_FINITE,
-		"EC-DATA-NOT-FINITE", 1)
 
 
 /* Execution control flow violation */
@@ -244,6 +240,10 @@ COB_EXCEPTION  (0801, COB_EC_OO_CONFORMANCE,
 COB_EXCEPTION  (0802, COB_EC_OO_EXCEPTION,
 		"EC-OO-EXCEPTION", 1)
 
+/* Invalid assignment of finalizable/finalized object reference */
+COB_EXCEPTION  (0803, COB_EC_OO_FINALIZABLE,
+		"EC-OO-FINALIZABLE", 1)
+
 /* Implementation-defined OO exception */
 COB_EXCEPTION  (0803, COB_EC_OO_IMP,
 		"EC-OO-IMP", 0)
@@ -263,10 +263,6 @@ COB_EXCEPTION  (0806, COB_EC_OO_RESOURCE,
 /* A runtime type check failed */
 COB_EXCEPTION  (0807, COB_EC_OO_UNIVERSAL,
 		"EC-OO-UNIVERSAL", 1)
-
-/* Argument omitted */
-COB_EXCEPTION  (0808, COB_EC_OO_ARG_OMITTED,
-		"EC-OO-ARG-OMITTED", 1)
 
 
 /* Ordering exception */
@@ -396,21 +392,13 @@ COB_EXCEPTION  (1405, COB_EC_VALIDATE_VARYING,
 COB_EXCEPTION  (1500, COB_EC_FUNCTION,
 		"EC-FUNCTION", 0)
 
-/* FUNCTION not found */
-COB_EXCEPTION  (1501, COB_EC_FUNCTION_NOT_FOUND,
-		"EC-FUNCTION-NOT-FOUND", 1)
-
 /* FUNCTION signature mismatch */
-COB_EXCEPTION  (1502, COB_EC_FUNCTION_PTR_INVALID,
+COB_EXCEPTION  (1501, COB_EC_FUNCTION_PTR_INVALID,
 		"EC-FUNCTION-PTR-INVALID", 1)
 
 /* FUNCTION pointer is NULL */
-COB_EXCEPTION  (1503, COB_EC_FUNCTION_PTR_NULL,
+COB_EXCEPTION  (1502, COB_EC_FUNCTION_PTR_NULL,
 		"EC-FUNCTION-PTR-NULL", 1)
-
-/* FUNCTION argument omitted */
-COB_EXCEPTION  (1504, COB_EC_FUNCTION_ARG_OMITTED,
-		"EC-FUNCTION-ARG-OMITTED", 1)
 
 
 /* XML exception */
@@ -636,5 +624,3 @@ COB_EXCEPTION  (0F05, COB_EC_SCREEN_STARTING_COLUMN,
 /* All exceptions */
 COB_EXCEPTION  (FFFF, COB_EC_ALL,
 		"EC-ALL", 0)
-
-
