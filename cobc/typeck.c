@@ -3503,7 +3503,6 @@ cb_expr_shift (int token, cb_tree value)
 	case ')':
 		/* Enclosed by parentheses */
 		(void)expr_reduce (token);
-		expr_lh = NULL;
 		if (TOKEN (-2) == '(') {
 			value = CB_BUILD_PARENTHESES (VALUE (-1));
 			expr_index -= 2;

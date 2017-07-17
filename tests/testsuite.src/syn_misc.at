@@ -180,7 +180,7 @@ AT_DATA([prog.cob], [
               CONTINUE
               CONTINUE
            END-IF.
-           IF (V = 1) OR 2
+           IF C78 OR V
                CONTINUE
                CONTINUE
            END-IF.
@@ -293,6 +293,10 @@ AT_DATA([prog.cob], [
             END-IF.
             IF WRKX = "Red" NOT "White"
               DISPLAY "Home wine! " WRKX
+            END-IF.
+            IF WRKN = (123 - 12) OR
+                   >= (456 + 16)
+              DISPLAY "And another brew! " WRKN
             END-IF.
             STOP RUN.
 ])

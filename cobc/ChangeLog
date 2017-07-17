@@ -636,8 +636,6 @@
 
 2017-01-09  Edward Hart <edward.dan.hart@gmail.com>
 
-	* typeck.c (cb_expr_shift): fixed bug #321 - parentheses now terminate
-	  abbreviated conditions.
 	* parser.y (expr_token): restricted IS to before ZERO/classes/condition
 	  words.
 
