@@ -3625,10 +3625,8 @@ cb_expr_finish (void)
 		return cb_error_node;
 	}
 
-#if 0
 	expr_stack[3].value->source_file = cb_source_file;
 	expr_stack[3].value->source_line = cb_exp_line;
-#endif
 
 	if (expr_index != 4) {
 		/* TODO: Add test case for this to syn_misc.at invalid expression */
@@ -4578,15 +4576,6 @@ cb_build_cond (cb_tree x)
 	default:
 		break;
 	}
-#if 0	/* FIMXE: doesn't work with EVALUATE as we loose cb_exp_line there */
-	if (x->source_line == 0 || x->source_line < cb_exp_line) {
-		x->source_line = cb_exp_line;
-	}
-#else /* workaround to get at least some numbers correct */
-	if (x->source_line == 0 || x->source_line < CB_TREE(current_statement)->source_line) {
-		x->source_line = cb_exp_line;
-	}
-#endif
 	cb_error_x (x, _("invalid expression"));
 	return cb_error_node;
 }
@@ -6711,8 +6700,6 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	stmt = CB_VALUE (whens);
 	whens = CB_CHAIN (whens);
 	c1 = NULL;
-
-	/* FIXME: set cb_exp_line here as we lost in in gathering the whens */
 
 	/* For each WHEN sequence */
 	for (; whens; whens = CB_CHAIN (whens)) {

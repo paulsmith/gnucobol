@@ -49,9 +49,7 @@ do { \
 }  ONCE_COB
 
 #define push_expr(type, node) \
-  current_expr = cb_build_list (cb_int (type), node, current_expr); \
-  current_expr->source_file = cb_source_file;	\
-  current_expr->source_line = cb_source_line	\
+  current_expr = cb_build_list (cb_int (type), node, current_expr)
 
 /* Statement terminator definitions */
 #define TERM_NONE		0
@@ -9095,9 +9093,6 @@ evaluate_object:
 	cb_tree	e2;
 	cb_tree	x;
 	cb_tree	parm1;
-
-	/* FIXME: partial_expr sets cb_exp_line correctly - but as the expression generation is done later
-	          we need to store it here next to the whens for later extraction */
 
 	not0 = cb_int0;
 	e2 = $2;

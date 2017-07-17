@@ -71,14 +71,12 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# Note: we always get the same line number a
-AT_CHECK([$COMPILE_ONLY -Wno-parentheses prog.cob], [0], [],
-[prog.cob: 5: warning: expression is always FALSE
-prog.cob: 6: warning: expression is always FALSE
-prog.cob: 6: warning: expression is always TRUE
-prog.cob: 10: warning: expression is always FALSE
-prog.cob: 11: warning: expression is always FALSE
-prog.cob: 11: warning: expression is always TRUE
+# FIXME positions broken
+AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
+[prog.cob: 5: warning: expression '3' EQUALS '1' is always FALSE
+prog.cob: 6: warning: expression '3' EQUALS '2' is always FALSE
+prog.cob: 10: warning: expression '3' EQUALS '1' is always FALSE
+prog.cob: 11: warning: expression '3' EQUALS '2' is always FALSE
 ])
 
 AT_CLEANUP
@@ -140,9 +138,9 @@ prog.cob: 28: warning: literal is longer than field
 prog.cob: 28: warning: expression is always FALSE
 prog.cob: 31: warning: literal is longer than field
 prog.cob: 31: warning: expression is always FALSE
-prog.cob: 33: warning: expression is always FALSE
-prog.cob: 35: warning: expression is always TRUE
-prog.cob: 37: warning: expression is always TRUE
+prog.cob: 33: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
+prog.cob: 35: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
+prog.cob: 37: warning: expression '00000001234' EQUALS '1234' is always TRUE
 ])
 
 AT_CLEANUP
@@ -237,7 +235,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# FIXME: expression line numbers currently wrong in EVALUATE
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 10: error: invalid expression
 prog.cob: 14: error: invalid expression
@@ -346,8 +343,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fno-constant-folding prog.cob], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([missing headers])
 AT_KEYWORDS([misc])
@@ -4005,26 +4004,26 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob ], [0], [],
-[prog.cob: 15: warning: expression is always FALSE
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 15: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob: 17: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 22: warning: expression is always FALSE
-prog.cob: 25: warning: expression is always TRUE
+prog.cob: 22: warning: expression '2' EQUALS '3' is always FALSE
+prog.cob: 25: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob: 29: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 30: warning: expression is always TRUE
-prog.cob: 37: warning: expression is always FALSE
+prog.cob: 30: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob: 37: warning: expression '1' EQUALS '3' is always FALSE
 prog.cob: 37: warning: PERFORM FOREVER since UNTIL is always FALSE
-prog.cob: 41: warning: expression is always TRUE
+prog.cob: 41: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob: 41: warning: PERFORM NEVER since UNTIL is always TRUE
-prog.cob: 45: warning: expression is always FALSE
+prog.cob: 45: warning: expression '1' EQUALS '3' is always FALSE
 prog.cob: 45: warning: PERFORM FOREVER since UNTIL is always FALSE
-prog.cob: 49: warning: expression is always TRUE
+prog.cob: 49: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob: 49: warning: PERFORM ONCE since UNTIL is always TRUE
-prog.cob: 54: warning: expression is always FALSE
-prog.cob: 56: warning: expression is always TRUE
-prog.cob: 67: warning: expression is always TRUE
-prog.cob: 67: warning: expression is always FALSE
-prog.cob: 67: warning: expression is always TRUE
+prog.cob: 54: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob: 56: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob: 67: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob: 63: warning: expression '115' EQUALS '15' is always FALSE
+prog.cob: 64: warning: expression '115' EQUALS '115' is always TRUE
 ])
 
 AT_CLEANUP

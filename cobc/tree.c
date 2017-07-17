@@ -160,7 +160,29 @@ cb_tree cb_standard_error_handler = NULL;
 
 unsigned int	gen_screen_ptr = 0;
 
+static	int	prev_expr_line = 0;
+static	int	prev_expr_pos = 0;
+static	int	prev_expr_warn[4] = {0,0,0,0};
+
 /* Local functions */
+
+static int
+was_prev_warn (int linen)
+{
+	int	i;
+	if (cb_exp_line != prev_expr_line) {
+		prev_expr_line = cb_exp_line;
+		for (i=0; i < 4; i++) 
+			prev_expr_warn[i] = 0;
+	}
+	for (i=0; i < 4; i++) {
+		if (prev_expr_warn[i] == linen)
+			return 1;
+	}
+	prev_expr_pos = (prev_expr_pos + 1) % 4;
+	prev_expr_warn [prev_expr_pos] = linen;
+	return 0;
+}
 
 static size_t
 hash (const unsigned char *s)
@@ -3608,23 +3630,24 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	struct cb_binary_op	*p;
 	enum cb_category	category = CB_CATEGORY_UNKNOWN;
 	cob_s64_t		xval, yval, rslt;
-	char			result[48];
+	char			result[48],*llit,*rlit;
+	const char		*bop;
 	int			i, j, xscale,yscale, rscale;
 	struct cb_literal 	*xl, *yl;
 	cb_tree			relop, e;
 
-	relop = cb_any;
+	if (op == '@' 
+	 && y == NULL
+	 && CB_NUMERIC_LITERAL_P(x) )	/* Parens around a Numeric Literal */
+		return x;
+
 	/* setting an error tree to point to the correct expression
 	   instead of the literal/var definition / current line */
-	if (y && y->source_line >= cb_exp_line - 1) {
-		e = y;
-	} else if (x && (x->source_line == 0 || x->source_line >= CB_TREE(current_statement)->source_line)) {
-		e = x;
-	} else {
-		e = cb_any;
-		e->source_file = NULL;
-		e->source_line = cb_exp_line;
-	}
+	e = relop = cb_any;
+	e->source_file = NULL;
+	e->source_line = cb_exp_line;
+	llit = rlit = NULL;
+	bop = (const char*)NULL;
 
 	switch (op) {
 	case '+':
@@ -3768,6 +3791,11 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		}
 		xl = (void*)x;
 		yl = (void*)y;
+		if (yl->common.source_line) {
+			e->source_file = yl->common.source_file;
+			e->source_line = yl->common.source_line;
+			e->source_column = yl->common.source_column;
+		}
 		if (CB_REF_OR_FIELD_P (y)
 		&&  CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
 		&&  !CB_FIELD (cb_ref (y))->flag_any_length
@@ -3828,6 +3856,13 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		if (cb_constant_folding
 		&&  CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
+			if (yl->common.source_line) {
+				e->source_file = yl->common.source_file;
+				e->source_line = yl->common.source_line;
+				e->source_column = yl->common.source_column;
+			}
+			llit = (char*)xl->data;
+			rlit = (char*)yl->data;
 			if(xl->llit == 0
 			&& xl->scale == 0
 			&& yl->llit == 0
@@ -3840,6 +3875,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				yval = atoll((const char*)yl->data);
 				switch(op) {
 				case '=':
+					bop = "EQUALS";
 					if (xval == yval) {
 						relop = cb_true;
 					} else {
@@ -3847,6 +3883,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '~':
+					bop = "NOT EQUAL";
 					if (xval != yval) {
 						relop = cb_true;
 					} else {
@@ -3854,6 +3891,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '>':
+					bop = "GREATER THAN";
 					if (xval > yval) {
 						relop = cb_true;
 					} else {
@@ -3861,6 +3899,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '<':
+					bop = "LESS THAN";
 					if (xval < yval) {
 						relop = cb_true;
 					} else {
@@ -3868,6 +3907,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case ']':
+					bop = "GREATER OR EQUAL";
 					if (xval >= yval) {
 						relop = cb_true;
 					} else {
@@ -3875,6 +3915,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '[':
+					bop = "LESS OR EQUAL";
 					if (xval <= yval) {
 						relop = cb_true;
 					} else {
@@ -3896,6 +3937,15 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(y)
 		&& !CB_NUMERIC_LITERAL_P(x)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
+			xl = (void*)x;
+			yl = (void*)y;
+			if (yl->common.source_line) {
+				e->source_file = yl->common.source_file;
+				e->source_line = yl->common.source_line;
+				e->source_column = yl->common.source_column;
+			}
+			llit = (char*)xl->data;
+			rlit = (char*)yl->data;
 			for (i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
 				if (xl->data[i] != yl->data[j]) {
 					break;
@@ -3911,6 +3961,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			}
 			switch(op) {
 			case '=':
+				bop = "EQUALS";
 				if (xl->data[i] == yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3918,6 +3969,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '~':
+				bop = "NOT EQUAL";
 				if (xl->data[i] != yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3925,6 +3977,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '>':
+				bop = "GREATER THAN";
 				if (xl->data[i] > yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3932,6 +3985,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '<':
+				bop = "LESS THAN";
 				if (xl->data[i] < yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3939,6 +3993,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case ']':
+				bop = "GREATER OR EQUAL";
 				if (xl->data[i] >= yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3946,6 +4001,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '[':
+				bop = "LESS OR EQUAL";
 				if (xl->data[i] <= yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -4006,16 +4062,26 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	}
 
 	if (relop == cb_true) {
-		/* don't warn on the internal expressions */
-		if (e->source_line != 0) {
-			cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
+		if (cb_warn_constant_expr
+		 && !was_prev_warn (e->source_line)) {
+			if (rlit && llit && bop) {
+				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always TRUE"),
+					llit, bop, rlit);
+			} else{
+				cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
+			}
 		}
 		return cb_true;
 	}
 	if (relop == cb_false) {
-		/* don't warn on the internal expressions */
-		if (e->source_line != 0) {
-			cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
+		if (cb_warn_constant_expr
+		 && !was_prev_warn (e->source_line)) {
+			if (rlit && llit && bop) {
+				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always FALSE"),
+					llit, bop, rlit);
+			} else {
+				cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
+			}
 		}
 		return cb_false;
 	}
