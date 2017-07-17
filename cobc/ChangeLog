@@ -22,6 +22,9 @@
 	* reserved.c, cobc.h, cobc.c: renamed cb_list_mnemonics
 	  to cb_list_system_names
 	* reserved.c: added switch alias-names UPSI-0 to UPSI-8
+	* cobc.c (cobc_enum_explain), codegen.c (output_param), tree.h:
+	  added missing parts for CB_TAG_DECIMAL_LITERAL to fix
+	  cast check errors
 
 2017-07-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
