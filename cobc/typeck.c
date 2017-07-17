@@ -3456,6 +3456,17 @@ cb_expr_shift_class (const char *name)
 	}
 }
 
+static int
+binary_op_is_relational (const struct cb_binary_op * const op)
+{
+        return op->op == '='
+		|| op->op == '>'
+		|| op->op == '<'
+		|| op->op == '['
+		|| op->op == ']'
+		|| op->op == '~';
+}
+
 static void
 cb_expr_shift (int token, cb_tree value)
 {
@@ -3503,6 +3514,14 @@ cb_expr_shift (int token, cb_tree value)
 	case ')':
 		/* Enclosed by parentheses */
 		(void)expr_reduce (token);
+	        if (CB_BINARY_OP_P (VALUE (-1))
+		    && binary_op_is_relational (CB_BINARY_OP (VALUE (-1)))) {
+			/*
+			  If a relation is surrounded in parentheses, it cannot
+			  be the start of an abbreviated condition.
+			*/
+			expr_lh = NULL;
+		}
 		if (TOKEN (-2) == '(') {
 			value = CB_BUILD_PARENTHESES (VALUE (-1));
 			expr_index -= 2;

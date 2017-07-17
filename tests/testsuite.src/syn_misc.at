@@ -230,6 +230,10 @@ AT_DATA([prog.cob], [
               CONTINUE
            END-IF.
 
+           IF (V = 1) AND V
+              CONTINUE
+           END-IF
+
            STOP RUN.
 ])
 
@@ -252,6 +256,7 @@ prog.cob: 66: error: invalid expression
 prog.cob: 72: error: invalid expression
 prog.cob: 76: error: 'NOTDEFINED' is not defined
 prog.cob: 76: error: invalid expression
+prog.cob: 80: error: invalid expression
 ])
 
 AT_CLEANUP
@@ -312,6 +317,37 @@ prog.cob: 32: error: invalid expression
 
 AT_CLEANUP
 
+
+AT_SETUP([Valid conditional expression])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var         PIC 999.
+
+       PROCEDURE       DIVISION.
+           IF  var = 83  AND >  1 + 1
+              CONTINUE
+           END-IF
+           IF  var = 83  AND >  2
+              CONTINUE
+           END-IF
+           IF  var = 83  AND > (1 + 1)
+              CONTINUE
+           END-IF
+           IF (var NOT = 1) OR (var NOT = 2)
+               CONTINUE
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CLEANUP
 
 AT_SETUP([missing headers])
 AT_KEYWORDS([misc])
