@@ -1790,6 +1790,7 @@ extern void		cb_end_cond (cb_tree);
 extern void		cb_if_true (void);
 extern void		cb_if_false (void);
 extern void		cb_if_end (void);
+extern const char		*explain_operator (const int);
 
 extern void		cb_emit_arithmetic (cb_tree, const int, cb_tree);
 extern cb_tree		cb_build_add (cb_tree, cb_tree, cb_tree);

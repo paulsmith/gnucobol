@@ -3630,8 +3630,8 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	struct cb_binary_op	*p;
 	enum cb_category	category = CB_CATEGORY_UNKNOWN;
 	cob_s64_t		xval, yval, rslt;
-	char			result[48],*llit,*rlit;
-	const char		*bop;
+	char			result[48];
+	char			*llit, *rlit;
 	int			i, j, xscale,yscale, rscale;
 	struct cb_literal 	*xl, *yl;
 	cb_tree			relop, e;
@@ -3647,7 +3647,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	e->source_file = NULL;
 	e->source_line = cb_exp_line;
 	llit = rlit = NULL;
-	bop = (const char*)NULL;
 
 	switch (op) {
 	case '+':
@@ -3875,7 +3874,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				yval = atoll((const char*)yl->data);
 				switch(op) {
 				case '=':
-					bop = "EQUALS";
 					if (xval == yval) {
 						relop = cb_true;
 					} else {
@@ -3883,7 +3881,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '~':
-					bop = "NOT EQUAL";
 					if (xval != yval) {
 						relop = cb_true;
 					} else {
@@ -3891,7 +3888,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '>':
-					bop = "GREATER THAN";
 					if (xval > yval) {
 						relop = cb_true;
 					} else {
@@ -3899,7 +3895,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '<':
-					bop = "LESS THAN";
 					if (xval < yval) {
 						relop = cb_true;
 					} else {
@@ -3907,7 +3902,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case ']':
-					bop = "GREATER OR EQUAL";
 					if (xval >= yval) {
 						relop = cb_true;
 					} else {
@@ -3915,7 +3909,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '[':
-					bop = "LESS OR EQUAL";
 					if (xval <= yval) {
 						relop = cb_true;
 					} else {
@@ -3961,7 +3954,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			}
 			switch(op) {
 			case '=':
-				bop = "EQUALS";
 				if (xl->data[i] == yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3969,7 +3961,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '~':
-				bop = "NOT EQUAL";
 				if (xl->data[i] != yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3977,7 +3968,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '>':
-				bop = "GREATER THAN";
 				if (xl->data[i] > yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3985,7 +3975,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '<':
-				bop = "LESS THAN";
 				if (xl->data[i] < yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -3993,7 +3982,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case ']':
-				bop = "GREATER OR EQUAL";
 				if (xl->data[i] >= yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -4001,7 +3989,6 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				}
 				break;
 			case '[':
-				bop = "LESS OR EQUAL";
 				if (xl->data[i] <= yl->data[j]) {
 					relop = cb_true;
 				} else {
@@ -4064,9 +4051,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	if (relop == cb_true) {
 		if (cb_warn_constant_expr
 		 && !was_prev_warn (e->source_line)) {
-			if (rlit && llit && bop) {
+			if (rlit && llit) {
 				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always TRUE"),
-					llit, bop, rlit);
+					llit, explain_operator (op), rlit);
 			} else{
 				cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
 			}
@@ -4076,9 +4063,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	if (relop == cb_false) {
 		if (cb_warn_constant_expr
 		 && !was_prev_warn (e->source_line)) {
-			if (rlit && llit && bop) {
+			if (rlit && llit) {
 				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always FALSE"),
-					llit, bop, rlit);
+					llit, explain_operator (op), rlit);
 			} else {
 				cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
 			}

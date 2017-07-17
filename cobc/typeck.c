@@ -3712,6 +3712,34 @@ cb_build_expr (cb_tree list)
 	return cb_expr_finish ();
 }
 
+const char *
+explain_operator (const int op)
+{
+	switch (op)
+	{
+	case '>':
+		return "GREATER THAN";
+	case '<':
+		return "LESS THAN";
+	case ']':
+		return "GREATER OR EQUAL";
+	case '[':
+		return "LESS OR EQUAL";
+	case '=':
+		return "EQUALS";
+	case '~':
+		return "NOT EQUAL";
+	case '!':
+		return "NOT";
+	case '&':
+		return "AND";
+	case '|':
+		return "OR";
+	default:
+		return NULL;
+	}
+}
+
 /* Numerical operation */
 
 static cb_tree
@@ -3808,25 +3836,7 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		func = "cob_decimal_pow";
 		break;
 	default:
-		func = NULL;
-		if (op == '>')
-			func = "GREATER";
-		else if (op == '<')
-			func = "LESS";
-		else if (op == ']')
-			func = "GREATER OR EQUAL";
-		else if (op == '[')
-			func = "LESS OR EQUAL";
-		else if (op == '=')
-			func = "EQUAL";
-		else if (op == '~')
-			func = "NOT EQUAL";
-		else if (op == '!')
-			func = "NOT";
-		else if (op == '&')
-			func = "AND";
-		else if (op == '|')
-			func = "OR";
+		func = explain_operator (op);
 		if (func) {
 			error_statement = current_statement;
 			cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);

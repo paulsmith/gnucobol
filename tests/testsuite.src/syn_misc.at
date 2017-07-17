@@ -83,7 +83,7 @@ AT_CLEANUP
 
 
 AT_SETUP([warn literal size])
-AT_KEYWORDS([numeric constant expresssio])
+AT_KEYWORDS([numeric constant expression])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -305,8 +305,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 10: error: GREATER operator may be misplaced
-prog.cob: 17: error: EQUAL operator may be misplaced
+prog.cob: 10: error: GREATER THAN operator may be misplaced
+prog.cob: 17: error: EQUALS operator may be misplaced
 prog.cob: 20: error: NOT EQUAL operator may be misplaced
 prog.cob: 29: error: LESS OR EQUAL operator may be misplaced
 prog.cob: 32: error: invalid expression
