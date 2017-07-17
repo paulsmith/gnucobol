@@ -339,7 +339,6 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 static int
 cb_read_conf (const char *conf_file, FILE *fp)
 {
-	const unsigned char	*x;	
 	int			sub_ret, ret;
 	int			line;
 	char			buff[COB_SMALL_BUFF];
@@ -350,22 +349,6 @@ cb_read_conf (const char *conf_file, FILE *fp)
 	line = 0;
 	while (fgets (buff, COB_SMALL_BUFF, fp)) {
 		line++;
-
-		/* Skip line comments, empty lines */
-		if (buff[0] == '#' || buff[0] == '\n') {
-			continue;
-		}
-
-		/* Skip blank lines */
-		for (x = (const unsigned char *)buff; *x; x++) {
-			if (isgraph (*x)) {
-				break;
-			}
-		}
-		if (!*x) {
-			continue;
-		}
-		
 		sub_ret = cb_config_entry (buff, conf_file, line);
 		if (sub_ret == 1 || sub_ret == 3) {
 			if (sub_ret == 1) {
@@ -477,10 +460,20 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	size_t		i;
 	size_t		j;
 
-	/* Get tag */
+	/* ignore leading white-spaces */
+	while (*buff == '\t' || *buff == ' ') {
+		buff++;
+	}
+
+	/* ignore empty / comment line */
+	if (*buff == 0 || *buff == '\r' || *buff == '\n' || *buff == '#') {
+		return 0;
+	}
+	
+	/* get tag */
 	s = strpbrk (buff, " \t:=");
 	if (!s) {
-		/* Remove CR LF */
+		/* no tag separator --> error (remove CR LF for message) */
 		for (j = strlen(buff); buff[j - 1] == '\r' || buff[j - 1] == '\n';) {
 			buff[--j] = 0;
 		}
@@ -501,7 +494,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			_("unknown configuration tag '%s'"), buff);
 		return -1;
 	}
-#if 0 /* Currently not possible (all entries from config.def are included
+#if 0 /* currently not possible (all entries from config.def are included
          --> no gettext for messages here */
 	/* if not included in documentation: reject for command line */
 	if (!fname && config_table[i].doc == 0) {
