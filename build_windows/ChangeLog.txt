@@ -1,0 +1,69 @@
+
+2017-04-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added subfolder vs2017
+	* renamed subfolder for VisualC++ builds vc8 -> vs2005, vc9 -> vs2008,
+	  vc10 -> vs2010, vc11 -> vs2012, vc12 -> vs2013, vc14 -> vs2015
+	* makedist.bat: only pause when started by double click
+	* makebisonflex.bat: new batch for (re-)generating bison/flex files
+
+2016-12-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* defaults.h.in: added "/incremental:no" to COB_LDFLAGS
+
+2016-11-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.h.in, defaults.h.in: renamed from config.h.tmpl, defaults.h.tmpl
+
+2016-11-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makedist.bat: cater for build with and w/o 32bit/64bit,
+	  rename text files in the win dist package to .TXT
+
+2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* vc7: removed (GC 2+ will not build with Visual C compiler < 2005)
+	* config.h.tmpl, defaults.h.tmpl, set_env_vs.bat, set_env_vs_dist.bat:
+	  removed pre-VS2005 references
+
+2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.h.tmpl, defaults.h.tmpl: combined all files config.h/default.h
+	  from subfolders and config.h.bdb.win, config.h.vb.win,
+	  deleted the old files
+	* config.h.tmpl: added CONFIGURED_ISAM for a single configuration option
+	* config.h.tmpl: pretend _MSC has setenv (using the alias to _putenv_s)
+	* changed path in all project files accordingly
+	* README.txt: renamed README and updated it
+
+2015-10-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added subfolder vc14 (Visual Studio 2015)
+	* updated all project files
+	* updated all batch files
+	* updated version_cobc.rc, version_libcob.rc, version_cobcrun.rc
+
+2015-02-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* updated all project files
+
+2014-09-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* update for subfolder vc10
+
+2014-07-07  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* minor bugfix (tpyos) for subfolder vc12
+
+2014-06-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* added README, set_env_vs.bat, set_env_vs_dist.bat, makedist.bat,
+	  set_env_vs_dist_x64.bat, set_env_vs_x64.bat
+	* updated all project files
+	* added subfolder vc11
+
+2014-06-20  Philipp Böhme <phi.boehme@googlemail.com>
+
+	* added project files - subfolders: vc7, vc8, vc9, vc10, vc12 
+	  (original project files and ressource files version_cobc.rc,
+	  version_libcob.rc, version_cobcrun.rc provided by Simon)
