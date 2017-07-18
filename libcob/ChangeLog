@@ -1,4 +1,9 @@
 
+2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: increased MAX_FD_RECORD to 64MB and introduced
+	  MAX_FD_RECORD_IDX with the old 64KB limit
+
 2017-07-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* exception.def: update to COBOL 2014 and added finalizer exception.

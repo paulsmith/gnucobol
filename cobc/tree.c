@@ -3219,7 +3219,13 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		}
 	}
 
-	if (f->record_max > MAX_FD_RECORD) {
+	if (f->organization == COB_ORG_INDEXED) {
+		if (f->record_max > MAX_FD_RECORD_IDX)  {
+			f->record_max = MAX_FD_RECORD_IDX;
+			cb_error (_("file '%s': record size (IDX) %d exceeds maximum allowed (%d)"),
+				f->name, f->record_max, MAX_FD_RECORD_IDX);
+		}
+	} else if (f->record_max > MAX_FD_RECORD)  {
 		cb_error (_("file '%s': record size %d exceeds maximum allowed (%d)"),
 			f->name, f->record_max, MAX_FD_RECORD);
 	}

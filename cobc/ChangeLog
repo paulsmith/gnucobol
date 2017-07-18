@@ -1,4 +1,9 @@
 
+2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, tree.c: check both increased MAX_FD_RECORD and the new
+	  introduced MAX_FD_RECORD_IDX depending on file organization
+
 2017-07-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_expr_shift): corrected r1347 - only set expr_lh to NULL

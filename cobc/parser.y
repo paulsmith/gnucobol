@@ -4408,7 +4408,13 @@ record_clause:
 			current_file->record_max = 1;
 			cb_error (_("RECORD clause invalid"));
 		}
-		if (current_file->record_max > MAX_FD_RECORD)  {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
 			current_file->record_max = MAX_FD_RECORD;
 			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
 				  MAX_FD_RECORD);
@@ -4433,7 +4439,14 @@ record_clause:
 			current_file->record_max = 1;
 			error_ind = 1;
 		}
-		if (current_file->record_max > MAX_FD_RECORD)  {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+			error_ind = 1;
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
 			current_file->record_max = MAX_FD_RECORD;
 			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
 				  MAX_FD_RECORD);
@@ -4463,11 +4476,20 @@ record_clause:
 		current_file->record_max = 1;
 		error_ind = 1;
 	}
-	if ($7 && current_file->record_max > MAX_FD_RECORD)  {
-		current_file->record_max = MAX_FD_RECORD;
-		cb_error (_("RECORD size exceeds maximum allowed (%d)"),
-			  MAX_FD_RECORD);
-		error_ind = 1;
+	if ($7) {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+				error_ind = 1;
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
+			current_file->record_max = MAX_FD_RECORD;
+			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
+				  MAX_FD_RECORD);
+			error_ind = 1;
+		}
 	}
 	if (($6 || $7) && current_file->record_max <= current_file->record_min)  {
 		error_ind = 1;
