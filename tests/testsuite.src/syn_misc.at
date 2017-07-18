@@ -4039,7 +4039,7 @@ AT_SETUP([Constant Expressions (2)])
 AT_KEYWORDS([conditions])
 
 # we currently don't have a way to show the correct line numbers
-# if we compare two constants
+# when we compare two constants
 AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [

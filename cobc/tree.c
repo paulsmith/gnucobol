@@ -3826,7 +3826,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			if (i > CB_FIELD (cb_ref (y))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
 				if (cb_constant_folding) {
-					switch(op) {
+					switch (op) {
 					case '=':
 						relop = cb_false;
 						break;
@@ -3852,7 +3852,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			if (i > CB_FIELD (cb_ref (x))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
 				if (cb_constant_folding) {
-					switch(op) {
+					switch (op) {
 					case '=':
 						relop = cb_false;
 						break;
@@ -3953,7 +3953,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			&& yl->data[j] == 0) {
 				while (xl->data[i] == ' ') i++;
 			}
-			switch(op) {
+			switch (op) {
 			case '=':
 				if (xl->data[i] == yl->data[j]) {
 					relop = cb_true;
