@@ -3818,7 +3818,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(x)
 		&&  xl->all == 0
 		&&  xl->scale == 0) {
-			for (i = strlen ((const char *)xl->data); i>0 && xl->data[i-1] == ' '; i--);
+			for (i = strlen ((const char *)xl->data); i > 0 && xl->data[i-1] == ' '; i--);
 			if (CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC
 			 || CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
 				for (j=0; xl->data[j] == '0'; j++, i--);
@@ -3844,7 +3844,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(y)
 		&&  yl->all == 0
 		&&  yl->scale == 0) {
-			for (i = strlen ((const char *)yl->data); i>0 && yl->data[i-1] == ' '; i--)
+			for (i = strlen ((const char *)yl->data); i > 0 && yl->data[i-1] == ' '; i--);
 			if (CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
 			 || CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
 				for (j=0; yl->data[j] == '0'; j++, i--);

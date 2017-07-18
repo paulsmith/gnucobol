@@ -124,6 +124,10 @@ AT_DATA([prog.cob], [
           WHEN CONST2 = 1234
              CONTINUE
        END-EVALUATE
+       IF WS-LINE-NUMBER > 0000234
+          CONTINUE.
+       IF WS-TEXT = 'CAT         '
+          CONTINUE.
        STOP RUN.
 ])
 
