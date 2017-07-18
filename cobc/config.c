@@ -633,6 +633,9 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				}
 			} else if (strcmp (name, "not-reserved") == 0) {
 				split_and_iterate_on_comma_separated_str (&remove_reserved_word, 0, 0, val, fname, line);
+				split_and_iterate_on_comma_separated_str (&deactivate_intrinsic, 1, 0, val, fname, line);
+				split_and_iterate_on_comma_separated_str (&deactivate_system_name, 1, 0, val, fname, line);
+				split_and_iterate_on_comma_separated_str (&remove_register, 1, 0, val, fname, line);
 			} else if (strcmp (name, "reserved") == 0) {
 				split_and_iterate_on_comma_separated_str (&add_reserved_word, 0, 1, val, fname, line);
 			} else if (strcmp (name, "not-intrinsic-function") == 0) {

@@ -3,6 +3,9 @@
 
 	* parser.y, tree.c: check both increased MAX_FD_RECORD and the new
 	  introduced MAX_FD_RECORD_IDX depending on file organization
+	* config.c: for -fnot-reserved=word: additional to removing "word"
+	  from reserved word list remove "word" from register, system-names
+	  and intrinsic function list
 
 2017-07-17  Edward Hart <edward.dan.hart@gmail.com>
 
