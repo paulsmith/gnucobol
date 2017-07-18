@@ -2361,7 +2361,7 @@ AT_DATA([prog3.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -free prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -free -fword-length=31 prog.cob], [1], [],
 [prog.cob: 11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog.cob: 12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
@@ -2407,7 +2407,7 @@ prog2.cob: 21: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WIT
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog2.cob], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -free -frelax-syntax-checks prog2.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -free -fword-length=31 -frelax-syntax-checks prog2.cob], [0], [],
 [prog2.cob: 11: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
 prog2.cob: 12: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-31':
