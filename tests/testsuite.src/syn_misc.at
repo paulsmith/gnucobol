@@ -3927,7 +3927,7 @@ prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have t
 AT_CLEANUP
 
 
-AT_SETUP([Constant Expressions])
+AT_SETUP([Constant Expressions (1)])
 AT_KEYWORDS([conditions refmod])
 
 AT_DATA([prog.cob], [
@@ -3940,7 +3940,7 @@ AT_DATA([prog.cob], [
        01  A         PIC 9 VALUE 1.
        01  B         PIC 9 VALUE 2.
        01  C         PIC 9 VALUE 3.
-       78  var-len value 115.
+       78  var-len   value 115.
 
        PROCEDURE DIVISION.
 
@@ -4001,6 +4001,10 @@ AT_DATA([prog.cob], [
            WHEN OTHER
                move othervar to var
            END-EVALUATE
+
+           IF 15 = var-len
+           OR var-len = 15
+               move othervar to var.
            STOP RUN.
 ])
 
@@ -4024,6 +4028,41 @@ prog.cob: 56: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob: 67: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob: 63: warning: expression '115' EQUALS '15' is always FALSE
 prog.cob: 64: warning: expression '115' EQUALS '115' is always TRUE
+prog.cob: 73: warning: expression '15' EQUALS '115' is always FALSE
+prog.cob: 74: warning: expression '115' EQUALS '15' is always FALSE
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Constant Expressions (2)])
+AT_KEYWORDS([conditions])
+
+# we currently don't have a way to show the correct line numbers
+# if we compare two constants
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       78  const1    value 115.
+       78  const2    value 112.
+
+       PROCEDURE DIVISION.
+
+           IF const1 = const2
+           OR const2 = const1
+              DISPLAY 'no way' END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 11: warning: expression '112' EQUALS '115' is always FALSE
+prog.cob: 12: warning: expression '115' EQUALS '112' is always FALSE
+prog.cob: 11: warning: expression is always FALSE
 ])
 
 AT_CLEANUP

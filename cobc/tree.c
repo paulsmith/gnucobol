@@ -3794,13 +3794,22 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
-		xl = (void*)x;
-		yl = (void*)y;
-		if (yl->common.source_line) {
-			e->source_file = yl->common.source_file;
-			e->source_line = yl->common.source_line;
-			e->source_column = yl->common.source_column;
+		/* get best position (in the case of constants y/x point to DATA-DIVISION) */
+		if (y->source_line >= e->source_line) {
+			e->source_file = y->source_file;
+			e->source_line = y->source_line;
+			e->source_column = y->source_column;
+		} else if (x->source_line >= e->source_line) {
+			e->source_file = x->source_file;
+			e->source_line = x->source_line;
+			e->source_column = x->source_column;
+		} else {
+			e->source_file = y->source_file;
+			e->source_line = y->source_line;
+			e->source_column = y->source_column;
 		}
+		xl = CB_LITERAL(x);
+		yl = CB_LITERAL(y);
 		if (CB_REF_OR_FIELD_P (y)
 		&&  CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
 		&&  !CB_FIELD (cb_ref (y))->flag_any_length
@@ -3809,10 +3818,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  CB_LITERAL_P(x)
 		&&  xl->all == 0
 		&&  xl->scale == 0) {
-			for(i = strlen((const char *)xl->data); i>0 && xl->data[i-1] == ' '; i--);
-			if(CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC
-			|| CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
-				for(j=0; xl->data[j] == '0'; j++,i--);
+			for (i = strlen ((const char *)xl->data); i>0 && xl->data[i-1] == ' '; i--);
+			if (CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC
+			 || CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+				for (j=0; xl->data[j] == '0'; j++, i--);
 			}
 			if (i > CB_FIELD (cb_ref (y))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
@@ -3836,9 +3845,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&&  yl->all == 0
 		&&  yl->scale == 0) {
 			for (i = strlen ((const char *)yl->data); i>0 && yl->data[i-1] == ' '; i--)
-			if(CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
-			|| CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
-				for(j=0; yl->data[j] == '0'; j++,i--);
+			if (CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
+			 || CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
+				for (j=0; yl->data[j] == '0'; j++, i--);
 			}
 			if (i > CB_FIELD (cb_ref (x))->size) {
 				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
@@ -3853,19 +3862,13 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 				}
 			}
-		} else
 		/*
 		 * If this is an operation between two simple integer numerics
 		 * then resolve the value here at compile time -> "constant folding"
 		 */
-		if (cb_constant_folding
+		} else if (cb_constant_folding
 		&&  CB_NUMERIC_LITERAL_P(x)
 		&&  CB_NUMERIC_LITERAL_P(y)) {
-			if (yl->common.source_line) {
-				e->source_file = yl->common.source_file;
-				e->source_line = yl->common.source_line;
-				e->source_column = yl->common.source_column;
-			}
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
 			if(xl->llit == 0
@@ -3926,23 +3929,15 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					break;
 				}
 			}
-		} else
 		/*
 		 * If this is an operation between two literal strings
 		 * then resolve the value here at compile time -> "constant folding"
 		 */
-		if (cb_constant_folding
+		} else if (cb_constant_folding
 		&&  CB_LITERAL_P(x)
 		&&  CB_LITERAL_P(y)
 		&& !CB_NUMERIC_LITERAL_P(x)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
-			xl = (void*)x;
-			yl = (void*)y;
-			if (yl->common.source_line) {
-				e->source_file = yl->common.source_file;
-				e->source_line = yl->common.source_line;
-				e->source_column = yl->common.source_column;
-			}
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
 			for (i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
