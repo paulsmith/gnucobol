@@ -1,4 +1,8 @@
 
+2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* default.conf: set word-length to most unrestrictive value: 61
+
 2017-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: added move-figurative-constant-to-numeric and

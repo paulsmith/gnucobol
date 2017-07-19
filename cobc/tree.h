@@ -1786,10 +1786,13 @@ extern void		cb_validate_program_body (struct cb_program *);
 
 extern cb_tree		cb_build_expr (cb_tree);
 extern cb_tree		cb_build_cond (cb_tree);
+
 extern void		cb_end_cond (cb_tree);
-extern void		cb_if_true (void);
-extern void		cb_if_false (void);
-extern void		cb_if_end (void);
+extern void		cb_save_cond (void);
+extern void		cb_terminate_cond (void);
+extern void		cb_true_side (void);
+extern void		cb_false_side (void);
+extern void		cb_end_statement (void);
 extern const char		*explain_operator (const int);
 
 extern void		cb_emit_arithmetic (cb_tree, const int, cb_tree);

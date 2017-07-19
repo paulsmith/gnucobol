@@ -590,7 +590,13 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define	COB_STACK_SIZE		255
 
 /* Maximum size of file records */
-#define	MAX_FD_RECORD		65535
+/* TODO: add compiler configuration for limiting this */
+#define	MAX_FD_RECORD		64 * 1024 * 1024
+
+/* Maximum size of file records (IDX) */
+/* TODO: define depending on used ISAM */
+/* TODO: add compiler configuration for limiting this */
+#define	MAX_FD_RECORD_IDX	65535
 
 /* Maximum number of field digits */
 #define	COB_MAX_DIGITS		38
@@ -599,7 +605,8 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define	COB_MAX_BINARY		39
 
 /* Maximum bytes in a single/group field,
-  which doesn't contain UNBOUNDED items */
+   which doesn't contain UNBOUNDED items */
+/* TODO: add compiler configuration for limiting this */
 #define	COB_MAX_FIELD_SIZE	268435456
 
 /* Maximum bytes in an unbounded table entry
@@ -610,10 +617,10 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define	COB_MAX_DEC_STRUCT	32
 
 /* Maximum length of COBOL words */
-#define COB_MAX_WORDLEN		61
+#define	COB_MAX_WORDLEN		61
 
 /* Memory size for sorting */
-#define COB_SORT_MEMORY		128 * 1024 * 1024
+#define	COB_SORT_MEMORY		128 * 1024 * 1024
 #define	COB_SORT_CHUNK		256 * 1024
 
 /* Program return types */
@@ -1339,6 +1346,7 @@ COB_EXPIMP void	*cob_fast_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_realloc		(void *, const size_t);
 COB_EXPIMP void	cob_cache_free			(void *);
+
 COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
 
 COB_EXPIMP char *cob_expand_env_string(char *);

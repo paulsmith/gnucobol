@@ -3905,6 +3905,8 @@ output_search_whens (cb_tree table, struct cb_field *p, cb_tree stmt,
 	cb_tree		l;
 	cb_tree		idx = NULL;
 
+	COB_UNUSED(table);	/* to be handled later */
+
 	if (!p->index_list) {
 		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
@@ -3967,6 +3969,8 @@ output_search_all (cb_tree table, struct cb_field *p, cb_tree stmt,
 					cb_tree cond, cb_tree when)
 {
 	cb_tree		idx;
+
+	COB_UNUSED(table);	/* to be handled later */
 
 	idx = CB_VALUE (p->index_list);
 	/* Header */

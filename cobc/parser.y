@@ -491,6 +491,7 @@ terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 static void
 terminator_clear (cb_tree stmt, const unsigned int termid)
 {
+	struct cb_perform	*p;
 	check_unreached = 0;
 	if (term_array[termid]) {
 		term_array[termid]--;
@@ -501,6 +502,13 @@ terminator_clear (cb_tree stmt, const unsigned int termid)
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_END */
+	if (termid == TERM_PERFORM
+	 && perform_stack) {
+		p = CB_PERFORM (CB_VALUE (perform_stack));
+		if (p->perform_type == CB_PERFORM_UNTIL) {
+			cb_terminate_cond ();
+		}
+	}
 	/* Free tree associated with terminator */
 	if (stmt) {
 		cobc_parse_free (stmt);
@@ -4408,7 +4416,13 @@ record_clause:
 			current_file->record_max = 1;
 			cb_error (_("RECORD clause invalid"));
 		}
-		if (current_file->record_max > MAX_FD_RECORD)  {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
 			current_file->record_max = MAX_FD_RECORD;
 			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
 				  MAX_FD_RECORD);
@@ -4433,7 +4447,14 @@ record_clause:
 			current_file->record_max = 1;
 			error_ind = 1;
 		}
-		if (current_file->record_max > MAX_FD_RECORD)  {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+			error_ind = 1;
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
 			current_file->record_max = MAX_FD_RECORD;
 			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
 				  MAX_FD_RECORD);
@@ -4463,11 +4484,20 @@ record_clause:
 		current_file->record_max = 1;
 		error_ind = 1;
 	}
-	if ($7 && current_file->record_max > MAX_FD_RECORD)  {
-		current_file->record_max = MAX_FD_RECORD;
-		cb_error (_("RECORD size exceeds maximum allowed (%d)"),
-			  MAX_FD_RECORD);
-		error_ind = 1;
+	if ($7) {
+		if (current_file->organization == COB_ORG_INDEXED) {
+			if (current_file->record_max > MAX_FD_RECORD_IDX)  {
+				current_file->record_max = MAX_FD_RECORD_IDX;
+				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
+					  MAX_FD_RECORD_IDX);
+				error_ind = 1;
+			}
+		} else if (current_file->record_max > MAX_FD_RECORD)  {
+			current_file->record_max = MAX_FD_RECORD;
+			cb_error (_("RECORD size exceeds maximum allowed (%d)"),
+				  MAX_FD_RECORD);
+			error_ind = 1;
+		}
 	}
 	if (($6 || $7) && current_file->record_max <= current_file->record_min)  {
 		error_ind = 1;
@@ -7002,11 +7032,13 @@ procedure:
 		next_label_id++;
 	}
 	/* check_unreached = 0; */
+	cb_end_statement();
   }
 | invalid_statement %prec SHIFT_PREFER
 | TOK_DOT
   {
 	/* check_unreached = 0; */
+	cb_end_statement();
   }
 ;
 
@@ -9144,6 +9176,10 @@ evaluate_object:
 
 	/* Build expr now */
 	e1 = cb_build_expr (parm1);
+	cb_terminate_cond ();
+	cb_end_cond (e1);
+	cb_save_cond ();
+	cb_true_side ();
 
 	eval_inc2++;
 	$$ = CB_BUILD_PAIR (not0, CB_BUILD_PAIR (e1, e2));
@@ -9416,7 +9452,7 @@ if_statement:
   {
 	begin_statement ("IF", TERM_IF);
   }
-  condition _then if_else_statements
+  condition if_then if_else_statements
   end_if
 ;
 
@@ -9435,15 +9471,25 @@ if_else_statements:
   }
 ;
 
+if_then:
+  {
+	cb_save_cond ();
+  }
+| THEN
+  {
+	cb_save_cond ();
+  }
+;
+
 if_true:
   {
-	  cb_if_true();
+	  cb_true_side ();
   }
 ;
 
 if_false:
   {
-	  cb_if_false();
+	  cb_false_side ();
   }
 ;
 
@@ -9451,12 +9497,12 @@ end_if:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-4, IF);
-	cb_if_end();
+	cb_terminate_cond ();
   }
 | END_IF
   {
 	TERMINATOR_CLEAR ($-4, IF);
-	cb_if_end();
+	cb_terminate_cond ();
   }
 ;
 

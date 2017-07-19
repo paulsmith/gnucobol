@@ -3029,11 +3029,10 @@ process_command_line (const int argc, char **argv)
 		case 'Y':
 			/* -Werror[=warning] : Treat all/single warnings as errors */
 			if (cob_optarg) {
-				if (0) {} // dummy place holder
 #define CB_CHECK_WARNING(var,name)  \
-				else if (strcmp(cob_optarg,name) == 0) {	\
+				if (strcmp(cob_optarg,name) == 0) {	\
 					var = COBC_WARN_AS_ERROR;		\
-				}
+				} else
 #define	CB_WARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
 #define	CB_ONWARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
 #define	CB_NOWARNDEF(var,name,doc)	CB_CHECK_WARNING(var,name)
@@ -3042,7 +3041,8 @@ process_command_line (const int argc, char **argv)
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
-				else if (verbose_output) {
+				/* note: ends block from last CB_CHECK_WARNING */
+				/* else */ if (verbose_output) {
 					cobc_err_msg (_("unknown warning option '%s'"),
 						cob_optarg);
 				}
