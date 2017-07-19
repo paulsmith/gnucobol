@@ -1393,3 +1393,8 @@ if test "$COB_HAS_UTC_OFFSET" = "no"; then
   AC_MSG_WARN([ Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE])
   AC_MSG_WARN([and FORMATTED-DATETIME may not work.])
 fi
+
+if test "$enable_code_coverage" = "yes"; then
+	AC_MSG_WARN([Code coverage checks are currently disabled because of compatibility issues!])
+	AC_MSG_NOTICE([Use trunk (or enable it in */Makefile.am) to use coverage checks.])
+fi

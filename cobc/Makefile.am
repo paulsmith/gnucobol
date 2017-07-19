@@ -36,10 +36,11 @@ COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
 BUILT_SOURCES = pplex.c scanner.c
 EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
 
-# Add rules for code-coverage testing, as provided by AX_CODE_COVERAGE
-@CODE_COVERAGE_RULES@
-CODE_COVERAGE_BRANCH_COVERAGE=1
-CODE_COVERAGE_LCOV_OPTIONS =  --no-external
+# FIXME: needs GNU make, even if not enabled
+# Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
+#CODE_COVERAGE_BRANCH_COVERAGE=1
+#@CODE_COVERAGE_RULES@
+#CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
 cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)

@@ -21308,3 +21308,10 @@ $as_echo "$as_me: WARNING:  Could not find strftime or timezone. FORMATTED-CURRE
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: and FORMATTED-DATETIME may not work." >&5
 $as_echo "$as_me: WARNING: and FORMATTED-DATETIME may not work." >&2;}
 fi
+
+if test "$enable_code_coverage" = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Code coverage checks are currently disabled because of compatibility issues!" >&5
+$as_echo "$as_me: WARNING: Code coverage checks are currently disabled because of compatibility issues!" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: Use trunk (or enable it in the Makefiles) to use coverage checks." >&5
+$as_echo "$as_me: Use trunk (or enable it in */Makefile.am) to use coverage checks." >&6;}
+fi
