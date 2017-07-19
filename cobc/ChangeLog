@@ -1,4 +1,10 @@
 
+2017-07-19  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c, parser.y, tree.h, tree.c:
+	  Limit ignoring errors to IF, WHEN and PERFORM UNTIL
+	  when the condition is resolved at compile time
+
 2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, tree.c: check both increased MAX_FD_RECORD and the new

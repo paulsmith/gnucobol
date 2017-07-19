@@ -4050,7 +4050,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		if (cb_warn_constant_expr
 		 && !was_prev_warn (e->source_line)) {
 			if (rlit && llit) {
-				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always TRUE"),
+				cb_warning_x (cb_warn_constant_expr, e, _("expression '%.38s' %s '%.38s' is always TRUE"),
 					llit, explain_operator (op), rlit);
 			} else{
 				cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
@@ -4062,7 +4062,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		if (cb_warn_constant_expr
 		 && !was_prev_warn (e->source_line)) {
 			if (rlit && llit) {
-				cb_warning_x (cb_warn_constant_expr, e, _("expression '%s' %s '%s' is always FALSE"),
+				cb_warning_x (cb_warn_constant_expr, e, _("expression '%.38s' %s '%.38s' is always FALSE"),
 					llit, explain_operator (op), rlit);
 			} else {
 				cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
@@ -4372,6 +4372,15 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 		}
 		cb_source_line++;
 	}
+
+	if (until) {
+		cb_save_cond ();
+	}
+	if (until == cb_true
+	 && !after_until) {
+		cb_false_side ();	/* PERFORM body is NEVER executed */
+	}
+
 	after_until = 0;
 	if (name) {
 		if (name == cb_error_node) {

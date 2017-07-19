@@ -105,9 +105,10 @@ static int			expr_op;		/* Last operator */
 static cb_tree			expr_lh;		/* Last left hand */
 static int			expr_dmax = -1;		/* Max scale for expression result */
 static int			cond_fixed = -1;	/* 0 means TRUE, 1 means FALSE, -1 unknown */
-#define MAX_NESTED_IF	128
+#define MAX_NESTED_COND	128
 static int			if_nest = 0;
-static int			if_cond[MAX_NESTED_IF];
+static int			if_cond[MAX_NESTED_COND];
+static int			if_stop = 0;
 static int			expr_line = 0;		/* Line holding expression for warnings */
 static cb_tree			expr_rslt = NULL;	/* Expression result */
 
@@ -4595,11 +4596,12 @@ cb_build_cond (cb_tree x)
 	return cb_error_node;
 }
 
-/* Reset at end of emiting code for condition */
+/* End parsing a 'condition' */
 void
 cb_end_cond (cb_tree rslt)
 {
-	expr_dmax = -1;
+	expr_dmax = -1;		/* Reset 'Max scale' */
+
 	if (rslt == cb_true) {
 		cond_fixed = 0;
 	} else
@@ -4608,25 +4610,37 @@ cb_end_cond (cb_tree rslt)
 	} else {
 		cond_fixed = -1;
 	}
-	if (if_nest < MAX_NESTED_IF) {
+}
+
+/* Save this 'condition' result */
+void
+cb_save_cond (void)
+{
+	if (if_stop)
+		return;
+	if (if_nest < MAX_NESTED_COND) {
 		if_cond[if_nest++] = cond_fixed;
 	} else {
-		cb_warning (COBC_WARN_FILLER, _("'IF' nested more than %d deep"), MAX_NESTED_IF);
+		/* result: errors won't be ignored in "false" condition parts */
+		cb_warning (COBC_WARN_FILLER, _("more than %d nested conditions"), MAX_NESTED_COND);
+		if_stop = 1;
+		if_nest = 0;
+		cb_set_ignore_error (0);
 	}
 }
 
-/* TRUE side of IF condition */
+/* TRUE side of 'condition' */
 void
-cb_if_true(void)
+cb_true_side (void)
 {
 	if (cond_fixed == 1) {
 		cb_set_ignore_error (1);
 	}
 }
 
-/* FALSE side of IF condition */
+/* FALSE side of 'condition' */
 void
-cb_if_false(void)
+cb_false_side (void)
 {
 	if (cond_fixed == 0) {
 		cb_set_ignore_error (1);
@@ -4635,10 +4649,12 @@ cb_if_false(void)
 	}
 }
 
-/* END of IF statement */
+/* END of statement that had a 'condition' */
 void
-cb_if_end(void)
+cb_terminate_cond (void)
 {
+	if (if_stop)
+		return;
 	if_nest--;
 	if (if_nest <= 0) {
 		cond_fixed = -1;
@@ -4647,6 +4663,16 @@ cb_if_end(void)
 	} else {
 		cond_fixed = if_cond[if_nest];
 	}
+}
+
+/* Now at PERIOD, ending statement(s) */
+void
+cb_end_statement (void)
+{
+	expr_dmax = -1;
+	if_stop = 0;
+	if_nest = 0;
+	cb_set_ignore_error (0);
 }
 
 /* ADD/SUBTRACT CORRESPONDING */
