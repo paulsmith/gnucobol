@@ -2,7 +2,8 @@
 2017-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: version bump to 2.2rc
-	* general: temporarily disabled code-coverage because of portability issues
+	* general: temporarily disabled code-coverage because of portability issues	
+	* create_win_dist.sh: fixed creation of zip archive to root directory
 
 2017-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

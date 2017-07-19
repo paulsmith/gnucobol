@@ -84,12 +84,14 @@ for file in ./cobc/pplex.c ./cobc/scanner.c; do
 #	  $file > $file.tmp && mv -f $file.tmp $file
 	sed -i -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' $file
 done
-cd $olddir # back in win-dist
+cd .. # back in win-dist
 
 
 # Create windows dist zip
 rm -f $EXTDISTDIR"_win.zip"
-zip -rq ../../$EXTDISTDIR"_win.zip" $EXTDISTDIR
+zip -rq $olddir/$EXTDISTDIR"_win.zip" $EXTDISTDIR
+
+cd $olddir # back in starting directory
 
 # Remove temporary folder
 rm -r -f $WINTMP
