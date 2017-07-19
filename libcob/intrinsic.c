@@ -2275,15 +2275,20 @@ add_offset_time (const int with_colon, int const *offset_time,
 	int		hours;
 	int		minutes;
 	const char	*format_str;
+	char	local_buff[13]; /* 13: make the compiler happy as "(un)signed short" *could*
+						           have more digits than we "assume" */
 
 	if (offset_time) {
 		hours = *offset_time / 60;
 		minutes = abs (*offset_time) % 60;
 
 		format_str = with_colon ? "%+2.2d:%2.2d" : "%+2.2d%2.2d";
-		sprintf (buff + buff_pos, format_str, hours, minutes);
+		snprintf (local_buff, sizeof (local_buff), format_str,
+			(cob_s16_t) hours,
+			(cob_u16_t) minutes);
+		memcpy (buff + buff_pos, local_buff, (size_t)6);
 	} else {
-		sprintf (buff + buff_pos, "00000");
+		snprintf (buff + buff_pos, (size_t)6, "00000");
 	}
 }
 
@@ -4124,7 +4129,8 @@ cob_intr_day_of_integer (cob_field *srcdays)
 	int		baseyear;
 	cob_field_attr	attr;
 	cob_field	field;
-	char		buff[16];
+	char		buff[13]; /* 13: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	COB_ATTR_INIT (COB_TYPE_NUMERIC_DISPLAY, 7, 0, 0, NULL);
 	COB_FIELD_INIT (7, NULL, &attr);
@@ -4140,7 +4146,9 @@ cob_intr_day_of_integer (cob_field *srcdays)
 	}
 
 	day_of_integer (days, &baseyear, &days);
-	snprintf (buff, (size_t)15, "%4.4d%3.3d", baseyear, days);
+	snprintf (buff, sizeof (buff), "%4.4d%3.3d",
+		(cob_u16_t) baseyear,
+		(cob_u16_t) days);
 
 	memcpy (curr_field->data, buff, (size_t)7);
 	return curr_field;

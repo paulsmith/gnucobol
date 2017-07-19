@@ -1,4 +1,8 @@
 
+2017-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: version bump to 2.2rc
+
 2017-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac [_BSD_SOURCE]: set COB_HAS_UTC_OFFSET to "yes" if C compiler

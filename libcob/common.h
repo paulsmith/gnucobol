@@ -1449,18 +1449,18 @@ COB_EXPIMP void			cob_reset_trace		(void);
 /* Datetime structure */
 struct cob_time
 {
-	int	year;
-	int	month; /* 1 = Jan ... 12 = Dec */
-	int	day_of_month; /* 1 ... 31 */
-	int	day_of_week; /* 1 = Monday ... 7 = Sunday */
-	int day_of_year; /* -1 on _WIN32! */
-	int	hour;
-	int	minute;
-	int	second;
-	int	nanosecond;
+	int	year;			/* Year         [1900-9999] */
+	int	month;			/* Month        [1-12] 1 = Jan ... 12 = Dec */
+	int	day_of_month;	/* Day          [1-31] */
+	int	day_of_week;	/* Day of week  [1-7] 1 = Monday ... 7 = Sunday */
+	int day_of_year;	/* Days in year [1-366] -1 on _WIN32! */
+	int	hour;			/* Hours        [0-23] */
+	int	minute;			/* Minutes      [0-59] */
+	int	second;			/* Seconds      [0-60] (1 leap second) */
+	int	nanosecond;		/* Nanoseconds */
 	int	offset_known;
-	int	utc_offset; /* in minutes */
-	int is_daylight_saving_time;
+	int	utc_offset;		/* Minutes east of UTC */
+	int is_daylight_saving_time;	/* DST [-1/0/1] */
 };
 
 COB_EXPIMP struct cob_time cob_get_current_date_and_time	(void);

@@ -418,25 +418,25 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 "IDENTIFICATION"[ ,;]+"DIVISION" {
 	/* Allow comment sentences/paragraphs */
 	comment_allowed = 1;
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 "PROGRAM-ID"	{
 	/* Allow comment sentences/paragraphs */
 	comment_allowed = 1;
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 "DIVISION"	{
 	/* Disallow comment sentences/paragraphs */
 	comment_allowed = 0;
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 "SECTION"	{
 	/* Disallow comment sentences/paragraphs */
 	comment_allowed = 0;
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 ^[ ]*"EJECT"([ ]*\.)? |
@@ -486,7 +486,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	/* Pick up early - Also activates debugging lines */
 	cb_verify (cb_debugging_mode, "DEBUGGING MODE");
 	cb_flag_debugging_line = 1;
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 [,;]?\n		{
@@ -522,7 +522,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 {NUMRIC_LITERAL} |
 {ALNUM_LITERAL} |
 .		{
-	ppecho (yytext, 0, yyleng);
+	ppecho (yytext, 0, (int)yyleng);
 }
 
 <CALL_DIRECTIVE_STATE,
@@ -1037,9 +1037,9 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 }
 
 void
-ppparse_error (const char *msg)
+ppparse_error (const char *err_msg)
 {
-	cb_plex_error (newline_count, "%s", msg);
+	cb_plex_error (newline_count, "%s", err_msg);
 }
 
 void
@@ -1200,7 +1200,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		repl->lastline = cb_source_line;
 
 		for (l = r->old_text, length = 0; l; l = l->next) {
-			length += strlen (l->text);
+			length += (int)strlen (l->text);
 		}
 		repl->from = cobc_malloc (length + 2);
 		memset (repl->from, 0, length + 2);
@@ -1209,7 +1209,7 @@ set_print_replace_list (struct cb_replace_list *list)
 		}
 
 		for (l = r->new_text, length = 0; l; l = l->next) {
-			length += strlen (l->text);
+			length += (int)strlen (l->text);
 		}
 		repl->to = cobc_malloc (length + 2);
 		memset (repl->to, 0, length + 2);

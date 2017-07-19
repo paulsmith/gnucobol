@@ -1207,7 +1207,7 @@ error_numeric_literal (const char *literal)
 
 /* Check numeric literal length, postponed from scanner.l (scan_numeric) */
 static void
-check_lit_length (const int size, const char *lit)
+check_lit_length (const int unsigned size, const char *lit)
 {
 	if (unlikely(size > COB_MAX_DIGITS)) {
 		/* Absolute limit */
@@ -1215,7 +1215,7 @@ check_lit_length (const int size, const char *lit)
 			_("literal length %d exceeds maximum of %d digits"),
 			size, COB_MAX_DIGITS);
 		error_numeric_literal (lit);
-	} else if (unlikely((unsigned int) size > cb_numlit_length)) {
+	} else if (unlikely(size > cb_numlit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d digits"),
 			size, cb_numlit_length);
@@ -1228,8 +1228,7 @@ cb_get_int (const cb_tree x)
 {
 	struct cb_literal	*l;
 	const char		*s;
-	size_t			size;
-	size_t			i;
+	unsigned int	size, i;
 	int			val;
 
 	if (!CB_LITERAL_P (x)) {
@@ -1304,8 +1303,7 @@ cb_get_long_long (const cb_tree x)
 {
 	struct cb_literal	*l;
 	const char		*s;
-	size_t			i;
-	size_t			size;
+	unsigned int	size, i;
 	cob_s64_t		val;
 
 	if (!CB_LITERAL_P (x)) {
@@ -1354,8 +1352,7 @@ cb_get_u_long_long (const cb_tree x)
 {
 	struct cb_literal	*l;
 	const char		*s;
-	size_t			i;
-	size_t			size;
+	unsigned int	size, i;
 	cob_u64_t		val;
 
 	l = CB_LITERAL (x);
@@ -3682,9 +3679,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			yl = CB_LITERAL(y);
 
 			if(xl->llit == 0
-			   && xl->size >= xl->scale
+			   && xl->size >= (unsigned int)xl->scale
 			   && yl->llit == 0
-			   && yl->size >= yl->scale
+			   && yl->size >= (unsigned int)yl->scale
 			   && xl->all == 0
 			   && yl->all == 0) {
 				xval = atoll((const char*)xl->data);

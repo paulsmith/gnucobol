@@ -2,9 +2,9 @@
 # Adjust/activate "Packager" tag as necessary
 
 Name:		gnucobol
-Version:	2.0
+Version:	2.2
 Release:	1%{?dist}
-Summary:	GnuCOBOL - COBOL compiler
+Summary:	GnuCOBOL - COBOL compiler and runtime library
 
 # Packager:	Whoever
 

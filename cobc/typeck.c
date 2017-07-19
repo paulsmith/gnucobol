@@ -1156,7 +1156,8 @@ cb_build_register_number_parameters (const char *name, const char *definition)
 static void
 cb_build_register_when_compiled (const char *name, const char *definition)
 {
-	char		buff[21];
+	char		buff[32]; /* 32: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 	size_t lit_size;
 	
 	if (!definition) {
@@ -1172,24 +1173,24 @@ cb_build_register_when_compiled (const char *name, const char *definition)
 #if 0
 	if (doesn_t_contain_X_20(definition)) {
 #endif
+		snprintf (buff, sizeof (buff), "%2.2d/%2.2d/%2.2d%2.2d.%2.2d.%2.2d",
+			(cob_u16_t) current_compile_time.day_of_month,
+			(cob_u16_t) current_compile_time.month,
+			(cob_u16_t) current_compile_time.year % 100,
+			(cob_u16_t) current_compile_time.hour,
+			(cob_u16_t) current_compile_time.minute,
+			(cob_u16_t) current_compile_time.second);
 		lit_size = 16;
-		snprintf (buff, lit_size + 1, "%02d/%02d/%02d%02d.%02d.%02d",
-			current_compile_time.day_of_month,
-			current_compile_time.month,
-			current_compile_time.year % 100,
-			current_compile_time.hour,
-			current_compile_time.minute,
-			current_compile_time.second);
 #if 0
 	} else {
+		snprintf (buff, sizeof (buff) + 1, "%2.2d\.%2.2d\.%2.2d%s %2.2d, %4.4d",
+			(cob_u16_t) current_compile_time.hour,
+			(cob_u16_t) current_compile_time.minute,
+			(cob_u16_t) current_compile_time.second,
+			(cob_u16_t) current_compile_time.month,
+			(cob_u16_t) current_compile_time.day_of_month,
+			(cob_u16_t) current_compile_time.year);
 		lit_size = 20;
-		snprintf (buff, lit_size + 1, "%02d\.%02d\.%02d%s %02d, %04d",
-			current_compile_time.hour,
-			current_compile_time.minute,
-			current_compile_time.second,
-			current_compile_time.month,
-			current_compile_time.day_of_month,
-			current_compile_time.year);
 	}
 #endif
 	(void)cb_build_constant (cb_build_reference (name),
@@ -1292,20 +1293,21 @@ cb_build_registers (void)
 void
 cb_set_intr_when_compiled (void)
 {
-	char	buff[22];
+	char	buff[36]; /* 36: make the compiler happy as "unsigned short" *could*
+						     have more digits than we "assume" */
 
-	snprintf (buff, (size_t)17, "%d%02d%02d%02d%02d%02d%02d",
-		current_compile_time.year,
-		current_compile_time.month,
-		current_compile_time.day_of_month,
-		current_compile_time.hour,
-		current_compile_time.minute,
-		current_compile_time.second,
-		current_compile_time.nanosecond / 10000000);
+	snprintf (buff, sizeof (buff), "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d",
+		(cob_u16_t) current_compile_time.year,
+		(cob_u16_t) current_compile_time.month,
+		(cob_u16_t) current_compile_time.day_of_month,
+		(cob_u16_t) current_compile_time.hour,
+		(cob_u16_t) current_compile_time.minute,
+		(cob_u16_t) current_compile_time.second,
+		(cob_u16_t) (current_compile_time.nanosecond / 10000000));
 	if (current_compile_time.offset_known) {
-		snprintf (buff + 16, (size_t)6, "%+03d%02d",
-			current_compile_time.utc_offset / 60,
-			current_compile_time.utc_offset % 60);
+		snprintf (buff + 16, (size_t)11, "%+3.3d%2.2d",	/* 11: see above */
+			(cob_u16_t) current_compile_time.utc_offset / 60,
+			(cob_u16_t) current_compile_time.utc_offset % 60);
 	} else {
 		snprintf (buff + 16, (size_t)6, "00000");
 	}
@@ -1464,7 +1466,7 @@ cb_define_switch_name (cb_tree name, cb_tree sname, const int flag)
 }
 
 void
-cb_check_word_length (int length, const char *word)
+cb_check_word_length (unsigned int length, const char *word)
 {
 	if (unlikely (length > cb_word_length)) {
 		if (length > COB_MAX_WORDLEN) {
@@ -1502,7 +1504,7 @@ cb_build_section_name (cb_tree name, const int sect_or_para)
 			break;
 		}
 	}
-	if (nwlength != 0) {
+	if (nwlength > 0) {
 		cb_check_word_length(nwlength, w->name);
 	}
 
@@ -2079,6 +2081,9 @@ cb_build_const_start (struct cb_field *f, cb_tree x)
 	}
 
 	target = CB_FIELD (cb_ref (x));
+	if (!target) {
+		return cb_error_node;
+	}
 	if (!target->flag_external
 	 && target->storage != CB_STORAGE_FILE
 	 && target->storage != CB_STORAGE_LINKAGE) {

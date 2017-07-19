@@ -3126,46 +3126,60 @@ void
 cob_accept_date (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[8];
+	char		buff[16]; /* 16: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	time = cob_get_current_date_and_time ();
 
-	snprintf(str, 7, "%02d%02d%02d", time.year % 100, time.month, time.day_of_month);
-	cob_memcpy (field, str, (size_t)6);
+	snprintf(buff, sizeof (buff), "%2.2d%2.2d%2.2d",
+		(cob_u16_t) time.year % 100,
+		(cob_u16_t) time.month,
+		(cob_u16_t) time.day_of_month);
+	cob_memcpy (field, buff, (size_t)6);
 }
 
 void
 cob_accept_date_yyyymmdd (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[10];
+	char		buff[16]; /* 16: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	time = cob_get_current_date_and_time ();
 
-	snprintf (str, 9, "%04d%02d%02d", time.year, time.month, time.day_of_month);
-	cob_memcpy (field, str, (size_t)8);
+	snprintf (buff, sizeof (buff), "%4.4d%2.2d%2.2d",
+		(cob_u16_t) time.year,
+		(cob_u16_t) time.month,
+		(cob_u16_t) time.day_of_month);
+	cob_memcpy (field, buff, (size_t)8);
 }
 
 void
 cob_accept_day (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[7];
+	char		buff[11]; /* 11: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	time = cob_get_current_date_and_time ();
-	snprintf (str, 6, "%02d%03d", time.year % 100, time.day_of_year);
-	cob_memcpy (field, str, (size_t)5);
+	snprintf (buff, sizeof (buff), "%2.2d%3.3d",
+		(cob_u16_t) time.year % 100,
+		(cob_u16_t) time.day_of_year);
+	cob_memcpy (field, buff, (size_t)5);
 }
 
 void
 cob_accept_day_yyyyddd (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[9];
+	char		buff[11]; /* 11: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	time = cob_get_current_date_and_time ();
-	snprintf (str, 8, "%04d%03d", time.year, time.day_of_year);
-	cob_memcpy (field, str, (size_t)7);
+	snprintf (buff, sizeof (buff), "%4.4d%3.3d",
+		(cob_u16_t) time.year,
+		(cob_u16_t) time.day_of_year);
+	cob_memcpy (field, buff, (size_t)7);
 }
 
 void
@@ -3183,13 +3197,17 @@ void
 cob_accept_time (cob_field *field)
 {
 	struct cob_time	time;
-	char		str[10] = { '\0' };
+	char		buff[21]; /* 11: make the compiler happy as "unsigned short" *could*
+						         have more digits than we "assume" */
 
 	time = cob_get_current_date_and_time ();
-	snprintf (str, 9, "%2.2d%2.2d%2.2d%2.2d", time.hour, time.minute,
-		  time.second, time.nanosecond / 10000000);
+	snprintf (buff, sizeof (buff), "%2.2d%2.2d%2.2d%2.2d",
+		(cob_u16_t) time.hour,
+		(cob_u16_t) time.minute,
+		(cob_u16_t) time.second,
+		(cob_u16_t) (time.nanosecond / 10000000));
 
-	cob_memcpy (field, str, (size_t)8);
+	cob_memcpy (field, buff, (size_t)8);
 }
 
 void

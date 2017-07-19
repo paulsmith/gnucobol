@@ -1766,7 +1766,7 @@ extern char		*cb_encode_program_id (const char *);
 extern char		*cb_build_program_id (cb_tree, cb_tree, const cob_u32_t);
 extern cb_tree		cb_define_switch_name (cb_tree, cb_tree, const int);
 
-extern void		cb_check_word_length (int, const char *);
+extern void		cb_check_word_length (unsigned int, const char *);
 extern cb_tree		cb_build_section_name (cb_tree, const int);
 extern cb_tree		cb_build_assignment_name (struct cb_file *, cb_tree);
 extern cb_tree		cb_build_index (cb_tree, cb_tree,
