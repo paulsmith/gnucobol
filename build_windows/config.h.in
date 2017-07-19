@@ -348,7 +348,7 @@
 #define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GnuCOBOL 2.0"
+#define PACKAGE_STRING "GnuCOBOL 2.2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnucobol"
@@ -357,7 +357,7 @@
 #define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.0"
+#define PACKAGE_VERSION "2.2rc"
 
 /* Define a patch level (numeric, max. 8 digits) */
 #define PATCH_LEVEL COB_NUM_TAR_DATE
