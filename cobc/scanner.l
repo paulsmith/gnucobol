@@ -746,7 +746,7 @@ H#[0-9A-Za-z]* {
 	cb_tree				l;
 	struct cb_program		*program;
 
-	cb_check_word_length (yyleng, yytext);
+	cb_check_word_length ((unsigned int)yyleng, yytext);
 
 	/* Check Intrinsic FUNCTION name without keyword */
 	if ((cobc_in_procedure && (functions_are_all || cb_intrinsic_list ||

@@ -591,7 +591,8 @@ cob_check_pos_status (const int fret)
 	cob_field	*f;
 	int		sline;
 	int		scolumn;
-	char		datbuf[8];
+	char		buff[23]; /* 10: make the compiler happy as "int" *could*
+						         have more digits than we "assume" */
 
 	if (fret) {
 		cob_set_exception (COB_EC_IMP_ACCEPT);
@@ -604,8 +605,8 @@ cob_check_pos_status (const int fret)
 		if (COB_FIELD_IS_NUMERIC (COB_MODULE_PTR->crt_status)) {
 			cob_set_int (COB_MODULE_PTR->crt_status, fret);
 		} else {
-			sprintf(datbuf, "%4.4d", fret);
-			memcpy (COB_MODULE_PTR->crt_status->data, datbuf,
+			sprintf(buff, "%4.4d", fret);
+			memcpy (COB_MODULE_PTR->crt_status->data, buff,
 				(size_t)4);
 		}
 	}
@@ -621,13 +622,13 @@ cob_check_pos_status (const int fret)
 			if (f->size < 6) {
 				sline *= 100;
 				sline += scolumn;
-				sprintf(datbuf, "%4.4d", sline);
-				memcpy (f->data, datbuf, (size_t)4);
+				sprintf (buff, "%4.4d", sline);
+				memcpy (f->data, buff, (size_t)4);
 			} else {
 				sline *= 1000;
 				sline += scolumn;
-				sprintf(datbuf, "%6.6d", sline);
-				memcpy (f->data, datbuf, (size_t)6);
+				sprintf (buff, "%6.6d", sline);
+				memcpy (f->data, buff, (size_t)6);
 			}
 		}
 	}

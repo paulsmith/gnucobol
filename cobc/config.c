@@ -262,8 +262,9 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 				for (i = (int)strlen(buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
-					snprintf(filename, (size_t)COB_NORMAL_MAX, "%s%c%s", buff, SLASH_CHAR, conf_file);
-					if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
+					snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%c%s", buff, SLASH_CHAR, conf_file);
+					filename[COB_NORMAL_MAX] = 0;
+					if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 						conf_file = filename;		/* Prefix last directory */
 					} else {
 						filename[0] = 0;
@@ -274,7 +275,7 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 				/* check for COB_CONFIG_DIR (use default if not in environment) */
 				snprintf (filename, (size_t)COB_NORMAL_MAX, "%s%c%s", cob_config_dir, SLASH_CHAR, conf_file);
 				filename[COB_NORMAL_MAX] = 0;
-				if (access(filename, F_OK) == 0) {	/* and prefixed file exist */
+				if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 					conf_file = filename;		/* Prefix COB_CONFIG_DIR */
 				}
 			}

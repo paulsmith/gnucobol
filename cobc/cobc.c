@@ -4790,7 +4790,7 @@ xref_88_values (struct cb_field *field)
 static int
 xref_fields (struct cb_field *top)
 {
-	char		lcl_name[LCL_NAME_LEN] = { '\0' };
+	char		lcl_name[LCL_NAME_LEN];
 	int		found = 0;
 
 	for (; top; top = top->sister) {
@@ -4801,8 +4801,8 @@ xref_fields (struct cb_field *top)
 			continue;
 		}
 
-		strncpy (lcl_name, check_filler_name ((char *)top->name),
-			 LCL_NAME_MAX);
+		strncpy (lcl_name, check_filler_name ((char *)top->name), LCL_NAME_MAX);
+		lcl_name[LCL_NAME_MAX] = 0;	/* make sure we always have the trailing NULL */
 		if (!strcmp (lcl_name, "FILLER") && !top->validation) {
 			if (top->children) {
 				found += xref_fields (top->children);
