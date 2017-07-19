@@ -19,8 +19,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #endif
 
 VS_VERSION_INFO    VERSIONINFO
-  FILEVERSION      2,2,PATCH_LEVEL,0
-  PRODUCTVERSION   2,2,PATCH_LEVEL,0
+  FILEVERSION      2,3,PATCH_LEVEL,0
+  PRODUCTVERSION   2,3,PATCH_LEVEL,0
 
   FILEOS           VOS_NT_WINDOWS32
 
@@ -38,15 +38,15 @@ VS_VERSION_INFO    VERSIONINFO
       // VALUE "Comments",         "Free for personal use only.\0"
       // VALUE "CompanyName",      "Fake Company\0"
       VALUE "FileDescription",  PACKAGE_NAME " compiler for most COBOL dialects with lots of extensions"
-      VALUE "FileVersion",      "2.2.1817"
+      VALUE "FileVersion",      "2.3.1821"
       VALUE "InternalName",     "cobc"
       VALUE "LegalCopyright",   "Copyright (C) 2001-2017 Free Software Foundation, Inc."
       VALUE "LegalTrademarks",  "Compiler: GNU General Public License v3 - see COPYING,\x0ADocumentation: GNU Free Documentation License."
       VALUE "OriginalFilename", "cobc.exe"
       VALUE "ProductName",      PACKAGE_NAME " Compiler"
-      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r1817"
+      VALUE "ProductVersion",   PACKAGE_VERSION "." STRINGIZE(COB_NUM_TAR_DATE) " - r1821"
       // Should be set if VS_FF_PRIVATEBUILD is set:
-      VALUE "PrivateBuild",     "Built from SVN"
+      VALUE "PrivateBuild",     "Built from SVN (trunk)"
       // Should be set if VS_FF_SPECIALBUILD is set (including description what it was build for):
       VALUE "SpecialBuild",     ""
 

@@ -23,7 +23,7 @@
 AC_PREREQ([2.64])
 
 AC_INIT([GnuCOBOL],
-	[2.2-rc],
+	[2.3-dev],
 	[bug-gnucobol@gnu.org],
 	[gnucobol],
 	[https://www.gnu.org/software/gnucobol/])
