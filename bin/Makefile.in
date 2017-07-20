@@ -851,10 +851,10 @@ uninstall-man: uninstall-man1
 # FIXME: needs GNU make, even if not enabled
 # Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
 #CODE_COVERAGE_BRANCH_COVERAGE=1
-#@CODE_COVERAGE_RULES@
+#@ CODE_COVERAGE_RULES @
 #CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  $(COBCRUN)
+cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

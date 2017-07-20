@@ -33,9 +33,9 @@ cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.l
 # FIXME: needs GNU make, even if not enabled
 # Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
 #CODE_COVERAGE_BRANCH_COVERAGE=1
-#@CODE_COVERAGE_RULES@
+#@ CODE_COVERAGE_RULES @
 #CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  $(COBCRUN)
+cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)
 

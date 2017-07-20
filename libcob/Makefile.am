@@ -38,7 +38,7 @@ pkginclude_HEADERS = common.h cobgetopt.h exception.def
 # FIXME: needs GNU make, even if not enabled
 # Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
 #CODE_COVERAGE_BRANCH_COVERAGE=1
-#@CODE_COVERAGE_RULES@
+#@ CODE_COVERAGE_RULES @
 #CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
 #libcob.3: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac | $(COBCRUN)

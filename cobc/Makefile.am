@@ -39,10 +39,10 @@ EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
 # FIXME: needs GNU make, even if not enabled
 # Add rules for code-coverage testing, as defined by AX_CODE_COVERAGE
 #CODE_COVERAGE_BRANCH_COVERAGE=1
-#@CODE_COVERAGE_RULES@
+#@ CODE_COVERAGE_RULES @
 #CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | $(COBC)
+cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)
 
 .l.c:
