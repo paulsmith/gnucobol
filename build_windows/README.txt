@@ -62,7 +62,9 @@ How to test the native builds:
   in PATH (a Cygwin/MSYS version is needed, a normal Windows binary won't work)
 * do the following commands:
   cd $yourfolder
-  ./configure (add --without-db --without-curses if your system does not have
-  these files); this will create the necessary Makefiles for you
-  cd tests
-  make checkall # or make check if you don't want to run the NIST testsuite
+  ./configure (add --without-db --without-curses if the binaries to test are not
+  configured for ISAM/screenio); this will create the necessary Makefiles for you
+  cd extras
+  make -e
+  cd ../tests
+  make -e checkall # or make -e check if you don't want to run the NIST testsuite
