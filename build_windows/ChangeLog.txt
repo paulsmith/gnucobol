@@ -1,4 +1,9 @@
 
+2017-07-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makedist.bat: optimize during build of extras,
+	  improved displays to command line
+
 2017-04-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* added subfolder vs2017
