@@ -54,7 +54,8 @@ mkdir $WINTMP
 cp -p -r --parents $EXTDISTDIR $WINTMP || exit 1
 
 # Add content only necessary for windows dist zip
-cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR || exit 2
+cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
+cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win || exit 2
 
 olddir=$(pwd)
 cd $WINTMP/$EXTDISTDIR || exit 3
