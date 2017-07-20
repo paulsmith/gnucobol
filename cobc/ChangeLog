@@ -1,4 +1,9 @@
 
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: fixed memory overlap for long strings in listing title
+	* cobc.c [_MSC_VER](process_filtered): fixed cobc_free of NULL pointer
+
 2017-07-19  Ron Norman <rjn@inglenet.com>
 
 	* typeck.c, parser.y, tree.h, tree.c:
