@@ -348,7 +348,12 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #endif
 #endif
 
-#endif
+#endif /* _MSC_VER */
+
+#ifdef	__MINGW32__	/* needed by older versions */
+#define strncasecmp		_strnicmp
+#define strcasecmp		_stricmp
+#endif /* __MINGW32__ */
 
 #ifdef __BORLANDC__
 #include <io.h>
@@ -361,7 +366,7 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define timezone	_timezone
 #define tzname		_tzname
 #define daylight	_daylight
-#endif
+#endif /* __BORLANDC__ */
 
 #include <setjmp.h>
 
