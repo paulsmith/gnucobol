@@ -1,4 +1,9 @@
 
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: allow GnuCOBOL specific registers for lax dialect
+	  configurations
+
 2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* default.conf: set word-length to most unrestrictive value: 61
@@ -26,7 +31,7 @@
 2017-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: created a "strict" set of vendor dialect configurations,
-	  laxed "normal" vendor dialect configurations by allowing *all*
+	  made "normal" vendor dialect configurations lax by allowing *all*
 	  words GnuCOBOL can handle *additional* to the not-implemented
 	  vendor specific extensions and by allowing use of most features
 	  Note: COBOL85, COBOL2002 and COBOL2014 are always "strict"

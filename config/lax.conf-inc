@@ -101,3 +101,15 @@ reference-out-of-declaratives:		+warning
 numeric-value-for-edited-item:		+warning
 incorrect-conf-sec-order:		ok
 define-constant-directive:		+obsolete
+
+
+# use complete word list
+# (vendor specific, currently not supported words are
+# loaded by *including* the appropriate word list)
+reserved-words:		default
+
+# enable all intrinsic functions
+intrinsic-function:	DIALECT-ALL
+
+# enable GnuCOBOL registers
+register:	NUMBER-OF-CALL-PARAMETERS

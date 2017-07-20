@@ -1,4 +1,8 @@
 
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h [__MINGW32__]: added missing defines
+
 2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: increased MAX_FD_RECORD to 64MB and introduced
