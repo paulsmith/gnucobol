@@ -104,7 +104,13 @@ AT_DATA([prog.cob], [
           CONTINUE.
        IF WS-LINE-NUMBER > 1234
           CONTINUE.
+       IF WS-LINE-NUMBER <= 1234
+          CONTINUE.
        IF WS-LINE-NUMBER > '1234'
+          CONTINUE.
+       IF 1234 < WS-LINE-NUMBER 
+          CONTINUE.
+       IF 1234 >= WS-LINE-NUMBER 
           CONTINUE.
        IF WS-TEXT > 'DOGGY++'
           CONTINUE.
@@ -133,18 +139,26 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 18: warning: literal is longer than field
+prog.cob: 18: warning: expression is always FALSE
 prog.cob: 20: warning: literal is longer than field
+prog.cob: 20: warning: expression is always TRUE
 prog.cob: 22: warning: literal is longer than field
+prog.cob: 22: warning: expression is always FALSE
 prog.cob: 24: warning: literal is longer than field
+prog.cob: 24: warning: expression is always FALSE
 prog.cob: 26: warning: literal is longer than field
 prog.cob: 26: warning: expression is always TRUE
 prog.cob: 28: warning: literal is longer than field
-prog.cob: 28: warning: expression is always FALSE
-prog.cob: 31: warning: literal is longer than field
-prog.cob: 31: warning: expression is always FALSE
-prog.cob: 33: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
-prog.cob: 35: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
-prog.cob: 37: warning: expression '00000001234' EQUALS '1234' is always TRUE
+prog.cob: 30: warning: literal is longer than field
+prog.cob: 32: warning: literal is longer than field
+prog.cob: 32: warning: expression is always TRUE
+prog.cob: 34: warning: literal is longer than field
+prog.cob: 34: warning: expression is always FALSE
+prog.cob: 37: warning: literal is longer than field
+prog.cob: 37: warning: expression is always FALSE
+prog.cob: 39: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
+prog.cob: 41: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
+prog.cob: 43: warning: expression '00000001234' EQUALS '1234' is always TRUE
 ])
 
 AT_CLEANUP

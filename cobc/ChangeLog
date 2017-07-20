@@ -9,6 +9,9 @@
 	* typeck.c, parser.y, tree.h, tree.c:
 	  Limit ignoring errors to IF, WHEN and PERFORM UNTIL
 	  when the condition is resolved at compile time
+	* tree.c: When comparing a display numeric field to a literal
+	  and the literal is longer than the field, the result
+	  can be determined at compile time as TRUE or FALSE
 
 2017-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

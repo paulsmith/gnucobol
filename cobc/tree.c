@@ -3832,6 +3832,18 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 						break;
 					}
 				}
+				if (CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC) {
+					switch(op) {
+					case '>':
+					case ']':
+						relop = cb_true;
+						break;
+					case '<':
+					case '[':
+						relop = cb_false;
+						break;
+					}
+				}
 			}
 		} else if (CB_REF_OR_FIELD_P (x)
 		&&  CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
@@ -3854,6 +3866,18 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 						relop = cb_false;
 						break;
 					case '~':
+						relop = cb_true;
+						break;
+					}
+				}
+				if (CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC) {
+					switch(op) {
+					case '>':
+					case ']':
+						relop = cb_false;
+						break;
+					case '<':
+					case '[':
 						relop = cb_true;
 						break;
 					}
