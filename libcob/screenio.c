@@ -2578,41 +2578,6 @@ cob_display_text (const char *text)
 	return 0;
 }
 
-/* COBOL: get a char (or x'00' for function keys)
-   call a second time when getting x'00' leads to the function keys
-   1001-1199 as x'01' - x'C7', 2001 - 2055 as x'C9' - x'FF'
-   No implementation of MF function tables so far.
-*/
-int
-cob_sys_get_char (char c)
-{
-	int ret;
-
-	COB_CHK_PARMS (CBL_READ_KBD_CHAR, 1);
-
-	if (!got_sys_char) {
-		ret = cob_get_char ();
-		if (ret > 255) {
-			c = 0;
-			got_sys_char = 1;
-		} else {
-			c = (char) ret;
-		}
-	} else {
-		got_sys_char = 0;
-		if (COB_ACCEPT_STATUS == 0) {
-			return cob_sys_get_char (c);
-		} else if (COB_ACCEPT_STATUS > 1000 && COB_ACCEPT_STATUS < 1201) {
-			c = (char) (COB_ACCEPT_STATUS - 1000);
-		} else if (COB_ACCEPT_STATUS > 2000 && COB_ACCEPT_STATUS < 2056) {
-			c = (char) (COB_ACCEPT_STATUS - 1800);
-		} else {
-			return -1;
-		}
-	}
-	return 0;
-}
-
 /* C: get a char x'01' thru x'255' or keyboard status > 1000  (or 0) */
 int
 cob_get_char (void)
@@ -2861,6 +2826,47 @@ cob_sys_get_csr_pos (unsigned char *fld)
 	return 0;
 }
 
+/* COBOL: get a char (or x'00' for function keys)
+   call a second time when getting x'00' leads to the function keys
+   1001-1199 as x'01' - x'C7', 2001 - 2055 as x'C9' - x'FF'
+   No implementation of MF function tables so far.
+*/
+int
+cob_sys_get_char (char c)
+{
+#ifdef	COB_GEN_SCREENIO
+	int ret;
+#endif
+
+	COB_CHK_PARMS (CBL_READ_KBD_CHAR, 1);
+
+#ifdef	COB_GEN_SCREENIO
+	if (!got_sys_char) {
+		ret = cob_get_char ();
+		if (ret > 255) {
+			c = 0;
+			got_sys_char = 1;
+		} else {
+			c = (char) ret;
+		}
+	} else {
+		got_sys_char = 0;
+		if (COB_ACCEPT_STATUS == 0) {
+			return cob_sys_get_char (c);
+		} else if (COB_ACCEPT_STATUS > 1000 && COB_ACCEPT_STATUS < 1201) {
+			c = (char) (COB_ACCEPT_STATUS - 1000);
+		} else if (COB_ACCEPT_STATUS > 2000 && COB_ACCEPT_STATUS < 2056) {
+			c = (char) (COB_ACCEPT_STATUS - 1800);
+		} else {
+			return -1;
+		}
+	}
+#else
+	COB_UNUSED (c);
+#endif
+	return 0;
+}
+
 /* set CurSoR position on screen */
 int
 cob_sys_set_csr_pos (unsigned char *fld)
@@ -2878,6 +2884,7 @@ cob_sys_set_csr_pos (unsigned char *fld)
 	ccol= fld[1];
 	return move (cline, ccol);
 #else
+	COB_UNUSED (fld);
 	return 0;
 #endif
 }
