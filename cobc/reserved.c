@@ -388,10 +388,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CAPACITY",			0, 1, CAPACITY,			/* 2014 */
 				0, CB_CS_OCCURS
   },
-  { "CARD-PUNCH",			0, 1, CARD_PUNCH,			/* Extension */
+  { "CARD-PUNCH",		0, 1, CARD_PUNCH,		/* Extension */
 				0, CB_CS_ASSIGN
   },
-  { "CARD-READER",			0, 1, CARD_READER,			/* Extension */
+  { "CARD-READER",		0, 1, CARD_READER,		/* Extension */
 				0, CB_CS_ASSIGN
   },
   { "CASSETTE",			0, 1, CASSETTE,			/* Extension */
@@ -434,8 +434,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CLOSE",			0, 0, CLOSE,			/* 2002 */
 				0, 0
   },
-  { "COBOL",			0, 1, COBOL,			/* 2002,
-												Extension: implicit defined CALL-CONVENTION */
+  { "COBOL",			0, 1, COBOL,			/* 2002
+								   Extension: implicit defined CALL-CONVENTION */
 				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "CODE",			0, 0, CODE,			/* 2002 */
@@ -630,8 +630,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DEFAULT",			0, 0, DEFAULT,			/* 2002 */
 				0, 0
   },
-  { "DEFAULT-FONT",			0, 0, DEFAULT_FONT,			/* ACU extension */
-				0, 0					/* Checkme: likely context sensitive */
+  { "DEFAULT-FONT",		0, 0, DEFAULT_FONT,		/* ACU extension */
+				0, 0				/* Checkme: likely context sensitive */
   },
   { "DELETE",			1, 0, DELETE,			/* 2002 */
 				0, 0
@@ -651,7 +651,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DESTINATION",		0, 0, DESTINATION,		/* 2002 */
 				0, 0
   },
-  { "DESTROY",		0, 0, DESTROY,		/* ACU extension */
+  { "DESTROY",			0, 0, DESTROY,			/* ACU extension */
 				0, 0
   },
   { "DETAIL",			0, 0, DETAIL,			/* 2002 */
@@ -840,8 +840,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXTEND",			0, 0, EXTEND,			/* 2002 */
 				0, 0
   },
-  { "EXTERN",			0, 1, TOK_EXTERN,			/* 2002 Implementor specific ENTRY-CONVENTION,
-											Extension: implicit defined CALL-CONVENTION */
+  { "EXTERN",			0, 1, TOK_EXTERN,		/* 2002 Implementor specific ENTRY-CONVENTION,
+								   Extension: implicit defined CALL-CONVENTION */
 				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
@@ -880,8 +880,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FIXED",			0, 0, FIXED,			/* Extension */
 				0, CB_CS_RECORDING
   },
-  { "FIXED-FONT",			0, 0, FIXED_FONT,			/* ACU extension */
-					0, 0					/* Checkme: likely context sensitive */
+  { "FIXED-FONT",		0, 0, FIXED_FONT,		/* ACU extension */
+				0, 0				/* Checkme: likely context sensitive */
   },
   { "FLOAT-BINARY-128",		0, 0, -1,			/* 2014 */
 				0, 0
@@ -918,11 +918,11 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FLOAT-SHORT",		0, 0, FLOAT_SHORT,		/* 2002 */
 				0, 0
   },
-  { "FLOATING",		0, 0, FLOATING,		/* ACU extension */
+  { "FLOATING",			0, 0, FLOATING,			/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "FONT",			0, 0, FONT,			/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+	  			0, 0				/* Checkme: likely context sensitive */
   },
   { "FOOTING",			0, 0, FOOTING,			/* 2002 */
 				0, 0
@@ -991,7 +991,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "HANDLE",			0, 0, HANDLE,			/* ACU extension */
-	  0, 0
+	  			0, 0
   },
   { "HEADING",			0, 0, HEADING,			/* 2002 */
 				0, 0
@@ -1110,14 +1110,14 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LABEL",			0, 0, LABEL,			/* 85 */
 				0, 0
   },
-  { "LARGE-FONT",			0, 0, LARGE_FONT,			/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+  { "LARGE-FONT",		0, 0, LARGE_FONT,		/* ACU extension */
+	  			0, 0				/* Checkme: likely context sensitive */
   },
   { "LAST",			0, 0, LAST,			/* 2002 */
 				0, 0
   },
   { "LAYOUT-MANAGER",		0, 0, LAYOUT_MANAGER,		/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+	  			0, 0				/* Check me: likely context sensitive */
   },
   { "LC_ALL",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
@@ -1182,8 +1182,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LINKAGE",			0, 0, LINKAGE,			/* 2002 */
 				0, 0
   },
-  { "LM-RESIZE",			0, 0, LM_RESIZE,			/* ACU extension */
-					0, 0					/* Checkme: likely context sensitive */
+  { "LM-RESIZE",		0, 0, LM_RESIZE,		/* ACU extension */
+				0, 0				/* Checkme: likely context sensitive */
   },
   { "LOCAL-STORAGE",		0, 0, LOCAL_STORAGE,		/* 2002 */
 				0, 0
@@ -1206,20 +1206,20 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LOWLIGHT",			0, 0, LOWLIGHT,			/* 2002 (C/S) */
 				0, 0
   },
-  { "MAGNETIC-TAPE",			0, 1, MAGNETIC_TAPE,			/* Extension */
+  { "MAGNETIC-TAPE",		0, 1, MAGNETIC_TAPE,		/* Extension */
 				0, CB_CS_ASSIGN
   },
   { "MANUAL",			0, 0, MANUAL,			/* 2002 */
 				0, 0
   },
-  { "MEDIUM-FONT",			0, 0, MEDIUM_FONT,			/* ACU extension */
-		  0, 0					/* Checkme: likely context sensitive */
+  { "MEDIUM-FONT",		0, 0, MEDIUM_FONT,		/* ACU extension */
+		  		0, 0				/* Checkme: likely context sensitive */
   },
   { "MEMORY",			0, 1, MEMORY,			/* 85 */
 				0, CB_CS_OBJECT_COMPUTER
   },
   { "MENU",			0, 0, MENU,			/* ACU extension */
-					0, 0					/* Checkme: likely context sensitive */
+				0, 0				/* Checkme: likely context sensitive */
   },
   { "MERGE",			0, 0, MERGE,			/* 2002 */
 				0, 0
@@ -1239,7 +1239,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "MODE",			0, 0, MODE,			/* 2002 */
 				0, 0
   },
-  { "MODULES",		0, 0, MODULES,			/* 85 */
+  { "MODULES",			0, 0, MODULES,			/* 85 */
 				0, CB_CS_OBJECT_COMPUTER
   },
   { "MOVE",			0, 0, MOVE,			/* 2002 */
@@ -1413,7 +1413,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "POINTER",			0, 0, POINTER,			/* 2002 */
 				0, 0
   },
-  { "POP-UP",		0, 0, POP_UP,		/* ACU extension */
+  { "POP-UP",			0, 0, POP_UP,			/* ACU extension */
 				0, 0
   },
   { "POSITION",			0, 0, POSITION,			/* 85 */
@@ -1438,14 +1438,14 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PRINTER",			0, 1, PRINTER,			/* Extension */
 				0, CB_CS_ASSIGN
   },
-  { "PRINTER-1",			0, 1, PRINTER_1,			/* Extension */
+  { "PRINTER-1",		0, 1, PRINTER_1,		/* Extension */
 				0, CB_CS_ASSIGN
   },
   { "PRINTING",			0, 0, PRINTING,			/* 2002 */
 				0, 0
   },
   { "PRIORITY",			0, 0, PRIORITY,			/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+	  			0, 0				/* Checkme: likely context sensitive */
   },
   { "PROCEDURE",		0, 0, PROCEDURE,		/* 2002 */
 				0, 0
@@ -1718,8 +1718,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SIZE",			0, 0, SIZE,			/* 2002 */
 				0, 0
   },
-  { "SMALL-FONT",			0, 0, SMALL_FONT,			/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+  { "SMALL-FONT",		0, 0, SMALL_FONT,		/* ACU extension */
+	  			0, 0				/* Checkme: likely context sensitive */
   },
   { "SORT",			0, 0, SORT,			/* 2002 */
 				0, 0
@@ -1815,8 +1815,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SUBTRACT",			1, 0, SUBTRACT,			/* 2002 */
 				0, 0
   },
-  { "SUBWINDOW",			0, 0, SUBWINDOW,			/* ACU extension */
-	  0, 0					/* Checkme: likely context sensitive */
+  { "SUBWINDOW",		0, 0, SUBWINDOW,		/* ACU extension */
+	  			0, 0				/* Checkme: likely context sensitive */
   },
   { "SUM",			0, 0, SUM,			/* 2002 */
 				0, 0
@@ -1909,7 +1909,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_ROUNDED
   },
   { "TRADITIONAL-FONT",		0, 0, TRADITIONAL_FONT,		/* ACU extension */
-					0, 0					/* Checkme: likely context sensitive */
+				0, 0					/* Checkme: likely context sensitive */
   },
   { "TRAILING",			0, 0, TRAILING,			/* 2002 */
 				0, 0
@@ -2029,7 +2029,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_RECORDING
   },
   { "VARIANT",			0, 0, VARIANT,			/* ACU extension */
-					0, 0
+				0, 0
   },
   { "VARYING",			0, 0, VARYING,			/* 2002 */
 				0, 0
@@ -2041,7 +2041,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "WINDOW",			0, 0, WINDOW,			/* ACU extension */
-					0, 0
+				0, 0
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
 				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY
@@ -2932,7 +2932,7 @@ try_remove_removal (struct amendment_list * const addition)
 {
 	struct amendment_list	*l = addition->next;
 	struct amendment_list	*prev = addition;
-	
+
 	while (l) {
 		/* Look for elements with the same word. */
 		if (cob_strcasecmp (addition->word, l->word)) {
@@ -3080,7 +3080,7 @@ list_aliases (const struct cobc_reserved * const word)
 	if (word->token <= 0) {
 		return;
 	}
-	
+
 	for (i = 0; i < num_reserved_words; ++i) {
 		if (&reserved_words[i] == word
 		    || reserved_words[i].token != word->token) {
@@ -3130,7 +3130,7 @@ get_system_name (const char *name)
 {
 
 	struct system_name_struct *system_name = lookup_system_name (name, 0);
-	
+
 	if (system_name != NULL) {
 		return cb_build_system_name (system_name->category,
 			system_name->token);
@@ -3306,7 +3306,7 @@ change_intrinsic (const char *name, const char *fname, const int line, enum cb_f
 {
 	struct cb_intrinsic_table *cbp;
 	size_t		i;
-	
+
 	/* Group "ALL" intrinsics */
 	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_INTRINSICS; ++i) {
@@ -3471,7 +3471,7 @@ cb_list_registers (void)
 	const char	*name, *t;
 
 	/* TODO: implement creation from user-specified list (currently only enable/disable)
-	   Note: will still be able to be referenced if not implemented, 
+	   Note: will still be able to be referenced if not implemented,
 	         but not set/read by libcob [still helps compilation but should raise a warning]
 	*/
 
@@ -3560,7 +3560,7 @@ change_system_name (const char *name, const char *fname, const int line, enum cb
 			}
 		}
 		return;
-	} 
+	}
 
 	system_name = lookup_system_name (name, 1);
 	if (!system_name) {

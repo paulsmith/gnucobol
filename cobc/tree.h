@@ -1700,7 +1700,7 @@ extern void			remove_context_sensitivity (const char *,
 							    const int);
 extern struct cobc_reserved	*lookup_reserved_word (const char *);
 extern cb_tree			get_system_name (const char *);
-extern const char	*cb_get_register_definition (const char *);
+extern const char		*cb_get_register_definition (const char *);
 extern void			cb_list_reserved (void);
 extern void			cb_list_intrinsics (void);
 extern void			cb_list_system_names (void);

@@ -66,31 +66,6 @@ int				current_call_convention;
 static struct cb_define_struct	*ppp_setvar_list = NULL;
 static unsigned int		current_cmd = 0;
 
-#if	0	/* RXWRXW OPT */
-static const char	* const compopts[] = {
-	"ibm",
-	"ibmcomp",
-	"iso2002",
-	"mf",
-	"mfcomment",
-	"sticky-linkage",
-	"trunc",
-	"noibmcomp",
-	"nofold-copy-name",
-	"nofoldcopyname",
-	"nomfcomment",
-	"nosticky-linkage",
-	"notrunc"
-};
-
-static const char	* const varopts[] = {
-	"fold-copy-name",
-	"foldcopyname",
-	"sourceformat",
-	"trunc"
-};
-#endif
-
 /* Local functions */
 
 static char *
@@ -311,7 +286,7 @@ ppp_compare_vals (const struct cb_define_struct *p1,
 
 static struct cb_define_struct *
 ppp_define_add (struct cb_define_struct *list, const char *name,
-	       const char *text, const unsigned int override)
+		const char *text, const unsigned int override)
 {
 	struct cb_define_struct	*p;
 	struct cb_define_struct	*l;
@@ -370,7 +345,7 @@ ppp_define_del (const char *name)
 }
 
 void
-ppp_clear_lists ( void )
+ppp_clear_lists (void)
 {
 	ppp_setvar_list = NULL;
 }

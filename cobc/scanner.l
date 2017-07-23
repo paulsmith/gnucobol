@@ -66,17 +66,17 @@ static int yywrap (void) {
 	}
 
 #define	YY_USER_INIT						\
-	if (!plexbuff) {					\
-		plexsize = COB_MINI_BUFF;			\
-		plexbuff = cobc_malloc (plexsize);		\
+	if (!plex_buff) {					\
+		plex_size = COB_MINI_BUFF;			\
+		plex_buff = cobc_malloc (plex_size);		\
 	}							\
-	if (!picbuff1) {					\
-		pic1size = COB_MINI_BUFF;			\
-		picbuff1 = cobc_malloc (pic1size);		\
+	if (!pic_buff1) {					\
+		pic1_size = COB_MINI_BUFF;			\
+		pic_buff1 = cobc_malloc (pic1_size);		\
 	}							\
-	if (!picbuff2) {					\
-		pic2size = COB_MINI_BUFF;			\
-		picbuff2 = cobc_malloc (pic2size);		\
+	if (!pic_buff2) {					\
+		pic2_size = COB_MINI_BUFF;			\
+		pic_buff2 = cobc_malloc (pic2_size);		\
 	}
 
 #include "config.h"
@@ -114,9 +114,9 @@ static int yywrap (void) {
 /* CONSTANT (78 level) structure */
 struct cb_level_78 {
 	struct cb_level_78	*next;		/* Next in chain */
-	struct cb_level_78	*globnext;	/* Continued next in chain */
+	struct cb_level_78	*glob_next;	/* Continued next in chain */
 	struct cb_level_78	*last;		/* Last in chain */
-	struct cb_field		*fld78;		/* Pointer to field */
+	struct cb_field		*fld_78;		/* Pointer to field */
 	struct cb_program	*prog;		/* Program where defined */
 	cob_u32_t		name_len;	/* Length of name */
 	cob_u32_t		not_const;	/* Invalid usage check */
@@ -125,22 +125,22 @@ struct cb_level_78 {
 
 struct cb_top_level_78 {
 	struct cb_top_level_78	*next;
-	struct cb_level_78	*lev78ptr;
+	struct cb_level_78	*lev_78_ptr;
 };
 
 /* Local variables */
 static cb_tree			last_yylval;
 static int			last_token;
-static struct cb_level_78	*top78ptr = NULL;
-static struct cb_level_78	*const78ptr = NULL;
-static struct cb_level_78	*lev78ptr = NULL;
-static struct cb_level_78	*globlev78ptr = NULL;
-static char			*plexbuff = NULL;
-static char			*picbuff1 = NULL;
-static char			*picbuff2 = NULL;
-static size_t			plexsize;
-static size_t			pic1size;
-static size_t			pic2size;
+static struct cb_level_78	*top_78_ptr = NULL;
+static struct cb_level_78	*const_78_ptr = NULL;
+static struct cb_level_78	*lev_78_ptr = NULL;
+static struct cb_level_78	*glob_lev_78_ptr = NULL;
+static char			*plex_buff = NULL;
+static char			*pic_buff1 = NULL;
+static char			*pic_buff2 = NULL;
+static size_t			plex_size;
+static size_t			pic1_size;
+static size_t			pic2_size;
 static unsigned int		last_token_is_dot = 0;
 static unsigned int		integer_is_label = 0;
 static unsigned int		inside_bracket = 0;
@@ -159,7 +159,6 @@ static int	scan_floating_numeric (const char *);
 static void	scan_picture (const char *);
 static void	count_lines (const char *);
 static void	scan_define_options (const char *);
-static void	scan_options (const char *, const unsigned int);
 
 %}
 
@@ -196,18 +195,6 @@ static void	scan_options (const char *, const unsigned int);
 
 <*>^[ ]?"#DEFLIT".*\n {
 	scan_define_options (yytext);
-}
-
-<*>^[ ]?"#OPTION".*\n {
-	scan_options (yytext, 1);
-}
-
-<*>^[ ]?"#DEFOFF".*\n {
-	scan_options (yytext, 2);
-}
-
-<*>^[ ]?"#DEFENV".*\n {
-	scan_options (yytext, 3);
 }
 
 <*>\n {
@@ -850,8 +837,8 @@ H#[0-9A-Za-z]* {
 
 	/* Check local, global and source global CONSTANT (78) items */
 
-	for (p78 = top78ptr; p78; p78 = p78->globnext) {
-		if (strcasecmp (yytext, p78->fld78->name) == 0) {
+	for (p78 = top_78_ptr; p78; p78 = p78->glob_next) {
+		if (strcasecmp (yytext, p78->fld_78->name) == 0) {
 			if (unlikely (non_const_word)) {
 				if (p78->prog == current_program) {
 					cb_error (_("a constant may not be used here - '%s'"), yytext);
@@ -866,7 +853,7 @@ H#[0-9A-Za-z]* {
 			if (p78->chk_const && p78->not_const) {
 				break;
 			}
-			yylval = CB_VALUE (p78->fld78->values);
+			yylval = CB_VALUE (p78->fld_78->values);
 			RETURN_TOK (LITERAL);
 		}
 	}
@@ -1020,27 +1007,27 @@ H#[0-9A-Za-z]* {
 	struct cb_level_78	*p782;
 
 	/* At EOF - Clear variables */
-	for (p78 = lev78ptr; p78; ) {
+	for (p78 = lev_78_ptr; p78; ) {
 		p782 = p78->next;
 		cobc_free (p78);
 		p78 = p782;
 	}
-	for (p78 = globlev78ptr; p78; ) {
+	for (p78 = glob_lev_78_ptr; p78; ) {
 		p782 = p78->next;
 		cobc_free (p78);
 		p78 = p782;
 	}
-	for (p78 = const78ptr; p78; ) {
+	for (p78 = const_78_ptr; p78; ) {
 		p782 = p78->next;
 		cobc_free (p78);
 		p78 = p782;
 	}
-	top78ptr = NULL;
+	top_78_ptr = NULL;
 	last_token_is_dot = 0;
 	integer_is_label = 0;
 	inside_bracket = 0;
-	lev78ptr = NULL;
-	globlev78ptr = NULL;
+	lev_78_ptr = NULL;
+	glob_lev_78_ptr = NULL;
 	cobc_force_literal = 0;
 	yyterminate ();
 }
@@ -1099,14 +1086,14 @@ read_literal (const char mark, const char *type)
 	/* NO early exit possible as the literal has to be consumed */
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {
-			if (unlikely (i == plexsize)) {
-				plexsize *= 2;
-				if (unlikely (plexsize > (cb_lit_length + 1))) {
-					plexsize = cb_lit_length + 1;
+			if (unlikely (i == plex_size)) {
+				plex_size *= 2;
+				if (unlikely (plex_size > (cb_lit_length + 1))) {
+					plex_size = cb_lit_length + 1;
 				}
-				plexbuff = cobc_realloc (plexbuff, plexsize);
+				plex_buff = cobc_realloc (plex_buff, plex_size);
 			}
-			plexbuff[i] = (cob_u8_t)c;
+			plex_buff[i] = (cob_u8_t)c;
 		}
 		if (c == mark && (c = input ()) != (int)mark) {
 			if (c == '-') {
@@ -1124,8 +1111,8 @@ read_literal (const char mark, const char *type)
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal length exceeds %d characters"),
 				cb_lit_length);
-			plexbuff[cb_lit_length] = 0; /* ensure valid C-string for error message */
-			error_literal ("", plexbuff);
+			plex_buff[cb_lit_length] = 0; /* ensure valid C-string for error message */
+			error_literal ("", plex_buff);
 		}
 	}
 	/* FIXME: COBOL 2014 allows this (and needs it for DYNAMIC LENGTH items),
@@ -1139,20 +1126,20 @@ read_literal (const char mark, const char *type)
 	if (!i) {
 		cb_warning (COBC_WARN_FILLER,
 			_("alphanumeric literal has zero length; a SPACE will be assumed"));
-		plexbuff[i++] = ' ';
+		plex_buff[i++] = ' ';
 	} else if (i > cb_lit_length) {
 		i = cb_lit_length;
 	}
 
 	/* build literal with given size */
-	plexbuff[i] = 0;
+	plex_buff[i] = 0;
 	if (type[0] != 'N') {
-		yylval = cb_build_alphanumeric_literal (plexbuff, i);
+		yylval = cb_build_alphanumeric_literal (plex_buff, i);
 	} else {
 		if (cb_verify (cb_national_literals, _("national literal"))) {
 			CB_UNFINISHED (_("national literal"));
 		}
-		yylval = cb_build_national_literal (plexbuff, i);
+		yylval = cb_build_national_literal (plex_buff, i);
 	}
 }
 
@@ -1164,8 +1151,8 @@ scan_x (const char *text, const char *type)
 	char		*dst;
 	size_t		currlen;
 	size_t		result_len;
-	int			high = 1;
-	int			c;
+	int		high = 1;
+	int		c;
 	cob_u64_t	val = 0;
 
 	literal_error = 0;
@@ -1173,16 +1160,16 @@ scan_x (const char *text, const char *type)
 	/* Remark:
 	   The standard allows for 8,191 (normal/national/boolean) character positions */
 
-	/* currlen includes the terminating quote 
+	/* currlen includes the terminating quote
 	   and has to be adjusted according to type */
 
 	currlen = strlen (text);
 	currlen--;
-	if (unlikely (currlen + 1 > plexsize)) {
-		plexsize = currlen + 1;
-		plexbuff = cobc_realloc (plexbuff, plexsize);
+	if (unlikely (currlen + 1 > plex_size)) {
+		plex_size = currlen + 1;
+		plex_buff = cobc_realloc (plex_buff, plex_size);
 	}
-	memcpy (plexbuff, text, currlen);
+	memcpy (plex_buff, text, currlen);
 	if (likely(type[0] == 'X')) {
 		result_len = currlen / 2; /* characters, two half-bytes (hex) = 1 byte */
 	} else if (type[0] == 'B') {
@@ -1195,7 +1182,7 @@ scan_x (const char *text, const char *type)
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal length %d exceeds %d characters"),
 				  (int) result_len, 64);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 			goto error;
 		}
 	} else {
@@ -1209,13 +1196,13 @@ scan_x (const char *text, const char *type)
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
 			  (int) result_len, cb_lit_length);
-		error_literal (type, plexbuff);
+		error_literal (type, plex_buff);
 		goto error;
 	}
 
 	p = (char *)text;
 	e = (char *)p + currlen;
-	dst = plexbuff;
+	dst = plex_buff;
 
 	if (unlikely(type[0] == 'B')) {
 		/* hexadecimal-boolean */
@@ -1231,10 +1218,10 @@ scan_x (const char *text, const char *type)
 				snprintf (err_msg, COB_MINI_MAX,
 					_("literal contains invalid character '%c'"), c);
 				if (likely (literal_error == 0)) {
-					memcpy (plexbuff, text, currlen + 1);
-					plexbuff[currlen] = 0;
+					memcpy (plex_buff, text, currlen + 1);
+					plex_buff[currlen] = 0;
 				}
-				error_literal (type, plexbuff);
+				error_literal (type, plex_buff);
 				/* By not breaking immediately, we detect any following
 					invalid chars
 				*/
@@ -1244,8 +1231,8 @@ scan_x (const char *text, const char *type)
 		if (unlikely (literal_error != 0)) {
 			goto error;
 		}
-		sprintf ((char *)plexbuff, CB_FMT_LLU, val);
-		yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+		sprintf ((char *)plex_buff, CB_FMT_LLU, val);
+		yylval = cb_build_numeric_literal (0, (const void *)plex_buff, 0);
 
 	} else {
 
@@ -1262,10 +1249,10 @@ scan_x (const char *text, const char *type)
 				snprintf (err_msg, COB_MINI_MAX,
 					_("literal contains invalid character '%c'"), c);
 				if (likely (literal_error == 0)) {
-					memcpy (plexbuff, text, currlen + 1);
-					plexbuff[currlen] = 0;
+					memcpy (plex_buff, text, currlen + 1);
+					plex_buff[currlen] = 0;
 				}
-				error_literal (type, plexbuff);
+				error_literal (type, plex_buff);
 				/* By not breaking immediately, we detect any following
 					invalid chars
 				*/
@@ -1286,18 +1273,18 @@ scan_x (const char *text, const char *type)
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal does not have an even number of digits"));
 			if (likely (literal_error == 0)) {
-				memcpy (plexbuff, text, currlen + 1);
-				plexbuff[currlen] = 0;
+				memcpy (plex_buff, text, currlen + 1);
+				plex_buff[currlen] = 0;
 			}
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 		}
 		if (unlikely (literal_error != 0)) {
 			goto error;
 		}
 		if (type [0] != 'N') {
-			yylval = cb_build_alphanumeric_literal (plexbuff, (size_t)(dst - plexbuff));
+			yylval = cb_build_alphanumeric_literal (plex_buff, (size_t)(dst - plex_buff));
 		} else {
-			yylval = cb_build_national_literal (plexbuff, (size_t)(dst - plexbuff));
+			yylval = cb_build_national_literal (plex_buff, (size_t)(dst - plex_buff));
 		}
 	}
 
@@ -1326,15 +1313,15 @@ scan_z (const char *text, const char *type)
 		yylval = cb_error_node;
 		RETURN_TOK (LITERAL);
 	}
-	if (unlikely (currlen > plexsize)) {
-		plexsize = currlen;
-		plexbuff = cobc_realloc (plexbuff, plexsize);
+	if (unlikely (currlen > plex_size)) {
+		plex_size = currlen;
+		plex_buff = cobc_realloc (plex_buff, plex_size);
 	}
-	memcpy (plexbuff, text, currlen);
-	plexbuff[currlen - 1] = 0;
+	memcpy (plex_buff, text, currlen);
+	plex_buff[currlen - 1] = 0;
 
 	/* Count is correct here as the trailing quote is now a null */
-	yylval = cb_build_alphanumeric_literal (plexbuff, currlen);
+	yylval = cb_build_alphanumeric_literal (plex_buff, currlen);
 	if (type[0] == 'L') {
 		CB_LITERAL(yylval)->llit = 1;
 	}
@@ -1358,20 +1345,20 @@ scan_h (const char *text, const char *type)
 
 	/* currlen can include the terminating quote */
 	currlen = strlen (text);
-	memcpy (plexbuff, text, currlen + 1);
+	memcpy (plex_buff, text, currlen + 1);
 	if (type[1] != '#') {
 		currlen--;
-		plexbuff[currlen] = 0;
+		plex_buff[currlen] = 0;
 	}
 	if (unlikely (currlen > 16)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
 			  (int) currlen,  16);
-		error_literal ("hex", plexbuff);
+		error_literal ("hex", plex_buff);
 		goto error;
 	}
 
-	for (p = plexbuff; *p != 0; p++) {
+	for (p = plex_buff; *p != 0; p++) {
 		c = (int) *p;
 		if ('0' <= c && c <= '9') {
 			c = c - '0';
@@ -1382,7 +1369,7 @@ scan_h (const char *text, const char *type)
 		} else {
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal contains invalid character '%c'"), c);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 			/* By not breaking immediately, we detect any following
 				invalid chars
 			*/
@@ -1397,7 +1384,7 @@ scan_h (const char *text, const char *type)
 		if (val > UINT_MAX) {
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal exceeds limit %u"), UINT_MAX);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 		}
 	}
 
@@ -1406,8 +1393,8 @@ scan_h (const char *text, const char *type)
 	}
 
 	/* Duplication? */
-	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
-	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+	sprintf ((char *)plex_buff, CB_FMT_LLU, val);
+	yylval = cb_build_numeric_literal (0, (const void *)plex_buff, 0);
 
 	RETURN_TOK (LITERAL);
 
@@ -1445,23 +1432,23 @@ scan_b (const char *text, const char *type)
 			goto error; /* early exit possible as complete literal is consumed */
 		}
 	};
-	if (unlikely (currlen >= plexsize)) {
-		currlen = plexsize - 1;
+	if (unlikely (currlen >= plex_size)) {
+		currlen = plex_size - 1;
 	}
-	memcpy (plexbuff, text, currlen + 1);
+	memcpy (plex_buff, text, currlen + 1);
 	if (type[1] == 0) {
 		currlen--;
 	}
-	plexbuff[currlen] = 0;
+	plex_buff[currlen] = 0;
 	if (unlikely (currlen > 64)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal length %d exceeds %d characters"),
 			  (int) currlen, 64);
-		error_literal (type, plexbuff);
+		error_literal (type, plex_buff);
 		goto error;
 	}
 
-	for (p = plexbuff; *p != 0; p++) {
+	for (p = plex_buff; *p != 0; p++) {
 		c = (int) *p;
 		if (c == '0') {
 			c = 0;
@@ -1470,7 +1457,7 @@ scan_b (const char *text, const char *type)
 		} else {
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal contains invalid character '%c'"), c);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 			continue;
 		}
 
@@ -1481,7 +1468,7 @@ scan_b (const char *text, const char *type)
 		if (val > UINT_MAX) {
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal exceeds limit %u"), UINT_MAX);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 		}
 	}
 
@@ -1489,9 +1476,9 @@ scan_b (const char *text, const char *type)
 		goto error;
 	}
 
-	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
+	sprintf ((char *)plex_buff, CB_FMT_LLU, val);
 	/* FIXME: we should likely build a boolean literal ... */
-	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+	yylval = cb_build_numeric_literal (0, (const void *)plex_buff, 0);
 
 	RETURN_TOK (LITERAL);
 
@@ -1515,21 +1502,21 @@ scan_o (const char *text, const char *type)
 	}
 
 	currlen = strlen (text);
-	memcpy (plexbuff, text, currlen + 1);
+	memcpy (plex_buff, text, currlen + 1);
 	if (unlikely (currlen > 22)) {
 		snprintf (err_msg, COB_MINI_MAX,
 			  _("literal length %d exceeds %d characters"),
 			  (int) currlen, 22);
-		error_literal (type, plexbuff);
+		error_literal (type, plex_buff);
 		goto error;
 	}
 
-	for (p = plexbuff; *p != 0; p++) {
+	for (p = plex_buff; *p != 0; p++) {
 		c = (int) *p;
 		if (!('0' <= c && c <= '7')) {
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal contains invalid character '%c'"), c);
-			error_literal (type, plexbuff);
+			error_literal (type, plex_buff);
 			continue;
 		}
 
@@ -1540,15 +1527,15 @@ scan_o (const char *text, const char *type)
 	if (val > UINT_MAX) {
 		snprintf (err_msg, COB_MINI_MAX,
 			_("literal exceeds limit %u"), UINT_MAX);
-		error_literal (type, plexbuff);
+		error_literal (type, plex_buff);
 	}
 
 	if (literal_error) {
 		goto error;
 	}
 
-	sprintf ((char *)plexbuff, CB_FMT_LLU, val);
-	yylval = cb_build_numeric_literal (0, (const void *)plexbuff, 0);
+	sprintf ((char *)plex_buff, CB_FMT_LLU, val);
+	yylval = cb_build_numeric_literal (0, (const void *)plex_buff, 0);
 
 	RETURN_TOK (LITERAL);
 
@@ -1847,33 +1834,26 @@ cb_add_const_var (const char *name, cb_tree value)
 
 	/* Add constant item */
 	p78 = cobc_malloc (sizeof(struct cb_level_78));
-	p78->fld78 = f;
+	p78->fld_78 = f;
 	p78->prog = NULL;
 	p78->name_len = (cob_u32_t)strlen (f->name);
 	/* RXWRXW - Check this */
 	p78->chk_const = 0;
-	if (!const78ptr) {
+	if (!const_78_ptr) {
 		p78->last = p78;
 	} else {
-		p78->last = const78ptr->last;
+		p78->last = const_78_ptr->last;
 	}
-	p78->next = const78ptr;
-	p78->globnext = const78ptr;
-	const78ptr = p78;
-	if (globlev78ptr) {
-		globlev78ptr->last->globnext = const78ptr;
-	} else if (lev78ptr) {
-		lev78ptr->last->globnext = const78ptr;
+	p78->next = const_78_ptr;
+	p78->glob_next = const_78_ptr;
+	const_78_ptr = p78;
+	if (glob_lev_78_ptr) {
+		glob_lev_78_ptr->last->glob_next = const_78_ptr;
+	} else if (lev_78_ptr) {
+		lev_78_ptr->last->glob_next = const_78_ptr;
 	} else {
-		top78ptr = const78ptr;
+		top_78_ptr = const_78_ptr;
 	}
-}
-
-static void
-scan_options (const char *text, const unsigned int optype)
-{
-	COB_UNUSED (text);
-	COB_UNUSED (optype);
 }
 
 static void
@@ -1894,7 +1874,7 @@ scan_define_options (const char *text)
 	p = cobc_strdup (text);
 
 	q = &p[strlen(p)-1];
-	while(q != p 
+	while(q != p
 	   && (isspace(*q) || *q == '\n' || *q == '\r'))
 		q--;
 	q = q - 7;
@@ -1918,8 +1898,8 @@ scan_define_options (const char *text)
 
 	/* Check for already defined constant */
 	if (!override) {
-		for (p78 = top78ptr; p78; p78 = p78->globnext) {
-			if (strcasecmp (s, p78->fld78->name) == 0) {
+		for (p78 = top_78_ptr; p78; p78 = p78->glob_next) {
+			if (strcasecmp (s, p78->fld_78->name) == 0) {
 				cobc_free (p);
 				return;
 			}
@@ -1997,21 +1977,21 @@ void
 ylex_clear_all (void)
 {
 	/* Clear buffers after parsing all source elements */
-	if (picbuff2) {
-		cobc_free (picbuff2);
-		picbuff2 = NULL;
+	if (pic_buff2) {
+		cobc_free (pic_buff2);
+		pic_buff2 = NULL;
 	}
-	if (picbuff1) {
-		cobc_free (picbuff1);
-		picbuff1 = NULL;
+	if (pic_buff1) {
+		cobc_free (pic_buff1);
+		pic_buff1 = NULL;
 	}
-	if (plexbuff) {
-		cobc_free (plexbuff);
-		plexbuff = NULL;
+	if (plex_buff) {
+		cobc_free (plex_buff);
+		plex_buff = NULL;
 	}
-	plexsize = 0;
-	pic1size = 0;
-	pic2size = 0;
+	plex_size = 0;
+	pic1_size = 0;
+	pic2_size = 0;
 }
 
 void
@@ -2019,7 +1999,7 @@ ylex_call_destroy (void)
 {
 	/* Release flex buffers */
 	(void)yylex_destroy ();
-	const78ptr = NULL;
+	const_78_ptr = NULL;
 }
 
 void
@@ -2035,19 +2015,19 @@ cb_reset_78 (void)
 	struct cb_level_78	*p782;
 
 	/* Remove constant (78 level) items for current program */
-	for (p78 = lev78ptr; p78; ) {
+	for (p78 = lev_78_ptr; p78; ) {
 		p782 = p78->next;
 		cobc_free (p78);
 		p78 = p782;
 	}
-	lev78ptr = NULL;
-	for (p78 = globlev78ptr; p78; p78 = p78->next) {
+	lev_78_ptr = NULL;
+	for (p78 = glob_lev_78_ptr; p78; p78 = p78->next) {
 		p78->not_const = 0;
 	}
-	if (globlev78ptr) {
-		top78ptr = globlev78ptr;
+	if (glob_lev_78_ptr) {
+		top_78_ptr = glob_lev_78_ptr;
 	} else {
-		top78ptr = const78ptr;
+		top_78_ptr = const_78_ptr;
 	}
 }
 
@@ -2058,13 +2038,13 @@ cb_reset_global_78 (void)
 	struct cb_level_78	*p782;
 
 	/* Remove constant (78 level) items for top program */
-	for (p78 = globlev78ptr; p78; ) {
+	for (p78 = glob_lev_78_ptr; p78; ) {
 		p782 = p78->next;
 		cobc_free (p78);
 		p78 = p782;
 	}
-	globlev78ptr = NULL;
-	top78ptr = const78ptr;
+	glob_lev_78_ptr = NULL;
+	top_78_ptr = const_78_ptr;
 }
 
 void
@@ -2074,40 +2054,40 @@ cb_add_78 (struct cb_field *f)
 
 	/* Add a constant (78 level) item */
 	p78 = cobc_malloc (sizeof(struct cb_level_78));
-	p78->fld78 = f;
+	p78->fld_78 = f;
 	p78->prog = current_program;
 	p78->name_len = (cob_u32_t)strlen (f->name);
 	if (f->flag_is_global) {
-		if (!globlev78ptr) {
+		if (!glob_lev_78_ptr) {
 			p78->last = p78;
 		} else {
-			p78->last = globlev78ptr->last;
+			p78->last = glob_lev_78_ptr->last;
 		}
-		p78->last->globnext = const78ptr;
-		p78->next = globlev78ptr;
-		p78->globnext = globlev78ptr;
+		p78->last->glob_next = const_78_ptr;
+		p78->next = glob_lev_78_ptr;
+		p78->glob_next = glob_lev_78_ptr;
 		p78->chk_const = 1;
-		globlev78ptr = p78;
-		if (lev78ptr) {
-			lev78ptr->last->globnext = globlev78ptr;
+		glob_lev_78_ptr = p78;
+		if (lev_78_ptr) {
+			lev_78_ptr->last->glob_next = glob_lev_78_ptr;
 		} else {
-			top78ptr = globlev78ptr;
+			top_78_ptr = glob_lev_78_ptr;
 		}
 	} else {
-		if (!lev78ptr) {
+		if (!lev_78_ptr) {
 			p78->last = p78;
 		} else {
-			p78->last = lev78ptr->last;
+			p78->last = lev_78_ptr->last;
 		}
-		if (globlev78ptr) {
-			p78->last->globnext = globlev78ptr;
+		if (glob_lev_78_ptr) {
+			p78->last->glob_next = glob_lev_78_ptr;
 		} else {
-			p78->last->globnext = const78ptr;
+			p78->last->glob_next = const_78_ptr;
 		}
-		p78->next = lev78ptr;
-		p78->globnext = lev78ptr;
-		lev78ptr = p78;
-		top78ptr = lev78ptr;
+		p78->next = lev_78_ptr;
+		p78->glob_next = lev_78_ptr;
+		lev_78_ptr = p78;
+		top_78_ptr = lev_78_ptr;
 	}
 }
 
@@ -2117,15 +2097,15 @@ check_level_78 (const char *name)
 	const struct cb_level_78	*p78;
 
 	/* Check against a current constant (78 level) */
-	for (p78 = lev78ptr; p78; p78 = p78->next) {
-		if (strcasecmp (name, p78->fld78->name) == 0) {
-			return p78->fld78;
+	for (p78 = lev_78_ptr; p78; p78 = p78->next) {
+		if (strcasecmp (name, p78->fld_78->name) == 0) {
+			return p78->fld_78;
 		}
 	}
 	/* Check against a global constant (78 level) */
-	for (p78 = globlev78ptr; p78; p78 = p78->next) {
-		if (strcasecmp (name, p78->fld78->name) == 0) {
-			return p78->fld78;
+	for (p78 = glob_lev_78_ptr; p78; p78 = p78->next) {
+		if (strcasecmp (name, p78->fld_78->name) == 0) {
+			return p78->fld_78;
 		}
 	}
 	return NULL;

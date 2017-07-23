@@ -157,7 +157,7 @@ static void	switch_to_buffer	(const int, const char *,
 					 const YY_BUFFER_STATE);
 static void	check_listing		(const char *, const unsigned int);
 static void	skip_to_eol		(void);
-static void display_finish		(void);
+static void	display_finish		(void);
 static void	set_print_replace_list	(struct cb_replace_list *list);
 static void	get_new_listing_file	(void);
 
@@ -586,7 +586,7 @@ CONTROL_STATEMENT_STATE>{
 
 <CONTROL_STATEMENT_STATE>{
   "SOURCE"		{ return SOURCE; }
-  "NOSOURCE"	{ return NOSOURCE; }
+  "NOSOURCE"		{ return NOSOURCE; }
   "LIST"		{ return LIST; }
   "NOLIST"		{ return NOLIST; }
   "MAP"			{ return MAP; }
@@ -1912,12 +1912,14 @@ skip_to_eol (void)
 }
 
 static void
-display_finish (void) {
-	int msglen;
+display_finish (void)
+{
+	int	msg_len;
+	
 	if (!plex_skip_input) {
-		msglen = strlen (msg) - 1;
-		while (msglen != 0 && msg[msglen] == ' ') {
-			msg[msglen--] = 0;
+		msg_len = strlen (msg) - 1;
+		while (msg_len != 0 && msg[msg_len] == ' ') {
+			msg[msg_len--] = 0;
 		}
 		puts (msg);
 		msg[0] = 0;
