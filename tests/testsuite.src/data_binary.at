@@ -157,8 +157,8 @@ fe4964b459cf0cb2
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
-                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123
@@ -344,8 +344,8 @@ b20ccf59b46449fe
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
-                   -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123
@@ -527,8 +527,8 @@ fe4964b459cf0cb2
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
-                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123
@@ -713,8 +713,8 @@ b20ccf59b46449fe
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
-                   -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123
@@ -897,8 +897,8 @@ fe4964b459cf0cb2
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
-                   -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123
@@ -1083,8 +1083,8 @@ b20ccf59b46449fe
 sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
-                   -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+                   -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [1
 12
 123

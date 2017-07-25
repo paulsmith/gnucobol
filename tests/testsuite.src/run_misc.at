@@ -924,8 +924,8 @@ AT_CHECK([./prog], [0],
 00000009
 00000004
 ])
-AT_CHECK([$COMPILE -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COMPILE -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
+AT_CHECK([./prog2], [0],
 [00000001
 00000009
 00000004

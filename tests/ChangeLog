@@ -1,4 +1,9 @@
 
+2017-07-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_misc.at, testsuite.src/data_binary.at: changed
+	  subsequent compilations in same folder to use a different output name
+
 2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at, Makefile.am: added testsuite.src/syn_refmod.at
