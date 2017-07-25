@@ -3902,7 +3902,9 @@ process_filtered (const char *cmd, struct filename *fn)
 
 	cobc_free (read_buffer);
 	cobc_free (search_pattern);
-	cobc_free (search_pattern2);
+	if (search_pattern2) {
+		cobc_free (search_pattern2);
+	}
 
 	if (!output_name) cobc_free (output_name_temp);
 
@@ -4216,8 +4218,8 @@ set_listing_header_none (void)
 static void
 set_standard_title (void)
 {
-	char		version[20];
-	sprintf (version, "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
+	char		version[30];
+	snprintf (version, sizeof (version), "%s.%d", PACKAGE_VERSION, PATCH_LEVEL);
 	snprintf (cb_listing_title, 80, "%s %s",
 		PACKAGE_NAME,
 		version);
@@ -4446,7 +4448,8 @@ set_category (int category, int usage, char *type)
 	}
 }
 
-static void
+/* terminate string at first trailing space and return its length */
+static int
 terminate_str_at_first_trailing_space (char * const str)
 {
 	int	i;
@@ -4454,6 +4457,7 @@ terminate_str_at_first_trailing_space (char * const str)
 	for (i = strlen (str) - 1; i && isspace ((unsigned char)str[i]); i--) {
 		str[i] = '\0';
 	}
+	return i;
 }
 
 static void
@@ -4758,7 +4762,7 @@ xref_print (struct cb_xref *xref, const enum xref_type type, struct cb_xref *xre
 		pd_off += sprintf (print_data + pd_off, "  %-6d", elem->line);
 		if (++cnt >= maxcnt) {
 			cnt = 0;
-			terminate_str_at_first_trailing_space (print_data);
+			(void)terminate_str_at_first_trailing_space (print_data);
 			print_program_data (print_data);
 			if (elem->next) {
 				pd_off = sprintf (print_data, "%38.38s", " ");
@@ -4766,7 +4770,7 @@ xref_print (struct cb_xref *xref, const enum xref_type type, struct cb_xref *xre
 		}
 	}
 	if (cnt) {
-		terminate_str_at_first_trailing_space (print_data);
+		(void)terminate_str_at_first_trailing_space (print_data);
 		print_program_data (print_data);
 	}
 }
@@ -5366,9 +5370,9 @@ line_has_listing_statement (char *line, const enum cb_format source_format)
 			}
 		}
 		snprintf (print_data, size, "%s", statement_start);
-		terminate_str_at_first_trailing_space (print_data);
-		size = strlen (print_data);
-		snprintf (cb_listing_title, size, "%s", print_data);
+		size = terminate_str_at_first_trailing_space (print_data);
+		print_data[size] = 0;
+		snprintf (cb_listing_title, sizeof (cb_listing_title), "%s", print_data);
 		force_new_page_for_next_line ();
 	} else {
 		if (!strncasecmp (statement_start, "EJECT", 5)) {
@@ -5404,7 +5408,7 @@ print_fixed_line (const int line_num, char pch, char *line)
 			format_str = "%06d%c %-72.72s";
 		}
 		sprintf (print_data, format_str, line_num, pch, line + i);
-		terminate_str_at_first_trailing_space (print_data);
+		(void)terminate_str_at_first_trailing_space (print_data);
 		print_program_data (print_data);
 
 		if (cb_text_column == 72) {
@@ -5429,7 +5433,7 @@ print_free_line (const int line_num, char pch, char *line)
 			format_str = "%06d%c %-72.72s";
 		}
 		sprintf (print_data, format_str, line_num, pch, line + i);
-		terminate_str_at_first_trailing_space (print_data);
+		(void)terminate_str_at_first_trailing_space (print_data);
 		print_program_data (print_data);
 		pch = '+';
 	}
@@ -5497,7 +5501,7 @@ print_line (struct list_files *cfile, char *line, int line_num, int in_copy)
 			}
 		}
 
-		terminate_str_at_first_trailing_space (line);
+		(void)terminate_str_at_first_trailing_space (line);
 		if (cfile->source_format == CB_FORMAT_FIXED) {
 			print_fixed_line (line_num, pch, line);
 		} else { /* CB_FORMAT_FREE */
@@ -5911,7 +5915,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	}
 
 	/* Trim the string to search and replace */
-	terminate_str_at_first_trailing_space (rfp);
+	(void)terminate_str_at_first_trailing_space (rfp);
 	while (*rfp && isspace (*rfp)) {
 		rfp++;
 	}

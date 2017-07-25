@@ -19,10 +19,9 @@
 */
 
 
-/* COB_SYSTEM_GEN (external name, number of parameters, internal name) */
+/* COB_SYSTEM_GEN (external name, number of parameters min, max, internal name) */
 
 COB_SYSTEM_GEN ("SYSTEM",		1, 1, cob_sys_system)
-
 
 COB_SYSTEM_GEN ("CBL_AND",		3, 3, cob_sys_and)
 COB_SYSTEM_GEN ("CBL_CHANGE_DIR",	1, 1, cob_sys_change_dir)

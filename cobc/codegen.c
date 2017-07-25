@@ -7481,9 +7481,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* ANY LENGTH items */
-	i = 0;
 	anyseen = 0;
-	for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
+	for (l = parameter_list; l; l = CB_CHAIN (l)) {
 		f = cb_code_field (CB_VALUE (l));
 		if (f->flag_any_length) {
 			anyseen = 1;

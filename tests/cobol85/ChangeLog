@@ -1,4 +1,10 @@
 
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* report.pl: activated runtime checks where possible to prevent
+	  loops and hard aborts for not-working environments, for example
+	  when running ISAM tests with a no-ISAM build
+
 2017-07-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added some hacks for make not supporting $> and $(D>),

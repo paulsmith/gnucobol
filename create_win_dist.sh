@@ -54,7 +54,8 @@ mkdir $WINTMP
 cp -p -r --parents $EXTDISTDIR $WINTMP || exit 1
 
 # Add content only necessary for windows dist zip
-cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR || exit 2
+cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
+cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win || exit 2
 
 olddir=$(pwd)
 cd $WINTMP/$EXTDISTDIR || exit 3
@@ -84,12 +85,14 @@ for file in ./cobc/pplex.c ./cobc/scanner.c; do
 #	  $file > $file.tmp && mv -f $file.tmp $file
 	sed -i -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' $file
 done
-cd $olddir # back in win-dist
+cd .. # back in win-dist
 
 
 # Create windows dist zip
 rm -f $EXTDISTDIR"_win.zip"
-zip -rq ../../$EXTDISTDIR"_win.zip" $EXTDISTDIR
+zip -rq $olddir/$EXTDISTDIR"_win.zip" $EXTDISTDIR
+
+cd $olddir # back in starting directory
 
 # Remove temporary folder
 rm -r -f $WINTMP

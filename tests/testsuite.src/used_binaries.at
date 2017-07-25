@@ -18,7 +18,7 @@
 
 ### GnuCOBOL Test Suite
 
-AT_SETUP([Compiler outputs])
+AT_SETUP([Compiler outputs (general)])
 AT_KEYWORDS([runmisc cobc])
 
 AT_DATA([prog.cob],[
@@ -36,18 +36,43 @@ AT_CHECK([$COBC -C prog.cob], [0], [], [])
 AT_CHECK([$COBC -c prog.c], [0], [], [])
 AT_CHECK([$COBC prog.$COB_OBJECT_EXT])
 AT_CHECK([$COBCRUN prog], [0], [bluBb], [])
-AT_CHECK([$COBC -S prog.cob], [0], [], [])
-AT_CHECK([$COBC prog.s])
-AT_CHECK([$COBCRUN prog], [0], [bluBb], [])
 AT_CHECK([$COBC -x -C prog.cob], [0], [], [])
 AT_CHECK([$COBC -x -c prog.c], [0], [], [])
 AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT])
-AT_CHECK([./prog], [0], [bluBb], [])
-AT_CHECK([$COBC -x -S prog.cob], [0], [], [])
-AT_CHECK([$COBC -x prog.s])
-AT_CHECK([./prog], [0], [bluBb], [])
 AT_CHECK([$COBC -E prog.cob], [0], [], [])
-AT_CHECK([test -f prog.i], [0], [], [])
+AT_CHECK([$COBC -x prog.i], [0], [], [])
+AT_CHECK([./prog], [0], [bluBb], [])
+AT_CLEANUP
+
+
+AT_SETUP([Compiler outputs (assembler)])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob],[
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 BLA PIC X(5) VALUE 'bluBb'.
+        PROCEDURE DIVISION.
+        DISPLAY BLA NO ADVANCING END-DISPLAY
+        STOP RUN.
+])
+
+AT_CHECK([$COBC -S prog.cob], [0], [], [])
+AT_CHECK([test -f prog.s], [0], [], [],
+# Previous test "failed" --> prog.s not available --> likely a VS build
+[AT_CHECK([test -f prog.asm], [0], [], [])],
+# Previous test "passed" --> prog.s is available, test compilation and run
+[AT_CHECK([$COBC prog.s])
+ AT_CHECK([$COBCRUN prog], [0], [bluBb], [])])
+AT_CHECK([$COBC -x -S prog.cob], [0], [], [])
+AT_CHECK([test -f prog.s], [0], [], [],
+# Previous test "failed" --> prog.s not available --> likely a VS build
+[AT_CHECK([test -f prog.asm], [0], [], [])],
+# Previous test "passed" --> prog.s is available, test compilation and run
+[AT_CHECK([$COBC -x prog.s])
+ AT_CHECK([./prog], [0], [bluBb], [])])
 AT_CLEANUP
 
 

@@ -148,7 +148,6 @@ $comp_only{DB205A} = 1;
 
 # Programs that do not produce any meaningful test results
 # However they must execute successfully
-
 my %no_output;
 $no_output{NC110M} = 1;
 $no_output{NC214M} = 1;
@@ -170,6 +169,16 @@ $no_output{DB305M} = 1;
 $no_output{IF402M} = 1;
 
 $cobc_flags{SM206A} = "-fdebugging-line";
+
+# Programs that won't run correctly with enabled runtime checks
+# TODO for later: only deactivate specific checks by -fno-ec-...
+my %no_debug;
+$no_debug{DB101A} = 1;
+$no_debug{DB104A} = 1;
+$no_debug{DB201A} = 1;
+$no_debug{DB202A} = 1;
+$no_debug{DB203A} = 1;
+$no_debug{DB204A} = 1;
 
 # Programs that need to be "visual" inspected
 # NC113M: inspected additional to normal tests for output of hex values
@@ -228,6 +237,9 @@ foreach $in (sort (glob("*.{CBL,SUB}"))) {
 	}
 	if ($exe =~ /^SM/) {
 		$compile_current = "$compile_current -I ../copy";
+	}
+	if (!$no_debug{$exe}) {
+		$compile_current = "$compile_current -debug";
 	}
 	$compile_current = "$compile_current $in";
 	if ($comp_only{$exe}) {

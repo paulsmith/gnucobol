@@ -1,4 +1,8 @@
 
+2017-07-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c: moved cob_sys_get_char and added parts for !COB_GEN_SCREENIO
+
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h [__MINGW32__]: added missing defines
