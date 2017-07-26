@@ -8909,6 +8909,12 @@ disp_attr:
 	check_repeated ("UNDERLINE", SYN_CLAUSE_16, &check_duplicate);
 	set_dispattr (COB_SCREEN_UNDERLINE);
   }
+| COLOR _is num_id_or_lit
+  {
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_17, &check_duplicate);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
+	CB_PENDING ("COLOR");
+  }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
 	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_17, &check_duplicate);
