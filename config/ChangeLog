@@ -1,4 +1,8 @@
 
+2017-07-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* mf.words: updated to Visual COBOL 3.0.
+
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: allow GnuCOBOL specific registers for lax dialect
