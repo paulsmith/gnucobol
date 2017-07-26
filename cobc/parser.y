@@ -1765,6 +1765,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token CODE_SET			"CODE-SET"
 %token COLLATING
 %token COL
+%token COLOR
 %token COLS
 %token COLUMN
 %token COLUMNS
@@ -6464,6 +6465,12 @@ screen_option:
   {
 	set_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
   }
+| SIZE _is integer
+  {
+	/* set_screen_attr ("SIZE", COB_SCREEN_SIZE); */
+	CB_PENDING ("SIZE clause");
+	current_field->size = cb_get_int ($3);
+  }
 | UNDERLINE
   {
 	set_screen_attr ("UNDERLINE", COB_SCREEN_UNDERLINE);
@@ -6535,6 +6542,17 @@ screen_option:
 | column_or_col screen_col_number
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_17, &check_pic_duplicate);
+  }
+| COLOR _is num_id_or_lit
+  {
+#if 0 /* TODO: implement, and add reverse to BACKGROUND/FOREGROUND-COLOR */
+	check_repeated ("COLOR", SYN_CLAUSE_19, &check_pic_duplicate);
+	set_screen_attr_with_conflict ("COLOR", COB_SCREEN_COLOR,
+				       "BACKGROUND-COLOR", COB_SCREEN_BACKGROUND_COLOR);
+	set_screen_attr_with_conflict ("COLOR", COB_SCREEN_COLOR,
+				       "FOREGROUND-COLOR", FOREGROUND_COLOR);
+#endif
+	CB_PENDING ("COLOR clause");
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
@@ -7387,6 +7405,17 @@ accept_body:
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
   }
+| identifier FROM SCREEN
+  {
+	  check_duplicate = 0;
+	  check_line_col_duplicate = 0;
+	  line_column = NULL;
+  }
+  accept_from_screen_clauses
+  {
+	cobc_cs_check = 0;
+	CB_PENDING ("ACCEPT FROM SCREEN");
+  }
 | identifier FROM lines_or_number
   {
 	cb_emit_accept_line_or_col ($1, 0);
@@ -7505,6 +7534,17 @@ accept_clause:
 			&check_duplicate);
 	set_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
   }
+;
+
+accept_from_screen_clauses:
+  accept_from_screen_clause
+| accept_from_screen_clauses accept_from_screen_clause
+;
+
+accept_from_screen_clause:
+  /* FIXME: could be optional FROM instead of optional AT */
+  at_line_column
+| SIZE _is pos_num_id_or_lit /* ignored, as ACCEPT FROM is pending */
 ;
 
 lines_or_number:
@@ -7671,12 +7711,12 @@ accp_attr:
 	set_dispattr_with_conflict ("SECURE", COB_SCREEN_SECURE,
 				    "NO-ECHO", COB_SCREEN_NO_ECHO);
   }
-| PROTECTED SIZE _is num_id_or_lit
+| PROTECTED SIZE _is positive_id_or_lit
   {
 	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
 	set_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
   }
-| SIZE _is num_id_or_lit
+| SIZE _is pos_num_id_or_lit
   {
 	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
 	set_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
@@ -7703,6 +7743,12 @@ accp_attr:
 	check_repeated ("UPPER", SYN_CLAUSE_25, &check_duplicate);
 	set_dispattr_with_conflict ("UPPER", COB_SCREEN_UPPER,
 				    "LOWER", COB_SCREEN_LOWER);
+  }
+| COLOR _is num_id_or_lit
+  {
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_26, &check_duplicate);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_27, &check_duplicate);
+	CB_PENDING ("COLOR");
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
@@ -12808,6 +12854,8 @@ num_id_or_lit:
   }
 ;
 
+/* literal not allowing zero */
+/* FIXME: expressions would be allowed in most cases, too */
 positive_id_or_lit:
   sub_identifier
   {
@@ -12816,6 +12864,8 @@ positive_id_or_lit:
 | report_integer
 ;
 
+/* literal allowing zero */
+/* FIXME: expressions would be allowed in most cases, too */
 pos_num_id_or_lit:
   sub_identifier
   {

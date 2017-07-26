@@ -1,4 +1,9 @@
 
+2017-07-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c: added clauses COLOR and SIZE as PENDING
+	* parser.y: added ACCEPT FROM SCREEN as PENDING
+
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: fixed memory overlap for long strings in listing title

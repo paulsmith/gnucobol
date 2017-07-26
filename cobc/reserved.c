@@ -450,7 +450,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COLLATING",		0, 0, COLLATING,		/* 2002 */
 				0, 0
   },
-  { "COLOR",			0, 0, -1,			/* Extension */
+  { "COLOR",			0, 0, COLOR,			/* Extension */
 				0, 0
   },
   { "COLS",			0, 0, COLS,			/* 2002 */
