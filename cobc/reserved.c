@@ -568,7 +568,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "CONVERSION",		0, 1, CONVERSION,		/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "CONVERTING",		0, 0, CONVERTING,		/* 2002 */
 				0, 0
@@ -1201,7 +1201,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "LOWER",			0, 1, LOWER,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "LOWLIGHT",			0, 0, LOWLIGHT,			/* 2002 (C/S) */
 				0, 0
@@ -1477,8 +1477,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PROPERTY",			0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "PROTECTED",		0, 0, PROTECTED,		/* Extension */
-				0, CB_CS_WITH
+  { "PROTECTED",		0, 0, PROTECTED,		/* Extension PROTECTED SIZE */
+				0, CB_CS_ACCEPT
   },
   { "PROTOTYPE",		0, 0, -1,			/* 2002 */
 				0, 0
@@ -1643,7 +1643,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "SCROLL",			0, 1, SCROLL,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT | CB_CS_DISPLAY
   },
   { "SD",			0, 0, SD,			/* 2002 */
 				0, 0
@@ -1891,7 +1891,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "TIME-OUT",			0, 1, TIME_OUT,			/* Ext (C/S) */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "TIMES",			0, 0, TIMES,			/* 2002 */
 				0, 0
@@ -1981,7 +1981,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "UPPER",			0, 1, UPPER,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "USAGE",			0, 0, USAGE,			/* 2002 */
 				0, 0
@@ -2044,7 +2044,7 @@ static struct cobc_reserved default_reserved_words[] = {
 					0, 0
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
-				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY
+				0, 0
   },
   { "WORDS",			0, 0, WORDS,			/* 85 */
 				0, 0

@@ -1171,7 +1171,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACCEPT WITH AUTO / TAB])
-AT_KEYWORDS([AUTO-SKIP AUTOTERMINATE misc extensions])
+AT_KEYWORDS([AUTO-SKIP AUTOTERMINATE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1195,8 +1195,30 @@ AT_CHECK([$COMPILE_ONLY -faccept-auto prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([ACCEPT WITH LOWER / UPPER])
+AT_KEYWORDS([misc extensions screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X(05).
+       PROCEDURE        DIVISION.
+           ACCEPT X WITH LOWER     END-ACCEPT.
+           ACCEPT X WITH UPPER     END-ACCEPT.
+           ACCEPT X      LOWER
+           ACCEPT X      UPPER
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([ACCEPT WITH SIZE])
-AT_KEYWORDS([PROTECTED SIZE misc extensions])
+AT_KEYWORDS([PROTECTED SIZE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1210,7 +1232,12 @@ AT_DATA([prog.cob], [
            ACCEPT X WITH           SIZE IS 1 END-ACCEPT.
            ACCEPT X WITH PROTECTED SIZE    2 END-ACCEPT.
            ACCEPT X WITH PROTECTED SIZE IS 3 END-ACCEPT.
-           ACCEPT X WITH           SIZE    Y END-ACCEPT.
+           ACCEPT X                SIZE    Y END-ACCEPT.
+           ACCEPT X                SIZE    0
+           ACCEPT X                SIZE IS 1
+           ACCEPT X      PROTECTED SIZE    2
+           ACCEPT X      PROTECTED SIZE IS 3
+           ACCEPT X                SIZE    Y
            STOP RUN.
 ])
 
@@ -1220,7 +1247,7 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY WITH SIZE])
-AT_KEYWORDS([SIZE misc extensions])
+AT_KEYWORDS([SIZE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1233,6 +1260,9 @@ AT_DATA([prog.cob], [
            DISPLAY X AT 0101 WITH SIZE    5 END-DISPLAY.
            DISPLAY X AT 0101 WITH SIZE IS 6 END-DISPLAY.
            DISPLAY X AT 0101 WITH SIZE IS Y END-DISPLAY.
+           DISPLAY X AT 0101      SIZE    5 END-DISPLAY.
+           DISPLAY X AT 0101      SIZE IS 6 END-DISPLAY.
+           DISPLAY X AT 0101      SIZE IS Y END-DISPLAY.
            STOP RUN.
 ])
 
