@@ -1745,6 +1745,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token BLINK
 %token BLOCK
 %token BOTTOM
+%token BOX
 %token BOXED
 %token BY
 %token BYTE_LENGTH		"BYTE-LENGTH"
@@ -1938,6 +1939,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token HEADING
 %token HIGHLIGHT
 %token HIGH_VALUE		"HIGH-VALUE"
+%token ICON
 %token ID
 %token IDENTIFICATION
 %token IF
@@ -2216,6 +2218,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TIME
 %token TIME_OUT			"TIME-OUT"
 %token TIMES
+%token TITLE
 %token TO
 %token TOK_AMPER		"&"
 %token TOK_CLOSE_PAREN		")"
@@ -6434,7 +6437,7 @@ screen_option:
 	set_screen_attr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
 				       "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
-| BLANK SCREEN
+| BLANK SCREEN	/* FIXME: this SCREEN is optional! */
   {
 	set_screen_attr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
 				       "BLANK LINE", COB_SCREEN_BLANK_LINE);
@@ -6630,7 +6633,7 @@ eol:
 
 eos:
   EOS
-| _end_of SCREEN
+| _end_of SCREEN /* FIXME: this SCREEN is optional! */
 ;
 
 plus_plus:
@@ -8605,6 +8608,7 @@ display_body:
 	cb_emit_command_line ($1);
   }
 | screen_or_device_display _display_exception_phrases
+| display_message_box
 | display_window
 | display_floating_window
 | display_initial_window
@@ -8736,6 +8740,46 @@ crt_under:
 | CRT_UNDER
 ;
 
+display_message_box:
+  MESSAGE _box x_list
+  {
+	CB_UNFINISHED_X (CB_TREE(current_statement), "DISPLAY MESSAGE");
+	upon_value = NULL;  
+  }
+  _display_message_clauses
+  {
+	/* for now: minimal support for display and prompt only */
+	if (upon_value) {
+		cb_emit_display (CB_LIST_INIT (upon_value), NULL, NULL, NULL,
+				 NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+	}
+	cb_emit_display ($3, NULL, NULL, NULL,
+			 NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+	cb_emit_accept (cb_null, NULL, NULL);
+  }
+;
+
+_display_message_clauses:
+  /* empty */
+| display_message_clauses
+;
+
+display_message_clauses:
+  display_message_clause
+| display_message_clauses display_message_clause
+;
+
+display_message_clause:
+  TITLE _is_equal x
+  {
+	upon_value = $3;
+  }
+| TYPE _is_equal x
+| ICON _is_equal x
+| DEFAULT _is_equal x
+| return_give x
+;
+
 display_window:
   sub_or_window
   {
@@ -8842,6 +8886,7 @@ display_window_clause:
 	/* TODO: store */
   }
 | at_line_column
+| TITLE _is x
 | shadow_boxed
 | no_scroll_wrap
 | _with disp_attr
@@ -13745,13 +13790,14 @@ _as:		| AS ;
 _at:		| AT ;
 _before:	| BEFORE ;
 _binary:	| BINARY ;
+_box:		| BOX ;
 _by:		| BY ;
 _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
 _contains:	| CONTAINS ;
 _controls:	| CONTROLS ;
 _data:		| DATA ;
-_end_of:	| END _of ;
+_end_of:	| _to END _of ;
 _file:		| TOK_FILE ;
 _final:		| FINAL ;
 _for:		| FOR ;
@@ -13763,6 +13809,7 @@ _indicate:	| INDICATE ;
 _initial:	| TOK_INITIAL ;
 _into:		| INTO ;
 _is:		| IS ;
+_is_equal:		| IS | TOK_EQUAL;
 _is_are:	| IS | ARE ;
 _is_in:		| IS | IN ;
 _key:		| KEY ;

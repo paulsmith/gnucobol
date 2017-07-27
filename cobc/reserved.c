@@ -382,6 +382,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BOTTOM",			0, 0, BOTTOM,			/* 2002 */
 				0, 0
   },
+  { "BOX",		0, 0, BOX,		/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "BOXED",		0, 0, BOXED,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
@@ -1023,6 +1026,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "I-O-CONTROL",		0, 0, I_O_CONTROL,		/* 2002 */
 				0, 0
   },
+  { "ICON",			0, 0, ICON,			/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "ID",			0, 0, ID,			/* Extension */
 				0, 0
   },
@@ -1426,7 +1432,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "POP-UP",		0, 0, POP_UP,		/* ACU extension */
-				0, 0
+				0, CB_CS_DISPLAY
   },
   { "POSITION",			0, 0, POSITION,			/* 85 */
 				0, 0
@@ -1910,6 +1916,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "TIMES",			0, 0, TIMES,			/* 2002 */
 				0, 0
+  },
+  { "TITLE",			0, 0, TITLE,			/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "TO",			0, 0, TO,			/* 2002 */
 				0, 0
