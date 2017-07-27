@@ -1844,7 +1844,7 @@ extern void		cb_emit_delete_file (cb_tree);
 
 extern void		cb_emit_display_window (cb_tree, cb_tree, cb_tree,
 					 cb_tree, struct cb_attr_struct *);
-extern void		cb_emit_close_window (cb_tree);
+extern void		cb_emit_close_window (cb_tree, cb_tree);
 extern void		cb_emit_destroy (cb_tree);
 
 extern void		cb_emit_display (cb_tree, cb_tree,

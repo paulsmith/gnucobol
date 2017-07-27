@@ -8403,11 +8403,7 @@ close_window:
   }
   identifier _close_display_option
   {
-	if ($4) {
-		cb_emit_close_window ($3);
-	} else {
-		cb_emit_destroy ($3);
-	}
+	cb_emit_close_window ($3, $4);
   }
 ;
 

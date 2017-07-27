@@ -890,7 +890,7 @@ usage_is_window_handle (cb_tree x)
 		return 1;
 	}
 	if (f->usage == CB_USAGE_DISPLAY &&
-		f->category == CB_CATEGORY_ALPHANUMERIC &&
+		f->pic->category == CB_CATEGORY_ALPHANUMERIC &&
 		f->size == 10){
 		return 1;
 	}
@@ -6161,12 +6161,16 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 */
 
 void
-cb_emit_close_window (cb_tree handle)
+cb_emit_close_window (cb_tree handle, cb_tree no_display)
 {
 	if (handle && !usage_is_window_handle (handle)) {
 		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
-	cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
+	if (no_display) {
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
+	} else {
+		cb_emit_destroy (handle);
+	}
 }
 
 
