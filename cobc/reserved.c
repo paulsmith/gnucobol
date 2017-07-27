@@ -549,6 +549,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COMPUTATIONAL-5",		0, 0, COMP_5,			/* Extension */
 				0, 0
   },
+  { "COMPUTATIONAL-6",		0, 0, COMP_6,			/* Extension */
+				0, 0
+  },
 	/* Note EBCDIC! */
 #ifndef	COB_EBCDIC_MACHINE
   { "COMPUTATIONAL-X",		0, 0, COMP_X,			/* Extension */
