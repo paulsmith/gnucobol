@@ -2305,7 +2305,6 @@ cobc_print_usage (char * prog)
 	putchar ('\t');
 	puts (_("where <support> is one of the following:"));
 	puts ("\t'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'");
-	putchar ('\t');
 	cobc_print_flag ("not-reserved", _("word to be taken out of the reserved words list"), 1, _("<word>"), NULL);
 	cobc_print_flag ("reserved", _("word to be added to reserved words list"), 1, _("<word>"), NULL);
 	cobc_print_flag ("reserved", _("word to be added to reserved words list as alias"), 1, _("<word>:<alias>"), NULL);

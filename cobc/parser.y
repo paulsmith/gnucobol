@@ -1729,6 +1729,9 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token AUTOMATIC
 %token AWAY_FROM_ZERO		"AWAY-FROM-ZERO"
 %token BACKGROUND_COLOR		"BACKGROUND-COLOR"
+%token BACKGROUND_HIGH		"BACKGROUND-HIGH"
+%token BACKGROUND_LOW		"BACKGROUND-LOW"
+%token BACKGROUND_STANDARD		"BACKGROUND-STANDARD"
 %token BASED
 %token BEFORE
 %token BELL
@@ -1742,6 +1745,8 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token BLINK
 %token BLOCK
 %token BOTTOM
+%token BOX
+%token BOXED
 %token BY
 %token BYTE_LENGTH		"BYTE-LENGTH"
 %token CALL
@@ -1765,6 +1770,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token CODE_SET			"CODE-SET"
 %token COLLATING
 %token COL
+%token COLOR
 %token COLS
 %token COLUMN
 %token COLUMNS
@@ -1933,6 +1939,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token HEADING
 %token HIGHLIGHT
 %token HIGH_VALUE		"HIGH-VALUE"
+%token ICON
 %token ID
 %token IDENTIFICATION
 %token IF
@@ -2155,6 +2162,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SEQUENTIAL
 %token SET
 %token SEVENTY_EIGHT		"78"
+%token SHADOW
 %token SHARING
 %token SIGN
 %token SIGNED
@@ -2210,6 +2218,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TIME
 %token TIME_OUT			"TIME-OUT"
 %token TIMES
+%token TITLE
 %token TO
 %token TOK_AMPER		"&"
 %token TOK_CLOSE_PAREN		")"
@@ -2278,6 +2287,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token WORD			"Identifier"
 %token WORDS
 %token WORKING_STORAGE		"WORKING-STORAGE"
+%token WRAP
 %token WRITE
 %token YYYYDDD
 %token YYYYMMDD
@@ -6427,7 +6437,7 @@ screen_option:
 	set_screen_attr_with_conflict ("BLANK LINE", COB_SCREEN_BLANK_LINE,
 				       "BLANK SCREEN", COB_SCREEN_BLANK_SCREEN);
   }
-| BLANK SCREEN
+| BLANK SCREEN	/* FIXME: this SCREEN is optional! */
   {
 	set_screen_attr_with_conflict ("BLANK SCREEN", COB_SCREEN_BLANK_SCREEN,
 				       "BLANK LINE", COB_SCREEN_BLANK_LINE);
@@ -6460,9 +6470,36 @@ screen_option:
 	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+#if 0 /* in general we could simply remove high/low, but for syntax checks
+	we still need a flag */
+	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+#endif
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
 | reverse_video
   {
 	set_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
+  }
+| SIZE _is integer
+  {
+	/* set_screen_attr ("SIZE", COB_SCREEN_SIZE); */
+	CB_PENDING ("SIZE clause");
+	current_field->size = cb_get_int ($3);
   }
 | UNDERLINE
   {
@@ -6536,6 +6573,17 @@ screen_option:
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_17, &check_pic_duplicate);
   }
+| COLOR _is num_id_or_lit
+  {
+#if 0 /* TODO: implement, and add reverse to BACKGROUND/FOREGROUND-COLOR */
+	check_repeated ("COLOR", SYN_CLAUSE_19, &check_pic_duplicate);
+	set_screen_attr_with_conflict ("COLOR", COB_SCREEN_COLOR,
+				       "BACKGROUND-COLOR", COB_SCREEN_BACKGROUND_COLOR);
+	set_screen_attr_with_conflict ("COLOR", COB_SCREEN_COLOR,
+				       "FOREGROUND-COLOR", FOREGROUND_COLOR);
+#endif
+	CB_PENDING ("COLOR clause");
+  }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
 	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_18, &check_pic_duplicate);
@@ -6585,7 +6633,7 @@ eol:
 
 eos:
   EOS
-| _end_of SCREEN
+| _end_of SCREEN /* FIXME: this SCREEN is optional! */
 ;
 
 plus_plus:
@@ -7387,6 +7435,17 @@ accept_body:
 	cobc_cs_check = 0;
 	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
   }
+| identifier FROM SCREEN
+  {
+	  check_duplicate = 0;
+	  check_line_col_duplicate = 0;
+	  line_column = NULL;
+  }
+  accept_from_screen_clauses
+  {
+	cobc_cs_check = 0;
+	CB_PENDING ("ACCEPT FROM SCREEN");
+  }
 | identifier FROM lines_or_number
   {
 	cb_emit_accept_line_or_col ($1, 0);
@@ -7507,6 +7566,17 @@ accept_clause:
   }
 ;
 
+accept_from_screen_clauses:
+  accept_from_screen_clause
+| accept_from_screen_clauses accept_from_screen_clause
+;
+
+accept_from_screen_clause:
+  /* FIXME: could be optional FROM instead of optional AT */
+  at_line_column
+| SIZE _is pos_num_id_or_lit /* ignored, as ACCEPT FROM is pending */
+;
+
 lines_or_number:
   LINES
 | LINE NUMBER
@@ -7606,12 +7676,6 @@ accp_attr:
 	check_repeated ("FULL", SYN_CLAUSE_10, &check_duplicate);
 	set_dispattr (COB_SCREEN_FULL);
   }
-| HIGHLIGHT
-  {
-	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
-	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
-				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
-  }
 | LEFTLINE
   {
 	check_repeated ("LEFTLINE", SYN_CLAUSE_12, &check_duplicate);
@@ -7623,11 +7687,33 @@ accp_attr:
 	set_dispattr_with_conflict ("LOWER", COB_SCREEN_LOWER,
 				    "UPPER", COB_SCREEN_UPPER);
   }
+| HIGHLIGHT
+  {
+	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
+	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
+  }
 | LOWLIGHT
   {
 	check_repeated ("LOWLIGHT", SYN_CLAUSE_14, &check_duplicate);
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+  }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
   }
 | no_echo
   {
@@ -7671,12 +7757,12 @@ accp_attr:
 	set_dispattr_with_conflict ("SECURE", COB_SCREEN_SECURE,
 				    "NO-ECHO", COB_SCREEN_NO_ECHO);
   }
-| PROTECTED SIZE _is num_id_or_lit
+| PROTECTED SIZE _is positive_id_or_lit
   {
 	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
 	set_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
   }
-| SIZE _is num_id_or_lit
+| SIZE _is pos_num_id_or_lit
   {
 	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
 	set_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
@@ -7703,6 +7789,12 @@ accp_attr:
 	check_repeated ("UPPER", SYN_CLAUSE_25, &check_duplicate);
 	set_dispattr_with_conflict ("UPPER", COB_SCREEN_UPPER,
 				    "LOWER", COB_SCREEN_LOWER);
+  }
+| COLOR _is num_id_or_lit
+  {
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_26, &check_duplicate);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_27, &check_duplicate);
+	CB_PENDING ("COLOR");
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
@@ -8310,15 +8402,11 @@ close_window:
   WINDOW
   {
 	CB_PENDING ("GRAPHICAL WINDOW");
-	current_statement->name = "DISPLAY WINDOW";
+	current_statement->name = "CLOSE WINDOW";
   }
   identifier _close_display_option
   {
-	if ($3) {
-		cb_emit_close_window ($2);
-	} else {
-		cb_emit_destroy ($2);
-	}
+	cb_emit_close_window ($3, $4);
   }
 ;
 
@@ -8520,6 +8608,7 @@ display_body:
 	cb_emit_command_line ($1);
   }
 | screen_or_device_display _display_exception_phrases
+| display_message_box
 | display_window
 | display_floating_window
 | display_initial_window
@@ -8560,9 +8649,8 @@ display_atom:
   {
 	if ($1 == cb_null) {
 		/* Emit DISPLAY OMITTED. */
-		CB_UNFINISHED ("DISPLAY OMITTED");
+		CB_UNFINISHED_X (CB_TREE(current_statement), "DISPLAY OMITTED");
 		error_if_no_advancing_in_screen_display (advancing_value);
-		$1 = cb_low;
 	}
 
 	/* Emit device or screen DISPLAY. */
@@ -8599,7 +8687,6 @@ disp_list:
   }
 | OMITTED
   {
-	CB_PENDING ("DISPLAY OMITTED");
 	$$ = cb_null;
   }
 ;
@@ -8651,6 +8738,46 @@ crt_under:
 | CRT_UNDER
 ;
 
+display_message_box:
+  MESSAGE _box x_list
+  {
+	CB_UNFINISHED_X (CB_TREE(current_statement), "DISPLAY MESSAGE");
+	upon_value = NULL;  
+  }
+  _display_message_clauses
+  {
+	/* for now: minimal support for display and prompt only */
+	if (upon_value) {
+		cb_emit_display (CB_LIST_INIT (upon_value), NULL, NULL, NULL,
+				 NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+	}
+	cb_emit_display ($3, NULL, NULL, NULL,
+			 NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+	cb_emit_accept (cb_null, NULL, NULL);
+  }
+;
+
+_display_message_clauses:
+  /* empty */
+| display_message_clauses
+;
+
+display_message_clauses:
+  display_message_clause
+| display_message_clauses display_message_clause
+;
+
+display_message_clause:
+  TITLE _is_equal x
+  {
+	upon_value = $3;
+  }
+| TYPE _is_equal x
+| ICON _is_equal x
+| DEFAULT _is_equal x
+| return_give x
+;
+
 display_window:
   sub_or_window
   {
@@ -8666,7 +8793,7 @@ display_window:
   }
   display_window_clauses
   {
-	cb_emit_display_window (NULL, upon_value, $2, line_column,
+	cb_emit_display_window (NULL, upon_value, $3, line_column,
 			 current_statement->attr_ptr);
   }
 ;
@@ -8757,8 +8884,22 @@ display_window_clause:
 	/* TODO: store */
   }
 | at_line_column
+| TITLE _is x
+| shadow_boxed
+| no_scroll_wrap
 | _with disp_attr
 ;
+
+no_scroll_wrap:
+  _with NO SCROLL
+| _with NO WRAP
+;
+
+shadow_boxed:
+  SHADOW
+| BOXED
+;
+
 
 pop_up_or_handle:
   pop_up_area
@@ -8843,6 +8984,22 @@ disp_attr:
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
 | OVERLINE
   {
 	check_repeated ("OVERLINE", SYN_CLAUSE_13, &check_duplicate);
@@ -8862,6 +9019,12 @@ disp_attr:
   {
 	check_repeated ("UNDERLINE", SYN_CLAUSE_16, &check_duplicate);
 	set_dispattr (COB_SCREEN_UNDERLINE);
+  }
+| COLOR _is num_id_or_lit
+  {
+	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_17, &check_duplicate);
+	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
+	CB_PENDING ("COLOR");
   }
 | FOREGROUND_COLOR _is num_id_or_lit
   {
@@ -12808,6 +12971,8 @@ num_id_or_lit:
   }
 ;
 
+/* literal not allowing zero */
+/* FIXME: expressions would be allowed in most cases, too */
 positive_id_or_lit:
   sub_identifier
   {
@@ -12816,6 +12981,8 @@ positive_id_or_lit:
 | report_integer
 ;
 
+/* literal allowing zero */
+/* FIXME: expressions would be allowed in most cases, too */
 pos_num_id_or_lit:
   sub_identifier
   {
@@ -13621,13 +13788,14 @@ _as:		| AS ;
 _at:		| AT ;
 _before:	| BEFORE ;
 _binary:	| BINARY ;
+_box:		| BOX ;
 _by:		| BY ;
 _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
 _contains:	| CONTAINS ;
 _controls:	| CONTROLS ;
 _data:		| DATA ;
-_end_of:	| END _of ;
+_end_of:	| _to END _of ;
 _file:		| TOK_FILE ;
 _final:		| FINAL ;
 _for:		| FOR ;
@@ -13639,6 +13807,7 @@ _indicate:	| INDICATE ;
 _initial:	| TOK_INITIAL ;
 _into:		| INTO ;
 _is:		| IS ;
+_is_equal:		| IS | TOK_EQUAL;
 _is_are:	| IS | ARE ;
 _is_in:		| IS | IN ;
 _key:		| KEY ;

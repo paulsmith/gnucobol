@@ -328,6 +328,15 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BACKGROUND-COLOR",		0, 0, BACKGROUND_COLOR,		/* 2002 (C/S) */
 				0, 0
   },
+  { "BACKGROUND-HIGH",		0, 0, BACKGROUND_HIGH,		/* ACU extension */
+				0, 0
+  },
+  { "BACKGROUND-LOW",		0, 0, BACKGROUND_LOW,		/* ACU extension */
+				0, 0
+  },
+  { "BACKGROUND-STANDARD",		0, 0, BACKGROUND_STANDARD,		/* ACU extension */
+				0, 0
+  },
   { "BASED",			0, 0, BASED,			/* 2002 */
 				0, 0
   },
@@ -372,6 +381,12 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BOTTOM",			0, 0, BOTTOM,			/* 2002 */
 				0, 0
+  },
+  { "BOX",		0, 0, BOX,		/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
+  { "BOXED",		0, 0, BOXED,		/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "BY",			0, 0, BY,			/* 2002 */
 				0, 0
@@ -450,7 +465,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COLLATING",		0, 0, COLLATING,		/* 2002 */
 				0, 0
   },
-  { "COLOR",			0, 0, -1,			/* Extension */
+  { "COLOR",			0, 0, COLOR,			/* Extension */
 				0, 0
   },
   { "COLS",			0, 0, COLS,			/* 2002 */
@@ -568,7 +583,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "CONVERSION",		0, 1, CONVERSION,		/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "CONVERTING",		0, 0, CONVERTING,		/* 2002 */
 				0, 0
@@ -1011,6 +1026,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "I-O-CONTROL",		0, 0, I_O_CONTROL,		/* 2002 */
 				0, 0
   },
+  { "ICON",			0, 0, ICON,			/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "ID",			0, 0, ID,			/* Extension */
 				0, 0
   },
@@ -1201,7 +1219,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "LOWER",			0, 1, LOWER,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "LOWLIGHT",			0, 0, LOWLIGHT,			/* 2002 (C/S) */
 				0, 0
@@ -1414,7 +1432,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "POP-UP",			0, 0, POP_UP,			/* ACU extension */
-				0, 0
+				0, CB_CS_DISPLAY
   },
   { "POSITION",			0, 0, POSITION,			/* 85 */
 				0, 0
@@ -1477,8 +1495,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PROPERTY",			0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "PROTECTED",		0, 0, PROTECTED,		/* Extension */
-				0, CB_CS_WITH
+  { "PROTECTED",		0, 0, PROTECTED,		/* Extension PROTECTED SIZE */
+				0, CB_CS_ACCEPT
   },
   { "PROTOTYPE",		0, 0, -1,			/* 2002 */
 				0, 0
@@ -1643,7 +1661,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "SCROLL",			0, 1, SCROLL,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT | CB_CS_DISPLAY
   },
   { "SD",			0, 0, SD,			/* 2002 */
 				0, 0
@@ -1689,6 +1707,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "SET",			0, 0, SET,			/* 2002 */
 				0, 0
+  },
+  { "SHADOW",		0, 0, SHADOW,		/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "SHARING",			0, 0, SHARING,			/* 2002 */
 				0, 0
@@ -1891,10 +1912,13 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "TIME-OUT",			0, 1, TIME_OUT,			/* Ext (C/S) */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "TIMES",			0, 0, TIMES,			/* 2002 */
 				0, 0
+  },
+  { "TITLE",			0, 0, TITLE,			/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "TO",			0, 0, TO,			/* 2002 */
 				0, 0
@@ -1981,7 +2005,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "UPPER",			0, 1, UPPER,			/* Extension */
-				0, CB_CS_WITH
+				0, CB_CS_ACCEPT
   },
   { "USAGE",			0, 0, USAGE,			/* 2002 */
 				0, 0
@@ -2044,13 +2068,16 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "WITH",			0, 0, WITH,			/* 2002 */
-				CB_CS_WITH, CB_CS_ACCEPT | CB_CS_DISPLAY
+				0, 0
   },
   { "WORDS",			0, 0, WORDS,			/* 85 */
 				0, 0
   },
   { "WORKING-STORAGE",		0, 0, WORKING_STORAGE,		/* 2002 */
 				0, 0
+  },
+  { "WRAP",			0, 1, WRAP,				/* Extension */
+				0, CB_CS_ACCEPT | CB_CS_DISPLAY
   },
   { "WRITE",			1, 0, WRITE,			/* 2002 */
 				0, 0

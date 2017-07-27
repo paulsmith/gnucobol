@@ -1171,7 +1171,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACCEPT WITH AUTO / TAB])
-AT_KEYWORDS([AUTO-SKIP AUTOTERMINATE misc extensions])
+AT_KEYWORDS([AUTO-SKIP AUTOTERMINATE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1195,8 +1195,30 @@ AT_CHECK([$COMPILE_ONLY -faccept-auto prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([ACCEPT WITH LOWER / UPPER])
+AT_KEYWORDS([misc extensions screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X(05).
+       PROCEDURE        DIVISION.
+           ACCEPT X WITH LOWER     END-ACCEPT.
+           ACCEPT X WITH UPPER     END-ACCEPT.
+           ACCEPT X      LOWER
+           ACCEPT X      UPPER
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([ACCEPT WITH SIZE])
-AT_KEYWORDS([PROTECTED SIZE misc extensions])
+AT_KEYWORDS([PROTECTED SIZE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1210,7 +1232,12 @@ AT_DATA([prog.cob], [
            ACCEPT X WITH           SIZE IS 1 END-ACCEPT.
            ACCEPT X WITH PROTECTED SIZE    2 END-ACCEPT.
            ACCEPT X WITH PROTECTED SIZE IS 3 END-ACCEPT.
-           ACCEPT X WITH           SIZE    Y END-ACCEPT.
+           ACCEPT X                SIZE    Y END-ACCEPT.
+           ACCEPT X                SIZE    0
+           ACCEPT X                SIZE IS 1
+           ACCEPT X      PROTECTED SIZE    2
+           ACCEPT X      PROTECTED SIZE IS 3
+           ACCEPT X                SIZE    Y
            STOP RUN.
 ])
 
@@ -1220,7 +1247,7 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY WITH SIZE])
-AT_KEYWORDS([SIZE misc extensions])
+AT_KEYWORDS([SIZE misc extensions screen])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1233,6 +1260,9 @@ AT_DATA([prog.cob], [
            DISPLAY X AT 0101 WITH SIZE    5 END-DISPLAY.
            DISPLAY X AT 0101 WITH SIZE IS 6 END-DISPLAY.
            DISPLAY X AT 0101 WITH SIZE IS Y END-DISPLAY.
+           DISPLAY X AT 0101      SIZE    5 END-DISPLAY.
+           DISPLAY X AT 0101      SIZE IS 6 END-DISPLAY.
+           DISPLAY X AT 0101      SIZE IS Y END-DISPLAY.
            STOP RUN.
 ])
 
@@ -3158,7 +3188,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACUCOBOL WINDOW statements])
-AT_KEYWORDS([misc acu extensions])
+AT_KEYWORDS([misc acu extensions screen])
 
 # TODO: need a better tests when we implement this,
 #       likely splitted into multiple ones
@@ -3174,7 +3204,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
        MAIN.
            DISPLAY WINDOW, LINE 1, COLUMN 29, SIZE 51, LINES 12,
-               ERASE, POP-UP AREA IS WINDOW-HANDLE
+               ERASE SCREEN BOXED SHADOW, POP-UP AREA IS WINDOW-HANDLE
            END-DISPLAY
            DISPLAY "THIS IS TEXT IN A WINDOW"
            DISPLAY FLOATING WINDOW UPON WINDOW-HANDLE,
@@ -3197,12 +3227,75 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob: 11: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 12: error: syntax error, unexpected POP-UP, expecting LINE or SCREEN
 prog.cob: 15: warning: GRAPHICAL WINDOW is not implemented
 prog.cob: 20: warning: GRAPHICAL WINDOW is not implemented
 prog.cob: 21: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 23: error: HANDLE must be either a generic or a WINDOW HANDLE
+prog.cob: 23: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
 prog.cob: 25: warning: GRAPHICAL CONTROL is not implemented
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY MESSAGE BOX])
+AT_KEYWORDS([misc acu extensions screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       77  my-text             pic x(10) value "TEXT".
+       78  MB-OK               VALUE 1.
+       78  MB-YES-NO           VALUE 2.
+       78  MB-OK-CANCEL        VALUE 3.
+       78  MB-YES-NO-CANCEL    VALUE 4.
+       78  MB-YES              VALUE 1.
+       78  MB-NO               VALUE 2.
+       78  MB-CANCEL           VALUE 3.
+       78  MB-DEFAULT-ICON     VALUE 1.
+       78  MB-WARNING-ICON     VALUE 2.
+       78  MB-ERROR-ICON       VALUE 3.
+       PROCEDURE DIVISION.
+           DISPLAY MESSAGE "Important"
+                   TITLE "Very important"
+                   TYPE = MB-OK
+                   ICON IS MB-WARNING-ICON
+           DISPLAY MESSAGE "This is" space "my" space my-text
+           DISPLAY MESSAGE BOX "More messages?"
+                   TYPE  MB-YES-NO
+                   TITLE = "box title"
+                   DEFAULT IS MB-YES
+                   RETURNING RETURN-CODE
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
+[prog.cob: 18: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+prog.cob: 22: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+prog.cob: 23: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DISPLAY OMITTED])
+AT_KEYWORDS([misc extensions screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE DIVISION.
+           DISPLAY OMITTED WITH BELL
+           DISPLAY OMITTED LINE 10 COL 15 ERASE EOL
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 5: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
+prog.cob: 6: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
 ])
 
 AT_CLEANUP

@@ -871,8 +871,11 @@ usage_is_thread_handle (cb_tree x)
 	struct cb_field *f;
 	f = CB_FIELD_PTR (x);
 
-	return (f->usage == CB_USAGE_HNDL ||
-		f->usage == CB_USAGE_HNDL_THREAD);
+	if (f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_THREAD) {
+		return 1;
+	}
+	return 0;
 }
 
 static int
@@ -881,10 +884,17 @@ usage_is_window_handle (cb_tree x)
 	struct cb_field *f;
 	f = CB_FIELD_PTR (x);
 
-	/* FIXME: may also be a PIC X(10) item */
-	return (f->usage == CB_USAGE_HNDL ||
+	if (f->usage == CB_USAGE_HNDL ||
 		f->usage == CB_USAGE_HNDL_WINDOW ||
-		f->usage == CB_USAGE_HNDL_SUBWINDOW);
+		f->usage == CB_USAGE_HNDL_SUBWINDOW) {
+		return 1;
+	}
+	if (f->usage == CB_USAGE_DISPLAY &&
+		f->pic->category == CB_CATEGORY_ALPHANUMERIC &&
+		f->size == 10){
+		return 1;
+	}
+	return 0;
 }
 
 /* List system routines */
@@ -1870,7 +1880,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 
 	/* Reference modification check */
-	if ( f->usage == CB_USAGE_NATIONAL ) {
+	if (f->usage == CB_USAGE_NATIONAL ) {
 		pseudosize = f->size / 2;
 	} else {
 		pseudosize = f->size;
@@ -6133,11 +6143,11 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 		return;
 	}
 
-	if (own_handle && !usage_is_window_handle(own_handle)) {
-		cb_error_x (own_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	if (own_handle && !usage_is_window_handle (own_handle)) {
+		cb_error_x (own_handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
-	if (upon_handle && !usage_is_window_handle(upon_handle)) {
-		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	if (upon_handle && !usage_is_window_handle (upon_handle)) {
+		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
 
 #if 0 /* TODO, likely as multiple functions */
@@ -6151,12 +6161,16 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 */
 
 void
-cb_emit_close_window (cb_tree handle)
+cb_emit_close_window (cb_tree handle, cb_tree no_display)
 {
-	if (handle && !usage_is_window_handle(handle)) {
-		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW handle"));
+	if (handle && !usage_is_window_handle (handle)) {
+		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
-	cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
+	if (no_display) {
+		cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
+	} else {
+		cb_emit_destroy (handle);
+	}
 }
 
 
@@ -6490,15 +6504,20 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 	cb_tree last_elt;
 	int	is_first_item;
 
-	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
-	if (!l) {
-		/* LCOV_EXCL_START */
-		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
-			"emit_field_display_for_last", "values");
-		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* DISPLAY OMITTED ? */
+	if (values == cb_null) {
+		l = last_elt = cb_null;
+	} else {
+		for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
+		if (!l) {
+			/* LCOV_EXCL_START */
+			cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+				"emit_field_display_for_last", "values");
+			COBC_ABORT ();
+			/* LCOV_EXCL_STOP */
+		}
+		last_elt = CB_VALUE (l);
 	}
-	last_elt = CB_VALUE (l);
 
 	if (line_column == NULL) {
 		is_first_item = is_first_display_list && l == values;
@@ -6523,11 +6542,13 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cob_flags_t		disp_attrs;
 
 	/* Validate upon and values */
-	if (upon == cb_error_node
-	    || !values
-	    || cb_validate_list (values)
-	    || validate_types_of_display_values (values)) {
-		return;
+	if (values != cb_null) /* DISPLAY OMITTED */ {
+		if (upon == cb_error_node
+			|| !values
+			|| cb_validate_list (values)
+			|| validate_types_of_display_values (values)) {
+			return;
+		}
 	}
 
 	/* Validate line_column and the attributes */
@@ -6551,8 +6572,11 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 		break;
 
 	case FIELD_ON_SCREEN_DISPLAY:
-		emit_default_field_display_for_all_but_last (values, size_is,
-							     is_first_display_list);
+		/* no DISPLAY OMITTED */
+		if (values != cb_null) {
+			emit_default_field_display_for_all_but_last (values, size_is,
+									 is_first_display_list);
+		}
 		emit_field_display_for_last (values, line_column, fgc, bgc,
 					     scroll, size_is, disp_attrs,
 					     is_first_display_list);

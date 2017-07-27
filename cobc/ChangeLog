@@ -1,4 +1,17 @@
 
+2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: fixed bug #402 - optional WITH clause functional
+	* parser.y, reserved.c: FR #78 more phrases for DISPLAY WINDOW
+	* parser.y, typeck.c: FR #77 fixed HANDLE references
+	* parser.y, reserved.c: FR #190 minimal support for DISPLAY MESSAGE BOX
+	* parser.y, typeck.c: fixed SIGSEGV in cobc for DISPLAY OMITTED
+
+2017-07-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c: added clauses COLOR and SIZE as PENDING
+	* parser.y: added ACCEPT FROM SCREEN as PENDING
+
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: fixed memory overlap for long strings in listing title
