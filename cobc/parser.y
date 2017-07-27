@@ -1729,6 +1729,9 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token AUTOMATIC
 %token AWAY_FROM_ZERO		"AWAY-FROM-ZERO"
 %token BACKGROUND_COLOR		"BACKGROUND-COLOR"
+%token BACKGROUND_HIGH		"BACKGROUND-HIGH"
+%token BACKGROUND_LOW		"BACKGROUND-LOW"
+%token BACKGROUND_STANDARD		"BACKGROUND-STANDARD"
 %token BASED
 %token BEFORE
 %token BELL
@@ -1742,6 +1745,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token BLINK
 %token BLOCK
 %token BOTTOM
+%token BOXED
 %token BY
 %token BYTE_LENGTH		"BYTE-LENGTH"
 %token CALL
@@ -2156,6 +2160,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token SEQUENTIAL
 %token SET
 %token SEVENTY_EIGHT		"78"
+%token SHADOW
 %token SHARING
 %token SIGN
 %token SIGNED
@@ -2279,6 +2284,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token WORD			"Identifier"
 %token WORDS
 %token WORKING_STORAGE		"WORKING-STORAGE"
+%token WRAP
 %token WRITE
 %token YYYYDDD
 %token YYYYMMDD
@@ -6461,6 +6467,27 @@ screen_option:
 	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+#if 0 /* in general we could simply remove high/low, but for syntax checks
+	we still need a flag */
+	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
+				       "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+#endif
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
 | reverse_video
   {
 	set_screen_attr ("REVERSE-VIDEO", COB_SCREEN_REVERSE);
@@ -7646,12 +7673,6 @@ accp_attr:
 	check_repeated ("FULL", SYN_CLAUSE_10, &check_duplicate);
 	set_dispattr (COB_SCREEN_FULL);
   }
-| HIGHLIGHT
-  {
-	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
-	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
-				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
-  }
 | LEFTLINE
   {
 	check_repeated ("LEFTLINE", SYN_CLAUSE_12, &check_duplicate);
@@ -7663,11 +7684,33 @@ accp_attr:
 	set_dispattr_with_conflict ("LOWER", COB_SCREEN_LOWER,
 				    "UPPER", COB_SCREEN_UPPER);
   }
+| HIGHLIGHT
+  {
+	check_repeated ("HIGHLIGHT", SYN_CLAUSE_11, &check_duplicate);
+	set_dispattr_with_conflict ("HIGHLIGHT", COB_SCREEN_HIGHLIGHT,
+				    "LOWLIGHT", COB_SCREEN_LOWLIGHT);
+  }
 | LOWLIGHT
   {
 	check_repeated ("LOWLIGHT", SYN_CLAUSE_14, &check_duplicate);
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+  }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
   }
 | no_echo
   {
@@ -8356,14 +8399,14 @@ close_window:
   WINDOW
   {
 	CB_PENDING ("GRAPHICAL WINDOW");
-	current_statement->name = "DISPLAY WINDOW";
+	current_statement->name = "CLOSE WINDOW";
   }
   identifier _close_display_option
   {
-	if ($3) {
-		cb_emit_close_window ($2);
+	if ($4) {
+		cb_emit_close_window ($3);
 	} else {
-		cb_emit_destroy ($2);
+		cb_emit_destroy ($3);
 	}
   }
 ;
@@ -8712,7 +8755,7 @@ display_window:
   }
   display_window_clauses
   {
-	cb_emit_display_window (NULL, upon_value, $2, line_column,
+	cb_emit_display_window (NULL, upon_value, $3, line_column,
 			 current_statement->attr_ptr);
   }
 ;
@@ -8803,8 +8846,21 @@ display_window_clause:
 	/* TODO: store */
   }
 | at_line_column
+| shadow_boxed
+| no_scroll_wrap
 | _with disp_attr
 ;
+
+no_scroll_wrap:
+  _with NO SCROLL
+| _with NO WRAP
+;
+
+shadow_boxed:
+  SHADOW
+| BOXED
+;
+
 
 pop_up_or_handle:
   pop_up_area
@@ -8888,6 +8944,22 @@ disp_attr:
 	check_repeated ("LOWLIGHT", SYN_CLAUSE_12, &check_duplicate);
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+  }
+| STANDARD /* ACU extension to reset a group HIGH/LOW */
+  {
+	CB_PENDING("STANDARD intensity");
+  }
+| BACKGROUND_HIGH
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_LOW
+  {
+	CB_PENDING("BACKGROUND intensity");
+  }
+| BACKGROUND_STANDARD
+  {
+	CB_PENDING("BACKGROUND intensity");
   }
 | OVERLINE
   {

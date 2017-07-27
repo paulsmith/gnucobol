@@ -871,8 +871,11 @@ usage_is_thread_handle (cb_tree x)
 	struct cb_field *f;
 	f = CB_FIELD_PTR (x);
 
-	return (f->usage == CB_USAGE_HNDL ||
-		f->usage == CB_USAGE_HNDL_THREAD);
+	if (f->usage == CB_USAGE_HNDL ||
+		f->usage == CB_USAGE_HNDL_THREAD) {
+		return 1;
+	}
+	return 0;
 }
 
 static int
@@ -881,10 +884,17 @@ usage_is_window_handle (cb_tree x)
 	struct cb_field *f;
 	f = CB_FIELD_PTR (x);
 
-	/* FIXME: may also be a PIC X(10) item */
-	return (f->usage == CB_USAGE_HNDL ||
+	if (f->usage == CB_USAGE_HNDL ||
 		f->usage == CB_USAGE_HNDL_WINDOW ||
-		f->usage == CB_USAGE_HNDL_SUBWINDOW);
+		f->usage == CB_USAGE_HNDL_SUBWINDOW) {
+		return 1;
+	}
+	if (f->usage == CB_USAGE_DISPLAY &&
+		f->category == CB_CATEGORY_ALPHANUMERIC &&
+		f->size == 10){
+		return 1;
+	}
+	return 0;
 }
 
 /* List system routines */
@@ -1870,7 +1880,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	}
 
 	/* Reference modification check */
-	if ( f->usage == CB_USAGE_NATIONAL ) {
+	if (f->usage == CB_USAGE_NATIONAL ) {
 		pseudosize = f->size / 2;
 	} else {
 		pseudosize = f->size;
@@ -6133,11 +6143,11 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 		return;
 	}
 
-	if (own_handle && !usage_is_window_handle(own_handle)) {
-		cb_error_x (own_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	if (own_handle && !usage_is_window_handle (own_handle)) {
+		cb_error_x (own_handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
-	if (upon_handle && !usage_is_window_handle(upon_handle)) {
-		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE"));
+	if (upon_handle && !usage_is_window_handle (upon_handle)) {
+		cb_error_x (upon_handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
 
 #if 0 /* TODO, likely as multiple functions */
@@ -6153,8 +6163,8 @@ cb_emit_display_window (cb_tree type, cb_tree own_handle, cb_tree upon_handle,
 void
 cb_emit_close_window (cb_tree handle)
 {
-	if (handle && !usage_is_window_handle(handle)) {
-		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW handle"));
+	if (handle && !usage_is_window_handle (handle)) {
+		cb_error_x (handle, _("HANDLE must be either a generic or a WINDOW HANDLE or X(10)"));
 	}
 	cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
 }

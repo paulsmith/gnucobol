@@ -2,6 +2,8 @@
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: fixed bug #402 - optional WITH clause functional
+	* parser.y, reserved.c: FR #78 more phrases for DISPLAY WINDOW
+	* parser.y, typeck.c: FR #77 fixed HANDLE references
 
 2017-07-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

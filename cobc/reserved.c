@@ -328,6 +328,15 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BACKGROUND-COLOR",		0, 0, BACKGROUND_COLOR,		/* 2002 (C/S) */
 				0, 0
   },
+  { "BACKGROUND-HIGH",		0, 0, BACKGROUND_HIGH,		/* ACU extension */
+				0, 0
+  },
+  { "BACKGROUND-LOW",		0, 0, BACKGROUND_LOW,		/* ACU extension */
+				0, 0
+  },
+  { "BACKGROUND-STANDARD",		0, 0, BACKGROUND_STANDARD,		/* ACU extension */
+				0, 0
+  },
   { "BASED",			0, 0, BASED,			/* 2002 */
 				0, 0
   },
@@ -372,6 +381,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BOTTOM",			0, 0, BOTTOM,			/* 2002 */
 				0, 0
+  },
+  { "BOXED",		0, 0, BOXED,		/* ACU extension */
+				0, CB_CS_DISPLAY
   },
   { "BY",			0, 0, BY,			/* 2002 */
 				0, 0
@@ -1690,6 +1702,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SET",			0, 0, SET,			/* 2002 */
 				0, 0
   },
+  { "SHADOW",		0, 0, SHADOW,		/* ACU extension */
+				0, CB_CS_DISPLAY
+  },
   { "SHARING",			0, 0, SHARING,			/* 2002 */
 				0, 0
   },
@@ -2051,6 +2066,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WORKING-STORAGE",		0, 0, WORKING_STORAGE,		/* 2002 */
 				0, 0
+  },
+  { "WRAP",			0, 1, WRAP,				/* Extension */
+				0, CB_CS_ACCEPT | CB_CS_DISPLAY
   },
   { "WRITE",			1, 0, WRITE,			/* 2002 */
 				0, 0
