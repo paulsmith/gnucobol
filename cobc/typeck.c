@@ -6504,15 +6504,20 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 	cb_tree last_elt;
 	int	is_first_item;
 
-	for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
-	if (!l) {
-		/* LCOV_EXCL_START */
-		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
-			"emit_field_display_for_last", "values");
-		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* DISPLAY OMITTED ? */
+	if (values == cb_null) {
+		l = last_elt = cb_null;
+	} else {
+		for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
+		if (!l) {
+			/* LCOV_EXCL_START */
+			cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+				"emit_field_display_for_last", "values");
+			COBC_ABORT ();
+			/* LCOV_EXCL_STOP */
+		}
+		last_elt = CB_VALUE (l);
 	}
-	last_elt = CB_VALUE (l);
 
 	if (line_column == NULL) {
 		is_first_item = is_first_display_list && l == values;
@@ -6537,11 +6542,13 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cob_flags_t		disp_attrs;
 
 	/* Validate upon and values */
-	if (upon == cb_error_node
-	    || !values
-	    || cb_validate_list (values)
-	    || validate_types_of_display_values (values)) {
-		return;
+	if (values != cb_null) /* DISPLAY OMITTED */ {
+		if (upon == cb_error_node
+			|| !values
+			|| cb_validate_list (values)
+			|| validate_types_of_display_values (values)) {
+			return;
+		}
 	}
 
 	/* Validate line_column and the attributes */
@@ -6565,8 +6572,11 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 		break;
 
 	case FIELD_ON_SCREEN_DISPLAY:
-		emit_default_field_display_for_all_but_last (values, size_is,
-							     is_first_display_list);
+		/* no DISPLAY OMITTED */
+		if (values != cb_null) {
+			emit_default_field_display_for_all_but_last (values, size_is,
+									 is_first_display_list);
+		}
 		emit_field_display_for_last (values, line_column, fgc, bgc,
 					     scroll, size_is, disp_attrs,
 					     is_first_display_list);
