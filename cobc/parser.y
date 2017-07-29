@@ -13693,6 +13693,10 @@ error_stmt_recover:
   {
 	cobc_repeat_last_token = 1;
   }
+| ELSE
+  {
+	cobc_repeat_last_token = 0;
+  }
 | scope_terminator
   {
 	cobc_repeat_last_token = 0;
@@ -13713,7 +13717,6 @@ verb:
 | DELETE
 | DISPLAY
 | DIVIDE
-| ELSE
 | ENTRY
 | EVALUATE
 | EXIT

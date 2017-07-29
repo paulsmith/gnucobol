@@ -4,6 +4,8 @@
 	* reserved.c (system_name_table): added switches USW-0 thru USW-31.
 	* field.c (validate_field_1): added warning for useless FULL clause on
 	  numeric items.
+	* parser.y (error_stmt_recover): removed ELSE from list of verbs,
+	  preventing recursion on syntax error in IF statements (bug #403).
 
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
