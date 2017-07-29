@@ -2,6 +2,8 @@
 2017-07-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (system_name_table): added switches USW-0 thru USW-31.
+	* field.c (validate_field_1): added warning for useless FULL clause on
+	  numeric items.
 
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -551,3 +551,24 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([FULL on numeric item])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       SCREEN SECTION.
+       01  scr.
+           03  full-pointless PIC 999 FULL.
+           03  full-useful PIC ZZZ FULL.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 8: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
+])
+
+AT_CLEANUP

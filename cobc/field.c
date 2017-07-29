@@ -1144,6 +1144,12 @@ validate_field_1 (struct cb_field *f)
 				}
 			}
 		}
+
+		/* Validate FULL */
+		if (f->screen_flag & COB_SCREEN_FULL
+		    && f->pic->category == CB_CATEGORY_NUMERIC) {
+			cb_warning_x (warningopt, x, _("FULL has no effect on numeric items; you may want REQUIRED or PIC Z"));
+		}
 	}
 
 	return 0;
