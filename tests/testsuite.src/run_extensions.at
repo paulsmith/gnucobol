@@ -280,7 +280,7 @@ AT_DATA([prog.cob], [
                    VARYING I FROM LENGTH OF I
                              BY   LENGTH OF X
                    UNTIL   I > LENGTH OF L
-           IF ((L NOT = 2) OR 
+           IF ((L NOT = 2) OR
                (I NOT = 6)    )
               DISPLAY "Length 7 " L " - " I
               END-DISPLAY
@@ -350,7 +350,7 @@ AT_DATA([prog.cob], [
            MOVE WHEN-COMPILED TO X.
            INSPECT X CONVERTING "0123456789" TO "9999999999".
            IF X NOT = "99/99/9999.99.99    "
-              CALL 'CBL_OC_DUMP' USING X 
+              CALL 'CBL_OC_DUMP' USING X
                  ON EXCEPTION
                     DISPLAY X NO ADVANCING
                     END-DISPLAY
@@ -1137,45 +1137,45 @@ AT_DATA([prog.cob], [
            *> Test of auto size, identical to SIZE AUTO
            CALL "prog2" USING BY VALUE 4 0 0 1 0
            END-CALL
-           
+
            *> Test of explicit SIZE syntax
            CALL "prog2" USING BY VALUE 1 SIZE 1 2 0 0 0
-           END-CALL                   
+           END-CALL
            CALL "prog2" USING BY VALUE 2 0 SIZE 2 3 0 0
-           END-CALL                   
+           END-CALL
            CALL "prog2" USING BY VALUE 4 0 0 SIZE 4 4 0
-           END-CALL                   
+           END-CALL
            CALL "prog2" USING BY VALUE 8 0 0 0 SIZE 8 5
            END-CALL
            CALL "prog2" USING BY VALUE 4 0 0 SIZE DEFAULT 6 0
-           END-CALL          
+           END-CALL
            CALL "prog2" USING BY VALUE 4 0 0 SIZE AUTO    7 0
            END-CALL
            *> test for SIZE AUTO with VALUE > INT_MAX is non-portable
-           
+
            *> Test of explicit UNSIGNED SIZE syntax
            CALL "prog2" USING BY VALUE 1 UNSIGNED SIZE 1 2 0 0 0
-           END-CALL          
+           END-CALL
            CALL "prog2" USING BY VALUE 2 0 UNSIGNED SIZE 2 3 0 0
-           END-CALL          
+           END-CALL
            CALL "prog2" USING BY VALUE 4 0 0 UNSIGNED SIZE 4 4 0
-           END-CALL          
+           END-CALL
            CALL "prog2" USING BY VALUE 8 0 0 0 UNSIGNED SIZE 8 5 0
            END-CALL
            CALL "prog2" USING BY VALUE 4 0 0 UNSIGNED SIZE AUTO 6 0
            END-CALL
            *> test for SIZE AUTO with VALUE > INT_MAX is non-portable
-           
+
            *> Test of MF size syntax
            *>CALL "prog2" USING BY VALUE 2 SIZE 1
-           *>END-CALL                    
+           *>END-CALL
            *>CALL "prog2" USING BY VALUE 3 SIZE 2
-           *>END-CALL                    
+           *>END-CALL
            *>CALL "prog2" USING BY VALUE 4 SIZE 4
-           *>END-CALL                    
+           *>END-CALL
            *>CALL "prog2" USING BY VALUE 5 SIZE 8
            *>END-CALL
-           
+
            STOP RUN.
        PROGRAM-ID.      prog2.
        DATA             DIVISION.
@@ -1206,7 +1206,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], ignore)
-#AT_CHECK([$COMPILE prog.cob], [0], [], 
+#AT_CHECK([$COMPILE prog.cob], [0], [],
 # hack for now: ignore
 #[prog.cob: 58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 #])
@@ -2553,6 +2553,10 @@ AT_DATA([prog.cob], [
              ON  IS SWIT26-ON
              OFF IS SWIT26-OFF
            .
+           USW-31
+             ON  IS SWIT31-ON
+             OFF IS SWIT31-OFF
+           .
            SWITCH-32
              ON  IS SWIT32-ON
              OFF IS SWIT32-OFF
@@ -2612,6 +2616,13 @@ AT_DATA([prog.cob], [
               DISPLAY " OFF" NO ADVANCING
               END-DISPLAY
            END-IF.
+           IF SWIT31-ON
+              DISPLAY " ON" NO ADVANCING
+              END-DISPLAY
+           ELSE
+              DISPLAY " OFF" NO ADVANCING
+              END-DISPLAY
+           END-IF.
            IF SWIT32-ON
               DISPLAY " ON" NO ADVANCING
               END-DISPLAY
@@ -2623,9 +2634,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fsystem-name="sw1, SwItCh\ b, SWITCH\ 25" \
--fsystem-name=SWITCH-32 -fsystem-name="SWITCH\ Z" prog.cob], [0], [], [])
-AT_CHECK([COB_SWITCH_2=1 COB_SWITCH_26=1 COB_SWITCH_32=1 ./prog], [0],
-[OFF ON OFF OFF ON ON], [])
+-fsystem-name=SWITCH-32 -fsystem-name="SWITCH\ Z" -fsystem-name=USW-31 prog.cob], [0], [], [])
+AT_CHECK([COB_SWITCH_2=1 COB_SWITCH_26=1 COB_SWITCH_31=1 COB_SWITCH_32=1 ./prog], [0],
+[OFF ON OFF OFF ON ON ON], [])
 
 AT_CLEANUP
 
@@ -3361,7 +3372,7 @@ AT_DATA([prog.cob], [
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
                END-CALL
-            
+
                EVALUATE COUNTER
                   WHEN 0
                      IF RETURN-CHAR NOT = 'v' THEN
@@ -3394,7 +3405,7 @@ AT_DATA([prog.cob], [
             END-PERFORM.
 
             MOVE 0 TO RETURN-CODE.
-            
+
             IF COUNTER NOT = 5 THEN
                MOVE RETURN-CODE TO RET-DISP
                DISPLAY 'CBL_GC_GETOPT returned -1 too early: ' COUNTER
@@ -3440,12 +3451,12 @@ AT_DATA([prog2.cob], [
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
-               CALL 'CBL_GC_GETOPT' USING 
+               CALL 'CBL_GC_GETOPT' USING
                   BY REFERENCE SO LO LONGIND
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
                END-CALL
-            
+
                EVALUATE COUNTER
                   WHEN 0
                      IF RETURN-CHAR NOT = '?' THEN
@@ -3466,7 +3477,7 @@ AT_DATA([prog2.cob], [
             END-PERFORM.
 
             MOVE 0 TO RETURN-CODE.
-            
+
             IF COUNTER NOT = 2 THEN
                MOVE RETURN-CODE TO RET-DISP
                DISPLAY 'CBL_GC_GETOPT returned -1 too early: ' COUNTER
@@ -3510,24 +3521,24 @@ AT_DATA([prog3.cob], [
             MOVE "usage"   TO ONAME     (3).
             MOVE 0         TO HAS-VALUE (3).
             MOVE "u"       TO VAL       (3).
-        
+
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
-               CALL 'CBL_GC_GETOPT' USING 
+               CALL 'CBL_GC_GETOPT' USING
                   BY REFERENCE SO LO LONGIND
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
                END-CALL
-            
+
                EVALUATE COUNTER
                   WHEN 0
                      IF OPT-VAL(1:4) NOT = 'lang' THEN
                         DISPLAY '0-ERROR: ' OPT-VAL END-DISPLAY
                      END-IF
                   WHEN 1
-                     IF (OPT-VAL(1:1) NOT = 'k' OR 
-                         RETURN-CHAR  NOT = 'V' OR 
+                     IF (OPT-VAL(1:1) NOT = 'k' OR
+                         RETURN-CHAR  NOT = 'V' OR
                          OPT-VAL(1:4)     = 'kang')  THEN
                         DISPLAY '1-ERROR: ' OPT-VAL ' ' RETURN-CHAR
                         END-DISPLAY
@@ -3537,13 +3548,13 @@ AT_DATA([prog3.cob], [
                         DISPLAY '2-ERROR: ' RETURN-CHAR END-DISPLAY
                      END-IF
                   WHEN 3
-                     IF OPT-VAL(1:1) NOT = '5' OR 
+                     IF OPT-VAL(1:1) NOT = '5' OR
                         RETURN-CHAR  NOT = 'j' THEN
                         DISPLAY '3-ERROR: ' OPT-VAL ' ' RETURN-CHAR
                         END-DISPLAY
                      END-IF
                   WHEN 4
-                     IF OPT-VAL(1:1) NOT = '6' OR 
+                     IF OPT-VAL(1:1) NOT = '6' OR
                         RETURN-CHAR  NOT = 'k' THEN
                         DISPLAY '4-ERROR: ' OPT-VAL ' ' RETURN-CHAR
                         END-DISPLAY
@@ -3563,7 +3574,7 @@ AT_DATA([prog3.cob], [
             END-PERFORM.
 
             MOVE 0 TO RETURN-CODE.
-            
+
             IF COUNTER NOT = 6 THEN
                MOVE RETURN-CODE TO RET-DISP
                DISPLAY 'CBL_GC_GETOPT returned -1 too early: ' COUNTER
@@ -3611,31 +3622,31 @@ AT_DATA([prog4.cob], [
             MOVE "usage"     TO ONAME     (3).
             MOVE 1           TO HAS-VALUE (3).
             MOVE 'u'         TO VAL       (3).
-        
+
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
-               CALL 'CBL_GC_GETOPT' USING 
+               CALL 'CBL_GC_GETOPT' USING
                   BY REFERENCE SO LO LONGIND
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
                END-CALL
-            
+
                EVALUATE COUNTER
                   WHEN 0
-                     IF RETURN-CODE NOT = 0 OR 
+                     IF RETURN-CODE NOT = 0 OR
                         FLAG-VAL    NOT = '1' THEN
                         DISPLAY '0-ERROR: ' RET-DISP ' ' FLAG-VAL
                         END-DISPLAY
                      END-IF
                   WHEN 1
-                     IF RETURN-CODE NOT = 0 OR 
+                     IF RETURN-CODE NOT = 0 OR
                         FLAG-VAL    NOT = '0' THEN
                         DISPLAY '1-ERROR: ' RET-DISP ' ' FLAG-VAL
                         END-DISPLAY
                      END-IF
                   WHEN 2
-                     IF RETURN-CHAR NOT = 'u' OR 
+                     IF RETURN-CHAR NOT = 'u' OR
                         RETURN-CODE NOT = 2 THEN
                         DISPLAY '2-ERROR: ' RET-DISP ' ' FLAG-VAL
                         END-DISPLAY
@@ -3651,7 +3662,7 @@ AT_DATA([prog4.cob], [
             END-PERFORM.
 
             MOVE 0 TO RETURN-CODE.
-            
+
             IF COUNTER NOT = 3 THEN
                MOVE RETURN-CODE TO RET-DISP
                DISPLAY 'CBL_GC_GETOPT returned -1 too early: ' COUNTER
@@ -3693,16 +3704,16 @@ AT_DATA([prog5.cob], [
               TO ONAME(2).
             MOVE 0   TO HAS-VALUE(2).
             MOVE '0' TO VAL(2).
-        
+
             PERFORM WITH TEST AFTER
                     VARYING COUNTER FROM 0 BY 1
                     UNTIL RETURN-CODE = -1
-               CALL 'CBL_GC_GETOPT' USING 
+               CALL 'CBL_GC_GETOPT' USING
                   BY REFERENCE SO LO LONGIND
                   BY VALUE     LONG-ONLY
                   BY REFERENCE RETURN-CHAR OPT-VAL
                END-CALL
-            
+
                EVALUATE COUNTER
                   WHEN 0
                   WHEN 1
@@ -3795,7 +3806,7 @@ Parent again
 AT_CLEANUP
 
 
-# Placed as extra routine as we should find a way to test this 
+# Placed as extra routine as we should find a way to test this
 # without CBL_GC_FORK (which isn't available on all systems where-
 # CBL_GC_WAITPID is available, for example MINGW)
 AT_SETUP([System routine CBL_GC_WAITPID])
@@ -3955,7 +3966,7 @@ AT_DATA([prog.cob], [
        END-IF
 
        *> Test assumes return-code will be 3, chars output by last fprintf
-       CALL "test_stdio" USING BY VALUE STDIN STDOUT STDERR 
+       CALL "test_stdio" USING BY VALUE STDIN STDOUT STDERR
        END-CALL
 
        STOP RUN.

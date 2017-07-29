@@ -1023,7 +1023,7 @@ prog.cob: 64: error: 'SWIT2-ON' is not defined
 prog.cob: 70: error: 'SWIT26-ON' is not defined
 prog.cob: 76: error: 'SWIT32-OFF' is not defined
 ])
-# There should be an additional
+# FIXME: There should be an additional
 #prog.cob: 19: error: duplicate definition of 'SWITCH-25'
 #prog.cob: 15: error: 'SWITCH-25' previously defined here
 #
@@ -1031,7 +1031,7 @@ AT_CHECK([$COMPILE_ONLY -std=acu-strict -fsystem-name=SW1 -fno-relax-syntax-chec
 [prog.cob: 33: error: duplicate ON clause
 prog.cob: 76: error: 'SWIT32-OFF' is not defined
 ])
-# There should be an additional
+# FIXME: There should be an additional
 #prog.cob: 19: error: duplicate definition of 'SWITCH-25'
 #prog.cob: 15: error: 'SWITCH-25' previously defined here
 #prog.cob: 23: error: duplicate definition of 'SWITCH 25'
