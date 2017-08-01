@@ -749,12 +749,19 @@ validate_field_1 (struct cb_field *f)
 			}
 		} else if (f->flag_any_numeric) {
 			if (f->pic->category != CB_CATEGORY_NUMERIC) 
-				cb_error (_("'%s' ANY NUMERIC must be PIC 9"),f->name);
-		} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC
-			&& f->pic->category != CB_CATEGORY_ALPHABETIC) {
-			cb_error (_("'%s' ANY LENGTH must be PIC X or PIC A"),f->name);
+				cb_error (_("'%s' ANY NUMERIC must be PIC 9"),
+					  f->name);
+		} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
+			cb_error (_("'%s' ANY LENGTH must be PIC X or PIC N"),
+				  f->name);
 		}
-		if (f->pic->size != 1 || f->usage != CB_USAGE_DISPLAY) {
+		/*
+		  TO-DO: Replace pic->orig check with f->usage ==
+		  CB_USAGE_NATIONAL. Currently NATIONAL items are marked as
+		  having ALPHANUMERIC category and USAGE DISPLAY.
+		*/
+		if (!((f->pic->size == 1 && f->usage == CB_USAGE_DISPLAY)
+		      || (f->pic->size == 2 && *f->pic->orig == 'N'))) {
 			if (f->flag_any_numeric) {
 				cb_error_x (x, _("'%s' ANY NUMERIC has invalid definition"), cb_name (x));
 			} else {

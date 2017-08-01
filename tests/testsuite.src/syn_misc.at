@@ -4249,3 +4249,35 @@ prog.cob: 25: warning: expression '115' GREATER THAN '16' is always TRUE
 
 AT_CLEANUP
 
+AT_SETUP([ANY LENGTH/NUMERIC with incorrect PIC])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       
+       DATA           DIVISION.
+       LINKAGE        SECTION.
+       *> Valid
+       01  valid-1    PIC X ANY LENGTH.
+       01  valid-2    PIC N ANY LENGTH.
+       01  valid-3    PIC 9 ANY NUMERIC.
+
+       *> Invalid
+       01  invalid-1  PIC A ANY LENGTH.
+       01  invalid-2  PIC Z ANY LENGTH.
+       01  invalid-3  PIC 9 ANY LENGTH.
+       01  invalid-4  PIC X ANY NUMERIC.
+       01  invalid-5  PIC XX ANY LENGTH.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: 9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed                                                       
+prog.cob: 18: error: 'invalid-1' ANY LENGTH must be PIC X or PIC N
+prog.cob: 18: error: 'invalid-2' ANY LENGTH must be PIC X or PIC N
+prog.cob: 18: error: 'invalid-3' ANY LENGTH must be PIC X or PIC N
+prog.cob: 18: error: 'invalid-4' ANY NUMERIC must be PIC 9
+prog.cob: 17: error: 'invalid-5' ANY LENGTH has invalid definition
+])
+
+AT_CLEANUP
