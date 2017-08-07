@@ -3067,6 +3067,7 @@ cb_validate_program_body (struct cb_program *prog)
 	struct cb_label		*l1;
 	struct cb_label		*l2;
 	struct cb_field		*f;
+	struct cb_file		*fl;
 	int			size;
 
 	/* Resolve all labels */
@@ -3222,6 +3223,35 @@ cb_validate_program_body (struct cb_program *prog)
 	cobc_cs_check = 0;
 
 	prog->exec_list = cb_list_reverse (prog->exec_list);
+
+	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
+		fl = CB_FILE (CB_VALUE (l));
+		if (fl->organization == COB_ORG_RELATIVE
+		 && fl->key != NULL) {
+			f = CB_FIELD_PTR (fl->key);
+			if (f->pic == NULL
+			 || f->pic->category != CB_CATEGORY_NUMERIC) {
+				cb_error_x (fl->key, 
+					_("File %s: RELATIVE KEY %s is not numeric"), fl->name, f->name);
+			}
+			if (f->pic != NULL
+			 && f->pic->category == CB_CATEGORY_NUMERIC
+			 && f->pic->scale != 0) {
+				cb_error_x (fl->key, 
+					_("File %s: RELATIVE KEY %s must be integer"), fl->name, f->name);
+			}
+			if (f->flag_occurs) {
+				cb_error_x (fl->key,
+					_("File %s: RELATIVE KEY %s cannot have OCCURS"), fl->name, f->name);
+			}
+			if (f->storage != CB_STORAGE_WORKING
+			 && f->storage != CB_STORAGE_LOCAL) {
+				cb_error_x (fl->key,
+					_("File %s: RELATIVE KEY %s declared outside WORKING STORAGE"), 
+						fl->name, f->name);
+			}
+		}
+	}
 }
 
 /* Expressions */

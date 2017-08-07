@@ -782,6 +782,11 @@
 	* typeck.c: disabled nested ODO as the current implementation
 	  has too many flaws (see re-opened FR #99)
 
+2016-12-27  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c: Added checks for RELATIVE KEY field being
+	  integer in WORKING-STORAGE and having no OCCURS
+
 2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	integrating patch #30 by Frank Swarbrick and make sure it works
