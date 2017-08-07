@@ -1,4 +1,11 @@
 
+2017-08-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c, typeck.c: moved RELATIVE KEY validating code to
+	  (validate_relative_key), called in (finalize_file).
+	* tree.c (validate_relative_key): altered to check key is not the
+	  associated file's records and improved category check.
+
 2017-07-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (system_name_table): added switches USW-0 thru USW-31.

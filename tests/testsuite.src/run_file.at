@@ -613,7 +613,7 @@ AT_DATA([prog.cob], [
        FD  TEST-FILE.
        01  TEST-REC     PIC X(4).
        WORKING-STORAGE  SECTION.
-       01  TESTKEY      USAGE BINARY-LONG.
+       01  TESTKEY      USAGE BINARY-LONG UNSIGNED.
        01  TESTSTAT     PIC XX.
            88  V-OK     VALUE "00" "05".
        PROCEDURE        DIVISION.
@@ -662,7 +662,7 @@ AT_DATA([prog.cob], [
        FD  TEST-FILE.
        01  TEST-REC     PIC X(4).
        WORKING-STORAGE  SECTION.
-       01  TESTKEY      USAGE BINARY-LONG.
+       01  TESTKEY      USAGE BINARY-LONG UNSIGNED.
        01  TESTSTAT     PIC XX.
            88  V-OK     VALUE "00" "05".
            88  V-ZERO   VALUE "00".
@@ -797,8 +797,10 @@ AT_DATA([prog.cob], [
        FILE SECTION.
        FD my-file EXTERNAL.
        01 my-record.
-           03 my-key PIC X(80).
-           03 my-record-data PIC x(80).
+           03 my-record-data PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01  my-key PIC 9.
 
        PROCEDURE DIVISION.
            CONTINUE

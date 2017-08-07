@@ -172,10 +172,10 @@ was_prev_warn (int linen)
 	int	i;
 	if (cb_exp_line != prev_expr_line) {
 		prev_expr_line = cb_exp_line;
-		for (i=0; i < 4; i++) 
+		for (i = 0; i < 4; i++)
 			prev_expr_warn[i] = 0;
 	}
-	for (i=0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		if (prev_expr_warn[i] == linen)
 			return 1;
 	}
@@ -3101,6 +3101,45 @@ validate_file (struct cb_file *f, cb_tree name)
 }
 
 static void
+validate_relative_key (struct cb_file *file)
+{
+	struct cb_field	*key_field = CB_FIELD_PTR (file->key);
+
+	if (CB_TREE_CATEGORY (key_field) != CB_CATEGORY_NUMERIC) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s is not numeric"),
+			    file->name, key_field->name);
+	}
+
+	/* TO-DO: Check if key_field is an integer based on USAGE */
+	if (key_field->pic != NULL) {
+		if (key_field->pic->category == CB_CATEGORY_NUMERIC
+		    && key_field->pic->scale != 0) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be integer"),
+				    file->name, key_field->name);
+		}
+		if (key_field->pic->have_sign) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be unsigned"),
+				    file->name, key_field->name);
+		}
+	}
+
+	if (key_field->flag_occurs) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s cannot have OCCURS"),
+			    file->name, key_field->name);
+	}
+
+	if (cb_field_founder (key_field)->file == file) {
+		cb_error_x (file->key,
+			    _("RELATIVE KEY %s cannot be in file record belonging to %s"),
+			    key_field->name, file->name);
+	}
+}
+
+static void
 validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 {
 	cb_tree			key_ref;
@@ -3136,8 +3175,12 @@ validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 		field_end = k->offset + k->size;
 		if (field_end > f->record_min) {
 			cb_error_x (CB_TREE(k), _("minimal record length %d can not hold the key item '%s';"
-				  " needs to be at least %d"), f->record_min, k->name, field_end);
+						  " needs to be at least %d"), f->record_min, k->name, field_end);
 		}
+	}
+
+	if (f->organization == COB_ORG_RELATIVE && f->key) {
+		validate_relative_key (f);
 	}
 }
 
@@ -3639,7 +3682,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	struct cb_literal 	*xl, *yl;
 	cb_tree			relop, e;
 
-	if (op == '@' 
+	if (op == '@'
 	 && y == NULL
 	 && CB_NUMERIC_LITERAL_P(x) )	/* Parens around a Numeric Literal */
 		return x;
@@ -3961,7 +4004,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
-			for (i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
+			for (i = j = 0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
 				if (xl->data[i] != yl->data[j]) {
 					break;
 				}

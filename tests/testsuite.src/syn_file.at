@@ -908,11 +908,12 @@ AT_DATA([prog.cob], [
             STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [], [prog.cob: 9: Error: File FILE1: RELATIVE KEY FILE1-KEY is not numeric
-prog.cob: 12: Error: File FILE2: RELATIVE KEY FILE2-KEY is not numeric
-prog.cob: 15: Error: File FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
-prog.cob: 18: Error: File FILE4: RELATIVE KEY FILE4-KEY declared outside WORKING STORAGE
-prog.cob: 21: Error: File FILE5: RELATIVE KEY FILE5-KEY must be integer
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 9: error: file FILE1: RELATIVE KEY FILE1-KEY is not numeric
+prog.cob: 12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
+prog.cob: 15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
+prog.cob: 18: error: RELATIVE KEY FILE4-KEY cannot be in file record belonging to FILE4
+prog.cob: 21: error: file FILE5: RELATIVE KEY FILE5-KEY must be integer
 ])
 
 AT_CLEANUP

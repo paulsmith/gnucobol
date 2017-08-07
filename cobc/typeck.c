@@ -1170,7 +1170,7 @@ cb_build_register_when_compiled (const char *name, const char *definition)
 	char		buff[32]; /* 32: make the compiler happy as "unsigned short" *could*
 						         have more digits than we "assume" */
 	size_t lit_size;
-	
+
 	if (!definition) {
 		definition = cb_get_register_definition (name);
 		if (!definition) {
@@ -1214,7 +1214,7 @@ static void
 cb_build_register_tally (const char *name, const char *definition)
 {
 	cb_tree field;
-	
+
 	if (!definition) {
 		definition = cb_get_register_definition (name);
 		if (!definition) {
@@ -1243,7 +1243,7 @@ cb_build_single_register (const char *name, const char *definition)
 {
 	/* TODO: parse definition here or in sub-functions */
 
-	/* registers that are currently created elsewhere 
+	/* registers that are currently created elsewhere
 	   TODO: move them here */
 	/* FIXME: LENGTH OF (must have different results depending on compiler configuration) */
 	if (!strcasecmp (name, "ADDRESS OF")
@@ -2859,11 +2859,12 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_field		*p;
 	struct cb_field		*q;
 	struct cb_field		*depfld;
-	struct cb_file		*f;
+	struct cb_field		*field;
+	struct cb_file		*file;
 	struct cb_report	*rep;
 	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
-	unsigned int	odo_level;
+	unsigned int		odo_level;
 
 	current_program->report_list = cb_list_reverse (current_program->report_list);
 
@@ -2893,9 +2894,9 @@ cb_validate_program_data (struct cb_program *prog)
 	current_program->file_list = cb_list_reverse (current_program->file_list);
 
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
-		f = CB_FILE (CB_VALUE (l));
-		if (!f->flag_finalized) {
-			finalize_file (f, NULL);
+		file = CB_FILE (CB_VALUE (l));
+		if (!file->flag_finalized) {
+			finalize_file (file, NULL);
 		}
 	}
 
@@ -3048,9 +3049,9 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* file definition checks */
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
-		f = CB_FILE (CB_VALUE (l));
-		if (CB_VALID_TREE(f->record_depending)) {
-			validate_record_depending (f->record_depending);
+		file = CB_FILE (CB_VALUE (l));
+		if (CB_VALID_TREE(file->record_depending)) {
+			validate_record_depending (file->record_depending);
 		}
 	}
 }
@@ -3067,7 +3068,6 @@ cb_validate_program_body (struct cb_program *prog)
 	struct cb_label		*l1;
 	struct cb_label		*l2;
 	struct cb_field		*f;
-	struct cb_file		*fl;
 	int			size;
 
 	/* Resolve all labels */
@@ -3223,35 +3223,6 @@ cb_validate_program_body (struct cb_program *prog)
 	cobc_cs_check = 0;
 
 	prog->exec_list = cb_list_reverse (prog->exec_list);
-
-	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-		fl = CB_FILE (CB_VALUE (l));
-		if (fl->organization == COB_ORG_RELATIVE
-		 && fl->key != NULL) {
-			f = CB_FIELD_PTR (fl->key);
-			if (f->pic == NULL
-			 || f->pic->category != CB_CATEGORY_NUMERIC) {
-				cb_error_x (fl->key, 
-					_("File %s: RELATIVE KEY %s is not numeric"), fl->name, f->name);
-			}
-			if (f->pic != NULL
-			 && f->pic->category == CB_CATEGORY_NUMERIC
-			 && f->pic->scale != 0) {
-				cb_error_x (fl->key, 
-					_("File %s: RELATIVE KEY %s must be integer"), fl->name, f->name);
-			}
-			if (f->flag_occurs) {
-				cb_error_x (fl->key,
-					_("File %s: RELATIVE KEY %s cannot have OCCURS"), fl->name, f->name);
-			}
-			if (f->storage != CB_STORAGE_WORKING
-			 && f->storage != CB_STORAGE_LOCAL) {
-				cb_error_x (fl->key,
-					_("File %s: RELATIVE KEY %s declared outside WORKING STORAGE"), 
-						fl->name, f->name);
-			}
-		}
-	}
 }
 
 /* Expressions */
