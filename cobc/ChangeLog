@@ -1,4 +1,8 @@
 
+2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: included Patch #27 for FR #100 as PENDING
+
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: fixed bug #402 - optional WITH clause functional
@@ -1602,6 +1606,12 @@
 	* reserved.c (default_reserved_words): moved uncommon, non-standard
 	  aliases (e.g., AUTOTERMINATE for AUTO) to config files.
 	* parser.y: renamed TIMEOUT token to TIME-OUT.
+
+2016-06-13  Wim Niemans <niemans@nlbox.com>
+
+	* parser.y, reserved.c, typeck.c, tree.h: added ACUCOBOL CGI extension
+	  EXTERNAL-FORM / IDENTIFIED BY as DATA DIVISION clauses processed in
+	  handling of DISPLAY / ACCEPT statements
 
 2016-06-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

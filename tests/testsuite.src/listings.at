@@ -840,7 +840,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+[copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
@@ -857,7 +857,8 @@ LINE    PG/LN  A...B............................................................
 000006         COPY "copy.inc".
 000001C
 000002C        01 TEST-VAR PIC X(2) VULUE "OK".
-error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+error: syntax error, unexpected Identifier, expecting EXTERNAL or
+     + EXTERNAL-FORM or GLOBAL or IDENTIFIED
 000007         PROCEDURE        DIVISION.
 000008             DISPLAY FIRST-MATCH NO ADVANCING
 error: 'FIRST-MATCH' is not defined
@@ -874,7 +875,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
 
 0 warnings in compilation group
@@ -897,7 +898,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
 ])
 
@@ -912,7 +913,8 @@ LINE    PG/LN  A...B............................................................
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 TEST-VAR PIC X(2) VULUE "OK".
-error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+error: syntax error, unexpected Identifier, expecting EXTERNAL or
+     + EXTERNAL-FORM or GLOBAL or IDENTIFIED
 000007         PROCEDURE        DIVISION.
 000008             DISPLAY FIRST-MATCH NO ADVANCING
 error: 'FIRST-MATCH' is not defined
@@ -929,7 +931,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob: 8: error: 'FIRST-MATCH' is not defined
 
 0 warnings in compilation group
