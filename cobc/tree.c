@@ -3101,46 +3101,7 @@ validate_file (struct cb_file *f, cb_tree name)
 }
 
 static void
-validate_relative_key (struct cb_file *file)
-{
-	struct cb_field	*key_field = CB_FIELD_PTR (file->key);
-
-	if (CB_TREE_CATEGORY (key_field) != CB_CATEGORY_NUMERIC) {
-		cb_error_x (file->key,
-			    _("file %s: RELATIVE KEY %s is not numeric"),
-			    file->name, key_field->name);
-	}
-
-	/* TO-DO: Check if key_field is an integer based on USAGE */
-	if (key_field->pic != NULL) {
-		if (key_field->pic->category == CB_CATEGORY_NUMERIC
-		    && key_field->pic->scale != 0) {
-			cb_error_x (file->key,
-				    _("file %s: RELATIVE KEY %s must be integer"),
-				    file->name, key_field->name);
-		}
-		if (key_field->pic->have_sign) {
-			cb_error_x (file->key,
-				    _("file %s: RELATIVE KEY %s must be unsigned"),
-				    file->name, key_field->name);
-		}
-	}
-
-	if (key_field->flag_occurs) {
-		cb_error_x (file->key,
-			    _("file %s: RELATIVE KEY %s cannot have OCCURS"),
-			    file->name, key_field->name);
-	}
-
-	if (cb_field_founder (key_field)->file == file) {
-		cb_error_x (file->key,
-			    _("RELATIVE KEY %s cannot be in file record belonging to %s"),
-			    key_field->name, file->name);
-	}
-}
-
-static void
-validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
+validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 {
 	cb_tree			key_ref;
 	struct cb_field		*k;
@@ -3178,10 +3139,6 @@ validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 						  " needs to be at least %d"), f->record_min, k->name, field_end);
 		}
 	}
-
-	if (f->organization == COB_ORG_RELATIVE && f->key) {
-		validate_relative_key (f);
-	}
 }
 
 void
@@ -3203,19 +3160,20 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	/* associate records to file (seperate and first for being able
-	   to resolve references, for example in validate_key_field */
+	   to resolve references, for example in validate_indexed_key_field */
 	for (p = records; p; p = p->sister) {
 		p->file = f;
 	}
 
-	/* validate key fields */
+	/* Validate INDEXED key fields (RELATIVE keys can only be validated when
+	   the whole data division has been processed). */
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->key) {
-			validate_key_field (f, records, f->key);
+			validate_indexed_key_field (f, records, f->key);
 		}
 		if (f->alt_key_list) {
 			for (cbak = f->alt_key_list; cbak; cbak = cbak->next) {
-				validate_key_field (f, records, cbak->key);
+				validate_indexed_key_field (f, records, cbak->key);
 			}
 		}
 	}
@@ -3369,7 +3327,7 @@ cb_finalize_cd (struct cb_cd *cd, struct cb_field *records)
 	}
 
 	for (p = records; p; p = p->sister) {
-		/* Check record size is exactly 87 chars */
+		/* TO-DO: Check record size is exactly 87 chars */
 
 		p->cd = cd;
 		if (p != cd->record) {

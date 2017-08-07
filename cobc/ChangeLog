@@ -1,10 +1,12 @@
 
 2017-08-07  Edward Hart <edward.dan.hart@gmail.com>
 
-	* tree.c, typeck.c: moved RELATIVE KEY validating code to
-	  (validate_relative_key), called in (finalize_file).
-	* tree.c (validate_relative_key): altered to check key is not the
+	* typeck.c: moved RELATIVE KEY validating code to
+	  (validate_relative_key), called in (cb_validate_program_data).
+	* typeck.c (validate_relative_key): altered to check key is not the
 	  associated file's records and improved category check.
+	* parser.y: added check that correct KEY clause is used with
+	  RELATIVE/INDEXED files (bug #405).
 
 2017-07-29  Edward Hart <edward.dan.hart@gmail.com>
 

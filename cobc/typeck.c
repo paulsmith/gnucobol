@@ -2850,6 +2850,45 @@ validate_record_depending (cb_tree x)
 	}
 }
 
+static void
+validate_relative_key_field (struct cb_file *file)
+{
+	struct cb_field	*key_field = CB_FIELD_PTR (file->key);
+
+	if (CB_TREE_CATEGORY (key_field) != CB_CATEGORY_NUMERIC) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s is not numeric"),
+			    file->name, key_field->name);
+	}
+
+	/* TO-DO: Check if key_field is an integer based on USAGE */
+	if (key_field->pic != NULL) {
+		if (key_field->pic->category == CB_CATEGORY_NUMERIC
+		    && key_field->pic->scale != 0) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be integer"),
+				    file->name, key_field->name);
+		}
+		if (key_field->pic->have_sign) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be unsigned"),
+				    file->name, key_field->name);
+		}
+	}
+
+	if (key_field->flag_occurs) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s cannot have OCCURS"),
+			    file->name, key_field->name);
+	}
+
+	if (cb_field_founder (key_field)->file == file) {
+		cb_error_x (file->key,
+			    _("RELATIVE KEY %s cannot be in file record belonging to %s"),
+			    key_field->name, file->name);
+	}
+}
+
 void
 cb_validate_program_data (struct cb_program *prog)
 {
@@ -2859,7 +2898,6 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_field		*p;
 	struct cb_field		*q;
 	struct cb_field		*depfld;
-	struct cb_field		*field;
 	struct cb_file		*file;
 	struct cb_report	*rep;
 	unsigned char		*c;
@@ -2968,6 +3006,7 @@ cb_validate_program_data (struct cb_program *prog)
 			prog->crt_status = NULL;
 		}
 	} else {
+		/* TO-DO: Add to registers list */
 		l = cb_build_reference ("COB-CRT-STATUS");
 		p = CB_FIELD (cb_build_field (l));
 		p->usage = CB_USAGE_DISPLAY;
@@ -3050,8 +3089,12 @@ cb_validate_program_data (struct cb_program *prog)
 	/* file definition checks */
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
 		file = CB_FILE (CB_VALUE (l));
-		if (CB_VALID_TREE(file->record_depending)) {
+		if (CB_VALID_TREE (file->record_depending)) {
 			validate_record_depending (file->record_depending);
+		}
+		if (file->organization == COB_ORG_RELATIVE && file->key
+		    && cb_ref (file->key) != cb_error_node) {
+			validate_relative_key_field (file);
 		}
 	}
 }

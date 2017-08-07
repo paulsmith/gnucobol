@@ -791,7 +791,7 @@ AT_DATA([prog.cob], [
            SELECT my-file
                ASSIGN TO "blahblah"
                ORGANIZATION IS RELATIVE
-               RECORD KEY IS my-key.
+               RELATIVE KEY IS my-key.
 
        DATA DIVISION.
        FILE SECTION.

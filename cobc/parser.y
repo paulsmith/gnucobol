@@ -151,6 +151,12 @@ enum tallying_phrase {
 	VALUE_REGION_PHRASE
 };
 
+enum key_clause_type {
+	NO_KEY,
+	RECORD_KEY,
+	RELATIVE_KEY
+};
+	 
 static struct cb_statement	*main_statement;
 
 static cb_tree			current_expr;
@@ -210,6 +216,7 @@ static cob_flags_t		header_check;
 static unsigned int		call_nothing;
 static enum tallying_phrase	previous_tallying_phrase;
 static cb_tree			default_rounded_mode;
+static enum key_clause_type	key_type;
 
 static enum cb_display_type	display_type;
 static int			is_first_display_item;
@@ -3745,9 +3752,20 @@ file_control_entry:
 		current_program->file_list
 			= CB_CHAIN (current_program->file_list);
 	}
+        key_type = NO_KEY;
   }
   _select_clauses_or_error
   {
+	if (current_file->organization == COB_ORG_INDEXED
+	    && key_type == RELATIVE_KEY) {
+		cb_error_x (current_file->key,
+			    _("Cannot use RELATIVE KEY clause on INDEXED files"));
+	} else if (current_file->organization == COB_ORG_RELATIVE
+		   && key_type == RECORD_KEY) {
+		cb_error_x (current_file->key,
+			    _("Cannot use RECORD KEY clause on RELATIVE files"));
+	}
+	  
 	if (CB_VALID_TREE ($3)) {
 		validate_file (current_file, $3);
 	}
@@ -4120,6 +4138,7 @@ record_key_clause:
   {
 	check_repeated ("RECORD KEY", SYN_CLAUSE_9, &check_duplicate);
 	current_file->key = $4;
+	key_type = RECORD_KEY;
   }
 ;
 
@@ -4136,6 +4155,7 @@ relative_key_clause:
   {
 	check_repeated ("RELATIVE KEY", SYN_CLAUSE_10, &check_duplicate);
 	current_file->key = $4;
+	key_type = RELATIVE_KEY;
   }
 ;
 

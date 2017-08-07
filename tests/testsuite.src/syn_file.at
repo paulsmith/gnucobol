@@ -859,7 +859,7 @@ prog.cob: 13: warning: 'filename' will be implicitly defined
 AT_CLEANUP
 
 
-AT_SETUP([KEY type checks])
+AT_SETUP([RELATIVE KEY type checks])
 AT_KEYWORDS([RELATIVE FILE])
 
 AT_DATA([prog.cob], [
@@ -914,6 +914,31 @@ prog.cob: 12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
 prog.cob: 15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
 prog.cob: 18: error: RELATIVE KEY FILE4-KEY cannot be in file record belonging to FILE4
 prog.cob: 21: error: file FILE5: RELATIVE KEY FILE5-KEY must be integer
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Mismatched KEY clause])
+AT_KEYWORDS([file RELATIVE INDEXED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+            SELECT file-1 ASSIGN DISK,
+                INDEXED, RELATIVE KEY file-1-key.
+            SELECT file-2 ASSIGN DISK,
+                RELATIVE, RECORD KEY file-2-key.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob: 8: error: Cannot use RELATIVE KEY clause on INDEXED files
+prog.cob: 10: error: Cannot use RECORD KEY clause on RELATIVE files
+prog.cob: 8: error: 'file-1-key' is not defined
+prog.cob: 10: error: 'file-2-key' is not defined
 ])
 
 AT_CLEANUP
