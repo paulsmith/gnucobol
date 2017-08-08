@@ -1,7 +1,12 @@
 
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* update_linguas.sh: auto-add new translations received from TP
+	  to svn; only run make if a Makefile actually exists
+
 2017-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* pt.po: added Portuguese (translated by Jum Currey and his team)
+	* pt.po: added Portuguese (translated by Mario Matos)
 
 2016-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -34,6 +39,10 @@
 
 	* nl.po: added Dutch  (translated by Ed Borchert and Ronald Heirbaut)
 
+2011-06-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* es.po: added Spanish (translated by Randy Coman)
+
 2010-06-28  Roger While <simrw@sim-basis.de>
 
 	* MARK - Version 2.0
@@ -42,4 +51,3 @@
 2002-05-29  Keisuke Nishida  <knishida@netlab.jp>
 
 	* ja.po: New file.
-

@@ -71,8 +71,8 @@ AT_CHECK([$COMPILE_ONLY -std=xopen prog.cob], [0], [],
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
 [prog.cob: 4: warning: AUTHOR is obsolete in ACUCOBOL-GT
 ])
-AT_CHECK([$COMPILE_ONLY -std=bs2000-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in BS2000 COBOL
+AT_CHECK([$COMPILE_ONLY -std=bs2000-strict prog.cob], [1], [],
+[prog.cob: 4: error: AUTHOR does not conform to BS2000 COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [0], [],
 [prog.cob: 4: warning: AUTHOR is obsolete in IBM COBOL

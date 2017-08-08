@@ -41,6 +41,7 @@ reserved:	ADDRESS
 reserved:	ADVANCING
 reserved:	AFTER
 reserved:	ALL
+reserved:	ALLOCATE
 reserved:	ALPHABET
 reserved:	ALPHABETIC
 reserved:	ALPHABETIC-LOWER
@@ -226,6 +227,7 @@ reserved:	END-DIVIDE
 reserved:	END-EVALUATE
 reserved:	END-IF
 reserved:	END-INVOKE
+reserved:	END-JSON
 reserved:	END-MULTIPLY
 reserved:	END-OF-PAGE
 reserved:	END-PERFORM
@@ -289,6 +291,7 @@ reserved:	FOOTING
 reserved:	FOR
 reserved:	FOREGROUND-COLOR*
 reserved:	FOREGROUND-COLOUR*=FOREGROUND-COLOR
+reserved:	FREE
 reserved:	FROM
 reserved:	FULL*
 reserved:	FUNCTION
@@ -343,6 +346,7 @@ reserved:	INVOKED
 reserved:	IS
 reserved:	JAPANESE
 reserved:	JOINING
+reserved:	JSON
 reserved:	JUST
 reserved:	JUSTIFIED
 reserved:	KANJI
@@ -685,7 +689,7 @@ intrinsic-function:	FRACTION-PART
 intrinsic-function:	INTEGER
 intrinsic-function:	INTEGER-OF-DATE
 intrinsic-function:	INTEGER-OF-DAY
-intrinsic-function:	INTEGER-OF-FORMATTED-DATE 
+intrinsic-function:	INTEGER-OF-FORMATTED-DATE
 intrinsic-function:	INTEGER-PART
 intrinsic-function:	LENGTH
 intrinsic-function:	LENGTH-AN

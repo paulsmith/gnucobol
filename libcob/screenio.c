@@ -1840,7 +1840,7 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 			fig_const = f->data[0];
 			cob_addnch (ssize_is, fig_const);
 		} else {
-			addnstr ((char *)f->data, f->size);
+			cob_addnstr ((char *)f->data, f->size);
 			/* WITH SIZE larger than field displays trailing spaces */
 			cob_addnch (size_display - f->size, COB_CH_SP);
 		}

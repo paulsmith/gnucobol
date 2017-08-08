@@ -172,10 +172,10 @@ was_prev_warn (int linen)
 	int	i;
 	if (cb_exp_line != prev_expr_line) {
 		prev_expr_line = cb_exp_line;
-		for (i=0; i < 4; i++) 
+		for (i = 0; i < 4; i++)
 			prev_expr_warn[i] = 0;
 	}
-	for (i=0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		if (prev_expr_warn[i] == linen)
 			return 1;
 	}
@@ -3104,7 +3104,7 @@ validate_file (struct cb_file *f, cb_tree name)
 }
 
 static void
-validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
+validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 {
 	cb_tree			key_ref;
 	struct cb_field		*k;
@@ -3139,7 +3139,7 @@ validate_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
 		field_end = k->offset + k->size;
 		if (field_end > f->record_min) {
 			cb_error_x (CB_TREE(k), _("minimal record length %d can not hold the key item '%s';"
-				  " needs to be at least %d"), f->record_min, k->name, field_end);
+						  " needs to be at least %d"), f->record_min, k->name, field_end);
 		}
 	}
 }
@@ -3163,19 +3163,20 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	/* associate records to file (seperate and first for being able
-	   to resolve references, for example in validate_key_field */
+	   to resolve references, for example in validate_indexed_key_field */
 	for (p = records; p; p = p->sister) {
 		p->file = f;
 	}
 
-	/* validate key fields */
+	/* Validate INDEXED key fields (RELATIVE keys can only be validated when
+	   the whole data division has been processed). */
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->key) {
-			validate_key_field (f, records, f->key);
+			validate_indexed_key_field (f, records, f->key);
 		}
 		if (f->alt_key_list) {
 			for (cbak = f->alt_key_list; cbak; cbak = cbak->next) {
-				validate_key_field (f, records, cbak->key);
+				validate_indexed_key_field (f, records, cbak->key);
 			}
 		}
 	}
@@ -3329,7 +3330,7 @@ cb_finalize_cd (struct cb_cd *cd, struct cb_field *records)
 	}
 
 	for (p = records; p; p = p->sister) {
-		/* Check record size is exactly 87 chars */
+		/* TO-DO: Check record size is exactly 87 chars */
 
 		p->cd = cd;
 		if (p != cd->record) {
@@ -3642,7 +3643,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	struct cb_literal 	*xl, *yl;
 	cb_tree			relop, e;
 
-	if (op == '@' 
+	if (op == '@'
 	 && y == NULL
 	 && CB_NUMERIC_LITERAL_P(x) )	/* Parens around a Numeric Literal */
 		return x;
@@ -3964,7 +3965,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		&& !CB_NUMERIC_LITERAL_P(y)) {
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
-			for (i=j=0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
+			for (i = j = 0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
 				if (xl->data[i] != yl->data[j]) {
 					break;
 				}

@@ -66,8 +66,8 @@ call-overflow:				ok
 data-records-clause:			+obsolete
 debugging-mode:				ok
 use-for-debugging:			+obsolete
-listing-statements:			ok
-title-statement:			ok
+listing-statements:			ok	# may be a user-defined word
+title-statement:			ok	# may be a user-defined word
 entry-statement:			ok
 goto-statement-without-name:		+obsolete
 label-records-clause:			+obsolete
@@ -77,7 +77,7 @@ move-figurative-constant-to-numeric:	+archaic
 move-figurative-quote-to-numeric:	+archaic
 multiple-file-tape-clause:		+obsolete
 next-sentence-phrase:			+archaic
-odo-without-to:				ok
+odo-without-to:				+warning
 padding-character-clause:		+obsolete
 section-segments:			+ignore
 stop-literal-statement:			+obsolete
@@ -99,7 +99,7 @@ constant-78:				ok
 program-prototypes:			ok
 reference-out-of-declaratives:		+warning
 numeric-value-for-edited-item:		+warning
-incorrect-conf-sec-order:		ok
+incorrect-conf-sec-order:		+warning
 define-constant-directive:		+obsolete
 
 

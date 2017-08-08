@@ -6017,8 +6017,11 @@ print_version (void)
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart");
+	
+	/* TRANSLATORS: This msgid is indented as the "Packaged" msgid, %s expands to date and time */
 	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
+	/* TRANSLATORS: This msgid is indented as the "Built" msgid, %s expands to date and time */
 	printf (_("Packaged  %s"), COB_TAR_DATE);
 	putchar ('\n');
 

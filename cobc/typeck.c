@@ -587,7 +587,7 @@ cb_validate_one (cb_tree x)
 			if (f->odo_level > 1) {
 				/* to enable this take care of the FIXME entries in (output_size) */
 				cb_error_x (x, _("%s is not implemented"),
-					_("reference to item containing nested ODO"));
+					_("reference to item containing nested OCCURS DEPENDING ON"));
 				return 1;
 			}
 #endif
@@ -1170,7 +1170,7 @@ cb_build_register_when_compiled (const char *name, const char *definition)
 	char		buff[32]; /* 32: make the compiler happy as "unsigned short" *could*
 						         have more digits than we "assume" */
 	size_t lit_size;
-	
+
 	if (!definition) {
 		definition = cb_get_register_definition (name);
 		if (!definition) {
@@ -1214,7 +1214,7 @@ static void
 cb_build_register_tally (const char *name, const char *definition)
 {
 	cb_tree field;
-	
+
 	if (!definition) {
 		definition = cb_get_register_definition (name);
 		if (!definition) {
@@ -1243,7 +1243,7 @@ cb_build_single_register (const char *name, const char *definition)
 {
 	/* TODO: parse definition here or in sub-functions */
 
-	/* registers that are currently created elsewhere 
+	/* registers that are currently created elsewhere
 	   TODO: move them here */
 	/* FIXME: LENGTH OF (must have different results depending on compiler configuration) */
 	if (!strcasecmp (name, "ADDRESS OF")
@@ -1742,7 +1742,9 @@ cb_build_identifier (cb_tree x, const int subchk)
 			p = p->redefines;
 		}
 		if (p == f) {
-			sprintf(full_name, "'%s'", name);
+			/* TRANSLATORS: This msgid is used when a variable name
+			   or label is referenced in a compiler message. */
+			sprintf(full_name, _("'%s'"), name);
 		} else {
 			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
 		}
@@ -2850,6 +2852,45 @@ validate_record_depending (cb_tree x)
 	}
 }
 
+static void
+validate_relative_key_field (struct cb_file *file)
+{
+	struct cb_field	*key_field = CB_FIELD_PTR (file->key);
+
+	if (CB_TREE_CATEGORY (key_field) != CB_CATEGORY_NUMERIC) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s is not numeric"),
+			    file->name, key_field->name);
+	}
+
+	/* TO-DO: Check if key_field is an integer based on USAGE */
+	if (key_field->pic != NULL) {
+		if (key_field->pic->category == CB_CATEGORY_NUMERIC
+		    && key_field->pic->scale != 0) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be integer"),
+				    file->name, key_field->name);
+		}
+		if (key_field->pic->have_sign) {
+			cb_error_x (file->key,
+				    _("file %s: RELATIVE KEY %s must be unsigned"),
+				    file->name, key_field->name);
+		}
+	}
+
+	if (key_field->flag_occurs) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s cannot have OCCURS"),
+			    file->name, key_field->name);
+	}
+
+	if (cb_field_founder (key_field)->file == file) {
+		cb_error_x (file->key,
+			    _("RELATIVE KEY %s cannot be in file record belonging to %s"),
+			    key_field->name, file->name);
+	}
+}
+
 void
 cb_validate_program_data (struct cb_program *prog)
 {
@@ -2859,11 +2900,11 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_field		*p;
 	struct cb_field		*q;
 	struct cb_field		*depfld;
-	struct cb_file		*f;
+	struct cb_file		*file;
 	struct cb_report	*rep;
 	unsigned char		*c;
 	char			buff[COB_MINI_BUFF];
-	unsigned int	odo_level;
+	unsigned int		odo_level;
 
 	current_program->report_list = cb_list_reverse (current_program->report_list);
 
@@ -2893,9 +2934,9 @@ cb_validate_program_data (struct cb_program *prog)
 	current_program->file_list = cb_list_reverse (current_program->file_list);
 
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
-		f = CB_FILE (CB_VALUE (l));
-		if (!f->flag_finalized) {
-			finalize_file (f, NULL);
+		file = CB_FILE (CB_VALUE (l));
+		if (!file->flag_finalized) {
+			finalize_file (file, NULL);
 		}
 	}
 
@@ -2967,6 +3008,7 @@ cb_validate_program_data (struct cb_program *prog)
 			prog->crt_status = NULL;
 		}
 	} else {
+		/* TO-DO: Add to registers list */
 		l = cb_build_reference ("COB-CRT-STATUS");
 		p = CB_FIELD (cb_build_field (l));
 		p->usage = CB_USAGE_DISPLAY;
@@ -3020,7 +3062,7 @@ cb_validate_program_data (struct cb_program *prog)
 			for (; p->sister; p = p->sister) {
 				if (p->sister == depfld) {
 						cb_error_x (x,
-							    _("'%s' ODO field item invalid here"),
+							    _("'%s' OCCURS DEPENDING ON field item invalid here"),
 							    p->sister->name);
 				}
 				if (!p->sister->redefines) {
@@ -3038,7 +3080,7 @@ cb_validate_program_data (struct cb_program *prog)
 		/* If the field is GLOBAL, then the ODO must also be GLOBAL */
 		if (q->flag_is_global && depfld) {
 			if (!depfld->flag_is_global) {
-				cb_error_x (x, _("'%s' ODO item must have GLOBAL attribute"),
+				cb_error_x (x, _("'%s' OCCURS DEPENDING ON item must have GLOBAL attribute"),
 					depfld->name);
 			}
 		}
@@ -3048,9 +3090,13 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* file definition checks */
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
-		f = CB_FILE (CB_VALUE (l));
-		if (CB_VALID_TREE(f->record_depending)) {
-			validate_record_depending (f->record_depending);
+		file = CB_FILE (CB_VALUE (l));
+		if (CB_VALID_TREE (file->record_depending)) {
+			validate_record_depending (file->record_depending);
+		}
+		if (file->organization == COB_ORG_RELATIVE && file->key
+		    && cb_ref (file->key) != cb_error_node) {
+			validate_relative_key_field (file);
 		}
 	}
 }

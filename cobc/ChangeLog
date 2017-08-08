@@ -4,6 +4,24 @@
 	* parser.y, reserved.c, typeck.c, tree.h: adjusted and included
 	  Patch #27 by Wim Niemans 2016-06-13 for FR #100 as PENDING
 	* field.c, tree.c: adjustments for EXTERNAL-FORM
+	* cobc.c, error.c, parser.y, typeck.c: msgid specific changes
+
+2017-08-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c: moved RELATIVE KEY validating code to
+	  (validate_relative_key), called in (cb_validate_program_data).
+	* typeck.c (validate_relative_key): altered to check key is not the
+	  associated file's records and improved category check.
+	* parser.y: added check that correct KEY clause is used with
+	  RELATIVE/INDEXED files (bug #405).
+
+2017-07-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c (system_name_table): added switches USW-0 thru USW-31.
+	* field.c (validate_field_1): added warning for useless FULL clause on
+	  numeric items.
+	* parser.y (error_stmt_recover): removed ELSE from list of verbs,
+	  preventing recursion on syntax error in IF statements (bug #403).
 
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -779,6 +797,11 @@
 
 	* typeck.c: disabled nested ODO as the current implementation
 	  has too many flaws (see re-opened FR #99)
+
+2016-12-27  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c: Added checks for RELATIVE KEY field being
+	  integer in WORKING-STORAGE and having no OCCURS
 
 2016-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -4475,12 +4475,13 @@ cob_file_external_addr (const char *exname,
 	if (fl->file_version == 0)
 		fl->file_version = COB_FILE_VERSION;
 
-	if (nkeys > 0
-	 && fl->keys != NULL) {
-		fl->keys = cob_cache_malloc (sizeof(cob_file_key) * nkeys);
-	}
-	if (pky != NULL) {
-		*pky = fl->keys;
+	if (nkeys > 0) {
+		if (fl->keys == NULL) {
+			fl->keys = cob_cache_malloc (sizeof(cob_file_key) * nkeys);
+		}
+		if (pky != NULL) {
+			*pky = fl->keys;
+		}
 	}
 
 	if (linage > 0
