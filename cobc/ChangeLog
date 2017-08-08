@@ -1,7 +1,9 @@
 
 2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* general: included Patch #27 for FR #100 as PENDING
+	* parser.y, reserved.c, typeck.c, tree.h: adjusted and included
+	  Patch #27 by Wim Niemans 2016-06-13 for FR #100 as PENDING
+	* field.c, tree.c: adjustments for EXTERNAL-FORM
 
 2017-07-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
