@@ -35,13 +35,13 @@ COBCRUN="${abs_top_builddir}/bin/cobcrun"
 # * diff these parts into your atlocal (preferably creating a temporary one)
 # * set switches you need to the following lines and set the tool accordingly (template has MEMCHECK)
 
-VALGRIND_COBC_LOG=${abs_srcdir}/valgrind/cobc_%p.log
-VALGRIND_COBCRUN_LOG=${abs_srcdir}/valgrind/cobcrun_%p.log
-VALGRIND_COBCRUN_DIRECT_LOG=${abs_srcdir}/valgrind/cobcrun_direct_%p.log
+VALGRIND_COBC_LOG=${abs_builddir}/valgrind/cobc_%p.log
+VALGRIND_COBCRUN_LOG=${abs_builddir}/valgrind/cobcrun_%p.log
+VALGRIND_COBCRUN_DIRECT_LOG=${abs_builddir}/valgrind/cobcrun_direct_%p.log
 
 # if you stumble over system library errors you may want to suppress some of them
 # re-run with --gen-suppressions=yes and then point to the file (after inspecting and
-# modifiying it via --suppressions=${abs_srcdir}/local.supp) 
+# modifiying it via --suppressions=${abs_builddir}/local.supp) 
 MEMCHECK="valgrind --tool=memcheck --read-var-info=yes --track-origins=yes --leak-check=full --show-leak-kinds=all"
 SGCHECK="valgrind --tool=exp-sgcheck --read-var-info=yes"
 
