@@ -5086,7 +5086,7 @@ emit_accept_external_form (cb_tree x)
 	return found;
 }
 
-void
+static void
 cb_emit_accept_external_form (cb_tree x1)
 {
 	cb_tree		x2;
@@ -5130,7 +5130,7 @@ emit_display_external_form (cb_tree x)
 	return found;
 }
 
-void
+static void
 cb_emit_display_external_form (cb_tree x1)
 {
 	cb_tree		x2;
