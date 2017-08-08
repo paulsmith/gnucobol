@@ -1,4 +1,9 @@
 
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* create_win_dist.sh: remove ".in" suffix from template files config.h.in
+	  and defaults.h.in in generated win dist package
+
 2017-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: version bump to 2.3-dev

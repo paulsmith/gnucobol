@@ -711,6 +711,9 @@ struct cb_field {
 	cb_tree			values;		/* VALUE */
 	cb_tree			false_88;	/* 88 FALSE clause */
 	cb_tree			index_list;	/* INDEXED BY */
+	cb_tree			external_form_identifier;	/* target of IDENTIFIED BY 
+												(CGI template) */
+
 	struct cb_field		*parent;	/* Upper level field (if any) */
 	struct cb_field		*children;	/* Top of lower level fields */
 	struct cb_field		*validation;	/* First level 88 field (if any) */
@@ -779,6 +782,7 @@ struct cb_field {
 	unsigned int flag_item_78	: 1;	/* Is 78 level */
 	unsigned int flag_any_length	: 1;	/* Is ANY LENGTH */
 	unsigned int flag_item_based	: 1;	/* Is BASED */
+	unsigned int flag_is_external_form : 1;		/* Is EXTERNAL-FORM */
 	unsigned int flag_filler	: 1;	/* Implicit/explicit filler */
 	unsigned int flag_synchronized	: 1;	/* SYNCHRONIZED */
 	unsigned int flag_invalid	: 1;	/* Is broken */

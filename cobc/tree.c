@@ -902,8 +902,11 @@ cb_tree_category (cb_tree x)
 			default:
 				if (f->pic) {
 					x->category = f->pic->category;
+				/* FIXME: Hack for CGI to not abort */
+				} else if (f->flag_is_external_form) {
+					x->category = CB_CATEGORY_ALPHANUMERIC;
 				} else {
-					x->category = (enum cb_category)0;
+					x->category = CB_CATEGORY_UNKNOWN;
 				}
 				break;
 			}

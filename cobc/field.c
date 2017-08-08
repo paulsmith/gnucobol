@@ -210,7 +210,7 @@ cb_push_op ( char op, int prec )
 	}
 	op_pos++;
 	op_type [op_pos] = op;
-	op_prec [op_pos] = prec;
+	op_prec [op_pos] = (char) prec;
 }
 
 /* Evaluate expression and store as new Numeric Literal */
@@ -681,6 +681,7 @@ check_picture_item (cb_tree x, struct cb_field *f)
 		}
 		return 0;
 	}
+
 	if (f->level == 1) {
 		cb_error_x (x, _("PICTURE clause required for '%s'"),
 			    cb_name (x));
@@ -935,7 +936,11 @@ validate_field_1 (struct cb_field *f)
 			need_picture = 0;
 			break;
 		default:
-			need_picture = 1;
+			if (!f->flag_is_external_form) {
+				need_picture = 1;
+			} else {
+				need_picture = 0;
+			}
 			break;
 		}
 
@@ -1590,7 +1595,7 @@ unbounded_again:
 					f->name, COB_MAX_FIELD_SIZE);
 		}
 		f->size = (int) size_check;
-	} else {
+	} else if (!f->flag_is_external_form) {
 		/* Elementary item */
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:

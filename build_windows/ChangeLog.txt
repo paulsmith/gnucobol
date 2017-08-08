@@ -1,4 +1,13 @@
 
+2017-08-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makebisonflex.bat: mimic ylwrap (only replace existing generated files
+	  if the newly generated ones are newer);
+	  modularized executable check
+	* general: removed all entries from linker input in project files
+	* common.h.in: linker input via pragma for configured libraries,
+	  added necessary parts for builds without curses
+
 2017-07-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* makedist.bat: optimize during build of extras,

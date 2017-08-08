@@ -1614,6 +1614,7 @@ deduce_display_type (cb_tree x_list, cb_tree local_upon_value, cb_tree local_lin
 	int	using_default_device_which_is_crt =
 		local_upon_value == NULL && get_default_display_device () == cb_null;
 
+	/* TODO: Seperate CGI DISPLAYs here */
 	if (contains_only_screen_fields ((struct cb_list *) x_list)) {
 		if (!contains_one_screen_field ((struct cb_list *) x_list)
 		    || attr_ptr) {
@@ -1898,6 +1899,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token EXPONENTIATION		"exponentiation operator"
 %token EXTEND
 %token EXTERNAL
+%token EXTERNAL_FORM		"EXTERNAL-FORM"
 %token F
 %token FD
 %token FILE_CONTROL		"FILE-CONTROL"
@@ -1948,6 +1950,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token HIGH_VALUE		"HIGH-VALUE"
 %token ICON
 %token ID
+%token IDENTIFIED
 %token IDENTIFICATION
 %token IF
 %token IGNORE
@@ -5300,6 +5303,8 @@ data_description_clause:
 | based_clause
 | value_clause
 | any_length_clause
+| external_form_clause
+| identified_by_clause
 ;
 
 
@@ -5961,6 +5966,49 @@ any_length_clause:
 		current_field->flag_any_length = 1;
 		current_field->flag_any_numeric = 1;
 	}
+  }
+;
+
+/* EXTERNAL-FORM clause */
+
+external_form_clause:
+  _is EXTERNAL_FORM
+  {
+	check_repeated ("EXTERNAL-FORM", SYN_CLAUSE_2, &check_pic_duplicate);
+	CB_PENDING("EXTERNAL-FORM");
+	if (current_storage != CB_STORAGE_WORKING) {
+		cb_error (_("%s not allowed here"), "EXTERNAL-FORM");
+	} else if (current_field->level != 1) {	/* docs say: at group level */
+		cb_error (_("%s only allowed at 01 level"), "EXTERNAL-FORM");
+	} else if (!qualifier) {
+		cb_error (_("%s requires a data name"), "EXTERNAL-FORM");
+	} else if (current_field->redefines) {
+		cb_error (_("%s and %s combination not allowed"), "EXTERNAL-FORM", "REDEFINES");
+	} else {
+		current_field->flag_is_external_form = 1;
+	}
+  }
+;
+
+/* IDENTIFIED BY clause */
+
+identified_by_clause:
+  /* minimal glitch: IS should only be usable if EXTERNAL-FORM comes directly before */
+  /* glitch: EXTERNAL-FORM clause can come after IDENTIFIED BY clause */
+  _is IDENTIFIED _by id_or_lit
+  {
+	check_repeated ("IDENTIFIED BY", SYN_CLAUSE_3, &check_pic_duplicate);
+	if (!current_field->flag_is_external_form) {
+		CB_PENDING("EXTERNAL-FORM (IDENTIFIED BY)");
+		if (current_storage != CB_STORAGE_WORKING) {
+			cb_error (_("%s not allowed here"), "IDENTIFIED BY");
+		} else if (!qualifier) {
+			cb_error (_("%s requires a data name"), "IDENTIFIED BY");
+		} else if (current_field->redefines) {
+			cb_error (_("%s and %s combination not allowed"), "IDENTIFIED BY", "REDEFINES");
+		}
+	}
+	current_field->external_form_identifier = $4;
   }
 ;
 

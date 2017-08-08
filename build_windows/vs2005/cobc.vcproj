@@ -65,9 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(SolutionDir)..\($PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="1"
@@ -148,9 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(SolutionDir)..\($PlatformName)"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -233,7 +229,6 @@
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"
-				AdditionalDependencies=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -573,23 +568,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\defaults.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tarstamp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\cobc\cobc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 			<File
@@ -601,11 +584,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\defaults.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\flag.def"
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\cobc\ppparse.def"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tarstamp.h"
 				>
 			</File>
 			<File
@@ -614,10 +613,6 @@
 			</File>
 			<File
 				RelativePath="..\..\cobc\warning.def"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob\cobgetopt.h"
 				>
 			</File>
 		</Filter>

@@ -1,6 +1,9 @@
 
 2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* parser.y, reserved.c, typeck.c, tree.h: adjusted and included
+	  Patch #27 by Wim Niemans 2016-06-13 for FR #100 as PENDING
+	* field.c, tree.c: adjustments for EXTERNAL-FORM
 	* cobc.c, error.c, parser.y, typeck.c: msgid specific changes
 
 2017-08-07  Edward Hart <edward.dan.hart@gmail.com>
@@ -1628,6 +1631,12 @@
 	* reserved.c (default_reserved_words): moved uncommon, non-standard
 	  aliases (e.g., AUTOTERMINATE for AUTO) to config files.
 	* parser.y: renamed TIMEOUT token to TIME-OUT.
+
+2016-06-13  Wim Niemans <niemans@nlbox.com>
+
+	* parser.y, reserved.c, typeck.c, tree.h: added ACUCOBOL CGI extension
+	  EXTERNAL-FORM / IDENTIFIED BY as DATA DIVISION clauses processed in
+	  handling of DISPLAY / ACCEPT statements
 
 2016-06-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

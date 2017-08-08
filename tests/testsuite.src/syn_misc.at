@@ -3301,6 +3301,61 @@ prog.cob: 6: warning: handling of DISPLAY OMITTED is unfinished; implementation 
 AT_CLEANUP
 
 
+AT_SETUP([CGI: EXTERNAL-FORM])
+AT_KEYWORDS([misc acu extensions accept display])
+
+# TODO: need a better tests when we implement this,
+#       likely splitted into multiple ones
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  GNUCOBOL-URL IS EXTERNAL-FORM 
+                IDENTIFIED BY "http://www.gnu.org/software/gnucobol/".
+       01  WEB-PAGE-1 EXTERNAL-FORM,
+                IDENTIFIED "cgipage1".
+       01  SIMPLE-FORM IS EXTERNAL-FORM.
+           03  SIMPLE-FORM-VAR1  PIC X(10).
+           03  SIMPLE-FORM-VAR2  PIC 9(5).
+       01  MY-FORM EXTERNAL-FORM.
+           03  CGI-VAR1 PIC X(20) IDENTIFIED "Name".
+           03  CGI-VAR2 PIC X(50) IDENTIFIED BY CGI-VAR1.
+       
+       PROCEDURE DIVISION.
+       MAIN.
+      *>   CGI display of static content (full URL)
+           DISPLAY GNUCOBOL-URL
+      *>   CGI display of static content (current URL + "cgipage1" + ".html")
+           DISPLAY WEB-PAGE-1
+      *>   CGI display of output form
+           DISPLAY MY-FORM
+      *>   CGI display of input  form (docs say: used for debugging purposes)
+           DISPLAY SIMPLE-FORM
+      *>   CGI accept
+           ACCEPT SIMPLE-FORM
+      *>   normal accept
+           ACCEPT SIMPLE-FORM-VAR1
+      *>   CGI accept with first var (with cgi identifier Name)
+      *>   setting the cgi identifier of the second
+           ACCEPT MY-FORM
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
+[prog.cob: 6: warning: EXTERNAL-FORM is not implemented
+prog.cob: 8: warning: EXTERNAL-FORM is not implemented
+prog.cob: 10: warning: EXTERNAL-FORM is not implemented
+prog.cob: 13: warning: EXTERNAL-FORM is not implemented
+prog.cob: 14: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
+prog.cob: 15: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([adding/removing reserved words])
 AT_KEYWORDS([misc extensions configuration])
 
@@ -3949,11 +4004,11 @@ prog.cob: 9: error: '/' operator misplaced
 ])
 
 AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
-[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 7: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 8: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 9: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
-prog.cob: 10: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob: 7: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob: 8: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob: 9: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob: 10: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 ])
 
 AT_CHECK([$COMPILE -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],

@@ -11,115 +11,129 @@ if errorlevel 1 (
    set interactive=0
 )
 
-:: Go to cobc directory
+:: change to cobc directory
 pushd "%~dp0..\cobc"
 
-:: check for bison executable
-if not "%BISON%"=="" (
-   set BISON_EXT=1
-) else (
-   set BISON_EXT=0
-   echo.
-   echo Searching for GNU Bison...
-   where /q win_bison.exe
-   if errorlevel 1 (
-      where /q bison.exe
-      if errorlevel 1 (
-         where /q bison.bat
-         if errorlevel 1 (
-            echo.
-            echo No bison executable found.
-            echo Make sure bison is in PATH or set BISON environment variable accordingly.
-         ) else (
-            set BISON=bison.bat
-         )
-      ) else (
-         set BISON=bison.exe
-      )
-   ) else (
-      set BISON=win_bison.exe
-   )
-)
-if not "%BISON%"=="" (
-   echo.
-   echo Testing bison:
-   "%BISON%" --version
-   if errorlevel 1 (
-      echo.
-      if %BISON_EXT%==0 (
-         echo "%BISON%" is not usable.
-         echo Make sure a working GNU Bison is in PATH or set BISON environment variable accordingly.
-      ) else (
-         echo BISON environment doesn't point to a working bison executable: "%BISON%"
-         echo Unset it and make sure bison is in PATH or set BISON environment variable accordingly.
-      )
-      set BISON=
-   )
-)
+:: file prefix used for temporary files
+set tmp_prf=mbfbat
+
+:: check executables
+call :exe_check "%BISON%" bison "GNU Bison" BISON
+call :exe_check "%FLEX%" flex "flex" FLEX
 
 echo.
+echo.
+
 :: bison invocation
 if not "%BISON%"=="" (
-   echo generating ppparse.c ...
-   %BISON% -o ppparse.c ppparse.y
-   echo generating parser.c ...
-   %BISON% -o parser.c  parser.y
+   call :bisoncall ppparse
+   call :bisoncall parser
 ) else (
    echo ERROR: invocation of bison skipped!
 )
 
-:: check for flex executable
-if not "%FLEX%"=="" (
-   set FLEX_EXT=1
-) else (
-   set FLEX_EXT=0
-   echo.
-   echo Searching for flex...
-   where /q win_flex.exe
-   if errorlevel 1 (
-      where /q flex.exe
-      if errorlevel 1 (
-         where /q flex.bat
-         if errorlevel 1 (
-            echo.
-            echo No flex executable found.
-            echo Make sure flex is in PATH or set FLEX environment variable accordingly.
-         ) else (
-            set FLEX=flex.bat
-         )
-      ) else (
-         set FLEX=flex.exe
-      )
-   ) else (
-      set FLEX=win_flex.exe
-   )
-)
-if not "%FLEX%"=="" (
-   echo Testing flex:
-   "%FLEX%" --version
-   if errorlevel 1 (
-      echo.
-      if %FLEX_EXT%==0 (
-         echo "%FLEX%" is not usable.
-         echo Make sure a working flex is in PATH or set FLEX environment variable accordingly.
-      ) else (
-         echo FLEX environment doesn't point to a working flex executable: "%FLEX%"
-         echo Unset it and make sure flex is in PATH or set FLEX environment variable accordingly.
-      )
-      set FLEX=
-   )
-)
-
-echo.
 :: flex invocation
 if not "%FLEX%"=="" (
-   echo generating pplex.c ...
-   %FLEX%  -o pplex.c   pplex.l
-   echo generating scanner.c ...
-   %FLEX%  -o scanner.c scanner.l
+   call :flexcall pplex
+   call :flexcall scanner
 ) else (
    echo ERROR: invocation of flex skipped!
 )
+goto :end
+
+
+:exe_check
+:: set local variables, remove quotes for command name and package
+set "command_name=%1"
+set "command_name=%command_name:"=%"
+set "exe_name=%2"
+set "exe_package=%3"
+set "exe_package=%exe_package:"=%"
+set "env_name=%4"
+
+if not "%command_name%"=="" (
+   set command_extern=1
+) else (
+   set command_extern=0
+   set "command_name="
+   rem echo.
+   rem echo Searching for %exe_package%...
+   where /q win_%exe_name%.exe
+   if errorlevel 1 (
+      where /q %exe_name%.exe
+      if errorlevel 1 (
+         where /q %exe_name%.bat
+         if errorlevel 1 (
+            echo.
+            echo ERROR: No %exe_name% executable found.
+            echo Make sure %exe_package% is in PATH or set %env_name% environment variable accordingly.
+         ) else (
+            set "command_name=%exe_name%.bat"
+         )
+      ) else (
+         set "command_name=%exe_name%.exe"
+      )
+   ) else (
+      set "command_name=win_%exe_name%.exe"
+   )
+)
+if not "%command_name%"=="" (
+   echo.
+   echo Testing %exe_package%:
+   "%command_name%" --version
+   if errorlevel 1 (
+      echo.
+      if %command_extern%==0 (
+         echo ERROR: "%command_name%" is not usable.
+         echo Make sure a working %exe_package% is in PATH or set %env_name% environment variable accordingly.
+      ) else (
+         echo ERROR: %env_name% environment doesn't point to a working %exe_package% executable: "%command_name%"
+         echo Unset this variable and make sure %exe_package% is in PATH or set %env_name% environment variable accordingly.
+      )
+      set "command_name="
+   )
+)
+set "%env_name%=%command_name%"
+goto :eof
+
+
+:bisoncall
+echo generating %1.c, %1.h ...
+%BISON% -o "%tmp_prf%_%1.c"   "%1.y" ^
+ && (call :compare_generated %1.c ^
+  &  call :compare_generated %1.h ^
+  &  if exist "%tmp_prf%_%1.output" erase "%tmp_prf%_%1.output" >NUL ) ^
+ || echo.   %1.c, %1.h were not changed
+echo.
+goto :eof
+
+:flexcall
+echo generating %1.c ...
+%FLEX%  -o "%tmp_prf%_%1.c"   "%1.l" ^
+ && call :compare_generated %1.c ^
+ || echo.   %1.c was not changed
+echo.
+goto :eof
+
+
+:compare_generated
+rem echo %1 was generated
+fc "%1" "%tmp_prf%_%1" 1>NUL 2>NUL ^
+ && (call :delete_generated %1) ^
+ || (call :use_generated %1)
+goto :eof
+
+:use_generated
+if exist "%tmp_prf%_%1" (
+  move   "%tmp_prf%_%1" "%1" >NUL
+  echo.   %1 is changed
+)
+goto :eof
+
+:delete_generated
+if exist "%tmp_prf%_%1" erase "%tmp_prf%_%1" >NUL
+echo.   %1 is unchanged
+goto :eof
 
 
 :end

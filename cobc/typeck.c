@@ -5082,6 +5082,114 @@ cb_emit_move_corresponding (cb_tree source, cb_tree target_list)
 	}
 }
 
+static unsigned int
+emit_accept_external_form (cb_tree x)
+{
+	struct cb_field *f;
+#if 1 /* TODO: implement CGI runtime, see Patch #27 */
+	cb_tree		t, m;
+#else
+	cb_tree		t, o, m, n, r;
+	int		i;
+	char		buff[32];
+#endif
+	unsigned int	found;
+
+	found = 0;
+	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
+		if (!f->redefines) {
+			if (f->children) {
+				t = cb_build_field_reference (f, x);
+				found += emit_accept_external_form (t);
+			} else {
+				if (f->external_form_identifier) {
+					m = f->external_form_identifier;
+				} else {
+					m = cb_build_alphanumeric_literal (f->name,	strlen(f->name)); 
+				}
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+				if (f->flag_occurs) {
+					for (i = 1; i <= f1->occurs_max; i++) {
+						sprintf (buff, "%d", i);
+						n = cb_build_numeric_literal(0, buff, 0); 
+
+						o = cb_build_field_reference (f, x);
+						CB_REFERENCE (o)->subs = CB_LIST_INIT (n);
+
+						r = CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, o);
+						cb_emit (r);
+					}
+				} else {
+					n = cb_build_numeric_literal(0, "1", 0);
+					r = CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, t);
+					cb_emit (r);
+				}
+#endif
+				found++;
+			}
+		}
+	}
+	return found;
+}
+
+static void
+cb_emit_accept_external_form (cb_tree x1)
+{
+	cb_tree		x2;
+
+	x2 = cb_check_group_name (x1);
+	if (cb_validate_one (x2)) {
+		return;
+	}
+	if (!emit_accept_external_form (x2)) {
+		cb_warning_x (COBC_WARN_FILLER, x1, _("no items to ACCEPT found"));
+	}
+}
+
+static unsigned int
+emit_display_external_form (cb_tree x)
+{
+	struct cb_field *f;
+	cb_tree		t, m;
+	unsigned int	found;
+
+	found = 0;
+	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
+		if (!f->redefines && !f->flag_occurs) {
+			t = cb_build_field_reference (f, x);
+			if (f->children) {
+				found += emit_display_external_form (t);
+			} else {
+				if (CB_FIELD (cb_ref (t))->external_form_identifier) {
+					m = CB_FIELD (cb_ref (t))->external_form_identifier;
+				} else {
+					m = cb_build_alphanumeric_literal (CB_FIELD (cb_ref (t))->name,
+						strlen((CB_FIELD (cb_ref (t))->name))); 
+				}
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+				cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", m, t));
+#endif
+				found++;
+			}
+		}
+	}
+	return found;
+}
+
+static void
+cb_emit_display_external_form (cb_tree x1)
+{
+	cb_tree		x2;
+
+	x2 = cb_check_group_name (x1);
+	if (cb_validate_one (x2)) {
+		return;
+	}
+	if (!emit_display_external_form (x2)) {
+		cb_warning_x (COBC_WARN_FILLER, x1, _("no items to DISPLAY found"));
+	}
+}
+
 static void
 output_screen_from (struct cb_field *p, const unsigned int sisters)
 {
@@ -5330,6 +5438,13 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 				return;
 			}
 		}
+	}
+
+	/* CGI: ACCEPT external-form */
+	/* TODO: CHECKME, see Patch #27 */
+	if (CB_REF_OR_FIELD_P (var) && CB_FIELD (cb_ref (var))->flag_is_external_form) {
+		cb_emit_accept_external_form (var);
+		return;
 	}
 
 #if	0	/* RXWRXW - Screen */
@@ -6546,8 +6661,8 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 			     cob_flags_t disp_attrs,
 			     const int is_first_display_list)
 {
-	cb_tree	l;
-	cb_tree last_elt;
+	cb_tree		l;
+	cb_tree		last_elt;
 	int	is_first_item;
 
 	/* DISPLAY OMITTED ? */
@@ -6587,6 +6702,9 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cb_tree		size_is;	/* WITH SIZE IS */
 	cob_flags_t		disp_attrs;
 
+	cb_tree		m;
+	struct cb_field	*f = NULL;
+
 	/* Validate upon and values */
 	if (values != cb_null) /* DISPLAY OMITTED */ {
 		if (upon == cb_error_node
@@ -6606,6 +6724,34 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	/* Emit appropriate function call(s) */
 	switch (display_type) {
 	case DEVICE_DISPLAY:
+
+		/* CGI: DISPLAY external-form */
+		/* TODO: CHECKME, see Patch #27 */
+		m = CB_VALUE(values);
+		if (CB_REF_OR_FIELD_P (m)) {
+			f = CB_FIELD (cb_ref (m));
+		}
+		if (f && (f->flag_is_external_form || f->external_form_identifier)) {
+			/* static content has both attributes */
+			if (f->flag_is_external_form && f->external_form_identifier) {
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+				cb_emit (CB_BUILD_FUNCALL_1 ("cob_cgi_static", f->external_form_identifier));
+#endif
+				return;
+			}
+			cb_emit_display_external_form (m);
+			/* TODO: CHECKME, DISPLAY without identifier (template) is a "debug display" */
+			if (f->external_form_identifier) {
+				m = f->external_form_identifier;
+			} else {
+				m = cb_build_alphanumeric_literal (f->name, strlen(f->name)); 
+			}
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+			cb_emit (CB_BUILD_FUNCALL_1 ("cob_cgi_renderTpl", m));
+#endif
+			return;
+		}
+
 		if (upon == NULL) {
 			upon = cb_int0;
 		}

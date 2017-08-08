@@ -898,6 +898,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXTERNAL",			0, 0, EXTERNAL,			/* 2002 */
 				0, 0
   },
+  { "EXTERNAL-FORM",			0, 0, EXTERNAL_FORM,			/* ACU CGI extension */
+				0, 0
+  },
   { "F",			0, 0, F,			/* Extension */
 				0, CB_CS_RECORDING
   },
@@ -1069,6 +1072,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "IDENTIFICATION",		0, 0, IDENTIFICATION,		/* 2002 */
+				0, 0
+  },
+  { "IDENTIFIED",			0, 0, IDENTIFIED,			/* ACU CGI extension */
 				0, 0
   },
   { "IF",			1, 0, IF,			/* 2002 */
