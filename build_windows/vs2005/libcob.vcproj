@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
+				AdditionalDependencies=""
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -131,7 +131,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
@@ -149,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
+				AdditionalDependencies=""
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -212,7 +212,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -232,7 +232,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
+				AdditionalDependencies=""
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)$(PlatformName)"
 				ModuleDefinitionFile=""
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\.."
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -310,7 +310,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mpir.lib pdcurses.lib libvbisam.lib"
+				AdditionalDependencies=""
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)$(PlatformName)"
 				ModuleDefinitionFile=""

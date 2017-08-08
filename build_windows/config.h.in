@@ -6,11 +6,48 @@
 #define CISAM  3
 #define DISAM  4
 
-/* Use the following global define to switch from VBISAM to another
-   ISAM configuration, if needed
-   *MUST* match linker input in libcob.sln */
+#define NOCURSES 0
+#define PDCURSES 1
 
-#define CONFIGURED_ISAM VBISAM /* see possible values above */
+#define MATHLIB_MPIR  1
+#define MATHLIB_GMP   2
+
+/* Use the following global define to switch from VBISAM to another
+   ISAM configuration and/or from PDCURSES to "no curses", if needed */
+
+#define CONFIGURED_ISAM   VBISAM        /* see possible values above */
+#define CONFIGURED_CURSES PDCURSES      /* see possible values above */
+#define USED_MATHLIB      MATHLIB_MPIR  /* see possible values above */
+
+/* adjust the following linker pragmas if needed */
+
+#ifdef WITHIN_LIBCOB
+
+#if USED_MATHLIB == MATHLIB_MPIR 
+#pragma comment(lib, "mpir")
+#elif USED_MATHLIB == MATHLIB_GMP
+#pragma comment(lib, "libgmp")
+#endif
+
+#if CONFIGURED_CURSES == PDCURSES 
+#pragma comment(lib, "pdcurses")
+#endif
+
+#if CONFIGURED_ISAM == VBISAM 
+#pragma comment(lib, "libvbisam")
+#elif CONFIGURED_ISAM == DISAM
+#pragma comment(lib, "libdisam72")
+#elif CONFIGURED_ISAM == BDB
+#if defined _DEBUG
+#pragma comment(lib, "libdb48d")
+//#pragma comment(lib, "libdb62d")
+#else
+#pragma comment(lib, "libdb48")
+//#pragma comment(lib, "libdb62")
+#endif
+#endif /* CONFIGURED_ISAM */
+
+#endif /* WITHIN_LIBCOB */
 
 /* Define if building universal (internal helper macro) */
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
@@ -87,13 +124,21 @@
 /* #undef HAVE_CLOCK_GETTIME */
 
 /* curses has color_set function */
+#if CONFIGURED_CURSES != NOCURSES
 #define HAVE_COLOR_SET 1
+#else
+/* #undef HAVE_COLOR_SET */
+#endif
 
 /* ncurses has _nc_freeall function */
 /* #undef HAVE_CURSES_FREEALL */
 
 /* Define to 1 if you have the <curses.h> header file. */
+#if CONFIGURED_CURSES != NOCURSES
 #define HAVE_CURSES_H 1
+#else
+/* #undef HAVE_CURSES_H */
+#endif
 
 /* Define to 1 if you have the <db.h> header file. */
 #if CONFIGURED_ISAM == BDB
@@ -178,7 +223,11 @@
 /* #undef HAVE_LIBNCURSESW */
 
 /* Define to 1 if you have the `pdcurses' library (-lpdcurses). */
+#if CONFIGURED_CURSES == PDCURSES
 #define HAVE_LIBPDCURSES 1
+#else
+/* #undef HAVE_LIBPDCURSES */
+#endif
 
 /* Define to 1 if you have the `posix4' library (-lposix4). */
 /* #undef HAVE_LIBPOSIX4 */
@@ -404,7 +453,11 @@
 #endif
 
 /* curses library for extended SCREEN I/O */
+#if CONFIGURED_CURSES == PDCURSES
 #define WITH_CURSES "pdcurses"
+#else
+#define WITH_CURSES "disabled"
+#endif
 
 /* Use Berkeley DB library as emulation of ISAM handler */
 #if CONFIGURED_ISAM == BDB
@@ -448,6 +501,10 @@
 # endif
 #endif
 
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#define YYTEXT_POINTER 1
+
 /* Define to 1 if on MINIX. */
 /* #undef _MINIX */
 
@@ -469,8 +526,15 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
 
+#undef NOISAM
 #undef BDB
 #undef VBISAM
 #undef CISAM
 #undef DISAM
 #undef CONFIGURED_ISAM
+#undef NOCURSES
+#undef PDCURSES
+#undef CONFIGURED_CURSES
+#undef MATHLIB_MPIR
+#undef MATHLIB_GMP
+#undef USED_MATHLIB

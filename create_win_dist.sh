@@ -60,6 +60,12 @@ cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win || exit 2
 olddir=$(pwd)
 cd $WINTMP/$EXTDISTDIR || exit 3
 
+# rename templates for faster setup
+cd build_windows
+mv config.h.in config.h
+mv defaults.h.in defaults.h
+cd ..
+
 # Remove content not necessary for windows dist zip --> breaks make dist[check]
 # rm -r -f m4
 

@@ -83,7 +83,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBCOB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -93,7 +93,8 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpir.lib;pdcurses.lib;libvbisam.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
@@ -120,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBCOB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -129,7 +130,8 @@
       </DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpir.lib;pdcurses.lib;libvbisam.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
@@ -154,7 +156,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBCOB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -164,7 +166,8 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpir.lib;pdcurses.lib;libvbisam.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
@@ -179,7 +182,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;$(SolutionDir)..\..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBCOB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;WITHIN_LIBCOB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -187,7 +190,8 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>mpir.lib;pdcurses.lib;libvbisam.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
