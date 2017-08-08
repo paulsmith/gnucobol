@@ -1,4 +1,8 @@
 
+2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, error.c, parser.y, typeck.c: msgid specific changes
+
 2017-08-07  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c: moved RELATIVE KEY validating code to

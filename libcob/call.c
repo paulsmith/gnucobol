@@ -267,11 +267,8 @@ static const unsigned char	pvalid_char[] =
 /* Local functions */
 
 static void
-set_resolve_error (const char *msg, const char *entry)
+set_resolve_error (void)
 {
-	resolve_error_buff[CALL_BUFF_MAX] = 0;
-	snprintf (resolve_error_buff, (size_t)CALL_BUFF_MAX,
-		  "%s '%s'", msg, entry);
 	resolve_error = resolve_error_buff;
 	cob_set_exception (COB_EC_PROGRAM_NOT_FOUND);
 }
@@ -727,9 +724,10 @@ cob_resolve_internal (const char *name, const char *dirent,
 	}
 
 	/* Search external modules */
+	resolve_error_buff[CALL_BUFF_MAX] = 0;
 #ifdef	__OS400__
 	strcpy (call_filename_buff, s);
-	for(p = call_filename_buff; *p; ++p) {
+	for (p = call_filename_buff; *p; ++p) {
 		*p = (cob_u8_t)toupper(*p);
 	}
 	handle = lt_dlopen (call_filename_buff);
@@ -749,7 +747,9 @@ cob_resolve_internal (const char *name, const char *dirent,
 			  "%s%s.%s", dirent, (char *)s, COB_MODULE_EXT);
 		call_filename_buff[COB_NORMAL_MAX] = 0;
 		if (access (call_filename_buff, R_OK) != 0) {
-			set_resolve_error (_("cannot find module"), name);
+			snprintf (resolve_error_buff, (size_t)CALL_BUFF_MAX,
+				  "module '%s' not found", name);
+			set_resolve_error ();
 			return NULL;
 		}
 		handle = lt_dlopen (call_filename_buff);
@@ -764,8 +764,9 @@ cob_resolve_internal (const char *name, const char *dirent,
 				return func;
 			}
 		}
-		set_resolve_error (_("cannot find entry point"),
-				   (const char *)s);
+		snprintf (resolve_error_buff, (size_t)CALL_BUFF_MAX,
+			  "entry point '%s' not found", (const char *)s);
+		set_resolve_error ();
 		return NULL;
 	}
 	for (i = 0; i < resolve_size; ++i) {
@@ -792,14 +793,16 @@ cob_resolve_internal (const char *name, const char *dirent,
 					return func;
 				}
 			}
-			set_resolve_error (_("cannot find entry point"),
-					   (const char *)s);
+			snprintf (resolve_error_buff, (size_t)CALL_BUFF_MAX,
+				  "entry point '%s' not found", (const char *)s);
+			set_resolve_error ();
 			return NULL;
 		}
 	}
 #endif
-
-	set_resolve_error (_("cannot find module"), name);
+	snprintf (resolve_error_buff, (size_t)CALL_BUFF_MAX,
+		  "module '%s' not found", name);
+	set_resolve_error ();
 	return NULL;
 }
 

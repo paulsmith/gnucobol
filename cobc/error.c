@@ -67,9 +67,9 @@ print_error (const char *file, int line, const char *prefix,
 			if (file) {
 				fprintf (stderr, "%s: ", file);
 			}
-			fputs (_("in section"), stderr);
-			fprintf (stderr, " '%s':\n",
+			fprintf (stderr, _("in section '%s':"),
 				(char *)current_section->name);
+			fputs ("\n", stderr);
 		}
 		last_section = current_section;
 	}
@@ -78,9 +78,9 @@ print_error (const char *file, int line, const char *prefix,
 			if (file) {
 				fprintf (stderr, "%s: ", file);
 			}
-			fputs (_("in paragraph"), stderr);
-			fprintf (stderr, " '%s':\n",
+			fprintf (stderr, _("in paragraph '%s':"),
 				(char *)current_paragraph->name);
+			fputs ("\n", stderr);
 		}
 		last_paragraph = current_paragraph;
 	}

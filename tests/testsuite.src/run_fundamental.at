@@ -1047,8 +1047,73 @@ in prog3
 AT_CLEANUP
 
 
+AT_SETUP([Entry point visibility (1)])
+AT_KEYWORDS([fundamental CALL])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+           CALL 'module'
+           CALL 'modulepart'
+           STOP RUN.
+])
+
+AT_DATA([module.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      module.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+           DISPLAY 'A' WITH NO ADVANCING
+           GOBACK.
+       ENTRY 'modulepart'.
+           DISPLAY 'B' WITH NO ADVANCING
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE module.cob], [0], [], [])
+AT_CHECK([./prog], [0], [AB], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Entry point visibility (2)])
+AT_KEYWORDS([fundamental CALL])
+
+# TODO: skip on __OS400__
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA DIVISION.
+       PROCEDURE        DIVISION.
+       CALL 'module'
+       STOP RUN.
+])
+
+AT_DATA([module.c], [
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int some (void);
+int some (void)
+{
+  return 0;
+}
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE module.c], [0], [], [])
+AT_CHECK([./prog], [1], [],
+[libcob: prog.cob: 6: entry point 'module' not found
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Contained program visibility (1)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental CALL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1096,14 +1161,14 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[libcob: prog.cob: 14: cannot find module 'prog3'
+[libcob: prog.cob: 14: module 'prog3' not found
 ])
 
 AT_CLEANUP
 
 
 AT_SETUP([Contained program visibility (2)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental CALL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1149,14 +1214,14 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([./prog], [1], [],
-[libcob: prog.cob: 25: cannot find module 'prog3'
+[libcob: prog.cob: 25: module 'prog3' not found
 ])
 
 AT_CLEANUP
 
 
 AT_SETUP([Contained program visibility (3)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental CALL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1207,7 +1272,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Contained program visibility (4)])
-AT_KEYWORDS([fundamental])
+AT_KEYWORDS([fundamental CALL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

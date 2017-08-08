@@ -645,7 +645,7 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 		current_field->occurs_min = 1; /* CHECKME: why using 1 ? */
 		current_field->occurs_max = cb_get_int (occurs_min);
 		if (current_field->depending) {
-			cb_verify (cb_odo_without_to, _ ("ODO without TO phrase"));
+			cb_verify (cb_odo_without_to, _ ("OCCURS DEPENDING ON without TO phrase"));
 		}
 	}
 }

@@ -587,7 +587,7 @@ cb_validate_one (cb_tree x)
 			if (f->odo_level > 1) {
 				/* to enable this take care of the FIXME entries in (output_size) */
 				cb_error_x (x, _("%s is not implemented"),
-					_("reference to item containing nested ODO"));
+					_("reference to item containing nested OCCURS DEPENDING ON"));
 				return 1;
 			}
 #endif
@@ -1742,7 +1742,9 @@ cb_build_identifier (cb_tree x, const int subchk)
 			p = p->redefines;
 		}
 		if (p == f) {
-			sprintf(full_name, "'%s'", name);
+			/* TRANSLATORS: This msgid is used when a variable name
+			   or label is referenced in a compiler message. */
+			sprintf(full_name, _("'%s'"), name);
 		} else {
 			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
 		}
@@ -3060,7 +3062,7 @@ cb_validate_program_data (struct cb_program *prog)
 			for (; p->sister; p = p->sister) {
 				if (p->sister == depfld) {
 						cb_error_x (x,
-							    _("'%s' ODO field item invalid here"),
+							    _("'%s' OCCURS DEPENDING ON field item invalid here"),
 							    p->sister->name);
 				}
 				if (!p->sister->redefines) {
@@ -3078,7 +3080,7 @@ cb_validate_program_data (struct cb_program *prog)
 		/* If the field is GLOBAL, then the ODO must also be GLOBAL */
 		if (q->flag_is_global && depfld) {
 			if (!depfld->flag_is_global) {
-				cb_error_x (x, _("'%s' ODO item must have GLOBAL attribute"),
+				cb_error_x (x, _("'%s' OCCURS DEPENDING ON item must have GLOBAL attribute"),
 					depfld->name);
 			}
 		}

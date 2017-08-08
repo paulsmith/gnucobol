@@ -46,6 +46,7 @@ prog.cob: 12: error: 'I' is not a numeric value
 
 AT_CLEANUP
 
+
 AT_SETUP([Subscript range check])
 AT_KEYWORDS([subscripts])
 
@@ -86,8 +87,9 @@ prog.cob: 24: error: subscript of 'Y' out of bounds: 4
 
 AT_CLEANUP
 
-AT_SETUP([Subscript bounds with ODO (lower)])
-AT_KEYWORDS([runsubscripts subscripts])
+
+AT_SETUP([Subscript bounds with OCCURS DEPENDING ON])
+AT_KEYWORDS([runsubscripts subscripts odo])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -99,35 +101,13 @@ AT_DATA([prog.cob], [
        01 N             PIC 9 VALUE 4.
        PROCEDURE        DIVISION.
            DISPLAY X(0)
-           END-DISPLAY.
+           DISPLAY X(7)
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
 [prog.cob: 10: error: subscript of 'X' out of bounds: 0
-])
-
-AT_CLEANUP
-
-AT_SETUP([Subscript bounds with ODO (upper)])
-AT_KEYWORDS([runsubscripts subscripts])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01 G.
-         02 X           PIC X OCCURS 4 TO 6 DEPENDING ON N.
-       01 N             PIC 9 VALUE 4.
-       PROCEDURE        DIVISION.
-           DISPLAY X(7)
-           END-DISPLAY.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 10: error: subscript of 'X' out of bounds: 7
+prog.cob: 11: error: subscript of 'X' out of bounds: 7
 ])
 
 AT_CLEANUP
@@ -159,6 +139,7 @@ prog.cob: 11: error: 'X' cannot be subscripted
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([Number of subscripts])
 AT_KEYWORDS([subscripts])

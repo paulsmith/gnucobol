@@ -89,7 +89,7 @@ AT_CLEANUP
 
 
 AT_SETUP([OCCURS with variable-occurrence data item])
-AT_KEYWORDS([nested occurs depending extensions])
+AT_KEYWORDS([nested occurs depending extensions odo])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -264,7 +264,7 @@ AT_CLEANUP
 # 24) 
 # in COBOL 2014 this is rule 24, not sure about COBOL 2002.
 AT_SETUP([OCCURS with unmatched DEPENDING / TO phrases])
-AT_KEYWORDS([occurs])
+AT_KEYWORDS([occurs odo])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -279,15 +279,15 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 8: error: ODO without TO phrase does not conform to COBOL 2014
+[prog.cob: 8: error: OCCURS DEPENDING ON without TO phrase does not conform to COBOL 2014
 prog.cob: 10: error: TO phrase without DEPENDING phrase
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: warning: ODO without TO phrase used
+[prog.cob: 8: warning: OCCURS DEPENDING ON without TO phrase used
 prog.cob: 10: error: TO phrase without DEPENDING phrase
 ])
 AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [],
-[prog.cob: 8: warning: ODO without TO phrase used
+[prog.cob: 8: warning: OCCURS DEPENDING ON without TO phrase used
 prog.cob: 10: warning: TO phrase without DEPENDING phrase
 prog.cob: 10: warning: maximum number of occurences assumed to be exact number
 ])

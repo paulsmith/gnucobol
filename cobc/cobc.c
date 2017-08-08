@@ -2304,7 +2304,31 @@ cobc_print_usage (char * prog)
 #undef	CB_CONFIG_SUPPORT
 	putchar ('\t');
 	puts (_("where <support> is one of the following:"));
-	puts ("\t'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error', 'unconformable'");
+	putchar ('\t');
+	/* Note: separated as translators should be able to replace the single quote */
+	printf (_("'%s'"), "ok");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "warning");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "archaic");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "obsolete");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "skip");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "ignore");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "error");
+	putchar (',');
+	putchar (' ');
+	printf (_("'%s'"), "unconformable");
+	putchar ('\n');
 	cobc_print_flag ("not-reserved", _("word to be taken out of the reserved words list"), 1, _("<word>"), NULL);
 	cobc_print_flag ("reserved", _("word to be added to reserved words list"), 1, _("<word>"), NULL);
 	cobc_print_flag ("reserved", _("word to be added to reserved words list as alias"), 1, _("<word>:<alias>"), NULL);

@@ -119,8 +119,8 @@ libcob: prog2.cob: 10: maximum subscript for 'X': 6
 AT_CLEANUP
 
 
-AT_SETUP([Subscript bounds with ODO])
-AT_KEYWORDS([runsubscripts subscripts])
+AT_SETUP([Subscript bounds with OCCURS DEPENDING ON])
+AT_KEYWORDS([runsubscripts subscripts odo])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -233,7 +233,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SEARCH ALL with OCCURS DEPENDING ON])
-AT_KEYWORDS([runsubscripts subscripts ODO])
+AT_KEYWORDS([runsubscripts subscripts odo])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
