@@ -1,4 +1,9 @@
 
+2017-08-09  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.c (cb_config_entry): removed extraneous free (bug #409).
+	* config.c (cb_config_entry): fixed indentation.
+
 2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c, typeck.c, tree.h: adjusted and included
