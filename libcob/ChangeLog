@@ -1,5 +1,5 @@
 
-2017-07-29  Edward Hart <edward.dan.hart@gmail.com>
+2017-08-06 Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (cob_file_external_addr): fixed bug #404, where the
 	  cob_file_key for a RELATIVE file was not allocated.
@@ -28,8 +28,8 @@
 2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE
-	* general:
-	  surrounded exception ABORTs that cannot be tested by LCOV_EXCP markers
+	* general: surrounded exception ABORTs that cannot be tested by
+	  LCOV_EXCP markers
 
 2017-06-04  Ron Norman <rjn@inglenet.com>
 
