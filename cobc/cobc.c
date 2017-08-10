@@ -1709,6 +1709,7 @@ cobc_clean_up (const int status)
 		fclose (cb_storage_file);
 		cb_storage_file = NULL;
 	}
+
 	if (ppin) {
 		fclose (ppin);
 		ppin = NULL;
@@ -1718,15 +1719,17 @@ cobc_clean_up (const int status)
 		fclose (ppout);
 		ppout = NULL;
 	}
+	plex_clear_all ();
+
 	if (yyin) {
 		fclose (yyin);
 		yyin = NULL;
 	}
-
 	if (yyout) {
 		fclose (yyout);
 		yyout = NULL;
 	}
+	ylex_clear_all ();
 
 	for (fn = file_list; fn; fn = fn->next) {
 		for (lf = fn->localfile; lf; lf = lf->next) {
@@ -1784,6 +1787,7 @@ cobc_clean_up (const int status)
 	cobc_free_mem ();
 	file_list = NULL;
 }
+
 static void
 set_listing_date (void)
 {
@@ -2801,7 +2805,7 @@ process_command_line (const int argc, char **argv)
 			if (cb_listing_outputfile) {
 				cobc_main_free (cb_listing_outputfile);
 			}
-			/* FIXME: add option to place each source in a single listing 
+			/* FIXME: add option to place each source in a single listing
 			          by specifying a directory (similar to -P) */
 			cb_listing_outputfile = cobc_main_strdup (cob_optarg);
 			break;
@@ -3090,7 +3094,7 @@ process_command_line (const int argc, char **argv)
 			cobc_err_exit (_("invalid option detected"));
 		}
 	}
-	
+
 	/* Load reserved words from fixed word-list if specified */
 	if (cb_reserved_words != NULL) {
 		cb_load_words();
@@ -4091,8 +4095,8 @@ preprocess (struct filename *fn)
 	}
 
 	if (ppout) {
-		if (unlikely(fclose(ppout) != 0)) {
-			cobc_terminate(fn->preprocess);
+		if (unlikely (fclose (ppout) != 0)) {
+			cobc_terminate (fn->preprocess);
 		}
 		ppout = NULL;
 	}
@@ -4101,8 +4105,8 @@ preprocess (struct filename *fn)
 	plex_call_destroy ();
 
 	if (cobc_gen_listing && !cobc_list_file) {
-		if (unlikely(fclose (cb_listing_file) != 0)) {
-			cobc_terminate(fn->listing_file);
+		if (unlikely (fclose (cb_listing_file) != 0)) {
+			cobc_terminate (fn->listing_file);
 		}
 #ifndef COB_INTERNAL_XREF
 		/* external cross-reference with cobxref */
@@ -4974,7 +4978,7 @@ print_program_trailer (void)
 		if (p->next_program) {
 			print_names = 1;
 		}
-	
+
 		/* Print file/symbol tables if requested */
 		if (cb_listing_symbols) {
 			set_listing_header_symbols();
@@ -5298,7 +5302,7 @@ line_has_listing_directive (char *line, const enum cb_format source_format, int 
 	char	*token;
 
 	token = get_directive_start (line, source_format);
-	
+
 	if (token != NULL &&
 		!strncasecmp (token, "LISTING", 7)) {
 		token += 7;
@@ -5372,7 +5376,7 @@ line_has_listing_statement (char *line, const enum cb_format source_format)
 
 	/* handle statements */
 	if (!strncasecmp (statement_start, "TITLE", 5)) {
-		/* check if we actually want to process TITLE as a statement 
+		/* check if we actually want to process TITLE as a statement
 		   note: the title statement is an extra listing-directive statement */
 		if (cb_title_statement > CB_OBSOLETE) {
 			return 0;

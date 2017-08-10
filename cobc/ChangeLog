@@ -1,4 +1,9 @@
 
+2017-08-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c (cobc_clean_up): added calls to (plex_clear_all) and
+	  (ylex_clear_all), fixing bug #407.
+
 2017-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.c (cb_config_entry): removed extraneous free (bug #409).
