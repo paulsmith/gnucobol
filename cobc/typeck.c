@@ -5088,6 +5088,7 @@ emit_accept_external_form (cb_tree x)
 	struct cb_field *f;
 #if 1 /* TODO: implement CGI runtime, see Patch #27 */
 	cb_tree		t, m;
+	COB_UNUSED (m);
 #else
 	cb_tree		t, o, m, n, r;
 	int		i;
@@ -5105,7 +5106,7 @@ emit_accept_external_form (cb_tree x)
 				if (f->external_form_identifier) {
 					m = f->external_form_identifier;
 				} else {
-					m = cb_build_alphanumeric_literal (f->name,	strlen(f->name)); 
+					m = cb_build_alphanumeric_literal (f->name, strlen (f->name)); 
 				}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 				if (f->flag_occurs) {
@@ -5153,6 +5154,8 @@ emit_display_external_form (cb_tree x)
 	cb_tree		t, m;
 	unsigned int	found;
 
+	COB_UNUSED (m);
+	
 	found = 0;
 	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
 		if (!f->redefines && !f->flag_occurs) {
