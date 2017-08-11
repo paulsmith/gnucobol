@@ -2170,13 +2170,13 @@ struct register_struct {
 static size_t current_register = 0;
 
 static struct register_struct	register_list[] = {
+	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},		/* FIXME: currently not handled the "normal" register way */
+	{"COB-CRT-STATUS", "PICTURE 9(4) USAGE DISPLAY VALUE ZERO", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
+	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
+	{"NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* OpenCOBOL / GnuCOBOL extension, at least from 1.0+ */
 	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"SORT-RETURN", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
-	{"NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* OpenCOBOL / GnuCOBOL extension, at least from 1.0+ */
-	{"COB-CRT-STATUS", "PICTURE 9(4) USAGE DISPLAY VALUE ZERO", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
-	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},		/* FIXME: currently not handled the "normal" register way */
-	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
 };
 
@@ -3461,11 +3461,22 @@ lookup_register (const char *name, const int checkimpl)
 void
 add_register (const char *name_and_definition, const char *fname, const int line)
 {
-	const char *name = name_and_definition;
-	char *definition;
-
+	const char	*name = name_and_definition;
+	int		i;
+	char		*definition;
 	struct register_struct *special_register;
 
+	/* Enable all registers, if requested. */
+	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+		for (i = 0; i < NUM_REGISTERS; ++i) {
+			/* TODO: add register here */
+			register_list[i].active = CB_FEATURE_ACTIVE;
+		}
+		return;
+	}
+
+	/* Otherwise enable a named register. */
+	
 	/* note: we don't break at space as this would kill "ADDRESS OF"
 	         and "PIC 9(05) USAGE ..." */
 	definition = strpbrk (name_and_definition, "\t:=");
@@ -3491,16 +3502,27 @@ add_register (const char *name_and_definition, const char *fname, const int line
 void
 remove_register (const char *name, const char *fname, const int line)
 {
-	struct register_struct *special_register = lookup_register (name, 1);
+	struct register_struct	*special_register;
+	int	i;
 
 	COB_UNUSED (fname);
 	COB_UNUSED (line);
 
-	if (!special_register) {
-		return;
+	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+		for (i = 0; i < NUM_REGISTERS; ++i) {
+			/* TODO: when user-defined registers are possible: do
+			   memory cleanup here */
+			register_list[i].active = CB_FEATURE_DISABLED;
+		}
+	} else {
+		special_register = lookup_register (name, 1);
+		if (!special_register) {
+			return;
+		}
+		/* TODO: when user-defined registers are possible: do memory
+		   cleanup here */
+		special_register->active = CB_FEATURE_DISABLED;
 	}
-	/* TODO: when user-defined registers are possible: do memory cleanup here */
-	special_register->active = CB_FEATURE_DISABLED;
 }
 
 const char *

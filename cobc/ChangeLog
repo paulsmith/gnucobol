@@ -1,4 +1,10 @@
 
+2017-08-11  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: implemented (not-)register: DIALECT-ALL.
+	* codegen.c (output_internal_function): fixed C compile error when
+	  RETURN-CODE register is disabled.
+
 2017-08-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c (cobc_clean_up): added calls to (plex_clear_all) and

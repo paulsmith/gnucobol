@@ -8002,6 +8002,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_param (prog->returning, -1);
 	} else if (prog->cb_return_code) {
 		output_integer (prog->cb_return_code);
+	} else {
+		output ("0");
 	}
 	output (";\n");
 
