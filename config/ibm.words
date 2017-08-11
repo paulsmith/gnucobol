@@ -243,6 +243,8 @@ reserved:	INTO
 reserved:	INVALID
 reserved:	INVOKE
 reserved:	IS
+reserved:	JNIENVPTR # note: this is a register, move as soon as supported
+reserved:	JSON-CODE # note: this is a register, move as soon as supported
 reserved:	JUST
 reserved:	JUSTIFIED
 reserved:	KANJI
@@ -395,13 +397,20 @@ reserved:	SEQUENCE
 reserved:	SEQUENTIAL
 reserved:	SERVICE
 reserved:	SET
+reserved:	SHIFT-IN # note: this is a register, move as soon as supported
+reserved:	SHIFT-OUT # note: this is a register, move as soon as supported
 reserved:	SIGN
 reserved:	SIZE
 reserved:	SKIP1
 reserved:	SKIP2
 reserved:	SKIP3
 reserved:	SORT
+reserved:	SORT-CONTROL # note: this is a register, move as soon as supported
+reserved:	SORT-CORE-SIZE # note: this is a register, move as soon as supported
+reserved:	SORT-FILE-SIZE # note: this is a register, move as soon as supported
 reserved:	SORT-MERGE
+reserved:	SORT-MESSAGE # note: this is a register, move as soon as supported
+reserved:	SORT-MODE-SIZE # note: this is a register, move as soon as supported
 reserved:	SOURCE
 reserved:	SOURCE-COMPUTER
 reserved:	SPACE
@@ -475,17 +484,51 @@ reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	WRITE-ONLY
 reserved:	XML
-reserved:	XML-CODE
+reserved:	XML-CODE # note: this is a register, move as soon as supported
 reserved:	XML-DECLARATION
-reserved:	XML-EVENT
-reserved:	XML-NTEXT
+reserved:	XML-EVENT # note: this is a register, move as soon as supported
+reserved:	XML-INFORMATION # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NTEXT # note: this is a register, move as soon as supported
 reserved:	XML-SCHEMA
-reserved:	XML-TEXT
+reserved:	XML-TEXT # note: this is a register, move as soon as supported
 reserved:	YYYYDDD*
 reserved:	YYYYMMDD*
 reserved:	ZERO
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+# list of registers:
+not-register:	DIALECT-ALL
+register:	"ADDRESS\ OF"
+# register:	DEBUG-ITEM
+# register:	JNIENVPTR
+# register:	JSON-CODE
+register:	"LENGTH\ OF"
+# register:	LINAGE-COUNTER
+register:	RETURN-CODE
+# register:	SHIFT-IN
+# register:	SHIFT-OUT
+# register:	SORT-CONTROL
+# register:	SORT-CORE-SIZE
+# register:	SORT-FILE-SIZE
+# register:	SORT-MESSAGE
+# register:	SORT-MODE-SIZE
+register:	SORT-RETURN
+register:	TALLY
+register:	WHEN-COMPILED
+# register:	XML-CODE
+# register:	XML-EVENT
+# register:	XML-INFORMATION
+# register:	XML-NAMESPACE
+# register:	XML-NAMESPACE-PREFIX
+# register:	XML-NNAMESPACE
+# register:	XML-NNAMESPACE-PREFIX
+# register:	XML-NTEXT
+# register:	XML-TEXT
 
 
 # list of system names:

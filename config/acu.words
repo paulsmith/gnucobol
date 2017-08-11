@@ -114,7 +114,7 @@ reserved:	COLLATING
 reserved:	COLOR
 reserved:	COLOUR=COLOR
 reserved:	COLUMN
-reserved:	COM-REG
+reserved:	COM-REG # Note: ACUCOBOL explicitly does not support this register.
 reserved:	COMMA
 reserved:	COMMAND-LINE
 reserved:	COMMIT
@@ -228,6 +228,7 @@ reserved:	ENDING
 reserved:	ENTER
 reserved:	ENTRY
 reserved:	ENVIRONMENT
+reserved:	ENVIRONMENT-NAME # note: this is a register, move as soon as supported
 reserved:	EOL
 reserved:	EOP
 reserved:	EOS
@@ -252,7 +253,7 @@ reserved:	FILE-ID
 reserved:	FILE-LIMIT
 reserved:	FILE-LIMITS
 reserved:	FILE-PATH
-reserved:	FILE-PREFIX
+reserved:	FILE-PREFIX # note: this is a register, move as soon as supported
 reserved:	FILLER
 reserved:	FIRST
 reserved:	FLOAT
@@ -550,12 +551,34 @@ reserved:	WORKING-STORAGE
 reserved:	WRAP
 reserved:	WRITE
 reserved:	WRITERS
+reserved:	XML-CODE # note: this is a register, move as soon as supported
+reserved:	XML-EVENT # note: this is a register, move as soon as supported
+reserved:	XML-TEXT # note: this is a register, move as soon as supported
 reserved:	YYYYDDD
 reserved:	YYYYMMDD
 reserved:	ZERO
 reserved:	ZERO-FILL
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+# list of registers:
+not-register:	DIALECT-ALL
+register:	"ADDRESS\ OF"
+# CONDITION-CODE is only available in HPUX mode, not yet recognised by GnuCOBOL
+# CURRENT-DATE is only available in HPUX mode, not yet recognised by GnuCOBOL
+# register:	ENVIRONMENT-NAME
+# register:	FILE-PREFIX
+register:	"LENGTH\ OF"
+register:	RETURN-CODE
+# register:	RETURN-UNSIGNED
+# SORT-RETURN is only available in IBM mode
+# SORT-MESSAGE is only available in IBM mode, not yet recognised by GnuCOBOL
+# TALLY is only available in HPUX mode
+# TIME-OF-DAY is only available in HPUX mode, not yet recognised by GnuCOBOL
+# WHEN-COMPILED is only available in HPUX mode
+# register:	XML-CODE
+# register:	XML-EVENT
+# register:	XML-TEXT
 
 
 # list of (non-standard) system names:

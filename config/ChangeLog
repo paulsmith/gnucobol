@@ -1,4 +1,9 @@
 
+2017-08-11  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: moved all register definitions to the words files.
+	* general: added unimplemented registers as reserved words.
+
 2017-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* default.conf: set entry-statement from "obsolete" to "ok"
