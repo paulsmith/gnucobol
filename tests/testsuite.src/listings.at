@@ -1734,24 +1734,9 @@ AT_CLEANUP
 
 
 AT_SETUP([Symbols: pointer])
-AT_KEYWORDS([listing])
+AT_KEYWORDS([listing 64bit])
 
 AT_CAPTURE_FILE([prog.lst])
-
-# Check for 32/64bit first
-AT_DATA([P64.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      P64.
-       DATA             DIVISION.
-       PROCEDURE        DIVISION.
-       >>IF P64 SET
-           DISPLAY '64' WITH NO ADVANCING
-           END-DISPLAY.
-       >>END-IF
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE P64.cob], [0], [], [])
 
 AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
@@ -1804,9 +1789,9 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog3.cob], [0], [], [])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 
-AT_CHECK([./P64], [0], [64], [],
+AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
 
-# Previous test "failed" --> P64 did not show '64' --> 32 bit
+# Previous test "failed" --> 32 bit
 
 AT_DATA([prog17-32.lst],
 [GnuCOBOL V.R.P               prog3.cob                  DDD MMM dd HH:MM:SS YYYY
@@ -1915,7 +1900,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 ,
 
-# Previous test "passed" --> P64 showed '64' --> 64 bit
+# Previous test "passed" --> 64 bit
 
 AT_DATA([prog17-64.lst],
 [GnuCOBOL V.R.P               prog3.cob                  DDD MMM dd HH:MM:SS YYYY
