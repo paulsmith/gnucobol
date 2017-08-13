@@ -852,7 +852,7 @@ cob_file_write_opt (cob_file *f, const int opt)
 		i = opt & COB_WRITE_MASK;
 		if (!i) {
 			/* AFTER/BEFORE 0 */
-			putc (0x0d, (FILE *)f->file);
+			putc ('\r', (FILE *)f->file);
 		} else {
 			for (; i > 0; --i) {
 				putc ('\n', (FILE *)f->file);
