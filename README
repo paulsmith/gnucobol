@@ -23,6 +23,7 @@ This package contains the following subdirectories:
     cobc        COBOL compiler
     libcob      COBOL run-time library
     bin         COBOL driver program
+    build_aux   Helper scripts
     lib         Helper routines for missing OS functionality
     config      Configuration files
     po          International messages
@@ -282,4 +283,5 @@ these are the most important ones:
 Development
 ============
 
-If you wish to hack the GnuCOBOL source or build from svn, see HACKING.
+If you wish to hack the GnuCOBOL source or build from version control,
+see HACKING.
