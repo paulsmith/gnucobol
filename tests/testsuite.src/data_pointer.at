@@ -19,22 +19,7 @@
 ### GnuCOBOL Test Suite
 
 AT_SETUP([POINTER: display])
-AT_KEYWORDS([pointer])
-
-# Check for 32/64bit first
-AT_DATA([P64.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      P64.
-       DATA             DIVISION.
-       PROCEDURE        DIVISION.
-       >>IF P64 SET
-           DISPLAY '64' WITH NO ADVANCING
-           END-DISPLAY.
-       >>END-IF
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE P64.cob], [0], [], [])
+AT_KEYWORDS([pointer 64bit])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -55,9 +40,9 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./P64], [0], [64], [],
+AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
 
-# Previous test "failed" --> P64 did not show '64' --> 32 bit
+# Previous test "failed" --> 32 bit
 
 [AT_CHECK([./prog], [0], [0x00000000
 0x00000001
@@ -66,7 +51,7 @@ AT_CHECK([./P64], [0], [64], [],
 
 ,
 
-# Previous test "passed" --> P64 showed '64' --> 64 bit
+# Previous test "passed" --> 64 bit
 
 [AT_CHECK([./prog], [0], [0x0000000000000000
 0x0000000000000001

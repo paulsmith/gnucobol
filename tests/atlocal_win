@@ -4,7 +4,7 @@
 # This script is a special variant of the atlocal script for testing
 # a not POSIX build (VisualStudio build for example) in a POSIX environment.
 #
-# Copyright (C) 2003-2012, 2014-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -28,7 +28,7 @@ COB_SRC_PATH="$(cd ${abs_srcdir}/.. ; pwd)"
 COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/Release"
 
 COB_BIGENDIAN="no"
-COB_HAS_UTC_OFFSET="yes"
+COB_HAS_UTC_OFFSET="yes"	# FIXME: set from cobcrun --info
 
 export COBC="cobc.exe"
 export COBCRUN="cobcrun.exe"
@@ -101,6 +101,7 @@ if test "$TERM" != "cygwin"; then # this is true for CYGWIN and MSYS
    fi
 fi
 export COB_HAS_CURSES
+export COB_HAS_64_BIT_POINTER=$($COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-)
 export PATHSEP
 
 

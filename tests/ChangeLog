@@ -1,4 +1,10 @@
 
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_valgrind, atlocal_win: export COB_HAS_64_BIT_POINTER
+	* testsuite.src/data_pointer.at, testsuite.src/listings.at: check
+	  COB_HAS_64_BIT_POINTER instead of indirect test from COBOL
+
 2017-07-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_misc.at, testsuite.src/data_binary.at: changed
