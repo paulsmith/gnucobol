@@ -49,6 +49,14 @@ dist-hook:
 	echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $(distdir)/tarstamp.h
 	find $(distdir) -type d -print | xargs chmod 755
 	find $(distdir) -type f -print | xargs chmod 644
+	touch $(distdir)/m4/*.m4
+	touch $(distdir)/aclocal.m4
+	touch $(distdir)/Makefile.in
+	touch $(distdir)/*/Makefile.in
+	touch $(distdir)/*/*/Makefile.in
+	touch $(distdir)/configure
+	touch $(distdir)/config.h.in
+	touch $(distdir)/doc/stamp-vti
 	chmod 755 $(distdir)/build_aux/compile
 	chmod 755 $(distdir)/build_aux/config.guess
 	chmod 755 $(distdir)/build_aux/config.sub
