@@ -1,4 +1,9 @@
 
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* call.c, common.c, fileio.c, intrinsic.c, screenio.c:
+	  surrounded code parts that cannot be tested by LCOV_EXCP markers
+
 2017-08-06 Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (cob_file_external_addr): fixed bug #404, where the

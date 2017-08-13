@@ -1376,9 +1376,11 @@ cob_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = calloc ((size_t)1, size);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
@@ -1387,18 +1389,22 @@ cob_realloc (void * optr, const size_t osize, const size_t nsize)
 {
 	void	*mptr;
 
+	/* LCOV_EXCL_START */
 	if (unlikely (!optr)) {
 		cob_fatal_error (COB_FERROR_FREE);
 	}
+	/* LCOV_EXCL_STOP */
 
 	if (unlikely (osize <= nsize)) {
 		return realloc (optr, nsize);
 	}
 
 	mptr = calloc ((size_t)1, nsize);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	memcpy (mptr, optr, osize);
 	cob_free (optr);
 	return mptr;
@@ -1408,9 +1414,11 @@ void
 cob_free (void * mptr)
 {
 #ifdef _DEBUG
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_FREE);
 	}
+	/* LCOV_EXCL_STOP */
 #endif
 	free (mptr);
 
@@ -1422,9 +1430,11 @@ cob_fast_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = malloc (size);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
@@ -1666,9 +1676,11 @@ cob_is_initialized (void)
 cob_global *
 cob_get_global_ptr (void)
 {
+	/* LCOV_EXCL_START */
 	if (unlikely (!cob_initialized)) {
 		cob_fatal_error (COB_FERROR_INITIALIZED);
 	}
+	/* LCOV_EXCL_STOP */
 	return cobglobptr;
 }
 
@@ -3797,10 +3809,12 @@ cob_sys_system (const void *cmdline)
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		cmd = cmdline;
 		i = (int)COB_MODULE_PTR->cob_procedure_params[0]->size;
+		/* LCOV_EXCL_START */
 		if (unlikely (i > COB_MEDIUM_MAX)) {
 			cob_runtime_error (_("parameter to SYSTEM call is larger than %d characters"), COB_MEDIUM_MAX);
 			cob_stop_run (1);
 		}
+		/* LCOV_EXCL_STOP */
 		i--;
 		for (; i >= 0; --i) {
 			if (cmd[i] != ' ' && cmd[i] != 0) {
@@ -5798,7 +5812,6 @@ cob_fatal_error (const int fatal_error)
 	switch (fatal_error) {
 #if 0 /* Currently not in use, should enter unknown error */
 	case COB_FERROR_NONE:
-		cob_runtime_error (_("attempt to CANCEL active program"));
 		break;
 #endif
 	case COB_FERROR_CANCEL:
@@ -5819,9 +5832,11 @@ cob_fatal_error (const int fatal_error)
 #endif
 		cob_runtime_error (_("cob_init() has not been called"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_CODEGEN:
 		cob_runtime_error (_("codegen error - Please report this!"));
 		break;
+	/* LCOV_EXCL_STOP */
 	case COB_FERROR_CHAINING:
 		cob_runtime_error (_("CALL of program with CHAINING clause"));
 		break;
@@ -5831,19 +5846,25 @@ cob_fatal_error (const int fatal_error)
 	case COB_FERROR_GLOBAL:
 		cob_runtime_error (_("invalid entry/exit in GLOBAL USE procedure"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_MEMORY:
 		cob_runtime_error (_("unable to allocate memory"));
 		break;
+	/* LCOV_EXCL_STOP */
 	case COB_FERROR_MODULE:
 		cob_runtime_error (_("invalid entry into module"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_RECURSIVE:
 		cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
 			COB_MODULE_PTR->module_name);
 		break;
+	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_FREE:
 		cob_runtime_error (_("call to %s with NULL pointer"), "cob_free");
 		break;
+	/* LCOV_EXCL_STOP */
 	case COB_FERROR_FILE:
 		file_status = cobglobptr->cob_error_file->file_status;
 		status = COB_D2I (file_status[0]) * 10 + COB_D2I (file_status[1]);
@@ -5919,12 +5940,14 @@ cob_fatal_error (const int fatal_error)
 			msg, status, err_cause);
 		cob_free (err_cause);
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_FUNCTION:
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
 	default:
 		cob_runtime_error (_("unknown failure: %d"), fatal_error);
 		break;
+	/* LCOV_EXCL_STOP */
 	}
 	cob_stop_run (1);
 }

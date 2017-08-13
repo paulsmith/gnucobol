@@ -45,7 +45,7 @@
 #include "coblocal.h"
 
 #define DECIMAL_CHECK(d1,d2) \
-	if (unlikely(d1->scale == COB_DECIMAL_NAN || \
+	if (unlikely (d1->scale == COB_DECIMAL_NAN || \
 	    d2->scale == COB_DECIMAL_NAN)) { \
 		d1->scale = COB_DECIMAL_NAN; \
 		return; \
@@ -389,11 +389,11 @@ cob_decimal_print (cob_decimal *d, FILE *fp)
 {
 	int	scale;
 
-	if (unlikely(d->scale == COB_DECIMAL_NAN)) {
+	if (unlikely (d->scale == COB_DECIMAL_NAN)) {
 		fprintf (fp, "(Nan)");
 		return;
 	}
-	if (unlikely(d->scale == COB_DECIMAL_INF)) {
+	if (unlikely (d->scale == COB_DECIMAL_INF)) {
 		fprintf (fp, "(Inf)");
 		return;
 	}
@@ -904,7 +904,7 @@ cob_decimal_get_double (cob_decimal *d)
 	cob_sli_t	n;
 
 	v = 0.0;
-	if (unlikely(mpz_size (d->value) == 0)) {
+	if (unlikely (mpz_size (d->value) == 0)) {
 		return v;
 	}
 
@@ -1127,7 +1127,7 @@ cob_decimal_set_packed (cob_decimal *d, cob_field *f)
 #endif
 	sign = cob_packed_get_sign (f);
 
-	if (unlikely(COB_FIELD_NO_SIGN_NIBBLE (f))) {
+	if (unlikely (COB_FIELD_NO_SIGN_NIBBLE (f))) {
 		endp = f->data + f->size;
 		nibtest = 1;
 	} else {
@@ -1198,7 +1198,7 @@ cob_decimal_get_packed (cob_decimal *d, cob_field *f, const int opt)
 	}
 
 #if	0	/* RXWRXW stack */
-	if (unlikely(mpz_sizeinbase (d->value, 10) > sizeof(buff) - 1)) {
+	if (unlikely (mpz_sizeinbase (d->value, 10) > sizeof(buff) - 1)) {
 #endif
 		mza = mpz_get_str (NULL, 10, d->value);
 #if	0	/* RXWRXW stack */
@@ -1227,7 +1227,7 @@ cob_decimal_get_packed (cob_decimal *d, cob_field *f, const int opt)
 		   then throw an exception */
 		if (opt & COB_STORE_KEEP_ON_OVERFLOW) {
 #if	0	/* RXWRXW stack */
-			if (unlikely(mza != buff)) {
+			if (unlikely (mza != buff)) {
 #endif
 				cob_gmp_free(mza);
 
@@ -1257,7 +1257,7 @@ cob_decimal_get_packed (cob_decimal *d, cob_field *f, const int opt)
 	}
 
 #if	0	/* RXWRXW stack */
-	if (unlikely(mza != buff)) {
+	if (unlikely (mza != buff)) {
 #endif
 		cob_gmp_free(mza);
 
@@ -1339,12 +1339,12 @@ cob_decimal_set_display (cob_decimal *d, cob_field *f)
 
 	data = COB_FIELD_DATA (f);
 	size = COB_FIELD_SIZE (f);
-	if (unlikely(*data == 255)) {
+	if (unlikely (*data == 255)) {
 		mpz_ui_pow_ui (d->value, 10UL, (cob_uli_t)size);
 		d->scale = COB_FIELD_SCALE(f);
 		return;
 	}
-	if (unlikely(*data == 0)) {
+	if (unlikely (*data == 0)) {
 		mpz_ui_pow_ui (d->value, 10UL, (cob_uli_t)size);
 		mpz_neg (d->value, d->value);
 		d->scale = COB_FIELD_SCALE(f);
@@ -1417,7 +1417,7 @@ cob_decimal_get_display (cob_decimal *d, cob_field *f, const int opt)
 
 	/* Store number */
 	diff = (int)(COB_FIELD_SIZE (f) - size);
-	if (unlikely(diff < 0)) {
+	if (unlikely (diff < 0)) {
 		/* Overflow */
 		cob_set_exception (COB_EC_SIZE_OVERFLOW);
 
@@ -1541,7 +1541,7 @@ cob_decimal_get_binary (cob_decimal *d, cob_field *f, const int opt)
 	unsigned int		lo;
 #endif
 
-	if (unlikely(mpz_size (d->value) == 0)) {
+	if (unlikely (mpz_size (d->value) == 0)) {
 		memset (f->data, 0, f->size);
 		return 0;
 	}
@@ -1556,7 +1556,7 @@ cob_decimal_get_binary (cob_decimal *d, cob_field *f, const int opt)
 		}
 	}
 	bitnum = (f->size * 8) - sign;
-	if (unlikely(mpz_sizeinbase (d->value, 2) > bitnum)) {
+	if (unlikely (mpz_sizeinbase (d->value, 2) > bitnum)) {
 		if (opt & COB_STORE_KEEP_ON_OVERFLOW) {
 			goto overflow;
 		}
@@ -1831,7 +1831,7 @@ cob_decimal_get_field (cob_decimal *d, cob_field *f, const int opt)
 		float			fval;
 	} uval;
 
-	if (unlikely(d->scale == COB_DECIMAL_NAN)) {
+	if (unlikely (d->scale == COB_DECIMAL_NAN)) {
 		cob_set_exception (COB_EC_SIZE_OVERFLOW);
 		return cobglobptr->cob_exception_code;
 	}
@@ -1925,7 +1925,7 @@ cob_decimal_div (cob_decimal *d1, cob_decimal *d2)
 	DECIMAL_CHECK (d1, d2);
 
 	/* Check for division by zero */
-	if (unlikely(mpz_sgn (d2->value) == 0)) {
+	if (unlikely (mpz_sgn (d2->value) == 0)) {
 		d1->scale = COB_DECIMAL_NAN;
 		/* FIXME: we currently don't handle the fatal exception correct
 		   fatal->abort. We only should set it when it *doesn't* happen
@@ -1935,7 +1935,7 @@ cob_decimal_div (cob_decimal *d1, cob_decimal *d2)
 		cob_set_exception (COB_EC_SIZE_ZERO_DIVIDE);
 		return;
 	}
-	if (unlikely(mpz_sgn (d1->value) == 0)) {
+	if (unlikely (mpz_sgn (d1->value) == 0)) {
 		d1->scale = 0;
 		return;
 	}
@@ -2071,7 +2071,7 @@ display_add_int (unsigned char *data, const size_t size, int n, const int opt)
 		n /= 10;
 
 		/* Check for overflow */
-		if (unlikely(--sp < data)) {
+		if (unlikely (--sp < data)) {
 			return opt;
 		}
 
@@ -2114,7 +2114,7 @@ display_sub_int (unsigned char *data, const size_t size, int n, const int opt)
 		n /= 10;
 
 		/* Check for overflow */
-		if (unlikely(--sp < data)) {
+		if (unlikely (--sp < data)) {
 			return 1;
 		}
 
@@ -2172,7 +2172,7 @@ cob_display_add_int (cob_field *f, int n, const int opt)
 		n = -n;
 	}
 
-	if (unlikely(scale < 0)) {
+	if (unlikely (scale < 0)) {
 		/* PIC 9(n)P(m) */
 		if (-scale < 10) {
 			while (scale++) {
@@ -2240,7 +2240,7 @@ cob_add_int (cob_field *f, const int n, const int opt)
 	int	scale;
 	int	val;
 
-	if (unlikely(n == 0)) {
+	if (unlikely (n == 0)) {
 		return 0;
 	}
 #if	0	/* RXWRXW - Buggy */
@@ -2264,7 +2264,7 @@ cob_add_int (cob_field *f, const int n, const int opt)
 	else {
 		scale = COB_FIELD_SCALE (f);
 		val = n;
-		if (unlikely(scale < 0)) {
+		if (unlikely (scale < 0)) {
 			/* PIC 9(n)P(m) */
 			if (-scale < 10) {
 				while (scale++) {
@@ -2588,7 +2588,7 @@ cob_cmp_numdisp (const unsigned char *data, const size_t size,
 
 	p = data;
 	if (!has_sign) {
-		if (unlikely(n < 0)) {
+		if (unlikely (n < 0)) {
 			return 1;
 		}
 		for (inc = 0; inc < size; inc++, p++) {
@@ -2603,7 +2603,7 @@ cob_cmp_numdisp (const unsigned char *data, const size_t size,
 	if (*p >= (unsigned char)'0' && *p <= (unsigned char)'9') {
 		val += COB_D2I (*p);
 	} else {
-		if (unlikely(COB_MODULE_PTR->ebcdic_sign)) {
+		if (unlikely (COB_MODULE_PTR->ebcdic_sign)) {
 			if (cob_get_long_ebcdic_sign (p, &val)) {
 				val = -val;
 			}

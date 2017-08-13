@@ -1791,9 +1791,11 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	int		status;
 	char	fig_const;	/* figurative constant character */
 
-	if (unlikely(!f)) {
+	/* LCOV_EXCL_START */
+	if (unlikely (!f)) {
 		cob_fatal_error(COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 
 	init_cob_screen_if_needed ();
 
@@ -2122,7 +2124,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		}
 
 		/* extension: ACCEPT OMITTED */
-		if (unlikely(!f)) {
+		if (unlikely (!f)) {
 			/* special keys for ACCEPT OMITTED */
 			switch (keyp) {
 			case KEY_LEFT:
