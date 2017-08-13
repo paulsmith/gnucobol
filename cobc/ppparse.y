@@ -392,6 +392,7 @@ ppp_search_comp_vars (const char *name)
 #define	CB_PARSE_DEF(x,z)	if (!strcasecmp (name, x)) return (z);
 #include "ppparse.def"
 #undef	CB_PARSE_DEF
+	cb_warning (COBC_WARN_FILLER, _("compiler flag '%s' unknown"), name);
 	return 0;
 }
 

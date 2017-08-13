@@ -1,4 +1,8 @@
 
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ppparse.y: CDF: warn if compiler flag is unknown
+
 2017-08-11  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: implemented (not-)register: DIALECT-ALL.
