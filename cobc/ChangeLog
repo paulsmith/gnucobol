@@ -2513,8 +2513,7 @@
 
 2014-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* codegen.c: Fixing Bug #55
-	  UDF with no parameters do not compile
+	* codegen.c: Fixing Bug #55 UDF with no parameters does not compile
 
 201?-??-??  Sergey Kashyrin <ska@kiska.net>
 
@@ -4220,7 +4219,7 @@
 
 2005-05-13  Roger While <simrw@sim-basis.de>
 
-	* cobc.c : Allow multiple input files when producing executable.
+	* cobc.c: Allow multiple input files when producing executable.
 
 2005-05-03  Roger While <simrw@sim-basis.de>
 
@@ -4262,13 +4261,12 @@
 
 2005-03-03  Roger While <simrw@sim-basis.de>
 
-	* cobc.h, tree.h, parser.y, reserved.c, cobc.c,
-	  tree.c, codegen.c, typeck.c :
+	* cobc.h, tree.h, parser.y, reserved.c, cobc.c, tree.c, codegen.c,
+	  typeck.c :
 	  Implement LINAGE
 	  Implement -Os
 	  Implement stripping of main/modules with O2 or Os
-	  Fix dangling preprocess file after non-existent
-	  file
+	  Fix dangling preprocess file after non-existent file
 	  Fix ASSIGN implicit data-item when not referenced
 	  Implement some options for gcc >= 3
 	  Change an incorrect long to int
@@ -4277,7 +4275,7 @@
 2005-02-22  Roger While <simrw@sim-basis.de>
 
 	* codegen.c : Generated C code indentation
-	  typeck.c : Check usage of 66 level with pointer
+	* typeck.c : Check usage of 66 level with pointer
 
 2005-02-15  Roger While <simrw@sim-basis.de>
 
@@ -4379,7 +4377,7 @@
 	* typeck.c, parser.y, error.c, field.c config.c, tree.c, tree.h,
 	  pplex.l : Replace back-tick "'" with quote "'"
 	* codegen.c : specify aligned(4) and not just aligned. On IA32,
-	  wth gcc, default alignment is 16 which is non-optimal.
+	  with gcc, default alignment is 16 which is non-optimal.
 	  For 64-bit non-Intel platforms we may need 8 here to cater
 	  for eventual direct casts for pointers and COMP-1/2 fields.
 
@@ -4417,7 +4415,7 @@
 
 	* parser.y (procedure_division, entry_statement): Use using_clause.
 	* codegen.c (codegen, output_entry_function): Handle using_list
-	with BY REFERENCE/CONTENT/VALUE.
+	  with BY REFERENCE/CONTENT/VALUE.
 	* typeck.c, tree.h (cb_build_using_list): Removed.
 	* cobc.c (process_translate): Do not call codegen when no entry.
 
@@ -4429,10 +4427,10 @@
 2004-05-04  Keisuke Nishida  <knishida@opencobol.org>
 
 	* typeck.c (cb_build_move_field): Optimize when the usage of src
-	and dst are the same, not only when they are DISPLAY.
-	(cb_build_move_high, cb_build_move_low): Really move low/high
-	values to numeric fields.
-	(cb_build_move): Do not convert 0 literal to ZERO.
+	  and dst are the same, not only when they are DISPLAY.
+	  (cb_build_move_high, cb_build_move_low): Really move low/high
+	  values to numeric fields.
+	  (cb_build_move): Do not convert 0 literal to ZERO.
 
 2004-04-19  Keisuke Nishida  <knishida@opencobol.org>
 

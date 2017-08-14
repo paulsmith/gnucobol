@@ -5086,14 +5086,9 @@ static unsigned int
 emit_accept_external_form (cb_tree x)
 {
 	struct cb_field *f;
-#if 1 /* TODO: implement CGI runtime, see Patch #27 */
-	cb_tree		t, m;
-	COB_UNUSED (m);
-#else
-	cb_tree		t, o, m, n, r;
+	cb_tree		t, o, m, n;
 	int		i;
 	char		buff[32];
-#endif
 	unsigned int	found;
 
 	found = 0;
@@ -5108,24 +5103,26 @@ emit_accept_external_form (cb_tree x)
 				} else {
 					m = cb_build_alphanumeric_literal (f->name, strlen (f->name)); 
 				}
-#if 0 /* TODO: implement CGI runtime, see Patch #27 */
 				if (f->flag_occurs) {
-					for (i = 1; i <= f1->occurs_max; i++) {
+					for (i = 1; i <= f->occurs_max; i++) {
 						sprintf (buff, "%d", i);
 						n = cb_build_numeric_literal(0, buff, 0); 
 
 						o = cb_build_field_reference (f, x);
 						CB_REFERENCE (o)->subs = CB_LIST_INIT (n);
 
-						r = CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, o);
-						cb_emit (r);
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+						cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, o));
+#else
+						COB_UNUSED (m);
+#endif
 					}
 				} else {
 					n = cb_build_numeric_literal(0, "1", 0);
-					r = CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, t);
-					cb_emit (r);
-				}
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+					cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, t));
 #endif
+				}
 				found++;
 			}
 		}
@@ -5171,6 +5168,8 @@ emit_display_external_form (cb_tree x)
 				}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 				cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", m, t));
+#else
+				COB_UNUSED (m);
 #endif
 				found++;
 			}

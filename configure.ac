@@ -3,7 +3,8 @@
 # Process this file with autoconf to produce a configure script.
 #
 # Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
-# Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch
+# Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
+# Edward Hart
 #
 # This file is part of GnuCOBOL.
 #

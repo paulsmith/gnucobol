@@ -50,7 +50,7 @@ VS_VERSION_INFO    VERSIONINFO
       // Should be set if VS_FF_SPECIALBUILD is set (including description what it was build for):
       VALUE "SpecialBuild",     ""
 
-	  /* Non-Standard entries */
+      /* Non-Standard entries */
       VALUE "Build",            "Jul 2017"
       VALUE "Developer",        "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart and many others (see AUTHORS and THANKS)"
       VALUE "Support",          "https://www.gnu.org/software/gnucobol/"
