@@ -99,19 +99,27 @@ goto :eof
 
 :bisoncall
 echo generating %1.c, %1.h ...
-%BISON% -o "%tmp_prf%_%1.c"   "%1.y" ^
- && (call :compare_generated %1.c ^
+call :store_old %1.c
+call :store_old %1.h
+%BISON% -o "%1.c"   "%1.y" ^
+ && (call :waiter ^
+  &  call :compare_generated %1.c ^
   &  call :compare_generated %1.h ^
-  &  if exist "%tmp_prf%_%1.output" erase "%tmp_prf%_%1.output" >NUL ) ^
- || echo.   %1.c, %1.h were not changed
+  &  if exist "%1.output" erase "%1.output" >NUL ) ^
+ || (call :delete_generated %1.c ^
+  &  call :delete_generated %1.h ^
+  &  echo.   %1.c, %1.h were not changed)
 echo.
 goto :eof
 
 :flexcall
 echo generating %1.c ...
-%FLEX%  -o "%tmp_prf%_%1.c"   "%1.l" ^
- && call :compare_generated %1.c ^
- || echo.   %1.c was not changed
+call :store_old %1.c
+%FLEX%  -o "%1.c"   "%1.l" ^
+ && (call :waiter ^
+  &  call :compare_generated %1.c) ^
+ || (call :delete_generated %1.c ^
+  &  echo.   %1.c was not changed)
 echo.
 goto :eof
 
@@ -123,15 +131,27 @@ fc "%1" "%tmp_prf%_%1" 1>NUL 2>NUL ^
  || (call :use_generated %1)
 goto :eof
 
-:use_generated
-if exist "%tmp_prf%_%1" (
-  move   "%tmp_prf%_%1" "%1" >NUL
-  echo.   %1 is changed
+:waiter
+ping -w 250 -n 2 localhost 1>NUL 2>NUL
+goto :eof
+
+:store_old
+if exist "%1" (
+  move  "%1" "%tmp_prf%_%1" >NUL
+) else if exist "%tmp_prf%_%1" (
+  erase      "%tmp_prf%_%1" >NUL
 )
 goto :eof
 
+:use_generated
+if exist "%tmp_prf%_%1" (
+  erase  "%tmp_prf%_%1" >NUL
+)
+echo.   %1 is changed
+goto :eof
+
 :delete_generated
-if exist "%tmp_prf%_%1" erase "%tmp_prf%_%1" >NUL
+if exist "%tmp_prf%_%1" move "%tmp_prf%_%1" "%1" >NUL
 echo.   %1 is unchanged
 goto :eof
 

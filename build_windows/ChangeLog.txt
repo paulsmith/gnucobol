@@ -1,4 +1,9 @@
 
+2017-08-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makebisonflex.bat: use normal output name like ylwrap does;
+	  added sleep for slow / indexing systems
+
 2017-08-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* makebisonflex.bat: mimic ylwrap (only replace existing generated files
