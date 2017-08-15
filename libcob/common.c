@@ -1733,6 +1733,8 @@ cob_module_free (cob_module **module)
 	}
 }
 
+/* save module environment - returns an allocated cob_func_loc (free at cob_restore_func)
+   and the intermediate return field (must be freed by caller) */
 void *
 cob_save_func (cob_field **savefld, const int params,
 	       const int eparams, ...)
@@ -1777,6 +1779,7 @@ cob_save_func (cob_field **savefld, const int params,
 	return fl;
 }
 
+/* restores module environment - frees the passed cob_func_loc */
 void
 cob_restore_func (struct cob_func_loc *fl)
 {
