@@ -2676,8 +2676,7 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
-	cob_global *cobol_global;
-{
+   cob_global *cobol_global;
    /* for storing COBOL return code */
    int cob_ret;
 
