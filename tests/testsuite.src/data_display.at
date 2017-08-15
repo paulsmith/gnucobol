@@ -61,7 +61,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fsign=ascii prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [12340
 12340
 123t0
@@ -118,7 +118,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fsign=ascii prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [0123456789pqrstuvwxy])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0123456789pqrstuvwxy])
 
 AT_CLEANUP
 
@@ -164,7 +164,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fsign=ebcdic prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [{ABCDEFGHI}JKLMNOPQR])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [{ABCDEFGHI}JKLMNOPQR])
 
 AT_CLEANUP
 
@@ -202,7 +202,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [127
 128
 32767

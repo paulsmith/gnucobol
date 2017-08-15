@@ -85,7 +85,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_PRINTOUT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -170,7 +170,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_PRINTOUT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -243,7 +243,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_PRINTOUT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -328,7 +328,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_PRINTOUT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -524,7 +524,7 @@ prog.cob: 29: warning: DATA RECORDS is obsolete in Micro Focus COBOL
 prog.cob: 45: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -892,7 +892,7 @@ prog.cob: 28: warning: DATA RECORDS is obsolete in Micro Focus COBOL
 prog.cob: 44: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -1277,7 +1277,7 @@ prog.cob: 28: warning: DATA RECORDS is obsolete in Micro Focus COBOL
 prog.cob: 44: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -1657,7 +1657,7 @@ prog.cob: 35: warning: DATA RECORDS is obsolete in Micro Focus COBOL
 prog.cob: 52: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -2025,7 +2025,7 @@ prog.cob: in paragraph 'USE-SALESMAN-TOTAL-PROC':
 prog.cob: 127: warning: ignoring sign
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -2746,7 +2746,7 @@ prog.cob: 33: warning: DATA RECORDS is obsolete in Micro Focus COBOL
 prog.cob: 63: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
 ])
 
-AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -2977,7 +2977,7 @@ AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
 [prog.cob: 16: warning: RECORD clause ignored for LINE SEQUENTIAL
 ])
 
-AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" ./prog], [0], 
+AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" $COBCRUN_DIRECT ./prog], [0], 
 [Report Test 1
 '  000005     Hello                    Bye     7    '
 ], [])
@@ -3267,7 +3267,7 @@ AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
 [prog.cob: 16: warning: RECORD clause ignored for LINE SEQUENTIAL
 ])
 
-AT_CHECK([DD_CUSTORD="./inp_data" DD_REPORT2="./report.txt" ./prog], [0],
+AT_CHECK([DD_CUSTORD="./inp_data" DD_REPORT2="./report.txt" $COBCRUN_DIRECT ./prog], [0],
 [Report test 2
 Report test 2 completed
 ], [])
@@ -3526,7 +3526,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_STUDREC="./inp_data" DD_REPORT3="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_STUDREC="./inp_data" DD_REPORT3="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -3741,7 +3741,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [], [])
 
-AT_CHECK([DD_INVFILE="./inp_data" DD_REPORT4="./report.txt" ./prog], [0], [], [])
+AT_CHECK([DD_INVFILE="./inp_data" DD_REPORT4="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)

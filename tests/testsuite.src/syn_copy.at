@@ -88,7 +88,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -117,7 +117,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -147,7 +147,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OKOK])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
 
 AT_CLEANUP
 
@@ -176,7 +176,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OKOK])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
 
 AT_CLEANUP
 
@@ -205,7 +205,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OKOK])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OKOK])
 
 AT_CLEANUP
 
@@ -234,7 +234,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
 
 AT_CLEANUP
 
@@ -259,6 +259,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -free prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [OK], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [OK], [])
 
 AT_CLEANUP

@@ -51,7 +51,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -91,7 +91,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -158,7 +158,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -207,7 +207,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([cat result.txt], [0], [                              hello world ], [])
 
 AT_CLEANUP
@@ -259,7 +259,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([cat result.txt], [0], [
 
 
@@ -317,7 +317,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([cat test.txt], [0], [
 
 bla
@@ -358,7 +358,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([cat SORT-OUT], [0], [], [])
 
 AT_CLEANUP
@@ -394,7 +394,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [hello
 ], [])
 
@@ -433,7 +433,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [hello
 ], [])
 
@@ -583,7 +583,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [Loading sample program data file.
 Sample program data file load complete.
 Read    BET00000 Sts:00 Trms:0013
@@ -636,7 +636,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -713,7 +713,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -771,7 +771,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0], [1st Read on missing optional file = 10 OK
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [1st Read on missing optional file = 10 OK
 2nd Read on missing optional file = 46 OK
 ], [])
 
@@ -808,7 +808,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -849,7 +849,7 @@ AT_DATA([prog.cob], [
 
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -e abcd], [1], [], [])
 
 AT_CLEANUP
@@ -1015,12 +1015,12 @@ AT_DATA([prog2.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
-AT_CHECK([./prog], [0], [],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [],
 [libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_lock: 11
 libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_dev: 22
 libcob: prog.cob: 15: warning: call to CBL_OPEN_FILE with wrong access mode: 55
 ])
-AT_CHECK([./prog2], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
 
 AT_CLEANUP
 
@@ -1054,7 +1054,7 @@ AT_DATA([prog2.cob], [
 ])
 
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
-AT_CHECK([./prog2], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
 AT_CHECK([diff prog.cob prog3.cob], [0], [], [])
 
 AT_CLEANUP

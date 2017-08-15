@@ -427,7 +427,7 @@ prog.cob: 31: warning: overlapping MOVE may occur and produce unpredictable resu
 prog.cob: 32: warning: overlapping MOVE may produce unpredictable results
 prog.cob: 34: warning: overlapping MOVE may produce unpredictable results
 ])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 

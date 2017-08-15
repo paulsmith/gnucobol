@@ -32,6 +32,7 @@ COB_HAS_UTC_OFFSET="yes"	# FIXME: set from cobcrun --info
 
 export COBC="cobc.exe"
 export COBCRUN="cobcrun.exe"
+export COBCRUN_DIRECT="" # used for running created executables through tools
 
 TEMPLATE="${abs_srcdir}/testsuite.src"
 

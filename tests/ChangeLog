@@ -1,4 +1,10 @@
 
+2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_valgrind, atlocal_win: set COBCRUN_DIRECT
+	  used for running executables through tools (especially valgrind)
+	* testsuite.src: COBCRUN_DIRECT as prefix for running generated executables
+
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_valgrind, atlocal_win: export COB_HAS_64_BIT_POINTER

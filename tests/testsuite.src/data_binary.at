@@ -43,7 +43,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
                    -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0001202020202020
 000c202020202020
 007b202020202020
@@ -158,7 +158,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
                    -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -230,7 +230,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
                    -fbinary-byteorder=native  prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0100202020202020
 0c00202020202020
 7b00202020202020
@@ -345,7 +345,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=2-4-8 \
                    -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -413,7 +413,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
                    -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0120202020202020
 0c20202020202020
 007b202020202020
@@ -528,7 +528,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
                    -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -599,7 +599,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
                    -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0120202020202020
 0c20202020202020
 7b00202020202020
@@ -714,7 +714,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1-2-4-8 \
                    -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -783,7 +783,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
                    -fbinary-byteorder=big-endian prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0120202020202020
 0c20202020202020
 007b202020202020
@@ -898,7 +898,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
                    -fbinary-byteorder=big-endian prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -969,7 +969,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-dump.cob" > prog.cob
 AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
                    -fbinary-byteorder=native prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [0120202020202020
 0c20202020202020
 7b00202020202020
@@ -1084,7 +1084,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
                    -fbinary-byteorder=native prog.cob -o prog2], [0], [], [])
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [1
 12
 123
@@ -1138,7 +1138,7 @@ sed -e 's/@USAGE@/BINARY/' "${TEMPLATE}/numeric-display.cob" > prog.cob
 
 AT_CHECK([$COMPILE -fbinary-size=1--8 \
                    -fno-pretty-display prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [001
 012
 00123
@@ -1201,7 +1201,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1228,7 +1228,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [18446744073709551615
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [18446744073709551615
 09223372036854775807
 ], [])
 
@@ -1252,6 +1252,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fnotrunc prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [-09223372036854775808], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [-09223372036854775808], [])
 
 AT_CLEANUP

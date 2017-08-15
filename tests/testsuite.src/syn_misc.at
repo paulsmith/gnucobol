@@ -2218,7 +2218,7 @@ PROCEDURE        DIVISION.
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [MFCOMMENTASTERISK
 MFCOMMENTSLASH
 NOMFCOMMENTASTERISK
@@ -2235,7 +2235,7 @@ prog2.cob: 17: error: invalid symbol '|' - skipping word
 AT_CHECK([$COMPILE -fmfcomment prog.cob], [0], [],
 [])
 
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [NOMFCOMMENTASTERISK
 NOMFCOMMENTSLASH
 NOFLOATING
@@ -2249,7 +2249,7 @@ prog2.cob: 17: error: invalid symbol '|' - skipping word
 
 AT_CHECK([$COMPILE -facucomment prog.cob], [0], [], [])
 
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [MFCOMMENTASTERISK
 MFCOMMENTSLASH
 NOMFCOMMENTASTERISK
@@ -2259,7 +2259,7 @@ NOFLOATING
 
 AT_CHECK([$COMPILE -facucomment prog2.cob], [0], [], [])
 
-AT_CHECK([./prog2], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 [MFCOMMENTASTERISK
 MFCOMMENTSLASH
 NOMFCOMMENTASTERISK

@@ -44,7 +44,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [a:ab:abc:abcd:abcd
 b:bc:bcd:bcd
 c:cd:cd
@@ -81,7 +81,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [a
 d
 a
@@ -108,7 +108,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [1], [],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob: 9: offset of 'X' out of bounds: 0
 ])
 
@@ -132,7 +132,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [1], [],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob: 9: offset of 'X' out of bounds: 5
 ])
 
@@ -156,7 +156,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [1], [],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob: 9: length of 'X' out of bounds: 0
 ])
 
@@ -180,7 +180,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [1], [],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob: 9: length of 'X' out of bounds: 5
 ])
 

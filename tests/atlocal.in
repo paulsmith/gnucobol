@@ -25,8 +25,10 @@ COB_HAS_ISAM="@COB_HAS_ISAM@"
 COB_HAS_CURSES="@COB_HAS_CURSES@"
 COB_HAS_UTC_OFFSET="@COB_HAS_UTC_OFFSET@"
 COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
+
 COBC="${abs_top_builddir}/cobc/cobc"
 COBCRUN="${abs_top_builddir}/bin/cobcrun"
+COBCRUN_DIRECT="" # used for running created executables through tools
 
 TEMPLATE="${abs_srcdir}/testsuite.src"
 
