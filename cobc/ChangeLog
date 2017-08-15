@@ -1,4 +1,8 @@
 
+2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: bug #413 don't generate cob_check_based for UDF return fields
+
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: added cobc_early_exit and adjusted exit calls to fix missing free
