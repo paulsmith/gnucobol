@@ -908,7 +908,7 @@ cobc_free (void * mptr)
 		cobc_abort_terminate ();
 		/* LCOV_EXCL_STOP */
 	}
-	free(mptr);
+	free (mptr);
 }
 
 void *
@@ -1516,6 +1516,14 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 	return n;
 }
 
+/* exit to OS before processing a COBOL/C source file */
+DECLNORET static void COB_A_NORETURN
+cobc_early_exit (int retcode)
+{
+	cobc_free_mem ();
+	exit (retcode);
+}
+
 DECLNORET static void COB_A_NORETURN
 cobc_err_exit (const char *fmt, ...)
 {
@@ -1528,8 +1536,7 @@ cobc_err_exit (const char *fmt, ...)
 	va_end (ap);
 	putc ('\n', stderr);
 	fflush (stderr);
-	cobc_free_mem ();
-	exit (1);
+	cobc_early_exit (1);
 }
 
 static struct cb_define_struct *
@@ -1624,6 +1631,8 @@ cobc_getenv_path (const char *env)
 	return cobc_main_strdup (p);
 }
 
+/* compiler startup phase: add string to internal flags which keep its own length,
+   if target field is too small reallocate the memory with doubled size */
 static void
 cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 	      const char *s3)
@@ -1873,6 +1882,8 @@ cobc_abort_msg (void)
 	}
 }
 
+/* return to OS in case of hard errors after trying to output the error to
+   listing file if active */
 DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
@@ -2359,6 +2370,8 @@ cobc_options_error_build (void)
 	cobc_err_exit (_("only one of options 'm', 'x', 'b' may be specified"));
 }
 
+/* decipher functions given on command line,
+   checking that these are actually intrinsic functions */
 static void
 cobc_deciph_funcs (const char *opt)
 {
@@ -2382,6 +2395,7 @@ cobc_deciph_funcs (const char *opt)
 	cobc_free (p);
 }
 
+/* process command line options */
 static int
 process_command_line (const int argc, char **argv)
 {
@@ -2428,8 +2442,7 @@ process_command_line (const int argc, char **argv)
 
 		case '?':
 			/* Unknown option or ambiguous */
-			cobc_free_mem ();
-			exit (1);
+			cobc_early_exit (1);
 
 		case 'h':
 			/* --help */
@@ -2457,19 +2470,17 @@ process_command_line (const int argc, char **argv)
 				cobc_buffer = NULL;
 #endif
 			}
-			cobc_free_mem ();
-			exit (0);
+			cobc_early_exit (0);
 
 		case 'V':
 			/* --version */
 			cobc_print_version ();
-			cobc_free_mem ();
-			exit (0);
+			cobc_early_exit (0);
 
 		case 'i':
 			/* --info */
 			cobc_print_info ();
-			exit (0);
+			cobc_early_exit (0);
 
 		/*
 			The following list options are postponed until
@@ -2576,8 +2587,7 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit for configuration errors resulting from -std/-conf/default.conf */
 	if (conf_ret != 0) {
-		cobc_free_mem ();
-		exit (1);
+		cobc_early_exit (1);
 	}
 
 	cob_optind = 1;
@@ -2844,8 +2854,7 @@ process_command_line (const int argc, char **argv)
 			/* temporary: check if we run the testsuite and skip
 			   the run if we don't have the internal xref */
 			if (getenv ("COB_IS_RUNNING_IN_TESTMODE")) {
-				cobc_free_mem ();
-				exit (77);
+				cobc_early_exit (77);
 			}
 #else
 			/* -Xref : Generate internal listing */
@@ -2874,8 +2883,8 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-I");
 			}
-			if (stat (cob_optarg, &st) != 0 ||
-			    !(S_ISDIR (st.st_mode))) {
+			if (stat (cob_optarg, &st) != 0
+			|| !(S_ISDIR (st.st_mode))) {
 				break;
 			}
 #ifdef	_MSC_VER
@@ -2893,8 +2902,8 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-L");
 			}
-			if (stat (cob_optarg, &st) != 0 ||
-			    !(S_ISDIR (st.st_mode))) {
+			if (stat (cob_optarg, &st) != 0
+			||  !(S_ISDIR (st.st_mode))) {
 				break;
 			}
 #ifdef	_MSC_VER
@@ -3102,32 +3111,12 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit for configuration errors resulting from -f<conf-tag>[=<value>] */
 	if (conf_ret != 0) {
-		cobc_free_mem ();
-		exit (1);
+		cobc_early_exit (1);
 	}
 
-	/* Set relaxed syntax configuration options if requested */
-	/* part 1: relaxed syntax compiler configuration option */
-	if (cb_relaxed_syntax_checks) {
-		if (cb_reference_out_of_declaratives > CB_WARNING) {
-			cb_reference_out_of_declaratives = CB_WARNING;
-		}
-		/* fixme - the warning was only raised if not relaxed */
-		cb_warn_ignored_initial_val = 0;
-	}
-#if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
-		 are available at command line - maybe re-add with another name */
-	/* 2: relaxed syntax group option from command line */
-	if (cb_flag_relaxed_syntax_group) {
-		cb_relaxed_syntax_checks = 1;
-		cb_larger_redefines_ok = 1;
-		cb_relax_level_hierarchy = 1;
-		cb_top_level_occurs_clause = CB_OK;
-	}
-#endif
-
+	/* handling of list options */
 	if (list_reserved) {
-		/* includes register listing */
+		/* includes register list */
 		cb_list_reserved ();
 	} else if (list_registers) {
 		cb_list_registers ();
@@ -3144,9 +3133,28 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit if list options were specified */
 	if (exit_option) {
-		cobc_free_mem ();
-		exit (0);
+		cobc_early_exit (0);
 	}
+
+	/* Set relaxed syntax configuration options if requested */
+	/* part 1: relaxed syntax compiler configuration option */
+	if (cb_relaxed_syntax_checks) {
+		if (cb_reference_out_of_declaratives > CB_WARNING) {
+			cb_reference_out_of_declaratives = CB_WARNING;
+		}
+		/* FIXME - the warning was only raised if not relaxed */
+		cb_warn_ignored_initial_val = 0;
+	}
+#if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
+		 are available at command line - maybe re-add with another name */
+	/* 2: relaxed syntax group option from command line */
+	if (cb_flag_relaxed_syntax_group) {
+		cb_relaxed_syntax_checks = 1;
+		cb_larger_redefines_ok = 1;
+		cb_relax_level_hierarchy = 1;
+		cb_top_level_occurs_clause = CB_OK;
+	}
+#endif
 
 	/* Set active warnings to errors, if requested */
 	if (error_all_warnings) {
@@ -3172,6 +3180,14 @@ process_command_line (const int argc, char **argv)
 	&&  cb_listing_statements > CB_OBSOLETE) {
 		cb_listing_statements = cb_title_statement;
 	}
+	if (cb_flag_notrunc) {
+		cb_binary_truncate = 0;
+		cb_pretty_display = 0;
+	}
+	if (cb_flag_traceall) {
+		cb_flag_trace = 1;
+		cb_flag_source_location = 1;
+	}
 
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {
@@ -3187,11 +3203,6 @@ process_command_line (const int argc, char **argv)
 	/* If C debug, do not strip output */
 	if (gflag_set) {
 		strip_output = 0;
-	}
-
-	if (cb_flag_traceall) {
-		cb_flag_trace = 1;
-		cb_flag_source_location = 1;
 	}
 
 	return cob_optind;
@@ -7527,11 +7538,39 @@ main (int argc, char **argv)
 	/* Process command line arguments */
 	iargs = process_command_line (argc, argv);
 
-	cb_text_column = cb_config_text_column;
-
 	/* Check the filename */
 	if (iargs == argc) {
 		cobc_err_exit (_("no input files"));
+	}
+
+	/* Defaults are set here */
+	if (!cb_flag_syntax_only) {
+		if (!wants_nonfinal) {
+			if (cobc_flag_main) {
+				cb_compile_level = CB_LEVEL_EXECUTABLE;
+			} else if (cobc_flag_module) {
+				cb_compile_level = CB_LEVEL_MODULE;
+			} else if (cobc_flag_library) {
+				cb_compile_level = CB_LEVEL_LIBRARY;
+			} else if (cb_compile_level == 0) {
+				cb_compile_level = CB_LEVEL_MODULE;
+				cobc_flag_module = 1;
+			}
+		}
+		if (wants_nonfinal && cb_compile_level != CB_LEVEL_PREPROCESS &&
+		    !cobc_flag_main && !cobc_flag_module && !cobc_flag_library) {
+			cobc_flag_module = 1;
+		}
+	} else {
+		cb_compile_level = CB_LEVEL_TRANSLATE;
+		cobc_flag_main = 0;
+		cobc_flag_module = 0;
+		cobc_flag_library = 0;
+	}
+
+	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&
+	    (argc - iargs) > 1) {
+		cobc_err_exit (_("%s option invalid in this combination"), "-o");
 	}
 
 	/* compiler specific options for (non/very) verbose output */
@@ -7587,45 +7626,12 @@ main (int argc, char **argv)
 	/* Add default COB_COPY_DIR directory */
 	CB_TEXT_LIST_CHK (cb_include_list, COB_COPY_DIR);
 
-	/* Defaults are set here */
-	if (!cb_flag_syntax_only) {
-		if (!wants_nonfinal) {
-			if (cobc_flag_main) {
-				cb_compile_level = CB_LEVEL_EXECUTABLE;
-			} else if (cobc_flag_module) {
-				cb_compile_level = CB_LEVEL_MODULE;
-			} else if (cobc_flag_library) {
-				cb_compile_level = CB_LEVEL_LIBRARY;
-			} else if (cb_compile_level == 0) {
-				cb_compile_level = CB_LEVEL_MODULE;
-				cobc_flag_module = 1;
-			}
-		}
-		if (wants_nonfinal && cb_compile_level != CB_LEVEL_PREPROCESS &&
-		    !cobc_flag_main && !cobc_flag_module && !cobc_flag_library) {
-			cobc_flag_module = 1;
-		}
-	} else {
-		cb_compile_level = CB_LEVEL_TRANSLATE;
-		cobc_flag_main = 0;
-		cobc_flag_module = 0;
-		cobc_flag_library = 0;
-	}
-
-	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&
-	    (argc - iargs) > 1) {
-		cobc_err_exit (_("%s option invalid in this combination"), "-o");
-	}
-
-	if (cb_flag_notrunc) {
-		cb_binary_truncate = 0;
-		cb_pretty_display = 0;
-	}
-
 	/* Compiler initialization II */
 #ifndef	HAVE_DESIGNATED_INITS
 	cobc_init_typeck ();
 #endif
+
+	cb_text_column = cb_config_text_column;
 
 	memset (cb_listing_header, 0, sizeof (cb_listing_header));
 	/* If -P=file specified, all lists go to this file */
