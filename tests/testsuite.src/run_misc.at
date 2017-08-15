@@ -2916,7 +2916,7 @@ AT_DATA([callee.cob], [
               DISPLAY "OK" WITH NO ADVANCING
               END-DISPLAY
            END-IF.
-           EXIT PROGRAM.
+           STOP RUN.
 ])
 
 AT_DATA([caller.c], [[
@@ -2925,18 +2925,13 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
-   /* for storing COBOL return code */
-   int cob_ret;
-
    /* initialize parameters */
    char *p1 = "A";
    char *p2 = "FROM C";
 
-   /* call COBOL program (initialization missing) */
-   cob_ret = callee (p1, p2);
-
-   /* Clean up and terminate - This does not return */
-   cob_stop_run (cob_ret);
+   /* call COBOL program (initialization missing)
+      note: COBOL program terminates the program by STOP RUN */
+   (void)callee (p1, p2);
 }
 ]])
 
