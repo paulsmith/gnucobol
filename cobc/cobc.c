@@ -4797,7 +4797,8 @@ xref_print (struct cb_xref *xref, const enum xref_type type, struct cb_xref *xre
 
 	cnt = 0;
 	for (elem = xref->head; elem; elem = elem->next) {
-		pd_off += sprintf (print_data + pd_off, "  %-6d", elem->line);
+		pd_off += sprintf (print_data + pd_off, " %c%-6u",
+			elem->receive ? '*' : ' ', elem->line);
 		if (++cnt >= maxcnt) {
 			cnt = 0;
 			(void)terminate_str_at_first_trailing_space (print_data);
@@ -4822,7 +4823,7 @@ xref_88_values (struct cb_field *field)
 	for (f = field->validation; f; f = f->sister) {
 		strncpy (lcl_name, (char *)f->name, LCL_NAME_MAX);
 		pd_off = sprintf (print_data,
-			"%-30.30s %-6d ",
+			"%-30.30s %-6u ",
 			lcl_name, f->common.source_line);
 		xref_print (&f->xref, XREF_FIELD, NULL);
 
@@ -4852,7 +4853,7 @@ xref_fields (struct cb_field *top)
 			continue;
 		}
 		found = 1;
-		pd_off = sprintf (print_data, "%-30.30s %-6d ",
+		pd_off = sprintf (print_data, "%-30.30s %-6u ",
 			 lcl_name, top->common.source_line);
 
 		/* print xref for field */
@@ -4881,7 +4882,7 @@ xref_files_and_their_records (cb_tree file_list_p)
 	cb_tree	l;
 
 	for (l = file_list_p; l; l = CB_CHAIN (l)) {
-		pd_off = sprintf (print_data, "%-30.30s %-6d ",
+		pd_off = sprintf (print_data, "%-30.30s %-6u ",
 			 CB_FILE (CB_VALUE (l))->name,
 			 CB_FILE (CB_VALUE (l))->common.source_line);
 		xref_print (&CB_FILE (CB_VALUE (l))->xref, XREF_FILE, NULL);
@@ -4928,7 +4929,7 @@ xref_labels (cb_tree label_list_p)
 			} else {
 				label_type = 'P';
 			}
-			pd_off = sprintf (print_data, "%c %-28.28s %-6d ",
+			pd_off = sprintf (print_data, "%c %-28.28s %-6u ",
 				label_type, lab->name, lab->common.source_line);
 			xref_print (&lab->xref, XREF_LABEL, NULL);
 		}

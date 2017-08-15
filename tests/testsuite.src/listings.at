@@ -4204,12 +4204,12 @@ OLD-RECORD                     46       44      258
 OLD-STATEMENT                  47       164     212     249     269     286
 OLD-NUMBER                     48       202     211     264     291
 
-NEW-VERSION                    28       50      154     282     304     305
+NEW-VERSION                    28       50     *154    *282     304     305
                                         312     322
 NEW-RECORD                     55       53      282     313
-NEW-STATEMENT                  56       164     212     236     249     269
-                                        286
-NEW-NUMBER                     57       281
+NEW-STATEMENT                  56      *164    *212    *236    *249    *269
+                                       *286
+NEW-NUMBER                     57      *281
 
 PRT-VERSION                    30     not referenced
 
@@ -4223,59 +4223,59 @@ REMOVE                         69       188
 ADDNEW                         70       192
 CHANGE                         71       187
 DISPLY                         72       189
-A-FIELD                        74       181     183
+A-FIELD                        74      *181     183
 A-ALPHA                        75     referenced by parent/child
 A-BLANK                        76       181
-B-FIELD                        78       182     184
+B-FIELD                        78      *182     184
 B-ALPHA                        79     referenced by parent/child
 B-BLANK                        80       182
 
-COMMENTARY                     34       84      154     162     170     171
-                                        176     179     194     204     209
-                                        227     232     239     260     267
-                                        275     293     296     299     302
-                                        314     321     322
-COMMENT-LINE                   89       87      162     170     171     176
-                                        179     194     204     209     227
-                                        232     239     260     267     275
-                                        293     296     299     302     314
-                                        321
+COMMENTARY                     34       84     *154    *162    *170    *171
+                                       *176    *179    *194    *204    *209
+                                       *227    *232    *239    *260    *267
+                                       *275    *293    *296    *299    *302
+                                       *314    *321     322
+COMMENT-LINE                   89       87     *162    *170    *171    *176
+                                       *179    *194    *204    *209    *227
+                                       *232    *239    *260    *267    *275
+                                       *293    *296    *299    *302    *314
+                                       *321
 
-COMMAND-ADDITIONS              94       230     233     234     240
-COMMAND-SUBTRACTIONS           95       263     265     268     270
+COMMAND-ADDITIONS              94       230     233    *234     240
+COMMAND-SUBTRACTIONS           95       263     265     268    *270
 TOTAL-INSERTED                 96       233     294
 TOTAL-DELETED                  97       268     297
 OUTPUT-COUNT                   98       280     281     300
-LINE-COUNT                     99       169     180     241     242     261
+LINE-COUNT                     99      *169     180     241     242     261
                                         262     315     316
-FIELDA                         100      183     202     208     211
-FIELDB                         101      184     264
+FIELDA                         100     *183     202     208     211
+FIELDB                         101     *184     264
 BLANK-LINE                     102      171
-DATE-FROM-SYS                  104      156
+DATE-FROM-SYS                  104     *156
 DFSYS                          105      157     158     159
 HEADINGS-LINE                  107      170
-PHASE                          110      306
-MONTH-RUN                      111      158
-DAY-RUN                        113      159
-YEAR-RUN                       115      157
-PAGE-NUMBER                    118      168     307
+PHASE                          110     *306
+MONTH-RUN                      111     *158
+DAY-RUN                        113     *159
+YEAR-RUN                       115     *157
+PAGE-NUMBER                    118      168    *307
 COMMAND-LISTING                120      179
-COMMAND-IMAGE                  122      178
+COMMAND-IMAGE                  122     *178
 ACTIVITIES-LISTING             124      239     260     314
-DISPOSITION                    125      237     259     309
-ACTIVE-IMAGE                   126      236     258     313
+DISPOSITION                    125     *237    *259    *309
+ACTIVE-IMAGE                   126     *236    *258    *313
 UPSI-BYTE                      128    referenced by child
-UPSI-BIT                       129      155     189     303
+UPSI-BIT                       129     *155    *189     303
 MESSAGE-LOG                    131      162     176     194     204     227
                                         321
-MESSAGE-TEXT                   133      161     175     193     203     226
-                                        320
+MESSAGE-TEXT                   133     *161    *175    *193    *203    *226
+                                       *320
 DISPLAY-MESSAGE                135      209     232     267     275     293
                                         296     299     302
-DISPLAY-TEMP                   137      208     230     265     291     294
-                                        297     300
-DISPLAY-TEXT                   139      207     231     266     274     292
-                                        295     298     301
+DISPLAY-TEMP                   137     *208    *230    *265    *291    *294
+                                       *297    *300
+DISPLAY-TEXT                   139     *207    *231    *266    *274    *292
+                                       *295    *298    *301
 END-JOB-PROCESS                141    not referenced
 DELETE-PROCESS                 142    not referenced
 INSERT-PROCESS                 143    not referenced
@@ -4801,10 +4801,10 @@ OLD-RECORD                     46       44      258
 OLD-STATEMENT                  47       164     212     249     269     286
 OLD-NUMBER                     48       202     211     264     291
 
-NEW-VERSION                    28       50      154     282     304     305     312     322
+NEW-VERSION                    28       50     *154    *282     304     305     312     322
 NEW-RECORD                     55       53      282     313
-NEW-STATEMENT                  56       164     212     236     249     269     286
-NEW-NUMBER                     57       281
+NEW-STATEMENT                  56      *164    *212    *236    *249    *269    *286
+NEW-NUMBER                     57      *281
 
 PRT-VERSION                    30     not referenced
 
@@ -4818,49 +4818,49 @@ REMOVE                         69       188
 ADDNEW                         70       192
 CHANGE                         71       187
 DISPLY                         72       189
-A-FIELD                        74       181     183
+A-FIELD                        74      *181     183
 A-ALPHA                        75     referenced by parent/child
 A-BLANK                        76       181
-B-FIELD                        78       182     184
+B-FIELD                        78      *182     184
 B-ALPHA                        79     referenced by parent/child
 B-BLANK                        80       182
 
-COMMENTARY                     34       84      154     162     170     171     176     179     194     204     209
-                                        227     232     239     260     267     275     293     296     299     302
-                                        314     321     322
-COMMENT-LINE                   89       87      162     170     171     176     179     194     204     209     227
-                                        232     239     260     267     275     293     296     299     302     314
-                                        321
+COMMENTARY                     34       84     *154    *162    *170    *171    *176    *179    *194    *204    *209
+                                       *227    *232    *239    *260    *267    *275    *293    *296    *299    *302
+                                       *314    *321     322
+COMMENT-LINE                   89       87     *162    *170    *171    *176    *179    *194    *204    *209    *227
+                                       *232    *239    *260    *267    *275    *293    *296    *299    *302    *314
+                                       *321
 
-COMMAND-ADDITIONS              94       230     233     234     240
-COMMAND-SUBTRACTIONS           95       263     265     268     270
+COMMAND-ADDITIONS              94       230     233    *234     240
+COMMAND-SUBTRACTIONS           95       263     265     268    *270
 TOTAL-INSERTED                 96       233     294
 TOTAL-DELETED                  97       268     297
 OUTPUT-COUNT                   98       280     281     300
-LINE-COUNT                     99       169     180     241     242     261     262     315     316
-FIELDA                         100      183     202     208     211
-FIELDB                         101      184     264
+LINE-COUNT                     99      *169     180     241     242     261     262     315     316
+FIELDA                         100     *183     202     208     211
+FIELDB                         101     *184     264
 BLANK-LINE                     102      171
-DATE-FROM-SYS                  104      156
+DATE-FROM-SYS                  104     *156
 DFSYS                          105      157     158     159
 HEADINGS-LINE                  107      170
-PHASE                          110      306
-MONTH-RUN                      111      158
-DAY-RUN                        113      159
-YEAR-RUN                       115      157
-PAGE-NUMBER                    118      168     307
+PHASE                          110     *306
+MONTH-RUN                      111     *158
+DAY-RUN                        113     *159
+YEAR-RUN                       115     *157
+PAGE-NUMBER                    118      168    *307
 COMMAND-LISTING                120      179
-COMMAND-IMAGE                  122      178
+COMMAND-IMAGE                  122     *178
 ACTIVITIES-LISTING             124      239     260     314
-DISPOSITION                    125      237     259     309
-ACTIVE-IMAGE                   126      236     258     313
+DISPOSITION                    125     *237    *259    *309
+ACTIVE-IMAGE                   126     *236    *258    *313
 UPSI-BYTE                      128    referenced by child
-UPSI-BIT                       129      155     189     303
+UPSI-BIT                       129     *155    *189     303
 MESSAGE-LOG                    131      162     176     194     204     227     321
-MESSAGE-TEXT                   133      161     175     193     203     226     320
+MESSAGE-TEXT                   133     *161    *175    *193    *203    *226    *320
 DISPLAY-MESSAGE                135      209     232     267     275     293     296     299     302
-DISPLAY-TEMP                   137      208     230     265     291     294     297     300
-DISPLAY-TEXT                   139      207     231     266     274     292     295     298     301
+DISPLAY-TEMP                   137     *208    *230    *265    *291    *294    *297    *300
+DISPLAY-TEXT                   139     *207    *231    *266    *274    *292    *295    *298    *301
 END-JOB-PROCESS                141    not referenced
 DELETE-PROCESS                 142    not referenced
 INSERT-PROCESS                 143    not referenced
