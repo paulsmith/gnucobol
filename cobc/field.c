@@ -720,6 +720,13 @@ validate_field_1 (struct cb_field *f)
 	unsigned int	ret;
 	int		i;
 
+	/* LCOV_EXCL_START */
+	if (unlikely(!f)) {	/* checked to keep the analyzer happy */
+		cobc_err_msg (_("call to %s with NULL pointer"), "validate_field_1");
+		COBC_ABORT();
+	}
+	/* LCOV_EXCL_STOP */
+
 	if (f->flag_invalid) {
 		return 1;
 	}
@@ -1159,7 +1166,7 @@ validate_field_1 (struct cb_field *f)
 
 		/* Validate FULL */
 		if (f->screen_flag & COB_SCREEN_FULL
-		    && f->pic->category == CB_CATEGORY_NUMERIC) {
+			&& f->pic && f->pic->category == CB_CATEGORY_NUMERIC) {
 			cb_warning_x (warningopt, x, _("FULL has no effect on numeric items; you may want REQUIRED or PIC Z"));
 		}
 	}

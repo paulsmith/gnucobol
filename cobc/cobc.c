@@ -889,25 +889,25 @@ cobc_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = calloc ((size_t)1, size);
+	/* LCOV_EXCL_START */
 	if (unlikely(!mptr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
 void
 cobc_free (void * mptr)
 {
+	/* LCOV_EXCL_START */
 	if (unlikely(!mptr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	free (mptr);
 }
 
@@ -974,12 +974,12 @@ cobc_main_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_main_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1090,12 +1090,12 @@ cobc_parse_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_parse_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_parse_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1205,12 +1205,12 @@ cobc_plex_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_plex_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_plex_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1222,12 +1222,12 @@ cobc_check_string (const char *dupstr)
 {
 	struct strcache	*s;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_check_string");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	for (s = base_string; s; s = s->next) {
 		if (!strcmp (dupstr, (const char *)s->val)) {
 			return s->val;
@@ -1586,12 +1586,12 @@ cobc_stradd_dup (const char *str1, const char *str2)
 	char	*p;
 	size_t	m, n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!str1 || !str2)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m = strlen (str1);
 	n = strlen (str2);
 	p = cobc_main_malloc (m + n + 1);

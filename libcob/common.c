@@ -3022,6 +3022,7 @@ check_current_date()
 	} else if (cobsetptr->cob_date[j] == '+'
 		|| cobsetptr->cob_date[j] == '-') {
 		strncpy (iso_timezone_ptr, cobsetptr->cob_date + j, 6);
+		iso_timezone[6] = 0;	/* just to keep the analyzer happy */
 		if (strlen (iso_timezone_ptr) == 3) {
 			strcpy (iso_timezone_ptr + 3, "00");
 		} else if (iso_timezone[3] == ':') {
