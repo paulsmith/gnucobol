@@ -453,7 +453,6 @@ cob_exit_common (void)
 static void
 cob_terminate_routines (void)
 {
-
 	if (!cob_initialized || !cobglobptr) {
 		return;
 	}
@@ -3692,7 +3691,7 @@ cob_tidy (void)
 	struct exit_handlerlist	*h;
 
 	if (!cob_initialized) {
-		exit (1);
+		return 1;
 	}
 	if (exit_hdlrs != NULL) {
 		h = exit_hdlrs;
@@ -5814,9 +5813,11 @@ cob_fatal_error (const int fatal_error)
 	case COB_FERROR_NONE:
 		break;
 #endif
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_CANCEL:
 		cob_runtime_error (_("attempt to CANCEL active program"));
 		break;
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_INITIALIZED:
 #ifdef	_WIN32
 		/* cob_unix_lf needs to be set before any error message is thrown,
@@ -5837,29 +5838,35 @@ cob_fatal_error (const int fatal_error)
 		cob_runtime_error (_("codegen error - Please report this!"));
 		break;
 	/* LCOV_EXCL_STOP */
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_CHAINING:
 		cob_runtime_error (_("CALL of program with CHAINING clause"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_STACK:
 		cob_runtime_error (_("stack overflow, possible PERFORM depth exceeded"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_GLOBAL:
 		cob_runtime_error (_("invalid entry/exit in GLOBAL USE procedure"));
 		break;
+	/* LCOV_EXCL_STOP */
 	/* LCOV_EXCL_START */
 	case COB_FERROR_MEMORY:
 		cob_runtime_error (_("unable to allocate memory"));
 		break;
 	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_MODULE:
 		cob_runtime_error (_("invalid entry into module"));
 		break;
-	/* LCOV_EXCL_START */
+	/* LCOV_EXCL_STOP */
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_RECURSIVE:
 		cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
 			COB_MODULE_PTR->module_name);
 		break;
-	/* LCOV_EXCL_STOP */
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FREE:
 		cob_runtime_error (_("call to %s with NULL pointer"), "cob_free");
@@ -5926,12 +5933,16 @@ cob_fatal_error (const int fatal_error)
 		case COB_STATUS_61_FILE_SHARING:
 			msg = _("file sharing conflict");
 			break;
+		/* LCOV_EXCL_START */
 		case COB_STATUS_91_NOT_AVAILABLE:
 			msg = _("runtime library is not configured for this operation");
 			break;
+		/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_START */
 		default:
 			msg = _("unknown file error");
 			break;
+		/* LCOV_EXCL_STOP */
 		}
 		err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
 		cob_field_to_string (cobglobptr->cob_error_file->assign,
@@ -5959,8 +5970,7 @@ conf_runtime_error_value (const char *value, const int pos)
 
 	if (gc_conf[pos].data_type & STS_CNFSET) {
 		name = gc_conf[pos].conf_name;
-	}
-	else {
+	} else {
 		name = gc_conf[pos].env_name;
 	}
 	conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), value, name);

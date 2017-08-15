@@ -819,7 +819,8 @@ AT_DATA([callee2.cob], [
 AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [], [libcob: callee2.cob: 5: invalid recursive COBOL CALL to 'callee'
+AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
+[libcob: callee2.cob: 5: invalid recursive COBOL CALL to 'callee'
 ])
 
 AT_CLEANUP
@@ -2666,7 +2667,6 @@ AT_DATA([callee.cob], [
 AT_DATA([caller.c], [[
 #include <libcob.h>
 
-
 int callee (char *, char *);
   
 #ifndef NULL
@@ -2677,12 +2677,25 @@ int
 main (int argc, char **argv)
 {
 	cob_global *cobol_global;
-	char *p1 = "A";
+{
+   /* for storing COBOL return code */
+   int cob_ret;
 
-	cob_init(argc, argv);
-	cobol_global = cob_get_global_ptr ();
-	cobol_global->cob_call_params = 1;
-	return callee (p1, NULL);
+   /* initialize parameters */
+   char *p1 = "A";
+
+   /* initialize the COBOL run-time library */
+   cob_init(argc, argv);
+
+   /* setup for COBOL parameter handling */
+   cobol_global = cob_get_global_ptr ();
+   cobol_global->cob_call_params = 1;
+
+   /* call COBOL program */
+   cob_ret = callee (p1, NULL);
+
+   /* Clean up and terminate - This does not return */
+   cob_stop_run (cob_ret);
 }
 ]])
 
@@ -2725,11 +2738,21 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
-	char *p1 = "A";
-	char *p2 = "FROM C";
+   /* for storing COBOL return code */
+   int cob_ret;
 
-	cob_init(argc, argv);
-	return callee (p1, p2);
+   /* initialize parameters */
+   char *p1 = "A";
+   char *p2 = "FROM C";
+
+   /* initialize the COBOL run-time library */
+   cob_init (argc, argv);
+
+   /* call COBOL program */
+   cob_ret = callee (p1, p2);
+
+   /* Clean up and terminate - This does not return */
+   cob_stop_run (cob_ret);
 }
 ]])
 
@@ -2789,13 +2812,13 @@ AT_DATA([cprog.c], [[
 int
 cprog(void *cb)
 {
-    char *p1;
-    int p2 = 42;
-    char *p3 = "CALLBACK";
+   char *p1;
+   int  p2 = 42;
+   char *p3 = "CALLBACK";
 
-    p1 = p3;
-    ((int (*)(char *, int, char *))cb)(p1, p2, p3);
-	return 0;
+   p1 = p3;
+   ((int (*)(char *, int, char *))cb)(p1, p2, p3);
+   return 0;
 }
 ]])
 
@@ -2855,13 +2878,13 @@ AT_DATA([cprog.c], [[
 int
 cprog(void *cb)
 {
-    char *p1;
-    int p2 = 42;
-    char *p3 = "CALLBACK";
+   char *p1;
+   int  p2 = 42;
+   char *p3 = "CALLBACK";
 
-    p1 = p3;
-    ((int (*)(char *, int, char *))cb)(p1, p2, p3);
-	return 0;
+   p1 = p3;
+   ((int (*)(char *, int, char *))cb)(p1, p2, p3);
+   return 0;
 }
 ]])
 
@@ -2902,11 +2925,18 @@ int callee (char *, char *);
 int
 main (int argc, char **argv)
 {
+   /* for storing COBOL return code */
+   int cob_ret;
 
-	char *p1 = "A";
-	char *p2 = "FROM C";
+   /* initialize parameters */
+   char *p1 = "A";
+   char *p2 = "FROM C";
 
-	return callee (p1, p2);
+   /* call COBOL program (initialization missing) */
+   cob_ret = callee (p1, p2);
+
+   /* Clean up and terminate - This does not return */
+   cob_stop_run (cob_ret);
 }
 ]])
 
@@ -2962,12 +2992,12 @@ AT_DATA([callee.c], [[
 int
 callee (char *p1, char *p2)
 {
-	if (p1[0] == 'A') {
-		p1[0] = 'B';
-	}
-	strncpy (p2, "FROM C", 6);
+   if (p1[0] == 'A') {
+      p1[0] = 'B';
+   }
+   strncpy (p2, "FROM C", 6);
 
-	return 3;
+   return 3;
 }
 ]])
 
