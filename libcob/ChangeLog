@@ -1,4 +1,8 @@
 
+2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_tidy): don't exit if runtime isn't initialized yet
+
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* call.c, common.c, fileio.c, intrinsic.c, screenio.c:
