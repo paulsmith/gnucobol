@@ -331,8 +331,6 @@ COB_HIDDEN void		cob_exit_call		(void);
 COB_HIDDEN void		cob_exit_intrinsic	(void);
 COB_HIDDEN void		cob_exit_strings	(void);
 
-COB_HIDDEN char		*cob_strdup		(const char *);
-
 COB_HIDDEN int		cob_real_get_sign	(cob_field *);
 COB_HIDDEN void		cob_real_put_sign	(cob_field *, const int);
 

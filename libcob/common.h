@@ -1350,6 +1350,7 @@ DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
 
 COB_EXPIMP void	*cob_malloc			(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_realloc			(void *, const size_t, const size_t) COB_A_MALLOC;
+COB_EXPIMP char	*cob_strdup				(const char *);
 COB_EXPIMP void	cob_free			(void *);
 COB_EXPIMP void	*cob_fast_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_malloc		(const size_t) COB_A_MALLOC;
@@ -1358,7 +1359,7 @@ COB_EXPIMP void	cob_cache_free			(void *);
 
 COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
 
-COB_EXPIMP char *cob_expand_env_string(char *);
+COB_EXPIMP char	*cob_expand_env_string(char *);
 
 COB_EXPIMP void	cob_check_version		(const char *, const char *,
 						 const int);
