@@ -1646,6 +1646,7 @@ cob_stop_run (const int status)
 {
 	struct exit_handlerlist	*h;
 	cob_module	*mod;
+	const int	MAX_ITERS = 10240;
 	int		k;
 	int		(*cancel_func)(const int);
 
@@ -1653,13 +1654,14 @@ cob_stop_run (const int status)
 		exit (1);
 	}
 	/* Call each module to release 'decimal' memory */
-	for(k = 0, mod = COB_MODULE_PTR; mod && k < 10240; mod = mod->next, k++) {
+	for(k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
 		mod->flag_did_cancel = 0;
 		/* Recursive modules create a loop in the module chain */
 		/* Avoid an infinite processing loop */
+		/* TO-DO: Replace with Floyd's cycle-detecting algorithm? */
 	}
 
-	for(k = 0, mod = COB_MODULE_PTR; mod && k < 10240; mod = mod->next, k++) {
+	for(k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
 		if (mod->module_cancel.funcint
 		 && !mod->flag_did_cancel) {
 			mod->flag_did_cancel = 1;
