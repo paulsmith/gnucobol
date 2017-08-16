@@ -221,9 +221,9 @@ split_and_iterate_on_comma_separated_str (
 			}
 		default:
 			if (transform_case == 1) {
-				word_buff[j++] = toupper ((int)val[i]);
+				word_buff[j++] = (char)toupper ((int)val[i]);
 			} else if (transform_case == 2) {
-				word_buff[j++] = tolower ((int)val[i]);
+				word_buff[j++] = (char)tolower ((int)val[i]);
 			} else {;
 				word_buff[j++] = val[i];
 			}
@@ -596,8 +596,8 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	case CB_STRING:
 		val = read_string (val);
 
-		if (strcmp (name, "include") == 0 ||
-		    strcmp (name, "includeif") == 0) {
+		if (strcmp (name, "include") == 0
+		||  strcmp (name, "includeif") == 0) {
 			/* Include another conf file */
 			s = cob_expand_env_string ((char *)val);
 			cobc_main_free ((void *) val);
@@ -693,8 +693,8 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		/* handling of special "adjust" mode */
 		if (s != val) {
 			if (*((enum cb_support *)var) != CB_SKIP
-			    &&  *((enum cb_support *)var) != CB_IGNORE
-			    &&  *((enum cb_support *)var) > support_val) {
+			&&  *((enum cb_support *)var) != CB_IGNORE
+			&&  *((enum cb_support *)var) > support_val) {
 				*((enum cb_support *)var) = support_val;
 			}
 			break;
