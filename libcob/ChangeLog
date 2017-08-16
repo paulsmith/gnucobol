@@ -2,8 +2,6 @@
 2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_tidy): don't exit if runtime isn't initialized yet
-	* common.h, coblocal.h: moved declaration of cob_strdup to allow it
-	  to be called like the other memory functions
 
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -15,6 +13,13 @@
 	* common.c: cob_stop_run issue callbacks to free any decimal memory
 	* common.c: avoid infinite loop walking COB_MODULE list when RECURSIVE
 	            modules are being used
+
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: common.h [_MSC_VER]: moved setenv hack to inline function
+	* common.c, common.h: new environment functions cob_setenv cob_unsetenv
+	* common.h, coblocal.h: moved declaration of cob_strdup to allow it
+	  to be called like the other memory functions
 
 2017-08-06 Ron Norman <rjn@inglenet.com>
 

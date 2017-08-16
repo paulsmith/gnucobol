@@ -290,7 +290,8 @@
 /* _MSC does *NOT* has `setenv' (!)
    But as the handling of the fallback `putenv' is different in POSIX and _MSC
    (POSIX stores no duplicate of `putenv', where _MSC does), we pretend to
-   have support for `setenv', redefining it to _putenv_s, omitting the last param */
+   have support for `setenv' and define it in common.c using _putenv_s,
+   omitting the override parameter */
 #define HAVE_SETENV 1
 
 /* Define to 1 if you have the `setlocale' function. */

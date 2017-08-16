@@ -141,43 +141,33 @@ cobcrun_print_usage (char * prog)
 }
 
 /**
- * Set current argument from getopt as environment value
- */
-static int
-cobcrun_setenv (const char * environment)
-{
-#if !HAVE_SETENV
-	int len;
-	char * p;
-
-	len = strlen (environment) + strlen (cob_optarg) + 2U;
-	p = cob_fast_malloc (len);
-	sprintf (p, "%s=%s", environment, cob_optarg);
-	return putenv (p);
-#else
-	return setenv(environment, cob_optarg, 1);
-#endif
-}
-
-/**
  * split into path and file, or just path, or just file
- *  Note: *p and *f memory needs to be freed after use
+ * returns allocated strings (possible emtpy) for both
+ *  Note: cob_free must be called with *pathname and *filename
+ *        for releasing memory after use
  */
 static void
-cobcrun_split_path_file(char** p, char** f, char *pf)
+cobcrun_split_path_file (char** pathname, char** filename, char *pf)
 {
-	char *slash = pf, *next;
-	
-	while ((next = strpbrk(slash + 1, "\\/")) != NULL) slash = next;
-	if (pf != slash) slash++;
-	
-	/* *p = strndup(pf, slash - pf); */
-	*p = (char*)cob_malloc(slash - pf + 1);
-	if (*p) {
-		(void)memcpy(*p, pf, slash - pf);
-		(*p)[slash - pf] = '\0';
-        }
-	*f = strdup(slash);
+	char *pos = pf;
+	char *next_pos;
+
+	char sav;
+
+	/* set pos to last slash (if any) */
+	while ((next_pos = strpbrk (pos + 1, "\\/")) != NULL) pos = next_pos;
+
+	/* set pos to first character after last slash (if any) */
+	if (pf !=pos) pos++;
+
+	/* copy string up to  last slash as pathname (possible emtpy) */
+	sav = *pos;
+	*pos = 0;
+	*pathname = cob_strdup (pf);
+	*pos = sav;
+
+	/* copy string after last slash as filename (possible emtpy) */
+	*filename = cob_strdup (pos);
 }
 
 /**
@@ -187,13 +177,8 @@ cobcrun_split_path_file(char** p, char** f, char *pf)
 static int
 cobcrun_initial_module (char *module_argument)
 {
-	char *pathname, *filename;
-	char env_space[COB_MEDIUM_BUFF], *envptr;
-#if HAVE_SETENV
-	int envop_return;
-#else
-	char	*put;
-#endif
+	char	*pathname, *filename;
+	char	env_space[COB_MEDIUM_BUFF], *envptr;
 	/* FIXME: split in two functions (one setting module, one setting path)
 	          after allowing module with path in COB_PRE_LOAD */
 	if (!module_argument) {
@@ -202,7 +187,7 @@ cobcrun_initial_module (char *module_argument)
 
 	/* See if we have a /dir/path/module, or a /dir/path/ or a module (no slash) */
 	cobcrun_split_path_file (&pathname, &filename, module_argument);
-	if (pathname && *pathname) {
+	if (*pathname) {
 		memset (env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_LIBRARY_PATH");
 		if (envptr) {
@@ -212,27 +197,11 @@ cobcrun_initial_module (char *module_argument)
 			snprintf (env_space, COB_MEDIUM_MAX, "%s", pathname);
 		}
 		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
-#if HAVE_SETENV
-		envop_return = setenv ("COB_LIBRARY_PATH", env_space, 1);
-		if (envop_return) {
-			/* LCOV_EXCL_START */
-			fprintf (stderr, _("problem with setenv %s: %d"),
-				"COB_LIBRARY_PATH", errno);
-			fputc ('\n', stderr);
-			return 1;
-			/* LCOV_EXCL_STOP */
-		}
-#else
-		put = cob_fast_malloc (strlen (env_space) + 19U);
-		sprintf (put, "COB_LIBRARY_PATH=%s", env_space);
-		(void)putenv (strdup (put));
-		cob_free ((void *)put);
-#endif
+		(void) cob_setenv ("COB_LIBRARY_PATH", env_space, 1);
 	}
-	if (pathname) {
-		cob_free((void *)pathname);
-	}
-	if (filename && *filename) {
+	cob_free((void *)pathname);
+
+	if (*filename) {
 		memset(env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_PRE_LOAD");
 		if (envptr) {
@@ -242,26 +211,9 @@ cobcrun_initial_module (char *module_argument)
 			snprintf (env_space, COB_MEDIUM_MAX, "%s", filename);
 		}
 		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
-#if HAVE_SETENV
-		envop_return = setenv ("COB_PRE_LOAD", env_space, 1);
-		if (envop_return) {
-			/* LCOV_EXCL_START */
-			fprintf (stderr, _("problem with setenv %s: %d"),
-				"COB_PRE_LOAD", errno);
-			fputc ('\n', stderr);
-			return 1;
-			/* LCOV_EXCL_STOP */
-		}
-#else
-		put = cob_fast_malloc (strlen (env_space) + 15U);
-		sprintf (put, "COB_PRE_LOAD=%s", env_space);
-		(void)putenv (strdup (put));
-		cob_free ((void *)put);
-#endif
+		(void) cob_setenv ("COB_PRE_LOAD", env_space, 1);
 	}
-	if (filename) {
-		cob_free ((void *)filename);
-	}
+	cob_free ((void *)filename);
 	return 0;
 }
 
@@ -304,7 +256,7 @@ process_command_line (int argc, char *argv[])
 				/* LCOV_EXCL_STOP */
 			}
 			arg_shift++;
-			cobcrun_setenv ("COB_RUNTIME_CONFIG");
+			(void) cob_setenv ("COB_RUNTIME_CONFIG", cob_optarg, 1);
 			/* shift argument again if two part argument was used */
 			if (c == 'c') {
 				arg_shift++;

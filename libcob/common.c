@@ -1217,13 +1217,7 @@ cob_rescan_env_vals (void)
 				gc_conf[i].data_type = old_type;
 
 				/* Remove invalid setting */
-#if HAVE_SETENV
-				(void)unsetenv (gc_conf[i].env_name);
-#else
-				env = cob_malloc (strlen (gc_conf[i].env_name) | 2);
-				sprintf (env, "%s=", gc_conf[i].env_name);
-				(void)putenv (env);
-#endif
+				(void)cob_unsetenv (gc_conf[i].env_name);
 			} else if (gc_conf[i].env_group == GRP_HIDE) {
 				/* Any alias present? */
 				for (j = 0; j < NUM_CONFIG; j++) {
@@ -3346,7 +3340,54 @@ cob_accept_arg_value (cob_field *f)
 	current_arg++;
 }
 
-/* Environment variable */
+/* Environment variable handling */
+
+#ifdef	_MSC_VER
+/* _MSC does *NOT* have `setenv` (!)
+   But as the handling of the fallback `putenv` is different in POSIX and _MSC
+   (POSIX stores no duplicate of `putenv`, where _MSC does), we pretend to
+   have support for `setenv` and define it here with the same behaviour: */
+
+static COB_INLINE COB_A_INLINE int
+setenv (const char *name, const char *value, int overwrite) {
+	/* remark: _putenv_s does always overwrite, add a check for overwrite = 1 if necessary later */
+	COB_UNUSED (overwrite);
+	return _putenv_s (name,value);
+}
+static COB_INLINE COB_A_INLINE int
+unsetenv (const char *name) {
+	return _putenv_s (name,"");
+}
+#endif
+
+int
+cob_setenv (const char *name, const char *value, int overwrite) {
+#if defined (HAVE_SETENV) && HAVE_SETENV
+	return setenv (name, value, overwrite);
+#else
+	char	*env;
+	size_t	len;
+
+	COB_UNUSED (overwrite);
+	len = strlen (name) + strlen (value) + 2U;
+	env = cob_fast_malloc (len);
+	sprintf (env, "%s=%s", name, value);
+	return putenv (env);
+#endif
+}
+
+int
+cob_unsetenv (const char *name) {
+#if defined(HAVE_SETENV) && HAVE_SETENV
+	return unsetenv (name);
+#else
+	char	*env;
+
+	env = cob_fast_malloc (strlen (name) + 2U);
+	sprintf (env, "%s=", name);
+	return putenv (env);
+#endif
+}
 
 void
 cob_display_environment (const cob_field *f)
@@ -3374,10 +3415,6 @@ void
 cob_display_env_value (const cob_field *f)
 {
 	char	*env2;
-#if !HAVE_SETENV
-	char	*p;
-	size_t	len;
-#endif
 	int		ret;
 
 	if (!cob_local_env) {
@@ -3390,14 +3427,7 @@ cob_display_env_value (const cob_field *f)
 	}
 	env2 = cob_malloc (f->size + 1U);
 	cob_field_to_string (f, env2, f->size);
-#if HAVE_SETENV
-	ret = setenv (cob_local_env, env2, 1);
-#else
-	len = strlen (cob_local_env) + strlen (env2) + 3U;
-	p = cob_fast_malloc (len);
-	sprintf (p, "%s=%s", cob_local_env, env2);
-	ret = putenv (p);
-#endif
+	ret = cob_setenv (cob_local_env, env2, 1);
 	cob_free (env2);
 	if (ret != 0) {
 		cob_set_exception (COB_EC_IMP_DISPLAY);
@@ -3606,9 +3636,6 @@ cob_gettmpdir (void)
 {
 	char	*tmpdir;
 	char	*tmp;
-#if !HAVE_SETENV
-	char	*put;
-#endif
 
 	if ((tmpdir = getenv ("TMPDIR")) == NULL) {
 		tmp = NULL;
@@ -3628,14 +3655,7 @@ cob_gettmpdir (void)
 			tmpdir = tmp;
 		}
 #endif
-#if HAVE_SETENV
-		(void)setenv ("TMPDIR", tmpdir, 1);
-#else
-		put = cob_fast_malloc (strlen (tmpdir) + 10);
-		sprintf (put, "TMPDIR=%s", tmpdir);
-		(void)putenv (cob_strdup (put));
-		cob_free ((void *)put);
-#endif
+		(void)cob_setenv ("TMPDIR", tmpdir, 1);
 		if (tmp) {
 			cob_free ((void *)tmp);
 			tmpdir = getenv ("TMPDIR");
@@ -5354,9 +5374,6 @@ static int
 cb_config_entry (char *buf, int line)
 {
 	int	i, j, k, old_type;
-#if !HAVE_SETENV
-	int	len;
-#endif
 	void	*data;
 	char	*env, *str, qt;
 	char	keyword[COB_MINI_BUFF], value[COB_SMALL_BUFF], value2[COB_SMALL_BUFF];
@@ -5434,14 +5451,7 @@ cb_config_entry (char *buf, int line)
 		/* check additional value for inline env vars ${varname:-default} */
 		str = cob_expand_env_string (value2);
 
-#if HAVE_SETENV
-		(void)setenv (value, str, 1);
-#else
-		len = (int) strlen (value) + (int) strlen (str) + 2;
-		env = cob_fast_malloc (len);
-		sprintf (env, "%s=%s", value, str);
-		(void)putenv (env);
-#endif
+		(void)cob_setenv (value, str, 1);
 		cob_free (str);
 		for (i = 0; i < NUM_CONFIG; i++) {		/* Set value from config file */
 			if (gc_conf[i].env_name
@@ -5462,14 +5472,7 @@ cb_config_entry (char *buf, int line)
 					break;
 				}
 			}
-#if HAVE_SETENV
-			(void)unsetenv (value);
-#else
-			len = (int) strlen (value) + 2;
-			env = cob_fast_malloc (len);
-			sprintf (env, "%s=", value);
-			(void)putenv (env);
-#endif
+			(void)cob_unsetenv (value);
 		}
 		return 0;
 	}
@@ -5615,7 +5618,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 			cobsetptr->cob_config_file = cob_realloc (cobsetptr->cob_config_file,
 				sizeof (char *)*(cobsetptr->cob_config_num), sizeof (char *)*(cobsetptr->cob_config_num + 1));
 		}
-		cobsetptr->cob_config_file[cobsetptr->cob_config_num++] = strdup (config_file);	/* Save config file name */
+		cobsetptr->cob_config_file[cobsetptr->cob_config_num++] = cob_strdup (config_file);	/* Save config file name */
 		cobsetptr->cob_config_cur = cobsetptr->cob_config_num;
 	}
 

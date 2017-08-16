@@ -1,4 +1,9 @@
 
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: use only memory and environment functions provided by libcob
+	* cobcrun.c (cobcrun_setenv): removed
+
 2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE

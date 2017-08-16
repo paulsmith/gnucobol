@@ -313,9 +313,6 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define snprintf		_snprintf
 #define getpid			_getpid
 #define access			_access
-/* remark: _putenv_s always overwrites, add a check for overwrite = 1 if necessary later*/
-#define setenv(name,value,overwrite)	_putenv_s(name,value)
-#define unsetenv(name)					_putenv_s(name,"")
 #if COB_USE_VC2013_OR_GREATER
 /* only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
@@ -1359,7 +1356,9 @@ COB_EXPIMP void	cob_cache_free			(void *);
 
 COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
 
-COB_EXPIMP char	*cob_expand_env_string(char *);
+COB_EXPIMP int 	cob_setenv	(const char *, const char *, int);
+COB_EXPIMP int 	cob_unsetenv	(const char *);
+COB_EXPIMP char	*cob_expand_env_string	(char *);
 
 COB_EXPIMP void	cob_check_version		(const char *, const char *,
 						 const int);
