@@ -7519,6 +7519,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	if (prog->prog_type == CB_PROGRAM_TYPE) {
 		output_line ("/* CANCEL callback */");
 		output_line ("if (unlikely(entry < 0)) {");
+		output_line ("\tif (entry == -20)");
+		output_line ("\t\tgoto P_clear_decimal;");
 		output_line ("\tgoto P_cancel;");
 		output_line ("}");
 		output_newline ();
@@ -8306,16 +8308,22 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_newline ();
 
 cancel_end:
-	output_line ("/* Clear Decimal Constant values */");
+	output_line ("initialized = 0;");
+	output_newline ();
+	output_line ("P_clear_decimal:");
+	i = 1;
 	for (m = literal_cache; m; m = m->next) {
 		if (CB_TREE_CLASS (m->x) == CB_CLASS_NUMERIC
 		 && m->make_decimal) {
+			if (i) {
+				i = 0;
+				output_line ("/* Clear Decimal Constant values */");
+			}
 			output_line ("cob_decimal_clear(%s%d);",CB_PREFIX_DEC_CONST,m->id);
 			output_line ("%s%d = NULL;",CB_PREFIX_DEC_CONST,m->id);
 		}
 	}
 	output_newline ();
-	output_line ("initialized = 0;");
 	output_line ("return 0;");
 	output_newline ();
 	/* End of CANCEL callback code */

@@ -1144,6 +1144,10 @@ typedef struct __cob_module {
 	unsigned char		flag_main;		/* Main module */
 	unsigned char		flag_fold_call;		/* Fold case */
 	unsigned char		flag_exit_program;	/* Exit after CALL */
+
+	unsigned char		flag_did_cancel;	/* Module has been canceled */
+	unsigned char		unused[3];		/* Use these flags up later, added for alignment */
+
 } cob_module;
 
 

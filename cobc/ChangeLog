@@ -9,6 +9,11 @@
 	* cobc.c: added cobc_early_exit and adjusted exit calls to fix missing free
 	* ppparse.y: CDF: warn if compiler flag is unknown
 
+2017-08-12  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Place all code to clear Decimal Constant values under
+	  label P_clear_decimal and invoke that code when 'entry' is -20
+
 2017-08-11  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: implemented (not-)register: DIALECT-ALL.

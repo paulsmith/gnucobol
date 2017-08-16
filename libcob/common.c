@@ -1651,10 +1651,29 @@ void
 cob_stop_run (const int status)
 {
 	struct exit_handlerlist	*h;
+	cob_module	*mod;
+	int		k;
+	int		(*cancel_func)(const int);
 
 	if (!cob_initialized) {
 		exit (1);
 	}
+	/* Call each module to release 'decimal' memory */
+	for(k = 0, mod = COB_MODULE_PTR; mod && k < 10240; mod = mod->next, k++) {
+		mod->flag_did_cancel = 0;
+		/* Recursive modules create a loop in the module chain */
+		/* Avoid an infinite processing loop */
+	}
+
+	for(k = 0, mod = COB_MODULE_PTR; mod && k < 10240; mod = mod->next, k++) {
+		if (mod->module_cancel.funcint
+		 && !mod->flag_did_cancel) {
+			mod->flag_did_cancel = 1;
+			cancel_func = mod->module_cancel.funcint;
+			(void)cancel_func (-20);	/* Special value to indicate, just decimals */
+		}
+	}
+
 	if (exit_hdlrs != NULL) {
 		h = exit_hdlrs;
 		while (h != NULL) {
@@ -6520,7 +6539,7 @@ cob_init (const int argc, char **argv)
 
 	/* Get user name if not set via environment already */
 	if (cobsetptr->cob_user_name == NULL || !strcmp(cobsetptr->cob_user_name, "Unknown")) {
-#if defined	(_WIN32) && (COB_USE_VC2008_OR_GREATER /* Needs SDK for earlier versions */ || !defined(_MSC_VER))
+#if 0 //defined	(_WIN32) && (COB_USE_VC2008_OR_GREATER /* Needs SDK for earlier versions */ || !defined(_MSC_VER))
 		unsigned long bsiz = COB_ERRBUF_SIZE;
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");

@@ -4,6 +4,12 @@
 	* call.c, common.c, fileio.c, intrinsic.c, screenio.c:
 	  surrounded code parts that cannot be tested by LCOV_EXCP markers
 
+2017-08-12  Ron Norman <rjn@inglenet.com>
+
+	* common.c: cob_stop_run issue callbacks to free any decimal memory
+	* common.c: avoid infinite loop walking COB_MODULE list when RECURSIVE
+	            modules are being used
+
 2017-08-06 Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (cob_file_external_addr): fixed bug #404, where the
