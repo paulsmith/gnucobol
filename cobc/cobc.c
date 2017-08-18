@@ -561,10 +561,9 @@ static const struct option long_options[] = {
 	{NULL,			0, NULL, 0}
 };
 
-#undef	CB_ARG_NO
-#undef	CB_ARG_RQ
-#undef	CB_ARG_NQ
-#undef	CB_ARG_OP
+#undef	CB_NO_ARG
+#undef	CB_RQ_ARG
+#undef	CB_OP_ARG
 
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
