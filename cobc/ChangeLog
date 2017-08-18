@@ -1103,9 +1103,11 @@
 2016-10-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: fixed missing initialization of static_call_cache
-	* flags.def, cobc.c, codegen.c: added new cb_flag_c_decl_for_static_call,
-	  normally active, to create the option to disable the auto-generation of
-	  C function declarations for static CALLs
+	* flags.def, cobc.c: added CB_FLAG_ON for compiler flags that are
+	  active by default
+	* flags.def, codegen.c: added new cb_flag_c_decl_for_static_call as 
+	  CB_FLAG_ON, to create the option for disabling the auto-generation
+	  of C function declarations for static CALLs
 
 2016-10-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
