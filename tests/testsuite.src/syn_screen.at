@@ -516,15 +516,23 @@ AT_DATA([prog3.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+[prog.cob: 7: warning: OCCURS screen items is not implemented
+prog.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
 ])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+[prog2.cob: 7: warning: OCCURS screen items is not implemented
+prog2.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+prog2.cob: 9: warning: OCCURS screen items is not implemented
 prog2.cob: 9: error: relative LINE/COLUMN clause required with OCCURS
 ])
 
-AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
+[prog3.cob: 7: warning: OCCURS screen items is not implemented
+prog3.cob: 9: warning: OCCURS screen items is not implemented
+prog3.cob: 11: warning: OCCURS screen items is not implemented
+prog3.cob: 13: warning: OCCURS screen items is not implemented
+])
 
 AT_CLEANUP
 

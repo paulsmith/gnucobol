@@ -6765,6 +6765,7 @@ _screen_col_plus_minus:
 screen_occurs_clause:
   OCCURS integer _times
   {
+	CB_PENDING (_("OCCURS screen items"));
 	check_repeated ("OCCURS", SYN_CLAUSE_23, &check_pic_duplicate);
 	current_field->occurs_max = cb_get_int ($2);
 	current_field->occurs_min = current_field->occurs_max;
