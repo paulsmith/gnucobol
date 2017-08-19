@@ -257,10 +257,10 @@ struct cb_exception cb_exception_table[] = {
 };
 #undef	COB_EXCEPTION
 
-#define	CB_FLAG(var,pdok,name,doc)	int var = 0;
-#define	CB_FLAG_ON(var,pdok,name,doc)	int var = 1;
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	int var = def;
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)
+#define	CB_FLAG(var,print_help,name,doc)	int var = 0;
+#define	CB_FLAG_ON(var,print_help,name,doc)	int var = 1;
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)	int var = def;
+#define	CB_FLAG_NQ(print_help,name,opt,doc)
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
@@ -500,15 +500,15 @@ static const struct option long_options[] = {
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
 	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},
 
-#define	CB_FLAG(var,pdok,name,doc)			\
+#define	CB_FLAG(var,print_help,name,doc)			\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
 	{"fno-" name,		CB_NO_ARG, &var, 0},
-#define	CB_FLAG_ON(var,pdok,name,doc)		\
+#define	CB_FLAG_ON(var,print_help,name,doc)		\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
 	{"fno-" name,		CB_NO_ARG, &var, 0},
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)		\
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)		\
 	{"f" name,		CB_RQ_ARG, NULL, opt},
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)			\
+#define	CB_FLAG_NQ(print_help,name,opt,doc)			\
 	{"f" name,		CB_RQ_ARG, NULL, opt},
 #include "flag.def"
 #undef	CB_FLAG
@@ -2144,53 +2144,32 @@ cobc_print_info (void)
 }
 
 static void
-cobc_print_warn (const char *name, const char *doc, const int warnopt)
+cobc_print_active (const char *doc, const int print_help)
 {
-	switch (warnopt) {
-	case 0:
-		printf ("  -W%-19s\t%s\n", name, doc);
-		fputs ("\t\t\t", stdout);
-		fputs (_("- NOT set with -Wall"), stdout);
-		putchar ('\n');
-		break;
-	case 1:
-		printf ("  -W%-19s\t%s\n", name, doc);
-		break;
-	case 2:
-		printf ("  -Wno-%-16s\t%s\n", name, doc);
-		fputs ("\t\t\t", stdout);
-		fputs (_("- ALWAYS active"), stdout);
-		putchar ('\n');
-		break;
-	default:
-		/* LCOV_EXCL_START */
-		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
-			"cobc_print_warn", "warnopt");
-		COBC_ABORT ();
-		break;
-		/* LCOV_EXCL_STOP */
+	if (!print_help) {
+		return;
 	}
+	
+	puts (doc);
 }
 
 static void
-cobc_print_flag (const char *name, const char *doc,
-		 const int pdok, const char *odoc, const char *def)
+cobc_print_config_flag (const char *name, const char *doc,
+		 const char *odoc)
 {
 	char		buff[78];
 
-	if (!pdok || !doc) {
+	if (!doc) {
 		return;
 	}
-	if (!odoc) {
-		snprintf (buff, sizeof (buff) - 1, "-f%s", name);
-	} else if (!strcmp(odoc, "no")) {
-		snprintf (buff, sizeof (buff) - 1, "-fno-%s", name);
-	} else {
-		snprintf (buff, sizeof (buff) - 1, "-f%s=%s", name, odoc);
+	if (odoc) {
+		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
+		name = (const char *) &buff;
 	}
-	printf ("  %-21s\t%s\n", buff, doc);
-	if (def) {
-		printf ("\t\t\t- %s: %s\n", _("default"), def);
+	if (strlen(name) <= 19) {
+		printf ("  -f%-19s  %s\n", name, doc);
+	} else {
+		printf ("  -f%s\t%s\n", name, doc);
 	}
 }
 
@@ -2214,7 +2193,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -vvv, -verbose=3      like -vv but additional pass verbose option\n" \
 	        "                        to linker"));
 	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
-	puts (_ ("  -###                 like -v but commands not executed"));
+	puts (_("  -###                  like -v but commands not executed"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
 	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
@@ -2263,35 +2242,39 @@ cobc_print_usage (char * prog)
 	puts (_("  -save-temps[=<dir>]   save intermediate files\n"
 			"                        - default: current directory"));
 	puts (_("  -ext <extension>      add file extension for resolving COPY"));
-
 	putchar ('\n');
 
+	puts (_("Warning options:"));
 	puts (_("  -W                    enable all warnings"));
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
 	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
 #define	CB_WARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 1);
+	puts (doc);
 #define	CB_ONWARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 2);
+	puts (doc);							\
+	/* TRANSLATORS: This msgid is appended to msgid for -Wno-pending and others */ \
+	puts (_("                        - ALWAYS active"));
 #define	CB_NOWARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 0);
+	puts (doc);							\
+	/* TRANSLATORS: This msgid is appended to msgid for -Wpossible-truncate and others */ \
+	puts (_("                        - NOT set with -Wall"));
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 	puts (_("  -Werror               treat all warnings as errors"));
 	puts (_("  -Werror=<warning>     treat specified <warning> as error"));
-
 	putchar ('\n');
 
-#define	CB_FLAG(var,pdok,name,doc)		\
-	cobc_print_flag (name, doc, pdok, NULL, NULL);
-#define	CB_FLAG_ON(var,pdok,name,doc)		\
-	cobc_print_flag (name, doc, pdok, "no", NULL);
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	\
-	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)		\
-	cobc_print_flag (name, doc, pdok, vdoc, NULL);
+	puts (_("Compiler options:"));
+#define	CB_FLAG(var,print_help,name,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_ON(var,print_help,name,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_NQ(print_help,name,opt,doc)		\
+	cobc_print_active (doc, print_help);
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
@@ -2299,17 +2282,17 @@ cobc_print_usage (char * prog)
 #undef	CB_FLAG_NQ
 
 	putchar ('\n');
-
+	puts (_("Compiler dialect configuration options:"));
 #define	CB_CONFIG_STRING(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+	cobc_print_config_flag (name, doc, _("<value>"));
 #define	CB_CONFIG_INT(var,name,min,max,odoc,doc)		\
-	cobc_print_flag (name, doc, 1, odoc, NULL);
+	cobc_print_config_flag (name, doc, odoc);
 #define	CB_CONFIG_ANY(type,var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+	cobc_print_config_flag (name, doc, _("<value>"));
 #define	CB_CONFIG_BOOLEAN(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, NULL, NULL);
+	cobc_print_config_flag (name, doc, NULL);
 #define	CB_CONFIG_SUPPORT(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<support>"), NULL);
+	cobc_print_config_flag (name, doc, _("<support>"));
 #include "config.def"
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
@@ -2343,9 +2326,9 @@ cobc_print_usage (char * prog)
 	putchar (' ');
 	printf (_("'%s'"), "unconformable");
 	putchar ('\n');
-	cobc_print_flag ("not-reserved", _("word to be taken out of the reserved words list"), 1, _("<word>"), NULL);
-	cobc_print_flag ("reserved", _("word to be added to reserved words list"), 1, _("<word>"), NULL);
-	cobc_print_flag ("reserved", _("word to be added to reserved words list as alias"), 1, _("<word>:<alias>"), NULL);
+	cobc_print_config_flag ("not-reserved", _("word to be taken out of the reserved words list"), _("<word>"));
+	cobc_print_config_flag ("reserved", _("word to be added to reserved words list"), _("<word>"));
+	cobc_print_config_flag ("reserved", _("word to be added to reserved words list as alias"), _("<word>:<alias>"));
 
 	putchar ('\n');
 

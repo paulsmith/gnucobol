@@ -1150,15 +1150,16 @@ validate_field_1 (struct cb_field *f)
 			}
 
 			/* ISO+IEC+1989-2002: 13.16.42.2-10 */
-			for (p = f; p; p = p->parent) {
-				if (cb_warn_ignored_initial_val) {
+			if (cb_warn_ignored_initial_val) {
+				for (p = f; p; p = p->parent) {
 					if (p->flag_external) {
-						cb_warning_x (COBC_WARN_FILLER, x, _("initial VALUE clause ignored for %s item"),
-										"EXTERNAL");
-				} else
-					if (p->redefines) {
-						cb_warning_x (COBC_WARN_FILLER, x, _("initial VALUE clause ignored for %s item"),
-										"REDEFINES");
+						cb_warning_x (cb_warn_ignored_initial_val, x,
+							_("initial VALUE clause ignored for %s item %s"),
+							"EXTERNAL", cb_name (CB_TREE(p)));
+					} else if (p->redefines) {
+						cb_warning_x (cb_warn_ignored_initial_val, x
+							_("initial VALUE clause ignored for %s item %s"),
+							"REDEFINES", cb_name (CB_TREE(p)));
 					}
 				}
 			}
@@ -1167,7 +1168,8 @@ validate_field_1 (struct cb_field *f)
 		/* Validate FULL */
 		if (f->screen_flag & COB_SCREEN_FULL
 			&& f->pic && f->pic->category == CB_CATEGORY_NUMERIC) {
-			cb_warning_x (warningopt, x, _("FULL has no effect on numeric items; you may want REQUIRED or PIC Z"));
+			cb_warning_x (warningopt, x,
+				_("FULL has no effect on numeric items; you may want REQUIRED or PIC Z"));
 		}
 	}
 
