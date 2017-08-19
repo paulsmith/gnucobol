@@ -1,4 +1,9 @@
 
+2017-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for cobc --help,
+	  mainly to provide translators with context for msgids
+
 2017-08-18  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (screen_occurs_clause): marked as pending.
