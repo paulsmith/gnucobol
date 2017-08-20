@@ -5908,7 +5908,7 @@ output_section_info (struct cb_label *lp)
 }
 
 static void
-output_trace_info (cb_tree x, struct cb_statement *p)
+output_trace_info (cb_tree x, const char *name)
 {
 	output_prefix ();
 	output ("cob_set_location (%s%d, %d, ",
@@ -5927,9 +5927,9 @@ output_trace_info (cb_tree x, struct cb_statement *p)
 	} else {
 		output ("NULL, ");
 	}
-	if (p->name) {
+	if (name) {
 		output ("%s%d);\n",
-			CB_PREFIX_STRING, lookup_string (p->name));
+			CB_PREFIX_STRING, lookup_string (name));
 	} else {
 		output ("NULL);\n");
 	}
@@ -6087,6 +6087,8 @@ output_handler (struct cb_statement *stmt)
 static void
 output_stmt (cb_tree x)
 {
+	struct cb_binary_op	*bop;
+	cb_tree			w;
 	struct cb_statement	*p;
 	struct cb_label		*lp;
 	struct cb_assign	*ap;
@@ -6130,7 +6132,7 @@ output_stmt (cb_tree x)
 		if (x->source_file) {
 			if (cb_flag_source_location) {
 				/* Output source location as code */
-				output_trace_info (x, p);
+				output_trace_info (x, p->name);
 			}
 			if (current_prog->flag_gen_debug &&
 			    !p->flag_in_debug) {
@@ -6369,7 +6371,51 @@ output_stmt (cb_tree x)
 		}
 		if (!ip->is_if) {
 			output_newline ();
-			output_line ("/* WHEN */");
+			if (ip->test == cb_true) {
+				output_line ("/* WHEN is always TRUE */");
+			} else if (ip->test == cb_false) {
+				output_line ("/* WHEN is always FALSE */");
+			} else
+			if (ip->test
+			 && CB_TREE_TAG (ip->test) == CB_TAG_BINARY_OP) {
+				bop = CB_BINARY_OP (ip->test);
+				w = NULL;
+				if (bop->op == '!') {
+					w = bop->x;
+				} else if (bop->y) {
+					w = bop->y;
+				} else if (bop->x) {
+					w = bop->x;
+				}
+				if (w == cb_true) {
+					output_line ("/* WHEN is always %s */", bop->op == '!'?"FALSE":"TRUE");
+				} else if (w == cb_false) {
+					output_line ("/* WHEN is always %s */", bop->op != '!'?"FALSE":"TRUE");
+				} else if (w && w->source_line) {
+					output_prefix ();
+					output ("/* Line: %-10d: %-19s",w->source_line, "WHEN");
+					if (w->source_file) {
+						output (": %s ", w->source_file);
+					}
+					output ("*/\n");
+					if (cb_flag_source_location
+					 && last_line != w->source_line) {
+						/* Output source location as code */
+						output_trace_info (w, "WHEN");
+					}
+				} else {
+					output_line ("/* WHEN */");
+				}
+			} else if (ip->test->source_line) {
+				output_line ("/* Line: %-10d: WHEN */",ip->test->source_line);
+				if (cb_flag_source_location
+				 && last_line != ip->test->source_line) {
+					/* Output source location as code */
+					output_trace_info (ip->test, "WHEN");
+				}
+			} else {
+				output_line ("/* WHEN */");
+			}
 			output_newline ();
 		}
 		gen_if_level++;

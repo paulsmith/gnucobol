@@ -75,8 +75,13 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
 [prog.cob: 5: warning: expression '3' EQUALS '1' is always FALSE
 prog.cob: 6: warning: expression '3' EQUALS '2' is always FALSE
+prog.cob: 6: warning: expression is always FALSE
+prog.cob: 6: warning: expression '3' EQUALS '3' is always TRUE
+prog.cob: 6: warning: expression is always TRUE
 prog.cob: 10: warning: expression '3' EQUALS '1' is always FALSE
 prog.cob: 11: warning: expression '3' EQUALS '2' is always FALSE
+prog.cob: 11: warning: expression '3' EQUALS '3' is always TRUE
+prog.cob: 11: warning: expression is always FALSE
 ])
 
 AT_CLEANUP
@@ -90,75 +95,190 @@ AT_DATA([prog.cob], [
        PROGRAM-ID. prog.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01 WS-LINE-NUMBER PIC 9(3) VALUE ZERO.
-       01 WS-NUMBER      PIC 9(3)V99 VALUE ZERO.
-       01 WS-TEXT        PIC X(5) VALUE 'CAT'.
-       78 CONST1         VALUE 'CAT     '.
-       01 CONST2         CONSTANT AS 00000001234.
+       01 WS-LINE-NUMBER    PIC 9(3) VALUE ZERO.
+       01 WS-NUMBER         PIC 9(3)V99 VALUE ZERO.
+       01 WS-TEXT           PIC X(5) VALUE 'CAT'.
+       01 PIC-9-SIGNED      PIC S9(2) VALUE 5.
+       01 PIC-9-NOT-SIGNED  PIC 9(3) VALUE 5.
+       01 PIC-9-NOT-DECIMAL PIC 9(3) VALUE 5.
+       01 XX                PIC 9(2) VALUE 2.
+       01 PIC-9-DECIMAL     PIC 9(3)V9 VALUE 5.
+       01 COMPUTE-1         PIC 999V9999 VALUE 654.1873.
+       01 GROUP-ITEM-X6     PIC X(6) VALUE 'CAT'.
+       78 CONST1            VALUE 'CAT     '.
+       01 CONST2            CONSTANT AS 00000001234.
+       01 IF-D16            PIC PP99 VALUE .0012.
        PROCEDURE DIVISION.
-       IF WS-LINE-NUMBER > '123'
-          CONTINUE.
-       IF WS-TEXT > 'DOGGY'
-          CONTINUE.
-       IF WS-NUMBER > 123.999
-          CONTINUE.
-       IF WS-LINE-NUMBER > 1234
-          CONTINUE.
-       IF WS-LINE-NUMBER <= 1234
-          CONTINUE.
-       IF WS-LINE-NUMBER > '1234'
-          CONTINUE.
-       IF 1234 < WS-LINE-NUMBER 
-          CONTINUE.
-       IF 1234 >= WS-LINE-NUMBER 
-          CONTINUE.
-       IF WS-TEXT > 'DOGGY++'
-          CONTINUE.
-       IF WS-TEXT > 3141596
-          CONTINUE.
-       IF 'DOG+CAT' NOT = WS-TEXT
-          CONTINUE.
-       IF WS-TEXT = 'CAT+DOG'
-          CONTINUE.
-       EVALUATE TRUE
-          WHEN 'DOG+CAT' = WS-TEXT
-             CONTINUE
-          WHEN CONST1 = 'CAT+DOG'
-             CONTINUE
-          WHEN CONST1 = 'CAT'
-             CONTINUE
-          WHEN CONST2 = 1234
-             CONTINUE
-       END-EVALUATE
-       IF WS-LINE-NUMBER > 0000234
-          CONTINUE.
-       IF WS-TEXT = 'CAT         '
-          CONTINUE.
-       STOP RUN.
+       MAIN.
+           IF GROUP-ITEM-X6 = '1234567' 
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL = 1.1
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL = 1.0
+               CONTINUE.
+           IF PIC-9-DECIMAL = 1.01
+               CONTINUE.
+           IF PIC-9-DECIMAL = 1.100
+               CONTINUE.
+           IF PIC-9-SIGNED NOT = 11.0
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED < 0
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED < ZERO
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED < (25 - 50)
+               CONTINUE.
+           IF PIC-9-DECIMAL = (2.24 / 2)
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL = "123"
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL = "1B0"
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL (1:3) = "1B0"
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL (1:3) NOT = "Hot Doggy"
+               CONTINUE.
+           IF PIC-9-NOT-DECIMAL (1:XX) NOT = "Hi"
+               CONTINUE.
+           IF WS-LINE-NUMBER > '123'
+              CONTINUE.
+           IF WS-TEXT > 'DOGGY'
+              CONTINUE.
+           IF WS-NUMBER > 123.999
+              CONTINUE.
+           IF WS-LINE-NUMBER > 2345
+              CONTINUE.
+           IF WS-LINE-NUMBER <= 1234
+              CONTINUE.
+           IF WS-LINE-NUMBER > '1234'
+              CONTINUE.
+           IF 5432 < WS-LINE-NUMBER 
+              CONTINUE.
+           IF 7855 >= WS-LINE-NUMBER 
+              CONTINUE.
+           IF 1234 < WS-LINE-NUMBER 
+              CONTINUE.
+           IF 5432 >= WS-LINE-NUMBER 
+              CONTINUE.
+           IF WS-TEXT > 'DOGGY++'
+              CONTINUE.
+           IF WS-TEXT > 3141596
+              CONTINUE.
+           IF WS-TEXT > 3.141596
+              CONTINUE.
+           IF WS-TEXT = 3.141596
+              CONTINUE.
+           IF 'DOG+CAT' NOT = WS-TEXT
+              CONTINUE.
+           IF WS-TEXT = 'CAT+DOG'
+              CONTINUE.
+           EVALUATE TRUE
+              WHEN 'DOG+CAT' = WS-TEXT
+                 CONTINUE
+              WHEN CONST1 = 'CAT+DOG'
+                 CONTINUE
+              WHEN CONST1 = 'CAT'
+                 CONTINUE
+              WHEN CONST2 = 1234
+                 CONTINUE
+           END-EVALUATE
+           IF WS-LINE-NUMBER > 0000234
+              CONTINUE.
+           IF WS-TEXT = 'CAT         '
+              CONTINUE.
+           IF ( COMPUTE-1 < 654.20038) AND 
+              ( COMPUTE-1 > 654.17422) THEN
+              CONTINUE.
+           IF ( COMPUTE-1 < 5654.20)
+              CONTINUE.
+           IF ( COMPUTE-1 > 5654.20)
+              CONTINUE.
+           IF ( 5654.20 > COMPUTE-1)
+              CONTINUE.
+           IF ( 5654.20 < COMPUTE-1)
+              CONTINUE.
+           IF IF-D16 POSITIVE
+              CONTINUE.
+           IF IF-D16 NOT POSITIVE
+              CONTINUE.
+           IF IF-D16 NEGATIVE
+              CONTINUE.
+           IF IF-D16 NOT NEGATIVE
+              CONTINUE.
+           IF PIC-9-NOT-SIGNED > (25 - 50)
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED >= -1
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED > 0.0
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED > ZERO
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED >= 0.0
+               CONTINUE.
+           IF PIC-9-NOT-SIGNED >= ZERO
+               CONTINUE.
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 18: warning: literal is longer than field
-prog.cob: 18: warning: expression is always FALSE
-prog.cob: 20: warning: literal is longer than field
-prog.cob: 20: warning: expression is always TRUE
-prog.cob: 22: warning: literal is longer than field
-prog.cob: 22: warning: expression is always FALSE
-prog.cob: 24: warning: literal is longer than field
-prog.cob: 24: warning: expression is always FALSE
-prog.cob: 26: warning: literal is longer than field
-prog.cob: 26: warning: expression is always TRUE
-prog.cob: 28: warning: literal is longer than field
-prog.cob: 30: warning: literal is longer than field
-prog.cob: 32: warning: literal is longer than field
-prog.cob: 32: warning: expression is always TRUE
-prog.cob: 34: warning: literal is longer than field
-prog.cob: 34: warning: expression is always FALSE
-prog.cob: 37: warning: literal is longer than field
-prog.cob: 37: warning: expression is always FALSE
-prog.cob: 39: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
-prog.cob: 41: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
-prog.cob: 43: warning: expression '00000001234' EQUALS '1234' is always TRUE
+[prog.cob: in paragraph 'MAIN':
+prog.cob: 21: warning: literal '1234567' is longer than GROUP-ITEM-X6
+prog.cob: 21: warning: expression is always FALSE
+prog.cob: 23: warning: literal '1.1' has more decimals than PIC-9-NOT-DECIMAL
+prog.cob: 23: warning: expression is always FALSE
+prog.cob: 27: warning: literal '1.01' has more decimals than PIC-9-DECIMAL
+prog.cob: 27: warning: expression is always FALSE
+prog.cob: 33: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
+prog.cob: 35: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
+prog.cob: 38: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN -25
+prog.cob: 40: warning: literal '1.12' has more decimals than PIC-9-DECIMAL
+prog.cob: 40: warning: expression is always FALSE
+prog.cob: 43: warning: literal '1B0' is alphanumeric but PIC-9-NOT-DECIMAL is numeric
+prog.cob: 55: warning: literal '123.999' has more decimals than WS-NUMBER
+prog.cob: 57: warning: literal '2345' has more digits than WS-LINE-NUMBER
+prog.cob: 57: warning: expression is always FALSE
+prog.cob: 59: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob: 59: warning: expression is always TRUE
+prog.cob: 61: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob: 61: warning: expression is always FALSE
+prog.cob: 63: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob: 63: warning: expression is always FALSE
+prog.cob: 65: warning: literal '7855' has more digits than WS-LINE-NUMBER
+prog.cob: 65: warning: expression is always TRUE
+prog.cob: 67: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob: 67: warning: expression is always FALSE
+prog.cob: 69: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob: 69: warning: expression is always TRUE
+prog.cob: 71: warning: literal 'DOGGY++' is longer than WS-TEXT
+prog.cob: 73: warning: literal '3141596' is longer than WS-TEXT
+prog.cob: 75: warning: literal '3.141596' is longer than WS-TEXT
+prog.cob: 77: warning: literal '3.141596' is longer than WS-TEXT
+prog.cob: 77: warning: expression is always FALSE
+prog.cob: 79: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob: 79: warning: expression is always TRUE
+prog.cob: 81: warning: literal 'CAT+DOG' is longer than WS-TEXT
+prog.cob: 81: warning: expression is always FALSE
+prog.cob: 84: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob: 84: warning: expression is always FALSE
+prog.cob: 86: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
+prog.cob: 88: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
+prog.cob: 90: warning: expression '00000001234' EQUALS '1234' is always TRUE
+prog.cob: 97: warning: literal '654.20038' has more decimals than COMPUTE-1
+prog.cob: 98: warning: literal '654.17422' has more decimals than COMPUTE-1
+prog.cob: 100: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob: 100: warning: expression is always TRUE
+prog.cob: 102: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob: 102: warning: expression is always FALSE
+prog.cob: 104: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob: 104: warning: expression is always TRUE
+prog.cob: 106: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob: 106: warning: expression is always FALSE
+prog.cob: 112: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
+prog.cob: 114: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
+prog.cob: 117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -25
+prog.cob: 118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
+prog.cob: 124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+prog.cob: 126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 ])
 
 AT_CLEANUP
@@ -4192,29 +4312,34 @@ AT_DATA([prog.cob], [
                  to var (17 - var-len:var-len - 8)
            WHEN  var-len > 16
                move othervar to var
+           WHEN  A = B
+               move var      to othervar
            WHEN OTHER
-               move othervar to var
+               CONTINUE
            END-EVALUATE
 
-           EVALUATE var-len
-           WHEN  15
-           WHEN 115
-               move A to B
-               move B to C
-           WHEN  > 16
+           EVALUATE FALSE
+           WHEN  var-len < 16
+               move othervar (1:var-len - 9)
+                 to var (16 - var-len:var-len - 9)
+           WHEN  var-len > 16
                move othervar to var
+           WHEN  A = B
+               move var      to othervar
            WHEN OTHER
-               move othervar to var
-           END-EVALUATE
+               CONTINUE
+           END-EVALUATE.
 
            IF 15 = var-len
-           OR var-len = 15
                move othervar to var.
+
+           IF var-len = 15
+               move var      to othervar.
 
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 15: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob: 17: error (ignored): offset of 'var' out of bounds: -98
 prog.cob: 22: warning: expression '2' EQUALS '3' is always FALSE
@@ -4236,11 +4361,13 @@ prog.cob: 54: warning: PERFORM ONCE since UNTIL is always TRUE
 prog.cob: 59: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob: 61: error (ignored): offset of 'var' out of bounds: -98
 prog.cob: 62: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob: 73: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob: 69: warning: expression '115' EQUALS '15' is always FALSE
-prog.cob: 70: warning: expression '115' EQUALS '115' is always TRUE
-prog.cob: 79: warning: expression '15' EQUALS '115' is always FALSE
-prog.cob: 80: warning: expression '115' EQUALS '15' is always FALSE
+prog.cob: 71: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob: 73: error: offset of 'var' out of bounds: -99
+prog.cob: 74: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob: 74: warning: expression is always TRUE
+prog.cob: 74: warning: expression is always FALSE
+prog.cob: 82: warning: expression '15' EQUALS '115' is always FALSE
+prog.cob: 85: warning: expression '115' EQUALS '15' is always FALSE
 ])
 
 AT_CLEANUP
@@ -4249,12 +4376,12 @@ AT_CLEANUP
 AT_SETUP([Constant Expressions (2)])
 AT_KEYWORDS([conditions refmod IF EVALUATE])
 
-# we currently don't have a way to show the correct line numbers
-# when we compare two constants
+# we currently only get the last line of an expression when we compare two constants
 
 # we currently do the comparision checks for EVALUATE from last WHEN to first one
 # to get the line numbers in order we'd need to have to postpone the check
 # until the list of WHENs is reversed
+
 AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
@@ -4283,20 +4410,22 @@ AT_DATA([prog.cob], [
                  to var (17 - const1:const1 - 8)
            WHEN  > 16
                display othervar
-           *> actually WHEN OTHER is also FALSE in this case (115 = 16),
-           *> but this is too complex to check
+       *> actually WHEN OTHER is also FALSE in this case (115 = 16),
+       *> but this is too complex to check
            WHEN OTHER
                display othervar
            END-EVALUATE
+
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 13: warning: expression '115' EQUALS '200' is always FALSE
 prog.cob: 14: warning: expression '200' EQUALS '115' is always FALSE
-prog.cob: 13: warning: expression is always FALSE
+prog.cob: 14: warning: expression is always FALSE
 prog.cob: 19: warning: expression '115' EQUALS '15' is always FALSE
 prog.cob: 20: warning: expression '115' EQUALS '115' is always TRUE
+prog.cob: 20: warning: expression is always TRUE
 prog.cob: 22: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob: 24: error (ignored): offset of 'var' out of bounds: -98
 prog.cob: 25: warning: expression '115' GREATER THAN '16' is always TRUE

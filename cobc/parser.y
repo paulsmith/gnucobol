@@ -9238,6 +9238,9 @@ evaluate_statement:
 		eval_inc = 0;
 		eval_inc2 = 0;
 	}
+	cb_end_cond (cb_any);
+	cb_save_cond ();
+	cb_true_side ();
   }
   evaluate_body
   end_evaluate
@@ -9283,7 +9286,7 @@ evaluate_subject:
 | TOK_FALSE
   {
 	$$ = cb_false;
-	eval_check[eval_level][eval_inc++] = NULL;
+	eval_check[eval_level][eval_inc++] = cb_false;
 	if (eval_inc >= EVAL_DEPTH) {
 		cb_error (_("maximum evaluate depth exceeded (%d)"),
 			  EVAL_DEPTH);
@@ -9362,7 +9365,8 @@ evaluate_object:
 	e2 = $2;
 	x = NULL;
 	parm1 = $1;
-	if (eval_check[eval_level][eval_inc2]) {
+	if (eval_check[eval_level][eval_inc2]
+	 && eval_check[eval_level][eval_inc2] != cb_false) {
 		/* Check if the first token is NOT */
 		/* It may belong to the EVALUATE, however see */
 		/* below when it may be part of a partial expression */
@@ -9408,13 +9412,21 @@ evaluate_object:
 
 	/* Build expr now */
 	e1 = cb_build_expr (parm1);
+
+	eval_inc2++;
+	$$ = CB_BUILD_PAIR (not0, CB_BUILD_PAIR (e1, e2));
+
+	if (eval_check[eval_level][eval_inc2-1] == cb_false) {
+		/* It was  EVALUATE FALSE; So flip condition */
+		if (e1 == cb_true)
+			e1 = cb_false;
+		else if (e1 == cb_false)
+			e1 = cb_true;
+	}
 	cb_terminate_cond ();
 	cb_end_cond (e1);
 	cb_save_cond ();
 	cb_true_side ();
-
-	eval_inc2++;
-	$$ = CB_BUILD_PAIR (not0, CB_BUILD_PAIR (e1, e2));
   }
 | ANY				{ $$ = cb_any; eval_inc2++; }
 | TOK_TRUE			{ $$ = cb_true; eval_inc2++; }

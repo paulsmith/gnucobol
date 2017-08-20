@@ -160,28 +160,78 @@ cb_tree cb_standard_error_handler = NULL;
 
 unsigned int	gen_screen_ptr = 0;
 
+static	int	save_expr_line = 0;
+static	cb_tree cb_zero_lit;
+static	char	*save_expr_file = NULL;
 static	int	prev_expr_line = 0;
 static	int	prev_expr_pos = 0;
-static	int	prev_expr_warn[4] = {0,0,0,0};
+#define EXPR_WARN_PER_LINE 8
+static	int	prev_expr_warn[EXPR_WARN_PER_LINE] = {0,0,0,0,0,0,0,0};
+static	int	prev_expr_tf[EXPR_WARN_PER_LINE] = {0,0,0,0,0,0,0,0};
 
 /* Local functions */
 
 static int
-was_prev_warn (int linen)
+was_prev_warn (int linen, int tf)
 {
 	int	i;
 	if (cb_exp_line != prev_expr_line) {
 		prev_expr_line = cb_exp_line;
-		for (i = 0; i < 4; i++)
+		for (i = 0; i < EXPR_WARN_PER_LINE; i++) {
 			prev_expr_warn[i] = 0;
+			prev_expr_tf[i] = -1;
+		}
 	}
-	for (i = 0; i < 4; i++) {
-		if (prev_expr_warn[i] == linen)
-			return 1;
+	for (i=0; i < EXPR_WARN_PER_LINE; i++) {
+		if (prev_expr_warn[i] == linen) {
+			if (prev_expr_tf[i] == tf) {
+				return 1;
+			}
+			prev_expr_tf [i] = tf;
+			return 0;
+		}
 	}
-	prev_expr_pos = (prev_expr_pos + 1) % 4;
+	prev_expr_pos = (prev_expr_pos + 1) % EXPR_WARN_PER_LINE;
 	prev_expr_warn [prev_expr_pos] = linen;
+	prev_expr_tf [prev_expr_pos] = tf;
 	return 0;
+}
+
+/* get best position (note: in the case of constants y/x point to DATA-DIVISION) */
+static void
+copy_file_line (cb_tree e, cb_tree y, cb_tree x)
+{
+	if (y == cb_zero || x == cb_zero) {
+		e->source_line = prev_expr_line = cb_exp_line;
+		e->source_file = cb_source_file;
+	} else if (y && x && y->source_line > x->source_line) {
+		e->source_file = y->source_file;
+		e->source_line = y->source_line;
+		e->source_column = y->source_column;
+		save_expr_file = (char *)y->source_file;
+		save_expr_line = y->source_line;
+	} else if (!x && y && y->source_line) {
+		e->source_file = y->source_file;
+		e->source_line = y->source_line;
+		e->source_column = y->source_column;
+		save_expr_file = (char *)e->source_file;
+		save_expr_line = e->source_line;
+	} else if (x && x->source_line) {
+		e->source_file = x->source_file;
+		e->source_line = x->source_line;
+		e->source_column = x->source_column;
+		save_expr_file = (char *)e->source_file;
+		save_expr_line = e->source_line;
+	} else if (y || x) {
+		e->source_line = cb_exp_line;
+		e->source_file = cb_source_file;
+	} else if (save_expr_line) {
+		e->source_file = save_expr_file;
+		e->source_line = save_expr_line;
+	} else {
+		e->source_line = cb_exp_line;
+		e->source_file = cb_source_file;
+	}
 }
 
 static size_t
@@ -1403,6 +1453,7 @@ cb_init_constants (void)
 	cb_norm_high = cb_high;
 	cb_quote = make_constant (CB_CATEGORY_ALPHANUMERIC, "&cob_all_quote");
 	cb_one = cb_build_numeric_literal (0, "1", 0);
+	cb_zero_lit = cb_build_numeric_literal (0, "0", 0);
 	cb_int0 = cb_int (0);
 	cb_int1 = cb_int (1);
 	cb_int2 = cb_int (2);
@@ -3629,6 +3680,211 @@ error:
 	return cb_error_node;
 }
 
+static char *
+display_literal (char *disp, struct cb_literal *l)
+{
+	if (CB_NUMERIC_LITERAL_P(l)) { 
+		if (l->scale == 0) {
+			snprintf(disp,38,"%s%.36s",(char*)(l->sign == -1 ? "-" : ""),(char*)l->data);
+		} else if (l->scale > 0) {
+			snprintf(disp,38,"%s%.*s.%s",(char*)(l->sign == -1 ? "-" : ""),
+					l->size-l->scale, l->data, (char*)l->data+l->size-l->scale);
+		} else {
+			snprintf(disp,38,"%s%.36s",(char*)(l->sign == -1 ? "-" : ""),(char*)l->data);
+		}
+	} else {
+		sprintf(disp,"%.38s",(char*)l->data);
+	}
+	return disp;
+}
+
+/* Check if comparing field to literal is always TRUE or FALSE */
+static cb_tree
+compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_literal *l)
+{
+	int	i, j, scale;
+	int	alph_lit, ref_mod, zero_val;
+	char	lit_disp[40];
+	struct cb_field *f;
+
+	f = CB_FIELD (cb_ref (x));
+	if (f->flag_any_length
+	 || f->pic == NULL)
+		return cb_any;
+
+	ref_mod = 0;
+	if (CB_REFERENCE_P(x)) {
+	 	if (CB_REFERENCE(x)->offset
+	 	 || CB_REFERENCE(x)->length)
+			ref_mod = 1;
+	}
+
+	for (i = strlen ((const char *)l->data); i>0 && l->data[i-1] == ' '; i--);
+	alph_lit = 0;
+	zero_val = 1;
+	for (j = 0; l->data[j] != 0; j++) {
+		if (!isdigit(l->data[j])) {
+			alph_lit = 1;
+		}
+		if (l->data[j] != '0') {
+			zero_val = 0;
+		}
+	}
+
+	if ((f->pic->category != CB_CATEGORY_NUMERIC
+	  && f->pic->category != CB_CATEGORY_NUMERIC_EDITED)
+	 || ref_mod) {
+		if (i > f->size
+		 && !ref_mod) {	/* Leave reference mod to run-time */
+			copy_file_line (e, CB_TREE(l), NULL);
+			if (cb_warn_constant_expr
+			&& !was_prev_warn (e->source_line, 2)) {
+				cb_warning_x (cb_warn_constant_expr, e,
+							_("literal '%.38s' is longer than %s"),
+							display_literal(lit_disp,l),f->name);
+			}
+			switch(op) {
+			case '=':
+				return cb_false;
+			case '~':
+				return cb_true;
+			}
+		}
+		return cb_any;
+	}
+
+	if (f->pic->scale < 0)		/* Leave for run-time */
+		return cb_any;
+
+	scale = l->scale;
+	for (j = strlen ((const char *)l->data); scale > 0 && j > 0 && l->data[j-1] == '0'; j--)
+		scale--;
+
+	if (scale > 0
+	 && f->pic->scale >= 0
+	 && f->pic->scale < scale) {
+		copy_file_line (e, CB_TREE(l), NULL);
+		if (cb_warn_constant_expr
+		&& !was_prev_warn (e->source_line, 4)) {
+			cb_warning_x (cb_warn_constant_expr, e,
+						_("literal '%s' has more decimals than %s"),
+						display_literal(lit_disp,l),f->name);
+		}
+		switch(op) {
+		case '=':
+			return cb_false;
+		case '~':
+			return cb_true;
+		}
+	}
+
+	if (alph_lit) {
+		copy_file_line (e, CB_TREE(l), NULL);
+		if (cb_warn_constant_expr
+		 && f->pic->category == CB_CATEGORY_NUMERIC
+		 && !was_prev_warn (e->source_line, 3)) {
+			cb_warning_x (cb_warn_constant_expr, e,
+						_("literal '%s' is alphanumeric but %s is numeric"),
+						display_literal(lit_disp,l),f->name);
+		}
+		return cb_any;
+	}
+
+	/* Adjust for leading ZERO & trailing ZEROS|SPACES in literal */
+	for (i = strlen ((const char *)l->data); i>0 && l->data[i-1] == ' '; i--);
+	for(j=0; l->data[j] == '0'; j++,i--);
+	scale = l->scale;
+	for (j = strlen ((const char *)l->data); scale > 0 && j > 0 && l->data[j-1] == '0'; j--,i--)
+		scale--;
+
+	/* If Literal has more digits in whole portion than field can hold
+	 * Then the literal value will never match the field contents 
+	 */
+	if ((i - scale) >= 0
+	 && (f->size - f->pic->scale) >= 0
+	 && (i - scale) > (f->size - f->pic->scale)) {
+		copy_file_line (e, CB_TREE(l), NULL);
+		if (cb_warn_constant_expr
+		&& !was_prev_warn (e->source_line, 4)) {
+			cb_warning_x (cb_warn_constant_expr, e,
+						_("literal '%s' has more digits than %s"),
+						display_literal (lit_disp, l), f->name);
+		}
+		switch(op) {
+		case '=':
+			return cb_false;
+		case '~':
+			return cb_true;
+		}
+		if (f->pic->category == CB_CATEGORY_NUMERIC) {
+			switch(op) {
+			case '>':
+			case ']':
+				return swap ? cb_true : cb_false;
+			case '<':
+			case '[':
+				return swap ? cb_false : cb_true;
+			}
+		}
+	}
+
+
+	if (cb_warn_constant_expr && f->pic->have_sign == 0) {
+		/* note: the actual result may be different if non-numeric
+		data is stored in the numeric fields - and may (later)
+		be dependent on compiler configuration flags;
+		therefore we don't set cb_true/cb_false here */
+		/* comparision with zero */
+		if (zero_val) {
+			switch (op) {
+			case '<':
+				copy_file_line (e, CB_TREE(l), NULL);
+				if (!was_prev_warn (e->source_line, 5)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("unsigned '%s' may not be %s %s"),
+						f->name, explain_operator (op), "ZERO");
+				}
+				break;
+			case ']':
+				copy_file_line (e, CB_TREE(l), NULL);
+				if (!was_prev_warn (e->source_line, 5)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("unsigned '%s' may always be %s %s"),
+						f->name, explain_operator (op), "ZERO");
+				}
+				break;
+			default:
+				break;
+			}
+			/* comparision with negative literal */
+		} else if (l->sign < 0) {
+			switch (op) {
+			case '<':
+			case '[':
+				copy_file_line (e, CB_TREE(l), NULL);
+				if (!was_prev_warn (e->source_line, 5)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("unsigned '%s' may not be %s %s"),
+						f->name, explain_operator (op), display_literal (lit_disp, l));
+				}
+				break;
+			case '>':
+			case ']':
+				copy_file_line (e, CB_TREE(l), NULL);
+				if (!was_prev_warn (e->source_line, 5)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("unsigned '%s' may always be %s %s"),
+						f->name, explain_operator (op), display_literal (lit_disp, l));
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	return cb_any;
+}
+
 /* Expression */
 
 cb_tree
@@ -3651,8 +3907,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	/* setting an error tree to point to the correct expression
 	   instead of the literal/var definition / current line */
 	e = relop = cb_any;
-	e->source_file = NULL;
-	e->source_line = cb_exp_line;
+	copy_file_line (e, NULL, NULL);
 	llit = rlit = NULL;
 
 	switch (op) {
@@ -3795,115 +4050,54 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
-		/* get best position (in the case of constants y/x point to DATA-DIVISION) */
-		if (y->source_line >= e->source_line) {
-			e->source_file = y->source_file;
-			e->source_line = y->source_line;
-			e->source_column = y->source_column;
-		} else if (x->source_line >= e->source_line) {
-			e->source_file = x->source_file;
-			e->source_line = x->source_line;
-			e->source_column = x->source_column;
+
+		if (x == cb_zero) {
+			xl = CB_LITERAL(cb_zero_lit);
+			xl->common.source_line = prev_expr_line = cb_exp_line;
+		} else if (CB_LITERAL_P(x)) {
+			xl = CB_LITERAL(x);
 		} else {
-			e->source_file = y->source_file;
-			e->source_line = y->source_line;
-			e->source_column = y->source_column;
+			xl = NULL;
 		}
-		xl = CB_LITERAL(x);
-		yl = CB_LITERAL(y);
+		if (y == cb_zero) {
+			yl = CB_LITERAL(cb_zero_lit);
+			yl->common.source_line = prev_expr_line = cb_exp_line;
+		} else if (CB_LITERAL_P(y)) {
+			yl = CB_LITERAL(y);
+		} else {
+			yl = NULL;
+		}
+
 		if (CB_REF_OR_FIELD_P (y)
-		&&  CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
-		&&  !CB_FIELD (cb_ref (y))->flag_any_length
-		&&  CB_FIELD (cb_ref (y))->pic
-		&&  CB_FIELD (cb_ref (y))->pic->scale == 0
-		&&  CB_LITERAL_P(x)
-		&&  xl->all == 0
-		&&  xl->scale == 0) {
-			for (i = strlen ((const char *)xl->data); i > 0 && xl->data[i-1] == ' '; i--);
-			if (CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC
-			 || CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
-				for (j=0; xl->data[j] == '0'; j++, i--);
-			}
-			if (i > CB_FIELD (cb_ref (y))->size) {
-				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
-				if (cb_constant_folding) {
-					switch (op) {
-					case '=':
-						relop = cb_false;
-						break;
-					case '~':
-						relop = cb_true;
-						break;
-					}
-				}
-				if (CB_FIELD (cb_ref (y))->pic->category == CB_CATEGORY_NUMERIC) {
-					switch(op) {
-					case '>':
-					case ']':
-						relop = cb_true;
-						break;
-					case '<':
-					case '[':
-						relop = cb_false;
-						break;
-					}
-				}
-			}
+		 && CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
+		 && (CB_LITERAL_P(x) || x == cb_zero)
+		 && xl->all == 0) {
+			relop = compare_field_literal (e, 1, y, op, xl);
 		} else if (CB_REF_OR_FIELD_P (x)
-		&&  CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
-		&&  !CB_FIELD (cb_ref (x))->flag_any_length
-		&&  CB_FIELD (cb_ref (x))->pic
-		&&  CB_FIELD (cb_ref (x))->pic->scale == 0
-		&&  CB_LITERAL_P(y)
-		&&  yl->all == 0
-		&&  yl->scale == 0) {
-			for (i = strlen ((const char *)yl->data); i > 0 && yl->data[i-1] == ' '; i--);
-			if (CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC
-			 || CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC_EDITED) {
-				for (j=0; yl->data[j] == '0'; j++, i--);
-			}
-			if (i > CB_FIELD (cb_ref (x))->size) {
-				cb_warning_x (cb_warn_constant_expr, e, _("literal is longer than field"));
-				if (cb_constant_folding) {
-					switch (op) {
-					case '=':
-						relop = cb_false;
-						break;
-					case '~':
-						relop = cb_true;
-						break;
-					}
-				}
-				if (CB_FIELD (cb_ref (x))->pic->category == CB_CATEGORY_NUMERIC) {
-					switch(op) {
-					case '>':
-					case ']':
-						relop = cb_false;
-						break;
-					case '<':
-					case '[':
-						relop = cb_true;
-						break;
-					}
-				}
-			}
+		 && CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
+		 && (CB_LITERAL_P(y) || y == cb_zero)
+		 && yl->all == 0) {
+			relop = compare_field_literal (e, 0, x, op, yl);
 		/*
 		 * If this is an operation between two simple integer numerics
 		 * then resolve the value here at compile time -> "constant folding"
 		 */
 		} else if (cb_constant_folding
 		&&  CB_NUMERIC_LITERAL_P(x)
-		&&  CB_NUMERIC_LITERAL_P(y)) {
+		 && CB_NUMERIC_LITERAL_P(y)) {
+			xl = CB_LITERAL(x);
+			yl = CB_LITERAL(y);
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
-			if(xl->llit == 0
-			&& xl->scale == 0
-			&& yl->llit == 0
-			&& yl->scale == 0
-			&& xl->sign == 0
-			&& yl->sign == 0
-			&& xl->all == 0
-			&& yl->all == 0) {
+			if (xl->llit == 0
+			 && xl->scale == 0
+		 	 && yl->llit == 0
+			 && yl->scale == 0
+			 && xl->sign == 0
+			 && yl->sign == 0
+			 && xl->all == 0
+			 && yl->all == 0) {
+				copy_file_line (e, y, x);
 				xval = atoll((const char*)xl->data);
 				yval = atoll((const char*)yl->data);
 				switch(op) {
@@ -3960,9 +4154,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 */
 		} else if (cb_constant_folding
 		&&  CB_LITERAL_P(x)
-		&&  CB_LITERAL_P(y)
-		&& !CB_NUMERIC_LITERAL_P(x)
-		&& !CB_NUMERIC_LITERAL_P(y)) {
+		 && CB_LITERAL_P(y)
+		 && !CB_NUMERIC_LITERAL_P(x) 
+		 && !CB_NUMERIC_LITERAL_P(y)) {
+			copy_file_line (e, y, x);
+			xl = CB_LITERAL(x);
+			yl = CB_LITERAL(y);
 			llit = (char*)xl->data;
 			rlit = (char*)yl->data;
 			for (i = j = 0; xl->data[i] != 0 && yl->data[j] != 0; i++,j++) {
@@ -4032,13 +4229,25 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	case '&':
 	case '|':
 		/* Logical operators */
-		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN ||
-		    (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
-			cb_error_x (e, _("invalid expression"));
+		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN 
+		 || (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
+			copy_file_line (e, y, x);
+			if (CB_NUMERIC_LITERAL_P(x) 
+			 && y
+			 && CB_NUMERIC_LITERAL_P(y)) {
+				xl = (void*)x;
+				yl = (void*)y;
+				llit = (char*)xl->data;
+				rlit = (char*)yl->data;
+				cb_error_x (e, _("invalid expression: %s %s %s"),
+					llit, explain_operator (op), rlit);
+			} else {
+				cb_error_x (e, _("invalid expression"));
+			}
 			return cb_error_node;
 		}
-		if((x == cb_true || x == cb_false)
-		&& (y == cb_true || y == cb_false)) {
+		if ((x == cb_true || x == cb_false)
+		 && (y == cb_true || y == cb_false)) {
 			if (op == '&') {
 				if (x == cb_true && y == cb_true) {
 					relop = cb_true;
@@ -4052,6 +4261,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				} else {
 					relop = cb_false;
 				}
+			}
+		} else if (op == '!') {
+			if (x == cb_true) {
+				relop = cb_false;
+			} else if (x == cb_false) {
+				relop = cb_true;
 			}
 		}
 		category = CB_CATEGORY_BOOLEAN;
@@ -4075,26 +4290,38 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	}
 
 	if (relop == cb_true) {
-		if (cb_warn_constant_expr
-		 && !was_prev_warn (e->source_line)) {
+		if (cb_warn_constant_expr) {
 			if (rlit && llit) {
-				cb_warning_x (cb_warn_constant_expr, e, _("expression '%.38s' %s '%.38s' is always TRUE"),
-					llit, explain_operator (op), rlit);
-			} else{
-				cb_warning_x (cb_warn_constant_expr, e, _("expression is always TRUE"));
+				if (!was_prev_warn (e->source_line, 1)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("expression '%.38s' %s '%.38s' is always TRUE"),
+						llit, explain_operator (op), rlit);
+				}
+			} else {
+				if (!was_prev_warn (e->source_line, -1)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("expression is always TRUE"));
+				}
 			}
+			prev_expr_line = cb_exp_line = e->source_line;
 		}
 		return cb_true;
 	}
 	if (relop == cb_false) {
-		if (cb_warn_constant_expr
-		 && !was_prev_warn (e->source_line)) {
+		if (cb_warn_constant_expr) {
 			if (rlit && llit) {
-				cb_warning_x (cb_warn_constant_expr, e, _("expression '%.38s' %s '%.38s' is always FALSE"),
-					llit, explain_operator (op), rlit);
+				if (!was_prev_warn (e->source_line, 0)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("expression '%.38s' %s '%.38s' is always FALSE"),
+						llit, explain_operator (op), rlit);
+				}
 			} else {
-				cb_warning_x (cb_warn_constant_expr, e, _("expression is always FALSE"));
+				if (!was_prev_warn (e->source_line, -2)) {
+					cb_warning_x (cb_warn_constant_expr, e,
+						_("expression is always FALSE"));
+				}
 			}
+			prev_expr_line = cb_exp_line = e->source_line;
 		}
 		return cb_false;
 	}
@@ -4341,16 +4568,28 @@ cb_build_if (const cb_tree test, const cb_tree stmt1, const cb_tree stmt2,
 	     const unsigned int is_if)
 {
 	struct cb_if *p;
+	struct cb_binary_op	*bop;
 
 	p = make_tree (CB_TAG_IF, CB_CATEGORY_UNKNOWN,
 		       sizeof (struct cb_if));
 	p->test = test;
 	p->stmt1 = stmt1;
 	p->stmt2 = stmt2;
-	if (test == cb_true) {	/* Always TRUE so skip 'else code' */
+	if (test == cb_true) {		/* Always TRUE so skip 'else code' */
 		p->stmt2 = NULL;
 	} else if (test == cb_false) {	/* Always FALSE, so skip 'true code' */
 		p->stmt1 = NULL;
+	}
+	if (p->test
+	 && CB_TREE_TAG (p->test) == CB_TAG_BINARY_OP) {
+		bop = CB_BINARY_OP (p->test);
+		if (bop->op == '!') {
+			if (bop->x == cb_true) {
+				p->stmt1 = NULL;
+			} else if (bop->x == cb_false) {
+				p->stmt2 = NULL;
+			}
+		}
 	}
 	p->is_if = is_if;
 	return CB_TREE (p);

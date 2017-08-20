@@ -1,9 +1,22 @@
 
+2017-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: work on expression warning messages and added more
+
 2017-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for cobc --help,
 	  mainly to provide translators with context for msgids
 	* field.c: adjusted message for cb_warn_ignored_initial_val
+
+2017-08-17  Ron Norman <rjn@inglenet.com>
+
+	* scanner.l: Added SET_LOCATION when returning 'literal' 
+	             which is a 78/01 constant
+
+2017-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: work on expression warning messages
 
 2017-08-18  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -13,6 +26,10 @@
 
 	* typeck.c: bug #413 don't generate cob_check_based for UDF return fields
 	* cobc.c (xref_print): output marker for receiving references
+
+2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: fixed tree cast error for literals
 
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -76,6 +93,20 @@
 
 	* parser.y, reserved.c: added clauses COLOR and SIZE as PENDING
 	* parser.y: added ACCEPT FROM SCREEN as PENDING
+
+2017-07-27  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: Improve warning messages for comparing literals to fields
+
+2017-07-23  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: 
+	  Improve line number used in warnings about 'always TRUE/FALSE'
+	  Check for IF/WHEN with NOT condition to resolve compile time expr
+	* typeck.c: 
+	  Turn off ignore of errors as required
+	* codegen.c: 
+	  Emit line# in C code for WHEN statements
 
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

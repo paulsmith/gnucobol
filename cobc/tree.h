@@ -1181,7 +1181,7 @@ struct cb_goto {
 #define CB_GOTO(x)		(CB_TREE_CAST (CB_TAG_GOTO, struct cb_goto, x))
 #define CB_GOTO_P(x)		(CB_TREE_TAG (x) == CB_TAG_GOTO)
 
-/* IF */
+/* IF and WHEN */
 
 struct cb_if {
 	struct cb_tree_common	common;		/* Common values */

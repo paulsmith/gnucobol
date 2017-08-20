@@ -358,7 +358,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: 7: warning: initial VALUE clause ignored for REDEFINES item 'A'
-prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item 'G'
+prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item 'B'
 ])
 AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [], [])
 

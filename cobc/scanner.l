@@ -111,6 +111,12 @@ static int yywrap (void) {
 		return last_token;		\
 	} ONCE_COB
 
+#define SET_LOCATION(x)                         \
+	do {					\
+		(x)->source_file = cb_source_file;		\
+		(x)->source_line = cb_source_line;		\
+	} ONCE_COB
+
 /* CONSTANT (78 level) structure */
 struct cb_level_78 {
 	struct cb_level_78	*next;		/* Next in chain */
@@ -854,6 +860,7 @@ H#[0-9A-Za-z]* {
 				break;
 			}
 			yylval = CB_VALUE (p78->fld_78->values);
+			SET_LOCATION (yylval);
 			RETURN_TOK (LITERAL);
 		}
 	}
