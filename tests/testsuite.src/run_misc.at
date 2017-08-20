@@ -5273,12 +5273,13 @@ AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 8: warning: initial VALUE clause ignored for REDEFINES item
-prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item
-prog.cob: 11: warning: initial VALUE clause ignored for REDEFINES item
+[prog.cob: 8: warning: initial VALUE clause ignored for REDEFINES item 'WS-ASK-ID-DATE-YYYY'
+prog.cob: 9: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
+prog.cob: 11: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
 ])
 
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [The date is 2015*08*21 Compiled
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[The date is 2015*08*21 Compiled
 The date is 0000*08*21 INITIALIZE
 The date is 0000 08 21 WITH FILLER
 The date is 2017-08-21 ALL TO VALUE

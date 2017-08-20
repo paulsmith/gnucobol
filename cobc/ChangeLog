@@ -3,6 +3,7 @@
 
 	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for cobc --help,
 	  mainly to provide translators with context for msgids
+	* field.c: adjusted message for cb_warn_ignored_initial_val
 
 2017-08-18  Edward Hart <edward.dan.hart@gmail.com>
 

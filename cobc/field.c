@@ -1154,11 +1154,11 @@ validate_field_1 (struct cb_field *f)
 				for (p = f; p; p = p->parent) {
 					if (p->flag_external) {
 						cb_warning_x (cb_warn_ignored_initial_val, x,
-							_("initial VALUE clause ignored for %s item %s"),
+							_("initial VALUE clause ignored for %s item '%s'"),
 							"EXTERNAL", cb_name (CB_TREE(p)));
 					} else if (p->redefines) {
-						cb_warning_x (cb_warn_ignored_initial_val, x
-							_("initial VALUE clause ignored for %s item %s"),
+						cb_warning_x (cb_warn_ignored_initial_val, x,
+							_("initial VALUE clause ignored for %s item '%s'"),
 							"REDEFINES", cb_name (CB_TREE(p)));
 					}
 				}
