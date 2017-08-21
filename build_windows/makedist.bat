@@ -171,7 +171,7 @@ copy "%cob_release_path%set_env_vs_dist%platform_ext%.bat"	set_env_vs%platform_e
 set copy_to_bin=bin%platform_ext%
 set copy_to_lib=lib%platform_ext%
 
-set copy_from="%cob_release_path%%platform%\debug"
+set copy_from="%cob_release_path%%platform%\%config%"
 
 echo Copying binaries for %platform%...
 mkdir %copy_to_bin%
