@@ -1,200 +1,255 @@
 :: Batch for preparing windows binary distribution folder
+:: By default, binaries use Release executable. To distribute a debug
+:: distributable (y tho), provide DEBUG as an argument.
 
 @echo off
-setlocal
-
-:: check if started directly
-echo %cmdcmdline% | find /i "%~0" >nul
-if errorlevel 1 (
-   set interactive=1
-) else (
-   set interactive=0
-)
+setlocal enabledelayedexpansion
 
 :: Set distribution folder
-set COB_DIST_PATH="%~dp0\dist\"
+set cob_dist_path="%~dp0\dist\"
 
 :: Set clean source directory
-set COB_SOURCE_PATH="%~dp0..\"
+set cob_source_path="%~dp0..\"
 
 :: Set directory with necessary header files
-set COB_HEADER_PATH="%~dp0"
+set cob_header_path="%~dp0"
 
 :: Set directory with generated release files
-set COB_RELEASE_PATH="%~dp0"
+set cob_release_path="%~dp0"
 
-:: Set directory with necessary library files
-set COB_LIB_PATH="COB_RELEASE_PATH..\"
-
-:: clean dist and copy all files
+:: clean dist
 %~d0
-
-if exist "%COB_DIST_PATH%" (
-   rmdir /S /Q "%COB_DIST_PATH%" 1>NUL
+if exist "%cob_dist_path%" (
+   rmdir /S /Q "%cob_dist_path%" 1>nul
 )
+mkdir "%cob_dist_path%"
+cd "%cob_dist_path%"
 
-mkdir "%COB_DIST_PATH%"
-cd "%COB_DIST_PATH%"
-
-if exist "%COB_RELEASE_PATH%Win32\Release\cobc.exe" (
-   set HAVE32=1
+if /i "%1%"=="DEBUG" (
+   set config=Debug
 ) else (
-   set HAVE32=0
+   set config=Release
 )
 
-if exist "%COB_RELEASE_PATH%x64\Release\cobc.exe" (
-   set HAVE64=1
+if exist "%cob_release_path%Win32\%config%\cobc.exe" (
+   set have_32=1
+   echo 32-bit %config% binaries: found
+   
 ) else (
-   set HAVE64=0
+   set have_32=0
+   echo 32-bit %config% binaries: not found
 )
 
-if "%HAVE32%"=="1" (
-   echo 32bit binaries: found
-   if "%HAVE64%"=="1" (
-      echo 64bit binaries: found
-   ) else (
-      echo 64bit binaries: not found
-   )
+if exist "%cob_release_path%x64\%config%\cobc.exe" (
+   set have_64=1
+   echo 64-bit %config% binaries: found
 ) else (
-   echo 32bit binaries: not found
-   if "%HAVE64%"=="1" (
-      echo 64bit binaries: found
-   ) else (
-      echo 64bit binaries: not found
-      echo No binaries available, ABORT!
-      goto :over
-   )
+   set have_64=0
+   echo 64-bit %config% binaries: not found
 )
+
+if "%have_32%%have_64%"=="00" (
+   echo No %config% binaries available.
+   goto :abort
+)
+
 echo.
 
-
 echo Copying docs...
-copy "%COB_SOURCE_PATH%AUTHORS"			.\AUTHORS.TXT	1>NUL
-copy "%COB_SOURCE_PATH%COPYING"			.\COPYING.TXT	1>NUL
-copy "%COB_SOURCE_PATH%COPYING.LESSER"	.\COPYING.LESSER.TXT	1>NUL
-copy "%COB_SOURCE_PATH%COPYING.DOC"		.\COPYING.DOC.TXT	1>NUL
-copy "%COB_SOURCE_PATH%NEWS"			.\NEWS.TXT		1>NUL
-copy "%COB_SOURCE_PATH%README"			.\README.TXT	1>NUL
-copy "%COB_SOURCE_PATH%THANKS"			.\THANKS.TXT	1>NUL
-copy "%COB_SOURCE_PATH%TODO"			.\TODO.TXT		1>NUL
-
+set txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO
+for %%f in (%txt_doc_list%) do (
+    copy  %cob_source_path%%%f .\%%f.TXT 1>nul
+)
 mkdir doc
-copy "%COB_SOURCE_PATH%doc\*.pdf"		doc\	1>NUL
+if exist "%cob_source_path%doc\*.pdf" (
+   copy "%cob_source_path%doc\*.pdf"		doc\	1>nul
+)
 
 
 echo Copying configuration files...
 mkdir config
-copy "%COB_SOURCE_PATH%config\*.conf"		config\	1>NUL
-copy "%COB_SOURCE_PATH%config\*.conf-inc"	config\	1>NUL
-copy "%COB_SOURCE_PATH%config\*.words"		config\	1>NUL
-copy "%COB_SOURCE_PATH%config\*.cfg"		config\	1>NUL
+set config_ext_list=conf conf-inc words cfg
+for %%f in (%config_ext_list%) do (
+    copy "%cob_source_path%config\*.%%f"	config\	1>nul
+)
 
 echo Copying copybooks...
 mkdir copy
-copy "%COB_SOURCE_PATH%copy\*.cpy"		copy\	1>NUL
+copy "%cob_source_path%copy\*.cpy"		copy\	1>nul
 
 echo Copying header files...
 mkdir include
 mkdir include\libcob
-copy "%COB_SOURCE_PATH%libcob.h"		include\		1>NUL
-copy "%COB_SOURCE_PATH%libcob\common.h"		include\libcob\	1>NUL
-copy "%COB_SOURCE_PATH%libcob\exception.def"	include\libcob\	1>NUL
-copy "%COB_HEADER_PATH%gmp.h"			include\		1>NUL
-rem erase /S include\_*	1>NUL
+copy "%cob_source_path%libcob.h"		include\	1>nul
+copy "%cob_source_path%libcob\common.h"		include\libcob\	1>nul
+copy "%cob_source_path%libcob\exception.def"	include\libcob\	1>nul
+copy "%cob_header_path%gmp.h"			include\	1>nul
 
 echo Copying translations...
 mkdir po
-for %%f in ("%COB_SOURCE_PATH%po\*.gmo") do (
-   copy "%%~ff"			po\%%~nf.mo	1>NUL
+for %%f in ("%cob_source_path%po\*.gmo") do (
+   copy "%%~ff"					po\%%~nf.mo	1>nul
 )
-copy "%COB_SOURCE_PATH%po\*.po"			po\	1>NUL
-copy "%COB_SOURCE_PATH%po\*.pot"		po\	1>NUL
-erase /Q po\*@*	1>NUL
-
-if "%HAVE32%"=="1" (
-   copy "%COB_RELEASE_PATH%set_env_vs_dist.bat"	set_env_vs.bat	1>NUL
-   call :copyrel
-)
-if "%HAVE64%"=="1" (
-   copy "%COB_RELEASE_PATH%set_env_vs_dist_x64.bat"	set_env_vs_x64.bat	1>NUL
-   call :copyrel x64
+copy "%cob_source_path%po\*.po"			po\	1>nul
+copy "%cob_source_path%po\*.pot"		po\	1>nul
+if exist "po\*@*" (
+   erase /Q po\*@* 1>nul
 )
 
-goto :end
-
-:copyrel
-if NOT "%1"=="x64" (
-   set mode=Win32
-   set copyfrom="%COB_RELEASE_PATH%Win32\release"
-   set copytobin=bin
-   set copytolib=lib
-) else (
-   set mode=x64
-   set copytobin=bin_x64
-   set copytolib=lib_x64
+if "%have_32%"=="1" (
+   call :copy_exes_and_libs Win32
+   if errorlevel 1 (
+	 goto :abort
+   )
 )
-set copyfrom="%COB_RELEASE_PATH%%mode%\release"
+if "%have_64%"=="1" (
+   call :copy_exes_and_libs x64
+   if errorlevel 1 (
+	 goto :abort
+   )
+)
 
-echo Copying binaries for %mode%...
-mkdir %copytobin%
-copy "%copyfrom%\cobc.exe"			%copytobin%\	1>NUL
-copy "%copyfrom%\cobc.pdb"			%copytobin%\	1>NUL
-copy "%copyfrom%\cobcrun.exe"			%copytobin%\	1>NUL
-copy "%copyfrom%\cobcrun.pdb"			%copytobin%\	1>NUL
-copy "%copyfrom%\libcob.dll"			%copytobin%\	1>NUL
-copy "%copyfrom%\libcob.pdb"			%copytobin%\	1>NUL
-
-copy "%copyfrom%\libvbisam.dll"			%copytobin%\	1>NUL
-copy "%copyfrom%\mpir.dll"			%copytobin%\	1>NUL
-copy "%copyfrom%\pdcurses.dll"			%copytobin%\	1>NUL
-
-mkdir %copytolib%"
-copy "%copyfrom%\libcob.lib"			%copytolib%\	1>NUL
-
-goto :eof
-
-:end
 :: must be last as we compile with the dist itself
 echo Copying extras...
 mkdir extras
-copy "%COB_SOURCE_PATH%extras\*.cob"		extras\	1>NUL
-copy "%COB_SOURCE_PATH%extras\README"		extras\README.txt	1>NUL
+copy "%cob_source_path%extras\*.cob"		extras\			1>nul
+copy "%cob_source_path%extras\README"		extras\README.txt	1>nul
 
-if "%HAVE32%"=="1" (
-   echo.
-   echo Using created GnuCOBOL distribution -Win32- to compile extras...
-   cd "%COB_DIST_PATH%bin"
-   call ..\set_env_vs.bat
-   cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob -v
-   cd ..
+echo.
+
+if "%have_32%"=="1" (
+   call :compile_extras "Win32"
+   if errorlevel 1 (
+      goto :abort
+   )
 )
-
-if "%HAVE64%"=="1" (
-   echo.
-   echo Using created GnuCOBOL distribution -x64- to compile extras...
-   cd "%COB_DIST_PATH%bin_x64"
-   call ..\set_env_vs_x64.bat
-   cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob -v
-   cd ..
+if "%have_64%"=="1" (
+   call :compile_extras "x64"
+   if errorlevel 1 (
+      goto :abort
+   )
 )
 
 echo.
 
 echo Compressing dist package...
 if exist "%ProgramFiles%\7-Zip\7z.exe" (
-   erase "..\GnuCOBOL.7z" 1>NUL
+   erase "..\GnuCOBOL.7z" 1>nul
    "%ProgramFiles%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
 ) else if exist "%ProgramFiles(x86)%\7-Zip\7z.exe" (
-   erase "..\GnuCOBOL.7z"
+   erase "..\GnuCOBOL.7z" 1>nul
    "%ProgramFiles(x86)%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
 ) else (
    echo 7-zip not found, "GnuCOBOL.7z" not created
 )
 
+goto :end
 
-:over
-if _%interactive%_==_0_ (
+:abort
+echo Abort^^!
+
+:end
+set saved_errorlevel=%errorlevel%
+
+:: pause if not started directly
+echo %cmdcmdline% | find /i "%~0" >nul
+if %errorlevel% equ 0 (
    echo.
    pause
 )
+
+set errorlevel=%saved_errorlevel%
 endlocal
+exit /b
+
+
+:copy_exes_and_libs
+call :set_platform_and_ext %1%
+
+copy "%cob_release_path%set_env_vs_dist%platform_ext%.bat"	set_env_vs%platform_ext%.bat	1>nul
+
+set copy_to_bin=bin%platform_ext%
+set copy_to_lib=lib%platform_ext%
+
+set copy_from="%cob_release_path%%platform%\debug"
+
+echo Copying binaries for %platform%...
+mkdir %copy_to_bin%
+set exe_lib_list=cobc.exe cobc.pdb cobcrun.exe cobcrun.pdb libcob.dll libcob.pdb
+for %%f in (%exe_lib_list%) do (
+    copy "%copy_from%\%%f"	%copy_to_bin%\	1>nul
+)
+
+:: Copy math library.
+if exist "%copy_from%\mpir.dll" (
+   copy "%copy_from%\mpir.dll"			%copy_to_bin%\	1>nul
+) else if exist "%copy_from%\gmp.dll" (
+   copy "%copy_from%\gmp.dll"			%copy_to_bin%\	1>nul
+) else (
+   echo No math library found.
+   set errorlevel=1
+   goto :eof
+)
+
+:: Copy the ISAM-handler library, guessing the name if necessary.
+if exist "%copy_from%\libvbisam.dll" (
+   copy "%copy_from%\libvbisam.dll"		%copy_to_bin%\	1>nul
+) else if exist "%cob_header_path%db.h" (
+   for /f "tokens=3" %%a in ('find "DB_VERSION_MAJOR" %cob_header_path%db.h') do (
+      set major=%%a
+   )
+   for /f "tokens=3" %%a in ('find "DB_VERSION_MINOR" %cob_header_path%db.h') do (
+      set minor=%%a
+   )
+   echo Guessing from db.h... libdb!major!!minor!
+   if exist "%copy_from%\libdb!major!!minor!.dll" (
+      copy "%copy_from%\libdb!major!!minor!.dll"	%copy_to_bin%\	1>nul
+   ) else if exist "%copy_from%\libdb!major!!minor!d.dll" (
+      copy "%copy_from%\libdb!major!!minor!d.dll"	%copy_to_bin%\	1>nul
+   ) else (
+      echo No ISAM handler found.
+   )
+) else (
+   echo No ISAM handler found.
+)
+
+:: Copy the curses library.
+if exist "%copy_from%\pdcurses.dll" (
+   copy "%copy_from%\pdcurses.dll"		%copy_to_bin%\	1>nul
+) else ( 
+   echo No curses library found.
+)
+
+mkdir %copy_to_lib%
+copy "%copy_from%\libcob.lib"			%copy_to_lib%\	1>nul
+
+goto :eof
+
+
+:compile_extras
+call :set_platform_and_ext %1%
+echo Using created GnuCOBOL distribution -%platform%- to compile extras...
+cd "%cob_dist_path%bin%platform_ext%"
+call ..\set_env_vs%platform_ext%.bat
+cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
+if errorlevel 1 (
+   echo.
+   echo cobc had unexpected return value %errorlevel%
+   echo You may:
+   echo  * have forgotten to #define MAKE_DIST 1 in defaults.h.
+   echo  * be using the normal command prompt, not the Visual Studio command prompt.
+   goto :eof
+)
+cd ..
+goto :eof
+
+
+:set_platform_and_ext
+if %1%=="Win32" (
+   set platform=Win32
+   set platform_ext=
+) else (
+   set platform=x64
+   set platform_ext=_x64
+)
+goto :eof

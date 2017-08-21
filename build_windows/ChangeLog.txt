@@ -1,4 +1,17 @@
 
+2017-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* makedist.bat: re-organised code, with subroutines at the end of the
+	  file.
+	* makedist.bat: make identifiers consistently use lowercase_snake_case.
+	* makedist.bat: the batch fails if DLLs are missing or if compiling the
+	  extras fails. (errorlevel is set to that of the failing command.)
+	* makedist.bat: added if exist checks around copy/erase commands which
+	  complain files are missing.
+	* makedist.bat (copy_exes_and_libs): add guess of ISAM-handler DLL name
+	  based on db.h.
+	* makedist.bat (compile_extras): removed -v from cobc when compiling extras.
+
 2017-08-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* makebisonflex.bat: use normal output name like ylwrap does;
