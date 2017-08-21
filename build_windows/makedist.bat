@@ -192,6 +192,7 @@ if exist "%copy_from%\mpir.dll" (
 )
 
 :: Copy the ISAM-handler library, guessing the name if necessary.
+:: TO-DO: Handle C-ISAM.
 if exist "%copy_from%\libvbisam.dll" (
    copy "%copy_from%\libvbisam.dll"		%copy_to_bin%\	1>nul
 ) else if exist "%cob_header_path%db.h" (
@@ -206,6 +207,25 @@ if exist "%copy_from%\libvbisam.dll" (
       copy "%copy_from%\libdb!major!!minor!.dll"	%copy_to_bin%\	1>nul
    ) else if exist "%copy_from%\libdb!major!!minor!d.dll" (
       copy "%copy_from%\libdb!major!!minor!d.dll"	%copy_to_bin%\	1>nul
+   ) else (
+      echo No ISAM handler found.
+   )
+) else if exist "%cob_header_path%disam.h" (
+   for /f "tokens=3,4 delims=. " %%a in ('find "Version" %cob_header_path%disam.h') do (
+      set major=%%a
+	  set minor=%%b
+   )
+   echo Guessing from disam.h... libdisam!major!!minor!
+   if exist "%copy_from%\libdisam!major!!minor!.dll" (
+      copy "%copy_from%\libdisam!major!!minor!.dll"	%copy_to_bin%\	1>nul
+   ) else if "%PLATFORM%"=="Win32" (
+      if exist "%copy_from%\libdisam!major!!minor!_win32.dll" (
+      	 copy "%copy_from%\libdisam!major!!minor!_win32.dll"	%copy_to_bin%\	1>nul
+      ) else (
+      	 echo No ISAM handler found.
+      )
+   ) else if exist "%copy_from%\libdisam!major!!minor!_win64.dll" (
+      	 copy "%copy_from%\libdisam!major!!minor!_win64.dll"	%copy_to_bin%\	1>nul
    ) else (
       echo No ISAM handler found.
    )
@@ -235,9 +255,7 @@ cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
 if errorlevel 1 (
    echo.
    echo cobc had unexpected return value %errorlevel%
-   echo You may:
-   echo  * have forgotten to #define MAKE_DIST 1 in defaults.h.
-   echo  * be using the normal command prompt, not the Visual Studio command prompt.
+   echo You may be using the normal command prompt, not the Visual Studio command prompt.
    goto :eof
 )
 cd ..
