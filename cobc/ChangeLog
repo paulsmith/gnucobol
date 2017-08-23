@@ -1,4 +1,9 @@
 
+2017-08-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c (cobc_clean_up): added calls to (plex_call_destroy) and
+	  (ylex_call_destroy), *actually* fixing bug #407.
+
 2017-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: work on expression warning messages and added more
@@ -11,7 +16,7 @@
 
 2017-08-17  Ron Norman <rjn@inglenet.com>
 
-	* scanner.l: Added SET_LOCATION when returning 'literal' 
+	* scanner.l: Added SET_LOCATION when returning 'literal'
 	             which is a 78/01 constant
 
 2017-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
@@ -100,13 +105,10 @@
 
 2017-07-23  Ron Norman <rjn@inglenet.com>
 
-	* tree.c: 
-	  Improve line number used in warnings about 'always TRUE/FALSE'
+	* tree.c: Improve line number used in warnings about 'always TRUE/FALSE'
 	  Check for IF/WHEN with NOT condition to resolve compile time expr
-	* typeck.c: 
-	  Turn off ignore of errors as required
-	* codegen.c: 
-	  Emit line# in C code for WHEN statements
+	* typeck.c: Turn off ignore of errors as required
+	* codegen.c: Emit line # in C code for WHEN statements
 
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1142,7 +1144,7 @@
 	* codegen.c: fixed missing initialization of static_call_cache
 	* flags.def, cobc.c: added CB_FLAG_ON for compiler flags that are
 	  active by default
-	* flags.def, codegen.c: added new cb_flag_c_decl_for_static_call as 
+	* flags.def, codegen.c: added new cb_flag_c_decl_for_static_call as
 	  CB_FLAG_ON, to create the option for disabling the auto-generation
 	  of C function declarations for static CALLs
 

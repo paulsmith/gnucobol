@@ -1727,6 +1727,7 @@ cobc_clean_up (const int status)
 		fclose (ppout);
 		ppout = NULL;
 	}
+	plex_call_destroy ();
 	plex_clear_all ();
 
 	if (yyin) {
@@ -1737,6 +1738,7 @@ cobc_clean_up (const int status)
 		fclose (yyout);
 		yyout = NULL;
 	}
+	ylex_call_destroy ();
 	ylex_clear_all ();
 
 	for (fn = file_list; fn; fn = fn->next) {
