@@ -3,6 +3,8 @@
 
 	* cobc.c (cobc_clean_up): added calls to (plex_call_destroy) and
 	  (ylex_call_destroy), *actually* fixing bug #407.
+	* pplex.l (ylex_clear_all): added calls to (cb_reset_78) and
+	  (cb_reset_global_78) to prevent memory leak on abort (bug #417).
 
 2017-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

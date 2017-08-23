@@ -1829,7 +1829,6 @@ cb_add_const_var (const char *name, cb_tree value)
 	struct cb_level_78	*p78;
 	struct cb_field		*f;
 
-
 	/* Add an inline constant */
 	x = cb_build_constant (cb_build_reference (name), value);
 	f = CB_FIELD (x);
@@ -1999,6 +1998,9 @@ ylex_clear_all (void)
 	plex_size = 0;
 	pic1_size = 0;
 	pic2_size = 0;
+
+	cb_reset_78 ();
+	cb_reset_global_78 ();
 }
 
 void
