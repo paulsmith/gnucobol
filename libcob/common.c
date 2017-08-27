@@ -146,6 +146,11 @@ struct cob_alloc_cache {
 	size_t			size;		/* Item size */
 };
 
+struct cob_alloc_module {
+	struct cob_alloc_module	*next;		/* Pointer to next */
+	void			*cob_pointer;	/* Pointer to malloced space */
+};
+
 /* EXTERNAL structure */
 
 struct cob_external {
@@ -160,10 +165,12 @@ struct cob_external {
 /* Local variables */
 
 static int			cob_initialized = 0;
-static int			cob_argc;
-static char			**cob_argv;
-static struct cob_alloc_cache	*cob_alloc_base;
-static char			*cob_last_sfile;
+static int			cob_argc = 0;
+static char			**cob_argv = NULL;
+static struct cob_alloc_cache	*cob_alloc_base = NULL;
+static struct cob_alloc_module	*cob_module_list = NULL;
+static cob_module		*cob_module_err = NULL;
+static const char		*cob_last_sfile = NULL;
 
 static cob_global		*cobglobptr = NULL;
 static cob_settings		*cobsetptr = NULL;
@@ -451,6 +458,29 @@ cob_exit_common (void)
 }
 
 static void
+cob_exit_common_modules (void)
+{
+	cob_module	*mod;
+	struct cob_alloc_module	*ptr, *nxt;
+	int		(*cancel_func)(const int);
+
+	/* Call each module to release local memory
+	   - currently used for: decimals -
+	   and remove it from the internal module list */
+	for (ptr = cob_module_list; ptr; ptr = nxt) {
+		mod = ptr->cob_pointer;
+		nxt = ptr->next;
+		if (mod && mod->module_cancel.funcint) {
+			mod->module_active = 0;
+			cancel_func = mod->module_cancel.funcint;
+			(void)cancel_func (-20);	/* Clear just decimals */
+		}
+		cob_free (ptr);
+	}
+	cob_module_list = NULL;
+}
+
+static void
 cob_terminate_routines (void)
 {
 	if (!cob_initialized || !cobglobptr) {
@@ -466,6 +496,7 @@ cob_terminate_routines (void)
 	cob_exit_intrinsic ();
 	cob_exit_strings ();
 	cob_exit_numeric ();
+	cob_exit_common_modules ();
 	cob_exit_call ();
 	cob_exit_common ();
 }
@@ -1645,29 +1676,9 @@ void
 cob_stop_run (const int status)
 {
 	struct exit_handlerlist	*h;
-	cob_module	*mod;
-	const int	MAX_ITERS = 10240;
-	int		k;
-	int		(*cancel_func)(const int);
 
 	if (!cob_initialized) {
 		exit (1);
-	}
-	/* Call each module to release 'decimal' memory */
-	for(k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
-		mod->flag_did_cancel = 0;
-		/* Recursive modules create a loop in the module chain */
-		/* Avoid an infinite processing loop */
-		/* TO-DO: Replace with Floyd's cycle-detecting algorithm? */
-	}
-
-	for(k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
-		if (mod->module_cancel.funcint
-		 && !mod->flag_did_cancel) {
-			mod->flag_did_cancel = 1;
-			cancel_func = mod->module_cancel.funcint;
-			(void)cancel_func (-20);	/* Special value to indicate, just decimals */
-		}
 	}
 
 	if (exit_hdlrs != NULL) {
@@ -1698,10 +1709,16 @@ cob_get_global_ptr (void)
 	return cobglobptr;
 }
 
-void
-cob_module_enter (cob_module **module, cob_global **mglobal,
-		  const int auto_init)
+int
+cob_module_global_enter (cob_module **module, cob_global **mglobal,
+		  const int auto_init, const int entry, const unsigned int *name_hash)
 {
+	cob_module	*mod;
+	const int	MAX_ITERS = 10240;
+	int		k;
+	struct cob_alloc_module	*mod_ptr;
+
+
 	/* Check initialized */
 	if (unlikely (!cob_initialized)) {
 		if (auto_init) {
@@ -1714,9 +1731,55 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 	/* Set global pointer */
 	*mglobal = cobglobptr;
 
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	/* Was caller a COBOL module */
+	if (name_hash != NULL
+	 && cobglobptr->cob_call_name_hash != 0) {
+		cobglobptr->cob_call_from_c = 1;
+		k = 0;
+		while (*name_hash != 0) {	/* Scan table of values */
+			if (cobglobptr->cob_call_name_hash == *name_hash) {
+				cobglobptr->cob_call_from_c = 0;
+				break;
+			}
+			name_hash++;
+			k++;
+		}
+	}
+#else
+	/* LCOV_EXCL_LINE */
+	COB_UNUSED(name_hash);
+#endif
+
 	/* Check module pointer */
 	if (!*module) {
 		*module = cob_cache_malloc (sizeof (cob_module));
+		/* Add to list of all modules activated */
+		mod_ptr = cob_malloc (sizeof (struct cob_alloc_module));
+		mod_ptr->cob_pointer = *module;
+		mod_ptr->next = cob_module_list;
+		cob_module_list = mod_ptr;
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	} else if (entry == 0
+		&& !cobglobptr->cob_call_from_c) {
+#else
+	} else if (entry == 0) {
+#endif
+		for (k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
+			if (*module == mod) {
+				if (cobglobptr->cob_stmt_exception) {
+					/* CALL has ON EXCEPTION so return to caller */
+					cob_set_exception (COB_EC_PROGRAM_RECURSIVE_CALL);
+					cobglobptr->cob_stmt_exception = 0;
+					return 1;
+				}
+				cob_module_err = mod;
+				cob_fatal_error(COB_FERROR_RECURSIVE);
+				cob_stop_run (1);
+			}
+		}
 	}
 
 	/* Save parameter count, get number from argc if main program */
@@ -1729,6 +1792,15 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 	/* Push module pointer */
 	(*module)->next = COB_MODULE_PTR;
 	COB_MODULE_PTR = *module;
+	cobglobptr->cob_stmt_exception = 0;
+	return 0;
+}
+
+void
+cob_module_enter (cob_module **module, cob_global **mglobal,
+		  const int auto_init)
+{
+	(void)cob_module_global_enter (module, mglobal, auto_init, 0, 0);
 }
 
 void
@@ -1742,7 +1814,31 @@ cob_module_leave (cob_module *module)
 void
 cob_module_free (cob_module **module)
 {
+	struct cob_alloc_module	*ptr, *prv;
 	if (*module != NULL) {
+		prv = NULL;
+		/* Remove from list of all modules activated */
+		for (ptr = cob_module_list; ptr; ptr = ptr->next) {
+			if (ptr->cob_pointer == *module) {
+				if (prv == NULL) {
+					cob_module_list = ptr->next;
+				} else {
+					prv->next = ptr->next;
+				}
+				cob_free (ptr);
+				break;
+			}
+			prv = ptr;
+		}
+
+#if 0 /* cob_module->param_buf and cob_module->param_field are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+		&& !cobglobptr->cob_call_from_c
+		if ((*module)->param_buf != NULL)
+			cob_cache_free ((*module)->param_buf);
+		if ((*module)->param_field != NULL)
+			cob_cache_free ((*module)->param_field);
+#endif
 		cob_cache_free (*module);
 		*module = NULL;
 	}
@@ -5892,8 +5988,18 @@ cob_fatal_error (const int fatal_error)
 	/* LCOV_EXCL_STOP */
 	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_RECURSIVE:
-		cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
-			COB_MODULE_PTR->module_name);
+		/* LCOV_EXCL_LINE */
+		if (cob_module_err) {
+			cob_runtime_error (_("recursive CALL from %s to %s which is NOT RECURSIVE"),
+					COB_MODULE_PTR->module_name, cob_module_err->module_name);
+			cob_module_err = NULL;
+		/* LCOV_EXCL_START */
+		/* Note: only in for old modules - not active with current generation */
+		} else {
+			cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
+					   COB_MODULE_PTR->module_name);
+		}
+		/* LCOV_EXCL_STOP */
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FREE:

@@ -1654,6 +1654,10 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 		p->toplev_count = toplev_count++;
 		functions_are_all = cb_flag_functions_all;
 		cb_reset_global_78 ();
+		/* Recursive check disabled? Then handle all programs as recursive */
+		if (!cb_flag_recursive_check) {
+			p->flag_recursive = 1;
+		}
 	}
 	return p;
 }

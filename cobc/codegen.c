@@ -4607,10 +4607,12 @@ output_call (struct cb_call *p)
 	size_t				need_brace;
 	const int			name_is_literal_or_prototype
 		= is_literal_or_prototype_ref (p->name);
+	int				except_id;
 #if	0	/* RXWRXW - Clear params */
 	cob_u32_t			parmnum;
 #endif
 
+	except_id = 0;
 	if (p->call_returning && p->call_returning != cb_null &&
 	    CB_TREE_CLASS(p->call_returning) == CB_CLASS_POINTER) {
 		ret_ptr = 1;
@@ -4883,6 +4885,12 @@ output_call (struct cb_call *p)
 	/* Set number of parameters */
 	output_prefix ();
 	output ("cob_glob_ptr->cob_call_params = %u;\n", n);
+	output_prefix ();
+	if (p->stmt1) {
+		output ("cob_glob_ptr->cob_stmt_exception = 1;\n");
+	} else {
+		output ("cob_glob_ptr->cob_stmt_exception = 0;\n");
+	}
 
 	/* Function name */
 	output_prefix ();
@@ -5003,6 +5011,8 @@ output_call (struct cb_call *p)
 			}
 			output_line ("{");
 			output_indent_level += 2;
+			except_id = cb_id++;
+			output_line ("%s%d:", CB_PREFIX_LABEL, except_id);
 			output_stmt (p->stmt1);
 			output_indent_level -= 2;
 			output_line ("}");
@@ -5128,6 +5138,11 @@ output_call (struct cb_call *p)
 	}
 
 	output (");\n");
+
+	if (except_id > 0) {
+		output_line ("if (unlikely(cob_glob_ptr->cob_exception_code != 0))");
+		output_line ("\tgoto %s%d;", CB_PREFIX_LABEL, except_id);
+	}
 
 	if (p->call_returning
 	&& (!(p->convention & CB_CONV_NO_RET_UPD))
@@ -7358,14 +7373,36 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	output_line ("/* Entry point name_hash values */");
+	output_line ("static const unsigned int %sname_hash [] = {",CB_PREFIX_STRING);
+	if (cb_list_length (prog->entry_list) > 1) {
+		for (i = 0, l = prog->entry_list; l; l = CB_CHAIN (l)) {
+			name_hash = ;
+			output_line ("\t0x%X,\t/* %d: %s */",
+				cob_get_name_hash (CB_LABEL (CB_PURPOSE (l))->name),
+				i, CB_LABEL (CB_PURPOSE (l))->name);
+			i++;
+		}
+	} else {
+		name_hash = ;
+		output_line ("\t0x%X,\t/* %s */",
+			cob_get_name_hash (prog->orig_program_id),
+			prog->orig_program_id);
+	}
+	output_line ("0};");
+#endif
+
 	/* Module initialization indicator */
+
 	output_local ("/* Module initialization indicator */\n");
 	output_local ("static unsigned int\tinitialized = 0;\n\n");
-
-	output_local ("/* Module structure pointer */\n");
 	if (prog->flag_recursive) {
+		output_local ("/* Module structure pointer for recursive */\n");
 		output_local ("cob_module\t\t*module = NULL;\n\n");
 	} else {
+		output_local ("/* Module structure pointer */\n");
 		output_local ("static cob_module\t*module = NULL;\n\n");
 	}
 
@@ -7575,8 +7612,19 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_line ("/* Check initialized, check module allocated, */");
 	output_line ("/* set global pointer, */");
 	output_line ("/* push module stack, save call parameter count */");
-	output_line ("cob_module_enter (&module, &cob_glob_ptr, %d);",
-		      cb_flag_implicit_init);
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	output_line ("if (cob_module_global_enter (&module, &cob_glob_ptr, %d, entry, %sname_hash))",
+				      cb_flag_implicit_init, CB_PREFIX_STRING);
+#else
+	output_line ("if (cob_module_global_enter (&module, &cob_glob_ptr, %d, entry, 0))",
+				      cb_flag_implicit_init);
+#endif
+	if (prog->prog_type == CB_FUNCTION_TYPE) {
+		output_line ("\treturn NULL;");
+	} else {
+		output_line ("\treturn -1;");
+	}
 	output_newline ();
 
 	if (prog->flag_chained) {
@@ -7585,16 +7633,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("\tcob_fatal_error (COB_FERROR_CHAINING);");
 		output_line ("}");
 		output_newline ();
-	}
-
-	/* Check INITIAL programms being non-recursive */
-	if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_RECURSIVE_CALL)
-		&& prog->flag_initial) {
-		output_line ("/* Check active count */");
-		output_line ("if (unlikely(module->module_active)) {");
-		/* FIXME: Should raise COB_EC_PROGRAM_RECURSIVE_CALL instead */
-		output_line ("\tcob_fatal_error (COB_FERROR_RECURSIVE);");
-		output_line ("}");
 	}
 
 	/* Recursive module initialization */
@@ -7745,12 +7783,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	if (cb_flag_recursive && !prog->flag_recursive) {
-		output_line ("/* Check active count */");
-		output_line ("if (unlikely(module->module_active)) {");
-		output_line ("\tcob_fatal_error (COB_FERROR_RECURSIVE);");
-		output_line ("}");
-	}
 	if (!prog->flag_recursive) {
 		output_line ("/* Increment module active */");
 		output_line ("module->module_active++;");
@@ -7856,6 +7888,18 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			}
 		}
 		output_newline ();
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+		name_hash = cob_get_name_hash (prog->orig_program_id);
+		output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
+		output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
+		output_line ("} else {");
+		output_line ("    cob_glob_ptr->cob_call_from_c = 0;");
+		for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
+			pickup_param (l, i, 0);
+		}
+		output_line ("}");
+#endif
 	}
 
 	if (prog->prog_type == CB_FUNCTION_TYPE &&
@@ -8016,6 +8060,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_newline ();
 
 	if (prog->flag_recursive) {
+		output_line ("/* Free for recursive module */");
 		output_line ("cob_module_free (&module);");
 		output_newline ();
 	}

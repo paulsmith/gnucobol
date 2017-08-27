@@ -1,4 +1,24 @@
 
+2017-08-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: moved code to cleanup modules to cob_exit_common_modules
+	  and do this only once (after exit handler calls, before call cleanup)
+
+2017-08-26  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Free the structs used to track modules on STOP RUN
+
+2017-08-18  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Keep list of all active modules for later free of
+	            memory allocated for decimal constants
+	* common.c: cob_stop_run issue callbacks to free any decimal memory
+	* common.c: cob_module_enter check for Recursive CALL used in the
+	            wrong place. Add cob_module_global_enter routine.
+	* common.h: Add cob_module_global_enter routine.
+	            Add cob_stmt_exception to cob_global, used to indicate
+	            the previous statment has ON EXCEPTION clause.
+
 2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_tidy): don't exit if runtime isn't initialized yet

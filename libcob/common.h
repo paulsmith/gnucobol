@@ -1295,6 +1295,8 @@ typedef struct __cob_global {
 	int			cob_max_y;		/* Screen max y */
 	int			cob_max_x;		/* Screen max x */
 
+	unsigned int		cob_stmt_exception;	/* Statement has 'On Exception' */
+
 } cob_global;
 
 /* File I/O function pointer structure */
@@ -1336,6 +1338,9 @@ COB_EXPIMP int		cob_is_initialized	(void);
 COB_EXPIMP cob_global		*cob_get_global_ptr	(void);
 
 COB_EXPIMP void	cob_init			(const int, char **);
+
+COB_EXPIMP int	cob_module_global_enter	(cob_module **, cob_global **,
+						 const int, const int, const unsigned int *);
 COB_EXPIMP void	cob_module_enter		(cob_module **, cob_global **,
 						 const int);
 COB_EXPIMP void	cob_module_leave		(cob_module *);

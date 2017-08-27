@@ -78,8 +78,12 @@ CB_FLAG (cb_flag_static_call, 0, "static-call",
 	_("  -fstatic-call         output static function calls for the CALL statement"))
 
 CB_FLAG_ON (cb_flag_c_decl_for_static_call, 0, "gen-c-decl-static-call",
-	_("  -fgen-c-decl-static-call\tdisable generation of C function declations\n"
+	_("  -fno-gen-c-decl-static-call\tdisable generation of C function declations\n"
 	  "                        for subroutines with static CALL"))
+
+CB_FLAG_ON (cb_flag_recursive_check, 1, "recursive-check",
+	_("  -fno-recursive_check  disable check of recursive program call;\n"
+	  "                        effectively compiling as RECURSIVE program"))
 
 CB_FLAG (cb_flag_winmain, 0, "winmain",
 	_("  -fwinmain             generate WinMain instead of main when compiling\n"
@@ -151,9 +155,6 @@ CB_FLAG (cb_flag_odoslide, 1, "odoslide",
 CB_FLAG (cb_flag_apostrophe, 1, "single-quote",
 	_("  -fsingle-quote        use a single quote (apostrophe) for QUOTE\n"
 	  "                        - default: double quote"))
-
-CB_FLAG (cb_flag_recursive, 1, "recursive-check",
-	_("  -frecursive-check     check recursive program call"))
 
 #if 0 /* deactivated + untranslated as -frelaxed-syntax (compiler configuration) is available */
 CB_FLAG (cb_flag_relaxed_syntax, 1, "relax-syntax",

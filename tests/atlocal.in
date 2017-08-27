@@ -30,6 +30,33 @@ COBC="${abs_top_builddir}/cobc/cobc"
 COBCRUN="${abs_top_builddir}/bin/cobcrun"
 COBCRUN_DIRECT="" # used for running created executables through tools
 
+# -- BEGIN OF VALGRIND SPECIFIC PARTS ---
+#
+# To check with valgrind:
+# * ideally: reconfigure with `./configure --enable-debug & make`
+# * create tests/valgrind
+# * diff these parts into your atlocal (preferably creating a temporary one)
+# * set switches you need to the following lines and set the tool accordingly (template has MEMCHECK)
+# * if your system ships with valgrind suppression files (default.supp is always active) you likely
+#   want to activate --suppressions=/usr/lib/valgrind/debian.supp --suppressions=/usr/lib/valgrind/ncurses.supp
+
+VALGRIND_COBC_LOG=${abs_builddir}/valgrind/cobc_%p.log
+VALGRIND_COBCRUN_LOG=${abs_builddir}/valgrind/cobcrun_%p.log
+VALGRIND_COBCRUN_DIRECT_LOG=${abs_builddir}/valgrind/cobcrun_direct_%p.log
+
+# if you stumble over system library errors you may want to suppress some of them
+# re-run with --gen-suppressions=yes and then point to the file (after inspecting and
+# modifiying it via --suppressions=${abs_builddir}/local.supp) 
+MEMCHECK="valgrind --tool=memcheck --read-var-info=yes --track-origins=yes --leak-check=full --show-leak-kinds=all"
+SGCHECK="valgrind --tool=exp-sgcheck --read-var-info=yes"
+
+# cobol85 test use environment from a new perl process --> export needed
+export COBC="libtool --mode=execute $MEMCHECK --log-file=$VALGRIND_COBC_LOG ${COBC}"
+export COBCRUN="libtool --mode=execute $MEMCHECK --log-file=$VALGRIND_COBCRUN_LOG ${COBCRUN}"
+export COBCRUN_DIRECT="$MEMCHECK --log-file=$VALGRIND_COBCRUN_DIRECT_LOG ${COBCRUN_DIRECT}"
+
+# -- END OF VALGRIND SPECIFIC PARTS ---
+
 TEMPLATE="${abs_srcdir}/testsuite.src"
 
 FLAGS="-debug -Wall ${COBOL_FLAGS}"

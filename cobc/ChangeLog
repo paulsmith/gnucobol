@@ -16,10 +16,21 @@
 	  mainly to provide translators with context for msgids
 	* field.c: adjusted message for cb_warn_ignored_initial_val
 
+2017-08-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* flag.def: always activate cb_flag_recursive_check by CB_FLAG_ON
+	* tree.c, codegen.c: assume RECURSIVE for -fno-recursive-check
+
+2017-08-18  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: emit code for CALL to handle ON EXCEPTION
+
 2017-08-17  Ron Norman <rjn@inglenet.com>
 
 	* scanner.l: Added SET_LOCATION when returning 'literal'
 	             which is a 78/01 constant
+	* codegen.c: Emit cob_module_global_entry instead of cob_module_enter and
+	  pass the 'entry' value (currently only set in rw-branch).
 
 2017-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -103,7 +114,8 @@
 
 2017-07-27  Ron Norman <rjn@inglenet.com>
 
-	* tree.c: Improve warning messages for comparing literals to fields
+	* tree.c: 
+	  Improve warning messages for comparing literals to fields
 
 2017-07-23  Ron Norman <rjn@inglenet.com>
 
