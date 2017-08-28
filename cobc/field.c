@@ -54,8 +54,8 @@ static int		occur_align_size = 0;
 static const int	pic_digits[] = { 2, 4, 7, 9, 12, 14, 16, 18 };
 #define CB_MAX_OPS	16
 static int			op_pos = 1, op_val_pos;
-static char			op_type [CB_MAX_OPS];
-static char			op_prec [CB_MAX_OPS];
+static char			op_type	[CB_MAX_OPS];
+static char			op_prec	[CB_MAX_OPS];
 static cob_s64_t	op_val	[CB_MAX_OPS];
 static int			op_scale[CB_MAX_OPS];
 
@@ -1271,12 +1271,14 @@ validate_field_1 (struct cb_field *f)
 	cb_tree		x;
 	cb_tree		l;
 
+#if 0
 	/* LCOV_EXCL_START */
 	if (unlikely (!f)) {	/* checked to keep the analyzer happy */
 		cobc_err_msg (_("call to %s with NULL pointer"), "validate_field_1");
 		COBC_ABORT();
 	}
 	/* LCOV_EXCL_STOP */
+#endif
 
 	if (f->flag_invalid) {
 		return 1;
@@ -1317,8 +1319,6 @@ validate_field_1 (struct cb_field *f)
 	} else {
 		return validate_elementary_item (f);
 	}
-
-	return 0;
 }
 
 static void
