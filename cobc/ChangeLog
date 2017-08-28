@@ -1,4 +1,8 @@
 
+2017-08-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (validate_field_1): refactored.
+
 2017-08-23  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c (cobc_clean_up): added calls to (plex_call_destroy) and
