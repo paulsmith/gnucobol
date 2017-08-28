@@ -176,7 +176,7 @@ AT_DATA([prog.cob], [
 
        SCREEN SECTION.
        01  scr.
-           03  y PIC 99 LINE 3 COLUMN 5.
+           03  y PIC 99 FROM x LINE 3 COLUMN 5.
 
        PROCEDURE DIVISION.
            DISPLAY "hello" AT 0000
@@ -243,13 +243,13 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        *> Valid numbers
-       01  a            LINE 1.
-       01  b            LINE +1.
-       01  c            LINE 0.
+       01  a            VALUE "-" LINE 1.
+       01  b            VALUE "-" LINE +1.
+       01  c            VALUE "-" LINE 0.
 
        *> invalid numbers
-       01  d            LINE -1.
-       01  e            LINE 1.0.
+       01  d            VALUE "-" LINE -1.
+       01  e            VALUE "-" LINE 1.0.
        PROCEDURE        DIVISION.
            STOP RUN.
 ])
@@ -486,7 +486,7 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        01 x-scr.
-          03 x PIC X OCCURS 10.
+          03 x PIC X VALUE "a" OCCURS 10.
 ])
 
 AT_DATA([prog2.cob], [
@@ -495,9 +495,9 @@ AT_DATA([prog2.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        01 x-scr.
-          03 x PIC X OCCURS 10 COL  10.
+          03 x PIC X VALUE "a" OCCURS 10 COL  10.
        01 y-scr.
-          03 y PIC X OCCURS 10 LINE 10.
+          03 y PIC X VALUE "a" OCCURS 10 LINE 10.
 ])
 
 AT_DATA([prog3.cob], [
@@ -506,13 +506,13 @@ AT_DATA([prog3.cob], [
        DATA             DIVISION.
        SCREEN           SECTION.
        01 x-scr.
-          03 x PIC X OCCURS 10 COL  + 10.
+          03 x PIC X VALUE "a" OCCURS 10 COL  + 10.
        01 y-scr.
-          03 y PIC X OCCURS 10 LINE - 10.
+          03 y PIC X VALUE "a" OCCURS 10 LINE - 10.
        01 a-scr.
-          03 a PIC X OCCURS 10 COL  PLUS 10.
+          03 a PIC X VALUE "a" OCCURS 10 COL  PLUS 10.
        01 b-scr.
-          03 b PIC X OCCURS 10 LINE MINUS 10.
+          03 b PIC X VALUE "a" OCCURS 10 LINE MINUS 10.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -569,14 +569,17 @@ AT_DATA([prog.cob], [
        PROGRAM-ID. prog.
 
        DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  num PIC 999.
+
        SCREEN SECTION.
        01  scr.
-           03  full-pointless PIC 999 FULL.
-           03  full-useful PIC ZZZ FULL.
+           03  full-pointless PIC 999 TO num FULL.
+           03  full-useful PIC ZZZ TO num FULL.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 8: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
+[prog.cob: 11: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
 ])
 
 AT_CLEANUP

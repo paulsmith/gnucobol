@@ -4995,9 +4995,9 @@ AT_DATA([prog.cob], [
        DATA           DIVISION.
        SCREEN         SECTION.
        01  invalid-line.
-           03  a      PIC X LINE 99999999.
+           03  a      VALUE "a" LINE 99999999.
        01  invalid-col.
-           03  c     PIC X COLUMN 99999999.
+           03  c      VALUE "c" COLUMN 99999999.
 
        PROCEDURE      DIVISION.
            DISPLAY invalid-line END-DISPLAY
