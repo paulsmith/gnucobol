@@ -1,4 +1,11 @@
 
+2017-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal_valgrind: changed default name for valgrind log files
+	  to show the actual compilation;
+	  changed for easier applying of suppression rules;
+	  don't use valgrind in atlocal itself for "cobcrun --runtime-conf"
+
 2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_valgrind, atlocal_win: set COBCRUN_DIRECT

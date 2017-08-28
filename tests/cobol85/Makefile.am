@@ -142,18 +142,18 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
-	. ../atconfig && . ../atlocal && cd $@ &&  ../EXEC85
+	. ../atconfig && . ../atlocal NIST_EXEC85_$@ && cd $@ &&  $$COBCRUN_DIRECT ../EXEC85
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@echo "test:" > $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 	@echo "	@echo \"Performing tests for module directory $@\"" >> $@/Makefile
-	@echo "	@. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl" >> $@/Makefile
+	@echo "	@. ../../atconfig && . ../../atlocal NIST_$@   && perl $(COB85DIR)/report.pl" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
 	@echo "	@echo \"Comparing test results for module directory $@\"" >> $@/Makefile
 	@echo "	diff $(COB85DIR)/$@.txt report.txt || true" >> $@/Makefile
 	@echo "	@echo" >> $@/Makefile
-#	@echo "	. ../../atconfig && . ../../atlocal && perl $(COB85DIR)/report.pl -O" >> $@/Makefile
+#	@echo "	@. ../../atconfig && . ../../atlocal NIST_O-$@ && perl $(COB85DIR)/report.pl -O" >> $@/Makefile
 #	@echo "	diff $(COB85DIR)/$@.txt report.txt || true" >> $@/Makefile
 	@echo "Finished module directory $@."
 
@@ -175,4 +175,4 @@ EXEC85$(EXEEXT): newcob.val
 	-e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
 	"$$NEWCOB_VAL" > EXEC85.cob
 	@echo "Compiling EXEC85 program"
-	@. ../atconfig; . ../atlocal; cobc -std=cobol85 -x EXEC85.cob
+	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -std=cobol85 -x EXEC85.cob
