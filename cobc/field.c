@@ -1213,7 +1213,7 @@ validate_elementary_item (struct cb_field *f)
 	/* TO-DO: Also move, this is not validation */
 	if (f->flag_blank_zero
 	    && f->pic
-	    && f->pic->category != CB_CATEGORY_NUMERIC) {
+	    && f->pic->category == CB_CATEGORY_NUMERIC) {
 		/* Reconstruct the picture string */
 		if (f->pic->scale > 0) {
 			/* Size for genned string */

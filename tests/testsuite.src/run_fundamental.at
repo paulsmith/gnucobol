@@ -4191,3 +4191,33 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([BLANK WHEN ZERO])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  x            PIC 9, BLANK WHEN ZERO, VALUE 1.
+
+       PROCEDURE        DIVISION.
+           DISPLAY x
+           MOVE 0 TO x
+           DISPLAY FUNCTION TRIM(x)
+           MOVE ZERO TO x
+           DISPLAY FUNCTION TRIM(x)
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[1
+
+
+])
+
+AT_CLEANUP
