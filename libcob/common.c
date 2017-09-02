@@ -6654,12 +6654,14 @@ cob_init (const int argc, char **argv)
 	}
 #endif
 	if (!strcmp(cobsetptr->cob_user_name, _("unknown"))) {
-#if defined (_WIN32) && defined (HAVE_GETUSERNAME)	/* note: currently only defined manual! */
+#if defined (_WIN32)
+#if defined (HAVE_GETUSERNAME)	/* note: currently only defined manual! */
 		unsigned long bsiz = COB_ERRBUF_SIZE;
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");
 		}
-#elif !defined(__OS400__) && !defined(_MSC_VER)
+#endif
+#elif !defined(__OS400__)
 		s = getlogin ();
 		if (s) {
 			set_config_val_by_name(s, "username", "getlogin()");
