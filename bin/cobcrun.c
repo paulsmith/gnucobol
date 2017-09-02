@@ -235,7 +235,7 @@ process_command_line (int argc, char *argv[])
 		}
 	}
 #endif
-	
+
 	/* c = -1 if idx > argc or argv[idx] has non-option */
 	while ((c = cob_getopt_long_long (argc, argv, short_options,
 					  long_options, &idx, 1)) >= 0) {
@@ -290,7 +290,7 @@ process_command_line (int argc, char *argv[])
 			/* --version */
 			cobcrun_print_version ();
 			putchar ('\n');
-			print_version();
+			print_version ();
 			exit (0);
 		case 'M':
 		case 'm':

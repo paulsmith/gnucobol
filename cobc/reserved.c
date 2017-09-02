@@ -318,6 +318,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ARITHMETIC",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to OPTIONS paragraph */
   },
   { "AS",			0, 0, AS,			/* 2002 */
 				0, 0
@@ -338,10 +339,12 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_SET
   },
   { "AUTO",			0, 0, AUTO,			/* 2002 (C/S) */
+	/* FIXME: 2014 Context-sensitive to screen description entry */
 				0, 0
   },
   { "AUTOMATIC",		0, 0, AUTOMATIC,		/* 2002 */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to LOCK MODE clause */
   },
   { "AWAY-FROM-ZERO",		0, 1, AWAY_FROM_ZERO,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
@@ -360,6 +363,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BACKGROUND-COLOR",		0, 0, BACKGROUND_COLOR,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "BACKGROUND-HIGH",		0, 0, BACKGROUND_HIGH,		/* ACU extension */
 				0, 0
@@ -378,6 +382,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BELL",			0, 0, BELL,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry and SET attribute statement */
   },
   { "BINARY",			0, 0, BINARY,			/* 2002 */
 				0, 0
@@ -405,6 +410,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BLINK",			0, 0, BLINK,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry and SET attribute statement */
   },
   { "BLOCK",			0, 0, BLOCK,			/* 2002 */
 				0, 0
@@ -478,6 +484,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "CLASSIFICATION",		0, 1, CLASSIFICATION,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME + Check: 2014 Context-sensitive to OBJECT-COMPUTER paragraph */
   },
   { "CLOSE",			0, 0, CLOSE,			/* 2002 */
 				0, 0
@@ -860,6 +867,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ERASE",			0, 0, ERASE,			/* 2002 (C/S) */
 				CB_CS_ERASE, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "ERROR",			0, 0, ERROR,			/* 2002 */
 				0, 0
@@ -887,6 +895,8 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "EXPANDS",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to class-specifier and
+	   interface-specifier of REPOSITORY paragraph */
   },
   { "EXTEND",			0, 0, EXTEND,			/* 2002 */
 				0, 0
@@ -986,6 +996,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "FOREGROUND-COLOR",		0, 0, FOREGROUND_COLOR,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "FOREVER",			0, 1, FOREVER,			/* 2002 (C/S) */
 				0, CB_CS_PERFORM | CB_CS_RETRY
@@ -1001,6 +1012,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "FULL",			0, 0, FULL,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "FUNCTION",			0, 0, FUNCTION,			/* 2002 */
 				0, 0
@@ -1052,6 +1064,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "HIGH-VALUE",		0, 0, HIGH_VALUE,		/* 2002 */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "HIGH-VALUES",		0, 0, HIGH_VALUE,		/* 2002 */
 				0, 0
@@ -1088,6 +1101,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "IMPLEMENTS",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to FACTORY and OBJECT paragraph */
   },
   { "IN",			0, 0, IN,			/* 2002 */
 				0, 0
@@ -1142,6 +1156,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "INTRINSIC",		0, 1, INTRINSIC,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to function-specifier of the REPOSITORY paragraph */
   },
   { "INVALID",			0, 0, INVALID,			/* 2002 */
 				0, 0
@@ -1181,24 +1196,31 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "LC_ALL",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_COLLATE",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_CTYPE",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_MESSAGES",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_MONETARY",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_NUMERIC",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LC_TIME",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to SET statement */
   },
   { "LEADING",			0, 0, LEADING,			/* 2002 */
 				0, 0
@@ -1265,12 +1287,14 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "LOWLIGHT",			0, 0, LOWLIGHT,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry and SET attribute statement */
   },
   { "MAGNETIC-TAPE",		0, 1, MAGNETIC_TAPE,		/* Extension */
 				0, CB_CS_ASSIGN
   },
   { "MANUAL",			0, 0, MANUAL,			/* 2002 */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to LOCK MODE clause */
   },
   { "MEDIUM-FONT",		0, 0, MEDIUM_FONT,		/* ACU extension */
 		  		0, 0				/* Checkme: likely context sensitive */
@@ -1307,6 +1331,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "MULTIPLE",			0, 0, MULTIPLE,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to LOCK ON phrase */
   },
   { "MULTIPLY",			1, 0, MULTIPLY,			/* 2002 */
 				0, 0
@@ -1325,12 +1350,15 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "NEAREST-AWAY-FROM-ZERO",	0, 1, NEAREST_AWAY_FROM_ZERO,	/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+	/* FIXME: 2014 ... and INTERMEDIATE ROUNDING clause  */
   },
   { "NEAREST-EVEN",		0, 1, NEAREST_EVEN,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+	/* FIXME: 2014 ... and INTERMEDIATE ROUNDING clause  */
   },
   { "NEAREST-TOWARD-ZERO",	0, 1, NEAREST_TOWARD_ZERO,	/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+	/* FIXME: 2014 ... and INTERMEDIATE ROUNDING clause  */
   },
   { "NEGATIVE",			0, 0, NEGATIVE,			/* 2002 */
 				0, 0
@@ -1370,6 +1398,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "NUMBERS",			0, 0, NUMBERS,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to LINE and COLUMN clause */
   },
   { "NUMERIC",			0, 0, NUMERIC,			/* 2002 */
 				0, 0
@@ -1403,6 +1432,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ONLY",			0, 0, ONLY,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to Object-view, SHARING clause, SHARING phrase, and USAGE clause */
   },
   { "OPEN",			0, 0, OPEN,			/* 2002 */
 				0, 0
@@ -1461,6 +1491,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PH",			0, 0, PH,			/* 2002 */
 				0, 0
   },
+  { "PHYSICAL",			0, 0, PHYSICAL,			/* 2014, note:
+	only listed as argument for LENGTH FUNCTIONS...  */
+				0, 0
+  },
   { "PIC",			0, 0, PICTURE,			/* 2002 */
 				0, 0
   },
@@ -1490,7 +1524,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "PREVIOUS",			0, 0, PREVIOUS,			/* 2002 (C/S) */
-				0, 0
+				0, CB_CS_READ
   },
   { "PRINT",			0, 1, PRINT,			/* Extension */
 				0, CB_CS_ASSIGN
@@ -1530,6 +1564,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "PROHIBITED",		0, 1, PROHIBITED,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+	/* FIXME: 2014 ... and INTERMEDIATE ROUNDING clause clause */
   },
   { "PROMPT",			0, 0, PROMPT,			/* Extension */
 				0, 0
@@ -1599,6 +1634,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "RELATION",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to VALIDATE-STATUS clause */
   },
   { "RELATIVE",			0, 0, RELATIVE,			/* 2002 */
 				0, 0
@@ -1635,6 +1671,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "REQUIRED",			0, 0, REQUIRED,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "RESERVE",			0, 0, RESERVE,			/* 2002 */
 				0, 0
@@ -1659,6 +1696,8 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "REVERSE-VIDEO",		0, 0, REVERSE_VIDEO,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry
+	          and SET attribute statement */
   },
   { "REVERSED",			0, 0, REVERSED,			/* Obsolete */
 				0, 0
@@ -1719,6 +1758,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "SECURE",			0, 0, SECURE,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry */
   },
   { "SEGMENT",			0, 0, SEGMENT,			/* Communication Section */
 				0, 0
@@ -1844,6 +1884,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "STATEMENT",		0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to RESUME statement */
   },
   { "STATIC",			0, 1, STATIC,			/* Extension: implicit defined CALL-CONVENTION */
 				0, CB_CS_CALL
@@ -1855,7 +1896,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_CALL | CB_CS_OPTIONS
   },
   { "STEP",			0, 0, STEP,			/* 2002 (C/S) */
-				0, 0
+				0, CB_CS_OCCURS
   },
   { "STOP",			0, 0, STOP,			/* 2002 */
 				CB_CS_STOP, 0
@@ -1865,6 +1906,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "STRONG",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to TYPEDEF clause */
   },
   { "SUB-QUEUE-1",		0, 0, SUB_QUEUE_1,		/* Communication Section */
 				0, 0
@@ -1892,6 +1934,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "SYMBOL",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to CURRENCY clause */
   },
   { "SYMBOLIC",			0, 0, SYMBOLIC,			/* 2002 */
 				0, 0
@@ -1991,6 +2034,7 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "TRUNCATION",		0, 1, TRUNCATION,		/* 2014 (C/S) */
 				0, CB_CS_ROUNDED
+	/* FIXME: 2014 ... and INTERMEDIATE ROUNDING phrase */
   },
   { "TYPE",			0, 0, TYPE,			/* 2002 */
 				0, 0
@@ -2002,13 +2046,14 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_RECORDING
   },
   { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
-				0, 0
+				0, CB_CS_ALPHABET
   },
   { "UNBOUNDED",		0, 1, UNBOUNDED,			/* IBM V5 */
 				0, CB_CS_OCCURS
   },
   { "UNDERLINE",		0, 0, UNDERLINE,		/* 2002 (C/S) */
 				0, 0
+	/* FIXME: 2014 Context-sensitive to screen description entry and SET attribute statement */
   },
   { "UNIT",			0, 0, UNIT,			/* 2002 */
 				0, 0
@@ -2065,10 +2110,10 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "UTF-16",			0, 1, -1,			/* 2002 (C/S) */
-				0, 0
+				0, CB_CS_ALPHABET
   },
   { "UTF-8",			0, 1, -1,			/* 2002 (C/S) */
-				0, 0
+				0, CB_CS_ALPHABET
   },
   { "V",			0, 0, V,			/* Extension */
 				0, CB_CS_RECORDING
@@ -2229,7 +2274,7 @@ static struct cb_intrinsic_table function_list[] = {
   },
   { "BYTE-LENGTH",			"cob_intr_byte_length",
 					CB_INTR_BYTE_LENGTH, LENGTH_FUNC,
-					CB_FEATURE_ACTIVE,	1, 1,
+					CB_FEATURE_ACTIVE,	2, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "CHAR",				"cob_intr_char",
@@ -2406,7 +2451,7 @@ static struct cb_intrinsic_table function_list[] = {
   },
   { "LENGTH",				"cob_intr_length",
 					CB_INTR_LENGTH, LENGTH_FUNC,
-					CB_FEATURE_ACTIVE,	1, 1,
+					CB_FEATURE_ACTIVE,	2, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "LENGTH-AN",			"cob_intr_byte_length",

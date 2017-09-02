@@ -1,4 +1,10 @@
 
+2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: adusted some missing context-sensitive options
+	* reserved.c, parser.y: added parsing of PHYSICAL attribute in
+	  LENGTH functions
+
 2017-08-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* field.c (validate_field_1): refactored.

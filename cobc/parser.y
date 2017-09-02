@@ -2081,6 +2081,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PERFORM
 %token PH
 %token PF
+%token PHYSICAL
 %token PICTURE
 %token PICTURE_SYMBOL		"PICTURE SYMBOL"
 %token PLUS
@@ -4016,13 +4017,13 @@ collating_sequence_clause:
 alphabet_name:
   WORD
   {
-	  if (CB_ALPHABET_NAME_P (cb_ref ($1))) {
-		  $$ = $1;
-	  } else {
-		  cb_error_x ($1, _("'%s' is not an alphabet-name"),
-			      cb_name ($1));
-		  $$ = cb_error_node;
-	  }
+	if (CB_ALPHABET_NAME_P (cb_ref ($1))) {
+		$$ = $1;
+	} else {
+		cb_error_x ($1, _("'%s' is not an alphabet-name"),
+			cb_name ($1));
+		$$ = cb_error_node;
+	}
   }
 ;
 
@@ -13424,6 +13425,11 @@ function:
   }
 | LENGTH_FUNC TOK_OPEN_PAREN length_arg TOK_CLOSE_PAREN
   {
+	$$ = cb_build_intrinsic ($1, $3, NULL, 0);
+  }
+| LENGTH_FUNC TOK_OPEN_PAREN length_arg PHYSICAL TOK_CLOSE_PAREN
+  {
+	CB_PENDING (_("PHYSICAL argument for LENGTH functions"));
 	$$ = cb_build_intrinsic ($1, $3, NULL, 0);
   }
 | NUMVALC_FUNC TOK_OPEN_PAREN numvalc_args TOK_CLOSE_PAREN
