@@ -3,14 +3,6 @@
 @echo off
 setlocal
 
-:: check if started directly
-echo %cmdcmdline% | find /i "%~0" >nul
-if errorlevel 1 (
-   set interactive=1
-) else (
-   set interactive=0
-)
-
 :: change to cobc directory
 pushd "%~dp0..\cobc"
 
@@ -157,7 +149,10 @@ goto :eof
 
 
 :end
-if _%interactive%_==_0_ (
+
+:: pause if not started directly
+echo %cmdcmdline% | find /i "%~0" >nul
+if %errorlevel% equ 0 (
    echo.
    pause
 )

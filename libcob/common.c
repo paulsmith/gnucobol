@@ -1776,8 +1776,7 @@ cob_module_global_enter (cob_module **module, cob_global **mglobal,
 					return 1;
 				}
 				cob_module_err = mod;
-				cob_fatal_error(COB_FERROR_RECURSIVE);
-				cob_stop_run (1);
+				cob_fatal_error (COB_FERROR_RECURSIVE);
 			}
 		}
 	}
@@ -6649,8 +6648,13 @@ cob_init (const int argc, char **argv)
 	}
 
 	/* Get user name if not set via environment already */
-	if (cobsetptr->cob_user_name == NULL || !strcmp(cobsetptr->cob_user_name, "Unknown")) {
-#if defined	(_WIN32) && defined (GetUserName)
+#if 0 /* Should not be possible */
+	if (cobsetptr->cob_user_name == NULL) {
+		cobsetptr->cob_user_name = _ ("unknown");
+	}
+#endif
+	if (!strcmp(cobsetptr->cob_user_name, _("unknown"))) {
+#if defined (_WIN32) && defined (HAVE_GETUSERNAME)	/* note: currently only defined manual! */
 		unsigned long bsiz = COB_ERRBUF_SIZE;
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");

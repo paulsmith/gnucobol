@@ -3,28 +3,22 @@
 :: distributable (y tho), provide DEBUG as an argument.
 
 @echo off
+
 setlocal enabledelayedexpansion
 
 :: Set distribution folder
-set cob_dist_path="%~dp0\dist\"
+set "cob_dist_path=%~dp0\dist\"
 
 :: Set clean source directory
-set cob_source_path="%~dp0..\"
+set "cob_source_path=%~dp0..\"
 
 :: Set directory with necessary header files
-set cob_header_path="%~dp0"
+set "cob_header_path=%~dp0"
 
 :: Set directory with generated release files
-set cob_release_path="%~dp0"
+set "cob_release_path=%~dp0"
 
-:: clean dist
-%~d0
-if exist "%cob_dist_path%" (
-   rmdir /S /Q "%cob_dist_path%" 1>nul
-)
-mkdir "%cob_dist_path%"
-cd "%cob_dist_path%"
-
+:: check for existing binaries
 if /i "%1%"=="DEBUG" (
    set config=Debug
 ) else (
@@ -53,10 +47,17 @@ if "%have_32%%have_64%"=="00" (
    goto :abort
 )
 
+:: clean dist
+if exist "%cob_dist_path%" (
+   rmdir /S /Q "%cob_dist_path%" 1>nul
+)
+mkdir "%cob_dist_path%"
+pushd "%cob_dist_path%"
+
 echo.
 
 echo Copying docs...
-set txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO
+set "txt_doc_list=AUTHORS COPYING COPYING.LESSER COPYING.DOC NEWS README THANKS TODO"
 for %%f in (%txt_doc_list%) do (
     copy  %cob_source_path%%%f .\%%f.TXT 1>nul
 )
@@ -64,11 +65,14 @@ mkdir doc
 if exist "%cob_source_path%doc\*.pdf" (
    copy "%cob_source_path%doc\*.pdf"		doc\	1>nul
 )
+if exist "%cob_source_path%doc\*.html" (
+   copy "%cob_source_path%doc\*.html"		doc\	1>nul
+)
 
 
 echo Copying configuration files...
 mkdir config
-set config_ext_list=conf conf-inc words cfg
+set "config_ext_list=conf conf-inc words cfg"
 for %%f in (%config_ext_list%) do (
     copy "%cob_source_path%config\*.%%f"	config\	1>nul
 )
@@ -95,26 +99,31 @@ copy "%cob_source_path%po\*.pot"		po\	1>nul
 if exist "po\*@*" (
    erase /Q po\*@* 1>nul
 )
-
-if "%have_32%"=="1" (
-   call :copy_exes_and_libs Win32
-   if errorlevel 1 (
-	 goto :abort
-   )
-)
-if "%have_64%"=="1" (
-   call :copy_exes_and_libs x64
-   if errorlevel 1 (
-	 goto :abort
-   )
-)
-
-:: must be last as we compile with the dist itself
 echo Copying extras...
 mkdir extras
 copy "%cob_source_path%extras\*.cob"		extras\			1>nul
 copy "%cob_source_path%extras\README"		extras\README.txt	1>nul
 
+echo.
+
+if "%have_32%"=="1" (
+   call :copy_exes_and_libs "Win32"
+   if errorlevel 1 (
+      goto :abort
+   )
+)
+if "%have_64%"=="1" (
+   if "%have_32%"=="1" (
+       echo.
+   )
+   call :copy_exes_and_libs "x64"
+   if errorlevel 1 (
+      goto :abort
+   )
+)
+
+:: must be last as we compile with the dist itself
+echo Compiling extras...
 echo.
 
 if "%have_32%"=="1" (
@@ -124,6 +133,9 @@ if "%have_32%"=="1" (
    )
 )
 if "%have_64%"=="1" (
+   if "%have_32%"=="1" (
+       echo.
+   )
    call :compile_extras "x64"
    if errorlevel 1 (
       goto :abort
@@ -150,6 +162,7 @@ echo Abort^^!
 
 :end
 set saved_errorlevel=%errorlevel%
+popd
 
 :: pause if not started directly
 echo %cmdcmdline% | find /i "%~0" >nul
@@ -171,11 +184,11 @@ copy "%cob_release_path%set_env_vs_dist%platform_ext%.bat"	set_env_vs%platform_e
 set copy_to_bin=bin%platform_ext%
 set copy_to_lib=lib%platform_ext%
 
-set copy_from="%cob_release_path%%platform%\%config%"
+set "copy_from=%cob_release_path%%platform%\%config%"
 
 echo Copying binaries for %platform%...
 mkdir %copy_to_bin%
-set exe_lib_list=cobc.exe cobc.pdb cobcrun.exe cobcrun.pdb libcob.dll libcob.pdb
+set "exe_lib_list=cobc.exe cobc.pdb cobcrun.exe cobcrun.pdb libcob.dll libcob.pdb"
 for %%f in (%exe_lib_list%) do (
     copy "%copy_from%\%%f"	%copy_to_bin%\	1>nul
 )
@@ -192,7 +205,7 @@ if exist "%copy_from%\mpir.dll" (
 )
 
 :: Copy the ISAM-handler library, guessing the name if necessary.
-:: TO-DO: Handle C-ISAM.
+:: Note: Not handling C-ISAM as there's no known Windows version of this library.
 if exist "%copy_from%\libvbisam.dll" (
    copy "%copy_from%\libvbisam.dll"		%copy_to_bin%\	1>nul
 ) else if exist "%cob_header_path%db.h" (
@@ -249,16 +262,17 @@ goto :eof
 :compile_extras
 call :set_platform_and_ext %1%
 echo Using created GnuCOBOL distribution -%platform%- to compile extras...
-cd "%cob_dist_path%bin%platform_ext%"
+pushd "%cob_dist_path%bin%platform_ext%"
 call ..\set_env_vs%platform_ext%.bat
 cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
 if errorlevel 1 (
    echo.
-   echo cobc had unexpected return value %errorlevel%
-   echo You may be using the normal command prompt, not the Visual Studio command prompt.
-   goto :eof
+   echo cobc had unexpected return value %errorlevel%, running verbose again...
+   pause
+   cobc -vv -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
+   pause
 )
-cd ..
+popd
 goto :eof
 
 

@@ -1,4 +1,9 @@
 
+2017-08-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_init)[_WIN32]: only use GetUsername if HAVE_GETUSERNAME
+	  is defined (for example in config.h)
+
 2017-08-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c: moved code to cleanup modules to cob_exit_common_modules

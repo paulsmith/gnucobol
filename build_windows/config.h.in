@@ -19,9 +19,20 @@
 #define CONFIGURED_CURSES PDCURSES      /* see possible values above */
 #define USED_MATHLIB      MATHLIB_MPIR  /* see possible values above */
 
+/* define if you want to use the fall-back to GetUserName
+   for ACCEPT var FROM USER NAME
+   note: only active if %USERNAME% is not set, needs an additional
+   library for each invocation of libcob, even if not used...
+#define HAVE_GETUSERNAME 1
+*/
+
 /* adjust the following linker pragmas if needed */
 
+
 #ifdef WITHIN_LIBCOB
+#ifdef HAVE_GETUSERNAME
+#pragma comment(lib, "advapi32")
+#endif
 
 #if USED_MATHLIB == MATHLIB_MPIR 
 #pragma comment(lib, "mpir")

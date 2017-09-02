@@ -2166,9 +2166,10 @@ cobc_print_config_flag (const char *name, const char *doc,
 	}
 	if (odoc) {
 		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
+		buff [77] = 0;	/* keep analyzer happy ... */
 		name = (const char *) &buff;
 	}
-	if (strlen(name) <= 19) {
+	if (strlen (name) <= 19) {
 		printf ("  -f%-19s  %s\n", name, doc);
 	} else {
 		printf ("  -f%s\t%s\n", name, doc);

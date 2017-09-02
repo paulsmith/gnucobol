@@ -2186,8 +2186,9 @@ cob_get_u64_comp6 (void *mem, int len)
 	return val;
 }
 
-static char ebcdic_pos[10] = "{ABCDEFGHI";
-static char ebcdic_neg[10] = "}JKLMNOPQR";
+/* note: the 11th position is only there to keep the analyzer happy ...*/
+static char ebcdic_pos[11] = "{ABCDEFGHI";
+static char ebcdic_neg[11] = "}JKLMNOPQR";
 
 void
 cob_put_s64_pic9 (cob_s64_t val, void *mem, int len)
