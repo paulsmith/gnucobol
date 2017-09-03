@@ -386,19 +386,20 @@ AT_DATA([prog.cob], [
        LOCAL-STORAGE    SECTION.
        01  path         PIC X(10) VALUE "test.txt".
        PROCEDURE        DIVISION.
-           OPEN INPUT test-file.
-           READ test-file   END-READ.
-           DISPLAY test-rec END-DISPLAY.
-           CLOSE test-file.
+           OPEN INPUT test-file
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[hello
-], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([ASSIGN with LOCAL-STORAGE item and INITIAL prog])
 AT_KEYWORDS([runfile])
@@ -425,17 +426,60 @@ AT_DATA([prog.cob], [
        LOCAL-STORAGE    SECTION.
        01  path         PIC X(10) VALUE "test.txt".
        PROCEDURE        DIVISION.
-           OPEN INPUT test-file.
-           READ test-file   END-READ.
-           DISPLAY test-rec END-DISPLAY.
-           CLOSE test-file.
+           OPEN INPUT test-file
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ASSIGN with BASED data item])
+AT_KEYWORDS([runfile])
+
+# TODO 2.3 - SIGSEGV - either dissallow or fix...
+AT_XFAIL_IF(true)
+ 
+AT_DATA([TEST-FILE],
 [hello
-], [])
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT test-file ASSIGN path
+                        ORGANIZATION LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE	            SECTION.
+       FD  test-file.
+       01  test-rec     PIC X(5).
+       WORKING-STORAGE    SECTION.
+       01  path         BASED PIC X(10).
+       PROCEDURE        DIVISION.
+           ALLOCATE path
+           MOVE "test.txt" TO path
+           OPEN INPUT test-file
+           FREE path
+           READ test-file   END-READ
+           IF test-rec NOT = "hello"
+              DISPLAY test-rec END-DISPLAY
+           END-IF
+           CLOSE test-file
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
