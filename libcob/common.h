@@ -107,6 +107,10 @@ _MSC_VER == 1700 (Visual Studio 2012, VS11) since OS-Version 7  / 2008 R2
 _MSC_VER == 1800 (Visual Studio 2013, VS12) since OS-Version 7  / 2008 R2
 _MSC_VER == 1900 (Visual Studio 2015, VS14) since OS-Version 7  / 2008 R2
 _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
+
+Note: also defined together with __clang__ in both frontends:
+   __llvm__ Clang LLVM frontend for Visual Studio by LLVM Project (via clang-cl.exe [cl build options])
+   __c2__   Clang C2 frontend with MS CodeGen (via clang.exe [original clang build options])
 */
 
 #if _MSC_VER >= 1500

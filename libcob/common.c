@@ -109,7 +109,15 @@
 
 /* C version info */
 #ifdef	__VERSION__
+#if		! defined (_MSC_VER)
 #define OC_C_VERSION_PRF	""
+#elif	defined (__c2__)
+#define OC_C_VERSION_PRF	"(Microsoft C2) "
+#elif	defined (__llvm__)
+#define OC_C_VERSION_PRF	"(LLVM / MSC) "
+#else
+#define OC_C_VERSION_PRF	"(Microsoft) "
+#endif
 #define OC_C_VERSION	CB_XSTRINGIFY (__VERSION__)
 #elif	defined (__xlc__)
 #define OC_C_VERSION_PRF	"(IBM XL C/C++) "
@@ -4582,8 +4590,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
 		longoptions = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
-	}
-	else {
+	} else {
 		cob_runtime_error (_("Call to CBL_GC_GETOPT with wrong longoption size."));
 		cob_stop_run (1);
 	}
@@ -6208,8 +6215,10 @@ print_info (void)
 	putchar ('\n');
 	puts (_("build information"));
 	var_print (_("build environment"), 	COB_BLD_BUILD, "", 0);
-	snprintf (versbuff, 55, "%s\tC version %s%s", COB_BLD_CC, OC_C_VERSION_PRF, OC_C_VERSION);
-	var_print ("CC", versbuff, "", 0);
+	var_print ("CC", COB_BLD_CC, "", 0);
+	// Note: newline because most compilers define a long version string (> 30 characters)
+	snprintf (versbuff, 55, "%s%s", OC_C_VERSION_PRF, OC_C_VERSION);
+	var_print ("C version", versbuff, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);
 	var_print ("CFLAGS", COB_BLD_CFLAGS, "", 0);
 	var_print ("LD", COB_BLD_LD, "", 0);
