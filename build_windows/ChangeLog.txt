@@ -1,4 +1,11 @@
 
+2017-09-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* set_env_vs_x64.bat, set_env_vs_dist_x64.bat: fix VCINSTALLDIR being
+	  expanded too soon.
+	* set_env_vs_dist_x64.bat: replaced reference to "dist/lib" with
+	  "dist/lib_x64".
+
 2017-09-02  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* config.h.in: optional setting and link for use of GetUsername

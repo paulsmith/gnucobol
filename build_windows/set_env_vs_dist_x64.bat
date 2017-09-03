@@ -46,11 +46,14 @@ if exist "%VS140COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS140COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS140COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 :: Visual Studio 2013
 if exist "%VS120COMNTOOLS%vsvars64.bat" (
    call "%VS120COMNTOOLS%vsvars64.bat"
@@ -58,11 +61,14 @@ if exist "%VS120COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS120COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS120COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 :: Visual Studio 2012
 if exist "%VS110COMNTOOLS%vsvars64.bat" (
    call "%VS110COMNTOOLS%vsvars64.bat"
@@ -70,11 +76,14 @@ if exist "%VS110COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS110COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS110COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 :: Visual Studio 2010
 if exist "%VS100COMNTOOLS%vsvars64.bat" (
    call "%VS100COMNTOOLS%vsvars64.bat"
@@ -82,11 +91,14 @@ if exist "%VS100COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS100COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS100COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 :: Visual Studio 2008
 if exist "%VS90COMNTOOLS%vsvars64.bat" (
    call "%VS90COMNTOOLS%vsvars64.bat"
@@ -94,11 +106,14 @@ if exist "%VS90COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS90COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS90COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 :: Visual Studio 2005
 if exist "%VS80COMNTOOLS%vsvars64.bat" (
    call "%VS80COMNTOOLS%vsvars64.bat"
@@ -106,11 +121,14 @@ if exist "%VS80COMNTOOLS%vsvars64.bat" (
 )
 if exist "%VS80COMNTOOLS%vcvarsqueryregistry.bat" (
    call "%VS80COMNTOOLS%vcvarsqueryregistry.bat"
+)
+if %errorlevel% equ 0 (
    if exist "%VCINSTALLDIR%vcvarsall.bat" (
-      call "%VCINSTALLDIR%vcvarsall.bat" %arch%
-      goto :gc
+       call "%VCINSTALLDIR%vcvarsall.bat" %arch%
+       goto :gc
    )
 )
+
 
 echo Warning: Not possible to set %arch_full% environment for Microsoft Visual Studio!
 :: Windows SDK 10 (Windows 10 / VS 2015 compiler) - untested
@@ -201,7 +219,7 @@ set "LOCALEDIR=%COB_MAIN_DIR%po"
 
 :: Set the necessary options for MSC compiler
 set "COB_CFLAGS=/I "%COB_MAIN_DIR%include""
-set "COB_LIB_PATHS=/LIBPATH:"%COB_MAIN_DIR%lib""
+set "COB_LIB_PATHS=/LIBPATH:"%COB_MAIN_DIR%lib_x64""
 ::if "%COB_LIBS%"       EQU "" (
 ::   if exist "%COB_MAIN_DIR%lib\mpir.lib"	set COB_LIBS=libcob.lib mpir.lib
 ::   if exist "%COB_MAIN_DIR%lib\libgmp.lib" 	set COB_LIBS=libcob.lib libgmp.lib
