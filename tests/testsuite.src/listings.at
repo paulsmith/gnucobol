@@ -1479,6 +1479,193 @@ AT_CHECK([diff prog20c.lst prog.lis], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([Multiple programs in one compilation group])
+AT_KEYWORDS([listing])
+
+# TODO 2.3 - revise listing: combinations and positions
+#                            of entries in compilation group
+#                            the previous test should likely produce
+#                            a different result, too...
+AT_XFAIL_IF(true)
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([proga.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-1.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  blah   PIC x.
+
+       PROCEDURE DIVISION.
+           ACCEPT blah END-ACCEPT
+           CALL "prog-2" USING blah END-CALL
+           GO TO EX
+
+           DISPLAY blah.
+
+       EX. STOP RUN.
+])
+
+AT_DATA([progb.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog-2.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  data-b  PIC 9.
+       LINKAGE SECTION.
+       01  stuff   PIC x.
+       PROCEDURE DIVISION USING stuff.
+
+           MOVE FUNCTION NUMVAL (stuff) TO data-b
+           DISPLAY data-b
+           GO TO EX
+
+           ACCEPT stuff.
+
+       EX. STOP RUN.
+      
+])
+
+AT_DATA([expected.lst],
+[GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog-1.
+000004
+000005         DATA DIVISION.
+000006         WORKING-STORAGE SECTION.
+000007         01  blah   PIC x.
+000008
+000009         PROCEDURE DIVISION.
+000010             ACCEPT blah END-ACCEPT
+000011             CALL "prog-2" USING blah END-CALL
+000012             GO TO EX
+000013
+000014             DISPLAY blah.
+warning: unreachable statement 'DISPLAY'
+000015
+000016         EX. STOP RUN.
+GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      WORKING-STORAGE SECTION
+
+00001 ALPHANUMERIC   01   blah                           X
+
+GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
+
+NAME                           DEFINED                REFERENCES
+
+blah                           7       *10      11      14
+
+GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+LABEL                          DEFINED                REFERENCES
+
+E prog__1                      10
+P EX                           16       12
+GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+FUNCTION                       TYPE                   REFERENCES
+
+L prog-2                       EXTERN   11
+
+GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
+
+Error/Warning summary:
+
+proga.cob: 14: warning: unreachable statement 'DISPLAY'
+
+1 warning in compilation group
+0 errors in compilation group
+GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog-2.
+000004
+000005         DATA DIVISION.
+000006         WORKING-STORAGE SECTION.
+000007         01  data-b  PIC 9.
+000008         LINKAGE SECTION.
+000009         01  stuff   PIC x.
+000010         PROCEDURE DIVISION USING stuff.
+000011
+000012             MOVE FUNCTION NUMVAL (stuff) TO data-b
+000013             DISPLAY data-b
+000014             GO TO EX
+000015
+000016             ACCEPT stuff.
+warning: unreachable statement 'ACCEPT'
+000017
+000018         EX. STOP RUN.
+000019
+GnuCOBOL 2.3-dev.0      progb.cob            Sun Sep  3 14:46:33 2017  Page 0002
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      WORKING-STORAGE SECTION
+
+00001 NUMERIC        01   data-b                         9
+
+      LINKAGE SECTION
+
+00001 ALPHANUMERIC   01   stuff                          X
+
+GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page  Page 0003
+
+NAME                           DEFINED                REFERENCES
+
+data-b                         7       *12      13
+
+stuff                          9       *10      12     *16
+
+GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
+
+LABEL                          DEFINED                REFERENCES
+
+E prog__2                      12
+P EX                           18       14
+
+GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
+
+Error/Warning summary:
+
+progb.cob: 16: warning: unreachable statement 'ACCEPT'
+
+2 warnings in compilation group
+0 errors in compilation group
+])
+
+# Check once with $COMPILE and once with $COMPILE_ONLY.
+# This tests whether codegen affects the listing.
+
+AT_CHECK([$COMPILE -x -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
+[proga.cob: 14: warning: unreachable statement 'DISPLAY'
+progb.cob: 16: warning: unreachable statement 'ACCEPT'
+])
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+
+AT_CHECK([$COMPILE_ONLY -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
+[proga.cob: 14: warning: unreachable statement 'DISPLAY'
+progb.cob: 16: warning: unreachable statement 'ACCEPT'
+])
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([Wide listing])
 AT_KEYWORDS([listing])
 
