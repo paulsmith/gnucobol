@@ -5,6 +5,8 @@
 	  internal variables to be unsigned int instead of int to prevent
 	  C compiler warnings about a possible negative access to arrays
 	  and sign mismatches in comparisons
+	* codegen.c: output comment for decimal constants only if we have
+	  actually generate decimal constants
 
 2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
