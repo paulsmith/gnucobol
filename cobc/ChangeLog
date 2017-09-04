@@ -1,7 +1,14 @@
 
+2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c, tree.c, tree.h, typeck.c: started to change compiler
+	  internal variables to be unsigned int instead of int to prevent
+	  C compiler warnings about a possible negative access to arrays
+	  and sign mismatches in comparisons
+
 2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* reserved.c: adusted some missing context-sensitive options
+	* reserved.c: adjusted some missing context-sensitive options
 	* reserved.c, parser.y: added parsing of PHYSICAL attribute in
 	  LENGTH functions
 
