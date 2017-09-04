@@ -1,4 +1,14 @@
 
+2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_screen_get_all, field_accept): beep instead of
+	  wrong-casting characters we currently can't store
+	* screenio.c (field_accept): beep on insert if field is already full
+	* screenio.c (cob_screen_init): set cursor depending on insert mode
+	  to vertical bar cursor (on) or square cursor (off)
+	* screenio.c (cob_screen_get_all): fix for handling BACKSPACE,
+	  added handling for DELETE and INSERT keys and COB_INSERT_MODE
+
 2017-08-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_init)[_WIN32]: only use GetUsername if HAVE_GETUSERNAME
