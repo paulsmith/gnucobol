@@ -231,4 +231,4 @@ if "%COB_OLD_PATH%" == "" (
 ) else (
    set "PATH=%COB_OLD_PATH%"
 )
-set "PATH=%COB_MAIN_DIR%bin;%PATH%"
+set "PATH=%COB_MAIN_DIR%bin_x64;%PATH%"
