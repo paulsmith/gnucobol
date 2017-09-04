@@ -1,4 +1,14 @@
 
+2017-09-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* set_env_vs_dist_x64.bat: replaced reference to "dist/bin" with
+	  "dist/bin_x64".
+	* makedist.bat: the batch now fails if cobc has a negative errorlevel
+	  (e.g. if a DLL is missing).
+	* makedist.bat: replaced setting of errorlevel with cb_errorlevel;
+	  errorlevel is a built-in variable which can be hidden by an
+	  environment variable of the same name.
+
 2017-09-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* set_env_vs_x64.bat, set_env_vs_dist_x64.bat: fix VCINSTALLDIR being

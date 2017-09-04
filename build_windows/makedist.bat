@@ -5,6 +5,7 @@
 @echo off
 
 setlocal enabledelayedexpansion
+set cb_errorlevel=0
 
 :: Set distribution folder
 set "cob_dist_path=%~dp0\dist\"
@@ -108,7 +109,7 @@ echo.
 
 if "%have_32%"=="1" (
    call :copy_exes_and_libs "Win32"
-   if errorlevel 1 (
+   if !cb_errorlevel! neq 0 (
       goto :abort
    )
 )
@@ -117,7 +118,7 @@ if "%have_64%"=="1" (
        echo.
    )
    call :copy_exes_and_libs "x64"
-   if errorlevel 1 (
+   if !cb_errorlevel! neq 0 (
       goto :abort
    )
 )
@@ -128,7 +129,7 @@ echo.
 
 if "%have_32%"=="1" (
    call :compile_extras "Win32"
-   if errorlevel 1 (
+   if !cb_errorlevel! neq 0 (
       goto :abort
    )
 )
@@ -137,7 +138,7 @@ if "%have_64%"=="1" (
        echo.
    )
    call :compile_extras "x64"
-   if errorlevel 1 (
+   if !cb_errorlevel! neq 0 (
       goto :abort
    )
 )
@@ -161,7 +162,6 @@ goto :end
 echo Abort^^!
 
 :end
-set saved_errorlevel=%errorlevel%
 popd
 
 :: pause if not started directly
@@ -171,9 +171,7 @@ if %errorlevel% equ 0 (
    pause
 )
 
-set errorlevel=%saved_errorlevel%
-endlocal
-exit /b
+exit /b %cb_errorlevel%
 
 
 :copy_exes_and_libs
@@ -200,7 +198,7 @@ if exist "%copy_from%\mpir.dll" (
    copy "%copy_from%\gmp.dll"			%copy_to_bin%\	1>nul
 ) else (
    echo No math library found.
-   set errorlevel=1
+   set cb_errorlevel=1
    goto :eof
 )
 
@@ -265,12 +263,12 @@ echo Using created GnuCOBOL distribution -%platform%- to compile extras...
 pushd "%cob_dist_path%bin%platform_ext%"
 call ..\set_env_vs%platform_ext%.bat
 cobc -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
-if errorlevel 1 (
+if %errorlevel% neq 0 (
    echo.
    echo cobc had unexpected return value %errorlevel%, running verbose again...
    pause
    cobc -vv -m -Wall -O2 ..\extras\CBL_OC_DUMP.cob
-   pause
+   set cb_errorlevel=!errorlevel!
 )
 popd
 goto :eof
