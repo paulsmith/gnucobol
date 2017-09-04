@@ -66,7 +66,7 @@ struct sort_list {
 struct system_table {
 	const char		*syst_name;
 	const char		*syst_call;
-	const int		syst_max_params;
+	const unsigned int	syst_max_params;
 };
 
 struct label_list {
@@ -1414,7 +1414,7 @@ output_call_parameter_stack_pointers (struct cb_program *prog)
 	if (cb_flag_stack_on_heap || prog->flag_recursive) {
 		output_local ("cob_field\t\t**cob_procedure_params;\n");
 	} else {
-		output_local ("cob_field\t\t*cob_procedure_params[%d];\n",
+		output_local ("cob_field\t\t*cob_procedure_params[%u];\n",
 			      prog->max_call_param ? prog->max_call_param : 1);
 	}
 }
@@ -2958,7 +2958,7 @@ output_param (cb_tree x, int id)
 			if (ip->intr_field == cb_int0) {
 				output ("NULL");
 			} else if (ip->intr_field == cb_int1) {
-				output ("%d", cb_list_length (ip->args));
+				output ("%u", cb_list_length (ip->args));
 			} else {
 				output_param (ip->intr_field, id);
 			}
@@ -5213,7 +5213,7 @@ output_cancel (struct cb_cancel *p)
 	struct nested_list	*nlp;
 	char			*name_str;
 	char			*s;
-	int			i;
+	unsigned int	i;
 
 	if (is_literal_or_prototype_ref (p->target)) {
 		s = get_program_id_str (p->target);
@@ -7144,14 +7144,12 @@ output_error_handler (struct cb_program *prog)
 {
 	struct handler_struct	*hstr;
 	size_t			seen;
-	int			i;
-	int			n;
-	int			parmnum;
+	unsigned int	parameter_count, pcounter, hcounter;
 
 	output_newline ();
 	seen = 0;
-	for (i = COB_OPEN_INPUT; i <= COB_OPEN_EXTEND; i++) {
-		if (prog->global_handler[i].handler_label) {
+	for (hcounter = COB_OPEN_INPUT; hcounter <= COB_OPEN_EXTEND; hcounter++) {
+		if (prog->global_handler[hcounter].handler_label) {
 			seen = 1;
 			break;
 		}
@@ -7161,10 +7159,10 @@ output_error_handler (struct cb_program *prog)
 	if (seen) {
 		output_line ("switch (cob_glob_ptr->cob_error_file->last_open_mode)");
 		output_indent ("{");
-		for (i = COB_OPEN_INPUT; i <= COB_OPEN_EXTEND; i++) {
-			hstr = &prog->global_handler[i];
+		for (hcounter = COB_OPEN_INPUT; hcounter <= COB_OPEN_EXTEND; hcounter++) {
+			hstr = &prog->global_handler[hcounter];
 			if (hstr->handler_label) {
-				output_line ("case %d:", i);
+				output_line ("case %u:", hcounter);
 				output_indent ("{");
 				if (prog == hstr->handler_prog) {
 					output_perform_call (hstr->handler_label,
@@ -7181,8 +7179,8 @@ output_error_handler (struct cb_program *prog)
 							hstr->handler_prog->program_id,
 							hstr->handler_label->id);
 					}
-					parmnum = cb_list_length (hstr->handler_prog->parameter_list);
-					for (n = 0; n < parmnum; n++) {
+					parameter_count = cb_list_length (hstr->handler_prog->parameter_list);
+					for (pcounter = 0; pcounter < parameter_count; pcounter++) {
 						output (", NULL");
 					}
 					output (");\n");
@@ -7279,8 +7277,8 @@ output_module_init (struct cb_program *prog)
 	output_line ("module->module_active = 0;");
 	output_line ("module->module_date = COB_MODULE_DATE;");
 	output_line ("module->module_time = COB_MODULE_TIME;");
-	output_line ("module->module_type = %d;", (int)prog->prog_type);
-	output_line ("module->module_param_cnt = %d;", prog->num_proc_params);
+	output_line ("module->module_type = %u;", prog->prog_type);
+	output_line ("module->module_param_cnt = %u;", prog->num_proc_params);
 	output_line ("module->module_returning = 0;");
 	output_line ("module->ebcdic_sign = %d;", cb_ebcdic_sign);
 	output_line ("module->decimal_point = '%c';", prog->decimal_point);
@@ -7314,7 +7312,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	FILE			*savetarget;
 	const char		*s;
 	char			key_ptr[64];
-	int			i;
+	unsigned int	i;
 	cob_u32_t		inc;
 	int			parmnum;
 	int			seen;
@@ -7748,12 +7746,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Allocate decimal numbers */");
 		output_prefix ();
 		if (prog->flag_recursive) {
-			output ("cob_decimal_push (%d", prog->decimal_index_max);
+			output ("cob_decimal_push (%u", prog->decimal_index_max);
 		} else {
-			output ("cob_decimal_alloc (%d", prog->decimal_index_max);
+			output ("cob_decimal_alloc (%u", prog->decimal_index_max);
 		}
 		for (i = 0; i < prog->decimal_index_max; i++) {
-			output (", &d%d", i);
+			output (", &d%u", i);
 		}
 		output (");\n");
 		output_newline ();
@@ -8031,9 +8029,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	if (prog->decimal_index_max && prog->flag_recursive) {
 		output_line ("/* Free decimal structures */");
 		output_prefix ();
-		output ("cob_decimal_pop (%d", prog->decimal_index_max);
+		output ("cob_decimal_pop (%u", prog->decimal_index_max);
 		for (i = 0; i < prog->decimal_index_max; i++) {
-			output (", d%d", i);
+			output (", d%u", i);
 		}
 		output (");\n");
 		output_newline ();

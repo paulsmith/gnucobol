@@ -1528,10 +1528,10 @@ cb_list_reverse (cb_tree l)
 	return last;
 }
 
-int
+unsigned int
 cb_list_length (cb_tree l)
 {
-	int	n;
+	unsigned int	n;
 
 	if (l == cb_error_node) {
 		return 0;
@@ -2014,7 +2014,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 /* Decimal */
 
 cb_tree
-cb_build_decimal (const int id)
+cb_build_decimal (const unsigned int id)
 {
 	struct cb_decimal *p;
 
@@ -4815,10 +4815,9 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				x;
-	int				numargs;
 	enum cb_category		catg;
 
-	numargs = cb_list_length (args);
+	int numargs = (int)cb_list_length (args);
 
 	if (unlikely(isuser)) {
 		if (refmod && CB_LITERAL_P(CB_PAIR_X(refmod)) &&
@@ -4832,7 +4831,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(name));
 			return cb_error_node;
 		}
-		if (numargs > current_program->max_call_param) {
+		if (numargs > (int)current_program->max_call_param) {
 			current_program->max_call_param = numargs;
 		}
 		return make_intrinsic (name, &userbp, args, cb_int1, refmod, 1);

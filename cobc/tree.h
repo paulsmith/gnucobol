@@ -665,7 +665,7 @@ struct cb_literal {
 
 struct cb_decimal {
 	struct cb_tree_common	common;		/* Common values */
-	int			id;		/* Id for this decimal */
+	unsigned int			id;		/* Id for this decimal */
 };
 
 #define CB_DECIMAL(x)	(CB_TREE_CAST (CB_TAG_DECIMAL, struct cb_decimal, x))
@@ -1406,12 +1406,12 @@ struct cb_program {
 
 	/* Internal variables */
 	int		loop_counter;			/* Loop counters */
-	int		decimal_index;			/* cob_decimal count */
-	int		decimal_index_max;		/* cob_decimal max */
+	unsigned int	decimal_index;			/* cob_decimal count */
+	unsigned int	decimal_index_max;		/* cob_decimal max */
 	int		nested_level;			/* Nested program level */
-	int		num_proc_params;		/* PROC DIV params */
+	unsigned int	num_proc_params;		/* PROC DIV params */
 	int		toplev_count;			/* Top level source count */
-	int		max_call_param;			/* Max params */
+	unsigned int	max_call_param;			/* Max params */
 
 	unsigned char	decimal_point;			/* '.' or ',' */
 	unsigned char	currency_symbol;		/* '$' or user-specified */
@@ -1549,7 +1549,7 @@ extern cb_tree			cb_build_numsize_literal (const void *,
 extern cb_tree			cb_concat_literals (const cb_tree,
 						    const cb_tree);
 
-extern cb_tree			cb_build_decimal (const int);
+extern cb_tree			cb_build_decimal (const unsigned int);
 extern cb_tree			cb_build_decimal_literal (const int);
 extern int 			cb_lookup_literal (cb_tree x, int make_decimal);
 
@@ -1656,7 +1656,7 @@ extern cb_tree			cb_list_add (cb_tree, cb_tree);
 extern cb_tree			cb_pair_add (cb_tree, cb_tree, cb_tree);
 extern cb_tree			cb_list_append (cb_tree, cb_tree);
 extern cb_tree			cb_list_reverse (cb_tree);
-extern int			cb_list_length (cb_tree);
+extern unsigned int		cb_list_length (cb_tree);
 
 extern struct cb_report		*build_report (cb_tree);
 

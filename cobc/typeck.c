@@ -48,8 +48,8 @@ extern int call_line_number;
 
 struct system_table {
 	const char		*const syst_name;
-	const int		syst_params_min;
-	const int		syst_params_max;
+	const unsigned int	syst_params_min;
+	const unsigned int	syst_params_max;
 };
 
 struct optim_table {
@@ -1622,8 +1622,7 @@ cb_build_address (cb_tree x)
 	cb_tree			v;
 	struct cb_reference	*r;
 	const char		*name;
-	int			numsubs;
-	int			refsubs;
+	unsigned int	numsubs, refsubs;
 
 	if (x == cb_error_node) {
 		return cb_error_node;
@@ -3847,8 +3846,8 @@ decimal_alloc (void)
 
 	x = cb_build_decimal (current_program->decimal_index);
 	current_program->decimal_index++;
+	/* LCOV_EXCL_START */
 	if (current_program->decimal_index >= COB_MAX_DEC_STRUCT) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("internal decimal structure size exceeded: %d"),
 				COB_MAX_DEC_STRUCT);
 		if (strcmp(current_statement->name, "COMPUTE") == 0) {
@@ -3856,8 +3855,8 @@ decimal_alloc (void)
 							 "or split into multiple computations."));
 		}
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	if (current_program->decimal_index > current_program->decimal_index_max) {
 		current_program->decimal_index_max = current_program->decimal_index;
 	}
@@ -3966,15 +3965,14 @@ decimal_expand (cb_tree d, cb_tree x)
 	}
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
-		if (x == cb_zero) {
-			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
-				cb_int0));
-		} else {
-			/* LCOV_EXCL_START */
+		/* LCOV_EXCL_START */
+		if (x != cb_zero) {
 			cobc_err_msg (_("unexpected constant expansion"));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
+		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
+			cb_int0));
 		break;
 	case CB_TAG_LITERAL:
 		/* Set d, N */
@@ -5867,7 +5865,7 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	cob_u32_t			is_sys_idx;
 	int				error_ind;
 	int				call_conv;
-	int				numargs;
+	unsigned int		numargs;
 	const int			prog_is_literal_or_prototype
 		= CB_LITERAL_P (prog) || (CB_REFERENCE_P (prog)
 					  && CB_PROTOTYPE_P (cb_ref (prog)));
@@ -6457,7 +6455,7 @@ emit_device_display (cb_tree values, cb_tree upon, cb_tree no_adv)
 	cb_tree	p;
 
 	p = CB_BUILD_FUNCALL_3 ("cob_display", upon, no_adv, values);
-	CB_FUNCALL (p)->varcnt = cb_list_length (values);
+	CB_FUNCALL (p)->varcnt = (int)cb_list_length (values);
 	CB_FUNCALL (p)->nolitcast = 1;
 	cb_emit (p);
 }
@@ -6674,13 +6672,13 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 		l = last_elt = cb_null;
 	} else {
 		for (l = values; l && CB_CHAIN (l); l = CB_CHAIN (l));
+		/* LCOV_EXCL_START */
 		if (!l) {
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 				"emit_field_display_for_last", "values");
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 		last_elt = CB_VALUE (l);
 	}
 
@@ -9926,12 +9924,12 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 		if (current_program->cb_sort_return) {
 			CB_FIELD_PTR (current_program->cb_sort_return)->count++;
 			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
-						     cb_int (cb_list_length (keys)), col,
+						     cb_int ((int)cb_list_length (keys)), col,
 						     CB_BUILD_CAST_ADDRESS (current_program->cb_sort_return),
 						     CB_FILE(cb_ref (name))->file_status));
 		} else {
 			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
-						     cb_int (cb_list_length (keys)), col,
+						     cb_int ((int)cb_list_length (keys)), col,
 						     cb_null, CB_FILE(cb_ref (name))->file_status));
 
 		}
@@ -9948,7 +9946,7 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 			cb_error_x (name, _("%s is not implemented"), _("table SORT without keys"));
 		}
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_table_sort_init",
-					     cb_int (cb_list_length (keys)), col));
+					     cb_int ((int)cb_list_length (keys)), col));
 		for (l = keys; l; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_3 ("cob_table_sort_init_key",
 					CB_VALUE (l),
@@ -10260,7 +10258,7 @@ cb_emit_unstring (cb_tree name, cb_tree delimited, cb_tree into,
 		return;
 	}
 	cb_emit (CB_BUILD_FUNCALL_3 ("cob_unstring_init", name, pointer,
-		cb_int (cb_list_length (delimited))));
+		cb_int ((int)cb_list_length (delimited))));
 	cb_emit_list (delimited);
 	cb_emit_list (into);
 	if (tallying) {

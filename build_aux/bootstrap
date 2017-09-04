@@ -24,7 +24,7 @@
 echo start to bootstrap GnuCOBOL
 ret=0
 # get path to GnuCOBOL main directory
-if test "$0" = "./bootstrap"; then 
+if test "$0" = "./bootstrap"; then
 	MAINPATH=..
 else
 	MAINPATH=$(dirname $(readlink -f "$0"))/..
