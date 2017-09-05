@@ -1,4 +1,9 @@
 
+2017-09-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (cb_int): add bitmask to suppress runtime loss-of-data warning
+	  on Windows.
+
 2017-09-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_validate_program_data): temporarily disabled ASSIGN
