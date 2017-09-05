@@ -1340,6 +1340,19 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				} else {
 					*p2 = ' ';
 				}
+				/* Add space to screen. */
+				cob_move_cursor (cline, count - 1);
+				if (s->attr & COB_SCREEN_NO_ECHO) {
+					cob_addch (COB_CH_SP);
+				} else if (s->attr & COB_SCREEN_SECURE) {
+					cob_addch (COB_CH_AS);
+				} else {
+					if (*p2 == ' ') {
+						cob_addch (promptchar);
+					} else {
+						cob_addch (*p2);
+					}
+				}
 				/* Move cursor left one from current. */
 				ccolumn--;
 				cob_move_cursor (cline, ccolumn);
@@ -1416,6 +1429,19 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				*p2 = '0';
 			} else {
 				*p2 = ' ';
+			}
+			/* Add space to screen. */
+			cob_move_cursor (cline, count);
+			if (s->attr & COB_SCREEN_NO_ECHO) {
+				cob_addch (COB_CH_SP);
+			} else if (s->attr & COB_SCREEN_SECURE) {
+				cob_addch (COB_CH_AS);
+			} else {
+				if (*p2 == ' ') {
+					cob_addch (promptchar);
+				} else {
+					cob_addch (*p2);
+				}
 			}
 			/* Put cursor back to original position. */
 			cob_move_cursor (cline, ccolumn);
