@@ -1457,7 +1457,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				/* check and beep if field is already full,
 				ignore numeric fields for now */
 				if (cob_field_is_numeric_or_numeric_edited (s->field)) {
-					p2 = " ";
+					p2 = (unsigned char *)" ";
 				} else {
 					p2 = s->field->data + rightpos - scolumn;
 				}
@@ -2536,7 +2536,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				/* check and beep if field is already full,
 				   ignore numeric fields for now */
 				if (cob_field_is_numeric_or_numeric_edited (f)) {
-					p2 = " ";
+					p2 = (unsigned char *)" ";
 				} else {
 					p2 = COB_TERM_BUFF + rightpos - scolumn;
 				}
