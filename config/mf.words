@@ -347,6 +347,7 @@ reserved:	IS
 reserved:	JAPANESE
 reserved:	JOINING
 reserved:	JSON
+reserved:	JSON-COUNTER # note: this is a register, move as soon as supported
 reserved:	JUST
 reserved:	JUSTIFIED
 reserved:	KANJI
@@ -647,18 +648,58 @@ reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	WRITING
 reserved:	XML
-reserved:	XML-CODE
+reserved:	XML-CODE # note: this is a register, move as soon as supported
 reserved:	XML-DECLARATION
-reserved:	XML-EVENT
-reserved:	XML-NTEXT
+reserved:	XML-EVENT # note: this is a register, move as soon as supported
+reserved:	XML-INFORMATION # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NTEXT # note: this is a register, move as soon as supported
 reserved:	XML-SCHEMA
-reserved:	XML-TEXT
+reserved:	XML-TEXT # note: this is a register, move as soon as supported
 reserved:	YYYYDDD*
 reserved:	YYYYMMDD*
 reserved:	ZERO
 reserved:	ZERO-FILL
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+
+# list of registers:
+not-register:	DIALECT-ALL
+register:	"ADDRESS\ OF"
+# register:	COM-REG			# only available is DOS/VS mode.
+# register:	CURRENT-DATE		# only available in OS/VS mode
+# register:	DEBUG-ITEM
+# register:	JSON-CODE
+register:	"LENGTH\ OF"		# only available in OS/VS or VSC2 mode or otherwise in 78-item's value clause.
+# register:	LINAGE-COUNTER
+# register:	LINE-COUNTER
+# register:	PAGE-COUNTER
+# register:	PRINT-SWITCH		# only available in OS/VS mode
+register:	RETURN-CODE		# Note this varies according to MF/OSVS/VSC2/XOpen mode.
+# register:	SHIFT-OUT		# only available in VSC2 mode
+# register:	SHIFT-IN		# only available in VSC2 mode
+# register:	SORT-CONTROL		# only available in VSC2 mode
+# register:	SORT-CORE-SIZE		# only available in OS/VS or VSC2 modes
+# register:	SORT-FILE-SIZE		# only available in OS/VS or VSC2 modes
+# register:	SORT-MESSAGE		# only available in OS/VS or VSC2 modes
+# register:	SORT-MODE-SIZE		# only available in OS/VS or VSC2 modes
+register:	SORT-RETURN
+# register:	TALLY			# only available in OS/VS or VSC2 modes
+# register:	TIME-OF-DAY		# only available in OS/VS mode
+# register:	WHEN-COMPILED		# only available in OS/VS or VSC2 modes (note the format of the date differs with the mode!)
+# register:	XML-CODE
+# register:	XML-EVENT
+# register:	XML-INFORMATION
+# register:	XML-NAMESPACE
+# register:	XML-NAMESPACE-PREFIX
+# register:	XML-NNAMESPACE
+# register:	XML-NNAMESPACE-PREFIX
+# register:	XML-NTEXT
+# register:	XML-TEXT
 
 # disable all functions
 not-intrinsic-function:	DIALECT-ALL

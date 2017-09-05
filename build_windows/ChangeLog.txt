@@ -1,4 +1,60 @@
 
+2017-09-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* set_env_vs_dist_x64.bat: replaced reference to "dist/bin" with
+	  "dist/bin_x64".
+	* makedist.bat: the batch now fails if cobc has a negative errorlevel
+	  (e.g. if a DLL is missing).
+	* makedist.bat: replaced setting of errorlevel with cb_errorlevel;
+	  errorlevel is a built-in variable which can be hidden by an
+	  environment variable of the same name.
+
+2017-09-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* set_env_vs_x64.bat, set_env_vs_dist_x64.bat: fix VCINSTALLDIR being
+	  expanded too soon.
+	* set_env_vs_dist_x64.bat: replaced reference to "dist/lib" with
+	  "dist/lib_x64".
+
+2017-09-02  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.h.in: optional setting and link for use of GetUsername
+	* vs2005, vs2008, vs2010, vs2012, vs2013, vs2015, vs2017: adjusted
+	  solutions to default to start project "cobc"; adjusted project files
+	  to always create usable PDBs with reasonable optimization for release
+	  and maximum debugging abilities for debug configurations
+	* README.txt: updated
+	* set_env_vs.bat, set_env_vs_x64.bat, set_env_vs_dist.bat,
+	  set_env_vs_dist_x64.bat: only try to setup a matching cl.exe if it
+	  isn't present already; fix setup for the uncommon VS2017 rules;
+	  show the cl.exe actually used
+	* makedist.bat: only remove dist folder if new binaries to distribute
+	  are found; copy html docs if available; show verbose compilation of
+	  extras if compilation did not work; ensure that changing in/out of
+	  folders always works
+
+2017-08-21  Edward Hart <edward.dan.hart@gmail.com>
+
+	* makedist.bat (copy_exes_and_libs): added DISAM handling.
+
+2017-08-20  Edward Hart <edward.dan.hart@gmail.com>
+
+	* makedist.bat: re-organised code, with subroutines at the end of the
+	  file.
+	* makedist.bat: make identifiers consistently use lowercase_snake_case.
+	* makedist.bat: the batch fails if DLLs are missing or if compiling the
+	  extras fails. (errorlevel is set to that of the failing command.)
+	* makedist.bat: added if exist checks around copy/erase commands which
+	  complain files are missing.
+	* makedist.bat (copy_exes_and_libs): add guess of ISAM-handler DLL name
+	  based on db.h.
+	* makedist.bat (compile_extras): removed -v from cobc when compiling extras.
+
+2017-08-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* makebisonflex.bat: use normal output name like ylwrap does;
+	  added sleep for slow / indexing systems
+
 2017-08-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* makebisonflex.bat: mimic ylwrap (only replace existing generated files

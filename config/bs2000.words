@@ -90,6 +90,7 @@ reserved:	BY
 reserved:	BYTE-LENGTH
 reserved:	CALL
 reserved:	CANCEL
+reserved:	CBL-CTR # note: this is a register, move as soon as supported
 reserved:	CENTER*
 reserved:	CF
 reserved:	CH
@@ -376,6 +377,7 @@ reserved:	POSITIVE
 reserved:	PRESENT
 reserved:	PREVIOUS*
 reserved:	PRINTING
+reserved:	PRINT-SWITCH # note: this is a register, move as soon as supported
 reserved:	PROCEDURE
 reserved:	PROCEED
 reserved:	PROCESSING*
@@ -455,7 +457,12 @@ reserved:	SIGN
 reserved:	SIGNED*
 reserved:	SIZE
 reserved:	SORT
+reserved:	SORT-CCSN # note: this is a register, move as soon as supported
+reserved:	SORT-CORE-SIZE # note: this is a register, move as soon as supported
+reserved:	SORT-EOW # note: this is a register, move as soon as supported
+reserved:	SORT-FILE-SIZE # note: this is a register, move as soon as supported
 reserved:	SORT-MERGE
+reserved:	SORT-MODE-SIZE # note: this is a register, move as soon as supported
 reserved:	SORT-TAPE
 reserved:	SORT-TAPES
 reserved:	SOURCE
@@ -538,11 +545,46 @@ reserved:	WORDS
 reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	XML
+reserved:	XML-CODE # note: this is a register, move as soon as supported
+reserved:	XML-EVENT # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE-PREFIX # note: this is a register, move as soon as supported
+reserved:	XML-NTEXT # note: this is a register, move as soon as supported
+reserved:	XML-TEXT # note: this is a register, move as soon as supported
 reserved:	YYYYDDD*
 reserved:	YYYYMMDD*
 reserved:	ZERO
 reserved:	ZEROES=ZERO
 reserved:	ZEROS=ZERO
+
+# list of registers
+not-register:	DIALECT-ALL
+register:	"ADDRESS\ OF"
+# register:	"BYTE-LENGTH\ OF"
+# register:	CBL-CTR
+register:	"LENGTH\ OF"
+# register:	LINAGE-COUNTER
+# register:	LINE-COUNTER
+# register:	PAGE-COUNTER
+# register:	PRINT-SWITCH
+register:	RETURN-CODE
+# register:	SORT-CCSN
+# register:	SORT-CORE-SIZE
+# register:	SORT-EOW
+# register:	SORT-FILE-SIZE
+# register:	SORT-MODE-SIZE
+register:	SORT-RETURN
+register:	TALLY
+# register:	XML-CODE
+# register:	XML-EVENT
+# register:	XML-NAMESPACE
+# register:	XML-NAMESPACE-PREFIX
+# register:	XML-NNAMESPACE
+# register:	XML-NNAMESPACE-PREFIX
+# register:	XML-NTEXT
+# register:	XML-TEXT
 
 # TO-DO: Add all printer mnemonics and special variables
 # (e.g. DATE-ISO4, CPU-TIME).

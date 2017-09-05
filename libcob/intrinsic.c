@@ -571,7 +571,7 @@ cob_alloc_field (cob_decimal *d)
 	cob_field_attr	attr;
 	cob_field	field;
 
-	if (unlikely(d->scale == COB_DECIMAL_NAN)) {
+	if (unlikely (d->scale == COB_DECIMAL_NAN)) {
 		/* Check this */
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		COB_ATTR_INIT (COB_TYPE_NUMERIC_BINARY, 9,
@@ -1758,7 +1758,7 @@ cob_alloc_set_field_str (char *str, const int offset, const int length)
 	make_field_entry (&field);
 	memcpy (curr_field->data, str, str_len);
 
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 }
@@ -1983,9 +1983,11 @@ seconds_from_formatted_time (const struct time_format format, const char *str,
 	int		unscaled_fraction = 0;
 	cob_decimal	*fractional_seconds = &d2;
 
-	if (unlikely(!sscanf (str, scanf_str, &hours, &minutes, &seconds))) {
-		cob_fatal_error(COB_FERROR_CODEGEN);
+	/* LCOV_EXCL_START */
+	if (unlikely (!sscanf (str, scanf_str, &hours, &minutes, &seconds))) {
+		cob_fatal_error (COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 
 	total_seconds = (hours * 60 * 60) + (minutes * 60) + seconds;
 
@@ -2896,9 +2898,11 @@ integer_of_mmdd (const struct date_format format, const int year,
 	int		month;
 	int		day;
 
-	if (unlikely(!sscanf (final_part, scanf_str, &month, &day))) {
-		cob_fatal_error(COB_FERROR_CODEGEN);
+	/* LCOV_EXCL_START */
+	if (unlikely (!sscanf (final_part, scanf_str, &month, &day))) {
+		cob_fatal_error (COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 	return integer_of_date (year, month, day);
 
 }
@@ -2908,9 +2912,11 @@ integer_of_ddd (const int year, const char *final_part)
 {
 	int	day;
 
-	if (unlikely(!sscanf (final_part, "%3d", &day))) {
-		cob_fatal_error(COB_FERROR_CODEGEN);
+	/* LCOV_EXCL_START */
+	if (unlikely (!sscanf (final_part, "%3d", &day))) {
+		cob_fatal_error (COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 	return integer_of_day (year, day);
 }
 
@@ -2925,9 +2931,11 @@ integer_of_wwwd (const struct date_format format, const int year,
 	cob_u32_t	total_days = 0;
 
 	first_week_monday = get_iso_week_one (days_up_to_year (year) + 1, 1);
-	if (unlikely(!sscanf (final_part, scanf_str, &week, &day_of_week))) {
-		cob_fatal_error(COB_FERROR_CODEGEN);
+	/* LCOV_EXCL_START */
+	if (unlikely (!sscanf (final_part, scanf_str, &week, &day_of_week))) {
+		cob_fatal_error (COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 	total_days = first_week_monday + ((week - 1) * 7) + day_of_week - 1;
 
 	return total_days;
@@ -2940,9 +2948,11 @@ integer_of_formatted_date (const struct date_format format,
 	int		year;
 	int		final_part_start = 4 + format.with_hyphens;
 
-	if (unlikely(!sscanf (formatted_date, "%4d", &year))) {
-		cob_fatal_error(COB_FERROR_CODEGEN);
+	/* LCOV_EXCL_START */
+	if (unlikely (!sscanf (formatted_date, "%4d", &year))) {
+		cob_fatal_error (COB_FERROR_CODEGEN);
 	}
+	/* LCOV_EXCL_STOP */
 
 	if (format.days == DAYS_MMDD) {
 		return integer_of_mmdd (format, year, formatted_date + final_part_start);
@@ -3021,10 +3031,10 @@ cob_decimal_pow (cob_decimal *pd1, cob_decimal *pd2)
 	cob_uli_t		n;
 	int			sign;
 
-	if (unlikely(pd1->scale == COB_DECIMAL_NAN)) {
+	if (unlikely (pd1->scale == COB_DECIMAL_NAN)) {
 		return;
 	}
-	if (unlikely(pd2->scale == COB_DECIMAL_NAN)) {
+	if (unlikely (pd2->scale == COB_DECIMAL_NAN)) {
 		pd1->scale = COB_DECIMAL_NAN;
 		return;
 	}
@@ -3595,7 +3605,7 @@ cob_intr_upper_case (const int offset, const int length, cob_field *srcfield)
 	for (i = 0; i < size; ++i) {
 		curr_field->data[i] = (cob_u8_t)toupper (srcfield->data[i]);
 	}
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -3612,7 +3622,7 @@ cob_intr_lower_case (const int offset, const int length, cob_field *srcfield)
 	for (i = 0; i < size; ++i) {
 		curr_field->data[i] = (cob_u8_t)tolower (srcfield->data[i]);
 	}
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -3629,7 +3639,7 @@ cob_intr_reverse (const int offset, const int length, cob_field *srcfield)
 	for (i = 0; i < size; ++i) {
 		curr_field->data[i] = srcfield->data[size - i - 1];
 	}
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -3780,7 +3790,7 @@ cob_intr_concatenate (const int offset, const int length,
 		p += f[i]->size;
 	}
 
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	cob_free (f);
@@ -3852,7 +3862,7 @@ cob_intr_trim (const int offset, const int length,
 		++size;
 	}
 	curr_field->size = size;
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -3971,7 +3981,7 @@ cob_intr_when_compiled (const int offset, const int length, cob_field *f)
 	make_field_entry (f);
 
 	memcpy (curr_field->data, f->data, f->size);
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;
@@ -3996,7 +4006,7 @@ cob_intr_current_date (const int offset, const int length)
 	add_offset_time (0, &time.utc_offset, 16, buff);
 
 	memcpy (curr_field->data, buff, (size_t)21);
-	if (unlikely(offset > 0)) {
+	if (unlikely (offset > 0)) {
 		calc_ref_mod (curr_field, offset, length);
 	}
 	return curr_field;

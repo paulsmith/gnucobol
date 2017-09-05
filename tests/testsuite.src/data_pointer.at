@@ -44,7 +44,7 @@ AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
 
 # Previous test "failed" --> 32 bit
 
-[AT_CHECK([./prog], [0], [0x00000000
+[AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0x00000000
 0x00000001
 0x00000000
 ])]
@@ -53,7 +53,7 @@ AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
 
 # Previous test "passed" --> 64 bit
 
-[AT_CHECK([./prog], [0], [0x0000000000000000
+[AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0x0000000000000000
 0x0000000000000001
 0x0000000000000000
 ])])

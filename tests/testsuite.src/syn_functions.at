@@ -569,3 +569,30 @@ prog.cob: 9: error: cannot specify offset and SYSTEM-OFFSET at the same time
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([FUNCTION LENGTH / BYTE-LENGTH])
+AT_KEYWORDS([functions PREFIXED])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           DISPLAY FUNCTION LENGTH ("abcd" & "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH ("abcd" "xyz")
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH ("abcd" & "xyz" PHYSICAL)
+           END-DISPLAY
+           DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz" PHYSICAL)
+           END-DISPLAY
+           .
+])
+
+AT_CHECK([$COMPILE -Wno-pending prog.cob], [1], [],
+[prog.cob: 9: error: syntax error, unexpected Literal, expecting PHYSICAL or )
+])
+
+AT_CLEANUP

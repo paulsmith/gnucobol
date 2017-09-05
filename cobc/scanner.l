@@ -111,6 +111,12 @@ static int yywrap (void) {
 		return last_token;		\
 	} ONCE_COB
 
+#define SET_LOCATION(x)                         \
+	do {					\
+		(x)->source_file = cb_source_file;		\
+		(x)->source_line = cb_source_line;		\
+	} ONCE_COB
+
 /* CONSTANT (78 level) structure */
 struct cb_level_78 {
 	struct cb_level_78	*next;		/* Next in chain */
@@ -867,6 +873,7 @@ H#[0-9A-Za-z]* {
 				break;
 			}
 			yylval = CB_VALUE (p78->fld78->values);
+			SET_LOCATION (yylval);
 			RETURN_TOK (LITERAL);
 		}
 	}
@@ -1835,7 +1842,6 @@ cb_add_const_var (const char *name, cb_tree value)
 	struct cb_level_78	*p78;
 	struct cb_field		*f;
 
-
 	/* Add an inline constant */
 	x = cb_build_constant (cb_build_reference (name), value);
 	f = CB_FIELD (x);
@@ -2012,6 +2018,9 @@ ylex_clear_all (void)
 	plexsize = 0;
 	pic1size = 0;
 	pic2size = 0;
+
+	cb_reset_78 ();
+	cb_reset_global_78 ();
 }
 
 void

@@ -42,7 +42,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [1])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1])
 
 AT_CLEANUP
 
@@ -94,7 +94,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_MODULE mod1.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE mod2.cob], [0], [], [])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -131,6 +131,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([./prog], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP

@@ -107,6 +107,10 @@ _MSC_VER == 1700 (Visual Studio 2012, VS11) since OS-Version 7  / 2008 R2
 _MSC_VER == 1800 (Visual Studio 2013, VS12) since OS-Version 7  / 2008 R2
 _MSC_VER == 1900 (Visual Studio 2015, VS14) since OS-Version 7  / 2008 R2
 _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
+
+Note: also defined together with __clang__ in both frontends:
+   __llvm__ Clang LLVM frontend for Visual Studio by LLVM Project (via clang-cl.exe [cl build options])
+   __c2__   Clang C2 frontend with MS CodeGen (via clang.exe [original clang build options])
 */
 
 #if _MSC_VER >= 1500
@@ -313,9 +317,6 @@ _MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
 #define snprintf		_snprintf
 #define getpid			_getpid
 #define access			_access
-/* remark: _putenv_s always overwrites, add a check for overwrite = 1 if necessary later*/
-#define setenv(name,value,overwrite)	_putenv_s(name,value)
-#define unsetenv(name)					_putenv_s(name,"")
 #if COB_USE_VC2013_OR_GREATER
 /* only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
@@ -1144,6 +1145,10 @@ typedef struct __cob_module {
 	unsigned char		flag_main;		/* Main module */
 	unsigned char		flag_fold_call;		/* Fold case */
 	unsigned char		flag_exit_program;	/* Exit after CALL */
+
+	unsigned char		flag_did_cancel;	/* Module has been canceled */
+	unsigned char		unused[3];		/* Use these flags up later, added for alignment */
+
 } cob_module;
 
 
@@ -1294,6 +1299,8 @@ typedef struct __cob_global {
 	int			cob_max_y;		/* Screen max y */
 	int			cob_max_x;		/* Screen max x */
 
+	unsigned int		cob_stmt_exception;	/* Statement has 'On Exception' */
+
 } cob_global;
 
 /* File I/O function pointer structure */
@@ -1335,6 +1342,9 @@ COB_EXPIMP int		cob_is_initialized	(void);
 COB_EXPIMP cob_global		*cob_get_global_ptr	(void);
 
 COB_EXPIMP void	cob_init			(const int, char **);
+
+COB_EXPIMP int	cob_module_global_enter	(cob_module **, cob_global **,
+						 const int, const int, const unsigned int *);
 COB_EXPIMP void	cob_module_enter		(cob_module **, cob_global **,
 						 const int);
 COB_EXPIMP void	cob_module_leave		(cob_module *);
@@ -1346,6 +1356,7 @@ DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
 
 COB_EXPIMP void	*cob_malloc			(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_realloc			(void *, const size_t, const size_t) COB_A_MALLOC;
+COB_EXPIMP char	*cob_strdup				(const char *);
 COB_EXPIMP void	cob_free			(void *);
 COB_EXPIMP void	*cob_fast_malloc		(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_cache_malloc		(const size_t) COB_A_MALLOC;
@@ -1354,7 +1365,9 @@ COB_EXPIMP void	cob_cache_free			(void *);
 
 COB_EXPIMP void	cob_set_locale			(cob_field *, const int);
 
-COB_EXPIMP char *cob_expand_env_string(char *);
+COB_EXPIMP int 	cob_setenv	(const char *, const char *, int);
+COB_EXPIMP int 	cob_unsetenv	(const char *);
+COB_EXPIMP char	*cob_expand_env_string	(char *);
 
 COB_EXPIMP void	cob_check_version		(const char *, const char *,
 						 const int);

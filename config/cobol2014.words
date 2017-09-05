@@ -355,6 +355,7 @@ reserved:	PARAGRAPH*
 reserved:	PERFORM
 reserved:	PF
 reserved:	PH
+reserved:	PHYSICAL # only listed as argument for LENGTH FUNCTIONS... 
 reserved:	PIC=PICTURE
 reserved:	PICTURE
 reserved:	PLUS

@@ -111,5 +111,5 @@ reserved-words:		default
 # enable all intrinsic functions
 intrinsic-function:	DIALECT-ALL
 
-# enable GnuCOBOL registers
-register:	NUMBER-OF-CALL-PARAMETERS
+# enable all registers
+register:		DIALECT-ALL

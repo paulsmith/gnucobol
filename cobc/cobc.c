@@ -96,7 +96,15 @@ struct strcache {
 
 /* C version info */
 #ifdef	__VERSION__
+#if		! defined (_MSC_VER)
 #define OC_C_VERSION_PRF	""
+#elif	defined (__c2__)
+#define OC_C_VERSION_PRF	"(Microsoft C2) "
+#elif	defined (__llvm__)
+#define OC_C_VERSION_PRF	"(LLVM / MSC) "
+#else
+#define OC_C_VERSION_PRF	"(Microsoft) "
+#endif
 #define OC_C_VERSION	CB_XSTRINGIFY(__VERSION__)
 #elif	defined(__xlc__)
 #define OC_C_VERSION_PRF	"(IBM XL C/C++) "
@@ -257,10 +265,10 @@ struct cb_exception cb_exception_table[] = {
 };
 #undef	COB_EXCEPTION
 
-#define	CB_FLAG(var,pdok,name,doc)	int var = 0;
-#define	CB_FLAG_ON(var,pdok,name,doc)	int var = 1;
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	int var = def;
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)
+#define	CB_FLAG(var,print_help,name,doc)	int var = 0;
+#define	CB_FLAG_ON(var,print_help,name,doc)	int var = 1;
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)	int var = def;
+#define	CB_FLAG_NQ(print_help,name,opt,doc)
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
@@ -500,15 +508,15 @@ static const struct option long_options[] = {
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
 	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},
 
-#define	CB_FLAG(var,pdok,name,doc)			\
+#define	CB_FLAG(var,print_help,name,doc)			\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
 	{"fno-" name,		CB_NO_ARG, &var, 0},
-#define	CB_FLAG_ON(var,pdok,name,doc)		\
+#define	CB_FLAG_ON(var,print_help,name,doc)		\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
 	{"fno-" name,		CB_NO_ARG, &var, 0},
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)		\
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)		\
 	{"f" name,		CB_RQ_ARG, NULL, opt},
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)			\
+#define	CB_FLAG_NQ(print_help,name,opt,doc)			\
 	{"f" name,		CB_RQ_ARG, NULL, opt},
 #include "flag.def"
 #undef	CB_FLAG
@@ -561,10 +569,9 @@ static const struct option long_options[] = {
 	{NULL,			0, NULL, 0}
 };
 
-#undef	CB_ARG_NO
-#undef	CB_ARG_RQ
-#undef	CB_ARG_NQ
-#undef	CB_ARG_OP
+#undef	CB_NO_ARG
+#undef	CB_RQ_ARG
+#undef	CB_OP_ARG
 
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
@@ -889,26 +896,26 @@ cobc_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = calloc ((size_t)1, size);
+	/* LCOV_EXCL_START */
 	if (unlikely(!mptr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
 void
 cobc_free (void * mptr)
 {
+	/* LCOV_EXCL_START */
 	if (unlikely(!mptr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
-	free(mptr);
+	/* LCOV_EXCL_STOP */
+	free (mptr);
 }
 
 void *
@@ -974,12 +981,12 @@ cobc_main_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_main_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1090,12 +1097,12 @@ cobc_parse_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_parse_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_parse_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1205,12 +1212,12 @@ cobc_plex_strdup (const char *dupstr)
 	void	*p;
 	size_t	n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_plex_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
 	p = cobc_plex_malloc (n + 1);
 	memcpy (p, dupstr, n);
@@ -1222,12 +1229,12 @@ cobc_check_string (const char *dupstr)
 {
 	struct strcache	*s;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_check_string");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	for (s = base_string; s; s = s->next) {
 		if (!strcmp (dupstr, (const char *)s->val)) {
 			return s->val;
@@ -1516,6 +1523,14 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 	return n;
 }
 
+/* exit to OS before processing a COBOL/C source file */
+DECLNORET static void COB_A_NORETURN
+cobc_early_exit (int retcode)
+{
+	cobc_free_mem ();
+	exit (retcode);
+}
+
 DECLNORET static void COB_A_NORETURN
 cobc_err_exit (const char *fmt, ...)
 {
@@ -1528,8 +1543,7 @@ cobc_err_exit (const char *fmt, ...)
 	va_end (ap);
 	putc ('\n', stderr);
 	fflush (stderr);
-	cobc_free_mem ();
-	exit (1);
+	cobc_early_exit (1);
 }
 
 static struct cb_define_struct *
@@ -1579,12 +1593,12 @@ cobc_stradd_dup (const char *str1, const char *str2)
 	char	*p;
 	size_t	m, n;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(!str1 || !str2)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m = strlen (str1);
 	n = strlen (str2);
 	p = cobc_main_malloc (m + n + 1);
@@ -1624,6 +1638,8 @@ cobc_getenv_path (const char *env)
 	return cobc_main_strdup (p);
 }
 
+/* compiler startup phase: add string to internal flags which keep its own length,
+   if target field is too small reallocate the memory with doubled size */
 static void
 cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 	      const char *s3)
@@ -1709,6 +1725,7 @@ cobc_clean_up (const int status)
 		fclose (cb_storage_file);
 		cb_storage_file = NULL;
 	}
+
 	if (ppin) {
 		fclose (ppin);
 		ppin = NULL;
@@ -1718,15 +1735,19 @@ cobc_clean_up (const int status)
 		fclose (ppout);
 		ppout = NULL;
 	}
+	plex_call_destroy ();
+	plex_clear_all ();
+
 	if (yyin) {
 		fclose (yyin);
 		yyin = NULL;
 	}
-
 	if (yyout) {
 		fclose (yyout);
 		yyout = NULL;
 	}
+	ylex_call_destroy ();
+	ylex_clear_all ();
 
 	for (fn = file_list; fn; fn = fn->next) {
 		for (lf = fn->localfile; lf; lf = lf->next) {
@@ -1784,6 +1805,7 @@ cobc_clean_up (const int status)
 	cobc_free_mem ();
 	file_list = NULL;
 }
+
 static void
 set_listing_date (void)
 {
@@ -1869,6 +1891,8 @@ cobc_abort_msg (void)
 	}
 }
 
+/* return to OS in case of hard errors after trying to output the error to
+   listing file if active */
 DECLNORET static void COB_A_NORETURN
 cobc_abort_terminate (void)
 {
@@ -2035,8 +2059,10 @@ cobc_print_info (void)
 	putchar ('\n');
 	puts (_("build information"));
 	cobc_var_print (_("build environment"),	COB_BLD_BUILD, 0);
-	snprintf (versbuff, 55, "%s\tC version %s%s", COB_BLD_CC, OC_C_VERSION_PRF, OC_C_VERSION);
-	cobc_var_print ("CC", versbuff, 0);
+	cobc_var_print ("CC", COB_BLD_CC, 0);
+	// Note: newline because most compilers define a long version string (> 30 characters)
+	snprintf (versbuff, 55, "%s%s", OC_C_VERSION_PRF, OC_C_VERSION);
+	cobc_var_print ("C version", versbuff, 0);
 	cobc_var_print ("CPPFLAGS",		COB_BLD_CPPFLAGS, 0);
 	cobc_var_print ("CFLAGS",		COB_BLD_CFLAGS, 0);
 	cobc_var_print ("LD",			COB_BLD_LD, 0);
@@ -2130,53 +2156,33 @@ cobc_print_info (void)
 }
 
 static void
-cobc_print_warn (const char *name, const char *doc, const int warnopt)
+cobc_print_active (const char *doc, const int print_help)
 {
-	switch (warnopt) {
-	case 0:
-		printf ("  -W%-19s\t%s\n", name, doc);
-		fputs ("\t\t\t", stdout);
-		fputs (_("- NOT set with -Wall"), stdout);
-		putchar ('\n');
-		break;
-	case 1:
-		printf ("  -W%-19s\t%s\n", name, doc);
-		break;
-	case 2:
-		printf ("  -Wno-%-16s\t%s\n", name, doc);
-		fputs ("\t\t\t", stdout);
-		fputs (_("- ALWAYS active"), stdout);
-		putchar ('\n');
-		break;
-	default:
-		/* LCOV_EXCL_START */
-		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
-			"cobc_print_warn", "warnopt");
-		COBC_ABORT ();
-		break;
-		/* LCOV_EXCL_STOP */
+	if (!print_help) {
+		return;
 	}
+	
+	puts (doc);
 }
 
 static void
-cobc_print_flag (const char *name, const char *doc,
-		 const int pdok, const char *odoc, const char *def)
+cobc_print_config_flag (const char *name, const char *doc,
+		 const char *odoc)
 {
 	char		buff[78];
 
-	if (!pdok || !doc) {
+	if (!doc) {
 		return;
 	}
-	if (!odoc) {
-		snprintf (buff, sizeof (buff) - 1, "-f%s", name);
-	} else if (!strcmp(odoc, "no")) {
-		snprintf (buff, sizeof (buff) - 1, "-fno-%s", name);
-	} else {
-		snprintf (buff, sizeof (buff) - 1, "-f%s=%s", name, odoc);
+	if (odoc) {
+		snprintf (buff, sizeof (buff) - 1, "%s=%s", name, odoc);
+		buff [77] = 0;	/* keep analyzer happy ... */
+		name = (const char *) &buff;
 	}
-	printf ("  %-21s\t%s\n", buff, doc);
-	if (def) {
-		printf ("\t\t\t- %s: %s\n", _("default"), def);
+	if (strlen (name) <= 19) {
+		printf ("  -f%-19s  %s\n", name, doc);
+	} else {
+		printf ("  -f%s\t%s\n", name, doc);
 	}
 }
 
@@ -2200,7 +2206,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -vvv, -verbose=3      like -vv but additional pass verbose option\n" \
 	        "                        to linker"));
 	puts (_("  -q, -brief            reduced displays, commands invoked not shown"));
-	puts (_ ("  -###                 like -v but commands not executed"));
+	puts (_("  -###                  like -v but commands not executed"));
 	puts (_("  -x                    build an executable program"));
 	puts (_("  -m                    build a dynamically loadable module (default)"));
 	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
@@ -2249,35 +2255,39 @@ cobc_print_usage (char * prog)
 	puts (_("  -save-temps[=<dir>]   save intermediate files\n"
 			"                        - default: current directory"));
 	puts (_("  -ext <extension>      add file extension for resolving COPY"));
-
 	putchar ('\n');
 
+	puts (_("Warning options:"));
 	puts (_("  -W                    enable all warnings"));
 	puts (_("  -Wall                 enable most warnings (all except as noted below)"));
 	puts (_("  -Wno-<warning>        disable warning enabled by -W or -Wall"));
 #define	CB_WARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 1);
+	puts (doc);
 #define	CB_ONWARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 2);
+	puts (doc);							\
+	/* TRANSLATORS: This msgid is appended to msgid for -Wno-pending and others */ \
+	puts (_("                        - ALWAYS active"));
 #define	CB_NOWARNDEF(var,name,doc)		\
-	cobc_print_warn (name, doc, 0);
+	puts (doc);							\
+	/* TRANSLATORS: This msgid is appended to msgid for -Wpossible-truncate and others */ \
+	puts (_("                        - NOT set with -Wall"));
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 	puts (_("  -Werror               treat all warnings as errors"));
 	puts (_("  -Werror=<warning>     treat specified <warning> as error"));
-
 	putchar ('\n');
 
-#define	CB_FLAG(var,pdok,name,doc)		\
-	cobc_print_flag (name, doc, pdok, NULL, NULL);
-#define	CB_FLAG_ON(var,pdok,name,doc)		\
-	cobc_print_flag (name, doc, pdok, "no", NULL);
-#define	CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	\
-	cobc_print_flag (name, doc, pdok, vdoc, ddoc);
-#define	CB_FLAG_NQ(pdok,name,opt,doc,vdoc)		\
-	cobc_print_flag (name, doc, pdok, vdoc, NULL);
+	puts (_("Compiler options:"));
+#define	CB_FLAG(var,print_help,name,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_ON(var,print_help,name,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_RQ(var,print_help,name,def,opt,doc)		\
+	cobc_print_active (doc, print_help);
+#define	CB_FLAG_NQ(print_help,name,opt,doc)		\
+	cobc_print_active (doc, print_help);
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
@@ -2285,17 +2295,17 @@ cobc_print_usage (char * prog)
 #undef	CB_FLAG_NQ
 
 	putchar ('\n');
-
+	puts (_("Compiler dialect configuration options:"));
 #define	CB_CONFIG_STRING(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+	cobc_print_config_flag (name, doc, _("<value>"));
 #define	CB_CONFIG_INT(var,name,min,max,odoc,doc)		\
-	cobc_print_flag (name, doc, 1, odoc, NULL);
+	cobc_print_config_flag (name, doc, odoc);
 #define	CB_CONFIG_ANY(type,var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<value>"), NULL);
+	cobc_print_config_flag (name, doc, _("<value>"));
 #define	CB_CONFIG_BOOLEAN(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, NULL, NULL);
+	cobc_print_config_flag (name, doc, NULL);
 #define	CB_CONFIG_SUPPORT(var,name,doc)		\
-	cobc_print_flag (name, doc, 1, _("<support>"), NULL);
+	cobc_print_config_flag (name, doc, _("<support>"));
 #include "config.def"
 #undef	CB_CONFIG_ANY
 #undef	CB_CONFIG_INT
@@ -2329,9 +2339,9 @@ cobc_print_usage (char * prog)
 	putchar (' ');
 	printf (_("'%s'"), "unconformable");
 	putchar ('\n');
-	cobc_print_flag ("not-reserved", _("word to be taken out of the reserved words list"), 1, _("<word>"), NULL);
-	cobc_print_flag ("reserved", _("word to be added to reserved words list"), 1, _("<word>"), NULL);
-	cobc_print_flag ("reserved", _("word to be added to reserved words list as alias"), 1, _("<word>:<alias>"), NULL);
+	cobc_print_config_flag ("not-reserved", _("word to be taken out of the reserved words list"), _("<word>"));
+	cobc_print_config_flag ("reserved", _("word to be added to reserved words list"), _("<word>"));
+	cobc_print_config_flag ("reserved", _("word to be added to reserved words list as alias"), _("<word>:<alias>"));
 
 	putchar ('\n');
 
@@ -2355,6 +2365,8 @@ cobc_options_error_build (void)
 	cobc_err_exit (_("only one of options 'm', 'x', 'b' may be specified"));
 }
 
+/* decipher functions given on command line,
+   checking that these are actually intrinsic functions */
 static void
 cobc_deciph_funcs (const char *opt)
 {
@@ -2378,6 +2390,7 @@ cobc_deciph_funcs (const char *opt)
 	cobc_free (p);
 }
 
+/* process command line options */
 static int
 process_command_line (const int argc, char **argv)
 {
@@ -2424,8 +2437,7 @@ process_command_line (const int argc, char **argv)
 
 		case '?':
 			/* Unknown option or ambiguous */
-			cobc_free_mem ();
-			exit (1);
+			cobc_early_exit (1);
 
 		case 'h':
 			/* --help */
@@ -2453,19 +2465,17 @@ process_command_line (const int argc, char **argv)
 				cobc_buffer = NULL;
 #endif
 			}
-			cobc_free_mem ();
-			exit (0);
+			cobc_early_exit (0);
 
 		case 'V':
 			/* --version */
 			cobc_print_version ();
-			cobc_free_mem ();
-			exit (0);
+			cobc_early_exit (0);
 
 		case 'i':
 			/* --info */
 			cobc_print_info ();
-			exit (0);
+			cobc_early_exit (0);
 
 		/*
 			The following list options are postponed until
@@ -2572,8 +2582,7 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit for configuration errors resulting from -std/-conf/default.conf */
 	if (conf_ret != 0) {
-		cobc_free_mem ();
-		exit (1);
+		cobc_early_exit (1);
 	}
 
 	cob_optind = 1;
@@ -2801,7 +2810,7 @@ process_command_line (const int argc, char **argv)
 			if (cb_listing_outputfile) {
 				cobc_main_free (cb_listing_outputfile);
 			}
-			/* FIXME: add option to place each source in a single listing 
+			/* FIXME: add option to place each source in a single listing
 			          by specifying a directory (similar to -P) */
 			cb_listing_outputfile = cobc_main_strdup (cob_optarg);
 			break;
@@ -2840,8 +2849,7 @@ process_command_line (const int argc, char **argv)
 			/* temporary: check if we run the testsuite and skip
 			   the run if we don't have the internal xref */
 			if (getenv ("COB_IS_RUNNING_IN_TESTMODE")) {
-				cobc_free_mem ();
-				exit (77);
+				cobc_early_exit (77);
 			}
 #else
 			/* -Xref : Generate internal listing */
@@ -2870,8 +2878,8 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-I");
 			}
-			if (stat (cob_optarg, &st) != 0 ||
-			    !(S_ISDIR (st.st_mode))) {
+			if (stat (cob_optarg, &st) != 0
+			|| !(S_ISDIR (st.st_mode))) {
 				break;
 			}
 #ifdef	_MSC_VER
@@ -2889,8 +2897,8 @@ process_command_line (const int argc, char **argv)
 			if (strlen (cob_optarg) > COB_SMALL_MAX) {
 				cobc_err_exit (COBC_INV_PAR, "-L");
 			}
-			if (stat (cob_optarg, &st) != 0 ||
-			    !(S_ISDIR (st.st_mode))) {
+			if (stat (cob_optarg, &st) != 0
+			||  !(S_ISDIR (st.st_mode))) {
 				break;
 			}
 #ifdef	_MSC_VER
@@ -3090,7 +3098,7 @@ process_command_line (const int argc, char **argv)
 			cobc_err_exit (_("invalid option detected"));
 		}
 	}
-	
+
 	/* Load reserved words from fixed word-list if specified */
 	if (cb_reserved_words != NULL) {
 		cb_load_words();
@@ -3098,32 +3106,12 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit for configuration errors resulting from -f<conf-tag>[=<value>] */
 	if (conf_ret != 0) {
-		cobc_free_mem ();
-		exit (1);
+		cobc_early_exit (1);
 	}
 
-	/* Set relaxed syntax configuration options if requested */
-	/* part 1: relaxed syntax compiler configuration option */
-	if (cb_relaxed_syntax_checks) {
-		if (cb_reference_out_of_declaratives > CB_WARNING) {
-			cb_reference_out_of_declaratives = CB_WARNING;
-		}
-		/* fixme - the warning was only raised if not relaxed */
-		cb_warn_ignored_initial_val = 0;
-	}
-#if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
-		 are available at command line - maybe re-add with another name */
-	/* 2: relaxed syntax group option from command line */
-	if (cb_flag_relaxed_syntax_group) {
-		cb_relaxed_syntax_checks = 1;
-		cb_larger_redefines_ok = 1;
-		cb_relax_level_hierarchy = 1;
-		cb_top_level_occurs_clause = CB_OK;
-	}
-#endif
-
+	/* handling of list options */
 	if (list_reserved) {
-		/* includes register listing */
+		/* includes register list */
 		cb_list_reserved ();
 	} else if (list_registers) {
 		cb_list_registers ();
@@ -3140,9 +3128,28 @@ process_command_line (const int argc, char **argv)
 
 	/* Exit if list options were specified */
 	if (exit_option) {
-		cobc_free_mem ();
-		exit (0);
+		cobc_early_exit (0);
 	}
+
+	/* Set relaxed syntax configuration options if requested */
+	/* part 1: relaxed syntax compiler configuration option */
+	if (cb_relaxed_syntax_checks) {
+		if (cb_reference_out_of_declaratives > CB_WARNING) {
+			cb_reference_out_of_declaratives = CB_WARNING;
+		}
+		/* FIXME - the warning was only raised if not relaxed */
+		cb_warn_ignored_initial_val = 0;
+	}
+#if 0 /* deactivated as -frelaxed-syntax-checks and other compiler configurations
+		 are available at command line - maybe re-add with another name */
+	/* 2: relaxed syntax group option from command line */
+	if (cb_flag_relaxed_syntax_group) {
+		cb_relaxed_syntax_checks = 1;
+		cb_larger_redefines_ok = 1;
+		cb_relax_level_hierarchy = 1;
+		cb_top_level_occurs_clause = CB_OK;
+	}
+#endif
 
 	/* Set active warnings to errors, if requested */
 	if (error_all_warnings) {
@@ -3168,6 +3175,14 @@ process_command_line (const int argc, char **argv)
 	&&  cb_listing_statements > CB_OBSOLETE) {
 		cb_listing_statements = cb_title_statement;
 	}
+	if (cb_flag_notrunc) {
+		cb_binary_truncate = 0;
+		cb_pretty_display = 0;
+	}
+	if (cb_flag_traceall) {
+		cb_flag_trace = 1;
+		cb_flag_source_location = 1;
+	}
 
 	/* debug: Turn on all exception conditions */
 	if (cobc_wants_debug) {
@@ -3183,11 +3198,6 @@ process_command_line (const int argc, char **argv)
 	/* If C debug, do not strip output */
 	if (gflag_set) {
 		strip_output = 0;
-	}
-
-	if (cb_flag_traceall) {
-		cb_flag_trace = 1;
-		cb_flag_source_location = 1;
 	}
 
 	return cob_optind;
@@ -4091,8 +4101,8 @@ preprocess (struct filename *fn)
 	}
 
 	if (ppout) {
-		if (unlikely(fclose(ppout) != 0)) {
-			cobc_terminate(fn->preprocess);
+		if (unlikely (fclose (ppout) != 0)) {
+			cobc_terminate (fn->preprocess);
 		}
 		ppout = NULL;
 	}
@@ -4101,8 +4111,8 @@ preprocess (struct filename *fn)
 	plex_call_destroy ();
 
 	if (cobc_gen_listing && !cobc_list_file) {
-		if (unlikely(fclose (cb_listing_file) != 0)) {
-			cobc_terminate(fn->listing_file);
+		if (unlikely (fclose (cb_listing_file) != 0)) {
+			cobc_terminate (fn->listing_file);
 		}
 #ifndef COB_INTERNAL_XREF
 		/* external cross-reference with cobxref */
@@ -4782,7 +4792,8 @@ xref_print (struct cb_xref *xref, const enum xref_type type, struct cb_xref *xre
 
 	cnt = 0;
 	for (elem = xref->head; elem; elem = elem->next) {
-		pd_off += sprintf (print_data + pd_off, "  %-6d", elem->line);
+		pd_off += sprintf (print_data + pd_off, " %c%-6u",
+			elem->receive ? '*' : ' ', elem->line);
 		if (++cnt >= maxcnt) {
 			cnt = 0;
 			(void)terminate_str_at_first_trailing_space (print_data);
@@ -4807,7 +4818,7 @@ xref_88_values (struct cb_field *field)
 	for (f = field->validation; f; f = f->sister) {
 		strncpy (lcl_name, (char *)f->name, LCL_NAME_MAX);
 		pd_off = sprintf (print_data,
-			"%-30.30s %-6d ",
+			"%-30.30s %-6u ",
 			lcl_name, f->common.source_line);
 		xref_print (&f->xref, XREF_FIELD, NULL);
 
@@ -4837,7 +4848,7 @@ xref_fields (struct cb_field *top)
 			continue;
 		}
 		found = 1;
-		pd_off = sprintf (print_data, "%-30.30s %-6d ",
+		pd_off = sprintf (print_data, "%-30.30s %-6u ",
 			 lcl_name, top->common.source_line);
 
 		/* print xref for field */
@@ -4866,7 +4877,7 @@ xref_files_and_their_records (cb_tree file_list_p)
 	cb_tree	l;
 
 	for (l = file_list_p; l; l = CB_CHAIN (l)) {
-		pd_off = sprintf (print_data, "%-30.30s %-6d ",
+		pd_off = sprintf (print_data, "%-30.30s %-6u ",
 			 CB_FILE (CB_VALUE (l))->name,
 			 CB_FILE (CB_VALUE (l))->common.source_line);
 		xref_print (&CB_FILE (CB_VALUE (l))->xref, XREF_FILE, NULL);
@@ -4913,7 +4924,7 @@ xref_labels (cb_tree label_list_p)
 			} else {
 				label_type = 'P';
 			}
-			pd_off = sprintf (print_data, "%c %-28.28s %-6d ",
+			pd_off = sprintf (print_data, "%c %-28.28s %-6u ",
 				label_type, lab->name, lab->common.source_line);
 			xref_print (&lab->xref, XREF_LABEL, NULL);
 		}
@@ -4974,7 +4985,7 @@ print_program_trailer (void)
 		if (p->next_program) {
 			print_names = 1;
 		}
-	
+
 		/* Print file/symbol tables if requested */
 		if (cb_listing_symbols) {
 			set_listing_header_symbols();
@@ -5298,7 +5309,7 @@ line_has_listing_directive (char *line, const enum cb_format source_format, int 
 	char	*token;
 
 	token = get_directive_start (line, source_format);
-	
+
 	if (token != NULL &&
 		!strncasecmp (token, "LISTING", 7)) {
 		token += 7;
@@ -5372,7 +5383,7 @@ line_has_listing_statement (char *line, const enum cb_format source_format)
 
 	/* handle statements */
 	if (!strncasecmp (statement_start, "TITLE", 5)) {
-		/* check if we actually want to process TITLE as a statement 
+		/* check if we actually want to process TITLE as a statement
 		   note: the title statement is an extra listing-directive statement */
 		if (cb_title_statement > CB_OBSOLETE) {
 			return 0;
@@ -7523,11 +7534,39 @@ main (int argc, char **argv)
 	/* Process command line arguments */
 	iargs = process_command_line (argc, argv);
 
-	cb_text_column = cb_config_text_column;
-
 	/* Check the filename */
 	if (iargs == argc) {
 		cobc_err_exit (_("no input files"));
+	}
+
+	/* Defaults are set here */
+	if (!cb_flag_syntax_only) {
+		if (!wants_nonfinal) {
+			if (cobc_flag_main) {
+				cb_compile_level = CB_LEVEL_EXECUTABLE;
+			} else if (cobc_flag_module) {
+				cb_compile_level = CB_LEVEL_MODULE;
+			} else if (cobc_flag_library) {
+				cb_compile_level = CB_LEVEL_LIBRARY;
+			} else if (cb_compile_level == 0) {
+				cb_compile_level = CB_LEVEL_MODULE;
+				cobc_flag_module = 1;
+			}
+		}
+		if (wants_nonfinal && cb_compile_level != CB_LEVEL_PREPROCESS &&
+		    !cobc_flag_main && !cobc_flag_module && !cobc_flag_library) {
+			cobc_flag_module = 1;
+		}
+	} else {
+		cb_compile_level = CB_LEVEL_TRANSLATE;
+		cobc_flag_main = 0;
+		cobc_flag_module = 0;
+		cobc_flag_library = 0;
+	}
+
+	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&
+	    (argc - iargs) > 1) {
+		cobc_err_exit (_("%s option invalid in this combination"), "-o");
 	}
 
 	/* compiler specific options for (non/very) verbose output */
@@ -7583,45 +7622,12 @@ main (int argc, char **argv)
 	/* Add default COB_COPY_DIR directory */
 	CB_TEXT_LIST_CHK (cb_include_list, COB_COPY_DIR);
 
-	/* Defaults are set here */
-	if (!cb_flag_syntax_only) {
-		if (!wants_nonfinal) {
-			if (cobc_flag_main) {
-				cb_compile_level = CB_LEVEL_EXECUTABLE;
-			} else if (cobc_flag_module) {
-				cb_compile_level = CB_LEVEL_MODULE;
-			} else if (cobc_flag_library) {
-				cb_compile_level = CB_LEVEL_LIBRARY;
-			} else if (cb_compile_level == 0) {
-				cb_compile_level = CB_LEVEL_MODULE;
-				cobc_flag_module = 1;
-			}
-		}
-		if (wants_nonfinal && cb_compile_level != CB_LEVEL_PREPROCESS &&
-		    !cobc_flag_main && !cobc_flag_module && !cobc_flag_library) {
-			cobc_flag_module = 1;
-		}
-	} else {
-		cb_compile_level = CB_LEVEL_TRANSLATE;
-		cobc_flag_main = 0;
-		cobc_flag_module = 0;
-		cobc_flag_library = 0;
-	}
-
-	if (output_name && cb_compile_level < CB_LEVEL_LIBRARY &&
-	    (argc - iargs) > 1) {
-		cobc_err_exit (_("%s option invalid in this combination"), "-o");
-	}
-
-	if (cb_flag_notrunc) {
-		cb_binary_truncate = 0;
-		cb_pretty_display = 0;
-	}
-
 	/* Compiler initialization II */
 #ifndef	HAVE_DESIGNATED_INITS
 	cobc_init_typeck ();
 #endif
+
+	cb_text_column = cb_config_text_column;
 
 	memset (cb_listing_header, 0, sizeof (cb_listing_header));
 	/* If -P=file specified, all lists go to this file */

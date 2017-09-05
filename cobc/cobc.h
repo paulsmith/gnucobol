@@ -329,15 +329,15 @@ extern struct cb_exception	cb_exception_table[];
 #undef	COB_EXCEPTION
 
 
-#define	CB_FLAG(var,pdok,name,doc)		extern int var;
-#define	CB_FLAG_ON(var,pdok,name,doc)		extern int var;
-#define CB_FLAG_RQ(var,pdok,name,def,opt,doc,vdoc,ddoc)	extern int var;
-#define CB_FLAG_NQ(pdok,name,opt,doc,vdoc)
+#define	CB_FLAG(var,print_help,name,doc)		extern int var;
+#define	CB_FLAG_ON(var,print_help,name,doc)		extern int var;
+#define CB_FLAG_RQ(var,print_help,name,def,opt,doc)	extern int var;
+#define CB_FLAG_NQ(print_help,name,opt,doc)
 #include "flag.def"
 #undef	CB_FLAG
 #undef	CB_FLAG_ON
 #undef	CB_FLAG_RQ
-#undef	CB_FLAG_nQ
+#undef	CB_FLAG_NQ
 
 #define	CB_WARNDEF(var,name,doc)	extern int var;
 #define	CB_ONWARNDEF(var,name,doc)	extern int var;

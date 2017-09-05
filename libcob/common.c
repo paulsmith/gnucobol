@@ -109,7 +109,15 @@
 
 /* C version info */
 #ifdef	__VERSION__
+#if		! defined (_MSC_VER)
 #define OC_C_VERSION_PRF	""
+#elif	defined (__c2__)
+#define OC_C_VERSION_PRF	"(Microsoft C2) "
+#elif	defined (__llvm__)
+#define OC_C_VERSION_PRF	"(LLVM / MSC) "
+#else
+#define OC_C_VERSION_PRF	"(Microsoft) "
+#endif
 #define OC_C_VERSION	CB_XSTRINGIFY (__VERSION__)
 #elif	defined (__xlc__)
 #define OC_C_VERSION_PRF	"(IBM XL C/C++) "
@@ -146,6 +154,11 @@ struct cob_alloc_cache {
 	size_t			size;		/* Item size */
 };
 
+struct cob_alloc_module {
+	struct cob_alloc_module	*next;		/* Pointer to next */
+	void			*cob_pointer;	/* Pointer to malloced space */
+};
+
 /* EXTERNAL structure */
 
 struct cob_external {
@@ -160,10 +173,12 @@ struct cob_external {
 /* Local variables */
 
 static int			cob_initialized = 0;
-static int			cob_argc;
-static char			**cob_argv;
-static struct cob_alloc_cache	*cob_alloc_base;
-static char			*cob_last_sfile;
+static int			cob_argc = 0;
+static char			**cob_argv = NULL;
+static struct cob_alloc_cache	*cob_alloc_base = NULL;
+static struct cob_alloc_module	*cob_module_list = NULL;
+static cob_module		*cob_module_err = NULL;
+static const char		*cob_last_sfile = NULL;
 
 static cob_global		*cobglobptr = NULL;
 static cob_settings		*cobsetptr = NULL;
@@ -451,9 +466,31 @@ cob_exit_common (void)
 }
 
 static void
+cob_exit_common_modules (void)
+{
+	cob_module	*mod;
+	struct cob_alloc_module	*ptr, *nxt;
+	int		(*cancel_func)(const int);
+
+	/* Call each module to release local memory
+	   - currently used for: decimals -
+	   and remove it from the internal module list */
+	for (ptr = cob_module_list; ptr; ptr = nxt) {
+		mod = ptr->cob_pointer;
+		nxt = ptr->next;
+		if (mod && mod->module_cancel.funcint) {
+			mod->module_active = 0;
+			cancel_func = mod->module_cancel.funcint;
+			(void)cancel_func (-20);	/* Clear just decimals */
+		}
+		cob_free (ptr);
+	}
+	cob_module_list = NULL;
+}
+
+static void
 cob_terminate_routines (void)
 {
-
 	if (!cob_initialized || !cobglobptr) {
 		return;
 	}
@@ -467,6 +504,7 @@ cob_terminate_routines (void)
 	cob_exit_intrinsic ();
 	cob_exit_strings ();
 	cob_exit_numeric ();
+	cob_exit_common_modules ();
 	cob_exit_call ();
 	cob_exit_common ();
 }
@@ -1218,13 +1256,7 @@ cob_rescan_env_vals (void)
 				gc_conf[i].data_type = old_type;
 
 				/* Remove invalid setting */
-#if HAVE_SETENV
-				(void)unsetenv (gc_conf[i].env_name);
-#else
-				env = cob_malloc (strlen (gc_conf[i].env_name) | 2);
-				sprintf (env, "%s=", gc_conf[i].env_name);
-				(void)putenv (env);
-#endif
+				(void)cob_unsetenv (gc_conf[i].env_name);
 			} else if (gc_conf[i].env_group == GRP_HIDE) {
 				/* Any alias present? */
 				for (j = 0; j < NUM_CONFIG; j++) {
@@ -1376,9 +1408,11 @@ cob_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = calloc ((size_t)1, size);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
@@ -1387,18 +1421,22 @@ cob_realloc (void * optr, const size_t osize, const size_t nsize)
 {
 	void	*mptr;
 
+	/* LCOV_EXCL_START */
 	if (unlikely (!optr)) {
 		cob_fatal_error (COB_FERROR_FREE);
 	}
+	/* LCOV_EXCL_STOP */
 
 	if (unlikely (osize <= nsize)) {
 		return realloc (optr, nsize);
 	}
 
 	mptr = calloc ((size_t)1, nsize);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	memcpy (mptr, optr, osize);
 	cob_free (optr);
 	return mptr;
@@ -1408,9 +1446,11 @@ void
 cob_free (void * mptr)
 {
 #ifdef _DEBUG
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_FREE);
 	}
+	/* LCOV_EXCL_STOP */
 #endif
 	free (mptr);
 
@@ -1422,9 +1462,11 @@ cob_fast_malloc (const size_t size)
 	void	*mptr;
 
 	mptr = malloc (size);
+	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cob_fatal_error (COB_FERROR_MEMORY);
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
@@ -1646,6 +1688,7 @@ cob_stop_run (const int status)
 	if (!cob_initialized) {
 		exit (1);
 	}
+
 	if (exit_hdlrs != NULL) {
 		h = exit_hdlrs;
 		while (h != NULL) {
@@ -1666,16 +1709,24 @@ cob_is_initialized (void)
 cob_global *
 cob_get_global_ptr (void)
 {
+	/* LCOV_EXCL_START */
 	if (unlikely (!cob_initialized)) {
 		cob_fatal_error (COB_FERROR_INITIALIZED);
 	}
+	/* LCOV_EXCL_STOP */
 	return cobglobptr;
 }
 
-void
-cob_module_enter (cob_module **module, cob_global **mglobal,
-		  const int auto_init)
+int
+cob_module_global_enter (cob_module **module, cob_global **mglobal,
+		  const int auto_init, const int entry, const unsigned int *name_hash)
 {
+	cob_module	*mod;
+	const int	MAX_ITERS = 10240;
+	int		k;
+	struct cob_alloc_module	*mod_ptr;
+
+
 	/* Check initialized */
 	if (unlikely (!cob_initialized)) {
 		if (auto_init) {
@@ -1688,9 +1739,54 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 	/* Set global pointer */
 	*mglobal = cobglobptr;
 
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	/* Was caller a COBOL module */
+	if (name_hash != NULL
+	 && cobglobptr->cob_call_name_hash != 0) {
+		cobglobptr->cob_call_from_c = 1;
+		k = 0;
+		while (*name_hash != 0) {	/* Scan table of values */
+			if (cobglobptr->cob_call_name_hash == *name_hash) {
+				cobglobptr->cob_call_from_c = 0;
+				break;
+			}
+			name_hash++;
+			k++;
+		}
+	}
+#else
+	/* LCOV_EXCL_LINE */
+	COB_UNUSED(name_hash);
+#endif
+
 	/* Check module pointer */
 	if (!*module) {
 		*module = cob_cache_malloc (sizeof (cob_module));
+		/* Add to list of all modules activated */
+		mod_ptr = cob_malloc (sizeof (struct cob_alloc_module));
+		mod_ptr->cob_pointer = *module;
+		mod_ptr->next = cob_module_list;
+		cob_module_list = mod_ptr;
+#if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+	} else if (entry == 0
+		&& !cobglobptr->cob_call_from_c) {
+#else
+	} else if (entry == 0) {
+#endif
+		for (k = 0, mod = COB_MODULE_PTR; mod && k < MAX_ITERS; mod = mod->next, k++) {
+			if (*module == mod) {
+				if (cobglobptr->cob_stmt_exception) {
+					/* CALL has ON EXCEPTION so return to caller */
+					cob_set_exception (COB_EC_PROGRAM_RECURSIVE_CALL);
+					cobglobptr->cob_stmt_exception = 0;
+					return 1;
+				}
+				cob_module_err = mod;
+				cob_fatal_error (COB_FERROR_RECURSIVE);
+			}
+		}
 	}
 
 	/* Save parameter count, get number from argc if main program */
@@ -1703,6 +1799,15 @@ cob_module_enter (cob_module **module, cob_global **mglobal,
 	/* Push module pointer */
 	(*module)->next = COB_MODULE_PTR;
 	COB_MODULE_PTR = *module;
+	cobglobptr->cob_stmt_exception = 0;
+	return 0;
+}
+
+void
+cob_module_enter (cob_module **module, cob_global **mglobal,
+		  const int auto_init)
+{
+	(void)cob_module_global_enter (module, mglobal, auto_init, 0, 0);
 }
 
 void
@@ -1716,12 +1821,38 @@ cob_module_leave (cob_module *module)
 void
 cob_module_free (cob_module **module)
 {
+	struct cob_alloc_module	*ptr, *prv;
 	if (*module != NULL) {
+		prv = NULL;
+		/* Remove from list of all modules activated */
+		for (ptr = cob_module_list; ptr; ptr = ptr->next) {
+			if (ptr->cob_pointer == *module) {
+				if (prv == NULL) {
+					cob_module_list = ptr->next;
+				} else {
+					prv->next = ptr->next;
+				}
+				cob_free (ptr);
+				break;
+			}
+			prv = ptr;
+		}
+
+#if 0 /* cob_module->param_buf and cob_module->param_field are rw-branch only features
+         for now - TODO: activate on merge of r1547 */
+		&& !cobglobptr->cob_call_from_c
+		if ((*module)->param_buf != NULL)
+			cob_cache_free ((*module)->param_buf);
+		if ((*module)->param_field != NULL)
+			cob_cache_free ((*module)->param_field);
+#endif
 		cob_cache_free (*module);
 		*module = NULL;
 	}
 }
 
+/* save module environment - returns an allocated cob_func_loc (free at cob_restore_func)
+   and the intermediate return field (must be freed by caller) */
 void *
 cob_save_func (cob_field **savefld, const int params,
 	       const int eparams, ...)
@@ -1766,6 +1897,7 @@ cob_save_func (cob_field **savefld, const int params,
 	return fl;
 }
 
+/* restores module environment - frees the passed cob_func_loc */
 void
 cob_restore_func (struct cob_func_loc *fl)
 {
@@ -3008,6 +3140,7 @@ check_current_date()
 	} else if (cobsetptr->cob_date[j] == '+'
 		|| cobsetptr->cob_date[j] == '-') {
 		strncpy (iso_timezone_ptr, cobsetptr->cob_date + j, 6);
+		iso_timezone[6] = 0;	/* just to keep the analyzer happy */
 		if (strlen (iso_timezone_ptr) == 3) {
 			strcpy (iso_timezone_ptr + 3, "00");
 		} else if (iso_timezone[3] == ':') {
@@ -3312,7 +3445,54 @@ cob_accept_arg_value (cob_field *f)
 	current_arg++;
 }
 
-/* Environment variable */
+/* Environment variable handling */
+
+#ifdef	_MSC_VER
+/* _MSC does *NOT* have `setenv` (!)
+   But as the handling of the fallback `putenv` is different in POSIX and _MSC
+   (POSIX stores no duplicate of `putenv`, where _MSC does), we pretend to
+   have support for `setenv` and define it here with the same behaviour: */
+
+static COB_INLINE COB_A_INLINE int
+setenv (const char *name, const char *value, int overwrite) {
+	/* remark: _putenv_s does always overwrite, add a check for overwrite = 1 if necessary later */
+	COB_UNUSED (overwrite);
+	return _putenv_s (name,value);
+}
+static COB_INLINE COB_A_INLINE int
+unsetenv (const char *name) {
+	return _putenv_s (name,"");
+}
+#endif
+
+int
+cob_setenv (const char *name, const char *value, int overwrite) {
+#if defined (HAVE_SETENV) && HAVE_SETENV
+	return setenv (name, value, overwrite);
+#else
+	char	*env;
+	size_t	len;
+
+	COB_UNUSED (overwrite);
+	len = strlen (name) + strlen (value) + 2U;
+	env = cob_fast_malloc (len);
+	sprintf (env, "%s=%s", name, value);
+	return putenv (env);
+#endif
+}
+
+int
+cob_unsetenv (const char *name) {
+#if defined(HAVE_SETENV) && HAVE_SETENV
+	return unsetenv (name);
+#else
+	char	*env;
+
+	env = cob_fast_malloc (strlen (name) + 2U);
+	sprintf (env, "%s=", name);
+	return putenv (env);
+#endif
+}
 
 void
 cob_display_environment (const cob_field *f)
@@ -3340,10 +3520,6 @@ void
 cob_display_env_value (const cob_field *f)
 {
 	char	*env2;
-#if !HAVE_SETENV
-	char	*p;
-	size_t	len;
-#endif
 	int		ret;
 
 	if (!cob_local_env) {
@@ -3356,14 +3532,7 @@ cob_display_env_value (const cob_field *f)
 	}
 	env2 = cob_malloc (f->size + 1U);
 	cob_field_to_string (f, env2, f->size);
-#if HAVE_SETENV
-	ret = setenv (cob_local_env, env2, 1);
-#else
-	len = strlen (cob_local_env) + strlen (env2) + 3U;
-	p = cob_fast_malloc (len);
-	sprintf (p, "%s=%s", cob_local_env, env2);
-	ret = putenv (p);
-#endif
+	ret = cob_setenv (cob_local_env, env2, 1);
 	cob_free (env2);
 	if (ret != 0) {
 		cob_set_exception (COB_EC_IMP_DISPLAY);
@@ -3572,9 +3741,6 @@ cob_gettmpdir (void)
 {
 	char	*tmpdir;
 	char	*tmp;
-#if !HAVE_SETENV
-	char	*put;
-#endif
 
 	if ((tmpdir = getenv ("TMPDIR")) == NULL) {
 		tmp = NULL;
@@ -3594,14 +3760,7 @@ cob_gettmpdir (void)
 			tmpdir = tmp;
 		}
 #endif
-#if HAVE_SETENV
-		(void)setenv ("TMPDIR", tmpdir, 1);
-#else
-		put = cob_fast_malloc (strlen (tmpdir) + 10);
-		sprintf (put, "TMPDIR=%s", tmpdir);
-		(void)putenv (cob_strdup (put));
-		cob_free ((void *)put);
-#endif
+		(void)cob_setenv ("TMPDIR", tmpdir, 1);
 		if (tmp) {
 			cob_free ((void *)tmp);
 			tmpdir = getenv ("TMPDIR");
@@ -3680,7 +3839,7 @@ cob_tidy (void)
 	struct exit_handlerlist	*h;
 
 	if (!cob_initialized) {
-		exit (1);
+		return 1;
 	}
 	if (exit_hdlrs != NULL) {
 		h = exit_hdlrs;
@@ -3797,10 +3956,12 @@ cob_sys_system (const void *cmdline)
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		cmd = cmdline;
 		i = (int)COB_MODULE_PTR->cob_procedure_params[0]->size;
+		/* LCOV_EXCL_START */
 		if (unlikely (i > COB_MEDIUM_MAX)) {
 			cob_runtime_error (_("parameter to SYSTEM call is larger than %d characters"), COB_MEDIUM_MAX);
 			cob_stop_run (1);
 		}
+		/* LCOV_EXCL_STOP */
 		i--;
 		for (; i >= 0; --i) {
 			if (cmd[i] != ' ' && cmd[i] != 0) {
@@ -4429,8 +4590,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
 		longoptions = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
-	}
-	else {
+	} else {
 		cob_runtime_error (_("Call to CBL_GC_GETOPT with wrong longoption size."));
 		cob_stop_run (1);
 	}
@@ -5318,9 +5478,6 @@ static int
 cb_config_entry (char *buf, int line)
 {
 	int	i, j, k, old_type;
-#if !HAVE_SETENV
-	int	len;
-#endif
 	void	*data;
 	char	*env, *str, qt;
 	char	keyword[COB_MINI_BUFF], value[COB_SMALL_BUFF], value2[COB_SMALL_BUFF];
@@ -5398,14 +5555,7 @@ cb_config_entry (char *buf, int line)
 		/* check additional value for inline env vars ${varname:-default} */
 		str = cob_expand_env_string (value2);
 
-#if HAVE_SETENV
-		(void)setenv (value, str, 1);
-#else
-		len = (int) strlen (value) + (int) strlen (str) + 2;
-		env = cob_fast_malloc (len);
-		sprintf (env, "%s=%s", value, str);
-		(void)putenv (env);
-#endif
+		(void)cob_setenv (value, str, 1);
 		cob_free (str);
 		for (i = 0; i < NUM_CONFIG; i++) {		/* Set value from config file */
 			if (gc_conf[i].env_name
@@ -5426,14 +5576,7 @@ cb_config_entry (char *buf, int line)
 					break;
 				}
 			}
-#if HAVE_SETENV
-			(void)unsetenv (value);
-#else
-			len = (int) strlen (value) + 2;
-			env = cob_fast_malloc (len);
-			sprintf (env, "%s=", value);
-			(void)putenv (env);
-#endif
+			(void)cob_unsetenv (value);
 		}
 		return 0;
 	}
@@ -5579,7 +5722,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 			cobsetptr->cob_config_file = cob_realloc (cobsetptr->cob_config_file,
 				sizeof (char *)*(cobsetptr->cob_config_num), sizeof (char *)*(cobsetptr->cob_config_num + 1));
 		}
-		cobsetptr->cob_config_file[cobsetptr->cob_config_num++] = strdup (config_file);	/* Save config file name */
+		cobsetptr->cob_config_file[cobsetptr->cob_config_num++] = cob_strdup (config_file);	/* Save config file name */
 		cobsetptr->cob_config_cur = cobsetptr->cob_config_num;
 	}
 
@@ -5798,12 +5941,13 @@ cob_fatal_error (const int fatal_error)
 	switch (fatal_error) {
 #if 0 /* Currently not in use, should enter unknown error */
 	case COB_FERROR_NONE:
-		cob_runtime_error (_("attempt to CANCEL active program"));
 		break;
 #endif
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_CANCEL:
 		cob_runtime_error (_("attempt to CANCEL active program"));
 		break;
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_INITIALIZED:
 #ifdef	_WIN32
 		/* cob_unix_lf needs to be set before any error message is thrown,
@@ -5819,31 +5963,55 @@ cob_fatal_error (const int fatal_error)
 #endif
 		cob_runtime_error (_("cob_init() has not been called"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_CODEGEN:
 		cob_runtime_error (_("codegen error - Please report this!"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_CHAINING:
 		cob_runtime_error (_("CALL of program with CHAINING clause"));
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_STACK:
 		cob_runtime_error (_("stack overflow, possible PERFORM depth exceeded"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_GLOBAL:
 		cob_runtime_error (_("invalid entry/exit in GLOBAL USE procedure"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_MEMORY:
 		cob_runtime_error (_("unable to allocate memory"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_START */
 	case COB_FERROR_MODULE:
 		cob_runtime_error (_("invalid entry into module"));
 		break;
+	/* LCOV_EXCL_STOP */
+	/* Note: can be simply tested; therefore no exclusion */
 	case COB_FERROR_RECURSIVE:
-		cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
-			COB_MODULE_PTR->module_name);
+		/* LCOV_EXCL_LINE */
+		if (cob_module_err) {
+			cob_runtime_error (_("recursive CALL from %s to %s which is NOT RECURSIVE"),
+					COB_MODULE_PTR->module_name, cob_module_err->module_name);
+			cob_module_err = NULL;
+		/* LCOV_EXCL_START */
+		/* Note: only in for old modules - not active with current generation */
+		} else {
+			cob_runtime_error (_("invalid recursive COBOL CALL to '%s'"),
+					   COB_MODULE_PTR->module_name);
+		}
+		/* LCOV_EXCL_STOP */
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_FREE:
 		cob_runtime_error (_("call to %s with NULL pointer"), "cob_free");
 		break;
+	/* LCOV_EXCL_STOP */
 	case COB_FERROR_FILE:
 		file_status = cobglobptr->cob_error_file->file_status;
 		status = COB_D2I (file_status[0]) * 10 + COB_D2I (file_status[1]);
@@ -5905,12 +6073,16 @@ cob_fatal_error (const int fatal_error)
 		case COB_STATUS_61_FILE_SHARING:
 			msg = _("file sharing conflict");
 			break;
+		/* LCOV_EXCL_START */
 		case COB_STATUS_91_NOT_AVAILABLE:
 			msg = _("runtime library is not configured for this operation");
 			break;
+		/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_START */
 		default:
 			msg = _("unknown file error");
 			break;
+		/* LCOV_EXCL_STOP */
 		}
 		err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
 		cob_field_to_string (cobglobptr->cob_error_file->assign,
@@ -5919,12 +6091,14 @@ cob_fatal_error (const int fatal_error)
 			msg, status, err_cause);
 		cob_free (err_cause);
 		break;
+	/* LCOV_EXCL_START */
 	case COB_FERROR_FUNCTION:
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
 	default:
 		cob_runtime_error (_("unknown failure: %d"), fatal_error);
 		break;
+	/* LCOV_EXCL_STOP */
 	}
 	cob_stop_run (1);
 }
@@ -5936,8 +6110,7 @@ conf_runtime_error_value (const char *value, const int pos)
 
 	if (gc_conf[pos].data_type & STS_CNFSET) {
 		name = gc_conf[pos].conf_name;
-	}
-	else {
+	} else {
 		name = gc_conf[pos].env_name;
 	}
 	conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), value, name);
@@ -6042,8 +6215,10 @@ print_info (void)
 	putchar ('\n');
 	puts (_("build information"));
 	var_print (_("build environment"), 	COB_BLD_BUILD, "", 0);
-	snprintf (versbuff, 55, "%s\tC version %s%s", COB_BLD_CC, OC_C_VERSION_PRF, OC_C_VERSION);
-	var_print ("CC", versbuff, "", 0);
+	var_print ("CC", COB_BLD_CC, "", 0);
+	// Note: newline because most compilers define a long version string (> 30 characters)
+	snprintf (versbuff, 55, "%s%s", OC_C_VERSION_PRF, OC_C_VERSION);
+	var_print ("C version", versbuff, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);
 	var_print ("CFLAGS", COB_BLD_CFLAGS, "", 0);
 	var_print ("LD", COB_BLD_LD, "", 0);
@@ -6482,13 +6657,20 @@ cob_init (const int argc, char **argv)
 	}
 
 	/* Get user name if not set via environment already */
-	if (cobsetptr->cob_user_name == NULL || !strcmp(cobsetptr->cob_user_name, "Unknown")) {
-#if defined	(_WIN32) && (COB_USE_VC2008_OR_GREATER /* Needs SDK for earlier versions */ || !defined(_MSC_VER))
+#if 0 /* Should not be possible */
+	if (cobsetptr->cob_user_name == NULL) {
+		cobsetptr->cob_user_name = _ ("unknown");
+	}
+#endif
+	if (!strcmp(cobsetptr->cob_user_name, _("unknown"))) {
+#if defined (_WIN32)
+#if defined (HAVE_GETUSERNAME)	/* note: currently only defined manual! */
 		unsigned long bsiz = COB_ERRBUF_SIZE;
 		if (GetUserName (runtime_err_str, &bsiz)) {
 			set_config_val_by_name(runtime_err_str, "username", "GetUserName()");
 		}
-#elif !defined(__OS400__) && !defined(_MSC_VER)
+#endif
+#elif !defined(__OS400__)
 		s = getlogin ();
 		if (s) {
 			set_config_val_by_name(s, "username", "getlogin()");

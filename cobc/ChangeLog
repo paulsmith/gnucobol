@@ -1,4 +1,90 @@
 
+2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c, tree.c, tree.h, typeck.c: started to change compiler
+	  internal variables to be unsigned int instead of int to prevent
+	  C compiler warnings about a possible negative access to arrays
+	  and sign mismatches in comparisons
+	* codegen.c: output comment for decimal constants only if we have
+	  actually generate decimal constants
+
+2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: adjusted some missing context-sensitive options
+	* reserved.c, parser.y: added parsing of PHYSICAL attribute in
+	  LENGTH functions
+
+2017-08-23  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c (cobc_clean_up): added calls to (plex_call_destroy) and
+	  (ylex_call_destroy), *actually* fixing bug #407.
+	* pplex.l (ylex_clear_all): added calls to (cb_reset_78) and
+	  (cb_reset_global_78) to prevent memory leak on abort (bug #417).
+
+2017-08-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: work on expression warning messages and added more
+
+2017-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for cobc --help,
+	  mainly to provide translators with context for msgids
+	* field.c: adjusted message for cb_warn_ignored_initial_val
+
+2017-08-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* flag.def: always activate cb_flag_recursive_check by CB_FLAG_ON
+	* tree.c, codegen.c: assume RECURSIVE for -fno-recursive-check
+
+2017-08-18  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: emit code for CALL to handle ON EXCEPTION
+
+2017-08-17  Ron Norman <rjn@inglenet.com>
+
+	* scanner.l: Added SET_LOCATION when returning 'literal'
+	             which is a 78/01 constant
+	* codegen.c: Emit cob_module_global_entry instead of cob_module_enter and
+	  pass the 'entry' value (currently only set in rw-branch).
+
+2017-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: work on expression warning messages
+
+2017-08-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (screen_occurs_clause): marked as pending.
+
+2017-08-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: bug #413 don't generate cob_check_based for UDF return fields
+	* cobc.c (xref_print): output marker for receiving references
+
+2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c: fixed tree cast error for literals
+
+2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: added cobc_early_exit and adjusted exit calls to fix missing free
+	* ppparse.y: CDF: warn if compiler flag is unknown
+
+2017-08-12  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Place all code to clear Decimal Constant values under
+	  label P_clear_decimal and invoke that code when 'entry' is -20
+
+2017-08-11  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: implemented (not-)register: DIALECT-ALL.
+	* codegen.c (output_internal_function): fixed C compile error when
+	  RETURN-CODE register is disabled.
+
+2017-08-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* cobc.c (cobc_clean_up): added calls to (plex_clear_all) and
+	  (ylex_clear_all), fixing bug #407.
+
 2017-08-09  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.c (cb_config_entry): removed extraneous free (bug #409).
@@ -40,6 +126,18 @@
 
 	* parser.y, reserved.c: added clauses COLOR and SIZE as PENDING
 	* parser.y: added ACCEPT FROM SCREEN as PENDING
+
+2017-07-27  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: 
+	  Improve warning messages for comparing literals to fields
+
+2017-07-23  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: Improve line number used in warnings about 'always TRUE/FALSE'
+	  Check for IF/WHEN with NOT condition to resolve compile time expr
+	* typeck.c: Turn off ignore of errors as required
+	* codegen.c: Emit line # in C code for WHEN statements
 
 2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1073,9 +1171,11 @@
 2016-10-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: fixed missing initialization of static_call_cache
-	* flags.def, cobc.c, codegen.c: added new cb_flag_c_decl_for_static_call,
-	  normally active, to create the option to disable the auto-generation of
-	  C function declarations for static CALLs
+	* flags.def, cobc.c: added CB_FLAG_ON for compiler flags that are
+	  active by default
+	* flags.def, codegen.c: added new cb_flag_c_decl_for_static_call as
+	  CB_FLAG_ON, to create the option for disabling the auto-generation
+	  of C function declarations for static CALLs
 
 2016-10-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

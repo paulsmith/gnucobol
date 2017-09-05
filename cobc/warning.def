@@ -28,67 +28,67 @@
 /* CB_NOWARNDEF (var, name, doc) */
 
 CB_ONWARNDEF (cb_warn_unfinished, "unfinished",
-	    _("do not warn if unfinished features are used"))
+	_("  -Wno-unfinished       do not warn if unfinished features are used"))
 
 CB_ONWARNDEF (cb_warn_pending, "pending",
-	    _("do not warn if pending features are mentioned"))
+	_("  -Wno-pending          do not warn if pending features are mentioned"))
 
 CB_WARNDEF (cb_warn_obsolete, "obsolete",
-	    _("warn if obsolete features are used"))
+	_("  -Wobsolete            warn if obsolete features are used"))
 
 CB_WARNDEF (cb_warn_archaic, "archaic",
-	    _("warn if archaic features are used"))
+	_("  -Warchaic             warn if archaic features are used"))
 
 CB_WARNDEF (cb_warn_redefinition, "redefinition",
-	    _("warn incompatible redefinition of data items"))
+	_("  -Wredefinition        warn incompatible redefinition of data items"))
 
 CB_WARNDEF (cb_warn_truncate, "truncate",
-	    _("warn field truncation from constant assignments"))
+	_("  -Wtruncate            warn field truncation from constant assignments"))
 
 CB_NOWARNDEF (cb_warn_pos_truncate, "possible-truncate",
-	    _("warn possible field truncation"))
+	_("  -Wpossible-truncate   warn possible field truncation"))
 
 CB_WARNDEF (cb_warn_overlap, "overlap",
-	    _("warn overlapping MOVE items"))
+	_("  -Woverlap             warn overlapping MOVE items"))
 
 CB_NOWARNDEF (cb_warn_pos_overlap, "possible-overlap",
-	    _("warn MOVE items that may overlap depending on variables"))
+	_("  -Wpossible-overlap    warn MOVE items that may overlap depending on variables"))
 
 CB_WARNDEF (cb_warn_parentheses, "parentheses",
-	    _("warn lack of parentheses around AND within OR"))
+	_("  -Wparentheses         warn lack of parentheses around AND within OR"))
 
 CB_WARNDEF (cb_warn_strict_typing, "strict-typing",
-	    _("warn type mismatch strictly"))
+	_("  -Wstrict-typing       warn type mismatch strictly"))
 
 CB_WARNDEF (cb_warn_implicit_define, "implicit-define",
-	    _("warn implicitly defined data items"))
+	_("  -Wimplicit-define     warn implicitly defined data items"))
 
 CB_WARNDEF (cb_warn_corresponding, "corresponding",
-	    _("warn CORRESPONDING with no matching items"))
+	_("  -Wcorresponding       warn CORRESPONDING with no matching items"))
 
 CB_WARNDEF (cb_warn_ignored_initial_val, "initial-value",
-	    _("warn Initial VALUE clause ignored"))
+	_("  -Winitial-value       warn if initial VALUE clause is ignored"))
 
 CB_WARNDEF (cb_warn_prototypes, "prototypes",
-	    _("warn missing FUNCTION prototypes/definitions"))
+	_("  -Wprototypes          warn missing FUNCTION prototypes/definitions"))
 
 CB_WARNDEF (cb_warn_arithmetic_osvs, "arithmetic-osvs",
-	    _("warn if arithmetic expression precision has changed"))
+	_("  -Warithmetic-osvs     warn if arithmetic expression precision has changed"))
 
 CB_NOWARNDEF (cb_warn_call_params, "call-params",
-	    _("warn non 01/77 items for CALL params"))
+	_("  -Wcall-params         warn non 01/77 items for CALL params"))
 
 CB_WARNDEF (cb_warn_constant_expr, "constant-expression",
-	    _("warn expressions that always resolve to true/false"))
+	_("  -Wconstant-expression  warn expressions that always resolve to true/false"))
 
 CB_NOWARNDEF (cb_warn_column_overflow, "column-overflow",
-	    _("warn text after program-text area, FIXED format"))
+	_("  -Wcolumn-overflow     warn text after program-text area, FIXED format"))
 
 CB_NOWARNDEF (cb_warn_terminator, "terminator",
-	    _("warn lack of scope terminator END-XXX"))
+	_("  -Wterminator          warn lack of scope terminator END-XXX"))
 
 CB_NOWARNDEF (cb_warn_linkage, "linkage",
-	    _("warn dangling LINKAGE items"))
+	_("  -Wlinkage             warn dangling LINKAGE items"))
 
 CB_NOWARNDEF (cb_warn_unreachable, "unreachable",
-	    _("warn likely unreachable statements"))
+	_("  -Wunreachable         warn likely unreachable statements"))

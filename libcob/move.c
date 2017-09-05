@@ -132,7 +132,7 @@ store_common_region (cob_field *f, const unsigned char *data,
 		p = data + hf1 - gcf;
 		q = COB_FIELD_DATA (f) + hf2 - gcf;
 		for (cinc = 0; cinc < csize; ++cinc, ++p, ++q) {
-			if (unlikely(*p == ' ' || *p == 0)) {
+			if (unlikely (*p == ' ' || *p == 0)) {
 				*q = (unsigned char)'0';
 			} else {
 				*q = *p;
@@ -347,7 +347,7 @@ cob_move_display_to_alphanum (cob_field *f1, cob_field *f2)
 	data1 = COB_FIELD_DATA (f1);
 	size1 = COB_FIELD_SIZE (f1);
 	sign = COB_GET_SIGN (f1);
-	if (unlikely(COB_FIELD_SCALE(f1) < 0)) {
+	if (unlikely (COB_FIELD_SCALE(f1) < 0)) {
 		/* Scaling */
 		zero_size = (int)-COB_FIELD_SCALE(f1);
 	} else {
@@ -355,7 +355,7 @@ cob_move_display_to_alphanum (cob_field *f1, cob_field *f2)
 	}
 	data2 = f2->data;
 	size2 = f2->size;
-	if (unlikely(COB_FIELD_JUSTIFIED (f2))) {
+	if (unlikely (COB_FIELD_JUSTIFIED (f2))) {
 		/* Justified right */
 		if (zero_size) {
 			/* Implied 0 ('P's) */
@@ -1181,7 +1181,7 @@ cob_move (cob_field *src, cob_field *dst)
 	if (dst->size == 0) {
 		return;
 	}
-	if (unlikely(src->size == 0)) {
+	if (unlikely (src->size == 0)) {
 		temp.size = 1;
 		temp.data = data;
 		temp.attr = &const_alpha_attr;
@@ -2186,8 +2186,9 @@ cob_get_u64_comp6 (void *mem, int len)
 	return val;
 }
 
-static char ebcdic_pos[10] = "{ABCDEFGHI";
-static char ebcdic_neg[10] = "}JKLMNOPQR";
+/* note: the 11th position is only there to keep the analyzer happy ...*/
+static char ebcdic_pos[11] = "{ABCDEFGHI";
+static char ebcdic_neg[11] = "}JKLMNOPQR";
 
 void
 cob_put_s64_pic9 (cob_s64_t val, void *mem, int len)
