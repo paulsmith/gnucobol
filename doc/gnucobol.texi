@@ -499,7 +499,7 @@ where it doesn't directly conflict with the specified dialect, including reserve
 COBOL sources compiled with these dialects therefore may work only with GnuCOBOL.
 COBOL sources may need a change because of reserved words in GnuCOBOL, otherwise
 offending words may be removed by @code{-fno-reserved=word}.@*
-COBOL-85, @w{COBOL 2002} and @w{COBOL 2014} are always "strict".
+COBOL-85, X/Open COBOL, @w{COBOL 2002} and @w{COBOL 2014} are always "strict".
 
 @item -std=default
 GnuCOBOL dialect, supporting many of the @w{COBOL 2002} and @w{COBOL 2014} features,
