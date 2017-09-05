@@ -1134,7 +1134,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 	int			ccolumn;
 	int			rightpos = scolumn + (int)s->field->size - 1;
 	int			ateof = 0;
-	int			gotbacksp = 0;
 	int			ungetched = 0;
 	int			status;
 	int			count;
@@ -1211,7 +1210,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
@@ -1231,7 +1229,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			if (ungetched) {
 				ungetched = 0;
@@ -1253,7 +1250,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
@@ -1269,7 +1265,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
@@ -1285,7 +1280,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
@@ -1301,7 +1295,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
 			ateof = 0;
-			gotbacksp = 0;
 			rightpos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
@@ -1311,6 +1304,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 		case KEY_BACKSPACE:
 			/* Backspace key. */
 			if ((int) ccolumn > scolumn) {
+				ateof = 0;
 				/* Shift remainder left with cursor. */
 				for (count = ccolumn; count < rightpos + 1; count++) {
 					/* Get character. */
@@ -1325,12 +1319,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 						cob_addch (COB_CH_SP);
 					} else if (s->attr & COB_SCREEN_SECURE) {
 						cob_addch (COB_CH_AS);
+					} else if (move_char == ' ') {
+						cob_addch (promptchar);
 					} else {
-						if (move_char == ' ') {
-							cob_addch (promptchar);
-						} else {
-							cob_addch (move_char);
-						}
+						cob_addch (move_char);
 					}
 				}
 				/* Put space as the right most character. */
@@ -1346,12 +1338,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 					cob_addch (COB_CH_SP);
 				} else if (s->attr & COB_SCREEN_SECURE) {
 					cob_addch (COB_CH_AS);
+				} else if (*p2 == ' ') {
+					cob_addch (promptchar);
 				} else {
-					if (*p2 == ' ') {
-						cob_addch (promptchar);
-					} else {
-						cob_addch (*p2);
-					}
+					cob_addch (*p2);
 				}
 				/* Move cursor left one from current. */
 				ccolumn--;
@@ -1359,13 +1349,11 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				p--;
 			} else {
 				ungetched = 1;
-				gotbacksp = 0;
 				ungetch (KEY_BACKSPACE);
 				ungetch (KEY_BTAB);
 			}
 			continue;
 		case KEY_LEFT:
-			gotbacksp = 0;
 			if (ccolumn > scolumn) {
 				ccolumn--;
 				cob_move_cursor (cline, ccolumn);
@@ -1376,7 +1364,6 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			}
 			continue;
 		case KEY_RIGHT:
-			gotbacksp = 0;
 			if (ccolumn < rightpos) {
 				ccolumn++;
 				cob_move_cursor (cline, ccolumn);
@@ -1415,12 +1402,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 					cob_addch (COB_CH_SP);
 				} else if (s->attr & COB_SCREEN_SECURE) {
 					cob_addch (COB_CH_AS);
+				} else if (move_char == ' ') {
+					cob_addch (promptchar);
 				} else {
-					if (move_char == ' ') {
-						cob_addch (promptchar);
-					} else {
-						cob_addch (move_char);
-					}
+					cob_addch (move_char);
 				}
 			}
 			/* Put space as the right most character. */
@@ -1547,10 +1532,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			} else {
 				p++;
 			}
-			gotbacksp = 0;
 			continue;
 		}
-		gotbacksp = 0;
 		(void)flushinp ();
 		cob_beep ();
 	}
