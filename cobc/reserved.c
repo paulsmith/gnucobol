@@ -2338,8 +2338,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "E",				"cob_intr_e",
-					CB_INTR_E, FUNCTION_NAME, CB_FEATURE_ACTIVE,
-					0, 0,
+					CB_INTR_E, FUNCTION_NAME,
+					CB_FEATURE_ACTIVE, 0, 0,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "EXCEPTION-FILE",			"cob_intr_exception_file",
@@ -2575,8 +2575,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "NATIONAL-OF",			"cob_intr_national_of",
-					CB_INTR_NATIONAL_OF, NATIONAL_OF_FUNC, 0,
-					2, 1,
+					CB_INTR_NATIONAL_OF, NATIONAL_OF_FUNC,
+					CB_FEATURE_NOT_IMPLEMENTED, 2, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
   },
   { "NUMERIC-DECIMAL-POINT",		"cob_intr_num_decimal_point",
@@ -2675,8 +2675,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_CATEGORY_NUMERIC, 0
   },
   { "STANDARD-COMPARE",			"cob_intr_standard_compare",
-					CB_INTR_STANDARD_COMPARE, FUNCTION_NAME, 0,
-					4, 2,
+					CB_INTR_STANDARD_COMPARE, FUNCTION_NAME,
+					CB_FEATURE_NOT_IMPLEMENTED, 4, 2,
 					CB_CATEGORY_ALPHANUMERIC, 0
   },
   { "STANDARD-DEVIATION",		"cob_intr_standard_deviation",
