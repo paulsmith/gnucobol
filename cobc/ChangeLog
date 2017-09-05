@@ -1,4 +1,10 @@
 
+2017-09-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_validate_program_data): temporarily disabled ASSIGN
+	  fields with changing address (BASED + LINKAGE) to prevent SIGSEGV
+	  until code generation is changed, see bug #421
+
 2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c, tree.c, tree.h, typeck.c: started to change compiler
@@ -31,8 +37,8 @@
 
 2017-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for cobc --help,
-	  mainly to provide translators with context for msgids
+	* cobc.c, flag.def, warnings.def, cobc.h: changed handling for
+	  cobc --help, mainly to provide translators with context for msgids
 	* field.c: adjusted message for cb_warn_ignored_initial_val
 
 2017-08-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
