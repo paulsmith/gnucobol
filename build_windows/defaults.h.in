@@ -1,14 +1,22 @@
 // Use \ to escape things, for example \\ for using in paths
 // Use \" for paths with spaces
 
-// define MAKE_DIST to 1 for using C:\GnuCOBOL
+// define MAKE_DIST for using C:\\GnuCOBOL_Version:
+//#define MAKE_DIST 1
 
 #define COB_CC           "cl.exe"
 #ifdef MAKE_DIST
-#define COB_MAIN_DIR     "C:\\" PACKAGE_STRING
+#define COB_MAIN_DIR     "C:\\" PACKAGE_NAME "_" PACKAGE_VERSION
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\\include\""
-#define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\libs\""
+#ifdef _WIN64
+#define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\lib_x64\""
+#else
+#define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\lib\""
+#endif
+
 #else  // no MAKE_DIST
+
+// specify the local path where the gnucobol sources reside in:
 #define COB_MAIN_DIR     "C:\\GnuCOBOL"
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\" -I \"" COB_MAIN_DIR "\\build_windows\""
 

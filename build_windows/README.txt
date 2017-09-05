@@ -56,11 +56,22 @@ How to test the native builds:
   testsuite (normally Cygwin or MinGW with MSYS)
 * if you want to run the NIST testsuite you need a perl binary installed and
   in PATH (a Cygwin/MSYS version is needed, a normal Windows binary won't work!)
+* if you've set MAKE_DIST in defaults.h copy the dist package to the place
+  cobc --info says (for example to C:\GnuCOBOL_2.3)
+* start the VS command prompt that matches the version you want to test
+* start the GNU/Linux-like environment from within the VS command prompt
+  (for example by dropping its shortcut on the cmd window and pressing ENTER)
 * do the following commands:
   cd $yourfolder
-  ./configure (add --without-db --without-curses if the binaries to test are not
-  configured for ISAM/screenio); this will create the necessary Makefiles for you
+  ./configure # add --without-db --without-curses if the binaries to test are not
+              # configured for ISAM/screenio
+              # this will create the necessary Makefiles for you
+* rename tests/atlocal to tests/atlocal_gnu
+* rename tests/atlocal_win to tests/atlocal
+* do the following commands:
   cd extras
   make -e
   cd ../tests
-  make -e checkall # or make -e check if you don't want to run the NIST testsuite
+  make -j2 -e checkall # or make -j2 -e check if you don't want to run the NIST
+                       # testsuite; instead of -j2 you may set -j7, depending on
+                       # how many logical processors you have

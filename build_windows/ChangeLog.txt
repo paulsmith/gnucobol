@@ -1,4 +1,17 @@
 
+2017-09-05  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* defaults.h.in: changed install folder for DIST builds to
+	  PACKAGE_NAME + _ + PACKAGE_VERSION (GnuCOBOL_2.3_dev)
+	* vs2008: added size check for DEBUG builds
+	* README.txt: updated
+	* set_env_vs.bat, set_env_vs_x64.bat, set_env_vs_dist.bat,
+	  set_env_vs_dist_x64.bat: only try to setup a matching cl.exe if it
+	  isn't present already
+	* makedist.bat: fixed version lookup when directory contains spaces;
+	  use PACKAGE_NAME, PACKAGE_VERSION and suffix "vs_bin" for resulting
+	  7zip file; fallback to directory, when 7zip is not available
+
 2017-09-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* set_env_vs_dist_x64.bat: replaced reference to "dist/bin" with
@@ -25,8 +38,7 @@
 	  and maximum debugging abilities for debug configurations
 	* README.txt: updated
 	* set_env_vs.bat, set_env_vs_x64.bat, set_env_vs_dist.bat,
-	  set_env_vs_dist_x64.bat: only try to setup a matching cl.exe if it
-	  isn't present already; fix setup for the uncommon VS2017 rules;
+	  set_env_vs_dist_x64.bat: fix setup for the uncommon VS2017 rules;
 	  show the cl.exe actually used
 	* makedist.bat: only remove dist folder if new binaries to distribute
 	  are found; copy html docs if available; show verbose compilation of

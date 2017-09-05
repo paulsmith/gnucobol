@@ -7,7 +7,7 @@
 setlocal enabledelayedexpansion
 set cb_errorlevel=0
 
-:: Set distribution folder
+:: Set (temporary) distribution folder
 set "cob_dist_path=%~dp0\dist\"
 
 :: Set clean source directory
@@ -18,6 +18,23 @@ set "cob_header_path=%~dp0"
 
 :: Set directory with generated release files
 set "cob_release_path=%~dp0"
+
+if exist "%cob_release_path%config.h" (
+   for /f "tokens=3 delims= " %%a in ('find "PACKAGE_NAME" "%cob_header_path%config.h"') do (
+      set PVTEMP=%%a
+   )
+   set PACKAGE_NAME=!PVTEMP:"=!
+   for /f "tokens=3 delims= " %%a in ('find "PACKAGE_VERSION" "%cob_header_path%config.h"') do (
+      set PVTEMP=%%a
+   )
+   set PACKAGE_VERSION=!PVTEMP:"=!
+   set PACKAGE_DIRECTORY=!PACKAGE_NAME!_!PACKAGE_VERSION!
+) else (
+   echo WARNING: config.h not found as "%cob_header_path%config.h"!
+   set PACKAGE_DIRECTORY=GnuCOBOL
+)
+echo Creating binary distribution for %PACKAGE_DIRECTORY%
+set PACKAGE=%PACKAGE_DIRECTORY%_vs_bin
 
 :: check for existing binaries
 if /i "%1%"=="DEBUG" (
@@ -147,14 +164,22 @@ echo.
 
 echo Compressing dist package...
 if exist "%ProgramFiles%\7-Zip\7z.exe" (
-   erase "..\GnuCOBOL.7z" 1>nul
-   "%ProgramFiles%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
+   erase "..\%PACKAGE%.7z" 1>nul 2>nul
+   "%ProgramFiles%\7-Zip\7z.exe" a -r -mx=9 "..\%PACKAGE%.7z" *
 ) else if exist "%ProgramFiles(x86)%\7-Zip\7z.exe" (
-   erase "..\GnuCOBOL.7z" 1>nul
-   "%ProgramFiles(x86)%\7-Zip\7z.exe" a -r -mx=9 "..\GnuCOBOL.7z" *
+   erase "..\%PACKAGE%.7z" 1>nul
+   "%ProgramFiles(x86)%\7-Zip\7z.exe" a -r -mx=9 "..\%PACKAGE%.7z" *
 ) else (
-   echo 7-zip not found, "GnuCOBOL.7z" not created
+   echo.
+   echo 7-zip not found, "%PACKAGE%.7z" not created
+   cd ..
+   move dist PACKAGE 1>nul
+   echo.
+   echo %cob_release_path%%PACKAGE% ready for distribution; manual compression needed.
+   goto :end
 )
+echo.
+echo %cob_release_path%%PACKAGE%.7z ready for distribution."
 
 goto :end
 
@@ -207,10 +232,10 @@ if exist "%copy_from%\mpir.dll" (
 if exist "%copy_from%\libvbisam.dll" (
    copy "%copy_from%\libvbisam.dll"		%copy_to_bin%\	1>nul
 ) else if exist "%cob_header_path%db.h" (
-   for /f "tokens=3" %%a in ('find "DB_VERSION_MAJOR" %cob_header_path%db.h') do (
+   for /f "tokens=3" %%a in ('find "DB_VERSION_MAJOR" "%cob_header_path%db.h"') do (
       set major=%%a
    )
-   for /f "tokens=3" %%a in ('find "DB_VERSION_MINOR" %cob_header_path%db.h') do (
+   for /f "tokens=3" %%a in ('find "DB_VERSION_MINOR" "%cob_header_path%db.h"') do (
       set minor=%%a
    )
    echo Guessing from db.h... libdb!major!!minor!
@@ -222,21 +247,21 @@ if exist "%copy_from%\libvbisam.dll" (
       echo No ISAM handler found.
    )
 ) else if exist "%cob_header_path%disam.h" (
-   for /f "tokens=3,4 delims=. " %%a in ('find "Version" %cob_header_path%disam.h') do (
+   for /f "tokens=3,4 delims=. " %%a in ('find "Version" "%cob_header_path%disam.h"') do (
       set major=%%a
-	  set minor=%%b
+      set minor=%%b
    )
    echo Guessing from disam.h... libdisam!major!!minor!
    if exist "%copy_from%\libdisam!major!!minor!.dll" (
       copy "%copy_from%\libdisam!major!!minor!.dll"	%copy_to_bin%\	1>nul
    ) else if "%PLATFORM%"=="Win32" (
       if exist "%copy_from%\libdisam!major!!minor!_win32.dll" (
-      	 copy "%copy_from%\libdisam!major!!minor!_win32.dll"	%copy_to_bin%\	1>nul
+         copy "%copy_from%\libdisam!major!!minor!_win32.dll"	%copy_to_bin%\	1>nul
       ) else (
-      	 echo No ISAM handler found.
+         echo No ISAM handler found.
       )
    ) else if exist "%copy_from%\libdisam!major!!minor!_win64.dll" (
-      	 copy "%copy_from%\libdisam!major!!minor!_win64.dll"	%copy_to_bin%\	1>nul
+         copy "%copy_from%\libdisam!major!!minor!_win64.dll"	%copy_to_bin%\	1>nul
    ) else (
       echo No ISAM handler found.
    )
