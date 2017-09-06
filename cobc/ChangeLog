@@ -9,6 +9,7 @@
 	* typeck.c (cb_validate_program_data): temporarily disabled ASSIGN
 	  fields with changing address (BASED + LINKAGE) to prevent SIGSEGV
 	  until code generation is changed, see bug #421
+	* codegen.c: changed generated newlines/comments for file initialization
 
 2017-09-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -144,7 +145,7 @@
 
 2017-07-27  Ron Norman <rjn@inglenet.com>
 
-	* tree.c: 
+	* tree.c:
 	  Improve warning messages for comparing literals to fields
 
 2017-07-23  Ron Norman <rjn@inglenet.com>
