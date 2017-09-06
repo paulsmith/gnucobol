@@ -1537,6 +1537,8 @@ cb_build_section_name (cb_tree name, const int sect_or_para)
 	return name;
 }
 
+/* build name for ASSIGN, to be resolved later as we don't have any
+   field info at this point (postponed to cb_validate_program_data) */
 cb_tree
 cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 {
@@ -2980,8 +2982,30 @@ cb_validate_program_data (struct cb_program *prog)
 			}
 			if (CB_REFERENCE_P (assign)) {
 				x = cb_ref (assign);
-				if (CB_FIELD_P (x) && CB_FIELD (x)->level == 88) {
-					cb_error_x (assign, _("ASSIGN data item '%s' invalid"), CB_NAME (assign));
+				if (CB_FIELD_P (x)) {
+					if (CB_FIELD (x)->level == 88) {
+						cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
+							CB_NAME (assign));
+					} else if (CB_FIELD (x)->storage != CB_STORAGE_WORKING &&
+						CB_FIELD (x)->storage != CB_STORAGE_LOCAL) {
+						/* FIXME: Should be allowed, but needs changes to codegen,
+						          including a check for the LINKAGE item */
+						if (CB_FIELD (x)->storage == CB_STORAGE_LINKAGE) {
+							CB_PENDING_X (assign,
+								_("ASSIGN data item defined in LINKAGE"));
+						}
+						cb_error_x (assign,
+							_("ASSIGN data item '%s' is invalid"),
+							CB_NAME (assign));
+					} else if (CB_FIELD (x)->flag_item_based) {
+						/* FIXME: Should be allowed, but needs changes to codegen,
+						          including a check for the BASED item */
+						CB_PENDING_X (assign,
+							_("ASSIGN data item with BASED clause"));
+						cb_error_x (assign,
+							_("ASSIGN data item '%s' is invalid"),
+							CB_NAME (assign));
+					}
 				}
 			}
 		}

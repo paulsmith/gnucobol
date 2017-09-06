@@ -44,26 +44,47 @@ if test ! -d "$EXTSRCDIR/build_windows"; then
 	exit 5
 fi
 
+# check where to place temporary files
+if test "x$TMPDIR" = "x"; then
+	if test "x$TMP" = "x"; then
+		if test "x$TEMP" = "x"; then
+			TMPDIR=/tmp
+		else
+			TMPDIR=$TEMP
+		fi
+	else
+		TMPDIR=$TMP
+	fi
+fi
+if test ! -d "$TMPDIR"; then
+	echo "TMPDIR $TMPDIR" does not exist, aborting $0
+	exit 1
+fi
+export TMPDIR
 
 # Create temporary folder as we don't want to change the EXTDISTDIR's content
-WINTMP=/tmp/win-dist-$(date +%s)
+WINTMP=$TMPDIR/win-dist-$(date +%s)
 
 rm -r -f $WINTMP
+echo mkdir $WINTMP
 mkdir $WINTMP
 
-cp -p -r --parents $EXTDISTDIR $WINTMP || exit 1
+echo cp -p -r  $EXTDISTDIR $WINTMP
+cp -p -r $EXTDISTDIR $WINTMP || exit 1
 
 # Add content only necessary for windows dist zip
-cp -p -r --parents $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
+echo cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/
+cp -p -r $EXTSRCDIR/build_windows $WINTMP/$EXTDISTDIR/ || exit 2
+echo cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win
 cp $EXTSRCDIR/tests/atlocal_win $WINTMP/$EXTDISTDIR/tests/atlocal_win || exit 2
 
 olddir=$(pwd)
 cd $WINTMP/$EXTDISTDIR || exit 3
 
 # rename templates for faster setup
-cd build_windows
-mv config.h.in config.h
-mv defaults.h.in defaults.h
+cd build_windows || exit 5
+mv "config.h.in"   "config.h"
+mv "defaults.h.in" "defaults.h"
 cd ..
 
 # Remove content not necessary for windows dist zip --> breaks make dist[check]
@@ -76,16 +97,16 @@ find -regextype posix-egrep -regex ".*(\.([chyl]|def|cpy|cob|conf|cfg)|(README|C
  
 # fix timestamps again
 ./doc/cobcinfo.sh "fixtimestamps"
-touch ./bin/cobcrun.1
-touch ./cobc/cobc.1
-touch ./cobc/ppparse.c
-touch ./cobc/parser.c
-#touch ./cobc/pplex.c
-#touch ./cobc/scanner.c
-#touch ./libcob/libcob.3
+touch "./bin/cobcrun.1"
+touch "./cobc/cobc.1"
+touch "./cobc/ppparse.c"
+touch "./cobc/parser.c"
+#touch "./cobc/pplex.c"
+#touch "./cobc/scanner.c"
+#touch "./libcob/libcob.3"
 
 # bugfix for old _MSC versions that define __STDC_VERSION__ >= 199901L but don't work correct
-for file in ./cobc/pplex.c ./cobc/scanner.c; do
+for file in "./cobc/pplex.c" "./cobc/scanner.c"; do
 # "sed -i" isn't supported on all systems --> maybe use sed && mv - do we actually want to care for this here?
 #	sed -e 's/199901L/199901L \&\&(!defined(_MSC_VER) || _MSC_VER >= 1800)/g' \
 #	  $file > $file.tmp && mv -f $file.tmp $file

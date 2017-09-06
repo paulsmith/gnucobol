@@ -1740,16 +1740,16 @@ cb_flags_t (const cob_flags_t n)
 
 	/* FIXME:
 
-	   This ONLY works for the current version as we have two bit left before
+	   This ONLY works for the current version as we have one bit left before
 	   we actually need the 64bit cob_flags_t that we use internally
 	   in cobc (needed already for syntax checks) and in screenio
-	   (needed soon).
+	   (needed soon, but not yet, hence the bitmask).
 
 	   Ideally we either store the flags as string here or mark them and
 	   output the flags in codegen as flags, making the code much more readable.
 	*/
 
-	return cb_int ((const int)n);
+	return cb_int ((int) (n & 0xFFFF));
 }
 
 /* Code output and comment */
@@ -3687,7 +3687,7 @@ error:
 static char *
 display_literal (char *disp, struct cb_literal *l)
 {
-	if (CB_NUMERIC_LITERAL_P(l)) { 
+	if (CB_NUMERIC_LITERAL_P(l)) {
 		if (l->scale == 0) {
 			snprintf(disp,38,"%s%.36s",(char*)(l->sign == -1 ? "-" : ""),(char*)l->data);
 		} else if (l->scale > 0) {
@@ -3802,7 +3802,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		scale--;
 
 	/* If Literal has more digits in whole portion than field can hold
-	 * Then the literal value will never match the field contents 
+	 * Then the literal value will never match the field contents
 	 */
 	if ((i - scale) >= 0
 	 && (f->size - f->pic->scale) >= 0
@@ -4159,7 +4159,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		} else if (cb_constant_folding
 		&&  CB_LITERAL_P(x)
 		 && CB_LITERAL_P(y)
-		 && !CB_NUMERIC_LITERAL_P(x) 
+		 && !CB_NUMERIC_LITERAL_P(x)
 		 && !CB_NUMERIC_LITERAL_P(y)) {
 			copy_file_line (e, y, x);
 			xl = CB_LITERAL(x);
@@ -4233,10 +4233,10 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	case '&':
 	case '|':
 		/* Logical operators */
-		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN 
+		if (CB_TREE_CLASS (x) != CB_CLASS_BOOLEAN
 		 || (y && CB_TREE_CLASS (y) != CB_CLASS_BOOLEAN)) {
 			copy_file_line (e, y, x);
-			if (CB_NUMERIC_LITERAL_P(x) 
+			if (CB_NUMERIC_LITERAL_P(x)
 			 && y
 			 && CB_NUMERIC_LITERAL_P(y)) {
 				xl = (void*)x;

@@ -6647,6 +6647,7 @@ output_file_initialization (struct cb_file *f)
 	int			features;
 	char			key_ptr[64];
 
+	output_line ("/* File initialization for %s */", f->name);
 	if (f->organization == COB_ORG_RELATIVE
 	 || f->organization == COB_ORG_INDEXED) {
 		nkeys = 1;
@@ -6817,6 +6818,7 @@ output_file_initialization (struct cb_file *f)
 	if (f->flag_external) {
 		output_indent ("}");
 	}
+	output_newline ();
 }
 
 /* Screen definition */
@@ -7795,13 +7797,16 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Initialize W/S and files unconditionally when INITIAL program */
 	if (prog->flag_initial) {
-		output_line ("/* Initialize INITIAL program WORKING-STORAGE */");
-		output_initial_values (prog->working_storage);
-		output_newline ();
-		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-			output_file_initialization (CB_FILE (CB_VALUE (l)));
+		if (prog->working_storage) {
+			output_line ("/* Initialize INITIAL program WORKING-STORAGE */");
+			output_initial_values (prog->working_storage);
+			output_newline ();
 		}
-		output_newline ();
+		if (prog->file_list) {
+			for (l = prog->file_list; l; l = CB_CHAIN (l)) {
+				output_file_initialization (CB_FILE (CB_VALUE (l)));
+			}
+		}
 	}
 
 	/* Call parameters */
@@ -8244,11 +8249,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_newline ();
 		}
 		if (prog->file_list) {
-			output_newline ();
 			for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 				output_file_initialization (CB_FILE (CB_VALUE (l)));
 			}
-			output_newline ();
 		}
 		i = 1;
 		for (m = literal_cache; m; m = m->next) {

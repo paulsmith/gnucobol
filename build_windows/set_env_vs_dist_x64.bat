@@ -7,16 +7,30 @@
 set arch=x64
 set arch_full=amd64
 
+:: restore old PATH to not expand it endlessly
+if not "%COB_OLD_PATH%" == "" (
+   set "PATH=%COB_OLD_PATH%"
+   set "COB_OLD_PATH=%PATH%"
+)
+
+
+echo Setup Visual Studio (%arch%/%arch_full%)...
+echo.
+
 :: check if cl.exe with matching architecture is already in path
 where cl.exe 1>nul 2>nul
-if "%errorlevel%" == "0" (
-   cl.exe 2>&1 | findstr %arch% > nul
-   if "%errorlevel%" == "0" (
-      echo cl.exe already in PATH
-      echo no further initialization is done for the C compiler
-      goto :gc
-   )
+if not "%errorlevel%" == "0" (
+   goto :vsvars
 )
+cl.exe 2>&1 | findstr %arch% > nul
+if "%errorlevel%" == "0" (
+   echo cl.exe already in PATH
+   echo no further initialization is done for the C compiler
+   echo.
+   goto :gc
+)
+
+:vsvars
 
 :: Check for valid MSC Environment and let it do it's work.
 :: If not found try Windows SDKs in standard installation folders
@@ -225,10 +239,8 @@ set "COB_LIB_PATHS=/LIBPATH:"%COB_MAIN_DIR%lib_x64""
 ::   if exist "%COB_MAIN_DIR%lib\libgmp.lib" 	set COB_LIBS=libcob.lib libgmp.lib
 ::)
 
-:: Add the bin path of GnuCOBOL to PATH for further references
+:: save current PATH and add the bin path of GnuCOBOL to PATH for further references
 if "%COB_OLD_PATH%" == "" (
    set "COB_OLD_PATH=%PATH%"
-) else (
-   set "PATH=%COB_OLD_PATH%"
 )
 set "PATH=%COB_MAIN_DIR%bin_x64;%PATH%"

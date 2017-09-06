@@ -7,16 +7,23 @@
 set arch=x64
 set arch_full=amd64
 
+echo Setup Visual Studio (%arch%/%arch_full%)...
+echo.
+
 :: check if cl.exe with matching architecture is already in path
 where cl.exe 1>nul 2>nul
-if "%errorlevel%" == "0" (
-   cl.exe 2>&1 | findstr %arch% > nul
-   if "%errorlevel%" == "0" (
-      echo cl.exe already in PATH
-      echo no further initialization is done for the C compiler
-      goto :gc
-   )
+if not "%errorlevel%" == "0" (
+   goto :vsvars
 )
+cl.exe 2>&1 | findstr %arch% > nul
+if "%errorlevel%" == "0" (
+   echo cl.exe already in PATH
+   echo no further initialization is done for the C compiler
+   echo.
+   goto :gc
+)
+
+:vsvars
 
 :: Check for valid MSC Environment and let it do it's work.
 :: If not found try Windows SDKs in standard installation folders
