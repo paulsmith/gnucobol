@@ -2085,9 +2085,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 	if (f) {
 		if (size_is) {
-			/* #error "DISPLAY LOW-VALUES does not work between DISPLAYs" */
-			/* #error "SPACES/X"01"/etc. MF behaviour need option for disabling" */
-			/* #error "ACCEPT with UPDATE does not work" */
 			size_accept = cob_get_int (size_is);
 			/* SIZE ZERO is ignored */
 			if (size_accept == 0) {
