@@ -93,7 +93,10 @@ test: $(MODULES_RUN)
 	@perl $(srcdir)/summary.pl $(MODULES) > summary.log
 	$(MAKE) diff-summary
 
-diff:
+summary.log:
+	@perl $(srcdir)/summary.pl $(MODULES) > summary.log
+
+diff: summary.log
 	@for m in $(MODULES); do \
 		(diff $(srcdir)/$$m.txt $$m/report.txt) \
 	done
