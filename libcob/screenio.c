@@ -830,7 +830,7 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input,
 	size_t		size;
 	int		line;
 	int		column;
-	chtype		promptchar;
+	chtype		default_prompt_char;
 
 	get_screen_item_line_and_col (s, &line, &column);
 
@@ -844,9 +844,9 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input,
 	if (s->attr & COB_SCREEN_INPUT) {
 		cob_screen_attr (s->foreg, s->backg, s->attr, stmt);
 		if (s->prompt) {
-			promptchar = s->prompt->data[0];
+			default_prompt_char = s->prompt->data[0];
 		} else {
-			promptchar = COB_CH_UL;
+			default_prompt_char = COB_CH_UL;
 		}
 		p = f->data;
 		raise_ec_on_truncation (f->size);
@@ -854,7 +854,7 @@ cob_screen_puts (cob_screen *s, cob_field *f, const cob_u32_t is_input,
 			if (s->attr & COB_SCREEN_SECURE) {
 				cob_addch_no_trunc_check (COB_CH_AS);
 			} else if (*p <= ' ') {
-				cob_addch_no_trunc_check (promptchar);
+				cob_addch_no_trunc_check (default_prompt_char);
 			} else {
 				cob_addch_no_trunc_check ((const chtype)*p);
 			}
@@ -1119,7 +1119,7 @@ finalize_all_fields (struct cob_inp_struct *sptr, const size_t total_idx)
 }
 
 static void
-cob_screen_get_all (const int initial_curs, const int gettimeout)
+cob_screen_get_all (const int initial_curs, const int get_timeout)
 {
 	size_t			curr_index = (size_t)initial_curs;
 	struct cob_inp_struct	*sptr = cob_base_inp + curr_index;
@@ -1132,12 +1132,12 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 	int			scolumn = sptr->this_x;
 	int			cline;
 	int			ccolumn;
-	int			rightpos = scolumn + (int)s->field->size - 1;
-	int			ateof = 0;
+	int			right_pos = scolumn + (int)s->field->size - 1;
+	int			at_eof = 0;
 	int			ungetched = 0;
 	int			status;
 	int			count;
-	chtype			promptchar;
+	chtype			default_prompt_char;
 
 	status = cob_move_cursor (sline, scolumn);
 	if (status != ERR) {
@@ -1147,14 +1147,14 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 
 	for (; ;) {
 		if (s->prompt) {
-			promptchar = s->prompt->data[0];
+			default_prompt_char = s->prompt->data[0];
 		} else {
-			promptchar = COB_CH_UL;
+			default_prompt_char = COB_CH_UL;
 		}
 
 		refresh ();
 		errno = 0;
-		timeout (gettimeout);
+		timeout (get_timeout);
 		keyp = getch ();
 
 		/* FIXME: modularize (cob_screen_get_all, field_accept) and
@@ -1209,8 +1209,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr,
@@ -1228,12 +1228,12 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			if (ungetched) {
 				ungetched = 0;
-				p = s->field->data + rightpos;
-				cob_move_cursor (sline, rightpos);
+				p = s->field->data + right_pos;
+				cob_move_cursor (sline, right_pos);
 			} else {
 				p = s->field->data;
 				cob_move_cursor (sline, scolumn);
@@ -1249,8 +1249,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr,
@@ -1264,8 +1264,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr,
@@ -1279,8 +1279,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr,
@@ -1294,8 +1294,8 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			s = sptr->scr;
 			sline = sptr->this_y;
 			scolumn = sptr->this_x;
-			ateof = 0;
-			rightpos = scolumn + (int)s->field->size - 1;
+			at_eof = 0;
+			right_pos = scolumn + (int)s->field->size - 1;
 			p = s->field->data;
 			cob_move_cursor (sline, scolumn);
 			cob_screen_attr (s->foreg, s->backg, s->attr,
@@ -1304,9 +1304,9 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 		case KEY_BACKSPACE:
 			/* Backspace key. */
 			if ((int) ccolumn > scolumn) {
-				ateof = 0;
+				at_eof = 0;
 				/* Shift remainder left with cursor. */
-				for (count = ccolumn; count < rightpos + 1; count++) {
+				for (count = ccolumn; count < right_pos + 1; count++) {
 					/* Get character. */
 					p2 = s->field->data + count - scolumn ;
 					move_char = *p2;
@@ -1320,7 +1320,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 					} else if (s->attr & COB_SCREEN_SECURE) {
 						cob_addch (COB_CH_AS);
 					} else if (move_char == ' ') {
-						cob_addch (promptchar);
+						cob_addch (default_prompt_char);
 					} else {
 						cob_addch (move_char);
 					}
@@ -1339,7 +1339,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				} else if (s->attr & COB_SCREEN_SECURE) {
 					cob_addch (COB_CH_AS);
 				} else if (*p2 == ' ') {
-					cob_addch (promptchar);
+					cob_addch (default_prompt_char);
 				} else {
 					cob_addch (*p2);
 				}
@@ -1364,7 +1364,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			}
 			continue;
 		case KEY_RIGHT:
-			if (ccolumn < rightpos) {
+			if (ccolumn < right_pos) {
 				ccolumn++;
 				cob_move_cursor (cline, ccolumn);
 				p = s->field->data + ccolumn - scolumn;
@@ -1389,7 +1389,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 		case KEY_DC:
 			/* Delete key. */
 			/* Delete character, move remainder left. */
-			for (count = ccolumn; count < rightpos; count++) {
+			for (count = ccolumn; count < right_pos; count++) {
 				/* Get character one position to right. */
 				p2 = s->field->data + count - scolumn + 1;
 				move_char = *p2;
@@ -1403,7 +1403,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				} else if (s->attr & COB_SCREEN_SECURE) {
 					cob_addch (COB_CH_AS);
 				} else if (move_char == ' ') {
-					cob_addch (promptchar);
+					cob_addch (default_prompt_char);
 				} else {
 					cob_addch (move_char);
 				}
@@ -1423,7 +1423,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				cob_addch (COB_CH_AS);
 			} else {
 				if (*p2 == ' ') {
-					cob_addch (promptchar);
+					cob_addch (default_prompt_char);
 				} else {
 					cob_addch (*p2);
 				}
@@ -1470,14 +1470,14 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				if (cob_field_is_numeric_or_numeric_edited (s->field)) {
 					p2 = (unsigned char *)" ";
 				} else {
-					p2 = s->field->data + rightpos - scolumn;
+					p2 = s->field->data + right_pos - scolumn;
 				}
 				if (*p2 != ' ') {
 					cob_beep ();
 					continue;
 				}
 				/* Move remainder to the right. */
-				for (count = rightpos; count > ccolumn - 1; count--) {
+				for (count = right_pos; count > ccolumn - 1; count--) {
 					/* Get character */
 					p2 = s->field->data + count - scolumn - 1;
 					move_char = *p2;
@@ -1512,7 +1512,7 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 			} else {
 				cob_addch ((const chtype)keyp);
 			}
-			if (ccolumn == rightpos) {
+			if (ccolumn == right_pos) {
 				/* Auto-skip at end of field. */
 				if (s->attr & COB_SCREEN_AUTO) {
 					if (curr_index == totl_index - 1) {
@@ -1524,10 +1524,10 @@ cob_screen_get_all (const int initial_curs, const int gettimeout)
 				cob_move_cursor (cline, ccolumn);
 				/* check if we (still) are at last position and inform
 				   user with a beep (after having processed his key) */
-				if (ateof) {
+				if (at_eof) {
 					cob_beep ();
 				} else {
-					ateof = 1;
+					at_eof = 1;
 				}
 			} else {
 				p++;
@@ -1844,7 +1844,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 	size_t			firsty;
 	int			starty;
 	int			initial_curs;
-	int			gettimeout;
+	int			get_timeout;
 
 	init_cob_screen_if_needed ();
 	if (!cob_base_inp) {
@@ -1874,12 +1874,12 @@ screen_accept (cob_screen *s, const int line, const int column,
 	}
 
 	if (ftimeout) {
-		gettimeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
-		if (gettimeout >= 0 && gettimeout < 500) {
-			gettimeout = 500;
+		get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
+		if (get_timeout >= 0 && get_timeout < 500) {
+			get_timeout = 500;
 		}
 	} else {
-		gettimeout = -1;
+		get_timeout = -1;
 	}
 
 	/* Sort input fields on line, column */
@@ -1922,7 +1922,7 @@ screen_accept (cob_screen *s, const int line, const int column,
 	if (initial_curs < 0) {
 		initial_curs = 0;
 	}
-	cob_screen_get_all (initial_curs, gettimeout);
+	cob_screen_get_all (initial_curs, get_timeout);
 	cob_check_pos_status (global_return);
 }
 
@@ -1931,11 +1931,10 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	       cob_field *bgc, cob_field *fscroll, cob_field *size_is,
 	       const cob_flags_t fattr)
 {
-	int		sline;
-	int		scolumn;
-	int		ssize_is = 0;	/* WITH SIZE IS */
-	int		size_display;	/* final size to display */
-	int		status;
+	int	sline;
+	int	scolumn;
+	int	size_display;
+	int	status;
 	char	fig_const;	/* figurative constant character */
 
 	/* LCOV_EXCL_START */
@@ -1949,17 +1948,16 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	origin_y = 0;
 	origin_x = 0;
 
-	/* Field size to display */
-	size_display = (int)f->size;
-	/* WITH SIZE IS */
 	if (size_is) {
-		ssize_is = cob_get_int (size_is);
-		/* Use WITH SIZE IS when less than field size */
-		if (ssize_is > 0 && ssize_is < (int)f->size) {
-			size_display = ssize_is;
+		size_display = cob_get_int (size_is);
+		/* SIZE ZERO is ignored */
+		if (size_display == 0) {
+			size_display = (int)f->size;
 		}
 	} else if (fattr & COB_SCREEN_NO_DISP) {
 		size_display = 0;
+	} else {
+		size_display = (int)f->size;
 	}
 
 	if (fscroll) {
@@ -1983,15 +1981,17 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	cob_screen_attr (fgc, bgc, fattr, DISPLAY_STATEMENT);
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
 		/* figurative constant and WITH SIZE repeats the character */
-		if ((size_is)
+		if (size_is
 		    && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
 		    && (int)f->size == 1) {
 			fig_const = f->data[0];
-			cob_addnch (ssize_is, fig_const);
+			cob_addnch (size_display, fig_const);
 		} else {
-			cob_addnstr ((char *)f->data, f->size);
-			/* WITH SIZE larger than field displays trailing spaces */
-			cob_addnch (size_display - f->size, COB_CH_SP);
+			cob_addnstr ((char *)f->data, cob_min_int (size_display, f->size));
+			if (size_display > f->size) {
+				/* WITH SIZE larger than field displays trailing spaces */
+				cob_addnch (size_display - f->size, COB_CH_SP);
+			}
 		}
 	}
 
@@ -2016,27 +2016,26 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	unsigned char	*p2;
 	size_t		count;
 	int		keyp;
-	int		fret;
+	int		fret = 0;
 	int		cline = 0;
 	size_t		ccolumn = 0;
-	size_t		rightpos;
-	int		ateof;
+	size_t		right_pos;
+	int		at_eof = 0;
 	unsigned char	move_char;      /* data shift character */
 	int		prompt_char;    /* prompt character */
-	int		gettimeout;
+	int		get_timeout;
 	int		status;
-	chtype		promptchar;
-	int		ssize_is = 0;	/* WITH SIZE IS */
+	chtype		default_prompt_char;
 	size_t		size_accept = 0;	/* final size to accept */
-	cob_field	temp;
+	cob_field	temp_field;
 #if	0	/* RXWRXW - Screen update */
 	cob_field	char_temp;
 	unsigned char	space_buff[4];
 #endif
 
 	memset (COB_TERM_BUFF, ' ', (size_t)COB_MEDIUM_MAX);
-	temp.data = COB_TERM_BUFF;
-	temp.attr = &const_alpha_attr;
+	temp_field.data = COB_TERM_BUFF;
+	temp_field.attr = &const_alpha_attr;
 #if	0	/* RXWRXW - Screen update */
 	char_temp.data = space_buff;
 	char_temp.attr = &const_alpha_attr;
@@ -2050,19 +2049,19 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 
 	/* Set the default prompt character */
 	if (prompt) {
-		promptchar = prompt->data[0];
+		default_prompt_char = prompt->data[0];
 	} else {
-		promptchar = COB_CH_UL;
+		default_prompt_char = COB_CH_UL;
 	}
 	init_cob_screen_if_needed ();
 
 	if (ftimeout) {
-		gettimeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
-		if (gettimeout >= 0 && gettimeout < 500) {
-			gettimeout = 500;
+		get_timeout = cob_get_int (ftimeout) * COB_TIMEOUT_SCALE;
+		if (get_timeout >= 0 && get_timeout < 500) {
+			get_timeout = 500;
 		}
 	} else {
-		gettimeout = -1;
+		get_timeout = -1;
 	}
 
 	if (fscroll) {
@@ -2085,43 +2084,44 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	cob_screen_attr (fgc, bgc, fattr, ACCEPT_STATEMENT);
 
 	if (f) {
-		/* Field size to accept */
-		size_accept = f->size;
-		/* WITH SIZE IS */
 		if (size_is) {
-			ssize_is = cob_get_int (size_is);
-			/* Use WITH SIZE IS when less than field size */
-			if (ssize_is > 0 && ssize_is < (int)f->size) {
-			  size_accept = ssize_is;
+			/* #error "DISPLAY LOW-VALUES does not work between DISPLAYs" */
+			/* #error "SPACES/X"01"/etc. MF behaviour need option for disabling" */
+			/* #error "ACCEPT with UPDATE does not work" */
+			size_accept = cob_get_int (size_is);
+			/* SIZE ZERO is ignored */
+			if (size_accept == 0) {
+				size_accept = (int)f->size;
 			}
+		} else {
+			size_accept = f->size;
 		}
 
 		p = COB_TERM_BUFF;
-		temp.size = size_accept;
+		temp_field.size = size_accept;
 		if (fattr & COB_SCREEN_UPDATE) {
-			cob_move (f, &temp);
+			cob_move (f, &temp_field);
 		}
-		/* SIZE IS greater than field, blank out trailing screen */
-		if (ssize_is > (int)f->size) {
-			cob_addnch (ssize_is, COB_CH_SP);
-			cob_move_cursor (sline, scolumn);
-		}
+
 		raise_ec_on_truncation (size_accept);
-		for (count = 0; count < size_accept; count++) {
+		for (count = 0; count < cob_min_int (size_accept, f->size); count++) {
 			if (fattr & COB_SCREEN_SECURE) {
 				cob_addch_no_trunc_check (COB_CH_AS);
 			} else if (fattr & COB_SCREEN_NO_ECHO) {
 				cob_addch_no_trunc_check (COB_CH_SP);
 			} else if (fattr & COB_SCREEN_UPDATE) {
-				fret = *p++;
-				cob_addch_no_trunc_check ((const chtype)fret);
+				cob_addch_no_trunc_check ((const chtype)*p++);
 			} else if (COB_FIELD_IS_NUMERIC (f)) {
 				cob_addch_no_trunc_check ('0');
 			} else if (fattr & COB_SCREEN_PROMPT) {
-				cob_addch_no_trunc_check (promptchar);
+				cob_addch_no_trunc_check (default_prompt_char);
 			} else {
 				cob_addch_no_trunc_check (COB_CH_SP);
 			}
+		}
+		/* SIZE IS greater than field, blank out trailing screen */
+		if (size_accept > (int)f->size) {
+			cob_addnch (size_accept - f->size, COB_CH_SP);
 		}
 		cob_move_cursor (sline, scolumn);
 #if	0	/* RXWRXW - Screen update */
@@ -2137,14 +2137,12 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		accept_cursor_y = sline;
 		accept_cursor_x = scolumn + size_accept;
 
-		rightpos = scolumn + size_accept - 1;
+		right_pos = scolumn + size_accept - 1;
 		p = COB_TERM_BUFF;
 	} else {
-		rightpos = 0;
+		right_pos = 0;
 		p = NULL;
 	}
-	fret = 0;
-	ateof = 0;
 	count = 0;
 
 	/* Get characters from keyboard, processing each one. */
@@ -2158,11 +2156,11 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			} else if (COB_FIELD_IS_NUMERIC (f)) {
 				prompt_char = '0';
 			} else if (fattr & COB_SCREEN_PROMPT) {
-				prompt_char = promptchar;
+				prompt_char = default_prompt_char;
 			} else {
 				prompt_char = COB_CH_SP;
 			}
-			for (count = rightpos; (int)count > scolumn - 1; count--) {
+			for (count = right_pos; (int)count > scolumn - 1; count--) {
 				/* Get character */
 				p2 = COB_TERM_BUFF + count - scolumn;
 				move_char = *p2;
@@ -2205,7 +2203,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			refresh ();
 		}
 		errno = 0;
-		timeout (gettimeout);
+		timeout (get_timeout);
 
 		/* Get a character. */
 		keyp = getch ();
@@ -2313,7 +2311,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			/* Backspace key. */
 			if ((int) ccolumn > scolumn) {
 				/* Shift remainder left with cursor. */
-				for (count = ccolumn; count < rightpos + 1; count++) {
+				for (count = ccolumn; count < right_pos + 1; count++) {
 					/* Get character. */
 					p2 = COB_TERM_BUFF + count - scolumn ;
 					move_char = *p2;
@@ -2344,15 +2342,15 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				cob_move_cursor (cline, ccolumn);
 				p--;
 			}
-			ateof = 0;
+			at_eof = 0;
 			continue;
 		case KEY_HOME:
 			/* Home key, cursor to start of characters. */
 			/* Prepare for empty field. */
-			ccolumn = rightpos;
+			ccolumn = right_pos;
 			move_char = ' ';
 			/* Find non-blank from left. */
-			for (count = scolumn; count <= rightpos; count++) {
+			for (count = scolumn; count <= right_pos; count++) {
 				/* Get character. */
 				p2 = COB_TERM_BUFF + count - scolumn;
 				move_char = *p2;
@@ -2364,13 +2362,13 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			}
 			cob_move_cursor (cline, ccolumn);
 			p = COB_TERM_BUFF + ccolumn - scolumn;
-			ateof = 0;
+			at_eof = 0;
 			continue;
 		case 01026:
 			/* Alt-Home key, cursor to start of field. */
 			cob_move_cursor (sline, scolumn);
 			p = COB_TERM_BUFF;
-			ateof = 0;
+			at_eof = 0;
 			continue;
 		case KEY_END:
 			/* End key, cursor to end of characters. */
@@ -2378,7 +2376,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			ccolumn = scolumn;
 			move_char = ' ';
 			/* Find non blank from right. */
-			for (count = rightpos; (int) count >= scolumn; count--) {
+			for (count = right_pos; (int) count >= scolumn; count--) {
 				/* Get character. */
 				p2 = COB_TERM_BUFF + count - scolumn;
 				move_char = *p2;
@@ -2389,24 +2387,24 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				}
 			}
 			/* Cursor to first blank after. */
-			if (move_char != ' ' && ccolumn != rightpos) {
+			if (move_char != ' ' && ccolumn != right_pos) {
 				ccolumn++;
 			}
 			cob_move_cursor (cline, ccolumn);
 			p = COB_TERM_BUFF + ccolumn - scolumn;
-			ateof = 0;
+			at_eof = 0;
 			continue;
 		case 01021:
 			/* Alt-End key, cursor to end of size of field */
-			cob_move_cursor (sline, rightpos);
+			cob_move_cursor (sline, right_pos);
 			p = COB_TERM_BUFF + size_accept - 1;
-			ateof = 0;
+			at_eof = 0;
 			continue;
 		case KEY_LEFT:
 		case KEY_CLOSE:
 			/* Left-arrow     KEY_LEFT  auto-skip. */
 			/* Alt-left-arrow KEY_CLOSE no auto-skip. */
-			ateof = 0;
+			at_eof = 0;
 			if ((int) ccolumn > scolumn) {
 				ccolumn--;
 				cob_move_cursor (cline, ccolumn);
@@ -2424,7 +2422,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		case KEY_PREVIOUS:
 			/* Right-arrow     KEY_RIGHT    auto-skip. */
 			/* Alt-right-arrow KEY_PREVIOUS no auto-skip. */
-			if (ccolumn < rightpos) {
+			if (ccolumn < right_pos) {
 				ccolumn++;
 				cob_move_cursor (cline, ccolumn);
 				p = COB_TERM_BUFF + ccolumn - scolumn;
@@ -2454,7 +2452,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 		case KEY_DC:
 			/* Delete key. */
 			/* Delete character, move remainder left. */
-			for (count = ccolumn; count < rightpos; count++) {
+			for (count = ccolumn; count < right_pos; count++) {
 				/* Get character one position to right. */
 				p2 = COB_TERM_BUFF + count - scolumn + 1;
 				move_char = *p2;
@@ -2485,7 +2483,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			continue;
 		case KEY_EOL:
 			/* Alt-Delete key, erase cursor to end of field. */
-			for (count = ccolumn; count <= rightpos; count++) {
+			for (count = ccolumn; count <= right_pos; count++) {
 				/* Character position. */
 				p2 = COB_TERM_BUFF + count - scolumn;
 				/* Blank character. */
@@ -2547,14 +2545,14 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				if (cob_field_is_numeric_or_numeric_edited (f)) {
 					p2 = (unsigned char *)" ";
 				} else {
-					p2 = COB_TERM_BUFF + rightpos - scolumn;
+					p2 = COB_TERM_BUFF + right_pos - scolumn;
 				}
 				if (*p2 != ' ') {
 					cob_beep ();
 					continue;
 				}
 				/* Move remainder to the right. */
-				for (count = rightpos; count > ccolumn - 1; count--) {
+				for (count = right_pos; count > ccolumn - 1; count--) {
 					/* Get character */
 					p2 = COB_TERM_BUFF + count - scolumn - 1;
 					move_char = *p2;
@@ -2590,7 +2588,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			} else {
 				cob_addch ((const chtype)keyp);
 			}
-			if (ccolumn == rightpos) {
+			if (ccolumn == right_pos) {
 				/* Auto-skip at end of field. */
 				if (fattr & COB_SCREEN_AUTO) {
 					break;
@@ -2598,10 +2596,10 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				cob_move_cursor (cline, ccolumn);
 				/* check if we (still) are at last position and inform
 				   user with a beep (after having processed his key) */
-				if (ateof) {
+				if (at_eof) {
 					cob_beep ();
 				} else {
-					ateof = 1;
+					at_eof = 1;
 				}
 			} else {
 				p++;
@@ -2613,14 +2611,14 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
  field_return:
 	if (f) {
-		cob_move_cursor (sline, rightpos + 1);
+		cob_move_cursor (sline, right_pos + 1);
 	}
 	refresh ();
 	cob_check_pos_status (fret);
 	if (!f) {
 		return;
 	}
-	cob_move (&temp, f);
+	cob_move (&temp_field, f);
 }
 
 static void

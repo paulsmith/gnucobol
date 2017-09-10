@@ -1,4 +1,14 @@
 
+2017-09-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (cb_int): corrected bitmask.
+	* config.def, typeck.c: added line-col-zero-default and display-special-
+	  fig-consts options. This reinstates GnuCOBOL's previous behaviour of
+	  DISPLAYing a field on screen at the current position of the cursor and
+	  disabling the MF DISPLAY SPACES extension.
+	* parser.y: increase number of places which accept ZERO (including SIZE
+	  clause).
+
 2017-09-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_int): add bitmask to suppress runtime loss-of-data warning

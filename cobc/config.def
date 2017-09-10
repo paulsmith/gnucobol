@@ -136,6 +136,11 @@ CB_CONFIG_BOOLEAN (cb_console_is_crt, "console-is-crt",
 CB_CONFIG_BOOLEAN (cb_no_echo_means_secure, "no-echo-means-secure",
 	_("NO-ECHO hides input with asterisks like SECURE"))
 
+CB_CONFIG_BOOLEAN (cb_line_col_zero_default, "line-col-zero-default",
+	_("assume the first item in a field DISPLAY goes at LINE 0 COL 0, not LINE 1 COL 1"))
+
+CB_CONFIG_BOOLEAN (cb_display_special_fig_consts, "display-special-fig-consts",
+	_("special behaviour of DISPLAY SPACE/ALL X\"01\"/ALL X\"02\"/ALL X\"07\""))
 
 /* Support flags */
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs",

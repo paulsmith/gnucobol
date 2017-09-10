@@ -157,7 +157,7 @@ enum key_clause_type {
 	RECORD_KEY,
 	RELATIVE_KEY
 };
-	 
+
 static struct cb_statement	*main_statement;
 
 static cb_tree			current_expr;
@@ -2922,7 +2922,7 @@ object_computer_segment:
   SEGMENT_LIMIT _is integer
   {
 	int segnum;
-	
+
 	if (cb_verify (cb_section_segments, "SEGMENT LIMIT")) {
 		segnum = cb_get_int ($3);
 		if (segnum == 0 || segnum > 49) {
@@ -3770,7 +3770,7 @@ file_control_entry:
 		cb_error_x (current_file->key,
 			    _("Cannot use RECORD KEY clause on RELATIVE files"));
 	}
-	  
+
 	if (CB_VALID_TREE ($3)) {
 		validate_file (current_file, $3);
 	}
@@ -5234,12 +5234,12 @@ constant_entry:
 ;
 
 constant_source:
-  _as value_item_list 
+  _as value_item_list
   {
 	$$ = $2;
   }
-| FROM WORD	
-  { 
+| FROM WORD
+  {
 	$$ = CB_LIST_INIT(cb_build_const_from ($2));
   }
 ;
@@ -7293,7 +7293,7 @@ _segment:
 | integer
   {
 	int segnum = cb_get_int ($1);
-	
+
 	$$ = NULL;
 	if (cb_verify (cb_section_segments, "SECTION segment")) {
 		if (segnum > 99) {
@@ -7645,7 +7645,7 @@ accept_from_screen_clauses:
 accept_from_screen_clause:
   /* FIXME: could be optional FROM instead of optional AT */
   at_line_column
-| SIZE _is pos_num_id_or_lit /* ignored, as ACCEPT FROM is pending */
+| SIZE _is pos_num_id_or_lit_or_zero /* ignored, as ACCEPT FROM is pending */
 ;
 
 lines_or_number:
@@ -7828,15 +7828,10 @@ accp_attr:
 	set_dispattr_with_conflict ("SECURE", COB_SCREEN_SECURE,
 				    "NO-ECHO", COB_SCREEN_NO_ECHO);
   }
-| PROTECTED SIZE _is positive_id_or_lit
+| _protected SIZE _is pos_num_id_or_lit_or_zero
   {
 	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
 	set_attribs (NULL, NULL, NULL, NULL, NULL, $4, 0);
-  }
-| SIZE _is pos_num_id_or_lit
-  {
-	check_repeated ("SIZE", SYN_CLAUSE_21, &check_duplicate);
-	set_attribs (NULL, NULL, NULL, NULL, NULL, $3, 0);
   }
 | UNDERLINE
   {
@@ -8813,7 +8808,7 @@ display_message_box:
   MESSAGE _box x_list
   {
 	CB_UNFINISHED_X (CB_TREE(current_statement), "DISPLAY MESSAGE");
-	upon_value = NULL;  
+	upon_value = NULL;
   }
   _display_message_clauses
   {
@@ -8991,7 +8986,7 @@ handle_is_in:
   HANDLE _is_in identifier
   {
 	if (strcmp (current_statement->name, "DISPLAY WINDOW")) {
-		cb_error_x ($1, _("HANDLE clause invalid for %s"), 
+		cb_error_x ($1, _("HANDLE clause invalid for %s"),
 			current_statement->name);
 		upon_value = cb_error_node;
 	} else{
@@ -10979,7 +10974,7 @@ set_last_exception_to_off:
 /* SET THREAD thread-handle PRIORITY TO priority */
 
 set_thread_priority:
-  thread_reference_optional PRIORITY TO pos_num_id_or_lit
+  thread_reference_optional PRIORITY TO pos_num_id_or_lit_or_zero
   {
 	cb_emit_set_thread_priority ($1, $4);
 	CB_PENDING ("THREAD");
@@ -13064,6 +13059,12 @@ positive_id_or_lit:
 | report_integer
 ;
 
+/* literal allowing zero and figurative constant ZERO */
+pos_num_id_or_lit_or_zero:
+  pos_num_id_or_lit
+| ZERO
+;
+
 /* literal allowing zero */
 /* FIXME: expressions would be allowed in most cases, too */
 pos_num_id_or_lit:
@@ -13753,7 +13754,7 @@ flag_separate:
 
 _from_idx_to_idx:
 /* empty */			{ $$ = NULL; }
-| FROM _index pos_num_id_or_lit TO pos_num_id_or_lit
+| FROM _index pos_num_id_or_lit_or_zero TO pos_num_id_or_lit_or_zero
   {
 	cb_tree	x;
 
@@ -13764,7 +13765,7 @@ _from_idx_to_idx:
 
 _dest_index:
 /* empty */			{ $$ = NULL; }
-| DESTINATION _index pos_num_id_or_lit
+| DESTINATION _index pos_num_id_or_lit_or_zero
   {
 	$$ = $3;
   }
@@ -13917,6 +13918,7 @@ _onoff_status:	| STATUS IS | STATUS | IS ;
 _other:		| OTHER ;
 _procedure:	| PROCEDURE ;
 _program:	| PROGRAM ;
+_protected:	| PROTECTED ;
 _record:	| RECORD ;
 _records:	| RECORD | RECORDS;
 _right:		| RIGHT ;

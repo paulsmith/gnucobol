@@ -1749,7 +1749,7 @@ cb_flags_t (const cob_flags_t n)
 	   output the flags in codegen as flags, making the code much more readable.
 	*/
 
-	return cb_int ((int) (n & 0xFFFF));
+	return cb_int ((int) (n & 0xFFFFFFFF));
 }
 
 /* Code output and comment */

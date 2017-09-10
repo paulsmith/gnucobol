@@ -5125,12 +5125,12 @@ emit_accept_external_form (cb_tree x)
 				if (f->external_form_identifier) {
 					m = f->external_form_identifier;
 				} else {
-					m = cb_build_alphanumeric_literal (f->name, strlen (f->name)); 
+					m = cb_build_alphanumeric_literal (f->name, strlen (f->name));
 				}
 				if (f->flag_occurs) {
 					for (i = 1; i <= f->occurs_max; i++) {
 						sprintf (buff, "%d", i);
-						n = cb_build_numeric_literal(0, buff, 0); 
+						n = cb_build_numeric_literal(0, buff, 0);
 
 						o = cb_build_field_reference (f, x);
 						CB_REFERENCE (o)->subs = CB_LIST_INIT (n);
@@ -5176,7 +5176,7 @@ emit_display_external_form (cb_tree x)
 	unsigned int	found;
 
 	COB_UNUSED (m);
-	
+
 	found = 0;
 	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
 		if (!f->redefines && !f->flag_occurs) {
@@ -5188,7 +5188,7 @@ emit_display_external_form (cb_tree x)
 					m = CB_FIELD (cb_ref (t))->external_form_identifier;
 				} else {
 					m = cb_build_alphanumeric_literal (CB_FIELD (cb_ref (t))->name,
-						strlen((CB_FIELD (cb_ref (t))->name))); 
+						strlen((CB_FIELD (cb_ref (t))->name)));
 				}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 				cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", m, t));
@@ -6528,42 +6528,50 @@ emit_screen_display (const cb_tree x, const cb_tree pos)
 }
 
 static void
-process_special_values (cb_tree value, cb_tree size_is, cob_flags_t * const attrs)
+process_special_values (cb_tree value, cb_tree * const size_is, cob_flags_t * const attrs)
 {
 	/*
 	  The following are MF extensions. MF specifically
 	  states X"01", X"02" and X"07", so the values do not
 	  need to be changed for other codesets.
+
+	  For all special values, the SIZE clause is ignored.
 	*/
 
-	/* low-values position cursor, size does not matter */
+	/* LOW-VALUES positions cursor */
 	if (value == cb_low) {
 		*attrs |= COB_SCREEN_NO_DISP;
-	}
-
-	if (size_is) {
+		*size_is = NULL;
 		return;
 	}
 
-	/* no WITH SIZE then SPACE clears to end of screen */
+	if (!cb_display_special_fig_consts) {
+		return;
+	}
+
+	/* SPACE clears to end of screen */
 	if (value == cb_space) {
 		*attrs |= COB_SCREEN_ERASE_EOS;
 		*attrs |= COB_SCREEN_NO_DISP;
+		*size_is = NULL;
 	} else if (CB_LITERAL_P (value) && CB_LITERAL (value)->all &&
 		   CB_LITERAL (value)->size == 1) {
 		if (CB_LITERAL (value)->data[0] == '\1') {
 			/* ASCII char \1 is SOH, start of header */
 			*attrs |= COB_SCREEN_ERASE_EOL;
 			*attrs |= COB_SCREEN_NO_DISP;
+			*size_is = NULL;
 		} else if (CB_LITERAL (value)->data[0] == '\2') {
 			/* ASCII char \2 is STX, start of text */
 			cb_emit (CB_BUILD_FUNCALL_0 ("cob_sys_clear_screen"));
 			/* We might still need to position the cursor */
 			*attrs |= COB_SCREEN_NO_DISP;
+			*size_is = NULL;
 		} else if (CB_LITERAL (value)->data[0] == '\7') {
 			/* ASCII char \7 is BEL, bell */
 			*attrs |= COB_SCREEN_BELL;
 			*attrs |= COB_SCREEN_NO_DISP;
+			*size_is = NULL;
 		}
 	}
 }
@@ -6641,7 +6649,9 @@ get_default_field_line_column (const int is_first_display_item)
 	  (DISPLAY ... WITH HIGHLIGHT, etc.).
 	*/
 	const int	display_after_last =
-		!line_col_zero_is_supported () || !is_first_display_item;
+		!line_col_zero_is_supported ()
+		|| !is_first_display_item
+		|| cb_line_col_zero_default;
 
 	if (display_after_last) {
 		return get_after_last_line_column ();
@@ -6675,7 +6685,7 @@ emit_default_field_display_for_all_but_last (cb_tree values, cb_tree size_is,
 
 		x = CB_VALUE (l);
 		disp_attrs = 0;
-		process_special_values (x, size_is, &disp_attrs);
+		process_special_values (x, &size_is, &disp_attrs);
 
 		emit_field_display (x, pos, NULL, NULL, NULL, NULL, disp_attrs);
 	}
@@ -6711,7 +6721,7 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 		line_column = get_default_field_line_column (is_first_item);
 	}
 
-	process_special_values (last_elt, size_is, &disp_attrs);
+	process_special_values (last_elt, &size_is, &disp_attrs);
 	emit_field_display (last_elt, line_column, fgc, bgc, scroll, size_is,
 			    disp_attrs);
 }
@@ -6726,8 +6736,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	cob_flags_t		disp_attrs;
-
+	cob_flags_t	disp_attrs; 
 	cb_tree		m;
 	struct cb_field	*f = NULL;
 
@@ -6770,7 +6779,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 			if (f->external_form_identifier) {
 				m = f->external_form_identifier;
 			} else {
-				m = cb_build_alphanumeric_literal (f->name, strlen(f->name)); 
+				m = cb_build_alphanumeric_literal (f->name, strlen(f->name));
 			}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_cgi_renderTpl", m));
