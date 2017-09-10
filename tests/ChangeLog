@@ -1,4 +1,9 @@
 
+2017-09-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in, atlocal_valgrind, atlocal_win: set COB_RUNTIME_CONFIG
+	  before running `cobcrun --runtime-conf`
+
 2017-08-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal_valgrind: changed default name for valgrind log files
