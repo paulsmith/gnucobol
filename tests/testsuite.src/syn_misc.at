@@ -3594,7 +3594,10 @@ AT_DATA([prog.cob], [
        SOURCE-COMPUTER. b.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+# MF extension, supported by GnuCOBOL
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+# note: testing with lax configuration, otherwise there would be an error
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
 [prog.cob: 8: warning: incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs used
 ])
 AT_CLEANUP
@@ -3652,7 +3655,10 @@ AT_DATA([prog.cob], [
        END PROGRAM prog4.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+# MF extension, supported by GnuCOBOL
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+# note: testing with lax configuration, otherwise there would be an error
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
 [prog.cob: 12: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 prog.cob: 35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
