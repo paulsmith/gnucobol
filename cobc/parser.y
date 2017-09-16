@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
-   Edward Hard
+   Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -5317,11 +5317,8 @@ redefines_clause:
   {
 	check_repeated ("REDEFINES", SYN_CLAUSE_1, &check_pic_duplicate);
 	if ($0 != NULL) {
-		if (cb_relaxed_syntax_checks) {
-			cb_warning_x (COBC_WARN_FILLER, $2, _("REDEFINES clause should follow entry-name"));
-		} else {
-			cb_error_x ($2, _("REDEFINES clause must follow entry-name"));
-		}
+		cb_verify_x ($2, cb_free_redefines_position,
+			     _("REDEFINES clause not following entry-name"));
 	}
 
 	current_field->redefines = cb_resolve_redefines (current_field, $2);

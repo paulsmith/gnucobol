@@ -37,12 +37,12 @@ AT_DATA([prog.cob], [
        01 Y             PIC 9 REDEFINES X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: REDEFINES clause must follow entry-name
+AT_CHECK([$COMPILE_ONLY -ffree-redefines-position=error prog.cob], [1], [],
+[prog.cob: 7: error: REDEFINES clause not following entry-name used
 ])
 
-AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
-[prog.cob: 7: warning: REDEFINES clause should follow entry-name
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob: 7: warning: REDEFINES clause not following entry-name used
 ])
 
 AT_CLEANUP

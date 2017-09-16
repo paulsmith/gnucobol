@@ -2,6 +2,7 @@
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* ibm.words: updated to Enterprise COBOL V6.2.
+	* general: added free-redefines-position option.
 
 2017-09-10  Edward Hart <edward.dan.hart@gmail.com>
 

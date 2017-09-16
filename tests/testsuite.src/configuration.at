@@ -465,6 +465,7 @@ test.conf: missing definitions:
 	no definition of 'numeric-value-for-edited-item'
 	no definition of 'incorrect-conf-sec-order'
 	no definition of 'define-constant-directive'
+	no definition of 'free-redefines-position'
 ])
 
 AT_CLEANUP
