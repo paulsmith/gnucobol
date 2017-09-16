@@ -1,4 +1,9 @@
 
+2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (field_display): implemented DISPLAY ALL "blah" WITH SIZE
+	  (bug #428).
+
 2017-09-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (field_display, field_accept): fixed SIZE not working if it

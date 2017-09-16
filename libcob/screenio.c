@@ -1936,6 +1936,7 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	int	size_display;
 	int	status;
 	char	fig_const;	/* figurative constant character */
+	int	i;
 
 	/* LCOV_EXCL_START */
 	if (unlikely (!f)) {
@@ -1980,12 +1981,18 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 
 	cob_screen_attr (fgc, bgc, fattr, DISPLAY_STATEMENT);
 	if (!(fattr & COB_SCREEN_NO_DISP)) {
-		/* figurative constant and WITH SIZE repeats the character */
+		/* figurative constant and WITH SIZE repeats the literal */
 		if (size_is
-		    && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL
-		    && (int)f->size == 1) {
-			fig_const = f->data[0];
-			cob_addnch (size_display, fig_const);
+		    && f->attr->type == COB_TYPE_ALPHANUMERIC_ALL) {
+			if ((int)f->size == 1) {
+				fig_const = f->data[0];
+				cob_addnch (size_display, fig_const);
+			} else {
+				for (i = 0; i < (size_display / f->size); ++i) {
+					cob_addnstr ((char *)f->data, f->size);
+				}
+				cob_addnstr ((char *)f->data, size_display % f->size);
+			}
 		} else {
 			cob_addnstr ((char *)f->data, cob_min_int (size_display, f->size));
 			if (size_display > f->size) {
