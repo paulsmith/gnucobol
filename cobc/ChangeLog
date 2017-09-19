@@ -1,4 +1,9 @@
 
+2017-09-18  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c:
+	  Emit Decimal Constants for all module types
+
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, config.def: added free-redefines-position config option.
