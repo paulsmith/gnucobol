@@ -425,8 +425,6 @@ AT_DATA([prog.cob], [
        01  test-rec     PIC X(5).
        LOCAL-STORAGE    SECTION.
        01  path         PIC X(10) VALUE "test.txt".
-       01  ATOGP-ANUM   PIC 9(4) VALUE 5.
-       01  WORK-A       PIC 9(4) VALUE 5.
        PROCEDURE        DIVISION.
            OPEN INPUT test-file
            READ test-file   END-READ
@@ -434,7 +432,6 @@ AT_DATA([prog.cob], [
               DISPLAY test-rec END-DISPLAY
            END-IF
            CLOSE test-file
-           MULTIPLY ATOGP-ANUM BY 4 GIVING WORK-A.
            STOP RUN.
 ])
 

@@ -4221,3 +4221,24 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([MULTIPLY BY literal in INIITAL program])
+AT_KEYWORDS([decimal constants fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog INITIAL.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  num          PIC 9(4) VALUE 5.
+       01  result       PIC 9(4).
+       PROCEDURE        DIVISION.
+           MULTIPLY num BY 4 GIVING result
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
