@@ -756,6 +756,14 @@ cob_set_signal (void)
 	(void)sigemptyset (&sa.sa_mask);
 	(void)sigaction (SIGBUS, &sa, NULL);
 #endif
+#ifdef	SIGFPE
+	/* fatal arithmetic errors including non-floating-point division by zero */
+	(void)sigaction (SIGFPE, NULL, &osa);
+	if (osa.sa_handler != SIG_IGN) {
+		(void)sigemptyset (&sa.sa_mask);
+		(void)sigaction (SIGFPE, &sa, NULL);
+	}
+#endif
 
 #else
 
