@@ -562,6 +562,7 @@ cob_sig_handler (int sig)
 	sig_is_handled = 1;
 #endif
 
+	/* LCOV_EXCL_START */
 	switch (sig) {
 #ifdef	SIGINT
 	case SIGINT:
@@ -598,12 +599,19 @@ cob_sig_handler (int sig)
 		signal_name = "SIGBUS";
 		break;
 #endif
+#ifdef	SIGFPE
+	case SIGFPE:
+		signal_name = "SIGFPE";
+		break;
+#endif
 	default:
 		signal_name = _("unknown");
-		fprintf (stderr, _("cob_sig_handler caught not handled signal: %d"), sig);
+		/* not translated as it is a very unlikely errorcase */
+		fprintf (stderr, "cob_sig_handler caught not handled signal: %d", sig);
 		putc ('\n', stderr);
 		break;
 	}
+	/* LCOV_EXCL_END */
 
 #ifdef	HAVE_SIGACTION
 #ifndef	SA_RESETHAND
@@ -624,6 +632,7 @@ cob_sig_handler (int sig)
 		}
 	}
 
+	/* LCOV_EXCL_START */
 	switch (sig) {
 #ifdef	SIGSEGV
 	case SIGSEGV:
@@ -635,10 +644,16 @@ cob_sig_handler (int sig)
 		fprintf (stderr, _("bus error"));
 		break;
 #endif
+#ifdef	SIGFPE
+	case SIGFPE:
+		fprintf (stderr, _("fatal arithmetic error"));
+		break;
+#endif
 	default:
 		fprintf (stderr, _("caught signal"));
 		break;
 	}
+	/* LCOV_EXCL_END */
 	fprintf (stderr, " (");
 	fprintf (stderr, _("signal %s"), signal_name);
 	fprintf (stderr, ")\n");
@@ -776,6 +791,11 @@ cob_set_signal (void)
 #ifdef	SIGBUS
 	/* Take direct control of bus error */
 	(void)signal (SIGBUS, cob_sig_handler);
+#endif
+#ifdef	SIGFPE
+	if (signal (SIGFPE, SIG_IGN) != SIG_IGN) {
+		(void)signal (SIGFPE, cob_sig_handler);
+	}
 #endif
 
 #endif

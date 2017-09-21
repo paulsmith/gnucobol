@@ -1,4 +1,10 @@
 
+2017-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sig_handler, cob_set_signal): added code for SIGFPE
+	  in correspondence to SIGHUP code (+ additional error message);
+	  set LCOV_EXCL markers for most of the signal handling
+
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (field_display): implemented DISPLAY ALL "blah" WITH SIZE
