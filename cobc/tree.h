@@ -480,8 +480,6 @@ typedef struct cb_tree_common	*cb_tree;
 #define	CB_VALID_TREE(x)	(x && CB_TREE (x) != cb_error_node)
 #define	CB_INVALID_TREE(x)	(!(x) || CB_TREE (x) == cb_error_node)
 
-#define COB_TREE_DEBUG 1
-
 #ifdef	COB_TREE_DEBUG
 
 #ifdef	COB_HAVE_STEXPR
