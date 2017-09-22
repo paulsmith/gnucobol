@@ -333,6 +333,7 @@ static size_t		cobc_buffer_size;
 static struct filename	*file_list;
 
 static unsigned int	cb_compile_level = 0;
+static unsigned int cb_correct_program_order = 0;
 
 static int		iargs;
 
@@ -3203,20 +3204,27 @@ process_command_line (const int argc, char **argv)
 	return cob_optind;
 }
 
-/* Reverse the list of programs */
-static struct cb_program *
-program_list_reverse (struct cb_program *p)
+/* Restore the order in list of programs */
+static void
+restore_program_list_order (void)
 {
 	struct cb_program	*next;
 	struct cb_program	*last;
 
-	last = NULL;
-	for (; p; p = next) {
-		next = p->next_program;
-		p->next_program = last;
-		last = p;
+	/* ensure that this function is only processed once
+	   as we must call it from multiple points */
+	if (cb_correct_program_order) {
+		return;
 	}
-	return last;
+	cb_correct_program_order = 1;
+
+	last = NULL;
+	for (; current_program; current_program = next) {
+		next = current_program->next_program;
+		current_program->next_program = last;
+		last = current_program;
+	}
+	current_program = last;
 }
 
 static void
@@ -4964,25 +4972,20 @@ static void
 print_program_trailer (void)
 {
 	struct cb_program	*p;
-	struct cb_program	*q;
 	struct list_error	*err;
 	int			print_names = 0;
 	int			print_break = 1;
 	int			found;
 	char			err_msg[BUFSIZ];
 
-	/* needed for syntax-checks-only as codegen reverses the program list */
-	if (cb_flag_syntax_only) {
-		p = program_list_reverse (current_program);
-	} else {
-		p = current_program;
-	}
+	if (current_program != NULL) {
 
-	if (p != NULL) {
+		/* ensure correct order in program list */
+		restore_program_list_order ();
 
-	/* Print program in symbol table / cross-reference if more than one program */
-	/* MAYBE use a second header line and a forced page break instead */
-		if (p->next_program) {
+		/* Print program in symbol table / cross-reference if more than one program */
+		/* MAYBE use a second header line and a forced page break instead */
+		if (current_program->next_program) {
 			print_names = 1;
 		}
 
@@ -4992,26 +4995,26 @@ print_program_trailer (void)
 			force_new_page_for_next_line ();
 			print_program_header ();
 
-			for (q = p; q; q = q->next_program) {
+			for (p = current_program; p; p = p->next_program) {
 				if (print_names) {
 					sprintf (print_data,
 						"      %-14s      %s",
-			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
 				 			"FUNCTION" : "PROGRAM"),
-			 	 		q->program_name);
+			 	 		p->program_name);
 					print_program_data (print_data);
 					print_program_data ("");
 				}
 				found = 0;
-				if (q->file_list) {
-					print_files_and_their_records (q->file_list);
+				if (p->file_list) {
+					print_files_and_their_records (p->file_list);
 					found++;
 				}
-				found += print_fields_in_section (q->working_storage);
-				found += print_fields_in_section (q->local_storage);
-				found += print_fields_in_section (q->linkage_storage);
-				found += print_fields_in_section (q->screen_storage);
-				found += print_fields_in_section (q->report_storage);
+				found += print_fields_in_section (p->working_storage);
+				found += print_fields_in_section (p->local_storage);
+				found += print_fields_in_section (p->linkage_storage);
+				found += print_fields_in_section (p->screen_storage);
+				found += print_fields_in_section (p->report_storage);
 				if (!found) {
 					snprintf (print_data, CB_PRINT_LEN, "      %s",
 						_("No fields defined."));
@@ -5026,7 +5029,7 @@ print_program_trailer (void)
 		/* Print internal cross reference if requested */
 		if (cb_listing_xref) {
 
-			for (q = p; q; q = q->next_program) {
+			for (p = current_program; p; p = p->next_program) {
 
 				set_listing_header_xref (XREF_FIELD);
 				force_new_page_for_next_line ();
@@ -5035,22 +5038,22 @@ print_program_trailer (void)
 				if (print_names) {
 					sprintf (print_data,
 						 "%s %s",
-			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
 				 			"FUNCTION" : "PROGRAM"),
-			 	 		q->program_name);
+			 	 		p->program_name);
 					print_program_data (print_data);
 					print_program_data ("");
 				}
 				found = 0;
-				if (q->file_list) {
-					xref_files_and_their_records (q->file_list);
+				if (p->file_list) {
+					xref_files_and_their_records (p->file_list);
 					found++;
 				}
-				found += xref_fields_in_section (q->working_storage);
-				found += xref_fields_in_section (q->local_storage);
-				found += xref_fields_in_section (q->linkage_storage);
-				found += xref_fields_in_section (q->screen_storage);
-				found += xref_fields_in_section (q->report_storage);
+				found += xref_fields_in_section (p->working_storage);
+				found += xref_fields_in_section (p->local_storage);
+				found += xref_fields_in_section (p->linkage_storage);
+				found += xref_fields_in_section (p->screen_storage);
+				found += xref_fields_in_section (p->report_storage);
 				if (!found) {
 					snprintf (print_data, CB_PRINT_LEN, "      %s",
 						_("No fields defined."));
@@ -5065,20 +5068,20 @@ print_program_trailer (void)
 				if (print_names) {
 					sprintf (print_data,
 						 "%s %s",
-			 	 		(q->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
 				 			"FUNCTION" : "PROGRAM"),
-			 	 		q->program_name);
+			 	 		p->program_name);
 					print_program_data (print_data);
 					print_program_data ("");
 				}
-				if (!xref_labels (q->exec_list)) {
+				if (!xref_labels (p->exec_list)) {
 					snprintf (print_data, CB_PRINT_LEN, "      %s",
 						_("No labels defined."));
 					print_program_data (print_data);
 					print_program_data ("");
 				};
 
-				xref_calls (&q->call_xref);
+				xref_calls (&p->call_xref);
 			}
 			print_break = 0;
 		}
@@ -6546,7 +6549,6 @@ static int
 process_translate (struct filename *fn)
 {
 	struct cb_program	*p;
-	struct cb_program	*q;
 	struct cb_program	*r;
 	struct nested_list	*nlp;
 	struct handler_struct	*hstr1;
@@ -6572,6 +6574,8 @@ process_translate (struct filename *fn)
 	}
 
 	current_program = NULL;
+	cb_correct_program_order = 0;
+
 	cb_init_constants ();
 
 	/* Parse */
@@ -6600,16 +6604,15 @@ process_translate (struct filename *fn)
 	}
 
 	/* Set up USE GLOBAL handlers */
-	p = current_program;
-	for (q = p; q; q = q->next_program) {
-		q->global_file_list = cb_list_reverse (q->global_file_list);
-		if (q->nested_level) {
-			for (r = q->next_program; r; r = r->next_program) {
-				if (r->nested_level >= q->nested_level) {
+	for (p = current_program; p; p = p->next_program) {
+		p->global_file_list = cb_list_reverse (p->global_file_list);
+		if (p->nested_level) {
+			for (r = p->next_program; r; r = r->next_program) {
+				if (r->nested_level >= p->nested_level) {
 					continue;
 				}
 				for (i = COB_OPEN_INPUT; i <= COB_OPEN_EXTEND; ++i) {
-					hstr1 = &q->global_handler[i];
+					hstr1 = &p->global_handler[i];
 					hstr2 = &r->global_handler[i];
 					if (!hstr1->handler_label &&
 					    hstr2->handler_label &&
@@ -6653,16 +6656,16 @@ process_translate (struct filename *fn)
 		cobc_terminate (cb_storage_file_name);
 	}
 
-	current_program = program_list_reverse (current_program);
-	p = current_program;
+	/* Process programs in original order */
+	restore_program_list_order ();
 
 	/* Set up local storage files */
 	lf = NULL;
 	ret = 1;
-	for (q = p; q; q = q->next_program, ret++) {
+	for (p = current_program; p; p = p->next_program, ret++) {
 		lf = cobc_main_malloc (sizeof(struct local_filename));
 		lf->local_name = cobc_main_malloc (fn->translate_len + 12U);
-		if (q == p && !q->next_program) {
+		if (p == current_program && !p->next_program) {
 			sprintf (lf->local_name, "%s.l.h", fn->translate);
 		} else {
 			sprintf (lf->local_name, "%s.l%d.h", fn->translate, ret);
@@ -6675,16 +6678,16 @@ process_translate (struct filename *fn)
 		if (!lf->local_fp) {
 			cobc_terminate (lf->local_name);
 		}
-		q->local_include = lf;
+		p->local_include = lf;
 		lf->next = fn->localfile;
 		fn->localfile = lf;
 	}
 
 	/* Entries for COMMON programs */
-	for (q = p; q; q = q->next_program) {
-		i = q->nested_level;
-		for (nlp = q->common_prog_list; nlp; nlp = nlp->next) {
-			for (r = q->next_program; r; r = r->next_program) {
+	for (p = current_program; p; p = p->next_program) {
+		i = p->nested_level;
+		for (nlp = p->common_prog_list; nlp; nlp = nlp->next) {
+			for (r = p->next_program; r; r = r->next_program) {
 				if (r->nested_level <= i) {
 					break;
 				}
@@ -6701,29 +6704,29 @@ process_translate (struct filename *fn)
 	/* Temporarily disable cross-reference during C generation */
 	if (cb_listing_xref) {
 		cb_listing_xref = 0;
-		codegen (p, 0);
+		codegen (current_program, 0);
 		cb_listing_xref = 1;
 	} else {
-		codegen (p, 0);
+		codegen (current_program, 0);
 	}
 
 	/* Close files */
-	if(unlikely(fclose (cb_storage_file) != 0)) {
+	if (unlikely(fclose (cb_storage_file) != 0)) {
 		cobc_terminate (cb_storage_file_name);
 	}
 	cb_storage_file = NULL;
-	if(unlikely(fclose (yyout) != 0)) {
+	if (unlikely(fclose (yyout) != 0)) {
 		cobc_terminate (fn->translate);
 	}
 	yyout = NULL;
-	for (q = p; q; q = q->next_program) {
-		if (unlikely(!q->local_include->local_fp)) {
+	for (p = current_program; p; p = p->next_program) {
+		if (unlikely(!p->local_include->local_fp)) {
 			continue;
 		}
-		if (unlikely(fclose (q->local_include->local_fp) != 0)) {
+		if (unlikely(fclose (p->local_include->local_fp) != 0)) {
 			cobc_terminate(lf->local_name);
 		}
-		q->local_include->local_fp = NULL;
+		p->local_include->local_fp = NULL;
 	}
 	return !!errorcount;
 }
