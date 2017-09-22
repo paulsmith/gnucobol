@@ -2796,15 +2796,14 @@ output_param (cb_tree x, int id)
 			break;
 		}
 
+		/* LCOV_EXCL_START */
 		if (!CB_FIELD_P (r->value)) {
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 				"output_param", "x");
 			cobc_err_msg (_("%s is not a field"), r->word->name);
-			cobc_err_msg (_("Please report this!"));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 
 		f = CB_FIELD (r->value);
 
@@ -2904,7 +2903,17 @@ output_param (cb_tree x, int id)
 	case CB_TAG_INTRINSIC:
 		ip = CB_INTRINSIC (x);
 		if (ip->isuser) {
-			func = user_func_upper (CB_PROTOTYPE (cb_ref (ip->name))->ext_name);
+			l = cb_ref (ip->name);
+			/* LCOV_EXCL_START */
+			if (l == cb_error_node) {
+				cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+					"output_param", "x");
+				/* not translated as it is a highly unlikely internal abort */
+				cobc_err_msg ("%s is no valid reference", cb_name (ip->name));
+				COBC_ABORT ();
+			}
+			/* LCOV_EXCL_STOP */
+			func = user_func_upper (CB_PROTOTYPE (l)->ext_name);
 			lookup_func_call (func);
 #if	0	/* RXWRXW Func */
 			output ("cob_user_function (func_%s, &cob_dyn_%u, ",
@@ -8671,14 +8680,14 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 
 	/* entry convention */
 	l = CB_PURPOSE (CB_VALUE (entry));
+	/* LCOV_EXCL_START */
 	if (!l || !(CB_INTEGER_P (l) || CB_NUMERIC_LITERAL_P (l))) {
-		/* not translated as it is an unlikely internal abort, remove the check later */
-		/* LCOV_EXCL_START */
+		/* not translated as it is a highly unlikely internal abort */
 		cobc_err_msg ("Missing/wrong internal entry convention!");
-		cobc_err_msg (_("Please report this!"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
-	} else if (CB_INTEGER_P (l)) {
+	} else 
+	/* LCOV_EXCL_STOP */
+	if (CB_INTEGER_P (l)) {
 		entry_convention = CB_INTEGER (l)->val;
 	} else if (CB_NUMERIC_LITERAL_P (l)) {
 		entry_convention = cb_get_int (l);

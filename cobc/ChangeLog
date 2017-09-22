@@ -2,6 +2,9 @@
 2017-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: ensure correct order of the programs during processing
+	* codegen.c (output_param): added missing check after calling (cb_ref)
+	  to prevent SIGSEGV, see Bug #435
+	* typeck.c, tree.c: checked result of (cb_ref) where missing
 
 2017-09-18  Ron Norman <rjn@inglenet.com>
 

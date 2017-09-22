@@ -1513,6 +1513,8 @@ cb_pair_add (cb_tree l, cb_tree x, cb_tree y)
 	return cb_list_append (l, CB_BUILD_PAIR (x, y));
 }
 
+/* Reverse a list of trees,
+   NOTE: changes the passed list directly! */
 cb_tree
 cb_list_reverse (cb_tree l)
 {
@@ -3711,16 +3713,23 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 	char	lit_disp[40];
 	struct cb_field *f;
 
-	f = CB_FIELD (cb_ref (x));
-	if (f->flag_any_length
-	 || f->pic == NULL)
-		return cb_any;
+	/* LCOV_EXCL_START */
+	if (!CB_REFERENCE_P(x)) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"compare_field_literalisplay_for_last", "x");;
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 
 	ref_mod = 0;
-	if (CB_REFERENCE_P(x)) {
-	 	if (CB_REFERENCE(x)->offset
-	 	 || CB_REFERENCE(x)->length)
-			ref_mod = 1;
+	f = CB_FIELD (cb_ref (x));
+	if (f->flag_any_length
+	 || f->pic == NULL) {
+		return cb_any;
+	}
+	if (CB_REFERENCE(x)->offset
+	 || CB_REFERENCE(x)->length) {
+		ref_mod = 1;
 	}
 
 	for (i = strlen ((const char *)l->data); i>0 && l->data[i-1] == ' '; i--);
@@ -4654,11 +4663,11 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 
 	after_until = 0;
 	if (name) {
-		if (name == cb_error_node) {
+		l = cb_ref (name);
+		if (l == cb_error_node) {
 			p->step = NULL;
 			return CB_TREE (p);
 		}
-		l = cb_ref (name);
 		x = cb_build_add (name, by, cb_high);
 		if (current_program->flag_debugging &&
 		    !current_statement->flag_in_debug &&

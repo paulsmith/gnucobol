@@ -1280,7 +1280,7 @@ cb_build_single_register (const char *name, const char *definition)
 	/* LCOV_EXCL_START */
 	cb_error ("unexpected register %s, defined as \"%s\"", name, definition);
 	COBC_ABORT();
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 }
 
 /* get all active registers and build them */
@@ -3737,6 +3737,8 @@ cb_build_expr (cb_tree list)
 
 	cb_expr_init ();
 
+	/* Checkme: maybe add validate_list(l) here */
+
 	for (l = list; l; l = CB_CHAIN (l)) {
 		op = CB_PURPOSE_INT (l);
 		switch (op) {
@@ -4140,7 +4142,8 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 	cb_tree	s2;
 	cb_tree	d;
 
-	if(cb_arithmetic_osvs) {
+	/* note: vars validated by caller: cb_emit_arithmetic */
+	if (cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in result field */
 		expr_dmax = -1;
 		expr_rslt = CB_VALUE(vars);
@@ -5172,7 +5175,7 @@ static unsigned int
 emit_display_external_form (cb_tree x)
 {
 	struct cb_field *f;
-	cb_tree		t, m;
+	cb_tree		t, m, rtree;
 	unsigned int	found;
 
 	COB_UNUSED (m);
@@ -5184,11 +5187,12 @@ emit_display_external_form (cb_tree x)
 			if (f->children) {
 				found += emit_display_external_form (t);
 			} else {
-				if (CB_FIELD (cb_ref (t))->external_form_identifier) {
-					m = CB_FIELD (cb_ref (t))->external_form_identifier;
+				rtree = cb_ref (t);
+				if (CB_FIELD (rtree)->external_form_identifier) {
+					m = CB_FIELD (rtree)->external_form_identifier;
 				} else {
-					m = cb_build_alphanumeric_literal (CB_FIELD (cb_ref (t))->name,
-						strlen((CB_FIELD (cb_ref (t))->name)));
+					m = cb_build_alphanumeric_literal (CB_FIELD (rtree)->name,
+						strlen((CB_FIELD (rtree)->name)));
 				}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 				cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", m, t));
@@ -6155,9 +6159,6 @@ cb_emit_close (cb_tree file, cb_tree opt)
 {
 	struct cb_file	*f;
 
-	if (file == cb_error_node) {
-		return;
-	}
 	file = cb_ref (file);
 	if (file == cb_error_node) {
 		return;
@@ -6206,9 +6207,6 @@ cb_emit_delete (cb_tree file)
 {
 	struct cb_file	*f;
 
-	if (file == cb_error_node) {
-		return;
-	}
 	file = cb_ref (file);
 	if (file == cb_error_node) {
 		return;
@@ -6246,9 +6244,6 @@ cb_emit_delete (cb_tree file)
 void
 cb_emit_delete_file (cb_tree file)
 {
-	if (file == cb_error_node) {
-		return;
-	}
 	file = cb_ref (file);
 	if (file == cb_error_node) {
 		return;
@@ -6618,6 +6613,7 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 	cb_tree pos;
 	cb_tree	screen_ref;
 
+	/* note: screen_list validated by caller cb_emit_display */
 	for (l = screen_list; l; l = CB_CHAIN (l)) {
 		/*
 		  LINE 1 COL 1 is assumed, not LINE 0 COL 0 as in field
@@ -6819,9 +6815,6 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 cb_tree
 cb_build_display_mnemonic (cb_tree x)
 {
-	if (x == cb_error_node) {
-		return cb_int0;
-	}
 	if (cb_ref (x) == cb_error_node) {
 		return cb_int0;
 	}
@@ -9098,9 +9091,6 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 	cb_tree orig_file = file;
 	struct cb_file	*f;
 
-	if (file == cb_error_node) {
-		return;
-	}
 	file = cb_ref (file);
 	if (file == cb_error_node) {
 		return;
@@ -9261,9 +9251,6 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 	} else if (lock_opts == cb_int5) {
 		read_opts = COB_READ_LOCK | COB_READ_KEPT_LOCK;
 	}
-	if (ref == cb_error_node) {
-		return;
-	}
 	file = cb_ref (ref);
 	if (file == cb_error_node) {
 		return;
@@ -9366,6 +9353,7 @@ void
 cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 {
 	cb_tree		file;
+	cb_tree		rtree;
 	struct cb_file	*f;
 	int		opts;
 
@@ -9375,13 +9363,14 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 	if (cb_validate_one (from)) {
 		return;
 	}
-	if (CB_FILE_P (cb_ref (record))) {
+	rtree = cb_ref (record);
+	if (CB_FILE_P (rtree)) {
 		if (from == NULL) {
 			cb_error_x (CB_TREE (current_statement),
 				_("%s FILE requires a FROM clause"), "REWRITE");
 			return;
 		}
-		file = cb_ref(record);		/* FILE filename: was used */
+		file = rtree;		/* FILE filename: was used */
 		f = CB_FILE (file);
 		if (f->record->sister) {
 			record = CB_TREE(f->record->sister);
@@ -9389,7 +9378,7 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 			record = CB_TREE(f->record);
 		}
 	} else {
-		if (!CB_REF_OR_FIELD_P (cb_ref (record))) {
+		if (!CB_REF_OR_FIELD_P (rtree)) {
 			cb_error_x (CB_TREE (current_statement),
 				_("%s requires a record name as subject"), "REWRITE");
 			return;
@@ -9400,7 +9389,7 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 			return;
 		}
 
-		file = CB_TREE (CB_FIELD (cb_ref (record))->file);
+		file = CB_TREE (CB_FIELD (rtree)->file);
 		if (!file || file == cb_error_node) {
 			return;
 		}
@@ -9506,9 +9495,6 @@ cb_emit_return (cb_tree ref, cb_tree into)
 		return;
 	}
 	file = cb_ref (ref);
-	if (file == cb_error_node) {
-		return;
-	}
 	rec = cb_build_field_reference (CB_FILE (file)->record, ref);
 	cb_emit (CB_BUILD_FUNCALL_1 ("cob_file_return", file));
 	if (into) {
@@ -9699,6 +9685,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 {
 	cb_tree		l;
 	cb_tree		v;
+	cb_tree		rtree;
 	struct cb_cast	*p;
 	enum cb_class	class;
 
@@ -9738,12 +9725,20 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 		if (p->cast_type != CB_CAST_ADDRESS) {
 			continue;
 		}
-		if (CB_FIELD (cb_ref (p->val))->level != 1
-		    && CB_FIELD (cb_ref (p->val))->level != 77) {
+		rtree = cb_ref (p->val);
+		/* LCOV_EXCL_START */
+		if (rtree == cb_error_node) {
+			cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+				"cb_emit_set_to", "vars");
+			COBC_ABORT ();
+		}
+		/* LCOV_EXCL_STOP */
+		if (CB_FIELD (rtree)->level != 1
+		    && CB_FIELD (rtree)->level != 77) {
 			cb_error_x (p->val, _("cannot change address of '%s', which is not level 1 or 77"),
 				    cb_name (p->val));
 			CB_VALUE (l) = cb_error_node;
-		} else if (!CB_FIELD (cb_ref (p->val))->flag_base) {
+		} else if (!CB_FIELD (rtree)->flag_base) {
 			cb_error_x (p->val, _("cannot change address of '%s', which is not BASED or a linkage item"),
 				    cb_name (p->val));
 			CB_VALUE (l) = cb_error_node;
@@ -9935,40 +9930,41 @@ void
 cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 {
 	cb_tree			l;
+	cb_tree			rtree;
 	struct cb_field		*f;
 
 	if (cb_validate_list (keys)) {
 		return;
 	}
-	if (cb_ref (name) == cb_error_node) {
+	rtree = cb_ref (name);
+	if (rtree == cb_error_node) {
 		return;
 	}
 	for (l = keys; l; l = CB_CHAIN (l)) {
 		if (CB_VALUE (l) == NULL) {
 			CB_VALUE (l) = name;
 		}
-		cb_ref (CB_VALUE (l));
 	}
 
-	if (CB_FILE_P (cb_ref (name))) {
-		if (CB_FILE (cb_ref (name))->organization != COB_ORG_SORT) {
+	if (CB_FILE_P (rtree)) {
+		if (CB_FILE (rtree)->organization != COB_ORG_SORT) {
 			cb_error_x (name, _("invalid SORT filename"));
 		}
 		if (current_program->cb_sort_return) {
 			CB_FIELD_PTR (current_program->cb_sort_return)->count++;
-			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
+			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", rtree,
 						     cb_int ((int)cb_list_length (keys)), col,
 						     CB_BUILD_CAST_ADDRESS (current_program->cb_sort_return),
-						     CB_FILE(cb_ref (name))->file_status));
+						     CB_FILE(rtree)->file_status));
 		} else {
-			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", cb_ref (name),
+			cb_emit (CB_BUILD_FUNCALL_5 ("cob_file_sort_init", rtree,
 						     cb_int ((int)cb_list_length (keys)), col,
-						     cb_null, CB_FILE(cb_ref (name))->file_status));
+						     cb_null, CB_FILE(rtree)->file_status));
 
 		}
 		for (l = keys; l; l = CB_CHAIN (l)) {
 			cb_emit (CB_BUILD_FUNCALL_4 ("cob_file_sort_init_key",
-						     cb_ref (name),
+						     rtree,
 						     CB_VALUE (l),
 						     CB_PURPOSE (l),
 						     cb_int (CB_FIELD_PTR (CB_VALUE(l))->offset)));
@@ -9987,7 +9983,7 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 					cb_int(CB_FIELD_PTR (CB_VALUE(l))->offset
 						   - CB_FIELD_PTR (CB_VALUE(l))->parent->offset)));
 		}
-		f = CB_FIELD (cb_ref (name));
+		f = CB_FIELD (rtree);
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_table_sort", name,
 					     (f->depending
 					      ? cb_build_cast_int (f->depending)
@@ -9998,16 +9994,26 @@ cb_emit_sort_init (cb_tree name, cb_tree keys, cb_tree col)
 void
 cb_emit_sort_using (cb_tree file, cb_tree l)
 {
+	cb_tree rtree;
+
 	if (cb_validate_list (l)) {
 		return;
 	}
+	rtree = cb_ref (file);
+	/* LCOV_EXCL_START */
+	if (rtree == cb_error_node) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cb_emit_sort_using", "file");
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 	for (; l; l = CB_CHAIN (l)) {
 		if (CB_FILE (cb_ref(CB_VALUE(l)))->organization == COB_ORG_SORT) {
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid SORT USING parameter"));
 		}
 		cb_emit (CB_BUILD_FUNCALL_2 ("cob_file_sort_using",
-			cb_ref (file), cb_ref (CB_VALUE (l))));
+			rtree, cb_ref (CB_VALUE (l))));
 	}
 }
 
@@ -10036,8 +10042,16 @@ cb_emit_sort_giving (cb_tree file, cb_tree l)
 				    _("invalid SORT GIVING parameter"));
 		}
 	}
+	p = cb_ref (file);
+	/* LCOV_EXCL_START */
+	if (p == cb_error_node) {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cb_emit_sort_giving", "file");
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 	listlen = cb_list_length (l);
-	p = CB_BUILD_FUNCALL_2 ("cob_file_sort_giving", cb_ref (file), l);
+	p = CB_BUILD_FUNCALL_2 ("cob_file_sort_giving", p, l);
 	CB_FUNCALL(p)->varcnt = listlen;
 	cb_emit (p);
 }
@@ -10128,9 +10142,6 @@ cb_emit_start (cb_tree file, cb_tree op, cb_tree key, cb_tree keylen)
 		return;
 	}
 	if (cb_validate_one (keylen)) {
-		return;
-	}
-	if (file == cb_error_node) {
 		return;
 	}
 	fl = cb_ref (file);
@@ -10262,13 +10273,11 @@ cb_emit_unlock (cb_tree ref)
 {
 	cb_tree	file;
 
-	if (ref != cb_error_node) {
-		file = cb_ref (ref);
-		if (file != cb_error_node) {
-			cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
-				 file, CB_FILE(file)->file_status));
-			current_statement->file = file;
-		}
+	file = cb_ref (ref);
+	if (file != cb_error_node) {
+		cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
+				file, CB_FILE(file)->file_status));
+		current_statement->file = file;
 	}
 }
 
@@ -10330,6 +10339,7 @@ void
 cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 {
 	cb_tree		file;
+	cb_tree		rtree;
 	cb_tree		check_eop;
 	struct cb_file	*f;
 
@@ -10339,13 +10349,14 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	if (cb_validate_one (from)) {
 		return;
 	}
-	if (CB_FILE_P (cb_ref (record))) {
+	rtree = cb_ref (record);
+	if (CB_FILE_P (rtree)) {
 		if (from == NULL) {
 			cb_error_x (CB_TREE (current_statement),
 				_("%s FILE requires a FROM clause"), "WRITE");
 			return;
 		}
-		file = cb_ref(record);		/* FILE filename: was used */
+		file = rtree;		/* FILE filename: was used */
 		f = CB_FILE (file);
 		if (f->record->sister) {
 			record = CB_TREE(f->record->sister);
@@ -10353,7 +10364,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 			record = CB_TREE(f->record);
 		}
 	} else {
-		if (!CB_REF_OR_FIELD_P (cb_ref (record))) {
+		if (!CB_REF_OR_FIELD_P (rtree)) {
 			cb_error_x (CB_TREE (current_statement),
 				_("%s requires a record name as subject"), "WRITE");
 			return;
@@ -10363,7 +10374,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 				_("%s subject does not refer to a record name"), "WRITE");
 			return;
 		}
-		file = CB_TREE (CB_FIELD (cb_ref (record))->file);
+		file = CB_TREE (CB_FIELD (rtree)->file);
 		if (!file || file == cb_error_node) {
 			return;
 		}
@@ -10448,14 +10459,13 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 {
 	int	opt;
 	int	token;
+	cb_tree rtree;
 
-	if (mnemonic == cb_error_node) {
+	rtree = cb_ref (mnemonic);
+	if (rtree == cb_error_node) {
 		return cb_int0;
 	}
-	if (cb_ref (mnemonic) == cb_error_node) {
-		return cb_int0;
-	}
-	token = CB_SYSTEM_NAME (cb_ref (mnemonic))->token;
+	token = CB_SYSTEM_NAME (rtree)->token;
 	switch (token) {
 	case CB_FEATURE_FORMFEED:
 		opt = (pos == CB_BEFORE) ? COB_WRITE_BEFORE : COB_WRITE_AFTER;

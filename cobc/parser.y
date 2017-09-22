@@ -453,7 +453,7 @@ terminator_warning (cb_tree stmt, const unsigned int termid,
 			"terminator_warning", name);
 		COBC_ABORT ();
 	}
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 	snprintf (terminator, 32, "END-%s", name);
 	if (is_reserved_word (terminator)) {
 		cb_warning_x (cb_warn_terminator, CB_TREE (current_statement),
@@ -480,7 +480,7 @@ terminator_error (cb_tree stmt, const unsigned int termid, const char *name)
 			"terminator_error", name);
 		COBC_ABORT ();
 	}
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 	snprintf (terminator, 32, "END-%s", name);
 	if (is_reserved_word (terminator)) {
 		cb_error_x (CB_TREE (current_statement),
@@ -509,7 +509,7 @@ terminator_clear (cb_tree stmt, const unsigned int termid)
 			"terminator_warning", current_statement->name);
 		COBC_ABORT ();
 	}
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 	if (termid == TERM_PERFORM
 	 && perform_stack) {
 		p = CB_PERFORM (CB_VALUE (perform_stack));
@@ -1487,7 +1487,7 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 		/* This should never happen (and therefore doesn't get a translation) */
 		cb_error ("unexpected tallying phrase");
 		COBC_ABORT();
-		/* LCOV_EXCL_END */
+		/* LCOV_EXCL_STOP */
 	}
 
 	previous_tallying_phrase = phrase;
