@@ -253,7 +253,8 @@ int			fatal_errors_flag = 0;
 int			no_physical_cancel = 0;
 int			cb_source_line = 0;
 int			cb_saveargc = 0;
-unsigned int		cobc_gen_listing = 0;
+unsigned int	cobc_gen_listing = 0;
+unsigned int	cb_correct_program_order = 0;
 
 cob_u32_t		optimize_defs[COB_OPTIM_MAX] = { 0 };
 
@@ -333,7 +334,6 @@ static size_t		cobc_buffer_size;
 static struct filename	*file_list;
 
 static unsigned int	cb_compile_level = 0;
-static unsigned int cb_correct_program_order = 0;
 
 static int		iargs;
 
@@ -3212,7 +3212,6 @@ process_command_line (const int argc, char **argv)
 static void
 restore_program_list_order (void)
 {
-	struct cb_program	*next;
 	struct cb_program	*last;
 
 	/* ensure that this function is only processed once
@@ -3223,8 +3222,8 @@ restore_program_list_order (void)
 	cb_correct_program_order = 1;
 
 	last = NULL;
-	for (; current_program; current_program = next) {
-		next = current_program->next_program;
+	for (; current_program; current_program = current_program->next_program_ordered) {
+		current_program->next_program_ordered = current_program->next_program;
 		current_program->next_program = last;
 		last = current_program;
 	}

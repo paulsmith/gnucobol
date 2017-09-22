@@ -3620,8 +3620,13 @@ cb_ref (cb_tree x)
 		val = hash ((const unsigned char *)r->word->name);
 */
 		val = r->hashval;
-		prog = current_program->next_program;
-		for (; prog; prog = prog->next_program) {
+		prog = current_program;
+		while (prog) {
+			if (!cb_correct_program_order) {
+				prog = prog->next_program;
+			} else {
+				prog = prog->next_program_ordered;
+			}
 			if (prog->nested_level >= current_program->nested_level) {
 				continue;
 			}

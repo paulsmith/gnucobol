@@ -2,9 +2,13 @@
 2017-09-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_abort_msg): output orig_program_id instead of C-converted
-	* codegen.c (codegen): adjust current_program used for error messages during
-	  code generation of nested programs
+	* codegen.c (codegen): adjust current_program used for error messages
+	  during code generation of nested programs
 	* parser.y: fixed missing warning for pending CURRENCY SIGN other than '$'
+	* cobc.c, tree.c, tree.h: fixed #435 - nested programs had no access to
+	  identifiers in its parent's scope: added next_program_ordered to
+	  struct cb_program set in (restore_program_list_order) and used for
+	  checking nested lookups afterwards
 
 2017-09-22  Edward Hart <edward.dan.hart@gmail.com>
 

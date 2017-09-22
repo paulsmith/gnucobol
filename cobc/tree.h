@@ -1356,6 +1356,8 @@ struct cb_program {
 
 	/* Program variables */
 	struct cb_program	*next_program;		/* Nested/contained */
+	struct cb_program	*next_program_ordered;		/* Nested/contained
+													when cb_correct_program_order is set */
 	const char		*program_name;		/* Internal program-name */
 	const char		*program_id;		/* Demangled external PROGRAM-ID */
 	char			*source_name;		/* Source name */
@@ -1998,6 +2000,7 @@ extern void			cobc_xref_link (struct cb_xref *, const int, const int);
 extern void			cobc_xref_link_parent (const struct cb_field *);
 extern void			cobc_xref_set_receiving (const cb_tree);
 extern void			cobc_xref_call (const char *, const int, const int, const int);
+extern unsigned int		cb_correct_program_order;
 
 /* Function defines */
 
