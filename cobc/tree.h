@@ -106,6 +106,8 @@ enum cb_tag {
 	CB_TAG_PROGRAM,		/* 37 Program */
 	CB_TAG_PROTOTYPE,	/* 38 Prototype */
 	CB_TAG_DECIMAL_LITERAL	/* 39 Decimal Literal */
+	/* When adding a new entry, please remember to add it to
+	   cobc_enum_explain as well. */
 };
 
 /* Alphabet type */
@@ -477,6 +479,8 @@ typedef struct cb_tree_common	*cb_tree;
 
 #define	CB_VALID_TREE(x)	(x && CB_TREE (x) != cb_error_node)
 #define	CB_INVALID_TREE(x)	(!(x) || CB_TREE (x) == cb_error_node)
+
+#define COB_TREE_DEBUG 1
 
 #ifdef	COB_TREE_DEBUG
 

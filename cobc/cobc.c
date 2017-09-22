@@ -656,8 +656,6 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "LITERAL";
 	case CB_TAG_DECIMAL:
 		return "DECIMAL";
-	case CB_TAG_DECIMAL_LITERAL:
-		return "DECIMAL_LITERAL";
 	case CB_TAG_FIELD:
 		return "FIELD";
 	case CB_TAG_FILE:
@@ -712,6 +710,12 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "DEBUG";
 	case CB_TAG_DEBUG_CALL:
 		return "DEBUG CALL";
+	case CB_TAG_PROGRAM:
+		return "PROGRAM";
+	case CB_TAG_PROTOTYPE:
+		return "PROTOTYPE";
+	case CB_TAG_DECIMAL_LITERAL:
+		return "DECIMAL LITERAL";
 	default:
 		break;
 	}

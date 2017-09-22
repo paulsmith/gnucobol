@@ -3619,15 +3619,43 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  XYZ.
-           03 X         PIC X.
-           03 FILLER    PIC X(20).
+       01  compiled-datetime.
+           03  compiled-date.
+               05  millenium PIC X.
+               05  FILLER    PIC X(15).
+           03  timezone  PIC X(5).
        PROCEDURE        DIVISION.
-           MOVE FUNCTION WHEN-COMPILED TO XYZ.
-           IF X NOT = "2"
-              DISPLAY "NOT OK"
+           *> Check millenium.
+           MOVE FUNCTION WHEN-COMPILED TO compiled-datetime.
+           IF millenium NOT = "2"
+              DISPLAY "Millenium NOT OK: " millenium
               END-DISPLAY
            END-IF.
+
+           *> Check timezone.
+           IF timezone NOT = FUNCTION CURRENT-DATE (17:5)
+              DISPLAY "Timezone NOT OK: " timezone
+              END-DISPLAY
+           END-IF.
+
+           *> Check date format.
+           INSPECT compiled-date CONVERTING "0123456789"
+               TO "9999999999".
+           IF compiled-date NOT = ALL "9"
+               DISPLAY "Date format NOT OK: " compiled-date
+               END-DISPLAY
+           END-IF.
+
+           *> Check timezone format.
+           IF timezone NOT = "00000"
+               INSPECT timezone CONVERTING "0123456789"
+                   TO "9999999999"
+               IF timezone NOT = "+9999" AND "-9999"
+                   DISPLAY "Timezone format NOT OK: " timezone
+                   END-DISPLAY
+               END-IF
+           END-IF.
+           
            STOP RUN.
 ])
 

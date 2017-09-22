@@ -1316,7 +1316,7 @@ cb_set_intr_when_compiled (void)
 		(cob_u16_t) current_compile_time.second,
 		(cob_u16_t) (current_compile_time.nanosecond / 10000000));
 	if (current_compile_time.offset_known) {
-		snprintf (buff + 16, (size_t)11, "%+3.3d%2.2d",	/* 11: see above */
+		snprintf (buff + 16, (size_t)11, "%+2.2d%2.2d",	/* 11: see above */
 			(cob_u16_t) current_compile_time.utc_offset / 60,
 			(cob_u16_t) current_compile_time.utc_offset % 60);
 	} else {
