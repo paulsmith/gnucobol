@@ -611,7 +611,7 @@ cob_sig_handler (int sig)
 		putc ('\n', stderr);
 		break;
 	}
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 
 #ifdef	HAVE_SIGACTION
 #ifndef	SA_RESETHAND
@@ -653,7 +653,7 @@ cob_sig_handler (int sig)
 		fprintf (stderr, _("caught signal"));
 		break;
 	}
-	/* LCOV_EXCL_END */
+	/* LCOV_EXCL_STOP */
 	fprintf (stderr, " (");
 	fprintf (stderr, _("signal %s"), signal_name);
 	fprintf (stderr, ")\n");
