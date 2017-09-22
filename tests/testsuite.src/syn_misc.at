@@ -1009,7 +1009,9 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: 7: error: invalid CURRENCY SIGN '*'
 prog.cob: 7: error: invalid character '*' in PICTURE SYMBOL for CURRENCY
 ])
-AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [],
+[prog2.cob: 7: warning: CURRENCY SIGN other than '$' is not implemented
+])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
 [prog3.cob: 7: error: PICTURE SYMBOL for CURRENCY must be one character long
 ])
@@ -1030,7 +1032,9 @@ AT_CHECK([$COMPILE_ONLY prog7.cob], [1], [],
 prog7.cob: 7: error: invalid CURRENCY SIGN '+-'
 prog7.cob: 8: error: PICTURE SYMBOL for CURRENCY must be one character long
 ])
-AT_CHECK([$COMPILE_ONLY prog8.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog8.cob], [0], [],
+[prog8.cob: 7: warning: CURRENCY SIGN other than '$' is not implemented
+])
 
 AT_CLEANUP
 

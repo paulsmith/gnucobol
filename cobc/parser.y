@@ -3518,8 +3518,10 @@ currency_sign_clause:
 	} else {
 		check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
 		if (strcmp("$", (const char *)s) != 0) {
-			if ($5 && CB_LITERAL ($4)->size != 1) {
-				CB_PENDING_X ($4, _("CURRENCY SIGN longer than one character"));
+			if (CB_LITERAL ($4)->size != 1) {
+				if ($5) {
+					CB_PENDING_X ($4, _("CURRENCY SIGN longer than one character"));
+				}
 				error_ind = 1;
 			}
 			while (*s) {
@@ -3552,8 +3554,7 @@ currency_sign_clause:
 			if (!char_seen) {
 				error_ind = 2;
 			}
-		} else {
-			if (error_ind > 1) {;
+			if (error_ind == 0) {
 				CB_PENDING_X ($4, _("CURRENCY SIGN other than '$'"));
 			}
 		}

@@ -4,6 +4,7 @@
 	* cobc.c (cobc_abort_msg): output orig_program_id instead of C-converted
 	* codegen.c (codegen): adjust current_program used for error messages during
 	  code generation of nested programs
+	* parser.y: fixed missing warning for pending CURRENCY SIGN other than '$'
 
 2017-09-22  Edward Hart <edward.dan.hart@gmail.com>
 
