@@ -1876,8 +1876,8 @@ cobc_abort_msg (void)
 			} else {
 				prog_type = "PROGRAM-ID";
 			}
-			if (current_program->program_id) {
-				prog_id = (char *)current_program->program_id;
+			if (current_program->orig_program_id) {
+				prog_id = (char *)current_program->orig_program_id;
 			} else {
 				prog_id = (char *)_("unknown");
 			}

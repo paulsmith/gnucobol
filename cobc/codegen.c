@@ -9198,10 +9198,14 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	output_local_base_cache ();
 	output_local_field_cache ();
 
-	/* Skip to next program contained in the source */
+	/* Skip to next program contained in the source and
+	   adjust current_program used for error messages */
 
 	if (prog->next_program) {
+		cp = current_program;
+		current_program = prog->next_program;
 		codegen (prog->next_program, 1);
+		current_program = cp;
 		return;
 	}
 

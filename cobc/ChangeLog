@@ -1,8 +1,14 @@
 
+2017-09-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_abort_msg): output orig_program_id instead of C-converted
+	* codegen.c (codegen): adjust current_program used for error messages during
+	  code generation of nested programs
+
 2017-09-22  Edward Hart <edward.dan.hart@gmail.com>
 
-	* typeck.c (cb_set_intr_when_compiled): fixed timezone printf format.
-	* tree.c (cobc_enum_explain): added missing tags.
+	* typeck.c (cb_set_intr_when_compiled): #436 fixed timezone printf format
+	* cobc.c (cobc_enum_explain): added missing tags
 
 2017-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1302,7 +1308,7 @@
 
 2016-09-19  Ron Norman <rjn@inglenet.com>
 
-	* codgen.c, tree.c, tree.h:  added code to optimize handling of
+	* codegen.c, tree.c, tree.h:  added code to optimize handling of
 	  'decimal constants' in expressions
 
 2016-09-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
