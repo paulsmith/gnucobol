@@ -1,4 +1,12 @@
 
+2017-09-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.module.in: (new file) moved content of generated
+	  Makefiles to separate template file;
+	  splitted into multiple targets and all target
+	* Makefile.am: adjusted to `sed` the template instead of
+	  using `echo` to create the module Makefile
+
 2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: extra target for summary.log

@@ -1,4 +1,9 @@
 
+2017-09-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* atlocal.in: set and export variables in separate lines;
+	  use `` instead of $() - see Bug #437
+
 2017-09-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_valgrind, atlocal_win: set COB_RUNTIME_CONFIG

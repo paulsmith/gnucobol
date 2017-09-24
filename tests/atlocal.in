@@ -48,7 +48,7 @@ UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
-for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); \
+for cobenv in `$COBCRUN --runtime-conf | grep COB_ | cut -d: -f2`; \
 	do unset $cobenv; \
 done
 
@@ -59,20 +59,18 @@ _return_path () {
 }
 
 PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
-export PATH
-export COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
-export COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
-export COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
-export COB_CONFIG_DIR="${abs_top_srcdir}/config"
-export COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
-export COB_COPY_DIR="${abs_top_srcdir}/copy"
-export LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
-export DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
-export SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
-export LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
-export COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
-export COB_UNIX_LF=YES
-export COB_HAS_ISAM
+COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
+COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
+COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
+COB_CONFIG_DIR="${abs_top_srcdir}/config"
+COB_RUNTIME_CONFIG="${COB_CONFIG_DIR}/runtime_empty.cfg"
+COB_COPY_DIR="${abs_top_srcdir}/copy"
+LD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$LD_LIBRARY_PATH"
+DYLD_LIBRARY_PATH="${abs_top_builddir}/libcob/.libs:$DYLD_LIBRARY_PATH"
+SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
+LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
+COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
+COB_UNIX_LF=YES
 if test "$MSYSTEM" = "MINGW32"; then
 	# running MSYS builds as not-visible child processes result in
 	# "Redirection is not supported"
@@ -80,15 +78,21 @@ if test "$MSYSTEM" = "MINGW32"; then
 	# Fix for testcases were cobc translates path to win32 equivalents
 	PATHSEP=";"
 fi
-export COB_HAS_CURSES
-export COB_HAS_UTC_OFFSET
-export COB_HAS_64_BIT_POINTER
-export LC_ALL=C
-export PATHSEP
+LC_ALL=C
+
+
+export PATH PATHSEP
+export COB_CFLAGS COB_LDFLAGS COB_LIBS
+export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR
+export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
+export COB_LIBRARY_PATH
+export COB_UNIX_LF
+export COB_HAS_ISAM COB_HAS_CURSES COB_HAS_UTC_OFFSET COB_HAS_64_BIT_POINTER
+export LC_ALL
 
 
 # For rare cases where cobc/libcob may need to know if they're running in test mode:
 case $0 in
-	*/testsuite) export COB_IS_RUNNING_IN_TESTMODE=1;;
+	*/testsuite) COB_IS_RUNNING_IN_TESTMODE=1 && export COB_IS_RUNNING_IN_TESTMODE;;
 	*)	unset COB_IS_RUNNING_IN_TESTMODE;;
 esac
