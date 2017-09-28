@@ -11223,6 +11223,7 @@ stop_statement:
   STOP RUN
   {
 	begin_statement ("STOP RUN", 0);
+	cobc_cs_check = CB_CS_STOP;
   }
   stop_returning
   {

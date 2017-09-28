@@ -1,4 +1,8 @@
 
+2017-09-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (stop_statement): set context-sensitive flag (bug #433).
+
 2017-09-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_abort_msg): output orig_program_id instead of C-converted

@@ -1986,8 +1986,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  NORMAL       PIC 9 VALUE 0.
        PROCEDURE        DIVISION.
-           DISPLAY NORMAL NO ADVANCING
-           END-DISPLAY.
+           DISPLAY NORMAL NO ADVANCING.
            STOP RUN NORMAL.
 ])
 
