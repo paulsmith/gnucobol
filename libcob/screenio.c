@@ -1348,9 +1348,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 				cob_move_cursor (cline, ccolumn);
 				p--;
 			} else {
-				ungetched = 1;
-				ungetch (KEY_BACKSPACE);
-				ungetch (KEY_BTAB);
+				cob_beep ();
 			}
 			continue;
 		case KEY_LEFT:

@@ -1,4 +1,9 @@
 
+2017-09-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (cob_screen_get_all): changed backspace to emit beep if
+	  entered at start of field, not to act like back-tab (bug #426).
+
 2017-09-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sig_handler, cob_set_signal): added code for SIGFPE
