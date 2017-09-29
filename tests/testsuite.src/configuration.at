@@ -411,6 +411,7 @@ test.conf: missing definitions:
 	no definition of 'larger-redefines-ok'
 	no definition of 'relax-syntax-checks'
 	no definition of 'relax-level-hierarchy'
+	no definition of 'select-working'
 	no definition of 'sticky-linkage'
 	no definition of 'move-ibm'
 	no definition of 'perform-osvs'

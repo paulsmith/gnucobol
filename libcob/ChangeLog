@@ -10,6 +10,11 @@
 	  in correspondence to SIGHUP code (+ additional error message);
 	  set LCOV_EXCL markers for most of the signal handling
 
+2017-09-18  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Check if file ASSIGN field has NULL address and report a
+	  runtime error and return status 31
+
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (field_display): implemented DISPLAY ALL "blah" WITH SIZE

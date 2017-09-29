@@ -2896,6 +2896,15 @@ validate_relative_key_field (struct cb_file *file)
 			    _("RELATIVE KEY %s cannot be in file record belonging to %s"),
 			    key_field->name, file->name);
 	}
+
+	if (cb_select_working
+	    && key_field->storage != CB_STORAGE_WORKING
+	    && key_field->storage != CB_STORAGE_FILE
+	    && key_field->storage != CB_STORAGE_LOCAL) {
+		cb_error_x (file->key,
+			    _("file %s: RELATIVE KEY %s declared outside WORKING-STORAGE"), 
+			    file->name, key_field->name);
+	}
 }
 
 void
@@ -2991,25 +3000,6 @@ cb_validate_program_data (struct cb_program *prog)
 				if (CB_FIELD_P (x)) {
 					if (CB_FIELD (x)->level == 88) {
 						cb_error_x (assign, _("ASSIGN data item '%s' is invalid"),
-							CB_NAME (assign));
-					} else if (CB_FIELD (x)->storage != CB_STORAGE_WORKING &&
-						CB_FIELD (x)->storage != CB_STORAGE_LOCAL) {
-						/* FIXME: Should be allowed, but needs changes to codegen,
-						          including a check for the LINKAGE item */
-						if (CB_FIELD (x)->storage == CB_STORAGE_LINKAGE) {
-							CB_PENDING_X (assign,
-								_("ASSIGN data item defined in LINKAGE"));
-						}
-						cb_error_x (assign,
-							_("ASSIGN data item '%s' is invalid"),
-							CB_NAME (assign));
-					} else if (CB_FIELD (x)->flag_item_based) {
-						/* FIXME: Should be allowed, but needs changes to codegen,
-						          including a check for the BASED item */
-						CB_PENDING_X (assign,
-							_("ASSIGN data item with BASED clause"));
-						cb_error_x (assign,
-							_("ASSIGN data item '%s' is invalid"),
 							CB_NAME (assign));
 					}
 				}

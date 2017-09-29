@@ -4604,6 +4604,13 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 		return;
 	}
 
+	if (f->assign->data == NULL) {
+		cob_runtime_error (_("file %s has ASSIGN field with NULL address"),
+							f->select_name);
+		save_status (f, fnstatus, COB_STATUS_31_INCONSISTENT_FILENAME);
+		return;
+	} 
+
 	/* Obtain the file name */
 	cob_field_to_string (f->assign, file_open_name, (size_t)COB_FILE_MAX);
 

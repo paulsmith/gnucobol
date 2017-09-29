@@ -1,4 +1,8 @@
 
+2017-09-18  Ron Norman <rjn@inglenet.com>
+	* Added option for disallowing SELECT ASSIGN and RELATIVE KEY
+	  fields to be in other than WORKING-STORAGE locations
+
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* ibm.words: updated to Enterprise COBOL V6.2.

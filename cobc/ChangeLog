@@ -31,6 +31,21 @@
 	* codegen.c:
 	  Emit Decimal Constants for all module types
 
+2017-09-18  Ron Norman <rjn@inglenet.com>
+
+	* config.def:
+	  Added select-working: yes/no
+	  SELECT RELATIVE KEY and ASSIGN fields must be in WORKING-STORAGE
+	* typeck.c:
+	  Report 'declared outside WORKING-STORAGE' if 'select-working: yes'
+	  and SELECT RELATIVE KEY or ASSIGN field is not in WORKING-STORAGE
+	* codegen.c:
+	  When SELECT RELATIVE KEY or ASSIGN field is not in WORKING-STORAGE
+	  Then set current data address in each OPEN and for RELATIVE files
+	  on every I/O operation
+	* tree.c:
+	  Fix compile time resolve of FUNCTION INTEGER with negative value
+
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, config.def: added free-redefines-position config option.

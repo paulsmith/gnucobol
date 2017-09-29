@@ -103,6 +103,9 @@ CB_CONFIG_BOOLEAN (cb_relaxed_syntax_checks, "relax-syntax-checks",
 CB_CONFIG_BOOLEAN (cb_relax_level_hierarchy, "relax-level-hierarchy",
 	_("allow non-matching level numbers"))
 
+CB_CONFIG_BOOLEAN (cb_select_working, "select-working",
+	_("require ASSIGN USING items to be in WORKING-STORAGE"))
+
 CB_CONFIG_BOOLEAN (cb_sticky_linkage, "sticky-linkage",
 	_("LINKAGE-SECTION items remain allocated between invocations"))
 

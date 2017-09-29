@@ -6108,6 +6108,48 @@ output_handler (struct cb_statement *stmt)
 }
 
 
+/*
+ * For OPEN and file has SELECT fields which are LINKAGE or BASED
+ * set the current address of the field at OPEN time
+ */
+static void
+output_file_variable (cb_tree x, struct cb_file *fl, struct cb_statement *p, const char *set_field, int always)
+{
+	struct cb_funcall	*c;
+	struct cb_reference	*r;
+	struct cb_field		*f;
+	int			set_address;
+	if (x == NULL)
+		return;
+	 if (!CB_REF_OR_FIELD_P (x))
+		 return;
+	r = CB_REFERENCE (x);
+	if ( r && CB_FIELD_P (r->value) ) {
+		f = CB_FIELD (r->value);
+		if (f->flag_local 
+		 || f->flag_item_based
+		 || f->flag_local_storage
+		 || f->storage == CB_STORAGE_LINKAGE
+		 || f->storage == CB_STORAGE_LOCAL)
+			set_address = 1;
+		else
+			set_address = 0;
+		if (set_address
+		&& p->body
+		&& CB_TREE_TAG (CB_VALUE(p->body)) == CB_TAG_FUNCALL) {
+			c = CB_FUNCALL (CB_VALUE(p->body));
+			if (strcmp(c->name,"cob_open") == 0
+			 || strcmp(c->name,"cob_extfh_open") == 0
+			 || always) {
+				output_prefix ();
+				output ("%s%s->%s = ", CB_PREFIX_FILE, fl->cname, set_field);
+				output_param (x, -1);	
+				output (";\n");
+			}
+		}
+	}
+}
+
 static void
 output_stmt (cb_tree x)
 {
@@ -6119,6 +6161,7 @@ output_stmt (cb_tree x)
 	struct cb_if		*ip;
 	struct cb_para_label	*pal;
 	struct cb_set_attr	*sap;
+	struct cb_file		*fl;
 #ifdef	COB_NON_ALIGNED
 	struct cb_cast		*cp;
 #endif
@@ -6170,6 +6213,15 @@ output_stmt (cb_tree x)
 
 		if (!p->file && (p->ex_handler || p->not_ex_handler)) {
 			output_line ("cob_glob_ptr->cob_exception_code = 0;");
+		}
+
+		if (p->file) {
+			fl = CB_FILE (p->file);
+			
+			if (fl->organization == COB_ORG_RELATIVE) {
+				output_file_variable (fl->key, fl, p, "keys[0].field", 1);
+			}
+			output_file_variable (fl->assign, fl, p, "assign", 0);
 		}
 
 		if (p->null_check) {
