@@ -1305,7 +1305,8 @@ void
 cb_set_intr_when_compiled (void)
 {
 	char	buff[36]; /* 36: make the compiler happy as "unsigned short" *could*
-						     have more digits than we "assume" */
+			     have more digits than we "assume" */
+	cob_u16_t	offset_minutes;
 
 	snprintf (buff, sizeof (buff), "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d",
 		(cob_u16_t) current_compile_time.year,
@@ -1316,9 +1317,14 @@ cb_set_intr_when_compiled (void)
 		(cob_u16_t) current_compile_time.second,
 		(cob_u16_t) (current_compile_time.nanosecond / 10000000));
 	if (current_compile_time.offset_known) {
+		if (current_compile_time.utc_offset >= 0) {
+			offset_minutes = current_compile_time.utc_offset % 60;
+		} else {
+			offset_minutes = -current_compile_time.utc_offset % 60;
+		}
 		snprintf (buff + 16, (size_t)11, "%+2.2d%2.2d",	/* 11: see above */
-			(cob_u16_t) current_compile_time.utc_offset / 60,
-			(cob_u16_t) current_compile_time.utc_offset % 60);
+			  (cob_s16_t) current_compile_time.utc_offset / 60,
+			  offset_minutes);
 	} else {
 		snprintf (buff + 16, (size_t)6, "00000");
 	}
