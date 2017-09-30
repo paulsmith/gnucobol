@@ -181,14 +181,9 @@
 #define offsetof(s_name,m_name) (int)(long)&(((s_name*)0))->m_name
 #endif
 
-/* Convert a digit (e.g., '0') into an integer (e.g., 0) */
-#define COB_D2I(x)		((x) & 0x0F)
-#if	0	/* RXWRXW - D2I */
+/* Convert between a digit and an integer (e.g., '0' <-> 0) */
 #define COB_D2I(x)		((x) - '0')
-#endif
-
-/* Convert an integer (e.g., 0) into a digit (e.g., '0') */
-#define COB_I2D(x)		((x) + '0')
+#define COB_I2D(x)		(char) ((x) + '0')
 
 #define	COB_MODULE_PTR		cobglobptr->cob_current_module
 #define	COB_TERM_BUFF		cobglobptr->cob_term_buff
@@ -354,8 +349,6 @@ COB_HIDDEN void		cob_runtime_warning	(const char *, ...) COB_A_FORMAT12;
 
 COB_HIDDEN char*	cob_save_env_value	(char*, char*);
 COB_HIDDEN cob_settings *cob_get_settings_ptr	(void);
-
-COB_HIDDEN int		cob_ctoi		(const char);
 
 #if 0 /* currently not used */
 COB_HIDDEN char		*cob_int_to_string		(int, char*);

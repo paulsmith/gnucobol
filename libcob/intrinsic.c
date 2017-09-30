@@ -1995,7 +1995,7 @@ seconds_from_formatted_time (const struct time_format format, const char *str,
 		offset = format.with_colons ? 9 : 7;
 		end_of_decimal = offset + format.decimal_places;
 		for (; offset != end_of_decimal; ++offset) {
-			unscaled_fraction = unscaled_fraction * 10 + cob_ctoi (str[offset]);
+			unscaled_fraction = unscaled_fraction * 10 + COB_D2I (str[offset]);
 		}
 
 		mpz_set_ui (fractional_seconds->value, unscaled_fraction);
@@ -2510,7 +2510,7 @@ static int test_millenium (const char *date, int *offset, int *millenium)
 {
 	RETURN_IF_NOT_ZERO (test_char_in_range ('1', '9', date[*offset], offset));
 
-	*millenium = cob_ctoi (date[*offset - 1]);
+	*millenium = COB_D2I (date[*offset - 1]);
 	return 0;
 }
 
@@ -2524,7 +2524,7 @@ test_century (const char *date, int *offset, int *state)
 							offset));
 	}
 
-	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	*state = *state * 10 + COB_D2I (date[*offset - 1]);
 	return 0;
 }
 
@@ -2532,7 +2532,7 @@ static int
 test_decade (const char *date, int *offset, int *state)
 {
 	RETURN_IF_NOT_ZERO (test_digit (date[*offset], offset));
-	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	*state = *state * 10 + COB_D2I (date[*offset - 1]);
 	return 0;
 }
 
@@ -2546,7 +2546,7 @@ test_unit_year (const char *date, int *offset, int *state)
 							offset));
 	}
 
-	*state = *state * 10 + cob_ctoi (date[*offset - 1]);
+	*state = *state * 10 + COB_D2I (date[*offset - 1]);
 	return 0;
 }
 
@@ -2575,7 +2575,7 @@ test_month (const char *date, int *offset, int *month)
 	/* Validate first digit */
 	RETURN_IF_NOT_ZERO (test_char_cond (date[*offset] == '0' || date[*offset] == '1',
 					    offset));
-	first_digit = cob_ctoi (date[*offset - 1]);
+	first_digit = COB_D2I (date[*offset - 1]);
 
 	/* Validate second digit */
 	if (first_digit == 0) {
@@ -2586,7 +2586,7 @@ test_month (const char *date, int *offset, int *month)
 						    offset));
 	}
 
-	*month = first_digit * 10 + cob_ctoi (date[*offset - 1]);
+	*month = first_digit * 10 + COB_D2I (date[*offset - 1]);
 	return 0;
 }
 
@@ -2635,7 +2635,7 @@ test_day_of_year (const char *date, const int year, int *offset)
 	/* Validate first digit */
 	/* Check day is not greater than 399 */
 	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '3', date[*offset], offset));
-	state = cob_ctoi (date[*offset - 1]);
+	state = COB_D2I (date[*offset - 1]);
 
 	/* Validate second digit */
 	if (state != 3) {
@@ -2645,7 +2645,7 @@ test_day_of_year (const char *date, const int year, int *offset)
 		RETURN_IF_NOT_ZERO (test_char_in_range ('0', '6', date[*offset],
 							offset));
 	}
-	state = state * 10 + cob_ctoi (date[*offset - 1]);
+	state = state * 10 + COB_D2I (date[*offset - 1]);
 
 	/* Validate third digit */
 	if (state == 0) {
@@ -2677,7 +2677,7 @@ test_week (const char *date, const int year, int *offset)
 
 	/* Validate first digit */
 	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '5', date[*offset], offset));
-	first_digit = cob_ctoi (date[*offset - 1]);
+	first_digit = COB_D2I (date[*offset - 1]);
 
 	/* Validate second digit */
 	if (first_digit == 0) {
@@ -2768,7 +2768,7 @@ test_hour (const char *time, int *offset)
 	int	first_digit;
 
 	RETURN_IF_NOT_ZERO (test_char_in_range ('0', '2', time[*offset], offset));
-	first_digit = cob_ctoi (time[*offset - 1]);
+	first_digit = COB_D2I (time[*offset - 1]);
 
 	if (first_digit != 2) {
 		RETURN_IF_NOT_ZERO (test_digit (time[*offset], offset));

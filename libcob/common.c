@@ -2714,14 +2714,6 @@ cob_external_addr (const char *exname, const int exlength)
 	return eptr->ext_alloc;
 }
 
-/* Retrieving current date and time */
-
-int
-cob_ctoi (const char digit)
-{
-	return (int) (digit - '0');
-}
-
 #if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
 
 /* Get function pointer for most precise time function
@@ -2851,10 +2843,10 @@ cob_get_current_date_and_time_from_os (void)
 		/* Convert the timezone string into minutes from UTC */
 		cb_time.offset_known = 1;
 		cb_time.utc_offset =
-			cob_ctoi (iso_timezone[1]) * 60 * 10
-			+ cob_ctoi (iso_timezone[2]) * 60
-			+ cob_ctoi (iso_timezone[3]) * 10
-			+ cob_ctoi (iso_timezone[4]);
+			COB_D2I (iso_timezone[1]) * 60 * 10
+			+ COB_D2I (iso_timezone[2]) * 60
+			+ COB_D2I (iso_timezone[3]) * 10
+			+ COB_D2I (iso_timezone[4]);
 		if (iso_timezone[0] == '-') {
 			cb_time.utc_offset *= -1;
 		}
@@ -2975,7 +2967,7 @@ check_current_date()
 		yr = 0;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-			 	yr = yr * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+			 	yr = yr * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3002,7 +2994,7 @@ check_current_date()
 		mm = 0;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-				mm = mm * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+				mm = mm * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3029,7 +3021,7 @@ check_current_date()
 		dd = 0;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-				dd = dd * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+				dd = dd * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3056,7 +3048,7 @@ check_current_date()
 		while(isspace(cobsetptr->cob_date[j])) j++;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-				hh = hh * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+				hh = hh * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3084,7 +3076,7 @@ check_current_date()
 		mi = 0;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-				mi = mi * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+				mi = mi * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3115,7 +3107,7 @@ check_current_date()
 		ss = 0;
 		for (i=0; cobsetptr->cob_date[j] != 0; j++) {
 			if (isdigit(cobsetptr->cob_date[j])) {
-				ss = ss * 10 + cob_ctoi(cobsetptr->cob_date[j]);
+				ss = ss * 10 + COB_D2I (cobsetptr->cob_date[j]);
 			} else {
 				break;
 			}
@@ -3183,10 +3175,10 @@ check_current_date()
 			}
 		}
 		if (i == 4) {
-			offset = cob_ctoi (iso_timezone[1]) * 60 * 10
-				+ cob_ctoi (iso_timezone[2]) * 60
-				+ cob_ctoi (iso_timezone[3]) * 10
-				+ cob_ctoi (iso_timezone[4]);
+			offset = COB_D2I (iso_timezone[1]) * 60 * 10
+				+ COB_D2I (iso_timezone[2]) * 60
+				+ COB_D2I (iso_timezone[3]) * 10
+				+ COB_D2I (iso_timezone[4]);
 			if (iso_timezone[0] == '-') {
 				offset *= -1;
 			}
