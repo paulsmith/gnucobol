@@ -1,7 +1,13 @@
 
+2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added record-delimiter, sequential-delimiters and
+	  record-delim-with-fixed-recs options.
+
 2017-09-18  Ron Norman <rjn@inglenet.com>
-	* Added option for disallowing SELECT ASSIGN and RELATIVE KEY
-	  fields to be in other than WORKING-STORAGE locations
+
+	* general: Added option for disallowing SELECT ASSIGN and RELATIVE
+	  KEY fields to be in other than WORKING-STORAGE locations
 
 2017-09-16  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -1,4 +1,11 @@
 
+2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y, tree.c, tree.h: added RECORD DELIMITER syntax checks.
+	* parser.y, cobc.h, reserved.c: added BINARY-SEQUENTIAL and
+	  LINE-SEQUENTIAL phrases to RECORD DELIMITER.
+	* config.def: added config options for RECORD DELIMITER clause.
+
 2017-09-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (stop_statement): set context-sensitive flag (bug #433).

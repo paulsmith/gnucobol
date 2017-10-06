@@ -3278,7 +3278,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	if (f->organization == COB_ORG_INDEXED) {
-		if (f->record_max > MAX_FD_RECORD_IDX)  {
+		if (f->record_max > MAX_FD_RECORD_IDX) {
 			f->record_max = MAX_FD_RECORD_IDX;
 			cb_error (_("file '%s': record size (IDX) %d exceeds maximum allowed (%d)"),
 				f->name, f->record_max, MAX_FD_RECORD_IDX);
@@ -3286,6 +3286,12 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	} else if (f->record_max > MAX_FD_RECORD)  {
 		cb_error (_("file '%s': record size %d exceeds maximum allowed (%d)"),
 			f->name, f->record_max, MAX_FD_RECORD);
+	}
+
+	if (f->flag_delimiter && f->record_min > 0
+	    && f->record_min == f->record_max) {
+		cb_verify (cb_record_delim_with_fixed_recs,
+			   _("RECORD DELIMITER clause on file with fixed-length records"));
 	}
 
 	if (f->same_clause) {

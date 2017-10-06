@@ -128,6 +128,7 @@ enum cb_format {
 #define	CB_CS_SET			(1U << 20)
 #define	CB_CS_STOP			(1U << 21)
 #define	CB_CS_OBJECT_COMPUTER		(1U << 22)
+#define	CB_CS_DELIMITER			(1U << 23)
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

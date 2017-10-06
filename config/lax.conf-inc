@@ -102,6 +102,9 @@ numeric-value-for-edited-item:		+warning
 incorrect-conf-sec-order:		+warning
 define-constant-directive:		+obsolete
 free-redefines-position:		ok
+record-delimiter:			ok
+sequential-delimiters:			ok
+record-delim-with-fixed-recs:		ok
 
 
 # use complete word list

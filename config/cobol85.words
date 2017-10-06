@@ -57,6 +57,7 @@ reserved:	AT
 reserved:	AUTHOR
 reserved:	BEFORE
 reserved:	BINARY
+reserved:	BINARY-SEQUENTIAL*	# implementor RECORD DELIMITER word
 reserved:	BLANK
 reserved:	BLOCK
 reserved:	BOTTOM
@@ -208,6 +209,7 @@ reserved:	LINAGE
 reserved:	LINAGE-COUNTER
 reserved:	LINE
 reserved:	LINE-COUNTER
+reserved:	LINE-SEQUENTIAL*	# implementor RECORD DELIMITER word
 reserved:	LINES
 reserved:	LINKAGE
 reserved:	LOCK

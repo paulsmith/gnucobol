@@ -412,7 +412,7 @@ AT_DATA([prog2.cob], [
        DATA             DIVISION.
        FILE             SECTION.
        FD TEST-FILE
-           RECORD IS VARYING IN SIZE 
+           RECORD IS VARYING IN SIZE
               FROM 2 TO 1250 CHARACTERS.
        01  TEST-REC.
            05 TEST-P1   PIC X(4).
@@ -492,13 +492,13 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        FILE             SECTION.
        FD TEST-FILE
-           RECORD IS VARYING IN SIZE 
+           RECORD IS VARYING IN SIZE
               FROM 12 TO 125 CHARACTERS
                  DEPENDING ON RECORDSIZE.
        01  TEST-REC.
            05 FILLER    PIC X(40).
        FD TEST-FIL2
-           RECORD IS VARYING IN SIZE 
+           RECORD IS VARYING IN SIZE
               FROM 20 TO 250 CHARACTERS
                  DEPENDING ON TEST-FILE.
        01  TEST-REC2.
@@ -506,13 +506,13 @@ AT_DATA([prog.cob], [
            05 RECORDSIZE3  PIC 9(04).
            05 RECORDSIZE4  PIC X(04).
        FD TEST-FIL3
-           RECORD IS VARYING IN SIZE 
+           RECORD IS VARYING IN SIZE
               FROM 40 TO 50  CHARACTERS
                  DEPENDING ON RECORDSIZE3.
        01  TEST-REC3.
            05 FILLER    PIC X(50).
        FD TEST-FIL4
-           RECORD IS VARYING IN SIZE 
+           RECORD IS VARYING IN SIZE
               FROM 1 TO 2  CHARACTERS
                  DEPENDING ON RECORDSIZE4.
        01  TEST-REC4.
@@ -941,4 +941,116 @@ prog.cob: 8: error: 'file-1-key' is not defined
 prog.cob: 10: error: 'file-2-key' is not defined
 ])
 
+AT_CLEANUP
+
+
+AT_SETUP([RECORD DELIMITER])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           *> Valid.
+           SELECT good-1 ASSIGN "a"
+               RECORD DELIMITER LINE-SEQUENTIAL.
+
+           SELECT good-2 ASSIGN "a"
+               SEQUENTIAL
+               RECORD DELIMITER LINE-SEQUENTIAL.
+
+           SELECT good-3 ASSIGN "a"
+               RECORD DELIMITER LINE-SEQUENTIAL
+               LINE SEQUENTIAL.
+
+           SELECT good-4 ASSIGN "a"
+               RECORD DELIMITER BINARY-SEQUENTIAL.
+
+           *> Warning.
+           SELECT ok-i-guess-1 ASSIGN "a"
+               RECORD DELIMITER STANDARD-1.
+
+           SELECT ok-i-guess-2 ASSIGN "a"
+               RECORD DELIMITER THE-END-OF-THE-WORLD.
+
+           *> Not valid.
+           SELECT bad-1 ASSIGN "a"
+               RECORD DELIMITER LINE-SEQUENTIAL
+               INDEXED
+               RECORD KEY bad-1-rec.
+
+           SELECT bad-2 ASSIGN "a"
+               INDEXED
+               RECORD KEY bad-2-rec
+               RECORD DELIMITER LINE-SEQUENTIAL.
+
+           SELECT bad-3 ASSIGN "a"
+               LINE SEQUENTIAL
+               RECORD DELIMITER BINARY-SEQUENTIAL.
+
+           SELECT bad-4 ASSIGN "a"
+               LINE SEQUENTIAL
+               RECORD DELIMITER STANDARD-1.
+
+           SELECT bad-5 ASSIGN "a"
+               RECORD DELIMITER BINARY-SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  good-1.
+       01  good-1-rec PIC 9.
+       01  good-1-rec-2 PIC 99.
+
+       FD  good-2 RECORD VARYING FROM 1 TO 5 CHARACTERS.
+       01  good-2-rec PIC 9.
+
+       FD  good-3.
+       01  good-3-rec PIC 9.
+       01  good-3-rec-2 PIC 99.
+
+       FD  good-4 RECORD CONTAINS 1 TO 5 CHARACTERS.
+       01  good-4-rec PIC 9.
+
+       FD  ok-i-guess-1.
+       01  ok-i-guess-1-rec PIC 9.
+       01  ok-i-guess-1-rec-2 PIC 99.
+
+       FD  ok-i-guess-2.
+       01  ok-i-guess-2-rec PIC 9.
+       01  ok-i-guess-2-rec-2 PIC 99.
+
+       FD  bad-1 RECORD VARYING.
+       01  bad-1-rec PIC 9.
+
+       FD  bad-2 RECORD VARYING.
+       01  bad-2-rec PIC 9.
+
+       FD  bad-3 RECORD VARYING.
+       01  bad-3-rec PIC 9.
+
+       FD  bad-4.
+       01  bad-4-rec PIC 9.
+
+       FD  bad-5 RECORD CONTAINS 1 CHARACTERS.
+       01  bad-5-rec PIC 9.
+])
+
+AT_CHECK([$COMPILE -frecord-delim-with-fixed-recs=warning prog.cob], [1], [],
+[prog.cob: 25: warning: RECORD DELIMITER STANDARD-1 ignored
+prog.cob: 28: warning: Phrase in RECORD DELIMITER not recognised; will be ignored
+prog.cob: 33: error: ORGANIZATION INDEXED is incompatible with RECORD DELIMITER
+prog.cob: 39: error: RECORD DELIMITER LINE-SEQUENTIAL only allowed with (LINE) SEQUENTIAL files
+prog.cob: 36: error: RECORD clause is invalid for file 'bad-2' (file type)
+prog.cob: 43: error: RECORD DELIMITER BINARY-SEQUENTIAL only allowed with SEQUENTIAL files
+prog.cob: 47: error: RECORD DELIMITER STANDARD-1 only allowed with SEQUENTIAL files
+prog.cob: 47: warning: RECORD DELIMITER STANDARD-1 ignored
+prog.cob: 79: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob: 82: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob: 85: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob: 88: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob: 90: warning: RECORD DELIMITER clause on file with fixed-length records used
+])
 AT_CLEANUP

@@ -85,6 +85,7 @@ reserved:	BINARY
 reserved:	BINARY-CHAR
 reserved:	BINARY-DOUBLE
 reserved:	BINARY-LONG
+reserved:	BINARY-SEQUENTIAL*
 reserved:	BINARY-SHORT
 reserved:	BIT
 reserved:	BLANK
@@ -370,6 +371,7 @@ reserved:	LINAGE-COUNTER
 reserved:	LINE
 reserved:	LINE-COUNTER
 reserved:	LINES
+reserved:	LINE-SEQUENTIAL*
 reserved:	LINKAGE
 reserved:	LOCAL-STORAGE
 reserved:	LOCK

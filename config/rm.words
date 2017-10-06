@@ -66,6 +66,7 @@ reserved:	BEEP=BELL
 reserved:	BEFORE
 reserved:	BELL
 reserved:	BINARY
+reserved:	BINARY-SEQUENTIAL*
 reserved:	BLANK
 reserved:	BLINK
 reserved:	BLOCK
@@ -252,6 +253,7 @@ reserved:	LIMITS
 reserved:	LINAGE
 reserved:	LINAGE-COUNTER
 reserved:	LINE
+reserved:	LINE-SEQUENTIAL*
 reserved:	LINES
 reserved:	LINKAGE
 reserved:	LOCK

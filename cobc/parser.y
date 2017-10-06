@@ -1222,6 +1222,29 @@ setup_prototype (cb_tree prototype_name, cb_tree ext_name,
 }
 
 static void
+error_if_record_delimiter_incompatible (const int organization,
+					const char *organization_name)
+{
+	int	is_compatible;
+	
+	if (!current_file->flag_delimiter) {
+		return;
+	}
+
+	if (organization == COB_ORG_LINE_SEQUENTIAL) {
+		is_compatible = current_file->organization == COB_ORG_SEQUENTIAL
+			|| current_file->organization == COB_ORG_LINE_SEQUENTIAL;
+	} else {
+		is_compatible = current_file->organization == organization;
+	}
+
+	if (!is_compatible) {
+		cb_error (_("ORGANIZATION %s is incompatible with RECORD DELIMITER"),
+			  organization_name);
+	}
+}
+ 
+static void
 error_if_invalid_level_for_renames (cb_tree item)
 {
 	int	level = CB_FIELD (cb_ref (item))->level;
@@ -1749,6 +1772,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token BINARY_CHAR		"BINARY-CHAR"
 %token BINARY_DOUBLE		"BINARY-DOUBLE"
 %token BINARY_LONG		"BINARY-LONG"
+%token BINARY_SEQUENTIAL	"BINARY-SEQUENTIAL"
 %token BINARY_SHORT		"BINARY-SHORT"
 %token BLANK
 %token BLINK
@@ -1997,6 +2021,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token LINAGE_COUNTER		"LINAGE-COUNTER"
 %token LINE
 %token LINE_COUNTER		"LINE-COUNTER"
+%token LINE_SEQUENTIAL		"LINE-SEQUENTIAL"
 %token LINES
 %token LINKAGE
 %token LITERAL			"Literal"
@@ -4096,21 +4121,26 @@ organization:
   INDEXED
   {
 	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
+	error_if_record_delimiter_incompatible (COB_ORG_INDEXED, "INDEXED");
 	current_file->organization = COB_ORG_INDEXED;
   }
 | _record _binary SEQUENTIAL
   {
 	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
+	error_if_record_delimiter_incompatible (COB_ORG_SEQUENTIAL, "SEQUENTIAL");
 	current_file->organization = COB_ORG_SEQUENTIAL;
   }
 | RELATIVE
   {
 	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
+	error_if_record_delimiter_incompatible (COB_ORG_RELATIVE, "RELATIVE");
 	current_file->organization = COB_ORG_RELATIVE;
   }
 | LINE SEQUENTIAL
   {
 	check_repeated ("ORGANIZATION", SYN_CLAUSE_6, &check_duplicate);
+	error_if_record_delimiter_incompatible (COB_ORG_LINE_SEQUENTIAL,
+						"LINE SEQUENTIAL");
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
   }
 ;
@@ -4130,12 +4160,69 @@ padding_character_clause:
 /* RECORD DELIMITER clause */
 
 record_delimiter_clause:
-  RECORD DELIMITER _is STANDARD_1
+  RECORD DELIMITER _is
   {
 	check_repeated ("RECORD DELIMITER", SYN_CLAUSE_8, &check_duplicate);
+	current_file->flag_delimiter = 1;
+  }
+  record_delimiter_option
+  {
+	cobc_cs_check = 0;
   }
 ;
 
+record_delimiter_option:
+  STANDARD_1
+  {
+	if (current_file->organization != COB_ORG_SEQUENTIAL) {
+		cb_error (_("RECORD DELIMITER %s only allowed with SEQUENTIAL files"),
+			  "STANDARD-1");
+	}
+
+	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))) {
+		cb_warning (warningopt,
+			    _("RECORD DELIMITER STANDARD-1 ignored"));
+	}
+  }
+| LINE_SEQUENTIAL
+  {
+	if (current_file->organization != COB_ORG_SEQUENTIAL
+	    && current_file->organization != COB_ORG_LINE_SEQUENTIAL) {
+		cb_error (_("RECORD DELIMITER %s only allowed with (LINE) SEQUENTIAL files"),
+			  "LINE-SEQUENTIAL");
+	}
+
+	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))
+	    && cb_verify (cb_sequential_delimiters, _("LINE-SEQUENTIAL phrase"))) {
+		
+		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+	}
+  }
+| BINARY_SEQUENTIAL
+  {
+	if (current_file->organization != COB_ORG_SEQUENTIAL) {
+		cb_error (_("RECORD DELIMITER %s only allowed with SEQUENTIAL files"),
+			  "BINARY-SEQUENTIAL");
+	}
+
+	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))
+	    && cb_verify (cb_sequential_delimiters, _("BINARY-SEQUENTIAL phrase"))) {
+		current_file->organization = COB_ORG_SEQUENTIAL;
+	}
+  }
+| WORD
+  {
+	if (current_file->organization != COB_ORG_SEQUENTIAL
+	    && current_file->organization != COB_ORG_LINE_SEQUENTIAL) {
+		cb_error (_("RECORD DELIMITER clause only allowed with (LINE) SEQUENTIAL files"));
+	}
+
+	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))) {
+		cb_warning (warningopt,
+			    _("Phrase in RECORD DELIMITER not recognised; will be ignored"));
+	}
+  }
+;
 
 /* RECORD KEY clause */
 
@@ -4488,7 +4575,7 @@ record_clause:
 				current_file->record_max = MAX_FD_RECORD_IDX;
 				cb_error (_("RECORD size (IDX) exceeds maximum allowed (%d)"),
 					  MAX_FD_RECORD_IDX);
-			error_ind = 1;
+				error_ind = 1;
 			}
 		} else if (current_file->record_max > MAX_FD_RECORD)  {
 			current_file->record_max = MAX_FD_RECORD;

@@ -935,6 +935,7 @@ struct cb_file {
 	unsigned int		flag_global	: 1;	/* Is GLOBAL */
 	unsigned int		flag_fl_debug	: 1;	/* DEBUGGING */
 	unsigned int		flag_line_adv	: 1;	/* LINE ADVANCING */
+	unsigned int		flag_delimiter	: 1;	/* RECORD DELIMITER */
 };
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))

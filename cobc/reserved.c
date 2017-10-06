@@ -399,6 +399,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BINARY-LONG",		0, 0, BINARY_LONG,		/* 2002 */
 				0, 0
   },
+  { "BINARY-SEQUENTIAL",	0, 0, BINARY_SEQUENTIAL,	/* Extension */
+				0, CB_CS_DELIMITER
+  },
   { "BINARY-SHORT",		0, 0, BINARY_SHORT,		/* 2002 */
 				0, 0
   },
@@ -698,7 +701,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "DELIMITER",		0, 0, DELIMITER,		/* 2002 */
-				0, 0
+				CB_CS_DELIMITER, 0
   },
   { "DEPENDING",		0, 0, DEPENDING,		/* 2002 */
 				0, 0
@@ -1257,6 +1260,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "LINE-COUNTER",		0, 0, LINE_COUNTER,		/* 2002 */
 				0, 0
+  },
+  { "LINE-SEQUENTIAL",		0, 0, LINE_SEQUENTIAL,		/* Extension */
+				0, CB_CS_DELIMITER
   },
   { "LINES",			0, 0, LINES,			/* 2002 */
 				0, 0

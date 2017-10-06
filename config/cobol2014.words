@@ -77,6 +77,7 @@ reserved:	BINARY-CHAR
 reserved:	BINARY-DOUBLE
 reserved:	BINARY-ENCODING*
 reserved:	BINARY-LONG
+reserved:	BINARY-SEQUENTIAL*	# implementor RECORD DELIMITER word
 reserved:	BINARY-SHORT
 reserved:	BIT
 reserved:	BLANK
@@ -291,6 +292,7 @@ reserved:	LINAGE
 reserved:	LINAGE-COUNTER
 reserved:	LINE
 reserved:	LINE-COUNTER
+reserved:	LINE-SEQUENTIAL*	# implementor RECORD DELIMITER word
 reserved:	LINES
 reserved:	LINKAGE
 reserved:	LOCAL-STORAGE
