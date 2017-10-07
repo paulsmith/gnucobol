@@ -467,6 +467,9 @@ test.conf: missing definitions:
 	no definition of 'incorrect-conf-sec-order'
 	no definition of 'define-constant-directive'
 	no definition of 'free-redefines-position'
+	no definition of 'record-delimiter'
+	no definition of 'sequential-delimiters'
+	no definition of 'record-delim-with-fixed-recs'
 ])
 
 AT_CLEANUP
