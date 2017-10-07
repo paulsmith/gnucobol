@@ -2118,7 +2118,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PREVIOUS
 %token PRINT
 %token PRINTER
-%token PRINTER_1
+%token PRINTER_1		"PRINTER-1"
 %token PRINTING
 %token PRIORITY
 %token PROCEDURE
@@ -2130,7 +2130,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PROGRAM_POINTER		"PROGRAM-POINTER"
 %token PROHIBITED
 %token PROMPT
-%token PROTECTED		"PROTECTED"
+%token PROTECTED
 %token PURGE
 %token QUEUE
 %token QUOTE
@@ -2226,9 +2226,9 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token STEP
 %token STOP
 %token STRING
-%token SUB_QUEUE_1
-%token SUB_QUEUE_2
-%token SUB_QUEUE_3
+%token SUB_QUEUE_1		"SUB-QUEUE-1"
+%token SUB_QUEUE_2		"SUB-QUEUE-2"
+%token SUB_QUEUE_3		"SUB-QUEUE-3"
 %token SUBSTITUTE_FUNC		"FUNCTION SUBSTITUTE"
 %token SUBSTITUTE_CASE_FUNC	"FUNCTION SUBSTITUTE-CASE"
 %token SUBTRACT
