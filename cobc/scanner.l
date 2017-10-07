@@ -287,7 +287,7 @@ L\"[^\"\n]*\" {
 
 H\'[^\'\n]*\' |
 H\"[^\"\n]*\" {
-	/* H hexdecimal/numeric literal */
+	/* H hexadecimal/numeric literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_h (yytext + 2, "H"));
 }
@@ -683,7 +683,7 @@ H#[0-9A-Za-z]* {
 	count_lines (yytext);
 	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
 	          if we actually want to do this,
-			  otherwise return 2 (!) WORD tokens (by adding a que
+			  otherwise return 2 (!) WORD tokens (by adding a queue
 			  of tokens to be returned)
 	*/
 	RETURN_TOK (LENGTH_OF);
@@ -694,11 +694,11 @@ H#[0-9A-Za-z]* {
 	char suffix[3] = "";
 	char name[10] = "";
 
-	unput (yytext[yyleng-1]); /* unput seperator */
+	unput (yytext[yyleng-1]); /* unput separator */
 	/* FIXME: move the code for filling "name" here and first
 	          check with "lookup_system_name (name) != NULL"
 	          if we actually want to do this,
-			  otherwise return 2 (!) WORD tokens (by adding a que
+			  otherwise return 2 (!) WORD tokens (by adding a queue
 			  of tokens to be returned)
 	*/
 	if (cobc_in_procedure) {
@@ -1089,7 +1089,7 @@ read_literal (const char mark, const char *type)
 
 	i = 0;
 	/* read until a not-escaped mark is found (see break)
-	   or (unliky) we reach EOF */
+	   or (unlikely) we reach EOF */
 	/* NO early exit possible as the literal has to be consumed */
 	while ((c = input ()) != EOF) {
 		if (!literal_error) {

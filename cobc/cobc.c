@@ -2534,7 +2534,7 @@ process_command_line (const int argc, char **argv)
 
 		case 'v':
 			/* --verbose : Verbose reporting */
-			/* VERY special case as we set different level by mutliple calls */
+			/* VERY special case as we set different level by multiple calls */
 			/* output version information when running very verbose -vv */
 			/* pass verbose switch to invoked commands when running very very verbose -vvv */
 			if (cob_optarg) {
@@ -3317,7 +3317,7 @@ file_basename (const char *filename)
 		basename_len = len + 16;
 		basename_buffer = cobc_main_realloc (basename_buffer, basename_len);
 	}
-	/* Copy base name (possiby done before -> memmove) */
+	/* Copy base name (possibly done before -> memmove) */
 	memmove (basename_buffer, startp, len);
 	basename_buffer[len] = 0;
 	return basename_buffer;
@@ -3912,7 +3912,7 @@ process_filtered (const char *cmd, struct filename *fn)
 		file_stripext(output_name_temp);
 	}
 
-	/* check for last path seperator as we only need the file name */
+	/* check for last path separator as we only need the file name */
 	for (i = fn->translate_len; i > 0; i--) {
 		if (fn->translate[i - 1] == '\\' || fn->translate[i - 1] == '/') break;
 	}
@@ -4874,7 +4874,7 @@ xref_fields (struct cb_field *top)
 			xref_88_values (top);
 		}
 
-		/* print xref for all childs */
+		/* print xref for all children */
 		if (top->children) {
 			(void)xref_fields (top->children);
 		}

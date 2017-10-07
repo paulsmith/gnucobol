@@ -3315,7 +3315,7 @@ AT_SETUP([ACUCOBOL WINDOW statements])
 AT_KEYWORDS([misc acu extensions screen])
 
 # TODO: need a better tests when we implement this,
-#       likely splitted into multiple ones
+#       likely split into multiple ones
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3429,7 +3429,7 @@ AT_SETUP([CGI: EXTERNAL-FORM])
 AT_KEYWORDS([misc acu extensions accept display])
 
 # TODO: need a better tests when we implement this,
-#       likely splitted into multiple ones
+#       likely split into multiple ones
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -4388,7 +4388,7 @@ AT_KEYWORDS([conditions refmod IF EVALUATE])
 
 # we currently only get the last line of an expression when we compare two constants
 
-# we currently do the comparision checks for EVALUATE from last WHEN to first one
+# we currently do the comparison checks for EVALUATE from last WHEN to first one
 # to get the line numbers in order we'd need to have to postpone the check
 # until the list of WHENs is reversed
 

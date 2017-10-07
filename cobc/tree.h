@@ -32,7 +32,7 @@
 #define CB_PREFIX_CONST		"c_"	/* Constant or literal (cob_field) */
 #define CB_PREFIX_DECIMAL	"d_"	/* Decimal number (cob_decimal) */
 #define CB_PREFIX_DEC_FIELD	"kc_"	/* Decimal Constant for literal (cob_field) */
-#define CB_PREFIX_DEC_CONST	"dc_"	/* Decimal Contant (cob_decimal) */
+#define CB_PREFIX_DEC_CONST	"dc_"	/* Decimal Constant (cob_decimal) */
 #define CB_PREFIX_FIELD		"f_"	/* Field (cob_field) */
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
 #define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
@@ -134,7 +134,7 @@ enum cb_tag {
 /*	5	currently ignored by GC + MF		*/
 /*		Thunked to 16 bit	0 - No thunk			*/
 /*					1 - Thunk			*/
-/*	6	GC: works bith with static/dynamic calls */
+/*	6	GC: works both with static/dynamic calls */
 /*		MF: this has his has no effect on dynamic calls	*/
 /*		STDCALL convention	0 - CDECL			*/
 /*					1 - STDCALL			*/
@@ -143,7 +143,7 @@ enum cb_tag {
 /*		parameter-count for individual entry points	0 - checked	*/
 /*					1 - not checked			*/
 /*	9	currently ignored by GC			*/
-/*		case of call + program names	0 - disregareded (depending on compile time flags)		*/
+/*		case of call + program names	0 - disregarded (depending on compile time flags)		*/
 /*					1 - regarded			*/
 /*	10	currently ignored by GC			*/
 /*		RETURN-CODE storage	0 - passed as return value		*/
@@ -1442,7 +1442,7 @@ struct cb_program {
 	unsigned int	flag_debugging		: 1;	/* DEBUGGING MODE */
 	unsigned int	flag_gen_debug		: 1;	/* DEBUGGING MODE */
 
-	unsigned int	flag_save_exception	: 1;	/* Save execption code */
+	unsigned int	flag_save_exception	: 1;	/* Save exception code */
 	unsigned int	flag_report		: 1;	/* Have REPORT SECTION */
 	unsigned int	flag_void		: 1;	/* void return for subprogram */
 };
@@ -2053,7 +2053,7 @@ extern unsigned int		cb_correct_program_order;
 	cb_build_funcall (f, 11, a1, a2, a3, a4, a5, a6, a7, a8,	\
 			  a9, a10, a11)
 
-/* Miscellanous defines */
+/* Miscellaneous defines */
 
 #define CB_BUILD_CAST_ADDRESS(x)	cb_build_cast (CB_CAST_ADDRESS, x)
 #define CB_BUILD_CAST_ADDR_OF_ADDR(x)	cb_build_cast (CB_CAST_ADDR_OF_ADDR, x)

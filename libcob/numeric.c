@@ -1428,7 +1428,7 @@ cob_decimal_get_display (cob_decimal *d, cob_field *f, const int opt)
 			return cobglobptr->cob_exception_code;
 		}
 
-		/* Othersize, truncate digits */
+		/* Other size, truncate digits */
 		memcpy (data, p - diff, COB_FIELD_SIZE (f));
 	} else {
 		/* No overflow */

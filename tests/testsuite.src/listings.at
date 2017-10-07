@@ -2200,7 +2200,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 AT_CLEANUP
 
 
-AT_SETUP([Symbols: mutliple programs/functions])
+AT_SETUP([Symbols: multiple programs/functions])
 AT_KEYWORDS([listing program function])
 
 AT_CAPTURE_FILE([prog.lst])
@@ -2872,7 +2872,7 @@ AT_DATA([prog.cob], [
       -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
-       01  mutiple-symbols.
+       01  multiple-symbols.
            03  PIC 9CRCR.
            03  PIC SS99S.
            03  PIC $+99$-.
@@ -2982,7 +2982,7 @@ warning: continuation of COBOL words used
 warning: continuation of COBOL words used
 000014        -XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
 warning: continuation of COBOL words used
-000015         01  mutiple-symbols.
+000015         01  multiple-symbols.
 000016             03  PIC 9CRCR.
 error: CR or DB may only occur once in a PICTURE string
 000017             03  PIC SS99S.
@@ -3069,7 +3069,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00000 ALPHANUMERIC   01   too-long-pic2                  INVALID
 
-00000 GROUP          01   mutiple-symbols
+00000 GROUP          01   multiple-symbols
 00000 ALPHANUMERIC   03   FILLER                         INVALID
 00000 ALPHANUMERIC   03   FILLER                         INVALID
 00000 ALPHANUMERIC   03   FILLER                         INVALID

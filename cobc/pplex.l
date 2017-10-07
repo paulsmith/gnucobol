@@ -1773,7 +1773,7 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 		return;
 	}
 	if (!current_replace_list && !base_replace_list) {
-		/* Ouput queue */
+		/* Output queue */
 		for (; text_queue; text_queue = text_queue->next) {
 			fputs (text_queue->text, ppout);
 		}

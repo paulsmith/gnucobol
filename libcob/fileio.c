@@ -151,7 +151,7 @@ struct indexfile {
 	int		readdir;	/* Read direction: ISPREV or ISNEXT */
 	int		lenkey;		/* Length of savekey area */
 	int		eofpending;	/* End of file pending */
-	int		readdone;	/* A 'read' has been succesfully done */
+	int		readdone;	/* A 'read' has been successfully done */
 	int		startiscur;	/* The 'start' record is current */
 	int		wrkhasrec;	/* 'recwrk' holds the next|prev record */
 	struct keydesc	key[1];		/* Table of key information */
@@ -1093,7 +1093,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 		/* Problem with	VC (tested MSC_VER 15) if file isn't there: */
 		/* Both modes create the file and return a bad pointer */
 		/* Mode "a+"  sets EINVAL, further actions on the file do work */
-		/* Mode "ab+" doesn't set errno, but we dont want a binary file */
+		/* Mode "ab+" doesn't set errno, but we don't want a binary file */
 		/* Possible Solutions: */
 		/* a) Create the file and reopen it with a+ */
 		/* b) Check this stuff in EINVAL and just go on */

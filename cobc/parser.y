@@ -82,7 +82,7 @@ do { \
 #define	TERMINATOR_CLEAR(x,z)	terminator_clear (x, TERM_##z)
 
 /* Defines for duplicate checks */
-/* Note - We use <= 16 for common item definitons and */
+/* Note - We use <= 16 for common item definitions and */
 /* > 16 for non-common item definitions e.g. REPORT and SCREEN */
 #define	SYN_CLAUSE_1		(1U << 0)
 #define	SYN_CLAUSE_2		(1U << 1)
@@ -630,7 +630,7 @@ setup_occurs_min_max (cb_tree occurs_min, cb_tree occurs_max)
 			if (!current_field->depending) {
 				if (cb_relaxed_syntax_checks) {
 					cb_warning (COBC_WARN_FILLER, _ ("TO phrase without DEPENDING phrase"));
-					cb_warning (COBC_WARN_FILLER, _ ("maximum number of occurences assumed to be exact number"));
+					cb_warning (COBC_WARN_FILLER, _ ("maximum number of occurrences assumed to be exact number"));
 					current_field->occurs_min = 1; /* CHECKME: why using 1 ? */
 				} else {
 					cb_error (_ ("TO phrase without DEPENDING phrase"));
@@ -1638,7 +1638,7 @@ deduce_display_type (cb_tree x_list, cb_tree local_upon_value, cb_tree local_lin
 	int	using_default_device_which_is_crt =
 		local_upon_value == NULL && get_default_display_device () == cb_null;
 
-	/* TODO: Seperate CGI DISPLAYs here */
+	/* TODO: Separate CGI DISPLAYs here */
 	if (contains_only_screen_fields ((struct cb_list *) x_list)) {
 		if (!contains_one_screen_field ((struct cb_list *) x_list)
 		    || attr_ptr) {
@@ -8979,7 +8979,7 @@ display_floating_window:
 ;
 
 display_initial_window:
-  intial_type _graphical WINDOW
+  initial_type _graphical WINDOW
   {
 	CB_PENDING ("GRAPHICAL WINDOW");
 	current_statement->name = "DISPLAY INITIAL WINDOW";
@@ -8999,7 +8999,7 @@ display_initial_window:
   }
 ;
 
-intial_type:
+initial_type:
   TOK_INITIAL	{$$ = cb_int1;}
 | STANDARD	{$$ = cb_int2;}
 | INDEPENDENT	{$$ = cb_int3;}

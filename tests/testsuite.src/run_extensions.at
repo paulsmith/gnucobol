@@ -1041,7 +1041,7 @@ AT_CLEANUP
 AT_SETUP([CALL / GOBACK with LOCAL-STORAGE])
 AT_KEYWORDS([extensions])
 
-# Testcase introduced when Bug #91 occured.
+# Testcase introduced when Bug #91 occurred.
 # Will fail if memory is freed which was
 # allocated by mpir/gmp.
 AT_DATA([prog_a.cob], [
@@ -3675,7 +3675,7 @@ AT_DATA([prog4.cob], [
 AT_DATA([prog5.cob], [
         IDENTIFICATION DIVISION.
         PROGRAM-ID. prog5.
-      *> check for wrong longopotion structure
+      *> check for wrong longoption structure
         DATA DIVISION.
         WORKING-STORAGE SECTION.
             01 SO PIC X.

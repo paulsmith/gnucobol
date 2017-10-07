@@ -483,7 +483,7 @@ AT_KEYWORDS([configuration misc])
 AT_CHECK([$COBCRUN --runtime-conf], [0], ignore, [])
 
 # check if --runtime-conf points to a file called "runtime_empty.cfg"
-# use tr to remove newlines and spaces as the path likely is splitted
+# use tr to remove newlines and spaces as the path likely is split
 # into two lines
 AT_CHECK([$COBCRUN --runtime-conf | tr -d '\n ' | \
 grep "runtime_empty.cfg"], [0], ignore, [])

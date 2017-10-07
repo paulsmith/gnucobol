@@ -1987,7 +1987,7 @@ cb_concat_literals (const cb_tree x1, const cb_tree x2)
 	if ((x1->category != CB_CATEGORY_ALPHANUMERIC) &&
 		(x1->category != CB_CATEGORY_NATIONAL) &&
 		(x1->category != CB_CATEGORY_BOOLEAN)) {
-		cb_error_x (x1, _("only alpanumeric, national or boolean literals may be concatenated"));
+		cb_error_x (x1, _("only alphanumeric, national or boolean literals may be concatenated"));
 		return cb_error_node;
 	}
 
@@ -3191,7 +3191,7 @@ validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree
 	}
 
 	/* Validate minimum record size against key field's end */
-	/* FIXME: calculate minumum length for all keys first and only check the biggest */
+	/* FIXME: calculate minimum length for all keys first and only check the biggest */
 	if (f->record_min > 0) {
 		field_end = k->offset + k->size;
 		if (field_end > f->record_min) {
@@ -3219,7 +3219,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 							   strlen (f->name));
 	}
 
-	/* associate records to file (seperate and first for being able
+	/* associate records to file (separate and first for being able
 	   to resolve references, for example in validate_indexed_key_field */
 	for (p = records; p; p = p->sister) {
 		p->file = f;
@@ -3727,7 +3727,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 	/* LCOV_EXCL_START */
 	if (!CB_REFERENCE_P(x)) {
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
-			"compare_field_literalisplay_for_last", "x");;
+			"compare_field_literal", "x");;
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_STOP */
@@ -3858,7 +3858,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		data is stored in the numeric fields - and may (later)
 		be dependent on compiler configuration flags;
 		therefore we don't set cb_true/cb_false here */
-		/* comparision with zero */
+		/* comparison with zero */
 		if (zero_val) {
 			switch (op) {
 			case '<':
@@ -3880,7 +3880,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 			default:
 				break;
 			}
-			/* comparision with negative literal */
+			/* comparison with negative literal */
 		} else if (l->sign < 0) {
 			switch (op) {
 			case '<':

@@ -1715,7 +1715,7 @@ get_line_and_col_from_num (cob_field *pos, int *line, int *column)
 		max_line_column = 1000;
 	} else {
 		/* Throw an exception? EC-SCREEN-IMP-LINE-VAR-LENGTH? */
-		max_line_column = 1; /* set to some value that don't chrash */
+		max_line_column = 1; /* set to some value that don't crash */
 	}
 	*line = (pos_val / max_line_column);
 	*column = (pos_val % max_line_column);

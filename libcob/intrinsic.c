@@ -638,7 +638,7 @@ cob_mod_or_rem (cob_field *f1, cob_field *f2, const int func_is_rem)
 
 	cob_decimal_div (&d2, &d3);
 
-	/* Caclulate integer / integer-part */
+	/* Calculate integer / integer-part */
 	if (d2.scale < 0) {
 		mpz_ui_pow_ui (cob_mexp, 10UL, (cob_uli_t)-d2.scale);
 		mpz_mul (d2.value, d2.value, cob_mexp);
@@ -1346,7 +1346,7 @@ substitute_matches (cob_field *original, cob_field **matches, cob_field **reps,
 	for (cur_idx = 0; cur_idx < orig_size; ) {
 		/* Try to find a match at this point. */
 		for (i = 0; i < numreps; ++i) {
-			/* If we overrucur_idx */
+			/* If we overrun */
 			if (cur_idx + matches[i]->size > orig_size) {
 				continue;
 			}

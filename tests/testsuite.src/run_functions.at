@@ -3621,14 +3621,14 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  compiled-datetime.
            03  compiled-date.
-               05  millenium PIC X.
+               05  millennium PIC X.
                05  FILLER    PIC X(15).
            03  timezone  PIC X(5).
        PROCEDURE        DIVISION.
-           *> Check millenium.
+           *> Check millennium.
            MOVE FUNCTION WHEN-COMPILED TO compiled-datetime.
-           IF millenium NOT = "2"
-              DISPLAY "Millenium NOT OK: " millenium
+           IF millennium NOT = "2"
+              DISPLAY "Millennium NOT OK: " millennium
               END-DISPLAY
            END-IF.
 

@@ -32,6 +32,6 @@ Michel Gouget - Work on syntax - IS
 Bill Klein - The mainstay for COBOL questions
 Frank Swarbrick - Work on compiler syntax
 Warren Gay - For testing systems that we didn't known that we even support!
-	(eg. Old DEC Alpha sytems)
+	(eg. Old DEC Alpha systems)
 Ron Norman - Work on C/D/VB-ISAM handler
 Fabrizio Calabretta - Work on the EXTFH interface

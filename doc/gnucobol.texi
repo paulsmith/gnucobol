@@ -410,7 +410,7 @@ Place the output into <file>.
 
 GnuCOBOL supports both fixed and free source format.
 The default format is the fixed format.
-This can be overriden either by the
+This can be overridden either by the
 @code{>>SOURCE [FORMAT] [IS] @{FIXED|FREE@}} directive,
 or by one of the following options:
 
@@ -565,7 +565,7 @@ Generate and place a wide print listing into @file{*.lst}.
 
 @item --tlines=<lines>
 Specify lines per page in print listing, default = 55.
-Set to zero for no aditional page breaks.
+Set to zero for no additional page breaks.
 
 @item --tsymbols
 Generate symbol table in listing.
@@ -1849,7 +1849,7 @@ This system routine is not available on Windows (exception: GCC on Cygwin).
 Parameters:	none
 Returns:	PID (the child process gets '0' returned, the calling process gets
 the PID of the created children).
-Negative values are returned for system dependand error codes and -1 if the function
+Negative values are returned for system dependent error codes and -1 if the function
 is not available on the current system.
 
 @example
@@ -1924,7 +1924,7 @@ Additional you can check the process' return code.
 
 Parameters:	none
 Returns:	function-status / child-status
-Negative values are returned for system dependand error codes and -1 if the function
+Negative values are returned for system dependent error codes and -1 if the function
 is not available on the current system.
 
 @example

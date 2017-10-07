@@ -42,7 +42,7 @@ COB_EXE_EXT="@COB_EXE_EXT@"
 
 PATHSEP=":"
 
-# Helper script to unify listings (repleace version, date, time)
+# Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 
 # unset all environment variables that are used in libcob

@@ -50,7 +50,7 @@ PATHSEP=";"
 PATH="$COB_WIN_BUILDPATH:${PATH}"
 export PATH
 
-# Helper script to unify listings (repleace version, date, time)
+# Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="$COB_SRC_PATH/tests/listings-sed.sh"
 
 # unset all environment variables that are used in libcob

@@ -2203,7 +2203,7 @@ struct amendment_list {
 	struct amendment_list	*next;	/* next pointer */
 	char			*word;
 	char			*alias_for;
-#if 0 /* FIXME: store refence to origin */
+#if 0 /* FIXME: store reference to origin */
 	char			*defined_by;
 #endif
 	int			is_context_sensitive;
@@ -3540,7 +3540,7 @@ add_register (const char *name_and_definition, const char *fname, const int line
 	if (!special_register) {
 		if (!definition || *definition == 0) {
 			configuration_error (fname, line, 1,
-				_("special register %s is unknown, needs a defintion"), name);
+				_("special register %s is unknown, needs a definition"), name);
 			return;
 		}
 		/* TODO: add register here */

@@ -70,7 +70,7 @@ VG_COBCRUN_DIRECT_LOG="$VG_LOG_PREFIX-cobcrun_direct.log"
 
 # if you stumble over system library errors you may want to suppress some of them
 # re-run with --gen-suppressions=yes and then point to the file (after inspecting and
-# modifiying it via --suppressions=${abs_builddir}/local.supp) 
+# modifying it via --suppressions=${abs_builddir}/local.supp)
 MEMCHECK="valgrind --tool=memcheck --read-var-info=yes --track-origins=yes --leak-check=full --show-leak-kinds=all $VG_SUPPR"
 SGCHECK="valgrind --tool=exp-sgcheck --read-var-info=yes $VG_SUPPR"
 
@@ -93,7 +93,7 @@ COB_EXE_EXT="@COB_EXE_EXT@"
 
 PATHSEP=":"
 
-# Helper script to unify listings (repleace version, date, time)
+# Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 
 # unset all environment variables that are used in libcob

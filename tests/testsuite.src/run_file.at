@@ -444,7 +444,7 @@ AT_CLEANUP
 AT_SETUP([ASSIGN with BASED data item])
 AT_KEYWORDS([runfile])
 
-# TODO 2.3 - SIGSEGV - either dissallow or fix...
+# TODO 2.3 - SIGSEGV - either disallow or fix...
 AT_XFAIL_IF(true)
  
 AT_DATA([TEST-FILE],

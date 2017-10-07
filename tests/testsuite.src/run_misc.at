@@ -5630,7 +5630,7 @@ getType(int type)
    case COB_TYPE_GROUP:    return "Group";
    case COB_TYPE_NUMERIC_COMP5:
        /* fall through as the test will have different results
-          on bigendian systems otherwise
+          on big endian systems otherwise
           return "COMP-5"; */
    case COB_TYPE_NUMERIC_BINARY: return "COMP-4";
    case COB_TYPE_NUMERIC_PACKED: return "COMP-3";

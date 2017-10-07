@@ -981,7 +981,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        78  GLOB-PATH           GLOBAL VALUE "GLOBP1".
        01  GLOB-PATH2 CONSTANT GLOBAL       "GLOBP2".
-      * Test global vars because of implicitely defined ASSIGN var, too.
+      * Test global vars because of implicitly defined ASSIGN var, too.
        78  GLOB-VAR            GLOBAL VALUE "GLOBV1".
        01  GLOB-VAR2  CONSTANT GLOBAL       "GLOBV2".
        PROCEDURE        DIVISION.
@@ -4311,7 +4311,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([MULTIPLY BY literal in INIITAL program])
+AT_SETUP([MULTIPLY BY literal in INITIAL program])
 AT_KEYWORDS([decimal constants fundamental])
 
 AT_DATA([prog.cob], [

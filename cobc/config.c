@@ -199,7 +199,7 @@ split_and_iterate_on_comma_separated_str (
 		*/
 		switch (val[i]) {
 		case ' ':
-			/* Remove spaces if not escaped, espacially needed for
+			/* Remove spaces if not escaped, especially needed for
 			   mnemonics "SWITCH A" and registers "LENGTH OF" */
 			if (j > 0 && word_buff[j - 1] == '\\') {
 				word_buff[j - 1] = ' ';

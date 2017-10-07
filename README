@@ -68,7 +68,7 @@ for implementation of decimal arithmetic:
   OR
 
   o MPIR (libgmp - MPIR gmp-compat) 1.3.1 or later
-    (prefered when compiling on Windows with other compilers than GCC)
+    (preferred when compiling on Windows with other compilers than GCC)
     http://mpir.org
 
     GNU MP and MPIR are distributed under GNU Lesser General Public License.
