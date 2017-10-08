@@ -657,7 +657,7 @@ AT_CLEANUP
 AT_SETUP([Complex OCCURS DEPENDING ON (6)])
 AT_KEYWORDS([extensions runsubscripts nested subscripts])
 
-AT_SKIP_IF(true) # fixme, see FR #99
+AT_SKIP_IF(true) # This test is incorrect. Should be removed. RJN
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -701,8 +701,6 @@ AT_CLEANUP
 AT_SETUP([Complex OCCURS DEPENDING ON (7)])
 AT_KEYWORDS([extensions runsubscripts nested subscripts])
 
-AT_SKIP_IF(true) # fixme, see FR #99
-
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -728,11 +726,10 @@ AT_DATA([prog.cob], [
               DISPLAY "Vals (slided) wrong: " vals
               END-DISPLAY
            END-IF
-        *> FIXME - currently not working (size is wrong)
-        *> IF a-table NOT = "ABCDEF"
-        *>    DISPLAY "Table (slided) wrong: " a-table
-        *>    END-DISPLAY
-        *> END-IF
+           IF a-table NOT = "ABCDEF"
+              DISPLAY "Table (slided) wrong: " a-table
+              END-DISPLAY
+           END-IF
            .
 ])
 
@@ -782,6 +779,318 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([DEPENDING ON with ODOSLIDE])
+AT_KEYWORDS([nested DEPENDING ON])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE 
+           ASSIGN "SEQODO"
+           ORGANIZATION LINE SEQUENTIAL
+           FILE STATUS IS CUST-STAT .
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSTREC.
+         05  SEQ           PIC 99.
+         05  DEP-X         PIC 99.
+         05  DEP-Y         PIC 99.
+         05  HELLO         PIC X(5) VALUE 'World'.
+         05  TSTGRP.
+           10  TSTGRP1.
+             15  TSTX OCCURS 1 TO 3 TIMES 
+                      DEPENDING ON DEP-X.
+               20  TSTG-1  PIC Z9.
+             15  TSTTAIL1  PIC XXXX.
+           10  TSTY-ALL.
+             15  TSTY OCCURS 1 TO 3 TIMES 
+                      DEPENDING ON DEP-X.
+               20  TSTY-1  PIC 99.
+               20  TSTY-2  PIC XXX.
+               20  TSTY-3  PIC X 
+                             OCCURS 1 TO 12 TIMES
+                             DEPENDING ON DEP-Y.
+               20  TSTY-4  PIC XX.
+               20  TSTY-5    OCCURS 1 TO 3 TIMES
+                             DEPENDING ON DEP-X.
+                  25  TSTY-6 OCCURS 1 TO 3 TIMES 
+                             DEPENDING ON DEP-X.
+                     30  TSTY-7  PIC X.
+           10  TSTTAIL2    PIC XX.
+
+       WORKING-STORAGE SECTION.
+       77  CUST-STAT PIC  X(2).
+       01  LN        PIC  9(3).
+       01  IX        PIC  9(9) BINARY.
+       01  IY        PIC  9(9) BINARY.
+       01  IZ        PIC  9(9) BINARY.
+       01  TSTXXX    PIC  X(26) VALUE "Abcdefghijklmnopqrstuvwxyz".
+       01  TSTALPHA REDEFINES TSTXXX.
+           05 ALPH-CHR PIC  X OCCURS 26 TIMES.
+       01  TSTHEX    PIC  X(15) VALUE "123456789ABCDEF".
+       01  FILLER REDEFINES TSTHEX.
+           05 HEX-CHR PIC  X OCCURS 15 TIMES.
+
+       01  TSTREC2.
+         05  DEP-X2        PIC 99.
+         05  TSTGRP2.
+             10  TSTX2 OCCURS 1 TO 3 TIMES DEPENDING ON DEP-X2.
+               15  TSTG2-1  PIC Z9.
+             10  TST2TAIL1  PIC XXX.
+
+       01  TSTREC3.
+         05  DEP-X3        PIC 99.
+         05  TSTGRP3.
+             10  TSTX3 OCCURS 1 TO 6 TIMES DEPENDING ON DEP-X3.
+               15  TSTG3-1  PIC 9.
+       01  TSTWRK   PIC X(24).
+
+       PROCEDURE DIVISION.
+       MAIN-10.
+           MOVE 6 TO DEP-X3.
+           MOVE 1 TO TSTG3-1 (1).
+           MOVE 2 TO TSTG3-1 (2).
+           MOVE 3 TO TSTG3-1 (3).
+           MOVE 4 TO TSTG3-1 (4).
+           MOVE 5 TO TSTG3-1 (5).
+           MOVE 6 TO TSTG3-1 (6).
+           MOVE 3 TO DEP-X3.
+           STRING TSTGRP3 "-TRAILER" DELIMITED BY SIZE
+           INTO TSTWRK.
+           DISPLAY "'" TSTWRK "'".
+           OPEN OUTPUT FLATFILE.
+           MOVE "Howdy" TO HELLO.
+           MOVE 0 TO SEQ.
+           MOVE 2 TO DEP-X.
+           MOVE 5 TO DEP-Y.
+           PERFORM WRITE-REC.
+           MOVE 1 TO DEP-X.
+           MOVE 2 TO DEP-Y.
+           PERFORM WRITE-REC.
+           MOVE 3 TO DEP-X.
+           MOVE 3 TO DEP-Y.
+           PERFORM WRITE-REC.
+           MOVE 3 TO DEP-X.
+           MOVE 10 TO DEP-Y.
+           PERFORM WRITE-REC.
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           PERFORM READ-REC.
+           CLOSE FLATFILE.
+           STOP RUN.
+
+       WRITE-REC SECTION.
+           ADD 1 TO SEQ.
+           MOVE LENGTH OF TSTREC TO LN.
+           DISPLAY "Write SEQ " SEQ ", DEP-X = " DEP-X
+                   " & DEP-Y = " DEP-Y
+                   ", TSTREC len:" LN.
+           MOVE ALL "*" TO TSTGRP.
+           MOVE "<>"    TO TSTTAIL1, TSTTAIL2.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > DEP-X
+               MOVE IX TO TSTG-1 (IX)
+           END-PERFORM.
+           MOVE LENGTH OF TSTGRP1 TO LN.
+           DISPLAY "Group1: '" TSTGRP1 "' len:" LN.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > DEP-X
+               MOVE IX TO TSTY-1 (IX)
+               MOVE "." TO TSTY-4 (IX)
+               PERFORM VARYING IY FROM 1 BY 1
+                         UNTIL IY > DEP-Y
+                   MOVE ALPH-CHR (IY) TO TSTY-3 (IX, IY)
+               END-PERFORM
+           END-PERFORM.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > DEP-X
+               PERFORM VARYING IY FROM 1 BY 1
+                         UNTIL IY > DEP-X
+                 PERFORM VARYING IZ FROM 1 BY 1
+                           UNTIL IZ > DEP-X
+                   MOVE HEX-CHR (IX+IY+IZ) TO TSTY-7 (IX, IY, IZ)
+                 END-PERFORM
+               END-PERFORM
+           END-PERFORM.
+           DISPLAY "  Data: '" TSTGRP "'".
+
+           MOVE ALL "*" TO TSTGRP2.
+           MOVE DEP-X TO DEP-X2.
+           PERFORM VARYING IX FROM 1 BY 1
+                     UNTIL IX > DEP-X2
+               MOVE IX TO TSTG2-1 (IX)
+           END-PERFORM.
+           MOVE "<>"    TO TST2TAIL1.
+           MOVE LENGTH OF TSTGRP2 TO LN.
+           DISPLAY "Group2: '" TSTGRP2 "' len:" LN.
+           WRITE TSTREC.
+
+       READ-REC SECTION.
+       READ-10.
+           READ FLATFILE AT END GO TO READ-99.
+           MOVE LENGTH OF TSTREC TO LN.
+           DISPLAY "Read SEQ " SEQ ", DEP-X = " DEP-X
+                   " & DEP-Y = " DEP-Y
+                   ", TSTREC len:" LN.
+           DISPLAY "  Data: '" TSTGRP "'".
+           GO TO READ-10.
+       READ-99.
+           EXIT .
+])
+
+AT_CHECK([cobc -x -std=mf -w -fodoslide prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0], ['123-TRAILER             '
+Write SEQ 01, DEP-X = 02 & DEP-Y = 05, TSTREC len:053
+Group1: ' 1 2<>  ' len:008
+  Data: ' 1 2<>  01***Abcde. 344502***Abcde. 4556<>'
+Group2: ' 1 2<> ' len:007
+Write SEQ 02, DEP-X = 01 & DEP-Y = 02, TSTREC len:029
+Group1: ' 1<>  ' len:006
+  Data: ' 1<>  01***Ab. 3<>'
+Group2: ' 1<> ' len:005
+Write SEQ 03, DEP-X = 03 & DEP-Y = 03, TSTREC len:080
+Group1: ' 1 2 3<>  ' len:010
+  Data: ' 1 2 3<>  01***Abc. 34545656702***Abc. 45656767803***Abc. 567678789<>'
+Group2: ' 1 2 3<> ' len:009
+Write SEQ 04, DEP-X = 03 & DEP-Y = 10, TSTREC len:101
+Group1: ' 1 2 3<>  ' len:010
+  Data: ' 1 2 3<>  01***Abcdefghij. 34545656702***Abcdefghij. 45656767803***Abcdefghij. 567678789<>'
+Group2: ' 1 2 3<> ' len:009
+Read SEQ 01, DEP-X = 02 & DEP-Y = 05, TSTREC len:053
+  Data: ' 1 2<>  01***Abcde. 344502***Abcde. 4556<>'
+Read SEQ 02, DEP-X = 01 & DEP-Y = 02, TSTREC len:029
+  Data: ' 1<>  01***Ab. 3<>'
+Read SEQ 03, DEP-X = 03 & DEP-Y = 03, TSTREC len:080
+  Data: ' 1 2 3<>  01***Abc. 34545656702***Abc. 45656767803***Abc. 567678789<>'
+Read SEQ 04, DEP-X = 03 & DEP-Y = 10, TSTREC len:101
+  Data: ' 1 2 3<>  01***Abcdefghij. 34545656702***Abcdefghij. 45656767803***Abcdefghij. 567678789<>'
+], [])
+
+
+AT_CAPTURE_FILE(./SEQODO)
+
+AT_DATA([reference], [010205Howdy 1 2<>  01***Abcde. 344502***Abcde. 4556<>
+020102Howdy 1<>  01***Ab. 3<>
+030303Howdy 1 2 3<>  01***Abc. 34545656702***Abc. 45656767803***Abc. 567678789<>
+040310Howdy 1 2 3<>  01***Abcdefghij. 34545656702***Abcdefghij. 45656767803***Abcdefghij. 567678789<>
+])
+
+AT_CHECK([gcdiff reference SEQODO], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([DEPENDING ON with ODOSLIDE for IBM])
+AT_KEYWORDS([OCCURS])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  L1-1-2-S    PIC 99.
+       01  L1-1-2-1-S  PIC 99.
+       01  L1-2-S      PIC 99.
+       01  L1-3-S      PIC 99.
+       01  L1-3-2-S    PIC 99.
+       01  BUFFER      PIC X(370).
+      
+       PROCEDURE DIVISION.
+           MOVE ALL '0123456789' TO BUFFER.
+           MOVE 3 TO L1-1-2-S.
+           MOVE 4 TO L1-1-2-1-S.
+           MOVE 0 TO L1-2-S.
+           MOVE 6 TO L1-3-S.
+           MOVE 1 TO L1-3-2-S.
+           CALL 'IBM-ODO-TEST' USING BUFFER
+                               L1-1-2-S
+                               L1-1-2-1-S
+                               L1-2-S
+                               L1-3-S
+                               L1-3-2-S.
+
+           MOVE ALL '0123456789' TO BUFFER.
+           MOVE 2 TO L1-1-2-S.
+           MOVE 3 TO L1-1-2-1-S.
+           MOVE 1 TO L1-2-S.
+           MOVE 4 TO L1-3-S.
+           MOVE 0 TO L1-3-2-S.
+           CALL 'IBM-ODO-TEST' USING BUFFER
+                               L1-1-2-S
+                               L1-1-2-1-S
+                               L1-2-S
+                               L1-3-S
+                               L1-3-2-S.
+           STOP RUN.
+           END PROGRAM prog.
+      
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. IBM-ODO-TEST.
+      
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+      
+       LINKAGE SECTION.
+       01  L1-1-2-S    PIC 99.
+       01  L1-1-2-1-S  PIC 99.
+       01  L1-2-S      PIC 99.
+       01  L1-3-S      PIC 99.
+       01  L1-3-2-S    PIC 99.
+       01 BASE.
+         10 ARRAY OCCURS 2 TIMES.
+           20 L1-1.
+             25 L1-1-1 PIC X(3).
+             25 L1-1-2 OCCURS 4 TIMES DEPENDING ON L1-1-2-S.
+               30 L1-1-2-1 OCCURS 5 TIMES DEPENDING ON L1-1-2-1-S
+                  PIC XXX.
+           20 L1-2 OCCURS 0 TO 1 TIMES DEPENDING ON L1-2-S PIC XX.
+           20 L1-3 OCCURS 1 TO 10 TIMES DEPENDING ON L1-3-S.
+             25 L1-3-1.
+               30  L1-3-1-1 PIC X(5).
+               30  L1-3-1-2 PIC X.
+               30  L1-3-1-3 PIC X(5).
+             25 L1-3-2 OCCURS 0 TO 1 TIMES DEPENDING ON L1-3-2-S PIC X.
+      
+       PROCEDURE DIVISION USING BASE
+                                L1-1-2-S
+                                L1-1-2-1-S
+                                L1-2-S
+                                L1-3-S
+                                L1-3-2-S.
+           DISPLAY "Length is " LENGTH OF BASE
+                   " with " L1-1-2-S 
+                   ", " L1-1-2-1-S
+                   ", " L1-2-S
+                   ", " L1-3-S
+                   ", " L1-3-2-S.
+           MOVE '.'   TO L1-3-2(1, 5, 1).
+           MOVE '--'  TO L1-2(2, 1).
+           MOVE '+++' TO L1-1-2-1(2, 1, 5).
+           DISPLAY '"' BASE '"'.
+       END PROGRAM IBM-ODO-TEST.
+])
+
+AT_CHECK([cobc -x -std=ibm -w -fodoslide prog.cob ], [0], [], [])
+
+AT_CHECK([./prog], [0],
+[Length is +0000000222 with 03, 04, 00, 06, 01
+"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567.901234567890123456789012345+++901234567890123456789--2345678901234567890123456789012345678901234567890123456789012345678901"
+Length is +0000000134 with 02, 03, 01, 04, 00
+"012345678901234567890123456789012345678901234567890123456789012345678901234567.901+++567--01234567890123456789012345678901234567890123"
+], [])
 
 AT_CLEANUP
 

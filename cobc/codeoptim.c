@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 2006-2017 Free Software Foundation, Inc.
    Written by Roger While
 
    This file is part of GnuCOBOL.
@@ -92,17 +92,18 @@ cob_gen_optim (const enum cb_optim val)
 
 	case COB_GET_NUMDISP:
 		output_storage ("static int COB_NOINLINE");
-		output_storage ("cob_get_numdisp (const void *data, const size_t size)");
+		output_storage ("cob_get_numdisp (const void *data, const int size)");
 		output_storage ("{");
 		output_storage ("	const unsigned char	*p;");
-		output_storage ("	size_t			n;");
-		output_storage ("	int    			 retval;");
+		output_storage ("	int			n;");
+		output_storage ("	int 			retval;");
 
 		output_storage ("	p = (const unsigned char *)data;");
 		output_storage ("	retval = 0;");
 		output_storage ("	for (n = 0; n < size; ++n, ++p) {");
 		output_storage ("		retval *= 10;");
-		output_storage ("		retval += (*p & 0x0F);");
+		output_storage ("		if (*p > '0' && *p <= '9')");
+		output_storage ("		    retval += (*p - '0');");
 		output_storage ("	}");
 		output_storage ("	return retval;");
 		output_storage ("}");

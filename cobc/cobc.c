@@ -2166,7 +2166,7 @@ cobc_print_active (const char *doc, const int print_help)
 	if (!print_help) {
 		return;
 	}
-	
+
 	puts (doc);
 }
 
@@ -3171,6 +3171,11 @@ process_command_line (const int argc, char **argv)
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
 	}
+
+	if (cb_flag_odoslide) {
+		cb_complex_odo = 1;
+	}
+
 	if (fatal_errors_flag) {
 		cb_max_errors = 0;
 	}

@@ -1,4 +1,8 @@
 
+2017-10-07  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: correction for -fodoslide
+
 2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, tree.c, tree.h: added RECORD DELIMITER syntax checks.
@@ -550,6 +554,11 @@
 
 	* parser.y: accept ACUCOBOL SET var TO SIZE OF field, handle as
 	  MOVE LENGTH OF field TO var
+
+2017-05-20  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c, tree.c, tree.h, typeck.c, codeoptim.c: Enhancements to
+	  handle nested OCCURS DEPENDING ON including -fodoslide
 
 2017-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

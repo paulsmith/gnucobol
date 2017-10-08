@@ -582,15 +582,6 @@ cb_validate_one (cb_tree x)
 			if (f->flag_invalid) {
 				return 1;
 			}
-#if 0 /* Simon: deactivated completely, see FR #99 */
-			/* check for nested ODO */
-			if (f->odo_level > 1) {
-				/* to enable this take care of the FIXME entries in (output_size) */
-				cb_error_x (x, _("%s is not implemented"),
-					_("reference to item containing nested OCCURS DEPENDING ON"));
-				return 1;
-			}
-#endif
 			/* validate use of handles depending on the statement */
 			if (f->usage == CB_USAGE_HNDL ||
 				f->usage == CB_USAGE_HNDL_WINDOW ||
@@ -1983,11 +1974,9 @@ cb_build_length_1 (cb_tree x)
 		size = cb_build_length_1 (cb_build_field_reference (f, x));
 		if (f->depending) {
 			if (!cb_flag_odoslide && f->flag_odo_relative) {
-				size = cb_build_binary_op (size, '*',
-							   cb_int (f->occurs_max));
+				size = cb_build_binary_op (size, '*', cb_int (f->occurs_max));
 			} else {
-				size = cb_build_binary_op (size, '*',
-							   f->depending);
+				size = cb_build_binary_op (size, '*', f->depending);
 			}
 		} else if (f->occurs_max > 1) {
 			size = cb_build_binary_op (size, '*',
@@ -2911,7 +2900,7 @@ void
 cb_validate_program_data (struct cb_program *prog)
 {
 	cb_tree			l;
-	cb_tree			x;
+	cb_tree			x, xerr;
 	cb_tree			assign;
 	struct cb_field		*p;
 	struct cb_field		*q;
@@ -3049,6 +3038,7 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* Check ODO items */
 	for (l = cb_depend_check; l; l = CB_CHAIN (l)) {
+		xerr = NULL;
 		x = CB_VALUE(l);
 		if (x == cb_error_node) {
 			continue;
@@ -3065,13 +3055,13 @@ cb_validate_program_data (struct cb_program *prog)
 
 		for (p = q; ; p = p->parent) {
 			if (p->depending) {
-#if 1 /* Simon: nested ODO deactivated completely, see FR #99 */
-				if (odo_level) {
+				if (odo_level > 0
+				 && !cb_flag_odoslide) {
+					xerr = x;
 					cb_error_x (x,
-						_ ("'%s' cannot have OCCURS DEPENDING"),
+						_ ("'%s' cannot have nested OCCURS DEPENDING"),
 						cb_name (x));
 				}
-#endif
 				odo_level++;
 			}
 			p->odo_level = odo_level;
@@ -3079,16 +3069,19 @@ cb_validate_program_data (struct cb_program *prog)
 				break;
 			}
 			for (; p->sister; p = p->sister) {
-				if (p->sister == depfld) {
-						cb_error_x (x,
-							    _("'%s' OCCURS DEPENDING ON field item invalid here"),
-							    p->sister->name);
+				if (p->sister == depfld && x != xerr) {
+					xerr = x;
+					cb_error_x (x,
+						    _("'%s' OCCURS DEPENDING ON field item invalid here"),
+						    p->sister->name);
 				}
 				if (!p->sister->redefines) {
-					if (!cb_complex_odo) {
+					if (!cb_complex_odo
+					 && x != xerr) {
+						xerr = x;
 						cb_error_x (x,
-							_ ("'%s' cannot have OCCURS DEPENDING"),
-							cb_name (x));
+							_ ("'%s' cannot have OCCURS DEPENDING because of '%s'"),
+							cb_name (x),p->sister->name);
 						break;
 					}
 					p->flag_odo_relative = 1;

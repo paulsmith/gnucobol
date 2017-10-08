@@ -53,6 +53,10 @@
 	* Makefile.am: added .PHONY to correctly declare logical targets that
 	  always have to be executed and don't result in a file
 
+2017-05-20  Ron Norman <rjn@inglenet.com>
+
+	* testsuite.src/run_extensions.at: Test added for -fodoslide
+
 2017-05-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_misc.at: set COB_EXIT_WAIT=0 in all testcases

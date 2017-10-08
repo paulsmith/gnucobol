@@ -192,6 +192,7 @@ static int			local_working_mem = 0;
 static int			output_indent_level = 0;
 static int			last_segment = 0;
 static int			gen_if_level = 0;
+static int			gen_init_working = 0;
 static unsigned int		nolitcast = 0;
 
 static unsigned int		inside_check = 0;
@@ -566,7 +567,7 @@ real_field_founder (const struct cb_field *f)
 		ff = ff->parent;
 	}
 	if (ff->redefines) {
-		return ff->redefines;
+		ff = ff->redefines;
 	}
 	return (struct cb_field *)ff;
 }
@@ -582,7 +583,6 @@ chk_field_variable_size (struct cb_field *f)
 	}
 	for (fc = f->children; fc; fc = fc->sister) {
 		if (fc->depending) {
-			/* FIXME: does only cater for one ODO, not for the extension nested ones */
 			f->vsize = fc;
 			f->flag_vsize_done = 1;
 			return fc;
@@ -620,6 +620,234 @@ chk_field_variable_address (struct cb_field *fld)
 	fld->vaddr = 0;
 	fld->flag_vaddr_done = 1;
 	return 0;
+}
+
+static int	need_plus_sign = 0;
+static int	odo_stop_now = 0;
+static int	out_odoslide_grp_offset	(struct cb_field *p, struct cb_field *fld);
+static void	out_odoslide_grp_size	(struct cb_field *p, struct cb_field *fld);
+/*
+ * Output field offset from base, handle DEPENDING ON with 'odoslide'
+ */
+static int
+out_odoslide_fld_offset (struct cb_field *p, struct cb_field *fld)
+{
+
+	if (p == fld) 	/* Single field */
+		return 1;
+
+	if (p->children) {
+		if(out_odoslide_grp_offset (p, fld))
+			return 1;
+	} else {
+		if (need_plus_sign) {
+			output ("+");
+			need_plus_sign = 0;
+		}
+		if (p->depending) {
+			if (p->size != 1) {
+				output ("%d*", p->size);
+			}
+			output_integer (p->depending);
+		} else if (p->occurs_max > 1) {
+			output ("%d", p->size * p->occurs_max);
+		} else {
+			output ("%d", p->size);
+		}
+	}
+	return 0;
+}
+
+static int
+out_odoslide_grp_offset (struct cb_field *p, struct cb_field *fld)
+{
+	struct cb_field *f;
+	int	found_it;
+	int	add_size;
+
+	if (p == fld
+	 || odo_stop_now) {
+		return 1;
+	}
+	if (p->children) {
+		for (f=p->children; f; f = f->children) {
+			if(f == fld) {
+				need_plus_sign = 0;
+				odo_stop_now = 1;
+				return 1;
+			}
+		}
+		if (need_plus_sign) {
+			output ("+");
+			need_plus_sign = 0;
+		}
+		found_it = 0;
+		f = p->children;
+		if (f->sister == NULL
+	 	 && f->children == NULL
+		 && f->depending == NULL) {
+			found_it = out_odoslide_fld_offset (f, fld);
+		} else {
+			output ("(");
+			add_size = 0;
+			for (f=p->children; f; f = f->sister) {
+				if (f == fld) {
+					found_it = 1;
+					if (add_size > 0) {
+						if (need_plus_sign) {
+							output ("+");
+							need_plus_sign = 0;
+						}
+						output ("%d",add_size);
+						add_size = 0;
+					}
+					output (")");
+					return 1;
+				}
+				if (f != fld
+				 && f->depending == NULL
+				 && f->sister != NULL
+				 && f->children == NULL) {
+					if(f->occurs_max > 1) {
+						add_size += (f->size * f->occurs_max);
+					} else {
+						add_size += f->size;
+					}
+					continue;
+				}
+				if (add_size > 0) {
+					if (need_plus_sign) {
+						output ("+");
+						need_plus_sign = 0;
+					}
+					output ("%d",add_size);
+					add_size = 0;
+					need_plus_sign = 1;
+				}
+				found_it = out_odoslide_fld_offset (f, fld);
+				if (found_it)
+					break;
+				need_plus_sign = 1;
+			}
+			need_plus_sign = 0;
+			output (")");
+			if (found_it)
+				return 1;
+		}
+		if (odo_stop_now)
+			return 1;
+		if (p->depending) {
+			output ("*");
+			output_integer (p->depending);
+		} else if (p->occurs_max > 1) {
+			output ("*%d", p->occurs_max);
+		}
+		if (found_it)
+			return 1;
+	} else {
+		if(out_odoslide_fld_offset (p, fld))
+			return 1;
+	}
+	return 0;
+}
+
+static void
+out_odoslide_offset (struct cb_field *f01, struct cb_field *fld)
+{
+	need_plus_sign = 1;
+	odo_stop_now = 0;
+	out_odoslide_fld_offset (f01, fld);
+}
+
+/*
+ * Output field size, handle DEPENDING ON with 'odoslide'
+ */
+static void
+out_odoslide_fld_size (struct cb_field *p, struct cb_field *fld)
+{
+	if (p->children) {
+		out_odoslide_grp_size (p, fld);
+	} else {
+		if (p->depending) {
+			if (p->size != 1) {
+				output ("%d*", p->size);
+			}
+			output_integer (p->depending);
+		} else if (p->occurs_max > 1) {
+			output ("%d", p->size * p->occurs_max);
+		} else {
+			output ("%d", p->size);
+		}
+		if (p == fld)
+			return;
+	}
+}
+
+static void
+out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld)
+{
+	struct cb_field	*f;
+	int		add_size;
+
+	if (p->children) {
+		need_plus_sign = 0;
+		f = p->children;
+		if (f->sister == NULL
+	 	 && f->children == NULL
+		 && f->depending == NULL) {
+			out_odoslide_fld_size (f, fld);
+		} else {
+			output ("(");
+			add_size = 0;
+			for (f=p->children; f; f = f->sister) {
+				if (need_plus_sign) {
+					output ("+");
+					need_plus_sign = 0;
+				}
+				if (f != fld
+				 && f->depending == NULL
+				 && f->sister != NULL
+				 && f->children == NULL) {
+					if(f->occurs_max > 1) {
+						add_size += (f->size * f->occurs_max);
+					} else {
+						add_size += f->size;
+					}
+					continue;
+				}
+				if (add_size > 0) {
+					if (need_plus_sign) {
+						output ("+");
+					}
+					output ("%d+",add_size);
+					add_size = 0;
+					need_plus_sign = 0;
+				}
+				out_odoslide_fld_size (f, fld);
+				need_plus_sign = 1;
+			}
+			output (")");
+		}
+		need_plus_sign = 0;
+		if (p == fld)
+			return;
+		if (p->depending) {
+			output ("*");
+			output_integer (p->depending);
+		} else if (p->occurs_max > 1) {
+			output ("*%d", p->occurs_max);
+		}
+	} else {
+		out_odoslide_fld_size (p, fld);
+	}
+	return;
+}
+
+static void
+out_odoslide_size (struct cb_field *fld)
+{
+	need_plus_sign = 0;
+	out_odoslide_fld_size (fld, fld);
 }
 
 static void
@@ -694,30 +922,54 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 		output ("%s%d", CB_PREFIX_BASE, f01->id);
 	}
 
-	if (chk_field_variable_address (f)) {
-		for (p = f->parent; p; f = f->parent, p = f->parent) {
-			for (p = p->children; p != f; p = p->sister) {
-				v = chk_field_variable_size (p);
-				if (v) {
-					output (" + %d + ", v->offset - p->offset);
-					if (v->size != 1) {
-						output ("%d * ", v->size);
+	if (!gen_init_working
+	 && chk_field_variable_address (f)) {
+		if (f01->level == 0
+		 && f01->sister
+		 && strstr(f01->name," Record")) {	/* Skip to First 01 within FD */
+			f01 = f01->sister;
+		}
+		if (cb_flag_odoslide) {
+			out_odoslide_offset (f01, f);
+		} else {
+			for (p = f->parent; p; f = f->parent, p = f->parent) {
+				for (p = p->children; p != f; p = p->sister) {
+					v = chk_field_variable_size (p);
+					if (v) {
+						output (" + %d + ", v->offset - p->offset);
+						if (v->size != 1) {
+							output ("%d * ", v->size);
+						}
+						output_integer (v->depending);
+					} else {
+						output (" + %d", p->size * p->occurs_max);
 					}
-					output_integer (v->depending);
-				} else if (p->depending && cb_flag_odoslide) {
-					output (" + ");
-					if (p->size != 1) {
-						output ("%d * ", p->size);
-					}
-					output_integer (p->depending);
-				} else {
-					output (" + %d", p->size * p->occurs_max);
 				}
 			}
 		}
 	} else if (f->offset > 0) {
 		output (" + %d", f->offset);
 	}
+}
+
+static int
+is_index_1 (cb_tree x)
+{
+	switch (CB_TREE_TAG (x)) {
+	case CB_TAG_INTEGER:
+		if (CB_INTEGER (x)->val == 1) {
+			return 1;
+		}
+		break;
+	case CB_TAG_LITERAL:
+		if (cb_get_int (x) == 1) {
+			return 1;
+		}
+		break;
+	default:
+		return 0;
+	}
+	return 0;
 }
 
 static void
@@ -734,7 +986,7 @@ output_data (cb_tree x)
 	case CB_TAG_LITERAL:
 		l = CB_LITERAL (x);
 		if (CB_TREE_CLASS (x) == CB_CLASS_NUMERIC) {
-			output ("(cob_u8_ptr)\"%s%s\"", 
+			output ("(cob_u8_ptr)\"%s%s\"",
 					(l->sign < 0) ? "-" : (l->sign > 0) ? "+" : "",
 					(char *)l->data);
 		} else {
@@ -756,28 +1008,46 @@ output_data (cb_tree x)
 		if (r->subs) {
 			lsub = r->subs;
 			o_slide = NULL;
+			o = f;
 			for (; f && lsub; f = f->parent) {
 				/* add current field size for OCCURS */
 				if (f->flag_occurs) {
-					/* recalculate size for nested ODO ... */
-					if (unlikely(o_slide)) {
-						for (o = o_slide; o; o = o->children) {
-							if (o->depending) {
-								output (" + (%d * ", o->size);
-								output_integer (o->depending);
-								output (")");
-							}
-						}
+					/* 1 - 1 is 0 so skip it */
+					if (is_index_1 (CB_VALUE (lsub)) ) {
+						lsub = CB_CHAIN (lsub);
+						continue;
+					}
+
+					if (cb_flag_odoslide
+					 && !gen_init_working
+					 && f != o
+					 && chk_field_variable_size(f)) {
+						output (" + ");
+						out_odoslide_size (f);
 						output (" * ");
 					} else {
-					/* ... use field size otherwise */
-						output (" + ");
-						if (f->size != 1) {
-							output ("%d * ", f->size);
+						/* recalculate size for nested ODO ... */
+						if (unlikely(o_slide)) {
+							for (o = o_slide; o; o = o->children) {
+								if (o->depending) {
+									output (" + (%d * ", o->size);
+									output_integer (o->depending);
+									output (")");
+								}
+							}
+							output (" * ");
+						} else {
+						/* ... use field size otherwise */
+							output (" + ");
+							if (f->size != 1) {
+								output ("%d * ", f->size);
+							}
 						}
-					}
-					if (cb_flag_odoslide && f->depending) {
-						o_slide = f;
+						if (cb_flag_odoslide
+						 && !gen_init_working
+						 && f->depending) {
+							o_slide = f;
+						}
 					}
 
 					output_index (CB_VALUE (lsub));
@@ -843,11 +1113,17 @@ output_size (const cb_tree x)
 		} else if (r->offset && f->flag_any_length) {
 			output ("%s%d.size - ", CB_PREFIX_FIELD, f->id);
 			output_index (r->offset);
+		} else if (chk_field_variable_size (f)
+			&& cb_flag_odoslide
+			&& !gen_init_working) {
+			out_odoslide_size (f);
 		} else {
 			p = chk_field_variable_size (f);
 			q = f;
 again:
-			if (!cb_flag_odoslide && p && p->flag_odo_relative) {
+			if ((!cb_flag_odoslide || gen_init_working)
+			 && p
+			 && p->flag_odo_relative) {
 				q = p;
 				output ("%d", p->size * p->occurs_max);
 			} else if (p && (!r->flag_receiving ||
@@ -856,20 +1132,6 @@ again:
 					output ("%d + ", p->offset - q->offset);
 				}
 				if (p->size != 1) {
-#if 0 /* draft from Simon -
-		 works only if the ODOs are directly nested and
-		 have no "sister" elements,
-		 the content would only be correct if -fodoslide
-		 is active as we need a temporary field otherwise
-		 see FR #99 */
-					/* size for nested ODO */
-					if (p->odo_level > 1) {
-						output_integer (p->depending);
-						output (" * ");
-						p = q;
-						goto again;
-					}
-#endif
 					output ("%d * ", p->size);
 				}
 				output_integer (p->depending);
@@ -2816,9 +3078,11 @@ output_param (cb_tree x, int id)
 			f->flag_local = 1;
 		}
 
-		if (!r->subs && !r->offset && f->count > 0 &&
-		    !chk_field_variable_size (f) &&
-		    !chk_field_variable_address (f)) {
+		if (!r->subs
+		 && !r->offset
+		 && f->count > 0
+		 && !chk_field_variable_size (f)
+		 && !chk_field_variable_address (f)) {
 			if (!f->flag_field) {
 				savetarget = output_target;
 				output_target = NULL;
@@ -2895,7 +3159,13 @@ output_param (cb_tree x, int id)
 		output ("cob_intr_binop (");
 		output_param (bp->x, id);
 		output (", ");
-		output ("%d", bp->op);
+		if (isprint(bp->op)
+		 && bp->op != '"'
+		 && bp->op != '\'') {
+			output ("'%c'", bp->op);
+		} else {
+			output ("%d", bp->op);
+		}
 		output (", ");
 		output_param (bp->y, id);
 		output (")");
@@ -6126,7 +6396,7 @@ output_file_variable (cb_tree x, struct cb_file *fl, struct cb_statement *p, con
 	r = CB_REFERENCE (x);
 	if ( r && CB_FIELD_P (r->value) ) {
 		f = CB_FIELD (r->value);
-		if (f->flag_local 
+		if (f->flag_local
 		 || f->flag_item_based
 		 || f->flag_local_storage
 		 || f->storage == CB_STORAGE_LINKAGE
@@ -6143,7 +6413,7 @@ output_file_variable (cb_tree x, struct cb_file *fl, struct cb_statement *p, con
 			 || always) {
 				output_prefix ();
 				output ("%s%s->%s = ", CB_PREFIX_FILE, fl->cname, set_field);
-				output_param (x, -1);	
+				output_param (x, -1);
 				output (";\n");
 			}
 		}
@@ -6217,7 +6487,7 @@ output_stmt (cb_tree x)
 
 		if (p->file) {
 			fl = CB_FILE (p->file);
-			
+
 			if (fl->organization == COB_ORG_RELATIVE) {
 				output_file_variable (fl->key, fl, p, "keys[0].field", 1);
 			}
@@ -7178,26 +7448,158 @@ output_initial_values (struct cb_field *f)
 	}
 }
 
-#if	0	/* BWT coerce linkage values to picture */
-/**
- * Ensure linkage items match picture
- */
+/* Code for displaying hex dumps - Ron Norman */
+#if 0
+static int field_subscript[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+static int size_subscript[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+
 static void
-output_coerce_linkage (struct cb_field *f)
+output_field_display (struct cb_field *f, int offset, int idx)
+{
+	struct cb_field *p;
+	cb_tree x;
+	int	i, svlocal;
+	char	*fname = (char*)f->name;
+
+	if (memcmp(fname,"FILLER ",7) == 0)
+		fname = (char*)"FILLER";
+	svlocal = f->flag_local;
+	f->flag_local = 0;
+	x = cb_build_field_reference (f, NULL);
+	output_prefix ();
+	output ("cob_dump_field (%2d, \"%s\", ", f->level, fname);
+	if (f->flag_local
+	 && !f->flag_data_set) {
+		output ("COB_SET_DATA (%s%d, ",
+			CB_PREFIX_FIELD, f->id);
+		output_data (x);
+		output (")");
+	} else
+	if (f->count > 0) {
+		output_param (x, 0);
+	} else {
+		output ("COB_SET_FLD(%s, ", "f0");
+		output_size (x);
+		output (", ");
+		output_data (x);
+		output (", ");
+		output_attr (x);
+		output (")");
+	}
+	output (", %d, %d", offset, idx);
+	if(idx > 0) {
+		p = f->parent;
+		for (i=0; i < idx; i++) {
+			if (field_subscript[i] < 0) {
+				output (", i_%d, ",-field_subscript[i]);
+				if (cb_flag_odoslide
+				 && p->depending) {
+					output_size (cb_build_field_reference (p, NULL));
+				} else {
+					output ("%d",size_subscript[i]);
+				}
+			} else {
+				output (", %d, 0",field_subscript[i]);
+			}
+			p = p->parent;
+		}
+	}
+	output (");\n");
+	f->flag_local = svlocal;
+}
+
+static void
+output_display_fields (struct cb_field *f, int offset, int idx)
 {
 	struct cb_field	*p;
-	cb_tree		x;
+	int		adjust;
+	int		i;
 
 	for (p = f; p; p = p->sister) {
-		x = cb_build_field_reference (p, NULL);
-		if (p->flag_item_based) {
+		if (p->redefines
+		    || (p->level == 0 && p->file == NULL)
+		    || p->level == 66
+		    || p->level == 78
+		    || p->level == 88
+		    || p->flag_item_based) {
 			continue;
 		}
 		/* For special registers */
 		if (p->flag_no_init && !p->count) {
 			continue;
 		}
-		output_stmt (cb_build_move (x, x));
+		if (p->children) {
+			output_field_display (p, offset, idx);
+			if (p->occurs_max > 2) {
+				idx++;
+				if (p->depending) {
+					output_line ("{ int i_%d,m_%d;",idx,idx);
+					output_indent_level += 2;
+					output_prefix ();
+					output ("m_%d = ",idx);
+					output_integer (p->depending);
+					output (";\n");
+					output_line ("for (i_%d=0; i_%d < m_%d; i_%d++) {",idx,idx,idx,idx);
+				} else {
+					output_line ("{ int i_%d;",idx);
+					output_indent_level += 2;
+					output_line ("for (i_%d=0; i_%d < %d; i_%d++) {",idx,idx,p->occurs_max,idx);
+				}
+				output_indent_level += 2;
+				field_subscript[idx-1] = -idx;
+				size_subscript[idx-1] = p->size;
+				output_display_fields (p->children, offset, idx);
+				output_indent_level -= 2;
+				output_line ("}");
+				output_indent_level -= 2;
+				output_line ("}");
+				idx--;
+			} else if (p->occurs_max > 1) {
+				adjust = 0;
+				for (i=1; i <= p->occurs_max; i++) {
+					field_subscript[idx] = i;
+					output_display_fields (p->children, offset+adjust, idx+1);
+					adjust += p->size;
+				}
+			} else {
+				output_display_fields (p->children, offset, idx);
+			}
+		} else {
+			if (p->occurs_max > 2) {
+				idx++;
+				if (p->depending) {
+					output_line ("{ int i_%d,m_%d;",idx,idx);
+					output_indent_level += 2;
+					output_prefix ();
+					output ("m_%d = ",idx);
+					output_integer (p->depending);
+					output (";\n");
+					output_line ("for (i_%d=0; i_%d < m_%d; i_%d++) {",idx,idx,idx,idx);
+				} else {
+					output_line ("{ int i_%d;",idx);
+					output_indent_level += 2;
+					output_line ("for (i_%d=0; i_%d < %d; i_%d++) {",idx,idx,p->occurs_max,idx);
+				}
+				output_indent_level += 2;
+				field_subscript[idx-1] = -idx;
+				size_subscript[idx-1] = p->size;
+				output_field_display (p, offset, idx);
+				output_indent_level -= 2;
+				output_line ("}");
+				output_indent_level -= 2;
+				output_line ("}");
+				idx--;
+			} else if (p->occurs_max > 1) {
+				adjust = 0;
+				for (i=1; i <= p->occurs_max; i++) {
+					field_subscript[idx] = i;
+					output_field_display (p, offset+adjust, idx+1);
+					adjust += p->size;
+				}
+			} else {
+				output_field_display (p, offset, idx);
+			}
+		}
 	}
 }
 #endif
@@ -8288,6 +8690,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
+	gen_init_working = 1;		/* Disable use of DEPENDING ON fields */
 	/* Initialize WORKING-STORAGE EXTERNAL items */
 	for (f = prog->working_storage; f; f = f->sister) {
 		if (f->redefines) {
@@ -8325,11 +8728,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 				i = 0;
 			}
 			output_line ("%s%d = &%s%d;", 	CB_PREFIX_DEC_CONST,m->id,
-							CB_PREFIX_DEC_FIELD,m->id);
+				     CB_PREFIX_DEC_FIELD,m->id);
 			output_line ("cob_decimal_init(%s%d);",CB_PREFIX_DEC_CONST,m->id);
 			output_line ("cob_decimal_set_field (%s%d, (cob_field *)&%s%d);",
-								CB_PREFIX_DEC_CONST,m->id,
-								CB_PREFIX_CONST,m->id);
+				     CB_PREFIX_DEC_CONST,m->id,
+				     CB_PREFIX_CONST,m->id);
 			output_newline ();
 		}
 	}
@@ -8351,6 +8754,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
+	gen_init_working = 0;		/* Enable use of DEPENDING ON fields */
 	output_line ("initialized = 1;");
 	output_line ("goto P_ret_initialize;");
 
@@ -8737,7 +9141,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		/* not translated as it is a highly unlikely internal abort */
 		cobc_err_msg ("Missing/wrong internal entry convention!");
 		COBC_ABORT ();
-	} else 
+	} else
 	/* LCOV_EXCL_STOP */
 	if (CB_INTEGER_P (l)) {
 		entry_convention = CB_INTEGER (l)->val;
