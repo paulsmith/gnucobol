@@ -653,52 +653,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-# Nested ODO subscripts
 AT_SETUP([Complex OCCURS DEPENDING ON (6)])
-AT_KEYWORDS([extensions runsubscripts nested subscripts])
-
-AT_SKIP_IF(true) # This test is incorrect. Should be removed. RJN
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01  n            PIC 9 VALUE 2.
-       01  m            PIC 9 VALUE 3.
-
-       01  a-table      VALUE "ABCDEFGHIJ".
-           03  rows     OCCURS 0 TO 2 TIMES
-                        DEPENDING ON n.
-                05  chars OCCURS 0 TO 5 TIMES
-                          DEPENDING ON m
-                          PIC X.
-
-       01  vals         PIC X(3).
-
-       PROCEDURE DIVISION.
-           MOVE chars (1, 2) TO vals (1:1)
-           MOVE chars (2, 1) TO vals (2:1)
-           MOVE chars (2, 3) TO vals (3:1)
-           IF vals NOT = "BFH"
-              DISPLAY "Vals (aligned) wrong: " vals
-              END-DISPLAY
-           END-IF
-        *> currently not working (size is wrong and it needs a temporary field)
-        *> IF a-table NOT = "ABCFGH"
-        *>    DISPLAY "Table (aligned) wrong: " a-table
-        *>    END-DISPLAY
-        *> END-IF
-           .
-])
-
-AT_CHECK([$COMPILE -fcomplex-odo prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
-
-AT_CLEANUP
-
-
-AT_SETUP([Complex OCCURS DEPENDING ON (7)])
 AT_KEYWORDS([extensions runsubscripts nested subscripts])
 
 AT_DATA([prog.cob], [
