@@ -150,7 +150,7 @@ CB_FLAG (cb_flag_notrunc, 1, "notrunc",
 
 CB_FLAG (cb_flag_odoslide, 1, "odoslide",
 	_("  -fodoslide            adjust items following OCCURS DEPENDING\n"
-	  "                        - requires implicit/explicit relaxed syntax"))
+	  "                        - implies -fcomplex-odo"))
 
 CB_FLAG (cb_flag_apostrophe, 1, "single-quote",
 	_("  -fsingle-quote        use a single quote (apostrophe) for QUOTE\n"
