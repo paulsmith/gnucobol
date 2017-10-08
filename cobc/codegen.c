@@ -144,7 +144,7 @@ static struct field_list	*field_cache = NULL;
 static struct field_list	*local_field_cache = NULL;
 static struct call_list		*call_cache = NULL;
 static struct call_list		*func_call_cache = NULL;
-static struct static_call_list		*static_call_cache = NULL;
+static struct static_call_list	*static_call_cache = NULL;
 static struct base_list		*base_cache = NULL;
 static struct base_list		*globext_cache = NULL;
 static struct base_list		*local_base_cache = NULL;
@@ -193,6 +193,8 @@ static int			output_indent_level = 0;
 static int			last_segment = 0;
 static int			gen_if_level = 0;
 static int			gen_init_working = 0;
+static int			need_plus_sign = 0;
+static int			odo_stop_now = 0;
 static unsigned int		nolitcast = 0;
 
 static unsigned int		inside_check = 0;
@@ -215,6 +217,9 @@ static void output (const char *, ...)		COB_A_FORMAT12;
 static void output_line (const char *, ...)	COB_A_FORMAT12;
 static void output_storage (const char *, ...)	COB_A_FORMAT12;
 static void output_local (const char *, ...)	COB_A_FORMAT12;
+
+static int	out_odoslide_grp_offset	(struct cb_field *p, struct cb_field *fld);
+static void	out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld);
 
 static void output_stmt		(cb_tree);
 static void output_integer	(cb_tree);
@@ -560,16 +565,13 @@ output_local (const char *fmt, ...)
 static struct cb_field *
 real_field_founder (const struct cb_field *f)
 {
-	const struct cb_field		*ff;
-
-	ff = f;
-	while (ff->parent) {
-		ff = ff->parent;
+	while (f->parent) {
+		f = f->parent;
 	}
-	if (ff->redefines) {
-		ff = ff->redefines;
+	if (f->redefines) {
+		f = f->redefines;
 	}
-	return (struct cb_field *)ff;
+	return (struct cb_field *)f;
 }
 
 static struct cb_field *
@@ -622,10 +624,6 @@ chk_field_variable_address (struct cb_field *fld)
 	return 0;
 }
 
-static int	need_plus_sign = 0;
-static int	odo_stop_now = 0;
-static int	out_odoslide_grp_offset	(struct cb_field *p, struct cb_field *fld);
-static void	out_odoslide_grp_size	(struct cb_field *p, struct cb_field *fld);
 /*
  * Output field offset from base, handle DEPENDING ON with 'odoslide'
  */
@@ -637,7 +635,7 @@ out_odoslide_fld_offset (struct cb_field *p, struct cb_field *fld)
 		return 1;
 
 	if (p->children) {
-		if(out_odoslide_grp_offset (p, fld))
+		if (out_odoslide_grp_offset (p, fld))
 			return 1;
 	} else {
 		if (need_plus_sign) {
@@ -670,8 +668,8 @@ out_odoslide_grp_offset (struct cb_field *p, struct cb_field *fld)
 		return 1;
 	}
 	if (p->children) {
-		for (f=p->children; f; f = f->children) {
-			if(f == fld) {
+		for (f = p->children; f; f = f->children) {
+			if (f == fld) {
 				need_plus_sign = 0;
 				odo_stop_now = 1;
 				return 1;
@@ -690,7 +688,7 @@ out_odoslide_grp_offset (struct cb_field *p, struct cb_field *fld)
 		} else {
 			output ("(");
 			add_size = 0;
-			for (f=p->children; f; f = f->sister) {
+			for (f = p->children; f; f = f->sister) {
 				if (f == fld) {
 					found_it = 1;
 					if (add_size > 0) {
@@ -708,7 +706,7 @@ out_odoslide_grp_offset (struct cb_field *p, struct cb_field *fld)
 				 && f->depending == NULL
 				 && f->sister != NULL
 				 && f->children == NULL) {
-					if(f->occurs_max > 1) {
+					if (f->occurs_max > 1) {
 						add_size += (f->size * f->occurs_max);
 					} else {
 						add_size += f->size;
@@ -745,7 +743,7 @@ out_odoslide_grp_offset (struct cb_field *p, struct cb_field *fld)
 		if (found_it)
 			return 1;
 	} else {
-		if(out_odoslide_fld_offset (p, fld))
+		if (out_odoslide_fld_offset (p, fld))
 			return 1;
 	}
 	return 0;
@@ -778,8 +776,6 @@ out_odoslide_fld_size (struct cb_field *p, struct cb_field *fld)
 		} else {
 			output ("%d", p->size);
 		}
-		if (p == fld)
-			return;
 	}
 }
 
@@ -799,7 +795,7 @@ out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld)
 		} else {
 			output ("(");
 			add_size = 0;
-			for (f=p->children; f; f = f->sister) {
+			for (f = p->children; f; f = f->sister) {
 				if (need_plus_sign) {
 					output ("+");
 					need_plus_sign = 0;
@@ -808,7 +804,7 @@ out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld)
 				 && f->depending == NULL
 				 && f->sister != NULL
 				 && f->children == NULL) {
-					if(f->occurs_max > 1) {
+					if (f->occurs_max > 1) {
 						add_size += (f->size * f->occurs_max);
 					} else {
 						add_size += f->size;
@@ -829,8 +825,9 @@ out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld)
 			output (")");
 		}
 		need_plus_sign = 0;
-		if (p == fld)
+		if (p == fld) {
 			return;
+		}
 		if (p->depending) {
 			output ("*");
 			output_integer (p->depending);
@@ -840,7 +837,6 @@ out_odoslide_grp_size (struct cb_field *p, struct cb_field *fld)
 	} else {
 		out_odoslide_fld_size (p, fld);
 	}
-	return;
 }
 
 static void
@@ -926,7 +922,7 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 	 && chk_field_variable_address (f)) {
 		if (f01->level == 0
 		 && f01->sister
-		 && strstr(f01->name," Record")) {	/* Skip to First 01 within FD */
+		 && strstr (f01->name, " Record")) {	/* Skip to First 01 within FD */
 			f01 = f01->sister;
 		}
 		if (cb_flag_odoslide) {
@@ -1099,7 +1095,7 @@ output_size (const cb_tree x)
 		break;
 	case CB_TAG_LITERAL:
 		l = CB_LITERAL (x);
-		output ("%d", (int)(l->size + ((l->sign != 0) ? 1 : 0)));
+		output ("%d", (int)(l->size + (l->sign != 0)));
 		break;
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
@@ -2269,7 +2265,7 @@ cb_lookup_literal (cb_tree x, int make_decimal)
 		    literal->scale == l->literal->scale &&
 		    memcmp (literal->data, l->literal->data,
 			    (size_t)literal->size) == 0) {
-			if(make_decimal)
+			if (make_decimal)
 				l->make_decimal = 1;
 			return l->id;
 		}
@@ -2818,9 +2814,9 @@ output_index (cb_tree x)
 		break;
 	default:
 		output ("(");
-		if(CB_TREE_TAG (x) == CB_TAG_REFERENCE) {
+		if (CB_TREE_TAG (x) == CB_TAG_REFERENCE) {
 			f = cb_code_field (x);
-			if(f->pic
+			if (f->pic
 			&& f->pic->have_sign == 0) {	/* Avoid ((unsigned int)(0 - 1)) */
 				f->pic->have_sign = 1;	/* Handle subscript as signed */
 				output_integer (x);
@@ -7487,7 +7483,7 @@ output_field_display (struct cb_field *f, int offset, int idx)
 		output (")");
 	}
 	output (", %d, %d", offset, idx);
-	if(idx > 0) {
+	if (idx > 0) {
 		p = f->parent;
 		for (i=0; i < idx; i++) {
 			if (field_subscript[i] < 0) {
@@ -9424,7 +9420,7 @@ output_function_prototypes (struct cb_program *prog)
 #if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
 			for (l = cp->entry_list; l; l = CB_CHAIN (l)) {
 				const char * entry_name = CB_LABEL (CB_PURPOSE (l))->name;
-				if(0 == strcmp (entry_name, cp->program_id)) {
+				if (0 == strcmp (entry_name, cp->program_id)) {
 					continue;
 				}
 				output_entry_function (cp, l, cp->parameter_list, 0);
