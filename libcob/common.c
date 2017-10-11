@@ -2699,6 +2699,10 @@ cob_external_addr (const char *exname, const int exlength)
 						   exname, eptr->esize, exlength);
 				cob_stop_run (1);
 			}
+			if (exlength < eptr->esize) {
+				cob_runtime_warning (_("EXTERNAL item '%s' previously allocated with size %d, requested size is %d"),
+						   exname, eptr->esize, exlength);
+			}
 			cobglobptr->cob_initial_external = 0;
 			return eptr->ext_alloc;
 		}
@@ -4384,7 +4388,7 @@ cob_sys_fork (void)
 		return 0;		/* child process just returns */
 	}
 	if (pid < 0) {			/* Some error happened */
-		cob_runtime_warning (_("Error '%s' during CBL_GC_FORK"), cob_get_strerror ());
+		cob_runtime_warning (_("error '%s' during CBL_GC_FORK"), cob_get_strerror ());
 		return -2;
 	}
 	return pid;			/* parent gets process id of child */
