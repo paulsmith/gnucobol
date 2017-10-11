@@ -1,4 +1,11 @@
 
+2017-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_check_ref_mod): #446 splitted checks for length and
+	  combination of offset and length
+	* common.c (cob_external_addr): #445 added supressible warning for EXTERNAL
+	  data items that are requested with a smaller size than allocated
+
 2017-09-28  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (cob_screen_get_all): changed backspace to emit beep if

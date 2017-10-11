@@ -2678,10 +2678,19 @@ cob_check_ref_mod (const int offset, const int length,
 		cob_stop_run (1);
 	}
 
-	/* Check length */
-	if (length < 1 || offset + length - 1 > size) {
+	/* Check plain length */
+	if (length < 1 || length > size) {
 		cob_set_exception (COB_EC_BOUND_REF_MOD);
-		cob_runtime_error (_("length of '%s' out of bounds: %d"), name, length);
+		cob_runtime_error (_("length of '%s' out of bounds: %d"),
+			name, length, offset);
+		cob_stop_run (1);
+	}
+
+	/* Check length with offset */
+	if (offset + length - 1 > size) {
+		cob_set_exception (COB_EC_BOUND_REF_MOD);
+		cob_runtime_error (_("length of '%s' out of bounds: %d, starting at: %d"),
+			name, length, offset);
 		cob_stop_run (1);
 	}
 }
