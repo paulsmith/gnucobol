@@ -1,10 +1,16 @@
 
 2017-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* common.c (cob_check_ref_mod): #446 splitted checks for length and
+	* common.c (cob_check_ref_mod): bug #446 splitted checks for length and
 	  combination of offset and length
-	* common.c (cob_external_addr): #445 added supressible warning for EXTERNAL
-	  data items that are requested with a smaller size than allocated
+	* common.c (cob_external_addr): bug #445 added supressible warning for
+	  EXTERNAL data items that are requested with a smaller size than allocated
+	* common.c (cob_check_version): FR #239: allow difference in module version
+	  vs. runtime version
+	FR #239 - adjustments for changed function signatures between 2.0-rc and 2.3:
+	* common.c (cob_check_odo): adjustments for changed function signature 
+	* common.c (cob_check_subscript, cob_check_version): don't check subscript
+	  max if at least one module is too old for the current function signature
 
 2017-09-28  Edward Hart <edward.dan.hart@gmail.com>
 

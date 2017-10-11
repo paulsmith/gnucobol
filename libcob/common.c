@@ -173,6 +173,7 @@ struct cob_external {
 /* Local variables */
 
 static int			cob_initialized = 0;
+static int			cannot_check_subscript = 0;
 static int			cob_argc = 0;
 static char			**cob_argv = NULL;
 static struct cob_alloc_cache	*cob_alloc_base = NULL;
@@ -1942,15 +1943,31 @@ cob_restore_func (struct cob_func_loc *fl)
 }
 
 void
-cob_check_version (const char *prog, const char *packver, const int patchlev)
+cob_check_version (const char *prog, const char *packver_prog, const int patchlev_prog)
 {
-	if (strcmp (packver, PACKAGE_VERSION) || patchlev != PATCH_LEVEL) {
+	int status;
+	int major_cob, minor_cob;
+	int major_prog, minor_prog;
+
+	/* note: to be tested with direct C call */
+
+	status = sscanf (PACKAGE_VERSION, "%d.%d", &major_cob, &minor_cob);
+	if (status == 2) {
+		status = sscanf (packver_prog, "%d.%d", &major_prog, &minor_prog);
+	}
+
+	if (status != 2 || major_prog > major_cob
+	 || (major_prog == major_cob && minor_prog > minor_cob)
+	 || (major_prog == major_cob && minor_prog == minor_cob && patchlev_prog > PATCH_LEVEL)) {
 		cob_runtime_error (_("error: version mismatch"));
-		cob_runtime_error (_("%s has version/patch level %s/%d"), prog,
-				   packver, patchlev);
-		cob_runtime_error (_("libcob has version/patch level %s/%d"),
+		cob_runtime_error (_("%s has version %s.%d"), prog,
+				   packver_prog, patchlev_prog);
+		cob_runtime_error (_("%s has version %s.%d"), "libcob",
 				   PACKAGE_VERSION, PATCH_LEVEL);
 		cob_stop_run (1);
+	}
+	if (major_prog == 2 && minor_prog < 2) {
+		cannot_check_subscript = 1;
 	}
 }
 
@@ -2635,6 +2652,17 @@ cob_check_odo (const int i, const int min,
 	/* Check OCCURS DEPENDING ON item */
 	if (i < min || i > max) {
 		cob_set_exception (COB_EC_BOUND_ODO);
+
+		/* Hack for call from 2.0 modules as the module signature was changed :-(
+		   Note: depending on the actual C runtime this may work or directly break
+		*/
+		/* LCOV_EXCL_START */
+		if (dep_name == NULL) {
+			dep_name = name;
+			name = "unknown field";
+		}
+		/* LCOV_EXCL_STOP */
+
 		cob_runtime_error (_("OCCURS DEPENDING ON '%s' out of bounds: %d"),
 					dep_name, i);
 		if (i > max) {
@@ -2650,6 +2678,23 @@ void
 cob_check_subscript (const int i, const int max,
 			const char *name, const int odo_item)
 {
+#if 1
+	/* Hack for call from 2.0 modules as the module signature was changed :-(
+	   Note: depending on the actual C runtime this may work or directly break
+	*/
+	/* LCOV_EXCL_START */
+	if (cannot_check_subscript) {
+		/* Check zero subscript */
+		if (i == 0) {
+			cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
+			cob_runtime_error (_("subscript of '%s' out of bounds: %d"), "unknown field", i);
+			cob_stop_run (1);
+		}
+		return;
+	}
+	/* LCOV_EXCL_STOP */
+#endif
+
 	/* Check subscript */
 	if (i < 1 || i > max) {
 		cob_set_exception (COB_EC_BOUND_SUBSCRIPT);
