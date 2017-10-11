@@ -31,7 +31,7 @@ How to build in native Windows environments:
 * compile with your environment, for example via IDE by opening the solution
   and click "build" or by starting the VS/WinSDK command prompt and doing
     pushd X:\path\to\gnucobol\build_windows\vsYYYY
-    msbuild "GnuCOBOL.sln" /p:Platform=x64 /p:Configuration=Release
+    MSBuild "GnuCOBOL.sln" /p:Platform=x64 /p:Configuration=Release
   replace YYYY with the Visual Studio version you've used and with using the
   platform/configuration you want to build
 

@@ -2727,7 +2727,7 @@ cob_check_ref_mod (const int offset, const int length,
 	if (length < 1 || length > size) {
 		cob_set_exception (COB_EC_BOUND_REF_MOD);
 		cob_runtime_error (_("length of '%s' out of bounds: %d"),
-			name, length, offset);
+			name, length);
 		cob_stop_run (1);
 	}
 

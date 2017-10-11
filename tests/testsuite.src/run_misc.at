@@ -216,6 +216,9 @@ AT_CLEANUP
 AT_SETUP([EXTERNAL data item size mismatch])
 AT_KEYWORDS([runmisc])
 
+# FIXME - see Bug #445
+AT_XFAIL_IF(true)
+
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      callee.
