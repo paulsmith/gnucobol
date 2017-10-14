@@ -3436,6 +3436,10 @@ cb_build_filler (void)
 	return x;
 }
 
+/*
+  Return a reference to the field f. If ref != NULL, other attributes are set to
+  the same as ref.
+*/
 cb_tree
 cb_build_field_reference (struct cb_field *f, cb_tree ref)
 {

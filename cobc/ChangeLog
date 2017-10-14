@@ -1,4 +1,9 @@
 
+2017-10-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c: refactored and improved variable names in external form
+	  functions.
+
 2017-10-07  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: correction for -fodoslide

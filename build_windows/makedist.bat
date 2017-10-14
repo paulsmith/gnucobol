@@ -179,7 +179,7 @@ if exist "%ProgramFiles%\7-Zip\7z.exe" (
    goto :end
 )
 echo.
-echo %cob_release_path%%PACKAGE%.7z ready for distribution."
+echo %cob_release_path%%PACKAGE%.7z ready for distribution.
 
 goto :end
 

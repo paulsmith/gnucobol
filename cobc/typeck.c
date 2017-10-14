@@ -1823,16 +1823,11 @@ cb_build_identifier (cb_tree x, const int subchk)
 		/* Subscript check along with setting of table offset */
 		if (r->subs) {
 			l = r->subs;
-			for (p = f; p; p = p->parent) {
+			for (p = f; p && l; p = p->parent) {
 				if (!p->flag_occurs) {
 					continue;
 				}
 
-#if	1	/* RXWRXW - Sub check */
-				if (!l) {
-					break;
-				}
-#endif
 				sub = cb_check_integer_value (CB_VALUE (l));
 				l = CB_CHAIN (l);
 				if (sub == cb_error_node) {
@@ -1870,7 +1865,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 				}
 			}
 		}
-
 	}
 
 	if (subchk) {
@@ -2891,7 +2885,7 @@ validate_relative_key_field (struct cb_file *file)
 	    && key_field->storage != CB_STORAGE_FILE
 	    && key_field->storage != CB_STORAGE_LOCAL) {
 		cb_error_x (file->key,
-			    _("file %s: RELATIVE KEY %s declared outside WORKING-STORAGE"), 
+			    _("file %s: RELATIVE KEY %s declared outside WORKING-STORAGE"),
 			    file->name, key_field->name);
 	}
 }
@@ -5102,47 +5096,54 @@ static unsigned int
 emit_accept_external_form (cb_tree x)
 {
 	struct cb_field *f;
-	cb_tree		t, o, m, n;
+	cb_tree		f_ref, f_ref_2, ext_form_id, index_lit;
 	int		i;
 	char		buff[32];
-	unsigned int	found;
+	unsigned int	found = 0;
 
-	found = 0;
 	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
-		if (!f->redefines) {
-			if (f->children) {
-				t = cb_build_field_reference (f, x);
-				found += emit_accept_external_form (t);
-			} else {
-				if (f->external_form_identifier) {
-					m = f->external_form_identifier;
-				} else {
-					m = cb_build_alphanumeric_literal (f->name, strlen (f->name));
-				}
-				if (f->flag_occurs) {
-					for (i = 1; i <= f->occurs_max; i++) {
-						sprintf (buff, "%d", i);
-						n = cb_build_numeric_literal(0, buff, 0);
-
-						o = cb_build_field_reference (f, x);
-						CB_REFERENCE (o)->subs = CB_LIST_INIT (n);
-
-#if 0 /* TODO: implement CGI runtime, see Patch #27 */
-						cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, o));
-#else
-						COB_UNUSED (m);
-#endif
-					}
-				} else {
-					n = cb_build_numeric_literal(0, "1", 0);
-#if 0 /* TODO: implement CGI runtime, see Patch #27 */
-					cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue", m, n, t));
-#endif
-				}
-				found++;
-			}
+		if (f->redefines) {
+			continue;
 		}
+
+		if (f->children) {
+			f_ref = cb_build_field_reference (f, x);
+			found += emit_accept_external_form (f_ref);
+			continue;
+		}
+
+		if (f->external_form_identifier) {
+			ext_form_id = f->external_form_identifier;
+		} else {
+			ext_form_id = cb_build_alphanumeric_literal (f->name, strlen (f->name));
+		}
+		if (f->flag_occurs) {
+			for (i = 1; i <= f->occurs_max; i++) {
+				sprintf (buff, "%d", i);
+				index_lit = cb_build_numeric_literal(0, buff, 0);
+
+				f_ref_2 = cb_build_field_reference (f, x);
+				CB_REFERENCE (f_ref_2)->subs = CB_LIST_INIT (index_lit);
+
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+				cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue",
+							     ext_form_id, index_lit,
+							     f_ref_2));
+#else
+				COB_UNUSED (ext_form_id);
+#endif
+			}
+		} else {
+			index_lit = cb_build_numeric_literal (0, "1", 0);
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+			cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue",
+						     ext_form_id, index_lit,
+						     f_ref));
+#endif
+		}
+		found++;
 	}
+
 	return found;
 }
 
@@ -5163,35 +5164,38 @@ cb_emit_accept_external_form (cb_tree x1)
 static unsigned int
 emit_display_external_form (cb_tree x)
 {
-	struct cb_field *f;
-	cb_tree		t, m, rtree;
-	unsigned int	found;
+	struct cb_field *f, *f_ref_field;
+	cb_tree		f_ref, ext_form_id;
+	unsigned int	found = 0;
 
-	COB_UNUSED (m);
+	COB_UNUSED (ext_form_id);
 
-	found = 0;
 	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
-		if (!f->redefines && !f->flag_occurs) {
-			t = cb_build_field_reference (f, x);
-			if (f->children) {
-				found += emit_display_external_form (t);
+		if (f->redefines || f->flag_occurs) {
+			continue;
+		}
+
+		f_ref = cb_build_field_reference (f, x);
+		if (f->children) {
+			found += emit_display_external_form (f_ref);
+		} else {
+			/* TO-DO: Is CB_FIELD (cb_ref (f_ref)) == f? */
+			f_ref_field = CB_FIELD (cb_ref (f_ref));
+			if (f_ref_field->external_form_identifier) {
+				ext_form_id = f_ref_field->external_form_identifier;
 			} else {
-				rtree = cb_ref (t);
-				if (CB_FIELD (rtree)->external_form_identifier) {
-					m = CB_FIELD (rtree)->external_form_identifier;
-				} else {
-					m = cb_build_alphanumeric_literal (CB_FIELD (rtree)->name,
-						strlen((CB_FIELD (rtree)->name)));
-				}
-#if 0 /* TODO: implement CGI runtime, see Patch #27 */
-				cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", m, t));
-#else
-				COB_UNUSED (m);
-#endif
-				found++;
+				ext_form_id = cb_build_alphanumeric_literal (f_ref_field->name,
+								   strlen (f_ref_field->name));
 			}
+#if 0 /* TODO: implement CGI runtime, see Patch #27 */
+			cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", ext_form_id, f_ref));
+#else
+			COB_UNUSED (ext_form_id);
+#endif
+			found++;
 		}
 	}
+
 	return found;
 }
 
@@ -5209,6 +5213,20 @@ cb_emit_display_external_form (cb_tree x1)
 	}
 }
 
+static int
+get_screen_type (const struct cb_field * const p)
+{
+	if (p->children) {
+		return COB_SCREEN_TYPE_GROUP;
+	} else if (p->values) {
+		return COB_SCREEN_TYPE_VALUE;
+	} else if (p->size > 0) {
+		return COB_SCREEN_TYPE_FIELD;
+	} else {
+		return COB_SCREEN_TYPE_ATTRIBUTE;
+	}
+}
+
 static void
 output_screen_from (struct cb_field *p, const unsigned int sisters)
 {
@@ -5221,9 +5239,7 @@ output_screen_from (struct cb_field *p, const unsigned int sisters)
 		output_screen_from (p->children, 1U);
 	}
 
-	type = (p->children ? COB_SCREEN_TYPE_GROUP :
-		p->values ? COB_SCREEN_TYPE_VALUE :
-		(p->size > 0) ? COB_SCREEN_TYPE_FIELD : COB_SCREEN_TYPE_ATTRIBUTE);
+	type = get_screen_type (p);
 	if (type == COB_SCREEN_TYPE_FIELD && p->screen_from) {
 		/* Bump reference count */
 		p->count++;
@@ -5244,9 +5260,7 @@ output_screen_to (struct cb_field *p, const unsigned int sisters)
 		output_screen_to (p->children, 1U);
 	}
 
-	type = (p->children ? COB_SCREEN_TYPE_GROUP :
-		p->values ? COB_SCREEN_TYPE_VALUE :
-		(p->size > 0) ? COB_SCREEN_TYPE_FIELD : COB_SCREEN_TYPE_ATTRIBUTE);
+	type = get_screen_type (p);
 	if (type == COB_SCREEN_TYPE_FIELD && p->screen_to) {
 		/* Bump reference count */
 		p->count++;
@@ -6721,7 +6735,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	cob_flags_t	disp_attrs; 
+	cob_flags_t	disp_attrs;
 	cb_tree		m;
 	struct cb_field	*f = NULL;
 
