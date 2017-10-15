@@ -3034,7 +3034,7 @@ cb_validate_program_data (struct cb_program *prog)
 	for (l = cb_depend_check; l; l = CB_CHAIN (l)) {
 		xerr = NULL;
 		x = CB_VALUE(l);
-		if (x == cb_error_node) {
+		if (x == NULL || x == cb_error_node) {
 			continue;
 		}
 		q = CB_FIELD_PTR (x);
@@ -3075,7 +3075,7 @@ cb_validate_program_data (struct cb_program *prog)
 						xerr = x;
 						cb_error_x (x,
 							_ ("'%s' cannot have OCCURS DEPENDING because of '%s'"),
-							cb_name (x),p->sister->name);
+							cb_name (x), p->sister->name);
 						break;
 					}
 					p->flag_odo_relative = 1;
