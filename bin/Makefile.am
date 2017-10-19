@@ -35,6 +35,6 @@ cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.l
 CODE_COVERAGE_BRANCH_COVERAGE=1
 CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
-cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  $(COBCRUN)
+cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  cobcrun$(EXEEXT)
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)
 
