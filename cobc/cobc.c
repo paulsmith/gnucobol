@@ -252,6 +252,7 @@ int			cb_flag_functions_all = 0;
 int			cobc_seen_stdin = 0;
 int			cb_unix_lf = 0;
 
+int 		fatal_startup_error = 0;
 int			errorcount = 0;
 int			warningcount = 0;
 int			warningopt = 0;
@@ -582,6 +583,8 @@ static const struct option long_options[] = {
 
 /* Prototype */
 DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
+DECLNORET static void COB_A_NORETURN	cobc_early_exit (int);
+DECLNORET static void COB_A_NORETURN	cobc_err_exit (const char *, ...) COB_A_FORMAT12;
 static void	free_list_file		(struct list_files *);
 static void	print_program_code	(struct list_files *, int);
 static void	set_standard_title	(void);
@@ -1538,6 +1541,10 @@ cobc_deciph_optarg (const char *p, const int allow_quote)
 DECLNORET static void COB_A_NORETURN
 cobc_early_exit (int retcode)
 {
+	if (fatal_startup_error) {
+		fatal_startup_error = 0;
+		cobc_err_exit (_("please check environment variables as noted above"));
+	}
 	cobc_free_mem ();
 	exit (retcode);
 }
@@ -1644,7 +1651,7 @@ cobc_getenv_path (const char *env)
 	}
 	if (strchr (p, PATHSEP_CHAR) != NULL) {
 		cobc_err_msg (_("environment variable '%s' is '%s'; should not contain '%c'"), env, p, PATHSEP_CHAR);
-		cobc_abort_terminate ();
+		fatal_startup_error = 1;
 	}
 	return cobc_main_strdup (p);
 }
@@ -7596,6 +7603,11 @@ main (int argc, char **argv)
 
 	/* Process command line arguments */
 	iargs = process_command_line (argc, argv);
+
+	if (fatal_startup_error) {
+		cobc_err_msg (_("please check environment variables as noted above"));
+		cobc_abort_terminate ();
+	}
 
 	/* Check the filename */
 	if (iargs == argc) {

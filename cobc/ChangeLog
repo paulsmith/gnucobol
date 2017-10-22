@@ -4,6 +4,8 @@
 	* Makefile.am: moved include of top_srcdir to AM_CPPFLAGS to prevent
 	  user-specified CPPFLAGS to override own includes, see bug #452
 	* cobc.c: minimal support for DJGGP, including generation of 8.3 filenames
+	* cobc.c: don't halt immediately on first PATH error during startup,
+	  postponed until command line arguments are processed
 
 2017-10-14  Edward Hart <edward.dan.hart@gmail.com>
 
