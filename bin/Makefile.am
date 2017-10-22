@@ -26,7 +26,8 @@ dist_man_MANS = cobcrun.1
 COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)
-cobcrun_CFLAGS = $(AM_CFLAGS) -I$(top_srcdir) $(CODE_COVERAGE_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)
+AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.la \
 	$(CODE_COVERAGE_LIBS)
 
