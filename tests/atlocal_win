@@ -22,17 +22,15 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-# CC="gcc -std=gnu99"
-
 COB_SRC_PATH="$(cd ${abs_srcdir}/.. ; pwd)"
 COB_WIN_BUILDPATH="$COB_SRC_PATH/build_windows/Win32/Release"
 
 COB_BIGENDIAN="no"
 COB_HAS_UTC_OFFSET="yes"	# FIXME: set from cobcrun --info
 
-export COBC="cobc.exe"
-export COBCRUN="cobcrun.exe"
-export COBCRUN_DIRECT="" # used for running created executables through tools
+COBC="cobc.exe"
+COBCRUN="cobcrun.exe"
+COBCRUN_DIRECT="" # used for running created executables through tools
 
 TEMPLATE="${abs_srcdir}/testsuite.src"
 
@@ -44,19 +42,23 @@ COMPILE_MODULE="${COBC} -m ${FLAGS}"
 COB_OBJECT_EXT="obj"
 COB_EXE_EXT="@COB_EXE_EXT@"
 
-# Fix for testcases were cobc uses win32 paths internally
+# Fix for testcases where cobc uses win32 paths internally
 PATHSEP=";"
-
-PATH="$COB_WIN_BUILDPATH:${PATH}"
-export PATH
 
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="$COB_SRC_PATH/tests/listings-sed.sh"
 
+# be sure we use the English messages
+LC_ALL=C
+export LC_ALL
+
+PATH="$COB_WIN_BUILDPATH:${PATH}"
+export PATH
+
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
-for cobenv in $($COBCRUN --runtime-conf | grep COB_ | cut -d: -f2); \
+for cobenv in `$COBCRUN --runtime-conf | grep COB_ | cut -d: -f2`; \
 	do unset $cobenv; \
 done
 
@@ -78,23 +80,21 @@ _return_path () {
 	fi
 }
 
-export COB_CONFIG_DIR="$(_return_path "$COB_SRC_PATH/config")"
-export COB_RUNTIME_CONFIG="$(_return_path "$COB_SRC_PATH/config/runtime_empty.cfg")"
-export COB_COPY_DIR="$(_return_path "$COB_SRC_PATH/copy")"
-export COB_LIBRARY_PATH="$(_return_path "$COB_WIN_BUILDPATH"):$(_return_path ":$COB_LIBRARY_PATH")"
-export COB_UNIX_LF=YES
-export COB_MSG_FORMAT=GCC
-export COB_HAS_UTC_OFFSET
-export LC_ALL=C
+
+COB_CONFIG_DIR="$(_return_path "$COB_SRC_PATH/config")"
+COB_RUNTIME_CONFIG="$(_return_path "$COB_SRC_PATH/config/runtime_empty.cfg")"
+COB_COPY_DIR="$(_return_path "$COB_SRC_PATH/copy")"
+COB_LIBRARY_PATH="$(_return_path "$COB_WIN_BUILDPATH"):$(_return_path ":$COB_LIBRARY_PATH")"
+COB_UNIX_LF=YES
+COB_MSG_FORMAT=GCC
 
 
-
+COB_HAS_64_BIT_POINTER=`$COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-`
 if test $($COBC --info | grep -i -c "ISAM.*disabled") = 0; then
    COB_HAS_ISAM="yes"
 else
    COB_HAS_ISAM="no"
 fi
-export COB_HAS_ISAM
 
 COB_HAS_CURSES="no"
 if test "$TERM" != "cygwin"; then # this is true for CYGWIN and MSYS
@@ -106,13 +106,20 @@ if test "$TERM" != "cygwin"; then # this is true for CYGWIN and MSYS
       COB_HAS_CURSES="yes"
    fi
 fi
-export COB_HAS_CURSES
-export COB_HAS_64_BIT_POINTER=$($COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-)
+
+
+export COBC COBCRUN
 export PATHSEP
+export COB_CFLAGS COB_LDFLAGS COB_LIBS
+export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR
+export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
+export COB_LIBRARY_PATH
+export COB_UNIX_LF
+export COB_HAS_ISAM COB_HAS_CURSES COB_HAS_UTC_OFFSET COB_HAS_64_BIT_POINTER
 
 
 # For rare cases where cobc/libcob may need to know if they're running in test mode:
 case $0 in
-	*/testsuite) export COB_IS_RUNNING_IN_TESTMODE=1;;
+	*/testsuite) COB_IS_RUNNING_IN_TESTMODE=1 && export COB_IS_RUNNING_IN_TESTMODE;;
 	*)	unset COB_IS_RUNNING_IN_TESTMODE;;
 esac

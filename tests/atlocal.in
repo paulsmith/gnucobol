@@ -19,15 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-# CC="@CC@"
 COB_BIGENDIAN="@COB_BIGENDIAN@"
 COB_HAS_ISAM="@COB_HAS_ISAM@"
 COB_HAS_CURSES="@COB_HAS_CURSES@"
 COB_HAS_UTC_OFFSET="@COB_HAS_UTC_OFFSET@"
 COB_HAS_64_BIT_POINTER="@COB_HAS_64_BIT_POINTER@"
 
-COBC="${abs_top_builddir}/cobc/cobc"
-COBCRUN="${abs_top_builddir}/bin/cobcrun"
+COBC="${abs_top_builddir}/cobc/cobc@COB_EXE_EXT@"
+COBCRUN="${abs_top_builddir}/bin/cobcrun@COB_EXE_EXT@"
 COBCRUN_DIRECT="" # used for running created executables through tools
 
 TEMPLATE="${abs_srcdir}/testsuite.src"
@@ -45,6 +44,13 @@ PATHSEP=":"
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="${abs_srcdir}/listings-sed.sh"
 
+# be sure to use the English messages
+LC_ALL=C
+export LC_ALL
+
+PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
+export PATH
+
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
@@ -58,7 +64,6 @@ _return_path () {
 	echo "$1"
 }
 
-PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
 COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
 COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
 COB_LIBS="-L${abs_top_builddir}/libcob/.libs -lcob @LIBCOB_LIBS@"
@@ -75,20 +80,19 @@ if test "$MSYSTEM" = "MINGW32"; then
 	# running MSYS builds as not-visible child processes result in
 	# "Redirection is not supported"
 	COB_HAS_CURSES="no"
-	# Fix for testcases were cobc translates path to win32 equivalents
+	# Fix for testcases where cobc translates path to win32 equivalents
 	PATHSEP=";"
 fi
-LC_ALL=C
 
 
-export PATH PATHSEP
+export COBC COBCRUN
+export PATHSEP
 export COB_CFLAGS COB_LDFLAGS COB_LIBS
 export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR
 export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
 export COB_LIBRARY_PATH
 export COB_UNIX_LF
 export COB_HAS_ISAM COB_HAS_CURSES COB_HAS_UTC_OFFSET COB_HAS_64_BIT_POINTER
-export LC_ALL
 
 
 # For rare cases where cobc/libcob may need to know if they're running in test mode:
