@@ -122,17 +122,16 @@ _create_file () {
 
 docdir=`dirname $0`
 confdir=$docdir/../config
+created_texfiles="cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex"
+created_texfiles="$created_texfiles cbmnem.tex cbconf.tex cbrunt.tex"
+
+
 
 case "$1" in
 	"")
-		_create_file "cbhelp.tex"
-		_create_file "cbchelp.tex"
-		_create_file "cbrese.tex"
-		_create_file "cbintr.tex"
-		_create_file "cbsyst.tex"
-		_create_file "cbmnem.tex"
-		_create_file "cbconf.tex"
-		_create_file "cbrunt.tex"
+		for file in $created_texfiles; do
+			_create_file $file
+		done
 		;;
 	"help")
 		_create_file "cbhelp.tex"
@@ -174,7 +173,7 @@ case "$1" in
 		;;
 	"fixtimestamps")
 		echo $0: touch tex-includes
-		for file in $docdir/*.tex; do
+		for file in $created_texfiles; do
 			echo " touch $file"
 			touch $file
 		done
