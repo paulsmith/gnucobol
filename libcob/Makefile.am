@@ -26,12 +26,11 @@ libcob_la_SOURCES = common.c move.c numeric.c strings.c \
 #dist_man_MANS = libcob.3
 #COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 
-libcob_la_CFLAGS = $(AM_CFLAGS) $(CODE_COVERAGE_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)
+AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 libcob_la_LIBADD = $(LIBCOB_LIBS) $(CODE_COVERAGE_LIBS)
 libcob_la_LDFLAGS = $(COB_FIX_LIBTOOL) -version-info 4:0:0 -no-undefined
 AM_LDFLAGS = $(COB_FIX_LIB)
-# needs to be here, otherwise include directories passed to configure will get in between
-AM_CPPFLAGS = -I$(top_srcdir)
 
 EXTRA_DIST = coblocal.h system.def
 pkgincludedir = $(includedir)/libcob
