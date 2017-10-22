@@ -37,6 +37,15 @@ if test "$1" != "fixtimestamps"; then
    fi
 fi
 
+if test "x$COBC" = "x"; then
+   echo 'WARNING: $COBC not set, defaulting to "cobc"'
+   COBC=cobc
+fi
+
+if test "x$COBCRUN" = "x"; then
+   echo 'WARNING: $COBCRUN not set, defaulting to "cobcrun"'
+   COBCRUN=cobcrun
+fi
 
 # Make sure to source atconfig/atlocal before running this shell
 # to use the currently compiled version of cobc
@@ -48,32 +57,32 @@ _create_file () {
 	case "$1" in
 		"cbhelp.tex")
 			echo "@verbatim"               > $1
-			cobc -q --help                 >>$1
+			$COBC -q --help                >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbchelp.tex")
 			echo "@verbatim"               > $1
-			cobcrun -q --help              >>$1
+			$COBCRUN -q --help             >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbrese.tex")
 			echo "@verbatim"               > $1
-			cobc -q --list-reserved        >>$1
+			$COBC -q --list-reserved       >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbintr.tex")
 			echo "@verbatim"               > $1
-			cobc -q --list-intrinsics      >>$1
+			$COBC -q --list-intrinsics     >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbsyst.tex")
 			echo "@verbatim"               > $1
-			cobc -q --list-system          >>$1
+			$COBC -q --list-system         >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbmnem.tex")
 			echo "@verbatim"               > $1
-			cobc -q --list-mnemonics       >>$1
+			$COBC -q --list-mnemonics      >>$1
 			echo "@end verbatim"           >>$1
 			;;
 		"cbconf.tex")
