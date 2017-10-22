@@ -23,8 +23,9 @@
 GREP_ORIG="$GREP";
 if test "x$GREP" = "x"; then GREP=grep; fi
 
-# test for grep -A
 if test "$1" != "fixtimestamps"; then
+
+   # test for grep -A
    $GREP -A2 test /dev/null 2>/dev/null
    if test "$?" -ne 1; then
       GREP=ggrep
@@ -35,16 +36,16 @@ if test "$1" != "fixtimestamps"; then
          exit 1
       fi
    fi
-fi
 
-if test "x$COBC" = "x"; then
-   echo 'WARNING: $COBC not set, defaulting to "cobc"'
-   COBC=cobc
-fi
+   if test "x$COBC" = "x"; then
+      echo 'WARNING: $COBC not set, defaulting to "cobc"'
+      COBC=cobc
+   fi
+   if test "x$COBCRUN" = "x"; then
+      echo 'WARNING: $COBCRUN not set, defaulting to "cobcrun"'
+      COBCRUN=cobcrun
+   fi
 
-if test "x$COBCRUN" = "x"; then
-   echo 'WARNING: $COBCRUN not set, defaulting to "cobcrun"'
-   COBCRUN=cobcrun
 fi
 
 # Make sure to source atconfig/atlocal before running this shell
