@@ -13,8 +13,7 @@ set tmp_prf=mbfbat
 call :exe_check "%BISON%" bison "GNU Bison" BISON
 call :exe_check "%FLEX%" flex "flex" FLEX
 
-echo.
-echo.
+call :print_separator
 
 :: bison invocation
 if not "%BISON%"=="" (
@@ -89,38 +88,55 @@ set "%env_name%=%command_name%"
 goto :eof
 
 
+:print_separator
+echo.
+echo -----------------------------------------------
+echo.
+goto :eof
+
+
 :bisoncall
 echo generating %1.c, %1.h ...
 call :store_old %1.c
 call :store_old %1.h
-%BISON% -o "%1.c"   "%1.y" ^
- && (call :waiter ^
-  &  call :compare_generated %1.c ^
-  &  call :compare_generated %1.h ^
-  &  if exist "%1.output" erase "%1.output" >NUL ) ^
- || (call :delete_generated %1.c ^
-  &  call :delete_generated %1.h ^
-  &  echo.   %1.c, %1.h were not changed)
-echo.
+%BISON% -o "%1.c"   "%1.y"
+if %ERRORLEVEL% equ 0 (
+  call :waiter
+  call :compare_generated %1.c
+  call :compare_generated %1.h
+  if exist "%1.output" erase "%1.output" >NUL
+) else (
+  call :delete_generated %1.c 
+  call :delete_generated %1.h
+  echo.   %1.c, %1.h were not changed
+)
+call :print_separator
 goto :eof
 
 :flexcall
 echo generating %1.c ...
 call :store_old %1.c
-%FLEX%  -o "%1.c"   "%1.l" ^
- && (call :waiter ^
-  &  call :compare_generated %1.c) ^
- || (call :delete_generated %1.c ^
-  &  echo.   %1.c was not changed)
-echo.
+%FLEX%  -o "%1.c"   "%1.l"
+if %ERRORLEVEL% equ 0 (
+  call :waiter
+  call :compare_generated %1.c
+) else (
+  call :delete_generated %1.c
+  echo.   %1.c was not changed
+)
+call :print_separator
 goto :eof
 
 
 :compare_generated
 rem echo %1 was generated
-fc "%1" "%tmp_prf%_%1" 1>NUL 2>NUL ^
- && (call :delete_generated %1) ^
- || (call :use_generated %1)
+fc "%1" "%tmp_prf%_%1" 1>NUL 2>NUL
+if %ERRORLEVEL% equ 0 (
+  call :delete_generated %1
+  echo.   %1 is unchanged
+) else (
+  call :use_generated %1
+)
 goto :eof
 
 :waiter
@@ -144,7 +160,6 @@ goto :eof
 
 :delete_generated
 if exist "%tmp_prf%_%1" move "%tmp_prf%_%1" "%1" >NUL
-echo.   %1 is unchanged
 goto :eof
 
 
