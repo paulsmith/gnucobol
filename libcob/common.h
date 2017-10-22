@@ -537,7 +537,7 @@ Note: also defined together with __clang__ in both frontends:
 
 
 
-#if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__)
+#if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
 #define PATHSEP_CHAR (char) ';'
 #define PATHSEP_STR (char *) ";"
 #else
@@ -550,6 +550,10 @@ Note: also defined together with __clang__ in both frontends:
 #else
 #define SLASH_CHAR	(char) '\\'
 #define SLASH_STR	(char *) "\\"
+#endif
+
+#ifdef __DJGPP__
+#define HAVE_8DOT3_FILENAMES
 #endif
 
 /* End compiler stuff */
