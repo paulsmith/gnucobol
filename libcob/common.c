@@ -4439,6 +4439,7 @@ cob_sys_fork (void)
 #if defined	(HAVE_UNISTD_H) && !(defined (_WIN32))
 	int	pid;
 	if ((pid = fork ()) == 0 ) {
+		cob_process_id = 0;	/* reset cached value */
 		return 0;		/* child process just returns */
 	}
 	if (pid < 0) {			/* Some error happened */
