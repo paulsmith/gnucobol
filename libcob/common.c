@@ -110,7 +110,13 @@
 /* C version info */
 #ifdef	__VERSION__
 #if		! defined (_MSC_VER)
+#if		defined (__MINGW32__)
+#define OC_C_VERSION_PRF	"(MinGW) "
+#elif	defined (__DJGPP__)
+#define OC_C_VERSION_PRF	"(DJGPP) "
+#else
 #define OC_C_VERSION_PRF	""
+#endif
 #elif	defined (__c2__)
 #define OC_C_VERSION_PRF	"(Microsoft C2) "
 #elif	defined (__llvm__)
@@ -122,9 +128,9 @@
 #elif	defined (__xlc__)
 #define OC_C_VERSION_PRF	"(IBM XL C/C++) "
 #define OC_C_VERSION	CB_XSTRINGIFY (__xlc__)
-#elif	defined (__SUNPRO_CC)
-#define OC_C_VERSION_PRF	"(Sun C++) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__SUNPRO_CC)
+#elif	defined (__SUNPRO_C)
+#define OC_C_VERSION_PRF	"(Sun C) "
+#define OC_C_VERSION	CB_XSTRINGIFY (__SUNPRO_C)
 #elif	defined (_MSC_VER)
 #define OC_C_VERSION_PRF	"(Microsoft) "
 #define OC_C_VERSION	CB_XSTRINGIFY (_MSC_VER)
@@ -3847,17 +3853,29 @@ cob_gettmpdir (void)
 	return tmpdir;
 }
 
+/* Set temporary file name */
 void
 cob_temp_name (char *filename, const char *ext)
 {
-	/* Set temporary file name */
+	int pid = cob_sys_getpid ();
+#ifndef HAVE_8DOT3_FILENAMES
+#define TEMP_EXT_SCHEMA	"%s%ccob%d_%d%s"
+#define TEMP_SORT_SCHEMA	"%s%ccobsort%d_%d"
+#else
+/* 8.3 allows only short names... */
+#define TEMP_EXT_SCHEMA	"%s%cc%d_%d%s"
+#define TEMP_SORT_SCHEMA	"%s%cs%d_%d"
+	pid = pid % 9999;
+#endif
 	if (ext) {
-		snprintf (filename, (size_t)COB_FILE_MAX, "%s%ccob%d_%d%s",
-			cob_gettmpdir (), SLASH_CHAR, cob_sys_getpid (), cob_temp_iteration, ext);
+		snprintf (filename, (size_t)COB_FILE_MAX, TEMP_EXT_SCHEMA,
+			cob_gettmpdir (), SLASH_CHAR, pid, cob_temp_iteration, ext);
 	} else {
-		snprintf (filename, (size_t)COB_FILE_MAX, "%s%ccobsort%d_%d",
-			cob_gettmpdir (), SLASH_CHAR, cob_sys_getpid (), cob_temp_iteration);
+		snprintf (filename, (size_t)COB_FILE_MAX, TEMP_SORT_SCHEMA,
+			cob_gettmpdir (), SLASH_CHAR, pid, cob_temp_iteration);
 	}
+#undef TEMP_EXT_SCHEMA
+#undef TEMP_SORT_SCHEMA
 }
 
 void

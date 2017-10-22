@@ -97,7 +97,13 @@ struct strcache {
 /* C version info */
 #ifdef	__VERSION__
 #if		! defined (_MSC_VER)
+#if		defined (__MINGW32__)
+#define OC_C_VERSION_PRF	"(MinGW) "
+#elif	defined (__DJGPP__)
+#define OC_C_VERSION_PRF	"(DJGPP) "
+#else
 #define OC_C_VERSION_PRF	""
+#endif
 #elif	defined (__c2__)
 #define OC_C_VERSION_PRF	"(Microsoft C2) "
 #elif	defined (__llvm__)
@@ -109,9 +115,9 @@ struct strcache {
 #elif	defined(__xlc__)
 #define OC_C_VERSION_PRF	"(IBM XL C/C++) "
 #define OC_C_VERSION	CB_XSTRINGIFY(__xlc__)
-#elif	defined(__SUNPRO_CC)
-#define OC_C_VERSION_PRF	"(Sun C++) "
-#define OC_C_VERSION	CB_XSTRINGIFY(__SUNPRO_CC)
+#elif	defined(__SUNPRO_C)
+#define OC_C_VERSION_PRF	"(Sun C) "
+#define OC_C_VERSION	CB_XSTRINGIFY(__SUNPRO_C)
 #elif	defined(_MSC_VER)
 #define OC_C_VERSION_PRF	"(Microsoft) "
 #define OC_C_VERSION	CB_XSTRINGIFY(_MSC_VER)
@@ -1717,6 +1723,9 @@ cobc_clean_up (const int status)
 	struct filename		*fn;
 	struct local_filename	*lf;
 	cob_u32_t		i;
+#ifdef HAVE_8DOT3_FILENAMES
+	char	*buffer;
+#endif
 
 	if (cb_src_list_file) {
 		fclose (cb_src_list_file);
@@ -1789,13 +1798,28 @@ cobc_clean_up (const int status)
 			} else if (fn->translate) {
 				/* If we get syntax errors, we do not
 				   know the number of local include files */
+#ifndef HAVE_8DOT3_FILENAMES
 				snprintf (cobc_buffer, cobc_buffer_size,
 					 "%s.l.h", fn->translate);
+#else
+				/* for 8.3 filenames use no ".c" prefix and only one period */
+				buffer = cobc_strdup (fn->translate);
+				*(buffer + strlen(buffer) - 2) = 'l';
+				*(buffer + strlen(buffer) - 1) = 0;
+				snprintf (cobc_buffer, cobc_buffer_size,
+					 "%s.h", buffer);
+				cobc_free (buffer);
+#endif
 				cobc_buffer[cobc_buffer_size] = 0;
 				for (i = 0; i < 30U; ++i) {
 					if (i) {
+#ifndef HAVE_8DOT3_FILENAMES
 						snprintf (cobc_buffer, cobc_buffer_size,
 							 "%s.l%u.h", fn->translate, i);
+#else
+						snprintf (cobc_buffer, cobc_buffer_size,
+							"%s%u.h", buffer, i);
+#endif
 						cobc_buffer[cobc_buffer_size] = 0;
 					}
 					if (!access (cobc_buffer, F_OK)) {
@@ -1804,6 +1828,9 @@ cobc_clean_up (const int status)
 						break;
 					}
 				}
+#ifdef HAVE_8DOT3_FILENAMES
+				cobc_free (buffer);
+#endif
 			}
 		}
 	}
@@ -2410,7 +2437,7 @@ process_command_line (const int argc, char **argv)
 	int			list_intrinsics = 0;
 	int			list_system_names = 0;
 	int			list_system_routines = 0;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__DJGPP__)
 	int 			argnum;
 #endif
 	enum cob_exception_id	i;
@@ -2422,8 +2449,8 @@ process_command_line (const int argc, char **argv)
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
 
-#ifdef _WIN32
-	/* Translate command line arguments from WIN to UNIX style */
+#if defined (_WIN32) || defined (__DJGPP__)
+	/* Translate command line arguments from DOS/WIN to UNIX style */
 	argnum = 1;
 	while (++argnum <= argc) {
 		if (strrchr(argv[argnum - 1], '/') == argv[argnum - 1]) {
@@ -3350,6 +3377,9 @@ process_filename (const char *filename)
 	char		*listptr;
 	size_t		fsize;
 	int		file_is_stdin;
+#ifdef HAVE_8DOT3_FILENAMES
+	char	*buffer;
+#endif
 
 	if (strcmp(filename, COB_DASH) == 0) {
 		if (cobc_seen_stdin == 0) {
@@ -3475,7 +3505,14 @@ process_filename (const char *filename)
 
 	/* Set storage filename */
 	if (fn->need_translate) {
+#ifndef HAVE_8DOT3_FILENAMES
 		fn->trstorage = cobc_stradd_dup (fn->translate, ".h");
+#else
+		/* for 8.3 filenames use no ".c" prefix */
+		buffer = cobc_strdup (fn->translate);
+		*(buffer + strlen(buffer) - 1) = 'h';
+		fn->trstorage = buffer;
+#endif
 	}
 
 	/* Set object filename */
@@ -6564,6 +6601,9 @@ process_translate (struct filename *fn)
 	struct local_filename	*lf;
 	int			ret;
 	int			i;
+#ifdef HAVE_8DOT3_FILENAMES
+	char	*buffer;
+#endif
 
 	/* Initialize */
 	cb_source_file = NULL;
@@ -6673,11 +6713,24 @@ process_translate (struct filename *fn)
 	for (p = current_program; p; p = p->next_program, ret++) {
 		lf = cobc_main_malloc (sizeof(struct local_filename));
 		lf->local_name = cobc_main_malloc (fn->translate_len + 12U);
+#ifndef HAVE_8DOT3_FILENAMES
 		if (p == current_program && !p->next_program) {
 			sprintf (lf->local_name, "%s.l.h", fn->translate);
 		} else {
 			sprintf (lf->local_name, "%s.l%d.h", fn->translate, ret);
 		}
+#else
+		/* for 8.3 filenames use no ".c" prefix and only one period */
+		buffer = cobc_strdup (fn->translate);
+		*(buffer + strlen(buffer) - 2) = 'l';
+		*(buffer + strlen(buffer) - 1) = 0;
+		if (p == current_program && !p->next_program) {
+			sprintf (lf->local_name, "%s.h", buffer);
+		} else {
+			sprintf (lf->local_name, "%s%d.h", buffer, ret);
+		}
+		cobc_free (buffer);
+#endif
 		if (cb_unix_lf) {
 			lf->local_fp = fopen (lf->local_name, "wb");
 		} else {
@@ -7526,11 +7579,10 @@ main (int argc, char **argv)
 	output_name = NULL;
 
 	/* Set default computed goto usage if appropriate */
-#if	defined(__GNUC__) && !defined(__clang__)
-	cb_flag_computed_goto = 1;
-#elif	defined(__SUNPRO_C) && __SUNPRO_C >= 0x570
-	cb_flag_computed_goto = 1;
-#elif	defined(__xlc__) && defined(__IBMC__) && __IBMC__ >= 700
+	/* note: some internal compiler errors with sunpro 5120 */
+#if	(defined(__GNUC__) && !defined(__clang__)) \
+ || (defined(__SUNPRO_C) && __SUNPRO_C >= 0x570) \
+ || (defined(__xlc__) && defined(__IBMC__) && __IBMC__ >= 700)
 	cb_flag_computed_goto = 1;
 #endif
 
