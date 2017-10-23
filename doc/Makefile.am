@@ -19,12 +19,18 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+if COB_MAKE_RUN_BINARIES
 COBCINFOSH = . $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal && \
 	GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
+else
+COBCINFOSH = GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
+endif
+	
 info_TEXINFOS = gnucobol.texi
 gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
 	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi
 
+if COB_MAKE_RUN_BINARIES
 cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
 	$(top_srcdir)/cobc/flag.def $(top_srcdir)/cobc/warning.def \
 	$(top_srcdir)/doc/cobcinfo.sh
@@ -33,6 +39,7 @@ cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
 cbchelp.tex: $(top_srcdir)/bin/cobcrun.c $(top_srcdir)/configure.ac \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
+endif
 
 cbconf.tex: $(top_srcdir)/config/default.conf \
 	$(top_srcdir)/doc/cobcinfo.sh
@@ -42,10 +49,16 @@ cbrunt.tex: $(top_srcdir)/config/runtime.cfg \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
 
+if COB_MAKE_RUN_BINARIES
 cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(top_srcdir)/cobc/cobc.c $(top_srcdir)/cobc/reserved.c \
 	$(top_srcdir)/doc/cobcinfo.sh
 	$(COBCINFOSH) $@
+else
+cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
+	$(top_srcdir)/doc/cobcinfo.sh
+	$(COBCINFOSH) "fixtimestamps"
+endif
 
 EXTRA_DIST = gnucobol.pdf cobcinfo.sh
 

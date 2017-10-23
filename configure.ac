@@ -248,15 +248,15 @@ AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 # Checks for UTC offset (init)
 COB_HAS_UTC_OFFSET="no"
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef _BSD_SOURCE
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for _BSD_SOURCE])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
+	[[
+	#ifndef _BSD_SOURCE
+	# error macro not defined
 	#endif]])],
-	[COB_HAS_UTC_OFFSET="yes"],
-	[],
-	[])
+	[COB_HAS_UTC_OFFSET="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])
@@ -279,74 +279,66 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
 
 
 # Check gcc/icc/clang
-COB_USES_GCC=no
-COB_USES_GCC_NO_ICC=no
-COB_USES_ICC_ONLY=no
-COB_USES_CLANG_ONLY=no
-COB_USES_XLC_ONLY=no
-COB_USES_WATCOMC_ONLY=no
+COB_USES_GCC="no"
+COB_USES_GCC_NO_ICC="no"
+COB_USES_ICC_ONLY="no"
+COB_USES_CLANG_ONLY="no"
+COB_USES_XLC_ONLY="no"
+COB_USES_WATCOMC_ONLY="no"
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __GNUC__
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for __GNUC__])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef __GNUC__
+	# error macro not defined
 	#endif]])],
-	[COB_USES_GCC=yes],
-	[],
-	[])
+	[COB_USES_GCC="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#if	defined(__GNUC__) && !defined(__INTEL_COMPILER)
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for __INTEL_COMPILER])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef __INTEL_COMPILER
+	# error macro not defined
 	#endif]])],
-	[COB_USES_GCC_NO_ICC=yes],
-	[],
-	[])
+	[COB_USES_ICC_ONLY=yes
+	 AC_MSG_RESULT([yes])],
+	[if test "$COB_USES_GCC" = "yes"; then
+		COB_USES_GCC_NO_ICC="yes"
+	 fi
+	 AC_MSG_RESULT([no])]
+	)
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __INTEL_COMPILER
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for __clang__])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef __clang__
+	# error macro not defined
 	#endif]])],
-	[COB_USES_ICC_ONLY=yes],
-	[],
-	[])
+	[COB_USES_CLANG_ONLY="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __clang__
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for __xlc__])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef __xlc__
+	# error macro not defined
 	#endif]])],
-	[COB_USES_CLANG_ONLY=yes],
-	[],
-	[])
+	[COB_USES_XLC_ONLY="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __xlc__
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for __WATCOMC__])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef __WATCOMC__
+	# error macro not defined
 	#endif]])],
-	[COB_USES_XLC_ONLY=yes],
-	[],
-	[])
+	[COB_USES_WATCOMC_ONLY="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef __WATCOMC__
-	return 0;
-	#else
-	return 1;
-	#endif]])],
-	[COB_USES_WATCOMC_ONLY=yes],
-	[],
-	[])
+if test "x$COB_CC" = "x"; then
+	COB_CC="$CC"
+fi
 
-COB_CC="$CC"
 if test "$COB_USES_ICC_ONLY" = "yes"; then
 	LIBCOB_LIBS="-limf -lm"
 else
@@ -514,7 +506,8 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	]])],
 	[COB_GMP_HEADER=`./conftest$ac_exeext x`],
 	[AC_MSG_ERROR([Unable to extract GMP version information from gmp.h])],
-	[])
+	[AC_MSG_WARN([cannot run test program while cross-compiling])
+	 COB_GMP_HEADER="cross-compilation - assumed"])
 if test "x$COB_GMP_HEADER" = "x"; then
 	AC_MSG_ERROR([Unable to extract GMP version information (header)])
 fi
@@ -535,7 +528,8 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	]])],
 	[COB_GMP_LIB=`./conftest$ac_exeext x`],
 	[AC_MSG_ERROR([Unable to extract GMP version information from gmp_version])],
-	[])
+	[AC_MSG_WARN([matching GMP version assumed])]
+	 COB_GMP_LIB="cross")
 if test "x$COB_GMP_LIB" = "x"; then
 	AC_MSG_ERROR([Unable to extract GMP version information (library)])
 fi
@@ -544,7 +538,7 @@ AC_MSG_CHECKING([matching GMP version])
 COB_GMP_LIB_MAJOR=$(echo "$COB_GMP_LIB" | cut -d. -f1)
 COB_GMP_LIB_MINOR=$(echo "$COB_GMP_LIB" | cut -d. -f2)
 
-if test "$COB_GMP_HEADER" = "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR"; then
+if test "$COB_GMP_HEADER" = "$COB_GMP_LIB_MAJOR.$COB_GMP_LIB_MINOR" -o "$COB_GMP_LIB" = "cross"; then
 	AC_MSG_RESULT([yes ($COB_GMP_HEADER)])
 else
 	AC_MSG_RESULT([no (header: $COB_GMP_HEADER / library: $COB_GMP_LIB)])
@@ -625,15 +619,14 @@ esac
 
 # Simon: removed, use --disable-nls instead
 ## Disable for Cygwin
-#AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-#	#ifdef __CYGWIN__
-#	return 0;
-#	#else
-#	return 1;
+#AC_MSG_CHECKING([for __CYGWIN__])
+#AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+#	#ifndef __CYGWIN__
+#	# error macro not defined
 #	#endif]])],
-#	[enable_nls=no],
-#	[],
-#	[])
+#	[enable_nls=no
+#	 AC_MSG_RESULT([yes])],
+#	[AC_MSG_RESULT([no])])
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.19.8])
@@ -815,56 +808,65 @@ if test "$with_db" = "yes"; then
 		[COB_BDB_HEADER=`./conftest$ac_exeext x`]
 		[COB_BDB_HEADER_STR=`./conftest$ac_exeext x y`],
 		[AC_MSG_ERROR([Unable to extract Berkeley DB version information from db.h])],
-		[])
+		[AC_MSG_WARN([cannot run test program while cross-compiling])
+		 COB_BDB_HEADER="cross"
+		 COB_BDB_HEADER_STR="cross"])
 	if test "x$COB_BDB_HEADER" = "x"; then
 		AC_MSG_ERROR([Unable to extract Berkeley DB version information])
 	fi
 	if test "x$COB_BDB_HEADER_STR" != "x"; then
 		AC_MSG_NOTICE([db.h reports version "$COB_BDB_HEADER_STR"])
 	fi
-	AC_MSG_CHECKING([for Berkeley DB db.h version >= 4.1])
-	COB_BDB_HEADER_MAJOR=$(echo "$COB_BDB_HEADER" | cut -d. -f1)
-	if test $COB_BDB_HEADER_MAJOR -gt 4; then
-		AC_MSG_RESULT([yes ($COB_BDB_HEADER)])
-	else
-		COB_BDB_HEADER_MINOR=$(echo "$COB_BDB_HEADER" | cut -d. -f2)
-		if test $COB_BDB_HEADER_MAJOR -eq 4 -a $COB_BDB_HEADER_MINOR -ge 1; then
+	if test "$COB_BDB_HEADER_STR" != "cross"; then
+		AC_MSG_CHECKING([for Berkeley DB db.h version >= 4.1])
+		COB_BDB_HEADER_MAJOR=$(echo "$COB_BDB_HEADER" | cut -d. -f1)
+		if test $COB_BDB_HEADER_MAJOR -gt 4; then
 			AC_MSG_RESULT([yes ($COB_BDB_HEADER)])
 		else
-			AC_MSG_RESULT([no ($COB_BDB_HEADER)])
-			AC_MSG_ERROR([Berkeley DB db.h has incompatible version])
+			COB_BDB_HEADER_MINOR=$(echo "$COB_BDB_HEADER" | cut -d. -f2)
+			if test $COB_BDB_HEADER_MAJOR -eq 4 -a $COB_BDB_HEADER_MINOR -ge 1; then
+				AC_MSG_RESULT([yes ($COB_BDB_HEADER)])
+			else
+				AC_MSG_RESULT([no ($COB_BDB_HEADER)])
+				AC_MSG_ERROR([Berkeley DB db.h has incompatible version])
+			fi
 		fi
-	fi
-	MYOLDLIBS="$LIBS"
-	cob_got_db=no
-	AC_MSG_CHECKING([for Berkeley DB library with version $COB_BDB_HEADER])
-	# prefer library with version number included as some systems link against s wrong version
-	# of the library and to not break when a newer BDB version is installed, see bug #100
-	for cobdb in db-$COB_BDB_HEADER db
-	do
-		LIBS="$MYOLDLIBS -l$cobdb"
-		AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
-		#include <db.h>]], [[
-		int major, minor, patch;
-		db_version (&major, &minor, &patch);
-		if (major == DB_VERSION_MAJOR && minor == DB_VERSION_MINOR) {
-			return 0;
-		}
-		return 1;]])],
-		[AC_DEFINE([WITH_DB], [1])
-		cob_got_db=yes
-		LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdb"
-		break],
-		[],
-		[])
-	done
-	LIBS="$MYOLDLIBS"
-	if test "$cob_got_db" = "yes"; then
-		AC_MSG_RESULT([yes])
-		AC_MSG_NOTICE([BDB library version $COB_BDB_HEADER found as -l$cobdb])
+		MYOLDLIBS="$LIBS"
+		cob_got_db=no
+		AC_MSG_CHECKING([for Berkeley DB library with version $COB_BDB_HEADER])
+		# prefer library with version number included as some systems link against s wrong version
+		# of the library and to not break when a newer BDB version is installed, see bug #100
+		for cobdb in db-$COB_BDB_HEADER db
+		do
+			LIBS="$MYOLDLIBS -l$cobdb"
+			AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
+			#include <db.h>]], [[
+			int major, minor, patch;
+			db_version (&major, &minor, &patch);
+			if (major == DB_VERSION_MAJOR && minor == DB_VERSION_MINOR) {
+				return 0;
+			}
+			return 1;]])],
+			[AC_DEFINE([WITH_DB], [1])
+			cob_got_db=yes
+			LIBCOB_LIBS="$LIBCOB_LIBS -l$cobdb"
+			break],
+			[],
+			[])
+		done
+		LIBS="$MYOLDLIBS"
+		if test "$cob_got_db" = "yes"; then
+			AC_MSG_RESULT([yes])
+			AC_MSG_NOTICE([BDB library version $COB_BDB_HEADER found as -l$cobdb])
+		else
+			AC_MSG_RESULT([no])
+			AC_MSG_ERROR([BDB library version $COB_BDB_HEADER not found])
+		fi
 	else
-		AC_MSG_RESULT([no])
-		AC_MSG_ERROR([BDB library version $COB_BDB_HEADER not found])
+		AC_MSG_WARN([Matching BDB version (>=4.1) assumed])
+		AC_CHECK_LIB([db], [db_version],
+		[LIBCOB_LIBS="$LIBCOB_LIBS -ldb"],
+		AC_MSG_ERROR([BDB library is required as -ldb]), [])
 	fi
 	unset cobdb
 	unset cob_got_db
@@ -874,15 +876,14 @@ fi
 # Checks for dl/ltdl.
 DEFINE_DL="no"
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
-	#ifdef _WIN32
-	return 0;
-	#else
-	return 1;
+AC_MSG_CHECKING([for _WIN32])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	#ifndef _WIN32
+	# error macro not defined
 	#endif]])],
-	[DEFINE_DL="yes"],
-	[],
-	[])
+	[DEFINE_DL="yes"
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
 if test "$DEFINE_DL" = "no" -a "$with_dl" = "yes"; then
   if test "x$ac_cv_header_dlfcn_h" = "xyes"; then
@@ -932,10 +933,12 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 	}
 	return 0;]])],
 	[AC_DEFINE([COB_STRFTIME], [1])
-		COB_HAS_UTC_OFFSET="yes"
-		AC_MSG_RESULT([yes])],
+	 COB_HAS_UTC_OFFSET="yes"
+	 AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
-	[])
+	[AC_DEFINE([COB_STRFTIME], [0])
+	 AC_MSG_RESULT([assumed "no" - cross-compilation])
+	 AC_MSG_WARN([cannot run test program while cross-compiling])])
 
 # Checks for size of long
 AC_MSG_CHECKING([if size of long int = size of long long])
@@ -946,7 +949,18 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	]])],
 	[AC_DEFINE([COB_LI_IS_LL], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
-	[])
+	[if test "$COB_LI_IS_LL" = "0"; then
+		AC_MSG_RESULT([specified "no" on configure line])
+	 else
+		if test "$COB_LI_IS_LL" = "1"; then
+			AC_MSG_RESULT([specified "yes" on configure line])
+		else
+			COB_LI_IS_LL=1
+			AC_MSG_RESULT([assumed - cross-compilation])
+		fi
+	 fi
+	 AC_DEFINE([COB_LI_IS_LL], [$COB_LI_IS_LL])
+	 AC_MSG_WARN([cannot run test program while cross-compiling])])
 
 AC_MSG_CHECKING([if long is 32 bits])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
@@ -956,10 +970,23 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	]])],
 	[AC_DEFINE([COB_32_BIT_LONG], [1]) AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
-	[])
+	[if test "$COB_32_BIT_LONG" = "0"; then
+		AC_MSG_RESULT([specified "no" on configure line])
+	 else
+		if test "$COB_32_BIT_LONG" = "1"; then
+			AC_MSG_RESULT([specified "yes" on configure line])
+		else
+			COB_32_BIT_LONG=1
+			AC_MSG_RESULT([assumed - cross-compilation])
+		fi
+	 fi
+	 AC_DEFINE([COB_32_BIT_LONG], [$COB_32_BIT_LONG])
+	 AC_MSG_WARN([cannot run test program while cross-compiling])])
 
 
-COB_HAS_64_BIT_POINTER="no"
+if test "cross_compiling" != "yes"; then
+	COB_HAS_64_BIT_POINTER="no"
+fi
 AC_MSG_CHECKING([if pointer is longer than 32 bits])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	if (sizeof (void *) > 4U)
@@ -970,7 +997,22 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
 	 AC_DEFINE([COB_64_BIT_POINTER], [1])
 	 AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])],
-	[])
+	[if test "$COB_HAS_64_BIT_POINTER" = "0"; then
+		COB_HAS_64_BIT_POINTER="no"
+		AC_DEFINE([COB_64_BIT_POINTER], [0])
+		AC_MSG_RESULT([specified "no" on configure line])
+	 else
+		if test "$COB_HAS_64_BIT_POINTER" = "1"; then
+			COB_HAS_64_BIT_POINTER="yes"
+			AC_DEFINE([COB_64_BIT_POINTER], [1])
+			AC_MSG_RESULT([specified "yes" on configure line])
+		else
+			COB_HAS_64_BIT_POINTER="no"
+			AC_DEFINE([COB_64_BIT_POINTER], [0])
+			AC_MSG_RESULT([assumed "no" - cross-compilation])
+		fi
+	 fi
+	 AC_MSG_WARN([cannot run test program while cross-compiling])])
 
 #if test "$enable_debug" != "yes" -a "$COB_USES_GCC_NO_ICC" = "yes"; then
 #	MYOLDCFLAGS="$CFLAGS"
@@ -1015,9 +1057,18 @@ fi
 COB_CONFIG_DIR="$datadir/$PACKAGE_TARNAME/config"
 COB_COPY_DIR="$datadir/$PACKAGE_TARNAME/copy"
 COB_LIBRARY_PATH="$libdir/$PACKAGE_TARNAME"
-COB_OBJECT_EXT="$OBJEXT"
-COB_MODULE_EXT=`echo "$acl_cv_shlibext" | sed -e 's/dll\.a/dll/'`
 COB_EXE_EXT="$EXEEXT"
+if test "$COB_EXE_EXT" = ".exe"; then
+	COB_MODULE_EXT="dll"
+else
+	if test "$COB_EXE_EXT" = ".exe" -o "$COB_EXE_EXT" = ".EXE"; then
+		COB_MODULE_EXT="dll"
+	else
+		# normal case...
+		COB_MODULE_EXT=`echo "$acl_cv_shlibext" | sed -e 's/dll\.a/dll/'`
+	fi
+fi
+COB_OBJECT_EXT="$OBJEXT"
 LIBS="$save_libs"
 COB_EXPORT_DYN="`eval echo $export_dynamic_flag_spec`"
 COB_PIC_FLAGS=`echo "$lt_prog_compiler_pic" | sed -e 's/^ //'`
@@ -1286,6 +1337,8 @@ unset MYOCLIBS
 # Generate the output
 
 AM_CONDITIONAL([COB_MAKE_IX], [test "$COB_HAS_ISAM" = yes])
+AM_CONDITIONAL([COB_MAKE_RUN_BINARIES], [test "$cross_compiling" != yes])
+# FIXME: Should be tested as the system may can actually run these (Bash on Windows?)
 
 AC_DEFINE_UNQUOTED([COB_EXPORT_DYN], ["$COB_EXPORT_DYN"])
 AC_DEFINE_UNQUOTED([COB_PIC_FLAGS], ["$COB_PIC_FLAGS"])
@@ -1340,12 +1393,13 @@ AC_OUTPUT
 AC_MSG_NOTICE([GnuCOBOL Configuration:])
 AC_MSG_NOTICE([ CC                ${CC}])
 AC_MSG_NOTICE([ CFLAGS            ${CFLAGS}])
-AC_MSG_NOTICE([ COB_CFLAGS        ${COB_CFLAGS}])
 AC_MSG_NOTICE([ LDFLAGS           ${LDFLAGS}])
-AC_MSG_NOTICE([ COB_LDFLAGS       ${COB_LDFLAGS}])
 if test "x$COBC_LIBS" != "x"; then
   AC_MSG_NOTICE([ COBC_LIBS         ${COBC_LIBS}])
 fi
+AC_MSG_NOTICE([ COB_CC            ${COB_CC}])
+AC_MSG_NOTICE([ COB_CFLAGS        ${COB_CFLAGS}])
+AC_MSG_NOTICE([ COB_LDFLAGS       ${COB_LDFLAGS}])
 AC_MSG_NOTICE([ COB_LIBS          ${COB_LIBS}])
 AC_MSG_NOTICE([ COB_CONFIG_DIR    ${COB_CONFIG_DIR}])
 AC_MSG_NOTICE([ COB_COPY_DIR      ${COB_COPY_DIR}])

@@ -20,7 +20,9 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 extrasdir = @COB_LIBRARY_PATH@
+if COB_MAKE_RUN_BINARIES
 extras_DATA = CBL_OC_DUMP.$(COB_MODULE_EXT)
+endif
 
 EXTRA_DIST = CBL_OC_DUMP.cob
 CLEANFILES = $(extras_DATA)

@@ -1,4 +1,13 @@
 
+2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: revised all uses of AC_RUN_IFELSE and changed to
+	  AC_COMPILE_IFELSE where the preparser output is enough
+	* configure.ac: allow cross-compiling with --host and --build;
+	  allow to change compiler executable called by cobc with COB_CC
+	* extras/Makefile.am, doc/Makefile.am: don't call generated binaries
+	  if not possible because of cross-compiling
+
 2017-10-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* bin/Makefile.am, cobcrun/Makefile.am: fixed bug #448 parallel build
