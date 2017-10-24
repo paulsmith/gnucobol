@@ -5,6 +5,8 @@
 	  CURRENCY SIGN, better error messages for this clause
 	* error.c, cobc.c: changed message format back to old version,
 	  see bug #455
+	* typeck.c: fixed bug #266 - false error on duplicate characters in
+	  class definition
 
 2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

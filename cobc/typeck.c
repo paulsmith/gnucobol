@@ -2641,16 +2641,18 @@ cb_validate_program_environment (struct cb_program *prog)
 				for (i = lower; i <= upper; i++) {
 					if (values[i]) {
 						dupls = 1;
+					} else {
+						values[i] = 1;
 					}
-					values[i] = 1;
 				}
 			} else {
 				if (CB_NUMERIC_LITERAL_P (x)) {
 					n = get_value (x);
 					if (values[n]) {
 						dupls = 1;
+					} else {
+						values[n] = 1;
 					}
-					values[n] = 1;
 				} else if (CB_LITERAL_P (x)) {
 					size = (int)CB_LITERAL (x)->size;
 					data = CB_LITERAL (x)->data;
@@ -2658,28 +2660,24 @@ cb_validate_program_environment (struct cb_program *prog)
 						n = data[i];
 						if (values[n]) {
 							dupls = 1;
+						} else {
+							values[n] = 1;
 						}
-						values[n] = 1;
 					}
 				} else {
 					n = get_value (x);
 					if (values[n]) {
 						dupls = 1;
+					} else {
+						values[n] = 1;
 					}
-					values[n] = 1;
 				}
 			}
 		}
 		if (dupls) {
-			if (!cb_relaxed_syntax_checks) {
-				cb_error_x (CB_VALUE(l),
-					    _("duplicate values in class '%s'"),
-					    cb_name (CB_VALUE(l)));
-			} else {
-				cb_warning_x (COBC_WARN_FILLER, CB_VALUE(l),
-					    _("duplicate values in class '%s'"),
-					    cb_name (CB_VALUE(l)));
-			}
+			cb_warning_x (warningopt, CB_VALUE(l),
+					_("duplicate character values in class '%s'"),
+					cb_name (CB_VALUE(l)));
 		}
 	}
 
