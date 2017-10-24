@@ -34,7 +34,7 @@ AT_DATA([prog.cob], [
 
 # default configuration permits this extension
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in GnuCOBOL
+[prog.cob:4: warning: AUTHOR is obsolete in GnuCOBOL
 ])
 
 AT_CLEANUP
@@ -54,37 +54,37 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=default prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in GnuCOBOL
+[prog.cob:4: warning: AUTHOR is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in COBOL 85
+[prog.cob:4: warning: AUTHOR is obsolete in COBOL 85
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
-[prog.cob: 4: error: AUTHOR does not conform to COBOL 2002
+[prog.cob:4: error: AUTHOR does not conform to COBOL 2002
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 4: error: AUTHOR does not conform to COBOL 2014
+[prog.cob:4: error: AUTHOR does not conform to COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY -std=xopen prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR used
+[prog.cob:4: warning: AUTHOR used
 ])
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in ACUCOBOL-GT
+[prog.cob:4: warning: AUTHOR is obsolete in ACUCOBOL-GT
 ])
 AT_CHECK([$COMPILE_ONLY -std=bs2000-strict prog.cob], [1], [],
-[prog.cob: 4: error: AUTHOR does not conform to BS2000 COBOL
+[prog.cob:4: error: AUTHOR does not conform to BS2000 COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in IBM COBOL
+[prog.cob:4: warning: AUTHOR is obsolete in IBM COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in Micro Focus COBOL
+[prog.cob:4: warning: AUTHOR is obsolete in Micro Focus COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in RM-COBOL
+[prog.cob:4: warning: AUTHOR is obsolete in RM-COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=mvs-strict prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in MVS/VM COBOL
+[prog.cob:4: warning: AUTHOR is obsolete in MVS/VM COBOL
 ])
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=bs2000 prog.cob], [0], [], [])
@@ -111,7 +111,7 @@ AT_DATA([prog.cob], [
 
 # check if -std loads configuration file and if override works
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 4: error: AUTHOR does not conform to COBOL 2014
+[prog.cob:4: error: AUTHOR does not conform to COBOL 2014
 ])
 
 AT_CLEANUP
@@ -132,7 +132,7 @@ AT_DATA([prog.cob], [
 
 # check if override via -conf works
 AT_CHECK([$COMPILE_ONLY -conf=cobol2014.conf prog.cob], [1], [],
-[prog.cob: 4: error: AUTHOR does not conform to COBOL 2014
+[prog.cob:4: error: AUTHOR does not conform to COBOL 2014
 ])
 
 AT_CLEANUP
@@ -197,9 +197,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [1], [],
 [configuration error:
 test.conf: recursive inclusion
-test3.conf: 2: configuration file was included here
-test2.conf: 4: configuration file was included here
-test.conf: 3: configuration file was included here
+test3.conf:2: configuration file was included here
+test2.conf:4: configuration file was included here
+test.conf:3: configuration file was included here
 ])
 
 AT_CLEANUP
@@ -335,11 +335,11 @@ notthere.conf: No such file or directory
 AT_CHECK([$COMPILE_ONLY -conf=defunc.conf prog.cob], [1], [],
 [configuration error:
 notthere.conf: No such file or directory
-defunc.conf: 2: configuration file was included here
+defunc.conf:2: configuration file was included here
 ])
 AT_CHECK([$COMPILE_ONLY -conf=defunc2.conf prog.cob], [1], [],
 [configuration error:
-defunc2.conf: 2: invalid configuration tag 'include'
+defunc2.conf:2: invalid configuration tag 'include'
 ])
 
 AT_CLEANUP
@@ -374,7 +374,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -conf=defunc.conf prog.cob], [0], [],
-[prog.cob: 4: warning: AUTHOR is obsolete in GnuCOBOL
+[prog.cob:4: warning: AUTHOR is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE_ONLY -conf=test.conf prog.cob], [0], [], [])
 
@@ -550,9 +550,9 @@ include "test.cfg"
 AT_CHECK([$COBCRUN -c test.cfg -r], [1], [],
 [configuration error:
 test.cfg: recursive inclusion
-test3.cfg: 2: configuration file was included here
-test2.cfg: 4: configuration file was included here
-test.cfg: 3: configuration file was included here
+test3.cfg:2: configuration file was included here
+test2.cfg:4: configuration file was included here
+test.cfg:3: configuration file was included here
 ])
 
 AT_CLEANUP
@@ -594,20 +594,20 @@ trace_file /tmp:/temp
 # conf entries must be clean
 AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [1], [],
 [configuration error:
-defunc.cfg: 2: unknown configuration tag 'novar'
-defunc.cfg: 3: invalid value 'notwithme' for configuration tag 'physical_cancel';
+defunc.cfg:2: unknown configuration tag 'novar'
+defunc.cfg:3: invalid value 'notwithme' for configuration tag 'physical_cancel';
 	should be one of the following values: true, false
-defunc.cfg: 4: invalid value 'insensitive' for configuration tag 'load_case';
+defunc.cfg:4: invalid value 'insensitive' for configuration tag 'load_case';
 	should be one of the following values: LOWER(1), UPPER(2), not set(0)
-defunc.cfg: 5: invalid value 'big' for configuration tag 'varseq_format';
+defunc.cfg:5: invalid value 'big' for configuration tag 'varseq_format';
 	should be one of the following values: 0, 1, 2, 3
-defunc.cfg: 6: invalid value '4K' for configuration tag 'sort_chunk';
+defunc.cfg:6: invalid value '4K' for configuration tag 'sort_chunk';
 	minimum value: 131072
-defunc.cfg: 7: invalid value '4G' for configuration tag 'sort_memory';
+defunc.cfg:7: invalid value '4G' for configuration tag 'sort_memory';
 	maximum value: 4294967294
-defunc.cfg: 8: WARNING - 'setenv nothing' without a value - ignored!
-defunc.cfg: 9: WARNING - 'sort_chunk' without a value - ignored!
-defunc.cfg: 10: invalid value '/tmp:/temp' for configuration tag 'trace_file';
+defunc.cfg:8: WARNING - 'setenv nothing' without a value - ignored!
+defunc.cfg:9: WARNING - 'sort_chunk' without a value - ignored!
+defunc.cfg:10: invalid value '/tmp:/temp' for configuration tag 'trace_file';
 	should not contain ':'
 ])
 
@@ -630,20 +630,20 @@ trace_file C:\tmp;C:\temp
 # conf entries must be clean
 AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [1], [],
 [configuration error:
-defunc.cfg: 2: unknown configuration tag 'novar'
-defunc.cfg: 3: invalid value 'notwithme' for configuration tag 'physical_cancel';
+defunc.cfg:2: unknown configuration tag 'novar'
+defunc.cfg:3: invalid value 'notwithme' for configuration tag 'physical_cancel';
 	should be one of the following values: true, false
-defunc.cfg: 4: invalid value 'insensitive' for configuration tag 'load_case';
+defunc.cfg:4: invalid value 'insensitive' for configuration tag 'load_case';
 	should be one of the following values: LOWER(1), UPPER(2), not set(0)
-defunc.cfg: 5: invalid value 'big' for configuration tag 'varseq_format';
+defunc.cfg:5: invalid value 'big' for configuration tag 'varseq_format';
 	should be one of the following values: 0, 1, 2, 3
-defunc.cfg: 6: invalid value '4K' for configuration tag 'sort_chunk';
+defunc.cfg:6: invalid value '4K' for configuration tag 'sort_chunk';
 	minimum value: 131072
-defunc.cfg: 7: invalid value '4G' for configuration tag 'sort_memory';
+defunc.cfg:7: invalid value '4G' for configuration tag 'sort_memory';
 	maximum value: 4294967294
-defunc.cfg: 8: WARNING - 'setenv nothing' without a value - ignored!
-defunc.cfg: 9: WARNING - 'sort_chunk' without a value - ignored!
-defunc.cfg: 10: invalid value 'C:\tmp;C:\temp' for configuration tag 'trace_file';
+defunc.cfg:8: WARNING - 'setenv nothing' without a value - ignored!
+defunc.cfg:9: WARNING - 'sort_chunk' without a value - ignored!
+defunc.cfg:10: invalid value 'C:\tmp;C:\temp' for configuration tag 'trace_file';
 	should not contain ';'
 ])
 
@@ -670,12 +670,12 @@ notthere.cfg: No such file or directory
 AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [1], [],
 [configuration error:
 notthere.cfg: No such file or directory
-defunc.cfg: 2: configuration file was included here
+defunc.cfg:2: configuration file was included here
 ])
 
 AT_CHECK([$COBCRUN -c defunc2.cfg --runtime-conf], [1], [],
 [configuration error:
-defunc2.cfg: 2: 'include' without a value!
+defunc2.cfg:2: 'include' without a value!
 ])
 
 AT_CLEANUP

@@ -840,8 +840,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 8: error: 'FIRST-MATCH' is not defined
+[copy.inc:2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog12.lst],
@@ -875,8 +875,8 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-copy.inc: 2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 8: error: 'FIRST-MATCH' is not defined
+copy.inc:2: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:8: error: 'FIRST-MATCH' is not defined
 
 0 warnings in compilation group
 2 errors in compilation group
@@ -898,8 +898,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [1], [],
-[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 8: error: 'FIRST-MATCH' is not defined
+[prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:8: error: 'FIRST-MATCH' is not defined
 ])
 
 AT_DATA([prog13.lst],
@@ -931,8 +931,8 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 8: error: 'FIRST-MATCH' is not defined
+prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:8: error: 'FIRST-MATCH' is not defined
 
 0 warnings in compilation group
 2 errors in compilation group
@@ -954,7 +954,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [0], [],
-[prog.cob: 6: warning: numeric value is expected
+[prog.cob:6: warning: numeric value is expected
 ])
 
 AT_DATA([prog14.lst],
@@ -986,7 +986,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 6: warning: numeric value is expected
+prog.cob:6: warning: numeric value is expected
 
 1 warning in compilation group
 0 errors in compilation group
@@ -1037,8 +1037,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COBC $FLAGS -E prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.i], [0], [],
-[prog.cob: 11: warning: numeric value is expected
-prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
+[prog.cob:11: warning: numeric value is expected
+prog.cob:6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 
 AT_DATA([prog17.lst],
@@ -1080,7 +1080,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 11: warning: numeric value is expected
+prog.cob:11: warning: numeric value is expected
 
 1 warning in compilation group
 0 errors in compilation group
@@ -1106,9 +1106,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [1], [],
-[prog.cob: 7: error: CRUD.CPY: No such file or directory
-prog.cob: 11: warning: numeric value is expected
-prog.cob: 6: warning: 'TEST-VAR' defined here as PIC 9(2)
+[prog.cob:7: error: CRUD.CPY: No such file or directory
+prog.cob:11: warning: numeric value is expected
+prog.cob:6: warning: 'TEST-VAR' defined here as PIC 9(2)
 ])
 
 AT_DATA([prog16.lst],
@@ -1137,8 +1137,8 @@ warning: numeric value is expected
 
 Error/Warning summary:
 
-prog.cob: 7: error: CRUD.CPY: No such file or directory
-prog.cob: 11: warning: numeric value is expected
+prog.cob:7: error: CRUD.CPY: No such file or directory
+prog.cob:11: warning: numeric value is expected
 
 1 warning in compilation group
 1 error in compilation group
@@ -1148,7 +1148,7 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -fmax-errors=0 prog.cob], [97], [],
-[prog.cob: 7: error: CRUD.CPY: No such file or directory
+[prog.cob:7: error: CRUD.CPY: No such file or directory
 cobc: too many errors
 cobc: aborting compile of prog.cob at line 7 (unknown: unknown)
 ])
@@ -1178,7 +1178,7 @@ error: CRUD.CPY: No such file or directory
 
 Error/Warning summary:
 
-prog.cob: 7: error: CRUD.CPY: No such file or directory
+prog.cob:7: error: CRUD.CPY: No such file or directory
 
 0 warnings in compilation group
 1 error in compilation group
@@ -1457,7 +1457,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-progc.cob: 13: error: syntax error, unexpected ., expecting DIVISION
+progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 
 0 warnings in compilation group
 1 error in compilation group
@@ -1466,12 +1466,12 @@ progc.cob: 13: error: syntax error, unexpected ., expecting DIVISION
 # Check once with $COMPILE and once with $COMPILE_ONLY.
 # This tests whether codegen affects the listing.
 AT_CHECK([$COMPILE -t prog.lst -tsymbols progc.cob], [1], [],
-[progc.cob: 13: error: syntax error, unexpected ., expecting DIVISION
+[progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 ])
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog20c.lst prog.lis], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -t prog2.lst -tsymbols progc.cob], [1], [],
-[progc.cob: 13: error: syntax error, unexpected ., expecting DIVISION
+[progc.cob:13: error: syntax error, unexpected ., expecting DIVISION
 ])
 AT_CHECK([$UNIFY_LISTING prog2.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog20c.lst prog.lis], [0], [], [])
@@ -1581,7 +1581,7 @@ L prog-2                       EXTERN   11
 
 Error/Warning summary:
 
-proga.cob: 14: warning: unreachable statement 'DISPLAY'
+proga.cob:14: warning: unreachable statement 'DISPLAY'
 
 1 warning in compilation group
 0 errors in compilation group
@@ -1640,7 +1640,7 @@ P EX                           18       14
 
 Error/Warning summary:
 
-progb.cob: 16: warning: unreachable statement 'ACCEPT'
+progb.cob:16: warning: unreachable statement 'ACCEPT'
 
 2 warnings in compilation group
 0 errors in compilation group
@@ -1650,15 +1650,15 @@ progb.cob: 16: warning: unreachable statement 'ACCEPT'
 # This tests whether codegen affects the listing.
 
 AT_CHECK([$COMPILE -x -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
-[proga.cob: 14: warning: unreachable statement 'DISPLAY'
-progb.cob: 16: warning: unreachable statement 'ACCEPT'
+[proga.cob:14: warning: unreachable statement 'DISPLAY'
+progb.cob:16: warning: unreachable statement 'ACCEPT'
 ])
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff expected.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
-[proga.cob: 14: warning: unreachable statement 'DISPLAY'
-progb.cob: 16: warning: unreachable statement 'ACCEPT'
+[proga.cob:14: warning: unreachable statement 'DISPLAY'
+progb.cob:16: warning: unreachable statement 'ACCEPT'
 ])
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff expected.lst prog.lis], [0], [], [])
@@ -2619,14 +2619,14 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
-[prog.cob: 21: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 23: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 30: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 32: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 39: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 41: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob:21: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:23: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:30: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:32: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:39: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:41: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:64: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:66: warning: DATA RECORDS is obsolete in GnuCOBOL
 ])
 
 
@@ -2834,14 +2834,14 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 21: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 23: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 30: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 32: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 39: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 41: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 64: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 66: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:21: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:23: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:30: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:32: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:39: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:41: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:64: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:66: warning: DATA RECORDS is obsolete in GnuCOBOL
 
 8 warnings in compilation group
 0 errors in compilation group
@@ -2913,46 +2913,46 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [1], [],
-[prog.cob: 9: warning: continuation of COBOL words used
-prog.cob: 11: warning: continuation of COBOL words used
-prog.cob: 12: warning: continuation of COBOL words used
-prog.cob: 13: warning: continuation of COBOL words used
-prog.cob: 14: warning: continuation of COBOL words used
-prog.cob: 7: error: missing PICTURE string
-prog.cob: 10: error: PICTURE string may not contain more than 255 characters; contains 301 characters
-prog.cob: 16: error: CR or DB may only occur once in a PICTURE string
-prog.cob: 17: error: S may only occur once in a PICTURE string
-prog.cob: 17: error: S must be at start of PICTURE string
-prog.cob: 18: error: a leading +/- sign cannot follow a leading currency symbol
-prog.cob: 18: error: a trailing currency symbol cannot follow a leading currency symbol
-prog.cob: 18: error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 20: error: invalid PICTURE character 'K'
-prog.cob: 21: error: numeric field cannot be larger than 38 digits
-prog.cob: 22: error: only up to 9 significant digits are permitted within parentheses
-prog.cob: 23: error: '(100' is not defined
-prog.cob: 23: error: invalid PICTURE character ')'
-prog.cob: 24: error: unbalanced parentheses
-prog.cob: 25: error: only one set of parentheses is permitted
-prog.cob: 26: error: parentheses must contain (a constant-name defined as) a positive integer
-prog.cob: 28: error: . cannot follow V
-prog.cob: 29: error: cannot have both Z and * in PICTURE string
-prog.cob: 30: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 30: error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 31: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
-prog.cob: 31: error: N cannot follow A or X
-prog.cob: 32: error: A or X cannot follow S
-prog.cob: 33: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 34: error: CR or DB cannot follow a leading +/- sign
-prog.cob: 36: error: a leading +/- sign cannot follow B, 0 or /
-prog.cob: 37: error: a leading +/- sign cannot follow 9
-prog.cob: 38: error: B, 0 or / cannot follow CR or DB
-prog.cob: 39: error: 9 cannot follow CR or DB
-prog.cob: 40: error: a floating currency symbol string which is before the decimal point cannot follow 9
-prog.cob: 41: error: a leading currency symbol cannot follow 9
-prog.cob: 42: error: a leading currency symbol cannot follow B, 0 or /
-prog.cob: 43: error: P must be at start or end of PICTURE string
-prog.cob: 43: error: V cannot follow a P which is after the decimal point
-prog.cob: 45: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+[prog.cob:9: warning: continuation of COBOL words used
+prog.cob:11: warning: continuation of COBOL words used
+prog.cob:12: warning: continuation of COBOL words used
+prog.cob:13: warning: continuation of COBOL words used
+prog.cob:14: warning: continuation of COBOL words used
+prog.cob:7: error: missing PICTURE string
+prog.cob:10: error: PICTURE string may not contain more than 255 characters; contains 301 characters
+prog.cob:16: error: CR or DB may only occur once in a PICTURE string
+prog.cob:17: error: S may only occur once in a PICTURE string
+prog.cob:17: error: S must be at start of PICTURE string
+prog.cob:18: error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob:18: error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob:18: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob:20: error: invalid PICTURE character 'K'
+prog.cob:21: error: numeric field cannot be larger than 38 digits
+prog.cob:22: error: only up to 9 significant digits are permitted within parentheses
+prog.cob:23: error: '(100' is not defined
+prog.cob:23: error: invalid PICTURE character ')'
+prog.cob:24: error: unbalanced parentheses
+prog.cob:25: error: only one set of parentheses is permitted
+prog.cob:26: error: parentheses must contain (a constant-name defined as) a positive integer
+prog.cob:28: error: . cannot follow V
+prog.cob:29: error: cannot have both Z and * in PICTURE string
+prog.cob:30: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob:30: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob:31: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:31: error: N cannot follow A or X
+prog.cob:32: error: A or X cannot follow S
+prog.cob:33: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob:34: error: CR or DB cannot follow a leading +/- sign
+prog.cob:36: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob:37: error: a leading +/- sign cannot follow 9
+prog.cob:38: error: B, 0 or / cannot follow CR or DB
+prog.cob:39: error: 9 cannot follow CR or DB
+prog.cob:40: error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob:41: error: a leading currency symbol cannot follow 9
+prog.cob:42: error: a leading currency symbol cannot follow B, 0 or /
+prog.cob:43: error: P must be at start or end of PICTURE string
+prog.cob:43: error: V cannot follow a P which is after the decimal point
+prog.cob:45: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 ])
 
 AT_DATA([prog19.lst],
@@ -3123,46 +3123,46 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 Error/Warning summary:
 
-prog.cob: 9: warning: continuation of COBOL words used
-prog.cob: 11: warning: continuation of COBOL words used
-prog.cob: 12: warning: continuation of COBOL words used
-prog.cob: 13: warning: continuation of COBOL words used
-prog.cob: 14: warning: continuation of COBOL words used
-prog.cob: 7: error: missing PICTURE string
-prog.cob: 10: error: PICTURE string may not contain more than 255 characters; contains 301 characters
-prog.cob: 16: error: CR or DB may only occur once in a PICTURE string
-prog.cob: 17: error: S may only occur once in a PICTURE string
-prog.cob: 17: error: S must be at start of PICTURE string
-prog.cob: 18: error: a leading +/- sign cannot follow a leading currency symbol
-prog.cob: 18: error: a trailing currency symbol cannot follow a leading currency symbol
-prog.cob: 18: error: a trailing +/- sign cannot follow a leading +/- sign
-prog.cob: 20: error: invalid PICTURE character 'K'
-prog.cob: 21: error: numeric field cannot be larger than 38 digits
-prog.cob: 22: error: only up to 9 significant digits are permitted within parentheses
-prog.cob: 23: error: '(100' is not defined
-prog.cob: 23: error: invalid PICTURE character ')'
-prog.cob: 24: error: unbalanced parentheses
-prog.cob: 25: error: only one set of parentheses is permitted
-prog.cob: 26: error: parentheses must contain (a constant-name defined as) a positive integer
-prog.cob: 28: error: . cannot follow V
-prog.cob: 29: error: cannot have both Z and * in PICTURE string
-prog.cob: 30: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 30: error: a trailing +/- sign may only occur once in a PICTURE string
-prog.cob: 31: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
-prog.cob: 31: error: N cannot follow A or X
-prog.cob: 32: error: A or X cannot follow S
-prog.cob: 33: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
-prog.cob: 34: error: CR or DB cannot follow a leading +/- sign
-prog.cob: 36: error: a leading +/- sign cannot follow B, 0 or /
-prog.cob: 37: error: a leading +/- sign cannot follow 9
-prog.cob: 38: error: B, 0 or / cannot follow CR or DB
-prog.cob: 39: error: 9 cannot follow CR or DB
-prog.cob: 40: error: a floating currency symbol string which is before the decimal point cannot follow 9
-prog.cob: 41: error: a leading currency symbol cannot follow 9
-prog.cob: 42: error: a leading currency symbol cannot follow B, 0 or /
-prog.cob: 43: error: P must be at start or end of PICTURE string
-prog.cob: 43: error: V cannot follow a P which is after the decimal point
-prog.cob: 45: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
+prog.cob:9: warning: continuation of COBOL words used
+prog.cob:11: warning: continuation of COBOL words used
+prog.cob:12: warning: continuation of COBOL words used
+prog.cob:13: warning: continuation of COBOL words used
+prog.cob:14: warning: continuation of COBOL words used
+prog.cob:7: error: missing PICTURE string
+prog.cob:10: error: PICTURE string may not contain more than 255 characters; contains 301 characters
+prog.cob:16: error: CR or DB may only occur once in a PICTURE string
+prog.cob:17: error: S may only occur once in a PICTURE string
+prog.cob:17: error: S must be at start of PICTURE string
+prog.cob:18: error: a leading +/- sign cannot follow a leading currency symbol
+prog.cob:18: error: a trailing currency symbol cannot follow a leading currency symbol
+prog.cob:18: error: a trailing +/- sign cannot follow a leading +/- sign
+prog.cob:20: error: invalid PICTURE character 'K'
+prog.cob:21: error: numeric field cannot be larger than 38 digits
+prog.cob:22: error: only up to 9 significant digits are permitted within parentheses
+prog.cob:23: error: '(100' is not defined
+prog.cob:23: error: invalid PICTURE character ')'
+prog.cob:24: error: unbalanced parentheses
+prog.cob:25: error: only one set of parentheses is permitted
+prog.cob:26: error: parentheses must contain (a constant-name defined as) a positive integer
+prog.cob:28: error: . cannot follow V
+prog.cob:29: error: cannot have both Z and * in PICTURE string
+prog.cob:30: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob:30: error: a trailing +/- sign may only occur once in a PICTURE string
+prog.cob:31: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:31: error: N cannot follow A or X
+prog.cob:32: error: A or X cannot follow S
+prog.cob:33: error: a trailing +/- sign cannot follow a floating +/- string which is before the decimal point
+prog.cob:34: error: CR or DB cannot follow a leading +/- sign
+prog.cob:36: error: a leading +/- sign cannot follow B, 0 or /
+prog.cob:37: error: a leading +/- sign cannot follow 9
+prog.cob:38: error: B, 0 or / cannot follow CR or DB
+prog.cob:39: error: 9 cannot follow CR or DB
+prog.cob:40: error: a floating currency symbol string which is before the decimal point cannot follow 9
+prog.cob:41: error: a leading currency symbol cannot follow 9
+prog.cob:42: error: a leading currency symbol cannot follow B, 0 or /
+prog.cob:43: error: P must be at start or end of PICTURE string
+prog.cob:43: error: V cannot follow a P which is after the decimal point
+prog.cob:45: error: PICTURE string must contain at least one of the set A, N, X, Z, 1, 9 and *; or at least two of the set +, - and the currency symbol
 
 6 warnings in compilation group
 34 errors in compilation group
@@ -3922,22 +3922,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
-[prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
@@ -4498,19 +4498,19 @@ P END-JOB                      319      163     210     217     228     246
 
 Error/Warning summary:
 
-prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
 0 errors in compilation group
@@ -4520,22 +4520,22 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
-[prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
+[prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
 prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
@@ -5082,19 +5082,19 @@ P END-JOB                      319      163     210     217     228     246     
 
 Error/Warning summary:
 
-prog.cob: 42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob: 87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: 198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: 254: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
+prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
 0 errors in compilation group

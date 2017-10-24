@@ -44,8 +44,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -Wno-constant-expression prog.cob], [0], [],
-[prog.cob: 11: warning: suggest parentheses around AND within OR
-prog.cob: 15: warning: suggest parentheses around OR within AND
+[prog.cob:11: warning: suggest parentheses around AND within OR
+prog.cob:15: warning: suggest parentheses around OR within AND
 ])
 
 AT_CLEANUP
@@ -73,15 +73,15 @@ AT_DATA([prog.cob], [
 
 # FIXME positions broken
 AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
-[prog.cob: 5: warning: expression '3' EQUALS '1' is always FALSE
-prog.cob: 6: warning: expression '3' EQUALS '2' is always FALSE
-prog.cob: 6: warning: expression is always FALSE
-prog.cob: 6: warning: expression '3' EQUALS '3' is always TRUE
-prog.cob: 6: warning: expression is always TRUE
-prog.cob: 10: warning: expression '3' EQUALS '1' is always FALSE
-prog.cob: 11: warning: expression '3' EQUALS '2' is always FALSE
-prog.cob: 11: warning: expression '3' EQUALS '3' is always TRUE
-prog.cob: 11: warning: expression is always FALSE
+[prog.cob:5: warning: expression '3' EQUALS '1' is always FALSE
+prog.cob:6: warning: expression '3' EQUALS '2' is always FALSE
+prog.cob:6: warning: expression is always FALSE
+prog.cob:6: warning: expression '3' EQUALS '3' is always TRUE
+prog.cob:6: warning: expression is always TRUE
+prog.cob:10: warning: expression '3' EQUALS '1' is always FALSE
+prog.cob:11: warning: expression '3' EQUALS '2' is always FALSE
+prog.cob:11: warning: expression '3' EQUALS '3' is always TRUE
+prog.cob:11: warning: expression is always FALSE
 ])
 
 AT_CLEANUP
@@ -222,63 +222,63 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 21: warning: literal '1234567' is longer than GROUP-ITEM-X6
-prog.cob: 21: warning: expression is always FALSE
-prog.cob: 23: warning: literal '1.1' has more decimals than PIC-9-NOT-DECIMAL
-prog.cob: 23: warning: expression is always FALSE
-prog.cob: 27: warning: literal '1.01' has more decimals than PIC-9-DECIMAL
-prog.cob: 27: warning: expression is always FALSE
-prog.cob: 33: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
-prog.cob: 35: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
-prog.cob: 38: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN -25
-prog.cob: 40: warning: literal '1.12' has more decimals than PIC-9-DECIMAL
-prog.cob: 40: warning: expression is always FALSE
-prog.cob: 43: warning: literal '1B0' is alphanumeric but PIC-9-NOT-DECIMAL is numeric
-prog.cob: 55: warning: literal '123.999' has more decimals than WS-NUMBER
-prog.cob: 57: warning: literal '2345' has more digits than WS-LINE-NUMBER
-prog.cob: 57: warning: expression is always FALSE
-prog.cob: 59: warning: literal '1234' has more digits than WS-LINE-NUMBER
-prog.cob: 59: warning: expression is always TRUE
-prog.cob: 61: warning: literal '1234' has more digits than WS-LINE-NUMBER
-prog.cob: 61: warning: expression is always FALSE
-prog.cob: 63: warning: literal '5432' has more digits than WS-LINE-NUMBER
-prog.cob: 63: warning: expression is always FALSE
-prog.cob: 65: warning: literal '7855' has more digits than WS-LINE-NUMBER
-prog.cob: 65: warning: expression is always TRUE
-prog.cob: 67: warning: literal '1234' has more digits than WS-LINE-NUMBER
-prog.cob: 67: warning: expression is always FALSE
-prog.cob: 69: warning: literal '5432' has more digits than WS-LINE-NUMBER
-prog.cob: 69: warning: expression is always TRUE
-prog.cob: 71: warning: literal 'DOGGY++' is longer than WS-TEXT
-prog.cob: 73: warning: literal '3141596' is longer than WS-TEXT
-prog.cob: 75: warning: literal '3.141596' is longer than WS-TEXT
-prog.cob: 77: warning: literal '3.141596' is longer than WS-TEXT
-prog.cob: 77: warning: expression is always FALSE
-prog.cob: 79: warning: literal 'DOG+CAT' is longer than WS-TEXT
-prog.cob: 79: warning: expression is always TRUE
-prog.cob: 81: warning: literal 'CAT+DOG' is longer than WS-TEXT
-prog.cob: 81: warning: expression is always FALSE
-prog.cob: 84: warning: literal 'DOG+CAT' is longer than WS-TEXT
-prog.cob: 84: warning: expression is always FALSE
-prog.cob: 86: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
-prog.cob: 88: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
-prog.cob: 90: warning: expression '00000001234' EQUALS '1234' is always TRUE
-prog.cob: 97: warning: literal '654.20038' has more decimals than COMPUTE-1
-prog.cob: 98: warning: literal '654.17422' has more decimals than COMPUTE-1
-prog.cob: 100: warning: literal '5654.20' has more digits than COMPUTE-1
-prog.cob: 100: warning: expression is always TRUE
-prog.cob: 102: warning: literal '5654.20' has more digits than COMPUTE-1
-prog.cob: 102: warning: expression is always FALSE
-prog.cob: 104: warning: literal '5654.20' has more digits than COMPUTE-1
-prog.cob: 104: warning: expression is always TRUE
-prog.cob: 106: warning: literal '5654.20' has more digits than COMPUTE-1
-prog.cob: 106: warning: expression is always FALSE
-prog.cob: 112: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
-prog.cob: 114: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
-prog.cob: 117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -25
-prog.cob: 118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
-prog.cob: 124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
-prog.cob: 126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+prog.cob:21: warning: literal '1234567' is longer than GROUP-ITEM-X6
+prog.cob:21: warning: expression is always FALSE
+prog.cob:23: warning: literal '1.1' has more decimals than PIC-9-NOT-DECIMAL
+prog.cob:23: warning: expression is always FALSE
+prog.cob:27: warning: literal '1.01' has more decimals than PIC-9-DECIMAL
+prog.cob:27: warning: expression is always FALSE
+prog.cob:33: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
+prog.cob:35: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
+prog.cob:38: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN -25
+prog.cob:40: warning: literal '1.12' has more decimals than PIC-9-DECIMAL
+prog.cob:40: warning: expression is always FALSE
+prog.cob:43: warning: literal '1B0' is alphanumeric but PIC-9-NOT-DECIMAL is numeric
+prog.cob:55: warning: literal '123.999' has more decimals than WS-NUMBER
+prog.cob:57: warning: literal '2345' has more digits than WS-LINE-NUMBER
+prog.cob:57: warning: expression is always FALSE
+prog.cob:59: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:59: warning: expression is always TRUE
+prog.cob:61: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:61: warning: expression is always FALSE
+prog.cob:63: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob:63: warning: expression is always FALSE
+prog.cob:65: warning: literal '7855' has more digits than WS-LINE-NUMBER
+prog.cob:65: warning: expression is always TRUE
+prog.cob:67: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:67: warning: expression is always FALSE
+prog.cob:69: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob:69: warning: expression is always TRUE
+prog.cob:71: warning: literal 'DOGGY++' is longer than WS-TEXT
+prog.cob:73: warning: literal '3141596' is longer than WS-TEXT
+prog.cob:75: warning: literal '3.141596' is longer than WS-TEXT
+prog.cob:77: warning: literal '3.141596' is longer than WS-TEXT
+prog.cob:77: warning: expression is always FALSE
+prog.cob:79: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob:79: warning: expression is always TRUE
+prog.cob:81: warning: literal 'CAT+DOG' is longer than WS-TEXT
+prog.cob:81: warning: expression is always FALSE
+prog.cob:84: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob:84: warning: expression is always FALSE
+prog.cob:86: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
+prog.cob:88: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
+prog.cob:90: warning: expression '00000001234' EQUALS '1234' is always TRUE
+prog.cob:97: warning: literal '654.20038' has more decimals than COMPUTE-1
+prog.cob:98: warning: literal '654.17422' has more decimals than COMPUTE-1
+prog.cob:100: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:100: warning: expression is always TRUE
+prog.cob:102: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:102: warning: expression is always FALSE
+prog.cob:104: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:104: warning: expression is always TRUE
+prog.cob:106: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:106: warning: expression is always FALSE
+prog.cob:112: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
+prog.cob:114: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
+prog.cob:117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -25
+prog.cob:118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
+prog.cob:124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+prog.cob:126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 ])
 
 AT_CLEANUP
@@ -374,24 +374,24 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: invalid expression
-prog.cob: 14: error: invalid expression
-prog.cob: 18: error: invalid expression
-prog.cob: 22: error: invalid expression
-prog.cob: 26: error: invalid expression
-prog.cob: 30: error: invalid expression
-prog.cob: 35: error: invalid expression
-prog.cob: 38: error: invalid expression
-prog.cob: 41: error: invalid expression
-prog.cob: 44: error: invalid expression
-prog.cob: 47: error: invalid expression
-prog.cob: 54: error: invalid expression
-prog.cob: 60: error: invalid expression
-prog.cob: 66: error: invalid expression
-prog.cob: 72: error: invalid expression
-prog.cob: 76: error: 'NOTDEFINED' is not defined
-prog.cob: 76: error: invalid expression
-prog.cob: 80: error: invalid expression
+[prog.cob:10: error: invalid expression
+prog.cob:14: error: invalid expression
+prog.cob:18: error: invalid expression
+prog.cob:22: error: invalid expression
+prog.cob:26: error: invalid expression
+prog.cob:30: error: invalid expression
+prog.cob:35: error: invalid expression
+prog.cob:38: error: invalid expression
+prog.cob:41: error: invalid expression
+prog.cob:44: error: invalid expression
+prog.cob:47: error: invalid expression
+prog.cob:54: error: invalid expression
+prog.cob:60: error: invalid expression
+prog.cob:66: error: invalid expression
+prog.cob:72: error: invalid expression
+prog.cob:76: error: 'NOTDEFINED' is not defined
+prog.cob:76: error: invalid expression
+prog.cob:80: error: invalid expression
 ])
 
 AT_CLEANUP
@@ -443,11 +443,11 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 10: error: GREATER THAN operator may be misplaced
-prog.cob: 17: error: EQUALS operator may be misplaced
-prog.cob: 20: error: NOT EQUAL operator may be misplaced
-prog.cob: 29: error: LESS OR EQUAL operator may be misplaced
-prog.cob: 32: error: invalid expression
+prog.cob:10: error: GREATER THAN operator may be misplaced
+prog.cob:17: error: EQUALS operator may be misplaced
+prog.cob:20: error: NOT EQUAL operator may be misplaced
+prog.cob:29: error: LESS OR EQUAL operator may be misplaced
+prog.cob:32: error: invalid expression
 ])
 
 AT_CLEANUP
@@ -514,23 +514,23 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 2: error: PROGRAM-ID header missing
-prog.cob: 2: error: ENVIRONMENT DIVISION header missing
-prog.cob: 2: error: CONFIGURATION SECTION header missing
-prog.cob: 10: error: INPUT-OUTPUT SECTION header missing
-prog.cob: 10: error: FILE-CONTROL header missing
-prog.cob: 14: error: FILE SECTION header missing
-prog.cob: 17: error: PROCEDURE DIVISION header missing
+[prog.cob:2: error: PROGRAM-ID header missing
+prog.cob:2: error: ENVIRONMENT DIVISION header missing
+prog.cob:2: error: CONFIGURATION SECTION header missing
+prog.cob:10: error: INPUT-OUTPUT SECTION header missing
+prog.cob:10: error: FILE-CONTROL header missing
+prog.cob:14: error: FILE SECTION header missing
+prog.cob:17: error: PROCEDURE DIVISION header missing
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
-[prog.cob: 2: warning: PROGRAM-ID header missing - assumed
-prog.cob: 2: warning: ENVIRONMENT DIVISION header missing - assumed
-prog.cob: 2: warning: CONFIGURATION SECTION header missing - assumed
-prog.cob: 10: warning: INPUT-OUTPUT SECTION header missing - assumed
-prog.cob: 10: warning: FILE-CONTROL header missing - assumed
-prog.cob: 14: warning: FILE SECTION header missing - assumed
-prog.cob: 17: warning: PROCEDURE DIVISION header missing - assumed
+[prog.cob:2: warning: PROGRAM-ID header missing - assumed
+prog.cob:2: warning: ENVIRONMENT DIVISION header missing - assumed
+prog.cob:2: warning: CONFIGURATION SECTION header missing - assumed
+prog.cob:10: warning: INPUT-OUTPUT SECTION header missing - assumed
+prog.cob:10: warning: FILE-CONTROL header missing - assumed
+prog.cob:14: warning: FILE SECTION header missing - assumed
+prog.cob:17: warning: PROCEDURE DIVISION header missing - assumed
 ])
 
 AT_CLEANUP
@@ -543,13 +543,13 @@ AT_DATA([prog.cob], [           DISPLAY "minimal".
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 1: error: PROGRAM-ID header missing
-prog.cob: 1: error: PROCEDURE DIVISION header missing
+[prog.cob:1: error: PROGRAM-ID header missing
+prog.cob:1: error: PROCEDURE DIVISION header missing
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
-[prog.cob: 1: warning: PROGRAM-ID header missing - assumed
-prog.cob: 1: warning: PROCEDURE DIVISION header missing - assumed
+[prog.cob:1: warning: PROGRAM-ID header missing - assumed
+prog.cob:1: warning: PROCEDURE DIVISION header missing - assumed
 ])
 
 AT_CLEANUP
@@ -584,11 +584,11 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 AT_DATA([prog3.cob], [])
 
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob: 1: error: PROGRAM-ID header missing
+[prog3.cob:1: error: PROGRAM-ID header missing
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog3.cob], [0], [],
-[prog3.cob: 1: warning: PROGRAM-ID header missing - assumed
+[prog3.cob:1: warning: PROGRAM-ID header missing - assumed
 ])
 
 AT_CLEANUP
@@ -613,9 +613,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: invalid INITIALIZE statement
-prog.cob: 12: error: invalid INITIALIZE statement
-prog.cob: 13: error: invalid INITIALIZE statement
+[prog.cob:10: error: invalid INITIALIZE statement
+prog.cob:12: error: invalid INITIALIZE statement
+prog.cob:13: error: invalid INITIALIZE statement
 ])
 
 AT_CLEANUP
@@ -650,7 +650,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: error: duplicate values in class 'CHECK-VALID'
+[prog.cob:9: error: duplicate values in class 'CHECK-VALID'
 ])
 
 AT_CLEANUP
@@ -676,10 +676,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: REPLACING operands differ in size
-prog.cob: 9: error: REPLACING operands differ in size
-prog.cob: 11: error: CONVERTING operands differ in size
-prog.cob: 12: error: CONVERTING operands differ in size
+[prog.cob:8: error: REPLACING operands differ in size
+prog.cob:9: error: REPLACING operands differ in size
+prog.cob:11: error: CONVERTING operands differ in size
+prog.cob:12: error: CONVERTING operands differ in size
 ])
 
 AT_CLEANUP
@@ -701,8 +701,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: invalid target for REPLACING
-prog.cob: 9: error: invalid target for CONVERTING
+[prog.cob:8: error: invalid target for REPLACING
+prog.cob:9: error: invalid target for CONVERTING
 ])
 
 AT_CLEANUP
@@ -723,7 +723,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: INSPECT missing ALL/FIRST/LEADING/TRAILING
+[prog.cob:8: error: INSPECT missing ALL/FIRST/LEADING/TRAILING
 ])
 
 AT_CLEANUP
@@ -748,14 +748,14 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
-prog.cob: 12: error: TALLYING clause is incomplete
-prog.cob: 12: error: missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase
+[prog.cob:10: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:11: error: missing value between CHARACTERS/ALL/LEADING/TRAILING words
+prog.cob:12: error: TALLYING clause is incomplete
+prog.cob:12: error: missing CHARACTERS/ALL/LEADING/TRAILING phrase after FOR phrase
 ])
 
 AT_CLEANUP
@@ -778,7 +778,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: TALLYING clause is incomplete
+[prog.cob:11: error: TALLYING clause is incomplete
 ])
 AT_CLEANUP
 
@@ -801,7 +801,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: syntax error, unexpected BEFORE
+[prog.cob:11: error: syntax error, unexpected BEFORE
 ])
 AT_CLEANUP
 
@@ -826,10 +826,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: error: 'SINGLE-ITEM' cannot be larger than 268435456 bytes
-prog.cob: 8: error: 'FILLER 1' cannot be larger than 268435456 bytes
-prog.cob: 7: error: 'GROUP-ITEM1' cannot be larger than 268435456 bytes
-prog.cob: 9: error: 'GROUP-ITEM2' cannot be larger than 268435456 bytes
+[prog.cob:6: error: 'SINGLE-ITEM' cannot be larger than 268435456 bytes
+prog.cob:8: error: 'FILLER 1' cannot be larger than 268435456 bytes
+prog.cob:7: error: 'GROUP-ITEM1' cannot be larger than 268435456 bytes
+prog.cob:9: error: 'GROUP-ITEM2' cannot be larger than 268435456 bytes
 ])
 
 AT_CLEANUP
@@ -871,7 +871,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -Wunreachable prog.cob], [0], [],
 [prog.cob: in paragraph 'P01':
-prog.cob: 26: warning: unreachable statement 'DISPLAY'
+prog.cob:26: warning: unreachable statement 'DISPLAY'
 ])
 
 AT_CLEANUP
@@ -912,7 +912,7 @@ AT_DATA([prog2.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: 'MY-CRT-STATUS' is not defined
+[prog.cob:7: error: 'MY-CRT-STATUS' is not defined
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
 
@@ -1004,27 +1004,27 @@ AT_DATA([prog7.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: invalid character '*' in currency symbol
+[prog.cob:7: error: invalid character '*' in currency symbol
 ])
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 7: error: currency symbol must be one character long
+[prog2.cob:7: error: currency symbol must be one character long
 ])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
-[prog3.cob: 7: warning: separate currency symbol and currency string is not implemented
+[prog3.cob:7: warning: separate currency symbol and currency string is not implemented
 ])
 AT_CHECK([$COMPILE_ONLY prog4.cob], [1], [],
-[prog4.cob: 7: warning: separate currency symbol and currency string is not implemented
-prog4.cob: 7: error: invalid CURRENCY SIGN '   '
-prog4.cob: 8: error: invalid character '*' in currency symbol
+[prog4.cob:7: warning: separate currency symbol and currency string is not implemented
+prog4.cob:7: error: invalid CURRENCY SIGN '   '
+prog4.cob:8: error: invalid character '*' in currency symbol
 ])
 AT_CHECK([$COMPILE_ONLY prog5.cob], [1], [],
-[prog5.cob: 7: warning: separate currency symbol and currency string is not implemented
-prog5.cob: 8: error: invalid character ' ' in currency symbol
+[prog5.cob:7: warning: separate currency symbol and currency string is not implemented
+prog5.cob:8: error: invalid character ' ' in currency symbol
 ])
 AT_CHECK([$COMPILE_ONLY prog6.cob], [1], [],
-[prog6.cob: 7: warning: separate currency symbol and currency string is not implemented
-prog6.cob: 7: error: invalid CURRENCY SIGN '+-'
-prog6.cob: 8: error: currency symbol must be one character long
+[prog6.cob:7: warning: separate currency symbol and currency string is not implemented
+prog6.cob:7: error: invalid CURRENCY SIGN '+-'
+prog6.cob:8: error: currency symbol must be one character long
 ])
 AT_CHECK([$COMPILE_ONLY prog7.cob], [0], [], [])
 
@@ -1116,44 +1116,44 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: invalid system-name 'SW1'
-prog.cob: 8: error: ON/OFF usage requires a SWITCH name
-prog.cob: 9: error: ON/OFF usage requires a SWITCH name
-prog.cob: 11: error: invalid system-name 'SWITCH B'
-prog.cob: 12: error: ON/OFF usage requires a SWITCH name
-prog.cob: 13: error: ON/OFF usage requires a SWITCH name
-prog.cob: 23: error: invalid system-name 'SWITCH 25'
-prog.cob: 24: error: ON/OFF usage requires a SWITCH name
-prog.cob: 25: error: ON/OFF usage requires a SWITCH name
-prog.cob: 27: error: invalid system-name 'SWITCH Y'
-prog.cob: 28: error: ON/OFF usage requires a SWITCH name
-prog.cob: 29: error: ON/OFF usage requires a SWITCH name
-prog.cob: 31: error: invalid system-name 'SWITCH Z'
-prog.cob: 32: error: ON/OFF usage requires a SWITCH name
-prog.cob: 33: error: ON/OFF usage requires a SWITCH name
-prog.cob: 49: error: 'SWIT1-ON' is not defined
-prog.cob: 56: error: 'SWIT2-ON' is not defined
-prog.cob: 63: error: 'SWITCH-B' is not defined
-prog.cob: 63: error: syntax error, unexpected OFF
-prog.cob: 64: error: 'SWIT2-ON' is not defined
-prog.cob: 70: error: 'SWIT26-ON' is not defined
-prog.cob: 76: error: 'SWIT32-OFF' is not defined
+[prog.cob:7: error: invalid system-name 'SW1'
+prog.cob:8: error: ON/OFF usage requires a SWITCH name
+prog.cob:9: error: ON/OFF usage requires a SWITCH name
+prog.cob:11: error: invalid system-name 'SWITCH B'
+prog.cob:12: error: ON/OFF usage requires a SWITCH name
+prog.cob:13: error: ON/OFF usage requires a SWITCH name
+prog.cob:23: error: invalid system-name 'SWITCH 25'
+prog.cob:24: error: ON/OFF usage requires a SWITCH name
+prog.cob:25: error: ON/OFF usage requires a SWITCH name
+prog.cob:27: error: invalid system-name 'SWITCH Y'
+prog.cob:28: error: ON/OFF usage requires a SWITCH name
+prog.cob:29: error: ON/OFF usage requires a SWITCH name
+prog.cob:31: error: invalid system-name 'SWITCH Z'
+prog.cob:32: error: ON/OFF usage requires a SWITCH name
+prog.cob:33: error: ON/OFF usage requires a SWITCH name
+prog.cob:49: error: 'SWIT1-ON' is not defined
+prog.cob:56: error: 'SWIT2-ON' is not defined
+prog.cob:63: error: 'SWITCH-B' is not defined
+prog.cob:63: error: syntax error, unexpected OFF
+prog.cob:64: error: 'SWIT2-ON' is not defined
+prog.cob:70: error: 'SWIT26-ON' is not defined
+prog.cob:76: error: 'SWIT32-OFF' is not defined
 ])
 # FIXME: There should be an additional
-#prog.cob: 19: error: duplicate definition of 'SWITCH-25'
-#prog.cob: 15: error: 'SWITCH-25' previously defined here
+#prog.cob:19: error: duplicate definition of 'SWITCH-25'
+#prog.cob:15: error: 'SWITCH-25' previously defined here
 #
 AT_CHECK([$COMPILE_ONLY -std=acu-strict -fsystem-name=SW1 -fno-relax-syntax-checks prog.cob], [1], [],
-[prog.cob: 33: error: duplicate ON clause
-prog.cob: 76: error: 'SWIT32-OFF' is not defined
+[prog.cob:33: error: duplicate ON clause
+prog.cob:76: error: 'SWIT32-OFF' is not defined
 ])
 # FIXME: There should be an additional
-#prog.cob: 19: error: duplicate definition of 'SWITCH-25'
-#prog.cob: 15: error: 'SWITCH-25' previously defined here
-#prog.cob: 23: error: duplicate definition of 'SWITCH 25'
-#prog.cob: 15: error: 'SWITCH-25' previously defined here
-#prog.cob: 27: error: duplicate definition of 'SWITCH Y'
-#prog.cob: 15: error: 'SWITCH-25' previously defined here
+#prog.cob:19: error: duplicate definition of 'SWITCH-25'
+#prog.cob:15: error: 'SWITCH-25' previously defined here
+#prog.cob:23: error: duplicate definition of 'SWITCH 25'
+#prog.cob:15: error: 'SWITCH-25' previously defined here
+#prog.cob:27: error: duplicate definition of 'SWITCH Y'
+#prog.cob:15: error: 'SWITCH-25' previously defined here
 
 AT_CLEANUP
 
@@ -1177,9 +1177,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: invalid mnemonic identifier
-prog.cob: 11: error: invalid mnemonic identifier
-prog.cob: 12: error: invalid mnemonic identifier
+[prog.cob:10: error: invalid mnemonic identifier
+prog.cob:11: error: invalid mnemonic identifier
+prog.cob:12: error: invalid mnemonic identifier
 ])
 
 AT_CLEANUP
@@ -1203,8 +1203,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: 'SYSOUT' is not an input device
-prog.cob: 9: error: 'SYSIN' is not an output device
+[prog.cob:8: error: 'SYSOUT' is not an input device
+prog.cob:9: error: 'SYSIN' is not an output device
 ])
 
 AT_CLEANUP
@@ -1225,7 +1225,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: unknown device 'mnemonic-name'; not defined in SPECIAL-NAMES
+[prog.cob:8: error: unknown device 'mnemonic-name'; not defined in SPECIAL-NAMES
 ])
 
 AT_CLEANUP
@@ -1251,11 +1251,11 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 # Checkme: Error currently doesn't occur for UPON_COMMAND_LINE as this is already tokenized
 # in scanner.l. We just ignore this for now and maybe fix it later.
 #AT_CHECK([$COMPILE_ONLY -fnot-reserved=COMMAND-LINE prog.cob], [1], [],
-#[prog.cob: 8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
-#prog.cob: 9: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+#[prog.cob:8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+#prog.cob:9: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
 #])
 AT_CHECK([$COMPILE_ONLY -fnot-reserved=COMMAND-LINE prog.cob], [1], [],
-[prog.cob: 8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
+[prog.cob:8: error: unknown device 'COMMAND-LINE'; it may exist in another dialect
 ])
 
 AT_CLEANUP
@@ -1402,7 +1402,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -W prog.cob], [0], [],
-[prog.cob: 8: warning: source text after program-text area (column 72)
+[prog.cob:8: warning: source text after program-text area (column 72)
 ])
 
 AT_CLEANUP
@@ -1436,21 +1436,21 @@ AT_DATA([prog_tmpl.cob], [
 AT_CHECK([sed -e 's/_$//' prog_tmpl.cob > prog.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -fixed -W prog.cob], [0], [],
-[prog.cob: 7: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 8: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 11: warning: source text after program-text area (column 72)
+[prog.cob:7: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:8: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:11: warning: source text after program-text area (column 72)
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -W prog.cob], [1], [],
-[prog.cob: 7: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 8: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 8: error: unknown statement 'This'
+[prog.cob:7: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:8: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:8: error: unknown statement 'This'
 ])
 
 AT_CHECK([$COMPILE_ONLY -F -W prog.cob], [1], [],
-[prog.cob: 7: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 8: warning: source text exceeds 512 bytes, will be truncated
-prog.cob: 8: error: unknown statement 'This'
+[prog.cob:7: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:8: warning: source text exceeds 512 bytes, will be truncated
+prog.cob:8: error: unknown statement 'This'
 ])
 
 AT_CLEANUP
@@ -2001,13 +2001,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 538: error: buffer overrun - too many continuation lines
+[prog.cob:538: error: buffer overrun - too many continuation lines
 ])
 
 # extra test with listing as this is an edge case there
 AT_CAPTURE_FILE([prog.lst])
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
-[prog.cob: 538: error: buffer overrun - too many continuation lines
+[prog.cob:538: error: buffer overrun - too many continuation lines
 ])
 
 AT_CLEANUP
@@ -2025,10 +2025,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [0], [],
-[prog.cob: 6: warning: continuation of COBOL words is archaic in COBOL 2014
+[prog.cob:6: warning: continuation of COBOL words is archaic in COBOL 2014
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 6: warning: continuation of COBOL words used
+[prog.cob:6: warning: continuation of COBOL words used
 ])
 
 AT_CLEANUP
@@ -2239,31 +2239,31 @@ AT_DATA([prog2.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 8191 characters
+[prog.cob:9: error: invalid literal: '                                   ...'
+prog.cob:9: error: literal length exceeds 8191 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -fliteral-length=160 prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 160 characters
+[prog.cob:9: error: invalid literal: '                                   ...'
+prog.cob:9: error: literal length exceeds 160 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -free prog2.cob], [1], [],
-[prog2.cob: 9: error: invalid literal: '                                   ...'
-prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:9: error: invalid literal: '                                   ...'
+prog2.cob:9: error: literal length 8299 exceeds 8191 characters
 ])
 
 # extra test with listing as this is an edge case there
 AT_CAPTURE_FILE([prog.lst])
 AT_CHECK([$COMPILE_ONLY -t prog.lst prog.cob], [1], [],
-[prog.cob: 9: error: invalid literal: '                                   ...'
-prog.cob: 9: error: literal length exceeds 8191 characters
+[prog.cob:9: error: invalid literal: '                                   ...'
+prog.cob:9: error: literal length exceeds 8191 characters
 ])
 
 AT_CAPTURE_FILE([prog2.lst])
 AT_CHECK([$COMPILE_ONLY -free -t prog2.lst prog2.cob], [1], [],
-[prog2.cob: 9: error: invalid literal: '                                   ...'
-prog2.cob: 9: error: literal length 8299 exceeds 8191 characters
+[prog2.cob:9: error: invalid literal: '                                   ...'
+prog2.cob:9: error: literal length 8299 exceeds 8191 characters
 ])
 
 AT_CLEANUP
@@ -2343,8 +2343,8 @@ NOFLOATING
 ], [])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 11: error: invalid indicator '$' at column 7
-prog2.cob: 17: error: invalid symbol '|' - skipping word
+[prog2.cob:11: error: invalid indicator '$' at column 7
+prog2.cob:17: error: invalid symbol '|' - skipping word
 ])
 
 
@@ -2358,8 +2358,8 @@ NOFLOATING
 ], [])
 
 AT_CHECK([$COMPILE_ONLY -fmfcomment prog2.cob], [1], [],
-[prog2.cob: 11: error: invalid indicator '$' at column 7
-prog2.cob: 17: error: invalid symbol '|' - skipping word
+[prog2.cob:11: error: invalid indicator '$' at column 7
+prog2.cob:17: error: invalid symbol '|' - skipping word
 ])
 
 
@@ -2386,45 +2386,45 @@ NOFLOATING
 
 
 AT_CHECK([$COMPILE_ONLY -free prog3.cob], [1], [],
-[prog3.cob: 11: warning: spurious '$' detected - ignored
-prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 14: error: invalid symbol '|' - skipping word
-prog3.cob: 16: error: syntax error, unexpected Identifier
+[prog3.cob:11: warning: spurious '$' detected - ignored
+prog3.cob:9: error: syntax error, unexpected *
+prog3.cob:10: error: syntax error, unexpected /
+prog3.cob:12: error: syntax error, unexpected *
+prog3.cob:13: error: syntax error, unexpected /
+prog3.cob:14: error: invalid symbol '|' - skipping word
+prog3.cob:16: error: syntax error, unexpected Identifier
 ])
 AT_CHECK([$COMPILE_ONLY -free -fmfcomment prog3.cob], [1], [],
-[prog3.cob: 11: warning: spurious '$' detected - ignored
-prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 14: error: invalid symbol '|' - skipping word
-prog3.cob: 16: error: syntax error, unexpected Identifier
+[prog3.cob:11: warning: spurious '$' detected - ignored
+prog3.cob:9: error: syntax error, unexpected *
+prog3.cob:10: error: syntax error, unexpected /
+prog3.cob:12: error: syntax error, unexpected *
+prog3.cob:13: error: syntax error, unexpected /
+prog3.cob:14: error: invalid symbol '|' - skipping word
+prog3.cob:16: error: syntax error, unexpected Identifier
 ])
 AT_CHECK([$COMPILE_ONLY -free -facucomment prog3.cob], [1], [],
-[prog3.cob: 11: warning: spurious '$' detected - ignored
-prog3.cob: 9: error: syntax error, unexpected *
-prog3.cob: 10: error: syntax error, unexpected /
-prog3.cob: 12: error: syntax error, unexpected *
-prog3.cob: 13: error: syntax error, unexpected /
-prog3.cob: 16: error: syntax error, unexpected Identifier
+[prog3.cob:11: warning: spurious '$' detected - ignored
+prog3.cob:9: error: syntax error, unexpected *
+prog3.cob:10: error: syntax error, unexpected /
+prog3.cob:12: error: syntax error, unexpected *
+prog3.cob:13: error: syntax error, unexpected /
+prog3.cob:16: error: syntax error, unexpected Identifier
 ])
 # Check that invalid indicator and doesn't abort preprocessing
 # and that errors in preprocessing doesn't abort compilation
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob: 2: error: invalid indicator 'F' at column 7
-prog3.cob: 3: error: invalid indicator 'M' at column 7
-prog3.cob: 4: error: invalid indicator 'N' at column 7
-prog3.cob: 5: error: invalid indicator 'U' at column 7
-prog3.cob: 7: error: invalid indicator 'G' at column 7
-prog3.cob: 8: error: invalid indicator 'U' at column 7
-prog3.cob: 11: error: invalid indicator '$' at column 7
-prog3.cob: 16: error: invalid indicator 'x' at column 7
-prog3.cob: 6: error: PROGRAM-ID header missing
-prog3.cob: 6: error: PROCEDURE DIVISION header missing
-prog3.cob: 6: error: syntax error, unexpected DIVISION
+[prog3.cob:2: error: invalid indicator 'F' at column 7
+prog3.cob:3: error: invalid indicator 'M' at column 7
+prog3.cob:4: error: invalid indicator 'N' at column 7
+prog3.cob:5: error: invalid indicator 'U' at column 7
+prog3.cob:7: error: invalid indicator 'G' at column 7
+prog3.cob:8: error: invalid indicator 'U' at column 7
+prog3.cob:11: error: invalid indicator '$' at column 7
+prog3.cob:16: error: invalid indicator 'x' at column 7
+prog3.cob:6: error: PROGRAM-ID header missing
+prog3.cob:6: error: PROCEDURE DIVISION header missing
+prog3.cob:6: error: syntax error, unexpected DIVISION
 ])
 
 AT_CLEANUP
@@ -2526,68 +2526,68 @@ AT_DATA([prog3.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=31 prog.cob], [1], [],
-[prog.cob: 11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
-prog.cob: 12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+[prog.cob:11: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog.cob:12: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-31':
-prog.cob: 19: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
+prog.cob:19: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
-prog.cob: 20: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
-prog.cob: 21: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:20: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog.cob:21: error: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog.cob: 22: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob: 23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:22: error: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=45 prog.cob], [1], [],
-[prog.cob: 12: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+[prog.cob:12: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
-prog.cob: 21: error: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:21: error: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog.cob: 22: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
-prog.cob: 23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:22: error: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog.cob], [1], [],
-[prog.cob: 13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+[prog.cob:13: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog.cob: 23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:23: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 prog.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE':
-prog.cob: 24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
+prog.cob:24: error: word length exceeds maximum of 61 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-90-CHARS-WHO-NEEDS-THAT-LONG-NAMES-I-CANNOT-THINK-OF-SOMEONE'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=45 -frelax-syntax-checks prog2.cob], [0], [],
-[prog2.cob: 12: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+[prog2.cob:12: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
-prog2.cob: 20: warning: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob:20: warning: word length exceeds 45 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog2.cob: 21: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob:21: warning: word length exceeds 45 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 ])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=60 prog2.cob], [0], [], [])
 
 AT_CHECK([$COMPILE_ONLY -free -fword-length=31 -frelax-syntax-checks prog2.cob], [0], [],
-[prog2.cob: 11: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
-prog2.cob: 12: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+[prog2.cob:11: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog2.cob:12: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-31':
-prog2.cob: 18: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
+prog2.cob:18: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-32C'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-32C':
-prog2.cob: 19: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
-prog2.cob: 20: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob:19: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-32C'
+prog2.cob:20: warning: word length exceeds 31 characters: 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 prog2.cob: in paragraph 'SOME-SPECIAL-PAR-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES':
-prog2.cob: 21: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
+prog2.cob:21: warning: word length exceeds 31 characters: 'SOME-SPECIAL-VAL-WITH-LENGTH-58C-WHO-NEEDS-THAT-LONG-NAMES'
 ])
 
 AT_CHECK([$COMPILE_ONLY -fword-length=59 prog3.cob], [1], [],
 [prog3.cob: in section '00000000000000000000000000000000000000000000000000000000000':
-prog3.cob: 11: error: word length exceeds 59 characters: '000000000000000000000000000000000000000000000000000000000000'
+prog3.cob:11: error: word length exceeds 59 characters: '000000000000000000000000000000000000000000000000000000000000'
 prog3.cob: in paragraph '000000000000000000000000000000000000000000000000000000000000':
-prog3.cob: 25: error: word length exceeds 59 characters: '100000000000000000000000000000000000000000000000000000000001'
+prog3.cob:25: error: word length exceeds 59 characters: '100000000000000000000000000000000000000000000000000000000001'
 ])
 
 AT_CLEANUP
@@ -2702,71 +2702,71 @@ AT_CHECK([$COMPILE_ONLY -fliteral-length=1 -fnumeric-literal-length=1 -fword-len
 
 # result with extended scanner for wrong numeric literals:
 #AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-#[prog2.cob: 16: error: invalid numeric literal: '1.03.0'
-#prog2.cob: 16: error: literal with more than one decimal point
-#prog2.cob: 17: error: invalid numeric literal: '--123'
-#prog2.cob: 17: error: literal with more than one sign character
-#prog2.cob: 18: error: invalid numeric literal: '-123-'
-#prog2.cob: 18: error: literal with more than one sign character
-#prog2.cob: 19: error: invalid numeric literal: '-123-456'
-#prog2.cob: 19: error: literal with more than one sign character
-#prog2.cob: 20: error: invalid numeric literal: '-123-4.56'
-#prog2.cob: 20: error: literal with more than one sign character
-#prog2.cob: 21: error: invalid numeric literal: '-12.3-456'
-#prog2.cob: 21: error: literal with more than one sign character
-#prog2.cob: 22: error: invalid numeric literal: '-12.3-4.56'
-#prog2.cob: 22: error: literal with more than one sign character
-#prog2.cob: 22: error: literal with more than one decimal point
-#prog2.cob: 23: error: invalid numeric literal: '1000003+'
-#prog2.cob: 23: error: sign must appear as leftmost character
-#prog2.cob: 24: error: invalid numeric literal: '1.000003+'
-#prog2.cob: 24: error: sign must appear as leftmost character
-#prog2.cob: 25: error: invalid numeric literal: '.3+'
-#prog2.cob: 25: error: sign must appear as leftmost character
-#prog2.cob: 26: error: invalid numeric literal: '3.+'
-#prog2.cob: 26: error: sign must appear as leftmost character
+#[prog2.cob:16: error: invalid numeric literal: '1.03.0'
+#prog2.cob:16: error: literal with more than one decimal point
+#prog2.cob:17: error: invalid numeric literal: '--123'
+#prog2.cob:17: error: literal with more than one sign character
+#prog2.cob:18: error: invalid numeric literal: '-123-'
+#prog2.cob:18: error: literal with more than one sign character
+#prog2.cob:19: error: invalid numeric literal: '-123-456'
+#prog2.cob:19: error: literal with more than one sign character
+#prog2.cob:20: error: invalid numeric literal: '-123-4.56'
+#prog2.cob:20: error: literal with more than one sign character
+#prog2.cob:21: error: invalid numeric literal: '-12.3-456'
+#prog2.cob:21: error: literal with more than one sign character
+#prog2.cob:22: error: invalid numeric literal: '-12.3-4.56'
+#prog2.cob:22: error: literal with more than one sign character
+#prog2.cob:22: error: literal with more than one decimal point
+#prog2.cob:23: error: invalid numeric literal: '1000003+'
+#prog2.cob:23: error: sign must appear as leftmost character
+#prog2.cob:24: error: invalid numeric literal: '1.000003+'
+#prog2.cob:24: error: sign must appear as leftmost character
+#prog2.cob:25: error: invalid numeric literal: '.3+'
+#prog2.cob:25: error: sign must appear as leftmost character
+#prog2.cob:26: error: invalid numeric literal: '3.+'
+#prog2.cob:26: error: sign must appear as leftmost character
 #])
 #AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-#[prog3.cob: 16: error: invalid numeric literal: '1,03,0'
-#prog3.cob: 16: error: literal with more than one decimal point
-#prog3.cob: 17: error: invalid numeric literal: '--123'
-#prog3.cob: 17: error: literal with more than one sign character
-#prog3.cob: 18: error: invalid numeric literal: '-123-'
-#prog3.cob: 18: error: literal with more than one sign character
-#prog3.cob: 19: error: invalid numeric literal: '-123-456'
-#prog3.cob: 19: error: literal with more than one sign character
-#prog3.cob: 20: error: invalid numeric literal: '-123-4,56'
-#prog3.cob: 20: error: literal with more than one sign character
-#prog3.cob: 21: error: invalid numeric literal: '-12,3-456'
-#prog3.cob: 21: error: literal with more than one sign character
-#prog3.cob: 22: error: invalid numeric literal: '-12,3-4,56'
-#prog3.cob: 22: error: literal with more than one sign character
-#prog3.cob: 22: error: literal with more than one decimal point
-#prog3.cob: 23: error: invalid numeric literal: '1000003+'
-#prog3.cob: 23: error: sign must appear as leftmost character
-#prog3.cob: 24: error: invalid numeric literal: '1,000003+'
-#prog3.cob: 24: error: sign must appear as leftmost character
-#prog3.cob: 25: error: invalid numeric literal: ',3+'
-#prog3.cob: 25: error: sign must appear as leftmost character
-#prog3.cob: 26: error: invalid numeric literal: '3,+'
-#prog3.cob: 26: error: sign must appear as leftmost character
+#[prog3.cob:16: error: invalid numeric literal: '1,03,0'
+#prog3.cob:16: error: literal with more than one decimal point
+#prog3.cob:17: error: invalid numeric literal: '--123'
+#prog3.cob:17: error: literal with more than one sign character
+#prog3.cob:18: error: invalid numeric literal: '-123-'
+#prog3.cob:18: error: literal with more than one sign character
+#prog3.cob:19: error: invalid numeric literal: '-123-456'
+#prog3.cob:19: error: literal with more than one sign character
+#prog3.cob:20: error: invalid numeric literal: '-123-4,56'
+#prog3.cob:20: error: literal with more than one sign character
+#prog3.cob:21: error: invalid numeric literal: '-12,3-456'
+#prog3.cob:21: error: literal with more than one sign character
+#prog3.cob:22: error: invalid numeric literal: '-12,3-4,56'
+#prog3.cob:22: error: literal with more than one sign character
+#prog3.cob:22: error: literal with more than one decimal point
+#prog3.cob:23: error: invalid numeric literal: '1000003+'
+#prog3.cob:23: error: sign must appear as leftmost character
+#prog3.cob:24: error: invalid numeric literal: '1,000003+'
+#prog3.cob:24: error: sign must appear as leftmost character
+#prog3.cob:25: error: invalid numeric literal: ',3+'
+#prog3.cob:25: error: sign must appear as leftmost character
+#prog3.cob:26: error: invalid numeric literal: '3,+'
+#prog3.cob:26: error: sign must appear as leftmost character
 #])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 17: error: syntax error, unexpected -
-prog2.cob: 18: error: syntax error, unexpected -
-prog2.cob: 23: error: syntax error, unexpected +
-prog2.cob: 24: error: syntax error, unexpected +
-prog2.cob: 25: error: syntax error, unexpected +
-prog2.cob: 26: error: syntax error, unexpected +
+[prog2.cob:17: error: syntax error, unexpected -
+prog2.cob:18: error: syntax error, unexpected -
+prog2.cob:23: error: syntax error, unexpected +
+prog2.cob:24: error: syntax error, unexpected +
+prog2.cob:25: error: syntax error, unexpected +
+prog2.cob:26: error: syntax error, unexpected +
 ])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob: 17: error: syntax error, unexpected -
-prog3.cob: 18: error: syntax error, unexpected -
-prog3.cob: 23: error: syntax error, unexpected +
-prog3.cob: 24: error: syntax error, unexpected +
-prog3.cob: 25: error: syntax error, unexpected +
-prog3.cob: 26: error: syntax error, unexpected +
+[prog3.cob:17: error: syntax error, unexpected -
+prog3.cob:18: error: syntax error, unexpected -
+prog3.cob:23: error: syntax error, unexpected +
+prog3.cob:24: error: syntax error, unexpected +
+prog3.cob:25: error: syntax error, unexpected +
+prog3.cob:26: error: syntax error, unexpected +
 ])
 
 AT_CLEANUP
@@ -2833,45 +2833,45 @@ AT_DATA([prog2.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: 'D3' is not defined
-prog.cob: 12: error: '1E3' is not defined
-prog.cob: 13: error: 'BLAH' is not defined
-prog.cob: 14: error: invalid floating-point literal: '1.0E3.0'
-prog.cob: 14: error: exponent has decimal point
-prog.cob: 15: error: invalid floating-point literal: '-0.0E-0'
-prog.cob: 15: error: significand of 0 must be positive
-prog.cob: 15: error: exponent of 0 must be positive
-prog.cob: 16: error: invalid floating-point literal: '1.0E00003'
-prog.cob: 16: error: exponent has more than 4 digits
-prog.cob: 17: error: invalid floating-point literal: '.12345678901234567890123456789012345E0'
-prog.cob: 17: error: significand has more than 34 digits
-prog.cob: 18: error: invalid floating-point literal: '0.0E3'
-prog.cob: 18: error: exponent of 0 must be 0
-prog.cob: 21: error: invalid floating-point literal: '1.0E77'
-prog.cob: 21: error: exponent not between -78 and 76
-prog.cob: 22: error: invalid floating-point literal: '1.0E-79'
-prog.cob: 22: error: exponent not between -78 and 76
+[prog.cob:11: error: 'D3' is not defined
+prog.cob:12: error: '1E3' is not defined
+prog.cob:13: error: 'BLAH' is not defined
+prog.cob:14: error: invalid floating-point literal: '1.0E3.0'
+prog.cob:14: error: exponent has decimal point
+prog.cob:15: error: invalid floating-point literal: '-0.0E-0'
+prog.cob:15: error: significand of 0 must be positive
+prog.cob:15: error: exponent of 0 must be positive
+prog.cob:16: error: invalid floating-point literal: '1.0E00003'
+prog.cob:16: error: exponent has more than 4 digits
+prog.cob:17: error: invalid floating-point literal: '.12345678901234567890123456789012345E0'
+prog.cob:17: error: significand has more than 34 digits
+prog.cob:18: error: invalid floating-point literal: '0.0E3'
+prog.cob:18: error: exponent of 0 must be 0
+prog.cob:21: error: invalid floating-point literal: '1.0E77'
+prog.cob:21: error: exponent not between -78 and 76
+prog.cob:22: error: invalid floating-point literal: '1.0E-79'
+prog.cob:22: error: exponent not between -78 and 76
 ])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 15: error: 'D3' is not defined
-prog2.cob: 16: error: '1E3' is not defined
-prog2.cob: 17: error: 'BLAH' is not defined
-prog2.cob: 18: error: invalid floating-point literal: '1,0E3,0'
-prog2.cob: 18: error: exponent has decimal point
-prog2.cob: 19: error: invalid floating-point literal: '-0,0E-0'
-prog2.cob: 19: error: significand of 0 must be positive
-prog2.cob: 19: error: exponent of 0 must be positive
-prog2.cob: 20: error: invalid floating-point literal: '1,0E00003'
-prog2.cob: 20: error: exponent has more than 4 digits
-prog2.cob: 21: error: invalid floating-point literal: ',12345678901234567890123456789012345E0'
-prog2.cob: 21: error: significand has more than 34 digits
-prog2.cob: 22: error: invalid floating-point literal: '0,0E3'
-prog2.cob: 22: error: exponent of 0 must be 0
-prog2.cob: 25: error: invalid floating-point literal: '1,0E77'
-prog2.cob: 25: error: exponent not between -78 and 76
-prog2.cob: 26: error: invalid floating-point literal: '1,0E-79'
-prog2.cob: 26: error: exponent not between -78 and 76
+[prog2.cob:15: error: 'D3' is not defined
+prog2.cob:16: error: '1E3' is not defined
+prog2.cob:17: error: 'BLAH' is not defined
+prog2.cob:18: error: invalid floating-point literal: '1,0E3,0'
+prog2.cob:18: error: exponent has decimal point
+prog2.cob:19: error: invalid floating-point literal: '-0,0E-0'
+prog2.cob:19: error: significand of 0 must be positive
+prog2.cob:19: error: exponent of 0 must be positive
+prog2.cob:20: error: invalid floating-point literal: '1,0E00003'
+prog2.cob:20: error: exponent has more than 4 digits
+prog2.cob:21: error: invalid floating-point literal: ',12345678901234567890123456789012345E0'
+prog2.cob:21: error: significand has more than 34 digits
+prog2.cob:22: error: invalid floating-point literal: '0,0E3'
+prog2.cob:22: error: exponent of 0 must be 0
+prog2.cob:25: error: invalid floating-point literal: '1,0E77'
+prog2.cob:25: error: exponent not between -78 and 76
+prog2.cob:26: error: invalid floating-point literal: '1,0E-79'
+prog2.cob:26: error: exponent not between -78 and 76
 ])
 
 AT_CLEANUP
@@ -2894,11 +2894,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: error: invalid X literal: 'GH'
-prog.cob: 9: error: literal contains invalid character 'G'
-prog.cob: 9: error: literal contains invalid character 'H'
-prog.cob: 10: error: invalid X literal: '1'
-prog.cob: 10: error: literal does not have an even number of digits
+[prog.cob:9: error: invalid X literal: 'GH'
+prog.cob:9: error: literal contains invalid character 'G'
+prog.cob:9: error: literal contains invalid character 'H'
+prog.cob:10: error: invalid X literal: '1'
+prog.cob:10: error: literal does not have an even number of digits
 ])
 
 AT_CLEANUP
@@ -2918,17 +2918,17 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 5: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 6: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 7: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 8: warning: handling of national literal is unfinished; implementation is likely to be changed
+[prog.cob:5: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:6: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:7: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:8: warning: handling of national literal is unfinished; implementation is likely to be changed
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 5: error: national literal does not conform to COBOL 85
-prog.cob: 6: error: national literal does not conform to COBOL 85
-prog.cob: 7: error: national literal does not conform to COBOL 85
-prog.cob: 8: error: national literal does not conform to COBOL 85
+[prog.cob:5: error: national literal does not conform to COBOL 85
+prog.cob:6: error: national literal does not conform to COBOL 85
+prog.cob:7: error: national literal does not conform to COBOL 85
+prog.cob:8: error: national literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -2951,22 +2951,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 7: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 10: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 10: error: invalid NX literal: 'GH'
-prog.cob: 10: error: literal contains invalid character 'G'
-prog.cob: 10: error: literal contains invalid character 'H'
-prog.cob: 11: warning: handling of national literal is unfinished; implementation is likely to be changed
-prog.cob: 11: error: invalid NX literal: '1'
-prog.cob: 11: error: literal does not have an even number of digits
+[prog.cob:6: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:7: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:10: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:10: error: invalid NX literal: 'GH'
+prog.cob:10: error: literal contains invalid character 'G'
+prog.cob:10: error: literal contains invalid character 'H'
+prog.cob:11: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:11: error: invalid NX literal: '1'
+prog.cob:11: error: literal does not have an even number of digits
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 6: error: hexadecimal-national literal does not conform to COBOL 85
-prog.cob: 7: error: hexadecimal-national literal does not conform to COBOL 85
-prog.cob: 10: error: hexadecimal-national literal does not conform to COBOL 85
-prog.cob: 11: error: hexadecimal-national literal does not conform to COBOL 85
+[prog.cob:6: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob:7: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob:10: error: hexadecimal-national literal does not conform to COBOL 85
+prog.cob:11: error: hexadecimal-national literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -2991,18 +2991,18 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
-[prog.cob: 9: error: invalid B literal: '23'
-prog.cob: 9: error: literal contains invalid character '2'
-prog.cob: 9: error: literal contains invalid character '3'
-prog.cob: 10: error: invalid B literal: '11111111111111111111111111111111111...'
-prog.cob: 10: error: literal length 152 exceeds 64 characters
+[prog.cob:9: error: invalid B literal: '23'
+prog.cob:9: error: literal contains invalid character '2'
+prog.cob:9: error: literal contains invalid character '3'
+prog.cob:10: error: invalid B literal: '11111111111111111111111111111111111...'
+prog.cob:10: error: literal length 152 exceeds 64 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 5: error: numeric boolean literal does not conform to COBOL 85
-prog.cob: 6: error: numeric boolean literal does not conform to COBOL 85
-prog.cob: 9: error: numeric boolean literal does not conform to COBOL 85
-prog.cob: 10: error: numeric boolean literal does not conform to COBOL 85
+[prog.cob:5: error: numeric boolean literal does not conform to COBOL 85
+prog.cob:6: error: numeric boolean literal does not conform to COBOL 85
+prog.cob:9: error: numeric boolean literal does not conform to COBOL 85
+prog.cob:10: error: numeric boolean literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -3024,14 +3024,14 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 6: error: invalid BX literal: '0123456789ABCDEF0123456789ABCDEF012...'
-prog.cob: 6: error: literal length 192 exceeds 64 characters
+[prog.cob:6: error: invalid BX literal: '0123456789ABCDEF0123456789ABCDEF012...'
+prog.cob:6: error: literal length 192 exceeds 64 characters
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 5: error: hexadecimal-boolean literal does not conform to COBOL 85
-prog.cob: 6: error: hexadecimal-boolean literal does not conform to COBOL 85
-prog.cob: 9: error: hexadecimal-boolean literal does not conform to COBOL 85
+[prog.cob:5: error: hexadecimal-boolean literal does not conform to COBOL 85
+prog.cob:6: error: hexadecimal-boolean literal does not conform to COBOL 85
+prog.cob:9: error: hexadecimal-boolean literal does not conform to COBOL 85
 ])
 
 AT_CLEANUP
@@ -3059,41 +3059,41 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
-[prog.cob: 11: error: invalid B# literal: '11111111111111111111111111111111111...'
-prog.cob: 11: error: literal length 65 exceeds 64 characters
-prog.cob: 12: error: invalid O# literal: '11111111111111111111111'
-prog.cob: 12: error: literal length 23 exceeds 22 characters
-prog.cob: 12: error: invalid hexadecimal literal: '11111111111111111'
-prog.cob: 12: error: literal length 17 exceeds 16 characters
-prog.cob: 12: error: invalid hexadecimal literal: '22222222222222222'
-prog.cob: 12: error: literal length 17 exceeds 16 characters
-prog.cob: 14: error: invalid B# literal: '23'
-prog.cob: 14: error: literal contains invalid character '2'
-prog.cob: 14: error: literal contains invalid character '3'
-prog.cob: 14: error: invalid O# literal: '89'
-prog.cob: 14: error: literal contains invalid character '8'
-prog.cob: 14: error: literal contains invalid character '9'
-prog.cob: 14: error: invalid X# literal: 'GG'
-prog.cob: 14: error: literal contains invalid character 'G'
-prog.cob: 14: error: literal contains invalid character 'G'
-prog.cob: 14: error: invalid H# literal: 'HH'
-prog.cob: 14: error: literal contains invalid character 'H'
-prog.cob: 14: error: literal contains invalid character 'H'
+[prog.cob:11: error: invalid B# literal: '11111111111111111111111111111111111...'
+prog.cob:11: error: literal length 65 exceeds 64 characters
+prog.cob:12: error: invalid O# literal: '11111111111111111111111'
+prog.cob:12: error: literal length 23 exceeds 22 characters
+prog.cob:12: error: invalid hexadecimal literal: '11111111111111111'
+prog.cob:12: error: literal length 17 exceeds 16 characters
+prog.cob:12: error: invalid hexadecimal literal: '22222222222222222'
+prog.cob:12: error: literal length 17 exceeds 16 characters
+prog.cob:14: error: invalid B# literal: '23'
+prog.cob:14: error: literal contains invalid character '2'
+prog.cob:14: error: literal contains invalid character '3'
+prog.cob:14: error: invalid O# literal: '89'
+prog.cob:14: error: literal contains invalid character '8'
+prog.cob:14: error: literal contains invalid character '9'
+prog.cob:14: error: invalid X# literal: 'GG'
+prog.cob:14: error: literal contains invalid character 'G'
+prog.cob:14: error: literal contains invalid character 'G'
+prog.cob:14: error: invalid H# literal: 'HH'
+prog.cob:14: error: literal contains invalid character 'H'
+prog.cob:14: error: literal contains invalid character 'H'
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 11: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
-prog.cob: 14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+[prog.cob:6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:6: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:11: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:12: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
+prog.cob:14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
 ])
 
 AT_CLEANUP
@@ -3144,49 +3144,49 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'DEC-1':
-prog.cob: 9: warning: SECTION segment ignored
+prog.cob:9: warning: SECTION segment ignored
 prog.cob: in section 'DEC-2':
-prog.cob: 12: warning: SECTION segment ignored
+prog.cob:12: warning: SECTION segment ignored
 prog.cob: in section 'SEC-1':
-prog.cob: 17: warning: SECTION segment ignored
+prog.cob:17: warning: SECTION segment ignored
 prog.cob: in section 'SEC-2':
-prog.cob: 20: warning: SECTION segment ignored
+prog.cob:20: warning: SECTION segment ignored
 prog.cob: in section 'SEC-3':
-prog.cob: 23: error: non-negative integer value expected
-prog.cob: 23: warning: SECTION segment ignored
+prog.cob:23: error: non-negative integer value expected
+prog.cob:23: warning: SECTION segment ignored
 prog.cob: in section 'SEC-4':
-prog.cob: 26: warning: SECTION segment ignored
+prog.cob:26: warning: SECTION segment ignored
 prog.cob: in section 'SEC-5':
-prog.cob: 29: warning: SECTION segment ignored
+prog.cob:29: warning: SECTION segment ignored
 prog.cob: in section 'SEC-6':
-prog.cob: 32: warning: SECTION segment ignored
+prog.cob:32: warning: SECTION segment ignored
 prog.cob: in section 'SEC-7':
-prog.cob: 35: warning: SECTION segment ignored
+prog.cob:35: warning: SECTION segment ignored
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
 [prog.cob: in section 'DEC-1':
-prog.cob: 9: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: 9: warning: SECTION segment within DECLARATIVES is not implemented
+prog.cob:9: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:9: warning: SECTION segment within DECLARATIVES is not implemented
 prog.cob: in section 'DEC-2':
-prog.cob: 12: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: 12: error: SECTION segment-number in DECLARATIVES must be less than 50
-prog.cob: 12: warning: SECTION segment within DECLARATIVES is not implemented
+prog.cob:12: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:12: error: SECTION segment-number in DECLARATIVES must be less than 50
+prog.cob:12: warning: SECTION segment within DECLARATIVES is not implemented
 prog.cob: in section 'SEC-1':
-prog.cob: 17: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:17: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-2':
-prog.cob: 20: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:20: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-3':
-prog.cob: 23: error: non-negative integer value expected
-prog.cob: 23: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:23: error: non-negative integer value expected
+prog.cob:23: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-4':
-prog.cob: 26: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: 26: error: SECTION segment-number must be less than or equal to 99
+prog.cob:26: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:26: error: SECTION segment-number must be less than or equal to 99
 prog.cob: in section 'SEC-5':
-prog.cob: 29: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:29: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-6':
-prog.cob: 32: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:32: warning: SECTION segment is obsolete in COBOL 85
 prog.cob: in section 'SEC-7':
-prog.cob: 35: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:35: warning: SECTION segment is obsolete in COBOL 85
 ])
 AT_CLEANUP
 
@@ -3212,12 +3212,12 @@ AT_DATA([prog.cob], [
 #AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
 # TODO check the result according to COB_32_BIT_LONG --> 1 should result in the following
 AT_CHECK([$COMPILE -std=acu prog.cob], [1], [],
-[prog.cob: 7: error: invalid B# literal: '11111111111111111111111111111111111...'
-prog.cob: 7: error: literal exceeds limit 4294967295
-prog.cob: 8: error: invalid O# literal: '1111111111111111111111'
-prog.cob: 8: error: literal exceeds limit 4294967295
-prog.cob: 8: error: invalid X# literal: '1111111111111111'
-prog.cob: 8: error: literal exceeds limit 4294967295
+[prog.cob:7: error: invalid B# literal: '11111111111111111111111111111111111...'
+prog.cob:7: error: literal exceeds limit 4294967295
+prog.cob:8: error: invalid O# literal: '1111111111111111111111'
+prog.cob:8: error: literal exceeds limit 4294967295
+prog.cob:8: error: invalid X# literal: '1111111111111111'
+prog.cob:8: error: literal exceeds limit 4294967295
 ])
 AT_CLEANUP
 
@@ -3274,30 +3274,30 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 26: warning: THREAD is not implemented
-prog.cob: 28: warning: THREAD is not implemented
-prog.cob: 27: error: HANDLE must be either a generic or a THREAD HANDLE
-prog.cob: 31: error: HANDLE must be either a generic or a THREAD HANDLE
-prog.cob: 31: warning: STOP THREAD is replaced by STOP RUN
-prog.cob: 36: warning: THREAD is not implemented
-prog.cob: 38: warning: THREAD is not implemented
-prog.cob: 37: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:26: warning: THREAD is not implemented
+prog.cob:28: warning: THREAD is not implemented
+prog.cob:27: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:31: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:31: warning: STOP THREAD is replaced by STOP RUN
+prog.cob:36: warning: THREAD is not implemented
+prog.cob:38: warning: THREAD is not implemented
+prog.cob:37: error: HANDLE must be either a generic or a THREAD HANDLE
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
-[prog.cob: 12: error: syntax error, unexpected Identifier
-prog.cob: 13: error: syntax error, unexpected Identifier
-prog.cob: 14: error: syntax error, unexpected Identifier
-prog.cob: 14: error: PICTURE clause required for 'mywindow'
+[prog.cob:12: error: syntax error, unexpected Identifier
+prog.cob:13: error: syntax error, unexpected Identifier
+prog.cob:14: error: syntax error, unexpected Identifier
+prog.cob:14: error: PICTURE clause required for 'mywindow'
 prog.cob: in paragraph 'MAIN':
-prog.cob: 27: error: 'handle IN mywindow' is not defined, but is a reserved word in another dialect
-prog.cob: 26: error: invalid expression
-prog.cob: 30: error: syntax error, unexpected END-PERFORM
-prog.cob: 31: error: 'thread' is not defined, but is a reserved word in another dialect
-prog.cob: 31: error: syntax error, unexpected Identifier
-prog.cob: 36: error: syntax error, unexpected Identifier, expecting THREAD
-prog.cob: 40: error: syntax error, unexpected END-CALL
-prog.cob: 26: error: 'thread' is not defined, but is a reserved word in another dialect
+prog.cob:27: error: 'handle IN mywindow' is not defined, but is a reserved word in another dialect
+prog.cob:26: error: invalid expression
+prog.cob:30: error: syntax error, unexpected END-PERFORM
+prog.cob:31: error: 'thread' is not defined, but is a reserved word in another dialect
+prog.cob:31: error: syntax error, unexpected Identifier
+prog.cob:36: error: syntax error, unexpected Identifier, expecting THREAD
+prog.cob:40: error: syntax error, unexpected END-CALL
+prog.cob:26: error: 'thread' is not defined, but is a reserved word in another dialect
 ])
 
 AT_CLEANUP
@@ -3342,12 +3342,12 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob: 11: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 15: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 20: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 21: warning: GRAPHICAL WINDOW is not implemented
-prog.cob: 23: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
-prog.cob: 25: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:15: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:20: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:21: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:23: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
+prog.cob:25: warning: GRAPHICAL CONTROL is not implemented
 ])
 
 AT_CLEANUP
@@ -3388,9 +3388,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
-[prog.cob: 18: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
-prog.cob: 22: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
-prog.cob: 23: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+[prog.cob:18: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+prog.cob:22: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
+prog.cob:23: warning: handling of DISPLAY MESSAGE is unfinished; implementation is likely to be changed
 ])
 
 AT_CLEANUP
@@ -3410,8 +3410,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 5: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
-prog.cob: 6: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
+[prog.cob:5: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
+prog.cob:6: warning: handling of DISPLAY OMITTED is unfinished; implementation is likely to be changed
 ])
 
 AT_CLEANUP
@@ -3461,12 +3461,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
-[prog.cob: 6: warning: EXTERNAL-FORM is not implemented
-prog.cob: 8: warning: EXTERNAL-FORM is not implemented
-prog.cob: 10: warning: EXTERNAL-FORM is not implemented
-prog.cob: 13: warning: EXTERNAL-FORM is not implemented
-prog.cob: 14: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
-prog.cob: 15: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
+[prog.cob:6: warning: EXTERNAL-FORM is not implemented
+prog.cob:8: warning: EXTERNAL-FORM is not implemented
+prog.cob:10: warning: EXTERNAL-FORM is not implemented
+prog.cob:13: warning: EXTERNAL-FORM is not implemented
+prog.cob:14: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
+prog.cob:15: warning: EXTERNAL-FORM (IDENTIFIED BY) is not implemented
 ])
 
 AT_CLEANUP
@@ -3492,9 +3492,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob], [1], [],
-[prog.cob: 7: error: 'hello' is a reserved word, but isn't supported
-prog.cob: 8: error: 'foo' is a reserved word, but isn't supported
-prog.cob: 9: error: 'bar' is a reserved word, but isn't supported
+[prog.cob:7: error: 'hello' is a reserved word, but isn't supported
+prog.cob:8: error: 'foo' is a reserved word, but isn't supported
+prog.cob:9: error: 'bar' is a reserved word, but isn't supported
 ])
 AT_CLEANUP
 
@@ -3546,8 +3546,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
-[prog.cob: 7: error: syntax error, unexpected Identifier
-prog.cob: 7: error: PICTURE clause required for 'SQLCABC'
+[prog.cob:7: error: syntax error, unexpected Identifier
+prog.cob:7: error: PICTURE clause required for 'SQLCABC'
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict -freserved=BINARY-LONG prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
@@ -3571,8 +3571,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
-prog.cob: 9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
+[prog.cob:9: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+prog.cob:9: error: ANY LENGTH items may only be BY REFERENCE formal parameters
 ])
 AT_CLEANUP
 
@@ -3594,7 +3594,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 # note: testing with lax configuration, otherwise there would be an error
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
-[prog.cob: 8: warning: incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs used
+[prog.cob:8: warning: incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs used
 ])
 AT_CLEANUP
 
@@ -3655,16 +3655,16 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 # note: testing with lax configuration, otherwise there would be an error
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
-[prog.cob: 12: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 45: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+[prog.cob:12: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:45: warning: incorrect order of CONFIGURATION SECTION paragraphs used
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob: 12: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 24: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 35: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob: 45: error: incorrect order of CONFIGURATION SECTION paragraphs used
+[prog.cob:12: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:24: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:35: error: incorrect order of CONFIGURATION SECTION paragraphs used
+prog.cob:45: error: incorrect order of CONFIGURATION SECTION paragraphs used
 ])
 AT_CLEANUP
 
@@ -3726,8 +3726,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 22: error: NOT AT END-OF-PAGE before AT END-OF-PAGE does not conform to COBOL 85
-prog.cob: 44: error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
+[prog.cob:22: error: NOT AT END-OF-PAGE before AT END-OF-PAGE does not conform to COBOL 85
+prog.cob:44: error: NOT EXCEPTION before EXCEPTION does not conform to COBOL 85
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
@@ -3751,8 +3751,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: 10: error: 'CONVERSION' is not defined, but is a reserved word in another dialect
-prog.cob: 11: error: unknown statement 'TRANSFORM'; it may exist in another dialect
+[prog.cob:10: error: 'CONVERSION' is not defined, but is a reserved word in another dialect
+prog.cob:11: error: unknown statement 'TRANSFORM'; it may exist in another dialect
 ])
 AT_CLEANUP
 
@@ -3781,8 +3781,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 6: warning: ignoring redundant .
-prog.cob: 12: warning: ignoring redundant .
+[prog.cob:6: warning: ignoring redundant .
+prog.cob:12: warning: ignoring redundant .
 ])
 AT_CLEANUP
 
@@ -3811,10 +3811,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: syntax error, unexpected Identifier
-prog.cob: 14: error: syntax error, unexpected END-ACCEPT
-prog.cob: 15: error: syntax error, unexpected ELSE
-prog.cob: 17: error: syntax error, unexpected END-IF
+[prog.cob:11: error: syntax error, unexpected Identifier
+prog.cob:14: error: syntax error, unexpected END-ACCEPT
+prog.cob:15: error: syntax error, unexpected ELSE
+prog.cob:17: error: syntax error, unexpected END-IF
 ])
 
 AT_CLEANUP
@@ -3871,16 +3871,16 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: error: syntax error, unexpected DELIMITED
-prog.cob: 15: error: syntax error, unexpected END-STRING
-prog.cob: 17: error: syntax error, unexpected END-STRING, expecting Identifier
-prog.cob: 19: error: syntax error, unexpected DELIMITED
-prog.cob: 24: error: syntax error, unexpected DELIMITED
-prog.cob: 32: error: syntax error, unexpected DELIMITED
-prog.cob: 34: error: syntax error, unexpected Identifier, expecting INTO
-prog.cob: 37: error: syntax error, unexpected END-UNSTRING, expecting Identifier
-prog.cob: 38: error: syntax error, unexpected DELIMITED
-prog.cob: 43: error: syntax error, unexpected DELIMITED, expecting INTO
+[prog.cob:12: error: syntax error, unexpected DELIMITED
+prog.cob:15: error: syntax error, unexpected END-STRING
+prog.cob:17: error: syntax error, unexpected END-STRING, expecting Identifier
+prog.cob:19: error: syntax error, unexpected DELIMITED
+prog.cob:24: error: syntax error, unexpected DELIMITED
+prog.cob:32: error: syntax error, unexpected DELIMITED
+prog.cob:34: error: syntax error, unexpected Identifier, expecting INTO
+prog.cob:37: error: syntax error, unexpected END-UNSTRING, expecting Identifier
+prog.cob:38: error: syntax error, unexpected DELIMITED
+prog.cob:43: error: syntax error, unexpected DELIMITED, expecting INTO
 ])
 AT_CLEANUP
 
@@ -3904,10 +3904,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -fprogram-prototypes=warning prog.cob], [0], [],
-[prog.cob: 9: warning: PROGRAM phrase used
-prog.cob: 8: warning: no definition/prototype seen for program 'test-prog'
-prog.cob: 11: warning: CALL/CANCEL with program-prototype-name used
-prog.cob: 12: warning: CALL/CANCEL with program-prototype-name used
+[prog.cob:9: warning: PROGRAM phrase used
+prog.cob:8: warning: no definition/prototype seen for program 'test-prog'
+prog.cob:11: warning: CALL/CANCEL with program-prototype-name used
+prog.cob:12: warning: CALL/CANCEL with program-prototype-name used
 ])
 AT_CLEANUP
 
@@ -3941,17 +3941,17 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 20: error: 'f' is not a field
-prog.cob: 20: error: 'not-a-num' is not numeric
-prog.cob: 20: error: 3 is not an alphanumeric literal
-prog.cob: 20: error: invalid target for TALLYING
-prog.cob: 21: error: 'not-display' is not USAGE DISPLAY
-prog.cob: 20: error: REPLACING operands differ in size
-prog.cob: 20: error: invalid target for REPLACING
-prog.cob: 22: error: 'f' is not a field
-prog.cob: 22: error: 3 is not an alphanumeric literal
-prog.cob: 22: error: 2 is not an alphanumeric literal
-prog.cob: 22: error: invalid target for TRANSFORM
+[prog.cob:20: error: 'f' is not a field
+prog.cob:20: error: 'not-a-num' is not numeric
+prog.cob:20: error: 3 is not an alphanumeric literal
+prog.cob:20: error: invalid target for TALLYING
+prog.cob:21: error: 'not-display' is not USAGE DISPLAY
+prog.cob:20: error: REPLACING operands differ in size
+prog.cob:20: error: invalid target for REPLACING
+prog.cob:22: error: 'f' is not a field
+prog.cob:22: error: 3 is not an alphanumeric literal
+prog.cob:22: error: 2 is not an alphanumeric literal
+prog.cob:22: error: invalid target for TRANSFORM
 ])
 AT_CLEANUP
 
@@ -3975,8 +3975,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: error: elementary items with SIGN clause must have S in PICTURE
-prog.cob: 13: error: elementary items with SIGN clause must be USAGE DISPLAY or NATIONAL
+[prog.cob:12: error: elementary items with SIGN clause must have S in PICTURE
+prog.cob:13: error: elementary items with SIGN clause must be USAGE DISPLAY or NATIONAL
 ])
 AT_CLEANUP
 
@@ -3999,7 +3999,7 @@ AT_DATA([prog.cob], [
            .
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 11: warning: overriding convention specified in ENTRY-CONVENTION
+[prog.cob:11: warning: overriding convention specified in ENTRY-CONVENTION
 ])
 AT_CLEANUP
 
@@ -4035,14 +4035,14 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 18: warning: ADD TABLE is not implemented
-prog.cob: 19: warning: SUBTRACT TABLE is not implemented
-prog.cob: 20: warning: ADD TABLE is not implemented
-prog.cob: 21: warning: SUBTRACT TABLE is not implemented
-prog.cob: 22: warning: ADD TABLE is not implemented
-prog.cob: 23: warning: SUBTRACT TABLE is not implemented
-prog.cob: 24: warning: ADD TABLE is not implemented
-prog.cob: 24: error: 'tab2b-entry' is not numeric
+[prog.cob:18: warning: ADD TABLE is not implemented
+prog.cob:19: warning: SUBTRACT TABLE is not implemented
+prog.cob:20: warning: ADD TABLE is not implemented
+prog.cob:21: warning: SUBTRACT TABLE is not implemented
+prog.cob:22: warning: ADD TABLE is not implemented
+prog.cob:23: warning: SUBTRACT TABLE is not implemented
+prog.cob:24: warning: ADD TABLE is not implemented
+prog.cob:24: error: 'tab2b-entry' is not numeric
 ])
 AT_CLEANUP
 
@@ -4093,8 +4093,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 12: warning: STOP identifier is obsolete in GnuCOBOL
-prog.cob: 12: warning: STOP literal is obsolete in GnuCOBOL
+[prog.cob:12: warning: STOP identifier is obsolete in GnuCOBOL
+prog.cob:12: warning: STOP literal is obsolete in GnuCOBOL
 ])
 AT_CHECK([$COMPILE_ONLY -fstop-identifier=ok -fstop-literal=ok prog.cob], [0], [], [])
 AT_CLEANUP
@@ -4120,29 +4120,29 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob: 7: error: missing right parenthesis
-prog.cob: 8: error: missing left parenthesis
-prog.cob: 9: error: '/' operator misplaced
+[prog.cob:7: error: missing right parenthesis
+prog.cob:8: error: missing left parenthesis
+prog.cob:9: error: '/' operator misplaced
 ])
 
 AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
-[prog.cob: 6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 7: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 8: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 9: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
-prog.cob: 10: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+[prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:7: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:8: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:9: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:10: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 ])
 
 AT_CHECK([$COMPILE -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],
-[prog.cob: 6: error: 01 CONSTANT does not conform to Micro Focus COBOL
-prog.cob: 7: error: 01 CONSTANT does not conform to Micro Focus COBOL
-prog.cob: 7: error: syntax error, unexpected Identifier, expecting .
+[prog.cob:6: error: 01 CONSTANT does not conform to Micro Focus COBOL
+prog.cob:7: error: 01 CONSTANT does not conform to Micro Focus COBOL
+prog.cob:7: error: syntax error, unexpected Identifier, expecting .
 ])
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [1], [],
-[prog.cob: 7: error: missing right parenthesis
-prog.cob: 8: error: missing left parenthesis
-prog.cob: 9: error: '/' operator misplaced
+[prog.cob:7: error: missing right parenthesis
+prog.cob:8: error: missing left parenthesis
+prog.cob:9: error: '/' operator misplaced
 ])
 
 AT_CLEANUP
@@ -4169,22 +4169,22 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob: 8: error: missing right parenthesis
-prog.cob: 9: error: missing left parenthesis
-prog.cob: 10: error: '/' operator misplaced
+[prog.cob:8: error: missing right parenthesis
+prog.cob:9: error: missing left parenthesis
+prog.cob:10: error: '/' operator misplaced
 ])
 
 AT_CHECK([$COMPILE -std=ibm-strict prog.cob ], [1], [],
-[prog.cob: 6: error: 78 VALUE does not conform to IBM COBOL
-prog.cob: 7: error: 78 VALUE does not conform to IBM COBOL
-prog.cob: 8: error: 78 VALUE does not conform to IBM COBOL
-prog.cob: 8: error: syntax error, unexpected Identifier, expecting .
+[prog.cob:6: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:7: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:8: error: 78 VALUE does not conform to IBM COBOL
+prog.cob:8: error: syntax error, unexpected Identifier, expecting .
 ])
 
 AT_CHECK([$COMPILE -std=ibm prog.cob], [1], [],
-[prog.cob: 8: error: missing right parenthesis
-prog.cob: 9: error: missing left parenthesis
-prog.cob: 10: error: '/' operator misplaced
+[prog.cob:8: error: missing right parenthesis
+prog.cob:9: error: missing left parenthesis
+prog.cob:10: error: '/' operator misplaced
 ])
 
 AT_CLEANUP
@@ -4233,16 +4233,16 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob: 6: error: VALUE of 'POS0': NEXT target is invalid
-prog.cob: 6: error: no previous data-item found
-prog.cob: 10: error: VALUE of 'POS3': NEXT target is invalid
-prog.cob: 10: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
-prog.cob: 12: error: VALUE of 'POS4': NEXT target is invalid
-prog.cob: 12: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
-prog.cob: 14: error: VALUE of 'POS-NEXT': NEXT target is invalid
-prog.cob: 14: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
-prog.cob: 24: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
-prog.cob: 24: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+[prog.cob:6: error: VALUE of 'POS0': NEXT target is invalid
+prog.cob:6: error: no previous data-item found
+prog.cob:10: error: VALUE of 'POS3': NEXT target is invalid
+prog.cob:10: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob:12: error: VALUE of 'POS4': NEXT target is invalid
+prog.cob:12: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob:14: error: VALUE of 'POS-NEXT': NEXT target is invalid
+prog.cob:14: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob:24: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
+prog.cob:24: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
 ])
 
 AT_CLEANUP
@@ -4342,34 +4342,34 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 15: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob: 17: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 22: warning: expression '2' EQUALS '3' is always FALSE
-prog.cob: 25: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob: 29: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 30: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob: 35: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob: 36: warning: expression '2' EQUALS '1' is always FALSE
-prog.cob: 38: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 41: warning: expression '1' EQUALS '3' is always FALSE
-prog.cob: 41: warning: PERFORM FOREVER since UNTIL is always FALSE
-prog.cob: 45: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob: 45: warning: PERFORM NEVER since UNTIL is always TRUE
-prog.cob: 47: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 50: warning: expression '1' EQUALS '3' is always FALSE
-prog.cob: 50: warning: PERFORM FOREVER since UNTIL is always FALSE
-prog.cob: 54: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob: 54: warning: PERFORM ONCE since UNTIL is always TRUE
-prog.cob: 59: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob: 61: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 62: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob: 71: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob: 73: error: offset of 'var' out of bounds: -99
-prog.cob: 74: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob: 74: warning: expression is always TRUE
-prog.cob: 74: warning: expression is always FALSE
-prog.cob: 82: warning: expression '15' EQUALS '115' is always FALSE
-prog.cob: 85: warning: expression '115' EQUALS '15' is always FALSE
+[prog.cob:15: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:17: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:22: warning: expression '2' EQUALS '3' is always FALSE
+prog.cob:25: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:29: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:30: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:35: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:36: warning: expression '2' EQUALS '1' is always FALSE
+prog.cob:38: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:41: warning: expression '1' EQUALS '3' is always FALSE
+prog.cob:41: warning: PERFORM FOREVER since UNTIL is always FALSE
+prog.cob:45: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:45: warning: PERFORM NEVER since UNTIL is always TRUE
+prog.cob:47: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:50: warning: expression '1' EQUALS '3' is always FALSE
+prog.cob:50: warning: PERFORM FOREVER since UNTIL is always FALSE
+prog.cob:54: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:54: warning: PERFORM ONCE since UNTIL is always TRUE
+prog.cob:59: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:61: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:71: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:73: error: offset of 'var' out of bounds: -99
+prog.cob:74: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:74: warning: expression is always TRUE
+prog.cob:74: warning: expression is always FALSE
+prog.cob:82: warning: expression '15' EQUALS '115' is always FALSE
+prog.cob:85: warning: expression '115' EQUALS '15' is always FALSE
 ])
 
 AT_CLEANUP
@@ -4422,15 +4422,15 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 13: warning: expression '115' EQUALS '200' is always FALSE
-prog.cob: 14: warning: expression '200' EQUALS '115' is always FALSE
-prog.cob: 14: warning: expression is always FALSE
-prog.cob: 19: warning: expression '115' EQUALS '15' is always FALSE
-prog.cob: 20: warning: expression '115' EQUALS '115' is always TRUE
-prog.cob: 20: warning: expression is always TRUE
-prog.cob: 22: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob: 24: error (ignored): offset of 'var' out of bounds: -98
-prog.cob: 25: warning: expression '115' GREATER THAN '16' is always TRUE
+[prog.cob:13: warning: expression '115' EQUALS '200' is always FALSE
+prog.cob:14: warning: expression '200' EQUALS '115' is always FALSE
+prog.cob:14: warning: expression is always FALSE
+prog.cob:19: warning: expression '115' EQUALS '15' is always FALSE
+prog.cob:20: warning: expression '115' EQUALS '115' is always TRUE
+prog.cob:20: warning: expression is always TRUE
+prog.cob:22: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:24: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:25: warning: expression '115' GREATER THAN '16' is always TRUE
 ])
 
 AT_CLEANUP
@@ -4458,12 +4458,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed                                                       
-prog.cob: 18: error: 'invalid-1' ANY LENGTH must be PIC X or PIC N
-prog.cob: 18: error: 'invalid-2' ANY LENGTH must be PIC X or PIC N
-prog.cob: 18: error: 'invalid-3' ANY LENGTH must be PIC X or PIC N
-prog.cob: 18: error: 'invalid-4' ANY NUMERIC must be PIC 9
-prog.cob: 17: error: 'invalid-5' ANY LENGTH has invalid definition
+[prog.cob:9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed                                                       
+prog.cob:18: error: 'invalid-1' ANY LENGTH must be PIC X or PIC N
+prog.cob:18: error: 'invalid-2' ANY LENGTH must be PIC X or PIC N
+prog.cob:18: error: 'invalid-3' ANY LENGTH must be PIC X or PIC N
+prog.cob:18: error: 'invalid-4' ANY NUMERIC must be PIC 9
+prog.cob:17: error: 'invalid-5' ANY LENGTH has invalid definition
 ])
 
 AT_CLEANUP

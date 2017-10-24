@@ -1174,17 +1174,17 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
 [prog.cob: in paragraph 'S-03':
-prog.cob: 36: warning: MOVE of non-integer to alphanumeric
+prog.cob:36: warning: MOVE of non-integer to alphanumeric
 prog.cob: in paragraph 'S-10':
-prog.cob: 41: warning: MOVE of non-integer to alphanumeric
+prog.cob:41: warning: MOVE of non-integer to alphanumeric
 prog.cob: in paragraph 'S-20':
-prog.cob: 46: warning: MOVE of non-integer to alphanumeric
+prog.cob:46: warning: MOVE of non-integer to alphanumeric
 prog.cob: in paragraph 'S-30':
-prog.cob: 51: warning: MOVE of non-integer to alphanumeric
+prog.cob:51: warning: MOVE of non-integer to alphanumeric
 prog.cob: in paragraph 'S-40':
-prog.cob: 56: warning: MOVE of non-integer to alphanumeric
+prog.cob:56: warning: MOVE of non-integer to alphanumeric
 prog.cob: in paragraph 'S-50':
-prog.cob: 61: warning: MOVE of non-integer to alphanumeric
+prog.cob:61: warning: MOVE of non-integer to alphanumeric
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [12891289128912891289128912891289])
 
@@ -1381,8 +1381,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 8: warning: BY CONTENT assumed for alphanumeric item
-prog.cob: 19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+[prog.cob:8: warning: BY CONTENT assumed for alphanumeric item
+prog.cob:19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -1472,7 +1472,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], ignore)
 #AT_CHECK([$COMPILE prog.cob], [0], [],
 # hack for now: ignore
-#[prog.cob: 58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+#[prog.cob:58: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 #])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [4: +0000000001
@@ -1584,7 +1584,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fassign-clause=mf prog.cob], [0], [],
-[prog.cob: 12: warning: 'FILENAME' will be implicitly defined
+[prog.cob:12: warning: 'FILENAME' will be implicitly defined
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -1612,7 +1612,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fassign-clause=ibm prog.cob], [0], [],
-[prog.cob: 7: warning: ASSIGN interpreted as FILENAME
+[prog.cob:7: warning: ASSIGN interpreted as FILENAME
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -f FILENAME], [0], [], [])
@@ -1807,8 +1807,8 @@ AT_DATA([prog.cob], [
 #FIXME: Should get a dialect check in syntax checks,
 #       along with all other special registers
 AT_CHECK([$COMPILE_ONLY -fnot-register=TALLY prog.cob], [1], [],
-[prog.cob: 5: error: 'TALLY' is not defined
-prog.cob: 12: error: 'tally' is not defined
+[prog.cob:5: error: 'TALLY' is not defined
+prog.cob:12: error: 'tally' is not defined
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
@@ -1843,7 +1843,7 @@ AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [1], [], [ignore])
 AT_CHECK([$COMPILE -std=acu-strict prog.cob], [0], [], [])
 #AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
 #AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [1], [],
-#[prog.cob: 7: error: redefinition of register 'TALLY'
+#[prog.cob:7: error: redefinition of register 'TALLY'
 #])
 #AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
@@ -1900,7 +1900,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [],
-[callee.cob: 10: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
+[callee.cob:10: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
@@ -2015,7 +2015,7 @@ AT_CHECK([$COBCRUN prog3 X ABCD], [0], [], [])
 
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller X ABCD], [1], [],
-[libcob: caller.cob: 6: CALL of program with CHAINING clause
+[libcob: caller.cob:6: CALL of program with CHAINING clause
 ])
 
 AT_CHECK([$COMPILE init.cob], [0], [], [])
@@ -2832,12 +2832,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -flarger-redefines-ok -Wno-constant-expression prog.cob], [0], [],
-[prog.cob: 12: warning: size of 'XMAIN0502' larger than size of 'XMAIN0501'
-prog.cob: 21: warning: size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
-prog.cob: 23: warning: size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'
-prog.cob: 25: warning: size of 'FIRST-VARIANT-C' larger than size of 'FIRST-DATA'
-prog.cob: 31: warning: size of 'SECOND-VARIANT-A' larger than size of 'SECOND-HEADER'
-prog.cob: 33: warning: size of 'SECOND-VARIANT-B' larger than size of 'SECOND-HEADER'
+[prog.cob:12: warning: size of 'XMAIN0502' larger than size of 'XMAIN0501'
+prog.cob:21: warning: size of 'FIRST-VARIANT-A' larger than size of 'FIRST-DATA'
+prog.cob:23: warning: size of 'FIRST-VARIANT-B' larger than size of 'FIRST-DATA'
+prog.cob:25: warning: size of 'FIRST-VARIANT-C' larger than size of 'FIRST-DATA'
+prog.cob:31: warning: size of 'SECOND-VARIANT-A' larger than size of 'SECOND-HEADER'
+prog.cob:33: warning: size of 'SECOND-VARIANT-B' larger than size of 'SECOND-HEADER'
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -2860,9 +2860,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [1], [],
-[prog.cob: 6: error: syntax error, unexpected TERMINAL
-prog.cob: 7: error: syntax error, unexpected SEND
-prog.cob: 9: error: syntax error, unexpected TERMINAL
+[prog.cob:6: error: syntax error, unexpected TERMINAL
+prog.cob:7: error: syntax error, unexpected SEND
+prog.cob:9: error: syntax error, unexpected TERMINAL
 ])
 AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
@@ -2907,10 +2907,10 @@ AT_DATA([wrong.cob], [
 ])
 
 AT_CHECK([$COMPILE wrong.cob], [1], [],
-[wrong.cob: 8: error: wrong number of CALL parameters for 'CBL_OR', 1 given, 3 expected
+[wrong.cob:8: error: wrong number of CALL parameters for 'CBL_OR', 1 given, 3 expected
 ])
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 9: warning: wrong number of CALL parameters for 'C$NARG', 2 given, 1 expected
+[prog.cob:9: warning: wrong number of CALL parameters for 'C$NARG', 2 given, 1 expected
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog 1 2], [0], [], [])
 
@@ -3878,7 +3878,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog4 --static --dynamic --usage=boringandtoolongtex
 # Return code 1 is sufficient as proof of hard return (as wanted).
 AT_CHECK([$COMPILE prog5.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog5 --static], [1], [],
-[libcob: prog5.cob: 37: Call to CBL_GC_GETOPT with wrong longoption size.
+[libcob: prog5.cob:37: Call to CBL_GC_GETOPT with wrong longoption size.
 ])
 
 AT_CLEANUP

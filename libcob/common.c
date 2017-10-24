@@ -5948,11 +5948,12 @@ cob_runtime_warning (const char *fmt, ...)
 	/* Prefix */
 	fprintf (stderr, "libcob: ");
 	if (cob_source_file) {
-		fprintf (stderr, "%s: ", cob_source_file);
+		fprintf (stderr, "%s:", cob_source_file);
 	}
 	if (cob_source_line) {
-		fprintf (stderr, "%u: ", cob_source_line);
+		fprintf (stderr, "%u:", cob_source_line);
 	}
+	fputc (' ', stderr);
 	fprintf (stderr, "warning: ");
 
 	/* Body */
@@ -5982,7 +5983,7 @@ cob_runtime_error (const char *fmt, ...)
 		if (runtime_err_str) {
 			p = runtime_err_str;
 			if (cob_source_file) {
-				sprintf (runtime_err_str, "%s: %u: ",
+				sprintf (runtime_err_str, "%s:%u: ",
 					cob_source_file, cob_source_line);
 				p = runtime_err_str + strlen (runtime_err_str);
 			}
@@ -6008,10 +6009,11 @@ cob_runtime_error (const char *fmt, ...)
 	/* Prefix */
 	fputs ("libcob: ", stderr);
 	if (cob_source_file) {
-		fprintf (stderr, "%s: ", cob_source_file);
+		fprintf (stderr, "%s", cob_source_file);
 		if (cob_source_line) {
-			fprintf (stderr, "%u: ", cob_source_line);
+			fprintf (stderr, ":%u:", cob_source_line);
 		}
+		fputc (' ', stderr);
 	}
 
 	/* Body */
@@ -6230,15 +6232,15 @@ conf_runtime_error (const int finish_error, const char *fmt, ...)
 		last_runtime_error_file = cob_source_file;
 		last_runtime_error_line = cob_source_line;
 		if (cob_source_file) {
-			fprintf (stderr, "%s: ", cob_source_file);
-		}
-		else {
+			fprintf (stderr, "%s", cob_source_file);
+			if (cob_source_line) {
+				fprintf (stderr, ":%u", cob_source_line);
+			}
+		} else {
 			fprintf (stderr, "%s", _("environment variables"));
-			fprintf (stderr, ": ");
 		}
-		if (cob_source_line) {
-			fprintf (stderr, "%u: ", cob_source_line);
-		}
+		fputc(':', stderr);
+		fputc(' ', stderr);
 	}
 
 	/* Body */
@@ -6251,8 +6253,7 @@ conf_runtime_error (const int finish_error, const char *fmt, ...)
 		putc (';', stderr);
 		putc ('\n', stderr);
 		putc ('\t', stderr);
-	}
-	else {
+	} else {
 		putc ('\n', stderr);
 		fflush (stderr);
 	}

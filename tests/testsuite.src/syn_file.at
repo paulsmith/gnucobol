@@ -230,7 +230,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: ASSIGN clause is required for file 'TEST-FILE'
+[prog.cob:7: error: ASSIGN clause is required for file 'TEST-FILE'
 ])
 
 AT_CLEANUP
@@ -260,7 +260,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 15: error: START not allowed on SEQUENTIAL files
+[prog.cob:15: error: START not allowed on SEQUENTIAL files
 ])
 
 AT_CLEANUP
@@ -358,11 +358,11 @@ AT_DATA([prog.cob], [
 
 # FIXME: "is not defined" should be changed in "is not defined in file ..."
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 10: error: 'TEST-P2' is not defined
-prog.cob: 11: error: 'TEST-P1' is not defined
-prog.cob: 12: error: 'TEST-P3' is not defined
-prog.cob: 18: error: 'NOT-THERE' is not defined
-prog.cob: 13: error: invalid KEY item 'SOME-REC', not in file 'TEST-FILE'
+[prog.cob:10: error: 'TEST-P2' is not defined
+prog.cob:11: error: 'TEST-P1' is not defined
+prog.cob:12: error: 'TEST-P3' is not defined
+prog.cob:18: error: 'NOT-THERE' is not defined
+prog.cob:13: error: invalid KEY item 'SOME-REC', not in file 'TEST-FILE'
 ])
 
 AT_CLEANUP
@@ -451,22 +451,22 @@ AT_DATA([prog3.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 13: error: duplicate RECORD clause
+[prog.cob:13: error: duplicate RECORD clause
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
-[prog.cob: 13: warning: duplicate RECORD clause
+[prog.cob:13: warning: duplicate RECORD clause
 ])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 20: error: minimal record length 2 can not hold the key item 'TEST-P2'; needs to be at least 6
-prog2.cob: 19: error: minimal record length 2 can not hold the key item 'TEST-P1'; needs to be at least 4
-prog2.cob: 21: error: minimal record length 2 can not hold the key item 'TEST-P3'; needs to be at least 9
+[prog2.cob:20: error: minimal record length 2 can not hold the key item 'TEST-P2'; needs to be at least 6
+prog2.cob:19: error: minimal record length 2 can not hold the key item 'TEST-P1'; needs to be at least 4
+prog2.cob:21: error: minimal record length 2 can not hold the key item 'TEST-P3'; needs to be at least 9
 ])
 
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob: 13: error: size of record 'TEST-REC-1' (4) smaller than minimum of file 'TEST-FILE' (5)
-prog3.cob: 15: error: size of record 'TEST-REC-2' (50) larger than maximum of file 'TEST-FILE' (10)
+[prog3.cob:13: error: size of record 'TEST-REC-1' (4) smaller than minimum of file 'TEST-FILE' (5)
+prog3.cob:15: error: size of record 'TEST-REC-2' (50) larger than maximum of file 'TEST-FILE' (10)
 ])
 
 AT_CLEANUP
@@ -529,18 +529,18 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# FIXME: the check misses "prog.cob: 40: error: RECORD DEPENDING item must be unsigned numeric"
+# FIXME: the check misses "prog.cob:40: error: RECORD DEPENDING item must be unsigned numeric"
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 20: error: 'RECORDSIZE' is not defined
-prog.cob: 26: error: RECORD DEPENDING must reference a data-item
-prog.cob: 34: error: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
-prog.cob: 40: error: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+[prog.cob:20: error: 'RECORDSIZE' is not defined
+prog.cob:26: error: RECORD DEPENDING must reference a data-item
+prog.cob:34: error: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+prog.cob:40: error: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
 ])
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [1], [],
-[prog.cob: 20: error: 'RECORDSIZE' is not defined
-prog.cob: 26: error: RECORD DEPENDING must reference a data-item
-prog.cob: 34: warning: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
-prog.cob: 40: warning: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+[prog.cob:20: error: 'RECORDSIZE' is not defined
+prog.cob:26: error: RECORD DEPENDING must reference a data-item
+prog.cob:34: warning: RECORD DEPENDING item 'RECORDSIZE3' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
+prog.cob:40: warning: RECORD DEPENDING item 'RECORDSIZE4' should be defined in WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION
 ])
 
 AT_CLEANUP
@@ -601,11 +601,11 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in section 'G01':
 prog.cob: in paragraph 'G02':
-prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob:24: warning: 'GG02' is not in DECLARATIVES
 prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
-prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
+prog.cob:31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob:34: warning: 'PP02' is not in DECLARATIVES
 ])
 
 AT_CHECK([$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob], [0], [], [])
@@ -613,21 +613,21 @@ AT_CHECK([$COMPILE_ONLY -freference-out-of-declaratives=ok prog.cob], [0], [], [
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob: in section 'G01':
 prog.cob: in paragraph 'G02':
-prog.cob: 24: error: 'GG02' is not in DECLARATIVES
+prog.cob:24: error: 'GG02' is not in DECLARATIVES
 prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 31: error: 'PPOK' is not in DECLARATIVES
-prog.cob: 34: error: 'PP02' is not in DECLARATIVES
+prog.cob:31: error: 'PPOK' is not in DECLARATIVES
+prog.cob:34: error: 'PP02' is not in DECLARATIVES
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 -frelax-syntax prog.cob], [0], [],
 [prog.cob: in section 'G01':
 prog.cob: in paragraph 'G02':
-prog.cob: 24: warning: 'GG02' is not in DECLARATIVES
+prog.cob:24: warning: 'GG02' is not in DECLARATIVES
 prog.cob: in section 'P01':
 prog.cob: in paragraph 'P02':
-prog.cob: 31: warning: 'PPOK' is not in DECLARATIVES
-prog.cob: 34: warning: 'PP02' is not in DECLARATIVES
+prog.cob:31: warning: 'PPOK' is not in DECLARATIVES
+prog.cob:34: warning: 'PP02' is not in DECLARATIVES
 ])
 
 
@@ -669,7 +669,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'PP01':
 prog.cob: in paragraph 'PP02':
-prog.cob: 26: error: invalid reference to 'P02' (in DECLARATIVES)
+prog.cob:26: error: invalid reference to 'P02' (in DECLARATIVES)
 ])
 
 AT_CLEANUP
@@ -699,7 +699,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: error: RECORDING MODE U or S can only be used with RECORD SEQUENTIAL files
+[prog.cob:12: error: RECORDING MODE U or S can only be used with RECORD SEQUENTIAL files
 ])
 AT_CLEANUP
 
@@ -731,11 +731,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 17: warning: ignoring CODE-SET 'A'
-prog.cob: 17: warning: CODE-SET is not implemented
-prog.cob: 20: error: 'foo' is not defined
-prog.cob: 20: error: 'foo' is not an alphabet-name
-prog.cob: 20: warning: CODE-SET is not implemented
+[prog.cob:17: warning: ignoring CODE-SET 'A'
+prog.cob:17: warning: CODE-SET is not implemented
+prog.cob:20: error: 'foo' is not defined
+prog.cob:20: error: 'foo' is not an alphabet-name
+prog.cob:20: warning: CODE-SET is not implemented
 ])
 AT_CLEANUP
 
@@ -766,10 +766,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 16: warning: FOR sub-records is not implemented
-prog.cob: 16: warning: CODE-SET is not implemented
-prog.cob: 16: error: FOR item 'x' is a record
-prog.cob: 16: error: FOR item 'z' is in different record to 'x'
+[prog.cob:16: warning: FOR sub-records is not implemented
+prog.cob:16: warning: CODE-SET is not implemented
+prog.cob:16: error: FOR item 'x' is a record
+prog.cob:16: error: FOR item 'z' is in different record to 'x'
 ])
 AT_CLEANUP
 
@@ -821,16 +821,16 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 22: error: invalid use of 88 level item
-prog.cob: 23: error: WRITE subject does not refer to a record name
-prog.cob: 26: error: WRITE requires a record name as subject
-prog.cob: 27: error: 'TEST-REC' is not a file name
-prog.cob: 28: error: WRITE FILE requires a FROM clause
-prog.cob: 31: error: invalid use of 88 level item
-prog.cob: 32: error: REWRITE subject does not refer to a record name
-prog.cob: 35: error: REWRITE requires a record name as subject
-prog.cob: 36: error: 'TEST-REC' is not a file name
-prog.cob: 37: error: REWRITE FILE requires a FROM clause
+[prog.cob:22: error: invalid use of 88 level item
+prog.cob:23: error: WRITE subject does not refer to a record name
+prog.cob:26: error: WRITE requires a record name as subject
+prog.cob:27: error: 'TEST-REC' is not a file name
+prog.cob:28: error: WRITE FILE requires a FROM clause
+prog.cob:31: error: invalid use of 88 level item
+prog.cob:32: error: REWRITE subject does not refer to a record name
+prog.cob:35: error: REWRITE requires a record name as subject
+prog.cob:36: error: 'TEST-REC' is not a file name
+prog.cob:37: error: REWRITE FILE requires a FROM clause
 ])
 AT_CLEANUP
 
@@ -853,8 +853,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
-prog.cob: 13: warning: 'filename' will be implicitly defined
+[prog.cob:11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+prog.cob:13: warning: 'filename' will be implicitly defined
 ])
 AT_CLEANUP
 
@@ -909,11 +909,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob: 9: error: file FILE1: RELATIVE KEY FILE1-KEY is not numeric
-prog.cob: 12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
-prog.cob: 15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
-prog.cob: 18: error: RELATIVE KEY FILE4-KEY cannot be in file record belonging to FILE4
-prog.cob: 21: error: file FILE5: RELATIVE KEY FILE5-KEY must be integer
+[prog.cob:9: error: file FILE1: RELATIVE KEY FILE1-KEY is not numeric
+prog.cob:12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
+prog.cob:15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
+prog.cob:18: error: RELATIVE KEY FILE4-KEY cannot be in file record belonging to FILE4
+prog.cob:21: error: file FILE5: RELATIVE KEY FILE5-KEY must be integer
 ])
 
 AT_CLEANUP
@@ -935,10 +935,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob: 8: error: Cannot use RELATIVE KEY clause on INDEXED files
-prog.cob: 10: error: Cannot use RECORD KEY clause on RELATIVE files
-prog.cob: 8: error: 'file-1-key' is not defined
-prog.cob: 10: error: 'file-2-key' is not defined
+[prog.cob:8: error: Cannot use RELATIVE KEY clause on INDEXED files
+prog.cob:10: error: Cannot use RECORD KEY clause on RELATIVE files
+prog.cob:8: error: 'file-1-key' is not defined
+prog.cob:10: error: 'file-2-key' is not defined
 ])
 
 AT_CLEANUP
@@ -1039,18 +1039,18 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -frecord-delim-with-fixed-recs=warning prog.cob], [1], [],
-[prog.cob: 25: warning: RECORD DELIMITER STANDARD-1 ignored
-prog.cob: 28: warning: Phrase in RECORD DELIMITER not recognised; will be ignored
-prog.cob: 33: error: ORGANIZATION INDEXED is incompatible with RECORD DELIMITER
-prog.cob: 39: error: RECORD DELIMITER LINE-SEQUENTIAL only allowed with (LINE) SEQUENTIAL files
-prog.cob: 36: error: RECORD clause is invalid for file 'bad-2' (file type)
-prog.cob: 43: error: RECORD DELIMITER BINARY-SEQUENTIAL only allowed with SEQUENTIAL files
-prog.cob: 47: error: RECORD DELIMITER STANDARD-1 only allowed with SEQUENTIAL files
-prog.cob: 47: warning: RECORD DELIMITER STANDARD-1 ignored
-prog.cob: 79: warning: RECORD DELIMITER clause on file with fixed-length records used
-prog.cob: 82: warning: RECORD DELIMITER clause on file with fixed-length records used
-prog.cob: 85: warning: RECORD DELIMITER clause on file with fixed-length records used
-prog.cob: 88: warning: RECORD DELIMITER clause on file with fixed-length records used
-prog.cob: 90: warning: RECORD DELIMITER clause on file with fixed-length records used
+[prog.cob:25: warning: RECORD DELIMITER STANDARD-1 ignored
+prog.cob:28: warning: Phrase in RECORD DELIMITER not recognised; will be ignored
+prog.cob:33: error: ORGANIZATION INDEXED is incompatible with RECORD DELIMITER
+prog.cob:39: error: RECORD DELIMITER LINE-SEQUENTIAL only allowed with (LINE) SEQUENTIAL files
+prog.cob:36: error: RECORD clause is invalid for file 'bad-2' (file type)
+prog.cob:43: error: RECORD DELIMITER BINARY-SEQUENTIAL only allowed with SEQUENTIAL files
+prog.cob:47: error: RECORD DELIMITER STANDARD-1 only allowed with SEQUENTIAL files
+prog.cob:47: warning: RECORD DELIMITER STANDARD-1 ignored
+prog.cob:79: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob:82: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob:85: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob:88: warning: RECORD DELIMITER clause on file with fixed-length records used
+prog.cob:90: warning: RECORD DELIMITER clause on file with fixed-length records used
 ])
 AT_CLEANUP

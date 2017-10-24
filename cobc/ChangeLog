@@ -1,4 +1,11 @@
 
+2017-10-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: fixed bug #454 suspicious warning with actual working
+	  CURRENCY SIGN, better error messages for this clause
+	* error.c, cobc.c: changed message format back to old version,
+	  see bug #455
+
 2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: moved include of top_srcdir to AM_CPPFLAGS to prevent

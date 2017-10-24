@@ -50,12 +50,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 11: warning: REPORT WRITER is not implemented
-prog.cob: 13: warning: REPORT SECTION is not implemented
-prog.cob: 18: error: unsigned positive integer value expected
-prog.cob: 19: error: unsigned positive integer value expected
-prog.cob: 20: error: unsigned positive integer value expected
-prog.cob: 21: error: unsigned positive integer value expected
+[prog.cob:11: warning: REPORT WRITER is not implemented
+prog.cob:13: warning: REPORT SECTION is not implemented
+prog.cob:18: error: unsigned positive integer value expected
+prog.cob:19: error: unsigned positive integer value expected
+prog.cob:20: error: unsigned positive integer value expected
+prog.cob:21: error: unsigned positive integer value expected
 ])
 
 AT_CLEANUP
@@ -162,22 +162,22 @@ AT_CLEANUP
 # 
 # # Parsing + error with -std=cobol2014
 # AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], ,
-# [prog.cob: 17: error: lABEL RECORDS does not conform to COBOL 2014
-# prog.cob: 19: warning: RECORD clause ignored for LINE SEQUENTIAL
-# prog.cob: 20: error: DATA RECORDS does not conform to COBOL 2014
-# prog.cob: 34: error: lABEL RECORDS does not conform to COBOL 2014
-# prog.cob: 41: error: 'SOME-REPORT' is not defined
-# prog.cob: 41: error: 'SOME-REPORT' is not a report name
+# [prog.cob:17: error: lABEL RECORDS does not conform to COBOL 2014
+# prog.cob:19: warning: RECORD clause ignored for LINE SEQUENTIAL
+# prog.cob:20: error: DATA RECORDS does not conform to COBOL 2014
+# prog.cob:34: error: lABEL RECORDS does not conform to COBOL 2014
+# prog.cob:41: error: 'SOME-REPORT' is not defined
+# prog.cob:41: error: 'SOME-REPORT' is not a report name
 # ])
 # 
 # # Check for correct compile and a warning
 # AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], ,
-# [prog.cob: 17: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
-# prog.cob: 19: warning: RECORD clause ignored for LINE SEQUENTIAL
-# prog.cob: 20: warning: DATA RECORDS is obsolete in Micro Focus COBOL
-# prog.cob: 34: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
-# prog.cob: 41: error: 'SOME-REPORT' is not defined
-# prog.cob: 41: error: 'SOME-REPORT' is not a report name
+# [prog.cob:17: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+# prog.cob:19: warning: RECORD clause ignored for LINE SEQUENTIAL
+# prog.cob:20: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+# prog.cob:34: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+# prog.cob:41: error: 'SOME-REPORT' is not defined
+# prog.cob:41: error: 'SOME-REPORT' is not a report name
 # ])
 # 
 # AT_CLEANUP

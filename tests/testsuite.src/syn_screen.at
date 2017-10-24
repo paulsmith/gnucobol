@@ -77,13 +77,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 31: error: cannot specify NO ADVANCING in screen DISPLAY
-prog.cob: 31: error: screens may only be displayed on CRT
-prog.cob: 32: error: cannot mix screens and fields in the same DISPLAY statement
-prog.cob: 33: error: ambiguous DISPLAY; put items to display on device in separate DISPLAY
-prog.cob: 34: error: screen clauses may only be used for DISPLAY on CRT
-prog.cob: 35: error: cannot mix screens and fields in the same DISPLAY statement
-prog.cob: 49: error: cannot specify NO ADVANCING in screen DISPLAY
+[prog.cob:31: error: cannot specify NO ADVANCING in screen DISPLAY
+prog.cob:31: error: screens may only be displayed on CRT
+prog.cob:32: error: cannot mix screens and fields in the same DISPLAY statement
+prog.cob:33: error: ambiguous DISPLAY; put items to display on device in separate DISPLAY
+prog.cob:34: error: screen clauses may only be used for DISPLAY on CRT
+prog.cob:35: error: cannot mix screens and fields in the same DISPLAY statement
+prog.cob:49: error: cannot specify NO ADVANCING in screen DISPLAY
 ])
 
 AT_CLEANUP
@@ -107,13 +107,13 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 8: error: duplicate LINE clause
-prog.cob: 8: error: duplicate HIGHLIGHT clause
-prog.cob: 9: error: cannot specify both AT screen-location and LINE or COLUMN
-prog.cob: 9: error: duplicate MODE IS BLOCK clause
-prog.cob: 10: error: duplicate LINE clause
-prog.cob: 10: error: duplicate HIGHLIGHT clause
-prog.cob: 11: error: cannot specify both AT screen-location and LINE or COLUMN
+[prog.cob:8: error: duplicate LINE clause
+prog.cob:8: error: duplicate HIGHLIGHT clause
+prog.cob:9: error: cannot specify both AT screen-location and LINE or COLUMN
+prog.cob:9: error: duplicate MODE IS BLOCK clause
+prog.cob:10: error: duplicate LINE clause
+prog.cob:10: error: duplicate HIGHLIGHT clause
+prog.cob:11: error: cannot specify both AT screen-location and LINE or COLUMN
 ])
 AT_CLEANUP
 
@@ -153,11 +153,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 24: error: value in AT clause must have 4 or 6 digits
-prog.cob: 25: error: value in AT clause must have 4 or 6 digits
-prog.cob: 26: error: value in AT clause is not numeric
-prog.cob: 27: error: value in AT clause must have 4 or 6 digits
-prog.cob: 29: error: cannot specify figurative constant ZERO in AT clause
+[prog.cob:24: error: value in AT clause must have 4 or 6 digits
+prog.cob:25: error: value in AT clause must have 4 or 6 digits
+prog.cob:26: error: value in AT clause is not numeric
+prog.cob:27: error: value in AT clause must have 4 or 6 digits
+prog.cob:29: error: cannot specify figurative constant ZERO in AT clause
 ])
 AT_CLEANUP
 
@@ -195,15 +195,15 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -faccept-display-extensions=error prog.cob], [1], [],
-[prog.cob: 15: error: AT clause used
-prog.cob: 15: error: non-standard DISPLAY used
-prog.cob: 16: error: LINE 0 used
-prog.cob: 16: error: COLUMN 0 used
-prog.cob: 16: error: non-standard DISPLAY used
-prog.cob: 17: error: non-standard ACCEPT used
-prog.cob: 19: error: non-standard DISPLAY used
-prog.cob: 20: error: non-standard ACCEPT used
-prog.cob: 22: error: non-standard DISPLAY used
+[prog.cob:15: error: AT clause used
+prog.cob:15: error: non-standard DISPLAY used
+prog.cob:16: error: LINE 0 used
+prog.cob:16: error: COLUMN 0 used
+prog.cob:16: error: non-standard DISPLAY used
+prog.cob:17: error: non-standard ACCEPT used
+prog.cob:19: error: non-standard DISPLAY used
+prog.cob:20: error: non-standard ACCEPT used
+prog.cob:22: error: non-standard DISPLAY used
 ])
 AT_CLEANUP
 
@@ -255,8 +255,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: error: non-negative integer value expected
-prog.cob: 13: error: non-negative integer value expected
+[prog.cob:12: error: non-negative integer value expected
+prog.cob:13: error: non-negative integer value expected
 ])
 
 AT_CLEANUP
@@ -280,9 +280,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 9: warning: LEFTLINE is not implemented
-prog.cob: 9: warning: OVERLINE is not implemented
-prog.cob: 10: warning: GRID is not implemented
+[prog.cob:9: warning: LEFTLINE is not implemented
+prog.cob:9: warning: OVERLINE is not implemented
+prog.cob:10: warning: GRID is not implemented
 ])
 
 AT_CLEANUP
@@ -340,9 +340,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 12: error: 88-level cannot be used here
-prog.cob: 12: error: 88-level cannot be used here
-prog.cob: 12: error: 88-level cannot be used here
+[prog.cob:12: error: 88-level cannot be used here
+prog.cob:12: error: 88-level cannot be used here
+prog.cob:12: error: 88-level cannot be used here
 ])
 
 AT_CLEANUP
@@ -379,31 +379,31 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 11: error: cannot specify both LOWLIGHT and HIGHLIGHT
-prog.cob: 12: error: cannot specify both ERASE EOS and ERASE EOL
-prog.cob: 13: error: cannot specify both BLANK SCREEN and BLANK LINE
-prog.cob: 16: error: cannot specify both LOWLIGHT and HIGHLIGHT
-prog.cob: 17: error: cannot specify both ERASE EOS and ERASE EOL
-prog.cob: 18: error: cannot specify both BLANK SCREEN and BLANK LINE
-prog.cob: 21: error: cannot specify both SCROLL DOWN and SCROLL UP
-prog.cob: 21: error: cannot specify both TAB and AUTO
-prog.cob: 22: error: cannot specify both SCROLL DOWN and SCROLL UP
-prog.cob: 22: error: cannot specify both NO UPDATE and UPDATE
-prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
+[prog.cob:11: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob:12: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob:13: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob:16: error: cannot specify both LOWLIGHT and HIGHLIGHT
+prog.cob:17: error: cannot specify both ERASE EOS and ERASE EOL
+prog.cob:18: error: cannot specify both BLANK SCREEN and BLANK LINE
+prog.cob:21: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob:21: error: cannot specify both TAB and AUTO
+prog.cob:22: error: cannot specify both SCROLL DOWN and SCROLL UP
+prog.cob:22: error: cannot specify both NO UPDATE and UPDATE
+prog.cob:24: error: cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
 AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [1], [],
-[prog.cob: 11: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
-prog.cob: 12: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
-prog.cob: 13: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
-prog.cob: 16: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
-prog.cob: 17: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
-prog.cob: 18: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
-prog.cob: 21: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
-prog.cob: 21: warning: cannot specify both TAB and AUTO; TAB is ignored
-prog.cob: 22: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
-prog.cob: 22: warning: cannot specify both NO UPDATE and UPDATE; NO UPDATE is ignored
-prog.cob: 24: error: cannot specify both HIGHLIGHT and LOWLIGHT
+[prog.cob:11: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob:12: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob:13: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob:16: warning: cannot specify both LOWLIGHT and HIGHLIGHT; LOWLIGHT is ignored
+prog.cob:17: warning: cannot specify both ERASE EOS and ERASE EOL; ERASE EOS is ignored
+prog.cob:18: warning: cannot specify both BLANK SCREEN and BLANK LINE; BLANK SCREEN is ignored
+prog.cob:21: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob:21: warning: cannot specify both TAB and AUTO; TAB is ignored
+prog.cob:22: warning: cannot specify both SCROLL DOWN and SCROLL UP; SCROLL DOWN is ignored
+prog.cob:22: warning: cannot specify both NO UPDATE and UPDATE; NO UPDATE is ignored
+prog.cob:24: error: cannot specify both HIGHLIGHT and LOWLIGHT
 ])
 
 AT_CLEANUP
@@ -468,10 +468,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 13: error: duplicate FULL clause
-prog.cob: 16: error: duplicate BACKGROUND-COLOR clause
-prog.cob: 17: error: duplicate HIGHLIGHT clause
-prog.cob: 17: error: duplicate UPDATE clause
+[prog.cob:13: error: duplicate FULL clause
+prog.cob:16: error: duplicate BACKGROUND-COLOR clause
+prog.cob:17: error: duplicate HIGHLIGHT clause
+prog.cob:17: error: duplicate UPDATE clause
 ])
 
 AT_CLEANUP
@@ -516,22 +516,22 @@ AT_DATA([prog3.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: warning: OCCURS screen items is not implemented
-prog.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
+[prog.cob:7: warning: OCCURS screen items is not implemented
+prog.cob:7: error: relative LINE/COLUMN clause required with OCCURS
 ])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob: 7: warning: OCCURS screen items is not implemented
-prog2.cob: 7: error: relative LINE/COLUMN clause required with OCCURS
-prog2.cob: 9: warning: OCCURS screen items is not implemented
-prog2.cob: 9: error: relative LINE/COLUMN clause required with OCCURS
+[prog2.cob:7: warning: OCCURS screen items is not implemented
+prog2.cob:7: error: relative LINE/COLUMN clause required with OCCURS
+prog2.cob:9: warning: OCCURS screen items is not implemented
+prog2.cob:9: error: relative LINE/COLUMN clause required with OCCURS
 ])
 
 AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
-[prog3.cob: 7: warning: OCCURS screen items is not implemented
-prog3.cob: 9: warning: OCCURS screen items is not implemented
-prog3.cob: 11: warning: OCCURS screen items is not implemented
-prog3.cob: 13: warning: OCCURS screen items is not implemented
+[prog3.cob:7: warning: OCCURS screen items is not implemented
+prog3.cob:9: warning: OCCURS screen items is not implemented
+prog3.cob:11: warning: OCCURS screen items is not implemented
+prog3.cob:13: warning: OCCURS screen items is not implemented
 ])
 
 AT_CLEANUP
@@ -555,7 +555,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 9: error: syntax error, unexpected Literal
+[prog.cob:9: error: syntax error, unexpected Literal
 ])
 
 AT_CLEANUP
@@ -579,7 +579,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob: 11: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
+[prog.cob:11: warning: FULL has no effect on numeric items; you may want REQUIRED or PIC Z
 ])
 
 AT_CLEANUP

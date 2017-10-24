@@ -43,8 +43,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
-[prog.cob: 14: error: cannot change address of 'X', which is not BASED or a linkage item
-prog.cob: 15: error: cannot change address of 'Z', which is not level 1 or 77
+[prog.cob:14: error: cannot change address of 'X', which is not BASED or a linkage item
+prog.cob:15: error: cannot change address of 'Z', which is not level 1 or 77
 ])
 
 AT_CLEANUP

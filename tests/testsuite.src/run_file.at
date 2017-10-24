@@ -1060,9 +1060,9 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [],
-[libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_lock: 11
-libcob: prog.cob: 15: warning: call to CBL_CREATE_FILE with wrong file_dev: 22
-libcob: prog.cob: 15: warning: call to CBL_OPEN_FILE with wrong access mode: 55
+[libcob: prog.cob:15: warning: call to CBL_CREATE_FILE with wrong file_lock: 11
+libcob: prog.cob:15: warning: call to CBL_CREATE_FILE with wrong file_dev: 22
+libcob: prog.cob:15: warning: call to CBL_OPEN_FILE with wrong access mode: 55
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
 

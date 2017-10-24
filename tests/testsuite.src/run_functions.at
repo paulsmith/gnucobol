@@ -167,7 +167,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 7: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+[prog.cob:7: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -3758,13 +3758,13 @@ AT_CHECK([echo "$COB_HAS_UTC_OFFSET"], [0], [no
 # Previous test "failed" --> UTC offset available
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
-prog.cob: 18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
-prog.cob: 24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
-prog.cob: 31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
-prog.cob: 37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
-prog.cob: 44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
-prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+[prog.cob:11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob:18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob:24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob:31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob:37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob:44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob:51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
 ])
 
 ,
@@ -3772,14 +3772,14 @@ prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
 # Previous test "passed" --> UTC offset is not available
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
-prog.cob: 11: warning: cannot find the UTC offset on this system
-prog.cob: 18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
-prog.cob: 24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
-prog.cob: 31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
-prog.cob: 37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
-prog.cob: 44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
-prog.cob: 51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
+[prog.cob:11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
+prog.cob:11: warning: cannot find the UTC offset on this system
+prog.cob:18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
+prog.cob:24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
+prog.cob:31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
+prog.cob:37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
+prog.cob:44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
+prog.cob:51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
 ])
 
 )

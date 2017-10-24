@@ -90,7 +90,7 @@ print_error (const char *file, int line, const char *prefix,
 		if (cb_msg_style == CB_MSG_STYLE_MSC) {
 			fprintf (stderr, "%s (%d): ", file, line);
 		} else {
-			fprintf (stderr, "%s: %d: ", file, line);
+			fprintf (stderr, "%s:%d: ", file, line);
 		}
 	}
 	if (prefix) {
@@ -380,10 +380,13 @@ configuration_error (const char *fname, const int line,
 		last_error_file = fname;
 		last_error_line = line;
 		if (fname) {
-			fprintf (stderr, "%s: ", fname);
+			fprintf (stderr, "%s:", fname);
 		}
 		if (line) {
-			fprintf (stderr, "%d: ", line);
+			fprintf (stderr, "%d:", line);
+		}
+		if (fname || line) {
+			fputc (' ', stderr);
 		}
 	}
 
