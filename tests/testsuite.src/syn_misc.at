@@ -649,8 +649,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:9: error: duplicate values in class 'CHECK-VALID'
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:9: warning: duplicate character values in class 'CHECK-VALID'
 ])
 
 AT_CLEANUP
