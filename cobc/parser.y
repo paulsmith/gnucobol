@@ -3463,7 +3463,7 @@ integer_list:
 /* CLASS clause */
 
 class_name_clause:
-  CLASS undefined_word _is class_item_list
+  CLASS undefined_word _class_type _is class_item_list _in_alphabet
   {
 	cb_tree		x;
 
@@ -3474,7 +3474,7 @@ class_name_clause:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
 		/* Returns null on error */
-		x = cb_build_class_name ($2, $4);
+		x = cb_build_class_name ($2, $5);
 		if (x) {
 			current_program->class_name_list =
 				cb_list_add (current_program->class_name_list, x);
@@ -3508,6 +3508,28 @@ class_item:
 	} else {
 		$$ = CB_BUILD_PAIR ($3, $1);
 	}
+  }
+;
+
+_class_type:
+  /* empty */
+| _for ALPHANUMERIC
+  {
+	$$ = NULL;
+  }
+| _for NATIONAL
+  {
+	CB_PENDING_X ($2, _("NATIONAL CLASS"));
+	$$ = cb_int0;
+  }
+;
+
+_in_alphabet:
+  /* empty */
+| IN alphabet_name
+  {
+	CB_PENDING_X ($2, _("CLASS IS integer IN alphabet-name"));
+	$$ = $2;
   }
 ;
 
