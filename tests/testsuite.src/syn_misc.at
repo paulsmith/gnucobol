@@ -937,7 +937,7 @@ AT_DATA([prog2.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CURRENCY 'T'.
+           CURRENCY 'DOLLAR'.
 ])
 
 AT_DATA([prog3.cob], [
@@ -946,7 +946,15 @@ AT_DATA([prog3.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CURRENCY 'DOLLAR'.
+           CURRENCY 'DOLLAR'
+           WITH PICTURE SYMBOL '$'.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 SOME-CASH     PIC 9(04).99$.
+       PROCEDURE        DIVISION.
+           MOVE 123.4 TO SOME-CASH
+           DISPLAY SOME-CASH END-DISPLAY.
+           STOP RUN.
 ])
 
 AT_DATA([prog4.cob], [
@@ -955,8 +963,8 @@ AT_DATA([prog4.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CURRENCY 'DOLLAR'
-           WITH PICTURE SYMBOL '$'.
+           CURRENCY '   '
+           PICTURE SYMBOL '*'.
 ])
 
 AT_DATA([prog5.cob], [
@@ -965,8 +973,8 @@ AT_DATA([prog5.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CURRENCY '   '
-           PICTURE SYMBOL '*'.
+           CURRENCY ' T '
+           PICTURE SYMBOL ' '.
 ])
 
 AT_DATA([prog6.cob], [
@@ -975,23 +983,13 @@ AT_DATA([prog6.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-           CURRENCY ' T '
-           PICTURE SYMBOL ' '.
+           CURRENCY '+-'
+           PICTURE SYMBOL 'TT'.
 ])
 
 AT_DATA([prog7.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog7.
-       ENVIRONMENT DIVISION.
-       CONFIGURATION SECTION.
-       SPECIAL-NAMES.
-           CURRENCY '+-'
-           PICTURE SYMBOL 'TT'.
-])
-
-AT_DATA([prog8.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog8.
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
@@ -1006,35 +1004,29 @@ AT_DATA([prog8.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: 7: error: invalid CURRENCY SIGN '*'
-prog.cob: 7: error: invalid character '*' in PICTURE SYMBOL for CURRENCY
+[prog.cob: 7: error: invalid character '*' in currency symbol
 ])
-AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [],
-[prog2.cob: 7: warning: CURRENCY SIGN other than '$' is not implemented
+AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
+[prog2.cob: 7: error: currency symbol must be one character long
 ])
-AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob: 7: error: PICTURE SYMBOL for CURRENCY must be one character long
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
+[prog3.cob: 7: warning: separate currency symbol and currency string is not implemented
 ])
-AT_CHECK([$COMPILE_ONLY prog4.cob], [0], [],
-[prog4.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
+AT_CHECK([$COMPILE_ONLY prog4.cob], [1], [],
+[prog4.cob: 7: warning: separate currency symbol and currency string is not implemented
+prog4.cob: 7: error: invalid CURRENCY SIGN '   '
+prog4.cob: 8: error: invalid character '*' in currency symbol
 ])
 AT_CHECK([$COMPILE_ONLY prog5.cob], [1], [],
-[prog5.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
-prog5.cob: 7: error: invalid CURRENCY SIGN '   '
-prog5.cob: 8: error: invalid character '*' in PICTURE SYMBOL for CURRENCY
+[prog5.cob: 7: warning: separate currency symbol and currency string is not implemented
+prog5.cob: 8: error: invalid character ' ' in currency symbol
 ])
 AT_CHECK([$COMPILE_ONLY prog6.cob], [1], [],
-[prog6.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
-prog6.cob: 8: error: invalid character ' ' in PICTURE SYMBOL for CURRENCY
+[prog6.cob: 7: warning: separate currency symbol and currency string is not implemented
+prog6.cob: 7: error: invalid CURRENCY SIGN '+-'
+prog6.cob: 8: error: currency symbol must be one character long
 ])
-AT_CHECK([$COMPILE_ONLY prog7.cob], [1], [],
-[prog7.cob: 7: warning: CURRENCY SIGN longer than one character is not implemented
-prog7.cob: 7: error: invalid CURRENCY SIGN '+-'
-prog7.cob: 8: error: PICTURE SYMBOL for CURRENCY must be one character long
-])
-AT_CHECK([$COMPILE_ONLY prog8.cob], [0], [],
-[prog8.cob: 7: warning: CURRENCY SIGN other than '$' is not implemented
-])
+AT_CHECK([$COMPILE_ONLY prog7.cob], [0], [], [])
 
 AT_CLEANUP
 

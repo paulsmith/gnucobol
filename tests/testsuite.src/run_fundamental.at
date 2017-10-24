@@ -1079,7 +1079,7 @@ AT_DATA([prog.cob], [
            FUNCTION f1
            FUNCTION f2.
        SPECIAL-NAMES.
-           CURRENCY SIGN IS "Y" WITH PICTURE SYMBOL "?"
+           CURRENCY SIGN IS "Y"
            DECIMAL-POINT IS COMMA.
        
        PROCEDURE DIVISION.
@@ -1091,7 +1091,7 @@ AT_DATA([prog.cob], [
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        77  n1    BINARY-LONG VALUE 0.
-       77  curr  PIC 9.9999,99?.
+       77  curr  PIC 9.9999,99Y.
        
        PROCEDURE DIVISION.
            MOVE f1()   TO n1
@@ -1120,17 +1120,9 @@ AT_DATA([prog.cob], [
 
 ])
 
-# Should be (as soon as this is implemented):
-#AT_CHECK([$COMPILE prog.cob], [0], [], [])
-#AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-#[0.0004,00Y
-#])
-# expected result until then:
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: 30: warning: CURRENCY SIGN other than '$' is not implemented
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[0.0004,00?
+[0.0004,00Y
 ])
 
 AT_CLEANUP

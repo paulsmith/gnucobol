@@ -38,6 +38,233 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [111])
 AT_CLEANUP
 
 
+## TODO: Check if the following DECIMAL-POINT tests are really all extensions.
+
+
+AT_SETUP([DECIMAL-POINT is COMMA (1)])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MIN (3,,,,,,5) TO X.
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00,50
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DECIMAL-POINT is COMMA (2)])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MIN (3,,,,,, 5) TO X.
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[03,00
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DECIMAL-POINT is COMMA (3)])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MIN (3,,,,,, 1,5) TO X.
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[01,50
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DECIMAL-POINT is COMMA (4)])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC 99V99.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MIN (3,,,,,,1,5) TO X.
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[00,10
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([DECIMAL-POINT is COMMA (5)])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       CONFIGURATION    SECTION.
+       SPECIAL-NAMES.
+           DECIMAL-POINT    IS COMMA.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  X            PIC 99V99.
+       PROCEDURE        DIVISION.
+           COMPUTE X=1 + ,1
+           END-COMPUTE
+           DISPLAY X
+           END-DISPLAY.
+           COMPUTE X=1*,1
+           END-COMPUTE
+           DISPLAY X
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[01,10
+00,10
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([CURRENCY SIGN])
+AT_KEYWORDS([misc fundamental])
+
+AT_DATA([prog.cob], [
+       PROGRAM-ID.   prog.
+       
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           CURRENCY SIGN IS "Y".
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  amount    pic Y(6)9.99.
+       
+       PROCEDURE DIVISION.
+           Move 1512.34 to Amount
+           Display "Amount is #" Amount '#' with no advancing.
+
+           GOBACK
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Amount is #  Y1512.34#])
+
+AT_CLEANUP
+
+
+AT_SETUP([CURRENCY SIGN WITH PICTURE SYMBOL])
+AT_KEYWORDS([misc fundamental])
+
+# FIXME - see FR #246
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       PROGRAM-ID.   prog.
+       
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           *> note the space after EUR / before ct.
+           CURRENCY SIGN IS "EUR "      WITH PICTURE SYMBOL "U",
+           CURRENCY SIGN IS " ct (EUR)" WITH PICTURE SYMBOL "c",
+           Currency Sign is "$US" with Picture Symbol "$".
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  EUROS    PIC U99v99.
+       77  cents    PIC c9,999.
+       77  DOLLARS  Pic $$,$$9.99.
+       
+       PROCEDURE DIVISION.
+           MOVE 12.34 TO EUROS
+           MULTIPLY euros BY 1000 GIVING cents.
+           DISPLAY "#" EUROS "# equal #" cents '#'.
+           Move 1500 to Invoice-Amount
+           Display "Invoice amount #1 is " Invoice-Amount '.'.
+           Move 12.34 to Invoice-Amount
+           Display "Invoice amount #2 is " Invoice-Amount '.'.
+
+           GOBACK
+           .
+       END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[#EUR 12.34# equal #1,234 ct (EUR)#
+Invoice amount #1 is  $US1,500.00.
+Invoice amount #2 is     $US12.34.
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([LOCAL-STORAGE (1)])
 AT_KEYWORDS([runmisc])
 

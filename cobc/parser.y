@@ -1069,14 +1069,16 @@ get_literal_or_word_name (const cb_tree x)
 	}
 }
 
-/* verify and set picture sign for currency */
+/* verify and set currency symbol used in picture (compile time) and - if no currency
+   string is explicitly set (which is currently not implemented) - as currency string
+   (run time for display and [de-]editing)*/
 static void
 set_currency_picture_symbol (const cb_tree x)
 {
 	unsigned char	*s		= CB_LITERAL (x)->data;
 
 	if (CB_LITERAL (x)->size != 1) {
-		cb_error_x (x, _("PICTURE SYMBOL for CURRENCY must be one character long"));
+		cb_error_x (x, _("currency symbol must be one character long"));
 		return;
 	}
 	switch (*s) {
@@ -1127,7 +1129,13 @@ set_currency_picture_symbol (const cb_tree x)
 	case '\'':
 	case '"':
 	case ' ':
-		cb_error_x (x, _("invalid character '%c' in PICTURE SYMBOL for CURRENCY"), s[0]);
+#if 0 /* note: MicroFocus also dissalows L (VAX) and G (OSVS) */
+	case 'L':
+	case 'G':
+	case 'l':
+	case 'g':
+#endif
+		cb_error_x (x, _("invalid character '%c' in currency symbol"), s[0]);
 		return;
 	default:
 		break;
@@ -3541,14 +3549,12 @@ currency_sign_clause:
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
+		/* FIXME: actual allowed (depending on dialect), see FR #246 */
 		check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
-		if (strcmp("$", (const char *)s) != 0) {
-			if (CB_LITERAL ($4)->size != 1) {
-				if ($5) {
-					CB_PENDING_X ($4, _("CURRENCY SIGN longer than one character"));
-				}
-				error_ind = 1;
-			}
+		
+		/* checks of CURRENCY SIGN (being currency string) when separate */
+		if ($5) {
+			CB_PENDING_X ($4, _("separate currency symbol and currency string"));
 			while (*s) {
 				switch (*s) {
 				case '0':
@@ -3566,7 +3572,7 @@ currency_sign_clause:
 				case ',':
 				case '.':
 				case '*':
-					error_ind = 2;
+					error_ind = 1;
 					break;
 				case ' ':
 					break;
@@ -3577,26 +3583,18 @@ currency_sign_clause:
 				s++;
 			}
 			if (!char_seen) {
-				error_ind = 2;
-			}
-			if (error_ind == 0) {
-				CB_PENDING_X ($4, _("CURRENCY SIGN other than '$'"));
+				error_ind = 1;
 			}
 		}
-		switch (error_ind) {
-		case 0:
-		case 1:
-			/* FIXME: currency sign/symbol are currently mixed in cobc and libcob */
-			/* current_program->currency_sign = CB_LITERAL ($4); */
-			break;
-		default:
+		if (error_ind) {
 			cb_error_x ($4, _("invalid CURRENCY SIGN '%s'"), (char*)CB_LITERAL ($4)->data);
-			break;
 		}
 		if ($5) {
 			set_currency_picture_symbol ($5);
 		} else {
-			set_currency_picture_symbol ($4);
+			if (!error_ind) {
+				set_currency_picture_symbol ($4);
+			}
 		}
 	}
   }
