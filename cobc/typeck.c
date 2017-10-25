@@ -8272,6 +8272,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 invalid:
 	if (is_value) {
 		cb_error_x (loc, _("invalid VALUE clause"));
+	} else if (cobc_cs_check == CB_CS_SET) {
+		cb_error_x (loc, _("invalid SET statement"));
 	} else {
 		cb_error_x (loc, _("invalid MOVE statement"));
 	}

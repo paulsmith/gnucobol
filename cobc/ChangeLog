@@ -1,4 +1,9 @@
 
+2017-10-25  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c (validate_move invalid:) fixed bug #255 report
+	  'invalid SET statement' when appropriate
+
 2017-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: specify all generated source files in BUILT_SOURCES

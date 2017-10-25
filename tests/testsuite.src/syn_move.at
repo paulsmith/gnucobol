@@ -496,3 +496,32 @@ prog.cob:18: error: invalid MOVE target: "A"
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([SET error])
+AT_KEYWORDS([SET-MOVE])
+
+AT_DATA([prog.cob], [
+       program-id. thing.
+       data division.
+       working-storage section.
+       01 default-float usage float-long.
+
+       linkage section.
+       01 float-var usage float-long.
+
+       procedure division .
+           set address of float-var to default-float
+      *> previously generated error message about invalid MOVE statement,
+      *> see bug #255
+           set address of float-var to address of default-float
+           goback.
+       end program thing .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:11: error: invalid SET statement
+])
+
+AT_CLEANUP
+
