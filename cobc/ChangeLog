@@ -1,4 +1,9 @@
 
+2017-10-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: specify all generated source files in BUILT_SOURCES
+	  that have to be built _before_ other sources, fixing parallel builds
+
 2017-10-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fixed bug #454 suspicious warning with actual working

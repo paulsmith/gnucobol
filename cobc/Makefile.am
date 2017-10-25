@@ -34,7 +34,9 @@ cobc_LDADD = $(COBC_LIBS) $(top_builddir)/libcob/libcob.la $(top_builddir)/lib/l
 dist_man_MANS = cobc.1
 COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
 
-BUILT_SOURCES = pplex.c scanner.c
+# sources that needs to be built *before* any other file
+# note: we actually want their header files...
+BUILT_SOURCES = ppparse.c parser.c
 EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
 
 # Add rules for code-coverage testing, as provided by AX_CODE_COVERAGE
