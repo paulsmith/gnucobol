@@ -130,9 +130,9 @@ SHLIB_PATH="${abs_top_builddir}/libcob/.libs:$SHLIB_PATH"
 LIBPATH="${abs_top_builddir}/libcob/.libs:$LIBPATH"
 COB_LIBRARY_PATH="${abs_top_builddir}/extras:$COB_LIBRARY_PATH"
 COB_UNIX_LF=YES
-if test "$MSYSTEM" = "MINGW32"; then
+if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# running MSYS builds as not-visible child processes result in
-	# "Redirection is not supported"
+	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
 	COB_HAS_CURSES="no"
 	# Fix for testcases where cobc translates path to win32 equivalents
 	PATHSEP=";"
