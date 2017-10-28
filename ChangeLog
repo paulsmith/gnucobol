@@ -1,4 +1,9 @@
 
+2017-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: fixed --with-curses (without option) and adjusted its
+	  help text
+
 2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: revised all uses of AC_RUN_IFELSE and changed to

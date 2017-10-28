@@ -355,14 +355,19 @@ fi
 
 # Configure options part II (needing compilation)
 AC_ARG_WITH([curses],
-  [AS_HELP_STRING([--with-curses],
-    [(GnuCOBOL) Used curses library for extended SCREEN I/O (default=check)])],
+  [AS_HELP_STRING([[--with-curses[=ARG]]],
+    [(GnuCOBOL) Use curses library for extended SCREEN I/O, where ARG may be:
+     check (default), ncursesw, ncurses, pdcurses, curses, no])],
   [case "$with_curses" in
     ncursesw | ncurses | pdcurses | curses | check | no)
 		USE_NCURSES="$with_curses"
 		;;
+	"yes")
+		USE_NCURSES="check"
+		;;
     *)
-		AC_MSG_ERROR([Wrong value for --with-curses, must be one of the following
+		AC_MSG_ERROR([invalid value "$with_curses" for --with-curses,
+  must be one of the following:
   ncursesw, ncurses, pdcurses, curses  (use only the specified library)
   check  (use whatever curses library is usable, disable if no one usable)
   no  (disable curses usage)])
