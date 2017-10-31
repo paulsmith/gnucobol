@@ -1,4 +1,8 @@
 
+2017-10-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcinfo.sh: use `` instead of $() - see Bug #437
+
 2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: use exported COBC/COBCRUN instead of relying on
