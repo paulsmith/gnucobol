@@ -135,7 +135,9 @@ if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
 	COB_HAS_CURSES="no"
 	# Fix for testcases where cobc translates path to win32 equivalents
-	PATHSEP=";"
+	if test "x$MSYSTEM" != "x"; then
+		PATHSEP=";"
+	fi
 fi
 
 
