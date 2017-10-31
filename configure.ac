@@ -431,10 +431,11 @@ if test "$with_cisam" != "yes" -a "$with_disam" != "yes"; then
   [ if test "$with_vbisam" = "yes"; then
 	AC_CHECK_HEADERS([vbisam.h], [],
 		AC_MSG_ERROR([vbisam.h is required for VBISAM]))
-	AC_CHECK_LIB([vbisam], [isopen],
+	# note: isfullclose is available since 2.0, isopen since 1.0
+	AC_CHECK_LIB([vbisam], [isfullclose],
 		[AC_DEFINE([WITH_VBISAM], [1])
 		LIBCOB_LIBS="$LIBCOB_LIBS -lvbisam"],
-		AC_MSG_ERROR([libvbisam is required for VBISAM]), [])
+		AC_MSG_ERROR([libvbisam >= 2.0 is required for VBISAM]), [])
     fi ],
   [])
 fi

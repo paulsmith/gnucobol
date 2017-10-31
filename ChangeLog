@@ -1,4 +1,9 @@
 
+2017-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: if --with-vbisam is given: check for isfullclose
+	  (available since 2.0) instead of isopen (available since 1.0)
+
 2017-10-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: fixed --with-curses (without option) and adjusted its
