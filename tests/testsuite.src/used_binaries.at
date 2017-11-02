@@ -18,6 +18,31 @@
 
 ### GnuCOBOL Test Suite
 
+
+## Note: cobc -c file / cobc --config=file
+##  and  cobcrun -c file / cobcrun --config=file
+##  are tested via configuration.at
+
+
+AT_SETUP([Compiler help and information])
+AT_KEYWORDS([runmisc cobc])
+
+# FIXME: check at least some parts of the output by using $GREP
+AT_CHECK([$COBC --version], [0], [ignore], [])
+AT_CHECK([$COBC --help], [0], [ignore], [])
+AT_CHECK([$COBC --info], [0], [ignore], [])
+AT_CHECK([$COBC --list-reserved], [0], [ignore], [])
+AT_CHECK([$COBC --list-registers], [0], [ignore], [])
+AT_CHECK([$COBC --list-intrinsics], [0], [ignore], [])
+AT_CHECK([$COBC --list-mnemonics], [0], [ignore], [])
+AT_CHECK([$COBC -std=mf --list-reserved], [0], [ignore], [])
+AT_CHECK([$COBC -std=acu --list-registers], [0], [ignore], [])
+AT_CHECK([$COBC -std=cobol2002 --list-intrinsics], [0], [ignore], [])
+AT_CHECK([$COBC -std=ibm --list-mnemonics], [0], [ignore], [])
+AT_CHECK([$COBC --list-system], [0], [ignore], [])
+AT_CLEANUP
+
+
 AT_SETUP([Compiler outputs (general)])
 AT_KEYWORDS([runmisc cobc])
 
@@ -83,24 +108,6 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [cobc: prog.cob: No such file or directory
 ])
 
-AT_CLEANUP
-
-
-AT_SETUP([Compiler help and information])
-AT_KEYWORDS([runmisc cobc])
-
-AT_CHECK([$COBC --version], [0], [ignore], [])
-AT_CHECK([$COBC --help], [0], [ignore], [])
-AT_CHECK([$COBC --info], [0], [ignore], [])
-AT_CHECK([$COBC --list-reserved], [0], [ignore], [])
-AT_CHECK([$COBC --list-registers], [0], [ignore], [])
-AT_CHECK([$COBC --list-intrinsics], [0], [ignore], [])
-AT_CHECK([$COBC --list-mnemonics], [0], [ignore], [])
-AT_CHECK([$COBC -std=mf --list-reserved], [0], [ignore], [])
-AT_CHECK([$COBC -std=acu --list-registers], [0], [ignore], [])
-AT_CHECK([$COBC -std=cobol2002 --list-intrinsics], [0], [ignore], [])
-AT_CHECK([$COBC -std=ibm --list-mnemonics], [0], [ignore], [])
-AT_CHECK([$COBC --list-system], [0], [ignore], [])
 AT_CLEANUP
 
 
@@ -177,6 +184,16 @@ AT_CHECK([$COMPILE -q -Wdoesntexist prog.cob], [1], [],
 AT_CLEANUP
 
 
+AT_SETUP([cobcrun help and information])
+AT_KEYWORDS([runmisc cobcrun])
+
+# FIXME: check at least some parts of the output by using $GREP
+AT_CHECK([$COBCRUN --version], [0], [ignore], [])
+AT_CHECK([$COBCRUN --help], [0], [ignore], [])
+AT_CHECK([$COBCRUN --info], [0], [ignore], [])
+AT_CLEANUP
+
+
 AT_SETUP([cobcrun validation])
 AT_KEYWORDS([runmisc])
 
@@ -212,7 +229,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE caller.cob], [0], [], [])
-AT_CHECK([$COBCRUN caller], [0], [HelloWorld])
+AT_CHECK([$COBCRUN caller], [0], [HelloWorld], [])
 
 AT_CLEANUP
 
@@ -261,15 +278,20 @@ AT_DATA([caller.cob], [
        END PROGRAM inside.
 ])
 
-AT_CHECK([$COMPILE_MODULE callee.cob])
-AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN -M ./caller inside again], [0],
 [Aloha
 World
 again
-])
+], [])
 
 AT_CLEANUP
+
+
+## FIXME: missing tests:
+## * combining $COBCRUN -M with COB_PRE_LOAD / COB_LIBRARY_PATH
+## * $COBCRUN -m
 
 
 AT_SETUP([cobcrun -M directory/ default])
@@ -300,12 +322,13 @@ AT_DATA([caller.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_MODULE callee.cob])
-AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN -M ./ caller], [0],
 [Hello
 World
-])
+], [])
+
 
 AT_CLEANUP
 
@@ -351,12 +374,12 @@ AT_DATA([caller.cob], [
        END PROGRAM inside.
 ])
 
-AT_CHECK([$COMPILE_MODULE callee.cob])
-AT_CHECK([$COMPILE_MODULE caller.cob])
+AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN -M ./caller inside], [0],
 [Aloha
 World
-])
+], [])
 
 AT_CLEANUP
 
@@ -388,10 +411,40 @@ AT_DATA([mainer.cob], [
        END PROGRAM mainer.
 ])
 
-AT_CHECK([$COBC -b ${FLAGS} mainer.cob called.cob])
+AT_CHECK([$COBC -b ${FLAGS} mainer.cob called.cob], [0], [], [])
 AT_CHECK([$COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
 [first argument second third:second
+], [])
+
+# additional test with environment configuration settings removed:
+AT_CHECK([unset COB_PRE_LOAD COB_LIBRARY_PATH && $COBCRUN -M ./mainer called "first argument" "second" "third"], [0],
+[first argument second third:second
+], [])
+
+# additional test with showing the preloaded environment
+# FIXME: check at least some parts of the output ("configuration" and the expected output) by using $GREP
+AT_CHECK([$COBCRUN -M ./mainer --runtime-conf called "first argument" "second" "third"], [0],
+[ignore], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([cobcrun error messages])
+AT_KEYWORDS([runmisc])
+
+AT_CHECK([$COBCRUN], [1], [ignore], [])
+AT_CHECK([$COBCRUN -q -prog], [1], [],
+[cobcrun: unrecognized option '-prog'
 ])
+AT_CHECK([$COBCRUN noprog], [1], [],
+[libcob: module 'noprog' not found
+])
+AT_CHECK([$COBCRUN -q -M], [1], [],
+[cobcrun: option requires an argument -- M
+])
+# FIXME - The following doesn't seem to work correct,
+#         we expect an error about missing module name
+#AT_CHECK([$COBCRUN -q -M noprog], [1], [], [])
 
 AT_CLEANUP
 
@@ -430,7 +483,7 @@ AT_DATA([prog.cob], [
            STOP RUN WITH NORMAL STATUS.
 ])
 
-AT_CHECK([$COMPILE -jd prog.cob], [0], [job])
+AT_CHECK([$COMPILE -jd prog.cob], [0], [job], [])
 AT_CHECK([$COMPILE_MODULE -jd prog.cob], [0], [job], [])
 
 AT_CLEANUP

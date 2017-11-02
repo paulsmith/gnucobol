@@ -911,7 +911,7 @@ cobc_malloc (const size_t size)
 
 	mptr = calloc ((size_t)1, size);
 	/* LCOV_EXCL_START */
-	if (unlikely(!mptr)) {
+	if (unlikely (!mptr)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
@@ -924,7 +924,7 @@ void
 cobc_free (void * mptr)
 {
 	/* LCOV_EXCL_START */
-	if (unlikely(!mptr)) {
+	if (unlikely (!mptr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
 		cobc_abort_terminate ();
 	}
@@ -939,12 +939,12 @@ cobc_strdup (const char *dupstr)
 	size_t	n;
 
 #ifdef	COB_TREE_DEBUG
-	if (unlikely(!dupstr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_strdup");
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 #endif
 	n = strlen (dupstr);
 	p = cobc_malloc (n + 1);
@@ -958,13 +958,13 @@ cobc_realloc (void *prevptr, const size_t size)
 	void	*mptr;
 
 	mptr = realloc (prevptr, size);
-	if (unlikely(!mptr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!mptr)) {
 		cobc_err_msg (_("cannot reallocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	return mptr;
 }
 
@@ -975,13 +975,13 @@ cobc_main_malloc (const size_t size)
 	struct cobc_mem_struct	*m;
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
-	if (unlikely(!m)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->next = cobc_mainmem_base;
 	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->memlen = size;
@@ -996,7 +996,7 @@ cobc_main_strdup (const char *dupstr)
 	size_t	n;
 
 	/* LCOV_EXCL_START */
-	if (unlikely(!dupstr)) {
+	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_strdup");
 		cobc_abort_terminate ();
 	}
@@ -1015,13 +1015,13 @@ cobc_main_realloc (void *prevptr, const size_t size)
 	struct cobc_mem_struct	*prev;
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
-	if (unlikely(!m)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->memlen = size;
 
@@ -1032,12 +1032,12 @@ cobc_main_realloc (void *prevptr, const size_t size)
 		}
 		prev = curr;
 	}
-	if (unlikely(!curr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!curr)) {
 		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->next = curr->next;
 	if (prev) {
 		prev->next = m;
@@ -1064,8 +1064,8 @@ cobc_main_free (void *prevptr)
 		}
 		prev = curr;
 	}
-	if (unlikely(!curr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!curr)) {
 #ifdef	COB_TREE_DEBUG
 		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
 			"cobc_main_free");
@@ -1073,8 +1073,8 @@ cobc_main_free (void *prevptr)
 #else
 		return;
 #endif
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	if (prev) {
 		prev->next = curr->next;
 	} else {
@@ -1091,13 +1091,13 @@ cobc_parse_malloc (const size_t size)
 	struct cobc_mem_struct	*m;
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
-	if (unlikely(!m)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->next = cobc_parsemem_base;
 	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
 	m->memlen = size;
@@ -1112,7 +1112,7 @@ cobc_parse_strdup (const char *dupstr)
 	size_t	n;
 
 	/* LCOV_EXCL_START */
-	if (unlikely(!dupstr)) {
+	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_parse_strdup");
 		cobc_abort_terminate ();
 	}
@@ -1131,13 +1131,13 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 	struct cobc_mem_struct	*prev;
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
-	if (unlikely(!m)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
 	m->memlen = size;
 
@@ -1148,12 +1148,12 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 		}
 		prev = curr;
 	}
-	if (unlikely(!curr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!curr)) {
 		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->next = curr->next;
 	if (prev) {
 		prev->next = m;
@@ -1180,8 +1180,8 @@ cobc_parse_free (void *prevptr)
 		}
 		prev = curr;
 	}
-	if (unlikely(!curr)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!curr)) {
 #ifdef	COB_TREE_DEBUG
 		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
 			"cobc_parse_free");
@@ -1189,8 +1189,8 @@ cobc_parse_free (void *prevptr)
 #else
 		return;
 #endif
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	if (prev) {
 		prev->next = curr->next;
 	} else {
@@ -1207,13 +1207,13 @@ cobc_plex_malloc (const size_t size)
 	struct cobc_mem_struct	*m;
 
 	m = calloc ((size_t)1, sizeof(struct cobc_mem_struct) + size);
-	if (unlikely(!m)) {
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
+	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
 		cobc_abort_terminate ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
 	m->next = cobc_plexmem_base;
 	cobc_plexmem_base = m;
@@ -1227,7 +1227,7 @@ cobc_plex_strdup (const char *dupstr)
 	size_t	n;
 
 	/* LCOV_EXCL_START */
-	if (unlikely(!dupstr)) {
+	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_plex_strdup");
 		cobc_abort_terminate ();
 	}
@@ -1244,7 +1244,7 @@ cobc_check_string (const char *dupstr)
 	struct strcache	*s;
 
 	/* LCOV_EXCL_START */
-	if (unlikely(!dupstr)) {
+	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_check_string");
 		cobc_abort_terminate ();
 	}
@@ -1428,12 +1428,12 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 	case PROGRAM_ID_NAME:
 		cb_error (_("invalid PROGRAM-ID '%s'%s"), name, s);
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unknown name error '%s'%s"),
 			name, s);
 		break;
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1612,7 +1612,7 @@ cobc_stradd_dup (const char *str1, const char *str2)
 	size_t	m, n;
 
 	/* LCOV_EXCL_START */
-	if (unlikely(!str1 || !str2)) {
+	if (unlikely (!str1 || !str2)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
 		cobc_abort_terminate ();
 	}
@@ -1676,12 +1676,12 @@ cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 	if (s3) {
 		calcsize += strlen (s3);
 	}
+	/* LCOV_EXCL_START */
 	if (calcsize >= 131072) {
 		/* Arbitrary limit */
-		/* LCOV_EXCL_START */
 		cobc_err_exit (_("parameter buffer size exceeded"));
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	if (calcsize >= *cursize) {
 		while (*cursize <= calcsize) {
 			*cursize *= 2;
@@ -1700,6 +1700,7 @@ cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 static void
 cobc_check_action (const char *name)
 {
+	int ret;
 	if (!name || access (name, F_OK)) {
 		return;
 	}
@@ -1715,12 +1716,13 @@ cobc_check_action (const char *name)
 		temp_buff[COB_MEDIUM_MAX] = 0;
 		/* Remove possible target file - ignore return */
 		(void)unlink (temp_buff);
-		if (rename (name, temp_buff)) {
-			/* LCOV_EXCL_START */
+		ret = rename (name, temp_buff);
+		/* LCOV_EXCL_START */
+		if (ret) {
 			cobc_err_msg (_("warning: could not move temporary file to %s"),
 					temp_buff);
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1868,12 +1870,12 @@ set_listing_date (void)
 	current_compile_tm.tm_yday = current_compile_time.day_of_year;
 	current_compile_tm.tm_isdst = current_compile_time.is_daylight_saving_time;
 	time_buff = asctime (&current_compile_tm);
+	/* LCOV_EXCL_START */
 	if (!time_buff) {
-		/* LCOV_EXCL_START */
 		strncpy (cb_listing_date, "DATE BUG, PLEASE REPORT", CB_LISTING_DATE_MAX);
 		return;
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	*strchr (time_buff, '\n') = '\0';
 	strncpy (cb_listing_date, time_buff, CB_LISTING_DATE_MAX);
 }
@@ -3133,8 +3135,12 @@ process_command_line (const int argc, char **argv)
 #undef	CB_NOWARNDEF
 			break;
 
+		/* LCOV_EXCL_START */
 		default:
-			cobc_err_exit (_("invalid option detected"));
+			cobc_err_msg ("missing evaluation of command line option '%c'", c);	/* not translated as unlikely */
+			COBC_ABORT ();
+		/* LCOV_EXCL_STOP */
+
 		}
 	}
 
@@ -3323,13 +3329,13 @@ file_basename (const char *filename)
 	const char	*endp;
 	size_t		len;
 
+	/* LCOV_EXCL_START */
 	if (!filename) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"file_basename", "filename");
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 	/* Remove directory name */
 	startp = NULL;
@@ -3402,12 +3408,12 @@ process_filename (const char *filename)
 	}
 
 	fsize = strlen (filename);
+	/* LCOV_EXCL_START */
 	if (fsize > COB_NORMAL_MAX) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid file name parameter (length > %d)"), COB_NORMAL_MAX);
 		return NULL;
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 #ifdef	__OS400__
 	if (strchr (filename, '.') != NULL) {
@@ -3550,8 +3556,8 @@ process_filename (const char *filename)
 			fn->listing_file = cobc_stradd_dup (fbasename, ".lst");
 		}
 #ifndef COB_INTERNAL_XREF
-	} else if (cobc_gen_listing == 2) {
 	/* LCOV_EXCL_START */
+	} else if (cobc_gen_listing == 2) {
 		fn->listing_file = cobc_stradd_dup (fbasename, ".xrf");
 	/* LCOV_EXCL_STOP */
 #endif
@@ -4175,9 +4181,9 @@ preprocess (struct filename *fn)
 			cobc_terminate (fn->listing_file);
 		}
 #ifndef COB_INTERNAL_XREF
+		/* LCOV_EXCL_START */
 		/* external cross-reference with cobxref */
 		if (cobc_gen_listing == 2) {
-			/* LCOV_EXCL_START */
 			if (cb_src_list_file) {
 				fclose (cb_src_list_file);
 			}
@@ -4218,8 +4224,8 @@ preprocess (struct filename *fn)
 				force_new_page_for_next_line ();
 			}
 			unlink (fn->listing_file);
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 #endif
 		cb_listing_file = NULL;
 	}

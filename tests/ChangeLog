@@ -1,4 +1,9 @@
 
+2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/configuration.at, testsuite.src/used_binaries.at:
+	  added some checks for code coverage (leading to a minor bugfix)
+
 2017-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_valgrind, atlocal_win: adjustments for cygwin

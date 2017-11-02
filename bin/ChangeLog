@@ -1,4 +1,10 @@
 
+2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: check missing evaluation of command line option;
+	  fixed printing newline to stderr instead of stdout;
+	  code-coverage specific changes
+
 2017-10-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: moved include of top_srcdir to AM_CPPFLAGS to prevent
