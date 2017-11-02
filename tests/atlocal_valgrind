@@ -105,18 +105,19 @@ export LC_ALL
 PATH="${abs_top_builddir}/cobc:${abs_top_builddir}/bin:${abs_top_builddir}/libcob/.libs:${PATH}"
 export PATH
 
+# possible path conversion for running the testsuite in an environment
+# that doesn't match the one where the tested binaries were built
+# Note: not needed for running the testsuite with MSYS as this translates the path
+_return_path () {
+	echo "$1"
+}
+
 # unset all environment variables that are used in libcob
 # for runtime configuration
 COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
 for cobenv in `$COBCRUN_WITHOUT_VG --runtime-conf | grep COB_ | cut -d: -f2`; \
 	do unset $cobenv; \
 done
-
-# For running the testsuite in Cygwin with non-Cygwin binaries
-# we need a wrapper function
-_return_path () {
-	echo "$1"
-}
 
 COB_CFLAGS="-I${abs_top_srcdir} -I${abs_top_srcdir}/libcob @COB_CFLAGS@"
 COB_LDFLAGS="-L${abs_top_builddir}/libcob/.libs @COB_LDFLAGS@"
@@ -133,6 +134,7 @@ COB_UNIX_LF=YES
 if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# running MSYS builds as not-visible child processes result in
 	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
+	# --> disabling the tests for this feature
 	COB_HAS_CURSES="no"
 	# Fix for testcases where cobc translates path to win32 equivalents
 	if test "x$MSYSTEM" != "x"; then

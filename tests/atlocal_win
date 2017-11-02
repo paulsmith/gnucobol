@@ -48,38 +48,37 @@ PATHSEP=";"
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="$COB_SRC_PATH/tests/listings-sed.sh"
 
-# be sure we use the English messages
+# be sure to use the English messages
 LC_ALL=C
 export LC_ALL
 
 PATH="$COB_WIN_BUILDPATH:${PATH}"
 export PATH
 
-# unset all environment variables that are used in libcob
-# for runtime configuration
-COB_RUNTIME_CONFIG="${abs_top_srcdir}/config/runtime_empty.cfg"
-for cobenv in `$COBCRUN --runtime-conf | grep COB_ | cut -d: -f2`; \
-	do unset $cobenv; \
-done
-
-# For running the testsuite in Cygwin with non-Cygwin binaries
-# (for example Visual C builds) we need a wrapper function
-# (not needed for running the testsuite with MSYS as this translates the path)
+# possible path conversion for running the testsuite in an environment
+# that doesn't match the one where the tested binaries were built
+# Note: not needed for running the testsuite with MSYS as this translates the path
 _return_path () {
 	# For later reference only
 	#echo "$1" | sed 's/\//\\/g' | sed 's/^\\\([a-z]\)\\/\1:\\/g')
 	if test "$OSTYPE" = "cygwin"; then
-	   cygpath -pw "$1"
+		cygpath -pw "$1"
 	else
-	   # check for WSL / Bash on Windows; ignore error messages (file not available)
-	   if $(grep -q "Microsoft" /proc/sys/kernel/osrelease 2>/dev/null); then
-	      echo "$1" | sed -E 's+^/mnt/(.{1})+\1:+' | sed 's+:$+:/+1'
-	   else
-	      echo "$1"
-	   fi
+		# check for WSL / Bash on Windows; ignore error messages (file not available)
+		if $(grep -q "Microsoft" /proc/sys/kernel/osrelease 2>/dev/null); then
+			echo "$1" | sed -E 's+^/mnt/(.{1})+\1:+' | sed 's+:$+:/+1'
+		else
+			echo "$1"
+		fi
 	fi
 }
 
+# unset all environment variables that are used in libcob
+# for runtime configuration
+COB_RUNTIME_CONFIG="$(_return_path "$COB_SRC_PATH/config/runtime_empty.cfg")"
+for cobenv in `$COBCRUN --runtime-conf | grep COB_ | cut -d: -f2`; \
+	do unset $cobenv; \
+done
 
 COB_CONFIG_DIR="$(_return_path "$COB_SRC_PATH/config")"
 COB_RUNTIME_CONFIG="$(_return_path "$COB_SRC_PATH/config/runtime_empty.cfg")"
@@ -91,20 +90,19 @@ COB_MSG_FORMAT=GCC
 
 COB_HAS_64_BIT_POINTER=`$COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-`
 if test $($COBC --info | grep -i -c "ISAM.*disabled") = 0; then
-   COB_HAS_ISAM="yes"
+	COB_HAS_ISAM="yes"
 else
-   COB_HAS_ISAM="no"
+	COB_HAS_ISAM="no"
 fi
 
 COB_HAS_CURSES="no"
 if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
-   # using non-cygwin builds and MSYS builds results in
-   # "Redirection is not supported"
-   # workaround until solved (likely via curses library):
-   # only activate when this isn't true
-   if test $($COBC --info | grep -i -c "screen .*: .*curses") = 1; then
-      COB_HAS_CURSES="yes"
-   fi
+	# running MSYS builds as not-visible child processes result in
+	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
+	# --> disabling the tests for this feature, uncomment if fixed in the curses library
+	#if test $($COBC --info | grep -i -c "screen .*: .*curses") = 1; then
+	#	COB_HAS_CURSES="yes"
+	#fi
 fi
 
 
