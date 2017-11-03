@@ -1960,6 +1960,8 @@ cob_check_version (const char *prog, const char *packver_prog, const int patchle
 	status = sscanf (PACKAGE_VERSION, "%d.%d", &major_cob, &minor_cob);
 	if (status == 2) {
 		status = sscanf (packver_prog, "%d.%d", &major_prog, &minor_prog);
+	} else {
+		minor_prog = major_prog = -1;
 	}
 
 	if (status != 2 || major_prog > major_cob
