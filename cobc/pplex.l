@@ -835,9 +835,11 @@ ENDIF_DIRECTIVE_STATE>{
 		yyterminate ();
 	}
 
-	/* Close the current file */
-	fclose (ppin);
-	ppin = NULL;
+	/* Close the current file (can be NULL if open failed) */
+	if (ppin) {
+		fclose (ppin);
+		ppin = NULL;
+	}
 
 	if (current_copy_info->containing_files) {
 		cb_current_file = current_copy_info->containing_files;
@@ -918,12 +920,12 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 
 	if (!ppin) {
 		cb_error ("%s: %s", name, cb_get_strerror ());
-		return -1;
+		/* Note: postpone error exit as we need the saved buffers later on */
 	}
 
 	/* Check for BOM - *not* for input from stdin as rewind() clears the input
 	  buffer if used on stdin and output in console has normally no BOM at all */
-	if (strcmp (name, COB_DASH) != 0) {
+	if (ppin && strcmp (name, COB_DASH) != 0) {
 		if (fread (bom, 3, 1, ppin) == 1) {
 			if (bom[0] != 0xEF || bom[1] != 0xBB || bom[2] != 0xBF) {
 				rewind (ppin);
@@ -979,6 +981,9 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 
 	/* Switch to new buffer */
 	switch_to_buffer (1, dname, yy_create_buffer (ppin, YY_BUF_SIZE));
+
+	/* postponed errror handling */
+	if (!ppin) return -1;
 	return 0;
 }
 
@@ -987,6 +992,7 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 {
 	struct cb_text_list	*il;
 	struct cb_text_list	*el;
+	int ret;
 	const char		*s;
 
 	if (cb_current_file) {
@@ -1004,14 +1010,18 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 
 	/* Find the file */
 	if (access (s, R_OK) == 0) {
-		return ppopen (s, replace_list);
+		ret = ppopen (s, replace_list);
+		if (ret == 0) return 0;	/* LCOV_EXCL_BR_LINE */
+		goto err_handling;	/* LCOV_EXCL_LINE */
 	}
 
 	for (el = cb_extension_list; el; el = el->next) {
 		snprintf (plexbuff2, (size_t)COB_SMALL_MAX, "%s%s", s, el->text);
 		plexbuff2[COB_SMALL_MAX] = 0;
 		if (access (plexbuff2, R_OK) == 0) {
-			return ppopen (plexbuff2, replace_list);
+			ret = ppopen (plexbuff2, replace_list);
+			if (ret == 0) return 0;	/* LCOV_EXCL_BR_LINE */
+			goto err_handling;	/* LCOV_EXCL_LINE */
 		}
 	}
 
@@ -1022,17 +1032,21 @@ ppcopy (const char *name, const char *lib, struct cb_replace_list *replace_list)
 					  "%s/%s%s", il->text, name, el->text);
 				plexbuff2[COB_SMALL_MAX] = 0;
 				if (access (plexbuff2, R_OK) == 0) {
-					return ppopen (plexbuff2, replace_list);
+					ret = ppopen (plexbuff2, replace_list);
+					if (ret == 0) return 0;	/* LCOV_EXCL_BR_LINE */
+					goto err_handling;	/* LCOV_EXCL_LINE */
 				}
 			}
 		}
 	}
 
+	/* pass file error as we have no more places to check */
+	cb_error ("%s: %s", s, cb_get_strerror ());
+
+err_handling:
 	/* On COPY, open error restore old file */
 	cb_current_file = old_list_file;
 	fprintf (yyout, "#line %d \"%s\"\n", cb_source_line, cb_source_file);
-
-	cb_error ("%s: %s", s, cb_get_strerror ());
 	return -1;
 }
 
@@ -1272,6 +1286,14 @@ ppinput (char *buff, const size_t max_size)
 	int	coln;
 	struct list_skip *skip;
 	const char	*paragraph_name;
+
+	/* check that we actually have input to process
+	   (isn't the case if something went wrong beforehand) */
+	/* LCOV_EXCL_START */
+	if (unlikely (ppin == NULL)) {
+		return YY_NULL; /* fake eof (no further processing of the not available file) */
+	}
+	/* LCOV_EXCL_STOP */
 
 	/* Read line(s) */
 
