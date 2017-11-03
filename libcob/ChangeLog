@@ -1,4 +1,10 @@
 
+2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: fixed bug #457 explicit check for error after all put/write
+	  calls (calls to put were completely unchecked before) and raise correct
+	  fileio status (especially 34 for disk/quota full) instead of status 30
+
 2017-10-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c: changed message format back to old version, see bug #455
