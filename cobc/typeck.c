@@ -2629,9 +2629,15 @@ cb_validate_program_environment (struct cb_program *prog)
 
 	/* Check CLASS clauses */
 	for (l = current_program->class_name_list; l; l = CB_CHAIN (l)) {
+		cp = CB_CLASS_NAME (CB_VALUE (l));
+		/* LCOV_EXCL_START */
+		if (cp == NULL) {	/* keep the analyzer happy... */
+			cobc_err_msg ("invalid CLASS detected");	/* not translated as highly unlikely */
+			COBC_ABORT ();
+		}
+		/* LCOV_EXCL_STOP */
 		dupls = 0;
 		memset (values, 0, sizeof(values));
-		cp = CB_CLASS_NAME (CB_VALUE (l));
 		for (y = cp->list; y; y = CB_CHAIN (y)) {
 			x = CB_VALUE (y);
 			if (CB_PAIR_P (x)) {
