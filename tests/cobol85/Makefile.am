@@ -34,7 +34,7 @@ endif
 
 EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 	summarynoix.txt NC.txt SM.txt IC.txt SQ.txt RL.txt IX.txt \
-	ST.txt SG.txt OB.txt IF.txt DB.txt DBNOIX.txt RW.txt
+	ST.txt SG.txt OB.txt IF.txt DB.txt DBNOIX.txt RW.txt Makefile.module.in
 
 #CLEANFILES = EXEC85 summary.log
 
