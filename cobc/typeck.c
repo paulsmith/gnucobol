@@ -1296,7 +1296,7 @@ void
 cb_set_intr_when_compiled (void)
 {
 	char	buff[36]; /* 36: make the compiler happy as "unsigned short" *could*
-			     have more digits than we "assume" */
+						     have more digits than we "assume" */
 	cob_u16_t	offset_minutes;
 
 	snprintf (buff, sizeof (buff), "%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d%2.2d",
@@ -2677,9 +2677,9 @@ cb_validate_program_environment (struct cb_program *prog)
 		if (dupls) {
 			cb_warning_x (warningopt, CB_VALUE(l),
 					_("duplicate character values in class '%s'"),
-					cb_name (CB_VALUE(l)));
+					    cb_name (CB_VALUE(l)));
+			}
 		}
-	}
 
 	/* Resolve the program collating sequence */
 	if (prog->collating_sequence) {
@@ -3063,9 +3063,9 @@ cb_validate_program_data (struct cb_program *prog)
 			for (; p->sister; p = p->sister) {
 				if (p->sister == depfld && x != xerr) {
 					xerr = x;
-					cb_error_x (x,
-						    _("'%s' OCCURS DEPENDING ON field item invalid here"),
-						    p->sister->name);
+						cb_error_x (x,
+							    _("'%s' OCCURS DEPENDING ON field item invalid here"),
+							    p->sister->name);
 				}
 				if (!p->sister->redefines) {
 					if (!cb_complex_odo
@@ -3140,7 +3140,7 @@ cb_validate_program_body (struct cb_program *prog)
 						    CB_LABEL (v)->name);
 					break;
 				case CB_WARNING:
-					cb_warning_x (COBC_WARN_FILLER, x, _("'%s' is not in DECLARATIVES"),
+					cb_warning_x (cb_warn_dialect, x, _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
 					break;
 				default:
@@ -3863,7 +3863,7 @@ decimal_alloc (void)
 		}
 		COBC_ABORT ();
 	}
-	/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 	if (current_program->decimal_index > current_program->decimal_index_max) {
 		current_program->decimal_index_max = current_program->decimal_index;
 	}
@@ -3972,12 +3972,12 @@ decimal_expand (cb_tree d, cb_tree x)
 	}
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
-		/* LCOV_EXCL_START */
+			/* LCOV_EXCL_START */
 		if (x != cb_zero) {
 			cobc_err_msg (_("unexpected constant expansion"));
 			COBC_ABORT ();
 		}
-		/* LCOV_EXCL_STOP */
+			/* LCOV_EXCL_STOP */
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
 			cb_int0));
 		break;
@@ -4124,7 +4124,7 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 	cb_tree	d;
 
 	/* note: vars validated by caller: cb_emit_arithmetic */
-	if (cb_arithmetic_osvs) {
+	if(cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in result field */
 		expr_dmax = -1;
 		expr_rslt = CB_VALUE(vars);
@@ -5104,20 +5104,20 @@ emit_accept_external_form (cb_tree x)
 			continue;
 		}
 
-		if (f->children) {
+			if (f->children) {
 			f_ref = cb_build_field_reference (f, x);
 			found += emit_accept_external_form (f_ref);
 			continue;
 		}
 
-		if (f->external_form_identifier) {
+				if (f->external_form_identifier) {
 			ext_form_id = f->external_form_identifier;
-		} else {
+				} else {
 			ext_form_id = cb_build_alphanumeric_literal (f->name, strlen (f->name));
-		}
-		if (f->flag_occurs) {
-			for (i = 1; i <= f->occurs_max; i++) {
-				sprintf (buff, "%d", i);
+				}
+				if (f->flag_occurs) {
+					for (i = 1; i <= f->occurs_max; i++) {
+						sprintf (buff, "%d", i);
 				index_lit = cb_build_numeric_literal(0, buff, 0);
 
 				f_ref_2 = cb_build_field_reference (f, x);
@@ -5130,17 +5130,17 @@ emit_accept_external_form (cb_tree x)
 #else
 				COB_UNUSED (ext_form_id);
 #endif
-			}
-		} else {
+					}
+				} else {
 			index_lit = cb_build_numeric_literal (0, "1", 0);
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 			cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue",
 						     ext_form_id, index_lit,
 						     f_ref));
 #endif
-		}
-		found++;
-	}
+				}
+				found++;
+			}
 
 	return found;
 }
@@ -5174,25 +5174,25 @@ emit_display_external_form (cb_tree x)
 		}
 
 		f_ref = cb_build_field_reference (f, x);
-		if (f->children) {
+			if (f->children) {
 			found += emit_display_external_form (f_ref);
-		} else {
+			} else {
 			/* TO-DO: Is CB_FIELD (cb_ref (f_ref)) == f? */
 			f_ref_field = CB_FIELD (cb_ref (f_ref));
 			if (f_ref_field->external_form_identifier) {
 				ext_form_id = f_ref_field->external_form_identifier;
-			} else {
+				} else {
 				ext_form_id = cb_build_alphanumeric_literal (f_ref_field->name,
 								   strlen (f_ref_field->name));
-			}
+				}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 			cb_emit (CB_BUILD_FUNCALL_2 ("cob_cgi_addTplVar", ext_form_id, f_ref));
 #else
 			COB_UNUSED (ext_form_id);
 #endif
-			found++;
+				found++;
+			}
 		}
-	}
 
 	return found;
 }
@@ -6709,7 +6709,7 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 				"emit_field_display_for_last", "values");
 			COBC_ABORT ();
 		}
-		/* LCOV_EXCL_STOP */
+			/* LCOV_EXCL_STOP */
 		last_elt = CB_VALUE (l);
 	}
 
@@ -6733,7 +6733,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 	cb_tree		bgc;
 	cb_tree		scroll;
 	cb_tree		size_is;	/* WITH SIZE IS */
-	cob_flags_t	disp_attrs;
+	cob_flags_t		disp_attrs;
 	cb_tree		m;
 	struct cb_field	*f = NULL;
 
@@ -6776,7 +6776,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 			if (f->external_form_identifier) {
 				m = f->external_form_identifier;
 			} else {
-				m = cb_build_alphanumeric_literal (f->name, strlen(f->name));
+				m = cb_build_alphanumeric_literal (f->name, strlen(f->name)); 
 			}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_cgi_renderTpl", m));
@@ -10276,13 +10276,13 @@ cb_emit_unlock (cb_tree ref)
 {
 	cb_tree	file;
 
-	file = cb_ref (ref);
-	if (file != cb_error_node) {
-		cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
-				file, CB_FILE(file)->file_status));
-		current_statement->file = file;
+		file = cb_ref (ref);
+		if (file != cb_error_node) {
+			cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
+				 file, CB_FILE(file)->file_status));
+			current_statement->file = file;
+		}
 	}
-}
 
 /* UNSTRING statement */
 

@@ -256,6 +256,8 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 prog.cob:6: warning: 'X' previously defined here
 ])
 
+AT_CHECK([$COMPILE_ONLY -Wno-other prog.cob], [0], [], [])
+
 AT_CLEANUP
 
 

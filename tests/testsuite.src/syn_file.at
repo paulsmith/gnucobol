@@ -598,6 +598,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
+AT_CHECK([$COMPILE_ONLY -Wno-dialect prog.cob], [0], [], [])
+
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in section 'G01':
 prog.cob: in paragraph 'G02':

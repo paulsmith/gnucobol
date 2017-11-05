@@ -155,11 +155,6 @@ enum cb_support {
 	CB_UNCONFORMABLE
 };
 
-#define COBC_WARN_FILLER  -1
-#define COBC_WARN_DISABLED 0
-#define COBC_WARN_ENABLED  1
-#define COBC_WARN_AS_ERROR 2
-
 /* Config dialect support types */
 enum cb_std_def {
 	CB_STD_OC = 0,
@@ -347,6 +342,11 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
 #undef	CB_NOWARNDEF
+
+#define COBC_WARN_FILLER  cb_warn_filler
+#define COBC_WARN_DISABLED 0
+#define COBC_WARN_ENABLED  1
+#define COBC_WARN_AS_ERROR 2
 
 
 #define	CB_OPTIM_DEF(x)			x,

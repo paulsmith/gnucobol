@@ -301,7 +301,7 @@ cb_plex_verify (const size_t sline, const enum cb_support tag,
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
-		cb_plex_warning (COBC_WARN_FILLER, sline, _("%s used"), feature);
+		cb_plex_warning (cb_warn_dialect, sline, _("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
 		cb_plex_warning (cb_warn_archaic, sline, _("%s is archaic in %s"),
@@ -482,7 +482,7 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 	case CB_OK:
 		return 1;
 	case CB_WARNING:
-		cb_warning_x (COBC_WARN_FILLER, x, _("%s used"), feature);
+		cb_warning_x (cb_warn_dialect, x, _("%s used"), feature);
 		return 1;
 	case CB_ARCHAIC:
 		cb_warning_x (cb_warn_archaic, x, _("%s is archaic in %s"),
