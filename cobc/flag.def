@@ -40,9 +40,11 @@ CB_FLAG_RQ (cb_stack_size, 0, "stack-size", 255, 1,
 	_("  -fstack-size=<number>\tdefine PERFORM stack size\n"
 	  "                       - default: 255"))
 
+#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
 CB_FLAG_RQ (cb_if_cutoff, 0, "if-cutoff", 3, 2,
 	_("  -fif-cutoff=<number>  define cutoff depth for IF statements\n"
 	  "                        - default: 3"))
+#endif
 
 CB_FLAG_RQ (cb_ebcdic_sign, 1, "sign", 0, 3,
 	_("  -fsign=[ASCII|EBCDIC]\tdefine display sign representation\n"

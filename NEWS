@@ -1,6 +1,18 @@
 NEWS - user visible changes				-*- outline -*-
 
 
+GnuCOBOL 2.3 to be released (201711xx)
+
+* Changed cobc options:
+
+** The option -fif-cutoff (option to change generated C sources to use
+   a label + goto for nested if/else) was deactivated to allow the C compiler
+   to fully control the program flow.
+   Please report if you have a need for this option as it will be removed
+   permanently in GnuCOBOL 3.1 otherwise.
+
+
+
 GnuCOBOL 2.2 released (20170906)
 
 * Move to GPL/LGPL 3

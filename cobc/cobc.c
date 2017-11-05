@@ -2998,6 +2998,7 @@ process_command_line (const int argc, char **argv)
 			cb_stack_size = n;
 			break;
 
+#ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: may be removed completely in 3.0 */
 		case 2:
 			/* -fif-cutoff=<xx> : Specify IF cutoff level */
 			n = cobc_deciph_optarg (cob_optarg, 0);
@@ -3006,6 +3007,7 @@ process_command_line (const int argc, char **argv)
 			}
 			cb_if_cutoff = n;
 			break;
+#endif
 
 		case 3:
 			/* -fsign=<ASCII/EBCDIC> : Specify display sign */
