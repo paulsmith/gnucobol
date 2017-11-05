@@ -369,6 +369,11 @@ Note: also defined together with __clang__ in both frontends:
 #define daylight	_daylight
 #endif /* __BORLANDC__ */
 
+#if	__SUNPRO_C
+/* Disable certain warnings */
+#pragma error_messages (off, E_STATEMENT_NOT_REACHED)
+#endif
+
 #include <setjmp.h>
 
 #if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)

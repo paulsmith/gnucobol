@@ -1,4 +1,9 @@
 
+2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: suppress C statement not reached warnings for Solaris C,
+	  see bug #456
+
 2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c: fixed bug #457 explicit check for error after all put/write
