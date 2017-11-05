@@ -1,8 +1,12 @@
 
+2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* listings-sed.sh: use `` instead of $() - see Bug #437
+
 2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* testsuite.src/configuration.at, testsuite.src/used_binaries.at:
-	  added some checks for code coverage (leading to a minor bugfix)
+	* testsuite.src/configuration.at, testsuite.src/used_binaries.at: added
+	  some checks for increasing code coverage (leading to a minor bugfix)
 
 2017-10-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
