@@ -82,6 +82,7 @@ AH_TEMPLATE([COB_EXE_EXT], [Executable extension])
 AH_TEMPLATE([COB_KEYWORD_INLINE], [Keyword for inline])
 AH_TEMPLATE([COB_NO_SELFOPEN], [Can not dlopen self])
 AH_TEMPLATE([COB_STRFTIME], [Can use strftime for timezone])
+AH_TEMPLATE([COB_COMPUTED_GOTO], [Compilation of computed gotos works])
 AH_TEMPLATE([COB_LI_IS_LL], [long int is long long])
 AH_TEMPLATE([COB_32_BIT_LONG], [long int is 32 bits])
 AH_TEMPLATE([COB_64_BIT_POINTER], [Pointers are longer than 32 bits])
@@ -921,6 +922,24 @@ if test "$DEFINE_DL" = "no"; then
 	[LIBCOB_LIBS="$LIBCOB_LIBS -lltdl"],
 	AC_MSG_ERROR([libltdl is required]), [])
 fi
+
+# Checks for compiling computed gotos
+AC_MSG_CHECKING([for support of computed gotos])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	int test ()
+	{
+	void	*test_ptr;
+	test_ptr = &&lab;
+	
+	goto *test_ptr;
+	return 1;
+	
+	lab:
+	return 0;
+	}]])],
+	[AC_DEFINE([COB_COMPUTED_GOTO], [1])
+	 AC_MSG_RESULT([yes])],
+	[AC_MSG_RESULT([no])])
 
 # Checks for workable strftime
 AC_MSG_CHECKING([for working strftime])

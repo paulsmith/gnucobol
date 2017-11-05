@@ -7592,10 +7592,7 @@ main (int argc, char **argv)
 	output_name = NULL;
 
 	/* Set default computed goto usage if appropriate */
-	/* note: some internal compiler errors with sunpro 5120 */
-#if	(defined(__GNUC__) && !defined(__clang__)) \
- || (defined(__SUNPRO_C) && __SUNPRO_C >= 0x570) \
- || (defined(__xlc__) && defined(__IBMC__) && __IBMC__ >= 700)
+#if	defined(COB_COMPUTED_GOTO) && COB_COMPUTED_GOTO
 	cb_flag_computed_goto = 1;
 #endif
 

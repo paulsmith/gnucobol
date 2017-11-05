@@ -7,6 +7,8 @@
 	  because of "COBC_WARN_FILLER"
 	* warning.def, error.c, typeck.c: allow -Wno-dialect to suppress messages
 	  generated because of dialect option value "warning"
+	* cobc.c: default cb_flag_computed_goto depending on COB_COMPUTED_GOTO
+	  instead of a fixed list of compiler (version) defines
 
 2017-11-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
