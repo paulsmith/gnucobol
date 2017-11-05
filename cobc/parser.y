@@ -8330,7 +8330,7 @@ call_param:
   }
 | call_type _size_optional call_x
   {
-	int	save_mode;
+	int	save_mode;	/* internal single parameter only mode */
 
 	save_mode = call_mode;
 	if (call_mode != CB_CALL_BY_REFERENCE) {
@@ -8339,14 +8339,19 @@ call_param:
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid file name reference"));
 		} else if (call_mode == CB_CALL_BY_VALUE) {
+			/* FIXME: compiler configuration needed, IBM allows one-byte 
+			          alphanumeric items [--> a `char`], too, while
+			          COBOL 2002/2014 allow only numeric literals
+			   --> revise after rw-merge */
 			if (cb_category_is_alpha ($3)) {
 				cb_warning_x (COBC_WARN_FILLER, $3,
-					      _("BY CONTENT assumed for alphanumeric item"));
-				save_mode = CB_CALL_BY_CONTENT;
+					      _("BY CONTENT assumed for alphanumeric item '%s'"),
+						  cb_name ($3));
+				call_mode = CB_CALL_BY_CONTENT;
 			}
 		}
 	}
-	$$ = CB_BUILD_PAIR (cb_int (save_mode), $3);
+	$$ = CB_BUILD_PAIR (cb_int (call_mode), $3);
 	CB_SIZES ($$) = size_mode;
 	call_mode = save_mode;
   }

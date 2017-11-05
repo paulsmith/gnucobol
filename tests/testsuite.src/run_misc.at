@@ -6021,9 +6021,12 @@ CAPI(void *p1, ...)
 ]])
 
 AT_CHECK([$COMPILE -w prog.cob cmod.c], [0], [],
-[prog.cob:31: warning: BY CONTENT assumed for alphanumeric item
-prog.cob:32: warning: BY CONTENT assumed for alphanumeric item
-prog.cob:34: warning: BY CONTENT assumed for alphanumeric item
+[prog.cob:31: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
+prog.cob:31: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
+prog.cob:32: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
+prog.cob:32: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
+prog.cob:34: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
+prog.cob:34: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
 ])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],

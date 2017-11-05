@@ -1372,16 +1372,16 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog2.
        DATA             DIVISION.
        LINKAGE          SECTION.
-       01  X            PIC XX.
-       PROCEDURE        DIVISION USING BY VALUE X.
-           MOVE "KO" TO X.
+       01  Y            PIC XX.
+       PROCEDURE        DIVISION USING BY VALUE Y.
+           MOVE "KO" TO Y.
            EXIT PROGRAM.
        END PROGRAM prog2.
        END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:8: warning: BY CONTENT assumed for alphanumeric item
+[prog.cob:8: warning: BY CONTENT assumed for alphanumeric item 'X'
 prog.cob:19: warning: handling of parameters passed BY VALUE is unfinished; implementation is likely to be changed
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])

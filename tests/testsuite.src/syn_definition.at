@@ -917,8 +917,42 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob:8: warning: BY CONTENT assumed for alphanumeric item
+[prog.cob:8: warning: BY CONTENT assumed for alphanumeric item 'X'
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([CALL BY VALUE figurative constants])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       PROCEDURE        DIVISION.
+           CALL "PROG2" USING BY VALUE 
+                low-value
+                high-value
+                space
+                quote
+                zero
+           END-CALL.
+           CALL "PROG2" USING
+                low-value
+                high-value
+                space
+                quote
+                zero
+           END-CALL.
+           CALL "PROG3" USING
+                null
+           END-CALL.
+           STOP RUN.
+])
+
+# FIXME: should raise an error with -std=cobolNNNN, no warning with -std=default
+# -->    revise after rw-merge
+AT_CHECK([$COMPILE_ONLY -w prog.cob], [0], [], [])
 
 AT_CLEANUP
 

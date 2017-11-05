@@ -1,6 +1,8 @@
 
 2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* parser.y: only switch CALL ... BY VALUE to BY CONTENT for a single
+	  parameter and output its name
 	* warning.def, cobc.h: allow -Wno-other to suppress messages generated
 	  because of "COBC_WARN_FILLER"
 	* warning.def, error.c, typeck.c: allow -Wno-dialect to suppress messages
@@ -207,6 +209,8 @@
 
 	* cobc.c: added cobc_early_exit and adjusted exit calls to fix missing free
 	* ppparse.y: CDF: warn if compiler flag is unknown
+	* typeck.c: allow figurative constants to be used for CALL USING as
+	  documented for IBM COBOL
 
 2017-08-12  Ron Norman <rjn@inglenet.com>
 

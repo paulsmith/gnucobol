@@ -5887,6 +5887,7 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	const struct system_table	*psyst;
 	const char			*p;
 	const char			*entry;
+	char				c;
 	cob_s64_t			val;
 	cob_s64_t			valmin;
 	cob_s64_t			valmax;
@@ -6048,9 +6049,19 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 			continue;
 		}
 		if (CB_CONST_P (x) && x != cb_null) {
-			cb_error_x (x, _("figurative constant invalid here"));
-			error_ind = 1;
-			continue;
+			if (x == cb_space ||
+				x == cb_norm_low ||
+				x == cb_norm_high||
+				x == cb_quote) {
+				c = (char)get_value (x);
+				x = cb_build_alphanumeric_literal (&c, 1);
+			} else if (x == cb_zero) {
+				x = cb_build_numsize_literal ("0", 1, 0);
+			} else{
+				cb_error_x (x, _ ("figurative constant %s invalid here"), cb_name (x));
+				error_ind = 1;
+				continue;
+			}
 		}
 		if ((CB_REFERENCE_P (x) && CB_FIELD_P(CB_REFERENCE(x)->value)) ||
 		    CB_FIELD_P (x)) {
