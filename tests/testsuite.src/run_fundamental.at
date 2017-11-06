@@ -4322,3 +4322,121 @@ AT_CHECK([$COMPILE prog.cob])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([debugging lines (not active)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+      D    DISPLAY "KO" NO ADVANCING
+      D    END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK])
+
+AT_CLEANUP
+
+
+AT_SETUP([debugging lines (-fdebugging-line)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+           DISPLAY "OK" NO ADVANCING
+           END-DISPLAY.
+      D    DISPLAY "KO" NO ADVANCING
+      D    END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -fdebugging-line prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OKKO])
+
+AT_CLEANUP
+
+
+AT_SETUP([debugging lines (WITH DEBUGGING MODE)])
+AT_KEYWORDS([fundamental extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+      D    DISPLAY "KO" NO ADVANCING UPON STDOUT
+      D    END-DISPLAY.
+           DISPLAY "OK" NO ADVANCING UPON STDOUT
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[KOOK])
+
+AT_CLEANUP
+
+
+AT_SETUP([debugging lines, free format (not active)])
+AT_KEYWORDS([fundamental extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY.
+      >>D    DISPLAY "KO" NO ADVANCING
+      >>D    END-DISPLAY.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE -free prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK])
+
+AT_CLEANUP
+
+
+AT_SETUP([debugging lines, free format (-fdebugging-line)])
+AT_KEYWORDS([fundamental extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+             DISPLAY "OK" NO ADVANCING
+             END-DISPLAY.
+      >>D    DISPLAY "KO" NO ADVANCING
+      >>D    END-DISPLAY.
+             STOP RUN.
+])
+
+AT_CHECK([$COMPILE -free -fdebugging-line prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OKKO])
+
+AT_CLEANUP

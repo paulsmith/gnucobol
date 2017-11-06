@@ -1,4 +1,10 @@
 
+2017-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobol85.conf, ibm-strict.conf, mvs-strict.conf, mf-strict.conf,
+	  rm-strict.conf: fixed "debugging-mode" to be "ok" (only use-for-debugging
+	  is obsolete in COBOL 85, debugging-mode became obsolete with COBOL 2002)
+
 2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added record-delimiter, sequential-delimiters and
