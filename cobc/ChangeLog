@@ -2774,9 +2774,18 @@
 
 2010-05-??  Roger While <simrw@sim-basis.de> ?
 
-	* flag.def, cobc.c: remove compiler flags if-cutoff, extra-brace, optional-file
+	* flag.def, cobc.c: remove compiler flags if-cutoff, extra-brace,
+	  optional-file
 	* error.c: remove special warnings for lvl-78
 	* pplex.l [_WIN32]: check for UTF-8 BOM in source files and skip it
+
+2009-??-??  Roger While <simrw@sim-basis.de>
+
+	* parser.y, reserved.c, tree.c, tree.h, codegen.c: full support of ANSI 85
+	  debugging module by adding USE FOR DEBUGGING declarative procedures
+	  (only part of the generation if WITH DEBUGGING MODE is active during
+	  compilation) and special register DEBUG-ITEM
+	  note: the execution at runtime is depending on COB_SET_DEBUG
 
 2009-??-??  Roger While <simrw@sim-basis.de>
 
