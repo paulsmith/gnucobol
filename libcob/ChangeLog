@@ -1,4 +1,9 @@
 
+2017-11-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, coblocal.h: added COB_SET_DEBUG as cob_debugging_mode
+	  in global settings
+
 2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: suppress C statement not reached warnings for Solaris C,

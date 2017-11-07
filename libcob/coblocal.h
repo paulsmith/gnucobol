@@ -206,7 +206,8 @@ extern "C" {
 typedef struct __cob_settings {
 	unsigned int	cob_display_warn;	/* Display warnings */
 	unsigned int	cob_env_mangle;		/* Mangle env names */
-	unsigned int	cob_line_trace;	
+	unsigned int	cob_debugging_mode;		/* Activate USE ON DEBUGGING procedures */
+	unsigned int	cob_line_trace;		/* Activate tracing for routines compiled with trace flag */
 	unsigned int	cob_config_cur;		/* Current runtime.cfg file being processed */
 	unsigned int	cob_config_num;		/* Number of different runtime.cfg files read */
 	char		**cob_config_file;	/* Keep all file names for later reporting */

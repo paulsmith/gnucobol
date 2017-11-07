@@ -1641,10 +1641,12 @@ output_local_implicit_fields (void)
 static void
 output_debugging_fields (struct cb_program *prog)
 {
+#if 0 /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
 	if (prog->flag_debugging) {
 		output_local ("\n/* DEBUG runtime switch */\n");
 		output_local ("static int\tcob_debugging_mode = 0;\n");
 	}
+#endif
 	if (need_save_exception) {
 		output_local ("\n/* DEBUG exception code save */\n");
 		output_local ("int\t\tsave_exception_code = 0;\n");
@@ -6547,7 +6549,11 @@ output_stmt (cb_tree x)
 
 		/* Check for runtime debug flag */
 		if (current_prog->flag_debugging && lp->flag_is_debug_sect) {
-			output_line ("if (!cob_debugging_mode)");
+#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
+			output_line ("if (!cob_glob_ptr->cob_debugging_mode)");
+#else
+			output_line ("if (!cob_glob_ptr->cob_debugging_mode)");
+#endif
 			output_line ("\tgoto %s%d;",
 				CB_PREFIX_LABEL, CB_LABEL (lp->exit_label)->id);
 		}
@@ -8676,12 +8682,13 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 
-	/* Check runtime DEBUGGING MODE variable */
+#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
+	/* Check runtime DEBUGGING MODE variable, nowadays done directly in libcob */
 	if (prog->flag_debugging) {
-		output_line ("if ((s = getenv (\"COB_SET_DEBUG\")) && (*s == 'Y' || *s == 'y' || *s == '1'))");
-		output_line ("\tcob_debugging_mode = 1;");
+		output_line ("\tcob_debugging_mode = cob_glob_ptr->cob_debugging_mode;");
 		output_newline ();
 	}
+#endif
 
 	/* Setup up CANCEL callback */
 	if (!prog->nested_level && prog->prog_type == CB_PROGRAM_TYPE) {
@@ -8859,10 +8866,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		}
 	}
 
+#if 0 /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
 	/* Reset DEBUGGING mode */
 	if (prog->flag_debugging) {
 		output_line ("cob_debugging_mode = 0;");
 	}
+#endif
 
 	/* Clear CALL pointers */
 	for (clp = call_cache; clp; clp = clp->next) {
