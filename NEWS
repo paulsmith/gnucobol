@@ -85,7 +85,9 @@ GnuCOBOL 2.2 released (20170906)
       02 FILLER          PIC X VALUE SPACE.
       02 DEBUG-SUB-3     PIC S9(4).
       02 FILLER          PIC X VALUE SPACE.
-      02 DEBUG-CONTENTS  PIC X(31).
+      02 DEBUG-CONTENTS  PIC X(n).  
+   With "n" being at least 31, size is increased if USE FOR DEBUGGING identifier
+   is used and the identifier has a longer size.
    Note: COB_SET_DEBUG activates the specified debugging sections at runtime
 
 ** many new / extended COBOL statements from COBOL2002/2014 and extensions

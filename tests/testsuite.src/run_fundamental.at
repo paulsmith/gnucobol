@@ -4342,7 +4342,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OK])
+[OK], [])
 
 AT_CLEANUP
 
@@ -4365,7 +4365,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -fdebugging-line prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OKKO])
+[OKKO], [])
 
 AT_CLEANUP
 
@@ -4391,7 +4391,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[KOOK])
+[KOOK], [])
 
 AT_CLEANUP
 
@@ -4414,7 +4414,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -free prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OK])
+[OK], [])
 
 AT_CLEANUP
 
@@ -4437,6 +4437,196 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -free -fdebugging-line prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OKKO])
+[OKKO], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING (no DEBUGGING MODE)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       TEST-DEBUG SECTION. USE FOR DEBUGGING ON ALL PROCEDURES.
+           DISPLAY DEBUG-ITEM END-DISPLAY.
+       END DECLARATIVES.
+       FIRST-PAR.
+           DISPLAY "OK1" END-DISPLAY.
+           GO TO SECOND-PAR.
+       SECOND-PAR.
+           DISPLAY "OK2" END-DISPLAY.
+       THIRD-PAR.
+           DISPLAY "OK3" END-DISPLAY.
+           PERFORM FIRST-PAR THRU SECOND-PAR.
+           DISPLAY "OK4" END-DISPLAY.
+           PERFORM SECOND-PAR.
+           DISPLAY "OK5" END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
+[OK1
+OK2
+OK3
+OK1
+OK2
+OK4
+OK2
+OK5
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING (COB_SET_DEBUG deactivated)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       TEST-DEBUG SECTION. USE FOR DEBUGGING ON ALL PROCEDURES.
+           DISPLAY DEBUG-ITEM END-DISPLAY.
+       END DECLARATIVES.
+       FIRST-PAR.
+           DISPLAY "OK1" END-DISPLAY.
+           GO TO SECOND-PAR.
+       SECOND-PAR.
+           DISPLAY "OK2" END-DISPLAY.
+       THIRD-PAR.
+           DISPLAY "OK3" END-DISPLAY.
+           PERFORM FIRST-PAR THRU SECOND-PAR.
+           DISPLAY "OK4" END-DISPLAY.
+           PERFORM SECOND-PAR.
+           DISPLAY "OK5" END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([COB_SET_DEBUG=0 $COBCRUN_DIRECT ./prog], [0],
+[OK1
+OK2
+OK3
+OK1
+OK2
+OK4
+OK2
+OK5
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING ON ALL PROCEDURES])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       TEST-DEBUG SECTION. USE FOR DEBUGGING ON ALL PROCEDURES.
+           DISPLAY DEBUG-ITEM "|" END-DISPLAY.
+       END DECLARATIVES.
+       FIRST-PAR.
+           DISPLAY "OK1" END-DISPLAY.
+           GO TO SECOND-PAR.
+       SECOND-PAR.
+           DISPLAY "OK2" END-DISPLAY.
+       THIRD-PAR.
+           DISPLAY "OK3" END-DISPLAY.
+           PERFORM FIRST-PAR THRU SECOND-PAR.
+           DISPLAY "OK4" END-DISPLAY.
+           PERFORM SECOND-PAR.
+           DISPLAY "OK5" END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
+[       FIRST-PAR                                         START PROGRAM                  |
+OK1
+    16 SECOND-PAR                                                                       |
+OK2
+    18 THIRD-PAR                                         FALL THROUGH                   |
+OK3
+    21 FIRST-PAR                                         PERFORM LOOP                   |
+OK1
+    16 SECOND-PAR                                                                       |
+OK2
+OK4
+    23 SECOND-PAR                                        PERFORM LOOP                   |
+OK2
+OK5
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING (COB_SET_DEBUG switched)])
+AT_KEYWORDS([fundamental])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       TEST-DEBUG SECTION. USE FOR DEBUGGING ON ALL PROCEDURES.
+           DISPLAY DEBUG-ITEM "|" END-DISPLAY.
+       END DECLARATIVES.
+       FIRST-PAR.
+           SET ENVIRONMENT "COB_SET_DEBUG" TO "false"
+           DISPLAY "OK1" END-DISPLAY.
+           GO TO SECOND-PAR.
+       SECOND-PAR.
+           DISPLAY "OK2" END-DISPLAY.
+       THIRD-PAR.
+           DISPLAY "OK3" END-DISPLAY.
+           PERFORM FIRST-PAR THRU SECOND-PAR.
+           DISPLAY "OK4" END-DISPLAY.
+           SET ENVIRONMENT "COB_SET_DEBUG" TO "Y"
+           PERFORM SECOND-PAR.
+           DISPLAY "OK5" END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
+[       FIRST-PAR                                         START PROGRAM                  |
+OK1
+OK2
+OK3
+OK1
+OK2
+OK4
+    25 SECOND-PAR                                        PERFORM LOOP                   |
+OK2
+OK5
+], [])
 
 AT_CLEANUP

@@ -2,7 +2,8 @@
 2017-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_extensions.at, testsuite.src/run_fundamental.at:
-	  moved debuggging line checks from to run_fundamental.at
+	  moved debugging line checks from to run_fundamental.at
+	* testsuite.src/run_fundamental.at: added first checks for COB_SET_DEBUG
 
 2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

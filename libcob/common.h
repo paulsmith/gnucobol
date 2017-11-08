@@ -1298,9 +1298,6 @@ typedef struct __cob_global {
 	unsigned int		cob_got_exception;	/* Exception active */
 	unsigned int		cob_screen_initialized;	/* Screen initialized */
 	unsigned int		cob_physical_cancel;	/* Unloading of modules */
-
-												/* Library routine variables */
-
 												/* screenio / termio */
 	unsigned char		*cob_term_buff;		/* Screen I/O buffer */
 	int			cob_accept_status;	/* ACCEPT STATUS */
@@ -1309,6 +1306,8 @@ typedef struct __cob_global {
 	int			cob_max_x;		/* Screen max x */
 
 	unsigned int		cob_stmt_exception;	/* Statement has 'On Exception' */
+	
+	unsigned int		cob_debugging_mode;	/* activation of USE ON DEBUGGING code */
 
 } cob_global;
 

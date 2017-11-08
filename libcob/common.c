@@ -307,7 +307,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_SCREEN_EXCEPTIONS", "screen_exceptions", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_extended_status)},
 	{"COB_TIMEOUT_SCALE", "timeout_scale", 	"0", 	timeopts, GRP_SCREEN, ENV_INT, SETPOS (cob_timeout_scale)},
 	{"COB_INSERT_MODE", "insert_mode", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_insert_mode)},
-	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_debugging_mode)},
+	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL | ENV_RESETS, SETPOS (cob_debugging_mode)},
 	{"COB_SET_TRACE", "set_trace", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_line_trace)},
 	{"COB_TRACE_FILE", "trace_file", 		NULL, 	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_trace_filename)},
 #ifdef  _WIN32
@@ -5403,6 +5403,12 @@ set_config_val (char *value, int pos)
 				numval = !numval;
 			}
 			set_value (data, data_len, numval);
+			if ((data_type & ENV_RESETS)) {	/* Additional setup needed */
+				if (strcmp(gc_conf[pos].env_name, "COB_SET_DEBUG") == 0) {
+					/* Copy variables from settings (internal) to global structure, each time */
+					cobglobptr->cob_debugging_mode = cobsetptr->cob_debugging_mode;
+				}
+			}
 		}
 
 	} else if ((data_type & ENV_STR)

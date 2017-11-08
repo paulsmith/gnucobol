@@ -1,8 +1,12 @@
 
 2017-11-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* common.c, coblocal.h: added COB_SET_DEBUG as cob_debugging_mode
-	  in global settings
+	* common.c, common.h, coblocal.h: added COB_SET_DEBUG as cob_debugging_mode
+	  in local settings / global pointer
+	* common.c, coblocal.h: added internal configuration status option ENV_RESETS
+	  for "needs additional code on change"
+	* common.c: added ENV_RESETS to COB_SET_DEBUG changing the externalized value
+	  in cobglobtr when setting changes during runtime
 
 2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
