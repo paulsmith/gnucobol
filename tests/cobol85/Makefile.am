@@ -131,7 +131,7 @@ newcob.val: newcob.val.Z
 	fi
 
 clean-local:
-	rm -rf copy copyalt $(MODULES_ALL) EXEC85 summary.log EXEC85.cob
+	rm -rf copy copyalt $(MODULES_ALL) EXEC85$(EXEEXT) summary.log EXEC85.cob
 
 $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	@echo "Building module directory $@ ..."
@@ -145,7 +145,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	else \
 		export NEWCOB_VAL=$<; \
 	fi; \
-	. ../atconfig && . ../atlocal NIST_EXEC85_$@ && cd $@ &&  $$COBCRUN_DIRECT ../EXEC85
+	. ../atconfig && . ../atlocal NIST_EXEC85_$@ && cd $@ && $$COBCRUN_DIRECT ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
 	@sed -e 's/##MODULE##/'"$@"'/'            \
