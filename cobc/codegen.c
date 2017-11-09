@@ -5164,12 +5164,20 @@ output_call (struct cb_call *p)
 	/* Set number of parameters */
 	output_prefix ();
 	output ("cob_glob_ptr->cob_call_params = %u;\n", n);
+
+	/* pass information about available ON EXCEPTION */
 	output_prefix ();
 	if (p->stmt1) {
 		output ("cob_glob_ptr->cob_stmt_exception = 1;\n");
 	} else {
 		output ("cob_glob_ptr->cob_stmt_exception = 0;\n");
 	}
+
+	/* ensure that we don't have a program exception set already
+	   as this will be checked directly when returning from CALL */
+	output_line ("if (unlikely((cob_glob_ptr->cob_exception_code & 0x%04x) == 0x%04x)) "
+		"cob_glob_ptr->cob_exception_code = 0;",
+		CB_EXCEPTION_CODE(COB_EC_PROGRAM), CB_EXCEPTION_CODE(COB_EC_PROGRAM));
 
 	/* Function name */
 	output_prefix ();
@@ -5419,7 +5427,8 @@ output_call (struct cb_call *p)
 	output (");\n");
 
 	if (except_id > 0) {
-		output_line ("if (unlikely(cob_glob_ptr->cob_exception_code != 0))");
+		output_line ("if (unlikely((cob_glob_ptr->cob_exception_code & 0x%04x) == 0x%04x))",
+			CB_EXCEPTION_CODE(COB_EC_PROGRAM), CB_EXCEPTION_CODE(COB_EC_PROGRAM));
 		output_line ("\tgoto %s%d;", CB_PREFIX_LABEL, except_id);
 	}
 
@@ -6122,11 +6131,11 @@ get_ec_code_for_handler (const enum cb_handler_type handler_type)
 		return CB_EXCEPTION_CODE (COB_EC_I_O_EOP);
 	case INVALID_KEY_HANDLER:
 		return CB_EXCEPTION_CODE (COB_EC_I_O_INVALID_KEY);
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected handler type: %d"), (int) handler_type);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 

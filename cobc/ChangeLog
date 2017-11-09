@@ -1,4 +1,9 @@
 
+2017-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_call): change to exception handling: only check for
+	  exceptions that are the result of the current CALL
+
 2017-11-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: change to USE FOR DEBUGGING procedures - don't generate a
