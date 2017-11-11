@@ -487,7 +487,7 @@ register:	"ADDRESS\ OF"
 # register:	"COUNT-MIN\ OF"
 # register:	"COUNT\ IN"
 # register:	"COUNT\ OF"
-# register:	"DEBUG-ITEM"	# not yet handled as register in GnuCOBOL
+register:	DEBUG-ITEM
 # register:	"HIGHEST-VALUE\ IN"
 # register:	"HIGHEST-VALUE\ OF"
 # register:	"INITIAL-VALUE\ IN"

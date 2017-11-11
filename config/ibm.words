@@ -507,7 +507,7 @@ reserved:	ZEROS=ZERO
 # list of registers:
 not-register:	DIALECT-ALL
 register:	"ADDRESS\ OF"
-# register:	DEBUG-ITEM
+register:	DEBUG-ITEM
 # register:	JNIENVPTR
 # register:	JSON-CODE
 register:	"LENGTH\ OF"

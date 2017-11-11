@@ -75,9 +75,9 @@ GnuCOBOL 2.2 released (20170906)
    USE FOR DEBUGGING declarative procedures (only part of the generation if
    WITH DEBUGGING MODE is active during compilation) and special register:
    01 DEBUG-ITEM.
-      02 DEBUG-LINE      PIC 9(6).
+      02 DEBUG-LINE      PIC X(6).
       02 FILLER          PIC X VALUE SPACE.
-      02 DEBUG-NAME      PIC X(31).
+      02 DEBUG-NAME      PIC X(30).
       02 FILLER          PIC X VALUE SPACE.
       02 DEBUG-SUB-1     PIC S9(4).
       02 FILLER          PIC X VALUE SPACE
@@ -86,7 +86,7 @@ GnuCOBOL 2.2 released (20170906)
       02 DEBUG-SUB-3     PIC S9(4).
       02 FILLER          PIC X VALUE SPACE.
       02 DEBUG-CONTENTS  PIC X(n).  
-   With "n" being at least 31, size is increased if USE FOR DEBUGGING identifier
+   With "n" being at least 30, size is increased if USE FOR DEBUGGING identifier
    is used and the identifier has a longer size.
    Note: COB_SET_DEBUG activates the specified debugging sections at runtime
 

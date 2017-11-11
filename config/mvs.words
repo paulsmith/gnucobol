@@ -457,7 +457,7 @@ reserved:	ZEROS=ZERO
 # list of registers:
 not-register:	DIALECT-ALL
 register:	"ADDRESS\ OF"
-# register:	DEBUG-ITEM
+register:	DEBUG-ITEM
 register:	"LENGTH\ OF"
 # register:	LINAGE-COUNTER
 register:	RETURN-CODE

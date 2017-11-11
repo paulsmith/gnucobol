@@ -1641,7 +1641,8 @@ output_local_implicit_fields (void)
 static void
 output_debugging_fields (struct cb_program *prog)
 {
-#if 0 /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
+#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
+      /* directly done in libcob now, see cob_glob_ptr->cob_debugging_mode */
 	if (prog->flag_debugging) {
 		output_local ("\n/* DEBUG runtime switch */\n");
 		output_local ("static int\tcob_debugging_mode = 0;\n");
@@ -6559,7 +6560,7 @@ output_stmt (cb_tree x)
 		/* Check for runtime debug flag */
 		if (current_prog->flag_debugging && lp->flag_is_debug_sect) {
 #if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
-			output_line ("if (!cob_glob_ptr->cob_debugging_mode)");
+			output_line ("if (!cob_debugging_mode)");
 #else
 			output_line ("if (!cob_glob_ptr->cob_debugging_mode)");
 #endif
@@ -8087,11 +8088,13 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_local ("\n");
 	}
 
+#if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
 	/* Runtime DEBUGGING MODE variable */
 	if (prog->flag_debugging) {
 		output_line ("char\t\t*s;");
 		output_newline ();
 	}
+#endif
 
 	/* Start of function proper */
 	output_line ("/* Start of function code */");
@@ -8186,6 +8189,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	} else {
 		output_line ("frame_ptr = frame_stack;");
 		output_line ("frame_ptr->perform_through = 0;");
+		output_line ("frame_ptr->return_address_ptr = &&P_cgerror;");
 		if (cb_flag_stack_check) {
 			output_line ("frame_overflow = frame_ptr + %d - 1;",
 				     cb_stack_size);
@@ -8452,13 +8456,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("  }");
 		output_line ("/* This should never be reached */");
 		output_line ("cob_fatal_error (COB_FERROR_MODULE);");
-		output_newline ();
 	} else {
 		l = prog->entry_list;
 		output_line ("goto %s%d;", CB_PREFIX_LABEL,
 			     CB_LABEL (CB_PURPOSE (l))->id);
-		output_newline ();
 	}
+	output_newline ();
 
 	/* PROCEDURE DIVISION */
 	output_line ("/* PROCEDURE DIVISION */");
@@ -8621,9 +8624,10 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			}
 			output_line (" }");
 		}
-		output_line (" cob_fatal_error (COB_FERROR_CODEGEN);");
-		output_newline ();
 	}
+	output_line ("P_cgerror:");
+	output_line (" cob_fatal_error (COB_FERROR_CODEGEN);");
+	output_newline ();
 
 	/* Program initialization */
 
@@ -8694,7 +8698,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 #if 0 /* only needed for compilation to GnuCOBOL 2.0-2.2 level (later addition) */
 	/* Check runtime DEBUGGING MODE variable, nowadays done directly in libcob */
 	if (prog->flag_debugging) {
-		output_line ("\tcob_debugging_mode = cob_glob_ptr->cob_debugging_mode;");
+		output_line ("if ((s = getenv (\"COB_SET_DEBUG\")) && (*s == 'Y' || *s == 'y' || *s == '1'))");
+		output_line ("\tcob_debugging_mode = 1;");
 		output_newline ();
 	}
 #endif
@@ -8791,7 +8796,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	gen_init_working = 0;		/* Enable use of DEPENDING ON fields */
+	gen_init_working = 0;		/* re-enable use of DEPENDING ON fields */
+
+	/* ensure references needed to prevent compilation warnings/errors*/
+	output_line ("if (0 == 1) goto P_cgerror;");
+
 	output_line ("initialized = 1;");
 	output_line ("goto P_ret_initialize;");
 

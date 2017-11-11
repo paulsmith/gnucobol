@@ -2223,6 +2223,7 @@ static size_t current_register = 0;
 static struct register_struct	register_list[] = {
 	{"ADDRESS OF", "USAGE POINTER", CB_FEATURE_ACTIVE},		/* FIXME: currently not handled the "normal" register way */
 	{"COB-CRT-STATUS", "PICTURE 9(4) USAGE DISPLAY VALUE ZERO", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
+	{"DEBUG-ITEM", "PICTURE X(n) USAGE DISPLAY", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"LENGTH OF", "CONSTANT USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* FIXME: currently not handled the "normal" register way */
 	{"NUMBER-OF-CALL-PARAMETERS", "USAGE BINARY-LONG", CB_FEATURE_ACTIVE},	/* OpenCOBOL / GnuCOBOL extension, at least from 1.0+ */
 	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
@@ -3783,7 +3784,8 @@ cb_list_reserved (void)
 	puts ("INSTALLATION");
 	puts ("REMARKS");
 	puts ("SECURITY");
-	putchar ('\n');
+
+	/* note: starts with an empty line */
 	cb_list_registers ();
 }
 

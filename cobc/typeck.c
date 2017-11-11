@@ -1239,7 +1239,8 @@ cb_build_single_register (const char *name, const char *definition)
 	/* FIXME: LENGTH OF (must have different results depending on compiler configuration) */
 	if (!strcasecmp (name, "ADDRESS OF")
 	 || !strcasecmp (name, "LENGTH OF")
-	 || !strcasecmp (name, "COB-CRT-STATUS")) {
+	 || !strcasecmp (name, "COB-CRT-STATUS")
+	 || !strcasecmp (name, "DEBUG-ITEM")) {
 		return;
 	}
 
@@ -2705,6 +2706,17 @@ cb_validate_program_environment (struct cb_program *prog)
 	}
 }
 
+/* default (=minimal) size of DEBUG-CONTENTS */
+#ifdef DFLT_DEBUG_CONTENTS_SIZE
+#if DFLT_DEBUG_CONTENTS_SIZE < 13
+#undef  DFLT_DEBUG_CONTENTS_SIZE
+#define DFLT_DEBUG_CONTENTS_SIZE 13	/* Lenght of fixed values */
+#endif
+#else
+#define DFLT_DEBUG_CONTENTS_SIZE 30
+#endif
+
+
 void
 cb_build_debug_item (void)
 {
@@ -2722,7 +2734,7 @@ cb_build_debug_item (void)
 	l = cb_build_reference ("DEBUG-LINE");
 	x = cb_build_field_tree (NULL, l, CB_FIELD(assign),
 				 CB_STORAGE_WORKING, NULL, 3);
-	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("9(6)"));
+	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("X(6)"));
 	cb_validate_field (CB_FIELD (x));
 	cb_debug_line = l;
 
@@ -2736,7 +2748,7 @@ cb_build_debug_item (void)
 	l = cb_build_reference ("DEBUG-NAME");
 	x = cb_build_field_tree (NULL, l, CB_FIELD(x),
 				 CB_STORAGE_WORKING, NULL, 3);
-	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("X(31)"));
+	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("X(30)"));
 	cb_validate_field (CB_FIELD (x));
 	cb_debug_name = l;
 
@@ -2798,7 +2810,8 @@ cb_build_debug_item (void)
 	l = cb_build_reference ("DEBUG-CONTENTS");
 	x = cb_build_field_tree (NULL, l, CB_FIELD(x),
 				 CB_STORAGE_WORKING, NULL, 3);
-	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("X(31)"));
+	CB_FIELD (x)->pic = CB_PICTURE (
+		cb_build_picture ("X(" CB_XSTRINGIFY(DFLT_DEBUG_CONTENTS_SIZE) ")"));
 	cb_validate_field (CB_FIELD (x));
 	cb_debug_contents = l;
 
@@ -3171,9 +3184,10 @@ cb_validate_program_body (struct cb_program *prog)
 	}
 
 	/* Resolve DEBUG references */
-	/* For data items, we may need to adjust the size of DEBUG-CONTENTS */
-	/* Basic size of DEBUG-CONTENTS is 31 */
-	size = 31;
+	/* For data items, we may need to adjust the size of DEBUG-CONTENTS directly,
+	   for file items from its maximum length */
+	/* Basic size of DEBUG-CONTENTS is DFLT_DEBUG_CONTENTS_SIZE */
+	size = DFLT_DEBUG_CONTENTS_SIZE;
 	for (l = prog->debug_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		current_section = CB_REFERENCE (x)->section;
@@ -3187,8 +3201,7 @@ cb_validate_program_body (struct cb_program *prog)
 			if (current_program->all_procedure) {
 				cb_error_x (x, _("DEBUGGING target invalid with ALL PROCEDURES: '%s'"),
 					    cb_name (x));
-			}
-			if (!CB_LABEL (v)->flag_real_label) {
+			} else if (!CB_LABEL (v)->flag_real_label) {
 				cb_error_x (x, _("DEBUGGING target invalid: '%s'"),
 					    cb_name (x));
 			}
@@ -3197,7 +3210,11 @@ cb_validate_program_body (struct cb_program *prog)
 			CB_LABEL (v)->flag_debugging_mode = 1;
 			break;
 		case CB_TAG_FILE:
-		case CB_TAG_CD:
+			if (CB_FILE (v)->record_max > size) {
+				size = CB_FILE (v)->record_max;
+			}
+			break;
+		case CB_TAG_CD: /* Should this be allowed at all? */
 			break;
 		case CB_TAG_FIELD:
 			if (CB_FIELD (v)->size > size) {
@@ -3212,11 +3229,11 @@ cb_validate_program_body (struct cb_program *prog)
 	}
 	/* If necessary, adjust size of DEBUG-CONTENTS (and DEBUG-ITEM) */
 	if (current_program->flag_debugging) {
-		if (size != 31) {
+		if (size != DFLT_DEBUG_CONTENTS_SIZE) {
 			f = CB_FIELD_PTR (cb_debug_contents);
 			f->size = size;
 			f->memory_size = size;
-			size -= 31;
+			size -= DFLT_DEBUG_CONTENTS_SIZE;
 			f = CB_FIELD_PTR (cb_debug_item);
 			f->size += size;
 			f->memory_size += size;

@@ -1,8 +1,18 @@
 
+2017-11-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c: increase size for DEBUG-CONTENT according to file record length
+
 2017-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_call): change to exception handling: only check for
 	  exceptions that are the result of the current CALL
+
+2017-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c, typeck.c: add DEBUG-ITEM to be handled as register
+	* typeck.c: change definition of DEBUG-ITEM: DEBUG-LINE is alphanumeric,
+	  DEBUG-NAME and DEBUG-CONTENT X(31) -> X(30)
 
 2017-11-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

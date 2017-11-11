@@ -1,4 +1,9 @@
 
+2017-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobol85.words, ibm.words, mvs.words, mf.words rm.words, xopen.conf:
+	  added DEBUG-ITEM to be handled as register
+
 2017-11-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol85.conf, ibm-strict.conf, mvs-strict.conf, mf-strict.conf,

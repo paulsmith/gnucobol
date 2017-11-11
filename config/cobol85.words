@@ -380,7 +380,7 @@ reserved:	ZEROS=ZERO
 
 
 not-register:	DIALECT-ALL	# disable all registers, specify used below
-#register:	"DEBUG-ITEM"	# not yet handled as register in GnuCOBOL
+register:	DEBUG-ITEM
 #register:	"LINAGE-COUNTER"	# not yet handled as register in GnuCOBOL
 #register:	"LINE-COUNTER"	# not yet handled as register in GnuCOBOL
 #register:	"PAGE-COUNTER"	# not yet handled as register in GnuCOBOL
