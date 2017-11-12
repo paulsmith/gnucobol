@@ -229,6 +229,7 @@
 2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: fixed tree cast error for literals
+	* typeck.c (cb_build_cond): fixed tree cast error with cb_arithmetic_osvs
 
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -935,6 +936,12 @@
 	* field.c: set COB_FLAG_REAL_BINARY to on for COMP-5
 	* codegen.c: for numeric literals passed on CALL, COB_FLAG_REAL_BINARY is
 	  not set on since the internal field is actually S9(9) COMP-4
+
+2017-01-17  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c (output_integer) [COB_NON_ALIGNED]: insert (cob_u8_ptr)
+	  before cob_get_pointer (..) for systems not allowing pointer arithmetic
+	  on (void*)
 
 2017-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

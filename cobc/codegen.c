@@ -2342,8 +2342,34 @@ output_integer (cb_tree x)
 			output (")");
 		} else {
 			output ("(");
+#ifdef	COB_NON_ALIGNED
+			if (CB_TREE_TAG (p->x) == CB_TAG_REFERENCE
+			 && p->x != cb_null) {
+				f = cb_code_field (p->x);
+				/* typecast is required on Sun because pointer
+				 * arithmetic is not allowed on (void *)
+				 */
+				if (f->usage == CB_USAGE_POINTER
+				 || f->usage == CB_USAGE_PROGRAM_POINTER) {
+					output ("(cob_u8_ptr)");
+				}
+			}
+#endif
 			output_integer (p->x);
 			output (" %c ", p->op);
+#ifdef	COB_NON_ALIGNED
+			if (CB_TREE_TAG (p->y) == CB_TAG_REFERENCE
+			 && p->y != cb_null) {
+				f = cb_code_field (p->y);
+				/* typecast is required on Sun because pointer
+				 * arithmetic is not allowed on (void *)
+				 */
+				if (f->usage == CB_USAGE_POINTER
+				 || f->usage == CB_USAGE_PROGRAM_POINTER) {
+					output ("(cob_u8_ptr)");
+				}
+			}
+#endif
 			output_integer (p->y);
 			output (")");
 		}

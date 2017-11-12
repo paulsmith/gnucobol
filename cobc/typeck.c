@@ -4548,7 +4548,12 @@ cb_build_cond (cb_tree x)
 	if (cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in condition */
 		if (expr_dmax == -1) {
-			expr_rslt = CB_VALUE(x);
+			/* FIXME: this is a hack, x should always be a list !*/
+			if (CB_LIST_P(x)) {
+				expr_rslt = CB_VALUE(x);
+			} else {
+				expr_rslt = x;
+			}
 			cb_walk_cond (x);
 		}
 	} else {
