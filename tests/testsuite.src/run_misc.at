@@ -6480,7 +6480,7 @@ prog.cob:48: warning: precision of result may change with arithmetic-osvs
 prog.cob:51: warning: precision of result may change with arithmetic-osvs
 prog.cob:55: warning: precision of result may change with arithmetic-osvs
 prog.cob:61: warning: precision of result may change with arithmetic-osvs
-prog.cob:67: warning: precision of result may change with arithmetic-osvs
+prog.cob:66: warning: precision of result may change with arithmetic-osvs
 ])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],

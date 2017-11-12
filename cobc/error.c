@@ -672,21 +672,6 @@ group_error (cb_tree x, const char *clause)
 		    cb_name (x), clause);
 }
 
-void
-level_redundant_error (cb_tree x, const char *clause)
-{
-	const char		*s;
-	const struct cb_field	*f;
-
-	s = cb_name (x);
-	f = CB_FIELD_PTR (x);
-	if (f->flag_item_78) {
-		cb_error_x (x, _("constant item '%s' cannot have a %s clause"), s, clause);
-	} else {
-		cb_error_x (x, _("level %02d item '%s' cannot have a %s clause"), f->level,
-			    s, clause);
-	}
-}
 
 void
 level_require_error (cb_tree x, const char *clause)

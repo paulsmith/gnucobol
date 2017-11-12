@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2015-2017 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -36,19 +36,45 @@ AT_DATA([prog.cob], [
        01 X-01          PIC X OCCURS 10.
        01 G             OCCURS 10.
          02 X-02        PIC X OCCURS 10.
+       01 G2.
+         02 X2-02       PIC X OCCURS 10.
        77 X-77          PIC X OCCURS 10.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob:6: error: level 01 item 'X-01' cannot have a OCCURS clause
 prog.cob:7: error: level 01 item 'G' cannot have a OCCURS clause
-prog.cob:9: error: level 77 item 'X-77' cannot have a OCCURS clause
+prog.cob:11: error: level 77 item 'X-77' cannot have a OCCURS clause
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -ftop-level-occurs-clause=warning prog.cob], [0], [],
+[prog.cob:6: warning: 01/77 OCCURS used
+prog.cob:7: warning: 01/77 OCCURS used
+prog.cob:11: warning: 01/77 OCCURS used
+])
 
 AT_CLEANUP
 
+
+# FIXME: should be a single test but the error recovery is broken
+# AT_SETUP([OCCURS with level 66 / 78 / 88])
+# AT_KEYWORDS([occurs RENAMES])
+# 
+# AT_DATA([prog.cob], [
+#        IDENTIFICATION   DIVISION.
+#        PROGRAM-ID.      prog.
+#        DATA             DIVISION.
+#        WORKING-STORAGE  SECTION.
+#        01  x PIC X.
+#        66  y RENAMES x OCCURS 10.
+# ])
+# 
+# AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+# [prog.cob:7: error: syntax error, unexpected OCCURS, expecting .
+# prog.cob:8: error: syntax error, unexpected OCCURS, expecting .
+# prog.cob:10: error: syntax error, unexpected OCCURS, expecting .
+# ])
 
 AT_SETUP([OCCURS with level 66])
 AT_KEYWORDS([occurs RENAMES])
@@ -64,6 +90,24 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:7: error: syntax error, unexpected OCCURS, expecting .
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([OCCURS with level 78])
+AT_KEYWORDS([occurs RENAMES])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       78  c value "a" OCCURS 10.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:6: error: syntax error, unexpected OCCURS, expecting .
 ])
 
 AT_CLEANUP

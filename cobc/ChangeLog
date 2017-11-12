@@ -1,4 +1,11 @@
 
+2017-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.h, tree.c, typeck.c: removed level_redundant_error and moved
+	  the only part of it that was used once to typeck.c (validate_occurs)
+	* typeck.c (validate_occurs): check level before raising a warning on
+	  use of level 01/77 OCCURS, warn with correct position
+
 2017-11-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: increase size for DEBUG-CONTENT according to file record length

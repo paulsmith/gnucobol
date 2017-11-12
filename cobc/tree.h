@@ -1730,7 +1730,6 @@ extern void		redefinition_warning (cb_tree, cb_tree);
 extern void		undefined_error (cb_tree);
 extern void		ambiguous_error (cb_tree);
 extern void		group_error (cb_tree, const char *);
-extern void		level_redundant_error (cb_tree, const char *);
 extern void		level_require_error (cb_tree, const char *);
 extern void		level_except_error (cb_tree, const char *);
 extern int		cb_set_ignore_error (int state);
