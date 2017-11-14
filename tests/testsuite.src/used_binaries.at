@@ -157,6 +157,9 @@ AT_CHECK([$COBCRUN_DIRECT ./progs], [0], [OK], [])
 AT_CHECK([$COMPILE -O3 -o prog3 prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog3], [0], [OK], [])
 
+AT_CHECK([$COMPILE -O0  -o prog  prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog],  [0], [OK], [])
+
 AT_CLEANUP
 
 

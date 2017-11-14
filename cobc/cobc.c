@@ -139,36 +139,43 @@ struct strcache {
 #define	CB_TEXT_LIST_CHK(y,z)	y = cb_text_list_chk (y, z)
 
 #ifdef	_MSC_VER
+#define	CB_COPT_0	" /Od"
 #define	CB_COPT_1	" /O1"
 #define	CB_COPT_2	" /O2"
 #define	CB_COPT_3	" /Ox"
 #define	CB_COPT_S	" /Os"
 #elif   defined(__BORLANDC__)
-#define	CB_COPT_1	" -O"
-#define	CB_COPT_2	" -O2"
-#define	CB_COPT_3	" -O3"
-#define	CB_COPT_S	" -O1"
+#define	CB_COPT_0	" -O"
+#define	CB_COPT_1	" -O"	/* optimize jumps only*/
+#define	CB_COPT_2	" -O2"	/* optimize for speed */
+#define	CB_COPT_3	" -O2"	/* CHECKME: is -O03 available? */
+#define	CB_COPT_S	" -O1"	/* optimize for size */
 #elif defined(__hpux) && !defined(__GNUC__)
-#define	CB_COPT_1	" -O"
+#define	CB_COPT_0	" +O0"
+#define	CB_COPT_1	" +O1"
 #define	CB_COPT_2	" +O2"
 #define	CB_COPT_3	" +O3"
-#define	CB_COPT_S	" +O2 +Osize"
+#define	CB_COPT_S	" +Os"
 #elif   defined(__WATCOMC__)
+#define	CB_COPT_0	" -od"
 #define	CB_COPT_1	" -ot"
 #define	CB_COPT_2	" -ox"
 #define	CB_COPT_3	" -ox -oh"
 #define	CB_COPT_S	" -os"
 #elif   defined(__SUNPRO_C)
+#define	CB_COPT_0	" -xO1"	/* CHECKME: is -xO0 available? */
 #define	CB_COPT_1	" -xO1"
 #define	CB_COPT_2	" -xO2"
-#define	CB_COPT_3	" -xO2"	/* Oracle docs are confusing, is -xO3 working? */
+#define	CB_COPT_3	" -xO2"	/* CHECKME: Oracle docs are confusing, is -xO3 working? */
 #define	CB_COPT_S	" -xO1 -xspace"
 #elif	defined(__xlc__)
+#define	CB_COPT_0	" -O0"
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
 #define	CB_COPT_2	" -O3"
 #define	CB_COPT_S	" -O"
 #else
+#define	CB_COPT_0	" -O0"
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
 #define	CB_COPT_3	" -O3"
@@ -492,6 +499,7 @@ static const struct option long_options[] = {
 	{"list-mnemonics",	CB_NO_ARG, NULL, '7'},
 	{"list-system",		CB_NO_ARG, NULL, '8'},
 	{"list-registers",		CB_NO_ARG, NULL, '9'},
+	{"O0",			CB_NO_ARG, NULL, '0'},
 	{"O2",			CB_NO_ARG, NULL, '2'},
 	{"O3",			CB_NO_ARG, NULL, '3'},
 	{"Os",			CB_NO_ARG, NULL, 's'},
@@ -2262,6 +2270,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
 	puts (_("  -O, -O2, -O3, -Os     enable optimization"));
+	puts (_("  -O0                   disable optimization"));
 	puts (_("  -g                    enable C compiler debug / stack check / trace"));
 	puts (_("  -d, -debug            enable all run-time error checking"));
 	puts (_("  -o <file>             place the output into <file>"));
@@ -2758,6 +2767,14 @@ process_command_line (const int argc, char **argv)
 			output_name = cobc_main_strdup (cob_optarg);
 			/* Allocate buffer plus extension reserve */
 			output_name_buff = cobc_main_malloc (osize + 32U);
+			break;
+
+		case '0':
+			/* -O0 : disable optimizations (or at least minimize them) */
+			cob_optimize = 0;
+			strip_output = 0;
+			cb_constant_folding = 0;
+			COBC_ADD_STR (cobc_cflags, CB_COPT_0, NULL, NULL);
 			break;
 
 		case 'O':
