@@ -230,7 +230,6 @@ static void output_func_1	(const char *, cb_tree);
 static void output_param	(cb_tree, int);
 static void output_funcall	(cb_tree);
 
-/* Local functions */
 
 static struct cb_field *
 cb_code_field (cb_tree x)
@@ -1647,6 +1646,8 @@ output_debugging_fields (struct cb_program *prog)
 		output_local ("\n/* DEBUG runtime switch */\n");
 		output_local ("static int\tcob_debugging_mode = 0;\n");
 	}
+#else
+	COB_UNUSED (prog);
 #endif
 	if (need_save_exception) {
 		output_local ("\n/* DEBUG exception code save */\n");
