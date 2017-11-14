@@ -5,6 +5,11 @@
 	* cobc.c: FR #255 new command line option `-O0` (short-opt: '0') for
 	  disabling optimizations (new define CB_COPT_0),
 	  postpone addition for -O option group to cflags
+	* tree.c (cb_int, cb_build_label): set source position for integers
+	  and labels on tree creation
+	* parser.y: removed position setting for integers and labels
+	* parser.y (backup_current_pos, set_pos_from_backup): new functions for
+	  position corrections (currently not used)
 
 2017-11-13  Ron Norman <rjn@inglenet.com>
 

@@ -228,6 +228,11 @@ static cb_tree			line_column;
 static int			term_array[TERM_MAX];
 static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
 
+#if 0 /* currently not used */
+static const char		*backup_source_file = NULL;
+static int			backup_source_line = 0;
+#endif
+
 /* Defines for header presence */
 
 #define	COBC_HD_ENVIRONMENT_DIVISION	(1U << 0)
@@ -299,6 +304,24 @@ void print_bits (cob_flags_t num)
 }
 #endif
 
+#if 0 /* currently not used */
+/* functions for storing current position and
+   assigning it to a cb_tree after its parsing is finished */
+static COB_INLINE
+void backup_current_pos (void)
+{
+	backup_source_file = cb_source_file;
+	backup_source_line = cb_source_line;
+}
+
+static COB_INLINE
+void set_pos_from_backup (cb_tree x)
+{
+	x->source_file = backup_source_file;
+	x->source_line = backup_source_line;
+}
+#endif
+
 static void
 emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree convention)
 {
@@ -321,8 +344,6 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 	CB_LABEL (label)->flag_begin = 1;
 	CB_LABEL (label)->flag_entry = 1;
-	label->source_file = cb_source_file;
-	label->source_line = cb_source_line;
 	emit_statement (label);
 
 	if (current_program->flag_debugging) {
@@ -2751,8 +2772,6 @@ _entry_convention_clause:
 | ENTRY_CONVENTION _is convention_type
   {
 	current_program->entry_convention = $3;
-	current_program->entry_convention->source_file = cb_source_file;
-	current_program->entry_convention->source_line = cb_source_line;
   }
 ;
 
@@ -6966,8 +6985,6 @@ _procedure_division:
 	current_section->flag_skip_label = !!skip_statements;
 	current_section->flag_declaratives = !!in_declaratives;
 	current_section->xref.skip = 1;
-	CB_TREE (current_section)->source_file = cb_source_file;
-	CB_TREE (current_section)->source_line = cb_source_line;
 	emit_statement (CB_TREE (current_section));
 	label = cb_build_reference ("MAIN PARAGRAPH");
 	current_paragraph = CB_LABEL (cb_build_label (label, NULL));
@@ -6975,8 +6992,6 @@ _procedure_division:
 	current_paragraph->flag_skip_label = !!skip_statements;
 	current_paragraph->flag_dummy_paragraph = 1;
 	current_paragraph->xref.skip = 1;
-	CB_TREE (current_paragraph)->source_file = cb_source_file;
-	CB_TREE (current_paragraph)->source_line = cb_source_line;
 	emit_statement (CB_TREE (current_paragraph));
 	cb_set_system_names ();
   }
@@ -7307,8 +7322,6 @@ section_header:
 	current_section->flag_real_label = !in_debugging;
 	current_section->flag_declaratives = !!in_declaratives;
 	current_section->flag_skip_label = !!skip_statements;
-	CB_TREE (current_section)->source_file = cb_source_file;
-	CB_TREE (current_section)->source_line = cb_source_line;
 	current_paragraph = NULL;
   }
   _segment TOK_DOT
@@ -7356,8 +7369,6 @@ paragraph_header:
 		current_section->flag_declaratives = !!in_declaratives;
 		current_section->flag_skip_label = !!skip_statements;
 		current_section->xref.skip = 1;
-		CB_TREE (current_section)->source_file = cb_source_file;
-		CB_TREE (current_section)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_section));
 	}
 	current_paragraph = CB_LABEL (cb_build_label ($1, current_section));
@@ -7365,8 +7376,6 @@ paragraph_header:
 	current_paragraph->flag_skip_label = !!skip_statements;
 	current_paragraph->flag_real_label = !in_debugging;
 	current_paragraph->segment = current_section->segment;
-	CB_TREE (current_paragraph)->source_file = cb_source_file;
-	CB_TREE (current_paragraph)->source_line = cb_source_line;
 	emit_statement (CB_TREE (current_paragraph));
   }
 ;
@@ -7454,8 +7463,6 @@ statements:
 		current_section->flag_skip_label = !!skip_statements;
 		current_section->flag_declaratives = !!in_declaratives;
 		current_section->xref.skip = 1;
-		CB_TREE (current_section)->source_file = cb_source_file;
-		CB_TREE (current_section)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_section));
 	}
 	if (!current_paragraph) {
@@ -7465,8 +7472,6 @@ statements:
 		current_paragraph->flag_skip_label = !!skip_statements;
 		current_paragraph->flag_dummy_paragraph = 1;
 		current_paragraph->xref.skip = 1;
-		CB_TREE (current_paragraph)->source_file = cb_source_file;
-		CB_TREE (current_paragraph)->source_line = cb_source_line;
 		emit_statement (CB_TREE (current_paragraph));
 	}
 	if (check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0) == 1) {

@@ -1686,7 +1686,8 @@ cb_insert_common_prog (struct cb_program *prog, struct cb_program *comprog)
 cb_tree
 cb_int (const int n)
 {
-	struct cb_integer	*x;
+	struct cb_tree		*x;
+	struct cb_integer	*y;
 	struct int_node		*p;
 
 	for (p = int_node_table; p; p = p->next) {
@@ -1697,17 +1698,21 @@ cb_int (const int n)
 
 	/* Do not use make_tree here as we want a main_malloc
 	   instead of parse_malloc! */
-	x = cobc_main_malloc (sizeof (struct cb_integer));
-	x->common.tag = CB_TAG_INTEGER;
-	x->common.category = CB_CATEGORY_NUMERIC;
-	x->val = n;
+	y = cobc_main_malloc (sizeof (struct cb_integer));
+	y->val = n;
+
+	x = CB_TREE (y);
+	x->tag = CB_TAG_INTEGER;
+	x->category = CB_CATEGORY_NUMERIC;
+	x->source_file = cb_source_file;
+	x->source_line = cb_source_line;
 
 	p = cobc_main_malloc (sizeof (struct int_node));
 	p->n = n;
-	p->node = CB_TREE (x);
+	p->node = x;
 	p->next = int_node_table;
 	int_node_table = p;
-	return CB_TREE (x);
+	return x;
 }
 
 cb_tree
@@ -4451,6 +4456,7 @@ cb_tree
 cb_build_label (cb_tree name, struct cb_label *section)
 {
 	struct cb_label		*p;
+	struct cb_tree		*x;
 	struct cb_para_label	*l;
 
 	p = make_tree (CB_TAG_LABEL, CB_CATEGORY_UNKNOWN,
@@ -4468,7 +4474,10 @@ cb_build_label (cb_tree name, struct cb_label *section)
 	} else {
 		p->section_id = p->id;
 	}
-	return CB_TREE (p);
+	x = CB_TREE (p);
+	x->source_file = cb_source_file;
+	x->source_line = cb_source_line;
+	return x;
 }
 
 /* Assign */
@@ -4527,8 +4536,8 @@ cb_build_search (const int flag_all, const cb_tree table, const cb_tree var,
 /* CALL */
 
 cb_tree
-cb_build_call (const cb_tree name, const cb_tree args, const cb_tree stmt1,
-	       const cb_tree stmt2, const cb_tree returning,
+cb_build_call (const cb_tree name, const cb_tree args, const cb_tree on_exception,
+	       const cb_tree not_on_exception, const cb_tree returning,
 	       const cob_u32_t is_system_call, const int convention)
 {
 	struct cb_call *p;
@@ -4537,8 +4546,8 @@ cb_build_call (const cb_tree name, const cb_tree args, const cb_tree stmt1,
 		       sizeof (struct cb_call));
 	p->name = name;
 	p->args = args;
-	p->stmt1 = stmt1;
-	p->stmt2 = stmt2;
+	p->stmt1 = on_exception;
+	p->stmt2 = not_on_exception;
 	p->call_returning = returning;
 	p->is_system = is_system_call;
 	p->convention = convention;
