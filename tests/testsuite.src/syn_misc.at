@@ -3669,6 +3669,54 @@ prog.cob:45: error: incorrect order of CONFIGURATION SECTION paragraphs used
 AT_CLEANUP
 
 
+AT_SETUP([NOT ON EXCEPTION with STATIC CALL convention])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+           CALL STATIC "stuff"
+              ON EXCEPTION
+                 CONTINUE
+           END-CALL
+           GOBACK.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog2.
+       PROCEDURE      DIVISION.
+           CALL "stuff"
+              ON EXCEPTION
+                 CONTINUE
+           END-CALL
+           GOBACK.
+])
+
+AT_DATA([prog3.cob], [
+       >> CALL-CONVENTION STATIC
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog3.
+       PROCEDURE      DIVISION.
+           CALL "stuff"
+              ON EXCEPTION
+                 CONTINUE
+           END-CALL
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:5: error: STATIC CALL and ON EXCEPTION are mutually exclusive
+])
+AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -static prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog3.cob], [0], [],
+[prog3.cob:6: warning: STATIC CALL convention ignored because of ON EXCEPTION
+])
+AT_CLEANUP
+
+
 AT_SETUP([NOT ON EXCEPTION phrases before ON EXCEPTION])
 AT_KEYWORDS([misc])
 

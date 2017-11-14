@@ -8176,17 +8176,32 @@ call_body:
   call_exception_phrases
   {
 	int call_conv = 0;
+	int call_conv_local = 0;
 
 	if (current_program->prog_type == CB_PROGRAM_TYPE
 	    && !current_program->flag_recursive
 	    && is_recursive_call ($3)) {
-		cb_warning_x (COBC_WARN_FILLER, $3, _("recursive program call - assuming RECURSIVE attribute"));
+		cb_warning_x (COBC_WARN_FILLER, $3,
+			_("recursive program call - assuming RECURSIVE attribute"));
 		current_program->flag_recursive = 1;
 	}
 	call_conv = current_call_convention;
+	if ((CB_PAIR_X ($8) != NULL)
+	 && (call_conv & CB_CONV_STATIC_LINK)) {
+		cb_warning_x (COBC_WARN_FILLER, $3,
+		    _("STATIC CALL convention ignored because of ON EXCEPTION"));
+		call_conv &= ~CB_CONV_STATIC_LINK;
+	}
 	if ($1) {
 		if (CB_INTEGER_P ($1)) {
-			call_conv |= CB_INTEGER ($1)->val;
+			call_conv_local = CB_INTEGER ($1)->val;
+			if ((CB_PAIR_X ($8) != NULL)
+			 && (call_conv_local & CB_CONV_STATIC_LINK)) {
+				cb_error_x ($1, _("%s and %s are mutually exclusive"),
+					"STATIC CALL", "ON EXCEPTION");
+				call_conv_local &= ~CB_CONV_STATIC_LINK;
+			}
+			call_conv |= call_conv_local;
 			if (CB_INTEGER ($1)->val & CB_CONV_COBOL) {
 				call_conv &= ~CB_CONV_STDCALL;
 			} else {

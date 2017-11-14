@@ -10,6 +10,8 @@
 	* parser.y: removed position setting for integers and labels
 	* parser.y (backup_current_pos, set_pos_from_backup): new functions for
 	  position corrections (currently not used)
+	* codegen.c (output_call), parser.y (call_body): fixing bug #462
+	  don't generate static calls if ON EXCEPTION is given
 
 2017-11-13  Ron Norman <rjn@inglenet.com>
 

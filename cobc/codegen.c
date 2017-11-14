@@ -4961,7 +4961,9 @@ output_call (struct cb_call *p)
 	}
 
 	if (dynamic_link && name_is_literal_or_prototype) {
-		if (cb_flag_static_call || (p->convention & CB_CONV_STATIC_LINK)) {
+		/* no static link for calls with exception statement */
+		if ((cb_flag_static_call && !p->stmt1)
+		 || (p->convention & CB_CONV_STATIC_LINK)) {
 			dynamic_link = 0;
 		}
 
