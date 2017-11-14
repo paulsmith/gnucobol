@@ -1686,7 +1686,7 @@ cb_insert_common_prog (struct cb_program *prog, struct cb_program *comprog)
 cb_tree
 cb_int (const int n)
 {
-	struct cb_tree		*x;
+	cb_tree		x;
 	struct cb_integer	*y;
 	struct int_node		*p;
 
@@ -4455,8 +4455,8 @@ cb_build_cast_llint (const cb_tree val)
 cb_tree
 cb_build_label (cb_tree name, struct cb_label *section)
 {
+	cb_tree		x;
 	struct cb_label		*p;
-	struct cb_tree		*x;
 	struct cb_para_label	*l;
 
 	p = make_tree (CB_TAG_LABEL, CB_CATEGORY_UNKNOWN,
