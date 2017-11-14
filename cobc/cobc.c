@@ -3055,7 +3055,7 @@ process_command_line (const int argc, char **argv)
 		case 7:
 			/* -fmax-errors=<xx> : maximum errors until abort */
 			n = cobc_deciph_optarg (cob_optarg, 0);
-			if (n < 0 || n > 99999) {
+			if (n < 0) {
 				cobc_err_exit (COBC_INV_PAR, "-max-errors");
 			}
 			cb_max_errors = n;

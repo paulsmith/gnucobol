@@ -1,4 +1,8 @@
 
+2017-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: removed artificial limit for -fmax-errors
+
 2017-11-13  Ron Norman <rjn@inglenet.com>
 
 	fixed Bug #461:

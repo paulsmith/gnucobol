@@ -64,7 +64,8 @@ CB_FLAG_RQ (cb_default_byte, 1, "defaultbyte", -1, 6,
 	  "                        - default: initialize to picture"))
 
 CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 100, 7,
-	_("  -fmax-errors=<number>\tmaximum number of errors to report\n"
+	_("  -fmax-errors=<number>\tmaximum number of errors to report before\n"
+	  "                        compilation is aborted\n"
 	  "                        - default: 100"))
 
 /* Flags with required parameter and no associated variable */
