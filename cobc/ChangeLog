@@ -2,7 +2,9 @@
 2017-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: removed artificial limit for -fmax-errors
-	* cobc.c: added -O0 for disabling optimizations
+	* cobc.c: FR #255 new command line option `-O0` (short-opt: '0') for
+	  disabling optimizations (new define CB_COPT_0),
+	  postpone addition for -O option group to cflags
 
 2017-11-13  Ron Norman <rjn@inglenet.com>
 

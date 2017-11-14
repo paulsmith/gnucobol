@@ -2464,6 +2464,7 @@ process_command_line (const int argc, char **argv)
 	char			ext[COB_MINI_BUFF];
 	char			*conf_label;	/* we want a dynamic address for erroc.c, not a static one */
 	char			*conf_entry;
+	const char		*copt = NULL;	/* C optimization options */
 
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
@@ -2774,34 +2775,34 @@ process_command_line (const int argc, char **argv)
 			cob_optimize = 0;
 			strip_output = 0;
 			cb_constant_folding = 0;
-			COBC_ADD_STR (cobc_cflags, CB_COPT_0, NULL, NULL);
+			copt = CB_COPT_0;
 			break;
 
 		case 'O':
 			/* -O : Optimize */
 			cob_optimize = 1;
-			COBC_ADD_STR (cobc_cflags, CB_COPT_1, NULL, NULL);
+			copt = CB_COPT_1;
 			break;
 
 		case '2':
 			/* -O2 : Optimize */
 			cob_optimize = 1;
 			strip_output = 1;
-			COBC_ADD_STR (cobc_cflags, CB_COPT_2, NULL, NULL);
+			copt = CB_COPT_2;
 			break;
 
 		case '3':
 			/* -O3 : Optimize */
 			cob_optimize = 1;
 			strip_output = 1;
-			COBC_ADD_STR (cobc_cflags, CB_COPT_3, NULL, NULL);
+			copt = CB_COPT_3;
 			break;
 
 		case 's':
 			/* -Os : Optimize */
 			cob_optimize = 1;
 			strip_output = 1;
-			COBC_ADD_STR (cobc_cflags, CB_COPT_S, NULL, NULL);
+			copt = CB_COPT_S;
 			break;
 
 		case 'g':
@@ -3238,6 +3239,11 @@ process_command_line (const int argc, char **argv)
 
 	if (fatal_errors_flag) {
 		cb_max_errors = 0;
+	}
+
+	/* Set postponed options */
+	if (copt != NULL) {
+		COBC_ADD_STR (cobc_cflags, copt, NULL, NULL);
 	}
 
 	/* Set implied options */
