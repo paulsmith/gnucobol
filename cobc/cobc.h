@@ -523,6 +523,9 @@ extern size_t		suppress_warn;	/* no warnings for internal generated stuff */
 /* codeoptim.c */
 extern void		cob_gen_optim (const enum cb_optim);
 
+/* codegen.c */
+extern void		cb_init_codegen (void);
+
 /* error.c */
 #define CB_MSG_STYLE_GCC	0
 #define CB_MSG_STYLE_MSC	1U

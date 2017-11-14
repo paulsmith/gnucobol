@@ -1,4 +1,11 @@
 
+2017-11-13  Ron Norman <rjn@inglenet.com>
+
+	fixed Bug #461:
+	* codegen.c: new function cb_init_codegen to clear local variables
+	* cobc.c: call cb_init_codegen after releasing cob_parsemem_base or
+	  cobc_mainmem_base
+
 2017-11-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.h, tree.c, typeck.c: removed level_redundant_error and moved

@@ -441,6 +441,25 @@ list_cache_sort (void *inlist, int (*cmpfunc)(const void *mp1, const void *mp2))
 	}
 }
 
+/* Clear local variables */
+void
+cb_init_codegen (void)
+{
+	attr_cache = NULL;
+	base_cache = NULL;
+	call_cache = NULL;
+	field_cache = NULL;
+	func_call_cache = NULL;
+	globext_cache = NULL;
+	label_cache = NULL;
+	literal_cache = NULL;
+	local_base_cache = NULL;
+	local_field_cache = NULL;
+	static_call_cache = NULL;
+	string_buffer = NULL;
+	string_cache = NULL;
+}
+
 /* Output routines */
 
 static void

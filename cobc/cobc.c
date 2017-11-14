@@ -640,6 +640,7 @@ cobc_free_mem (void)
 		cobc_free (repsl);
 	}
 	cobc_mainmem_base = NULL;
+	cb_init_codegen ();
 	ppp_clear_lists ();
 }
 
@@ -7854,6 +7855,7 @@ main (int argc, char **argv)
 				cobc_free (mptrt);
 			}
 			cobc_parsemem_base = NULL;
+			cb_init_codegen ();
 		} else {
 			if (cb_src_list_file) {
 				print_program_listing ();
