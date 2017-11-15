@@ -2869,7 +2869,6 @@ process_command_line (const int argc, char **argv)
 			/* -T : Generate wide listing */
 			cb_listing_wide = 1;
 			/* fall through */
-
 		case 't':
 			/* -t : Generate listing */
 			if (cb_listing_outputfile) {
@@ -3202,6 +3201,13 @@ process_command_line (const int argc, char **argv)
 		cobc_early_exit (0);
 	}
 
+	/* Exit on missing options */
+#ifdef COB_INTERNAL_XREF
+	if (cb_listing_xref && !cb_listing_outputfile) {
+		cobc_err_exit (_("%s option requires a listing file"), "-Xref");
+	}
+#endif
+
 	/* Set relaxed syntax configuration options if requested */
 	/* part 1: relaxed syntax compiler configuration option */
 	if (cb_relaxed_syntax_checks) {
@@ -3411,6 +3417,9 @@ file_extension (const char *filename)
 	return "";
 }
 
+/* process setup for a single filename,
+   returns a (struct filename *) if the file
+   is to be processed, otherwise NULL */
 static struct filename *
 process_filename (const char *filename)
 {
@@ -7520,47 +7529,10 @@ set_cobc_defaults (void)
 #endif
 }
 
-/* Main function */
-int
-main (int argc, char **argv)
+/* Setup for the C compiler/linker */
+static void
+begin_setup_compiler_env (void)
 {
-	struct filename		*fn;
-	struct cobc_mem_struct	*mptr;
-	struct cobc_mem_struct	*mptrt;
-	unsigned int		iparams;
-	unsigned int		local_level;
-	int			status;
-	int			i;
-
-#ifdef	_WIN32
-	char			*p;
-#endif
-
-#ifdef	ENABLE_NLS
-	struct stat	localest;
-	const char* localedir;
-#endif
-
-	file_list = NULL;
-	cb_listing_file = NULL;
-	cb_src_list_file = NULL;
-	ppin = NULL;
-	ppout = NULL;
-	yyin = NULL;
-	yyout = NULL;
-
-
-	cob_reg_sighnd (&cobc_sig_handler);
-
-	cb_saveargc = argc;
-	cb_saveargv = argv;
-
-	/* General buffers */
-	cobc_buffer = cobc_main_malloc ((size_t)COB_LARGE_BUFF);
-	cobc_buffer_size = COB_LARGE_MAX;
-	basename_buffer = cobc_main_malloc ((size_t)COB_MINI_BUFF);
-	basename_len = COB_MINI_MAX - 16;
-
 	cobc_libs = cobc_main_malloc ((size_t)COB_SMALL_BUFF);
 	cobc_lib_paths = cobc_main_malloc ((size_t)COB_SMALL_BUFF);
 	cobc_cflags = cobc_main_malloc ((size_t)COB_MINI_BUFF);
@@ -7573,10 +7545,95 @@ main (int argc, char **argv)
 	cobc_include_size = COB_MINI_MAX;
 	cobc_ldflags_size = COB_MINI_MAX;
 
+	cobc_objects_len = 0;
+}
+
+/* Setup for the C compiler/linker */
+static void
+finish_setup_compiler_env (void)
+{
+	/* compiler specific options for (non/very) verbose output */
+#if defined(__GNUC__)
+	if (verbose_output > 1) {
+		COBC_ADD_STR (cobc_cflags,  " -v", NULL, NULL);
+#if	!defined (__INTEL_COMPILER)
+		if (verbose_output > 2) {
+			COBC_ADD_STR (cobc_ldflags, " -t", NULL, NULL);
+		}
+#endif
+	}
+#elif defined(_MSC_VER)
+	/* MSC stuff reliant upon verbose option */
+	switch (verbose_output) {
+	case 0:
+	/* -v */
+	case 1:
+		COBC_ADD_STR (cobc_cflags, " /nologo", NULL, NULL);
+		manicmd = "mt /nologo";
+		manilink = "/link /manifest /nologo";
+		break;
+	/* -vv */
+	case 2:
+		manicmd = "mt";
+		manilink = "/link /manifest";
+		break;
+	/* -vvv */
+	default:
+		manicmd = "mt /verbose";
+		manilink = "/link /manifest /verbose";
+	}
+	manilink_len = strlen (manilink);
+#elif defined(__WATCOMC__)
+	if (verbose_output < 2) {
+		COBC_ADD_STR (cobc_cflags, " -q", NULL, NULL);
+	}
+#endif
+
+	/* Set length of compiler strings */
+	cobc_cc_len = strlen (cobc_cc);
+	cobc_cflags_len = strlen (cobc_cflags);
+	cobc_include_len = strlen (cobc_include);
+	cobc_shared_opt_len = strlen (COB_SHARED_OPT);
+	cobc_pic_flags_len = strlen (COB_PIC_FLAGS);
+	cobc_export_dyn_len = strlen (COB_EXPORT_DYN);
+	cobc_ldflags_len = strlen (cobc_ldflags);
+	cobc_lib_paths_len = strlen (cobc_lib_paths);
+	cobc_libs_len = strlen (cobc_libs);
+}
+
+
+static void
+begin_setup_internal_and_compiler_env (void)
+{
+#ifdef	ENABLE_NLS
+	struct stat	localest;
+	const char* localedir;
+#endif
+
+#ifdef	_WIN32
+	char			*p;
+#endif
+
+	/* register signal handlers from cobc */
+	cob_reg_sighnd (&cobc_sig_handler);
+
+	file_list = NULL;
+	cb_listing_file = NULL;
+	cb_src_list_file = NULL;
+	ppin = NULL;
+	ppout = NULL;
+	yyin = NULL;
+	yyout = NULL;
+
+	/* General buffers */
+	cobc_buffer = cobc_main_malloc ((size_t)COB_LARGE_BUFF);
+	cobc_buffer_size = COB_LARGE_MAX;
+	basename_buffer = cobc_main_malloc ((size_t)COB_MINI_BUFF);
+	basename_len = COB_MINI_MAX - 16;
+
 	cb_source_file = NULL;
 	save_temps_dir = NULL;
 	base_string = NULL;
-	cobc_objects_len = 0;
 	cb_id = 1;
 	cb_pic_id = 1;
 	cb_attr_id = 1;
@@ -7620,6 +7677,7 @@ main (int argc, char **argv)
 #endif
 
 	/* Initialize variables */
+	begin_setup_compiler_env ();
 
 	set_const_cobc_build_stamp();
 	set_cobc_defaults();
@@ -7634,10 +7692,169 @@ main (int argc, char **argv)
 	/* Enable default I/O exceptions */
 	CB_EXCEPTION_ENABLE (COB_EC_I_O) = 1;
 
-	/* Compiler initialization I */
 #ifndef	HAVE_DESIGNATED_INITS
 	cobc_init_reserved ();
 #endif
+}
+
+
+static void
+finish_setup_internal_env (void)
+{
+#ifndef	HAVE_DESIGNATED_INITS
+	cobc_init_typeck ();
+#endif
+
+	/* Append default extensions */
+	CB_TEXT_LIST_ADD (cb_extension_list, ".CPY");
+	CB_TEXT_LIST_ADD (cb_extension_list, ".CBL");
+	CB_TEXT_LIST_ADD (cb_extension_list, ".COB");
+	CB_TEXT_LIST_ADD (cb_extension_list, ".cpy");
+	CB_TEXT_LIST_ADD (cb_extension_list, ".cbl");
+	CB_TEXT_LIST_ADD (cb_extension_list, ".cob");
+	CB_TEXT_LIST_ADD (cb_extension_list, "");
+
+	/* Process COB_COPY_DIR and COBCPY environment variables */
+	process_env_copy_path (getenv ("COB_COPY_DIR"));
+	process_env_copy_path (getenv ("COBCPY"));
+
+	/* Add default COB_COPY_DIR directory */
+	CB_TEXT_LIST_CHK (cb_include_list, COB_COPY_DIR);
+}
+
+static int
+process_file (struct filename *fn, int status)
+{
+	struct cobc_mem_struct	*mptr;
+	struct cobc_mem_struct	*mptrt;
+
+	current_compile_time = cob_get_current_date_and_time ();
+
+	/* Initialize listing */
+	if (cb_src_list_file) {
+		set_listing_date ();
+		set_standard_title ();
+
+		cb_current_file = cb_listing_file_struct;
+		cb_current_file->copy_tail = NULL;	/* may include an old reference */
+		cb_current_file->name = cobc_strdup (fn->source);
+		cb_current_file->source_format = cb_source_format;
+		force_new_page_for_next_line ();
+	}
+
+	/* Initialize general vars */
+	errorcount = 0;
+	cb_source_file = NULL;
+	cb_source_line = 0;
+	current_section = NULL;
+	current_paragraph = NULL;
+	current_program = NULL;
+	cb_id = 1;
+	cb_pic_id = 1;
+	cb_attr_id = 1;
+	cb_literal_id = 1;
+	cb_field_id = 1;
+	demangle_name = fn->demangle_source;
+	memset (optimize_defs, 0, sizeof (optimize_defs));
+
+	if (cb_src_list_file) {
+		cb_listing_page = 0;
+		strcpy (cb_listing_filename, fn->source);
+		set_listing_header_code ();
+	}
+
+
+	if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
+	    fn->need_preprocess) {
+		/* Preprocess */
+		fn->has_error = preprocess (fn);
+		status |= fn->has_error;
+		/* If preprocessing raised errors go on but only check syntax */
+		if (fn->has_error) {
+			cb_flag_syntax_only = 1;
+		}
+	}
+
+	if (cobc_list_file) {
+		putc ('\n', cb_listing_file);
+	}
+
+	if (cb_compile_level < CB_LEVEL_TRANSLATE) {
+		if (cb_src_list_file) {
+			print_program_listing ();
+		}
+		return status;
+	}
+	if (fn->need_translate) {
+		/* Parse / Translate (to C code) */
+		fn->has_error = process_translate (fn);
+		status |= fn->has_error;
+		if (cb_src_list_file) {
+			print_program_listing ();
+		}
+		/* Free parse memory */
+		for (mptr = cobc_parsemem_base; mptr; ) {
+			mptrt = mptr;
+			mptr = mptr->next;
+			cobc_free (mptrt);
+		}
+		cobc_parsemem_base = NULL;
+		cb_init_codegen ();
+	} else {
+		if (cb_src_list_file) {
+			print_program_listing ();
+		}
+	}
+	if (cb_compile_level < CB_LEVEL_COMPILE ||
+	    cb_flag_syntax_only || fn->has_error) {
+		return status;
+	}
+	if (cb_compile_level == CB_LEVEL_COMPILE) {
+		/* Compile to assembler code */
+		fn->has_error = process_compile (fn);
+		status |= fn->has_error;
+		return status;
+	}
+
+	if (cb_compile_level == CB_LEVEL_MODULE && fn->need_assemble) {
+		/* Build module direct */
+		fn->has_error = process_module_direct (fn);
+		status |= fn->has_error;
+	} else {
+		/* Compile to object code */
+		if (cb_compile_level >= CB_LEVEL_ASSEMBLE &&
+		    fn->need_assemble) {
+			fn->has_error = process_assemble (fn);
+			status |= fn->has_error;
+		}
+		if (fn->has_error) {
+			return status;
+		}
+
+		/* Build module */
+		if (cb_compile_level == CB_LEVEL_MODULE) {
+			fn->has_error = process_module (fn);
+			status |= fn->has_error;
+		}
+	}
+	return status;
+}
+
+/* Main function */
+int
+main (int argc, char **argv)
+{
+	struct filename		*fn;
+	unsigned int		iparams;
+	unsigned int		local_level;
+	int			status;
+	int			i;
+
+	/* Setup routines I */
+	begin_setup_internal_and_compiler_env ();
+
+	cb_saveargc = argc;
+	cb_saveargv = argv;
 
 	/* Process command line arguments */
 	iargs = process_command_line (argc, argv);
@@ -7682,63 +7899,9 @@ main (int argc, char **argv)
 		cobc_err_exit (_("%s option invalid in this combination"), "-o");
 	}
 
-	/* compiler specific options for (non/very) verbose output */
-#if defined(__GNUC__)
-	if (verbose_output > 1) {
-		COBC_ADD_STR (cobc_cflags,  " -v", NULL, NULL);
-#if	!defined (__INTEL_COMPILER)
-		if (verbose_output > 2) {
-			COBC_ADD_STR (cobc_ldflags, " -t", NULL, NULL);
-		}
-#endif
-	}
-#elif defined(_MSC_VER)
-	/* MSC stuff reliant upon verbose option */
-	switch (verbose_output) {
-	case 0:
-	/* -v */
-	case 1:
-		COBC_ADD_STR (cobc_cflags, " /nologo", NULL, NULL);
-		manicmd = "mt /nologo";
-		manilink = "/link /manifest /nologo";
-		break;
-	/* -vv */
-	case 2:
-		manicmd = "mt";
-		manilink = "/link /manifest";
-		break;
-	/* -vvv */
-	default:
-		manicmd = "mt /verbose";
-		manilink = "/link /manifest /verbose";
-	}
-	manilink_len = strlen (manilink);
-#elif defined(__WATCOMC__)
-	if (verbose_output < 2) {
-		COBC_ADD_STR (cobc_cflags, " -q", NULL, NULL);
-	}
-#endif
-
-	/* Append default extensions */
-	CB_TEXT_LIST_ADD (cb_extension_list, ".CPY");
-	CB_TEXT_LIST_ADD (cb_extension_list, ".CBL");
-	CB_TEXT_LIST_ADD (cb_extension_list, ".COB");
-	CB_TEXT_LIST_ADD (cb_extension_list, ".cpy");
-	CB_TEXT_LIST_ADD (cb_extension_list, ".cbl");
-	CB_TEXT_LIST_ADD (cb_extension_list, ".cob");
-	CB_TEXT_LIST_ADD (cb_extension_list, "");
-
-	/* Process COB_COPY_DIR and COBCPY environment variables */
-	process_env_copy_path (getenv ("COB_COPY_DIR"));
-	process_env_copy_path (getenv ("COBCPY"));
-
-	/* Add default COB_COPY_DIR directory */
-	CB_TEXT_LIST_CHK (cb_include_list, COB_COPY_DIR);
-
-	/* Compiler initialization II */
-#ifndef	HAVE_DESIGNATED_INITS
-	cobc_init_typeck ();
-#endif
+	/* Setup routines II */
+	finish_setup_compiler_env ();
+	finish_setup_internal_env ();
 
 	cb_text_column = cb_config_text_column;
 
@@ -7756,11 +7919,6 @@ main (int argc, char **argv)
 	}
 
 	/* internal complete source listing file */
-#ifdef COB_INTERNAL_XREF
-	if (cb_listing_xref && !cb_listing_outputfile) {
-		cobc_err_exit (_("%s option requires a listing file"), "-Xref");
-	}
-#endif
 	if (cb_listing_outputfile) {
 		if (cb_unix_lf) {
 			cb_src_list_file = fopen (cb_listing_outputfile, "wb");
@@ -7783,20 +7941,7 @@ main (int argc, char **argv)
 		fflush (stderr);
 	}
 
-	cobc_cc_len = strlen (cobc_cc);
-	cobc_cflags_len = strlen (cobc_cflags);
-	cobc_include_len = strlen (cobc_include);
-	cobc_shared_opt_len = strlen (COB_SHARED_OPT);
-	cobc_pic_flags_len = strlen (COB_PIC_FLAGS);
-	cobc_export_dyn_len = strlen (COB_EXPORT_DYN);
-	cobc_ldflags_len = strlen (cobc_ldflags);
-	cobc_lib_paths_len = strlen (cobc_lib_paths);
-	cobc_libs_len = strlen (cobc_libs);
-
 	/* Process input files */
-	status = 0;
-	iparams = 0;
-	local_level = 0;
 
 	/* Set up file parameters, if any are missing: abort */
 	while (iargs < argc) {
@@ -7808,123 +7953,18 @@ main (int argc, char **argv)
 	}
 
 	/* process all files */
+	status = 0;
+	iparams = 0;
+	local_level = 0;
+
 	for (fn = file_list; fn; fn = fn->next) {
-		current_compile_time = cob_get_current_date_and_time ();
-
-		/* Initialize listing */
-		if (cb_src_list_file) {
-			set_listing_date ();
-			set_standard_title ();
-
-			cb_current_file = cb_listing_file_struct;
-			cb_current_file->copy_tail = NULL;	/* may include an old reference */
-			cb_current_file->name = cobc_strdup (fn->source);
-			cb_current_file->source_format = cb_source_format;
-			force_new_page_for_next_line ();
-		}
-
-		/* Initialize general vars */
-		errorcount = 0;
-		cb_source_file = NULL;
-		cb_source_line = 0;
-		current_section = NULL;
-		current_paragraph = NULL;
-		current_program = NULL;
-		cb_id = 1;
-		cb_pic_id = 1;
-		cb_attr_id = 1;
-		cb_literal_id = 1;
-		cb_field_id = 1;
-		demangle_name = fn->demangle_source;
-		memset (optimize_defs, 0, sizeof (optimize_defs));
-
 		iparams++;
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
 			local_level = cb_compile_level;
 			cb_compile_level = CB_LEVEL_ASSEMBLE;
 			cobc_flag_main = 0;
 		}
-
-		if (cb_src_list_file) {
-			cb_listing_page = 0;
-			strcpy (cb_listing_filename, fn->source);
-			set_listing_header_code ();
-		}
-
-
-		if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
-		    fn->need_preprocess) {
-			/* Preprocess */
-			fn->has_error = preprocess (fn);
-			status |= fn->has_error;
-			/* If preprocessing raised errors go on but only check syntax */
-			if (fn->has_error) {
-				cb_flag_syntax_only = 1;
-			}
-		}
-
-		if (cobc_list_file) {
-			putc ('\n', cb_listing_file);
-		}
-
-		if (cb_compile_level < CB_LEVEL_TRANSLATE) {
-			if (cb_src_list_file) {
-				print_program_listing ();
-			}
-			continue;
-		}
-		if (fn->need_translate) {
-			/* Parse / Translate (to C code) */
-			fn->has_error = process_translate (fn);
-			status |= fn->has_error;
-			if (cb_src_list_file) {
-				print_program_listing ();
-			}
-			/* Free parse memory */
-			for (mptr = cobc_parsemem_base; mptr; ) {
-				mptrt = mptr;
-				mptr = mptr->next;
-				cobc_free (mptrt);
-			}
-			cobc_parsemem_base = NULL;
-			cb_init_codegen ();
-		} else {
-			if (cb_src_list_file) {
-				print_program_listing ();
-			}
-		}
-		if (cb_compile_level < CB_LEVEL_COMPILE ||
-		    cb_flag_syntax_only || fn->has_error) {
-			continue;
-		}
-		if (cb_compile_level == CB_LEVEL_COMPILE) {
-			/* Compile to assembler code */
-			fn->has_error = process_compile (fn);
-			status |= fn->has_error;
-			continue;
-		}
-
-		if (cb_compile_level == CB_LEVEL_MODULE && fn->need_assemble) {
-			/* Build module direct */
-			fn->has_error = process_module_direct (fn);
-			status |= fn->has_error;
-		} else {
-			/* Compile to object code */
-			if (cb_compile_level >= CB_LEVEL_ASSEMBLE &&
-			    fn->need_assemble) {
-				fn->has_error = process_assemble (fn);
-				status |= fn->has_error;
-			}
-			if (fn->has_error) {
-				continue;
-			}
-
-			/* Build module */
-			if (cb_compile_level == CB_LEVEL_MODULE) {
-				fn->has_error = process_module (fn);
-				status |= fn->has_error;
-			}
-		}
+		status = process_file (fn, status);
 	}
 
 	if (cobc_list_file) {

@@ -9,6 +9,10 @@
 	* cobc.c (cobc_xref_call): bug #463 - fixed memory leak in Xref code
 	* cobc.c: modularized cleanup code to (cleanup_copybook_reference)
 	* cobc.c: bug #463 - reset cb_current_file->copy_tail on listing setup
+	* cobc.c: modularized processing of files from (main) to (process_file)
+	  and separated functions (begin_setup_compiler_env),
+	  (finish_setup_compiler_env), (begin_setup_internal_and_compiler_env),
+	  (finish_setup_internal_env) from (main) function
 
 2017-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
