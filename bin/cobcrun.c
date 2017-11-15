@@ -353,7 +353,7 @@ main (int argc, char **argv)
 	/* At least one option or module name needed */
 	if (argc <= arg_shift) {
 		if (print_runtime_wanted) {
-			cob_init (0, &argv[0]);
+			cob_init_nomain (0, &argv[0]);
 			print_runtime_conf ();
 			cob_stop_run (0);
 		}
@@ -369,7 +369,9 @@ main (int argc, char **argv)
 
 	/* Initialize the COBOL system, resolve the PROGRAM name */
 	/*   and invoke, wrapped in a STOP RUN, if found */
-	cob_init (argc - arg_shift, &argv[arg_shift]);
+	/*   note: we use cob_init_nomain here as there are no functions */
+	/*         linked here we want to provide for the COBOL environment */
+	cob_init_nomain (argc - arg_shift, &argv[arg_shift]);
 	if (print_runtime_wanted) {
 		print_runtime_conf ();
 		putc ('\n', stdout);

@@ -1,4 +1,9 @@
 
+2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: use (cob_init_nomain) instead of (cob_init) as it includes
+	  no functions intended for COBOL use (speedup + workaround ltdl leak)
+
 2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: check missing evaluation of command line option;

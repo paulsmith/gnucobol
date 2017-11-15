@@ -179,7 +179,7 @@ struct cob_external {
 /* Local variables */
 
 static int			cob_initialized = 0;
-static int			cannot_check_subscript = 0;
+static int			check_mainhandle = 1;
 static int			cob_argc = 0;
 static char			**cob_argv = NULL;
 static struct cob_alloc_cache	*cob_alloc_base = NULL;
@@ -191,6 +191,8 @@ static cob_global		*cobglobptr = NULL;
 static cob_settings		*cobsetptr = NULL;
 
 static char			*runtime_err_str = NULL;
+
+static int			cannot_check_subscript = 0;
 
 static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
@@ -6580,16 +6582,6 @@ print_runtime_conf ()
 	}
 
 
-	/* checkme
-
-	var_print ("resolve_path",
-			cob_strjoin (&cobsetptr->cob_library_path, *(cobsetptr->resolve_size),
-					(char *) PATHSEPS), not_set, 3);
-	*/
-	//var_print ("base_preload_ptr",
-	//		cobsetptr->cob_preload_str, not_set, 3);
-
-
 #ifdef	HAVE_SETLOCALE
 	printf ("    : %-*s : %s\n", hdlen, "LC_CTYPE", (char *) setlocale (LC_CTYPE, NULL));
 	printf ("    : %-*s : %s\n", hdlen, "LC_NUMERIC", (char *) setlocale (LC_NUMERIC, NULL));
@@ -6606,6 +6598,13 @@ cob_settings *
 cob_get_settings_ptr ()
 {
 	return cobsetptr;
+}
+
+void
+cob_init_nomain (const int argc, char **argv)
+{
+	check_mainhandle = 0;
+	cob_init (argc, argv);
 }
 
 void
@@ -6746,7 +6745,7 @@ cob_init (const int argc, char **argv)
 	cob_init_move (cobglobptr, cobsetptr);
 	cob_init_intrinsic (cobglobptr);
 	cob_init_fileio (cobglobptr, cobsetptr);
-	cob_init_call (cobglobptr, cobsetptr);
+	cob_init_call (cobglobptr, cobsetptr, check_mainhandle);
 	cob_init_termio (cobglobptr, cobsetptr);
 
 	/* Set up library routine stuff */

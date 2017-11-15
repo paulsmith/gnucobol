@@ -1,4 +1,11 @@
 
+2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h, coblocal.h, call.c: added (cob_init_nomain) to start
+	  runtime initialization without setting the main handle (saves time on
+	  each function lookup)
+	* call.c [COB_BORKED_DLOPEN]: no processing of mainhandle
+
 2017-11-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, common.h, coblocal.h: added COB_SET_DEBUG as cob_debugging_mode

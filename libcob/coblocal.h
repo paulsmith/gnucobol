@@ -315,7 +315,7 @@ struct config_tbl {
 COB_HIDDEN void		cob_init_numeric	(cob_global *);
 COB_HIDDEN void		cob_init_termio		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_fileio		(cob_global *, cob_settings *);
-COB_HIDDEN void		cob_init_call		(cob_global *, cob_settings *);
+COB_HIDDEN void		cob_init_call		(cob_global *, cob_settings *, const int);
 COB_HIDDEN void		cob_init_intrinsic	(cob_global *);
 COB_HIDDEN void		cob_init_strings	(void);
 COB_HIDDEN void		cob_init_move		(cob_global *, cob_settings *);

@@ -1350,6 +1350,7 @@ COB_EXPIMP int		cob_is_initialized	(void);
 COB_EXPIMP cob_global		*cob_get_global_ptr	(void);
 
 COB_EXPIMP void	cob_init			(const int, char **);
+COB_EXPIMP void	cob_init_nomain		(const int, char **);
 
 COB_EXPIMP int	cob_module_global_enter	(cob_module **, cob_global **,
 						 const int, const int, const unsigned int *);

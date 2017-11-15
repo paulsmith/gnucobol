@@ -170,10 +170,12 @@ static char			*call_filename_buff;
 static char			*call_entry_buff;
 static unsigned char		*call_entry2_buff;
 
+#ifndef	COB_BORKED_DLOPEN
 static lt_dlhandle		mainhandle;
+#endif
 
 static size_t			call_lastsize;
-static size_t			resolve_size;
+static size_t			resolve_size = 0;
 static unsigned int		cob_jmp_primed;
 static cob_field_attr	const_binll_attr =
 			{COB_TYPE_NUMERIC_BINARY, 18, 0, COB_FLAG_HAVE_SIGN, NULL};
@@ -661,6 +663,7 @@ cob_resolve_internal (const char *name, const char *dirent,
 		break;
 	}
 
+#ifndef	COB_BORKED_DLOPEN
 	/* Search the main program */
 	if (mainhandle != NULL) {
 		func = lt_dlsym (mainhandle, call_entry_buff);
@@ -670,6 +673,7 @@ cob_resolve_internal (const char *name, const char *dirent,
 			return func;
 		}
 	}
+#endif
 
 	/* Search preloaded modules */
 	for (preptr = base_preload_ptr; preptr; preptr = preptr->next) {
@@ -1375,15 +1379,19 @@ cob_exit_call (void)
 #if	!defined(_WIN32) && !defined(USE_LIBDL)
 	lt_dlexit ();
 #if	0	/* RXWRXW - ltdl leak */
+#ifndef	COB_BORKED_DLOPEN
 	/* Weird - ltdl leaks mainhandle - This appears to work but .. */
-	cob_free (mainhandle);
+	if (mainhandle) {
+		cob_free (mainhandle);
+	}
+#endif
 #endif
 #endif
 
 }
 
 void
-cob_init_call (cob_global *lptr, cob_settings* sptr)
+cob_init_call (cob_global *lptr, cob_settings* sptr, const int check_mainhandle)
 {
 	char				*buff;
 	char				*s;
@@ -1404,15 +1412,9 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 	resolve_path = NULL;
 	resolve_alloc = NULL;
 	resolve_error = NULL;
-	resolve_error_buff = NULL;
-	mainhandle = NULL;
 	call_buffer = NULL;
-	call_filename_buff = NULL;
-	call_entry_buff = NULL;
 	call_entry2_buff = NULL;
-	call_table = NULL;
 	call_lastsize = 0;
-	resolve_size = 0;
 	cob_jmp_primed = 0;
 
 #ifndef	HAVE_DESIGNATED_INITS
@@ -1427,6 +1429,8 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 
 #ifndef	COB_ALT_HASH
 	call_table = cob_malloc (sizeof (struct call_hash *) * HASH_SIZE);
+#else
+	call_table = NULL;
 #endif
 
 	call_filename_buff = cob_malloc ((size_t)COB_NORMAL_BUFF);
@@ -1455,7 +1459,14 @@ cob_init_call (cob_global *lptr, cob_settings* sptr)
 	lt_dlinit ();
 
 #ifndef	COB_BORKED_DLOPEN
-	mainhandle = lt_dlopen (NULL);
+	/* only set main handle if not started by cobcrun as this
+	   saves a check for exported functions in every CALL
+	*/
+	if (check_mainhandle) {
+		mainhandle = lt_dlopen (NULL);
+	} else {
+		mainhandle = NULL;
+	}
 #endif
 
 	if (cobsetptr->cob_preload_str != NULL) {
