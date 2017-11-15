@@ -245,7 +245,7 @@ struct tm		current_compile_tm = { 0 };
 char			*source_name = NULL;
 #endif
 
-int			cb_source_format = CB_FORMAT_FIXED;
+enum cb_format		cb_source_format = CB_FORMAT_FIXED;
 int			cb_text_column;
 int			cb_id = 0;
 int			cb_pic_id = 0;
@@ -508,8 +508,8 @@ static const struct option long_options[] = {
 	{"conf",		CB_RQ_ARG, NULL, '&'},
 	{"debug",		CB_NO_ARG, NULL, 'd'},
 	{"ext",			CB_RQ_ARG, NULL, 'e'},
-	{"free",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FREE},
-	{"fixed",		CB_NO_ARG, &cb_source_format, CB_FORMAT_FIXED},
+	{"free",		CB_NO_ARG, NULL, 'F'},	/* note: not assigned directly as this is only valid for */
+	{"fixed",		CB_NO_ARG, NULL, 'f'},	/*       `int`: sizeof(enum) isn't always sizeof (int) */
 	{"static",		CB_NO_ARG, &cb_flag_static_call, 1},
 	{"dynamic",		CB_NO_ARG, &cb_flag_static_call, 0},
 	{"job",			CB_OP_ARG, NULL, 'j'},
@@ -2742,8 +2742,13 @@ process_command_line (const int argc, char **argv)
 			break;
 
 		case 'F':
-			/* -F : short option for -free */
+			/* --free */
 			cb_source_format = CB_FORMAT_FREE;
+			break;
+
+		case 'f':
+			/* --fixed */
+			cb_source_format = CB_FORMAT_FIXED;
 			break;
 
 		case 'q':
@@ -4832,7 +4837,7 @@ cobc_xref_call (const char *name, const int line, const int is_ident, const int 
 	}
 
 	elem = cobc_parse_malloc (sizeof (struct cb_call_elem));
-	elem->name = cobc_strdup (name);
+	elem->name = cobc_parse_strdup (name);
 	elem->is_identifier = is_ident;
 	elem->is_system = is_sys;
 	cobc_xref_link (&elem->xref, line, 0);
@@ -6291,6 +6296,17 @@ deep_copy_list_replace (struct list_replace *src, struct list_files *dst_file)
 	dst_file->replace_tail = copy;
 }
 
+static void
+cleanup_copybook_reference (struct list_files *cur)
+{
+	if (cur->name) {
+		cobc_free ((void *)cur->name);
+	}
+	cobc_free (cur);
+	cur = NULL;
+}
+
+
 /* TO-DO: Modularise! */
 /*
   Applies active REPLACE statements to the source lines in pline. Returns the
@@ -6369,8 +6385,9 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					pline[i][0] = 0;
 				}
 
-				/* Print copybook, with REPLACE'd text. */
 				cur = cfile->copy_head;
+
+				/* Print copybook, with REPLACE'd text. */
 				if (!cur->replace_head) {
 					for (rep = cfile->replace_head;
 					     rep && rep->firstline <= line_num;
@@ -6379,13 +6396,10 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					}
 				}
 				print_program_code (cur, 1);
+				
+				/* Delete the copybook reference when done */
 				cfile->copy_head = cur->next;
-
-				/* Discard copybook reference */
-				if (cur->name) {
-					cobc_free ((char *)cur->name);
-				}
-				cobc_free (cur);
+				cleanup_copybook_reference (cur);
 			}
 		} else {
 			/* Print text with replacements */
@@ -6534,21 +6548,19 @@ print_program_code (struct list_files *cfile, int in_copy)
 				/* Output copybooks which are COPY'd at the current line */
 				if (cfile->copy_head
 				    && cfile->copy_head->copy_line == line_num) {
-					/* Add the current text replacements to the copybook */
+
 					cur = cfile->copy_head;
+
+					/* Add the current text replacements to the copybook */
 					for (rep = cfile->replace_head; rep && in_copy;
 					     rep = rep->next) {
 						deep_copy_list_replace (rep, cur);
 					}
-
 					print_program_code (cur, 1);
-
+					
 					/* Delete the copybook reference when done */
 					cfile->copy_head = cur->next;
-					if (cur->name) {
-						cobc_free ((void *)cur->name);
-					}
-					cobc_free (cur);
+					cleanup_copybook_reference (cur);
 				}
 
 				/* Delete all but the last line. */
@@ -6579,10 +6591,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 			cur = cfile->copy_head;
 			print_program_code (cur, 1);
 			cfile->copy_head = cur->next;
-			if (cur->name) {
-				cobc_free ((void *)cur->name);
-			}
-			cobc_free (cur);
+			cleanup_copybook_reference (cur);
 		}
 	}
 
@@ -7762,7 +7771,6 @@ main (int argc, char **argv)
 			cobc_terminate (cb_listing_outputfile);
 		}
 		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
-		memset (cb_listing_file_struct, 0, sizeof (struct list_files));
 	}
 
 	if (verbose_output) {
@@ -7809,6 +7817,7 @@ main (int argc, char **argv)
 			set_standard_title ();
 
 			cb_current_file = cb_listing_file_struct;
+			cb_current_file->copy_tail = NULL;	/* may include an old reference */
 			cb_current_file->name = cobc_strdup (fn->source);
 			cb_current_file->source_format = cb_source_format;
 			force_new_page_for_next_line ();

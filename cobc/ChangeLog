@@ -1,4 +1,15 @@
 
+2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l, cobc.c: removed superfluous memset to 0 after cobc_malloc
+	  in listing functions
+	* cobc.c, cobc.h: always store cb_source_format as enum cb_format,
+	  using getopt return values for `--fixed` / `--free` instead as
+	  getopt assigns an integer which is not guaranteed to be sizeof(enum)
+	* cobc.c (cobc_xref_call): bug #463 - fixed memory leak in Xref code
+	* cobc.c: modularized cleanup code to (cleanup_copybook_reference)
+	* cobc.c: bug #463 - reset cb_current_file->copy_tail on listing setup
+
 2017-11-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: removed artificial limit for -fmax-errors

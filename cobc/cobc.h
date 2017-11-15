@@ -294,7 +294,7 @@ struct list_files {
 extern struct list_files	*cb_listing_files;
 extern struct list_files	*cb_current_file;
 
-extern int			cb_source_format;
+extern enum cb_format		cb_source_format;
 extern int			cb_text_column;
 
 extern struct cb_exception	cb_exception_table[];

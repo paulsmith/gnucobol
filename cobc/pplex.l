@@ -1191,7 +1191,6 @@ get_new_listing_file (void)
 	}
 	cb_current_file->copy_tail = newfile;
 
-	memset (newfile, 0, sizeof (struct list_files));
 	newfile->copy_line = cb_source_line;
 	newfile->source_format = cb_source_format;
 	old_list_file = cb_current_file;
@@ -1208,7 +1207,6 @@ set_print_replace_list (struct cb_replace_list *list)
 
 	for (r = list; r; r = r->next) {
 		repl = cobc_malloc (sizeof (struct list_replace));
-		memset (repl, 0, sizeof (struct list_replace));
 		repl->firstline = r->line_num;
 		repl->lead_trail = r->lead_trail;
 		repl->lastline = cb_source_line;
@@ -1217,7 +1215,6 @@ set_print_replace_list (struct cb_replace_list *list)
 			length += (int)strlen (l->text);
 		}
 		repl->from = cobc_malloc (length + 2);
-		memset (repl->from, 0, length + 2);
 		for (l = r->old_text; l; l = l->next) {
 			strcat (repl->from, l->text);
 		}
@@ -1226,7 +1223,6 @@ set_print_replace_list (struct cb_replace_list *list)
 			length += (int)strlen (l->text);
 		}
 		repl->to = cobc_malloc (length + 2);
-		memset (repl->to, 0, length + 2);
 		for (l = r->new_text; l; l = l->next) {
 			strcat (repl->to, l->text);
 		}
@@ -1498,7 +1494,6 @@ start:
 		newline_count++;
 		if (cb_src_list_file) {
 			skip = cobc_malloc (sizeof (struct list_skip));
-			memset (skip, 0, sizeof (struct list_skip));
 			skip->skipline = cb_source_line + (int)newline_count;
 
 			if (cb_current_file->skip_tail) {
