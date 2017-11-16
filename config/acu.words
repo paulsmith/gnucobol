@@ -119,7 +119,7 @@ reserved:	COMMA
 reserved:	COMMAND-LINE
 reserved:	COMMIT
 reserved:	COMP
-reserved:	COMP-1
+reserved:	COMP-1		# different from most other vendors, consider defining as COMP-1=COMP
 reserved:	COMP-2
 reserved:	COMP-3
 reserved:	COMP-4
