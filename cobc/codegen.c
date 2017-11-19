@@ -8237,7 +8237,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	} else {
 		output_line ("frame_ptr = frame_stack;");
 		output_line ("frame_ptr->perform_through = 0;");
-		output_line ("frame_ptr->return_address_ptr = &&P_cgerror;");
+		if (cb_flag_computed_goto) {
+			output_line ("frame_ptr->return_address_ptr = &&P_cgerror;");
+		}
 		if (cb_flag_stack_check) {
 			output_line ("frame_overflow = frame_ptr + %d - 1;",
 				     cb_stack_size);

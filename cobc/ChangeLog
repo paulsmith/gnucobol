@@ -45,6 +45,8 @@
 2017-11-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c: increase size for DEBUG-CONTENT according to file record length
+	* codegen.c: initialize return_address_ptr to an existing label to ensure
+	  that at least one label is available for computed goto, see bug 439#
 
 2017-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -918,6 +920,11 @@
 
 	* cobc.h, warning.def: test cb_warn_pending in CB_PENDING message macro.
 
+2017-01-30  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: emit call to pass address of file for dump of
+	  specific fields such as FILE STATUS
+
 2017-01-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, reserved.c, tree.h: allow EXTERN, STDCALL and STATIC to be
@@ -933,6 +940,13 @@
 	* parser.y, codegen.c: implemented entry-convention for entry points
 	  including stdcall generation
 	* reserved.c, parser.y: removed WINAPI
+
+2017-01-25  Ron Norman <rjn@inglenet.com>
+
+	* flag.def, cobc.h: new option -fdump=<scope> added (cb_flag_dump)
+	* cobc.h: added defines for values
+	* cobc.c: added code to set cb_flag_dump
+	* codegen.c: added code to emit calls to new trace & dump routines
 
 2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
