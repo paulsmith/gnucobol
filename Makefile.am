@@ -24,13 +24,14 @@ include_HEADERS = libcob.h
 SUBDIRS = lib libcob cobc bin config copy po doc extras tests
 
 # define prerequisites to fix parallel builds
-libcob: lib
+libcob: defaults.h lib
 cobc: libcob
 bin: libcob
 po: cobc
 doc: cobc
 extras: cobc
-tests: bin cobc
+test: bin cobc
+check: bin cobc
 
 ACLOCAL_AMFLAGS = -I m4 --install
 BUILT_SOURCES = defaults.h
@@ -114,3 +115,4 @@ test: all
 	cd tests && $(MAKE) $(AM_MAKEFLAGS) test
 
 checkall: check test
+

@@ -1,4 +1,9 @@
 
+2017-11-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: tweaked dependencies to make sure defaults.h is
+	  even build if another target than all/check is used
+
 2017-11-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: new template COB_COMPUTED_GOTO, defined if

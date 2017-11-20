@@ -40,7 +40,7 @@ COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
 COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
 COB_OBJECT_EXT="obj"
-COB_EXE_EXT="@COB_EXE_EXT@"
+COB_EXE_EXT=".exe"
 
 # Fix for testcases where cobc uses win32 paths internally
 PATHSEP=";"
@@ -96,14 +96,14 @@ else
 fi
 
 COB_HAS_CURSES="no"
-if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
+#if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# running MSYS builds as not-visible child processes result in
 	# "Redirection is not supported" (old PDcurses) and exit 127 (NCurses)
 	# --> disabling the tests for this feature, uncomment if fixed in the curses library
 	#if test $($COBC --info | grep -i -c "screen .*: .*curses") = 1; then
 	#	COB_HAS_CURSES="yes"
 	#fi
-fi
+#fi
 
 
 export COBC COBCRUN COBCRUN_DIRECT
