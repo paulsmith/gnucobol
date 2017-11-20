@@ -1,4 +1,16 @@
 
+2017-11-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_assemble, process_filename)[__OS400__]: fixed
+	  SIGSEGV by ensuring bufflen to always include the size of the full
+	  path for fn->translate and a minor memory issue by calling
+	  cobc_main_free with original fn->translate before assigning it with
+	  the full path
+	* cobc.c (process_assemble)[__OS400__, __WATCOMC__]: removed running
+	  the created object file
+	* cobc.c: renamed cobc_stradd_dup to cobc_main_stradd_dup and added
+	  a new version of cobc_stradd_dup that uses temporary memory
+
 2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l, cobc.c: removed superfluous memset to 0 after cobc_malloc

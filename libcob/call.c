@@ -1469,7 +1469,8 @@ cob_init_call (cob_global *lptr, cob_settings* sptr, const int check_mainhandle)
 	}
 #endif
 
-	if (cobsetptr->cob_preload_str != NULL) {
+	if (cobsetptr->cob_preload_str != NULL
+	 && resolve_path != NULL) {
 
 		p = cob_strdup (cobsetptr->cob_preload_str);
 

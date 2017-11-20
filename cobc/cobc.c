@@ -961,6 +961,28 @@ cobc_strdup (const char *dupstr)
 	return p;
 }
 
+#ifdef	_MSC_VER
+static char *
+cobc_stradd_dup (const char *str1, const char *str2)
+{
+	char	*p;
+	size_t	m, n;
+
+	/* LCOV_EXCL_START */
+	if (unlikely (!str1 || !str2)) {
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
+		cobc_abort_terminate ();
+	}
+	/* LCOV_EXCL_STOP */
+	m = strlen (str1);
+	n = strlen (str2);
+	p = cobc_malloc (m + n + 1);
+	memcpy (p, str1, m);
+	memcpy (p + m, str2, n);
+	return p;
+}
+#endif
+
 void *
 cobc_realloc (void *prevptr, const size_t size)
 {
@@ -1013,6 +1035,26 @@ cobc_main_strdup (const char *dupstr)
 	n = strlen (dupstr);
 	p = cobc_main_malloc (n + 1);
 	memcpy (p, dupstr, n);
+	return p;
+}
+
+static char *
+cobc_main_stradd_dup (const char *str1, const char *str2)
+{
+	char	*p;
+	size_t	m, n;
+
+	/* LCOV_EXCL_START */
+	if (unlikely (!str1 || !str2)) {
+		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_stradd_dup");
+		cobc_abort_terminate ();
+	}
+	/* LCOV_EXCL_STOP */
+	m = strlen (str1);
+	n = strlen (str2);
+	p = cobc_main_malloc (m + n + 1);
+	memcpy (p, str1, m);
+	memcpy (p + m, str2, n);
 	return p;
 }
 
@@ -1612,26 +1654,6 @@ cb_define_list_add (struct cb_define_struct *list, const char *text)
 	list->last->next = p;
 	list->last = p;
 	return list;
-}
-
-static char *
-cobc_stradd_dup (const char *str1, const char *str2)
-{
-	char	*p;
-	size_t	m, n;
-
-	/* LCOV_EXCL_START */
-	if (unlikely (!str1 || !str2)) {
-		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
-		cobc_abort_terminate ();
-	}
-	/* LCOV_EXCL_STOP */
-	m = strlen (str1);
-	n = strlen (str2);
-	p = cobc_main_malloc (m + n + 1);
-	memcpy (p, str1, m);
-	memcpy (p + m, str2, n);
-	return p;
 }
 
 static char *
@@ -3433,6 +3455,9 @@ process_filename (const char *filename)
 #ifdef HAVE_8DOT3_FILENAMES
 	char	*buffer;
 #endif
+#ifdef	__OS400__
+	char	*full_path;
+#endif
 
 	if (strcmp(filename, COB_DASH) == 0) {
 		if (cobc_seen_stdin == 0) {
@@ -3536,7 +3561,7 @@ process_filename (const char *filename)
 		fn->preprocess = cobc_main_strdup (output_name);
 	} else if (save_all_src || save_temps ||
 		   cb_compile_level == CB_LEVEL_PREPROCESS) {
-		fn->preprocess = cobc_stradd_dup (fbasename, ".i");
+		fn->preprocess = cobc_main_stradd_dup (fbasename, ".i");
 	} else {
 		fn->preprocess = cobc_main_malloc(COB_FILE_MAX);
 		cob_temp_name ((char *)fn->preprocess, ".cob");
@@ -3549,17 +3574,30 @@ process_filename (const char *filename)
 		fn->translate = cobc_main_strdup (output_name);
 	} else if (save_all_src || save_temps || save_c_src ||
 		   cb_compile_level == CB_LEVEL_TRANSLATE) {
-		fn->translate = cobc_stradd_dup (fbasename, ".c");
+		fn->translate = cobc_main_stradd_dup (fbasename, ".c");
 	} else {
 		fn->translate = cobc_main_malloc(COB_FILE_MAX);
 		cob_temp_name ((char *)fn->translate, ".c");
 	}
+#ifdef	__OS400__
+	/* adjustment of fn->translate, seems to need a full path
+	   for later command line for cc; note - while it is unlikely that
+	   cob_temp_name isn't starting with "/" it is still possible */
+	if (fn->translate[0] != '/') {
+		full_path = cobc_main_malloc (COB_LARGE_BUFF);
+		getcwd (full_path, COB_LARGE_BUFF);
+		strcat (full_path, "/");
+		strcat (full_path, fn->translate);
+		cobc_main_free (fn->translate);
+		fn->translate = full_path;
+	}
+#endif
 	fn->translate_len = strlen (fn->translate);
 
 	/* Set storage filename */
 	if (fn->need_translate) {
 #ifndef HAVE_8DOT3_FILENAMES
-		fn->trstorage = cobc_stradd_dup (fn->translate, ".h");
+		fn->trstorage = cobc_main_stradd_dup (fn->translate, ".h");
 #else
 		/* for 8.3 filenames use no ".c" prefix */
 		buffer = cobc_strdup (fn->translate);
@@ -3574,7 +3612,7 @@ process_filename (const char *filename)
 	} else if (output_name && cb_compile_level == CB_LEVEL_ASSEMBLE) {
 		fn->object = cobc_main_strdup (output_name);
 	} else if (save_temps || cb_compile_level == CB_LEVEL_ASSEMBLE) {
-		fn->object = cobc_stradd_dup(fbasename, "." COB_OBJECT_EXT);
+		fn->object = cobc_main_stradd_dup (fbasename, "." COB_OBJECT_EXT);
 	} else {
 		fn->object = cobc_main_malloc(COB_FILE_MAX);
 		cob_temp_name ((char *)fn->object, "." COB_OBJECT_EXT);
@@ -3593,12 +3631,12 @@ process_filename (const char *filename)
 				  cobc_list_dir, SLASH_CHAR, fbasename);
 			fn->listing_file = listptr;
 		} else {
-			fn->listing_file = cobc_stradd_dup (fbasename, ".lst");
+			fn->listing_file = cobc_main_stradd_dup (fbasename, ".lst");
 		}
 #ifndef COB_INTERNAL_XREF
 	/* LCOV_EXCL_START */
 	} else if (cobc_gen_listing == 2) {
-		fn->listing_file = cobc_stradd_dup (fbasename, ".xrf");
+		fn->listing_file = cobc_main_stradd_dup (fbasename, ".xrf");
 	/* LCOV_EXCL_STOP */
 #endif
 	}
@@ -6920,7 +6958,10 @@ process_assemble (struct filename *fn)
 
 	bufflen = cobc_cc_len + cobc_cflags_len + fn->object_len
 			+ fn->translate_len + cobc_include_len
-			+ cobc_pic_flags_len + 64U;
+#ifndef	__OS400__
+			+ cobc_pic_flags_len
+#endif
+			+ 64U;
 
 	cobc_chk_buff_size (bufflen);
 
@@ -6936,24 +6977,11 @@ process_assemble (struct filename *fn)
 		return process_filtered (cobc_buffer, fn);
 	}
 #elif defined(__OS400__)
-	name = (char *) fn->translate;
-	if (name[0] != '/') {
-		char	*p;
-
-		p = cobc_main_malloc (COB_LARGE_BUFF);
-		getcwd (p, COB_LARGE_BUFF);
-		strcat (p, "/");
-		strcat (p, name);
-		name = p;
-	}
 	file_stripext ((char *) fn->object);
 	sprintf (cobc_buffer, "%s -c %s %s -o %s %s",
 		 cobc_cc, cobc_cflags, cobc_include,
-		 fn->object, name);
+		 fn->object, fn->translate);
 	ret = process (cobc_buffer);
-	if ((ret == 0) && cobc_flag_run) {
-		ret = process_run (name);
-	}
 	return ret;
 #elif defined(__WATCOMC__)
 	if (cb_compile_level == CB_LEVEL_MODULE ||
@@ -6967,9 +6995,6 @@ process_assemble (struct filename *fn)
 			 fn->object, fn->translate);
 	}
 	ret = process (cobc_buffer);
-	if ((ret == 0) && cobc_flag_run) {
-		ret = process_run (fn->object);
-	}
 	return ret;
 #else
 	if (cb_compile_level == CB_LEVEL_MODULE ||
@@ -7017,12 +7042,11 @@ process_module_direct (struct filename *fn)
 	} else {
 		name = file_basename (fn->source);
 #if	!defined(_MSC_VER) && !defined(__OS400__) && !defined(__WATCOMC__) && !defined(__BORLANDC__)
-		strcat (name, ".");
-		strcat (name, COB_MODULE_EXT);
+		strcat (name, "." COB_MODULE_EXT);
 #endif
 	}
 #ifdef	_MSC_VER
-	exename = cobc_stradd_dup (name, ".dll");
+	exename = cobc_stradd_dup (name, "." COB_MODULE_EXT);
 #endif
 
 	size = strlen (name);
@@ -7063,12 +7087,13 @@ process_module_direct (struct filename *fn)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
+	cobc_free ((void *) exename);
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
-	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr (fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.%s", name, COB_OBJECT_EXT);
-	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr (fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 #else	/* _MSC_VER */
 #ifdef	__OS400__
 	if (fn->translate[0] != '/') {
@@ -7127,19 +7152,17 @@ process_module (struct filename *fn)
 		file_stripext (name);
 #else
 		if (strchr (output_name, '.') == NULL) {
-			strcat (name, ".");
-			strcat (name, COB_MODULE_EXT);
+			strcat (name, "." COB_MODULE_EXT);
 		}
 #endif
 	} else {
 		name = file_basename (fn->source);
 #if	!defined(_MSC_VER) && !defined(__OS400__) && !defined(__WATCOMC__) &&! defined(__BORLANDC__)
-		strcat (name, ".");
-		strcat (name, COB_MODULE_EXT);
+		strcat (name, "." COB_MODULE_EXT);
 #endif
 	}
 #ifdef	_MSC_VER
-	exename = cobc_stradd_dup (name, ".dll");
+	exename = cobc_stradd_dup (name, "." COB_MODULE_EXT);
 #endif
 
 	size = strlen (name);
@@ -7175,12 +7198,13 @@ process_module (struct filename *fn)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
+	cobc_free ((void *) exename);
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
-	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr (fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.obj", name);
-	if (strstr(fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
+	if (strstr (fn->source, cobc_buffer) == NULL)	cobc_check_action (cobc_buffer);
 #else	/* _MSC_VER */
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s %s %s -fe=\"%s\" \"%s\" %s %s %s",
@@ -7220,11 +7244,13 @@ process_library (struct filename *l)
 	size_t		size;
 	int		ret;
 
+	/* LCOV_EXCL_START */
 	if (!l) {
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"process_library", "l");
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_STOP */
 
 	for (f = l; f; f = f->next) {
 		strcat (cobc_objects_buffer, "\"");
@@ -7239,19 +7265,17 @@ process_library (struct filename *l)
 		file_stripext (name);
 #else
 		if (strchr (output_name, '.') == NULL) {
-			strcat (name, ".");
-			strcat (name, COB_MODULE_EXT);
+			strcat (name, "." COB_MODULE_EXT);
 		}
 #endif
 	} else {
 		name = file_basename (l->source);
 #if	!defined(_MSC_VER) && !defined(__OS400__) && !defined(__WATCOMC__) && !defined(__BORLANDC__)
-		strcat (name, ".");
-		strcat (name, COB_MODULE_EXT);
+		strcat (name, "." COB_MODULE_EXT);
 #endif
 	}
 #ifdef	_MSC_VER
-	exename = cobc_stradd_dup (name, ".dll");
+	exename = cobc_stradd_dup (name, "." COB_MODULE_EXT);
 #endif
 
 	size = strlen (name);
@@ -7286,6 +7310,7 @@ process_library (struct filename *l)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
+	cobc_free ((void *) exename);
 	sprintf (cobc_buffer, "%s.exp", name);
 	cobc_check_action (cobc_buffer);
 	sprintf (cobc_buffer, "%s.lib", name);
@@ -7337,11 +7362,13 @@ process_link (struct filename *l)
 	size_t		size;
 	int		ret;
 
+	/* LCOV_EXCL_START */
 	if (!l) {
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"process_link", "l");
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_STOP */
 
 	for (f = l; f; f = f->next) {
 #ifdef	__OS400__
@@ -7370,7 +7397,7 @@ process_link (struct filename *l)
 		}
 	}
 #ifdef	_MSC_VER
-	exename = cobc_stradd_dup (name, ".exe");
+	exename = cobc_stradd_dup (name, COB_EXE_EXT);
 #endif
 
 	size = strlen (name);
@@ -7404,6 +7431,7 @@ process_link (struct filename *l)
 		sprintf (cobc_buffer, "%s.manifest", exename);
 		cobc_check_action (cobc_buffer);
 	}
+	cobc_free ((void *) exename);
 #else	/* _MSC_VER */
 #ifdef	__WATCOMC__
 	sprintf (cobc_buffer, "%s %s -fe=\"%s\" %s %s %s %s",
