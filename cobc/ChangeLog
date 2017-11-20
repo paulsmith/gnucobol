@@ -10,6 +10,14 @@
 	  the created object file
 	* cobc.c: renamed cobc_stradd_dup to cobc_main_stradd_dup and added
 	  a new version of cobc_stradd_dup that uses temporary memory
+	* cobc.c: added optional parameter to file_basename to specify which
+	  extension to remove (if NULL all extensions will be removed)
+	* cobc.c (process_filename): use strcasecmp instead of strcmp
+	  because of possible compilation on FAT/NTFS
+	* cobc.c: removed wants_nonfinal, directly check cb_compile_level instead
+	* cobc.c (set_compile_level_from_file_extension): new function to
+	  adjust cb_compile_level if outputname was specified but no option
+	  to set the compile level
 
 2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

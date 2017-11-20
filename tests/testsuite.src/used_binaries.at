@@ -63,9 +63,38 @@ AT_CHECK([$COBC prog.$COB_OBJECT_EXT])
 AT_CHECK([$COBCRUN prog], [0], [bluBb], [])
 AT_CHECK([$COBC -x -C prog.cob], [0], [], [])
 AT_CHECK([$COBC -x -c prog.c], [0], [], [])
-AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT])
+AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT -o progo])
+AT_CHECK([$COBCRUN_DIRECT ./progo], [0], [bluBb], [])
 AT_CHECK([$COBC -E prog.cob], [0], [], [])
 AT_CHECK([$COBC -x prog.i], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [bluBb], [])
+AT_CLEANUP
+
+
+AT_SETUP([Compiler outputs (file specified)])
+AT_KEYWORDS([runmisc cobc])
+
+AT_DATA([prog.cob],[
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. prog.
+        DATA DIVISION.
+        WORKING-STORAGE SECTION.
+        01 BLA PIC X(5) VALUE 'bluBb'.
+        PROCEDURE DIVISION.
+        DISPLAY BLA NO ADVANCING END-DISPLAY
+        STOP RUN.
+])
+
+AT_CHECK([$COBC prog.cob -o prog.c], [0], [], [])
+AT_CHECK([$COBC prog.c -o prog.$COB_OBJECT_EXT], [0], [], [])
+AT_CHECK([$COBC prog.$COB_OBJECT_EXT -o prog])
+AT_CHECK([$COBCRUN prog], [0], [bluBb], [])
+AT_CHECK([$COBC -x prog.cob -o prog.c], [0], [], [])
+AT_CHECK([$COBC -x prog.c -o prog.$COB_OBJECT_EXT], [0], [], [])
+AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT -o progo$COB_EXE_EXT])
+AT_CHECK([$COBCRUN_DIRECT ./progo], [0], [bluBb], [])
+AT_CHECK([$COBC prog.cob -o prog.i], [0], [], [])
+AT_CHECK([$COBC -x prog.i -o prog$COB_EXE_EXT], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [bluBb], [])
 AT_CLEANUP
 
@@ -87,6 +116,8 @@ AT_DATA([prog.cob],[
 AT_CHECK([$COBC -S prog.cob], [0], [], [])
 AT_CHECK([test -f prog.s], [0], [], [],
 # Previous test "failed" --> prog.s not available --> likely a VS build
+# only check for file as cl.exe cannot create executables from self-created
+# assembler sources
 [AT_CHECK([test -f prog.asm], [0], [], [])],
 # Previous test "passed" --> prog.s is available, test compilation and run
 [AT_CHECK([$COBC prog.s])
@@ -94,6 +125,8 @@ AT_CHECK([test -f prog.s], [0], [], [],
 AT_CHECK([$COBC -x -S prog.cob], [0], [], [])
 AT_CHECK([test -f prog.s], [0], [], [],
 # Previous test "failed" --> prog.s not available --> likely a VS build
+# only check for file as cl.exe cannot create executables from self-created
+# assembler sources
 [AT_CHECK([test -f prog.asm], [0], [], [])],
 # Previous test "passed" --> prog.s is available, test compilation and run
 [AT_CHECK([$COBC -x prog.s])
