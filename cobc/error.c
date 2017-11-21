@@ -47,6 +47,25 @@ static int		ignore_error = 0;
 size_t				cb_msg_style;
 
 static void
+print_error_prefix (const char *file, int line, const char *prefix)
+{
+	if (file) {
+		if (line > 0) {
+			if (cb_msg_style == CB_MSG_STYLE_MSC) {
+				fprintf (stderr, "%s (%d): ", file, line);
+			} else {
+				fprintf (stderr, "%s:%d: ", file, line);
+			}
+		} else {
+			fprintf (stderr, "%s: ", file);
+		}
+	}
+	if (prefix) {
+		fprintf (stderr, "%s", prefix);
+	}
+}
+
+static void
 print_error (const char *file, int line, const char *prefix,
 	     const char *fmt, va_list ap)
 {
@@ -86,16 +105,7 @@ print_error (const char *file, int line, const char *prefix,
 	}
 
 	/* Print the error */
-	if (file) {
-		if (cb_msg_style == CB_MSG_STYLE_MSC) {
-			fprintf (stderr, "%s (%d): ", file, line);
-		} else {
-			fprintf (stderr, "%s:%d: ", file, line);
-		}
-	}
-	if (prefix) {
-		fprintf (stderr, "%s", prefix);
-	}
+	print_error_prefix (file, line, prefix);
 	vsprintf (errmsg, fmt, ap);
 	fprintf (stderr, "%s\n", errmsg);
 
@@ -344,12 +354,7 @@ configuration_warning (const char *fname, const int line, const char *fmt, ...)
 		|| line != last_error_line) {
 		last_error_file = fname;
 		last_error_line = line;
-		if (fname) {
-			fprintf (stderr, "%s: ", fname);
-		}
-		if (line) {
-			fprintf (stderr, "%d: ", line);
-		}
+		print_error_prefix (fname, line, NULL);
 	}
 
 	/* Body */
@@ -366,44 +371,38 @@ configuration_warning (const char *fname, const int line, const char *fmt, ...)
 	}
 	warningcount++;
 }
+
 void
 configuration_error (const char *fname, const int line,
                      const int finish_error, const char *fmt, ...)
 {
 	va_list args;
 
-	configuration_error_head();
+	configuration_error_head ();
 
 	/* Prefix */
 	if (fname != last_error_file
 		|| line != last_error_line) {
 		last_error_file = fname;
 		last_error_line = line;
-		if (fname) {
-			fprintf (stderr, "%s:", fname);
-		}
-		if (line) {
-			fprintf (stderr, "%d:", line);
-		}
-		if (fname || line) {
-			fputc (' ', stderr);
-		}
+		print_error_prefix (fname, line, NULL);
 	}
 
 	/* Body */
-	va_start(args, fmt);
+	va_start (args, fmt);
 	vfprintf (stderr, fmt, args);
-	va_end(args);
+	va_end (args);
 
 	/* Postfix */
 	if (!finish_error) {
-		putc(';', stderr);
-		putc('\n', stderr);
-		putc('\t', stderr);
-	} else {
-		putc('\n', stderr);
-		fflush(stderr);
+		putc (';', stderr);
+		putc ('\n', stderr);
+		putc ('\t', stderr);
+		return;
 	}
+
+	putc ('\n', stderr);
+	fflush (stderr);
 
 	if (sav_lst_file) {
 		return;

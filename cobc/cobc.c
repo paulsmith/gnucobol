@@ -5305,8 +5305,13 @@ print_program_trailer (void)
 		print_program_data ("");
 		err = cb_listing_error_head;
 		do {
-			snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
-				err->file, err->line, err->prefix, err->msg);
+			if (err->line > 0) {
+				snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
+					err->file, err->line, err->prefix, err->msg);
+			} else {
+				snprintf (err_msg, BUFSIZ, "%s: %s%s",
+					err->file, err->prefix, err->msg);
+			}
 			print_program_data (err_msg);
 			err = err->next;
 		} while (err);

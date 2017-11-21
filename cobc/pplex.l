@@ -86,6 +86,7 @@ static int ppwrap (void) {
 
 #define	COB_IN_PPLEX	1
 #include "cobc.h"
+#include "tree.h"
 #include "ppparse.h"
 
 /* ignore unused functions here as flex generates unused ones */
@@ -892,12 +893,14 @@ pp_set_replace_list (struct cb_replace_list *list, const cob_u32_t is_pushpop)
 	}
 }
 
+/* open file (source or coypbook) for further processing */
 int
 ppopen (const char *name, struct cb_replace_list *replacing_list)
 {
 	struct copy_info	*current_copy_info;
 	char			*s;
 	char			*dname;
+	cb_tree			x = NULL;
 
 	unsigned char		bom[4];
 
@@ -908,17 +911,39 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 	}
 
 	/* Open copy/source file, or use stdin */
-	if (strcmp(name, COB_DASH) == 0) {
+	if (strcmp (name, COB_DASH) == 0) {
 		ppin = stdin;
 	} else {
+		for (current_copy_info = copy_stack; current_copy_info; current_copy_info = current_copy_info->next) {
+			if (!strcmp (name, current_copy_info->dname)) {
+				x = cobc_malloc (sizeof (struct cb_tree_common));
+				x->source_file = name;
+				x->source_line = -1;
+				/* TODO: add an explain_error option instead of the forced warnings */
+				cb_error_x (x, _("recursive inclusion"));
+				x->source_line = 0;
+				for (current_copy_info = copy_stack; current_copy_info; current_copy_info = current_copy_info->next) {
+					x->source_file = current_copy_info->dname;
+					cb_warning_x (COBC_WARN_ENABLED, x, _("file was included here"));
+					x->source_line = current_copy_info->line;
+				}
+				cobc_free (x);
+				break;
+			}
+
+		}
+		if (!x) {
 #ifdef	__OS400__
-		ppin = fopen (name, "r");
+			ppin = fopen (name, "r");
 #else
-		ppin = fopen (name, "rb");
+			ppin = fopen (name, "rb");
 #endif
+		} else {
+			ppin = 0;
+		}
 	}
 
-	if (!ppin) {
+	if (!ppin && !x) {
 		cb_error ("%s: %s", name, cb_get_strerror ());
 		/* Note: postpone error exit as we need the saved buffers later on */
 	}

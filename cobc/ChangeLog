@@ -8,6 +8,10 @@
 	* cobc.c: fixed possible SIGSEGV for long COB_STRIP_CMD
 	* cobc.c (process_link): only add COB_EXE_EXT for running strip command
 	  if is isn't already specified
+	* pplex.l (ppopen): fixed bug #467 by adding missing checks for
+	  recursive sources before fopen
+	* cobc.c, error.c: allowed messages with filenames only, line number
+	  isn't printed if -1
 
 2017-11-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
