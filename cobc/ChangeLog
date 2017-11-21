@@ -1,4 +1,14 @@
 
+2017-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_run): fixed possible SIGSEGV for long run options,
+	  use output_name, with stripped extension if necessary (see bug #466)
+	* cobc.c (process_translate): fixed bug #466 by removing path from
+	  C source names after fopen
+	* cobc.c: fixed possible SIGSEGV for long COB_STRIP_CMD
+	* cobc.c (process_link): only add COB_EXE_EXT for running strip command
+	  if is isn't already specified
+
 2017-11-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process_assemble, process_filename)[__OS400__]: fixed

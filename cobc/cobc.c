@@ -2481,9 +2481,11 @@ file_stripext (char *buff)
 }
 #endif
 
+# define COB_BASENAME_KEEP_EXT ""
 /* get basename from file, if optional parameter strip_ext is given then only
-strip the extension if it matches the parameter (must include the period)
-returns a pointer to the previous allocated basename_buffer */
+  strip the extension if it matches the parameter (must include the period),
+  don't strip the extension if the parameter equals COB_BASENAME_KEEP_EXT;
+  returns a pointer to the previous allocated basename_buffer */
 static char *
 file_basename (const char *filename, const char *strip_ext)
 {
@@ -2514,7 +2516,11 @@ file_basename (const char *filename, const char *strip_ext)
 	}
 
 	/* Remove extension */
-	endp = strrchr (filename, '.');
+	if (!strip_ext || strcmp (strip_ext, COB_BASENAME_KEEP_EXT)) {
+		endp = strrchr (filename, '.');
+	} else {
+		endp = startp;
+	}
 	if (endp > startp
 		&& (!strip_ext || strcasecmp (endp, strip_ext) == 0)) {
 		len = endp - startp;
@@ -3435,7 +3441,7 @@ restore_program_list_order (void)
 	struct cb_program	*last;
 
 	/* ensure that this function is only processed once
-	   as we must call it from multiple points */
+	   as we must call it from multiple places */
 	if (cb_correct_program_order) {
 		return;
 	}
@@ -3727,6 +3733,8 @@ static int
 process_run (const char *name)
 {
 	int ret, status;
+	size_t curr_size;
+	const char * buffer;
 
 	if (cb_compile_level < CB_LEVEL_MODULE) {
 		fputs (_("nothing for -j to run"), stderr);
@@ -3734,25 +3742,41 @@ process_run (const char *name)
 		return 0;
 	}
 
+	if (output_name) {
+		name = output_name;
+		/* ensure enough space (output name) */
+		cobc_chk_buff_size (strlen (output_name) + 18);
+	} else {
+		name = file_basename (name, NULL);
+	}
+
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY) {
-		if (cobc_run_args) {
-			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s %s",
-				COB_EXE_EXT, file_basename (name, NULL), cobc_run_args);
-		} else {
-			snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s",
-				COB_EXE_EXT, file_basename (name, NULL));
+		curr_size = snprintf (cobc_buffer, cobc_buffer_size, "cobcrun%s %s",
+			COB_EXE_EXT, name);
+		/* strip period + COB_MODULE_EXT if specified */
+		if (output_name && curr_size < cobc_buffer_size) {
+			buffer = file_extension (output_name);
+			if (!strcasecmp (buffer, COB_MODULE_EXT)) {
+				*(cobc_buffer + curr_size - strlen (buffer) - 1) = 0;
+			}
 		}
 	} else {  /* executable */
-		if (cobc_run_args) {
-			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s %s",
-				SLASH_CHAR, name, COB_EXE_EXT, cobc_run_args);
-		} else {
-			snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s",
+		/* only add COB_EXE_EXT if it is not specified */
+		buffer = file_extension (name);
+		if (COB_EXE_EXT[0] && strcasecmp (buffer, COB_EXE_EXT + 1)) {
+			curr_size = snprintf (cobc_buffer, cobc_buffer_size, ".%c%s%s",
 				SLASH_CHAR, name, COB_EXE_EXT);
+		} else {
+			curr_size = snprintf (cobc_buffer, cobc_buffer_size, ".%c%s",
+				SLASH_CHAR, name);
 		}
 	}
-	cobc_buffer[cobc_buffer_size] = 0;
+	if (cobc_run_args) {
+		cobc_chk_buff_size (curr_size + 1 + strlen (cobc_run_args));
+		strncat (cobc_buffer, " ", cobc_buffer_size);
+		strncat (cobc_buffer, cobc_run_args, cobc_buffer_size);
+	}
 	if (verbose_output) {
 		cobc_cmd_print (cobc_buffer);
 	}
@@ -4087,8 +4111,7 @@ process_filtered (const char *cmd, struct filename *fn)
 		}
 	} else {
 		/* demangle_source is encoded and cannot be used
-		   -> set to file.something and strip at point
-		*/
+		   -> set to file.something and strip at period */
 		output_name_temp = file_basename (cobc_strdup (fn->source), NULL);
 	}
 
@@ -6741,9 +6764,7 @@ process_translate (struct filename *fn)
 	struct local_filename	*lf;
 	int			ret;
 	int			i;
-#ifdef HAVE_8DOT3_FILENAMES
 	char	*buffer;
-#endif
 
 	/* Initialize */
 	cb_source_file = NULL;
@@ -6843,6 +6864,12 @@ process_translate (struct filename *fn)
 	if (!cb_storage_file) {
 		cobc_terminate (cb_storage_file_name);
 	}
+	/* remove possible path from header name for later codegen */
+	if (strrchr (cb_storage_file_name, '/')
+	 || strrchr (cb_storage_file_name, '\\')) {
+		buffer = file_basename (cb_storage_file_name, COB_BASENAME_KEEP_EXT);
+		memcpy ((void *) cb_storage_file_name, (void *) buffer, strlen (buffer) + 1);
+	}
 
 	/* Process programs in original order */
 	restore_program_list_order ();
@@ -6878,6 +6905,12 @@ process_translate (struct filename *fn)
 		}
 		if (!lf->local_fp) {
 			cobc_terminate (lf->local_name);
+		}
+		/* remove possible path from header name for later codegen */
+		if (strrchr (lf->local_name, '/')
+		 || strrchr (lf->local_name, '\\')) {
+			buffer = file_basename (lf->local_name, COB_BASENAME_KEEP_EXT);
+			memcpy ((void *) lf->local_name, (void *) buffer, strlen (buffer) + 1);
 		}
 		p->local_include = lf;
 		lf->next = fn->localfile;
@@ -7165,6 +7198,7 @@ process_module_direct (struct filename *fn)
 	ret = process (cobc_buffer);
 #ifdef	COB_STRIP_CMD
 	if (strip_output && ret == 0) {
+		cobc_chk_buff_size (strlen (COB_STRIP_CMD) + 3 + strlen (name));
 		sprintf (cobc_buffer, "%s \"%s\"", COB_STRIP_CMD, name);
 		ret = process (cobc_buffer);
 	}
@@ -7262,7 +7296,8 @@ process_module (struct filename *fn)
 	ret = process (cobc_buffer);
 #ifdef	COB_STRIP_CMD
 	if (strip_output && ret == 0) {
-		sprintf (cobc_buffer, "%s %s", COB_STRIP_CMD, name);
+		cobc_chk_buff_size (strlen (COB_STRIP_CMD) + 3 + strlen (name));
+		sprintf (cobc_buffer, "%s \"%s\"", COB_STRIP_CMD, name);
 		ret = process (cobc_buffer);
 	}
 #endif
@@ -7399,7 +7434,7 @@ process_link (struct filename *l)
 {
 	struct filename	*f;
 	const char		*name;
-#ifdef	_MSC_VER
+#if defined(_MSC_VER) || defined (COB_STRIP_CMD)
 	const char		*exe_name;
 #endif
 	size_t		bufflen;
@@ -7499,8 +7534,16 @@ process_link (struct filename *l)
 
 #ifdef	COB_STRIP_CMD
 	if (strip_output && ret == 0) {
-		sprintf (cobc_buffer, "%s \"%s%s\"",
-			 COB_STRIP_CMD, name, COB_EXE_EXT);
+		cobc_chk_buff_size (strlen (COB_STRIP_CMD) + 3 + strlen (name) + strlen (COB_EXE_EXT));
+		/* only add COB_EXE_EXT if it is not specified */
+		exe_name = file_extension (name);
+		if (COB_EXE_EXT[0] && strcasecmp (exe_name, COB_EXE_EXT + 1)) {
+			sprintf (cobc_buffer, "%s \"%s%s\"",
+				 COB_STRIP_CMD, name, COB_EXE_EXT);
+		} else {
+			sprintf (cobc_buffer, "%s \"%s\"",
+				 COB_STRIP_CMD, name);
+		}
 		ret = process (cobc_buffer);
 	}
 #endif
