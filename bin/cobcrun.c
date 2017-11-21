@@ -344,6 +344,19 @@ main (int argc, char **argv)
 {
 	cob_call_union	unifunc;
 
+#ifdef	_WIN32
+	/* Allows running tests under Win */
+	char *p = getenv ("COB_UNIX_LF");
+	if (p && (*p == 'Y' || *p == 'y' ||
+		*p == 'O' || *p == 'o' ||
+		*p == 'T' || *p == 't' ||
+		*p == '1')) {
+		(void)_setmode (_fileno (stdin), _O_BINARY);
+		(void)_setmode (_fileno (stdout), _O_BINARY);
+		(void)_setmode (_fileno (stderr), _O_BINARY);
+	}
+#endif
+
 #ifdef	HAVE_SETLOCALE
 	setlocale (LC_ALL, "");
 #endif

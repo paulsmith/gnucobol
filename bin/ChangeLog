@@ -1,4 +1,9 @@
 
+2017-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c [_WIN32]: allowing tests to result in the expected line
+	  ending for messages returned from cobcrun.c directly
+
 2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: use (cob_init_nomain) instead of (cob_init) as it includes
