@@ -7,6 +7,11 @@
 	* parser.y: renamed "not" to much more clearer "not_expr" to prevent
 	  confusing it with "flag_not"
 	* reserved.c: moved aliases LOW-VALUES/HIGH-VALUES to default.conf
+	* parser.y: moved reset of cobc_cs_check from _mnemonic_conv to end of
+	  call_statement
+	* reserved.c (lookup_reserved_word): fixed returning of context-sensitive
+	  word without context (happened when the word *set* a context, too);
+	  no auto-reset for CB_CS_SCREEN context
 
 2017-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

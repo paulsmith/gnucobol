@@ -229,8 +229,8 @@ static struct system_name_struct *lookup_system_name (const char *, const int);
 /* Must be ordered on word for binary search */
 /* Description */
 
-/* Word # Statement has terminator # Is context sensitive # Token */
-/* Special context set # Special context test */
+/* Word # Statement has terminator # Is context sensitive (only for printing)
+        # Token # Special context set # Special context test */
 
 static struct cobc_reserved *reserved_words;
 
@@ -337,8 +337,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ATTRIBUTE",		0, 1, ATTRIBUTE,		/* 2002 (C/S) */
 				0, CB_CS_SET
   },
-  { "AUTO",			0, 1, AUTO,			/* 2002 (C/S) */
-				0, CB_CS_SCREEN
+  { "AUTO",			0, 1, AUTO,			/* 2002 (C/S), extension */
+				0, CB_CS_ACCEPT | CB_CS_SCREEN | CB_CS_CALL
   },
   { "AUTOMATIC",		0, 0, AUTOMATIC,		/* 2002 */
 				0, 0
@@ -1004,7 +1004,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "FROM",			0, 0, FROM,			/* 2002 */
-				CB_CS_FROM, CB_CS_ACCEPT
+				CB_CS_FROM, 0
   },
   { "FULL",			0, 1, FULL,			/* 2002 (C/S) */
 				0, CB_CS_ACCEPT | CB_CS_DISPLAY | CB_CS_SCREEN
@@ -3329,7 +3329,7 @@ lookup_reserved_word (const char *name)
 		if (unlikely(p->context_test)) {
 			/* Dependent words */
 			if (!(cobc_cs_check & p->context_test)) {
-				return p;
+				return NULL;
 			}
 		}
 		cobc_cs_check |= p->context_set;
@@ -3341,15 +3341,19 @@ lookup_reserved_word (const char *name)
 			return NULL;
 		}
 		/*
-		  The only context-sensitive phrase outside the procedure
-		  division we expect to reset cobc_cs_check is OPTIONS.
+		  The only context-sensitive phrase outside the procedure division
+		  we expect to manually reset cobc_cs_check is OPTIONS and SCREEN.
 
-		  TO-DO: Change !cobc_in_procedure to cobc_in_data. (Everything
-		  in the environment and identification division can (and does)
-		  reset cobc-cs_check.)
+		  Note: Everything in the environment and identification division can 
+		  (and does) reset cobc-cs_check.
 		*/
-		if (!cobc_in_procedure && !(cobc_cs_check & CB_CS_OPTIONS)) {
-			cobc_cs_check = 0;
+		if (!cobc_in_procedure
+		 && !(cobc_cs_check & CB_CS_OPTIONS)) {
+			if (cobc_cs_check & CB_CS_SCREEN) {
+				cobc_cs_check = CB_CS_SCREEN;
+			} else {
+				cobc_cs_check = 0;
+			}
 		}
 		return p;
 	}

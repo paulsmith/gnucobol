@@ -5008,8 +5008,8 @@ AT_DATA([caller.cob], [
                                  volatile
                                  char
                                  do
-                                 extern
-                                 static
+                                 *>extern
+                                 *>static
                                  union
                                  while
            END-CALL.
@@ -5133,8 +5133,8 @@ AT_DATA([callee.cob], [
        77  volatile                    PIC X.
        77  char                        PIC X.
        77  do                          PIC X.
-       77  extern                      PIC X.
-       77  static                      PIC X.
+      *77  extern                      PIC X.
+      *77  static                      PIC X.
        77  union                       PIC X.
        77  while                       PIC X.
        PROCEDURE        DIVISION USING
@@ -5156,8 +5156,8 @@ AT_DATA([callee.cob], [
                                  volatile
                                  char
                                  do
-                                 extern
-                                 static
+                                *>extern
+                                *>static
                                  union
                                  while
                                  .
@@ -5179,8 +5179,8 @@ AT_DATA([callee.cob], [
               (volatile                    NOT = "P") OR
               (char                        NOT = "Q") OR
               (do                          NOT = "R") OR
-              (extern                      NOT = "S") OR
-              (static                      NOT = "T") OR
+            *>(extern                      NOT = "S") OR
+            *>(static                      NOT = "T") OR
               (union                       NOT = "U") OR
               (while                       NOT = "V")
               DISPLAY "At least one var has wrong content!"
@@ -5204,8 +5204,8 @@ AT_DATA([callee.cob], [
                                  volatile
                                  char
                                  do
-                                 extern
-                                 static
+                               *>extern
+                               *>static
                                  union
                                  while
                                  .

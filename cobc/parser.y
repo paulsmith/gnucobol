@@ -8202,6 +8202,9 @@ call_statement:
   }
   call_body
   end_call
+  {
+	cobc_cs_check = 0;
+  }
 ;
 
 call_body:
@@ -8263,7 +8266,6 @@ _mnemonic_conv:
   /* empty */
   {
 	$$ = NULL;
-	cobc_cs_check = 0;
   }
 | STATIC	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
@@ -8272,17 +8274,14 @@ _mnemonic_conv:
 	} else {
 		$$ = cb_int (CB_CONV_STATIC_LINK);
 	}
-	cobc_cs_check = 0;
   }
 | STDCALL	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
 	$$ = cb_int (CB_CONV_STDCALL);
-	cobc_cs_check = 0;
   }
 | TOK_EXTERN	/* not active for ENTRY-CONVENTION via PROCEDURE DIVISION */
   {
 	$$ = cb_int (0);
-	cobc_cs_check = 0;
   }
 | MNEMONIC_NAME
   {
@@ -8299,7 +8298,6 @@ _mnemonic_conv:
 	} else {
 		$$ = NULL;
 	}
-	cobc_cs_check = 0;
   }
 ;
 
