@@ -1255,7 +1255,7 @@ error_if_record_delimiter_incompatible (const int organization,
 					const char *organization_name)
 {
 	int	is_compatible;
-	
+
 	if (!current_file->flag_delimiter) {
 		return;
 	}
@@ -1272,7 +1272,7 @@ error_if_record_delimiter_incompatible (const int organization,
 			  organization_name);
 	}
 }
- 
+
 static void
 error_if_invalid_level_for_renames (cb_tree item)
 {
@@ -1780,6 +1780,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token AREAS
 %token ARGUMENT_NUMBER		"ARGUMENT-NUMBER"
 %token ARGUMENT_VALUE		"ARGUMENT-VALUE"
+%token ARITHMETIC
 %token AS
 %token ASCENDING
 %token ASCII
@@ -2248,6 +2249,8 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token STANDARD
 %token STANDARD_1		"STANDARD-1"
 %token STANDARD_2		"STANDARD-2"
+%token STANDARD_BINARY		"STANDARD-BINARY"
+%token STANDARD_DECIMAL		"STANDARD-DECIMAL"
 %token START
 %token STATIC
 %token STATUS
@@ -2746,10 +2749,46 @@ _options_paragraph:
 ;
 
 _options_clauses:
+  _arithmetic_clause
   _default_rounded_clause
   _entry_convention_clause
   _intermediate_rounding_clause
   TOK_DOT
+;
+
+_arithmetic_clause:
+  /* empty */
+| ARITHMETIC _is arithmetic_choice
+;
+
+arithmetic_choice:
+  NATIVE
+  {
+/* FIXME: the IBM-compatible ARITHMETIC should only be disabled
+          for the specified program (and its nested programs)
+   note: ibm-strict.conf has no OPTIONS paragraph, but ibm.conf does */
+	cb_arithmetic_osvs = 0;
+  }
+| STANDARD
+  {
+	CB_PENDING ("STANDARD ARITHMETIC");
+  }
+| STANDARD_BINARY
+  {
+	CB_PENDING ("STANDARD-BINARY ARITHMETIC");
+  }
+| STANDARD_DECIMAL
+  {
+	CB_PENDING ("STANDARD-DECIMAL ARITHMETIC");
+  }
+/* note: the IBM-compatible ARITHMETIC should likely get in here as an extension
+         but only for the specified program (and its nested programs)
+   decide for a good token name (with CB_CS_OPTIONS), once published it will be fixed
+| OSVS
+  {
+	cb_arithmetic_osvs = 1;
+  }
+ */
 ;
 
 _default_rounded_clause:
@@ -3592,7 +3631,7 @@ currency_sign_clause:
 	} else {
 		/* FIXME: actual allowed (depending on dialect), see FR #246 */
 		check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
-		
+
 		/* checks of CURRENCY SIGN (being currency string) when separate */
 		if ($5) {
 			CB_PENDING_X ($4, _("separate currency symbol and currency string"));
@@ -4233,7 +4272,6 @@ record_delimiter_option:
 
 	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))
 	    && cb_verify (cb_sequential_delimiters, _("LINE-SEQUENTIAL phrase"))) {
-		
 		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
 	}
   }
@@ -6512,6 +6550,7 @@ report_usage_clause:
 _screen_section:
 | SCREEN SECTION TOK_DOT
   {
+	cobc_cs_check = CB_CS_SCREEN;
 	current_storage = CB_STORAGE_SCREEN;
 	current_field = NULL;
 	description_field = NULL;
@@ -6528,6 +6567,7 @@ _screen_section:
 		current_program->screen_storage = description_field;
 		current_program->flag_screen = 1;
 	}
+	cobc_cs_check = 0;
   }
 ;
 
@@ -6542,6 +6582,7 @@ screen_description_list:
 
 screen_description:
   constant_entry
+  /* normal screen definition */
 | level_number _entry_name
   {
 	cb_tree	x;
@@ -6602,6 +6643,7 @@ screen_description:
 		}
 	}
   }
+  /* entry for error recovery */
 | level_number error TOK_DOT
   {
 	/* Free tree associated with level number */
@@ -6851,9 +6893,6 @@ screen_line_number:
 
 _screen_line_plus_minus:
   /* empty */
-  {
-	/* Nothing */
-  }
 | plus_plus
   {
 	current_field->screen_flag |= COB_SCREEN_LINE_PLUS;
@@ -8359,7 +8398,7 @@ call_param:
 			cb_error_x (CB_TREE (current_statement),
 				    _("invalid file name reference"));
 		} else if (call_mode == CB_CALL_BY_VALUE) {
-			/* FIXME: compiler configuration needed, IBM allows one-byte 
+			/* FIXME: compiler configuration needed, IBM allows one-byte
 			          alphanumeric items [--> a `char`], too, while
 			          COBOL 2002/2014 allow only numeric literals
 			   --> revise after rw-merge */
@@ -12493,10 +12532,10 @@ expr_tokens:
 expr_token:
   x				{ push_expr ('x', $1); }
 | _is condition_or_class
-  /* This case is separate because _is _not causes a shift/reduce error. */
-| IS not condition_or_class
+  /* This case is separate because _is _not_expr causes a shift/reduce error. */
+| IS not_expr condition_or_class
   /* This case is not in condition_or_class as x contains ZERO. */
-| IS _not ZERO			{ push_expr ('x', cb_zero); }
+| IS _not_expr ZERO			{ push_expr ('x', cb_zero); }
 /* Parentheses */
 | TOK_OPEN_PAREN		{ push_expr ('(', NULL); }
 | TOK_CLOSE_PAREN		{ push_expr (')', NULL); }
@@ -12507,17 +12546,17 @@ expr_token:
 | TOK_DIV			{ push_expr ('/', NULL); }
 | EXPONENTIATION		{ push_expr ('^', NULL); }
 /* Logical operators */
-| not
+| not_expr
 | AND				{ push_expr ('&', NULL); }
 | OR				{ push_expr ('|', NULL); }
 ;
 
-_not:
+_not_expr:
   /* empty */
-| not
+| not_expr
 ;
 
-not:
+not_expr:
   NOT				{ push_expr ('!', NULL); }
 
 condition_or_class:

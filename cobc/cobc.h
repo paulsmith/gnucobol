@@ -105,30 +105,31 @@ enum cb_format {
 #define PLEX_DEF_DEL			3U
 
 /* Context sensitive keyword defines (trigger words) */
-#define	CB_CS_ACCEPT			(1U << 0)
-#define CB_CS_ALLOCATE			(1U << 1)
+#define	CB_CS_ACCEPT			(1U << 0)	/* within ACCEPT statement */
+#define CB_CS_ALLOCATE			(1U << 1)	/* within ALLOCATE statement */
 #define	CB_CS_ALPHABET			(1U << 2)
 #define	CB_CS_ASSIGN			(1U << 3)
-#define	CB_CS_CALL			(1U << 4)
+#define	CB_CS_CALL			(1U << 4)	/* within CALL statement */
 #define	CB_CS_CONSTANT			(1U << 5)
 #define	CB_CS_DATE			(1U << 6)
 #define	CB_CS_DAY			(1U << 7)
-#define	CB_CS_DISPLAY			(1U << 8)
+#define	CB_CS_DISPLAY			(1U << 8)	/* within DISPLAY statement */
 #define	CB_CS_ERASE			(1U << 9)
-#define	CB_CS_EXIT			(1U << 10)
+#define	CB_CS_EXIT			(1U << 10)	/* within EXIT statement */
 #define	CB_CS_FROM			(1U << 11)
 #define	CB_CS_OCCURS			(1U << 12)
 #define CB_CS_OPTIONS			(1U << 13)
-#define	CB_CS_PERFORM			(1U << 14)
-#define	CB_CS_PROGRAM_ID		(1U << 15)
-#define	CB_CS_READ			(1U << 16)
+#define	CB_CS_PERFORM			(1U << 14)	/* within PERFORM statement */
+#define	CB_CS_PROGRAM_ID		(1U << 15)	/* within PROGRAM-ID definition */
+#define	CB_CS_READ			(1U << 16)	/* within READ statement */
 #define	CB_CS_RECORDING			(1U << 17)
 #define	CB_CS_RETRY			(1U << 18)
 #define	CB_CS_ROUNDED			(1U << 19)
-#define	CB_CS_SET			(1U << 20)
+#define	CB_CS_SET			(1U << 20)	/* within SET statement */
 #define	CB_CS_STOP			(1U << 21)
 #define	CB_CS_OBJECT_COMPUTER		(1U << 22)
 #define	CB_CS_DELIMITER			(1U << 23)
+#define	CB_CS_SCREEN			(1U << 24)	/* within SCREEN section */
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"
