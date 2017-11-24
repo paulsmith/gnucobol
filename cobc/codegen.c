@@ -1820,7 +1820,7 @@ output_field (cb_tree x)
 }
 
 static void
-output_local_field_cache (void)
+output_local_field_cache (int is_recursive_prog)
 {
 	struct field_list	*field;
 
@@ -1830,17 +1830,33 @@ output_local_field_cache (void)
 
 	/* Switch to local storage file */
 	output_target = current_prog->local_include->local_fp;
-	output_local ("\n/* Fields */\n");
+	if (is_recursive_prog) {
+		output_local ("\n/* Fields for recursive routine */\n");
+	} else {
+		output_local ("\n/* Fields */\n");
+	}
 
 	local_field_cache = list_cache_sort (local_field_cache,
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
-		output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
-			field->f->id);
 
 		if (!field->f->flag_local) {
+			if (is_recursive_prog
+			&& !field->f->flag_filler) {
+				output ("/* %s is not local */\n",
+				field->f->name);
+			}
+			output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
+				field->f->id);
 			output_field (field->x);
 		} else {
+			if (is_recursive_prog) {
+				output ("       ");
+			} else {
+				output ("static ");
+			}
+			output ("cob_field %s%d\t= ", CB_PREFIX_FIELD,
+				field->f->id);
 			output ("{");
 			output_size (field->x);
 			output (", NULL, ");
@@ -7961,7 +7977,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	if (prog->decimal_index_max) {
 		output_local ("/* Decimal structures */\n");
 		for (i = 0; i < prog->decimal_index_max; i++) {
-			output_local ("\tcob_decimal\t*d%d = NULL;\n", i);
+			output_local ("cob_decimal\t*d%d = NULL;\n", i);
 		}
 		output_local ("\n");
 	}
@@ -8639,19 +8655,23 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	output_line ("/* Program return */");
-	if (prog->returning && prog->cb_return_code) {
-		output_move (prog->returning, prog->cb_return_code);
-	}
-
-	output_prefix ();
-	output ("return ");
 	if (prog->prog_type == CB_FUNCTION_TYPE) {
+		output_line ("/* Function return */");
+		output_prefix ();
+		output ("return ");
 		output_param (prog->returning, -1);
-	} else if (prog->cb_return_code) {
-		output_integer (prog->cb_return_code);
 	} else {
-		output ("0");
+		output_line ("/* Program return */");
+		if (prog->returning && prog->cb_return_code) {
+			output_move (prog->returning, prog->cb_return_code);
+		}
+		output_prefix ();
+		output ("return ");
+		if (prog->cb_return_code) {
+			output_integer (prog->cb_return_code);
+		} else {
+			output ("0");
+		}
 	}
 	output (";\n");
 
@@ -9752,7 +9772,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	output_frame_stack (prog);
 	output_dynamic_field_function_id_pointers ();
 	output_local_base_cache ();
-	output_local_field_cache ();
+	output_local_field_cache (prog->flag_recursive);
 
 	/* Skip to next program contained in the source and
 	   adjust current_program used for error messages */

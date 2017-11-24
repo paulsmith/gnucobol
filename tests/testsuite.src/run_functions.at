@@ -4010,3 +4010,69 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([UDF with recursion])
+AT_KEYWORDS([functions LOCAL-STORAGE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       FUNCTION-ID. foo.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ttl  PIC 9 VALUE 1.
+
+       LOCAL-STORAGE SECTION.
+       01  num  PIC 9.
+
+       LINKAGE SECTION.
+       01  arg PIC 9.
+       01  ret PIC 9.
+
+       PROCEDURE DIVISION USING arg RETURNING ret.
+           IF arg < 5
+              ADD 1 TO arg GIVING num END-ADD
+              MOVE FUNCTION foo (num) TO ret
+           ELSE
+              MOVE arg TO ret
+           END-IF
+           DISPLAY "Step: " ttl ", Arg: " arg ", Return: " ret
+           END-DISPLAY
+           ADD 1 to ttl END-ADD
+           GOBACK.
+       END FUNCTION foo.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       REPOSITORY.
+           FUNCTION foo.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 num PIC 9 VALUE 1.
+
+       PROCEDURE DIVISION.
+           DISPLAY "Return value '" FUNCTION foo (num) "'"
+             WITH NO ADVANCING
+           END-DISPLAY
+           GOBACK.
+       END PROGRAM prog.
+
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Step: 1, Arg: 5, Return: 5
+Step: 2, Arg: 4, Return: 5
+Step: 3, Arg: 3, Return: 5
+Step: 4, Arg: 2, Return: 5
+Step: 5, Arg: 1, Return: 5
+Return value '5'], [])
+
+AT_CLEANUP
+
