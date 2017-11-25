@@ -400,19 +400,19 @@ reserved:	SEQUENCE
 reserved:	SEQUENTIAL
 reserved:	SERVICE
 reserved:	SET
-reserved:	SHIFT-IN # note: this is a register, move as soon as supported
-reserved:	SHIFT-OUT # note: this is a register, move as soon as supported
+reserved:	SHIFT-IN       # note: this is a register, move as soon as supported
+reserved:	SHIFT-OUT      # note: this is a register, move as soon as supported
 reserved:	SIGN
 reserved:	SIZE
 reserved:	SKIP1
 reserved:	SKIP2
 reserved:	SKIP3
 reserved:	SORT
-reserved:	SORT-CONTROL # note: this is a register, move as soon as supported
+reserved:	SORT-CONTROL   # note: this is a register, move as soon as supported
 reserved:	SORT-CORE-SIZE # note: this is a register, move as soon as supported
 reserved:	SORT-FILE-SIZE # note: this is a register, move as soon as supported
 reserved:	SORT-MERGE
-reserved:	SORT-MESSAGE # note: this is a register, move as soon as supported
+reserved:	SORT-MESSAGE   # note: this is a register, move as soon as supported
 reserved:	SORT-MODE-SIZE # note: this is a register, move as soon as supported
 reserved:	SOURCE
 reserved:	SOURCE-COMPUTER

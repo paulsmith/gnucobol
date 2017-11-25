@@ -221,8 +221,8 @@ reserved:	MESSAGE
 reserved:	MODE
 reserved:	MODULES
 reserved:	MOVE
-reserved:	MULTIPLY
 reserved:	MULTIPLE
+reserved:	MULTIPLY
 reserved:	NATIVE
 reserved:	NEGATIVE
 reserved:	NEXT
@@ -286,8 +286,8 @@ reserved:	RENAMES
 reserved:	REPLACE
 reserved:	REPLACING
 reserved:	REPORT
-reserved:	REPORT
 reserved:	REPORTING
+reserved:	REPORTS
 reserved:	RERUN
 reserved:	RESERVE
 reserved:	RESET
@@ -308,7 +308,6 @@ reserved:	SECURITY
 reserved:	SEGMENT
 reserved:	SEGMENT-LIMIT
 reserved:	SELECT
-reserved:	SEND
 reserved:	SEND
 reserved:	SENTENCE
 reserved:	SEPARATE
@@ -367,7 +366,7 @@ reserved:	USAGE
 reserved:	USE
 reserved:	USING
 reserved:	VALUE
-reserved:	VALUES
+reserved:	VALUES=VALUE
 reserved:	VARYING
 reserved:	WHEN
 reserved:	WITH

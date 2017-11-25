@@ -620,4 +620,3 @@ intrinsic-function:	UPPER-CASE
 intrinsic-function:	VARIANCE
 intrinsic-function:	WHEN-COMPILED
 intrinsic-function:	YEAR-TO-YYYY
-

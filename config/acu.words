@@ -320,6 +320,7 @@ reserved:	LESS
 reserved:	LINAGE
 reserved:	LINAGE-COUNTER
 reserved:	LINE
+reserved:	LINE-SEQUENTIAL*	# implementor RECORD DELIMITER word
 reserved:	LINES
 reserved:	LINK
 reserved:	LINKAGE
@@ -551,9 +552,9 @@ reserved:	WORKING-STORAGE
 reserved:	WRAP
 reserved:	WRITE
 reserved:	WRITERS
-reserved:	XML-CODE # note: this is a register, move as soon as supported
+reserved:	XML-CODE  # note: this is a register, move as soon as supported
 reserved:	XML-EVENT # note: this is a register, move as soon as supported
-reserved:	XML-TEXT # note: this is a register, move as soon as supported
+reserved:	XML-TEXT  # note: this is a register, move as soon as supported
 reserved:	YYYYDDD
 reserved:	YYYYMMDD
 reserved:	ZERO
