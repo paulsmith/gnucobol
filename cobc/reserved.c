@@ -2111,9 +2111,6 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VALUE",			0, 0, VALUE,			/* 2002 */
 				0, 0
   },
-  { "VALUES",			0, 0, VALUE,			/* 2002 */
-				0, 0
-  },
   { "VARIABLE",			0, 0, VARIABLE,			/* Extension */
 				0, CB_CS_RECORDING
   },
@@ -2157,12 +2154,6 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "ZERO-FILL",		0, 0, -1,			/* Extension */
-				0, 0
-  },
-  { "ZEROES",			0, 0, ZERO,			/* 2002 */
-				0, 0
-  },
-  { "ZEROS",			0, 0, ZERO,			/* 2002 */
 				0, 0
   }
 };

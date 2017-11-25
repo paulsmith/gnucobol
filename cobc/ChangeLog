@@ -1,4 +1,8 @@
 
+2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: moved aliases VALUES/ZEROES/ZEROS to default.conf
+
 2017-11-23  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: Fix for bug #222 - for FUNCTION-ID and RECURSIVE,
