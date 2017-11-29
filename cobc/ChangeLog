@@ -3,6 +3,9 @@
 
 	* error.c (undefined_error): always raise "not defined" error if
 	  word is already qualified
+	* parser.y, reserved.c, cobc.h: FR #265 added parsing for ACUCOBOL
+	  graphical controls, control styles, control properties and rough
+	  parsing of INQUIRE and MODIFY statements
 
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -28,7 +31,7 @@
 	  call_statement
 	* reserved.c (lookup_reserved_word): fixed returning of context-sensitive
 	  word without context (happened when the word *set* a context, too);
-	  no auto-reset for CB_CS_SCREEN context
+	  no auto-reset within CB_CS_SCREEN context
 
 2017-11-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

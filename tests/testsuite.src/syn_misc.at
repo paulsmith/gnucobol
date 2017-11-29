@@ -3290,7 +3290,7 @@ prog.cob:13: error: syntax error, unexpected Identifier
 prog.cob:14: error: syntax error, unexpected Identifier
 prog.cob:14: error: PICTURE clause required for 'mywindow'
 prog.cob: in paragraph 'MAIN':
-prog.cob:27: error: 'handle IN mywindow' is not defined, but is a reserved word in another dialect
+prog.cob:27: error: 'handle IN mywindow' is not defined
 prog.cob:26: error: invalid expression
 prog.cob:30: error: syntax error, unexpected END-PERFORM
 prog.cob:31: error: 'thread' is not defined, but is a reserved word in another dialect
@@ -3338,8 +3338,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-# FIXME: line 12 is actually a parser error (ignore for now)
-
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
@@ -3348,6 +3346,85 @@ prog.cob:20: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:21: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:23: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
 prog.cob:25: warning: GRAPHICAL CONTROL is not implemented
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([ACUCOBOL GRAPHICAL controls])
+AT_KEYWORDS([misc acu extensions screen MODIFY INQUIRE])
+
+# TODO: need a better tests when we implement this,
+#       likely split into multiple ones
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       77  window-handle USAGE HANDLE OF WINDOW.
+       77  lb-row        PIC X(10).
+       77  lb-color      PIC 9(05) VALUE 8192.
+       77  lb-num-lines  PIC 9(02) VALUE 20.
+       77  lb-num-rows   PIC 9(02) VALUE 11.
+       77  window-lines  PIC 9(02) VALUE 22.
+       77  window-rows   PIC 9(02) VALUE 13.
+       77  selection-idx PIC S9(02).
+       SCREEN SECTION.
+       01 lb-screen.
+           03 lb-frm LIST-BOX 3-D
+      *             FIXME: the following should be possible in any order
+                    UNSORTED
+                    EXCEPTION-VALUE = 13
+                    COLOR lb-color
+                    CLINE 1 CCOL 1
+                    LINES = lb-num-lines
+                    SIZE  IS lb-num-rows
+      *             VALUE lb-row  raises error as no identifer according
+      *                           to cobol2002, but here it is fine
+                    .
+       PROCEDURE DIVISION.
+       MAIN.
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 1'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 2'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 3'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 4'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 5'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 6'
+           MODIFY lb-frm ITEM-TO-ADD = 'Row 7'
+           DISPLAY FLOATING WINDOW 
+               LINE 5 COL 5
+               LINES window-lines
+               SIZE  window-rows
+               BOXED
+               COLOR lb-color
+               HANDLE IS window-handle
+           END-DISPLAY
+           DISPLAY lb-screen
+           ACCEPT  lb-screen
+           IF lb-row = SPACES
+              INQUIRE lb-frm SELECTION-INDEX IN selection-idx
+              IF selection-idx > ZERO
+                 MODIFY  lb-frm QUERY-INDEX = selection-idx
+                 INQUIRE lb-frm ITEM-VALUE IN lb-row
+              END-IF
+           END-IF
+           CLOSE WINDOW window-handle
+           DISPLAY "chosen row value was '" lb-row "'"
+           ACCEPT OMITTED
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [],
+[prog.cob:16: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:21: warning: COLOR clause is not implemented
+prog.cob:23: warning: LINES clause is not implemented
+prog.cob:26: warning: screen positions from data-item is not implemented
+prog.cob: in paragraph 'MAIN':
+prog.cob:36: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:42: warning: COLOR is not implemented
+prog.cob:53: warning: GRAPHICAL WINDOW is not implemented
 ])
 
 AT_CLEANUP
@@ -3483,7 +3560,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  hello       PIC X.
        01  foo         PIC X.
-       01  bar         PIC X.
+       01  bars        PIC X.
        01  file        PIC X.
 
        PROCEDURE       DIVISION.
@@ -3491,10 +3568,10 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bar -fnot-reserved=file prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bars -fnot-reserved=file prog.cob], [1], [],
 [prog.cob:7: error: 'hello' is a reserved word, but isn't supported
 prog.cob:8: error: 'foo' is a reserved word, but isn't supported
-prog.cob:9: error: 'bar' is a reserved word, but isn't supported
+prog.cob:9: error: 'bars' is a reserved word, but isn't supported
 ])
 AT_CLEANUP
 
@@ -3513,15 +3590,15 @@ AT_DATA([prog.cob], [
 
 # FIXME: user defined words need to store a reference to the name originally defining the word
 #        otherwise we can't help the user to know where the error came from
-#        (command line is only a special sample, but even then it may be wrapped and not visible
+#        (command line is only a special case, but even then it may be wrapped and not visible
 #        to the user)
-#AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob], [1], [],
+#AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BARS:FOO prog.cob], [1], [],
 #[configuration warning: -freserved=FOO=DISPLAY*: ignored asterisk at end of alias target
 #configuration error:
-#-freserved=BAR:FOO: alias target 'FOO' is not a default reserved word
+#-freserved=BARS:FOO: alias target 'FOO' is not a default reserved word
 #])
 
-AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BAR:FOO prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -freserved=FOO=DISPLAY* -freserved=BARS:FOO prog.cob], [1], [],
 [configuration warning: -freserved=FOO=DISPLAY*: ignored asterisk at end of alias target
 configuration error:
 alias target 'FOO' is not a default reserved word

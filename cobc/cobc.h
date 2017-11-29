@@ -130,6 +130,8 @@ enum cb_format {
 #define	CB_CS_OBJECT_COMPUTER		(1U << 22)
 #define	CB_CS_DELIMITER			(1U << 23)
 #define	CB_CS_SCREEN			(1U << 24)	/* within SCREEN section */
+#define	CB_CS_INQUIRE_MODIFY			(1U << 25)	/* within INQUIRE or MODIFY statement */
+#define	CB_CS_GRAPHICAL_CONTROL			(1U << 26)	/* within ACUCOBOL-GT graphical control */
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

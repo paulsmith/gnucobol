@@ -5618,7 +5618,7 @@ cb_config_entry (char *buf, int line)
 	&&  strcasecmp (keyword, "includeif") != 0
 	&&  strcasecmp (keyword, "setenv") != 0
 	&&  strcasecmp (keyword, "unsetenv") != 0) {
-		i = cb_lookup_config(keyword);
+		i = cb_lookup_config (keyword);
 
 		if (i >= NUM_CONFIG) {
 			conf_runtime_error (1,_("unknown configuration tag '%s'"), keyword);
