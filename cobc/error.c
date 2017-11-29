@@ -577,17 +577,20 @@ undefined_error (cb_tree x)
 	/* Get complete variable name */
 	snprintf (errnamebuff, (size_t)COB_NORMAL_MAX, "%s", CB_NAME (x));
 	errnamebuff[COB_NORMAL_MAX] = 0;
-	for (c = r->chain; c; c = CB_REFERENCE (c)->chain) {
-		strcat (errnamebuff, " IN ");
-		strcat (errnamebuff, CB_NAME (c));
-	}
-
-	if (is_reserved_word (CB_NAME (x))) {
-		error_message = _("'%s' cannot be used here");
-	} else if (is_default_reserved_word (CB_NAME (x))) {
-		error_message = _("'%s' is not defined, but is a reserved word in another dialect");
-	} else {
+	if (r->chain) {
+		for (c = r->chain; c; c = CB_REFERENCE (c)->chain) {
+			strcat (errnamebuff, " IN ");
+			strcat (errnamebuff, CB_NAME (c));
+		}
 		error_message = _("'%s' is not defined");
+	} else {
+		if (is_reserved_word (CB_NAME (x))) {
+			error_message = _("'%s' cannot be used here");
+		} else if (is_default_reserved_word (CB_NAME (x))) {
+			error_message = _("'%s' is not defined, but is a reserved word in another dialect");
+		} else {
+			error_message = _("'%s' is not defined");
+		}
 	}
 
 	if (r->flag_optional) {

@@ -1,4 +1,9 @@
 
+2017-11-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* error.c (undefined_error): always raise "not defined" error if
+	  word is already qualified
+
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: moved aliases VALUES/ZEROES/ZEROS to default.conf
