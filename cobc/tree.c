@@ -2581,7 +2581,9 @@ cb_build_picture (const char *str)
 	cob_u32_t		s_count = 0;
 	cob_u32_t		v_count = 0;
 	cob_u32_t		digits = 0;
+#if 0 /* currently unused */
 	cob_u32_t		real_digits = 0;
+#endif
 	cob_u32_t		x_digits = 0;
 	int			category = 0;
 	int			size = 0;
@@ -2657,7 +2659,9 @@ repeat:
 		case '9':
 			category |= PIC_NUMERIC;
 			digits += n;
+#if 0 /* currently unused */
 			real_digits += n;
+#endif
 			if (v_count) {
 				scale += n;
 			}
@@ -2871,7 +2875,9 @@ repeat:
 	pic->digits = digits;
 	pic->scale = scale;
 	pic->have_sign = s_count;
+#if 0 /* currently unused */
 	pic->real_digits = real_digits;
+#endif
 
 	/* Set picture category */
 	switch (category) {

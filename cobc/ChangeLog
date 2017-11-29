@@ -6,10 +6,20 @@
 	* parser.y, reserved.c, cobc.h: FR #265 added parsing for ACUCOBOL
 	  graphical controls, control styles, control properties and rough
 	  parsing of INQUIRE and MODIFY statements
+	* tree.h, field.c (validate_pic, setup_parameters): set new attribute
+	  pic->flag_is_calculated where picture wasn't originally specified
+	  and don't check this pseudo PICTURE later.
 
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: moved aliases VALUES/ZEROES/ZEROS to default.conf
+
+2017-11-25  Ron Norman <rjn@inglenet.com>
+
+	Bug #175 fixed: LENGTH OF constants with grouped fields
+	* typeck.c: make sure field has been verified for constant LENGTH
+	* field.c: set pic.category for POINTER and ignore PIC for it later
+	* field.c (setup_parameters): set PIC 9(17) for pointer in 64 bit mode
 
 2017-11-23  Ron Norman <rjn@inglenet.com>
 

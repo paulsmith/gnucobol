@@ -4560,6 +4560,28 @@ prog.cob:25: warning: expression '115' GREATER THAN '16' is always TRUE
 
 AT_CLEANUP
 
+
+AT_SETUP([CONSTANT LENGTH])
+AT_KEYWORDS([LENGTH])
+
+AT_DATA([prog.cob], [
+       identification division.
+       program-id. prog.
+       environment division.
+       data division.
+       working-storage section.
+       01  item-01.
+           05  item-05-a       pointer.
+           05  item-05-b       pic x(01).
+       01 myk-01 constant global as length of item-01.
+       01 myk-02 constant global as length of item-05-a.
+       01 myk-03 constant global as length of pointer.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CLEANUP
+
+
 AT_SETUP([ANY LENGTH/NUMERIC with incorrect PIC])
 AT_KEYWORDS([misc])
 

@@ -687,8 +687,11 @@ struct cb_picture {
 	enum cb_category	category;	/* Field category */
 	cob_u32_t		digits;		/* Number of digit places */
 	int			scale;		/* 1/10^scale */
-	cob_u32_t		have_sign;	/* Have 'S' */
+#if 0 /* currently unused */
 	cob_u32_t		real_digits;	/* Real number of digits */
+#endif
+	cob_u32_t		have_sign;	/* Have 'S' */
+	unsigned int flag_is_calculated	: 1;	/* is calculated */
 };
 
 #define CB_PICTURE(x)	(CB_TREE_CAST (CB_TAG_PICTURE, struct cb_picture, x))

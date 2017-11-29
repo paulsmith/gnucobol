@@ -967,7 +967,9 @@ validate_pic (struct cb_field *f)
 	if (f->pic == NULL && need_picture && check_picture_item (f)) {
 		return 1;
 	}
-	if (f->pic != NULL && !need_picture) {
+	/* if picture is not needed it is an error to specify it
+	   note: we may have set the picture internal */
+	if (f->pic != NULL && !f->pic->flag_is_calculated && !need_picture) {
 		cb_error_x (x, _("'%s' cannot have PICTURE clause"),
 			    cb_name (x));
 	}
@@ -1357,29 +1359,49 @@ setup_parameters (struct cb_field *f)
 		case CB_USAGE_HNDL_VARIANT:
 		case CB_USAGE_HNDL_LM:
 			f->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
+			f->pic->flag_is_calculated = 1;
+#if 0
+			/* REMIND: The category should be set, but doing so causes
+			 * other problems as more checks need to be added to
+			 * accept a category of CB_CATEGORY_INDEX so this change
+			 * is deferred until a later time
+			 * RJN: Nov 2017
+			 */
+			f->pic->category = CB_CATEGORY_INDEX;
+#endif
 			break;
 
 		case CB_USAGE_LENGTH:
 			f->pic = CB_PICTURE (cb_build_picture ("9(9)"));
+			f->pic->flag_is_calculated = 1;
 			break;
 
 		case CB_USAGE_POINTER:
 		case CB_USAGE_PROGRAM_POINTER:
-			f->pic = CB_PICTURE (cb_build_picture ("9(10)"));
+			if (sizeof (void *) == 8) {
+				f->pic = CB_PICTURE (cb_build_picture ("9(17)"));
+			} else {
+				f->pic = CB_PICTURE (cb_build_picture ("9(10)"));
+			}
+			f->pic->flag_is_calculated = 1;
 			break;
 		case CB_USAGE_FLOAT:
 			f->pic = CB_PICTURE (cb_build_picture ("S9(7)V9(8)"));
+			f->pic->flag_is_calculated = 1;
 			break;
 		case CB_USAGE_DOUBLE:
 			f->pic = CB_PICTURE (cb_build_picture ("S9(17)V9(17)"));
+			f->pic->flag_is_calculated = 1;
 			break;
 		case CB_USAGE_FP_DEC64:
 			/* RXWRXW - Scale Fix me */
 			f->pic = CB_PICTURE (cb_build_picture ("S9(17)V9(16)"));
+			f->pic->flag_is_calculated = 1;
 			break;
 		case CB_USAGE_FP_DEC128:
 			/* RXWRXW - Scale Fix me */
 			f->pic = CB_PICTURE (cb_build_picture ("S999V9(34)"));
+			f->pic->flag_is_calculated = 1;
 			break;
 
 		case CB_USAGE_COMP_5:

@@ -2007,6 +2007,7 @@ cb_build_const_length (cb_tree x)
 
 	memset (buff, 0, sizeof (buff));
 	f = CB_FIELD (cb_ref (x));
+	cb_validate_field (f);
 	if (f->flag_any_length) {
 		cb_error (_("ANY LENGTH item not allowed here"));
 		return cb_error_node;
