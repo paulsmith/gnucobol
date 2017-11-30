@@ -409,41 +409,6 @@ prog.cob:24: error: cannot specify both HIGHLIGHT and LOWLIGHT
 AT_CLEANUP
 
 
-AT_SETUP([Optional SCREEN for BLANK / ERASE])
-AT_KEYWORDS([screen])
-
-# SCREEN is currently not optional in the parser but at least with ACUCOBOL
-AT_XFAIL_IF(true)
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-
-       DATA             DIVISION.
-
-       SCREEN           SECTION.
-       01  scr.
-           03  VALUE "foo1" BLANK SCREEN.
-       01  scr2.
-           03  VALUE "foo2" BLANK.
-       01  scr3.
-           03  VALUE "foo3" ERASE EOS.
-       01  scr4.
-           03  VALUE "foo4" ERASE.
-
-       PROCEDURE        DIVISION.
-           DISPLAY "one" BLANK SCREEN.
-           DISPLAY "two" BLANK.
-           DISPLAY " 3 " ERASE TO END OF SCREEN.
-           DISPLAY " 4 " ERASE
-           .
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([Redundant screen clauses])
 AT_KEYWORDS([screen])
 
