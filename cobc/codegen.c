@@ -7927,7 +7927,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Program local variables */
 	output_line ("/* Program local variables */");
-	output_line ("#include \"%s\"", prog->local_include->local_name);
+	output_line ("#include \"%s\"", prog->local_include->local_include_name);
 	output_newline ();
 
 	/* Alphabet-names */

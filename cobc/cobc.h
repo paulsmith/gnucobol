@@ -206,7 +206,8 @@ struct cb_define_struct {
 /* Structure for extended filenames */
 struct local_filename {
 	struct local_filename	*next;			/* next pointer */
-	char			*local_name;
+	char			*local_name;			/* foo.c.l[n].h (full path) */
+	char			*local_include_name;	/* foo.c.l[n].h (for #include)*/
 	FILE			*local_fp;
 };
 

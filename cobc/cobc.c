@@ -6860,7 +6860,7 @@ process_translate (struct filename *fn)
 	}
 
 	/* Open the common storage file */
-	cb_storage_file_name = fn->trstorage;
+	cb_storage_file_name = cobc_main_strdup (fn->trstorage);
 	if (cb_unix_lf) {
 		cb_storage_file = fopen (cb_storage_file_name, "wb");
 	} else {
@@ -6912,11 +6912,7 @@ process_translate (struct filename *fn)
 			cobc_terminate (lf->local_name);
 		}
 		/* remove possible path from header name for later codegen */
-		if (strrchr (lf->local_name, '/')
-		 || strrchr (lf->local_name, '\\')) {
-			buffer = file_basename (lf->local_name, COB_BASENAME_KEEP_EXT);
-			memcpy ((void *) lf->local_name, (void *) buffer, strlen (buffer) + 1);
-		}
+		lf->local_include_name = cobc_main_strdup (file_basename (lf->local_name, COB_BASENAME_KEEP_EXT));
 		p->local_include = lf;
 		lf->next = fn->localfile;
 		fn->localfile = lf;
@@ -6951,7 +6947,7 @@ process_translate (struct filename *fn)
 
 	/* Close files */
 	if (unlikely(fclose (cb_storage_file) != 0)) {
-		cobc_terminate (cb_storage_file_name);
+		cobc_terminate (fn->trstorage);
 	}
 	cb_storage_file = NULL;
 	if (unlikely(fclose (yyout) != 0)) {

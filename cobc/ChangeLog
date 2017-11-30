@@ -1,4 +1,10 @@
 
+2017-11-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.h, cobc.c (process_translate), codegen.c: local_filename with
+	  additional attribute local_include_name as short name,
+	  local_name containing the full name for file handling again
+
 2017-11-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* error.c (undefined_error): always raise "not defined" error if
@@ -9,6 +15,8 @@
 	* tree.h, field.c (validate_pic, setup_parameters): set new attribute
 	  pic->flag_is_calculated where picture wasn't originally specified
 	  and don't check this pseudo PICTURE later.
+	* tree.c, tree.h: disabled pic->real_digits as it is currently not
+	  in use anywhere (just calculated in tree.c)	  
 
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
