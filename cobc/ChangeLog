@@ -1,4 +1,11 @@
 
+2017-12-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: FR 259 delete temporary files as soon as possible:
+	  moved cleanup of intermediates for a single processed file
+	  from (cobc_clean_up) to (clean_up_intermediates) and call this in
+	  main after processing the single file
+
 2017-11-30  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.h, cobc.c (process_translate), codegen.c: local_filename with

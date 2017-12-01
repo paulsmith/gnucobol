@@ -1757,14 +1757,83 @@ cobc_check_action (const char *name)
 }
 
 static void
-cobc_clean_up (const int status)
+clean_up_intermediates (struct filename *fn, const int status)
 {
-	struct filename		*fn;
 	struct local_filename	*lf;
 	cob_u32_t		i;
 #ifdef HAVE_8DOT3_FILENAMES
 	char	*buffer;
 #endif
+	for (lf = fn->localfile; lf; lf = lf->next) {
+		if (unlikely(lf->local_fp)) {
+			fclose (lf->local_fp);
+			lf->local_fp = NULL;
+		}
+	}
+	if (save_all_src) {
+		return;
+	}
+	if (fn->need_preprocess &&
+		(status || cb_compile_level > CB_LEVEL_PREPROCESS ||
+		 (cb_compile_level == CB_LEVEL_PREPROCESS && save_temps))) {
+		cobc_check_action (fn->preprocess);
+	}
+	if (save_c_src) {
+		return;
+	}
+	if (fn->need_translate &&
+		(status || cb_compile_level > CB_LEVEL_TRANSLATE ||
+		 (cb_compile_level == CB_LEVEL_TRANSLATE && save_temps))) {
+		cobc_check_action (fn->translate);
+		cobc_check_action (fn->trstorage);
+		if (fn->localfile) {
+			for (lf = fn->localfile; lf; lf = lf->next) {
+				cobc_check_action (lf->local_name);
+			}
+		} else if (fn->translate) {
+			/* If we get syntax errors, we do not
+			   know the number of local include files */
+#ifndef HAVE_8DOT3_FILENAMES
+			snprintf (cobc_buffer, cobc_buffer_size,
+				 "%s.l.h", fn->translate);
+#else
+			/* for 8.3 filenames use no ".c" prefix and only one period */
+			buffer = cobc_strdup (fn->translate);
+			*(buffer + strlen(buffer) - 2) = 'l';
+			*(buffer + strlen(buffer) - 1) = 0;
+			snprintf (cobc_buffer, cobc_buffer_size,
+				 "%s.h", buffer);
+			cobc_free (buffer);
+#endif
+			cobc_buffer[cobc_buffer_size] = 0;
+			for (i = 0; i < 30U; ++i) {
+				if (i) {
+#ifndef HAVE_8DOT3_FILENAMES
+					snprintf (cobc_buffer, cobc_buffer_size,
+						 "%s.l%u.h", fn->translate, i);
+#else
+					snprintf (cobc_buffer, cobc_buffer_size,
+						"%s%u.h", buffer, i);
+#endif
+					cobc_buffer[cobc_buffer_size] = 0;
+				}
+				if (!access (cobc_buffer, F_OK)) {
+					unlink (cobc_buffer);
+				} else if (i) {
+					break;
+				}
+			}
+#ifdef HAVE_8DOT3_FILENAMES
+			cobc_free (buffer);
+#endif
+		}
+	}
+}
+
+static void
+cobc_clean_up (const int status)
+{
+	struct filename		*fn;
 
 	if (cb_src_list_file) {
 		fclose (cb_src_list_file);
@@ -1803,75 +1872,12 @@ cobc_clean_up (const int status)
 	ylex_clear_all ();
 
 	for (fn = file_list; fn; fn = fn->next) {
-		for (lf = fn->localfile; lf; lf = lf->next) {
-			if (unlikely(lf->local_fp)) {
-				fclose (lf->local_fp);
-				lf->local_fp = NULL;
-			}
-		}
 		if (fn->need_assemble &&
 		    (status || cb_compile_level > CB_LEVEL_ASSEMBLE ||
 		     (cb_compile_level == CB_LEVEL_ASSEMBLE && save_temps))) {
 			cobc_check_action (fn->object);
 		}
-		if (save_all_src) {
-			continue;
-		}
-		if (fn->need_preprocess &&
-		    (status || cb_compile_level > CB_LEVEL_PREPROCESS ||
-		     (cb_compile_level == CB_LEVEL_PREPROCESS && save_temps))) {
-			cobc_check_action (fn->preprocess);
-		}
-		if (save_c_src) {
-			continue;
-		}
-		if (fn->need_translate &&
-		    (status || cb_compile_level > CB_LEVEL_TRANSLATE ||
-		     (cb_compile_level == CB_LEVEL_TRANSLATE && save_temps))) {
-			cobc_check_action (fn->translate);
-			cobc_check_action (fn->trstorage);
-			if (fn->localfile) {
-				for (lf = fn->localfile; lf; lf = lf->next) {
-					cobc_check_action (lf->local_name);
-				}
-			} else if (fn->translate) {
-				/* If we get syntax errors, we do not
-				   know the number of local include files */
-#ifndef HAVE_8DOT3_FILENAMES
-				snprintf (cobc_buffer, cobc_buffer_size,
-					 "%s.l.h", fn->translate);
-#else
-				/* for 8.3 filenames use no ".c" prefix and only one period */
-				buffer = cobc_strdup (fn->translate);
-				*(buffer + strlen(buffer) - 2) = 'l';
-				*(buffer + strlen(buffer) - 1) = 0;
-				snprintf (cobc_buffer, cobc_buffer_size,
-					 "%s.h", buffer);
-				cobc_free (buffer);
-#endif
-				cobc_buffer[cobc_buffer_size] = 0;
-				for (i = 0; i < 30U; ++i) {
-					if (i) {
-#ifndef HAVE_8DOT3_FILENAMES
-						snprintf (cobc_buffer, cobc_buffer_size,
-							 "%s.l%u.h", fn->translate, i);
-#else
-						snprintf (cobc_buffer, cobc_buffer_size,
-							"%s%u.h", buffer, i);
-#endif
-						cobc_buffer[cobc_buffer_size] = 0;
-					}
-					if (!access (cobc_buffer, F_OK)) {
-						unlink (cobc_buffer);
-					} else if (i) {
-						break;
-					}
-				}
-#ifdef HAVE_8DOT3_FILENAMES
-				cobc_free (buffer);
-#endif
-			}
-		}
+		clean_up_intermediates (fn, status);
 	}
 	cobc_free_mem ();
 	file_list = NULL;
@@ -4263,13 +4269,7 @@ preprocess (struct filename *fn)
 		sourcename = fn->source;
 	}
 	if (ppopen (sourcename, NULL) != 0) {
-		fclose (ppout);
-		ppout = NULL;
-		if (fn->preprocess) {
-			(void)unlink (fn->preprocess);
-		}
-		cobc_free_mem ();
-		exit (1);
+		cobc_terminate (sourcename);
 	}
 
 	if (verbose_output) {
@@ -8075,11 +8075,15 @@ main (int argc, char **argv)
 	for (fn = file_list; fn; fn = fn->next) {
 		iparams++;
 		if (iparams > 1 && cb_compile_level == CB_LEVEL_EXECUTABLE) {
+			/* only the first source has the compile_level and main flag set */
 			local_level = cb_compile_level;
 			cb_compile_level = CB_LEVEL_ASSEMBLE;
 			cobc_flag_main = 0;
 		}
 		status = process_file (fn, status);
+
+		/* take care for all intermediate files which aren't needed for linking */
+		clean_up_intermediates (fn, status);
 	}
 
 	if (cobc_list_file) {
