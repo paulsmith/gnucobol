@@ -595,7 +595,8 @@ cb_validate_one (cb_tree x)
 				   the only statements reaching this are MOVE and DISPLAY */
 				if (strcmp (current_statement->name, "MOVE") != 0 &&
 					strcmp (current_statement->name, "DISPLAY") != 0 &&
-					strcmp (current_statement->name, "DESTROY") != 0) {
+					strcmp (current_statement->name, "DESTROY") != 0 &&
+					strcmp (current_statement->name, "CLOSE WINDOW") != 0) {
 						cb_error_x (x, _ ("invalid use of HANDLE item"));
 					return 1;
 				}
@@ -6392,7 +6393,7 @@ cb_emit_close_window (cb_tree handle, cb_tree no_display)
 	if (no_display) {
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_close_window", handle));
 	} else {
-		cb_emit_destroy (handle);
+		cb_emit_destroy (CB_LIST_INIT (handle));
 	}
 }
 

@@ -11434,28 +11434,28 @@ end_perform:
   /* empty */	%prec SHIFT_PREFER
   {
 	if (cb_relaxed_syntax_checks) {
-		TERMINATOR_WARNING ($-4, PERFORM);
+		TERMINATOR_WARNING ($-6, PERFORM);
 	} else {
-		TERMINATOR_ERROR ($-4, PERFORM);
+		TERMINATOR_ERROR ($-6, PERFORM);
 	}
   }
 | END_PERFORM
   {
-	TERMINATOR_CLEAR ($-4, PERFORM);
+	TERMINATOR_CLEAR ($-6, PERFORM);
   }
 ;
 
 term_or_dot:
   END_PERFORM
   {
-	TERMINATOR_CLEAR ($-2, PERFORM);
+	TERMINATOR_CLEAR ($-4, PERFORM);
   }
 | TOK_DOT
   {
 	if (cb_relaxed_syntax_checks) {
-		TERMINATOR_WARNING ($-2, PERFORM);
+		TERMINATOR_WARNING ($-4, PERFORM);
 	} else {
-		TERMINATOR_ERROR ($-2, PERFORM);
+		TERMINATOR_ERROR ($-4, PERFORM);
 	}
 	/* Put the dot token back into the stack for reparse */
 	cb_unput_dot ();
