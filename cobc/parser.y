@@ -11529,9 +11529,21 @@ perform_varying_list:
 ;
 
 perform_varying:
-  identifier FROM x BY x UNTIL condition
+  identifier FROM x _by_phrase UNTIL condition
   {
-	$$ = cb_build_perform_varying ($1, $3, $5, $7);
+	$$ = cb_build_perform_varying ($1, $3, $4, $6);
+  }
+;
+
+_by_phrase:
+  /*empty */
+  {
+	cb_verify (cb_perform_varying_without_by, _ ("PERFORM VARYING without BY phrase"));
+	$$ = cb_build_numeric_literal (0, "1", 0);
+  }
+| BY arith_nonzero_x
+  {
+	$$ = $2;
   }
 ;
 
@@ -14161,6 +14173,38 @@ arith_x:
 	$$ = cb_build_length ($2);
   }
 ;
+
+arith_nonzero_x:
+  identifier
+| nonzero_numeric_literal
+| function
+| LENGTH_OF identifier_1
+  {
+	$$ = cb_build_length ($2);
+  }
+| LENGTH_OF basic_literal
+  {
+	$$ = cb_build_length ($2);
+  }
+| LENGTH_OF function
+  {
+	$$ = cb_build_length ($2);
+  }
+;
+
+nonzero_numeric_literal:
+  LITERAL
+  {
+	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
+	    || cb_get_int ($1) == 0) {
+		cb_error (_("non-zero value expected"));
+		$$ = cb_int1;
+	} else {
+		$$ = $1;
+	}
+  }
+;
+
 
 prog_or_entry:
   PROGRAM

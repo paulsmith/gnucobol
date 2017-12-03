@@ -1,4 +1,8 @@
 
+2017-11-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: FR #158 added perform-varying-without-by (COBOL2002+)
+
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* default.conf: added aliases HIGH-VALUES/LOW-VALUES/VALUES/ZEROES/ZEROS

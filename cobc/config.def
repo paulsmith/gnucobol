@@ -254,6 +254,9 @@ CB_CONFIG_SUPPORT (cb_constant_78, "constant-78",
 CB_CONFIG_SUPPORT (cb_constant_01, "constant-01",
 	_("constant with level 01 CONSTANT AS/FROM item")) /* COBOL 2002+ */
 
+CB_CONFIG_SUPPORT (cb_perform_varying_without_by, "perform-varying-without-by",
+	_("PERFORM VARYING without BY phrase (implies BY 1)"))
+
 CB_CONFIG_SUPPORT (cb_program_prototypes, "program-prototypes",
 	_("CALL/CANCEL with program-prototype-name"))
 

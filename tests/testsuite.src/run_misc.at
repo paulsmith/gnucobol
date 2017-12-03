@@ -1824,11 +1824,12 @@ AT_KEYWORDS([runmisc])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       DATA             DIVISION.
        PROCEDURE        DIVISION.
            PERFORM 2 TIMES
+             DISPLAY "X" NO ADVANCING
+             END-DISPLAY
              PERFORM 2 TIMES
-               DISPLAY "X" NO ADVANCING
+               DISPLAY "Y" NO ADVANCING
                END-DISPLAY
              END-PERFORM
            END-PERFORM.
@@ -1836,7 +1837,63 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [XXXX])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [XYYXYY])
+
+AT_CLEANUP
+
+
+AT_SETUP([PERFORM VARYING BY -0.2])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+	   77 X             PIC 9v9.
+       PROCEDURE        DIVISION.
+           PERFORM VARYING X FROM 0.8 BY -0.2
+                   UNTIL   X < 0.4
+             DISPLAY "X" NO ADVANCING
+             END-DISPLAY
+           END-PERFORM.
+		   IF X NOT = 0.2
+		     DISPLAY "WRONG X: " X END-DISPLAY
+		   END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [XXX])
+
+AT_CLEANUP
+
+
+AT_SETUP([PERFORM VARYING BY phrase omitted])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+	   77 X             PIC 9.
+       PROCEDURE        DIVISION.
+           PERFORM VARYING X FROM 4
+                   UNTIL   X > 6
+             DISPLAY "X" NO ADVANCING
+           END-PERFORM.
+		   IF X NOT = 7
+		     DISPLAY "WRONG X: " X
+		   END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob:9: error: PERFORM VARYING without BY phrase does not conform to COBOL 85
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [XXX])
 
 AT_CLEANUP
 
@@ -1959,8 +2016,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([PERFORM UNTIL EXIT])
-AT_KEYWORDS([runmisc])
+AT_SETUP([PERFORM FOREVER / PERFORM UNTIL EXIT])
+AT_KEYWORDS([runmisc extension])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1978,7 +2035,17 @@ AT_DATA([prog.cob], [
             END-IF
            END-PERFORM
            IF INDVAL NOT = 3
-              DISPLAY INDVAL
+              DISPLAY "1: " INDVAL
+              END-DISPLAY
+           END-IF
+           PERFORM FOREVER
+            ADD 1 TO INDVAL
+            IF INDVAL > 4
+               EXIT PERFORM
+            END-IF
+           END-PERFORM
+           IF INDVAL NOT = 5
+              DISPLAY "2: " INDVAL
               END-DISPLAY
            END-IF
            STOP RUN.
