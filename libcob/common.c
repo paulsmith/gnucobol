@@ -4070,11 +4070,32 @@ cob_sys_system (const void *cmdline)
 			}
 		}
 		if (i >= 0) {
-			buff = cob_malloc ((size_t) (i + 2));
-			memcpy (buff, cmd, (size_t) (i + 1));
+#ifdef _WIN32
+			/* All known _WIN32 implementations use MSVCRT's system()
+			   which passes the given commandline as paramter to "cmd /k".
+			   Because "of compatibility" this checks if you have a
+			   leading and trailing " and if yes simply removes them (!).
+			   Check if this is the case and if it is handled already
+			   by an *extra* pair of quotes, otherwise add these...
+			*/
+			if (i > 2 && cmd[0] == '"' && cmd[i] == '"'
+			&& (cmd[1] != '"' || cmd[i - 1] != '"')) {
+				buff = cob_malloc ((size_t)(i + 4));
+				buff[0] = '"';
+				memcpy (buff + 1, cmd, (size_t)(i + 1));
+				buff[i + 1] = '"';
+			} else {
+#endif // _WIN32
+				buff = cob_malloc ((size_t) (i + 2));
+				memcpy (buff, cmd, (size_t) (i + 1));
+#ifdef _WIN32
+			}
+#endif // _WIN32
 			if (cobglobptr->cob_screen_initialized) {
 				cob_screen_set_mode (0);
 			}
+			/* note: if the command cannot be executed _WIN32 always returns 1
+			   while GNU/Linux returns -1 */
 			i = system (buff);
 			cob_free (buff);
 			if (cobglobptr->cob_screen_initialized) {

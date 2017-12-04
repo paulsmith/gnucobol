@@ -6049,6 +6049,7 @@ libcob: prog.cob:16: warning: ' S U B' literal includes leading spaces which are
 
 AT_CLEANUP
 
+
 AT_SETUP([C API Test])
 AT_KEYWORDS([CALL])
 
