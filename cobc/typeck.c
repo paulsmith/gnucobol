@@ -7050,7 +7050,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 			}
 		}
 		if (subjs || objs) {
-			cb_error (_("wrong number of WHEN parameters"));
+			cb_error_x (case_list, _("wrong number of WHEN parameters"));
 		}
 		/* Connect multiple WHEN's */
 		if (c1 == NULL) {

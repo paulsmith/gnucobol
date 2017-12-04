@@ -3912,7 +3912,7 @@ prog.cob:12: warning: ignoring redundant .
 AT_CLEANUP
 
 
-AT_SETUP([IF-ELSE statement with invalid syntax])
+AT_SETUP([IF-ELSE statement list with invalid syntax])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -3940,6 +3940,52 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob:14: error: syntax error, unexpected END-ACCEPT
 prog.cob:15: error: syntax error, unexpected ELSE
 prog.cob:17: error: syntax error, unexpected END-IF
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([EVALUATE statement with invalid syntax])
+AT_KEYWORDS([misc expression])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  a-variable PIC 9.
+
+       PROCEDURE DIVISION.
+           EVALUATE a-variable
+
+              ALSO true
+
+              WHEN 1
+
+              ALSO a-variable
+                 CONTINUE
+
+              WHEN 1 OR 2
+                 CONTINUE
+
+           END-EVALUATE
+           .
+           EVALUATE a-variable
+
+              ALSO true
+
+              WHEN 3
+                 CONTINUE
+
+           END-EVALUATE
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:19: error: invalid expression: 1 OR 2
+prog.cob:16: error: invalid expression
+prog.cob:29: error: wrong number of WHEN parameters
 ])
 
 AT_CLEANUP

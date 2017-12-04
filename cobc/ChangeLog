@@ -1,4 +1,9 @@
 
+2017-12-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (build_evaluate): error position improvement for
+	  "wrong number of WHEN parameters"
+
 2017-12-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def, parser.y: FR #158 added cb_perform_varying_without_by
@@ -589,7 +594,7 @@
 
 2017-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* cobc.c (cb_build_binary_op): raise "invalid expression" for
+	* tree.c (cb_build_binary_op): raise "invalid expression" for
 	  invalid elements instead of COBC_ABORT
 	* config.def, cobc.c (cb_build_binary_op): added cb_constant_folding
 	  "constant-folding" configuration option to provide a way to disable

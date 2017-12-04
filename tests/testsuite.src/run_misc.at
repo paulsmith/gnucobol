@@ -5824,7 +5824,8 @@ AT_CLEANUP
 AT_SETUP([REDEFINES values on FILLER and INITIALIZE])
 AT_KEYWORDS([runmisc INITIALIZE])
 
-AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        DATA  DIVISION.
        WORKING-STORAGE SECTION.
@@ -5860,9 +5861,9 @@ AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:8: warning: initial VALUE clause ignored for REDEFINES item 'WS-ASK-ID-DATE-YYYY'
-prog.cob:9: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
-prog.cob:11: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
+[prog.cob:9: warning: initial VALUE clause ignored for REDEFINES item 'WS-ASK-ID-DATE-YYYY'
+prog.cob:10: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
+prog.cob:12: warning: initial VALUE clause ignored for REDEFINES item 'FILLER'
 ])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
