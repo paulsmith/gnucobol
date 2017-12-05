@@ -166,17 +166,16 @@ cobcrun_split_path_file (char** pathname, char** filename, char *pf)
 	while ((next_pos = strpbrk (pos + 1, "\\/")) != NULL) {
 		pos = next_pos;
 	}
+	/* copy string up to last slash as pathname (possible emtpy) */
+	sav = *pos;
+	*pos = 0;
+	*pathname = cob_strdup (pf);
+	*pos = sav;
 
 	/* set pos to first character after last slash (if any) */
 	if (pf != pos) {
 		pos++;
 	}
-
-	/* copy string up to  last slash as pathname (possible emtpy) */
-	sav = *pos;
-	*pos = 0;
-	*pathname = cob_strdup (pf);
-	*pos = sav;
 
 	/* copy string after last slash as filename (possible emtpy) */
 	*filename = cob_strdup (pos);
