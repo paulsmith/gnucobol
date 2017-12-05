@@ -1,4 +1,8 @@
 
+2017-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: always use non-localized date formatting for tarstamp.h
+
 2017-11-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: tweaked dependencies to make sure defaults.h is

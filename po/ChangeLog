@@ -1,4 +1,9 @@
 
+2017-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* update_linguas.sh: only include en@quot and en@boldquot in LINGUAS once
+	* sv.po: new message catalog from TP
+
 2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* update_linguas.sh: auto-add new translations received from TP
@@ -33,7 +38,7 @@
 
 2014-01-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* gettext extra message catalogues en@quot and en@boldquot added
+	* gettext extra message catalogs en@quot and en@boldquot added
 
 2013-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

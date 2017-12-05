@@ -1,4 +1,13 @@
 
+2017-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* compile, config.guess, config.sub, depcomp, install-sh, mdate-sh,
+	  texinfo.tex: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+	* ylwrap, missing: updated to recent version from
+	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/
+	* missing: adjusted perl_URL and flex_URL
+
 2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: new script for creating missing files after checkout
@@ -6,7 +15,7 @@
 
 2017-07-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* config.guess, config.sub, compile: updated to recent version from
+	* compile, config.guess, config.sub: updated to recent version from
 	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
 	* texinfo.tex: updated from https://ftp.gnu.org/gnu/texinfo
 
