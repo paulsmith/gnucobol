@@ -26,14 +26,22 @@
 #include	<stddef.h>
 #include	<string.h>
 #include	<errno.h>
-#include	"libcob.h"
-#include	"tarstamp.h"
-
-#include "libcob/cobgetopt.h"
 
 #ifdef	HAVE_LOCALE_H
 #include <locale.h>
 #endif
+#ifdef	HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef	_WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
+
+#include	"libcob.h"
+#include	"tarstamp.h"
+
+#include "libcob/cobgetopt.h"
 
 static int arg_shift = 1;
 static int print_runtime_wanted = 0;
