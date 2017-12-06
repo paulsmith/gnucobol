@@ -4,6 +4,11 @@
 	* common.c (cob_sys_system) [_WIN32]: FR #153 workaround for CALL 'SYSTEM'
 	  on buggy Woe32 which removes first and last quote from command
 
+2017-11-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_get_current_date_and_time_from_os)[!_WIN32]: fixed #469
+	  ACCEPT FROM DAY being one too low
+
 2017-11-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, common.h, coblocal.h, call.c: added (cob_init_nomain) to start

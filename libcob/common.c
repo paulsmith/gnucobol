@@ -2881,7 +2881,7 @@ cob_get_current_date_and_time_from_os (void)
 	cb_time.month = tmptr->tm_mon + 1;
 	cb_time.day_of_month = tmptr->tm_mday;
 	cb_time.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
-	cb_time.day_of_year = tmptr->tm_yday;
+	cb_time.day_of_year = tmptr->tm_yday + 1;
 	cb_time.hour = tmptr->tm_hour;
 	cb_time.minute = tmptr->tm_min;
 	cb_time.second = tmptr->tm_sec;
