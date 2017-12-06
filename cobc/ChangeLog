@@ -1,4 +1,8 @@
 
+2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_run) [_WIN32]: change / in given output name to \
+
 2017-12-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (build_evaluate): error position improvement for

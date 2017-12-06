@@ -3738,9 +3738,12 @@ line_contains (char* line_start, char* line_end, char* search_patterns)
 static int
 process_run (const char *name)
 {
-	int ret, status;
-	size_t curr_size;
-	const char * buffer;
+	int		ret, status;
+	size_t	curr_size;
+	const char	*buffer;
+#ifdef	_WIN32
+	char		*ptr;
+#endif
 
 	if (cb_compile_level < CB_LEVEL_MODULE) {
 		fputs (_("nothing for -j to run"), stderr);
@@ -3778,6 +3781,13 @@ process_run (const char *name)
 				SLASH_CHAR, name);
 		}
 	}
+#ifdef	_WIN32 /* "fix" given output name */
+	if (output_name) {
+		for (ptr = cobc_buffer; *ptr; ptr++) {
+			if (*ptr == '/') *ptr = '\\';
+		}
+	}
+#endif
 	if (cobc_run_args) {
 		cobc_chk_buff_size (curr_size + 1 + strlen (cobc_run_args));
 		strncat (cobc_buffer, " ", cobc_buffer_size);
