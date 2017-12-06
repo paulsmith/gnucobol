@@ -42,4 +42,23 @@ echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $MAINPATH/tarstam
 echo "#define COB_NUM_TAR_DATE `date -u +'%Y%m%d'`" >> $MAINPATH/tarstamp.h
 echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $MAINPATH/tarstamp.h
 
+echo; echo ensure we have executable scripts...
+chmod +x $MAINPATH/build_aux/compile
+chmod +x $MAINPATH/build_aux/config.guess
+chmod +x $MAINPATH/build_aux/config.rpath
+chmod +x $MAINPATH/build_aux/config.sub
+chmod +x $MAINPATH/build_aux/depcomp
+chmod +x $MAINPATH/build_aux/install-sh
+chmod +x $MAINPATH/build_aux/ltmain.sh
+chmod +x $MAINPATH/build_aux/mdate-sh
+chmod +x $MAINPATH/build_aux/missing
+chmod +x $MAINPATH/build_aux/mkinstalldirs
+chmod +x $MAINPATH/build_aux/ylwrap
+chmod +x $MAINPATH/doc/cobcinfo.sh
+chmod +x $MAINPATH/po/update_linguas.sh
+chmod +x $MAINPATH/tests/listings-sed.sh
+if test -f $MAINPATH/create_win_dist.sh; then
+   chmod +x $MAINPATH/create_win_dist.sh
+fi
+
 echo; echo bootstrap is finished
