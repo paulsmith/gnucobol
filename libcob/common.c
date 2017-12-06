@@ -219,11 +219,12 @@ static unsigned int		cob_source_line = 0;
 
 #ifdef COB_DEBUG_LOG
 static const char		*cob_debug_env = NULL;
-static FILE				*cob_debug_file = NULL;
-static int				cob_debug_level = 9;
-static char				*cob_debug_file_name = NULL;
-static char				*cob_debug_mod = NULL;
-static char				cob_debug_modules[12][4] = {"", "", "", "", "", "", "", "", "", "", "", ""};
+static FILE			*cob_debug_file = NULL;
+static int			cob_debug_level = 9;
+static char			*cob_debug_mod = NULL;
+static char			cob_debug_modules[12][4] = {"", "", "", "", "", "", "", "", "", "", "", ""};
+#endif
+static char			*cob_debug_file_name = NULL;
 #endif
 
 static char			*strbuff = NULL;
@@ -6924,7 +6925,7 @@ cob_init (const int argc, char **argv)
  *        default is  cob_debug_log.##
  */
 int
-cob_debug_open (char *debug_env)
+cob_debug_open (const char *debug_env)
 {
 	int		i,j;
 	char	val[256],logfile[256];
@@ -6994,7 +6995,7 @@ cob_debug_open (char *debug_env)
 }
 #endif
 
-#if defined(COB_DEBUG_LOG)
+#ifdef COB_DEBUG_LOG
 /* Determine if DEBUGLOG is to be allowed */
 int
 cob_debug_logit(int level, char *module)
@@ -7006,11 +7007,11 @@ cob_debug_logit(int level, char *module)
 		return 1;
 	for(i=0; i < 12 && cob_debug_modules[i][0] > ' '; i++) {
 		if(strcasecmp("ALL",cob_debug_modules[i]) == 0) {
-			cob_debug_mod = module;
+			cob_debug_mod = (char*)module;
 			return 0;						/* Logging is allowed */
 		}
 		if(strcasecmp(module,cob_debug_modules[i]) == 0) {
-			cob_debug_mod = &cob_debug_modules[i];
+			cob_debug_mod = (char*)&cob_debug_modules[i];
 			return 0;						/* Logging is allowed */
 		}
 	}
@@ -7021,21 +7022,22 @@ cob_debug_logit(int level, char *module)
 static int cob_debug_hdr = 1;
 static int cob_debug_prv_line = 0;
 int
-cob_debug_logger(char *fmt, ...)
+cob_debug_logger (const char *fmt, ...)
 {
-	va_list			ap;
+	va_list		ap;
 	int		ln;
-	if(cob_debug_file == NULL) 
-		return 0;
+	if (cob_debug_file == NULL) return 0;
+
+	if(*fmt == '~') {			/* Force line# out again to log file */
+		fmt++;
+		cob_debug_prv_line = -1;
+		cob_debug_hdr = 1;
+	}
 	if(cob_debug_hdr) {
 		if(cob_debug_mod)
 			fprintf(cob_debug_file,"%-3s:",cob_debug_mod);
 		if(cob_source_file)
 			fprintf(cob_debug_file," %s :",cob_source_file);
-		if(*fmt == '~') {			/* Force line# out again to log file */
-			fmt++;
-			cob_debug_prv_line = -1;
-		}
 		if(cob_source_line && cob_source_line != cob_debug_prv_line) {
 			fprintf(cob_debug_file,"%5d : ",cob_source_line);
 			cob_debug_prv_line = cob_source_line;
