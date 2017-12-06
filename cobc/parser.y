@@ -163,6 +163,7 @@ static struct cb_statement	*main_statement;
 
 static cb_tree			current_expr;
 static struct cb_field		*current_field;
+static struct cb_field		*control_field;
 static struct cb_field		*description_field;
 static struct cb_file		*current_file;
 static struct cb_cd		*current_cd;
@@ -5158,13 +5159,13 @@ report_clause:
   report_keyword rep_name_list
   {
 	check_repeated ("REPORT", SYN_CLAUSE_11, &check_duplicate);
-	CB_PENDING("REPORT WRITER");
 	if (current_file->organization != COB_ORG_LINE_SEQUENTIAL &&
 	    current_file->organization != COB_ORG_SEQUENTIAL) {
 		cb_error (_("REPORT clause with wrong file type"));
 	} else {
 		current_file->reports = $2;
 		current_file->organization = COB_ORG_LINE_SEQUENTIAL;
+		current_file->flag_line_adv = 1;
 	}
   }
 ;
@@ -5179,7 +5180,9 @@ rep_name_list:
   {
 	current_report = build_report ($1);
 	current_report->file = current_file;
-	CB_ADD_TO_CHAIN (CB_TREE (current_report), current_program->report_list);
+	current_program->report_list =
+				cb_list_add (current_program->report_list,
+					     CB_TREE (current_report));
 	if (report_count == 0) {
 		report_instance = current_report;
 	}
@@ -5188,7 +5191,10 @@ rep_name_list:
 | rep_name_list undefined_word
   {
 	current_report = build_report ($2);
-	CB_ADD_TO_CHAIN (CB_TREE (current_report), current_program->report_list);
+	current_report->file = current_file;
+	current_program->report_list =
+				cb_list_add (current_program->report_list,
+					     CB_TREE (current_report));
 	if (report_count == 0) {
 		report_instance = current_report;
 	}
@@ -5365,6 +5371,7 @@ _record_description_list:
 |
   {
 	current_field = NULL;
+	control_field = NULL;
 	description_field = NULL;
 	cb_clear_real_field ();
   }
@@ -6463,8 +6470,10 @@ _linkage_section:
 _report_section:
 | REPORT SECTION TOK_DOT
   {
-	CB_PENDING("REPORT SECTION");
+	header_check |= COBC_HD_REPORT_SECTION;
 	current_storage = CB_STORAGE_REPORT;
+	description_field = NULL;
+	current_program->flag_report = 1;
 	cb_clear_real_field ();
   }
   _report_description_sequence
@@ -6482,12 +6491,28 @@ report_description:
 	if (CB_INVALID_TREE ($2)) {
 		YYERROR;
 	} else {
+		current_field = NULL;
+		control_field = NULL;
+		description_field = NULL;
 		current_report = CB_REPORT (cb_ref ($2));
 	}
 	check_duplicate = 0;
   }
   _report_description_options TOK_DOT
   _report_group_description_list
+  {
+	struct cb_field *p;
+
+	for (p = description_field; p; p = p->sister) {
+		cb_validate_field (p);
+	}
+	current_program->report_storage = description_field;
+	current_program->flag_report = 1;
+	if(current_report->records == NULL)
+		current_report->records = description_field;
+	finalize_report (current_report, description_field);
+	$$ = CB_TREE (description_field);
+  }
 ;
 
 _report_description_options:
@@ -6502,6 +6527,7 @@ report_description_option:
   _is GLOBAL
   {
 	check_repeated ("GLOBAL", SYN_CLAUSE_1, &check_duplicate);
+	current_report->global = 1;
 	cb_error (_("GLOBAL is not allowed with RD"));
   }
 | CODE _is id_or_lit
@@ -6522,7 +6548,29 @@ control_clause:
 ;
 
 control_field_list:
-  _final identifier_list
+  control_final_tag control_identifier_list
+| control_final_tag
+| control_identifier_list
+;
+
+control_final_tag:
+  FINAL 
+  {
+	current_report->control_final = 1;
+  }
+;
+
+control_identifier_list:
+  control_identifier
+| control_identifier_list control_identifier
+;
+
+control_identifier:
+  identifier
+  {
+	/* Add field to current control list */
+	CB_ADD_TO_CHAIN ($1, current_report->controls);
+  }
 ;
 
 /* PAGE clause */
@@ -6546,6 +6594,14 @@ page_limit_clause:
 		} else {
 			current_report->last_control = current_report->lines;
 		}
+		if (current_report->t_last_detail) {
+			current_report->t_last_control = current_report->t_last_detail;
+		} else if (current_report->t_footing) {
+			current_report->t_last_control = current_report->t_footing;
+		} else if(current_report->t_lines) {
+			current_report->t_last_control = current_report->t_lines;
+		}
+
 	}
 	if (!current_report->last_detail && !current_report->footing) {
 		current_report->last_detail = current_report->lines;
@@ -6555,29 +6611,51 @@ page_limit_clause:
 	} else if (!current_report->footing) {
 		current_report->footing = current_report->last_detail;
 	}
-	if (current_report->heading > current_report->first_detail ||
-	    current_report->first_detail > current_report->last_control ||
-	    current_report->last_control > current_report->last_detail ||
-	    current_report->last_detail > current_report->footing) {
-		cb_error (_("invalid %s clause"), "PAGE");
-	}
+	/* PAGE LIMIT values checked in finalize_report in typeck.c */
   }
 ;
 
 page_line_column:
+  report_int_ident
+  {
+	if (CB_LITERAL_P ($1)) {
+		current_report->lines = cb_get_int ($1);
+		if(current_report->lines > 999)
+			cb_error (_("PAGE LIMIT lines > 999"));
+	} else {
+		current_report->t_lines = $1;
+	}
+  }
+| report_int_ident line_or_lines
+  {
+	if (CB_LITERAL_P ($1)) {
+		current_report->lines = cb_get_int ($1);
+		if(current_report->lines > 999)
+			cb_error (_("PAGE LIMIT lines > 999"));
+	} else {
+		current_report->t_lines = $1;
+	}
+  }
+| report_int_ident line_or_lines report_int_ident columns_or_cols
+  {
+	if (CB_LITERAL_P ($1)) {
+		current_report->lines = cb_get_int ($1);
+		if(current_report->lines > 999)
+			cb_error (_("PAGE LIMIT lines > 999"));
+	} else {
+		current_report->t_lines = $1;
+	}
+	if (CB_LITERAL_P ($3)) {
+		current_report->columns = cb_get_int ($3);
+	} else {
+		current_report->t_columns = $3;
+	}
+  }
+;
+
+report_int_ident:
   report_integer
-  {
-	current_report->lines = cb_get_int ($1);
-  }
-| report_integer line_or_lines report_integer columns_or_cols
-  {
-	current_report->lines = cb_get_int ($1);
-	current_report->columns = cb_get_int ($3);
-  }
-| report_integer line_or_lines
-  {
-	current_report->lines = cb_get_int ($1);
-  }
+| identifier
 ;
 
 _page_heading_list:
@@ -6594,37 +6672,57 @@ page_detail:
 ;
 
 heading_clause:
-  HEADING _is report_integer
+  HEADING _is report_int_ident
   {
-	current_report->heading = cb_get_int ($3);
+	if (CB_LITERAL_P ($3)) {
+		current_report->heading = cb_get_int ($3);
+	} else {
+		current_report->t_heading = $3;
+	}
   }
 ;
 
 first_detail:
-  FIRST detail_keyword _is report_integer
+  FIRST detail_keyword _is report_int_ident
   {
-	current_report->first_detail = cb_get_int ($4);
+	if (CB_LITERAL_P ($4)) {
+		current_report->first_detail = cb_get_int ($4);
+	} else {
+		current_report->t_first_detail = $4;
+	}
   }
 ;
 
 last_heading:
-  LAST ch_keyword _is report_integer
+  LAST ch_keyword _is report_int_ident
   {
-	current_report->last_control = cb_get_int ($4);
+	if (CB_LITERAL_P ($4)) {
+		current_report->last_control = cb_get_int ($4);
+	} else {
+		current_report->t_last_control = $4;
+	}
   }
 ;
 
 last_detail:
-  LAST detail_keyword _is report_integer
+  LAST detail_keyword _is report_int_ident
   {
-	current_report->last_detail = cb_get_int ($4);
+	if (CB_LITERAL_P ($4)) {
+		current_report->last_detail = cb_get_int ($4);
+	} else {
+		current_report->t_last_detail = $4;
+	}
   }
 ;
 
 footing_clause:
-  FOOTING _is report_integer
+  FOOTING _is report_int_ident
   {
-	current_report->footing = cb_get_int ($3);
+	if (CB_LITERAL_P ($3)) {
+		current_report->footing = cb_get_int ($3);
+	} else {
+		current_report->t_footing = $3;
+	}
   }
 ;
 
@@ -6635,7 +6733,21 @@ _report_group_description_list:
 report_group_description_entry:
   level_number _entry_name
   {
+	cb_tree	x;
+
+	x = cb_build_field_tree ($1, $2, current_field, current_storage,
+				 current_file, 0);
+	/* Free tree assocated with level number */
+	cobc_parse_free ($1);
 	check_pic_duplicate = 0;
+	if (CB_INVALID_TREE (x)) {
+		YYERROR;
+	}
+
+	current_field = CB_FIELD (x);
+	if (!description_field) {
+		description_field = current_field;
+	}
   }
   _report_group_options TOK_DOT
 ;
@@ -6648,6 +6760,7 @@ report_group_option:
   type_clause
 | next_group_clause
 | line_clause
+| line_clause_next_page
 | picture_clause
 | report_usage_clause
 | sign_clause
@@ -6672,50 +6785,145 @@ type_clause:
 
 type_option:
   rh_keyword
+  {
+	current_field->report_flag |= COB_REPORT_HEADING;
+  }
 | ph_keyword
-| ch_keyword _control_final
+  {
+	current_field->report_flag |= COB_REPORT_PAGE_HEADING;
+  }
+| ch_keyword _control_heading_final
+| cf_keyword _control_footing_final
 | detail_keyword
-| cf_keyword _control_final
+  {
+	if(current_report != NULL) {
+		current_report->has_detail = 1;
+	}
+	current_field->report_flag |= COB_REPORT_DETAIL;
+  }
 | pf_keyword
+  {
+	current_field->report_flag |= COB_REPORT_PAGE_FOOTING;
+  }
 | rf_keyword
+  {
+	current_field->report_flag |= COB_REPORT_FOOTING;
+  }
 ;
 
-_control_final:
+_control_heading_final:
+  /* empty */
+  {
+	current_field->report_flag |= COB_REPORT_CONTROL_HEADING;
+  }
 | identifier _or_page
+  {
+	current_field->report_flag |= COB_REPORT_CONTROL_HEADING;
+	current_field->report_control = $1;
+  }
 | FINAL _or_page
+  {
+	current_field->report_flag |= COB_REPORT_CONTROL_HEADING_FINAL;
+  }
 ;
+
+/* TODO: check where this should be allowed
+         and what results are expected */
 
 _or_page:
+  /* empty */
 | OR PAGE
 ;
 
+_control_footing_final:
+  /* empty */
+  {
+      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+  }
+| identifier _or_page
+  {
+      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+      current_field->report_control = $1;
+  }
+| FINAL _or_page
+  {
+      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING_FINAL;
+  }
+;
+
 next_group_clause:
-  NEXT GROUP _is line_or_plus
+  NEXT GROUP _is next_group_plus
   {
 	check_repeated ("NEXT GROUP", SYN_CLAUSE_17, &check_pic_duplicate);
   }
+;
+
+next_group_plus:
+  integer
+  {
+	if (CB_LITERAL ($1)->sign > 0) {
+		current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
+	} else {
+		current_field->report_flag |= COB_REPORT_NEXT_GROUP_LINE;
+	}
+	current_field->next_group_line = cb_get_int($1);
+  }
+| PLUS integer
+  {
+      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
+      current_field->next_group_line = cb_get_int($2);
+  }
+| TOK_PLUS integer
+  {
+      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
+      current_field->next_group_line = cb_get_int($2);
+  }
+| next_page
+  {
+      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PAGE;
+  }
+;
+
+next_page:
+  NEXT PAGE 
+| NEXT_PAGE
+| PAGE
+| NEXT
 ;
 
 sum_clause_list:
   SUM _of report_x_list _reset_clause
   {
 	check_repeated ("SUM", SYN_CLAUSE_19, &check_pic_duplicate);
+	current_field->report_sum_list = $3;
+	build_sum_counter( current_report, current_field);
   }
 ;
 
 _reset_clause:
 | RESET _on data_or_final
+| UPON identifier
+  {
+      current_field->report_sum_upon = $2;
+  }
 ;
 
 data_or_final:
   identifier
+  {
+      current_field->report_reset = $1;
+  }
 | FINAL
+  {
+      current_field->report_flag |= COB_REPORT_RESET_FINAL;
+  }
 ;
 
 present_when_condition:
   PRESENT WHEN condition
   {
 	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
+	current_field->report_when = $3;
   }
 ;
 
@@ -6724,19 +6932,91 @@ varying_clause:
 ;
 
 line_clause:
-  line_keyword_clause report_line_integer_list
+  line_keyword_clause line_clause_options
   {
 	check_repeated ("LINE", SYN_CLAUSE_21, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_LINE;
   }
 ;
 
 line_keyword_clause:
-  LINE _numbers _is_are
-| LINES _are
+  LINE number_is
+;
+
+line_clause_options:
+  line_clause_integer 
+  {
+	if(current_field->report_line == 0) {
+		CB_PENDING ("LINE 0");
+	}
+  }
+| PLUS report_integer 
+  {
+	current_field->report_flag |= COB_REPORT_LINE_PLUS;
+	current_field->report_line = cb_get_int($2);
+	if($2 != cb_int0
+	&& $2 != cb_int1) {
+		if (CB_LITERAL ($2)->sign < 0
+		|| current_field->report_line < 0) {
+			cb_error (_("Positive Integer value expected"));
+		}
+	}
+	if (current_field->report_line == 0) {
+		CB_PENDING ("LINE PLUS 0");
+	}
+  }
+| TOK_PLUS report_integer 
+  {
+	current_field->report_flag |= COB_REPORT_LINE_PLUS;
+	current_field->report_line = cb_get_int($2);
+	if($2 != cb_int0
+	&& $2 != cb_int1) {
+		if (CB_LITERAL ($2)->sign < 0
+		|| current_field->report_line < 0) {
+			cb_error (_("Positive Integer value expected"));
+		}
+	}
+	if (current_field->report_line == 0) {
+		CB_PENDING ("LINE PLUS 0");
+	}
+  }
+;
+
+number_is:
+| NUMBER IS
+| NUMBER
+;
+
+line_clause_integer:
+  report_integer
+  {
+	current_field->report_line = cb_get_int($1);
+	if($1 != cb_int0) {
+		if (CB_LITERAL ($1)->sign > 0) {
+			current_field->report_flag |= COB_REPORT_LINE_PLUS;
+		} else if (CB_LITERAL ($1)->sign < 0
+		|| current_field->report_line < 0) {
+			cb_error (_("Positive Integer value expected"));
+			current_field->report_line = 1;
+			current_field->report_flag |= COB_REPORT_LINE_PLUS;
+		}
+	}
+  }
+;
+
+line_clause_next_page:
+  NEXT PAGE
+  {
+      current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
+  }
+| ON NEXT PAGE
+  {
+      current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
+  }
 ;
 
 column_clause:
-  col_keyword_clause report_col_integer_list
+  col_keyword_clause col_or_plus
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_18, &check_pic_duplicate);
   }
@@ -6747,31 +7027,46 @@ col_keyword_clause:
 | columns_or_cols _are
 ;
 
-report_line_integer_list:
-  line_or_plus
-| report_line_integer_list line_or_plus
-;
-
-line_or_plus:
-  PLUS integer
-| report_integer
-| NEXT_PAGE
-;
-
-report_col_integer_list:
-  col_or_plus
-| report_col_integer_list col_or_plus
-;
-
 col_or_plus:
-  PLUS integer
+  PLUS report_integer 
+  {
+	current_field->report_column = cb_get_int ($2);
+	if(current_field->report_column > 0)
+		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+	else
+		current_field->report_column = 0;
+  }
+| TOK_PLUS report_integer 
+  {
+	current_field->report_column = cb_get_int ($2);
+	if(current_field->report_column > 0)
+		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+	else
+		current_field->report_column = 0;
+  }
 | report_integer
+  {
+	current_field->report_column = cb_get_int ($1);
+	if (CB_LITERAL ($1)->sign > 0) {
+		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+	}
+	if($1 != cb_int1
+	&& $1 != cb_int0) {
+		if (current_field->report_column <= 0
+		|| CB_LITERAL ($1)->sign < 0) {
+			cb_error (_("invalid COLUMN integer; must be > 0"));
+			current_field->report_column = 0;
+			$$ = cb_int0;
+		}
+	}
+  }
 ;
 
 source_clause:
-  SOURCE _is arith_x flag_rounded
+  SOURCE _is arith_x flag_rounded 
   {
 	check_repeated ("SOURCE", SYN_CLAUSE_22, &check_pic_duplicate);
+	current_field->report_source = $3;
   }
 ;
 
@@ -6779,6 +7074,7 @@ group_indicate_clause:
   GROUP _indicate
   {
 	check_repeated ("GROUP", SYN_CLAUSE_23, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_GROUP_INDICATE;
   }
 ;
 
@@ -10754,7 +11050,6 @@ generate_statement:
   GENERATE
   {
 	begin_statement ("GENERATE", 0);
-	CB_PENDING("GENERATE");
   }
   generate_body
 ;
@@ -10762,6 +11057,12 @@ generate_statement:
 
 generate_body:
   qualified_word
+  {
+	begin_implicit_statement ();
+	if ($1 != cb_error_node) {
+		cb_emit_generate($1);
+	}
+  }
 ;
 
 /* GO TO statement */
@@ -10975,7 +11276,6 @@ initiate_statement:
   INITIATE
   {
 	begin_statement ("INITIATE", 0);
-	CB_PENDING("INITIATE");
   }
   initiate_body
 ;
@@ -10985,12 +11285,14 @@ initiate_body:
   {
 	begin_implicit_statement ();
 	if ($1 != cb_error_node) {
+	    cb_emit_initiate($1);
 	}
   }
 | initiate_body report_name
   {
 	begin_implicit_statement ();
 	if ($2 != cb_error_node) {
+	    cb_emit_initiate($2);
 	}
   }
 ;
@@ -11531,7 +11833,36 @@ perform_varying_list:
 perform_varying:
   identifier FROM x _by_phrase UNTIL condition
   {
-	$$ = cb_build_perform_varying ($1, $3, $4, $6);
+	cb_tree		x;
+	int		dataTypeOk = 1;
+
+	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
+		x = cb_ref ($1);
+		cb_error_x (CB_TREE (current_statement),
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+					cb_name (x),x->source_line, x->source_file);
+		$$ = cb_int1;
+		dataTypeOk = 0;
+	} 
+	if (cb_tree_category ($3) != CB_CATEGORY_NUMERIC) {
+		x = cb_ref ($3);
+		cb_error_x (CB_TREE (current_statement),
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+					cb_name (x),x->source_line, x->source_file);
+		$$ = cb_int1;
+		dataTypeOk = 0;
+	} 
+	if (cb_tree_category ($4) != CB_CATEGORY_NUMERIC) {
+		x = cb_ref ($4);
+		cb_error_x (CB_TREE (current_statement),
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+					cb_name (x),x->source_line, x->source_file);
+		$$ = cb_int1;
+		dataTypeOk = 0;
+	} 
+	if(dataTypeOk) {
+		$$ = cb_build_perform_varying ($1, $3, $4, $6);
+	}
   }
 ;
 
@@ -12630,7 +12961,7 @@ suppress_statement:
 		cb_error_x (CB_TREE (current_statement),
 			    _("SUPPRESS statement must be within DECLARATIVES"));
 	}
-	CB_PENDING("SUPPRESS");
+	cb_emit_suppress (control_field);
   }
 ;
 
@@ -12644,7 +12975,6 @@ terminate_statement:
   TERMINATE
   {
 	begin_statement ("TERMINATE", 0);
-	CB_PENDING("TERMINATE");
   }
   terminate_body
 ;
@@ -12653,13 +12983,16 @@ terminate_body:
   report_name
   {
 	begin_implicit_statement ();
+	begin_implicit_statement ();
 	if ($1 != cb_error_node) {
+	    cb_emit_terminate ($1);
 	}
   }
 | terminate_body report_name
   {
 	begin_implicit_statement ();
 	if ($2 != cb_error_node) {
+		cb_emit_terminate ($2);
 	}
   }
 ;
@@ -13038,9 +13371,31 @@ program_start_end:
 use_reporting:
   use_global BEFORE REPORTING identifier
   {
+	char wrk[80];
+	cb_tree x;
+	struct cb_field		*f;
+	struct cb_report	*r;
+
+	x = cb_ref ($4);
+	if (!CB_FIELD_P (x)) {
+		cb_error_x ($4, _("'%s' is not a report group"), CB_NAME ($4));
+		$$ = cb_error_node;
+	} else {
+		control_field = f = CB_FIELD (x);
+		f->report_decl_id = current_section->id;
+		if((r = f->report) != NULL) {
+			r->has_declarative = 1;
+		}
+	}
+	sprintf(wrk,"USE BEFORE REPORTING %s is l_%d",cb_name($4),current_section->id);
 	current_section->flag_real_label = 1;
-	emit_statement (cb_build_comment ("USE BEFORE REPORTING"));
-	CB_PENDING ("USE BEFORE REPORTING");
+	current_section->flag_declaratives = 1;
+	current_section->flag_begin = 1;
+	current_section->flag_return = 1;
+	current_section->flag_declarative_exit = 1;
+	current_section->flag_real_label = 1;
+	current_section->flag_skip_label = 0;
+	emit_statement (cb_build_comment (strdup(wrk)));
   }
 ;
 
@@ -13709,6 +14064,10 @@ line_linage_page_counter:
   }
 | LINE_COUNTER
   {
+	if (report_count > 1
+	&& current_report != NULL) {
+		$$ = current_report->line_counter;
+	} else
 	if (report_count > 1) {
 		cb_error (_("LINE-COUNTER must be qualified here"));
 		$$ = cb_error_node;
@@ -13730,6 +14089,10 @@ line_linage_page_counter:
   }
 | PAGE_COUNTER
   {
+	if (report_count > 1
+	&& current_report != NULL) {
+		$$ = current_report->page_counter;
+	} else
 	if (report_count > 1) {
 		cb_error (_("PAGE-COUNTER must be qualified here"));
 		$$ = cb_error_node;
@@ -13905,7 +14268,7 @@ report_name:
 	if (CB_REPORT_P (cb_ref ($1))) {
 		$$ = $1;
 	} else {
-		cb_error_x ($1, _("'%s' is not a report name"), CB_NAME ($1));
+		cb_error (_("'%s' is not a valid report name"), CB_NAME ($1));
 		$$ = cb_error_node;
 	}
   }
@@ -14286,7 +14649,7 @@ positive_id_or_lit:
   {
 	check_not_88_level ($1);
   }
-| report_integer
+| unsigned_pos_integer
 ;
 
 /* literal allowing zero and figurative constant ZERO */
@@ -14430,6 +14793,10 @@ target_identifier:
   {
 	$$ = cb_build_identifier ($1, 0);
   }
+| line_linage_page_counter
+  {
+	$$ = cb_build_identifier ($1, 0);
+  }
 ;
 
 target_identifier_1:
@@ -14546,7 +14913,7 @@ symbolic_integer:
   }
 ;
 
-report_integer:
+unsigned_pos_integer:
   LITERAL
   {
 	int	n;
@@ -14555,8 +14922,7 @@ report_integer:
 	    || CB_LITERAL ($1)->sign
 	    || CB_LITERAL ($1)->scale) {
 		cb_error (_("unsigned positive integer value expected"));
-		$$ = cb_int1;
-	} else {
+		$$ = cb_int1;	} else {
 		n = cb_get_int ($1);
 		if (n < 1) {
 			cb_error (_("unsigned positive integer value expected"));
@@ -14565,6 +14931,25 @@ report_integer:
 			$$ = $1;
 		}
 	}
+  }
+;
+
+report_integer:
+  LITERAL
+  {
+	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
+		cb_error (_("Integer value expected"));
+		$$ = cb_int1;
+	} else if (CB_LITERAL ($1)->sign < 0 || CB_LITERAL ($1)->scale) {
+		cb_error (_("positive integer value expected"));
+		$$ = cb_int1;
+	} else {
+		$$ = $1;
+	}
+  }
+| ZERO
+  {
+	$$ = cb_int0;
   }
 ;
 
@@ -15122,7 +15507,6 @@ _controls:	| CONTROLS ;
 _data:		| DATA ;
 _end_of:	| _to END _of ;
 _file:		| TOK_FILE ;
-_final:		| FINAL ;
 _for:		| FOR ;
 _from:		| FROM ;
 _in:		| IN ;

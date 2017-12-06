@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -654,6 +654,18 @@ check_picture_item (struct cb_field *f)
 		f->pic = CB_PICTURE (cb_build_picture (pic));
 		return 0;
 	}
+
+	if(f->storage == CB_STORAGE_REPORT) {
+		if (f->values) {
+			sprintf (pic, "X(%d)", (int)CB_LITERAL(CB_VALUE(f->values))->size);
+		} else {
+			f->flag_no_field = 1;
+			strcpy (pic, "X(1)");
+		}
+		f->pic = CB_PICTURE (cb_build_picture (pic));
+		return 0;
+	}
+
 	if (f->flag_item_78) {
 		if (!f->values || CB_VALUE (f->values) == cb_error_node) {
 			level_require_error (x, "VALUE");
@@ -1615,14 +1627,14 @@ static int
 compute_size (struct cb_field *f)
 {
 	struct cb_field	*c;
-	int		size;
-	cob_u64_t	size_check;
+	int		size = 0;
+	cob_u64_t	size_check = 0;
 	int		align_size;
 	int		pad;
 	int		unbounded_items = 0;
 	int		unbounded_parts = 1;
 
-	int maxsz;
+	int		maxsz;
 	struct cb_field *c0;
 
 	if (f->level == 66) {
@@ -1637,6 +1649,10 @@ compute_size (struct cb_field *f)
 	}
 
 	if (f->children) {
+		if(f->storage == CB_STORAGE_REPORT
+		&& (f->report_flag && COB_REPORT_LINE) )
+			f->offset = 0;
+
 		/* Groups */
 		if (f->flag_synchronized && warningopt) {
 			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f), _("ignoring SYNCHRONIZED for group item '%s'"),
@@ -1680,6 +1696,12 @@ unbounded_again:
 					c->occurs_max = (COB_MAX_UNBOUNDED_SIZE / c->size / unbounded_parts) - 1;
 				}
 				size_check += c->size * c->occurs_max;
+
+				if(c->storage == CB_STORAGE_REPORT
+				&& !(c->report_flag & COB_REPORT_COLUMN_PLUS)
+				&& c->report_column > 0) {	/* offset based on COLUMN value */
+					c->offset = c->report_column - 1;
+				}
 
 				/* Word alignment */
 				if (c->flag_synchronized &&
@@ -1734,6 +1756,12 @@ unbounded_again:
 					}
 				}
 			}
+
+			if(c->sister == NULL
+			&& c->storage == CB_STORAGE_REPORT) {	/* To set parent size */
+				if((c->offset + c->size) > size_check)
+					size_check = (c->offset + c->size);
+			}
 		}
 		/* Ensure items within OCCURS are aligned correctly. */
 		if (f->occurs_max > 1 && (size_check % occur_align_size) != 0) {
@@ -1774,6 +1802,12 @@ unbounded_again:
 		f->size = (int) size_check;
 	} else if (!f->flag_is_external_form) {
 		/* Elementary item */
+		if(f->storage == CB_STORAGE_REPORT
+		&& !(f->report_flag & COB_REPORT_COLUMN_PLUS)
+		&& f->report_column > 0) {		/* offset based on COLUMN value */
+				f->offset = f->report_column - 1;	
+		}
+
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {

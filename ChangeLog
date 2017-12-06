@@ -1,4 +1,9 @@
 
+2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: version bump to 3.0-dev
+	* general: merged code for REPORTWRITER module from reportwriter branch
+
 2017-12-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: always use non-localized date formatting for tarstamp.h
@@ -240,6 +245,13 @@
 	* general: removed "Experimental" marker from CISAM/DISAM/VBISAM
 	* configure.ac: define WITH_CURSES for printing library for screenio
 
+2015-02-16  Ron Norman <rjn@inglenet.com>
+
+	Implemented DEBUG logging for Compiler developers
+	* configure.ac: Added --enable-debug-log to configure.ac
+	  Logging can be turned and set to certain level using
+	  an environment variable COB_DEBUG_LOG
+
 2015-03-06  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* m4/gettext.m4: Upgrade to gettext-0.19.4.
@@ -251,6 +263,11 @@
 	* m4/po.m4: Upgrade to gettext-0.19.4.
 	* m4/progtest.m4: Upgrade to gettext-0.19.4.
 	* configure.ac (AM_GNU_GETTEXT_VERSION): Bump to 0.19.4.
+
+2015-02-12  Ron Norman <rjn@inglenet.com>
+
+	* Merged Report Writer code into 2.0 code base to create a new 2.0
+	  with all collective features
 
 2014-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

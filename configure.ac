@@ -58,6 +58,7 @@ AM_INIT_AUTOMAKE([gnu no-texinfo.tex])
 
 # Autoheader templates
 AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
+AH_TEMPLATE([COB_DEBUG_LOG], [Enable internal logging (Developers only!)])
 AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
 AH_TEMPLATE([PATCH_LEVEL], [Define a patch level (numeric, max. 8 digits)])
 AH_TEMPLATE([MAX_CALL_FIELD_PARAMS], [Define maximum parameters for CALL])
@@ -67,6 +68,7 @@ AH_TEMPLATE([WITH_DB], [Use Berkeley DB library as emulation of ISAM handler])
 AH_TEMPLATE([WITH_CISAM], [Use CISAM as ISAM handler])
 AH_TEMPLATE([WITH_DISAM], [Use DISAM as ISAM handler])
 AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as ISAM handler])
+
 AH_TEMPLATE([COB_EXPORT_DYN], [Compile/link option for exporting symbols])
 AH_TEMPLATE([COB_PIC_FLAGS], [Compile/link option for PIC code])
 AH_TEMPLATE([COB_SHARED_OPT], [Compile/link option for shared code])
@@ -123,6 +125,14 @@ AC_ARG_ENABLE([experimental],
     [(GnuCOBOL) Enable experimental code (Developers only!)])],
   [if test "$enable_experimental" = "yes"; then
 	AC_DEFINE([COB_EXPERIMENTAL], [1])
+   fi],
+  [])
+
+AC_ARG_ENABLE([debuglog],
+  [AS_HELP_STRING([--enable-debuglog],
+    [(GnuCOBOL) Enable internal logging code (Developers only!)])],
+  [if test "$enable_debuglog" = "yes"; then
+	AC_DEFINE([COB_DEBUG_LOG], [1])
    fi],
   [])
 
@@ -1456,6 +1466,9 @@ case "$USE_NCURSES" in
     AC_MSG_NOTICE([ Use ncurses/pdcurses/curses for screen I/O:  ${USE_NCURSES}])
 	;;
 esac
+if test "$with_debug_log" = "yes"; then
+  AC_MSG_NOTICE([ Enabled Compiler Developer logger            yes])
+fi
 if test "$with_seqra_extfh" = "yes"; then
   AC_MSG_NOTICE([ Use external SEQ/RAN file handler            yes])
 fi

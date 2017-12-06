@@ -19,22 +19,22 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-MODULES_ALL = NC SM IC SQ RL ST SG OB IF DB IX DBNOIX RW CM
+MODULES_ALL = NC SM IC SQ RL ST SG OB IF RW DB IX DBNOIX CM
 
-# currently untested modules: RW and CM
+# currently untested modules: CM
 if COB_MAKE_IX
-MODULES = NC SM IC SQ RL ST SG OB IF DB IX
+MODULES = NC SM IC SQ RL ST SG OB IF RW DB IX
 MODULES_RUN = NC_RUN SM_RUN IC_RUN SQ_RUN RL_RUN \
-	ST_RUN SG_RUN OB_RUN IF_RUN DB_RUN IX_RUN
+	ST_RUN SG_RUN OB_RUN IF_RUN RW_RUN DB_RUN IX_RUN
 else
-MODULES = NC SM IC SQ RL ST SG OB IF DBNOIX
+MODULES = NC SM IC SQ RL ST SG OB IF RW DBNOIX
 MODULES_RUN = NC_RUN SM_RUN IC_RUN SQ_RUN RL_RUN \
-	ST_RUN SG_RUN OB_RUN IF_RUN DBNOIX_RUN
+	ST_RUN SG_RUN OB_RUN IF_RUN RW_RUN DBNOIX_RUN
 endif
 
 EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 	summarynoix.txt NC.txt SM.txt IC.txt SQ.txt RL.txt IX.txt \
-	ST.txt SG.txt OB.txt IF.txt DB.txt DBNOIX.txt RW.txt Makefile.module.in
+	ST.txt SG.txt OB.txt IF.txt RW.txt DB.txt DBNOIX.txt Makefile.module.in
 
 #CLEANFILES = EXEC85 summary.log
 
@@ -72,6 +72,9 @@ OB_RUN: OB
 IF_RUN: IF
 	@cd IF && $(MAKE) -k
 
+RW_RUN: RW
+	@cd RW && $(MAKE) -k
+
 DB_RUN: DB
 	@cd DB && $(MAKE) -k
 
@@ -80,9 +83,6 @@ IX_RUN: IX
 
 DBNOIX_RUN: DBNOIX
 	@cd DBNOIX && $(MAKE) -k
-
-RW_RUN: RW
-	@cd RW && $(MAKE) -k
 
 CM_RUN: CM
 	@cd CM && $(MAKE) -k

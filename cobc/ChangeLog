@@ -1,6 +1,11 @@
 
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* parser.y, tree.c, tree.h, typeck.c: minor adjustments after merge
+	  of reportwriter branch
+	* codegen.c: adjustments after merge of reportwriter branch for
+	  refactored code parts (no additional refactoring so far)
+	* cobc.c (cobc_enum_explain): added CB_TAG_REPORT_LINE
 	* cobc.c (process_run) [_WIN32]: change / in given output name to \
 
 2017-12-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
@@ -2750,6 +2755,15 @@
 
 	* codegen.c: added check of recursive CALL for INITIAL programs
 
+2015-02-13  Ron Norman <rjn@inglenet.com>
+
+	* tree.c: fix to only adjust up file record_max for REPORT files
+
+2015-02-12  Ron Norman <rjn@inglenet.com>
+
+	* Merged Report Writer code into 2.0 code base to create a new 2.0
+	  with all collective features
+
 2015-01-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c: updated valid_time_format and valid_datetime_format to pass
@@ -2764,6 +2778,18 @@
 
 	* parser.y: fixed segfault with STOP "literal" with the ACCEPT OMITTED
 	  feature attempting to generate code with null pointer
+
+2014-12-11  Ron Norman <rjn@inglenet.com>
+
+	* Fixes so WARNING is given if no DETAIL lines in a report
+
+2014-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: fixing Bug #79 by defining PLUS_KEYWORD: PLUS|+
+
+2014-06-14  Ron Norman <rjn@inglenet.com>
+
+	* Fixes for LINE|COL 0 to get error message
 
 2014-12-02  Sergey Kashyrin <ska@kiska.net>
 
@@ -2945,6 +2971,10 @@
 2014-01-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: Fixing Bug #55 UDF with no parameters does not compile
+
+2013-11-20  Ron Norman <rjn@inglenet.com>
+
+	* Report Writer module
 
 201?-??-??  Sergey Kashyrin <ska@kiska.net>
 

@@ -217,6 +217,15 @@ static const char		*cob_source_statement = NULL;
 static FILE			*cob_trace_file = NULL;
 static unsigned int		cob_source_line = 0;
 
+#ifdef COB_DEBUG_LOG
+static const char		*cob_debug_env = NULL;
+static FILE				*cob_debug_file = NULL;
+static int				cob_debug_level = 9;
+static char				*cob_debug_file_name = NULL;
+static char				*cob_debug_mod = NULL;
+static char				cob_debug_modules[12][4] = {"", "", "", "", "", "", "", "", "", "", "", ""};
+#endif
+
 static char			*strbuff = NULL;
 
 static int		cob_process_id = 0;
@@ -504,6 +513,21 @@ cob_terminate_routines (void)
 	if (!cob_initialized || !cobglobptr) {
 		return;
 	}
+
+#if COB_DEBUG_LOG
+	if (cob_debug_file && cob_debug_file != cob_trace_file) {
+		if(cob_debug_file_name != NULL
+		&& ftell(cob_debug_file) == 0) {
+			fclose (cob_debug_file);
+			unlink(cob_debug_file_name);
+			cob_debug_file_name = NULL;
+		} else {
+			fclose (cob_debug_file);
+		}
+	}
+	cob_debug_file = NULL;
+#endif
+
 	if (cob_trace_file && cob_trace_file != stderr) {
 		fclose (cob_trace_file);
 		cob_trace_file = NULL;
@@ -6883,3 +6907,215 @@ cob_init (const int argc, char **argv)
 	/* The above must be last in this function as we do early return */
 	/* from certain ifdef's */
 }
+
+/******************************/
+/* Routines for COB_DEBUG_LOG */
+/******************************/
+
+#ifdef COB_DEBUG_LOG
+/* Check env var value and open log file */
+/* 
+ * Env var is  COB_DEBUG_LOG
+ * Env Var string is a series of keyword=value parameters where keywords:
+ * L=x  - T for trace level, W for warnings, N for normal, A for ALL
+ * M=yy - rw for report writer, the 2 char code is tabled and compared
+ *        with the value coded on DEBUG_LOG("yy",("format",args));
+ * O=path/file - file name to write log data to. A ## is replaced by process id
+ *        default is  cob_debug_log.##
+ */
+int
+cob_debug_open (char *debug_env)
+{
+	int		i,j;
+	char	val[256],logfile[256];
+	if(debug_env == NULL)
+		return 0;
+	strcpy(logfile,"cob_debug_log.##");
+	for(i=0; debug_env[i] != 0; i++) {
+		if(debug_env[i] == ','
+		|| debug_env[i] == ';')
+			continue;
+		if(debug_env[i+1] == '=') {
+			if(toupper(debug_env[i]) == 'M') {
+				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 4; i++)
+					val[j++] = debug_env[i];
+				val[j] = 0;
+				for(j=0; cob_debug_modules[j][0] > ' '; j++);
+				if(j < 12)
+					strcpy(cob_debug_modules[j],val);
+			} else if(toupper(debug_env[i]) == 'L') {
+				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 4; i++)
+					val[j++] = debug_env[i];
+				val[j] = 0;
+				if(toupper(val[0]) == 'T')
+					cob_debug_level = 3;
+				else if(toupper(val[0]) == 'W')
+					cob_debug_level = 2;
+				else if(toupper(val[0]) == 'N')
+					cob_debug_level = 0;
+				else if(toupper(val[0]) == 'A')
+					cob_debug_level = 9;
+
+			} else if(toupper(debug_env[i]) == 'O') {
+				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 240; i++)
+					val[j++] = debug_env[i];
+				val[j] = 0;
+				strcpy(logfile,val);
+			} else {
+				/* Unknown x=, Just ignore it for now */
+			}
+			if(debug_env[i] == 0) i--;
+		}
+	}
+	strcpy(val,logfile);
+	for(i=j=0; val[i] != 0; ) {
+		if(memcmp(&val[i],"##",2) == 0
+		|| memcmp(&val[i],"++",2) == 0
+		|| memcmp(&val[i],"$$",2) == 0
+		|| memcmp(&val[i],"%%",2) == 0) {
+			j += sprintf(&logfile[j],"%d",getpid());
+			i += 2;
+		} else {
+			logfile[j++] = val[i++];
+		}
+	}
+	logfile[j] = 0;
+	cob_debug_file = fopen(logfile,"w");
+	if(cob_debug_file == NULL) {
+		cob_runtime_error (_("Error '%s opening COB_DEBUG_LOG '%s'"),strerror(errno),debug_env);
+		return 0;
+	}
+	cob_debug_file_name = cob_strdup(logfile);
+#if 0 /* currently not needed as the functions is always active */
+	cob_runtime_error ("Compiler was not built with --enable-debug-log so ignore COB_DEBUG_LOG");
+	COB_UNUSED (debug_env);
+#endif
+	return 1;
+}
+#endif
+
+#if defined(COB_DEBUG_LOG)
+/* Determine if DEBUGLOG is to be allowed */
+int
+cob_debug_logit(int level, char *module)
+{
+	int	i;
+	if(cob_debug_file == NULL)
+		return 1;
+	if(level > cob_debug_level) 
+		return 1;
+	for(i=0; i < 12 && cob_debug_modules[i][0] > ' '; i++) {
+		if(strcasecmp("ALL",cob_debug_modules[i]) == 0) {
+			cob_debug_mod = module;
+			return 0;						/* Logging is allowed */
+		}
+		if(strcasecmp(module,cob_debug_modules[i]) == 0) {
+			cob_debug_mod = &cob_debug_modules[i];
+			return 0;						/* Logging is allowed */
+		}
+	}
+	return 1;
+}
+
+/* Write logging line */
+static int cob_debug_hdr = 1;
+static int cob_debug_prv_line = 0;
+int
+cob_debug_logger(char *fmt, ...)
+{
+	va_list			ap;
+	int		ln;
+	if(cob_debug_file == NULL) 
+		return 0;
+	if(cob_debug_hdr) {
+		if(cob_debug_mod)
+			fprintf(cob_debug_file,"%-3s:",cob_debug_mod);
+		if(cob_source_file)
+			fprintf(cob_debug_file," %s :",cob_source_file);
+		if(*fmt == '~') {			/* Force line# out again to log file */
+			fmt++;
+			cob_debug_prv_line = -1;
+		}
+		if(cob_source_line && cob_source_line != cob_debug_prv_line) {
+			fprintf(cob_debug_file,"%5d : ",cob_source_line);
+			cob_debug_prv_line = cob_source_line;
+		} else {
+			fprintf(cob_debug_file,"%5s : "," ");
+		}
+		cob_debug_hdr = 0;
+	}
+	va_start (ap, fmt);
+	vfprintf (cob_debug_file, fmt, ap);
+	va_end (ap);
+	ln = strlen(fmt);
+	if(fmt[ln-1] == '\n') {
+		cob_debug_hdr = 1;
+		fflush(cob_debug_file);
+	}
+	return 0;
+}
+
+static int			/* Return TRUE if word is repeated 16 times */
+repeatWord(
+	char	*match,	/* 4 bytes to match */
+	char	*mem)	/* Memory area to match repeated value */
+{
+	if(memcmp(match, &mem[0], 4) == 0
+	&& memcmp(match, &mem[4], 4) == 0
+	&& memcmp(match, &mem[8], 4) == 0
+	&& memcmp(match, &mem[12], 4) == 0)
+		return 1;
+	return 0;
+}
+
+/* Hexdump of memory */
+int
+cob_debug_dump(void *pMem, int len)
+{
+#define dMaxPerLine	24
+#define dMaxHex ((dMaxPerLine*2)+(dMaxPerLine/4-1))
+	register int i, j, k;
+	register char	c, *mem = pMem;
+	char	lastWord[4];
+	char	hex[dMaxHex+4],chr[dMaxPerLine+4];
+	int		adrs = 0;
+
+	if(cob_debug_file == NULL) 
+		return 0;
+	memset(lastWord,0xFD, 4);
+	for(i=0; i < len; ) {
+        for(j=k=0; j < dMaxPerLine && (i+j) < len; j++) {
+			k += sprintf(&hex[k],"%02X",mem[i+j]&0xFF);
+			if( (j % 4) == 3 )
+				hex[k++] = ' ';
+		}
+		if(hex[k-1] == ' ')
+			hex[k-1] = 0;
+		hex[k] = 0;
+
+		k = 0;
+		for(j=0; j<dMaxPerLine && (i+j)<len; j++) {
+			c = mem[i+j];
+			chr[k++] =  c >= ' ' && c < 0x7f ? c : '.';
+		}
+		chr[k++] = 0;
+
+		fprintf(cob_debug_file," %6.6X : %-*s '%s'\n",adrs+i,dMaxHex,hex,chr);
+		if ( (i + dMaxPerLine) < len )
+			memcpy( (char *)lastWord, (char *)&mem[i+dMaxPerLine-4], j<4?j:4);
+		i += dMaxPerLine;
+		if( (i + (16*2)) < len
+		&& repeatWord( lastWord, &mem[i])
+		&& repeatWord( lastWord, &mem[i+dMaxPerLine])) {
+		    fprintf(cob_debug_file," %6.6X : ",adrs+i);
+			while(i < len-16
+			&& repeatWord(lastWord,&mem[i]))
+				i += 16;
+			fprintf(cob_debug_file," thru %6.6X same as last word\n",adrs+i-1);
+		}
+	}
+	fflush(cob_debug_file);
+
+	return 0;
+}
+#endif

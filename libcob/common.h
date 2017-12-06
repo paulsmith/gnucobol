@@ -999,6 +999,35 @@ typedef cob_s64_t cob_flags_t;
 
 /* End Screen attribute defines */
 
+/* Report attribute defines */
+
+#define COB_REPORT_LINE			(1 << 0)
+#define COB_REPORT_LINE_PLUS		(1 << 1)
+#define COB_REPORT_COLUMN_PLUS		(1 << 2)
+#define COB_REPORT_RESET_FINAL		(1 << 3)
+#define COB_REPORT_HEADING		(1 << 4)
+#define COB_REPORT_FOOTING		(1 << 5)
+#define COB_REPORT_PAGE_HEADING		(1 << 6)
+#define COB_REPORT_PAGE_FOOTING		(1 << 7)
+#define COB_REPORT_CONTROL_HEADING	(1 << 8)
+#define COB_REPORT_CONTROL_HEADING_FINAL (1 << 9)
+#define COB_REPORT_CONTROL_FOOTING	(1 << 10)
+#define COB_REPORT_CONTROL_FOOTING_FINAL (1 << 11)
+#define COB_REPORT_DETAIL		(1 << 12)
+#define COB_REPORT_NEXT_GROUP_LINE	(1 << 13)
+#define COB_REPORT_NEXT_GROUP_PLUS	(1 << 14)
+#define COB_REPORT_NEXT_GROUP_PAGE	(1 << 15)
+#define COB_REPORT_LINE_NEXT_PAGE	(1 << 16)
+#define COB_REPORT_NEXT_PAGE		(1 << 17)
+#define COB_REPORT_GROUP_INDICATE	(1 << 18)
+
+#define COB_REPORT_REF_EMITED		(1 << 31)
+#define COB_REPORT_LINE_EMITED		(1 << 30)
+#define COB_REPORT_SUM_EMITED		(1 << 29)
+#define COB_REPORT_EMITED		(COB_REPORT_REF_EMITED|COB_REPORT_LINE_EMITED|COB_REPORT_SUM_EMITED)
+
+/* End Report attribute defines */
+
 
 /* Structure/union declarations */
 
@@ -1247,13 +1276,93 @@ typedef struct {
 } cob_linage;
 
 
+/********************/
 /* Report structure */
+/********************/
 
-typedef struct {
+/* for each SUM field of each line in the report */
+typedef struct cob_report_sum_ {
+	struct cob_report_sum_	*next;			/* Next field */
+	cob_field		*f;			/* Field to be summed */
+} cob_report_sum;
+
+/* for each field of each line in the report */
+typedef struct cob_report_field_ {
+	struct cob_report_field_ *next;			/* Next field */
+	cob_field		*f;			/* Field definition */
+	cob_field		*source;		/* Field SOURCE */
+	cob_field		*control;		/* CONTROL Field */
+	char			*litval;		/* Literal value */
+	int			litlen;			/* Length of literal string */
+	int			flags;
+	int			line;
+	int			column;
+	int			step_count;
+	int			next_group_line;	/* NEXT GROUP line or PLUS line; see flags */
+	unsigned int		group_indicate:1;	/* field had GROUP INDICATE */
+	unsigned int		suppress:1;		/* SUPPRESS display of this field */
+} cob_report_field;
+
+/* for each line of a report */
+typedef struct cob_report_line_ {
+	struct cob_report_line_	*sister;		/* Next line */
+	struct cob_report_line_	*child;			/* Child line */
+	cob_report_field	*fields;		/* List of fields on this line */
+	cob_field		*control;		/* CONTROL Field */
+	int			use_decl;		/* Label# of Declaratives code */
+	int			flags;			/* flags defined with line */
+	int			line;			/* 'LINE' value */
+	int			step_count;
+	int			next_group_line;
+	int			report_flags;		/* flags ORed with upper level flags */
+	unsigned int		suppress:1;		/* SUPPRESS printing this line */
+} cob_report_line;
+
+/* for each 'line referencing a control field' of the report */
+typedef struct cob_report_control_ref_ {
+	struct cob_report_control_ref_ *next;		/* Next control_ref */
+	cob_report_line		*ref_line;		/* Report Line with this control field */
+} cob_report_control_ref;
+
+/* for each 'control field' of the report */
+typedef struct cob_report_control_ {
+	struct cob_report_control_ *next;		/* Next control */
+	const char		*name;			/* Control field name */
+	cob_field		*f;			/* Field definition */
+	cob_field		*val;			/* previous field value */
+	cob_field		*sf;			/* save field value */
+	cob_report_control_ref	*control_ref;		/* References to this control field */
+	int			sequence;		/* Order of Control Break */
+	unsigned int		data_change:1;		/* Control field data did change */
+	unsigned int		has_heading:1;		/* CONTROL HEADING */
+	unsigned int		has_footing:1;		/* CONTROL FOOTING */
+	unsigned int		suppress:1;		/* SUPPRESS printing this break */
+} cob_report_control;
+
+/* for each SUM counter in the report */
+typedef struct cob_report_sumctr_ {
+	struct cob_report_sumctr_ *next;		/* Next sum counter */
+	const char		*name;			/* Name of this SUM counter */
+	cob_report_sum		*sum;			/* list of fields to be summed */
+	cob_field		*counter;		/* Field to hold the SUM counter */
+	cob_field		*f;			/* Data Field for SUM counter */
+	cob_report_control	*control;		/* RESET when this control field changes */
+	unsigned int		reset_final:1;		/* RESET on FINAL */
+	unsigned int		control_final:1;	/* CONTROL FOOTING FINAL */
+	unsigned int		subtotal:1;		/* This is a 'subtotal' counter */
+	unsigned int		crossfoot:1;		/* This is a 'crossfoot' counter */
+} cob_report_sum_ctr;
+
+/* main report table for each RD */
+typedef struct cob_report_ {
 	const char		*report_name;		/* Report name */
+	struct cob_report_	*next;			/* Next report */
 	cob_file		*report_file;		/* Report file */
 	cob_field		*page_counter;		/* PAGE-COUNTER */
 	cob_field		*line_counter;		/* LINE-COUNTER */
+	cob_report_line		*first_line;		/* First defined LINE of report */
+	cob_report_control	*controls;		/* control fields of report */
+	cob_report_sum_ctr	*sum_counters;		/* List of SUM counters in report */
 	int			def_lines;		/* Default lines */
 	int			def_cols;		/* Default columns */
 	int			def_heading;		/* Default heading */
@@ -1262,11 +1371,28 @@ typedef struct {
 	int			def_last_detail;	/* Default last detail */
 	int			def_footing;		/* Default footing */
 	int			curr_page;		/* Current page */
-	int			curr_lines;		/* Current lines */
-	int			curr_cols;		/* Current columns */
+	int			curr_line;		/* Current line on page */
+	int			curr_cols;		/* Current column on line */
 	int			curr_status;		/* Current status */
+	int			next_value;		/* NEXT GROUP Line/Page/Plus value */
+	unsigned int		control_final:1;	/* CONTROL FINAL declared */
+	unsigned int		global:1;		/* IS GLOBAL declared */
+	unsigned int		first_detail:1;		/* First Detail on page */
+	unsigned int		in_page_footing:1;	/* doing page footing now */
+	unsigned int		in_page_heading:1;	/* doing page heading now */
+	unsigned int		first_generate:1;	/* Ready for first GENERATE */
+	unsigned int		initiate_done:1;	/* INITIATE has been done */
+	unsigned int		next_line:1;		/* Advance to line on next DETAIL */
+	unsigned int		next_line_plus:1;	/* Advance to plus line on next DETAIL */
+	unsigned int		next_page:1;		/* Advance to next page on next DETAIL */
+	unsigned int		next_just_set:1;	/* NEXT xxx was just set so ignore */
+	unsigned int		in_report_footing:1;	/* doing report footing now */
+	unsigned int		incr_line:1;		/* 'curr_lines' should be incremented */
+	unsigned int		foot_next_page:1;	/* Advance to next page after all CONTROL footings */
 } cob_report;
-
+/***************************/
+/* End of Report structure */
+/***************************/
 
 /* Global variable structure */
 
@@ -1797,9 +1923,17 @@ COB_EXPIMP void	cob_file_sort_giving	(cob_file *, const size_t, ...);
 COB_EXPIMP void	cob_file_release	(cob_file *);
 COB_EXPIMP void	cob_file_return		(cob_file *);
 
-/*******************************/
-/* Functions in intrinsic.c */
+/***************************/
+/* Functions in reportio.c */
+/***************************/
+COB_EXPIMP void cob_report_initiate	(cob_report *);
+COB_EXPIMP int  cob_report_terminate	(cob_report *, int);
+COB_EXPIMP int  cob_report_generate	(cob_report *, cob_report_line *, int);
+COB_EXPIMP void cob_report_suppress	(cob_report *r, cob_report_line *l);
 
+/****************************/
+/* Functions in intrinsic.c */
+/****************************/
 COB_EXPIMP void		cob_put_indirect_field		(cob_field *);
 COB_EXPIMP void		cob_get_indirect_field		(cob_field *);
 COB_EXPIMP cob_field *cob_switch_value			(const int);

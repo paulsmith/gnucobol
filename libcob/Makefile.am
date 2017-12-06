@@ -21,7 +21,7 @@
 
 lib_LTLIBRARIES = libcob.la
 libcob_la_SOURCES = common.c move.c numeric.c strings.c \
-	fileio.c call.c intrinsic.c termio.c screenio.c cobgetopt.c
+	fileio.c call.c intrinsic.c termio.c screenio.c reportio.c cobgetopt.c
 #ToDo Man Page
 #dist_man_MANS = libcob.3
 #COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)

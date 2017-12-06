@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2017 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -118,6 +118,7 @@ static size_t			overlapping = 0;
 static int			expr_index;		/* Stack index */
 static int			expr_stack_size;	/* Stack max size */
 static struct expr_node		*expr_stack;		/* Expression node stack */
+static int			report_id = 1;
 
 static const unsigned char	hexval[] = "0123456789ABCDEF";
 
@@ -597,7 +598,7 @@ cb_validate_one (cb_tree x)
 					strcmp (current_statement->name, "DISPLAY") != 0 &&
 					strcmp (current_statement->name, "DESTROY") != 0 &&
 					strcmp (current_statement->name, "CLOSE WINDOW") != 0) {
-						cb_error_x (x, _ ("invalid use of HANDLE item"));
+						cb_error_x (x, _("invalid use of HANDLE item"));
 					return 1;
 				}
 			}
@@ -677,8 +678,31 @@ cb_check_numeric_edited_name (cb_tree x)
 }
 
 cb_tree
+cb_check_sum_field (cb_tree x)
+{
+	struct cb_field		*f;
+	if (x == cb_error_node) {
+		return cb_error_node;
+	}
+
+	if (CB_TREE_CATEGORY (x) != CB_CATEGORY_NUMERIC_EDITED) {
+		return x;
+	}
+
+	f = CB_FIELD (cb_ref(x));
+	if(f->report) {		/* If part of a REPORT, check if it is a SUM */
+		struct cb_field *sc = get_sum_data_field(f->report, f);
+		if(sc) {	/* Use the SUM variable instead of the print variable */
+			return cb_build_field_reference (sc, NULL);
+		}
+	}
+	return x;
+}
+
+cb_tree
 cb_check_numeric_value (cb_tree x)
 {
+	struct cb_field	*f;
 	if (x == cb_error_node) {
 		return cb_error_node;
 	}
@@ -687,7 +711,24 @@ cb_check_numeric_value (cb_tree x)
 		return x;
 	}
 
-	cb_error_x (x, _("'%s' is not a numeric value"), cb_name (x));
+	switch(CB_TREE_CATEGORY (x)) {
+	case CB_CATEGORY_ALPHABETIC:
+		cb_error_x (x, _("'%s' is Alpha, instead of a numeric value"), cb_name (x));
+		break;
+	case CB_CATEGORY_ALPHANUMERIC_EDITED:
+		cb_error_x (x, _("'%s' is Alpha Edited, instead of a numeric value"), cb_name (x));
+		break;
+	case CB_CATEGORY_NUMERIC_EDITED:
+		f = CB_FIELD (cb_ref(x));
+		if(f->report) {
+			struct cb_field *sc = get_sum_data_field(f->report, f);
+			if(sc) {	/* Use the SUM variable instead of the print variable */
+				return cb_build_field_reference (sc, NULL);
+			}
+		}
+	default:
+		cb_error_x (x, _("'%s' is not a numeric value"), cb_name (x));
+	}
 	return cb_error_node;
 }
 
@@ -2929,24 +2970,28 @@ cb_validate_program_data (struct cb_program *prog)
 	for (l = current_program->report_list; l; l = CB_CHAIN (l)) {
 		/* Set up LINE-COUNTER / PAGE-COUNTER */
 		rep = CB_REPORT (CB_VALUE (l));
-		snprintf (buff, (size_t)COB_MINI_MAX,
-			  "LINE-COUNTER %s", rep->cname);
-		x = cb_build_field (cb_build_reference (buff));
-		CB_FIELD (x)->usage = CB_USAGE_UNSIGNED_INT;
-		CB_FIELD (x)->values = CB_LIST_INIT (cb_zero);
-		CB_FIELD (x)->count++;
-		cb_validate_field (CB_FIELD (x));
-		rep->line_counter = cb_build_field_reference (CB_FIELD (x), NULL);
-		CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
-		snprintf (buff, (size_t)COB_MINI_MAX,
-			  "PAGE-COUNTER %s", rep->cname);
-		x = cb_build_field (cb_build_reference (buff));
-		CB_FIELD (x)->usage = CB_USAGE_UNSIGNED_INT;
-		CB_FIELD (x)->values = CB_LIST_INIT (cb_zero);
-		CB_FIELD (x)->count++;
-		cb_validate_field (CB_FIELD (x));
-		rep->page_counter = cb_build_field_reference (CB_FIELD (x), NULL);
-		CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
+		if (rep->line_counter == NULL) {
+			snprintf (buff, (size_t)COB_MINI_MAX,
+				  "LINE-COUNTER %s", rep->cname);
+			x = cb_build_field (cb_build_reference (buff));
+			CB_FIELD (x)->usage = CB_USAGE_UNSIGNED_INT;
+			CB_FIELD (x)->values = CB_LIST_INIT (cb_zero);
+			CB_FIELD (x)->count++;
+			cb_validate_field (CB_FIELD (x));
+			rep->line_counter = cb_build_field_reference (CB_FIELD (x), NULL);
+			CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
+		}
+		if (rep->page_counter == NULL) {
+			snprintf (buff, (size_t)COB_MINI_MAX,
+				  "PAGE-COUNTER %s", rep->cname);
+			x = cb_build_field (cb_build_reference (buff));
+			CB_FIELD (x)->usage = CB_USAGE_UNSIGNED_INT;
+			CB_FIELD (x)->values = CB_LIST_INIT (cb_zero);
+			CB_FIELD (x)->count++;
+			cb_validate_field (CB_FIELD (x));
+			rep->page_counter = cb_build_field_reference (CB_FIELD (x), NULL);
+			CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
+		}
 	}
 
 	current_program->file_list = cb_list_reverse (current_program->file_list);
@@ -9003,6 +9048,8 @@ cb_build_move (cb_tree src, cb_tree dst)
 		CB_REFERENCE (src)->flag_receiving = 0;
 	}
 #endif
+	src = cb_check_sum_field(src);
+	dst = cb_check_sum_field(dst);
 
 	if (CB_REFERENCE_P (dst)) {
 		/* Clone reference */
@@ -9090,6 +9137,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 	}
 
 	cb_check_data_incompat (src);
+	src = cb_check_sum_field(src);
 
 	tempval = 0;
 	if (cb_list_length (dsts) > 1) {
@@ -9119,7 +9167,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 			continue;
 		}
 		if (!tempval) {
-			m = cb_build_move (src, x);
+			m = cb_build_move (src, cb_check_sum_field(x));
 		} else {
 			m = CB_BUILD_FUNCALL_1 ("cob_get_indirect_field", x);
 		}
@@ -10573,3 +10621,162 @@ cobc_init_typeck (void)
 	expr_prio[0] = 10;
 }
 #endif
+
+/*
+ * Emit any MOVEs from non-simple field to temp field
+ * for GENERATE to execute
+ */
+static int report_in_footing = 0;
+static void
+cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
+{
+	struct cb_field         *p;
+	for (p = f; p; p = p->sister) {
+		if(p->report_flag & (COB_REPORT_FOOTING|COB_REPORT_CONTROL_FOOTING|COB_REPORT_CONTROL_FOOTING_FINAL)) {
+			report_in_footing = 1;
+		}
+		if(p->report_from) {
+			if(forterminate
+			&& report_in_footing) {
+				cb_emit_move( p->report_from, p->report_source);
+			} else
+			if(!forterminate
+			&& !report_in_footing) {
+				cb_emit_move( p->report_from, p->report_source);
+			}
+		}
+		if(p->report_when) {
+			int  ifwhen = 2;
+			if(p->children)
+				ifwhen = 3;
+			if(forterminate
+			&& report_in_footing) {
+				cb_emit (cb_build_if (p->report_when, NULL, (cb_tree)p, ifwhen));
+			} else
+			if(!forterminate
+			&& !report_in_footing) {
+				cb_emit (cb_build_if (p->report_when, NULL, (cb_tree)p, ifwhen));
+			}
+		}
+		if(p->children) {
+			cb_emit_report_moves(r, p->children, forterminate);
+			if(p->report_flag & (COB_REPORT_FOOTING|COB_REPORT_CONTROL_FOOTING|COB_REPORT_CONTROL_FOOTING_FINAL)) {
+				report_in_footing = 0;
+			}
+		}
+	}
+}
+
+static void
+cb_emit_report_move_id(cb_tree rep)
+{
+	struct cb_report *r = CB_REPORT (cb_ref(rep));
+	if(r
+	&& r->id == 0) {
+		r->id = report_id++;
+		cb_emit (CB_BUILD_FUNCALL_1 ("$M", rep));
+		cb_emit_report_moves(r, r->records, 0);
+		cb_emit (CB_BUILD_FUNCALL_1 ("$t", rep));
+		cb_emit_report_moves(r, r->records, 1);
+		cb_emit (CB_BUILD_FUNCALL_1 ("$m", rep));
+	}
+}
+
+/* INITIATE statement */
+
+void
+cb_emit_initiate (cb_tree rep)
+{
+	if (rep == cb_error_node) {
+		return;
+	}
+	rep->tag = CB_TAG_REPORT;
+	cb_emit_report_move_id(rep);
+	cb_emit (CB_BUILD_FUNCALL_1 ("$I", rep));
+
+}
+
+/* TERMINATE statement */
+
+void
+cb_emit_terminate (cb_tree rep)
+{
+	if (rep == cb_error_node) {
+		return;
+	}
+	rep->tag = CB_TAG_REPORT;
+	cb_emit_report_move_id(rep);
+	cb_emit (CB_BUILD_FUNCALL_1 ("$T", rep));
+
+}
+
+/* GENERATE statement */
+
+void
+cb_emit_generate (cb_tree x)
+{
+	struct cb_field	*f;
+	struct cb_report *r;
+	cb_tree		y;
+	cb_tree		z;
+	struct cb_word	*word;
+	if (x == cb_error_node) {
+		return;
+	}
+	y = cb_ref (x);
+	if (y == cb_error_node) {
+		return;
+	}
+	if(CB_TREE_TAG (y) == CB_TAG_REPORT) {
+		r = CB_REPORT (y);
+		z = cb_build_reference (r->name);
+		word = CB_REFERENCE (z)->word;
+		z->category = CB_CATEGORY_UNKNOWN;
+		z->tag = CB_TAG_REPORT;
+		CB_REFERENCE (z)->word = word;
+		CB_REFERENCE (z)->value = CB_TREE (y);
+		cb_emit_report_move_id(z);
+		cb_emit (CB_BUILD_FUNCALL_2 ("$R", z, NULL));
+		return;
+	}
+	f = CB_FIELD (y);
+	if(f == NULL
+	|| f->report == NULL) {
+		cb_error_x (x, _("Data item is not part of a report"));
+	} else {
+		r = CB_REPORT (f->report);
+		z = cb_build_reference (f->name);
+		word = CB_REFERENCE (z)->word;
+		z->category = CB_CATEGORY_UNKNOWN;
+		z->tag = CB_TAG_REPORT;
+		CB_REFERENCE (z)->word = word;
+		CB_REFERENCE (z)->value = CB_TREE (f->report);
+		x->tag = CB_TAG_REPORT_LINE;
+		cb_emit_report_move_id(z);
+		cb_emit (CB_BUILD_FUNCALL_2 ("$R", z, x));
+	}
+}
+
+/* GENERATE statement */
+
+void
+cb_emit_suppress (struct cb_field *f)
+{
+	cb_tree		z;
+	struct cb_word	*word;
+	/* MORE TO DO HERE */
+	/* Find cob_report_control and set on suppress flag */
+	if(f == NULL
+	|| f->report == NULL) {
+		cb_error (_("Improper use of SUPPRESS PRINTING "));
+		return;
+	}
+	z = cb_build_reference (f->name);
+	word = CB_REFERENCE (z)->word;
+	z->category = CB_CATEGORY_UNKNOWN;
+	z->tag = CB_TAG_REPORT;
+	CB_REFERENCE (z)->word = word;
+	CB_REFERENCE (z)->value = CB_TREE (f->report);
+	cb_emit (CB_BUILD_FUNCALL_2 ("$S", z, cb_int (f->id)));
+}
+

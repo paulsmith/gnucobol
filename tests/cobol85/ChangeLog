@@ -1,4 +1,10 @@
 
+2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: adjustments after merge from reportwriter
+	* report.pl: retro-fixed RW301 and RW302 to be comp_only
+	* RW.txt, summary.txt, summarynoix.txt: adjusted expected results
+
 2017-09-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.module.in: (new file) moved content of generated

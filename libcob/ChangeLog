@@ -1,4 +1,13 @@
 
+2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, common.h, reportio.c: minor adjustments after merge
+	  of reportwriter branch
+	* coblocal.h, common.h: moved declarations for COB_DEBUG_LOG to common.h
+	  and set to COB_HIDDEN instead of COB_EXTERN
+	* common.c, coblocal.h: disabled all parts of internal debug log
+	  if COB_DEBUG_LOG is not defined
+
 2017-12-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_system) [_WIN32]: FR #153 workaround for CALL 'SYSTEM'
@@ -913,6 +922,23 @@
 
 	* screenio.c: fixed buffer overflow in screen section ACCEPT
 
+2015-02-18  Ron Norman <rjn@inglenet.com>
+
+	* common.c (cob_debug_logger): if fmt starts with '~' then force print of line#
+	* reportio.c: Fix spacing problems related to CONTROL FOOTING
+
+2015-02-16  Ron Norman <rjn@inglenet.com>
+
+	Implemented DEBUG logging for Compiler developers
+	* common.h: added DEBUG_xxx macros
+	* common.c: added cob_debug_xxx subroutines
+	* reportio.c: updated to use this new COB_DEBUG_LOG feature
+
+2015-02-12  Ron Norman <rjn@inglenet.com>
+
+	* Merged Report Writer code into 2.0 code base to create a new 2.0
+	  with all collective features
+
 2015-01-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h, intrinsic.c: updated (cob_valid_time_format) and
@@ -922,6 +948,11 @@
 2015-01-12  Sergey Kashyrin <ska@kiska.net>
 
 	* intrinsic.c: Fix for Bug #120 - Function CURRENT-DATE
+
+2014-12-11  Ron Norman <rjn@inglenet.com>
+
+	* reportio.c: Corrected to handle processing of a single DETAIL line
+	  (It had been incorrectly processing all DETAIL lines of report)
 
 2014-12-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -998,6 +1029,12 @@
 	* common.c: use (cob_sys_getpid) everywhere instead of (getpid);
 	  use (setenv) if available
 
+2014-06-17  Ron Norman (rjn@inglenet.com)
+	* parser.y, tree.c, codegen.c Added check to verfiy PAGE LIMITS of report
+
+2014-06-14  Ron Norman (rjn@inglenet.com)
+	* parser.y Fixes for LINE|COL 0 to get error message
+
 2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* call.c: inverted preload list for WIN32 builds
@@ -1047,6 +1084,10 @@
 
 	* strings.c: Fix Unstring delimited by all delimiter size > 1 issue,
 	  see bug #54.
+
+2013-11-18  Ron Norman
+
+	* Report Writer Module initial development
 
 2013-??-??  Sergey Kashyrin <ska@kiska.net>
 

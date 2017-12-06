@@ -733,6 +733,8 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "PROTOTYPE";
 	case CB_TAG_DECIMAL_LITERAL:
 		return "DECIMAL LITERAL";
+	case CB_TAG_REPORT_LINE:
+		return "REPORT LINE";
 	default:
 		break;
 	}

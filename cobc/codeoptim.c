@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 2006-2012, 2013 Free Software Foundation, Inc.
    Written by Roger While
 
    This file is part of GnuCOBOL.
@@ -72,6 +72,14 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("	s->type = type;");
 		output_storage ("	s->occurs = occurs;");
 		output_storage ("	s->attr = attr;");
+		output_storage ("}");
+		return;
+
+	case COB_SET_REPORT:
+		output_storage ("static void COB_NOINLINE");
+		output_storage ("cob_set_report (cob_report *r, cob_file *pfile)");
+		output_storage ("{");
+		output_storage ("	r->report_file = pfile;");
 		output_storage ("}");
 		return;
 

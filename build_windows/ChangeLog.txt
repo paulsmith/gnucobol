@@ -1,4 +1,10 @@
 
+2017-12-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+
+	* config.h.in: added COB_DEBUG_LOG (as undefined)
+	* vs2005, vs2008, vs2010, vs2012, vs2013, vs2015, vs2017: added
+	  libcob/reportio.c
+
 2017-10-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
 
 	* makebisonflex.bat: check ERRORLEVEL instead of using || and &&

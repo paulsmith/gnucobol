@@ -74,6 +74,12 @@
 #undef COB_64_BIT_POINTER
 #endif
 
+/* Compilation of computed gotos works */
+/* #undef COB_COMPUTED_GOTO */
+
+/* Enable internal logging (Developers only!) */
+/* #undef COB_DEBUG_LOG */
+
 /* Executable extension */
 #define COB_EXE_EXT ".exe"
 
@@ -409,7 +415,7 @@
 #define PACKAGE_NAME "GnuCOBOL"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "GnuCOBOL 2.3"
+#define PACKAGE_STRING "GnuCOBOL 3.0-dev"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gnucobol"
@@ -418,7 +424,7 @@
 #define PACKAGE_URL "https://www.gnu.org/software/gnucobol/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.3-dev"
+#define PACKAGE_VERSION "3.0-dev"
 
 /* Define a patch level (numeric, max. 8 digits) */
 #define PATCH_LEVEL COB_NUM_TAR_DATE

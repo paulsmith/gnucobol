@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\libcob\numeric.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\libcob\reportio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\libcob\screenio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
