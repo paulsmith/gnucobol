@@ -1020,10 +1020,21 @@ typedef cob_s64_t cob_flags_t;
 #define COB_REPORT_LINE_NEXT_PAGE	(1 << 16)
 #define COB_REPORT_NEXT_PAGE		(1 << 17)
 #define COB_REPORT_GROUP_INDICATE	(1 << 18)
+#define COB_REPORT_GROUP_ITEM		(1 << 19)
+#define COB_REPORT_HAD_WHEN		(1 << 20)
+#define COB_REPORT_COLUMN_LEFT		(1 << 21)
+#define COB_REPORT_COLUMN_CENTER	(1 << 22)
+#define COB_REPORT_COLUMN_RIGHT		(1 << 23)
+#define COB_REPORT_PRESENT		(1 << 24)
+#define COB_REPORT_BEFORE		(1 << 25)
+#define COB_REPORT_PAGE			(1 << 26)
+#define COB_REPORT_ALL			(1 << 27)
 
-#define COB_REPORT_REF_EMITED		(1 << 31)
-#define COB_REPORT_LINE_EMITED		(1 << 30)
+#define COB_REPORT_NEGATE		(1 << 28)	/* Negative: so ABSENT == PRESENT & NEGATE */
+
 #define COB_REPORT_SUM_EMITED		(1 << 29)
+#define COB_REPORT_LINE_EMITED		(1 << 30)
+#define COB_REPORT_REF_EMITED		(1 << 31)
 #define COB_REPORT_EMITED		(COB_REPORT_REF_EMITED|COB_REPORT_LINE_EMITED|COB_REPORT_SUM_EMITED)
 
 /* End Report attribute defines */
@@ -1294,13 +1305,15 @@ typedef struct cob_report_field_ {
 	cob_field		*control;		/* CONTROL Field */
 	char			*litval;		/* Literal value */
 	int			litlen;			/* Length of literal string */
-	int			flags;
+	unsigned int		flags;
 	int			line;
 	int			column;
 	int			step_count;
 	int			next_group_line;	/* NEXT GROUP line or PLUS line; see flags */
+	unsigned int		level:8;		/* Data item level number */
 	unsigned int		group_indicate:1;	/* field had GROUP INDICATE */
 	unsigned int		suppress:1;		/* SUPPRESS display of this field */
+	unsigned int		present_now:1;		/* PRESENT BEFORE|AFTER to be processed */
 } cob_report_field;
 
 /* for each line of a report */
@@ -1310,11 +1323,11 @@ typedef struct cob_report_line_ {
 	cob_report_field	*fields;		/* List of fields on this line */
 	cob_field		*control;		/* CONTROL Field */
 	int			use_decl;		/* Label# of Declaratives code */
-	int			flags;			/* flags defined with line */
+	unsigned int		flags;			/* flags defined with line */
 	int			line;			/* 'LINE' value */
 	int			step_count;
 	int			next_group_line;
-	int			report_flags;		/* flags ORed with upper level flags */
+	unsigned int		report_flags;		/* flags ORed with upper level flags */
 	unsigned int		suppress:1;		/* SUPPRESS printing this line */
 } cob_report_line;
 

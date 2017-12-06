@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2015 Free Software Foundation, Inc.
+## Copyright (C) 2014-2016 Free Software Foundation, Inc.
 ## Written by Ron Norman
 ##
 ## This file is part of GnuCOBOL.
@@ -20,7 +20,7 @@
  
 ### ISO+IEC+1989-2002 REPORT WRITER module
 
-AT_SETUP([REPORT BUG1])
+AT_SETUP([Report Line Order])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -186,7 +186,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([REPORT BUG3])
+AT_SETUP([Report Overlapping Fields])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -460,7 +460,7 @@ AT_CHECK([diff reference report.txt], [0])
 AT_CLEANUP
 
 
-AT_SETUP([Customer Report])
+AT_SETUP([Sample Customer Report])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
@@ -775,7 +775,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Charge Report])
+AT_SETUP([Sample Charge Report])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
@@ -1128,7 +1128,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Charge Report 2])
+AT_SETUP([Sample Charge Report 2])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
@@ -1498,7 +1498,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Charge Report 3])
+AT_SETUP([Sample Charge Report 3])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
@@ -1798,7 +1798,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Charge Report 4])
+AT_SETUP([Sample Charge Report 4])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[05 A 007328
@@ -2218,7 +2218,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Payroll Report])
+AT_SETUP([Sample Payroll Report])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[01 6622 M GAVIN SHAFER         19740201 026000 01521 03362 00075 021042
@@ -2384,6 +2384,7 @@ AT_DATA([prog.cob], [
            88  END-OF-FILE                         VALUE 'Y'.
        77  PR-SW                       PIC X(1)    VALUE 'N'.
        77  SUM-FED-WH                  PIC 9(04)V99 VALUE 0.
+       77  HI-GROSS                    PIC 9(05) VALUE 2000.
       
        01  WS-EMPLOYEE-KEY.
            03  WS-EMPLOYEE-NUMBER      PIC 9(04).
@@ -2462,14 +2463,20 @@ AT_DATA([prog.cob], [
        01  DEPT-HEAD TYPE CONTROL HEADING PRR-DEPARTMENT-NUMBER
            NEXT GROUP +1.
            02  LINE PLUS 1.
-               03 COLUMN 01    PIC X(18) VALUE
-                  'DEPARTMENT NUMBER:'.
+               03  COLUMN 01   PIC X(18) VALUE
+                     'DEPARTMENT NUMBER:'.
                03  COLUMN 21   PIC 9(02) SOURCE PRR-DEPARTMENT-NUMBER.
                03  COLUMN 24   PIC X(15) SOURCE DE-NAME (DE-IX).
       
        01  EMPLOYEE-DETAIL TYPE DETAIL.
            02  LINE +1.
                03  COLUMN 01   PIC X(27) SOURCE PRR-EMPLOYEE-KEY.
+               03  COLUMN 30   PIC X(5) VALUE "Hello"
+                               PRESENT AFTER NEW PRR-EMPLOYEE-KEY
+                                              OR PAGE.
+               03  COLUMN 30   PIC X(5) VALUE " ''  "
+                               ABSENT AFTER NEW PRR-EMPLOYEE-KEY
+                                              OR PAGE.
                03  COLUMN 50   PIC 9(04).99 SOURCE PRR-GROSS-PAY.
                03  COLUMN 60   PIC 9(03).99 SOURCE PRR-FICA-WH.
                03  COLUMN 70   PIC 9(03).99 SOURCE PRR-FED-WH.
@@ -2559,6 +2566,8 @@ AT_DATA([prog.cob], [
            02  LINE PLUS 2.
                03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (1).
                03  COLUMN 08   PIC X(15) SOURCE DE-NAME (1).
+               03  FILLER      PRESENT WHEN DE-GROSS (1) > HI-GROSS.
+                 05  COLUMN 30 PIC X(4) VALUE "High".
                03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (1).
                03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (1 1).
                03  COLUMN 51   PIC X VALUE '%'.
@@ -2574,9 +2583,13 @@ AT_DATA([prog.cob], [
                03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (1).
                03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (1 5).
                03  COLUMN 121  PIC X VALUE '%'.
+               03  FILLER      PRESENT WHEN WPC-PERCENT (1 5) < 15 .
+                 05  COLUMN PLUS 1 PIC X(2) VALUE "Lo".
            02  LINE PLUS 2.
                03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (2).
                03  COLUMN 08   PIC X(15) SOURCE DE-NAME (2).
+               03  FILLER      PRESENT WHEN DE-GROSS (2) > HI-GROSS.
+                 05  COLUMN 30 PIC X(4) VALUE "High".
                03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (2).
                03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (2 1).
                03  COLUMN 51   PIC X VALUE '%'.
@@ -2592,9 +2605,13 @@ AT_DATA([prog.cob], [
                03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (2).
                03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (2 5).
                03  COLUMN 121  PIC X VALUE '%'.
+               03  FILLER      PRESENT WHEN WPC-PERCENT (2 5) < 15 .
+                 05  COLUMN PLUS 1 PIC X(2) VALUE "Lo".
            02  LINE PLUS 2.
                03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (3).
                03  COLUMN 08   PIC X(15) SOURCE DE-NAME (3).
+               03  FILLER      PRESENT WHEN DE-GROSS (3) > HI-GROSS.
+                 05  COLUMN 30 PIC X(4) VALUE "High".
                03  COLUMN 38   PIC $$,$$9.99 SOURCE DE-GROSS (3).
                03  COLUMN 48   PIC ZZ9 SOURCE WPC-PERCENT (3 1).
                03  COLUMN 51   PIC X VALUE '%'.
@@ -2610,6 +2627,8 @@ AT_DATA([prog.cob], [
                03  COLUMN 108  PIC $$,$$9.99 SOURCE DE-NET (3).
                03  COLUMN 118  PIC ZZ9 SOURCE WPC-PERCENT (3 5).
                03  COLUMN 121  PIC X VALUE '%'.
+               03  FILLER      PRESENT WHEN WPC-PERCENT (3 5) < 15 .
+                 05  COLUMN PLUS 1 PIC X(2) VALUE "Lo".
            02  LINE PLUS 2.
                03  COLUMN 05   PIC 9(02) SOURCE DE-NUMBER (4).
                03  COLUMN 08   PIC X(15) SOURCE DE-NAME (4).
@@ -2779,7 +2798,10 @@ AT_DATA([prog.cob], [
       
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 266: Warning: PLUS is ignored on first field of line
+prog.cob: 288: Warning: PLUS is ignored on first field of line
+prog.cob: 310: Warning: PLUS is ignored on first field of line
+])
 
 AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -2860,11 +2882,11 @@ DEPARTMENT NUMBER:  25 MAINTENANCE
 
     * * * DEPARTMENT TOTALS * * *
 
-    01 MANAGEMENT                    $5,140.00  30%     $300.71  30%     $520.25  21%      $15.00  19%     $4,304.07  31%
+    01 MANAGEMENT            High    $5,140.00  30%     $300.71  30%     $520.25  21%      $15.00  19%     $4,304.07  31%
 
-    05 ADMINISTRATIVE                $1,915.00  11%     $112.03  11%     $485.83  20%      $14.75  18%     $1,482.42  11%
+Lo  05 ADMINISTRATIVE                $1,915.00  11%     $112.03  11%     $485.83  20%      $14.75  18%     $1,482.42  11%
 
-    10 SKILLED NURSING               $5,165.00  30%     $302.18  30%     $798.24  33%      $12.00  15%     $4,052.58  29%
+    10 SKILLED NURSING       High    $5,165.00  30%     $302.18  30%     $798.24  33%      $12.00  15%     $4,052.58  29%
 
     15 PATIENT SUPPORT               $1,726.00  10%     $100.96  10%     $239.12  10%      $12.00  15%     $1,373.92  10%
 
@@ -2880,7 +2902,170 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([STUDENT REPORT; Test INITIAL])
+AT_SETUP([Sample REPORT with RIGHT/CENTER])
+AT_KEYWORDS([report])
+
+AT_DATA([inp_data],
+[00099Dorken, Keith       CS 000008
+00007Allinson, Sandy     MA 000118
+00125Allinson, Nina      MA 012308
+00126Allinson, Natalia   MA 000008
+00127Allinson, Kristina  MBA000008
+00131Norman, Nancy       SC 000006
+00132Norman, Becky       SC 000116
+00133Norman, Michelle    SC 112306
+00134Norman, James       AM 000006
+12345Norman, Ron         CS 000008
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+               SELECT INPUT-FILE ASSIGN TO EXTERNAL STUDENT
+                              ORGANIZATION IS LINE SEQUENTIAL. 
+               SELECT PRINT-FILE ASSIGN TO EXTERNAL 
+                              LINE ADVANCING REPORT1.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD   INPUT-FILE.
+       01   INPUT-REC.
+               05  STUDENT-ID               PIC  9(5).
+               05  STUDENT-NAME             PIC  X(20).
+               05  MAJOR                    PIC  XXX.
+               05  NUM-COURSES              PIC  9(6).
+
+       FD   PRINT-FILE
+             BLOCK CONTAINS 0 RECORDS                                     
+             LABEL RECORD STANDARD                                        
+             RECORDING MODE IS F                                          
+             RECORD CONTAINS 132 CHARACTERS  
+            REPORT IS STUDENT-REPORT.
+       01   RW-REC  PIC X(90).
+
+       WORKING-STORAGE SECTION.
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+
+       REPORT SECTION.
+       RD   STUDENT-REPORT
+           PAGE LIMIT 30 
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 25
+           FOOTING 28
+           LINE LIMIT 90
+           .
+       01 HEADING-LINE.
+          02 TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(50) VALUE 
+                "         1         2         3         4         5".
+            05  COLUMN 51     PIC X(20) VALUE "         6         7".
+          02 TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(50) VALUE 
+                "12345678901234567890123456789012345678901234567890".
+            05  COLUMN 51     PIC X(20) VALUE "12345678901234567890".
+          02 TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(2)  VALUE "Ln".
+            05  COLUMN 5      PIC X(6)  VALUE "--ID--".
+            05  COLUMN 16     PIC X(20) VALUE "--------Name--------".
+            05  COLUMN 39     PIC X(5)  VALUE "Major".
+            05  COLUMN 45     PIC XXX   VALUE "*-*".
+            05  COLUMN 54     PIC X(5)  VALUE "+Odd+".
+            05  COLUMN 61     PIC X(6)  VALUE "+Even+".
+
+       01 REPORT-LINE
+          TYPE DETAIL LINE PLUS  1.
+            05  COLUMN PLUS 1 PIC Z9   
+                  SOURCE LINE-COUNTER OF STUDENT-REPORT.
+            05  COLUMN LEFT PLUS 2   PIC Z(5)9 SOURCE STUDENT-ID.
+            05  COLUMN CENTER 25     PIC X(20) SOURCE STUDENT-NAME.
+            05  COLUMN RIGHT  43     PIC X(5)  SOURCE MAJOR.
+            05  COLUMN        45     PIC XXX   VALUE ":-:".
+            05  COLUMN CENTER 56     PIC Z(4)9 SOURCE NUM-COURSES.
+            05  COLUMN CENTER 63     PIC Z(5)9 SOURCE NUM-COURSES.
+            05  COLUMN        68     PIC X   VALUE ":".
+
+       PROCEDURE DIVISION.
+       A000-MAINLINE.
+           OPEN  INPUT  INPUT-FILE
+                 OUTPUT PRINT-FILE
+           PERFORM DO-INIT.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO" TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+               UNTIL ARE-THERE-MORE-RECORDS = "NO ".
+           PERFORM DO-TERM.
+           CLOSE INPUT-FILE
+                 PRINT-FILE.
+           STOP RUN.
+
+       A001-LOOP.
+           GENERATE REPORT-LINE.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO " TO ARE-THERE-MORE-RECORDS.
+       DO-INIT.
+           INITIATE STUDENT-REPORT.
+
+       DO-TERM.
+           TERMINATE STUDENT-REPORT.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:62: warning: PLUS is ignored on first field of line
+prog.cob:64: warning: PLUS is not recommended with LEFT, RIGHT or CENTER
+])
+
+AT_CHECK([DD_STUDENT=./inp_data DD_REPORT1=./report.txt \
+$COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference],
+[         1         2         3         4         5         6         7
+1234567890123456789012345678901234567890123456789012345678901234567890
+Ln  --ID--     --------Name--------   Major *-*      +Odd+  +Even+
+
+ 5  99            Dorken, Keith          CS :-:        8      8    :
+ 6  7            Allinson, Sandy         MA :-:       118    118   :
+ 7  125          Allinson, Nina          MA :-:      12308  12308  :
+ 8  126         Allinson, Natalia        MA :-:        8      8    :
+ 9  127        Allinson, Kristina       MBA :-:        8      8    :
+10  131           Norman, Nancy          SC :-:        6      6    :
+11  132           Norman, Becky          SC :-:       116    116   :
+12  133         Norman, Michelle         SC :-:      12306  112306 :
+13  134           Norman, James          AM :-:        6      6    :
+14  12345          Norman, Ron           CS :-:        8      8    :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([STUDENT REPORT with INITIAL])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[00123Dorken, Keith       CS 08
@@ -2921,24 +3106,14 @@ AT_DATA([prog.cob], [
 
        WORKING-STORAGE SECTION.
        01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
-       01   REPORT-DUMMY.
-            05  FILLER        PIC X(3) VALUE SPACES.
-            05  COLUMN-4      PIC 9(6).
-            05  FILLER        PIC X(5) VALUE SPACES.
-            05  COLUMN-15     PIC X(20).
-            05  FILLER        PIC X(5) VALUE SPACES.
-            05  COLUMN-40     PIC XXX.
-            05  FILLER        PIC X(4) VALUE SPACES.
-            05  COLUMN-46     PIC Z99.9.
-            05  LAST-CHAR     PIC X.
 
        REPORT SECTION.
        RD   STUDENT-REPORT
-           PAGE LIMIT 50 LINES
+           PAGE LIMIT 30 LINES
            HEADING 2
-           FIRST DETAIL 5
-           LAST DETAIL 45
-           FOOTING 48.
+           FIRST DETAIL 3
+           LAST DETAIL 25
+           FOOTING 28.
        01   REPORT-LINE
             TYPE DETAIL
              LINE PLUS  1.
@@ -2974,18 +3149,6 @@ AT_DATA([prog.cob], [
        A000-MAINLINE.
            OPEN  INPUT  INPUT-FILE
                  OUTPUT PRINT-FILE
-           MOVE SPACES  TO REPORT-DUMMY.
-           DISPLAY "*** Report Test 1 ***" UPON CONSOLE.
-           MOVE SPACES  TO REPORT-DUMMY.
-           MOVE 5       TO COLUMN-4.
-           MOVE "Hello" TO COLUMN-15.
-           MOVE "Bye"   TO COLUMN-40.
-           MOVE 75.0    TO COLUMN-46.
-           MOVE "*"     TO LAST-CHAR
-      *  Test that overlapping move does not mangle data
-           MOVE REPORT-DUMMY (2:50) TO REPORT-DUMMY.
-           MOVE "*"     TO LAST-CHAR
-           DISPLAY REPORT-DUMMY UPON CONSOLE.
            PERFORM DO-INIT.
            READ INPUT-FILE
                AT END
@@ -3023,36 +3186,16 @@ AT_CAPTURE_FILE(./report.txt)
 
 AT_DATA([reference], [
 
-
-
-05 000123     Dorken, Keith            CS   -*-    08
-06 000124     Allinson, Sandy          MA   -*-    08
-07 000125     Allinson, Nina           MA   -*-    08
-08 000126     Allinson, Natalia        MA   -*-    08
-09 000127     Allinson, Kristina       MBA  -*-    08
-10 000131     Norman, Nancy            SC   -*-    06
-11 000132     Norman, Becky            SC   -*-    06
-12 000133     Norman, Michelle         SC   -*-    06
-13 000134     Norman, James            AM   -*-    06
-14 012345     Norman, Ron              CS   -*-    08
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+03 000123     Dorken, Keith            CS   -*-    08
+04 000124     Allinson, Sandy          MA   -*-    08
+05 000125     Allinson, Nina           MA   -*-    08
+06 000126     Allinson, Natalia        MA   -*-    08
+07 000127     Allinson, Kristina       MBA  -*-    08
+08 000131     Norman, Nancy            SC   -*-    06
+09 000132     Norman, Becky            SC   -*-    06
+10 000133     Norman, Michelle         SC   -*-    06
+11 000134     Norman, James            AM   -*-    06
+12 012345     Norman, Ron              CS   -*-    08
 
 
 
@@ -3432,7 +3575,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Control Break Report])
+AT_SETUP([Sample Control Break])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[Norman, Ronald J    25CS Malcolm, Mike        Waterloo
@@ -3442,7 +3585,16 @@ Dorken, Kevin       35CS Manning, Eric        Waterloo
 Allinson, A R       25EC Manning, Eric        Whistler
 Norman, Michelle    27EC Manning, Donna       Toronto 
 Dorken, Melissa     37EC Manning, Donna       Toronto 
-Norman, Becky       27EC DiMetri, Donna       Toronto 
+Norseman, Ben01     27EC DiMetri, Gary        Toronto 
+Norseman, Ben02     27EC DiMetri, Gary        Toronto 
+Norseman, Ben03     27EC DiMetri, Gary        Toronto 
+Norseman, Ben04     27EC DiMetri, Gary        Toronto 
+Norseman, Ben05     27EC DiMetri, Gary        Toronto 
+Norseman, Ben06     27EC DiMetri, Gary        Toronto 
+Norseman, Ben07     27EC DiMetri, Gary        Toronto 
+Norseman, Ben08     27EC DiMetri, Gary        Toronto 
+Norseman, Ben09     27EC DiMetri, Gary        Toronto 
+Norseman, Ben10     27EC DiMetri, Gary        Toronto 
 ])
 
 AT_DATA([prog.cob], [
@@ -3483,10 +3635,10 @@ AT_DATA([prog.cob], [
        REPORT SECTION.
        RD    CONTROL-BREAK
            CONTROLS ARE MAJOR ADVISOR
-           PAGE LIMIT 50 LINES
+           PAGE LIMIT 25 LINES
            HEADING 1
            FIRST DETAIL 5
-           FOOTING 48.
+           FOOTING 23.
        01  TYPE IS PAGE HEADING.
            05  LINE 1.
                 10  COLUMN 61    PIC X(4) VALUE 'PAGE'.
@@ -3496,7 +3648,7 @@ AT_DATA([prog.cob], [
                        VALUE 'STUDENT ADVISEMENT LIST'.
 
        01  TYPE IS CONTROL HEADING MAJOR.
-           05     LINE 5 ON NEXT PAGE.
+           05     LINE 5 ON NEXT PAGE .
                 10  COLUMN 37    PIC X(5)  VALUE 'MAJOR'.
                 10  COLUMN 44    PIC X(20) SOURCE MAJOR.
 
@@ -3513,6 +3665,10 @@ AT_DATA([prog.cob], [
                 10  COLUMN  3    PIC X(20) SOURCE STUDENT-NAME.
                 10  COLUMN 26    PIC 99    SOURCE COURSE-PTS.
                 10  COLUMN 34    PIC X(15) SOURCE CAMPUS.
+                10  COLUMN 51    PIC X(5) VALUE "Hello"
+                              PRESENT AFTER PAGE OR ADVISOR.
+                10  COLUMN 51    PIC X(5) VALUE '  "  '
+                              ABSENT AFTER PAGE OR ADVISOR.
                 10  COLUMN 60    PIC X(20) SOURCE ADVISOR 
                                        GROUP INDICATE.
 
@@ -3575,43 +3731,18 @@ AT_DATA([reference], [                                                          
 
    STUDENT NAME         PTS      CAMPUS                    ADVISOR
    --------------------------------------------------------------------
-  Norman, Ronald J       25       Waterloo                 Malcolm, Mike
-  Dorken, Keith A        35       Waterloo
+  Norman, Ronald J       25       Waterloo        Hello    Malcolm, Mike
+  Dorken, Keith A        35       Waterloo          "
 
     ADVISOR Malcolm, Mike        TOTAL   2
 
-  Norman, James J        25       Waterloo                 Manning, Eric
-  Dorken, Kevin          35       Waterloo
+  Norman, James J        25       Waterloo        Hello    Manning, Eric
+  Dorken, Kevin          35       Waterloo          "
 
     ADVISOR Manning, Eric        TOTAL   2
 
 
     MAJOR TOTAL        4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3625,39 +3756,38 @@ AT_DATA([reference], [                                                          
 
    STUDENT NAME         PTS      CAMPUS                    ADVISOR
    --------------------------------------------------------------------
-  Allinson, A R          25       Whistler                 Manning, Eric
+  Allinson, A R          25       Whistler        Hello    Manning, Eric
 
     ADVISOR Manning, Eric        TOTAL   1
 
-  Norman, Michelle       27       Toronto                  Manning, Donna
-  Dorken, Melissa        37       Toronto
+  Norman, Michelle       27       Toronto         Hello    Manning, Donna
+  Dorken, Melissa        37       Toronto           "
 
     ADVISOR Manning, Donna       TOTAL   2
 
-  Norman, Becky          27       Toronto                  DiMetri, Donna
+  Norseman, Ben01        27       Toronto         Hello    DiMetri, Gary
+  Norseman, Ben02        27       Toronto           "
+  Norseman, Ben03        27       Toronto           "
+  Norseman, Ben04        27       Toronto           "
+  Norseman, Ben05        27       Toronto           "
+  Norseman, Ben06        27       Toronto           "
 
-    ADVISOR DiMetri, Donna       TOTAL   1
+                                                            PAGE    3
 
+                         STUDENT ADVISEMENT LIST
 
-    MAJOR TOTAL        4
+  Norseman, Ben07        27       Toronto         Hello    DiMetri, Gary
+  Norseman, Ben08        27       Toronto           "
+  Norseman, Ben09        27       Toronto           "
+  Norseman, Ben10        27       Toronto           "
 
-
-         FINAL TOTAL   8
-
-
-
-
-
-
-
-
-
-
+    ADVISOR DiMetri, Gary        TOTAL  10
 
 
+    MAJOR TOTAL       13
 
 
-
+         FINAL TOTAL  17
 
 
 
@@ -3674,7 +3804,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Inventory Report])
+AT_SETUP([Sample Inventory Report])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[01Data Processing   02000500012388
@@ -3864,7 +3994,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([Dup Detail Line])
+AT_SETUP([Duplicate Detail Line])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -3992,7 +4122,7 @@ AT_CHECK([diff reference report.txt], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([OCCURS Test])
+AT_SETUP([Report with OCCURS])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -4010,11 +4140,21 @@ AT_DATA([prog.cob], [
        FD  rp-file REPORT rp.
 
        REPORT SECTION.
-       RD  rp.
+       RD  RP 
+           PAGE LIMIT 10 LINES
+           HEADING 1
+           FIRST DETAIL 4.
+       01 HEADING-LINE.
+          02 TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(50) VALUE 
+                "         1         2         3         4         5".
+          02 TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(50) VALUE 
+                "12345678901234567890123456789012345678901234567890".
 
-       01  rp-detail TYPE DETAIL, LINE + 1.
-            03  nums  COLUMN 1, PIC 999 OCCURS 3 TIMES.
-            03  mark  COLUMN +2 PIC X(6).
+       01  RP-DTL1 TYPE DETAIL, LINE + 1.
+            03  NUMS  COLUMN 1  PIC 999 OCCURS 3 TIMES STEP 10.
+            03  MARK  COLUMN +2 PIC X(4).
 
        01  rp-dtl2 TYPE DETAIL, LINE + 1.
             03  grps  COLUMN 1 OCCURS 3 TIMES.
@@ -4022,42 +4162,71 @@ AT_DATA([prog.cob], [
                05  FILLER    PIC X.
                05  tag2      PIC X(5).
                05  FILLER    PIC XX.
-      *        05  FILLER    OCCURS 2 TIMES.
-      *            10  tag3  PIC X(2).
+
+       01  RP-DTL3 TYPE DETAIL, LINE + 1.
+            03  NNNS  COLUMN 1, 11, 21, 27 PIC 999.
+            03  TAGP  COLUMN PLUS 3 PIC X(4).
+
+       01  RP-DTL4 TYPE DETAIL, LINE + 1.
+            03  NUM4A               PIC 999.
+            03  NUM4B COLUMN PLUS 7 PIC 999 OCCURS 3.
+            03  MRK4  COLUMN +2     PIC X(4).
 
        PROCEDURE DIVISION.
+	   DISPLAY "Test started" UPON PRINTER.
            OPEN OUTPUT rp-file
            INITIATE rp
 
            MOVE 100 TO NUMS (1), NUMS (2), NUMS (3)
-           MOVE "<-->" TO MARK.
-           GENERATE rp-detail
+           MOVE "<1>" TO MARK.
+           GENERATE rp-dtl1
 
            MOVE ALL '*' TO grps(1), grps(2), grps(3)
            MOVE "Tag1" to tag1 (1), tag1 (2), tag1 (3)
            MOVE "Tag2" to tag2 (1), tag2 (2), tag2 (3)
-      *    MOVE "Ab"   TO tag3(1,1) tag3(1,2)
-      *    MOVE "De"   TO tag3(2,1) tag3(2,2)
-      *    MOVE "Hi"   TO tag3(3,1) tag3(3,2)
            GENERATE rp-dtl2
+
+           MOVE 200 TO NNNS (1), NNNS (2), NNNS (3) NNNS (4)
+           MOVE "<3>" TO TAGP.
+           GENERATE RP-DTL3.
+
+           MOVE 400 TO NUM4A
+           MOVE 401 TO NUM4B (1)
+           MOVE 402 TO NUM4B (2)
+           MOVE 403 TO NUM4B (3)
+           MOVE "<4>" TO MRK4.
+           GENERATE RP-DTL4
 
            TERMINATE rp  
            CLOSE rp-file
+	   DISPLAY "Test completed" UPON PRINTER.
 
            STOP RUN .
            END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 49: Warning: 'PRINTER' is not defined in SPECIAL-NAMES
+prog.cob: 75: Warning: 'PRINTER' is not defined in SPECIAL-NAMES
+])
 
 AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [], [])
+./prog], [0], [Test started
+Test completed
+], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
 
-AT_DATA([reference], [100100100  <-->
+AT_DATA([reference], [         1         2         3         4         5
+12345678901234567890123456789012345678901234567890
+
+100       100       100         <1>
 Tag1 *Tag2 **Tag1 *Tag2 **Tag1 *Tag2 **
+200       200       200   200   <3>
+400       401       402       403         <4>
+
+
+
 ])
 
 AT_CHECK([diff reference report.txt], [0])
@@ -4065,7 +4234,7 @@ AT_CHECK([diff reference report.txt], [0])
 AT_CLEANUP
 
 
-AT_SETUP([Dupliate INITIATE])
+AT_SETUP([Duplicate INITIATE])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -4193,7 +4362,7 @@ AT_CHECK([diff reference report.txt], [0])
 AT_CLEANUP
 
 
-AT_SETUP([Next Page Bug ])
+AT_SETUP([Next Group Next Page])
 AT_KEYWORDS([report])
 
 AT_DATA([inp_data],[MW1000051IN15021220150212OR150212043ITEM_NUMBER_22      0000002800002999
@@ -8471,6 +8640,268 @@ IN150202   20150202                          OR150216          016  ITEM_NUMBER_
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+])
+
+AT_CHECK([diff reference report.txt], [0])
+
+AT_CLEANUP
+
+
+AT_SETUP([Report PRESENT AFTER])
+AT_KEYWORDS([report])
+
+AT_DATA([inp_data],
+[SAINATH KOTGIRE          30/03/201611029473  20 00100000                          00000100
+UDAY PRATIVADI           30/03/201604547552  20 00100000                          00000200
+MILIND PARDESHI          30/03/201611256856  20 00100000                          00000300
+AJIT PATIL               30/03/201610503086  20 00000500                          00000400
+VINOD KAMBLE             30/03/201615487558  20 00100000                          00000500
+SACHIN TENDUNLKAR        30/03/201614645425  20 00500000                          00000600
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+           SELECT IN-FILE   ASSIGN TO EXTERNAL INFILE
+                  LINE SEQUENTIAL
+                  FILE STATUS IS WS-INPUT-STATUS.
+
+           SELECT OUT-FILE  ASSIGN TO EXTERNAL OREPORT
+                  LINE SEQUENTIAL
+                  FILE STATUS IS WS-OUTPUT-STATUS.
+
+       DATA DIVISION.
+
+       FILE SECTION.
+
+       FD  IN-FILE
+           RECORDING MODE IS F
+           BLOCK 0.
+
+       01  IN-REC.
+           05 IN-EMP-NAME                  PIC X(25).
+           05 IN-REPORT-PERIOD             PIC X(10).
+           05 IN-EMP-USERID                PIC X(10).
+           05 IN-BILL-DAYS                 PIC X(3).
+           05 IN-SALARY                    PIC 9(8).
+           05 FILLER                       PIC X(34).
+
+       FD  OUT-FILE
+           RECORDING MODE IS F
+           REPORT IS REPORT1.
+
+       01  REP-REC                         PIC X(100).
+
+       WORKING-STORAGE SECTION.
+       01  WS-FILE-FLAGS.
+           05 WS-INPUT-STATUS              PIC XX.
+              88  WS-INPUT-OK                        VALUE '00'.
+              88  WS-INPUT-EOF                       VALUE '10'.
+           05 WS-OUTPUT-STATUS             PIC XX.
+              88  WS-OUTPUT-OK                       VALUE '00'.
+      *-----------------------------------------------------------*
+      * MISCELLANOUS FIELDS                                       *
+      *-----------------------------------------------------------*
+       01  WS-MISC.
+           05 WS-EMP-NAME                  PIC X(25).
+           05 WS-REPORT-PERIOD             PIC X(10).
+           05 WS-EMP-USERID                PIC X(10).
+           05 WS-BILL-DAYS                 PIC X(3).
+           05 WS-SALARY                    PIC 9(8).
+
+       01  WS-MISC-DATE.
+           05 WS-DATE                      PIC 9(8) VALUE 20160422.
+           05 WS-TIME                      PIC 9(8) VALUE 10550000.
+           05 FILLER REDEFINES WS-TIME.
+              10 WS-HH                     PIC 99.
+              10 WS-MI                     PIC 99.
+              10 WS-SS                     PIC 99.
+              10 WS-HU                     PIC 99.
+
+       REPORT SECTION.
+
+       RD REPORT1
+          PAGE LIMIT IS 65 LINES
+          LINE LIMIT 132
+          HEADING 1
+          CONTROL ARE WS-SALARY.
+
+       01  MAIN-HEADER TYPE IS PAGE HEADING.
+           05 LINE 1.
+              10 COLUMN CENTER 45  PIC X(35)  VALUE
+                 'STARK TECHNOLOGIES MONTHLY REPORT'.
+
+           05 LINE 2.
+              10 COLUMN CENTER 45  PIC X(50)  VALUE ALL '-'.
+
+           05 LINE 3.
+              10 COLUMN 02  PIC X(14)  VALUE 'REPORT PERIOD:'.
+              10 COLUMN 20  PIC 9999/99/99 SOURCE WS-DATE.
+              10 COLUMN 32  PIC 99    SOURCE WS-HH.
+              10 COLUMN 34  PIC X     VALUE ':'.
+              10 COLUMN 35  PIC 99    SOURCE WS-MI.
+
+       01  TYPE IS CONTROL HEADING
+                FOR WS-SALARY OR PAGE.
+           05 LINE PLUS 2 PRESENT AFTER NEW WS-SALARY.
+              10 COLUMN 6   PIC X(9)   VALUE 'EMP NAME:'.
+              10 COLUMN 30  PIC X(13)  VALUE 'EMP USERID:'.
+              10 COLUMN 60  PIC X(13)  VALUE 'BILLING DAYS'.
+              10 COLUMN 80  PIC X(15)  VALUE 'SALARY CREDITED'.
+           05 LINE PLUS 1 PRESENT AFTER NEW WS-SALARY.
+              10 COLUMN 2   PIC X(100)  VALUE ALL '+'.
+
+       01  DETAIL-1 TYPE DETAIL.
+           05 LINE PLUS 1.
+              10 COLUMN 6   PIC X(25)  SOURCE WS-EMP-NAME.
+              10 COLUMN 30  PIC X(08)  SOURCE WS-EMP-USERID.
+              10 COLUMN 60  PIC X(3)   SOURCE WS-BILL-DAYS.
+              10 COLUMN 80  PIC Z(7)9  SOURCE WS-SALARY.
+
+       01  REP-FOOTER TYPE DETAIL.
+           05 LINE PLUS 2.
+              10 COLUMN 2   PIC X(100) VALUE ALL '*'.
+           05 LINE PLUS 1.
+              10 COLUMN 30  PIC X(23)  VALUE 'END OF SALARY REPORT'.
+           05 LINE PLUS 1.
+              10 COLUMN 2   PIC X(100) VALUE ALL '*'.
+
+       PROCEDURE DIVISION.
+
+      *    ACCEPT WS-DATE FROM DATE YYYYMMDD.
+      *    ACCEPT WS-TIME FROM TIME.
+
+           INITIATE REPORT1
+
+      *    GENERATE MAIN-HEADER
+
+           PERFORM 100-OPEN-FILES
+           PERFORM 200-MAIN-PROCESS
+
+           TERMINATE REPORT1
+
+           CLOSE IN-FILE
+           CLOSE OUT-FILE
+           STOP RUN.
+
+       100-OPEN-FILES.
+
+           OPEN INPUT IN-FILE
+
+           IF WS-INPUT-OK
+              CONTINUE
+           ELSE
+              DISPLAY 'ERROR OPENING INFILE FILE.STATUS = '
+                     WS-INPUT-STATUS
+              STOP RUN
+           END-IF
+
+           OPEN OUTPUT OUT-FILE
+
+           IF WS-OUTPUT-OK
+              INITIALIZE REP-REC
+           ELSE
+              DISPLAY 'ERROR OPENING OREPORT FILE.STATUS = '
+                     WS-OUTPUT-STATUS
+              STOP RUN
+           END-IF.
+
+       200-MAIN-PROCESS.
+      *    GENERATE HEADER-1
+
+           PERFORM UNTIL WS-INPUT-EOF
+               READ IN-FILE
+               MOVE IN-REC  TO WS-MISC
+               EVALUATE WS-INPUT-STATUS
+                 WHEN '00'
+                   GENERATE DETAIL-1
+                 WHEN '10'
+                   GENERATE REP-FOOTER
+                 WHEN OTHER
+                   DISPLAY ':ERROR READING INFILE FILE.STATUS = '
+                           WS-INPUT-STATUS
+                   STOP RUN
+               END-EVALUATE
+           END-PERFORM.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([DD_INFILE=./inp_data DD_OREPORT=./report.txt \
+$COBCRUN_DIRECT ./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./report.txt)
+
+AT_DATA([reference], [                           STARK TECHNOLOGIES MONTHLY REPORT
+                    --------------------------------------------------
+ REPORT PERIOD:    2016/04/22  10:55
+
+     EMP NAME:               EMP USERID:                   BILLING DAYS        SALARY CREDITED
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     SAINATH KOTGIRE         11029473                      20                    100000
+     UDAY PRATIVADI          04547552                      20                    100000
+     MILIND PARDESHI         11256856                      20                    100000
+
+     EMP NAME:               EMP USERID:                   BILLING DAYS        SALARY CREDITED
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     AJIT PATIL              10503086                      20                       500
+
+     EMP NAME:               EMP USERID:                   BILLING DAYS        SALARY CREDITED
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     VINOD KAMBLE            15487558                      20                    100000
+
+     EMP NAME:               EMP USERID:                   BILLING DAYS        SALARY CREDITED
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     SACHIN TENDUNLKAR       14645425                      20                    500000
+
+ ****************************************************************************************************
+                             END OF SALARY REPORT
+ ****************************************************************************************************
 
 
 

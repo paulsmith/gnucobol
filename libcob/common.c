@@ -198,7 +198,7 @@ static const cob_field_attr	const_alpha_attr =
 				{COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL};
 
 static char			*cob_local_env = NULL;
-static int			current_arg;
+static int			current_arg = 0;
 static unsigned char		*commlnptr = NULL;
 static size_t			commlncnt;
 static size_t			cob_local_env_size = 0;
@@ -218,12 +218,12 @@ static FILE			*cob_trace_file = NULL;
 static unsigned int		cob_source_line = 0;
 
 #ifdef COB_DEBUG_LOG
+static int			cob_debug_log_time = 0;
 static const char		*cob_debug_env = NULL;
 static FILE			*cob_debug_file = NULL;
 static int			cob_debug_level = 9;
 static char			*cob_debug_mod = NULL;
 static char			cob_debug_modules[12][4] = {"", "", "", "", "", "", "", "", "", "", "", ""};
-#endif
 static char			*cob_debug_file_name = NULL;
 #endif
 
@@ -314,6 +314,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_DEBUG_LOG", "debug_log", 		NULL, 	NULL, GRP_HIDE, ENV_FILE, SETPOS (cob_debug_log)},
 	{"COB_DISABLE_WARNINGS", "disable_warnings", "0", 	NULL, GRP_MISC, ENV_BOOL | ENV_NOT, SETPOS (cob_display_warn)},
 	{"COB_ENV_MANGLE", "env_mangle", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_env_mangle)},
+	{"COB_COL_JUST_LRC", "col_just_lrc", "true", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_col_just_lrc)},
 	{"COB_REDIRECT_DISPLAY", "redirect_display", "0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_disp_to_stderr)},
 	{"COB_SCREEN_ESC", "screen_esc", 		"0", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_use_esc)},
 	{"COB_SCREEN_EXCEPTIONS", "screen_exceptions", "0", NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_extended_status)},
@@ -515,7 +516,7 @@ cob_terminate_routines (void)
 		return;
 	}
 
-#if COB_DEBUG_LOG
+#ifdef COB_DEBUG_LOG
 	if (cob_debug_file && cob_debug_file != cob_trace_file) {
 		if(cob_debug_file_name != NULL
 		&& ftell(cob_debug_file) == 0) {
@@ -541,6 +542,7 @@ cob_terminate_routines (void)
 	cob_exit_numeric ();
 	cob_exit_common_modules ();
 	cob_exit_call ();
+	cob_exit_reportio ();
 	cob_exit_common ();
 }
 
@@ -6793,6 +6795,7 @@ cob_init (const int argc, char **argv)
 	cob_init_fileio (cobglobptr, cobsetptr);
 	cob_init_call (cobglobptr, cobsetptr, check_mainhandle);
 	cob_init_termio (cobglobptr, cobsetptr);
+	cob_init_reportio (cobglobptr, cobsetptr);
 
 	/* Set up library routine stuff */
 	cobglobptr->cob_term_buff = cob_malloc ((size_t)COB_MEDIUM_BUFF);
@@ -6949,7 +6952,7 @@ cob_debug_open (const char *debug_env)
 					val[j++] = debug_env[i];
 				val[j] = 0;
 				if(toupper(val[0]) == 'T')
-					cob_debug_level = 3;
+					cob_debug_log_time = cob_debug_level = 3;
 				else if(toupper(val[0]) == 'W')
 					cob_debug_level = 2;
 				else if(toupper(val[0]) == 'N')
@@ -7026,6 +7029,8 @@ cob_debug_logger (const char *fmt, ...)
 {
 	va_list		ap;
 	int		ln;
+	struct cob_time time;
+
 	if (cob_debug_file == NULL) return 0;
 
 	if(*fmt == '~') {			/* Force line# out again to log file */
@@ -7034,6 +7039,11 @@ cob_debug_logger (const char *fmt, ...)
 		cob_debug_hdr = 1;
 	}
 	if(cob_debug_hdr) {
+		if(cob_debug_log_time) {
+			time = cob_get_current_date_and_time ();
+			fprintf(cob_debug_file,"%02d:%02d:%02d.%02d ", time.hour, time.minute,
+							time.second, time.nanosecond / 10000000);
+		}     
 		if(cob_debug_mod)
 			fprintf(cob_debug_file,"%-3s:",cob_debug_mod);
 		if(cob_source_file)

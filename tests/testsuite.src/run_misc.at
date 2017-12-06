@@ -5432,9 +5432,9 @@ AT_DATA([callee2.cob], [
            EXIT PROGRAM.
 ])
 
-AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
-AT_CHECK([$COMPILE -o prog caller.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -fnot-reserved=new callee.cob], [0], [], [])
+AT_CHECK([$COMPILE_MODULE -fnot-reserved=new callee2.cob], [0], [], [])
+AT_CHECK([$COMPILE -fnot-reserved=new -o prog caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP

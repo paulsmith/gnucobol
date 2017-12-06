@@ -20,7 +20,7 @@
  
 ### ISO+IEC+1989-2014 REPORT WRITER module
 
-AT_SETUP([Check REPORT error/warning])
+AT_SETUP([REPORT error/warning])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -122,7 +122,7 @@ prog.cob:82: error: 'CUSTOMER-REPORT' is not a valid report name
 AT_CLEANUP
 
 
-AT_SETUP([REPORT not positive integers in COL / LINE [PLUS]])
+AT_SETUP([REPORT not positive integers in COL / LINE PLUS])
 AT_KEYWORDS([report])
 
 AT_DATA([prog.cob], [
@@ -144,13 +144,16 @@ AT_DATA([prog.cob], [
        01  rp-head TYPE PH.
           02  LINE 1, COL 0 VALUE "Hello!".
           02  LINE 2, COL 2 VALUE "Hello!".
-          02  LINE PLUS 0.
+          02  LINE PLUS 1.
               03 COLUMN 01      PIC X(09) VALUE 'CUST. NO.'.
               03 COLUMN PLUS 0  PIC X(09) VALUE 'ITEM'.
-          02  LINE PLUS zero.
+          02  LINE PLUS 2.
               03 COLUMN 1.5     PIC X(09) VALUE 'CUST. NO.'.
               03 COLUMN + -10   PIC X(09) VALUE 'ITEM'.
 
+       01 rp-detail TYPE DETAIL.
+          02 LINE PLUS 1.
+             03 COLUMN 03   PIC X(06) VALUE 'SAMPLE'.
 
        PROCEDURE DIVISION.
            OPEN OUTPUT out-file.
@@ -163,12 +166,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:18: error: invalid COLUMN integer; must be > 0
-prog.cob:20: warning: LINE PLUS 0 is not implemented
-prog.cob:23: warning: LINE PLUS 0 is not implemented
 prog.cob:24: error: positive integer value expected
 prog.cob:25: error: positive integer value expected
-prog.cob:13: warning: NO DETAIL line defined in report rp
-prog.cob:31: error: 'rp-detail' is not defined
 ])
 
 AT_CLEANUP
@@ -212,6 +211,266 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:13: warning: NO DETAIL line defined in report rp
 prog.cob:27: error: 'rp-detail' is not defined
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([REPORT LINE PLUS ZERO])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+       SELECT out-file ASSIGN "blah.txt"
+           ORGANIZATION LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  out-file REPORT rp.
+
+       REPORT SECTION.
+       RD  rp.
+       01  rp-head TYPE PH.
+          02  LINE 1  COL 5 PIC X(20) VALUE "Hello World!".
+          02  LINE 2  COL 4 PIC X(20) VALUE "Hello Goodbye!".
+          02  LINE PLUS 0.
+              03 COLUMN  1      PIC X(09) VALUE 'CUST. No.'.
+              03 COLUMN PLUS 0  PIC X(09) VALUE 'ITEM'.
+          02  LINE PLUS ZERO.
+              03 COLUMN 1       PIC X(09) VALUE 'Cust. No.'.
+              03 COLUMN + 10    PIC X(09) VALUE 'Item'.
+
+       01 rp-detail TYPE DETAIL.
+          02 LINE PLUS 1.
+             03 COLUMN 03   PIC X(06) VALUE 'SAMPLE'.
+
+       PROCEDURE DIVISION.
+           OPEN OUTPUT out-file.
+           INITIATE rp.
+           GENERATE rp-detail.
+           TERMINATE rp.
+           CLOSE out-file.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:20: warning: LINE PLUS 0 is not implemented
+prog.cob:23: warning: LINE PLUS 0 is not implemented
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Incorrect REPORT NAME])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+           SELECT TRANSACTION-DATA
+           ASSIGN TO EXTERNAL DATAIN
+           ORGANIZATION IS LINE SEQUENTIAL.
+           
+           SELECT REPORT-FILE
+           ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TRANSACTION-DATA
+          LABEL RECORDS ARE OMITTED
+         BLOCK CONTAINS 0 RECORDS
+         RECORD CONTAINS 80 CHARACTERS
+         DATA RECORD IS TRANSACTION-RECORD.
+       01 TRANSACTION-RECORD.
+          03 TR-CUSTOMER-NUMBER     PIC 9(04).
+          03 FILLER                 PIC X(01).
+          03 TR-CUSTOMER-NAME       PIC X(16).
+          03 FILLER                 PIC X(01).
+          03 TR-ITEM-NUMBER         PIC 9(05).
+          03 FILLER                 REDEFINES TR-ITEM-NUMBER.
+             05 TR-ITEM-DEPARTMENT  PIC 9(01).
+             05 FILLER              PIC 9(04).
+          03 FILLER                 PIC X(01).
+          03 TR-ITEM-COST           PIC 9(03)V99.
+          03 FILLER                 PIC X(47).
+       FD REPORT-FILE
+          LABEL RECORDS ARE OMITTED
+          REPORT IS NO-REPORT.
+       WORKING-STORAGE  SECTION.
+       01 END-OF-FILE-SWITCH        PIC X(1)    VALUE 'N'.
+          88 END-OF-FILE            VALUE 'Y'.
+          88 GOFOREVER              VALUE 'X'.
+      
+       REPORT           SECTION.
+       RD SOME-REPORT
+          PAGE LIMIT IS 66 LINES
+          HEADING 1
+          FIRST DETAIL 5
+          LAST DETAIL 58.
+      
+       01 PAGE-HEAD-GROUP TYPE PAGE HEADING.
+          02 LINE 1.
+             03 COLUMN 27   PIC X(41) VALUE
+                'S A M P L E  R E P O R T'.
+          02 LINE PLUS 2.
+             03 COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+             03 COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+             03 COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+             03 COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+             03 COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+      
+       01 CHARGE-DETAIL TYPE DETAIL.
+          02 LINE PLUS 1.
+             03 COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+             03 COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+             03 COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+             03 COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+             03 COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+
+       PROCEDURE DIVISION.
+      
+           OPEN INPUT  TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH 
+           END-READ.
+      
+           PERFORM UNTIL GOFOREVER
+              GENERATE CHARGE-DETAIL
+              READ TRANSACTION-DATA
+                  AT END
+                     EXIT PERFORM
+              END-READ
+           END-PERFORM.
+      
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
+[prog.cob:17: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob:19: warning: RECORD clause ignored for LINE SEQUENTIAL
+prog.cob:20: warning: DATA RECORDS is obsolete in Micro Focus COBOL
+prog.cob:34: warning: LABEL RECORDS is obsolete in Micro Focus COBOL
+prog.cob:42: error: 'SOME-REPORT' is not defined
+prog.cob:42: error: 'SOME-REPORT' is not a valid report name
+])
+
+AT_CHECK([$COMPILE_ONLY -std=cobol2002 prog.cob], [1], [],
+[prog.cob:17: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob:34: error: syntax error, unexpected Identifier, expecting EXTERNAL or GLOBAL
+prog.cob:36: error: RECORD description missing or invalid
+prog.cob:42: error: 'SOME-REPORT' is not defined
+prog.cob:42: error: 'SOME-REPORT' is not a valid report name
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([REPORT with PLUS RIGHT/CENTER])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+               SELECT INPUT-FILE ASSIGN TO EXTERNAL STUDENT
+                              ORGANIZATION IS LINE SEQUENTIAL. 
+               SELECT PRINT-FILE ASSIGN TO EXTERNAL 
+                              LINE ADVANCING REPORT1.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD   INPUT-FILE.
+       01   INPUT-REC.
+               05  STUDENT-ID               PIC  9(5).
+               05  STUDENT-NAME             PIC  X(20).
+               05  MAJOR                    PIC  XXX.
+               05  NUM-COURSES              PIC  9(6).
+
+       FD   PRINT-FILE
+             REPORT IS STUDENT-REPORT.
+
+       WORKING-STORAGE SECTION.
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+
+       REPORT SECTION.
+       RD   STUDENT-REPORT
+           PAGE LIMIT 30 LINES
+           HEADING 1
+           FIRST DETAIL 3
+           LAST DETAIL 25
+           FOOTING 28.
+       01   HEADING-LINE 
+            TYPE PAGE HEADING LINE PLUS 1.
+            05  COLUMN 1      PIC X(2)  VALUE "Ln".
+            05  COLUMN 4      PIC X(6)  VALUE "--ID--".
+            05  COLUMN 16     PIC X(20) VALUE "--------Name--------".
+            05  COLUMN 39     PIC X(5)  VALUE "  Mjr".
+            05  COLUMN 48     PIC XXX   VALUE "*-*".
+            05  COLUMN 54     PIC X(5)  VALUE "+Num+".
+
+       01   REPORT-LINE
+            TYPE DETAIL LINE PLUS  1.
+            05  COLUMN PLUS 1 PIC 9(2) 
+                  SOURCE LINE-COUNTER OF STUDENT-REPORT.
+            05  COLUMN LEFT PLUS 1   PIC Z(5)9 SOURCE STUDENT-ID.
+            05  COLUMN CENTER 25     PIC X(20) SOURCE STUDENT-NAME.
+            05  COLUMN RIGHT  43     PIC X(5)  SOURCE MAJOR.
+            05  COLUMN        48     PIC XXX   VALUE "<->".
+            05  COLUMN CENTER 56     PIC Z(4)9 SOURCE NUM-COURSES.
+            05  COLUMN 60 62 65      PIC Z9 OCCURS 3 TIMES.
+
+       PROCEDURE DIVISION.
+       A000-MAINLINE.
+           OPEN  INPUT  INPUT-FILE
+                 OUTPUT PRINT-FILE
+           PERFORM DO-INIT.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO" TO ARE-THERE-MORE-RECORDS.
+           PERFORM A001-LOOP
+               UNTIL ARE-THERE-MORE-RECORDS = "NO ".
+           PERFORM DO-TERM.
+           CLOSE INPUT-FILE
+                 PRINT-FILE.
+           STOP RUN.
+
+       A001-LOOP.
+           GENERATE REPORT-LINE.
+           READ INPUT-FILE
+               AT END
+                   MOVE "NO " TO ARE-THERE-MORE-RECORDS.
+       DO-INIT.
+           INITIATE STUDENT-REPORT.
+
+       DO-TERM.
+           TERMINATE STUDENT-REPORT.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:46: warning: PLUS is ignored on first field of line
+prog.cob:48: error: PLUS is not allowed with LEFT, RIGHT or CENTER
+prog.cob:53: error: OCCURS and multi COLUMNs is not allowed
 ])
 
 AT_CLEANUP

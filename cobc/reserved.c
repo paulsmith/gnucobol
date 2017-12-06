@@ -240,6 +240,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
 #endif
+  { "ABSENT",			0, 0, ABSENT,			/* IBM RW */
+				0, 0
+  },
   { "ACCEPT",			1, 0, ACCEPT,			/* 2002 */
 				CB_CS_ACCEPT, 0
   },
@@ -535,7 +538,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "CELL-PROTECTION",		0, 1, CELL_PROTECTION,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
-  { "CENTER",			0, 1, -1,			/* 2002 (C/S) */
+  { "CENTER",			0, 1, CENTER,			/* 2002 (C/S) */
 				0, 0
 	/* FIXME + Check: 2014 Context-sensitive to COLUMN clause */
   },
@@ -1742,6 +1745,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "NESTED",			0, 0, NESTED,			/* 2002 */
+				0, 0
+  },
+  { "NEW",			0, 0, NEW,			/* 2002 */
 				0, 0
   },
   { "NEXT",			0, 0, NEXT,			/* 2002 */

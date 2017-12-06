@@ -2220,6 +2220,11 @@
 	* codeoptim.c: Bug #229: binary-double unsigned compares failed when high
 	  bit set.
 
+2016-04-22  Ron Norman <rjn@inglenet.com>
+
+	* parser.y, scanner.l, reserved.c, codegen.c: support features of an
+     IBM REPORT WRITER - LINE LIMIT, PRESENT AFTER & ABSENT AFTER
+
 2016-04-17  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (screen_description): fixed bug #227: code now handles case
@@ -2715,6 +2720,15 @@
 	* parser.y, typeck.c, cobc.h: bug #135 - give correct error position
 	  (cb_source_file + new cb_exp_line) for expression errors
 
+2015-04-14  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c codegen.c common.h tree.h parser.y typeck.c:
+	  updated to include support REPORT COLUMN LEFT/RIGHT/CENTER
+	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
+	NOTE Simon: -fibmcomp is deactivated for now
+	* cobc.c, flag.def: added -fibmcomp: Handle COMP fields like MF IBMCOMP
+	  (binary-size: 1--8 & synchronized-clause: ignore)
+
 2015-04-28  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c now emits extern <function prototype> ();
@@ -2740,6 +2754,11 @@
 2015-04-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.c: replaced "MSC_VER >= 1400" with COB_USE_VC2005_OR_GREATER
+
+2015-04-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c, parser.y : added column orientation as pending
+	* reserved.c : marked SYNCHRONIZED RIGHT as pending as generation was LEFT
 
 2015-03-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

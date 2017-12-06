@@ -1759,6 +1759,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token TOKEN_EOF 0 "end of file"
 
 %token THREEDIMENSIONAL	"3D"
+%token ABSENT
 %token ACCEPT
 %token ACCESS
 %token ACTIVEX			"ACTIVE-X"
@@ -2171,6 +2172,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token LINAGE_COUNTER		"LINAGE-COUNTER"
 %token LINE
 %token LINE_COUNTER		"LINE-COUNTER"
+%token LINE_LIMIT		"LINE LIMIT"
 %token LINE_SEQUENTIAL		"LINE-SEQUENTIAL"
 %token LINES
 %token LINES_AT_ROOT	"LINES-AT-ROOT"
@@ -2224,8 +2226,10 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token NEAREST_TOWARD_ZERO	"NEAREST-TOWARD-ZERO"
 %token NEGATIVE
 %token NESTED
+%token NEW
 %token NEXT
 %token NEXT_ITEM		"NEXT-ITEM"
+%token NEXT_GROUP		"NEXT GROUP"
 %token NEXT_PAGE		"NEXT PAGE"
 %token NO
 %token NO_ADVANCING		"NO ADVANCING"
@@ -4743,9 +4747,8 @@ file_description:
   {
 	if (CB_VALID_TREE (current_file)) {
 		if (CB_VALID_TREE ($2)) {
-			if (current_file->reports) {
-				cb_error (_("RECORD description invalid with REPORT"));
-			} else {
+			/* Do not keep Record if this is really a report */
+			if (!current_file->reports) {
 				finalize_file (current_file, CB_FIELD ($2));
 			}
 		} else if (!current_file->reports) {
@@ -6288,6 +6291,15 @@ synchronized_clause:
   }
 ;
 
+_left_or_right:
+  /* empty -> implemented as LEFT */
+| LEFT
+| RIGHT
+  {
+	CB_PENDING ("SYNCHRONIZED RIGHT");
+  }
+;
+
 
 /* BLANK clause */
 
@@ -6573,7 +6585,7 @@ control_identifier:
   }
 ;
 
-/* PAGE clause */
+/* PAGE LIMIT clause */
 
 page_limit_clause:
   PAGE _limits page_line_column
@@ -6621,7 +6633,7 @@ page_line_column:
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
 		if(current_report->lines > 999)
-			cb_error (_("PAGE LIMIT lines > 999"));
+			cb_error ("PAGE LIMIT lines > 999");
 	} else {
 		current_report->t_lines = $1;
 	}
@@ -6631,7 +6643,7 @@ page_line_column:
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
 		if(current_report->lines > 999)
-			cb_error (_("PAGE LIMIT lines > 999"));
+			cb_error ("PAGE LIMIT lines > 999");
 	} else {
 		current_report->t_lines = $1;
 	}
@@ -6640,11 +6652,13 @@ page_line_column:
   {
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
-		if(current_report->lines > 999)
-			cb_error (_("PAGE LIMIT lines > 999"));
+		if (current_report->lines > 999) {
+			cb_error ("PAGE LIMIT lines > 999");
+		}
 	} else {
 		current_report->t_lines = $1;
 	}
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_25, &check_pic_duplicate);
 	if (CB_LITERAL_P ($3)) {
 		current_report->columns = cb_get_int ($3);
 	} else {
@@ -6669,6 +6683,15 @@ page_detail:
 | last_heading
 | last_detail
 | footing_clause
+| LINE_LIMIT _is report_int_ident
+  {
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_25, &check_pic_duplicate);
+	if (CB_LITERAL_P ($3)) {
+		current_report->columns = cb_get_int ($3);
+	} else {
+		current_report->t_columns = $3;
+	}
+  }
 ;
 
 heading_clause:
@@ -6737,7 +6760,7 @@ report_group_description_entry:
 
 	x = cb_build_field_tree ($1, $2, current_field, current_storage,
 				 current_file, 0);
-	/* Free tree assocated with level number */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 	check_pic_duplicate = 0;
 	if (CB_INVALID_TREE (x)) {
@@ -6760,7 +6783,6 @@ report_group_option:
   type_clause
 | next_group_clause
 | line_clause
-| line_clause_next_page
 | picture_clause
 | report_usage_clause
 | sign_clause
@@ -6792,8 +6814,8 @@ type_option:
   {
 	current_field->report_flag |= COB_REPORT_PAGE_HEADING;
   }
-| ch_keyword _control_heading_final
-| cf_keyword _control_footing_final
+| ch_keyword _on_for _control_heading_final
+| cf_keyword _on_for _control_footing_final
 | detail_keyword
   {
 	if(current_report != NULL) {
@@ -6820,6 +6842,9 @@ _control_heading_final:
   {
 	current_field->report_flag |= COB_REPORT_CONTROL_HEADING;
 	current_field->report_control = $1;
+	if ($2) {
+		current_field->report_flag |= COB_REPORT_PAGE;
+	}
   }
 | FINAL _or_page
   {
@@ -6831,8 +6856,8 @@ _control_heading_final:
          and what results are expected */
 
 _or_page:
-  /* empty */
-| OR PAGE
+  /* empty */	{$$ = NULL;}
+| OR PAGE		{$$ = cb_int0;}
 ;
 
 _control_footing_final:
@@ -6849,10 +6874,15 @@ _control_footing_final:
   {
       current_field->report_flag |= COB_REPORT_CONTROL_FOOTING_FINAL;
   }
+| ALL
+  {
+      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+      current_field->report_flag |= COB_REPORT_ALL;
+  }
 ;
 
 next_group_clause:
-  NEXT GROUP _is next_group_plus
+  NEXT_GROUP _is next_group_plus
   {
 	check_repeated ("NEXT GROUP", SYN_CLAUSE_17, &check_pic_duplicate);
   }
@@ -6885,8 +6915,7 @@ next_group_plus:
 ;
 
 next_page:
-  NEXT PAGE 
-| NEXT_PAGE
+  NEXT_PAGE
 | PAGE
 | NEXT
 ;
@@ -6920,11 +6949,65 @@ data_or_final:
 ;
 
 present_when_condition:
-  PRESENT WHEN condition
+  present_absent WHEN condition
   {
 	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
 	current_field->report_when = $3;
   }
+| present_absent AFTER _new page_or_id
+  {
+	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_PRESENT;
+	current_field->report_flag &= ~COB_REPORT_BEFORE;
+  }
+| present_absent JUSTIFIED AFTER _new PAGE
+  {
+	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_PRESENT;
+	current_field->report_flag &= ~COB_REPORT_BEFORE;
+	current_field->report_flag |= COB_REPORT_PAGE;
+  }
+| present_absent BEFORE _new page_or_id
+  {
+	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_PRESENT;
+	current_field->report_flag |= COB_REPORT_BEFORE;
+  }
+| present_absent JUSTIFIED BEFORE _new PAGE
+  {
+	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
+	current_field->report_flag |= COB_REPORT_PRESENT;
+	current_field->report_flag |= COB_REPORT_BEFORE;
+	current_field->report_flag |= COB_REPORT_PAGE;
+  }
+;
+
+present_absent:
+  PRESENT
+  {
+	current_field->report_flag |= COB_REPORT_PRESENT;
+  }
+| ABSENT
+  {
+	current_field->report_flag |= COB_REPORT_PRESENT;
+	current_field->report_flag |= COB_REPORT_NEGATE;
+  }
+;
+
+page_or_id:
+| page_or_ids page_or_id
+;
+
+page_or_ids:
+  PAGE
+  {
+	current_field->report_flag |= COB_REPORT_PAGE;
+  }
+| identifier 
+  {
+	current_field->report_control = $1;
+  }
+| OR
 ;
 
 varying_clause:
@@ -6944,11 +7027,19 @@ line_keyword_clause:
 ;
 
 line_clause_options:
-  line_clause_integer 
+| line_clause_option line_clause_options
+;
+
+line_clause_option:
+  line_clause_integer
   {
 	if(current_field->report_line == 0) {
 		CB_PENDING ("LINE 0");
 	}
+  }
+| NEXT_PAGE	/* token contains optional ON */
+  {
+	current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
   }
 | PLUS report_integer 
   {
@@ -7004,61 +7095,104 @@ line_clause_integer:
   }
 ;
 
-line_clause_next_page:
-  NEXT PAGE
-  {
-      current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
-  }
-| ON NEXT PAGE
-  {
-      current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
-  }
-;
 
 column_clause:
   col_keyword_clause col_or_plus
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_18, &check_pic_duplicate);
+	if((current_field->report_flag & (COB_REPORT_COLUMN_LEFT|COB_REPORT_COLUMN_RIGHT|COB_REPORT_COLUMN_CENTER))
+	&& (current_field->report_flag & COB_REPORT_COLUMN_PLUS)) {
+		if (cb_relaxed_syntax_checks) {
+			cb_warning (COBC_WARN_FILLER, _("PLUS is not recommended with LEFT, RIGHT or CENTER"));
+		} else {
+			cb_error (_("PLUS is not allowed with LEFT, RIGHT or CENTER"));
+		}
+	}
   }
 ;
 
 col_keyword_clause:
-  column_or_col _numbers _is_are
-| columns_or_cols _are
+  column_or_cols _numbers _orientation _is_are
+;
+
+_orientation:
+  /* empty */
+| _left_right_center
+;
+
+_left_right_center:
+  LEFT
+  {
+	current_field->report_flag |= COB_REPORT_COLUMN_LEFT;
+  }
+| RIGHT
+  {
+	current_field->report_flag |= COB_REPORT_COLUMN_RIGHT;
+  }
+| CENTER
+  {
+	current_field->report_flag |= COB_REPORT_COLUMN_CENTER;
+  }
 ;
 
 col_or_plus:
-  PLUS report_integer 
+  plus_plus report_integer 
   {
-	current_field->report_column = cb_get_int ($2);
-	if(current_field->report_column > 0)
-		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
-	else
-		current_field->report_column = 0;
+	int colnum;
+	colnum = cb_get_int ($2);
+	if (colnum > 0) {
+		if(current_field->parent
+		&& current_field->parent->children == current_field) {
+			cb_warning (COBC_WARN_FILLER, _("PLUS is ignored on first field of line"));
+			if (current_field->step_count == 0)
+				current_field->step_count = colnum;
+		} else {
+			current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+		}
+	} else {
+		colnum = 0;
+	}
+	if(current_field->report_column == 0)
+		current_field->report_column = colnum;
+	current_field->report_num_col++;
   }
-| TOK_PLUS report_integer 
+| column_integer_list
+;
+
+column_integer_list:
+  column_integer
+| column_integer column_integer_list
+;
+
+column_integer:
+  report_integer
   {
-	current_field->report_column = cb_get_int ($2);
-	if(current_field->report_column > 0)
-		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
-	else
-		current_field->report_column = 0;
-  }
-| report_integer
-  {
-	current_field->report_column = cb_get_int ($1);
+	int colnum;
+	colnum = cb_get_int ($1);
 	if (CB_LITERAL ($1)->sign > 0) {
-		current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+		if(current_field->parent
+		&& current_field->parent->children == current_field) {
+			cb_warning (COBC_WARN_FILLER, _("PLUS is ignored on first field of line"));
+		} else {
+			current_field->report_flag |= COB_REPORT_COLUMN_PLUS;
+		}
 	}
 	if($1 != cb_int1
 	&& $1 != cb_int0) {
-		if (current_field->report_column <= 0
+		if (colnum <= 0
 		|| CB_LITERAL ($1)->sign < 0) {
 			cb_error (_("invalid COLUMN integer; must be > 0"));
-			current_field->report_column = 0;
+			colnum = 0;
 			$$ = cb_int0;
+		} else if(colnum <= current_field->report_column) {
+			cb_warning (COBC_WARN_FILLER, _("COLUMN numbers should increase"));
 		}
+		current_field->report_column_list = 
+				cb_list_append (current_field->report_column_list, CB_LIST_INIT ($1));
 	}
+	if(current_field->report_column == 0)
+		current_field->report_column = colnum;
+	current_field->report_num_col++;
   }
 ;
 
@@ -15522,17 +15656,18 @@ _is_are:	| IS | ARE ;
 _is_are_equal:		| IS | ARE | TOK_EQUAL;
 _is_in:		| IS | IN ;
 _key:		| KEY ;
-_left_or_right:	| LEFT | RIGHT ;
 _line:		| LINE ;
 _line_or_lines:	| LINE | LINES ;
-_limits:	| LIMIT _is | LIMITS _are ;
+_limits:	| LIMIT _is_are | LIMITS _is_are ;
 _lines:		| LINES ;
 _message:	| MESSAGE ;
 _mode:		| MODE ;
+_new:		| NEW ;
 _number:	| NUMBER ;
 _numbers:	| NUMBER | NUMBERS ;
 _of:		| OF ;
 _on:		| ON ;
+_on_for:	| ON | FOR ;
 _onoff_status:	| STATUS IS | STATUS | IS ;
 _other:		| OTHER ;
 _procedure:	| PROCEDURE ;
@@ -15563,6 +15698,7 @@ _with:		| WITH ;
 coll_sequence:		COLLATING SEQUENCE | SEQUENCE ;
 column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
+column_or_cols:		column_or_col | columns_or_cols ;
 comp_equal:		TOK_EQUAL | EQUAL ;
 exception_or_error:	EXCEPTION | ERROR ;
 in_of:			IN | OF ;
@@ -15570,7 +15706,7 @@ label_option:		STANDARD | OMITTED ;
 line_or_lines:		LINE | LINES ;
 lock_records:		RECORD | RECORDS ;
 object_char_or_word_or_modules:	CHARACTERS | WORDS | MODULES;
-records:		RECORD _is | RECORDS _are ;
+records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
 scroll_line_or_lines:	LINE | LINES ;
 size_or_length:		SIZE | LENGTH ;
@@ -15590,6 +15726,6 @@ ph_keyword:		PAGE HEADING | PH ;
 pf_keyword:		PAGE FOOTING | PF ;
 rh_keyword:		REPORT HEADING | RH ;
 rf_keyword:		REPORT FOOTING | RF ;
-control_keyword:	CONTROL _is | CONTROLS _are ;
+control_keyword:	CONTROL _is_are | CONTROLS _is_are ;
 
 %%

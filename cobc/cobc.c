@@ -3439,6 +3439,16 @@ process_command_line (const int argc, char **argv)
 		set_compile_level_from_file_extension (output_name);
 	}
 
+#if 0 /* deactivated for now, check later */
+	if(cb_mf_ibm_comp == 0) {		/* NO-IBMCOMP */
+		cb_binary_size = CB_BINARY_SIZE_1__8;
+		cb_synchronized_clause = CB_IGNORE;
+	} else if(cb_mf_ibm_comp == 1) {	/* IBMCOMP */
+		cb_binary_size = CB_BINARY_SIZE_2_4_8;
+		cb_synchronized_clause = CB_OK;
+	}
+#endif
+
 	return cob_optind;
 }
 

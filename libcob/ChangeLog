@@ -480,6 +480,11 @@
 
 	* numeric.c, common.h: added cob_decimal_align function for 'arithemtic-osvs'
 
+2016-10-02 Ron Norman <rjn@inglenet.com>
+
+	* common.c: report time in COB_DEBUG_LOG for performance test
+	* reportio.c: fixed scan for changed fields to be faster
+
 2016-10-02  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h: added cob_flags_t typedef for variables made of bit flags.
@@ -587,6 +592,11 @@
 
 	* common.h, numeric.c: 64bit unsigned treated as signed when long int
 	  same size as long long.
+
+2016-04-22  Ron Norman <rjn@inglenet.com>
+
+	* common.h, reportio.c: support features of an IBM REPORT WRITER
+	  PRESENT AFTER & ABSENT AFTER
 
 2016-04-06  Brian Tiffin <btiffin@gnu.org>
 
@@ -869,6 +879,14 @@
 	  by moving physical_cancel (defined in call.c and referenced via
 	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
 
+2015-04-14  Ron Norman <rjn@inglenet.com>
+
+	* reportio.c common.c:
+	  updated to include support REPORT COLUMN LEFT/RIGHT/CENTER
+	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
+	  Runtime option: col_just_lrc if set to false will disable
+	  justification of LEFT/RIGHT/CENTER data with the field
+
 2015-04-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobgetopt.c (_getopt_initialize): re-added support for GNU extensions
@@ -1085,7 +1103,7 @@
 	* strings.c: Fix Unstring delimited by all delimiter size > 1 issue,
 	  see bug #54.
 
-2013-11-18  Ron Norman
+2013-11-18  Ron Norman <rjn@inglenet.com>
 
 	* Report Writer Module initial development
 
