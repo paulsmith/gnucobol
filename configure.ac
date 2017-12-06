@@ -24,11 +24,11 @@
 AC_PREREQ([2.64])
 
 AC_INIT([GnuCOBOL],
-	[2.3-dev],
+	[3.0-dev],
 	[bug-gnucobol@gnu.org],
 	[gnucobol],
 	[https://www.gnu.org/software/gnucobol/])
-AC_REVISION([GnuCOBOL snapshot $Revision: 1286 $])
+AC_REVISION([GnuCOBOL snapshot $Revision: 2248 $])
 AC_CONFIG_SRCDIR([libcob.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_TESTDIR([tests])
