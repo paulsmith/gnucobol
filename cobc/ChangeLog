@@ -565,6 +565,10 @@
 	* reserved.c: output a reserved word's aliases during --list-reserved
 	  (feature request #214).
 
+2017-07-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c: Prevent undefined behaviour and fixed typos in RW code
+
 2017-07-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: RECORD KEY in SELECT does not support FD in name bug #331
@@ -1107,6 +1111,11 @@
 	* field.c: set COB_FLAG_REAL_BINARY to on for COMP-5
 	* codegen.c: for numeric literals passed on CALL, COB_FLAG_REAL_BINARY is
 	  not set on since the internal field is actually S9(9) COMP-4
+
+2017-01-17  Ron Norman <rjn@inglenet.com>
+
+	* parser.y: fixed coding errors in referencing CB_LITERAL before
+	  verifying that the token is a literal in REPORT DIVISION
 
 2017-01-17  Ron Norman <rjn@inglenet.com>
 

@@ -232,7 +232,7 @@ static void output_index	(cb_tree);
 static void output_func_1	(const char *, cb_tree);
 static void output_param	(cb_tree, int);
 static void output_funcall	(cb_tree);
-static void output_report_sumed_field (struct cb_field *);
+static void output_report_summed_field (struct cb_field *);
 
 
 static struct cb_field *
@@ -1851,7 +1851,7 @@ output_local_base_cache (void)
 		} else if (blp->f->special_index) {
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
-		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITED)) {
+		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
 			output_local ("static cob_u8_t	%s%d[%d]%s;",
 				      CB_PREFIX_BASE, blp->f->id,
 				      blp->f->memory_size, COB_ALIGN);
@@ -2015,10 +2015,10 @@ output_emit_field (cb_tree x, const char *cmt)
 	struct cb_field *f = cb_code_field (x);
 	int	i;
 	if(f
-	&& !(f->report_flag & COB_REPORT_REF_EMITED)) {
+	&& !(f->report_flag & COB_REPORT_REF_EMITTED)) {
 		if(f->step_count < f->size)
 			f->step_count = f->size;
-		f->report_flag |= COB_REPORT_REF_EMITED;
+		f->report_flag |= COB_REPORT_REF_EMITTED;
 		if(f->flag_occurs && f->occurs_max > 1) {
 			output_local("\t\t/* col%3d %s OCCURS %d ", f->report_column, f->name, f->occurs_max);
 			if(cmt && strlen(cmt) > 0)
@@ -2109,7 +2109,7 @@ output_local_field_cache (struct cb_program *prog)
 		} else {
 			output (";\t/* %s */\n", field->f->name);
 		}
-		field->f->report_flag |= COB_REPORT_REF_EMITED;
+		field->f->report_flag |= COB_REPORT_REF_EMITTED;
 	}
 	/* Report special fields */
 	if (prog->report_storage) {
@@ -2119,7 +2119,7 @@ output_local_field_cache (struct cb_program *prog)
 			rep = CB_REPORT(CB_VALUE(l));
 			for(f=rep->records; f; f=f->sister) {
 				if (f->storage == CB_STORAGE_WORKING
-				&& !(f->report_flag & COB_REPORT_REF_EMITED)) {
+				&& !(f->report_flag & COB_REPORT_REF_EMITTED)) {
 					output_emit_field(cb_build_field_reference (f, NULL), NULL);
 				}
 			}
@@ -2127,7 +2127,7 @@ output_local_field_cache (struct cb_program *prog)
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 			rep = CB_REPORT(CB_VALUE(l));
 			if(rep) {
-				output_report_sumed_field (rep->records);
+				output_report_summed_field (rep->records);
 			}
 		}
 	}
@@ -8005,7 +8005,7 @@ output_report_sum_control_field (struct cb_field *p)
 }
 
 static void
-output_report_sumed_field (struct cb_field *p)
+output_report_summed_field (struct cb_field *p)
 {
 	cb_tree	l, x;
 	struct cb_field *f;
@@ -8016,16 +8016,16 @@ output_report_sumed_field (struct cb_field *p)
 			x = CB_VALUE (l);
 			f = cb_code_field(x);
 			if (f->storage == CB_STORAGE_WORKING
-			&& !(f->report_flag & COB_REPORT_REF_EMITED)) {
+			&& !(f->report_flag & COB_REPORT_REF_EMITTED)) {
 				output_emit_field(cb_build_field_reference (f, NULL), NULL);
 			}
 		}
 		if (p->children) {
-			output_report_sumed_field (p->children);
+			output_report_summed_field (p->children);
 		}
 	}
 	if (p->sister) {
-		output_report_sumed_field (p->sister);
+		output_report_summed_field (p->sister);
 	}
 }
 
@@ -8260,13 +8260,13 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		f->report_flag |= COB_REPORT_GROUP_ITEM;
 	if(f->report_when)
 		f->report_flag |= COB_REPORT_HAD_WHEN;
-	if((f->report_flag&~(COB_REPORT_EMITED|COB_REPORT_COLUMN_PLUS)) == 0) {
+	if((f->report_flag&~(COB_REPORT_EMITTED|COB_REPORT_COLUMN_PLUS)) == 0) {
 		output_local("0,%d",f->report_line);
 	}else
 	if(subscript > 0) {
-		output_local("0x%X,%d",f->report_flag&~(COB_REPORT_EMITED|COB_REPORT_GROUP_ITEM),f->report_line);
+		output_local("0x%X,%d",f->report_flag&~(COB_REPORT_EMITTED|COB_REPORT_GROUP_ITEM),f->report_line);
 	} else {
-		output_local("0x%X,%d",f->report_flag&~COB_REPORT_EMITED,f->report_line);
+		output_local("0x%X,%d",f->report_flag&~COB_REPORT_EMITTED,f->report_line);
 	}
 	if(subscript > 1) {
 		idx = 1;
@@ -8328,9 +8328,9 @@ output_report_define_lines (int top, struct cb_field *f, struct cb_report *r)
 	if(!top)
 		c = NULL;
 
-	if(f->report_flag & COB_REPORT_LINE_EMITED)	/* Was this already emited? */
+	if(f->report_flag & COB_REPORT_LINE_EMITTED)	/* Was this already emited? */
 		return;
-	f->report_flag |= COB_REPORT_LINE_EMITED;
+	f->report_flag |= COB_REPORT_LINE_EMITTED;
 
 	if(memcmp(f->name,"FILLER ",7) == 0) {
 		if(f->report_flag & COB_REPORT_PAGE_HEADING) {
@@ -8412,9 +8412,9 @@ output_report_define_lines (int top, struct cb_field *f, struct cb_report *r)
 	output_local(",%d",f->report_decl_id);
 	if(f->report_decl_id)
 		output_local("/* Declaratives */");
-	output_local(",%d,%d,%d,%d",f->report_flag&~COB_REPORT_EMITED,
+	output_local(",%d,%d,%d,%d",f->report_flag&~COB_REPORT_EMITTED,
 				f->report_line, f->step_count,f->next_group_line);
-	output_local(",%d,0",f->report_flag&~COB_REPORT_EMITED);
+	output_local(",%d,0",f->report_flag&~COB_REPORT_EMITTED);
 	output_local ("};\n");
 }
 
@@ -8474,9 +8474,9 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 
 	if(f->report_sum_list == NULL)
 		return;
-	if(f->report_flag & COB_REPORT_SUM_EMITED)	/* Was this already emited? */
+	if(f->report_flag & COB_REPORT_SUM_EMITTED)	/* Was this already emited? */
 		return;
-	f->report_flag |= COB_REPORT_SUM_EMITED;
+	f->report_flag |= COB_REPORT_SUM_EMITTED;
 
 	if(memcmp(f->name,"FILLER ",7) == 0) {
 		if(f->report_flag & COB_REPORT_PAGE_HEADING) {

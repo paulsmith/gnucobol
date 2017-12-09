@@ -180,6 +180,11 @@
 
 	* fileio.c: checked the now optional sort-return before accessing it
 
+2017-07-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.h (COB_REPORT_*): prevent undefined behaviour caused by 1 << 31
+	  and fixed typos.
+
 2017-06-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: added CODE_COVERAGE parts as provided by AX_CODE_COVERAGE
@@ -878,6 +883,13 @@
 	* common.h, coblocal.h, call.c, common.c: fixed CALL after physical CANCEL
 	  by moving physical_cancel (defined in call.c and referenced via
 	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
+
+2015-04-29  Ron Norman <rjn@inglenet.com>
+
+	* reportio.c: change to allocate larger size data area for temp
+	  fields used for CONTROL breaks. This is a cludge to avoid
+	  something that is clobbering free memory on SUN system.
+	  It did work fine on x86 Linux so watch out for this later.
 
 2015-04-14  Ron Norman <rjn@inglenet.com>
 

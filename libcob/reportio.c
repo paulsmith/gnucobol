@@ -170,9 +170,10 @@ cob_field_dup (cob_field *f, int incr)
 {
 	cob_field	temp;
 	cob_field	*fld = cob_malloc(sizeof(cob_field));
+	int		dsize = f->size+incr;
 
-	fld->size = f->size+incr;
-	fld->data = cob_malloc(f->size+incr);
+	fld->size = dsize;
+	fld->data = cob_malloc((size_t)(dsize < COB_MAX_DIGITS ? COB_MAX_DIGITS : dsize) + 1);
 	fld->attr = f->attr;
 
 	temp.size = 1;
@@ -188,7 +189,7 @@ cob_field_dup (cob_field *f, int incr)
 }
 
 /*
- * Free a field created by cob_field_dup or cob_field_save
+ * Free a field created by cob_field_dup
  */
 static void
 cob_field_free (cob_field *f)
