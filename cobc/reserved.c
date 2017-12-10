@@ -3814,7 +3814,7 @@ get_reserved_words_with_amendments (void)
 
 	if (cb_reserved_words == NULL) {
 		/*
-		  Append the default reserved words to the amendment list as
+		  Prepend the default reserved words to the amendment list as
 		  additions.
 		*/
 		for (i = 0; i < NUM_DEFAULT_RESERVED_WORDS; ++i) {
@@ -3842,11 +3842,11 @@ get_reserved_words_with_amendments (void)
 	for (i = 0; amendment_list; ++i) {
 		to_find = create_dummy_reserved (amendment_list->word);
 		p = find_default_reserved_word (to_find);
-		if (p) {
+		if (p && !amendment_list->alias_for) {
 			reserved_words[i] = *p;
 			/*
 			  Note that we ignore if the user specified this word
-			  as context-sensitive or as an alias.
+			  as context-sensitive.
 			*/
 		} else {
 			reserved_words[i] = get_user_specified_reserved_word (*amendment_list);
@@ -4061,7 +4061,7 @@ lookup_reserved_word (const char *name)
 		  The only context-sensitive phrase outside the procedure division
 		  we expect to manually reset cobc_cs_check is OPTIONS and SCREEN.
 
-		  Note: Everything in the environment and identification division can 
+		  Note: Everything in the environment and identification division can
 		  (and does) reset cobc-cs_check.
 		*/
 		if (!cobc_in_procedure
@@ -4218,7 +4218,7 @@ add_register (const char *name_and_definition, const char *fname, const int line
 	}
 
 	/* Otherwise enable a named register. */
-	
+
 	/* note: we don't break at space as this would kill "ADDRESS OF"
 	         and "PIC 9(05) USAGE ..." */
 	definition = strpbrk (name_and_definition, "\t:=");

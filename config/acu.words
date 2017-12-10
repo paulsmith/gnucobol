@@ -454,11 +454,11 @@ reserved:	LOCK
 reserved:	LOCK-HOLDING
 reserved:	LOW-VALUE
 reserved:	LOW-VALUES=LOW-VALUE
-reserved:	LOW
+reserved:	LOW=LOWLIGHT
 reserved:	LOW-COLOR*
 reserved:	LOWER
 reserved:	LOWERED*
-reserved:	LOWLIGHT=LOW
+reserved:	LOWLIGHT
 reserved:	MAGNETIC-TAPE*
 reserved:	MANUAL
 reserved:	MASS-UPDATE

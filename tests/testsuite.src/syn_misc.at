@@ -3610,6 +3610,22 @@ AT_CHECK([$COMPILE_ONLY -freserved=" FOO = DISPLAY  " prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([overriding default words])
+AT_KEYWORDS([misc extensions configuration])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  prog.
+
+       PROCEDURE DIVISION.
+           COMP-1 "Hello, world!"
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -freserved=COMP-1=DISPLAY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
 AT_SETUP([complete specified word list])
 AT_KEYWORDS([misc extensions configuration])
 

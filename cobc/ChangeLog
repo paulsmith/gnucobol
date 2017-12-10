@@ -1,4 +1,9 @@
 
+2017-12-10  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c (get_reserved_words_with_amendments): no longer ignore
+	  user-specified aliases for default reserved words.
+
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, tree.c, tree.h, typeck.c: minor adjustments after merge
