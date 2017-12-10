@@ -165,6 +165,9 @@ static int	scan_floating_numeric (const char *);
 static void	scan_picture (const char *);
 static void	count_lines (const char *);
 static void	scan_define_options (const char *);
+static void	copy_word_in_quotes (char ** const);
+static void	copy_two_words_in_quotes (char ** const, char ** const);
+static void	add_synonym (const int);
 
 %}
 
@@ -201,6 +204,51 @@ static void	scan_define_options (const char *);
 
 <*>^[ ]?"#DEFLIT".*\n {
 	scan_define_options (yytext);
+}
+
+<*>^[ ]?"#ADDRSV".*\n {
+	char	*word;
+
+	copy_word_in_quotes (&word);
+	add_reserved_word_now (word, NULL);
+	cobc_free (word);
+}
+
+<*>^[ ]?"#ADDSYN".*\n {
+	add_synonym (0);
+}
+
+<*>^[ ]?"#MAKESYN".*\n {
+	char	*new_meaning;
+	char	*word_to_change;
+
+	copy_two_words_in_quotes (&new_meaning, &word_to_change);
+
+	if (!is_default_reserved_word (new_meaning)) {
+		cb_error (_("'%s' is not a default reserved word, so cannot be aliased"),
+			  new_meaning);
+	} else if (!is_reserved_word (word_to_change)) {
+		cb_error (_("'%s' is not a reserved word; you may want ADDSYN or OVERRIDE instead"),
+			  word_to_change);
+	} else {
+		remove_reserved_word_now (word_to_change);
+		add_reserved_word_now (word_to_change, new_meaning);
+	}
+
+	cobc_free (new_meaning);
+	cobc_free (word_to_change);
+ }
+
+<*>^[ ]?"#OVERRIDE".*\n {
+	add_synonym (1);
+}
+
+<*>^[ ]?"#REMOVE".*\n {
+	char	*word;
+
+	copy_word_in_quotes (&word);
+        remove_reserved_word_now (word);
+	cobc_free (word);
 }
 
 <*>\n {
@@ -1986,6 +2034,80 @@ freevar:
 }
 
 #undef INCREMENT_IF_SIGNED
+
+/*
+  For yytext of the form '#directive "a-word"' or '#directive
+  (first-word) (second-word)', copy a-word into word.
+*/
+static void
+copy_word_in_quotes (char ** const word)
+{
+	char	*text = cobc_strdup (yytext);
+	char	*word_str;
+
+	/* Skip directive */
+	word_str = strtok (text, " ");
+
+	/* Get word and remove quotes */
+	word_str = strtok (NULL, "\n");
+	*word = cobc_malloc (strlen (word_str) - 1);
+	strncpy (*word, word_str + 1, strlen (word_str) - 2);
+
+	cobc_free (text);
+}
+
+/*
+   For yytext of the form '#directive "first-word" "second-word"' or '#directive
+   (first-word) (second-word)', allocate copies of first-word for word1 and
+   second-word for word2.
+*/
+static void
+copy_two_words_in_quotes (char ** const word1, char ** const word2)
+{
+	char	*text = cobc_strdup (yytext);
+	char	*word1_str;
+	char	*word2_str;
+
+	/* Skip directive. */
+        word1_str = strtok (text, " ");
+
+	/* Get words and remove surrounding quotes. */
+
+	word1_str = strtok (NULL, " ");
+	*word1 = cobc_malloc (strlen (word1_str) - 1);
+	strncpy (*word1, word1_str + 1, strlen (word1_str) - 2);
+
+	word2_str = strtok (NULL, "\n");
+	*word2 = cobc_malloc (strlen (word2_str) - 1);
+	strncpy (*word2, word2_str + 1, strlen (word2_str) - 2);
+
+	cobc_free (text);
+}
+
+static void
+add_synonym (const int synonym_replaces_original)
+{
+	char	*word;
+	char	*synonym;
+
+	copy_two_words_in_quotes (&word, &synonym);
+
+	if (!is_default_reserved_word (word)) {
+		cb_error (_("'%s' is not a default reserved word, so cannot be aliased"),
+			  word);
+	} else if (is_reserved_word (synonym)) {
+		cb_error (_("'%s' is already reserved; you may want MAKESYN instead"),
+			  synonym);
+	} else {
+		if (synonym_replaces_original) {
+			remove_reserved_word_now (word);
+		}
+		add_reserved_word_now (synonym, word);
+	}
+
+	cobc_free (word);
+	cobc_free (synonym);
+}
 
 /* Global functions */
 

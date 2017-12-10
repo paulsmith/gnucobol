@@ -3,6 +3,8 @@
 
 	* reserved.c (get_reserved_words_with_amendments): no longer ignore
 	  user-specified aliases for default reserved words.
+	* pplex.l, ppparse.y, reserved.c, scanner.l: added support for MF's
+	  reserved word directives ADDRSV, ADDSYN, MAKESYN, OVERRIDE and REMOVE.
 
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -49,7 +51,7 @@
 	  pic->flag_is_calculated where picture wasn't originally specified
 	  and don't check this pseudo PICTURE later.
 	* tree.c, tree.h: disabled pic->real_digits as it is currently not
-	  in use anywhere (just calculated in tree.c)	  
+	  in use anywhere (just calculated in tree.c)
 
 2017-11-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

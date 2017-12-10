@@ -572,6 +572,8 @@ extern struct reserved_word_list	*cobc_user_res_list;
 
 extern void		remove_reserved_word (const char *, const char *, const int);
 extern void		add_reserved_word (const char *, const char *, const int);
+extern void		remove_reserved_word_now (char * const);
+extern void		add_reserved_word_now (char * const, char * const);
 
 extern void		remove_register (const char *, const char *, const int);
 extern void		add_register (const char *, const char *, const int);

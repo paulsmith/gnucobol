@@ -385,6 +385,24 @@ ppp_list_add (struct cb_text_list *list, const char *text)
 	return list;
 }
 
+static struct cb_text_list *
+ppp_list_append (struct cb_text_list *list_1, struct cb_text_list *list_2)
+{
+	struct cb_text_list	*list_1_end;
+
+	if (!list_1) {
+		return list_2;
+	}
+
+	for (list_1_end = list_1;
+	     list_1_end->next;
+	     list_1_end = list_1_end->next);
+	list_1_end->next = list_2;
+	list_2->last = list_1_end;
+
+	return list_1;
+}
+
 static unsigned int
 ppp_search_comp_vars (const char *name)
 {
@@ -562,6 +580,11 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token SOURCEFORMAT
 %token FOLDCOPYNAME
 %token NOFOLDCOPYNAME
+%token ADDRSV
+%token ADDSYN
+%token MAKESYN
+/* OVERRIDE token defined above. */
+%token REMOVE
 
 %token IF_DIRECTIVE
 %token ELSE_DIRECTIVE
@@ -605,6 +628,9 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %type <l>	text_dst
 %type <l>	text_partial_src
 %type <l>	text_partial_dst
+%type <l>	alnum_list
+%type <l>	alnum_equality
+%type <l>	alnum_equality_list
 
 %type <r>	copy_replacing
 %type <r>	replacing_list
@@ -670,7 +696,7 @@ directive:
 		current_call_convention |= CB_CONV_COBOL;
 	};
   }
-  
+
 ;
 
 set_directive:
@@ -750,6 +776,69 @@ set_choice:
 	} else {
 		cb_error (_("invalid %s directive"), "FOLD-COPY-NAME");
 	}
+  }
+| ADDRSV alnum_list
+  {
+	struct cb_text_list	*l;
+
+	for (l = $2; l; l = l->next) {
+		fprintf (ppout, "#ADDRSV %s\n", l->text);
+	}
+  }
+| ADDSYN alnum_equality
+  {
+      struct cb_text_list	*l;
+
+      for (l = $2; l; l = l->next->next) {
+	      fprintf (ppout, "#ADDSYN %s %s\n", l->text, l->next->text);
+      }
+  }
+| MAKESYN alnum_equality
+  {
+	fprintf (ppout, "#MAKESYN %s %s\n", $2->text, $2->next->text);
+  }
+| OVERRIDE alnum_equality_list
+  {
+      struct cb_text_list	*l;
+
+      for (l = $2; l; l = l->next->next) {
+	      fprintf (ppout, "#OVERRIDE %s %s\n", l->text, l->next->text);
+      }
+  }
+| REMOVE alnum_list
+  {
+	struct cb_text_list	*l;
+
+	for (l = $2; l; l = l->next) {
+		fprintf (ppout, "#REMOVE %s\n", l->text);
+	}
+  }
+;
+
+alnum_list:
+  LITERAL
+  {
+	$$ = ppp_list_add (NULL, $1);
+  }
+| alnum_list LITERAL
+  {
+	$$ = ppp_list_add ($1, $2);
+  }
+;
+
+alnum_equality_list:
+  alnum_equality
+| alnum_equality_list alnum_equality
+  {
+	  $$ = ppp_list_append ($1, $2);
+  }
+;
+
+alnum_equality:
+  LITERAL EQ LITERAL
+  {
+	$$ = ppp_list_add (NULL, $1);
+	$$ = ppp_list_add ($$, $3);
   }
 ;
 
@@ -851,7 +940,7 @@ define_directive:
      use        01 CONSTANT with/without FROM clause  for constant definitions */
 	struct cb_define_struct	*p;
 
-	
+
 	if (cb_verify (cb_define_constant_directive, ">> DEFINE CONSTANT var")) {
 		p = ppp_define_add (ppp_setvar_list, $2, $4, $5);
 		if (p) {

@@ -629,7 +629,8 @@ CONTROL_STATEMENT_STATE>{
   "CONSTANT"		{
 	return CONSTANT;
   }
-  "SOURCEFORMAT"	{
+  "SOURCEFORMAT" |
+  "SOURCE-FORMAT"	{
 	return SOURCEFORMAT;
   }
   "FOLDCOPYNAME" |
@@ -637,30 +638,46 @@ CONTROL_STATEMENT_STATE>{
 	return FOLDCOPYNAME;
   }
   "NOFOLDCOPYNAME" |
-  "NOFOLD-COPY-NAME"	{
+  "NOFOLD-COPY-NAME" |
+  "NO-FOLD-COPY-NAME"	{
 	return NOFOLDCOPYNAME;
+  }
+  "ADDRSV" |
+  "ADD-RSV"		{
+	return ADDRSV;
+  }
+  "ADDSYN" |
+  "ADD-SYN"		{
+	return ADDSYN;
+  }
+  "MAKESYN" |
+  "MAKE-SYN"		{
+	return MAKESYN;
+  }
+  "OVERRIDE"		{
+	return OVERRIDE;
+  }
+  "REMOVE"		{
+	return REMOVE;
   }
   /*"AS"			{ - not available with MF compilers -
 	return AS;
   }*/
-  "OVERRIDE"		{
-	  /* not valid, only in for error checking as it would
-	     result in a variable name otherwise */
-	  return OVERRIDE;
-  }
   {DEFNUM_LITERAL} |
-  {ALNUM_LITERAL}	{
+  {ALNUM_LITERAL} {
 	pplval.s = cobc_plex_strdup (yytext);
 	return LITERAL;
   }
   {SET_PAREN_LIT}	{
-	yytext[yyleng - 1] = 0;
-	pplval.s = cobc_plex_strdup (yytext + 1);
+	pplval.s = cobc_plex_strdup (yytext);
 	return LITERAL;
   }
   {WORD}		{
 	pplval.s = cobc_plex_strdup (yytext);
 	return VARIABLE_NAME;
+  }
+  "="			{
+	return EQ;
   }
 }
 
@@ -800,7 +817,6 @@ ENDIF_DIRECTIVE_STATE>{
 	return TOKEN;
   }
 }
-
 
 <<EOF>> {
 	struct copy_info *current_copy_info = copy_stack;
@@ -1690,7 +1706,7 @@ start:
 	for (i = bp - buff; buff[i] != '\n'; ++i) {
 		/* Pick up floating comment and force loop exit */
 		if (!quotation_mark && ((buff[i] == '*' && buff[i + 1] == '>') ||
-			                    (cb_flag_acucomment && buff[i] == '|') ) ) {
+			                    (cb_flag_acucomment && buff[i] == '|'))) {
 			/* remove indicator "source text too long" if the column
 			   leading to the indicator comes after the floating comment
 			*/
@@ -1957,7 +1973,7 @@ static void
 display_finish (void)
 {
 	int	msg_len;
-	
+
 	if (!plex_skip_input) {
 		msg_len = strlen (display_msg) - 1;
 		while (msg_len != 0 && display_msg[msg_len] == ' ') {

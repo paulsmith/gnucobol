@@ -3709,8 +3709,8 @@ get_user_specified_reserved_word (struct amendment_list user_reserved)
 		} else {
 			/* FIXME: can we point to the fname originally defining the word? */
 			configuration_error (NULL, 0, 1,
-					_("alias target '%s' is not a default reserved word"),
-					user_reserved.alias_for);
+					     _("alias target '%s' is not a default reserved word"),
+					     user_reserved.alias_for);
 		}
 	}
 
@@ -3763,7 +3763,10 @@ try_remove_removal (struct amendment_list * const addition)
 	return 0;
 }
 
-/* Reduce the amendment list to a list of additions. */
+/*
+  Reduce the amendment list to a list of additions. Any removals which are not
+  cancelled out are deleted.
+*/
 static void
 reduce_amendment_list (void)
 {
@@ -4018,6 +4021,82 @@ void
 remove_reserved_word (const char *word, const char *fname, const int line)
 {
 	add_amendment (word, fname, line, 0);
+}
+
+void
+add_reserved_word_now (char * const word, char * const alias_for)
+{
+	int			offset;
+	struct cobc_reserved	*new_reserved_words;
+	struct amendment_list	amendment;
+
+	/* Nothing to do if the word is already reserved */
+        if (is_reserved_word (word)) {
+		return;
+	}
+	
+	if (alias_for && !is_default_reserved_word (alias_for)) {
+		/* Should not happen */
+		COBC_ABORT ();
+	}
+
+	/* Find where to add new word */
+	for (offset = 0; offset < num_reserved_words; ++offset) {
+		if (cob_strcasecmp (word, reserved_words[offset].name) < 0) {
+			break;
+		}
+	}
+	
+	/*
+	  Replace reserved_words with a bigger copy, with a gap for the new
+	  element to go in.
+	*/
+	new_reserved_words = cobc_main_malloc ((num_reserved_words + 1)
+					       * sizeof (struct cobc_reserved));
+	memcpy (new_reserved_words, reserved_words,
+		offset * sizeof (struct cobc_reserved));
+	memcpy (new_reserved_words + offset + 1, reserved_words + offset,
+		(num_reserved_words - offset) * sizeof (struct cobc_reserved));
+	++num_reserved_words;
+	cobc_main_free (reserved_words);
+	reserved_words = new_reserved_words;
+
+	/* Add new word to list. */
+	amendment.word = word;
+	amendment.alias_for = alias_for;
+	amendment.is_context_sensitive = 0;
+	amendment.to_add = 1;
+	reserved_words[offset] = get_user_specified_reserved_word (amendment);
+}
+
+void
+remove_reserved_word_now (char * const word)
+{
+
+	struct cobc_reserved	*entry_to_remove;
+	struct cobc_reserved	*new_reserved_words;
+        int			entry_offset;
+
+	/* If the word is not a reserved, there's nothing to do. */
+	entry_to_remove = find_reserved_word (create_dummy_reserved (word));
+	if (!entry_to_remove) {
+		return;
+	}
+	
+	/* Create copy of list without word. */
+	new_reserved_words = cobc_main_malloc ((num_reserved_words - 1)
+					       * sizeof (struct cobc_reserved));
+        entry_offset = entry_to_remove - reserved_words;
+	memcpy (new_reserved_words, reserved_words,
+		entry_offset * sizeof (struct cobc_reserved));
+	memcpy (new_reserved_words + entry_offset,
+		reserved_words + entry_offset + 1,
+		(num_reserved_words - entry_offset - 1) * sizeof (struct cobc_reserved));
+	
+	/* Use it to replace old reserved word list. */
+	cobc_main_free (reserved_words);
+	reserved_words = new_reserved_words;
+	--num_reserved_words;
 }
 
 struct cobc_reserved *

@@ -4020,6 +4020,60 @@ prog.cob:29: error: wrong number of WHEN parameters
 
 AT_CLEANUP
 
+AT_SETUP([MF reserved word directives])
+AT_KEYWORDS([extensions ADDRSV ADDSYN MAKESYN OVERRIDE REMOVE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+           *> Valid
+           $SET ADDRSV"DOG""CAT"
+
+           *> Valid
+           $SET ADD-SYN "VALUE" = "VA"
+           *> Bread is not reserved.
+           $SET ADDSYN "BREAD" = "BARA"
+           *> ID is already reserved
+           $SET ADDSYN "IDENTIFICATION" = "ID"
+
+           *> Valid
+           $SET MAKESYN(PROGRAM) = (FUNCTION)
+           *> BREAD is not reserved.
+           $SET MAKESYN "BREAD" = "PROGRAM"
+           $SET MAKESYN "PROGRAM" = "BREAD"
+
+           *> Valid
+           $SET OVERRIDE "DIVISION" = "DIV" "JUST" = "JS"
+           *> Bread is not reserved
+           $SET OVERRIDE "BREAD"="BARA"
+           *> ID is already reserved
+           $SET OVERRIDE "IDENTIFICATION"="ID"
+
+           *> Valid
+           $SET REMOVE "BREAD" (BARA)REMOVE(DOG)
+
+       DATA DIV.
+       WORKING-STORAGE SECTION.
+       *> Check ADDSYN and OVERRIDE work correctly
+       01  just PIC XX VA "1" JS.
+       *> Check ADDRSV
+       01  cat PIC 9 VA 1.
+       *> Check REMOVE
+       01  dog PIC 9 VA 1.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:11: error: 'BREAD' is not a default reserved word, so cannot be aliased
+prog.cob:13: error: 'ID' is already reserved; you may want MAKESYN instead
+prog.cob:18: error: 'BREAD' is not a default reserved word, so cannot be aliased
+prog.cob:19: error: 'BREAD' is not a reserved word; you may want ADDSYN or OVERRIDE instead
+prog.cob:24: error: 'BREAD' is not a default reserved word, so cannot be aliased
+prog.cob:26: error: 'ID' is already reserved; you may want MAKESYN instead
+prog.cob:36: error: 'cat' is a reserved word, but isn't supported
+])
+
+AT_CLEANUP
 
 AT_SETUP([STRING / UNSTRING with invalid syntax])
 AT_KEYWORDS([misc])
