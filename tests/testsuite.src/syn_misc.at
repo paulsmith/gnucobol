@@ -3223,7 +3223,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACUCOBOL USAGE HANDLE])
-AT_KEYWORDS([misc acu extensions])
+AT_KEYWORDS([misc acu extensions reserved])
 
 # TODO: need a better test here
 # TODO: maybe add a compiler support configuration to provide better messages
@@ -3577,7 +3577,7 @@ AT_CLEANUP
 
 
 AT_SETUP([adding aliases])
-AT_KEYWORDS([misc extensions configuration])
+AT_KEYWORDS([misc extensions configuration reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3611,7 +3611,7 @@ AT_CLEANUP
 
 
 AT_SETUP([overriding default words])
-AT_KEYWORDS([misc extensions configuration])
+AT_KEYWORDS([misc extensions configuration reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3619,15 +3619,29 @@ AT_DATA([prog.cob], [
 
        PROCEDURE DIVISION.
            COMP-1 "Hello, world!"
-           .
+           DISPLAY "Hello, world!".
 ])
 
 AT_CHECK([$COMPILE_ONLY -freserved=COMP-1=DISPLAY prog.cob], [0], [], [])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  prog2.
+
+       PROCEDURE DIVISION.
+           COMP-1 "Hello, world!".
+           DISPLAY "Hello, world!".
+])
+
+AT_CHECK([$COMPILE_ONLY -fnot-reserved=DISPLAY -freserved=COMP-1=DISPLAY prog2.cob], [1], [],
+[prog2.cob:7: error: unknown statement 'DISPLAY'; it may exist in another dialect
+])
+
 AT_CLEANUP
 
 
 AT_SETUP([complete specified word list])
-AT_KEYWORDS([misc extensions configuration])
+AT_KEYWORDS([misc extensions configuration reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3875,7 +3889,7 @@ AT_CLEANUP
 
 
 AT_SETUP([wrong dialect hints])
-AT_KEYWORDS([misc])
+AT_KEYWORDS([misc configuration reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4288,7 +4302,7 @@ AT_CLEANUP
 
 
 AT_SETUP([01 CONSTANT])
-AT_KEYWORDS([CONSTANT])
+AT_KEYWORDS([CONSTANT reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
