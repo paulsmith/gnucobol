@@ -5511,7 +5511,15 @@ con_identifier:
   {
 	$$ = cb_int ((int)sizeof(void *));
   }
-| float_usage
+| COMP_1
+  {
+	if (cb_binary_comp_1) {
+		$$ = cb_int2;
+	} else {
+		$$ = cb_int ((int)sizeof(float));
+	}
+  }
+| FLOAT_SHORT
   {
 	$$ = cb_int ((int)sizeof(float));
   }
@@ -5687,12 +5695,12 @@ constant_expression:
   lit_or_length			{ $$ = $1; }
 | TOK_OPEN_PAREN		{ $$ = cb_build_alphanumeric_literal ("(", 1); }
 | TOK_CLOSE_PAREN		{ $$ = cb_build_alphanumeric_literal (")", 1); }
-| TOK_PLUS				{ $$ = cb_build_alphanumeric_literal ("+", 1); }
-| TOK_MINUS				{ $$ = cb_build_alphanumeric_literal ("-", 1); }
-| TOK_MUL				{ $$ = cb_build_alphanumeric_literal ("*", 1); }
-| TOK_DIV				{ $$ = cb_build_alphanumeric_literal ("/", 1); }
-| AND					{ $$ = cb_build_alphanumeric_literal ("&", 1); }
-| OR					{ $$ = cb_build_alphanumeric_literal ("|", 1); }
+| TOK_PLUS			{ $$ = cb_build_alphanumeric_literal ("+", 1); }
+| TOK_MINUS			{ $$ = cb_build_alphanumeric_literal ("-", 1); }
+| TOK_MUL			{ $$ = cb_build_alphanumeric_literal ("*", 1); }
+| TOK_DIV			{ $$ = cb_build_alphanumeric_literal ("/", 1); }
+| AND				{ $$ = cb_build_alphanumeric_literal ("&", 1); }
+| OR				{ $$ = cb_build_alphanumeric_literal ("|", 1); }
 | EXPONENTIATION		{ $$ = cb_build_alphanumeric_literal ("^", 1); }
 ;
 
@@ -5846,9 +5854,14 @@ usage:
   {
 	check_and_set_usage (CB_USAGE_BINARY);
   }
-| float_usage
+| COMP_1
   {
-	check_and_set_usage (CB_USAGE_FLOAT);
+	current_field->flag_comp_1 = 1;
+	if (cb_binary_comp_1) {
+		check_and_set_usage (CB_USAGE_SIGNED_SHORT);
+	} else {
+		check_and_set_usage (CB_USAGE_FLOAT);
+	}
   }
 | double_usage
   {
@@ -5873,6 +5886,10 @@ usage:
 | COMP_X
   {
 	check_and_set_usage (CB_USAGE_COMP_X);
+  }
+| FLOAT_SHORT
+  {
+	check_and_set_usage (CB_USAGE_FLOAT);
   }
 | DISPLAY
   {
@@ -6036,11 +6053,6 @@ usage:
 	check_repeated ("USAGE", SYN_CLAUSE_5, &check_pic_duplicate);
 	CB_UNFINISHED ("USAGE NATIONAL");
   }
-;
-
-float_usage:
-  COMP_1
-| FLOAT_SHORT
 ;
 
 double_usage:

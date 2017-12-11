@@ -979,6 +979,12 @@ validate_pic (struct cb_field *f)
 	if (f->pic == NULL && need_picture && check_picture_item (f)) {
 		return 1;
 	}
+
+	/* ACUCOBOL/RM-COBOL-style COMP-1 ignores the PICTURE clause. */
+	if (f->flag_comp_1 && cb_binary_comp_1) {
+		return 0;
+	}
+	
 	/* if picture is not needed it is an error to specify it
 	   note: we may have set the picture internal */
 	if (f->pic != NULL && !f->pic->flag_is_calculated && !need_picture) {

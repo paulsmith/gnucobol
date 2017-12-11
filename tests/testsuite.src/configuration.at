@@ -425,6 +425,7 @@ test.conf: missing definitions:
 	no definition of 'no-echo-means-secure'
 	no definition of 'line-col-zero-default'
 	no definition of 'display-special-fig-consts'
+	no definition of 'binary-comp-1'
 	no definition of 'comment-paragraphs'
 	no definition of 'memory-size-clause'
 	no definition of 'multiple-file-tape-clause'

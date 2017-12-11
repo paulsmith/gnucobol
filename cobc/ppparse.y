@@ -453,6 +453,12 @@ ppp_check_needs_quote (const char *envval)
 	return 0;
 }
 
+static void
+ppp_error_invalid_option (const char *directive, const char *option)
+{
+	cb_error (_("invalid %s directive option '%s'"), directive, option);
+}
+
 /* Global functions */
 
 void
@@ -576,15 +582,16 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token OVERRIDE
 
 %token SET_DIRECTIVE
-%token CONSTANT
-%token SOURCEFORMAT
-%token FOLDCOPYNAME
-%token NOFOLDCOPYNAME
 %token ADDRSV
 %token ADDSYN
+%token COMP1
+%token CONSTANT
+%token FOLDCOPYNAME
 %token MAKESYN
+%token NOFOLDCOPYNAME
 /* OVERRIDE token defined above. */
 %token REMOVE
+%token SOURCEFORMAT
 
 %token IF_DIRECTIVE
 %token ELSE_DIRECTIVE
@@ -707,7 +714,7 @@ set_directive:
 set_choice:
   CONSTANT VARIABLE_NAME LITERAL
   {
-	/* note: the old version was _as LITERAL but MF doesn't supports this */
+	/* note: the old version was _as LITERAL but MF doesn't support this */
 	struct cb_define_struct	*p;
 
 	p = ppp_define_add (ppp_setvar_list, $2, $3, 1);
@@ -717,66 +724,6 @@ set_choice:
 	}
   }
 | VARIABLE_NAME set_options
-| SOURCEFORMAT _as LITERAL
-  {
-	char	*p;
-	size_t	size;
-	int	quote;
-
-	p = $3;
-	if (*p == '\"' || *p == '\'') {
-		quote = *p;
-		p++;
-		size = strlen (p) - 1;
-		if (p[size] != quote) {
-			cb_error (_("invalid %s directive"), "SOURCEFORMAT");
-		}
-		p[size] = 0;
-	}
-	if (!strcasecmp (p, "FIXED")) {
-		cb_source_format = CB_FORMAT_FIXED;
-		cb_text_column = cb_config_text_column;
-	} else if (!strcasecmp (p, "FREE")) {
-		cb_source_format = CB_FORMAT_FREE;
-	} else if (!strcasecmp (p, "VARIABLE")) {
-		cb_source_format = CB_FORMAT_FIXED;
-		/* This is an arbitrary value; perhaps change later? */
-		cb_text_column = 500;
-	} else {
-		cb_error (_("invalid %s directive"), "SOURCEFORMAT");
-	}
-	if (cb_src_list_file) {
-		cb_current_file->source_format = cb_source_format;
-	}
-  }
-| NOFOLDCOPYNAME
-  {
-	cb_fold_copy = 0;
-  }
-| FOLDCOPYNAME _as LITERAL
-  {
-	char	*p;
-	size_t	size;
-	int	quote;
-
-	p = $3;
-	if (*p == '\"' || *p == '\'') {
-		quote = *p;
-		p++;
-		size = strlen (p) - 1;
-		if (p[size] != quote) {
-			cb_error (_("invalid %s directive"), "FOLD-COPY-NAME");
-		}
-		p[size] = 0;
-	}
-	if (!strcasecmp (p, "UPPER")) {
-		cb_fold_copy = COB_FOLD_UPPER;
-	} else if (!strcasecmp (p, "LOWER")) {
-		cb_fold_copy = COB_FOLD_LOWER;
-	} else {
-		cb_error (_("invalid %s directive"), "FOLD-COPY-NAME");
-	}
-  }
 | ADDRSV alnum_list
   {
 	struct cb_text_list	*l;
@@ -793,9 +740,49 @@ set_choice:
 	      fprintf (ppout, "#ADDSYN %s %s\n", l->text, l->next->text);
       }
   }
+| COMP1 LITERAL
+  {
+	char	*p = $2;
+	size_t	size;
+
+	/* Remove surrounding quotes/brackets */
+	++p;
+	size = strlen (p) - 1;
+	p[size] = '\0';
+
+	if (!strcasecmp (p, "BINARY")) {
+		cb_binary_comp_1 = 1;
+	} else if (!strcasecmp (p, "FLOAT")) {
+		cb_binary_comp_1 = 0;
+	} else {
+		ppp_error_invalid_option ("COMP1", p);
+	}
+  }
+| FOLDCOPYNAME _as LITERAL
+  {
+	char	*p = $3;
+	size_t	size;
+
+	/* Remove surrounding quotes/brackets */
+	++p;
+	size = strlen (p) - 1;
+	p[size] = '\0';
+
+	if (!strcasecmp (p, "UPPER")) {
+		cb_fold_copy = COB_FOLD_UPPER;
+	} else if (!strcasecmp (p, "LOWER")) {
+		cb_fold_copy = COB_FOLD_LOWER;
+	} else {
+		ppp_error_invalid_option ("FOLD-COPY-NAME", p);
+	}
+  }
 | MAKESYN alnum_equality
   {
 	fprintf (ppout, "#MAKESYN %s %s\n", $2->text, $2->next->text);
+  }
+| NOFOLDCOPYNAME
+  {
+	cb_fold_copy = 0;
   }
 | OVERRIDE alnum_equality_list
   {
@@ -811,6 +798,32 @@ set_choice:
 
 	for (l = $2; l; l = l->next) {
 		fprintf (ppout, "#REMOVE %s\n", l->text);
+	}
+  }
+| SOURCEFORMAT _as LITERAL
+  {
+	char	*p = $3;
+	size_t	size;
+
+	/* Remove surrounding quotes/brackets */
+	++p;
+	size = strlen (p) - 1;
+	p[size] = '\0';
+
+	if (!strcasecmp (p, "FIXED")) {
+		cb_source_format = CB_FORMAT_FIXED;
+		cb_text_column = cb_config_text_column;
+	} else if (!strcasecmp (p, "FREE")) {
+		cb_source_format = CB_FORMAT_FREE;
+	} else if (!strcasecmp (p, "VARIABLE")) {
+		cb_source_format = CB_FORMAT_FIXED;
+		/* This is an arbitrary value; perhaps change later? */
+		cb_text_column = 500;
+	} else {
+		ppp_error_invalid_option ("SOURCEFORMAT", p);
+	}
+	if (cb_src_list_file) {
+		cb_current_file->source_format = cb_source_format;
 	}
   }
 ;

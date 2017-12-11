@@ -1,4 +1,12 @@
 
+2017-12-11  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.def, field.c, parser.y: added binary-comp-1 option (feature
+	  request #272).
+	* pplex.l, ppparse.y: added COMP1 directive.
+	* ppparse.y: removed redundant checks for well-formed literals.
+	* ppparse.y: slightly improved error messages for invalid directives.
+
 2017-12-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (get_reserved_words_with_amendments): no longer ignore

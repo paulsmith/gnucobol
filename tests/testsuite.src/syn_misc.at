@@ -4744,3 +4744,29 @@ prog.cob:17: error: 'invalid-5' ANY LENGTH has invalid definition
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([SET SOURCEFORMAT syntax checks])
+AT_KEYWORDS([misc extensions directives])
+
+AT_DATA([prog.cob], [
+       *> Valid
+       $set sourceformat(free)
+       $SET SOURCEFORMAT"FIXED"
+       *> Invalid
+       $SET SOURCEFORMAT"hi!"
+       $SET SOURCEFORMAT()
+       $SET sourceformat'mis-matched"
+])
+# " <-- fix syntax highlighting
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:6: error: invalid SOURCEFORMAT directive option 'hi!'
+prog.cob:7: error: invalid SOURCEFORMAT directive option ''
+prog.cob:8: error: syntax error, unexpected Variable, expecting Literal
+prog.cob:8: warning: alphanumeric literal has zero length; a SPACE will be assumed
+prog.cob:8: error: PROGRAM-ID header missing
+prog.cob:8: error: PROCEDURE DIVISION header missing
+prog.cob:8: error: syntax error, unexpected Literal
+])
+AT_CLEANUP

@@ -626,22 +626,6 @@ CONTROL_STATEMENT_STATE>{
 }
 
 <SET_DIRECTIVE_STATE>{
-  "CONSTANT"		{
-	return CONSTANT;
-  }
-  "SOURCEFORMAT" |
-  "SOURCE-FORMAT"	{
-	return SOURCEFORMAT;
-  }
-  "FOLDCOPYNAME" |
-  "FOLD-COPY-NAME"	{
-	return FOLDCOPYNAME;
-  }
-  "NOFOLDCOPYNAME" |
-  "NOFOLD-COPY-NAME" |
-  "NO-FOLD-COPY-NAME"	{
-	return NOFOLDCOPYNAME;
-  }
   "ADDRSV" |
   "ADD-RSV"		{
 	return ADDRSV;
@@ -650,9 +634,26 @@ CONTROL_STATEMENT_STATE>{
   "ADD-SYN"		{
 	return ADDSYN;
   }
+  "COMP1" |
+  "COMP-1"		{
+	return COMP1;
+  }
+
+  "CONSTANT"		{
+	return CONSTANT;
+  }
+  "FOLDCOPYNAME" |
+  "FOLD-COPY-NAME"	{
+	return FOLDCOPYNAME;
+  }
   "MAKESYN" |
   "MAKE-SYN"		{
 	return MAKESYN;
+  }
+  "NOFOLDCOPYNAME" |
+  "NOFOLD-COPY-NAME" |
+  "NO-FOLD-COPY-NAME"	{
+	return NOFOLDCOPYNAME;
   }
   "OVERRIDE"		{
 	return OVERRIDE;
@@ -660,15 +661,17 @@ CONTROL_STATEMENT_STATE>{
   "REMOVE"		{
 	return REMOVE;
   }
+  "SOURCEFORMAT" |
+  "SOURCE-FORMAT"	{
+	return SOURCEFORMAT;
+  }
   /*"AS"			{ - not available with MF compilers -
 	return AS;
   }*/
   {DEFNUM_LITERAL} |
-  {ALNUM_LITERAL} {
-	pplval.s = cobc_plex_strdup (yytext);
-	return LITERAL;
-  }
+  {ALNUM_LITERAL} |
   {SET_PAREN_LIT}	{
+	  
 	pplval.s = cobc_plex_strdup (yytext);
 	return LITERAL;
   }

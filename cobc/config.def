@@ -145,6 +145,9 @@ CB_CONFIG_BOOLEAN (cb_line_col_zero_default, "line-col-zero-default",
 CB_CONFIG_BOOLEAN (cb_display_special_fig_consts, "display-special-fig-consts",
 	_("special behaviour of DISPLAY SPACE/ALL X\"01\"/ALL X\"02\"/ALL X\"07\""))
 
+CB_CONFIG_BOOLEAN (cb_binary_comp_1, "binary-comp-1",
+	_("COMP-1 is a 16-bit signed integer"))
+
 /* Support flags */
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs",
 	_("comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)"))

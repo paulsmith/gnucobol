@@ -4338,3 +4338,70 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Binary COMP-1 (1)])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  comp1       COMP-1.
+       01  num         PIC 9.9.
+
+       PROCEDURE       DIVISION.
+           COMPUTE comp1 = 7 / 2
+           MOVE comp1 TO num
+           DISPLAY num
+           .
+])
+
+AT_CHECK([$COMPILE -fbinary-comp-1 prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[3.0
+])
+AT_CHECK([$COMPILE -fno-binary-comp-1 prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[3.5
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Binary COMP-1 (2)])
+AT_KEYWORDS([extensions directives])
+
+AT_DATA([prog.cob], [
+       >>IF BINARY-COMP-1 IS DEFINED
+           $SET COMP-1(BINARY)
+       >>ELSE
+           $SET COMP1 "float"
+       >>END-IF
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  comp1       COMP-1.
+       01  num         PIC 9.9.
+
+       PROCEDURE       DIVISION.
+           COMPUTE comp1 = 7 / 2
+           MOVE comp1 TO num
+           DISPLAY num
+           .
+])
+
+AT_CHECK([$COMPILE -DBINARY-COMP-1 prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[3.0
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[3.5
+])
+
+AT_CLEANUP
