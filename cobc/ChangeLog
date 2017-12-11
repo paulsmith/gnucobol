@@ -1,4 +1,9 @@
 
+2017-12-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: set RW VARYING clause as PENDING
+	* parser.y: FR #167 added ACUCOBOL CONTROL KEY as PENDING
+
 2017-12-11  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, field.c, parser.y: added binary-comp-1 option (feature

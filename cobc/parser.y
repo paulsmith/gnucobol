@@ -6807,7 +6807,7 @@ report_group_option:
 | present_when_condition
 | group_indicate_clause
 | report_occurs_clause
-| varying_clause
+| report_varying_clause
 ;
 
 type_clause:
@@ -7022,8 +7022,11 @@ page_or_ids:
 | OR
 ;
 
-varying_clause:
+report_varying_clause:
   VARYING identifier FROM arith_x BY arith_x
+  {
+	CB_PENDING ("RW VARYING clause");
+  }
 ;
 
 line_clause:
@@ -9075,10 +9078,14 @@ accept_body:
   {
 	cb_emit_accept_day_of_week ($1);
   }
+  /* note: GnuCOBOL uses screenio.cpy 9(4) identifier,
+     MicroFocus/ACUCOBOL 99 */
 | identifier FROM ESCAPE KEY
   {
 	cb_emit_accept_escape_key ($1);
   }
+  /* note: GnuCOBOL uses ISO X(4) identifier,
+     MicroFocus 9(3) */
 | identifier FROM EXCEPTION STATUS
   {
 	cb_emit_accept_exception_status ($1);
@@ -9417,6 +9424,21 @@ accp_attr:
 	check_repeated (_("TIME-OUT or BEFORE TIME clauses"), SYN_CLAUSE_4,
 			&check_duplicate);
 	set_attribs (NULL, NULL, NULL, $3, NULL, NULL, 0);
+  }
+| _control KEY _in key_dest
+;
+
+_key_dest:	/* empty */ | key_dest;
+
+key_dest:
+  /* note: GnuCOBOL uses screenio.cpy 9(4) identifier, ACUCOBOL 99 */
+  numeric_identifier
+  {
+	check_repeated ("CONTROL KEY", SYN_CLAUSE_29, &check_duplicate);
+	CB_PENDING ("CONTROL KEY");
+#if 0 /* should generate the following AFTER the ACCEPT is finished */
+	cb_emit_accept_escape_key ($1);
+#endif
   }
 ;
 
@@ -11167,6 +11189,8 @@ exit_body:
 
 exit_program_returning:
   /* empty */			{ $$ = NULL; }
+  /* extension supported by MF and ACU
+     (note: ACU supports this with x only, too) */
 | return_give x		{ $$ = $2; }
 ;
 
@@ -13658,10 +13682,10 @@ _accp_on_exception:
 ;
 
 accp_on_exception:
-  escape_or_exception statement_list
+  escape_or_exception _key_dest statement_list
   {
 	current_statement->handler_type = ACCEPT_HANDLER;
-	current_statement->ex_handler = $2;
+	current_statement->ex_handler = $3;
   }
 ;
 
@@ -15654,6 +15678,7 @@ _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
 _contains:	| CONTAINS ;
 _controls:	| CONTROLS ;
+_control:	| CONTROL ;
 _data:		| DATA ;
 _end_of:	| _to END _of ;
 _file:		| TOK_FILE ;
