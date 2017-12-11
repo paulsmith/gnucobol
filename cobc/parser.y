@@ -253,6 +253,9 @@ static int			backup_source_line = 0;
 #define	COBC_HD_SCREEN_SECTION		(1U << 13)
 #define	COBC_HD_PROCEDURE_DIVISION	(1U << 14)
 #define	COBC_HD_PROGRAM_ID		(1U << 15)
+#define	COBC_HD_SOURCE_COMPUTER		(1U << 16)
+#define	COBC_HD_OBJECT_COMPUTER		(1U << 17)
+#define	COBC_HD_REPOSITORY		(1U << 18)
 
 /* Static functions */
 
@@ -729,7 +732,7 @@ check_relaxed_syntax (const cob_flags_t lev)
 		s = "PROGRAM-ID";
 		break;
 	default:
-		s = "Unknown";
+		s = "unknown";
 		break;
 	}
 	if (cb_relaxed_syntax_checks) {
@@ -776,6 +779,81 @@ check_headers_present (const cob_flags_t lev1, const cob_flags_t lev2,
 	}
 	return ret;
 }
+
+/*
+  TO-DO: Refactor header checks - have several header_checks: division_header,
+  section_header, paragraph_header, sentence_type
+*/
+static void
+set_conf_section_part (const cob_flags_t part)
+{
+	header_check &= ~COBC_HD_SOURCE_COMPUTER;
+	header_check &= ~COBC_HD_OBJECT_COMPUTER;
+	header_check &= ~COBC_HD_SPECIAL_NAMES;
+	header_check &= ~COBC_HD_REPOSITORY;
+	header_check |= part;
+}
+
+static const char *
+get_conf_section_part_name (const cob_flags_t part)
+{
+	if (part == COBC_HD_SOURCE_COMPUTER) {
+		return "SOURCE-COMPUTER";
+	} else if (part == COBC_HD_OBJECT_COMPUTER) {
+		return "OBJECT-COMPUTER";
+	} else if (part == COBC_HD_SPECIAL_NAMES) {
+		return "SPECIAL-NAMES";
+	} else if (part == COBC_HD_REPOSITORY) {
+		return "REPOSITORY";
+	} else {
+		cb_error ("unexpected configuration section part " CB_FMT_LLU, part);
+		COBC_ABORT ();
+	}
+}
+
+static int
+get_conf_section_part_order (const cob_flags_t part)
+{
+	if (part == COBC_HD_SOURCE_COMPUTER) {
+		return 1;
+	} else if (part == COBC_HD_OBJECT_COMPUTER) {
+		return 2;
+	} else if (part == COBC_HD_SPECIAL_NAMES) {
+		return 3;
+	} else if (part == COBC_HD_REPOSITORY) {
+		return 4;
+	} else {
+		cb_error ("unexpected configuration section part " CB_FMT_LLU, part);
+		COBC_ABORT ();
+	}
+}
+
+static void
+check_conf_section_order (const cob_flags_t part)
+{
+	const cob_flags_t	prev_part
+		= header_check & (COBC_HD_SOURCE_COMPUTER
+				  | COBC_HD_OBJECT_COMPUTER
+				  | COBC_HD_SPECIAL_NAMES
+				  | COBC_HD_REPOSITORY);
+#define MESSAGE_LEN 100
+        char			message[MESSAGE_LEN] = { '\0' };
+
+	if (prev_part == 0) {
+		return;
+	}
+
+	if (prev_part == part) {
+		cb_error (_("duplicate %s"), get_conf_section_part_name (part));
+	} else if (get_conf_section_part_order (part) < get_conf_section_part_order (prev_part)) {
+		snprintf (message, MESSAGE_LEN, _("%s incorrectly after %s"),
+			  get_conf_section_part_name (part),
+			  get_conf_section_part_name (prev_part));
+		cb_verify (cb_incorrect_conf_sec_order, message);
+	}
+}
+
+#undef MESSAGE_LEN
 
 static void
 build_nested_special (const int ndepth)
@@ -3127,36 +3205,6 @@ _configuration_section:
   _configuration_paragraphs
 ;
 
-_configuration_paragraphs:
-| standard_order_conf_section
-| nonstandard_order_conf_section
-  {
-	cb_verify (cb_incorrect_conf_sec_order,
-		   _("incorrect order of CONFIGURATION SECTION paragraphs"));
-  }
-;
-
-/*
-  We explicitly list all of the possible permutations to preclude shift/reduce
-  and reduce/reduce errors.
-*/
-
-standard_order_conf_section:
-  source_object_computer_paragraphs special_names_paragraph _repository_paragraph
-| source_object_computer_paragraphs repository_paragraph
-| source_object_computer_paragraphs
-| special_names_paragraph _repository_paragraph
-| repository_paragraph
-;
-
-nonstandard_order_conf_section:
-  source_object_computer_paragraphs repository_paragraph special_names_paragraph
-| repository_paragraph source_object_computer_paragraphs _special_names_paragraph
-| repository_paragraph special_names_paragraph _source_object_computer_paragraphs
-| special_names_paragraph source_object_computer_paragraphs _repository_paragraph
-| special_names_paragraph repository_paragraph source_object_computer_paragraphs
-;
-
 _configuration_header:
 | CONFIGURATION SECTION TOK_DOT
   {
@@ -3168,21 +3216,23 @@ _configuration_header:
   }
 ;
 
-_source_object_computer_paragraphs:
-| source_object_computer_paragraphs
+_configuration_paragraphs:
+  /* empty */
+| configuration_paragraphs
 ;
 
-source_object_computer_paragraphs:
+configuration_paragraphs:
+  configuration_paragraph
+| configuration_paragraphs configuration_paragraph
+;
+
+configuration_paragraph:
   source_computer_paragraph
 | object_computer_paragraph
-| source_computer_paragraph object_computer_paragraph
-| object_computer_paragraph source_computer_paragraph
-  {
-	cb_verify (cb_incorrect_conf_sec_order,
-		   _("incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs"));
-  }
+| special_names_header
+| special_names_sentence
+| repository_paragraph
 ;
-
 
 /* SOURCE-COMPUTER paragraph */
 
@@ -3191,6 +3241,8 @@ source_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
+	check_conf_section_order (COBC_HD_SOURCE_COMPUTER);
+	set_conf_section_part (COBC_HD_SOURCE_COMPUTER);
   }
   _source_computer_entry
 ;
@@ -3217,6 +3269,8 @@ object_computer_paragraph:
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
+	check_conf_section_order (COBC_HD_OBJECT_COMPUTER);
+	set_conf_section_part (COBC_HD_OBJECT_COMPUTER);
   }
   _object_computer_entry
   {
@@ -3311,15 +3365,13 @@ computer_words:
 
 /* REPOSITORY paragraph */
 
-_repository_paragraph:
-| repository_paragraph
-;
-
 repository_paragraph:
   REPOSITORY TOK_DOT
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
+	check_conf_section_order (COBC_HD_REPOSITORY);
+	set_conf_section_part (COBC_HD_REPOSITORY);
   }
   _repository_entry
   {
@@ -3381,37 +3433,22 @@ repository_name_list:
 
 /* SPECIAL-NAMES paragraph */
 
-_special_names_paragraph:
-| special_names_paragraph
-;
-
-special_names_paragraph:
-  special_names_header _special_names_sentence_list
-| special_names_sentence_list
-;
-
 special_names_header:
   SPECIAL_NAMES TOK_DOT
   {
 	check_duplicate = 0;
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION, 0, 0);
-	header_check |= COBC_HD_SPECIAL_NAMES;
+	check_conf_section_order (COBC_HD_SPECIAL_NAMES);
+	set_conf_section_part (COBC_HD_SPECIAL_NAMES);
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	}
   }
 ;
 
-_special_names_sentence_list:
-  /* empty */
-| special_names_sentence_list
-;
-
-special_names_sentence_list:
+special_names_sentence:
   special_name_list TOK_DOT
-| special_names_sentence_list special_name_list TOK_DOT
-;
 
 special_name_list:
   special_name
@@ -4638,7 +4675,7 @@ same_clause:
 	cb_tree l;
 
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
-			       COBC_HD_CONFIGURATION_SECTION,
+			       COBC_HD_INPUT_OUTPUT_SECTION,
 			       COBC_HD_I_O_CONTROL, 0);
 	switch (CB_INTEGER ($2)->val) {
 	case 0:
@@ -4678,7 +4715,7 @@ multiple_file_tape_clause:
   _file _tape _contains multiple_file_list
   {
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
-			       COBC_HD_CONFIGURATION_SECTION,
+			       COBC_HD_INPUT_OUTPUT_SECTION,
 			       COBC_HD_I_O_CONTROL, 0);
 	cb_verify (cb_multiple_file_tape_clause, "MULTIPLE FILE TAPE");
 	cobc_cs_check = 0;
@@ -6578,7 +6615,7 @@ control_field_list:
 ;
 
 control_final_tag:
-  FINAL 
+  FINAL
   {
 	current_report->control_final = 1;
   }
@@ -7015,7 +7052,7 @@ page_or_ids:
   {
 	current_field->report_flag |= COB_REPORT_PAGE;
   }
-| identifier 
+| identifier
   {
 	current_field->report_control = $1;
   }
@@ -7056,7 +7093,7 @@ line_clause_option:
   {
 	current_field->report_flag |= COB_REPORT_LINE_NEXT_PAGE;
   }
-| PLUS report_integer 
+| PLUS report_integer
   {
 	current_field->report_flag |= COB_REPORT_LINE_PLUS;
 	current_field->report_line = cb_get_int($2);
@@ -7071,7 +7108,7 @@ line_clause_option:
 		CB_PENDING ("LINE PLUS 0");
 	}
   }
-| TOK_PLUS report_integer 
+| TOK_PLUS report_integer
   {
 	current_field->report_flag |= COB_REPORT_LINE_PLUS;
 	current_field->report_line = cb_get_int($2);
@@ -7151,7 +7188,7 @@ _left_right_center:
 ;
 
 col_or_plus:
-  plus_plus report_integer 
+  plus_plus report_integer
   {
 	int colnum;
 	colnum = cb_get_int ($2);
@@ -7202,7 +7239,7 @@ column_integer:
 		} else if(colnum <= current_field->report_column) {
 			cb_warning (COBC_WARN_FILLER, _("COLUMN numbers should increase"));
 		}
-		current_field->report_column_list = 
+		current_field->report_column_list =
 				cb_list_append (current_field->report_column_list, CB_LIST_INIT ($1));
 	}
 	if(current_field->report_column == 0)
@@ -7212,7 +7249,7 @@ column_integer:
 ;
 
 source_clause:
-  SOURCE _is arith_x flag_rounded 
+  SOURCE _is arith_x flag_rounded
   {
 	check_repeated ("SOURCE", SYN_CLAUSE_22, &check_pic_duplicate);
 	current_field->report_source = $3;
@@ -11478,7 +11515,7 @@ inquire_statement:
   inquire_body
   {
 	cobc_cs_check = 0;
-  }  
+  }
 ;
 
 inquire_body:
@@ -12009,27 +12046,27 @@ perform_varying:
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($1);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
 					cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
 		dataTypeOk = 0;
-	} 
+	}
 	if (cb_tree_category ($3) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($3);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
 					cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
 		dataTypeOk = 0;
-	} 
+	}
 	if (cb_tree_category ($4) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($4);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"), 
+			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
 					cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
 		dataTypeOk = 0;
-	} 
+	}
 	if(dataTypeOk) {
 		$$ = cb_build_perform_varying ($1, $3, $4, $6);
 	}

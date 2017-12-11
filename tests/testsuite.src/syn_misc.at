@@ -3701,7 +3701,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 # note: testing with lax configuration, otherwise there would be an error
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
-[prog.cob:8: warning: incorrect order of SOURCE- and OBJECT-COMPUTER paragraphs used
+[prog.cob:8: warning: SOURCE-COMPUTER incorrectly after OBJECT-COMPUTER used
 ])
 AT_CLEANUP
 
@@ -3762,16 +3762,18 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 # note: testing with lax configuration, otherwise there would be an error
 AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [],
-[prog.cob:12: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:24: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:35: warning: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:45: warning: incorrect order of CONFIGURATION SECTION paragraphs used
+[prog.cob:8: warning: SOURCE-COMPUTER incorrectly after REPOSITORY used
+prog.cob:22: warning: SPECIAL-NAMES incorrectly after REPOSITORY used
+prog.cob:32: warning: SOURCE-COMPUTER incorrectly after REPOSITORY used
+prog.cob:43: warning: SPECIAL-NAMES incorrectly after REPOSITORY used
+prog.cob:44: warning: SOURCE-COMPUTER incorrectly after SPECIAL-NAMES used
 ])
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
-[prog.cob:12: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:24: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:35: error: incorrect order of CONFIGURATION SECTION paragraphs used
-prog.cob:45: error: incorrect order of CONFIGURATION SECTION paragraphs used
+[prog.cob:8: error: SOURCE-COMPUTER incorrectly after REPOSITORY used
+prog.cob:22: error: SPECIAL-NAMES incorrectly after REPOSITORY used
+prog.cob:32: error: SOURCE-COMPUTER incorrectly after REPOSITORY used
+prog.cob:43: error: SPECIAL-NAMES incorrectly after REPOSITORY used
+prog.cob:44: error: SOURCE-COMPUTER incorrectly after SPECIAL-NAMES used
 ])
 AT_CLEANUP
 

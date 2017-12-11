@@ -1041,11 +1041,9 @@ AT_DATA([prog.cob], [
        SOURCE-COMPUTER. a-computer.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:10: error: PROCEDURE DIVISION header missing
-prog.cob:10: error: syntax error, unexpected SPECIAL-NAMES
-prog.cob:11: error: syntax error, unexpected DECIMAL-POINT
-prog.cob:13: error: syntax error, unexpected SOURCE-COMPUTER
+AT_CHECK([$COMPILE_ONLY -fincorrect-conf-sec-order=error prog.cob], [1], [],
+[prog.cob:10: error: duplicate SPECIAL-NAMES
+prog.cob:13: error: SOURCE-COMPUTER incorrectly after SPECIAL-NAMES used
 ])
 AT_CLEANUP
 
