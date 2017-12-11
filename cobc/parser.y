@@ -6843,6 +6843,16 @@ report_group_description_entry:
 	}
   }
   _report_group_options TOK_DOT
+| level_number error TOK_DOT
+  {
+	/* Free tree associated with level number */
+	cobc_parse_free ($1);
+	cb_unput_dot ();
+	yyerrok;
+	check_pic_duplicate = 0;
+	check_duplicate = 0;
+	current_field = cb_get_real_field ();
+  }
 ;
 
 _report_group_options:

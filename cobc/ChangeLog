@@ -16,6 +16,7 @@
 	* ppparse.y: slightly improved error messages for invalid directives.
 	* parser.y: added syntax checks for PAGE LIMITS clause.
 	* reserved.c: fixed COLUMNS not being detected by GnuCOBOL.
+	* parser.y (report_group_description_entry): added syntax error handler.
 
 2017-12-10  Edward Hart <edward.dan.hart@gmail.com>
 
