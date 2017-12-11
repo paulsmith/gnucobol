@@ -619,9 +619,6 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COLUMN",			0, 0, COLUMN,			/* 2002 */
 				0, 0
   },
-  { "COLUMNS",			0, 0, COLUMNS,			/* 2002 */
-				0, 0
-  },
   { "COLUMN-COLOR",		0, 1, COLUMN_COLOR,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -636,6 +633,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "COLUMN-PROTECTION",		0, 1, COLUMN_PROTECTION,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "COLUMNS",			0, 0, COLUMNS,			/* 2002 */
+				0, 0
   },
   { "COMBO-BOX",		1, 1, COMBO_BOX,		/* ACU extension */
 				CB_CS_GRAPHICAL_CONTROL, CB_CS_DISPLAY | CB_CS_SCREEN

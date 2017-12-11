@@ -621,6 +621,15 @@ check_repeated (const char *clause, const cob_flags_t bitval, cob_flags_t *alrea
 }
 
 static void
+error_if_no_page_lines_limit (const char *phrase)
+{
+	if (!current_report->lines && !current_report->t_lines) {
+		cb_error (_("Cannot specify %s without number of lines on page"),
+			  phrase);
+	}
+}
+
+static void
 setup_occurs (void)
 {
 	check_repeated ("OCCURS", SYN_CLAUSE_7, &check_pic_duplicate);
@@ -6662,7 +6671,6 @@ page_limit_clause:
 		} else if(current_report->t_lines) {
 			current_report->t_last_control = current_report->t_lines;
 		}
-
 	}
 	if (!current_report->last_detail && !current_report->footing) {
 		current_report->last_detail = current_report->lines;
@@ -6677,27 +6685,7 @@ page_limit_clause:
 ;
 
 page_line_column:
-  report_int_ident
-  {
-	if (CB_LITERAL_P ($1)) {
-		current_report->lines = cb_get_int ($1);
-		if(current_report->lines > 999)
-			cb_error ("PAGE LIMIT lines > 999");
-	} else {
-		current_report->t_lines = $1;
-	}
-  }
-| report_int_ident line_or_lines
-  {
-	if (CB_LITERAL_P ($1)) {
-		current_report->lines = cb_get_int ($1);
-		if(current_report->lines > 999)
-			cb_error ("PAGE LIMIT lines > 999");
-	} else {
-		current_report->t_lines = $1;
-	}
-  }
-| report_int_ident line_or_lines report_int_ident columns_or_cols
+  report_int_ident _line_or_lines
   {
 	if (CB_LITERAL_P ($1)) {
 		current_report->lines = cb_get_int ($1);
@@ -6707,11 +6695,29 @@ page_line_column:
 	} else {
 		current_report->t_lines = $1;
 	}
-	check_repeated ("LINE LIMIT", SYN_CLAUSE_25, &check_pic_duplicate);
-	if (CB_LITERAL_P ($3)) {
-		current_report->columns = cb_get_int ($3);
+  }
+| page_limit_cols
+| report_int_ident line_or_lines page_limit_cols
+  {
+	if (CB_LITERAL_P ($1)) {
+		current_report->lines = cb_get_int ($1);
+		if (current_report->lines > 999) {
+			cb_error ("PAGE LIMIT lines > 999");
+		}
 	} else {
-		current_report->t_columns = $3;
+		current_report->t_lines = $1;
+	}
+  }
+;
+
+page_limit_cols:
+  report_int_ident columns_or_cols
+  {
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
+	if (CB_LITERAL_P ($1)) {
+		current_report->columns = cb_get_int ($1);
+	} else {
+		current_report->t_columns = $1;
 	}
   }
 ;
@@ -6734,7 +6740,7 @@ page_detail:
 | footing_clause
 | LINE_LIMIT _is report_int_ident
   {
-	check_repeated ("LINE LIMIT", SYN_CLAUSE_25, &check_pic_duplicate);
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
 	if (CB_LITERAL_P ($3)) {
 		current_report->columns = cb_get_int ($3);
 	} else {
@@ -6746,6 +6752,9 @@ page_detail:
 heading_clause:
   HEADING _is report_int_ident
   {
+	check_repeated ("HEADING", SYN_CLAUSE_6, &check_duplicate);
+	error_if_no_page_lines_limit ("HEADING");
+
 	if (CB_LITERAL_P ($3)) {
 		current_report->heading = cb_get_int ($3);
 	} else {
@@ -6757,6 +6766,9 @@ heading_clause:
 first_detail:
   FIRST detail_keyword _is report_int_ident
   {
+	check_repeated ("FIRST DETAIL", SYN_CLAUSE_7, &check_duplicate);
+	error_if_no_page_lines_limit ("FIRST DETAIL");
+
 	if (CB_LITERAL_P ($4)) {
 		current_report->first_detail = cb_get_int ($4);
 	} else {
@@ -6768,6 +6780,9 @@ first_detail:
 last_heading:
   LAST ch_keyword _is report_int_ident
   {
+	check_repeated ("LAST CONTROL HEADING", SYN_CLAUSE_8, &check_duplicate);
+	error_if_no_page_lines_limit ("LAST CONTROL HEADING");
+
 	if (CB_LITERAL_P ($4)) {
 		current_report->last_control = cb_get_int ($4);
 	} else {
@@ -6779,6 +6794,9 @@ last_heading:
 last_detail:
   LAST detail_keyword _is report_int_ident
   {
+	check_repeated ("LAST DETAIL", SYN_CLAUSE_9, &check_duplicate);
+	error_if_no_page_lines_limit ("LAST DETAIL");
+
 	if (CB_LITERAL_P ($4)) {
 		current_report->last_detail = cb_get_int ($4);
 	} else {
@@ -6790,6 +6808,9 @@ last_detail:
 footing_clause:
   FOOTING _is report_int_ident
   {
+	check_repeated ("FOOTING", SYN_CLAUSE_10, &check_duplicate);
+	error_if_no_page_lines_limit ("FOOTING");
+
 	if (CB_LITERAL_P ($3)) {
 		current_report->footing = cb_get_int ($3);
 	} else {
@@ -7003,7 +7024,7 @@ present_when_condition:
 	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
 	current_field->report_when = $3;
   }
-| present_absent AFTER _new page_or_id
+| present_absent AFTER _new _page_or_id
   {
 	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
 	current_field->report_flag |= COB_REPORT_PRESENT;
@@ -7016,7 +7037,7 @@ present_when_condition:
 	current_field->report_flag &= ~COB_REPORT_BEFORE;
 	current_field->report_flag |= COB_REPORT_PAGE;
   }
-| present_absent BEFORE _new page_or_id
+| present_absent BEFORE _new _page_or_id
   {
 	check_repeated ("PRESENT", SYN_CLAUSE_20, &check_pic_duplicate);
 	current_field->report_flag |= COB_REPORT_PRESENT;
@@ -7043,8 +7064,9 @@ present_absent:
   }
 ;
 
-page_or_id:
-| page_or_ids page_or_id
+_page_or_id:
+  /* empty */
+| page_or_ids _page_or_id
 ;
 
 page_or_ids:
@@ -7067,7 +7089,7 @@ report_varying_clause:
 ;
 
 line_clause:
-  line_keyword_clause line_clause_options
+  line_keyword_clause _line_clause_options
   {
 	check_repeated ("LINE", SYN_CLAUSE_21, &check_pic_duplicate);
 	current_field->report_flag |= COB_REPORT_LINE;
@@ -7075,11 +7097,12 @@ line_clause:
 ;
 
 line_keyword_clause:
-  LINE number_is
+  LINE _number_is
 ;
 
-line_clause_options:
-| line_clause_option line_clause_options
+_line_clause_options:
+  /* empty */
+| line_clause_option _line_clause_options
 ;
 
 line_clause_option:
@@ -7123,11 +7146,6 @@ line_clause_option:
 		CB_PENDING ("LINE PLUS 0");
 	}
   }
-;
-
-number_is:
-| NUMBER IS
-| NUMBER
 ;
 
 line_clause_integer:
@@ -12041,33 +12059,34 @@ perform_varying:
   identifier FROM x _by_phrase UNTIL condition
   {
 	cb_tree		x;
-	int		dataTypeOk = 1;
+	int		data_type_ok = 1;
 
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($1);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
-					cb_name (x),x->source_line, x->source_file);
+			    _("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
+			    cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
-		dataTypeOk = 0;
+		data_type_ok = 0;
 	}
 	if (cb_tree_category ($3) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($3);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
+			_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
 					cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
-		dataTypeOk = 0;
+		data_type_ok = 0;
 	}
 	if (cb_tree_category ($4) != CB_CATEGORY_NUMERIC) {
 		x = cb_ref ($4);
 		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (Line %d of %s) is not a numeric field"),
+			_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
 					cb_name (x),x->source_line, x->source_file);
 		$$ = cb_int1;
-		dataTypeOk = 0;
+		data_type_ok = 0;
 	}
-	if(dataTypeOk) {
+
+	if (data_type_ok) {
 		$$ = cb_build_perform_varying ($1, $3, $4, $6);
 	}
   }
@@ -14079,7 +14098,7 @@ _scroll_lines:
   {
 	$$ = cb_one;
   }
-| pos_num_id_or_lit scroll_line_or_lines
+| pos_num_id_or_lit line_or_lines
   {
 	$$ = $1;
   }
@@ -15742,6 +15761,7 @@ _message:	| MESSAGE ;
 _mode:		| MODE ;
 _new:		| NEW ;
 _number:	| NUMBER ;
+_number_is:	| NUMBER IS | NUMBER ;
 _numbers:	| NUMBER | NUMBERS ;
 _of:		| OF ;
 _on:		| ON ;
@@ -15786,7 +15806,6 @@ lock_records:		RECORD | RECORDS ;
 object_char_or_word_or_modules:	CHARACTERS | WORDS | MODULES;
 records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
-scroll_line_or_lines:	LINE | LINES ;
 size_or_length:		SIZE | LENGTH ;
 with_dups:		WITH DUPLICATES | DUPLICATES ;
 

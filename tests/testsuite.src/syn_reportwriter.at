@@ -475,3 +475,37 @@ prog.cob:53: error: OCCURS and multi COLUMNs is not allowed
 
 AT_CLEANUP
 
+
+AT_SETUP([PAGE LIMITS clause])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+       
+       ENVIRONMENT     DIVISION.
+       INPUT-OUTPUT    SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.txt".
+           
+       DATA            DIVISION.
+       FILE            SECTION.
+       FD  f           REPORT r1, r2.
+       01  f-rec       PIC XXXXX.
+       
+       REPORT          SECTION.
+       RD  r1          PAGE LIMIT 1 LINES 1 COLUMNS
+                       HEADING f-rec,
+                       HEADING f-rec,
+                       LINE LIMIT 1.
+       
+       RD  r2          PAGE LIMIT 1 COLUMNS
+                       HEADING f-rec.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:19: error: duplicate HEADING clause
+prog.cob:19: error: duplicate LINE LIMIT clause
+prog.cob:22: error: Cannot specify HEADING without number of lines on page
+])
+AT_CLEANUP

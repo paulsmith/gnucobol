@@ -11,6 +11,8 @@
 	* pplex.l, ppparse.y: added COMP1 directive.
 	* ppparse.y: removed redundant checks for well-formed literals.
 	* ppparse.y: slightly improved error messages for invalid directives.
+	* parser.y: added syntax checks for PAGE LIMITS clause.
+	* reserved.c: fixed COLUMNS not being detected by GnuCOBOL.
 
 2017-12-10  Edward Hart <edward.dan.hart@gmail.com>
 
