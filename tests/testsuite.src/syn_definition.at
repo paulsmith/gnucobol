@@ -32,7 +32,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:3: error: invalid PROGRAM-ID 'short' - name duplicates a 'C' keyword
 ])
 
@@ -49,7 +49,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:3: error: COMMON may only be used in a contained program
 ])
 
@@ -66,7 +66,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:3: error: syntax error, unexpected RECURSIVE, expecting .
 ])
 
@@ -117,7 +117,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:5: error: 'X' cannot be used here
 ])
 
@@ -139,7 +139,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: 'X IN G' is not defined
 ])
 
@@ -163,7 +163,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:10: error: 'Y IN G' is not defined
 ])
 
@@ -185,7 +185,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: 'X IN X' is not defined
 ])
 
@@ -205,7 +205,7 @@ AT_DATA([prog.cob], [
        01 X.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:6: error: PICTURE clause required for 'X'
 ])
 
@@ -663,7 +663,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:11: error: 'X' is ambiguous; needs qualification
 prog.cob:7: error: 'X IN G1' defined here
 prog.cob:9: error: 'X IN G2' defined here
@@ -689,7 +689,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:10: error: 'X' is ambiguous; needs qualification
 prog.cob:7: error: 'X IN G' defined here
 prog.cob:8: error: 'X IN X IN G' defined here
@@ -718,7 +718,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:13: error: 'Y IN X' is ambiguous; needs qualification
 prog.cob:8: error: 'Y IN X IN G1' defined here
 prog.cob:11: error: 'Y IN X IN G2' defined here
@@ -774,7 +774,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:5: error: 'END-OF-PROGRAM' is not defined
 ])
 
@@ -795,11 +795,15 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'L':
 prog.cob:6: error: redefinition of 'L'
 prog.cob:5: error: 'L' previously defined here
 ])
+
+# FIXME: as long as there is no direct reference to the section
+#        this should be not more than a warning,
+#        maybe depending on a compiler configuration
 
 AT_CLEANUP
 
@@ -816,11 +820,52 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'L':
 prog.cob:6: error: redefinition of 'L'
 prog.cob:5: error: 'L' previously defined here
 ])
+
+# FIXME: as long as there is no direct reference to
+#        the paragraph/section this should be not more
+#        than a warning, maybe depending on a compiler
+#        configuration
+
+AT_CLEANUP
+
+
+AT_SETUP([Redefinition of label and variable names])
+AT_KEYWORDS([definition])
+
+# currently failing, see FR #260
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       identification division.
+       program-id. WORD.
+       data division.
+       working-storage section.
+      *-----------------------------------------------------------------
+       77 word pic 9.
+      *-----------------------------------------------------------------
+       PROCEDURE DIVISION.
+       main section.
+      *
+           move 0 to word
+           perform word
+      *
+           exit program returning word.
+      *-----------------------------------------------------------------
+       word section.
+           add 1 to word.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+
+# FIXME: as long as there is no direct reference to
+#        the paragraph/section this should be not more
+#        than a warning, maybe depending on a compiler
+#        configuration
 
 AT_CLEANUP
 
@@ -842,7 +887,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 
 ## Change when we DON'T allow this (likely as a warning,
 ## depending on compiler configuration)
-## AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+## AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 ## [prog.cob: in paragraph 'L':
 ## prog.cob:6: error: redefinition of 'L'
 ## prog.cob:5: error: 'L' previously defined here
@@ -867,7 +912,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], ,
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in section 'S-3':
 prog.cob:10: error: 'L' is ambiguous; needs qualification
 prog.cob:6: error: 'L IN S-1' defined here
