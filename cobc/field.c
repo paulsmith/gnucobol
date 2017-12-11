@@ -260,7 +260,7 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 					break;
 				case ')':
 					unop = 0;
-					for (k=op_pos; k >= 0 && op_type[k] != '('; k--);
+					for (k=op_pos; k > 0 && op_type[k] != '('; k--);
 					if (op_type [k] != '(')
 						cb_error (_("missing left parenthesis"));
 					while (op_pos >= 0
