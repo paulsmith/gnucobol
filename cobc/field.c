@@ -1396,11 +1396,11 @@ setup_parameters (struct cb_field *f)
 
 		case CB_USAGE_POINTER:
 		case CB_USAGE_PROGRAM_POINTER:
-			if (sizeof (void *) == 8) {
-				f->pic = CB_PICTURE (cb_build_picture ("9(17)"));
-			} else {
-				f->pic = CB_PICTURE (cb_build_picture ("9(10)"));
-			}
+#ifdef COB_64_BIT_POINTER
+			f->pic = CB_PICTURE (cb_build_picture ("9(17)"));
+#else
+			f->pic = CB_PICTURE (cb_build_picture ("9(10)"));
+#endif
 			f->pic->flag_is_calculated = 1;
 			break;
 		case CB_USAGE_FLOAT:

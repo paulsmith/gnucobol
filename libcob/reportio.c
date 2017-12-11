@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2013-2016 Free Software Foundation, Inc.
+   Copyright (C) 2013-2017 Free Software Foundation, Inc.
    Written by Ron Norman
 
    This file is part of GnuCOBOL.
@@ -856,6 +856,7 @@ print_field(cob_report_field *rf, char *rec)
 	int	ln,k,i;
 
 	cob_field_to_string(rf->f, wrk, sizeof(wrk)-1);
+	wrk[COB_SMALL_MAX] = 0;	/* keep analyzer happy */
 	ln = strlen(wrk);
 	if(cobsetptr
 	&& !cobsetptr->cob_col_just_lrc) {		/* Data justify is turned off */

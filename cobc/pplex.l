@@ -2002,13 +2002,13 @@ check_listing (const char *text, const unsigned int comment)
 	if (!text) {
 		return;
 	}
+#ifndef COB_INTERNAL_XREF
 	if (cobc_gen_listing == 2) {
-		/* LCOV_EXCL_START */
 		/* Passed to cobxref */
 		fputs (text, cb_listing_file);
 		return;
-		/* LCOV_EXCL_STOP */
 	}
+#endif
 	if (comment) {
 		c = '*';
 	} else {

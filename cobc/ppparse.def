@@ -23,7 +23,11 @@
 
 CB_PARSE_DEF ("OPENCOBOL",		1U)
 CB_PARSE_DEF ("GNUCOBOL",		1U)
-CB_PARSE_DEF ("P64",			sizeof (void *) > 4U)
+#ifdef COB_64_BIT_POINTER
+CB_PARSE_DEF ("P64",			1U)
+#else
+CB_PARSE_DEF ("P64",			0U)
+#endif
 CB_PARSE_DEF ("EXECUTABLE",		cb_flag_main != 0)
 CB_PARSE_DEF ("MODULE",			cb_flag_main == 0)
 CB_PARSE_DEF ("TRUNC",			cb_binary_truncate != 0)

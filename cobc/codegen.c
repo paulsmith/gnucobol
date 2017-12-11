@@ -6935,6 +6935,8 @@ output_stmt (cb_tree x)
 	struct cb_para_label	*pal;
 	struct cb_set_attr	*sap;
 	struct cb_file		*fl;
+	struct cb_field		*p2;
+	char	*px;
 #ifdef	COB_NON_ALIGNED
 	struct cb_cast		*cp;
 #endif
@@ -7246,7 +7248,7 @@ output_stmt (cb_tree x)
 					output_line ("/* WHEN is always %s */", bop->op != '!'?"FALSE":"TRUE");
 				} else if (w && w->source_line) {
 					output_prefix ();
-					output ("/* Line: %-10d: %-19s",w->source_line, "WHEN");
+					output ("/* Line: %-10d: %-19s", w->source_line, "WHEN");
 					if (w->source_file) {
 						output (": %s ", w->source_file);
 					}
@@ -7260,7 +7262,7 @@ output_stmt (cb_tree x)
 					output_line ("/* WHEN */");
 				}
 			} else if (ip->test->source_line) {
-				output_line ("/* Line: %-10d: WHEN */",ip->test->source_line);
+				output_line ("/* Line: %-10d: WHEN */", ip->test->source_line);
 				if (cb_flag_source_location
 				 && last_line != ip->test->source_line) {
 					/* Output source location as code */
@@ -7279,9 +7281,8 @@ output_stmt (cb_tree x)
 		if(ip->is_if == 2
 		&& ip->stmt1 == NULL
 		&& ip->stmt2 != NULL) {	/* Really PRESENT WHEN for Report field */
-			struct cb_field *p = (struct cb_field *)ip->stmt2;
-			char	*px;
-			if((p->report_flag & COB_REPORT_LINE)) {
+			p2 = (struct cb_field *)ip->stmt2;
+			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
 				output_line ("/* PRESENT WHEN Line */");
 			} else {
@@ -7293,9 +7294,9 @@ output_stmt (cb_tree x)
 			output_cond (ip->test, 0);
 			output (")\n");
 			output_line ("{");
-			output("\t%s%d.suppress = 0;\n",px,p->id);
+			output ("\t%s%d.suppress = 0;\n", px, p2->id);
 			output_line ("} else {");
-			output("\t%s%d.suppress = 1;\n",px,p->id);
+			output ("\t%s%d.suppress = 1;\n", px, p2->id);
 			output_line ("}");
 #ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
 			gen_if_level--;
@@ -7305,9 +7306,8 @@ output_stmt (cb_tree x)
 		if(ip->is_if == 3
 		&& ip->stmt1 == NULL
 		&& ip->stmt2 != NULL) {	/* Really PRESENT WHEN for Report line */
-			struct cb_field *p = (struct cb_field *)ip->stmt2;
-			char	*px;
-			if((p->report_flag & COB_REPORT_LINE)) {
+			p2 = (struct cb_field *)ip->stmt2;
+			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
 				output_line ("/* PRESENT WHEN line */");
 			} else {
@@ -7319,9 +7319,9 @@ output_stmt (cb_tree x)
 			output_cond (ip->test, 0);
 			output (")\n");
 			output_line ("{");
-			output("\t%s%d.suppress = 0;\n",px,p->id);
+			output ("\t%s%d.suppress = 0;\n", px, p2->id);
 			output_line ("} else {");
-			output("\t%s%d.suppress = 1;\n",px,p->id);
+			output ("\t%s%d.suppress = 1;\n", px, p2->id);
 			output_line ("}");
 #ifdef COBC_HAS_CUTOFF_FLAG	/* CHECKME: likely will be removed completely in 3.1 */
 			gen_if_level--;
@@ -8110,8 +8110,12 @@ output_report_control(struct cb_report *p, int id, cb_tree ctl, cb_tree nx)
 static void
 output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report *r, int subscript)
 {
-	int	idx, colnum;
-	cb_tree	l,x;
+	int		idx, colnum;
+	cb_tree		l, x;
+	struct cb_literal	*lit;
+	cb_tree		value;
+	unsigned int	i, j;
+	char		*val;
 
 	if (f == NULL) {
 		return;
@@ -8213,37 +8217,33 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 	}
 	output_local(",");	
 	if (f->values) {
-		struct cb_literal	*l;
-		cb_tree	value = CB_VALUE (f->values);
+		value = CB_VALUE (f->values);
 
 		if (CB_TREE_TAG (value) == CB_TAG_LITERAL) {
-			int	i,j;
-			char	*val;
-
-			l = CB_LITERAL (value);
-			if (l->all) {
+			lit = CB_LITERAL (value);
+			if (lit->all) {
 				val = (char *)calloc(1, f->size * 2 + 2);
-				if(l->data[0] == '"'
-				|| l->data[0] == '\\') {	/* Fix string for C code */
-					for(i=j=0; j < f->size; j++) {
+				if(lit->data[0] == '"'
+				|| lit->data[0] == '\\') {	/* Fix string for C code */
+					for(i=j=0; j < (unsigned int)f->size; j++) {
 						val[i++] = '\\';
-						val[i++] = l->data[0];
+						val[i++] = lit->data[0];
 					}
 					val[i] = 0;
 				} else {
-					memset(val,l->data[0],f->size);
+					memset(val,lit->data[0],f->size);
 				}
 				output_local("\"%s\",%d,", val, (int)f->size);
 			} else {
-				val = (char *)calloc(1, l->size * 2 + 2);
-				for(i=j=0; j < l->size; j++) {
-					if(l->data[j] == '"'
-					|| l->data[j] == '\\')	/* Fix string for C code */
+				val = (char *)calloc(1, lit->size * 2 + 2);
+				for(i=j=0; j < lit->size; j++) {
+					if(lit->data[j] == '"'
+					|| lit->data[j] == '\\')	/* Fix string for C code */
 						val[i++] = '\\';
-					val[i++] = l->data[j];
+					val[i++] = lit->data[j];
 				}
 				val[i] = 0;
-				output_local("\"%s\",%d,", val, (int)l->size);
+				output_local("\"%s\",%d,", val, (int)lit->size);
 			}
 			free((void*) val);
 		} else {
@@ -8544,10 +8544,11 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 	output_local("&%s%d_%d,",CB_PREFIX_REPORT_SUM,rsid,rsprv);
 	if(f->report_sum_counter) {
 		output_local("&%s%d,",CB_PREFIX_FIELD, cb_code_field(CB_VALUE(f->report_sum_counter))->id);
+		z = get_sum_data_field(r, cb_code_field(CB_VALUE(f->report_sum_counter)));
 	} else {
 		output_local("NULL,");
+		z = NULL;
 	}
-	z = get_sum_data_field(r, cb_code_field(CB_VALUE(f->report_sum_counter)));
 	if(z) {
 		output_local("&%s%d,",CB_PREFIX_FIELD, z->id);
 	} else {
@@ -10187,9 +10188,8 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Initialize REPORT data items */");
 		/* Initialize items with VALUE */
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			struct cb_report *rep;
 			rep = CB_REPORT(CB_VALUE(l));
-			if(rep) {
+			if (rep) {
 				output_initial_values (rep->records);
 			}
 		}
@@ -10197,7 +10197,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* Reports */
-	if(prog->report_list) {
+	if (prog->report_list) {
 		optimize_defs[COB_SET_REPORT] = 1;
 		output_line ("\n/* Init Reports */\n");
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {

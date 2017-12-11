@@ -3257,8 +3257,10 @@ build_sum_counter(struct cb_report *r, struct cb_field *f)
 void
 finalize_report (struct cb_report *r, struct cb_field *records)
 {
-	struct cb_field		*p,*ff;
+	struct cb_field		*p, *ff, *fld;
 	struct cb_file		*f;
+	struct cb_reference	*ref;
+
 	if(report_checked != r) {
 		report_checked = r;
 		if(r->lines > 9999)
@@ -3271,7 +3273,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			&& r->t_first_detail == NULL
 			&& r->t_last_detail == NULL) {
 				cb_warning_x (COBC_WARN_FILLER,
-					CB_TREE(r), _("NO DETAIL line defined in report %s"), r->name);
+					CB_TREE(r), _("no DETAIL line defined in report %s"), r->name);
 			}
 			r->first_detail = 1;
 		}
@@ -3284,7 +3286,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		&& r->t_footing == NULL) {	/* No PAGE LIMITS set at run-time so check it now */
 			if(r->first_detail <= 0) {
 				cb_warning_x (COBC_WARN_FILLER,
-					CB_TREE(r), _("NO DETAIL line defined in report %s"),r->name);
+					CB_TREE(r), _("no DETAIL line defined in report %s"),r->name);
 			} else if(!(r->first_detail >= r->heading)) {
 				cb_error_x (CB_TREE(r), _("PAGE LIMIT FIRST DETAIL should be >= HEADING"));
 			} 
@@ -3301,7 +3303,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 	}
 
 	for (p = records; p; p = p->sister) {
-		if(p->report != NULL)
+		if (p->report != NULL)
 		    continue;
 		p->report = r;
 		if(p->storage == CB_STORAGE_REPORT
@@ -3317,28 +3319,30 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			r->line_ids[r->num_lines++] = p;
 			r->line_ids[r->num_lines] = NULL;	/* Clear next entry */
 		} 
+		/* report source field */
 		if(p->report_source
 		&& CB_REF_OR_FIELD_P (p->report_source)) {
-			struct cb_field *f = CB_FIELD (cb_ref(p->report_source));
-			if(f && f->count == 0)
-				f->count++;
+			/* force generation of report source field TODO: Check why */
+			fld = CB_FIELD (cb_ref(p->report_source));
+			if(fld && fld->count == 0)
+				fld->count++;
 			if(CB_TREE_TAG (p->report_source) == CB_TAG_REFERENCE) {
-				struct cb_reference     *ref;
 				ref = CB_REFERENCE (p->report_source); 
-				if(ref->offset || ref->length || ref->subs || f->flag_local) {
+				if(ref->offset || ref->length || ref->subs || fld->flag_local) {
 					p->report_from = p->report_source;
-					p->report_source = cb_field_dup(f, ref);
+					p->report_source = cb_field_dup (fld, ref);
 				}
 			}
 		}
+		/* force generation of report sum counter TODO: Check why */
 		if(p->report_sum_counter
 		&& CB_REF_OR_FIELD_P (p->report_sum_counter)) {
-			struct cb_field *f = CB_FIELD (cb_ref(p->report_sum_counter));
-			if(f && f->count == 0)
-				f->count++;
+			fld = CB_FIELD (cb_ref(p->report_sum_counter));
+			if (fld && fld->count == 0)
+				fld->count++;
 		}
 		if (p->children) {
-		    finalize_report(r,p->children);
+		    finalize_report (r,p->children);
 		}
 	}
 
@@ -3373,6 +3377,14 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			}
 		}
 	}
+	/* LCOV_EXCL_START */
+	if (!r || !r->file) {
+		/* checked to keep the analyzer happy, TODO: real fix later */
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"finalize_report", "r");;
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 	if(r->file->record_max < r->rcsz)
 		r->file->record_max = r->rcsz;
 	if(r->rcsz < r->file->record_max)

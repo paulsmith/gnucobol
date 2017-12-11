@@ -3,6 +3,9 @@
 
 	* parser.y: set RW VARYING clause as PENDING
 	* parser.y: FR #167 added ACUCOBOL CONTROL KEY as PENDING
+	* codegen.c, tree.c: fixed compiler warnings in RW code
+	* field.c, ppparse.def: removed constant evaluations of pointer size
+	  by using COB_64_BIT_POINTER
 
 2017-12-11  Edward Hart <edward.dan.hart@gmail.com>
 
