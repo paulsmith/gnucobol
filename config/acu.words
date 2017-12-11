@@ -796,7 +796,7 @@ reserved:	VALUES=VALUE
 reserved:	VALUE-FORMAT*
 reserved:	VARIANT*
 reserved:	VARYING
-reserved:	VERSION
+reserved:	VERSION*
 reserved:	VERTICAL*
 reserved:	VERY-HEAVY*
 reserved:	VIRTUAL-WIDTH*
