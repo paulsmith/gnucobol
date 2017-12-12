@@ -1,4 +1,8 @@
 
+2017-12-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: fix --list-registers to list these, not mnemonics...
+
 2017-12-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: set RW VARYING clause as PENDING

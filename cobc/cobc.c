@@ -1958,14 +1958,14 @@ cobc_abort_msg (void)
 		} else {
 			prog_type = prog_id = (char *)_("unknown");
 		}
-		if (!cb_source_line) {
-			cobc_err_msg (_("aborting codegen for %s (%s: %s)"),
-				cb_source_file, prog_type, prog_id);
+			if (!cb_source_line) {
+				cobc_err_msg (_("aborting codegen for %s (%s: %s)"),
+					cb_source_file, prog_type, prog_id);
+			} else {
+				cobc_err_msg (_("aborting compile of %s at line %d (%s: %s)"),
+					cb_source_file, cb_source_line, prog_type, prog_id);
+			}
 		} else {
-			cobc_err_msg (_("aborting compile of %s at line %d (%s: %s)"),
-				cb_source_file, cb_source_line, prog_type, prog_id);
-		}
-	} else {
 		cobc_err_msg (_("aborting"));
 	}
 }
@@ -2709,7 +2709,7 @@ process_command_line (const int argc, char **argv)
 
 		case '9':
 			/* --list-registers */
-			list_system_names = 1;
+			list_registers = 1;
 			exit_option = 1;
 			break;
 
@@ -3681,8 +3681,8 @@ process_filename (const char *filename)
 		fn->object = cobc_main_malloc (COB_FILE_MAX);
 		cob_temp_name ((char *)fn->object, "." COB_OBJECT_EXT);
 	}
-	fn->object_len = strlen (fn->object);
-	cobc_objects_len += fn->object_len + 8U;
+		fn->object_len = strlen (fn->object);
+		cobc_objects_len += fn->object_len + 8U;
 
 	/* Set listing filename */
 	if (cobc_gen_listing == 1) {
