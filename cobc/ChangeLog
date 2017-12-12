@@ -1,4 +1,9 @@
 
+2017-12-12  Edward Hart <edward.dan.hart@gmail.com>
+
+	* parser.y (rep_name_list): handle case where $1 == cb_error_node
+	  (bug #472).
+
 2017-12-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: fix --list-registers to list these, not mnemonics...

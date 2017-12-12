@@ -1,23 +1,23 @@
 ## Copyright (C) 2014-2015 Free Software Foundation, Inc.
 ## Written by Simon Sobisch
-## 
+##
 ## This file is part of GnuCOBOL.
-## 
+##
 ## The GnuCOBOL compiler is free software: you can redistribute it
 ## and/or modify it under the terms of the GNU General Public License
 ## as published by the Free Software Foundation, either version 3 of the
 ## License, or (at your option) any later version.
-## 
+##
 ## GnuCOBOL is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 ### GnuCOBOL Test Suite
- 
+
 ### ISO+IEC+1989-2014 REPORT WRITER module
 
 AT_SETUP([REPORT error/warning])
@@ -32,7 +32,7 @@ AT_DATA([prog.cob], [
            SELECT TRANSACTION-DATA
            ASSIGN TO EXTERNAL DATAIN
            ORGANIZATION IS LINE SEQUENTIAL.
-           
+
            SELECT REPORT-FILE
            ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
 
@@ -57,14 +57,14 @@ AT_DATA([prog.cob], [
        01 END-OF-FILE-SWITCH        PIC X(1)    VALUE 'N'.
           88 END-OF-FILE            VALUE 'Y'.
           88 GOFOREVER              VALUE 'X'.
-      
+
        REPORT           SECTION.
        RD NO-REPORT
           PAGE LIMIT IS 66 LINES
           HEADING 1
           FIRST DETAIL 5
           LAST DETAIL 58.
-      
+
        01 PAGE-HEAD-GROUP TYPE PAGE HEADING.
           02 LINE 1.
              03 COLUMN 27   PIC X(41) VALUE
@@ -75,7 +75,7 @@ AT_DATA([prog.cob], [
              03 COLUMN 30   PIC X(05) VALUE 'DEPT.'.
              03 COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
              03 COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
-      
+
        01 CHARGE-DETAIL TYPE DETAIL.
           02 LINE PLUS 1.
              03 COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
@@ -85,17 +85,17 @@ AT_DATA([prog.cob], [
              03 COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
 
        PROCEDURE        DIVISION.
-      
+
            OPEN INPUT TRANSACTION-DATA,
                 OUTPUT REPORT-FILE.
-      
+
            INITIATE CUSTOMER-REPORT.
-      
+
            READ TRANSACTION-DATA
                AT END
-                   MOVE 'Y' TO END-OF-FILE-SWITCH 
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
            END-READ.
-      
+
            PERFORM UNTIL GOFOREVER
               GENERATE CHARGE-DETAIL
               READ TRANSACTION-DATA
@@ -103,12 +103,12 @@ AT_DATA([prog.cob], [
                      EXIT PERFORM
               END-READ
            END-PERFORM.
-      
+
            TERMINATE CUSTOMER-REPORT.
-      
+
            CLOSE TRANSACTION-DATA,
                  REPORT-FILE.
-      
+
            STOP RUN.
 ])
 
@@ -209,7 +209,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:13: warning: NO DETAIL line defined in report rp
+[prog.cob:13: warning: no DETAIL line defined in report rp
 prog.cob:27: error: 'rp-detail' is not defined
 ])
 
@@ -278,7 +278,7 @@ AT_DATA([prog.cob], [
            SELECT TRANSACTION-DATA
            ASSIGN TO EXTERNAL DATAIN
            ORGANIZATION IS LINE SEQUENTIAL.
-           
+
            SELECT REPORT-FILE
            ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
 
@@ -308,14 +308,14 @@ AT_DATA([prog.cob], [
        01 END-OF-FILE-SWITCH        PIC X(1)    VALUE 'N'.
           88 END-OF-FILE            VALUE 'Y'.
           88 GOFOREVER              VALUE 'X'.
-      
+
        REPORT           SECTION.
        RD SOME-REPORT
           PAGE LIMIT IS 66 LINES
           HEADING 1
           FIRST DETAIL 5
           LAST DETAIL 58.
-      
+
        01 PAGE-HEAD-GROUP TYPE PAGE HEADING.
           02 LINE 1.
              03 COLUMN 27   PIC X(41) VALUE
@@ -326,7 +326,7 @@ AT_DATA([prog.cob], [
              03 COLUMN 30   PIC X(05) VALUE 'DEPT.'.
              03 COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
              03 COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
-      
+
        01 CHARGE-DETAIL TYPE DETAIL.
           02 LINE PLUS 1.
              03 COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
@@ -336,17 +336,17 @@ AT_DATA([prog.cob], [
              03 COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
 
        PROCEDURE DIVISION.
-      
+
            OPEN INPUT  TRANSACTION-DATA,
                 OUTPUT REPORT-FILE.
-      
+
            INITIATE CUSTOMER-REPORT.
-      
+
            READ TRANSACTION-DATA
                AT END
-                   MOVE 'Y' TO END-OF-FILE-SWITCH 
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
            END-READ.
-      
+
            PERFORM UNTIL GOFOREVER
               GENERATE CHARGE-DETAIL
               READ TRANSACTION-DATA
@@ -354,12 +354,12 @@ AT_DATA([prog.cob], [
                      EXIT PERFORM
               END-READ
            END-PERFORM.
-      
+
            TERMINATE CUSTOMER-REPORT.
-      
+
            CLOSE TRANSACTION-DATA,
                  REPORT-FILE.
-      
+
            STOP RUN.
 ])
 
@@ -394,8 +394,8 @@ AT_DATA([prog.cob], [
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
                SELECT INPUT-FILE ASSIGN TO EXTERNAL STUDENT
-                              ORGANIZATION IS LINE SEQUENTIAL. 
-               SELECT PRINT-FILE ASSIGN TO EXTERNAL 
+                              ORGANIZATION IS LINE SEQUENTIAL.
+               SELECT PRINT-FILE ASSIGN TO EXTERNAL
                               LINE ADVANCING REPORT1.
 
        DATA DIVISION.
@@ -411,7 +411,7 @@ AT_DATA([prog.cob], [
              REPORT IS STUDENT-REPORT.
 
        WORKING-STORAGE SECTION.
-       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".
 
        REPORT SECTION.
        RD   STUDENT-REPORT
@@ -420,7 +420,7 @@ AT_DATA([prog.cob], [
            FIRST DETAIL 3
            LAST DETAIL 25
            FOOTING 28.
-       01   HEADING-LINE 
+       01   HEADING-LINE
             TYPE PAGE HEADING LINE PLUS 1.
             05  COLUMN 1      PIC X(2)  VALUE "Ln".
             05  COLUMN 4      PIC X(6)  VALUE "--ID--".
@@ -431,7 +431,7 @@ AT_DATA([prog.cob], [
 
        01   REPORT-LINE
             TYPE DETAIL LINE PLUS  1.
-            05  COLUMN PLUS 1 PIC 9(2) 
+            05  COLUMN PLUS 1 PIC 9(2)
                   SOURCE LINE-COUNTER OF STUDENT-REPORT.
             05  COLUMN LEFT PLUS 1   PIC Z(5)9 SOURCE STUDENT-ID.
             05  COLUMN CENTER 25     PIC X(20) SOURCE STUDENT-NAME.
@@ -482,23 +482,23 @@ AT_KEYWORDS([report])
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
        PROGRAM-ID.     prog.
-       
+
        ENVIRONMENT     DIVISION.
        INPUT-OUTPUT    SECTION.
        FILE-CONTROL.
            SELECT f ASSIGN "f.txt".
-           
+
        DATA            DIVISION.
        FILE            SECTION.
        FD  f           REPORT r1, r2.
        01  f-rec       PIC XXXXX.
-       
+
        REPORT          SECTION.
        RD  r1          PAGE LIMIT 1 LINES 1 COLUMNS
                        HEADING f-rec,
                        HEADING f-rec,
                        LINE LIMIT 1.
-       
+
        RD  r2          PAGE LIMIT 1 COLUMNS
                        HEADING f-rec.
 ])
@@ -507,5 +507,37 @@ AT_CHECK([$COMPILE prog.cob], [1], [],
 [prog.cob:19: error: duplicate HEADING clause
 prog.cob:19: error: duplicate LINE LIMIT clause
 prog.cob:22: error: Cannot specify HEADING without number of lines on page
+])
+AT_CLEANUP
+
+
+AT_SETUP([Report FD without period])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       INPUT-OUTPUT    SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.txt".
+
+       DATA            DIVISION.
+       FILE            SECTION.
+       FD  f           REPORT r
+])
+
+# In this case, the error handler enters an infinite loop, but it's OK as the
+# error is still easy to identify and it doesn't occur if anything follows the
+# "REPORT r".
+AT_CHECK([$COMPILE -fmax-errors=4 prog.cob], [97], [],
+[prog.cob:13: error: syntax error, unexpected end of file
+prog.cob:13: error: syntax error, unexpected end of file
+prog.cob:13: error: syntax error, unexpected end of file
+prog.cob:13: error: syntax error, unexpected end of file
+prog.cob:13: error: syntax error, unexpected end of file
+cobc: too many errors
+cobc: aborting compile of prog.cob at line 13 (PROGRAM-ID: prog)
 ])
 AT_CLEANUP

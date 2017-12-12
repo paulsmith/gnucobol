@@ -4813,7 +4813,7 @@ file_description_entry:
 	check_headers_present (COBC_HD_DATA_DIVISION,
 			       COBC_HD_FILE_SECTION, 0, 0);
 	check_duplicate = 0;
-	if (CB_INVALID_TREE ($2) || cb_ref ($2) == cb_error_node) {
+	if (CB_INVALID_TREE ($2)) {
 		YYERROR;
 	}
 	current_file = CB_FILE (cb_ref ($2));
@@ -5227,27 +5227,31 @@ report_keyword:
 rep_name_list:
   undefined_word
   {
-	current_report = build_report ($1);
-	current_report->file = current_file;
-	current_program->report_list =
-				cb_list_add (current_program->report_list,
-					     CB_TREE (current_report));
-	if (report_count == 0) {
-		report_instance = current_report;
+	if (CB_VALID_TREE ($1)) {
+		current_report = build_report ($1);
+		current_report->file = current_file;
+		current_program->report_list =
+			cb_list_add (current_program->report_list,
+				     CB_TREE (current_report));
+		if (report_count == 0) {
+			report_instance = current_report;
+		}
+		report_count++;
 	}
-	report_count++;
   }
 | rep_name_list undefined_word
   {
-	current_report = build_report ($2);
-	current_report->file = current_file;
-	current_program->report_list =
-				cb_list_add (current_program->report_list,
-					     CB_TREE (current_report));
-	if (report_count == 0) {
-		report_instance = current_report;
+	if (CB_VALID_TREE ($2)) {
+		current_report = build_report ($2);
+		current_report->file = current_file;
+		current_program->report_list =
+			cb_list_add (current_program->report_list,
+				     CB_TREE (current_report));
+		if (report_count == 0) {
+			report_instance = current_report;
+		}
+		report_count++;
 	}
-	report_count++;
   }
 ;
 
