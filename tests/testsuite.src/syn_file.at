@@ -937,8 +937,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob:8: error: Cannot use RELATIVE KEY clause on INDEXED files
-prog.cob:10: error: Cannot use RECORD KEY clause on RELATIVE files
+[prog.cob:8: error: cannot use RELATIVE KEY clause on INDEXED files
+prog.cob:10: error: cannot use RECORD KEY clause on RELATIVE files
 prog.cob:8: error: 'file-1-key' is not defined
 prog.cob:10: error: 'file-2-key' is not defined
 ])

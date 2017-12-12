@@ -3345,14 +3345,14 @@ AT_DATA([prog.cob], [
                     10 VALPOINT     POINTER     VALUE NULL.
                     10 VAL          PIC X(4).
 
-            01 SO PIC X(256).
-            01 LONGIND PIC 99.
-            01 LONG-ONLY PIC 9 VALUE 1.
-            01 RETURN-CHAR PIC X(4).
-            01 OPT-VAL PIC X(10).
-            01 RET-DISP PIC S9 VALUE 0.
+            01 SO             PIC X(256).
+            01 LONGIND        PIC 99.
+            01 LONG-ONLY      PIC 9 VALUE 1.
+            01 RETURN-CHAR    PIC X(4).
+            01 OPT-VAL        PIC X(10).
+            01 RET-DISP       PIC S9 VALUE 0.
 
-            01 COUNTER PIC 9 VALUE 0.
+            01 COUNTER        PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "jkl"     TO SO.
 
@@ -3431,14 +3431,14 @@ AT_DATA([prog2.cob], [
                     10 VALPOINT     POINTER     VALUE NULL.
                     10 VAL          PIC X(4).
 
-            78 SO VALUE "jkl".
-            01 LONGIND PIC 99.
-            01 LONG-ONLY PIC 9 VALUE 1.
-            01 RETURN-CHAR PIC X(4).
-            01 OPT-VAL PIC X(10).
-            01 RET-DISP PIC S9 VALUE 0.
+            78 SO             VALUE "jkl".
+            01 LONGIND        PIC 99.
+            01 LONG-ONLY      PIC 9 VALUE 1.
+            01 RETURN-CHAR    PIC X(4).
+            01 OPT-VAL        PIC X(10).
+            01 RET-DISP       PIC S9 VALUE 0.
 
-            01 COUNTER PIC 9 VALUE 0.
+            01 COUNTER        PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "version" TO ONAME     (1).
             MOVE 0         TO HAS-VALUE (1).
@@ -3500,13 +3500,13 @@ AT_DATA([prog3.cob], [
                     10 HAS-VALUE    PIC 9.
                     10 VALPOINT     POINTER     VALUE NULL.
                     10 VAL          PIC X(4).
-            01 LONGIND PIC 99.
-            01 LONG-ONLY PIC 9 VALUE 0.
-            01 RETURN-CHAR PIC X(4).
-            01 OPT-VAL PIC X(10).
-            01 RET-DISP PIC S9 VALUE 0.
+            01 LONGIND        PIC 99.
+            01 LONG-ONLY      PIC 9 VALUE 0.
+            01 RETURN-CHAR    PIC X(4).
+            01 OPT-VAL        PIC X(10).
+            01 RET-DISP       PIC S9 VALUE 0.
 
-            01 COUNTER PIC 9 VALUE 0.
+            01 COUNTER        PIC 9 VALUE 0.
         PROCEDURE DIVISION.
             MOVE "j:k::l"  TO SO.
 
@@ -3597,15 +3597,15 @@ AT_DATA([prog4.cob], [
                     10 HAS-VALUE    PIC 9.
                     10 VALPOINT     POINTER     VALUE NULL.
                     10 VAL          PIC X(4).
-            01 LONGIND PIC 99.
-            01 LONG-ONLY PIC 9 VALUE 1.
-            01 RETURN-CHAR PIC X(4).
-            01 OPT-VAL PIC X(10).
-            01 RET-DISP PIC S999 VALUE 0.
+            01 LONGIND          PIC 99.
+            01 LONG-ONLY        PIC 9 VALUE 1.
+            01 RETURN-CHAR      PIC X(4).
+            01 OPT-VAL          PIC X(10).
+            01 RET-DISP         PIC S999 VALUE 0.
 
-            01 COUNTER PIC 9 VALUE 0.
+            01 COUNTER          PIC 9 VALUE 0.
 
-            01 FLAG-VAL PIC X(4).
+            01 FLAG-VAL         PIC X(4).
         procedure division.
             MOVE "jkl"       TO SO.
 
@@ -3685,15 +3685,15 @@ AT_DATA([prog5.cob], [
                     10 HAS-VALUE    PIC 9.
                     10 VALPOINT     POINTER     VALUE NULL.
                     10 VAL          PIC X(4).
-            01 LONGIND PIC 99.
-            01 LONG-ONLY PIC 9 VALUE 1.
-            01 RETURN-CHAR PIC X(4).
-            01 OPT-VAL PIC X(10).
-            01 RET-DISP PIC S999 VALUE 0.
+            01 LONGIND       PIC 99.
+            01 LONG-ONLY     PIC 9 VALUE 1.
+            01 RETURN-CHAR   PIC X(4).
+            01 OPT-VAL       PIC X(10).
+            01 RET-DISP      PIC S999 VALUE 0.
 
-            01 COUNTER PIC 9 VALUE 0.
+            01 COUNTER       PIC 9 VALUE 0.
 
-            01 FLAG-VAL PIC 9.
+            01 FLAG-VAL      PIC 9.
         PROCEDURE DIVISION.
             MOVE "super-long-option-with-more-than-25-bytes"
               TO ONAME(1).

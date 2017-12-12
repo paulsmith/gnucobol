@@ -4163,11 +4163,11 @@ file_control_entry:
 	if (current_file->organization == COB_ORG_INDEXED
 	    && key_type == RELATIVE_KEY) {
 		cb_error_x (current_file->key,
-			    _("Cannot use RELATIVE KEY clause on INDEXED files"));
+			    _("cannot use RELATIVE KEY clause on INDEXED files"));
 	} else if (current_file->organization == COB_ORG_RELATIVE
 		   && key_type == RECORD_KEY) {
 		cb_error_x (current_file->key,
-			    _("Cannot use RECORD KEY clause on RELATIVE files"));
+			    _("cannot use RECORD KEY clause on RELATIVE files"));
 	}
 
 	if (CB_VALID_TREE ($3)) {
@@ -4318,6 +4318,7 @@ line_seq_device_name:
 ;
 
 _line_adv_file:
+  /* empty */
 | LINE ADVANCING _file
   {
 	current_file->flag_line_adv = 1;
@@ -4325,6 +4326,7 @@ _line_adv_file:
 ;
 
 _ext_clause:
+  /* empty */
 | EXTERNAL
   {
 	current_file->flag_ext_assign = 1;
@@ -14240,6 +14242,7 @@ exp_list:
 ;
 
 _e_sep:
+  /* empty */
 | COMMA_DELIM
 | SEMI_COLON
 ;
