@@ -5066,10 +5066,10 @@ xref_fields (struct cb_field *top)
 	int		found = 0;
 
 	for (; top; top = top->sister) {
-
 		/* no entry for internal generated fields
 		   other than used special indexes */
-		if (!top->level || (top->special_index && !top->count)) {
+		if (!top->level || (top->index_type != CB_NORMAL_INDEX
+				    && !top->count)) {
 			continue;
 		}
 

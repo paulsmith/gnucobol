@@ -1154,7 +1154,7 @@ cb_build_register_return_code (const char *name, const char *definition)
 	}
 
 	field = cb_build_index (cb_build_reference (name), cb_zero, 0, NULL);
-	CB_FIELD_PTR (field)->special_index = 1U;
+	CB_FIELD_PTR (field)->index_type = CB_STATIC_INT_INDEX;
 	current_program->cb_return_code = field;
 }
 
@@ -1192,7 +1192,7 @@ cb_build_register_number_parameters (const char *name, const char *definition)
 	field = cb_build_index (cb_build_reference (name), cb_zero, 0, NULL);
 	CB_FIELD_PTR (field)->flag_no_init = 1;
 	CB_FIELD_PTR (field)->flag_local = 1;
-	CB_FIELD_PTR (field)->special_index = 2U;
+	CB_FIELD_PTR (field)->index_type = CB_INT_INDEX;
 	current_program->cb_call_params = field;
 }
 
@@ -4380,7 +4380,7 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	}
 #endif
 #if	0	/* RXWRXW - SI */
-	if (f->special_index) {
+	if (f->index_type) {
 		return CB_BUILD_FUNCALL_2 ("cob_cmp_special",
 			cb_build_cast_int (p->x),
 			cb_build_cast_int (p->y));

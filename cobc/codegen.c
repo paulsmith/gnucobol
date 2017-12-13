@@ -890,7 +890,7 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 	/* Base storage */
 
 	if (!f01->flag_base) {
-		if (f01->special_index == 2U) {
+		if (f01->index_type == CB_INT_INDEX) {
 			bl = cobc_parse_malloc (sizeof (struct base_list));
 			bl->f = f01;
 			bl->curr_prog = excp_current_program_id;
@@ -929,7 +929,7 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 		return;
 	}
 
-	if (f01->special_index) {
+	if (f01->index_type != CB_NORMAL_INDEX) {
 		output ("(cob_u8_t *)&%s%d", CB_PREFIX_BASE, f01->id);
 		return;
 	} else if (f01->flag_local_storage) {
@@ -1845,10 +1845,10 @@ output_local_base_cache (void)
 
 	local_base_cache = list_cache_sort (local_base_cache, &base_cache_cmp);
 	for (blp = local_base_cache; blp; blp = blp->next) {
-		if (blp->f->special_index == 2U) {
+		if (blp->f->index_type == CB_INT_INDEX) {
 			output_local ("int		%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
-		} else if (blp->f->special_index) {
+		} else if (blp->f->index_type == CB_STATIC_INT_INDEX) {
 			output_local ("static int	%s%d;",
 				      CB_PREFIX_BASE, blp->f->id);
 		} else if( !(blp->f->report_flag & COB_REPORT_REF_EMITTED)) {
@@ -1882,7 +1882,7 @@ output_nonlocal_base_cache (void)
 					prev_prog);
 		}
 
-		if (blp->f->special_index) {
+		if (blp->f->index_type != CB_NORMAL_INDEX) {
 			output_storage ("static int	  %s%d;",
 					CB_PREFIX_BASE, blp->f->id);
 		} else {
@@ -2701,7 +2701,7 @@ output_integer (cb_tree x)
 		f = cb_code_field (x);
 		switch (f->usage) {
 		case CB_USAGE_INDEX:
-			if (f->special_index) {
+			if (f->index_type != CB_NORMAL_INDEX) {
 				output_base (f, 1U);
 				output ("%s%d", CB_PREFIX_BASE, f->id);
 				return;
@@ -2968,7 +2968,7 @@ output_long_integer (cb_tree x)
 		f = cb_code_field (x);
 		switch (f->usage) {
 		case CB_USAGE_INDEX:
-			if (f->special_index) {
+			if (f->index_type != CB_NORMAL_INDEX) {
 				output_base (f, 1U);
 				output ("(cob_s64_t)%s%d", CB_PREFIX_BASE, f->id);
 				return;
@@ -3424,8 +3424,9 @@ output_param (cb_tree x, int id)
 				fl->x = x;
 				fl->f = f;
 				fl->curr_prog = excp_current_program_id;
-				if (f->special_index != 2U && (f->flag_is_global ||
-				    current_prog->flag_file_global)) {
+				if (f->index_type != CB_INT_INDEX
+				    && (f->flag_is_global
+					|| current_prog->flag_file_global)) {
 					fl->next = field_cache;
 					field_cache = fl;
 				} else {

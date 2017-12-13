@@ -456,6 +456,13 @@ enum cb_perform_type {
 	CB_PERFORM_FOREVER
 };
 
+/* Index type */
+enum cb_index_type {
+	CB_NORMAL_INDEX = 0,
+	CB_INT_INDEX,
+	CB_STATIC_INT_INDEX
+};
+
 /* Reserved word list structure */
 struct cobc_reserved {
 	const char	*name;		/* Word */
@@ -786,8 +793,7 @@ struct cb_field {
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
 						   could be direct ODO (check via depending)
 						   or via subordinate) */
-	cob_u32_t		special_index;	/* Special field,
-						   generated as int (2=>non-static) */
+	enum cb_index_type	index_type;	/* Type of generated index */
 
 	enum cb_storage		storage;	/* Storage section */
 	enum cb_usage		usage;		/* USAGE */

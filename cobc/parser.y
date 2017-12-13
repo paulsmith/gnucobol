@@ -6230,7 +6230,7 @@ _capacity_in:
 | CAPACITY _in WORD
   {
 	$$ = cb_build_index ($3, cb_zero, 0, current_field);
-	CB_FIELD_PTR ($$)->special_index = 1U;
+	CB_FIELD_PTR ($$)->index_type = CB_STATIC_INT_INDEX;
   }
 ;
 
@@ -6329,7 +6329,7 @@ occurs_index:
   WORD
   {
 	$$ = cb_build_index ($1, cb_int1, 1U, current_field);
-	CB_FIELD_PTR ($$)->special_index = 1U;
+	CB_FIELD_PTR ($$)->index_type = CB_STATIC_INT_INDEX;
   }
 ;
 

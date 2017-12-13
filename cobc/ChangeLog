@@ -1,4 +1,9 @@
 
+2017-12-13  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.h: renamed special_index to index_type and replaced magic
+	  constants with (cb_index_type) enum.
+
 2017-12-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y (rep_name_list): handle case where $1 == cb_error_node
