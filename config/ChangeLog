@@ -1,4 +1,9 @@
 
+2017-11-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* ibm.words, mvs.words, rm.words: fixed bug #476, where WHEN-COMPILED
+	  register was hidden by WHEN-COMPILED reserved word.
+
 2017-11-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added binary-comp-1 option (feature request #272).

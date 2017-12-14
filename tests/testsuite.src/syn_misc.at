@@ -110,7 +110,7 @@ AT_DATA([prog.cob], [
        01 IF-D16            PIC PP99 VALUE .0012.
        PROCEDURE DIVISION.
        MAIN.
-           IF GROUP-ITEM-X6 = '1234567' 
+           IF GROUP-ITEM-X6 = '1234567'
                CONTINUE.
            IF PIC-9-NOT-DECIMAL = 1.1
                CONTINUE.
@@ -152,13 +152,13 @@ AT_DATA([prog.cob], [
               CONTINUE.
            IF WS-LINE-NUMBER > '1234'
               CONTINUE.
-           IF 5432 < WS-LINE-NUMBER 
+           IF 5432 < WS-LINE-NUMBER
               CONTINUE.
-           IF 7855 >= WS-LINE-NUMBER 
+           IF 7855 >= WS-LINE-NUMBER
               CONTINUE.
-           IF 1234 < WS-LINE-NUMBER 
+           IF 1234 < WS-LINE-NUMBER
               CONTINUE.
-           IF 5432 >= WS-LINE-NUMBER 
+           IF 5432 >= WS-LINE-NUMBER
               CONTINUE.
            IF WS-TEXT > 'DOGGY++'
               CONTINUE.
@@ -186,7 +186,7 @@ AT_DATA([prog.cob], [
               CONTINUE.
            IF WS-TEXT = 'CAT         '
               CONTINUE.
-           IF ( COMPUTE-1 < 654.20038) AND 
+           IF ( COMPUTE-1 < 654.20038) AND
               ( COMPUTE-1 > 654.17422) THEN
               CONTINUE.
            IF ( COMPUTE-1 < 5654.20)
@@ -3392,7 +3392,7 @@ AT_DATA([prog.cob], [
            MODIFY lb-frm ITEM-TO-ADD = 'Row 5'
            MODIFY lb-frm ITEM-TO-ADD = 'Row 6'
            MODIFY lb-frm ITEM-TO-ADD = 'Row 7'
-           DISPLAY FLOATING WINDOW 
+           DISPLAY FLOATING WINDOW
                LINE 5 COL 5
                LINES window-lines
                SIZE  window-rows
@@ -3505,7 +3505,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE SECTION.
-       01  GNUCOBOL-URL IS EXTERNAL-FORM 
+       01  GNUCOBOL-URL IS EXTERNAL-FORM
                 IDENTIFIED BY "http://www.gnu.org/software/gnucobol/".
        01  WEB-PAGE-1 EXTERNAL-FORM,
                 IDENTIFIED "cgipage1".
@@ -3515,7 +3515,7 @@ AT_DATA([prog.cob], [
        01  MY-FORM EXTERNAL-FORM.
            03  CGI-VAR1 PIC X(20) IDENTIFIED "Name".
            03  CGI-VAR2 PIC X(50) IDENTIFIED BY CGI-VAR1.
-       
+
        PROCEDURE DIVISION.
        MAIN.
       *>   CGI display of static content (full URL)
@@ -4720,7 +4720,7 @@ AT_KEYWORDS([misc])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID.    prog.
-       
+
        DATA           DIVISION.
        LINKAGE        SECTION.
        *> Valid
@@ -4737,7 +4737,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed                                                       
+[prog.cob:9: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
 prog.cob:18: error: 'invalid-1' ANY LENGTH must be PIC X or PIC N
 prog.cob:18: error: 'invalid-2' ANY LENGTH must be PIC X or PIC N
 prog.cob:18: error: 'invalid-3' ANY LENGTH must be PIC X or PIC N
@@ -4771,4 +4771,21 @@ prog.cob:8: error: PROGRAM-ID header missing
 prog.cob:8: error: PROCEDURE DIVISION header missing
 prog.cob:8: error: syntax error, unexpected Literal
 ])
+AT_CLEANUP
+
+AT_SETUP([WHEN-COMPILED register in dialect])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+           DISPLAY WHEN-COMPILED
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -std=rm prog.cob], [0], [], [])
 AT_CLEANUP

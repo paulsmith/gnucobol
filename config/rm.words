@@ -422,7 +422,6 @@ reserved:	VALUE
 reserved:	VALUES=VALUE
 reserved:	VARYING
 reserved:	WHEN
-reserved:	WHEN-COMPILED
 reserved:	WHILE*
 reserved:	WITH
 reserved:	WORDS
