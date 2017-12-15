@@ -6,6 +6,9 @@
 	* cobc.c (process_filename): don't allocate and set fn->object for
 	  most used cb_compile_level == CB_LEVEL_MODULE as it is is compiled
 	  without intermediate object file
+	* reserved.c (function_list): corrected number of parameters according
+	  to all other checked implementations and the Programmer's Guide
+	  (PRESENT-VALUE min 1->2, RANDOM max unlimited->1)
 
 2017-12-13  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -3322,12 +3322,12 @@ static struct cb_intrinsic_table function_list[] = {
   },
   { "PRESENT-VALUE",			"cob_intr_present_value",
 					CB_INTR_PRESENT_VALUE, FUNCTION_NAME,
-					CB_FEATURE_ACTIVE,	-1, 1,
+					CB_FEATURE_ACTIVE,	-1, 2,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "RANDOM",				"cob_intr_random",
 					CB_INTR_RANDOM, FUNCTION_NAME,
-					CB_FEATURE_ACTIVE,	-1, 0,
+					CB_FEATURE_ACTIVE,	1, 0,
 					CB_CATEGORY_NUMERIC, 0
   },
   { "RANGE",				"cob_intr_range",
