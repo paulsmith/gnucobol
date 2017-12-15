@@ -98,8 +98,8 @@ static struct config_struct {
 #define	CB_CONFIG_SIZE	sizeof(config_table) / sizeof(struct config_struct)
 
 /* Configuration includes */
-static struct includelist {
-	struct includelist	*next;
+static struct include_list {
+	struct include_list	*next;
 	const char		*name;
 } *conf_includes = NULL;
 
@@ -243,7 +243,7 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 	FILE	*fp;
 	char	buff[COB_SMALL_BUFF];
 	char	filename[COB_NORMAL_BUFF];
-	struct includelist	*c, *cc;
+	struct	include_list	*c, *cc;
 	int	i, ret;
 
 	for (i = 0; conf_file[i] != 0 && conf_file[i] != SLASH_CHAR; i++);
@@ -311,7 +311,7 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 	}
 
 	/* add current entry to list*/
-	c = cob_malloc (sizeof (struct includelist));
+	c = cob_malloc (sizeof (struct include_list));
 	c->next = NULL;
 	c->name = conf_file;
 	if (cc != NULL) {

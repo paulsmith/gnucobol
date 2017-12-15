@@ -4788,4 +4788,5 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=rm prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -freserved=WHEN-COMPILED -fregister=WHEN-COMPILED prog.cob], [0], [], [])
 AT_CLEANUP

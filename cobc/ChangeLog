@@ -1,4 +1,10 @@
 
+2017-12-15  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: adding/removing a register now removes the reserved word
+	  with the same name (if it exists) (feature request #278).
+	* cobc.c (cobc_print_usage): added help text for -f(not-)register.
+
 2017-12-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (process_command_line) [_MSC_VER]: check if -l was specified

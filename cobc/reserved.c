@@ -4292,6 +4292,8 @@ add_register (const char *name_and_definition, const char *fname, const int line
 		for (i = 0; i < NUM_REGISTERS; ++i) {
 			/* TODO: add register here */
 			register_list[i].active = CB_FEATURE_ACTIVE;
+			/* Disable reserved word with same name. */
+			remove_reserved_word (register_list[i].name, fname, line);
 		}
 		return;
 	}
@@ -4318,6 +4320,9 @@ add_register (const char *name_and_definition, const char *fname, const int line
 		return;
 	}
 	special_register->active = CB_FEATURE_ACTIVE;
+
+	/* Disable reserved word with same name. */
+	remove_reserved_word (name, fname, line);
 }
 
 void
@@ -4334,6 +4339,9 @@ remove_register (const char *name, const char *fname, const int line)
 			/* TODO: when user-defined registers are possible: do
 			   memory cleanup here */
 			register_list[i].active = CB_FEATURE_DISABLED;
+			/* Disable reserved word with same name. */
+			remove_reserved_word (register_list[i].name, fname,
+					      line);
 		}
 	} else {
 		special_register = lookup_register (name, 1);
@@ -4343,6 +4351,8 @@ remove_register (const char *name, const char *fname, const int line)
 		/* TODO: when user-defined registers are possible: do memory
 		   cleanup here */
 		special_register->active = CB_FEATURE_DISABLED;
+		/* Disable reserved word with same name. */
+		remove_reserved_word (name, fname, line);
 	}
 }
 

@@ -2422,7 +2422,9 @@ cobc_print_usage (char * prog)
 	cobc_print_config_flag ("not-reserved", _("word to be taken out of the reserved words list"), _("<word>"));
 	cobc_print_config_flag ("reserved", _("word to be added to reserved words list"), _("<word>"));
 	cobc_print_config_flag ("reserved", _("word to be added to reserved words list as alias"), _("<word>:<alias>"));
-
+	cobc_print_config_flag ("not-register", _("special register to disable"), _("<word>"));
+	cobc_print_config_flag ("register", _("special register to enable"), _("<word>"));
+	
 	putchar ('\n');
 
 	putchar ('\n');
