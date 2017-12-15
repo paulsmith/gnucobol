@@ -1,4 +1,12 @@
 
+2017-12-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_command_line) [_MSC_VER]: check if -l was specified
+	  including ".lib" before adding it
+	* cobc.c (process_filename): don't allocate and set fn->object for
+	  most used cb_compile_level == CB_LEVEL_MODULE as it is is compiled
+	  without intermediate object file
+
 2017-12-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.h: renamed special_index to index_type and replaced magic

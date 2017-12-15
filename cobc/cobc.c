@@ -2615,6 +2615,9 @@ process_command_line (const int argc, char **argv)
 	char			*conf_label;	/* we want a dynamic address for erroc.c, not a static one */
 	char			*conf_entry;
 	const char		*copt = NULL;	/* C optimization options */
+#if defined (_MSC_VER)
+	const char		*extension;
+#endif
 
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
@@ -2753,10 +2756,11 @@ process_command_line (const int argc, char **argv)
 
 		case '$':
 			/* -std=<xx> : Specify dialect */
-			snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
-			if (cb_load_std (ext) != 0) {
-				cobc_err_exit (_("invalid parameter -std=%s"), cob_optarg);
+			if (strlen (cob_optarg) > COB_MINI_MAX) {
+				cobc_err_exit (COBC_INV_PAR, "-std");
 			}
+			snprintf (ext, (size_t)COB_MINI_MAX, "%s.conf", cob_optarg);
+			conf_ret |= cb_load_std (ext);
 			break;
 
 		case '&':
@@ -3124,7 +3128,13 @@ process_command_line (const int argc, char **argv)
 				cobc_err_exit (COBC_INV_PAR, "-l");
 			}
 #ifdef	_MSC_VER
-			COBC_ADD_STR (cobc_libs, " \"", cob_optarg, ".lib\"");
+			extension = file_extension (cob_optarg);
+			/* note: strcasecmp because of possible different specified extension */
+			if (!strcasecmp (extension, "lib")) {
+				COBC_ADD_STR (cobc_libs, " \"", cob_optarg, "\"");
+			} else {
+				COBC_ADD_STR (cobc_libs, " \"", cob_optarg, ".lib\"");
+			}
 #else
 			COBC_ADD_STR (cobc_libs, " -l\"", cob_optarg, "\"");
 #endif
@@ -3677,12 +3687,17 @@ process_filename (const char *filename)
 		fn->object = cobc_main_strdup (output_name);
 	} else if (save_temps || cb_compile_level == CB_LEVEL_ASSEMBLE) {
 		fn->object = cobc_main_stradd_dup (fbasename, "." COB_OBJECT_EXT);
-	} else {
+	} else if (cb_compile_level != CB_LEVEL_MODULE) {
+		/* note: CB_LEVEL_MODULE is compiled without an intermediate object file */
 		fn->object = cobc_main_malloc (COB_FILE_MAX);
 		cob_temp_name ((char *)fn->object, "." COB_OBJECT_EXT);
 	}
+	if (fn->object) {
 		fn->object_len = strlen (fn->object);
 		cobc_objects_len += fn->object_len + 8U;
+	} else {
+		fn->object_len = 0;
+	}
 
 	/* Set listing filename */
 	if (cobc_gen_listing == 1) {
@@ -3732,11 +3747,11 @@ line_contains (char* line_start, char* line_end, char* search_patterns)
 				if (memcmp (line_pos, search_patterns + pattern_start, pattern_length) == 0) {
 					/* Exit if all patterns found, skip to next pattern otherwise */
 					if (pattern_start + pattern_length == full_length) {
-					return 1;
+						return 1;
 					} else {
 						break;
+					}
 				}
-			}
 			}
 			pattern_start = pattern_end + 1;
 		}
