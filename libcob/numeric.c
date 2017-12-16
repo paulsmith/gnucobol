@@ -557,7 +557,7 @@ cob_decimal_get_ieee64dec (cob_decimal *d, cob_field *f, const int opt)
 	mpz_export (&data, NULL, -1, (size_t)8, COB_MPZ_ENDIAN,
 		    (size_t)0, d->value);
 	/* Move in exponent */
-	if (mpz_sizeinbase (d->value, 2) > 51U) {
+	if (mpz_sizeinbase (d->value, 2) > 53U) {
 		data &= COB_64_SIGF_2;
 		data |= (expo << 51U) | COB_DEC_EXTEND | COB_64_OR_EXTEND;
 	} else {

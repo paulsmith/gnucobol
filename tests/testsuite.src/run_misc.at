@@ -7064,3 +7064,69 @@ My Dog's name is Piper;
 ], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([FLOAT-DECIMAL])
+AT_KEYWORDS([Numeric runmisc FLOAT-DECIMAL-16 FLOAT-DECIMAL-34 COMP-2])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      ******************************************************************
+      *                                                                *
+      *  CALCULATIONS WITH 'FLOAT-DECIMAL-16'                          *
+      *                                                                *
+      ******************************************************************
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  CMP2                        COMP-2.
+       01  FD16                        USAGE FLOAT-DECIMAL-16.
+       01  FD34                        USAGE FLOAT-DECIMAL-34.
+
+       PROCEDURE DIVISION.
+       CND-000.
+           DISPLAY "--- FLOAT-DECIMAL-34 ---"
+           COMPUTE FD34 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " FD34
+
+           COMPUTE FD34 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " FD34
+
+           DISPLAY "    ..."
+           DISPLAY "--- FLOAT-DECIMAL-16 ---"
+           COMPUTE FD16 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " FD16 
+
+           COMPUTE FD16 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " FD16
+
+           DISPLAY "    ..."
+           DISPLAY "--- COMP-2 ---"
+           COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " CMP2 
+           COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " CMP2 
+           .
+
+       CND-999.
+           STOP RUN.
+           END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[--- FLOAT-DECIMAL-34 ---
+A: 9216586861751152073732718894009216E-27
+B: 530503678779840848806366047745358E-26
+    ...
+--- FLOAT-DECIMAL-16 ---
+A: 9216586861751152E-9
+B: 5305036787798408E-9
+    ...
+--- COMP-2 ---
+A: 9216586.86175115
+B: 5305036.787798408
+], [])
+
+AT_CLEANUP
