@@ -116,11 +116,7 @@
 
 2017-11-23  Ron Norman <rjn@inglenet.com>
 
-	* codegen.c: Fix for bug #222 - for FUNCTION-ID and RECURSIVE,
-	  generate all LINKAGE and LOCAL-STORAGE fields with the 'cob_field'
-	  on the function stack instead of making them 'static'.
-	  If static then the fields end up as a side effect with the same
-	  memory address which is not correct.
+	* codegen.c: change in generation of comments concerning returning items
 
 2017-11-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

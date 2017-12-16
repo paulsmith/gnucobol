@@ -2079,24 +2079,12 @@ output_local_field_cache (struct cb_program *prog)
 	local_field_cache = list_cache_sort (local_field_cache,
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
+		output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
+			field->f->id);
 
 		if (!field->f->flag_local) {
-			if (prog->flag_recursive
-			&& !field->f->flag_filler) {
-				output ("/* %s is not local */\n",
-				field->f->name);
-			}
-			output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
-				field->f->id);
 			output_field (field->x);
 		} else {
-			if (prog->flag_recursive) {
-				output ("       ");
-			} else {
-				output ("static ");
-			}
-			output ("cob_field %s%d\t= ", CB_PREFIX_FIELD,
-				field->f->id);
 			output ("{");
 			output_size (field->x);
 			output (", NULL, ");
