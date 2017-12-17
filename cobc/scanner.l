@@ -1150,6 +1150,9 @@ read_literal (const char mark, const char *type)
 	   or (unlikely) we reach EOF */
 	/* NO early exit possible as the literal has to be consumed */
 	while ((c = input ()) != EOF) {
+#if EOF != 0
+		if (unlikely (c == 0)) break;	/* fixes unexpected error case */
+#endif
 		if (!literal_error) {
 			if (unlikely (i == plex_size)) {
 				plex_size *= 2;
@@ -1166,6 +1169,7 @@ read_literal (const char mark, const char *type)
 				/* Hack it as concatenation */
 				unput ('&');
 			} else {
+				if (c == EOF || c == 0) break;
 				unput (c);
 			}
 			break;

@@ -1,4 +1,9 @@
 
+2017-12-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l (read_literal): fix endless loop on invalid literals for
+	  systems that define EOF as -1
+
 2017-12-15  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: adding/removing a register now removes the reserved word

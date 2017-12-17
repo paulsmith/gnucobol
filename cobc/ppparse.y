@@ -703,7 +703,6 @@ directive:
 		current_call_convention |= CB_CONV_COBOL;
 	};
   }
-
 ;
 
 set_directive:
@@ -952,7 +951,6 @@ define_directive:
      use plain  >> DEFINE var [AS] literal  for conditional compilation and
      use        01 CONSTANT with/without FROM clause  for constant definitions */
 	struct cb_define_struct	*p;
-
 
 	if (cb_verify (cb_define_constant_directive, ">> DEFINE CONSTANT var")) {
 		p = ppp_define_add (ppp_setvar_list, $2, $4, $5);
