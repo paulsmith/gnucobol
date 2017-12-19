@@ -6606,9 +6606,10 @@ report_description_option:
 	current_report->global = 1;
 	cb_error (_("GLOBAL is not allowed with RD"));
   }
-| CODE _is id_or_lit
+| _with CODE _is id_or_lit
   {
 	check_repeated ("CODE", SYN_CLAUSE_2, &check_duplicate);
+	CB_PENDING ("CODE clause");
   }
 | control_clause
 | page_limit_clause
@@ -6701,6 +6702,8 @@ page_line_column:
 	} else {
 		current_report->t_lines = $1;
 	}
+	/* may be repeated later by page detail */
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
   }
 | page_limit_cols
 | report_int_ident line_or_lines page_limit_cols
@@ -6713,13 +6716,15 @@ page_line_column:
 	} else {
 		current_report->t_lines = $1;
 	}
+	/* may be repeated later by page detail */
+	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
   }
 ;
 
 page_limit_cols:
   report_int_ident columns_or_cols
   {
-	check_repeated ("LINE LIMIT", SYN_CLAUSE_5, &check_duplicate);
+	CB_PENDING ("COLUMNS limit");
 	if (CB_LITERAL_P ($1)) {
 		current_report->columns = cb_get_int ($1);
 	} else {

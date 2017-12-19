@@ -10420,6 +10420,7 @@ output_function_entry_function (struct cb_program *prog, const int gencode,
 	}
 	output (");\n");
 	output_line ("**cob_fret = *floc->ret_fld;");
+	output_newline ();
 	output_line ("/* Restore environment */");
 	output_line ("cob_restore_func (floc);");
 	output_line ("return *cob_fret;");
