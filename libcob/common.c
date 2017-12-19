@@ -200,14 +200,14 @@ static const cob_field_attr	const_alpha_attr =
 static char			*cob_local_env = NULL;
 static int			current_arg = 0;
 static unsigned char		*commlnptr = NULL;
-static size_t			commlncnt;
+static size_t			commlncnt = 0;
 static size_t			cob_local_env_size = 0;
 
 static struct cob_external	*basext = NULL;
 
 static size_t			sort_nkeys = 0;
-static cob_file_key		*sort_keys;
-static const unsigned char	*sort_collate;
+static cob_file_key		*sort_keys = NULL;
+static const unsigned char	*sort_collate = NULL;
 
 static const char		*cob_current_program_id = NULL;
 static const char		*cob_current_section = NULL;
