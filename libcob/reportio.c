@@ -170,7 +170,7 @@ cob_field_dup (cob_field *f, int incr)
 {
 	cob_field	temp;
 	cob_field	*fld = cob_malloc(sizeof(cob_field));
-	int		dsize = f->size+incr;
+	int		dsize = f->size + incr;
 
 	fld->size = dsize;
 	fld->data = cob_malloc((size_t)(dsize < COB_MAX_DIGITS ? COB_MAX_DIGITS : dsize) + 1);

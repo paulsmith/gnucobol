@@ -4026,7 +4026,7 @@ remove_reserved_word (const char *word, const char *fname, const int line)
 void
 add_reserved_word_now (char * const word, char * const alias_for)
 {
-	int			offset;
+	size_t		offset;
 	struct cobc_reserved	*new_reserved_words;
 	struct amendment_list	amendment;
 
