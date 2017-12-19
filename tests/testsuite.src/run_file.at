@@ -59,7 +59,7 @@ AT_CLEANUP
 AT_SETUP([First READ on empty SEQUENTIAL INDEXED file])
 AT_KEYWORDS([runfile])
 
-AT_CHECK([test "$COB_HAS_ISAM" = "yes" || exit 77])
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

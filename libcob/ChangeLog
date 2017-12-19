@@ -201,11 +201,22 @@
 	  unsetenv is used in runtime.cfg to show environment variable
 	  was removed and runtime.cfg variable was then present
 
+
+2017-05-31 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (indexed_open) [WITH_DB]: if the first record in the file
+	  has a size larger than the FD has defined then return status 39
+
 2017-05-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* system.def: replaced misleading name C$PRINTABLE (OC-extension,
 	  not a C$ -> ACUCOBOL extension!) by CBL_GC_PRINTABLE (old name
 	  still supported for legacy reasons)
+
+2017-05-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* common.c: fixed minor style issues, mostly missing spaces around
+	  operators.
 
 2017-05-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -216,11 +227,6 @@
 	  instead of in every function
 	* common.c: allow partial replace of datetime (including offset only)
 	  by COB_CURRENT_DATE
-
-2017-05-24  Edward Hart <edward.dan.hart@gmail.com>
-
-	* common.c: fixed minor style issues, mostly missing spaces around
-	  operators.
 
 2017-05-22  Ron Norman <rjn@inglenet.com>
 

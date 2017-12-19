@@ -3262,6 +3262,11 @@ dobuild:
 	p->cursor[0] = NULL;
 	if (!ret) {
 		memcpy (p->last_readkey[0], p->key.data, (size_t)p->key.size);
+		if (p->data.data != NULL
+		 && p->data.size > 0
+		 && p->data.size > f->record_max) {
+			return COB_STATUS_39_CONFLICT_ATTRIBUTE;
+		}
 	} else {
 		p->data.data = NULL;
 	}

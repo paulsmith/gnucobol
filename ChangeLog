@@ -81,6 +81,12 @@
 	  always have to be executed and don't result in a file,
 	  define prerequisites to fix parallel builds
 
+2017-05-31  Ron Norman <rjn@inglenet.com> 
+
+	* configure.ac: set COB_HAS_ISAM to type of ISAM handler instead of 'yes'
+	  'cisam', 'disam', 'vbisam', 'db', 'index_extfh' - if no ISAM then it is
+	  set to 'no'
+
 2017-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: change in library check for BDB - prefer library

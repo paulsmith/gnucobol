@@ -1347,10 +1347,18 @@ if test "x$lt_cv_dlopen_self" != "xyes"; then
 	AC_DEFINE([COB_NO_SELFOPEN], [1])
 fi
 
-if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "yes" -a "$with_index_extfh" != "yes" -a "$with_db" != "yes"; then
-	COB_HAS_ISAM=no
+if test "$with_cisam" = "yes"; then
+	COB_HAS_ISAM=cisam
+elif test "$with_disam" = "yes"; then
+	COB_HAS_ISAM=disam
+elif test "$with_vbisam" = "yes"; then
+	COB_HAS_ISAM=vbisam
+elif test "$with_db" = "yes"; then
+	COB_HAS_ISAM=db
+elif test "$with_index_extfh" = "yes"; then
+	COB_HAS_ISAM=index_extfh
 else
-	COB_HAS_ISAM=yes
+	COB_HAS_ISAM=no
 fi
 
 if test "$USE_NCURSES" = "not_found" -o "$USE_NCURSES" = "no"; then
@@ -1371,7 +1379,7 @@ unset MYOCLIBS
 
 # Generate the output
 
-AM_CONDITIONAL([COB_MAKE_IX], [test "$COB_HAS_ISAM" = yes])
+AM_CONDITIONAL([COB_MAKE_IX], [test "$COB_HAS_ISAM" != no])
 AM_CONDITIONAL([COB_MAKE_RUN_BINARIES], [test "$cross_compiling" != yes])
 # FIXME: Should be tested as the system may can actually run these (Bash on Windows?)
 
