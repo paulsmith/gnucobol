@@ -583,7 +583,7 @@ AT_CLEANUP
 
 
 AT_SETUP([FUNCTION EXCEPTION-FILE])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions exceptions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -600,6 +600,9 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  TEST-STATUS  PIC XX.
        PROCEDURE        DIVISION.
+           DISPLAY FUNCTION EXCEPTION-FILE '|'
+                   NO ADVANCING
+           END-DISPLAY.
            OPEN INPUT TEST-FILE.
            DISPLAY FUNCTION EXCEPTION-FILE
                    NO ADVANCING
@@ -609,13 +612,13 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[35TEST-FILE], [])
+[00|35TEST-FILE], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([FUNCTION EXCEPTION-LOCATION])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions exceptions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -634,6 +637,9 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
        A00-MAIN SECTION.
        A00.
+           DISPLAY FUNCTION EXCEPTION-LOCATION '|'
+                   NO ADVANCING
+           END-DISPLAY.
            OPEN INPUT TEST-FILE.
        B00-MAIN SECTION.
        B00.
@@ -645,13 +651,13 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[prog; A00 OF A00-MAIN; 18], [])
+[ |prog; A00 OF A00-MAIN; 21], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([FUNCTION EXCEPTION-STATEMENT])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions exceptions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -668,6 +674,9 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  TEST-STATUS  PIC XX.
        PROCEDURE        DIVISION.
+           DISPLAY FUNCTION EXCEPTION-STATEMENT '|'
+                   NO ADVANCING
+           END-DISPLAY.
            OPEN INPUT TEST-FILE.
            DISPLAY FUNCTION EXCEPTION-STATEMENT
                    NO ADVANCING
@@ -677,13 +686,13 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[OPEN                           ], [])
+[                               |OPEN                           ], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([FUNCTION EXCEPTION-STATUS])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions exceptions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -700,6 +709,9 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  TEST-STATUS  PIC XX.
        PROCEDURE        DIVISION.
+           DISPLAY FUNCTION EXCEPTION-STATUS '|'
+                   NO ADVANCING
+           END-DISPLAY.
            OPEN INPUT TEST-FILE.
            DISPLAY FUNCTION EXCEPTION-STATUS
                    NO ADVANCING
@@ -709,7 +721,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[EC-I-O-PERMANENT-ERROR         ], [])
+[                               |EC-I-O-PERMANENT-ERROR         ], [])
 
 AT_CLEANUP
 

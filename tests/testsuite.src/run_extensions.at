@@ -4116,6 +4116,94 @@ tests finished
 AT_CLEANUP
 
 
+AT_SETUP([System routine CBL_ERROR_PROC])
+AT_KEYWORDS([extensions exceptions error
+EXCEPTION-LOCATION EXCEPTION-STATEMENT EXCEPTION-FILE EXCEPTION-STATUS])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DemoErrProc.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77  Err-Proc-Address            USAGE PROGRAM-POINTER.
+       77  Err-Message-Len             PIC 9(04) USAGE COMP-5.
+       LINKAGE SECTION.
+       77  Err-Message-From-Runtime    PIC X(1023).
+       PROCEDURE DIVISION.
+       S1.
+           DISPLAY 'Program is starting'
+           SET Err-Proc-Address TO ENTRY 'ErrProc'
+           CALL 'CBL_ERROR_PROC' USING 0, Err-Proc-Address
+           SET Err-Proc-Address TO ENTRY 'ErrProc-internal'
+           CALL 'CBL_ERROR_PROC' USING 0, Err-Proc-Address
+           SET Err-Proc-Address TO NULL
+           CALL 'Tilt' *> THIS DOESN'T EXIST!!!!
+           DISPLAY 'Program is stopping'
+           STOP RUN
+           .
+       ENTRY 'ErrProc-internal' USING Err-Message-From-Runtime.
+           DISPLAY 'Error (interal): ' FUNCTION EXCEPTION-LOCATION  '-'
+           DISPLAY '                 ' FUNCTION EXCEPTION-STATEMENT '-'
+           DISPLAY '                 ' FUNCTION EXCEPTION-STATUS    '-'
+           *> NOTE: the error message is *EXPLICIT* specified to end with x'00'
+           MOVE 0 TO Err-Message-Len
+           INSPECT Err-Message-From-Runtime
+              TALLYING Err-Message-Len FOR CHARACTERS BEFORE x'00'
+           DISPLAY 'Error-Message:   ' Err-Message-From-Runtime
+                                       (1:Err-Message-Len)
+           DISPLAY '-*- Returning to Next Error Routine -*-'
+           EXIT PROGRAM
+           .
+       END PROGRAM DemoErrProc.
+   
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ErrProc.
+       PROCEDURE DIVISION.
+       000-Main.
+           DISPLAY 'Error: ' FUNCTION EXCEPTION-LOCATION  '-'
+           DISPLAY '       ' FUNCTION EXCEPTION-STATEMENT '-'
+           DISPLAY '       ' FUNCTION EXCEPTION-STATUS    '-'
+           DISPLAY '-*- Returning to Standard Error Routine -*-'
+           EXIT PROGRAM
+           .
+       END PROGRAM ErrProc.
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1],
+[Program is starting
+Error (interal): DemoErrProc; S1; 19-
+                 CALL                           -
+                 EC-PROGRAM-NOT-FOUND           -
+Error-Message:   prog.cob:19: module 'Tilt' not found
+-*- Returning to Next Error Routine -*-
+Error: DemoErrProc; S1; 19-
+       CALL                           -
+       EC-PROGRAM-NOT-FOUND           -
+-*- Returning to Standard Error Routine -*-
+],
+[libcob: prog.cob:19: module 'Tilt' not found
+])
+
+AT_CHECK([$COBC -x -o prog_noloc prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog_noloc], [1],
+[Program is starting
+Error (interal):  -
+                                                -
+                 EC-PROGRAM-NOT-FOUND           -
+Error-Message:   module 'Tilt' not found
+-*- Returning to Next Error Routine -*-
+Error:  -
+                                      -
+       EC-PROGRAM-NOT-FOUND           -
+-*- Returning to Standard Error Routine -*-
+],
+[libcob: module 'Tilt' not found
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([DISPLAY DIRECTIVE and $DISPLAY])
 AT_KEYWORDS([extensions])
 

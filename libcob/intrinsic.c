@@ -625,7 +625,7 @@ cob_mod_or_rem (cob_field *f1, cob_field *f2, const int func_is_rem)
 {
 	int	sign;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	cob_decimal_set_field (&d2, f1);
 	cob_decimal_set_field (&d3, f2);
 
@@ -3480,7 +3480,7 @@ cob_intr_binop (cob_field *f1, const int op, cob_field *f2)
 		cob_decimal_mul (&d1, &d2);
 		break;
 	case '/':
-		cob_set_exception (0);
+		cobglobptr->cob_exception_code = 0;
 		if (!mpz_sgn (d2.value)) {
 			/* Divide by zero */
 			cob_set_exception (COB_EC_SIZE_ZERO_DIVIDE);
@@ -3868,6 +3868,7 @@ cob_intr_trim (const int offset, const int length,
 	return curr_field;
 }
 
+/* get variable length (at least 2) temporary field containing last file exception status + name */
 cob_field *
 cob_intr_exception_file (void)
 {
@@ -3875,8 +3876,9 @@ cob_intr_exception_file (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	if (cobglobptr->cob_exception_code == 0 || !cobglobptr->cob_error_file ||
-	    (cobglobptr->cob_exception_code & 0x0500) != 0x0500) {
+	/* check if last-exception is active and a file-exception */
+	if (!cobglobptr->cob_error_file ||
+	    (!cob_last_exception_is (COB_EC_I_O))) {
 		field.size = 2;
 		make_field_entry (&field);
 		memcpy (curr_field->data, "00", (size_t)2);
@@ -3892,6 +3894,7 @@ cob_intr_exception_file (void)
 	return curr_field;
 }
 
+/* get variable length (at least 1) temporary field containing last exception location */
 cob_field *
 cob_intr_exception_location (void)
 {
@@ -3899,33 +3902,34 @@ cob_intr_exception_location (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	if (!cobglobptr->cob_got_exception || !cobglobptr->cob_orig_program_id) {
+	/* check if last-exception is active and if LOCATION is available */
+	if (!cobglobptr->last_exception_id) {
 		field.size = 1;
 		make_field_entry (&field);
 		*(curr_field->data) = ' ';
 		return curr_field;
 	}
 	buff = cob_malloc ((size_t)COB_SMALL_BUFF);
-	if (cobglobptr->cob_orig_section && cobglobptr->cob_orig_paragraph) {
+	if (cobglobptr->last_exception_section && cobglobptr->last_exception_paragraph) {
 		snprintf (buff, (size_t)COB_SMALL_MAX, "%s; %s OF %s; %u",
-			  cobglobptr->cob_orig_program_id,
-			  cobglobptr->cob_orig_paragraph,
-			  cobglobptr->cob_orig_section,
-			  cobglobptr->cob_orig_line);
-	} else if (cobglobptr->cob_orig_section) {
+			  cobglobptr->last_exception_id,
+			  cobglobptr->last_exception_paragraph,
+			  cobglobptr->last_exception_section,
+			  cobglobptr->last_exception_line);
+	} else if (cobglobptr->last_exception_section) {
 		snprintf (buff, (size_t)COB_SMALL_MAX, "%s; %s; %u",
-			  cobglobptr->cob_orig_program_id,
-			  cobglobptr->cob_orig_section,
-			  cobglobptr->cob_orig_line);
-	} else if (cobglobptr->cob_orig_paragraph) {
+			  cobglobptr->last_exception_id,
+			  cobglobptr->last_exception_section,
+			  cobglobptr->last_exception_line);
+	} else if (cobglobptr->last_exception_paragraph) {
 		snprintf (buff, (size_t)COB_SMALL_MAX, "%s; %s; %u",
-			  cobglobptr->cob_orig_program_id,
-			  cobglobptr->cob_orig_paragraph,
-			  cobglobptr->cob_orig_line);
+			  cobglobptr->last_exception_id,
+			  cobglobptr->last_exception_paragraph,
+			  cobglobptr->last_exception_line);
 	} else {
 		snprintf (buff, (size_t)COB_SMALL_MAX, "%s; ; %u",
-			  cobglobptr->cob_orig_program_id,
-			  cobglobptr->cob_orig_line);
+			  cobglobptr->last_exception_id,
+			  cobglobptr->last_exception_line);
 	}
 	buff[COB_SMALL_MAX] = 0; /* silence warnings */
 	field.size = strlen (buff);
@@ -3935,6 +3939,7 @@ cob_intr_exception_location (void)
 	return curr_field;
 }
 
+/* get x(31) temporary field containing last exception name */
 cob_field *
 cob_intr_exception_status (void)
 {
@@ -3945,8 +3950,8 @@ cob_intr_exception_status (void)
 	make_field_entry (&field);
 
 	memset (curr_field->data, ' ', (size_t)31);
-	if (cobglobptr->cob_exception_code) {
-		except_name = cob_get_exception_name ();
+	if (cob_get_last_exception_code() != 0) {
+		except_name = cob_get_last_exception_name ();
 		if (except_name == NULL) {
 			except_name = "EXCEPTION-OBJECT";
 		}
@@ -3955,6 +3960,7 @@ cob_intr_exception_status (void)
 	return curr_field;
 }
 
+/* get x(31) temporary field containing last exception statement */
 cob_field *
 cob_intr_exception_statement (void)
 {
@@ -3965,12 +3971,12 @@ cob_intr_exception_statement (void)
 	make_field_entry (&field);
 
 	memset (curr_field->data, ' ', (size_t)31);
-	if (cobglobptr->cob_exception_code && cobglobptr->cob_orig_statement) {
-		flen = strlen (cobglobptr->cob_orig_statement);
+	if (cobglobptr->last_exception_statement) {
+		flen = strlen (cobglobptr->last_exception_statement);
 		if (flen > 31) {
 			flen = 31;
 		}
-		memcpy (curr_field->data, cobglobptr->cob_orig_statement, flen);
+		memcpy (curr_field->data, cobglobptr->last_exception_statement, flen);
 	}
 	return curr_field;
 }
@@ -4063,7 +4069,7 @@ cob_intr_combined_datetime (cob_field *srcdays, cob_field *srctime)
 	cob_decimal	*srtime;
 	cob_decimal	*hundred_thousand;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Validate and extract the value of srcdays */
 	srdays = cob_get_int (srcdays);
@@ -4116,7 +4122,7 @@ cob_intr_date_of_integer (cob_field *srcdays)
 	COB_FIELD_INIT (8, NULL, &attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	/* Base 1601-01-01 */
 	days = cob_get_int (srcdays);
 	if (!valid_integer_date (days)) {
@@ -4146,7 +4152,7 @@ cob_intr_day_of_integer (cob_field *srcdays)
 	COB_FIELD_INIT (7, NULL, &attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	/* Base 1601-01-01 */
 	days = cob_get_int (srcdays);
 	if (!valid_integer_date (days)) {
@@ -4172,7 +4178,7 @@ cob_intr_integer_of_date (cob_field *srcfield)
 	int		month;
 	int		year;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	/* Base 1601-01-01 */
 	indate = cob_get_int (srcfield);
 	year = indate / 10000;
@@ -4206,7 +4212,7 @@ cob_intr_integer_of_day (cob_field *srcfield)
 	int		days;
 	int		year;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	/* Base 1601-01-01 */
 	indate = cob_get_int (srcfield);
 	year = indate / 1000;
@@ -4284,7 +4290,7 @@ cob_intr_factorial (cob_field *srcfield)
 {
 	int		srcval;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	srcval = cob_get_int (srcfield);
 	d1.scale = 0;
 	if (srcval < 0) {
@@ -4328,7 +4334,7 @@ cob_intr_exp (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	if (!mpz_sgn (d1.value)) {
 		/* Power is zero */
@@ -4352,7 +4358,7 @@ cob_intr_exp10 (cob_field *srcfield)
 
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	sign = mpz_sgn (d1.value);
 	if (!sign) {
@@ -4395,7 +4401,7 @@ cob_intr_log (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	if (mpz_sgn (d1.value) <= 0) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
@@ -4426,7 +4432,7 @@ cob_intr_log10 (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	if (mpz_sgn (d1.value) <= 0) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
@@ -4477,7 +4483,7 @@ cob_intr_acos (cob_field *srcfield)
 	mpz_set_ui (d3.value, 1UL);
 	d3.scale = 0;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	if (cob_decimal_cmp (&d4, &d2) < 0 || cob_decimal_cmp (&d5, &d3) > 0) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
@@ -4507,7 +4513,7 @@ cob_intr_asin (cob_field *srcfield)
 	mpz_set_ui (d3.value, 1UL);
 	d3.scale = 0;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	if (cob_decimal_cmp (&d4, &d2) < 0 || cob_decimal_cmp (&d5, &d3) > 0) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
@@ -4534,7 +4540,7 @@ cob_intr_atan (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	if (!mpz_sgn (d1.value)) {
 		/* Atan (0) = 0 */
@@ -4556,7 +4562,7 @@ cob_intr_cos (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	cob_decimal_get_mpf (cob_mpft, &d1);
 	cob_mpf_cos (cob_mpft, cob_mpft);
@@ -4572,7 +4578,7 @@ cob_intr_sin (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	cob_decimal_get_mpf (cob_mpft, &d1);
 	cob_mpf_sin (cob_mpft, cob_mpft);
@@ -4588,7 +4594,7 @@ cob_intr_tan (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	cob_decimal_get_mpf (cob_mpft, &d1);
 	cob_mpf_tan (cob_mpft, cob_mpft);
@@ -4604,7 +4610,7 @@ cob_intr_sqrt (cob_field *srcfield)
 {
 	cob_decimal_set_field (&d1, srcfield);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	if (mpz_sgn (d1.value) < 0) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
@@ -5136,7 +5142,7 @@ cob_intr_standard_deviation (const int num_args, ...)
 	GET_VARIANCE (num_args, args);
 	cob_trim_decimal (&d1);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Take square root of variance */
 	mpz_set_ui (d3.value, 5UL);
@@ -5201,7 +5207,7 @@ cob_intr_year_to_yyyy (const int params, ...)
 	int		current_year;
 	int		maxyear;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	va_start (args, params);
 	f = va_arg (args, cob_field *);
 	year = cob_get_int (f);
@@ -5257,7 +5263,7 @@ cob_intr_date_to_yyyymmdd (const int params, ...)
 	int		current_year;
 	int		maxyear;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	va_start (args, params);
 
@@ -5303,7 +5309,7 @@ cob_intr_day_to_yyyyddd (const int params, ...)
 	int		current_year;
 	int		maxyear;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	va_start (args, params);
 
@@ -5378,7 +5384,7 @@ cob_intr_seconds_from_formatted_time (cob_field *format_field, cob_field *time_f
 					   format_field->size);
 	memcpy (format_str, format_field->data, str_length);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Validate the format string */
 	if (cob_valid_datetime_format (format_str, decimal_point)) {
@@ -5438,7 +5444,7 @@ cob_intr_locale_date (const int offset, const int length,
 	char		locale_buff[COB_SMALL_BUFF];
 #endif
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_LANGINFO_CODESET)
 	if (COB_FIELD_IS_NUMERIC (srcfield)) {
@@ -5549,7 +5555,7 @@ cob_intr_locale_time (const int offset, const int length,
 	char		buff[LOCTIME_BUFSIZE] = { '\0' };
 #endif
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_LANGINFO_CODESET)
 	if (COB_FIELD_IS_NUMERIC (srcfield)) {
@@ -5608,7 +5614,7 @@ cob_intr_lcl_time_from_secs (const int offset, const int length,
 	char		buff[LOCTIME_BUFSIZE] = { '\0' };
 #endif
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(HAVE_LANGINFO_CODESET)
 	if (COB_FIELD_IS_NUMERIC (srcfield)) {
@@ -5647,7 +5653,7 @@ cob_intr_mon_decimal_point (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #ifdef	HAVE_LOCALECONV
 	p = localeconv ();
@@ -5682,7 +5688,7 @@ cob_intr_num_decimal_point (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #ifdef	HAVE_LOCALECONV
 	p = localeconv ();
@@ -5717,7 +5723,7 @@ cob_intr_mon_thousands_sep (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #ifdef	HAVE_LOCALECONV
 	p = localeconv ();
@@ -5752,7 +5758,7 @@ cob_intr_num_thousands_sep (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #ifdef	HAVE_LOCALECONV
 	p = localeconv ();
@@ -5787,7 +5793,7 @@ cob_intr_currency_symbol (void)
 	cob_field	field;
 
 	COB_FIELD_INIT (0, NULL, &const_alpha_attr);
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 #ifdef	HAVE_LOCALECONV
 	p = localeconv ();
@@ -5994,7 +6000,7 @@ cob_intr_locale_compare (const int params, ...)
 	cob_field	field;
 	va_list		args;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	va_start (args, params);
 	f1 = va_arg (args, cob_field *);
 	f2 = va_arg (args, cob_field *);
@@ -6092,7 +6098,7 @@ cob_intr_formatted_date (const int offset, const int length,
 	COB_FIELD_INIT (field_length, NULL, &const_alpha_attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 	days = cob_get_int (days_field);
 
 	if (!valid_day_and_format (days, format_str)) {
@@ -6163,7 +6169,7 @@ cob_intr_formatted_time (const int offset, const int length,
 	COB_FIELD_INIT (field_length, NULL, &const_alpha_attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Extract and validate the times and time format */
 
@@ -6260,7 +6266,7 @@ cob_intr_formatted_datetime (const int offset, const int length,
 	COB_FIELD_INIT (field_length, NULL, &const_alpha_attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Validate the formats, dates and times */
 	if (!cob_valid_datetime_format (fmt_str, COB_MODULE_PTR->decimal_point)) {
@@ -6327,7 +6333,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	int	time_part_offset;
 	int	error_pos;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Copy to null-terminated strings */
 	copy_data_to_null_terminated_str (format_field, datetime_format_str,
@@ -6422,7 +6428,7 @@ cob_intr_integer_of_formatted_date (cob_field *format_field,
 	int	is_date;
 	struct date_format date_fmt;
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	copy_data_to_null_terminated_str (format_field, original_format_str,
 					  COB_DATETIMESTR_MAX);
@@ -6482,7 +6488,7 @@ cob_intr_formatted_current_date (const int offset, const int length,
 	COB_FIELD_INIT (field_length, NULL, &const_alpha_attr);
 	make_field_entry (&field);
 
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Validate format */
 	if (!cob_valid_datetime_format (format_str, COB_MODULE_PTR->decimal_point)) {

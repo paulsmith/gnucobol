@@ -190,6 +190,8 @@ static const char		*cob_last_sfile = NULL;
 static cob_global		*cobglobptr = NULL;
 static cob_settings		*cobsetptr = NULL;
 
+static int			last_exception_code;	/* Last exception: code */
+static int			active_error_handler = 0;
 static char			*runtime_err_str = NULL;
 
 static int			cannot_check_subscript = 0;
@@ -1410,50 +1412,71 @@ cob_max_int (const int x, const int y)
 	return y;
 }
 
+/* get last exception (or 0 if not active) */
 int
-cob_get_exception_code (void)
+cob_get_last_exception_code (void)
 {
-	return cobglobptr->cob_exception_code;
+	return last_exception_code;
 }
 
+/* get exception name for last raised exception */
 const char *
-cob_get_exception_name (void)
+cob_get_last_exception_name (void)
 {
 	size_t	n;
 
 	for (n = 0; n < EXCEPTION_TAB_SIZE; ++n) {
-		if (cobglobptr->cob_exception_code == cob_exception_tab_code[n]) {
+		if (last_exception_code == cob_exception_tab_code[n]) {
 			return cob_exception_tab_name[n];
 		}
 	}
 	return NULL;
 }
 
+/* check if last exception is set and includes the given exception */
+int
+cob_last_exception_is (const int exception_to_check)
+{
+	if ((last_exception_code & cob_exception_tab_code[exception_to_check])
+	 == cob_exception_tab_code[exception_to_check]) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+/* set last exception,
+   used for EXCEPTION- functions and for cob_accept_exception_status,
+   only reset on SET LAST EXCEPTION TO OFF */
 void
 cob_set_exception (const int id)
 {
 	cobglobptr->cob_exception_code = cob_exception_tab_code[id];
-	if (cobglobptr->cob_exception_code) {
+	last_exception_code = cobglobptr->cob_exception_code;
+	if (id) {
 		cobglobptr->cob_got_exception = 1;
-		cobglobptr->cob_orig_statement = cob_source_statement;
-		cobglobptr->cob_orig_line = cob_source_line;
-		cobglobptr->cob_orig_program_id = cob_current_program_id;
-		cobglobptr->cob_orig_section = cob_current_section;
-		cobglobptr->cob_orig_paragraph = cob_current_paragraph;
+		cobglobptr->last_exception_statement = cob_source_statement;
+		cobglobptr->last_exception_line = cob_source_line;
+		cobglobptr->last_exception_id = cob_current_program_id;
+		cobglobptr->last_exception_section = cob_current_section;
+		cobglobptr->last_exception_paragraph = cob_current_paragraph;
 	} else {
 		cobglobptr->cob_got_exception = 0;
-		cobglobptr->cob_orig_statement = NULL;
-		cobglobptr->cob_orig_line = 0;
-		cobglobptr->cob_orig_program_id = NULL;
-		cobglobptr->cob_orig_section = NULL;
-		cobglobptr->cob_orig_paragraph = NULL;
+		cobglobptr->last_exception_statement = NULL;
+		cobglobptr->last_exception_line = 0;
+		cobglobptr->last_exception_id = NULL;
+		cobglobptr->last_exception_section = NULL;
+		cobglobptr->last_exception_paragraph = NULL;
 	}
 }
 
+/* return the last exception value */
 void
 cob_accept_exception_status (cob_field *f)
 {
-	cob_set_int (f, cobglobptr->cob_exception_code);
+	/* Note: MF set this to a 9(3) item, we may
+	   add a translation here */
+	cob_set_int (f, last_exception_code);
 }
 
 void
@@ -1722,6 +1745,11 @@ cob_field_to_string (const cob_field *f, void *str, const size_t maxsize)
 
 	count = 0;
 	if (unlikely (f->size == 0)) {
+		return;
+	}
+	/* check if field has data assigned (may be a BASED / LINKAGE item) */
+	if (unlikely (f->data == NULL)) {
+		strncpy (str, _ ("field with NULL address"), maxsize);
 		return;
 	}
 	i = f->size - 1;
@@ -4030,8 +4058,8 @@ cob_sys_exit_proc (const void *dispo, const void *pptr)
 int
 cob_sys_error_proc (const void *dispo, const void *pptr)
 {
-	struct handlerlist	*hp = NULL;
-	struct handlerlist	*h = hdlrs;
+	struct handlerlist	*hp;
+	struct handlerlist	*h;
 	const unsigned char	*x;
 	int			(**p) (char *s);
 
@@ -6033,36 +6061,63 @@ cob_runtime_error (const char *fmt, ...)
 	char			*p;
 	va_list			ap;
 
+	const char		*err_source_file;
+	unsigned int	err_source_line;
+
 #if	1	/* RXWRXW - Exit screen */
 	/* Exit screen mode early */
 	cob_exit_screen ();
 #endif
 
-	if (hdlrs != NULL) {
+	if (hdlrs != NULL && !active_error_handler) {
 		if (runtime_err_str) {
 			p = runtime_err_str;
 			if (cob_source_file) {
-				sprintf (runtime_err_str, "%s:%u: ",
-					cob_source_file, cob_source_line);
+				if (cob_source_line) {
+					sprintf (runtime_err_str, "%s:%u: ",
+						cob_source_file, cob_source_line);
+				} else {
+					sprintf (runtime_err_str, "%s: ",
+						cob_source_file);
+				}
 				p = runtime_err_str + strlen (runtime_err_str);
 			}
 			va_start (ap, fmt);
 			vsprintf (p, fmt, ap);
 			va_end (ap);
+		/* LCOV_EXCL_START */
+		} else {
+			runtime_err_str = (char *) "-";
 		}
+		/* LCOV_EXCL_STOP */
+
+		/* save error location */
+		err_source_file = cob_source_file;
+		err_source_line = cob_source_line;
+
+		/* run registered error handlers */
+		active_error_handler = 1;
 		h = hdlrs;
 		while (h != NULL) {
-			if (runtime_err_str) {
-				h->proc (runtime_err_str);
-			}
-			else {
-				h->proc ((char *)_("malloc error"));
-			}
+			/* ensure that error handlers set their own locations */
+			cob_source_file = NULL;
+			cob_source_line = 0;
+			h->proc (runtime_err_str);
 			hp = h;
 			h = h->next;
 			cob_free (hp);
 		}
+		/* LCOV_EXCL_START */
+		if (runtime_err_str[0] == '-' && runtime_err_str[1] == 0) {
+			runtime_err_str = NULL;
+		}
+		/* LCOV_EXCL_STOP */
 		hdlrs = NULL;
+		active_error_handler = 0;
+
+		/* restore error location */
+		cob_source_file = err_source_file;
+		cob_source_line = err_source_line;
 	}
 
 	/* Prefix */
@@ -6192,6 +6247,9 @@ cob_fatal_error (const int fatal_error)
 		case COB_STATUS_30_PERMANENT_ERROR:
 			msg = _("permanent file error");
 			break;
+		case COB_STATUS_31_INCONSISTENT_FILENAME:
+			msg = _("inconsistant file name");
+			break;
 		case COB_STATUS_35_NOT_EXISTS:
 			msg = _("file does not exist");
 			break;
@@ -6242,12 +6300,19 @@ cob_fatal_error (const int fatal_error)
 			break;
 		/* LCOV_EXCL_STOP */
 		}
-		err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
-		cob_field_to_string (cobglobptr->cob_error_file->assign,
-			err_cause, (size_t)COB_FILE_MAX);
-		cob_runtime_error (_("%s (status = %02d) file: '%s'"),
-			msg, status, err_cause);
-		cob_free (err_cause);
+		if (cobglobptr->cob_error_file->assign
+		 && cobglobptr->cob_error_file->assign->data) {
+			err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
+			cob_field_to_string (cobglobptr->cob_error_file->assign,
+				err_cause, (size_t)COB_FILE_MAX);
+			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
+				msg, status, err_cause);
+			cob_free (err_cause);
+		} else {
+			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
+				msg, status, cobglobptr->cob_error_file->select_name);
+			cob_runtime_error ("ASSIGN field with NULL address");
+		}
 		break;
 	/* LCOV_EXCL_START */
 	case COB_FERROR_FUNCTION:
@@ -6789,7 +6854,7 @@ cob_init (const int argc, char **argv)
 	/* Screen-IO might be needed for error outputs */
 	cob_init_screenio (cobglobptr, cobsetptr);
 	cob_init_numeric (cobglobptr);
-	cob_init_strings ();
+	cob_init_strings (cobglobptr);
 	cob_init_move (cobglobptr, cobsetptr);
 	cob_init_intrinsic (cobglobptr);
 	cob_init_fileio (cobglobptr, cobsetptr);

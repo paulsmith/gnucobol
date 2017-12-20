@@ -321,7 +321,7 @@ COB_HIDDEN void		cob_init_fileio		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_reportio	(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_call		(cob_global *, cob_settings *, const int);
 COB_HIDDEN void		cob_init_intrinsic	(cob_global *);
-COB_HIDDEN void		cob_init_strings	(void);
+COB_HIDDEN void		cob_init_strings	(cob_global *);
 COB_HIDDEN void		cob_init_move		(cob_global *, cob_settings *);
 COB_HIDDEN void		cob_init_screenio	(cob_global *, cob_settings *);
 
@@ -345,10 +345,10 @@ COB_HIDDEN void		cob_print_realbin	(const cob_field *, FILE *,
 						 const int);
 
 COB_HIDDEN void		cob_screen_set_mode	(const cob_u32_t);
-COB_HIDDEN int		cob_get_exception_code	(void);
+COB_HIDDEN int		cob_get_last_exception_code	(void);
 COB_HIDDEN int		cob_check_env_true	(char*);
 COB_HIDDEN int		cob_check_env_false	(char*);
-COB_HIDDEN const char	*cob_get_exception_name	(void);
+COB_HIDDEN const char	*cob_get_last_exception_name	(void);
 COB_HIDDEN void		cob_field_to_string	(const cob_field *, void *,
 						 const size_t);
 COB_HIDDEN void		cob_parameter_check	(const char *, const int);

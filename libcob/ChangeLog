@@ -1,4 +1,21 @@
 
+2017-12-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* strings.c, common.c, coblocal.h: cob_init_strings gets and stores
+	  cob_global * as all other sources do
+	* call.c, common.c, fileio.c, intrinsic.c, strings.c: directly set internal
+	  cobglobptr->cob_exception_code = 0 instead of using cob_set_exception
+	* common.c (cob_get_exception_name), coblocal.h: renamed
+	  cob_get_exception_code / cob_get_exception_name to
+	  cob_get_last exception_code / cob_get_last_exception_name
+	* common.c (cob_last_exception_is), common.h: new function to check if a
+	  specific error group/value is set
+	* common.c (cob_field_to_string): check if field has data assigned
+	* common.c (cob_runtime_error): ensure that registered error handlers
+	  aren't called recursive and don't change error location
+	* common.c (cob_fatal_error): added COB_STATUS_31_INCONSISTENT_FILENAME
+	  and check that ASSIGN field has a value before using it
+
 2017-12-16  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c (cob_decimal_get_ieee64dec): fix bug #470 (coding error)
@@ -200,7 +217,6 @@
 	* common.c: Improved 'cobcrun -r' display for when
 	  unsetenv is used in runtime.cfg to show environment variable
 	  was removed and runtime.cfg variable was then present
-
 
 2017-05-31 Ron Norman <rjn@inglenet.com>
 

@@ -686,7 +686,7 @@ save_status (cob_file *f, cob_field *fnstatus, const int status)
 			eop_status = 0;
 			cob_set_exception (COB_EC_I_O_EOP);
 		} else {
-			cob_set_exception (0);
+			cobglobptr->cob_exception_code = 0;
 		}
 		if (unlikely (cobsetptr->cob_do_sync)) {
 			cob_sync (f);
@@ -4628,8 +4628,10 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	}
 
 	if (f->assign->data == NULL) {
-		cob_runtime_error (_("file %s has ASSIGN field with NULL address"),
+#if 0 /* we don't raise an error in other places and a similar error is raised in cob_fatal_error */
+		cob_runtime_error ("file %s has ASSIGN field with NULL address",
 							f->select_name);
+#endif
 		save_status (f, fnstatus, COB_STATUS_31_INCONSISTENT_FILENAME);
 		return;
 	} 

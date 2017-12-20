@@ -614,7 +614,7 @@ cob_resolve_internal (const char *name, const char *dirent,
 		cob_fatal_error (COB_FERROR_INITIALIZED);
 	}
 	/* LCOV_EXCL_STOP */
-	cob_set_exception (0);
+	cobglobptr->cob_exception_code = 0;
 
 	/* Search the cache */
 	func = lookup (name);

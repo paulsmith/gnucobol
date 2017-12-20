@@ -1412,10 +1412,10 @@ typedef struct cob_report_ {
 typedef struct __cob_global {
 	cob_file		*cob_error_file;	/* Last error file */
 	cob_module		*cob_current_module;	/* Current module */
-	const char		*cob_orig_statement;	/* Statement */
-	const char		*cob_orig_program_id;	/* Program ID */
-	const char		*cob_orig_section;	/* Section */
-	const char		*cob_orig_paragraph;	/* Paragraph */
+	const char		*last_exception_statement;	/* SLast exception: tatement */
+	const char		*last_exception_id;	/* Last exception: PROGRAMM-ID / FUNCTION-ID*/
+	const char		*last_exception_section;	/* Last exception: Section */
+	const char		*last_exception_paragraph;	/* Last exception: Paragraph */
 	const char		*cob_main_argv0;	/* Main program */
 	char			*cob_locale;		/* Program locale */
 	char			*cob_locale_orig;	/* Initial locale */
@@ -1426,15 +1426,15 @@ typedef struct __cob_global {
 	char			*cob_locale_numeric;	/* Initial locale */
 	char			*cob_locale_time;	/* Initial locale */
 
-	int			cob_exception_code;	/* Last exception code */
+	int			cob_exception_code;	/* current exception code, in contrast to last_exception_code heavily changed */
 	int			cob_call_params;	/* Number of current arguments
 									   This is set to the actual number before a CALL
 									   and is stored directly on module entry to its
 									   cob_module structure within cob_module_enter().
 									*/
 	int			cob_initial_external;	/* First external ref */
-	unsigned int		cob_orig_line;		/* Program source line */
-	unsigned int		cob_got_exception;	/* Exception active */
+	unsigned int		last_exception_line;		/* Last exception: Program source line */
+	unsigned int		cob_got_exception;	/* Exception active (see last_exception) */
 	unsigned int		cob_screen_initialized;	/* Screen initialized */
 	unsigned int		cob_physical_cancel;	/* Unloading of modules */
 												/* screenio / termio */
@@ -1476,12 +1476,14 @@ struct cobjmp_buf {
 
 /*******************************/
 /* Functions in common.c */
-COB_EXPIMP void		print_info(void);
-COB_EXPIMP void		print_version(void);
-COB_EXPIMP int		cob_load_config(void);
-COB_EXPIMP void		print_runtime_conf(void);
+COB_EXPIMP void		print_info	(void);
+COB_EXPIMP void		print_version	(void);
+COB_EXPIMP int		cob_load_config	(void);
+COB_EXPIMP void		print_runtime_conf	(void);
 
-COB_EXPIMP void		cob_set_exception(const int);
+COB_EXPIMP void		cob_set_exception	(const int);
+COB_EXPIMP int		cob_last_exception_is	(const int);
+
 
 /* General functions */
 
