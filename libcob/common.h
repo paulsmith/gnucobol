@@ -317,6 +317,8 @@ Note: also defined together with __clang__ in both frontends:
 #define snprintf		_snprintf
 #define getpid			_getpid
 #define access			_access
+#define popen			_popen
+#define pclose			_pclose
 #if COB_USE_VC2013_OR_GREATER
 /* only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
@@ -1619,6 +1621,13 @@ COB_EXPIMP void			*cob_external_addr	(const char *, const int);
 COB_EXPIMP unsigned char	*cob_get_pointer	(const void *);
 COB_EXPIMP void			cob_ready_trace		(void);
 COB_EXPIMP void			cob_reset_trace		(void);
+
+/* Call from outside to set/read/re-evaluate libcob options */
+#define COB_SET_RUNTIME_TRACE_FILE 		0	/* 'p' is  FILE *  */
+#define COB_SET_RUNTIME_DISPLAY_PRINTER_FILE	1	/* 'p' is  FILE *  */
+#define COB_SET_RUNTIME_RESCAN_ENV		2	/* rescan environment variables */
+COB_EXPIMP void			cob_set_runtime_option		(int opt, void *p);
+COB_EXPIMP void			*cob_get_runtime_option		(int opt);
 
 /* Datetime structure */
 struct cob_time

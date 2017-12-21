@@ -238,19 +238,53 @@ display_common (cob_field *f, FILE *fp)
 }
 
 void
-cob_display (const int to_stderr, const int newline, const int varcnt, ...)
+cob_display (const int to_device, const int newline, const int varcnt, ...)
 {
 	FILE		*fp;
 	cob_field	*f;
 	int		i;
-	int		nlattr;
+	int		nlattr, close_fp, pclose_fp;
 	cob_u32_t	disp_redirect;
 	va_list		args;
 
 	disp_redirect = 0;
-	if (to_stderr) {
+	pclose_fp = close_fp = 0;
+	
+	/* display to device ? */
+	if (to_device == 2) {	/* PRINTER */
+		/* display to external specified print file handle */
+		if (cobsetptr->cob_display_print_file) {
+			fp = cobsetptr->cob_display_print_file;
+		/* display to configured print file */
+		} else if (cobsetptr->cob_display_print != NULL) {
+			fp = fopen (cobsetptr->cob_display_print, "a");
+			if (fp == NULL) {
+				fp = stderr;
+			} else {
+				close_fp = 1;
+			}
+		/* display to configured print command (piped) */
+		} else if (cobsetptr->cob_printer != NULL) {
+			fp = popen (cobsetptr->cob_printer, "w");
+			if (fp == NULL) {
+				fp = stderr;
+			} else {
+				pclose_fp = 1;
+			}
+		/* fallback: display to the defined SYSOUT */
+		} else {
+			fp = stdout;
+			if (cobglobptr->cob_screen_initialized) {
+				if (!COB_DISP_TO_STDERR) {
+					disp_redirect = 1;
+				} else {
+					fp = stderr;
+				}
+			}
+		}
+	} else if (to_device == 1) {	/* SYSERR */
 		fp = stderr;
-	} else {
+	} else {		/* general (SYSOUT) */
 		fp = stdout;
 		if (cobglobptr->cob_screen_initialized) {
 			if (!COB_DISP_TO_STDERR) {
@@ -277,6 +311,12 @@ cob_display (const int to_stderr, const int newline, const int varcnt, ...)
 	if (newline && !disp_redirect) {
 		putc ('\n', fp);
 		fflush (fp);
+	}
+	if (pclose_fp) {
+		pclose (fp);
+	}
+	if (close_fp) {
+		fclose (fp);
 	}
 }
 

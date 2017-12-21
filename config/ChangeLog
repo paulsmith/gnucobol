@@ -263,6 +263,10 @@
 
 	* general: added numeric-boolean and acu-literals
 
+2015-07-07  Ron Norman <rjn@inglenet.com>
+
+	* runtime.cfg: oadded COBPRINTER and COB_DISPLAY_PRINTER
+
 2015-07-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobol2014.conf: added new configuration for COBOL 2014 (most values

@@ -10433,7 +10433,7 @@ display_upon:
   }
 | UPON PRINTER
   {
-	upon_value = cb_int0;
+	upon_value = cb_int2;
   }
 | UPON crt_under
   {

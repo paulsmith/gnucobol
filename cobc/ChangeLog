@@ -2734,6 +2734,13 @@
 	* cobc.c: add -j after build run
 	  added short aliases for -free (-F) and -debug (-a)
 
+2015-07-07  Ron Norman <rjn@inglenet.com>
+
+	* parser.y, typeck.c, reserved.c, tree.h:
+	  Added CB_DEVICE_PRINTER with a new value to differentiate between
+	  PRINTER and SYSOUT. DISPLAY ... UPON PRINTER can be redirected via
+	  the env var COBPRINTER similar to what Micro Focus supports
+
 2015-07-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: Improved parsing of all literals including error messages,

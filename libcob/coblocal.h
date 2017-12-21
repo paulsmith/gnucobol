@@ -211,7 +211,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_config_cur;		/* Current runtime.cfg file being processed */
 	unsigned int	cob_config_num;		/* Number of different runtime.cfg files read */
 	char		**cob_config_file;	/* Keep all file names for later reporting */
-	char		*cob_trace_filename;
+	char		*cob_trace_filename;	/* File to write TRACE[ALL] information to */
 	char		*cob_user_name;
 	char		*cob_sys_lang;		/* LANG setting from env */
 	char		*cob_sys_term;		/* TERM setting from env */
@@ -260,6 +260,16 @@ typedef struct __cob_settings {
 
 	/* reportio.c */
 	unsigned int 	cob_col_just_lrc;	/* Justify data in column LEFT/RIGHT/CENTER */
+
+	/* termio.c */
+	char 		*cob_printer;		/* DISPLAY UPON PRINTER destination */
+	char		*cob_display_print;	/* File name for DISPLAY UPON PRINTER */
+
+	/* common.c */
+	char		external_trace_file;	/* use external FILE * for TRACE[ALL] */
+	char		external_display_print_file;	/* use external FILE * for DISPLAY UPON PRINTER */
+	FILE		*cob_trace_file;		/* FILE* to write TRACE[ALL] information to */
+	FILE		*cob_display_print_file;	/* FILE* to write DISPLAY UPON PRINTER information to */
 } cob_settings;
 
 

@@ -216,7 +216,6 @@ static const char		*cob_current_section = NULL;
 static const char		*cob_current_paragraph = NULL;
 static const char		*cob_source_file = NULL;
 static const char		*cob_source_statement = NULL;
-static FILE			*cob_trace_file = NULL;
 static unsigned int		cob_source_line = 0;
 
 #ifdef COB_DEBUG_LOG
@@ -353,6 +352,8 @@ static struct config_tbl gc_conf[] = {
 #ifdef  WITH_DB
 	{"DB_HOME", "db_home", 			NULL, 	NULL, GRP_FILE, ENV_FILE, SETPOS (bdb_home)},
 #endif
+	{"COBPRINTER", "printer",		NULL,	NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_printer)},
+	{"COB_DISPLAY_PRINTER", "display_printer",		NULL,	NULL, GRP_SCREEN, ENV_STR,SETPOS (cob_display_print)},
 	{"COB_LEGACY", "legacy", 			NULL, 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_legacy)},
 	{"COB_EXIT_WAIT", "exit_wait", 		"1", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_exit_wait)},
 	{"COB_EXIT_MSG", "exit_msg", 		_("end of program, please press a key to exit"), NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_exit_msg)},
@@ -519,7 +520,9 @@ cob_terminate_routines (void)
 	}
 
 #ifdef COB_DEBUG_LOG
-	if (cob_debug_file && cob_debug_file != cob_trace_file) {
+	if (cob_debug_file
+	&& !cobsetptr->external_trace_file
+	&& cob_debug_file != cob_trace_file) {
 		if(cob_debug_file_name != NULL
 		&& ftell(cob_debug_file) == 0) {
 			fclose (cob_debug_file);
@@ -532,9 +535,11 @@ cob_terminate_routines (void)
 	cob_debug_file = NULL;
 #endif
 
-	if (cob_trace_file && cob_trace_file != stderr) {
-		fclose (cob_trace_file);
-		cob_trace_file = NULL;
+	if (cobsetptr->cob_trace_file 
+	&& !cobsetptr->external_trace_file
+	&& cobsetptr->cob_trace_file != stderr) {
+		fclose (cobsetptr->cob_trace_file);
+		cobsetptr->cob_trace_file = NULL;
 	}
 
 	cob_exit_screen ();
@@ -1262,17 +1267,18 @@ cob_memcpy (cob_field *dst, const void *src, const size_t size)
 static void
 cob_check_trace_file (void)
 {
-	if (!cobsetptr->cob_trace_filename) {
-		cob_trace_file = stderr;
+	if (!cobsetptr->cob_trace_filename
+	 && !cobsetptr->cob_trace_file) {
+		cobsetptr->cob_trace_file = stderr;
 		return;
 	}
 	if (!cobsetptr->cob_unix_lf) {
-		cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
+		cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
 	} else {
-		cob_trace_file = fopen (cobsetptr->cob_trace_filename, "wb");
+		cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "wb");
 	}
-	if (!cob_trace_file) {
-		cob_trace_file = stderr;
+	if (!cobsetptr->cob_trace_file) {
+		cobsetptr->cob_trace_file = stderr;
 	}
 }
 
@@ -1654,30 +1660,26 @@ cob_set_location (const char *sfile, const unsigned int sline,
 		cob_source_statement = cstatement;
 	}
 	if (cobsetptr->cob_line_trace) {
-		if (!cob_trace_file) {
+		if (!cobsetptr->cob_trace_file) {
 			cob_check_trace_file ();
-			/* silence warnings */
-			if (!cob_trace_file) {
-				return;
-			}
 		}
 		if (!cob_last_sfile || strcmp (cob_last_sfile, sfile)) {
 			if (cob_last_sfile) {
 				cob_free ((void *)cob_last_sfile);
 			}
 			cob_last_sfile = cob_strdup (sfile);
-			fprintf (cob_trace_file, "Source :    '%s'\n", sfile);
+			fprintf (cobsetptr->cob_trace_file, "Source :    '%s'\n", sfile);
 		}
 		if (COB_MODULE_PTR->module_name) {
 			s = COB_MODULE_PTR->module_name;
 		} else {
 			s = "Unknown";
 		}
-		fprintf (cob_trace_file,
+		fprintf (cobsetptr->cob_trace_file,
 			 "Program-Id: %-16s Statement: %-21.21s  Line: %u\n",
 			 s, cstatement ? (char *)cstatement : "Unknown",
 			 sline);
-		fflush (cob_trace_file);
+		fflush (cobsetptr->cob_trace_file);
 	}
 }
 
@@ -1688,9 +1690,8 @@ cob_trace_section (const char *para, const char *source, const int line)
 	const char	*s;
 
 	if (cobsetptr->cob_line_trace) {
-		if (!cob_trace_file) {
+		if (!cobsetptr->cob_trace_file) {
 			cob_check_trace_file ();
-			if (!cob_trace_file) return; /* silence warnings */
 		}
 		if (source &&
 		    (!cob_last_sfile || strcmp (cob_last_sfile, source))) {
@@ -1698,20 +1699,20 @@ cob_trace_section (const char *para, const char *source, const int line)
 				cob_free ((void *)cob_last_sfile);
 			}
 			cob_last_sfile = cob_strdup (source);
-			fprintf (cob_trace_file, "Source:     '%s'\n", source);
+			fprintf (cobsetptr->cob_trace_file, "Source:     '%s'\n", source);
 		}
 		if (COB_MODULE_PTR->module_name) {
 			s = COB_MODULE_PTR->module_name;
 		} else {
 			s = "Unknown";
 		}
-		fprintf (cob_trace_file, "Program-Id: %-16s ", s);
+		fprintf (cobsetptr->cob_trace_file, "Program-Id: %-16s ", s);
 		if (line) {
-			fprintf (cob_trace_file, "%-34.34sLine: %d\n", para, line);
+			fprintf (cobsetptr->cob_trace_file, "%-34.34sLine: %d\n", para, line);
 		} else {
-			fprintf (cob_trace_file, "%s\n", para);
+			fprintf (cobsetptr->cob_trace_file, "%s\n", para);
 		}
-		fflush (cob_trace_file);
+		fflush (cobsetptr->cob_trace_file);
 	}
 }
 
@@ -5597,7 +5598,13 @@ get_config_val (char *value, int pos, char *orgvalue)
 	/* TO-DO: Consolidate copy-and-pasted code! */
 	} else if ((data_type & ENV_STR)) {	/* String stored as a string */
 		memcpy (&str, data, sizeof (char *));
-		if (str == NULL)
+		if (data_loc == offsetof (cob_settings, cob_display_print)
+		 && cobsetptr->external_display_print_file) 
+			strcpy (value, "set by cob_set_runtime_option");
+		else if (data_loc == offsetof (cob_settings, cob_trace_filename)
+		      && cobsetptr->external_trace_file) 
+			strcpy (value, "set by cob_set_runtime_option");
+		else if (str == NULL)
 			sprintf (value, "%s", "not set");
 		else
 			sprintf (value, "'%s'", str);
@@ -6975,6 +6982,57 @@ cob_init (const int argc, char **argv)
 	}
 	/* The above must be last in this function as we do early return */
 	/* from certain ifdef's */
+}
+
+/*
+ * Set special runtime options:
+ * Currently this is only FILE * for trace and printer output
+ * or to reload the runtime configuration after changing environment
+ */
+void
+cob_set_runtime_option (int opt, void *p)
+{
+	switch (opt) {
+	case COB_SET_RUNTIME_TRACE_FILE:
+		cobsetptr->cob_trace_file = (FILE *)p;
+		if (p)
+			cobsetptr->external_trace_file = 1;
+		else
+			cobsetptr->external_trace_file = 0;
+		break;
+	case COB_SET_RUNTIME_DISPLAY_PRINTER_FILE:
+		cobsetptr->cob_display_print_file = (FILE *)p;
+		if (p)
+			cobsetptr->external_display_print_file = 1;
+		else
+			cobsetptr->external_display_print_file = 0;
+		break;
+	case COB_SET_RUNTIME_RESCAN_ENV:
+		cob_rescan_env_vals ();
+		break;
+	default:
+		cob_runtime_error (_("%s called with unknown option: %d"),
+			"cob_set_runtime_option", opt);
+	}
+	return;
+}
+
+/*
+ * Return current value of special runtime options
+ */
+void *
+cob_get_runtime_option (int opt)
+{
+	switch(opt) {
+	case COB_SET_RUNTIME_TRACE_FILE:
+		return (void*)cobsetptr->cob_trace_file;
+	case COB_SET_RUNTIME_DISPLAY_PRINTER_FILE:
+		return (void*)cobsetptr->cob_display_print_file;
+	default:
+		cob_runtime_error (_("%s called with unknown option: %d"),
+			"cob_get_runtime_option", opt);
+	}
+	return NULL;
 }
 
 /******************************/

@@ -974,6 +974,30 @@ cc -o main main.o @`{}cob-config --libs@`{}
 @end example
 
 @node Static C to COBOL, Dynamic C to COBOL, Main C program, C interface
+@subsection Redirecting output to a (FILE *)
+From a module written in C you may call cob_set_runtime_option to set the exact (FILE *) which trace
+data is to be written to. In common.h is the following:
+@example
+#define COB_SET_RUNTIME_TRACE_FILE              0       /* 'p' is  FILE *  */
+#define COB_SET_RUNTIME_DISPLAY_PRINTER_FILE    1       /* 'p' is  FILE *  */
+#define COB_SET_RUNTIME_RESCAN_ENV              2       /* rescan environment variables */
+COB_EXPIMP void cob_set_runtime_option(int opt, void *p);    
+@end example
+So from you C code you can tell the GnuCOBOL runtime to redirect TRACE output by:
+@example
+cob_set_runtime_option(COB_SET_RUNTIME_TRACE_FILE, (void*)((FILE*)myfd));
+@end example
+You could also redirect all DISPLAY UPON PRINTER output to a file by:
+@example
+cob_set_runtime_option(COB_SET_RUNTIME_DISPLAY_PRINTER_FILE, (void*)((FILE*)myfd));
+@end example
+
+Another routine can be used to return the current value of the option.
+@example
+COB_EXPIMP void *cob_get_runtime_option(int opt);    
+@end example
+
+
 @subsection Static linking with COBOL programs
 
 Let's call the following COBOL module from a C program:

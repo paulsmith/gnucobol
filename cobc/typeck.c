@@ -6912,6 +6912,8 @@ cb_build_display_mnemonic (cb_tree x)
 		return cb_int0;
 	case CB_DEVICE_SYSERR:
 		return cb_int1;
+	case CB_DEVICE_PRINTER:
+		return cb_int2;
 	default:
 		cb_error_x (x, _("'%s' is not an output device"), CB_NAME (x));
 		return cb_int0;
@@ -6945,6 +6947,12 @@ cb_build_display_name (cb_tree x)
 					_("'%s' is not defined in SPECIAL-NAMES"), name);
 			}
 			return cb_int1;
+		case CB_DEVICE_PRINTER:
+			if (!cb_relaxed_syntax_checks) {
+				cb_warning_x (COBC_WARN_FILLER, x,
+					_("'%s' is not defined in SPECIAL-NAMES"), name);
+			}
+			return cb_int2;
 		default:
 			cb_error_x (x, _("'%s' is not an output device"), name);
 		}

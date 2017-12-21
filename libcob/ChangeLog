@@ -739,6 +739,13 @@
 	* call.c (cob_call): fr #101 - allow more parameters for CALL
 	  (COB_MAX_FIELD_PARAMS to be one of 16/36/56/76/96)
 
+2016-01-01 Ron Norman <rjn@inglenet.com>
+
+	* common.c (cob_set_runtime_option, cob_get_runtime_option), common.h,
+	  coblocal.h, termio.c: added cob_set_runtime_option / cob_get_runtime_option
+	  to allow TRACE and/or DISPLAY UPON PRINTER output to be redirected
+	  to a specific (FILE*)
+
 2015-12-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.h: added COB_SCREEN_GRID.
@@ -855,6 +862,16 @@
 
 	* call.c (cob_init_call): Don't add the current directory "." to resolve_path
 	  if it's already set (either via runtime configuration or default value)
+
+2015-07-07  Ron Norman
+
+	* DISPLAY ... UPON PRINTER can be redirected via
+	  the env var COBPRINTER similar to what Micro Focus supports
+	  cob_display will do a popen of whatever COBPRINTER is defined
+	  In addition COB_DISPLAY_PRINTER can be used as a file name and
+	  cob_display will do an fopen "a" and append to that file
+	  termio.c, common.c changed 
+	* fileio.c fixed to avoid core dump when COB_SYNC and using BDB
 
 2015-07-07  Ron Norman <rjn@inglenet.com>
 

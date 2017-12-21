@@ -7134,3 +7134,69 @@ B: 5305036.787798408
 ], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([DISPLAY UPON])
+AT_KEYWORDS([DISPLAY])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           PRINTER IS PRINTER.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       PROCEDURE DIVISION.
+       DISPLAY "This is sent to CONSOLE" UPON CONSOLE.
+       DISPLAY "This is sent to SYSERR" UPON SYSERR.
+       DISPLAY "This is sent to PRINTER" UPON PRINTER.
+       DISPLAY "This is also sent to CONSOLE" UPON CONSOLE.
+       DISPLAY "This is also sent to SYSERR" UPON SYSERR.
+       DISPLAY "This is also sent to PRINTER" UPON PRINTER.
+       STOP RUN RETURNING 0.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is sent to PRINTER
+This is also sent to CONSOLE
+This is also sent to PRINTER
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
+])
+
+AT_CHECK([COBPRINTER='cat >>prt.log' \
+$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is also sent to CONSOLE
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
+])
+
+AT_CHECK([COB_DISPLAY_PRINTER='prt.log' \
+$COBCRUN_DIRECT ./prog], [0],
+[This is sent to CONSOLE
+This is also sent to CONSOLE
+],
+[This is sent to SYSERR
+This is also sent to SYSERR
+])
+
+AT_CAPTURE_FILE(./prt.log)
+
+AT_DATA([reference],
+[This is sent to PRINTER
+This is also sent to PRINTER
+This is sent to PRINTER
+This is also sent to PRINTER
+])
+
+AT_CHECK([diff reference prt.log], [0])
+
+AT_CLEANUP
