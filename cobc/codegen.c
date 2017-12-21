@@ -3733,47 +3733,68 @@ output_funcall (cb_tree x)
 		case 'I':	/* Initiate REPORT */
 			r = CB_REPORT(CB_VALUE(p->argv[0]));
 			if(r->t_lines) {
-				output (" /* Page Limit is %s */\n",cb_name (r->t_lines));
+				output_line ("/* Page Limit is %s */",cb_name (r->t_lines));
+				output_prefix ();
 				output ("%s%s.def_lines = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_lines);
 				output (";\n");
 			}
 			if(r->t_columns) {
-				output (" /* Page Limit is %s */\n",cb_name (r->t_columns));
+				output_line ("/* Page Limit is %s */",cb_name (r->t_columns));
+				output_prefix ();
 				output ("%s%s.def_cols = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_columns);
 				output (";\n");
 			}
 			if(r->t_heading) {
-				output (" /* Heading is %s */\n",cb_name (r->t_heading));
+				output_line ("/* Heading is %s */",cb_name (r->t_heading));
+				output_prefix ();
 				output ("%s%s.def_heading = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_heading);
 				output (";\n");
 			}
 			if(r->t_footing) {
-				output (" /* Footing is %s */\n",cb_name (r->t_footing));
+				output_line ("/* Footing is %s */",cb_name (r->t_footing));
+				output_prefix ();
 				output ("%s%s.def_footing = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_footing);
 				output (";\n");
 			}
 			if(r->t_first_detail) {
-				output (" /* First Detail is %s */\n",cb_name (r->t_first_detail));
+				output_line ("/* First Detail is %s */",cb_name (r->t_first_detail));
+				output_prefix ();
 				output ("%s%s.def_first_detail = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_first_detail);
 				output (";\n");
 			}
 			if(r->t_last_detail) {
-				output (" /* Last Detail is %s */\n",cb_name (r->t_last_detail));
+				output_line ("/* Last Detail is %s */",cb_name (r->t_last_detail));
+				output_prefix ();
 				output ("%s%s.def_last_detail = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_last_detail);
 				output (";\n");
 			}
 			if(r->t_last_control) {
-				output (" /* Last Control is %s */\n",cb_name (r->t_last_control));
+				output_line ("/* Last Control is %s */",cb_name (r->t_last_control));
+				output_prefix ();
 				output ("%s%s.def_last_control = ", CB_PREFIX_REPORT, r->cname);
 				output_integer(r->t_last_control);
 				output (";\n");
 			}
+			if (r->code_clause) {
+				output_prefix ();
+				output ("%s%s.code_is = (char*)", CB_PREFIX_REPORT, r->cname);
+				output_data (r->code_clause);
+				output (";\n");
+				output_prefix ();
+				output ("%s%s.code_len = ", CB_PREFIX_REPORT, r->cname);
+				output_size (r->code_clause);
+				output (";\n");
+				output_line ("%s%s.code_is_present = 1;", CB_PREFIX_REPORT, r->cname);
+			} else {
+				output_line ("%s%s.code_is_present = 0;", CB_PREFIX_REPORT, r->cname);
+			}
+			output_prefix ();
 			output ("cob_report_initiate (");
 			output_param (p->argv[0], 0);
 			output (")");

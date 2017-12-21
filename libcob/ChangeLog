@@ -1,4 +1,16 @@
 
+2017-12-21 Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add code_is_present flag to cob_report structure
+	* reportio.c: Output CODE value as fixed length field
+	              (Do not trim trailing spaces)
+
+2017-12-20 Ron Norman <rjn@inglenet.com>
+
+	* common.h: Add code_is, code_len to cob_report structure
+	* reportio.c: Output CODE value and chop lines based on 
+	              PAGE LIMIT nnn COLUMNS
+
 2017-12-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* strings.c, common.c, coblocal.h: cob_init_strings gets and stores

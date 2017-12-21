@@ -769,6 +769,40 @@ line_control_chg(cob_report *r, cob_report_line *l, cob_field *f)
 }
 
 /*
+ * Write one line of report 
+ */
+static void
+write_rec(cob_report *r, int opt)
+{
+	cob_file	*f = r->report_file;
+	int		num = opt & COB_WRITE_MASK;
+		
+	if (f->record->size > r->def_cols)	/* Truncate line if needed */
+		f->record->size = r->def_cols;
+
+	if (r->code_is_present
+	 && r->code_len > 0) {			/* Insert CODE IS value */
+		 if (f->file) {
+			 if (num > 1
+			 && (opt & COB_WRITE_LINES)) {
+				opt = (opt & ~COB_WRITE_MASK) | 1;
+				while (num > 0) {
+			 		fwrite(r->code_is, r->code_len, 1, (FILE*)f->file);
+					cob_write(f, f->record, opt, NULL, 0);
+					memset(f->record->data,' ',f->record->size);
+					num--;
+				}
+			 } else {
+			 	fwrite(r->code_is, r->code_len, 1, (FILE*)f->file);
+				cob_write(f, f->record, opt, NULL, 0);
+			 }
+		 }
+	} else {
+		cob_write(f, f->record, opt, NULL, 0);
+	}
+}
+
+/*
  * Write the Page Footing
  */
 static void
@@ -784,7 +818,7 @@ do_page_footing(cob_report *r)
 	report_line_type(r,r->first_line,COB_REPORT_PAGE_FOOTING);
 	memset(rec,' ',f->record_max);
 	if(r->curr_line < r->def_lines) {
-		cob_write(f, f->record, COB_WRITE_BEFORE|COB_WRITE_LINES|(r->def_lines-r->curr_line), NULL, 0);
+		write_rec(r, COB_WRITE_BEFORE|COB_WRITE_LINES|(r->def_lines-r->curr_line));
 		r->curr_line = r->def_lines;
 		r->incr_line = FALSE;
 	} else {
@@ -817,7 +851,7 @@ do_page_heading(cob_report *r)
 	&& r->curr_line <= r->def_lines
 	&& r->curr_line > r->def_heading) { 		/* Skip to end of page */
 		while(r->curr_line <= r->def_lines) {		
-			cob_write(f, f->record, opt, NULL, 0);
+			write_rec(r, opt);
 			r->curr_line++;
 		}
 		if(r->curr_line > r->def_lines)		/* Reset line to 1 */
@@ -830,14 +864,14 @@ do_page_heading(cob_report *r)
 	}
 	r->first_detail = FALSE;
 	while(r->curr_line < r->def_heading) {		/* Skip to Heading position on page */
-		cob_write(f, f->record, opt, NULL, 0);
+		write_rec(r, opt);
 		r->curr_line++;
 		saveLineCounter(r);
 	}
 	report_line_type(r,r->first_line,COB_REPORT_PAGE_HEADING);
 	memset(rec,' ',f->record_max);
 	while(r->curr_line < r->def_first_detail) {
-		cob_write(f, f->record, opt, NULL, 0);
+		write_rec(r, opt);
 		r->curr_line++;
 		saveLineCounter(r);
 	}
@@ -915,7 +949,7 @@ report_line(cob_report *r, cob_report_line *l)
 			DEBUG_LOG("rw",(" Line# %d of Page# %d; ",r->curr_line,r->curr_page));
 			DEBUG_LOG("rw",("Execute NEXT GROUP PLUS %d\n",r->next_value));
 			opt = COB_WRITE_BEFORE | COB_WRITE_LINES | (r->next_value);
-			cob_write(f, f->record, opt, NULL, 0);
+			write_rec(r, opt);
 			r->curr_line += r->next_value;
 			r->next_line_plus = FALSE;
 			bChkLinePlus = TRUE;
@@ -929,7 +963,7 @@ report_line(cob_report *r, cob_report_line *l)
 				do_page_heading(r);
 			}
 			while(r->curr_line < r->next_value) {
-				cob_write(f, f->record, opt, NULL, 0);
+				write_rec(r, opt);
 				r->curr_line++;
 			}
 			bChkLinePlus = TRUE;
@@ -956,7 +990,7 @@ report_line(cob_report *r, cob_report_line *l)
 				r->first_detail = FALSE;
 			}
 			while(r->curr_line < l->line) {
-				cob_write(f, f->record, opt, NULL, 0);
+				write_rec(r, opt);
 				r->curr_line++;
 			}
 		} else {
@@ -969,7 +1003,7 @@ report_line(cob_report *r, cob_report_line *l)
 			if(r->curr_line != r->def_first_detail
 			|| r->def_first_detail == 0) {
 				opt = COB_WRITE_BEFORE | COB_WRITE_LINES | (l->line - 1);
-				cob_write(f, f->record, opt, NULL, 0);
+				write_rec(r, opt);
 				r->curr_line += l->line - 1;
 			}
 		}
@@ -1056,7 +1090,7 @@ report_line(cob_report *r, cob_report_line *l)
 	}
 	if(rec) {
 		opt = COB_WRITE_BEFORE | COB_WRITE_LINES | 1;
-		cob_write(f, f->record, opt, NULL, 0);
+		write_rec(r, opt);
 		r->curr_line ++;
 		saveLineCounter(r);
 	}
@@ -1279,6 +1313,11 @@ cob_report_initiate(cob_report *r)
 		cob_set_exception (COB_EC_REPORT_ACTIVE);
 		return;
 	}
+	if (r->def_lines > 9999)
+		r->def_lines = 9999;
+	if (r->def_cols > 999
+	 || r->def_cols < 1)
+		r->def_cols = 999;
 	if((r->def_first_detail > 0 && !(r->def_first_detail >= r->def_heading))
 	|| (r->def_last_detail > 0 && !(r->def_last_detail >= r->def_first_detail))
 	|| (r->def_footing > 0 && !(r->def_footing >= r->def_heading))
