@@ -262,8 +262,8 @@ typedef struct __cob_settings {
 	unsigned int 	cob_col_just_lrc;	/* Justify data in column LEFT/RIGHT/CENTER */
 
 	/* termio.c */
-	char 		*cob_printer;		/* DISPLAY UPON PRINTER destination */
-	char		*cob_display_print;	/* File name for DISPLAY UPON PRINTER */
+	char 		*cob_display_print_pipe;		/* DISPLAY UPON PRINTER destination */
+	char		*cob_display_print_filename;	/* File name for DISPLAY UPON PRINTER */
 
 	/* common.c */
 	char		external_trace_file;	/* use external FILE * for TRACE[ALL] */

@@ -352,8 +352,9 @@ static struct config_tbl gc_conf[] = {
 #ifdef  WITH_DB
 	{"DB_HOME", "db_home", 			NULL, 	NULL, GRP_FILE, ENV_FILE, SETPOS (bdb_home)},
 #endif
-	{"COBPRINTER", "printer",		NULL,	NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_printer)},
-	{"COB_DISPLAY_PRINTER", "display_printer",		NULL,	NULL, GRP_SCREEN, ENV_STR,SETPOS (cob_display_print)},
+	{"COB_DISPLAY_PRINT_PIPE", "display_print_pipe",		NULL,	NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_display_print_pipe)},
+	{"COBPRINTER", "printer",		NULL,	NULL, GRP_HIDE, ENV_STR, SETPOS (cob_display_print_pipe)},
+	{"COB_DISPLAY_PRINT_FILE", "display_print_file",		NULL,	NULL, GRP_SCREEN, ENV_STR,SETPOS (cob_display_print_filename)},
 	{"COB_LEGACY", "legacy", 			NULL, 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_legacy)},
 	{"COB_EXIT_WAIT", "exit_wait", 		"1", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_exit_wait)},
 	{"COB_EXIT_MSG", "exit_msg", 		_("end of program, please press a key to exit"), NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_exit_msg)},
@@ -521,7 +522,7 @@ cob_terminate_routines (void)
 
 #ifdef COB_DEBUG_LOG
 	if (cob_debug_file
-	&& !cobsetptr->external_trace_file
+	&& !cobsetptr->cob_trace_file
 	&& cob_debug_file != cob_trace_file) {
 		if(cob_debug_file_name != NULL
 		&& ftell(cob_debug_file) == 0) {
@@ -1267,17 +1268,19 @@ cob_memcpy (cob_field *dst, const void *src, const size_t size)
 static void
 cob_check_trace_file (void)
 {
-	if (!cobsetptr->cob_trace_filename
-	 && !cobsetptr->cob_trace_file) {
-		cobsetptr->cob_trace_file = stderr;
+	if (cobsetptr->cob_trace_file) {
 		return;
 	}
-	if (!cobsetptr->cob_unix_lf) {
-		cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
+	if (cobsetptr->cob_trace_filename) {
+		if (!cobsetptr->cob_unix_lf) {
+			cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
+		} else {
+			cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "wb");
+		}
+		if (!cobsetptr->cob_trace_file) {
+			cobsetptr->cob_trace_file = stderr;
+		}
 	} else {
-		cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "wb");
-	}
-	if (!cobsetptr->cob_trace_file) {
 		cobsetptr->cob_trace_file = stderr;
 	}
 }
@@ -5598,7 +5601,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 	/* TO-DO: Consolidate copy-and-pasted code! */
 	} else if ((data_type & ENV_STR)) {	/* String stored as a string */
 		memcpy (&str, data, sizeof (char *));
-		if (data_loc == offsetof (cob_settings, cob_display_print)
+		if (data_loc == offsetof (cob_settings, cob_display_print_filename)
 		 && cobsetptr->external_display_print_file) 
 			strcpy (value, "set by cob_set_runtime_option");
 		else if (data_loc == offsetof (cob_settings, cob_trace_filename)
@@ -6990,15 +6993,11 @@ cob_init (const int argc, char **argv)
  * or to reload the runtime configuration after changing environment
  */
 void
-cob_set_runtime_option (int opt, void *p)
+cob_set_runtime_option (enum cob_runtime_option_switch opt, void *p)
 {
 	switch (opt) {
 	case COB_SET_RUNTIME_TRACE_FILE:
 		cobsetptr->cob_trace_file = (FILE *)p;
-		if (p)
-			cobsetptr->external_trace_file = 1;
-		else
-			cobsetptr->external_trace_file = 0;
 		break;
 	case COB_SET_RUNTIME_DISPLAY_PRINTER_FILE:
 		cobsetptr->cob_display_print_file = (FILE *)p;
@@ -7021,7 +7020,7 @@ cob_set_runtime_option (int opt, void *p)
  * Return current value of special runtime options
  */
 void *
-cob_get_runtime_option (int opt)
+cob_get_runtime_option (enum cob_runtime_option_switch opt)
 {
 	switch(opt) {
 	case COB_SET_RUNTIME_TRACE_FILE:

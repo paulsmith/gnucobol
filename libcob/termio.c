@@ -256,16 +256,16 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 		if (cobsetptr->cob_display_print_file) {
 			fp = cobsetptr->cob_display_print_file;
 		/* display to configured print file */
-		} else if (cobsetptr->cob_display_print != NULL) {
-			fp = fopen (cobsetptr->cob_display_print, "a");
+		} else if (cobsetptr->cob_display_print_filename != NULL) {
+			fp = fopen (cobsetptr->cob_display_print_filename, "a");
 			if (fp == NULL) {
 				fp = stderr;
 			} else {
 				close_fp = 1;
 			}
 		/* display to configured print command (piped) */
-		} else if (cobsetptr->cob_printer != NULL) {
-			fp = popen (cobsetptr->cob_printer, "w");
+		} else if (cobsetptr->cob_display_print_pipe != NULL) {
+			fp = popen (cobsetptr->cob_display_print_pipe, "w");
 			if (fp == NULL) {
 				fp = stderr;
 			} else {

@@ -7170,7 +7170,7 @@ This is also sent to PRINTER
 This is also sent to SYSERR
 ])
 
-AT_CHECK([COBPRINTER='cat >>prt.log' \
+AT_CHECK([COB_DISPLAY_PRINT_PIPE='cat >>prt.log' \
 $COBCRUN_DIRECT ./prog], [0],
 [This is sent to CONSOLE
 This is also sent to CONSOLE
@@ -7179,7 +7179,7 @@ This is also sent to CONSOLE
 This is also sent to SYSERR
 ])
 
-AT_CHECK([COB_DISPLAY_PRINTER='prt.log' \
+AT_CHECK([COB_DISPLAY_PRINT_FILE='prt.log' \
 $COBCRUN_DIRECT ./prog], [0],
 [This is sent to CONSOLE
 This is also sent to CONSOLE

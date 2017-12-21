@@ -2,15 +2,17 @@ NEWS - user visible changes				-*- outline -*-
 
 GnuCOBOL 3.0 to be released (201712xx)
 
-* REPORTWRITER module added
-* updated exception handling, GnuCOBOL now only cleans raised exceptions when
-  requested by SET LAST EXCEPTION TO OFF
+* New GnuCOBOL features
 
-* New configure option --enable-debug-log to allow internal
-  tracing of GnuCOBOL (intended for developers only) 
+** REPORTWRITER module added
 
+** DISPLAY ... UPON PRINTER may be redirected to an external command
+   (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
+   (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
 
-GnuCOBOL 2.3 to be released (201711xx)
+** C interface: new functions cob_set_runtime_option / cob_get_runtime_option
+   to set/get special runtime options (currently FILE * for trace and printer
+   output) or to reload the runtime configuration after changing environment
 
 * Changed cobc options:
 
@@ -20,6 +22,13 @@ GnuCOBOL 2.3 to be released (201711xx)
    Please report if you have a need for this option as it will be removed
    permanently in GnuCOBOL 3.1 otherwise.
 
+* Changes in the runtime
+
+** updated exception handling, GnuCOBOL now only cleans raised exceptions when
+   requested by SET LAST EXCEPTION TO OFF
+
+* New configure option --enable-debug-log to allow internal
+  tracing of GnuCOBOL (intended for developers only) 
 
 
 GnuCOBOL 2.2 released (20170906)

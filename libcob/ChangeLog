@@ -1,14 +1,23 @@
 
+2017-12-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, termio.c, coblocal.h: renamed setting COBPRINTER to
+	  COB_DISPLAY_PRINT_PIPE (with keeping an alias of COBPRINTER) and
+	  COB_DISPLAY_PRINTER to COB_DISPLAY_PRINT_FILE
+	* common.c (cob_set_runtime_option, cob_get_runtime_option), common.h:
+	  use enum cob_runtime_option_switch instead of anonymous int with
+	  possible values as defines
+
 2017-12-21 Ron Norman <rjn@inglenet.com>
 
-	* common.h: Add code_is_present flag to cob_report structure
-	* reportio.c: Output CODE value as fixed length field
-	              (Do not trim trailing spaces)
+	* common.h: add code_is_present flag to cob_report structure
+	* reportio.c: output CODE value as fixed length field
+	              (do not trim trailing spaces)
 
 2017-12-20 Ron Norman <rjn@inglenet.com>
 
-	* common.h: Add code_is, code_len to cob_report structure
-	* reportio.c: Output CODE value and chop lines based on 
+	* common.h: add code_is, code_len to cob_report structure
+	* reportio.c: output CODE value and chop lines based on 
 	              PAGE LIMIT nnn COLUMNS
 
 2017-12-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
