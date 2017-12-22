@@ -10752,7 +10752,9 @@ cb_emit_generate (cb_tree x)
 	|| f->report == NULL) {
 		cb_error_x (x, _("Data item is not part of a report"));
 	} else {
+#if 0	/* r is unused afterwards and parameter types doesn't match */
 		r = CB_REPORT (f->report);
+#endif
 		z = cb_build_reference (f->name);
 		word = CB_REFERENCE (z)->word;
 		z->category = CB_CATEGORY_UNKNOWN;

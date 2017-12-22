@@ -13229,7 +13229,6 @@ terminate_body:
   report_name
   {
 	begin_implicit_statement ();
-	begin_implicit_statement ();
 	if ($1 != cb_error_node) {
 	    cb_emit_terminate ($1);
 	}
