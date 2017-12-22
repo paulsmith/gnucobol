@@ -6724,7 +6724,6 @@ page_line_column:
 page_limit_cols:
   report_int_ident columns_or_cols
   {
-	CB_PENDING ("COLUMNS limit");
 	if (CB_LITERAL_P ($1)) {
 		current_report->columns = cb_get_int ($1);
 	} else {

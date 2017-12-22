@@ -504,10 +504,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [1], [],
-[prog.cob:16: warning: COLUMNS limit is not implemented
-prog.cob:19: error: duplicate HEADING clause
+[prog.cob:19: error: duplicate HEADING clause
 prog.cob:19: error: duplicate LINE LIMIT clause
-prog.cob:21: warning: COLUMNS limit is not implemented
 prog.cob:22: error: Cannot specify HEADING without number of lines on page
 ])
 AT_CLEANUP
