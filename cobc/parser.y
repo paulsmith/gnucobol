@@ -287,6 +287,7 @@ begin_implicit_statement (void)
 	new_statement->common = current_statement->common;
 	new_statement->name = current_statement->name;
 	new_statement->flag_in_debug = !!in_debugging;
+	new_statement->flag_implicit = 1;
 	current_statement = new_statement;
 	main_statement->body = cb_list_add (main_statement->body,
 					    CB_TREE (current_statement));

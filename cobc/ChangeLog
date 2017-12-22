@@ -1,4 +1,9 @@
 
+2017-12-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.h, parser.y (begin_implicit_statement), codegen.c (output_stmt):
+	  fixed duplicated trace code generation for implicit statements
+
 2017-12-21  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: For REPORT pass CODE value to report structure

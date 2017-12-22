@@ -6958,12 +6958,12 @@ output_stmt (cb_tree x)
 		output_line (";");
 		return;
 	}
+	/* LCOV_EXCL_START */
 	if (unlikely(x == cb_error_node)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected error_node parameter"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 	if (inside_check != 0) {
 		if (inside_stack[inside_check - 1] != 0) {
@@ -6975,13 +6975,15 @@ output_stmt (cb_tree x)
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_STATEMENT:
 		p = CB_STATEMENT (x);
-		/* Output source location as a comment */
-		if (p->name) {
+		/* note: p->name and x->sourcefile/line are always available here */
+
+		/* Output source location, but only if it isn't an implicit statement */
+		if (!p->flag_implicit) {
+			/* Output source location as a comment */
 			output_newline ();
 			output_line ("/* Line: %-10d: %-19.19s: %s */",
 				     x->source_line, p->name, x->source_file);
-		}
-		if (x->source_file) {
+			/* Output source location as code */
 			if (cb_flag_source_location) {
 				/* Output source location as code */
 				output_trace_info (x, p->name);
