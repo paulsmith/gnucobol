@@ -1342,17 +1342,7 @@ cb_get_int (const cb_tree x)
 		}
 	}
 #else
-	if (unlikely(size >= 5U)) {
-		if (l->sign < 0) {
-			s = "32768";
-		} else {
-			s = "32767";
-		}
-		if (size == 5U || memcmp (&l->data[i], s, (size_t)5) > 0) {
-			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
-			return INT_MAX;
-		}
-	}
+#error compiler maximum for INT seems to be 16bit
 #endif
 
 	val = 0;
