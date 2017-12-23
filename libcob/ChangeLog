@@ -1,4 +1,9 @@
 
+2017-12-22  Ron Norman <rjn@inglenet.com>
+
+	* numeric.c: fixes for FLOAT-DECIMAL-16/34 data types to raise
+	  SIZE ERROR condition when out of bounds
+
 2017-12-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, termio.c, coblocal.h: renamed setting COBPRINTER to
@@ -19,6 +24,12 @@
 	* common.h: add code_is, code_len to cob_report structure
 	* reportio.c: output CODE value and chop lines based on 
 	              PAGE LIMIT nnn COLUMNS
+	* numeric.c (cob_decimal_get_ieee64dec): Fix coding error
+	* numeric.c: Tidy up the cob_decimal_get/set routines
+	* numeric.c (cob_decimal_get_ieee64dec, cob_decimal_get_ieee128dec):
+	  adjust the scale until the number is within the allowed max number of
+	  digits so only if the scale is out of bounds will you get an OVERFLOW
+	  and then ON SIZE ERROR
 
 2017-12-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

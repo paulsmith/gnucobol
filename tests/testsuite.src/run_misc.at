@@ -9458,72 +9458,6 @@ My Dog's name is Piper;
 AT_CLEANUP
 
 
-AT_SETUP([FLOAT-DECIMAL])
-AT_KEYWORDS([Numeric runmisc FLOAT-DECIMAL-16 FLOAT-DECIMAL-34 COMP-2])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
-      ******************************************************************
-      *                                                                *
-      *  CALCULATIONS WITH 'FLOAT-DECIMAL-16'                          *
-      *                                                                *
-      ******************************************************************
-       DATA DIVISION.
-       WORKING-STORAGE SECTION.
-       01  CMP2                        COMP-2.
-       01  FD16                        USAGE FLOAT-DECIMAL-16.
-       01  FD34                        USAGE FLOAT-DECIMAL-34.
-
-       PROCEDURE DIVISION.
-       CND-000.
-           DISPLAY "--- FLOAT-DECIMAL-34 ---"
-           COMPUTE FD34 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " FD34
-
-           COMPUTE FD34 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " FD34
-
-           DISPLAY "    ..."
-           DISPLAY "--- FLOAT-DECIMAL-16 ---"
-           COMPUTE FD16 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " FD16 
-
-           COMPUTE FD16 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " FD16
-
-           DISPLAY "    ..."
-           DISPLAY "--- COMP-2 ---"
-           COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " CMP2 
-           COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " CMP2 
-           .
-
-       CND-999.
-           STOP RUN.
-           END PROGRAM prog.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[--- FLOAT-DECIMAL-34 ---
-A: 9216586861751152073732718894009216E-27
-B: 530503678779840848806366047745358E-26
-    ...
---- FLOAT-DECIMAL-16 ---
-A: 9216586861751152E-9
-B: 5305036787798408E-9
-    ...
---- COMP-2 ---
-A: 9216586.86175115
-B: 5305036.787798408
-], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([DISPLAY UPON])
 AT_KEYWORDS([DISPLAY])
 
@@ -9588,3 +9522,226 @@ This is also sent to PRINTER
 AT_CHECK([diff reference prt.log], [0])
 
 AT_CLEANUP
+
+
+AT_SETUP([FLOAT-DECIMAL w/o SIZE ERROR])
+AT_KEYWORDS([Numeric runmisc
+FLOAT-DECIMAL-16 FLOAT-DECIMAL-34 COMP-2
+DISPLAY COMPUTE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  CMP2                        COMP-2.
+       01  SV2                         COMP-2.
+       01  FD16                        USAGE FLOAT-DECIMAL-16.
+       01  FD34                        USAGE FLOAT-DECIMAL-34.
+       01  SV16                        USAGE FLOAT-DECIMAL-16.
+       01  SV34                        USAGE FLOAT-DECIMAL-34.
+
+       PROCEDURE DIVISION.
+       CND-000.
+           DISPLAY "--- FLOAT-DECIMAL-34 ---"
+           COMPUTE FD34 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " FD34
+
+           COMPUTE FD34 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " FD34
+           MOVE ZERO TO FD34.
+           COMPUTE FD34 = 1.0E3 / 2.1E0
+                   ON SIZE ERROR DISPLAY "Z: " FD34 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "Z: " FD34 " IS OK"
+           END-COMPUTE.
+
+           DISPLAY "    ..."
+           DISPLAY "--- FLOAT-DECIMAL-16 ---"
+           COMPUTE FD16 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " FD16 
+
+           COMPUTE FD16 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " FD16
+           MOVE ZERO TO FD16.
+           COMPUTE FD16 = 1.0E3 / 2.1E0
+                   ON SIZE ERROR DISPLAY "Z: " FD16 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "Z: " FD16 " IS OK"
+           END-COMPUTE.
+
+           DISPLAY "    ..."
+           DISPLAY "--- COMP-2 ---"
+           COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+           DISPLAY "A: " CMP2 
+           COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
+           DISPLAY "B: " CMP2 
+           MOVE ZERO TO CMP2.
+           COMPUTE CMP2 = 1.0E3 / 2.1E0
+                   ON SIZE ERROR DISPLAY "Z: " CMP2 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "Z: " CMP2 " IS OK"
+           END-COMPUTE.
+
+           DISPLAY "    ..."
+           DISPLAY "--- 99 + 1 / 3 ---"
+           MOVE -1 TO FD16, FD34, CMP2.
+           COMPUTE FD34 = 99 + 1 / 3
+                   ON SIZE ERROR DISPLAY "FD34: " FD34 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "FD34: " FD34 " IS OK"
+           END-COMPUTE.
+           COMPUTE FD16 = 99 + 1 / 3
+                   ON SIZE ERROR DISPLAY "FD16: " FD16 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "FD16: " FD16 " IS OK"
+           END-COMPUTE.
+           COMPUTE CMP2 = 99 + 1 / 3
+                   ON SIZE ERROR DISPLAY "CMP2: " CMP2 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "CMP2: " CMP2 " IS OK"
+           END-COMPUTE.
+
+           DISPLAY "    ..."
+           DISPLAY "--- 99 ---"
+           MOVE -1 TO FD16, FD34, CMP2.
+           COMPUTE FD34 = 99 
+                   ON SIZE ERROR DISPLAY "FD34: " FD34 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "FD34: " FD34 " IS OK"
+           END-COMPUTE.
+           COMPUTE FD16 = 99
+                   ON SIZE ERROR DISPLAY "FD16: " FD16 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "FD16: " FD16 " IS OK"
+           END-COMPUTE.
+           COMPUTE CMP2 = 99
+                   ON SIZE ERROR DISPLAY "CMP2: " CMP2 " SIZE ERROR"
+               NOT ON SIZE ERROR DISPLAY "CMP2: " CMP2 " IS OK"
+           END-COMPUTE.
+
+       CND-100-OK.
+           DISPLAY "    ..."
+           DISPLAY "--- Test overflow ---"
+           MOVE 9900000000000 TO FD16, FD34.
+           PERFORM 390 TIMES
+             MOVE FD16 TO SV16
+             COMPUTE FD16 = FD16 * 10
+                    ON SIZE ERROR GO TO CND-100-ERR
+             END-COMPUTE
+             IF FD16 < 9.0
+               DISPLAY "FD16: " FD16 " IS Wrong"
+               GO TO CND-100-ERR
+             END-IF
+           END-PERFORM.
+           DISPLAY "FD16: " FD16 " IS OK".
+           GO TO CND-200-OK.
+       CND-100-ERR.
+           DISPLAY "FD16: after " SV16 " SIZE ERROR".
+
+       CND-200-OK.
+           MOVE 9900000000000 TO FD16, FD34.
+           PERFORM 6500 TIMES
+             MOVE FD34 TO SV34
+             COMPUTE FD34 = FD34 * 10
+                    ON SIZE ERROR GO TO CND-200-ERR
+             END-COMPUTE
+             IF FD34 < 9.0
+               GO TO CND-200-ERR
+             END-IF
+           END-PERFORM.
+           DISPLAY "FD34: " FD34 " IS OK".
+           GO TO CND-300-OK.
+       CND-200-ERR.
+           DISPLAY "FD34: after " SV34 " SIZE ERROR".
+
+       CND-300-OK.
+           DISPLAY "    ..."
+           DISPLAY "--- Test underlow ---"
+           MOVE 0.000000099 TO FD16, FD34.
+           PERFORM 400 TIMES
+             MOVE FD16 TO SV16
+             COMPUTE FD16 = FD16 / 10
+                    ON SIZE ERROR GO TO CND-300-ERR
+             END-COMPUTE
+             IF FD16 = 0.0
+               GO TO CND-300-ERR
+             END-IF
+           END-PERFORM.
+           DISPLAY "FD16: " FD16 " IS OK".
+           GO TO CND-400-OK.
+       CND-300-ERR.
+           DISPLAY "FD16: after " SV16 " SIZE ERROR".
+
+       CND-400-OK.
+           MOVE 0.000000099 TO FD16, FD34.
+           PERFORM 6600 TIMES
+             MOVE FD34 TO SV34
+             COMPUTE FD34 = FD34 / 10.0
+                    ON SIZE ERROR GO TO CND-400-ERR
+             END-COMPUTE
+             IF FD34 = 0.0
+               GO TO CND-400-ERR
+             END-IF
+           END-PERFORM.
+           DISPLAY "FD34: " FD34 " IS OK".
+           GO TO CND-500-OK.
+       CND-400-ERR.
+           DISPLAY "FD34: after " SV34 " SIZE ERROR".
+
+       CND-500-OK.
+           MOVE 0.000000099 TO CMP2.
+           PERFORM 350 TIMES
+             MOVE CMP2 TO SV2
+             COMPUTE CMP2 = CMP2 / 10.0
+                    ON SIZE ERROR GO TO CND-500-ERR
+             END-COMPUTE
+             IF CMP2 = 0.0
+               GO TO CND-500-ERR
+             END-IF
+           END-PERFORM.
+           DISPLAY "CMP2: " CMP2 " IS OK".
+           GO TO CND-600-OK.
+       CND-500-ERR.
+           DISPLAY "CMP2: after " SV2 " SIZE ERROR".
+
+       CND-600-OK.
+
+       CND-999.
+           STOP RUN.
+           END PROGRAM prog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[--- FLOAT-DECIMAL-34 ---
+A: 9216586.861751152073732718894009216
+B: 5305036.78779840848806366047745358
+Z: 476.1904761904761904761904761904761 IS OK
+    ...
+--- FLOAT-DECIMAL-16 ---
+A: 9216586.861751152
+B: 5305036.787798408
+Z: 476.1904761904761 IS OK
+    ...
+--- COMP-2 ---
+A: 9216586.86175115
+B: 5305036.787798408
+Z: 476.1904761904761 IS OK
+    ...
+--- 99 + 1 / 3 ---
+FD34: 99.33333333333333333333333333333333 IS OK
+FD16: 99.33333333333333 IS OK
+CMP2: 99.33333333333333 IS OK
+    ...
+--- 99 ---
+FD34: 99 IS OK
+FD16: 99 IS OK
+CMP2: 99 IS OK
+    ...
+--- Test overflow ---
+FD16: after 99E369 SIZE ERROR
+FD34: after 99E6111 SIZE ERROR
+    ...
+--- Test underlow ---
+FD16: after 99E-398 SIZE ERROR
+FD34: after 99E-6176 SIZE ERROR
+CMP2: after 9.881312916824931E-324 SIZE ERROR
+], [])
+
+AT_CLEANUP
+

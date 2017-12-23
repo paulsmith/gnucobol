@@ -1485,13 +1485,11 @@ output_attr (const cb_tree x)
 				case CB_USAGE_DOUBLE:
 				case CB_USAGE_FLOAT:
 				case CB_USAGE_LONG_DOUBLE:
-#if	0	/* RXWRXW - Floating ind */
 				case CB_USAGE_FP_BIN32:
 				case CB_USAGE_FP_BIN64:
 				case CB_USAGE_FP_BIN128:
 				case CB_USAGE_FP_DEC64:
 				case CB_USAGE_FP_DEC128:
-#endif
 					flags |= COB_FLAG_IS_FP;
 					break;
 				default:
