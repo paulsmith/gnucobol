@@ -9745,3 +9745,30 @@ CMP2: after 9.881312916824931E-324 SIZE ERROR
 
 AT_CLEANUP
 
+
+AT_SETUP([EC-SIZE-ZERO-DIVIDE])
+AT_KEYWORDS([misc fundamental exception])
+
+# FIXME - see bug #223.
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 9.
+       01  y PIC 9.
+       
+       PROCEDURE DIVISION.
+           DIVIDE x BY 0 GIVING y
+           DISPLAY FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[EC-SIZE-ZERO-DIVIDE
+])
+AT_CLEANUP
