@@ -4911,8 +4911,8 @@ cob_sys_parameter_size (void *data)
 		n = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
 		if (n > 0 && n <= COB_MODULE_PTR->module_num_params) {
 			n--;
-			if (COB_MODULE_PTR->next &&
-			    COB_MODULE_PTR->next->cob_procedure_params[n]) {
+			if (COB_MODULE_PTR->next
+			 && COB_MODULE_PTR->next->cob_procedure_params[n]) {
 				return (int)COB_MODULE_PTR->next->cob_procedure_params[n]->size;
 			}
 		}
@@ -5064,6 +5064,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 int
 cob_sys_sleep (const void *data)
 {
+#define MAX_SLEEP_TIME 3600*24*7
 	int	n;
 
 	COB_UNUSED (data);
@@ -5072,11 +5073,14 @@ cob_sys_sleep (const void *data)
 
 	if (COB_MODULE_PTR->cob_procedure_params[0]) {
 		n = cob_get_int (COB_MODULE_PTR->cob_procedure_params[0]);
-		if (n > 0 && n < 3600*24*7) {
+		if (n > MAX_SLEEP_TIME) {
+			n = MAX_SLEEP_TIME;
+		}
+		if (n > 0) {
 #ifdef	_WIN32
-			Sleep (n*1000);
+			Sleep ((DWORD)(n*1000));
 #else
-			sleep ((unsigned int)n);
+			sleep (n);
 #endif
 		}
 	}

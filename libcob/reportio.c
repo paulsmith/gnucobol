@@ -170,14 +170,14 @@ cob_field_dup (cob_field *f, int incr)
 {
 	cob_field	temp;
 	cob_field	*fld = cob_malloc(sizeof(cob_field));
-	int		dsize = f->size + incr;
+	size_t		dsize = f->size + incr;
 
 	fld->size = dsize;
 	fld->data = cob_malloc((size_t)(dsize < COB_MAX_DIGITS ? COB_MAX_DIGITS : dsize) + 1);
 	fld->attr = f->attr;
 
 	temp.size = 1;
-	if(COB_FIELD_IS_NUMERIC(f)) {
+	if (COB_FIELD_IS_NUMERIC (f)) {
 		temp.data = (unsigned char*)"0";	/* MOVE ZERO to new field */
 		temp.attr = &const_num_attr;
 	} else {
@@ -777,7 +777,7 @@ write_rec(cob_report *r, int opt)
 	cob_file	*f = r->report_file;
 	int		num = opt & COB_WRITE_MASK;
 		
-	if (f->record->size > r->def_cols)	/* Truncate line if needed */
+	if (f->record->size > (unsigned int)r->def_cols)	/* Truncate line if needed */
 		f->record->size = r->def_cols;
 
 	if (r->code_is_present
@@ -887,7 +887,7 @@ static void
 print_field(cob_report_field *rf, char *rec)
 {
 	char	wrk[COB_SMALL_BUFF];
-	int	ln,k,i;
+	size_t	ln, k, i;
 
 	cob_field_to_string(rf->f, wrk, sizeof(wrk)-1);
 	wrk[COB_SMALL_MAX] = 0;	/* keep analyzer happy */
