@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <errno.h>
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
@@ -40,8 +41,8 @@
 
 /* Local variables */
 
-static cob_global		*cobglobptr;
-static cob_settings		*cobsetptr;
+static cob_global		*cobglobptr = NULL;
+static cob_settings		*cobsetptr = NULL;
 
 static const unsigned short	bin_digits[] =
 	{ 1, 3, 5, 8, 10, 13, 15, 17, 20 };
@@ -318,6 +319,243 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 	if (close_fp) {
 		fclose (fp);
 	}
+}
+
+static int
+is_field_display (cob_field *f)
+{
+	size_t	i;
+	for (i = 0; i < f->size; i++) {
+		if (f->data[i] < ' '
+		 || f->data[i] > 0x7F)
+			return 0;
+	}
+	return 1;
+}
+
+static void
+display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
+{
+	size_t	i, j, pos, lowv, highv, spacev, printv, delv, len, colsize;
+	char	wrk[200];
+
+	lowv = highv = spacev = printv = delv = 0;
+	colsize = max_width - indent - 2;
+	for (i = 0; i < f->size; i++) {
+		if (f->data[i] == 0x00) {
+			lowv++;
+			delv++;
+		} else if (f->data[i] == 0xFF) {
+			highv++;
+		} else if (f->data[i] == ' ') {
+			spacev++;
+			printv++;
+		} else if (f->data[i] >= ' '
+			&& f->data[i] <= 0x7F
+			&& isprint(f->data[i])) {
+			printv++;
+		} else if (f->data[i] == '\b'
+			|| f->data[i] == '\f'
+			|| f->data[i] == '\n'
+			|| f->data[i] == '\r'
+			|| f->data[i] == '\t') {
+			delv ++;
+		}
+	}
+	for (len = f->size; len > 0 && f->data[len-1] == ' '; len--);
+
+	if (spacev == f->size) {
+		fprintf(fp,"ALL SPACES");
+		return;
+	}
+	if (lowv == f->size) {
+		fprintf(fp,"ALL LOW-VALUES");
+		return;
+	}
+	if (highv == f->size) {
+		fprintf(fp,"ALL HIGH-VALUES");
+		return;
+	}
+
+	if (lowv > 0
+	 && (lowv+printv) == f->size) {
+		for (len = f->size; len > 0 && f->data[len-1] == 0x00; len--);
+		if ((len+lowv) == f->size) {
+			for (i=0; len > colsize; i+=colsize,len-=colsize) {
+				fprintf(fp,"'%.*s'\n%*s",(unsigned int)colsize,&f->data[i],indent," ");
+			}
+			if (len <= colsize) {
+				fprintf(fp,"'%.*s'",(unsigned int)len,&f->data[i]);
+			}
+			fprintf(fp,"\n%*s trailing LOW-VALUES",indent-8," ");
+			return;
+		}
+	}
+
+	if (printv == f->size) {
+		for (i=0; len > colsize; i+=colsize,len-=colsize) {
+			fprintf(fp,"'%.*s'\n%*s",(unsigned int)colsize,&f->data[i],indent," ");
+		}
+		if (len <= colsize) {
+			fprintf(fp,"'%.*s'",(unsigned int)len,&f->data[i]);
+			return;
+		}
+	}
+
+	if ((delv + printv) == f->size) {
+		for (i = 0; i < f->size; ) {
+			for (j=0; j < colsize && i < f->size; j++,i++) {
+				if (f->data[i] == '\0')
+					fprintf(fp,"\\0"), j++;
+				else if (f->data[i] == '\\')
+					fprintf(fp,"\\\\"), j++;
+				else if (f->data[i] == '\r')
+					fprintf(fp,"\\r"), j++;
+				else if (f->data[i] == '\n')
+					fprintf(fp,"\\n"), j++;
+				else if (f->data[i] == '\t')
+					fprintf(fp,"\\t"), j++;
+				else if (f->data[i] == '\b')
+					fprintf(fp,"\\b"), j++;
+				else if (f->data[i] == '\f')
+					fprintf(fp,"\\f"), j++;
+				else
+					fprintf(fp,"%c",f->data[i]);
+			}
+			if (i < f->size)
+				fprintf(fp,"\n%*s%5d : ",indent-8," ",(unsigned int)(i+1));
+		}
+		return;
+	}
+
+	if (colsize > sizeof(wrk)-1)
+		colsize = sizeof(wrk) - 1;
+	if (colsize > 9) {
+		colsize = colsize / 9;
+		colsize = colsize * 9;
+	}
+
+	for (i = 0; i < f->size; ) {
+		wrk[0] = 0;
+		pos = i + 1;
+		for (j=0; j < colsize && i < f->size; j+=2,i++) {
+			if (f->data[i] >= ' '
+			 && f->data[i] <= 0x7F) {
+				fprintf(fp," %c",f->data[i]);
+				sprintf (&wrk[j],"%02X",f->data[i]);
+			} else {
+				fprintf(fp,"  ");
+				sprintf (&wrk[j],"%02X",f->data[i]);
+			}
+			if ((j+2) < colsize
+			 && ((i+1) % 4) == 0
+			 && (i+1) < f->size) {
+				fprintf(fp," ");
+				j++;
+				wrk[j+1] = ' ';
+				wrk[j+2] = 0;
+			}
+		}
+		fprintf(fp,"\n%*s%5d x %s",indent-8," ",(unsigned int)pos,wrk);
+		if (i < f->size)
+			fprintf(fp,"\n%*s",indent," ");
+	}
+}
+
+static int	dump_null_adrs = 0;
+/* Display field for DUMP purposes */
+void
+cob_dump_field (const int level, const char *name, 
+		cob_field *fa, const int offset, const int indexes, ...)
+{
+	FILE	*fp = cobsetptr->cob_dump_file;
+	char	vname[64],lvlwrk[16];
+	va_list	ap;
+	int	idx, subscript, size, adjust, indent;
+	cob_field	f[1];
+
+	if (fp == NULL) {
+		if(cobsetptr->cob_trace_file != NULL) {
+			fp = cobsetptr->cob_trace_file;
+		} else if(cobsetptr->cob_dump_filename != NULL) {
+			fp = fopen(cobsetptr->cob_dump_filename, "a");
+			if(fp == NULL)
+				fp = stderr;
+			cobsetptr->cob_dump_file = fp;
+		} else {
+			fp = stderr;
+		}
+	}
+
+	if (level < 0) {	/* Special directive */
+		if (level == -1) {
+			fprintf(fp, "\n%s\n**********************\n",name);
+			dump_null_adrs = 0;
+		}
+	} else {
+		va_start (ap, indexes);
+		strcpy(vname,name);
+		memcpy(f,fa,sizeof(cob_field));
+		adjust = offset;
+		if (indexes > 0) {
+			strcat(vname," (");
+			for (idx = 1; idx <= indexes; idx++) {
+				subscript = va_arg (ap, int);
+				size = va_arg (ap, int);
+				adjust = adjust + (subscript * size);
+				if(idx > 1)
+					strcat(vname,",");
+				sprintf(&vname[strlen(vname)],"%d",subscript+1);
+			}
+			strcat(vname,")");
+		}
+		f->data += adjust;
+		if (level == 77
+		 && f->data != NULL)
+			dump_null_adrs = 0;
+		if (level == 77
+		 || level == 1) {
+			indent = 0;
+			sprintf(lvlwrk,"%02d",level);
+		} else {
+			indent = level / 2;
+			if (indent > 7)
+				indent = 7;
+			sprintf(lvlwrk,"%*s%02d",indent," ",level);
+		}
+		if (f->attr->type == COB_TYPE_GROUP) {
+			strcat(vname,".");
+			if (f->data == NULL) {
+				dump_null_adrs = 1;
+				fprintf(fp, "%-10s%-30s  <NULL> address\n",lvlwrk,vname);
+			} else {
+				fprintf(fp, "%-10s%-30s\n",lvlwrk,vname);
+				dump_null_adrs = 0;
+			}
+		} else if (dump_null_adrs) {
+			/* Skip printing as Group had no address */
+		} else {
+			fprintf(fp, "%-10s%-30s ",lvlwrk,vname);
+			if (strlen(vname) > 30)
+				fprintf(fp,"\n%-*s",41," ");
+			if (f->data == NULL) {
+				fprintf(fp," <NULL> address");
+			} else if (!is_field_display(f)
+				&& (f->attr->type == COB_TYPE_NUMERIC_EDITED
+				 || f->attr->type == COB_TYPE_NUMERIC_DISPLAY)) {
+				display_alnum_dump (f, fp, 41, cobsetptr->cob_dump_width);
+			} else if (f->attr->type == COB_TYPE_ALPHANUMERIC
+				|| f->attr->type == COB_TYPE_ALPHANUMERIC_EDITED
+				|| f->size > 39) {
+				display_alnum_dump (f, fp, 41, cobsetptr->cob_dump_width);
+			} else {
+				fprintf(fp," ");
+				display_common (f, fp);
+			}
+			fprintf(fp,"\n");
+		}
+	}
+	va_end (ap);
 }
 
 /* ACCEPT */

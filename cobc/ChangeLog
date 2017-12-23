@@ -299,6 +299,15 @@
 	* cobc.c: don't halt immediately on first PATH error during startup,
 	  postponed until command line arguments are processed
 
+2017-10-17  Ron Norman <rjn@inglenet.com>
+
+	Fixed bug #449 - debug should not imply trace
+	* cobc.c: change so -debug does NOT set -ftrace
+	* codegen.c: set module flags on entry to indicate if module
+	  was compiled with -debug or -ftrace[all] so that the module
+	  is not traced at runtime unless it had been compiled with that
+	  option
+
 2017-10-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c: refactored and improved variable names in external form
@@ -1130,8 +1139,8 @@
 2017-01-25  Ron Norman <rjn@inglenet.com>
 
 	* flag.def, cobc.h: new option -fdump=<scope> added (cb_flag_dump)
-	* cobc.h: added defines for values
 	* cobc.c: added code to set cb_flag_dump
+	* cobc.h: added defines for values
 	* codegen.c: added code to emit calls to new trace & dump routines
 
 2017-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

@@ -6,6 +6,11 @@ GnuCOBOL 3.0 to be released (201712xx)
 
 ** REPORTWRITER module added
 
+** Option to dump (partial) data of modules on abort.
+   Use new cobc option -fdump=[ALL|WS,LS,RD,FD,SC] to prepare the module
+   and optional use new runtime configuration options COB_DUMP_FILE and
+   COB_DUMP_WIDTH to adjust the dump.
+
 ** DISPLAY ... UPON PRINTER may be redirected to an external command
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
    (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
@@ -15,6 +20,10 @@ GnuCOBOL 3.0 to be released (201712xx)
    output) or to reload the runtime configuration after changing environment
 
 * Changed cobc options:
+
+** The option -debug (runtime checks) no longer implies -ftrace (option to
+   trace program flow of the generated module with COB_SET_TRACE).
+   You may specify -ftrace[all] along -debug if you want to use this feature.
 
 ** The option -fif-cutoff (option to change generated C sources to use
    a label + goto for nested if/else) was deactivated to allow the C compiler
@@ -26,6 +35,9 @@ GnuCOBOL 3.0 to be released (201712xx)
 
 ** updated exception handling, GnuCOBOL now only cleans raised exceptions when
    requested by SET LAST EXCEPTION TO OFF
+
+** The standard-format for program tracing was changed and is now adjustable
+   by the runtime configuration option COB_TRACE_FORMAT.
 
 * New configure option --enable-debug-log to allow internal
   tracing of GnuCOBOL (intended for developers only) 

@@ -5719,11 +5719,16 @@ AT_DATA([callee2c.cob], [
        EX. EXIT.
 ])
 
-AT_CHECK([$COBC -ftraceall callee1.cob], [0], [], [])
-AT_CHECK([$COBC callee2.cob], [0], [], [])
-AT_CHECK([$COBC -ftrace preload.cob], [0], [], [])
-AT_CHECK([$COBC -fsource-location callee2c.cob], [0], [], [])
-AT_CHECK([$COBC -x -o prog -ftraceall caller.cob], [0], [], [])
+AT_CHECK([COB_OLD_TRACE=y \
+$COBC -ftraceall callee1.cob], [0], [], [])
+AT_CHECK([COB_OLD_TRACE=y \
+$COBC callee2.cob], [0], [], [])
+AT_CHECK([COB_OLD_TRACE=y \
+$COBC -ftrace preload.cob], [0], [], [])
+AT_CHECK([COB_OLD_TRACE=y \
+$COBC -fsource-location callee2c.cob], [0], [], [])
+AT_CHECK([COB_OLD_TRACE=y \
+$COBC -x -o prog -ftraceall caller.cob], [0], [], [])
 AT_CHECK([COB_PHYSICAL_CANCEL=1 COB_PRE_LOAD=preload ./prog], [0], [],
 [Source :    'caller.cob'
 Program-Id: caller           Statement: MOVE                   Line: 7
@@ -5765,6 +5770,2389 @@ Program-Id: caller           Statement: CANCEL                 Line: 15
 Program-Id: caller           Statement: MOVE                   Line: 16
 Program-Id: caller           Statement: STOP RUN               Line: 17
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([Trace feature with subroutine])
+AT_KEYWORDS([Trace])
+
+AT_DATA([callsub.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. callsub.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 NUM-A     PIC 9(3) VALUE 399.
+       01 NUM-B     PIC 9(3) VALUE 211.
+       01 RSLT      PIC 9(5)V99.
+
+       LINKAGE SECTION.
+       01  n PIC 99.
+       
+       PROCEDURE DIVISION USING n.
+       MAIN-10.
+           ADD 1 TO n.
+           COMPUTE RSLT = ((NUM-A / (100.55 + -0.550)) 
+                         -  (NUM-B / (10.11 * 10 - 1.1)))
+                             * (220 / 2.2) * n.
+       END PROGRAM callsub.
+])
+
+AT_CHECK([$COMPILE_MODULE callsub.cob], [0], [],
+[])
+
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT OPTIONAL TSPFILE
+           ASSIGN TO "testisam"
+           ORGANIZATION INDEXED ACCESS DYNAMIC
+           RECORD KEY IS CM-CUST-NUM
+           ALTERNATE RECORD KEY IS CM-TELEPHONE WITH DUPLICATES
+           ALTERNATE RECORD KEY IS CM-DISK WITH DUPLICATES
+           FILE STATUS IS CUST-STAT.
+
+           SELECT TSTFILE
+           ASSIGN TO "testisam"
+           ORGANIZATION INDEXED ACCESS DYNAMIC
+           RECORD KEY IS TS-CUST-NUM
+           ALTERNATE RECORD KEY IS TS-TELEPHONE WITH DUPLICATES
+           ALTERNATE RECORD KEY IS TS-DISK WITH DUPLICATES
+           FILE STATUS IS CUST-STAT.
+
+           SELECT FLATFILE 
+           ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS RANDOM RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  TSPFILE
+           BLOCK CONTAINS 5 RECORDS.
+
+       01  TSPFL-RECORD.
+           05  TSPFL-REC.
+           10  CM-CUST-NUM.
+             15  CM-CUST-PRE                   PICTURE X(3).
+             15  CM-CUST-NNN                   PICTURE X(5).
+           10  CM-STATUS                       PICTURE X.
+           10  CM-COMPANY                      PICTURE X(25).
+           10  CM-ADDRESS-1                    PICTURE X(25).
+           10  CM-ADDRESS-2                    PICTURE X(25).
+           10  CM-ADDRESS-3                    PICTURE X(25).
+           10  CM-TELEPHONE                    PICTURE 9(10).
+           10  CM-DP-MGR                       PICTURE X(25).
+           10  CM-MACHINE                      PICTURE X(8).
+           10  CM-MEMORY                       PICTURE X(4).
+           10  CM-DISK                         PICTURE X(8).
+           10  CM-TAPE                         PICTURE X(8).
+           10  CM-NO-TERMINALS                 PICTURE 9(5).
+
+       FD  TSTFILE
+           BLOCK CONTAINS 5 RECORDS.
+
+       01  TSTFL-RECORD.
+           05  TSTFL-REC.
+           10  TS-CUST-NUM                     PICTURE X(8).
+           10  TS-STATUS                       PICTURE X.
+           10  TS-COMPANY                      PICTURE X(25).
+           10  TS-ADDRESS-1                    PICTURE X(25).
+           10  TS-ADDRESS-2                    PICTURE X(25).
+           10  TS-ADDRESS-3                    PICTURE X(25).
+           10  TS-TELEPHONE                    PICTURE 9(10).
+           10  TS-DP-MGR                       PICTURE X(25).
+           10  TS-MACHINE                      PICTURE X(8).
+           10  TS-MEMORY                       PICTURE X(4).
+           10  TS-DISK                         PICTURE X(8).
+           10  TS-TAPE                         PICTURE X(8).
+
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
+
+       WORKING-STORAGE SECTION.
+
+       01  CUST-STAT.
+           05  FILLER PICTURE XX.
+       77  MAX-SUB           VALUE  16         PICTURE 9(5) COMP SYNC.
+       77  CALL-NUM          VALUE  00         PICTURE 99.
+
+       01  TEST-DATA.
+
+         02  DATA-CUST-NUM-TBL.
+
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GIB00000".
+           05  FILLER PIC X(8) VALUE "H&J00000".
+           05  FILLER PIC X(8) VALUE "INC00000".
+           05  FILLER PIC X(8) VALUE "JOH00000".
+           05  FILLER PIC X(8) VALUE "KON00000".
+           05  FILLER PIC X(8) VALUE "LEW00000".
+           05  FILLER PIC X(8) VALUE "MOR00000".
+           05  FILLER PIC X(8) VALUE "NEW00000".
+           05  FILLER PIC X(8) VALUE "OLD00000".
+           05  FILLER PIC X(8) VALUE "PRE00000".
+
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 16.
+         02  DATA-COMPANY-TBL.
+
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GIBRALTER LIFE INSURANCE ".
+           05  FILLER PIC X(25) VALUE "H & J PLUMBING SUPPLIES  ".
+           05  FILLER PIC X(25) VALUE "INCREMENTAL BACKUP CORP. ".
+           05  FILLER PIC X(25) VALUE "JOHNSON BOATING SUPPLIES ".
+           05  FILLER PIC X(25) VALUE "KONFLAB PLASTIC PRODUCTS.".
+           05  FILLER PIC X(25) VALUE "LEWISTON GRAPHICS LTD.   ".
+           05  FILLER PIC X(25) VALUE "MORNINGSIDE CARPENTRY.   ".
+           05  FILLER PIC X(25) VALUE "NEW WAVE SURF SHOPS INC. ".
+           05  FILLER PIC X(25) VALUE "OLD TYME PIZZA MFG. CO.  ".
+           05  FILLER PIC X(25) VALUE "PRESTIGE OFFICE FURNITURE".
+
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 16.
+         02  DATA-ADDRESS-1-TBL.
+
+           05  FILLER PIC X(25) VALUE "123 MAIN STREET          ".
+           05  FILLER PIC X(25) VALUE "1090 2ND AVE. WEST       ".
+           05  FILLER PIC X(25) VALUE "1401 JEFFERSON BLVD.     ".
+           05  FILLER PIC X(25) VALUE "1620 ARIZONA WAY         ".
+           05  FILLER PIC X(25) VALUE "1184 EAST FIRST STREET   ".
+           05  FILLER PIC X(25) VALUE "114 JOHN F. KENNEDY AVE. ".
+           05  FILLER PIC X(25) VALUE "650 LIBERTY CRESCENT     ".
+           05  FILLER PIC X(25) VALUE "77 SUNSET BLVD.          ".
+           05  FILLER PIC X(25) VALUE "10908 SANTA MONICA BLVD. ".
+           05  FILLER PIC X(25) VALUE "1134 PARIS ROAD          ".
+           05  FILLER PIC X(25) VALUE "808 NORTHWEST MAIN ST.   ".
+           05  FILLER PIC X(25) VALUE "9904 QUEEN STREET        ".
+           05  FILLER PIC X(25) VALUE "1709 DUNDAS CRESCENT W.  ".
+           05  FILLER PIC X(25) VALUE "3240 MARIS AVENUE        ".
+           05  FILLER PIC X(25) VALUE "1705 WISCONSIN ROAD      ".
+           05  FILLER PIC X(25) VALUE "114A MAPLE GROVE         ".
+
+         02  DATA-ADDRESS-1 REDEFINES DATA-ADDRESS-1-TBL
+                                       PIC X(25) OCCURS 16.
+         02  DATA-ADDRESS-2-TBL.
+
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "SAN DIEGO ".
+           05  FILLER PIC X(10) VALUE "LOS RIOS  ".
+           05  FILLER PIC X(10) VALUE "MADISON   ".
+           05  FILLER PIC X(10) VALUE "WILBUR    ".
+           05  FILLER PIC X(10) VALUE "TOPEKA    ".
+           05  FILLER PIC X(10) VALUE "SEATTLE   ".
+           05  FILLER PIC X(10) VALUE "NEW JERSEY".
+           05  FILLER PIC X(10) VALUE "FORT WAYNE".
+           05  FILLER PIC X(10) VALUE "COLUMBUS  ".
+           05  FILLER PIC X(10) VALUE "RICHMOND  ".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+
+         02  DATA-ADDRESS-2 REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 16.
+         02  DATA-ADDRESS-3-TBL.
+
+           05  FILLER PIC X(10) VALUE "N.Y.      ".
+           05  FILLER PIC X(10) VALUE "GEORGIA   ".
+           05  FILLER PIC X(10) VALUE "D.C.      ".
+           05  FILLER PIC X(10) VALUE "CANADA    ".
+           05  FILLER PIC X(10) VALUE "CANADA    ".
+           05  FILLER PIC X(10) VALUE "CALIFORNIA".
+           05  FILLER PIC X(10) VALUE "NEW MEXICO".
+           05  FILLER PIC X(10) VALUE "WISCONSIN ".
+           05  FILLER PIC X(10) VALUE "DELAWARE  ".
+           05  FILLER PIC X(10) VALUE "KANSAS    ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "N.J.      ".
+           05  FILLER PIC X(10) VALUE "COLORADO  ".
+           05  FILLER PIC X(10) VALUE "OHIO      ".
+           05  FILLER PIC X(10) VALUE "VIRGINIA  ".
+           05  FILLER PIC X(10) VALUE "N.Y.      ".
+
+         02  DATA-ADDRESS-3 REDEFINES DATA-ADDRESS-3-TBL
+                                       PIC X(10) OCCURS 16.
+         02  DATA-TELEPHONE-TBL.
+
+           05  FILLER PIC 9(10) VALUE 3131234432.
+           05  FILLER PIC 9(10) VALUE 4082938498.
+           05  FILLER PIC 9(10) VALUE 8372487274.
+           05  FILLER PIC 9(10) VALUE 4169898509.
+           05  FILLER PIC 9(10) VALUE 5292398745.
+           05  FILLER PIC 9(10) VALUE 8009329492.
+           05  FILLER PIC 9(10) VALUE 6456445643.
+           05  FILLER PIC 9(10) VALUE 6546456333.
+           05  FILLER PIC 9(10) VALUE 3455445444.
+           05  FILLER PIC 9(10) VALUE 6456445643.
+           05  FILLER PIC 9(10) VALUE 7456434355.
+           05  FILLER PIC 9(10) VALUE 6554456433.
+           05  FILLER PIC 9(10) VALUE 4169898509.
+           05  FILLER PIC 9(10) VALUE 7534587453.
+           05  FILLER PIC 9(10) VALUE 8787458374.
+           05  FILLER PIC 9(10) VALUE 4169898509.
+
+         02  DATA-TELEPHONE REDEFINES DATA-TELEPHONE-TBL
+                                       PIC 9(10) OCCURS 16.
+         02  DATA-DP-MGR-TBL.
+
+           05  FILLER PIC X(20) VALUE "MR. DAVE HARRIS     ".
+           05  FILLER PIC X(20) VALUE "MS. JANICE SILCOX   ".
+           05  FILLER PIC X(20) VALUE "MR. ALLAN JONES     ".
+           05  FILLER PIC X(20) VALUE "MR. PETER MACKAY    ".
+           05  FILLER PIC X(20) VALUE "MRS. DONNA BREWER   ".
+           05  FILLER PIC X(20) VALUE "MR. MICHAEL SMYTHE  ".
+           05  FILLER PIC X(20) VALUE "MR. D.A. MORRISON   ".
+           05  FILLER PIC X(20) VALUE "MR. BRIAN PATTERSON ".
+           05  FILLER PIC X(20) VALUE "MR. DARRYL TOWNSEND ".
+           05  FILLER PIC X(20) VALUE "MS. VALERIE HARPER  ".
+           05  FILLER PIC X(20) VALUE "MR. FRED MILLER     ".
+           05  FILLER PIC X(20) VALUE "MR. DONALD FISCHER  ".
+           05  FILLER PIC X(20) VALUE "MR. STEVEN YOURDIN  ".
+           05  FILLER PIC X(20) VALUE "MS. Goldie Hawn     ".
+           05  FILLER PIC X(20) VALUE "MS. ALICE WINSTON   ".
+           05  FILLER PIC X(20) VALUE "MR. THOMAS JEFFERSON".
+
+         02  DATA-DP-MGR    REDEFINES DATA-DP-MGR-TBL
+                                       PIC X(20) OCCURS 16.
+         02  DATA-MACHINE-TBL.
+
+           05  FILLER PIC X(8) VALUE "UNI-9030".
+           05  FILLER PIC X(8) VALUE "UNI-9040".
+           05  FILLER PIC X(8) VALUE "UNI-80/3".
+           05  FILLER PIC X(8) VALUE "UNI-80/5".
+           05  FILLER PIC X(8) VALUE "UNI-80/6".
+           05  FILLER PIC X(8) VALUE "UNI-80/6".
+           05  FILLER PIC X(8) VALUE "UNI-80/6".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-80/8".
+           05  FILLER PIC X(8) VALUE "UNI-9040".
+           05  FILLER PIC X(8) VALUE "UNI-9040".
+
+         02  DATA-MACHINE   REDEFINES DATA-MACHINE-TBL
+                                       PIC X(8) OCCURS 16.
+         02  DATA-NO-TERMINALS-TBL.
+
+           05  FILLER PIC 9(3) COMP-3 VALUE 85.
+           05  FILLER PIC 9(3) COMP-3 VALUE 34.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 45.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 107.
+           05  FILLER PIC 9(3) COMP-3 VALUE 67.
+           05  FILLER PIC 9(3) COMP-3 VALUE 32.
+           05  FILLER PIC 9(3) COMP-3 VALUE 16.
+           05  FILLER PIC 9(3) COMP-3 VALUE 34.
+           05  FILLER PIC 9(3) COMP-3 VALUE 128.
+           05  FILLER PIC 9(3) COMP-3 VALUE 64.
+           05  FILLER PIC 9(3) COMP-3 VALUE 110.
+           05  FILLER PIC 9(3) COMP-3 VALUE 324.
+           05  FILLER PIC 9(3) COMP-3 VALUE 124.
+           05  FILLER PIC 9(3) COMP-3 VALUE 86.
+
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 16.
+
+       01  WORK-AREA.
+           05  REC-NUM                         PICTURE 9(6) VALUE 0.
+           05  REC-MAX                         PICTURE 9(6) VALUE 10.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5 7 9 10 11.
+
+           05  TSPFL-KEY                       PICTURE X(8).
+
+       PROCEDURE DIVISION.
+
+       MAINFILE.
+           OPEN OUTPUT TSPFILE
+           CLOSE TSPFILE.
+
+           OPEN I-O TSPFILE
+           MOVE '99' TO CUST-STAT
+           READ  TSPFILE NEXT RECORD WITH NO LOCK
+           IF CUST-STAT NOT = "10"
+               DISPLAY "Error " CUST-STAT " on read of empty file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           MOVE LOW-VALUES                     TO TSPFL-RECORD.
+           START TSPFILE KEY GREATER THAN CM-CUST-NUM
+           IF CUST-STAT NOT = "23"
+               DISPLAY "Error " CUST-STAT " starting empty file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           READ  TSPFILE NEXT RECORD WITH NO LOCK
+           IF CUST-STAT NOT = "46"
+               DISPLAY "Error " CUST-STAT " start/read of empty file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           DISPLAY "OK: Operations on empty file"
+           CLOSE TSPFILE.
+
+           PERFORM LOADFILE.
+           PERFORM LISTFILE.
+
+
+
+          *> check that multiple empty lines are handled correctly
+
+
+
+
+
+
+
+           STOP RUN.
+
+       LOADFILE.
+           DISPLAY "Loading sample data file."
+                            UPON CONSOLE.
+
+           OPEN OUTPUT TSPFILE
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT
+               " opening 'testisam' file" UPON CONSOLE
+               STOP RUN
+           END-IF.
+
+           PERFORM 1000-LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1
+                          UNTIL SUB > MAX-SUB.
+
+           DISPLAY "Sample data file load complete."
+                            UPON CONSOLE.
+           CLOSE TSPFILE.
+
+      *---------------------------------------------------------------*
+      *         LOAD A RECORD FROM DATA TABLES                        *
+      *---------------------------------------------------------------*
+
+       1000-LOAD-RECORD.
+
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE CM-CUST-NUM                  TO TSPFL-KEY.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-ADDRESS-1     (SUB)     TO CM-ADDRESS-1.
+           MOVE DATA-ADDRESS-2     (SUB)     TO CM-ADDRESS-2.
+           MOVE DATA-ADDRESS-3     (SUB)     TO CM-ADDRESS-3.
+           MOVE DATA-TELEPHONE     (SUB)     TO CM-TELEPHONE.
+           MOVE DATA-DP-MGR        (SUB)     TO CM-DP-MGR.
+           MOVE DATA-MACHINE       (SUB)     TO CM-MACHINE.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK
+               MOVE "1600 BPI"               TO CM-TAPE
+               MOVE "1MEG"                   TO CM-MEMORY
+           ELSE
+               MOVE "8470"                   TO CM-DISK
+               MOVE "6250 BPI"               TO CM-TAPE
+               MOVE "3MEG"                   TO CM-MEMORY.
+
+           WRITE TSPFL-RECORD.
+           IF CUST-STAT NOT = "00"
+           AND CUST-STAT NOT = "02"
+               DISPLAY "Load - Key: " TSPFL-KEY ", Status: " CUST-STAT
+                                 UPON CONSOLE.
+
+       LISTFILE.
+           DISPLAY "LIST SAMPLE FILE" UPON CONSOLE.
+           OPEN INPUT TSTFILE
+           MOVE SPACES                       TO TSTFL-RECORD.
+           MOVE "PRE00000" TO CM-CUST-NUM.
+           START TSTFILE KEY GREATER THAN OR EQUAL TO TS-CUST-NUM
+           READ  TSTFILE NEXT RECORD
+           READ  TSTFILE NEXT RECORD
+           CLOSE TSTFILE.
+
+           MOVE ZERO TO REC-NUM
+           OPEN INPUT TSPFILE
+           IF CUST-STAT NOT = "00"
+               DISPLAY "ERROR " CUST-STAT " OPENING INPUT FILE"
+                                             UPON CONSOLE
+               STOP RUN
+           END-IF.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE "PRE00000" TO CM-CUST-NUM.
+           START TSPFILE KEY GREATER THAN OR EQUAL TO CM-CUST-NUM
+           READ  TSPFILE NEXT RECORD
+           READ  TSPFILE NEXT RECORD
+
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE "DEL00000" TO CM-CUST-NUM.
+           START TSPFILE KEY GREATER THAN CM-CUST-NUM
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " starting file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           READ  TSPFILE NEXT RECORD WITH NO LOCK
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on 1st read of file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           PERFORM UNTIL CUST-STAT NOT = "00"
+                      OR REC-NUM > REC-MAX
+               DISPLAY "Key: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+               CALL "callsub" USING CALL-NUM
+               READ TSPFILE NEXT RECORD
+                    AT END
+                        MOVE "99" TO CUST-STAT
+                END-READ
+                ADD 1 TO REC-NUM
+           END-PERFORM
+           IF CUST-STAT = "99"
+               DISPLAY "Hit End of File: " CALL-NUM UPON CONSOLE
+           ELSE
+               DISPLAY "Stop read after: " CALL-NUM UPON CONSOLE
+           END-IF.
+
+           DISPLAY "LIST SAMPLE FILE DESCENDING" UPON CONSOLE.
+           MOVE ZERO TO REC-NUM
+           START TSPFILE KEY LESS THAN CM-CUST-NUM
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " starting file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           READ  TSPFILE PREVIOUS RECORD WITH NO LOCK
+           IF CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on 1st read of file"
+                                UPON CONSOLE
+               STOP RUN
+           END-IF.
+           PERFORM UNTIL CUST-STAT NOT = "00"
+                      OR REC-NUM > REC-MAX
+               DISPLAY "Key: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+               READ TSPFILE PREVIOUS RECORD
+                    AT END
+                        MOVE "99" TO CUST-STAT
+                END-READ
+                ADD 1 TO REC-NUM
+           END-PERFORM.
+
+           CLOSE TSPFILE.
+
+           OPEN I-O TSPFILE.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE 'X'                          TO CM-CUST-NUM (5:1).
+           READ TSPFILE KEY IS CM-CUST-NUM
+           IF  CUST-STAT NOT = "23"
+               DISPLAY "Error " CUST-STAT " instead of 23."
+                                UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on primary read ."
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Got: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+           END-IF.
+           READ TSPFILE NEXT RECORD
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " on next read"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Nxt: " CM-CUST-NUM " is " CM-COMPANY
+                        " Disk=" CM-DISK "."
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-TELEPHONE     (7)       TO CM-TELEPHONE.
+           MOVE DATA-MACHINE       (7)       TO CM-MACHINE.
+           READ TSPFILE KEY IS CM-TELEPHONE
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 23"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "Ky2: " CM-CUST-NUM " is " CM-COMPANY
+                        " Mach=" CM-MACHINE "."
+                         UPON CONSOLE
+           END-IF.
+           WRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "22"
+               DISPLAY "Error " CUST-STAT " instead of 22"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "  Write: " CM-CUST-NUM " got 22 as expected"
+                         UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (3)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (3)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           DISPLAY "   Read: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected "
+                         CM-NO-TERMINALS " terminals"
+                         UPON CONSOLE.
+           ADD 5 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 00"
+                                UPON CONSOLE
+           ELSE
+
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                       CUST-STAT " as expected "
+                       CM-NO-TERMINALS " terminals"
+                       UPON CONSOLE
+           END-IF.
+           MOVE DATA-CUST-NUM      (2)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           DISPLAY "   Read: " CM-CUST-NUM " got "
+                         CUST-STAT " as expected "
+                         CM-NO-TERMINALS " terminals"
+                         UPON CONSOLE.
+           MOVE DATA-CUST-NUM      (3)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (3)       TO CM-COMPANY.
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "02"
+           AND CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                       "00/02 as expected"
+                        UPON CONSOLE
+           END-IF
+           MOVE DATA-CUST-NUM      (6)       TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (6)       TO CM-COMPANY.
+           READ TSPFILE KEY IS CM-CUST-NUM
+           MOVE DATA-TELEPHONE     (7)       TO CM-TELEPHONE.
+           MOVE DATA-MACHINE       (7)       TO CM-MACHINE.
+           REWRITE TSPFL-RECORD
+           IF  CUST-STAT NOT = "02"
+           AND CUST-STAT NOT = "00"
+               DISPLAY "Error " CUST-STAT " instead of 00/02"
+                                UPON CONSOLE
+           ELSE
+               DISPLAY "ReWrite: " CM-CUST-NUM " got "
+                       "00/02 as expected"
+                       UPON CONSOLE
+           END-IF
+           DELETE TSPFILE
+           CLOSE TSPFILE.
+
+       LOADFLAT.
+           OPEN OUTPUT FLATFILE.
+           PERFORM FLAT-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB
+                             OR SUB > 5.
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           MOVE 3 TO REC-NUM
+           READ FLATFILE
+           MOVE 999 TO REC-NUM
+           READ FLATFILE
+           CLOSE FLATFILE.
+      
+       FLAT-RECORD.
+      
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE SUB                          TO REC-NUM.
+           MOVE DATA-CUST-NUM      (SUB)     TO C2-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO C2-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO C2-NO-TERMINALS.
+           MOVE 20070319                     TO C2-PK-DATE.
+           IF  ODD-RECORD
+               MOVE "8417"                   TO C2-DISK 
+           ELSE
+               MOVE "8470"                   TO C2-DISK.
+           WRITE TSP2-RECORD.
+])
+
+AT_CHECK([$COMPILE -ftraceall prog.cob], [0], [], [])
+
+# first run without runtime tracing
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK: Operations on empty file
+Loading sample data file.
+Sample data file load complete.
+LIST SAMPLE FILE
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Stop read after: 11
+LIST SAMPLE FILE DESCENDING
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
+Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=8470    .
+Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
+  Write: GIB00000 got 22 as expected
+   Read: GAM00000 got 00 as expected 00075 terminals
+ReWrite: GAM00000 got 00 as expected 00080 terminals
+   Read: BET00000 got 00 as expected 00034 terminals
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
+], [])
+
+# not merged yet:
+#export COB_TRACE_IO=Y
+#export IO_TSPFILE=trace
+#export IO_TSTFILE=no-trace
+
+AT_CHECK([COB_TRACE_FILE=trace.txt \
+COB_SET_TRACE=Y \
+COB_TRACE_FORMAT=%L%S \
+$COBCRUN_DIRECT ./prog], [0],
+[OK: Operations on empty file
+Loading sample data file.
+Sample data file load complete.
+LIST SAMPLE FILE
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Stop read after: 11
+LIST SAMPLE FILE DESCENDING
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
+Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=8470    .
+Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
+  Write: GIB00000 got 22 as expected
+   Read: GAM00000 got 00 as expected 00075 terminals
+ReWrite: GAM00000 got 00 as expected 00080 terminals
+   Read: BET00000 got 00 as expected 00034 terminals
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
+], [])
+
+
+AT_CAPTURE_FILE(./trace.txt)
+
+# variant with file trace:
+#AT_DATA([reference_tmpl],
+#[Source: 'prog.cob'
+#Program-Id: prog            _
+# Line:    292     Entry: prog                            _
+# Line:    292 Paragraph: MAINFILE                        _
+# Line:    293             OPEN                           _
+#            OPEN OUTPUT TSPFILE -> 'testisam' Status: 00
+# Line:    294             CLOSE                          _
+#            CLOSE TSPFILE Status: 00
+# Line:    296             OPEN                           _
+#            OPEN I_O TSPFILE -> 'testisam' Status: 00
+# Line:    297             MOVE                           _
+# Line:    298             READ                           _
+#            READ Sequential TSPFILE Status: 10
+# Line:    299             IF                             _
+# Line:    304             MOVE                           _
+# Line:    305             START                          _
+#            START TSPFILE Status: 23
+#            Key : ALL LOW-VALUES
+# Line:    306             IF                             _
+# Line:    311             READ                           _
+#            READ Sequential TSPFILE Status: 46
+# Line:    312             IF                             _
+# Line:    317             DISPLAY                        _
+# Line:    318             CLOSE                          _
+#            CLOSE TSPFILE Status: 00
+# Line:    320             PERFORM                        _
+# Line:    335 Paragraph: LOADFILE                        _
+# Line:    336             DISPLAY                        _
+# Line:    339             OPEN                           _
+#            OPEN OUTPUT TSPFILE -> 'testisam' Status: 00
+# Line:    340             IF                             _
+# Line:    346             PERFORM                        _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 00
+#         Record : 'ALP00000 ALPHA ELECTRICAL CO. LTD.123 MAIN STREET          NEW YORK             '
+#                  '    N.Y.                     3131234432MR. DAVE HARRIS          UNI-90301MEG8417'
+#                  '    1600 BPI00085'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 00
+#         Record : 'BET00000 BETA SHOE MFG. INC.      1090 2ND AVE. WEST       ATLANTA              '
+#                  '    GEORGIA                  4082938498MS. JANICE SILCOX        UNI-90403MEG8470'
+#                  '    6250 BPI00034'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1401 JEFFERSON BLVD.     WASHINGTON           '
+#                  '    D.C.                     8372487274MR. ALLAN JONES          UNI-80/31MEG8417'
+#                  '    1600 BPI00075'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'DEL00000 DELTA LUGGAGE REPAIRS    1620 ARIZONA WAY         TORONTO              '
+#                  '    CANADA                   4169898509MR. PETER MACKAY         UNI-80/53MEG8470'
+#                  '    6250 BPI00045'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'EPS00000 EPSILON EQUIPMENT SUPPLY 1184 EAST FIRST STREET   CALGARY              '
+#                  '    CANADA                   5292398745MRS. DONNA BREWER        UNI-80/61MEG8417'
+#                  '    1600 BPI00090'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               8009329492MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'GIB00000 GIBRALTER LIFE INSURANCE 650 LIBERTY CRESCENT     LOS RIOS             '
+#                  '    NEW MEXICO               6456445643MR. D.A. MORRISON        UNI-80/61MEG8417'
+#                  '    1600 BPI00067'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'H&J00000 H & J PLUMBING SUPPLIES  77 SUNSET BLVD.          MADISON              '
+#                  '    WISCONSIN                6546456333MR. BRIAN PATTERSON      UNI-80/83MEG8470'
+#                  '    6250 BPI00032'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'INC00000 INCREMENTAL BACKUP CORP. 10908 SANTA MONICA BLVD. WILBUR               '
+#                  '    DELAWARE                 3455445444MR. DARRYL TOWNSEND      UNI-80/81MEG8417'
+#                  '    1600 BPI00016'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'JOH00000 JOHNSON BOATING SUPPLIES 1134 PARIS ROAD          TOPEKA               '
+#                  '    KANSAS                   6456445643MS. VALERIE HARPER       UNI-80/81MEG8417'
+#                  '    1600 BPI00034'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    373             MOVE                           _
+# Line:    374             MOVE                           _
+# Line:    375             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'KON00000 KONFLAB PLASTIC PRODUCTS.808 NORTHWEST MAIN ST.   SEATTLE              '
+#                  '    WASHINGTON               7456434355MR. FRED MILLER          UNI-80/81MEG8417'
+#                  '    1600 BPI00128'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'LEW00000 LEWISTON GRAPHICS LTD.   9904 QUEEN STREET        NEW JERSEY           '
+#                  '    N.J.                     6554456433MR. DONALD FISCHER       UNI-80/83MEG8470'
+#                  '    6250 BPI00064'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'MOR00000 MORNINGSIDE CARPENTRY.   1709 DUNDAS CRESCENT W.  FORT WAYNE           '
+#                  '    COLORADO                 4169898509MR. STEVEN YOURDIN       UNI-80/83MEG8470'
+#                  '    6250 BPI00110'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'NEW00000 NEW WAVE SURF SHOPS INC. 3240 MARIS AVENUE        COLUMBUS             '
+#                  '    OHIO                     7534587453MS. Goldie Hawn          UNI-80/83MEG8470'
+#                  '    6250 BPI00324'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'OLD00000 OLD TYME PIZZA MFG. CO.  1705 WISCONSIN ROAD      RICHMOND             '
+#                  '    VIRGINIA                 8787458374MS. ALICE WINSTON        UNI-90403MEG8470'
+#                  '    6250 BPI00124'
+# Line:    382             IF                             _
+# Line:    358 Paragraph: 1000-LOAD-RECORD                _
+# Line:    360             MOVE                           _
+# Line:    361             MOVE                           _
+# Line:    362             MOVE                           _
+# Line:    363             MOVE                           _
+# Line:    364             MOVE                           _
+# Line:    365             MOVE                           _
+# Line:    366             MOVE                           _
+# Line:    367             MOVE                           _
+# Line:    368             MOVE                           _
+# Line:    369             MOVE                           _
+# Line:    370             MOVE                           _
+# Line:    372             IF                             _
+# Line:    377             MOVE                           _
+# Line:    378             MOVE                           _
+# Line:    379             MOVE                           _
+# Line:    381             WRITE                          _
+#            WRITE TSPFILE Status: 02
+#         Record : 'PRE00000 PRESTIGE OFFICE FURNITURE114A MAPLE GROVE         WHITEPLAIN           '
+#                  '    N.Y.                     4169898509MR. THOMAS JEFFERSON     UNI-90403MEG8470'
+#                  '    6250 BPI00086'
+# Line:    382             IF                             _
+# Line:    350             DISPLAY                        _
+# Line:    352             CLOSE                          _
+#            CLOSE TSPFILE Status: 00
+# Line:    321             PERFORM                        _
+# Line:    387 Paragraph: LISTFILE                        _
+# Line:    388             DISPLAY                        _
+# Line:    389             OPEN                           _
+# Line:    390             MOVE                           _
+# Line:    391             MOVE                           _
+# Line:    392             START                          _
+# Line:    393             READ                           _
+# Line:    394             READ                           _
+# Line:    395             CLOSE                          _
+# Line:    397             MOVE                           _
+# Line:    398             OPEN                           _
+#            OPEN INPUT TSPFILE -> 'testisam' Status: 00
+# Line:    399             IF                             _
+# Line:    404             MOVE                           _
+# Line:    405             MOVE                           _
+# Line:    406             START                          _
+#            START TSPFILE Status: 00
+#            Key : 'PRE00000'
+# Line:    407             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'PRE00000 PRESTIGE OFFICE FURNITURE114A MAPLE GROVE         WHITEPLAIN           '
+#                  '    N.Y.                     4169898509MR. THOMAS JEFFERSON     UNI-90403MEG8470'
+#                  '    6250 BPI00086'
+# Line:    408             READ                           _
+#            READ Sequential TSPFILE Status: 10
+# Line:    410             MOVE                           _
+# Line:    411             MOVE                           _
+# Line:    412             START                          _
+#            START TSPFILE Status: 00
+#            Key : 'DEL00000'
+# Line:    413             IF                             _
+# Line:    418             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'EPS00000 EPSILON EQUIPMENT SUPPLY 1184 EAST FIRST STREET   CALGARY              '
+#                  '    CANADA                   5292398745MRS. DONNA BREWER        UNI-80/61MEG8417'
+#                  '    1600 BPI00090'
+# Line:    419             IF                             _
+# Line:    424             PERFORM                        _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               8009329492MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1401 JEFFERSON BLVD.     WASHINGTON           '
+#                  '    D.C.                     8372487274MR. ALLAN JONES          UNI-80/31MEG8417'
+#                  '    1600 BPI00075'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'GIB00000 GIBRALTER LIFE INSURANCE 650 LIBERTY CRESCENT     LOS RIOS             '
+#                  '    NEW MEXICO               6456445643MR. D.A. MORRISON        UNI-80/61MEG8417'
+#                  '    1600 BPI00067'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'H&J00000 H & J PLUMBING SUPPLIES  77 SUNSET BLVD.          MADISON              '
+#                  '    WISCONSIN                6546456333MR. BRIAN PATTERSON      UNI-80/83MEG8470'
+#                  '    6250 BPI00032'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'INC00000 INCREMENTAL BACKUP CORP. 10908 SANTA MONICA BLVD. WILBUR               '
+#                  '    DELAWARE                 3455445444MR. DARRYL TOWNSEND      UNI-80/81MEG8417'
+#                  '    1600 BPI00016'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'JOH00000 JOHNSON BOATING SUPPLIES 1134 PARIS ROAD          TOPEKA               '
+#                  '    KANSAS                   6456445643MS. VALERIE HARPER       UNI-80/81MEG8417'
+#                  '    1600 BPI00034'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'KON00000 KONFLAB PLASTIC PRODUCTS.808 NORTHWEST MAIN ST.   SEATTLE              '
+#                  '    WASHINGTON               7456434355MR. FRED MILLER          UNI-80/81MEG8417'
+#                  '    1600 BPI00128'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'LEW00000 LEWISTON GRAPHICS LTD.   9904 QUEEN STREET        NEW JERSEY           '
+#                  '    N.J.                     6554456433MR. DONALD FISCHER       UNI-80/83MEG8470'
+#                  '    6250 BPI00064'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'MOR00000 MORNINGSIDE CARPENTRY.   1709 DUNDAS CRESCENT W.  FORT WAYNE           '
+#                  '    COLORADO                 4169898509MR. STEVEN YOURDIN       UNI-80/83MEG8470'
+#                  '    6250 BPI00110'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'NEW00000 NEW WAVE SURF SHOPS INC. 3240 MARIS AVENUE        COLUMBUS             '
+#                  '    OHIO                     7534587453MS. Goldie Hawn          UNI-80/83MEG8470'
+#                  '    6250 BPI00324'
+# Line:    434             ADD                            _
+# Line:    426             DISPLAY                        _
+# Line:    429             CALL                           _
+# Line:    430             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'OLD00000 OLD TYME PIZZA MFG. CO.  1705 WISCONSIN ROAD      RICHMOND             '
+#                  '    VIRGINIA                 8787458374MS. ALICE WINSTON        UNI-90403MEG8470'
+#                  '    6250 BPI00124'
+# Line:    434             ADD                            _
+# Line:    436             IF                             _
+# Line:    439             DISPLAY                        _
+# Line:    442             DISPLAY                        _
+# Line:    443             MOVE                           _
+# Line:    444             START                          _
+#            START TSPFILE Status: 00
+#            Key : 'OLD00000'
+# Line:    445             IF                             _
+# Line:    450             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'NEW00000 NEW WAVE SURF SHOPS INC. 3240 MARIS AVENUE        COLUMBUS             '
+#                  '    OHIO                     7534587453MS. Goldie Hawn          UNI-80/83MEG8470'
+#                  '    6250 BPI00324'
+# Line:    451             IF                             _
+# Line:    456             PERFORM                        _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'MOR00000 MORNINGSIDE CARPENTRY.   1709 DUNDAS CRESCENT W.  FORT WAYNE           '
+#                  '    COLORADO                 4169898509MR. STEVEN YOURDIN       UNI-80/83MEG8470'
+#                  '    6250 BPI00110'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'LEW00000 LEWISTON GRAPHICS LTD.   9904 QUEEN STREET        NEW JERSEY           '
+#                  '    N.J.                     6554456433MR. DONALD FISCHER       UNI-80/83MEG8470'
+#                  '    6250 BPI00064'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'KON00000 KONFLAB PLASTIC PRODUCTS.808 NORTHWEST MAIN ST.   SEATTLE              '
+#                  '    WASHINGTON               7456434355MR. FRED MILLER          UNI-80/81MEG8417'
+#                  '    1600 BPI00128'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'JOH00000 JOHNSON BOATING SUPPLIES 1134 PARIS ROAD          TOPEKA               '
+#                  '    KANSAS                   6456445643MS. VALERIE HARPER       UNI-80/81MEG8417'
+#                  '    1600 BPI00034'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'INC00000 INCREMENTAL BACKUP CORP. 10908 SANTA MONICA BLVD. WILBUR               '
+#                  '    DELAWARE                 3455445444MR. DARRYL TOWNSEND      UNI-80/81MEG8417'
+#                  '    1600 BPI00016'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'H&J00000 H & J PLUMBING SUPPLIES  77 SUNSET BLVD.          MADISON              '
+#                  '    WISCONSIN                6546456333MR. BRIAN PATTERSON      UNI-80/83MEG8470'
+#                  '    6250 BPI00032'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'GIB00000 GIBRALTER LIFE INSURANCE 650 LIBERTY CRESCENT     LOS RIOS             '
+#                  '    NEW MEXICO               6456445643MR. D.A. MORRISON        UNI-80/61MEG8417'
+#                  '    1600 BPI00067'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1401 JEFFERSON BLVD.     WASHINGTON           '
+#                  '    D.C.                     8372487274MR. ALLAN JONES          UNI-80/31MEG8417'
+#                  '    1600 BPI00075'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               8009329492MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'EPS00000 EPSILON EQUIPMENT SUPPLY 1184 EAST FIRST STREET   CALGARY              '
+#                  '    CANADA                   5292398745MRS. DONNA BREWER        UNI-80/61MEG8417'
+#                  '    1600 BPI00090'
+# Line:    465             ADD                            _
+# Line:    458             DISPLAY                        _
+# Line:    461             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'DEL00000 DELTA LUGGAGE REPAIRS    1620 ARIZONA WAY         TORONTO              '
+#                  '    CANADA                   4169898509MR. PETER MACKAY         UNI-80/53MEG8470'
+#                  '    6250 BPI00045'
+# Line:    465             ADD                            _
+# Line:    468             CLOSE                          _
+#            CLOSE TSPFILE Status: 00
+# Line:    470             OPEN                           _
+#            OPEN I_O TSPFILE -> 'testisam' Status: 00
+# Line:    471             MOVE                           _
+# Line:    472             MOVE                           _
+# Line:    473             MOVE                           _
+# Line:    474             READ                           _
+#            READ TSPFILE Status: 23
+#            Key : 'BET0X000'
+# Line:    475             IF                             _
+# Line:    479             MOVE                           _
+# Line:    480             MOVE                           _
+# Line:    481             READ                           _
+#            READ TSPFILE Status: 00
+#         Record : 'BET00000 BETA SHOE MFG. INC.      1090 2ND AVE. WEST       ATLANTA              '
+#                  '    GEORGIA                  4082938498MS. JANICE SILCOX        UNI-90403MEG8470'
+#                  '    6250 BPI00034'
+#            Key : 'BET00000'
+# Line:    482             IF                             _
+# Line:    486             DISPLAY                        _
+# Line:    490             READ                           _
+#            READ Sequential TSPFILE Status: 00
+#         Record : 'DEL00000 DELTA LUGGAGE REPAIRS    1620 ARIZONA WAY         TORONTO              '
+#                  '    CANADA                   4169898509MR. PETER MACKAY         UNI-80/53MEG8470'
+#                  '    6250 BPI00045'
+# Line:    491             IF                             _
+# Line:    495             DISPLAY                        _
+# Line:    499             MOVE                           _
+# Line:    500             MOVE                           _
+# Line:    501             READ                           _
+#            READ TSPFILE Status: 00
+#         Record : 'GIB00000 GIBRALTER LIFE INSURANCE 650 LIBERTY CRESCENT     LOS RIOS             '
+#                  '    NEW MEXICO               6456445643MR. D.A. MORRISON        UNI-80/61MEG8417'
+#                  '    1600 BPI00067'
+#            Key :  6456445643
+# Line:    502             IF                             _
+# Line:    506             DISPLAY                        _
+# Line:    510             WRITE                          _
+#            WRITE TSPFILE Status: 22
+#         Record : 'GIB00000 GIBRALTER LIFE INSURANCE 650 LIBERTY CRESCENT     LOS RIOS             '
+#                  '    NEW MEXICO               6456445643MR. D.A. MORRISON        UNI-80/61MEG8417'
+#                  '    1600 BPI00067'
+# Line:    511             IF                             _
+# Line:    515             DISPLAY                        _
+# Line:    518             MOVE                           _
+# Line:    519             MOVE                           _
+# Line:    520             READ                           _
+#            READ TSPFILE Status: 00
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1401 JEFFERSON BLVD.     WASHINGTON           '
+#                  '    D.C.                     8372487274MR. ALLAN JONES          UNI-80/31MEG8417'
+#                  '    1600 BPI00075'
+#            Key : 'GAM00000'
+# Line:    521             DISPLAY                        _
+# Line:    525             ADD                            _
+# Line:    526             REWRITE                        _
+#            REWRITE TSPFILE Status: 00
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1401 JEFFERSON BLVD.     WASHINGTON           '
+#                  '    D.C.                     8372487274MR. ALLAN JONES          UNI-80/31MEG8417'
+#                  '    1600 BPI00080'
+# Line:    527             IF                             _
+# Line:    532             DISPLAY                        _
+# Line:    537             MOVE                           _
+# Line:    538             MOVE                           _
+# Line:    539             READ                           _
+#            READ TSPFILE Status: 00
+#         Record : 'BET00000 BETA SHOE MFG. INC.      1090 2ND AVE. WEST       ATLANTA              '
+#                  '    GEORGIA                  4082938498MS. JANICE SILCOX        UNI-90403MEG8470'
+#                  '    6250 BPI00034'
+#            Key : 'BET00000'
+# Line:    540             DISPLAY                        _
+# Line:    544             MOVE                           _
+# Line:    545             MOVE                           _
+# Line:    546             REWRITE                        _
+#            REWRITE TSPFILE Status: 02
+#         Record : 'GAM00000 GAMMA X-RAY TECHNOLOGY   1090 2ND AVE. WEST       ATLANTA              '
+#                  '    GEORGIA                  4082938498MS. JANICE SILCOX        UNI-90403MEG8470'
+#                  '    6250 BPI00034'
+# Line:    547             IF                             _
+# Line:    552             DISPLAY                        _
+# Line:    556             MOVE                           _
+# Line:    557             MOVE                           _
+# Line:    558             READ                           _
+#            READ TSPFILE Status: 00
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               8009329492MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+#            Key : 'FOR00000'
+# Line:    559             MOVE                           _
+# Line:    560             MOVE                           _
+# Line:    561             REWRITE                        _
+#            REWRITE TSPFILE Status: 02
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               6456445643MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+# Line:    562             IF                             _
+# Line:    567             DISPLAY                        _
+# Line:    571             DELETE                         _
+#            DELETE TSPFILE Status: 00
+#         Record : 'FOR00000 FORTUNE COOKIE COMPANY   114 JOHN F. KENNEDY AVE. SAN DIEGO            '
+#                  '    CALIFORNIA               6456445643MR. MICHAEL SMYTHE       UNI-80/63MEG8470'
+#                  '    6250 BPI00107'
+# Line:    572             CLOSE                          _
+#            CLOSE TSPFILE Status: 00
+# Line:    333             STOP RUN                       _
+#])
+
+# variant without file trace
+
+
+AT_DATA([reference_tmpl],
+[Source: 'prog.cob'
+Program-Id: prog            _
+ Line:    292     Entry: prog                            _
+ Line:    292 Paragraph: MAINFILE                        _
+ Line:    293             OPEN                           _
+ Line:    294             CLOSE                          _
+ Line:    296             OPEN                           _
+ Line:    297             MOVE                           _
+ Line:    298             READ                           _
+ Line:    299             IF                             _
+ Line:    304             MOVE                           _
+ Line:    305             START                          _
+ Line:    306             IF                             _
+ Line:    311             READ                           _
+ Line:    312             IF                             _
+ Line:    317             DISPLAY                        _
+ Line:    318             CLOSE                          _
+ Line:    320             PERFORM                        _
+ Line:    335 Paragraph: LOADFILE                        _
+ Line:    336             DISPLAY                        _
+ Line:    339             OPEN                           _
+ Line:    340             IF                             _
+ Line:    346             PERFORM                        _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    373             MOVE                           _
+ Line:    374             MOVE                           _
+ Line:    375             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    358 Paragraph: 1000-LOAD-RECORD                _
+ Line:    360             MOVE                           _
+ Line:    361             MOVE                           _
+ Line:    362             MOVE                           _
+ Line:    363             MOVE                           _
+ Line:    364             MOVE                           _
+ Line:    365             MOVE                           _
+ Line:    366             MOVE                           _
+ Line:    367             MOVE                           _
+ Line:    368             MOVE                           _
+ Line:    369             MOVE                           _
+ Line:    370             MOVE                           _
+ Line:    372             IF                             _
+ Line:    377             MOVE                           _
+ Line:    378             MOVE                           _
+ Line:    379             MOVE                           _
+ Line:    381             WRITE                          _
+ Line:    382             IF                             _
+ Line:    350             DISPLAY                        _
+ Line:    352             CLOSE                          _
+ Line:    321             PERFORM                        _
+ Line:    387 Paragraph: LISTFILE                        _
+ Line:    388             DISPLAY                        _
+ Line:    389             OPEN                           _
+ Line:    390             MOVE                           _
+ Line:    391             MOVE                           _
+ Line:    392             START                          _
+ Line:    393             READ                           _
+ Line:    394             READ                           _
+ Line:    395             CLOSE                          _
+ Line:    397             MOVE                           _
+ Line:    398             OPEN                           _
+ Line:    399             IF                             _
+ Line:    404             MOVE                           _
+ Line:    405             MOVE                           _
+ Line:    406             START                          _
+ Line:    407             READ                           _
+ Line:    408             READ                           _
+ Line:    410             MOVE                           _
+ Line:    411             MOVE                           _
+ Line:    412             START                          _
+ Line:    413             IF                             _
+ Line:    418             READ                           _
+ Line:    419             IF                             _
+ Line:    424             PERFORM                        _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    426             DISPLAY                        _
+ Line:    429             CALL                           _
+ Line:    430             READ                           _
+ Line:    434             ADD                            _
+ Line:    436             IF                             _
+ Line:    439             DISPLAY                        _
+ Line:    442             DISPLAY                        _
+ Line:    443             MOVE                           _
+ Line:    444             START                          _
+ Line:    445             IF                             _
+ Line:    450             READ                           _
+ Line:    451             IF                             _
+ Line:    456             PERFORM                        _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    458             DISPLAY                        _
+ Line:    461             READ                           _
+ Line:    465             ADD                            _
+ Line:    468             CLOSE                          _
+ Line:    470             OPEN                           _
+ Line:    471             MOVE                           _
+ Line:    472             MOVE                           _
+ Line:    473             MOVE                           _
+ Line:    474             READ                           _
+ Line:    475             IF                             _
+ Line:    479             MOVE                           _
+ Line:    480             MOVE                           _
+ Line:    481             READ                           _
+ Line:    482             IF                             _
+ Line:    486             DISPLAY                        _
+ Line:    490             READ                           _
+ Line:    491             IF                             _
+ Line:    495             DISPLAY                        _
+ Line:    499             MOVE                           _
+ Line:    500             MOVE                           _
+ Line:    501             READ                           _
+ Line:    502             IF                             _
+ Line:    506             DISPLAY                        _
+ Line:    510             WRITE                          _
+ Line:    511             IF                             _
+ Line:    515             DISPLAY                        _
+ Line:    518             MOVE                           _
+ Line:    519             MOVE                           _
+ Line:    520             READ                           _
+ Line:    521             DISPLAY                        _
+ Line:    525             ADD                            _
+ Line:    526             REWRITE                        _
+ Line:    527             IF                             _
+ Line:    532             DISPLAY                        _
+ Line:    537             MOVE                           _
+ Line:    538             MOVE                           _
+ Line:    539             READ                           _
+ Line:    540             DISPLAY                        _
+ Line:    544             MOVE                           _
+ Line:    545             MOVE                           _
+ Line:    546             REWRITE                        _
+ Line:    547             IF                             _
+ Line:    552             DISPLAY                        _
+ Line:    556             MOVE                           _
+ Line:    557             MOVE                           _
+ Line:    558             READ                           _
+ Line:    559             MOVE                           _
+ Line:    560             MOVE                           _
+ Line:    561             REWRITE                        _
+ Line:    562             IF                             _
+ Line:    567             DISPLAY                        _
+ Line:    571             DELETE                         _
+ Line:    572             CLOSE                          _
+ Line:    333             STOP RUN                       _
+])
+
+# AT_DATA workaround via sed:
+AT_CHECK([sed -e 's/_$//' reference_tmpl > reference], [0], [], [])
+
+AT_CHECK([diff reference trace.txt], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([Test dump feature])
+AT_KEYWORDS([Dump])
+
+
+AT_DATA([./cpyabrt], [
+            MOVE "Quick brown fox jumped over the dog" 
+              TO TSTTAILX (1:40).
+            MOVE CM-COMPANY TO TSTTAILX (42:20).
+      *     DISPLAY ':' X ':'.
+      *     DISPLAY CM-COMPANY.
+      *     DISPLAY '>' CM-COMPANY '<'.
+])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS SEQUENTIAL RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4).
+      
+       WORKING-STORAGE SECTION.
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+       77  REC-NUM           VALUE  1          PICTURE 9(4).
+       01  BIN                      PIC 9(9) BINARY VALUE 0.
+      
+       01  TEST-DATA.
+         02  DATA-CUST-NUM-TBL.
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+
+           OPEN INPUT FLATFILE.
+           READ FLATFILE.
+
+       MAIN-100.
+           PERFORM CALL-SUB-1.
+           PERFORM CALL-SUB-2.
+           PERFORM CALL-IT-OMIT.
+           STOP RUN.
+
+       LOADFILE.
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           CLOSE FLATFILE.
+      
+       LOAD-RECORD.
+      
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE TSPFL-RECORD.
+
+       CALL-SUB-1 SECTION.
+           CALL "sub1" USING bin, TSPFL-RECORD.
+       
+       CALL-SUB-2 SECTION.
+           MOVE 4096 TO bin
+           CALL "sub2" USING bin, TSPFL-RECORD.
+       
+       CALL-IT-OMIT SECTION.
+           MOVE 5440 TO bin
+           CALL "sub1" USING bin, OMITTED.
+
+           END PROGRAM prog.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. sub1.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ZRO PIC 9(9) BINARY VALUE 0.
+       01  HEXV PIC X  COMP-X.
+       01  HEXC REDEFINES HEXV PIC X.
+
+       01  IDX PIC 9(9) BINARY VALUE 0.
+       01  TSTREC.
+         05  TSTDEP  PIC XXX.
+         05  TSTX OCCURS 4 TIMES.
+           15  TSTG-1 PIC 99.
+           15  TSTX-2 PIC XX OCCURS 4 TIMES.
+         05  TSTTAIL1  PIC 99.
+         05  TSTCOMP3  PIC 9(5) COMP-3.
+         05  TSTLONG   PIC X(100).
+         05  TSTHEX    PIC X(100).
+         05  TSTHEX2   PIC X(60).
+         05  TSTTAILX  PIC X(80).
+
+       LINKAGE SECTION.
+       01  X  PIC 9(9) BINARY.
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4).
+       
+       PROCEDURE DIVISION USING X, TSPFL-RECORD.
+       MAIN-1 SECTION.
+            MOVE ALL "X" TO TSTREC.
+            MOVE 1 TO TSTG-1 (1).
+            MOVE 2 TO TSTG-1 (2).
+            MOVE 3 TO TSTG-1 (3).
+            MOVE 'A' TO TSTX-2 (1,1).
+            MOVE 'B' TO TSTX-2 (2,1).
+            MOVE 'C' TO TSTX-2 (3,1).
+            MOVE 'xx' TO TSTX-2 (1,4).
+            MOVE 'yy' TO TSTX-2 (2,4).
+            MOVE 'zz' TO TSTX-2 (3,4).
+            MOVE SPACES TO TSTX-2 (1,3).
+            MOVE HIGH-VALUES TO TSTX (4).
+            MOVE LOW-VALUES TO TSTX-2 (2,3).
+            MOVE HIGH-VALUES TO TSTX-2 (3,3).
+            MOVE "Quick brown fox jumped over the dog"
+              TO TSTLONG, TSTLONG (50:36).
+            MOVE "Quicker grey fox jumped the cougar"
+              TO TSTHEX (1:35).
+       MAIN-2.
+            MOVE 17 TO HEXV.
+            MOVE HEXC TO TSTHEX (39:1).
+            MOVE HEXC TO TSTTAIL1 (2:1).
+            MOVE 7 TO HEXV.
+            MOVE HEXC TO TSTHEX (47:1).
+            MOVE 13 TO HEXV.
+            MOVE HEXC TO TSTHEX (59:1).
+            MOVE 0 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (39:1), TSTHEX2 (10:1).
+            MOVE 9 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (47:1).
+            MOVE '\' TO TSTHEX2 (32:1).
+            MOVE 13 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (59:1).
+            MOVE 'A' TO TSTHEX2 (54:1).
+            MOVE LOW-VALUES TO TSTTAILX
+            ADD 1 TO X.
+            DISPLAY "X is " X.
+            COPY cpyabrt.
+	    GOBACK.
+       END PROGRAM sub1.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. sub2.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ZRO PIC 9(9) BINARY VALUE 0.
+       01  HEXV PIC X  COMP-X.
+       01  HEXC REDEFINES HEXV PIC X.
+
+       01  IDX PIC 9(9) BINARY VALUE 0.
+       01  TSTREC.
+         05  TSTDEP  PIC XXX.
+         05  TSTX OCCURS 4 TIMES.
+           15  TSTG-1 PIC 99.
+           15  TSTX-2 PIC XX OCCURS 4 TIMES.
+         05  TSTTAIL1  PIC 99.
+         05  TSTCOMP3  PIC 9(5) COMP-3.
+         05  TSTLONG   PIC X(100).
+         05  TSTHEX    PIC X(100).
+         05  TSTHEX2   PIC X(60).
+         05  TSTTAILX  PIC X(80).
+
+       LINKAGE SECTION.
+       01  X  PIC 9(9) BINARY.
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4).
+       
+       PROCEDURE DIVISION USING X, TSPFL-RECORD.
+            MOVE ALL "X" TO TSTREC.
+            MOVE 1 TO TSTG-1 (1).
+            MOVE 2 TO TSTG-1 (2).
+            MOVE 3 TO TSTG-1 (3).
+            MOVE 'A' TO TSTX-2 (1,1).
+            MOVE 'B' TO TSTX-2 (2,1).
+            MOVE 'C' TO TSTX-2 (3,1).
+            MOVE 'xx' TO TSTX-2 (1,4).
+            MOVE 'yy' TO TSTX-2 (2,4).
+            MOVE 'zz' TO TSTX-2 (3,4).
+            MOVE SPACES TO TSTX-2 (1,3).
+            MOVE HIGH-VALUES TO TSTX (4).
+            MOVE LOW-VALUES TO TSTX-2 (2,3).
+            MOVE HIGH-VALUES TO TSTX-2 (3,3).
+            MOVE "Quick brown fox jumped over the dog"
+              TO TSTLONG, TSTLONG (50:36).
+            MOVE "Quicker grey fox jumped the cougar"
+              TO TSTHEX (1:35).
+            MOVE 17 TO HEXV.
+            MOVE HEXC TO TSTHEX (39:1).
+            MOVE HEXC TO TSTTAIL1 (2:1).
+            MOVE 7 TO HEXV.
+            MOVE HEXC TO TSTHEX (47:1).
+            MOVE 13 TO HEXV.
+            MOVE HEXC TO TSTHEX (59:1).
+            MOVE 0 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (39:1), TSTHEX2 (10:1).
+            MOVE 9 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (47:1).
+            MOVE '\' TO TSTHEX2 (32:1).
+            MOVE 13 TO HEXV.
+            MOVE HEXC TO TSTHEX2 (59:1).
+            MOVE 'A' TO TSTHEX2 (54:1).
+            MOVE LOW-VALUES TO TSTTAILX.
+            COPY cpyabrt.
+       END PROGRAM sub2.
+])
+
+AT_CHECK([$COMPILE -fdump=ALL prog.cob], [0], [], [])
+
+AT_CHECK([COB_DUMP_FILE=tstdump.txt \
+$COBCRUN_DIRECT ./prog], [11],
+[X is 000000001
+X is 000005441
+], [
+cpyabrt: 4: attempt to reference unallocated memory (signal SIGSEGV)
+libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
+abnormal termination - file contents may be incorrect
+])
+
+AT_CAPTURE_FILE(./tstdump.txt)
+
+AT_DATA([reference_tmpl],
+[Module dump due to signal SIGSEGV
+ Last statement of sub1 was Line 4 of cpyabrt
+ Last statement of prog was Line 118 of prog.cob
+
+Dump Program-Id sub1 from prog.cob compiled MMM DD YYYY HH:MM:SS
+
+WORKING-STORAGE
+**********************
+01        ZRO                             000000000
+01        HEXV                            13
+01        IDX                             000000000
+01        TSTREC.                       _
+  05      TSTDEP                         'XXX'
+  05      TSTX.                         _
+       15 TSTG-1 (1)                      01
+       15 TSTX-2 (1,1)                   'A'
+       15 TSTX-2 (1,2)                   'XX'
+       15 TSTX-2 (1,3)                   ALL SPACES
+       15 TSTX-2 (1,4)                   'xx'
+       15 TSTG-1 (2)                      02
+       15 TSTX-2 (2,1)                   'B'
+       15 TSTX-2 (2,2)                   'XX'
+       15 TSTX-2 (2,3)                   ALL LOW-VALUES
+       15 TSTX-2 (2,4)                   'yy'
+       15 TSTG-1 (3)                      03
+       15 TSTX-2 (3,1)                   'C'
+       15 TSTX-2 (3,2)                   'XX'
+       15 TSTX-2 (3,3)                   ALL HIGH-VALUES
+       15 TSTX-2 (3,4)                   'zz'
+       15 TSTG-1 (4)                     ALL HIGH-VALUES
+       15 TSTX-2 (4,1)                   ALL HIGH-VALUES
+       15 TSTX-2 (4,2)                   ALL HIGH-VALUES
+       15 TSTX-2 (4,3)                   ALL HIGH-VALUES
+       15 TSTX-2 (4,4)                   ALL HIGH-VALUES
+  05      TSTTAIL1                        X  _
+                                     1 x 5811
+  05      TSTCOMP3                        58585
+  05      TSTLONG                        'Quick brown fox jumped over the dog              Quick br'
+                                         'own fox jumped over the dog'
+  05      TSTHEX                          Q u i c  k e r    g r e y    f o x    j u m  p e d   _
+                                     1 x 51756963 6B657220 67726579 20666F78 206A756D 70656420 _
+                                          t h e    c o u g  a r   X  X X   X  X X X X  X X   X _
+                                    25 x 74686520 636F7567 61722058 58581158 58585858 58580758 _
+                                          X X X X  X X X X  X X   X  X X X X  X X X X  X X X X _
+                                    49 x 58585858 58585858 58580D58 58585858 58585858 58585858 _
+                                          X X X X  X X X X  X X X X  X X X X  X X X X  X X X X _
+                                    73 x 58585858 58585858 58585858 58585858 58585858 58585858 _
+                                          X X X X
+                                    97 x 58585858
+  05      TSTHEX2                        XXXXXXXXX\0XXXXXXXXXXXXXXXXXXXXX\\XXXXXX\0XXXXXXX\tXXXXXX
+                                    54 : AXXXX\rX
+  05      TSTTAILX                       'Quick brown fox jumped over the dog     '
+                                  trailing LOW-VALUES
+
+LINKAGE
+**********************
+01        X                               000005441
+01        TSPFL-RECORD.                   <NULL> address
+
+Dump Program-Id prog from prog.cob compiled MMM DD YYYY HH:MM:SS
+
+FD FLATFILE
+**********************
+01        TSPFL-RECORD.                 _
+     10   CM-CUST-NUM                    'ALP00000'
+     10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'
+     10   CM-DISK                        '8417'
+     10   CM-NO-TERMINALS                 0010
+
+WORKING-STORAGE
+**********************
+77        MAX-SUB                         0006
+77        CUST-STAT                      '00'
+77        REC-NUM                         0001
+01        BIN                             000005441
+01        TEST-DATA.                    _
+ 02       DATA-CUST-NUM-TBL.            _
+  05      FILLER                         'ALP00000'
+  05      FILLER                         'BET00000'
+  05      FILLER                         'DEL00000'
+  05      FILLER                         'EPS00000'
+  05      FILLER                         'FOR00000'
+  05      FILLER                         'GAM00000'
+ 02       DATA-COMPANY-TBL.             _
+  05      FILLER                         'ALPHA ELECTRICAL CO. LTD.'
+  05      FILLER                         'BETA SHOE MFG. INC.'
+  05      FILLER                         'DELTA LUGGAGE REPAIRS'
+  05      FILLER                         'EPSILON EQUIPMENT SUPPLY'
+  05      FILLER                         'FORTUNE COOKIE COMPANY'
+  05      FILLER                         'GAMMA X-RAY TECHNOLOGY'
+ 02       DATA-ADDRESS-2-TBL.           _
+  05      FILLER                         'ATLANTA'
+  05      FILLER                         'CALGARY'
+  05      FILLER                         'NEW YORK'
+  05      FILLER                         'TORONTO'
+  05      FILLER                         'WASHINGTON'
+  05      FILLER                         'WHITEPLAIN'
+ 02       DATA-NO-TERMINALS-TBL.        _
+  05      FILLER                          010
+  05      FILLER                          013
+  05      FILLER                          075
+  05      FILLER                          010
+  05      FILLER                          090
+  05      FILLER                          254
+01        WORK-AREA.                    _
+  05      SUB                             0007
+
+])
+
+# AT_DATA workaround via sed:
+AT_CHECK([sed -e 's/_$//' reference_tmpl > reference], [0], [], [])
+AT_CHECK([sed -e 's/compiled ... .. .... ..:..:../compiled MMM DD YYYY HH:MM:SS/g' \
+tstdump.txt > tstdump.sed], [0], [], [])
+
+AT_CHECK([diff reference tstdump.sed], [0], [], [])
+
+AT_CHECK([$COMPILE -fdump=FD,LS prog.cob -o prog_fdls], [0], [], [])
+
+AT_CHECK([COB_DUMP_FILE=tstdump_fdls.txt \
+$COBCRUN_DIRECT ./prog_fdls], [11],
+[X is 000000001
+X is 000005441
+], [
+cpyabrt: 4: attempt to reference unallocated memory (signal SIGSEGV)
+libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
+abnormal termination - file contents may be incorrect
+])
+
+
+AT_CAPTURE_FILE(./tstdump_fdls.txt)
+
+AT_DATA([reference_fdls_tmpl],
+[Module dump due to signal SIGSEGV
+ Last statement of sub1 was Line 4 of cpyabrt
+ Last statement of prog was Line 118 of prog.cob
+
+Dump Program-Id sub1 from prog.cob compiled MMM DD YYYY HH:MM:SS
+
+LINKAGE
+**********************
+01        X                               000005441
+01        TSPFL-RECORD.                   <NULL> address
+
+Dump Program-Id prog from prog.cob compiled MMM DD YYYY HH:MM:SS
+
+FD FLATFILE
+**********************
+01        TSPFL-RECORD.                 _
+     10   CM-CUST-NUM                    'ALP00000'
+     10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'
+     10   CM-DISK                        '8417'
+     10   CM-NO-TERMINALS                 0010
+
+])
+
+# AT_DATA workaround via sed:
+AT_CHECK([sed -e 's/_$//' reference_fdls_tmpl > reference], [0], [], [])
+AT_CHECK([sed -e 's/compiled ... .. .... ..:..:../compiled MMM DD YYYY HH:MM:SS/g' \
+tstdump_fdls.txt > tstdump.sed], [0], [], [])
+
+AT_CHECK([diff reference tstdump.sed], [0], [], [])
 
 AT_CLEANUP
 

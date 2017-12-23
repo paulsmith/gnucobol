@@ -99,6 +99,13 @@
 	* common.c, common.h: minimal support for DJGGP,
 	  including generation of 8.3 filenames
 
+2017-10-17  Ron Norman <rjn@inglenet.com>
+
+	* common.h: add flag_debug_trace to the cob_module
+	* common.c: check flag_debug_trace to verify module
+	  was compiled with -debug and/or -ftrace[all] and only
+	  record trace information if compiled with the option
+
 2017-10-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_check_ref_mod): bug #446 splitted checks for length and
@@ -363,8 +370,8 @@
 	* common.c, common.h:
 	  added cob_module_free so that structure gets freed within libcob
 	* fileio.c, common.h:
-	  Added new routines cob_file_external_addr,cob_file_malloc,cob_file_free
-	  so that 'cob_file' is allocated within libcob
+	  Added new routines cob_file_external_addr, cob_file_malloc, cob_file_free
+	  so that 'cob_file' is allocated within libcob.
 	  This will allow the stucture have fields added to the end
 	  without forcing a recompile.
 
@@ -374,6 +381,21 @@
 	  format modifiers for long long
 	* common.c: [WIN32] check if PROCESS_QUERY_LIMITED_INFORMATION is
 	  actually defined (not the case for MINGW and old VC versions)
+
+2017-02-01  Ron Norman <rjn@inglenet.com>
+
+	* common.c, common.h: Corrections to routines for handling -ftrace,
+	  -ftraceall & -fdump=ALL
+
+2017-01-25  Ron Norman <rjn@inglenet.com>
+
+	* common.c, common.h, coblocal.h, termio.c:
+	  New routines for handling -ftrace, -ftraceall & -fdump=ALL
+	  -fdump= causes code to be generated that will dump out data
+	  variables in the event of a program abort or abnormal end
+	  New runtime.cfg/env-vars: 
+	      COB_DUMP_FILE, COB_DUMP_FORMAT, COB_DUMP_WIDTH
+	  The old trace routines have been kept for backward compatible
 
 2017-01-18  Ron Norman <rjn@inglenet.com>
 

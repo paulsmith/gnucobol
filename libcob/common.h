@@ -1198,7 +1198,15 @@ typedef struct __cob_module {
 	unsigned char		flag_exit_program;	/* Exit after CALL */
 
 	unsigned char		flag_did_cancel;	/* Module has been canceled */
-	unsigned char		unused[3];		/* Use these flags up later, added for alignment */
+	unsigned char		flag_dump_ready;	/* Module was compiled with -fdump */
+	unsigned char		flag_debug_trace;	/* Module debug/trace compile option */
+#define COB_MODULE_DEBUG	1
+#define COB_MODULE_TRACE	2
+#define COB_MODULE_TRACEALL	4
+	unsigned char		unused[1];		/* Use these flags up later, added for alignment */
+
+	unsigned int		module_stmt;		/* Last statement executed */
+	const char		**module_sources;	/* Source module names compiled */
 
 } cob_module;
 
@@ -1616,6 +1624,11 @@ COB_EXPIMP void	cob_set_location	(const char *, const unsigned int,
 					 const char *, const char *,
 					 const char *);
 COB_EXPIMP void	cob_trace_section	(const char *, const char *, const int);
+COB_EXPIMP void	cob_trace_sect	(const char *name);
+COB_EXPIMP void	cob_trace_para	(const char *name);
+COB_EXPIMP void	cob_trace_entry	(const char *name);
+COB_EXPIMP void	cob_trace_exit	(const char *name);
+COB_EXPIMP void	cob_trace_stmt	(const char *stmt);
 
 COB_EXPIMP void			*cob_external_addr	(const char *, const int);
 COB_EXPIMP unsigned char	*cob_get_pointer	(const void *);
@@ -1630,6 +1643,10 @@ enum cob_runtime_option_switch {
 };
 COB_EXPIMP void			cob_set_runtime_option		(enum cob_runtime_option_switch opt, void *p);
 COB_EXPIMP void			*cob_get_runtime_option		(enum cob_runtime_option_switch opt);
+
+#define COB_GET_LINE_NUM(n) ( n & 0xFFFFF )
+#define COB_GET_FILE_NUM(n) ( (n >> 20) & 0xFFF)
+#define COB_SET_LINE_FILE(l,f) ( (unsigned int)((unsigned int)f<<20) | l)
 
 /* Datetime structure */
 struct cob_time
@@ -1885,6 +1902,7 @@ COB_EXPIMP int		cob_sys_set_csr_pos	(unsigned char *);
 /* Functions in termio.c */
 
 COB_EXPIMP void cob_display	(const int, const int, const int, ...);
+COB_EXPIMP void cob_dump_field	(const int, const char *, cob_field *, const int, const int, ...);
 COB_EXPIMP void cob_accept	(cob_field *);
 
 /*******************************/

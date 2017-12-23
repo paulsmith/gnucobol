@@ -339,6 +339,9 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
+/* Flag to emit Old style: cob_set_location, cob_trace_section */  
+extern int cb_old_trace;
+
 #define	CB_WARNDEF(var,name,doc)	extern int var;
 #define	CB_ONWARNDEF(var,name,doc)	extern int var;
 #define	CB_NOWARNDEF(var,name,doc)	extern int var;
@@ -368,6 +371,16 @@ extern int			cb_literal_id;
 extern int			cb_field_id;
 extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
+
+extern int			cb_flag_dump;
+#define COB_DUMP_FD	0x0001
+#define COB_DUMP_WS	0x0002
+#define COB_DUMP_RD	0x0004
+#define COB_DUMP_SD	0x0008
+#define COB_DUMP_SC	0x0010
+#define COB_DUMP_LS	0x0020
+#define COB_DUMP_ALL	(COB_DUMP_FD|COB_DUMP_WS|COB_DUMP_RD|COB_DUMP_SD|COB_DUMP_SC|COB_DUMP_LS)
+
 extern int			cb_flag_main;
 extern int			cobc_wants_debug;
 extern int			cb_listing_xref;
