@@ -1734,19 +1734,13 @@ cob_get_u64_param (int n)
 }
 
 char *
-cob_get_picx_param (int n, void *char_field, int char_len)
+cob_get_picx_param (int n, void *char_field, size_t char_len)
 {
-	void		*cbl_data;
-	int		size;
 	cob_field	*f = cob_get_param_field (n, "cob_get_picx_param");
-
 	if (f == NULL) {
 		return NULL;
 	}
-
-	cbl_data = f->data;
-	size    = f->size;
-	return cob_get_picx (cbl_data, size, char_field, char_len);
+	return cob_get_picx (f->data, f->size, char_field, char_len);
 }
 
 void
@@ -1891,15 +1885,14 @@ cob_put_picx_param (int n, void *char_field)
 }
 
 void *
-cob_get_grp_param (int n, void *char_field, int len)
+cob_get_grp_param (int n, void *char_field, size_t len)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_get_grp_param");
 
 	if (f == NULL) {
 		return NULL;
 	}
-
-	if (len <= 0) {
+	if (len == 0) {
 		len = f->size;
 	}
 
@@ -1914,7 +1907,7 @@ cob_get_grp_param (int n, void *char_field, int len)
 }
 
 void
-cob_put_grp_param (int n, void *char_field, int len)
+cob_put_grp_param (int n, void *char_field, size_t len)
 {
 	cob_field	*f = cob_get_param_field (n, "cob_put_grp_param");
 
@@ -1927,7 +1920,7 @@ cob_put_grp_param (int n, void *char_field, int len)
 		return;
 	}
 
-	if (len <= 0 || len > f->size) {
+	if (len == 0 || len > f->size) {
 		len = f->size;
 	}
 	memcpy (f->data, char_field, len);

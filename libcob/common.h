@@ -1753,7 +1753,7 @@ COB_EXPIMP cob_s64_t	cob_get_llint	(cob_field *);
 /**************************************************/
 /* Functions in move.c for C access to COBOL data */
 /**************************************************/
-COB_EXPIMP char *	cob_get_picx( void *cbldata, int len, void *charfld, int charlen);
+COB_EXPIMP char *	cob_get_picx( void *cbldata, size_t len, void *charfld, size_t charlen);
 COB_EXPIMP cob_s64_t	cob_get_s64_comp3(void *cbldata, int len);
 COB_EXPIMP cob_s64_t	cob_get_s64_comp5(void *cbldata, int len);
 COB_EXPIMP cob_s64_t	cob_get_s64_compx(void *cbldata, int len);
@@ -1767,7 +1767,7 @@ COB_EXPIMP float 	cob_get_comp1(void *cbldata);
 COB_EXPIMP double	cob_get_comp2(void *cbldata);
 COB_EXPIMP void		cob_put_comp1(float val, void *cbldata);
 COB_EXPIMP void		cob_put_comp2(double val, void *cbldata);
-COB_EXPIMP void 	cob_put_picx( void *cbldata, int len, void *string);
+COB_EXPIMP void 	cob_put_picx( void *cbldata, size_t len, void *string);
 COB_EXPIMP void		cob_put_s64_comp3(cob_s64_t val, void *cbldata, int len);
 COB_EXPIMP void		cob_put_s64_comp5(cob_s64_t val, void *cbldata, int len);
 COB_EXPIMP void		cob_put_s64_compx(cob_s64_t val, void *cbldata, int len);
@@ -1860,12 +1860,12 @@ COB_EXPIMP int		cob_get_param_type ( int num_param );
 COB_EXPIMP void *	cob_get_param_data ( int num_param );
 COB_EXPIMP cob_s64_t	cob_get_s64_param  ( int num_param );
 COB_EXPIMP cob_u64_t	cob_get_u64_param  ( int num_param );
-COB_EXPIMP char *	cob_get_picx_param ( int num_param, void *charfld, int charlen );
-COB_EXPIMP void *	cob_get_grp_param  ( int num_param, void *charfld, int charlen );
+COB_EXPIMP char *	cob_get_picx_param ( int num_param, void *charfld, size_t charlen );
+COB_EXPIMP void *	cob_get_grp_param  ( int num_param, void *charfld, size_t charlen );
 COB_EXPIMP void		cob_put_s64_param  ( int num_param, cob_s64_t value );
 COB_EXPIMP void		cob_put_u64_param  ( int num_param, cob_u64_t value );
 COB_EXPIMP void 	cob_put_picx_param ( int num_param, void *charfld );
-COB_EXPIMP void  	cob_put_grp_param  ( int num_param, void *charfld, int charlen );
+COB_EXPIMP void  	cob_put_grp_param  ( int num_param, void *charfld, size_t charlen );
 
 /*******************************/
 /* Functions in screenio.c */

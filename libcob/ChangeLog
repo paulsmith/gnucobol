@@ -338,6 +338,12 @@
 	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
 	  HAVE_ISFINITE to either use 'isfinite' or 'finite' or '_finite'
 
+2017-04-10  Ron Norman <rjn@inglenet.com>
+
+	* move.c, call.c, common.h: C-API
+	  Changed 'len' variables from 'int' to 'size_t' in cob_get_picx,
+	  cob_put_picx, cob_get_picx_param, cob_get_grp_param, cob_put_grp_param
+
 2017-04-10  Brian Tiffin <btiffin@gnu.org>
 
 	* common.c, common.h: remove cob_get_prog_pointer in preference to
