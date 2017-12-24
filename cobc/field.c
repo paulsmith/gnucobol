@@ -641,7 +641,6 @@ check_picture_item (struct cb_field *f)
 	  but guessing one if it doesn't exist.
 	*/
 	if (f->storage == CB_STORAGE_SCREEN) {
-		/* RXWRXW Fixme - Corner cases */
 		if (f->values) {
 			size_implied = (int)CB_LITERAL (CB_VALUE (f->values))->size;
 			is_numeric = CB_NUMERIC_LITERAL_P (CB_VALUE (f->values));
@@ -1249,10 +1248,6 @@ validate_elem_screen_clauses_std (struct cb_field * const f)
 
 	error_both_full_and_justified (f);
 
-	/*
-	  TO-DO: Report error to std committee: numeric literal allowed in
-	  13.17.2.7, but forbidden in 13.18.63.2.14
-	*/
 	error_value_figurative_constant (f);
 }
 
