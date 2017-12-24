@@ -30,6 +30,10 @@
 	* default.conf: changed use-for-debugging to "ok"
 	* runtime.cfg: included COB_SET_DEBUG in the documentation
 
+2017-10-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added screen-section-clauses option.
+
 2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added record-delimiter, sequential-delimiters and

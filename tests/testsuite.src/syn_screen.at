@@ -548,3 +548,148 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([Compiler-specific SCREEN SECTION clause rules])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC X.
+       01  num PIC 9.
+
+       SCREEN SECTION.
+       01  scr.
+           03  no-clauses.
+           03  no-required-clauses BACKGROUND-COLOR 1.
+           03  only-line LINE 1.
+           03  numeric-pic-and-value PIC 999 VALUE 100.
+           03  only-pic PIC 9.
+           03  from-to-using-without-pic FROM x.
+           03  auto-without-from-to-using PIC 9 AUTO.
+           03  full-without-to-using PIC X FROM x FULL.
+           03  full-and-justified PIC X USING x, FULL, JUST.
+           03  secure-with-from PIC X FROM x SECURE.
+           03  secure-justified-no-clauses VALUE "Hello" SECURE, JUST.
+           03  blank-when-zero-without-pic FROM num, BLANK ZERO.
+           03  justified-without-pic FROM x, JUST.
+           03  sign-no-clauses PIC S9, SIGN LEADING SEPARATE.
+           03  figurative-constant-value VALUE SPACES.
+           03  only-erase ERASE EOL.
+           03  only-blank BLANK SCREEN.
+           03  only-bell BELL.
+           03  numeric-value-no-pic VALUE 1.
+
+       01 always-ok-scr.
+           03  my-group LINE 1, COL 1, FULL.
+               05  PIC X FROM "x" TO x.
+               05  PIC Z USING num.
+               05  VALUE "Hello, world!".
+])
+
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=std prog.cob], [1], [],
+[prog.cob:12: error: 'no-clauses' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
+prog.cob:13: error: 'no-required-clauses' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
+prog.cob:14: error: 'only-line' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
+prog.cob:16: error: 'only-pic' cannot have PIC without FROM, TO, USING or numeric VALUE
+prog.cob:17: warning: 'from-to-using-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:18: error: 'auto-without-from-to-using' cannot have PIC without FROM, TO, USING or numeric VALUE
+prog.cob:20: error: cannot specify both FULL and JUSTIFIED
+prog.cob:23: warning: 'blank-when-zero-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:24: warning: 'justified-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:25: error: 'sign-no-clauses' cannot have PIC without FROM, TO, USING or numeric VALUE
+prog.cob:26: error: VALUE may not contain a figurative constant
+prog.cob:30: warning: 'numeric-value-no-pic' has numeric VALUE without PIC; PIC will be implied
+])
+
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=acu prog.cob], [1], [],
+[prog.cob:15: error: cannot specify both PIC and VALUE
+prog.cob:15: error: cannot have PIC without FROM, TO or USING
+prog.cob:15: error: VALUE item may not be numeric
+prog.cob:16: error: cannot have PIC without FROM, TO or USING
+prog.cob:17: warning: 'from-to-using-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:18: error: cannot have PIC without FROM, TO or USING
+prog.cob:22: error: cannot have JUSTIFIED without PIC
+prog.cob:23: warning: 'blank-when-zero-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:23: error: cannot have BLANK WHEN ZERO without PIC
+prog.cob:24: warning: 'justified-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:24: error: cannot have JUSTIFIED without PIC
+prog.cob:25: error: cannot have PIC without FROM, TO or USING
+prog.cob:30: error: VALUE item may not be numeric
+])
+
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=mf prog.cob], [1], [],
+[prog.cob:12: error: 'no-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:13: error: 'no-required-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:15: error: cannot specify both PIC and VALUE
+prog.cob:15: error: cannot have PIC without FROM, TO or USING
+prog.cob:15: error: VALUE item may not be numeric
+prog.cob:16: error: cannot have PIC without FROM, TO or USING
+prog.cob:17: error: 'from-to-using-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:17: warning: 'from-to-using-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:18: error: cannot have PIC without FROM, TO or USING
+prog.cob:18: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
+prog.cob:19: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
+prog.cob:21: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
+prog.cob:22: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
+prog.cob:22: error: cannot use BLANK WHEN ZERO, JUSTIFIED, OCCURS or SIGN on item without FROM, TO or USING
+prog.cob:23: error: 'blank-when-zero-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:23: warning: 'blank-when-zero-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:24: error: 'justified-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:24: warning: 'justified-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:25: error: cannot have PIC without FROM, TO or USING
+prog.cob:25: error: cannot use BLANK WHEN ZERO, JUSTIFIED, OCCURS or SIGN on item without FROM, TO or USING
+prog.cob:26: error: VALUE may not contain a figurative constant
+prog.cob:27: error: 'only-erase' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:30: error: VALUE item may not be numeric
+prog.cob:36: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
+])
+
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=rm prog.cob], [1], [],
+[prog.cob:15: error: cannot specify both PIC and VALUE
+prog.cob:15: error: cannot have PIC without FROM, TO or USING
+prog.cob:15: error: VALUE item may not be numeric
+prog.cob:16: error: cannot have PIC without FROM, TO or USING
+prog.cob:17: error: cannot have FROM, TO or USING without PIC
+prog.cob:18: error: cannot have PIC without FROM, TO or USING
+prog.cob:22: error: cannot use AUTO, FULL, REQUIRED or SECURE on elementary item without FROM, TO or USING
+prog.cob:22: error: cannot use BLANK WHEN ZERO, JUSTIFIED or SIGN without FROM, TO or USING
+prog.cob:23: error: cannot have FROM, TO or USING without PIC
+prog.cob:23: error: cannot use BLANK WHEN ZERO, JUSTIFIED or SIGN without FROM, TO or USING
+prog.cob:24: error: cannot have FROM, TO or USING without PIC
+prog.cob:24: error: cannot use BLANK WHEN ZERO, JUSTIFIED or SIGN without FROM, TO or USING
+prog.cob:25: error: cannot have PIC without FROM, TO or USING
+prog.cob:30: error: VALUE item may not be numeric
+prog.cob:36: error: cannot use AUTO, FULL, REQUIRED or SECURE on elementary item without FROM, TO or USING
+])
+
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=xopen prog.cob], [1], [],
+[prog.cob:12: error: 'no-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:13: error: 'no-required-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:15: error: cannot specify both PIC and VALUE
+prog.cob:15: error: cannot have PIC without FROM, TO or USING
+prog.cob:15: error: VALUE item may not be numeric
+prog.cob:16: error: cannot have PIC without FROM, TO or USING
+prog.cob:17: error: 'from-to-using-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:17: error: cannot have FROM, TO or USING without PIC
+prog.cob:18: error: cannot have PIC without FROM, TO or USING
+prog.cob:18: error: cannot have AUTO without FROM, TO or USING
+prog.cob:19: error: cannot use FULL or REQUIRED on item without TO or USING
+prog.cob:20: error: cannot specify both FULL and JUSTIFIED
+prog.cob:21: error: SECURE can be used with TO only
+prog.cob:22: error: SECURE must be used with TO
+prog.cob:23: error: 'blank-when-zero-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:23: error: cannot have FROM, TO or USING without PIC
+prog.cob:24: error: 'justified-without-pic' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:24: error: cannot have FROM, TO or USING without PIC
+prog.cob:25: error: cannot have PIC without FROM, TO or USING
+prog.cob:27: error: 'only-erase' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
+prog.cob:30: error: VALUE item may not be numeric
+prog.cob:36: error: cannot use FULL or REQUIRED on item without TO or USING
+])
+
+AT_CLEANUP

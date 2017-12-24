@@ -574,6 +574,21 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				invalid_value (fname, line, name, val, "native, big-endian", 0, 0);
 				return -1;
 			}
+		} else if (strcmp (name, "screen-section-clauses") == 0) {
+			if (strcmp (val, "std") == 0) {
+				cb_screen_section_clauses = CB_STD_SCREEN_RULES;
+			} else if (strcmp (val, "mf") == 0) {
+				cb_screen_section_clauses = CB_MF_SCREEN_RULES;
+			} else if (strcmp (val, "acu") == 0) {
+				cb_screen_section_clauses = CB_ACU_SCREEN_RULES;
+			} else if (strcmp (val, "rm") == 0) {
+				cb_screen_section_clauses = CB_RM_SCREEN_RULES;
+			} else if (strcmp (val, "xopen") == 0) {
+				cb_screen_section_clauses = CB_XOPEN_SCREEN_RULES;
+			} else {
+				invalid_value (fname, line, name, val, "std, mf, acu, rm, xopen", 0, 0);
+				return -1;
+			}
 		} else if (strcmp (name, "standard-define") != 0) {
 			configuration_error (fname, line, 1, _("Invalid type for '%s'"), name);
 			return -1;

@@ -321,6 +321,13 @@
 
 	* codegen.c: correction for -fodoslide
 
+2017-10-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.def, config.c, field.c: added screen-section-clauses option to
+	  set rules for SCREEN SECTION item clauses.
+	* field.c: removed "alphanumeric value is expected" warning when using
+	  numeric VALUEs in the SCREEN SECTION.
+
 2017-10-06  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, tree.c, tree.h: added RECORD DELIMITER syntax checks.
