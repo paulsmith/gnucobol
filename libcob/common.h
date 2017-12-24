@@ -1620,15 +1620,17 @@ COB_EXPIMP int	cob_sys_printable	(void *, ...);
 
 /* Utilities */
 
+/* compatibility functions up to GnuCOBOL 2.2 */
 COB_EXPIMP void	cob_set_location	(const char *, const unsigned int,
 					 const char *, const char *,
 					 const char *);
 COB_EXPIMP void	cob_trace_section	(const char *, const char *, const int);
-COB_EXPIMP void	cob_trace_sect	(const char *name);
-COB_EXPIMP void	cob_trace_para	(const char *name);
-COB_EXPIMP void	cob_trace_entry	(const char *name);
-COB_EXPIMP void	cob_trace_exit	(const char *name);
-COB_EXPIMP void	cob_trace_stmt	(const char *stmt);
+/* new functions from 2.3 on: */
+COB_EXPIMP void	cob_trace_sect		(const char *name);
+COB_EXPIMP void	cob_trace_para		(const char *name);
+COB_EXPIMP void	cob_trace_entry		(const char *name);
+COB_EXPIMP void	cob_trace_exit		(const char *name);
+COB_EXPIMP void	cob_trace_stmt		(const char *stmt);
 
 COB_EXPIMP void			*cob_external_addr	(const char *, const int);
 COB_EXPIMP unsigned char	*cob_get_pointer	(const void *);

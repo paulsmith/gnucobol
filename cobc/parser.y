@@ -741,9 +741,11 @@ check_relaxed_syntax (const cob_flags_t lev)
 	case COBC_HD_PROGRAM_ID:
 		s = "PROGRAM-ID";
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		s = "unknown";
+		s = _("unknown");
 		break;
+	/* LCOV_EXCL_STOP */
 	}
 	if (cb_relaxed_syntax_checks) {
 		cb_warning (COBC_WARN_FILLER, _("%s header missing - assumed"), s);

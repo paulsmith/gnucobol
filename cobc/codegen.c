@@ -9021,16 +9021,15 @@ static void
 output_display_fields (struct cb_field *f, int offset, int idx)
 {
 	struct cb_field	*p;
-	int		adjust;
-	int		i;
+	int	adjust,i;
 
 	for (p = f; p; p = p->sister) {
 		if (p->redefines
-		    || (p->level == 0 && p->file == NULL)
-		    || p->level == 66
-		    || p->level == 78
-		    || p->level == 88
-		    || p->flag_item_based) {
+		 || (p->level == 0 && p->file == NULL)
+		 || p->level == 66
+		 || p->level == 78
+		 || p->level == 88
+		 || p->flag_item_based) {
 			continue;
 		}
 		/* For special registers */

@@ -3563,9 +3563,11 @@ res_get_feature (const enum cb_system_name_category category)
 	case CB_FEATURE_NAME:
 		s = _("feature name");
 		break;
+	/* LCOV_EXCL_START */
 	default:
 		s = _("unknown");
 		break;
+	/* LCOV_EXCL_STOP */
 	}
 	return s;
 }

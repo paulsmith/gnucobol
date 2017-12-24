@@ -69,7 +69,8 @@ CB_FLAG_RQ (cb_max_errors, 1, "max-errors", 100, 7,
 	  "                        - default: 100"))
 
 CB_FLAG_RQ (cb_def_dump, 1, "dump", -1, 8,
-	 _("  -fdump=[ALL|WS,LS,RD,FD,SC]\tdump data fields on abort"))
+	_("  -fdump=<scope>        dump data fields on abort, <scope> may be\n"
+	  "                        a combination of: ALL, WS, LS, RD, FD, SC"))
 
 /* Flags with required parameter and no associated variable */
 

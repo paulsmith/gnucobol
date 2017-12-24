@@ -406,8 +406,8 @@
 
 2017-02-01  Ron Norman <rjn@inglenet.com>
 
-	* common.c, common.h: Corrections to routines for handling -ftrace,
-	  -ftraceall & -fdump=ALL
+	* common.c, common.h:
+	  Corrections to routines for handling -ftrace, -ftraceall & -fdump=ALL
 
 2017-01-30  Ron Norman <rjn@inglenet.com>
 
@@ -416,8 +416,8 @@
 2017-01-25  Ron Norman <rjn@inglenet.com>
 
 	* common.c, common.h, coblocal.h, termio.c:
-	  New routines for handling -ftrace, -ftraceall & -fdump=ALL
-	  -fdump= causes code to be generated that will dump out data
+	  New routines for handling -ftrace, -ftraceall & -fdump=<scope>
+	  -fdump=<scope> causes code to be generated that will dump out data
 	  variables in the event of a program abort or abnormal end
 	  New runtime.cfg/env-vars: 
 	      COB_DUMP_FILE, COB_DUMP_FORMAT, COB_DUMP_WIDTH
@@ -1172,9 +1172,11 @@
 	  use (setenv) if available
 
 2014-06-17  Ron Norman (rjn@inglenet.com)
+
 	* parser.y, tree.c, codegen.c Added check to verfiy PAGE LIMITS of report
 
 2014-06-14  Ron Norman (rjn@inglenet.com)
+
 	* parser.y Fixes for LINE|COL 0 to get error message
 
 2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>

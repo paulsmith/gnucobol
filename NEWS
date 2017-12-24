@@ -6,14 +6,14 @@ GnuCOBOL 3.0 to be released (201712xx)
 
 ** REPORTWRITER module added
 
-** Option to dump (partial) data of modules on abort.
-   Use new cobc option -fdump=[ALL|WS,LS,RD,FD,SC] to prepare the module
-   and optional use new runtime configuration options COB_DUMP_FILE and
-   COB_DUMP_WIDTH to adjust the dump.
-
 ** DISPLAY ... UPON PRINTER may be redirected to an external command
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
    (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
+
+** Option to dump (partial) data of modules on abort.
+   Use new cobc option -fdump=<scope> to prepare the module and optional 
+   use new runtime configuration options COB_DUMP_FILE and COB_DUMP_WIDTH
+   to adjust the dump.
 
 ** C interface: new functions cob_set_runtime_option / cob_get_runtime_option
    to set/get special runtime options (currently FILE * for trace and printer

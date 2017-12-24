@@ -38,7 +38,7 @@ static struct cb_label	*last_paragraph = NULL;
 
 static int conf_error_displayed = 0;
 static int last_error_line = 0;
-static const char	*last_error_file = "Unknown";
+static const char	*last_error_file = "unknown";	/* no gettext for static initializer */
 static FILE			*sav_lst_file = NULL;
 static int		ignore_error = 0;
 
