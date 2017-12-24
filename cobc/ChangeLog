@@ -954,7 +954,7 @@
 
 	* field.c: Specific error messages for ANY NUMERIC
 
-2017-04-27 Sergey Kashyrin <ska@kiska.net>
+2017-04-27  Sergey Kashyrin <ska@kiska.net>
 
 	* parser.y: Fix for CALL-CONVENTION (was broken)
 	* codegen.c: on Windows we need to output entries prototypes
@@ -1111,11 +1111,11 @@
 
 	* tree.c: fixed use of warn_cannot_get_utc while available
 
-2017-02-02 Brian Tiffin <btiffin@gnu.org>
+2017-02-02  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: Updated CB_PENDING CB_UNFINISHED macros with quieter ONCE_COB
 
-2017-02-02 Brian Tiffin <btiffin@gnu.org>
+2017-02-02  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h, warning.def: test cb_warn_pending in CB_PENDING message macro.
 
@@ -1317,7 +1317,7 @@
 	  with PICTURE or UNBOUNDED are shown correctly now,
 	  references by parent/child only are shown, too
 
-2017-01-02 Brian Tiffin <btiffin@gnu.org>
+2017-01-02  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.h: test cb_warn_unfinished in CB_UNFINISHED message macro.
 
@@ -1423,7 +1423,7 @@
 	* cobc.c: fix minor memory leaks in listing code
 	* pplex.l, cobc.h: commented copy_tail as it doesn't seem to be used
 
-2016-11-19 Edward Hart <edward.dan.hart@gmail.com>
+2016-11-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y, reserved.c, etc.: added complete recognition of all
 	  COMMUNICATION SECTION syntax.
@@ -2051,7 +2051,7 @@
 	* parser.y (accept_statement): fixed bug where context-sensitive words
 	  were not detected.
 
-2016-07-17 Brian Tiffin <btiffin@gnu.org>
+2016-07-17  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: when emitting source for a function entry, if cob_call_params
 	  is zero, and cob_module is not set, set cob_call_params to the number of
@@ -2066,7 +2066,7 @@
 	* scanner.l, pplex.l: fixed bug #269. GnuCOBOL now gobbles redundant
 	  periods, instead of releasing them to the parser.
 
-2016-07-15 Brian Tiffin <btiffin@gnu.org>
+2016-07-15  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: correction to exception code tested for ACCEPT ON EXCEPTION
 
@@ -2168,7 +2168,7 @@
 	* ppparse.def: Added compiler constants GNUCOBOL (alias for OPENCOBOL)
 	  and GCCOMP (alias for OCCOMP)
 
-2016-06-15 Brian Tiffin <btiffin@gnu.org>
+2016-06-15  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: Added optional arguments for -j job submits and -job alias
 
@@ -2231,7 +2231,7 @@
 	* parser.y: fixed bug #242 and allowed exception handlers to be in any
 	  order.
 
-2016-05-31 Brian Tiffin <btiffin@gnu.org>
+2016-05-31  Brian Tiffin <btiffin@gnu.org>
 
 	* typeck.c: fix bug #235 ADD/SUBTRACT CORRESPONDING only for NUMERIC items.
 
@@ -2245,7 +2245,7 @@
 	  array of (cob_pic_symbol) structs which are easier to use.
 	* codegen.c (codegen): split large chunks of code in separate functions.
 
-2016-05-21 Brian Tiffin <btiffin@gnu.org>
+2016-05-21  Brian Tiffin <btiffin@gnu.org>
 
 	* codegen.c: improving CALL BY VALUE. One step of many, more to do.
 
@@ -2256,11 +2256,11 @@
 	* field.c: improved error checking for BLANK WHEN ZERO with invalid
 	  PICs.
 
-2016-05-16 Brian Tiffin <btiffin@gnu.org>
+2016-05-16  Brian Tiffin <btiffin@gnu.org>
 
 	* codeoptim.c: bug #229, missed patching cob_cmp_align_u64.
 
-2016-05-15 Brian Tiffin <btiffin@gnu.org>
+2016-05-15  Brian Tiffin <btiffin@gnu.org>
 
 	* cobc.c: correct process_run return code for systems with WEXITSTATUS
 
@@ -2642,7 +2642,7 @@
 	* tree.c (offset_time_format): fixed bug #169 - require datetime
 	  functions with Z format to take an offset parameter.
 
-2015-11-25 Sergey Kashyrin <ska@kiska.net>
+2015-11-25  Sergey Kashyrin <ska@kiska.net>
 
 	* codegen.c (output_integer): cast program-pointer to unsigned char *,
 	  not to void *

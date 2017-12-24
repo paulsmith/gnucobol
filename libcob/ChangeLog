@@ -1,4 +1,9 @@
 
+2017-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* numeric.c (cob_decimal_get_field): fix bug #223 don't raise
+	  EC-SIZE-OVERFLOW when EC-SIZE-ZERO-DIVIDE is active
+
 2017-12-22  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c: fixes for FLOAT-DECIMAL-16/34 data types to raise
@@ -13,13 +18,13 @@
 	  use enum cob_runtime_option_switch instead of anonymous int with
 	  possible values as defines
 
-2017-12-21 Ron Norman <rjn@inglenet.com>
+2017-12-21  Ron Norman <rjn@inglenet.com>
 
 	* common.h: add code_is_present flag to cob_report structure
 	* reportio.c: output CODE value as fixed length field
 	              (do not trim trailing spaces)
 
-2017-12-20 Ron Norman <rjn@inglenet.com>
+2017-12-20  Ron Norman <rjn@inglenet.com>
 
 	* common.h: add code_is, code_len to cob_report structure
 	* reportio.c: output CODE value and chop lines based on 
@@ -214,7 +219,7 @@
 	* common.h, coblocal.h: moved declaration of cob_strdup to allow it
 	  to be called like the other memory functions
 
-2017-08-06 Ron Norman <rjn@inglenet.com>
+2017-08-06  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (cob_file_external_addr): fixed bug #404, where the
 	  cob_file_key for a RELATIVE file was not allocated.
@@ -257,7 +262,7 @@
 	  unsetenv is used in runtime.cfg to show environment variable
 	  was removed and runtime.cfg variable was then present
 
-2017-05-31 Ron Norman <rjn@inglenet.com>
+2017-05-31  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (indexed_open) [WITH_DB]: if the first record in the file
 	  has a size larger than the FD has defined then return status 39
@@ -333,7 +338,7 @@
 	* common.h: always use COB_KEYWORD_INLINE (set by configure)
 	  for COB_INLINE
 
-2017-04-18 Ron Norman <rjn@inglenet.com>
+2017-04-18  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c, common.c, coblocal.h: define ISFINITE depending on
 	  HAVE_ISFINITE to either use 'isfinite' or 'finite' or '_finite'
@@ -504,7 +509,7 @@
 	* common.h: added compatibility define for cobclear and corrected
 	  cobrescanenv to always return zero.
 
-2016-12-18 Ron Norman <rjn@inglenet.com>
+2016-12-18  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (lock_record, test_record_lock): initialize DBT structure
 	  before using it to prevent memory corruption
@@ -529,7 +534,7 @@
 	  the system specific error code instead
 	* common.c (cob_sys_waitpid): added [_WIN32] implementation
 
-2016-11-17 Ron Norman <rjn@inglenet.com>
+2016-11-17  Ron Norman <rjn@inglenet.com>
 
 	* common.c, common.h, system.def: added cob_sys_fork for CBL_GC_FORK
 	  (fork a new COBOL process) and cob_sys_waitpid for CBL_GC_WAITPID
@@ -571,7 +576,7 @@
 
 	* numeric.c, common.h: added cob_decimal_align function for 'arithemtic-osvs'
 
-2016-10-02 Ron Norman <rjn@inglenet.com>
+2016-10-02  Ron Norman <rjn@inglenet.com>
 
 	* common.c: report time in COB_DEBUG_LOG for performance test
 	* reportio.c: fixed scan for changed fields to be faster
@@ -638,7 +643,7 @@
 
 	* common.c, common.h: minor fixes for compatibility to VC2005
 
-2016-06-20 Ron Norman <rjn@inglenet.com>
+2016-06-20  Ron Norman <rjn@inglenet.com>
 
 	* coblocal.h, common.c: FR #138 identify config variables which accept
 	  a path list and any which only accept a single directory/file
@@ -666,7 +671,7 @@
 	* common.h, move.c, termio.c: replaced PICTURE strings containing packed
 	  ints with array of (cob_pic_symbol) structs which are easier to use.
 
-2016-05-01 Ron Norman <rjn@inglenet.com>
+2016-05-01  Ron Norman <rjn@inglenet.com>
 
 	* common.c fixed incorrect reporting of error for undefined environment variables
 
@@ -787,7 +792,7 @@
 	* call.c (cob_call): fr #101 - allow more parameters for CALL
 	  (COB_MAX_FIELD_PARAMS to be one of 16/36/56/76/96)
 
-2016-01-01 Ron Norman <rjn@inglenet.com>
+2016-01-01  Ron Norman <rjn@inglenet.com>
 
 	* common.c (cob_set_runtime_option, cob_get_runtime_option), common.h,
 	  coblocal.h, termio.c: added cob_set_runtime_option / cob_get_runtime_option
@@ -880,7 +885,7 @@
 
 	* common.c [WIN32][MINGW]: tweaking of additional environment settings
 
-2015-10-10 Ron Norman <rjn@inglenet.com>
+2015-10-10  Ron Norman <rjn@inglenet.com>
 
 	* common.c: added code to report additional environment settings
 
