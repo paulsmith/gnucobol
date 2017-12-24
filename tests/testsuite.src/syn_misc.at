@@ -88,7 +88,7 @@ AT_CLEANUP
 
 
 AT_SETUP([warn literal size])
-AT_KEYWORDS([numeric constant expression])
+AT_KEYWORDS([misc numeric constant expressions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -279,6 +279,51 @@ prog.cob:117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -2
 prog.cob:118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
 prog.cob:124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 prog.cob:126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([warn literal size / constant expr. (level 88)])
+AT_KEYWORDS([misc numeric constant expressions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x PIC 9.
+        88 never-true value 99.
+       01  y PIC 9.
+        88 never-truen value -9.
+       01  xx pic x.
+        88 some-not values 'a', 'b', 'cd'.
+        88 some-not-s values '00', 'a', 'b', 'cd'.
+
+       PROCEDURE DIVISION.
+           if never-true
+            continue
+           end-if
+           if never-truen
+            continue
+           end-if
+           if some-not-s
+            set some-not to true
+            set some-not-s to true
+           end-if
+           goback.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:8: warning: literal '99' has more digits than x
+prog.cob:8: warning: expression is always FALSE
+prog.cob:13: warning: literal '00' is longer than xx
+prog.cob:13: warning: expression is always FALSE
+prog.cob:13: warning: literal 'cd' is longer than xx
+prog.cob:13: warning: expression is always FALSE
+prog.cob:24: warning: value size exceeds data size
+prog.cob:11: warning: 'xx' defined here as PIC X
 ])
 
 AT_CLEANUP
