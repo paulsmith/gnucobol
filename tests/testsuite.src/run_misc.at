@@ -8055,6 +8055,8 @@ Dump Program-Id prog from prog.cob compiled MMM DD YYYY HH:MM:SS
 
 FD FLATFILE
 **********************
+   File is OPEN
+   FILE STATUS  '00'
 01        TSPFL-RECORD.                 _
      10   CM-CUST-NUM                    'ALP00000'
      10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'
@@ -8139,6 +8141,8 @@ Dump Program-Id prog from prog.cob compiled MMM DD YYYY HH:MM:SS
 
 FD FLATFILE
 **********************
+   File is OPEN
+   FILE STATUS  '00'
 01        TSPFL-RECORD.                 _
      10   CM-CUST-NUM                    'ALP00000'
      10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'

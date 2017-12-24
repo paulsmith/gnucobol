@@ -491,6 +491,17 @@ cob_dump_field (const int level, const char *name,
 		if (level == -1) {
 			fprintf(fp, "\n%s\n**********************\n",name);
 			dump_null_adrs = 0;
+		} else
+		if (level == -2
+		 && name != NULL) {
+			cob_file *fl = (cob_file*)name;
+			if (fl->open_mode == COB_OPEN_CLOSED) 
+				fprintf(fp,"   File is CLOSED\n");
+			else if (fl->open_mode == COB_OPEN_LOCKED) 
+				fprintf(fp,"   File is LOCKED\n");
+			else
+				fprintf(fp,"   File is OPEN\n");
+			fprintf(fp, "   FILE STATUS  '%.2s'\n",fl->file_status);
 		}
 	} else {
 		va_start (ap, indexes);

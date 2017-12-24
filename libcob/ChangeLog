@@ -409,6 +409,10 @@
 	* common.c, common.h: Corrections to routines for handling -ftrace,
 	  -ftraceall & -fdump=ALL
 
+2017-01-30  Ron Norman <rjn@inglenet.com>
+
+	* termio.c: for -fdump=ALL,IO; Dump FILE STATUS value
+
 2017-01-25  Ron Norman <rjn@inglenet.com>
 
 	* common.c, common.h, coblocal.h, termio.c:
