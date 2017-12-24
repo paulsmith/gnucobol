@@ -169,6 +169,7 @@ static struct cb_file		*current_file;
 static struct cb_cd		*current_cd;
 static struct cb_report		*current_report;
 static struct cb_report		*report_instance;
+static struct cb_key_component	*key_component_list;
 
 static struct cb_file		*linage_file;
 static cb_tree			next_label_list;
@@ -4372,17 +4373,40 @@ access_mode:
 /* ALTERNATIVE RECORD KEY clause */
 
 alternative_record_key_clause:
-  ALTERNATE _record _key _is key_or_split_keys flag_duplicates _suppress_clause
+  ALTERNATE _record _key _is reference _split_keys flag_duplicates _suppress_clause
   {
 	struct cb_alt_key *p;
 	struct cb_alt_key *l;
 
+	cb_tree composite_key;
+
 	p = cobc_parse_malloc (sizeof (struct cb_alt_key));
 	p->key = $5;
-	p->duplicates = CB_INTEGER ($6)->val;
+	p->component_list = NULL;
+	p->duplicates = CB_INTEGER ($7)->val;
+	if ($8) {
+		p->tf_suppress = 1;
+		p->char_suppress = CB_INTEGER ($8)->val;
+	} else {
+		p->tf_suppress = 0;
+	}
 	p->next = NULL;
+	
+	/* handle split keys */
+	if ($6) {
+		/* generate field (in w-s) for composite-key */
+		composite_key = cb_build_field($5);
+		if (composite_key == cb_error_node) {
+			YYERROR;
+		} else {
+			composite_key->category = CB_CATEGORY_ALPHANUMERIC; 
+			((struct cb_field *)composite_key)->count = 1;
+			p->key = cb_build_field_reference((struct cb_field *)composite_key, NULL);
+			p->component_list = key_component_list;
+		}
+	}
 
-	/* Add to the end of list */
+	/* add to the end of list */
 	if (current_file->alt_key_list == NULL) {
 		current_file->alt_key_list = p;
 	} else {
@@ -4394,16 +4418,19 @@ alternative_record_key_clause:
 ;
 
 _suppress_clause:
-  /* empty */                   { }
+  /* empty */
+  {
+	$$ = NULL;;
+  }
 |
   SUPPRESS WHEN ALL basic_value
   {
-	CB_PENDING ("SUPPRESS WHEN ALL");
+	$$ = cb_int (literal_value ($4));
   }
 |
   SUPPRESS WHEN space_or_zero
   {
-	CB_PENDING ("SUPPRESS WHEN SPACE/ZERO");
+	$$ = cb_int (literal_value ($3));
   }
 ;
 
@@ -4604,18 +4631,69 @@ record_delimiter_option:
 /* RECORD KEY clause */
 
 record_key_clause:
-  RECORD _key _is key_or_split_keys
+  RECORD _key _is reference _split_keys
   {
+	cb_tree composite_key;
+
 	check_repeated ("RECORD KEY", SYN_CLAUSE_9, &check_duplicate);
 	current_file->key = $4;
 	key_type = RECORD_KEY;
+
+	/* handle split keys */
+	if ($5) {
+		/* generate field (in w-s) for composite-key */
+		composite_key = cb_build_field ($4);
+		if (composite_key == cb_error_node) {
+			YYERROR;
+		} else {
+			composite_key->category = CB_CATEGORY_ALPHANUMERIC; 
+			((struct cb_field *)composite_key)->count = 1;
+			current_file->key = cb_build_field_reference ((struct cb_field *)composite_key, NULL);
+			current_file->component_list = key_component_list;
+		}
+	}
   }
 ;
 
-key_or_split_keys:
-  reference				{ $$ = $1; }
-| reference TOK_EQUAL reference_list	{ CB_PENDING ("SPLIT KEYS"); }
-| reference SOURCE _is reference_list	{ CB_PENDING ("SPLIT KEYS"); }
+_split_keys:
+  /* empty*/
+  {
+  	$$ = NULL;
+  }
+| source_is split_key_list
+  {
+  	$$ = cb_int0;
+  }
+;
+
+source_is:
+  TOK_EQUAL
+| SOURCE _is
+;
+
+split_key_list:
+  {
+	key_component_list = NULL;
+  }
+  split_key
+| split_key_list split_key
+;
+
+
+split_key:
+  reference
+  {
+	struct cb_key_component *c;
+	struct cb_key_component *comp = cobc_malloc (sizeof(struct cb_key_component));
+	comp->next = NULL;
+	comp->component = $1;
+	if (key_component_list == NULL) {
+		key_component_list = comp;
+	} else {
+		for (c = key_component_list; c->next != NULL; c = c->next);
+		c->next = comp;
+	}
+  }
 ;
 
 /* RELATIVE KEY clause */

@@ -41,7 +41,8 @@
 	* strings.c, common.c, coblocal.h: cob_init_strings gets and stores
 	  cob_global * as all other sources do
 	* call.c, common.c, fileio.c, intrinsic.c, strings.c: directly set internal
-	  cobglobptr->cob_exception_code = 0 instead of using cob_set_exception
+	  cobglobptr->cob_exception_code = 0 instead of using cob_set_exception,
+	  fixing bug #196
 	* common.c (cob_get_exception_name), coblocal.h: renamed
 	  cob_get_exception_code / cob_get_exception_name to
 	  cob_get_last exception_code / cob_get_last_exception_name
@@ -56,6 +57,10 @@
 2017-12-16  Ron Norman <rjn@inglenet.com>
 
 	* numeric.c (cob_decimal_get_ieee64dec): fix bug #470 (coding error)
+
+2017-12-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: aadjustments after merge of split/sparse keys from rw-branch
 
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -337,6 +342,11 @@
 
 	* common.h: always use COB_KEYWORD_INLINE (set by configure)
 	  for COB_INLINE
+
+2017-04-19  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (indexed_read) [WITH_DB]: check that the size of a record read
+	  is not larger than what the FD has defined, return status 43 to the READ.
 
 2017-04-18  Ron Norman <rjn@inglenet.com>
 
@@ -1063,6 +1073,18 @@
 2015-02-26  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: fixed buffer overflow in screen section ACCEPT
+
+2015-02-26  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c [WITH_VBISAM, VB_RTD]: updated to handle VB-ISAM 2.1.1
+	* fileio.c [WITH_DB]: handle sparse and split keys for BDB
+	  This was tested with BDB, D-ISAM, VB-ISAM 2.0 and VB-ISAM 2.1.1
+
+2015-02-23  Ron Norman <rjn@inglenet.com>
+
+	Implemented INDEXED file support for sparse and split keys FR #23 + FR #281
+	* fileio.c: updated to handle sparse and split keys
+	  This was tested with D-ISAM and VB-ISAM 2.0
 
 2015-02-18  Ron Norman <rjn@inglenet.com>
 

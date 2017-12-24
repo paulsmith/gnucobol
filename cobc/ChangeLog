@@ -82,6 +82,11 @@
 	* pplex.l, ppparse.y, reserved.c, scanner.l: added support for MF's
 	  reserved word directives ADDRSV, ADDSYN, MAKESYN, OVERRIDE and REMOVE.
 
+2017-12-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: adjustments after merge of split/sparse keys from rw-branch,
+	  minimized the number of necessary rules
+
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, tree.c, tree.h, typeck.c: minor adjustments after merge
@@ -2877,6 +2882,13 @@
 2015-03-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: added check of recursive CALL for INITIAL programs
+
+2015-02-23  Ron Norman <rjn@inglenet.com>
+
+	* tree.c, tree.h, typeck.c: moved cb_field_size to tree.c
+	* codegen.c, parser.y, tree.c, tree.h, typeck.c: FR #23 + FR #281
+	  Implemented support for sparse and split keys for INDEXED files
+	  Most of the compiler code was borrowed from the fileio-rewrite
 
 2015-02-13  Ron Norman <rjn@inglenet.com>
 

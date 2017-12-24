@@ -924,11 +924,19 @@ struct handler_struct {
 
 /* File */
 
+struct cb_key_component {
+	struct cb_key_component *next;
+	cb_tree			component;		/* Field which is part of index */
+};
+
 struct cb_alt_key {
 	struct cb_alt_key	*next;			/* Pointer to next */
 	cb_tree			key;			/* Key item */
 	int			duplicates;		/* DUPLICATES */
 	int			offset;			/* Offset from start */
+	int			tf_suppress;		/* !0 for SUPPRESS */
+	int			char_suppress;		/* character to test for suppress */
+	struct cb_key_component	*component_list;	/* List of fields making up key */
 };
 
 struct cb_file {
@@ -939,7 +947,8 @@ struct cb_file {
 	cb_tree			assign;			/* ASSIGN */
 	cb_tree			file_status;		/* FILE STATUS */
 	cb_tree			sharing;		/* SHARING */
-	cb_tree			key;			/* RECORD KEY */
+	cb_tree			key;			/* Primary RECORD KEY */
+	struct cb_key_component	*component_list;	/* List of fields making up primary key */
 	struct cb_alt_key	*alt_key_list;		/* ALTERNATE RECORD KEY */
 	/* FD/SD */
 	struct cb_field		*record;		/* Record descriptions */
@@ -1635,6 +1644,7 @@ extern void			cb_build_symbolic_chars (const cb_tree,
 
 extern struct cb_field		*cb_field_add (struct cb_field *,
 					       struct cb_field *);
+extern int				cb_field_size (const cb_tree x);
 extern struct cb_field		*cb_field_founder (const struct cb_field * const);
 extern struct cb_field		*cb_field_variable_size (const struct cb_field *);
 extern unsigned int		cb_field_variable_address (const struct cb_field *);

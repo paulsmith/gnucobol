@@ -2569,9 +2569,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 cb_tree
 cb_build_picture (const char *str)
 {
-	struct cb_picture	*pic
-		= make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
-			     sizeof (struct cb_picture));
+	struct cb_picture	*pic;
 	static cob_pic_symbol	*pic_buff = NULL;
 	const unsigned char	*p;
 	unsigned int		pic_str_len = 0;
@@ -2601,6 +2599,8 @@ cb_build_picture (const char *str)
 	unsigned char		second_last_char = '\0';
 	int			error_detected = 0;
 
+	pic = make_tree (CB_TAG_PICTURE, CB_CATEGORY_UNKNOWN,
+			sizeof (struct cb_picture));
 
 	if (strlen (str) == 0) {
 		cb_error (_("missing PICTURE string"));
@@ -3052,6 +3052,50 @@ cb_field_add (struct cb_field *f, struct cb_field *p)
 	return f;
 }
 
+int
+cb_field_size (const cb_tree x)
+{
+	struct cb_reference	*r;
+	struct cb_field		*f;
+
+	switch (CB_TREE_TAG (x)) {
+	case CB_TAG_LITERAL:
+		return CB_LITERAL (x)->size;
+	case CB_TAG_FIELD:
+		return CB_FIELD (x)->size;
+	case CB_TAG_REFERENCE:
+		r = CB_REFERENCE (x);
+		f = CB_FIELD (r->value);
+
+		if (r->length) {
+			if (CB_LITERAL_P (r->length)) {
+				return cb_get_int (r->length);
+			} else {
+				return -1;
+			}
+		} else if (r->offset) {
+			if (CB_LITERAL_P (r->offset)) {
+				return f->size - cb_get_int (r->offset) + 1;
+			} else {
+				return -1;
+			}
+		} else {
+			return f->size;
+		}
+
+	/* LCOV_EXCL_START */
+	default:
+		/* LCOV_EXCL_START */
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
+		COBC_ABORT ();
+	}
+#ifndef _MSC_VER
+	/* NOT REACHED */
+	return 0;
+#endif
+	/* LCOV_EXCL_STOP */
+}
+
 struct cb_field *
 cb_field_founder (const struct cb_field * const f)
 {
@@ -3450,7 +3494,8 @@ validate_file (struct cb_file *f, cb_tree name)
 }
 
 static void
-validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree key)
+validate_indexed_key_field (struct cb_file *f, struct cb_field *records,
+					cb_tree key, struct cb_key_component *component_list)
 {
 	cb_tree			key_ref;
 	struct cb_field		*k;
@@ -3459,6 +3504,11 @@ validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree
 
 	int			field_end;
 
+	int			cb;
+	char			pic[32];
+	struct cb_key_component	*key_component;
+	struct cb_field		*composite_key;
+
 	/* get reference (and check if it exists) */
 	key_ref = cb_ref (key);
 	if (key_ref == cb_error_node) {
@@ -3466,17 +3516,35 @@ validate_indexed_key_field (struct cb_file *f, struct cb_field *records, cb_tree
 	}
 	k = CB_FIELD_PTR (key_ref);
 
-	/* Check that key file is actual part of the file's records */
-	v = cb_field_founder (k);
-	for (p = records; p; p = p->sister) {
-		if (p == v) {
-			break;
+	/* check alternate key */
+	if (component_list != NULL) {
+		/* compute composite key total length */
+		cb = 0;
+		for (key_component = component_list;
+		     key_component != NULL;
+		     key_component = key_component->next) {
+			/* resolution of references in key components must be done here */
+			cb += cb_field_size(cb_ref(key_component->component));
 		}
-	}
-	if (!p) {
-		cb_error_x (CB_TREE(f), _("invalid KEY item '%s', not in file '%s'"),
-			  k->name, f->name);
-		return;
+		composite_key = (struct cb_field *)cb_ref(key);
+		memset (pic, 0, sizeof(pic));
+		sprintf (pic, "X(%d)", cb);
+		if (composite_key->pic != NULL) cobc_parse_free (composite_key->pic);
+		composite_key->pic = CB_PICTURE (cb_build_picture (pic));
+		cb_validate_field (composite_key);
+	} else {
+		/* Check that key file is actual part of the file's records */
+		v = cb_field_founder (k);
+		for (p = records; p; p = p->sister) {
+			if (p == v) {
+				break;
+			}
+		}
+		if (!p) {
+			cb_error_x (CB_TREE(f), _("invalid KEY item '%s', not in file '%s'"),
+				  k->name, f->name);
+			return;
+		}
 	}
 
 	/* Validate minimum record size against key field's end */
@@ -3515,14 +3583,16 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	}
 
 	/* Validate INDEXED key fields (RELATIVE keys can only be validated when
-	   the whole data division has been processed). */
+	   the whole DATA DIVISION has been processed). */
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->key) {
-			validate_indexed_key_field (f, records, f->key);
+			validate_indexed_key_field (f, records,
+				f->key, f->component_list);
 		}
 		if (f->alt_key_list) {
 			for (cbak = f->alt_key_list; cbak; cbak = cbak->next) {
-				validate_indexed_key_field (f, records, cbak->key);
+				validate_indexed_key_field (f, records,
+					cbak->key, cbak->component_list);
 			}
 		}
 	}
@@ -4607,11 +4677,11 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		cb_error_x (e, _("invalid expression"));
 		return cb_error_node;
 
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected operator: %d"), op);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 
 	if (relop == cb_true) {

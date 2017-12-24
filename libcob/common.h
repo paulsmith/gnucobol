@@ -1227,11 +1227,18 @@ struct cob_func_loc {
 
 /* Key structure */
 
+#define COB_MAX_KEYCOMP 8	/* max number of parts in a compound key (disam.h :: NPARTS ) */
+
 typedef struct {
 	cob_field	*field;	/* Key field */
-	int		flag;	/* WITH DUPLICATES (for RELATIVE/INDEXED) */
-					/* ASCENDING/DESCENDING (for SORT) */
-	unsigned int	offset;	/* Offset of field */
+	int		flag;				/* ASCENDING/DESCENDING (for SORT) */
+	int		tf_duplicates;			/* WITH DUPLICATES (for RELATIVE/INDEXED) */
+	int		tf_ascending;			/* ASCENDING/DESCENDING (for SORT)*/
+	int		tf_suppress;			/* supress keys where all chars = char_suppress */
+	int		char_suppress;			/* key supression character  */
+	unsigned int	offset;			/* Offset of field */
+	int		count_components;		/* 0..1::simple-key  2..n::split-key   */
+	cob_field	*component[COB_MAX_KEYCOMP];	/* key-components iff split-key   */
 } cob_file_key;
 
 
