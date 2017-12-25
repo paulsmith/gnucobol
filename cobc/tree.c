@@ -5135,7 +5135,7 @@ warn_if_no_definition_seen_for_prototype (const struct cb_prototype *proto)
 			  Warn if no definition seen for element with prototype-
 			  name.
 			*/
-			if (proto->type == CB_FUNCTION_TYPE) {
+			if (proto->type == COB_MODULE_TYPE_FUNCTION) {
 				error_msg = _("no definition/prototype seen for function '%s'");
 			} else { /* PROGRAM_TYPE */
 				error_msg = _("no definition/prototype seen for program '%s'");
@@ -5146,7 +5146,7 @@ warn_if_no_definition_seen_for_prototype (const struct cb_prototype *proto)
 			  Warn if no definition seen for element with given
 			  external-name.
 			*/
-			if (proto->type == CB_FUNCTION_TYPE) {
+			if (proto->type == COB_MODULE_TYPE_FUNCTION) {
 				error_msg = _("no definition/prototype seen for function with external name '%s'");
 			} else { /* PROGRAM_TYPE */
 				error_msg = _("no definition/prototype seen for program with external name '%s'");

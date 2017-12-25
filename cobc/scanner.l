@@ -863,7 +863,7 @@ H#[0-9A-Za-z]* {
 	}
 
 	/* Direct recursive reference in function */
-	if (current_program->prog_type == CB_FUNCTION_TYPE
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION
 		   && !functions_are_all
 		   && !strcasecmp (yytext, current_program->orig_program_id)) {
 		yylval = cb_build_reference (yytext);

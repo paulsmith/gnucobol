@@ -1,4 +1,12 @@
 
+2017-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, codegen.c, parser.y, scanner.l, tree.h, tree.c: renamed
+	  CB_PROGRAM_TYPE to COB_MODULE_TYPE_PROGRAM and CB_FUNCTION_TYPE to 
+	  COB_MODULE_TYPE_FUNCTION and moved definition to libcob/common.h
+	* codegen.c (output_module_init): deactivated generation of currently
+	  unused module_returning
+
 2017-12-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (file_status_clause): FR #51 added parsing for

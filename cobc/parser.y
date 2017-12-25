@@ -425,7 +425,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	/* Check returning item against using items when FUNCTION */
-	if (current_program->prog_type == CB_FUNCTION_TYPE && current_program->returning) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION && current_program->returning) {
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
 			if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
@@ -993,7 +993,7 @@ end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 
 	/* create empty entry if the program has no PROCEDURE DIVISION, error for UDF */
 	if (!program->entry_list) {
-		if (type == CB_FUNCTION_TYPE) {
+		if (type == COB_MODULE_TYPE_FUNCTION) {
 			cb_error (_("FUNCTION '%s' has no PROCEDURE DIVISION"), program->program_name);
 		} else {
 			emit_entry (program->program_id, 0, NULL, NULL);
@@ -1087,7 +1087,7 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		stack_progid[depth] = (char *)(CB_NAME (id));
 	}
 
-	if (depth != 0 && type == CB_FUNCTION_TYPE) {
+	if (depth != 0 && type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("functions may not be defined within a program/function"));
 	}
 
@@ -1095,15 +1095,15 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		return 1;
 	}
 
-	current_program->program_id = cb_build_program_id (id, as_literal, type == CB_FUNCTION_TYPE);
+	current_program->program_id = cb_build_program_id (id, as_literal, type == COB_MODULE_TYPE_FUNCTION);
 	current_program->prog_type = type;
 
-	if (type == CB_PROGRAM_TYPE) {
+	if (type == COB_MODULE_TYPE_PROGRAM) {
 		if (!main_flag_set) {
 			main_flag_set = 1;
 			current_program->flag_main = !!cobc_flag_main;
 		}
-	} else { /* CB_FUNCTION_TYPE */
+	} else { /* COB_MODULE_TYPE_FUNCTION */
 		current_program->flag_recursive = 1;
 	}
 
@@ -1129,7 +1129,7 @@ decrement_depth (const char *name, const unsigned char type)
 		return;
 	}
 
-	if (type == CB_FUNCTION_TYPE) {
+	if (type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("END FUNCTION '%s' is different from FUNCTION-ID '%s'"),
 			  name, stack_progid[depth]);
 		return;
@@ -1325,7 +1325,7 @@ setup_prototype (cb_tree prototype_name, cb_tree ext_name,
 		return;
 	}
 
-	name_redefinition_allowed = type == CB_PROGRAM_TYPE
+	name_redefinition_allowed = type == COB_MODULE_TYPE_PROGRAM
 		&& is_current_element && cb_program_name_redefinition;
 	if (!name_redefinition_allowed) {
 		if (CB_LITERAL_P (prototype_name)) {
@@ -1334,10 +1334,10 @@ setup_prototype (cb_tree prototype_name, cb_tree ext_name,
 			cb_define (prototype_name, prototype);
 		}
 
-		if (type == CB_PROGRAM_TYPE) {
+		if (type == COB_MODULE_TYPE_PROGRAM) {
 			current_program->program_spec_list =
 				cb_list_add (current_program->program_spec_list, prototype);
-		} else { /* CB_FUNCTION_TYPE */
+		} else { /* COB_MODULE_TYPE_FUNCTION */
 			current_program->user_spec_list =
 				cb_list_add (current_program->user_spec_list, prototype);
 		}
@@ -2881,7 +2881,7 @@ simple_prog:
 	l = cb_build_alphanumeric_literal (demangle_name,
 					   strlen (demangle_name));
 	current_program->program_id = cb_build_program_id (l, NULL, 0);
-	current_program->prog_type = CB_PROGRAM_TYPE;
+	current_program->prog_type = COB_MODULE_TYPE_PROGRAM;
 	if (!main_flag_set) {
 		main_flag_set = 1;
 		current_program->flag_main = cobc_flag_main;
@@ -2891,7 +2891,7 @@ simple_prog:
   _program_body
   /* do cleanup */
   {
-	clean_up_program (NULL, CB_PROGRAM_TYPE);
+	clean_up_program (NULL, COB_MODULE_TYPE_PROGRAM);
   }
 ;
 
@@ -2918,7 +2918,7 @@ function_definition:
 _end_program_list:
   /* empty (still do cleanup) */
   {
-	clean_up_program (NULL, CB_PROGRAM_TYPE);
+	clean_up_program (NULL, COB_MODULE_TYPE_PROGRAM);
   }
 | end_program_list
 ;
@@ -2932,14 +2932,14 @@ end_program:
   END_PROGRAM end_program_name TOK_DOT
   {
 	first_nested_program = 0;
-	clean_up_program ($2, CB_PROGRAM_TYPE);
+	clean_up_program ($2, COB_MODULE_TYPE_PROGRAM);
   }
 ;
 
 end_function:
   END_FUNCTION end_program_name TOK_DOT
   {
-	clean_up_program ($2, CB_FUNCTION_TYPE);
+	clean_up_program ($2, COB_MODULE_TYPE_FUNCTION);
   }
 ;
 
@@ -2974,11 +2974,11 @@ program_id_paragraph:
   }
   TOK_DOT program_id_name _as_literal
   {
-	if (setup_program ($4, $5, CB_PROGRAM_TYPE)) {
+	if (setup_program ($4, $5, COB_MODULE_TYPE_PROGRAM)) {
 		YYABORT;
 	}
 
-	setup_prototype ($4, $5, CB_PROGRAM_TYPE, 1);
+	setup_prototype ($4, $5, COB_MODULE_TYPE_PROGRAM, 1);
   }
   _program_type TOK_DOT
   {
@@ -2994,10 +2994,10 @@ function_id_paragraph:
   }
   TOK_DOT program_id_name _as_literal TOK_DOT
   {
-	if (setup_program ($4, $5, CB_FUNCTION_TYPE)) {
+	if (setup_program ($4, $5, COB_MODULE_TYPE_FUNCTION)) {
 		YYABORT;
 	}
-	setup_prototype ($4, $5, CB_FUNCTION_TYPE, 1);
+	setup_prototype ($4, $5, COB_MODULE_TYPE_FUNCTION, 1);
 	cobc_cs_check = 0;
 	cobc_in_id = 0;
   }
@@ -3414,7 +3414,7 @@ repository_name:
 | FUNCTION WORD _as_literal
   {
 	if ($2 != cb_error_node) {
-		setup_prototype ($2, $3, CB_FUNCTION_TYPE, 0);
+		setup_prototype ($2, $3, COB_MODULE_TYPE_FUNCTION, 0);
 	}
   }
 | FUNCTION repository_name_list INTRINSIC
@@ -3422,7 +3422,7 @@ repository_name:
   {
 	  if ($2 != cb_error_node
 	      && cb_verify (cb_program_prototypes, _("PROGRAM phrase"))) {
-		setup_prototype ($2, $3, CB_PROGRAM_TYPE, 0);
+		setup_prototype ($2, $3, COB_MODULE_TYPE_PROGRAM, 0);
 	}
   }
 | FUNCTION repository_name_list error
@@ -4959,7 +4959,7 @@ file_description_clause:
 		cb_error (_("file cannot have both EXTERNAL and GLOBAL clauses"));
 	}
 #endif
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "GLOBAL");
 	} else {
 		current_file->flag_global = 1;
@@ -5613,7 +5613,7 @@ const_global:
   }
 | _is GLOBAL
   {
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "GLOBAL");
 		$$= NULL;
 	} else {
@@ -5964,7 +5964,7 @@ global_clause:
 	} else if (current_field->flag_external) {
 		cb_error (_("%s and %s are mutually exclusive"), "GLOBAL", "EXTERNAL");
 #endif
-	} else if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	} else if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "GLOBAL");
 	} else if (current_storage == CB_STORAGE_LOCAL) {
 		cb_error (_("%s not allowed here"), "GLOBAL");
@@ -8607,7 +8607,7 @@ _procedure_using_chaining:
 | CHAINING
   {
 	call_mode = CB_CALL_BY_REFERENCE;
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("CHAINING invalid in user FUNCTION"));
 	} else {
 		current_program->flag_chained = 1;
@@ -8756,7 +8756,7 @@ _procedure_optional:
 _procedure_returning:
   /* empty */
   {
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("RETURNING clause is required for a FUNCTION"));
 	}
   }
@@ -8765,7 +8765,7 @@ _procedure_returning:
 	if (current_program->flag_main) {
 		cb_error (_("RETURNING clause cannot be OMITTED for main program"));
 	}
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("RETURNING clause cannot be OMITTED for a FUNCTION"));
 	}
 	current_program->flag_void = 1;
@@ -8785,7 +8785,7 @@ _procedure_returning:
 		} else if (f->flag_occurs) {
 			cb_error (_("RETURNING item should not have OCCURS"));
 		} else {
-			if (current_program->prog_type == CB_FUNCTION_TYPE) {
+			if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 				if (f->flag_any_length) {
 					cb_error (_("function RETURNING item may not be ANY LENGTH"));
 				}
@@ -9063,7 +9063,7 @@ statements:
 		emit_statement (CB_TREE (current_paragraph));
 	}
 	if (check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0) == 1) {
-		if (current_program->prog_type == CB_PROGRAM_TYPE) {
+		if (current_program->prog_type == COB_MODULE_TYPE_PROGRAM) {
 			emit_entry (current_program->program_id, 0, NULL, NULL);
 		}
 	}
@@ -9791,7 +9791,7 @@ call_body:
 	int call_conv = 0;
 	int call_conv_local = 0;
 
-	if (current_program->prog_type == CB_PROGRAM_TYPE
+	if (current_program->prog_type == COB_MODULE_TYPE_PROGRAM
 	    && !current_program->flag_recursive
 	    && is_recursive_call ($3)) {
 		cb_warning_x (COBC_WARN_FILLER, $3,
@@ -10973,7 +10973,7 @@ entry_body:
   {
 	if (current_program->nested_level) {
 		cb_error (_("%s is invalid in nested program"), "ENTRY");
-	} else if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	} else if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "ENTRY");
 	} else if (cb_verify (cb_entry_statement, "ENTRY")) {
 		if (!cobc_check_valid_name ((char *)(CB_LITERAL ($2)->data), ENTRY_NAME)) {
@@ -11240,7 +11240,7 @@ exit_body:
 		cb_error_x (CB_TREE (current_statement),
 			    _("EXIT PROGRAM is not allowed within a USE GLOBAL procedure"));
 	}
-	if (current_program->prog_type != CB_PROGRAM_TYPE) {
+	if (current_program->prog_type != COB_MODULE_TYPE_PROGRAM) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("EXIT PROGRAM not allowed within a FUNCTION"));
 	}
@@ -11265,7 +11265,7 @@ exit_body:
 		cb_error_x (CB_TREE (current_statement),
 			    _("EXIT FUNCTION is not allowed within a USE GLOBAL procedure"));
 	}
-	if (current_program->prog_type != CB_FUNCTION_TYPE) {
+	if (current_program->prog_type != COB_MODULE_TYPE_FUNCTION) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("EXIT FUNCTION only allowed within a FUNCTION"));
 	}
@@ -13515,7 +13515,7 @@ use_global:
   }
 | GLOBAL
   {
-	if (current_program->prog_type == CB_FUNCTION_TYPE) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "GLOBAL");
 	} else {
 		use_global_ind = 1;

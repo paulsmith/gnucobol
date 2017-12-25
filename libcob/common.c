@@ -325,7 +325,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_SET_DEBUG", "debugging_mode", 		"0", 	NULL, GRP_MISC, ENV_BOOL | ENV_RESETS, SETPOS (cob_debugging_mode)},
 	{"COB_SET_TRACE", "set_trace", 		"0", 	NULL, GRP_MISC, ENV_BOOL, SETPOS (cob_line_trace)},
 	{"COB_TRACE_FILE", "trace_file", 		NULL, 	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_trace_filename)},
-	{"COB_TRACE_FORMAT", "trace_format",	"%P%S%L", NULL,GRP_MISC, ENV_STR, SETPOS (cob_trace_format)},
+	{"COB_TRACE_FORMAT", "trace_format",	"%P %S Line: %L", NULL,GRP_MISC, ENV_STR, SETPOS (cob_trace_format)},
 	{"COB_DUMP_FILE", "dump_file",		NULL,	NULL, GRP_MISC, ENV_FILE, SETPOS (cob_dump_filename)},
 	{"COB_DUMP_WIDTH", "dump_width",		"100",	NULL, GRP_MISC, ENV_INT, SETPOS (cob_dump_width)},
 #ifdef  _WIN32
@@ -1284,21 +1284,52 @@ cob_memcpy (cob_field *dst, const void *src, const size_t size)
 static void
 cob_check_trace_file (void)
 {
+	const char *filename = cobsetptr->cob_trace_filename;
+	const char *mode;
+
 	if (cobsetptr->cob_trace_file) {
 		return;
 	}
 	if (cobsetptr->cob_trace_filename) {
 		if (!cobsetptr->cob_unix_lf) {
-			cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "w");
+			if (*filename == '+') {
+				filename++;
+				mode = "a";
+			} else {
+				mode = "w";
+			}
 		} else {
-			cobsetptr->cob_trace_file = fopen (cobsetptr->cob_trace_filename, "wb");
+			if (*filename == '+') {
+				filename++;
+				mode = "ab";
+			} else {
+				mode = "wb";
+			}
 		}
+		cobsetptr->cob_trace_file = fopen (filename, mode);
 		if (!cobsetptr->cob_trace_file) {
 			cobsetptr->cob_trace_file = stderr;
 		}
 	} else {
 		cobsetptr->cob_trace_file = stderr;
 	}
+}
+
+/* close current trace file (if open) and open/attach a new one */
+static void
+cob_new_trace_file (void)
+{
+	if (!cobsetptr->cob_trace_file
+	 || cobsetptr->external_trace_file
+	 || cobsetptr->cob_trace_file == stderr) {
+		cobsetptr->cob_trace_file = NULL;
+		cob_check_trace_file ();
+		return;
+	}
+	fclose (cobsetptr->cob_trace_file);
+	cobsetptr->cob_trace_file = NULL;
+	cob_check_trace_file ();
+
 }
 
 int
@@ -1341,8 +1372,6 @@ cob_rescan_env_vals (void)
 		    && (env = getenv (gc_conf[i].env_name)) != NULL) {
 			old_type = gc_conf[i].data_type;
 			gc_conf[i].data_type |= STS_ENVSET;
-
-			// FIXME: call check_current_date here, if needed
 
 			if (*env != '\0' && set_config_val (env, i)) {
 				gc_conf[i].data_type = old_type;
@@ -1778,7 +1807,11 @@ cob_trace_prep (void)
 	if (!cob_last_progid 
 	 || strcmp (cob_last_progid, s)) {
 		cob_last_progid = s;
-		fprintf (cobsetptr->cob_trace_file, "Program-Id: %-16s\n",cob_last_progid);
+		if (COB_MODULE_PTR && COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
+			fprintf (cobsetptr->cob_trace_file, "Function-Id: %s\n", cob_last_progid);
+		} else {
+			fprintf (cobsetptr->cob_trace_file, "Program-Id:  %s\n", cob_last_progid);
+		}
 	}
 	return 0;
 }
@@ -1787,23 +1820,45 @@ static void
 cob_trace_print (char *val)
 {
 	int	i;
+	int last_pos = (int)(strlen (cobsetptr->cob_trace_format) - 1);
+
 	for (i=0; cobsetptr->cob_trace_format[i] != 0; i++) {
 		if (cobsetptr->cob_trace_format[i] == '%') {
 			i++;
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'P') {
-				fprintf (cobsetptr->cob_trace_file, "Program-Id: %-16s ",cob_last_progid);
+				if (COB_MODULE_PTR && COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
+					if (i != last_pos) {
+						fprintf (cobsetptr->cob_trace_file, "Function-Id: %-16s", cob_last_progid);
+					} else {
+						fprintf (cobsetptr->cob_trace_file, "Function-Id: %s", cob_last_progid);
+					}
+				} else {
+					if (i != last_pos) {
+						fprintf (cobsetptr->cob_trace_file, "Program-Id:  %-16s", cob_last_progid);
+					} else {
+						fprintf (cobsetptr->cob_trace_file, "Program-Id:  %s", cob_last_progid);
+					}
+				}
+			} else
+			if (toupper(cobsetptr->cob_trace_format[i]) == 'I') {
+				fprintf (cobsetptr->cob_trace_file, "%s", cob_last_progid);
 			} else
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'L') {
-				fprintf (cobsetptr->cob_trace_file, " Line: %6u ", cob_source_line);
+				fprintf (cobsetptr->cob_trace_file, "%6u", cob_source_line);
 			} else
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'S') {
-				fprintf (cobsetptr->cob_trace_file, "%s ", val);
+				if (i != last_pos) {
+					fprintf (cobsetptr->cob_trace_file, "%-42.42s", val);
+				} else {
+					fprintf (cobsetptr->cob_trace_file, "%s", val);
+				}
 			} else
 			if (toupper(cobsetptr->cob_trace_format[i]) == 'F') {
-				fprintf (cobsetptr->cob_trace_file, "Source: '%s'", cob_last_sfile);
-				if (strlen(cob_last_sfile) < 31)
-					fprintf (cobsetptr->cob_trace_file,"%-*s",
-							(int)(31-strlen(cob_last_sfile))," ");
+				if (i != last_pos) {
+					fprintf (cobsetptr->cob_trace_file, "Source: %-31.31s", cob_last_sfile);
+				} else {
+					fprintf (cobsetptr->cob_trace_file, "Source: %s", cob_last_sfile);
+				}
 			}
 		} else {
 			fputc (cobsetptr->cob_trace_format[i], cobsetptr->cob_trace_file);
@@ -1828,7 +1883,7 @@ cob_trace_sect (const char *name)
 		 || name == NULL) {
 			return;
 		}
-		sprintf (val, "  Section: %-31.31s", name);
+		snprintf (val, sizeof (val), "  Section: %s", name);
 		cob_trace_print (val);
 		return;
 	}
@@ -1857,7 +1912,7 @@ cob_trace_para (const char *name)
 		 || name == NULL) {
 			return;
 		}
-		sprintf (val, "Paragraph: %-31.31s", name);
+		snprintf (val, sizeof (val), "Paragraph: %s", name);
 		cob_trace_print (val);
 		return;
 	}
@@ -1883,7 +1938,7 @@ cob_trace_entry (const char *name)
 		 || name == NULL) {
 			return;
 		}
-		sprintf (val, "    Entry: %-31.31s", name);
+		snprintf (val, sizeof (val), "    Entry: %s", name);
 		cob_trace_print (val);
 		return;
 	}
@@ -1909,7 +1964,7 @@ cob_trace_exit (const char *name)
 		 || name == NULL) {
 			return;
 		}
-		sprintf (val, "     Exit: %-31.31s", name);
+		snprintf (val, sizeof (val), "     Exit: %s", name);
 		cob_trace_print (val);
 		return;
 	}
@@ -1939,7 +1994,7 @@ cob_trace_stmt (const char *stmt)
 		if (cob_trace_prep ()) {
 			return;
 		}
-		sprintf(val, "            %-30.30s", stmt ? (char *)stmt : _("unknown"));
+		snprintf (val, sizeof (val), "           %s", stmt ? (char *)stmt : _("unknown"));
 		cob_trace_print (val);
 		return;
 	}
@@ -5756,6 +5811,13 @@ set_config_val (char *value, int pos)
 		memcpy (data, &str, sizeof (char *));
 		if (data_loc == offsetof (cob_settings, cob_preload_str)) {
 			cobsetptr->cob_preload_str_set = cob_strdup(str);
+		}
+
+		/* call internal routines that do post-processing */
+		if (strcmp(gc_conf[pos].env_name, "COB_CURRENT_DATE") == 0) {
+			check_current_date ();
+		} else if (strcmp(gc_conf[pos].env_name, "COB_TRACE_FILE") == 0) {
+			cob_new_trace_file ();
 		}
 
 	} else if ((data_type & ENV_CHAR)) {	/* 'char' field inline */

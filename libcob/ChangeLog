@@ -1,4 +1,14 @@
 
+2017-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_check_trace_file): FR #242 allow trace file to be
+	  appended by starting COB_TRACE_FILE with "+"
+	* common.c: changes to new tracing: distinguish between function and
+	  program, trailing output is not fixed-width, only use specified spacing
+	* common.c (cob_trace_prep, ): distinguish between function and program
+	* common.c (set_config_val): FR #242 allow COB_TRACE_FILE
+	  (and COB_CURRENT_DATE) to be changed at runtime (currently untested!)
+
 2017-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* numeric.c (cob_decimal_get_field): fix bug #223 don't raise

@@ -1949,7 +1949,7 @@ cobc_abort_msg (void)
 
 	if (cb_source_file) {
 		if (current_program) {
-			if (current_program->prog_type == CB_FUNCTION_TYPE) {
+			if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 				prog_type = "FUNCTION-ID";
 			} else {
 				prog_type = "PROGRAM-ID";
@@ -5284,7 +5284,7 @@ print_program_trailer (void)
 				if (print_names) {
 					sprintf (print_data,
 						"      %-14s      %s",
-			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == COB_MODULE_TYPE_FUNCTION ?
 				 			"FUNCTION" : "PROGRAM"),
 			 	 		p->program_name);
 					print_program_data (print_data);
@@ -5323,7 +5323,7 @@ print_program_trailer (void)
 				if (print_names) {
 					sprintf (print_data,
 						 "%s %s",
-			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == COB_MODULE_TYPE_FUNCTION ?
 				 			"FUNCTION" : "PROGRAM"),
 			 	 		p->program_name);
 					print_program_data (print_data);
@@ -5353,7 +5353,7 @@ print_program_trailer (void)
 				if (print_names) {
 					sprintf (print_data,
 						 "%s %s",
-			 	 		(p->prog_type == CB_FUNCTION_TYPE ?
+			 	 		(p->prog_type == COB_MODULE_TYPE_FUNCTION ?
 				 			"FUNCTION" : "PROGRAM"),
 			 	 		p->program_name);
 					print_program_data (print_data);

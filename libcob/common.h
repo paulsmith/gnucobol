@@ -1159,6 +1159,8 @@ typedef struct __cob_screen {
 } cob_screen;
 
 /* Module structure */
+#define COB_MODULE_TYPE_PROGRAM		0
+#define COB_MODULE_TYPE_FUNCTION	1
 
 typedef struct __cob_module {
 	struct __cob_module	*next;			/* Next pointer */
@@ -1177,9 +1179,9 @@ typedef struct __cob_module {
 	unsigned int		module_active;		/* Module is active */
 	unsigned int		module_date;		/* Module num date */
 	unsigned int		module_time;		/* Module num time */
-	unsigned int		module_type;		/* Module type */
+	unsigned int		module_type;		/* Module type (program = 0, function = 1) */
 	unsigned int		module_param_cnt;	/* Module param count */
-	unsigned int		module_returning;	/* Module return type */
+	unsigned int		module_returning;	/* Module return type, currently unset+unused */
 	int			module_num_params;	/* Module arg count */
 
 	unsigned char		ebcdic_sign;		/* DISPLAY SIGN */

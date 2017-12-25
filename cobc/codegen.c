@@ -1817,7 +1817,7 @@ static void
 output_frame_stack (struct cb_program *prog)
 {
 	output_local ("\n/* Perform frame stack */\n");
-	if (cb_perform_osvs && current_prog->prog_type == CB_PROGRAM_TYPE) {
+	if (cb_perform_osvs && current_prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_local ("struct cob_frame\t*temp_index;\n");
 	}
 	if (cb_flag_stack_check) {
@@ -6219,7 +6219,7 @@ output_perform_exit (struct cb_label *l)
 		output_line ("/* Implicit PERFORM return */");
 	}
 
-	if (cb_perform_osvs && current_prog->prog_type == CB_PROGRAM_TYPE) {
+	if (cb_perform_osvs && current_prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_line
 		    ("for (temp_index = frame_ptr; temp_index->perform_through; temp_index--) {");
 		output_line ("  if (temp_index->perform_through == %d) {", l->id);
@@ -6619,7 +6619,7 @@ output_goto (struct cb_goto *p)
 		/* EXIT PROGRAM/FUNCTION */
 		needs_exit_prog = 1;
 		if (cb_flag_implicit_init || current_prog->nested_level ||
-		    current_prog->prog_type == CB_FUNCTION_TYPE) {
+		    current_prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 			output_line ("goto exit_program;");
 		} else {
 			/* Ignore if not a callee */
@@ -9239,7 +9239,7 @@ output_module_init (struct cb_program *prog)
 	if (!prog->nested_level) {
 		output_line ("module->module_entry.funcptr = (void *(*)())%s;",
 			     prog->program_id);
-		if (prog->prog_type == CB_FUNCTION_TYPE) {
+		if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 			output_line ("module->module_cancel.funcptr = NULL;");
 		} else {
 			output_line ("module->module_cancel.funcptr = (void *(*)())%s_;",
@@ -9285,7 +9285,14 @@ output_module_init (struct cb_program *prog)
 	output_line ("module->module_time = COB_MODULE_TIME;");
 	output_line ("module->module_type = %u;", prog->prog_type);
 	output_line ("module->module_param_cnt = %u;", prog->num_proc_params);
-	output_line ("module->module_returning = 0;");
+#if 0 /* currently not checked anywhere, may use for void or more general type*/
+	if (prog->flag_void) {
+		opt = 0;
+	} else {
+		opt = 1;
+	}
+	output_line ("module->module_returning = %u;", (unsigend int)opt);
+#endif
 	output_line ("module->ebcdic_sign = %d;", cb_ebcdic_sign);
 	output_line ("module->decimal_point = '%c';", prog->decimal_point);
 	output_line ("module->currency_symbol = '%c';", prog->currency_symbol);
@@ -9348,11 +9355,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Program function */
 #if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output ("static cob_field *\n%s_ (const int entry, cob_field **cob_parms",
 			prog->program_id);
 #else
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output ("static cob_field *\n%s_ (const int entry",
 			prog->program_id);
 #endif
@@ -9365,7 +9372,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 	parmnum = 0;
 #if	0	/* RXWRXW USERFUNC */
-	if (!prog->flag_chained && prog->prog_type != CB_FUNCTION_TYPE) {
+	if (!prog->flag_chained && prog->prog_type != COB_MODULE_TYPE_FUNCTION) {
 #else
 	if (!prog->flag_chained) {
 #endif
@@ -9536,7 +9543,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 #if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		/* USING parameters for user FUNCTION */
 		seen = 0;
 		for (l = parameter_list; l; l = CB_CHAIN (l)) {
@@ -9631,7 +9638,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_newline ();
 
 	/* CANCEL callback */
-	if (prog->prog_type == CB_PROGRAM_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_line ("/* CANCEL callback */");
 		output_line ("if (unlikely(entry < 0)) {");
 		output_line ("\tif (entry == -10)");
@@ -9654,7 +9661,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_line ("if (cob_module_global_enter (&module, &cob_glob_ptr, %d, entry, 0))",
 				      cb_flag_implicit_init);
 #endif
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output_line ("\treturn NULL;");
 	} else {
 		output_line ("\treturn -1;");
@@ -9689,7 +9696,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_newline ();
 
 #if	0	/* RXWRXW USERFUNC */
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		parmnum = 0;
 		for (l = parameter_list; l; l = CB_CHAIN (l), parmnum++) {
 			f = cb_code_field (CB_VALUE (l));
@@ -9874,7 +9881,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	if (!cb_sticky_linkage && !prog->flag_chained
 #if	0	/* RXWRXW USERFUNC */
-		&& prog->prog_type != CB_FUNCTION_TYPE
+		&& prog->prog_type != COB_MODULE_TYPE_FUNCTION
 #endif
 		&& prog->num_proc_params) {
 		output_line ("/* Set not passed parameter pointers to NULL */");
@@ -9953,7 +9960,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 #endif
 	}
 
-	if (prog->prog_type == CB_FUNCTION_TYPE &&
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION &&
 		CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {
 		output_line ("/* Storage for returning item */");
 		output_prefix ();
@@ -10139,7 +10146,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output_line ("/* Function return */");
 		output_prefix ();
 		output ("return ");
@@ -10259,7 +10266,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 #endif
 
 	/* Setup up CANCEL callback */
-	if (!prog->nested_level && prog->prog_type == CB_PROGRAM_TYPE) {
+	if (!prog->nested_level && prog->prog_type == COB_MODULE_TYPE_PROGRAM) {
 		output_line ("/* Initialize cancel callback */");
 #if	0	/* RXWRXW CA */
 		if (!cb_flag_implicit_init) {
@@ -10450,7 +10457,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Set up CANCEL callback code */
 
-	if (prog->prog_type != CB_PROGRAM_TYPE) {
+	if (prog->prog_type != COB_MODULE_TYPE_PROGRAM) {
 		goto prog_cancel_end;
 	}
 
@@ -10585,7 +10592,7 @@ cancel_end:
 prog_cancel_end:
 	output_indent ("}");
 	output_newline ();
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		s = "FUNCTION-ID";
 	} else {
 		s = "PROGRAM-ID";
@@ -10821,7 +10828,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	}
 #endif
 
-	if (unlikely (prog->prog_type == CB_FUNCTION_TYPE)) {
+	if (unlikely (prog->prog_type == COB_MODULE_TYPE_FUNCTION)) {
 		output_function_entry_function (prog, gencode, entry_name,
 						using_list);
 		return;
@@ -11131,7 +11138,7 @@ output_function_prototypes (struct cb_program *prog)
 		}
 
 		/* Output prototype for the actual function */
-		if (cp->prog_type == CB_FUNCTION_TYPE) {
+		if (cp->prog_type == COB_MODULE_TYPE_FUNCTION) {
 			non_nested_count++;
 			output ("static cob_field\t*%s_ (const int",
 				cp->program_id);
@@ -11311,7 +11318,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 		output ("/* Functions */\n\n");
 	}
 
-	if (prog->prog_type == CB_FUNCTION_TYPE) {
+	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output ("/* FUNCTION-ID '%s' */\n\n", prog->orig_program_id);
 	} else {
 		output ("/* PROGRAM-ID '%s' */\n\n", prog->orig_program_id);
