@@ -160,7 +160,7 @@ enum cb_support {
 
 /* Config dialect support types */
 enum cb_std_def {
-	CB_STD_OC = 0,
+	CB_STD_GC = 0,
 	CB_STD_MF,
 	CB_STD_IBM,
 	CB_STD_MVS,
@@ -170,7 +170,9 @@ enum cb_std_def {
 	/* the following must contain ANSI/ISO standards in order */
 	CB_STD_85,
 	CB_STD_2002,
-	CB_STD_2014
+	CB_STD_2014,
+	/* the following must be the last and is invalid */
+	CB_STD_MAX
 };
 
 /* Clauses an elementary screen item is required to have */

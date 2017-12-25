@@ -294,7 +294,8 @@ begin_implicit_statement (void)
 					    CB_TREE (current_statement));
 }
 
-# if 0 /* activate only for debugging purposes for attribs */
+# if 0 /* activate only for debugging purposes for attribs
+	FIXME: Replace by DEBUG_LOG function */
 static
 void print_bits (cob_flags_t num)
 {
@@ -4461,10 +4462,21 @@ alphabet_name:
 /* FILE STATUS clause */
 
 file_status_clause:
-  _file_or_sort STATUS _is reference
+  _file_or_sort STATUS _is reference _reference
   {
 	check_repeated ("STATUS", SYN_CLAUSE_4, &check_duplicate);
 	current_file->file_status = $4;
+	if ($5) {
+		/* add a compiler configuration if either */
+		if (cb_std_define != CB_STD_IBM
+		 && cb_std_define != CB_STD_MVS
+		 && !cb_relaxed_syntax_checks) {
+			cb_verify (CB_UNCONFORMABLE, "VSAM STATUS");
+		} else {
+			cb_warning (warningopt,
+				_("%s ignored"), "VSAM STATUS");
+		}
+	}
   }
 ;
 
@@ -4586,7 +4598,7 @@ record_delimiter_option:
 
 	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))) {
 		cb_warning (warningopt,
-			    _("RECORD DELIMITER STANDARD-1 ignored"));
+			    _("%s ignored"), "RECORD DELIMITER STANDARD-1");
 	}
   }
 | LINE_SEQUENTIAL
@@ -5347,9 +5359,12 @@ _communication_section:
 	check_headers_present (COBC_HD_DATA_DIVISION, 0, 0, 0);
 	header_check |= COBC_HD_COMMUNICATION_SECTION;
 	/* add a compiler configuration if either */
-	if (cb_std_define > CB_STD_85) {
-		cb_verify (CB_UNCONFORMABLE, _ ("COMMUNICATION SECTION"));
-	} else if (cb_verify (CB_OBSOLETE, _("COMMUNICATION SECTION"))) {
+	if (cb_std_define != CB_STD_85
+	 && cb_std_define != CB_STD_RM
+	 && cb_std_define != CB_STD_GC
+	 && !cb_relaxed_syntax_checks) {
+		cb_verify (CB_UNCONFORMABLE, "COMMUNICATION SECTION");
+	} else if (cb_verify (CB_OBSOLETE, "COMMUNICATION SECTION")) {
 		CB_PENDING ("COMMUNICATION SECTION");
 	}
   }
@@ -9592,7 +9607,7 @@ key_dest:
   {
 	check_repeated ("CONTROL KEY", SYN_CLAUSE_29, &check_duplicate);
 	CB_PENDING ("CONTROL KEY");
-#if 0 /* should generate the following AFTER the ACCEPT is finished */
+#if 0 /* should generate the following *after* the ACCEPT is finished */
 	cb_emit_accept_escape_key ($1);
 #endif
   }
@@ -9623,11 +9638,12 @@ end_accept:
 | END_ACCEPT
   {
 	TERMINATOR_CLEAR ($-2, ACCEPT);
-# if 0 /* activate only for debugging purposes for attribs */
+# if 0 /* activate only for debugging purposes for attribs
+	FIXME: Replace by DEBUG_LOG function */
 	if (current_statement->attr_ptr) {
 		print_bits (current_statement->attr_ptr->dispattrs);
 	} else {
-		fprintf(stderr, "No Attribs\n");
+		fputs("No Attribs", stderr);
 	}
 #endif
   }
@@ -14666,6 +14682,11 @@ reference:
   }
 ;
 
+_reference:
+  /* empty */	{$$ = NULL;}
+| reference		{$$ = $1;}
+;
+
 single_reference:
   WORD
   {
@@ -14674,6 +14695,10 @@ single_reference:
   }
 ;
 
+
+
+/* FIXME: either this is "optional" then _ prefix should be used,
+   otherwise a more specific name */
 optional_reference_list:
   optional_reference
   {

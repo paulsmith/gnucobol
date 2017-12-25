@@ -554,6 +554,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				invalid_value (fname, line, name, val, "cobol2002, mf, ibm", 0, 0);
 				return -1;
 			}
+			break;
 		} else if (strcmp (name, "binary-size") == 0) {
 			if (strcmp (val, "2-4-8") == 0) {
 				cb_binary_size = CB_BINARY_SIZE_2_4_8;
@@ -565,6 +566,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				invalid_value (fname, line, name, val, "2-4-8, 1-2-4-8, 1--8", 0, 0);
 				return -1;
 			}
+			break;
 		} else if (strcmp (name, "binary-byteorder") == 0) {
 			if (strcmp (val, "native") == 0) {
 				cb_binary_byteorder = CB_BYTEORDER_NATIVE;
@@ -574,6 +576,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				invalid_value (fname, line, name, val, "native, big-endian", 0, 0);
 				return -1;
 			}
+			break;
 		} else if (strcmp (name, "screen-section-clauses") == 0) {
 			if (strcmp (val, "std") == 0) {
 				cb_screen_section_clauses = CB_STD_SCREEN_RULES;
@@ -589,11 +592,19 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				invalid_value (fname, line, name, val, "std, mf, acu, rm, xopen", 0, 0);
 				return -1;
 			}
-		} else if (strcmp (name, "standard-define") != 0) {
-			configuration_error (fname, line, 1, _("Invalid type for '%s'"), name);
-			return -1;
+			break;
+		/* for enums without a string value: set max_value and fall through to CB_INT */
+		} else if (strcmp (name, "standard-define") == 0) {
+			config_table[i].max_value = CB_STD_MAX - 1;
+			/* fall through */
+		/* LCOV_EXCL_START */
+		} else {
+			/* note: internal error only (config.def doesn't match config.c),
+			   therefore no translation */
+			cobc_err_msg ("Invalid type %s for '%s'", "ANY", name);
+			COBC_ABORT ();
 		}
-		break;
+		/* LCOV_EXCL_STOP */
 	case CB_INT:
 		for (j = 0; val[j]; j++) {
 			if (val[j] < '0' || val[j] > '9') {
@@ -642,7 +653,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				/* check if name.words exists and store the resolved name to words_file */
 				if (cb_load_conf_file (buff, CB_INCLUDE_RESOLVE_WORDS) != 0) {
 					configuration_error (fname, line, 1, _("Could not access word list for '%s'"), val);
-					cb_perror (1, "%s: %s", words_file, cb_get_strerror ());
+					//cb_perror (1, "%s: %s", words_file, cb_get_strerror ());
 					return -1;
 				};
 			}
@@ -717,9 +728,13 @@ cb_config_entry (char *buff, const char *fname, const int line)
 		/* normal handling */
 		*((enum cb_support *)var) = support_val;
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		configuration_error (fname, line, 1, _("invalid type for '%s'"), name);
-		return -1;
+		/* note: internal error only (config.def doesn't match config.c),
+		   therefore no translation */
+		cobc_err_msg ("Invalid type %ds for '%s'", config_table[i].type, name);
+		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
 	}
 	/* copy valid entries to config table */
 	if (config_table[i].val) {

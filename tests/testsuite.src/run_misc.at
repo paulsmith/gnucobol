@@ -7706,6 +7706,9 @@ AT_CLEANUP
 AT_SETUP([Test dump feature])
 AT_KEYWORDS([Dump])
 
+# note:
+# raises valgrind because of "planned SIGSEGV"
+# check - is this reprocible on all systems?
 
 AT_DATA([./cpyabrt], [
             MOVE "Quick brown fox jumped over the dog" 

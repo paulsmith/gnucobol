@@ -888,24 +888,24 @@ AT_DATA([prog.cob], [
        DATA DIVISION.
        FILE SECTION.
        FD FILE1.
-            01  FILE1-REC PIC X.
+       01  FILE1-REC PIC X.
        FD FILE2.
-            01  FILE2-REC PIC X.
+       01  FILE2-REC PIC X.
        FD FILE3.
-            01  FILE3-REC PIC X.
+       01  FILE3-REC PIC X.
        FD FILE4.
-            01  FILE4-REC.
-               05  FLD1      PIC X.
-               05  FILE4-KEY PIC 999.
+       01  FILE4-REC.
+          05  FLD1      PIC X.
+          05  FILE4-KEY PIC 999.
        FD FILE5.
-            01  FILE5-REC PIC X.
+       01  FILE5-REC PIC X.
        WORKING-STORAGE SECTION.
-            77  FILE1-KEY PIC XXXX.
-            01  FILE2-KEY.
-                05  F2-KEY PIC 9(5).
-            01  F3-KEY.
-                05  FILE3-KEY PIC 9(5) OCCURS 2 TIMES.
-            77  FILE5-KEY PIC 999V9.
+       77  FILE1-KEY PIC XXXX.
+       01  FILE2-KEY.
+           05  F2-KEY PIC 9(5).
+       01  F3-KEY.
+           05  FILE3-KEY PIC 9(5) OCCURS 2 TIMES.
+       77  FILE5-KEY PIC 999V9.
        PROCEDURE DIVISION.
             STOP RUN.
 ])
@@ -1055,4 +1055,54 @@ prog.cob:85: warning: RECORD DELIMITER clause on file with fixed-length records 
 prog.cob:88: warning: RECORD DELIMITER clause on file with fixed-length records used
 prog.cob:90: warning: RECORD DELIMITER clause on file with fixed-length records used
 ])
+AT_CLEANUP
+
+
+AT_SETUP([FILE STATUS])
+AT_KEYWORDS([file status])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT file1 ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS INDEXED
+                        ACCESS MODE  IS DYNAMIC
+                        RECORD KEY   IS file1-key
+                        STATUS       IS STATUS-1.
+           SELECT file2 ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION IS INDEXED
+                        ACCESS MODE  IS DYNAMIC
+                        RECORD KEY   IS file2-key
+                        STATUS       IS STATUS-1, STATUS-2.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  FILE1.
+       01  FILE1-REC.
+           05 FILE1-KEY PIC X.
+       FD  FILE2.
+       01  FILE2-REC.
+           05 FILE2-KEY PIC 9.
+           05 FILE2-DAT PIC X.
+       WORKING-STORAGE SECTION.
+       77  STATUS-1 PIC X(02).
+       77  STATUS-2 PIC X(06).
+       PROCEDURE DIVISION.
+            STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:16: error: VSAM STATUS does not conform to GnuCOBOL
+])
+
+AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob:16: warning: VSAM STATUS ignored
+])
+
+AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [0], [],
+[prog.cob:16: warning: VSAM STATUS ignored
+])
+
 AT_CLEANUP

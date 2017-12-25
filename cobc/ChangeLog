@@ -1,4 +1,12 @@
 
+2017-12-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (file_status_clause): FR #51 added parsing for
+	  secondary VSAM status, unconformable to any other than IBM/MVS
+	  where it is ignored (with a warning with -Wall)
+	* config.c, cobc.h: parse standard-define, checking for valid entry
+	  and actually setting it again
+
 2017-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, config.c, field.c: added screen-section-clauses option to

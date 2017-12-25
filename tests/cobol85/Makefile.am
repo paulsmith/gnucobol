@@ -19,6 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
+# FIXME: doesn't work when EXEC85$(EXEEXT) exists in sourcedir but not
+#        in builddir
+
 MODULES_ALL = NC SM IC SQ RL ST SG OB IF RW DB IX DBNOIX CM
 
 # currently untested modules: CM
@@ -36,7 +39,7 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 	summarynoix.txt NC.txt SM.txt IC.txt SQ.txt RL.txt IX.txt \
 	ST.txt SG.txt OB.txt IF.txt RW.txt DB.txt DBNOIX.txt Makefile.module.in
 
-#CLEANFILES = EXEC85 summary.log
+#CLEANFILES = EXEC85$(EXEEXT) summary.log
 
 COB85DIR = "`cd $(srcdir) && pwd`"
 

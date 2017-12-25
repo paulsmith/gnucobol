@@ -898,12 +898,12 @@ output_base (struct cb_field *f, const cob_u32_t no_output)
 	struct cb_field		*v;
 	struct base_list	*bl;
 
+	/* LCOV_EXCL_START */
 	if (unlikely(f->flag_item_78)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected CONSTANT item"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 	f01 = real_field_founder (f);
 

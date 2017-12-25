@@ -290,7 +290,6 @@ AT_KEYWORDS([configuration misc])
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
-       AUTHOR. tester.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        PROCEDURE        DIVISION.
@@ -312,6 +311,26 @@ AT_CHECK([$COMPILE_ONLY \
 [configuration error:
 -fassign-clause=cobol-2002: invalid value 'cobol-2002' for configuration tag 'assign-clause';
 	should be one of the following values: cobol2002, mf, ibm
+])
+AT_CHECK([$COMPILE_ONLY \
+-freserved-words=default prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY \
+-freserved-words=defaults prog.cob], [1], [],
+[configuration error:
+-freserved-words=defaults: Could not access word list for 'defaults'
+defaults.words: No such file or directory
+])
+AT_CHECK([$COMPILE_ONLY \
+-fword-length=thirty prog.cob], [1], [],
+[configuration error:
+-fword-length=thirty: invalid value 'thirty' for configuration tag 'word-length';
+	must be numeric
+])
+AT_CHECK([$COMPILE_ONLY \
+-fstandard-define=99 prog.cob], [1], [],
+[configuration error:
+-fstandard-define=99: invalid value '99' for configuration tag 'standard-define';
+	maximum value: 9
 ])
 
 AT_CLEANUP
