@@ -692,4 +692,17 @@ prog.cob:30: error: VALUE item may not be numeric
 prog.cob:36: error: cannot use FULL or REQUIRED on item without TO or USING
 ])
 
+AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=gc prog.cob], [0], [],
+[prog.cob:12: warning: 'no-clauses' does nothing
+prog.cob:13: warning: 'no-required-clauses' does nothing
+prog.cob:15: warning: 'numeric-pic-and-value' has numeric VALUE without PIC; PIC will be implied
+prog.cob:16: warning: 'only-pic' does nothing
+prog.cob:17: warning: 'from-to-using-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:18: warning: 'auto-without-from-to-using' does nothing
+prog.cob:23: warning: 'blank-when-zero-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:24: warning: 'justified-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:25: warning: 'sign-no-clauses' does nothing
+prog.cob:30: warning: 'numeric-value-no-pic' has numeric VALUE without PIC; PIC will be implied
+])
+
 AT_CLEANUP

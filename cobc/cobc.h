@@ -177,10 +177,11 @@ enum cb_std_def {
 
 /* Clauses an elementary screen item is required to have */
 enum cb_screen_clauses_rules {
-	CB_STD_SCREEN_RULES,
+	CB_ACU_SCREEN_RULES,
+	CB_GC_SCREEN_RULES,
 	CB_MF_SCREEN_RULES,
 	CB_RM_SCREEN_RULES,
-	CB_ACU_SCREEN_RULES,
+	CB_STD_SCREEN_RULES,
 	CB_XOPEN_SCREEN_RULES
 };
 

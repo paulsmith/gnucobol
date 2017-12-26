@@ -1,4 +1,13 @@
 
+2017-12-26  Edward Hart <edward.dan.hart@gmail.com>
+
+	* default.conf, lax.conf-inc: changed screen-section-rules to gc
+	  (bug #482).
+
+2017-12-24  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added screen-section-rules option (bug #382).
+
 2017-11-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* ibm.words, mvs.words, rm.words: fixed bug #476, where WHEN-COMPILED

@@ -1173,25 +1173,11 @@ has_std_needed_screen_clause (const struct cb_field * const f)
 		|| f->screen_flag & COB_SCREEN_ERASE_EOS;
 }
 
-static int
-is_figurative_constant (const cb_tree x)
-{
-	return x == cb_any
-		|| x == cb_null
-		|| x == cb_zero
-		|| x == cb_space
-		|| x == cb_low
-		|| x == cb_norm_low
-		|| x == cb_high
-		|| x == cb_norm_high
-		|| x == cb_quote;
-}
-
 static void
 error_value_figurative_constant(const struct cb_field * const f)
 {
 	if (f->values
-	    && is_figurative_constant (CB_VALUE (f->values))) {
+	    && cb_is_figurative_constant (CB_VALUE (f->values))) {
 		cb_error_x (CB_TREE (f), _("VALUE may not contain a figurative constant"));
 	}
 }
@@ -1209,11 +1195,24 @@ warn_from_to_using_without_pic (const struct cb_field * const f)
 {
 	const cb_tree	x = CB_TREE (f);
 	
-	if ((f->screen_from ||f->screen_to) && !f->pic) {
+	if ((f->screen_from || f->screen_to) && !f->pic) {
 		cb_warning_x (warningopt, x,
 			      _("'%s' has FROM, TO or USING without PIC; PIC will be implied"),
 			      cb_name (x));
 		/* TO-DO: Add setting of PIC below here or move warnings to the code which sets the PIC */
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+warn_pic_for_numeric_value_implied (const struct cb_field * const f)
+{
+	if (f->values && CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
+		cb_warning_x (warningopt, CB_TREE (f),
+			      _("'%s' has numeric VALUE without PIC; PIC will be implied"),
+			      cb_name (CB_TREE (f)));
 		return 1;
 	} else {
 		return 0;
@@ -1235,10 +1234,8 @@ validate_elem_screen_clauses_std (struct cb_field * const f)
 			  TO and USING assume the item has a PICTURE clause.
 			*/
 			;
-		} else if (f->values && CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
-			cb_warning_x (warningopt, x,
-				      _("'%s' has numeric VALUE without PIC; PIC will be implied"),
-				      cb_name (x));
+		} else if (warn_pic_for_numeric_value_implied (f)) {
+			;
 			/* TO-DO: Add setting of PIC below here or move warnings to the code which sets the PIC */
 		} else {
 			cb_error_x (x, _("'%s' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause"),
@@ -1421,6 +1418,33 @@ validate_elem_screen_clauses_xopen (struct cb_field *f)
 }
 
 static void
+warn_has_no_useful_clause (const struct cb_field * const f)
+{
+        if (!(f->screen_column
+	      || f->screen_flag & COB_SCREEN_BELL
+	      || f->screen_flag & COB_SCREEN_BLANK_LINE
+	      || f->screen_flag & COB_SCREEN_BLANK_SCREEN
+	      || f->screen_flag & COB_SCREEN_ERASE_EOL
+	      || f->screen_flag & COB_SCREEN_ERASE_EOS
+	      || f->screen_from
+	      || f->screen_line
+	      || f->screen_to
+	      || f->values)) {
+		cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
+			      _("'%s' does nothing"), cb_name (CB_TREE (f)));
+	}
+}
+
+static void
+validate_elem_screen_clauses_gc (const struct cb_field * const f)
+{
+	/* We aim for the least restrictive rules possible. */
+	warn_has_no_useful_clause (f);
+	warn_from_to_using_without_pic (f);
+	warn_pic_for_numeric_value_implied (f);
+}
+
+static void
 validate_elem_screen (struct cb_field *f)
 {
 	if (f->storage != CB_STORAGE_SCREEN) {
@@ -1442,6 +1466,9 @@ validate_elem_screen (struct cb_field *f)
 		break;
 	case CB_XOPEN_SCREEN_RULES:
 		validate_elem_screen_clauses_xopen (f);
+		break;
+	case CB_GC_SCREEN_RULES:
+		validate_elem_screen_clauses_gc (f);
 		break;
 	}
 
@@ -2643,4 +2670,19 @@ cb_get_usage_string (const enum cb_usage usage)
 		COBC_ABORT ();
 		/* LCOV_EXCL_STOP */
 	}
+}
+
+int
+cb_is_figurative_constant (const cb_tree x)
+{
+	return x == cb_null
+		|| x == cb_zero
+		|| x == cb_space
+		|| x == cb_low
+		|| x == cb_norm_low
+		|| x == cb_high
+		|| x == cb_norm_high
+		|| x == cb_quote
+		|| (CB_REFERENCE_P (x)
+		    && CB_REFERENCE (x)->flag_all);
 }

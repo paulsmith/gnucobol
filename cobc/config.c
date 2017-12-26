@@ -578,18 +578,20 @@ cb_config_entry (char *buff, const char *fname, const int line)
 			}
 			break;
 		} else if (strcmp (name, "screen-section-clauses") == 0) {
-			if (strcmp (val, "std") == 0) {
-				cb_screen_section_clauses = CB_STD_SCREEN_RULES;
+			if (strcmp (val, "acu") == 0) {
+				cb_screen_section_clauses = CB_ACU_SCREEN_RULES;
+			} else if (strcmp (val, "gc") == 0) {
+				cb_screen_section_clauses = CB_GC_SCREEN_RULES;
 			} else if (strcmp (val, "mf") == 0) {
 				cb_screen_section_clauses = CB_MF_SCREEN_RULES;
-			} else if (strcmp (val, "acu") == 0) {
-				cb_screen_section_clauses = CB_ACU_SCREEN_RULES;
 			} else if (strcmp (val, "rm") == 0) {
 				cb_screen_section_clauses = CB_RM_SCREEN_RULES;
+			} else if (strcmp (val, "std") == 0) {
+				cb_screen_section_clauses = CB_STD_SCREEN_RULES;
 			} else if (strcmp (val, "xopen") == 0) {
 				cb_screen_section_clauses = CB_XOPEN_SCREEN_RULES;
 			} else {
-				invalid_value (fname, line, name, val, "std, mf, acu, rm, xopen", 0, 0);
+				invalid_value (fname, line, name, val, "acu, gc, mf, rm, std, xopen", 0, 0);
 				return -1;
 			}
 			break;

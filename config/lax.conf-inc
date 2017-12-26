@@ -53,6 +53,8 @@ relax-syntax-checks:		yes
 # If yes, allow non-matching level numbers
 relax-level-hierarchy:		yes
 
+# What rules to apply to SCREEN SECTION items clauses
+screen-section-rules:		gc
 
 # Dialect features
 # Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',

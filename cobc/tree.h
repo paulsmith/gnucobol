@@ -1815,6 +1815,7 @@ extern struct cb_field	*cb_validate_78_item (struct cb_field *, const cob_u32_t)
 extern void		cb_validate_renames_item (struct cb_field *);
 extern struct cb_field	*cb_get_real_field (void);
 extern void		cb_clear_real_field (void);
+extern int		cb_is_figurative_constant (const cb_tree);
 
 /* typeck.c */
 extern cb_tree		cb_debug_item;
