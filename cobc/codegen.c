@@ -9349,7 +9349,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	char			key_ptr[64];
 	unsigned int	i;
 	cob_u32_t		inc;
-	int			parmnum;
+	int			parmnum, nested_dump;
 	int			seen;
 	int			anyseen;
 
@@ -10395,6 +10395,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("{ cob_field f0;");
 		output_indent_level += 2;
 		output_line ("memset(&f0,0,sizeof(f0));");
+		nested_dump = 1;
+	} else {
+		nested_dump = 0;
 	}
 
 	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
@@ -10447,8 +10450,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("cob_dump_field (-1, \"%s\", NULL, 0, 0);", "LINKAGE");
 		output_display_fields (prog->linkage_storage, 0, 0);
 	}
-	if (num_cob_fields == 0
-	 && cb_flag_dump != 0) {
+	if (nested_dump) {
 		output_indent_level -= 2;
 		output_line ("}");
 	}

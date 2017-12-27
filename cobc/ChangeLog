@@ -336,6 +336,11 @@
 	* cobc.c: don't halt immediately on first PATH error during startup,
 	  postponed until command line arguments are processed
 
+2017-10-18  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c(output_internal_function): Fixed problem with braces in
+	  variable dump code
+
 2017-10-17  Ron Norman <rjn@inglenet.com>
 
 	Fixed bug #449 - debug should not imply trace
