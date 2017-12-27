@@ -1799,7 +1799,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
-AT_SETUP([FUNCTION MOD])
+AT_SETUP([FUNCTION MOD (valid)])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
@@ -1807,20 +1807,55 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  Y   PIC   9(12)      VALUE 600851475143.
+       01  Y            PIC 9(12)      VALUE 600851475143.
+       01  R            PIC S9(4)V9(4) VALUE 0.
        PROCEDURE        DIVISION.
-           DISPLAY FUNCTION MOD ( -11 5 )
-           END-DISPLAY.
-           DISPLAY FUNCTION MOD ( Y, 71 )
-           END-DISPLAY.
+           MOVE FUNCTION MOD ( -11 5 ) TO R
+           IF R NOT = 4
+              DISPLAY 'first one wrong: ' R
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION MOD ( Y, 71 ) TO R
+           IF R NOT = 0
+              DISPLAY 'second one wrong: ' R
+              END-DISPLAY
+           END-IF
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[000000004
-000000000
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION MOD (invalid)])
+AT_KEYWORDS([functions exceptions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  Z            PIC 9          VALUE 0.
+       01  R            PIC S9(4)V9(4) VALUE 1.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION MOD ( -11 Z ) TO R
+           IF FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
+           NOT = 'EC-ARGUMENT-FUNCTION'
+              DISPLAY 'Wrong/missing exception: '
+                      FUNCTION EXCEPTION-STATUS
+              END-DISPLAY
+           END-IF
+           IF R NOT = 0
+              DISPLAY 'result is not zero: ' R
+              END-DISPLAY
+           END-IF
+           STOP RUN.
 ])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2368,7 +2403,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([FUNCTION REM])
+AT_SETUP([FUNCTION REM (valid)])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
@@ -2376,13 +2411,43 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  Z            PIC S9(4)V9(4) COMP-5.
+       01  R            PIC S9(4)V9(4) COMP-5 VALUE 0.
        PROCEDURE        DIVISION.
-           MOVE FUNCTION REM ( -11 5 ) TO Z.
-           IF Z NOT = -1
-              DISPLAY Z
+           MOVE FUNCTION REM ( -11 5 ) TO R
+           IF R NOT = -1
+              DISPLAY R END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION REM (invalid)])
+AT_KEYWORDS([functions exceptions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  R            PIC S9(4)V9(4) COMP-5 VALUE 4.1.
+       01  Z            PIC 9 COMP-5 VALUE 0.
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION REM ( -11 Z ) TO R
+           IF FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
+           NOT = 'EC-ARGUMENT-FUNCTION'
+              DISPLAY 'Wrong/missing exception: '
+                      FUNCTION EXCEPTION-STATUS
               END-DISPLAY
-           END-IF.
+           END-IF
+           IF R NOT = 0
+              DISPLAY 'result is not zero: ' R
+              END-DISPLAY
+           END-IF
            STOP RUN.
 ])
 

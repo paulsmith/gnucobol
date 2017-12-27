@@ -1,4 +1,9 @@
 
+2017-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (cob_mod_or_rem): fix bug #485 don't raise
+	  EC-SIZE-ZERO-DIVIDE but EC-ARGUMENT-FUNCTION
+
 2017-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_check_trace_file): FR #242 allow trace file to be

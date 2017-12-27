@@ -630,8 +630,8 @@ cob_mod_or_rem (cob_field *f1, cob_field *f2, const int func_is_rem)
 	cob_decimal_set_field (&d3, f2);
 
 	if (!mpz_sgn (d3.value)) {
-		/* Divide by zero */
-		cob_set_exception (COB_EC_SIZE_ZERO_DIVIDE);
+		/* function argument violation */
+		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
 		cob_alloc_set_field_uint (0);
 		return curr_field;
 	}
