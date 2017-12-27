@@ -54,7 +54,7 @@ relax-syntax-checks:		yes
 relax-level-hierarchy:		yes
 
 # What rules to apply to SCREEN SECTION items clauses
-screen-section-clauses:		gc
+screen-section-rules:		gc
 
 # Dialect features
 # Value: 'ok', 'warning', 'archaic', 'obsolete', 'skip', 'ignore', 'error',
