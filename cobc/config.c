@@ -577,7 +577,7 @@ cb_config_entry (char *buff, const char *fname, const int line)
 				return -1;
 			}
 			break;
-		} else if (strcmp (name, "screen-section-clauses") == 0) {
+		} else if (strcmp (name, "screen-section-rules") == 0) {
 			if (strcmp (val, "acu") == 0) {
 				cb_screen_section_clauses = CB_ACU_SCREEN_RULES;
 			} else if (strcmp (val, "gc") == 0) {

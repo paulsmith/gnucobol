@@ -591,7 +591,7 @@ AT_DATA([prog.cob], [
                05  VALUE "Hello, world!".
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=std prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=std prog.cob], [1], [],
 [prog.cob:12: error: 'no-clauses' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
 prog.cob:13: error: 'no-required-clauses' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
 prog.cob:14: error: 'only-line' needs a PIC, FROM, TO, USING, VALUE, BELL, BLANK or ERASE clause
@@ -606,7 +606,7 @@ prog.cob:26: error: VALUE may not contain a figurative constant
 prog.cob:30: warning: 'numeric-value-no-pic' has numeric VALUE without PIC; PIC will be implied
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=acu prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=acu prog.cob], [1], [],
 [prog.cob:15: error: cannot specify both PIC and VALUE
 prog.cob:15: error: cannot have PIC without FROM, TO or USING
 prog.cob:15: error: VALUE item may not be numeric
@@ -622,7 +622,7 @@ prog.cob:25: error: cannot have PIC without FROM, TO or USING
 prog.cob:30: error: VALUE item may not be numeric
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=mf prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=mf prog.cob], [1], [],
 [prog.cob:12: error: 'no-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
 prog.cob:13: error: 'no-required-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
 prog.cob:15: error: cannot specify both PIC and VALUE
@@ -649,7 +649,7 @@ prog.cob:30: error: VALUE item may not be numeric
 prog.cob:36: error: cannot use AUTO, FULL, PROMPT, REQUIRED or SECURE on elementary item without TO or USING
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=rm prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=rm prog.cob], [1], [],
 [prog.cob:15: error: cannot specify both PIC and VALUE
 prog.cob:15: error: cannot have PIC without FROM, TO or USING
 prog.cob:15: error: VALUE item may not be numeric
@@ -667,7 +667,7 @@ prog.cob:30: error: VALUE item may not be numeric
 prog.cob:36: error: cannot use AUTO, FULL, REQUIRED or SECURE on elementary item without FROM, TO or USING
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=xopen prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=xopen prog.cob], [1], [],
 [prog.cob:12: error: 'no-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
 prog.cob:13: error: 'no-required-clauses' needs a PIC, COL, LINE, VALUE, BELL or BLANK clause
 prog.cob:15: error: cannot specify both PIC and VALUE
@@ -692,7 +692,7 @@ prog.cob:30: error: VALUE item may not be numeric
 prog.cob:36: error: cannot use FULL or REQUIRED on item without TO or USING
 ])
 
-AT_CHECK([$COMPILE_ONLY -fscreen-section-clauses=gc prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -fscreen-section-rules=gc prog.cob], [0], [],
 [prog.cob:12: warning: 'no-clauses' does nothing
 prog.cob:13: warning: 'no-required-clauses' does nothing
 prog.cob:15: warning: 'numeric-pic-and-value' has numeric VALUE without PIC; PIC will be implied

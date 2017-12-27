@@ -2,7 +2,7 @@
 2017-12-26  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.h, config.c, field.c: added more lax "gc" option to
-	  screen-section-clauses.
+	  screen-section-rules.
 
 2017-12-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -22,7 +22,7 @@
 
 2017-12-24  Edward Hart <edward.dan.hart@gmail.com>
 
-	* config.def, config.c, field.c: added screen-section-clauses option to
+	* config.def, config.c, field.c: added screen-section-rules option to
 	  set rules for SCREEN SECTION item clauses.
 	* field.c: removed "alphanumeric value is expected" warning when using
 	  numeric VALUEs in the SCREEN SECTION.

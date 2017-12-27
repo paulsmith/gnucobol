@@ -77,7 +77,7 @@ CB_CONFIG_ANY (unsigned int, cb_binary_byteorder, "binary-byteorder",
 
 CB_CONFIG_ANY (enum cb_std_def, cb_std_define, "standard-define", NULL) /* Used Standard (set via -std) */
 
-CB_CONFIG_ANY (enum cb_screen_clauses_rules, cb_screen_section_clauses, "screen-section-clauses",
+CB_CONFIG_ANY (enum cb_screen_clauses_rules, cb_screen_section_clauses, "screen-section-rules",
 	_("which compiler's rules to apply to SCREEN SECTION item clauses"))
 
 /* Normal boolean flags */

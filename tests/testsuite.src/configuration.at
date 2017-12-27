@@ -422,7 +422,7 @@ test.conf: missing definitions:
 	no definition of 'binary-size'
 	no definition of 'binary-byteorder'
 	no definition of 'standard-define'
-	no definition of 'screen-section-clauses'
+	no definition of 'screen-section-rules'
 	no definition of 'filename-mapping'
 	no definition of 'pretty-display'
 	no definition of 'binary-truncate'
