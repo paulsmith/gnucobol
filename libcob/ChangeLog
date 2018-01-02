@@ -1,4 +1,11 @@
 
+2017-12-31  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (cob_rewrite): BDB fix to allocation record area for
+	  max record size
+	* common.c (cob_dump_module): flush stderr/stdout to get display output
+	  before dump
+
 2017-12-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* intrinsic.c (cob_mod_or_rem): fix bug #485 don't raise

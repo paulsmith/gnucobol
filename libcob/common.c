@@ -7414,8 +7414,11 @@ cob_dump_module (char *reason)
 	FILE		*fp;
 	int		(*cancel_func)(const int);
 	int		num_stmts = 0;
+
 	if (COB_MODULE_PTR
 	 && COB_MODULE_PTR->flag_dump_ready) {		/* Was it compiled with -fdump= */
+		fflush (stdout);
+		fflush (stderr);
 #if 1 /* new version as currently only COB_DUMP_TO_FILE is used */
 		fp = cob_get_dump_file();
 #else

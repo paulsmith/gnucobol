@@ -3590,10 +3590,10 @@ dobuild:
 		p->last_readkey[f->nkeys + i] = cob_malloc (maxsize);
 	}
 
-	p->temp_key = cob_malloc (maxsize + sizeof(unsigned int));
-	p->savekey  = cob_malloc (maxsize + sizeof(unsigned int));
-	p->suppkey  = cob_malloc (maxsize + sizeof(unsigned int));
-	p->saverec  = cob_malloc (f->record->size + sizeof(unsigned int));
+	p->temp_key = cob_malloc (maxsize + sizeof(unsigned long));
+	p->savekey  = cob_malloc (maxsize + sizeof(unsigned long));
+	p->suppkey  = cob_malloc (maxsize + sizeof(unsigned long));
+	p->saverec  = cob_malloc (f->record_max + sizeof(unsigned long));
 	f->file = p;
 	p->key_index = 0;
 	p->last_key = NULL;
@@ -5336,6 +5336,17 @@ cob_rewrite (cob_file *f, cob_field *rec, const int opt, cob_field *fnstatus)
 				save_status (f, fnstatus, COB_STATUS_44_RECORD_OVERFLOW);
 				return;
 			}
+		}
+	}
+
+	if (f->variable_record) {
+		f->record->size = (size_t)cob_get_int (f->variable_record);
+		if (unlikely(f->record->size > rec->size)) {
+			f->record->size = rec->size;
+		}
+		if (f->record->size < f->record_min || f->record_max < f->record->size) {
+			save_status (f, fnstatus, COB_STATUS_44_RECORD_OVERFLOW);
+			return;
 		}
 	}
 
