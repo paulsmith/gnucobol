@@ -1,5 +1,5 @@
-## Copyright (C) 2014-2015, 2017 Free Software Foundation, Inc.
-## Written by Simon Sobisch, Edward Hart
+## Copyright (C) 2014-2015, 2017-2018 Free Software Foundation, Inc.
+## Written by Simon Sobisch, Edward Hart, Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -467,7 +467,7 @@ AT_DATA([prog.cob], [
            TERMINATE STUDENT-REPORT.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:46: warning: PLUS is ignored on first field of line
 prog.cob:48: error: PLUS is not allowed with LEFT, RIGHT or CENTER
 prog.cob:53: error: OCCURS and multi COLUMNs is not allowed
@@ -503,7 +503,7 @@ AT_DATA([prog.cob], [
                        HEADING f-rec.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:19: error: duplicate HEADING clause
 prog.cob:19: error: duplicate LINE LIMIT clause
 prog.cob:22: error: Cannot specify HEADING without number of lines on page
@@ -531,7 +531,7 @@ AT_DATA([prog.cob], [
 # In this case, the error handler enters an infinite loop, but it's OK as the
 # error is still easy to identify and it doesn't occur if anything follows the
 # "REPORT r".
-AT_CHECK([$COMPILE -fmax-errors=4 prog.cob], [97], [],
+AT_CHECK([$COMPILE_ONLY -fmax-errors=4 prog.cob], [97], [],
 [prog.cob:13: error: syntax error, unexpected end of file
 prog.cob:13: error: syntax error, unexpected end of file
 prog.cob:13: error: syntax error, unexpected end of file
@@ -540,4 +540,32 @@ prog.cob:13: error: syntax error, unexpected end of file
 cobc: too many errors
 cobc: aborting compile of prog.cob at line 13 (PROGRAM-ID: prog)
 ])
+AT_CLEANUP
+
+
+AT_SETUP([REPORT with unreferenced control field])
+AT_KEYWORDS([report])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT     DIVISION.
+       INPUT-OUTPUT    SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "f.txt".
+
+       DATA            DIVISION.
+       FILE            SECTION.
+       FD  f           REPORT r.
+       01  f-rec       PIC X.
+
+       REPORT          SECTION.
+       RD  r.
+       01  r0          TYPE DETAIL, PRESENT AFTER NEW f-rec.
+])
+
+# no compile_only here as we check the C generation
+AT_CHECK([$COMPILE prog.cob ], [0], [], [])
+
 AT_CLEANUP

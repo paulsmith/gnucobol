@@ -1,4 +1,9 @@
 
+2017-12-31  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c, tree.c: fix bug #471 Mark report fields as being
+	  referenced so that the cob_field is always emitted
+
 2017-12-26  Edward Hart <edward.dan.hart@gmail.com>
 
 	* cobc.h, config.c, field.c: added more lax "gc" option to

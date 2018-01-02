@@ -8131,6 +8131,12 @@ output_report_sum_control_field (struct cb_field *p)
 		if(p->report_sum_counter) {
 			output_base(cb_code_field(p->report_sum_counter),1U);
 		}
+		if(p->report_control) {
+			output_base(cb_code_field(p->report_control),1U);
+		}
+		if(p->report_source) {
+			output_base(cb_code_field(p->report_source),1U);
+		}
 		for (l = p->report_sum_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
 			output_base(cb_code_field(x),1);
