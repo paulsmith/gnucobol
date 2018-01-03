@@ -3369,37 +3369,39 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			}
 		}
 		/* force generation of report sum counter TODO: Check why */
-		if(p->report_sum_counter
-		&& CB_REF_OR_FIELD_P (p->report_sum_counter)) {
+		if (p->report_sum_counter
+		 && CB_REF_OR_FIELD_P (p->report_sum_counter)) {
 			fld = CB_FIELD (cb_ref(p->report_sum_counter));
-			if (fld && fld->count == 0)
+			if (fld && fld->count == 0) {
 				fld->count++;
+			}
 		}
-		if(p->report_control
-		&& CB_REF_OR_FIELD_P (p->report_control)) {
-			struct cb_field *f = CB_FIELD (cb_ref(p->report_control));
-			if (f && f->count == 0) {
-				f->count++;
+		if (p->report_control
+		 && CB_REF_OR_FIELD_P (p->report_control)) {
+			fld = CB_FIELD (cb_ref(p->report_control));
+			if (fld && fld->count == 0) {
+				fld->count++;
 			}
 		}
 		if (p->children) {
-		    finalize_report (r,p->children);
+			finalize_report (r,p->children);
 		}
 	}
 
 	for (p = records; p; p = p->sister) {
-		if(p->report != r)
+		if (p->report != r) {
 			continue;
-		if(p->storage == CB_STORAGE_REPORT
-		&& ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
+		}
+		if (p->storage == CB_STORAGE_REPORT
+		 && ((p->report_flag & COB_REPORT_LINE) || p->level == 1)) {
 			if(p->size < r->rcsz)
 				p->size = r->rcsz;
 			if(p->memory_size < r->rcsz)
 				p->memory_size = r->rcsz;
 		}
-		if(p->level == 1
-		&& p->report != NULL
-		&& p->report->file != NULL) {
+		if (p->level == 1
+		 && p->report != NULL
+		 && p->report->file != NULL) {
 			f = p->report->file;
 			f->flag_report = 1;
 			for (ff = records; ff; ff = ff->sister) {
@@ -3408,13 +3410,15 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 					f->record_max = ff->size;
 				}
 			}
-			if(f->record_min < r->rcsz)
+			if (f->record_min < r->rcsz) {
 				f->record_min = r->rcsz;
-			if(f->record_max < p->size)
+			}
+			if (f->record_max < p->size) {
 				f->record_max = r->rcsz;
-			if(f->record != NULL) {
-				if(f->record->size < r->rcsz)
-					f->record->size = r->rcsz;
+			}
+			if (f->record != NULL
+			 && f->record->size < r->rcsz) {
+				f->record->size = r->rcsz;
 			}
 		}
 	}
