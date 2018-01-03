@@ -1,4 +1,8 @@
 
+2018-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* numeric.c [WIN32]: fix missing definition of isnan / isinf
+
 2017-12-31  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (cob_rewrite): BDB fix to allocation record area for

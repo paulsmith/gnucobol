@@ -38,6 +38,16 @@
 #include <ieeefp.h>
 #endif
 
+#ifdef WIN32
+#ifndef isnan
+#define isnan(x)	_isnan(x)
+#endif
+#ifndef isinf
+#define isinf(x)	((_fpclass(x) == _FPCLASS_PINF) || \
+					 (_fpclass(x) == _FPCLASS_NINF))
+#endif
+#endif
+
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP
 
