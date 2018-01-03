@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
 ## Ron Norman
 ##
@@ -192,16 +192,16 @@ AT_KEYWORDS([misc fundamental])
 
 AT_DATA([prog.cob], [
        PROGRAM-ID.   prog.
-       
+
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
            CURRENCY SIGN IS "Y".
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        77  amount    pic Y(6)9.99.
-       
+
        PROCEDURE DIVISION.
            Move 1512.34 to Amount
            Display "Amount is #" Amount '#' with no advancing.
@@ -226,7 +226,7 @@ AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
        PROGRAM-ID.   prog.
-       
+
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
@@ -234,13 +234,13 @@ AT_DATA([prog.cob], [
            CURRENCY SIGN IS "EUR "      WITH PICTURE SYMBOL "U",
            CURRENCY SIGN IS " ct (EUR)" WITH PICTURE SYMBOL "c",
            Currency Sign is "$US" with Picture Symbol "$".
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        77  EUROS    PIC U99v99.
        77  cents    PIC c9,999.
        77  DOLLARS  Pic $$,$$9.99.
-       
+
        PROCEDURE DIVISION.
            MOVE 12.34 TO EUROS
            MULTIPLY euros BY 1000 GIVING cents.
@@ -1328,7 +1328,7 @@ AT_DATA([callee2.cob], [
        PROGRAM-ID.      callee2.
        PROCEDURE        DIVISION.
            CALL "callee"
-           ON EXCEPTION 
+           ON EXCEPTION
               DISPLAY "Exception " FUNCTION EXCEPTION-STATUS ";"
                  UPON SYSERR
               STOP RUN RETURNING 1
@@ -2421,20 +2421,20 @@ AT_DATA([prog.cob], [
          05  PRM    PIC X(16) OCCURS 4 TIMES.
        PROCEDURE DIVISION.
            MOVE "The,Quick,Brown,Fox" TO TSTUNS.
-           UNSTRING TSTUNS DELIMITED BY ',' 
+           UNSTRING TSTUNS DELIMITED BY ','
               INTO  PRM(1), PRM(2), PRM(3), PRM(4).
            DISPLAY "PRM(1) is " PRM(1) ":".
            DISPLAY "PRM(2) is " PRM(2) ":".
            DISPLAY "PRM(3) is " PRM(3) ":".
            DISPLAY "PRM(4) is " PRM(4) ":".
-           UNSTRING FUNCTION UPPER-CASE(TSTUNS) DELIMITED BY ',' 
+           UNSTRING FUNCTION UPPER-CASE(TSTUNS) DELIMITED BY ','
               INTO  PRM(1), PRM(2), PRM(3), PRM(4).
            DISPLAY "Now using UPPER-CASE"
            DISPLAY "PRM(1) is " PRM(1) ":".
            DISPLAY "PRM(2) is " PRM(2) ":".
            DISPLAY "PRM(3) is " PRM(3) ":".
            DISPLAY "PRM(4) is " PRM(4) ":".
-           UNSTRING "Daddy,was,a,Rolling stone" DELIMITED BY ',' 
+           UNSTRING "Daddy,was,a,Rolling stone" DELIMITED BY ','
               INTO  PRM(1), PRM(2), PRM(3), PRM(4).
            DISPLAY "Now using Literal"
            DISPLAY "PRM(1) is " PRM(1) ":".
@@ -2442,7 +2442,7 @@ AT_DATA([prog.cob], [
            DISPLAY "PRM(3) is " PRM(3) ":".
            DISPLAY "PRM(4) is " PRM(4) ":".
            UNSTRING FUNCTION LOWER-CASE("Daddy,was,a,Rolling stone")
-                DELIMITED BY ',' 
+                DELIMITED BY ','
               INTO  PRM(1), PRM(2), PRM(3), PRM(4).
            DISPLAY "Now using Literal + LOWER-CASE"
            DISPLAY "PRM(1) is " PRM(1) ":".
@@ -3255,7 +3255,7 @@ AT_DATA([caller.c], [[
 #include <libcob.h>
 
 int callee (char *, char *);
-  
+
 #ifndef NULL
 #define NULL (void*)0
 #endif
@@ -3375,7 +3375,7 @@ AT_DATA([prog.cob], [
        01 P1            USAGE POINTER.
        01 P2            USAGE BINARY-LONG.
        01 P3            PIC X(8).
-       PROCEDURE        DIVISION EXTERN USING 
+       PROCEDURE        DIVISION EXTERN USING
                         BY VALUE P1 P2 BY REFERENCE P3.
            IF P1 NOT EQUAL ADDRESS OF P3
               DISPLAY P1
@@ -3389,7 +3389,7 @@ AT_DATA([prog.cob], [
               DISPLAY P3
               END-DISPLAY
            END-IF
-           EXIT PROGRAM. 
+           EXIT PROGRAM.
 ])
 
 AT_DATA([cprog.c], [[
@@ -3441,7 +3441,7 @@ AT_DATA([prog.cob], [
        01 P1            USAGE POINTER.
        01 P2            USAGE BINARY-LONG.
        01 P3            PIC X(8).
-       PROCEDURE        DIVISION USING 
+       PROCEDURE        DIVISION USING
                         BY VALUE P1 P2 BY REFERENCE P3.
            IF P1 NOT EQUAL ADDRESS OF P3
               DISPLAY P1
@@ -3455,7 +3455,7 @@ AT_DATA([prog.cob], [
               DISPLAY P3
               END-DISPLAY
            END-IF
-           EXIT PROGRAM. 
+           EXIT PROGRAM.
 ])
 
 AT_DATA([cprog.c], [[
@@ -3674,6 +3674,48 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
 
+
+AT_SETUP([ANY LENGTH (3)])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 str PIC X(20) VALUE ALL "X".
+
+       PROCEDURE DIVISION.
+           CALL "subprog" USING str
+           .
+       END PROGRAM prog.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. subprog.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01 str PIC X ANY LENGTH.
+
+       PROCEDURE DIVISION USING str.
+           MOVE "abcd" TO str
+           DISPLAY FUNCTION TRIM (str)
+           MOVE "abcd" TO str (5:)
+           DISPLAY FUNCTION TRIM (str)
+           MOVE ALL "a" TO str
+           DISPLAY FUNCTION TRIM (str)
+           .
+       END PROGRAM subprog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[abcd
+abcdabcd
+aaaaaaaaaaaaaaaaaaaa
+])
+AT_CLEANUP
 
 AT_SETUP([access to BASED item without allocation])
 AT_KEYWORDS([runmisc])
@@ -5780,7 +5822,7 @@ AT_KEYWORDS([Trace])
 AT_DATA([callsub.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. callsub.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01 NUM-A     PIC 9(3) VALUE 399.
@@ -5789,11 +5831,11 @@ AT_DATA([callsub.cob], [
 
        LINKAGE SECTION.
        01  n PIC 99.
-       
+
        PROCEDURE DIVISION USING n.
        MAIN-10.
            ADD 1 TO n.
-           COMPUTE RSLT = ((NUM-A / (100.55 + -0.550)) 
+           COMPUTE RSLT = ((NUM-A / (100.55 + -0.550))
                          -  (NUM-B / (10.11 * 10 - 1.1)))
                              * (220 / 2.2) * n.
        END PROGRAM callsub.
@@ -5828,7 +5870,7 @@ AT_DATA([prog.cob], [
            ALTERNATE RECORD KEY IS TS-DISK WITH DUPLICATES
            FILE STATUS IS CUST-STAT.
 
-           SELECT FLATFILE 
+           SELECT FLATFILE
            ASSIGN EXTERNAL RELFIX
            ORGANIZATION RELATIVE
            ACCESS IS RANDOM RELATIVE KEY IS REC-NUM
@@ -5877,12 +5919,12 @@ AT_DATA([prog.cob], [
 
        FD  FLATFILE
            BLOCK CONTAINS 5 RECORDS.
-      
+
        01  TSP2-RECORD.
-           10  C2-CUST-NUM                     PICTURE X(8). 
-           10  C2-COMPANY                      PICTURE X(25). 
-           10  C2-DISK                         PICTURE X(8). 
-           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-CUST-NUM                     PICTURE X(8).
+           10  C2-COMPANY                      PICTURE X(25).
+           10  C2-DISK                         PICTURE X(8).
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4.
            10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
 
        WORKING-STORAGE SECTION.
@@ -6379,7 +6421,7 @@ AT_DATA([prog.cob], [
        LOADFLAT.
            OPEN OUTPUT FLATFILE.
            PERFORM FLAT-RECORD
-                        VARYING SUB FROM 1 BY 1 
+                        VARYING SUB FROM 1 BY 1
                           UNTIL SUB > MAX-SUB
                              OR SUB > 5.
            CLOSE FLATFILE.
@@ -6389,9 +6431,9 @@ AT_DATA([prog.cob], [
            MOVE 999 TO REC-NUM
            READ FLATFILE
            CLOSE FLATFILE.
-      
+
        FLAT-RECORD.
-      
+
            MOVE SPACES                       TO TSP2-RECORD.
            MOVE SUB                          TO REC-NUM.
            MOVE DATA-CUST-NUM      (SUB)     TO C2-CUST-NUM.
@@ -6399,7 +6441,7 @@ AT_DATA([prog.cob], [
            MOVE DATA-NO-TERMINALS  (SUB)     TO C2-NO-TERMINALS.
            MOVE 20070319                     TO C2-PK-DATE.
            IF  ODD-RECORD
-               MOVE "8417"                   TO C2-DISK 
+               MOVE "8417"                   TO C2-DISK
            ELSE
                MOVE "8470"                   TO C2-DISK.
            WRITE TSP2-RECORD.
@@ -7849,7 +7891,7 @@ AT_KEYWORDS([Dump])
 # check - is this reprocible on all systems?
 
 AT_DATA([./cpyabrt], [
-            MOVE "Quick brown fox jumped over the dog" 
+            MOVE "Quick brown fox jumped over the dog"
               TO TSTTAILX (1:40).
             MOVE CM-COMPANY TO TSTTAILX (42:20).
       *     DISPLAY ':' X ':'.
@@ -7862,7 +7904,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID. prog.
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
-      
+
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT FLATFILE ASSIGN EXTERNAL RELFIX
@@ -7874,19 +7916,19 @@ AT_DATA([prog.cob], [
        FILE SECTION.
        FD  FLATFILE
            BLOCK CONTAINS 5 RECORDS.
-      
+
        01  TSPFL-RECORD.
-           10  CM-CUST-NUM                     PICTURE X(8). 
-           10  CM-COMPANY                      PICTURE X(25). 
-           10  CM-DISK                         PICTURE X(8). 
+           10  CM-CUST-NUM                     PICTURE X(8).
+           10  CM-COMPANY                      PICTURE X(25).
+           10  CM-DISK                         PICTURE X(8).
            10  CM-NO-TERMINALS                 PICTURE 9(4).
-      
+
        WORKING-STORAGE SECTION.
        77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
        77  CUST-STAT                           PICTURE X(2).
        77  REC-NUM           VALUE  1          PICTURE 9(4).
        01  BIN                      PIC 9(9) BINARY VALUE 0.
-      
+
        01  TEST-DATA.
          02  DATA-CUST-NUM-TBL.
            05  FILLER PIC X(8) VALUE "ALP00000".
@@ -7895,7 +7937,7 @@ AT_DATA([prog.cob], [
            05  FILLER PIC X(8) VALUE "EPS00000".
            05  FILLER PIC X(8) VALUE "FOR00000".
            05  FILLER PIC X(8) VALUE "GAM00000".
-      
+
          02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
                                        PIC X(8) OCCURS 6.
          02  DATA-COMPANY-TBL.
@@ -7929,8 +7971,8 @@ AT_DATA([prog.cob], [
        01  WORK-AREA.
            05  SUB                             PICTURE 9(4) COMP SYNC.
                88  ODD-RECORD                  VALUE 1 3 5.
-      
-      
+
+
        PROCEDURE DIVISION.
 
            PERFORM LOADFILE.
@@ -7946,32 +7988,32 @@ AT_DATA([prog.cob], [
 
        LOADFILE.
            OPEN OUTPUT FLATFILE.
-      
+
            PERFORM LOAD-RECORD
-                        VARYING SUB FROM 1 BY 1 
+                        VARYING SUB FROM 1 BY 1
                           UNTIL SUB > MAX-SUB.
-      
+
            CLOSE FLATFILE.
-      
+
        LOAD-RECORD.
-      
+
            MOVE SPACES                       TO TSPFL-RECORD.
            MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
            MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
            MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
            IF  ODD-RECORD
-               MOVE "8417"                   TO CM-DISK 
+               MOVE "8417"                   TO CM-DISK
            ELSE
                MOVE "8470"                   TO CM-DISK.
            WRITE TSPFL-RECORD.
 
        CALL-SUB-1 SECTION.
            CALL "sub1" USING bin, TSPFL-RECORD.
-       
+
        CALL-SUB-2 SECTION.
            MOVE 4096 TO bin
            CALL "sub2" USING bin, TSPFL-RECORD.
-       
+
        CALL-IT-OMIT SECTION.
            MOVE 5440 TO bin
            CALL "sub1" USING bin, OMITTED.
@@ -8002,11 +8044,11 @@ AT_DATA([prog.cob], [
        LINKAGE SECTION.
        01  X  PIC 9(9) BINARY.
        01  TSPFL-RECORD.
-           10  CM-CUST-NUM                     PICTURE X(8). 
-           10  CM-COMPANY                      PICTURE X(25). 
-           10  CM-DISK                         PICTURE X(8). 
+           10  CM-CUST-NUM                     PICTURE X(8).
+           10  CM-COMPANY                      PICTURE X(25).
+           10  CM-DISK                         PICTURE X(8).
            10  CM-NO-TERMINALS                 PICTURE 9(4).
-       
+
        PROCEDURE DIVISION USING X, TSPFL-RECORD.
        MAIN-1 SECTION.
             MOVE ALL "X" TO TSTREC.
@@ -8074,11 +8116,11 @@ AT_DATA([prog.cob], [
        LINKAGE SECTION.
        01  X  PIC 9(9) BINARY.
        01  TSPFL-RECORD.
-           10  CM-CUST-NUM                     PICTURE X(8). 
-           10  CM-COMPANY                      PICTURE X(25). 
-           10  CM-DISK                         PICTURE X(8). 
+           10  CM-CUST-NUM                     PICTURE X(8).
+           10  CM-COMPANY                      PICTURE X(25).
+           10  CM-DISK                         PICTURE X(8).
            10  CM-NO-TERMINALS                 PICTURE 9(4).
-       
+
        PROCEDURE DIVISION USING X, TSPFL-RECORD.
             MOVE ALL "X" TO TSTREC.
             MOVE 1 TO TSTG-1 (1).
@@ -8341,7 +8383,7 @@ AT_DATA([prog.cob], [
        REPOSITORY.
            PROGRAM d AS "blah?Sdk"
            PROGRAM b
-           .          
+           .
 
        PROCEDURE DIVISION.
            CALL d
@@ -8424,7 +8466,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE SECTION.
        01  foo-bar     CONSTANT 8.
        01  x           PIC 9(foo-bar)9(foo-bar).
-       
+
        PROCEDURE DIVISION.
            IF FUNCTION LENGTH (x) <> 16
                DISPLAY FUNCTION LENGTH (x)
@@ -8473,7 +8515,7 @@ AT_DATA([prog.cob], [
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 9(4) COMP.
-       
+
        PROCEDURE       DIVISION.
            MOVE 30000 TO x
            PERFORM check-x-val
@@ -8525,11 +8567,11 @@ AT_KEYWORDS([CALL])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  MYRTN  PIC X(9) VALUE " SUB  ".
-       
+
        PROCEDURE DIVISION.
            CALL " SUB " USING 'X'.
            MOVE x'00' TO MYRTN (6:1).
@@ -8540,26 +8582,26 @@ AT_DATA([prog.cob], [
            CALL MYRTN   USING 'B'.
            STOP RUN.
        END PROGRAM prog.
-       
+
        IDENTIFICATION DIVISION.
        PROGRAM-ID. "SUB ".
-       
+
        DATA DIVISION.
        LINKAGE SECTION.
        01  x  PIC X.
-       
+
        PROCEDURE DIVISION USING x.
             DISPLAY "SUB GOT " X
             END-DISPLAY.
        END PROGRAM " SUB".
-       
+
        IDENTIFICATION DIVISION.
        PROGRAM-ID. "S U B".
-       
+
        DATA DIVISION.
        LINKAGE SECTION.
        01  x  PIC X.
-       
+
        PROCEDURE DIVISION USING x.
             DISPLAY "S U B  GOT " X
             END-DISPLAY.
@@ -8596,7 +8638,7 @@ AT_XFAIL_IF(true)
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  BINFLD5     PIC  9(5) COMP-5  VALUE  1280.
@@ -8607,10 +8649,10 @@ AT_DATA([prog.cob], [
        01  PIC9        PIC S9(8) DISPLAY VALUE  8192.
        01  NE          PIC Z(4)9.99-.
        01  CHRX        PIC  X(9)         VALUE 'Hello'.
-       01  GRPX. 
+       01  GRPX.
            05  FILLER  PIC  X(9)         VALUE 'Hello'.
            05  FILLER  PIC  X(9)         VALUE 'World'.
-       
+
        PROCEDURE DIVISION.
            MOVE -512.77 TO NE.
            CALL "CAPI" USING 2560 BY VALUE 16.
@@ -8811,11 +8853,11 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.     prog.
        OPTIONS.
            DEFAULT ROUNDED NEAREST-EVEN.
-           
+
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  x           PIC 9.
-           
+
        PROCEDURE       DIVISION.
            COMPUTE x ROUNDED = 1.5
            DISPLAY x
@@ -8856,7 +8898,7 @@ AT_DATA([prog.cob], [
              10 FILLER PIC X(35)
                 VALUE 'A-F-GEN-LEDGER-ZOO            0306 '.
              10 FILLER PIC X(35)
-                VALUE 'A-F-GEN-LEDGER-ZTR            0307 '.  
+                VALUE 'A-F-GEN-LEDGER-ZTR            0307 '.
        01  DBI-RECORD-NAMESR REDEFINES DBI-RECORD-NAMEST.
            05  DBI-RECORD-NAMES
                   OCCURS 7 TIMES
@@ -8901,10 +8943,10 @@ AT_DATA([prog.cob], [
            PERFORM FINDIT.
            STOP RUN.
 
-       FINDIT. 
+       FINDIT.
            SEARCH DBI-RECORD-NAMES
            AT END
-               DISPLAY 'A ' REC-NAME ' is invalid.' 
+               DISPLAY 'A ' REC-NAME ' is invalid.'
            WHEN REC-NAME = DBI-RECORD-NAME (REC-NAME-IDX)
                DISPLAY 'A ' REC-NAME ' is code '
                          DBI-RECORD-CODE (REC-NAME-IDX) '.'.
@@ -9023,17 +9065,17 @@ AT_DATA([prog.cob], [
            COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
            DISPLAY 'Compute  RSLT    IS ' RSLT
            DISPLAY 'Compute  RSLTv9  IS ' RSLTV1
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-C TO RSLT.
            DISPLAY 'Add      RSLT    IS ' RSLT.
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-A NUM-C 10 TO RSLT.
            DISPLAY 'Add      RSLT    IS ' RSLT.
            SUBTRACT NUM-C FROM RSLT.
            DISPLAY 'Subtract RSLT    IS ' RSLT.
            SUBTRACT NUM-A -10 FROM RSLT.
            DISPLAY 'Subtract RSLT    IS ' RSLT.
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-A NUM-C TO RSLT GIVING RSLTV1.
            DISPLAY 'Add      RSLTv9  IS ' RSLTV1
            MULTIPLY NUM-A BY NUM-C GIVING RSLT.
@@ -9051,22 +9093,22 @@ AT_DATA([prog.cob], [
            DISPLAY 'Simple   RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
 
-           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550)) 
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550))
                                 -  (NUM-B / (10.11 * 10 - 1.1)))
                                   * (220 / 2.2)
            DISPLAY 'Complex  RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
 
-           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1)) 
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1))
                                 -  (NUM-B / (10 * 10))) * (200 / 2)
            DISPLAY 'Reduced  RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
            MOVE NUM-A TO NUMV1.
-           IF ((NUMV1 / (101 - 1)) 
+           IF ((NUMV1 / (101 - 1))
               -  (NUM-B / (10 * 10))) * (200 / 2) EQUAL 188
-              DISPLAY "Not Using ARITHMETIC-OSVS" 
+              DISPLAY "Not Using ARITHMETIC-OSVS"
            ELSE
-              DISPLAY "Using ARITHMETIC-OSVS" 
+              DISPLAY "Using ARITHMETIC-OSVS"
            END-IF.
            STOP RUN.
 ])
@@ -9127,17 +9169,17 @@ AT_DATA([prog.cob], [
            COMPUTE RSLTV1, RSLT = ((NUM-A / 100) - (NUM-B / 100)) * 100
            DISPLAY 'Compute  RSLT    IS ' RSLT
            DISPLAY 'Compute  RSLTv9  IS ' RSLTV1
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-C TO RSLT.
            DISPLAY 'Add      RSLT    IS ' RSLT.
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-A NUM-C 10 TO RSLT.
            DISPLAY 'Add      RSLT    IS ' RSLT.
            SUBTRACT NUM-C FROM RSLT.
            DISPLAY 'Subtract RSLT    IS ' RSLT.
            SUBTRACT NUM-A -10 FROM RSLT.
            DISPLAY 'Subtract RSLT    IS ' RSLT.
-           MOVE 0 TO RSLT 
+           MOVE 0 TO RSLT
            ADD NUM-A NUM-C TO RSLT GIVING RSLTV1.
            DISPLAY 'Add      RSLTv9  IS ' RSLTV1
            MULTIPLY NUM-A BY NUM-C GIVING RSLT.
@@ -9155,22 +9197,22 @@ AT_DATA([prog.cob], [
            DISPLAY 'Simple   RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
 
-           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550)) 
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (100.55 + -0.550))
                                 -  (NUM-B / (10.11 * 10 - 1.1)))
                                   * (220 / 2.2)
            DISPLAY 'Complex  RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
 
-           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1)) 
+           COMPUTE RSLTV1, RSLT = ((NUM-A / (101 - 1))
                                 -  (NUM-B / (10 * 10))) * (200 / 2)
            DISPLAY 'Reduced  RSLT    IS ' RSLT
                            ' RSLTv9  IS ' RSLTV1.
            MOVE NUM-A TO NUMV1.
-           IF ((NUMV1 / (101 - 1)) 
+           IF ((NUMV1 / (101 - 1))
               -  (NUM-B / (10 * 10))) * (200 / 2) EQUAL 188
-              DISPLAY "Not Using ARITHMETIC-OSVS" 
+              DISPLAY "Not Using ARITHMETIC-OSVS"
            ELSE
-              DISPLAY "Using ARITHMETIC-OSVS" 
+              DISPLAY "Using ARITHMETIC-OSVS"
            END-IF.
            STOP RUN.
 ])
@@ -9362,7 +9404,7 @@ AT_DATA([prog.cob], [
            DISPLAY "ENVPONY was NOT DEFINED;".
        >>END-IF
            DISPLAY "DPONY set to " CNSPONY ";".
-       >>IF ENVPONY = "WHITE" 
+       >>IF ENVPONY = "WHITE"
        >>DEFINE CONSTANT PONY AS "White Horse" OVERRIDE
        >>ELSE
        >>DEFINE CONSTANT PONY AS "default Dirty" OVERRIDE
@@ -9428,7 +9470,7 @@ AT_DATA([prog.cob], [
            DISPLAY "ENVPONY was NOT DEFINED;".
        >>END-IF
            DISPLAY "DPONY set to " CNSPONY ";".
-       >>IF ENVPONY = "WHITE" 
+       >>IF ENVPONY = "WHITE"
        >>DEFINE CONSTANT PONY AS "White Horse" OVERRIDE
        >>ELSE
        >>DEFINE CONSTANT PONY AS "default Dirty" OVERRIDE
@@ -9577,7 +9619,7 @@ AT_DATA([prog.cob], [
              DISPLAY "01 CONSTANT is " CON5 " left to right precedence."
            END-IF.
            DISPLAY "CON3 is " CON3.
-           DISPLAY "CON4 is " CON4 " vs " 3.141596 
+           DISPLAY "CON4 is " CON4 " vs " 3.141596
                    " & " -2.189 " & " +12.
            DISPLAY "CON6 is " CON6 "."
            DISPLAY "My Dog's name is " DOGNAME ";".
@@ -9706,7 +9748,7 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- FLOAT-DECIMAL-16 ---"
            COMPUTE FD16 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " FD16 
+           DISPLAY "A: " FD16
 
            COMPUTE FD16 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
            DISPLAY "B: " FD16
@@ -9719,9 +9761,9 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- COMP-1 ---"
            COMPUTE CMP1 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " CMP1 
+           DISPLAY "A: " CMP1
            COMPUTE CMP1 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " CMP1 
+           DISPLAY "B: " CMP1
            MOVE ZERO TO CMP1.
            COMPUTE CMP1 = 1.0E3 / 2.1E0
                    ON SIZE ERROR DISPLAY "Z: " CMP1 " SIZE ERROR"
@@ -9731,9 +9773,9 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- COMP-2 ---"
            COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-           DISPLAY "A: " CMP2 
+           DISPLAY "A: " CMP2
            COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " CMP2 
+           DISPLAY "B: " CMP2
            MOVE ZERO TO CMP2.
            COMPUTE CMP2 = 1.0E3 / 2.1E0
                    ON SIZE ERROR DISPLAY "Z: " CMP2 " SIZE ERROR"
@@ -9763,7 +9805,7 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- 99 ---"
            MOVE -1 TO FD16, FD34, CMP2.
-           COMPUTE FD34 = 99 
+           COMPUTE FD34 = 99
                    ON SIZE ERROR DISPLAY "FD34: " FD34 " SIZE ERROR"
                NOT ON SIZE ERROR DISPLAY "FD34: " FD34 " IS OK"
            END-COMPUTE.
@@ -10079,12 +10121,12 @@ DIVIDE COMPUTE EXCEPTION-STATUS])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 9 VALUE 0.
        01  y PIC 9 VALUE 0.
-       
+
        PROCEDURE DIVISION.
            DIVIDE x BY y GIVING y
            IF FUNCTION TRIM(FUNCTION EXCEPTION-STATUS)
@@ -10121,12 +10163,12 @@ AT_KEYWORDS([misc fundamental exceptions])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-       
+
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01  x PIC 9 VALUE 1.
        01  y PIC 9.
-       
+
        PROCEDURE DIVISION.
       *    raise exception checked in previous test
       *    as it may interfere with the expected exception

@@ -1,4 +1,11 @@
 
+2018-01-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* typeck.c (cb_build_move_literal): fixed bug #486, where literals moved
+	  to an ANY LENGTH item where truncated to one character.
+	* typeck.c (validate_move): fixed spurious "value exceeds data size"
+	  warning for ANY LENGTH items.
+
 2017-12-31  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c, tree.c: fix bug #471 Mark report fields as being

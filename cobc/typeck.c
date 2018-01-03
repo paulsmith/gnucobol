@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -6820,7 +6820,7 @@ cb_emit_display (cb_tree values, cb_tree upon, cb_tree no_adv,
 			if (f->external_form_identifier) {
 				m = f->external_form_identifier;
 			} else {
-				m = cb_build_alphanumeric_literal (f->name, strlen(f->name)); 
+				m = cb_build_alphanumeric_literal (f->name, strlen(f->name));
 			}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_cgi_renderTpl", m));
@@ -8180,7 +8180,9 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 
 			/* Size check */
 			size = cb_field_size (dst);
-			if (size > 0 && (int)l->size > size) {
+			if (size > 0
+			    && !fdst->flag_any_length
+			    && (int)l->size > size) {
 				goto size_overflow;
 			}
 		}
@@ -8717,6 +8719,10 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 	l = CB_LITERAL (src);
 	f = CB_FIELD_PTR (dst);
 	cat = CB_TREE_CATEGORY (dst);
+
+	if (f->flag_any_length) {
+		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
+	}
 
 	if (l->all) {
 		if (cat == CB_CATEGORY_NUMERIC ||
@@ -10761,4 +10767,3 @@ cb_emit_suppress (struct cb_field *f)
 	CB_REFERENCE (z)->value = CB_TREE (f->report);
 	cb_emit (CB_BUILD_FUNCALL_2 ("$S", z, cb_int (f->id)));
 }
-
