@@ -1363,6 +1363,7 @@ cb_encode_program_id (const char *name)
 	const unsigned char	*t;
 	unsigned char		buff[COB_MINI_BUFF];
 
+	/* position after last path separator */
 	s = NULL;
 	for (t = (const unsigned char *)name; *t; t++) {
 		if (*t == (unsigned char)'/' || *t == (unsigned char)'\\') {
@@ -3553,7 +3554,7 @@ cb_expr_shift_class (const char *name)
 static int
 binary_op_is_relational (const struct cb_binary_op * const op)
 {
-        return op->op == '='
+	return op->op == '='
 		|| op->op == '>'
 		|| op->op == '<'
 		|| op->op == '['
@@ -3608,8 +3609,8 @@ cb_expr_shift (int token, cb_tree value)
 	case ')':
 		/* Enclosed by parentheses */
 		(void)expr_reduce (token);
-	        if (CB_BINARY_OP_P (VALUE (-1))
-		    && binary_op_is_relational (CB_BINARY_OP (VALUE (-1)))) {
+		if (CB_BINARY_OP_P (VALUE (-1))
+		 && binary_op_is_relational (CB_BINARY_OP (VALUE (-1)))) {
 			/*
 			  If a relation is surrounded in parentheses, it cannot
 			  be the start of an abbreviated condition.
@@ -6675,7 +6676,7 @@ emit_screen_displays (cb_tree screen_list, cb_tree line_col_for_last)
 		output_screen_from (CB_FIELD (cb_ref (screen_ref)), 0);
 
 		gen_screen_ptr = 1;
-	        emit_screen_display (screen_ref, pos);
+		emit_screen_display (screen_ref, pos);
 		gen_screen_ptr = 0;
 	}
 }
@@ -7376,7 +7377,7 @@ cb_emit_inspect (cb_tree var, cb_tree body, const enum cb_inspect_clause clause)
 		break;
 	case CB_TAG_INTRINSIC:
 		if (replacing_or_converting) {
-		        goto error;
+			goto error;
 		}
 		switch (CB_TREE_CATEGORY (var)) {
 		case CB_CATEGORY_ALPHABETIC:
@@ -10616,7 +10617,7 @@ static int report_in_footing = 0;
 static void
 cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
 {
-	struct cb_field         *p;
+	struct cb_field		*p;
 	for (p = f; p; p = p->sister) {
 		if(p->report_flag & (COB_REPORT_FOOTING|COB_REPORT_CONTROL_FOOTING|COB_REPORT_CONTROL_FOOTING_FINAL)) {
 			report_in_footing = 1;

@@ -3755,10 +3755,10 @@ try_remove_removal (struct amendment_list * const addition)
 
 		if (!l->to_add) {
 			prev->next = l->next;
-		        free_amendment (l);
+			free_amendment (l);
 			l = prev->next;
 
-		        return 1;
+			return 1;
 		}
 	}
 
@@ -3798,7 +3798,7 @@ reduce_amendment_list (void)
 			if (l == amendment_list) {
 				amendment_list = next;
 			}
-		        free_amendment (l);
+			free_amendment (l);
 			l = next;
 
 			delete_current_elt = 0;
@@ -3902,12 +3902,12 @@ list_aliases (const struct cobc_reserved * const word)
 			continue;
 		}
 		if (!alias_found) {
-		        fputs (" (aliased with ", stdout);
+			fputs (" (aliased with ", stdout);
 			alias_found = 1;
 		} else {
-		        fputs (", ", stdout);
+			fputs (", ", stdout);
 		}
-	        fputs (reserved_words[i].name, stdout);
+		fputs (reserved_words[i].name, stdout);
 	}
 
 	if (alias_found) {
@@ -4033,7 +4033,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	struct amendment_list	amendment;
 
 	/* Nothing to do if the word is already reserved */
-        if (is_reserved_word (word)) {
+	if (is_reserved_word (word)) {
 		return;
 	}
 	
@@ -4077,7 +4077,7 @@ remove_reserved_word_now (char * const word)
 
 	struct cobc_reserved	*entry_to_remove;
 	struct cobc_reserved	*new_reserved_words;
-        int			entry_offset;
+	int			entry_offset;
 
 	/* If the word is not a reserved, there's nothing to do. */
 	entry_to_remove = find_reserved_word (create_dummy_reserved (word));
@@ -4088,7 +4088,7 @@ remove_reserved_word_now (char * const word)
 	/* Create copy of list without word. */
 	new_reserved_words = cobc_main_malloc ((num_reserved_words - 1)
 					       * sizeof (struct cobc_reserved));
-        entry_offset = entry_to_remove - reserved_words;
+	entry_offset = entry_to_remove - reserved_words;
 	memcpy (new_reserved_words, reserved_words,
 		entry_offset * sizeof (struct cobc_reserved));
 	memcpy (new_reserved_words + entry_offset,

@@ -1278,7 +1278,8 @@ add_new_label()
 static void
 cb_emit_decl_case(struct cb_report *r, struct cb_field *f)
 {
-	struct cb_field         *p;
+	struct cb_field		*p;
+
 	for (p = f; p; p = p->sister) {
 		if(p->report_decl_id) {
 			output ("\tcase %d:\t/* %s */\n",p->report_decl_id,p->name);
@@ -5390,7 +5391,7 @@ static char *
 get_program_id_str (cb_tree id_item)
 {
 	if (CB_LITERAL_P (id_item)) {
-	        return (char *)(CB_LITERAL (id_item)->data);
+		return (char *)(CB_LITERAL (id_item)->data);
 	} else { /* prototype */
 		return (char *)CB_PROTOTYPE (cb_ref (id_item))->ext_name;
 	}
@@ -5866,7 +5867,7 @@ output_call (struct cb_call *p)
 					output ("((int (*)");
 				} else {
 					output_integer (current_prog->cb_return_code);
-				        output (" = ((int (*)");
+					output (" = ((int (*)");
 				}
 			} else {
 				output ("((void (*)");
@@ -6905,7 +6906,7 @@ output_level_2_ex_condition (const int level_2_ec)
 static void
 output_display_accept_ex_condition (const enum cb_handler_type handler_type)
 {
-        int	imp_ec;
+	int	imp_ec;
 
 	output_line ("if (unlikely ((cob_glob_ptr->cob_exception_code & 0xff00) == 0x%04x",
 		     CB_EXCEPTION_CODE (COB_EC_SCREEN));
@@ -10849,7 +10850,7 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		/* not translated as it is a highly unlikely internal abort */
 		cobc_err_msg ("Missing/wrong internal entry convention!");
 		COBC_ABORT ();
-	} else
+	}
 	/* LCOV_EXCL_STOP */
 	if (CB_INTEGER_P (l)) {
 		entry_convention = CB_INTEGER (l)->val;
