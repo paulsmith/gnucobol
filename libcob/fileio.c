@@ -2787,15 +2787,17 @@ indexed_start_internal (cob_file *f, const int cond, cob_field *key,
 	struct indexed_file	*p;
 	int			ret,len,fullkeylen,partlen;
 	unsigned int		dupno;
+	int			key_index;
 
 	dupno = 0;
 	ret = 0;
 	p = f->file;
 	/* Look up for the key */
-	p->key_index = bdb_findkey(f, key, &fullkeylen, &partlen);
-	if(p->key_index < 0) {
+	key_index = bdb_findkey(f, key, &fullkeylen, &partlen);
+	if(key_index < 0) {
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
+	p->key_index = (unsigned int)key_index;
 
 	/* Search */
 	bdb_setkey(f, p->key_index);
