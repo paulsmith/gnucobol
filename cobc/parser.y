@@ -9107,6 +9107,7 @@ statement:
 | initiate_statement
 | inquire_statement
 | inspect_statement
+/* | TODO: invoke_statement */
 | merge_statement
 | modify_statement
 | move_statement
@@ -9114,11 +9115,13 @@ statement:
 | open_statement
 | perform_statement
 | purge_statement
+/* | TODO: raise_statement */
 | read_statement
 | ready_statement
 | receive_statement
 | release_statement
 | reset_statement
+/* | TODO: resume_statement */
 | return_statement
 | rewrite_statement
 | rollback_statement
@@ -9135,6 +9138,7 @@ statement:
 | transform_statement
 | unlock_statement
 | unstring_statement
+/* | TODO: validate_statement */
 | write_statement
 | %prec SHIFT_PREFER
   NEXT SENTENCE
