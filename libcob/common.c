@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -528,8 +528,8 @@ cob_terminate_routines (void)
 #ifdef COB_DEBUG_LOG
 	if (cob_debug_file
 	&& !cobsetptr->cob_trace_file
-	&& cob_debug_file != cob_trace_file) {
-		if(cob_debug_file_name != NULL
+	&& cob_debug_file != cobsetptr->cob_trace_file) {
+		if (cob_debug_file_name != NULL
 		&& ftell(cob_debug_file) == 0) {
 			fclose (cob_debug_file);
 			unlink(cob_debug_file_name);
@@ -6755,7 +6755,7 @@ print_version (void)
 
 	printf ("libcob (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2017 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
 	puts (_("License LGPLv3+: GNU LGPL version 3 or later <http://gnu.org/licenses/lgpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
