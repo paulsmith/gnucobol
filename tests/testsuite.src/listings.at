@@ -1,4 +1,4 @@
-## Copyright (C) 2015-2017 Free Software Foundation, Inc.
+## Copyright (C) 2015-2018 Free Software Foundation, Inc.
 ## Written by Dave Pitts, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -1482,15 +1482,13 @@ AT_CLEANUP
 AT_SETUP([Multiple programs in one compilation group])
 AT_KEYWORDS([listing])
 
-# TODO 2.3 - revise listing: combinations and positions
-#                            of entries in compilation group
-#                            the previous test should likely produce
-#                            a different result, too...
-AT_XFAIL_IF(true)
+# TODO CHECK
+# combinations and positions of entries in compilation group,
+# the previous test should likely produce a different result, too...
 
 AT_CAPTURE_FILE([prog.lst])
 
-AT_DATA([proga.cob], [
+AT_DATA([prog-1.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-1.
 
@@ -1508,7 +1506,7 @@ AT_DATA([proga.cob], [
        EX. STOP RUN.
 ])
 
-AT_DATA([progb.cob], [
+AT_DATA([prog-2.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-2.
 
@@ -1530,7 +1528,7 @@ AT_DATA([progb.cob], [
 ])
 
 AT_DATA([expected.lst],
-[GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1551,7 +1549,7 @@ LINE    PG/LN  A...B............................................................
 warning: unreachable statement 'DISPLAY'
 000015
 000016         EX. STOP RUN.
-GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE  TYPE           LVL  NAME                           PICTURE
 
@@ -1559,33 +1557,33 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00001 ALPHANUMERIC   01   blah                           X
 
-GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 NAME                           DEFINED                REFERENCES
 
 blah                           7       *10      11      14
 
-GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 LABEL                          DEFINED                REFERENCES
 
 E prog__1                      10
 P EX                           16       12
-GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
+GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 FUNCTION                       TYPE                   REFERENCES
 
 L prog-2                       EXTERN   11
 
-GnuCOBOL V.R.P          proga.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
+GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0006
 
 Error/Warning summary:
 
-proga.cob:14: warning: unreachable statement 'DISPLAY'
+prog-1.cob:14: warning: unreachable statement 'DISPLAY'
 
 1 warning in compilation group
 0 errors in compilation group
-GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -1609,7 +1607,7 @@ warning: unreachable statement 'ACCEPT'
 000017
 000018         EX. STOP RUN.
 000019
-GnuCOBOL 2.3-dev.0      progb.cob            Sun Sep  3 14:46:33 2017  Page 0002
+GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE  TYPE           LVL  NAME                           PICTURE
 
@@ -1621,7 +1619,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 
 00001 ALPHANUMERIC   01   stuff                          X
 
-GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page  Page 0003
+GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 NAME                           DEFINED                REFERENCES
 
@@ -1629,18 +1627,18 @@ data-b                         7       *12      13
 
 stuff                          9       *10      12     *16
 
-GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
+GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0004
 
 LABEL                          DEFINED                REFERENCES
 
 E prog__2                      12
 P EX                           18       14
 
-GnuCOBOL V.R.P          progb.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
+GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0005
 
 Error/Warning summary:
 
-progb.cob:16: warning: unreachable statement 'ACCEPT'
+prog-2.cob:16: warning: unreachable statement 'ACCEPT'
 
 2 warnings in compilation group
 0 errors in compilation group
@@ -1649,18 +1647,18 @@ progb.cob:16: warning: unreachable statement 'ACCEPT'
 # Check once with $COMPILE and once with $COMPILE_ONLY.
 # This tests whether codegen affects the listing.
 
-AT_CHECK([$COMPILE -x -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
-[proga.cob:14: warning: unreachable statement 'DISPLAY'
-progb.cob:16: warning: unreachable statement 'ACCEPT'
+AT_CHECK([$COMPILE -x -Wunreachable -t prog.lst -Xref -tsymbols prog-1.cob prog-2.cob], [0], [],
+[prog-1.cob:14: warning: unreachable statement 'DISPLAY'
+prog-2.cob:16: warning: unreachable statement 'ACCEPT'
 ])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff expected.lst prog.lis], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -Wunreachable -t prog.lst -Xref -tsymbols proga.cob progb.cob], [0], [],
-[proga.cob:14: warning: unreachable statement 'DISPLAY'
-progb.cob:16: warning: unreachable statement 'ACCEPT'
+AT_CHECK([$COMPILE_ONLY -Wunreachable -t prog.lst -Xref -tsymbols prog-1.cob prog-2.cob], [0], [],
+[prog-1.cob:14: warning: unreachable statement 'DISPLAY'
+prog-2.cob:16: warning: unreachable statement 'ACCEPT'
 ])
-AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff expected.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
