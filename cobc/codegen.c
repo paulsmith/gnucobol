@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -10612,23 +10612,32 @@ prog_cancel_end:
 
 /* Output the entry function for a COBOL function. */
 static void
-output_function_entry_function (struct cb_program *prog, const int gencode,
-				const char *entry_name, cb_tree using_list)
+output_function_entry_function (struct cb_program *prog, cb_tree entry,
+				const int gencode)
 {
+	const char		*entry_name;
+	cb_tree			using_list;
+
 	cob_u32_t	parmnum = 0;
 	cob_u32_t	n;
 	cb_tree		l;
+	
+	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
+	using_list = CB_VALUE (CB_VALUE (entry));
 
 	if (gencode) {
+		output ("/* ENTRY '%s' */\n\n", entry_name);
 		output ("cob_field *\n");
-	} else {
-		output ("cob_field\t\t*");
-	}
-	output ("%s (", entry_name);
-	if (!gencode) {
-		output ("cob_field **, const int");
-	} else {
+		output ("%s (", entry_name);
 		output ("cob_field **cob_fret, const int cob_pam");
+	} else {
+#if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
+		if (!prog->nested_level) {
+			output ("__declspec(dllexport) ");
+		}
+#endif
+		output ("cob_field\t\t*%s (", entry_name);
+		output ("cob_field **, const int");
 	}
 	parmnum = 0;
 	if (using_list) {
@@ -10645,13 +10654,13 @@ output_function_entry_function (struct cb_program *prog, const int gencode,
 			}
 		}
 	}
-	if (gencode) {
-		output (")\n");
-	} else {
+	if (!gencode) {
 		/* Finish prototype and return */
 		output (");\n");
 		return;
 	}
+	output (")\n");
+
 	output_indent ("{");
 	output_line ("struct cob_func_loc\t*floc;");
 	output_newline ();
@@ -10827,22 +10836,6 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
 	using_list = CB_VALUE (CB_VALUE (entry));
 
-	if (gencode) {
-		output ("/* ENTRY '%s' */\n\n", entry_name);
-	}
-
-#if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
-	if (!gencode && !prog->nested_level) {
-		output ("__declspec(dllexport) ");
-	}
-#endif
-
-	if (unlikely (prog->prog_type == COB_MODULE_TYPE_FUNCTION)) {
-		output_function_entry_function (prog, gencode, entry_name,
-						using_list);
-		return;
-	}
-
 	/* entry convention */
 	l = CB_PURPOSE (CB_VALUE (entry));
 	/* LCOV_EXCL_START */
@@ -10856,6 +10849,16 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		entry_convention = CB_INTEGER (l)->val;
 	} else if (CB_NUMERIC_LITERAL_P (l)) {
 		entry_convention = cb_get_int (l);
+	}
+
+	if (gencode) {
+		output ("/* ENTRY '%s' */\n\n", entry_name);
+#if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
+	} else {
+		if (!prog->nested_level) {
+			output ("__declspec(dllexport) ");
+		}
+#endif
 	}
 
 	/* Output return type. */
@@ -10892,20 +10895,19 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		parameter_list = NULL;
 	}
 
-	if (!gencode && !using_list) {
-		output ("void);\n");
-		return;
-	}
-
-	output_program_entry_function_parameters (using_list, gencode, s_type);
-
-	if (gencode) {
-		output (")\n");
-	} else {
+	if (!gencode) {
 		/* Finish prototype and return */
-		output (");\n");
+		if (using_list) {
+			output_program_entry_function_parameters (using_list, 0, s_type);
+			output (");\n");
+		} else {
+			output ("void);\n");
+		}
 		return;
 	}
+
+	output_program_entry_function_parameters (using_list, 1, s_type);
+	output (")\n");
 
 	output_indent ("{");
 
@@ -11040,10 +11042,9 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		output ("return ");
 	}
 	if (!prog->nested_level) {
-		output ("%s_ (%d", prog->program_id, progid++);
+		output ("%s_ (%d", prog->program_id, progid);
 	} else {
-		output ("%s_%d_ (%d", prog->program_id, prog->toplev_count,
-			progid++);
+		output ("%s_%d_ (%d", prog->program_id, prog->toplev_count, progid);
 	}
 
 	if (using_list || parameter_list) {
@@ -11141,8 +11142,14 @@ output_function_prototypes (struct cb_program *prog)
 #endif
 		} else {
 			/* Output implementation of other program wrapper. */
-			for (l = cp->entry_list; l; l = CB_CHAIN (l)) {
-				output_entry_function (cp, l, cp->parameter_list, 0);
+			if (likely(cp->prog_type == COB_MODULE_TYPE_PROGRAM)) {
+				for (l = cp->entry_list; l; l = CB_CHAIN (l)) {
+					output_entry_function (cp, l, cp->parameter_list, 0);
+				}
+			} else {
+				for (l = cp->entry_list; l; l = CB_CHAIN (l)) {
+					output_function_entry_function (cp, l, 0);
+				}
 			}
 		}
 
@@ -11329,13 +11336,17 @@ codegen (struct cb_program *prog, const int subsequent_call)
 
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		output ("/* FUNCTION-ID '%s' */\n\n", prog->orig_program_id);
+		for (l = prog->entry_list; l; l = CB_CHAIN (l)) {
+			output_function_entry_function (prog, l, 1);
+		}
 	} else {
 		output ("/* PROGRAM-ID '%s' */\n\n", prog->orig_program_id);
+		for (l = prog->entry_list; l; l = CB_CHAIN (l)) {
+			output_entry_function (prog, l, prog->parameter_list, 1);
+			progid++;
+		}
 	}
 
-	for (l = prog->entry_list; l; l = CB_CHAIN (l)) {
-		output_entry_function (prog, l, prog->parameter_list, 1);
-	}
 
 	output_internal_function (prog, prog->parameter_list);
 

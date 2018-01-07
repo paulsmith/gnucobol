@@ -1840,7 +1840,7 @@ extern void		cb_build_debug_item (void);
 extern void		cb_check_field_debug (cb_tree);
 extern void		cb_trim_program_id (cb_tree);
 extern char		*cb_encode_program_id (const char *);
-extern char		*cb_build_program_id (cb_tree, cb_tree, const cob_u32_t);
+extern char		*cb_build_program_id (const char *, const cob_u32_t);
 extern cb_tree		cb_define_switch_name (cb_tree, cb_tree, const int);
 
 extern void		cb_check_word_length (unsigned int, const char *);

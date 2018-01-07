@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -174,7 +174,7 @@ static struct cb_key_component	*key_component_list;
 static struct cb_file		*linage_file;
 static cb_tree			next_label_list;
 
-static char			*stack_progid[PROG_DEPTH];
+static const char			*stack_progid[PROG_DEPTH];
 
 static enum cb_storage		current_storage;
 
@@ -1064,11 +1064,12 @@ setup_program_start (void)
 static int
 setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 {
+	const char	*external_name = NULL;
+
 	setup_program_start ();
 
-	if (first_prog) {
-		first_prog = 0;
-	} else {
+	/* finish last program/function */
+	if (!first_prog) {
 		if (!current_program->flag_validated) {
 			current_program->flag_validated = 1;
 			cb_validate_program_body (current_program);
@@ -1079,13 +1080,18 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		build_nested_special (depth);
 		cb_set_intr_when_compiled ();
 		cb_build_registers ();
+	} else {
+		first_prog = 0;
 	}
 
+	/* set internal name */
 	if (CB_LITERAL_P (id)) {
-		stack_progid[depth] = (char *)(CB_LITERAL (id)->data);
+		current_program->program_name = (char *)CB_LITERAL (id)->data;
 	} else {
-		stack_progid[depth] = (char *)(CB_NAME (id));
+		current_program->program_name = CB_NAME (id);
 	}
+	stack_progid[depth] = current_program->program_name;
+	current_program->prog_type = type;
 
 	if (depth != 0 && type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("functions may not be defined within a program/function"));
@@ -1095,8 +1101,16 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		return 1;
 	}
 
-	current_program->program_id = cb_build_program_id (id, as_literal, type == COB_MODULE_TYPE_FUNCTION);
-	current_program->prog_type = type;
+	/* set external name if specified */
+	if (as_literal) {
+		external_name = (const char *)CB_LITERAL (as_literal)->data;
+	} else {
+		external_name = current_program->program_name;
+	}
+
+	/* build encoded external PROGRAM-ID */
+	current_program->program_id
+		= cb_build_program_id (external_name, type == COB_MODULE_TYPE_FUNCTION);
 
 	if (type == COB_MODULE_TYPE_PROGRAM) {
 		if (!main_flag_set) {
@@ -1108,7 +1122,7 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 	}
 
 	if (CB_REFERENCE_P (id)) {
-	        cb_define (id, CB_TREE (current_program));
+		cb_define (id, CB_TREE (current_program));
 	}
 
 	begin_scope_of_program_name (current_program);
@@ -2880,7 +2894,9 @@ simple_prog:
 	current_paragraph = NULL;
 	l = cb_build_alphanumeric_literal (demangle_name,
 					   strlen (demangle_name));
-	current_program->program_id = cb_build_program_id (l, NULL, 0);
+	current_program->program_name = (char *)CB_LITERAL (l)->data;
+	current_program->program_id
+		= cb_build_program_id (current_program->program_name, 0);
 	current_program->prog_type = COB_MODULE_TYPE_PROGRAM;
 	if (!main_flag_set) {
 		main_flag_set = 1;

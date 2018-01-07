@@ -1363,7 +1363,7 @@ cb_encode_program_id (const char *name)
 	const unsigned char	*t;
 	unsigned char		buff[COB_MINI_BUFF];
 
-	/* position after last path separator */
+	/* position after last path separator (included for CALL) */
 	s = NULL;
 	for (t = (const unsigned char *)name; *t; t++) {
 		if (*t == (unsigned char)'/' || *t == (unsigned char)'\\') {
@@ -1415,29 +1415,14 @@ cb_encode_program_id (const char *name)
 }
 
 char *
-cb_build_program_id (cb_tree name, cb_tree alt_name, const cob_u32_t is_func)
+cb_build_program_id (const char *name, const cob_u32_t is_func)
 {
-	const char	*name_str;
 	char		*s;
 	unsigned char	*p;
 
-	/* Set the program name */
-	if (CB_LITERAL_P (name)) {
-		current_program->program_name = (char *)CB_LITERAL (name)->data;
-	} else {
-		current_program->program_name = CB_NAME (name);
-	}
-
 	/* Set and encode the PROGRAM-ID */
-	if (alt_name) {
-		name_str = (const char *)CB_LITERAL (alt_name)->data;
-	} else if (CB_LITERAL_P (name)) {
-		name_str = (const char *)CB_LITERAL (name)->data;
-	} else {
-		name_str = CB_NAME (name);
-	}
-	current_program->orig_program_id = (char *) name_str;
-	s = cb_encode_program_id (cobc_parse_strdup (name_str));
+	current_program->orig_program_id = (char *) name;
+	s = cb_encode_program_id (cobc_parse_strdup (name));
 
 	(void)cobc_check_valid_name (current_program->orig_program_id, PROGRAM_ID_NAME);
 

@@ -1,4 +1,11 @@
 
+2018-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c: moved all code parts for (output_function_entry_function)
+	  to this function and adjusted the callers
+	* typeck.c, parser.y, tree.h: adjusted (cb_build_program_id) to directly
+	  get the external name passed, removing duplicated code
+
 2018-01-03  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (cb_build_move_literal): fixed bug #486, where literals moved
