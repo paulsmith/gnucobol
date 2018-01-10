@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -3061,7 +3061,6 @@ bdb_nofile (const char *filename)
 	}
 
 	for (i = 0; bdb_data_dir && bdb_data_dir[i]; ++i) {
-		bdb_buff[COB_SMALL_MAX] = 0;
 		if (is_absolute (bdb_data_dir[i])) {
 			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s",
 				  bdb_data_dir[i], SLASH_CHAR, filename);
@@ -3069,15 +3068,16 @@ bdb_nofile (const char *filename)
 			snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s%c%s",
 				  cobsetptr->bdb_home, SLASH_CHAR, bdb_data_dir[i], SLASH_CHAR, filename);
 		}
+		bdb_buff[COB_SMALL_MAX] = 0;	/* silence analyzer */
 		errno = 0;
 		if (access (bdb_buff, F_OK) == 0 || errno != ENOENT) {
 			return 0;
 		}
 	}
 	if (i == 0) {
-		bdb_buff[COB_SMALL_MAX] = 0;
 		snprintf (bdb_buff, (size_t)COB_SMALL_MAX, "%s%c%s",
 			  cobsetptr->bdb_home, SLASH_CHAR, filename);
+		bdb_buff[COB_SMALL_MAX] = 0; /* silence analyzer */
 		errno = 0;
 		if (access (bdb_buff, F_OK) == 0 || errno != ENOENT) {
 			return 0;

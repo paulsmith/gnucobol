@@ -2281,7 +2281,7 @@ cob_numeric_cmp (cob_field *f1, cob_field *f2)
 	|| COB_FIELD_TYPE (f1) == COB_TYPE_NUMERIC_DOUBLE
 	|| COB_FIELD_TYPE (f2) == COB_TYPE_NUMERIC_FLOAT
 	|| COB_FIELD_TYPE (f2) == COB_TYPE_NUMERIC_DOUBLE) {
-		return cob_cmp_float(f1,f2);
+		return cob_cmp_float (f1, f2);
 	}
 	cob_decimal_set_field (&cob_d1, f1);
 	cob_decimal_set_field (&cob_d2, f2);
