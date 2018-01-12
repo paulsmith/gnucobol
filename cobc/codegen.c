@@ -7238,12 +7238,12 @@ output_stmt (cb_tree x)
 							cb_fold_call);
 					}
 					break;
+				/* LCOV_EXCL_START */
 				default:
-					/* LCOV_EXCL_START */
 					cobc_err_msg (_("unexpected cast type: %d"),
 							cp->cast_type);
 					COBC_ABORT ();
-					/* LCOV_EXCL_STOP */
+				/* LCOV_EXCL_STOP */
 				}
 				output (";\n");
 			} else {
@@ -7258,13 +7258,13 @@ output_stmt (cb_tree x)
 			if (CB_TREE_TAG (ap->var) == CB_TAG_CAST) {
 				/* SET ADDRESS OF var ... */
 				cp = CB_CAST (ap->var);
+				/* LCOV_EXCL_START */
 				if (cp->cast_type != CB_CAST_ADDRESS) {
-					/* LCOV_EXCL_START */
 					cobc_err_msg (_("unexpected tree type: %d"),
 							cp->cast_type);
 					COBC_ABORT ();
-					/* LCOV_EXCL_STOP */
 				}
+				/* LCOV_EXCL_STOP */
 				output_data (cp->val);
 				output (" = temp_ptr;\n");
 			} else {
@@ -7589,11 +7589,11 @@ output_stmt (cb_tree x)
 		output_perform_call (CB_DEBUG_CALL(x)->target,
 				     CB_DEBUG_CALL(x)->target);
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -9754,12 +9754,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			if (f->redefines) {
 				continue;
 			}
+			/* LCOV_EXCL_START */
 			if (f->flag_item_78) {
-				/* LCOV_EXCL_START */
 				cobc_err_msg (_("unexpected CONSTANT item"));
 				COBC_ABORT ();
-				/* LCOV_EXCL_STOP */
 			}
+			/* LCOV_EXCL_STOP */
 			f->flag_local_storage = 1;
 			f->flag_local_alloced = 1;
 			f->mem_offset = local_mem;
@@ -10216,12 +10216,12 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			if (f->flag_no_init && !f->count) {
 				continue;
 			}
+			/* LCOV_EXCL_START */
 			if (f->flag_item_78) {
-				/* LCOV_EXCL_START */
 				cobc_err_msg (_("unexpected CONSTANT item"));
 				COBC_ABORT ();
-				/* LCOV_EXCL_STOP */
 			}
+			/* LCOV_EXCL_STOP */
 			if (f->flag_is_global) {
 				f->mem_offset = working_mem;
 				working_mem += ((f->memory_size + COB_MALLOC_ALIGN) &

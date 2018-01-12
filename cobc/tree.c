@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -551,8 +551,11 @@ cb_name_1 (char *s, cb_tree x)
 		sprintf (s, "REPORT %s", CB_REPORT (CB_VALUE (x))->name);
 		break;
 
+	/* LCOV_EXCL_START */
 	default:
-		sprintf (s, _("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
+		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
 	}
 
 	return strlen (orig);
@@ -919,12 +922,12 @@ cb_tree_category (cb_tree x)
 		case CB_CAST_PROGRAM_POINTER:
 			x->category = CB_CATEGORY_PROGRAM_POINTER;
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected cast type: %d"),
 					(int)(p->cast_type));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		break;
 	case CB_TAG_REFERENCE:
@@ -1053,12 +1056,12 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 			return COB_TYPE_NUMERIC_FP_DEC64;
 		case CB_USAGE_FP_DEC128:
 			return COB_TYPE_NUMERIC_FP_DEC128;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected numeric USAGE: %d"),
 					(int)f->usage);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 	case CB_CATEGORY_NUMERIC_EDITED:
 		return COB_TYPE_NUMERIC_EDITED;
@@ -1066,12 +1069,12 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 	case CB_CATEGORY_DATA_POINTER:
 	case CB_CATEGORY_PROGRAM_POINTER:
 		return COB_TYPE_NUMERIC_BINARY;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected category: %d"),
 				(int)CB_TREE_CATEGORY (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 	/* NOT REACHED */
 #ifndef _MSC_VER

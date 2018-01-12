@@ -819,9 +819,12 @@ get_conf_section_part_name (const cob_flags_t part)
 		return "SPECIAL-NAMES";
 	} else if (part == COBC_HD_REPOSITORY) {
 		return "REPOSITORY";
+	/* LCOV_EXCL_START */
 	} else {
+		/* This should never happen (and therefore doesn't get a translation) */
 		cb_error ("unexpected configuration section part " CB_FMT_LLU, part);
 		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -836,9 +839,12 @@ get_conf_section_part_order (const cob_flags_t part)
 		return 3;
 	} else if (part == COBC_HD_REPOSITORY) {
 		return 4;
+	/* LCOV_EXCL_START */
 	} else {
+		/* This should never happen (and therefore doesn't get a translation) */
 		cb_error ("unexpected configuration section part " CB_FMT_LLU, part);
 		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1642,12 +1648,12 @@ check_preceding_tallying_phrases (const enum tallying_phrase phrase)
 		}
 		break;
 
-		/* LCOV_EXCL_START */
+	/* LCOV_EXCL_START */
 	default:
 		/* This should never happen (and therefore doesn't get a translation) */
 		cb_error ("unexpected tallying phrase");
 		COBC_ABORT();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 
 	previous_tallying_phrase = phrase;

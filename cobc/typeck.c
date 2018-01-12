@@ -1268,8 +1268,8 @@ cb_build_single_register (const char *name, const char *definition)
 		return;
 	}
 
-	/* This should never happen (and therefore doesn't get a translation) */
 	/* LCOV_EXCL_START */
+	/* This should never happen (and therefore doesn't get a translation) */
 	cb_error ("unexpected register %s, defined as \"%s\"", name, definition);
 	COBC_ABORT();
 	/* LCOV_EXCL_STOP */
@@ -3137,6 +3137,10 @@ cb_validate_program_body (struct cb_program *prog)
 		current_section = CB_REFERENCE (x)->section;
 		current_paragraph = CB_REFERENCE (x)->paragraph;
 		v = cb_ref (x);
+		/* cb_error_node -> reference not defined, message raised in cb_ref() */
+		if (v == cb_error_node) {
+			continue;
+		}
 		/* Check refs in to / out of DECLARATIVES */
 		if (CB_LABEL_P (v)) {
 			if (CB_REFERENCE (x)->flag_in_decl &&
@@ -3150,7 +3154,8 @@ cb_validate_program_body (struct cb_program *prog)
 						    CB_LABEL (v)->name);
 					break;
 				case CB_WARNING:
-					cb_warning_x (cb_warn_dialect, x, _("'%s' is not in DECLARATIVES"),
+					cb_warning_x (cb_warn_dialect, x,
+						    _("'%s' is not in DECLARATIVES"),
 						    CB_LABEL (v)->name);
 					break;
 				default:
@@ -3162,14 +3167,15 @@ cb_validate_program_body (struct cb_program *prog)
 			if (CB_LABEL (v)->flag_declaratives &&
 			    !CB_REFERENCE (x)->flag_in_decl &&
 			    !CB_REFERENCE (x)->flag_decl_ok) {
-				cb_error_x (x, _("invalid reference to '%s' (in DECLARATIVES)"), CB_LABEL (v)->name);
+				cb_error_x (x, _("invalid reference to '%s' (in DECLARATIVES)"),
+					    CB_LABEL (v)->name);
 			}
 
 			CB_LABEL (v)->flag_begin = 1;
 			if (CB_REFERENCE (x)->length) {
 				CB_LABEL (v)->flag_return = 1;
 			}
-		} else if (v != cb_error_node) {
+		} else {
 			cb_error_x (x, _("'%s' is not a procedure name"), cb_name (x));
 		}
 	}
@@ -3919,15 +3925,15 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		break;
 	default:
 		func = explain_operator (op);
-		if (func) {
-			error_statement = current_statement;
-			cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
-			return;
-		}
 		/* LCOV_EXCL_START */
-		cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
-		COBC_ABORT ();
+		if (!func) {
+			cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
+			COBC_ABORT ();
+		}
 		/* LCOV_EXCL_STOP */
+		error_statement = current_statement;
+		cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
+		return;
 	}
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
 
@@ -3986,12 +3992,12 @@ decimal_expand (cb_tree d, cb_tree x)
 	}
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
-			/* LCOV_EXCL_START */
+		/* LCOV_EXCL_START */
 		if (x != cb_zero) {
 			cobc_err_msg (_("unexpected constant expansion"));
 			COBC_ABORT ();
 		}
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
 			cb_int0));
 		break;
@@ -4068,11 +4074,11 @@ decimal_expand (cb_tree d, cb_tree x)
 	case CB_TAG_INTRINSIC:
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -4697,8 +4703,9 @@ cb_end_cond (cb_tree rslt)
 void
 cb_save_cond (void)
 {
-	if (if_stop)
+	if (if_stop) {
 		return;
+	}
 	if (if_nest < MAX_NESTED_COND) {
 		if_cond[if_nest++] = cond_fixed;
 	} else {
@@ -7339,11 +7346,11 @@ emit_invalid_target_error (const enum cb_inspect_clause clause)
 		clause_name = "TRANSFORM";
 		break;
 
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected clause %d"), clause);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 
 	cb_error_x (CB_TREE (current_statement), _("invalid target for %s"),
@@ -8300,12 +8307,12 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	case CB_TAG_FUNCALL:
 		/* TODO: check this */
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"),
 				(int)CB_TREE_TAG (src));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 	return 0;
 
@@ -10714,7 +10721,7 @@ cb_emit_generate (cb_tree x)
 	f = CB_FIELD (y);
 	if(f == NULL
 	|| f->report == NULL) {
-		cb_error_x (x, _("Data item is not part of a report"));
+		cb_error_x (x, _("data item is not part of a report"));
 	} else {
 #if 0	/* r is unused afterwards and parameter types doesn't match */
 		r = CB_REPORT (f->report);
@@ -10742,7 +10749,7 @@ cb_emit_suppress (struct cb_field *f)
 	/* Find cob_report_control and set on suppress flag */
 	if(f == NULL
 	|| f->report == NULL) {
-		cb_error (_("Improper use of SUPPRESS PRINTING "));
+		cb_error (_("improper use of SUPPRESS PRINTING"));
 		return;
 	}
 	z = cb_build_reference (f->name);

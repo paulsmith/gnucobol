@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -2260,12 +2260,12 @@ unbounded_again:
 		case CB_USAGE_PROGRAM_POINTER:
 			f->size = sizeof (void *);
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected USAGE: %d"),
 					(int)f->usage);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -2664,11 +2664,11 @@ cb_get_usage_string (const enum cb_usage usage)
 		return "VARIANT";
 	case CB_USAGE_HNDL_LM:
 		return "HANDLE OF LAYOUT-MANAGER";
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cb_error (_("unexpected USAGE: %d"), usage);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 

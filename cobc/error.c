@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -502,8 +502,13 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 	case CB_UNCONFORMABLE:
 		cb_error_x (x, _("%s does not conform to %s"), feature, cb_config_name);
 		return 0;
+
+	/* LCOV_EXCL_START */
 	default:
-		break;
+		/* This should never happen (and therefore doesn't get a translation) */
+		cobc_err_msg ("unexpected compiler option value: %d", tag);
+		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
 	}
 	return 0;
 }

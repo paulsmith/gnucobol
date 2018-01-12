@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2006-2012, 2013 Free Software Foundation, Inc.
-   Written by Roger While
+   Copyright (C) 2006-2012, 2013, 2017-2018 Free Software Foundation, Inc.
+   Written by Roger While, Ron Norman
 
    This file is part of GnuCOBOL.
 
@@ -2629,10 +2629,10 @@ cob_gen_optim (const enum cb_optim val)
 #endif
 		output_storage ("}");
 		return;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected optimization value: %d"), val);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
