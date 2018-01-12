@@ -1114,16 +1114,19 @@ output_data (cb_tree x)
 			field_iteration);
 		break;
 	case CB_TAG_CONST:
-		if (x == cb_null) {
-			output ("NULL");
-			return;
-		}
-		/* Fall through */
-	default:
 		/* LCOV_EXCL_START */
+		if (x != cb_null) {
+			cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
+			COBC_ABORT ();
+		}
+		/* LCOV_EXCL_STOP */
+		output ("NULL");
+		break;
+	/* LCOV_EXCL_START */
+	default:
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -1200,11 +1203,11 @@ again:
 	case CB_TAG_FIELD:
 		output ("(int)%s%d.size", CB_PREFIX_FIELD, CB_FIELD (x)->id);
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -2718,12 +2721,12 @@ output_integer (cb_tree x)
 				output (", NULL, 0, %d)", cb_fold_call);
 			}
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected cast type: %d"),
 				 (int)cp->cast_type);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		break;
 	case CB_TAG_REFERENCE:
@@ -2903,11 +2906,11 @@ output_integer (cb_tree x)
 		output_param (x, -1);
 		output (")");
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -2985,12 +2988,12 @@ output_long_integer (cb_tree x)
 				output (", NULL, 0, %d)", cb_fold_call);
 			}
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected cast type: %d"),
 				 (int)cp->cast_type);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		break;
 	case CB_TAG_REFERENCE:
@@ -3150,11 +3153,11 @@ output_long_integer (cb_tree x)
 		output_param (x, -1);
 		output (")");
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -3620,11 +3623,11 @@ output_param (cb_tree x, int id)
 	case CB_TAG_FUNCALL:
 		output_funcall (x);
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -3852,11 +3855,11 @@ output_funcall (cb_tree x)
 			output_param (p->argv[1], 0);
 			output(");");
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected function: %s"), p->name);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		return;
 	}
@@ -3913,12 +3916,12 @@ output_cond (cb_tree x, const int save_flag)
 			output ("1");
 		} else if (x == cb_false) {
 			output ("0");
+		/* LCOV_EXCL_START */
 		} else {
-			/* LCOV_EXCL_START */
 			cobc_err_msg ("invalid constant");
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 		break;
 	case CB_TAG_BINARY_OP:
 		p = CB_BINARY_OP (x);
@@ -3993,13 +3996,13 @@ output_cond (cb_tree x, const int save_flag)
 			output ("(ret = ");
 		}
 		inside_stack[inside_check++] = 0;
+		/* LCOV_EXCL_START */
 		if (inside_check >= COB_INSIDE_SIZE) {
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("internal statement stack depth exceeded: %d"),
 					COB_INSIDE_SIZE);
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
 		}
+		/* LCOV_EXCL_STOP */
 		output ("(\n");
 		for (; x; x = CB_CHAIN (x)) {
 			output_stmt (CB_VALUE (x));
@@ -4012,11 +4015,11 @@ output_cond (cb_tree x, const int save_flag)
 			output (")");
 		}
 		break;
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -4045,12 +4048,12 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 	cb_tree		l;
 	int		type;
 
+	/* LCOV_EXCL_START */
 	if (f->flag_item_78) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected CONSTANT item"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 	if (f->flag_external && !p->flag_init_statement) {
 		return INITIALIZE_NONE;
@@ -4552,12 +4555,12 @@ output_initialize_one (struct cb_initialize *p, cb_tree x)
 		case CB_CATEGORY_NATIONAL_EDITED:
 			output_move (cb_space, x);
 			break;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected tree category: %d"),
 				 (int)CB_TREE_CATEGORY (x));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 	}
 }
@@ -4729,13 +4732,13 @@ output_search_whens (cb_tree table, struct cb_field *p, cb_tree stmt,
 
 	COB_UNUSED(table);	/* to be handled later */
 
+	/* LCOV_EXCL_START */
 	if (!p->index_list) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
 			"output_search", "table");
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 
 	/* Determine the index to use */
 	if (var) {
@@ -4937,11 +4940,11 @@ output_call_protocast (cb_tree x, cb_tree l)
 			case CB_SIZE_8:
 				output ("cob_u64_t");
 				return;
+			/* LCOV_EXCL_START */
 			default:
-				/* LCOV_EXCL_START */
 				cobc_err_msg (_("unexpected size: %d"), CB_SIZES_INT (l));
 				COBC_ABORT ();
-				/* LCOV_EXCL_STOP */
+			/* LCOV_EXCL_STOP */
 			}
 		}
 		val = cb_get_long_long (x);
@@ -4964,11 +4967,11 @@ output_call_protocast (cb_tree x, cb_tree l)
 		case CB_SIZE_8:
 			output ("cob_s64_t");
 			return;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected size: %d"), CB_SIZES_INT (l));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		return;
 	default:
@@ -5160,11 +5163,11 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 				output ("(cob_u64_t)");
 				output (CB_FMT_LLU_F, uval);
 				return;
+			/* LCOV_EXCL_START */
 			default:
-				/* LCOV_EXCL_START */
 				cobc_err_msg (_("unexpected size: %d"), CB_SIZES_INT (l));
 				COBC_ABORT ();
-				/* LCOV_EXCL_STOP */
+			/* LCOV_EXCL_STOP */
 			}
 		}
 		val = cb_get_long_long (x);
@@ -5192,11 +5195,11 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 			output ("(cob_s64_t)");
 			output (CB_FMT_LLD_F, val);
 			return;
+		/* LCOV_EXCL_START */
 		default:
-			/* LCOV_EXCL_START */
 			cobc_err_msg (_("unexpected size: %d"), CB_SIZES_INT (l));
 			COBC_ABORT ();
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		}
 		return;
 	default:
@@ -6941,11 +6944,11 @@ output_ec_condition_for_handler (const enum cb_handler_type handler_type)
 		output_level_2_ex_condition (COB_EC_OVERFLOW);
 		break;
 
+	/* LCOV_EXCL_START */
 	default:
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("unexpected handler type: %d"), (int) handler_type);
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	}
 }
 
