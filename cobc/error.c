@@ -178,11 +178,19 @@ cb_get_strerror (void)
 #endif
 }
 
+/* set the value for "ignore errors because instruction is
+   in a constant FALSE path which gets no codegen at all"
+   if state is -1, don't set the value 
+
+   returns the value which was active on call
+*/
 int
 cb_set_ignore_error (int state)
 {
 	int prev = ignore_error;
-	ignore_error = state;
+	if (state != -1) {
+		ignore_error = state;
+	}
 	return prev;
 }
 
@@ -213,6 +221,25 @@ cb_warning (int pref, const char *fmt, ...)
 	}
 }
 
+void
+cb_error_always (const char *fmt, ...)
+{
+	va_list ap;
+
+	cobc_in_repository = 0;
+	va_start (ap, fmt);
+	print_error (NULL, 0, _("error: "), fmt, ap);
+	va_end (ap);
+
+	if (sav_lst_file) {
+		return;
+	}
+	if (++errorcount > cb_max_errors) {
+		cobc_too_many_errors ();
+	}
+}
+
+/* raise error (or warning if current branch is not generated) */
 void
 cb_error (const char *fmt, ...)
 {
@@ -471,6 +498,8 @@ cb_error_x (cb_tree x, const char *fmt, ...)
 unsigned int
 cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 {
+	int	ignore_error_sav;
+
 	if (!x) {
 		x = cobc_parse_malloc (sizeof (struct cb_tree_common));
 		x->source_file = NULL;
@@ -497,10 +526,16 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 		cb_warning_x (warningopt, x, _("%s ignored"), feature);
 		return 0;
 	case CB_ERROR:
-		cb_error_x (x, _("%s used"), feature);
-		return 0;
+		/* Fall-through */
 	case CB_UNCONFORMABLE:
-		cb_error_x (x, _("%s does not conform to %s"), feature, cb_config_name);
+		/* raise error in any case */
+		ignore_error_sav = cb_set_ignore_error (0);
+		if (tag == CB_ERROR) {
+			cb_error_x (x, _("%s used"), feature);
+		} else {
+			cb_error_x (x, _("%s does not conform to %s"), feature, cb_config_name);
+		}
+		(void) cb_set_ignore_error (ignore_error_sav);
 		return 0;
 
 	/* LCOV_EXCL_START */

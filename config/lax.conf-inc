@@ -1,6 +1,6 @@
 # GnuCOBOL compiler configuration
 #
-# Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -108,6 +108,7 @@ free-redefines-position:		ok
 record-delimiter:			ok
 sequential-delimiters:			ok
 record-delim-with-fixed-recs:		ok
+missing-statement:			+warning
 
 
 # use complete word list

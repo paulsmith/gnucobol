@@ -3134,13 +3134,14 @@ cb_validate_program_body (struct cb_program *prog)
 	save_paragraph = current_paragraph;
 	for (l = cb_list_reverse (prog->label_list); l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
-		current_section = CB_REFERENCE (x)->section;
-		current_paragraph = CB_REFERENCE (x)->paragraph;
+		(void)cb_set_ignore_error (CB_REFERENCE (x)->flag_ignored);
 		v = cb_ref (x);
 		/* cb_error_node -> reference not defined, message raised in cb_ref() */
 		if (v == cb_error_node) {
 			continue;
 		}
+		current_section = CB_REFERENCE (x)->section;
+		current_paragraph = CB_REFERENCE (x)->paragraph;
 		/* Check refs in to / out of DECLARATIVES */
 		if (CB_LABEL_P (v)) {
 			if (CB_REFERENCE (x)->flag_in_decl &&
@@ -3187,12 +3188,13 @@ cb_validate_program_body (struct cb_program *prog)
 	size = DFLT_DEBUG_CONTENTS_SIZE;
 	for (l = prog->debug_list; l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
-		current_section = CB_REFERENCE (x)->section;
-		current_paragraph = CB_REFERENCE (x)->paragraph;
+		(void)cb_set_ignore_error (CB_REFERENCE (x)->flag_ignored);
 		v = cb_ref (x);
 		if (v == cb_error_node) {
 			continue;
 		}
+		current_section = CB_REFERENCE (x)->section;
+		current_paragraph = CB_REFERENCE (x)->paragraph;
 		switch (CB_TREE_TAG (v)) {
 		case CB_TAG_LABEL:
 			if (current_program->all_procedure) {
@@ -3224,6 +3226,9 @@ cb_validate_program_body (struct cb_program *prog)
 			break;
 		}
 	}
+	/* reset error handling */
+	cb_set_ignore_error (0);
+
 	/* If necessary, adjust size of DEBUG-CONTENTS (and DEBUG-ITEM) */
 	if (current_program->flag_debugging) {
 		if (size != DFLT_DEBUG_CONTENTS_SIZE) {
@@ -3247,10 +3252,12 @@ cb_validate_program_body (struct cb_program *prog)
 		}
 		x = CB_PURPOSE (l);
 		v = CB_VALUE (l);
-		if (CB_REFERENCE (x)->value == cb_error_node) {
+		if (CB_REFERENCE (x)->value == cb_error_node
+		 || CB_REFERENCE (x)->flag_ignored) {
 			continue;
 		}
-		if (CB_REFERENCE (v)->value == cb_error_node) {
+		if (CB_REFERENCE (v)->value == cb_error_node
+		 || CB_REFERENCE (v)->flag_ignored) {
 			continue;
 		}
 		l1 = CB_LABEL (CB_REFERENCE (x)->value);

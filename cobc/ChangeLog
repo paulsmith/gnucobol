@@ -1,4 +1,17 @@
 
+2018-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* config.def: added cb_missing_statement, see FR #288
+	* parser.y (if_statement): first change for FR #288 leading to warning
+	  message for "IF cond ELSE statements"
+	* tree.c (cb_build_reference, cb_ref), parser.y (procedure_name):
+	  store position (section/paragraph) for all references not only for labels
+	* error.c (cb_verify_x, cb_set_ignore_error): never ignore errors that
+	  depend on compiler configuration
+	* parser.y (procedure_name), typeck.c (cb_validate_program_body), tree.h:
+	  don't raise errors for labels in ignored code parts and skip some
+	  verifications on these
+
 2018-01-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: moved all code parts for (output_function_entry_function)

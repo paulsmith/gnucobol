@@ -1033,6 +1033,7 @@ struct cb_reference {
 	unsigned int		flag_target	: 1;	/* DEBUG item is target */
 
 	unsigned int		flag_optional	: 1;	/* Definition optional */
+	unsigned int		flag_ignored	: 1;	/* Part of ignored code */
 	unsigned int		flag_filler_ref	: 1;	/* Ref to FILLER */
 	unsigned int		flag_duped	: 1;	/* Duplicate name */
 };

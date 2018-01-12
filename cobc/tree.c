@@ -3788,20 +3788,26 @@ cb_finalize_cd (struct cb_cd *cd, struct cb_field *records)
 cb_tree
 cb_build_reference (const char *name)
 {
-	struct cb_reference	*p;
-	cb_tree			r;
+	struct cb_reference	*r;
+	cb_tree			x;
 
-	p = make_tree (CB_TAG_REFERENCE, CB_CATEGORY_UNKNOWN,
+	r = make_tree (CB_TAG_REFERENCE, CB_CATEGORY_UNKNOWN,
 		       sizeof (struct cb_reference));
+
+	/* position of reference */
+	r->section = current_section;
+	r->paragraph = current_paragraph;
+
 	/* Look up / insert word into hash list */
-	lookup_word (p, name);
+	lookup_word (r, name);
 
-	r = CB_TREE (p);
+	x = CB_TREE (r);
 
-	r->source_file = cb_source_file;
-	r->source_line = cb_source_line;
+	/* position of tree */
+	x->source_file = cb_source_file;
+	x->source_line = cb_source_line;
 
-	return r;
+	return x;
 }
 
 cb_tree
@@ -3901,7 +3907,9 @@ cb_ref (cb_tree x)
 	struct cb_program	*prog;
 	struct cb_word		*w;
 	size_t			val;
-	size_t			ambiguous;
+	size_t			ambiguous = 0;
+	struct cb_label		*save_section;
+	struct cb_label		*save_paragraph;
 
 	if (CB_INVALID_TREE (x)) {
 		return cb_error_node;
@@ -3967,8 +3975,8 @@ cb_ref (cb_tree x)
 				for (cb1 = CB_CHAIN (items); cb1; cb1 = CB_CHAIN (cb1)) {
 					cb2 = CB_VALUE (cb1);
 					if (s == CB_LABEL (cb2)->section) {
-						ambiguous_error (x);
-						goto error;
+						ambiguous = 1;
+						goto raise_error;
 					}
 				}
 				candidate = v;
@@ -4003,14 +4011,14 @@ cb_ref (cb_tree x)
 	/* There is no candidate */
 	if (candidate == NULL) {
 		if (likely(current_program->nested_level <= 0)) {
-			goto undef_error;
+			goto raise_error;
 		}
 		/* Nested program - check parents for GLOBAL candidate */
-		ambiguous = 0;
-/* RXWRXW
+#if 0 /* RXWRXW */
 		val = hash ((const unsigned char *)r->word->name);
-*/
+#else
 		val = r->hashval;
+#endif
 		prog = current_program;
 		while (prog) {
 			if (!cb_correct_program_order) {
@@ -4026,8 +4034,7 @@ cb_ref (cb_tree x)
 					candidate = global_check (r, w->items, &ambiguous);
 					if (candidate) {
 						if (ambiguous) {
-							ambiguous_error (x);
-							goto error;
+							goto raise_error;
 						}
 						if (CB_FILE_P(candidate)) {
 							current_program->flag_gen_error = 1;
@@ -4040,13 +4047,12 @@ cb_ref (cb_tree x)
 				break;
 			}
 		}
-		goto undef_error;
+		goto raise_error;
 	}
 
 	/* Reference is ambiguous */
 	if (ambiguous) {
-		ambiguous_error (x);
-		goto error;
+		goto raise_error;
 	}
 
 end:
@@ -4073,8 +4079,18 @@ end:
 	r->value = candidate;
 	return r->value;
 
-undef_error:
-	undefined_error (x);
+raise_error:
+	save_section = current_section;
+	save_paragraph = current_paragraph;
+	current_section = r->section;
+	current_paragraph = r->paragraph;
+	if (ambiguous) {
+		ambiguous_error (x);
+	} else {
+		undefined_error (x);
+	}
+	current_section = save_section;
+	current_paragraph = save_paragraph;
 	/* Fall through */
 
 error:

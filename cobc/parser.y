@@ -40,7 +40,7 @@
 #endif
 
 #define YYSTYPE			cb_tree
-#define yyerror(x)		cb_error ("%s", x)
+#define yyerror(x)		cb_error_always ("%s", x)
 
 #define emit_statement(x) \
 do { \
@@ -9194,7 +9194,7 @@ accept_statement:
 	cobc_cs_check = CB_CS_ACCEPT;
   }
   accept_body
-  end_accept
+  _end_accept
 ;
 
 accept_body:
@@ -9656,7 +9656,7 @@ update_default:
 | DEFAULT
 ;
 
-end_accept:
+_end_accept:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, ACCEPT);
@@ -9684,7 +9684,7 @@ add_statement:
 	begin_statement ("ADD", TERM_ADD);
   }
   add_body
-  end_add
+  _end_add
 ;
 
 add_body:
@@ -9714,7 +9714,7 @@ _add_to:
   }
 ;
 
-end_add:
+_end_add:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, ADD);
@@ -9798,7 +9798,7 @@ call_statement:
 	call_line_number = cb_source_line;
   }
   call_body
-  end_call
+  _end_call
   {
 	cobc_cs_check = 0;
   }
@@ -10147,7 +10147,7 @@ call_not_on_exception:
   }
 ;
 
-end_call:
+_end_call:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, CALL);
@@ -10254,7 +10254,7 @@ compute_statement:
 	begin_statement ("COMPUTE", TERM_COMPUTE);
   }
   compute_body
-  end_compute
+  _end_compute
 ;
 
 compute_body:
@@ -10264,7 +10264,7 @@ compute_body:
   }
 ;
 
-end_compute:
+_end_compute:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, COMPUTE);
@@ -10338,7 +10338,7 @@ delete_statement:
 	begin_statement ("DELETE", TERM_DELETE);
   }
   delete_body
-  end_delete
+  _end_delete
 ;
 
 delete_body:
@@ -10362,7 +10362,7 @@ delete_file_list:
   }
 ;
 
-end_delete:
+_end_delete:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, DELETE);
@@ -10417,7 +10417,7 @@ display_statement:
 	is_first_display_item = 1;
   }
   display_body
-  end_display
+  _end_display
 ;
 
 display_body:
@@ -10914,7 +10914,7 @@ disp_attr:
   }
 ;
 
-end_display:
+_end_display:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, DISPLAY);
@@ -10934,7 +10934,7 @@ divide_statement:
 	begin_statement ("DIVIDE", TERM_DIVIDE);
   }
   divide_body
-  end_divide
+  _end_divide
 ;
 
 divide_body:
@@ -10960,7 +10960,7 @@ divide_body:
   }
 ;
 
-end_divide:
+_end_divide:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, DIVIDE);
@@ -11036,7 +11036,7 @@ evaluate_statement:
 	cb_true_side ();
   }
   evaluate_body
-  end_evaluate
+  _end_evaluate
 ;
 
 evaluate_body:
@@ -11231,7 +11231,7 @@ _evaluate_thru_expr:
 | THRU expr			{ $$ = $2; }
 ;
 
-end_evaluate:
+_end_evaluate:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, EVALUATE);
@@ -11496,8 +11496,8 @@ if_statement:
   {
 	begin_statement ("IF", TERM_IF);
   }
-  condition if_then if_else_statements
-  end_if
+  condition _if_then if_else_statements
+  _end_if
 ;
 
 if_else_statements:
@@ -11508,6 +11508,8 @@ if_else_statements:
 | ELSE if_false statement_list
   {
 	cb_emit_if ($-1, NULL, $3);
+	cb_verify (cb_missing_statement,
+		_("IF without imperative statement"));
   }
 | if_true statement_list %prec SHIFT_PREFER
   {
@@ -11515,7 +11517,7 @@ if_else_statements:
   }
 ;
 
-if_then:
+_if_then:
   {
 	cb_save_cond ();
   }
@@ -11537,7 +11539,7 @@ if_false:
   }
 ;
 
-end_if:
+_end_if:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-4, IF);
@@ -11908,7 +11910,7 @@ modify_statement:
 	cobc_cs_check = CB_CS_INQUIRE_MODIFY;
   }
   modify_body
-  end_modify
+  _end_modify
   {
 	cobc_cs_check = 0;
   }
@@ -11919,7 +11921,7 @@ modify_body:
 | window_handle changeable_window_properties
 ;
 
-end_modify:
+_end_modify:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, MODIFY);
@@ -11961,7 +11963,7 @@ multiply_statement:
 	begin_statement ("MULTIPLY", TERM_MULTIPLY);
   }
   multiply_body
-  end_multiply
+  _end_multiply
 ;
 
 multiply_body:
@@ -11975,7 +11977,7 @@ multiply_body:
   }
 ;
 
-end_multiply:
+_end_multiply:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, MULTIPLY);
@@ -12084,7 +12086,7 @@ perform_body:
 	start_debug = save_debug;
 	cobc_cs_check = 0;
   }
-  statement_list end_perform
+  statement_list _end_perform
   {
 	perform_stack = CB_CHAIN (perform_stack);
 	cb_emit_perform ($2, $5, $1, $3);
@@ -12092,7 +12094,7 @@ perform_body:
 | _thread_start
   perform_option
   _thread_handle
-  term_or_dot
+  end_perform_or_dot
   {
 	cb_emit_perform ($2, NULL, $1, $3);
 	start_debug = save_debug;
@@ -12100,7 +12102,7 @@ perform_body:
   }
 ;
 
-end_perform:
+_end_perform:
   /* empty */	%prec SHIFT_PREFER
   {
 	if (cb_relaxed_syntax_checks) {
@@ -12115,7 +12117,7 @@ end_perform:
   }
 ;
 
-term_or_dot:
+end_perform_or_dot:
   END_PERFORM
   {
 	TERMINATOR_CLEAR ($-4, PERFORM);
@@ -12268,7 +12270,7 @@ read_statement:
 	cobc_cs_check = CB_CS_READ;
   }
   read_body
-  end_read
+  _end_read
 ;
 
 read_body:
@@ -12388,7 +12390,7 @@ read_handler:
 | at_end
 ;
 
-end_read:
+_end_read:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, READ);
@@ -12418,7 +12420,7 @@ receive_statement:
 	begin_statement ("RECEIVE", TERM_RECEIVE);
   }
   receive_body
-  end_receive
+  _end_receive
 ;
 
 receive_body:
@@ -12455,7 +12457,7 @@ with_data_sentence:
   DATA statement_list /* Optional WITH matched in scanner.l */
 ;
 
-end_receive:
+_end_receive:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, RECEIVE);
@@ -12502,7 +12504,7 @@ return_statement:
 	begin_statement ("RETURN", TERM_RETURN);
   }
   return_body
-  end_return
+  _end_return
 ;
 
 return_body:
@@ -12512,7 +12514,7 @@ return_body:
   }
 ;
 
-end_return:
+_end_return:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, RETURN);
@@ -12535,7 +12537,7 @@ rewrite_statement:
 	start_debug = 0;
   }
   rewrite_body
-  end_rewrite
+  _end_rewrite
 ;
 
 rewrite_body:
@@ -12565,7 +12567,7 @@ with_lock:
   }
 ;
 
-end_rewrite:
+_end_rewrite:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, REWRITE);
@@ -12596,7 +12598,7 @@ search_statement:
 	begin_statement ("SEARCH", TERM_SEARCH);
   }
   search_body
-  end_search
+  _end_search
 ;
 
 search_body:
@@ -12648,7 +12650,7 @@ search_when:
   }
 ;
 
-end_search:
+_end_search:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, SEARCH);
@@ -13034,7 +13036,7 @@ start_statement:
 	start_tree = cb_int (COB_EQ);
   }
   start_body
-  end_start
+  _end_start
 ;
 
 start_body:
@@ -13104,7 +13106,7 @@ not_equal_op:
 | NOT_EQUAL
 ;
 
-end_start:
+_end_start:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, START);
@@ -13220,7 +13222,7 @@ string_statement:
 	save_tree = NULL;
   }
   string_body
-  end_string
+  _end_string
 ;
 
 string_body:
@@ -13265,7 +13267,7 @@ _with_pointer:
 | _with POINTER _is identifier	{ $$ = $4; }
 ;
 
-end_string:
+_end_string:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, STRING);
@@ -13285,7 +13287,7 @@ subtract_statement:
 	begin_statement ("SUBTRACT", TERM_SUBTRACT);
   }
   subtract_body
-  end_subtract
+  _end_subtract
 ;
 
 subtract_body:
@@ -13308,7 +13310,7 @@ subtract_body:
   }
 ;
 
-end_subtract:
+_end_subtract:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, SUBTRACT);
@@ -13418,7 +13420,7 @@ unstring_statement:
 	begin_statement ("UNSTRING", TERM_UNSTRING);
   }
   unstring_body
-  end_unstring
+  _end_unstring
 ;
 
 unstring_body:
@@ -13477,7 +13479,7 @@ _unstring_tallying:
 | TALLYING _in identifier	{ $$ = $3; }
 ;
 
-end_unstring:
+_end_unstring:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, UNSTRING);
@@ -13792,7 +13794,7 @@ write_statement:
 	start_debug = 0;
   }
   write_body
-  end_write
+  _end_write
 ;
 
 write_body:
@@ -13840,7 +13842,7 @@ write_handler:
 | at_eop_clauses
 ;
 
-end_write:
+_end_write:
   /* empty */	%prec SHIFT_PREFER
   {
 	TERMINATOR_WARNING ($-2, WRITE);
@@ -14666,12 +14668,14 @@ procedure_name_list:
 procedure_name:
   label
   {
+	struct cb_reference *r = CB_REFERENCE ($1);
+
+	r->offset = CB_TREE (current_section);
+	r->flag_in_decl = !!in_declaratives;
+	r->flag_ignored = cb_set_ignore_error (-1);
+
 	$$ = $1;
-	CB_REFERENCE ($$)->offset = CB_TREE (current_section);
-	CB_REFERENCE ($$)->flag_in_decl = !!in_declaratives;
-	CB_REFERENCE ($$)->section = current_section;
-	CB_REFERENCE ($$)->paragraph = current_paragraph;
-	CB_ADD_TO_CHAIN ($$, current_program->label_list);
+	CB_ADD_TO_CHAIN ($1, current_program->label_list);
   }
 ;
 

@@ -1,4 +1,4 @@
-## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2007-2012, 2014-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
 ## Ron Norman
 ##
@@ -4733,6 +4733,184 @@ prog.cob:20: warning: expression is always TRUE
 prog.cob:22: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:24: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:25: warning: expression '115' GREATER THAN '16' is always TRUE
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Constant Expressions (3)])
+AT_KEYWORDS([conditions refmod undefined])
+
+# verify that we do ignore undefined errors where possible
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var       PIC X(200).
+       78  var-len   value 115.
+
+       PROCEDURE DIVISION.
+
+           IF var-len < 16
+               move spaces 
+                 to var (17 - var-len:var-len - 8)
+           END-IF
+
+           IF var-len < 16
+              move notdefined to var
+           END-IF
+
+           IF var-len < 16
+              perform notdefined
+           END-IF
+
+           IF var-len < 16
+              if notdefined continue.
+
+           STOP RUN.
+])
+
+# note: the last error message comes from program validation
+#       and therefore cannot be raised earlier
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:11: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:16: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:17: error (ignored): 'notdefined' is not defined
+prog.cob:20: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:24: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:25: error (ignored): 'notdefined' is not defined
+prog.cob:21: error (ignored): 'notdefined' is not defined
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Constant Expressions (4)])
+AT_KEYWORDS([conditions refmod])
+
+# verify that we do not ignore parsing errors as
+# these are likely to raise issues in codegen
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var       PIC X(200).
+       78  var-len   value 115.
+
+       PROCEDURE DIVISION.
+
+           IF var-len < 16
+               move spaces 
+                 to var (17 - var-len:var-len - 8)
+               IF IF.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:11: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
+prog.cob:14: error: syntax error, unexpected IF
+prog.cob:14: error: syntax error, unexpected .
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Missing imperative statements])
+AT_KEYWORDS([conditions IF EVALUATE PERFORM])
+
+# we currently don't do the necessary parsing steps for
+# WHEN / WHEN OTHER without statements to pass this test
+
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  var       PIC X(200).
+       01  othervar  PIC X(115).
+       01  A         PIC 9 VALUE 1.
+       01  B         PIC 9 VALUE 2.
+       01  C         PIC 9 VALUE 3.
+       78  var-len   value 115.
+
+       PROCEDURE DIVISION.
+
+           IF var-len < 16
+           ELSE
+               move othervar to var
+           END-IF
+
+           IF var-len > 16
+           ELSE
+               move othervar to var
+           END-IF
+
+           IF (2 = 3)
+           ELSE
+              IF 1 = 1
+              ELSE
+                 IF 1 = 1
+                    move var to othervar
+                 END-IF
+              END-IF
+           .
+
+           EVALUATE TRUE
+           WHEN  A = B
+               move var      to othervar
+           WHEN OTHER
+           END-EVALUATE
+
+           PERFORM WITH TEST BEFORE UNTIL 1 <> 3
+           END-PERFORM
+
+           EVALUATE FALSE
+           WHEN  A = B
+           WHEN  B = A
+           END-EVALUATE.
+
+           EVALUATE TRUE
+           WHEN  A = B
+           WHEN OTHER
+               move var      to othervar
+           END-EVALUATE
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:15: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:18: error: IF without imperative statement used
+prog.cob:20: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:23: error: IF without imperative statement used
+prog.cob:25: warning: expression '2' EQUALS '3' is always FALSE
+prog.cob:27: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:29: warning: expression '1' EQUALS '1' is always TRUE
+prog.cob:32: error: IF without imperative statement used
+prog.cob:33: error: IF without imperative statement used
+prog.cob:38: error: WHEN OTHER without imperative statement used
+prog.cob:41: warning: expression '1' NOT EQUAL '3' is always TRUE
+prog.cob:41: warning: PERFORM NEVER since UNTIL is always TRUE
+prog.cob:46: error: WHEN without imperative statement used
+prog.cob:52: error: WHEN without imperative statement used
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu -Wno-constant-expression prog.cob], [1], [],
+[prog.cob:18: warning: IF without imperative statement used
+prog.cob:23: warning: IF without imperative statement used
+prog.cob:32: warning: IF without imperative statement used
+prog.cob:33: warning: IF without imperative statement used
+prog.cob:38: warning: WHEN OTHER without imperative statement used
+prog.cob:46: warning: WHEN without imperative statement used
+prog.cob:52: warning: WHEN without imperative statement used
 ])
 
 AT_CLEANUP
