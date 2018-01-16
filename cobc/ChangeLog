@@ -1,4 +1,9 @@
 
+2018-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_assignment_name): only warn ASSIGN EXTERNAL fname
+	  interpretation when fname was changed
+
 2018-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.def: added cb_missing_statement, see FR #288

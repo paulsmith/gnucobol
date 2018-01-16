@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -1612,7 +1612,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fassign-clause=ibm prog.cob], [0], [],
-[prog.cob:7: warning: ASSIGN interpreted as FILENAME
+[prog.cob:7: warning: ASSIGN DA-S-FILENAME interpreted as 'FILENAME'
 ])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -f FILENAME], [0], [], [])

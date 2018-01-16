@@ -1526,7 +1526,8 @@ cb_build_section_name (cb_tree name, const int sect_or_para)
 cb_tree
 cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 {
-	const char	*s;
+	const char	*name_ptr;
+	const char	*orig_ptr;
 	const char	*p;
 
 	if (name == cb_error_node) {
@@ -1542,44 +1543,53 @@ cb_build_assignment_name (struct cb_file *cfile, cb_tree name)
 		return name;
 
 	case CB_TAG_REFERENCE:
-		s = CB_NAME (name);
+		name_ptr = orig_ptr = CB_NAME (name);
 		if (cb_assign_clause == CB_ASSIGN_MF) {
 			if (cfile->flag_ext_assign) {
-				p = strrchr (s, '-');
+				p = strrchr (name_ptr, '-');
 				if (p) {
-					s = p + 1;
+					name_ptr = p + 1;
 				}
-				return cb_build_alphanumeric_literal (s, strlen (s));
+				goto build_lit;
 			}
 			current_program->reference_list =
 			    cb_list_add (current_program->reference_list, name);
 			return name;
 		} else if (cb_assign_clause == CB_ASSIGN_IBM) {
+			p = name_ptr;
 			/* Check organization */
-			if (strncmp (s, "S-", (size_t)2) == 0 ||
-			    strncmp (s, "AS-", (size_t)3) == 0) {
+			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
+			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
 				goto org;
 			}
-			/* Skip the device label if exists */
-			if ((p = strchr (s, '-')) != NULL) {
-				s = p + 1;
+			/* Skip the device label if exists,
+			   CHECKME: this likely should have consequences... */
+			if ((p = strchr (name_ptr, '-')) != NULL) {
+				name_ptr = p + 1;
 			}
 			/* Check organization again */
-			if (strncmp (s, "S-", (size_t)2) == 0 ||
-			    strncmp (s, "AS-", (size_t)3) == 0) {
+			if (strncmp (name_ptr, "S-", (size_t)2) == 0 ||
+			    strncmp (name_ptr, "AS-", (size_t)3) == 0) {
 org:
-				/* Skip it for now */
-				s = strchr (s, '-') + 1;
+				/* Skip it for now,
+				   CHECKME: this likely should have consequences... */
+				name_ptr = strchr (name_ptr, '-') + 1;
 			}
-			/* Convert the name into literal */
-			cb_warning (warningopt, _("ASSIGN interpreted as %s"), s);
-			return cb_build_alphanumeric_literal (s, strlen (s));
+			goto build_lit;
 		}
 		/* Fall through for CB_ASSIGN_COBOL2002 */
-		/* To be looked at */
+		/* CHECKME - To be looked at */
 	default:
 		return cb_error_node;
 	}
+build_lit:
+	/* Warn if name was changed */
+	if (name_ptr != orig_ptr) {
+		cb_warning (warningopt, _("ASSIGN %s interpreted as '%s'"),
+			orig_ptr, name_ptr);
+	}
+	/* Convert the EXTERNAL name into literal */
+	return cb_build_alphanumeric_literal (name_ptr, strlen (name_ptr));
 }
 
 cb_tree
