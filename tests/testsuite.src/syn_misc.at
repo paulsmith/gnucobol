@@ -132,9 +132,9 @@ AT_DATA([prog.cob], [
                CONTINUE.
            IF PIC-9-NOT-DECIMAL = "123"
                CONTINUE.
-           IF PIC-9-NOT-DECIMAL = "1B0"
+           IF PIC-9-NOT-DECIMAL = "1B0"       *> field is numeric
                CONTINUE.
-           IF PIC-9-NOT-DECIMAL (1:3) = "1B0"
+           IF PIC-9-NOT-DECIMAL (1:3) = "1B0" *> refmod is always alphanumeric
                CONTINUE.
            IF PIC-9-NOT-DECIMAL (1:3) NOT = "Hot Doggy"
                CONTINUE.
@@ -217,61 +217,83 @@ AT_DATA([prog.cob], [
                CONTINUE.
            IF PIC-9-NOT-SIGNED >= ZERO
                CONTINUE.
+           IF GROUP-ITEM-X6 (1:6) = '123456'
+               CONTINUE.
+      * Both have correct error check verified in syn_refmod.at
+      *    IF GROUP-ITEM-X6 (2:6) = '123456'
+      *        CONTINUE.
+      *    IF GROUP-ITEM-X6 (WS-LINE-NUMBER:7) = '123456'
+      *        CONTINUE.
+           IF GROUP-ITEM-X6 (1:5) = '123456'
+               CONTINUE.
+           IF GROUP-ITEM-X6 (3:) = '12345'
+               CONTINUE.
+           IF GROUP-ITEM-X6 (3:WS-LINE-NUMBER) = '12345'
+               CONTINUE.
+           IF GROUP-ITEM-X6 (WS-LINE-NUMBER:3) = '12345'
+               CONTINUE.
+           IF GROUP-ITEM-X6 (WS-LINE-NUMBER:WS-LINE-NUMBER) = '12345'
+               CONTINUE.
+           IF GROUP-ITEM-X6 (WS-LINE-NUMBER:) = '12345'
+               CONTINUE.
+
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob:21: warning: literal '1234567' is longer than GROUP-ITEM-X6
+prog.cob:21: warning: literal '1234567' is longer than 'GROUP-ITEM-X6'
 prog.cob:21: warning: expression is always FALSE
-prog.cob:23: warning: literal '1.1' has more decimals than PIC-9-NOT-DECIMAL
+prog.cob:23: warning: literal '1.1' has more decimals than 'PIC-9-NOT-DECIMAL'
 prog.cob:23: warning: expression is always FALSE
-prog.cob:27: warning: literal '1.01' has more decimals than PIC-9-DECIMAL
+prog.cob:27: warning: literal '1.01' has more decimals than 'PIC-9-DECIMAL'
 prog.cob:27: warning: expression is always FALSE
 prog.cob:33: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
 prog.cob:35: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
 prog.cob:38: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN -25
-prog.cob:40: warning: literal '1.12' has more decimals than PIC-9-DECIMAL
+prog.cob:40: warning: literal '1.12' has more decimals than 'PIC-9-DECIMAL'
 prog.cob:40: warning: expression is always FALSE
-prog.cob:43: warning: literal '1B0' is alphanumeric but PIC-9-NOT-DECIMAL is numeric
-prog.cob:55: warning: literal '123.999' has more decimals than WS-NUMBER
-prog.cob:57: warning: literal '2345' has more digits than WS-LINE-NUMBER
+prog.cob:43: warning: literal '1B0' is alphanumeric but 'PIC-9-NOT-DECIMAL' is numeric
+prog.cob:47: warning: literal 'Hot Doggy' is longer than 'PIC-9-NOT-DECIMAL'
+prog.cob:47: warning: expression is always TRUE
+prog.cob:55: warning: literal '123.999' has more decimals than 'WS-NUMBER'
+prog.cob:57: warning: literal '2345' has more digits than 'WS-LINE-NUMBER'
 prog.cob:57: warning: expression is always FALSE
-prog.cob:59: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:59: warning: literal '1234' has more digits than 'WS-LINE-NUMBER'
 prog.cob:59: warning: expression is always TRUE
-prog.cob:61: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:61: warning: literal '1234' has more digits than 'WS-LINE-NUMBER'
 prog.cob:61: warning: expression is always FALSE
-prog.cob:63: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob:63: warning: literal '5432' has more digits than 'WS-LINE-NUMBER'
 prog.cob:63: warning: expression is always FALSE
-prog.cob:65: warning: literal '7855' has more digits than WS-LINE-NUMBER
+prog.cob:65: warning: literal '7855' has more digits than 'WS-LINE-NUMBER'
 prog.cob:65: warning: expression is always TRUE
-prog.cob:67: warning: literal '1234' has more digits than WS-LINE-NUMBER
+prog.cob:67: warning: literal '1234' has more digits than 'WS-LINE-NUMBER'
 prog.cob:67: warning: expression is always FALSE
-prog.cob:69: warning: literal '5432' has more digits than WS-LINE-NUMBER
+prog.cob:69: warning: literal '5432' has more digits than 'WS-LINE-NUMBER'
 prog.cob:69: warning: expression is always TRUE
-prog.cob:71: warning: literal 'DOGGY++' is longer than WS-TEXT
-prog.cob:73: warning: literal '3141596' is longer than WS-TEXT
-prog.cob:75: warning: literal '3.141596' is longer than WS-TEXT
-prog.cob:77: warning: literal '3.141596' is longer than WS-TEXT
+prog.cob:71: warning: literal 'DOGGY++' is longer than 'WS-TEXT'
+prog.cob:73: warning: literal '3141596' is longer than 'WS-TEXT'
+prog.cob:75: warning: literal '3.141596' is longer than 'WS-TEXT'
+prog.cob:77: warning: literal '3.141596' is longer than 'WS-TEXT'
 prog.cob:77: warning: expression is always FALSE
-prog.cob:79: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob:79: warning: literal 'DOG+CAT' is longer than 'WS-TEXT'
 prog.cob:79: warning: expression is always TRUE
-prog.cob:81: warning: literal 'CAT+DOG' is longer than WS-TEXT
+prog.cob:81: warning: literal 'CAT+DOG' is longer than 'WS-TEXT'
 prog.cob:81: warning: expression is always FALSE
-prog.cob:84: warning: literal 'DOG+CAT' is longer than WS-TEXT
+prog.cob:84: warning: literal 'DOG+CAT' is longer than 'WS-TEXT'
 prog.cob:84: warning: expression is always FALSE
 prog.cob:86: warning: expression 'CAT     ' EQUALS 'CAT+DOG' is always FALSE
 prog.cob:88: warning: expression 'CAT     ' EQUALS 'CAT' is always TRUE
 prog.cob:90: warning: expression '00000001234' EQUALS '1234' is always TRUE
-prog.cob:97: warning: literal '654.20038' has more decimals than COMPUTE-1
-prog.cob:98: warning: literal '654.17422' has more decimals than COMPUTE-1
-prog.cob:100: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:97: warning: literal '654.20038' has more decimals than 'COMPUTE-1'
+prog.cob:98: warning: literal '654.17422' has more decimals than 'COMPUTE-1'
+prog.cob:100: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:100: warning: expression is always TRUE
-prog.cob:102: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:102: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:102: warning: expression is always FALSE
-prog.cob:104: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:104: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:104: warning: expression is always TRUE
-prog.cob:106: warning: literal '5654.20' has more digits than COMPUTE-1
+prog.cob:106: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:106: warning: expression is always FALSE
 prog.cob:112: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
 prog.cob:114: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
@@ -279,6 +301,14 @@ prog.cob:117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -2
 prog.cob:118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
 prog.cob:124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 prog.cob:126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+prog.cob:135: warning: literal '123456' is longer than reference-modification of 'GROUP-ITEM-X6'
+prog.cob:135: warning: expression is always FALSE
+prog.cob:137: warning: literal '12345' is longer than reference-modification of 'GROUP-ITEM-X6'
+prog.cob:137: warning: expression is always FALSE
+prog.cob:139: warning: literal '12345' is longer than reference-modification of 'GROUP-ITEM-X6'
+prog.cob:139: warning: expression is always FALSE
+prog.cob:141: warning: literal '12345' is longer than reference-modification of 'GROUP-ITEM-X6'
+prog.cob:141: warning: expression is always FALSE
 ])
 
 AT_CLEANUP
@@ -316,11 +346,11 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob:8: warning: literal '99' has more digits than x
+[prog.cob:8: warning: literal '99' has more digits than 'x'
 prog.cob:8: warning: expression is always FALSE
-prog.cob:13: warning: literal '00' is longer than xx
+prog.cob:13: warning: literal '00' is longer than 'xx'
 prog.cob:13: warning: expression is always FALSE
-prog.cob:13: warning: literal 'cd' is longer than xx
+prog.cob:13: warning: literal 'cd' is longer than 'xx'
 prog.cob:13: warning: expression is always FALSE
 prog.cob:24: warning: value size exceeds data size
 prog.cob:11: warning: 'xx' defined here as PIC X

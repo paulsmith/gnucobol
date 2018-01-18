@@ -1681,6 +1681,23 @@ subserror:
 	return cb_error_node;
 }
 
+/* return a reference for a given field combination, needed for calls to CB_FUNC_CALL
+   as the string would not be allocated during codegen otherwise */
+static cb_tree
+cb_build_name_reference (struct cb_field *f1, struct cb_field *f2)
+{
+	char		full_name[COB_MAX_WORDLEN * 2 + 10];
+	if (f1 == f2) {
+		/* TRANSLATORS: This msgid is used when a variable name
+		   or label is referenced in a compiler message. */
+		sprintf(full_name, _("'%s'"), f1->name);
+	} else {
+		sprintf(full_name, _("'%s' (accessed by '%s')"), f1->name, f2->name);
+	}
+
+	return cb_build_reference (full_name);
+}
+
 cb_tree
 cb_build_identifier (cb_tree x, const int subchk)
 {
@@ -1688,8 +1705,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 	struct cb_field		*f;
 	struct cb_field		*p;
 	const char		*name;
-	char		full_name[COB_MAX_WORDLEN * 2 + 10];
-	cb_tree			xr;
+	cb_tree			name_ref;
 	cb_tree			v;
 	cb_tree			e1;
 	cb_tree			l;
@@ -1736,32 +1752,28 @@ cb_build_identifier (cb_tree x, const int subchk)
 		if (p->redefines) {
 			p = p->redefines;
 		}
-		if (p == f) {
-			/* TRANSLATORS: This msgid is used when a variable name
-			   or label is referenced in a compiler message. */
-			sprintf(full_name, _("'%s'"), name);
-		} else {
-			sprintf(full_name, _("'%s' (accessed by '%s')"), p->name, name);
-		}
-		xr = cb_build_reference (full_name);
-
+		name_ref = cb_null;
 		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) &&
 		    !current_statement->flag_no_based) {
 			if (p->flag_item_based ||
 			   (p->storage == CB_STORAGE_LINKAGE &&
 				  (!(p->flag_is_pdiv_parm || p->flag_is_returning) || p->flag_is_pdiv_opt))) {
+				name_ref = cb_build_name_reference (p, f);
 				current_statement->null_check = CB_BUILD_FUNCALL_2 (
 					"cob_check_based",
 					cb_build_address (cb_build_field_reference (p, NULL)),
-					CB_BUILD_STRING0 (CB_REFERENCE(xr)->word->name));
+					CB_BUILD_STRING0 (CB_REFERENCE(name_ref)->word->name));
 			}
 		}
 		if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED) &&
 		    p->flag_is_pdiv_opt) {
+			if (name_ref == cb_null) {
+				name_ref = cb_build_name_reference (p, f);
+			}
 			current_statement->null_check = CB_BUILD_FUNCALL_3 (
 				"cob_check_linkage",
 				cb_build_address (cb_build_field_reference (p, NULL)),
-				CB_BUILD_STRING0 (CB_REFERENCE(xr)->word->name), cb_int1);
+				CB_BUILD_STRING0 (CB_REFERENCE(name_ref)->word->name), cb_int1);
 		}
 	}
 
@@ -1902,6 +1914,13 @@ cb_build_identifier (cb_tree x, const int subchk)
 							    name, length);
 					}
 				}
+			}
+		} else if (r->length && CB_LITERAL_P (r->length)) {
+			length = cb_get_int (r->length);
+			/* FIXME: needs to be supported for zero length literals */
+			if (length < 1 || length > pseudosize) {
+				cb_error_x (x, _("length of '%s' out of bounds: %d"),
+					    name, length);
 			}
 		}
 
@@ -2103,7 +2122,7 @@ cb_build_const_start (struct cb_field *f, cb_tree x)
 		return cb_build_numeric_literal (0, "1", 0);
 	}
 	if (cb_field_variable_size (target)) {
-		cb_error (_("Variable length item not allowed here"));
+		cb_error (_("variable length item not allowed here"));
 		return cb_build_numeric_literal (0, "1", 0);
 	}
 	for (p = target; p; p = p->parent) {
@@ -2111,7 +2130,7 @@ cb_build_const_start (struct cb_field *f, cb_tree x)
 		p->flag_invalid = 0;
 		cb_validate_field (p);
 		if (cb_field_variable_size (p)) {
-			cb_error (_("Variable length item not allowed here"));
+			cb_error (_("variable length item not allowed here"));
 			return cb_build_numeric_literal (0, "1", 0);
 		}
 	}
@@ -2178,7 +2197,7 @@ cb_build_const_next (struct cb_field *f)
 			p->flag_invalid = 0;
 			cb_validate_field (p);
 			if (cb_field_variable_size (p)) {
-				cb_error (_("Variable length item not allowed here"));
+				cb_error (_("variable length item not allowed here"));
 				p->size = 0;
 				break;
 			}

@@ -1,4 +1,13 @@
 
+2018-01-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_identifier): also check for ref-mod length
+	  overflow when offset is is a variable
+	* typeck.c (cb_build_identifier): only build field name if actual
+	  needed, moved code building to new static cb_build_name_reference
+	* tree.c (compare_field_literal): added check for comparisions against
+	  a reference modified field when the offset or length is known
+
 2018-01-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_build_assignment_name): only warn ASSIGN EXTERNAL fname

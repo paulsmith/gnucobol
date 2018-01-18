@@ -4121,9 +4121,11 @@ static cb_tree
 compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_literal *l)
 {
 	int	i, j, scale;
-	int	alph_lit, ref_mod, zero_val;
+	int	alph_lit, zero_val;
+	int	lit_length, refmod_length;
 	char	lit_disp[40];
 	struct cb_field *f;
+	struct cb_reference	*rl;
 
 	/* LCOV_EXCL_START */
 	if (!CB_REFERENCE_P(x)) {
@@ -4133,23 +4135,33 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 	}
 	/* LCOV_EXCL_STOP */
 
-	ref_mod = 0;
 	f = CB_FIELD (cb_ref (x));
 	if (f->flag_any_length
 	 || f->pic == NULL) {
 		return cb_any;
 	}
-	if (CB_REFERENCE(x)->offset
-	 || CB_REFERENCE(x)->length) {
-		ref_mod = 1;
+	rl = CB_REFERENCE(x);
+	if (rl->length && CB_LITERAL_P (rl->length)) {
+		refmod_length = cb_get_int (rl->length);
+	} else if (rl->offset && CB_LITERAL_P (rl->offset)) {
+		refmod_length = f->size - cb_get_int (rl->offset) + 1;
+	} else if (rl->length || rl->offset) {
+		 /* Note: we leave reference mod of unknown size to run-time */
+		return cb_any;
+	} else {
+		refmod_length = 0;
 	}
 
-	for (i = strlen ((const char *)l->data); i>0 && l->data[i-1] == ' '; i--);
+	/* initial: set length and type of comparision literal */
+	for (lit_length = strlen ((const char *)l->data);
+		lit_length > 0 && l->data[lit_length - 1] == ' '; lit_length--);
+
 	alph_lit = 0;
 	zero_val = 1;
 	for (j = 0; l->data[j] != 0; j++) {
 		if (!isdigit(l->data[j])) {
 			alph_lit = 1;
+			break;
 		}
 		if (l->data[j] != '0') {
 			zero_val = 0;
@@ -4158,15 +4170,23 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 
 	if ((f->pic->category != CB_CATEGORY_NUMERIC
 	  && f->pic->category != CB_CATEGORY_NUMERIC_EDITED)
-	 || ref_mod) {
-		if (i > f->size
-		 && !ref_mod) {	/* Leave reference mod to run-time */
+	 || refmod_length) {
+		 if (!refmod_length) {
+			 refmod_length = f->size;
+		 }
+		 if (lit_length > refmod_length) {
 			copy_file_line (e, CB_TREE(l), NULL);
 			if (cb_warn_constant_expr
 			&& !was_prev_warn (e->source_line, 2)) {
-				cb_warning_x (cb_warn_constant_expr, e,
-							_("literal '%.38s' is longer than %s"),
+				if (lit_length > f->size) {
+					cb_warning_x (cb_warn_constant_expr, e,
+							_("literal '%.38s' is longer than '%s'"),
 							display_literal(lit_disp,l),f->name);
+				} else {
+					cb_warning_x (cb_warn_constant_expr, e,
+							_("literal '%.38s' is longer than reference-modification of '%s'"),
+							display_literal(lit_disp,l),f->name);
+				}
 			}
 			switch(op) {
 			case '=':
@@ -4192,7 +4212,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		if (cb_warn_constant_expr
 		&& !was_prev_warn (e->source_line, 4)) {
 			cb_warning_x (cb_warn_constant_expr, e,
-						_("literal '%s' has more decimals than %s"),
+						_("literal '%s' has more decimals than '%s'"),
 						display_literal(lit_disp,l),f->name);
 		}
 		switch(op) {
@@ -4209,17 +4229,20 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		 && f->pic->category == CB_CATEGORY_NUMERIC
 		 && !was_prev_warn (e->source_line, 3)) {
 			cb_warning_x (cb_warn_constant_expr, e,
-						_("literal '%s' is alphanumeric but %s is numeric"),
+						_("literal '%s' is alphanumeric but '%s' is numeric"),
 						display_literal(lit_disp,l),f->name);
 		}
 		return cb_any;
 	}
 
-	/* Adjust for leading ZERO & trailing ZEROS|SPACES in literal */
-	for (i = strlen ((const char *)l->data); i>0 && l->data[i-1] == ' '; i--);
-	for(j=0; l->data[j] == '0'; j++,i--);
+	/* Adjust length for leading ZERO in literal */
+	for (j=0; l->data[j] == '0'; j++, lit_length--);
+
+	/* Adjust scale for trailing ZEROS in literal */
 	scale = l->scale;
-	for (j = strlen ((const char *)l->data); scale > 0 && j > 0 && l->data[j-1] == '0'; j--,i--)
+	i = lit_length;
+	for (j = strlen ((const char *)l->data);
+		  scale > 0 && j > 0 && l->data[j-1] == '0'; j--,i--)
 		scale--;
 
 	/* If Literal has more digits in whole portion than field can hold
@@ -4232,7 +4255,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		if (cb_warn_constant_expr
 		&& !was_prev_warn (e->source_line, 4)) {
 			cb_warning_x (cb_warn_constant_expr, e,
-						_("literal '%s' has more digits than %s"),
+						_("literal '%s' has more digits than '%s'"),
 						display_literal (lit_disp, l), f->name);
 		}
 		switch(op) {
