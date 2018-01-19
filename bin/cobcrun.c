@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2004-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2004-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Brian Tiffin
 
    This file is part of GnuCOBOL.
@@ -101,7 +101,7 @@ cobcrun_print_version (void)
 
 	printf ("cobcrun (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2017 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
 	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
@@ -205,31 +205,31 @@ cobcrun_initial_module (char *module_argument)
 	cobcrun_split_path_file (&pathname, &filename, module_argument);
 	if (*pathname) {
 		/* TODO: check content, see libcob/common.h */
-		memset (env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_LIBRARY_PATH");
 		if (envptr) {
+			memset (env_space, 0, COB_MEDIUM_BUFF);
 			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s",
 				pathname, PATHSEP_CHAR, envptr);
+			env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
+			(void) cob_setenv ("COB_LIBRARY_PATH", env_space, 1);
 		} else {
-			snprintf (env_space, COB_MEDIUM_MAX, "%s", pathname);
+			(void) cob_setenv ("COB_LIBRARY_PATH", pathname, 1);
 		}
-		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
-		(void) cob_setenv ("COB_LIBRARY_PATH", env_space, 1);
 	}
 	cob_free((void *)pathname);
 
 	if (*filename) {
 		/* TODO: check content, see libcob/common.h */
-		memset(env_space, 0, COB_MEDIUM_BUFF);
 		envptr = getenv ("COB_PRE_LOAD");
 		if (envptr) {
+			memset (env_space, 0, COB_MEDIUM_BUFF);
 			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", filename,
 				PATHSEP_CHAR, envptr);
+			env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
+			(void) cob_setenv ("COB_PRE_LOAD", env_space, 1);
 		} else {
-			snprintf (env_space, COB_MEDIUM_MAX, "%s", filename);
+			(void) cob_setenv ("COB_PRE_LOAD", filename, 1);
 		}
-		env_space[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
-		(void) cob_setenv ("COB_PRE_LOAD", env_space, 1);
 	}
 	cob_free ((void *)filename);
 	return NULL;
@@ -331,7 +331,7 @@ process_command_line (int argc, char *argv[])
 
 		/* LCOV_EXCL_START */
 		default:
-			/* not translated as unlikely: */
+			/* not translated as it is an unlikely internal error: */
 			fprintf (stderr, "missing evaluation of command line option '%c'", c);
 			putc ('\n', stderr);
 			fputs (_("Please report this!"), stderr);
@@ -377,14 +377,19 @@ main (int argc, char **argv)
 			print_runtime_conf ();
 			cob_stop_run (0);
 		}
-		cobcrun_print_usage (argv[0]);
+		fprintf (stderr, _("%s: missing PROGRAM name"), argv[0]);
+		putc ('\n', stderr);
+		fprintf (stderr, _("Try '%s --help' for more information."), argv[0]);
+		putc ('\n', stderr);
+		fflush (stderr);
 		return 1;
 	}
 
 	if (strlen (argv[arg_shift]) > 31) {
-		fputs (_("PROGRAM name exceeds 31 characters"), stderr);
+		fprintf (stderr, _("%s: PROGRAM name exceeds 31 characters"), argv[0]);
 		putc ('\n', stderr);
-		cob_stop_run (1);
+		fflush (stderr);
+		return 1;
 	}
 
 	/* Initialize the COBOL system, resolve the PROGRAM name */
@@ -396,9 +401,7 @@ main (int argc, char **argv)
 		print_runtime_conf ();
 		putc ('\n', stdout);
 	}
-	unifunc.funcvoid = cob_resolve (argv[arg_shift]);
-	if (unifunc.funcvoid == NULL) {
-		cob_call_error ();
-	}
-	cob_stop_run ( unifunc.funcint() );
+	/* Note: cob_resolve_cobol takes care for call errors, no need to check here */
+	unifunc.funcvoid = cob_resolve_cobol (argv[arg_shift], 0, 1);
+	cob_stop_run (unifunc.funcint());
 }
