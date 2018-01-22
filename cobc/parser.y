@@ -9500,6 +9500,13 @@ accp_attr:
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
+| SAME /* ACU (?) extension to use the video attributes 
+          currently present at the field's screen location. */
+  {
+	CB_PENDING("SAME phrase");
+	/* may not be specified along with the UNDERLINED, BLINK, REVERSED,
+	HIGH, LOW, STANDARD, COLOR, FOREGROUND-COLOR, or BACKGROUND-COLOR phrases */
+  }
 | STANDARD /* ACU extension to reset a group HIGH/LOW */
   {
 	CB_PENDING("STANDARD intensity");
@@ -10845,6 +10852,13 @@ disp_attr:
 	check_repeated ("LOWLIGHT", SYN_CLAUSE_12, &check_duplicate);
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
+  }
+| SAME /* ACU (?) extension to use the video attributes 
+          currently present at the field's screen location. */
+  {
+	CB_PENDING("SAME phrase");
+	/* may not be specified along with the UNDERLINED, BLINK, REVERSED,
+	HIGH, LOW, STANDARD, COLOR, FOREGROUND-COLOR, or BACKGROUND-COLOR phrases */
   }
 | STANDARD /* ACU extension to reset a group HIGH/LOW */
   {
