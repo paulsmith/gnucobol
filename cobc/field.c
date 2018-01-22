@@ -2013,7 +2013,7 @@ compute_size (struct cb_field *f)
 
 	if (f->children) {
 		if (f->storage == CB_STORAGE_REPORT
-		&& (f->report_flag && COB_REPORT_LINE) ) {
+		&& (f->report_flag & COB_REPORT_LINE) ) {
 			f->offset = 0;
 		}
 
