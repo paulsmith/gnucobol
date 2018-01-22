@@ -10563,7 +10563,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 
 	/* Clear sticky-linkage pointers */
-	if (cb_sticky_linkage) {
+	if (cb_sticky_linkage && !prog->flag_chained) {
 		for (l = prog->parameter_list; l; l = CB_CHAIN (l)) {
 			output_line ("cob_parm_%d = NULL;",
 				      cb_code_field (CB_VALUE (l))->id);

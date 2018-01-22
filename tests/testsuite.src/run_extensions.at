@@ -67,6 +67,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 
 AT_CLEANUP
 
+
 ## Numeric Boolean literal
 
 AT_SETUP([Numeric Boolean literal])
@@ -97,6 +98,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 
 AT_CLEANUP
 
+
 # ACUCOBOL literal
 
 AT_SETUP([ACUCOBOL literal])
@@ -123,6 +125,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
 
 ## H literal
 
@@ -151,6 +154,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 
 AT_CLEANUP
+
 
 ## Expression
 
@@ -363,6 +367,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 ## OCCURS
 
@@ -947,6 +952,7 @@ AT_CHECK([diff reference SEQODO], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([DEPENDING ON with ODOSLIDE for IBM])
 AT_KEYWORDS([OCCURS])
 
@@ -1189,6 +1195,7 @@ prog.cob:61: warning: MOVE of non-integer to alphanumeric
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [12891289128912891289128912891289])
 
 AT_CLEANUP
+
 
 ## CALL
 
@@ -1560,6 +1567,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 ## ASSIGN
 
 AT_SETUP([ASSIGN clause])
@@ -1852,6 +1860,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 
 AT_CLEANUP
 
+
 # Program parameters
 
 AT_SETUP([PROCEDURE DIVISION USING BY ...])
@@ -1905,6 +1914,7 @@ AT_CHECK([$COMPILE_MODULE callee.cob], [0], [],
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([PROCEDURE DIVISION CHAINING])
 AT_KEYWORDS([extensions CALL INITIALIZE])
@@ -2006,6 +2016,11 @@ AT_DATA([init.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog X ABCD], [0], [], [])
 
+# note: sticky linkage and CHAINING produced compiler errors
+#   --> additional test
+AT_CHECK([$COMPILE prog.cob -fsticky-linkage -o prog_sticky], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog_sticky X ABCD], [0], [], [])
+
 AT_CHECK([$COMPILE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog2 X], [0], [-X     -], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [-a    7-], [])
@@ -2022,6 +2037,7 @@ AT_CHECK([$COMPILE init.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./init X], [0], [-X     02--     000--aXXXX702--a    702-], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([STOP RUN RETURNING/GIVING])
 AT_KEYWORDS([extensions])
