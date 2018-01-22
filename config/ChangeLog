@@ -1,6 +1,10 @@
 
 2018-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* acu-strict.conf: changed sticky-linkage to "no"
+
+2018-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
 	* general: added missing-statement (FR #288)
 
 2017-12-26  Edward Hart <edward.dan.hart@gmail.com>
