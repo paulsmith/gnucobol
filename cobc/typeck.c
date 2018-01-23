@@ -5487,25 +5487,13 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		prompt = attr_ptr->prompt;
 		size_is = attr_ptr->size_is;
 		disp_attrs = attr_ptr->dispattrs;
-		if (cb_validate_one (pos)) {
-			return;
-		}
-		if (cb_validate_one (fgc)) {
-			return;
-		}
-		if (cb_validate_one (bgc)) {
-			return;
-		}
-		if (cb_validate_one (scroll)) {
-			return;
-		}
-		if (cb_validate_one (timeout)) {
-			return;
-		}
-		if (cb_validate_one (prompt)) {
-			return;
-		}
-		if (cb_validate_one (size_is)) {
+		if (cb_validate_one (pos)
+		 || cb_validate_one (fgc)
+		 || cb_validate_one (bgc)
+		 || cb_validate_one (scroll)
+		 || cb_validate_one (timeout)
+		 || cb_validate_one (prompt)
+		 || cb_validate_one (size_is)) {
 			return;
 		}
 	} else {
@@ -5794,13 +5782,16 @@ cb_emit_accept_arg_value (cb_tree var)
 void
 cb_emit_accept_mnemonic (cb_tree var, cb_tree mnemonic)
 {
+	cb_tree		mnemonic_ref;
+
 	if (cb_validate_one (var)) {
 		return;
 	}
-	if (cb_ref (mnemonic) == cb_error_node) {
+	mnemonic_ref = cb_ref (mnemonic);
+	if (mnemonic_ref == cb_error_node) {
 		return;
 	}
-	switch (CB_SYSTEM_NAME (cb_ref (mnemonic))->token) {
+	switch (CB_SYSTEM_NAME (mnemonic_ref)->token) {
 	case CB_DEVICE_CONSOLE:
 	case CB_DEVICE_SYSIN:
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_accept", var));
@@ -5859,16 +5850,10 @@ cb_emit_allocate (cb_tree target1, cb_tree target2, cb_tree size,
 	cb_tree		x;
 	char		buff[32];
 
-	if (cb_validate_one (target1)) {
-		return;
-	}
-	if (cb_validate_one (target2)) {
-		return;
-	}
-	if (cb_validate_one (size)) {
-		return;
-	}
-	if (cb_validate_one (initialize)) {
+	if (cb_validate_one (target1)
+	 || cb_validate_one (target2)
+	 || cb_validate_one (size)
+	 || cb_validate_one (initialize)) {
 		return;
 	}
 	if (target1) {
@@ -6958,19 +6943,15 @@ void
 cb_emit_divide (cb_tree dividend, cb_tree divisor, cb_tree quotient,
 		cb_tree remainder)
 {
-	if (cb_validate_one (dividend)) {
-		return;
-	}
-	if (cb_validate_one (divisor)) {
+	if (cb_validate_one (dividend)
+	 || cb_validate_one (divisor)) {
 		return;
 	}
 	CB_VALUE (quotient) = cb_check_numeric_edited_name (CB_VALUE (quotient));
 	CB_VALUE (remainder) = cb_check_numeric_edited_name (CB_VALUE (remainder));
 
-	if (cb_validate_one (CB_VALUE (quotient))) {
-		return;
-	}
-	if (cb_validate_one (CB_VALUE (remainder))) {
+	if (cb_validate_one (CB_VALUE (quotient))
+	 || cb_validate_one (CB_VALUE (remainder))) {
 		return;
 	}
 
@@ -8876,8 +8857,8 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 	}
 
 	if ((f->usage == CB_USAGE_BINARY ||
-	    f->usage == CB_USAGE_COMP_5 ||
-	    f->usage == CB_USAGE_COMP_X) &&
+	     f->usage == CB_USAGE_COMP_5 ||
+	     f->usage == CB_USAGE_COMP_X) &&
 	    cb_fits_int (src) && f->size <= 8) {
 		if (cb_binary_truncate) {
 			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
@@ -9130,10 +9111,8 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 	unsigned int	tempval;
 	struct cb_reference	*r;
 
-	if (cb_validate_one (src)) {
-		return;
-	}
-	if (cb_validate_list (dsts)) {
+	if (cb_validate_one (src)
+	 || cb_validate_list (dsts)) {
 		return;
 	}
 
@@ -9450,10 +9429,8 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 	struct cb_file	*f;
 	int		opts;
 
-	if (cb_validate_one (record)) {
-		return;
-	}
-	if (cb_validate_one (from)) {
+	if (cb_validate_one (record)
+	 || cb_validate_one (from)) {
 		return;
 	}
 	rtree = cb_ref (record);
@@ -9581,13 +9558,14 @@ cb_emit_return (cb_tree ref, cb_tree into)
 	cb_tree		file;
 	cb_tree		rec;
 
-	if (cb_validate_one (ref)) {
-		return;
-	}
-	if (cb_validate_one (into)) {
+	if (cb_validate_one (ref)
+	 || cb_validate_one (into)) {
 		return;
 	}
 	file = cb_ref (ref);
+	if (file == cb_error_node) {
+		return;
+	}
 	rec = cb_build_field_reference (CB_FILE (file)->record, ref);
 	cb_emit (CB_BUILD_FUNCALL_1 ("cob_file_return", file));
 	if (into) {
@@ -9722,16 +9700,9 @@ cb_build_search_all (cb_tree table, cb_tree cond)
 void
 cb_emit_search (cb_tree table, cb_tree varying, cb_tree at_end, cb_tree whens)
 {
-	if (cb_validate_one (table)) {
-		return;
-	}
-	if (cb_validate_one (varying)) {
-		return;
-	}
-	if (table == cb_error_node) {
-		return;
-	}
-	if (whens == cb_error_node) {
+	if (cb_validate_one (table)
+	 || cb_validate_one (varying)
+	 || whens == cb_error_node) {
 		return;
 	}
 	whens = cb_list_reverse (whens);
@@ -9745,13 +9716,8 @@ cb_emit_search_all (cb_tree table, cb_tree at_end, cb_tree when, cb_tree stmts)
 	cb_tree		x;
 	cb_tree		stmt_lis;
 
-	if (cb_validate_one (table)) {
-		return;
-	}
-	if (table == cb_error_node) {
-		return;
-	}
-	if (when == cb_error_node) {
+	if (cb_validate_one (table)
+	 || when == cb_error_node) {
 		return;
 	}
 	x = cb_build_search_all (table, when);
@@ -9782,10 +9748,8 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 	struct cb_cast	*p;
 	enum cb_class	class;
 
-	if (cb_validate_one (x)) {
-		return;
-	}
-	if (cb_validate_list (vars)) {
+	if (cb_validate_one (x)
+	 || cb_validate_list (vars)) {
 		return;
 	}
 
@@ -9862,10 +9826,8 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 void
 cb_emit_set_up_down (cb_tree l, cb_tree flag, cb_tree x)
 {
-	if (cb_validate_one (x)) {
-		return;
-	}
-	if (cb_validate_list (l)) {
+	if (cb_validate_one (x)
+	 || cb_validate_list (l)) {
 		return;
 	}
 	for (; l; l = CB_CHAIN (l)) {
@@ -10245,10 +10207,8 @@ cb_emit_start (cb_tree file, cb_tree op, cb_tree key, cb_tree keylen)
 	cb_tree			cbtkey;
 	struct cb_file		*f;
 
-	if (cb_validate_one (key)) {
-		return;
-	}
-	if (cb_validate_one (keylen)) {
+	if (cb_validate_one (key)
+	 || cb_validate_one (keylen)) {
 		return;
 	}
 	fl = cb_ref (file);
@@ -10338,10 +10298,8 @@ cb_emit_string (cb_tree items, cb_tree into, cb_tree pointer)
 	cb_tree end;
 	cb_tree dlm;
 
-	if (cb_validate_one (into)) {
-		return;
-	}
-	if (cb_validate_one (pointer)) {
+	if (cb_validate_one (into)
+	 || cb_validate_one (pointer)) {
 		return;
 	}
 	start = items;
@@ -10380,13 +10338,13 @@ cb_emit_unlock (cb_tree ref)
 {
 	cb_tree	file;
 
-		file = cb_ref (ref);
-		if (file != cb_error_node) {
-			cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
-				 file, CB_FILE(file)->file_status));
-			current_statement->file = file;
-		}
+	file = cb_ref (ref);
+	if (file != cb_error_node) {
+		cb_emit (CB_BUILD_FUNCALL_2 ("cob_unlock_file",
+			 file, CB_FILE(file)->file_status));
+		current_statement->file = file;
 	}
+}
 
 /* UNSTRING statement */
 
@@ -10394,16 +10352,10 @@ void
 cb_emit_unstring (cb_tree name, cb_tree delimited, cb_tree into,
 		  cb_tree pointer, cb_tree tallying)
 {
-	if (cb_validate_one (name)) {
-		return;
-	}
-	if (cb_validate_one (tallying)) {
-		return;
-	}
-	if (cb_validate_list (delimited)) {
-		return;
-	}
-	if (cb_validate_list (into)) {
+	if (cb_validate_one (name)
+	 || cb_validate_one (tallying)
+	 || cb_validate_list (delimited)
+	 || cb_validate_list (into)) {
 		return;
 	}
 	cb_emit (CB_BUILD_FUNCALL_3 ("cob_unstring_init", name, pointer,
@@ -10450,10 +10402,8 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	cb_tree		check_eop;
 	struct cb_file	*f;
 
-	if (cb_validate_one (record)) {
-		return;
-	}
-	if (cb_validate_one (from)) {
+	if (cb_validate_one (record)
+	 || cb_validate_one (from)) {
 		return;
 	}
 	rtree = cb_ref (record);
@@ -10566,9 +10516,8 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 {
 	int	opt;
 	int	token;
-	cb_tree rtree;
+	cb_tree rtree = cb_ref (mnemonic);
 
-	rtree = cb_ref (mnemonic);
 	if (rtree == cb_error_node) {
 		return cb_int0;
 	}
