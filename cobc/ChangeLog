@@ -3,6 +3,8 @@
 
 	* parser.y: use position of last section when defining an implicit
 	  paragraph
+	* typeck.c (cb_build_identifier): adjusted debug checks for
+	  EC-PROGRAM-ARG-OMITTED and EC-DATA-PTR-NULL
 	* typeck.c: minor code refactoring
 
 2018-01-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>

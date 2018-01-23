@@ -10978,6 +10978,10 @@ output_entry_function (struct cb_program *prog, cb_tree entry,
 		}
 	}
 
+	/* FIXME: add check for COB_EC_PROGRAM_ARG_MISMATCH here,
+	   including checking for OPTIONAL items.
+	   See comment in typeck.c (cb_build_identifier), too. */
+
 	/* Sticky linkage set up */
 	if (cb_sticky_linkage && using_list) {
 		output_line ("/* Set the parameter list */");

@@ -7886,10 +7886,6 @@ AT_CLEANUP
 AT_SETUP([Test dump feature])
 AT_KEYWORDS([Dump])
 
-# note:
-# raises valgrind because of "planned SIGSEGV"
-# check - is this reprocible on all systems?
-
 AT_DATA([./cpyabrt], [
             MOVE "Quick brown fox jumped over the dog"
               TO TSTTAILX (1:40).
@@ -8089,7 +8085,7 @@ AT_DATA([prog.cob], [
             ADD 1 TO X.
             DISPLAY "X is " X.
             COPY cpyabrt.
-	    GOBACK.
+            GOBACK.
        END PROGRAM sub1.
 
        IDENTIFICATION DIVISION.
@@ -8163,19 +8159,18 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -fdump=ALL prog.cob], [0], [], [])
 
 AT_CHECK([COB_DUMP_FILE=tstdump.txt \
-$COBCRUN_DIRECT ./prog], [11],
+$COBCRUN_DIRECT ./prog], [1],
 [X is 000000001
 X is 000005441
-], [
-cpyabrt: 4: attempt to reference unallocated memory (signal SIGSEGV)
+],
+[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
-abnormal termination - file contents may be incorrect
 ])
 
 AT_CAPTURE_FILE(./tstdump.txt)
 
 AT_DATA([reference_tmpl],
-[Module dump due to signal SIGSEGV
+[Module dump due to LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
  Last statement of sub1 was Line 4 of cpyabrt
  Last statement of prog was Line 118 of prog.cob
 
@@ -8296,20 +8291,19 @@ AT_CHECK([diff reference tstdump.sed], [0], [], [])
 AT_CHECK([$COMPILE -fdump=FD,LS prog.cob -o prog_fdls], [0], [], [])
 
 AT_CHECK([COB_DUMP_FILE=tstdump_fdls.txt \
-$COBCRUN_DIRECT ./prog_fdls], [11],
+$COBCRUN_DIRECT ./prog_fdls], [1],
 [X is 000000001
 X is 000005441
-], [
-cpyabrt: 4: attempt to reference unallocated memory (signal SIGSEGV)
+],
+[libcob: cpyabrt:4: LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
 libcob: cpyabrt:4: warning: implicit CLOSE of FLATFILE ('RELFIX')
-abnormal termination - file contents may be incorrect
 ])
 
 
 AT_CAPTURE_FILE(./tstdump_fdls.txt)
 
 AT_DATA([reference_fdls_tmpl],
-[Module dump due to signal SIGSEGV
+[Module dump due to LINKAGE item 'TSPFL-RECORD' (accessed by 'CM-COMPANY') not passed by caller
  Last statement of sub1 was Line 4 of cpyabrt
  Last statement of prog was Line 118 of prog.cob
 

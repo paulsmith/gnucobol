@@ -1705,7 +1705,6 @@ cb_build_identifier (cb_tree x, const int subchk)
 	struct cb_field		*f;
 	struct cb_field		*p;
 	const char		*name;
-	cb_tree			name_ref;
 	cb_tree			v;
 	cb_tree			e1;
 	cb_tree			l;
@@ -1752,28 +1751,35 @@ cb_build_identifier (cb_tree x, const int subchk)
 		if (p->redefines) {
 			p = p->redefines;
 		}
-		name_ref = cb_null;
-		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL) &&
-		    !current_statement->flag_no_based) {
-			if (p->flag_item_based ||
-			   (p->storage == CB_STORAGE_LINKAGE &&
-				  (!(p->flag_is_pdiv_parm || p->flag_is_returning) || p->flag_is_pdiv_opt))) {
-				name_ref = cb_build_name_reference (p, f);
-				current_statement->null_check = CB_BUILD_FUNCALL_2 (
-					"cob_check_based",
-					cb_build_address (cb_build_field_reference (p, NULL)),
-					CB_BUILD_STRING0 (CB_REFERENCE(name_ref)->word->name));
-			}
-		}
-		if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED) &&
-		    p->flag_is_pdiv_opt) {
-			if (name_ref == cb_null) {
-				name_ref = cb_build_name_reference (p, f);
-			}
+#if 0
+		/* note: we can only ignore the check for fields with flag_is_pdiv_opt
+		   when we check for COB_EC_PROGRAM_ARG_MISMATCH in all entry points
+		   and this check is currently completely missing... */
+		if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED)
+		 && p->storage == CB_STORAGE_LINKAGE && p->flag_is_pdiv_parm
+		 && !(p->flag_is_pdiv_opt && CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_MISMATCH)) {
+#else
+		if (CB_EXCEPTION_ENABLE (COB_EC_PROGRAM_ARG_OMITTED)
+		 && p->storage == CB_STORAGE_LINKAGE && p->flag_is_pdiv_parm) {
+#endif
 			current_statement->null_check = CB_BUILD_FUNCALL_3 (
 				"cob_check_linkage",
 				cb_build_address (cb_build_field_reference (p, NULL)),
-				CB_BUILD_STRING0 (CB_REFERENCE(name_ref)->word->name), cb_int1);
+				CB_BUILD_STRING0 (
+					CB_REFERENCE(cb_build_name_reference (p, f))->word->name),
+				cb_int1);
+		} else
+		if (CB_EXCEPTION_ENABLE (COB_EC_DATA_PTR_NULL)
+		 && !current_statement->flag_no_based) {
+			if (p->flag_item_based
+			 || (p->storage == CB_STORAGE_LINKAGE &&
+				!(p->flag_is_pdiv_parm || p->flag_is_returning))) {
+				current_statement->null_check = CB_BUILD_FUNCALL_2 (
+					"cob_check_based",
+					cb_build_address (cb_build_field_reference (p, NULL)),
+					CB_BUILD_STRING0 (
+						CB_REFERENCE(cb_build_name_reference (p, f))->word->name));
+			}
 		}
 	}
 
