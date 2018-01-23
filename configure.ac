@@ -2,7 +2,7 @@
 # Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
 # Edward Hart
 #
@@ -1237,6 +1237,8 @@ if test "x$cob_temp_flags" != "x"; then
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-O//' -e 's/ $//' -e 's/^ //'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fmessage-length=0//'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-D_FORTIFY_SOURCE=.//'`
+	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fstack-protector-strong//'`
+	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fstack-protector-all//'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fstack-protector//'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-funwind-tables//'`
 	cob_temp_flags=`echo "$cob_temp_flags" | sed -e 's/-fasynchronous-unwind-tables//'`
