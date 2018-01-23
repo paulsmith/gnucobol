@@ -5797,7 +5797,7 @@ Program-Id: callee2b         Entry:     callee2b               Line: 5
 Program-Id: callee2b         Section:   SOME-SEC               Line: 5
 Program-Id: callee2b         Paragraph: SOME-PAR               Line: 6
 Program-Id: callee2b         Section:   OTHER-SEC              Line: 12
-Program-Id: callee2b         Paragraph: (None)                 Line: 13
+Program-Id: callee2b         Paragraph: (None)                 Line: 12
 Program-Id: callee2b         Paragraph: EX                     Line: 14
 Program-Id: callee2b         Entry:     LEAVE-ME               Line: 9
 Program-Id: callee2b         Paragraph: END-PAR                Line: 10

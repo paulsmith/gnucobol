@@ -9078,6 +9078,10 @@ statements:
 	if (!current_paragraph) {
 		label = cb_build_reference ("MAIN PARAGRAPH");
 		current_paragraph = CB_LABEL (cb_build_label (label, NULL));
+		CB_TREE (current_paragraph)->source_file
+			= CB_TREE (current_section)->source_file;
+		CB_TREE (current_paragraph)->source_line
+			= CB_TREE (current_section)->source_line;
 		current_paragraph->flag_declaratives = !!in_declaratives;
 		current_paragraph->flag_skip_label = !!skip_statements;
 		current_paragraph->flag_dummy_paragraph = 1;

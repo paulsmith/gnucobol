@@ -297,6 +297,7 @@ process_command_line (int argc, char *argv[])
 			/* removes the path to cobc in argv[0] */
 			strcpy (argv[0], "cobcrun");	/* set for simple compare in test suite
 										   and other static output */
+			arg_shift++;
 			break;
 
 		case 'r':
@@ -311,6 +312,7 @@ process_command_line (int argc, char *argv[])
 			putchar ('\n');
 			print_version ();
 			exit (0);
+
 		case 'M':
 		case 'm':
 			/* -M <module>, --module=<module> */

@@ -1,4 +1,8 @@
 
+2018-01-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c (process_command_line): added missing arg shift for --brief/-q
+
 2018-01-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c (main): raise explicit error if called without any PROGRAM
