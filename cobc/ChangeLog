@@ -483,6 +483,12 @@
 
 	* parser.y, config.def: added free-redefines-position config option.
 
+2017-09-15  Ron Norman <rjn@inglenet.com>
+
+	* tree.c (cb_build_intrinsic): compute CB_INTR_LENGTH CB_INTR_BYTE_LENGTH
+	  at compile time if field is fixed-length, non-national.
+	  NOTE (Simon): other functions are postponed to later
+
 2017-09-10  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_int): corrected bitmask.
@@ -2926,7 +2932,7 @@
 	* cobc.c codegen.c common.h tree.h parser.y typeck.c:
 	  updated to include support REPORT COLUMN LEFT/RIGHT/CENTER
 	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
-	NOTE Simon: -fibmcomp is deactivated for now
+	NOTE (Simon): -fibmcomp is deactivated for now
 	* cobc.c, flag.def: added -fibmcomp: Handle COMP fields like MF IBMCOMP
 	  (binary-size: 1--8 & synchronized-clause: ignore)
 

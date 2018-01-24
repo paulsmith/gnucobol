@@ -8469,7 +8469,10 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE -o prog prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:11: warning: expression '16' NOT EQUAL '16' is always FALSE
+])
+AT_CHECK([$COMPILE -fno-constant-folding prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
 AT_CLEANUP
 
