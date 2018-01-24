@@ -6988,16 +6988,14 @@ static void
 output_file_variable (cb_tree x, struct cb_file *fl, struct cb_statement *p, const char *set_field, int always)
 {
 	struct cb_funcall	*c;
-	struct cb_reference	*r;
 	struct cb_field		*f;
 	int			set_address;
 	if (x == NULL)
 		return;
 	 if (!CB_REF_OR_FIELD_P (x))
 		 return;
-	r = CB_REFERENCE (x);
-	if ( r && CB_FIELD_P (r->value) ) {
-		f = CB_FIELD (r->value);
+	f = cb_code_field(x);
+	if (f) {
 		if (f->flag_local
 		 || f->flag_item_based
 		 || f->flag_local_storage

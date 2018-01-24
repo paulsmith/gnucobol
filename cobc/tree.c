@@ -2564,7 +2564,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 		return get_pic_number_from_str (CB_LITERAL (item_value)->data,
 						error_detected);
 	} else {
-	        return get_pic_number_from_str (open_paren + 1,
+		return get_pic_number_from_str (open_paren + 1,
 						error_detected);
 	}
 }
@@ -3340,13 +3340,15 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 	}
 
 	for (p = records; p; p = p->sister) {
-		if (p->report != NULL)
-		    continue;
+		if (p->report != NULL) {
+			continue;
+		}
 		p->report = r;
 		if(p->storage == CB_STORAGE_REPORT
 		&& ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
-			if(r->rcsz < p->size)
+			if (r->rcsz < p->size) {
 				r->rcsz = p->size;
+			}
 			if(r->line_ids == NULL) {
 				r->line_ids = cobc_parse_malloc((r->num_lines+2) * sizeof(struct cb_field *));
 			} else {
@@ -3360,12 +3362,13 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		if(p->report_source
 		&& CB_REF_OR_FIELD_P (p->report_source)) {
 			/* force generation of report source field TODO: Check why */
-			fld = CB_FIELD (cb_ref(p->report_source));
-			if(fld && fld->count == 0)
+			fld = CB_FIELD_PTR (p->report_source);
+			if (fld && fld->count == 0) {
 				fld->count++;
-			if(CB_TREE_TAG (p->report_source) == CB_TAG_REFERENCE) {
+			}
+			if (CB_TREE_TAG (p->report_source) == CB_TAG_REFERENCE) {
 				ref = CB_REFERENCE (p->report_source); 
-				if(ref->offset || ref->length || ref->subs || fld->flag_local) {
+				if (ref->offset || ref->length || ref->subs || fld->flag_local) {
 					p->report_from = p->report_source;
 					p->report_source = cb_field_dup (fld, ref);
 				}
@@ -3374,14 +3377,14 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		/* force generation of report sum counter TODO: Check why */
 		if (p->report_sum_counter
 		 && CB_REF_OR_FIELD_P (p->report_sum_counter)) {
-			fld = CB_FIELD (cb_ref(p->report_sum_counter));
+			fld = CB_FIELD_PTR (p->report_sum_counter);
 			if (fld && fld->count == 0) {
 				fld->count++;
 			}
 		}
 		if (p->report_control
 		 && CB_REF_OR_FIELD_P (p->report_control)) {
-			fld = CB_FIELD (cb_ref(p->report_control));
+			fld = CB_FIELD_PTR (p->report_control);
 			if (fld && fld->count == 0) {
 				fld->count++;
 			}
@@ -4489,12 +4492,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	case ']':
 		/* Relational operators */
 		if ((CB_REF_OR_FIELD_P (x)) &&
-		    CB_FIELD (cb_ref (x))->level == 88) {
+		    CB_FIELD_PTR (x)->level == 88) {
 			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
 		if ((CB_REF_OR_FIELD_P (y)) &&
-		    CB_FIELD (cb_ref (y))->level == 88) {
+		    CB_FIELD_PTR (y)->level == 88) {
 			cb_error_x (e, _("invalid expression"));
 			return cb_error_node;
 		}
@@ -4517,12 +4520,12 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		}
 
 		if (CB_REF_OR_FIELD_P (y)
-		 && CB_FIELD (cb_ref (y))->usage == CB_USAGE_DISPLAY
+		 && CB_FIELD_PTR (y)->usage == CB_USAGE_DISPLAY
 		 && (CB_LITERAL_P(x) || x == cb_zero)
 		 && xl->all == 0) {
 			relop = compare_field_literal (e, 1, y, op, xl);
 		} else if (CB_REF_OR_FIELD_P (x)
-		 && CB_FIELD (cb_ref (x))->usage == CB_USAGE_DISPLAY
+		 && CB_FIELD_PTR (x)->usage == CB_USAGE_DISPLAY
 		 && (CB_LITERAL_P(y) || y == cb_zero)
 		 && yl->all == 0) {
 			relop = compare_field_literal (e, 0, x, op, yl);
@@ -5263,6 +5266,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 {
 	struct cb_intrinsic_table	*cbp;
 	cb_tree				x;
+	struct cb_field			*fld;
 	enum cb_category		catg;
 
 	int numargs = (int)cb_list_length (args);
@@ -5341,11 +5345,20 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	case CB_INTR_LENGTH:
 	case CB_INTR_BYTE_LENGTH:
 		x = CB_VALUE (args);
+		if (CB_REF_OR_FIELD_P (x)) {
+			fld = CB_FIELD_PTR (x);
+			if (!cb_field_variable_size (fld)
+			 && !fld->flag_any_length) {
+				if (!(fld->pic 
+				 && (fld->pic->category == CB_CATEGORY_NATIONAL
+				  || fld->pic->category == CB_CATEGORY_NATIONAL_EDITED))) 
+					return cb_build_length (x);
+			}
+		} else
 		if (CB_LITERAL_P (x)) {
 			return cb_build_length (x);
-		} else {
-			return make_intrinsic (name, cbp, args, NULL, NULL, 0);
 		}
+		return make_intrinsic (name, cbp, args, NULL, NULL, 0);
 
 	case CB_INTR_WHEN_COMPILED:
 		if (refmod) {
