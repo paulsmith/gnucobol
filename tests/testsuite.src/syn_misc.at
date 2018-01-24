@@ -3297,6 +3297,41 @@ prog.cob:8: error: literal exceeds limit 4294967295
 AT_CLEANUP
 
 
+AT_SETUP([ACUCOBOL USAGE FLOAT / DOUBLE])
+AT_KEYWORDS([misc acu extensions reserved])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       77  myfloat       usage float
+                         value is 3.97E+24.
+       77  mydouble      usage double
+                         value is 3.97E+44.
+       PROCEDURE DIVISION.
+       MAIN.
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [], [])
+
+# ideally we return the following, but there is currently no clean
+# way to get into Bison's error message handling
+#AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
+#[prog.cob:6: error: 'float' is not defined, but is a reserved word in another dialect
+#prog.cob:8: error: 'double' is not defined, but is a reserved word in another dialect
+#])
+
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
+[prog.cob:6: error: syntax error, unexpected Identifier
+prog.cob:8: error: syntax error, unexpected Identifier
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([ACUCOBOL USAGE HANDLE])
 AT_KEYWORDS([misc acu extensions reserved])
 

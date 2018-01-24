@@ -1,4 +1,9 @@
 
+2018-01-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: added ACUCOBOL synonyms FLOAT -> FLOAT-SHORT,
+	  DOUBLE -> FLOAT-LONG
+
 2018-01-23  Ron Norman <rjn@inglenet.com>
 
 	* tree.c: fixed coding error to use CB_FIELD_PTR

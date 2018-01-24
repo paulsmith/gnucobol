@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -916,6 +916,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "DOTTED",		0, 1, DOTTED,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "DOUBLE",		0, 0, FLOAT_LONG,		/* ACU extension */
+				0, 0
+  },
   { "DOWN",			0, 0, DOWN,			/* 2002 */
 				0, 0
   },
@@ -1198,6 +1201,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FLAT-BUTTONS",		0, 1, FLAT_BUTTONS,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "FLOAT",		0, 0, FLOAT_SHORT,		/* ACU extension */
+				0, 0
+  },
   { "FLOAT-BINARY-128",		0, 0, -1,			/* 2014 */
 				0, 0
   },
@@ -1218,6 +1224,8 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
 #endif
+  /* note: may be set as alias for FLOAT-LONG to enable compilation,
+           the actual precision seems to be compiler (version) specific */
   { "FLOAT-EXTENDED",		0, 0, -1,			/* 2002 */
 				0, 0
   },
