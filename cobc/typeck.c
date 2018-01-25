@@ -3158,21 +3158,24 @@ has_sub_reference (struct cb_field *fld)
 	if (fld->count) {
 		return 1;
 	}
-	for (f = fld->children; f; f = f->sister) {
-		if (has_sub_reference (f)) {
-			return 1;
+	if (fld->validation) {
+		for (f = fld->validation; f; f = f->sister) {
+			if (f->count) {
+				return 1;
+			}
 		}
-	}
-	for (f = fld->sister; f; f = f->sister) {
-		if (f->redefines == fld) {
+	} else {
+		for (f = fld->children; f; f = f->sister) {
 			if (has_sub_reference (f)) {
 				return 1;
 			}
 		}
-	}
-	if (fld->validation) {
-		if (has_sub_reference (fld->validation)) {
-			return 1;
+		for (f = fld->sister; f; f = f->sister) {
+			if (f->redefines == fld) {
+				if (has_sub_reference (f)) {
+					return 1;
+				}
+			}
 		}
 	}
 	return 0;

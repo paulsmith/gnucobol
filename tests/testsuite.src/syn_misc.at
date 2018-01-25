@@ -4406,14 +4406,15 @@ AT_DATA([prog.cob], [
        01 F.
           03 F1 PIC X.
           03 F2 PIC 9(NSIZE).
-      * variable referenced by level 88 (which is actually a child)
+      * variable referenced by level 88 (a validation entry)
        01 G.
           03 filler  PIC X.
-             88 g-val  value 'x'.
+             88 g-val-a value 'a'.
+             88 g-val-b value 'b'.
        PROCEDURE       DIVISION USING A B.
            
            IF D2 OMITTED OR Eb2 OMITTED or F2 OMITTED
-             set g-val to true
+             set g-val-b to true
            END-IF
            .
 ])
