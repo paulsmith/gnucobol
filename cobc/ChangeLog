@@ -1,4 +1,10 @@
 
+2018-01-25  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c (default_reserved_words_list): no longer assumed to be
+	  sorted - this caused hard to understand errors when it
+	  wasn't. (initialize_reserved_words_if_needed) now sorts it.
+
 2018-01-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: added ACUCOBOL synonyms FLOAT -> FLOAT-SHORT,

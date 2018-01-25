@@ -226,7 +226,6 @@ static struct system_name_struct	system_name_table[] = {
 static struct system_name_struct *lookup_system_name (const char *, const int);
 
 /* Reserved word table */
-/* Must be ordered on word for binary search */
 /* Description */
 
 /* Word # Statement has terminator # Is context sensitive (only for printing)
@@ -2331,13 +2330,13 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SELECT",			0, 0, SELECT,			/* 2002 */
 				0, 0
   },
+  { "SELECT-ALL",			0, 1, SELECT_ALL,			/* ACU extension */
+				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
   { "SELECTION-INDEX",			0, 1, SELECTION_INDEX,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "SELECTION-TEXT",			0, 1, SELECTION_TEXT,			/* ACU extension */
-				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
-  },
-  { "SELECT-ALL",			0, 1, SELECT_ALL,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "SELF",			0, 0, -1,			/* 2002 */
@@ -3886,6 +3885,12 @@ static void
 initialize_reserved_words_if_needed (void)
 {
 	if (!reserved_words) {
+		/* The default reserved words list should be sorted, but
+		   assuming so causes abstruse errors when a word is put in the
+		   wrong place (e.g. when dealing with EBCDIC or hyphens). */
+		qsort (default_reserved_words, NUM_DEFAULT_RESERVED_WORDS,
+		       sizeof (struct cobc_reserved), reserve_comp);
+
 		if (amendment_list) {
 			get_reserved_words_with_amendments ();
 		} else {
@@ -4044,7 +4049,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	if (is_reserved_word (word)) {
 		return;
 	}
-	
+
 	if (alias_for && !is_default_reserved_word (alias_for)) {
 		/* Should not happen */
 		COBC_ABORT ();
@@ -4056,7 +4061,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 			break;
 		}
 	}
-	
+
 	/*
 	  Replace reserved_words with a bigger copy, with a gap for the new
 	  element to go in.
@@ -4092,7 +4097,7 @@ remove_reserved_word_now (char * const word)
 	if (!entry_to_remove) {
 		return;
 	}
-	
+
 	/* Create copy of list without word. */
 	new_reserved_words = cobc_main_malloc ((num_reserved_words - 1)
 					       * sizeof (struct cobc_reserved));
@@ -4102,7 +4107,7 @@ remove_reserved_word_now (char * const word)
 	memcpy (new_reserved_words + entry_offset,
 		reserved_words + entry_offset + 1,
 		(num_reserved_words - entry_offset - 1) * sizeof (struct cobc_reserved));
-	
+
 	/* Use it to replace old reserved word list. */
 	cobc_main_free (reserved_words);
 	reserved_words = new_reserved_words;
