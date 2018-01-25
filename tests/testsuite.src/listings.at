@@ -656,7 +656,7 @@ AT_DATA([copy-sl-2.inc], [
       *
 ])
 
-AT_DATA([prog.cob], [
+AT_DATA([tstcpybk.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. tstcpybk.
       *
@@ -694,10 +694,10 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols tstcpybk.cob], [0], [], [])
 
 AT_DATA([prog3.lst],
-[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+[GnuCOBOL V.R.P               tstcpybk.cob               DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................
 
@@ -1209,7 +1209,7 @@ AT_DATA([prog.cob], [
 
 AT_DATA([prog1.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
+       PROGRAM-ID.      prog1.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
       *COPY "copy.inc".
@@ -1242,7 +1242,7 @@ LINE    PG/LN  A...B............................................................
 
 000001
 000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
+000003         PROGRAM-ID.      prog1.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006        *COPY "copy.inc".
@@ -1823,7 +1823,7 @@ AT_CHECK([diff prog15.lst prog.lis], [0], [], [])
 
 AT_DATA([prog2.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
+       PROGRAM-ID.      prog2.
        DATA             DIVISION.
        LINKAGE          SECTION.
        01 WS-ONE    PIC 9(4).
@@ -1842,7 +1842,7 @@ LINE    PG/LN  A...B............................................................
 
 000001
 000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
+000003         PROGRAM-ID.      prog2.
 000004         DATA             DIVISION.
 000005         LINKAGE          SECTION.
 000006         01 WS-ONE    PIC 9(4).
@@ -1869,9 +1869,9 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog16.lst prog.lis], [0], [], [])
 
-AT_DATA([prog-1.cob], [
+AT_DATA([prog3.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
+       PROGRAM-ID.      prog3.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01 WS-ONE    PIC 9(4) VALUE 37.
@@ -1885,16 +1885,16 @@ AT_DATA([prog-1.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst prog-1.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst prog3.cob], [0], [], [])
 
 AT_DATA([prog15-1.lst],
-[GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
 000001
 000002         IDENTIFICATION   DIVISION.
-000003         PROGRAM-ID.      prog.
+000003         PROGRAM-ID.      prog3.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
 000006         01 WS-ONE    PIC 9(4) VALUE 37.
@@ -1923,7 +1923,7 @@ AT_KEYWORDS([listing 64bit])
 
 AT_CAPTURE_FILE([prog.lst])
 
-AT_DATA([prog3.cob], [
+AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        DATA             DIVISION.
@@ -1970,7 +1970,7 @@ AT_DATA([prog3.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog3.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [], [])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 
@@ -1979,7 +1979,7 @@ AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
 # Previous test "failed" --> 32 bit
 
 AT_DATA([prog17-32.lst],
-[GnuCOBOL V.R.P               prog3.cob                  DDD MMM dd HH:MM:SS YYYY
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................
 
@@ -2088,7 +2088,7 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 # Previous test "passed" --> 64 bit
 
 AT_DATA([prog17-64.lst],
-[GnuCOBOL V.R.P               prog3.cob                  DDD MMM dd HH:MM:SS YYYY
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................
 
@@ -2203,7 +2203,7 @@ AT_KEYWORDS([listing program function])
 
 AT_CAPTURE_FILE([prog.lst])
 
-AT_DATA([prog4.cob], [
+AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        FUNCTION-ID.     WITHPAR.
        DATA             DIVISION.
@@ -2245,10 +2245,10 @@ AT_DATA([prog4.cob], [
        END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog4.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols prog.cob], [0], [], [])
 
 AT_DATA([prog18.lst],
-[GnuCOBOL V.R.P          prog4.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
+[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -2292,7 +2292,7 @@ LINE    PG/LN  A...B............................................................
 000038             END-IF.
 000039             STOP RUN.
 000040         END PROGRAM prog.
-GnuCOBOL V.R.P          prog4.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 SIZE  TYPE           LVL  NAME                           PICTURE
 
@@ -3592,7 +3592,7 @@ AT_KEYWORDS([listing])
 
 AT_CAPTURE_FILE([prog.lst])
 
-AT_DATA([prog.cob], [
+AT_DATA([EDITOR.cob], [
        IDENTIFICATION DIVISION.                                         EDIT0001
        PROGRAM-ID.                                                      EDIT0002
            EDITOR.                                                      EDIT0003
@@ -3919,28 +3919,28 @@ AT_DATA([prog.cob], [
        END PROGRAM EDITOR.                                              EDIT0343
 ])
 
-AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
-[prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst -tlines=0 -tsymbols EDITOR.cob], [0], [],
+[EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'CHANGE-A-RECORD':
+EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'INSERT-A-RECORD':
+EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'DELETE-A-RECORD':
+EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
 AT_DATA([prog18.lst],
-[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+[GnuCOBOL V.R.P               EDITOR.cob                 DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................
 
@@ -4496,19 +4496,19 @@ P END-JOB                      319      163     210     217     228     246
 
 Error/Warning summary:
 
-prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
 0 errors in compilation group
@@ -4517,28 +4517,28 @@ prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
-[prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob: in paragraph 'CHANGE-A-RECORD':
-prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: in paragraph 'INSERT-A-RECORD':
-prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob: in paragraph 'DELETE-A-RECORD':
-prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
+AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols EDITOR.cob], [0], [],
+[EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'CHANGE-A-RECORD':
+EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'INSERT-A-RECORD':
+EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob: in paragraph 'DELETE-A-RECORD':
+EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 ])
 
 
 AT_DATA([prog19.lst],
-[GnuCOBOL V.R.P               prog.cob                                                           DDD MMM dd HH:MM:SS YYYY
+[GnuCOBOL V.R.P               EDITOR.cob                                                         DDD MMM dd HH:MM:SS YYYY
 
 LINE    PG/LN  A...B............................................................SEQUENCE
 
@@ -5080,19 +5080,19 @@ P END-JOB                      319      163     210     217     228     246     
 
 Error/Warning summary:
 
-prog.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
-prog.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
-prog.cob:198: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:199: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:220: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:221: warning: ALTER is obsolete in GnuCOBOL
-prog.cob:254: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:53: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
+EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
 0 errors in compilation group

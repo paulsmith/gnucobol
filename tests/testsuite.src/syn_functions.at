@@ -1,4 +1,4 @@
-## Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2007-2012, 2014-2018 Free Software Foundation, Inc.
 ## Written by Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -113,7 +113,7 @@ AT_DATA([prog.cob], [
        END FUNCTION z.
 
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. testing.
+       PROGRAM-ID. prog.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -125,7 +125,7 @@ AT_DATA([prog.cob], [
            DISPLAY FUNCTION y
            DISPLAY FUNCTION z
            .
-       END PROGRAM testing.
+       END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
@@ -136,8 +136,8 @@ AT_SETUP([Redundant REPOSITORY entries])
 AT_KEYWORDS([functions])
 
 AT_DATA([prog.cob], [
-       PROGRAM-ID. beta.
-       END PROGRAM beta.
+       PROGRAM-ID. prog.
+       END PROGRAM prog.
 
        IDENTIFICATION DIVISION.
        FUNCTION-ID. alpha.
@@ -149,10 +149,10 @@ AT_DATA([prog.cob], [
            .
        REPOSITORY.
            FUNCTION alpha
-           PROGRAM beta
-           PROGRAM beta
-           PROGRAM beta AS "alpha"
-           FUNCTION beta
+           PROGRAM prog
+           PROGRAM prog
+           PROGRAM prog AS "alpha"
+           FUNCTION prog
            FUNCTION gamma
            .
        END FUNCTION alpha.
@@ -160,9 +160,9 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:14: warning: prototype has same name as current function and will be ignored
-prog.cob:16: warning: duplicate REPOSITORY entry for 'beta'
-prog.cob:17: error: duplicate REPOSITORY entries for 'beta' do not match
-prog.cob:18: error: duplicate REPOSITORY entries for 'beta' do not match
+prog.cob:16: warning: duplicate REPOSITORY entry for 'prog'
+prog.cob:17: error: duplicate REPOSITORY entries for 'prog' do not match
+prog.cob:18: error: duplicate REPOSITORY entries for 'prog' do not match
 prog.cob:19: warning: no definition/prototype seen for function 'gamma'
 prog.cob:19: error: redefinition of 'gamma'
 prog.cob:11: error: 'gamma' previously defined here

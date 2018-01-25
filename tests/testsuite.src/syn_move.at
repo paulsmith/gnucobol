@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2015-2016 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
@@ -427,6 +427,8 @@ prog.cob:31: warning: overlapping MOVE may occur and produce unpredictable resul
 prog.cob:32: warning: overlapping MOVE may produce unpredictable results
 prog.cob:34: warning: overlapping MOVE may produce unpredictable results
 ])
+# special case: for GnuCOBOL the result is predictable,
+# therefore test we have the expected result
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
@@ -502,7 +504,7 @@ AT_SETUP([SET error])
 AT_KEYWORDS([SET-MOVE])
 
 AT_DATA([prog.cob], [
-       program-id. thing.
+       program-id. prog.
        data division.
        working-storage section.
        01 default-float usage float-long.
@@ -516,7 +518,7 @@ AT_DATA([prog.cob], [
       *> see bug #255
            set address of float-var to address of default-float
            goback.
-       end program thing .
+       end program prog .
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],

@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2016-2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2016-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Edward Hart, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -22,18 +22,30 @@
 ### Invalid PROGRAM-ID
 ###
 
+AT_SETUP([Invalid source name])
+AT_KEYWORDS([definition])
+
+AT_DATA([short.cob], [])
+
+AT_CHECK([$COMPILE_ONLY short.cob], [1], [],
+[short.cob: error: invalid file base name 'short' - name duplicates a 'C' keyword
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([Invalid PROGRAM-ID])
 AT_KEYWORDS([definition])
 
-AT_DATA([prog.cob], [
+AT_DATA([SHORT.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      short.
        PROCEDURE        DIVISION.
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:3: error: invalid PROGRAM-ID 'short' - name duplicates a 'C' keyword
+AT_CHECK([$COMPILE_ONLY SHORT.cob], [1], [],
+[SHORT.cob:3: error: invalid PROGRAM-ID 'short' - name duplicates a 'C' keyword
 ])
 
 AT_CLEANUP
@@ -73,10 +85,10 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-AT_SETUP([INITIAL/RECURSIVE before COMMON])
+AT_SETUP([INITIAL / RECURSIVE before COMMON])
 AT_KEYWORDS([PROGRAM-ID definition])
 
-AT_DATA([prog.cob], [
+AT_DATA([containing-prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      containing-prog.
 
@@ -95,7 +107,7 @@ AT_DATA([prog.cob], [
        END PROGRAM      prog-2.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY containing-prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -1112,7 +1124,7 @@ AT_KEYWORDS([definition])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog-1.
+       PROGRAM-ID. prog.
        PROCEDURE DIVISION.
 
        IDENTIFICATION DIVISION.
@@ -1122,7 +1134,7 @@ AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-3.
 
-       END PROGRAM prog-1.
+       END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
@@ -1134,12 +1146,12 @@ AT_KEYWORDS([definition])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog-1.
+       PROGRAM-ID. prog.
 
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog-2.
 
-       END PROGRAM prog-1.
+       END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],

@@ -1499,6 +1499,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 AT_CLEANUP
 
 
+# extension, should normally be *not* case sensitive
 AT_SETUP([Case-sensitive PROGRAM-ID])
 AT_KEYWORDS([extensions])
 
@@ -1522,29 +1523,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([PROGRAM-ID AS clause])
-AT_KEYWORDS([extensions])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      caller AS "PROG".
-       PROCEDURE        DIVISION.
-           CALL "prog"
-           END-CALL.
-           STOP RUN.
-       PROGRAM-ID.      callee AS "prog".
-       PROCEDURE        DIVISION.
-           EXIT PROGRAM.
-       END PROGRAM callee.
-       END PROGRAM caller.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
-
-AT_CLEANUP
-
-
+# note: this is an extension while PROGAM-ID. name AS 'lit'
+#       is standard
 AT_SETUP([Quoted PROGRAM-ID])
 AT_KEYWORDS([extensions])
 
@@ -1556,6 +1536,29 @@ AT_DATA([prog.cob], [
            END-CALL.
            STOP RUN.
        PROGRAM-ID.      "callee".
+       PROCEDURE        DIVISION.
+           EXIT PROGRAM.
+       END PROGRAM callee.
+       END PROGRAM caller.
+])
+
+AT_CHECK([$COMPILE -w prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([PROGRAM-ID AS clause])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      caller AS "PROG".
+       PROCEDURE        DIVISION.
+           CALL "prog"
+           END-CALL.
+           STOP RUN.
+       PROGRAM-ID.      callee AS "prog".
        PROCEDURE        DIVISION.
            EXIT PROGRAM.
        END PROGRAM callee.
@@ -1793,8 +1796,8 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0],
 AT_CLEANUP
 
 
-AT_SETUP([TALLY])
-AT_KEYWORDS([extensions register])
+AT_SETUP([TALLY register])
+AT_KEYWORDS([extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -2150,7 +2153,7 @@ AT_KEYWORDS([extensions])
 
 AT_DATA([caller.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
+       PROGRAM-ID.      caller.
        PROCEDURE        DIVISION.
            CALL "hello" USING "COBOL"
            END-CALL.
@@ -2777,7 +2780,7 @@ AT_KEYWORDS([extensions narg])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      caller.
+       PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  N            PIC 9 USAGE BINARY.

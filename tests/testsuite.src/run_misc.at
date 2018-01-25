@@ -2861,7 +2861,7 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([COB_PRE_LOAD test])
+AT_SETUP([COB_PRE_LOAD])
 AT_KEYWORDS([runmisc])
 
 AT_DATA([callee.cob], [
@@ -5514,7 +5514,7 @@ AT_CHECK([test "$COB_HAS_CURSES" = "yes" || exit 77])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.    blah.
+       PROGRAM-ID.    prog.
 
        DATA           DIVISION.
        SCREEN         SECTION.
@@ -5591,7 +5591,7 @@ AT_KEYWORDS([runmisc exceptions EXCEPTION-STATUS EXCEPTION-LOCATION])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. blah.
+       PROGRAM-ID. prog.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -5612,9 +5612,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [EC-SIZE-OVERFLOW
-blah; ; 10
+prog; ; 10
 EC-SIZE-OVERFLOW
-blah; ; 10
+prog; ; 10
 
 
 ])

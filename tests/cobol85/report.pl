@@ -56,7 +56,7 @@ if (!defined $cobcrun) {
 }
 
 if (defined $cobcrun_direct) {
-    	$cobcrun_direct = "$cobcrun_direct ";
+	$cobcrun_direct = "$cobcrun_direct ";
 } else {
 	$cobcrun_direct = "";
 }

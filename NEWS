@@ -1,6 +1,6 @@
 NEWS - user visible changes				-*- outline -*-
 
-GnuCOBOL 3.0 to be released (201712xx)
+GnuCOBOL 3.0 to be released (201801xx)
 
 * New GnuCOBOL features
 
@@ -143,7 +143,8 @@ GnuCOBOL 2.2 released (20170906)
 ** screen IO: many extended ACCEPT DISPLAY and SCREEN SECTION changes
 
 ** Direct call interface for C:
-  CALL-CONVENTIONS for CALLs and PROCEDURE DIVISION
+  CALL-CONVENTION for CALLs and PROCEDURE DIVISION
+  ENTRY-CONVENTION for PROCEDURE DIVISION and ENTRY statement
   SIZE of parameters specified for CALL ... BY VALUE
   RETURN NOTHING for calling void functions
   RETURN ADDRESS OF VAR for calling functions returning a pointer

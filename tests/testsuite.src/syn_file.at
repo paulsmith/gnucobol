@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014, 2016-2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014, 2016-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -842,7 +842,7 @@ AT_KEYWORDS([file])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.    syntax.
+       PROGRAM-ID.    prog.
 
        ENVIRONMENT    DIVISION.
        INPUT-OUTPUT   SECTION.
