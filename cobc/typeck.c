@@ -3150,6 +3150,34 @@ cb_validate_program_data (struct cb_program *prog)
 	}
 }
 
+static int
+has_sub_reference (struct cb_field *fld)
+{
+	struct cb_field		*f;
+
+	if (fld->count) {
+		return 1;
+	}
+	for (f = fld->children; f; f = f->sister) {
+		if (has_sub_reference (f)) {
+			return 1;
+		}
+	}
+	for (f = fld->sister; f; f = f->sister) {
+		if (f->redefines == fld) {
+			if (has_sub_reference (f)) {
+				return 1;
+			}
+		}
+	}
+	if (fld->validation) {
+		if (has_sub_reference (fld->validation)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void
 cb_validate_program_body (struct cb_program *prog)
 {
@@ -3161,8 +3189,55 @@ cb_validate_program_body (struct cb_program *prog)
 	struct cb_alter_id	*aid;
 	struct cb_label		*l1;
 	struct cb_label		*l2;
-	struct cb_field		*f;
+	struct cb_field		*f, *ret_fld;
 	int			size;
+
+	/* Validate entry points */
+
+	/* Check dangling LINKAGE items */
+	if (cb_warn_linkage
+	 && current_program->linkage_storage) {
+		if (current_program->returning
+		 &&	cb_ref (current_program->returning) != cb_error_node) {
+			ret_fld = CB_FIELD (cb_ref (current_program->returning));
+			if (ret_fld->redefines) {
+				/* error, but we check this in parser.y already and just go on here */
+				ret_fld = ret_fld->redefines;
+			}
+		} else {
+			ret_fld = NULL;
+		}
+		for (v = current_program->entry_list; v; v = CB_CHAIN (v)) {
+			for (f = current_program->linkage_storage; f; f = f->sister) {
+
+				/* ignore RETURNING fields and fields that REDEFINES */
+				if (f == ret_fld
+				 || f->redefines) {
+					continue;
+				}
+
+				/* ignore fields that are part of current entry USING */
+				for (l = CB_VALUE (CB_VALUE (v)); l; l = CB_CHAIN (l)) {
+					x = CB_VALUE (l);
+					if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+						if (f == CB_FIELD (cb_ref (x))) {
+							break;
+						}
+					}
+				}
+				if (l) {
+					continue;
+				}
+
+				/* check if field or its cildren have any actual reference,
+				   otherwise the warning is useless */
+				if (has_sub_reference(f)) {
+					cb_warning_x (cb_warn_linkage, CB_TREE (f),
+						_("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
+				}
+			}
+		}
+	}
 
 	/* Resolve all labels */
 	save_section = current_section;

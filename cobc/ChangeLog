@@ -1,4 +1,11 @@
 
+2018-01-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck.c: postponed check for dangling LINKAGE items
+	  from entry point generation to program validation, allowing to
+	  only warn items that are actually in use, checked in new
+	  function (has_sub_reference)
+
 2018-01-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (default_reserved_words_list): no longer assumed to be

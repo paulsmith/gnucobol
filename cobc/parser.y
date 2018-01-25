@@ -398,30 +398,11 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 		cb_ref (current_program->returning) != cb_error_node) {
 		ret_f = CB_FIELD (cb_ref (current_program->returning));
 		if (ret_f->redefines) {
-			cb_error_x (current_program->returning, _("'%s' REDEFINES field not allowed here"), ret_f->name);
+			cb_error_x (current_program->returning,
+				_("'%s' REDEFINES field not allowed here"), ret_f->name);
 		}
 	} else {
 		ret_f = NULL;
-	}
-
-	/* Check dangling LINKAGE items */
-	if (cb_warn_linkage) {
-		for (f = current_program->linkage_storage; f; f = f->sister) {
-			if (f == ret_f) {
-				continue;
-			}
-			for (l = using_list; l; l = CB_CHAIN (l)) {
-				x = CB_VALUE (l);
-				if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
-					if (f == CB_FIELD (cb_ref (x))) {
-						break;
-					}
-				}
-			}
-			if (!l && !f->redefines) {
-				cb_warning (cb_warn_linkage, _("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
-			}
-		}
 	}
 
 	/* Check returning item against using items when FUNCTION */
