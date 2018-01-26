@@ -6015,7 +6015,7 @@ cb_config_entry (char *buf, int line)
 		i = cb_lookup_config (keyword);
 
 		if (i >= NUM_CONFIG) {
-			conf_runtime_error (1,_("unknown configuration tag '%s'"), keyword);
+			conf_runtime_error (1, _("unknown configuration tag '%s'"), keyword);
 			return -1;
 		}
 	}
@@ -6667,7 +6667,8 @@ cob_fatal_error (const int fatal_error)
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
 	default:
-		cob_runtime_error (_("unknown failure: %d"), fatal_error);
+		/* internal rare error, no need for translation */
+		cob_runtime_error ("unknown failure: %d", fatal_error);
 		break;
 	/* LCOV_EXCL_STOP */
 	}

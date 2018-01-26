@@ -1475,7 +1475,7 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 
 	switch (type) {
 	case FILE_BASE_NAME:
-		cobc_err_msg (_("invalid file base name '%s'%s"),
+		cb_error (_("invalid file base name '%s'%s"),
 			name, s);
 		break;
 	case ENTRY_NAME:
@@ -1486,8 +1486,8 @@ cobc_error_name (const char *name, const enum cobc_name_type type,
 		break;
 	/* LCOV_EXCL_START */
 	default:
-		cobc_err_msg (_("unknown name error '%s'%s"),
-			name, s);
+		/* internal rare error, no need for translation */
+		cobc_err_msg ("unknown name error '%s'%s", name, s);
 		break;
 	/* LCOV_EXCL_STOP */
 	}
@@ -3610,6 +3610,8 @@ process_filename (const char *filename)
 
 	fbasename = file_basename (filename, NULL);
 	extension = file_extension (filename);
+	 /* set source file for possible error message */
+	cb_source_file = filename;
 	/* note: strcasecmp because of possible compilation on FAT/NTFS */
 	if (strcasecmp (extension, "lib")
 	 && strcasecmp (extension, "a")
@@ -4008,7 +4010,9 @@ process (char *cmd)
 			optimize = 1;
 			break;
 		default:
-			cobc_err_msg (_("unknown option ignored:\t%s"),
+			/* rare issue only on OS400 where translation 
+			   may not even work - untranslated */
+			cobc_err_msg ("unknown option ignored:\t%s",
 				 token - 1);
 		}
 	}

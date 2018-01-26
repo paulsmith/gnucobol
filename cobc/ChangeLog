@@ -5,6 +5,8 @@
 	  from entry point generation to program validation, allowing to
 	  only warn items that are actually in use, checked in new
 	  function (has_sub_reference)
+	* cobc.c (process_filename): set internal filename before checking
+	  for valid name to get better error messages
 
 2018-01-25  Edward Hart <edward.dan.hart@gmail.com>
 
