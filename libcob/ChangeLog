@@ -1,4 +1,9 @@
 
+2018-01-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (valid_field_data): bug #491 allow numeric edited
+	  fields to contain all spaces, internally seen as zero
+
 2018-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* numeric.c [WIN32]: fix missing definition of isnan / isinf

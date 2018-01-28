@@ -1038,9 +1038,18 @@ satisfied_required_clause (cob_screen *s)
 static int
 valid_field_data (cob_field *field)
 {
+	int num_check;
+
 	if (COB_FIELD_IS_NUMERIC (field)) {
 		return cob_check_numval (field, NULL, 0, 0) == 0;
 	} else if (field->attr->type == COB_TYPE_NUMERIC_EDITED) {
+		num_check = cob_check_numval (field, NULL, 1, 0);
+		/* test for all spaces which is valid in this case
+		   and change to a one zero instead */
+		if (num_check == field->size + 1) {
+			field->data[0] = '0';
+			return 1;
+		}
 		return cob_check_numval (field, NULL, 1, 0) == 0;
 	} else {
 		return 1;
