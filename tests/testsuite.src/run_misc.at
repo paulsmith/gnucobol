@@ -949,6 +949,78 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([Non-numeric data in numeric items])
+
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X.
+          03 X-NUM      PIC 9(06) VALUE 123.
+       77 NUM           PIC 9(06).
+       PROCEDURE        DIVISION.
+           MOVE x"0000" TO X (2:2)
+           IF X-NUM NUMERIC
+              DISPLAY "low-value is numeric" UPON SYSERR
+              END-DISPLAY
+           END-IF
+           MOVE x"01" TO X (3:1)
+           IF X-NUM NUMERIC
+              DISPLAY "SOH is numeric" UPON SYSERR
+              END-DISPLAY
+           END-IF
+           MOVE X-NUM TO NUM
+           DISPLAY "test over"
+           END-DISPLAY
+      *
+           GOBACK.
+])
+
+AT_DATA([prog2.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog2.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X.
+          03 X-NUM      PIC 9(06) PACKED-DECIMAL VALUE 123.
+       77 NUM           PIC 9(06).
+       PROCEDURE        DIVISION.
+           MOVE x"0A" TO X (2:1)
+           IF X-NUM NUMERIC
+              DISPLAY "bad prog"
+              END-DISPLAY
+           END-IF
+           MOVE X-NUM TO NUM
+           DISPLAY "test over"
+           END-DISPLAY
+      *
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBC -x -o unchecked_prog prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog], [0],
+[test over
+], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob:20: 'X-NUM' (Type: NUMERIC DISPLAY) not numeric: '0\000\001123'
+])
+
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBC -x -o unchecked_prog2 prog2.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./unchecked_prog2], [0],
+[test over
+], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog2], [1], [],
+[libcob: prog2.cob:15: 'X-NUM' (Type: PACKED-DECIMAL) not numeric: '0x000a123f'
+])
+
+AT_CLEANUP
+
+
 ## CALL statement
 
 AT_SETUP([Dynamic call with static linking])
@@ -1131,7 +1203,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE m1.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE m2.cob], [0], [], [])
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
@@ -1182,7 +1254,7 @@ AT_DATA([callee2.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [OK], [])
@@ -1231,7 +1303,7 @@ AT_DATA([callee2.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
@@ -1281,7 +1353,7 @@ AT_DATA([callee2.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE -fno-recursive-check callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE -fno-recursive-check callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [OK], [])
@@ -1291,7 +1363,7 @@ AT_CLEANUP
 
 AT_SETUP([Recursive CALL with ON EXCEPTION])
 
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc EXCEPTION-STATUS])
 
 AT_DATA([caller.cob], [
        IDENTIFICATION   DIVISION.
@@ -1336,7 +1408,7 @@ AT_DATA([callee2.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [1], [],
@@ -1385,7 +1457,7 @@ AT_DATA([callee.cob], [
            GOBACK.
 ])
 
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [COUNTER = 001 LPARAM1 = 00000008 PARAM1 =  PARAM 1
 COUNTER = 001 LPARAM1 = 00000008 PARAM1 =  PARAM 1
@@ -2855,7 +2927,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE -fsticky-linkage callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -fsticky-linkage -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE -fsticky-linkage caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
@@ -3225,7 +3297,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
@@ -3625,7 +3697,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP
@@ -3669,7 +3741,7 @@ AT_DATA([caller.cob], [
 ])
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
-AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
+AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [], [])
 
 AT_CLEANUP

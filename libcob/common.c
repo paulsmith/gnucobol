@@ -300,7 +300,7 @@ static char	varseq_dflt[8] = "0";
 
 
 /*
- * Table of possible environment variables and/or runtime.cfg parameters
+ * Table of possible environment variables and/or runtime.cfg parameters:
    Env Var name, Name used in run-time config file, Default value (NULL for aliases), Table of Alternate values,
    Grouping for display of run-time options, Data type, Location within structure (adds computed length of referenced field),
    Set by which runtime.cfg file, value set by a different keyword,
@@ -2980,6 +2980,57 @@ cob_check_linkage (const unsigned char *x, const char *name, const int check_typ
 	}
 }
 
+static const char *
+explain_field_type (const cob_field *f)
+{
+	switch (COB_FIELD_TYPE (f)) {
+	case COB_TYPE_GROUP:
+		return "GROUP";
+	case COB_TYPE_BOOLEAN:
+		return "BOOLEAN";
+	case COB_TYPE_NUMERIC_DISPLAY:
+		return "NUMERIC DISPLAY";
+	case COB_TYPE_NUMERIC_BINARY:
+		return "BINARY";
+	case COB_TYPE_NUMERIC_PACKED:
+		return "PACKED-DECIMAL";
+	case COB_TYPE_NUMERIC_FLOAT:
+		return "FLOAT";
+	case COB_TYPE_NUMERIC_DOUBLE:
+		return "DOUBLE";
+	case COB_TYPE_NUMERIC_L_DOUBLE:
+		return "LONG DOUBLE";
+	case COB_TYPE_NUMERIC_FP_DEC64:
+		return "FP DECIMAL 64";
+	case COB_TYPE_NUMERIC_FP_DEC128:
+		return "FP DECIMAL 128";
+	case COB_TYPE_NUMERIC_FP_BIN32:
+		return "FP BINARY 32";
+	case COB_TYPE_NUMERIC_FP_BIN64:
+		return "FP BINARY 64";
+	case COB_TYPE_NUMERIC_FP_BIN128:
+		return "FP BINARY 128";
+	/* note: may be not reached depending on endianness */
+	case COB_TYPE_NUMERIC_COMP5:
+		return "COMP-5";
+	case COB_TYPE_NUMERIC_EDITED:
+		return "NUMERIC EDITED";
+	case COB_TYPE_ALPHANUMERIC:
+		return "ALPHANUMERIC";
+	case COB_TYPE_ALPHANUMERIC_ALL:
+		return "ALPHANUMERIC ALL";
+	case COB_TYPE_ALPHANUMERIC_EDITED:
+		return "ALPHANUMERIC EDITED";
+	case COB_TYPE_NATIONAL:
+		return "NATIONAL";
+	case COB_TYPE_NATIONAL_EDITED:
+		return "NATIONAL EDITED";
+	default:
+		break;
+	}
+	return "UNKNOWN";
+}
+
 void
 cob_check_numeric (const cob_field *f, const char *name)
 {
@@ -2989,18 +3040,27 @@ cob_check_numeric (const cob_field *f, const char *name)
 	size_t		i;
 
 	if (!cob_is_numeric (f)) {
+		cob_set_exception (COB_EC_DATA_INCOMPATIBLE);
 		buff = cob_fast_malloc ((size_t)COB_SMALL_BUFF);
 		p = buff;
 		data = f->data;
-		for (i = 0; i < f->size; ++i) {
-			if (isprint (data[i])) {
-				*p++ = data[i];
-			} else {
-				p += sprintf (p, "\\%03o", data[i]);
+		if (COB_FIELD_IS_NUMDISP(f) || COB_FIELD_IS_ANY_ALNUM(f)) {
+			for (i = 0; i < f->size; ++i) {
+				if (isprint (data[i])) {
+					*p++ = data[i];
+				} else {
+					p += sprintf (p, "\\%03o", data[i]);
+				}
+			}
+		} else {
+			p += sprintf (p, "0x");
+			for (i = 0; i < f->size; ++i) {
+				p += sprintf (p, "%02x", data[i]);
 			}
 		}
 		*p = '\0';
-		cob_runtime_error (_("'%s' not numeric: '%s'"), name, buff);
+		cob_runtime_error (_("'%s' (Type: %s) not numeric: '%s'"),
+			name, explain_field_type(f), buff);
 		cob_free (buff);
 		cob_stop_run (1);
 	}
@@ -5083,7 +5143,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	}
 
 	if (COB_MODULE_PTR->cob_procedure_params[1]) {
-		l = (struct longoption_def*) (COB_MODULE_PTR->cob_procedure_params[1]->data);
+		l = (struct __longoption_def*) (COB_MODULE_PTR->cob_procedure_params[1]->data);
 	}
 
 	for (i = 0; i < lo_amount; i++) {
@@ -6460,7 +6520,7 @@ cob_runtime_error (const char *fmt, ...)
 		}
 	}
 
-	/* Prefix */
+	/* Optional Module Dump */
 	if (cobglobptr && COB_MODULE_PTR
 	 && COB_MODULE_PTR->module_stmt != 0) {
 		va_start (ap, fmt);
@@ -6469,6 +6529,7 @@ cob_runtime_error (const char *fmt, ...)
 		cob_dump_module (reason);
 	}
 
+	/* Prefix */
 	fputs ("libcob: ", stderr);
 	if (cob_source_file) {
 		fprintf (stderr, "%s", cob_source_file);
@@ -7676,7 +7737,7 @@ cob_debug_dump(void *pMem, int len)
 		&& repeatWord( lastWord, &mem[i])
 		&& repeatWord( lastWord, &mem[i+dMaxPerLine])) {
 		    fprintf(cob_debug_file," %6.6X : ",adrs+i);
-			while(i < len-16
+			while (i < len - 16
 			&& repeatWord(lastWord,&mem[i]))
 				i += 16;
 			fprintf(cob_debug_file," thru %6.6X same as last word\n",adrs+i-1);

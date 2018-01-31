@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -682,6 +682,7 @@ Note: also defined together with __clang__ in both frontends:
 
 #define COB_TYPE_NUMERIC_EDITED		0x24U
 
+#define COB_TYPE_ALNUM			0x20U
 #define COB_TYPE_ALPHANUMERIC		0x21U
 #define COB_TYPE_ALPHANUMERIC_ALL	0x22U
 #define COB_TYPE_ALPHANUMERIC_EDITED	0x23U
@@ -740,6 +741,7 @@ Note: also defined together with __clang__ in both frontends:
 #define COB_FIELD_IS_NUMERIC(f)	(COB_FIELD_TYPE (f) & COB_TYPE_NUMERIC)
 #define COB_FIELD_IS_NUMDISP(f)	(COB_FIELD_TYPE (f) == COB_TYPE_NUMERIC_DISPLAY)
 #define COB_FIELD_IS_ALNUM(f)	(COB_FIELD_TYPE (f) == COB_TYPE_ALPHANUMERIC)
+#define COB_FIELD_IS_ANY_ALNUM(f)	(COB_FIELD_TYPE (f) & COB_TYPE_ALNUM)
 #define COB_FIELD_IS_NATIONAL(f)	(COB_FIELD_TYPE (f) & COB_TYPE_NATIONAL)
 
 
@@ -1047,14 +1049,14 @@ typedef cob_s64_t cob_flags_t;
 
 /* Picture symbol structure */
 
-typedef struct {
+typedef struct __cob_pic_symbol {
 	char	symbol;
 	int 	times_repeated;
 } cob_pic_symbol;
 
 /* Field attribute structure */
 
-typedef struct {
+typedef struct __cob_field_attr {
 	unsigned short		type;		/* Field type */
 	unsigned short		digits;		/* Digit count */
 	signed short		scale;		/* Field scale */
@@ -1064,7 +1066,7 @@ typedef struct {
 
 /* Field structure */
 
-typedef struct {
+typedef struct __cob_field {
 	size_t			size;		/* Field size */
 	unsigned char		*data;		/* Pointer to field data */
 	const cob_field_attr	*attr;		/* Pointer to attribute */
@@ -1073,7 +1075,7 @@ typedef struct {
 #if	0	/* RXWRXW - Constant field */
 /* Field structure for constants */
 
-typedef struct {
+typedef struct __cob_const_field {
 	const size_t		size;		/* Field size */
 	const unsigned char	*data;		/* Pointer to field data */
 	const cob_field_attr	*attr;		/* Pointer to attribute */
@@ -1082,7 +1084,7 @@ typedef struct {
 
 /* Union for field constants */
 
-typedef union {
+typedef union __cob_fld_union {
 	const cob_const_field	cf;
 	cob_field		vf;
 } cob_fld_union;
@@ -1090,7 +1092,7 @@ typedef union {
 
 /* Representation of 128 bit FP */
 
-typedef struct {
+typedef struct __cob_fp_128 {
 	cob_u64_t	fpval[2];
 } cob_fp_128;
 
@@ -1098,7 +1100,7 @@ typedef struct {
 /* n = value / 10 ^ scale */
 /* Decimal structure */
 
-typedef struct {
+typedef struct __cob_decimal {
 	mpz_t		value;			/* GMP value definition */
 	int		scale;			/* Decimal scale */
 } cob_decimal;
@@ -1112,14 +1114,14 @@ struct cob_frame {
 
 /* Call union structures */
 
-typedef union {
+typedef union __cob_content {
 	unsigned char data[8];
 	cob_s64_t     datall;
 	cob_u64_t     dataull;
 	int           dataint;
 } cob_content;
 
-typedef union {
+typedef union __cob_call_union {
 	void		*(*funcptr)();	/* Function returning "void *" */
 	void		(*funcnull)();	/* Function returning nothing */
 	cob_field	*(*funcfld)();	/* Function returning "cob_field *" */
@@ -1231,7 +1233,7 @@ struct cob_func_loc {
 
 #define COB_MAX_KEYCOMP 8	/* max number of parts in a compound key (disam.h :: NPARTS ) */
 
-typedef struct {
+typedef struct __cob_file_key {
 	cob_field	*field;	/* Key field */
 	int		flag;				/* ASCENDING/DESCENDING (for SORT) */
 	int		tf_duplicates;			/* WITH DUPLICATES (for RELATIVE/INDEXED) */
@@ -1254,7 +1256,7 @@ typedef struct {
  *       so as long as you add new fields to the end there should be no
  *       need to change COB_FILE_VERSION
  */
-typedef struct {
+typedef struct __cob_file {
 	const char		*select_name;		/* Name in SELECT */
 	unsigned char		*file_status;		/* FILE STATUS */
 	cob_field		*assign;		/* ASSIGN TO */
@@ -1293,7 +1295,7 @@ typedef struct {
 
 /* Linage structure */
 
-typedef struct {
+typedef struct __cob_linage {
 	cob_field		*linage;		/* LINAGE */
 	cob_field		*linage_ctr;		/* LINAGE-COUNTER */
 	cob_field		*latfoot;		/* LINAGE FOOTING */
@@ -1311,14 +1313,14 @@ typedef struct {
 /********************/
 
 /* for each SUM field of each line in the report */
-typedef struct cob_report_sum_ {
-	struct cob_report_sum_	*next;			/* Next field */
+typedef struct __cob_report_sum {
+	struct __cob_report_sum	*next;			/* Next field */
 	cob_field		*f;			/* Field to be summed */
 } cob_report_sum;
 
 /* for each field of each line in the report */
-typedef struct cob_report_field_ {
-	struct cob_report_field_ *next;			/* Next field */
+typedef struct __cob_report_field {
+	struct __cob_report_field *next;			/* Next field */
 	cob_field		*f;			/* Field definition */
 	cob_field		*source;		/* Field SOURCE */
 	cob_field		*control;		/* CONTROL Field */
@@ -1336,9 +1338,9 @@ typedef struct cob_report_field_ {
 } cob_report_field;
 
 /* for each line of a report */
-typedef struct cob_report_line_ {
-	struct cob_report_line_	*sister;		/* Next line */
-	struct cob_report_line_	*child;			/* Child line */
+typedef struct __cob_report_line {
+	struct __cob_report_line	*sister;		/* Next line */
+	struct __cob_report_line	*child;			/* Child line */
 	cob_report_field	*fields;		/* List of fields on this line */
 	cob_field		*control;		/* CONTROL Field */
 	int			use_decl;		/* Label# of Declaratives code */
@@ -1351,14 +1353,14 @@ typedef struct cob_report_line_ {
 } cob_report_line;
 
 /* for each 'line referencing a control field' of the report */
-typedef struct cob_report_control_ref_ {
-	struct cob_report_control_ref_ *next;		/* Next control_ref */
+typedef struct __cob_report_control_ref {
+	struct __cob_report_control_ref *next;		/* Next control_ref */
 	cob_report_line		*ref_line;		/* Report Line with this control field */
 } cob_report_control_ref;
 
 /* for each 'control field' of the report */
-typedef struct cob_report_control_ {
-	struct cob_report_control_ *next;		/* Next control */
+typedef struct __cob_report_control {
+	struct __cob_report_control *next;		/* Next control */
 	const char		*name;			/* Control field name */
 	cob_field		*f;			/* Field definition */
 	cob_field		*val;			/* previous field value */
@@ -1372,8 +1374,8 @@ typedef struct cob_report_control_ {
 } cob_report_control;
 
 /* for each SUM counter in the report */
-typedef struct cob_report_sumctr_ {
-	struct cob_report_sumctr_ *next;		/* Next sum counter */
+typedef struct __cob_report_sumctr {
+	struct __cob_report_sumctr *next;		/* Next sum counter */
 	const char		*name;			/* Name of this SUM counter */
 	cob_report_sum		*sum;			/* list of fields to be summed */
 	cob_field		*counter;		/* Field to hold the SUM counter */
@@ -1386,9 +1388,9 @@ typedef struct cob_report_sumctr_ {
 } cob_report_sum_ctr;
 
 /* main report table for each RD */
-typedef struct cob_report_ {
+typedef struct __cob_report {
 	const char		*report_name;		/* Report name */
-	struct cob_report_	*next;			/* Next report */
+	struct __cob_report	*next;			/* Next report */
 	cob_file		*report_file;		/* Report file */
 	cob_field		*page_counter;		/* PAGE-COUNTER */
 	cob_field		*line_counter;		/* LINE-COUNTER */
@@ -1614,7 +1616,7 @@ COB_EXPIMP int	cob_sys_waitpid	(const void *);
  * cob_sys_getopt_long_long
  */
 COB_EXPIMP int	cob_sys_getopt_long_long	(void*, void*, void*, const int, void*, void*);
-typedef struct longoption_def {
+typedef struct __longoption_def {
 	char name[25];
 	char has_option;
 	char return_value_pointer[sizeof(char*)];

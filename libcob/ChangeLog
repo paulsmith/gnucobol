@@ -1,4 +1,15 @@
 
+2018-01-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: change all typedef struct/union to be named using
+	  the same name schema
+	* common.c (explain_field_type): new function,
+	  used texts may be tweaked later
+	* common.c (cob_check_numeric): set COB_EC_DATA_INCOMPATIBLE if
+	  applicable and use only printable representation int the error
+	  message for numeric items that are actually printable,
+	  otherwise use hex representation
+
 2018-01-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (valid_field_data): bug #491 allow numeric edited
@@ -2115,7 +2126,7 @@
 
 2006-05-03  Roger While <simrw@sim-basis.de>
 
-	* screenio.c, screenio.h: Change strucrures
+	* screenio.c, screenio.h: Change structures
 
 2006-05-01  Roger While <simrw@sim-basis.de>
 
