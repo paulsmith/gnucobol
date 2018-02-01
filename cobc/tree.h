@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -494,21 +494,8 @@ typedef struct cb_tree_common	*cb_tree;
 #define	CB_INVALID_TREE(x)	(!(x) || CB_TREE (x) == cb_error_node)
 
 #ifdef	COB_TREE_DEBUG
-
-#ifdef	COB_HAVE_STEXPR
-#define CB_TREE_CAST(tg,ty,x)						\
-({									\
-	cb_tree _x = (x);						\
-	if (unlikely(!_x || CB_TREE_TAG (_x) != tg)) {			\
-		cobc_tree_cast_error (_x, __FILE__, __LINE__, tg);	\
-	}								\
-	((ty *) (_x));							\
-})
-#else
 #define CB_TREE_CAST(tg,ty,x)	\
 	((ty *)cobc_tree_cast_check (x, __FILE__, __LINE__, tg))
-#endif
-
 #else
 #define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
@@ -2047,11 +2034,7 @@ extern void			cb_emit_terminate (cb_tree rep);
 extern void			cb_emit_generate (cb_tree rep);
 extern void			cb_emit_suppress (struct cb_field *f);
 
-DECLNORET extern void	cobc_tree_cast_error (const cb_tree, const char *,
-					      const int,
-					      const enum cb_tag) COB_A_NORETURN;
-
-#if	!defined(__GNUC__) && defined(COB_TREE_DEBUG)
+#ifdef	COB_TREE_DEBUG
 extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
 					      const int, const enum cb_tag);
 #endif

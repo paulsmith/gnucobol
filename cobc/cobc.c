@@ -593,7 +593,7 @@ static const struct option long_options[] = {
 #undef	CB_OP_ARG
 
 /* Prototype */
-DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (void);
+DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (int);
 DECLNORET static void COB_A_NORETURN	cobc_early_exit (int);
 DECLNORET static void COB_A_NORETURN	cobc_err_exit (const char *, ...) COB_A_FORMAT12;
 static void	free_list_file		(struct list_files *);
@@ -875,7 +875,7 @@ void
 cobc_too_many_errors (void)
 {
 	cobc_err_msg (_("too many errors"));
-	cobc_abort_terminate ();
+	cobc_abort_terminate (0);
 }
 
 /* Output cobc source/line where an internal error occurs and exit */
@@ -884,34 +884,57 @@ void
 cobc_abort (const char * filename, const int line_num)
 {
 	cobc_err_msg (_("%s: %d: internal compiler error"), filename, line_num);
-	cobc_err_msg (_("Please report this!"));
-	cobc_abort_terminate ();
+	cobc_abort_terminate (1);
 }
 /* LCOV_EXCL_STOP */
 
-/* Output cobc source/line where a tree cast error occurs and exit */
+#ifdef COB_TREE_DEBUG
 /* LCOV_EXCL_START */
-void
+
+DECLNORET static void	cobc_tree_cast_error (const cb_tree, const char *,
+	const int, const enum cb_tag) COB_A_NORETURN;
+
+static cb_tree cast_error_tree_last = NULL;
+
+/* Output cobc source/line where a tree cast error occurs and exit */
+static void
 cobc_tree_cast_error (const cb_tree x, const char * filename, const int line_num,
 		      const enum cb_tag tagnum)
 {
-	cobc_err_msg (_("%s: %d: invalid cast from '%s' type %s to type %s"),
-		filename, line_num,
-		x ? cb_name (x) : "NULL",
+	const char *name;
+
+	if (!x) {
+		cast_error_tree_last = cb_null;
+		name = "NULL";
+	} else {
+		cast_error_tree_last = x;
+		name = cb_name (x);
+	}
+
+	putc ('\n', stderr);
+	/* not translated as this only occurs if developer-only setup is used: */
+	cobc_err_msg ("%s: %d: invalid cast from '%s' type %s to type %s",
+		filename, line_num, name,
 		x ? cobc_enum_explain (CB_TREE_TAG(x)) : "None",
 		cobc_enum_explain (tagnum));
-	cobc_abort_terminate ();
-}
-/* LCOV_EXCL_STOP */
 
-#if	!defined(__GNUC__) && defined(COB_TREE_DEBUG)
-/* LCOV_EXCL_START */
+	if (cast_error_tree_last == NULL) {
+		cobc_err_msg ("additional cast error was raised during name lookup");
+	}
+	cobc_abort_terminate (1);
+}
+
 cb_tree
 cobc_tree_cast_check (const cb_tree x, const char * file,
 		      const int line, const enum cb_tag tag)
 {
 	if (!x || x == cb_error_node || CB_TREE_TAG (x) != tag) {
-		cobc_tree_cast_error (x, file, line, tag);
+		/* if recursive don't raise a tree cast error */
+		if (cast_error_tree_last != x) {;
+			cobc_tree_cast_error (x, file, line, tag);
+		} else {
+			cast_error_tree_last = NULL;
+		}
 	}
 	return x;
 }
@@ -928,7 +951,7 @@ cobc_malloc (const size_t size)
 	if (unlikely (!mptr)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	return mptr;
@@ -940,7 +963,7 @@ cobc_free (void * mptr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!mptr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_free");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	free (mptr);
@@ -956,7 +979,7 @@ cobc_strdup (const char *dupstr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_strdup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 #endif
@@ -976,7 +999,7 @@ cobc_stradd_dup (const char *str1, const char *str2)
 	/* LCOV_EXCL_START */
 	if (unlikely (!str1 || !str2)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_stradd_dup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	m = strlen (str1);
@@ -998,7 +1021,7 @@ cobc_realloc (void *prevptr, const size_t size)
 	if (unlikely (!mptr)) {
 		cobc_err_msg (_("cannot reallocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	return mptr;
@@ -1015,7 +1038,7 @@ cobc_main_malloc (const size_t size)
 	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->next = cobc_mainmem_base;
@@ -1034,7 +1057,7 @@ cobc_main_strdup (const char *dupstr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_strdup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
@@ -1052,7 +1075,7 @@ cobc_main_stradd_dup (const char *str1, const char *str2)
 	/* LCOV_EXCL_START */
 	if (unlikely (!str1 || !str2)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_main_stradd_dup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	m = strlen (str1);
@@ -1075,7 +1098,7 @@ cobc_main_realloc (void *prevptr, const size_t size)
 	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
@@ -1091,7 +1114,7 @@ cobc_main_realloc (void *prevptr, const size_t size)
 	/* LCOV_EXCL_START */
 	if (unlikely (!curr)) {
 		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->next = curr->next;
@@ -1125,7 +1148,7 @@ cobc_main_free (void *prevptr)
 #ifdef	COB_TREE_DEBUG
 		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
 			"cobc_main_free");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 #else
 		return;
 #endif
@@ -1151,7 +1174,7 @@ cobc_parse_malloc (const size_t size)
 	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->next = cobc_parsemem_base;
@@ -1170,7 +1193,7 @@ cobc_parse_strdup (const char *dupstr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_parse_strdup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
@@ -1191,7 +1214,7 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof(struct cobc_mem_struct);
@@ -1207,7 +1230,7 @@ cobc_parse_realloc (void *prevptr, const size_t size)
 	/* LCOV_EXCL_START */
 	if (unlikely (!curr)) {
 		cobc_err_msg (_("attempt to reallocate non-allocated memory"));
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->next = curr->next;
@@ -1241,7 +1264,7 @@ cobc_parse_free (void *prevptr)
 #ifdef	COB_TREE_DEBUG
 		cobc_err_msg (_("call to %s with invalid pointer, as it is missing in list"),
 			"cobc_parse_free");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 #else
 		return;
 #endif
@@ -1267,7 +1290,7 @@ cobc_plex_malloc (const size_t size)
 	if (unlikely (!m)) {
 		cobc_err_msg (_("cannot allocate %d bytes of memory"),
 				(int)size);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 	/* LCOV_EXCL_STOP */
 	m->memptr = (char *)m + sizeof (struct cobc_mem_struct);
@@ -1285,7 +1308,7 @@ cobc_plex_strdup (const char *dupstr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_plex_strdup");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	n = strlen (dupstr);
@@ -1302,7 +1325,7 @@ cobc_check_string (const char *dupstr)
 	/* LCOV_EXCL_START */
 	if (unlikely (!dupstr)) {
 		cobc_err_msg (_("call to %s with NULL pointer"), "cobc_check_string");
-		cobc_abort_terminate ();
+		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
 	for (s = base_string; s; s = s->next) {
@@ -1977,7 +2000,7 @@ cobc_abort_msg (void)
 /* return to OS in case of hard errors after trying to output the error to
    listing file if active */
 DECLNORET static void COB_A_NORETURN
-cobc_abort_terminate (void)
+cobc_abort_terminate (int should_be_reported)
 {
 	/* note we returned 99 for aborts earlier but autotest will
 	   "recognize" status 99 as failure (you cannot "expect" the return 99 */
@@ -1986,7 +2009,11 @@ cobc_abort_terminate (void)
 	if (cb_src_list_file) {
 		print_program_listing ();
 	}
+	putc ('\n', stderr);
 	cobc_abort_msg ();
+	if (should_be_reported) {
+		cobc_err_msg (_("Please report this!"));
+	}
 	cobc_clean_up (ret_code);
 	exit (ret_code);
 }
@@ -2012,9 +2039,12 @@ cobc_sig_handler (int sig)
 #ifdef SIGPIPE
 	if (sig == SIGPIPE) ret = 1;
 #endif
+
+	/* LCOV_EXCL_START */
 	if (!ret) {
-		cobc_err_msg (_("Please report this!"));	/* LCOV_EXCL_LINE */
+		cobc_err_msg (_("Please report this!"));
 	}
+	/* LCOV_EXCL_STOP */
 #else
 	COB_UNUSED (sig);
 #endif
@@ -6003,7 +6033,7 @@ abort_if_too_many_continuation_lines (int pline_cnt, const char *filename, int l
 	if (pline_cnt >= CB_READ_AHEAD) {
 		cobc_err_msg (_("%s: %d: Too many continuation lines"),
 				filename, line_num);
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 }
 
@@ -8066,7 +8096,7 @@ main (int argc, char **argv)
 
 	if (fatal_startup_error) {
 		cobc_err_msg (_("please check environment variables as noted above"));
-		cobc_abort_terminate ();
+		cobc_abort_terminate (0);
 	}
 
 	/* Check the filename */
