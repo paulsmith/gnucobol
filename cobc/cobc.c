@@ -655,6 +655,7 @@ cobc_free_mem (void)
 	ppp_clear_lists ();
 }
 
+#ifdef COB_TREE_DEBUG
 static const char *
 cobc_enum_explain (const enum cb_tag tag)
 {
@@ -744,6 +745,7 @@ cobc_enum_explain (const enum cb_tag tag)
 	}
 	return "UNKNOWN";
 }
+#endif
 
 static const char *
 cobc_enum_explain_storage (const enum cb_storage storage)
@@ -894,31 +896,31 @@ cobc_abort (const char * filename, const int line_num)
 DECLNORET static void	cobc_tree_cast_error (const cb_tree, const char *,
 	const int, const enum cb_tag) COB_A_NORETURN;
 
-static cb_tree cast_error_tree_last = NULL;
+static int cast_error_raised = 0;
 
 /* Output cobc source/line where a tree cast error occurs and exit */
 static void
 cobc_tree_cast_error (const cb_tree x, const char * filename, const int line_num,
 		      const enum cb_tag tagnum)
 {
-	const char *name;
+	const char *name, *type;
 
+	cast_error_raised = 1;
 	if (!x) {
-		cast_error_tree_last = cb_null;
 		name = "NULL";
+		type = "None";
 	} else {
-		cast_error_tree_last = x;
 		name = cb_name (x);
+		type = cobc_enum_explain (CB_TREE_TAG (x));
 	}
 
 	putc ('\n', stderr);
 	/* not translated as this only occurs if developer-only setup is used: */
 	cobc_err_msg ("%s: %d: invalid cast from '%s' type %s to type %s",
-		filename, line_num, name,
-		x ? cobc_enum_explain (CB_TREE_TAG(x)) : "None",
+		filename, line_num, name, type,
 		cobc_enum_explain (tagnum));
 
-	if (cast_error_tree_last == NULL) {
+	if (cast_error_raised != 1) {
 		cobc_err_msg ("additional cast error was raised during name lookup");
 	}
 	cobc_abort_terminate (1);
@@ -930,10 +932,10 @@ cobc_tree_cast_check (const cb_tree x, const char * file,
 {
 	if (!x || x == cb_error_node || CB_TREE_TAG (x) != tag) {
 		/* if recursive don't raise a tree cast error */
-		if (cast_error_tree_last != x) {;
+		if (!cast_error_raised) {;
 			cobc_tree_cast_error (x, file, line, tag);
 		} else {
-			cast_error_tree_last = NULL;
+			cast_error_raised = 2;
 		}
 	}
 	return x;

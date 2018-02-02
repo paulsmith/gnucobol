@@ -7,8 +7,8 @@
 2018-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, tree.h [COB_TREE_DEBUG]: make sure that we don't enter
-	  a loop of cb_tree cast errors, possible as the called (cb_name)
-	  may call cobc_tree_cast_error again,
+	  a loop of cb_tree cast errors, possible as (cb_name) is called
+	  which may result in another call of (cobc_tree_cast_error);
 	  removed compiler specific handling
 	* cobc.c (cobc_abort_terminate): add parameter indicating that
 	  the user should report the error

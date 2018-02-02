@@ -538,6 +538,7 @@ prog.cob:13: error: syntax error, unexpected end of file
 prog.cob:13: error: syntax error, unexpected end of file
 prog.cob:13: error: syntax error, unexpected end of file
 cobc: too many errors
+
 cobc: aborting compile of prog.cob at line 13 (PROGRAM-ID: prog)
 ])
 AT_CLEANUP
