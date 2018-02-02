@@ -17,6 +17,10 @@
 	* cobc.c (cobc_abort_terminate): add parameter indicating that
 	  the user should report the error
 
+2018-01-30  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: Fix generation of dump-code for fields with IS EXTERNAL
+
 2018-01-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, typeck.c: postponed check for dangling LINKAGE items

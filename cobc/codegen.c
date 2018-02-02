@@ -2085,6 +2085,8 @@ output_local_field_cache (struct cb_program *prog)
 {
 	cb_tree			l;
 	struct field_list	*field;
+	struct cb_field		*f;
+	struct cb_report *rep;
 
 	if (!local_field_cache) {
 		return;
@@ -2104,7 +2106,8 @@ output_local_field_cache (struct cb_program *prog)
 		output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
 			field->f->id);
 
-		if (!field->f->flag_local) {
+		if (!field->f->flag_local
+		 && !field->f->flag_external) {
 			output_field (field->x);
 		} else {
 			output ("{");
@@ -2123,11 +2126,9 @@ output_local_field_cache (struct cb_program *prog)
 	}
 	/* Report special fields */
 	if (prog->report_storage) {
-		struct cb_field		*f;
-		struct cb_report *rep;
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 			rep = CB_REPORT(CB_VALUE(l));
-			for(f=rep->records; f; f=f->sister) {
+			for (f = rep->records; f; f = f->sister) {
 				if (f->storage == CB_STORAGE_WORKING
 				&& !(f->report_flag & COB_REPORT_REF_EMITTED)) {
 					output_emit_field(cb_build_field_reference (f, NULL), NULL);
