@@ -3,6 +3,10 @@
 
 	* tree.c (cb_get_long_long, cb_get_u_long_long): fix bug #492
 	  adjusted literal size check
+	* tree.c, typeck.c, codegen.c: first approach to fix tree cast
+	  errors in REPORTWRITER code
+	* codegen.c: moved parts of (output_funcall) to new functions
+	  (output_funcall_typed) and (output_funcall_typed_report)
 
 2018-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

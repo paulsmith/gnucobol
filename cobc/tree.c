@@ -548,7 +548,16 @@ cb_name_1 (char *s, cb_tree x)
 		break;
 
 	case CB_TAG_REPORT:
-		sprintf (s, "REPORT %s", CB_REPORT (CB_VALUE (x))->name);
+#if 0	/* CHECKME: Why should we have the report in the list ??? */
+		if (CB_LIST_P (x)) {
+			x = CB_VALUE (x);
+		}
+#endif
+		if (CB_REPORT_P (x)) {
+			sprintf (s, "REPORT %s", CB_REPORT (x)->name);
+		} else {
+			sprintf (s, "REPORT");
+		}
 		break;
 
 	/* LCOV_EXCL_START */

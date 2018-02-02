@@ -3634,235 +3634,278 @@ output_param (cb_tree x, int id)
 /* Function call */
 
 static void
+output_funcall_typed_report (struct cb_funcall *p, const char type)
+{
+	struct cb_report	*r;
+	cb_tree			l;
+
+	/* initialization for report */
+	l = cb_ref (p->argv[0]);
+#if	0		/* CHECKME: Why should we have the report in the list ??? */
+	if (CB_LIST_P (l)) {
+		l = CB_VALUE (l);
+	}
+#endif
+	r = CB_REPORT (l);
+
+	switch (type) {
+
+	case 'R':	/* Generate REPORT line */
+		generate_id++;
+		generate_bgn_lbl = -1;
+		if(r->has_declarative) {
+			output("{\n");
+			output("static\tint ctl;\n");
+			output("\tctl = 0;\n");
+			output("\tgoto gen_%d;\n",generate_id);
+			generate_bgn_lbl = add_new_label();
+			output("\tframe_ptr--;\n");
+			output("gen_%d:\n",generate_id);
+			if(r->id) {
+				output ("\tframe_ptr++;\n");
+				output ("\tframe_ptr->perform_through = 0;\n");
+				perform_label("rwmove_",r->id,-1);
+				output("\tframe_ptr--;\n");
+			}
+			output("\tctl = cob_report_generate (");
+			output_param (p->argv[0], 0);
+			output(", ");
+			output_param (p->argv[1], 1);
+			output(", ctl);\n");
+			output("\tswitch(ctl) {\n");
+			cb_emit_decl_case(r,r->records);
+			output("\t}\n");
+			output("}");
+		} else {
+			if(r->id) {
+				output ("\tframe_ptr++;\n");
+				output ("\tframe_ptr->perform_through = 0;\n");
+				perform_label("rwmove_",r->id,-1);
+				output("\tframe_ptr--;\n\t");
+			}
+			output ("cob_report_generate (");
+			output_param (p->argv[0], 0);
+			output(", ");
+			output_param (p->argv[1], 1);
+			output (", 0)");
+		}
+		break;
+
+	case 'T':	/* Terminate REPORT */
+		generate_id++;
+		generate_bgn_lbl  = -1;
+		if(r->has_declarative) {
+			output("{\n");
+			output("static\tint ctl;\n");
+			output("\tctl = 0;\n");
+			output("\tgoto gen_%d;\n",generate_id);
+			generate_bgn_lbl = add_new_label();
+			output("\tframe_ptr--;\n");
+			output("gen_%d:\n",generate_id);
+			if(r->id) {
+				output ("\tframe_ptr++;\n");
+				output ("\tframe_ptr->perform_through = 0;\n");
+				perform_label("rwfoot_",r->id,-1);
+				output("\tframe_ptr--;\n");
+			}
+			output("\tctl = cob_report_terminate (");
+			output_param (p->argv[0], 0);
+			output(", ctl);\n");
+			output("\tswitch(ctl) {\n");
+			cb_emit_decl_case(r,r->records);
+			output("\t}\n");
+			output("}");
+		} else {
+			if(r->id) {
+				output ("\tframe_ptr++;\n");
+				perform_label("rwfoot_",r->id,-1);
+				output("\tframe_ptr--;\n\t");
+			}
+			output ("cob_report_terminate (");
+			output_param (p->argv[0], 0);
+			output (", 0)");
+		}
+		break;
+
+	case 'M':	/* Move data for REPORT */
+		output("\tgoto rwexit_%d;\n",r->id);
+		output("rwmove_%d: ",r->id);
+		break;
+
+	case 't':	/* Label for MOVE for just Footings */
+		output("rwfoot_%d: ",r->id);
+		break;
+
+	case 'm':	/* End of Move data for REPORT */
+		if (!cb_flag_computed_goto) {
+			output_line ("\tgoto P_switch;");
+		} else {
+			output_line ("\tgoto *frame_ptr->return_address_ptr;");
+		}
+		output("rwexit_%d: ",r->id);
+		break;
+
+	case 'I':	/* Initiate REPORT */
+		if(r->t_lines) {
+			output_line ("/* Page Limit is %s */",cb_name (r->t_lines));
+			output_prefix ();
+			output ("%s%s.def_lines = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_lines);
+			output (";\n");
+		}
+		if(r->t_columns) {
+			output_line ("/* Page Limit is %s */",cb_name (r->t_columns));
+			output_prefix ();
+			output ("%s%s.def_cols = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_columns);
+			output (";\n");
+		}
+		if(r->t_heading) {
+			output_line ("/* Heading is %s */",cb_name (r->t_heading));
+			output_prefix ();
+			output ("%s%s.def_heading = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_heading);
+			output (";\n");
+		}
+		if(r->t_footing) {
+			output_line ("/* Footing is %s */",cb_name (r->t_footing));
+			output_prefix ();
+			output ("%s%s.def_footing = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_footing);
+			output (";\n");
+		}
+		if(r->t_first_detail) {
+			output_line ("/* First Detail is %s */",cb_name (r->t_first_detail));
+			output_prefix ();
+			output ("%s%s.def_first_detail = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_first_detail);
+			output (";\n");
+		}
+		if(r->t_last_detail) {
+			output_line ("/* Last Detail is %s */",cb_name (r->t_last_detail));
+			output_prefix ();
+			output ("%s%s.def_last_detail = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_last_detail);
+			output (";\n");
+		}
+		if(r->t_last_control) {
+			output_line ("/* Last Control is %s */",cb_name (r->t_last_control));
+			output_prefix ();
+			output ("%s%s.def_last_control = ", CB_PREFIX_REPORT, r->cname);
+			output_integer(r->t_last_control);
+			output (";\n");
+		}
+		if (r->code_clause) {
+			output_prefix ();
+			output ("%s%s.code_is = (char*)", CB_PREFIX_REPORT, r->cname);
+			output_data (r->code_clause);
+			output (";\n");
+			output_prefix ();
+			output ("%s%s.code_len = ", CB_PREFIX_REPORT, r->cname);
+			output_size (r->code_clause);
+			output (";\n");
+			output_line ("%s%s.code_is_present = 1;", CB_PREFIX_REPORT, r->cname);
+		} else {
+			output_line ("%s%s.code_is_present = 0;", CB_PREFIX_REPORT, r->cname);
+		}
+		output_prefix ();
+		output ("cob_report_initiate (");
+		output_param (p->argv[0], 0);
+		output (")");
+		break;
+
+	/* LCOV_EXCL_START */
+	default:
+		cobc_err_msg (_("unexpected function: %s"), p->name);
+		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
+	}
+}
+
+static void
+output_funcall_typed (struct cb_funcall *p, const char type)
+{
+	switch (type) {
+
+	case 'E':	/* Set of one character */
+		output ("*(");
+		output_data (p->argv[0]);
+		output (") = ");
+		output_param (p->argv[1], 1);
+		break;
+
+	case 'F':	/* Move of one character */
+		output ("*(");
+		output_data (p->argv[0]);
+		output (") = *(");
+		output_data (p->argv[1]);
+		output (")");
+		break;
+
+	case 'G':
+		/* Test of one character */
+		output ("(int)(*(");
+		output_data (p->argv[0]);
+		if (p->argv[1] == cb_space) {
+			output (") - ' ')");
+		} else if (p->argv[1] == cb_zero) {
+			output (") - '0')");
+		} else if (p->argv[1] == cb_low) {
+			output ("))");
+		} else if (p->argv[1] == cb_high) {
+			output (") - 255)");
+		} else if (CB_LITERAL_P (p->argv[1])) {
+			output (") - %d)", *(CB_LITERAL (p->argv[1])->data));
+		} else {
+			output (") - *(");
+			output_data (p->argv[1]);
+			output ("))");
+		}
+		break;
+
+	case 'R':	/* Generate REPORT line */
+	case 'T':	/* Terminate REPORT */
+	case 'M':	/* Move data for REPORT */
+	case 't':	/* Label for MOVE for just Footings */
+	case 'm':	/* End of Move data for REPORT */
+	case 'I':	/* Initiate REPORT */
+		output_funcall_typed_report (p, type);
+		break;
+
+	case 'S':	/* Suppress flag on */
+		output ("%s",CB_PREFIX_REPORT_LINE);
+		output_param (p->argv[1], 0);
+		output (".suppress = 1;\n");
+		output("cob_report_suppress (");
+		output_param (p->argv[0], 0);
+		output(", ");
+		output ("&%s",CB_PREFIX_REPORT_LINE);
+		output_param (p->argv[1], 0);
+		output(");");
+		break;
+
+	/* LCOV_EXCL_START */
+	default:
+		cobc_err_msg (_("unexpected function: %s"), p->name);
+		COBC_ABORT ();
+	/* LCOV_EXCL_STOP */
+	}
+}
+
+
+static void
 output_funcall (cb_tree x)
 {
 	struct cb_funcall	*p;
-	struct cb_report	*r;
 	cb_tree			l;
 	int			i;
 
 	p = CB_FUNCALL (x);
 	if (p->name[0] == '$') {
-		switch (p->name[1]) {
-		case 'E':
-			/* Set of one character */
-			output ("*(");
-			output_data (p->argv[0]);
-			output (") = ");
-			output_param (p->argv[1], 1);
-			break;
-		case 'F':
-			/* Move of one character */
-			output ("*(");
-			output_data (p->argv[0]);
-			output (") = *(");
-			output_data (p->argv[1]);
-			output (")");
-			break;
-		case 'G':
-			/* Test of one character */
-			output ("(int)(*(");
-			output_data (p->argv[0]);
-			if (p->argv[1] == cb_space) {
-				output (") - ' ')");
-			} else if (p->argv[1] == cb_zero) {
-				output (") - '0')");
-			} else if (p->argv[1] == cb_low) {
-				output ("))");
-			} else if (p->argv[1] == cb_high) {
-				output (") - 255)");
-			} else if (CB_LITERAL_P (p->argv[1])) {
-				output (") - %d)", *(CB_LITERAL (p->argv[1])->data));
-			} else {
-				output (") - *(");
-				output_data (p->argv[1]);
-				output ("))");
-			}
-			break;
-		case 'R':	/* Generate REPORT line */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			generate_id++;
-			generate_bgn_lbl = -1;
-			if(r->has_declarative) {
-				output("{\n");
-				output("static\tint ctl;\n");
-				output("\tctl = 0;\n");
-				output("\tgoto gen_%d;\n",generate_id);
-				generate_bgn_lbl = add_new_label();
-				output("\tframe_ptr--;\n");
-				output("gen_%d:\n",generate_id);
-				if(r->id) {
-					output ("\tframe_ptr++;\n");
-					output ("\tframe_ptr->perform_through = 0;\n");
-					perform_label("rwmove_",r->id,-1);
-					output("\tframe_ptr--;\n");
-				}
-				output("\tctl = cob_report_generate (");
-				output_param (p->argv[0], 0);
-				output(", ");
-				output_param (p->argv[1], 1);
-				output(", ctl);\n");
-				output("\tswitch(ctl) {\n");
-				cb_emit_decl_case(r,r->records);
-				output("\t}\n");
-				output("}");
-			} else {
-				if(r->id) {
-					output ("\tframe_ptr++;\n");
-					output ("\tframe_ptr->perform_through = 0;\n");
-					perform_label("rwmove_",r->id,-1);
-					output("\tframe_ptr--;\n\t");
-				}
-				output ("cob_report_generate (");
-				output_param (p->argv[0], 0);
-				output(", ");
-				output_param (p->argv[1], 1);
-				output (", 0)");
-			}
-			break;
-		case 'T':	/* Terminate REPORT */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			generate_id++;
-			generate_bgn_lbl  = -1;
-			if(r->has_declarative) {
-				output("{\n");
-				output("static\tint ctl;\n");
-				output("\tctl = 0;\n");
-				output("\tgoto gen_%d;\n",generate_id);
-				generate_bgn_lbl = add_new_label();
-				output("\tframe_ptr--;\n");
-				output("gen_%d:\n",generate_id);
-				if(r->id) {
-					output ("\tframe_ptr++;\n");
-					output ("\tframe_ptr->perform_through = 0;\n");
-					perform_label("rwfoot_",r->id,-1);
-					output("\tframe_ptr--;\n");
-				}
-				output("\tctl = cob_report_terminate (");
-				output_param (p->argv[0], 0);
-				output(", ctl);\n");
-				output("\tswitch(ctl) {\n");
-				cb_emit_decl_case(r,r->records);
-				output("\t}\n");
-				output("}");
-			} else {
-				if(r->id) {
-					output ("\tframe_ptr++;\n");
-					perform_label("rwfoot_",r->id,-1);
-					output("\tframe_ptr--;\n\t");
-				}
-				output ("cob_report_terminate (");
-				output_param (p->argv[0], 0);
-				output (", 0)");
-			}
-			break;
-		case 'M':	/* Move data for REPORT */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			output("\tgoto rwexit_%d;\n",r->id);
-			output("rwmove_%d: ",r->id);
-			break;
-		case 't':	/* Label for MOVE for just Footings */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			output("rwfoot_%d: ",r->id);
-			break;
-		case 'm':	/* End of Move data for REPORT */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			if (!cb_flag_computed_goto) {
-				output_line ("\tgoto P_switch;");
-			} else {
-				output_line ("\tgoto *frame_ptr->return_address_ptr;");
-			}
-			output("rwexit_%d: ",r->id);
-			break;
-		case 'I':	/* Initiate REPORT */
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			if(r->t_lines) {
-				output_line ("/* Page Limit is %s */",cb_name (r->t_lines));
-				output_prefix ();
-				output ("%s%s.def_lines = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_lines);
-				output (";\n");
-			}
-			if(r->t_columns) {
-				output_line ("/* Page Limit is %s */",cb_name (r->t_columns));
-				output_prefix ();
-				output ("%s%s.def_cols = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_columns);
-				output (";\n");
-			}
-			if(r->t_heading) {
-				output_line ("/* Heading is %s */",cb_name (r->t_heading));
-				output_prefix ();
-				output ("%s%s.def_heading = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_heading);
-				output (";\n");
-			}
-			if(r->t_footing) {
-				output_line ("/* Footing is %s */",cb_name (r->t_footing));
-				output_prefix ();
-				output ("%s%s.def_footing = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_footing);
-				output (";\n");
-			}
-			if(r->t_first_detail) {
-				output_line ("/* First Detail is %s */",cb_name (r->t_first_detail));
-				output_prefix ();
-				output ("%s%s.def_first_detail = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_first_detail);
-				output (";\n");
-			}
-			if(r->t_last_detail) {
-				output_line ("/* Last Detail is %s */",cb_name (r->t_last_detail));
-				output_prefix ();
-				output ("%s%s.def_last_detail = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_last_detail);
-				output (";\n");
-			}
-			if(r->t_last_control) {
-				output_line ("/* Last Control is %s */",cb_name (r->t_last_control));
-				output_prefix ();
-				output ("%s%s.def_last_control = ", CB_PREFIX_REPORT, r->cname);
-				output_integer(r->t_last_control);
-				output (";\n");
-			}
-			if (r->code_clause) {
-				output_prefix ();
-				output ("%s%s.code_is = (char*)", CB_PREFIX_REPORT, r->cname);
-				output_data (r->code_clause);
-				output (";\n");
-				output_prefix ();
-				output ("%s%s.code_len = ", CB_PREFIX_REPORT, r->cname);
-				output_size (r->code_clause);
-				output (";\n");
-				output_line ("%s%s.code_is_present = 1;", CB_PREFIX_REPORT, r->cname);
-			} else {
-				output_line ("%s%s.code_is_present = 0;", CB_PREFIX_REPORT, r->cname);
-			}
-			output_prefix ();
-			output ("cob_report_initiate (");
-			output_param (p->argv[0], 0);
-			output (")");
-			break;
-		case 'S':	/* Suppress flag on */
-			output ("%s",CB_PREFIX_REPORT_LINE);
-			output_param (p->argv[1], 0);
-			output (".suppress = 1;\n");
-			r = CB_REPORT(CB_VALUE(p->argv[0]));
-			output("cob_report_suppress (");
-			output_param (p->argv[0], 0);
-			output(", ");
-			output ("&%s",CB_PREFIX_REPORT_LINE);
-			output_param (p->argv[1], 0);
-			output(");");
-			break;
-		/* LCOV_EXCL_START */
-		default:
-			cobc_err_msg (_("unexpected function: %s"), p->name);
-			COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
-		}
+		output_funcall_typed (p, p->name[1]);
 		return;
 	}
+
 	screenptr = p->screenptr;
 	output ("%s (", p->name);
 	for (i = 0; i < p->argc; i++) {

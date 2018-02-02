@@ -10716,11 +10716,11 @@ cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
 }
 
 static void
-cb_emit_report_move_id(cb_tree rep)
+cb_emit_report_move_id (cb_tree rep)
 {
 	struct cb_report *r = CB_REPORT (cb_ref(rep));
-	if(r
-	&& r->id == 0) {
+	if (r
+	 && r->id == 0) {
 		r->id = report_id++;
 		cb_emit (CB_BUILD_FUNCALL_1 ("$M", rep));
 		cb_emit_report_moves(r, r->records, 0);
@@ -10738,8 +10738,12 @@ cb_emit_initiate (cb_tree rep)
 	if (rep == cb_error_node) {
 		return;
 	}
+#if 1	/* FIXME: Why do we change the tag here
+		   (which leads to tree cast errors later)?
+		   Note: if removed we get NIST only errors */
 	rep->tag = CB_TAG_REPORT;
-	cb_emit_report_move_id(rep);
+#endif
+	cb_emit_report_move_id (rep);
 	cb_emit (CB_BUILD_FUNCALL_1 ("$I", rep));
 
 }
@@ -10752,8 +10756,17 @@ cb_emit_terminate (cb_tree rep)
 	if (rep == cb_error_node) {
 		return;
 	}
+#if 1	/* FIXME: Why do we change the tag here
+		   (which leads to tree cast errors later)?
+
+		   Note: if removed we get NIST *only* errors
+		   TODO: ensure we get the same failures in
+		         our testsuite first, then investigate
+		         to fix the error
+		*/
 	rep->tag = CB_TAG_REPORT;
-	cb_emit_report_move_id(rep);
+#endif
+	cb_emit_report_move_id (rep);
 	cb_emit (CB_BUILD_FUNCALL_1 ("$T", rep));
 
 }
@@ -10779,8 +10792,12 @@ cb_emit_generate (cb_tree x)
 		r = CB_REPORT (y);
 		z = cb_build_reference (r->name);
 		word = CB_REFERENCE (z)->word;
+#if 1	/* FIXME: Why do we change the tag here
+		   (which leads to tree cast errors later)?
+		   Note: if removed we get NIST only errors */
 		z->category = CB_CATEGORY_UNKNOWN;
 		z->tag = CB_TAG_REPORT;
+#endif
 		CB_REFERENCE (z)->word = word;
 		CB_REFERENCE (z)->value = CB_TREE (y);
 		cb_emit_report_move_id(z);
@@ -10797,8 +10814,12 @@ cb_emit_generate (cb_tree x)
 #endif
 		z = cb_build_reference (f->name);
 		word = CB_REFERENCE (z)->word;
+#if 1	/* FIXME: Why do we change the tag here
+		   (which leads to tree cast errors later)?
+		   Note: if removed we get NIST only errors */
 		z->category = CB_CATEGORY_UNKNOWN;
 		z->tag = CB_TAG_REPORT;
+#endif
 		CB_REFERENCE (z)->word = word;
 		CB_REFERENCE (z)->value = CB_TREE (f->report);
 		x->tag = CB_TAG_REPORT_LINE;
