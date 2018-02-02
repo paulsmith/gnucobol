@@ -1301,12 +1301,12 @@ cb_get_int (const cb_tree x)
 	if(x == cb_int4)	return 4;
 	if(x == cb_int5)	return 5;
 
+	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	l = CB_LITERAL (x);
 
 	/* Skip leading zeroes */
@@ -1366,12 +1366,12 @@ cb_get_long_long (const cb_tree x)
 	unsigned int	size, i;
 	cob_s64_t		val;
 
+	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
-		/* LCOV_EXCL_START */
 		cobc_err_msg (_("invalid literal cast"));
 		COBC_ABORT ();
-		/* LCOV_EXCL_STOP */
 	}
+	/* LCOV_EXCL_STOP */
 	l = CB_LITERAL (x);
 
 	/* Skip leading zeroes */
@@ -1391,7 +1391,7 @@ cb_get_long_long (const cb_tree x)
 		} else {
 			s = "9223372036854775807";
 		}
-		if (size == 19U || memcmp (&(l->data[i]), s, (size_t)19) > 0) {
+		if (size > 19U || memcmp (&(l->data[i]), s, (size_t)19) > 0) {
 			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return LLONG_MAX;
 		}
@@ -1430,7 +1430,7 @@ cb_get_u_long_long (const cb_tree x)
 	/* Check numeric literal length matching requested output type */
 	if (unlikely(size >= 20U)) {
 		s = "18446744073709551615";
-		if (size == 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
+		if (size > 20U || memcmp (&(l->data[i]), s, (size_t)20) > 0) {
 			cb_error (_("numeric literal '%s' exceeds limit '%s'"), &l->data[i], s);
 			return ULLONG_MAX;
 		}

@@ -1,4 +1,9 @@
 
+2018-02-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_get_long_long, cb_get_u_long_long): fix bug #492
+	  adjusted literal size check
+
 2018-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, tree.h [COB_TREE_DEBUG]: make sure that we don't enter
