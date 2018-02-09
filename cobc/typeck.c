@@ -3954,6 +3954,32 @@ explain_operator (const int op)
 	}
 }
 
+const char *
+enum_explain_storage (const enum cb_storage storage)
+{
+	switch (storage) {
+	case CB_STORAGE_CONSTANT:
+		return "Constants";
+	case CB_STORAGE_FILE:
+		return "FILE SECTION";
+	case CB_STORAGE_WORKING:
+		return "WORKING-STORAGE SECTION";
+	case CB_STORAGE_LOCAL:
+		return "LOCAL-STORAGE SECTION";
+	case CB_STORAGE_LINKAGE:
+		return "LINKAGE SECTION";
+	case CB_STORAGE_SCREEN:
+		return "SCREEN SECTION";
+	case CB_STORAGE_REPORT:
+		return "REPORT SECTION";
+	case CB_STORAGE_COMMUNICATION:
+		return "COMMUNICATION SECTION";
+	default:
+		break;
+	}
+	return "UNKNOWN";
+}
+
 /* Numerical operation */
 
 static cb_tree
@@ -4091,69 +4117,28 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 	if (cb_arithmetic_osvs) {
 		if (expr_dec_align >= 0
 		 && expr_x != NULL
-		 && expr_x != x)
-		decimal_align ();
+		 && expr_x != x) {
+			decimal_align ();
+		}
 		decp = expr_dmax;
 	} else {
-		decp = -1;
+		decp = -1;	/* fix missing initialization warning, not actually used */
 	}
 	switch (op) {
 	case '+':
 		func = "cob_decimal_add";
-		if (cb_arithmetic_osvs
-		 && expr_nest > 1) {
-			expr_nest--;
-			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
-				expr_decp [expr_nest-1] = expr_decp [expr_nest];
-			}
-			decp = expr_decp [expr_nest-1];
-		}
 		break;
 	case '-':
 		func = "cob_decimal_sub";
-		if (cb_arithmetic_osvs
-		 && expr_nest > 1) {
-			expr_nest--;
-			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
-				expr_decp [expr_nest-1] = expr_decp [expr_nest];
-			}
-			decp = expr_decp [expr_nest-1];
-		}
 		break;
 	case '*':
 		func = "cob_decimal_mul";
-		if (cb_arithmetic_osvs
-		 && expr_nest > 1) {
-			expr_nest--;
-			expr_decp [expr_nest-1] += expr_decp [expr_nest];
-			decp = expr_decp [expr_nest-1];
-		}
 		break;
 	case '/':
 		func = "cob_decimal_div";
-		if (cb_arithmetic_osvs
-		 && expr_nest > 1) {
-			expr_nest--;
-			d = expr_decp [expr_nest-1] - expr_decp [expr_nest];
-			if (d > expr_dmax) {
-				expr_decp [expr_nest-1] = d;
-			} else {
-				expr_decp [expr_nest-1] = expr_dmax;
-			}
-			decp = expr_decp [expr_nest-1];
-		}
 		break;
 	case '^':
 		func = "cob_decimal_pow";
-		if (cb_arithmetic_osvs
-		 && expr_nest > 1) {
-			expr_nest--;
-			if (expr_decp [expr_nest-1] - expr_decp [expr_nest]
-				< expr_decp [expr_nest-1]) {
-				expr_decp [expr_nest-1] = expr_decp [expr_nest-1] - expr_decp [expr_nest];
-			}
-			decp = expr_decp [expr_nest-1];
-		}
 		break;
 	default:
 		func = explain_operator (op);
@@ -4167,11 +4152,49 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 		cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
 		return;
 	}
+	if (cb_arithmetic_osvs
+	 && expr_nest > 1) {
+		expr_nest--;
+		switch (op) {
+		case '+':
+			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest];
+			}
+			break;
+		case '-':
+			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest];
+			}
+			break;
+		case '*':
+			expr_decp [expr_nest-1] += expr_decp [expr_nest];
+			break;
+		case '/':
+			d = expr_decp [expr_nest-1] - expr_decp [expr_nest];
+			if (d > expr_dmax) {
+				expr_decp [expr_nest-1] = d;
+			} else {
+				expr_decp [expr_nest-1] = expr_dmax;
+			}
+			break;
+		case '^':
+			if (expr_decp [expr_nest-1] - expr_decp [expr_nest]
+				< expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest-1] - expr_decp [expr_nest];
+			}
+			break;
+		}
+		decp = expr_decp [expr_nest-1];
+	}
 
 	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
 
 	/* Save for later decimal_align */
-	expr_dec_align = decp;
+	if (cb_arithmetic_osvs) {
+		expr_dec_align = decp;
+	} else {
+		expr_dec_align = -1;
+	}
 	expr_x = x;
 }
 
@@ -4351,10 +4374,9 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 	cb_tree	d;
 
 	/* note: vars validated by caller: cb_emit_arithmetic */
-	if(cb_arithmetic_osvs) {
+	if (cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in result field */
 		expr_dec_align = -1;
-		expr_nest = 0;
 		expr_rslt = CB_VALUE(vars);
 		for (l = vars; l; l = CB_CHAIN (l)) {
 			if (CB_FIELD_P (cb_ref (CB_VALUE(l)))) {
@@ -4367,9 +4389,9 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 		cb_walk_cond (val);
 	} else {
 		expr_dmax = -1;
-		expr_nest = 0;
 		expr_dec_align = -1;
 	}
+	expr_nest = 0;
 
 	d = decimal_alloc ();
 

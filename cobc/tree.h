@@ -1860,6 +1860,7 @@ extern void		cb_true_side (void);
 extern void		cb_false_side (void);
 extern void		cb_end_statement (void);
 extern const char		*explain_operator (const int);
+extern const char		*enum_explain_storage (const enum cb_storage storage);
 
 extern void		cb_emit_arithmetic (cb_tree, const int, cb_tree);
 extern cb_tree		cb_build_add (cb_tree, cb_tree, cb_tree);

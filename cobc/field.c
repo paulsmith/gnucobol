@@ -1009,19 +1009,15 @@ validate_pic (struct cb_field *f)
 static int
 validate_usage (struct cb_field * const f)
 {
-	char		*section;
 	cb_tree	x = CB_TREE (f);
 
 	if ((f->storage == CB_STORAGE_SCREEN
 	  || f->storage == CB_STORAGE_REPORT) 
 	 &&  f->usage   != CB_USAGE_DISPLAY
 	 &&  f->usage   != CB_USAGE_NATIONAL) {
-		if (f->storage == CB_STORAGE_SCREEN)
-			section = (char*)"SCREEN SECTION";
-		else
-			section = (char*)"REPORT SECTION";
 		cb_error_x (CB_TREE(f), 
-			_("%s item '%s' should be USAGE DISPLAY"), section, cb_name (x));
+			_("%s item '%s' should be USAGE DISPLAY"),
+			enum_explain_storage (f->storage), cb_name (x));
 		return 1;
 	}
 

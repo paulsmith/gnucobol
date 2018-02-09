@@ -747,32 +747,6 @@ cobc_enum_explain (const enum cb_tag tag)
 }
 #endif
 
-static const char *
-cobc_enum_explain_storage (const enum cb_storage storage)
-{
-	switch (storage) {
-	case CB_STORAGE_CONSTANT:
-		return "Constants";
-	case CB_STORAGE_FILE:
-		return "FILE SECTION";
-	case CB_STORAGE_WORKING:
-		return "WORKING-STORAGE SECTION";
-	case CB_STORAGE_LOCAL:
-		return "LOCAL-STORAGE SECTION";
-	case CB_STORAGE_LINKAGE:
-		return "LINKAGE SECTION";
-	case CB_STORAGE_SCREEN:
-		return "SCREEN SECTION";
-	case CB_STORAGE_REPORT:
-		return "REPORT SECTION";
-	case CB_STORAGE_COMMUNICATION:
-		return "COMMUNICATION SECTION";
-	default:
-		break;
-	}
-	return "UNKNOWN";
-}
-
 static void
 free_error_list (struct list_error *err)
 {
@@ -4858,7 +4832,7 @@ print_fields (struct cb_field *top, int *found)
 			*found = 1;
 			/* MAYBE use a second header line and a forced page break instead */
 			snprintf (print_data, CB_PRINT_LEN,
-				"      %s", cobc_enum_explain_storage(top->storage));
+				"      %s", enum_explain_storage(top->storage));
 			print_program_data (print_data);
 			print_program_data ("");
 		}

@@ -7,6 +7,9 @@
 	* reserved.c (initialize_reserved_words_if_needed): use case
 	  sensitive comparison when sorting default_reserved_words_list
 	* field.c: adjustments for REPORT/SCREEN USAGE checks
+	* cobc.c, typeck.c, field.c, tree.h: moved (cobc_enum_explain_storage)
+	  to typeck.c as enum_explain_storage
+	* typeck.c: minor refactoring of arithmetic_osvs code
 
 2018-02-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
