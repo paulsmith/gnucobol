@@ -1,4 +1,12 @@
 
+2018-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: renamed cob_strcasecmp to cb_strcasecmp
+	* reserved.c (default_reserved_words_list): removed EBCDIC handling
+	  as the list is always sorted now
+	* reserved.c (initialize_reserved_words_if_needed): use case
+	  sensitive comparision when sorting default_reserved_words_list
+
 2018-02-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_get_long_long, cb_get_u_long_long): fix bug #492

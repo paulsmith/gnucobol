@@ -225,7 +225,8 @@ static struct system_name_struct	system_name_table[] = {
 
 static struct system_name_struct *lookup_system_name (const char *, const int);
 
-/* Reserved word table */
+/* Reserved word table, note: this list is sorted on startup in 
+   (initialize_reserved_words_if_needed), no need to care for EBCDIC */
 /* Description */
 
 /* Word # Statement has terminator # Is context sensitive (only for printing)
@@ -234,11 +235,9 @@ static struct system_name_struct *lookup_system_name (const char *, const int);
 static struct cobc_reserved *reserved_words;
 
 static struct cobc_reserved default_reserved_words[] = {
-#ifndef	COB_EBCDIC_MACHINE	/* Note EBCDIC! */
   { "3-D",			0, 1, THREEDIMENSIONAL,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
-#endif
   { "ABSENT",			0, 0, ABSENT,			/* IBM RW */
 				0, 0
   },
@@ -657,12 +656,6 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COMP",			0, 0, COMP,			/* 2002 */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifdef	COB_EBCDIC_MACHINE
-  { "COMP-X",			0, 0, COMP_X,			/* Extension */
-				0, 0
-  },
-#endif
   { "COMP-1",			0, 0, COMP_1,			/* Extension */
 				0, 0
   },
@@ -681,21 +674,12 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COMP-6",			0, 0, COMP_6,			/* Extension */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifndef	COB_EBCDIC_MACHINE
   { "COMP-X",			0, 0, COMP_X,			/* Extension */
 				0, 0
   },
-#endif
   { "COMPUTATIONAL",		0, 0, COMP,			/* 2002 */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifdef	COB_EBCDIC_MACHINE
-  { "COMPUTATIONAL-X",		0, 0, COMP_X,			/* Extension */
-				0, 0
-  },
-#endif
   { "COMPUTATIONAL-1",		0, 0, COMP_1,			/* Extension */
 				0, 0
   },
@@ -714,12 +698,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COMPUTATIONAL-6",		0, 0, COMP_6,			/* Extension */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifndef	COB_EBCDIC_MACHINE
   { "COMPUTATIONAL-X",		0, 0, COMP_X,			/* Extension */
 				0, 0
   },
-#endif
   { "COMPUTE",			1, 0, COMPUTE,			/* 2002 */
 				0, 0
   },
@@ -2454,31 +2435,18 @@ static struct cobc_reserved default_reserved_words[] = {
   { "STANDARD",			0, 0, STANDARD,			/* 2002 */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifdef	COB_EBCDIC_MACHINE
-	/* FIXME: 2014 Both are Context-sensitive to ARITHMETIC clause */
-  { "STANDARD-BINARY",		0, 1, STANDARD_BINARY,			/* 2014 (C/S) */
-				0, CB_CS_OPTIONS
-  },
-  { "STANDARD-DECIMAL",		0, 1, STANDARD_DECIMAL,			/* 2014 (C/S) */
-				0, CB_CS_OPTIONS
-  },
-#endif
   { "STANDARD-1",		0, 0, STANDARD_1,		/* 2002 */
 				0, 0
   },
   { "STANDARD-2",		0, 0, STANDARD_2,		/* 2002 */
 				0, 0
   },
-	/* Note EBCDIC! */
-#ifndef	COB_EBCDIC_MACHINE
   { "STANDARD-BINARY",		0, 1, STANDARD_BINARY,			/* 2014 (C/S) */
 				0, CB_CS_OPTIONS
   },
   { "STANDARD-DECIMAL",		0, 1, STANDARD_DECIMAL,			/* 2014 (C/S) */
 				0, CB_CS_OPTIONS
   },
-#endif
   { "START",			1, 0, START,			/* 2002 */
 				0, 0
   },
@@ -2882,13 +2850,6 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ZERO-FILL",		0, 1, -1,			/* Extension */
 				0, CB_CS_SCREEN
   }
-	/* Note EBCDIC! */
-#ifdef	COB_EBCDIC_MACHINE
-  ,
-  { "3-D",			0, 1, THREEDIMENSIONAL,			/* ACU extension */
-				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
-  }
-#endif
 };
 
 static size_t	num_reserved_words;
@@ -3509,7 +3470,7 @@ static const unsigned char	pcob_lower_val[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /* Local functions */
 
 static int
-cob_strcasecmp (const void *s1, const void *s2)
+cb_strcasecmp (const void *s1, const void *s2)
 {
 	const unsigned char	*p1;
 	const unsigned char	*p2;
@@ -3545,14 +3506,21 @@ cob_strcasecmp (const void *s1, const void *s2)
 static int
 reserve_comp (const void *p1, const void *p2)
 {
-	return cob_strcasecmp (((struct cobc_reserved *)p1)->name,
+	return cb_strcasecmp (((struct cobc_reserved *)p1)->name,
 			       ((struct cobc_reserved *)p2)->name);
+}
+
+static int
+reserve_comp_sens (const void *p1, const void *p2)
+{
+   return strcmp(((struct cobc_reserved *)p1)->name,
+		((struct cobc_reserved *)p2)->name);
 }
 
 static int
 intrinsic_comp (const void *p1, const void *p2)
 {
-	return cob_strcasecmp (p1, ((struct cb_intrinsic_table *)p2)->name);
+	return cb_strcasecmp (p1, ((struct cb_intrinsic_table *)p2)->name);
 }
 
 static const char *
@@ -3734,7 +3702,7 @@ followed_by_addition_for_same_word (const struct amendment_list * const addition
 	/* Walk through the list after the first addition. */
 	for (l = addition->next; l; l = l->next) {
 		/* Look for elements with the same word. */
-		if (!cob_strcasecmp (addition->word, l->word)
+		if (!cb_strcasecmp (addition->word, l->word)
 		    && l->to_add) {
 			return 1;
 		}
@@ -3754,7 +3722,7 @@ try_remove_removal (struct amendment_list * const addition)
 
 	while (l) {
 		/* Look for elements with the same word. */
-		if (cob_strcasecmp (addition->word, l->word)) {
+		if (cb_strcasecmp (addition->word, l->word)) {
 			prev = l;
 			l = l->next;
 			continue;
@@ -3889,7 +3857,7 @@ initialize_reserved_words_if_needed (void)
 		   assuming so causes abstruse errors when a word is put in the
 		   wrong place (e.g. when dealing with EBCDIC or hyphens). */
 		qsort (default_reserved_words, NUM_DEFAULT_RESERVED_WORDS,
-		       sizeof (struct cobc_reserved), reserve_comp);
+		       sizeof (struct cobc_reserved), reserve_comp_sens);
 
 		if (amendment_list) {
 			get_reserved_words_with_amendments ();
@@ -4057,7 +4025,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 
 	/* Find where to add new word */
 	for (offset = 0; offset < num_reserved_words; ++offset) {
-		if (cob_strcasecmp (word, reserved_words[offset].name) < 0) {
+		if (cb_strcasecmp (word, reserved_words[offset].name) < 0) {
 			break;
 		}
 	}
@@ -4213,7 +4181,7 @@ change_intrinsic (const char *name, const char *fname, const int line, enum cb_f
 	size_t		i;
 
 	/* Group "ALL" intrinsics */
-	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_INTRINSICS; ++i) {
 			set_intrinsic_mode (&function_list[i], mode);
 		}
@@ -4281,7 +4249,7 @@ lookup_register (const char *name, const int checkimpl)
 	size_t		i;
 
 	for (i = 0; i < NUM_REGISTERS; ++i) {
-		if (cob_strcasecmp (register_list[i].name, name) == 0) {
+		if (cb_strcasecmp (register_list[i].name, name) == 0) {
 			if (checkimpl || register_list[i].active != CB_FEATURE_DISABLED) {
 				return &register_list[i];
 			}
@@ -4303,7 +4271,7 @@ add_register (const char *name_and_definition, const char *fname, const int line
 	struct register_struct *special_register;
 
 	/* Enable all registers, if requested. */
-	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_REGISTERS; ++i) {
 			/* TODO: add register here */
 			register_list[i].active = CB_FEATURE_ACTIVE;
@@ -4349,7 +4317,7 @@ remove_register (const char *name, const char *fname, const int line)
 	COB_UNUSED (fname);
 	COB_UNUSED (line);
 
-	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_REGISTERS; ++i) {
 			/* TODO: when user-defined registers are possible: do
 			   memory cleanup here */
@@ -4441,7 +4409,7 @@ lookup_system_name (const char *name, const int checkimpl)
 	size_t		i;
 
 	for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
-		if (cob_strcasecmp (system_name_table[i].name, name) == 0) {
+		if (cb_strcasecmp (system_name_table[i].name, name) == 0) {
 			if (checkimpl || system_name_table[i].active != CB_FEATURE_DISABLED) {
 				return &system_name_table[i];
 			}
@@ -4471,26 +4439,26 @@ change_system_name (const char *name, const char *fname, const int line, enum cb
 
 
 	/* some predefined groups first */
-	if (cob_strcasecmp (name, "DIALECT-ALL") == 0) {
+	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
 			set_system_name_mode (&system_name_table[i], mode);
 		}
 		return;
-	} else if (cob_strcasecmp (name, "DIALECT-ALL-DEVICES") == 0) {
+	} else if (cb_strcasecmp (name, "DIALECT-ALL-DEVICES") == 0) {
 		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
 			if (system_name_table[i].category == CB_DEVICE_NAME) {
 				set_system_name_mode (&system_name_table[i], mode);
 			}
 		}
 		return;
-	} else if (cob_strcasecmp (name, "DIALECT-ALL-SWITCHES") == 0) {
+	} else if (cb_strcasecmp (name, "DIALECT-ALL-SWITCHES") == 0) {
 		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
 			if (system_name_table[i].category == CB_SWITCH_NAME) {
 				set_system_name_mode (&system_name_table[i], mode);
 			}
 		}
 		return;
-	} else if (cob_strcasecmp (name, "DIALECT-ALL-FEATURES") == 0) {
+	} else if (cb_strcasecmp (name, "DIALECT-ALL-FEATURES") == 0) {
 		for (i = 0; i < SYSTEM_TAB_SIZE; ++i) {
 			if (system_name_table[i].category == CB_FEATURE_NAME) {
 				set_system_name_mode (&system_name_table[i], mode);
