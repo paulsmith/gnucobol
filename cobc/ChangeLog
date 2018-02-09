@@ -5,7 +5,8 @@
 	* reserved.c (default_reserved_words_list): removed EBCDIC handling
 	  as the list is always sorted now
 	* reserved.c (initialize_reserved_words_if_needed): use case
-	  sensitive comparision when sorting default_reserved_words_list
+	  sensitive comparison when sorting default_reserved_words_list
+	* field.c: adjustments for REPORT/SCREEN USAGE checks
 
 2018-02-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -28,6 +29,14 @@
 2018-01-30  Ron Norman <rjn@inglenet.com>
 
 	* codegen.c: Fix generation of dump-code for fields with IS EXTERNAL
+	* parser.y: Have REPORT fields parse all USAGEs to provide
+	  meaningful errors and to allow USAGE NATIONAL
+	* field.c: Add check for REPORT/SCREEN field not DISPLAY
+	  'fieldname' should be USAGE DISPLAY for REPORT/SCREEN
+
+2018-01-29  Ron Norman <rjn@inglenet.com>
+
+	* tree.c, tree.h, typeck.c: Fine tuning of arithmetic_osvs
 
 2018-01-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

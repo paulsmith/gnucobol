@@ -6973,7 +6973,7 @@ report_group_option:
 | next_group_clause
 | line_clause
 | picture_clause
-| report_usage_clause
+| usage_clause
 | sign_clause
 | justified_clause
 | column_clause
@@ -7398,13 +7398,6 @@ group_indicate_clause:
   {
 	check_repeated ("GROUP", SYN_CLAUSE_23, &check_pic_duplicate);
 	current_field->report_flag |= COB_REPORT_GROUP_INDICATE;
-  }
-;
-
-report_usage_clause:
-  USAGE _is DISPLAY
-  {
-	check_repeated ("USAGE", SYN_CLAUSE_24, &check_pic_duplicate);
   }
 ;
 

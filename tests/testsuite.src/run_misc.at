@@ -9105,7 +9105,7 @@ UBIN: 00000001 is :1111:
 AT_CLEANUP
 
 
-AT_SETUP([Default Arithmetic])
+AT_SETUP([Default Arithmetic (1)])
 AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
@@ -9209,7 +9209,58 @@ Not Using ARITHMETIC-OSVS
 AT_CLEANUP
 
 
-AT_SETUP([OSVS Arithmetic])
+AT_SETUP([Default Arithmetic Test (2)])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  VAL                 PIC S9(7)V99 COMP-3 VALUE 20500.
+       01  DIV1                PIC S9(7)V99 COMP-3 VALUE 0.9.
+       01  DIV2                PIC S9(7)V99 COMP-3 VALUE 33.45.
+       01  DIV3                PIC S9(7)V99 COMP-3 VALUE 9.
+       01  MUL1                PIC S9(7)V99 COMP-3 VALUE 10.
+       01  MUL2                PIC S9(7)V99 COMP-3 VALUE 5.
+       01  MUL3                PIC S9(7)V99 COMP-3 VALUE 2.
+       01  RES                 PIC S9(7)V99 COMP-3.
+       PROCEDURE        DIVISION.
+           COMPUTE RES = VAL / DIV1 / DIV2.
+           DISPLAY 'RES = ' RES.
+           COMPUTE RES ROUNDED = VAL / DIV1 / DIV2.
+           DISPLAY 'RES ROUNDED = ' RES.
+           COMPUTE RES = VAL * MUL1 / DIV3 / DIV2.
+           DISPLAY 'RES MULT1 = ' RES.
+           COMPUTE RES = VAL * MUL2 * MUL3 / DIV3 / DIV2.
+           DISPLAY 'RES MULT2 = ' RES.
+           COMPUTE RES = VAL / DIV1.
+           DISPLAY 'RES 1 = ' RES.
+           COMPUTE RES = RES / DIV2.
+           DISPLAY 'RES F = ' RES.
+           COMPUTE RES ROUNDED MODE AWAY-FROM-ZERO =
+                VAL / DIV1 / DIV2.
+           DISPLAY 'RES ROUNDED AWAY = ' RES.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[RES = +0000680.95
+RES ROUNDED = +0000680.95
+RES MULT1 = +0000680.95
+RES MULT2 = +0000680.95
+RES 1 = +0022777.77
+RES F = +0000680.94
+RES ROUNDED AWAY = +0000680.96
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([OSVS Arithmetic (1)])
 AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
@@ -9288,17 +9339,12 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -farithmetic-osvs prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob:17: warning: precision of result may change with arithmetic-osvs
 prog.cob:19: warning: precision of result may change with arithmetic-osvs
 prog.cob:21: warning: precision of result may change with arithmetic-osvs
 prog.cob:24: warning: precision of result may change with arithmetic-osvs
 prog.cob:31: warning: precision of result may change with arithmetic-osvs
 prog.cob:35: warning: precision of result may change with arithmetic-osvs
 prog.cob:38: warning: precision of result may change with arithmetic-osvs
-prog.cob:40: warning: precision of result may change with arithmetic-osvs
-prog.cob:44: warning: precision of result may change with arithmetic-osvs
-prog.cob:46: warning: precision of result may change with arithmetic-osvs
-prog.cob:48: warning: precision of result may change with arithmetic-osvs
 prog.cob:51: warning: precision of result may change with arithmetic-osvs
 prog.cob:55: warning: precision of result may change with arithmetic-osvs
 prog.cob:61: warning: precision of result may change with arithmetic-osvs
@@ -9323,9 +9369,66 @@ Divide   RSLT    IS 039
 Divide   RSLTv9  IS 009.7
 Divide   RSLT    IS 009
 Simple   RSLT    IS 180 RSLTv9  IS 180.0
-Complex  RSLT    IS 180 RSLTv9  IS 180.0
+Complex  RSLT    IS 188 RSLTv9  IS 188.0
 Reduced  RSLT    IS 180 RSLTv9  IS 180.0
 Using ARITHMETIC-OSVS
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([OSVS Arithmetic Test (2)])
+AT_KEYWORDS([runmisc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT      DIVISION.
+       DATA             DIVISION.
+       WORKING-STORAGE SECTION.
+       01  VAL                 PIC S9(7)V99 COMP-3 VALUE 20500.
+       01  DIV1                PIC S9(7)V99 COMP-3 VALUE 0.9.
+       01  DIV2                PIC S9(7)V99 COMP-3 VALUE 33.45.
+       01  DIV3                PIC S9(7)V99 COMP-3 VALUE 9.
+       01  MUL1                PIC S9(7)V99 COMP-3 VALUE 10.
+       01  MUL2                PIC S9(7)V99 COMP-3 VALUE 5.
+       01  MUL3                PIC S9(7)V99 COMP-3 VALUE 2.
+       01  RES                 PIC S9(7)V99 COMP-3.
+       PROCEDURE        DIVISION.
+           COMPUTE RES = VAL / DIV1 / DIV2.
+           DISPLAY 'RES = ' RES.
+           COMPUTE RES ROUNDED = VAL / DIV1 / DIV2.
+           DISPLAY 'RES ROUNDED = ' RES.
+           COMPUTE RES = VAL * MUL1 / DIV3 / DIV2.
+           DISPLAY 'RES MULT1 = ' RES.
+           COMPUTE RES = VAL * MUL2 * MUL3 / DIV3 / DIV2.
+           DISPLAY 'RES MULT2 = ' RES.
+           COMPUTE RES = VAL / DIV1.
+           DISPLAY 'RES 1 = ' RES.
+           COMPUTE RES = RES / DIV2.
+           DISPLAY 'RES F = ' RES.
+           COMPUTE RES ROUNDED MODE AWAY-FROM-ZERO =
+                VAL / DIV1 / DIV2.
+           DISPLAY 'RES ROUNDED AWAY = ' RES.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [],
+[prog.cob:16: warning: precision of result may change with arithmetic-osvs
+prog.cob:18: warning: precision of result may change with arithmetic-osvs
+prog.cob:20: warning: precision of result may change with arithmetic-osvs
+prog.cob:22: warning: precision of result may change with arithmetic-osvs
+prog.cob:28: warning: precision of result may change with arithmetic-osvs
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[RES = +000068094
+RES ROUNDED = +000068095
+RES MULT1 = +000068094
+RES MULT2 = +000068095
+RES 1 = +002277777
+RES F = +000068094
+RES ROUNDED AWAY = +000068095
 ], [])
 
 AT_CLEANUP

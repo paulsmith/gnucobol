@@ -104,6 +104,11 @@ struct cb_statement		*error_statement = NULL;
 static int			expr_op;		/* Last operator */
 static cb_tree			expr_lh;		/* Last left hand */
 static int			expr_dmax = -1;		/* Max scale for expression result */
+#define MAX_NESTED_EXPR	64
+static cb_tree			expr_x = NULL;
+static int			expr_dec_align = -1;
+static int			expr_nest = 0;
+static int			expr_decp[MAX_NESTED_EXPR];
 static int			cond_fixed = -1;	/* 0 means TRUE, 1 means FALSE, -1 unknown */
 #define MAX_NESTED_COND	128
 static int			if_nest = 0;
@@ -534,6 +539,7 @@ static const struct optim_table	align_bin_sub_funcs[] = {
 #endif
 
 /* Functions */
+static void cb_walk_cond (cb_tree x);
 
 static cb_tree
 cb_check_needs_break (cb_tree stmt)
@@ -4015,50 +4021,25 @@ decimal_free (void)
 {
 	current_program->decimal_index--;
 }
+static void
+push_expr_dec (int dec)
+{
+	if (expr_nest < MAX_NESTED_EXPR) {
+		expr_decp[expr_nest++] = dec;
+	} else {
+		cb_warning (COBC_WARN_FILLER,
+			_("more than %d nested expressions"), MAX_NESTED_EXPR);
+	}
+}
 
 static void
-decimal_compute (const int op, cb_tree x, cb_tree y)
+decimal_align (void)
 {
-	const char	*func;
 	cb_tree		expr_dec = NULL;	/* Int value for decimal_align */
 
-	/* skip if the actual statement can't be generated any more
-	   to prevent multiple errors here */
-	if (error_statement == current_statement) {
-		return;
-	}
-	switch (op) {
-	case '+':
-		func = "cob_decimal_add";
-		break;
-	case '-':
-		func = "cob_decimal_sub";
-		break;
-	case '*':
-		func = "cob_decimal_mul";
-		break;
-	case '/':
-		func = "cob_decimal_div";
-		break;
-	case '^':
-		func = "cob_decimal_pow";
-		break;
-	default:
-		func = explain_operator (op);
-		/* LCOV_EXCL_START */
-		if (!func) {
-			cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
-			COBC_ABORT ();
-		}
-		/* LCOV_EXCL_STOP */
-		error_statement = current_statement;
-		cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
-		return;
-	}
-	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
-
-	if (expr_dmax >= 0) {
-		switch(expr_dmax) {
+	if (expr_dec_align >= 0
+	 && expr_x != NULL) {
+		switch(expr_dec_align) {
 		case 0:
 			expr_dec = cb_int0;
 			break;
@@ -4081,17 +4062,117 @@ decimal_compute (const int op, cb_tree x, cb_tree y)
 			expr_dec = cb_int6;
 			break;
 		default:
-			expr_dec = cb_int(expr_dmax);
+			expr_dec = cb_int (expr_dec_align);
 			break;
 		}
-		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_align", x, expr_dec));
+		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_align", expr_x, expr_dec));
 		if (cb_warn_arithmetic_osvs
 		&&  expr_line != cb_source_line) {
 			expr_line = cb_source_line; /* only warn once per line */
-			cb_warning_x (cb_warn_arithmetic_osvs, expr_rslt,
+			cb_warning_x (cb_warn_arithmetic_osvs, CB_TREE (current_statement),
 				_("precision of result may change with arithmetic-osvs"));
 		}
+		expr_dec_align = -1;
+		expr_x = NULL;
 	}
+}
+
+static void
+decimal_compute (const int op, cb_tree x, cb_tree y)
+{
+	const char	*func;
+	int		decp, d;
+
+	/* skip if the actual statement can't be generated any more
+	   to prevent multiple errors here */
+	if (error_statement == current_statement) {
+		return;
+	}
+	if (cb_arithmetic_osvs) {
+		if (expr_dec_align >= 0
+		 && expr_x != NULL
+		 && expr_x != x)
+		decimal_align ();
+		decp = expr_dmax;
+	} else {
+		decp = -1;
+	}
+	switch (op) {
+	case '+':
+		func = "cob_decimal_add";
+		if (cb_arithmetic_osvs
+		 && expr_nest > 1) {
+			expr_nest--;
+			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest];
+			}
+			decp = expr_decp [expr_nest-1];
+		}
+		break;
+	case '-':
+		func = "cob_decimal_sub";
+		if (cb_arithmetic_osvs
+		 && expr_nest > 1) {
+			expr_nest--;
+			if (expr_decp [expr_nest] > expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest];
+			}
+			decp = expr_decp [expr_nest-1];
+		}
+		break;
+	case '*':
+		func = "cob_decimal_mul";
+		if (cb_arithmetic_osvs
+		 && expr_nest > 1) {
+			expr_nest--;
+			expr_decp [expr_nest-1] += expr_decp [expr_nest];
+			decp = expr_decp [expr_nest-1];
+		}
+		break;
+	case '/':
+		func = "cob_decimal_div";
+		if (cb_arithmetic_osvs
+		 && expr_nest > 1) {
+			expr_nest--;
+			d = expr_decp [expr_nest-1] - expr_decp [expr_nest];
+			if (d > expr_dmax) {
+				expr_decp [expr_nest-1] = d;
+			} else {
+				expr_decp [expr_nest-1] = expr_dmax;
+			}
+			decp = expr_decp [expr_nest-1];
+		}
+		break;
+	case '^':
+		func = "cob_decimal_pow";
+		if (cb_arithmetic_osvs
+		 && expr_nest > 1) {
+			expr_nest--;
+			if (expr_decp [expr_nest-1] - expr_decp [expr_nest]
+				< expr_decp [expr_nest-1]) {
+				expr_decp [expr_nest-1] = expr_decp [expr_nest-1] - expr_decp [expr_nest];
+			}
+			decp = expr_decp [expr_nest-1];
+		}
+		break;
+	default:
+		func = explain_operator (op);
+		/* LCOV_EXCL_START */
+		if (!func) {
+			cobc_err_msg (_("unexpected operation: %c (%d)"), (char)op, op);
+			COBC_ABORT ();
+		}
+		/* LCOV_EXCL_STOP */
+		error_statement = current_statement;
+		cb_error_x (CB_TREE(current_statement), _("%s operator may be misplaced"), func);
+		return;
+	}
+
+	dpush (CB_BUILD_FUNCALL_2 (func, x, y));
+
+	/* Save for later decimal_align */
+	expr_dec_align = decp;
+	expr_x = x;
 }
 
 /**
@@ -4123,12 +4204,14 @@ decimal_expand (cb_tree d, cb_tree x)
 		break;
 	case CB_TAG_LITERAL:
 		/* Set d, N */
+		decimal_align ();
 		l = CB_LITERAL (x);
 		if (l->size < 19 && l->scale == 0) {
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint", d,
 				cb_build_cast_llint (x)));
 		} else {
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
+			push_expr_dec (l->scale);
 		}
 		break;
 	case CB_TAG_REFERENCE:
@@ -4146,6 +4229,7 @@ decimal_expand (cb_tree d, cb_tree x)
 							   x, CB_BUILD_STRING0 (f->name)));
 			}
 		}
+		decimal_align ();
 
 		if ((f->usage == CB_USAGE_BINARY ||
 		    f->usage == CB_USAGE_COMP_5 ||
@@ -4171,6 +4255,7 @@ decimal_expand (cb_tree d, cb_tree x)
 			}
 		} else {
 			dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
+			push_expr_dec (f->pic->scale);
 		}
 		break;
 	case CB_TAG_BINARY_OP:
@@ -4192,7 +4277,9 @@ decimal_expand (cb_tree d, cb_tree x)
 		}
 		break;
 	case CB_TAG_INTRINSIC:
+		decimal_align ();
 		dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_field", d, x));
+		push_expr_dec (0);
 		break;
 	/* LCOV_EXCL_START */
 	default:
@@ -4266,7 +4353,8 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 	/* note: vars validated by caller: cb_emit_arithmetic */
 	if(cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in result field */
-		expr_dmax = -1;
+		expr_dec_align = -1;
+		expr_nest = 0;
 		expr_rslt = CB_VALUE(vars);
 		for (l = vars; l; l = CB_CHAIN (l)) {
 			if (CB_FIELD_P (cb_ref (CB_VALUE(l)))) {
@@ -4276,8 +4364,11 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 				}
 			}
 		}
+		cb_walk_cond (val);
 	} else {
 		expr_dmax = -1;
+		expr_nest = 0;
+		expr_dec_align = -1;
 	}
 
 	d = decimal_alloc ();
@@ -4321,8 +4412,19 @@ build_decimal_assign (cb_tree vars, const int op, cb_tree val)
 
 	decimal_free ();
 	expr_dmax = -1;
+	expr_dec_align = -1;
+	expr_nest = 0;
 
 	return s1;
+}
+
+void
+cb_set_dmax (int scale)
+{
+	if (cb_arithmetic_osvs
+	 && scale > expr_dmax) {
+		expr_dmax = scale;
+	}
 }
 
 void
@@ -4615,11 +4717,21 @@ cb_walk_cond (cb_tree x)
 {
 	struct cb_binary_op	*p;
 	struct cb_field		*f;
+	struct cb_literal	*l;
 
 	if (x == NULL)
 		return;
 
 	switch (CB_TREE_TAG (x)) {
+	case CB_TAG_LITERAL:
+		if (CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC) {
+			l = CB_LITERAL (x);
+			if (l->scale > expr_dmax) {
+				expr_dmax = l->scale;
+			}
+		}
+		break;
+
 	case CB_TAG_REFERENCE:
 		if (!CB_FIELD_P (cb_ref (x))) {
 			return;
@@ -4640,7 +4752,9 @@ cb_walk_cond (cb_tree x)
 	case CB_TAG_BINARY_OP:
 		p = CB_BINARY_OP (x);
 		cb_walk_cond (p->x);
-		cb_walk_cond (p->y);
+		if (p->op != '/') {
+			cb_walk_cond (p->y);
+		}
 		break;
 
 	default:
@@ -4675,6 +4789,8 @@ cb_build_cond (cb_tree x)
 		}
 	} else {
 		expr_dmax = -1;
+		expr_dec_align = -1;
+		expr_nest = 0;
 	}
 
 	switch (CB_TREE_TAG (x)) {
@@ -4808,6 +4924,9 @@ void
 cb_end_cond (cb_tree rslt)
 {
 	expr_dmax = -1;		/* Reset 'Max scale' */
+	expr_dec_align = -1;
+	expr_nest = 0;
+	expr_line = -1;
 
 	if (rslt == cb_true) {
 		cond_fixed = 0;
@@ -4830,7 +4949,8 @@ cb_save_cond (void)
 		if_cond[if_nest++] = cond_fixed;
 	} else {
 		/* result: errors won't be ignored in "false" condition parts */
-		cb_warning (COBC_WARN_FILLER, _("more than %d nested conditions"), MAX_NESTED_COND);
+		cb_warning (COBC_WARN_FILLER,
+			_("more than %d nested conditions"), MAX_NESTED_COND);
 		if_stop = 1;
 		if_nest = 0;
 		cb_set_ignore_error (0);
@@ -4880,9 +5000,12 @@ void
 cb_end_statement (void)
 {
 	expr_dmax = -1;
+	expr_dec_align = -1;
+	expr_nest = 0;
 	if_stop = 0;
 	if_nest = 0;
 	cb_set_ignore_error (0);
+	expr_line = -1;
 }
 
 /* ADD/SUBTRACT CORRESPONDING */

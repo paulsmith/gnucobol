@@ -545,6 +545,7 @@ same_level:
 		f->flag_sign_separate = f->parent->flag_sign_separate;
 		f->flag_is_global = f->parent->flag_is_global;
 	}
+
 	return CB_TREE (f);
 }
 
@@ -1005,10 +1006,24 @@ validate_pic (struct cb_field *f)
 	return 0;
 }
 
-static void
+static int
 validate_usage (struct cb_field * const f)
 {
+	char		*section;
 	cb_tree	x = CB_TREE (f);
+
+	if ((f->storage == CB_STORAGE_SCREEN
+	  || f->storage == CB_STORAGE_REPORT) 
+	 &&  f->usage   != CB_USAGE_DISPLAY
+	 &&  f->usage   != CB_USAGE_NATIONAL) {
+		if (f->storage == CB_STORAGE_SCREEN)
+			section = (char*)"SCREEN SECTION";
+		else
+			section = (char*)"REPORT SECTION";
+		cb_error_x (CB_TREE(f), 
+			_("%s item '%s' should be USAGE DISPLAY"), section, cb_name (x));
+		return 1;
+	}
 
 	switch (f->usage) {
 	case CB_USAGE_BINARY:
@@ -1016,11 +1031,13 @@ validate_usage (struct cb_field * const f)
 	case CB_USAGE_BIT:
 		if (f->pic->category != CB_CATEGORY_NUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
+			return 1;
 		}
 		break;
 	case CB_USAGE_COMP_6:
 		if (f->pic->category != CB_CATEGORY_NUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
+			return 1;
 		}
 		if (f->pic->have_sign) {
 			cb_warning_x (COBC_WARN_FILLER, x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
@@ -1033,11 +1050,13 @@ validate_usage (struct cb_field * const f)
 		    && f->pic->category != CB_CATEGORY_NUMERIC
 		    && f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
+			return 1;
 		}
 		break;
 	default:
 		break;
 	}
+	return 0;
 }
 
 static void
@@ -1483,12 +1502,14 @@ validate_elementary_item (struct cb_field *f)
 	cob_pic_symbol	*pstr;
 	int		n;
 
-	validate_usage (f);
+	ret = validate_usage (f);
 	validate_sign (f);
 	validate_justified_right (f);
 	validate_blank_when_zero (f);
 	validate_elem_value (f);
-	validate_elem_screen (f);
+	if (!ret) {
+		validate_elem_screen (f);
+	}
 
 	/* Validate PICTURE */
 	ret = validate_pic (f);

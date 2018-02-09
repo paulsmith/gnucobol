@@ -4408,7 +4408,9 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				yval = atoll((const char*)yl->data);
 				if(yl->sign == -1) yval = -yval;
 				xscale = xl->scale;
+				cb_set_dmax (xscale);
 				yscale = yl->scale;
+				cb_set_dmax (yscale);
 				rscale = 0;
 				rslt = 0;
 				if (op == '+' || op == '-') {

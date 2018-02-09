@@ -1,5 +1,5 @@
-## Copyright (C) 2014-2017 Free Software Foundation, Inc.
-## Written by Simon Sobisch, Edward Hart
+## Copyright (C) 2014-2018 Free Software Foundation, Inc.
+## Written by Simon Sobisch, Edward Hart, Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -232,6 +232,38 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([Incorrect USAGE clause])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID. prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 X             PIC X.
+       SCREEN  SECTION.
+        01 SG.
+           05 SI1    LINE 1 COL 1 PIC X FROM X.
+           05 SI2    LINE 2 COL 1 PIC X FROM SPACE.
+           05 SI2-2  LINE 2 COL 5 PIC X(03) FROM ALL SPACES.
+           05 BAD1   LINE 4 COL 1 PIC 9 BINARY FROM ZERO.
+           05 FILLER LINE 4 COL 10 PIC 9 COMP-5 FROM ZERO.
+           05 BAD3   LINE 4 COL 5 COMP-2 FROM ALL ZEROES.
+       PROCEDURE        DIVISION.
+           DISPLAY SG END-DISPLAY.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:12: error: SCREEN SECTION item 'BAD1' should be USAGE DISPLAY
+prog.cob:13: error: SCREEN SECTION item 'FILLER' should be USAGE DISPLAY
+prog.cob:14: error: SCREEN SECTION item 'BAD3' should be USAGE DISPLAY
+])
+
+AT_CLEANUP
+
 
 
 AT_SETUP([SCREEN SECTION clause numbers])
