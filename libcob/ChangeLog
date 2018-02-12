@@ -1,4 +1,21 @@
 
+2018-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c, coblocal.h: removed external_display_print_file as
+	  cob_display_print_file is always external
+	* common.c (cob_open_logfile): moved log file opening handling
+	  code from cob_check_trace_file to new static function
+	* common.c (cob_debug_open): refactored, allowed debug log to be
+	  opened in append mode
+	* common.c [COB_DEBUG_LOG]: fixed issues when debug log has same
+	  name as trace file, fixed missing free of cob_debug_file_name
+
+2018-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c [!COB_DEBUG_LOG]: adjusted handling of COB_DEBUG_LOG to
+	  minimize active code while still raise a warning (instead of an
+	  error)
+
 2018-01-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: change all typedef struct/union to be named using

@@ -221,7 +221,6 @@ static unsigned int		cob_source_line = 0;
 
 #ifdef COB_DEBUG_LOG
 static int			cob_debug_log_time = 0;
-static const char		*cob_debug_env = NULL;
 static FILE			*cob_debug_file = NULL;
 static int			cob_debug_level = 9;
 static char			*cob_debug_mod = NULL;
@@ -373,6 +372,9 @@ static struct config_tbl gc_conf[] = {
 static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
 static void		cob_dump_module (char *reason);
+#ifdef COB_DEBUG_LOG
+static void		cob_debug_open	(void);
+#endif
 void		conf_runtime_error_value	(const char *value, const int conf_pos);
 void		conf_runtime_error	(const int finish_error, const char *fmt, ...);
 
@@ -525,22 +527,6 @@ cob_terminate_routines (void)
 		return;
 	}
 
-#ifdef COB_DEBUG_LOG
-	if (cob_debug_file
-	&& !cobsetptr->cob_trace_file
-	&& cob_debug_file != cobsetptr->cob_trace_file) {
-		if (cob_debug_file_name != NULL
-		&& ftell(cob_debug_file) == 0) {
-			fclose (cob_debug_file);
-			unlink(cob_debug_file_name);
-			cob_debug_file_name = NULL;
-		} else {
-			fclose (cob_debug_file);
-		}
-	}
-	cob_debug_file = NULL;
-#endif
-
 	if (cobsetptr->cob_dump_file == cobsetptr->cob_trace_file
 	 || cobsetptr->cob_dump_file == stderr) {
 		cobsetptr->cob_dump_file = NULL;
@@ -551,12 +537,36 @@ cob_terminate_routines (void)
 		cobsetptr->cob_dump_file = NULL;
 	}
 
-	if (cobsetptr->cob_trace_file 
-	&& !cobsetptr->external_trace_file
-	&& cobsetptr->cob_trace_file != stderr) {
-		fclose (cobsetptr->cob_trace_file);
-		cobsetptr->cob_trace_file = NULL;
+#ifdef COB_DEBUG_LOG
+	/* close debug log (delete file if empty) */
+	if (cob_debug_file
+	 && cob_debug_file != stderr) {
+		/* note: cob_debug_file can only be identical to cob_trace_file
+		         if same file name was used, not with external_trace_file */
+		if (cob_debug_file == cobsetptr->cob_trace_file) {
+			cobsetptr->cob_trace_file = NULL;
+		}
+		if (cob_debug_file_name != NULL
+		&& ftell (cob_debug_file) == 0) {
+			fclose (cob_debug_file);
+			unlink (cob_debug_file_name);
+		} else {
+			fclose (cob_debug_file);
+		}
 	}
+	cob_debug_file = NULL;
+	if (cob_debug_file_name) {
+		cob_free (cob_debug_file_name);
+		cob_debug_file_name = NULL;
+	}
+#endif
+
+	if (cobsetptr->cob_trace_file
+	 && cobsetptr->cob_trace_file != stderr
+	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
+		fclose (cobsetptr->cob_trace_file);
+	}
+	cobsetptr->cob_trace_file = NULL;
 
 	cob_exit_screen ();
 	cob_exit_fileio ();
@@ -1281,32 +1291,41 @@ cob_memcpy (cob_field *dst, const void *src, const size_t size)
 	cob_move (&temp, dst);
 }
 
+/* open file using mode according to cob_unix_lf and
+   filename (append when starting with +) */
+static FILE *
+cob_open_logfile (const char *filename)
+{
+	const char *mode;
+
+	if (!cobsetptr->cob_unix_lf) {
+		if (*filename == '+') {
+			filename++;
+			mode = "a";
+		} else {
+			mode = "w";
+		}
+	} else {
+		if (*filename == '+') {
+			filename++;
+			mode = "ab";
+		} else {
+			mode = "wb";
+		}
+	}
+	return fopen (filename, mode);
+}
+
+/* ensure that cob_trace_file is available for writing */
 static void
 cob_check_trace_file (void)
 {
-	const char *filename = cobsetptr->cob_trace_filename;
-	const char *mode;
 
 	if (cobsetptr->cob_trace_file) {
 		return;
 	}
 	if (cobsetptr->cob_trace_filename) {
-		if (!cobsetptr->cob_unix_lf) {
-			if (*filename == '+') {
-				filename++;
-				mode = "a";
-			} else {
-				mode = "w";
-			}
-		} else {
-			if (*filename == '+') {
-				filename++;
-				mode = "ab";
-			} else {
-				mode = "wb";
-			}
-		}
-		cobsetptr->cob_trace_file = fopen (filename, mode);
+		cobsetptr->cob_trace_file = cob_open_logfile (cobsetptr->cob_trace_filename);
 		if (!cobsetptr->cob_trace_file) {
 			cobsetptr->cob_trace_file = stderr;
 		}
@@ -1319,6 +1338,8 @@ cob_check_trace_file (void)
 static void
 cob_new_trace_file (void)
 {
+	FILE *old_trace_file = cobsetptr->cob_trace_file;
+
 	if (!cobsetptr->cob_trace_file
 	 || cobsetptr->external_trace_file
 	 || cobsetptr->cob_trace_file == stderr) {
@@ -1326,10 +1347,25 @@ cob_new_trace_file (void)
 		cob_check_trace_file ();
 		return;
 	}
+
 	fclose (cobsetptr->cob_trace_file);
 	cobsetptr->cob_trace_file = NULL;
-	cob_check_trace_file ();
 
+	cob_check_trace_file ();
+	if (cobsetptr->cob_display_print_file
+	 && cobsetptr->cob_display_print_file == old_trace_file) {
+		cobsetptr->cob_display_print_file = cobsetptr->cob_trace_file;
+	}
+	if (cobsetptr->cob_dump_file
+	 && cobsetptr->cob_dump_file == old_trace_file) {
+		cobsetptr->cob_dump_file = cobsetptr->cob_trace_file;
+	}
+#ifdef COB_DEBUG_LOG
+	if (cob_debug_file
+	 && cob_debug_file == old_trace_file) {
+		cob_debug_file = cobsetptr->cob_trace_file;
+	}
+#endif
 }
 
 int
@@ -5518,18 +5554,6 @@ cob_strjoin (char **strarray, int size, char *separator)
 	return result;
 }
 
-char *
-cob_save_env_value (char *env_var, char *env_val)
-{
-	if (!env_val) return NULL;
-
-	if (env_var) cob_free (env_var);
-	env_var = (char *) cob_fast_malloc (strlen (env_val) + 1);
-	strcpy (env_var, env_val);
-
-	return env_var;
-}
-
 static void
 var_print (const char *msg, const char *val, const char *default_val,
 		const unsigned int format)
@@ -5970,7 +5994,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 	} else if ((data_type & ENV_STR)) {	/* String stored as a string */
 		memcpy (&str, data, sizeof (char *));
 		if (data_loc == offsetof (cob_settings, cob_display_print_filename)
-		 && cobsetptr->external_display_print_file) 
+		 && cobsetptr->cob_display_print_file) 
 			strcpy (value, "set by cob_set_runtime_option");
 		else if (data_loc == offsetof (cob_settings, cob_trace_filename)
 		      && cobsetptr->external_trace_file) 
@@ -7260,6 +7284,15 @@ cob_init (const int argc, char **argv)
 	/* Copy COB_PHYSICAL_CANCEL from settings (internal) to global structure */
 	cobglobptr->cob_physical_cancel = cobsetptr->cob_physical_cancel;
 
+	/* Internal Debug Log */
+	if (cobsetptr->cob_debug_log) {
+#ifndef COB_DEBUG_LOG
+		cob_runtime_warning (_("compiler was not built with --enable-debug-log; COB_DEBUG_LOG ignored"));
+#else
+		cob_debug_open ();
+#endif
+	}
+
 	/* Call inits with cobsetptr to get the addresses of all */
 	/* Screen-IO might be needed for error outputs */
 	cob_init_screenio (cobglobptr, cobsetptr);
@@ -7280,9 +7313,9 @@ cob_init (const int argc, char **argv)
 		sprintf (runtime_err_str, "COB_SWITCH_%d", i);
 		s = getenv (runtime_err_str);
 		if (s && (*s == '1' || strcasecmp (s, "ON") == 0)) {
-				cob_switch[i] = 1;
+			cob_switch[i] = 1;
 		} else {
-				cob_switch[i] = 0;
+			cob_switch[i] = 0;
 		}
 	}
 
@@ -7398,19 +7431,21 @@ cob_set_runtime_option (enum cob_runtime_option_switch opt, void *p)
 	switch (opt) {
 	case COB_SET_RUNTIME_TRACE_FILE:
 		cobsetptr->cob_trace_file = (FILE *)p;
+		if (p) {
+			cobsetptr->external_trace_file = 1;
+		} else {
+			cobsetptr->external_trace_file = 0;
+		}
 		break;
 	case COB_SET_RUNTIME_DISPLAY_PRINTER_FILE:
+		/* note: if set cob_display_print_file is always external */
 		cobsetptr->cob_display_print_file = (FILE *)p;
-		if (p)
-			cobsetptr->external_display_print_file = 1;
-		else
-			cobsetptr->external_display_print_file = 0;
 		break;
 	case COB_SET_RUNTIME_RESCAN_ENV:
 		cob_rescan_env_vals ();
 		break;
 	default:
-		cob_runtime_error (_("%s called with unknown option: %d"),
+		cob_runtime_warning (_("%s called with unknown option: %d"),
 			"cob_set_runtime_option", opt);
 	}
 	return;
@@ -7529,108 +7564,152 @@ cob_get_runtime_option (enum cob_runtime_option_switch opt)
 	return NULL;
 }
 
+#ifdef COB_DEBUG_LOG
 /******************************/
 /* Routines for COB_DEBUG_LOG */
 /******************************/
 
-#ifdef COB_DEBUG_LOG
 /* Check env var value and open log file */
 /* 
  * Env var is  COB_DEBUG_LOG
  * Env Var string is a series of keyword=value parameters where keywords:
- * L=x  - T for trace level, W for warnings, N for normal, A for ALL
- * M=yy - rw for report writer, the 2 char code is tabled and compared
+ * L=x  - options: T for trace level, W for warnings, N for normal, A for ALL
+ * M=yy - module:  RW for report writer, the 2 char code is tabled and compared
  *        with the value coded on DEBUG_LOG("yy",("format",args));
- * O=path/file - file name to write log data to. A ## is replaced by process id
- *        default is  cob_debug_log.##
+ * O=path/file - file name to write log data to, default is: cob_debug_log.$$
+ *        note:  replacements already done in common setting handling
  */
-int
-cob_debug_open (const char *debug_env)
+void
+cob_debug_open (void)
 {
-	int		i,j;
-	char	val[256],logfile[256];
-	if(debug_env == NULL)
-		return 0;
-	strcpy(logfile,"cob_debug_log.##");
-	for(i=0; debug_env[i] != 0; i++) {
-		if(debug_env[i] == ','
-		|| debug_env[i] == ';')
+	char	*debug_env = cobsetptr->cob_debug_log;
+	int		i, j;
+	char	module_name[4];
+	char	log_opt;
+	char	logfile[COB_SMALL_BUFF];
+
+	logfile[0] = 0;
+
+	for (i=0; debug_env[i] != 0; i++) {
+		/* skip separator */
+		if (debug_env[i] == ','
+		 || debug_env[i] == ';')
 			continue;
-		if(debug_env[i+1] == '=') {
-			if(toupper(debug_env[i]) == 'M') {
-				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 4; i++)
-					val[j++] = debug_env[i];
-				val[j] = 0;
-				for(j=0; cob_debug_modules[j][0] > ' '; j++);
-				if(j < 12)
-					strcpy(cob_debug_modules[j],val);
-			} else if(toupper(debug_env[i]) == 'L') {
-				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 4; i++)
-					val[j++] = debug_env[i];
-				val[j] = 0;
-				if(toupper(val[0]) == 'T')
-					cob_debug_log_time = cob_debug_level = 3;
-				else if(toupper(val[0]) == 'W')
-					cob_debug_level = 2;
-				else if(toupper(val[0]) == 'N')
-					cob_debug_level = 0;
-				else if(toupper(val[0]) == 'A')
-					cob_debug_level = 9;
 
-			} else if(toupper(debug_env[i]) == 'O') {
-				for(j=0,i+=2; debug_env[i] != ',' && debug_env[i] != ';' && debug_env[i] != 0 && j < 240; i++)
-					val[j++] = debug_env[i];
-				val[j] = 0;
-				strcpy(logfile,val);
-			} else {
-				/* Unknown x=, Just ignore it for now */
-			}
-			if(debug_env[i] == 0) i--;
-		}
-	}
-	strcpy(val,logfile);
-	for(i=j=0; val[i] != 0; ) {
-		if(memcmp(&val[i],"##",2) == 0
-		|| memcmp(&val[i],"++",2) == 0
-		|| memcmp(&val[i],"$$",2) == 0
-		|| memcmp(&val[i],"%%",2) == 0) {
-			j += sprintf(&logfile[j],"%d", cob_sys_getpid());
+		/* debugging flags (not include in file name) */
+		if (debug_env[i + 1] == '=') {
+			log_opt = toupper (debug_env[i]);
 			i += 2;
+
+			switch (log_opt) {
+
+			case 'M':	/* module to debug */
+				for (j = 0; j < 4; i++) {
+					if (debug_env[i] == ','
+					 || debug_env[i] == ';'
+					 || debug_env[i] == 0) {
+						break;
+					}
+					module_name[j++] = debug_env[i];
+				}
+				module_name[j] = 0;
+				/* note: special module ALL is checked later */
+				for (j = 0; j < 12 && cob_debug_modules[j][0] > ' '; j++) {
+					if (strcasecmp (cob_debug_modules[j], module_name) == 0) {
+						break;
+					}
+				}
+				if (j < 12 && cob_debug_modules[j][0] == ' ') {
+					strcpy (cob_debug_modules[j], module_name);
+				}
+				if (debug_env[i] == 0) i--;
+				break;
+
+			case 'L':	/* logging options */
+				log_opt = toupper (debug_env[i]);
+				switch (log_opt) {
+				case 'T':	/* trace */
+					cob_debug_log_time = cob_debug_level = 3;
+					break;
+				case 'W':	/* warnings */
+					cob_debug_level = 2;
+					break;
+				case 'N':	/* normal */
+					cob_debug_level = 0;
+					break;
+				case 'A':	/* all */
+					cob_debug_level = 9;
+					break;
+				default:	/* Unknown log option, just ignored for now */
+					i--;
+					break;
+				}
+				break;
+
+			case 'O':	/* output name for logfile */
+				for (j = 0; j < COB_SMALL_MAX; i++) {
+					if (debug_env[i] == ','
+					 || debug_env[i] == ';'
+					 || debug_env[i] == 0) {
+						break;
+					}
+					logfile[j++] = debug_env[i];
+				}
+				logfile[j] = 0;
+				if (debug_env[i] == 0) i--;
+				break;
+
+			default:	/* Unknown x=, just ignored for now */
+				break;
+			}
 		} else {
-			logfile[j++] = val[i++];
+			/* invalid character, just ignored for now */
+			/* note: this allows for L=WARNING (but also for L=WUMPUS) */
 		}
 	}
-	logfile[j] = 0;
-	cob_debug_file = fopen(logfile,"w");
-	if(cob_debug_file == NULL) {
-		cob_runtime_error (_("Error '%s opening COB_DEBUG_LOG '%s'"),strerror(errno),debug_env);
-		return 0;
-	}
-	cob_debug_file_name = cob_strdup(logfile);
-#if 0 /* currently not needed as the functions is always active */
-	cob_runtime_error ("Compiler was not built with --enable-debug-log so ignore COB_DEBUG_LOG");
-	COB_UNUSED (debug_env);
-#endif
-	return 1;
-}
-#endif
 
-#ifdef COB_DEBUG_LOG
+	/* set default logfile if not given */
+	if (logfile[0] == 0) {
+		sprintf (logfile, "cob_debug_log.%d", cob_sys_getpid());
+	}
+	/* store filename for possible unlink (empty log file) */
+	cob_debug_file_name = cob_strdup (logfile);
+
+	/* ensure trace file is open if we use this as debug log and exit */
+	if (cobsetptr->cob_trace_filename &&
+		strcmp (cobsetptr->cob_trace_filename, cob_debug_file_name) == 0) {
+		cob_check_trace_file ();
+		cob_debug_file = cobsetptr->cob_trace_file;
+		return;
+	}
+
+	/* open logfile */
+	cob_debug_file = cob_open_logfile (cob_debug_file_name);
+	if (cob_debug_file == NULL) {
+		/* developer-only msg - not translated */
+		cob_runtime_error ("error '%s' opening COB_DEBUG_LOG '%s', resolved from '%s'",
+			cob_get_strerror (), cob_debug_file_name, cobsetptr->cob_debug_log);
+		return;
+	}
+}
+
 /* Determine if DEBUGLOG is to be allowed */
 int
-cob_debug_logit(int level, char *module)
+cob_debug_logit (int level, char *module)
 {
 	int	i;
-	if(cob_debug_file == NULL)
+	if (cob_debug_file == NULL) {
 		return 1;
-	if(level > cob_debug_level) 
+	}
+	if (level > cob_debug_level) {
 		return 1;
-	for(i=0; i < 12 && cob_debug_modules[i][0] > ' '; i++) {
-		if(strcasecmp("ALL",cob_debug_modules[i]) == 0) {
+	}
+	for (i=0; i < 12 && cob_debug_modules[i][0] > ' '; i++) {
+		if (strcasecmp ("ALL", cob_debug_modules[i]) == 0) {
 			cob_debug_mod = (char*)module;
 			return 0;						/* Logging is allowed */
 		}
-		if(strcasecmp(module,cob_debug_modules[i]) == 0) {
+		if (strcasecmp (module,cob_debug_modules[i]) == 0) {
 			cob_debug_mod = (char*)&cob_debug_modules[i];
 			return 0;						/* Logging is allowed */
 		}
@@ -7640,7 +7719,7 @@ cob_debug_logit(int level, char *module)
 
 /* Write logging line */
 static int cob_debug_hdr = 1;
-static int cob_debug_prv_line = 0;
+static unsigned int cob_debug_prv_line = 0;
 int
 cob_debug_logger (const char *fmt, ...)
 {
@@ -7648,28 +7727,31 @@ cob_debug_logger (const char *fmt, ...)
 	int		ln;
 	struct cob_time time;
 
-	if (cob_debug_file == NULL) return 0;
-
-	if(*fmt == '~') {			/* Force line# out again to log file */
+	if (cob_debug_file == NULL) {
+		return 0;
+	}
+	if (*fmt == '~') {			/* Force line# out again to log file */
 		fmt++;
 		cob_debug_prv_line = -1;
 		cob_debug_hdr = 1;
 	}
-	if(cob_debug_hdr) {
-		if(cob_debug_log_time) {
+	if (cob_debug_hdr) {
+		if (cob_debug_log_time) {
 			time = cob_get_current_date_and_time ();
-			fprintf(cob_debug_file,"%02d:%02d:%02d.%02d ", time.hour, time.minute,
+			fprintf (cob_debug_file, "%02d:%02d:%02d.%02d ", time.hour, time.minute,
 							time.second, time.nanosecond / 10000000);
-		}     
-		if(cob_debug_mod)
-			fprintf(cob_debug_file,"%-3s:",cob_debug_mod);
-		if(cob_source_file)
-			fprintf(cob_debug_file," %s :",cob_source_file);
-		if(cob_source_line && cob_source_line != cob_debug_prv_line) {
-			fprintf(cob_debug_file,"%5d : ",cob_source_line);
+		}
+		if (cob_debug_mod) {
+			fprintf (cob_debug_file, "%-3s:", cob_debug_mod);
+		}
+		if (cob_source_file) {
+			fprintf (cob_debug_file, " %s :", cob_source_file);
+		}
+		if (cob_source_line && cob_source_line != cob_debug_prv_line) {
+			fprintf (cob_debug_file, "%5d : ", cob_source_line);
 			cob_debug_prv_line = cob_source_line;
 		} else {
-			fprintf(cob_debug_file,"%5s : "," ");
+			fprintf (cob_debug_file, "%5s : ", " ");
 		}
 		cob_debug_hdr = 0;
 	}
@@ -7677,9 +7759,9 @@ cob_debug_logger (const char *fmt, ...)
 	vfprintf (cob_debug_file, fmt, ap);
 	va_end (ap);
 	ln = strlen(fmt);
-	if(fmt[ln-1] == '\n') {
+	if (fmt[ln-1] == '\n') {
 		cob_debug_hdr = 1;
-		fflush(cob_debug_file);
+		fflush (cob_debug_file);
 	}
 	return 0;
 }
@@ -7699,7 +7781,7 @@ repeatWord(
 
 /* Hexdump of memory */
 int
-cob_debug_dump(void *pMem, int len)
+cob_debug_dump (void *pMem, int len)
 {
 #define dMaxPerLine	24
 #define dMaxHex ((dMaxPerLine*2)+(dMaxPerLine/4-1))
@@ -7713,7 +7795,7 @@ cob_debug_dump(void *pMem, int len)
 		return 0;
 	memset(lastWord,0xFD, 4);
 	for(i=0; i < len; ) {
-        for(j=k=0; j < dMaxPerLine && (i+j) < len; j++) {
+		for(j=k=0; j < dMaxPerLine && (i+j) < len; j++) {
 			k += sprintf(&hex[k],"%02X",mem[i+j]&0xFF);
 			if( (j % 4) == 3 )
 				hex[k++] = ' ';
@@ -7729,21 +7811,21 @@ cob_debug_dump(void *pMem, int len)
 		}
 		chr[k++] = 0;
 
-		fprintf(cob_debug_file," %6.6X : %-*s '%s'\n",adrs+i,dMaxHex,hex,chr);
-		if ( (i + dMaxPerLine) < len )
+		fprintf (cob_debug_file," %6.6X : %-*s '%s'\n",adrs+i,dMaxHex,hex,chr);
+		if ((i + dMaxPerLine) < len )
 			memcpy( (char *)lastWord, (char *)&mem[i+dMaxPerLine-4], j<4?j:4);
 		i += dMaxPerLine;
 		if( (i + (16*2)) < len
-		&& repeatWord( lastWord, &mem[i])
-		&& repeatWord( lastWord, &mem[i+dMaxPerLine])) {
-		    fprintf(cob_debug_file," %6.6X : ",adrs+i);
+		&& repeatWord (lastWord, &mem[i])
+		&& repeatWord (lastWord, &mem[i+dMaxPerLine])) {
+			fprintf (cob_debug_file," %6.6X : ",adrs+i);
 			while (i < len - 16
 			&& repeatWord(lastWord,&mem[i]))
 				i += 16;
-			fprintf(cob_debug_file," thru %6.6X same as last word\n",adrs+i-1);
+			fprintf (cob_debug_file," thru %6.6X same as last word\n",adrs+i-1);
 		}
 	}
-	fflush(cob_debug_file);
+	fflush (cob_debug_file);
 
 	return 0;
 }

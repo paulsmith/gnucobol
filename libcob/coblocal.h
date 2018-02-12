@@ -268,9 +268,10 @@ typedef struct __cob_settings {
 
 	/* common.c */
 	char		external_trace_file;	/* use external FILE * for TRACE[ALL] */
-	char		external_display_print_file;	/* use external FILE * for DISPLAY UPON PRINTER */
 	FILE		*cob_trace_file;		/* FILE* to write TRACE[ALL] information to */
-	FILE		*cob_display_print_file;	/* FILE* to write DISPLAY UPON PRINTER information to */
+	FILE		*cob_display_print_file;	/* external FILE* to write DISPLAY UPON PRINTER information to 
+											   if not external cob_display_print_filename is always opened
+											   before each DISPLAY UPON PRINTER and closed afterwards */
 	FILE		*cob_dump_file;		/* FILE* to write DUMP information to */
 
 	char		*cob_dump_filename;	/* Place to write dump of variables */
@@ -289,14 +290,14 @@ struct config_tbl {
 	const char	*conf_name;		/* Name used in run-time config file */
 	const char	*default_val;		/* Default value */
 	struct config_enum *enums;		/* Table of Alternate values */
-	unsigned int		env_group;		/* Grouping for display of run-time options */
-	unsigned int		data_type;		/* Data type */
-	unsigned int		data_loc;		/* Location within structure */
-	unsigned int		data_len;		/* Length of referenced field */
-	unsigned int		config_num;		/* Set by which runtime.cfg file */
-	unsigned int		set_by;			/* value set by a different keyword */
-	unsigned long		min_value;		/* Minimum accepted value */
-	unsigned long		max_value;		/* Maximum accepted value */
+	int		env_group;		/* Grouping for display of run-time options */
+	int		data_type;		/* Data type */
+	int		data_loc;		/* Location within structure */
+	int		data_len;		/* Length of referenced field */
+	int		config_num;		/* Set by which runtime.cfg file */
+	int		set_by;			/* value set by a different keyword */
+	unsigned long	min_value;		/* Minimum accepted value */
+	unsigned long	max_value;		/* Maximum accepted value */
 };
 
 #define ENV_NOT		(1 << 1)		/* Negate True/False value setting */
@@ -370,12 +371,10 @@ COB_HIDDEN void		cob_parameter_check	(const char *, const int);
 COB_HIDDEN void		cob_runtime_error	(const char *, ...) COB_A_FORMAT12;
 COB_HIDDEN void		cob_runtime_warning	(const char *, ...) COB_A_FORMAT12;
 
-COB_HIDDEN char*	cob_save_env_value	(char*, char*);
 COB_HIDDEN cob_settings *cob_get_settings_ptr	(void);
 
 /* COB_DEBUG_LOG Macros and routines found in common.c */
 #ifdef COB_DEBUG_LOG
-COB_HIDDEN int	cob_debug_open		(const char *cob_debug_env);
 COB_HIDDEN int	cob_debug_logit		(int level, char *module);
 COB_HIDDEN int	cob_debug_logger	(const char *fmt, ... );
 COB_HIDDEN int	cob_debug_dump		(void *mem, int len);
