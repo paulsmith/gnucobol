@@ -56,7 +56,7 @@ static const struct option long_options[] = {
 	{"help",		CB_NO_ARG, NULL, 'h'},
 	{"info",		CB_NO_ARG, NULL, 'i'},
 	{"brief",		CB_NO_ARG, NULL, 'q'},
-	{"runtime-conf",		CB_NO_ARG, NULL, 'r'},
+	{"runtime-config",		CB_NO_ARG, NULL, 'r'},
 	{"config",		CB_RQ_ARG, NULL, 'C'},
 	{"version",   		CB_NO_ARG, NULL, 'V'},
 	{"module",		CB_RQ_ARG, NULL, 'm'},
@@ -133,7 +133,7 @@ cobcrun_print_usage (char * prog)
 	puts (_("  -q, -brief                     reduced displays"));
 #endif
 	puts (_("  -c <file>, -config=<file>      set runtime configuration from <file>"));
-	puts (_("  -r, -runtime-conf              display current runtime configuration\n"
+	puts (_("  -r, -runtime-config            display current runtime configuration\n"
 	        "                                 (value and origin for all settings)"));
 	puts (_("  -M <module>, -module=<module>  set entry point module name and/or load path\n"
 			"                                 where -M module prepends any directory to the\n"

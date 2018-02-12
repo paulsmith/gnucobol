@@ -1,4 +1,8 @@
 
+2018-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobcrun.c: renamed -runtime-conf to -runtime-config
+
 2018-01-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c (process_command_line): added missing arg shift for --brief/-q
