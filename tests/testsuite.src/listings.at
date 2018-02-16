@@ -5249,3 +5249,310 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
+AT_SETUP([Report Writer])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      
+      * ************************************************************* *
+      * REPORT WRITER EXAMPLE #1.                                     *
+      * ************************************************************* *
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      
+           SELECT TRANSACTION-DATA
+               ASSIGN TO EXTERNAL DATAIN
+                         ORGANIZATION IS LINE SEQUENTIAL.
+      
+           SELECT REPORT-FILE
+               ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+      
+       DATA DIVISION.
+       FILE SECTION.
+      
+       FD  TRANSACTION-DATA.
+      
+       01  TRANSACTION-RECORD.
+           03  TR-CUSTOMER-NUMBER      PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-CUSTOMER-NAME        PIC X(16).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-NUMBER          PIC 9(05).
+           03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+               05  TR-ITEM-DEPARTMENT  PIC 9(01).
+               05  FILLER              PIC 9(04).
+           03  FILLER                  PIC X(01).
+           03  TR-ITEM-COST            PIC 9(03)V99.
+           03  FILLER                  PIC X(47).
+      
+       FD  REPORT-FILE
+           REPORT IS CUSTOMER-REPORT.
+      
+       WORKING-STORAGE SECTION.
+       77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+           88  END-OF-FILE                         VALUE 'Y'.
+      
+       REPORT SECTION.
+       RD  CUSTOMER-REPORT
+           PAGE LIMIT IS 66 LINES
+           HEADING 1
+           FIRST DETAIL 5
+           LAST DETAIL 58.
+      
+       01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+           02  LINE 1.
+               03  COLUMN 27   PIC X(41) VALUE
+                   'C U S T O M E R  C H A R G E  R E P O R T'.
+           02  LINE PLUS 2.
+               03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+               03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+               03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+               03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+               03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+      
+       01  CHARGE-DETAIL TYPE DETAIL.
+           02  LINE PLUS 1.
+               03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+               03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+               03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+               03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+               03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+      
+       PROCEDURE DIVISION.
+      
+       000-INITIATE.
+      
+           OPEN INPUT TRANSACTION-DATA,
+                OUTPUT REPORT-FILE.
+      
+           INITIATE CUSTOMER-REPORT.
+      
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+           PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+               UNTIL END-OF-FILE.
+      
+       000-TERMINATE.
+           TERMINATE CUSTOMER-REPORT.
+      
+           CLOSE TRANSACTION-DATA,
+                 REPORT-FILE.
+      
+           STOP RUN.
+      
+       100-PROCESS-TRANSACTION-DATA.
+           GENERATE CHARGE-DETAIL.
+           READ TRANSACTION-DATA
+               AT END
+                   MOVE 'Y' TO END-OF-FILE-SWITCH.
+      *    END-READ.
+      
+       199-EXIT.
+           EXIT.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tsymbols -Xref -tlines=0 prog.cob], [0], [], [])
+
+AT_DATA([prog1.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         IDENTIFICATION DIVISION.
+000003         PROGRAM-ID. prog.
+000004
+000005        * ************************************************************* *
+000006        * REPORT WRITER EXAMPLE #1.                                     *
+000007        * ************************************************************* *
+000008
+000009         ENVIRONMENT DIVISION.
+000010         CONFIGURATION SECTION.
+000011
+000012         INPUT-OUTPUT SECTION.
+000013         FILE-CONTROL.
+000014
+000015             SELECT TRANSACTION-DATA
+000016                 ASSIGN TO EXTERNAL DATAIN
+000017                           ORGANIZATION IS LINE SEQUENTIAL.
+000018
+000019             SELECT REPORT-FILE
+000020                 ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
+000021
+000022         DATA DIVISION.
+000023         FILE SECTION.
+000024
+000025         FD  TRANSACTION-DATA.
+000026
+000027         01  TRANSACTION-RECORD.
+000028             03  TR-CUSTOMER-NUMBER      PIC 9(04).
+000029             03  FILLER                  PIC X(01).
+000030             03  TR-CUSTOMER-NAME        PIC X(16).
+000031             03  FILLER                  PIC X(01).
+000032             03  TR-ITEM-NUMBER          PIC 9(05).
+000033             03  FILLER                  REDEFINES TR-ITEM-NUMBER.
+000034                 05  TR-ITEM-DEPARTMENT  PIC 9(01).
+000035                 05  FILLER              PIC 9(04).
+000036             03  FILLER                  PIC X(01).
+000037             03  TR-ITEM-COST            PIC 9(03)V99.
+000038             03  FILLER                  PIC X(47).
+000039
+000040         FD  REPORT-FILE
+000041             REPORT IS CUSTOMER-REPORT.
+000042
+000043         WORKING-STORAGE SECTION.
+000044         77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
+000045             88  END-OF-FILE                         VALUE 'Y'.
+000046
+000047         REPORT SECTION.
+000048         RD  CUSTOMER-REPORT
+000049             PAGE LIMIT IS 66 LINES
+000050             HEADING 1
+000051             FIRST DETAIL 5
+000052             LAST DETAIL 58.
+000053
+000054         01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
+000055             02  LINE 1.
+000056                 03  COLUMN 27   PIC X(41) VALUE
+000057                     'C U S T O M E R  C H A R G E  R E P O R T'.
+000058             02  LINE PLUS 2.
+000059                 03  COLUMN 01   PIC X(09) VALUE 'CUST. NO.'.
+000060                 03  COLUMN 15   PIC X(10) VALUE 'CUST. NAME'.
+000061                 03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
+000062                 03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
+000063                 03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
+000064
+000065         01  CHARGE-DETAIL TYPE DETAIL.
+000066             02  LINE PLUS 1.
+000067                 03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
+000068                 03  COLUMN 10   PIC X(16) SOURCE TR-CUSTOMER-NAME.
+000069                 03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
+000070                 03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
+000071                 03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
+000072
+000073         PROCEDURE DIVISION.
+000074
+000075         000-INITIATE.
+000076
+000077             OPEN INPUT TRANSACTION-DATA,
+000078                  OUTPUT REPORT-FILE.
+000079
+000080             INITIATE CUSTOMER-REPORT.
+000081
+000082             READ TRANSACTION-DATA
+000083                 AT END
+000084                     MOVE 'Y' TO END-OF-FILE-SWITCH.
+000085        *    END-READ.
+000086
+000087             PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
+000088                 UNTIL END-OF-FILE.
+000089
+000090         000-TERMINATE.
+000091             TERMINATE CUSTOMER-REPORT.
+000092
+000093             CLOSE TRANSACTION-DATA,
+000094                   REPORT-FILE.
+000095
+000096             STOP RUN.
+000097
+000098         100-PROCESS-TRANSACTION-DATA.
+000099             GENERATE CHARGE-DETAIL.
+000100             READ TRANSACTION-DATA
+000101                 AT END
+000102                     MOVE 'Y' TO END-OF-FILE-SWITCH.
+000103        *    END-READ.
+000104
+000105         199-EXIT.
+000106             EXIT.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+00080 FILE                TRANSACTION-DATA
+00080 GROUP          01   TRANSACTION-RECORD
+00004 ALPHANUMERIC   03   TR-CUSTOMER-NUMBER             9(04)
+00001 ALPHANUMERIC   03   FILLER                         X(01)
+00016 ALPHANUMERIC   03   TR-CUSTOMER-NAME               X(16)
+00001 ALPHANUMERIC   03   FILLER                         X(01)
+00005 ALPHANUMERIC   03   TR-ITEM-NUMBER                 9(05)
+00005 GROUP          03   FILLER, REDEFINES TR-ITEM-NUMBER
+00001 ALPHANUMERIC   05   TR-ITEM-DEPARTMENT             9(01)
+00004 ALPHANUMERIC   05   FILLER                         9(04)
+00001 ALPHANUMERIC   03   FILLER                         X(01)
+00005 ALPHANUMERIC   03   TR-ITEM-COST                   9(03)V99
+00047 ALPHANUMERIC   03   FILLER                         X(47)
+
+00126 FILE                REPORT-FILE
+
+      WORKING-STORAGE SECTION
+
+00001 ALPHANUMERIC   77   END-OF-FILE-SWITCH             X(1)
+      CONDITIONAL    88   END-OF-FILE
+
+      REPORT SECTION
+
+00126 GROUP          01   PAGE-HEAD-GROUP
+00126 GROUP          02   FILLER
+00041 ALPHANUMERIC   03   FILLER                         X(41)
+00126 GROUP          02   FILLER
+00009 ALPHANUMERIC   03   FILLER                         X(09)
+00010 ALPHANUMERIC   03   FILLER                         X(10)
+00005 ALPHANUMERIC   03   FILLER                         X(05)
+00008 ALPHANUMERIC   03   FILLER                         X(08)
+00009 ALPHANUMERIC   03   FILLER                         X(09)
+
+00126 GROUP          01   CHARGE-DETAIL
+00126 GROUP          02   FILLER
+00004 ALPHANUMERIC   03   FILLER                         Z(04)
+00016 ALPHANUMERIC   03   FILLER                         X(16)
+00001 ALPHANUMERIC   03   FILLER                         9(01)
+00005 ALPHANUMERIC   03   FILLER                         9(05)
+00007 ALPHANUMERIC   03   FILLER                         $$$$.99
+
+
+NAME                           DEFINED                REFERENCES
+
+TRANSACTION-DATA               15       25      77      82      93      100
+TRANSACTION-RECORD             27     referenced by child
+TR-CUSTOMER-NUMBER             28       67
+TR-CUSTOMER-NAME               30       68
+TR-ITEM-NUMBER                 32       70
+TR-ITEM-DEPARTMENT             34       69
+TR-ITEM-COST                   37       71
+
+REPORT-FILE                    19       40     *78      94
+
+END-OF-FILE-SWITCH             44      *84     *102
+END-OF-FILE                    45       88
+
+PAGE-HEAD-GROUP                54     not referenced
+CHARGE-DETAIL                  65       99
+
+
+LABEL                          DEFINED                REFERENCES
+
+E prog                         75
+P 000-INITIATE                 75     not referenced
+P 000-TERMINATE                90     not referenced
+P 100-PROCESS-TRANSACTION-DATA 98       87
+P 199-EXIT                     105      87
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
