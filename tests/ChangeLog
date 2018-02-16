@@ -1,4 +1,9 @@
 
+2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.at, testsuite.src/run_reportwriter.at: activated and
+	  tweaked RW run checks
+
 2018-02-16  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: BUG #494 Added test case for embedded
@@ -343,8 +348,9 @@
 
 2016-02-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* testsuite.at, tests/syn_reportwriter.at: RW checks earlier skipped are
-	  now only comments - will be added back in 2.1 with more and better checks
+	* testsuite.at, testsuite.src/syn_reportwriter.at: RW checks earlier
+	  skipped are now only comments - will be added back in 3.0 with more
+	  and better checks
 
 2016-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

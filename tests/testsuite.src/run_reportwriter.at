@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2014-2018 Free Software Foundation, Inc.
 ## Written by Ron Norman, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -18,7 +18,7 @@
  
 ### GnuCOBOL Test Suite
  
-### ISO+IEC+1989-2002 REPORT WRITER module
+### ISO+IEC+1989-2014 REPORT WRITER module
 
 AT_SETUP([Report Line Order])
 AT_KEYWORDS([report])
@@ -371,8 +371,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT=./report.txt $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -441,8 +440,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [], [])
+AT_CHECK([DD_PRINTOUT=./report.txt $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -2043,8 +2041,8 @@ AT_DATA([prog.cob], [
       
            READ SALES-DATA
                AT END
-                   MOVE 'Y' TO END-OF-FILE-SWITCH.
-      *    END-READ.
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
+           END-READ.
       
            PERFORM 100-PROCESS-SALES-DATA THRU 199-EXIT
                UNTIL END-OF-FILE.
@@ -2061,19 +2059,15 @@ AT_DATA([prog.cob], [
            GENERATE DISTRICT-SALES-REPORT.
            READ SALES-DATA
                AT END
-                   MOVE 'Y' TO END-OF-FILE-SWITCH.
-      *    END-READ.
+                   MOVE 'Y' TO END-OF-FILE-SWITCH
+           END-READ.
       
        199-EXIT.
            EXIT.
       
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob: in section 'USE-SALESMAN-TOTAL':
-prog.cob: in paragraph 'USE-SALESMAN-TOTAL-PROC':
-prog.cob:127: warning: ignoring sign
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
@@ -2736,7 +2730,7 @@ AT_DATA([prog.cob], [
            PERFORM COMP-FOOT-CALC
                VARYING WPCD-IX FROM +1 BY +1
                UNTIL WPCD-IX > +6.
-           GO TO COMP-FOOT-EXIT.                                        
+           GO TO COMP-FOOT-EXIT.
       
        COMP-FOOT-CALC.
            SET DE-IX TO WPCD-IX.
@@ -2798,9 +2792,10 @@ AT_DATA([prog.cob], [
       
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 266: Warning: PLUS is ignored on first field of line
-prog.cob: 288: Warning: PLUS is ignored on first field of line
-prog.cob: 310: Warning: PLUS is ignored on first field of line
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:266: warning: PLUS is ignored on first field of line
+prog.cob:288: warning: PLUS is ignored on first field of line
+prog.cob:310: warning: PLUS is ignored on first field of line
 ])
 
 AT_CHECK([DD_DATAIN="./inp_data" DD_SYSPRINT="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
@@ -3172,9 +3167,7 @@ AT_DATA([prog.cob], [
            TERMINATE STUDENT-REPORT.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:16: warning: RECORD clause ignored for LINE SEQUENTIAL
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
 AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" $COBCRUN_DIRECT ./prog], [0], 
 [Report Test 1
@@ -3224,7 +3217,8 @@ AT_CLEANUP
 AT_SETUP([ORDER REPORT; Test substring])
 AT_KEYWORDS([report])
 
-AT_DATA([inp_data],[10001090001012010590416      $
+AT_DATA([inp_data],
+[10001090001012010590416      $
 10001090002013016950416      $
 10002090002023016950416      $
 10002090001022010590416      $
@@ -3367,12 +3361,12 @@ AT_DATA([prog.cob], [
        01  TYPE PAGE HEADING.
            05  LINE 2.
                10  COLUMN  10   PIC X(8) VALUE " Time:".
-               10  COLUMN  20   PIC 99  SOURCE CURRENT-TIME(1:2).
+               10  COLUMN  20   PIC 99  SOURCE CURRENT-TIME (1:2).
                10  COLUMN  22   PIC X VALUE ':'.
                10  COLUMN  23   PIC 99  SOURCE CURRENT-TIME (3:2).
                10  COLUMN  25   PIC X VALUE ':'.
                10  COLUMN  26   PIC 99  SOURCE CURRENT-TIME (5:2).
-               10  COLUMN  94   PIC X(5) VALUE 'PAGE'.
+               10  COLUMN  94   PIC X(5) VALUE 'Page'.
                10  COLUMN 106    PIC ZZ9
                       SOURCE PAGE-COUNTER.
            05  LINE 4.
@@ -3420,9 +3414,8 @@ AT_DATA([prog.cob], [
 
        PROCEDURE DIVISION.
        A000-MAINLINE.
-      *    ACCEPT CURRENT-TIME FROM TIME.
       * Use hard coded time value so test is repeatable
-           DISPLAY "Report test 2 at " CURRENT-TIME UPON CONSOLE.
+      *    ACCEPT CURRENT-TIME FROM TIME.
            OPEN INPUT  CUST-ORDER-FILE
                 OUTPUT CUST-PRINT-FILE.
            INITIATE ORDER-REPORT.
@@ -3434,7 +3427,6 @@ AT_DATA([prog.cob], [
            TERMINATE ORDER-REPORT.
            CLOSE CUST-ORDER-FILE
                   CUST-PRINT-FILE.
-           DISPLAY "Report test 2 completed" UPON CONSOLE.
            STOP RUN.
        A001-LOOP.
            MULTIPLY NUM-ORD BY PRICE GIVING AMT-ORDER.
@@ -3446,14 +3438,9 @@ AT_DATA([prog.cob], [
                     MOVE 'NO' TO ARE-THERE-MORE-RECORDS.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:16: warning: RECORD clause ignored for LINE SEQUENTIAL
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([DD_CUSTORD="./inp_data" DD_REPORT2="./report.txt" $COBCRUN_DIRECT ./prog], [0],
-[Report test 2
-Report test 2 completed
-], [])
+AT_CHECK([DD_CUSTORD="./inp_data" DD_REPORT2="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -4173,7 +4160,6 @@ AT_DATA([prog.cob], [
             03  MRK4  COLUMN +2     PIC X(4).
 
        PROCEDURE DIVISION.
-	   DISPLAY "Test started" UPON PRINTER.
            OPEN OUTPUT rp-file
            INITIATE rp
 
@@ -4199,20 +4185,14 @@ AT_DATA([prog.cob], [
 
            TERMINATE rp  
            CLOSE rp-file
-	   DISPLAY "Test completed" UPON PRINTER.
 
-           STOP RUN .
+           STOP RUN.
            END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [prog.cob: 49: Warning: 'PRINTER' is not defined in SPECIAL-NAMES
-prog.cob: 75: Warning: 'PRINTER' is not defined in SPECIAL-NAMES
-])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [Test started
-Test completed
-], [])
+AT_CHECK([DD_PRINTOUT=./report.txt $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -4299,7 +4279,6 @@ AT_DATA([prog.cob], [
             03  MRK4  COLUMN +2     PIC X(4).
 
        PROCEDURE DIVISION.
-           DISPLAY "Test started".
            OPEN OUTPUT RP-FILE
            INITIATE RP
 
@@ -4325,19 +4304,17 @@ AT_DATA([prog.cob], [
 
            TERMINATE rp  
            CLOSE RP-FILE
-           DISPLAY "Test completed".
 
            STOP RUN .
            END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [],
+[prog.cob:39: warning: RW VARYING clause is not implemented
+])
 
 AT_CHECK([DD_PRINTOUT=./report_var.txt \
-./prog], [0],
-[Test started
-Test completed
-], [])
+$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4399,7 +4376,6 @@ AT_DATA([prog.cob], [
             03  MRK4  COLUMN +2     PIC X(4).
 
        PROCEDURE DIVISION.
-           DISPLAY "Test started".
            OPEN OUTPUT RP-FILE
            INITIATE RP
 
@@ -4425,19 +4401,17 @@ AT_DATA([prog.cob], [
 
            TERMINATE rp  
            CLOSE RP-FILE
-           DISPLAY "Test completed".
 
            STOP RUN .
            END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [],
+[prog.cob:37: warning: RW VARYING clause is not implemented
+])
 
 AT_CHECK([DD_PRINTOUT=./report_lit.txt \
-./prog], [0],
-[Test started
-Test completed
-], [])
+$COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report_var.txt)
@@ -4456,8 +4430,8 @@ Hi-Q:
 Hi-Q: 
 ])
 
-AT_CHECK([gcdiff reference report_var.txt], [0])
-AT_CHECK([gcdiff reference report_lit.txt], [0])
+AT_CHECK([diff reference report_var.txt], [0])
+AT_CHECK([diff reference report_lit.txt], [0])
 
 AT_CLEANUP
 
@@ -4511,8 +4485,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [], [prog.cob: 34: libcob: ERROR INITIATE rp was already done
+AT_CHECK([DD_PRINTOUT=./report.txt $COBCRUN_DIRECT ./prog], [0], [],
+[libcob: prog.cob:34: INITIATE rp was already done
 ])
 
 
@@ -4561,23 +4535,23 @@ AT_DATA([prog.cob], [
            OPEN OUTPUT report-file.
 
            MOVE "hello" TO foo.
-            GENERATE rp-detail.
+           GENERATE rp-detail.
 
            MOVE "goodbye" TO foo.
-            GENERATE rp-detail.
+           GENERATE rp-detail.
 
            TERMINATE rp.
-             CLOSE report-file.
+           CLOSE report-file.
            STOP RUN.
            END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_PRINTOUT=./report.txt
-./prog], [0], [], [prog.cob: 31: libcob: ERROR GENERATE rp but No INITIATE was done
-prog.cob: 34: libcob: ERROR GENERATE rp but No INITIATE was done
-prog.cob: 36: libcob: ERROR TERMINATE rp but No INITIATE was done
+AT_CHECK([DD_PRINTOUT=./report.txt $COBCRUN_DIRECT ./prog], [0], [],
+[libcob: prog.cob:31: GENERATE rp but no INITIATE was done
+libcob: prog.cob:34: GENERATE rp but no INITIATE was done
+libcob: prog.cob:36: TERMINATE rp but no INITIATE was done
 ])
 
 
@@ -4881,9 +4855,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([export DD_TEMPFILE=./inp_data
-export DD_REPORTFILE=./report.txt
-./prog], [0], [], [])
+AT_CHECK([DD_TEMPFILE=./inp_data DD_REPORTFILE=./report.txt $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)

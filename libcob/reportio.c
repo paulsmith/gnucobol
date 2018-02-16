@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2013-2017 Free Software Foundation, Inc.
+   Copyright (C) 2013-2018 Free Software Foundation, Inc.
    Written by Ron Norman
 
    This file is part of GnuCOBOL.
@@ -641,14 +641,14 @@ limitCheckOneLine(cob_report *r, cob_report_line *fl)
 	cob_report_field	*rf;
 
 	if((fl->line > 0 && r->def_lines > 0 && fl->line > r->def_lines)) {
-		cob_runtime_error (_("ERROR INITIATE %s LINE %d exceeds PAGE LIMIT %d"),r->report_name,fl->line,r->def_lines);
+		cob_runtime_error (_("INITIATE %s LINE %d exceeds PAGE LIMIT %d"),r->report_name,fl->line,r->def_lines);
 		DEBUG_LOG("rw",("PAGE LIMITs is incorrect; LINE %d > LIMIT %d\n",fl->line,r->def_lines));
 		cob_set_exception (COB_EC_REPORT_PAGE_LIMIT);
 		r->initiate_done = FALSE;
 		return;
 	}
 	if((fl->next_group_line > 0 && r->def_lines > 0 && fl->next_group_line > r->def_lines)) {
-		cob_runtime_error (_("ERROR INITIATE %s NEXT GROUP %d exceeds PAGE LIMIT"),r->report_name,fl->next_group_line);
+		cob_runtime_error (_("INITIATE %s NEXT GROUP %d exceeds PAGE LIMIT"),r->report_name,fl->next_group_line);
 		DEBUG_LOG("rw",("PAGE LIMITs is incorrect; NEXT GROUP %d > LIMIT %d\n",fl->next_group_line,r->def_lines));
 		cob_set_exception (COB_EC_REPORT_PAGE_LIMIT);
 		r->initiate_done = FALSE;
@@ -656,14 +656,14 @@ limitCheckOneLine(cob_report *r, cob_report_line *fl)
 	}
 	for(rf = fl->fields; rf; rf = rf->next) {
 		if((rf->line && rf->line > r->def_lines)) {
-			cob_runtime_error (_("ERROR INITIATE %s LINE %d exceeds PAGE LIMIT"),r->report_name,rf->line);
+			cob_runtime_error (_("INITIATE %s LINE %d exceeds PAGE LIMIT"),r->report_name,rf->line);
 			DEBUG_LOG("rw",("PAGE LIMITs is incorrect; LINE %d > LIMIT %d\n",rf->line,r->def_lines));
 			cob_set_exception (COB_EC_REPORT_PAGE_LIMIT);
 			r->initiate_done = FALSE;
 			return;
 		}
 		if((rf->next_group_line && rf->next_group_line > r->def_lines)) {
-			cob_runtime_error (_("ERROR INITIATE %s NEXT GROUP %d exceeds PAGE LIMIT"),r->report_name,rf->next_group_line);
+			cob_runtime_error (_("INITIATE %s NEXT GROUP %d exceeds PAGE LIMIT"),r->report_name,rf->next_group_line);
 			DEBUG_LOG("rw",("PAGE LIMITs is incorrect; NEXT GROUP %d > LIMIT %d\n",rf->next_group_line,r->def_lines));
 			cob_set_exception (COB_EC_REPORT_PAGE_LIMIT);
 			r->initiate_done = FALSE;
@@ -1308,7 +1308,7 @@ cob_report_initiate(cob_report *r)
 
 	reportInitialize();
 	if(r->initiate_done) {
-		cob_runtime_error (_("ERROR INITIATE %s was already done"),r->report_name);
+		cob_runtime_error (_("INITIATE %s was already done"),r->report_name);
 		DEBUG_LOG("rw",("REPORT was already INITIATEd\n"));
 		cob_set_exception (COB_EC_REPORT_ACTIVE);
 		return;
@@ -1324,7 +1324,7 @@ cob_report_initiate(cob_report *r)
 	|| (r->def_footing > 0 && !(r->def_footing >= r->def_last_detail))
 	|| (r->def_lines > 0 && !(r->def_lines >= r->def_heading))
 	|| (r->def_lines > 0 && !(r->def_lines >= r->def_footing))) {
-		cob_runtime_error (_("ERROR INITIATE %s PAGE LIMIT problem"),r->report_name);
+		cob_runtime_error (_("INITIATE %s PAGE LIMIT problem"),r->report_name);
 #if defined(COB_DEBUG_LOG) 
 		DEBUG_LOG("rw",("PAGE LIMITs is incorrect\n"));
 		reportDump(r,"INITIATE");
@@ -1393,7 +1393,7 @@ cob_report_terminate(cob_report *r, int ctl)
 
 	if(!r->initiate_done) {
 		DEBUG_LOG("rw",("INITIATE was never done!\n"));
-		cob_runtime_error (_("ERROR TERMINATE %s but No INITIATE was done"),r->report_name);
+		cob_runtime_error (_("TERMINATE %s but no INITIATE was done"),r->report_name);
 		cob_set_exception (COB_EC_REPORT_INACTIVE);
 		return 0;
 	}
@@ -1558,7 +1558,7 @@ cob_report_generate(cob_report *r, cob_report_line *l, int ctl)
 
 	reportInitialize();
 	if(!r->initiate_done) {
-		cob_runtime_error (_("ERROR GENERATE %s but No INITIATE was done"),r->report_name);
+		cob_runtime_error (_("GENERATE %s but no INITIATE was done"),r->report_name);
 		cob_set_exception (COB_EC_REPORT_INACTIVE);
 		return 0;
 	}
@@ -1852,5 +1852,5 @@ cob_report_suppress(cob_report *r, cob_report_line *l)
 			}
 		}
 	}
-	cob_runtime_error (_("ERROR Could not find line to suppress in report %s"),r->report_name);
+	cob_runtime_error (_("could not find line to SUPPRESS in report %s"),r->report_name);
 }
