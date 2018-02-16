@@ -393,6 +393,152 @@ SIZE  TYPE           LVL  NAME                           PICTURE
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog5.lst prog.lis], [0], [], [])
 
+AT_CAPTURE_FILE([prog1.lst])
+
+AT_DATA([copy1.inc], [
+       01 'yyy-'struktur.
+          05  'yyy-'hello    pic x(30) value 'yyy copy1.inc'.
+          05  'yy1-'hello    pic x(30) value 'yy1 copy1.inc'.
+          05  'yy2-'hello    pic x(30) value 'yy2 copy1.inc'.
+          05  filler         pic x(20).
+])
+
+AT_DATA([prog1.cob], [
+       identification division.
+       program-id. copytest.
+
+       data division.
+       working-storage section.
+       01 hello                pic x(20) value 'Copytest'.
+
+       01 xx                   pic x(02).
+
+          copy 'copy1.inc' replacing 'YYY-' by a10-
+                                     'yy1-' by a11-
+                                     'yy2-' by a12-.
+
+          copy 'copy1.inc' replacing 'YYY-' by a20-
+                                     'yy1-' by a21-
+                                     'yy2-' by a22-.
+
+          copy 'copy1.inc' replacing 'YYY-' by a30-
+                                     'yy1-' by a31-
+                                     'yy2-' by a32-.
+
+       procedure division.
+
+       display hello
+
+       display 'a10-struktur'
+       display a10-struktur
+
+       display 'a20-struktur'
+       display a20-struktur
+
+       display 'a30-struktur'
+       display a30-struktur
+
+       goback.
+       end program copytest.
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog1.lst -tlines=0 -tsymbols prog1.cob], [0], [], [])
+
+AT_DATA([prog6.lst],
+[GnuCOBOL V.R.P               prog1.cob                  DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002         identification division.
+000003         program-id. copytest.
+000004
+000005         data division.
+000006         working-storage section.
+000007         01 hello                pic x(20) value 'Copytest'.
+000008
+000009         01 xx                   pic x(02).
+000010
+000011            copy 'copy1.inc' replacing 'YYY-' by a10-
+000012                                       'yy1-' by a11-
+000013                                       'yy2-' by a12-.
+000001C
+000002C        01 a10-struktur.
+000003C        05 a10-hello pic x(30) value 'yyy copy1.inc'.
+000004C        05 a11-hello pic x(30) value 'yy1 copy1.inc'.
+000005C        05 a12-hello pic x(30) value 'yy2 copy1.inc'.
+000006C           05  filler         pic x(20).
+000014
+000015            copy 'copy1.inc' replacing 'YYY-' by a20-
+000016                                       'yy1-' by a21-
+000017                                       'yy2-' by a22-.
+000001C
+000002C        01 a20-struktur.
+000003C        05 a20-hello pic x(30) value 'yyy copy1.inc'.
+000004C        05 a21-hello pic x(30) value 'yy1 copy1.inc'.
+000005C        05 a22-hello pic x(30) value 'yy2 copy1.inc'.
+000006C           05  filler         pic x(20).
+000018
+000019            copy 'copy1.inc' replacing 'YYY-' by a30-
+000020                                       'yy1-' by a31-
+000021                                       'yy2-' by a32-.
+000001C
+000002C        01 a30-struktur.
+000003C        05 a30-hello pic x(30) value 'yyy copy1.inc'.
+000004C        05 a31-hello pic x(30) value 'yy1 copy1.inc'.
+000005C        05 a32-hello pic x(30) value 'yy2 copy1.inc'.
+000006C           05  filler         pic x(20).
+000022
+000023         procedure division.
+000024
+000025         display hello
+000026
+000027         display 'a10-struktur'
+000028         display a10-struktur
+000029
+000030         display 'a20-struktur'
+000031         display a20-struktur
+000032
+000033         display 'a30-struktur'
+000034         display a30-struktur
+000035
+000036         goback.
+000037         end program copytest.
+
+SIZE  TYPE           LVL  NAME                           PICTURE
+
+      WORKING-STORAGE SECTION
+
+00020 ALPHANUMERIC   01   hello                          X(20)
+
+00002 ALPHANUMERIC   01   xx                             X(02)
+
+00110 GROUP          01   a10-struktur
+00030 ALPHANUMERIC   05   a10-hello                      X(30)
+00030 ALPHANUMERIC   05   a11-hello                      X(30)
+00030 ALPHANUMERIC   05   a12-hello                      X(30)
+00020 ALPHANUMERIC   05   FILLER                         X(20)
+
+00110 GROUP          01   a20-struktur
+00030 ALPHANUMERIC   05   a20-hello                      X(30)
+00030 ALPHANUMERIC   05   a21-hello                      X(30)
+00030 ALPHANUMERIC   05   a22-hello                      X(30)
+00020 ALPHANUMERIC   05   FILLER                         X(20)
+
+00110 GROUP          01   a30-struktur
+00030 ALPHANUMERIC   05   a30-hello                      X(30)
+00030 ALPHANUMERIC   05   a31-hello                      X(30)
+00030 ALPHANUMERIC   05   a32-hello                      X(30)
+00020 ALPHANUMERIC   05   FILLER                         X(20)
+
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$UNIFY_LISTING prog1.lst prog1.lis once], [0], [], [])
+AT_CHECK([diff prog6.lst prog1.lis], [0], [], [])
+
 AT_CLEANUP
 
 

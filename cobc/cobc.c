@@ -5494,6 +5494,12 @@ get_next_token (char *bp, char *token, char *term)
 			if (*bp == '"' || *bp == '\'') {
 				in_string = !in_string;
 				*token++ = *bp++;
+				if (!in_string) {
+					if (isspace ((unsigned char)*bp) || *bp == ',' || *bp == '.' || *bp == ';') {
+						term[0] = *bp++;
+					}
+					break;
+				}
 				continue;
 			}
 			if (in_string) {
