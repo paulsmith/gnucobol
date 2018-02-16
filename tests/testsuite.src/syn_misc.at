@@ -339,9 +339,10 @@ AT_DATA([prog.cob], [
             continue
            end-if
            if some-not-s
-            set some-not to true
+            set some-not   to true
             set some-not-s to true
            end-if
+           set never-true  to true
            goback.
 ])
 
@@ -353,7 +354,11 @@ prog.cob:13: warning: expression is always FALSE
 prog.cob:13: warning: literal 'cd' is longer than 'xx'
 prog.cob:13: warning: expression is always FALSE
 prog.cob:24: warning: value size exceeds data size
+prog.cob:24: warning: value size is 2
 prog.cob:11: warning: 'xx' defined here as PIC X
+prog.cob:26: warning: value size exceeds data size
+prog.cob:26: warning: value is 99
+prog.cob:7: warning: 'x' defined here as PIC 9
 ])
 
 AT_CLEANUP

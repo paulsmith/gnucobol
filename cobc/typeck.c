@@ -7822,7 +7822,7 @@ warning_destination (cb_tree x)
 
 static void
 move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
-	      const int flag, const int src_flag, const char *msg)
+	      const int warning_flag, const int src_flag, const char *msg)
 {
 	cb_tree		loc;
 
@@ -7831,7 +7831,7 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 	}
 	loc = src->source_line ? src : dst;
 	if (value_flag) {
-		/* VALUE clause */
+		/* VALUE clause --> always warn */
 		if (CB_LITERAL_P (src)) {
 			cb_warning_x (COBC_WARN_FILLER, dst, "%s", msg);
 		} else {
@@ -7839,15 +7839,27 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 		}
 	} else {
 		/* MOVE statement */
-		if (flag) {
+		if (warning_flag) {
 			if (CB_LITERAL_P (src)) {
-				cb_warning_x (COBC_WARN_FILLER, dst, "%s", msg);
+				cb_warning_x (warning_flag, dst, "%s", msg);
 			} else {
-				cb_warning_x (COBC_WARN_FILLER, loc, "%s", msg);
+				cb_warning_x (warning_flag, loc, "%s", msg);
 			}
 			listprint_suppress ();
 			if (src_flag) {
-				warning_destination (src);
+				/* note: src_flag is -1 for numeric literals,
+				   contains literal size otherwise */
+				if (!CB_LITERAL_P (src)) {
+					warning_destination (src);
+				} else if (src_flag == -1) {
+					if (CB_LITERAL_P (src)) {
+						cb_warning_x (warning_flag, dst,
+							_("value is %s"), CB_LITERAL (src)->data);
+					}
+				} else {
+					cb_warning_x (warning_flag, dst,
+						_("value size is %d"), src_flag);
+				}
 			}
 			warning_destination (dst);
 			listprint_restore ();
@@ -8381,6 +8393,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				return 0;
 			}
 			if (least_significant < -fdst->pic->scale) {
+				size = -1;
 				goto size_overflow;
 			}
 			if (fdst->pic->scale > 0) {
@@ -8389,6 +8402,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				size = fdst->pic->digits;
 			}
 			if (most_significant >= size) {
+				size = -1;
 				goto size_overflow;
 			}
 		} else {
@@ -8422,6 +8436,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			if (size > 0
 			    && !fdst->flag_any_length
 			    && (int)l->size > size) {
+				size = (int)l->size;
 				goto size_overflow;
 			}
 		}
@@ -8608,7 +8623,8 @@ value_mismatch:
 	return 0;
 
 size_overflow:
-	move_warning (src, dst, is_value, cb_warn_truncate, 0,
+	/* note: size is -1 for numeric literals, contains literal size otherwise */
+	move_warning (src, dst, is_value, cb_warn_truncate, size,
 		    _("value size exceeds data size"));
 	return 0;
 

@@ -1,4 +1,9 @@
 
+2018-02-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (validate_move, move_warning): show literal size for
+	  size overflow warnings (for numeric literals the actual literal)
+
 2018-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: renamed cob_strcasecmp to cb_strcasecmp
