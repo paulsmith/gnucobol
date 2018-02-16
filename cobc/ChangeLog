@@ -3,6 +3,8 @@
 
 	* typeck.c (validate_move, move_warning): show literal size for
 	  size overflow warnings (for numeric literals the actual literal)
+	* cobc.c (preprocess): FR #81 preprocess to stdout if no output file
+	  is given (= revert back to behaviour of GnuCOBOL pre 2.x)
 
 2018-02-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -65,7 +65,19 @@ AT_CHECK([$COBC -x -C prog.cob], [0], [], [])
 AT_CHECK([$COBC -x -c prog.c], [0], [], [])
 AT_CHECK([$COBC -x prog.$COB_OBJECT_EXT -o progo], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./progo], [0], [bluBb], [])
-AT_CHECK([$COBC -E prog.cob], [0], [], [])
+AT_CHECK([$COBC -E prog.cob], [0],
+[#line 1 "prog.cob"
+
+ IDENTIFICATION DIVISION.
+ PROGRAM-ID. prog.
+ DATA DIVISION.
+ WORKING-STORAGE SECTION.
+ 01 BLA PIC X(5) VALUE 'bluBb'.
+ PROCEDURE DIVISION.
+ DISPLAY BLA NO ADVANCING END-DISPLAY
+ STOP RUN.
+], [])
+AT_CHECK([$COBC -E -o prog.i prog.cob], [0], [], [])
 AT_CHECK([$COBC -x prog.i], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [bluBb], [])
 AT_CLEANUP

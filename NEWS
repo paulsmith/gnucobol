@@ -1,6 +1,6 @@
 NEWS - user visible changes				-*- outline -*-
 
-GnuCOBOL 3.0 to be released (201801xx)
+GnuCOBOL 3.0 to be released (201802xx)
 
 * New GnuCOBOL features
 
@@ -27,6 +27,10 @@ GnuCOBOL 3.0 to be released (201801xx)
 ** The option -debug (runtime checks) no longer implies -ftrace (option to
    trace program flow of the generated module with COB_SET_TRACE).
    You may specify -ftrace[all] along -debug if you want to use this feature.
+
+** The option -E (preprocess file) does not imply an output file any more.
+   If no output file is explicit specified with -o filename.i the output will
+   be written to stdout (behavior of versions 1.1 is restored).
 
 ** The option -fif-cutoff (option to change generated C sources to use
    a label + goto for nested if/else) was deactivated to allow the C compiler

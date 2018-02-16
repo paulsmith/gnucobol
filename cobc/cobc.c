@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2018 Free Software Foundation, Inc.
 
    Authors:
    Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Brian Tiffin,
@@ -2035,7 +2035,7 @@ cobc_print_version (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2017 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
 	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
@@ -4345,13 +4345,17 @@ preprocess (struct filename *fn)
 	int			ret;
 #endif
 
-	if (cb_unix_lf) {
-		ppout = fopen(fn->preprocess, "wb");
+	if (output_name || cb_compile_level > CB_LEVEL_PREPROCESS) {
+		if (cb_unix_lf) {
+			ppout = fopen(fn->preprocess, "wb");
+		} else {
+			ppout = fopen(fn->preprocess, "w");
+		}
+		if (!ppout) {
+			cobc_terminate (fn->preprocess);
+		}
 	} else {
-		ppout = fopen(fn->preprocess, "w");
-	}
-	if (!ppout) {
-		cobc_terminate (fn->preprocess);
+		ppout = stdout;
 	}
 
 	if (fn->file_is_stdin) {
