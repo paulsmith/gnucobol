@@ -4502,6 +4502,78 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
+# TODO: add more here
+AT_SETUP([whitespace handling])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog1.cob], [
+       IDENTIFICATION
+           DIVISION
+           .
+           author.
+           tester.
+       PROGRAM-ID
+           .
+           prog1
+           .
+           REMARKS;. Should work.,,
+
+       ENVIRONMENT
+           DIVISION
+           .
+       CONFIGURATION
+           SECTION
+           .
+       SOURCE-COMPUTER
+           .
+             whatever
+           WITH
+           DEBUGGING
+           MODE
+           .
+
+      DDATA
+      D   DIVISION
+      D   .
+       WORKING-STORAGE
+          SECTION
+          .
+       01
+           i
+           PIC
+           9
+           .
+
+       PROCEDURE
+           DIVISION
+           .
+           STOP
+           RUN
+           .
+])
+
+AT_DATA([prog2.cob], [
+       ID,;DIVISION;,.,;
+           author,.;tester.
+       PROGRAM-ID,;.;,prog2;,.;,
+           REMARKS;. Should work.,,
+       ENVIRONMENT,;DIVISION;,.,;
+       CONFIGURATION;;,,SECTION;;,,.
+       SOURCE-COMPUTER;;.,,whatever;DEBUGGING,MODE.
+
+      DDATA;DIVISION,.
+      DWORKING-STORAGE,SECTION;.
+       01;i,PIC;9;.
+
+       PROCEDURE;DIVISION,.;
+           STOP,RUN;.,
+])
+
+AT_CHECK([$COMPILE_ONLY -Wno-obsolete prog1.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -Wno-obsolete prog2.cob], [0], [], [])
+AT_CLEANUP
+
+
 AT_SETUP([STOP identifier])
 AT_KEYWORDS([misc extensions])
 

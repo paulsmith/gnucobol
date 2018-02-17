@@ -415,8 +415,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	return CONTROL_STATEMENT;
 }
 
-"ID"[ ,;]+"DIVISION" |
-"IDENTIFICATION"[ ,;]+"DIVISION" {
+("ID"|"IDENTIFICATION")[ ,;\n]+"DIVISION" {
 	/* Allow comment sentences/paragraphs */
 	comment_allowed = 1;
 	ppecho (yytext, 0, (int)yyleng);
@@ -482,8 +481,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	}
 }
 
-"WITH"[ ,;]+"DEBUGGING"[ ,;]+"MODE" |
-"DEBUGGING"[ ,;]+"MODE"	{
+("WITH"[ ,;\n]+)?"DEBUGGING"[ ,;\n]+"MODE"	{
 	/* Pick up early - Also activates debugging lines */
 	cb_verify (cb_debugging_mode, "DEBUGGING MODE");
 	cb_flag_debugging_line = 1;

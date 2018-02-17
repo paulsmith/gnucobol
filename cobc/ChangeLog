@@ -3202,6 +3202,11 @@
 	* parser.y: fix #88 false unreachable warning after END DECLARATIVES
 	  without main section/paragraph
 
+2014-07-18  Edward Hart <edward.dan.hart@gmail.com>
+
+	* pplex.l: fixed bug #86 whitespace handling for IDENTIFICATION DIVISION
+	  and DEBUGGING MODE
+
 2014-07-10  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* typeck.c (cb_emit_sort_init): calculation of table key offset fixed
