@@ -8801,11 +8801,11 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 	output_local ("static cob_report %s%s = {\n", CB_PREFIX_REPORT,p->cname);
 	output_local ("\t\t\"%s\",\n\t\t",p->name);
 	if(n != NULL) {
-		output_local ("&%s%s,", CB_PREFIX_REPORT, n->cname);
+		output_local ("&%s%s,", CB_PREFIX_REPORT, n->cname);	/* next report */
 	} else {
 		output_local ("NULL,");
 	}
-	output_local ("NULL,");	/* Address set at run-time */
+	output_local ("NULL,");	/* report file (address set at run-time) */
 	if (p->page_counter) {
 		output_param (p->page_counter, 0);
 		output_local (",");
@@ -9898,6 +9898,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_initial_values (prog->working_storage);
 			output_newline ();
 		}
+		if (prog->file_list) {
+			for (l = prog->file_list; l; l = CB_CHAIN (l)) {
+				output_file_initialization (CB_FILE (CB_VALUE (l)));
+			}
+		}
 
 		/* Do Reports again here */
 		if (prog->report_list) {
@@ -9908,11 +9913,6 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 				output_report_init (rep);
 			}
 			output_newline ();
-		}
-		if (prog->file_list) {
-			for (l = prog->file_list; l; l = CB_CHAIN (l)) {
-				output_file_initialization (CB_FILE (CB_VALUE (l)));
-			}
 		}
 	}
 

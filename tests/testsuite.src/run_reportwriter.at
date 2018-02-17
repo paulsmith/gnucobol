@@ -2919,9 +2919,10 @@ AT_DATA([prog.cob], [
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        INPUT-OUTPUT SECTION.
+
        FILE-CONTROL.
                SELECT INPUT-FILE ASSIGN TO EXTERNAL STUDENT
-                              ORGANIZATION IS LINE SEQUENTIAL. 
+                              ORGANIZATION IS LINE SEQUENTIAL.
                SELECT PRINT-FILE ASSIGN TO EXTERNAL 
                               LINE ADVANCING REPORT1.
 
@@ -2935,22 +2936,21 @@ AT_DATA([prog.cob], [
                05  NUM-COURSES              PIC  9(6).
 
        FD   PRINT-FILE
-             BLOCK CONTAINS 0 RECORDS                                     
-             LABEL RECORD STANDARD                                        
-             RECORDING MODE IS F                                          
-             RECORD CONTAINS 132 CHARACTERS  
+             BLOCK CONTAINS 0 RECORDS
+             RECORDING MODE IS F
+             RECORD CONTAINS 132 CHARACTERS
             REPORT IS STUDENT-REPORT.
        01   RW-REC  PIC X(90).
 
        WORKING-STORAGE SECTION.
-       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".
 
        REPORT SECTION.
        RD   STUDENT-REPORT
-           PAGE LIMIT 30 
+           PAGE LIMIT 30
            HEADING 1
-           FIRST DETAIL 5
-           LAST DETAIL 25
+           FIRST DETAIL  5
+           LAST  DETAIL 25
            FOOTING 28
            LINE LIMIT 90
            .
@@ -3011,7 +3011,12 @@ AT_DATA([prog.cob], [
            TERMINATE STUDENT-REPORT.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:62: warning: PLUS is ignored on first field of line
+prog.cob:64: error: PLUS is not allowed with LEFT, RIGHT or CENTER
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
 [prog.cob:62: warning: PLUS is ignored on first field of line
 prog.cob:64: warning: PLUS is not recommended with LEFT, RIGHT or CENTER
 ])
@@ -3063,7 +3068,8 @@ AT_CLEANUP
 AT_SETUP([STUDENT REPORT with INITIAL])
 AT_KEYWORDS([report])
 
-AT_DATA([inp_data],[00123Dorken, Keith       CS 08
+AT_DATA([inp_data],
+[00123Dorken, Keith       CS 08
 00124Allinson, Sandy     MA 08
 00125Allinson, Nina      MA 08
 00126Allinson, Natalia   MA 08
@@ -3100,7 +3106,7 @@ AT_DATA([prog.cob], [
              REPORT IS STUDENT-REPORT STUDENT-REPORT2.
 
        WORKING-STORAGE SECTION.
-       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".          
+       01   ARE-THERE-MORE-RECORDS       PIC  XXX   VALUE  "YES".
 
        REPORT SECTION.
        RD   STUDENT-REPORT
@@ -3169,10 +3175,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" $COBCRUN_DIRECT ./prog], [0], 
-[Report Test 1
-'  000005     Hello                    Bye     7    '
-], [])
+AT_CHECK([DD_STUDENT="./inp_data" DD_REPORT1="./report.txt" $COBCRUN_DIRECT ./prog], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report.txt)
@@ -4217,9 +4220,9 @@ AT_CLEANUP
 AT_SETUP([Report CODE and LIMIT COLUMNS])
 AT_KEYWORDS([report])
 
-AT_DATA([prog.cob], [
+AT_DATA([progv.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
+       PROGRAM-ID. progv.
 
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
@@ -4302,23 +4305,22 @@ AT_DATA([prog.cob], [
            MOVE "<4>" TO MRK4.
            GENERATE RP-DTL4
 
-           TERMINATE rp  
+           TERMINATE rp
            CLOSE RP-FILE
 
-           STOP RUN .
-           END PROGRAM prog.
+           STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [],
-[prog.cob:39: warning: RW VARYING clause is not implemented
+AT_CHECK([$COMPILE -std=cobol2002 progv.cob], [0], [],
+[progv.cob:39: warning: RW VARYING clause is not implemented
 ])
 
 AT_CHECK([DD_PRINTOUT=./report_var.txt \
-$COBCRUN_DIRECT ./prog], [0], [], [])
+$COBCRUN_DIRECT ./progv], [0], [], [])
 
-AT_DATA([prog.cob], [
+AT_DATA([progl.cob], [
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. prog.
+       PROGRAM-ID. progl.
 
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
@@ -4399,37 +4401,37 @@ AT_DATA([prog.cob], [
            MOVE "<4>" TO MRK4.
            GENERATE RP-DTL4
 
-           TERMINATE rp  
+           TERMINATE rp
            CLOSE RP-FILE
 
-           STOP RUN .
-           END PROGRAM prog.
+           STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [],
-[prog.cob:37: warning: RW VARYING clause is not implemented
+AT_CHECK([$COMPILE -std=cobol2002 progl.cob], [0], [],
+[progl.cob:37: warning: RW VARYING clause is not implemented
 ])
 
 AT_CHECK([DD_PRINTOUT=./report_lit.txt \
-$COBCRUN_DIRECT ./prog], [0], [], [])
+$COBCRUN_DIRECT ./progl], [0], [], [])
 
 
 AT_CAPTURE_FILE(./report_var.txt)
 AT_CAPTURE_FILE(./report_lit.txt)
 
-AT_DATA([reference],
+AT_DATA([reference.at],
 [Hi-Q:          1         2         3         4         5
 Hi-Q:          1         2         3         4         5
-Hi-Q: 
+Hi-Q: _
 Hi-Q: 100       100       100         <1>
 Hi-Q: Tag1 *Tag2 **Tag1 *Tag2 **Tag1 *Tag2 **
 Hi-Q: 200       200       200   200   <3>
 Hi-Q: 400       401       402       403         <4>
-Hi-Q: 
-Hi-Q: 
-Hi-Q: 
+Hi-Q: _
+Hi-Q: _
+Hi-Q: _
 ])
 
+AT_CHECK([cat reference.at | tr -d _ > reference], [0])
 AT_CHECK([diff reference report_var.txt], [0])
 AT_CHECK([diff reference report_lit.txt], [0])
 
