@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
 
    This file is part of GnuCOBOL.
@@ -527,177 +527,144 @@ H#[0-9A-Za-z]* {
 	RETURN_TOK (RESET_TRACE);
 }
 
-"GREATER"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
-"GREATER"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] |
-"GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
-"GREATER"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
+"GREATER"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")? {
 	count_lines (yytext);
 	RETURN_TOK (GREATER_OR_EQUAL);
 }
 
-"GREATER"[ ,;\n]+"THAN"[ ,;\n] {
+"GREATER"[ ,;\n]+"THAN" {
 	count_lines (yytext);
 	RETURN_TOK (GREATER);
 }
 
-"LESS"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
-"LESS"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] |
-"LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n]+"TO"[ ,;\n] |
-"LESS"[ ,;\n]+"THAN"[ ,;\n]+"OR"[ ,;\n]+"EQUAL"[ ,;\n] {
+"LESS"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")? {
 	count_lines (yytext);
 	RETURN_TOK (LESS_OR_EQUAL);
 }
 
-"LESS"[ ,;\n]+"THAN"[ ,;\n] {
+"LESS"[ ,;\n]+"THAN" {
 	count_lines (yytext);
 	RETURN_TOK (LESS);
 }
 
-"EQUAL"[ ,;\n]+"TO"[ ,;\n] {
+"EQUAL"[ ,;\n]+"TO" {
 	count_lines (yytext);
 	RETURN_TOK (EQUAL);
 }
 
-"THEN"[ ,;\n]+"REPLACING"[ ,;\n] {
+"THEN"[ ,;\n]+"REPLACING" {
 	count_lines (yytext);
 	RETURN_TOK (REPLACING);
 }
 
-"LINES"[ ,;\n]+"AT"[ ,;\n]+"TOP"[ ,;\n] |
-"LINES"[ ,;\n]+"TOP"[ ,;\n] |
-"AT"[ ,;\n]+"TOP"[ ,;\n] {
+"LINES"([ ,;\n]+"AT")?[ ,;\n]+"TOP" |
+"AT"[ ,;\n]+"TOP" {
 	count_lines (yytext);
 	RETURN_TOK (TOP);
 }
 
-"LINES"[ ,;\n]+"AT"[ ,;\n]+"BOTTOM"[ ,;\n] |
-"LINES"[ ,;\n]+"BOTTOM"[ ,;\n] |
-"AT"[ ,;\n]+"BOTTOM"[ ,;\n] {
+"LINES"([ ,;\n]+"AT")?[ ,;\n]+"BOTTOM" |
+"AT"[ ,;\n]+"BOTTOM" {
 	count_lines (yytext);
 	RETURN_TOK (BOTTOM);
 }
 
-"LINE"[ ,;\n]+"LIMIT"[ ,;\n] {
+"LINE"[ ,;\n]+"LIMIT" {
 	count_lines (yytext);
 	return LINE_LIMIT;
 }
 
-"WITH"[ ,;\n]+"NO"[ ,;\n]+"ADVANCING" |
-"NO"[ ,;\n]+"ADVANCING" {
+("WITH"[ ,;\n]+)?"NO"[ ,;\n]+"ADVANCING" {
 	count_lines (yytext);
 	RETURN_TOK (NO_ADVANCING);
 }
 
-"ON"[ ,;\n]+"NEXT"[ ,;\n]+"PAGE"[ ,;\n]* |
-"NEXT"[ ,;\n]+"PAGE"[ ,;\n]* {
+("ON"[ ,;\n]+)?"NEXT"[ ,;\n]+"PAGE" {
 	count_lines (yytext);
 	RETURN_TOK (NEXT_PAGE);
 }
 
-"NEXT"[ ,;\n]+"GROUP"[ ,;\n]* {
+"NEXT"[ ,;\n]+"GROUP" {
 	count_lines (yytext);
 	return NEXT_GROUP;
 }
 
-"NOT"[ ,;\n]+"ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
-"NOT"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR" {
 	count_lines (yytext);
 	RETURN_TOK (NOT_SIZE_ERROR);
 }
 
-"ON"[ ,;\n]+"SIZE"[ ,;\n]+"ERROR"[ ,;\n] |
-"SIZE"[ ,;\n]+"ERROR"[ ,;\n] {
+("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR" {
 	count_lines (yytext);
 	RETURN_TOK (SIZE_ERROR);
 }
 
-"NOT"[ ,;\n]+"ON"[ ,;\n]+"ESCAPE"[ ,;\n] |
-"NOT"[ ,;\n]+"ESCAPE"[ ,;\n] {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"ESCAPE" {
 	count_lines (yytext);
 	RETURN_TOK (NOT_ESCAPE);
 }
 
-"NOT"[ ,;\n]+"ON"[ ,;\n]+"EXCEPTION"[ ,;\n] |
-"NOT"[ ,;\n]+"EXCEPTION"[ ,;\n] {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"EXCEPTION" {
 	count_lines (yytext);
 	RETURN_TOK (NOT_EXCEPTION);
 }
 
-"ON"[ ,;\n]+"ESCAPE"[ ,;\n] {
+"ON"[ ,;\n]+"ESCAPE" {
 	count_lines (yytext);
 	RETURN_TOK (ESCAPE);
 }
 
-"ON"[ ,;\n]+"EXCEPTION"[ ,;\n] {
+"ON"[ ,;\n]+"EXCEPTION" {
 	count_lines (yytext);
 	RETURN_TOK (EXCEPTION);
 }
 
-"NOT"[ ,;\n]+"ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
-"NOT"[ ,;\n]+"OVERFLOW"[ ,;\n] {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"OVERFLOW" {
 	count_lines (yytext);
 	RETURN_TOK (NOT_OVERFLOW);
 }
 
-"NOT"[ ,;\n]+"AT"[ ,;\n]+"END"[ ,;\n] |
-"NOT"[ ,;\n]+"END"[ ,;\n] {
+"NOT"[ ,;\n]+("AT"[ ,;\n]+)?"END" {
 	count_lines (yytext);
 	RETURN_TOK (NOT_END);
 }
 
-"AT"[ ,;\n]+"END"[ ,;\n] {
+"AT"[ ,;\n]+"END" {
 	count_lines (yytext);
 	RETURN_TOK (END);
 }
 
-"ON"[ ,;\n]+"OVERFLOW"[ ,;\n] |
-"OVERFLOW"[ ,;\n] {
+("ON"[ ,;\n]+)?"OVERFLOW" {
 	count_lines (yytext);
 	RETURN_TOK (TOK_OVERFLOW);
 }
 
-"NOT"[ ,;\n]+"AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
-"NOT"[ ,;\n]+"AT"[ ,;\n]+"EOP"[ ,;\n] |
-"NOT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
-"NOT"[ ,;\n]+"EOP"[ ,;\n] {
+"NOT"[ ,;\n]+("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP") {
 	count_lines (yytext);
 	RETURN_TOK (NOT_EOP);
 }
 
-"AT"[ ,;\n]+"END-OF-PAGE"[ ,;\n] |
-"AT"[ ,;\n]+"EOP"[ ,;\n] |
-"END-OF-PAGE"[ ,;\n] |
-"EOP"[ ,;\n] {
+("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP") {
 	count_lines (yytext);
 	RETURN_TOK (EOP);
 }
 
-"NOT"[ ,;\n]+"INVALID"[ ,;\n]+"KEY"[ ,;\n] {
+"NOT"[ ,;\n]+"INVALID"([ ,;\n]+"KEY")? {
 	count_lines (yytext);
 	RETURN_TOK (NOT_INVALID_KEY);
 }
 
-"NOT"[ ,;\n]+"INVALID"[ ,;\n] {
-	count_lines (yytext);
-	RETURN_TOK (NOT_INVALID_KEY);
-}
-
-"INVALID"[ ,;\n]+"KEY"[ ,;\n] {
+"INVALID"([ ,;\n]+"KEY")? {
 	count_lines (yytext);
 	RETURN_TOK (INVALID_KEY);
 }
 
-"INVALID"[ ,;\n] {
-	count_lines (yytext);
-	RETURN_TOK (INVALID_KEY);
-}
-
-"NO"[ ,;\n]+"DATA"[ ,;\n] {
+"NO"[ ,;\n]+"DATA" {
 	count_lines (yytext);
 	RETURN_TOK (NO_DATA);
 }
 
-"WITH"[ ,;\n]+"DATA"[ ,;\n] {
+"WITH"[ ,;\n]+"DATA" {
 	count_lines (yytext);
 	RETURN_TOK (DATA);
 }
@@ -722,22 +689,17 @@ H#[0-9A-Za-z]* {
 	RETURN_TOK (UPON_COMMAND_LINE);
 }
 
-"AFTER"[ ,;\n]+"EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
+("AFTER"[ ,;\n]+)?"EXCEPTION"[ ,;\n]+"CONDITION" {
 	count_lines (yytext);
 	RETURN_TOK (EXCEPTION_CONDITION);
 }
 
-"EXCEPTION"[ ,;\n]+"CONDITION"[ ,;\n] {
-	count_lines (yytext);
-	RETURN_TOK (EXCEPTION_CONDITION);
-}
-
-"AFTER"[ ,;\n]+"EC"[ ,;\n] {
+"AFTER"[ ,;\n]+"EC" {
 	count_lines (yytext);
 	RETURN_TOK (EC);
 }
 
-"LENGTH"[ ,;\n]+"OF"[ ,;\n] {
+"LENGTH"[ ,;\n]+"OF" {
 	count_lines (yytext);
 	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
 	          if we actually want to do this,

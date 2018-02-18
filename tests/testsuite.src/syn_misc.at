@@ -4547,6 +4547,21 @@ AT_DATA([prog1.cob], [
        PROCEDURE
            DIVISION
            .
+       >> SOURCE FORMAT IS FREE
+IF
+i
+GREATER
+THAN
+OR
+EQUAL
+
+TO
+
+5
+
+THEN
+
+GOBACK.
            STOP
            RUN
            .
@@ -4559,13 +4574,15 @@ AT_DATA([prog2.cob], [
            REMARKS;. Should work.,,
        ENVIRONMENT,;DIVISION;,.,;
        CONFIGURATION;;,,SECTION;;,,.
-       SOURCE-COMPUTER;;.,,whatever;DEBUGGING,MODE.
+       SOURCE-COMPUTER;;.,,whatever;;DEBUGGING,,MODE;,.
 
       DDATA;DIVISION,.
       DWORKING-STORAGE,SECTION;.
        01;i,PIC;9;.
 
        PROCEDURE;DIVISION,.;
+           IF;,i;,GREATER,;THAN;,OR,;EQUAL ,;TO;;5;
+           ,,,THEN;;;GOBACK.
            STOP,RUN;.,
 ])
 

@@ -5,6 +5,8 @@
 	* parser.y (page_line_column): adjusted check for duplicate LINE LIMIT
 	* codegen.c (output_internal_function): fixed position of
 	  initialization for report files in INITIAL programs
+	* pplex.l, scanner.l: don't consume trailing whitespace/newline
+	  if not necessary, combined some groups with optional/or modifiers
 
 2018-02-16  Dave Pitts <dpitts@cozx.com>
 
