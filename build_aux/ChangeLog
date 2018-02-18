@@ -44,3 +44,9 @@
 	  git.savannah.gnu.org/gitweb/?p=config.git to solve build issues
 	  on different machines, but backported support for "ancient" systems
 	  without uname(1) [removed 2014-01-25] from old version
+
+
+Copyright 2015-2017 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

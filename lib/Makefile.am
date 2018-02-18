@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/lib
 #
-# Copyright (C) 2003-2012, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2002-2012, 2017 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.

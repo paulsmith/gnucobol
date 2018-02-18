@@ -400,3 +400,9 @@
 
 	* gnu.conf, cobol85.conf, cobol2002.conf, mf.conf, mvs.conf: New files.
 	* default.inc, Makefile.am: New files.
+
+
+Copyright 2003,2005-2007-2010,2014-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

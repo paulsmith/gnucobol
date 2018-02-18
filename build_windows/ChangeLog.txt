@@ -1,16 +1,16 @@
 
-2017-12-06  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in: added COB_DEBUG_LOG (as undefined)
 	* vs2005, vs2008, vs2010, vs2012, vs2013, vs2015, vs2017: added
 	  libcob/reportio.c
 
-2017-10-12  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-10-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* makebisonflex.bat: check ERRORLEVEL instead of using || and &&
 	  as this works on all systems; print separator between tools
 
-2017-09-05  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-09-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* defaults.h.in: changed install folder for DIST builds to
 	  PACKAGE_NAME + _ + PACKAGE_VERSION (GnuCOBOL_2.3_dev)
@@ -40,7 +40,7 @@
 	* set_env_vs_dist_x64.bat: replaced reference to "dist/lib" with
 	  "dist/lib_x64".
 
-2017-09-02  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-09-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in: optional setting and link for use of GetUsername
 	* vs2005, vs2008, vs2010, vs2012, vs2013, vs2015, vs2017: adjusted
@@ -73,12 +73,12 @@
 	  based on db.h.
 	* makedist.bat (compile_extras): removed -v from cobc when compiling extras.
 
-2017-08-14  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-08-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* makebisonflex.bat: use normal output name like ylwrap does;
 	  added sleep for slow / indexing systems
 
-2017-08-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-08-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* makebisonflex.bat: mimic ylwrap (only replace existing generated files
 	  if the newly generated ones are newer);
@@ -87,12 +87,12 @@
 	* common.h.in: linker input via pragma for configured libraries,
 	  added necessary parts for builds without curses
 
-2017-07-20  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-07-20  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* makedist.bat: optimize during build of extras,
 	  improved displays to command line
 
-2017-04-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2017-04-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* added subfolder vs2017
 	* renamed subfolder for VisualC++ builds vc8 -> vs2005, vc9 -> vs2008,
@@ -100,26 +100,26 @@
 	* makedist.bat: only pause when started by double click
 	* makebisonflex.bat: new batch for (re-)generating bison/flex files
 
-2016-12-28  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-12-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* defaults.h.in: added "/incremental:no" to COB_LDFLAGS
 
-2016-11-09  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-11-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in, defaults.h.in: renamed from config.h.tmpl, defaults.h.tmpl
 
-2016-11-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-11-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* makedist.bat: cater for build with and w/o 32bit/64bit,
 	  rename text files in the win dist package to .TXT
 
-2016-05-04  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-05-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* vc7: removed (GC 2+ will not build with Visual C compiler < 2005)
 	* config.h.tmpl, defaults.h.tmpl, set_env_vs.bat, set_env_vs_dist.bat:
 	  removed pre-VS2005 references
 
-2016-01-31  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2016-01-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.h.tmpl, defaults.h.tmpl: combined all files config.h/default.h
 	  from subfolders and config.h.bdb.win, config.h.vb.win,
@@ -129,18 +129,18 @@
 	* changed path in all project files accordingly
 	* README.txt: renamed README and updated it
 
-2015-10-26  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-10-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* added subfolder vc14 (Visual Studio 2015)
 	* updated all project files
 	* updated all batch files
 	* updated version_cobc.rc, version_libcob.rc, version_cobcrun.rc
 
-2015-02-27  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2015-02-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* updated all project files
 
-2014-09-08  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-09-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* update for subfolder vc10
 
@@ -148,7 +148,7 @@
 
 	* minor bugfix (tpyos) for subfolder vc12
 
-2014-06-23  Simon 'sf-mensch/human' Sobisch <sf-mensch@users.sf.net>
+2014-06-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* added README, set_env_vs.bat, set_env_vs_dist.bat, makedist.bat,
 	  set_env_vs_dist_x64.bat, set_env_vs_x64.bat
@@ -160,3 +160,9 @@
 	* added project files - subfolders: vc7, vc8, vc9, vc10, vc12 
 	  (original project files and ressource files version_cobc.rc,
 	  version_libcob.rc, version_cobcrun.rc provided by Simon)
+
+
+Copyright 2014-2017 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

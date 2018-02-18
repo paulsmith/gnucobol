@@ -176,3 +176,9 @@
 	  directory and, if your scripts use an environment
 	  variable for the driver program (e.g. $COBEXEC),
 	  then you can switch easily.
+
+
+Copyright 2004-2008,2010,2012,2014-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

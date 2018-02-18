@@ -813,3 +813,9 @@
 
 	* Makefile.am, atlocal.in: New files.
 	* redef.at, subref.at, runtime.at: New files.
+
+
+Copyright 2002-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

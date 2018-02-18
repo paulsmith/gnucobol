@@ -5765,3 +5765,9 @@
 	* cobc.c (short_options, long_options): New option -v and --verbose.
 	* cobc.c (process_command_line): Handle -v option.
 	* cobc.h (cobc_verbose_flag): Declared.
+
+
+Copyright 2002-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification, are
+permitted provided the copyright notice and this notice are preserved.

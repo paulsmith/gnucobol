@@ -11,12 +11,7 @@ standards, as well as many extensions included in other COBOL compilers.
 
 GnuCOBOL translates COBOL into C and compiles the translated code
 using the native C compiler on various platforms, including Unix/Linux,
-Mac OS X, and Microsoft Windows. 
-
-Although many have participated, most development thanks go to
-
-    Roger While
-    Keisuke Nishida
+Mac OS X, and Microsoft Windows.
 
 This package contains the following subdirectories:
 
@@ -35,7 +30,15 @@ All programs except those in lib and libcob are distributed under
 the GNU General Public License.  See COPYING for details.
 
 Programs in lib and libcob are distributed under the GNU Lesser
-General Public License.  See COPYING.LESSER for details.
+General Public License.  See COPYING.LESSER for details. 
+
+For any copyright year range specified as YYYY-ZZZZ in this package,
+that the range specifies every single year in that closed interval.
+
+Although many have participated, most development thanks go to
+
+    Roger While
+    Keisuke Nishida
 
 See AUTHORS for the author of each file.
 
@@ -147,6 +150,10 @@ The following libraries ARE required WHEN :
 Installation
 ============
 
+See the INSTALL file for detailed information about how to configure
+and install GnuCOBOL.
+Special requirements and further installation notes are listed below.
+
 ** NOTE **
    The default installation path for GnuCOBOL is /usr/local.
    The installation path may be changed by specifying --prefix=<dir>
@@ -207,8 +214,8 @@ To generate/install GnuCOBOL :
 
 **************************************
 
-If you think you have a problem or just want to
-record the make output, just redirect the output thus :
+If you think you have a problem or just want to log
+the output of make, just redirect the output with :
     make 1>mymake.log 2>&1
     make install 1>myinstall.log 2>&1
 
@@ -232,7 +239,7 @@ these are the most important ones:
   --with-db			Use Berkeley DB >= 4.1 (libdb) (ISAM handler)
 				This is the default
 
-  --without-db			Do not use Berkeley DB / any other ISAM handler
+  --without-db			Do neither use Berkeley DB nor any other ISAM handler
 				You will not be able to use indexed I/O
 
   --with-vbisam			Use VBISAM (libvbisam) (ISAM handler)
