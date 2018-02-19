@@ -7,6 +7,7 @@
 	  initialization for report files in INITIAL programs
 	* pplex.l, scanner.l: don't consume trailing whitespace/newline
 	  if not necessary, combined some groups with optional/or modifiers
+	* parser.y (select_clause): minimized context-sensitive settings
 
 2018-02-16  Dave Pitts <dpitts@cozx.com>
 

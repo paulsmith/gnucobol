@@ -838,7 +838,7 @@ check_conf_section_order (const cob_flags_t part)
 				  | COBC_HD_SPECIAL_NAMES
 				  | COBC_HD_REPOSITORY);
 #define MESSAGE_LEN 100
-        char			message[MESSAGE_LEN] = { '\0' };
+	char			message[MESSAGE_LEN] = { '\0' };
 
 	if (prev_part == 0) {
 		return;
@@ -1809,7 +1809,7 @@ static void
 error_if_different_display_type (cb_tree x_list, cb_tree local_upon_value,
 				 cb_tree local_line_column, struct cb_attr_struct * const attr_ptr)
 {
-        const enum cb_display_type	type =
+	const enum cb_display_type	type =
 		deduce_display_type (x_list, local_upon_value, local_line_column, attr_ptr);
 
 	/* Avoid re-displaying the same error for mixed DISPLAYs */
@@ -4164,10 +4164,11 @@ file_control_entry:
 		current_program->file_list
 			= CB_CHAIN (current_program->file_list);
 	}
-        key_type = NO_KEY;
+	key_type = NO_KEY;
   }
   _select_clauses_or_error
   {
+	cobc_cs_check = 0;
 	if (current_file->organization == COB_ORG_INDEXED
 	    && key_type == RELATIVE_KEY) {
 		cb_error_x (current_file->key,
@@ -4194,21 +4195,26 @@ _select_clauses_or_error:
 
 _select_clause_sequence:
 | _select_clause_sequence select_clause
+  {
+	/* reset context-sensitive words for next clauses */
+	cobc_cs_check = 0;
+  }
 ;
 
+/* duplicates are checked - but not the order... */
 select_clause:
   assign_clause
-| access_mode_clause
-| alternative_record_key_clause
-| collating_sequence_clause
-| file_status_clause
-| lock_mode_clause
+| reserve_clause
 | organization_clause
 | padding_character_clause
 | record_delimiter_clause
-| record_key_clause
+| access_mode_clause
 | relative_key_clause
-| reserve_clause
+| lock_mode_clause
+| collating_sequence_clause
+| record_key_clause
+| alternative_record_key_clause
+| file_status_clause
 | sharing_clause
 ;
 
@@ -4219,13 +4225,11 @@ assign_clause:
   ASSIGN _to_using _ext_clause _line_adv_file assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	current_file->assign = cb_build_assignment_name (current_file, $5);
   }
 | ASSIGN _to_using _ext_clause general_device_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
 	} else {
@@ -4235,7 +4239,6 @@ assign_clause:
 | ASSIGN _to_using _ext_clause line_seq_device_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -4246,7 +4249,6 @@ assign_clause:
 | ASSIGN _to_using _ext_clause DISPLAY _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
 	} else {
@@ -4259,7 +4261,6 @@ assign_clause:
 | ASSIGN _to_using _ext_clause KEYBOARD _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
 	} else {
@@ -4272,7 +4273,6 @@ assign_clause:
 | ASSIGN _to_using _ext_clause printer_name _assignment_name
   {
 	check_repeated ("ASSIGN", SYN_CLAUSE_1, &check_duplicate);
-	cobc_cs_check = 0;
 	current_file->organization = COB_ORG_LINE_SEQUENTIAL;
 	if ($5) {
 		current_file->assign = cb_build_assignment_name (current_file, $5);
@@ -4362,7 +4362,6 @@ _assignment_name:
 access_mode_clause:
   ACCESS _mode _is access_mode
   {
-	cobc_cs_check = 0;
 	check_repeated ("ACCESS", SYN_CLAUSE_2, &check_duplicate);
   }
 ;
@@ -4424,7 +4423,7 @@ alternative_record_key_clause:
 _suppress_clause:
   /* empty */
   {
-	$$ = NULL;;
+	$$ = NULL;
   }
 |
   SUPPRESS WHEN ALL basic_value
@@ -4502,17 +4501,14 @@ lock_mode:
   MANUAL _lock_with
   {
 	current_file->lock_mode |= COB_LOCK_MANUAL;
-	cobc_cs_check = 0;
   }
 | AUTOMATIC _lock_with
   {
 	current_file->lock_mode |= COB_LOCK_AUTOMATIC;
-	cobc_cs_check = 0;
   }
 | EXCLUSIVE
   {
 	current_file->lock_mode |= COB_LOCK_EXCLUSIVE;
-	cobc_cs_check = 0;
   }
 ;
 
@@ -4586,9 +4582,6 @@ record_delimiter_clause:
 	current_file->flag_delimiter = 1;
   }
   record_delimiter_option
-  {
-	cobc_cs_check = 0;
-  }
 ;
 
 record_delimiter_option:
@@ -4638,7 +4631,7 @@ record_delimiter_option:
 
 	if (cb_verify (cb_record_delimiter, _("RECORD DELIMITER clause"))) {
 		cb_warning (warningopt,
-			    _("Phrase in RECORD DELIMITER not recognised; will be ignored"));
+			    _("Phrase in RECORD DELIMITER not recognized; will be ignored."));
 	}
   }
 ;
@@ -7050,21 +7043,21 @@ _or_page:
 _control_footing_final:
   /* empty */
   {
-      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+	current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
   }
 | identifier _or_page
   {
-      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
-      current_field->report_control = $1;
+	current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+	current_field->report_control = $1;
   }
 | FINAL _or_page
   {
-      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING_FINAL;
+	current_field->report_flag |= COB_REPORT_CONTROL_FOOTING_FINAL;
   }
 | ALL
   {
-      current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
-      current_field->report_flag |= COB_REPORT_ALL;
+	current_field->report_flag |= COB_REPORT_CONTROL_FOOTING;
+	current_field->report_flag |= COB_REPORT_ALL;
   }
 ;
 
@@ -7087,17 +7080,17 @@ next_group_plus:
   }
 | PLUS integer
   {
-      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
-      current_field->next_group_line = cb_get_int($2);
+	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
+	current_field->next_group_line = cb_get_int($2);
   }
 | TOK_PLUS integer
   {
-      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
-      current_field->next_group_line = cb_get_int($2);
+	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PLUS;
+	current_field->next_group_line = cb_get_int($2);
   }
 | next_page
   {
-      current_field->report_flag |= COB_REPORT_NEXT_GROUP_PAGE;
+	current_field->report_flag |= COB_REPORT_NEXT_GROUP_PAGE;
   }
 ;
 
@@ -7120,18 +7113,18 @@ _reset_clause:
 | RESET _on data_or_final
 | UPON identifier
   {
-      current_field->report_sum_upon = $2;
+	current_field->report_sum_upon = $2;
   }
 ;
 
 data_or_final:
   identifier
   {
-      current_field->report_reset = $1;
+	current_field->report_reset = $1;
   }
 | FINAL
   {
-      current_field->report_flag |= COB_REPORT_RESET_FINAL;
+	current_field->report_flag |= COB_REPORT_RESET_FINAL;
   }
 ;
 
@@ -9440,7 +9433,7 @@ accp_attr:
   }
 | BLINK
   {
-        check_repeated ("BLINK", SYN_CLAUSE_8, &check_duplicate);
+	check_repeated ("BLINK", SYN_CLAUSE_8, &check_duplicate);
 	set_dispattr (COB_SCREEN_BLINK);
   }
 | CONVERSION
@@ -13230,7 +13223,7 @@ string_item_list:
 string_item:
   x _string_delimited
   {
-    if (!save_tree) {
+	if (!save_tree) {
 		save_tree = CB_LIST_INIT ($1);
 	} else {
 		save_tree = cb_list_add (save_tree, $1);
