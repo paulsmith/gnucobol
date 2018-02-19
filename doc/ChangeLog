@@ -1,4 +1,8 @@
 
+2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: remove generated includes in target maintainer-clean
+
 2017-10-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: use `` instead of $() - see Bug #437
@@ -144,7 +148,7 @@
 	* open-cobol.texi (Customize): Add COB_LDADD, COB_CONFIG_FILE.
 
 
-Copyright 2002,2005,2009-2017 Free Software Foundation, Inc.
+Copyright 2002,2005,2009-2018 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

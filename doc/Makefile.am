@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/doc
 #
-# Copyright (C) 2003-2012, 2015-2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -27,8 +27,9 @@ COBCINFOSH = GREP=$(GREP) $(top_srcdir)/doc/cobcinfo.sh
 endif
 	
 info_TEXINFOS = gnucobol.texi
-gnucobol_TEXINFOS = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
-	 cbconf.tex cbchelp.tex cbrunt.tex fdl.texi
+GENINCLUDES = cbhelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex \
+	 cbconf.tex cbchelp.tex cbrunt.tex
+gnucobol_TEXINFOS = $(GENINCLUDES) fdl.texi
 
 if COB_MAKE_RUN_BINARIES
 cbhelp.tex: $(top_srcdir)/cobc/cobc.c $(top_srcdir)/configure.ac \
@@ -64,4 +65,5 @@ EXTRA_DIST = gnucobol.pdf cobcinfo.sh
 
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs
+MAINTAINERCLEANFILES = $(GENINCLUDES)
 TEXI2DVI = texi2dvi -I $(srcdir)
