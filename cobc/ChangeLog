@@ -1,4 +1,9 @@
 
+2018-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.y (validate_move): check for ADDRESS OF var as invalid
+	  (bug #495), fixed check for SET statement
+
 2018-02-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (report_description_option): fixed reference for CODE IS

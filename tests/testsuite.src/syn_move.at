@@ -508,21 +508,25 @@ AT_DATA([prog.cob], [
        data division.
        working-storage section.
        01 default-float usage float-long.
+       01 no-pointer    pic s9(9) comp.
 
        linkage section.
        01 float-var usage float-long.
 
        procedure division .
-           set address of float-var to default-float
       *> previously generated error message about invalid MOVE statement,
-      *> see bug #255
+      *> see bug #255 and an internal compiler error, see bug #295:
+           set address of float-var to default-float
+           set no-pointer to address of default-float
+      *> all fine...
            set address of float-var to address of default-float
            goback.
        end program prog .
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:11: error: invalid SET statement
+[prog.cob:14: error: invalid SET statement
+prog.cob:15: error: invalid SET statement
 ])
 
 AT_CLEANUP

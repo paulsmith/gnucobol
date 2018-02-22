@@ -8562,6 +8562,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			return -1;
 		}
 		break;
+	case CB_TAG_CAST:
+		goto invalid;
 	case CB_TAG_INTEGER:
 	case CB_TAG_BINARY_OP:
 	case CB_TAG_INTRINSIC:
@@ -8580,7 +8582,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 invalid:
 	if (is_value) {
 		cb_error_x (loc, _("invalid VALUE clause"));
-	} else if (cobc_cs_check == CB_CS_SET) {
+	} else if (strcmp (current_statement->name, "SET") == 0) {
 		cb_error_x (loc, _("invalid SET statement"));
 	} else {
 		cb_error_x (loc, _("invalid MOVE statement"));
