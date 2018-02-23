@@ -9366,11 +9366,13 @@ output_module_init (struct cb_program *prog)
 	if (cb_flag_trace) {
 		opt |= COB_MODULE_TRACE;
 	}
-	if (cb_flag_source_location 
+#if 0 /* currently unused */
+	if (cobc_wants_debug
 	 || cb_flag_dump) {
 		opt |= COB_MODULE_DEBUG;
 	}
-	output_line ("module->flag_debug_trace = %d;",opt);
+#endif
+	output_line ("module->flag_debug_trace = %d;", opt);
 	if (cb_flag_dump) {
 		output_line ("module->flag_dump_ready = 1;");
 	} else {
