@@ -1,4 +1,8 @@
 
+2018-02-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c: cater for empty module_sources
+
 2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reportio.c: adjusted runtime error messages

@@ -1817,7 +1817,8 @@ cob_trace_prep (void)
 {
 	const char	*s;
 	cob_current_program_id = COB_MODULE_PTR->module_name;
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
@@ -1925,7 +1926,8 @@ cob_trace_sect (const char *name)
 	}
 
 	/* store for CHECKME */
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
@@ -1954,7 +1956,8 @@ cob_trace_para (const char *name)
 	}
 
 	/* store for CHECKME */
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
@@ -1980,7 +1983,8 @@ cob_trace_entry (const char *name)
 	}
 
 	/* store for CHECKME */
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
@@ -2006,7 +2010,8 @@ cob_trace_exit (const char *name)
 	}
 
 	/* store for CHECKME */
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
@@ -2036,7 +2041,8 @@ cob_trace_stmt (const char *stmt)
 	}
 
 	/* store for CHECKME */
-	if (COB_MODULE_PTR->module_stmt != 0) {
+	if (COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
 		cob_source_file = 
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
@@ -6437,7 +6443,8 @@ cob_runtime_warning (const char *fmt, ...)
 	/* Prefix */
 	fprintf (stderr, "libcob: ");
 	if (cobglobptr && COB_MODULE_PTR
-	 && COB_MODULE_PTR->module_stmt != 0) {
+	 && COB_MODULE_PTR->module_stmt != 0
+	 && COB_MODULE_PTR->module_sources) {
 		fprintf (stderr, "%s:%u: ",
 				COB_MODULE_PTR->module_sources
 					[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)],
@@ -7522,22 +7529,26 @@ cob_dump_module (char *reason)
 		fp = cob_get_dump_file(COB_DUMP_TO_FILE);
 #endif
 		fprintf (fp, _("Module dump due to %s\n"), reason);
-		for(mod = COB_MODULE_PTR; mod; mod = mod->next) {
-			if (mod->module_stmt != 0) {
-				fprintf(fp,_(" Last statement of %s was Line %d of %s\n"),
+		for (mod = COB_MODULE_PTR; mod; mod = mod->next) {
+			if (mod->module_stmt != 0
+			 && mod->module_sources) {
+				fprintf (fp,_(" Last statement of %s was Line %d of %s\n"),
 						mod->module_name,
 						COB_GET_LINE_NUM(mod->module_stmt),
 						mod->module_sources[COB_GET_FILE_NUM(mod->module_stmt)]);
 				num_stmts++;
+			} else {
+				fprintf (fp,_(" Last statement of %s unknown\n"), mod->module_name);
 			}
 		}
-		if(num_stmts == 0)
+		if (num_stmts == 0) {
 			return;
+		}
 		fprintf(fp,"\n");
 		for(mod = COB_MODULE_PTR; mod; mod = mod->next) {
 			if(mod->module_cancel.funcint) {
 				cancel_func = mod->module_cancel.funcint;
-				fprintf(fp,_("Dump Program-Id %s from %s compiled %s\n"),
+				fprintf (fp,_("Dump Program-Id %s from %s compiled %s\n"),
 						mod->module_name,mod->module_source,mod->module_formatted_date);
 				(void)cancel_func (-10);
 				fprintf(fp,"\n");

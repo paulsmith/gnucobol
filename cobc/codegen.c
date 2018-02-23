@@ -9268,7 +9268,8 @@ static void
 output_module_init (struct cb_program *prog)
 {
 	int	opt;
-#if	0	/* Module comments */
+#if	0	/* Module comments, maybe extend and only include if
+			   explicit requested via flag (auto-active for C generation)? */
 	output ("/* Next pointer, Parameter list pointer, Module name, */\n");
 	output ("/* Module formatted date, Module source, */\n");
 	output ("/* Module entry, Module cancel, */\n");
@@ -9376,7 +9377,12 @@ output_module_init (struct cb_program *prog)
 		output_line ("module->flag_dump_ready = 0;");
 	}
 	output_line ("module->module_stmt = 0;");
-	output_line ("module->module_sources = %ssource_files;",CB_PREFIX_STRING);
+	if (source_cache) {
+		output_line ("module->module_sources = %ssource_files;",
+			CB_PREFIX_STRING);
+	} else {
+		output_line ("module->module_sources = NULL;");
+	}
 	output_newline ();
 }
 

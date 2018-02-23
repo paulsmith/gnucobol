@@ -648,7 +648,10 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+# Note: we need to test for generating a valid C source (with normal/no flags),
+#       not only for COBOL compilation
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBC prog.cob], [0], [], [])
 
 AT_DATA([prog2.cob], [
        IDENTIFICATION DIVISION.
@@ -659,7 +662,8 @@ AT_DATA([prog2.cob], [
        01  x PIC 999 VALUE 124.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog2.cob], [0], [], [])
+AT_CHECK([$COMPILE prog2.cob], [0], [], [])
+AT_CHECK([$COBC prog2.cob], [0], [], [])
 
 AT_DATA([prog3.cob], [])
 
@@ -667,7 +671,10 @@ AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
 [prog3.cob:1: error: PROGRAM-ID header missing
 ])
 
-AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog3.cob], [0], [],
+AT_CHECK([$COMPILE -frelax-syntax-checks prog3.cob], [0], [],
+[prog3.cob:1: warning: PROGRAM-ID header missing - assumed
+])
+AT_CHECK([$COBC -frelax-syntax-checks prog3.cob], [0], [],
 [prog3.cob:1: warning: PROGRAM-ID header missing - assumed
 ])
 
