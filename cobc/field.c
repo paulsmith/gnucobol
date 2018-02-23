@@ -2051,9 +2051,11 @@ unbounded_again:
 				    c->size * c->occurs_max >
 				    c->redefines->size * c->redefines->occurs_max) {
 					if (cb_larger_redefines_ok) {
-						cb_warning_x (COBC_WARN_FILLER, CB_TREE (c),
-							      _("size of '%s' larger than size of '%s'"),
-							      c->name, c->redefines->name);
+						if (warningopt) {
+							cb_warning_x (COBC_WARN_FILLER, CB_TREE (c),
+									  _("size of '%s' larger than size of '%s'"),
+									  c->name, c->redefines->name);
+						}
 						maxsz = c->redefines->size * c->redefines->occurs_max;
 						for (c0 = c->redefines->sister; c0 != c; c0 = c0->sister) {
 							if (c0->size * c0->occurs_max > maxsz) {
@@ -2292,11 +2294,14 @@ unbounded_again:
 	if (f->redefines && f->redefines->flag_external &&
 	    (f->size * f->occurs_max > f->redefines->size * f->redefines->occurs_max)) {
 		if (cb_larger_redefines_ok) {
-			cb_warning_x (COBC_WARN_FILLER, CB_TREE (f), _("size of '%s' larger than size of '%s'"),
-				      f->name, f->redefines->name);
+			if (warningopt) {
+				cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
+					_("size of '%s' larger than size of '%s'"),
+					f->name, f->redefines->name);
+			}
 		} else {
 			cb_error_x (CB_TREE (f), _("size of '%s' larger than size of '%s'"),
-				    f->name, f->redefines->name);
+				f->name, f->redefines->name);
 		}
 	}
 

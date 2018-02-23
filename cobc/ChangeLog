@@ -2,6 +2,9 @@
 2018-02-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_module_init): cater for empty source_cache
+	* warning.def: change cb_warn_filler to be always active
+	* error.c, field.c, tree.c, typeck.c: only raise some cb_warn_filler
+	  warnings if -W/-Wall was used
 
 2018-02-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

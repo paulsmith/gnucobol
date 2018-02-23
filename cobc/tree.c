@@ -740,7 +740,7 @@ valid_const_date_time_args (const cb_tree tree, const struct cb_intrinsic_table 
 				    intr->name);
 			error_found = 1;
 		}
-	} else {
+	} else if (warningopt) {
 		cb_warning_x (COBC_WARN_FILLER, tree, _("FUNCTION '%s' has format in variable"),
 			      intr->name);
 	}
@@ -778,6 +778,8 @@ warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
 	if (!is_formatted_current_date && !has_system_offset_arg) {
 		return;
 	}
+
+#if 0
 	/* Fixme: this should not be an error by default as we may compile
 	   for a different system */
 
@@ -786,6 +788,12 @@ warn_cannot_get_utc (const cb_tree tree, const enum cb_intr_enum intr,
 	} else if (is_constant_utc_format) {
 		cb_error_x (tree, _("cannot find the UTC offset on this system"));
 	}
+#else
+	/* FIXME: add a warning option for this case see FR #117 */
+	if (warningopt) {
+		cb_warning_x (COBC_WARN_FILLER, tree, _("cannot find the UTC offset on this system"));
+	}
+#endif
 }
 #endif
 
@@ -5093,17 +5101,20 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 	p->from = from;
 	p->until = until;
 	if (warningopt) {
-		cb_source_line--;
+		//cb_source_line--;
 		if (until == cb_false) {
-			cb_warning (COBC_WARN_FILLER, _("PERFORM FOREVER since UNTIL is always FALSE"));
+			cb_warning_x (COBC_WARN_FILLER, until,
+				_("PERFORM FOREVER since UNTIL is always FALSE"));
 		} else if (until == cb_true) {
 			if (after_until) {
-				cb_warning (COBC_WARN_FILLER, _("PERFORM ONCE since UNTIL is always TRUE"));
+				cb_warning_x (COBC_WARN_FILLER, until,
+				_("PERFORM ONCE since UNTIL is always TRUE"));
 			} else {
-				cb_warning (COBC_WARN_FILLER, _("PERFORM NEVER since UNTIL is always TRUE"));
+				cb_warning_x (COBC_WARN_FILLER, until,
+				_("PERFORM NEVER since UNTIL is always TRUE"));
 			}
 		}
-		cb_source_line++;
+		//cb_source_line++;
 	}
 
 	if (until) {

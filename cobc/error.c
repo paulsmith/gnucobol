@@ -585,7 +585,9 @@ redefinition_warning (cb_tree x, cb_tree y)
 	cb_tree		z;
 
 	w = CB_REFERENCE (x)->word;
-	cb_warning_x (COBC_WARN_FILLER, x, _("redefinition of '%s'"), w->name);
+	if (warningopt) {
+		cb_warning_x (COBC_WARN_FILLER, x, _("redefinition of '%s'"), w->name);
+	}
 	z = NULL;
 	if (y) {
 		z = y;
@@ -598,7 +600,9 @@ redefinition_warning (cb_tree x, cb_tree y)
 			return;
 		}
 		listprint_suppress ();
-		cb_warning_x (COBC_WARN_FILLER, z, _("'%s' previously defined here"), w->name);
+		if (warningopt) {
+			cb_warning_x (COBC_WARN_FILLER, z, _("'%s' previously defined here"), w->name);
+		}
 		listprint_restore ();
 	}
 }
@@ -634,7 +638,9 @@ undefined_error (cb_tree x)
 	}
 
 	if (r->flag_optional) {
-		cb_warning_x (COBC_WARN_FILLER, x, error_message, errnamebuff);
+		if (warningopt) {
+			cb_warning_x (COBC_WARN_FILLER, x, error_message, errnamebuff);
+		}
 	} else {
 		cb_error_x (x, error_message, errnamebuff);
 	}

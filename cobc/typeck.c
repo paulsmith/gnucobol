@@ -1348,8 +1348,10 @@ cb_trim_program_id (cb_tree id_literal)
 			_("'%s' literal includes leading spaces which are omitted"), s);
 	}
 	if (s[len - 1] == ' ') {
-		cb_warning_x (COBC_WARN_FILLER, id_literal,
-			_("'%s' literal includes trailing spaces which are omitted"), s);
+		if (warningopt) {
+			cb_warning_x (COBC_WARN_FILLER, id_literal,
+				_("'%s' literal includes trailing spaces which are omitted"), s);
+		}
 	}
 	while (*s == ' ') {
 		memmove (s, s + 1, len--);
@@ -2878,11 +2880,15 @@ validate_record_depending (cb_tree x)
 	default:
 		/* RXWRXW - This breaks old legacy programs; FIXME: use compiler configuration */
 		if (cb_relaxed_syntax_checks) {
-			cb_warning_x (COBC_WARN_FILLER, x, _("RECORD DEPENDING item '%s' should be defined in "
-				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
+			if (warningopt) {
+				cb_warning_x (COBC_WARN_FILLER, x,
+					_("RECORD DEPENDING item '%s' should be defined in "
+					  "WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
+			}
 		} else {
-			cb_error_x (x, _("RECORD DEPENDING item '%s' should be defined in "
-				"WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
+			cb_error_x (x,
+				_("RECORD DEPENDING item '%s' should be defined in "
+				  "WORKING-STORAGE, LOCAL-STORAGE or LINKAGE SECTION"), p->name);
 		}
 	}
 }
