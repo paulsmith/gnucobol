@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1516,17 +1516,21 @@ cob_get_param_field (int n, const char *caller_name)
 {
 	if (cobglobptr == NULL
 	 || COB_MODULE_PTR == NULL) {
-		cob_runtime_warning (_("%s: COBOL runtime is not initialized"), caller_name);
+		/* note: same message in call.c */
+		cob_runtime_warning_external (caller_name, 1,
+			_("cob_init() has not been called"));
 		return NULL;
 	}
 	if (n < 1
 	 || n > cobglobptr->cob_call_params) {
-		cob_runtime_warning (_("%s: param %d is not within range of %d"),
-				     caller_name, n, cobglobptr->cob_call_params);
+		cob_runtime_warning_external (caller_name, 1,
+			_("parameter %d is not within range of %d"),
+			n, cobglobptr->cob_call_params);
 		return NULL;
 	}
 	if (COB_MODULE_PTR->cob_procedure_params[n - 1] == NULL) {
-		cob_runtime_warning (_("%s: param %d is NULL"), caller_name, n);
+		cob_runtime_warning_external (caller_name, 1,
+			_("parameter %d is NULL"), n);
 		return NULL;
 	}
 	return COB_MODULE_PTR->cob_procedure_params[n - 1];
@@ -1538,7 +1542,9 @@ cob_get_num_params (void)
 	if (cobglobptr) {
 		return cobglobptr->cob_call_params;
 	}
-	cob_runtime_warning (_("%s COBOL runtime is not initialized"), "cob_get_num_params");
+		/* note: same message in call.c */
+		cob_runtime_warning_external ("cob_get_num_params", 1,
+			_("cob_init() has not been called"));
 	return -1;
 }
 
@@ -1760,8 +1766,9 @@ cob_put_s64_param (int n, cob_s64_t val)
 	cbl_data = f->data;
 	size = f->size;
 	if (COB_FIELD_CONSTANT (f)) {
-		cob_runtime_warning (_("%s: attempt to over-write constant param %d with " CB_FMT_LLD),
-						"cob_put_s64_param", n, val);
+		cob_runtime_warning_external ("cob_put_s64_param", 1,
+			_("attempt to over-write constant parameter %d with " CB_FMT_LLD),
+			n, val);
 		return;
 	}
 
@@ -1822,8 +1829,9 @@ cob_put_u64_param (int n, cob_u64_t val)
 	cbl_data = f->data;
 	size = f->size;
 	if (COB_FIELD_CONSTANT (f)) {
-		cob_runtime_warning (_("%s: attempt to over-write constant param %d with " CB_FMT_LLD),
-							"cob_put_u64_param", n, val);
+		cob_runtime_warning_external ("cob_put_u64_param", 1,
+			_("attempt to over-write constant parameter %d with " CB_FMT_LLD),
+			n, val);
 		return;
 	}
 	switch (f->attr->type) {
@@ -1876,8 +1884,9 @@ cob_put_picx_param (int n, void *char_field)
 	}
 
 	if (COB_FIELD_CONSTANT (f)) {
-		cob_runtime_warning (_("%s: attempt to over-write constant param %d with '%s'"),
-						"cob_put_picx_param", n, (char*)char_field);
+		cob_runtime_warning_external ("cob_put_picx_param", 1,
+			_("attempt to over-write constant parameter %d with '%s'"),
+			n, (char*)char_field);
 		return;
 	}
 
@@ -1916,7 +1925,8 @@ cob_put_grp_param (int n, void *char_field, size_t len)
 	}
 
 	if (COB_FIELD_CONSTANT (f)) {
-		cob_runtime_warning (_("%s: attempt to over-write constant param %d"), "cob_put_grp_param", n);
+		cob_runtime_warning_external ("cob_put_grp_param", 1,
+			"attempt to over-write constant parameter %d", n);
 		return;
 	}
 

@@ -8716,7 +8716,7 @@ AT_CLEANUP
 AT_SETUP([C API Test])
 AT_KEYWORDS([CALL])
 
-# CHECKME - returns COMP-4 instead of COMP-5
+# Needs merge of BY VALUE handling...
 AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
@@ -8733,10 +8733,10 @@ AT_DATA([prog.cob], [
        01  PIC9        PIC S9(8) DISPLAY VALUE  8192.
        01  NE          PIC Z(4)9.99-.
        01  CHRX        PIC  X(9)         VALUE 'Hello'.
+      *01  CHRN        PIC  N(9)         VALUE N'Hello'.
        01  GRPX.
            05  FILLER  PIC  X(9)         VALUE 'Hello'.
            05  FILLER  PIC  X(9)         VALUE 'World'.
-
        PROCEDURE DIVISION.
            MOVE -512.77 TO NE.
            CALL "CAPI" USING 2560 BY VALUE 16.
@@ -8755,6 +8755,7 @@ AT_DATA([prog.cob], [
            CALL "CAPI" USING BY VALUE GRPX LENGTH OF GRPX.
            CALL "CAPI" USING "Fred Fish", COMP3.
            CALL "CAPI" USING COMP3V99.
+      *    CALL "CAPI" USING CHRN.
            CALL "CAPI" .
            DISPLAY "COMP3    is now " COMP3 ";".
            DISPLAY "COMP4    is now " BINFLD5 ";".
@@ -8770,119 +8771,122 @@ AT_DATA([cmod.c], [[
 #include <libcob.h>
 
 static char *
-getType(int type)
+getType (int type)
 {
    static char wrk[24];
    switch (type) {
-   case COB_TYPE_GROUP:    return "Group";
+   case COB_TYPE_GROUP:           return "Group";
    case COB_TYPE_NUMERIC_COMP5:
        /* fall through as the test will have different results
           on big endian systems otherwise
           return "COMP-5"; */
-   case COB_TYPE_NUMERIC_BINARY: return "COMP-4";
-   case COB_TYPE_NUMERIC_PACKED: return "COMP-3";
-   case COB_TYPE_NUMERIC_FLOAT:  return "COMP-1";
-   case COB_TYPE_NUMERIC_DOUBLE: return "COMP-2";
-   case COB_TYPE_NUMERIC_DISPLAY:   return "DISPLAY";
-   case COB_TYPE_ALPHANUMERIC:   return "X";
-   case COB_TYPE_NUMERIC_EDITED: return "EDITED";
+   case COB_TYPE_NUMERIC_BINARY:  return "BINARY";
+   case COB_TYPE_NUMERIC_PACKED:  return "COMP-3";
+   case COB_TYPE_NUMERIC_FLOAT:   return "COMP-1";
+   case COB_TYPE_NUMERIC_DOUBLE:  return "COMP-2";
+   case COB_TYPE_NUMERIC_DISPLAY: return "DISPLAY";
+   case COB_TYPE_ALPHANUMERIC:    return "X";
+   case COB_TYPE_NUMERIC_EDITED:  return "EDITED";
+   case COB_TYPE_NATIONAL:        return "N";
    }
-   sprintf(wrk,"Type %04X",type);
+   sprintf (wrk,"Type %04X",type);
    return wrk;
 }
 
 int
-CAPI(void *p1, ...)
+CAPI (void *p1, ...)
 {
    int      k,nargs,type,digits,scale,size,sign;
    cob_s64_t   val;
    char     *str, wrk[80],pic[24];
 
    nargs = cob_get_num_params();
-   printf("CAPI called with %d parameters\n",nargs);
+   printf ("CAPI called with %d parameters\n",nargs);
    for(k=1; k <= nargs; k++) {
       type   = cob_get_param_type (k);
       digits = cob_get_param_digits (k);
       scale  = cob_get_param_scale (k);
       size   = cob_get_param_size (k);
       sign   = cob_get_param_sign (k);
-      printf(" %d: %-8s ",k,getType(type));
-      if (cob_get_param_constant(k))
-         printf("BY VALUE     ");
-      else
-         printf("BY REFERENCE ");
+      printf (" %d: %-8s ",k,getType(type));
+      if (cob_get_param_constant(k)) {
+         printf ("BY VALUE     ");
+      } else {
+         printf ("BY REFERENCE ");
+      }
       if (type == COB_TYPE_ALPHANUMERIC) {
-         sprintf(pic,"X(%d)",size);
+         sprintf (pic,"X(%d)",size);
          str = cob_get_picx_param (k, NULL, 0);
          printf("%-11s '%s'",pic,str);
          cob_free ((void*)str);
          cob_put_picx_param (k, "Bye!");
+      } else if (type == COB_TYPE_NATIONAL) {
+         sprintf (pic,"N(%d)",size); /* FIXME */
+         printf ("exchange of national data is not supported yet");
       } else if (type == COB_TYPE_GROUP) {
-         sprintf(pic,"(%d)",size);
+         sprintf (pic,"(%d)",size);
          str = cob_get_grp_param (k, NULL, 0);
-         printf("%-11s '%.*s'",pic,size,str);
+         printf ("%-11s '%.*s'",pic,size,str);
          cob_free ((void*)str);
-         memset(wrk,' ',sizeof(wrk));
-         memcpy(wrk,"Bye-Bye Birdie!",15);
+         memset (wrk,' ',sizeof(wrk));
+         memcpy (wrk,"Bye-Bye Birdie!",15);
          cob_put_grp_param (k, wrk, sizeof(wrk));
       } else if (type == COB_TYPE_NUMERIC_EDITED) {
-         if(scale > 0) {
-            sprintf(pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
+         if (scale > 0) {
+            sprintf (pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
          } else {
-            sprintf(pic,"%s9(%d)",sign?"S":"",digits-scale);
+            sprintf (pic,"%s9(%d)",sign?"S":"",digits-scale);
          }
          val = cob_get_s64_param (k);
-         printf("%-11s %lld ",pic,val);
+         printf ("%-11s %lld ",pic,val);
          val = val + 130;
          val = -val;
          cob_put_s64_param (k, val);
          cob_get_grp_param (k, wrk, sizeof(wrk));
-         printf(" to %.*s",size,wrk);
+         printf (" to %.*s",size,wrk);
       } else {
          if(scale > 0) {
-            sprintf(pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
+            sprintf (pic,"%s9(%d)V9(%d)",sign?"S":"",digits-scale,scale);
          } else {
-            sprintf(pic,"%s9(%d)",sign?"S":"",digits-scale);
+            sprintf (pic,"%s9(%d)",sign?"S":"",digits-scale);
          }
          val = cob_get_s64_param (k);
-         printf("%-11s %lld",pic,val);
+         printf ("%-11s %lld",pic,val);
          cob_put_s64_param (k, val + 3);
       }
       printf(";\n");
       fflush(stdout);
    }
-   if (nargs > 2)
+   if (nargs > 2) {
       cob_put_s64_param (7, val + 3);
+   }
    return 0;
 }
 ]])
 
-AT_CHECK([$COMPILE -w prog.cob cmod.c], [0], [],
-[prog.cob:31: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
-prog.cob:31: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
-prog.cob:32: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
+AT_CHECK([$COMPILE -Wno-unfinished prog.cob cmod.c], [0], [],
+[prog.cob:31: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
 prog.cob:32: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
-prog.cob:34: warning: BY CONTENT assumed for alphanumeric item 'BINFLD5'
-prog.cob:34: warning: BY CONTENT assumed for alphanumeric item 'CHRX'
+prog.cob:34: warning: BY CONTENT assumed for alphanumeric item 'GRPX'
 ])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [CAPI called with 2 parameters
- 1: COMP-4   BY VALUE     S9(9)       2560;
+ 1: BINARY   BY VALUE     S9(9)       2560;
  2: DISPLAY  BY VALUE     9(2)        16;
 CAPI called with 2 parameters
- 1: COMP-5   BY REFERENCE 9(5)        1280;
+ 1: BINARY   BY REFERENCE 9(5)        1280;
  2: EDITED   BY REFERENCE S9(5)V9(2)  -51277  to   511.47 ;
 CAPI called with 1 parameters
- 1: COMP-4   BY REFERENCE S9(5)       1024;
+ 1: BINARY   BY REFERENCE S9(5)       1024;
 CAPI called with 1 parameters
- 1: COMP-4   BY REFERENCE 9(9)        2560;
+ 1: BINARY   BY REFERENCE 9(9)        2560;
 CAPI called with 2 parameters
  1: COMP-3   BY REFERENCE 9(8)        4096;
  2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
 CAPI called with 4 parameters
  1: DISPLAY  BY REFERENCE S9(8)       8192;
- 2: COMP-4   BY REFERENCE S9(5)       1027;
+ 2: BINARY   BY REFERENCE S9(5)       1027;
  3: X        BY REFERENCE X(9)        'Hello';
  4: Group    BY REFERENCE (18)        'Hello    World    ';
 CAPI called with 3 parameters
@@ -8890,19 +8894,19 @@ CAPI called with 3 parameters
  2: EDITED   BY REFERENCE S9(5)V9(2)  -51407  to   512.77 ;
  3: X        BY REFERENCE X(9)        'Bye!';
 CAPI called with 2 parameters
- 1: COMP-5   BY REFERENCE 9(5)        1283;
+ 1: BINARY   BY REFERENCE 9(5)        1283;
  2: EDITED   BY REFERENCE S9(5)V9(2)  51277  to   514.07-;
 CAPI called with 2 parameters
- 1: COMP-5   BY REFERENCE 9(5)        1286;
+ 1: BINARY   BY REFERENCE 9(5)        1286;
  2: X        BY VALUE     X(9)        'Hello!';
 CAPI called with 2 parameters
- 1: COMP-5   BY REFERENCE 9(5)        1289;
+ 1: BINARY   BY REFERENCE 9(5)        1289;
  2: X        BY VALUE     X(9)        'Hello!';
 CAPI called with 1 parameters
- 1: COMP-4   BY VALUE     S9(9)       18;
+ 1: BINARY   BY VALUE     S9(9)       18;
 CAPI called with 2 parameters
  1: Group    BY VALUE     (18)        'Bye-Bye Birdie!   ';
- 2: COMP-4   BY VALUE     S9(9)       18;
+ 2: BINARY   BY VALUE     S9(9)       18;
 CAPI called with 2 parameters
  1: X        BY VALUE     X(9)        'Fred Fish';
  2: COMP-3   BY REFERENCE 9(8)        4102;
@@ -8915,16 +8919,16 @@ BINFLD5S is now +01030;
 CHRX     is now Hello!   ;
 NE       is now   514.07-;
 ],
-[libcob: prog.cob:21: warning: cob_put_s64_param: attempt to over-write constant param 1 with 2563
-libcob: prog.cob:21: warning: cob_put_s64_param: attempt to over-write constant param 2 with 19
-libcob: prog.cob:27: warning: cob_put_s64_param: param 7 is not within range of 4
-libcob: prog.cob:28: warning: cob_put_s64_param: param 7 is not within range of 3
-libcob: prog.cob:31: warning: cob_put_picx_param: attempt to over-write constant param 2 with 'Bye!'
-libcob: prog.cob:32: warning: cob_put_picx_param: attempt to over-write constant param 2 with 'Bye!'
-libcob: prog.cob:33: warning: cob_put_s64_param: attempt to over-write constant param 1 with 21
-libcob: prog.cob:34: warning: cob_put_grp_param: attempt to over-write constant param 1
-libcob: prog.cob:34: warning: cob_put_s64_param: attempt to over-write constant param 2 with 21
-libcob: prog.cob:35: warning: cob_put_picx_param: attempt to over-write constant param 1 with 'Bye!'
+[libcob: prog.cob:21: warning: cob_put_s64_param: attempt to over-write constant parameter 1 with 2563
+libcob: prog.cob:21: warning: cob_put_s64_param: attempt to over-write constant parameter 2 with 19
+libcob: prog.cob:27: warning: cob_put_s64_param: parameter 7 is not within range of 4
+libcob: prog.cob:28: warning: cob_put_s64_param: parameter 7 is not within range of 3
+libcob: prog.cob:31: warning: cob_put_picx_param: attempt to over-write constant parameter 2 with 'Bye!'
+libcob: prog.cob:32: warning: cob_put_picx_param: attempt to over-write constant parameter 2 with 'Bye!'
+libcob: prog.cob:33: warning: cob_put_s64_param: attempt to over-write constant parameter 1 with 21
+libcob: prog.cob:34: warning: cob_put_grp_param: attempt to over-write constant parameter 1
+libcob: prog.cob:34: warning: cob_put_s64_param: attempt to over-write constant parameter 2 with 21
+libcob: prog.cob:35: warning: cob_put_picx_param: attempt to over-write constant parameter 1 with 'Bye!'
 ])
 
 AT_CLEANUP

@@ -5,6 +5,8 @@
 	  call, only use trace file if dump file cannot be opened
 	* termio.c (cob_dump_field): removed trailing spaces for group
 	  items, get trace file from (cob_get_dump_file)
+	* common.c, coblocal.h (cob_runtime_warning_external): new function
+	* call.c: warnings centralized, msgids changed
 
 2018-02-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
