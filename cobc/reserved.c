@@ -1926,6 +1926,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PARENT",			0, 1, PARENT,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "PASSWORD",			0, 1, PASSWORD,			/* IBM extension */
+				0, CB_CS_SELECT
+  },
   { "PERFORM",			1, 0, PERFORM,			/* 2002 */
 				CB_CS_PERFORM, 0
   },
@@ -2308,8 +2311,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SEGMENT-LIMIT",		0, 0, SEGMENT_LIMIT,		/* 85 */
 				0, 0
   },
-  { "SELECT",			0, 0, SELECT,			/* 2002 */
-				0, 0
+  { "SELECT",			1, 0, SELECT,			/* 2002 */
+				CB_CS_SELECT, 0
   },
   { "SELECT-ALL",			0, 1, SELECT_ALL,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY

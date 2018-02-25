@@ -3152,6 +3152,13 @@ cb_validate_program_data (struct cb_program *prog)
 	/* file definition checks */
 	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
 		file = CB_FILE (CB_VALUE (l));
+		if (file->flag_external) {
+			if (CB_VALID_TREE (file->password)
+				&& !CB_FIELD (cb_ref(file->password))->flag_external) {
+				cb_error_x (file->password, _("PASSWORD '%s' for EXTERNAL file '%s' must have EXTERNAL attribute"),
+					CB_NAME (file->password), file->name);
+			}
+		}
 		if (CB_VALID_TREE (file->record_depending)) {
 			validate_record_depending (file->record_depending);
 		}
@@ -4672,7 +4679,7 @@ cb_build_optim_cond (struct cb_binary_op *p)
 }
 
 static int
-cb_chk_num_cond (cb_tree x, cb_tree y)
+cb_check_num_cond (cb_tree x, cb_tree y)
 {
 	struct cb_field		*fx;
 	struct cb_field		*fy;
@@ -4716,7 +4723,7 @@ cb_chk_num_cond (cb_tree x, cb_tree y)
 }
 
 static int
-cb_chk_alpha_cond (cb_tree x)
+cb_check_alpha_cond (cb_tree x)
 {
 	if (current_program->alphabet_name_list) {
 		return 0;
@@ -4889,7 +4896,7 @@ cb_build_cond (cb_tree x)
 					x = CB_BUILD_FUNCALL_2 ("cob_cmp", p->x, p->y);
 					break;
 				}
-				if (cb_chk_num_cond (p->x, p->y)) {
+				if (cb_check_num_cond (p->x, p->y)) {
 					size1 = cb_field_size (p->x);
 					x = CB_BUILD_FUNCALL_3 ("memcmp",
 						CB_BUILD_CAST_ADDRESS (p->x),
@@ -4915,8 +4922,8 @@ cb_build_cond (cb_tree x)
 					x = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
 					break;
 				}
-				if (cb_chk_alpha_cond (p->x) &&
-				    cb_chk_alpha_cond (p->y)) {
+				if (cb_check_alpha_cond (p->x) &&
+				    cb_check_alpha_cond (p->y)) {
 					size1 = cb_field_size (p->x);
 					size2 = cb_field_size (p->y);
 				} else {

@@ -916,6 +916,7 @@ struct cb_key_component {
 struct cb_alt_key {
 	struct cb_alt_key	*next;			/* Pointer to next */
 	cb_tree			key;			/* Key item */
+	cb_tree			password;			/* Password item */
 	int			duplicates;		/* DUPLICATES */
 	int			offset;			/* Offset from start */
 	int			tf_suppress;		/* !0 for SUPPRESS */
@@ -932,6 +933,7 @@ struct cb_file {
 	cb_tree			file_status;		/* FILE STATUS */
 	cb_tree			sharing;		/* SHARING */
 	cb_tree			key;			/* Primary RECORD KEY */
+	cb_tree			password;			/* Password item for file or primary key */
 	struct cb_key_component	*component_list;	/* List of fields making up primary key */
 	struct cb_alt_key	*alt_key_list;		/* ALTERNATE RECORD KEY */
 	/* FD/SD */

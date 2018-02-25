@@ -677,6 +677,34 @@ prog.cob:26: error: invalid reference to 'P02' (in DECLARATIVES)
 AT_CLEANUP
 
 
+AT_SETUP([EXTERNAL file])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT my-file
+               ASSIGN TO "somefile"
+               ORGANIZATION IS SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD my-file EXTERNAL.
+       01 my-record.
+           03 my-record-data PIC X(80).
+
+       PROCEDURE DIVISION.
+           GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
 AT_SETUP([RECORDING MODE])
 AT_KEYWORDS([file extensions])
 
@@ -1103,6 +1131,57 @@ AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [],
 
 AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [0], [],
 [prog.cob:16: warning: VSAM STATUS ignored
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([PASSWORD clause, Indexed files])
+AT_KEYWORDS([file external split-key])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT file1 ASSIGN TO 'FILE-TEST'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD KEY    IS file1-key PASSWORD IS PASS1
+                        STATUS        IS FSTAT.
+           SELECT file2 ASSIGN TO 'FILE-TEST-EXT'
+                        ORGANIZATION  IS INDEXED
+                        ACCESS MODE   IS DYNAMIC
+                        RECORD KEY    IS file2-key PASSWORD IS PASS2
+                        ALTERNATE RECORD KEY IS NOTHEREKEY
+                           SOURCE     IS file2-dat file2-key
+                           PASSWORD   IS PASS-EXT
+                        STATUS        IS FSTAT.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  FILE1.
+       01  FILE1-REC.
+           05 FILE1-KEY PIC X.
+       FD  FILE2  EXTERNAL.
+       01  FILE2-REC.
+           05 FILE2-KEY PIC 9.
+           05 FILE2-DAT PIC X.
+       WORKING-STORAGE SECTION.
+       77  FSTAT       PIC X(02).
+      *> note: IBM specifies PASSWORDs are cut at / space filled to 8 bytes
+       77  PASS1       PIC X(08).
+       77  PASS2       PIC X(10).
+       77  PASS-EXT    PIC X(04) EXTERNAL.
+       PROCEDURE DIVISION.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [1], [],
+[prog.cob:10: warning: PASSWORD clause is not implemented
+prog.cob:15: warning: PASSWORD clause is not implemented
+prog.cob:18: warning: PASSWORD clause is not implemented
+prog.cob:15: error: PASSWORD 'PASS2' for EXTERNAL file 'file2' must have EXTERNAL attribute
 ])
 
 AT_CLEANUP

@@ -1886,6 +1886,7 @@ AT_CLEANUP
 
 
 AT_SETUP([EXTERNAL RELATIVE file])
+# FIXME: Check the function of the EXTERNAL file using a second program, too
 AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
@@ -1896,7 +1897,7 @@ AT_DATA([prog.cob], [
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT my-file
-               ASSIGN TO "blahblah"
+               ASSIGN TO "somefile"
                ORGANIZATION IS RELATIVE
                RELATIVE KEY IS my-key.
 

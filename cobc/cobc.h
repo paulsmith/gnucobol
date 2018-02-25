@@ -132,6 +132,7 @@ enum cb_format {
 #define	CB_CS_SCREEN			(1U << 24)	/* within SCREEN section */
 #define	CB_CS_INQUIRE_MODIFY			(1U << 25)	/* within INQUIRE or MODIFY statement */
 #define	CB_CS_GRAPHICAL_CONTROL			(1U << 26)	/* within ACUCOBOL-GT graphical control */
+#define	CB_CS_SELECT			(1U << 27)	/* within SELECT */
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

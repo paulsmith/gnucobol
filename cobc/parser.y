@@ -2389,6 +2389,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token PAGED
 %token PARAGRAPH
 %token PARENT
+%token PASSWORD
 %token PERFORM
 %token PERMANENT
 %token PH
@@ -4197,7 +4198,7 @@ _select_clause_sequence:
 | _select_clause_sequence select_clause
   {
 	/* reset context-sensitive words for next clauses */
-	cobc_cs_check = 0;
+	cobc_cs_check = CB_CS_SELECT;
   }
 ;
 
@@ -4216,6 +4217,19 @@ select_clause:
 | alternative_record_key_clause
 | file_status_clause
 | sharing_clause
+/* FXIME: disabled because of shift/reduce conflict
+  (optional in [alternate] record key, could be moved here
+   if the suppress_clause goes here too and both entries verify that
+   they directly are invoked after an [alternate] record key)
+| password_clause
+  {
+	if (current_file->organization == COB_ORG_INDEXED) {
+		cb_error ("for indexed files, the PASSWORD phrase must follow KEY");
+	} else {
+		current_file->password = $1;
+	}
+  }
+*/
 ;
 
 
@@ -4376,7 +4390,7 @@ access_mode:
 /* ALTERNATIVE RECORD KEY clause */
 
 alternative_record_key_clause:
-  ALTERNATE _record _key _is reference _split_keys flag_duplicates _suppress_clause
+  ALTERNATE _record _key _is reference _split_keys flag_duplicates _password_clause _suppress_clause
   {
 	struct cb_alt_key *p;
 	struct cb_alt_key *l;
@@ -4387,9 +4401,10 @@ alternative_record_key_clause:
 	p->key = $5;
 	p->component_list = NULL;
 	p->duplicates = CB_INTEGER ($7)->val;
-	if ($8) {
+	p->password = $8;
+	if ($9) {
 		p->tf_suppress = 1;
-		p->char_suppress = CB_INTEGER ($8)->val;
+		p->char_suppress = CB_INTEGER ($9)->val;
 	} else {
 		p->tf_suppress = 0;
 	}
@@ -4417,6 +4432,25 @@ alternative_record_key_clause:
 		for (; l->next; l = l->next) { ; }
 		l->next = p;
 	}
+  }
+;
+
+_password_clause:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| password_clause
+;
+
+password_clause:
+  PASSWORD
+  {
+	CB_PENDING ("PASSWORD clause");
+  }
+  _is reference
+  {
+	$$ = $4;
   }
 ;
 
@@ -4639,7 +4673,7 @@ record_delimiter_option:
 /* RECORD KEY clause */
 
 record_key_clause:
-  RECORD _key _is reference _split_keys
+  RECORD _key _is reference _split_keys _password_clause
   {
 	cb_tree composite_key;
 
@@ -4660,6 +4694,7 @@ record_key_clause:
 			current_file->component_list = key_component_list;
 		}
 	}
+	current_file->password = $6;
   }
 ;
 
