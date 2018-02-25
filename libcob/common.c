@@ -6431,6 +6431,55 @@ cob_load_config (void)
 	return 0;
 }
 
+static void
+output_source_location (void)
+{
+	if (cobglobptr && COB_MODULE_PTR
+		&& COB_MODULE_PTR->module_stmt != 0
+		&& COB_MODULE_PTR->module_sources) {
+		fprintf (stderr, "%s:%u: ",
+			COB_MODULE_PTR->module_sources
+			[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)],
+			COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt));
+	} else {
+		if (cob_source_file) {
+			fprintf (stderr, "%s:", cob_source_file);
+		}
+		if (cob_source_line) {
+			fprintf (stderr, "%u:", cob_source_line);
+		}
+		fputc (' ', stderr);
+	}
+}
+
+/* output runtime warning for issues produced by external API functions */
+void
+cob_runtime_warning_external (const char *caller_name, const int cob_reference, const char *fmt, ...)
+{
+	va_list args;
+
+	if (!cobsetptr->cob_display_warn) {
+		return;
+	}
+
+	/* Prefix */
+	fprintf (stderr, "libcob: ");
+	if (cob_reference) {
+		output_source_location ();
+	}
+	fprintf (stderr, _("warning: "));
+	fprintf (stderr, "%s: ", caller_name);
+
+	/* Body */
+	va_start (args, fmt);
+	vfprintf (stderr, fmt, args);
+	va_end (args);
+
+	/* Postfix */
+	putc ('\n', stderr);
+	fflush (stderr);
+}
+
 void
 cob_runtime_warning (const char *fmt, ...)
 {
@@ -6442,25 +6491,8 @@ cob_runtime_warning (const char *fmt, ...)
 
 	/* Prefix */
 	fprintf (stderr, "libcob: ");
-	if (cobglobptr && COB_MODULE_PTR
-	 && COB_MODULE_PTR->module_stmt != 0
-	 && COB_MODULE_PTR->module_sources) {
-		fprintf (stderr, "%s:%u: ",
-				COB_MODULE_PTR->module_sources
-					[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)],
-				COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt));
-	} else {
-		if (cob_source_file) {
-			fprintf (stderr, "%s:", cob_source_file);
-		}
-		if (cob_source_line) {
-			fprintf (stderr, "%u:", cob_source_line);
-		}
-		fputc (' ', stderr);
-	}
-
-	/* Prefix */
-	fprintf (stderr, "warning: ");
+	output_source_location ();
+	fprintf (stderr, _("warning: "));
 
 	/* Body */
 	va_start (args, fmt);
@@ -6471,6 +6503,7 @@ cob_runtime_warning (const char *fmt, ...)
 	putc ('\n', stderr);
 	fflush (stderr);
 }
+
 void
 cob_runtime_error (const char *fmt, ...)
 {
@@ -6614,6 +6647,7 @@ cob_fatal_error (const int fatal_error)
 			(void)_setmode (_fileno (stderr), _O_BINARY);
 		}
 #endif
+		/* note: same message in call.c */
 		cob_runtime_error (_("cob_init() has not been called"));
 		break;
 	/* LCOV_EXCL_START */
@@ -7458,24 +7492,20 @@ cob_set_runtime_option (enum cob_runtime_option_switch opt, void *p)
 	return;
 }
 
-#if 0 /* moved from common.h as the function is only used here with COB_DUMP_TO_FILE */
-#define COB_DUMP_TO_FILE 3
-#define COB_DUMP_TO_PRINT 2
-COB_EXPIMP FILE			*cob_get_dump_file(int where);
-#endif
-static FILE *
+FILE *
 cob_get_dump_file (void)
 {
 #if 1 /* new version as currently only COB_DUMP_TO_FILE is used */
 	if (cobsetptr->cob_dump_file != NULL) {	/* If DUMP active, use that */
-		return  cobsetptr->cob_dump_file;
-	} else if(cobsetptr->cob_trace_file != NULL) {	/* If TRACE active, use that */
-		return  cobsetptr->cob_trace_file;
-	} else if(cobsetptr->cob_dump_filename != NULL) {	/* Dump file defined */
-		cobsetptr->cob_dump_file = fopen(cobsetptr->cob_dump_filename, "a");
-		if (cobsetptr->cob_dump_file == NULL)
-			return stderr;
 		return cobsetptr->cob_dump_file;
+	} else if (cobsetptr->cob_dump_filename != NULL) {	/* Dump file defined */
+		cobsetptr->cob_dump_file = fopen (cobsetptr->cob_dump_filename, "a");
+		if (cobsetptr->cob_dump_file != NULL) {
+			return cobsetptr->cob_dump_file;
+		}
+	}
+	if (cobsetptr->cob_trace_file != NULL) {	/* If TRACE active, use that */
+		return cobsetptr->cob_trace_file;
 	} else {
 		return stderr;
 	}

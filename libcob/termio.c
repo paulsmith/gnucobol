@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -468,24 +468,13 @@ void
 cob_dump_field (const int level, const char *name, 
 		cob_field *fa, const int offset, const int indexes, ...)
 {
-	FILE	*fp = cobsetptr->cob_dump_file;
+	FILE	*fp;
 	char	vname[64],lvlwrk[16];
 	va_list	ap;
 	int	idx, subscript, size, adjust, indent;
 	cob_field	f[1];
 
-	if (fp == NULL) {
-		if(cobsetptr->cob_trace_file != NULL) {
-			fp = cobsetptr->cob_trace_file;
-		} else if(cobsetptr->cob_dump_filename != NULL) {
-			fp = fopen(cobsetptr->cob_dump_filename, "a");
-			if(fp == NULL)
-				fp = stderr;
-			cobsetptr->cob_dump_file = fp;
-		} else {
-			fp = stderr;
-		}
-	}
+	fp = cob_get_dump_file ();
 
 	if (level < 0) {	/* Special directive */
 		if (level == -1) {
@@ -540,7 +529,7 @@ cob_dump_field (const int level, const char *name,
 				dump_null_adrs = 1;
 				fprintf(fp, "%-10s%-30s  <NULL> address\n",lvlwrk,vname);
 			} else {
-				fprintf(fp, "%-10s%-30s\n",lvlwrk,vname);
+				fprintf(fp, "%-10s%s\n",lvlwrk,vname);
 				dump_null_adrs = 0;
 			}
 		} else if (dump_null_adrs) {

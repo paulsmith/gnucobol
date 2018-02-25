@@ -1,4 +1,9 @@
 
+2018-02-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_display_fields): activated dump code for
+	  BASED items
+
 2018-02-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_module_init): cater for empty source_cache;

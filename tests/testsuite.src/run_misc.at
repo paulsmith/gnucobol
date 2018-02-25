@@ -8096,6 +8096,13 @@ AT_DATA([prog.cob], [
        01  HEXV PIC X  COMP-X.
        01  HEXC REDEFINES HEXV PIC X.
 
+       01 TEST-BASED BASED.
+          05 TEST-BASED-SUB PIC X(00000100000).
+
+       01 TEST-ALLOCED BASED.
+          05 TEST-ALLOCED-SUB1 PIC X(010).
+          05 TEST-ALLOCED-SUB2 PIC 9(006).
+
        01  IDX PIC 9(9) BINARY VALUE 0.
        01  TSTREC.
          05  TSTDEP  PIC XXX.
@@ -8156,7 +8163,11 @@ AT_DATA([prog.cob], [
             MOVE LOW-VALUES TO TSTTAILX
             ADD 1 TO X.
             DISPLAY "X is " X.
+            ALLOCATE TEST-ALLOCED INITIALIZED.
             COPY cpyabrt.
+            IF ADDRESS OF TEST-BASED NOT = NULL
+              DISPLAY TEST-BASED-SUB
+            END-IF.
             GOBACK.
        END PROGRAM sub1.
 
@@ -8252,10 +8263,14 @@ WORKING-STORAGE
 **********************
 01        ZRO                             000000000
 01        HEXV                            13
+01        TEST-BASED.                     <NULL> address
+01        TEST-ALLOCED.
+  05      TEST-ALLOCED-SUB1              ALL SPACES
+  05      TEST-ALLOCED-SUB2               000000
 01        IDX                             000000000
-01        TSTREC.                       _
+01        TSTREC.
   05      TSTDEP                         'XXX'
-  05      TSTX.                         _
+  05      TSTX.
        15 TSTG-1 (1)                      01
        15 TSTX-2 (1,1)                   'A'
        15 TSTX-2 (1,2)                   'XX'
@@ -8307,7 +8322,7 @@ FD FLATFILE
 **********************
    File is OPEN
    FILE STATUS  '00'
-01        TSPFL-RECORD.                 _
+01        TSPFL-RECORD.
      10   CM-CUST-NUM                    'ALP00000'
      10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'
      10   CM-DISK                        '8417'
@@ -8319,36 +8334,36 @@ WORKING-STORAGE
 77        CUST-STAT                      '00'
 77        REC-NUM                         0001
 01        BIN                             000005441
-01        TEST-DATA.                    _
- 02       DATA-CUST-NUM-TBL.            _
+01        TEST-DATA.
+ 02       DATA-CUST-NUM-TBL.
   05      FILLER                         'ALP00000'
   05      FILLER                         'BET00000'
   05      FILLER                         'DEL00000'
   05      FILLER                         'EPS00000'
   05      FILLER                         'FOR00000'
   05      FILLER                         'GAM00000'
- 02       DATA-COMPANY-TBL.             _
+ 02       DATA-COMPANY-TBL.
   05      FILLER                         'ALPHA ELECTRICAL CO. LTD.'
   05      FILLER                         'BETA SHOE MFG. INC.'
   05      FILLER                         'DELTA LUGGAGE REPAIRS'
   05      FILLER                         'EPSILON EQUIPMENT SUPPLY'
   05      FILLER                         'FORTUNE COOKIE COMPANY'
   05      FILLER                         'GAMMA X-RAY TECHNOLOGY'
- 02       DATA-ADDRESS-2-TBL.           _
+ 02       DATA-ADDRESS-2-TBL.
   05      FILLER                         'ATLANTA'
   05      FILLER                         'CALGARY'
   05      FILLER                         'NEW YORK'
   05      FILLER                         'TORONTO'
   05      FILLER                         'WASHINGTON'
   05      FILLER                         'WHITEPLAIN'
- 02       DATA-NO-TERMINALS-TBL.        _
+ 02       DATA-NO-TERMINALS-TBL.
   05      FILLER                          010
   05      FILLER                          013
   05      FILLER                          075
   05      FILLER                          010
   05      FILLER                          090
   05      FILLER                          254
-01        WORK-AREA.                    _
+01        WORK-AREA.
   05      SUB                             0007
 
 ])
@@ -8392,7 +8407,7 @@ FD FLATFILE
 **********************
    File is OPEN
    FILE STATUS  '00'
-01        TSPFL-RECORD.                 _
+01        TSPFL-RECORD.
      10   CM-CUST-NUM                    'ALP00000'
      10   CM-COMPANY                     'ALPHA ELECTRICAL CO. LTD.'
      10   CM-DISK                        '8417'
@@ -8913,6 +8928,7 @@ libcob: prog.cob:35: warning: cob_put_picx_param: attempt to over-write constant
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([DEFAULT ROUNDED MODE])
 AT_KEYWORDS([runmisc])

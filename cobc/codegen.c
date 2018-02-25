@@ -9113,8 +9113,7 @@ output_display_fields (struct cb_field *f, int offset, int idx)
 		 || (p->level == 0 && p->file == NULL)
 		 || p->level == 66
 		 || p->level == 78
-		 || p->level == 88
-		 || p->flag_item_based) {
+		 || p->level == 88) {
 			continue;
 		}
 		/* For special registers */

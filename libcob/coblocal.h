@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2007-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2007-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -397,6 +397,8 @@ COB_HIDDEN int	cob_debug_dump		(void *mem, int len);
 /* Note: no definition for DEBUG_ISON_TRACE, DEBUG_ISON_WARN, DEBUG_ISON
          as these parts should be surrounded by #ifdef COB_DEBUG_LOG */
 #endif
+COB_HIDDEN FILE			*cob_get_dump_file	(void);
+
 
 #if 0 /* currently not used */
 COB_HIDDEN char		*cob_int_to_string		(int, char*);
