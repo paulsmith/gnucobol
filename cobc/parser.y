@@ -13058,7 +13058,7 @@ start_statement:
 ;
 
 start_body:
-  file_name start_key sizelen_clause _invalid_key_phrases
+  file_name _start_key _sizelen_clause _invalid_key_phrases
   {
 	if ($3 && !$2) {
 		cb_error_x (CB_TREE (current_statement),
@@ -13069,7 +13069,7 @@ start_body:
   }
 ;
 
-sizelen_clause:
+_sizelen_clause:
   /* empty */
   {
 	$$ = NULL;
@@ -13080,7 +13080,7 @@ sizelen_clause:
   }
 ;
 
-start_key:
+_start_key:
   /* empty */
   {
 	$$ = NULL;
@@ -13237,16 +13237,25 @@ string_statement:
   STRING
   {
 	begin_statement ("STRING", TERM_STRING);
-	save_tree = NULL;
   }
   string_body
   _end_string
 ;
 
 string_body:
-  string_item_list INTO identifier _with_pointer _on_overflow_phrases
+  string_items INTO identifier _with_pointer _on_overflow_phrases
   {
-	cb_emit_string (save_tree, $3, $4);
+	cb_emit_string ($1, $3, $4);
+  }
+;
+
+string_items:
+  {
+	save_tree = NULL;
+  }
+  string_item_list
+  {
+	$$ = save_tree;
   }
 ;
 
@@ -13270,7 +13279,7 @@ string_item:
 ;
 
 _string_delimited:
-  /* empty */			{ $$ = NULL; }
+  /* empty */		{ $$ = NULL; }
 | DELIMITED _by
   string_delimiter	{ $$ = $3; }
 ;
