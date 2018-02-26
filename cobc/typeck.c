@@ -10006,7 +10006,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 	cb_tree		v;
 	cb_tree		rtree;
 	struct cb_cast	*p;
-	enum cb_class	class;
+	enum cb_class	tree_class;
 
 	if (cb_validate_one (x)
 	 || cb_validate_list (vars)) {
@@ -10064,8 +10064,8 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 
 	/* Emit statements if targets have the correct class. */
 	for (l = vars; l; l = CB_CHAIN (l)) {
-		class = cb_tree_class (CB_VALUE (l));
-		switch (class) {
+		tree_class = cb_tree_class (CB_VALUE (l));
+		switch (tree_class) {
 		case CB_CLASS_INDEX:
 		case CB_CLASS_NUMERIC:
 		case CB_CLASS_POINTER:

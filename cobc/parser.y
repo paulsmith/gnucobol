@@ -1675,7 +1675,7 @@ check_not_88_level (cb_tree x)
 	f = CB_FIELD (cb_ref (x));
 
 	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
-		cb_error (_("88-level cannot be used here"));
+		cb_error (_("level %02d item '%s' may not be used here"), 88, cb_name (x));
 	}
 }
 
@@ -1844,6 +1844,35 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 		cb_error_x (x, _("%s is not an alphanumeric literal"), CB_LITERAL (x)->data);
 	} else if (is_field_with_usage_not_display) {
 		cb_error_x (x, _("'%s' is not USAGE DISPLAY"), cb_name (x));
+	}
+}
+
+static void
+check_validate_item (cb_tree x)
+{
+	struct cb_field	*f;
+	enum cb_class	tree_class;
+
+	if (CB_INVALID_TREE(x) || x->tag != CB_TAG_REFERENCE) {
+		return;
+	}
+	x = cb_ref (x);
+	if (CB_INVALID_TREE (x) || !CB_FIELD_P (x)) {
+		cb_error (_("invalid target for %s"), "VALIDATE");
+	}
+
+	f = CB_FIELD (x);
+	tree_class = CB_TREE_CLASS(f);
+	if (is_screen_field(x)) {
+		cb_error (_("SCREEN item cannot be used here"));
+	} else if (f->level == 66) {
+		cb_error (_("level %02d item '%s' may not be used here"), 66, cb_name (x));
+	} else if (f->flag_any_length) {
+		cb_error (_("ANY LENGTH item not allowed here"));
+	} else if (tree_class == CB_CLASS_INDEX
+		|| tree_class == CB_CLASS_OBJECT
+		|| tree_class == CB_CLASS_POINTER) {
+		cb_error (_("item '%s' has wrong class for VALIDATE"), cb_name (x));
 	}
 }
 
@@ -2670,6 +2699,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %token USER_FUNCTION_NAME	"user function name"
 %token USING
 %token V
+%token VALIDATE
 %token VALUE
 %token VALUE_FORMAT		"VALUE-FORMAT"
 %token VARIABLE
@@ -2765,6 +2795,7 @@ error_if_not_usage_display_or_nonnumeric_lit (cb_tree x)
 %nonassoc TRANSFORM
 %nonassoc UNLOCK
 %nonassoc UNSTRING
+%nonassoc VALIDATE
 %nonassoc WRITE
 
 %nonassoc NOT_END END
@@ -9164,7 +9195,7 @@ statement:
 | transform_statement
 | unlock_statement
 | unstring_statement
-/* | TODO: validate_statement */
+| validate_statement
 | write_statement
 | %prec SHIFT_PREFER
   NEXT SENTENCE
@@ -13517,6 +13548,36 @@ _end_unstring:
   }
 ;
 
+/* VALIDATE statement */
+
+validate_statement:
+  VALIDATE
+  {
+	begin_statement ("VALIDATE", 0);
+  }
+  validate_fields
+  {
+#if 0	/* FIXME: at least add syntax checks here */
+	cb_emit_validate ($3);
+#else
+	CB_PENDING ("VALIDATE");
+#endif
+  }
+;
+
+validate_fields:
+  identifier
+  {
+	check_validate_item ($1);
+	$$ = CB_LIST_INIT ($1);
+  }
+| validate_fields identifier
+  {
+	check_validate_item ($2);
+	$$ = cb_list_add ($1, $2);
+  }
+;
+
 
 /* USE statement */
 
@@ -13719,7 +13780,7 @@ debugging_target:
 		/* Reference must be a data item */
 		x = cb_ref ($3);
 		if (CB_INVALID_TREE (x) || !CB_FIELD_P (x)) {
-			cb_error (_("invalid target for DEBUGGING ALL"));
+			cb_error (_("invalid target for %s"), "DEBUGGING ALL");
 		} else {
 			needs_field_debug = 1;
 			CB_FIELD (x)->debug_section = current_section;

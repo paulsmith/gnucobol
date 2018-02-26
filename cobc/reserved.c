@@ -2757,7 +2757,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VALID",			0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "VALIDATE",			0, 0, -1,			/* 2002 */
+  { "VALIDATE",			0, 0, VALIDATE,			/* 2002 */
 				0, 0
   },
   { "VALIDATE-STATUS",		0, 0, -1,			/* 2002 */
