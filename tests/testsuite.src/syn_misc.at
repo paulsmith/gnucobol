@@ -4251,10 +4251,10 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:12: error: syntax error, unexpected DELIMITED
-prog.cob:15: error: syntax error, unexpected END-STRING
+prog.cob:15: error: syntax error, unexpected END-STRING, expecting INTO
 prog.cob:17: error: syntax error, unexpected END-STRING, expecting Identifier
 prog.cob:19: error: syntax error, unexpected DELIMITED
-prog.cob:24: error: syntax error, unexpected DELIMITED
+prog.cob:24: error: syntax error, unexpected DELIMITED, expecting INTO
 prog.cob:32: error: syntax error, unexpected DELIMITED
 prog.cob:34: error: syntax error, unexpected Identifier, expecting INTO
 prog.cob:37: error: syntax error, unexpected END-UNSTRING, expecting Identifier
