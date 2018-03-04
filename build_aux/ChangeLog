@@ -1,4 +1,9 @@
 
+2018-02-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: ensure auxiliary scripts are executable before
+	  running autoconf; only create tarstamp.h if missing
+
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: ensure auxiliary scripts are executable
@@ -46,7 +51,7 @@
 	  without uname(1) [removed 2014-01-25] from old version
 
 
-Copyright 2015-2017 Free Software Foundation, Inc.
+Copyright 2015-2018 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

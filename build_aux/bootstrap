@@ -3,7 +3,7 @@
 # Bootstrap gnucobol package from checked-out sources
 # Note:  call as ./bootstrap if you don't have readlink -f
 #
-# Copyright (C) 2017 Free Software Foundation, Inc.
+# Copyright (C) 2017-2018 Free Software Foundation, Inc.
 # Written by Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -30,19 +30,17 @@ else
 	MAINPATH=$(dirname $(readlink -f "$0"))/..
 fi
 
-echo; echo running autoreconf...
-#autoreconf -I m4 --install --force		# changing build_aux scripts
-autoreconf -I m4 --verbose --force $MAINPATH; ret=$?
-if test $ret -ne 0; then
-	echo; echo ERROR - aborting bootstrap && exit $ret
+echo
+if test ! -f $MAINPATH/tarstamp.h; then
+	echo creating tarstamp.h...
+	echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $MAINPATH/tarstamp.h
+	echo "#define COB_NUM_TAR_DATE `date -u +'%Y%m%d'`" >> $MAINPATH/tarstamp.h
+	echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $MAINPATH/tarstamp.h
+else
+	echo tarstamp.h exists already
 fi
 
-echo; echo creating tarstamp.h...
-echo "#define COB_TAR_DATE \"`date -u +'%b %d %Y %T'` UTC\"" > $MAINPATH/tarstamp.h
-echo "#define COB_NUM_TAR_DATE `date -u +'%Y%m%d'`" >> $MAINPATH/tarstamp.h
-echo "#define COB_NUM_TAR_TIME `date -u +'%H%M%S'`" >> $MAINPATH/tarstamp.h
-
-echo; echo ensure we have executable scripts...
+echo; echo ensure that we have executable scripts...
 chmod +x $MAINPATH/build_aux/compile
 chmod +x $MAINPATH/build_aux/config.guess
 chmod +x $MAINPATH/build_aux/config.rpath
@@ -58,7 +56,14 @@ chmod +x $MAINPATH/doc/cobcinfo.sh
 chmod +x $MAINPATH/po/update_linguas.sh
 chmod +x $MAINPATH/tests/listings-sed.sh
 if test -f $MAINPATH/create_win_dist.sh; then
-   chmod +x $MAINPATH/create_win_dist.sh
+	chmod +x $MAINPATH/create_win_dist.sh
+fi
+
+echo; echo running autoreconf...
+#autoreconf -I m4 --install --force		# changing build_aux scripts
+autoreconf -I m4 --verbose --force $MAINPATH; ret=$?
+if test $ret -ne 0; then
+	echo; echo ERROR - aborting bootstrap && exit $ret
 fi
 
 echo; echo bootstrap is finished
