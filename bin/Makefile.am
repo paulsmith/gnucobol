@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/bin
 #
-# Copyright (C) 2001-2012, 2014, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014, 2017-2018 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -35,6 +35,8 @@ cobcrun_LDADD = $(top_builddir)/lib/libsupport.a $(top_builddir)/libcob/libcob.l
 @CODE_COVERAGE_RULES@
 CODE_COVERAGE_BRANCH_COVERAGE=1
 CODE_COVERAGE_LCOV_OPTIONS =  --no-external
+
+MAINTAINERCLEANFILES = cobcrun.1
 
 cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  cobcrun$(EXEEXT)
 	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)

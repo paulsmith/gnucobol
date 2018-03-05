@@ -1,4 +1,8 @@
 
+2018-03-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (maintainer-clean): remove generated manpage
+
 2018-02-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcrun.c: renamed -runtime-conf to -runtime-config
@@ -105,7 +109,7 @@
 	* cobcrun.c : Changed output of --help for help2man
 	* Makefile.am : Added manpage generation + install
 
-2014-05-06  Philipp BÃ¶hme <phi.boehme@googlemail.com>
+2014-05-06  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* cobcrun.c : Added --runtime-env for displaying current runtime variables.;
 	  --version shows both version numbers of cobcrun (new) and libcob.;

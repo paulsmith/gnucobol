@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/cobc
 #
-# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -38,6 +38,9 @@ COBC = $(top_builddir)/cobc/cobc$(EXEEXT)
 # note: we actually want their header files...
 BUILT_SOURCES = ppparse.c parser.c
 EXTRA_DIST = pplex.l scanner.l ppparse.h parser.h
+
+MAINTAINERCLEANFILES = pplex.c scanner.c ppparse.h parser.h cobc.1
+CLEANFILES = parser.output ppparse.output
 
 # Add rules for code-coverage testing, as provided by AX_CODE_COVERAGE
 @CODE_COVERAGE_RULES@
