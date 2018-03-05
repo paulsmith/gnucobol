@@ -1,4 +1,11 @@
 
+2018-03-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* POTFILES.in: Changed bison/flex generated sources back to the real
+	  sources as the "not a real string" errors are now fixed by correct
+	  escaping in the used expressions and translators may only have the
+	  VCS checkout, not the complete tarball
+
 2018-02-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: updated translations from TP

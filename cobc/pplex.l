@@ -166,7 +166,7 @@ static void	get_new_listing_file	(void);
 
 WORD		[_0-9A-Z\x80-\xFF-]+
 NUMRIC_LITERAL	[+-]?[0-9,.]*[0-9]
-ALNUM_LITERAL	\"[^\"\n]*\"|\'[^\'\n]*\'
+ALNUM_LITERAL	"\""[^""\n]*"\""|"\'"[^''\n]*"\'"
 SET_PAREN_LIT	\([^()\n]*\)
 DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 

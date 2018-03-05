@@ -290,21 +290,21 @@ static void	add_synonym (const int);
 	BEGIN FUNCTION_STATE;
 }
 
-[\'\"] {
+[''""] {
 	/* String literal */
 	cobc_force_literal = 0;
 	read_literal (yytext[0], "");
 	RETURN_TOK (LITERAL);
 }
 
-X\'[^\'\n]*\' |
-X\"[^\"\n]*\" {
+X"\'"[^''\n]*"\'" |
+X"\""[^""\n]*"\"" {
 	/* X string literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_x (yytext + 2, "X"));
 }
 
-N[\'\"] {
+N[''""] {
 	/* N national string literal */
 	cobc_force_literal = 0;
 	/* TODO: national string - needs different handling */
@@ -312,43 +312,43 @@ N[\'\"] {
 	RETURN_TOK (LITERAL);
 }
 
-NX\'[^\'\n]*\' |
-NX\"[^\"\n]*\" {
+NX"\'"[^''\n]*"\'" |
+NX"\""[^""\n]*"\"" {
 	/* NX string literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_x (yytext + 3, "NX"));
 }
 
-Z\'[^\'\n]*\' |
-Z\"[^\"\n]*\" {
+Z"\'"[^''\n]*"\'" |
+Z"\""[^""\n]*"\"" {
 	/* Z string literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_z (yytext + 2, "Z"));
 }
 
-L\'[^\'\n]*\' |
-L\"[^\"\n]*\" {
+L"\'"[^''\n]*"\'" |
+L"\""[^""\n]*"\"" {
 	/* L string literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_z (yytext + 2, "L"));
 }
 
-H\'[^\'\n]*\' |
-H\"[^\"\n]*\" {
+H"\'"[^''\n]*"\'" |
+H"\""[^""\n]*"\"" {
 	/* H hexadecimal/numeric literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_h (yytext + 2, "H"));
 }
 
-B\'[^\'\n]*\' |
-B\"[^\"\n]*\" {
+B"\'"[^''\n]*"\'" |
+B"\""[^""\n]*"\"" {
 	/* B boolean/numeric literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_b (yytext + 2, "B"));
 }
 
-BX\'[^\'\n]*\' |
-BX\"[^\"\n]*\" {
+BX"\'"[^''\n]*"\'" |
+BX"\""[^""\n]*"\"" {
 	/* BX boolean hexadecimal string literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_x (yytext + 3, "BX"));
