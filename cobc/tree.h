@@ -1397,6 +1397,12 @@ struct cb_report {
 #define CB_REPORT(x)	(CB_TREE_CAST (CB_TAG_REPORT, struct cb_report, x))
 #define CB_REPORT_P(x)	(CB_TREE_TAG (x) == CB_TAG_REPORT)
 
+#define CB_REF_OR_REPORT_P(x)	\
+	(CB_REFERENCE_P (x) ? CB_REPORT_P (cb_ref (x)) : CB_REPORT_P (x))
+
+#define CB_REPORT_PTR(x)		\
+	(CB_REFERENCE_P (x) ? CB_REPORT   (cb_ref (x)) : CB_REPORT (x))
+
 /* Program */
 
 struct nested_list {

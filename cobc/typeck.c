@@ -2950,6 +2950,7 @@ cb_validate_program_data (struct cb_program *prog)
 	struct cb_field		*p;
 	struct cb_field		*q;
 	struct cb_field		*depfld;
+	struct cb_field		*field;
 	struct cb_file		*file;
 	struct cb_report	*rep;
 	unsigned char		*c;
@@ -3165,6 +3166,21 @@ cb_validate_program_data (struct cb_program *prog)
 		if (file->organization == COB_ORG_RELATIVE && file->key
 		    && cb_ref (file->key) != cb_error_node) {
 			validate_relative_key_field (file);
+		}
+		if (file->assign != NULL) {
+			if (CB_LITERAL_P (file->assign)) {
+				/* ASSIGN TO 'literal' */
+			} else if (CB_REF_OR_FIELD_P (file->assign)) {
+				field = CB_FIELD_PTR (file->assign);
+				if (cb_select_working
+					&& field->storage != CB_STORAGE_WORKING
+					&& field->storage != CB_STORAGE_FILE
+					&& field->storage != CB_STORAGE_LOCAL) {
+					cb_error_x (file->assign,
+						_("file %s: ASSIGN %s declared outside WORKING-STORAGE"), 
+						file->name, field->name);
+				}
+			}
 		}
 	}
 }
@@ -10862,11 +10878,11 @@ cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
 		if(p->report_from) {
 			if(forterminate
 			&& report_in_footing) {
-				cb_emit_move( p->report_from, p->report_source);
+				cb_emit_move (p->report_from, CB_LIST_INIT (p->report_source));
 			} else
 			if(!forterminate
 			&& !report_in_footing) {
-				cb_emit_move( p->report_from, p->report_source);
+				cb_emit_move (p->report_from, CB_LIST_INIT (p->report_source));
 			}
 		}
 		if(p->report_when) {
@@ -10894,7 +10910,7 @@ cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
 static void
 cb_emit_report_move_id (cb_tree rep)
 {
-	struct cb_report *r = CB_REPORT (cb_ref(rep));
+	struct cb_report *r = CB_REPORT_PTR (rep);
 	if (r
 	 && r->id == 0) {
 		r->id = report_id++;
@@ -10914,11 +10930,6 @@ cb_emit_initiate (cb_tree rep)
 	if (rep == cb_error_node) {
 		return;
 	}
-#if 1	/* FIXME: Why do we change the tag here
-		   (which leads to tree cast errors later)?
-		   Note: if removed we get NIST only errors */
-	rep->tag = CB_TAG_REPORT;
-#endif
 	cb_emit_report_move_id (rep);
 	cb_emit (CB_BUILD_FUNCALL_1 ("$I", rep));
 
@@ -10932,16 +10943,6 @@ cb_emit_terminate (cb_tree rep)
 	if (rep == cb_error_node) {
 		return;
 	}
-#if 1	/* FIXME: Why do we change the tag here
-		   (which leads to tree cast errors later)?
-
-		   Note: if removed we get NIST *only* errors
-		   TODO: ensure we get the same failures in
-		         our testsuite first, then investigate
-		         to fix the error
-		*/
-	rep->tag = CB_TAG_REPORT;
-#endif
 	cb_emit_report_move_id (rep);
 	cb_emit (CB_BUILD_FUNCALL_1 ("$T", rep));
 
@@ -10956,25 +10957,20 @@ cb_emit_generate (cb_tree x)
 	struct cb_report *r;
 	cb_tree		y;
 	cb_tree		z;
-	struct cb_word	*word;
 	if (x == cb_error_node) {
 		return;
 	}
-	y = cb_ref (x);
-	if (y == cb_error_node) {
-		return;
+	if (CB_REFERENCE_P (x)) {
+		y = cb_ref (x);
+		if (y == cb_error_node) {
+			return;
+		}
+	} else {
+		y = x;
 	}
-	if(CB_TREE_TAG (y) == CB_TAG_REPORT) {
+	if(CB_REPORT_P (y)) {
 		r = CB_REPORT (y);
 		z = cb_build_reference (r->name);
-		word = CB_REFERENCE (z)->word;
-#if 1	/* FIXME: Why do we change the tag here
-		   (which leads to tree cast errors later)?
-		   Note: if removed we get NIST only errors */
-		z->category = CB_CATEGORY_UNKNOWN;
-		z->tag = CB_TAG_REPORT;
-#endif
-		CB_REFERENCE (z)->word = word;
 		CB_REFERENCE (z)->value = CB_TREE (y);
 		cb_emit_report_move_id(z);
 		cb_emit (CB_BUILD_FUNCALL_2 ("$R", z, NULL));
@@ -10985,18 +10981,7 @@ cb_emit_generate (cb_tree x)
 	|| f->report == NULL) {
 		cb_error_x (x, _("data item is not part of a report"));
 	} else {
-#if 0	/* r is unused afterwards and parameter types doesn't match */
-		r = CB_REPORT (f->report);
-#endif
 		z = cb_build_reference (f->name);
-		word = CB_REFERENCE (z)->word;
-#if 1	/* FIXME: Why do we change the tag here
-		   (which leads to tree cast errors later)?
-		   Note: if removed we get NIST only errors */
-		z->category = CB_CATEGORY_UNKNOWN;
-		z->tag = CB_TAG_REPORT;
-#endif
-		CB_REFERENCE (z)->word = word;
 		CB_REFERENCE (z)->value = CB_TREE (f->report);
 		x->tag = CB_TAG_REPORT_LINE;
 		cb_emit_report_move_id(z);
@@ -11010,7 +10995,6 @@ void
 cb_emit_suppress (struct cb_field *f)
 {
 	cb_tree		z;
-	struct cb_word	*word;
 	/* MORE TO DO HERE */
 	/* Find cob_report_control and set on suppress flag */
 	if(f == NULL
@@ -11019,10 +11003,6 @@ cb_emit_suppress (struct cb_field *f)
 		return;
 	}
 	z = cb_build_reference (f->name);
-	word = CB_REFERENCE (z)->word;
-	z->category = CB_CATEGORY_UNKNOWN;
-	z->tag = CB_TAG_REPORT;
-	CB_REFERENCE (z)->word = word;
 	CB_REFERENCE (z)->value = CB_TREE (f->report);
 	cb_emit (CB_BUILD_FUNCALL_2 ("$S", z, cb_int (f->id)));
 }

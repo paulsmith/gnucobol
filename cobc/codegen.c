@@ -236,6 +236,7 @@ static void output_param	(cb_tree, int);
 static void output_funcall	(cb_tree);
 static void output_report_summed_field (struct cb_field *);
 
+/* Local functions */
 
 static struct cb_field *
 cb_code_field (cb_tree x)
@@ -245,6 +246,9 @@ cb_code_field (cb_tree x)
 			return CB_FIELD (cb_ref (x));
 		}
 		return CB_FIELD (CB_REFERENCE (x)->value);
+	}
+	if (CB_LIST_P (x)) {
+		return cb_code_field (CB_VALUE (x));
 	}
 	return CB_FIELD (x);
 }
@@ -3325,10 +3329,14 @@ output_param (cb_tree x, int id)
 		output ("%s%s", CB_PREFIX_FILE, CB_FILE (x)->cname);
 		break;
 	case CB_TAG_REPORT:
-		output ("&%s%s", CB_PREFIX_REPORT, CB_REPORT (CB_VALUE (x))->cname);
+		output ("&%s%s", CB_PREFIX_REPORT, CB_REPORT_PTR (x)->cname);
 		break;
 	case CB_TAG_REPORT_LINE:
+#if 1 /* FIXME: Why do we need the unchecked cast here? */
+		r = (struct cb_reference *)x;
+#else
 		r = CB_REFERENCE (x);
+#endif
 		f = CB_FIELD (r->value);
 		output ("&%s%d", CB_PREFIX_REPORT_LINE, f->id);
 		break;
@@ -3348,6 +3356,10 @@ output_param (cb_tree x, int id)
 		r = CB_REFERENCE (x);
 		if (CB_LOCALE_NAME_P (r->value)) {
 			output_param (CB_LOCALE_NAME(r->value)->list, id);
+			break;
+		}
+		if (CB_REPORT_P (r->value)) {
+			output ("&%s%s", CB_PREFIX_REPORT, CB_REPORT_PTR (r->value)->cname);
 			break;
 		}
 		if (r->check) {
@@ -3638,16 +3650,9 @@ static void
 output_funcall_typed_report (struct cb_funcall *p, const char type)
 {
 	struct cb_report	*r;
-	cb_tree			l;
 
 	/* initialization for report */
-	l = cb_ref (p->argv[0]);
-#if	0		/* CHECKME: Why should we have the report in the list ??? */
-	if (CB_LIST_P (l)) {
-		l = CB_VALUE (l);
-	}
-#endif
-	r = CB_REPORT (l);
+	r = CB_REPORT_PTR (p->argv[0]);
 
 	switch (type) {
 
@@ -8735,8 +8740,8 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 	output_local ("\"%s\",",fname);
 	output_local("&%s%d_%d,",CB_PREFIX_REPORT_SUM,rsid,rsprv);
 	if(f->report_sum_counter) {
-		output_local("&%s%d,",CB_PREFIX_FIELD, cb_code_field(CB_VALUE(f->report_sum_counter))->id);
-		z = get_sum_data_field(r, cb_code_field(CB_VALUE(f->report_sum_counter)));
+		output_local("&%s%d,",CB_PREFIX_FIELD, cb_code_field(f->report_sum_counter)->id);
+		z = get_sum_data_field(r, cb_code_field(f->report_sum_counter));
 	} else {
 		output_local("NULL,");
 		z = NULL;
@@ -8748,8 +8753,8 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 	}
 	for(p=f; p; p = p->parent) {
 		if(p->report_control) {
-			x = CB_VALUE(p->report_control);
-			output_local("&%s%d_%d,",CB_PREFIX_REPORT_CONTROL,r_ctl_id,cb_code_field(x)->id);
+			output_local("&%s%d_%d,",
+				CB_PREFIX_REPORT_CONTROL, r_ctl_id, cb_code_field(p->report_control)->id);
 			break;
 		} else if(p->report_flag & COB_REPORT_CONTROL_FOOTING_FINAL) {
 			ctl_foot = 1;
@@ -8774,7 +8779,7 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 {
 	int	i;
 	struct cb_field *s = NULL;
-	cb_tree	l,x;
+	cb_tree	l;
 
 	output_local("\n");
 	for(i= p->num_lines-1; i >= 0; i--) {
@@ -8784,8 +8789,7 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 	output_local ("\n");
 	if(p->controls) {
 		for (l = p->controls; l; l = CB_CHAIN (l)) {
-			x = CB_VALUE (l);
-			s = cb_code_field(x);
+			s = cb_code_field(l);
 			s->count++;
 		}
 		output_report_control(p,++r_ctl_id,p->controls,CB_CHAIN(p->controls));
@@ -8824,8 +8828,7 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 		output_local("NULL,");
 	}
 	if(p->controls) {
-		x = CB_VALUE (p->controls);
-		s = cb_code_field(x);
+		s = cb_code_field(p->controls);
 		output_local ("&%s%d_%d,",CB_PREFIX_REPORT_CONTROL,r_ctl_id,s->id);
 	} else {
 		output_local("NULL,");
@@ -8846,14 +8849,20 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 }
 
 static void
-output_report_list(cb_tree	l, cb_tree n)
+output_report_list (cb_tree l, cb_tree n)
 {
 	cb_tree nl;
 	struct cb_report	*rep, *nxrep;
 
-	rep = CB_REPORT(CB_VALUE(l));
+	if (CB_LIST_P (l))
+		rep = CB_REPORT_PTR (CB_VALUE(l));
+	else
+		rep = CB_REPORT_PTR (l);
 	if(n != NULL) {
-		nxrep = CB_REPORT(CB_VALUE(n));
+		if (CB_LIST_P (l))
+			nxrep = CB_REPORT_PTR (CB_VALUE(n));
+		else
+			nxrep = CB_REPORT_PTR (l);
 	} else {
 		nxrep = NULL;
 	}
@@ -9916,7 +9925,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			optimize_defs[COB_SET_REPORT] = 1;
 			output_line ("\n/* Init Reports for INITIAL program */\n");
 			for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-				rep = CB_REPORT(CB_VALUE(l));
+				rep = CB_REPORT_PTR (CB_VALUE(l));
 				output_report_init (rep);
 			}
 			output_newline ();
@@ -10420,7 +10429,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Initialize REPORT data items */");
 		/* Initialize items with VALUE */
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			rep = CB_REPORT(CB_VALUE(l));
+			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				output_initial_values (rep->records);
 			}
@@ -10433,7 +10442,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		optimize_defs[COB_SET_REPORT] = 1;
 		output_line ("\n/* Init Reports */\n");
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			rep = CB_REPORT(CB_VALUE(l));
+			rep = CB_REPORT_PTR (CB_VALUE(l));
 			output_report_init (rep);
 		}
 		output_newline ();
@@ -11294,6 +11303,8 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	enum cb_optim		optidx;
 	time_t			sectime;
 
+	struct cb_report *rep;
+
 	/* Clear local program stuff */
 	current_prog = prog;
 	param_id = 0;
@@ -11425,8 +11436,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	/* Report data fields */
 	if (prog->report_storage) {
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			struct cb_report *rep;
-			rep = CB_REPORT(CB_VALUE(l));
+			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				compute_report_rcsz (rep->records);
 			}
@@ -11445,8 +11455,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	if (prog->report_storage) {
 		output_target = current_prog->local_include->local_fp;
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			struct cb_report *rep;
-			rep = CB_REPORT(CB_VALUE(l));
+			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				output_report_sum_control_field (rep->records);
 			}
@@ -11462,7 +11471,7 @@ codegen (struct cb_program *prog, const int subsequent_call)
 		output_target = current_prog->local_include->local_fp;
 		output_local ("\n/* Report data fields */\n\n");
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
-			rep = CB_REPORT(CB_VALUE(l));
+			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if(rep) {
 				output_emit_field(rep->line_counter,NULL);
 				output_emit_field(rep->page_counter,NULL);

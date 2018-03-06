@@ -6728,7 +6728,7 @@ report_description:
 		current_field = NULL;
 		control_field = NULL;
 		description_field = NULL;
-		current_report = CB_REPORT (cb_ref ($2));
+		current_report = CB_REPORT_PTR ($2);
 	}
 	check_duplicate = 0;
   }
@@ -14539,8 +14539,8 @@ line_linage_page_counter:
   }
 | LINE_COUNTER in_of WORD
   {
-	if (CB_REPORT_P (cb_ref ($3))) {
-		$$ = CB_REPORT (cb_ref ($3))->line_counter;
+	if (CB_REF_OR_REPORT_P ($3)) {
+		$$ = CB_REPORT_PTR ($3)->line_counter;
 	} else {
 		cb_error_x ($3, _("'%s' is not a report name"), CB_NAME ($3));
 		$$ = cb_error_node;
@@ -14564,8 +14564,8 @@ line_linage_page_counter:
   }
 | PAGE_COUNTER in_of WORD
   {
-	if (CB_REPORT_P (cb_ref ($3))) {
-		$$ = CB_REPORT (cb_ref ($3))->page_counter;
+	if (CB_REF_OR_REPORT_P ($3)) {
+		$$ = CB_REPORT_PTR ($3)->page_counter;
 	} else {
 		cb_error_x ($3, _("'%s' is not a report name"), CB_NAME ($3));
 		$$ = cb_error_node;
@@ -14694,37 +14694,10 @@ cd_name:
 
 /* Report name */
 
-/* RXWRXW - Report list
-report_name_list:
-  report_name
-  {
-	$$ = CB_LIST_INIT ($1);
-  }
-| report_name_list report_name
-  {
-	cb_tree		l;
-
-	if (CB_VALID_TREE ($2)) {
-		for (l = $1; l; l = CB_CHAIN (l)) {
-			if (CB_VALID_TREE (CB_VALUE (l)) &&
-			    !strcasecmp (CB_NAME ($2), CB_NAME (CB_VALUE (l)))) {
-				cb_error_x ($2, _("multiple reference to '%s' "),
-					    CB_NAME ($2));
-				break;
-			}
-		}
-		if (!l) {
-			$$ = cb_list_add ($1, $2);
-		}
-	}
-  }
-;
-*/
-
 report_name:
   WORD
   {
-	if (CB_REPORT_P (cb_ref ($1))) {
+	if (CB_REF_OR_REPORT_P ($1)) {
 		$$ = $1;
 	} else {
 		cb_error (_("'%s' is not a valid report name"), CB_NAME ($1));

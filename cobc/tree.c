@@ -3934,6 +3934,12 @@ cb_ref (cb_tree x)
 	if (CB_INVALID_TREE (x)) {
 		return cb_error_node;
 	}
+
+	if (!CB_REFERENCE_P (x)) {
+		cobc_abort_pr (_("cb_ref was not passed a CB_REFERENCE"));
+		COBC_ABORT ();
+	}
+
 	r = CB_REFERENCE (x);
 	/* If this reference has already been resolved (and the value
 	   has been cached), then just return the value */
