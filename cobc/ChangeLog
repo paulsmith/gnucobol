@@ -1,4 +1,10 @@
 
+2018-03-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (cb_name_1): adjustments for CB_TAG_REPORT/CB_TAG_REPORT_LINE
+	* field.c (check_picture_item): fixed tree cast error for setting
+	  implied size/type for VALUE SPACE
+	
 2018-03-05  Ron Norman <rjn@inglenet.com>
 
 	Changes to solve REPORT problems related to COB_TREE_DEBUG

@@ -548,16 +548,17 @@ cb_name_1 (char *s, cb_tree x)
 		break;
 
 	case CB_TAG_REPORT:
-#if 0	/* CHECKME: Why should we have the report in the list ??? */
-		if (CB_LIST_P (x)) {
-			x = CB_VALUE (x);
-		}
+		sprintf (s, "REPORT %s", CB_REPORT_PTR (x)->name);
+		break;
+
+	case CB_TAG_REPORT_LINE:
+#if 1	/* FIXME: Why do we need the unchecked cast here? */
+		p = (struct cb_reference *)x;
+#else
+		p = CB_REFERENCE (x);
 #endif
-		if (CB_REPORT_P (x)) {
-			sprintf (s, "REPORT %s", CB_REPORT (x)->name);
-		} else {
-			sprintf (s, "REPORT");
-		}
+		f = CB_FIELD (p->value);
+		sprintf (s, "REPORT LINE %s", f->name);
 		break;
 
 	/* LCOV_EXCL_START */
@@ -3935,10 +3936,13 @@ cb_ref (cb_tree x)
 		return cb_error_node;
 	}
 
+	/* LCOV_EXCL_START */
 	if (!CB_REFERENCE_P (x)) {
-		cobc_abort_pr (_("cb_ref was not passed a CB_REFERENCE"));
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"cb_ref", "x");;
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_STOP */
 
 	r = CB_REFERENCE (x);
 	/* If this reference has already been resolved (and the value

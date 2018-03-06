@@ -631,6 +631,7 @@ static unsigned int
 check_picture_item (struct cb_field *f)
 {
 	cb_tree			x = CB_TREE (f);
+	cb_tree			v;
 	char			*pp;
 	struct cb_literal	*lp;
 	int			size_implied;
@@ -643,8 +644,18 @@ check_picture_item (struct cb_field *f)
 	*/
 	if (f->storage == CB_STORAGE_SCREEN) {
 		if (f->values) {
-			size_implied = (int)CB_LITERAL (CB_VALUE (f->values))->size;
-			is_numeric = CB_NUMERIC_LITERAL_P (CB_VALUE (f->values));
+			v = CB_VALUE (f->values);
+			if (CB_LITERAL_P (v)) {
+				size_implied = (int)CB_LITERAL (v)->size;
+				is_numeric = CB_NUMERIC_LITERAL_P (v);
+			} else if (CB_CONST_P (v)) {
+				size_implied = 1;
+				if (v == cb_zero) {
+					is_numeric = 1;
+				} else {
+					is_numeric = 0;
+				}
+			}
 		} else if (f->screen_from) {
 			size_implied = (int)CB_FIELD_PTR (f->screen_from)->size;
 			is_numeric = CB_TREE_CATEGORY (f->screen_from) == CB_CATEGORY_NUMERIC;
