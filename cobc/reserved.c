@@ -2952,7 +2952,7 @@ static struct cb_intrinsic_table function_list[] = {
   { "CHAR-NATIONAL",			"cob_intr_char_national",
 					CB_INTR_CHAR_NATIONAL, FUNCTION_NAME,
 					CB_FEATURE_NOT_IMPLEMENTED,	1, 1,
-					CB_CATEGORY_ALPHANUMERIC, 0
+					CB_CATEGORY_NATIONAL, 0
   },
   { "COMBINED-DATETIME",		"cob_intr_combined_datetime",
 					CB_INTR_COMBINED_DATETIME, FUNCTION_NAME,
@@ -2963,6 +2963,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_CONCATENATE, CONCATENATE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "COS",				"cob_intr_cos",
 					CB_INTR_COS, FUNCTION_NAME,
@@ -3017,7 +3019,7 @@ static struct cb_intrinsic_table function_list[] = {
   { "EXCEPTION-FILE-N",			"cob_intr_exception_file_n",
 					CB_INTR_EXCEPTION_FILE_N, FUNCTION_NAME,
 					CB_FEATURE_NOT_IMPLEMENTED,	0, 0,
-					CB_CATEGORY_ALPHANUMERIC, 0
+					CB_CATEGORY_NATIONAL, 0
   },
   { "EXCEPTION-LOCATION",		"cob_intr_exception_location",
 					CB_INTR_EXCEPTION_LOCATION, FUNCTION_NAME,
@@ -3027,7 +3029,7 @@ static struct cb_intrinsic_table function_list[] = {
   { "EXCEPTION-LOCATION-N",		"cob_intr_exception_location_n",
 					CB_INTR_EXCEPTION_LOCATION_N, FUNCTION_NAME,
 					CB_FEATURE_NOT_IMPLEMENTED,	0, 0,
-					CB_CATEGORY_ALPHANUMERIC, 0
+					CB_CATEGORY_NATIONAL, 0
   },
   { "EXCEPTION-STATEMENT",		"cob_intr_exception_statement",
 					CB_INTR_EXCEPTION_STATEMENT, FUNCTION_NAME,
@@ -3058,23 +3060,31 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_FORMATTED_CURRENT_DATE, FUNCTION_NAME,
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "FORMATTED-DATE",			"cob_intr_formatted_date",
 					CB_INTR_FORMATTED_DATE, FORMATTED_DATE_FUNC,
 					CB_FEATURE_ACTIVE,	2, 2,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "FORMATTED-DATETIME",		"cob_intr_formatted_datetime",
 					CB_INTR_FORMATTED_DATETIME, FORMATTED_DATETIME_FUNC,
 								/* including implicit SYSTEM-OFFSET arg */
 					CB_FEATURE_ACTIVE,	  5, 4,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "FORMATTED-TIME",			"cob_intr_formatted_time",
 					CB_INTR_FORMATTED_TIME, FORMATTED_TIME_FUNC,
     							/* including implicit SYSTEM-OFFSET arg */
 					CB_FEATURE_ACTIVE,	4, 3,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "FRACTION-PART",			"cob_intr_fraction_part",
 					CB_INTR_FRACTION_PART, FUNCTION_NAME,
@@ -3160,6 +3170,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_LOWER_CASE, LOWER_CASE_FUNC,
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "LOWEST-ALGEBRAIC",			"cob_intr_lowest_algebraic",
 					CB_INTR_LOWEST_ALGEBRAIC, FUNCTION_NAME,
@@ -3170,6 +3182,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_MAX, FUNCTION_NAME,
 					CB_FEATURE_ACTIVE,	-1, 1,
 					CB_CATEGORY_NUMERIC, 0
+					/* Note: category changed to alphanumeric/index/national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "MEAN",				"cob_intr_mean",
 					CB_INTR_MEAN, FUNCTION_NAME,
@@ -3190,6 +3204,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_MIN, FUNCTION_NAME,
 					CB_FEATURE_ACTIVE,	-1, 1,
 					CB_CATEGORY_NUMERIC, 0
+					/* Note: category changed to alphanumeric/index/national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "MOD",				"cob_intr_mod",
 					CB_INTR_MOD, FUNCTION_NAME,
@@ -3244,7 +3260,7 @@ static struct cb_intrinsic_table function_list[] = {
   { "NATIONAL-OF",			"cob_intr_national_of",
 					CB_INTR_NATIONAL_OF, NATIONAL_OF_FUNC,
 					CB_FEATURE_NOT_IMPLEMENTED, 2, 1,
-					CB_CATEGORY_ALPHANUMERIC, 1
+					CB_CATEGORY_NATIONAL, 1
   },
   { "NUMERIC-DECIMAL-POINT",		"cob_intr_num_decimal_point",
 					CB_INTR_NUM_DECIMAL_POINT, FUNCTION_NAME,
@@ -3315,6 +3331,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_REVERSE, REVERSE_FUNC,
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "SECONDS-FROM-FORMATTED-TIME",	"cob_intr_seconds_from_formatted_time",
 					CB_INTR_SECONDS_FROM_FORMATTED_TIME, FUNCTION_NAME,
@@ -3360,11 +3378,15 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_SUBSTITUTE, SUBSTITUTE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 3,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to alphabetic/national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "SUBSTITUTE-CASE",			"cob_intr_substitute_case",
 					CB_INTR_SUBSTITUTE_CASE, SUBSTITUTE_CASE_FUNC,
 					CB_FEATURE_ACTIVE,	-1, 3,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to alphabetic/national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "SUM",				"cob_intr_sum",
 					CB_INTR_SUM, FUNCTION_NAME,
@@ -3410,11 +3432,15 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_INTR_TRIM, TRIM_FUNC,
 					CB_FEATURE_ACTIVE,	2, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "UPPER-CASE",			"cob_intr_upper_case",
 					CB_INTR_UPPER_CASE, UPPER_CASE_FUNC,
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
+					/* Note: category changed to national depending on the content,
+					   see cb_build_intrinsic */
   },
   { "VARIANCE",				"cob_intr_variance",
 					CB_INTR_VARIANCE, FUNCTION_NAME,

@@ -951,6 +951,7 @@ cb_tree_category (cb_tree x)
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
 		if (r->offset) {
+			/* CHECKME: may should be alphabetic/national depending on the content */
 			x->category = CB_CATEGORY_ALPHANUMERIC;
 		} else {
 			x->category = cb_tree_category (r->value);
@@ -959,6 +960,7 @@ cb_tree_category (cb_tree x)
 	case CB_TAG_FIELD:
 		f = CB_FIELD (x);
 		if (f->children) {
+			/* CHECKME: may should be alphabetic/national depending on the content */
 			x->category = CB_CATEGORY_ALPHANUMERIC;
 		} else if (f->usage == CB_USAGE_POINTER && f->level != 88) {
 			x->category = CB_CATEGORY_DATA_POINTER;
@@ -968,6 +970,7 @@ cb_tree_category (cb_tree x)
 			switch (f->level) {
 			case 66:
 				if (f->rename_thru) {
+					/* CHECKME: may should be alphabetic/national depending on the content */
 					x->category = CB_CATEGORY_ALPHANUMERIC;
 				} else {
 					x->category = cb_tree_category (CB_TREE (f->redefines));
@@ -1037,6 +1040,10 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		return COB_TYPE_ALPHANUMERIC;
 	case CB_CATEGORY_ALPHANUMERIC_EDITED:
 		return COB_TYPE_ALPHANUMERIC_EDITED;
+	case CB_CATEGORY_NATIONAL:
+		return COB_TYPE_NATIONAL;
+	case CB_CATEGORY_NATIONAL_EDITED:
+		return COB_TYPE_NATIONAL_EDITED;
 	case CB_CATEGORY_NUMERIC:
 		switch (f->usage) {
 		case CB_USAGE_DISPLAY:
@@ -2927,8 +2934,10 @@ repeat:
 		}
 		break;
 	case PIC_ALPHANUMERIC:
-	case PIC_NATIONAL:
 		pic->category = CB_CATEGORY_ALPHANUMERIC;
+		break;
+	case PIC_NATIONAL:
+		pic->category = CB_CATEGORY_NATIONAL;
 		break;
 	case PIC_NUMERIC_EDITED:
 		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
@@ -2942,7 +2951,11 @@ repeat:
 	case PIC_NATIONAL_EDITED:
 		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
 		memcpy (pic->str, pic_buff, idx * sizeof(cob_pic_symbol));
-		pic->category = CB_CATEGORY_ALPHANUMERIC_EDITED;
+		if (category != PIC_NATIONAL_EDITED) {
+			pic->category = CB_CATEGORY_ALPHANUMERIC_EDITED;
+		} else {
+			pic->category = CB_CATEGORY_NATIONAL_EDITED;
+		}
 		pic->lenstr = idx;
 		pic->digits = x_digits;
 		break;
@@ -5373,6 +5386,13 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 #endif
 	}
 
+	/* FIXME: Some FUNCTIONS need a test for / adjustment depending on their arguments' category:
+	   * CONCATENATE/SUBSTITUTE/... 
+	     all should be of the same category alphanumeric/alphabetic vs. national
+	   * MAX/REVERSE/TRIM/...
+	     depending on the arguments' category the type of the function must be adjusted
+	*/
+
 	switch (cbp->intr_enum) {
 	case CB_INTR_LENGTH:
 	case CB_INTR_BYTE_LENGTH:
@@ -5386,8 +5406,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 				  || fld->pic->category == CB_CATEGORY_NATIONAL_EDITED))) 
 					return cb_build_length (x);
 			}
-		} else
-		if (CB_LITERAL_P (x)) {
+		} else if (CB_LITERAL_P (x)) {
 			return cb_build_length (x);
 		}
 		return make_intrinsic (name, cbp, args, NULL, NULL, 0);

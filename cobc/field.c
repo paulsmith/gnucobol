@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001-2018 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -655,6 +656,9 @@ check_picture_item (struct cb_field *f)
 				} else {
 					is_numeric = 0;
 				}
+			} else {
+				/* ToDo: add appropriate message (untranslated) */
+				COBC_ABORT ();	/* LCOV_EXCL_LINE */
 			}
 		} else if (f->screen_from) {
 			size_implied = (int)CB_FIELD_PTR (f->screen_from)->size;
@@ -783,7 +787,8 @@ validate_any_length_item (struct cb_field *f)
 			cb_error (_("'%s' ANY NUMERIC must be PIC 9"),
 				  f->name);
 		}
-	} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
+	} else if (f->pic->category != CB_CATEGORY_ALPHANUMERIC
+			&& f->pic->category != CB_CATEGORY_NATIONAL) {
 		cb_error (_("'%s' ANY LENGTH must be PIC X or PIC N"),
 			  f->name);
 	}

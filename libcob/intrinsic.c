@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2005-2012, 2014-2016 Free Software Foundation, Inc.
+   Copyright (C) 2005-2012, 2014-2017 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -3184,6 +3184,8 @@ cob_check_numval (const cob_field *srcfield, const cob_field *currency,
 	int		n;
 	unsigned char	dec_pt;
 	unsigned char	cur_symb;
+
+	/* FIXME later: srcfield may be of category national... */
 
 	begp = NULL;
 	currcy_size = 0;

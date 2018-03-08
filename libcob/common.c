@@ -1226,6 +1226,8 @@ cob_cmp_alnum (cob_field *f1, cob_field *f2)
 	int			sign1;
 	int			sign2;
 
+	/* FIXME later: must cater for national fields, too */
+
 	sign1 = COB_GET_SIGN (f1);
 	sign2 = COB_GET_SIGN (f2);
 	min = (f1->size < f2->size) ? f1->size : f2->size;
