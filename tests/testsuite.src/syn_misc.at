@@ -314,7 +314,7 @@ prog.cob:141: warning: expression is always FALSE
 AT_CLEANUP
 
 
-AT_SETUP([warn literal size / constant expr. (level 88)])
+AT_SETUP([warn literal size in constant expr. (level 88)])
 AT_KEYWORDS([misc numeric constant expressions])
 
 AT_DATA([prog.cob], [

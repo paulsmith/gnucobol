@@ -8105,7 +8105,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	int			src_scale_mod;
 	int			dst_scale_mod;
 	int			dst_size_mod;
-	int			size;
+	signed int			size;	/* -1 as special value*/
 	int			most_significant;
 	int			least_significant;
 
@@ -8267,11 +8267,12 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			}
 
 			/* Size check */
-			if (fdst->flag_real_binary ||
-			    ((fdst->usage == CB_USAGE_COMP_5 ||
-			      fdst->usage == CB_USAGE_COMP_X ||
-			      fdst->usage == CB_USAGE_BINARY) &&
-			      fdst->pic->scale == 0)) {
+			if (fdst->flag_real_binary
+			  || (  !cb_binary_truncate
+				 && fdst->pic->scale == 0
+			     && (   fdst->usage == CB_USAGE_COMP_5
+			         || fdst->usage == CB_USAGE_COMP_X
+			         || fdst->usage == CB_USAGE_BINARY))) {
 				p = l->data;
 				for (i = 0; i < l->size; i++) {
 					if (l->data[i] != '0') {
@@ -8463,10 +8464,30 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			/* Size check */
 			size = cb_field_size (dst);
 			if (size > 0
-			    && !fdst->flag_any_length
-			    && (int)l->size > size) {
-				size = (int)l->size;
-				goto size_overflow;
+				&& !fdst->flag_any_length) {
+				/* check the real size */
+				fdst = CB_FIELD_PTR (dst);
+				if (fdst->flag_justified) {
+					/* right justified: trimm left */
+					for (i = 0; i != l->size; i++) {
+						if (l->data[i] != ' ') {
+							break;
+						}
+					}
+					i = l->size - i;
+				} else {
+					/* normal field: trimm right */
+					for (i = l->size - 1; i != 0; i--) {
+						if (l->data[i] != ' ') {
+							break;
+						}
+					}
+					i++;
+				}
+				if ((int)i > size) {
+					size = i;
+					goto size_overflow;
+				}
 			}
 		}
 		break;
@@ -8554,16 +8575,16 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				} else {
 					dst_size_mod = fdst->size;
 				}
-				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC &&
-				    fsrc->pic->scale > 0) {
+				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC
+				 && fsrc->pic->scale > 0) {
 					goto non_integer_move;
 				}
-				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC &&
-				    (int)fsrc->pic->digits > dst_size_mod) {
+				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC
+				 && (int)fsrc->pic->digits > dst_size_mod) {
 					goto size_overflow_2;
 				}
-				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC_EDITED &&
-				    fsrc->size > dst_size_mod) {
+				if (CB_TREE_CATEGORY (src) == CB_CATEGORY_NUMERIC_EDITED
+				 && fsrc->size > dst_size_mod) {
 					goto size_overflow_1;
 				}
 				break;
@@ -8579,8 +8600,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				dst_scale_mod = fdst->pic->scale < 0 ?
 						0 : fdst->pic->scale;
 				if (fsrc->pic->digits - src_scale_mod >
-				    fdst->pic->digits - dst_scale_mod ||
-				    src_scale_mod > dst_scale_mod) {
+				    fdst->pic->digits - dst_scale_mod
+				 || src_scale_mod > dst_scale_mod) {
 					goto size_overflow_2;
 				}
 				break;

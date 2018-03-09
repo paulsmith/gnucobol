@@ -2875,6 +2875,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [04030201], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([SORT: EBCDIC table sort])
 AT_KEYWORDS([runmisc])
 
@@ -3905,6 +3906,7 @@ abcdabcd
 aaaaaaaaaaaaaaaaaaaa
 ])
 AT_CLEANUP
+
 
 AT_SETUP([access to BASED item without allocation])
 AT_KEYWORDS([runmisc])
@@ -8706,8 +8708,9 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 ])
 AT_CLEANUP
 
-AT_SETUP([MOVE with -fbinary-truncate])
-AT_KEYWORDS([runmisc])
+
+AT_SETUP([Numeric MOVE with/without -fbinary-truncate])
+AT_KEYWORDS([runmisc size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
@@ -8745,7 +8748,11 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:10: warning: value size exceeds data size
+prog.cob:10: warning: value is 30000
+prog.cob:7: warning: 'x' defined here as PIC 9(4)
+])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [x IS ZERO
 x IS ZERO
@@ -8759,6 +8766,70 @@ x >= 10000
 x >= 10000
 ])
 
+AT_CLEANUP
+
+
+AT_SETUP([Alphanumeric MOVE with truncation])
+AT_KEYWORDS([misc fundamental size])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  x-left  PIC X(03).
+       01  x-right PIC X(03) JUSTIFIED RIGHT.
+
+       PROCEDURE DIVISION.
+           MOVE '1234' TO x-left, x-right
+           IF x-left  not = '123'
+           OR x-right not = '234'
+              DISPLAY 'error with "1234":'
+              END-DISPLAY
+              DISPLAY x-left
+              END-DISPLAY
+              DISPLAY x-right
+              END-DISPLAY
+           END-IF
+           MOVE '   3' TO x-left, x-right
+           IF x-left  not = spaces
+           OR x-right not = '  3'
+              DISPLAY 'error with "   3":'
+              END-DISPLAY
+              DISPLAY x-left
+              END-DISPLAY
+              DISPLAY x-right
+              END-DISPLAY
+           END-IF
+           MOVE '3   ' TO x-left, x-right
+           IF x-left  not = '3'
+           OR x-right not = spaces
+              DISPLAY 'error with "3   ":'
+              END-DISPLAY
+              DISPLAY x-left
+              END-DISPLAY
+              DISPLAY x-right
+              END-DISPLAY
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:11: warning: value size exceeds data size
+prog.cob:11: warning: value size is 4
+prog.cob:7: warning: 'x-left' defined here as PIC X(03)
+prog.cob:11: warning: value size exceeds data size
+prog.cob:11: warning: value size is 4
+prog.cob:8: warning: 'x-right' defined here as PIC X(03)
+prog.cob:21: warning: value size exceeds data size
+prog.cob:21: warning: value size is 4
+prog.cob:7: warning: 'x-left' defined here as PIC X(03)
+prog.cob:31: warning: value size exceeds data size
+prog.cob:31: warning: value size is 4
+prog.cob:8: warning: 'x-right' defined here as PIC X(03)
+])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
 AT_CLEANUP
 
 

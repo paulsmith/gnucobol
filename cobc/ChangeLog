@@ -5,6 +5,10 @@
 	  as national items, not as alphanumeric
 	* reserved.c (function_list): adjustments for CB_CATEGORY_NATIONAL
 	* field.c (validate_any_length_item): adjustments for CB_CATEGORY_NATIONAL
+	* typeck.c (validate_move): added missing warning for truncation of
+	  numeric binary fields when -fbinary-truncate is active;
+	  removed false warning for truncation of literal to alphanumeric field
+	  when only spaces were truncated
 
 2018-03-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

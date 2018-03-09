@@ -1,5 +1,5 @@
-## Copyright (C) 2003-2012, 2017 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While
+## Copyright (C) 2003-2012, 2017-2018 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ## 
 ## This file is part of GnuCOBOL.
 ## 
@@ -41,7 +41,7 @@
 # 2) TODO
 
 AT_SETUP([Numeric item (integer)])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -66,8 +66,9 @@ prog.cob:10: warning: value size exceeds data size
 
 AT_CLEANUP
 
+
 AT_SETUP([Numeric item (non-integer)])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -89,8 +90,9 @@ prog.cob:9: warning: value size exceeds data size
 
 AT_CLEANUP
 
+
 AT_SETUP([Numeric item with picture P])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -148,7 +150,7 @@ AT_CLEANUP
 # 4) DONE
 
 AT_SETUP([Alphabetic item])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -173,8 +175,9 @@ prog.cob:10: warning: value size exceeds data size
 
 AT_CLEANUP
 
+
 AT_SETUP([Alphanumeric item])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -184,6 +187,7 @@ AT_DATA([prog.cob], [
        01 X-123         PIC XXX VALUE 123.
        01 X-ABC         PIC XXX VALUE "abc".
        01 X-ABCD        PIC XXX VALUE "abcd".
+       01 X-SPACE       PIC XXX VALUE "abc   ".
        PROCEDURE        DIVISION.
            STOP RUN.
 ])
@@ -195,8 +199,9 @@ prog.cob:8: warning: value size exceeds data size
 
 AT_CLEANUP
 
+
 AT_SETUP([Alphanumeric group item])
-AT_KEYWORDS([value])
+AT_KEYWORDS([value size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -231,7 +236,7 @@ AT_CLEANUP
 # 8) DONE
 
 AT_SETUP([Numeric-edited item])
-AT_KEYWORDS([value editing])
+AT_KEYWORDS([value editing size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -264,7 +269,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Alphanumeric-edited item])
-AT_KEYWORDS([value editing])
+AT_KEYWORDS([value editing size])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
