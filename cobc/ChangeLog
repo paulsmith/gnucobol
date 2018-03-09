@@ -7,6 +7,11 @@
 	* typeck.c (validate_move), config.def: check for new config option
 	  cb_move_fig_space_to_numeric / move-figurative-space-to-numeric
 
+2018-03-08  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c (deduce_initialize_type): use 'cob_move' for signed numeric
+	  items to fix wrong group initialization (issue mentioned in bug #61)
+
 2018-03-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c: actually handle items of CB_CATEGORY_NATIONAL / PIC_NATIONAL

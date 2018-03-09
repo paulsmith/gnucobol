@@ -1,4 +1,8 @@
 
+2017-03-08  Ron Norman <rjn@inglenet.com>
+
+	* termio.c: standardize DISPLAY of NaN (Not A Number)
+
 2018-02-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c, coblocal.h (cob_get_dump_file): export for internal
@@ -48,6 +52,10 @@
 
 	* screenio.c (valid_field_data): bug #491 allow numeric edited
 	  fields to contain all spaces, internally seen as zero
+
+2018-01-23  Ron Norman <rjn@inglenet.com>
+
+	* termio.c: Standardize display of -NaN and NaN for float/double
 
 2018-01-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

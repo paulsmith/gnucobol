@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015, 2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2015, 2017-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -64,16 +64,58 @@ AT_DATA([prog.cob], [
          02 G2          OCCURS 5.
            03 X         PIC Z9.
        PROCEDURE        DIVISION.
-           INITIALIZE G1.
-           IF G1 NOT = " 0 0 0 0 0"
-              DISPLAY G1 NO ADVANCING
+           INITIALIZE G1
+           MOVE 5  TO X(1)
+           MOVE 99 TO X(3)
+           IF G1 NOT = " 5 099 0 0"
+              DISPLAY 'MOVE "' G1 '"'
               END-DISPLAY
-           END-IF.
+           END-IF
+           INITIALIZE G1
+           IF G1 NOT = " 0 0 0 0 0"
+              DISPLAY 'INIT "' G1 '"'
+              END-DISPLAY
+           END-IF
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INITIALIZE OCCURS with SIGN LEADING / TRAILING])
+AT_KEYWORDS([initialize])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 G1.
+         02 FILLER      OCCURS 2.
+           03 X         PIC S9 SIGN LEADING  SEPARATE.
+         02 FILLER      OCCURS 2.
+           03 Y         PIC S9 SIGN TRAILING SEPARATE.
+       PROCEDURE        DIVISION.
+           INITIALIZE G1
+           MOVE 5  TO X(1)
+           MOVE -9 TO Y(2)
+           IF G1 NOT = "+5+00+9-"
+              DISPLAY 'MOVE "' G1 '"'
+              END-DISPLAY
+           END-IF
+           INITIALIZE G1
+           IF G1 NOT = "+0+00+0+"
+              DISPLAY 'INIT "' G1 '"'
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -105,6 +147,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([INITIALIZE complex group (2)])
 AT_KEYWORDS([initialize])
 
@@ -132,6 +175,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([INITIALIZE with REDEFINES])
 AT_KEYWORDS([initialize])
 
@@ -157,6 +201,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([INITIALIZE with FILLER])
 AT_KEYWORDS([initialize])
@@ -224,6 +269,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([INITIALIZE of EXTERNAL data items])
 AT_KEYWORDS([initialize])
 
@@ -273,6 +319,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([INITIALIZE with reference modification])
 AT_KEYWORDS([initialize])
