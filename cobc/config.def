@@ -150,6 +150,9 @@ CB_CONFIG_BOOLEAN (cb_display_special_fig_consts, "display-special-fig-consts",
 CB_CONFIG_BOOLEAN (cb_binary_comp_1, "binary-comp-1",
 	_("COMP-1 is a 16-bit signed integer"))
 
+CB_CONFIG_BOOLEAN (cb_move_nonnumlit_to_numeric_is_zero, "move-non-numeric-lit-to-numeric-is-zero",
+	_("imply zero in move of non-numeric literal to numeric items"))
+
 /* Support flags */
 CB_CONFIG_SUPPORT (cb_comment_paragraphs, "comment-paragraphs",
 	_("comment paragraphs in IDENTIFICATION DIVISION (AUTHOR, DATE-WRITTEN, ...)"))
@@ -210,6 +213,9 @@ CB_CONFIG_SUPPORT (cb_move_noninteger_to_alphanumeric, "move-noninteger-to-alpha
 
 CB_CONFIG_SUPPORT (cb_move_fig_constant_to_numeric, "move-figurative-constant-to-numeric",
 	_("move figurative constants to numeric"))
+
+CB_CONFIG_SUPPORT (cb_move_fig_space_to_numeric, "move-figurative-space-to-numeric",
+	_("move figurative constant SPACE to numeric"))
 
 CB_CONFIG_SUPPORT (cb_move_fig_quote_to_numeric, "move-figurative-quote-to-numeric",
 	_("move figurative constant QUOTE to numeric"))

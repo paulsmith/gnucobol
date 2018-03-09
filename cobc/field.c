@@ -2335,7 +2335,7 @@ static int
 validate_field_value (struct cb_field *f)
 {
 	if (f->values) {
-		validate_move (CB_VALUE (f->values), CB_TREE (f), 1);
+		validate_move (CB_VALUE (f->values), CB_TREE (f), 1, NULL);
 	}
 
 	if (f->children) {

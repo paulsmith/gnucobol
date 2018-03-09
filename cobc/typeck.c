@@ -8092,7 +8092,7 @@ overlap_ret:
 }
 
 int
-validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
+validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_zero)
 {
 	struct cb_field		*fdst;
 	struct cb_field		*fsrc;
@@ -8105,13 +8105,18 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	int			src_scale_mod;
 	int			dst_scale_mod;
 	int			dst_size_mod;
-	signed int			size;	/* -1 as special value*/
+	signed int			size;	/* -1 as special value */
+	int			m_zero;
 	int			most_significant;
 	int			least_significant;
 
 	loc = src->source_line ? src : dst;
 	is_numeric_edited = 0;
 	overlapping = 0;
+	if (move_zero == NULL) {
+		move_zero = &m_zero;
+	}
+	*move_zero = 0;
 	if (CB_REFERENCE_P (dst)) {
 		if (CB_ALPHABET_NAME_P(CB_REFERENCE(dst)->value)) {
 			goto invalid;
@@ -8136,10 +8141,28 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	fdst = CB_FIELD_PTR (dst);
 	switch (CB_TREE_TAG (src)) {
 	case CB_TAG_CONST:
-		if (src == cb_space) {	/* error because SPACE is category alphabetic */
-			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
-			   (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+		if (src == cb_space || src == cb_low || src == cb_high || src == cb_quote) {
+			if ((current_statement && strcmp (current_statement->name, "SET") == 0)
+			 || cobc_cs_check == CB_CS_SET) {
 				goto invalid;
+			 }
+		}
+
+		if (src == cb_space) {	/* error because SPACE is category alphabetic */
+			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+				/* note: ACUCOBOL and MF allow this, but not for NUMERIC + VALUE */
+				if (is_value) {
+					goto invalid;
+				}
+				if (cb_verify_x (loc, cb_move_fig_space_to_numeric,
+					_("MOVE of figurative constant SPACE to numeric item"))) {
+					if (cb_move_nonnumlit_to_numeric_is_zero) {
+						goto movezero;
+					}
+					break;
+				}
+				return -1; /* error message raised already*/
 			}
 		} else if (src == cb_zero) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_ALPHABETIC) {
@@ -8147,20 +8170,28 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			}
 		} else if (src == cb_quote) {	/* remark: no error because QUOTE is category alphanumeric */
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC) {
-				if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
-					_ ("MOVE of figurative constant to numeric item"))) {
+				if (!cb_verify_x (loc, cb_move_fig_quote_to_numeric,
+					_("MOVE of figurative constant QUOTE to numeric item"))) {
 					return -1;
 				}
-				if (!cb_verify_x (loc, cb_move_fig_quote_to_numeric,
-					_ ("MOVE of figurative constant QUOTE to numeric item"))) {
-					return -1;
+				if (cb_move_fig_quote_to_numeric != cb_move_fig_constant_to_numeric) {
+					if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
+						_("MOVE of figurative constant to numeric item"))) {
+						return -1;
+					}
+				}
+				if (cb_move_nonnumlit_to_numeric_is_zero) {
+					goto movezero;
 				}
 			}
 		} else if (src == cb_low || src == cb_high) {
 			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC) {
 				if (!cb_verify_x (loc, cb_move_fig_constant_to_numeric,
-					_ ("MOVE of figurative constant to numeric item"))) {
+					_("MOVE of figurative constant to numeric item"))) {
 					return -1;
+				}
+				if (cb_move_nonnumlit_to_numeric_is_zero) {
+					goto movezero;
 				}
 			}
 		}
@@ -8220,7 +8251,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			case CB_CATEGORY_NUMERIC_EDITED:
 				if (is_value) {
 					cb_verify_x (loc, cb_numeric_value_for_edited_item,
-						_ ("numeric literal in VALUE clause of numeric-edited item"));
+						_("numeric literal in VALUE clause of numeric-edited item"));
 				}
 				/* Fall-through */
 			case CB_CATEGORY_NUMERIC:
@@ -8450,13 +8481,43 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 				}
 				break;
 			case CB_CATEGORY_NUMERIC:
-				goto expect_numeric;
-			case CB_CATEGORY_NUMERIC_EDITED:
-				if (!is_value) {
-					goto expect_numeric;
+				/* TODO: add check (maybe a configuration)
+				         for numeric data in alphanumeric literal
+				         note - we did this in versions before 3.0 */
+				for (i = 0; i < l->size; i++) {
+					if (!isdigit (l->data[i])) {
+						/* no check for +-,. as MF seems to not do this here */
+						if (cb_move_nonnumlit_to_numeric_is_zero
+						 && !is_value) {
+							goto movezero;
+						}
+						goto expect_numeric;
+					}
 				}
-
-				/* TODO: validate the value */
+				break;
+			case CB_CATEGORY_NUMERIC_EDITED:
+				/* TODO: add check (maybe a configuration)
+				         for numeric data in alphanumeric literal
+				         note - we did this in versions before 3.0 */
+				if (!is_value) {
+					/* TODO check if the following is correct: */
+					/* validate the value for normal MOVE as MF does*/
+					for (i = 0; i < l->size; i++) {
+						if (!isdigit (l->data[i])
+						 && l->data[i] != '.'
+						 && l->data[i] != ','
+						 && l->data[i] != '+'
+						 && l->data[i] != '-'
+						 && l->data[i] != ' ') {
+							if (cb_move_nonnumlit_to_numeric_is_zero) {
+								goto movezero;
+							}
+							goto expect_numeric;
+						}
+					}
+				} else {
+					/* TODO: validate the value for VALUE - needed? */
+				}
 				break;
 			default:
 				break;
@@ -8630,10 +8691,17 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 	}
 	return 0;
 
+movezero:
+	cb_warning_x (COBC_WARN_FILLER, loc,
+		_("source is non-numeric - substituting zero"));
+	*move_zero = 1;
+	return 0;
+
 invalid:
 	if (is_value) {
 		cb_error_x (loc, _("invalid VALUE clause"));
-	} else if (strcmp (current_statement->name, "SET") == 0) {
+	} else if ((current_statement && strcmp (current_statement->name, "SET") == 0)
+			 || cobc_cs_check == CB_CS_SET) {
 		cb_error_x (loc, _("invalid SET statement"));
 	} else {
 		cb_error_x (loc, _("invalid MOVE statement"));
@@ -9314,12 +9382,13 @@ cb_tree
 cb_build_move (cb_tree src, cb_tree dst)
 {
 	struct cb_reference	*x;
+	int	move_zero;
 
 	if (src == cb_error_node || dst == cb_error_node) {
 		return cb_error_node;
 	}
 
-	if (validate_move (src, dst, 0) < 0) {
+	if (validate_move (src, dst, 0, &move_zero) < 0) {
 		return cb_error_node;
 	}
 
@@ -9342,14 +9411,9 @@ cb_build_move (cb_tree src, cb_tree dst)
 		cobc_xref_set_receiving (dst);
 	}
 
-#if 0 /* Simon: no explicit internal change of the source !!! */
-	if ((src == cb_space || src == cb_low ||
-	     src == cb_high || src == cb_quote) &&
-	    (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC ||
-	     CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED)) {
+	if (move_zero) {
 		src = cb_zero;
 	}
-#endif
 
 	if (CB_TREE_CLASS (dst) == CB_CLASS_POINTER ||
 	    CB_TREE_CLASS (src) == CB_CLASS_POINTER) {

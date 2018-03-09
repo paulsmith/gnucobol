@@ -5842,6 +5842,195 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [+000000000], [])
 AT_CLEANUP
 
 
+AT_SETUP([Figurative constants to numeric field])
+AT_KEYWORDS([Numeric])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  NUM9    PIC 9(6).
+       PROCEDURE DIVISION.
+           MOVE SPACES TO NUM9
+           DISPLAY "NUM9 value SPACES is " NUM9 "." UPON SYSOUT
+           MOVE LOW-VALUES TO NUM9
+           IF NUM9 = LOW-VALUES
+              DISPLAY "9(6) tests OK for LOW-VALUES" UPON SYSOUT
+           ELSE
+              DISPLAY "9(6) Does NOT test OK for LOW-VALUES"
+                 UPON SYSOUT
+              IF NUM9 = ZERO
+                 DISPLAY "9(6) tests as ZERO instead of LOW-VALUES"
+                    UPON SYSOUT
+              END-IF
+           END-IF.
+           MOVE HIGH-VALUES TO NUM9
+           IF NUM9 = HIGH-VALUES
+              DISPLAY "9(6) tests OK for HIGH-VALUES" UPON SYSOUT
+           ELSE
+              DISPLAY "9(6) Does NOT test OK for HIGH-VALUES"
+                 UPON SYSOUT
+              IF NUM9 = ZERO  
+                 DISPLAY "9(6) tests as ZERO instead of HIGH-VALUES"
+                    UPON SYSOUT
+              END-IF
+           END-IF.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -std=mf prog.cob], [0], [],
+[prog.cob:8: warning: source is non-numeric - substituting zero
+prog.cob:10: warning: source is non-numeric - substituting zero
+prog.cob:21: warning: source is non-numeric - substituting zero
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[NUM9 value SPACES is 000000.
+9(6) Does NOT test OK for LOW-VALUES
+9(6) tests as ZERO instead of LOW-VALUES
+9(6) Does NOT test OK for HIGH-VALUES
+9(6) tests as ZERO instead of HIGH-VALUES
+], [])
+
+AT_CHECK([$COMPILE -std=acu prog.cob -o aprog], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./aprog], [0],
+[NUM9 value SPACES is       .
+9(6) tests OK for LOW-VALUES
+9(6) tests OK for HIGH-VALUES
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([MF FIGURATIVE to NUMERIC])
+AT_KEYWORDS([MOVE])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID. prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  MYFLD        PIC 9(4) VALUE 96.
+       01  BIGFLT       COMP-1 VALUE 543.12345E10.
+       PROCEDURE        DIVISION.
+       MAIN-1.
+           DISPLAY "Initial value"
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE BIGFLT"
+           MOVE BIGFLT TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE SPACES"
+           MOVE SPACES TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE LOW-VALUES"
+           MOVE LOW-VALUES TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE HIGH-VALUES"
+           MOVE HIGH-VALUES TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE QUOTE"
+           MOVE QUOTE TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE ALL *"
+           MOVE ALL '*' TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE ALL 0"
+           MOVE ALL '0' TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE ALL 'A1'"
+           MOVE ALL 'A1' TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE ALL '21'"
+           MOVE ALL '21' TO MYFLD.
+           PERFORM SHOW-IT.
+           DISPLAY "MOVE HIGH-VALUES TO (1:)"
+           MOVE HIGH-VALUES TO MYFLD (1:).
+           PERFORM SHOW-IT.
+
+           DISPLAY "MOVE HIGH-VALUES TO BIGFLT"
+           MOVE HIGH-VALUES TO BIGFLT.
+           PERFORM SHOW-BIG.
+           DISPLAY "MOVE QUOTE TO BIGFLT"
+           MOVE QUOTE TO BIGFLT.
+           PERFORM SHOW-BIG.
+           DISPLAY "MOVE ALL * TO BIGFLT"
+           MOVE ALL '*' TO BIGFLT.
+           PERFORM SHOW-BIG.
+           DISPLAY "MOVE ALL '21' TO BIGFLT"
+           MOVE ALL '21' TO BIGFLT.
+           PERFORM SHOW-BIG.
+           STOP RUN.
+       SHOW-IT.
+           CALL "dump" USING MYFLD.
+       SHOW-BIG.
+           DISPLAY "BIGFLT is " BIGFLT.
+           CALL "dump" USING BIGFLT.
+])
+
+AT_DATA([cmod.c], [[
+#include <stdio.h>
+int dump (unsigned char *data)
+{
+  int i;
+  for (i = 0; i < 4; i++)
+    printf ("%02X", data[i]);
+  puts (" .");
+  return 0;
+}
+]])
+
+AT_CHECK([$COMPILE -std=mf -fno-move-non-numeric-lit-to-numeric-is-zero prog.cob cmod.c], [0], [],
+[prog.cob: in paragraph 'MAIN-1':
+prog.cob:28: warning: numeric value is expected
+prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
+prog.cob:34: warning: numeric value is expected
+prog.cob:6: warning: 'MYFLD' defined here as PIC 9(4)
+prog.cob:50: warning: numeric value is expected
+prog.cob:7: warning: 'BIGFLT' defined here as USAGE FLOAT
+])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Initial value
+30303936 .
+MOVE BIGFLT
+38333034 .
+MOVE SPACES
+20202020 .
+MOVE LOW-VALUES
+00000000 .
+MOVE HIGH-VALUES
+FFFFFFFF .
+MOVE QUOTE
+22222222 .
+MOVE ALL *
+2A2A2A2A .
+MOVE ALL 0
+30303030 .
+MOVE ALL 'A1'
+41314131 .
+MOVE ALL '21'
+32313231 .
+MOVE HIGH-VALUES TO (1:)
+FFFFFFFF .
+MOVE HIGH-VALUES TO BIGFLT
+BIGFLT is -NAN
+FFFFFFFF .
+MOVE QUOTE TO BIGFLT
+BIGFLT is 2.1973164E-18
+22222222 .
+MOVE ALL * TO BIGFLT
+BIGFLT is 5.4312347E+12
+DA119E54 .
+MOVE ALL '21' TO BIGFLT
+BIGFLT is 2.1212121E+37
+E5547F7D .
+], [])
+
+AT_CLEANUP
+
+
 # PROCEDURE DIVISION RETURNING OMITTED, CALL RETURNING NOTHING
 AT_SETUP([void PROCEDURE, NOTHING return])
 AT_KEYWORDS([runmisc])
