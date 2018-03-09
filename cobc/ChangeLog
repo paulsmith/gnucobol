@@ -1,6 +1,11 @@
 
 2018-03-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
+	* scanner.l (scan_floating_numeric): rewritten to merge 2018-01-12,
+	  significant allows 36 digits now (according to COBOL 202x)
+
+2018-03-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
 	* tree.c: actually handle items of CB_CATEGORY_NATIONAL / PIC_NATIONAL
 	  as national items, not as alphanumeric
 	* reserved.c (function_list): adjustments for CB_CATEGORY_NATIONAL
@@ -184,6 +189,10 @@
 
 	* typeck.c (cb_build_assignment_name): only warn ASSIGN EXTERNAL fname
 	  interpretation when fname was changed
+
+2018-01-12  Ron Norman <rjn@inglenet.com>
+
+	* scanner.l (scan_floating_numeric): allow larger float constants
 
 2018-01-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

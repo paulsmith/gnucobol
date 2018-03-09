@@ -8180,6 +8180,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value)
 			    fdst->usage == CB_USAGE_FP_BIN128 ||
 			    fdst->usage == CB_USAGE_FP_DEC64 ||
 			    fdst->usage == CB_USAGE_FP_DEC128) {
+				/* TODO: add check for exponent size */
 				break;
 			}
 			most_significant = -999;

@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Edwart Hart,
+   Ron Norman
 
    This file is part of GnuCOBOL.
 
@@ -1659,6 +1660,13 @@ significand_is_zero (const char *int_part, const char *dec_part)
 		&& all_zeroes (dec_part);
 }
 
+	/* Note: Exponent *digits* in literals according to COBOL 202x: 36 */
+#define COB_FLOAT_DIGITS_MAX         36
+#define COB_FLOAT_DIGITS_CHCK_MAX    37
+#define COB_FLOAT_DIGITS_STR_MAX     38
+
+#define COB_FLOAT_DIGITS_WIDTH	"%" CB_XSTRINGIFY(COB_FLOAT_DIGITS_STR_MAX)
+
 static int
 scan_floating_numeric (const char *text)
 {
@@ -1669,10 +1677,10 @@ scan_floating_numeric (const char *text)
 	int		scale;
 	int		exponent;
 	int		n;
-	char		significand_str[37] = { '\0' };
+	char		significand_str[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
 	char		*significand_pos;
-	char		significand_dec[36] = { '\0' };
-	char		significand_int[36] = { '\0' };
+	char		significand_dec[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
+	char		significand_int[COB_FLOAT_DIGITS_STR_MAX + 1] = { '\0' };
 	char		exponent_str[8] = { '\0' };
 	char		*exponent_pos;
 
@@ -1681,14 +1689,22 @@ scan_floating_numeric (const char *text)
 	literal_error = 0;
 
 	/* Separate into significand and exponent */
-	n = sscanf (text, "%36[0-9.,+-]%*1[Ee]%7[0-9.,+-]",
-		    significand_str, exponent_str);
-	/* We check the return for silencing warnings,
-		this should never happen as the flex rule ensures this */
+	n = sscanf (text, COB_FLOAT_DIGITS_WIDTH "[0-9.,+-]%*1[Ee]%7[0-9.,+-]",
+		  significand_str, exponent_str);
+	/* We check the return for silencing warnings, but
+	   this should actually never happen as the flex rule ensures this */
+	/* LCOV_EXCL_START */
 	if (n == 0) {
+#if 1
+		/* This should never happen (and therefore doesn't get a translation) */
+		cb_error ("flex rule for scan_floating_numeric is wrong");
+		COBC_ABORT();
+#else
 		yylval = cb_error_node;
 		RETURN_TOK (LITERAL);
+#endif
 	}
+	/* LCOV_EXCL_STOP */
 
 	/* Get signs and adjust string positions accordingly */
 	significand_pos = &significand_str[0];
@@ -1699,53 +1715,69 @@ scan_floating_numeric (const char *text)
 	exp_sign = get_sign (*exponent_pos);
 	INCREMENT_IF_SIGNED (exponent_pos, exp_sign);
 
-	/* Separate into integer and decimal */
-	n = sscanf (significand_pos, "%35[0-9]%*1[.,]%35[0-9]",
-		    significand_int, significand_dec);
+	/* Separate significand into integer and decimal */
+	n = sscanf (significand_pos,
+		  COB_FLOAT_DIGITS_WIDTH "[0-9]%*1[.,]" COB_FLOAT_DIGITS_WIDTH "[0-9]",
+		  significand_int, significand_dec);
 	if (n == 0) { /* no integer part, copy after decimal-point */
 		significand_int[0] = 0;
-		strncpy (significand_dec, significand_pos + 1, 35);
-		significand_dec[35] = 0;
+		strncpy (significand_dec, significand_pos + 1, COB_FLOAT_DIGITS_STR_MAX);
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
 	} else {
 	/* silencing some warnings */
-		significand_int[35] = significand_dec[35] = 0;
+		significand_int[COB_FLOAT_DIGITS_STR_MAX] = 0;
+		significand_dec[COB_FLOAT_DIGITS_STR_MAX] = 0;
 	}
 
-	/* Validation */
+	/* Validation and exponent handling */
 	sig_int_len = strlen (significand_int);
 	sig_dec_len = strlen (significand_dec);
-	if (sig_int_len + sig_dec_len > 34U) {
+	exponent = 0;
+
+	if (sig_int_len + sig_dec_len > COB_FLOAT_DIGITS_MAX) {
 		snprintf (err_msg, COB_MINI_MAX,
-			_("significand has more than 34 digits"));
+			_("significand has more than %d digits"), COB_FLOAT_DIGITS_MAX);
 		error_literal ("float", text);
-	}
-	if (strchr (exponent_pos, current_program->decimal_point)) {
-		snprintf (err_msg, COB_MINI_MAX,
-			_("exponent has decimal point"));
-		error_literal ("float", text);
-		exponent = 0;
 	} else {
-		if (strlen (exponent_pos) > 4) {
+		if (strchr (exponent_pos, current_program->decimal_point)) {
 			snprintf (err_msg, COB_MINI_MAX,
-				_("exponent has more than 4 digits"));
+				_("exponent has decimal point"));
 			error_literal ("float", text);
-		}
-		n = sscanf (exponent_pos, "%d", &exponent);
-		/* We check the return for silencing warnings,
-		   this should never happen as the flex rule ensures this */
-		if (n == 0) {
-			yylval = cb_error_node;
-			RETURN_TOK (LITERAL);
-		}
-
-		if (exp_sign == -1) {
-			exponent = -exponent;
-		}
-
-		if (!(-78 <= exponent && exponent <= 76)) {
-			snprintf (err_msg, COB_MINI_MAX,
-				_("exponent not between -78 and 76"));
-			error_literal ("float", text);
+		} else {
+			if (strlen (exponent_pos) > 4) {
+				snprintf (err_msg, COB_MINI_MAX,
+					_("exponent has more than 4 digits"));
+				error_literal ("float", text);
+			} else {
+				n = sscanf (exponent_pos, "%d", &exponent);
+				/* We check the return for silencing warnings, but
+				   this should actually never happen as the flex rule ensures this */
+				/* LCOV_EXCL_START */
+				if (n == 0) {
+#if 1
+					/* This should never happen (and therefore doesn't get a translation) */
+					cb_error ("flex rule for scan_floating_numeric is wrong");
+					COBC_ABORT();
+#else
+					yylval = cb_error_node;
+					RETURN_TOK (LITERAL);
+#endif
+				}
+			}
+	
+			if (exp_sign == -1) {
+				exponent = -exponent;
+			}
+	
+			/* "The maximum permitted value and minimum permitted value of
+			    the exponent is implementor-defined" */
+			/* Exponent range -383  thru +384  for FLOAT-DECIMAL-16 */
+			/* Exponent range -6143 thru +6144 for FLOAT-DECIMAL-34 */
+			if (!(-6143 <= exponent && exponent <= 6144)) {
+				snprintf (err_msg, COB_MINI_MAX,
+					_("exponent not between -6143 and 6144"));
+				error_literal ("float", text);
+			}
 		}
 	}
 
@@ -1772,40 +1804,23 @@ scan_floating_numeric (const char *text)
 		RETURN_TOK (LITERAL);
 	}
 
+	/* Literal data */
+	strcpy (result, significand_int);
+	strcat (result, significand_dec);
+
 	/* Determine scale */
 	/* Base scale is decimal part of the significant */
 	scale = (int)sig_dec_len;
-	/* Adjust according to exponent */
 	if (exponent < 0) {
 		/* Decimals; power down by scale difference */
-		exponent = -exponent;
-		scale += exponent;
-		result[0] = 0;
-		if (exponent > (int)sig_int_len) {
-			n = exponent - (int)sig_int_len;
-			for (; n; --n) {
-				strcat (result, "0");
-			}
-		}
-		strcat (result, significand_int);
-		strcat (result, significand_dec);
+		scale = - (exponent - scale);
 	} else if (exponent > 0) {
 		/* No decimals; power up by scale difference */
-		strcpy (result, significand_int);
-		strcat (result, significand_dec);
 		if (exponent >= scale) {
-			n = exponent - scale;
-			for (; n; --n) {
-				strcat (result, "0");
-			}
-			scale = 0;
+			scale = - (exponent - scale);
 		} else {
 			scale -= exponent;
 		}
-	} else {
-		/* Exponent is 0; take as is */
-		strcpy (result, significand_int);
-		strcat (result, significand_dec);
 	}
 
 	yylval = cb_build_numeric_literal (sig_sign, result,
