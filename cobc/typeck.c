@@ -8142,10 +8142,13 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 	switch (CB_TREE_TAG (src)) {
 	case CB_TAG_CONST:
 		if (src == cb_space || src == cb_low || src == cb_high || src == cb_quote) {
-			if ((current_statement && strcmp (current_statement->name, "SET") == 0)
-			 || cobc_cs_check == CB_CS_SET) {
-				goto invalid;
-			 }
+			if (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC
+			 || (CB_TREE_CATEGORY (dst) == CB_CATEGORY_NUMERIC_EDITED && !is_value)) {
+				if ((current_statement && strcmp (current_statement->name, "SET") == 0)
+				 || cobc_cs_check == CB_CS_SET) {
+					goto invalid;
+				}
+			}
 		}
 
 		if (src == cb_space) {	/* error because SPACE is category alphabetic */
@@ -10158,7 +10161,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 				    cb_name (p->val));
 			CB_VALUE (l) = cb_error_node;
 		} else if (!CB_FIELD (rtree)->flag_base) {
-			cb_error_x (p->val, _("cannot change address of '%s', which is not BASED or a linkage item"),
+			cb_error_x (p->val, _("cannot change address of '%s', which is not BASED or a LINKAGE item"),
 				    cb_name (p->val));
 			CB_VALUE (l) = cb_error_node;
 		}
@@ -10177,7 +10180,7 @@ cb_emit_set_to (cb_tree vars, cb_tree x)
 		default:
 			if (CB_VALUE (l) != cb_error_node) {
 				cb_error_x (CB_TREE (current_statement),
-					    _("SET target '%s' is not numeric, an index or a pointer"),
+					    _("SET target '%s' is not numeric, an INDEX or a POINTER"),
 					    cb_name (CB_VALUE(l)));
 			}
 			break;

@@ -1,4 +1,8 @@
 
+2018-03-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (validate_move): SET ... TO TRUE with figurative constant
+
 2018-03-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l (scan_floating_numeric): rewritten to merge 2018-01-12,
