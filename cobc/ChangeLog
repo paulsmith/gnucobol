@@ -2,6 +2,7 @@
 2018-03-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (validate_move): SET ... TO TRUE with figurative constant
+	* scanner.l: fix bug #499 tokenizer combining partial words
 
 2018-03-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

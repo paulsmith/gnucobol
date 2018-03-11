@@ -486,221 +486,227 @@ H#[0-9A-Za-z]* {
 	/* Ignore */
 }
 
-"END"[ ,;\n]+"PROGRAM" {
+"END"[ ,;\n]+"PROGRAM"/[ .,;\n] {
 	cobc_force_literal = 1;
 	count_lines (yytext);
 	RETURN_TOK (END_PROGRAM);
 }
 
-"END"[ ,;\n]+"FUNCTION" {
+"END"[ ,;\n]+"FUNCTION"/[ .,;\n] {
 	cobc_force_literal = 1;
 	count_lines (yytext);
 	RETURN_TOK (END_FUNCTION);
 }
 
-"PICTURE"[ ,;\n]+"SYMBOL" {
+"PICTURE"[ ,;\n]+"SYMBOL"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (PICTURE_SYMBOL);
 }
 
-"FROM"[ ,;\n]+"CRT" {
+"FROM"[ ,;\n]+"CRT"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (FROM_CRT);
 }
 
-"SCREEN"[ ,;\n]+"CONTROL" {
+"SCREEN"[ ,;\n]+"CONTROL"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (SCREEN_CONTROL);
 }
 
-"EVENT"[ ,;\n]+"STATUS" {
+"EVENT"[ ,;\n]+"STATUS"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EVENT_STATUS);
 }
 
-"READY"[ ,;\n]+"TRACE" {
+"READY"[ ,;\n]+"TRACE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (READY_TRACE);
 }
 
-"RESET"[ ,;\n]+"TRACE" {
+"RESET"[ ,;\n]+"TRACE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (RESET_TRACE);
 }
 
-"GREATER"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")? {
+"GREATER"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")?/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (GREATER_OR_EQUAL);
 }
 
-"GREATER"[ ,;\n]+"THAN" {
+"GREATER"[ ,;\n]+"THAN"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (GREATER);
 }
 
-"LESS"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")? {
+"LESS"[ ,;\n]+("THAN"[ ,;\n]+)?"OR"[ ,;\n]+"EQUAL"([ ,;\n]+"TO")?/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (LESS_OR_EQUAL);
 }
 
-"LESS"[ ,;\n]+"THAN" {
+"LESS"[ ,;\n]+"THAN"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (LESS);
 }
 
-"EQUAL"[ ,;\n]+"TO" {
+"EQUAL"[ ,;\n]+"TO"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EQUAL);
 }
 
-"THEN"[ ,;\n]+"REPLACING" {
+"THEN"[ ,;\n]+"REPLACING"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (REPLACING);
 }
 
-"LINES"([ ,;\n]+"AT")?[ ,;\n]+"TOP" |
-"AT"[ ,;\n]+"TOP" {
+"LINES"([ ,;\n]+"AT")?[ ,;\n]+"TOP"/[ .,;\n] {
+	count_lines (yytext);
+	RETURN_TOK (TOP);
+}
+"AT"[ ,;\n]+"TOP"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (TOP);
 }
 
-"LINES"([ ,;\n]+"AT")?[ ,;\n]+"BOTTOM" |
-"AT"[ ,;\n]+"BOTTOM" {
+"LINES"([ ,;\n]+"AT")?[ ,;\n]+"BOTTOM"/[ .,;\n] {
+	count_lines (yytext);
+	RETURN_TOK (BOTTOM);
+}
+"AT"[ ,;\n]+"BOTTOM"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (BOTTOM);
 }
 
-"LINE"[ ,;\n]+"LIMIT" {
+"LINE"[ ,;\n]+"LIMIT"/[ .,;\n] {
 	count_lines (yytext);
 	return LINE_LIMIT;
 }
 
-("WITH"[ ,;\n]+)?"NO"[ ,;\n]+"ADVANCING" {
+("WITH"[ ,;\n]+)?"NO"[ ,;\n]+"ADVANCING"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NO_ADVANCING);
 }
 
-("ON"[ ,;\n]+)?"NEXT"[ ,;\n]+"PAGE" {
+("ON"[ ,;\n]+)?"NEXT"[ ,;\n]+"PAGE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NEXT_PAGE);
 }
 
-"NEXT"[ ,;\n]+"GROUP" {
+"NEXT"[ ,;\n]+"GROUP"/[ .,;\n] {
 	count_lines (yytext);
 	return NEXT_GROUP;
 }
 
-"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR" {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_SIZE_ERROR);
 }
 
-("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR" {
+("ON"[ ,;\n]+)?"SIZE"[ ,;\n]+"ERROR"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (SIZE_ERROR);
 }
 
-"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"ESCAPE" {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"ESCAPE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_ESCAPE);
 }
 
-"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"EXCEPTION" {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"EXCEPTION"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_EXCEPTION);
 }
 
-"ON"[ ,;\n]+"ESCAPE" {
+"ON"[ ,;\n]+"ESCAPE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (ESCAPE);
 }
 
-"ON"[ ,;\n]+"EXCEPTION" {
+"ON"[ ,;\n]+"EXCEPTION"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EXCEPTION);
 }
 
-"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"OVERFLOW" {
+"NOT"[ ,;\n]+("ON"[ ,;\n]+)?"OVERFLOW"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_OVERFLOW);
 }
 
-"NOT"[ ,;\n]+("AT"[ ,;\n]+)?"END" {
+"NOT"[ ,;\n]+("AT"[ ,;\n]+)?"END"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_END);
 }
 
-"AT"[ ,;\n]+"END" {
+"AT"[ ,;\n]+"END"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (END);
 }
 
-("ON"[ ,;\n]+)?"OVERFLOW" {
+("ON"[ ,;\n]+)?"OVERFLOW"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (TOK_OVERFLOW);
 }
 
-"NOT"[ ,;\n]+("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP") {
+"NOT"[ ,;\n]+("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP")/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_EOP);
 }
 
-("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP") {
+("AT"[ ,;\n]+)?("END-OF-PAGE"|"EOP")/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EOP);
 }
 
-"NOT"[ ,;\n]+"INVALID"([ ,;\n]+"KEY")? {
+"NOT"[ ,;\n]+"INVALID"([ ,;\n]+"KEY")?/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NOT_INVALID_KEY);
 }
 
-"INVALID"([ ,;\n]+"KEY")? {
+"INVALID"([ ,;\n]+"KEY")?/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (INVALID_KEY);
 }
 
-"NO"[ ,;\n]+"DATA" {
+"NO"[ ,;\n]+"DATA"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (NO_DATA);
 }
 
-"WITH"[ ,;\n]+"DATA" {
+"WITH"[ ,;\n]+"DATA"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (DATA);
 }
 
-"UPON"[ ,;\n]+"ENVIRONMENT-NAME" {
+"UPON"[ ,;\n]+"ENVIRONMENT-NAME"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (UPON_ENVIRONMENT_NAME);
 }
 
-"UPON"[ ,;\n]+"ENVIRONMENT-VALUE" {
+"UPON"[ ,;\n]+"ENVIRONMENT-VALUE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (UPON_ENVIRONMENT_VALUE);
 }
 
-"UPON"[ ,;\n]+"ARGUMENT-NUMBER" {
+"UPON"[ ,;\n]+"ARGUMENT-NUMBER"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (UPON_ARGUMENT_NUMBER);
 }
 
-"UPON"[ ,;\n]+"COMMAND-LINE" {
+"UPON"[ ,;\n]+"COMMAND-LINE"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (UPON_COMMAND_LINE);
 }
 
-("AFTER"[ ,;\n]+)?"EXCEPTION"[ ,;\n]+"CONDITION" {
+("AFTER"[ ,;\n]+)?"EXCEPTION"[ ,;\n]+"CONDITION"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EXCEPTION_CONDITION);
 }
 
-"AFTER"[ ,;\n]+"EC" {
+"AFTER"[ ,;\n]+"EC"/[ .,;\n] {
 	count_lines (yytext);
 	RETURN_TOK (EC);
 }
 
-"LENGTH"[ ,;\n]+"OF" {
+"LENGTH"[ ,;\n]+"OF"/[ .,;\n] {
 	count_lines (yytext);
 	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
 	          if we actually want to do this,
@@ -710,12 +716,11 @@ H#[0-9A-Za-z]* {
 	RETURN_TOK (LENGTH_OF);
 }
 
-"SWITCH"[ ]+([0-9][0-9]?|[A-Z])[ ,;\n] {
+"SWITCH"[ ]+([0-9][0-9]?|[A-Z])/[ .,;\n] {
 	/* ACUCOBOL extension: switch-names with space and with letter */
 	char suffix[3] = "";
 	char name[10] = "";
 
-	unput (yytext[yyleng-1]); /* unput separator */
 	/* FIXME: move the code for filling "name" here and first
 	          check with "lookup_system_name (name) != NULL"
 	          if we actually want to do this,
@@ -725,23 +730,23 @@ H#[0-9A-Za-z]* {
 	if (cobc_in_procedure) {
 		 /* unput characters */
 		yylval = cb_build_reference ("SWITCH");
-		if (isdigit((unsigned char)yytext[yyleng-3])) {
+		if (isdigit((unsigned char)yytext[yyleng-2])) {
+			unput (yytext[yyleng-1]);
 			unput (yytext[yyleng-2]);
-			unput (yytext[yyleng-3]);
 		} else {
-			unput (yytext[yyleng-2]);
+			unput (yytext[yyleng-1]);
 		}
 	} else {
 		 /* we need to return a single word, reverted later in parser.y */
-		if (yytext[yyleng-3] == ' ' && isdigit((unsigned char)yytext[yyleng-2])) {
+		if (yytext[yyleng-2] == ' ' && isdigit((unsigned char)yytext[yyleng-1])) {
 			/* SWITCH 0  to SWITCH 9 */
-			suffix[0] = yytext[yyleng-2];
-		} else if (isdigit((unsigned char)yytext[yyleng-3])) {
+			suffix[0] = yytext[yyleng-1];
+		} else if (isdigit((unsigned char)yytext[yyleng-2])) {
 			/* SWITCH 00 to SWITCH 99 */
-			suffix[0] = yytext[yyleng-3];
-			suffix[1] = yytext[yyleng-2];
-		} else {
 			suffix[0] = yytext[yyleng-2];
+			suffix[1] = yytext[yyleng-1];
+		} else {
+			suffix[0] = yytext[yyleng-1];
 		}
 		strncpy(name, yytext, 6);
 		strcat(name, "_");

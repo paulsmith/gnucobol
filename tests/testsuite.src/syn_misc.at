@@ -2860,7 +2860,7 @@ AT_CLEANUP
 
 
 AT_SETUP([floating-point literals])
-# Refer to Section 8.3.1.2.2.2 of COBOL 2014.
+# Refer to Section 8.3.1.2.2.2 of the COBOL 2010 FCD.
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
@@ -2868,8 +2868,8 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
            *> Valid literals
-           DISPLAY 1.0E6144, +1.0E+3, +1.0E-6143,
-               +.123456789012345678901234567890123456E+0000
+           DISPLAY 1.0E76, +1.0E+3, +1.0E-0078,
+               +.1234567890123456789012345678901234E+0000
            END-DISPLAY
 
            *> invalid literals
@@ -2879,13 +2879,12 @@ AT_DATA([prog.cob], [
            DISPLAY 1.0E3.0 END-DISPLAY
            DISPLAY -0.0E-0 END-DISPLAY
            DISPLAY 1.0E00003 END-DISPLAY
-           DISPLAY .123456789012345678901234567890123456789E0
-           END-DISPLAY
+           DISPLAY .12345678901234567890123456789012345E0 END-DISPLAY
            DISPLAY 0.0E3 END-DISPLAY
 
            *> Implementor-defined invalid literals
-           DISPLAY 1.0E6145 END-DISPLAY
-           DISPLAY 1.0E-6144 END-DISPLAY
+           DISPLAY 1.0E77 END-DISPLAY
+           DISPLAY 1.0E-79 END-DISPLAY
 
            STOP RUN.
 ])
@@ -2899,8 +2898,8 @@ AT_DATA([prog2.cob], [
             DECIMAL-POINT IS COMMA.
        PROCEDURE        DIVISION.
            *> Valid literals
-           DISPLAY 1,0E6144; +1,0E+3; +1,0E-6143;
-               +,123456789012345678901234567890123456E+0000
+           DISPLAY 1,0E76; +1,0E+3; +1,0E-0078;
+               +,1234567890123456789012345678901234E+0000
            END-DISPLAY
 
            *> invalid literals
@@ -2910,13 +2909,12 @@ AT_DATA([prog2.cob], [
            DISPLAY 1,0E3,0 END-DISPLAY
            DISPLAY -0,0E-0 END-DISPLAY
            DISPLAY 1,0E00003 END-DISPLAY
-           DISPLAY ,123456789012345678901234567890123456789E0
-           END-DISPLAY
+           DISPLAY ,12345678901234567890123456789012345E0 END-DISPLAY
            DISPLAY 0,0E3 END-DISPLAY
 
            *> Implementor-defined invalid literals
-           DISPLAY 1,0E6145 END-DISPLAY
-           DISPLAY 1,0E-6144 END-DISPLAY
+           DISPLAY 1,0E77 END-DISPLAY
+           DISPLAY 1,0E-79 END-DISPLAY
 
            STOP RUN.
 ])
@@ -2932,14 +2930,14 @@ prog.cob:15: error: significand of 0 must be positive
 prog.cob:15: error: exponent of 0 must be positive
 prog.cob:16: error: invalid floating-point literal: '1.0E00003'
 prog.cob:16: error: exponent has more than 4 digits
-prog.cob:17: error: invalid floating-point literal: '.1234567890123456789012345678901234...'
-prog.cob:17: error: significand has more than 36 digits
-prog.cob:19: error: invalid floating-point literal: '0.0E3'
-prog.cob:19: error: exponent of 0 must be 0
-prog.cob:22: error: invalid floating-point literal: '1.0E6145'
-prog.cob:22: error: exponent not between -6143 and 6144
-prog.cob:23: error: invalid floating-point literal: '1.0E-6144'
-prog.cob:23: error: exponent not between -6143 and 6144
+prog.cob:17: error: invalid floating-point literal: '.12345678901234567890123456789012345E0'
+prog.cob:17: error: significand has more than 34 digits
+prog.cob:18: error: invalid floating-point literal: '0.0E3'
+prog.cob:18: error: exponent of 0 must be 0
+prog.cob:21: error: invalid floating-point literal: '1.0E77'
+prog.cob:21: error: exponent not between -78 and 76
+prog.cob:22: error: invalid floating-point literal: '1.0E-79'
+prog.cob:22: error: exponent not between -78 and 76
 ])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
@@ -2953,14 +2951,14 @@ prog2.cob:19: error: significand of 0 must be positive
 prog2.cob:19: error: exponent of 0 must be positive
 prog2.cob:20: error: invalid floating-point literal: '1,0E00003'
 prog2.cob:20: error: exponent has more than 4 digits
-prog2.cob:21: error: invalid floating-point literal: ',1234567890123456789012345678901234...'
-prog2.cob:21: error: significand has more than 36 digits
-prog2.cob:23: error: invalid floating-point literal: '0,0E3'
-prog2.cob:23: error: exponent of 0 must be 0
-prog2.cob:26: error: invalid floating-point literal: '1,0E6145'
-prog2.cob:26: error: exponent not between -6143 and 6144
-prog2.cob:27: error: invalid floating-point literal: '1,0E-6144'
-prog2.cob:27: error: exponent not between -6143 and 6144
+prog2.cob:21: error: invalid floating-point literal: ',12345678901234567890123456789012345E0'
+prog2.cob:21: error: significand has more than 34 digits
+prog2.cob:22: error: invalid floating-point literal: '0,0E3'
+prog2.cob:22: error: exponent of 0 must be 0
+prog2.cob:25: error: invalid floating-point literal: '1,0E77'
+prog2.cob:25: error: exponent not between -78 and 76
+prog2.cob:26: error: invalid floating-point literal: '1,0E-79'
+prog2.cob:26: error: exponent not between -78 and 76
 ])
 
 AT_CLEANUP
@@ -5207,7 +5205,6 @@ AT_DATA([prog.cob], [
        $SET SOURCEFORMAT()
        $SET sourceformat'mis-matched"
 ])
-# " <-- fix syntax highlighting
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:6: error: invalid SOURCEFORMAT directive option 'hi!'
@@ -5219,6 +5216,7 @@ prog.cob:8: error: PROCEDURE DIVISION header missing
 prog.cob:8: error: syntax error, unexpected Literal
 ])
 AT_CLEANUP
+
 
 AT_SETUP([WHEN-COMPILED register in dialect])
 AT_KEYWORDS([misc extensions])
@@ -5236,4 +5234,31 @@ AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=rm prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -freserved=WHEN-COMPILED -fregister=WHEN-COMPILED prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([tokens consisting of multiple words])
+# note: we actually do not check for all possible cases, but two are better than none...
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  test-var   pic xx.
+           88  endOfFile value '10'.
+       01  todo       pic xx.
+
+       PROCEDURE DIVISION.
+           if not endOfFile
+              display 'all fine'
+           end-if
+           if test-var greater or equal todo
+              display 'still fine'
+           end-if
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
