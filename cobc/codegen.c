@@ -4104,7 +4104,8 @@ deduce_initialize_type (struct cb_initialize *p, struct cb_field *f,
 	}
 	/* LCOV_EXCL_STOP */
 
-	if (f->flag_sign_separate) {	/* Need to use cob_move for this one */
+	if (f->flag_sign_separate	/* Need to use cob_move for this one */
+	 && !f->children) {
 		return INITIALIZE_ONE;
 	}
 
