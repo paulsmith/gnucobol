@@ -1,13 +1,12 @@
 NEWS - user visible changes				-*- outline -*-
 
-GnuCOBOL 3.0 to be released (201802xx)
+ GnuCOBOL 3.0rc-1 to be released (201803xx)
 
 * New GnuCOBOL features
 
 ** REPORTWRITER module added
 
-** INDEXED file support -  added support for sparse and split keys
-   (most of the compiler code was borrowed from the fileio-rewrite)
+** INDEXED file support: added support for sparse and split keys
 
 ** DISPLAY ... UPON PRINTER may be redirected to an external command
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
@@ -47,10 +46,10 @@ GnuCOBOL 3.0 to be released (201802xx)
    by the runtime configuration option COB_TRACE_FORMAT.
 
 * New configure option --enable-debug-log to allow internal
-  tracing of GnuCOBOL (intended for developers only) 
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-GnuCOBOL 2.2 released (20170906)
+ GnuCOBOL 2.2 released (20170906)
 
 * Move to GPL/LGPL 3
 
@@ -248,7 +247,7 @@ GnuCOBOL 2.2 released (20170906)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-GnuCOBOL 1.1 released (20140118)
+ GnuCOBOL 1.1 released (20140118)
 
 * Change unix package name to gnu-cobol, and project to GnuCOBOL
 * list of changes see
@@ -257,7 +256,7 @@ GnuCOBOL 1.1 released (20140118)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OpenCOBOL 1.1 released (20090206)
+ OpenCOBOL 1.1 released (20090206)
 
 * Note: was tagged as pre-release and later on as full version
 

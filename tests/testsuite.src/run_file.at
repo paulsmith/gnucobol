@@ -1,5 +1,6 @@
-## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+## Brian Tiffin
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -52,6 +53,292 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([LINAGE and LINAGE-COUNTER sample])
+AT_KEYWORDS([runfile optional file status READ WRITE END-OF-PAGE LINE SEQUENTIAL COB_CURRENT_DATE])
+
+# modified version of GC-FAQ: Example of LINAGE File Descriptor
+# Author: Brian Tiffin, Date:   10-July-2008
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           select optional data-file assign to 'prog.cob'
+               organization is line sequential
+               file status is data-file-status.
+           select mini-report assign to "mini-report".
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  data-file.
+       01  data-record.
+           88 endofdata        value high-values.
+           02 data-line        pic x(80).
+       FD  mini-report
+           linage is 16 lines
+               with footing at 15
+               lines at top 2
+               lines at bottom 2.
+       01  report-line         pic x(80).
+
+       WORKING-STORAGE SECTION.
+       01  command-arguments   pic x(1024).
+       01  file-name           pic x(160).
+       01  data-file-status    pic xx.
+       01  lc                  pic 99.
+       01  report-line-blank.
+           02 filler           pic x(18) value all "*".
+           02 filler           pic x(05) value spaces.
+           02 filler           pic x(34)
+               VALUE "THIS PAGE INTENTIONALLY LEFT BLANK".
+           02 filler           pic x(05) value spaces.
+           02 filler           pic x(18) value all "*".
+       01  report-line-data.
+           02 body-tag         pic 9(6).
+           02 line-3           pic x(74).
+       01  report-line-header.
+           02 filler           pic x(6) VALUE "PAGE: ".
+           02 page-no          pic 9999.
+           02 filler           pic x(24).
+           02 filler           pic x(5) VALUE " LC: ".
+           02 header-tag       pic 9(6).
+           02 filler           pic x(23).
+           02 filler           pic x(6) VALUE "DATE: ".
+           02 page-date        pic x(6).
+
+       01  page-count          pic 9999.
+
+       PROCEDURE DIVISION.
+
+       open input data-file.
+       read data-file
+           at end
+               display "File open error: " data-file-status
+               stop run
+       end-read.
+
+       open output mini-report.
+
+       write report-line
+           from report-line-blank
+       end-write.
+
+       move 1 to page-count.
+       accept page-date from date end-accept.
+       move page-count to page-no.
+       write report-line
+           from report-line-header
+           after advancing page
+       end-write.
+
+       perform readwrite-loop until endofdata.
+
+       display
+           "Normal termination, ending status: "
+           data-file-status
+       close mini-report.
+
+       close data-file.
+       stop run.
+
+      ****************************************************************
+       readwrite-loop.
+       move data-record to report-line-data
+       move linage-counter to body-tag
+       write report-line from report-line-data
+           end-of-page
+               add 1 to page-count end-add
+               move page-count to page-no
+               move linage-counter to header-tag
+               write report-line from report-line-header
+                   after advancing page
+               end-write
+       end-write
+       read data-file
+           at end set endofdata to true
+       end-read
+       .
+])
+
+AT_CAPTURE_FILE([mini-report])
+AT_DATA([reference-report], [
+
+******************     THIS PAGE INTENTIONALLY LEFT BLANK     ******************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PAGE: 0001                         LC: 000000                       DATE: 150206
+000001
+000002 IDENTIFICATION DIVISION.
+000003 PROGRAM-ID. prog.
+000004 ENVIRONMENT DIVISION.
+000005 INPUT-OUTPUT SECTION.
+000006 FILE-CONTROL.
+000007     select optional data-file assign to 'prog.cob'
+000008         organization is line sequential
+000009         file status is data-file-status.
+000010     select mini-report assign to "mini-report".
+000011
+000012 DATA DIVISION.
+000013 FILE SECTION.
+000014 FD  data-file.
+
+
+
+
+
+PAGE: 0002                         LC: 000015                       DATE: 150206
+000001 01  data-record.
+000002     88 endofdata        value high-values.
+000003     02 data-line        pic x(80).
+000004 FD  mini-report
+000005     linage is 16 lines
+000006         with footing at 15
+000007         lines at top 2
+000008         lines at bottom 2.
+000009 01  report-line         pic x(80).
+000010
+000011 WORKING-STORAGE SECTION.
+000012 01  command-arguments   pic x(1024).
+000013 01  file-name           pic x(160).
+000014 01  data-file-status    pic xx.
+
+
+
+
+
+PAGE: 0003                         LC: 000015                       DATE: 150206
+000001 01  lc                  pic 99.
+000002 01  report-line-blank.
+000003     02 filler           pic x(18) value all "*".
+000004     02 filler           pic x(05) value spaces.
+000005     02 filler           pic x(34)
+000006         VALUE "THIS PAGE INTENTIONALLY LEFT BLANK".
+000007     02 filler           pic x(05) value spaces.
+000008     02 filler           pic x(18) value all "*".
+000009 01  report-line-data.
+000010     02 body-tag         pic 9(6).
+000011     02 line-3           pic x(74).
+000012 01  report-line-header.
+000013     02 filler           pic x(6) VALUE "PAGE: ".
+000014     02 page-no          pic 9999.
+
+
+
+
+
+PAGE: 0004                         LC: 000015                       DATE: 150206
+000001     02 filler           pic x(24).
+000002     02 filler           pic x(5) VALUE " LC: ".
+000003     02 header-tag       pic 9(6).
+000004     02 filler           pic x(23).
+000005     02 filler           pic x(6) VALUE "DATE: ".
+000006     02 page-date        pic x(6).
+000007
+000008 01  page-count          pic 9999.
+000009
+000010 PROCEDURE DIVISION.
+000011
+000012 open input data-file.
+000013 read data-file
+000014     at end
+
+
+
+
+
+PAGE: 0005                         LC: 000015                       DATE: 150206
+000001         display "File open error: " data-file-status
+000002         stop run
+000003 end-read.
+000004
+000005 open output mini-report.
+000006
+000007 write report-line
+000008     from report-line-blank
+000009 end-write.
+000010
+000011 move 1 to page-count.
+000012 accept page-date from date end-accept.
+000013 move page-count to page-no.
+000014 write report-line
+
+
+
+
+
+PAGE: 0006                         LC: 000015                       DATE: 150206
+000001     from report-line-header
+000002     after advancing page
+000003 end-write.
+000004
+000005 perform readwrite-loop until endofdata.
+000006
+000007 display
+000008     "Normal termination, ending status: "
+000009     data-file-status
+000010 close mini-report.
+000011
+000012 close data-file.
+000013 stop run.
+000014
+
+
+
+
+
+PAGE: 0007                         LC: 000015                       DATE: 150206
+000001****************************************************************
+000002 readwrite-loop.
+000003 move data-record to report-line-data
+000004 move linage-counter to body-tag
+000005 write report-line from report-line-data
+000006     end-of-page
+000007         add 1 to page-count end-add
+000008         move page-count to page-no
+000009         move linage-counter to header-tag
+000010         write report-line from report-line-header
+000011             after advancing page
+000012         end-write
+000013 end-write
+000014 read data-file
+
+
+
+
+
+PAGE: 0008                         LC: 000015                       DATE: 150206
+000001     at end set endofdata to true
+000002 end-read
+000003 .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([COB_CURRENT_DATE="2015/02/06 16:40:52" $COBCRUN_DIRECT ./prog], [0],
+[Normal termination, ending status: 10
+], [])
+AT_CHECK([diff mini-report reference-report], [0], [], [])
 
 AT_CLEANUP
 
@@ -1542,6 +1829,390 @@ close
 close
 Test completed
 ], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INDEXED sample])
+AT_KEYWORDS([runfile optional file status READ WRITE DUPLICATES START])
+
+# modified version of GC-FAQ: indexing example
+# Author: Brian Tiffin, Date:   17-Feb-2009, 28-Jan-2014
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
+AT_DATA([prog.cob], [
+
+       identification division.
+       program-id. linage.
+
+       environment division.
+       configuration section.
+
+       input-output section.
+       file-control.
+          select optional indexed-file
+          assign to "indexed-file.dat"
+          status is indexing-status
+          organization is indexed
+          access mode is dynamic
+          record key is keyfield of indexing-record
+          alternate record key is altkey of indexing-record
+              with duplicates
+          .
+
+       data division.
+       file section.
+       fd indexed-file.
+       01 indexing-record.
+          03 keyfield          pic x(8).
+          03 filler            pic x.
+          03 altkey.
+             05 first-part     pic 99.
+             05 middle-part    pic x.
+             05 last-part      pic 99.
+          03 filler            pic x.
+          03 data-part         pic x(18).
+
+       working-storage section.
+       01 indexing-status.
+          03 high-status-code  pic xx.
+          03 high-status redefines high-status-code pic 99.
+             88 indexing-ok              values 0 thru 10.
+          03 low-status-code   pic xx.
+          03 low-status redefines low-status-code pic 99.
+
+       78 line-separator       value
+           '-----------------------------------------'.
+       01 display-record.
+          03 filler            pic x(4)  value spaces.
+          03 keyfield          pic x(8).
+          03 filler            pic xx    value spaces.
+          03 altkey.
+             05 first-part     pic 99.
+             05 filler         pic x     value space.
+             05 middle-part    pic x.
+             05 filler         pic x     value space.
+             05 last-part      pic 99.
+          03 filler            pic xx    value ", ".
+          03 data-part         pic x(18).
+
+      *> control break
+       01 oldkey               pic 99x99.
+
+      *> read control fields
+       01 duplicate-flag       pic x.
+          88 no-more-duplicates          value high-value
+             when set to false                 low-value.
+       01 record-flag          pic x.
+          88 no-more-records             value high-value
+             when set to false                 low-value.
+
+      *> ***************************************************************
+       procedure division.
+       main.
+      *> Populate a sample database, create or overwrite keys
+           perform populate-sample
+
+      *> clear the record space for this example
+           move spaces to indexing-record
+
+      *> open the data file again
+           open i-o indexed-file
+           perform indexing-check
+           if not indexing-ok
+             stop run returning 1
+           end-if
+
+      *> read all the duplicate 00b02 keys
+           move 00 to first-part of indexing-record
+           move "b" to middle-part of indexing-record
+           move 02 to last-part of indexing-record
+
+      *> using read key and then next key / last key compare
+           set no-more-duplicates to false
+
+           display "Read all 00b02 keys sequentially" end-display
+           perform read-indexing-record
+           perform read-next-record
+               until no-more-duplicates
+           display line-separator end-display
+
+      *> read by key of reference ... the cool stuff
+           move 00 to first-part of indexing-record
+           move "a" to middle-part of indexing-record
+           move 02 to last-part of indexing-record
+           set no-more-records to false
+
+      *> using start and read next
+           display "Read all alternate keys greater than 00a02"
+           end-display
+           perform start-at-key
+           perform read-next-by-key
+               until no-more-records
+           display line-separator end-display
+
+      *> read by primary key of reference
+           move "87654321" to keyfield of indexing-record
+           set no-more-records to false
+
+      *> using start and previous by key
+          display
+              "Read all primary keys less than "
+              function trim (keyfield of indexing-record)
+          end-display
+          perform start-prime-key
+          perform read-previous-by-key
+              until no-more-records
+          display line-separator end-display
+
+      *> and with that we are done with indexing sample
+          close indexed-file
+
+          goback
+          .
+      *> ***************************************************************
+
+      *> ***************************************************************
+      *><* read by alternate key paragraph
+       read-indexing-record.
+           display "Reading: " altkey of indexing-record end-display
+           read indexed-file key is altkey of indexing-record
+               invalid key
+                   display
+                       "bad read key: "
+                       function trim (altkey of indexing-record)
+                       upon syserr
+                   end-display
+               set no-more-duplicates to true
+           end-read
+           perform indexing-check
+           .
+
+      *><* read next sequential paragraph
+       read-next-record.
+           move corresponding indexing-record to display-record
+           display display-record end-display
+           move altkey of indexing-record to oldkey
+
+           read indexed-file next record
+               at end set no-more-duplicates to true
+               not at end
+                   if oldkey not equal altkey of indexing-record
+                       set no-more-duplicates to true
+                   end-if
+           end-read
+           perform indexing-check
+           .
+
+      *><* start primary key of reference paragraph
+       start-prime-key.
+           display "Prime < " keyfield of indexing-record end-display
+           start indexed-file
+              key is less than
+                  keyfield of indexing-record
+              invalid key
+                  display
+                      "bad start: "
+                      function trim (keyfield of indexing-record)
+                      upon syserr
+                  end-display
+                  set no-more-records to true
+              not invalid key
+                  read indexed-file previous record
+                      at end set no-more-records to true
+                  end-read
+           end-start
+           perform indexing-check
+           .
+
+      *><* read previous by key of reference paragraph
+       read-previous-by-key.
+           move corresponding indexing-record to display-record
+           display display-record end-display
+
+           read indexed-file previous record
+               at end set no-more-records to true
+           end-read
+           perform indexing-check
+           .
+      *><* start alternate key of reference paragraph
+       start-at-key.
+           display "Seeking >= " altkey of indexing-record end-display
+           start indexed-file
+              key is greater than or equal to
+                  altkey of indexing-record
+              invalid key
+                  display
+                      "bad start: "
+                      function trim (altkey of indexing-record)
+                      upon syserr
+                  end-display
+                  set no-more-records to true
+              not invalid key
+                  read indexed-file next record
+                      at end set no-more-records to true
+                  end-read
+           end-start
+           perform indexing-check
+           .
+
+      *><* read next by key of reference paragraph
+       read-next-by-key.
+           move corresponding indexing-record to display-record
+           display display-record end-display
+
+           read indexed-file next record
+               at end set no-more-records to true
+           end-read
+           perform indexing-check
+           .
+
+      *><* populate a sample database
+       populate-sample.
+
+      *> Open optional index file for read write
+           open i-o indexed-file
+           perform indexing-check
+
+           move "12345678 00a01 some 12345678 data" to indexing-record
+           perform write-indexing-record
+           move "87654321 00a01 some 87654321 data" to indexing-record
+           perform write-indexing-record
+           move "12348765 00a01 some 12348765 data" to indexing-record
+           perform write-indexing-record
+           move "87651234 00a01 some 87651234 data" to indexing-record
+           perform write-indexing-record
+
+           move "12345679 00b02 some 12345679 data" to indexing-record
+           perform write-indexing-record
+           move "97654321 00b02 some 97654321 data" to indexing-record
+           perform write-indexing-record
+           move "12349765 00b02 some 12349765 data" to indexing-record
+           perform write-indexing-record
+           move "97651234 00b02 some 97651234 data" to indexing-record
+           perform write-indexing-record
+
+           move "12345689 00c13 some 12345689 data" to indexing-record
+           perform write-indexing-record
+           move "98654321 00c13 some 98654321 data" to indexing-record
+           perform write-indexing-record
+           move "12349865 00c13 some 12349865 data" to indexing-record
+           perform write-indexing-record
+           move "98651234 00c13 some 98651234 data" to indexing-record
+           perform write-indexing-record
+
+      *> close it ... not necessary, but for the example we will
+           close indexed-file
+           perform indexing-check
+           .
+
+      *><* Write paragraph
+       write-indexing-record.
+           write indexing-record
+               invalid key
+                   display
+                       "rewriting key: "
+                       function trim (keyfield of indexing-record)
+                       upon syserr
+                   end-display
+                   rewrite indexing-record
+                       invalid key
+                           display
+                               "really bad key: "
+                             function trim (keyfield of indexing-record)
+                               upon syserr
+                           end-display
+                   end-rewrite
+           end-write
+           .
+
+      *><* file status quick check.  For this sample, keep running
+       indexing-check.
+           if not indexing-ok then
+               display
+                   "isam file io problem: " indexing-status
+                   upon syserr
+               end-display
+           end-if
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([rm -f "indexed-file.*"], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Read all 00b02 keys sequentially
+Reading: 00b02
+    12345679  00 b 02, some 12345679 data
+    97654321  00 b 02, some 97654321 data
+    12349765  00 b 02, some 12349765 data
+    97651234  00 b 02, some 97651234 data
+-----------------------------------------
+Read all alternate keys greater than 00a02
+Seeking >= 00a02
+    12345679  00 b 02, some 12345679 data
+    97654321  00 b 02, some 97654321 data
+    12349765  00 b 02, some 12349765 data
+    97651234  00 b 02, some 97651234 data
+    12345689  00 c 13, some 12345689 data
+    98654321  00 c 13, some 98654321 data
+    12349865  00 c 13, some 12349865 data
+    98651234  00 c 13, some 98651234 data
+-----------------------------------------
+Read all primary keys less than 87654321
+Prime < 87654321
+    87651234  00 a 01, some 87651234 data
+    12349865  00 c 13, some 12349865 data
+    12349765  00 b 02, some 12349765 data
+    12348765  00 a 01, some 12348765 data
+    12345689  00 c 13, some 12345689 data
+    12345679  00 b 02, some 12345679 data
+    12345678  00 a 01, some 12345678 data
+-----------------------------------------
+], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Read all 00b02 keys sequentially
+Reading: 00b02
+    12345679  00 b 02, some 12345679 data
+    97654321  00 b 02, some 97654321 data
+    12349765  00 b 02, some 12349765 data
+    97651234  00 b 02, some 97651234 data
+-----------------------------------------
+Read all alternate keys greater than 00a02
+Seeking >= 00a02
+    12345679  00 b 02, some 12345679 data
+    97654321  00 b 02, some 97654321 data
+    12349765  00 b 02, some 12349765 data
+    97651234  00 b 02, some 97651234 data
+    12345689  00 c 13, some 12345689 data
+    98654321  00 c 13, some 98654321 data
+    12349865  00 c 13, some 12349865 data
+    98651234  00 c 13, some 98651234 data
+-----------------------------------------
+Read all primary keys less than 87654321
+Prime < 87654321
+    87651234  00 a 01, some 87651234 data
+    12349865  00 c 13, some 12349865 data
+    12349765  00 b 02, some 12349765 data
+    12348765  00 a 01, some 12348765 data
+    12345689  00 c 13, some 12345689 data
+    12345679  00 b 02, some 12345679 data
+    12345678  00 a 01, some 12345678 data
+-----------------------------------------
+],
+[rewriting key: 12345678
+rewriting key: 87654321
+rewriting key: 12348765
+rewriting key: 87651234
+rewriting key: 12345679
+rewriting key: 97654321
+rewriting key: 12349765
+rewriting key: 97651234
+rewriting key: 12345689
+rewriting key: 98654321
+rewriting key: 12349865
+rewriting key: 98651234
+])
 
 AT_CLEANUP
 
