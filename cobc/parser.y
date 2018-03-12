@@ -11308,7 +11308,9 @@ exit_statement:
 
 exit_body:
   /* empty */	%prec SHIFT_PREFER
+  {
   /* TODO: add warning/error if there's another statement in the paragraph */
+  }
 | PROGRAM exit_program_returning
   {
 	if (in_declaratives && use_global_ind) {
@@ -11368,6 +11370,7 @@ exit_body:
 		}
 		current_statement->name = (const char *)"EXIT PERFORM CYCLE";
 		cb_emit_goto (CB_LIST_INIT (p->cycle_label), NULL);
+		check_unreached = 1;
 	}
   }
 | PERFORM
@@ -11390,6 +11393,7 @@ exit_body:
 		}
 		current_statement->name = (const char *)"EXIT PERFORM";
 		cb_emit_goto (CB_LIST_INIT (p->exit_label), NULL);
+		check_unreached = 1;
 	}
   }
 | SECTION
@@ -11410,6 +11414,7 @@ exit_body:
 		}
 		current_statement->name = (const char *)"EXIT SECTION";
 		cb_emit_goto (CB_LIST_INIT (current_section->exit_label), NULL);
+		check_unreached = 1;
 	}
   }
 | PARAGRAPH
@@ -11430,6 +11435,7 @@ exit_body:
 		}
 		current_statement->name = (const char *)"EXIT PARAGRAPH";
 		cb_emit_goto (CB_LIST_INIT (current_paragraph->exit_label), NULL);
+		check_unreached = 1;
 	}
   }
 ;

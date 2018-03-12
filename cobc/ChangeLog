@@ -1,4 +1,8 @@
 
+2018-03-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: unreached warning after EXIT SECTION/PARAGRAPH/PERFORM[CYCLE]
+
 2018-03-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (validate_move): SET ... TO TRUE with figurative constant
