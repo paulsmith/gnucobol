@@ -111,41 +111,44 @@
 #ifdef	__VERSION__
 #if		! defined (_MSC_VER)
 #if		defined (__MINGW32__)
-#define OC_C_VERSION_PRF	"(MinGW) "
+#define GC_C_VERSION_PRF	"(MinGW) "
 #elif	defined (__DJGPP__)
-#define OC_C_VERSION_PRF	"(DJGPP) "
+#define GC_C_VERSION_PRF	"(DJGPP) "
 #else
-#define OC_C_VERSION_PRF	""
+#define GC_C_VERSION_PRF	""
 #endif
 #elif	defined (__c2__)
-#define OC_C_VERSION_PRF	"(Microsoft C2) "
+#define GC_C_VERSION_PRF	"(Microsoft C2) "
 #elif	defined (__llvm__)
-#define OC_C_VERSION_PRF	"(LLVM / MSC) "
+#define GC_C_VERSION_PRF	"(LLVM / MSC) "
 #else
-#define OC_C_VERSION_PRF	"(Microsoft) "
+#define GC_C_VERSION_PRF	"(Microsoft) "
 #endif
-#define OC_C_VERSION	CB_XSTRINGIFY (__VERSION__)
+#define GC_C_VERSION	CB_XSTRINGIFY (__VERSION__)
 #elif	defined (__xlc__)
-#define OC_C_VERSION_PRF	"(IBM XL C/C++) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__xlc__)
+#define GC_C_VERSION_PRF	"(IBM XL C/C++) "
+#define GC_C_VERSION	CB_XSTRINGIFY (__xlc__)
 #elif	defined (__SUNPRO_C)
-#define OC_C_VERSION_PRF	"(Sun C) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__SUNPRO_C)
+#define GC_C_VERSION_PRF	"(Sun C) "
+#define GC_C_VERSION	CB_XSTRINGIFY (__SUNPRO_C)
 #elif	defined (_MSC_VER)
-#define OC_C_VERSION_PRF	"(Microsoft) "
-#define OC_C_VERSION	CB_XSTRINGIFY (_MSC_VER)
+#define GC_C_VERSION_PRF	"(Microsoft) "
+#define GC_C_VERSION	CB_XSTRINGIFY (_MSC_VER)
 #elif	defined (__BORLANDC__)
-#define OC_C_VERSION_PRF	"(Borland) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__BORLANDC__)
+#define GC_C_VERSION_PRF	"(Borland) "
+#define GC_C_VERSION	CB_XSTRINGIFY (__BORLANDC__)
 #elif	defined (__WATCOMC__)
-#define OC_C_VERSION_PRF	"(Watcom) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__WATCOMC__)
+#define GC_C_VERSION_PRF	"(Watcom) "
+#define GC_C_VERSION	CB_XSTRINGIFY (__WATCOMC__)
 #elif	defined (__INTEL_COMPILER)
-#define OC_C_VERSION_PRF	"(Intel) "
-#define OC_C_VERSION	CB_XSTRINGIFY (__INTEL_COMPILER)
+#define GC_C_VERSION_PRF	"(Intel) "
+#define GC_C_VERSION	CB_XSTRINGIFY (__INTEL_COMPILER)
+#elif	defined(__TINYC__)
+#define GC_C_VERSION_PRF	"(Tiny C) "
+#define GC_C_VERSION	CB_XSTRINGIFY(__TINYC__)
 #else
-#define OC_C_VERSION_PRF	""
-#define OC_C_VERSION	_("unknown")
+#define GC_C_VERSION_PRF	""
+#define GC_C_VERSION	_("unknown")
 #endif
 
 #if COB_MAX_UNBOUNDED_SIZE > COB_MAX_FIELD_SIZE
@@ -6916,7 +6919,7 @@ print_info (void)
 	var_print (_("build environment"), 	COB_BLD_BUILD, "", 0);
 	var_print ("CC", COB_BLD_CC, "", 0);
 	// Note: newline because most compilers define a long version string (> 30 characters)
-	snprintf (versbuff, 55, "%s%s", OC_C_VERSION_PRF, OC_C_VERSION);
+	snprintf (versbuff, 55, "%s%s", GC_C_VERSION_PRF, GC_C_VERSION);
 	var_print ("C version", versbuff, "", 0);
 	var_print ("CPPFLAGS", COB_BLD_CPPFLAGS, "", 0);
 	var_print ("CFLAGS", COB_BLD_CFLAGS, "", 0);
