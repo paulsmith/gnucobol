@@ -1,7 +1,10 @@
 
 2018-03-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* cobc.c: added Tiny C version info
+	* cobc.c [__TINYC__]: added Tiny C version info and verbose option
+	* cobc.c: change for command line option ´--version`/`-V`:
+	  depending on verbose option additionally call C compiler
+	  for more version information
 
 2018-03-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

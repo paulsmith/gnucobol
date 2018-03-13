@@ -2704,12 +2704,12 @@ process_command_line (const int argc, char **argv)
 				process ("cl.exe /help");
 				puts ("\n");
 				fflush (stdout);
-				process ("link.exe /help");
+				process ("link.exe");
 #else
 				cobc_buffer_size = strlen (cobc_cc) + 11;
 				cobc_buffer = cobc_malloc (cobc_buffer_size);
 				snprintf (cobc_buffer, cobc_buffer_size, "%s --help", cobc_cc);
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#if (defined(__GNUC__) && !defined(__INTEL_COMPILER)) || defined(__TINYC__)
 				if (verbose_output > 1) {
 					snprintf (cobc_buffer, cobc_buffer_size, "%s -v --help", cobc_cc);
 				}
@@ -2725,6 +2725,31 @@ process_command_line (const int argc, char **argv)
 		case 'V':
 			/* --version */
 			cobc_print_version ();
+			if (verbose_output) {
+				puts ("\n");
+				fflush (stdout);
+#ifdef _MSC_VER
+				process ("cl.exe");
+				puts ("\n");
+#else
+				cobc_buffer_size = strlen (cobc_cc) + 11;
+				cobc_buffer = cobc_malloc (cobc_buffer_size);
+#if defined(__TINYC__)
+				snprintf (cobc_buffer, cobc_buffer_size, "%s -v", cobc_cc);
+#else
+				snprintf (cobc_buffer, cobc_buffer_size, "%s --version", cobc_cc);
+#endif
+#if (defined(__GNUC__) && !defined(__INTEL_COMPILER))
+				if (verbose_output > 2) {
+					snprintf (cobc_buffer, cobc_buffer_size, "%s -v", cobc_cc);
+				}
+#endif
+				cobc_buffer[cobc_buffer_size] = 0;
+				process (cobc_buffer);
+				cobc_free (cobc_buffer);
+				cobc_buffer = NULL;
+#endif
+			}
 			cobc_early_exit (0);
 
 		case 'i':
@@ -7773,10 +7798,10 @@ static void
 finish_setup_compiler_env (void)
 {
 	/* compiler specific options for (non/very) verbose output */
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__TINYC__)
 	if (verbose_output > 1) {
 		COBC_ADD_STR (cobc_cflags,  " -v", NULL, NULL);
-#if	!defined (__INTEL_COMPILER)
+#if	!defined (__INTEL_COMPILER) && !defined(__TINYC__)
 		if (verbose_output > 2) {
 			COBC_ADD_STR (cobc_ldflags, " -t", NULL, NULL);
 		}
