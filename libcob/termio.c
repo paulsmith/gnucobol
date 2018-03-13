@@ -168,16 +168,29 @@ display_alnum (cob_field *f, FILE *fp)
 }
 
 /* Check for alternate styles of Not A Number and convert to just NaN
-   note: not all environments provide display of negative /quiet NaN */
+   and removes the leading zero from the Exponent
+   note: not all environments provide display of negative /quiet NaN,
+   some write data as 2.1212121E+37 while other use 2.1212121E+037 */
 static void
-clean_nan (char *wrk)
+clean_double (char *wrk)
 {
-	if(strcmp(wrk,"-NAN") == 0
-	|| strcmp(wrk,"-NaNQ") == 0
-	|| strcmp(wrk,"-NaN") == 0
-	|| strcmp(wrk,"NAN") == 0
-	|| strcmp(wrk,"NaNQ") == 0)
+	char *pos = strrchr (wrk, 'E');
+
+	if (pos) {
+		pos += 2; /* skip E+ */
+		if (pos[0] == '0') {
+			memmove (pos, pos + 1, strlen (pos));
+		}
+		return;
+	}
+
+	if (strcmp(wrk,"-NAN") == 0
+	 || strcmp(wrk,"-NaNQ") == 0
+	 || strcmp(wrk,"-NaN") == 0
+	 || strcmp(wrk,"NAN") == 0
+	 || strcmp(wrk,"NaNQ") == 0) {
 		strcpy(wrk,"NaN");
+	}
 }
 
 static void
@@ -202,13 +215,13 @@ display_common (cob_field *f, FILE *fp)
 	case COB_TYPE_NUMERIC_DOUBLE:
 		memcpy (&un.f1doub, f->data, sizeof (double));
 		sprintf (wrk, "%-.16G", un.f1doub);
-		clean_nan (wrk);
+		clean_double (wrk);
 		fprintf (fp, "%s", wrk);
 		return;
 	case COB_TYPE_NUMERIC_FLOAT:
 		memcpy (&un.f1float, f->data, sizeof (float));
 		sprintf (wrk, "%-.8G", (double)un.f1float);
-		clean_nan (wrk);
+		clean_double (wrk);
 		fprintf (fp, "%s", wrk);
 		return;
 	case COB_TYPE_NUMERIC_FP_DEC64:
