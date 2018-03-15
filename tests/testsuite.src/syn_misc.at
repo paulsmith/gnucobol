@@ -3412,7 +3412,6 @@ AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
 [prog.cob:12: error: syntax error, unexpected Identifier
 prog.cob:13: error: syntax error, unexpected Identifier
 prog.cob:14: error: syntax error, unexpected Identifier
-prog.cob:14: error: PICTURE clause required for 'mywindow'
 prog.cob: in paragraph 'MAIN':
 prog.cob:27: error: 'handle IN mywindow' is not defined
 prog.cob:26: error: invalid expression
@@ -3778,7 +3777,6 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
 [prog.cob:7: error: syntax error, unexpected Identifier
-prog.cob:7: error: PICTURE clause required for 'SQLCABC'
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict -freserved=BINARY-LONG prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])

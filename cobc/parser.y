@@ -1389,7 +1389,7 @@ set_current_field (cb_tree level, cb_tree name)
 	cobc_parse_free (level);
 
 	if (CB_INVALID_TREE (x)) {
-	        return 1;
+		return 1;
 	} else {
 		current_field = CB_FIELD (x);
 		check_pic_duplicate = 0;
@@ -2093,7 +2093,7 @@ check_validate_item (cb_tree x)
 %token EC
 %token ECHO
 %token EGI
-%token EIGHTY_EIGHT		"88"
+%token EIGHTY_EIGHT		"level-number 88"
 %token ENABLE
 %token ELSE
 %token EMI
@@ -2554,7 +2554,7 @@ check_validate_item (cb_tree x)
 %token SEQUENCE
 %token SEQUENTIAL
 %token SET
-%token SEVENTY_EIGHT		"78"
+%token SEVENTY_EIGHT		"level-number 78"
 %token SHADING
 %token SHADOW
 %token SHARING
@@ -2567,7 +2567,7 @@ check_validate_item (cb_tree x)
 %token SIGNED_INT		"SIGNED-INT"
 %token SIGNED_LONG		"SIGNED-LONG"
 %token SIGNED_SHORT		"SIGNED-SHORT"
-%token SIXTY_SIX		"66"
+%token SIXTY_SIX		"level-number 66"
 %token SIZE
 %token SIZE_ERROR		"SIZE ERROR"
 %token SMALL_FONT			"SMALL-FONT"
@@ -2722,6 +2722,7 @@ check_validate_item (cb_tree x)
 %token WINDOW
 %token WITH
 %token WORD			"Identifier"
+%token LEVEL_NUMBER			"level-number"		/* 01 thru 49, 77 */
 %token WORDS
 %token WORKING_STORAGE		"WORKING-STORAGE"
 %token WRAP
@@ -5613,6 +5614,7 @@ data_description:
 	if (set_current_field ($1, $2)) {
 		YYERROR;
 	}
+    save_tree = NULL;
   }
   _data_description_clause_sequence
   {
@@ -5626,17 +5628,21 @@ data_description:
 | level_number error TOK_DOT
   {
 	/* Free tree associated with level number */
+#if 0 /* works fine without, leads to invalid free otherwise [COB_TREE_DEBUG] */
 	cobc_parse_free ($1);
+#endif
 	yyerrok;
 	cb_unput_dot ();
 	check_pic_duplicate = 0;
 	check_duplicate = 0;
+#if 0 /* CHECKME - *Why* would we want to change the field here? */
 	current_field = cb_get_real_field ();
+#endif
   }
 ;
 
 level_number:
-  not_const_word WORD
+  not_const_word LEVEL_NUMBER
   {
 	$$ = $2;
   }
@@ -5916,16 +5922,15 @@ constant_expression:
 
 _data_description_clause_sequence:
   /* empty */
-  {
-	/* Required to check redefines */
-	$$ = NULL;
-  }
-| _data_description_clause_sequence
+| data_description_clause_sequence
+;
+
+data_description_clause_sequence:
   data_description_clause
   {
-	/* Required to check redefines */
-	$$ = cb_true;
+	save_tree = cb_int0;
   }
+| data_description_clause_sequence data_description_clause
 ;
 
 data_description_clause:
@@ -5953,7 +5958,7 @@ redefines_clause:
   REDEFINES identifier_1
   {
 	check_repeated ("REDEFINES", SYN_CLAUSE_1, &check_pic_duplicate);
-	if ($0 != NULL) {
+	if (save_tree != NULL) {
 		cb_verify_x ($2, cb_free_redefines_position,
 			     _("REDEFINES clause not following entry-name"));
 	}
@@ -6053,6 +6058,10 @@ picture_clause:
 usage_clause:
   usage
 | USAGE _is usage
+| USAGE _is error
+  {
+	check_and_set_usage (CB_USAGE_ERROR);
+  }
 ;
 
 usage:
@@ -9736,6 +9745,9 @@ add_body:
   }
 | x_list _add_to GIVING arithmetic_x_list on_size_error_phrases
   {
+	if ($2) {
+		cb_list_add ($1, $2);
+	}
 	cb_emit_arithmetic ($4, 0, cb_build_binary_list ($1, '+'));
   }
 | CORRESPONDING identifier TO identifier flag_rounded on_size_error_phrases
@@ -9750,10 +9762,8 @@ add_body:
 ;
 
 _add_to:
-| TO x
-  {
-	cb_list_add ($0, $2);
-  }
+  /* empty */ { $$ = NULL; }
+| TO x        { $$ = $2; }
 ;
 
 _end_add:

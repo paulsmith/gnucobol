@@ -323,7 +323,8 @@ enum cb_usage {
 	CB_USAGE_HNDL_THREAD,	/* 33 */
 	CB_USAGE_HNDL_MENU,		/* 34 */
 	CB_USAGE_HNDL_VARIANT,	/* 35 */
-	CB_USAGE_HNDL_LM		/* 36 */
+	CB_USAGE_HNDL_LM,		/* 36 */
+	CB_USAGE_ERROR		/* 37, allways last */
 };
 
 

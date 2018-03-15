@@ -1,4 +1,15 @@
 
+2018-03-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l, parser.y: new token LEVEL_NUMBER for clear separated
+	  handling from WORD (and minimal speedup in scanning)
+	* field.c (cb_get_level, cb_build_field_tree): simplified level
+	  handling as we only have valid level numbers in this tree
+	* parser.y (data_description): removed early free of level number
+	  token that results in invalid calls to (cobc_parse_free)
+	* parser.y (_data_description_clause_sequence, add_body): simplified
+	* parser.y (usage_clause), field.c, tree.h: catch unknown USAGE
+
 2018-03-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [__TINYC__]: added Tiny C version info and verbose option
@@ -2322,7 +2333,7 @@
 
 2016-07-27  Edward Hart <edward.dan.hart@gmail.com>
 
-	* parser.y, scanner.l: seperated 66-, 78- and 88-level handling from
+	* parser.y, scanner.l: separated 66-, 78- and 88-level handling from
 	  data_description, making it impossible to specify improper clauses.
 	* field.c: removed code made redundant by the above change.
 	* field.c, tree.h (cb_validate_renames_item): strengthened 66-level

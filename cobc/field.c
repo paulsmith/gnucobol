@@ -342,6 +342,10 @@ cb_evaluate_expr (cb_tree ch, int normal_prec)
 int
 cb_get_level (cb_tree x)
 {
+#if 1 /* level always contains a valid tree with valid numeric values only
+         --> all validation is done in scanner.l */
+	return atoi (CB_NAME (x));
+#else
 	const unsigned char	*p;
 	const char		*name;
 	int			level;
@@ -381,6 +385,7 @@ cb_get_level (cb_tree x)
 level_error:
 	cb_error_x (x, _("invalid level number '%s'"), name);
 	return 0;
+#endif
 }
 
 cb_tree
@@ -398,14 +403,18 @@ cb_build_field_tree (cb_tree level, cb_tree name, struct cb_field *last_field,
 	int			lv;
 
 	if (!expl_level) {
-		if (level == cb_error_node || name == cb_error_node) {
+		/* note: the level number is always a valid tree,
+		   the name may be a defined constant which leads to an error node here */
+		if (name == cb_error_node) {
 			return cb_error_node;
 		}
 		/* Check the level number */
 		lv = cb_get_level (level);
+#if 0 /*level is always valid --> 01 thru 49, 77, 66, 78, 88 */
 		if (!lv) {
 			return cb_error_node;
 		}
+#endif
 	} else {
 		lv = expl_level;
 	}
@@ -681,7 +690,7 @@ check_picture_item (struct cb_field *f)
 		return 0;
 	}
 
-	if(f->storage == CB_STORAGE_REPORT) {
+	if (f->storage == CB_STORAGE_REPORT) {
 		if (f->values) {
 			sprintf (pic, "X(%d)", (int)CB_LITERAL(CB_VALUE(f->values))->size);
 		} else {
@@ -728,7 +737,7 @@ check_picture_item (struct cb_field *f)
 		return 0;
 	}
 
-	if (f->level == 1) {
+	if (f->level == 1 || f->level == 77) {
 		cb_error_x (x, _("PICTURE clause required for '%s'"),
 			    cb_name (x));
 		return 1;
@@ -998,6 +1007,8 @@ validate_pic (struct cb_field *f)
 	case CB_USAGE_UNSIGNED_LONG:
 		need_picture = 0;
 		break;
+	case CB_USAGE_ERROR:
+		return 1;
 	default:
 		need_picture = !f->flag_is_external_form;
 		break;

@@ -393,30 +393,54 @@ H#[0-9A-Za-z]* {
 	RETURN_TOK (TOK_CLOSE_PAREN);
 }
 
-[0-9]+ {
+[0-9][0-9]? {
+	int	value;
+
 	cobc_force_literal = 0;
 	if (integer_is_label) {
 		yylval = cb_build_reference (yytext);
+
 		if (!cobc_in_procedure) {
-			if (!strcmp (yytext, "66")) {
-				/* Level number 66 */
+			value = atoi (yytext);
+			if (value == 66) {
+				/* level number 66 */
 				RETURN_TOK (SIXTY_SIX);
-			} else if (!strcmp (yytext, "78")) {
-				/* Level number 78 */
+			} else if (value == 78) {
+				/* level number 78 */
 				RETURN_TOK (SEVENTY_EIGHT);
-			} else if (!strcmp (yytext, "88")) {
-				/* Level number 88 */
+			} else if (value == 88) {
+				/* level number 88 */
 				RETURN_TOK (EIGHTY_EIGHT);
+			} else if ((value >= 1 && value <= 49) || value == 77) {
+				/* level number (1 through 49, 77) */
+				RETURN_TOK (LEVEL_NUMBER);
 			}
 		}
 
-		/* Integer label or level number */
+		/* Integer label */
 		RETURN_TOK (WORD);
 	}
 	/* Numeric literal or referenced integer label
-	remark: all transformations/checks are postponed:
-	literals to tree.c,
-	integer label to typeck.c (cb_build_section_name)
+	   remark: all transformations/checks are postponed:
+	   literals to tree.c,
+	   integer label to typeck.c (cb_build_section_name)
+	*/
+	yylval = cb_build_numeric_literal (0, yytext, 0);
+	RETURN_TOK (LITERAL);
+}
+
+[0-9]+ {
+
+	cobc_force_literal = 0;
+	if (integer_is_label) {
+		/* Integer label */
+		yylval = cb_build_reference (yytext);
+		RETURN_TOK (WORD);
+	}
+	/* Numeric literal or referenced integer label
+	   remark: all transformations/checks are postponed:
+	   literals to tree.c,
+	   integer label to typeck.c (cb_build_section_name)
 	*/
 	yylval = cb_build_numeric_literal (0, yytext, 0);
 	RETURN_TOK (LITERAL);
