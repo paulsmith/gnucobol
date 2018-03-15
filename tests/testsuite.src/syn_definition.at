@@ -204,8 +204,6 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
-## Incomplete
-
 AT_SETUP([Incomplete 01 definition])
 AT_KEYWORDS([definition])
 
@@ -866,18 +864,19 @@ AT_DATA([prog.cob], [
            move 0 to word
            perform word
       *
-           exit program returning word.
+           stop run returning word.
       *-----------------------------------------------------------------
        word section.
            add 1 to word.
 ])
 
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob: in section 'main':
+prog.cob:17: error: user-defined word re-used with different type does not conform to COBOL 2014
+prog.cob:17: error: redefinition of 'word' as label-name
+prog.cob:7: error: 'word' previously defined here as data-name
+])
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
-
-# FIXME: as long as there is no direct reference to
-#        the paragraph/section this should be not more
-#        than a warning, maybe depending on a compiler
-#        configuration
 
 AT_CLEANUP
 
