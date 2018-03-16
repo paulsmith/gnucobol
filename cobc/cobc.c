@@ -1307,6 +1307,9 @@ cobc_check_string (const char *dupstr)
 		cobc_abort_terminate (1);
 	}
 	/* LCOV_EXCL_STOP */
+
+	/* CHECKME: performance consideration: the strcmp in this loop
+	   consumes ~5% of the compilation time - can we optimize this? */
 	for (s = base_string; s; s = s->next) {
 		if (!strcmp (dupstr, (const char *)s->val)) {
 			return s->val;
@@ -6763,9 +6766,13 @@ print_program_code (struct list_files *cfile, int in_copy)
 							  cfile->source_format != CB_FORMAT_FREE)) {
 					continue;
 				}
-				/* Set line number as specified by #line directive. */
-				if (!strncmp (pline[0], "#line ", 6)) {
-					line_num = atoi (&pline[0][6]);
+				/* handling for preprocessed directives */
+				if (pline[0][0] == '#') {
+					/* Set line number as specified by #line directive. */
+					if (!strncmp (pline[0], "#line ", 6)) {
+						line_num = atoi (&pline[0][6]);
+						/* CHECKME: read the filename if given, too */
+					}
 					lines_read = -1;
 				}
 

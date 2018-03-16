@@ -1,4 +1,9 @@
 
+2018-03-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_move): speedup, especially for programs not
+	  defining any reports
+
 2018-03-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l, parser.y: new token LEVEL_NUMBER for clear separated

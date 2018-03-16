@@ -6751,8 +6751,9 @@ report_description:
 	}
 	current_program->report_storage = description_field;
 	current_program->flag_report = 1;
-	if(current_report->records == NULL)
+	if (current_report->records == NULL) {
 		current_report->records = description_field;
+	}
 	finalize_report (current_report, description_field);
 	$$ = CB_TREE (description_field);
   }

@@ -686,19 +686,16 @@ cb_check_numeric_edited_name (cb_tree x)
 cb_tree
 cb_check_sum_field (cb_tree x)
 {
-	struct cb_field		*f;
-	if (x == cb_error_node) {
-		return cb_error_node;
-	}
+	struct cb_field		*f, *sc;
 
 	if (CB_TREE_CATEGORY (x) != CB_CATEGORY_NUMERIC_EDITED) {
 		return x;
 	}
 
 	f = CB_FIELD (cb_ref(x));
-	if(f->report) {		/* If part of a REPORT, check if it is a SUM */
-		struct cb_field *sc = get_sum_data_field(f->report, f);
-		if(sc) {	/* Use the SUM variable instead of the print variable */
+	if (f->report) {		/* If part of a REPORT, check if it is a SUM */
+		sc = get_sum_data_field(f->report, f);
+		if (sc) {	/* Use the SUM variable instead of the print variable */
 			return cb_build_field_reference (sc, NULL);
 		}
 	}
@@ -7858,22 +7855,18 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 	if (suppress_warn) {
 		return;
 	}
-	loc = src->source_line ? src : dst;
+	if (CB_LITERAL_P (src) || !src->source_line) {
+		loc = dst;
+	} else {
+		loc = src;
+	}
 	if (value_flag) {
 		/* VALUE clause --> always warn */
-		if (CB_LITERAL_P (src)) {
-			cb_warning_x (COBC_WARN_FILLER, dst, "%s", msg);
-		} else {
-			cb_warning_x (COBC_WARN_FILLER, loc, "%s", msg);
-		}
+		cb_warning_x (COBC_WARN_FILLER, loc, "%s", msg);
 	} else {
 		/* MOVE statement */
 		if (warning_flag) {
-			if (CB_LITERAL_P (src)) {
-				cb_warning_x (warning_flag, dst, "%s", msg);
-			} else {
-				cb_warning_x (warning_flag, loc, "%s", msg);
-			}
+			cb_warning_x (warning_flag, loc, "%s", msg);
 			listprint_suppress ();
 			if (src_flag) {
 				/* note: src_flag is -1 for numeric literals,
@@ -9384,7 +9377,7 @@ cb_build_move_field (cb_tree src, cb_tree dst)
 cb_tree
 cb_build_move (cb_tree src, cb_tree dst)
 {
-	struct cb_reference	*x;
+	struct cb_reference	*src_ref, *dst_ref, *x;
 	int	move_zero;
 
 	if (src == cb_error_node || dst == cb_error_node) {
@@ -9400,22 +9393,32 @@ cb_build_move (cb_tree src, cb_tree dst)
 		CB_REFERENCE (src)->flag_receiving = 0;
 	}
 #endif
-	src = cb_check_sum_field(src);
-	dst = cb_check_sum_field(dst);
+	if (move_zero) {
+		src = cb_zero;
+	}
 
+	if (current_program->flag_report) {
+		src = cb_check_sum_field (src);
+		dst = cb_check_sum_field (dst);
+	}
+
+	if (CB_REFERENCE_P (src)) {
+		src_ref = CB_REFERENCE (src);
+	} else {
+		src_ref = NULL;
+	}
 	if (CB_REFERENCE_P (dst)) {
 		/* Clone reference */
 		x = cobc_parse_malloc (sizeof(struct cb_reference));
 		*x = *CB_REFERENCE (dst);
 		x->flag_receiving = 1;
 		dst = CB_TREE (x);
+		dst_ref = x;
+	} else {
+		dst_ref = NULL;
 	}
 	if (cb_listing_xref) {
 		cobc_xref_set_receiving (dst);
-	}
-
-	if (move_zero) {
-		src = cb_zero;
 	}
 
 	if (CB_TREE_CLASS (dst) == CB_CLASS_POINTER ||
@@ -9423,8 +9426,7 @@ cb_build_move (cb_tree src, cb_tree dst)
 		return cb_build_assign (dst, src);
 	}
 
-	if (CB_REFERENCE_P (src) &&
-	    CB_ALPHABET_NAME_P(CB_REFERENCE(src)->value)) {
+	if (src_ref && CB_ALPHABET_NAME_P(src_ref->value)) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 	if (CB_INDEX_OR_HANDLE_P (dst)) {
@@ -9443,10 +9445,10 @@ cb_build_move (cb_tree src, cb_tree dst)
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 
-	if (CB_REFERENCE_P (src) && CB_REFERENCE (src)->check) {
+	if (src_ref && src_ref->check) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
-	if (CB_REFERENCE_P (dst) && CB_REFERENCE (dst)->check) {
+	if (dst_ref && dst_ref->check) {
 		return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 	}
 

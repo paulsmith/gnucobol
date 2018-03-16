@@ -1722,6 +1722,15 @@ cb_int (const int n)
 	struct cb_integer	*y;
 	struct int_node		*p;
 
+	/* performance note: the following loop used 3% (according to callgrind)
+	   of the complete time spent in a sample run with
+	   -fsyntax-only on 880 production code files (2,500,000 LOC)
+	   according to gcov we entered this function 629684 times with only 280 new
+	   entries but the loop produces a lot of comparisions:
+	   for: 122441668, if: 122441388 
+	*/
+	/* CHECKME: optimization by alignment / otherwise? */
+
 	for (p = int_node_table; p; p = p->next) {
 		if (p->n == n) {
 			return p->node;

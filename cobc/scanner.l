@@ -1792,6 +1792,7 @@ scan_floating_numeric (const char *text)
 					RETURN_TOK (LITERAL);
 #endif
 				}
+				/* LCOV_EXCL_STOP */
 			}
 	
 			if (exp_sign == -1) {

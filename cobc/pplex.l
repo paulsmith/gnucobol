@@ -1311,6 +1311,13 @@ is_cobol_word_char (const char c)
 	return c == '-' || c == '_' || isalnum (c);
 }
 
+
+/* FIXME: try to optimize as this function used 25-10% (according to callgrind)
+   of the complete time spent in a sample run with
+   -fsyntax-only on 880 production code files (2,500,000 LOC)
+   --> too much  [Note: 10% are spent in getc and therefore could only
+   be optimized by using a buffered read instead]
+*/
 static int
 ppinput (char *buff, const size_t max_size)
 {
@@ -1492,11 +1499,11 @@ start:
 		}
 
 		memset (buff, ' ', (size_t)6);
-		/* Note we allow directive lines to start at column 7 */
+			/* Note we allow directive lines to start at column 7 */
 		bp = &buff[6];
 
-		/* Special case: acucomment must be checked here as we'd pass comments
-		   as directives otherwise */
+			/* Special case: acucomment must be checked here as we'd pass comments
+			   as directives otherwise */
 		if (cb_flag_acucomment && buff[6] == '$') {
 			buff[6] = '*';
 		}
@@ -1806,6 +1813,12 @@ pp_text_list_add (struct cb_text_list *list, const char *text,
 static void
 ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 {
+	/* performance note: while this function used 5% (according to callgrind)
+	   of the complete time spent in a sample run with
+	   -fsyntax-only on 880 production code files (2,500,000 LOC)
+	   3.8% of this time is spent in fwrite, therefore not much potential
+	   for optimization
+	*/
 	struct cb_replace_list		*r;
 	struct cb_replace_list		*save_ptr;
 	const struct cb_text_list	*lno;
