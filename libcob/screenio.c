@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -2549,7 +2549,8 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			}
 
 			/* Insert character, if requested. */
-			if (cobsetptr->cob_insert_mode == 1) {
+			if (cobsetptr->cob_insert_mode == 1
+			 && size_accept > 1) {
 				/* get last character in field */
 				/* check and beep if field is already full,
 				   ignore numeric fields for now */
@@ -2783,6 +2784,8 @@ cob_get_char (void)
 
 	field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL,
 		COB_SCREEN_AUTO | COB_SCREEN_NO_ECHO);
+
+	/* CHECKME: MF docs are not clear: should this return 0 ? */
 	if (c == ' ') {
 		return COB_ACCEPT_STATUS;
 #if EOF != -1

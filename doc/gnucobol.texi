@@ -1465,17 +1465,17 @@ The Alt-Home key moves the cursor to the beginning of the field.
 
 The Insert key changes the insert mode.
 
+The value of the insert mode is used in all following @code{ACCEPT}
+statements while the program is running.
+
 When the insert mode is on, typed characters move the existing characters
-to the right.
+to the right until field is full.
 When it is off, typed characters type over existing characters.
 
-The default insert mode is set by the @code{COB_INSERT_MODE} variable,
-@xref{Appendix H, Runtime Configuration}.
-This must be set before the first extended @code{ACCEPT}, @code{DISPLAY},
-or any routine that gets information from the screen.
+Note: The insert mode is ignored for fields with a size of 1.
 
-The last press of the Insert key is used in all following @code{ACCEPT}
-statements while the program is running.
+The insert mode can also be changed by the @code{COB_INSERT_MODE} setting
+@xref{Appendix H, Runtime Configuration} at any time.
 
 
 @subsection Tab keys
