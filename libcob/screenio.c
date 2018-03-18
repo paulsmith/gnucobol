@@ -2725,6 +2725,7 @@ int
 cob_sys_clear_screen (void)
 {
 	init_cob_screen_if_needed ();
+
 	clear ();
 	refresh ();
 	cob_current_y = 0;
@@ -2735,6 +2736,8 @@ cob_sys_clear_screen (void)
 void
 cob_screen_set_mode (const cob_u32_t smode)
 {
+	init_cob_screen_if_needed ();
+
 	if (!smode) {
 		refresh ();
 		def_prog_mode ();
@@ -2752,6 +2755,8 @@ cob_display_text (const char *text)
 	cob_field	field;
 	cob_field_attr	attr;
 
+	init_cob_screen_if_needed ();
+
 	if (text[0] == 0) return 0;
 
 	COB_FIELD_INIT (strlen (text), (unsigned char *)text, &attr);
@@ -2762,23 +2767,30 @@ cob_display_text (const char *text)
 	return 0;
 }
 
-/* C: get a char x'01' thru x'255' or keyboard status > 1000  (or 0) */
+/* C: get a char x'01' thru x'255' or keyboard status > 1000  (or 0)
+      without any prompt */
 int
 cob_get_char (void)
 {
 	cob_field		field;
-	unsigned char		c = ' ';
+	char			c = ' ';
 	cob_field_attr		attr;
 
-	COB_FIELD_INIT (1, &c, &attr);
+	init_cob_screen_if_needed ();
+
+	COB_FIELD_INIT (1, (unsigned char *)&c, &attr);
 	COB_ATTR_INIT (COB_TYPE_ALPHANUMERIC, 0, 0, 0, NULL);
 
 	field_accept_from_curpos (&field, NULL, NULL, NULL, NULL, NULL, NULL,
-				  COB_SCREEN_AUTO);
+		COB_SCREEN_AUTO | COB_SCREEN_NO_ECHO);
 	if (c == ' ') {
 		return COB_ACCEPT_STATUS;
+#if EOF != -1
+	} else if (c == EOF) {
+		return -1;
+#endif
 	} else {
-		return (int)c;
+		return c;
 	}
 }
 
@@ -2788,6 +2800,8 @@ cob_get_text (char *text, int size)
 {
 	cob_field	field;
 	cob_field_attr	attr;
+
+	init_cob_screen_if_needed ();
 
 	if (size > 0) {
 		COB_FIELD_INIT (size, (unsigned char *)text, &attr);
@@ -2809,6 +2823,8 @@ cob_display_formatted_text (const char *fmt, ...)
 	cob_field_attr	attr;
 	va_list		ap;
 	char		buff [COB_NORMAL_BUFF];
+
+	init_cob_screen_if_needed ();
 
 	va_start (ap, fmt);
 	size = vsnprintf (buff, COB_NORMAL_BUFF, fmt, ap);
@@ -2997,6 +3013,7 @@ cob_sys_get_csr_pos (unsigned char *fld)
 #endif
 
 	COB_CHK_PARMS (CBL_GET_CSR_POS, 1);
+	init_cob_screen_if_needed ();
 
 #ifdef	COB_GEN_SCREENIO
 	getyx (stdscr, cline, ccol);
@@ -3016,37 +3033,38 @@ cob_sys_get_csr_pos (unsigned char *fld)
    No implementation of MF function tables so far.
 */
 int
-cob_sys_get_char (char c)
+cob_sys_get_char (unsigned char *fld)
 {
 #ifdef	COB_GEN_SCREENIO
 	int ret;
 #endif
 
 	COB_CHK_PARMS (CBL_READ_KBD_CHAR, 1);
+	/* note: screen init done in called cob_get_char */
 
 #ifdef	COB_GEN_SCREENIO
 	if (!got_sys_char) {
 		ret = cob_get_char ();
 		if (ret > 255) {
-			c = 0;
+			*fld = 0;
 			got_sys_char = 1;
 		} else {
-			c = (char) ret;
+			*fld = (unsigned char) ret;
 		}
 	} else {
 		got_sys_char = 0;
 		if (COB_ACCEPT_STATUS == 0) {
-			return cob_sys_get_char (c);
+			return cob_sys_get_char (fld);
 		} else if (COB_ACCEPT_STATUS > 1000 && COB_ACCEPT_STATUS < 1201) {
-			c = (char) (COB_ACCEPT_STATUS - 1000);
+			*fld = (unsigned char) (COB_ACCEPT_STATUS - 1000);
 		} else if (COB_ACCEPT_STATUS > 2000 && COB_ACCEPT_STATUS < 2056) {
-			c = (char) (COB_ACCEPT_STATUS - 1800);
+			*fld = (unsigned char) (COB_ACCEPT_STATUS - 1800);
 		} else {
 			return -1;
 		}
 	}
 #else
-	COB_UNUSED (c);
+	COB_UNUSED (fld);
 #endif
 	return 0;
 }
@@ -3061,9 +3079,9 @@ cob_sys_set_csr_pos (unsigned char *fld)
 #endif
 
 	COB_CHK_PARMS (CBL_SET_CSR_POS, 1);
+	init_cob_screen_if_needed ();
 
 #ifdef	COB_GEN_SCREENIO
-	init_cob_screen_if_needed ();
 	cline = fld[0];
 	ccol= fld[1];
 	return move (cline, ccol);
@@ -3078,9 +3096,9 @@ int
 cob_sys_get_scr_size (unsigned char *line, unsigned char *col)
 {
 	COB_CHK_PARMS (CBL_GET_SCR_SIZE, 2);
+	init_cob_screen_if_needed ();
 
 #ifdef	COB_GEN_SCREENIO
-	init_cob_screen_if_needed ();
 	*line = (unsigned char)LINES;
 	*col = (unsigned char)COLS;
 #else
