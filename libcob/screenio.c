@@ -187,15 +187,30 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 	case 0177:
 		*keyp = KEY_BACKSPACE;
 		break;
-	case 01005:
-		*keyp = KEY_EOL;	/* Alt-Delete */
+#ifndef ALT_DEL
+#   define ALT_DEL   01005
+	case KEY_EOL:
+		*keyp = ALT_DEL;
 		break;
-	case 01040:
-		*keyp = KEY_CLOSE;	/* Alt-left-arrow */
+#endif
+#ifndef ALT_HOME
+#   define ALT_HOME  01026
+#endif
+#ifndef ALT_END
+#   define ALT_END   01021
+#endif
+#ifndef ALT_LEFT
+#   define ALT_LEFT  01040
+	case KEY_CLOSE:
+		*keyp = ALT_LEFT;
 		break;
-	case 01062:
-		*keyp = KEY_PREVIOUS;	/* Alt-right-arrow */
+#endif
+#ifndef ALT_RIGHT
+#   define ALT_RIGHT 01062
+	case KEY_PREVIOUS:
+		*keyp = ALT_LEFT;
 		break;
+#endif
 
 #ifdef	KEY_A1
 	/* A1, A3, C1, C3 must be present */
@@ -2375,7 +2390,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			p = COB_TERM_BUFF + ccolumn - scolumn;
 			at_eof = 0;
 			continue;
-		case 01026:
+		case ALT_HOME:
 			/* Alt-Home key, cursor to start of field. */
 			cob_move_cursor (sline, scolumn);
 			p = COB_TERM_BUFF;
@@ -2405,16 +2420,16 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			p = COB_TERM_BUFF + ccolumn - scolumn;
 			at_eof = 0;
 			continue;
-		case 01021:
+		case ALT_END:
 			/* Alt-End key, cursor to end of size of field */
 			cob_move_cursor (sline, right_pos);
 			p = COB_TERM_BUFF + size_accept - 1;
 			at_eof = 0;
 			continue;
 		case KEY_LEFT:
-		case KEY_CLOSE:
-			/* Left-arrow     KEY_LEFT  auto-skip. */
-			/* Alt-left-arrow KEY_CLOSE no auto-skip. */
+		case ALT_LEFT:
+			/* Left-arrow     KEY_LEFT auto-skip. */
+			/* Alt-left-arrow ALT_LEFT no auto-skip. */
 			at_eof = 0;
 			if ((int) ccolumn > scolumn) {
 				ccolumn--;
@@ -2430,9 +2445,9 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			cob_beep ();
 			continue;
 		case KEY_RIGHT:
-		case KEY_PREVIOUS:
-			/* Right-arrow     KEY_RIGHT    auto-skip. */
-			/* Alt-right-arrow KEY_PREVIOUS no auto-skip. */
+		case ALT_RIGHT:
+			/* Right-arrow     KEY_RIGHT auto-skip. */
+			/* Alt-right-arrow ALT_RIGHT no auto-skip. */
 			if (ccolumn < right_pos) {
 				ccolumn++;
 				cob_move_cursor (cline, ccolumn);
@@ -2492,7 +2507,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			/* Put cursor back to original position. */
 			cob_move_cursor (cline, ccolumn);
 			continue;
-		case KEY_EOL:
+		case ALT_DEL:
 			/* Alt-Delete key, erase cursor to end of field. */
 			for (count = ccolumn; count <= right_pos; count++) {
 				/* Character position. */
