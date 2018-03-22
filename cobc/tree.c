@@ -1127,7 +1127,7 @@ cb_fits_int (const cb_tree x)
 				break;
 			}
 		}
-		size = l->size - size;
+		size = l->size - size - l->scale;
 		if (size < 10) {
 			return 1;
 		}
@@ -1212,7 +1212,7 @@ cb_fits_long_long (const cb_tree x)
 				break;
 			}
 		}
-		size = l->size - size;
+		size = l->size - size - l->scale;
 		if (size < 19) {
 			return 1;
 		}
@@ -1328,7 +1328,8 @@ cb_get_int (const cb_tree x)
 
 	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
-		cobc_err_msg (_("invalid literal cast"));
+		/* not translated as it is a highly unlikely internal abort */
+		cobc_err_msg ("invalid literal cast");
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_STOP */
@@ -1341,9 +1342,13 @@ cb_get_int (const cb_tree x)
 		}
 	}
 
-	size = l->size - i;
 	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	size = l->size - i;
+	if (l->scale < 0) {
+		size = size - l->scale;
+	}
 	check_lit_length(size, (const char *)l->data + i);
+
 	/* Check numeric literal length matching requested output type */
 #if INT_MAX >= 9223372036854775807
 	if (unlikely(size >= 19U)) {
@@ -1393,7 +1398,8 @@ cb_get_long_long (const cb_tree x)
 
 	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
-		cobc_err_msg (_("invalid literal cast"));
+		/* not translated as it is a highly unlikely internal abort */
+		cobc_err_msg ("invalid literal cast");
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_STOP */
@@ -1406,9 +1412,13 @@ cb_get_long_long (const cb_tree x)
 		}
 	}
 
-	size = l->size - i;
 	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	size = l->size - i;
+	if (l->scale < 0) {
+		size = size - l->scale;
+	}
 	check_lit_length(size, (const char *)l->data + i);
+
 	/* Check numeric literal length matching requested output type */
 	if (unlikely (size >= 19U)) {
 		if (l->sign < 0) {
@@ -1440,6 +1450,13 @@ cb_get_u_long_long (const cb_tree x)
 	unsigned int	size, i;
 	cob_u64_t		val;
 
+	/* LCOV_EXCL_START */
+	if (!CB_LITERAL_P (x)) {
+		/* not translated as it is a highly unlikely internal abort */
+		cobc_err_msg ("invalid literal cast");
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
 	l = CB_LITERAL (x);
 
 	/* Skip leading zeroes */
@@ -1449,9 +1466,13 @@ cb_get_u_long_long (const cb_tree x)
 		}
 	}
 
-	size = l->size - i;
 	/* Check numeric literal length, postponed from scanner.l (scan_numeric) */
+	size = l->size - i;
+	if (l->scale < 0) {
+		size = size - l->scale;
+	}
 	check_lit_length(size, (const char *)l->data + i);
+
 	/* Check numeric literal length matching requested output type */
 	if (unlikely(size >= 20U)) {
 		s = "18446744073709551615";

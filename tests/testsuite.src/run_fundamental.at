@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2015, 2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2015, 2017-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart, Ron Norman
 ##
 ## This file is part of GnuCOBOL.
@@ -463,6 +463,59 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0   ])
 AT_CLEANUP
 
 
+AT_SETUP([Comparisions of FLOAT-LONG with floating-point literals])
+AT_KEYWORDS([fundamental literal exponent])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  VAR          FLOAT-LONG VALUE 0.0.
+
+       PROCEDURE        DIVISION.
+           MOVE 9.899999999999E+304 TO VAR
+           IF VAR < 0
+               DISPLAY 'error: compare ' VAR ' < ' 0
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+           IF VAR < 9.799999999999E+304
+               DISPLAY 'error: compare ' VAR ' < ' 9.799999999999E+304
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+           IF VAR > 9.999999999999E+304
+               DISPLAY 'error: compare ' VAR ' > ' 9.999999999999E+304
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+           MOVE -9.899999999999E+304 TO VAR
+           IF VAR > 0
+               DISPLAY 'error: compare ' VAR ' > ' 0
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+           IF VAR < -9.999999999999E+304
+               DISPLAY 'error: compare ' VAR ' < ' -9.999999999999E+304
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+           IF VAR > -9.799999999999E+304
+               DISPLAY 'error: compare ' VAR ' > ' -9.799999999999E+304
+                       ' failed!'
+               END-DISPLAY
+           END-IF.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([Check for equality of FLOAT-SHORT / FLOAT-LONG])
 AT_KEYWORDS([fundamental])
 
@@ -479,15 +532,15 @@ AT_DATA([prog.cob], [
        PROCEDURE        DIVISION.
            MOVE SRC1 TO DST1.
            IF DST1 not = 11.55
-               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-SHORT fa
-      -                "iled " DST1
+               DISPLAY 'error: move/compare FLOAT-LONG to FLOAT-SHORT fa
+      -                'iled ' DST1
                END-DISPLAY
            END-IF.
 
            MOVE SRC1 TO DST2.
            IF DST1 not = 11.55
-               DISPLAY "error: move/compare FLOAT-LONG to FLOAT-LONG fai
-      -                "led " DST2
+               DISPLAY 'error: move/compare FLOAT-LONG to FLOAT-LONG fai
+      -                'led ' DST2
                END-DISPLAY
            END-IF.
 
@@ -496,15 +549,15 @@ AT_DATA([prog.cob], [
 
            MOVE SRC2 TO DST1.
            IF DST1 not = 11.55
-               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-SHORT f
-      -                "ailed: " DST1
+               DISPLAY 'error: move/compare FLOAT-SHORT to FLOAT-SHORT f
+      -                'ailed: ' DST1
                END-DISPLAY
            END-IF.
 
            MOVE SRC2 TO DST2.
            IF DST2 not = 11.55
-               DISPLAY "error: move/compare FLOAT-SHORT to FLOAT-LONG fa
-      -                "iled: " DST2
+               DISPLAY 'error: move/compare FLOAT-SHORT to FLOAT-LONG fa
+      -                'iled: ' DST2
                END-DISPLAY
            END-IF.
 
@@ -531,8 +584,8 @@ AT_DATA([prog.cob], [
            MOVE 1.1234567 TO DST1.
            MOVE 1.1234568 TO DST2.
            IF DST1 not = DST2 THEN
-               DISPLAY "move/compare of very near numbers failed (not id
-      -                "entical): " DST1 " - " DST2
+               DISPLAY 'move/compare of very near numbers failed (not id
+      -                'entical): ' DST1 " - " DST2
                END-DISPLAY
            END-IF.
 
@@ -547,24 +600,24 @@ AT_DATA([prog.cob], [
            MOVE 1.1234567 TO DST1.
            MOVE 1.1234569 TO DST2.
            IF DST1 = DST2 THEN
-               DISPLAY "move/compare of near equal numbers failed (ident
-      -                "ical): " DST1 " - " DST2
+               DISPLAY 'move/compare of near equal numbers failed (ident
+      -                'ical): ' DST1 " - " DST2
                END-DISPLAY
            END-IF.
 
            MOVE 0.0001 TO DST1.
            MOVE 0.0000 TO DST2.
            IF DST1 = DST2 THEN
-               DISPLAY "move/compare of nearly equal very small numbers
-      -                "failed  (identical): " DST1 " - " DST2
+               DISPLAY 'move/compare of nearly equal very small numbers
+      -                'failed  (identical): ' DST1 " - " DST2
                END-DISPLAY
            END-IF.
 
            MOVE 1000001.0 TO DST1.
            MOVE 1000000.0 TO DST2.
            IF DST1 = DST2 THEN
-               DISPLAY "move/compare of nearly equal big numbers failed
-      -                "(identical): " DST1 " - " DST2
+               DISPLAY 'move/compare of nearly equal big numbers failed
+      -                '(identical): ' DST1 " - " DST2
                END-DISPLAY
            END-IF.
 
@@ -572,8 +625,8 @@ AT_DATA([prog.cob], [
       *     MOVE 1000000000.0 TO DST1.
       *     MOVE 1000000001.0 TO DST2.
       *     IF DST1 = DST2 THEN
-      *         DISPLAY "move/compare of nearly equal very big numbers fa
-      *-                "iled (identical): " DST1 " - " DST2
+      *         DISPLAY 'move/compare of nearly equal very big numbers fa
+      *-                'iled (identical): ' DST1 " - " DST2
       *         END-DISPLAY
       *     END-IF.
 
