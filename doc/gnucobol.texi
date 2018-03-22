@@ -1589,15 +1589,15 @@ Position the cursor to LINE and COLUMN.
 The next @code{DISPLAY} statement does not need a LINE or COLUMN
 to display at that position.
 
-@item @code{ALL "1"}
+@item @code{ALL X"01"}
 Display spaces from LINE and COLUMN to the end of the line.
 This is the same as @code{WITH ERASE EOL}.
 
-@item @code{ALL "2"}
+@item @code{ALL X"02"}
 Clear the whole screen.
 This is the same as @code{WITH BLANK SCREEN}.
 
-@item @code{ALL "7"}
+@item @code{ALL X"07"}
 Ring the bell.
 This is the same as @code{WITH BELL}.
 
