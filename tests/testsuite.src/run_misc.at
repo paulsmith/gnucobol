@@ -10487,13 +10487,22 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- COMP-2 ---"
            COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
+      *>   adjust output for possible rounding of intermediates
+           IF CMP2 >= 9216586.86175114 AND <= 9216586.86175116
+             MOVE 9216586.86175115 TO CMP2
+           END-IF
            DISPLAY "A: " CMP2
            COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
            DISPLAY "B: " CMP2
            MOVE ZERO TO CMP2.
            COMPUTE CMP2 = 1.0E3 / 2.1E0
                    ON SIZE ERROR DISPLAY "Z: " CMP2 " SIZE ERROR"
-               NOT ON SIZE ERROR DISPLAY "Z: " CMP2 " IS OK"
+               NOT ON SIZE ERROR
+      *>   adjust output for possible rounding of intermediates
+                IF CMP2 >= 476.1904761904760 AND <= 476.1904761904763
+                  MOVE 476.1904761904761 TO CMP2
+                END-IF
+                DISPLAY "Z: " CMP2 " IS OK"
            END-COMPUTE.
 
            DISPLAY "    ..."
@@ -10553,6 +10562,11 @@ AT_DATA([prog.cob], [
            DISPLAY "CMP2: " CMP2 " IS OK".
            GO TO CND-500-OK.
        CND-380-ERR.
+      *>   adjust output for possible rounding of intermediates
+           IF SV2 >= 9.899999999999E+307 AND
+                  <= 9.900000000001E+307
+             MOVE 9.899999999999781E+307 TO SV2
+           END-IF
            DISPLAY "CMP2: after " SV2 " SIZE ERROR".
 
        CND-500-OK.
@@ -10698,7 +10712,12 @@ AT_DATA([prog.cob], [
       *>      display 'counter: ' counter ', value: ' doubleValue
               compute doubleValue = doubleValue * 2
                    ON SIZE ERROR
+                      display 'SIZE ERROR raised'
+                              with no advancing upon syserr
+                      end-display
                       display 'SIZE ERROR, last value = ' doubleValue
+                              upon sysout
+                      end-display
                       exit perform
                not ON SIZE ERROR
                       if doubleValue > lastdoubleValue
@@ -10706,22 +10725,23 @@ AT_DATA([prog.cob], [
                       else
                          display 'math ERROR, last value > current: '
                                  lastdoubleValue ' > ' doubleValue
+                                 upon syserr
+                         end-display
                          exit perform
                       end-if
               end-compute
            end-perform
-           if counter not = 1024
-              display 'counter is ' counter
+           if not (counter >= 1023 and <=1025)
+              display ' '                   upon syserr
+              display 'counter is ' counter upon syserr
            end-if
 
            goback.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-
-AT_CHECK([./prog], [0],
-[SIZE ERROR, last value = 1.79769313486225E+308
-], [])
+# note: the actual value is not checked as this depends on intermediate rounding
+AT_CHECK([./prog], [0], ignore, [SIZE ERROR raised])
 
 AT_CLEANUP
 
