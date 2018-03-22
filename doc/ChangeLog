@@ -1,4 +1,12 @@
 
+2018-03-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* gnucobol.texi: removed all node pointers but the main level as
+	  makeinfo handles these correctly,
+	  added a menu group for appendices (not in pdf/html)
+	* gnucobol.texi: added missing subsection Figurative Constants below
+	  section Extended DISPLAY statement
+
 2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: remove generated includes in target maintainer-clean
@@ -98,10 +106,10 @@
 	* removed appendix cbinfo.tex from `cobcrun --info` as this is highly
 	  system specific
 	* cobcinfo.sh: Make sure the version of cobc is used that was built from
-	  this package, cater for changed appendixes, overwrite tex-files only if
+	  this package, cater for changed appendices, overwrite tex-files only if
 	  they are changed, new (optional) parameters for creating tex-files by
 	  group or single ones and for fixing the timestamps
-	* Makefile.am: cater for changed appendixes, make all appendixes dependent
+	* Makefile.am: cater for changed appendices, make all appendices dependent
 	  on cobcinfo.sh and source files of cobc to make sure these are always
 	  up-to-date
 

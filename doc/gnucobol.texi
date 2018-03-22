@@ -57,14 +57,15 @@ Edition @value{EDITION} @*
 Updated for GnuCOBOL @value{VERSION} @*
 @value{UPDATED} @*
 
-GnuCOBOL is a free and open-source COBOL compiler, which translates
-COBOL programs to C code and compiles it using GCC or other native
-operating system C compiler.
+GnuCOBOL (formerly OpenCOBOL) is a free COBOL compiler and runtime.
+@code{cobc} translates COBOL source to executable using intermediate C
+together with a designated C compiler and linker.
+@code{libcob} provides the necessary runtime.
 @sp 2
 This manual corresponds to GnuCOBOL @value{VERSION}.
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2002-2012, 2014-2017 Free Software Foundation, Inc.@*
+Copyright @copyright{} 2002-2012, 2014-2018 Free Software Foundation, Inc.@*
 Written by Keisuke Nishida, Roger While, Brian Tiffin, Simon Sobisch.
 
 @insertcopying
@@ -86,16 +87,10 @@ Welcome to the GnuCOBOL @value{VERSION} manual.
 * Optimize::                    Optimizing your program
 * Debug::                       Debugging your program
 * Extensions::                  Non-standard extensions
-* System routines::             Additional routines
-* Appendix A::                  @code{cobc --help}
-* Appendix B::                  @code{cobc --list-reserved}
-* Appendix C::                  @code{cobc --list-intrinsics}
-* Appendix D::                  @code{cobc --list-system}
-* Appendix E::                  @code{cobc --list-mnemonics}
-* Appendix F::                  Compiler Configuration
-* Appendix G::                  @code{cobcrun --help}
-* Appendix H::                  Runtime configuration
-* Appendix I::                  GNU Free Documentation License
+* System Routines::             Additional routines
+* Appendices::                  List of supported features and options,
+                                Compiler and Runtime Configuration,
+                                Documentation License
 * Index::                       Index
 
 @detailmenu
@@ -160,7 +155,7 @@ Extensions
 * ACCEPT special::              ACCEPT special keys.
 * Extended DISPLAY::            Extended DISPLAY statement.
 
-System routines
+System Routines
 
 * CBL_GC_GETOPT                 GETOPT for Cobol
 * CBL_GC_HOSTED                 Access to C hosted variables
@@ -168,21 +163,17 @@ System routines
 * CBL_GC_FORK                   Fork the current COBOL process to a new one
 * CBL_GC_WAITPID                Wait for a system process to end
 
-Appendix A
+Appendices
 
-Appendix B
-
-Appendix C
-
-Appendix D
-
-Appendix E
-
-Appendix F
-
-Appendix G
-
-Appendix H
+* Appendix A                    @code{cobc --help}
+* Appendix B                    @code{cobc --list-reserved}
+* Appendix C                    @code{cobc --list-intrinsics}
+* Appendix D                    @code{cobc --list-system}
+* Appendix E                    @code{cobc --list-mnemonics}
+* Appendix F                    Compiler Configuration
+* Appendix G                    @code{cobcrun --help}
+* Appendix H                    Runtime configuration
+* Appendix I                    GNU Free Documentation License
 
 @end detailmenu
 @end menu
@@ -194,7 +185,7 @@ Appendix H
 * Hello world!::                Hello, world!
 @end menu
 
-@node Hello world!,  , Getting started, Getting started
+@node Hello world!
 @section Hello, world!
 
 This is a sample program that displays ``Hello, world!'':
@@ -266,7 +257,7 @@ This chapter describes how to compile COBOL programs using GnuCOBOL.
 * C interface::                 Dealing with C files
 @end menu
 
-@node Compiler options, Multiple sources, Compile, Compile
+@node Compiler options
 @section Compiler options
 
 The compiler @code{cobc} accepts the options described in this section.
@@ -285,14 +276,14 @@ A complete list of options can be displayed by using the help option.
 * Miscellaneous::               Miscellaneous
 @end menu
 
-@node Help options, Build target, Compiler options, Compiler options
+@node Help options
 @subsection Help options
 
 The following switches display information about the compiler:
 
 @table @code
 @item --help, -h
-Display help screen (@pxref{Appendix A, ,cobc --help}).
+Display help screen (@pxref{Appendix A}).
 No further actions will be taken.
 
 @item --version
@@ -307,7 +298,7 @@ configurations. No further actions will be taken except for further display opti
 Verbosely display the programs invoked during compilation.
 
 @item --list-reserved
-Display reserved words (@pxref{Appendix B, ,cobc --list-reserved}).
+Display reserved words (@pxref{Appendix B}).
 A Y/N field shows if the word is supported.
 @footnote{Support may be partial or complete.}
 The given options for reserved words specified for example by @code{-std}
@@ -315,21 +306,21 @@ will be taken into account.
 No further actions will be taken except for further display options.
 
 @item --list-intrinsics
-Display intrinsic functions (@pxref{Appendix C, ,cobc --list-intrinsics}).
+Display intrinsic functions (@pxref{Appendix C}).
 A Y/N field shows if the function is implemented.
 No further actions will be taken except for further display options.
 
 @item --list-system
-Display system routines (@pxref{Appendix D, ,cobc --list-system}).
+Display system routines (@pxref{Appendix D}).
 No further actions will be taken except for further display options.
 
 @item --list-mnemonics
-Display mnemonic names (@pxref{Appendix E, ,cobc --list-mnemonics}).
+Display mnemonic names (@pxref{Appendix E}).
 No further actions will be taken except for further display options.
 
 @end table
 
-@node Build target, Source format, Help options, Compiler options
+@node Build target
 @subsection Build target
 
 The @code{cobc} compiler treats files like @file{*.cob}, @file{*.cbl} as
@@ -405,7 +396,7 @@ Place the output into <file>.
 
 @end table
 
-@node Source format, Warning options, Build target, Compiler options
+@node Source format
 @subsection Source format
 
 GnuCOBOL supports both fixed and free source format.
@@ -428,7 +419,7 @@ format was based on 80-character punch cards.}
 
 @end table
 
-@node Warning options, Configuration options, Source format, Compiler options
+@node Warning options
 @subsection Warning options
 
 @table @code
@@ -481,14 +472,14 @@ Warn on possible field truncation. This is @emph{not} set with @code{-Wall}.
 Warn if statements are unreachable. This is @emph{not} set with @code{-Wall}.
 @end table
 
-@node Configuration options, Listing options, Warning options, Compiler options
+@node Configuration options
 @subsection Configuration options
 
 @table @code
 @item -std=<dialect>
 Compiler uses the given dialect to determine certain compiler features
 and warnings.@*
-@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.@*
+@xref{Appendix F, Compiler Configuration, Compiler Configuration}, and @file{config/*.conf}.@*
 Note: The GnuCOBOL compiler tries to limit both the feature-set and reserved words
 to the specified compiler when the "strict" dialects are used.
 COBOL sources compiled with these dialects are therefore likely to compile with
@@ -535,7 +526,6 @@ RM/COBOL compatible
 
 @item -conf=<file>
 User-defined dialect configuration. See @code{-std=} above.@*
-@xref{Appendix F, Compiler Configuration}, and @file{config/*.conf}.
 
 @end table
 
@@ -550,9 +540,9 @@ Examples:
 @item -fnot-reserved=CHAIN,SCREEN
 @item -ftab-width=4
 @end table
-@xref{Appendix A, @code{cobc --help}}.
+@xref{Appendix A, @code{cobc --help}, @code{cobc --help}}.
 
-@node Listing options, Debug switches, Configuration options, Compiler options
+@node Listing options
 @subsection Listing options
 
 @table @code
@@ -666,7 +656,7 @@ The last part of the listing file is the summary of warnings an error in the com
 2 errors in compilation group
 @end example
 
-@node Debug switches, Miscellaneous, Listing options, Compiler options
+@node Debug switches
 @subsection Debug switches
 
 @table @code
@@ -713,7 +703,7 @@ Do not truncate binary fields according to PICTURE.
 
 @end table
 
-@node Miscellaneous,  , Debug switches, Compiler options
+@node Miscellaneous
 @subsection Miscellaneous
 @table @code
 
@@ -748,7 +738,7 @@ Save intermediate files (by default, in current directory).
 
 @end table
 
-@node Multiple sources, C interface, Compiler options, Compile
+@node Multiple sources
 @section Multiple sources
 
 This section describes how to compile a program from multiple source files.
@@ -764,7 +754,7 @@ COBOL programs.
 * Using library::               Using external libraries
 @end menu
 
-@node Static linking, Dynamic linking, Multiple sources, Multiple sources
+@node Static linking
 @subsection Static linking
 
 The easiest way of combining multiple files is to compile them into a
@@ -829,7 +819,7 @@ Note that this option only takes effect when the called program name
 is in a literal (like @code{CALL "subr"}).  With a data name (like
 @code{CALL SUBR}), the program is still called dynamically.
 
-@node Dynamic linking, Building library, Static linking, Multiple sources
+@node Dynamic linking
 @subsection Dynamic linking
 
 There are two methods to achieve this: a driver program, or compiling the main program and subprograms separately.
@@ -852,7 +842,8 @@ to your library directory, and run the main program:
 @example
 $ export COB_LIBRARY_PATH=/your/cobol/lib
 @end example
-(Note: You may set the variable via a runtime configuration file, @pxref{Appendix H, Runtime Configuration}. You may also set the variable to directly point to the directory where you compiled the sources.)
+(Note: You may set the variable via a runtime configuration file, @pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
+You may also set the variable to directly point to the directory where you compiled the sources.)
 
 Now execute your program:
 @example
@@ -885,7 +876,7 @@ $ export COB_LIBRARY_PATH=/your/cobol/lib
 $ ./main
 @end example
 
-@node Building library, Using library, Dynamic linking, Multiple sources
+@node Building library
 @subsection Building library
 
 You can build a shared library by combining multiple COBOL programs
@@ -898,7 +889,7 @@ $ cc -c subr3.c
 $ cc -shared -o libsubrs.so subr1.o subr2.o subr3.o
 @end example
 
-@node Using library,  , Building library, Multiple sources
+@node Using library
 @subsection Using library
 
 You can use a shared library by linking it with your main program.
@@ -918,7 +909,7 @@ Then, compile the main program, linking the library as follows:
 $ cobc -x main.cob -L/your/cobol/lib -lsubrs
 @end example
 
-@node C interface,  , Multiple sources, Compile
+@node C interface
 @section C interface
 
 This chapter describes how to combine C programs with COBOL programs.
@@ -931,7 +922,7 @@ This chapter describes how to combine C programs with COBOL programs.
 * Dynamic COBOL to C::
 @end menu
 
-@node Main C program, Static C to COBOL, C interface, C interface
+@node Main C program
 @subsection Writing Main Program in C
 
 Include @file{libcob.h} in your C program and call @code{cob_init} before using any COBOL module.
@@ -973,7 +964,7 @@ The compiled object must be linked with libcob as follows:
 cc -o main main.o @`{}cob-config --libs@`{}
 @end example
 
-@node Static C to COBOL, Dynamic C to COBOL, Main C program, C interface
+@node Static C to COBOL
 @subsection Redirecting output to a (FILE *)
 From a module written in C you may call cob_set_runtime_option to set the exact (FILE *) which trace
 data is to be written to. In common.h is the following:
@@ -1067,7 +1058,7 @@ $ ./hello
 Hello, world!
 @end example
 
-@node Dynamic C to COBOL, Static COBOL to C, Static C to COBOL, C interface
+@node Dynamic C to COBOL
 @subsection Dynamic linking with COBOL programs
 
 You can find a COBOL module having a specific name by using the C
@@ -1123,7 +1114,7 @@ $ ./hello
 Hello, world!
 @end example
 
-@node Static COBOL to C, Dynamic COBOL to C, Dynamic C to COBOL, C interface
+@node Static COBOL to C
 @subsection Static linking with C programs
 
 Let's call the following C function from COBOL:
@@ -1175,7 +1166,7 @@ $ ./hello
 Hello, world!
 @end example
 
-@node Dynamic COBOL to C,  , Static COBOL to C, C interface
+@node Dynamic COBOL to C
 @subsection Dynamic linking with C programs
 
 You can create a dynamically-linked module from a C program by passing an
@@ -1197,7 +1188,7 @@ Hello, world!
 * Customizing library::         Customizing library
 @end menu
 
-@node Customizing compiler, Customizing library, Customize, Customize
+@node Customizing compiler
 @section Customizing compiler
 
 These settings are effective at compile-time.
@@ -1217,7 +1208,7 @@ Standard libraries linked with the program ("-L$(PREFIX)/lib -lcob")
 Additional libraries linked with the program ("")
 @end table
 
-@node Customizing library,  , Customizing compiler, Customize
+@node Customizing library
 @section Customizing library
 
 These settings are effective at run-time. You can set them either via the
@@ -1232,7 +1223,7 @@ For displaying the current runtime settings you can use the option
 @code{-r, -runtime-env} of @code{cobcrun}.
 
 For a complete list of runtime variables, aliases, their default values and options
-to set them @pxref{Appendix H, Runtime Configuration}.
+to set them @pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
 
 @node Optimize, Debug, Customize, Top
 @chapter Optimize
@@ -1243,7 +1234,7 @@ to set them @pxref{Appendix H, Runtime Configuration}.
 * Optimize binary::             Use efficient binary representation
 @end menu
 
-@node Optimize options, Optimize call, Optimize, Optimize
+@node Optimize options
 @section Optimize options
 
 There are three compiler options for optimization: @code{-O}, @code{-Os}
@@ -1256,7 +1247,7 @@ the translation level.
 The option @code{-O}, @code{-Os} or @code{-O2} is passed to the
 C compiler as is and used for C level optimization.
 
-@node Optimize call, Optimize binary, Optimize options, Optimize
+@node Optimize call
 @section Optimize call
 
 When a @code{CALL} statement is executed, the called program is linked at run
@@ -1264,7 +1255,7 @@ time.  By specifying the compiler option @code{-fstatic-call}, you can
 statically link the program at compile time and call it efficiently.
 (@pxref{Static linking})
 
-@node Optimize binary,  , Optimize call, Optimize
+@node Optimize binary
 @section Optimize binary
 
 By default, data items of usage binary or comp are stored in
@@ -1278,14 +1269,14 @@ machine.  Set the config option @code{binary-byteorder} to
 In addition, setting the option @code{binary-size} to @code{2-4-8} or
 @code{1-2-4-8} is more efficient than others.
 
-@node Debug, Debug options, Optimize, Top
+@node Debug, Extensions, Optimize, Top
 @chapter Debug
 
 @menu
 * Debug options::               Debug options
 @end menu
 
-@node Debug options, Extensions, Debug, Debug
+@node Debug options
 @section Debug options
 
 The compiler option @code{-debug} can be used during the development
@@ -1295,7 +1286,7 @@ run-time errors with source locations.
 
 @exampleindent 0
 
-@node Extensions, SELECT, Debug options, Top
+@node Extensions, System Routines, Debug, Top
 @chapter Non-standard extensions
 @cindex Extensions
 @cindex Non-standard extensions
@@ -1309,7 +1300,7 @@ run-time errors with source locations.
 @end menu
 
 
-@node SELECT, Indexed , Extensions, Extensions
+@node SELECT
 @section SELECT ASSIGN TO
 @cindex @code{SELECT}
 @cindex @code{SELECT ASSIGN TO}
@@ -1317,7 +1308,7 @@ run-time errors with source locations.
 <This section is in progress.>
 
 
-@node Indexed, Extended ACCEPT, SELECT, Extensions
+@node Indexed
 @section Indexed file packages
 @cindex Indexed
 @cindex Indexed file packages
@@ -1325,7 +1316,7 @@ run-time errors with source locations.
 <This section is in progress.>
 
 
-@node Extended ACCEPT, ACCEPT special, Indexed, Extensions
+@node Extended ACCEPT
 @section Extended ACCEPT statement
 @cindex Extended @code{ACCEPT} statement
 
@@ -1397,7 +1388,7 @@ The variable-1 field accepts with its length.
 @end vtable
 
 
-@node ACCEPT special, Extended DISPLAY, Extended ACCEPT, Extensions
+@node ACCEPT special
 @section ACCEPT special keys
 @cindex @code{ACCEPT} special keys
 
@@ -1474,8 +1465,8 @@ When it is off, typed characters type over existing characters.
 
 Note: The insert mode is ignored for fields with a size of 1.
 
-The insert mode can also be changed by the @code{COB_INSERT_MODE} setting
-@xref{Appendix H, Runtime Configuration} at any time.
+The insert mode can also be changed by the @code{COB_INSERT_MODE} setting at any time,
+@pxref{Appendix H, Runtime Configuration, Runtime Configuration}.
 
 
 @subsection Tab keys
@@ -1486,7 +1477,7 @@ The Tab key returns from the @code{ACCEPT} with the @code{COB-SCR-TAB} value of 
 The Shift-Tab key returns with the @code{COB-SCR-BACK-TAB} value of 2008.
 
 
-@node Extended DISPLAY, System routines, ACCEPT special, Extensions
+@node Extended DISPLAY
 @section Extended DISPLAY statement
 @cindex Extended @code{DISPLAY} statement
 
@@ -1579,51 +1570,62 @@ Except that @code{LOW-VALUES} always positions the cursor (see @code{SIZE} ZERO 
 
 Variable-1 or literal-1 displays with the field length.
 
-Certain figurative constants have special functions.
-
-@code{SPACE}:  Display spaces from LINE and COLUMN to the end of the screen.
-This is the same as WITH ERASE EOS.
-
-@code{LOW-VALUE}:  Position the cursor to LINE and COLUMN.
-The next @code{DISPLAY} statement does not need a LINE or COLUMN
-to display at that position.
-
-ALL "1"  Display spaces from LINE and COLUMN to the end of the line.
-This is the same as @code{WITH ERASE EOL}.
-
-ALL "2"  Clear the whole screen.
-This is the same as @code{WITH BLANK SCREEN}.
-
-ALL "7"  Ring the bell.
-This is the same as @code{WITH BELL}.
-
-All other figurative constants display as a single character.
-
 @end vtable
 
 
-@node System routines, Appendix A, Extended DISPLAY, Top
+@subsection Figurative Constants
+@cindex Figurative Constants
+
+Certain figurative constants have special functions.
+
+@vtable @option
+
+@item @code{SPACE}
+Display spaces from LINE and COLUMN to the end of the screen.
+This is the same as WITH ERASE EOS.
+
+@item @code{LOW-VALUE}
+Position the cursor to LINE and COLUMN.
+The next @code{DISPLAY} statement does not need a LINE or COLUMN
+to display at that position.
+
+@item @code{ALL "1"}
+Display spaces from LINE and COLUMN to the end of the line.
+This is the same as @code{WITH ERASE EOL}.
+
+@item @code{ALL "2"}
+Clear the whole screen.
+This is the same as @code{WITH BLANK SCREEN}.
+
+@item @code{ALL "7"}
+Ring the bell.
+This is the same as @code{WITH BELL}.
+
+@end vtable
+
+All other figurative constants display as a single character.
 
 
-@chapter System routines
+@node System Routines, Appendices, Extensions, Top
+@chapter System Routines
 
-For a complete list of supported system routines
-@xref{Appendix D, ,cobc --list-system}.
+For a complete list of supported system routines,
+@pxref{Appendix D, ,cobc --list-system}.
 
 @menu
-* CBL_GC_GETOPT::				CBL_GC_GETOPT
-* CBL_GC_HOSTED::				CBL_GC_HOSTED
-* CBL_GC_NANOSLEEP::				CBL_GC_NANOSLEEP
-* CBL_GC_FORK::					CBL_GC_FORK
-* CBL_GC_WAITPID::				CBL_GC_WAITPID
+* CBL_GC_GETOPT::               GETOPT for Cobol
+* CBL_GC_HOSTED::               Access to C hosted variables
+* CBL_GC_NANOSLEEP::            Sleep for nanoseconds
+* CBL_GC_FORK::                 Fork the current COBOL process to a new one
+* CBL_GC_WAITPID::              Wait for a system process to end
 @end menu
 
-@node CBL_GC_GETOPT, , System routines, System routines
+@node CBL_GC_GETOPT
 @section CBL_GC_GETOPT
 
-@code{CBL_GC_GETOPT} realises the quite well-known option parser, getopt, for
-GnuCOBOL. The usage of this system routine is described by the
-following example.
+@code{CBL_GC_GETOPT} provides the quite well-known option parser, getopt, for
+GnuCOBOL.
+The usage of this system routine is described by the following example.
 
 @example
         identification division.
@@ -1651,16 +1653,18 @@ following example.
 
 We first need to define the necessary fields for getopt's shortoptions (so),
 longoptions (lo), longoption index (longind), long-only-option (long-only)
-and also the fields for return values return-char and opt-val (arbitrary size with trimming, see return codes).
+and also the fields for return values return-char and opt-val (arbitrary size
+with trimming, see return codes).
 
-The shortoptions are written down as an alphanumeric field (i.e., a string with arbitrary size) as follows:
+The shortoptions are written down as an alphanumeric field (i.e., a string with
+arbitrary size) as follows:
 
 @example
 "ab:c::d"
 @end example
 
-This means we want getopt to look for shortoptions named a, b, c or d and we demand an option
-value for b and we are accepting an optional one for c.
+This means we want getopt to look for shortoptions named a, b, c or d and we demand
+an option value for b and we are accepting an optional one for c.
 
 The longoptions are defined as a table of records with oname, has-value, valpoint and val.
 @itemize @bullet
@@ -1721,7 +1725,7 @@ The return-codes of @code{CBL_GC_GETOPT} are:
 @end itemize
 
 
-@node CBL_GC_HOSTED, , System routines, System routines
+@node CBL_GC_HOSTED
 @section CBL_GC_HOSTED
 
 @code{CBL_GC_HOSTED} provides access to the following C hosted variables:
@@ -1847,7 +1851,7 @@ HOSTED identification division.
 @end example
 
 
-@node CBL_GC_NANOSLEEP, , System routines, System routines
+@node CBL_GC_NANOSLEEP
 @section CBL_GC_NANOSLEEP
 
 @code{CBL_GC_NANOSLEEP} allows you to pause the program for nanoseconds.
@@ -1862,7 +1866,7 @@ The actual precision depends on the system.
 @end example
 
 
-@node CBL_GC_FORK, , System routines, System routines
+@node CBL_GC_FORK
 @section CBL_GC_FORK
 
 @code{CBL_GC_FORK} allows you to fork the current COBOL process to a new one.
@@ -1942,7 +1946,7 @@ is not available on the current system.
 @end example
 
 
-@node CBL_GC_WAITPID, , System routines, System routines
+@node CBL_GC_WAITPID
 @section CBL_GC_WAITPID
 
 @code{CBL_GC_WAITPID} allows you to wait until another system process ended.
@@ -1961,45 +1965,58 @@ is not available on the current system.
         END-DISPLAY
 @end example
 
+@node Appendices, Index, System Routines, Top
 
-@node Appendix A, Appendix B, System routines, Top
+@menu
+* Appendix A::                  @code{cobc --help}
+* Appendix B::                  @code{cobc --list-reserved}
+* Appendix C::                  @code{cobc --list-intrinsics}
+* Appendix D::                  @code{cobc --list-system}
+* Appendix E::                  @code{cobc --list-mnemonics}
+* Appendix F::                  Compiler Configuration
+* Appendix G::                  @code{cobcrun --help}
+* Appendix H::                  Runtime configuration
+* Appendix I::                  GNU Free Documentation License
+@end menu
+
+@node Appendix A, Appendix B, Appendices, Appendices
 @appendix @code{cobc --help}
 
 @include cbhelp.tex
 
-@node Appendix B, Appendix C, Appendix A, Top
+@node Appendix B, Appendix C, Appendix A, Appendices
 @appendix @code{cobc --list-reserved}
 
 @include cbrese.tex
 
-@node Appendix C, Appendix D, Appendix B, Top
+@node Appendix C, Appendix D, Appendix B, Appendices
 @appendix @code{cobc --list-intrinsics}
 
 @include cbintr.tex
 
-@node Appendix D, Appendix E, Appendix C, Top
+@node Appendix D, Appendix E, Appendix C, Appendices
 @appendix @code{cobc --list-system}
 
 @include cbsyst.tex
 
-@node Appendix E, Appendix F, Appendix D, Top
+@node Appendix E, Appendix F, Appendix D, Appendices
 @appendix @code{cobc --list-mnemonics}
 
 @include cbmnem.tex
 
-@node Appendix F, Appendix G, Appendix E, Top
+@node Appendix F, Appendix G, Appendix E, Appendices
 @appendix Compiler Configuration
 
 The following list was extracted from @file{config/default.conf}.
 
 @include cbconf.tex
 
-@node Appendix G, Appendix H, Appendix F, Top
+@node Appendix G, Appendix H, Appendix F, Appendices
 @appendix @code{cobcrun --help}
 
 @include cbchelp.tex
 
-@node Appendix H, Appendix I, Appendix G, Top
+@node Appendix H, Appendix I, Appendix G, Appendices
 @appendix Runtime configuration
 
 The following list was extracted from @file{config/runtime.cfg}.
@@ -2007,14 +2024,14 @@ The following list was extracted from @file{config/runtime.cfg}.
 @include cbrunt.tex
 
 @comment The full FDL 1.3 text
-@node Appendix I, Index, Appendix H, Top
+@node Appendix I, , Appendix H, Appendices
 @appendix GNU Free Documentation License
 @cindex Copying
 
 @include fdl.texi
 
 @comment Create index.
-@node Index, , Appendix I, Top
+@node Index, , Appendices, Top
 @unnumbered Index
 @printindex cp
 
