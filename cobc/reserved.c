@@ -3613,7 +3613,7 @@ strncpy_upper (char *dest, const char * const source, const size_t len)
 	
 	for (i = 0; i < len; ++i) {
 		if (cob_lower_tab[(int)source[i]]) {
-		        dest[i] = cob_lower_tab[(int)source[i]];
+			dest[i] = cob_lower_tab[(int)source[i]];
 		} else {
 			dest[i] = source[i];
 		}
@@ -3623,7 +3623,7 @@ strncpy_upper (char *dest, const char * const source, const size_t len)
 static void
 strcpy_upper (char *dest, const char * const source)
 {
-        strncpy_upper (dest, source, strlen (source) + 1);
+	strncpy_upper (dest, source, strlen (source) + 1);
 }
 
 static void
@@ -4056,23 +4056,26 @@ remove_reserved_word (const char *word, const char *fname, const int line)
 	add_amendment (word, fname, line, 0);
 }
 
+/* add reserved word to the current list, called as "target" of
+   reserved word directives */
 void
 add_reserved_word_now (char * const word, char * const alias_for)
 {
 	size_t		offset;
 	struct cobc_reserved	*new_reserved_words;
 	struct amendment_list	amendment;
-	char		*c;
 
 	/* Nothing to do if the word is already reserved */
 	if (is_reserved_word (word)) {
 		return;
 	}
 
+	/* LCOV_EXCL_START */
 	if (alias_for && !is_default_reserved_word (alias_for)) {
 		/* Should not happen */
 		COBC_ABORT ();
 	}
+	/* LCOV_EXCL_STOP */
 
 	/* Find where to add new word */
 	for (offset = 0; offset < num_reserved_words; ++offset) {
@@ -4137,10 +4140,15 @@ struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
 	struct cobc_reserved	*p;
-	static char		upper_name[64];
+	static char		upper_name[43];
+	int name_len = strlen (name);
 
-	strcpy_upper (upper_name, name);
-	upper_name[strlen (name)] = '\0';
+	if (name_len > sizeof(upper_name) - 1) {
+		return NULL;
+	}
+
+	/* copy including terminating byte */
+	strncpy_upper (upper_name, name, name_len + 1);
 	initialize_reserved_words_if_needed ();
 	
 	p = find_reserved_word (create_dummy_reserved (upper_name));
@@ -4209,10 +4217,15 @@ struct cb_intrinsic_table *
 lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
-	static char			upper_name[64];
+	static char		upper_name[43];
+	int name_len = strlen (name);
 
-	strcpy_upper (upper_name, name);
-	upper_name[strlen (name)] = '\0';
+	if (name_len > sizeof(upper_name) - 1) {
+		return NULL;
+	}
+
+	/* copy including terminating byte */
+	strncpy_upper (upper_name, name, name_len + 1);
 	
 	cbp = bsearch (upper_name, function_list, NUM_INTRINSICS,
 		sizeof (struct cb_intrinsic_table), intrinsic_comp);
@@ -4305,10 +4318,15 @@ static struct register_struct *
 lookup_register (const char *name, const int checkimpl)
 {
 	size_t		i;
-	static char	upper_name[64];
+	static char		upper_name[43];
+	int name_len = strlen (name);
 
-	strcpy_upper (upper_name, name);
-	upper_name[strlen (name)] = '\0';
+	if (name_len > sizeof(upper_name) - 1) {
+		return NULL;
+	}
+
+	/* copy including terminating byte */
+	strncpy_upper (upper_name, name, name_len + 1);
 	
 	for (i = 0; i < NUM_REGISTERS; ++i) {
 		/* For efficiency, we use strcmp instead of cb_strcasecmp. */
