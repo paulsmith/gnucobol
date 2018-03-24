@@ -920,6 +920,7 @@ This chapter describes how to combine C programs with COBOL programs.
 * Dynamic C to COBOL::
 * Static COBOL to C::
 * Dynamic COBOL to C::
+* Interface functions for C::
 @end menu
 
 @node Main C program
@@ -965,32 +966,6 @@ cc -o main main.o @`{}cob-config --libs@`{}
 @end example
 
 @node Static C to COBOL
-@subsection Redirecting output to a (FILE *)
-From a module written in C you may call cob_set_runtime_option to set the exact (FILE *) which trace
-data is to be written to. In common.h is the following:
-@example
-enum cob_runtime_option_switch @{
-   COB_SET_RUNTIME_TRACE_FILE              /* 'p' is  FILE *  */
-   COB_SET_RUNTIME_DISPLAY_PRINTER_FILE    /* 'p' is  FILE *  */
-   COB_SET_RUNTIME_RESCAN_ENV              /* rescan environment variables */
-@};
-COB_EXPIMP  void  cob_set_runtime_option   (enum cob_runtime_option_switch opt, void *p);
-@end example
-So from you C code you can tell the GnuCOBOL runtime to redirect TRACE output by:
-@example
-cob_set_runtime_option (COB_SET_RUNTIME_TRACE_FILE, (void*)((FILE*)myfd));
-@end example
-You could also redirect all DISPLAY UPON PRINTER output to a file by:
-@example
-cob_set_runtime_option (COB_SET_RUNTIME_DISPLAY_PRINTER_FILE, (void*)((FILE*)myfd));
-@end example
-
-Another routine can be used to return the current value of the option.
-@example
-COB_EXPIMP  void  *cob_get_runtime_option    (enum cob_runtime_option_switch opt);
-@end example
-
-
 @subsection Static linking with COBOL programs
 
 Let's call the following COBOL module from a C program:
@@ -1179,6 +1154,34 @@ $ export COB_LIBRARY_PATH=.
 $ ./hello
 Hello, world!
 @end example
+
+@node Interface functions for C
+@subsection Redirecting output to a (FILE *)
+
+From a module written in C you may call cob_set_runtime_option to set the exact (FILE *) which trace
+data is to be written to. In common.h is the following:
+@example
+enum cob_runtime_option_switch @{
+   COB_SET_RUNTIME_TRACE_FILE              /* 'p' is  FILE *  */
+   COB_SET_RUNTIME_DISPLAY_PRINTER_FILE    /* 'p' is  FILE *  */
+   COB_SET_RUNTIME_RESCAN_ENV              /* rescan environment variables */
+@};
+COB_EXPIMP  void  cob_set_runtime_option   (enum cob_runtime_option_switch opt, void *p);
+@end example
+So from you C code you can tell the GnuCOBOL runtime to redirect TRACE output by:
+@example
+cob_set_runtime_option (COB_SET_RUNTIME_TRACE_FILE, (void*)((FILE*)myfd));
+@end example
+You could also redirect all DISPLAY UPON PRINTER output to a file by:
+@example
+cob_set_runtime_option (COB_SET_RUNTIME_DISPLAY_PRINTER_FILE, (void*)((FILE*)myfd));
+@end example
+
+Another routine can be used to return the current value of the option.
+@example
+COB_EXPIMP  void  *cob_get_runtime_option    (enum cob_runtime_option_switch opt);
+@end example
+
 
 @node Customize, Optimize, Compile, Top
 @chapter Customize
@@ -1576,7 +1579,8 @@ Variable-1 or literal-1 displays with the field length.
 @subsection Figurative Constants
 @cindex Figurative Constants
 
-Certain figurative constants have special functions.
+Certain figurative constants and values have special functions.
+All other figurative constants display as a single character.
 
 @vtable @option
 
@@ -1602,8 +1606,6 @@ Ring the bell.
 This is the same as @code{WITH BELL}.
 
 @end vtable
-
-All other figurative constants display as a single character.
 
 
 @node System Routines, Appendices, Extensions, Top
