@@ -225,7 +225,7 @@ static struct system_name_struct	system_name_table[] = {
 
 static struct system_name_struct *lookup_system_name (const char *, const int);
 
-/* Reserved word table, note: this list is sorted on startup in 
+/* Reserved word table, note: this list is sorted on startup in
    (initialize_reserved_words_if_needed), no need to care for EBCDIC */
 /* Description */
 
@@ -3535,21 +3535,16 @@ cb_strcasecmp (const void *s1, const void *s2)
 static int
 reserve_comp (const void *p1, const void *p2)
 {
-	return cb_strcasecmp (((struct cobc_reserved *)p1)->name,
-			       ((struct cobc_reserved *)p2)->name);
-}
-
-static int
-reserve_comp_sens (const void *p1, const void *p2)
-{
-   return strcmp(((struct cobc_reserved *)p1)->name,
-		((struct cobc_reserved *)p2)->name);
+	/* For efficiency, we use strcmp here instead of cb_strcasecmp. */
+	return strcmp(((struct cobc_reserved *)p1)->name,
+		      ((struct cobc_reserved *)p2)->name);
 }
 
 static int
 intrinsic_comp (const void *p1, const void *p2)
-{
-	return cb_strcasecmp (p1, ((struct cb_intrinsic_table *)p2)->name);
+{		
+	/* For efficiency, we use strcmp here instead of cb_strcasecmp. */
+	return strcmp (p1, ((struct cb_intrinsic_table *)p2)->name);
 }
 
 static const char *
@@ -3607,9 +3602,33 @@ has_context_sensitive_indicator (const char *word, const size_t size)
 	return word[size - 1] == '*';
 }
 
+/*
+  Copy the first len characters of source, uppercased, to dest. We use
+  cob_lower_tab instead of toupper for efficiency.
+*/
 static void
-allocate_str_removing_asterisk (const char *word, const size_t size,
-				char ** const out_str)
+strncpy_upper (char *dest, const char * const source, const size_t len)
+{
+	int	i;
+	
+	for (i = 0; i < len; ++i) {
+		if (cob_lower_tab[(int)source[i]]) {
+		        dest[i] = cob_lower_tab[(int)source[i]];
+		} else {
+			dest[i] = source[i];
+		}
+	}
+}
+
+static void
+strcpy_upper (char *dest, const char * const source)
+{
+        strncpy_upper (dest, source, strlen (source) + 1);
+}
+
+static void
+allocate_upper_case_str_removing_asterisk (const char *word, const size_t size,
+					   char ** const out_str)
 {
 	size_t	chars_to_copy;
 
@@ -3621,7 +3640,7 @@ allocate_str_removing_asterisk (const char *word, const size_t size,
 	}
 
 	*out_str = cobc_main_malloc (chars_to_copy + 1U);
-	strncpy (*out_str, word, chars_to_copy);
+        strncpy_upper (*out_str, word, chars_to_copy);
 	(*out_str)[chars_to_copy] = '\0';
 }
 
@@ -3629,7 +3648,7 @@ static COB_INLINE COB_A_INLINE void
 initialize_word (const char *word, const size_t size,
 		 struct amendment_list * const reserved)
 {
-	allocate_str_removing_asterisk (word, size, &reserved->word);
+	allocate_upper_case_str_removing_asterisk (word, size, &reserved->word);
 }
 
 static int
@@ -3664,7 +3683,7 @@ initialize_alias_for (const char *alias_for,
 	if (is_invalid_word (alias_for, size, fname, line)) {
 		reserved->alias_for = NULL;
 	} else {
-		allocate_str_removing_asterisk (alias_for, size, &reserved->alias_for);
+		allocate_upper_case_str_removing_asterisk (alias_for, size, &reserved->alias_for);
 	}
 }
 
@@ -3731,7 +3750,9 @@ followed_by_addition_for_same_word (const struct amendment_list * const addition
 	/* Walk through the list after the first addition. */
 	for (l = addition->next; l; l = l->next) {
 		/* Look for elements with the same word. */
-		if (!cb_strcasecmp (addition->word, l->word)
+		/* NB: We can use strcmp instead of cb_strcasecmp because
+		   everything is already uppercase. */
+		if (!strcmp (addition->word, l->word)
 		    && l->to_add) {
 			return 1;
 		}
@@ -3751,7 +3772,7 @@ try_remove_removal (struct amendment_list * const addition)
 
 	while (l) {
 		/* Look for elements with the same word. */
-		if (cb_strcasecmp (addition->word, l->word)) {
+		if (strcmp (addition->word, l->word)) {
 			prev = l;
 			l = l->next;
 			continue;
@@ -3886,7 +3907,7 @@ initialize_reserved_words_if_needed (void)
 		   assuming so causes abstruse errors when a word is put in the
 		   wrong place (e.g. when dealing with EBCDIC or hyphens). */
 		qsort (default_reserved_words, NUM_DEFAULT_RESERVED_WORDS,
-		       sizeof (struct cobc_reserved), reserve_comp_sens);
+		       sizeof (struct cobc_reserved), reserve_comp);
 
 		if (amendment_list) {
 			get_reserved_words_with_amendments ();
@@ -4041,6 +4062,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	size_t		offset;
 	struct cobc_reserved	*new_reserved_words;
 	struct amendment_list	amendment;
+	char		*c;
 
 	/* Nothing to do if the word is already reserved */
 	if (is_reserved_word (word)) {
@@ -4073,8 +4095,8 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	cobc_main_free (reserved_words);
 	reserved_words = new_reserved_words;
 
-	/* Add new word to list. */
-	amendment.word = word;
+	/* Add word (in upper case) to list. */
+	strcpy_upper (amendment.word, word);
 	amendment.alias_for = alias_for;
 	amendment.is_context_sensitive = 0;
 	amendment.to_add = 1;
@@ -4114,11 +4136,14 @@ remove_reserved_word_now (char * const word)
 struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
-	struct cobc_reserved		*p;
+	struct cobc_reserved	*p;
+	static char		upper_name[64];
 
+	strcpy_upper (upper_name, name);
+	upper_name[strlen (name)] = '\0';
 	initialize_reserved_words_if_needed ();
-
-	p = find_reserved_word (create_dummy_reserved (name));
+	
+	p = find_reserved_word (create_dummy_reserved (upper_name));
 	if (!p) {
 		return NULL;
 	}
@@ -4184,8 +4209,12 @@ struct cb_intrinsic_table *
 lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
+	static char			upper_name[64];
 
-	cbp = bsearch (name, function_list, NUM_INTRINSICS,
+	strcpy_upper (upper_name, name);
+	upper_name[strlen (name)] = '\0';
+	
+	cbp = bsearch (upper_name, function_list, NUM_INTRINSICS,
 		sizeof (struct cb_intrinsic_table), intrinsic_comp);
 	if (cbp && (checkimpl || cbp->active == CB_FEATURE_ACTIVE)) {
 		return cbp;
@@ -4276,9 +4305,14 @@ static struct register_struct *
 lookup_register (const char *name, const int checkimpl)
 {
 	size_t		i;
+	static char	upper_name[64];
 
+	strcpy_upper (upper_name, name);
+	upper_name[strlen (name)] = '\0';
+	
 	for (i = 0; i < NUM_REGISTERS; ++i) {
-		if (cb_strcasecmp (register_list[i].name, name) == 0) {
+		/* For efficiency, we use strcmp instead of cb_strcasecmp. */
+		if (strcmp (register_list[i].name, upper_name) == 0) {
 			if (checkimpl || register_list[i].active != CB_FEATURE_DISABLED) {
 				return &register_list[i];
 			}

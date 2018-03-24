@@ -2,6 +2,8 @@
 2018-03-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, tree.h: emit error if RECORD VARYING has equal implied limits.
+	* reserved.c: replaced most instances of cb_strcasecmp with strcmp for
+	  efficiency.
 
 2018-03-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -137,7 +139,7 @@
 
 2018-02-16  Dave Pitts <dpitts@cozx.com>
 
-	* cobc.c (get_next_token): BUG #494 Fixed scanning of tokens with 
+	* cobc.c (get_next_token): BUG #494 Fixed scanning of tokens with
 	  embedded quotes, eg. 'yyy-'hello
 
 2018-02-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
