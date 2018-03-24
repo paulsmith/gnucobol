@@ -5128,6 +5128,8 @@ record_clause:
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	current_file->record_min = $6 ? cb_get_int ($6) : 0;
 	current_file->record_max = $7 ? cb_get_int ($7) : 0;
+	current_file->flag_check_record_varying_limits = 
+		current_file->record_min == 0 || current_file->record_max == 0;
 	if ($6 && current_file->record_min < 0)  {
 		current_file->record_min = 0;
 		error_ind = 1;

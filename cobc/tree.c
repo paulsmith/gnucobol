@@ -3722,6 +3722,12 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		}
 	}
 
+	if (f->flag_check_record_varying_limits
+	    && f->record_min == f->record_max) {
+		cb_error (_("file '%s': RECORD VARYING specified without limits, but implied limits are equal"),
+			  f->name);
+	}
+	
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->record_max > MAX_FD_RECORD_IDX) {
 			f->record_max = MAX_FD_RECORD_IDX;

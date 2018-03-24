@@ -717,7 +717,7 @@ struct cb_field {
 	cb_tree			values;		/* VALUE */
 	cb_tree			false_88;	/* 88 FALSE clause */
 	cb_tree			index_list;	/* INDEXED BY */
-	cb_tree			external_form_identifier;	/* target of IDENTIFIED BY 
+	cb_tree			external_form_identifier;	/* target of IDENTIFIED BY
 												(CGI template) */
 
 	struct cb_field		*parent;	/* Upper level field (if any) */
@@ -969,6 +969,8 @@ struct cb_file {
 	unsigned int		flag_line_adv	: 1;	/* LINE ADVANCING */
 	unsigned int		flag_delimiter	: 1;	/* RECORD DELIMITER */
 	unsigned int		flag_report	: 1;	/* Used by REPORT */
+	/* Implied RECORD VARYING limits need checking */
+	unsigned int	        flag_check_record_varying_limits	: 1;
 };
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))
