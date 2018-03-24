@@ -147,6 +147,9 @@
 /* #undef HAVE_COLOR_SET */
 #endif
 
+/* curses has define_key function */
+/* #undef HAVE_DEFINE_KEY */
+
 /* ncurses has _nc_freeall function */
 /* #undef HAVE_CURSES_FREEALL */
 
@@ -461,7 +464,7 @@
 
 
 /* Version number of package */
-#define VERSION "2.3-dev"
+#define VERSION "3.0-dev"
 
 /* Use CISAM as ISAM handler */
 #if CONFIGURED_ISAM == BDB
