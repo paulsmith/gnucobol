@@ -3,7 +3,15 @@
 
 	* screenio.c (cob_convert_key): define ALT_DEL, ALT_HOME, ALT_END,
 	  ALT_LEFT, ALT_RIGHT if they aren't defined already and map the
-	  keys that were previously converted to use these
+	  keys that were previously converted to use these defines,
+	  also fixes accepting these keys in all curses implementations
+	  that define these keys directly
+	* screenio.c (cob_screen_init): fix for bug #503 - based on work of
+	  Luke Smith
+	  add the PDCurses ALT key constants where not available instead of
+	  using the version-dependent numeric values, if possible using
+	  define_key to do this directly (if not this must be done be the users
+	  terminal setting)
 
 2018-03-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -1074,9 +1082,9 @@
 2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* screenio.c: Add or enhance special keys to Extended ACCEPT.
-          Insert, Tab, Shift-Tab, Backspace, Delete, Alt-Delete, End,
-          Alt-End, Home, Alt-Home, Left-arrow, Alt-Left-arrow,
-          Right-arrow, Alt-Right-arrow.
+	  Insert, Tab, Shift-Tab, Backspace, Delete, Alt-Delete, End,
+	  Alt-End, Home, Alt-Home, Left-arrow, Alt-Left-arrow,
+	  Right-arrow, Alt-Right-arrow.
 
 2015-06-21  Edward Hart <edward.dan.hart@gmail.com>
 

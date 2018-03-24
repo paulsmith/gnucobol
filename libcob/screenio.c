@@ -170,149 +170,6 @@ cob_beep (void)
 }
 
 static void
-cob_convert_key (int *keyp, const cob_u32_t field_accept)
-{
-	/* Map key to KEY_xxx value */
-	switch (*keyp) {
-	case '\n':
-	case '\r':
-	case '\004':
-	case '\032':
-		*keyp = KEY_ENTER;
-		break;
-	case '\t':
-		*keyp = KEY_STAB;
-		break;
-	case '\b':
-	case 0177:
-		*keyp = KEY_BACKSPACE;
-		break;
-#ifndef ALT_DEL
-#   define ALT_DEL   01005
-	case KEY_EOL:
-		*keyp = ALT_DEL;
-		break;
-#endif
-#ifndef ALT_HOME
-#   define ALT_HOME  01026
-#endif
-#ifndef ALT_END
-#   define ALT_END   01021
-#endif
-#ifndef ALT_LEFT
-#   define ALT_LEFT  01040
-	case KEY_CLOSE:
-		*keyp = ALT_LEFT;
-		break;
-#endif
-#ifndef ALT_RIGHT
-#   define ALT_RIGHT 01062
-	case KEY_PREVIOUS:
-		*keyp = ALT_LEFT;
-		break;
-#endif
-
-#ifdef	KEY_A1
-	/* A1, A3, C1, C3 must be present */
-	case KEY_A1:
-		*keyp = KEY_HOME;
-		break;
-	case KEY_A3:
-		*keyp = KEY_PPAGE;
-		break;
-	case KEY_C1:
-		*keyp = KEY_END;
-		break;
-	case KEY_C3:
-		*keyp = KEY_NPAGE;
-		break;
-	/* Any or all of A2, B1-3, C2 MAY be present */
-	/* Note B2 ignored */
-#ifdef	KEY_A2
-	case KEY_A2:
-		*keyp = KEY_UP;
-		break;
-#endif
-#ifdef	KEY_B1
-	case KEY_B1:
-		*keyp = KEY_LEFT;
-		break;
-#endif
-#ifdef	KEY_B3
-	case KEY_B3:
-		*keyp = KEY_RIGHT;
-		break;
-#endif
-#ifdef	KEY_C2
-	case KEY_C2:
-		*keyp = KEY_DOWN;
-		break;
-#endif
-
-#if	defined(__PDCURSES__) && defined(PADSLASH)
-	case PADSLASH:
-		*keyp = '/';
-		break;
-	case PADSTAR:
-		*keyp = '*';
-		break;
-	case PADMINUS:
-		*keyp = '-';
-		break;
-	case PADPLUS:
-		*keyp = '+';
-		break;
-	case PADENTER:
-		*keyp = KEY_ENTER;
-		break;
-#ifdef	PAD0
-	case PAD0:
-		*keyp = KEY_IC;
-		break;
-	case PADSTOP:
-		*keyp = KEY_DC;
-		break;
-#endif	/* PAD0 */
-#endif	/* __PDCURSES__ */
-#endif	/* KEY_A1 */
-	default:
-		break;
-	}
-
-	/* Check if key should be ignored */
-	switch (*keyp) {
-	/* 2012/08/30 removed to allow Tab key in extended Accept.
-	case KEY_STAB:
-		if (field_accept) {
-			*keyp = 0;
-		}
-		break;
-	*/
-	case '\033':
-		if (!COB_EXTENDED_STATUS || !COB_USE_ESC) {
-			*keyp = 0;
-		}
-		break;
-	case KEY_PPAGE:
-	case KEY_NPAGE:
-	case KEY_PRINT:
-		if (!COB_EXTENDED_STATUS) {
-			*keyp = 0;
-		}
-		break;
-	case KEY_UP:
-	case KEY_DOWN:
-		if (field_accept && !COB_EXTENDED_STATUS) {
-			*keyp = 0;
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-
-static void
 raise_ec_on_invalid_line_or_col (const int line, const int column)
 {
 	int	max_y;
@@ -608,6 +465,191 @@ cob_screen_init (void)
 		(void)curs_set(2);	/* set square cursor */
 	} else {
 		(void)curs_set(1);	/* set vertical bar cursor */
+	}
+
+	/* Possible alternative definitions for ALT Keys */
+#ifndef ALT_DEL
+#	ifdef kDC3
+#		define ALT_DEL   kDC3
+#	endif
+#endif
+#ifndef ALT_HOME
+#	ifdef kHOM3
+#		define ALT_HOME   kHOM3
+#	endif
+#endif
+#ifndef ALT_END
+#	ifdef kEND3
+#		define ALT_END    kEND3
+#	endif
+#endif
+#ifndef ALT_LEFT
+#	ifdef kLFT3
+#		define ALT_LEFT   kLFT3
+#	endif
+#endif
+#ifndef ALT_RIGHT
+#	ifdef kRIT3
+#		define ALT_RIGHT   kRIT3
+#	endif
+#endif
+
+	/* When still missing - self define the keys */
+	/* note: if define_key is not available rhe user will have to manually
+	   assign terminfo values for the control strings to the given
+	   KEY_MAX + n values */
+
+#ifndef HAVE_DEFINE_KEY
+#define define_key(x,y)	/* do nothing */
+#endif
+
+#ifndef ALT_DEL
+#define ALT_DEL                 (KEY_MAX + 1)
+	define_key("\E[3;3~", ALT_DEL);
+#endif
+#ifndef ALT_LEFT
+#define ALT_LEFT                (KEY_MAX + 2)
+	define_key("\E[1;3D", ALT_LEFT);
+#endif
+#ifndef ALT_RIGHT
+#define ALT_RIGHT               (KEY_MAX + 3)
+	define_key("\E[1;3C", ALT_RIGHT);
+#endif
+#ifndef ALT_HOME
+#define ALT_HOME                (KEY_MAX + 4)
+	define_key("\E[1;3H", ALT_HOME);
+#endif
+#ifndef ALT_END
+#define ALT_END                 (KEY_MAX + 5)
+	define_key("\E[1;3F", ALT_END);
+#endif
+
+}
+
+static void
+cob_convert_key (int *keyp, const cob_u32_t field_accept)
+{
+	/* Map key to KEY_xxx value */
+	switch (*keyp) {
+	case '\n':
+	case '\r':
+	case '\004':
+	case '\032':
+		*keyp = KEY_ENTER;
+		break;
+	case '\t':
+		*keyp = KEY_STAB;
+		break;
+	case '\b':
+	case 0177:
+		*keyp = KEY_BACKSPACE;
+		break;
+	case KEY_EOL:
+		*keyp = ALT_DEL;
+		break;
+	case KEY_CLOSE:
+		*keyp = ALT_LEFT;
+		break;
+	case KEY_PREVIOUS:
+		*keyp = ALT_LEFT;
+		break;
+
+#ifdef	KEY_A1
+	/* A1, A3, C1, C3 are always present if A1 is defined */
+	case KEY_A1:
+		*keyp = KEY_HOME;
+		break;
+	case KEY_A3:
+		*keyp = KEY_PPAGE;
+		break;
+	case KEY_C1:
+		*keyp = KEY_END;
+		break;
+	case KEY_C3:
+		*keyp = KEY_NPAGE;
+		break;
+	/* Any or all of A2, B1-3, C2 MAY be present */
+	/* Note: B2 ignored */
+#ifdef	KEY_A2
+	case KEY_A2:
+		*keyp = KEY_UP;
+		break;
+#endif
+#ifdef	KEY_B1
+	case KEY_B1:
+		*keyp = KEY_LEFT;
+		break;
+#endif
+#ifdef	KEY_B3
+	case KEY_B3:
+		*keyp = KEY_RIGHT;
+		break;
+#endif
+#ifdef	KEY_C2
+	case KEY_C2:
+		*keyp = KEY_DOWN;
+		break;
+#endif
+
+#if	defined(__PDCURSES__) && defined(PADSLASH)
+	case PADSLASH:
+		*keyp = '/';
+		break;
+	case PADSTAR:
+		*keyp = '*';
+		break;
+	case PADMINUS:
+		*keyp = '-';
+		break;
+	case PADPLUS:
+		*keyp = '+';
+		break;
+	case PADENTER:
+		*keyp = KEY_ENTER;
+		break;
+#ifdef	PAD0
+	case PAD0:
+		*keyp = KEY_IC;
+		break;
+	case PADSTOP:
+		*keyp = KEY_DC;
+		break;
+#endif	/* PAD0 */
+#endif	/* __PDCURSES__ */
+#endif	/* KEY_A1 */
+	default:
+		break;
+	}
+
+	/* Check if key should be ignored */
+	switch (*keyp) {
+#if 0 /* 2012/08/30 removed to allow Tab key in extended Accept */
+		case KEY_STAB:
+		if (field_accept) {
+			*keyp = 0;
+		}
+		break;
+#endif
+	case '\033':
+		if (!COB_EXTENDED_STATUS || !COB_USE_ESC) {
+			*keyp = 0;
+		}
+		break;
+	case KEY_PPAGE:
+	case KEY_NPAGE:
+	case KEY_PRINT:
+		if (!COB_EXTENDED_STATUS) {
+			*keyp = 0;
+		}
+		break;
+	case KEY_UP:
+	case KEY_DOWN:
+		if (field_accept && !COB_EXTENDED_STATUS) {
+			*keyp = 0;
+		}
+		break;
+	default:
+		break;
 	}
 }
 
