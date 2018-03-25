@@ -1,4 +1,14 @@
 
+2018-03-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite_manual.at: source for new manual test suite
+	* testsuite.src/run_manual_screen.at: adjusted version of screen
+	  test suite written by Edward Hart (Patch #26)
+	* Makefile.am (checkmanual): new target for running manual tests
+	* Makefile.am, atlocal.in: adjustments for the new manual testsuite
+	* run_prog_manual.sh.in: template for test runner - we use a template
+	  here as the user may need to tweak this according to his system
+
 2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at, testsuite.src/run_reportwriter.at: activated and

@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol
 #
-# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -109,10 +109,12 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 
 
 # targets that are only logical targets instead of files
-.PHONY: test checkall
+.PHONY: test checkall checkmanual
 
 test: all
 	cd tests && $(MAKE) $(AM_MAKEFLAGS) test
+checkmanual: all
+	cd tests && $(MAKE) $(AM_MAKEFLAGS) checkmanual
 
 checkall: check test
 

@@ -35,6 +35,12 @@ AC_CONFIG_TESTDIR([tests])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build_aux])
 
+AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
+	cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile
+	config/Makefile copy/Makefile
+	tests/atlocal tests/Makefile tests/cobol85/Makefile
+	extras/Makefile])
+
 # Note for SUN Solaris (gcc)
 # export/setenv CFLAGS "-m64 -mptr64"
 # export/setenv LDFLAGS "-m64 -mptr64 -L/usr/local/lib/sparcv9"
@@ -1453,12 +1459,6 @@ AC_SUBST([COB_HAS_CURSES])
 AC_SUBST([COB_HAS_UTC_OFFSET])
 AC_SUBST([COB_HAS_64_BIT_POINTER])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
-
-AC_CONFIG_FILES([bin/cob-config Makefile libcob/Makefile lib/Makefile
-	cobc/Makefile bin/Makefile po/Makefile.in doc/Makefile
-	config/Makefile copy/Makefile
-	tests/atlocal tests/Makefile tests/cobol85/Makefile
-	extras/Makefile])
 
 AC_CONFIG_COMMANDS([chmod],
 [chmod +x bin/cob-config;
