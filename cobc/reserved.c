@@ -3542,7 +3542,7 @@ reserve_comp (const void *p1, const void *p2)
 
 static int
 intrinsic_comp (const void *p1, const void *p2)
-{		
+{
 	/* For efficiency, we use strcmp here instead of cb_strcasecmp. */
 	return strcmp (p1, ((struct cb_intrinsic_table *)p2)->name);
 }
@@ -3610,7 +3610,7 @@ static void
 strncpy_upper (char *dest, const char * const source, const size_t len)
 {
 	int	i;
-	
+
 	for (i = 0; i < len; ++i) {
 		if (cob_lower_tab[(int)source[i]]) {
 			dest[i] = cob_lower_tab[(int)source[i]];
@@ -3618,12 +3618,6 @@ strncpy_upper (char *dest, const char * const source, const size_t len)
 			dest[i] = source[i];
 		}
 	}
-}
-
-static void
-strcpy_upper (char *dest, const char * const source)
-{
-	strncpy_upper (dest, source, strlen (source) + 1);
 }
 
 static void
@@ -3697,26 +3691,53 @@ get_length_of_amendment_list (void)
 	return length;
 }
 
-static COB_INLINE COB_A_INLINE struct cobc_reserved *
-find_reserved_word (struct cobc_reserved to_find)
+static struct cobc_reserved *
+search_reserved_list (const char * const word, const int needs_uppercasing,
+		      const struct cobc_reserved * const list, size_t list_len)
 {
-	return bsearch (&to_find, reserved_words, num_reserved_words,
-			sizeof (struct cobc_reserved), reserve_comp);
+	static char		upper_word[43];
+	int			word_len;
+	const char		*sought_word;
+	struct cobc_reserved    to_find;
+
+	if (needs_uppercasing) {
+		word_len = strlen (word);
+		if (word_len > sizeof(upper_word) - 1) {
+			return NULL;
+		}
+
+		/* copy including terminating byte */
+		strncpy_upper (upper_word, word, word_len + 1);
+		sought_word = upper_word;
+	} else {
+		sought_word = word;
+	}
+
+	to_find = create_dummy_reserved (sought_word);
+	return bsearch (&to_find, list, list_len, sizeof (struct cobc_reserved),
+			reserve_comp);
 }
 
-static COB_INLINE COB_A_INLINE struct cobc_reserved *
-find_default_reserved_word (struct cobc_reserved to_find)
+static struct cobc_reserved *
+find_reserved_word (const char * const word, const int needs_uppercasing)
 {
-	return bsearch (&to_find, default_reserved_words,
-			NUM_DEFAULT_RESERVED_WORDS,
-			sizeof (struct cobc_reserved), reserve_comp);
+	return search_reserved_list (word, needs_uppercasing,
+				     reserved_words,
+				     num_reserved_words);
+}
+
+static struct cobc_reserved *
+find_default_reserved_word (const char * const word, const int needs_uppercasing)
+{
+	return search_reserved_list (word, needs_uppercasing,
+				     default_reserved_words,
+				     NUM_DEFAULT_RESERVED_WORDS);
 }
 
 static struct cobc_reserved
 get_user_specified_reserved_word (struct amendment_list user_reserved)
 {
 	struct cobc_reserved	cobc_reserved = create_dummy_reserved (NULL);
-	struct cobc_reserved	to_find;
 	struct cobc_reserved	*p;
 
 	cobc_reserved.name = cobc_main_malloc (strlen (user_reserved.word) + 1);
@@ -3726,9 +3747,7 @@ get_user_specified_reserved_word (struct amendment_list user_reserved)
 		cobc_reserved.context_sens
 			= !!user_reserved.is_context_sensitive;
 	} else {
-		to_find = create_dummy_reserved (user_reserved.alias_for);
-		p = find_default_reserved_word (to_find);
-
+		p = find_default_reserved_word (user_reserved.alias_for, 0);
 		if (p) {
 			cobc_reserved.token = p->token;
 		} else {
@@ -3839,7 +3858,6 @@ get_reserved_words_with_amendments (void)
 {
 	int	i;
 	struct amendment_list		*amendment;
-	struct cobc_reserved		to_find;
 	struct cobc_reserved		*p;
 
 	if (cb_reserved_words == NULL) {
@@ -3870,8 +3888,7 @@ get_reserved_words_with_amendments (void)
 	  where possible. Free each word once processed.
 	*/
 	for (i = 0; amendment_list; ++i) {
-		to_find = create_dummy_reserved (amendment_list->word);
-		p = find_default_reserved_word (to_find);
+		p = find_default_reserved_word (amendment_list->word, 0);
 		if (p && !amendment_list->alias_for) {
 			reserved_words[i] = *p;
 			/*
@@ -3921,7 +3938,7 @@ static void
 list_aliases (const struct cobc_reserved * const word)
 {
 	size_t	i;
-	int     alias_found = 0;
+	int	alias_found = 0;
 
 	if (word->token <= 0) {
 		return;
@@ -3948,23 +3965,23 @@ list_aliases (const struct cobc_reserved * const word)
 
 /* Global functions */
 
+/* TO-DO: Duplication with lookup_reserved_word */
 int
 is_reserved_word (const char *word)
 {
-	return !!find_reserved_word (create_dummy_reserved (word));
-}
+	return !!find_reserved_word (word, 1);}
 
 int
 is_default_reserved_word (const char *word)
 {
-	return !!find_default_reserved_word (create_dummy_reserved (word));
+	return !!find_default_reserved_word (word, 1);
 }
 
 void
 remove_context_sensitivity (const char *word, const int context)
 {
 	struct cobc_reserved *reserved =
-		find_default_reserved_word (create_dummy_reserved (word));
+		find_default_reserved_word (word, 1);
 
 	if (reserved) {
 		reserved->context_test ^= context;
@@ -4064,6 +4081,7 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	size_t		offset;
 	struct cobc_reserved	*new_reserved_words;
 	struct amendment_list	amendment;
+	char		*p;
 
 	/* Nothing to do if the word is already reserved */
 	if (is_reserved_word (word)) {
@@ -4099,7 +4117,12 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	reserved_words = new_reserved_words;
 
 	/* Add word (in upper case) to list. */
-	strcpy_upper (amendment.word, word);
+	amendment.word = word;
+	for (p = amendment.word; *p; ++p) {
+		if (cob_lower_tab[(int)*p]) {
+			*p = cob_lower_tab[(int)*p];
+		}
+	}
 	amendment.alias_for = alias_for;
 	amendment.is_context_sensitive = 0;
 	amendment.to_add = 1;
@@ -4115,7 +4138,7 @@ remove_reserved_word_now (char * const word)
 	int			entry_offset;
 
 	/* If the word is not a reserved, there's nothing to do. */
-	entry_to_remove = find_reserved_word (create_dummy_reserved (word));
+	entry_to_remove = find_reserved_word (word, 1);
 	if (!entry_to_remove) {
 		return;
 	}
@@ -4140,18 +4163,10 @@ struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
 	struct cobc_reserved	*p;
-	static char		upper_name[43];
-	int name_len = strlen (name);
-
-	if (name_len > sizeof(upper_name) - 1) {
-		return NULL;
-	}
-
-	/* copy including terminating byte */
-	strncpy_upper (upper_name, name, name_len + 1);
-	initialize_reserved_words_if_needed ();
 	
-	p = find_reserved_word (create_dummy_reserved (upper_name));
+	initialize_reserved_words_if_needed ();
+
+	p = find_reserved_word (name, 1);
 	if (!p) {
 		return NULL;
 	}
@@ -4226,7 +4241,7 @@ lookup_intrinsic (const char *name, const int checkimpl)
 
 	/* copy including terminating byte */
 	strncpy_upper (upper_name, name, name_len + 1);
-	
+
 	cbp = bsearch (upper_name, function_list, NUM_INTRINSICS,
 		sizeof (struct cb_intrinsic_table), intrinsic_comp);
 	if (cbp && (checkimpl || cbp->active == CB_FEATURE_ACTIVE)) {
@@ -4327,7 +4342,7 @@ lookup_register (const char *name, const int checkimpl)
 
 	/* copy including terminating byte */
 	strncpy_upper (upper_name, name, name_len + 1);
-	
+
 	for (i = 0; i < NUM_REGISTERS; ++i) {
 		/* For efficiency, we use strcmp instead of cb_strcasecmp. */
 		if (strcmp (register_list[i].name, upper_name) == 0) {
