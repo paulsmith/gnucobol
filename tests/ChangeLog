@@ -8,6 +8,9 @@
 	* Makefile.am, atlocal.in: adjustments for the new manual testsuite
 	* run_prog_manual.sh.in: template for test runner - we use a template
 	  here as the user may need to tweak this according to his system
+	* testsuite.src/run_manual_screen.at: allow test cases to be directly
+	  acknowledged by ENTER and mark as failed with any function key;
+	  for failing BEEP tests: mention and check COB_BELL=FLASH
 
 2018-02-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

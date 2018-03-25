@@ -29,29 +29,30 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if the numbers below correspond to"
-               & " their line number and are in the ".
-           03  LINE 2 VALUE "first column. (This is line 2.)".
-           03  LINE 3 VALUE "3".
-           03  LINE 4 VALUE "4".
-           03  LINE 5 VALUE "5".
+           03  LINE 1 VALUE 'Enter "y" if the numbers below correspond '
+               & 'to their line number and are in the '.
+           03  LINE 2 VALUE 'first column. (This is line 2.)'.
+           03  LINE 3 VALUE '3'.
+           03  LINE 4 VALUE '4'.
+           03  LINE 5 VALUE '5'.
            03  group-1 LINE - 3.
                05  group-2 COL 5.
-                   07  LINE PLUS 6 VALUE "8".
-                   07  LINE MINUS 2 VALUE "6".
+                   07  LINE PLUS 6 VALUE '8'.
+                   07  LINE MINUS 2 VALUE '6'.
            03  group-3 LINE + 1.
-               05 COL 1 VALUE "7".
-           03  LINE + 2 PIC X, REQUIRED TO success-flag.
+               05 COL 1 VALUE '7'.
+           03  LINE + 3 PIC X, REQUIRED USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -74,31 +75,32 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(5).
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if the numbers below correspond to"
-               & " their column number.".
-           03  LINE 2 VALUE "123456789".
+           03  VALUE 'Enter "y" if the numbers below correspond to '
+               & 'their column number.'.
+           03  LINE 2 VALUE '123456789'.
            03  LINE 3 COLUMN 2.
-               05  COL 1 VALUE "1".
-               05  COL 5 VALUE "5".
-               05  COL MINUS 2 VALUE "3".
-               05  COL PLUS 1 VALUE "4".
+               05  COL 1 VALUE '1'.
+               05  COL 5 VALUE '5'.
+               05  COL MINUS 2 VALUE '3'.
+               05  COL PLUS 1 VALUE '4'.
                05  group-1 LINE 3.
-                   07  VALUE "2".
+                   07  VALUE '2'.
                    07  group-2 COLUMN + 4.
                        09  group-3.
-                           11 COL + 0 VALUE "6".
-               05  COLUMN + 1, VALUE "7".
-           03  LINE 5 PIC X, REQUIRED, TO success-flag.
+                           11 COL + 0 VALUE '6'.
+               05  COLUMN + 1, VALUE '7'.
+           03  LINE 5 PIC X, REQUIRED, USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -120,21 +122,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if there are three numbers on the"
-               & " line below starting at column 1.".
-           03  LINE + 3 PIC X, REQUIRED TO success-flag.
-           03  LINE 2 VALUE "1".
+           03  LINE 1 VALUE 'Enter "y" if there are three numbers on '
+               & 'the line below starting at column 1.'.
+           03  LINE + 3 PIC X, REQUIRED USING success-flag.
+           03  LINE 2 VALUE '1'.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
-           DISPLAY "2" LINE 2, COLUMN 0; "3"
+           DISPLAY '2' LINE 2, COLUMN 0; '3'
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -156,22 +159,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if there are three numbers on the"
-               & " line below starting at column 1.".
-           03  LINE + 3 PIC X, REQUIRED TO success-flag.
-           03  LINE 2 COL 3, VALUE "3".
-           03  LINE 1 COL 80 VALUE " ".
+           03  LINE 1 VALUE 'Enter "y" if there are three numbers on '
+               & 'the line below starting at column 1.'.
+           03  LINE + 3 PIC X, REQUIRED USING success-flag.
+           03  LINE 2 COL 3, VALUE '3'.
+           03  LINE 1 COL 80 VALUE ' '.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
-           DISPLAY "1" LINE 0, COLUMN 1; "2"
+           DISPLAY '1' LINE 0, COLUMN 1; '2'
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -193,24 +197,25 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if there are four numbers on the"
-               & " line below starting at column 1.".
-           03  LINE + 3 PIC X, REQUIRED TO success-flag.
-           03  LINE 2 VALUE "1".
+           03  LINE 1 VALUE 'Enter "y" if there are four numbers on '
+               & 'the line below starting at column 1.'.
+           03  LINE + 3 PIC X, REQUIRED USING success-flag.
+           03  LINE 2 VALUE '1'.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
-           DISPLAY "2" LINE 0, COLUMN 0
-           DISPLAY "3" LINE 2, COLUMN 3
-           DISPLAY "4" AT 0000
-           
+           DISPLAY '2' LINE 0, COLUMN 0
+           DISPLAY '3' LINE 2, COLUMN 3
+           DISPLAY '4' AT 0000
+
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -232,25 +237,26 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        01  screen-loc   PIC 9(6) VALUE 4004.
-           
+
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if the numbers 1-3 are in a diagonal"-
-               " line from line 2, column 2.".
-           03  success-field PIC X, LINE 6, REQUIRED, TO success-flag.
+           03  VALUE 'Enter "y" if the numbers 1-3 are in a diagonal'-
+               ' line from line 2, column 2.'.
+           03  success-field PIC X, LINE 6, REQUIRED,
+                                    USING success-flag.
 
        PROCEDURE DIVISION.
-           DISPLAY "1" AT 0202
-           DISPLAY "2" AT 003003
-           DISPLAY "3" AT screen-loc
+           DISPLAY '1' AT 0202
+           DISPLAY '2' AT 003003
+           DISPLAY '3' AT screen-loc
            DISPLAY scr
            ACCEPT scr
-           
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -272,20 +278,21 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if the word below starts at line"
-               & " 3, column 3.".
-           03  LINE + 4 PIC X, REQUIRED TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if the word below starts at line'
+               & ' 3, column 3.'.
+           03  LINE + 4 PIC X, REQUIRED USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
-           DISPLAY LOW-VALUES AT LINE 3, COL 3; "Hello!"
+           DISPLAY LOW-VALUES AT LINE 3, COL 3; 'Hello!'
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -307,21 +314,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if the word below starts at line"
-               & " 3, column 3.".
-           03  LINE + 4 PIC X, REQUIRED TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if the word below starts at line'
+               & ' 3, column 3.'.
+           03  LINE + 4 PIC X, REQUIRED USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            DISPLAY LOW-VALUES AT LINE 3, COL 3
-           DISPLAY "Hello!" UPON CRT
+           DISPLAY 'Hello!' UPON CRT
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -334,6 +342,7 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
 
+
 AT_SETUP([DISPLAY SPACES])
 AT_KEYWORDS([SPACE SPACES extensions])
 
@@ -343,36 +352,37 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 1 VALUE "Enter y if all the text after foo in the"
-               & " screen has been erased.".
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if all the text after foo in the'
+               & ' screen has been erased.'.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                       USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
-           DISPLAY SPACES AT LINE 6, COL 8; "foo" HIGHLIGHT
+           DISPLAY SPACES AT LINE 6, COL 8; 'foo' HIGHLIGHT
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -386,7 +396,7 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 AT_CLEANUP
 
 
-AT_SETUP([DISPLAY ALL X"01"])
+AT_SETUP([DISPLAY ALL X'01'])
 AT_KEYWORDS([SOH extensions])
 
 AT_DATA([prog.cob], [
@@ -395,36 +405,37 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 1 VALUE "Enter y if all the text after foo on that"
-               & " line alone has been erased.".
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if all the text after foo on '
+               & 'that line alone has been erased.'.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                       USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
-           DISPLAY ALL X"01", LINE 6, COLUMN 8; "foo" HIGHLIGHT
+           DISPLAY ALL X'01', LINE 6, COLUMN 8; 'foo' HIGHLIGHT
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -438,7 +449,7 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 AT_CLEANUP
 
 
-AT_SETUP([DISPLAY ALL X"02"])
+AT_SETUP([DISPLAY ALL X'02'])
 AT_KEYWORDS([STX extensions])
 
 AT_DATA([prog.cob], [
@@ -447,42 +458,43 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
 
        01  scr-2.
-           03  LINE 6 COL 8 VALUE "foo" BLANK SCREEN, HIGHLIGHT.
-           03  LINE 1 VALUE "Enter y if foo is the only word below.".
+           03  LINE 6 COL 8 VALUE 'foo' BLANK SCREEN, HIGHLIGHT.
+           03  LINE 1 VALUE 'Enter "y" if foo is the only word below.'.
 
        01  scr-3.
-           03  VALUE "Enter y if foo is the only word below.".
-           03  success-field COL + 2, PIC X, REQUIRED, TO success-flag.
+           03  VALUE 'Enter "y" if foo is the only word below.'.
+           03  success-field COL + 2, PIC X, REQUIRED,
+                                      USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
-           DISPLAY ALL X"02" AT LINE 6 COL 8; "foo" HIGHLIGHT
+           DISPLAY ALL X'02' AT LINE 6 COL 8; 'foo' HIGHLIGHT
            DISPLAY scr-3
            ACCEPT scr-3
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -496,8 +508,8 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 AT_CLEANUP
 
 
-AT_SETUP([DISPLAY ALL X"07"])
-AT_KEYWORDS([BEL BELL BEEP extensions])
+AT_SETUP([DISPLAY ALL X'07'])
+AT_KEYWORDS([BELL BEEP extensions])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -505,18 +517,39 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if you heard a beep:".
-           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag.
+           03  VALUE 'Enter "y" if you heard a beep:'.
+           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
+                                                       FROM 'Y'.
+       01  scr2.
+           03  LINE 4 VALUE 'system beep may be turned off ' &
+                             'on this system.'.
+           03  LINE 5 VALUE 'Retesting with COB_BELL=FLASH...'.
+           03  LINE +2
+               VALUE 'Enter "y" if you''ve seen your terminal flash'.
+           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
+                                                       FROM 'Y'.
 
        PROCEDURE DIVISION.
            DISPLAY scr
-           DISPLAY ALL X"07" UPON CRT
+           DISPLAY ALL X'07' UPON CRT
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           END-IF
+
+           SET ENVIRONMENT 'COB_BELL' TO 'FLASH'
+           CALL 'C$SLEEP' USING '1'
+
+           DISPLAY scr2
+           DISPLAY ALL X'07' UPON CRT
+           ACCEPT scr2
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -538,21 +571,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if this sentence starts at line 1,"-
-               " column 1:".
-           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag.
+           03  VALUE 'Enter "y" if this sentence starts at line 1,'-
+               ' column 1:'.
+           03  success-field PIC X, COL + 2, REQUIRED,
+                                             USING success-flag.
 
        PROCEDURE DIVISION.
-           DISPLAY "ignore this" AT LINE 4 COL 4
+           DISPLAY 'ignore this' AT LINE 4 COL 4
            DISPLAY scr
            ACCEPT success-field
-           
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -576,28 +610,29 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(5).
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if the numbers below correspond to"
-               & " their column number and are all on".
-           03  LINE 2 VALUE "the same line.".
-           03  LINE 3 VALUE "123456789".
+           03  VALUE 'Enter "y" if the numbers below correspond to'
+               & ' their column number and are all on'.
+           03  LINE 2 VALUE 'the same line.'.
+           03  LINE 3 VALUE '123456789'.
            03  FILLER LINE + 7.
                05 COL 3.
                    07  COL 1.
-                       09  LINE 4 VALUE "1".
-                       09  VALUE "2".
+                       09  LINE 4 VALUE '1'.
+                       09  VALUE '2'.
                05  LINE + 1, COL + 2.
-                   07  LINE 4, COL + 1, VALUE "5".
-           03  LINE 6 PIC X, REQUIRED, TO success-flag.
+                   07  LINE 4, COL + 1, VALUE '5'.
+           03  LINE 6 PIC X, REQUIRED, USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -620,22 +655,23 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(5).
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE "Enter y if the word below is not dim and has"
-               & " black background.".
+           03  VALUE 'Enter "y" if the word below is not dim and has'
+               & ' black background.'.
            03  LINE + 1, LOWLIGHT BACKGROUND-COLOR 3.
                05  HIGHLIGHT BACKGROUND-COLOR 0.
-                   07 VALUE "Highlight".
-           03  LINE + 2, PIC X TO success-flag.
+                   07 VALUE 'Highlight'.
+           03  LINE + 2, PIC X USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -659,32 +695,33 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(5).
        01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03                PIC X(80) VALUE "Enter y in the bottom"
-                             & " field if:".
-           03  LINE + 1,     PIC X(80) VALUE " * when the left field is"
-                             & " full, the cursor automatically moves".
-           03  LINE + 1,     PIC X(80) VALUE "   to the next field.".
-           03  LINE + 1,     PIC X(80) VALUE " * this does not happen"
-                             & " with the other fields.".
-           03  LINE + 1,     PIC X(80) VALUE " * the fields below are"
-                             & " on one line and separated by a single"
-                             & " column.".
+           03                PIC X(80) VALUE 'Enter "y" in the bottom'
+                             & ' field if:'.
+           03  LINE + 1,     PIC X(80) VALUE ' * when the left field is'
+                             & ' full, the cursor automatically moves'.
+           03  LINE + 1,     PIC X(80) VALUE '   to the next field.'.
+           03  LINE + 1,     PIC X(80) VALUE ' * this does not happen'
+                             & ' with the other fields.'.
+           03  LINE + 1,     PIC X(80) VALUE ' * the fields below are'
+                             & ' on one line and separated by a single'
+                             & ' column.'.
 
            03  test-fields   LINE + 2.
                05  field-1   COL 1, PIC X(5) AUTO TO dummy.
                05  field-2   COL + 2, PIC X(5) TO dummy.
                05  field-3   COL + 2, PIC X(5) TO dummy.
            03  success-field LINE + 2, COLUMN 1; PIC X, REQUIRED
-                             TO success-flag.
+                             TO success-flag FROM 'Y'.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -697,8 +734,9 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
 
-AT_SETUP([BACKGROUND/FOREGROUND-COLOUR])
-AT_KEYWORDS([BACKGROUND-COLOR FOREGROUND-COLOR])
+
+AT_SETUP([BACKGROUND- / FOREGROUND-COLOUR])
+AT_KEYWORDS([BACKGROUND-COLOR BACKGROUND-COLOUR FOREGROUND-COLOR])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -707,51 +745,52 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(10).
        01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the text below matches the colour of "
-               & "the background/text.".
+               VALUE 'Enter "y" if the text below matches the colour '
+               & 'of the background/text.'.
            03  LINE + 1, COL 1, PIC X(80)
-               VALUE "Note: the black text is on white background/the "
-               & "white background has black text".
+               VALUE 'Note: the black text is on white background/the '
+               & 'white background has black text'.
            03  LINE + 1, COL 1, PIC X(80)
-               VALUE "to make the text visible.".
+               VALUE 'to make the text visible.'.
 
            03  LINE + 1.
-               05  COL 1, PIC X(8) VALUE "Black" FOREGROUND-COLOR 0
+               05  COL 1, PIC X(8) VALUE 'Black' FOREGROUND-COLOR 0
                    BACKGROUND-COLOR 7.
-               05  COL + 2, PIC X(8) VALUE "Blue" FOREGROUND-COLOR 1.
-               05  COL + 2, PIC X(8) VALUE "Green" FOREGROUND-COLOR 2.
-               05  COL + 2, PIC X(8) VALUE "Cyan" FOREGROUND-COLOR 3.
-               05  COL + 2, PIC X(8) VALUE "Red" FOREGROUND-COLOR 4.
-               05  COL + 2, PIC X(8) VALUE "Magenta" FOREGROUND-COLOR 5.
-               05  COL + 2, PIC X(15) VALUE "Brown/Yellow"
+               05  COL + 2, PIC X(8) VALUE 'Blue' FOREGROUND-COLOR 1.
+               05  COL + 2, PIC X(8) VALUE 'Green' FOREGROUND-COLOR 2.
+               05  COL + 2, PIC X(8) VALUE 'Cyan' FOREGROUND-COLOR 3.
+               05  COL + 2, PIC X(8) VALUE 'Red' FOREGROUND-COLOR 4.
+               05  COL + 2, PIC X(8) VALUE 'Magenta' FOREGROUND-COLOR 5.
+               05  COL + 2, PIC X(15) VALUE 'Brown/Yellow'
                    FOREGROUND-COLOR 6.
-               05  COL + 2, PIC X(8) VALUE "White" FOREGROUND-COLOR 7.
+               05  COL + 2, PIC X(8) VALUE 'White' FOREGROUND-COLOR 7.
 
            03  LINE + 1.
-               05  COL 1, PIC X(8) VALUE "Black" BACKGROUND-COLOR 0
+               05  COL 1, PIC X(8) VALUE 'Black' BACKGROUND-COLOR 0
                    FOREGROUND-COLOR 7.
-               05  COL + 2, PIC X(8) VALUE "Blue" BACKGROUND-COLOR 1.
-               05  COL + 2, PIC X(8) VALUE "Green" BACKGROUND-COLOR 2.
-               05  COL + 2, PIC X(8) VALUE "Cyan" BACKGROUND-COLOR 3.
-               05  COL + 2, PIC X(8) VALUE "Red" BACKGROUND-COLOR 4.
-               05  COL + 2, PIC X(8) VALUE "Magenta" BACKGROUND-COLOR 5.
-               05  COL + 2, PIC X(15) VALUE "Brown/Yellow"
+               05  COL + 2, PIC X(8) VALUE 'Blue' BACKGROUND-COLOR 1.
+               05  COL + 2, PIC X(8) VALUE 'Green' BACKGROUND-COLOR 2.
+               05  COL + 2, PIC X(8) VALUE 'Cyan' BACKGROUND-COLOR 3.
+               05  COL + 2, PIC X(8) VALUE 'Red' BACKGROUND-COLOR 4.
+               05  COL + 2, PIC X(8) VALUE 'Magenta' BACKGROUND-COLOR 5.
+               05  COL + 2, PIC X(15) VALUE 'Brown/Yellow'
                    BACKGROUND-COLOR 6.
-               05  COL + 2, PIC X(8) VALUE "White" BACKGROUND-COLOR 7
+               05  COL + 2, PIC X(8) VALUE 'White' BACKGROUND-COLOR 7
                    FOREGROUND-COLOR 0.
 
            03  success-field LINE + 2, COL 1, PIC X, REQUIRED,
-               TO success-flag.
+               TO success-flag FROM 'Y'.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -763,6 +802,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([BEEP])
 AT_KEYWORDS([BEEP BELL])
@@ -773,18 +813,39 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  BELL.
-           03  VALUE "Enter y if you heard a beep:".
-           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag.
+           03  VALUE 'Enter "y" if you heard a beep:'.
+           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
+                                                       FROM 'Y'.
+       01  scr2.
+           03  LINE 4 VALUE 'system beep may be turned off ' &
+                             'on this system.'.
+           03  LINE 5 VALUE 'Retesting with COB_BELL=FLASH...'.
+           03  LINE +2
+               VALUE 'Enter "y" if you''ve seen your terminal flash'.
+           03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
+                                                       FROM 'Y'.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           END-IF
+
+           SET ENVIRONMENT 'COB_BELL' TO 'FLASH'
+           CALL 'C$SLEEP' USING '1'
+
+           DISPLAY scr2
+           DISPLAY ALL X'07' UPON CRT
+           ACCEPT scr2
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -807,39 +868,40 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        01  scr-2.
-           03  LINE 6 COL 8 VALUE "foo" BLANK LINE, HIGHLIGHT.
-           03  LINE 1 VALUE "Enter y if foo is the only word on one"
-               & " line.".
+           03  LINE 6 COL 8 VALUE 'foo' BLANK LINE, HIGHLIGHT.
+           03  LINE 1 VALUE 'Enter "y" if foo is the only word on one'
+               & ' line.'.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
            DISPLAY scr-2
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -862,38 +924,39 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        01  scr-2.
-           03  LINE 6 COL 8 VALUE "foo" BLANK SCREEN, HIGHLIGHT.
-           03  LINE 1 VALUE "Enter y if foo is the only word below.".
+           03  LINE 6 COL 8 VALUE 'foo' BLANK SCREEN, HIGHLIGHT.
+           03  LINE 1 VALUE 'Enter "y" if foo is the only word below.'.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
            DISPLAY scr-2
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -916,23 +979,24 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if you can see lorem ipsum filler"
-               & " text.".
-           03  LINE 3 COL 3 VALUE "Lorem ipsum dolor sit amet,"
-               & " consectetur ad ipiscing elit.".
+           03  LINE 1 VALUE 'Enter "y" if you can see lorem ipsum '
+               & 'filler text.'.
+           03  LINE 3 COL 3 VALUE 'Lorem ipsum dolor sit amet,'
+               & ' consectetur ad ipiscing elit.'.
 
        01  success-scr.
-           03 LINE 3, BLANK LINE, PIC X, REQUIRED, TO success-flag.
+           03 LINE 3, BLANK LINE, PIC X, REQUIRED, USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT success-scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -954,20 +1018,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the string below is blinking:".
-           03  LINE + 1, PIC X(10) VALUE "Blink" BLINK.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the string below is blinking:'.
+           03  LINE + 1, PIC X(10) VALUE 'Blink' BLINK.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -990,39 +1056,40 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 1 VALUE "Enter y if all the text after foo in the"
-               & " screen has been erased.".
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if all the text after foo in the'
+               & ' screen has been erased.'.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        01  scr-2.
-           03  LINE 6 COL 8 VALUE "foo" ERASE EOS, HIGHLIGHT.
+           03  LINE 6 COL 8 VALUE 'foo' ERASE EOS, HIGHLIGHT.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
            DISPLAY scr-2
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1045,39 +1112,40 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr-1.
-           03  LINE 1 VALUE "Enter y if all the text after foo on that"
-               & " line alone has been erased.".
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  LINE 1 VALUE 'Enter "y" if all the text after foo on '
+               & 'that line alone has been erased.'.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        01  scr-2.
-           03  LINE 6 COL 8 VALUE "foo" ERASE EOL, HIGHLIGHT.
+           03  LINE 6 COL 8 VALUE 'foo' ERASE EOL, HIGHLIGHT.
 
        PROCEDURE        DIVISION.
            DISPLAY scr-1
            DISPLAY scr-2
            ACCEPT success-field
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1100,35 +1168,37 @@ AT_DATA([prog.cob], [
 
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE "Enter y if you can see lorem ipsum filler"
-               & " text.".
-           03  LINE 3 VALUE "Lorem ipsum dolor sit amet, consectetur ad"
-               & "ipiscing elit. Curabitur dapibus dui".
-           03  LINE 4 VALUE "vitae augue lobortis, non tempor diam tris"
-               & "tique. Donec dignissim ex velit, ut".
-           03  LINE 5 VALUE "efficitur tellus pharetra at. Curabitur at"
-               & " condimentum nunc, nec accumsan".
-           03  LINE 6 VALUE "nulla. Nulla at feugiat elit, eget condime"
-               & "ntum justo. Nam lorem lectus,".
-           03  LINE 7 VALUE "imperdiet sit amet odio eu, eleifend conse"
-               & "ctetur ligula. Duis diam felis, porta".
-           03  LINE 8 VALUE "id diam id, ultrices finibus augue. Mauris"
-               & " imperdiet, dolor sed sodales porta,".
-           03  LINE 9 VALUE "justo nunc consequat nulla, iaculis venena"
-               & "tis lorem libero sit amet".
-           03  LINE 10 VALUE "magna. Nullam pulvinar nullam.".
+           03  LINE 1 VALUE 'Enter "y" if you can see lorem ipsum '
+               & 'filler text.'.
+           03  LINE 3 VALUE 'Lorem ipsum dolor sit amet, consectetur ad'
+               & 'ipiscing elit. Curabitur dapibus dui'.
+           03  LINE 4 VALUE 'vitae augue lobortis, non tempor diam tris'
+               & 'tique. Donec dignissim ex velit, ut'.
+           03  LINE 5 VALUE 'efficitur tellus pharetra at. Curabitur at'
+               & ' condimentum nunc, nec accumsan'.
+           03  LINE 6 VALUE 'nulla. Nulla at feugiat elit, eget condime'
+               & 'ntum justo. Nam lorem lectus,'.
+           03  LINE 7 VALUE 'imperdiet sit amet odio eu, eleifend conse'
+               & 'ctetur ligula. Duis diam felis, porta'.
+           03  LINE 8 VALUE 'id diam id, ultrices finibus augue. Mauris'
+               & ' imperdiet, dolor sed sodales porta,'.
+           03  LINE 9 VALUE 'justo nunc consequat nulla, iaculis venena'
+               & 'tis lorem libero sit amet'.
+           03  LINE 10 VALUE 'magna. Nullam pulvinar nullam.'.
            03  LINE 3 ERASE EOS.
-           03  success-field LINE 12, PIC X, REQUIRED, TO success-flag.
+           03  success-field LINE 12, PIC X, REQUIRED,
+                                             USING success-flag.
 
        PROCEDURE        DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1152,20 +1222,22 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(10).
        01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if you cannot continue without filling "
-               & "all of the below field:".
+               VALUE 'Enter "y" if you cannot continue without filling '
+               & 'all of the below field:'.
            03  LINE + 1, PIC X(10), FULL, REQUIRED, TO dummy.
+                    *> no initial value for success as we request input
            03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1177,6 +1249,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([HIGHLIGHT])
 AT_KEYWORDS([HIGHLIGHT])
@@ -1186,21 +1259,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the text below is bright "
-               & "(highlighted):".
-           03  LINE + 1, PIC X(10) VALUE "Highlight" HIGHLIGHT.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the text below is bright '
+               & '(highlighted):'.
+           03  LINE + 1, PIC X(10) VALUE 'Highlight' HIGHLIGHT.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1213,9 +1288,11 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
 
+
 AT_SETUP([LEFTLINE])
 AT_KEYWORDS([LEFTLINE GRID])
 
+# Currently not implemented
 AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [
@@ -1223,21 +1300,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the string has a vertical line to its "
-               & "left:".
-           03  LINE + 1, COL 2, PIC X(10) VALUE "Leftline" LEFTLINE.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the string has a vertical line to '
+               & 'its left:'.
+           03  LINE + 1, COL 2, PIC X(10) VALUE 'Leftline' LEFTLINE.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1249,6 +1328,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([LOWLIGHT])
 AT_KEYWORDS([LOWLIGHT])
@@ -1258,20 +1338,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the string below is dim (lowlight):".
-           03  LINE + 1, PIC X(10) VALUE "Lowlight" LOWLIGHT.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the string below is dim (lowlight):'.
+           03  LINE + 1, PIC X(10) VALUE 'Lowlight' LOWLIGHT.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1288,6 +1370,7 @@ AT_CLEANUP
 AT_SETUP([OVERLINE])
 AT_KEYWORDS([OVERLINE])
 
+# Currently not implemented
 AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [
@@ -1295,20 +1378,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the string below is overlined:".
-           03  LINE + 1, PIC X(10) VALUE "Overline" OVERLINE.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the string below is overlined:'.
+           03  LINE + 1, PIC X(10) VALUE 'Overline' OVERLINE.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1320,6 +1405,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([REVERSE-VIDEO])
 AT_KEYWORDS([REVERSE-VIDEO])
@@ -1329,23 +1415,24 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the background and foreground colours "
-               & "of the string below have".
-           03  LINE + 1, PIC X(80) VALUE "swapped:".
-           03  LINE + 1, PIC X(20) VALUE "Reversed colours"
+               VALUE 'Enter "y" if the background and foreground '
+               & 'colours of the string below have'.
+           03  LINE + 1, PIC X(80) VALUE 'swapped:'.
+           03  LINE + 1, PIC X(20) VALUE 'Reversed colours'
                REVERSE-VIDEO.
-           03  success-field LINE + 2, PIC X TO success-flag.
+           03  success-field LINE + 2, PIC X USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1357,6 +1444,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
+
 
 AT_SETUP([SECURE])
 AT_KEYWORDS([SECURE PASSWORD])
@@ -1367,21 +1455,23 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  dummy        PIC X(10).
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if text in the field below is replaced "
-               & "with asterisks:".
+               VALUE 'Enter "y" if text in the field below is replaced '
+               & 'with asterisks:'.
            03  LINE + 1, PIC X(10) SECURE TO dummy.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1403,27 +1493,27 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        01  num-1		PIC 9(5) VALUE 12345.
-       01  num-2        PIC X(10) VALUE "12345".
+       01  num-2        PIC X(10) VALUE '12345'.
        01  num-3        PIC 9(4) VALUE 1234.
 
        01  four         PIC 9 VALUE 4.
-           
+
        PROCEDURE        DIVISION.
-           DISPLAY "Enter y if you see exactly four rows of 1234, all"
-               & " aligned." LINE 1
-           
+           DISPLAY 'Enter "y" if you see exactly four rows of 1234, all'
+               & ' aligned.' LINE 1
+
            DISPLAY num-1 LINE 3 COL 3, SIZE 4;
                num-2 LINE 4 COL 3, SIZE four;
                num-3 LINE 5 COL 3, SIZE 8;
-               "1234" LINE 6 COL 3, SIZE ZERO
+               '1234' LINE 6 COL 3, SIZE ZERO
 
-           ACCEPT success-flag LINE 8, REQUIRED
+           ACCEPT success-flag LINE 8, REQUIRED UPDATE
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1445,24 +1535,24 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        PROCEDURE        DIVISION.
-           DISPLAY "Enter y if you see exactly three rows of quotes,"
-               & "zeroes and ""abc"", 8 characters", LINE 1
-           DISPLAY "long, all aligned.", LINE 2
-           
+           DISPLAY 'Enter "y" if you see exactly three rows of quotes, '
+               & 'zeroes and ''abc'',', LINE 1
+           DISPLAY '8 characters long, all aligned.', LINE 2
+
            DISPLAY QUOTES LINE 4 COL 3, SIZE 8;
                ZEROES LINE 5 COL 3, SIZE 8;
-               ALL "abc" LINE 6 COL 3, SIZE 8
+               ALL 'abc' LINE 6 COL 3, SIZE 8
 
-           DISPLAY "123456789" LINE 7 COL 3
+           DISPLAY '123456789' LINE 7 COL 3
            DISPLAY SPACE LINE 7 COL 3, SIZE 9
 
-           ACCEPT success-flag LINE 8, REQUIRED
+           ACCEPT success-flag LINE 8, REQUIRED UPDATE
 
-           IF success
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1475,6 +1565,7 @@ AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
 
 AT_CLEANUP
 
+
 AT_SETUP([UPDATE])
 AT_KEYWORDS([UPDATE extensions])
 
@@ -1483,18 +1574,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  n-str PIC X(12) VALUE ALL "N".
+       01  n-str PIC X(12) VALUE ALL 'N'.
        01  num-y PIC 99 VALUE ZERO.
 
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+
        PROCEDURE        DIVISION.
-           DISPLAY "Enter y if the entry field below is filled with n's"
+           DISPLAY 'Enter "y" if the entry field below is filled with '
+                 & "N's"
                LINE 1
 
-           ACCEPT n-str LINE 3, REQUIRED, UPDATE
+           DISPLAY n-str LINE 3
 
-           MOVE FUNCTION UPPER-CASE (n-str) TO n-str
-           INSPECT n-str TALLYING num-y FOR ALL "Y"
-           IF num-y >= 1
+           ACCEPT success-flag LINE +2, REQUIRED, UPDATE
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
@@ -1516,20 +1611,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  success-flag PIC X.
-           88  success  VALUE "Y", "y".
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
 
        SCREEN           SECTION.
        01  scr.
            03  PIC X(80)
-               VALUE "Enter y if the string below is underlined:".
-           03  LINE + 1, PIC X(10) VALUE "Underline" UNDERLINE.
-           03  success-field LINE + 2, PIC X, REQUIRED, TO success-flag.
+               VALUE 'Enter "y" if the string below is underlined:'.
+           03  LINE + 1, PIC X(10) VALUE 'Underline' UNDERLINE.
+           03  success-field LINE + 2, PIC X, REQUIRED,
+                                              USING success-flag.
 
        PROCEDURE DIVISION.
            DISPLAY scr
            ACCEPT scr
-           IF success
+
+           IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
            ELSE
                GOBACK RETURNING 1
