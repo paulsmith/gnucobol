@@ -4425,6 +4425,26 @@ AT_CHECK([$COMPILE prog.cob], [0], [])
 AT_CLEANUP
 
 
+AT_SETUP([Conditional/define directives (8)])
+AT_KEYWORDS([extensions directive])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    prog.
+       PROCEDURE      DIVISION.
+       >>IF A IS DEFINED
+           CONTINUE
+           .
+       >>else
+           CONTINUE
+           .
+       >>eNd-If
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [])
+AT_CLEANUP
+
+
 AT_SETUP([Variable format])
 AT_KEYWORDS([extensions runmisc])
 

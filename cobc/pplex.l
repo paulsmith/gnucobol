@@ -1297,12 +1297,12 @@ is_condition_directive_clause (const char *buff)
 		++buff;
 	}
 
-	return buff && (strncmp (buff, "END", 3) == 0
-			|| strncmp (buff, "IF", 2) == 0
-			|| strncmp (buff, "ELSE", 4) == 0
-			|| strncmp (buff, "ELIF", 4) == 0
-			|| strncmp (buff, "EVALUATE", 8) == 0
-			|| strncmp (buff, "WHEN", 4) == 0);
+	return buff && (strncasecmp (buff, "END", 3) == 0
+			|| strncasecmp (buff, "IF", 2) == 0
+			|| strncasecmp (buff, "ELSE", 4) == 0
+			|| strncasecmp (buff, "ELIF", 4) == 0
+			|| strncasecmp (buff, "EVALUATE", 8) == 0
+			|| strncasecmp (buff, "WHEN", 4) == 0);
 }
 
 static int
