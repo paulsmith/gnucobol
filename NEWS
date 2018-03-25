@@ -45,7 +45,13 @@ NEWS - user visible changes				-*- outline -*-
 ** The standard-format for program tracing was changed and is now adjustable
    by the runtime configuration option COB_TRACE_FORMAT.
 
+* New test suite for manual tests (especially SCREEN I/O),
+  run with `make checkmanual`.
+  Note: You may want to adjust the test runner tests/run_prog_manual.sh which
+  defaults to xterm.
+
 * New configure option --enable-debug-log to allow internal
+  tracing of GnuCOBOL (intended for developers of GnuCOBOL only) 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -218,7 +224,7 @@ NEWS - user visible changes				-*- outline -*-
 * New cobcrun options:
 
   -i -info, display build/environment
-  -r -runtime-env, display runtime configuration
+  -r -runtime-config, display runtime configuration
   -c -config, set runtime config from file
   -M -module, set path/module name when looking for entry
 

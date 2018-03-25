@@ -20,9 +20,12 @@
 # You should have received a copy of the GNU General Public License
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
-# Run a test program named prog and write its return code into the file
-# result for a later check, used for running in a detached xterm window
+# Running test program "prog" in a detached terminal and pass its return
+# code to the testsuite after the terminal ends.
 
+# You may change run_prog_manual.sh according to you needs, especially
+# if you want to use a different terminal than xterm or different xterm
+# options.
 
 rm -f ./result
 xterm -T 'GnuCOBOL Manual Test Run' \
