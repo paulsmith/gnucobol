@@ -3969,7 +3969,8 @@ list_aliases (const struct cobc_reserved * const word)
 int
 is_reserved_word (const char *word)
 {
-	return !!find_reserved_word (word, 1);}
+	return !!find_reserved_word (word, 1);
+}
 
 int
 is_default_reserved_word (const char *word)
