@@ -1,4 +1,10 @@
 
+2018-03-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* run_prog_manual.sh.in: add option to run manual tests in
+	  plain terminal environments using the screen window manager;
+	  added timeout (currently 60 seconds for each test)
+
 2018-03-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite_manual.at: source for new manual test suite

@@ -48,7 +48,7 @@ NEWS - user visible changes				-*- outline -*-
 * New test suite for manual tests (especially SCREEN I/O),
   run with `make checkmanual`.
   Note: You may want to adjust the test runner tests/run_prog_manual.sh which
-  defaults to xterm.
+  defaults to xterm in GUI environments and screen in terminal environments.
 
 * New configure option --enable-debug-log to allow internal
   tracing of GnuCOBOL (intended for developers of GnuCOBOL only) 

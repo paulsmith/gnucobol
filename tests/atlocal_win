@@ -4,7 +4,7 @@
 # This script is a special variant of the atlocal script for testing
 # a not POSIX build (VisualStudio build for example) in a POSIX environment.
 #
-# Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -47,6 +47,9 @@ PATHSEP=";"
 
 # Helper script to unify listings (replace version, date, time)
 UNIFY_LISTING="$COB_SRC_PATH/tests/listings-sed.sh"
+
+# Test runner for manual tests, content may changed by the user
+RUN_PROG_MANUAL="$COB_SRC_PATH/run_prog_manual.sh"
 
 # be sure to use the English messages
 LC_ALL=C
@@ -106,7 +109,7 @@ COB_HAS_CURSES="no"
 #fi
 
 
-export COBC COBCRUN COBCRUN_DIRECT
+export COBC COBCRUN COBCRUN_DIRECT RUN_PROG_MANUAL
 export PATHSEP COB_OBJECT_EXT COB_EXE_EXT
 export COB_CFLAGS COB_LDFLAGS COB_LIBS
 export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR

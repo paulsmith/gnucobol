@@ -24,11 +24,59 @@
 # code to the testsuite after the terminal ends.
 
 # You may change run_prog_manual.sh according to you needs, especially
-# if you want to use a different terminal than xterm or different xterm
-# options.
+# if you want to use a different terminal/temrinal manager than xterm/screen
+# or different options for these.
 
-rm -f ./result
-xterm -T 'GnuCOBOL Manual Test Run' \
-      -fa 'Liberation Mono' -fs 14 \
-      -e "bash -c '$COBCRUN_DIRECT ./prog && echo $? > ./result'"
+
+function test_with_xterm () {
+  xterm -T 'GnuCOBOL Manual Test Run' \
+        -fa 'Liberation Mono' -fs 14 \
+        -e "bash -c '($COBCRUN_DIRECT ./prog 2>./syserr.log && echo $? > ./result) || echo 1 > ./result'"
+}
+
+
+# Note: when using screen manager you have to
+#       run `screen -r "GCTESTS" in a separate terminal
+#       within 5 seconds after starting the tests
+function test_with_screen () {
+  # check if screen session already exists, setup if not 
+  screen -S "GCTESTS" -X select . 2>&1 1>/dev/null
+  if test "$?" != "0"; then
+     screen -dmS "GCTESTS"
+     screen -S "GCTESTS" -X stuff ". \"$PWD/../../atconfig\" && . \"$PWD/../../atlocal\"
+"
+     sleep 5
+  fi
+  # run actual test in screen session
+  screen -S "GCTESTS" -X stuff "bash -c \"cd \\\"$PWD\\\" && ($COBCRUN_DIRECT ./prog 2>./syserr.log && echo $? > ./result) || echo 1 > ./result \"
+"
+}
+
+# wait 60 seconds for the result file to be available
+function wait_result () {
+  # version that should work everywhere...
+  #local wait_time="60"
+  #until test $((wait_time--)) -eq 0 -o -f "./result" ; do sleep 1; done
+  # version that needs a "modern" sleep implementation:
+  local wait_time="600"
+  until test $((wait_time--)) -eq 0 -o -f "./result" ; do sleep 0.1; done
+  ((++wait_time))
+}
+
+
+# actual test
+rm -f ./result ./syserr.log
+if test ! -z "$DISPLAY"; then
+  test_with_xterm
+else
+  test_with_screen
+fi
+
+wait_result || {
+  (>&2 echo "No result file after waiting for 60 seconds!")
+  echo 124 > ./result # same value as timout from GNU coreutils
+}
+if test -f ./syserr.log; then
+  (>&2 cat ./syserr.log)
+fi
 exit `cat ./result`
