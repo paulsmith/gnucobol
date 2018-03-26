@@ -236,8 +236,9 @@ copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 	}
 }
 
+/* compute hash value of COBOL word (case insensitive) */
 static size_t
-hash (const unsigned char *s)
+word_hash (const unsigned char *s)
 {
 	size_t	val;
 	size_t	pos;
@@ -261,7 +262,7 @@ lookup_word (struct cb_reference *p, const char *name)
 	struct cb_word	*w;
 	size_t		val;
 
-	val = hash ((const unsigned char *)name);
+	val = word_hash ((const unsigned char *)name);
 	/* Find an existing word */
 	if (likely(current_program)) {
 		for (w = current_program->word_table[val]; w; w = w->next) {
@@ -2545,7 +2546,7 @@ get_number_in_parentheses (const unsigned char ** const p,
 	const unsigned char	*open_paren = *p;
 	const unsigned char	*close_paren;
 	const unsigned char	*c;
-	int			contains_name = 0;
+	int			contains_name;
 	size_t			name_length;
         char			*name_buff;
 	cb_tree			item;
@@ -2562,21 +2563,22 @@ get_number_in_parentheses (const unsigned char ** const p,
 		return 1;
 	}
 
-	/* Find out if the parens contain a number or a constant-name. */
-	for (c = open_paren + 1; c != close_paren; ++c) {
-		if (!(isdigit (*c) || *c == '.' || *c == '+'
-		      || *c == '-')) {
-			contains_name = 1;
-			break;
-		}
-	}
-
 	*p = close_paren;
 
 	if (open_paren + 1 == close_paren) {
 		cb_error (_("parentheses must contain (a constant-name defined as) a positive integer"));
 		*error_detected = 1;
 		return 1;
+	}
+
+	/* Find out if the parens contain a number or a constant-name. */
+	contains_name = 0;
+	for (c = open_paren + 1; c != close_paren; ++c) {
+		if (!(isdigit (*c) || *c == '.' || *c == '+'
+		      || *c == '-')) {
+			contains_name = 1;
+			break;
+		}
 	}
 
 	if (contains_name) {
@@ -2709,16 +2711,6 @@ repeat:
 
 		/* Check grammar and category */
 		switch (c) {
-		case 'A':
-			category |= PIC_ALPHABETIC;
-			x_digits += n;
-			break;
-
-		case 'X':
-			category |= PIC_ALPHANUMERIC;
-			x_digits += n;
-			break;
-
 		case '9':
 			category |= PIC_NUMERIC;
 			digits += n;
@@ -2730,11 +2722,21 @@ repeat:
 			}
 			break;
 
+		case 'X':
+			category |= PIC_ALPHANUMERIC;
+			x_digits += n;
+			break;
+
 		case 'N':
 			if (!(category & PIC_NATIONAL)) {
 				category |= PIC_NATIONAL;
 				CB_UNFINISHED ("USAGE NATIONAL");
 			}
+			x_digits += n;
+			break;
+
+		case 'A':
+			category |= PIC_ALPHABETIC;
 			x_digits += n;
 			break;
 
@@ -2954,9 +2956,6 @@ repeat:
 
 	/* Set picture category */
 	switch (category) {
-	case PIC_ALPHABETIC:
-		pic->category = CB_CATEGORY_ALPHABETIC;
-		break;
 	case PIC_NUMERIC:
 		pic->category = CB_CATEGORY_NUMERIC;
 		if (digits > COB_MAX_DIGITS) {
@@ -2968,6 +2967,9 @@ repeat:
 		break;
 	case PIC_NATIONAL:
 		pic->category = CB_CATEGORY_NATIONAL;
+		break;
+	case PIC_ALPHABETIC:
+		pic->category = CB_CATEGORY_ALPHABETIC;
 		break;
 	case PIC_NUMERIC_EDITED:
 		pic->str = cobc_parse_malloc ((idx + 1) * sizeof(cob_pic_symbol));
@@ -4094,7 +4096,7 @@ cb_ref (cb_tree x)
 		}
 		/* Nested program - check parents for GLOBAL candidate */
 #if 0 /* RXWRXW */
-		val = hash ((const unsigned char *)r->word->name);
+		val = word_hash ((const unsigned char *)r->word->name);
 #else
 		val = r->hashval;
 #endif

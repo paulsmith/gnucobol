@@ -208,12 +208,12 @@ FILE			*cb_listing_file = NULL;
 #define CB_READ_AHEAD	800 /* lines to read ahead */
 
 /* TODO: add new compiler configuration flags for this*/
-#define CB_INDICATOR	6
-#define CB_MARGIN_A	7
+#define CB_MARGIN_A	cb_indicator_column
 #define CB_MARGIN_B	11	/* careful, for COBOL 85 this would be 11,
 						   for COBOL 2002 (removed it) would be 7 */
+#define CB_INDICATOR	CB_MARGIN_A - 1
 #define CB_SEQUENCE	cb_text_column /* the only configuration available...*/
-#define CB_ENDLINE	cb_text_column + 8
+#define CB_ENDLINE	cb_text_column + cb_indicator_column + 1
 
 #define CB_MAX_LINES	55
 #define CB_LIST_PICSIZE 80
@@ -250,6 +250,7 @@ char			*source_name = NULL;
 
 enum cb_format		cb_source_format = CB_FORMAT_FIXED;
 int			cb_text_column;
+int			cb_indicator_column;
 int			cb_id = 0;
 int			cb_pic_id = 0;
 int			cb_attr_id = 0;
@@ -1308,8 +1309,9 @@ cobc_check_string (const char *dupstr)
 	}
 	/* LCOV_EXCL_STOP */
 
-	/* CHECKME: performance consideration: the strcmp in this loop
-	   consumes ~5% of the compilation time - can we optimize this? */
+	/* FIXME - optimize performance:
+	   this loop is extensively used for comparision of picture strings,
+	   it consumes ~6% of the compilation time with ~3% in strcmp */
 	for (s = base_string; s; s = s->next) {
 		if (!strcmp (dupstr, (const char *)s->val)) {
 			return s->val;
@@ -4523,7 +4525,7 @@ set_listing_header_code (void)
 			".............................");
 		if (cb_listing_wide) {
 			if (cb_listing_file_struct->source_format == CB_FORMAT_FIXED
-			    && cb_text_column == 72) {
+			    && cb_text_column == 72 && cb_indicator_column == 7) {
 				strcat (cb_listing_header, "SEQUENCE");
 			} else {
 				strcat (cb_listing_header,
@@ -8159,6 +8161,7 @@ main (int argc, char **argv)
 	finish_setup_internal_env ();
 
 	cb_text_column = cb_config_text_column;
+	cb_indicator_column = 7;
 
 	memset (cb_listing_header, 0, sizeof (cb_listing_header));
 	/* If -P=file specified, all lists go to this file */
