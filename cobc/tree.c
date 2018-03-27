@@ -4179,32 +4179,38 @@ error:
 	return cb_error_node;
 }
 
+/* place literal value for display into given pointer
+   note: must be char [COB_MAX_DIGITS + 2]) */
 static char *
-display_literal (char *disp, struct cb_literal *l)
+display_literal (char *disp, struct cb_literal *l, int offset, int scale)
 {
 	if (CB_NUMERIC_LITERAL_P(l)) {
-		if (l->scale == 0) {
-			snprintf(disp,38,"%s%.36s",(char*)(l->sign == -1 ? "-" : ""),(char*)l->data);
-		} else if (l->scale > 0) {
-			snprintf(disp,38,"%s%.*s.%s",(char*)(l->sign == -1 ? "-" : ""),
-					l->size-l->scale, l->data, (char*)l->data+l->size-l->scale);
+		if (scale == 0) {
+			snprintf (disp, COB_MAX_DIGITS + 1, "%s%s",
+				(char *)(l->sign == -1 ? "-" : ""), (char* )(l->data + offset));
+		} else if (scale > 0) {
+			snprintf (disp, COB_MAX_DIGITS + 1, "%s%.*s.%.*s",
+				(char *)(l->sign == -1 ? "-" : ""),
+				(l->size - l->scale - offset), (char *)(l->data + offset),
+				scale, (char *)(l->data + l->size - l->scale));
 		} else {
-			snprintf(disp,38,"%s%.36s",(char*)(l->sign == -1 ? "-" : ""),(char*)l->data);
+			snprintf (disp, COB_MAX_DIGITS + 1, "%s%s",
+				(char *)(l->sign == -1 ? "-" : ""), (char *)(l->data + offset));
 		}
 	} else {
-		sprintf(disp,"%.38s",(char*)l->data);
+		snprintf (disp, COB_MAX_DIGITS + 1, "%s", (char *)(l->data + offset));
 	}
 	return disp;
 }
 
 /* Check if comparing field to literal is always TRUE or FALSE */
 static cb_tree
-compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_literal *l)
+compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal *l)
 {
 	int	i, j, scale;
 	int	alph_lit, zero_val;
-	int	lit_length, refmod_length;
-	char	lit_disp[40];
+	int	lit_start, lit_length, refmod_length;
+	char	lit_disp[COB_MAX_DIGITS + 2];
 	struct cb_field *f;
 	struct cb_reference	*rl;
 
@@ -4234,18 +4240,20 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 	}
 
 	/* initial: set length and type of comparision literal */
-	for (lit_length = strlen ((const char *)l->data);
-		lit_length > 0 && l->data[lit_length - 1] == ' '; lit_length--);
+	for (lit_length = l->size;
+		  lit_length > 0 && l->data[lit_length - 1] == ' ';
+		  lit_length--);
 
 	alph_lit = 0;
 	zero_val = 1;
 	for (j = 0; l->data[j] != 0; j++) {
 		if (!isdigit(l->data[j])) {
 			alph_lit = 1;
+			/* note: zero_val not checked in this case */
 			break;
-		}
+				}
 		if (l->data[j] != '0') {
-			zero_val = 0;
+				zero_val = 0;
 		}
 	}
 
@@ -4262,14 +4270,14 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 				if (lit_length > f->size) {
 					cb_warning_x (cb_warn_constant_expr, e,
 							_("literal '%.38s' is longer than '%s'"),
-							display_literal(lit_disp,l),f->name);
+							display_literal (lit_disp, l, 0, l->scale), f->name);
 				} else {
 					cb_warning_x (cb_warn_constant_expr, e,
 							_("literal '%.38s' is longer than reference-modification of '%s'"),
-							display_literal(lit_disp,l),f->name);
+							display_literal (lit_disp, l, 0, l->scale), f->name);
 				}
 			}
-			switch(op) {
+			switch (op) {
 			case '=':
 				return cb_false;
 			case '~':
@@ -4279,29 +4287,9 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		return cb_any;
 	}
 
-	if (f->pic->scale < 0)		/* Leave for run-time */
+
+	if (f->pic->scale < 0) {		/* Leave for run-time */
 		return cb_any;
-
-	scale = l->scale;
-	for (j = strlen ((const char *)l->data); scale > 0 && j > 0 && l->data[j-1] == '0'; j--)
-		scale--;
-
-	if (scale > 0
-	 && f->pic->scale >= 0
-	 && f->pic->scale < scale) {
-		copy_file_line (e, CB_TREE(l), NULL);
-		if (cb_warn_constant_expr
-		&& !was_prev_warn (e->source_line, 4)) {
-			cb_warning_x (cb_warn_constant_expr, e,
-						_("literal '%s' has more decimals than '%s'"),
-						display_literal(lit_disp,l),f->name);
-		}
-		switch(op) {
-		case '=':
-			return cb_false;
-		case '~':
-			return cb_true;
-		}
 	}
 
 	if (alph_lit) {
@@ -4311,103 +4299,238 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, const int op, struct cb_l
 		 && !was_prev_warn (e->source_line, 3)) {
 			cb_warning_x (cb_warn_constant_expr, e,
 						_("literal '%s' is alphanumeric but '%s' is numeric"),
-						display_literal(lit_disp,l),f->name);
+						display_literal (lit_disp, l, 0, l->scale), f->name);
 		}
 		return cb_any;
 	}
 
-	/* Adjust length for leading ZERO in literal */
-	for (j=0; l->data[j] == '0'; j++, lit_length--);
+	/* from here on: only check for issues with
+	   numeric non-floating-point literals */
 
-	/* Adjust scale for trailing ZEROS in literal */
-	scale = l->scale;
-	i = lit_length;
-	for (j = strlen ((const char *)l->data);
-		  scale > 0 && j > 0 && l->data[j-1] == '0'; j--,i--)
-		scale--;
+	/* FIXME: consolidate with checks in validate_move for numeric literals,
+	   this should allow also a check for binary values (we currently only
+	   call this when field is USAGE DISPLAY) */
 
-	/* If Literal has more digits in whole portion than field can hold
-	 * Then the literal value will never match the field contents
-	 */
-	if ((i - scale) >= 0
-	 && (f->size - f->pic->scale) >= 0
-	 && (i - scale) > (f->size - f->pic->scale)) {
+	if (zero_val) {
+
+		/* handle ZERO to be as simple as possible */
+		lit_start = lit_length;
+		lit_length = 1;
+		scale = i = 0;
+
+	} else {
+
+		/* Adjust length for leading ZERO in literal */
+		for (lit_start=0; l->data[lit_start] == '0'; lit_start++);
+		lit_length -= lit_start;
+
+		/* Adjust scale for trailing ZEROS in literal */
+		scale = l->scale;
+		i = lit_length;
+		for (j = l->size;
+			  scale > 0 && j > 0 && l->data[j-1] == '0';
+			  j--,i--)
+			scale--;
+	}
+
+	if (scale > 0
+	 && f->pic->scale >= 0
+	 && f->pic->scale < scale) {
 		copy_file_line (e, CB_TREE(l), NULL);
 		if (cb_warn_constant_expr
 		&& !was_prev_warn (e->source_line, 4)) {
 			cb_warning_x (cb_warn_constant_expr, e,
-						_("literal '%s' has more digits than '%s'"),
-						display_literal (lit_disp, l), f->name);
+						_("literal '%s' has more decimals than '%s'"),
+						display_literal (lit_disp, l, lit_start, l->scale), f->name);
 		}
-		switch(op) {
+		switch (op) {
+		case '=':
+			return cb_false;
+		case '~':
+			return cb_true;
+		}
+	}
+
+	if (swap) {
+		/* not: swap, not negate */
+		switch (op) {
+		case '>':
+			op = '<';
+			break;
+		case ']':
+			op = '[';
+			break;
+		case '<':
+			op = '>';
+			break;
+		case '[':
+			op = ']';
+			break;
+		default:
+			break;
+		}
+	}
+
+	/* check for digits in literal vs. field size */
+	if ((i - scale) > 0
+	 && (f->size - f->pic->scale) >= 0
+	 && (i - scale) > (f->size - f->pic->scale)) {
+		/* If Literal has more digits in whole portion than field can hold
+		 * Then the literal value will never match the field contents
+		 */
+		copy_file_line (e, CB_TREE(l), NULL);
+		if (cb_warn_constant_expr
+		&& !was_prev_warn (e->source_line, 4)) {
+			cb_warning_x (cb_warn_constant_expr, e,
+				_("literal '%s' has more digits than '%s'"),
+				display_literal (lit_disp, l, lit_start, l->scale), f->name);
+		}
+		switch (op) {
 		case '=':
 			return cb_false;
 		case '~':
 			return cb_true;
 		}
 		if (f->pic->category == CB_CATEGORY_NUMERIC) {
-			switch(op) {
+			switch (op) {
 			case '>':
 			case ']':
-				return swap ? cb_true : cb_false;
+				return cb_false;
 			case '<':
 			case '[':
-				return swap ? cb_false : cb_true;
+				return cb_true;
 			}
 		}
+
 	}
 
 
-	if (cb_warn_constant_expr && f->pic->have_sign == 0) {
-		/* note: the actual result may be different if non-numeric
-		data is stored in the numeric fields - and may (later)
-		be dependent on compiler configuration flags;
-		therefore we don't set cb_true/cb_false here */
-		/* comparison with zero */
-		if (zero_val) {
-			switch (op) {
-			case '<':
-				copy_file_line (e, CB_TREE(l), NULL);
-				if (!was_prev_warn (e->source_line, 5)) {
-					cb_warning_x (cb_warn_constant_expr, e,
-						_("unsigned '%s' may not be %s %s"),
-						f->name, explain_operator (op), "ZERO");
+	/* Check for numeric issues. 
+	 * note: the actual result may be different if non-numeric
+	 *       data is stored in the numeric fields - and may (later)
+	 *       be dependent on compiler configuration flags;
+	 *       therefore we don't set cb_true/cb_false here
+	 */
+	if (cb_warn_constant_expr
+	 && (op == '<' || op == '[' || op == '>' || op == ']')) {
+		copy_file_line (e, CB_TREE(l), NULL);
+
+		if (f->pic->have_sign == 0) {
+			/* comparison with zero */
+			if (zero_val) {
+				switch (op) {
+				case '<':
+					if (!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("unsigned '%s' may not be %s %s"),
+							f->name, explain_operator (op), "ZERO");
+					}
+					break;
+				case ']':
+					/* don't raise a warning for VALUE THRU
+					   (we still can return cb_true here later) */
+					if (strcmp(current_statement->name, "VALUE THRU")
+					 &&!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("unsigned '%s' may always be %s %s"),
+							f->name, explain_operator (op), "ZERO");
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case ']':
-				copy_file_line (e, CB_TREE(l), NULL);
-				if (!was_prev_warn (e->source_line, 5)) {
-					cb_warning_x (cb_warn_constant_expr, e,
-						_("unsigned '%s' may always be %s %s"),
-						f->name, explain_operator (op), "ZERO");
+				/* comparison with negative literal */
+			} else if (l->sign < 0) {
+				switch (op) {
+				case '<':
+				case '[':
+					if (!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("unsigned '%s' may not be %s %s"),
+							f->name, explain_operator (op),
+							display_literal (lit_disp, l, lit_start, l->scale));
+					}
+					break;
+				case '>':
+				case ']':
+					if (!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("unsigned '%s' may always be %s %s"),
+							f->name, explain_operator (op),
+							display_literal (lit_disp, l, lit_start, l->scale));
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			default:
-				break;
 			}
-			/* comparison with negative literal */
-		} else if (l->sign < 0) {
-			switch (op) {
-			case '<':
-			case '[':
-				copy_file_line (e, CB_TREE(l), NULL);
-				if (!was_prev_warn (e->source_line, 5)) {
-					cb_warning_x (cb_warn_constant_expr, e,
-						_("unsigned '%s' may not be %s %s"),
-						f->name, explain_operator (op), display_literal (lit_disp, l));
+		}
+
+	    /* check for maximum value */
+#if 0 /* we currently call this only when field is USAGE DISPLAY) */
+		if ((f->usage == CB_USAGE_DISPLAY
+		  || (cb_binary_truncate
+		   && (f->usage == CB_USAGE_COMP_5
+	        || f->usage == CB_USAGE_COMP_X
+	        || f->usage == CB_USAGE_BINARY)))
+		 && i == f->size) {
+#else
+		if (i == f->size) {
+#endif
+
+			for (j=0; l->data[lit_start + j] == '9'; j++);
+			if (j != f->size) {
+				/* all fine */
+			} else if (l->sign < 0) {
+				switch (op) {
+				case '<':
+				case '[':
+					if (!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("'%s' may not be %s %s"),
+							f->name, explain_operator ('<'),
+							display_literal (lit_disp, l, lit_start, scale));
+					}
+					break;
+				case ']':
+					/* don't raise a warning for VALUE THRU
+					   (we still can return cb_true here later) */
+					if (strcmp(current_statement->name, "VALUE THRU")
+					 && !was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("'%s' may always be %s %s"),
+							f->name, explain_operator (op),
+							display_literal (lit_disp, l, lit_start, scale));
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case '>':
-			case ']':
-				copy_file_line (e, CB_TREE(l), NULL);
-				if (!was_prev_warn (e->source_line, 5)) {
-					cb_warning_x (cb_warn_constant_expr, e,
-						_("unsigned '%s' may always be %s %s"),
-						f->name, explain_operator (op), display_literal (lit_disp, l));
+			} else {
+				switch (op) {
+				case '>':
+				case ']':
+					if (!was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("'%s' may not be %s %s"),
+							f->name, explain_operator ('>'),
+							display_literal (lit_disp, l, lit_start, scale));
+					}
+					break;
+				case '[':
+					/* don't raise a warning for VALUE THRU
+					   (we still can return cb_true here later) */
+					if (strcmp(current_statement->name, "VALUE THRU")
+					 && !was_prev_warn (e->source_line, 5)) {
+						cb_warning_x (cb_warn_constant_expr, e,
+							_("'%s' may always be %s %s"),
+							f->name, explain_operator (op),
+							display_literal (lit_disp, l, lit_start, scale));
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			default:
-				break;
 			}
 		}
 	}
@@ -4515,7 +4638,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					rslt = rslt / 10;
 					rscale--;
 				}
-				switch(op) {
+				switch (op) {
 				case '+':
 				case '-':
 				case '*':
@@ -4599,6 +4722,17 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 			yl = NULL;
 		}
 
+		/* CHECKME: a call should also be possible when:
+		
+		    (f->usage == CB_USAGE_DISPLAY
+		  || (cb_binary_truncate
+		   && (f->usage == CB_USAGE_COMP_5
+	        || f->usage == CB_USAGE_COMP_X
+	        || f->usage == CB_USAGE_BINARY))
+
+			Shouldn't it?
+		*/
+
 		if (CB_REF_OR_FIELD_P (y)
 		 && CB_FIELD_PTR (y)->usage == CB_USAGE_DISPLAY
 		 && (CB_LITERAL_P(x) || x == cb_zero)
@@ -4631,7 +4765,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				copy_file_line (e, y, x);
 				xval = atoll((const char*)xl->data);
 				yval = atoll((const char*)yl->data);
-				switch(op) {
+				switch (op) {
 				case '=':
 					if (xval == yval) {
 						relop = cb_true;

@@ -11308,6 +11308,8 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	enum cb_optim		optidx;
 	time_t			sectime;
 
+	int	comment_gen;
+
 	struct cb_report *rep;
 
 	/* Clear local program stuff */
@@ -11472,12 +11474,15 @@ codegen (struct cb_program *prog, const int subsequent_call)
 
 	/* Report data fields */
 	if (prog->report_storage) {
-		struct cb_report	*rep;
-		output_target = current_prog->local_include->local_fp;
-		output_local ("\n/* Report data fields */\n\n");
+		comment_gen = 0;
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 			rep = CB_REPORT_PTR (CB_VALUE(l));
-			if(rep) {
+			if (rep) {
+				if (!comment_gen) {
+					comment_gen = 1;
+					output_target = current_prog->local_include->local_fp;
+					output_local ("\n/* Report data fields */\n\n");
+				}
 				output_emit_field(rep->line_counter,NULL);
 				output_emit_field(rep->page_counter,NULL);
 				report_col_pos = 1;
@@ -11485,12 +11490,14 @@ codegen (struct cb_program *prog, const int subsequent_call)
 				output_local ("\n");
 			}
 		}
-		output_local ("\n");
-		output_target = cb_storage_file;
+		if (comment_gen) {
+			output_local ("\n");
+			output_target = cb_storage_file;
+		}
 	}
 
 	/* Reports */
-	if(prog->report_list) {
+	if (prog->report_list) {
 		/* Switch to local storage file */
 		output_target = current_prog->local_include->local_fp;
 		optimize_defs[COB_SET_REPORT] = 1;
@@ -11543,16 +11550,22 @@ codegen (struct cb_program *prog, const int subsequent_call)
 		}
 	}
 
-	if (literal_cache) {
-		output_storage ("\t/* Decimal constants */\n");
-		for (m = literal_cache; m; m = m->next) {
-			if (CB_TREE_CLASS (m->x) == CB_CLASS_NUMERIC
-			 && m->make_decimal) {
-				output_storage ("static\tcob_decimal\t%s%d;\n", CB_PREFIX_DEC_FIELD,m->id);
-				output_storage ("static\tcob_decimal\t*%s%d = NULL;\n", CB_PREFIX_DEC_CONST,m->id);
+	comment_gen = 0;
+	for (m = literal_cache; m; m = m->next) {
+		if (CB_TREE_CLASS (m->x) == CB_CLASS_NUMERIC
+		 && m->make_decimal) {
+			if (!comment_gen) {
+				comment_gen = 1;
+				output_storage ("\n/* Decimal constants */\n");
 			}
+			output_storage ("static\tcob_decimal\t%s%d;\n", CB_PREFIX_DEC_FIELD,m->id);
+			output_storage ("static\tcob_decimal\t*%s%d = NULL;\n", CB_PREFIX_DEC_CONST,m->id);
 		}
 	}
+	if (comment_gen) {
+		output_storage ("\n");
+	}
+
 	/* Clean up by clearing these */
 	attr_cache = NULL;
 	literal_cache = NULL;

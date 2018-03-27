@@ -2181,35 +2181,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
 AT_CLEANUP
 
 
-AT_SETUP([88 with FILLER])
-AT_KEYWORDS([runmisc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01  FILLER       PIC X VALUE SPACE.
-           88 X         VALUE "X".
-       PROCEDURE        DIVISION.
-           IF X
-               DISPLAY "NOT OK"
-               END-DISPLAY
-           END-IF.
-           SET X TO TRUE.
-           IF NOT X
-               DISPLAY "NOT OK"
-               END-DISPLAY
-           END-IF.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
-
-AT_CLEANUP
-
-
 AT_SETUP([Non-overflow after overflow])
 AT_KEYWORDS([runmisc])
 
@@ -3210,34 +3181,6 @@ AT_DATA([caller.cob], [
 AT_CHECK([$COMPILE_MODULE CALLEE.cob], [0], [], [])
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
 AT_CHECK([export COB_LOAD_CASE=UPPER; ./caller], [0], [], [])
-
-AT_CLEANUP
-
-
-AT_SETUP([88 level with FALSE IS clause])
-AT_KEYWORDS([runmisc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       WORKING-STORAGE  SECTION.
-       01  MYFLD        PIC X(6) VALUE "ABCDEF".
-           88  MYFLD88  VALUE "ABCDEF"
-               FALSE IS "OKOKOK".
-       PROCEDURE        DIVISION.
-       ASTART SECTION.
-       A01.
-           SET MYFLD88 TO FALSE.
-           IF MYFLD NOT = "OKOKOK"
-              DISPLAY MYFLD
-              END-DISPLAY
-           END-IF.
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 

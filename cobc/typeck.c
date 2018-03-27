@@ -4533,6 +4533,7 @@ static cb_tree
 build_cond_88 (cb_tree x)
 {
 	struct cb_field	*f;
+	const char	*real_statement;	/* bad hack... */
 	cb_tree		l;
 	cb_tree		t;
 	cb_tree		c1;
@@ -4553,8 +4554,11 @@ build_cond_88 (cb_tree x)
 		t = CB_VALUE (l);
 		if (CB_PAIR_P (t)) {
 			/* VALUE THRU VALUE */
-			c2 = cb_build_binary_op (cb_build_binary_op (CB_PAIR_X (t), '[', x),
+			real_statement = current_statement->name;
+			current_statement->name = "VALUE THRU";
+			c2 = cb_build_binary_op (cb_build_binary_op (x, ']', CB_PAIR_X (t)),
 						 '&', cb_build_binary_op (x, '[', CB_PAIR_Y (t)));
+			current_statement->name = real_statement;
 		} else {
 			/* VALUE */
 			c2 = cb_build_binary_op (x, '=', t);

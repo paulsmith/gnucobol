@@ -95,23 +95,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID. prog.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01 WS-LINE-NUMBER    PIC 9(3) VALUE ZERO.
-       01 WS-NUMBER         PIC 9(3)V99 VALUE ZERO.
-       01 WS-TEXT           PIC X(5) VALUE 'CAT'.
-       01 PIC-9-SIGNED      PIC S9(2) VALUE 5.
-       01 PIC-9-NOT-SIGNED  PIC 9(3) VALUE 5.
-       01 PIC-9-NOT-DECIMAL PIC 9(3) VALUE 5.
-       01 XX                PIC 9(2) VALUE 2.
-       01 PIC-9-DECIMAL     PIC 9(3)V9 VALUE 5.
-       01 COMPUTE-1         PIC 999V9999 VALUE 654.1873.
-       01 GROUP-ITEM-X6     PIC X(6) VALUE 'CAT'.
-       78 CONST1            VALUE 'CAT     '.
-       01 CONST2            CONSTANT AS 00000001234.
-       01 IF-D16            PIC PP99 VALUE .0012.
+       01 WS-LINE-NUMBER         PIC 9(3) VALUE ZERO.
+       01 WS-NUMBER              PIC 9(3)V99 VALUE ZERO.
+       01 WS-TEXT                PIC X(5) VALUE 'CAT'.
+       01 PIC-9-SIGNED           PIC S9(2) VALUE 5.
+       01 PIC-9-SIGNED-DECIMAL   PIC S9(2)V99 VALUE 5.
+       01 PIC-9-NOT-SIGNED       PIC 9(3) VALUE 5.
+       01 PIC-9-NOT-DECIMAL      PIC 9(3) VALUE 5.
+       01 XX                     PIC 9(2) VALUE 2.
+       01 PIC-9-DECIMAL          PIC 9(3)V9 VALUE 5.
+       01 COMPUTE-1              PIC 999V9999 VALUE 654.1873.
+       01 GROUP-ITEM-X6          PIC X(6) VALUE 'CAT'.
+       78 CONST1                 VALUE 'CAT     '.
+       01 CONST2                 CONSTANT AS 00000001234.
+       01 IF-D16                 PIC PP99 VALUE .0012.
        PROCEDURE DIVISION.
        MAIN.
-           IF GROUP-ITEM-X6 = '1234567'
-               CONTINUE.
+           IF GROUP-ITEM-X6 = '1234567'   CONTINUE.
            IF PIC-9-NOT-DECIMAL = 1.1
                CONTINUE.
            IF PIC-9-NOT-DECIMAL = 1.0
@@ -189,14 +189,14 @@ AT_DATA([prog.cob], [
            IF ( COMPUTE-1 < 654.20038) AND
               ( COMPUTE-1 > 654.17422) THEN
               CONTINUE.
-           IF ( COMPUTE-1 < 5654.20)
-              CONTINUE.
-           IF ( COMPUTE-1 > 5654.20)
-              CONTINUE.
-           IF ( 5654.20 > COMPUTE-1)
-              CONTINUE.
-           IF ( 5654.20 < COMPUTE-1)
-              CONTINUE.
+           IF ( COMPUTE-1 < 5654.20) CONTINUE.
+           IF ( COMPUTE-1 > 5654.20) CONTINUE.
+           IF   COMPUTE-1 < 05654.20 CONTINUE.
+           IF   COMPUTE-1 > 05654.20 CONTINUE.
+           IF ( 5654.20 > COMPUTE-1) CONTINUE.
+           IF ( 5654.20 < COMPUTE-1) CONTINUE.
+           IF  05654.20 > COMPUTE-1  CONTINUE.
+           IF  05654.20 < COMPUTE-1  CONTINUE.
            IF IF-D16 POSITIVE
               CONTINUE.
            IF IF-D16 NOT POSITIVE
@@ -207,14 +207,14 @@ AT_DATA([prog.cob], [
               CONTINUE.
            IF PIC-9-NOT-SIGNED > (25 - 50)
                CONTINUE.
-           IF PIC-9-NOT-SIGNED >= -1
-               CONTINUE.
-           IF PIC-9-NOT-SIGNED > 0.0
-               CONTINUE.
+           IF PIC-9-NOT-SIGNED >= -1  CONTINUE.
+           IF PIC-9-NOT-SIGNED >= -.1 CONTINUE.
+           IF PIC-9-NOT-SIGNED > 0.0  CONTINUE.
+           IF PIC-9-NOT-SIGNED >  .0  CONTINUE.
            IF PIC-9-NOT-SIGNED > ZERO
                CONTINUE.
-           IF PIC-9-NOT-SIGNED >= 0.0
-               CONTINUE.
+           IF PIC-9-NOT-SIGNED >= 0.0 CONTINUE.
+           IF PIC-9-NOT-SIGNED >=  .0 CONTINUE.
            IF PIC-9-NOT-SIGNED >= ZERO
                CONTINUE.
            IF GROUP-ITEM-X6 (1:6) = '123456'
@@ -236,14 +236,31 @@ AT_DATA([prog.cob], [
                CONTINUE.
            IF GROUP-ITEM-X6 (WS-LINE-NUMBER:) = '12345'
                CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >     9     CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >   009     CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >   900     CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >   909     CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >   999     CONTINUE.
+           IF PIC-9-NOT-DECIMAL    >  0000999  CONTINUE.
+           IF PIC-9-DECIMAL        >   999     CONTINUE.
+           IF PIC-9-DECIMAL        >   990.9   CONTINUE.
+           IF PIC-9-DECIMAL        >   999.9   CONTINUE.
+           IF PIC-9-DECIMAL        >  0999.90  CONTINUE.
+           IF PIC-9-DECIMAL        > -0999.90  CONTINUE.
+           IF PIC-9-SIGNED-DECIMAL >    99.99  CONTINUE.
+           IF PIC-9-SIGNED-DECIMAL >=   99.99  CONTINUE.
+           IF PIC-9-SIGNED-DECIMAL <   -99.99  CONTINUE.
+           IF PIC-9-SIGNED-DECIMAL <= -099.990 CONTINUE.
+           IF PIC-9-SIGNED-DECIMAL <= -099.991 CONTINUE.
+
 
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob:21: warning: literal '1234567' is longer than 'GROUP-ITEM-X6'
-prog.cob:21: warning: expression is always FALSE
+prog.cob:22: warning: literal '1234567' is longer than 'GROUP-ITEM-X6'
+prog.cob:22: warning: expression is always FALSE
 prog.cob:23: warning: literal '1.1' has more decimals than 'PIC-9-NOT-DECIMAL'
 prog.cob:23: warning: expression is always FALSE
 prog.cob:27: warning: literal '1.01' has more decimals than 'PIC-9-DECIMAL'
@@ -289,17 +306,28 @@ prog.cob:97: warning: literal '654.20038' has more decimals than 'COMPUTE-1'
 prog.cob:98: warning: literal '654.17422' has more decimals than 'COMPUTE-1'
 prog.cob:100: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:100: warning: expression is always TRUE
+prog.cob:101: warning: literal '5654.20' has more digits than 'COMPUTE-1'
+prog.cob:101: warning: expression is always FALSE
 prog.cob:102: warning: literal '5654.20' has more digits than 'COMPUTE-1'
-prog.cob:102: warning: expression is always FALSE
+prog.cob:102: warning: expression is always TRUE
+prog.cob:103: warning: literal '5654.20' has more digits than 'COMPUTE-1'
+prog.cob:103: warning: expression is always FALSE
 prog.cob:104: warning: literal '5654.20' has more digits than 'COMPUTE-1'
 prog.cob:104: warning: expression is always TRUE
+prog.cob:105: warning: literal '5654.20' has more digits than 'COMPUTE-1'
+prog.cob:105: warning: expression is always FALSE
 prog.cob:106: warning: literal '5654.20' has more digits than 'COMPUTE-1'
-prog.cob:106: warning: expression is always FALSE
+prog.cob:106: warning: expression is always TRUE
+prog.cob:107: warning: literal '5654.20' has more digits than 'COMPUTE-1'
+prog.cob:107: warning: expression is always FALSE
 prog.cob:112: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
 prog.cob:114: warning: unsigned 'IF-D16' may not be LESS THAN ZERO
 prog.cob:117: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER THAN -25
 prog.cob:118: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -1
+prog.cob:119: warning: literal '-.1' has more decimals than 'PIC-9-NOT-SIGNED'
+prog.cob:119: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL -.1
 prog.cob:124: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
+prog.cob:125: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 prog.cob:126: warning: unsigned 'PIC-9-NOT-SIGNED' may always be GREATER OR EQUAL ZERO
 prog.cob:135: warning: literal '123456' is longer than reference-modification of 'GROUP-ITEM-X6'
 prog.cob:135: warning: expression is always FALSE
@@ -309,6 +337,16 @@ prog.cob:139: warning: literal '12345' is longer than reference-modification of 
 prog.cob:139: warning: expression is always FALSE
 prog.cob:141: warning: literal '12345' is longer than reference-modification of 'GROUP-ITEM-X6'
 prog.cob:141: warning: expression is always FALSE
+prog.cob:151: warning: 'PIC-9-NOT-DECIMAL' may not be GREATER THAN 999
+prog.cob:152: warning: 'PIC-9-NOT-DECIMAL' may not be GREATER THAN 999
+prog.cob:155: warning: 'PIC-9-DECIMAL' may not be GREATER THAN 999.9
+prog.cob:156: warning: 'PIC-9-DECIMAL' may not be GREATER THAN 999.9
+prog.cob:157: warning: unsigned 'PIC-9-DECIMAL' may always be GREATER THAN -999.90
+prog.cob:158: warning: 'PIC-9-SIGNED-DECIMAL' may not be GREATER THAN 99.99
+prog.cob:159: warning: 'PIC-9-SIGNED-DECIMAL' may not be GREATER THAN 99.99
+prog.cob:160: warning: 'PIC-9-SIGNED-DECIMAL' may not be LESS THAN -99.99
+prog.cob:161: warning: 'PIC-9-SIGNED-DECIMAL' may not be LESS THAN -99.99
+prog.cob:162: warning: literal '-99.991' has more decimals than 'PIC-9-SIGNED-DECIMAL'
 ])
 
 AT_CLEANUP

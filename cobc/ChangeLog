@@ -1,4 +1,21 @@
 
+2018-03-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (build_cond_88): for VALUE THRU pass generation of this
+	  clause by temporarily changing current_statement->name, changed
+	  generation of the two conditions to the more natural variant
+	  "var >= a && var <= b" instead of "a <= var && var <= b"
+	* tree.c (compare_field_literal): added warning for numerical values
+	  when compared against their maximum value
+	* codegen.c (codegen): generate some comments only when relevant
+
+2018-03-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* field.c (validate_any_length_item): fixed missing error position
+	* tree.c (word_hash): renamed from hash
+	* tree.c: check for alphabetic after checking for more common
+	  USAGE/categories
+
 2018-03-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, tree.h: emit error if RECORD VARYING has equal implied limits.
