@@ -10158,7 +10158,7 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY UPON])
-AT_KEYWORDS([DISPLAY])
+AT_KEYWORDS([CHAINING])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -10169,56 +10169,63 @@ AT_DATA([prog.cob], [
            PRINTER IS PRINTER.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       PROCEDURE DIVISION.
-       DISPLAY "This is sent to CONSOLE" UPON CONSOLE.
-       DISPLAY "This is sent to SYSERR" UPON SYSERR.
-       DISPLAY "This is sent to PRINTER" UPON PRINTER.
-       DISPLAY "This is also sent to CONSOLE" UPON CONSOLE.
-       DISPLAY "This is also sent to SYSERR" UPON SYSERR.
-       DISPLAY "This is also sent to PRINTER" UPON PRINTER.
+	   77 note PIC X(05).
+       PROCEDURE DIVISION CHAINING note.
+       DISPLAY "This is sent to CONSOLE " note UPON CONSOLE.
+       DISPLAY "This is sent to SYSERR  " note UPON SYSERR.
+       DISPLAY "This is sent to PRINTER " note UPON PRINTER.
+       DISPLAY "This is also sent to CONSOLE " note UPON CONSOLE.
+       DISPLAY "This is also sent to SYSERR  " note UPON SYSERR.
+       DISPLAY "This is also sent to PRINTER " note UPON PRINTER.
        STOP RUN RETURNING 0.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
-[This is sent to CONSOLE
-This is sent to PRINTER
-This is also sent to CONSOLE
-This is also sent to PRINTER
+AT_CHECK([$COBCRUN_DIRECT ./prog PLAIN], [0],
+[This is sent to CONSOLE PLAIN
+This is sent to PRINTER PLAIN
+This is also sent to CONSOLE PLAIN
+This is also sent to PRINTER PLAIN
 ],
-[This is sent to SYSERR
-This is also sent to SYSERR
+[This is sent to SYSERR  PLAIN
+This is also sent to SYSERR  PLAIN
 ])
 
 AT_CHECK([COB_DISPLAY_PRINT_PIPE='cat >>prt.log' \
-$COBCRUN_DIRECT ./prog], [0],
-[This is sent to CONSOLE
-This is also sent to CONSOLE
+$COBCRUN_DIRECT ./prog PIPE.], [0],
+[This is sent to CONSOLE PIPE.
+This is also sent to CONSOLE PIPE.
 ],
-[This is sent to SYSERR
-This is also sent to SYSERR
+[This is sent to SYSERR  PIPE.
+This is also sent to SYSERR  PIPE.
 ])
 
 AT_CHECK([COB_DISPLAY_PRINT_FILE='prt.log' \
-$COBCRUN_DIRECT ./prog], [0],
-[This is sent to CONSOLE
-This is also sent to CONSOLE
+$COBCRUN_DIRECT ./prog PRINT], [0],
+[This is sent to CONSOLE PRINT
+This is also sent to CONSOLE PRINT
 ],
-[This is sent to SYSERR
-This is also sent to SYSERR
+[This is sent to SYSERR  PRINT
+This is also sent to SYSERR  PRINT
 ])
 
 AT_CAPTURE_FILE(./prt.log)
 
 AT_DATA([reference],
-[This is sent to PRINTER
-This is also sent to PRINTER
-This is sent to PRINTER
-This is also sent to PRINTER
+[This is sent to PRINTER PIPE.
+This is also sent to PRINTER PIPE.
+This is sent to PRINTER PRINT
+This is also sent to PRINTER PRINT
 ])
 
-AT_CHECK([diff reference prt.log], [0])
+AT_CHECK([diff reference prt.log], [0], [], [],
+
+# Previous test "failed" --> check if EOL of PIPE is the issue
+
+AT_CHECK([sed -e 's/PIPE.\r/PIPE./g' prt.log > prt2.log], [0], [], [])
+AT_CHECK([diff reference prt2.log], [0], [], [])
+)
 
 AT_CLEANUP
 

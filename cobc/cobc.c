@@ -4224,7 +4224,7 @@ process_filtered (const char *cmd, struct filename *fn)
 	}
 
 	/* Open pipe to catch output of cl.exe */
-	pipe = _popen (cmd, "r");
+	pipe = popen (cmd, "r");
 
 	if (!pipe) {
 		return 1; /* checkme */

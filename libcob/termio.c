@@ -278,6 +278,7 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 	int		nlattr, close_fp, pclose_fp;
 	cob_u32_t	disp_redirect;
 	va_list		args;
+	const char *mode;
 
 	disp_redirect = 0;
 	pclose_fp = close_fp = 0;
@@ -289,7 +290,12 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 			fp = cobsetptr->cob_display_print_file;
 		/* display to configured print file */
 		} else if (cobsetptr->cob_display_print_filename != NULL) {
-			fp = fopen (cobsetptr->cob_display_print_filename, "a");
+			if (!cobsetptr->cob_unix_lf) {
+				mode = "a";
+			} else {
+				mode = "ab";
+			}
+			fp = fopen (cobsetptr->cob_display_print_filename, mode);
 			if (fp == NULL) {
 				fp = stderr;
 			} else {
@@ -297,7 +303,12 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 			}
 		/* display to configured print command (piped) */
 		} else if (cobsetptr->cob_display_print_pipe != NULL) {
-			fp = popen (cobsetptr->cob_display_print_pipe, "w");
+			if (!cobsetptr->cob_unix_lf) {
+				mode = "w";
+			} else {
+				mode = "wb";
+			}
+			fp = popen (cobsetptr->cob_display_print_pipe, mode);
 			if (fp == NULL) {
 				fp = stderr;
 			} else {
