@@ -3609,7 +3609,7 @@ has_context_sensitive_indicator (const char *word, const size_t size)
 static void
 strncpy_upper (char *dest, const char * const source, const size_t len)
 {
-	int	i;
+	size_t	i;
 
 	for (i = 0; i < len; ++i) {
 		if (cob_lower_tab[(int)source[i]]) {
@@ -3634,7 +3634,7 @@ allocate_upper_case_str_removing_asterisk (const char *word, const size_t size,
 	}
 
 	*out_str = cobc_main_malloc (chars_to_copy + 1U);
-        strncpy_upper (*out_str, word, chars_to_copy);
+	strncpy_upper (*out_str, word, chars_to_copy);
 	(*out_str)[chars_to_copy] = '\0';
 }
 
