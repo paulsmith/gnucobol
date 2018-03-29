@@ -63,7 +63,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -113,7 +113,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -152,7 +152,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -192,7 +192,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -234,7 +234,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -277,7 +277,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -315,7 +315,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -354,7 +354,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -409,7 +409,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdisplay-special-fig-consts prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -464,7 +464,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdisplay-special-fig-consts prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -525,7 +525,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdisplay-special-fig-consts prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -582,7 +582,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -fdisplay-special-fig-consts prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -621,7 +621,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -669,7 +669,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -710,7 +710,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -762,7 +762,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -833,7 +833,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -890,7 +890,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -948,7 +948,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1005,7 +1005,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1047,7 +1047,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1086,7 +1086,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1144,7 +1144,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1202,7 +1202,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1257,7 +1257,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1298,7 +1298,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1338,7 +1338,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1381,7 +1381,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1420,7 +1420,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1462,7 +1462,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1503,7 +1503,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1544,7 +1544,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1588,7 +1588,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1629,7 +1629,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1668,7 +1668,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
 
@@ -1707,6 +1707,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$RUN_PROG_MANUAL], [0], ignore, [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
