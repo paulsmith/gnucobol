@@ -114,7 +114,7 @@
 #define COB_SHARED_OPT ""
 
 /* Can use strftime for timezone */
-#define COB_STRFTIME 1
+/* #undef COB_STRFTIME */
 
 /* Strip command */
 /* #undef COB_STRIP_CMD */
