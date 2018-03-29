@@ -22,7 +22,9 @@
 ###  division clauses.
 
 AT_SETUP([LINE])
-AT_KEYWORDS([LINE])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -67,7 +69,9 @@ AT_CLEANUP
 
 
 AT_SETUP([COLUMN])
-AT_KEYWORDS([COLUMN COL])
+AT_KEYWORDS([COL])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -115,7 +119,9 @@ AT_CLEANUP
 
 
 AT_SETUP([LINE non-zero, COLUMN zero])
-AT_KEYWORDS([LINE COLUMN COL zero 0 extensions])
+AT_KEYWORDS([COL extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -152,7 +158,9 @@ AT_CLEANUP
 
 
 AT_SETUP([LINE zero, COLUMN non-zero])
-AT_KEYWORDS([LINE COLUMN COL zero 0 extensions])
+AT_KEYWORDS([COL zero extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -190,7 +198,9 @@ AT_CLEANUP
 
 
 AT_SETUP([LINE zero, COLUMN zero])
-AT_KEYWORDS([LINE COLUMN COL zero 0 extensions])
+AT_KEYWORDS([COL extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -230,7 +240,9 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY AT])
-AT_KEYWORDS([AT extensions])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -271,7 +283,9 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY LOW-VALUES (one statement)])
-AT_KEYWORDS([LOW-VALUE LOW-VALUES extensions])
+AT_KEYWORDS([LOW-VALUE extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -307,7 +321,9 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY LOW-VALUES (two statements)])
-AT_KEYWORDS([LOW-VALUE LOW-VALUES extensions])
+AT_KEYWORDS([LOW-VALUE extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -344,7 +360,9 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY SPACES])
-AT_KEYWORDS([SPACE SPACES extensions])
+AT_KEYWORDS([SPACE extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -399,6 +417,8 @@ AT_CLEANUP
 AT_SETUP([DISPLAY ALL X'01'])
 AT_KEYWORDS([SOH extensions])
 
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -451,6 +471,8 @@ AT_CLEANUP
 
 AT_SETUP([DISPLAY ALL X'02'])
 AT_KEYWORDS([STX extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -511,6 +533,8 @@ AT_CLEANUP
 AT_SETUP([DISPLAY ALL X'07'])
 AT_KEYWORDS([BELL BEEP extensions])
 
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -566,6 +590,8 @@ AT_CLEANUP
 AT_SETUP([Screen position after field display])
 AT_KEYWORDS([LINE COLUMN])
 
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -603,6 +629,8 @@ AT_CLEANUP
 
 AT_SETUP([Overridden clauses (1)])
 AT_KEYWORDS([LINE COLUMN COL])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -649,6 +677,8 @@ AT_CLEANUP
 AT_SETUP([Overridden clauses (2)])
 AT_KEYWORDS([HIGHLIGHT LOWLIGHT])
 
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -686,7 +716,9 @@ AT_CLEANUP
 
 
 AT_SETUP([AUTO])
-AT_KEYWORDS([AUTO])
+AT_KEYWORDS([position])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -737,6 +769,8 @@ AT_CLEANUP
 
 AT_SETUP([BACKGROUND- / FOREGROUND-COLOUR])
 AT_KEYWORDS([BACKGROUND-COLOR BACKGROUND-COLOUR FOREGROUND-COLOR])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -805,7 +839,9 @@ AT_CLEANUP
 
 
 AT_SETUP([BEEP])
-AT_KEYWORDS([BEEP BELL])
+AT_KEYWORDS([BELL FLASH])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -860,7 +896,9 @@ AT_CLEANUP
 
 
 AT_SETUP([BLANK LINE])
-AT_KEYWORDS([BLANK LINE])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -916,7 +954,9 @@ AT_CLEANUP
 
 
 AT_SETUP([BLANK SCREEN])
-AT_KEYWORDS([BLANK SCREEN])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -971,7 +1011,9 @@ AT_CLEANUP
 
 
 AT_SETUP([BLANK ignored in ACCEPT])
-AT_KEYWORDS([BLANK])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1011,7 +1053,9 @@ AT_CLEANUP
 
 
 AT_SETUP([BLINK])
-AT_KEYWORDS([BLINK])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1048,7 +1092,9 @@ AT_CLEANUP
 
 
 AT_SETUP([ERASE EOS])
-AT_KEYWORDS([ERASE EOS])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1104,7 +1150,9 @@ AT_CLEANUP
 
 
 AT_SETUP([ERASE EOL])
-AT_KEYWORDS([ERASE EOL])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1160,7 +1208,9 @@ AT_CLEANUP
 
 
 AT_SETUP([ERASE ignored in ACCEPT])
-AT_KEYWORDS([ERASE EOS])
+AT_KEYWORDS([EOS])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1213,7 +1263,9 @@ AT_CLEANUP
 
 
 AT_SETUP([FULL and REQUIRED])
-AT_KEYWORDS([FULL REQUIRED])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1252,7 +1304,9 @@ AT_CLEANUP
 
 
 AT_SETUP([HIGHLIGHT])
-AT_KEYWORDS([HIGHLIGHT])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1290,7 +1344,9 @@ AT_CLEANUP
 
 
 AT_SETUP([LEFTLINE])
-AT_KEYWORDS([LEFTLINE GRID])
+AT_KEYWORDS([GRID])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 # Currently not implemented
 AT_XFAIL_IF([true])
@@ -1331,7 +1387,9 @@ AT_CLEANUP
 
 
 AT_SETUP([LOWLIGHT])
-AT_KEYWORDS([LOWLIGHT])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1368,7 +1426,9 @@ AT_CLEANUP
 
 
 AT_SETUP([OVERLINE])
-AT_KEYWORDS([OVERLINE])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 # Currently not implemented
 AT_XFAIL_IF([true])
@@ -1408,7 +1468,9 @@ AT_CLEANUP
 
 
 AT_SETUP([REVERSE-VIDEO])
-AT_KEYWORDS([REVERSE-VIDEO])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1447,7 +1509,9 @@ AT_CLEANUP
 
 
 AT_SETUP([SECURE])
-AT_KEYWORDS([SECURE PASSWORD])
+AT_KEYWORDS([PASSWORD])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1486,7 +1550,9 @@ AT_CLEANUP
 
 
 AT_SETUP([SIZE with items])
-AT_KEYWORDS([PROTECTED SIZE extensions])
+AT_KEYWORDS([PROTECTED extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1528,7 +1594,9 @@ AT_CLEANUP
 
 
 AT_SETUP([SIZE with figurative constants])
-AT_KEYWORDS([PROTECTED SIZE extensions])
+AT_KEYWORDS([PROTECTED extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1567,7 +1635,9 @@ AT_CLEANUP
 
 
 AT_SETUP([UPDATE])
-AT_KEYWORDS([UPDATE extensions])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1604,7 +1674,9 @@ AT_CLEANUP
 
 
 AT_SETUP([UNDERLINE])
-AT_KEYWORDS([UNDERLINE])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
