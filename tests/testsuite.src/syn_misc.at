@@ -4462,7 +4462,7 @@ AT_DATA([prog.cob], [
              88 g-val-a value 'a'.
              88 g-val-b value 'b'.
        PROCEDURE       DIVISION USING A B.
-           
+
            IF D2 OMITTED OR Eb2 OMITTED or F2 OMITTED
              set g-val-b to true
            END-IF
@@ -5013,7 +5013,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
 
            IF var-len < 16
-               move spaces 
+               move spaces
                  to var (17 - var-len:var-len - 8)
            END-IF
 
@@ -5064,7 +5064,7 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
 
            IF var-len < 16
-               move spaces 
+               move spaces
                  to var (17 - var-len:var-len - 8)
                IF IF.
 
@@ -5298,6 +5298,26 @@ AT_DATA([prog.cob], [
            if test-var greater or equal todo
               display 'still fine'
            end-if
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([MOVE of hexadecimal zero-length literal])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  a           PIC X.
+
+       PROCEDURE DIVISION.
+           MOVE X'' TO a
            .
 ])
 

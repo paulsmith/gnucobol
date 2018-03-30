@@ -8275,12 +8275,10 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				if (!suppress_warn) {
 					goto invalid;
 				}
-#if	1	/* RXWRXW - Initialize warn */
 				if (warningopt) {
 					cb_warning_x (COBC_WARN_FILLER, loc,
 						_("numeric move to ALPHABETIC"));
 				}
-#endif
 				break;
 			default:
 				if (is_value) {
@@ -8526,7 +8524,8 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			/* Size check */
 			size = cb_field_size (dst);
 			if (size > 0
-				&& !fdst->flag_any_length) {
+			    && l->size > 0
+			    && !fdst->flag_any_length) {
 				/* check the real size */
 				fdst = CB_FIELD_PTR (dst);
 				if (fdst->flag_justified) {
