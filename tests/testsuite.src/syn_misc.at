@@ -5305,21 +5305,62 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([MOVE of hexadecimal zero-length literal])
+AT_SETUP([zero-length literals])
 AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
        PROGRAM-ID.     prog.
-
+       
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
-       01  a           PIC X.
-
-       PROCEDURE DIVISION.
-           MOVE X'' TO a
+       01  x           PIC X.
+       01  nat         PIC N.
+       01  n           PIC 9.
+       
+       PROCEDURE       DIVISION.
+           MOVE X'' TO x
+           MOVE H'' TO x
+           MOVE Z'' TO x
+           MOVE L'' TO x
+           MOVE N"" TO nat
+           MOVE NX'' TO nat
+           MOVE B"" TO n
+           MOVE BX"" TO n
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:12: warning: hexadecimal literal has zero length; X'00' will be assumed
+prog.cob:13: error: H literals must contain at least one character
+prog.cob:14: error: invalid Z literal: ''
+prog.cob:14: error: Z literals must contain at least one character
+prog.cob:15: error: invalid L literal: ''
+prog.cob:15: error: L literals must contain at least one character
+prog.cob:16: warning: national literal has zero length; a SPACE will be assumed
+prog.cob:16: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:17: warning: hexadecimal literal has zero length; X'00' will be assumed
+prog.cob:18: warning: Boolean literal has zero length; B'0' will be assumed
+prog.cob:19: warning: hexadecimal literal has zero length; X'00' will be assumed
+])
+AT_CHECK([$COMPILE_ONLY -fzero-length-literals=error prog.cob], [1], [],
+[prog.cob:8: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:12: error: zero-length literal used
+prog.cob:12: warning: hexadecimal literal has zero length; X'00' will be assumed
+prog.cob:13: error: H literals must contain at least one character
+prog.cob:14: error: invalid Z literal: ''
+prog.cob:14: error: Z literals must contain at least one character
+prog.cob:15: error: invalid L literal: ''
+prog.cob:15: error: L literals must contain at least one character
+prog.cob:16: error: zero-length literal used
+prog.cob:16: warning: national literal has zero length; a SPACE will be assumed
+prog.cob:16: warning: handling of national literal is unfinished; implementation is likely to be changed
+prog.cob:17: error: zero-length literal used
+prog.cob:17: warning: hexadecimal literal has zero length; X'00' will be assumed
+prog.cob:18: error: zero-length literal used
+prog.cob:18: warning: Boolean literal has zero length; B'0' will be assumed
+prog.cob:19: error: zero-length literal used
+prog.cob:19: warning: hexadecimal literal has zero length; X'00' will be assumed
+])
 AT_CLEANUP

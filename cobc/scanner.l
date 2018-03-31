@@ -355,7 +355,7 @@ BX"\""[^""\n]*"\"" {
 	RETURN_TOK (scan_x (yytext + 3, "BX"));
 }
 
-B#[0-9]* {
+B#[0-9]+ {
 	/*
 	  To avoid subtle silent errors, such as B#021, this rule (and the ones
 	  following) here admit some invalid literals which emit errors when
@@ -366,14 +366,14 @@ B#[0-9]* {
 	RETURN_TOK (scan_b (yytext + 2, "B#"));
 }
 
-O#[0-9]* {
+O#[0-9]+ {
 	/* ACUCOBOL octal numeric literal */
 	cobc_force_literal = 0;
 	RETURN_TOK (scan_o (yytext + 2, "O#"));
 }
 
-X#[0-9A-Za-z]* |
-H#[0-9A-Za-z]* {
+X#[0-9A-Za-z]+ |
+H#[0-9A-Za-z]+ {
 	/* ACUCOBOL hexadecimal numeric literal */
 	char type[3] = "x#";
 	type[0] = yytext [0];
@@ -1176,17 +1176,21 @@ read_literal (const char mark, const char *type)
 			error_literal ("", plex_buff);
 		}
 	}
-	/* FIXME: COBOL 2014 allows this (and needs it for DYNAMIC LENGTH items),
-	   while other versions do not allow this at all
-	   --> add a compiler support configuration for "OK" => zero length,
-	   "warning" => current implementation, "error" (for example in cobol2002),
-	   "ignore" => assume a space without warning; make sure zero length items
-	   work everywhere (should do as we support zero lengths via ODO items already)
+	/* FIXME: Exact behaviour should depend on level of support:
+	    * "OK" => stanadard behaviour, e.g. normal items filled with spaces/
+                      zeroes, DYNAMIC LENGTH items made empty
+	    * "warning" => current implementation, interpret '' as SPACE/ZERO
+	    * "ignore" => assume a space without warning; make sure zero length
+                          items work everywhere (should do as we support zero
+                          lengths via ODO items already)
 	*/
 
 	if (!i) {
+		cb_verify (cb_zero_length_lit, _("zero-length literal"));
 		cb_warning (COBC_WARN_FILLER,
-			_("alphanumeric literal has zero length; a SPACE will be assumed"));
+			    type[0] == 'N' ?
+			    _("national literal has zero length; a SPACE will be assumed") :
+			    _("alphanumeric literal has zero length; a SPACE will be assumed"));
 		plex_buff[i++] = ' ';
 	} else if (i > cb_lit_length) {
 		i = cb_lit_length;
@@ -1226,6 +1230,22 @@ scan_x (const char *text, const char *type)
 
 	currlen = strlen (text);
 	currlen--;
+	if (currlen == 0) {
+		cb_verify (cb_zero_length_lit, _("zero-length literal"));
+		plex_buff[0] = '\0';
+		plex_buff[1] = '\0';
+		cb_warning (COBC_WARN_FILLER,
+			    _("hexadecimal literal has zero length; X'00' will be assumed"));
+		if (type[0] == 'B') {
+			yylval = cb_build_numeric_literal (0, "0", 0);
+		} else if (type[0] == 'N') {
+			yylval = cb_build_alphanumeric_literal (plex_buff, 1);
+		} else {
+			yylval = cb_build_national_literal (plex_buff, 1);
+		}
+		RETURN_TOK (LITERAL);
+	}
+
 	if (unlikely (currlen + 1 > plex_size)) {
 		plex_size = currlen + 1;
 		plex_buff = cobc_realloc (plex_buff, plex_size);
@@ -1342,7 +1362,7 @@ scan_x (const char *text, const char *type)
 		if (unlikely (literal_error != 0)) {
 			goto error;
 		}
-		if (type [0] != 'N') {
+		if (type[0] != 'N') {
 			yylval = cb_build_alphanumeric_literal (plex_buff, (size_t)(dst - plex_buff));
 		} else {
 			yylval = cb_build_national_literal (plex_buff, (size_t)(dst - plex_buff));
@@ -1371,8 +1391,14 @@ scan_z (const char *text, const char *type)
 			_("literal length %d exceeds %d characters"),
 			  (int) currlen, cb_lit_length);
 		error_literal (type, text);
-		yylval = cb_error_node;
-		RETURN_TOK (LITERAL);
+		goto error;
+	} else if (unlikely (currlen == 1)) {
+		currlen--;
+	        snprintf (err_msg, COB_MINI_MAX,
+			  _("%s literals must contain at least one character"),
+			  type);
+		error_literal (type, "");
+		goto error;
 	}
 	if (unlikely (currlen > plex_size)) {
 		plex_size = currlen;
@@ -1386,6 +1412,10 @@ scan_z (const char *text, const char *type)
 	if (type[0] == 'L') {
 		CB_LITERAL(yylval)->llit = 1;
 	}
+	RETURN_TOK (LITERAL);
+
+ error:
+	yylval = cb_error_node;
 	RETURN_TOK (LITERAL);
 }
 
@@ -1409,6 +1439,10 @@ scan_h (const char *text, const char *type)
 	memcpy (plex_buff, text, currlen + 1);
 	if (type[1] != '#') {
 		currlen--;
+		if (currlen == 0) {
+			cb_error (_("H literals must contain at least one character"));
+			goto error;
+		}
 		plex_buff[currlen] = 0;
 	}
 	if (unlikely (currlen > 16)) {
@@ -1487,6 +1521,14 @@ scan_b (const char *text, const char *type)
 	if (type[1] == 0) {
 		if (!cb_verify (cb_numeric_boolean, _("numeric boolean literal"))) {
 			goto error; /* early exit possible as complete literal is consumed */
+		}
+		if (currlen == 1) {
+			cb_verify (cb_zero_length_lit, _("zero-length literal"));
+			cb_warning (COBC_WARN_FILLER,
+				    _("Boolean literal has zero length; B'0' will be assumed"));
+			/* FIXME: we should really build a boolean literal... */
+			yylval = cb_build_numeric_literal (0, "0", 0);
+			RETURN_TOK (LITERAL);
 		}
 	} else {
 		if (!cb_verify (cb_acu_literals, _("ACUCOBOL numeric literal"))) {
@@ -1794,11 +1836,11 @@ scan_floating_numeric (const char *text)
 				}
 				/* LCOV_EXCL_STOP */
 			}
-	
+
 			if (exp_sign == -1) {
 				exponent = -exponent;
 			}
-	
+
 			/* "The maximum permitted value and minimum permitted value of
 			    the exponent is implementor-defined" */
 			/* Exponent range -383  thru +384  for FLOAT-DECIMAL-16 */

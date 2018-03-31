@@ -1,4 +1,9 @@
 
+2018-03-31  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.def, scanner.l: added zero-length-literals config option.
+	* scanner.l: make zero-length Boolean/hex literals default to zero.
+
 2018-03-30  Edward Hart <edward.dan.hart@gmail.com>
 
 	* typeck.c (validate_move): fixed segfault with zero-length hex literal.
