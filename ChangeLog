@@ -9,6 +9,11 @@
 
 	* configure.ac: check for curses define_key function
 
+2018-03-11  Ron Norman <rjn@inglenet.com>
+
+	* configure.ac: COB_STRFTIME and COB_HAS_UTC_OFFSET removed as
+	  no longer needed
+
 2018-02-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* README: Explicitly state we use ranges in copyright years and

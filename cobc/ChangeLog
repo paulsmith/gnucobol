@@ -25,6 +25,10 @@
 	* tree.c: check for alphabetic after checking for more common
 	  USAGE/categories
 
+2018-03-25  Ron Norman <rjn@inglenet.com>
+
+	* tree.c (warn_cannot_get_utc): removed as we always have it available
+
 2018-03-24  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c, tree.h: emit error if RECORD VARYING has equal implied limits.

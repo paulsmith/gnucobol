@@ -1,4 +1,9 @@
 
+2018-03-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* testsuite.src/run_functions.at, atlocal.in, atlocal_valgrind,
+	  atlocal_win: COB_HAS_UTC_OFFSET removed as no longer needed
+
 2018-03-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_manual_screen.at: adjusted keywords,

@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 ##
 ## This file is part of GnuCOBOL.
@@ -3829,11 +3829,6 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([echo "$COB_HAS_UTC_OFFSET"], [0], [no
-], [],
-
-# Previous test "failed" --> UTC offset available
-
 AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob:11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
 prog.cob:18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
@@ -3843,23 +3838,6 @@ prog.cob:37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variabl
 prog.cob:44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
 prog.cob:51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
 ])
-
-,
-
-# Previous test "passed" --> UTC offset is not available
-
-AT_CHECK([$COMPILE prog.cob], [0], [],
-[prog.cob:11: warning: FUNCTION 'FORMATTED-CURRENT-DATE' has format in variable
-prog.cob:11: warning: cannot find the UTC offset on this system
-prog.cob:18: warning: FUNCTION 'FORMATTED-DATE' has format in variable
-prog.cob:24: warning: FUNCTION 'FORMATTED-DATETIME' has format in variable
-prog.cob:31: warning: FUNCTION 'FORMATTED-TIME' has format in variable
-prog.cob:37: warning: FUNCTION 'INTEGER-OF-FORMATTED-DATE' has format in variable
-prog.cob:44: warning: FUNCTION 'SECONDS-FROM-FORMATTED-TIME' has format in variable
-prog.cob:51: warning: FUNCTION 'TEST-FORMATTED-DATETIME' has format in variable
-])
-
-)
 
 # running the program
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
@@ -3870,8 +3848,6 @@ AT_CLEANUP
 
 AT_SETUP([FORMATTED-(DATE)TIME with SYSTEM-OFFSET])
 AT_KEYWORDS([functions FORMATTED-TIME FORMATTED-DATETIME extensions])
-
-AT_SKIP_IF([test "$COB_HAS_UTC_OFFSET" = "no"])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.

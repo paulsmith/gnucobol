@@ -1,7 +1,20 @@
 
+2018-03-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (set_cob_time_from_local_time): new function called on
+	  all systems, including code for computing UTC offset (with correct
+	  sign)
+	* common.c (cob_get_current_date_and_time) [_WIN32]: no longer need
+	  to force of date re-calculation as we always use localtime now
+
 2018-03-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* termio.c (cob_display): added missing handling of cob_unix_lf
+	* common.c (set_cob_time_offset): recreated for use on all systems,
+	  moved code for computation of UTC there, including adjustment by
+	  daylight saving time (which was missing from _WIN32 until now),
+	  set unknown offset in the unlikely case that computation of
+	  UTC offset does not work
 
 2018-03-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -34,6 +47,11 @@
 	* common.c: added Tiny C version info
 	* termio.c: renamed (clean_nan) to (clean_double) and let it
 	  remove the leading zero from the exponent
+
+2018-03-11  Ron Norman <rjn@inglenet.com>
+
+	* common.c: Compute UTC without strftime and adjust for
+	  daylight savings time, removed (set_unknown_offset)
 
 2017-03-08  Ron Norman <rjn@inglenet.com>
 

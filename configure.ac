@@ -91,7 +91,6 @@ AH_TEMPLATE([COB_MODULE_EXT], [Module extension])
 AH_TEMPLATE([COB_EXE_EXT], [Executable extension])
 AH_TEMPLATE([COB_KEYWORD_INLINE], [Keyword for inline])
 AH_TEMPLATE([COB_NO_SELFOPEN], [Can not dlopen self])
-AH_TEMPLATE([COB_STRFTIME], [Can use strftime for timezone])
 AH_TEMPLATE([COB_COMPUTED_GOTO], [Compilation of computed gotos works])
 AH_TEMPLATE([COB_LI_IS_LL], [long int is long long])
 AH_TEMPLATE([COB_32_BIT_LONG], [long int is 32 bits])
@@ -274,26 +273,12 @@ AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	readlink getexecname canonicalize_file_name realpath \
 	strcoll strxfrm setenv raise])
 
-# Checks for UTC offset (init)
-COB_HAS_UTC_OFFSET="no"
-
-AC_MSG_CHECKING([for _BSD_SOURCE])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],
-	[[
-	#ifndef _BSD_SOURCE
-	# error macro not defined
-	#endif]])],
-	[COB_HAS_UTC_OFFSET="yes"
-	 AC_MSG_RESULT([yes])],
-	[AC_MSG_RESULT([no])])
-
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
 	[[timezone = 3600;]])],
 	[AC_DEFINE([HAVE_TIMEZONE], [1])
-		COB_HAS_UTC_OFFSET="yes"
-		AC_MSG_RESULT([yes])],
+	 AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
 
 # Check for designated initializers
@@ -991,30 +976,6 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 	 AC_MSG_RESULT([yes])],
 	[AC_MSG_RESULT([no])])
 
-# Checks for workable strftime
-AC_MSG_CHECKING([for working strftime])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
-	#include <time.h>]], [[
-	time_t	ticks;
-	int	ret;
-	char	buff[16];
-	ticks = time(NULL);
-	ret = strftime(buff, 15, "%z", localtime(&ticks));
-	if (ret != 5) {
-		return 1;
-	}
-	if (buff[0] != '+' && buff[0] != '-') {
-		return 1;
-	}
-	return 0;]])],
-	[AC_DEFINE([COB_STRFTIME], [1])
-	 COB_HAS_UTC_OFFSET="yes"
-	 AC_MSG_RESULT([yes])],
-	[AC_MSG_RESULT([no])],
-	[AC_DEFINE([COB_STRFTIME], [0])
-	 AC_MSG_RESULT([assumed "no" - cross-compilation])
-	 AC_MSG_WARN([cannot run test program while cross-compiling])])
-
 # Checks for size of long
 AC_MSG_CHECKING([if size of long int = size of long long])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]], [[
@@ -1456,7 +1417,6 @@ AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
 AC_SUBST([COB_HAS_CURSES])
-AC_SUBST([COB_HAS_UTC_OFFSET])
 AC_SUBST([COB_HAS_64_BIT_POINTER])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
 
@@ -1530,7 +1490,3 @@ else
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
 unset DEFINE_DL
-if test "$COB_HAS_UTC_OFFSET" = "no"; then
-  AC_MSG_WARN([ Could not find strftime or timezone. FORMATTED-CURRENT-DATE, FORMATTED-DATE])
-  AC_MSG_WARN([and FORMATTED-DATETIME may not work.])
-fi

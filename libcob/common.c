@@ -1445,15 +1445,6 @@ one_indexed_day_of_week_from_monday (int zero_indexed_from_sunday)
 	return ((zero_indexed_from_sunday + 6) % 7) + 1;
 }
 
-#if !defined (_BSD_SOURCE)
-static void
-set_unknown_offset (struct cob_time *time)
-{
-	time->offset_known = 0;
-	time->utc_offset = 0;
-}
-#endif
-
 #if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
 static void
 set_cob_time_ns_from_filetime (const FILETIME filetime, struct cob_time *cb_time)
@@ -1464,26 +1455,6 @@ set_cob_time_ns_from_filetime (const FILETIME filetime, struct cob_time *cb_time
 		+ filetime.dwLowDateTime;
 	/* FILETIMEs are accurate to 100 nanosecond intervals */
 	cb_time->nanosecond = (filetime_int % (ULONGLONG) 10000000) * 100;
-
-}
-#endif
-
-#if defined (_WIN32) /* cygwin does not define _WIN32 */
-static void
-set_cob_time_offset (struct cob_time *cb_time)
-{
-	DWORD	time_zone_result;
-	TIME_ZONE_INFORMATION	time_zone_info = {0};
-
-	time_zone_result = GetTimeZoneInformation (&time_zone_info);
-	if (time_zone_result != TIME_ZONE_ID_INVALID) {
-		cb_time->offset_known = 1;
-		cb_time->utc_offset = time_zone_info.Bias;
-		cb_time->is_daylight_saving_time = time_zone_result - 1;
-	} else {
-		set_unknown_offset (cb_time);
-		cb_time->is_daylight_saving_time = -1;
-	}
 }
 #endif
 
@@ -3262,6 +3233,69 @@ get_function_ptr_for_precise_time (void)
 }
 #endif
 
+/* Set the offset from UTC */
+void
+static set_cob_time_from_localtime (time_t curtime, struct cob_time *cb_time) {
+
+	struct tm	*tmptr;
+#if !defined (_BSD_SOURCE) && !defined (HAVE_TIMEZONE)
+	time_t		utctime, lcltime, difftime;
+#endif
+
+	tmptr = localtime (&curtime);
+
+	cb_time->year = tmptr->tm_year + 1900;
+	cb_time->month = tmptr->tm_mon + 1;
+	cb_time->day_of_month = tmptr->tm_mday;
+	cb_time->day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
+	cb_time->day_of_year = tmptr->tm_yday + 1;
+	cb_time->hour = tmptr->tm_hour;
+	cb_time->minute = tmptr->tm_min;
+	/* LCOV_EXCL_START */
+	/* Leap seconds ? */
+	if (tmptr->tm_sec >= 60) {
+		tmptr->tm_sec = 59;
+	}
+	/* LCOV_EXCL_STOP */
+	cb_time->second = tmptr->tm_sec;
+	cb_time->nanosecond = 0;
+	cb_time->is_daylight_saving_time = tmptr->tm_isdst;
+
+#if defined (_BSD_SOURCE)
+	cb_time->offset_known = 1;
+	cb_time->utc_offset = tmptr->tm_gmtoff / 60;
+#elif defined (HAVE_TIMEZONE)
+	cb_time->offset_known = 1;
+	cb_time->utc_offset = timezone / -60;
+	/* LCOV_EXCL_START */
+	if (tmptr->tm_isdst) {
+		cb_time->utc_offset += 60;
+	}
+	/* LCOV_EXCL_STOP */
+#else
+	lcltime = mktime (tmptr);
+
+	tmptr = gmtime (&curtime);
+	utctime = mktime (tmptr);
+
+	if (utctime != -1 && lcltime != -1) { /* LCOV_EXCL_BR_LINE */
+		difftime = utctime - lcltime;
+		/* LCOV_EXCL_START */
+		if (tmptr->tm_isdst) {
+			difftime -= 3600;
+		}
+		/* LCOV_EXCL_STOP */
+		cb_time->utc_offset = difftime / 60;
+		cb_time->offset_known = 1;
+	/* LCOV_EXCL_START */
+	} else {
+		cb_time->offset_known = 0;
+		cb_time->utc_offset = 0;
+	}
+	/* LCOV_EXCL_STOP */
+#endif
+}
+
 #if defined (_WIN32) /* cygwin does not define _WIN32 */
 static struct cob_time
 cob_get_current_date_and_time_from_os (void)
@@ -3271,39 +3305,29 @@ cob_get_current_date_and_time_from_os (void)
 	FILETIME	filetime;
 	SYSTEMTIME	utc_time;
 #endif
+
+	time_t		curtime;
 	struct cob_time	cb_time;
 
+	curtime = time (NULL);
+	set_cob_time_from_localtime (curtime, &cb_time);
+
+	/* Get nanoseconds with highest precision possible */
 #if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
 	if (!time_as_filetime_func) {
 		get_function_ptr_for_precise_time ();
 	}
-#if defined (_MSC_VER)
 #pragma warning(suppress: 6011) // the function pointer is always set by get_function_ptr_for_precise_time
-#endif
 	(time_as_filetime_func) (&filetime);
-	/* use fallback to GetLocalTime if one of the following does not work */
-	if (!(FileTimeToSystemTime (&filetime, &utc_time) &&
-		SystemTimeToTzSpecificLocalTime (NULL, &utc_time, &local_time))) {
-		GetLocalTime (&local_time);
+	/* fallback to GetLocalTime if one of the following does not work */
+	if (FileTimeToSystemTime (&filetime, &utc_time) &&
+		SystemTimeToTzSpecificLocalTime (NULL, &utc_time, &local_time)) {
+		set_cob_time_ns_from_filetime (filetime, &cb_time);
+		return cb_time;
 	}
-#else
+#endif
 	GetLocalTime (&local_time);
-#endif
-
-	cb_time.year = local_time.wYear;
-	cb_time.month = local_time.wMonth;
-	cb_time.day_of_month = local_time.wDay;
-	/* day_of_week, day_of_year and is_daylight_saving_time
-	   are set in cob_get_current_date_and_time */
-	cb_time.hour = local_time.wHour;
-	cb_time.minute = local_time.wMinute;
-	cb_time.second = local_time.wSecond;
 	cb_time.nanosecond = local_time.wMilliseconds * 1000000;
-#if defined (_MSC_VER) && COB_USE_VC2008_OR_GREATER
-	set_cob_time_ns_from_filetime (filetime, &cb_time);
-#endif
-	set_cob_time_offset (&cb_time);
-
 	return cb_time;
 }
 #else
@@ -3316,11 +3340,7 @@ cob_get_current_date_and_time_from_os (void)
 	struct timeval	tmv;
 #endif
 	time_t		curtime;
-	struct tm	*tmptr;
 	struct cob_time	cb_time;
-#if !defined (_BSD_SOURCE) && defined (COB_STRFTIME)
-	char		iso_timezone[6] = { '\0' };
-#endif
 
 	/* Get the current time */
 #if defined (HAVE_CLOCK_GETTIME)
@@ -3332,20 +3352,8 @@ cob_get_current_date_and_time_from_os (void)
 #else
 	curtime = time (NULL);
 #endif
-	tmptr = localtime (&curtime);
 
-	cb_time.year = tmptr->tm_year + 1900;
-	cb_time.month = tmptr->tm_mon + 1;
-	cb_time.day_of_month = tmptr->tm_mday;
-	cb_time.day_of_week = one_indexed_day_of_week_from_monday (tmptr->tm_wday);
-	cb_time.day_of_year = tmptr->tm_yday + 1;
-	cb_time.hour = tmptr->tm_hour;
-	cb_time.minute = tmptr->tm_min;
-	cb_time.second = tmptr->tm_sec;
-	cb_time.nanosecond = 0;
-	cb_time.offset_known = 0;
-	cb_time.utc_offset = 0;
-	cb_time.is_daylight_saving_time = tmptr->tm_isdst;
+	set_cob_time_from_localtime (curtime, &cb_time);
 
 	/* Get nanoseconds or microseconds, if possible */
 #if defined (HAVE_CLOCK_GETTIME)
@@ -3354,34 +3362,6 @@ cob_get_current_date_and_time_from_os (void)
 	cb_time.nanosecond = tmv.tv_usec * 1000;
 #else
 	cb_time.nanosecond = 0;
-#endif
-
-	/* Get the offset from UTC */
-#if defined (_BSD_SOURCE)
-	cb_time.offset_known = 1;
-	cb_time.utc_offset = tmptr->tm_gmtoff / 60;
-#elif defined (COB_STRFTIME)
-	strftime (iso_timezone, (size_t) 6, "%z", tmptr);
-
-	if (iso_timezone[0] == '0') {
-		set_unknown_offset (&cb_time);
-	} else {
-		/* Convert the timezone string into minutes from UTC */
-		cb_time.offset_known = 1;
-		cb_time.utc_offset =
-			COB_D2I (iso_timezone[1]) * 60 * 10
-			+ COB_D2I (iso_timezone[2]) * 60
-			+ COB_D2I (iso_timezone[3]) * 10
-			+ COB_D2I (iso_timezone[4]);
-		if (iso_timezone[0] == '-') {
-			cb_time.utc_offset *= -1;
-		}
-	}
-#elif defined (HAVE_TIMEZONE)
-	cb_time.offset_known = 1;
-	cb_time.utc_offset = timezone / 60;
-#else
-	set_unknown_offset (&cb_time);
 #endif
 
 	return cb_time;
@@ -3396,13 +3376,9 @@ cob_get_current_date_and_time (void)
 	struct tm 	*tmptr;
 	struct cob_time	cb_time = cob_get_current_date_and_time_from_os ();
 
-#if _WIN32
-	needs_calculation = 1;	/* WIN32 always needs a recalculation (doesn't set all items) */
-#endif
-
 	/* do we have a constant time? */
-	if(cobsetptr != NULL
-	&& cobsetptr->cob_time_constant.year != 0) {
+	if (cobsetptr != NULL
+	 && cobsetptr->cob_time_constant.year != 0) {
 		if (cobsetptr->cob_time_constant.hour != -1) {
 			cb_time.hour = cobsetptr->cob_time_constant.hour;
 		}
@@ -3441,7 +3417,7 @@ cob_get_current_date_and_time (void)
 	/* set day_of_week, day_of_year, is_daylight_saving_time, if necessary */
 	if (needs_calculation) {
 		/* allocate tmptr (needs a correct time) */
-		time(&t);
+		time (&t);
 		tmptr = localtime (&t);
 		tmptr->tm_isdst = -1;
 		tmptr->tm_sec	= cb_time.second;
@@ -4606,7 +4582,7 @@ cob_sys_hosted (void *p, const void *var)
 			*((int **)data) = &errno;
 			return 0;
 		}
-#if defined(HAVE_TIMEZONE)
+#if defined (HAVE_TIMEZONE)
 		if ((i == 6) && !strncmp (name, "tzname", 6)) {
 			/* Recheck: bcc raises "suspicious pointer conversion */
 			*((char ***)data) = tzname;
