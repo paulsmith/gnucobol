@@ -1,4 +1,9 @@
 
+2018-04-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* extras/Makefile.am: compile with -O2 and retry without optimization
+	  if first compilation did not work, see Bug #439
+
 2018-03-25  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (checkmanual): new target for running manual tests,

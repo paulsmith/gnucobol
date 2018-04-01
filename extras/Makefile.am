@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/extras
 #
-# Copyright (C) 2012, 2014, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2012, 2014, 2017-2018 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -30,4 +30,4 @@ CLEANFILES = $(extras_DATA)
 SUFFIXES = .cob .$(COB_MODULE_EXT)
 .cob.$(COB_MODULE_EXT):
 	. $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal extras-$@ \
-		&& $$COBC -m -Wall -O -o $@ $<
+		&& ($$COBC -m -Wall -O2 -o $@ $< || $$COBC -m -Wall -o $@ $<)
