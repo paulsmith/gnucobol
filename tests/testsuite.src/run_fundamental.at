@@ -463,7 +463,7 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [0   ])
 AT_CLEANUP
 
 
-AT_SETUP([Comparisions of FLOAT-LONG with floating-point literals])
+AT_SETUP([Compare FLOAT-LONG with floating-point literal])
 AT_KEYWORDS([fundamental literal exponent])
 
 AT_DATA([prog.cob], [

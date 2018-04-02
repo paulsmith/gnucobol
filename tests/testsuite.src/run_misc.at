@@ -10437,22 +10437,29 @@ AT_DATA([prog.cob], [
            DISPLAY "    ..."
            DISPLAY "--- COMP-2 ---"
            COMPUTE CMP2 = (((1.0E7 / 2.1E0) / 3.1E0) - 5.0E-1) * 6.0E0
-      *>   adjust output for possible rounding of intermediates
+      *>   because of possible rounding of intermediates and different
+      *>   precision depending on math library / version: plain DISPLAY
            IF CMP2 >= 9216586.86175114 AND <= 9216586.86175116
-             MOVE 9216586.86175115 TO CMP2
+             DISPLAY "A ~ 9216586.86175115"
+           ELSE
+             DISPLAY "A: " CMP2
            END-IF
-           DISPLAY "A: " CMP2
            COMPUTE CMP2 = (((1.0E7 / 2.9E0) / 3.9E0) - 5.0E-1) * 6.0E0
-           DISPLAY "B: " CMP2
+           IF CMP2 >= 5305036.7877983 AND <= 5305036.7877985
+             DISPLAY "B ~ 5305036.787798408"
+           ELSE
+             DISPLAY "B: " CMP2
+           END-IF
            MOVE ZERO TO CMP2.
            COMPUTE CMP2 = 1.0E3 / 2.1E0
                    ON SIZE ERROR DISPLAY "Z: " CMP2 " SIZE ERROR"
                NOT ON SIZE ERROR
-      *>   adjust output for possible rounding of intermediates
+      *>        see note above
                 IF CMP2 >= 476.1904761904760 AND <= 476.1904761904763
-                  MOVE 476.1904761904761 TO CMP2
+                  DISPLAY "Z ~ 476.1904761904761 IS OK"
+                ELSE
+                  DISPLAY "Z: " CMP2 " IS OK"
                 END-IF
-                DISPLAY "Z: " CMP2 " IS OK"
            END-COMPUTE.
 
            DISPLAY "    ..."
@@ -10512,12 +10519,15 @@ AT_DATA([prog.cob], [
            DISPLAY "CMP2: " CMP2 " IS OK".
            GO TO CND-500-OK.
        CND-380-ERR.
-      *>   adjust output for possible rounding of intermediates
+      *>   because of possible rounding of intermediates and different
+      *>   precision depending on math library / version: plain DISPLAY
            IF SV2 >= 9.899999999999E+307 AND
                   <= 9.900000000001E+307
-             MOVE 9.899999999999781E+307 TO SV2
+             DISPLAY "CMP2: after ~ 9.899999999999781E+307 SIZE ERROR"
+           ELSE
+             DISPLAY "CMP2: after " SV2 " SIZE ERROR"
            END-IF
-           DISPLAY "CMP2: after " SV2 " SIZE ERROR".
+           .
 
        CND-500-OK.
            MOVE 0.000000099 TO CMP1.
@@ -10549,12 +10559,17 @@ AT_DATA([prog.cob], [
            DISPLAY "CMP2: " CMP2 " IS OK".
            GO TO CND-600-XIT.
        CND-600-ERR.
-           DISPLAY "CMP2: after " SV2 " SIZE ERROR".
+           IF SV2 >= 9.8813129168249E-324 AND <= 9.881312916825E-324
+             DISPLAY "CMP2: after ~ 9.881312916824931E-324 SIZE ERROR"
+           ELSE
+             DISPLAY "CMP2: after " SV2 " SIZE ERROR"
+           END-IF
+           .
        CND-600-XIT.
 
        CND-999.
            STOP RUN.
-           END PROGRAM prog.
+       END PROGRAM prog.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
@@ -10566,9 +10581,9 @@ B: 5305037
 Z: 476.19049 IS OK
     ...
 --- COMP-2 ---
-A: 9216586.86175115
-B: 5305036.787798408
-Z: 476.1904761904761 IS OK
+A ~ 9216586.86175115
+B ~ 5305036.787798408
+Z ~ 476.1904761904761 IS OK
     ...
 --- 99 + 1 / 3 ---
 CMP1: 99.333336 IS OK
@@ -10580,9 +10595,9 @@ CMP2: 99 IS OK
     ...
 --- Test overflow ---
 CMP1: after 9.8999983E+37 SIZE ERROR
-CMP2: after 9.899999999999781E+307 SIZE ERROR
+CMP2: after ~ 9.899999999999781E+307 SIZE ERROR
 CMP1: after 1.4012985E-45 SIZE ERROR
-CMP2: after 9.881312916824931E-324 SIZE ERROR
+CMP2: after ~ 9.881312916824931E-324 SIZE ERROR
 ], [])
 
 AT_CLEANUP
