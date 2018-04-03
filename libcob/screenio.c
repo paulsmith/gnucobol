@@ -497,30 +497,41 @@ cob_screen_init (void)
 	/* When still missing - self define the keys */
 	/* note: if define_key is not available rhe user will have to manually
 	   assign terminfo values for the control strings to the given
-	   KEY_MAX + n values */
+	   KEY_MAX + n / __KEY_MIN - n values */
 
 #ifndef HAVE_DEFINE_KEY
 #define define_key(x,y)	/* do nothing */
 #endif
 
+#if defined (KEY_MAX) && KEY_MAX > 0
+#define COB_NEW_KEY(n)		(KEY_MAX + n)
+#elif defined (__KEY_MIN) && __KEY_MIN < 0
+#define COB_NEW_KEY(n)		(__KEY_MIN - n)
+#else
+#define COB_NEW_KEY(n)	-1
+#ifdef HAVE_DEFINE_KEY
+#error "Did not found a valid value for key definition. Please report this!"
+#endif
+#endif
+
 #ifndef ALT_DEL
-#define ALT_DEL                 (KEY_MAX + 1)
+#define ALT_DEL                 COB_NEW_KEY(1)
 	define_key("\\E[3;3~", ALT_DEL);
 #endif
 #ifndef ALT_LEFT
-#define ALT_LEFT                (KEY_MAX + 2)
+#define ALT_LEFT                COB_NEW_KEY(2)
 	define_key("\\E[1;3D", ALT_LEFT);
 #endif
 #ifndef ALT_RIGHT
-#define ALT_RIGHT               (KEY_MAX + 3)
+#define ALT_RIGHT               COB_NEW_KEY(3)
 	define_key("\\E[1;3C", ALT_RIGHT);
 #endif
 #ifndef ALT_HOME
-#define ALT_HOME                (KEY_MAX + 4)
+#define ALT_HOME                COB_NEW_KEY(4)
 	define_key("\\E[1;3H", ALT_HOME);
 #endif
 #ifndef ALT_END
-#define ALT_END                 (KEY_MAX + 5)
+#define ALT_END                 COB_NEW_KEY(5)
 	define_key("\\E[1;3F", ALT_END);
 #endif
 
