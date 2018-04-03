@@ -508,12 +508,12 @@ cob_screen_init (void)
 #elif defined (__KEY_MIN) && __KEY_MIN < 0
 #define COB_NEW_KEY(n)		(__KEY_MIN - n)
 #else
-#define COB_NEW_KEY(n)	-1
 #ifdef HAVE_DEFINE_KEY
 #error "Did not found a valid value for key definition. Please report this!"
 #endif
 #endif
 
+#ifdef COB_NEW_KEY
 #ifndef ALT_DEL
 #define ALT_DEL                 COB_NEW_KEY(1)
 	define_key("\\E[3;3~", ALT_DEL);
@@ -533,6 +533,23 @@ cob_screen_init (void)
 #ifndef ALT_END
 #define ALT_END                 COB_NEW_KEY(5)
 	define_key("\\E[1;3F", ALT_END);
+#endif
+#else
+#ifndef ALT_DEL
+#define ALT_DEL                 KEY_SDC
+#endif
+#ifndef ALT_LEFT
+#define ALT_LEFT                KEY_SLEFT
+#endif
+#ifndef ALT_RIGHT
+#define ALT_RIGHT               KEY_ALEFT
+#endif
+#ifndef ALT_HOME
+#define ALT_HOME                KEY_SHOME
+#endif
+#ifndef ALT_END
+#define ALT_END                 KEY_SEND
+#endif
 #endif
 
 }
