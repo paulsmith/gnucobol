@@ -63,8 +63,9 @@ fi
 AM_INIT_AUTOMAKE([gnu no-texinfo.tex])
 
 # Autoheader templates
-AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
 AH_TEMPLATE([COB_DEBUG_LOG], [Enable internal logging (Developers only!)])
+AH_TEMPLATE([COB_EXPERIMENTAL], [Enable experimental code (Developers only!)])
+AH_TEMPLATE([COB_TREE_DEBUG], [Enable extra checks within the compiler (Developers only!)])
 AH_TEMPLATE([COB_PARAM_CHECK], [Enable minimum parameter check for system libraries])
 AH_TEMPLATE([PATCH_LEVEL], [Define a patch level (numeric, max. 8 digits)])
 AH_TEMPLATE([MAX_CALL_FIELD_PARAMS], [Define maximum parameters for CALL])
@@ -133,6 +134,14 @@ AC_ARG_ENABLE([experimental],
     [(GnuCOBOL) Enable experimental code (Developers only!)])],
   [if test "$enable_experimental" = "yes"; then
 	AC_DEFINE([COB_EXPERIMENTAL], [1])
+   fi],
+  [])
+
+AC_ARG_ENABLE([cobc-internal-checks],
+  [AS_HELP_STRING([--enable-cobc-internal-checks],
+    [(GnuCOBOL) Enable extra checks within the compiler (Developers only!)])],
+  [if test "$enable_cobc_internal_checks" = "yes"; then
+	AC_DEFINE([COB_TREE_DEBUG], [1])
    fi],
   [])
 

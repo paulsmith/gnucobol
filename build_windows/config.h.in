@@ -1,3 +1,4 @@
+
 /* config.h, tested with x86/x64 VS2005-2017 */
 
 #define NOISAM 0
@@ -113,11 +114,11 @@
 /* Compile/link option for shared code */
 #define COB_SHARED_OPT ""
 
-/* Can use strftime for timezone */
-/* #undef COB_STRFTIME */
-
 /* Strip command */
 /* #undef COB_STRIP_CMD */
+
+/* Enable extra checks within the compiler (Developers only!) */
+/* #undef COB_TREE_DEBUG */
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
@@ -170,6 +171,9 @@
 /* Define if the GNU dcgettext() function is already present or preinstalled.
    */
 /* #undef HAVE_DCGETTEXT */
+
+/* curses has define_key function */
+/* #undef HAVE_DEFINE_KEY */
 
 /* Has designated initializers */
 /* #undef HAVE_DESIGNATED_INITS */
