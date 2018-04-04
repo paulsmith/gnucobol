@@ -134,7 +134,6 @@ cb_tree				cobc_printer_node = NULL;
 int				functions_are_all = 0;
 int				non_const_word = 0;
 int				suppress_data_exceptions = 0;
-int				call_line_number;
 unsigned int			cobc_repeat_last_token = 0;
 unsigned int			cobc_in_id = 0;
 unsigned int			cobc_in_procedure = 0;
@@ -231,10 +230,8 @@ static cb_tree			line_column;
 static int			term_array[TERM_MAX];
 static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
 
-#if 0 /* currently not used */
 static const char		*backup_source_file = NULL;
 static int			backup_source_line = 0;
-#endif
 
 /* Defines for header presence */
 
@@ -312,7 +309,6 @@ void print_bits (cob_flags_t num)
 }
 #endif
 
-#if 0 /* currently not used */
 /* functions for storing current position and
    assigning it to a cb_tree after its parsing is finished */
 static COB_INLINE
@@ -322,6 +318,7 @@ void backup_current_pos (void)
 	backup_source_line = cb_source_line;
 }
 
+#if 0 /* currently not used */
 static COB_INLINE
 void set_pos_from_backup (cb_tree x)
 {
@@ -352,6 +349,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 	CB_LABEL (label)->flag_begin = 1;
 	CB_LABEL (label)->flag_entry = 1;
+	label->source_line = backup_source_line;
 	emit_statement (label);
 
 	if (current_program->flag_debugging) {
@@ -986,6 +984,7 @@ end_scope_of_program_name (struct cb_program *program, const unsigned char type)
 			emit_entry (program->program_id, 0, NULL, NULL);
 		}
 	}
+	program->last_source_line = backup_source_line;
 
 	if (program->nested_level == 0) {
 		return;
@@ -2877,6 +2876,7 @@ start:
 		YYABORT;
 	}
 	if (!current_program->entry_list) {
+		backup_current_pos ();
 		emit_entry (current_program->program_id, 0, NULL, NULL);
 	}
   }
@@ -2927,6 +2927,7 @@ simple_prog:
   _program_body
   /* do cleanup */
   {
+	backup_current_pos ();
 	clean_up_program (NULL, COB_MODULE_TYPE_PROGRAM);
   }
 ;
@@ -2954,6 +2955,7 @@ function_definition:
 _end_program_list:
   /* empty (still do cleanup) */
   {
+	backup_current_pos ();
 	clean_up_program (NULL, COB_MODULE_TYPE_PROGRAM);
   }
 | end_program_list
@@ -2965,17 +2967,25 @@ end_program_list:
 ;
 
 end_program:
-  END_PROGRAM end_program_name TOK_DOT
+  END_PROGRAM
+  {
+	backup_current_pos ();
+  }
+  end_program_name TOK_DOT
   {
 	first_nested_program = 0;
-	clean_up_program ($2, COB_MODULE_TYPE_PROGRAM);
+	clean_up_program ($3, COB_MODULE_TYPE_PROGRAM);
   }
 ;
 
 end_function:
-  END_FUNCTION end_program_name TOK_DOT
+  END_FUNCTION
   {
-	clean_up_program ($2, COB_MODULE_TYPE_FUNCTION);
+	backup_current_pos ();
+  }
+  end_program_name TOK_DOT
+  {
+	clean_up_program ($3, COB_MODULE_TYPE_FUNCTION);
   }
 ;
 
@@ -8573,7 +8583,7 @@ _procedure_division:
 		current_program->entry_convention = cb_int (CB_CONV_COBOL);
 	}
   }
-| PROCEDURE DIVISION _mnemonic_conv _procedure_using_chaining _procedure_returning TOK_DOT
+| PROCEDURE DIVISION
   {
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -8581,11 +8591,15 @@ _procedure_division:
 	check_duplicate = 0;
 	cobc_in_procedure = 1U;
 	cb_set_system_names ();
-	if ($3) {
+	backup_current_pos ();
+  }
+  _mnemonic_conv _procedure_using_chaining _procedure_returning TOK_DOT
+  {
+	if ($4) {
 		if (current_program->entry_convention) {
 			cb_warning (COBC_WARN_FILLER, _("overriding convention specified in ENTRY-CONVENTION"));
 		}
-		current_program->entry_convention = $3;
+		current_program->entry_convention = $4;
 	} else if (!current_program->entry_convention) {
 		current_program->entry_convention = cb_int (CB_CONV_COBOL);
 	}
@@ -8593,14 +8607,15 @@ _procedure_division:
   }
   _procedure_declaratives
   {
-	if (current_program->flag_main && !current_program->flag_chained && $4) {
+	if (current_program->flag_main
+	 && !current_program->flag_chained && $5) {
 		cb_error (_("executable program requested but PROCEDURE/ENTRY has USING clause"));
 	}
 	/* Main entry point */
-	emit_entry (current_program->program_id, 0, $4, NULL);
-	current_program->num_proc_params = cb_list_length ($4);
+	emit_entry (current_program->program_id, 0, $5, NULL);
+	current_program->num_proc_params = cb_list_length ($5);
 	if (current_program->source_name) {
-		emit_entry (current_program->source_name, 1, $4, NULL);
+		emit_entry (current_program->source_name, 1, $5, NULL);
 	}
   }
   _procedure_list
@@ -9133,6 +9148,7 @@ statements:
 	}
 	if (check_headers_present (COBC_HD_PROCEDURE_DIVISION, 0, 0, 0) == 1) {
 		if (current_program->prog_type == COB_MODULE_TYPE_PROGRAM) {
+			backup_current_pos ();
 			emit_entry (current_program->program_id, 0, NULL, NULL);
 		}
 	}
@@ -9850,7 +9866,7 @@ call_statement:
 	cobc_cs_check = CB_CS_CALL;
 	call_nothing = 0;
 	cobc_allow_program_name = 1;
-	call_line_number = cb_source_line;
+	backup_current_pos ();
   }
   call_body
   _end_call
@@ -9910,7 +9926,7 @@ call_body:
 		call_conv |= CB_CONV_NO_RET_UPD;
 	}
 	cb_emit_call ($3, $6, $7, CB_PAIR_X ($8), CB_PAIR_Y ($8),
-		      cb_int (call_conv), $2, $5);
+		      cb_int (call_conv), $2, $5, backup_source_line);
   }
 ;
 
@@ -11052,6 +11068,7 @@ entry_statement:
   {
 	check_unreached = 0;
 	begin_statement ("ENTRY", 0);
+	backup_current_pos ();
   }
   entry_body
 ;
@@ -13833,14 +13850,16 @@ program_start_end:
   START
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM START"));
-	/* emit_entry ("_START", 0, NULL, NULL); */
+	backup_current_pos ();
 	CB_PENDING ("USE AT PROGRAM START");
+	/* emit_entry ("_AT_START", 0, NULL, NULL); */
   }
 | END
   {
 	emit_statement (cb_build_comment ("USE AT PROGRAM END"));
-	/* emit_entry ("_END", 0, NULL, NULL); */
+	backup_current_pos ();
 	CB_PENDING ("USE AT PROGRAM END");
+	/* emit_entry ("_AT_END", 0, NULL, NULL); */
   }
 ;
 

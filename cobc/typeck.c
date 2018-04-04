@@ -44,8 +44,6 @@
 #include "cobc.h"
 #include "tree.h"
 
-extern int call_line_number;
-
 struct system_table {
 	const char		*const syst_name;
 	const unsigned int	syst_params_min;
@@ -6185,7 +6183,8 @@ cb_emit_alter (cb_tree source, cb_tree target)
 void
 cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 	      cb_tree on_exception, cb_tree not_on_exception,
-	      cb_tree convention, cb_tree newthread, cb_tree handle)
+	      cb_tree convention, cb_tree newthread, cb_tree handle,
+	      int call_line_number)
 {
 	cb_tree				l;
 	cb_tree				x;

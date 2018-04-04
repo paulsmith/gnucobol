@@ -1623,6 +1623,9 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 	p->common.tag = CB_TAG_PROGRAM;
 	p->common.category = CB_CATEGORY_UNKNOWN;
 
+	p->common.source_file = cobc_parse_strdup (cb_source_file);
+	p->common.source_line = cb_source_line;
+
 	p->next_program = last_program;
 	p->nested_level = nest_level;
 	p->decimal_point = '.';
@@ -4708,7 +4711,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 * then resolve the value here at compile time -> "constant folding"
 		 */
 		} else if (cb_constant_folding
-		&&  CB_NUMERIC_LITERAL_P(x)
+		 && CB_NUMERIC_LITERAL_P(x)
 		 && CB_NUMERIC_LITERAL_P(y)) {
 			xl = CB_LITERAL(x);
 			yl = CB_LITERAL(y);
@@ -4778,7 +4781,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		 * then resolve the value here at compile time -> "constant folding"
 		 */
 		} else if (cb_constant_folding
-		&&  CB_LITERAL_P(x)
+		 && CB_LITERAL_P(x)
 		 && CB_LITERAL_P(y)
 		 && !CB_NUMERIC_LITERAL_P(x)
 		 && !CB_NUMERIC_LITERAL_P(y)) {
@@ -5256,7 +5259,6 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 	p->from = from;
 	p->until = until;
 	if (warningopt) {
-		//cb_source_line--;
 		if (until == cb_false) {
 			cb_warning_x (COBC_WARN_FILLER, until,
 				_("PERFORM FOREVER since UNTIL is always FALSE"));
@@ -5269,7 +5271,6 @@ cb_build_perform_varying (cb_tree name, cb_tree from, cb_tree by, cb_tree until)
 				_("PERFORM NEVER since UNTIL is always TRUE"));
 			}
 		}
-		//cb_source_line++;
 	}
 
 	if (until) {

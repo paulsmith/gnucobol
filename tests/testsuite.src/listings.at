@@ -1714,7 +1714,7 @@ blah                           7       *10      11      14
 
 LABEL                          DEFINED                REFERENCES
 
-E prog__1                      10
+E prog__1                      9
 P EX                           16       12
 GnuCOBOL V.R.P          prog-1.cob           DDD MMM dd HH:MM:SS YYYY  Page 0005
 
@@ -1778,7 +1778,7 @@ stuff                          9       *10      12     *16
 
 LABEL                          DEFINED                REFERENCES
 
-E prog__2                      12
+E prog__2                      10
 P EX                           18       14
 
 GnuCOBOL V.R.P          prog-2.cob           DDD MMM dd HH:MM:SS YYYY  Page 0005
@@ -4619,7 +4619,7 @@ NEXT-JOB-SELECT                148    not referenced
 
 LABEL                          DEFINED                REFERENCES
 
-E EDITOR                       152
+E EDITOR                       150
 P START-SECTION                152    not referenced
 P TOP-OF-PAGE-ROUTINE          167      242     262     290     308     316
 P READ-A-COMMAND               173      195     205     251     271
@@ -5204,7 +5204,7 @@ NEXT-JOB-SELECT                148    not referenced
 
 LABEL                          DEFINED                                    REFERENCES
 
-E EDITOR                       152
+E EDITOR                       150
 P START-SECTION                152    not referenced
 P TOP-OF-PAGE-ROUTINE          167      242     262     290     308     316
 P READ-A-COMMAND               173      195     205     251     271
@@ -5249,6 +5249,7 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog19.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
 
 AT_SETUP([Report Writer])
 AT_KEYWORDS([listing])
@@ -5542,7 +5543,7 @@ CHARGE-DETAIL                  65       99
 
 LABEL                          DEFINED                REFERENCES
 
-E prog                         75
+E prog                         73
 P 000-INITIATE                 75     not referenced
 P 000-TERMINATE                90     not referenced
 P 100-PROCESS-TRANSACTION-DATA 98       87

@@ -1,4 +1,21 @@
 
+2018-04-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c: cosmetic change - label exit_program/exit_function
+	  depending on program type
+
+2018-04-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (process_translate): initialize cb_source_file with correct value
+	* parser.y (end_scope_of_program_name), tree.h (cb_program): store end
+	  of program/function definition in last_source_line
+	* codegen.c (output_internal_function): output source location of program
+	  / function end (to be set for fall-through end of its definition)
+	* tree.c (cb_build_program): store start position of program definition
+	* parser.y, typeck.c (cb_emit_call), tree.h: pass position of CALL in the
+	  function call instead of a global variable
+	* parser.y: store position of entry points with (backup_current_pos)
+
 2018-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, scanner.l: added zero-length-literals config option.

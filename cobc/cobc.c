@@ -3313,7 +3313,7 @@ process_command_line (const int argc, char **argv)
 			/* -fmax-errors=<xx> : maximum errors until abort */
 			n = cobc_deciph_optarg (cob_optarg, 0);
 			if (n < 0) {
-				cobc_err_exit (COBC_INV_PAR, "-max-errors");
+				cobc_err_exit (COBC_INV_PAR, "-fmax-errors");
 			}
 			cb_max_errors = n;
 			break;
@@ -3389,7 +3389,7 @@ process_command_line (const int argc, char **argv)
 
 		case 'Z':
 			/* -W : Turn on every warning */
-			warningopt = 1;
+			warningopt = 2;
 #define	CB_WARNDEF(var,name,doc)	var = 1;
 #define	CB_ONWARNDEF(var,name,doc)
 #define	CB_NOWARNDEF(var,name,doc)	var = 1;
@@ -6927,6 +6927,7 @@ process_translate (struct filename *fn)
 
 	current_program = NULL;
 	cb_correct_program_order = 0;
+	cb_source_file = fn->source;
 
 	cb_init_constants ();
 

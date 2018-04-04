@@ -1470,6 +1470,8 @@ struct cb_program {
 	struct cb_label		*all_procedure;		/* DEBUGGING */
 	struct cb_call_xref	call_xref;		/* CALL Xref list */
 
+	int			last_source_line;	/* Line of (implicit) END PROGRAM/FUNCTION */
+
 	/* Internal variables */
 	int		loop_counter;			/* Loop counters */
 	unsigned int	decimal_index;			/* cob_decimal count */
@@ -1911,7 +1913,7 @@ extern void		cb_emit_alter (cb_tree, cb_tree);
 extern void		cb_emit_free (cb_tree);
 
 extern void		cb_emit_call (cb_tree, cb_tree, cb_tree, cb_tree,
-				      cb_tree, cb_tree, cb_tree, cb_tree);
+				      cb_tree, cb_tree, cb_tree, cb_tree, int);
 
 extern void		cb_emit_cancel (cb_tree);
 extern void		cb_emit_close (cb_tree, cb_tree);

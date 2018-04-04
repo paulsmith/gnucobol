@@ -6057,7 +6057,11 @@ output_call (struct cb_call *p)
 		needs_exit_prog = 1;
 		output_line ("if (unlikely(module->flag_exit_program)) {");
 		output_line ("\tmodule->flag_exit_program = 0;");
-		output_line ("\tgoto exit_program;");
+		if (current_prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
+			output_line ("\tgoto exit_function;");
+		} else {
+			output_line ("\tgoto exit_program;");
+		}
 		output_line ("}");
 	}
 	if (p->stmt2) {
@@ -6673,20 +6677,20 @@ output_goto (struct cb_goto *p)
 			output_goto_1 (CB_VALUE (l));
 		}
 		output_indent ("}");
-	} else if (p->target == NULL) {
+	} else if (p->target == NULL
+	        || p->target == cb_int1) {
 		/* EXIT PROGRAM/FUNCTION */
 		needs_exit_prog = 1;
-		if (cb_flag_implicit_init || current_prog->nested_level ||
-		    current_prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
+		if (current_prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
+			output_line ("goto exit_function;");
+		} else if (p->target == cb_int1
+		        || cb_flag_implicit_init || current_prog->nested_level) {
 			output_line ("goto exit_program;");
 		} else {
 			/* Ignore if not a callee */
 			output_line ("if (module->next)");
 			output_line ("  goto exit_program;");
 		}
-	} else if (p->target == cb_int1) {
-		needs_exit_prog = 1;
-		output_line ("goto exit_program;");
 	} else {
 		output_goto_1 (p->target);
 	}
@@ -10095,13 +10099,31 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	}
 	output_newline ();
 
-	/* End of program */
-	output_line ("/* Program exit */");
-	output_newline ();
+	/* End of program / function */
 
-	if (needs_exit_prog) {
-		output_line ("exit_program:");
+	/* Output source location as code */
+	if (cb_flag_source_location
+	 || cb_flag_dump) {
+		l = CB_TREE (prog);
+		output_line ("module->module_stmt = 0x%08X;",
+			COB_SET_LINE_FILE(prog->last_source_line, lookup_source(l->source_file)));
 		output_newline ();
+	}
+
+	if (current_prog->prog_type == COB_MODULE_TYPE_FUNCTION) {
+		output_line ("/* Function exit */");
+		output_newline ();
+		if (needs_exit_prog) {
+			output_line ("exit_function:");
+			output_newline ();
+		}
+	} else {
+		output_line ("/* Program exit */");
+		output_newline ();
+		if (needs_exit_prog) {
+			output_line ("exit_program:");
+			output_newline ();
+		}
 	}
 
 	if (!prog->flag_recursive) {

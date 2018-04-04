@@ -6101,7 +6101,7 @@ Program-Id: caller           Statement: RESET TRACE            Line: 8
 Program-Id: caller           Statement: MOVE                   Line: 12
 Program-Id: caller           Statement: CALL                   Line: 13
 Source:     'callee1.cob'
-Program-Id: callee1          Entry:     callee1                Line: 5
+Program-Id: callee1          Entry:     callee1                Line: 4
 Program-Id: callee1          Section:   (None)                 Line: 5
 Program-Id: callee1          Paragraph: (None)                 Line: 5
 Program-Id: callee1          Statement: ADD                    Line: 5
@@ -6116,7 +6116,7 @@ Source :    'callee1.cob'
 Program-Id: callee1          Statement: CANCEL                 Line: 7
 Program-Id: callee1          Statement: CALL                   Line: 8
 Source:     'preload.cob'
-Program-Id: callee2b         Entry:     callee2b               Line: 5
+Program-Id: callee2b         Entry:     callee2b               Line: 4
 Program-Id: callee2b         Section:   SOME-SEC               Line: 5
 Program-Id: callee2b         Paragraph: SOME-PAR               Line: 6
 Program-Id: callee2b         Section:   OTHER-SEC              Line: 12
@@ -7585,7 +7585,7 @@ AT_CAPTURE_FILE(./trace.txt)
 AT_DATA([reference],
 [Source: 'prog.cob'
 Program-Id:  prog
-Line:    292     Entry: prog
+Line:    290     Entry: prog
 Line:    292 Paragraph: MAINFILE
 Line:    293            OPEN
 Line:    294            CLOSE
@@ -8154,7 +8154,7 @@ ReWrite: FOR00000 got 00/02 as expected
 AT_DATA([reference_append],
 [Source: 'prog.cob'
 Program-Id:  prog
-    Entry: prog                            and now ...    292
+    Entry: prog                            and now ...    290
 Paragraph: MAINFILE                        and now ...    292
 Paragraph: LOADFILE                        and now ...    335
 Paragraph: 1000-LOAD-RECORD                and now ...    358
@@ -8176,7 +8176,7 @@ Paragraph: 1000-LOAD-RECORD                and now ...    358
 Paragraph: LISTFILE                        and now ...    387
 Source: 'prog.cob'
 Program-Id:  prog
-    Entry: prog                            -    292
+    Entry: prog                            -    290
 Paragraph: MAINFILE                        -    292
 Paragraph: LOADFILE                        -    335
 Paragraph: 1000-LOAD-RECORD                -    358
