@@ -4437,18 +4437,18 @@ remove_register (const char *name, const char *fname, const int line)
 }
 
 const char *
-cb_register_list_get_first (const char *definition)
+cb_register_list_get_first (const char **definition)
 {
 	current_register = 0;
 	return cb_register_list_get_next (definition);
 }
 
 const char *
-cb_register_list_get_next (const char *definition)
+cb_register_list_get_next (const char **definition)
 {
 	for (; current_register < NUM_REGISTERS; ++current_register) {
 		if (register_list[current_register].active == CB_FEATURE_ACTIVE) {
-			definition = register_list[current_register].definition;
+			*definition = register_list[current_register].definition;
 			return register_list[current_register++].name;
 		}
 	}

@@ -703,7 +703,7 @@ cb_check_sum_field (cb_tree x)
 cb_tree
 cb_check_numeric_value (cb_tree x)
 {
-	struct cb_field	*f;
+	struct cb_field	*f, *sc;
 	if (x == cb_error_node) {
 		return cb_error_node;
 	}
@@ -721,12 +721,13 @@ cb_check_numeric_value (cb_tree x)
 		break;
 	case CB_CATEGORY_NUMERIC_EDITED:
 		f = CB_FIELD (cb_ref(x));
-		if(f->report) {
-			struct cb_field *sc = get_sum_data_field(f->report, f);
-			if(sc) {	/* Use the SUM variable instead of the print variable */
+		if (f->report) {
+			sc = get_sum_data_field (f->report, f);
+			if (sc) {	/* Use the SUM variable instead of the print variable */
 				return cb_build_field_reference (sc, NULL);
 			}
 		}
+		/* Fall-through as we only allow this for RW: SUM*/
 	default:
 		cb_error_x (x, _("'%s' is not a numeric value"), cb_name (x));
 	}
@@ -1282,10 +1283,10 @@ cb_build_registers (void)
 {
 	const char *name, *definition = NULL;
 
-	name = cb_register_list_get_first (definition);
+	name = cb_register_list_get_first (&definition);
 	while (name) {
 		cb_build_single_register (name, definition);
-		name = cb_register_list_get_next (definition);
+		name = cb_register_list_get_next (&definition);
 	}
 }
 
@@ -4059,7 +4060,7 @@ decimal_alloc (void)
 		}
 		COBC_ABORT ();
 	}
-		/* LCOV_EXCL_STOP */
+	/* LCOV_EXCL_STOP */
 	if (current_program->decimal_index > current_program->decimal_index_max) {
 		current_program->decimal_index_max = current_program->decimal_index;
 	}
@@ -5423,20 +5424,20 @@ emit_accept_external_form (cb_tree x)
 			continue;
 		}
 
-			if (f->children) {
+		if (f->children) {
 			f_ref = cb_build_field_reference (f, x);
 			found += emit_accept_external_form (f_ref);
 			continue;
 		}
 
-				if (f->external_form_identifier) {
+		if (f->external_form_identifier) {
 			ext_form_id = f->external_form_identifier;
-				} else {
+		} else {
 			ext_form_id = cb_build_alphanumeric_literal (f->name, strlen (f->name));
-				}
-				if (f->flag_occurs) {
-					for (i = 1; i <= f->occurs_max; i++) {
-						sprintf (buff, "%d", i);
+		}
+		if (f->flag_occurs) {
+			for (i = 1; i <= f->occurs_max; i++) {
+				sprintf (buff, "%d", i);
 				index_lit = cb_build_numeric_literal(0, buff, 0);
 
 				f_ref_2 = cb_build_field_reference (f, x);
@@ -5446,20 +5447,20 @@ emit_accept_external_form (cb_tree x)
 				cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue",
 							     ext_form_id, index_lit,
 							     f_ref_2));
-#else
-				COB_UNUSED (ext_form_id);
 #endif
-					}
-				} else {
-			index_lit = cb_build_numeric_literal (0, "1", 0);
+			}
 #if 0 /* TODO: implement CGI runtime, see Patch #27 */
+		} else {
+			index_lit = cb_build_numeric_literal (0, "1", 0);
 			cb_emit (CB_BUILD_FUNCALL_3 ("cob_cgi_getCgiValue",
 						     ext_form_id, index_lit,
 						     f_ref));
+#else
+			COB_UNUSED (ext_form_id);
 #endif
-				}
-				found++;
-			}
+		}
+		found++;
+	}
 
 	return found;
 }

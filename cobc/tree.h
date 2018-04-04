@@ -1837,8 +1837,8 @@ extern void		cb_set_dmax (int scale);
 
 extern void		cb_set_intr_when_compiled (void);
 extern void		cb_build_registers (void);
-extern const char		*cb_register_list_get_first (const char *);
-extern const char		*cb_register_list_get_next (const char *);
+extern const char		*cb_register_list_get_first (const char **);
+extern const char		*cb_register_list_get_next (const char **);
 extern void		cb_build_debug_item (void);
 extern void		cb_check_field_debug (cb_tree);
 extern void		cb_trim_program_id (cb_tree);

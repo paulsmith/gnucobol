@@ -16,6 +16,12 @@
 	  function call instead of a global variable
 	* parser.y: store position of entry points with (backup_current_pos)
 
+2018-04-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c (cb_register_list_get_first, cb_register_list_get_next),
+	  typeck.c (cb_build_registers), tree.h: actually create register
+	  definition, not only the name
+
 2018-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.def, scanner.l: added zero-length-literals config option.
