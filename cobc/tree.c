@@ -3081,6 +3081,8 @@ cb_field_add (struct cb_field *f, struct cb_field *p)
 	return f;
 }
 
+/* get size of given field/literal (or its reference),
+   returns -1 if size isn't known at compile time */
 int
 cb_field_size (const cb_tree x)
 {
@@ -3108,6 +3110,8 @@ cb_field_size (const cb_tree x)
 			} else {
 				return -1;
 			}
+		} else if (f->flag_any_length) {
+			return -1;
 		} else {
 			return f->size;
 		}
@@ -5212,9 +5216,9 @@ cb_build_if (const cb_tree test, const cb_tree stmt1, const cb_tree stmt2,
 	} else if (test == cb_false) {	/* Always FALSE, so skip 'true code' */
 		p->stmt1 = NULL;
 	}
-	if (p->test
-	 && CB_TREE_TAG (p->test) == CB_TAG_BINARY_OP) {
-		bop = CB_BINARY_OP (p->test);
+	if (test
+	 && CB_TREE_TAG (test) == CB_TAG_BINARY_OP) {
+		bop = CB_BINARY_OP (test);
 		if (bop->op == '!') {
 			if (bop->x == cb_true) {
 				p->stmt1 = NULL;

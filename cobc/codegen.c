@@ -9677,19 +9677,19 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		optimize_defs[COB_SET_REPORT] = 1;
 	}
 
+#if	0	/* RXWRXW - Any */
 	/* ANY LENGTH items */
 	anyseen = 0;
 	for (l = parameter_list; l; l = CB_CHAIN (l)) {
 		f = cb_code_field (CB_VALUE (l));
 		if (f->flag_any_length) {
 			anyseen = 1;
-#if	0	/* RXWRXW - Any */
 			output_local ("/* ANY LENGTH variable */\n");
 			output_local ("cob_field\t\t*cob_anylen;\n\n");
-#endif
 			break;
 		}
 	}
+#endif
 
 	/* Save variables for global callback */
 	if (prog->flag_global_use && parameter_list) {
@@ -9976,66 +9976,68 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	/* Set up ANY length items */
 	i = 0;
-	if (anyseen) {
-		output_line ("/* Initialize ANY LENGTH parameters */");
-		for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
-			f = cb_code_field (CB_VALUE (l));
-			if (f->flag_any_length) {
-				/* Force field cache */
-				savetarget = output_target;
-				output_target = NULL;
-				output_param (CB_VALUE (l), i);
-				output_target = savetarget;
-
-				output_line ("if (cob_call_params > %d && %s%d%s)",
-					i, "module->next->cob_procedure_params[",
-					i, "]");
-				if (f->flag_any_numeric) {
-					/* Copy complete structure */
-					output_line ("  %s%d = *(%s%d%s);",
-							 CB_PREFIX_FIELD, f->id,
-							 "module->next->cob_procedure_params[",
-							 i, "]");
-				} else {
-					/* Copy size */
-					output_line ("  %s%d.size = %s%d%s;",
-							 CB_PREFIX_FIELD, f->id,
-							 "module->next->cob_procedure_params[",
-							 i, "]->size");
-				}
-				output_prefix ();
-				output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
-				output_data (CB_VALUE (l));
-				output (";\n");
-#if	0	/* RXWRXW - Num check */
-				if (CB_EXCEPTION_ENABLE (COB_EC_DATA_INCOMPATIBLE) &&
-					f->flag_any_numeric &&
-					(f->usage == CB_USAGE_DISPLAY ||
-					 f->usage == CB_USAGE_PACKED ||
-					 f->usage == CB_USAGE_COMP_6)) {
-					output_line ("cob_check_numeric (&%s%d, %s%d);",
-							 CB_PREFIX_FIELD
-							 f->id,
-							 CB_PREFIX_STRING,
-							 lookup_string (f->name));
-				}
-#endif
+	anyseen = 0;
+	for (l = parameter_list; l; l = CB_CHAIN (l), i++) {
+		f = cb_code_field (CB_VALUE (l));
+		if (f->flag_any_length) {
+			if (!anyseen) {
+				anyseen = 1;
+				output_line ("/* Initialize ANY LENGTH parameters */");
 			}
+			/* Force field cache */
+			savetarget = output_target;
+			output_target = NULL;
+			output_param (CB_VALUE (l), i);
+			output_target = savetarget;
+
+			output_line ("if (cob_call_params > %d && %s%d%s)",
+				i, "module->next->cob_procedure_params[",
+				i, "]");
+			if (f->flag_any_numeric) {
+				/* Copy complete structure */
+				output_line ("  %s%d = *(%s%d%s);",
+						 CB_PREFIX_FIELD, f->id,
+						 "module->next->cob_procedure_params[",
+						 i, "]");
+			} else {
+				/* Copy size */
+				output_line ("  %s%d.size = %s%d%s;",
+						 CB_PREFIX_FIELD, f->id,
+						 "module->next->cob_procedure_params[",
+						 i, "]->size");
+			}
+			output_prefix ();
+			output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);
+			output_data (CB_VALUE (l));
+			output (";\n");
+#if	0	/* RXWRXW - Num check */
+			if (CB_EXCEPTION_ENABLE (COB_EC_DATA_INCOMPATIBLE) &&
+				f->flag_any_numeric &&
+				(f->usage == CB_USAGE_DISPLAY ||
+				 f->usage == CB_USAGE_PACKED ||
+				 f->usage == CB_USAGE_COMP_6)) {
+				output_line ("cob_check_numeric (&%s%d, %s%d);",
+						 CB_PREFIX_FIELD
+						 f->id,
+						 CB_PREFIX_STRING,
+						 lookup_string (f->name));
+			}
+#endif
 		}
-		output_newline ();
+	}
 #if 0 /* cob_call_name_hash and cob_call_from_c are rw-branch only features
          for now - TODO: activate on merge of r1547 */
-		name_hash = cob_get_name_hash (prog->orig_program_id);
-		output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
-		output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
-		output_line ("} else {");
-		output_line ("    cob_glob_ptr->cob_call_from_c = 0;");
-		for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
-			pickup_param (l, i, 0);
-		}
-		output_line ("}");
-#endif
+	output_newline ();
+	name_hash = cob_get_name_hash (prog->orig_program_id);
+	output_line ("if (cob_glob_ptr->cob_call_name_hash != 0x%X) {", name_hash);
+	output_line ("    cob_glob_ptr->cob_call_from_c = 1;");
+	output_line ("} else {");
+	output_line ("    cob_glob_ptr->cob_call_from_c = 0;");
+	for (i = 0, l = parameter_list; l; l = CB_CHAIN (l), i++) {
+		pickup_param (l, i, 0);
 	}
+	output_line ("}");
+#endif
 
 	if (prog->prog_type == COB_MODULE_TYPE_FUNCTION &&
 		CB_FIELD_PTR(prog->returning)->storage == CB_STORAGE_LINKAGE) {

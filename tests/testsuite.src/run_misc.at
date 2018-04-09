@@ -3722,7 +3722,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ANY LENGTH (1)])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc CALL])
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
@@ -3765,7 +3765,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ANY LENGTH (2)])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc CALL])
 
 AT_DATA([callee.cob], [
        IDENTIFICATION   DIVISION.
@@ -3809,7 +3809,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ANY LENGTH (3)])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc CALL])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3848,6 +3848,49 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 abcdabcd
 aaaaaaaaaaaaaaaaaaaa
 ])
+AT_CLEANUP
+
+
+AT_SETUP([ANY LENGTH (4)])
+AT_KEYWORDS([runmisc IF CALL])
+
+# comparision of any length was done only for first character - see bug 511
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 str PIC X(20) VALUE ALL "X".
+
+       PROCEDURE DIVISION.
+           CALL "subprog" USING str
+           move '   45'   to str
+           CALL "subprog" USING str
+           .
+       END PROGRAM prog.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. subprog.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01 str PIC X ANY LENGTH.
+
+       PROCEDURE DIVISION USING str.
+           IF str = 'X'
+             DISPLAY 'X is X'
+           END-IF
+           IF str = space
+             DISPLAY 'X is space'
+           END-IF
+           .
+       END PROGRAM subprog.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
 AT_CLEANUP
 
 
