@@ -611,7 +611,7 @@ LINE    PG/LN  A...B............................................................
 
 The first part of the listing lists the program text.  If the program text is
 a COPY the line number reflects the COPY line number and is appended with
-a 'C'. 
+a 'C'.
 
 When the wide list option is specified (-T), the SEQUENCE columns are included
 in the listing.
@@ -645,7 +645,7 @@ SIZE TYPE           LVL  NAME                           PICTURE
 0004 ALPHANUMERIC   05     FLD4                         X(4)
 @end example
 
-If the symbol redefines another variable the TYPE is marked with 'R'. If the 
+If the symbol redefines another variable the TYPE is marked with 'R'. If the
 symbol is an array the OCCURS phrase is in the PICTURE field.
 
 
@@ -1308,7 +1308,41 @@ run-time errors with source locations.
 @cindex @code{SELECT}
 @cindex @code{SELECT ASSIGN TO}
 
-<This section is in progress.>
+A file may be assigned to a literal file, a file in a variable,
+or a file in an environment variable.
+
+@subsection Literal file.
+
+Assign to a literal file.
+
+@example
+Select <file> assign to "/tmp/myfile.txt".
+@end example
+
+
+@subsection <variable>
+
+Assign to a file in a variable.
+
+@example
+Select <file> assign to my-file.
+
+01  my-file            pic x(512).
+
+Move "/tmp/myfile.txt" to my-file.
+Open output <file>.
+@end example
+
+
+@subsection <environment variable>
+
+Assign to a file in an environment variable.
+
+@example
+export myfile=/tmp/myfile.txt
+
+Select <file> assign to external myfile.
+@end example
 
 
 @node Indexed
@@ -1327,21 +1361,50 @@ Extended @code{ACCEPT} statements allow for full control of items
 accepted from the screen.
 Items accept by line and column positioning.
 
+All commands following @code{WITH} are optional.
+
+
 @example
 
 ACCEPT variable-1
-   LINE <line> COLUMN <column>
+   LINE variable-2 | literal-1 COLUMN variable-3 | literal-2
    WITH
       AUTO-SKIP | AUTO
-      [PROTECTED] SIZE [IS] variable-2 | literal-2
+      BACKGROUND-COLOR variable-4 | literal-3
+      BELL | BEEP
+      BLINK
+      FOREGROUND-COLOR variable-5 | literal-4
+      LOWLIGHT | HIGHLIGHT
+      PROMPT
+      PROTECTED
+      SIZE [IS] variable-6 | literal-5
+      UPDATE
+   ON EXCEPTION
+      <exception processing>
+   NOT ON EXCEPTION
+      <normal processing>
 END-ACCEPT.
 
 @end example
 
 
+@subsection LINE
+@cindex @code{LINE}
+
+The line number of variable-2 or literal-1 to accept the field.
+
+
+@subsection COLUMN
+@cindex @code{COLUMN}
+
+The column number of variable-3 or literal-2 to accept the field.
+
+
 @subsection AUTO-SKIP
 @cindex @code{AUTO-SKIP}
 @cindex @code{AUTO}
+
+The word @code{AUTO} may be used for @code{AUTO-SKIP}.
 
 With this option the @code{ACCEPT} statement returns after the last
 character is typed at the end of the field.
@@ -1350,8 +1413,6 @@ This is the same as if the Enter key were pressed.
 Without this option the cursor remains at the end of the field
 and waits for the user to press Enter.
 
-The word @code{AUTO} may be used for @code{AUTO-SKIP}.
-
 The Right-Arrow key returns from the end of the field.
 The Left-Arrow key returns from the beginning.
 @xref{ACCEPT special, Arrow keys,,,}.
@@ -1359,36 +1420,115 @@ The Left-Arrow key returns from the beginning.
 The Alt-Right-Arrow and Alt-Left-Arrow keys never @code{AUTO-SKIP}.
 
 
+@subsection BACKGROUND-COLOR
+@cindex @code{BACKGROUND-COLOR}
+
+The background color is the color used behind the characters.
+
+Variable-4 or literal-3 must be numeric.
+See screenio.cpy for the color assignments to variable-4 or literal-3.
+
+
+@subsection BELL
+@cindex @code{BELL}
+@cindex @code{BEEP}
+
+The word @code{BEEP} may be used for @code{BELL}.
+
+The system beeps when the cursor moves to accept from this field.
+On some systems, there is no sound.
+Some other method may indicate a beep, such a flashing screen or pop up window.
+
+
+@subsection BLINK
+@cindex @code{BLINK}
+
+The field blinks while the user enters the data.
+This can help small menu selection fields to stand out.
+
+
+@subsection FOREGROUND-COLOR
+@cindex @code{FOREGROUND-COLOR}
+
+The foreground color is the color used for the characters.
+
+Variable-5 or literal-4 must be numeric.
+See screenio.cpy for the color assignments to variable-5 or literal-4.
+
+
+@subsection LOWLIGHT
+@cindex @code{LOWLIGHT}
+@cindex @code{HIGHLIGHT}
+
+The @code{LOWLIGHT} and @code{HIGHLIGHT} commands vary the intensity of the field.
+
+@code{LOWLIGHT} displays with lower intensity
+and @code{HIGHLIGHT} displays with higher intensity.
+Having neither @code{LOWLIGHT} nor @code{HIGHLIGHT} displays at normal intensity.
+
+These may have different levels of intensity, if at all, depending on the
+make and model of the screens.
+
+
+@subsection PROMPT
+@cindex @code{PROMPT}
+
+Display the field with prompt characters as the cursor moves to accept from this field.
+
+
 @subsection PROTECTED
 @cindex @code{PROTECTED}
 
 @code{PROTECTED} is ignored.
-It is optional.
 
 
 @subsection SIZE
 @cindex @code{SIZE}
 
 The size of variable-1 to accept from the screen.
-It is optional.
+
+Variable-6 or literal-5 must be numeric.
 
 @vtable @option
 
 @item @code{SIZE} <greater than zero>
 
-If @code{SIZE} is less than the length of variable-1 then only the @code{SIZE}
+If variable-6 or literal-5 is less than the length of variable-1 then only the @code{SIZE}
 number of characters accept into the field.
 Variable-1 pads with spaces after @code{SIZE} to the end of the field.
 
-If SIZE is greater than variable-1, then the screen pads with spaces
+If variable-6 or literal-5 is greater than variable-1, then the screen pads with spaces
 after variable-1 to the @code{SIZE} length.
 
 @item @code{SIZE ZERO}
 @itemx <@code{SIZE} option not specified>
 
-The variable-1 field accepts with its length.
+The variable-1 accepts to its field length.
 
 @end vtable
+
+
+@subsection UPDATE
+@cindex @code{UPDATE}
+
+The contents of variable-1 displays on the screen as the @code{ACCEPT} begins.
+This allows the user to update the field without having to type it all again.
+
+Without this option, the @code{ACCEPT} field is always blank.
+
+
+@subsection ON EXCEPTION
+@cindex @code{ON EXCEPTION}
+
+Check the special register cob-crt-status for the special key that was pressed.
+This includes Escape, Tab, Back-Tab, F-keys, arrows, etc...
+See screenio.cpy for the values.
+
+
+@subsection NOT ON EXCEPTION
+@cindex @code{NOT ON EXCEPTION}
+
+Reset any F-key indicator because no special key was pressed.
 
 
 @node ACCEPT special
@@ -1423,8 +1563,7 @@ it never returns, even for @code{AUTO-SKIP}.
 @subsection Backspace key
 @cindex Backspace key
 
-The Backspace key moves the cursor, and the remainder of the text,
-to the left.
+The Backspace key moves the cursor, and the remainder of the text, to the left.
 
 
 @subsection Delete keys
@@ -1438,20 +1577,20 @@ The Alt-Delete key deletes all text from the cursor to the
 end of the field.
 
 
-@subsection End keys
-@cindex End keys
+@subsection End key
+@cindex End key
 
 The End key moves the cursor after the last non-space character.
+Pressing the End key again moves the cursor to the end of the field.
+Repeated pressing moves the cursor back and forth.
 
-The Alt-End key moves the cursor to the end of the field.
 
-
-@subsection Home keys
-@cindex Home keys
+@subsection Home key
+@cindex Home key
 
 The Home key moves the cursor to the first non-space character.
-
-The Alt-Home key moves the cursor to the beginning of the field.
+Pressing the Home key again moves the cursor to the beginning of the field.
+Repeated pressing moves the cursor back and forth.
 
 
 @subsection Insert key
@@ -1815,26 +1954,26 @@ HOSTED identification division.
 
 
        *> the following only returns zero if the system has HAVE_TIMEZONE set
-       
+
        call "CBL_GC_HOSTED" using daylight "daylight "
        display "'timezone' lookup    : " return-code
 
        if return-code not = 0
           display "system doesn't has timezone"
        else
-          
+
           display "timezone is          : " timezone
-          
+
           call "CBL_GC_HOSTED" using daylight "daylight "
           display "'daylight' lookup    : " return-code
           display "daylight is          : " daylight
-       
+
           set environment "TZ" to "PST8PDT"
           call static "tzset" returning omitted on exception continue end-call
-          
+
           call "CBL_GC_HOSTED" using tzname "tzname"
           display "'tzname' lookup      : " return-code
-       
+
           *> tzs(1) will point to z"PST" and tzs(2) to z"PDT"
           if return-code equal 0 and tzname not equal null then
               set address of tznames to tzname
@@ -1897,7 +2036,7 @@ is not available on the current system.
            EVALUATE TRUE
               WHEN CHILD-PID = ZERO
                  PERFORM CHILD-CODE
-              WHEN CHILD-PID > ZERO 
+              WHEN CHILD-PID > ZERO
                  PERFORM PARENT-CODE
               WHEN CHILD-PID = -1
                  DISPLAY 'CBL_GC_FORK is not available '

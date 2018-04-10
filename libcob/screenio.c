@@ -473,16 +473,6 @@ cob_screen_init (void)
 #		define ALT_DEL   kDC3
 #	endif
 #endif
-#ifndef ALT_HOME
-#	ifdef kHOM3
-#		define ALT_HOME   kHOM3
-#	endif
-#endif
-#ifndef ALT_END
-#	ifdef kEND3
-#		define ALT_END    kEND3
-#	endif
-#endif
 #ifndef ALT_LEFT
 #	ifdef kLFT3
 #		define ALT_LEFT   kLFT3
@@ -509,30 +499,22 @@ cob_screen_init (void)
 #define COB_NEW_KEY(n)		(__KEY_MIN - n)
 #else
 #ifdef HAVE_DEFINE_KEY
-#error "Did not found a valid value for key definition. Please report this!"
+#error "Did not find a valid value for key definition. Please report this!"
 #endif
 #endif
 
 #ifdef COB_NEW_KEY
 #ifndef ALT_DEL
 #define ALT_DEL                 COB_NEW_KEY(1)
-	define_key("\\E[3;3~", ALT_DEL);
+	define_key("\E[3;3~", ALT_DEL);
 #endif
 #ifndef ALT_LEFT
 #define ALT_LEFT                COB_NEW_KEY(2)
-	define_key("\\E[1;3D", ALT_LEFT);
+	define_key("\E[1;3D", ALT_LEFT);
 #endif
 #ifndef ALT_RIGHT
 #define ALT_RIGHT               COB_NEW_KEY(3)
-	define_key("\\E[1;3C", ALT_RIGHT);
-#endif
-#ifndef ALT_HOME
-#define ALT_HOME                COB_NEW_KEY(4)
-	define_key("\\E[1;3H", ALT_HOME);
-#endif
-#ifndef ALT_END
-#define ALT_END                 COB_NEW_KEY(5)
-	define_key("\\E[1;3F", ALT_END);
+	define_key("\E[1;3C", ALT_RIGHT);
 #endif
 #else
 #ifndef ALT_DEL
@@ -543,12 +525,6 @@ cob_screen_init (void)
 #endif
 #ifndef ALT_RIGHT
 #define ALT_RIGHT               KEY_ALEFT
-#endif
-#ifndef ALT_HOME
-#define ALT_HOME                KEY_SHOME
-#endif
-#ifndef ALT_END
-#define ALT_END                 KEY_SEND
 #endif
 #endif
 
@@ -652,7 +628,7 @@ cob_convert_key (int *keyp, const cob_u32_t field_accept)
 	/* Check if key should be ignored */
 	switch (*keyp) {
 #if 0 /* 2012/08/30 removed to allow Tab key in extended Accept */
-		case KEY_STAB:
+	case KEY_STAB:
 		if (field_accept) {
 			*keyp = 0;
 		}
@@ -1569,7 +1545,7 @@ cob_screen_get_all (const int initial_curs, const int get_timeout)
 					continue;
 				}
 				/* Move remainder to the right. */
-				for (count = right_pos; count > ccolumn - 1; count--) {
+				for (count = right_pos; count > ccolumn; count--) {
 					/* Get character */
 					p2 = s->field->data + count - scolumn - 1;
 					move_char = *p2;
@@ -2124,6 +2100,8 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	int		prompt_char;    /* prompt character */
 	int		get_timeout;
 	int		status;
+	int		home_toggle = 0;    /* Home key, beginning of data or field */
+	int		end_toggle = 0;     /* End key, end of data or field */
 	chtype		default_prompt_char;
 	size_t		size_accept = 0;	/* final size to accept */
 	cob_field	temp_field;
@@ -2241,7 +2219,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	count = 0;
 
-	/* Get characters from keyboard, processing each one. */
+	/* Show prompt characters. */
 	for (; ;) {
 		if (f) {
 			/* Get current line, column. */
@@ -2441,61 +2419,71 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			at_eof = 0;
 			continue;
 		case KEY_HOME:
-			/* Home key, cursor to start of characters. */
-			/* Prepare for empty field. */
-			ccolumn = right_pos;
-			move_char = ' ';
-			/* Find non-blank from left. */
-			for (count = scolumn; count <= right_pos; count++) {
-				/* Get character. */
-				p2 = COB_TERM_BUFF + count - scolumn;
-				move_char = *p2;
-				/* Non blank stop. */
-				if (move_char != ' ') {
-					ccolumn = count;
-					break;
+			/* Home key, toggle between start of characters or field */
+			if (home_toggle == 0) {
+				home_toggle = 1;
+				/* Cursor to start of characters. */
+				/* Prepare for empty field. */
+				ccolumn = right_pos;
+				move_char = ' ';
+				/* Find non-blank from left. */
+				for (count = scolumn; count <= right_pos; count++) {
+					/* Get character. */
+					p2 = COB_TERM_BUFF + count - scolumn;
+					move_char = *p2;
+					/* Non blank stop. */
+					if (move_char != ' ') {
+						ccolumn = count;
+						break;
+					}
 				}
+				cob_move_cursor (cline, ccolumn);
+				p = COB_TERM_BUFF + ccolumn - scolumn;
+				at_eof = 0;
+				continue;
+			} else {
+				home_toggle = 0;
+				/* Cursor to start of field. */
+				cob_move_cursor (sline, scolumn);
+				p = COB_TERM_BUFF;
+				at_eof = 0;
+				continue;
 			}
-			cob_move_cursor (cline, ccolumn);
-			p = COB_TERM_BUFF + ccolumn - scolumn;
-			at_eof = 0;
-			continue;
-		case ALT_HOME:
-			/* Alt-Home key, cursor to start of field. */
-			cob_move_cursor (sline, scolumn);
-			p = COB_TERM_BUFF;
-			at_eof = 0;
-			continue;
 		case KEY_END:
-			/* End key, cursor to end of characters. */
-			/* Prepare for empty field. */
-			ccolumn = scolumn;
-			move_char = ' ';
-			/* Find non blank from right. */
-			for (count = right_pos; (int) count >= scolumn; count--) {
-				/* Get character. */
-				p2 = COB_TERM_BUFF + count - scolumn;
-				move_char = *p2;
-				/* Non blank stop. */
-				if (move_char != ' ') {
-					ccolumn = count;
-					break;
+			/* End key, toggle between end of characters or field */
+			if (end_toggle == 0) {
+				end_toggle = 1;
+				/* Cursor to end of characters. */
+				/* Prepare for empty field. */
+				ccolumn = scolumn;
+				move_char = ' ';
+				/* Find non blank from right. */
+				for (count = right_pos; (int) count >= scolumn; count--) {
+					/* Get character. */
+					p2 = COB_TERM_BUFF + count - scolumn;
+					move_char = *p2;
+					/* Non blank stop. */
+					if (move_char != ' ') {
+						ccolumn = count;
+						break;
+					}
 				}
+				/* Cursor to first blank after. */
+				if (move_char != ' ' && ccolumn != right_pos) {
+					ccolumn++;
+				}
+				cob_move_cursor (cline, ccolumn);
+				p = COB_TERM_BUFF + ccolumn - scolumn;
+				at_eof = 0;
+				continue;
+			} else {
+				end_toggle = 0;
+				/* Alt-End key, cursor to end of size of field */
+				cob_move_cursor (sline, right_pos);
+				p = COB_TERM_BUFF + size_accept - 1;
+				at_eof = 0;
+				continue;
 			}
-			/* Cursor to first blank after. */
-			if (move_char != ' ' && ccolumn != right_pos) {
-				ccolumn++;
-			}
-			cob_move_cursor (cline, ccolumn);
-			p = COB_TERM_BUFF + ccolumn - scolumn;
-			at_eof = 0;
-			continue;
-		case ALT_END:
-			/* Alt-End key, cursor to end of size of field */
-			cob_move_cursor (sline, right_pos);
-			p = COB_TERM_BUFF + size_accept - 1;
-			at_eof = 0;
-			continue;
 		case KEY_LEFT:
 		case ALT_LEFT:
 			/* Left-arrow     KEY_LEFT auto-skip. */
@@ -2649,7 +2637,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 					continue;
 				}
 				/* Move remainder to the right. */
-				for (count = right_pos; count > ccolumn - 1; count--) {
+				for (count = right_pos; count > ccolumn; count--) {
 					/* Get character */
 					p2 = COB_TERM_BUFF + count - scolumn - 1;
 					move_char = *p2;

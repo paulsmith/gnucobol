@@ -1,4 +1,11 @@
 
+2018-04-10  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* gnucobol.texi:
+	   - replace Alt-Home and Alt-End with toggle functions
+	   - doc examples for SELECT ASSIGN
+	   - doc more options to extended ACCEPT
+
 2018-03-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* gnucobol.texi: removed all node pointers but the main level as
@@ -119,7 +126,7 @@
 
 2015-06-22  Luke Smith <cobcoder@users.sourceforge.net>
 
-	* gnucobol.texi: Add Extended ACCEPT special keys section. 
+	* gnucobol.texi: Add Extended ACCEPT special keys section.
 
 2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
 

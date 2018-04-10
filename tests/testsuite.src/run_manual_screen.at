@@ -1714,3 +1714,377 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([HOME key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if multiple presses of the HOME key"
+               LINE 1 COLUMN 1.
+           DISPLAY "go to the beginning of the field and the beginning"
+               LINE 2 COLUMN 1.
+           DISPLAY "of the characters."
+               LINE 3 COLUMN 1.
+
+           MOVE "    ABC   " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 5 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 7 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([END key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if multiple presses of the END key"
+               LINE 1 COLUMN 1.
+           DISPLAY "go to the end of the field and just after the end"
+               LINE 2 COLUMN 1.
+           DISPLAY "of the characters."
+               LINE 3 COLUMN 1.
+
+           MOVE "   ABC    " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 5 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 7 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INSERT key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if multiple presses of the INSERT key"
+               LINE 1 COLUMN 1.
+           DISPLAY "go back and forth between"
+               LINE 2 COLUMN 1.
+           DISPLAY "Insert Mode ON (characters move to the right)"
+               LINE 3 COLUMN 1.
+           DISPLAY "and Insert Mode OFF (characters type over)."
+               LINE 4 COLUMN 1.
+
+           MOVE "ABCD      " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 6 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 8 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([BACKSPACE key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if each press of the BACKSPACE key"
+               LINE 1 COLUMN 1.
+           DISPLAY "deletes the character to the left and moves the"
+               LINE 2 COLUMN 1.
+           DISPLAY "cursor and remaining characters one space to the"
+               LINE 3 COLUMN 1.
+           DISPLAY "left."
+               LINE 4 COLUMN 1.
+
+           MOVE "ABCD      " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 6 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 8 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([DELETE key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if each press of the DELETE key deletes"
+               LINE 1 COLUMN 1.
+           DISPLAY "the cursor character and moves the remaining"
+               LINE 2 COLUMN 1.
+           DISPLAY "characters one space to the left.  And the cursor"
+               LINE 3 COLUMN 1.
+           DISPLAY "does not move."
+               LINE 4 COLUMN 1.
+
+           MOVE "ABCD      " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 6 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 8 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALT DELETE key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if pressing the ALT and DELETE keys"
+               LINE 1 COLUMN 1.
+           DISPLAY "deletes all characters from the cursor to the end"
+               LINE 2 COLUMN 1.
+           DISPLAY "of the field.  And the cursor does not move."
+               LINE 3 COLUMN 1.
+
+           MOVE "ABCD      " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 5 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 7 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALT LEFT-ARROW key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-10      PIC X(10).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if pressing the ALT and LEFT-ARROW keys"
+               LINE 1 COLUMN 1.
+           DISPLAY "at the first column does not exit the field."
+               LINE 2 COLUMN 1.
+           DISPLAY "But the LEFT-ARROW without ALT does exit."
+               LINE 3 COLUMN 1.
+
+           MOVE "ABCD      " TO WS-X-10.
+           ACCEPT WS-X-10
+               LINE 5 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 7 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([ALT RIGHT-ARROW key])
+AT_KEYWORDS([])
+
+AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  success-flag PIC X VALUE 'Y'.
+           88  success  VALUE 'Y', 'y'.
+       01  ws-x-5       PIC X(05).
+       PROCEDURE DIVISION.
+           DISPLAY "Enter 'y' if pressing the ALT and RIGHT-ARROW keys"
+               LINE 1 COLUMN 1.
+           DISPLAY "at the last column does not exit the field."
+               LINE 2 COLUMN 1.
+           DISPLAY "But the RIGHT-ARROW without ALT does exit."
+               LINE 3 COLUMN 1.
+
+           MOVE "ABCDE" TO WS-X-5.
+           ACCEPT WS-X-5
+               LINE 5 COLUMN 1
+               WITH
+                   AUTO-SKIP
+                   UPDATE.
+
+           ACCEPT SUCCESS-FLAG
+               LINE 7 COLUMN 1
+               WITH UPDATE.
+
+           IF success AND COB-CRT-STATUS = 0
+               GOBACK RETURNING 0
+           ELSE
+               GOBACK RETURNING 1
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
+
+AT_CLEANUP

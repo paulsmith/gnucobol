@@ -1,4 +1,10 @@
 
+2018-04-10  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* testsuite.src/run_manual_screen.at
+	   - add key tests: Home, End, Insert, Backspace,
+	     Delete, alt delete, alt left-arrow, alt right-arrow
+
 2018-03-31  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_functions.at, atlocal.in, atlocal_valgrind,

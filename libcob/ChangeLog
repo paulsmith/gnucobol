@@ -1,4 +1,11 @@
 
+2018-04-10  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c:
+	   - replace Alt-Home and Alt-End with toggle functions
+	   - fix Insert key at column 1
+	   - fix other alt keys
+
 2018-04-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (cob_screen_init): fix definition of alt keys
@@ -179,7 +186,7 @@
 2017-12-20  Ron Norman <rjn@inglenet.com>
 
 	* common.h: add code_is, code_len to cob_report structure
-	* reportio.c: output CODE value and chop lines based on 
+	* reportio.c: output CODE value and chop lines based on
 	              PAGE LIMIT nnn COLUMNS
 	* numeric.c (cob_decimal_get_ieee64dec): Fix coding error
 	* numeric.c: Tidy up the cob_decimal_get/set routines
@@ -288,7 +295,7 @@
 	* common.c (cob_check_version): FR #239: allow difference in module version
 	  vs. runtime version
 	FR #239 - adjustments for changed function signatures between 2.0-rc and 2.3:
-	* common.c (cob_check_odo): adjustments for changed function signature 
+	* common.c (cob_check_odo): adjustments for changed function signature
 	* common.c (cob_check_subscript, cob_check_version): don't check subscript
 	  max if at least one module is too old for the current function signature
 
@@ -581,7 +588,7 @@
 	  New routines for handling -ftrace, -ftraceall & -fdump=<scope>
 	  -fdump=<scope> causes code to be generated that will dump out data
 	  variables in the event of a program abort or abnormal end
-	  New runtime.cfg/env-vars: 
+	  New runtime.cfg/env-vars:
 	      COB_DUMP_FILE, COB_DUMP_FORMAT, COB_DUMP_WIDTH
 	  The old trace routines have been kept for backward compatible
 
@@ -1089,7 +1096,7 @@
 	  cob_display will do a popen of whatever COBPRINTER is defined
 	  In addition COB_DISPLAY_PRINTER can be used as a file name and
 	  cob_display will do an fopen "a" and append to that file
-	  termio.c, common.c changed 
+	  termio.c, common.c changed
 	* fileio.c fixed to avoid core dump when COB_SYNC and using BDB
 
 2015-07-07  Ron Norman <rjn@inglenet.com>
