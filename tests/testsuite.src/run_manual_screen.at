@@ -133,8 +133,8 @@ AT_DATA([prog.cob], [
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE 'Enter "y" if there are three numbers on '
-               & 'the line below starting at column 1.'.
+           03  LINE 1 VALUE 'Enter "y" if you see 123 on the line '-
+               'below starting at column 1.'.
            03  LINE + 3 PIC X, REQUIRED USING success-flag.
            03  LINE 2 VALUE '1'.
 
@@ -172,8 +172,8 @@ AT_DATA([prog.cob], [
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE 'Enter "y" if there are three numbers on '
-               & 'the line below starting at column 1.'.
+           03  LINE 1 VALUE 'Enter "y" if you see 123 on the line '-
+               'below starting at column 1.'.
            03  LINE + 3 PIC X, REQUIRED USING success-flag.
            03  LINE 2 COL 3, VALUE '3'.
            03  LINE 1 COL 80 VALUE ' '.
@@ -212,8 +212,8 @@ AT_DATA([prog.cob], [
 
        SCREEN           SECTION.
        01  scr.
-           03  LINE 1 VALUE 'Enter "y" if there are four numbers on '
-               & 'the line below starting at column 1.'.
+           03  LINE 1 VALUE 'Enter "y" if you see 1234 on the line '-
+               'below starting at column 1.'.
            03  LINE + 3 PIC X, REQUIRED USING success-flag.
            03  LINE 2 VALUE '1'.
 
@@ -552,7 +552,7 @@ AT_DATA([prog.cob], [
            03  LINE 4 VALUE 'system beep may be turned off ' &
                              'on this system.'.
            03  LINE 5 VALUE 'Retesting with COB_BELL=FLASH...'.
-           03  LINE +2
+           03  LINE + 2
                VALUE 'Enter "y" if you''ve seen your terminal flash'.
            03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
                                                        FROM 'Y'.
@@ -643,11 +643,12 @@ AT_DATA([prog.cob], [
 
        SCREEN           SECTION.
        01  scr.
-           03  VALUE 'Enter "y" if the numbers below correspond to'
-               & ' their column number and are all on'.
-           03  LINE 2 VALUE 'the same line.'.
+       03  VALUE 'Enter "y" if the numbers below correspond to their'
+           & ' column number and all on'.
+           03  LINE 2 VALUE 'lines 3 and 4.'.
            03  LINE 3 VALUE '123456789'.
-           03  FILLER LINE + 7.
+           03  LINE 4 VALUE '  34'.
+           03  FILLER LINE + 6.
                05 COL 3.
                    07  COL 1.
                        09  LINE 4 VALUE '1'.
@@ -861,7 +862,7 @@ AT_DATA([prog.cob], [
            03  LINE 4 VALUE 'system beep may be turned off ' &
                              'on this system.'.
            03  LINE 5 VALUE 'Retesting with COB_BELL=FLASH...'.
-           03  LINE +2
+           03  LINE + 2,
                VALUE 'Enter "y" if you''ve seen your terminal flash'.
            03  success-field PIC X, COL + 2, REQUIRED, TO success-flag
                                                        FROM 'Y'.
@@ -1527,7 +1528,8 @@ AT_DATA([prog.cob], [
            03  PIC X(80)
                VALUE 'Enter "y" if text in the field below is replaced '
                & 'with asterisks:'.
-           03  LINE + 1, PIC X(10) SECURE TO dummy.
+           03  LINE + 1, PIC X(10) SECURE TO dummy, PROMPT CHARACTER
+               "-".
            03  success-field LINE + 2, PIC X, REQUIRED,
                                               USING success-flag.
 
@@ -1644,20 +1646,22 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01  n-str PIC X(12) VALUE ALL 'N'.
-       01  num-y PIC 99 VALUE ZERO.
-
-       01  success-flag PIC X VALUE 'Y'.
-           88  success  VALUE 'Y', 'y'.
+       01  n-str        PIC X(12) VALUE SPACES.
+       01  success-flag PIC X.
+           88  success VALUE 'Y', 'y'.
+       
+       SCREEN           SECTION.
+       01  scr.
+           03  VALUE 'Enter "y" if the entry field below is filled with'
+                 & ' N''s'.
+           03  n-field, LINE + 1, PIC X(12) USING n-str.
+           03  success-field, LINE + 2, PIC X, REQUIRED,
+               TO success-flag, FROM 'Y'.
 
        PROCEDURE        DIVISION.
-           DISPLAY 'Enter "y" if the entry field below is filled with '
-                 & "N's"
-               LINE 1
-
-           DISPLAY n-str LINE 3
-
-           ACCEPT success-flag LINE +2, REQUIRED, UPDATE
+           DISPLAY scr
+           MOVE ALL 'N' TO n-str
+           ACCEPT scr
 
            IF success AND COB-CRT-STATUS = 0
                GOBACK RETURNING 0
@@ -1667,7 +1671,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fno-accept-update prog.cob], [0], [], [])
 AT_CHECK([$RUN_PROG_MANUAL], [0], [], [])
 
 AT_CLEANUP
