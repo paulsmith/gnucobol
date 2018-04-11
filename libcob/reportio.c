@@ -70,7 +70,9 @@
 #define	close		_close
 #define	unlink		_unlink
 #define	fdopen		_fdopen
+#ifndef lseek
 #define lseek		_lseeki64
+#endif
 #endif
 #define off_t		cob_s64_t
 

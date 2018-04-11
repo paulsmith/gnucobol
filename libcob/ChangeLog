@@ -6,6 +6,10 @@
 	   - fix Insert key at column 1
 	   - fix other alt keys
 
+2018-04-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reportio.c [_WIN32]: fix redefinition of lseek
+
 2018-04-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (cob_screen_init): fix definition of alt keys
@@ -290,7 +294,7 @@
 
 	* common.c (cob_check_ref_mod): bug #446 splitted checks for length and
 	  combination of offset and length
-	* common.c (cob_external_addr): bug #445 added supressible warning for
+	* common.c (cob_external_addr): bug #445 added suppressible warning for
 	  EXTERNAL data items that are requested with a smaller size than allocated
 	* common.c (cob_check_version): FR #239: allow difference in module version
 	  vs. runtime version
