@@ -1,4 +1,9 @@
 
+2018-04-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: removed use of line breaks in sysout from C
+	  test compilation for extracting GMP/BDB version numbers
+
 2018-04-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: added --enable-cobc-internal-checks to define

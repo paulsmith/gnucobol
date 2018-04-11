@@ -529,7 +529,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	{
 		(void)argv;
 		if (argc > 1)
-			printf ("%d.%d\n", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
+			printf ("%d.%d", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
 		return 0;
 	}
 	]])],
@@ -551,7 +551,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	{
 		(void)argv;
 		if (argc > 1)
-			puts (gmp_version);
+			printf ("%s", gmp_version);
 		return 0;
 	}
 	]])],
@@ -850,9 +850,9 @@ if test "$with_db" = "yes"; then
 		{
 			(void)argv;
 			if (argc == 2)
-				printf ("%d.%d\n", DB_VERSION_MAJOR, DB_VERSION_MINOR);
+				printf ("%d.%d", DB_VERSION_MAJOR, DB_VERSION_MINOR);
 			if (argc == 3)
-				printf ("-%s-\n", DB_VERSION_STRING);
+				printf ("-%s-", DB_VERSION_STRING);
 			return 0;
 		}
 		]])],
@@ -885,7 +885,7 @@ if test "$with_db" = "yes"; then
 		MYOLDLIBS="$LIBS"
 		cob_got_db=no
 		AC_MSG_CHECKING([for Berkeley DB library with version $COB_BDB_HEADER])
-		# prefer library with version number included as some systems link against s wrong version
+		# prefer library with version number included as some systems link against wrong version
 		# of the library and to not break when a newer BDB version is installed, see bug #100
 		for cobdb in db-$COB_BDB_HEADER db
 		do
