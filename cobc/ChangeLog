@@ -3,6 +3,14 @@
 
 	* codegen.c (output_internal_function): prevent SIGSEGV for
 	  ANY LENGTH items in LINKAGE when program is first COBOL program
+	* tree.c (cb_build_intrinsic): leave size of national literals to
+	  runtime (as it is done for national items), note: we currently
+	  still generate national literals as alphanumeric literals
+	* parser.y, typeck.c (cb_build_const_length): allow non-numeric
+	  literals to be used with LENGTH OF and prohibit use of numeric
+	  literals as parameters for FUNCTION LENGTH/BYTE-LENGTH/LENGTH-AN
+	* parser.y, field.c (cb_validate_78_item): fix issues with invalid
+	  VALUE clauses
 
 2018-04-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

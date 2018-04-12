@@ -2432,6 +2432,9 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 	cb_tree			x;
 	cob_u32_t		noadd, prec;
 
+	if (!f) {
+		return last_real_field;
+	}
 	if (f->flag_internal_constant) {	/* Keep all internal CONSTANTs */
 		prec = 1;
 	} else if (f->flag_constant) {		/* 01 CONSTANT is verified in parser.y */
@@ -2449,9 +2452,11 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 
 	x = CB_TREE (f);
 	noadd = no78add;
-	if (CB_INVALID_TREE (f->values)
-	 || CB_INVALID_TREE (CB_VALUE (f->values))) {
+	if (CB_INVALID_TREE (f->values)) {
 		level_require_error (x, "VALUE");
+		noadd = 1;
+	}
+	if (CB_INVALID_TREE (CB_VALUE (f->values))) {
 		noadd = 1;
 	}
 

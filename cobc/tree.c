@@ -5541,6 +5541,10 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 					return cb_build_length (x);
 			}
 		} else if (CB_LITERAL_P (x)) {
+			/* FIXME: we currently generate national constants as alphanumeric constants */
+			if (cbp->intr_enum != CB_INTR_BYTE_LENGTH
+			 || (CB_TREE_CATEGORY (x) != CB_CATEGORY_NATIONAL_EDITED
+			    && CB_TREE_CATEGORY (x) != CB_CATEGORY_NATIONAL))
 			return cb_build_length (x);
 		}
 		return make_intrinsic (name, cbp, args, NULL, NULL, 0);

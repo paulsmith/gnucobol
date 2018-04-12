@@ -5704,14 +5704,18 @@ const_global:
 
 lit_or_length:
   literal				{ $$ = $1; }
-| LENGTH_OF con_identifier		{ $$ = cb_build_const_length ($2); }
-| LENGTH con_identifier			{ $$ = cb_build_const_length ($2); }
+| LENGTH_OF con_source		{ $$ = cb_build_const_length ($2); }
+| LENGTH con_source			{ $$ = cb_build_const_length ($2); }
 /* note: only reserved in context of CB_CS_CONSTANT: */
-| BYTE_LENGTH _of con_identifier	{ $$ = cb_build_const_length ($3); }
+| BYTE_LENGTH _of con_source	{ $$ = cb_build_const_length ($3); }
 ;
 
-con_identifier:
+con_source:
   identifier_1
+  {
+	$$ = $1;
+  }
+| non_numeric_literal
   {
 	$$ = $1;
   }
@@ -5902,7 +5906,9 @@ constant_source:
 constant_78_source:
   constant_expression_list
   {
-	current_field->values = $1;
+	if (CB_VALID_TREE (current_field)) {
+		current_field->values = $1;
+	}
   }
 | START _of identifier
   {
@@ -15036,6 +15042,18 @@ arith_nonzero_x:
   }
 ;
 
+non_numeric_literal:
+  LITERAL
+  {
+	if (CB_TREE_CATEGORY ($1) == CB_CATEGORY_NUMERIC) {
+		cb_error_x ($1, _("a non-numeric literal is expected here"));
+		$$ = cb_error_node;
+	} else {
+		$$ = $1;
+	}
+  }
+;
+
 nonzero_numeric_literal:
   LITERAL
   {
@@ -15646,7 +15664,12 @@ length_arg:
   expr_x
   {
 	suppress_data_exceptions = 0;
-	$$ = CB_LIST_INIT ($2);
+	if (CB_NUMERIC_LITERAL_P($2)) {
+		cb_error_x ($2, _("a non-numeric literal is expected here"));
+		$$ = CB_LIST_INIT (cb_error_node);
+	} else {
+		$$ = CB_LIST_INIT ($2);
+	}
   }
 ;
 

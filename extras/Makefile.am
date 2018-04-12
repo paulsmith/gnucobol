@@ -30,4 +30,5 @@ CLEANFILES = $(extras_DATA)
 SUFFIXES = .cob .$(COB_MODULE_EXT)
 .cob.$(COB_MODULE_EXT):
 	. $(top_builddir)/tests/atconfig && . $(top_builddir)/tests/atlocal extras-$@ \
-		&& ($$COBC -m -Wall -O2 -o $@ $< || $$COBC -m -Wall -o $@ $<)
+		&& ($$COBC -m -Wall -O2 -o "$@" "$$(_return_path $<)" \
+		    || $$COBC -m -Wall  -o "$@" "$$(_return_path $<)")

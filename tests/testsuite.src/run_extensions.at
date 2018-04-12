@@ -229,7 +229,7 @@ AT_CLEANUP
 
 
 AT_SETUP([LENGTH OF])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions VALUE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -239,15 +239,41 @@ AT_DATA([prog.cob], [
        01 X             PIC X(2).
        01 G.
          02 Y           PIC X(2) OCCURS 10.
-       01 L             PIC 9(4).
+       01 L             PIC s9(4)v99.
        01 I             PIC 9(2) VALUE 10.
        78 I-LEN         VALUE LENGTH OF I.
+      * TODO: check size of FILLER here
        01 TSTDISP.
          02 FILLER OCCURS 5000.
            10 T1        PIC X(11).
            10 T2        PIC X(22).
+       78 var-length-l      value length of '00128'.
+       78 var-length-x      value length of x'a0'.
+       78 var-length-z      value length of z'a0'.
+      *78 var-length-n      value length of n'001'.
        PROCEDURE        DIVISION.
-           MOVE LENGTH OF X TO L
+           move var-length-l TO L
+           IF L NOT = 5
+              DISPLAY "Length '00128'" L
+              END-DISPLAY
+           END-IF
+           move var-length-x TO L
+           IF L NOT = 1
+              DISPLAY "Length x'a0'" L
+              END-DISPLAY
+           END-IF
+           move var-length-z TO L
+           IF L NOT = 3
+              DISPLAY "Length z'a0'" L
+              END-DISPLAY
+           END-IF
+      *    What does MF reports here?
+      *>   move var-length-n TO L
+      *>   IF L NOT = 3
+      *>      DISPLAY "Length n'001'" L
+      *>      END-DISPLAY
+      *>   END-IF
+           MOVE LENGTH OF X  TO L
            IF L NOT = 2
               DISPLAY "Length 1 " L
               END-DISPLAY
@@ -266,7 +292,7 @@ AT_DATA([prog.cob], [
               DISPLAY "Length 4 " I-LEN
               END-DISPLAY
            END-IF
-           IF LENGTH OF L + 2 NOT = 6
+           IF LENGTH OF L + 2 NOT = 8
               ADD 2 TO LENGTH OF L GIVING L
               DISPLAY "Length 5 " L
               END-DISPLAY
@@ -275,7 +301,7 @@ AT_DATA([prog.cob], [
            PERFORM LENGTH OF L TIMES
               ADD 1 TO L
            END-PERFORM
-           IF L NOT = 4
+           IF L NOT = 6
               DISPLAY "Length 6 " L
               END-DISPLAY
            END-IF
@@ -284,8 +310,8 @@ AT_DATA([prog.cob], [
                    VARYING I FROM LENGTH OF I
                              BY   LENGTH OF X
                    UNTIL   I > LENGTH OF L
-           IF ((L NOT = 2) OR
-               (I NOT = 6)    )
+           IF ((L NOT = 3) OR
+               (I NOT = 8)    )
               DISPLAY "Length 7 " L " - " I
               END-DISPLAY
            END-IF

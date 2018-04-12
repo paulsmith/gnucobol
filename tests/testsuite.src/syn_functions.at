@@ -578,13 +578,17 @@ AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           DISPLAY FUNCTION LENGTH ("abcd" & "xyz")
+           DISPLAY FUNCTION LENGTH      ("abcd" & "xyz")
            END-DISPLAY
            DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz")
            END-DISPLAY
-           DISPLAY FUNCTION LENGTH ("abcd" "xyz")
+           DISPLAY FUNCTION LENGTH      ("abcd" "xyz")
            END-DISPLAY
-           DISPLAY FUNCTION LENGTH ("abcd" & "xyz" PHYSICAL)
+           DISPLAY FUNCTION BYTE-LENGTH (01234)
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH      (567)
+           END-DISPLAY
+           DISPLAY FUNCTION LENGTH      ("abcd" & "xyz" PHYSICAL)
            END-DISPLAY
            DISPLAY FUNCTION BYTE-LENGTH ("abcd" & "xyz" PHYSICAL)
            END-DISPLAY
@@ -593,6 +597,8 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE -Wno-pending prog.cob], [1], [],
 [prog.cob:9: error: syntax error, unexpected Literal, expecting PHYSICAL or )
+prog.cob:11: error: a non-numeric literal is expected here
+prog.cob:13: error: a non-numeric literal is expected here
 ])
 
 AT_CLEANUP

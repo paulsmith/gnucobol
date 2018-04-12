@@ -140,7 +140,7 @@ AT_CLEANUP
 
 
 AT_SETUP([FUNCTION BYTE-LENGTH])
-AT_KEYWORDS([functions])
+AT_KEYWORDS([functions length])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -156,13 +156,48 @@ AT_DATA([prog.cob], [
            IF TEST-FLD NOT = 4
               DISPLAY 'BYTE-LENGTH X(4) wrong: ' TEST-FLD
               END-DISPLAY
-           END-IF.
+           END-IF
            MOVE FUNCTION BYTE-LENGTH ( Z )
-             TO TEST-FLD.
+             TO TEST-FLD
            IF TEST-FLD NOT = 8
               DISPLAY 'BYTE-LENGTH N(4) wrong: ' TEST-FLD
               END-DISPLAY
-           END-IF.
+           END-IF
+
+           MOVE FUNCTION BYTE-LENGTH ( '00128' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 5
+              DISPLAY 'BYTE-LENGTH "00128" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+      *    note: we currently do not support items of category boolean...
+      *>   MOVE FUNCTION BYTE-LENGTH ( b'100' )
+      *>     TO TEST-FLD
+      *>   IF TEST-FLD NOT = 3
+      *>      DISPLAY 'BYTE-LENGTH b"100" wrong: ' TEST-FLD
+      *>      END-DISPLAY
+      *>   END-IF
+           MOVE FUNCTION BYTE-LENGTH ( x'a0' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 1
+              DISPLAY 'BYTE-LENGTH x"a0" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION BYTE-LENGTH ( z'a0' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 3
+              DISPLAY 'BYTE-LENGTH z"a0" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+      *    we currently generate national constants as
+      *    alphanumeric constants...
+      *    MOVE FUNCTION BYTE-LENGTH ( n'a0' )
+      *      TO TEST-FLD
+      *    IF TEST-FLD NOT = 4
+      *       DISPLAY 'BYTE-LENGTH n"a0" wrong: ' TEST-FLD
+      *       END-DISPLAY
+      *    END-IF
+
            STOP RUN.
 ])
 
@@ -1409,18 +1444,60 @@ AT_DATA([prog.cob], [
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01  X   PIC      S9(4)V9(4) VALUE -1.5.
+       01  N   PIC      N(9).
        01  TEST-FLD     PIC S9(04)V9(02).
        PROCEDURE        DIVISION.
            MOVE FUNCTION LENGTH ( X )
-             TO TEST-FLD.
+             TO TEST-FLD
            IF TEST-FLD NOT = 8
-              DISPLAY TEST-FLD
+              DISPLAY 'LENGTH "00128" wrong: ' TEST-FLD
               END-DISPLAY
-           END-IF.
+           END-IF
+           MOVE FUNCTION LENGTH ( N )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 9
+              DISPLAY 'LENGTH N(9) wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+
+           MOVE FUNCTION LENGTH ( '00128' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 5
+              DISPLAY 'LENGTH "00128" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+      *    note: we currently do not support items of category boolean...
+      *>   MOVE FUNCTION LENGTH ( b'100' )
+      *>     TO TEST-FLD
+      *>   IF TEST-FLD NOT = 3
+      *>      DISPLAY 'LENGTH b"100" wrong: ' TEST-FLD
+      *>      END-DISPLAY
+      *>   END-IF
+           MOVE FUNCTION LENGTH ( x'a0' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 1
+              DISPLAY 'LENGTH x"a0" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION LENGTH ( z'a0' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 3
+              DISPLAY 'LENGTH z"a0" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+           MOVE FUNCTION LENGTH ( n'a0' )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 2
+              DISPLAY 'LENGTH n"a0" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob:7: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:48: warning: handling of national literal is unfinished; implementation is likely to be changed
+])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
@@ -1451,7 +1528,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1553,7 +1630,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -1577,7 +1654,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2328,7 +2405,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2374,7 +2451,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2656,7 +2733,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2680,7 +2757,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2704,7 +2781,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -2890,7 +2967,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3334,7 +3411,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3432,7 +3509,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3530,7 +3607,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 

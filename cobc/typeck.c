@@ -2020,6 +2020,10 @@ cb_build_const_length (cb_tree x)
 		sprintf (buff, "%d", CB_INTEGER(x)->val);
 		return cb_build_numeric_literal (0, buff, 0);
 	}
+	if (CB_LITERAL_P (x)) {
+		sprintf (buff, "%d", CB_LITERAL(x)->size);
+		return cb_build_numsize_literal (buff, strlen(buff), 0);
+	}
 	if (CB_REFERENCE_P (x)) {
 		if (cb_ref (x) == cb_error_node) {
 			return cb_error_node;
@@ -2028,6 +2032,8 @@ cb_build_const_length (cb_tree x)
 			cb_error (_("reference modification not allowed here"));
 			return cb_error_node;
 		}
+	} else if (!CB_FIELD_P(x)) {
+		return cb_error_node;
 	}
 
 	memset (buff, 0, sizeof (buff));
