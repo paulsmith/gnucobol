@@ -2176,7 +2176,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
@@ -3890,7 +3890,32 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([ANY LENGTH (5)])
+AT_KEYWORDS([runmisc])
+
+# any length variables resulted in SIGSEGV when module was first program called
+
+AT_DATA([subprog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. subprog.
+
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01 str1 PIC X ANY LENGTH.
+       01 str2 PIC X ANY LENGTH.
+
+       PROCEDURE DIVISION USING str1 str2.
+           DISPLAY 'IN' WITH NO ADVANCING
+           .
+       END PROGRAM subprog.
+])
+
+AT_CHECK([$COMPILE_MODULE subprog.cob], [0], [], [])
+AT_CHECK([$COBCRUN subprog some test stuff], [0], [IN], [])
 AT_CLEANUP
 
 
@@ -8854,7 +8879,7 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:11: warning: expression '16' NOT EQUAL '16' is always FALSE
 ])
 AT_CHECK([$COMPILE -fno-constant-folding prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
@@ -9004,7 +9029,7 @@ prog.cob:31: warning: value size exceeds data size
 prog.cob:31: warning: value size is 4
 prog.cob:8: warning: 'x-right' defined here as PIC X(03)
 ])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
@@ -10793,7 +10818,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
@@ -10824,5 +10849,5 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP

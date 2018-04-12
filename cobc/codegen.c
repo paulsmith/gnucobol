@@ -9990,21 +9990,18 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_param (CB_VALUE (l), i);
 			output_target = savetarget;
 
-			output_line ("if (cob_call_params > %d && %s%d%s)",
-				i, "module->next->cob_procedure_params[",
-				i, "]");
+			output_line ("if (cob_call_params > %d && "
+				         "module->next && "
+				         "module->next->cob_procedure_params[%d])",
+				i, i);
 			if (f->flag_any_numeric) {
 				/* Copy complete structure */
-				output_line ("  %s%d = *(%s%d%s);",
-						 CB_PREFIX_FIELD, f->id,
-						 "module->next->cob_procedure_params[",
-						 i, "]");
+				output_line ("  %s%d = *(module->next->cob_procedure_params[%d]);",
+						 CB_PREFIX_FIELD, f->id, i);
 			} else {
 				/* Copy size */
-				output_line ("  %s%d.size = %s%d%s;",
-						 CB_PREFIX_FIELD, f->id,
-						 "module->next->cob_procedure_params[",
-						 i, "]->size");
+				output_line ("  %s%d.size = module->next->cob_procedure_params[%d]->size;",
+						 CB_PREFIX_FIELD, f->id, i);
 			}
 			output_prefix ();
 			output ("%s%d.data = ", CB_PREFIX_FIELD, f->id);

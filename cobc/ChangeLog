@@ -1,4 +1,9 @@
 
+2018-04-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_internal_function): prevent SIGSEGV for
+	  ANY LENGTH items in LINKAGE when program is first COBOL program
+
 2018-04-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_field_size): report ANY LENGTH items as "unknown size",
@@ -1744,7 +1749,7 @@
 	* parser.y: finished OCCURS ... TO UNBOUNDED
 	* reserved.c: new token LENGTH_FUNC for BYTE-LENGTH, LENGTH, LENGTH-AN
 	* parser.y, tree.h, typeck.c: new var suppress_data_exceptions used with
-	  LENGTH_FUNC for suppressing checks for fields are allocation
+	  LENGTH_FUNC for suppressing runtime checks for field-allocation
 	* typeck.c: passing additional parameters for table name / flag for ODO
 	  in generation of cob_check_odo and cob_check_subscript
 
