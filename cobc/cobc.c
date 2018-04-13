@@ -3111,6 +3111,12 @@ process_command_line (const int argc, char **argv)
 		case '*':
 			/* --tlines=nn : Lines per page */
 			cb_lines_per_page = atoi (cob_optarg);
+			if (cb_lines_per_page
+			 && cb_lines_per_page < 20) {
+				cobc_err_msg (_("warning: %d lines per listing page specified, using %d"),
+						cb_lines_per_page, 20);
+				cb_lines_per_page = 20;
+			}
 			break;
 
 		case 'P':

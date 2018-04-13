@@ -18,6 +18,70 @@
 
 ### GnuCOBOL Test Suite
 
+AT_SETUP([Minimal lines per listing pages])
+AT_KEYWORDS([listing symbols options])
+
+# note: 2.2 did not use a minmal length,
+# a typo like -tlines=2 loops forever
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+      * some comments go here
+                 *> and here
+                        *> and finally... here
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 NEWSTUFF PIC X(80).
+       PROCEDURE        DIVISION.
+           DISPLAY NEWSTUFF " BENEFITS SOME PARTS FROM "
+           "MANY" "STUFF" ", " "VERY MUCH" "GOOD" NEWSTUFF
+           "AND STUFF !"
+                   NO ADVANCING
+           END-DISPLAY.
+           STOP RUN.
+])
+
+AT_DATA([expected.lst],
+[GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
+
+LINE    PG/LN  A...B............................................................
+
+000001
+000002        * some comments go here
+000003                   *> and here
+000004                          *> and finally... here
+000005         IDENTIFICATION   DIVISION.
+000006         PROGRAM-ID.      prog.
+000007         DATA             DIVISION.
+000008         WORKING-STORAGE  SECTION.
+000009         01 NEWSTUFF PIC X(80).
+000010         PROCEDURE        DIVISION.
+000011             DISPLAY NEWSTUFF " BENEFITS SOME PARTS FROM "
+000012             "MANY" "STUFF" ", " "VERY MUCH" "GOOD" NEWSTUFF
+000013             "AND STUFF !"
+000014                     NO ADVANCING
+000015             END-DISPLAY.
+000016             STOP RUN.
+
+GnuCOBOL V.R.P          prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
+
+0 warnings in compilation group
+0 errors in compilation group
+])
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=2 prog.cob], [0], [],
+[cobc: warning: 2 lines per listing page specified, using 20
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
+AT_CHECK([diff expected.lst prog.lis], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([COPY within comment])
 AT_KEYWORDS([listing])
 
@@ -1671,7 +1735,7 @@ AT_DATA([prog-2.cob], [
            ACCEPT stuff.
 
        EX. STOP RUN.
-      
+
 ])
 
 AT_DATA([expected.lst],
@@ -1862,7 +1926,7 @@ AT_DATA([prog2.cob], [
   >> PAGE  page  feed  comment
   PROCEDURE        DIVISION.
  DISPLAY
- '3456&'. 
+ '3456&'.
   STOP RUN.
 ])
 
@@ -1885,7 +1949,7 @@ LINE    .....................................................SOURCE.............
 000006    >> PAGE  page  feed  comment
 000007    PROCEDURE        DIVISION.
 000008   DISPLAY
-000009   '3456&'. 
+000009   '3456&'.
 000010    STOP RUN.
 
 
@@ -3528,7 +3592,7 @@ AT_CLEANUP
 AT_SETUP([Eject page])
 AT_KEYWORDS([listing directive])
 
-AT_CAPTURE_FILE([prog.lst])
+AT_CAPTURE_FILE([prog.lis])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -3675,7 +3739,7 @@ LINE    PG/LN  A...B............................................................
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis], [0], [], [])
 AT_CHECK([diff prog9.lst prog.lis], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=8 prog3.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=20 prog3.cob], [0], [], [])
 
 AT_DATA([prog10.lst],
 [GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0001
@@ -3687,15 +3751,11 @@ LINE    PG/LN  A...B............................................................
 000003
 000004         PROGRAM-ID.      prog3.
 000005
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
-
-LINE    PG/LN  A...B............................................................
-
 000006
 000007         DATA             DIVISION.
 000008         WORKING-STORAGE  SECTION.
 000009         77 WS-VAR PIC X(2).
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
@@ -3704,27 +3764,20 @@ LINE    PG/LN  A...B............................................................
 000012
 000013
 000014         LOCAL-STORAGE  SECTION.
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0004
-
-LINE    PG/LN  A...B............................................................
-
 000015         77 LS-VAR PIC 9(2).
 000016
 000017
 000018         PROCEDURE        DIVISION.
 000019
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0005
-
-LINE    PG/LN  A...B............................................................
-
 000020             DISPLAY WS-VAR
 000021             MOVE 99 TO LS-VAR
 000022
 000023             STOP RUN.
 
-GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0006
 
 0 warnings in compilation group
+GnuCOBOL V.R.P          prog3.cob            DDD MMM dd HH:MM:SS YYYY  Page 0003
+
 0 errors in compilation group
 ])
 
@@ -5259,29 +5312,29 @@ AT_CAPTURE_FILE([prog.lst])
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
-      
+
       * ************************************************************* *
       * REPORT WRITER EXAMPLE #1.                                     *
       * ************************************************************* *
-      
+
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
-      
+
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-      
+
            SELECT TRANSACTION-DATA
                ASSIGN TO EXTERNAL DATAIN
                          ORGANIZATION IS LINE SEQUENTIAL.
-      
+
            SELECT REPORT-FILE
                ASSIGN TO EXTERNAL LINE ADVANCING SYSPRINT.
-      
+
        DATA DIVISION.
        FILE SECTION.
-      
+
        FD  TRANSACTION-DATA.
-      
+
        01  TRANSACTION-RECORD.
            03  TR-CUSTOMER-NUMBER      PIC 9(04).
            03  FILLER                  PIC X(01).
@@ -5294,21 +5347,21 @@ AT_DATA([prog.cob], [
            03  FILLER                  PIC X(01).
            03  TR-ITEM-COST            PIC 9(03)V99.
            03  FILLER                  PIC X(47).
-      
+
        FD  REPORT-FILE
            REPORT IS CUSTOMER-REPORT.
-      
+
        WORKING-STORAGE SECTION.
        77  END-OF-FILE-SWITCH          PIC X(1)    VALUE 'N'.
            88  END-OF-FILE                         VALUE 'Y'.
-      
+
        REPORT SECTION.
        RD  CUSTOMER-REPORT
            PAGE LIMIT IS 66 LINES
            HEADING 1
            FIRST DETAIL 5
            LAST DETAIL 58.
-      
+
        01  PAGE-HEAD-GROUP TYPE PAGE HEADING.
            02  LINE 1.
                03  COLUMN 27   PIC X(41) VALUE
@@ -5319,7 +5372,7 @@ AT_DATA([prog.cob], [
                03  COLUMN 30   PIC X(05) VALUE 'DEPT.'.
                03  COLUMN 39   PIC X(08) VALUE 'ITEM NO.'.
                03  COLUMN 51   PIC X(09) VALUE 'ITEM COST'.
-      
+
        01  CHARGE-DETAIL TYPE DETAIL.
            02  LINE PLUS 1.
                03  COLUMN 03   PIC Z(04) SOURCE TR-CUSTOMER-NUMBER.
@@ -5327,39 +5380,39 @@ AT_DATA([prog.cob], [
                03  COLUMN 32   PIC 9(01) SOURCE TR-ITEM-DEPARTMENT.
                03  COLUMN 40   PIC 9(05) SOURCE TR-ITEM-NUMBER.
                03  COLUMN 51   PIC $$$$.99 SOURCE TR-ITEM-COST.
-      
+
        PROCEDURE DIVISION.
-      
+
        000-INITIATE.
-      
+
            OPEN INPUT TRANSACTION-DATA,
                 OUTPUT REPORT-FILE.
-      
+
            INITIATE CUSTOMER-REPORT.
-      
+
            READ TRANSACTION-DATA
                AT END
                    MOVE 'Y' TO END-OF-FILE-SWITCH.
       *    END-READ.
-      
+
            PERFORM 100-PROCESS-TRANSACTION-DATA THRU 199-EXIT
                UNTIL END-OF-FILE.
-      
+
        000-TERMINATE.
            TERMINATE CUSTOMER-REPORT.
-      
+
            CLOSE TRANSACTION-DATA,
                  REPORT-FILE.
-      
+
            STOP RUN.
-      
+
        100-PROCESS-TRANSACTION-DATA.
            GENERATE CHARGE-DETAIL.
            READ TRANSACTION-DATA
                AT END
                    MOVE 'Y' TO END-OF-FILE-SWITCH.
       *    END-READ.
-      
+
        199-EXIT.
            EXIT.
 ])
