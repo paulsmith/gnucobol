@@ -2100,8 +2100,6 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	int		prompt_char;    /* prompt character */
 	int		get_timeout;
 	int		status;
-	int		home_toggle = 0;    /* Home key, beginning of data or field */
-	int		end_toggle = 0;     /* End key, end of data or field */
 	chtype		default_prompt_char;
 	size_t		size_accept = 0;	/* final size to accept */
 	cob_field	temp_field;
@@ -2219,8 +2217,9 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	}
 	count = 0;
 
-	/* Show prompt characters. */
+	/* Get characters from keyboard, processing each one. */
 	for (; ;) {
+		/* Show prompt characters. */
 		if (f) {
 			/* Get current line, column. */
 			getyx (stdscr, cline, ccolumn);
@@ -2415,75 +2414,80 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 				ccolumn--;
 				cob_move_cursor (cline, ccolumn);
 				p--;
+			} else {
+				cob_beep ();
 			}
 			at_eof = 0;
 			continue;
 		case KEY_HOME:
-			/* Home key, toggle between start of characters or field */
-			if (home_toggle == 0) {
-				home_toggle = 1;
-				/* Cursor to start of characters. */
-				/* Prepare for empty field. */
-				ccolumn = right_pos;
-				move_char = ' ';
-				/* Find non-blank from left. */
-				for (count = scolumn; count <= right_pos; count++) {
-					/* Get character. */
-					p2 = COB_TERM_BUFF + count - scolumn;
-					move_char = *p2;
-					/* Non blank stop. */
-					if (move_char != ' ') {
-						ccolumn = count;
-						break;
-					}
+			/* HOME key. */
+			/* Prepare for empty field. */
+			move_char = ' ';
+			/* Find non-blank character left to right. */
+			for (count = scolumn; count <= right_pos; count++) {
+				/* Get character. */
+				p2 = COB_TERM_BUFF + count - scolumn;
+				move_char = *p2;
+				/* Stop at beginning non-blank character. */
+				if (move_char != ' ') {
+					break;
 				}
+			}
+			/* Empty field. */
+			if (move_char == ' ') {
+				count = ccolumn;
+			}
+			/* Toggle between start of characters or start of field. */
+			if (count != ccolumn) {
+				/* Cursor to start of characters. */
+				ccolumn = count;
 				cob_move_cursor (cline, ccolumn);
 				p = COB_TERM_BUFF + ccolumn - scolumn;
-				at_eof = 0;
-				continue;
 			} else {
-				home_toggle = 0;
 				/* Cursor to start of field. */
 				cob_move_cursor (sline, scolumn);
 				p = COB_TERM_BUFF;
-				at_eof = 0;
-				continue;
 			}
+			/* Reset */
+			at_eof = 0;
+			continue;
 		case KEY_END:
-			/* End key, toggle between end of characters or field */
-			if (end_toggle == 0) {
-				end_toggle = 1;
-				/* Cursor to end of characters. */
-				/* Prepare for empty field. */
-				ccolumn = scolumn;
-				move_char = ' ';
-				/* Find non blank from right. */
-				for (count = right_pos; (int) count >= scolumn; count--) {
-					/* Get character. */
-					p2 = COB_TERM_BUFF + count - scolumn;
-					move_char = *p2;
-					/* Non blank stop. */
-					if (move_char != ' ') {
-						ccolumn = count;
-						break;
-					}
+			/* END key. */
+			/* Prepare for empty field. */
+			move_char = ' ';
+			/* Find non-blank character right to left. */
+			for (count = right_pos; (int) count >= scolumn; count--) {
+				/* Get character. */
+				p2 = COB_TERM_BUFF + count - scolumn;
+				move_char = *p2;
+				/* Stop at ending non-blank character. */
+				if (move_char != ' ') {
+					break;
 				}
-				/* Cursor to first blank after. */
-				if (move_char != ' ' && ccolumn != right_pos) {
-					ccolumn++;
+			}
+			/* Empty field. */
+			if (move_char == ' ') {
+				count = ccolumn;
+			} else {
+				/* Cursor to first blank after ending character. */
+				if (count != right_pos) {
+					count++;
 				}
+			}
+			/* Toggle between end of characters or end of field. */
+			if (count != ccolumn) {
+				/* Cursor after end character. */
+				ccolumn = count;
 				cob_move_cursor (cline, ccolumn);
 				p = COB_TERM_BUFF + ccolumn - scolumn;
-				at_eof = 0;
-				continue;
 			} else {
-				end_toggle = 0;
-				/* Alt-End key, cursor to end of size of field */
+				/* Cursor to end of size of field */
 				cob_move_cursor (sline, right_pos);
 				p = COB_TERM_BUFF + size_accept - 1;
-				at_eof = 0;
-				continue;
 			}
+			/* Reset */
+			at_eof = 0;
+			continue;
 		case KEY_LEFT:
 		case ALT_LEFT:
 			/* Left-arrow     KEY_LEFT auto-skip. */
@@ -2523,7 +2527,7 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 			/* Insert key toggle */
 			/* If off turn on, if on turn off;
 			   additional: switch between vertical bar cursor (on) and
-			   square cursor (off) - note: the cursor change may has no
+			   square cursor (off) - note: the cursor change may have no
 			   effect in all curses implementations / terminals */
 			if (cobsetptr->cob_insert_mode == 0) {
 				cobsetptr->cob_insert_mode = 1;     /* on */

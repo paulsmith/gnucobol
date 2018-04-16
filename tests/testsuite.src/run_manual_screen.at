@@ -1649,7 +1649,7 @@ AT_DATA([prog.cob], [
        01  n-str        PIC X(12) VALUE SPACES.
        01  success-flag PIC X.
            88  success VALUE 'Y', 'y'.
-       
+
        SCREEN           SECTION.
        01  scr.
            03  VALUE 'Enter "y" if the entry field below is filled with'
@@ -1717,7 +1717,7 @@ AT_CLEANUP
 
 
 AT_SETUP([HOME key])
-AT_KEYWORDS([])
+AT_KEYWORDS([HOME SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1728,7 +1728,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if multiple presses of the HOME key"
                LINE 1 COLUMN 1.
@@ -1737,11 +1737,12 @@ AT_DATA([prog.cob], [
            DISPLAY "of the characters."
                LINE 3 COLUMN 1.
 
-           MOVE "    ABC   " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "    ABC   " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 5 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1763,7 +1764,7 @@ AT_CLEANUP
 
 
 AT_SETUP([END key])
-AT_KEYWORDS([])
+AT_KEYWORDS([END SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1774,7 +1775,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if multiple presses of the END key"
                LINE 1 COLUMN 1.
@@ -1783,11 +1784,12 @@ AT_DATA([prog.cob], [
            DISPLAY "of the characters."
                LINE 3 COLUMN 1.
 
-           MOVE "   ABC    " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "   ABC    " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 5 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1809,7 +1811,7 @@ AT_CLEANUP
 
 
 AT_SETUP([INSERT key])
-AT_KEYWORDS([])
+AT_KEYWORDS([INSERT SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1820,7 +1822,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if multiple presses of the INSERT key"
                LINE 1 COLUMN 1.
@@ -1831,11 +1833,12 @@ AT_DATA([prog.cob], [
            DISPLAY "and Insert Mode OFF (characters type over)."
                LINE 4 COLUMN 1.
 
-           MOVE "ABCD      " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "ABCD      " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 6 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1857,7 +1860,7 @@ AT_CLEANUP
 
 
 AT_SETUP([BACKSPACE key])
-AT_KEYWORDS([])
+AT_KEYWORDS([BACKSPACE SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1868,7 +1871,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if each press of the BACKSPACE key"
                LINE 1 COLUMN 1.
@@ -1879,11 +1882,12 @@ AT_DATA([prog.cob], [
            DISPLAY "left."
                LINE 4 COLUMN 1.
 
-           MOVE "ABCD      " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "ABCD      " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 6 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1905,7 +1909,7 @@ AT_CLEANUP
 
 
 AT_SETUP([DELETE key])
-AT_KEYWORDS([])
+AT_KEYWORDS([DELETE SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1916,7 +1920,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if each press of the DELETE key deletes"
                LINE 1 COLUMN 1.
@@ -1927,11 +1931,12 @@ AT_DATA([prog.cob], [
            DISPLAY "does not move."
                LINE 4 COLUMN 1.
 
-           MOVE "ABCD      " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "ABCD      " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 6 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1953,7 +1958,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ALT DELETE key])
-AT_KEYWORDS([])
+AT_KEYWORDS([ALT-DELETE SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -1964,7 +1969,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if pressing the ALT and DELETE keys"
                LINE 1 COLUMN 1.
@@ -1973,11 +1978,12 @@ AT_DATA([prog.cob], [
            DISPLAY "of the field.  And the cursor does not move."
                LINE 3 COLUMN 1.
 
-           MOVE "ABCD      " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "ABCD      " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 5 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -1999,7 +2005,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ALT LEFT-ARROW key])
-AT_KEYWORDS([])
+AT_KEYWORDS([ALT-LEFT-ARROW SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -2010,7 +2016,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-10      PIC X(10).
+       01  ws-x-20      PIC X(20).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if pressing the ALT and LEFT-ARROW keys"
                LINE 1 COLUMN 1.
@@ -2019,11 +2025,12 @@ AT_DATA([prog.cob], [
            DISPLAY "But the LEFT-ARROW without ALT does exit."
                LINE 3 COLUMN 1.
 
-           MOVE "ABCD      " TO WS-X-10.
-           ACCEPT WS-X-10
+           MOVE "ABCD      " TO WS-X-20.
+           ACCEPT WS-X-20
                LINE 5 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 10
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG
@@ -2045,7 +2052,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ALT RIGHT-ARROW key])
-AT_KEYWORDS([])
+AT_KEYWORDS([ALT-RIGHT-ARROW SIZE])
 
 AT_SKIP_IF(test "$COB_HAS_CURSES" != "yes")
 
@@ -2056,7 +2063,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        01  success-flag PIC X VALUE 'Y'.
            88  success  VALUE 'Y', 'y'.
-       01  ws-x-5       PIC X(05).
+       01  ws-x-10      PIC X(10).
        PROCEDURE DIVISION.
            DISPLAY "Enter 'y' if pressing the ALT and RIGHT-ARROW keys"
                LINE 1 COLUMN 1.
@@ -2065,11 +2072,12 @@ AT_DATA([prog.cob], [
            DISPLAY "But the RIGHT-ARROW without ALT does exit."
                LINE 3 COLUMN 1.
 
-           MOVE "ABCDE" TO WS-X-5.
-           ACCEPT WS-X-5
+           MOVE "ABCDE" TO WS-X-10.
+           ACCEPT WS-X-10
                LINE 5 COLUMN 1
                WITH
                    AUTO-SKIP
+                   SIZE 5
                    UPDATE.
 
            ACCEPT SUCCESS-FLAG

@@ -1,4 +1,9 @@
 
+2018-04-16  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* testsuite.src/run_manual_screen.at
+	   - Add keywords and SIZE to special key tests.
+
 2018-04-10  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* testsuite.src/run_manual_screen.at

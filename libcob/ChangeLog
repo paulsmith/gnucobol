@@ -1,4 +1,10 @@
 
+2018-04-16  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* screenio.c:
+	   - HOME and END toggle on current column.
+	   - Backspace beep column 1.
+
 2018-04-10  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* screenio.c:
