@@ -6,6 +6,9 @@
 	* cobc.c, flag.def: replaced -tsymbols by -f[no-]tsymbols,
 	  added option to suppress specific listing parts with new options
 	  -fno-theader, -fno-tmessages, -fno-tsource (see NEWS)
+	* parser.y, reserved.c, typeck.c, field.c: FR 303 - added USAGE BIT
+	  and PIC 1 as pending (at least parsing of sources containing these
+	  should work)
 
 2018-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

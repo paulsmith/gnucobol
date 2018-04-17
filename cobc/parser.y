@@ -1858,6 +1858,7 @@ check_validate_item (cb_tree x)
 	x = cb_ref (x);
 	if (CB_INVALID_TREE (x) || !CB_FIELD_P (x)) {
 		cb_error (_("invalid target for %s"), "VALIDATE");
+		return;
 	}
 
 	f = CB_FIELD (x);
@@ -1936,6 +1937,7 @@ check_validate_item (cb_tree x)
 %token BINARY_LONG		"BINARY-LONG"
 %token BINARY_SEQUENTIAL	"BINARY-SEQUENTIAL"
 %token BINARY_SHORT		"BINARY-SHORT"
+%token BIT
 %token BITMAP
 %token BITMAP_END		"BITMAP-END"
 %token BITMAP_HANDLE	"BITMAP-HANDLE"
@@ -3440,6 +3442,7 @@ repository_paragraph:
 ;
 
 _repository_entry:
+  /* empty */
 | repository_list TOK_DOT
 | repository_list error TOK_DOT
   {
@@ -5639,8 +5642,8 @@ data_description:
   }
 | level_number error TOK_DOT
   {
-	/* Free tree associated with level number */
 #if 0 /* works fine without, leads to invalid free otherwise [COB_TREE_DEBUG] */
+	/* Free tree associated with level number */
 	cobc_parse_free ($1);
 #endif
 	yyerrok;
@@ -6086,6 +6089,11 @@ usage:
   BINARY
   {
 	check_and_set_usage (CB_USAGE_BINARY);
+  }
+| BIT
+  {
+	check_and_set_usage (CB_USAGE_BIT);
+	CB_PENDING ("USAGE BIT");
   }
 | COMP
   {
@@ -12297,33 +12305,38 @@ perform_varying:
 	cb_tree		x;
 	int		data_type_ok = 1;
 
-	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
-		x = cb_ref ($1);
-		cb_error_x (CB_TREE (current_statement),
-			    _("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
-			    cb_name (x),x->source_line, x->source_file);
-		$$ = cb_int1;
-		data_type_ok = 0;
-	}
-	if (cb_tree_category ($3) != CB_CATEGORY_NUMERIC) {
-		x = cb_ref ($3);
-		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
-					cb_name (x),x->source_line, x->source_file);
-		$$ = cb_int1;
-		data_type_ok = 0;
-	}
-	if (cb_tree_category ($4) != CB_CATEGORY_NUMERIC) {
-		x = cb_ref ($4);
-		cb_error_x (CB_TREE (current_statement),
-			_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
-					cb_name (x),x->source_line, x->source_file);
-		$$ = cb_int1;
-		data_type_ok = 0;
-	}
+	if ($1 != cb_error_node
+	 && $3 != cb_error_node
+	 && $4 != cb_error_node) {
 
-	if (data_type_ok) {
-		$$ = cb_build_perform_varying ($1, $3, $4, $6);
+		if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC) {
+			x = cb_ref ($1);
+			cb_error_x (CB_TREE (current_statement),
+				_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
+				cb_name (x),x->source_line, x->source_file);
+			$$ = cb_int1;
+			data_type_ok = 0;
+		}
+		if (cb_tree_category ($3) != CB_CATEGORY_NUMERIC) {
+			x = cb_ref ($3);
+			cb_error_x (CB_TREE (current_statement),
+				_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
+				cb_name (x),x->source_line, x->source_file);
+			$$ = cb_int1;
+			data_type_ok = 0;
+		}
+		if (cb_tree_category ($4) != CB_CATEGORY_NUMERIC) {
+			x = cb_ref ($4);
+			cb_error_x (CB_TREE (current_statement),
+				_("PERFORM VARYING '%s' (line %d of %s) is not a numeric field"),
+				cb_name (x),x->source_line, x->source_file);
+			$$ = cb_int1;
+			data_type_ok = 0;
+		}
+
+		if (data_type_ok) {
+			$$ = cb_build_perform_varying ($1, $3, $4, $6);
+		}
 	}
   }
 ;

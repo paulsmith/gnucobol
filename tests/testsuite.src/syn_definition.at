@@ -1176,7 +1176,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Invalid PICTURE strings])
-AT_KEYWORDS([definition])
+AT_KEYWORDS([definition USAGE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1260,6 +1260,20 @@ AT_DATA([prog.cob], [
            03  PIC $(integer-constant).
            03  PIC $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       -(integer-constant).
+
+
+       01  PC-COLOR-BACKGROUND-TABLE.
+           05  BIT-BACKGROUND-BLACK      PIC 1(8) BIT VALUE B"00000000".
+           05  BIT-BACKGROUND-BLUE       PIC 1(8) BIT VALUE B"00010000".
+           05  BIT-BACKGROUND-GREEN      PIC 1(8) BIT VALUE B"00100000".
+           05  BIT-BACKGROUND-CYAN       PIC 1(8) BIT VALUE B"00110000".
+           05  BIT-BACKGROUND-RED        PIC 1(8) BIT VALUE B"01000000".
+           05  BIT-BACKGROUND-MAGENTA    PIC 1(8) BIT VALUE B"01010000".
+           05  BIT-BACKGROUND-BROWN      PIC 1(8) BIT VALUE B"01100000".
+           05  BIT-BACKGROUND-LIGHT-GRAY PIC 1(8) BIT VALUE B"01110000".
+       01  FILLER REDEFINES PC-COLOR-BACKGROUND-TABLE.
+           05  COLOR-BACKGROUND
+               OCCURS 8 TIMES            PIC 1(8) BIT.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
@@ -1330,6 +1344,15 @@ prog.cob:67: error: 'STR-CONSTANT' is not a numeric literal
 prog.cob:68: error: 'FLOAT-CONSTANT' is not an integer
 prog.cob:69: error: 'SIGNED-CONSTANT' is not unsigned
 prog.cob:70: error: 'UNSEEN-CONSTANT' is not defined
+prog.cob:86: warning: USAGE BIT is not implemented
+prog.cob:87: warning: USAGE BIT is not implemented
+prog.cob:88: warning: USAGE BIT is not implemented
+prog.cob:89: warning: USAGE BIT is not implemented
+prog.cob:90: warning: USAGE BIT is not implemented
+prog.cob:91: warning: USAGE BIT is not implemented
+prog.cob:92: warning: USAGE BIT is not implemented
+prog.cob:93: warning: USAGE BIT is not implemented
+prog.cob:96: warning: USAGE BIT is not implemented
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -1399,6 +1422,15 @@ prog.cob:67: error: 'STR-CONSTANT' is not a numeric literal
 prog.cob:68: error: 'FLOAT-CONSTANT' is not an integer
 prog.cob:69: error: 'SIGNED-CONSTANT' is not unsigned
 prog.cob:70: error: 'UNSEEN-CONSTANT' is not defined
+prog.cob:86: warning: USAGE BIT is not implemented
+prog.cob:87: warning: USAGE BIT is not implemented
+prog.cob:88: warning: USAGE BIT is not implemented
+prog.cob:89: warning: USAGE BIT is not implemented
+prog.cob:90: warning: USAGE BIT is not implemented
+prog.cob:91: warning: USAGE BIT is not implemented
+prog.cob:92: warning: USAGE BIT is not implemented
+prog.cob:93: warning: USAGE BIT is not implemented
+prog.cob:96: warning: USAGE BIT is not implemented
 ])
 AT_CLEANUP
 

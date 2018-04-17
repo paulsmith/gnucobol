@@ -1786,6 +1786,7 @@ setup_parameters (struct cb_field *f)
 
 		case CB_USAGE_COMP_5:
 			f->flag_real_binary = 1;
+			/* Fall-through */
 		case CB_USAGE_COMP_X:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				if (f->pic->size > 8) {
@@ -2251,6 +2252,14 @@ unbounded_again:
 			compute_binary_size (f, size);
 			break;
 		case CB_USAGE_DISPLAY:
+			/* boolean items without USAGE BIT */
+			if (f->pic->category == CB_CATEGORY_BOOLEAN) {
+				f->size = f->pic->size / 8;
+				if (f->pic->size % 8 != 0) {
+					f->size++;
+				}
+				break;
+			}
 			f->size = f->pic->size;
 			/* size check for single items */
 			if (f->size > COB_MAX_FIELD_SIZE) {
@@ -2304,6 +2313,13 @@ unbounded_again:
 		case CB_USAGE_POINTER:
 		case CB_USAGE_PROGRAM_POINTER:
 			f->size = sizeof (void *);
+			break;
+		case CB_USAGE_BIT:
+			/* note: similar is found in DISPLAY */
+			f->size = f->pic->size / 8;
+			if (f->pic->size % 8 != 0) {
+				f->size++;
+			}
 			break;
 		/* LCOV_EXCL_START */
 		default:
@@ -2455,8 +2471,7 @@ cb_validate_78_item (struct cb_field *f, const cob_u32_t no78add)
 	if (CB_INVALID_TREE (f->values)) {
 		level_require_error (x, "VALUE");
 		noadd = 1;
-	}
-	if (CB_INVALID_TREE (CB_VALUE (f->values))) {
+	} else if (CB_INVALID_TREE (CB_VALUE (f->values))) {
 		noadd = 1;
 	}
 

@@ -2115,7 +2115,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 
 	for (; str->symbol != '\0'; ++str) {
 		if (!*first && (str->symbol == '+' || str->symbol == '-'
-				|| str->symbol == current_program->currency_symbol)) {
+		              || str->symbol == current_program->currency_symbol)) {
 			if (last_non_simple_insertion
 			    && last_non_simple_insertion->symbol == str->symbol) {
 				*first = last_non_simple_insertion;
@@ -2132,7 +2132,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 		if (!*first && !is_simple_insertion_char (str->symbol)) {
 			last_non_simple_insertion = str;
 		} else if (*first && !(is_simple_insertion_char (str->symbol)
-				       || str->symbol == floating_char)) {
+		                     || str->symbol == floating_char)) {
 			*last = str - 1;
 		        break;
 		}
@@ -2142,7 +2142,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 		*last = str - 1;
 		return;
 	} else if (!(str->symbol == current_program->decimal_point
-		     || str->symbol == 'V')) {
+	           || str->symbol == 'V')) {
 		return;
 	}
 
@@ -2154,7 +2154,7 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 	++str;
 	for (; str->symbol != '\0'; ++str) {
 		if (!(is_simple_insertion_char (str->symbol)
-		      || str->symbol == floating_char)) {
+		     || str->symbol == floating_char)) {
 			return;
 		}
 	}
@@ -2819,6 +2819,14 @@ repeat:
 				digits += n;
 			}
 			s_count++;
+			break;
+
+		case '1':
+			category |= PIC_NUMERIC;	/* FIXME: this is WRONG */
+			digits += n;
+#if 0 /* currently unused */
+			real_digits += n;
+#endif
 			break;
 
 		case 'C':

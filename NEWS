@@ -12,6 +12,11 @@ NEWS - user visible changes				-*- outline -*-
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
    (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
 
+** Parser support for many features of different compilers, for example
+   PIC 1 / USAGE BIT, ACUCOBOL extensions for graphical controls
+   VALIDATE statement and much more.
+   Most of them will be fully implemented in a later version...
+
 ** Option to dump (partial) data of modules on abort.
    Use new cobc option -fdump=<scope> to prepare the module and optional 
    use new runtime configuration options COB_DUMP_FILE and COB_DUMP_WIDTH

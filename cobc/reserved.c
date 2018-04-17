@@ -428,7 +428,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BINARY-SHORT",		0, 0, BINARY_SHORT,		/* 2002 */
 				0, 0
   },
-  { "BIT",			0, 0, -1,			/* 2002 */
+  { "BIT",			0, 0, BIT,			/* 2002 */
 				0, 0
   },
   { "BITMAP",		1, 1, BITMAP,		/* ACU extension */
