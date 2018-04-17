@@ -206,7 +206,8 @@ cobcrun_initial_module (char *module_argument)
 	if (*pathname) {
 		/* TODO: check content, see libcob/common.h */
 		envptr = getenv ("COB_LIBRARY_PATH");
-		if (envptr) {
+		if (envptr
+		 && strlen (envptr) + strlen (pathname) + 1 < COB_MEDIUM_MAX) {
 			memset (env_space, 0, COB_MEDIUM_BUFF);
 			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s",
 				pathname, PATHSEP_CHAR, envptr);
@@ -221,7 +222,8 @@ cobcrun_initial_module (char *module_argument)
 	if (*filename) {
 		/* TODO: check content, see libcob/common.h */
 		envptr = getenv ("COB_PRE_LOAD");
-		if (envptr) {
+		if (envptr
+			&& strlen (envptr) + strlen (filename) + 1 < COB_MEDIUM_MAX) {
 			memset (env_space, 0, COB_MEDIUM_BUFF);
 			snprintf (env_space, COB_MEDIUM_MAX, "%s%c%s", filename,
 				PATHSEP_CHAR, envptr);

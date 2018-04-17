@@ -25,8 +25,6 @@
 #define CB_BEFORE		cb_int0
 #define CB_AFTER		cb_int1
 
-#define COB_MAX_SUBSCRIPTS	16
-
 #define CB_PREFIX_ATTR		"a_"	/* Field attribute (cob_field_attr) */
 #define CB_PREFIX_BASE		"b_"	/* Base address (unsigned char *) */
 #define CB_PREFIX_CONST		"c_"	/* Constant or literal (cob_field) */

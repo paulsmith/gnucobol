@@ -736,7 +736,8 @@ bdb_setkey(cob_file *f, int idx)
 static int				/* Return compare status */
 bdb_cmpkey(cob_file *f, unsigned char *keyarea, unsigned char *record, int idx, int partlen)
 {
-	int sts, part, totlen, cl;
+	int sts, part, totlen;
+	size_t	cl;
 
 	if(partlen <= 0)
 		partlen = bdb_keylen(f, idx);
@@ -1319,6 +1320,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 
 	errno = 0;
 	fd = open (filename, fdmode, fperms);
+	f->fd = fd;
 
 	switch (errno) {
 	case 0:
@@ -1329,6 +1331,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 		break;
 	case ENOENT:
 		if (mode == COB_OPEN_EXTEND || mode == COB_OPEN_OUTPUT) {
+
 			return COB_STATUS_30_PERMANENT_ERROR;
 		}
 		if (f->flag_optional) {
@@ -1348,7 +1351,6 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	default:
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	f->fd = fd;
 
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
@@ -1493,6 +1495,8 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 
 	errno = 0;
 	fp = fopen (filename, fmode);
+	f->file = fp;
+	f->fd = fileno (fp);
 	switch (errno) {
 	case 0:
 		f->open_mode = mode;
@@ -1529,14 +1533,14 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
 		if (file_linage_check (f)) {
 			fclose (fp);
+			f->file = NULL;
+			f->fd = -1;
 			return COB_STATUS_57_I_O_LINAGE;
 		}
 		f->flag_needs_top = 1;
 		lingptr = f->linorkeyptr;
 		cob_set_int (lingptr->linage_ctr, 1);
 	}
-	f->file = fp;
-	f->fd = fileno (fp);
 
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
@@ -4924,7 +4928,7 @@ cob_file_free (cob_file **pfl, cob_file_key **pky)
 			*pky = NULL;
 		}
 	}
-	if (pfl != NULL) {
+	if (pfl != NULL && *pfl != NULL) {
 		fl = *pfl;
 		if (fl->linorkeyptr) {
 			cob_cache_free (fl->linorkeyptr);

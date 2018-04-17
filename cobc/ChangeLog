@@ -37,6 +37,12 @@
 
 	* codegen.c: cosmetic change - label exit_program/exit_function
 	  depending on program type
+	* tree.h: moved definition of COB_MAX_SUBSCRIPTS to libcob/common.h
+	* tree.c (finalize_report): removed double check for field (which I've
+	  added previously)
+	* codegen.c (output_report_def_fields), error.c (print_error),
+	  parser.y (emit_entry), typeck.c (cb_build_move):
+	  check pointer before dereferencing it
 
 2018-04-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

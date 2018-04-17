@@ -21,6 +21,24 @@
 	* screenio.c (cob_screen_init): fix definition of alt keys
 	  when function keys have negative values
 
+2018-04-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_sys_getopt_long_long): fixed free of changed pointer
+	* common.c (cob_gettmpdir): check if environment variables for TEMP
+	  points to usable directory before using it (fallback to ".")
+	* common.c (cob_init_nomain) [HAVE_READLINK]: fixed strcpy of
+	  unterminated return from (readlink)
+	* common.c, reportio.c, termio.c: changed occurrences of strcpy
+	  to strncpy to prevent possible buffer overflows
+	* common.h: moved definition of COB_MAX_SUBSCRIPTS from cobc/tree.h
+	* termio.c (cob_dump_field): allow longer field names and
+	  number/high values of subscripts
+	* initrinsic.c (numval, cob_intr_locale_compare): fixed missing free
+	  in cases of input errors
+	* fileio (cob_fd_file_open): directly set f->fd after open to prevent
+	  possible ressource leaks with file status != 0
+	* fileio (cob_file_free): check pointer before dereferencing it
+
 2018-04-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (cob_screen_init): escape backslash in key definitions

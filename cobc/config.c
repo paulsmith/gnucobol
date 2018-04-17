@@ -258,7 +258,8 @@ cb_load_conf_file (const char *conf_file, const enum cb_include_type include_typ
 			}
 			filename[0] = 0;
 			if (c && c->name) {
-				strcpy (buff, conf_includes->name);
+				strncpy (buff, conf_includes->name, (size_t)COB_SMALL_MAX);
+				buff[COB_SMALL_MAX] = 0;
 				for (i = (int)strlen (buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;

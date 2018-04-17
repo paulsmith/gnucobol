@@ -129,10 +129,12 @@ print_error (const char *file, int line, const char *prefix,
 
 			/* set correct listing entry for this file */
 			cfile = cb_current_file;
-			if (!cfile->name || strcmp (cfile->name, file)) {
+			if (!cfile->name
+			 || (file && strcmp (cfile->name, file))) {
 				cfile = cfile->copy_head;
 				while (cfile) {
-					if (cfile->name && !strcmp (cfile->name, file)) {
+					if (file && cfile->name
+					 && !strcmp (cfile->name, file)) {
 						break;
 					}
 					cfile = cfile->next;

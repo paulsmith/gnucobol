@@ -3382,8 +3382,8 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			continue;
 		}
 		p->report = r;
-		if(p->storage == CB_STORAGE_REPORT
-		&& ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
+		if (p->storage == CB_STORAGE_REPORT
+		 && ((p->report_flag &  COB_REPORT_LINE) || p->level == 1)) {
 			if (r->rcsz < p->size) {
 				r->rcsz = p->size;
 			}
@@ -3397,11 +3397,11 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			r->line_ids[r->num_lines] = NULL;	/* Clear next entry */
 		} 
 		/* report source field */
-		if(p->report_source
-		&& CB_REF_OR_FIELD_P (p->report_source)) {
+		if (p->report_source
+		 && CB_REF_OR_FIELD_P (p->report_source)) {
 			/* force generation of report source field TODO: Check why */
 			fld = CB_FIELD_PTR (p->report_source);
-			if (fld && fld->count == 0) {
+			if (fld->count == 0) {
 				fld->count++;
 			}
 			if (CB_TREE_TAG (p->report_source) == CB_TAG_REFERENCE) {
@@ -3416,14 +3416,14 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		if (p->report_sum_counter
 		 && CB_REF_OR_FIELD_P (p->report_sum_counter)) {
 			fld = CB_FIELD_PTR (p->report_sum_counter);
-			if (fld && fld->count == 0) {
+			if (fld->count == 0) {
 				fld->count++;
 			}
 		}
 		if (p->report_control
 		 && CB_REF_OR_FIELD_P (p->report_control)) {
 			fld = CB_FIELD_PTR (p->report_control);
-			if (fld && fld->count == 0) {
+			if (fld->count == 0) {
 				fld->count++;
 			}
 		}

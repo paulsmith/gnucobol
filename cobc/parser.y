@@ -404,7 +404,7 @@ emit_entry (const char *name, const int encode, cb_tree using_list, cb_tree conv
 	}
 
 	/* Check returning item against using items when FUNCTION */
-	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION && current_program->returning) {
+	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION && ret_f) {
 		for (l = using_list; l; l = CB_CHAIN (l)) {
 			x = CB_VALUE (l);
 			if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {

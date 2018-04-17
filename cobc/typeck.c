@@ -1005,18 +1005,22 @@ cb_check_field_debug (cb_tree fld)
 	}
 
 	/* Set up debug info */
-	strcpy (buff, CB_FIELD(x)->name);
-	size = strlen (buff);
-	for (l = CB_REFERENCE (fld)->chain; l; l = CB_REFERENCE (l)->chain) {
-		z = cb_ref (l);
-		if (z != cb_error_node) {
-			size += strlen (CB_FIELD (z)->name);
-			size += 4;
-			if (size >= sizeof(buff)) {
-				break;
+	strncpy (buff, CB_FIELD(x)->name, COB_MAX_WORDLEN);
+	buff[COB_MAX_WORDLEN] = 0;
+	l = CB_REFERENCE (fld)->chain;
+	if (l) {
+		size = strlen (buff);
+		for (; l; l = CB_REFERENCE (l)->chain) {
+			z = cb_ref (l);
+			if (z != cb_error_node) {
+				size += strlen (CB_FIELD (z)->name);
+				size += 4;
+				if (size >= sizeof(buff)) {
+					break;
+				}
+				strcat (buff, " OF ");
+				strcat (buff, CB_FIELD (z)->name);
 			}
-			strcat (buff, " OF ");
-			strcat (buff, CB_FIELD (z)->name);
 		}
 	}
 	current_statement->debug_nodups =
@@ -3650,8 +3654,15 @@ expr_reduce (int token)
 	}
 
 	/* Handle special case "op OR x AND" */
-	if (token == '&' && TOKEN (-2) == '|' &&
-	    CB_TREE_CLASS (VALUE (-1)) != CB_CLASS_BOOLEAN) {
+	if (token == '&' && TOKEN (-2) == '|'
+	 && CB_TREE_CLASS (VALUE (-1)) != CB_CLASS_BOOLEAN) {
+		/* LCOV_EXCL_START */
+		if (!expr_lh) {
+			/* untranslated as highly unlikely to be raised */
+			cobc_err_msg ("missing left-hand-expression");
+			COBC_ABORT ();
+		}
+		/* LCOV_EXCL_STOP */
 		TOKEN (-1) = 'x';
 		VALUE (-1) = cb_build_binary_op (expr_lh, expr_op, VALUE (-1));
 	}
@@ -7341,7 +7352,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 		/* Connect multiple WHEN's */
 		if (c1 == NULL) {
 			c1 = c2;
-		} else {
+		} else if (c2) {
 			c1 = cb_build_binary_op (c1, '|', c2);
 			if (c1 == cb_error_node) {
 				return;
@@ -9389,7 +9400,8 @@ cb_build_move (cb_tree src, cb_tree dst)
 	struct cb_reference	*src_ref, *dst_ref, *x;
 	int	move_zero;
 
-	if (src == cb_error_node || dst == cb_error_node) {
+	if (CB_INVALID_TREE(src)
+	 || CB_INVALID_TREE(dst)) {
 		return cb_error_node;
 	}
 

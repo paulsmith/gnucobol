@@ -511,7 +511,8 @@ cob_dump_field (const int level, const char *name,
 		cob_field *fa, const int offset, const int indexes, ...)
 {
 	FILE	*fp;
-	char	vname[64],lvlwrk[16];
+	char	vname[COB_MAX_WORDLEN + 1 + COB_MAX_SUBSCRIPTS * 4 + 1];
+	char	lvlwrk[16];
 	va_list	ap;
 	int	idx, subscript, size, adjust, indent;
 	cob_field	f[1];
@@ -535,21 +536,23 @@ cob_dump_field (const int level, const char *name,
 			fprintf(fp, "   FILE STATUS  '%.2s'\n",fl->file_status);
 		}
 	} else {
-		va_start (ap, indexes);
-		strcpy(vname,name);
-		memcpy(f,fa,sizeof(cob_field));
+		strncpy (vname, name, (size_t)COB_MAX_WORDLEN);
+		vname[COB_MAX_WORDLEN] = 0;
+		memcpy (f, fa, sizeof (cob_field));
 		adjust = offset;
+		va_start (ap, indexes);
 		if (indexes > 0) {
-			strcat(vname," (");
+			strcat (vname," (");
 			for (idx = 1; idx <= indexes; idx++) {
 				subscript = va_arg (ap, int);
 				size = va_arg (ap, int);
 				adjust = adjust + (subscript * size);
-				if(idx > 1)
-					strcat(vname,",");
+				if (idx > 1) {
+					strcat (vname,",");
+				}
 				sprintf(&vname[strlen(vname)],"%d",subscript+1);
 			}
-			strcat(vname,")");
+			strcat (vname,")");
 		}
 		f->data += adjust;
 		if (level == 77

@@ -8428,7 +8428,7 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		if (CB_TREE_TAG (value) == CB_TAG_LITERAL) {
 			lit = CB_LITERAL (value);
 			if (lit->all) {
-				val = (char *)calloc(1, f->size * 2 + 2);
+				val = (char *)cobc_malloc(f->size * 2 + 2);
 				if(lit->data[0] == '"'
 				|| lit->data[0] == '\\') {	/* Fix string for C code */
 					for(i=j=0; j < (unsigned int)f->size; j++) {
@@ -8441,7 +8441,7 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 				}
 				output_local("\"%s\",%d,", val, (int)f->size);
 			} else {
-				val = (char *)calloc(1, lit->size * 2 + 2);
+				val = (char *)cobc_malloc(lit->size * 2 + 2);
 				for(i=j=0; j < lit->size; j++) {
 					if(lit->data[j] == '"'
 					|| lit->data[j] == '\\')	/* Fix string for C code */
@@ -8451,7 +8451,7 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 				val[i] = 0;
 				output_local("\"%s\",%d,", val, (int)lit->size);
 			}
-			free((void*) val);
+			cobc_free((void*) val);
 		} else {
 			output_local("NULL,0,");	
 		}
@@ -9968,6 +9968,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			output_line ("case %d:", i++);
 			output_line ("\t%s%d = NULL;",
 				CB_PREFIX_BASE, cb_code_field (CB_VALUE (l))->id);
+			output_line ("/* Fall through */");
 		}
 		output_line ("default:\n\tbreak;");
 		output_line ("}");
@@ -11464,6 +11465,9 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	/* Report data fields */
 	if (prog->report_storage) {
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
+			if (!CB_VALUE (l)) {
+				continue;
+			}
 			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				compute_report_rcsz (rep->records);
@@ -11483,6 +11487,9 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	if (prog->report_storage) {
 		output_target = current_prog->local_include->local_fp;
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
+			if (!CB_VALUE (l)) {
+				continue;
+			}
 			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				output_report_sum_control_field (rep->records);
@@ -11497,6 +11504,9 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	if (prog->report_storage) {
 		comment_gen = 0;
 		for (l = prog->report_list; l; l = CB_CHAIN (l)) {
+			if (!CB_VALUE (l)) {
+				continue;
+			}
 			rep = CB_REPORT_PTR (CB_VALUE(l));
 			if (rep) {
 				if (!comment_gen) {

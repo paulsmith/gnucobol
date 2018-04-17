@@ -4270,18 +4270,29 @@ cob_gettmpdir (void)
 		if ((tmpdir = getenv ("TEMP")) == NULL &&
 		    (tmpdir = getenv ("TMP")) == NULL &&
 		    (tmpdir = getenv ("USERPROFILE")) == NULL) {
-			tmp = cob_fast_malloc (2U);
-			strcpy (tmp, ".");
-			tmpdir = tmp;
+			tmpdir = "";
 		}
 #else
 		if ((tmpdir = getenv ("TMP")) == NULL &&
 		    (tmpdir = getenv ("TEMP")) == NULL) {
 			tmp = cob_fast_malloc (5U);
-		    strcpy (tmp, "/tmp");
+			strcpy (tmp, "/tmp");
 			tmpdir = tmp;
 		}
 #endif
+		if (strlen (tmpdir) > COB_NORMAL_MAX
+		 || !access (tmpdir, W_OK)) {
+#ifndef	_WIN32
+			if (tmp) {
+				cob_free ((void *)tmp);
+				tmpdir = NULL;
+			}
+#endif
+			tmp = cob_fast_malloc (2U);
+			tmp[0] = '.';
+			tmp[1] = 0;
+			tmpdir = tmp;
+		}
 		(void)cob_setenv ("TMPDIR", tmpdir, 1);
 		if (tmp) {
 			cob_free ((void *)tmp);
@@ -5112,8 +5123,8 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	char * shortoptions;
 	char * temp;
 
-	struct option* longoptions;
-	longoption_def* l = NULL;
+	struct option *longoptions, *longoptions_root;
+	longoption_def *l = NULL;
 
 	int longind = 0;
 	unsigned int i;
@@ -5141,11 +5152,11 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	}
 
 	/*
-	 * Buffering longoptions (cobol), target format (struct option)
+	 * Buffering longoptions (COBOL), target format (struct option)
 	 */
 	if (lo_size % sizeof (longoption_def) == 0) {
 		lo_amount = (int)lo_size / sizeof (longoption_def);
-		longoptions = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
+		longoptions_root = (struct option*) cob_malloc (sizeof (struct option) * (lo_amount + 1U));
 	} else {
 		cob_runtime_error (_("Call to CBL_GC_GETOPT with wrong longoption size."));
 		cob_stop_run (1);
@@ -5169,6 +5180,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		l = (struct __longoption_def*) (COB_MODULE_PTR->cob_procedure_params[1]->data);
 	}
 
+	longoptions = longoptions_root;
 	for (i = 0; i < lo_amount; i++) {
 		j = sizeof (l->name) - 1;
 		while (j >= 0 && l->name[j] == 0x20) {
@@ -5228,7 +5240,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 
 
 	cob_free (shortoptions);
-	cob_free (longoptions);
+	cob_free (longoptions_root);
 
 	return exit_status;
 
@@ -6210,7 +6222,7 @@ cb_config_entry (char *buf, int line)
 		if (gc_conf[i].env_group == GRP_HIDE) {
 			for (j = 0; j < NUM_CONFIG; j++) {		/* Any alias present? */
 				if (j != i
-				&& gc_conf[i].data_loc == gc_conf[j].data_loc) {
+				 && gc_conf[i].data_loc == gc_conf[j].data_loc) {
 					gc_conf[j].data_type |= STS_CNFSET;
 					gc_conf[j].data_type &= ~STS_RESET;
 					gc_conf[j].config_num = gc_conf[i].config_num;
@@ -6240,11 +6252,14 @@ cob_load_config_file (const char *config_file, int isoptional)
 			/* check for path of previous configuration file (for includes) */
 			filename[0] = 0;
 			if (cobsetptr->cob_config_cur != 0) {
-				strcpy (buff, cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1]);
+				strncpy (buff,
+					cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1],
+					(size_t)COB_FILE_MAX);
 				for (i = (int)strlen (buff); i != 0 && buff[i] != SLASH_CHAR; i--);
 				if (i != 0) {
 					buff[i] = 0;
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s", buff, SLASH_STR, config_file);
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s", buff, SLASH_STR,
+						config_file);
 					if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 						config_file = filename;		/* Prefix last directory */
 					} else {
@@ -6256,9 +6271,11 @@ cob_load_config_file (const char *config_file, int isoptional)
 				/* check for COB_CONFIG_DIR (use default if not in environment) */
 				penv = getenv ("COB_CONFIG_DIR");
 				if (penv != NULL) {
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s", penv, SLASH_STR, config_file);
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s",
+						penv, SLASH_STR, config_file);
 				} else {
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s", COB_CONFIG_DIR, SLASH_STR, config_file);
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s",
+						COB_CONFIG_DIR, SLASH_STR, config_file);
 				}
 				if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 					config_file = filename;		/* Prefix COB_CONFIG_DIR */
@@ -6353,7 +6370,7 @@ cob_load_config (void)
 
 	/* Get the name for the configuration file */
 	if ((env = getenv ("COB_RUNTIME_CONFIG")) != NULL && env[0]) {
-		strcpy (conf_file, env);
+		strncpy (conf_file, env, (size_t)COB_MEDIUM_MAX);
 		is_optional = 0;			/* If declared then it is NOT optional */
 		if (strchr (conf_file, PATHSEP_CHAR) != NULL) {
 			conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_RUNTIME_CONFIG");
@@ -7020,7 +7037,8 @@ print_runtime_conf ()
 		/* output path of main configuration file */
 		printf (" %s  ", value);
 		plen = 80 - hdlen;
-		strcpy (value, cobsetptr->cob_config_file[0]);
+		strncpy (value, cobsetptr->cob_config_file[0], (size_t)COB_MEDIUM_MAX);
+		value[COB_MEDIUM_MAX] = 0;
 		vl = (unsigned int)strlen (value);
 		for (k = 0; vl > plen; vl -= plen, k += plen) {
 			printf ("%.*s\n%-*s", plen, &value[k], hdlen, "");
@@ -7030,7 +7048,8 @@ print_runtime_conf ()
 		/* output path of additional configuration files */
 		for (i = 1; i < cobsetptr->cob_config_num; i++) {
 			printf ("%*d  ", hdlen - 2, i);
-			strcpy (value, cobsetptr->cob_config_file[i]);
+			strncpy (value, cobsetptr->cob_config_file[i], (size_t)COB_MEDIUM_MAX);
+			value[COB_MEDIUM_MAX] = 0;
 			vl = (unsigned int)strlen (value);
 			for (k = 0; vl > plen; vl -= plen, k += plen) {
 				printf ("%.*s\n%-*s", plen, &value[k], hdlen, "");
@@ -7392,6 +7411,7 @@ cob_init (const int argc, char **argv)
 		s = cob_malloc ((size_t)COB_LARGE_BUFF);
 		i = (int)readlink (path, s, (size_t)COB_LARGE_MAX);
 		if (i > 0 && i < COB_LARGE_BUFF) {
+			s[i] = 0;
 			cobglobptr->cob_main_argv0 = cob_strdup (s);
 			cob_free (s);
 			return;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2005-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2005-2012, 2014-2018 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -1455,7 +1455,7 @@ enum numval_type {
 static cob_field *
 numval (cob_field *srcfield, cob_field *currency, const enum numval_type type)
 {
-	unsigned char	*final_buff = cob_malloc (srcfield->size + 1U);
+	unsigned char	*final_buff = NULL;
 	unsigned char	*currency_data = NULL;
 	size_t		i;
 	int		final_digits = 0;
@@ -1472,6 +1472,7 @@ numval (cob_field *srcfield, cob_field *currency, const enum numval_type type)
 		return curr_field;
 	}
 
+	final_buff = cob_malloc (srcfield->size + 1U);
 	if (currency && currency->size < srcfield->size) {
 		currency_data = currency->data;
 	}
@@ -2259,7 +2260,7 @@ add_decimal_digits (int decimal_places, cob_decimal *second_fraction,
 
 	/* Set remaining digits to zero */
 	if (decimal_places != 0) {
-		memset (buff + *buff_pos, '0', decimal_places);
+		memset (buff + *buff_pos, (int)'0', decimal_places);
 		*buff_pos += decimal_places;
 	}
 }
@@ -4129,7 +4130,7 @@ cob_intr_date_of_integer (cob_field *srcdays)
 	days = cob_get_int (srcdays);
 	if (!valid_integer_date (days)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		memset (curr_field->data, '0', (size_t)8);
+		memset (curr_field->data, (int)'0', (size_t)8);
 		return curr_field;
 	}
 
@@ -4159,7 +4160,7 @@ cob_intr_day_of_integer (cob_field *srcdays)
 	days = cob_get_int (srcdays);
 	if (!valid_integer_date (days)) {
 		cob_set_exception (COB_EC_ARGUMENT_FUNCTION);
-		memset (curr_field->data, '0', (size_t)7);
+		memset (curr_field->data, (int)'0', (size_t)7);
 		return curr_field;
 	}
 
@@ -6074,7 +6075,10 @@ cob_intr_locale_compare (const int params, ...)
 #endif
 
 	return curr_field;
+
 derror:
+	cob_free (p1);
+	cob_free (p2);
 #endif
 	curr_field->data[0] = ' ';
 	cob_set_exception (COB_EC_ARGUMENT_FUNCTION);

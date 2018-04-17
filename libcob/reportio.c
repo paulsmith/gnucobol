@@ -713,20 +713,21 @@ saveLineCounter(cob_report *r)
  * Search one LINE for Control field 
  */
 static void
-line_control_one(cob_report *r, cob_report_line *l, cob_field *f)
+line_control_one (cob_report *r, cob_report_line *l, cob_field *f)
 {
 	cob_report_field *rf;
 	cob_report_control	*rc;
-	char	fld[36];
-	if(l == NULL)
+	char	fld[COB_MAX_WORDLEN + 1];
+	if (l == NULL)
 		return;
 	for(rf = l->fields; rf; rf = rf->next) {
 		if(!(rf->flags & COB_REPORT_PRESENT)) 
 			continue;
-		strcpy(fld,"");
-		for(rc = r->controls; rc; rc = rc->next) {
-			if(rc->f == rf->control) { 
-				strcpy(fld,rc->name);
+		fld[0] = 0;
+		for (rc = r->controls; rc; rc = rc->next) {
+			if (rc->f == rf->control) { 
+				strncpy (fld, rc->name, COB_MAX_WORDLEN);
+				fld[COB_MAX_WORDLEN] = 0;
 				break;
 			}
 		}

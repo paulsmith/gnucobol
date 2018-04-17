@@ -319,13 +319,13 @@ Note: also defined together with __clang__ in both frontends:
 #define access			_access
 #define popen			_popen
 #define pclose			_pclose
-#if COB_USE_VC2013_OR_GREATER
-/* only usable with COB_USE_VC2013_OR_GREATER */
+/* MSDN says these are available since VC2005 #if COB_USE_VC2013_OR_GREATER
+only usable with COB_USE_VC2013_OR_GREATER */
 #define timezone		_timezone
 #define tzname			_tzname
 #define daylight		_daylight
-/* only usable with COB_USE_VC2013_OR_GREATER - End */
-#endif
+/* only usable with COB_USE_VC2013_OR_GREATER - End
+#endif */
 
 #if !COB_USE_VC2013_OR_GREATER
 #define atoll			_atoi64
@@ -635,6 +635,9 @@ Note: also defined together with __clang__ in both frontends:
 
 /* Maximum length of COBOL words */
 #define	COB_MAX_WORDLEN		61
+
+/* Maximum number of subscripts */
+#define COB_MAX_SUBSCRIPTS	16
 
 /* Memory size for sorting */
 #define	COB_SORT_MEMORY		128 * 1024 * 1024

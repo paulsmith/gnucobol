@@ -8078,7 +8078,8 @@ process_file (struct filename *fn, int status)
 
 	if (cb_src_list_file) {
 		cb_listing_page = 0;
-		strcpy (cb_listing_filename, fn->source);
+		strncpy (cb_listing_filename, fn->source, FILENAME_MAX - 1);
+		cb_listing_filename[FILENAME_MAX - 1] = 0;
 		set_listing_header_code ();
 	}
 
