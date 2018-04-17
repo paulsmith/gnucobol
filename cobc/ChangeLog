@@ -1,4 +1,12 @@
 
+2018-04-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: prevent output file name "-" for all levels but preprocess,
+	  allow listing to be output to stdout with listing name "-"
+	* cobc.c, flag.def: replaced -tsymbols by -f[no-]tsymbols,
+	  added option to suppress specific listing parts with new options
+	  -fno-theader, -fno-tmessages, -fno-tsource (see NEWS)
+
 2018-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (process_command_line): minimal size for -tlines=20

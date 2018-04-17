@@ -1,6 +1,6 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL 3.0rc-1 to be released (201803xx)
+ GnuCOBOL 3.0rc-1 to be released (20180422)
 
 * New GnuCOBOL features
 
@@ -30,12 +30,23 @@ NEWS - user visible changes				-*- outline -*-
 ** The option -E (preprocess file) does not imply an output file any more.
    If no output file is explicit specified with -o filename.i the output will
    be written to stdout (behavior of versions 1.1 is restored).
+   Requesting output to stdout explicit by using a dash as output name is
+   also possible.
+
+** Changed options for listing:
+   The option -tsymbols was replaced by -ftsymbols and therefore can now also
+   be explicit deactivated by specifying -fno-tsymbols.
+   New options for suppressing (or explicit requesting) parts of the listing:
+   -fno-theader    suppress all headers from listing while keeping page breaks
+   -fno-tmessages  suppress warning and error summary from listing
+   -fno-tsource    suppress actual source from listing (for example to only
+   produce the cross-reference)
 
 ** The option -fif-cutoff (option to change generated C sources to use
    a label + goto for nested if/else) was deactivated to allow the C compiler
    to fully control the program flow.
    Please report if you have a need for this option as it will be removed
-   permanently in GnuCOBOL 3.1 otherwise.
+   permanently in the next release of GnuCOBOL otherwise.
 
 * Changes in the runtime
 

@@ -557,8 +557,18 @@ Generate and place a wide print listing into @file{*.lst}.
 Specify lines per page in print listing, default = 55.
 Set to zero for no additional page breaks.
 
-@item --tsymbols
+@item -ftsymbols
 Generate symbol table in listing.
+
+@item -fno-theader
+Suppress all headers from listing while keeping page breaks.
+     
+@item -fno-tmessages
+Suppress warning and error summary from listing.
+
+@item -fno-tsource
+Suppress actual source from listing (for example to only produce the
+cross-reference).
 
 @item -P(=<dir or file>)
 Generate and place a preprocessed listing (old format) into @file{*.lst}.
@@ -569,10 +579,10 @@ Generate cross reference in the listing.
 
 @end table
 
-Here is an example program listing with the -t -tsymbols option:
+Here is an example program listing with the -t -ftsymbols option:
 
 @example
-GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0001
+GnuCOBOL 3.0.0   test.cbl                   Mon May 14 10:23:45 2018  Page 0001
 
 LINE    PG/LN  A...B............................................................
 
@@ -620,7 +630,7 @@ in the listing.
 The second part of the listing file is the listing of the Symbol Table:
 
 @example
-GnuCOBOL 2.0.0   test.cbl                   Mon Oct 17 10:23:45 2016  Page 0002
+GnuCOBOL 3.0.0   test.cbl                   Mon May 14 10:23:45 2018  Page 0002
 
 SIZE TYPE           LVL  NAME                           PICTURE
 

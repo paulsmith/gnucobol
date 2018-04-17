@@ -5610,3 +5610,155 @@ AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([huge REPLACE])
+AT_KEYWORDS([listing])
+
+AT_CAPTURE_FILE([prog.lst])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       PROCEDURE        DIVISION.
+
+           REPLACE ==111111111111111111111111111111111111111==
+              BY =='
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    '
+      -    ' '==.
+
+
+           DISPLAY 111111111111111111111111111111111111111
+           DISPLAY 111111111111111111111111111111111111111
+           DISPLAY 111111111111111111111111111111111111111
+
+           STOP RUN.
+])
+
+# as long as we fail the listing test (with a SIGSEGV see Bug #515):
+
+# ensure that normal compilation works (to be removed later), until then:
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_XFAIL_IF(true)
+
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [0], [], [])
+
+# TODO: add a second one using COPY REPLACING
+
+AT_DATA([prog1.lst],
+[GnuCOBOL V.R.P               prog.cob                   DDD MMM dd HH:MM:SS YYYY
+
+LINE    PG/LN  A...B............................................................
+
+ TODO
+
+])
+
+AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
+AT_CHECK([diff prog1.lst prog.lis], [0], [], [])
+
+AT_CLEANUP

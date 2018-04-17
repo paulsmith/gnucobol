@@ -231,7 +231,6 @@ FILE			*cb_src_list_file = NULL;
 int			cb_listing_page = 0;
 int			cb_listing_wide = 0;
 unsigned int		cb_lines_per_page = CB_MAX_LINES;
-int			cb_listing_symbols = 0;
 int			cb_listing_xref = 0;
 #define			CB_LISTING_DATE_BUFF 26
 #define			CB_LISTING_DATE_MAX (CB_LISTING_DATE_BUFF - 1)
@@ -516,7 +515,7 @@ static const struct option long_options[] = {
 	{"debug",		CB_NO_ARG, NULL, 'd'},
 	{"ext",			CB_RQ_ARG, NULL, 'e'},
 	{"free",		CB_NO_ARG, NULL, 'F'},	/* note: not assigned directly as this is only valid for */
-	{"fixed",		CB_NO_ARG, NULL, 'f'},	/*       `int`: sizeof(enum) isn't always sizeof (int) */
+	{"fixed",		CB_NO_ARG, NULL, 'f'},	/*       `int` and sizeof(enum) isn't always sizeof (int) */
 	{"static",		CB_NO_ARG, &cb_flag_static_call, 1},
 	{"dynamic",		CB_NO_ARG, &cb_flag_static_call, 0},
 	{"job",			CB_OP_ARG, NULL, 'j'},
@@ -529,7 +528,7 @@ static const struct option long_options[] = {
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
-	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},
+	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},		/* kept for backwards-compatibility */
 
 #define	CB_FLAG(var,print_help,name,doc)			\
 	{"f" name,		CB_NO_ARG, &var, 1},	\
@@ -601,7 +600,7 @@ DECLNORET static void COB_A_NORETURN	cobc_abort_terminate (int);
 DECLNORET static void COB_A_NORETURN	cobc_early_exit (int);
 DECLNORET static void COB_A_NORETURN	cobc_err_exit (const char *, ...) COB_A_FORMAT12;
 static void	free_list_file		(struct list_files *);
-static void	print_program_code	(struct list_files *, int);
+static void	print_program	(struct list_files *, int);
 static void	set_standard_title	(void);
 static void	print_program_header	(void);
 static void	print_program_data	(const char *);
@@ -1849,7 +1848,9 @@ cobc_clean_up (const int status)
 	struct filename		*fn;
 
 	if (cb_src_list_file) {
-		fclose (cb_src_list_file);
+		if (cb_src_list_file != stdout) {
+			fclose (cb_src_list_file);
+		}
 		cb_src_list_file = NULL;
 	}
 	if (cb_listing_file) {
@@ -1937,7 +1938,8 @@ cobc_terminate (const char *str)
 		set_listing_date ();
 		set_standard_title ();
 		cb_listing_linecount = cb_lines_per_page;
-		strcpy (cb_listing_filename, str);
+		strncpy (cb_listing_filename, str, FILENAME_MAX);
+		cb_listing_filename[FILENAME_MAX - 1] = 0;
 		print_program_header ();
 	}
 	cb_perror (0, "cobc: %s: %s", str, cb_get_strerror ());
@@ -2330,7 +2332,9 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-	puts (_("  --tsymbols            specify symbols in listing"));
+#if 0 /* to be hidden later, use -f[no-]tsymbols instead */
+	puts (_("  --tsymbols            specify symbols in listing, use -flist-symbols instead"));
+#endif
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 #ifndef COB_INTERNAL_XREF
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
@@ -3453,6 +3457,15 @@ process_command_line (const int argc, char **argv)
 	}
 #endif
 
+	if (output_name && strcmp (output_name, COB_DASH) == 0) {
+		cb_src_list_file = stdout;
+		if (cb_compile_level != CB_LEVEL_PREPROCESS) {
+			cobc_err_exit (_("output to stdout only valid for preprocess"));
+		}
+		cobc_main_free (output_name);
+		cobc_main_free (output_name_buff);
+	}
+
 	/* Set relaxed syntax configuration options if requested */
 	/* part 1: relaxed syntax compiler configuration option */
 	if (cb_relaxed_syntax_checks) {
@@ -4492,13 +4505,17 @@ preprocess (struct filename *fn)
 				fflush (stderr);
 			}
 			if (cb_listing_outputfile) {
-				if (cb_unix_lf) {
-					cb_src_list_file = fopen (cb_listing_outputfile, "ab");
+				if (strcmp (cb_listing_outputfile, COB_DASH) == 0) {
+					cb_src_list_file = stdout;
 				} else {
-					cb_src_list_file = fopen (cb_listing_outputfile, "a");
-				}
-				if (!cb_src_list_file) {
-					cobc_terminate (cb_listing_outputfile);
+					if (cb_unix_lf) {
+						cb_src_list_file = fopen (cb_listing_outputfile, "ab");
+					} else {
+						cb_src_list_file = fopen (cb_listing_outputfile, "a");
+					}
+					if (!cb_src_list_file) {
+						cobc_terminate (cb_listing_outputfile);
+					}
 				}
 				cb_listing_eject = 1;
 				force_new_page_for_next_line ();
@@ -4619,6 +4636,10 @@ print_program_header (void)
 		} else {
 			cb_listing_eject = 1;
 		}
+		if (!cb_listing_with_header) {
+			fputc ('\n', cb_src_list_file);
+			return;
+		}
 		if (cb_listing_wide) {
 			format_str = "%-23.23s %-61.61s %s  Page %04d\n";
 		} else {
@@ -4633,6 +4654,10 @@ print_program_header (void)
 
 	/* header for listing without page breaks: --tlines=0 */
 	} else {
+		if (!cb_listing_with_header) {
+			fputc ('\n', cb_src_list_file);
+			return;
+		}
 
 		if (cb_listing_page == 0) {
 			cb_listing_page = 1;
@@ -5432,28 +5457,37 @@ print_program_trailer (void)
 		print_program_data ("");
 	}
 
-	/* Print error/warning summary */
-	if (cb_listing_error_head) {
+	/* Print error/warning summary (this note may be always included later)
+	   and/or be replaced to be the secondary title of the listing */
+	if (cb_listing_error_head && cb_listing_with_messages) {
 		force_new_page_for_next_line ();
 		print_program_data (_("Error/Warning summary:"));
 		print_program_data ("");
-		err = cb_listing_error_head;
-		do {
-			if (err->line > 0) {
-				snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
-					err->file, err->line, err->prefix, err->msg);
-			} else {
-				snprintf (err_msg, BUFSIZ, "%s: %s%s",
-					err->file, err->prefix, err->msg);
-			}
-			print_program_data (err_msg);
-			err = err->next;
-		} while (err);
-		print_program_data ("");
+	}
+	if (cb_listing_error_head) {
+		if (cb_listing_with_messages) {
+			err = cb_listing_error_head;
+			do {
+				if (err->line > 0) {
+					snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
+						err->file, err->line, err->prefix, err->msg);
+				} else {
+					snprintf (err_msg, BUFSIZ, "%s: %s%s",
+						err->file, err->prefix, err->msg);
+				}
+				print_program_data (err_msg);
+				err = err->next;
+			} while (err);
+			print_program_data ("");
+		}
 
 		free_error_list (cb_listing_error_head);
 		cb_listing_error_head = NULL;
 		cb_listing_error_tail = NULL;
+	}
+
+	if (!cb_listing_with_messages) {
+		return;
 	}
 
 	/* Print error counts */
@@ -6491,12 +6525,11 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				} else {
 					strcat (newline, rep->to);
 				}
-				strcat (newline, tterm);
 				match = 1;
 			} else {
 				strcat (newline, ttoken);
-				strcat (newline, tterm);
 			}
+			strcat (newline, tterm);
 		}
 	}
 
@@ -6655,7 +6688,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					        deep_copy_list_replace (rep, cur);
 					}
 				}
-				print_program_code (cur, 1);
+				print_program (cur, 1);
 				
 				/* Delete the copybook reference when done */
 				cfile->copy_head = cur->next;
@@ -6691,11 +6724,11 @@ list_error_reverse (struct list_error *p)
 }
 
 /*
-  Print the listing for the file in cfile, with copybooks expanded and
-  after text has been REPLACE'd.
+Print the listing for the file in cfile, with copybooks expanded and
+after text has been REPLACE'd.
 
-  This function also frees contents of cfile's copy_head and replace_head
-  members, then sets them to NULL.
+FIXME: this code doesn't check for huge replace values and will abort
+       when these are used - see Bug #515
 */
 static void
 print_program_code (struct list_files *cfile, int in_copy)
@@ -6712,16 +6745,13 @@ print_program_code (struct list_files *cfile, int in_copy)
 	char	*pline[CB_READ_AHEAD] = { NULL };
 	int	lines_read;
 
-	if (cfile->err_head) {
-		cfile->err_head = list_error_reverse (cfile->err_head);
-	}
 	cfile->listing_on = 1;
 
 #ifdef DEBUG_REPLACE
 	struct list_skip *skip;
 
 	fprintf (stdout, "print_program_code: in_copy = %s\n",
-		 in_copy ? "YES" : "NO");
+		in_copy ? "YES" : "NO");
 	fprintf (stdout, "   name: %s\n", cfile->name);
 	fprintf (stdout, "   copy_line: %d\n", cfile->copy_line);
 	for (i = 0, cur = cfile->copy_head; cur; i++, cur = cur->next) {
@@ -6761,7 +6791,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 	if (fd != NULL) {
 		abort_if_too_many_continuation_lines (pline_cnt, cfile->name, line_num);
 		if (get_next_listing_line (fd, &pline[pline_cnt], fixed) >= 0) {
-		        do {
+			do {
 				abort_if_too_many_continuation_lines (pline_cnt, cfile->name, line_num);
 				if (get_next_listing_line (fd, &pline[pline_cnt + 1], fixed) < 0) {
 					eof = 1;
@@ -6771,7 +6801,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 
 				/* Collect all adjacent continuation lines */
 				if (is_continuation_line (pline[fixed ? pline_cnt : pline_cnt - 1],
-							  cfile->source_format != CB_FORMAT_FREE)) {
+						  cfile->source_format != CB_FORMAT_FREE)) {
 					continue;
 				}
 				/* handling for preprocessed directives */
@@ -6787,12 +6817,12 @@ print_program_code (struct list_files *cfile, int in_copy)
 				/* Perform text replacement on the lines. */
 				if (!in_copy) {
 					pline_cnt = print_replace_main (cfile, fd, pline, pline_cnt,
-								       line_num);
+						  line_num);
 				} else if (cfile->replace_head) {
 					rep = cfile->replace_head;
 					while (rep) {
 						pline_cnt = print_replace_text (cfile, fd, rep, pline,
-									       pline_cnt, line_num);
+							  pline_cnt, line_num);
 						rep = rep->next;
 					}
 				}
@@ -6811,7 +6841,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 
 				/* Output copybooks which are COPY'd at the current line */
 				if (cfile->copy_head
-				    && cfile->copy_head->copy_line == line_num) {
+				 && cfile->copy_head->copy_line == line_num) {
 
 					cur = cfile->copy_head;
 
@@ -6820,8 +6850,8 @@ print_program_code (struct list_files *cfile, int in_copy)
 					     rep = rep->next) {
 						deep_copy_list_replace (rep, cur);
 					}
-					print_program_code (cur, 1);
-					
+					print_program (cur, 1);
+
 					/* Delete the copybook reference when done */
 					cfile->copy_head = cur->next;
 					cleanup_copybook_reference (cur);
@@ -6830,7 +6860,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 				/* Delete all but the last line. */
 				strcpy (pline[0], pline[pline_cnt]);
 				for (i = 1; i < pline_cnt + 1; i++) {
-				   memset (pline[i], 0, CB_LINE_LENGTH);
+					memset (pline[i], 0, CB_LINE_LENGTH);
 				}
 
 				line_num += lines_read;
@@ -6851,12 +6881,6 @@ print_program_code (struct list_files *cfile, int in_copy)
 				print_program_data (print_data);
 			}
 		}
-		if (cfile->copy_head) {
-			cur = cfile->copy_head;
-			print_program_code (cur, 1);
-			cfile->copy_head = cur->next;
-			cleanup_copybook_reference (cur);
-		}
 	}
 
 	for (i = 0; i < CB_READ_AHEAD; i++) {
@@ -6864,6 +6888,36 @@ print_program_code (struct list_files *cfile, int in_copy)
 			break;
 		}
 		cobc_free (pline[i]);
+	}
+}
+
+/*
+  Print the listing for the file in cfile, with copybooks expanded and
+  after text has been REPLACE'd.
+
+  This function also frees contents of cfile's copy_head and replace_head
+  members, then sets them to NULL.
+*/
+static void
+print_program (struct list_files *cfile, int in_copy)
+{
+	struct list_error	*err;
+	struct list_files	*cur;
+
+	if (cfile->err_head) {
+		cfile->err_head = list_error_reverse (cfile->err_head);
+	}
+
+	if (cb_listing_with_source) {
+		/* actual printing of program code, copybooks included */
+		print_program_code (cfile, in_copy);
+	}
+	/* Free replace data (note: done before if source listing was done) */
+	if (cfile->copy_head) {
+		cur = cfile->copy_head;
+		print_program (cur, 1);
+		cfile->copy_head = cur->next;
+		cleanup_copybook_reference (cur);
 	}
 
 	/* Free replace data */
@@ -6891,7 +6945,7 @@ print_program_code (struct list_files *cfile, int in_copy)
 static void
 print_program_listing (void)
 {
-	print_program_code (cb_listing_file_struct, 0);
+	print_program (cb_listing_file_struct, 0);
 
 	print_program_trailer ();
 
@@ -8028,7 +8082,6 @@ process_file (struct filename *fn, int status)
 		set_listing_header_code ();
 	}
 
-
 	if (cb_compile_level >= CB_LEVEL_PREPROCESS &&
 	    fn->need_preprocess) {
 		/* Preprocess */
@@ -8185,13 +8238,17 @@ main (int argc, char **argv)
 
 	/* internal complete source listing file */
 	if (cb_listing_outputfile) {
-		if (cb_unix_lf) {
-			cb_src_list_file = fopen (cb_listing_outputfile, "wb");
+		if (strcmp (cb_listing_outputfile, COB_DASH) == 0) {
+			cb_src_list_file = stdout;
 		} else {
-			cb_src_list_file = fopen (cb_listing_outputfile, "w");
-		}
-		if (!cb_src_list_file) {
-			cobc_terminate (cb_listing_outputfile);
+			if (cb_unix_lf) {
+				cb_src_list_file = fopen (cb_listing_outputfile, "wb");
+			} else {
+				cb_src_list_file = fopen (cb_listing_outputfile, "w");
+			}
+			if (!cb_src_list_file) {
+				cobc_terminate (cb_listing_outputfile);
+			}
 		}
 		cb_listing_file_struct = cobc_malloc (sizeof (struct list_files));
 	}
@@ -8251,8 +8308,8 @@ main (int argc, char **argv)
 		cb_compile_level = CB_LEVEL_EXECUTABLE;
 	}
 
-	if (cb_compile_level < CB_LEVEL_LIBRARY ||
-	    status || cb_flag_syntax_only) {
+	if (cb_compile_level < CB_LEVEL_LIBRARY
+	 || status || cb_flag_syntax_only) {
 		/* Finished */
 		cobc_clean_up (status);
 		return status;
