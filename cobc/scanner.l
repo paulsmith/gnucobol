@@ -268,6 +268,9 @@ static void	add_synonym (const int);
 		if (p1) {
 			*p1 = 0;
 			cb_source_file = cobc_parse_strdup (p2);
+			/* FIXME: only place where strol is used, replace by cobc internal
+			          function for base 10 (found in cobc.c already) and base 16,
+			          remove from configure.ac */
 			cb_source_line = (int)strtol (yytext + 5, NULL, 10) - 1;
 		}
 		cobc_free (p2);

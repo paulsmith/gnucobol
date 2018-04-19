@@ -4182,6 +4182,7 @@ prog.cob:29: error: wrong number of WHEN parameters
 
 AT_CLEANUP
 
+
 AT_SETUP([MF reserved word directives])
 AT_KEYWORDS([extensions ADDRSV ADDSYN MAKESYN OVERRIDE REMOVE])
 
@@ -4236,6 +4237,7 @@ prog.cob:36: error: 'cat' is a reserved word, but isn't supported
 ])
 
 AT_CLEANUP
+
 
 AT_SETUP([STRING / UNSTRING with invalid syntax])
 AT_KEYWORDS([misc])
@@ -5363,4 +5365,46 @@ prog.cob:18: warning: Boolean literal has zero length; B'0' will be assumed
 prog.cob:19: error: zero-length literal used
 prog.cob:19: warning: hexadecimal literal has zero length; X'00' will be assumed
 ])
+AT_CLEANUP
+
+
+AT_SETUP([@OPTIONS parsing])
+AT_KEYWORDS([misc OPTIONS])
+
+# GnuCOBOL currently only skips these, see FR 305
+
+AT_DATA([valid.cob], [
+000100 @OPTIONS NOMAIN,APOST
+000200 IDENTIFICATION  DIVISION.
+000300 PROGRAM-ID. VALID.
+])
+
+AT_CHECK([$COMPILE_ONLY valid.cob], [0], [],
+[valid.cob:3: warning: ignoring unknown directive: '@OPTIONS'
+])
+
+#AT_DATA([invalid.cob], [
+#       @OPTIONS ALPHAL(WORD)
+#       @OPTIONS INITVALUE(100)
+#       @OPTIONS INITVALUE(F)
+#       @OPTIONS INITVALUE(AG)
+#       @OPTIONS BINARY(WORD,MLBON) INITVALUE(00) NOTRUNC
+#       @OPTIONS INITVALUE(00)
+#       @OPTIONS NOTRUNC
+#       @OPTIONS APOST,MAIN
+#       @OPTIONS THREAD(SINGLE)
+#       IDENTIFICATION DIVISION.
+#       PROGRAM-ID. INVALID.
+#])
+
+#AT_CHECK([$COMPILE_ONLY valid.cob], [0], [], [])
+#AT_CHECK([$COMPILE_ONLY invalid.cob], [1], [],
+#[invalid.cob:2: warning: unknown @OPTIONS directive 'ALPHAL'
+#invalid.cob:3: error: invalid @OPTIONS INITVALUE value '100'
+#invalid.cob:4: error: invalid @OPTIONS INITVALUE value 'F'
+#invalid.cob:5: error: invalid @OPTIONS INITVALUE value 'AG'
+#invalid.cob:6: warning: skipping line after first space
+#invalid.cob:7: error: @OPTIONS MAIN conflicts with command line option '-m'
+#])
+
 AT_CLEANUP

@@ -374,6 +374,14 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	}
 }
 
+^......."@OPTIONS"	{
+	/* Fujitsu COBOL extension for specifying command line options */
+	char * s = strchr (yytext, '@');
+	cb_plex_warning (COBC_WARN_FILLER, newline_count,
+		_("ignoring unknown directive: '%s'"), s);
+	skip_to_eol ();
+}
+
 ^[ ]*"$"		{
 	cb_plex_warning (COBC_WARN_FILLER, newline_count,
 		_("spurious '$' detected - ignored"));

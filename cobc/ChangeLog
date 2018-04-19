@@ -1,4 +1,8 @@
 
+2018-04-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l: FR #305 for now - skip Fujitsu @OPTIONS
+
 2018-04-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: prevent output file name "-" for all levels but preprocess,
