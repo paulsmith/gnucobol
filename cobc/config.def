@@ -259,6 +259,9 @@ CB_CONFIG_SUPPORT (cb_accept_display_extensions, "accept-display-extensions",
 CB_CONFIG_SUPPORT (cb_renames_uncommon_levels, "renames-uncommon-levels",
 	_("RENAMES of 01-, 66- and 77-level items"))
 
+CB_CONFIG_SUPPORT (cb_symbolic_constant, "symbolic-constant",
+	_("constants defined in SPECIAL-NAMES"))
+
 CB_CONFIG_SUPPORT (cb_constant_78, "constant-78",
 	_("constant with level 78 item (note: has left to right precedence in expressions)"))
 

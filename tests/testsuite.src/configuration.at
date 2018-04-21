@@ -482,6 +482,7 @@ test.conf: missing definitions:
 	no definition of 'not-exception-before-exception'
 	no definition of 'accept-display-extensions'
 	no definition of 'renames-uncommon-levels'
+	no definition of 'symbolic-constant'
 	no definition of 'constant-78'
 	no definition of 'constant-01'
 	no definition of 'perform-varying-without-by'

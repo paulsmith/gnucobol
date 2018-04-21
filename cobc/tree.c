@@ -1042,6 +1042,8 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 			return COB_TYPE_NUMERIC_FP_DEC64;
 		case CB_USAGE_FP_DEC128:
 			return COB_TYPE_NUMERIC_FP_DEC128;
+		case CB_USAGE_BIT:	/* FIXME: is neither numeric nor "cobc"-boolean */
+			return COB_TYPE_BOOLEAN;
 		/* LCOV_EXCL_START */
 		default:
 			cobc_err_msg (_("unexpected numeric USAGE: %d"),

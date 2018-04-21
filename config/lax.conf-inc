@@ -96,6 +96,7 @@ word-continuation:			ok
 not-exception-before-exception:		+warning
 accept-display-extensions:		ok
 renames-uncommon-levels:		ok
+symbolic-constant:			+warning
 constant-78:				ok
 constant-01:				ok
 perform-varying-without-by:		ok

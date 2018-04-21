@@ -3522,6 +3522,7 @@ special_name:
   mnemonic_name_clause
 | alphabet_name_clause
 | symbolic_characters_clause
+| symbolic_constant_clause
 | locale_clause
 | class_name_clause
 | currency_sign_clause
@@ -3865,6 +3866,47 @@ char_list:
 integer_list:
   symbolic_integer		{ $$ = CB_LIST_INIT ($1); }
 | integer_list symbolic_integer	{ $$ = cb_list_add ($1, $2); }
+;
+
+
+/* SYMBOLIC constant clause */
+
+symbolic_constant_clause:
+  %prec SHIFT_PREFER
+  SYMBOLIC CONSTANT symbolic_constant_list
+  {
+	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
+			       COBC_HD_CONFIGURATION_SECTION,
+			       COBC_HD_SPECIAL_NAMES, 0);
+	if (current_program->nested_level) {
+		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
+	}
+	(void)cb_verify (cb_symbolic_constant, "SYMBOLIC CONSTANT");
+  }
+;
+
+symbolic_constant_list:
+  symbolic_constant
+| symbolic_constant_list symbolic_constant
+;
+
+symbolic_constant:
+  user_entry_name _is literal
+  {
+	struct cb_field *f;
+	cb_tree v;
+
+	v = CB_LIST_INIT ($3);
+	f = CB_FIELD (cb_build_constant ($1, v));
+	f->flag_item_78 = 1;
+	f->flag_constant = 1;
+	f->flag_is_global = 1;
+	f->level = 1;
+	f->values = v;
+	cb_needs_01 = 1;
+	/* Ignore return value */
+	(void)cb_validate_78_item (f, 0);
+  }
 ;
 
 /* CLASS clause */
@@ -5689,16 +5731,16 @@ user_entry_name:
   }
 ;
 
-const_global:
+_const_global:
   /* Nothing */
   {
-	$$= NULL;
+	$$ = NULL;
   }
 | _is GLOBAL
   {
 	if (current_program->prog_type == COB_MODULE_TYPE_FUNCTION) {
 		cb_error (_("%s is invalid in a user FUNCTION"), "GLOBAL");
-		$$= NULL;
+		$$ = NULL;
 	} else {
 		$$ = cb_null;
 	}
@@ -5854,7 +5896,7 @@ condition_name_entry:
 ;
 
 constant_entry:
-  level_number user_entry_name CONSTANT const_global constant_source
+  level_number user_entry_name CONSTANT _const_global constant_source
   {
 	cb_tree x;
 	int	level;

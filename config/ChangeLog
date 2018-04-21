@@ -1,7 +1,12 @@
 
+2018-04-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* general: added symbolic-constant, set to OK for default only
+	  as we don't have a dialect file for Fujitsu currently
+
 2018-03-31  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added zero-length-literals option.
+	* general: added zero-length-literals option
 
 2018-03-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

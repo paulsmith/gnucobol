@@ -1,4 +1,11 @@
 
+2018-04-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, config.def: FR #306 added Fujitsu extension
+	  SYMBOLIC CONSTANT in SPECIAL-NAMES, effectively defining
+	  GLOBAL constants from literals,
+	  adjusted by compiler configuration symbolic-constant
+
 2018-04-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l: FR #305 for now - skip Fujitsu @OPTIONS
@@ -10,9 +17,9 @@
 	* cobc.c, flag.def: replaced -tsymbols by -f[no-]tsymbols,
 	  added option to suppress specific listing parts with new options
 	  -fno-theader, -fno-tmessages, -fno-tsource (see NEWS)
-	* parser.y, reserved.c, typeck.c, field.c: FR 303 - added USAGE BIT
-	  and PIC 1 as pending (at least parsing of sources containing these
-	  should work)
+	* parser.y, reserved.c, typeck.c, field.c, tree.c: FR 303
+	  added USAGE BIT and PIC 1 as pending (at least parsing
+	  of sources containing these should work now)
 
 2018-04-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -4665,7 +4665,7 @@ AT_CLEANUP
 
 
 AT_SETUP([01 CONSTANT])
-AT_KEYWORDS([CONSTANT reserved])
+AT_KEYWORDS([mirc reserved])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4807,6 +4807,55 @@ prog.cob:14: error: VALUE of 'POS-NEXT': NEXT target is invalid
 prog.cob:14: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
 prog.cob:24: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
 prog.cob:24: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([SYMBOLIC CONSTANT])
+AT_KEYWORDS([misc SPECIAL-NAMES])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+       SYMBOLIC CONSTANT
+         con-1  IS 1
+         25156c   "25156c".
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  NUM2      PIC 9.
+       01  SHORT-X   PIC X(5).
+      *
+       PROCEDURE DIVISION.
+       MAIN.
+           MOVE CON-1  TO NUM2.
+           MOVE 25156C TO SHORT-X
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [],
+[prog.cob: in paragraph 'MAIN':
+prog.cob:18: warning: value size exceeds data size
+prog.cob:18: warning: value size is 6
+prog.cob:13: warning: 'SHORT-X' defined here as PIC X(5)
+])
+
+AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
+[prog.cob:9: error: invalid SYMBOLIC clause
+prog.cob:9: error: integer value expected
+prog.cob: in paragraph 'MAIN':
+prog.cob:17: error: 'con-1' is not defined
+])
+
+AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [1], [],
+[prog.cob:9: error: SYMBOLIC CONSTANT does not conform to COBOL 2014
+prog.cob: in paragraph 'MAIN':
+prog.cob:18: warning: value size exceeds data size
+prog.cob:18: warning: value size is 6
+prog.cob:13: warning: 'SHORT-X' defined here as PIC X(5)
 ])
 
 AT_CLEANUP
