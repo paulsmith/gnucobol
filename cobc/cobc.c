@@ -6169,13 +6169,14 @@ reflow_replaced_fixed_format_text (const char *cfile_name, char *pline[CB_READ_A
 {
 	int	first_nonspace;
 	char	*new_line_ptr;
-	char	new_token[CB_LINE_LENGTH + 2];
+	char	*new_token;
 	char	token_terminator[2];
 	int	out_col;
 	int	out_line;
 	int	force_next_line;
 	int	new_token_len;
 
+	new_token = cobc_malloc (32768);
 	new_line_ptr = get_next_token (newline, new_token, token_terminator);
 
 	/*
@@ -6240,6 +6241,7 @@ reflow_replaced_fixed_format_text (const char *cfile_name, char *pline[CB_READ_A
 		fprintf (stdout, "   NEW pline[%2d] = %s\n", out_line, pline[out_line]);
 #endif
 	}
+	cobc_free (new_token);
 }
 
 static void
@@ -6248,11 +6250,12 @@ reflow_replaced_free_format_text (char *pline[CB_READ_AHEAD],
 				  const int first_col)
 {
 	char	*new_line_ptr;
-	char	new_token[CB_LINE_LENGTH + 2];
+	char	*new_token;
 	char	token_terminator[2];
 	int	i;
 	int	j;
 
+	new_token = cobc_malloc (32768);
 	new_line_ptr = get_next_token (newline, new_token, token_terminator);
 
 	for (i = 0; i < pline_cnt; i++) {
@@ -6279,6 +6282,7 @@ reflow_replaced_free_format_text (char *pline[CB_READ_AHEAD],
 			strcat (pline[i], " ");
 		}
 	}
+	cobc_free (new_token);
 }
 
 static int
@@ -6309,6 +6313,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	char	*rfp = rep->from;
 	char	*from_ptr;
 	char	*to_ptr;
+	char	*newline;
 	const int	fixed = (cfile->source_format == CB_FORMAT_FIXED);
 	int	first_col = fixed ? CB_MARGIN_A : 0;
 	int	last;
@@ -6321,13 +6326,13 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	tokmatch = 0;
 	int	subword = 0;
 	int	ttix, ttlen, from_token_len;
+	int	newlinelen;
 	char	lterm[2];
 	char	fterm[2];
 	char	ftoken[CB_LINE_LENGTH + 2];
 	char	tterm[2];
 	char	ttoken[CB_LINE_LENGTH + 2];
 	char	cmp_line[CB_LINE_LENGTH + 2];
-	char	newline[CB_LINE_LENGTH + 2];
 	char	from_line[CB_LINE_LENGTH + 2];
 
 	if (is_comment_line (pline[0], fixed)) {
@@ -6351,9 +6356,14 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	}
 	fprintf (stdout, "   rep: first = %d, last = %d, lead_trail = %d\n",
 		 rep->firstline, rep->lastline, rep->lead_trail);
-	fprintf (stdout, "   from: '%s'\n", rfp);
-	fprintf (stdout, "   to:   '%s'\n", rep->to);
+	fprintf (stdout, "   fromlen: %d\n", strlen(rfp));
+	fprintf (stdout, "   from: '%80.80s'\n", rfp);
+	fprintf (stdout, "   tolen: %d\n", strlen(rep->to));
+	fprintf (stdout, "   to:   '%80.80s'\n", rep->to);
 #endif
+
+	newlinelen = CB_LINE_LENGTH+2;
+	newline = cobc_malloc (newlinelen);
 
 	last = compare_prepare (cmp_line, pline, 0, pline_cnt, first_col, fixed);
 
@@ -6393,6 +6403,10 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			} else {
 				/* Discard partial match. */
 				if (seccount == 0) {
+					if ((strlen (newline) + strlen (ttoken) + strlen (tterm)) >= newlinelen) {
+						newlinelen += strlen (ttoken) + CB_LINE_LENGTH;
+						newline = cobc_realloc (newline, newlinelen);
+					}
 					strcat (newline, ttoken);
 					strcat (newline, tterm);
 				}
@@ -6411,9 +6425,17 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			  replacement.
 			*/
 			match = 1;
+			if ((strlen (newline) + strlen (rep->to) + strlen (lterm)) >= newlinelen) {
+				newlinelen += strlen (rep->to) + CB_LINE_LENGTH;
+				newline = cobc_realloc (newline, newlinelen);
+			}
 			strcat (newline, rep->to);
 			strcat (newline, lterm);
 			if (to_ptr) {
+				if ((strlen (newline) + strlen (ttoken) + strlen (to_ptr)) >= newlinelen) {
+					newlinelen += strlen (ttoken) + strlen (to_ptr) + CB_LINE_LENGTH;
+					newline = cobc_realloc (newline, newlinelen);
+				}
 				strcat (newline, ttoken);
 				strcat (newline, tterm);
 				strcat (newline, to_ptr);
@@ -6428,6 +6450,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 			fprintf (stdout, "   submatch = TRUE\n");
 #endif
 			if (eof) {
+				cobc_free (newline);
 				return pline_cnt;
 			}
 
@@ -6512,6 +6535,10 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				tokmatch = !strcasecmp (ttoken, ftoken);
 			}
 			if (tokmatch) {
+				if ((strlen (newline) + strlen (ttoken) + strlen (rep->to)) >= newlinelen) {
+					newlinelen += strlen (ttoken) + strlen (rep->to) + CB_LINE_LENGTH;
+					newline = cobc_realloc (newline, newlinelen);
+				}
 				if (subword) {
 					if (rep->lead_trail == CB_REPLACE_LEADING) {
 						strcat (newline, rep->to);
@@ -6527,6 +6554,10 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 				}
 				match = 1;
 			} else {
+				if ((strlen (newline) + strlen (ttoken) + strlen (tterm)) >= newlinelen) {
+					newlinelen += strlen (ttoken) + CB_LINE_LENGTH;
+					newline = cobc_realloc (newline, newlinelen);
+				}
 				strcat (newline, ttoken);
 			}
 			strcat (newline, tterm);
@@ -6542,6 +6573,7 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 						  last, fixed);
 	}
 
+	cobc_free (newline);
 	return pline_cnt;
 }
 
@@ -6660,8 +6692,8 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					if (i == 0)
 						fprintf (stdout, "   replace_list: \n");
 					fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
-					fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
-					fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+					fprintf (stdout, "      from[%d]:%d: '%80.80s'\n", i, strlen(rep->from), rep->from);
+					fprintf (stdout, "      to  [%d]:%d: '%80.80s'\n", i, strlen(rep->to), rep->to);
 				}
 			}
 #endif
@@ -6766,8 +6798,8 @@ print_program_code (struct list_files *cfile, int in_copy)
 			fprintf (stdout, "   replace_list: \n");
 		}
 		fprintf (stdout, "      line[%d]: %d\n", i, rep->firstline);
-		fprintf (stdout, "      from[%d]: '%s'\n", i, rep->from);
-		fprintf (stdout, "      to  [%d]: '%s'\n", i, rep->to);
+		fprintf (stdout, "      from[%d]:%d: '%80.80s'\n", i, strlen(rep->from), rep->from);
+		fprintf (stdout, "      to  [%d]:%d: '%80.80s'\n", i, strlen(rep->to), rep->to);
 	}
 	for (i = 0, err = cfile->err_head; err; i++, err = err->next) {
 		if (i == 0) {

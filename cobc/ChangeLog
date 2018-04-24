@@ -1,4 +1,11 @@
 
+2018-04-24  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c(reflow_replace_*_format_text): BUG #515 malloc'd token to
+	  large size.
+	* cobc.c (print_replace_text): BUG #515 malloc and realloc newline
+	  based on length of tokens.
+
 2018-04-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, config.def: FR #306 added Fujitsu extension

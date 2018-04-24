@@ -1,4 +1,8 @@
 
+2018-04-24  Dave Pitts <dpitts@cozx.com>
+
+	* testsuite.src/listings.at: BUG #515 Fixed test cases.
+
 2018-04-16  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* testsuite.src/run_manual_screen.at
