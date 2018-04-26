@@ -6176,7 +6176,7 @@ reflow_replaced_fixed_format_text (const char *cfile_name, char *pline[CB_READ_A
 	int	force_next_line;
 	int	new_token_len;
 
-	new_token = cobc_malloc (32768);
+	new_token = cobc_malloc (strlen(newline) + 2);
 	new_line_ptr = get_next_token (newline, new_token, token_terminator);
 
 	/*
@@ -6255,7 +6255,7 @@ reflow_replaced_free_format_text (char *pline[CB_READ_AHEAD],
 	int	i;
 	int	j;
 
-	new_token = cobc_malloc (32768);
+	new_token = cobc_malloc (strlen(newline) + 2);
 	new_line_ptr = get_next_token (newline, new_token, token_terminator);
 
 	for (i = 0; i < pline_cnt; i++) {

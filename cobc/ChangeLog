@@ -1,4 +1,9 @@
 
+2018-04-26  Dave Pitts <dpitts@cozx.com>
+
+	* cobc.c(reflow_replace_*_format_text): Changed to malloc token based on
+	  newline length instead of hardcoded.
+
 2018-04-24  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c(reflow_replace_*_format_text): BUG #515 malloc'd token to
