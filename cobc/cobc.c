@@ -2312,12 +2312,12 @@ cobc_print_usage (char * prog)
 	puts (_("  -m                    build a dynamically loadable module (default)"));
 	puts (_("  -j [<args>], -job[=<args>]\trun program after build, passing <args>"));
 	puts (_("  -std=<dialect>        warnings/features for a specific dialect\n"
-			"                        <dialect> can be one of:\n"
-			"                        default, cobol2014, cobol2002, cobol85, xopen,\n"
-			"                        ibm-strict, ibm, mvs-strict, mvs,\n"
-			"                        mf-strict, mf, bs2000-strict, bs2000,\n"
-			"                        acu-strict, acu, rm-strict, rm;\n"
-			"                        see configuration files in directory config"));
+	        "                        <dialect> can be one of:\n"
+	        "                        default, cobol2014, cobol2002, cobol85, xopen,\n"
+	        "                        ibm-strict, ibm, mvs-strict, mvs,\n"
+	        "                        mf-strict, mf, bs2000-strict, bs2000,\n"
+	        "                        acu-strict, acu, rm-strict, rm;\n"
+	        "                        see configuration files in directory config"));
 	puts (_("  -F, -free             use free source format"));
 	puts (_("  -fixed                use fixed source format (default)"));
 	puts (_("  -O, -O2, -O3, -Os     enable optimization"));
@@ -2326,7 +2326,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -d, -debug            enable all run-time error checking"));
 	puts (_("  -o <file>             place the output into <file>"));
 	puts (_("  -b                    combine all input files into a single\n"
-			"                        dynamically loadable module"));
+	        "                        dynamically loadable module"));
 	puts (_("  -E                    preprocess only; do not compile or link"));
 	puts (_("  -C                    translation only; convert COBOL to C"));
 	puts (_("  -S                    compile only; output assembly file"));
@@ -2334,13 +2334,13 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-#if 0 /* to be hidden later, use -f[no-]tsymbols instead */
+#if 0 /* to be hidden later, use -f[no-]list-symbols instead */
 	puts (_("  --tsymbols            specify symbols in listing, use -flist-symbols instead"));
 #endif
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 #ifndef COB_INTERNAL_XREF
 	puts (_("  -Xref                 generate cross reference through 'cobxref'\n"
-			"                        (V. Coen's 'cobxref' must be in path)"));
+	        "                        (V. Coen's 'cobxref' must be in path)"));
 #else
 	puts (_("  -Xref                 specify cross reference in listing"));
 #endif
@@ -2357,7 +2357,7 @@ cobc_print_usage (char * prog)
 	puts (_("  -list-mnemonics       display mnemonic names"));
 	puts (_("  -list-system          display system routines"));
 	puts (_("  -save-temps[=<dir>]   save intermediate files\n"
-			"                        - default: current directory"));
+	        "                        * default: current directory"));
 	puts (_("  -ext <extension>      add file extension for resolving COPY"));
 	putchar ('\n');
 
@@ -2370,11 +2370,11 @@ cobc_print_usage (char * prog)
 #define	CB_ONWARNDEF(var,name,doc)		\
 	puts (doc);							\
 	/* TRANSLATORS: This msgid is appended to msgid for -Wno-pending and others */ \
-	puts (_("                        - ALWAYS active"));
+	puts (_("                        * ALWAYS active"));
 #define	CB_NOWARNDEF(var,name,doc)		\
 	puts (doc);							\
 	/* TRANSLATORS: This msgid is appended to msgid for -Wpossible-truncate and others */ \
-	puts (_("                        - NOT set with -Wall"));
+	puts (_("                        * NOT set with -Wall"));
 #include "warning.def"
 #undef	CB_WARNDEF
 #undef	CB_ONWARNDEF
@@ -2453,7 +2453,8 @@ cobc_print_usage (char * prog)
 
 	putchar ('\n');
 	printf (_("Report bugs to: %s\n"
-			  "or (preferably) use the issue tracker via the home page."), "bug-gnucobol@gnu.org");
+	          "or (preferably) use the issue tracker via the home page."),
+			"bug-gnucobol@gnu.org");
 	putchar ('\n');
 	puts (_("GnuCOBOL home page: <http://www.gnu.org/software/gnucobol/>"));
 	puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>"));
