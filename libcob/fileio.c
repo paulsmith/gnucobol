@@ -85,7 +85,8 @@
 #define	_O_TEMPORARY	0
 #endif
 
-#else
+#else	/* _WIN32 */
+
 #if	defined(HAVE_FDATASYNC)
 #define	fdcobsync	fdatasync
 #else
@@ -96,7 +97,7 @@
 #define	O_BINARY	0
 #endif
 
-#endif
+#endif	/* _WIN32 */
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP

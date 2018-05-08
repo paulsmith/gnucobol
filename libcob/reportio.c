@@ -18,78 +18,15 @@
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
 
-#define _LFS64_LARGEFILE		1
-#define _LFS64_STDIO			1
-#define _FILE_OFFSET_BITS		64
-#define _LARGEFILE64_SOURCE		1
-#ifdef	_AIX
-#define _LARGE_FILES			1
-#endif	/* _AIX */
-#if defined(__hpux__) && !defined(__LP64__)
-#define _APP32_64BIT_OFF_T		1
-#endif
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef	HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#ifdef	HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
-#ifdef	_WIN32
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <direct.h>
-#include <io.h>
-#if defined (__WATCOMC__) || defined (__ORANGEC__)
-#define	fdcobsync	fsync
-#else
-#define	fdcobsync	_commit
-#endif
-#if !defined(__BORLANDC__) && !defined(__WATCOMC__) && !defined(__ORANGEC__)
-#define	getcwd		_getcwd
-#define	chdir		_chdir
-#define	mkdir		_mkdir
-#define	rmdir		_rmdir
-#define	open		_open
-#define	close		_close
-#define	unlink		_unlink
-#define	fdopen		_fdopen
-#ifndef lseek
-#define lseek		_lseeki64
-#endif
-#endif
-#define off_t		cob_s64_t
-
-#elif	defined(HAVE_FDATASYNC)
-#define	fdcobsync	fdatasync
-#else
-#define	fdcobsync	fsync
-
-#endif
-
-#ifndef	_O_TEMPORARY
-#define	_O_TEMPORARY	0
-#endif
-
-#ifndef	O_BINARY
-#define	O_BINARY	0
-#endif
 
 /* Force symbol exports */
 #define	COB_LIB_EXPIMP

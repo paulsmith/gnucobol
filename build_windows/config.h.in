@@ -368,7 +368,11 @@
 #define HAVE_STRERROR 1
 
 /* Define to 1 if you have the <strings.h> header file. */
+#if defined(__ORANGEC__)
+#define HAVE_STRINGS_H 1
+#else
 /* #undef HAVE_STRINGS_H */
+#endif
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
@@ -386,7 +390,11 @@
 #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
+#if defined(__ORANGEC__)
+#define HAVE_SYS_TIME_H 1
+#else
 /* #undef HAVE_SYS_TIME_H */
+#endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
@@ -398,7 +406,11 @@
 #define HAVE_TIMEZONE 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
+#if defined(__ORANGEC__)
+#define HAVE_UNISTD_H 1
+#else
 /* #undef HAVE_UNISTD_H */
+#endif
 
 /* ncurses has use_legacy_coding function */
 /* #undef HAVE_USE_LEGACY_CODING */
