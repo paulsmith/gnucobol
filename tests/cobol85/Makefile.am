@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/tests/cobol85
 #
-# Copyright (C) 2003-2012, 2015-2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2015-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -117,7 +117,7 @@ endif
 newcob.val.Z:
 	@if ! test -f "newcob.val"; then \
 		echo "Trying to download newcob.val.Z...";  \
-		wget "http://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";  \
+		wget "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";  \
 	fi
 
 newcob.val: newcob.val.Z
