@@ -371,6 +371,12 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define daylight	_daylight
 #endif /* __BORLANDC__ */
 
+#ifdef __ORANGEC__
+#define timezone		_timezone
+#define tzname			_tzname
+#define daylight		_daylight
+#endif /* _ORANGEC__ */
+
 #if	__SUNPRO_C
 /* Disable certain warnings */
 #pragma error_messages (off, E_STATEMENT_NOT_REACHED)

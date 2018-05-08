@@ -56,12 +56,12 @@
 #include <windows.h>
 #include <direct.h>
 #include <io.h>
-#ifndef __WATCOMC__
-#define	fdcobsync	_commit
-#else
+#if defined (__WATCOMC__) || defined (__ORANGEC__)
 #define	fdcobsync	fsync
+#else
+#define	fdcobsync	_commit
 #endif
-#if !defined(__BORLANDC__) && !defined(__WATCOMC__)
+#if !defined(__BORLANDC__) && !defined(__WATCOMC__) && !defined(__ORANGEC__)
 #define	getcwd		_getcwd
 #define	chdir		_chdir
 #define	mkdir		_mkdir

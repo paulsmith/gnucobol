@@ -114,6 +114,8 @@
 #define GC_C_VERSION_PRF	"(MinGW) "
 #elif	defined (__DJGPP__)
 #define GC_C_VERSION_PRF	"(DJGPP) "
+#elif	defined (__ORANGEC__)
+#define GC_C_VERSION_PRF	"(OrangeC) "
 #else
 #define GC_C_VERSION_PRF	""
 #endif

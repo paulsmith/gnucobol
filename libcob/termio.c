@@ -301,6 +301,7 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 			} else {
 				close_fp = 1;
 			}
+#ifdef HAVE_POPEN
 		/* display to configured print command (piped) */
 		} else if (cobsetptr->cob_display_print_pipe != NULL) {
 			if (!cobsetptr->cob_unix_lf) {
@@ -314,6 +315,7 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 			} else {
 				pclose_fp = 1;
 			}
+#endif
 		/* fallback: display to the defined SYSOUT */
 		} else {
 			fp = stdout;
@@ -355,9 +357,11 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 		putc ('\n', fp);
 		fflush (fp);
 	}
+#ifdef HAVE_POPEN
 	if (pclose_fp) {
 		pclose (fp);
 	}
+#endif
 	if (close_fp) {
 		fclose (fp);
 	}

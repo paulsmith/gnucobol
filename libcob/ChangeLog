@@ -1,4 +1,11 @@
 
+2018-05-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* termio.c (cob_display): cater for HAVE_POPEN
+	* common.h, fileio.c, reportio.c [__ORANGEC__]: minor adjustments for
+	  preprocessor defines
+	* common.c: added OrangeC version info
+
 2018-04-16  Luke Smith <cobcoder@users.sourceforge.net>
 
 	* screenio.c:

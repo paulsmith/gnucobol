@@ -279,8 +279,8 @@ unset cob_keyw
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset setlocale fcntl strerror strcasecmp \
 	strchr strrchr strdup strstr strtol gettimeofday localeconv \
-	readlink getexecname canonicalize_file_name realpath \
-	strcoll strxfrm setenv raise])
+	getexecname canonicalize_file_name popen raise readlink realpath \
+	setenv strcoll])
 
 # Check for timezone
 AC_MSG_CHECKING([for timezone variable access])

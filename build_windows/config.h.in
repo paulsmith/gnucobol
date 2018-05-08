@@ -1,5 +1,6 @@
 
-/* config.h, tested with x86/x64 VS2005-2017 */
+/* config.h, tested with x86/x64 VS2005-2017
+   and OrangeC 6.0.36 */
 
 #define NOISAM 0
 #define BDB    1
@@ -148,9 +149,6 @@
 /* #undef HAVE_COLOR_SET */
 #endif
 
-/* curses has define_key function */
-/* #undef HAVE_DEFINE_KEY */
-
 /* ncurses has _nc_freeall function */
 /* #undef HAVE_CURSES_FREEALL */
 
@@ -177,7 +175,8 @@
 
 /* Has designated initializers */
 /* #undef HAVE_DESIGNATED_INITS */
-#if defined(_MSC_VER) && _MSC_VER >= 1800 /* = COB_USE_VC2013_OR_GREATER [which is defined later] */
+#if defined(_MSC_VER) && _MSC_VER >= 1800 /* = COB_USE_VC2013_OR_GREATER [which is defined later] */ \
+ || defined(__ORANGEC__)
 #define HAVE_DESIGNATED_INITS 1
 #endif
 
@@ -232,6 +231,13 @@
 #define HAVE_ISAM_H 1
 #else
 /* #undef HAVE_ISAM_H */
+#endif
+
+/* Has isfinite function */
+#if defined(__ORANGEC__)
+#define HAVE_ISFINITE 1
+#else
+/* #undef HAVE_ISFINITE */
 #endif
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
@@ -301,6 +307,11 @@
 /* Define to 1 if you have the <pdcurses.h> header file. */
 /* #undef HAVE_PDCURSES_H */
 
+/* Define to 1 if you have the `popen' function. */
+#ifdef _MSC_VER
+#define HAVE_POPEN 1
+#endif
+
 /* Define to 1 if you have the `raise' function. */
 #define HAVE_RAISE 1
 
@@ -311,12 +322,14 @@
 /* #undef HAVE_REALPATH */
 
 /* Define to 1 if you have the `setenv' function. */
-/* _MSC does *NOT* has `setenv' (!)
+/* MSC does *NOT* has `setenv' (!)
    But as the handling of the fallback `putenv' is different in POSIX and _MSC
    (POSIX stores no duplicate of `putenv', where _MSC does), we pretend to
    have support for `setenv' and define it in common.c using _putenv_s,
    omitting the override parameter */
+#ifdef _MSC_VER
 #define HAVE_SETENV 1
+#endif
 
 /* Define to 1 if you have the `setlocale' function. */
 #define HAVE_SETLOCALE 1
@@ -368,9 +381,6 @@
 
 /* Define to 1 if you have the `strtol' function. */
 #define HAVE_STRTOL 1
-
-/* Define to 1 if you have the `strxfrm' function. */
-#define HAVE_STRXFRM 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
