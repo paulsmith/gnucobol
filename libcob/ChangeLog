@@ -3,6 +3,7 @@
 
 	* fileio.c (cob_file_open): fix for bug #520
 	  check f->fd before using it to prevent SIGSEGV on OPEN OUTPUT
+	* common.c (cob_sig_handler): minor format adjustment
 
 2018-05-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

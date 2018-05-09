@@ -702,10 +702,11 @@ cob_sig_handler (int sig)
 	cob_exit_screen ();
 	putc ('\n', stderr);
 	if (cob_source_file) {
-		fprintf (stderr, "%s: ", cob_source_file);
+		fprintf (stderr, "%s:", cob_source_file);
 		if (cob_source_line) {
-			fprintf (stderr, "%u: ", cob_source_line);
+			fprintf (stderr, "%u:", cob_source_line);
 		}
+		fputc (' ', stderr);
 	}
 
 	/* LCOV_EXCL_START */
@@ -6596,9 +6597,9 @@ cob_runtime_error (const char *fmt, ...)
 	/* Prefix */
 	fputs ("libcob: ", stderr);
 	if (cob_source_file) {
-		fprintf (stderr, "%s", cob_source_file);
+		fprintf (stderr, "%s:", cob_source_file);
 		if (cob_source_line) {
-			fprintf (stderr, ":%u:", cob_source_line);
+			fprintf (stderr, "%u:", cob_source_line);
 		}
 		fputc (' ', stderr);
 	}
@@ -6777,6 +6778,9 @@ cob_fatal_error (const int fatal_error)
 		if (cobglobptr->cob_error_file->assign
 		 && cobglobptr->cob_error_file->assign->data) {
 			err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
+			/* FIXME: for OPEN: provide both assign name and 
+			   full name (including COB_FILE_PATH / filename mapping)
+			 */
 			cob_field_to_string (cobglobptr->cob_error_file->assign,
 				err_cause, (size_t)COB_FILE_MAX);
 			cob_runtime_error (_("%s (status = %02d) file: '%s'"),
