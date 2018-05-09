@@ -21,7 +21,7 @@
 ### ISO+IEC+1989-2014 REPORT WRITER module
 
 AT_SETUP([Report Line Order])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report file mapping])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -118,7 +118,7 @@ AT_CLEANUP
 
 
 AT_SETUP([REPORT COL PLUS])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -187,7 +187,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Report Overlapping Fields])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -256,7 +256,7 @@ AT_CLEANUP
 
 
 AT_SETUP([EMPTY REPORT])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -325,7 +325,7 @@ AT_CLEANUP
 
 
 AT_SETUP([PAGE LIMIT REPORT])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -387,7 +387,7 @@ AT_CLEANUP
 
 
 AT_SETUP([PAGE LIMIT REPORT 2])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -459,7 +459,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Customer Report])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
 0152 J. LANGDON       64025 00945
@@ -774,7 +774,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Charge Report])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
 0152 J. LANGDON       64025 00945
@@ -1127,7 +1127,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Charge Report 2])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
 0152 J. LANGDON       64025 00945
@@ -1497,7 +1497,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Charge Report 3])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[0152 J. LANGDON       87653 02475
 0152 J. LANGDON       64025 00945
@@ -1797,7 +1797,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Charge Report 4])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[05 A 007328
 05 A 090620
@@ -2213,7 +2213,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Payroll Report])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[01 6622 M GAVIN SHAFER         19740201 026000 01521 03362 00075 021042
 01 6622 M GAVIN SHAFER         19740215 026000 01521 03362 00175 020942
@@ -2898,7 +2898,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample REPORT with RIGHT/CENTER])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],
 [00099Dorken, Keith       CS 000008
@@ -3066,7 +3066,7 @@ AT_CLEANUP
 
 
 AT_SETUP([STUDENT REPORT with INITIAL])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],
 [00123Dorken, Keith       CS 08
@@ -3218,7 +3218,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ORDER REPORT; Test substring])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],
 [10001090001012010590416      $
@@ -3566,7 +3566,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Control Break])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[Norman, Ronald J    25CS Malcolm, Mike        Waterloo
 Dorken, Keith A     35CS Malcolm, Mike        Waterloo
@@ -3795,7 +3795,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Sample Inventory Report])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[01Data Processing   02000500012388
 02Cow Milking       02000600054398
@@ -3985,7 +3985,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Duplicate Detail Line])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4113,7 +4113,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Report with OCCURS])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4218,7 +4218,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Report CODE and LIMIT COLUMNS])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([progv.cob], [
        IDENTIFICATION DIVISION.
@@ -4439,7 +4439,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Duplicate INITIATE])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4505,7 +4505,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Missing INITIATE])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4567,7 +4567,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Next Group Next Page])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],[MW1000051IN15021220150212OR150212043ITEM_NUMBER_22      0000002800002999
 MW1000051IN15022220150222OR150226020ITEM_NUMBER_06      0000004300000999
@@ -8890,7 +8890,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Report PRESENT AFTER])
-AT_KEYWORDS([report])
+AT_KEYWORDS([report runfile])
 
 AT_DATA([inp_data],
 [SAINATH KOTGIRE          30/03/201611029473  20 00100000                          00000100

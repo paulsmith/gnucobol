@@ -343,6 +343,51 @@ AT_CHECK([diff mini-report reference-report], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([OUTPUT on INDEXED file to missing directory])
+AT_KEYWORDS([runfile OPEN ASSIGN])
+
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT  FILE0 ASSIGN  TO "./nosubhere/MYFILE0"
+                   ORGANIZATION  IS INDEXED
+                   RECORD KEY    IS F0REC
+                   FILE STATUS   IS WSFS.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  FILE0.
+       01  F0REC             PIC X(80).
+       WORKING-STORAGE SECTION.
+       01  WSFS              PIC X(2).
+       PROCEDURE DIVISION.
+      *
+           OPEN OUTPUT FILE0
+           DISPLAY "STATUS OPENO " WSFS
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[STATUS OPENO 30
+], [])
+
+AT_CHECK([echo Test > ./nosubhere], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[STATUS OPENO 30
+], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([First READ on empty SEQUENTIAL INDEXED file])
 AT_KEYWORDS([runfile])
 
@@ -2369,6 +2414,7 @@ REWROTE BET00000 Sts:00 Trms:0014
 
 AT_CLEANUP
 
+
 AT_SETUP([START RELATIVE (1)])
 AT_KEYWORDS([fundamental runfile DELETE FILE])
 
@@ -2531,8 +2577,7 @@ AT_DATA([prog.cob], [
               DISPLAY "1st READ on missing optional file = " WSFS " Bad"
            END-IF.
 
-      *    Second read, should raise a FS 46 (READ AFTER AT END)
-      *    but a FS 23 is raised instead.
+      *    Second read, should raise a FS 46 (READ AFTER AT END).
            READ INFILE INTO WSINREC
            END-READ
 

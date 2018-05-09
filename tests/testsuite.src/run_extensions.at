@@ -1600,7 +1600,7 @@ AT_CLEANUP
 ## ASSIGN
 
 AT_SETUP([ASSIGN clause])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1629,7 +1629,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ASSIGN clause IBM])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1657,8 +1657,35 @@ AT_CHECK([test -f FILENAME], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([ASSIGN expansion])
+AT_KEYWORDS([extensions runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN "$DIR/FILENAME".
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN OUTPUT TEST-FILE.
+           CLOSE TEST-FILE.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE -ffilename-mapping prog.cob], [0], [], [])
+AT_CHECK([DIR="." $COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([ASSIGN mapping])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions runfile optional])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1710,38 +1737,127 @@ AT_CHECK([test -f "z"], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
 AT_CHECK([test -f "FILENAME2"], [0], [], [])
 
-AT_CLEANUP
-
-
-AT_SETUP([ASSIGN expansion])
-AT_KEYWORDS([extensions])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       ENVIRONMENT      DIVISION.
-       INPUT-OUTPUT     SECTION.
+AT_DATA([prog3.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-       SELECT TEST-FILE ASSIGN "$DIR/FILENAME".
-       DATA             DIVISION.
-       FILE             SECTION.
-       FD TEST-FILE.
-       01 TEST-REC      PIC X(4).
-       PROCEDURE        DIVISION.
-           OPEN OUTPUT TEST-FILE.
-           CLOSE TEST-FILE.
+           SELECT OPTIONAL INFILE ASSIGN TO "MYFILE"
+                ORGANIZATION IS RELATIVE
+                ACCESS IS SEQUENTIAL
+                FILE STATUS IS WSFS.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  INFILE.
+       01  INREC             PIC X(80).
+       WORKING-STORAGE SECTION.
+       01  WSFS              PIC X(2).
+       PROCEDURE DIVISION.
+      *
+      *    open missing file
+           OPEN INPUT INFILE
+           DISPLAY "STATUS OPENI " WSFS
+           CLOSE INFILE
+      *
+      *    create missing file
+           OPEN OUTPUT INFILE
+           DISPLAY "STATUS OPENO " WSFS
+           CLOSE INFILE
+      *
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE -ffilename-mapping prog.cob], [0], [], [])
-AT_CHECK([DIR="." $COBCRUN_DIRECT ./prog], [0], [], [])
-AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0], [], [])
+AT_CHECK([$COMPILE prog3.cob], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 05
+STATUS OPENO 00
+], [])
+AT_CHECK([test -f "MYFILE"], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 00
+STATUS OPENO 00
+], [])
+
+AT_CHECK([MYFILE="TSTFILE" $COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 05
+STATUS OPENO 00
+], [])
+AT_CHECK([test -f "TSTFILE"], [0], [], [])
+
+AT_CHECK([dd_MYFILE="TSTFILE2" $COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 05
+STATUS OPENO 00
+], [])
+AT_CHECK([test -f "TSTFILE2"], [0], [], [])
+
+AT_CHECK([DD_MYFILE="TSTFILE3" $COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 05
+STATUS OPENO 00
+], [])
+AT_CHECK([test -f "TSTFILE3"], [0], [], [])
+
+AT_CHECK([DD_MYFILE="./nosubhere/TSTFILE" $COBCRUN_DIRECT ./prog3], [0],
+[STATUS OPENI 05
+STATUS OPENO 30
+], [])
+
+AT_DATA([prog4.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog4.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT  FILE0 ASSIGN  TO "./nosubhere/MYFILE0"
+                   ORGANIZATION  IS LINE SEQUENTIAL
+                   FILE STATUS   IS WSFS.
+           SELECT  FILE1 ASSIGN  TO "MYFILE1"
+                   ORGANIZATION  IS LINE SEQUENTIAL
+                   FILE STATUS   IS WSFS.
+           SELECT  FILE2 ASSIGN  TO FILENAME
+                   ORGANIZATION  IS LINE SEQUENTIAL
+                   FILE STATUS   IS WSFS.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  FILE0.
+       01  F0REC             PIC X(80).
+       FD  FILE1.
+       01  F1REC             PIC X(80).
+       FD  FILE2.
+       01  F2REC             PIC X(80).
+       WORKING-STORAGE SECTION.
+       77  FILENAME          PIC X(80) VALUE "MYFILE2".
+       01  WSFS              PIC X(2).
+       PROCEDURE DIVISION.
+      *
+           OPEN OUTPUT FILE0
+           DISPLAY "STATUS OPENO 0 " WSFS
+           OPEN OUTPUT FILE1
+           DISPLAY "STATUS OPENO 1 " WSFS
+           OPEN OUTPUT FILE2
+           DISPLAY "STATUS OPENO 2 " WSFS
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog4.cob], [0], [], [])
+
+AT_CHECK([DD_MYFILE1="./nosubhere/NOFILE1" DD_MYFILE2="./nosubhere/NOFILE2" \
+$COBCRUN_DIRECT ./prog4], [0],
+[STATUS OPENO 0 30
+STATUS OPENO 1 30
+STATUS OPENO 2 30
+], [])
 
 AT_CLEANUP
 
 
 AT_SETUP([ASSIGN with COB_FILE_PATH])
-AT_KEYWORDS([extensions])
+AT_KEYWORDS([extensions runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1763,6 +1879,13 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -ffilename-mapping prog.cob], [0], [], [])
 AT_CHECK([COB_FILE_PATH=".." $COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
+AT_CHECK([COB_FILE_PATH="../" $COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CHECK([test -f "../FILENAMEX" && rm -f "../FILENAMEX"], [0], [], [])
+
+# FIXME: on OPEN we should also output the full filename (if any) leading to the error
+AT_CHECK([COB_FILE_PATH="./nosubhere" $COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob:13: permanent file error (status = 30) file: 'FILENAMEX'
+])
 
 AT_CLEANUP
 

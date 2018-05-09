@@ -1497,7 +1497,11 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	errno = 0;
 	fp = fopen (filename, fmode);
 	f->file = fp;
-	f->fd = fileno (fp);
+	if (fp) {
+		f->fd = fileno (fp);
+	} else {
+		f->fd = -1;
+	}
 	switch (errno) {
 	case 0:
 		f->open_mode = mode;
@@ -2336,9 +2340,9 @@ relative_delete (cob_file *f)
 	}
 	relsize = f->record_max + sizeof (f->record->size);
 	off = relnum * relsize;
-	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ||
-	    read (f->fd, &f->record->size, sizeof (f->record->size))
-		   != sizeof (f->record->size)) {
+	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1
+	 || read (f->fd, &f->record->size, sizeof (f->record->size))
+		 != sizeof (f->record->size)) {
 			return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 	lseek (f->fd, off, SEEK_SET);

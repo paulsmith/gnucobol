@@ -1,4 +1,9 @@
 
+2018-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c (cob_file_open): fix for bug #520
+	  check f->fd before using it to prevent SIGSEGV on OPEN OUTPUT
+
 2018-05-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* termio.c (cob_display): cater for HAVE_POPEN
