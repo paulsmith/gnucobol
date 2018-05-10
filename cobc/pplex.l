@@ -923,7 +923,9 @@ int
 ppopen (const char *name, struct cb_replace_list *replacing_list)
 {
 	struct copy_info	*current_copy_info;
+#if 0
 	char			*s;
+#endif
 	char			*dname;
 	cb_tree			x = NULL;
 
@@ -1023,11 +1025,13 @@ ppopen (const char *name, struct cb_replace_list *replacing_list)
 
 	dname = cobc_strdup (name);
 	current_copy_info->dname = dname;
+#if 0	/* Simon: better adjust the output where needed */
 	for (s = dname; *s; ++s) {
 		if (*s == '\\') {
 			*s = '/';
 		}
 	}
+#endif
 
 	/* Switch to new buffer */
 	switch_to_buffer (1, dname, yy_create_buffer (ppin, YY_BUF_SIZE));

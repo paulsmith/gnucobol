@@ -1614,8 +1614,23 @@ static void
 output_gnucobol_defines (const char *formatted_date, struct tm *local_time)
 {
 	int	i;
+	
+	if (!strrchr (cb_source_file, '\\')
+	 && !strrchr (cb_source_file, '"')) {
+		output ("#define  COB_SOURCE_FILE\t\t\"%s\"\n", cb_source_file);
+	} else {
+		char	cb_source_file_cleaned[FILENAME_MAX];
+		int		pos = 0;
 
-	output ("#define  COB_SOURCE_FILE\t\t\"%s\"\n", cb_source_file);
+		for (const char *c = cb_source_file; *c; ++c) {
+			if (*c == '\\' || *c == '"') {
+				cb_source_file_cleaned[pos++] = '\\';
+			}
+			cb_source_file_cleaned[pos++] = *c;
+		}
+		cb_source_file_cleaned[pos] = 0;
+		output ("#define  COB_SOURCE_FILE\t\t\"%s\"\n", cb_source_file_cleaned);
+	}
 	output ("#define  COB_PACKAGE_VERSION\t\t\"%s\"\n", PACKAGE_VERSION);
 	output ("#define  COB_PATCH_LEVEL\t\t%d\n", PATCH_LEVEL);
 	output ("#define  COB_MODULE_FORMATTED_DATE\t\"%s\"\n", formatted_date);
@@ -2540,8 +2555,24 @@ output_string_cache (void)
 
 	string_cache = string_list_reverse (string_cache);
 	for (stp = string_cache; stp; stp = stp->next) {
-		output ("static const char %s%d[]\t= \"%s\";\n",
-			CB_PREFIX_STRING, stp->id, stp->text);
+		if (!strrchr (stp->text, '\\')
+		 && !strrchr (stp->text, '"')) {
+			output ("static const char %s%d[]\t= \"%s\";\n",
+				CB_PREFIX_STRING, stp->id, stp->text);
+		} else {
+			char	text_cleaned[FILENAME_MAX];
+			int		pos = 0;
+
+			for (const char *c = stp->text; *c; ++c) {
+				if (*c == '\\' || *c == '"') {
+					text_cleaned[pos++] = '\\';
+				}
+				text_cleaned[pos++] = *c;
+			}
+			text_cleaned[pos] = 0;
+			output ("static const char %s%d[]\t= \"%s\";\n",
+				CB_PREFIX_STRING, stp->id, text_cleaned);
+		}
 	}
 
 	output_storage ("\n");
@@ -2563,7 +2594,22 @@ output_source_cache (void)
 	output ("static const char *%ssource_files[]\t= { \"\" ", CB_PREFIX_STRING);
 	if (source_cache) {
 		for (stp = source_cache; stp; stp = stp->next) {
-			output ("\n\t\t,\"%s\"",stp->text);
+			if (!strrchr (stp->text, '\\')
+			 && !strrchr (stp->text, '"')) {
+				output ("\n\t\t,\"%s\"", stp->text);
+			} else {
+				char	text_cleaned[FILENAME_MAX];
+				int		pos = 0;
+
+				for (const char *c = stp->text; *c; ++c) {
+					if (*c == '\\' || *c == '"') {
+						text_cleaned[pos++] = '\\';
+					}
+					text_cleaned[pos++] = *c;
+				}
+				text_cleaned[pos] = 0;
+				output ("\n\t\t,\"%s\"", text_cleaned);
+			}
 		}
 	}
 	output_storage ("};\n");

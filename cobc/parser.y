@@ -10101,7 +10101,7 @@ call_param_list:
 ;
 
 call_param:
-  call_type OMITTED
+  _call_type OMITTED
   {
 	if (call_mode != CB_CALL_BY_REFERENCE) {
 		cb_error_x (CB_TREE (current_statement),
@@ -10109,7 +10109,7 @@ call_param:
 	}
 	$$ = CB_BUILD_PAIR (cb_int (call_mode), cb_null);
   }
-| call_type _size_optional call_x
+| _call_type _size_optional call_x
   {
 	int	save_mode;	/* internal single parameter only mode */
 
@@ -10138,7 +10138,7 @@ call_param:
   }
 ;
 
-call_type:
+_call_type:
   /* empty */
 | _by REFERENCE
   {
