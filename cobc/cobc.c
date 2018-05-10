@@ -2334,8 +2334,8 @@ cobc_print_usage (char * prog)
 	puts (_("  -T <file>             generate and place a wide program listing into <file>"));
 	puts (_("  -t <file>             generate and place a program listing into <file>"));
 	puts (_("  --tlines=<lines>      specify lines per page in listing, default = 55"));
-#if 0 /* to be hidden later, use -f[no-]list-symbols instead */
-	puts (_("  --tsymbols            specify symbols in listing, use -flist-symbols instead"));
+#if 0 /* to be hidden later, use -f[no-]tsymbols instead */
+	puts (_("  --tsymbols            specify symbols in listing, use -ftsymbols instead"));
 #endif
 	puts (_("  -P[=<dir or file>]    generate preprocessed program listing (.lst)"));
 #ifndef COB_INTERNAL_XREF
