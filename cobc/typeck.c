@@ -7977,7 +7977,39 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 				return 0;
 			}
 #else
-			return 1;
+			/* for now: at least resolve one sub and handle when both reference a literal
+			   or a reference ...*/
+			if (!CB_CHAIN (sr->subs)
+			 && !CB_CHAIN (dr->subs)) {
+				if (CB_NUMERIC_LITERAL_P(CB_VALUE (sr->subs))
+				 && CB_NUMERIC_LITERAL_P(CB_VALUE (dr->subs))) {
+					struct cb_literal *sl, *dl;
+
+					sl = CB_LITERAL(CB_VALUE (sr->subs));
+					dl = CB_LITERAL(CB_VALUE (dr->subs));
+					if (atoll((const char*)sl->data) !=
+						atoll((const char*)dl->data)) {
+						return 0;
+					}
+				} else if (CB_REFERENCE_P(CB_VALUE (sr->subs))
+				 && CB_REFERENCE_P(CB_VALUE (dr->subs))) {
+					struct cb_reference *tsr, *tdr;
+
+					tsr = CB_REFERENCE(CB_VALUE (sr->subs));
+					tdr = CB_REFERENCE(CB_VALUE (dr->subs));
+					if (tsr->subs || tdr->subs) {
+						return 1;
+					} else {
+						if (tsr->value != tdr->value) {
+							return 1;
+						}
+					}
+				} else {
+					return 1;
+				}
+			} else {
+				return 1;
+			}
 #endif
 		}
 
@@ -8039,7 +8071,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 	dst_off = dst_f->offset;
 
 	/* Check for occurs */
-	if (sr->subs || dr->subs) {
+	if (src_f != dst_f && (sr->subs || dr->subs)) {
 		/* overlapping possible */
 #if 0	/* FIXME: more checks needed:
 		1: if all subs are integer literals: a full offset check of both fields
