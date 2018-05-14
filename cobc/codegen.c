@@ -1621,8 +1621,9 @@ output_gnucobol_defines (const char *formatted_date, struct tm *local_time)
 	} else {
 		char	cb_source_file_cleaned[FILENAME_MAX];
 		int		pos = 0;
+		const char *c;
 
-		for (const char *c = cb_source_file; *c; ++c) {
+		for (c = cb_source_file; *c; ++c) {
 			if (*c == '\\' || *c == '"') {
 				cb_source_file_cleaned[pos++] = '\\';
 			}
@@ -2562,8 +2563,9 @@ output_string_cache (void)
 		} else {
 			char	text_cleaned[FILENAME_MAX];
 			int		pos = 0;
+			const char *c;
 
-			for (const char *c = stp->text; *c; ++c) {
+			for (c = stp->text; *c; ++c) {
 				if (*c == '\\' || *c == '"') {
 					text_cleaned[pos++] = '\\';
 				}
@@ -2600,8 +2602,9 @@ output_source_cache (void)
 			} else {
 				char	text_cleaned[FILENAME_MAX];
 				int		pos = 0;
+				const char *c;
 
-				for (const char *c = stp->text; *c; ++c) {
+				for (c = stp->text; *c; ++c) {
 					if (*c == '\\' || *c == '"') {
 						text_cleaned[pos++] = '\\';
 					}
