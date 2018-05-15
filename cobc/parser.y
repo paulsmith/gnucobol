@@ -6121,6 +6121,19 @@ picture_clause:
 usage_clause:
   usage
 | USAGE _is usage
+| USAGE _is WORD
+  {
+	if (is_reserved_word (CB_NAME ($3))) {
+		cb_error_x ($3, _("'%s' is not a valid USAGE"), CB_NAME ($3));
+	} else if (is_default_reserved_word (CB_NAME ($3))) {
+		cb_error_x ($3, _("'%s' is not defined, but is a reserved word in another dialect"),
+				CB_NAME ($3));
+	} else {
+		cb_error_x ($3, _("unknown USAGE: %s"), CB_NAME ($3));
+	}
+	check_and_set_usage (CB_USAGE_ERROR);
+	YYERROR;
+  }
 | USAGE _is error
   {
 	check_and_set_usage (CB_USAGE_ERROR);

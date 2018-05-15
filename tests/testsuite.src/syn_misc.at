@@ -3369,16 +3369,9 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [0], [], [])
 
-# ideally we return the following, but there is currently no clean
-# way to get into Bison's error message handling
-#AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
-#[prog.cob:6: error: 'float' is not defined, but is a reserved word in another dialect
-#prog.cob:8: error: 'double' is not defined, but is a reserved word in another dialect
-#])
-
 AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
-[prog.cob:6: error: syntax error, unexpected Identifier
-prog.cob:8: error: syntax error, unexpected Identifier
+[prog.cob:6: error: 'float' is not defined, but is a reserved word in another dialect
+prog.cob:8: error: 'double' is not defined, but is a reserved word in another dialect
 ])
 
 AT_CLEANUP
@@ -3447,9 +3440,9 @@ prog.cob:37: error: HANDLE must be either a generic or a THREAD HANDLE
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
-[prog.cob:12: error: syntax error, unexpected Identifier
-prog.cob:13: error: syntax error, unexpected Identifier
-prog.cob:14: error: syntax error, unexpected Identifier
+[prog.cob:12: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:13: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:14: error: 'handle' is not defined, but is a reserved word in another dialect
 prog.cob: in paragraph 'MAIN':
 prog.cob:27: error: 'handle IN mywindow' is not defined
 prog.cob:26: error: invalid expression
@@ -3814,7 +3807,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [1], [],
-[prog.cob:7: error: syntax error, unexpected Identifier
+[prog.cob:7: error: 'BINARY-LONG' is not defined, but is a reserved word in another dialect
 ])
 AT_CHECK([$COMPILE_ONLY -std=ibm-strict -freserved=BINARY-LONG prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
