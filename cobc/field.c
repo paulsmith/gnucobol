@@ -2113,7 +2113,7 @@ unbounded_again:
 
 				/* Word alignment */
 				if (c->flag_synchronized &&
-				    cb_verify (cb_synchronized_clause, "SYNC")) {
+				    cb_verify_x (CB_TREE (c), cb_synchronized_clause, "SYNC")) {
 					align_size = 1;
 					switch (c->usage) {
 					case CB_USAGE_BINARY:

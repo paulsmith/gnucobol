@@ -4,6 +4,7 @@
 	* parser.y (usage_clause): better error message if USAGE is explicit
 	  coded and an undefined word follows; this is especially helpful
 	  for words that are only not reserved in the current dialect
+	* field.c (compute_size): fix error position for SNYCH dialect messages
 
 2018-05-14  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
