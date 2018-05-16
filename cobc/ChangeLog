@@ -1,4 +1,9 @@
 
+2018-05-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (compare_field_literal): compare literals also against
+	  group items
+
 2018-05-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (usage_clause): better error message if USAGE is explicit

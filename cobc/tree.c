@@ -4184,11 +4184,13 @@ display_literal (char *disp, struct cb_literal *l, int offset, int scale)
 static cb_tree
 compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal *l)
 {
-	int	i, j, scale;
+	int	i, j, scale, fscale;
 	int	alph_lit, zero_val;
 	int	lit_start, lit_length, refmod_length;
 	char	lit_disp[COB_MAX_DIGITS + 2];
 	struct cb_field *f;
+	enum cb_category	category;
+	cob_u32_t		have_sign;
 	struct cb_reference	*rl;
 
 	/* LCOV_EXCL_START */
@@ -4201,9 +4203,29 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 
 	f = CB_FIELD (cb_ref (x));
 	if (f->flag_any_length
-	 || f->pic == NULL) {
+	 || (f->pic == NULL && !f->children)) {
 		return cb_any;
 	}
+	if (f->pic) {
+		category = f->pic->category;
+		fscale = f->pic->scale;
+		have_sign = f->pic->have_sign;
+	} else {
+		/* no PICTURE but children, category depends on USAGE */
+		switch (f->usage) {
+		case CB_USAGE_NATIONAL:
+			category = CB_CATEGORY_NATIONAL;
+			break;
+		case CB_USAGE_BIT:
+			category = CB_CATEGORY_BOOLEAN;
+			break;
+		default:
+			category = CB_CATEGORY_ALPHABETIC;
+		}
+		fscale = 0;
+		have_sign = 0;
+	}
+
 	rl = CB_REFERENCE(x);
 	if (rl->length && CB_LITERAL_P (rl->length)) {
 		refmod_length = cb_get_int (rl->length);
@@ -4234,8 +4256,8 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 		}
 	}
 
-	if ((f->pic->category != CB_CATEGORY_NUMERIC
-	  && f->pic->category != CB_CATEGORY_NUMERIC_EDITED)
+	if ((category != CB_CATEGORY_NUMERIC
+	  && category != CB_CATEGORY_NUMERIC_EDITED)
 	 || refmod_length) {
 		 if (!refmod_length) {
 			 refmod_length = f->size;
@@ -4265,14 +4287,14 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 	}
 
 
-	if (f->pic->scale < 0) {		/* Leave for run-time */
+	if (fscale < 0) {		/* Leave for run-time */
 		return cb_any;
 	}
 
 	if (alph_lit) {
 		copy_file_line (e, CB_TREE(l), NULL);
 		if (cb_warn_constant_expr
-		 && f->pic->category == CB_CATEGORY_NUMERIC
+		 && category == CB_CATEGORY_NUMERIC
 		 && !was_prev_warn (e->source_line, 3)) {
 			cb_warning_x (cb_warn_constant_expr, e,
 						_("literal '%s' is alphanumeric but '%s' is numeric"),
@@ -4311,8 +4333,8 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 	}
 
 	if (scale > 0
-	 && f->pic->scale >= 0
-	 && f->pic->scale < scale) {
+	 && fscale >= 0
+	 && fscale < scale) {
 		copy_file_line (e, CB_TREE(l), NULL);
 		if (cb_warn_constant_expr
 		&& !was_prev_warn (e->source_line, 4)) {
@@ -4350,8 +4372,8 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 
 	/* check for digits in literal vs. field size */
 	if ((i - scale) > 0
-	 && (f->size - f->pic->scale) >= 0
-	 && (i - scale) > (f->size - f->pic->scale)) {
+	 && (f->size - fscale) >= 0
+	 && (i - scale) > (f->size - fscale)) {
 		/* If Literal has more digits in whole portion than field can hold
 		 * Then the literal value will never match the field contents
 		 */
@@ -4368,7 +4390,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 		case '~':
 			return cb_true;
 		}
-		if (f->pic->category == CB_CATEGORY_NUMERIC) {
+		if (category == CB_CATEGORY_NUMERIC) {
 			switch (op) {
 			case '>':
 			case ']':
@@ -4392,7 +4414,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 	 && (op == '<' || op == '[' || op == '>' || op == ']')) {
 		copy_file_line (e, CB_TREE(l), NULL);
 
-		if (f->pic->have_sign == 0) {
+		if (have_sign == 0) {
 			/* comparison with zero */
 			if (zero_val) {
 				switch (op) {

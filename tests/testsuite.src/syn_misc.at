@@ -105,15 +105,15 @@ AT_DATA([prog.cob], [
        01 XX                     PIC 9(2) VALUE 2.
        01 PIC-9-DECIMAL          PIC 9(3)V9 VALUE 5.
        01 COMPUTE-1              PIC 999V9999 VALUE 654.1873.
-       01 GROUP-ITEM-X6          PIC X(6) VALUE 'CAT'.
+       01 GROUP-ITEM-X6.
+          05 FILLER              PIC X(6) VALUE 'CAT'.
        78 CONST1                 VALUE 'CAT     '.
        01 CONST2                 CONSTANT AS 00000001234.
        01 IF-D16                 PIC PP99 VALUE .0012.
        PROCEDURE DIVISION.
        MAIN.
            IF GROUP-ITEM-X6 = '1234567'   CONTINUE.
-           IF PIC-9-NOT-DECIMAL = 1.1
-               CONTINUE.
+           IF PIC-9-NOT-DECIMAL = 1.1     CONTINUE.
            IF PIC-9-NOT-DECIMAL = 1.0
                CONTINUE.
            IF PIC-9-DECIMAL = 1.01
@@ -259,10 +259,10 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
-prog.cob:22: warning: literal '1234567' is longer than 'GROUP-ITEM-X6'
-prog.cob:22: warning: expression is always FALSE
-prog.cob:23: warning: literal '1.1' has more decimals than 'PIC-9-NOT-DECIMAL'
+prog.cob:23: warning: literal '1234567' is longer than 'GROUP-ITEM-X6'
 prog.cob:23: warning: expression is always FALSE
+prog.cob:24: warning: literal '1.1' has more decimals than 'PIC-9-NOT-DECIMAL'
+prog.cob:24: warning: expression is always FALSE
 prog.cob:27: warning: literal '1.01' has more decimals than 'PIC-9-DECIMAL'
 prog.cob:27: warning: expression is always FALSE
 prog.cob:33: warning: unsigned 'PIC-9-NOT-SIGNED' may not be LESS THAN ZERO
