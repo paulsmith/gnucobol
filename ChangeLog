@@ -1,7 +1,13 @@
 
+2018-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac [_WIN32]: define __GMP_LIBGMP_DLL when importing
+	  and calling gmp functions (done for version check) - to use
+	  a static version define __GMP_LIBGMP_DLL=0 via CPPFLAGS
+
 2018-05-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
-	* configure.ac [AC_CHECK_FUNCS} removed unused strxfrm, added popen
+	* configure.ac (AC_CHECK_FUNCS): removed unused strxfrm, added popen
 	* configure.ac: ensure that we don't replace too much when adjusting
 	  CFLAGS concerning -g
 

@@ -546,6 +546,11 @@ LIBS="$MYOLDLIBS -lgmp"
 # get GMP version from lib
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
+	#ifdef _WIN32
+	#ifndef __GMP_LIBGMP_DLL
+	#define __GMP_LIBGMP_DLL 1
+	#endif
+	#endif
 	#include <gmp.h>
 	int main (int argc, char **argv)
 	{

@@ -1,4 +1,10 @@
 
+2018-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c [_WIN32]: only define __GMP_LIBGMP_DLL if it is not
+	  defined already, allowing to use a static version by defining
+	  __GMP_LIBGMP_DLL to 0
+
 2018-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c (cob_file_open): fix for bug #520

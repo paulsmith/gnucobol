@@ -67,7 +67,9 @@
 
 /* library headers for version output */
 #ifdef _WIN32
+#ifndef __GMP_LIBGMP_DLL
 #define __GMP_LIBGMP_DLL 1
+#endif
 #endif
 #include <gmp.h>
 
