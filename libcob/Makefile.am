@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/libcob
 #
-# Copyright (C) 2003-2012, 2014, 2017 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014, 2017-2018 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -45,14 +45,14 @@ CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 #	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN) -specialflag
 
 install-data-hook:
-	rm -f $(includedir)/libcob/byteswap.h
-	rm -f $(includedir)/libcob/call.h
-	rm -f $(includedir)/libcob/fileio.h
-	rm -f $(includedir)/libcob/termio.h
-	rm -f $(includedir)/libcob/screenio.h
-	rm -f $(includedir)/libcob/move.h
-	rm -f $(includedir)/libcob/numeric.h
-	rm -f $(includedir)/libcob/strings.h
-	rm -f $(includedir)/libcob/intrinsic.h
-	rm -f $(includedir)/libcob/codegen.h
-	rm -f $(includedir)/libcob/system.def
+	rm -f $(DESTDIR)$(includedir)/libcob/byteswap.h
+	rm -f $(DESTDIR)$(includedir)/libcob/call.h
+	rm -f $(DESTDIR)$(includedir)/libcob/fileio.h
+	rm -f $(DESTDIR)$(includedir)/libcob/termio.h
+	rm -f $(DESTDIR)$(includedir)/libcob/screenio.h
+	rm -f $(DESTDIR)$(includedir)/libcob/move.h
+	rm -f $(DESTDIR)$(includedir)/libcob/numeric.h
+	rm -f $(DESTDIR)$(includedir)/libcob/strings.h
+	rm -f $(DESTDIR)$(includedir)/libcob/intrinsic.h
+	rm -f $(DESTDIR)$(includedir)/libcob/codegen.h
+	rm -f $(DESTDIR)$(includedir)/libcob/system.def

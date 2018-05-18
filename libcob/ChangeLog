@@ -4,6 +4,8 @@
 	* common.c [_WIN32]: only define __GMP_LIBGMP_DLL if it is not
 	  defined already, allowing to use a static version by defining
 	  __GMP_LIBGMP_DLL to 0
+	* Makefile.am (install-data-hook): added missing $(DESTDIR), as
+	  reported by Eric Gallager in bug #73
 
 2018-05-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
