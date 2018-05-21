@@ -4266,7 +4266,7 @@ cob_putenv (char *name)
 static const char *
 cob_gettmpdir (void)
 {
-	char	*tmpdir;
+	const char	*tmpdir;
 	char	*tmp;
 
 	if ((tmpdir = getenv ("TMPDIR")) == NULL) {

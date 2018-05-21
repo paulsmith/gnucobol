@@ -307,6 +307,7 @@ cob_display (const int to_device, const int newline, const int varcnt, ...)
 			if (!cobsetptr->cob_unix_lf) {
 				mode = "w";
 			} else {
+				/* Note: this doesn't seem to help with pipes :-( */
 				mode = "wb";
 			}
 			fp = popen (cobsetptr->cob_display_print_pipe, mode);
@@ -469,7 +470,7 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 					fprintf(fp,"%c",f->data[i]);
 			}
 			if (i < f->size)
-				fprintf(fp,"\n%*s%5d : ",indent-8," ",(unsigned int)(i+1));
+				fprintf(fp,"\n%*s%5u : ",indent-8," ",(unsigned int)(i+1));
 		}
 		return;
 	}
@@ -502,7 +503,7 @@ display_alnum_dump (cob_field *f, FILE *fp, int indent, int max_width)
 				wrk[j+2] = 0;
 			}
 		}
-		fprintf(fp,"\n%*s%5d x %s",indent-8," ",(unsigned int)pos,wrk);
+		fprintf(fp,"\n%*s%5u x %s",indent-8," ",(unsigned int)pos,wrk);
 		if (i < f->size)
 			fprintf(fp,"\n%*s",indent," ");
 	}
