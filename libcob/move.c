@@ -1694,7 +1694,9 @@ cob_init_move (cob_global *lptr, cob_settings *sptr)
 void
 cob_put_u64_compx (cob_u64_t val, void *mem, int len)
 {
+#if !defined(WORDS_BIGENDIAN)
 	cob_u64_t	ulong;
+#endif
 	cob_u32_t	uint;
 	cob_u16_t	ushort;
 	
@@ -1786,7 +1788,9 @@ cob_put_u64_comp5 (cob_u64_t val, void *mem, int len)
 void
 cob_put_s64_compx (cob_s64_t val, void *mem, int len)
 {
+#if !defined(WORDS_BIGENDIAN)
 	cob_s64_t	slong;
+#endif
 	cob_s32_t	sint;
 	cob_s16_t	sshort;
 #if defined(WORDS_BIGENDIAN)

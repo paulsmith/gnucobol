@@ -46,6 +46,8 @@
 2018-04-02  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_getopt_long_long): fixed free of changed pointer
+	* move.c (cob_put_u64_compx, cob_put_s64_compx) [!WORDS_BIGENDIAN]:
+	  fixed definition of unused variable
 	* common.c (cob_gettmpdir): check if environment variables for TEMP
 	  points to usable directory before using it (fallback to ".")
 	* common.c (cob_init_nomain) [HAVE_READLINK]: fixed strcpy of

@@ -6680,7 +6680,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 	to_ptr = get_next_token (cmp_line, ttoken, tterm);
 	is_copy_line = !strcasecmp (ttoken, "COPY");
 	is_replace_line = !strcasecmp (ttoken, "REPLACE");
-	if (is_replace_line) {
+	if (is_replace_line && to_ptr) {
 		to_ptr = get_next_token (to_ptr, ttoken, tterm);
 		is_replace_off = !strcasecmp (ttoken, "OFF");
 	}
