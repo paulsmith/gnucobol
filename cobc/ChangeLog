@@ -1,4 +1,8 @@
 
+2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: remove path output when creating manpage
+
 2018-05-16  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (compare_field_literal): compare literals also against
@@ -2373,7 +2377,7 @@
 	* cobc.c, cobc.h: better help for compiler flags
 	* flag.def, cobc.c, cobc.h: added more parameters in flag.def for better
 	  help output; changed defines for CB_FLAG_RQ and CB_FLAG_NQ
-	* Makefile.am: add config.def as prerequisite for man-page
+	* Makefile.am: add config.def as prerequisite for manpage
 
 2016-08-09  Edward Hart <edward.dan.hart@gmail.com>
 

@@ -39,5 +39,5 @@ CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 MAINTAINERCLEANFILES = cobcrun.1
 
 cobcrun.1: cobcrun.c $(top_srcdir)/configure.ac |  cobcrun$(EXEEXT)
-	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBCRUN)
+	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) "$(COBCRUN) -q"
 

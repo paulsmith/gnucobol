@@ -1273,14 +1273,18 @@ case $host_os in
 		COB_CONFIG_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/config"
 		COB_COPY_DIR="`cd /usr && pwd -W`/local/share/$PACKAGE_TARNAME/copy"
 	fi
-	COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
+	if test "$COB_USES_GCC" = "yes"; then
+		COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
+		COB_FIX_LIBTOOL="-Wl,--enable-auto-import"
+	fi
 	COB_FIX_LIB=""
-	COB_FIX_LIBTOOL="-Wl,--enable-auto-import"
 	;;
   cygwin*)
-	COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
+	if test "$COB_USES_GCC" = "yes"; then
+		COB_EXPORT_DYN="-Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--enable-auto-image-base"
+		COB_FIX_LIBTOOL="-Wl,--enable-auto-import"
+	fi
 	COB_FIX_LIB=""
-	COB_FIX_LIBTOOL="-Wl,--enable-auto-import"
 	;;
   darwin* | rhapsody*)
 	COB_SHARED_OPT="-bundle -flat_namespace -undefined suppress"

@@ -1,7 +1,7 @@
 #!/bin/sh
 # cobcinfo.sh gnucobol/doc
 #
-# Copyright (C) 2010,2012, 2016-2017 Free Software Foundation, Inc.
+# Copyright (C) 2010,2012, 2016-2018 Free Software Foundation, Inc.
 # Written by Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -127,8 +127,10 @@ created_texfiles="cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex"
 created_texfiles="$created_texfiles cbmnem.tex cbconf.tex cbrunt.tex"
 
 
-
-case "$1" in
+# for old systems that don't support this POSIX parameter expansion:
+#case "$1" in
+# otherwise: only use filename (strip possible path)
+case "${1##*/}" in
 	"")
 		for file in $created_texfiles; do
 			_create_file $file

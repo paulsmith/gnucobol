@@ -48,7 +48,7 @@ CODE_COVERAGE_BRANCH_COVERAGE=1
 CODE_COVERAGE_LCOV_OPTIONS =  --no-external
 
 cobc.1: cobc.c config.def flag.def warning.def $(top_srcdir)/configure.ac | cobc$(EXEEXT)
-	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) $(COBC)
+	$(HELP2MAN) --output=$@ --info-page=$(PACKAGE) "$(COBC) -q"
 
 .l.c:
 	LC_CTYPE=C $(LEX) -o$@ $<
