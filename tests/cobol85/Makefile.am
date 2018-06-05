@@ -156,7 +156,7 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	    $(srcdir)/Makefile.module.in > $@/Makefile
 	@echo "Finished module directory $@."
 
-EXEC85$(EXEEXT): newcob.val
+EXEC85.cob: newcob.val
 	@echo "Extracting EXEC85 program from newcob.val"
 #	setting NEWCOB_VAL to the full name for the sed invocation
 #	(for make not supporting $< this would be empty -> guess newcob.val is in builddir)
@@ -174,5 +174,7 @@ EXEC85$(EXEEXT): newcob.val
 	    -e 's/^003700.*/           "newcob.log"./'                               \
 	    -e 's/^004000.*/           "EXEC85.conf" ORGANIZATION LINE SEQUENTIAL./' \
 	    "$$NEWCOB_VAL" > EXEC85.cob
+
+EXEC85$(EXEEXT): EXEC85.cob
 	@echo "Compiling EXEC85 program"
-	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -std=cobol85 -x EXEC85.cob
+	@. ../atconfig && . ../atlocal EXEC85 && $$COBC -std=cobol85 -x $<

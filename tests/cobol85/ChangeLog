@@ -1,4 +1,9 @@
 
+2018-06-05  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: split rules for EXEC85 and EXEC85.cob to prevent
+	  unneeded recreation of the source file
+
 2018-05-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: new URL for NIST suite, using https
