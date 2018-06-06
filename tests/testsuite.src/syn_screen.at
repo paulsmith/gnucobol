@@ -131,7 +131,7 @@ AT_DATA([prog.cob], [
        01  curs-2.
            03  linee   PIC 999.
            03  coll    PIC 999.
-       01  pos         CONSTANT 0101.
+       01  posc        CONSTANT 0101.
 
        01  curs-3      PIC 99.
        01  curs-4      PIC 9(8) VALUE 0101.
@@ -141,7 +141,7 @@ AT_DATA([prog.cob], [
            *> Valid AT clauses
            DISPLAY "a" AT curs-1
            DISPLAY "a" AT curs-2
-           DISPLAY "a" AT pos
+           DISPLAY "a" AT posc
 
            *> Invalid AT clauses
            DISPLAY "a" AT curs-3

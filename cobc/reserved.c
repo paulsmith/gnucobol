@@ -1966,6 +1966,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "POP-UP",			0, 0, POP_UP,			/* ACU extension */
 				0, CB_CS_DISPLAY
   },
+  { "POS",			0, 0, POS,			/* ACU extension for AT POSITION */
+	  0, 0
+  },
   { "POSITION",			0, 0, POSITION,			/* 85 */
 				0, 0
   },

@@ -2432,6 +2432,7 @@ check_validate_item (cb_tree x)
 %token PLUS
 %token POINTER
 %token POP_UP			"POP-UP"
+%token POS
 %token POSITION
 %token POSITION_SHIFT	"POSITION-SHIFT"
 %token POSITIVE
@@ -7899,7 +7900,7 @@ screen_option:
   {
 	//check_repeated ("CLINE", SYN_CLAUSE_5000, &check_pic_duplicate);
   }
-| column_or_col screen_col_number
+| column_or_col_or_position_or_pos screen_col_number
   {
 	check_repeated ("COLUMN", SYN_CLAUSE_17, &check_pic_duplicate);
   }
@@ -9565,8 +9566,7 @@ line_number:
 ;
 
 column_number:
-  column_or_col _number num_id_or_lit	{ $$ = $3; }
-| POSITION _number num_id_or_lit	{ $$ = $3; }
+  column_or_col_or_position_or_pos _number num_id_or_lit	{ $$ = $3; }
 ;
 
 mode_is_block:
@@ -16143,6 +16143,7 @@ coll_sequence:		COLLATING SEQUENCE | SEQUENCE ;
 column_or_col:		COLUMN | COL ;
 columns_or_cols:	COLUMNS | COLS ;
 column_or_cols:		column_or_col | columns_or_cols ;
+column_or_col_or_position_or_pos:		COLUMN | COL | POSITION | POS ;
 comp_equal:		TOK_EQUAL | EQUAL ;
 exception_or_error:	EXCEPTION | ERROR ;
 in_of:			IN | OF ;
