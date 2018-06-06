@@ -3,6 +3,9 @@
 
 	* parser.y, reserved.c: added POS (only reserved for acu and default)
 	  as alternative for AT POSITION, allow both in SCREEN definitions
+	* parser.y: improved ACUCOBOL-GT parsing of USAGE HANDLE: allow
+	  HANDLE [OF] control-type (support pending), better error messages
+	  for unknown HANDLE types
 
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

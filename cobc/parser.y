@@ -6249,6 +6249,16 @@ usage:
 	check_and_set_usage (CB_USAGE_HNDL_LM);
 	CB_PENDING ("HANDLE OF LAYOUT-MANAGER");
   }
+| HANDLE _of control_type_name
+  {
+	check_and_set_usage (CB_USAGE_HNDL);
+	CB_PENDING ("HANDLE OF control-type");
+  }
+| HANDLE _of WORD
+  {
+	check_and_set_usage (CB_USAGE_HNDL);
+	cb_error_x ($3, _("unknown HANDLE type: %s"), CB_NAME ($3));
+  }
 | SIGNED_SHORT
   {
 	check_and_set_usage (CB_USAGE_SIGNED_SHORT);

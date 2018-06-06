@@ -3378,7 +3378,7 @@ AT_CLEANUP
 
 
 AT_SETUP([ACUCOBOL USAGE HANDLE])
-AT_KEYWORDS([misc acu extensions reserved])
+AT_KEYWORDS([misc acu extensions reserved CALL DESTROY])
 
 # TODO: need a better test here
 # TODO: maybe add a compiler support configuration to provide better messages
@@ -3388,15 +3388,23 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE SECTION.
-       78  listdir-open  value 1.
-       78  listdir-next  value 2.
-       78  listdir-close value 3.
-       77  pattern       pic x(5) value "*.cob".
-       77  directory     pic x(5) value ".".
-       77  filename      pic x(256).
-       77  mydir         usage handle.
-       77  mythread      usage handle of thread.
-       77  mywindow      usage handle of window.
+       78  listdir-open                value 1.
+       78  listdir-next                value 2.
+       78  listdir-close               value 3.
+       77  pattern           pic x(5) value "*.cob".
+       77  directory         pic x(5) value ".".
+       77  filename          pic x(256).
+       77  mydir             usage handle.
+
+       77  mythread          usage handle of thread.
+       77  unused-thread           handle    thread.
+
+       77  mywindow          usage handle of window.
+
+       77  nor-a-handle      usage handle bananas.
+       77  neither-a-handle  usage handle of apes.
+       77  control-handle    usage handle of label.
+
        PROCEDURE DIVISION.
        MAIN.
       * Call LISTDIR-OPEN to get a directory handle.
@@ -3424,34 +3432,47 @@ AT_DATA([prog.cob], [
               NOT ON EXCEPTION  DISPLAY 'called in THREAD'
            END-CALL
       *
+      *    Just to check that the handles are still recognized and usable:
+           destroy neither-a-handle, control-handle
+      *
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
-[prog.cob: in paragraph 'MAIN':
-prog.cob:26: warning: THREAD is not implemented
-prog.cob:28: warning: THREAD is not implemented
-prog.cob:27: error: HANDLE must be either a generic or a THREAD HANDLE
-prog.cob:31: error: HANDLE must be either a generic or a THREAD HANDLE
-prog.cob:31: warning: STOP THREAD is replaced by STOP RUN
+[prog.cob:19: error: unknown HANDLE type: bananas
+prog.cob:20: error: unknown HANDLE type: apes
+prog.cob:21: warning: HANDLE OF control-type is not implemented
+prog.cob: in paragraph 'MAIN':
+prog.cob:34: warning: THREAD is not implemented
 prog.cob:36: warning: THREAD is not implemented
-prog.cob:38: warning: THREAD is not implemented
-prog.cob:37: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:35: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:39: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:39: warning: STOP THREAD is replaced by STOP RUN
+prog.cob:44: warning: THREAD is not implemented
+prog.cob:46: warning: THREAD is not implemented
+prog.cob:45: error: HANDLE must be either a generic or a THREAD HANDLE
+prog.cob:51: warning: GRAPHICAL CONTROL is not implemented
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],
 [prog.cob:12: error: 'handle' is not defined, but is a reserved word in another dialect
-prog.cob:13: error: 'handle' is not defined, but is a reserved word in another dialect
 prog.cob:14: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:15: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
+prog.cob:17: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:19: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:20: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:21: error: 'handle' is not defined, but is a reserved word in another dialect
+prog.cob:15: error: PICTURE clause required for 'unused-thread'
 prog.cob: in paragraph 'MAIN':
-prog.cob:27: error: 'handle IN mywindow' is not defined
-prog.cob:26: error: invalid expression
-prog.cob:30: error: syntax error, unexpected END-PERFORM
-prog.cob:31: error: 'thread' is not defined, but is a reserved word in another dialect
-prog.cob:31: error: syntax error, unexpected Identifier
-prog.cob:36: error: syntax error, unexpected Identifier, expecting THREAD
-prog.cob:40: error: syntax error, unexpected END-CALL
-prog.cob:26: error: 'thread' is not defined, but is a reserved word in another dialect
+prog.cob:35: error: 'handle IN mywindow' is not defined
+prog.cob:34: error: invalid expression
+prog.cob:38: error: syntax error, unexpected END-PERFORM
+prog.cob:39: error: 'thread' is not defined, but is a reserved word in another dialect
+prog.cob:39: error: syntax error, unexpected Identifier
+prog.cob:44: error: syntax error, unexpected Identifier, expecting THREAD
+prog.cob:48: error: syntax error, unexpected END-CALL
+prog.cob:51: error: syntax error, unexpected Identifier
+prog.cob:34: error: 'thread' is not defined, but is a reserved word in another dialect
 ])
 
 AT_CLEANUP
