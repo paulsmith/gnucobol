@@ -1941,6 +1941,7 @@ AT_DATA([prog.cob], [
              05 last-part      pic 99.
           03 filler            pic xx    value ", ".
           03 data-part         pic x(18).
+       77 safety-net           pic 99.
 
       *> control break
        01 oldkey               pic 99x99.
@@ -1980,7 +1981,14 @@ AT_DATA([prog.cob], [
            display "Read all 00b02 keys sequentially" end-display
            perform read-indexing-record
            perform read-next-record
+      *>       this is only here for safety...
+               varying safety-net from 1 by 1
                until no-more-duplicates
+      *>         s a f e  against broken indexed i/o
+                  or safety-net > 40
+           if safety-net > 40
+               display "Safety kicked in!" end-display
+           end-if
            display line-separator end-display
 
       *> read by key of reference ... the cool stuff
@@ -1994,7 +2002,14 @@ AT_DATA([prog.cob], [
            end-display
            perform start-at-key
            perform read-next-by-key
+      *>       this is only here for safety...
+               varying safety-net from 1 by 1
                until no-more-records
+      *>         s a f e  against broken indexed i/o
+                  or safety-net > 40
+           if safety-net > 40
+               display "Safety kicked in!" end-display
+           end-if
            display line-separator end-display
 
       *> read by primary key of reference
@@ -2002,20 +2017,27 @@ AT_DATA([prog.cob], [
            set no-more-records to false
 
       *> using start and previous by key
-          display
-              "Read all primary keys less than "
-              function trim (keyfield of indexing-record)
-          end-display
-          perform start-prime-key
-          perform read-previous-by-key
-              until no-more-records
-          display line-separator end-display
+           display
+               "Read all primary keys less than "
+               function trim (keyfield of indexing-record)
+           end-display
+           perform start-prime-key
+           perform read-previous-by-key
+      *>       this is only here for safety...
+               varying safety-net from 1 by 1
+               until no-more-records
+      *>         s a f e  against broken indexed i/o
+                  or safety-net > 40
+           if safety-net > 40
+             display "Safety kicked in!" end-display
+           end-if
+           display line-separator end-display
 
       *> and with that we are done with indexing sample
-          close indexed-file
+           close indexed-file
 
-          goback
-          .
+           goback
+           .
       *> ***************************************************************
 
       *> ***************************************************************
