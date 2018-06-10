@@ -384,7 +384,8 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 #include <setjmp.h>
 
-#if	(defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__)
+#ifndef COB_EXPIMP
+#if	((defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__))
 #ifdef	COB_LIB_EXPIMP
 	#define COB_EXPIMP	__declspec(dllexport) extern
 #else
@@ -392,6 +393,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #endif
 #else
 	#define COB_EXPIMP	extern
+#endif
 #endif
 
 #if	defined(COB_KEYWORD_INLINE)

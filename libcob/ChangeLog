@@ -1,4 +1,9 @@
 
+2018-06-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: allow to override COB_EXPIMP, especially for allowing
+	  static builds on _WIN32 via -DCOB_EXPIMP=extern
+
 2018-05-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c [_WIN32]: only define __GMP_LIBGMP_DLL if it is not
