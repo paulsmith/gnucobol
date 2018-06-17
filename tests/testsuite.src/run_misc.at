@@ -5898,7 +5898,9 @@ AT_DATA([prog.cob], [
 
 AT_DATA([cmod.c], [[
 #include <stdio.h>
-int dump (unsigned char *data)
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 4; i++)
