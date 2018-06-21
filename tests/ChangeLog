@@ -1,4 +1,9 @@
 
+2018-06-21  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_functions.at: Test CONTENTS-OF and
+	  CONTENT-LENGTH
+
 2018-04-24  Dave Pitts <dpitts@cozx.com>
 
 	* testsuite.src/listings.at: BUG #515 Fixed test cases.

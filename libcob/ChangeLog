@@ -1,4 +1,9 @@
 
+2018-06-21  Brian Tiffin <btiffin@gnu.org>
+
+	* common.h, tree.h, tree.c, intrinsic.c: Added CONTENT-LENGTH
+	  and CONTENTS-OF
+
 2018-06-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: allow to override COB_EXPIMP, especially for allowing

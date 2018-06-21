@@ -6519,6 +6519,92 @@ cob_intr_formatted_current_date (const int offset, const int length,
 	return curr_field;
 }
 
+/**
+  FUNCTION CONTENT-LENGTH(pointer).  NUMERIC.
+
+  Return the nul byte terminated "string" length of data
+  addressed by the given pointer.
+**/
+cob_field *
+cob_intr_content_length (cob_field *srcfield)
+{
+	unsigned char	*pointed;
+	cob_u32_t	val = 0;
+
+	cob_set_exception (0);
+	if (srcfield && srcfield->data) {
+		pointed = *((unsigned char **)srcfield->data);
+		if (pointed) {
+			val = (cob_u32_t)strlen ((char *)pointed);
+		} else {
+			cob_set_exception (COB_EC_DATA_PTR_NULL);
+		}
+	} else {
+		cob_set_exception (COB_EC_DATA_PTR_NULL);
+	}
+	cob_alloc_set_field_uint (val);
+	return curr_field;
+}
+
+/**
+  FUNCTION CONTENTS-OF(pointer, [len]). ALPHANUMERIC, refmod allowed.
+
+  Retrieve the contents of a pointer indirection.
+  Either for given length, or if omitted or 0, by NUL terminator scan.
+  If the source pointer is null, points to null or an empty string,
+  return a zero length space.
+**/
+cob_field *
+cob_intr_contents_of (const int offset, const int length, int params, ...)
+{
+        size_t          size = 0;
+        unsigned char   *pointed;
+        unsigned int    request_len;
+        va_list         args;
+        cob_field       field;
+        cob_field       *srcfield;
+        cob_field       *lenfield;
+
+        va_start (args, params);
+        srcfield = va_arg(args, cob_field *);
+        if (params > 1) {
+                lenfield = va_arg (args, cob_field *);
+                request_len = cob_get_int (lenfield);
+        } else {
+                request_len = 0;
+        }
+        va_end (args);
+
+        if (srcfield && srcfield->data) {
+                pointed = *((unsigned char **)srcfield->data);
+                if (pointed && *pointed) {
+                        /* Fixed length or C nul terminated string */
+                        if (request_len > 0) {
+                                size = request_len;
+                        } else {
+                                size = strlen ((char *)pointed);
+                        }
+                }
+        }
+        if (size > 0) {
+                COB_FIELD_INIT (size, NULL, &const_alpha_attr);
+                make_field_entry (&field);
+                /* Testing for memory access permissions is canonically: */
+                /*   open fake pipe, use write and test for -1 and EFAULT */
+                /* Not used here, performance hit versus programmer error */
+                memcpy (curr_field->data, pointed, size);
+        } else {
+                COB_FIELD_INIT (1, NULL, &const_alpha_attr);
+                make_field_entry (&field);
+                curr_field->data[0] = ' ';
+                curr_field->size = 0;
+        }
+        if (unlikely(offset > 0)) {
+                calc_ref_mod (curr_field, offset, length);
+        }
+        return curr_field;
+}
+
 /* RXWRXW - To be implemented */
 
 cob_field *

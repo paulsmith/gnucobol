@@ -339,6 +339,67 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
+AT_SETUP([FUNCTION CONTENT-LENGTH])
+AT_KEYWORDS([functions length])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  P            USAGE    POINTER.
+       01  X            PIC      X(4) VALUE Z"ABC".
+       01  TEST-FLD     USAGE    BINARY-LONG.       
+       PROCEDURE        DIVISION.
+           MOVE FUNCTION CONTENT-LENGTH ( P )
+             TO TEST-FLD.
+           IF TEST-FLD NOT = 0
+              DISPLAY 'CONTENT-LENGTH NULL wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+           SET P TO ADDRESS OF X
+           MOVE FUNCTION CONTENT-LENGTH ( P )
+             TO TEST-FLD
+           IF TEST-FLD NOT = 3
+              DISPLAY 'CONTENT-LENGTH z"abc" wrong: ' TEST-FLD
+              END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([FUNCTION CONTENTS-OF])
+AT_KEYWORDS([functions contents-of])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  P   USAGE    POINTER.
+       01  X   PIC      X(4) VALUE Z"ABC".
+       PROCEDURE        DIVISION.
+           SET P TO ADDRESS OF X
+           IF FUNCTION CONTENTS-OF ( P ) NOT EQUAL 'ABC' THEN
+              DISPLAY 'CONTENTS-OF(ptr) wrong' END-DISPLAY
+           END-IF
+           IF FUNCTION CONTENTS-OF ( P, 2 ) NOT EQUAL 'AB' THEN
+              DISPLAY 'CONTENTS-OF(ptr, len) wrong' END-DISPLAY
+           END-IF
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+
+AT_CLEANUP
+
+
 AT_SETUP([FUNCTION as CALL parameter BY CONTENT])
 AT_KEYWORDS([functions])
 

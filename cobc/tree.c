@@ -5686,6 +5686,21 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		}
 		return make_intrinsic (name, cbp, args, NULL, refmod, 0);
 
+	case CB_INTR_CONTENT_LENGTH:
+		x = CB_VALUE (args);
+		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
+			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			return cb_error_node;
+		}
+		return make_intrinsic (name, cbp, args, NULL, NULL, 0);
+
+	case CB_INTR_CONTENTS_OF:
+		x = CB_VALUE (args);
+		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
+			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			return cb_error_node;
+		}
+		return make_intrinsic (name, cbp, args, cb_int1, refmod, 0);
 
 	case CB_INTR_CONCATENATE:
 	case CB_INTR_DISPLAY_OF:

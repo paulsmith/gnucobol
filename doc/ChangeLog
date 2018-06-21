@@ -1,4 +1,9 @@
 
+2018-06-21  Brian Tiffin <btiffin@gnu.org>
+
+	* gnucobol.texi: Added docs for CONTENT-LENGTH and CONTENTS-OF
+	  intrinsic function extensions
+
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: support VPATH builds with changed sources by stripping

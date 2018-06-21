@@ -2969,6 +2969,16 @@ static struct cb_intrinsic_table function_list[] = {
 					/* Note: category changed to national depending on the content,
 					   see cb_build_intrinsic */
   },
+  { "CONTENT-LENGTH",			"cob_intr_content_length",
+					CB_INTR_CONTENT_LENGTH, CONTENT_LENGTH_FUNC,
+					CB_FEATURE_ACTIVE,	1, 1,
+					CB_CATEGORY_NUMERIC, 0
+  },
+  { "CONTENTS-OF",			"cob_intr_contents_of",
+					CB_INTR_CONTENTS_OF, CONTENTS_OF_FUNC,
+					CB_FEATURE_ACTIVE,	2, 1,
+					CB_CATEGORY_ALPHANUMERIC, 1
+  },
   { "COS",				"cob_intr_cos",
 					CB_INTR_COS, FUNCTION_NAME,
 					CB_FEATURE_ACTIVE,	1, 1,

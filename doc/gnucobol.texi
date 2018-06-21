@@ -154,6 +154,8 @@ Extensions
 * Extended ACCEPT::             Extended ACCEPT statement.
 * ACCEPT special::              ACCEPT special keys.
 * Extended DISPLAY::            Extended DISPLAY statement.
+* FUNCTION CONTENT-LENGTH::     Length of NUL byte terminated pointer data.
+* FUNCTION CONTENTS-OF::        Contents of data at pointer, by length or NUL.
 
 System Routines
 
@@ -1310,6 +1312,8 @@ run-time errors with source locations.
 * Extended ACCEPT::             Extended @code{ACCEPT} statement.
 * ACCEPT special::              @code{ACCEPT} special keys.
 * Extended DISPLAY::            Extended @code{DISPLAY} statement.
+* FUNCTION CONTENT-LENGTH::     Length of NUL byte terminated pointer data.
+* FUNCTION CONTENTS-OF::        Contents of data at pointer, by length or NUL.
 @end menu
 
 
@@ -1755,6 +1759,60 @@ Ring the bell.
 This is the same as @code{WITH BELL}.
 
 @end vtable
+
+@node FUNCTION CONTENT-LENGTH
+@section CONTENT-LENGTH
+@cindex @code{FUNCTION CONTENT-LENGTH}
+
+@code{FUNCTION CONTENT-LENGTH} returns the length of NUL byte terminated data given a pointer:
+
+@example
+       identification division.
+       program-id. zlen.
+       data division.
+       working-storage section.
+       01 ptr   usage pointer.
+       01 str   pic x(4) value z"abc".
+
+      *> Testing CONTENT-LENGTH
+       procedure division.
+
+       set ptr to address of str
+       display content-length(ptr)
+
+       goback.
+       end program hosted.
+@end example
+
+
+@node FUNCTION CONTENTS-OF
+@section CONTENTS-OF
+@cindex @code{FUNCTION CONTENT-OF}
+
+@code{FUNCTION CONTENTS-OF} returns an alphanumeric field given a pointer and optional length:
+
+Data from pointer is returned as a COBOL field either by scanning for a NUL byte or using the
+optional length. Reference modification of result allowed.
+
+@example
+       identification division.
+       program-id. contents.
+       data division.
+       working-storage section.
+       01 ptr   usage pointer.
+       01 str   pic x(4) value z"abc".
+
+      *> Testing CONTENTS-OF
+       procedure division.
+
+       set ptr to address of str
+       display contents-of(ptr)
+       display contents-of(ptr, 2)
+       display contents-of(ptr)(2:2)
+
+       goback.
+       end program hosted.
+@end example
 
 
 @node System Routines, Appendices, Extensions, Top
