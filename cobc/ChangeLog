@@ -1,7 +1,8 @@
 
 2018-06-21  Brian Tiffin <btiffin@gnu.org>
 
-	* parser.y, reserved.c: added CONTENT-LENGTH and CONTENTS-OF
+	* parser.y, reserved.c, tree.c, tree.h: added intrinsic functions
+	  CONTENT-LENGTH and CONTENTS-OF
 
 2018-06-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
