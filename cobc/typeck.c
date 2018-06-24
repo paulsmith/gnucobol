@@ -6429,15 +6429,23 @@ cb_emit_call (cb_tree prog, cb_tree par_using, cb_tree returning,
 		is_sys_idx = 1;
 		for (psyst = system_tab; psyst->syst_name; psyst++, is_sys_idx++) {
 			if (!strcmp(entry, (const char *)psyst->syst_name)) {
+				char *name;
+				char xname[7];
+				if (psyst->syst_name[1]) {
+					name = (char *)psyst->syst_name;
+				} else {
+					sprintf (xname, "X\"%2X\"", (unsigned char)psyst->syst_name[0]);
+					name = (char *)&xname;
+				}
 				if (psyst->syst_params_min > numargs) {
 					cb_error_x (CB_TREE (current_statement),
-						    _("wrong number of CALL parameters for '%s', %d given, %d expected"),
-						    (char *)psyst->syst_name, numargs, psyst->syst_params_min);
+						_("wrong number of CALL parameters for '%s', %d given, %d expected"),
+						name, numargs, psyst->syst_params_min);
 					return;
 				} else if (psyst->syst_params_max < numargs) {
 					cb_warning_x (COBC_WARN_FILLER, CB_TREE (current_statement),
 						_("wrong number of CALL parameters for '%s', %d given, %d expected"),
-						(char *)psyst->syst_name, numargs, psyst->syst_params_max);
+						name, numargs, psyst->syst_params_max);
 				}
 				is_sys_call = is_sys_idx;
 				break;

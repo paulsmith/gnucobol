@@ -5471,3 +5471,32 @@ AT_CHECK([$COMPILE_ONLY valid.cob], [0], [],
 #])
 
 AT_CLEANUP
+
+
+AT_SETUP([system routines with wrong number of parameters])
+AT_KEYWORDS([misc CALL 91 C$TOUPPER CBL_GC_FORK])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 VAR1  PIC 9.
+       01 VAR2  PIC 9.
+       01 VAR3  PIC 9.
+       01 VAR4  PIC 9.
+       PROCEDURE DIVISION.
+        CALL X"91" USING VAR1 VAR2 VAR3 VAR4.
+        CALL X"91" USING VAR1.
+        CALL "C$TOUPPER" USING VAR1 VAR2 VAR3.
+        CALL "CBL_GC_FORK" USING VAR1.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:11: warning: wrong number of CALL parameters for 'X"91"', 4 given, 3 expected
+prog.cob:12: error: wrong number of CALL parameters for 'X"91"', 1 given, 3 expected
+prog.cob:13: warning: wrong number of CALL parameters for 'C$TOUPPER', 3 given, 2 expected
+prog.cob:14: warning: wrong number of CALL parameters for 'CBL_GC_FORK', 1 given, 0 expected
+])
+
+AT_CLEANUP

@@ -1,4 +1,9 @@
 
+2018-06-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_emit_call): use X"nn" as name for error messages
+	  concerning system library CALLs
+
 2018-06-21  Brian Tiffin <btiffin@gnu.org>
 
 	* parser.y, reserved.c, tree.c, tree.h: added intrinsic functions
