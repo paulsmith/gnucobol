@@ -4689,6 +4689,8 @@ cob_sys_xor (const void *p1, void *p2, const int length)
 	return 0;
 }
 
+/* COBOL routine to perform for logical IMPLIES between the bits in two fields,
+   storing the result in the second field */
 int
 cob_sys_imp (const void *p1, void *p2, const int length)
 {
@@ -4707,6 +4709,9 @@ cob_sys_imp (const void *p1, void *p2, const int length)
 	return 0;
 }
 
+
+/* COBOL routine to perform for logical NOT IMPLIES between the bits in two fields,
+   storing the result in the second field */
 int
 cob_sys_nimp (const void *p1, void *p2, const int length)
 {
@@ -4725,6 +4730,8 @@ cob_sys_nimp (const void *p1, void *p2, const int length)
 	return 0;
 }
 
+/* COBOL routine to check for logical EQUIVALENCE between the bits in two fields,
+   storing the result in the second field */
 int
 cob_sys_eq (const void *p1, void *p2, const int length)
 {
@@ -4743,6 +4750,7 @@ cob_sys_eq (const void *p1, void *p2, const int length)
 	return 0;
 }
 
+/* COBOL routine to perform a logical NOT on the bits of a field */
 int
 cob_sys_not (void *p1, const int length)
 {
@@ -4760,6 +4768,7 @@ cob_sys_not (void *p1, const int length)
 	return 0;
 }
 
+/* COBOL routine to pack the least significant bits in eight bytes into a single byte */
 int
 cob_sys_xf4 (void *p1, const void *p2)
 {
@@ -4776,6 +4785,7 @@ cob_sys_xf4 (void *p1, const void *p2)
 	return 0;
 }
 
+/* COBOL routine to unpack the bits in a byte into eight bytes */
 int
 cob_sys_xf5 (const void *p1, void *p2)
 {
@@ -4791,6 +4801,12 @@ cob_sys_xf5 (const void *p1, void *p2)
 	return 0;
 }
 
+/* COBOL routine for different functions, including functions for 
+   the programmable COBOL SWITCHES:
+   11: set  COBOL switches 0-7
+   12: read COBOL switches 0-7
+   16: return number of CALL USING parameters
+*/
 int
 cob_sys_x91 (void *p1, const void *p2, void *p3)
 {
@@ -4801,8 +4817,9 @@ cob_sys_x91 (void *p1, const void *p2, void *p3)
 	size_t			i;
 
 	switch (*func) {
+
+	/* Set switches (0-7) */
 	case 11:
-		/* Set switches */
 		p = parm;
 		for (i = 0; i < 8; ++i, ++p) {
 			if (*p == 0) {
@@ -4811,24 +4828,33 @@ cob_sys_x91 (void *p1, const void *p2, void *p3)
 				cob_switch[i] = 1;
 			}
 		}
+		/* INSPECT: MF additionally sets the ANSI DEBUG module switch */
 		*result = 0;
 		break;
+
+	/* Get switches (0-7) */
 	case 12:
-		/* Get switches */
 		p = parm;
 		for (i = 0; i < 8; ++i, ++p) {
 			*p = (unsigned char)cob_switch[i];
 		}
+		/* INSPECT: MF additionally reads the ANSI DEBUG module switch */
 		*result = 0;
 		break;
+
+	/* Return number of call parameters
+		according to the docs this is only set for programs CALLed from COBOL
+		NOT for main programs in contrast to C$NARG (cob_sys_return_args)
+	*/
 	case 16:
-		/* Return number of call parameters
-		   according to the docs this is only set for programs CALLed from COBOL
-		   NOT for main programs in contrast to C$NARG (cob_sys_return_args)
-		*/
 		*parm = (unsigned char)COB_MODULE_PTR->module_num_params;
 		*result = 0;
 		break;
+
+	/* unimplemented function,
+	   note: 46-49 may be implemented after fileio-specific merge of rw-branch
+	         35 (EXEC) and 15 (program lookup) may be implemented as soon as some legacy code
+			                                   shows its exact use and a test case */
 	default:
 		*result = 1;
 		break;
