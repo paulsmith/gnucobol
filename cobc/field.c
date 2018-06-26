@@ -653,7 +653,7 @@ check_picture_item (struct cb_field *f)
 	  but guessing one if it doesn't exist.
 	*/
 	if (f->storage == CB_STORAGE_SCREEN) {
-		if (f->values) {
+	if (f->values) {
 			v = CB_VALUE (f->values);
 			if (CB_LITERAL_P (v)) {
 				size_implied = (int)CB_LITERAL (v)->size;
@@ -744,19 +744,19 @@ check_picture_item (struct cb_field *f)
 	}
 	if (!f->values || CB_VALUE (f->values) == cb_error_node) {
 		cb_error_x (x, _("PICTURE clause required for '%s'"),
-			    cb_name (x));
+					cb_name (x));
 		return 1;
-	}
+		}
 	if (CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
 		cb_error_x (x, _("a non-numeric literal is expected for '%s'"),
-			    cb_name (x));
+					cb_name (x));
 		return 1;
 	}
 	size_implied = (int)CB_LITERAL (CB_VALUE (f->values))->size;
 	/* Checkme: should we raise an error for !cb_relaxed_syntax_checks? */
 	cb_warning_x (warningopt, x, _("defining implicit picture size %d for '%s'"),
 		    size_implied, cb_name (x));
-	sprintf (pic, "X(%d)", size_implied);
+		sprintf (pic, "X(%d)", size_implied);
 	f->pic = CB_PICTURE (cb_build_picture (pic));
 	f->pic->category = CB_CATEGORY_ALPHANUMERIC;
 	f->usage = CB_USAGE_DISPLAY;
@@ -1014,8 +1014,8 @@ validate_pic (struct cb_field *f)
 	}
 
 	if (f->pic == NULL && need_picture && check_picture_item (f)) {
-		return 1;
-	}
+			return 1;
+		}
 
 	/* ACUCOBOL/RM-COBOL-style COMP-1 ignores the PICTURE clause. */
 	if (f->flag_comp_1 && cb_binary_comp_1) {
@@ -1051,17 +1051,20 @@ validate_usage (struct cb_field * const f)
 	case CB_USAGE_BINARY:
 	case CB_USAGE_PACKED:
 	case CB_USAGE_BIT:
-		if (f->pic->category != CB_CATEGORY_NUMERIC) {
+		if (f->pic
+		 && f->pic->category != CB_CATEGORY_NUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
 			return 1;
 		}
 		break;
 	case CB_USAGE_COMP_6:
-		if (f->pic->category != CB_CATEGORY_NUMERIC) {
+		if (f->pic
+		 && f->pic->category != CB_CATEGORY_NUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
 			return 1;
 		}
-		if (f->pic->have_sign) {
+		if (f->pic
+		 && f->pic->have_sign) {
 			cb_warning_x (COBC_WARN_FILLER, x, _("'%s' COMP-6 with sign - changing to COMP-3"), cb_name (x));
 			f->usage = CB_USAGE_PACKED;
 		}
@@ -1069,8 +1072,8 @@ validate_usage (struct cb_field * const f)
 	case CB_USAGE_COMP_5:
 	case CB_USAGE_COMP_X:
 		if (f->pic
-		    && f->pic->category != CB_CATEGORY_NUMERIC
-		    && f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
+		 && f->pic->category != CB_CATEGORY_NUMERIC
+		 && f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
 			emit_incompatible_pic_and_usage_error (x, f->usage);
 			return 1;
 		}

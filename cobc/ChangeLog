@@ -1,4 +1,8 @@
 
+2018-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* field.c (validate_usage): fixed SIGSEGV when PICTURE is missing
+
 2018-06-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_emit_call): use X"nn" as name for error messages
