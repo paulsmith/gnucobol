@@ -26,10 +26,10 @@ if test "x$GREP" = "x"; then GREP=grep; fi
 if test "$1" != "fixtimestamps"; then
 
    # test for grep -A
-   $GREP -A2 test /dev/null 2>/dev/null
+   $GREP -A2 test /dev/null 2>/dev/null 1>&2
    if test "$?" -ne 1; then
       GREP=ggrep
-      $GREP -A2 test /dev/null 2>/dev/null
+      $GREP -A2 test /dev/null 2>/dev/null 1>&2
       if test "$?" -ne 1; then
          echo "error: grep not working, re-run with GREP=/path/to/gnu-grep"
          echo "       GREP is currently \"$GREP_ORIG\""
@@ -44,6 +44,23 @@ if test "$1" != "fixtimestamps"; then
    if test "x$COBCRUN" = "x"; then
       echo 'WARNING: $COBCRUN not set, defaulting to "cobcrun"'
       COBCRUN=cobcrun
+   fi
+   
+   # test for working executables
+   $COBC    -V 2>/dev/null 1>&2
+   ret=$?
+   if test "$ret" -ne 0; then
+     echo "error: cobc is not working, re-run with COBC=/path/to/cobc"
+	 echo "       and ensure that its dependencies can be found."
+     echo "       COBC is currently \"$COBC\""
+     exit $ret
+   fi
+   $COBCRUN -V 2>/dev/null 1>&2
+   if test "$ret" -ne 0; then
+     echo "error: cobcrun is not working, re-run with COBCRUN=/path/to/cobcrun"
+	 echo "       and ensure that its dependencies can be found."
+     echo "       COBCRUN is currently \"$COBCRUN\""
+     exit $ret
    fi
 
 fi
