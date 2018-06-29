@@ -6162,8 +6162,8 @@ output_cancel (struct cb_cancel *p)
 		s = get_program_id_str (p->target);
 		name_str = cb_encode_program_id (s);
 		nlp = find_nested_prog_with_id (name_str);
+		output_prefix ();
 		if (nlp) {
-			output_prefix ();
 			output ("(void)%s_%d_ (-1", name_str,
 				nlp->nested_prog->toplev_count);
 			for (i = 0; i < nlp->nested_prog->num_proc_params; ++i) {
@@ -10614,7 +10614,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output_line ("if (!initialized) {");
 	output_line ("\treturn 0;");
 	output_line ("}");
-	output_line ("if (module->module_active) {");
+	output_line ("if (module && module->module_active) {");
 	output_line ("\tcob_fatal_error (COB_FERROR_CANCEL);");
 	output_line ("}");
 	output_newline ();

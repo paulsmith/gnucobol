@@ -1,4 +1,10 @@
 
+2018-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c (output_internal_function): fixed bug #98 "SIGSEGV
+	  on CANCEL of RECURSIVE programs" by adjusting generation of
+	  CANCEL callback
+
 2018-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* field.c (validate_usage): fixed SIGSEGV when PICTURE is missing
