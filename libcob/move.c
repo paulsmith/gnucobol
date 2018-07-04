@@ -695,6 +695,10 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 	}
 
 	/* Count the number of digit places before decimal point */
+	/*
+	  TO-DO: This is computed in cb_build_picture; add computed results to
+	  cb_field and use those.
+	*/
 	for (p = COB_FIELD_PIC (f2); p->symbol; ++p) {
 		c = p->symbol;
 		repeat = p->times_repeated;
@@ -924,18 +928,16 @@ cob_move_display_to_edited (cob_field *f1, cob_field *f2)
 					}
 				}
 				if (sign_symbol && curr_symbol) {
+					/*
+					  Only one of $ and +/- can be floating
+					  in any given picture, so the symbol
+					  which comes after the other must be
+					  the one which floats.
+					*/
 					if (sign_first) {
 						*dst = curr_symbol;
-						--dst;
-						if (dst >= f2->data) {
-							*dst = sign_symbol;
-						}
 					} else {
 						*dst = sign_symbol;
-						--dst;
-						if (dst >= f2->data) {
-							*dst = curr_symbol;
-						}
 					}
 				} else if (sign_symbol) {
 					*dst = sign_symbol;

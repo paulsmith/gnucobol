@@ -372,8 +372,9 @@ AT_DATA([prog.cob], [
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01 num-1 PIC -*B*99.
-       01 num-2 PIC $BB**,***.**.
+       01  num-1 PIC -*B*99.
+       01  num-2 PIC $BB**,***.**.
+       01  num-3 PIC $BB--,---.--.
 
        PROCEDURE DIVISION.
            MOVE -123 TO num-1
@@ -381,6 +382,9 @@ AT_DATA([prog.cob], [
 
            MOVE 1234.56 TO num-2
            DISPLAY ">" num-2 "<"
+
+           MOVE 1234.56 TO num-3
+           DISPLAY ">" num-3 "<"
            .
 ])
 
@@ -388,6 +392,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [>-**123<
 >$  *1,234.56<
+>$   1,234.56<
 ])
 
 AT_CLEANUP

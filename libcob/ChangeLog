@@ -1,4 +1,9 @@
 
+2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* move.c (cob_move_display_to_edited): fixed bug #220 again; this time
+	  where $ would incorrectly float before a string of +/-.
+
 2018-06-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* system.def: bug #527 system call x'91' *always* uses three parameters

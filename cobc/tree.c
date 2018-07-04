@@ -2815,10 +2815,15 @@ repeat:
 		case '+':
 		case '-':
 			category |= PIC_NUMERIC_EDITED;
-			if(s_count == 0) {
-				digits += n - 1;
-			} else {
-				digits += n;
+			digits += n;
+			if (s_count == 0) {
+				--digits;
+			}
+			if (v_count) {
+				scale += n;
+				if (s_count == 0) {
+					--scale;
+				}
 			}
 			s_count++;
 			break;

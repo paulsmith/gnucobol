@@ -1,4 +1,10 @@
 
+2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* tree.c (cb_build_picture): fixed calculation of number of decimal
+	  digits in PICs with floating +/- after decimal point, e.g. --.--. See
+	  bug #220.
+
 2018-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_internal_function): fixed bug #98 "SIGSEGV
