@@ -1,4 +1,9 @@
 
+2018-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c, parser.y: added IBM's ALLOCATE format by including the
+	  ignored LOC phrase
+
 2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_build_picture): fixed calculation of number of decimal

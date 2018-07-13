@@ -1,6 +1,6 @@
 # GnuCOBOL compiler - list of reserved words
 #
-# Copyright (C) 2016-2017 Free Software Foundation, Inc.
+# Copyright (C) 2016-2018 Free Software Foundation, Inc.
 # Written by Simon Sobisch, Edward Hart
 #
 # This file is part of GnuCOBOL.
@@ -38,6 +38,7 @@ reserved:	ADDRESS
 reserved:	ADVANCING
 reserved:	AFTER
 reserved:	ALL
+reserved:	ALLOCATE         # V6
 reserved:	ALPHABET
 reserved:	ALPHABETIC
 reserved:	ALPHABETIC-LOWER
@@ -56,18 +57,20 @@ reserved:	AREAS
 reserved:	ASCENDING
 reserved:	ASSIGN
 reserved:	AT
-reserved:	ATTRIBUTE
-reserved:	ATTRIBUTES
+#reserved:	ATTRIBUTE        not included in Language Reference for 4.2 and 6.1
+#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
+reserved:	ATTRIBUTES*      # note: not included in IBMs reserved words
+         	                 #       list, but as a phrase to be parsed
+         	                 #       for XML GENERATE
 reserved:	AUTHOR
 reserved:	BASIS
 reserved:	BEFORE
 reserved:	BEGINNING
-reserved:	BINARY
-reserved:	BINARY
+reserved:	BINARY           # note: only with EXEC SQL coprocessor
 reserved:	BLANK
-reserved:	BLOB
-reserved:	BLOB-FILE
-reserved:	BLOB-LOCATOR
+reserved:	BLOB             # note: only with EXEC SQL coprocessor
+reserved:	BLOB-FILE        # note: only with EXEC SQL coprocessor
+reserved:	BLOB-LOCATOR     # note: only with EXEC SQL coprocessor
 reserved:	BLOCK
 reserved:	BOTTOM
 reserved:	BY
@@ -77,15 +80,16 @@ reserved:	CBL
 reserved:	CD
 reserved:	CF
 reserved:	CH
-reserved:	CHAR
-reserved:	CHAR-VARYING
+reserved:	CHAR             # Is this an error and was in for FUNCTION CHAR
+#        	                   or is it only defined with EXEC SQL coprocessor?
+reserved:	CHAR-VARYING     # note: only with EXEC SQL coprocessor
 reserved:	CHARACTER
 reserved:	CHARACTERS
 reserved:	CLASS
 reserved:	CLASS-ID
-reserved:	CLOB
-reserved:	CLOB-FILE
-reserved:	CLOB-LOCATOR
+reserved:	CLOB             # note: only with EXEC SQL coprocessor
+reserved:	CLOB-FILE        # note: only with EXEC SQL coprocessor
+reserved:	CLOB-LOCATOR     # note: only with EXEC SQL coprocessor
 reserved:	CLOCK-UNITS
 reserved:	CLOSE
 reserved:	COBOL
@@ -126,18 +130,19 @@ reserved:	CYCLE*
 reserved:	DATA
 reserved:	DATE
 reserved:	DATE-COMPILED
-reserved:	DATE-RECORD
+reserved:	DATE-RECORD      # note: only with EXEC SQL coprocessor
 reserved:	DATE-WRITTEN
 reserved:	DAY
 reserved:	DAY-OF-WEEK
-reserved:	DBCLOB
-reserved:	DBCLOB-FILE
-reserved:	DBCLOB-LOCATOR
+reserved:	DBCLOB           # note: only with EXEC SQL coprocessor
+reserved:	DBCLOB-FILE      # note: only with EXEC SQL coprocessor
+reserved:	DBCLOB-LOCATOR   # note: only with EXEC SQL coprocessor
 reserved:	DBCS
 reserved:	DE
 reserved:	DEBUGGING
 reserved:	DECIMAL-POINT
 reserved:	DECLARATIVES
+reserved:	DEFAULT          # V6
 reserved:	DELETE
 reserved:	DELIMITED
 reserved:	DELIMITER
@@ -156,11 +161,12 @@ reserved:	DYNAMIC
 reserved:	EGCS
 reserved:	EGI
 reserved:	EJECT
-reserved:	ELEMENT*
+#reserved:	ELEMENT*         not included in Language Reference for 4.2 and 6.1
+#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
 reserved:	ELSE
 reserved:	EMI
 reserved:	ENABLE
-reserved:	ENCODING
+reserved:	ENCODING*        # see note for XML-DECLARATION/VALIDATING
 reserved:	END
 reserved:	END-ADD
 reserved:	END-CALL
@@ -168,8 +174,10 @@ reserved:	END-COMPUTE
 reserved:	END-DELETE
 reserved:	END-DIVIDE
 reserved:	END-EVALUATE
+reserved:	END-EXEC         # note: for use with coprocessors, generally reserved
 reserved:	END-IF
 reserved:	END-INVOKE
+reserved:	END-JSON         # V6
 reserved:	END-MULTIPLY
 reserved:	END-OF-PAGE
 reserved:	END-PERFORM
@@ -195,6 +203,8 @@ reserved:	ESI
 reserved:	EVALUATE
 reserved:	EVERY
 reserved:	EXCEPTION
+reserved:	EXEC             # note: for use with coprocessors, generally reserved
+reserved:	EXECUTE          # note: for use with coprocessors, generally reserved
 reserved:	EXIT
 reserved:	EXTEND
 reserved:	EXTERNAL
@@ -208,6 +218,7 @@ reserved:	FINAL
 reserved:	FIRST
 reserved:	FOOTING
 reserved:	FOR
+reserved:	FREE             # V6
 reserved:	FROM
 reserved:	FUNCTION
 reserved:	FUNCTION-POINTER
@@ -245,9 +256,10 @@ reserved:	INTO
 reserved:	INVALID
 reserved:	INVOKE
 reserved:	IS
-reserved:	JNIENVPTR # note: this is a register, move as soon as supported
-reserved:	JSON-CODE # note: this is a register, move as soon as supported
-reserved:	JSON-STATUS # note: this is a register, move as soon as supported
+reserved:	JNIENVPTR        # note: this is a register, move as soon as supported
+reserved:	JSON
+reserved:	JSON-CODE        # note: this is a register, move as soon as supported
+reserved:	JSON-STATUS      # note: this is a register, move as soon as supported
 reserved:	JUST
 reserved:	JUSTIFIED
 reserved:	KANJI
@@ -267,32 +279,36 @@ reserved:	LINE-COUNTER
 reserved:	LINES
 reserved:	LINKAGE
 reserved:	LOCAL-STORAGE
+reserved:	LOC*
 reserved:	LOCK
-reserved:	LONG-VARBINARY
-reserved:	LONG-VARCHAR
+reserved:	LONG-VARBINARY   # note: only with EXEC SQL coprocessor
+reserved:	LONG-VARCHAR     # note: only with EXEC SQL coprocessor
 reserved:	LOW-VALUE
 reserved:	LOW-VALUES=LOW-VALUE
 reserved:	MEMORY
 reserved:	MERGE
 reserved:	MESSAGE
-reserved:	METACLASS
+#reserved:	METACLASS        not included in Language Reference for 4.2 and 6.1
+#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
 reserved:	METHOD
 reserved:	METHOD-ID
 reserved:	MODE
 reserved:	MODULES
 reserved:	MORE-LABELS
 reserved:	MOVE
-reserved:	MULTIPLE*
+reserved:	MULTIPLE
 reserved:	MULTIPLY
-reserved:	NAME*
-reserved:	NAMESPACE
-reserved:	NAMESPACE-PREFIX
+reserved:	NAME*            # note: context-sensitive to JSON/XML GENERATE,
+         	                 #       we may need to add rough parsing for these
+reserved:	NAMESPACE*       # see note for XML-DECLARATION
+reserved:	NAMESPACE-PREFIX* # see note for XML-DECLARATION
 reserved:	NATIONAL
 reserved:	NATIVE
 reserved:	NEGATIVE
 reserved:	NEXT
 reserved:	NO
-reserved:	NONNUMERIC*
+#reserved:	NONNUMERIC*      not included in Language Reference for 4.2 and 6.1
+#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
 reserved:	NOT
 reserved:	NULL
 reserved:	NULLS=NULL
@@ -320,7 +336,8 @@ reserved:	PADDING
 reserved:	PAGE
 reserved:	PAGE-COUNTER
 reserved:	PARAGRAPH*
-reserved:	PARSE
+reserved:	PARSE            # note: not included in IBM's reserved word list,
+         	                 #       but obviously needed for XML PARSE
 reserved:	PASSWORD
 reserved:	PERFORM
 reserved:	PF
@@ -371,7 +388,7 @@ reserved:	REPOSITORY
 reserved:	RERUN
 reserved:	RESERVE
 reserved:	RESET
-reserved:	RESULT-SET-LOCATOR
+reserved:	RESULT-SET-LOCATOR  # note: only with EXEC SQL coprocessor
 reserved:	RETURN
 reserved:	RETURNING
 reserved:	REVERSED
@@ -381,7 +398,7 @@ reserved:	RF
 reserved:	RH
 reserved:	RIGHT
 reserved:	ROUNDED
-reserved:	ROWID
+reserved:	ROWID               # note: only with EXEC SQL coprocessor
 reserved:	RUN
 reserved:	S*
 reserved:	SAME
@@ -400,26 +417,27 @@ reserved:	SEQUENCE
 reserved:	SEQUENTIAL
 reserved:	SERVICE
 reserved:	SET
-reserved:	SHIFT-IN       # note: this is a register, move as soon as supported
-reserved:	SHIFT-OUT      # note: this is a register, move as soon as supported
+reserved:	SHIFT-IN         # note: this is a register, move as soon as supported
+reserved:	SHIFT-OUT        # note: this is a register, move as soon as supported
 reserved:	SIGN
 reserved:	SIZE
 reserved:	SKIP1
 reserved:	SKIP2
 reserved:	SKIP3
 reserved:	SORT
-reserved:	SORT-CONTROL   # note: this is a register, move as soon as supported
-reserved:	SORT-CORE-SIZE # note: this is a register, move as soon as supported
-reserved:	SORT-FILE-SIZE # note: this is a register, move as soon as supported
+reserved:	SORT-CONTROL     # note: this is a register, move as soon as supported
+reserved:	SORT-CORE-SIZE   # note: this is a register, move as soon as supported
+reserved:	SORT-FILE-SIZE   # note: this is a register, move as soon as supported
 reserved:	SORT-MERGE
-reserved:	SORT-MESSAGE   # note: this is a register, move as soon as supported
-reserved:	SORT-MODE-SIZE # note: this is a register, move as soon as supported
+reserved:	SORT-MESSAGE     # note: this is a register, move as soon as supported
+reserved:	SORT-MODE-SIZE   # note: this is a register, move as soon as supported
 reserved:	SOURCE
 reserved:	SOURCE-COMPUTER
 reserved:	SPACE
 reserved:	SPACES=SPACE
 reserved:	SPECIAL-NAMES
-reserved:	SQL
+reserved:	SQL              # note: for use with coprocessors, generally reserved
+reserved:	SQLIMS           # note: for use with coprocessors, generally reserved
 reserved:	STANDARD
 reserved:	STANDARD-1
 reserved:	STANDARD-2
@@ -474,11 +492,14 @@ reserved:	USAGE
 reserved:	USE
 reserved:	USING
 reserved:	V*
-reserved:	VALIDATING
+reserved:	VALIDATING*           # note: not included in IBMs reserved words
+         	                      #       list, but as a phrase to be parsed
+         	                      #       for XML PARSE
 reserved:	VALUE
 reserved:	VALUES=VALUE
-reserved:	VARBINARY
+#reserved:	VARBINARY             not included in Language Reference for 4.2 and 6.1
 reserved:	VARYING
+reserved:	VOLATILE              # V6
 reserved:	WHEN
 reserved:	WITH
 reserved:	WORDS
@@ -486,17 +507,19 @@ reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	WRITE-ONLY
 reserved:	XML
-reserved:	XML-CODE # note: this is a register, move as soon as supported
-reserved:	XML-DECLARATION
-reserved:	XML-EVENT # note: this is a register, move as soon as supported
-reserved:	XML-INFORMATION # note: this is a register, move as soon as supported
-reserved:	XML-NAMESPACE # note: this is a register, move as soon as supported
-reserved:	XML-NAMESPACE-PREFIX # note: this is a register, move as soon as supported
-reserved:	XML-NNAMESPACE # note: this is a register, move as soon as supported
+reserved:	XML-CODE              # note: this is a register, move as soon as supported
+reserved:	XML-DECLARATION*      # note: not included in IBMs reserved words
+         	                      #       list, but as a phrase to be parsed
+         	                      #       for XML GENERATE
+reserved:	XML-EVENT             # note: this is a register, move as soon as supported
+reserved:	XML-INFORMATION       # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE         # note: this is a register, move as soon as supported
+reserved:	XML-NAMESPACE-PREFIX  # note: this is a register, move as soon as supported
+reserved:	XML-NNAMESPACE        # note: this is a register, move as soon as supported
 reserved:	XML-NNAMESPACE-PREFIX # note: this is a register, move as soon as supported
-reserved:	XML-NTEXT # note: this is a register, move as soon as supported
+reserved:	XML-NTEXT             # note: this is a register, move as soon as supported
 reserved:	XML-SCHEMA
-reserved:	XML-TEXT # note: this is a register, move as soon as supported
+reserved:	XML-TEXT              # note: this is a register, move as soon as supported
 reserved:	YYYYDDD*
 reserved:	YYYYMMDD*
 reserved:	ZERO
@@ -512,8 +535,8 @@ register:	DEBUG-ITEM
 register:	"LENGTH\ OF"
 # register:	LINAGE-COUNTER
 register:	RETURN-CODE
-# register:	SHIFT-IN
-# register:	SHIFT-OUT
+# register:	SHIFT-IN              #  78 SHIFT-IN  GLOBAL VALUE X"0F".
+# register:	SHIFT-OUT             #  78 SHIFT-OUT GLOBAL VALUE X"0E".
 # register:	SORT-CONTROL
 # register:	SORT-CORE-SIZE
 # register:	SORT-FILE-SIZE
@@ -558,6 +581,9 @@ intrinsic-function:	COS
 intrinsic-function:	CURRENT-DATE
 intrinsic-function:	DATE-OF-INTEGER
 intrinsic-function:	DATE-TO-YYYYMMDD
+#intrinsic-function:	DATEVAL          # IBM extension (Millennium Language Extension,
+#                   	                   removed with IBM Enterprise COBOL V5),
+#                   	                   not known to GnuCOBOL
 intrinsic-function:	DAY-OF-INTEGER
 intrinsic-function:	DAY-TO-YYYYDDD
 intrinsic-function:	DISPLAY-OF
@@ -592,13 +618,19 @@ intrinsic-function:	SQRT
 intrinsic-function:	STANDARD-DEVIATION
 intrinsic-function:	SUM
 intrinsic-function:	TAN
-#intrinsic-function:	ULENGTH		# IBM extension, not known to GnuCOBOL
-#intrinsic-function:	UPOS		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	ULENGTH          # IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UNDATE           # IBM extension (Millennium Language Extension,
+#                   	                   removed with IBM Enterprise COBOL V5),
+#                   	                   not known to GnuCOBOL
+#intrinsic-function:	UPOS             # IBM extension, not known to GnuCOBOL
 intrinsic-function:	UPPER-CASE
-#intrinsic-function:	USUBSTR		# IBM extension, not known to GnuCOBOL
-#intrinsic-function:	USUPPLEMENTARY		# IBM extension, not known to GnuCOBOL
-#intrinsic-function:	UVALID		# IBM extension, not known to GnuCOBOL
-#intrinsic-function:	UWIDTH		# IBM extension, not known to GnuCOBOL
+#intrinsic-function:	USUBSTR          # IBM extension, not known to GnuCOBOL
+#intrinsic-function:	USUPPLEMENTARY   # IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UVALID           # IBM extension, not known to GnuCOBOL
+#intrinsic-function:	UWIDTH           # IBM extension, not known to GnuCOBOL
 intrinsic-function:	VARIANCE
 intrinsic-function:	WHEN-COMPILED
 intrinsic-function:	YEAR-TO-YYYY
+#intrinsic-function:	YEARWINDOW       # IBM extension (Millennium Language Extension,
+#                   	                   removed with IBM Enterprise COBOL V5),
+#                   	                   not known to GnuCOBOL

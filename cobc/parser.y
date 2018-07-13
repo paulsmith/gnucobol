@@ -2305,6 +2305,7 @@ check_validate_item (cb_tree x)
 %token LIST_BOX			"LIST-BOX"
 %token LITERAL			"Literal"
 %token LM_RESIZE			"LM-RESIZE"
+%token LOC
 %token LOCALE
 %token LOCALE_DATE_FUNC		"FUNCTION LOCALE-DATE"
 %token LOCALE_TIME_FUNC		"FUNCTION LOCALE-TIME"
@@ -9891,20 +9892,34 @@ allocate_statement:
 ;
 
 allocate_body:
-  identifier flag_initialized allocate_returning
+  identifier flag_initialized _loc allocate_returning
   {
-	cb_emit_allocate ($1, $3, NULL, $2);
+	cb_emit_allocate ($1, $4, NULL, $2);
   }
-| exp CHARACTERS flag_initialized_to allocate_returning
+| exp CHARACTERS flag_initialized_to _loc allocate_returning
   {
-	if ($4 == NULL) {
+	if ($5 == NULL) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("ALLOCATE CHARACTERS requires RETURNING clause"));
 	} else {
-		cb_emit_allocate (NULL, $4, $1, $3);
+		cb_emit_allocate (NULL, $5, $1, $3);
 	}
   }
 ;
+
+_loc:
+  /* empty */
+| LOC integer
+  {
+	int adressing = cb_get_int ($2);
+
+	if (adressing == 24
+	 || adressing == 31) {
+		cb_warning (COBC_WARN_FILLER, _("ignoring %s phrase"), "LOC");
+	} else {
+		cb_error (_("addressing mode should be either 24 or 31 bit"));
+	}
+  }
 
 allocate_returning:
   /* empty */			{ $$ = NULL; }
@@ -10972,7 +10987,7 @@ disp_attr:
 | CONVERSION
   {
 	check_repeated ("CONVERSION", SYN_CLAUSE_8, &check_duplicate);
-	cb_warning (COBC_WARN_FILLER, _("ignoring CONVERSION"));
+	cb_warning (COBC_WARN_FILLER, _("ignoring %s phrase"), "CONVERSION");
   }
 | ERASE eol
   {
@@ -15138,7 +15153,7 @@ nonzero_numeric_literal:
   LITERAL
   {
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
-	    || cb_get_int ($1) == 0) {
+	 || cb_get_int ($1) == 0) {
 		cb_error (_("non-zero value expected"));
 		$$ = cb_int1;
 	} else {
@@ -15500,9 +15515,9 @@ unsigned_pos_integer:
 	int	n;
 
 	if (cb_tree_category ($1) != CB_CATEGORY_NUMERIC
-	    || !CB_LITERAL_P($1)
-	    || CB_LITERAL ($1)->sign
-	    || CB_LITERAL ($1)->scale) {
+	 || !CB_LITERAL_P($1)
+	 || CB_LITERAL ($1)->sign
+	 || CB_LITERAL ($1)->scale) {
 		cb_error (_("unsigned positive integer value expected"));
 		$$ = cb_int1;	} else {
 		n = cb_get_int ($1);

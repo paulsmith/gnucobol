@@ -1604,6 +1604,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LM-RESIZE",		0, 0, LM_RESIZE,		/* ACU extension */
 				0, 0				/* Checkme: likely context sensitive */
   },
+  { "LOC",		0, 0, LOC,		/* IBM extension (ignored) */
+				0, CB_CS_ALLOCATE
+  },
   { "LOCAL-STORAGE",		0, 0, LOCAL_STORAGE,		/* 2002 */
 				0, 0
   },
