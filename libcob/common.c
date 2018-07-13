@@ -3163,23 +3163,34 @@ cob_check_ref_mod (const int offset, const int length,
 	/* Check offset */
 	if (offset < 1 || offset > size) {
 		cob_set_exception (COB_EC_BOUND_REF_MOD);
-		cob_runtime_error (_("offset of '%s' out of bounds: %d"), name, offset);
+		if (offset < 1) {
+			cob_runtime_error (_("offset of '%s' out of bounds: %d"),
+			   name, offset);
+		} else {
+			cob_runtime_error (_("offset of '%s' out of bounds: %d, maximum: %d"),
+			   name, offset, size);
+		}
 		cob_stop_run (1);
 	}
 
 	/* Check plain length */
 	if (length < 1 || length > size) {
 		cob_set_exception (COB_EC_BOUND_REF_MOD);
-		cob_runtime_error (_("length of '%s' out of bounds: %d"),
-			name, length);
+		if (length < 1) {
+			cob_runtime_error (_("length of '%s' out of bounds: %d"),
+			   name, length);
+		} else {
+			cob_runtime_error (_("length of '%s' out of bounds: %d, maximum: %d"),
+			   name, length, size);
+		}
 		cob_stop_run (1);
 	}
 
 	/* Check length with offset */
 	if (offset + length - 1 > size) {
 		cob_set_exception (COB_EC_BOUND_REF_MOD);
-		cob_runtime_error (_("length of '%s' out of bounds: %d, starting at: %d"),
-			name, length, offset);
+		cob_runtime_error (_("length of '%s' out of bounds: %d, starting at: %d, maximum: %d"),
+			name, length, offset, size);
 		cob_stop_run (1);
 	}
 }
