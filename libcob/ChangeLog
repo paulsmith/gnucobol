@@ -1,4 +1,10 @@
 
+2018-07-14  Edward Hart <edward.dan.hart@gmail.com>
+
+	* screenio.c (get_screen_item_line_and_col): fixed bug #514, where
+	  length of elementary items with a LINE clause was ignored when
+	  calculating the COL of subsequent items.
+
 2018-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_check_ref_mod): display maximum size on overflow

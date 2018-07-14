@@ -838,26 +838,24 @@ get_screen_item_line_and_col (cob_screen * s, int * const line,
 	int		found_line = 0;
 	int		found_col = 0;
 	int	        is_screen_to_display = 1;
-	int		is_parent;
+	int		is_elementary;
 
 	*line = 0;
 	*col = 0;
 
+	/*
+	  Determine the line/col by looking at the given item and then moving
+	  backwards.
+	*/
 	for (; s; s = get_prev_screen_item (s)) {
-		if (s->line) {
-			if (!found_line) {
-				update_line (s, line, &found_line);
-			}
-
-			if (!s->column) {
-				found_col = 1;
-			}
+		if (s->line && !found_line) {
+			update_line (s, line, &found_line);
 		}
 
 		if (!found_col) {
-			is_parent = !!s->child;
+			is_elementary = !s->child;
 
-			if (!is_screen_to_display && !is_parent) {
+			if (!is_screen_to_display && is_elementary) {
 				*col += get_size (s) - 1;
 			}
 
@@ -865,12 +863,18 @@ get_screen_item_line_and_col (cob_screen * s, int * const line,
 				update_column (s, col, &found_col);
 			}
 
-			if (!s->column && !is_parent && !is_first_screen_item (s)) {
+			if (s->line && !s->column) {
+				found_col = 1;
+			}
+			
+			if (!found_col && !s->column && is_elementary
+			    && !is_first_screen_item (s)) {
 				/*
-				  Note that parents are excluded; the standard
-				  assumes COL + 1, unless otherwise specified,
-				  on all screen items. This seems silly on group
-				  items, hence why this non-standard extension.
+				  Note that group items are excluded; the
+				  standard assumes COL + 1, unless otherwise
+				  specified, on all screen items. This seems
+				  silly on group items, hence why this
+				  non-standard extension.
 				*/
 				++(*col);
 			}
