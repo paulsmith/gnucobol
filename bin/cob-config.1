@@ -1,0 +1,27 @@
+.TH cob-config "1" "July 2018" "cob-config (GnuCOBOL)" "User Commands"
+.SH NAME
+cob-config \- helper script for libcob (GnuCOBOL)
+.SH SYNOPSIS
+.B cob-config
+[\fIoptions\fR]
+.SH DESCRIPTION
+This is a shell script which simplifies building applications against libcob.
+.SH OPTIONS
+.TP
+\fB\-\-prefix\fR
+echos the package\-prefix of libcob
+.TP
+\fB\-\-exec\-prefix\fR
+echos the executable\-prefix of libcob
+.TP
+\fB\-\-version\fR
+echos the release version of libcob
+.TP
+\fB\-\-libs\fR
+echos the libraries needed to link with libcob
+.TP
+\fB\-\-cflags\fR
+echos the C compiler flags needed to compile with libcob
+.SH "SEE ALSO"
+.BR cobc (1)
+.BR cobcrun(1)

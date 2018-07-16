@@ -22,7 +22,7 @@
 bin_SCRIPTS = cob-config
 bin_PROGRAMS = cobcrun
 cobcrun_SOURCES = cobcrun.c
-dist_man_MANS = cobcrun.1
+dist_man_MANS = cobcrun.1 cob-config.1
 COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)
 
 AM_LDFLAGS = $(COB_EXPORT_DYN)
