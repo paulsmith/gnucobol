@@ -1,5 +1,6 @@
 ## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While, Simon Sobisch
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
+## Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -155,7 +156,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 
 AT_CLEANUP
 
-
 ## Expression
 
 AT_SETUP([Semi-parenthesized condition])
@@ -278,14 +278,28 @@ AT_DATA([prog.cob], [
               DISPLAY "Length 1 " L
               END-DISPLAY
            END-IF
-           MOVE LENGTH OF Y TO L
+           MOVE LENGTH OF X  TO L
+           IF L NOT = 2
+              DISPLAY "Length 1a " L LENGTH X
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH OF Y  TO L
            IF L NOT = 2
               DISPLAY "Length 2 " L
+              END-DISPLAY
+           END-IF
+           IF L NOT = 2
+              DISPLAY "Length 2a " L LENGTH OF Y
               END-DISPLAY
            END-IF
            MOVE LENGTH OF Y(1) TO L
            IF L NOT = 2
               DISPLAY "Length 3 " L
+              END-DISPLAY
+           END-IF
+           MOVE LENGTH Y(1) TO L
+           IF L NOT = 2
+              DISPLAY "Length 3a " L LENGTH OF Y(1)
               END-DISPLAY
            END-IF
            IF I-LEN NOT = 2
@@ -294,14 +308,22 @@ AT_DATA([prog.cob], [
            END-IF
            IF LENGTH OF L + 2 NOT = 8
               ADD 2 TO LENGTH OF L GIVING L
-              DISPLAY "Length 5 " L
+              DISPLAY "Length 5 + 2" L
+              END-DISPLAY
+           END-IF
+           IF LENGTH L + 2 NOT = 8
+              ADD 2 TO LENGTH L GIVING L
+              DISPLAY "Length 5a + 2 " L
               END-DISPLAY
            END-IF
            MOVE 0 TO L
            PERFORM LENGTH OF L TIMES
               ADD 1 TO L
            END-PERFORM
-           IF L NOT = 6
+           PERFORM LENGTH L TIMES
+              ADD 1 TO L
+           END-PERFORM
+           IF L NOT = 12
               DISPLAY "Length 6 " L
               END-DISPLAY
            END-IF
@@ -313,6 +335,16 @@ AT_DATA([prog.cob], [
            IF ((L NOT = 3) OR
                (I NOT = 8)    )
               DISPLAY "Length 7 " L " - " I
+              END-DISPLAY
+           END-IF
+           MOVE 0 TO L
+           PERFORM VARME
+                   VARYING I FROM LENGTH I
+                             BY   LENGTH X
+                   UNTIL   I > LENGTH L
+           IF ((L NOT = 3) OR
+               (I NOT = 8)    )
+              DISPLAY "Length 7a " L " - " I
               END-DISPLAY
            END-IF
            *> one display test
@@ -393,7 +425,6 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
-
 
 ## OCCURS
 
@@ -1132,7 +1163,6 @@ AT_CHECK([diff reference SEQODO], [0], [], [])
 
 AT_CLEANUP
 
-
 AT_SETUP([DEPENDING ON with ODOSLIDE for IBM])
 AT_KEYWORDS([OCCURS])
 
@@ -1376,7 +1406,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [12891289128912891289128912891289])
 
 AT_CLEANUP
 
-
 ## CALL
 
 AT_SETUP([CALL USING file-name])
@@ -1422,7 +1451,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -e TESTFILE], [0], [], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([CALL unusual PROGRAM-ID.])
 AT_KEYWORDS([extensions])
@@ -1487,7 +1515,6 @@ AT_CHECK([$COMPILE -o caller caller.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./caller], [0], [P1P2P3P4])
 
 AT_CLEANUP
-
 
 AT_SETUP([CALL / GOBACK with LOCAL-STORAGE])
 AT_KEYWORDS([extensions])
@@ -1750,7 +1777,6 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
 
-
 ## ASSIGN
 
 AT_SETUP([ASSIGN clause])
@@ -1780,7 +1806,6 @@ AT_CHECK([$COMPILE -fassign-clause=mf prog.cob], [0], [],
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([ASSIGN clause IBM])
 AT_KEYWORDS([extensions runfile])
@@ -1836,7 +1861,6 @@ AT_CHECK([DIR="." $COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CHECK([test -f "./FILENAME" && rm -f "./FILENAME"], [0], [], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([ASSIGN mapping])
 AT_KEYWORDS([extensions runfile optional])
@@ -2008,7 +2032,6 @@ STATUS OPENO 2 30
 ], [])
 
 AT_CLEANUP
-
 
 AT_SETUP([ASSIGN with COB_FILE_PATH])
 AT_KEYWORDS([extensions runfile])

@@ -733,16 +733,6 @@ H#[0-9A-Za-z]+ {
 	RETURN_TOK (EC);
 }
 
-"LENGTH"[ ,;\n]+"OF"/[ .,;\n] {
-	count_lines (yytext);
-	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
-	          if we actually want to do this,
-			  otherwise return 2 (!) WORD tokens (by adding a queue
-			  of tokens to be returned)
-	*/
-	RETURN_TOK (LENGTH_OF);
-}
-
 "SWITCH"[ ]+([0-9][0-9]?|[A-Z])/[ .,;\n] {
 	/* ACUCOBOL extension: switch-names with space and with letter */
 	char suffix[3] = "";

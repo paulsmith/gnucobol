@@ -2288,7 +2288,6 @@ check_validate_item (cb_tree x)
 %token LEFT_TEXT			"LEFT-TEXT"
 %token LENGTH
 %token LENGTH_FUNC		"FUNCTION LENGTH/BYTE-LENGTH"
-%token LENGTH_OF		"LENGTH OF"
 %token LESS
 %token LESS_OR_EQUAL		"LESS OR EQUAL"
 %token LIMIT
@@ -5753,11 +5752,11 @@ _const_global:
 
 lit_or_length:
   literal				{ $$ = $1; }
-| LENGTH_OF con_source		{ $$ = cb_build_const_length ($2); }
-| LENGTH con_source			{ $$ = cb_build_const_length ($2); }
+| LENGTH _of con_source			{ $$ = cb_build_const_length ($3); }
 /* note: only reserved in context of CB_CS_CONSTANT: */
 | BYTE_LENGTH _of con_source	{ $$ = cb_build_const_length ($3); }
 ;
+
 
 con_source:
   identifier_1
@@ -15045,15 +15044,15 @@ x_common:
   literal
 | function
 | line_linage_page_counter
-| LENGTH_OF identifier_1
+| length_of_register identifier_1
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF basic_literal
+| length_of_register basic_literal
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF function
+| length_of_register function
   {
 	$$ = cb_build_length ($2);
   }
@@ -15085,6 +15084,15 @@ x_common:
   }
 ;
 
+length_of_register:
+  LENGTH _of
+  {
+	/* FIXME: check with "lookup_register ("LENGTH OF") != NULL"
+	          if we actually want to do this,
+	          otherwise raise an error "not defined in this dialect"
+	*/
+  }
+;
 report_x_list:
   arith_x
   {
@@ -15107,15 +15115,15 @@ arith_x:
 | basic_literal
 | function
 | line_linage_page_counter
-| LENGTH_OF identifier_1
+| length_of_register identifier_1
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF basic_literal
+| length_of_register basic_literal
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF function
+| length_of_register function
   {
 	$$ = cb_build_length ($2);
   }
@@ -15125,15 +15133,15 @@ arith_nonzero_x:
   identifier
 | nonzero_numeric_literal
 | function
-| LENGTH_OF identifier_1
+| length_of_register identifier_1
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF basic_literal
+| length_of_register basic_literal
   {
 	$$ = cb_build_length ($2);
   }
-| LENGTH_OF function
+| length_of_register function
   {
 	$$ = cb_build_length ($2);
   }
