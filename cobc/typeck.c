@@ -3183,7 +3183,7 @@ cb_validate_program_data (struct cb_program *prog)
 					&& field->storage != CB_STORAGE_FILE
 					&& field->storage != CB_STORAGE_LOCAL) {
 					cb_error_x (file->assign,
-						_("file %s: ASSIGN %s declared outside WORKING-STORAGE"), 
+						_("file %s: ASSIGN %s declared outside WORKING-STORAGE"),
 						file->name, field->name);
 				}
 			}
@@ -9849,6 +9849,31 @@ cb_emit_reset_trace (void)
 
 /* REWRITE statement */
 
+static int
+error_if_invalid_file_from_clause_literal (cb_tree literal)
+{
+        enum cb_category	category = CB_TREE_CATEGORY (literal);
+	int	error = 0;
+
+	if (!(CB_CONST_P (literal) || CB_LITERAL_P (literal))) {
+		return 0;
+	}
+	
+	if (!(category == CB_CATEGORY_ALPHANUMERIC
+	      || category == CB_CATEGORY_NATIONAL
+	      || category == CB_CATEGORY_BOOLEAN)) {
+		cb_error_x (literal, _("literal in FROM clause must be alphanumeric, national or boolean"));
+		error = 1;
+	}
+	
+	if (cb_is_figurative_constant (literal)) {
+		cb_error_x (literal, _("figurative constants not allowed in FROM clause"));
+		error = 1;
+	}
+
+	return error;
+}
+
 void
 cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 {
@@ -9874,6 +9899,10 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 			record = CB_TREE(f->record->sister);
 		} else {
 			record = CB_TREE(f->record);
+		}
+		
+		if (error_if_invalid_file_from_clause_literal (from)) {
+			return;
 		}
 	} else {
 		if (!CB_REF_OR_FIELD_P (rtree)) {
@@ -9904,6 +9933,10 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
 				_("%s not allowed on %s files"), "REWRITE", "SORT");
+		return;
+	} else if (f->reports) {
+		cb_error_x (CB_TREE (current_statement),
+				_("%s not allowed on %s files"), "REWRITE", "REPORT");
 		return;
 	} else if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
 		cb_error_x (CB_TREE (current_statement),
@@ -10836,17 +10869,22 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	}
 	rtree = cb_ref (record);
 	if (CB_FILE_P (rtree)) {
+		/* FILE filename: was used */
 		if (from == NULL) {
 			cb_error_x (CB_TREE (current_statement),
 				_("%s FILE requires a FROM clause"), "WRITE");
 			return;
 		}
-		file = rtree;		/* FILE filename: was used */
+		file = rtree;
 		f = CB_FILE (file);
 		if (f->record->sister) {
 			record = CB_TREE(f->record->sister);
 		} else {
 			record = CB_TREE(f->record);
+		}
+		
+		if (error_if_invalid_file_from_clause_literal (from)) {
+			return;
 		}
 	} else {
 		if (!CB_REF_OR_FIELD_P (rtree)) {
@@ -10875,6 +10913,10 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	if (f->organization == COB_ORG_SORT) {
 		cb_error_x (CB_TREE (current_statement),
 		_("%s not allowed on %s files"), "WRITE", "SORT");
+	} else if (f->reports) {
+		cb_error_x (CB_TREE (current_statement),
+			    _("%s not allowed on %s files"), "WRITE", "REPORT");
+		return;
 	} else if (current_statement->handler_type == INVALID_KEY_HANDLER &&
 		  (f->organization != COB_ORG_RELATIVE &&
 		   f->organization != COB_ORG_INDEXED)) {

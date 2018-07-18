@@ -938,7 +938,7 @@ AT_DATA([prog.cob], [
             STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:9: error: file FILE1: RELATIVE KEY FILE1-KEY is not numeric
 prog.cob:12: error: file FILE2: RELATIVE KEY FILE2-KEY is not numeric
 prog.cob:15: error: file FILE3: RELATIVE KEY FILE3-KEY cannot have OCCURS
@@ -964,7 +964,7 @@ AT_DATA([prog.cob], [
                 RELATIVE, RECORD KEY file-2-key.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: cannot use RELATIVE KEY clause on INDEXED files
 prog.cob:10: error: cannot use RECORD KEY clause on RELATIVE files
 prog.cob:8: error: 'file-1-key' is not defined
@@ -1068,7 +1068,7 @@ AT_DATA([prog.cob], [
        01  bad-5-rec PIC 9.
 ])
 
-AT_CHECK([$COMPILE -frecord-delim-with-fixed-recs=warning prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -frecord-delim-with-fixed-recs=warning prog.cob], [1], [],
 [prog.cob:25: warning: RECORD DELIMITER STANDARD-1 ignored
 prog.cob:28: warning: Phrase in RECORD DELIMITER not recognized; will be ignored.
 prog.cob:33: error: ORGANIZATION INDEXED is incompatible with RECORD DELIMITER
@@ -1121,15 +1121,15 @@ AT_DATA([prog.cob], [
             STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:16: error: VSAM STATUS does not conform to GnuCOBOL
 ])
 
-AT_CHECK([$COMPILE -frelax-syntax-checks prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
 [prog.cob:16: warning: VSAM STATUS ignored
 ])
 
-AT_CHECK([$COMPILE -std=ibm-strict prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob], [0], [],
 [prog.cob:16: warning: VSAM STATUS ignored
 ])
 
@@ -1177,7 +1177,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:10: warning: PASSWORD clause is not implemented
 prog.cob:15: warning: PASSWORD clause is not implemented
 prog.cob:18: warning: PASSWORD clause is not implemented
@@ -1214,9 +1214,58 @@ AT_DATA([prog.cob], [
        01  f3-rec PIC X.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:18: error: file 'f1': RECORD VARYING specified without limits, but implied limits are equal
 prog.cob:18: error: RECORD clause invalid
 prog.cob:21: error: RECORD clause invalid
+])
+AT_CLEANUP
+
+
+AT_SETUP([FILE ... FROM literal])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN TO "ssad" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f REPORT f-rep.
+       01  f-rec PIC 999999.
+
+       WORKING-STORAGE SECTION.
+       01  num PIC 9(6) VALUE 123456.
+
+       REPORT SECTION.
+       RD  f-rep.
+       01  f-rep-line TYPE DE PIC XXX.
+
+       PROCEDURE DIVISION.
+           OPEN OUTPUT f
+           WRITE FILE f FROM zero
+           WRITE FILE f FROM 0
+           WRITE FILE f FROM "abc"
+           REWRITE FILE f FROM zero
+           REWRITE FILE f FROM 0
+           REWRITE FILE f FROM "abc"
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:25: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:25: error: figurative constants not allowed in FROM clause
+prog.cob:25: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:26: error: WRITE not allowed on REPORT files
+prog.cob:28: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:28: error: figurative constants not allowed in FROM clause
+prog.cob:28: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:29: error: REWRITE not allowed on REPORT files
 ])
 AT_CLEANUP
