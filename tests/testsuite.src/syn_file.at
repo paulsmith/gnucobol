@@ -1269,3 +1269,23 @@ prog.cob:28: error: literal in FROM clause must be alphanumeric, national or boo
 prog.cob:29: error: REWRITE not allowed on REPORT files
 ])
 AT_CLEANUP
+
+
+AT_SETUP([SELECT without fd-name])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ASSIGN "asd".
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: syntax error, unexpected ASSIGN, expecting Identifier
+prog.cob:8: error: syntax error, unexpected Literal
+])
+AT_CLEANUP

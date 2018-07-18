@@ -4261,17 +4261,17 @@ file_control_entry:
   _select_clauses_or_error
   {
 	cobc_cs_check = 0;
-	if (current_file->organization == COB_ORG_INDEXED
-	    && key_type == RELATIVE_KEY) {
-		cb_error_x (current_file->key,
-			    _("cannot use RELATIVE KEY clause on INDEXED files"));
-	} else if (current_file->organization == COB_ORG_RELATIVE
-		   && key_type == RECORD_KEY) {
-		cb_error_x (current_file->key,
-			    _("cannot use RECORD KEY clause on RELATIVE files"));
-	}
-
 	if (CB_VALID_TREE ($3)) {
+		if (current_file->organization == COB_ORG_INDEXED
+		    && key_type == RELATIVE_KEY) {
+			cb_error_x (current_file->key,
+				    _("cannot use RELATIVE KEY clause on INDEXED files"));
+		} else if (current_file->organization == COB_ORG_RELATIVE
+			   && key_type == RECORD_KEY) {
+			cb_error_x (current_file->key,
+				    _("cannot use RECORD KEY clause on RELATIVE files"));
+		}
+
 		validate_file (current_file, $3);
 	}
   }
@@ -4500,7 +4500,7 @@ alternative_record_key_clause:
 		p->tf_suppress = 0;
 	}
 	p->next = NULL;
-	
+
 	/* handle split keys */
 	if ($6) {
 		/* generate field (in w-s) for composite-key */
@@ -4508,7 +4508,7 @@ alternative_record_key_clause:
 		if (composite_key == cb_error_node) {
 			YYERROR;
 		} else {
-			composite_key->category = CB_CATEGORY_ALPHANUMERIC; 
+			composite_key->category = CB_CATEGORY_ALPHANUMERIC;
 			((struct cb_field *)composite_key)->count = 1;
 			p->key = cb_build_field_reference((struct cb_field *)composite_key, NULL);
 			p->component_list = key_component_list;
@@ -4779,7 +4779,7 @@ record_key_clause:
 		if (composite_key == cb_error_node) {
 			YYERROR;
 		} else {
-			composite_key->category = CB_CATEGORY_ALPHANUMERIC; 
+			composite_key->category = CB_CATEGORY_ALPHANUMERIC;
 			((struct cb_field *)composite_key)->count = 1;
 			current_file->key = cb_build_field_reference ((struct cb_field *)composite_key, NULL);
 			current_file->component_list = key_component_list;
@@ -5187,7 +5187,7 @@ record_clause:
 	check_repeated ("RECORD", SYN_CLAUSE_4, &check_duplicate);
 	current_file->record_min = $6 ? cb_get_int ($6) : 0;
 	current_file->record_max = $7 ? cb_get_int ($7) : 0;
-	current_file->flag_check_record_varying_limits = 
+	current_file->flag_check_record_varying_limits =
 		current_file->record_min == 0 || current_file->record_max == 0;
 	if ($6 && current_file->record_min < 0)  {
 		current_file->record_min = 0;
@@ -9645,7 +9645,7 @@ accp_attr:
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
-| SAME /* ACU (?) extension to use the video attributes 
+| SAME /* ACU (?) extension to use the video attributes
           currently present at the field's screen location. */
   {
 	CB_PENDING("SAME phrase");
@@ -11013,7 +11013,7 @@ disp_attr:
 	set_dispattr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
 				    "HIGHLIGHT", COB_SCREEN_HIGHLIGHT);
   }
-| SAME /* ACU (?) extension to use the video attributes 
+| SAME /* ACU (?) extension to use the video attributes
           currently present at the field's screen location. */
   {
 	CB_PENDING("SAME phrase");
