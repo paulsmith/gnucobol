@@ -5768,6 +5768,8 @@ con_source:
   {
 	$$ = $1;
   }
+/* note: all entries below are non-standard GnuCOBOL only extensions
+        (and miss the newer fixed-length USAGE types) */
 | BINARY_CHAR
   {
 	$$ = cb_int1;

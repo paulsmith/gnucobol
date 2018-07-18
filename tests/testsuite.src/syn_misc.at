@@ -559,7 +559,7 @@ AT_DATA([prog.cob], [
             STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:10: error: GREATER THAN operator may be misplaced
 prog.cob:17: error: EQUALS operator may be misplaced
@@ -598,8 +598,8 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COMPILE -fno-constant-folding prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -fno-constant-folding prog.cob], [0], [], [])
 
 AT_CLEANUP
 
@@ -686,8 +686,8 @@ AT_DATA([prog.cob], [
        END PROGRAM prog.
 ])
 
-# Note: we need to test for generating a valid C source (with normal/no flags),
-#       not only for COBOL compilation
+# Note: we need to test for generating a valid C source (with normal/no flags)
+#       here, not only for COBOL compilation
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBC prog.cob], [0], [], [])
 
@@ -2472,7 +2472,10 @@ AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
 prog2.cob:17: error: invalid symbol '|' - skipping word
 ])
 
-
+# note: for checking the result we actually either need to run the program
+#       or change it to string concatenation and raise a constant compile time warning
+#       we do (historically) the first (for now)
+#       
 AT_CHECK([$COMPILE -fmfcomment prog.cob], [0], [],
 [])
 
@@ -2487,10 +2490,10 @@ AT_CHECK([$COMPILE_ONLY -fmfcomment prog2.cob], [1], [],
 prog2.cob:17: error: invalid symbol '|' - skipping word
 ])
 
+# COMPILE needed, see note above
+AT_CHECK([$COMPILE -facucomment prog.cob -o prog1], [0], [], [])
 
-AT_CHECK([$COMPILE -facucomment prog.cob], [0], [], [])
-
-AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+AT_CHECK([$COBCRUN_DIRECT ./prog1], [0],
 [MFCOMMENTASTERISK
 MFCOMMENTSLASH
 NOMFCOMMENTASTERISK
@@ -2498,6 +2501,7 @@ NOMFCOMMENTSLASH
 NOFLOATING
 ], [])
 
+# COMPILE needed, see note above
 AT_CHECK([$COMPILE -facucomment prog2.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
@@ -3336,9 +3340,9 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-#AT_CHECK([$COMPILE -std=acu prog.cob], [0], [], [])
+#AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [0], [], [])
 # TODO check the result according to COB_32_BIT_LONG --> 1 should result in the following
-AT_CHECK([$COMPILE -std=acu prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
 [prog.cob:7: error: invalid B# literal: '11111111111111111111111111111111111...'
 prog.cob:7: error: literal exceeds limit 4294967295
 prog.cob:8: error: invalid O# literal: '1111111111111111111111'
@@ -4697,13 +4701,13 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:7: error: missing right parenthesis
 prog.cob:8: error: missing left parenthesis
 prog.cob:9: error: '/' operator misplaced
 ])
 
-AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
 [prog.cob:6: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob:7: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 prog.cob:8: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
@@ -4711,13 +4715,13 @@ prog.cob:9: error: syntax error, unexpected Identifier, expecting EXTERNAL or EX
 prog.cob:10: error: syntax error, unexpected Identifier, expecting EXTERNAL or EXTERNAL-FORM or GLOBAL or IDENTIFIED
 ])
 
-AT_CHECK([$COMPILE -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf-strict -freserved=CONSTANT prog.cob], [1], [],
 [prog.cob:6: error: 01 CONSTANT does not conform to Micro Focus COBOL
 prog.cob:7: error: 01 CONSTANT does not conform to Micro Focus COBOL
 prog.cob:7: error: syntax error, unexpected Identifier, expecting .
 ])
 
-AT_CHECK([$COMPILE -std=mf prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [1], [],
 [prog.cob:7: error: missing right parenthesis
 prog.cob:8: error: missing left parenthesis
 prog.cob:9: error: '/' operator misplaced
@@ -4746,20 +4750,20 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: missing right parenthesis
 prog.cob:9: error: missing left parenthesis
 prog.cob:10: error: '/' operator misplaced
 ])
 
-AT_CHECK([$COMPILE -std=ibm-strict prog.cob ], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm-strict prog.cob ], [1], [],
 [prog.cob:6: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:7: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:8: error: 78 VALUE does not conform to IBM COBOL
 prog.cob:8: error: syntax error, unexpected Identifier, expecting .
 ])
 
-AT_CHECK([$COMPILE -std=ibm prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [1], [],
 [prog.cob:8: error: missing right parenthesis
 prog.cob:9: error: missing left parenthesis
 prog.cob:10: error: '/' operator misplaced
@@ -4769,7 +4773,7 @@ AT_CLEANUP
 
 
 AT_SETUP([level 78 NEXT / START OF])
-AT_KEYWORDS([extensions constant])
+AT_KEYWORDS([extensions constant length])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4792,7 +4796,8 @@ AT_DATA([prog.cob], [
           05  FLD6   PIC X(4).
        01  PICX      PIC XXX VALUE 'Abc'.
        78  HUN       VALUE 10 * (10 + LENGTH OF PICX) + 12.35-2+3.
-       78  HUN2      VALUE HUN * (10 + LENGTH OF PICX) -4.
+       78  HUN2      VALUE HUN * (10 + LENGTH
+                                       OF PICX) -4.
        78  DIV1      VALUE 100 / 3.
        78  STRT4     VALUE START OF FLD4.
        LINKAGE SECTION.
@@ -4810,7 +4815,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:6: error: VALUE of 'POS0': NEXT target is invalid
 prog.cob:6: error: no previous data-item found
 prog.cob:10: error: VALUE of 'POS3': NEXT target is invalid
@@ -4819,8 +4824,8 @@ prog.cob:12: error: VALUE of 'POS4': NEXT target is invalid
 prog.cob:12: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
 prog.cob:14: error: VALUE of 'POS-NEXT': NEXT target is invalid
 prog.cob:14: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
-prog.cob:24: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
-prog.cob:24: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
+prog.cob:25: error: VALUE of 'STRT4': START OF target 'FLD4' is invalid
+prog.cob:25: error: target must be in FILE SECTION or LINKAGE SECTION or have the EXTERNAL clause
 ])
 
 AT_CLEANUP
@@ -4850,21 +4855,21 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:18: warning: value size exceeds data size
 prog.cob:18: warning: value size is 6
 prog.cob:13: warning: 'SHORT-X' defined here as PIC X(5)
 ])
 
-AT_CHECK([$COMPILE -std=mf-strict prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [1], [],
 [prog.cob:9: error: invalid SYMBOLIC clause
 prog.cob:9: error: integer value expected
 prog.cob: in paragraph 'MAIN':
 prog.cob:17: error: 'con-1' is not defined
 ])
 
-AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob:9: error: SYMBOLIC CONSTANT does not conform to COBOL 2014
 prog.cob: in paragraph 'MAIN':
 prog.cob:18: warning: value size exceeds data size
@@ -5241,8 +5246,8 @@ prog.cob:52: warning: WHEN without imperative statement used
 AT_CLEANUP
 
 
-AT_SETUP([CONSTANT LENGTH])
-AT_KEYWORDS([LENGTH])
+AT_SETUP([CONSTANT LENGTH / BYTE-LENGTH])
+AT_KEYWORDS([misc])
 
 AT_DATA([prog.cob], [
        identification division.
@@ -5254,11 +5259,14 @@ AT_DATA([prog.cob], [
            05  item-05-a       pointer.
            05  item-05-b       pic x(01).
        01 myk-01 constant global as length of item-01.
-       01 myk-02 constant global as length of item-05-a.
-       01 myk-03 constant global as length of pointer.
+       01 myk-02 constant is global as length item-05-a.
+       01 myk-03 constant global as length of pointer. *> extension
+       01 myk-04 constant global as byte-length of item-01.
+       01 myk-05 constant is global as byte-length item-05-a.
+       01 myk-06 constant global as byte-length of pointer. *> extension
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
 AT_CLEANUP
 
 
