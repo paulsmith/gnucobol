@@ -1,4 +1,9 @@
 
+2018-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* scanner.l: allow floating-point literals containing no digit after
+	  decimal point in significand (explicit specified in ACUCOBOL docs)
+
 2018-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: adjusted length_of handling to distinguish constant-entry

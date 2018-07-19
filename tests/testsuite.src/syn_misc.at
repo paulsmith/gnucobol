@@ -2910,7 +2910,7 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
            *> Valid literals
-           DISPLAY 1.0E6144, +1.0E+3, +1.0E-6143,
+           DISPLAY 1.0E6144, +1.0E+3, +1.0E-6143, 123.E1,
                +.123456789012345678901234567890123456E+0000
            END-DISPLAY
 
@@ -2941,7 +2941,7 @@ AT_DATA([prog2.cob], [
             DECIMAL-POINT IS COMMA.
        PROCEDURE        DIVISION.
            *> Valid literals
-           DISPLAY 1,0E6144; +1,0E+3; +1,0E-6143;
+           DISPLAY 1,0E6144; +1,0E+3; +1,0E-6143; 123,E1;
                +,123456789012345678901234567890123456E+0000
            END-DISPLAY
 

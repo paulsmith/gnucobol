@@ -465,12 +465,12 @@ H#[0-9A-Za-z]+ {
 	/* Ignore */
 }
 
-<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]+ {
+<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]*E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
 	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
-<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]+E[+-]?[0-9]*\.[0-9]+ {
+<DECIMAL_IS_PERIOD>[+-]?[0-9]*\.[0-9]*E[+-]?[0-9]*\.[0-9]+ {
 	/* Invalid numeric floating point literal */
 	RETURN_TOK (scan_floating_numeric (yytext));
 }
@@ -487,12 +487,12 @@ H#[0-9A-Za-z]+ {
 	/* Ignore */
 }
 
-<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]+ {
+<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]*E[+-]?[0-9]+ {
 	/* Numeric floating point literal */
 	RETURN_TOK (scan_floating_numeric (yytext));
 }
 
-<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]+E[+-]?[0-9]*,[0-9]+ {
+<DECIMAL_IS_COMMA>[+-]?[0-9]*,[0-9]*E[+-]?[0-9]*,[0-9]+ {
 	/* Invalid numeric floating point literal */
 	RETURN_TOK (scan_floating_numeric (yytext));
 }
