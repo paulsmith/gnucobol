@@ -4,6 +4,8 @@
 	* scanner.l: allow floating-point literals containing no digit after
 	  decimal point in significand (explicit specified in ACUCOBOL docs)
 	* reserved.c, parser.y, field.c, tree.h: added parsing for VOLATILE clause
+	* typeck.c (cb_build_expr): use correct line number for warning
+	  "suggest parentheses around AND within OR"
 
 2018-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

@@ -3951,12 +3951,16 @@ cb_build_expr (cb_tree list)
 			   (i.e., "a OR b AND c" or "a AND b OR c") */
 			if (cb_warn_parentheses
 			 && expr_index > 3) {
+				cb_tree e = cb_any;
+				e->source_line = cb_exp_line;
+				e->source_file = cb_source_file;
+
 				if (op == '|' && expr_stack[expr_index-2].token == '&') {
-					cb_warning (cb_warn_parentheses,
+					cb_warning_x (cb_warn_parentheses, e,
 						_("suggest parentheses around %s within %s"), "AND", "OR");
 				} else
 				if (op == '&' && expr_stack[expr_index-2].token == '|') {
-					cb_warning (cb_warn_parentheses,
+					cb_warning_x (cb_warn_parentheses, e,
 						_("suggest parentheses around %s within %s"), "OR", "AND");
 				}
 			}
@@ -4847,7 +4851,7 @@ cb_build_cond (cb_tree x)
 	if (cb_arithmetic_osvs) {
 		/* ARITHMETIC-OSVS: Determine largest scale used in condition */
 		if (expr_dmax == -1) {
-			/* FIXME: this is a hack, x should always be a list !*/
+			/* FIXME: this is a hack, x should always be a list! */
 			if (CB_LIST_P(x)) {
 				expr_rslt = CB_VALUE(x);
 			} else {

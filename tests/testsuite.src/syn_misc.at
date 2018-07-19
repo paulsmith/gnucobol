@@ -44,8 +44,8 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY -Wno-constant-expression prog.cob], [0], [],
-[prog.cob:11: warning: suggest parentheses around AND within OR
-prog.cob:15: warning: suggest parentheses around OR within AND
+[prog.cob:10: warning: suggest parentheses around AND within OR
+prog.cob:14: warning: suggest parentheses around OR within AND
 ])
 
 AT_CLEANUP
