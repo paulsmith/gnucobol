@@ -497,7 +497,7 @@ prog.cob:14: error: invalid expression
 prog.cob:18: error: invalid expression
 prog.cob:22: error: invalid expression
 prog.cob:26: error: invalid expression
-prog.cob:30: error: invalid expression
+prog.cob:30: error: invalid conditional expression
 prog.cob:35: error: invalid expression
 prog.cob:38: error: invalid expression
 prog.cob:41: error: invalid expression
@@ -566,6 +566,70 @@ prog.cob:17: error: EQUALS operator may be misplaced
 prog.cob:20: error: NOT EQUAL operator may be misplaced
 prog.cob:29: error: LESS OR EQUAL operator may be misplaced
 prog.cob:32: error: invalid expression
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Invalid conditional expression (3)])
+AT_KEYWORDS([expression condition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+      ******************************************************************
+       WORKING-STORAGE SECTION.
+      *
+       01 FLD1 PIC 9 VALUE 1.
+       01 FLD2 PIC 9 VALUE 2.
+       01 FLDX PIC 9 VALUE 5.
+       01 FLDY PIC 9 VALUE 6.
+
+       PROCEDURE DIVISION.
+           IF 1 AND 2 > 1 THEN
+                DISPLAY 'Test 1 is WRONG'
+           ELSE
+                DISPLAY 'Test 1 is OK'.
+
+           IF FLD1 AND FLDX > FLD2 THEN
+                DISPLAY 'Test 2 is OK'
+           ELSE
+                DISPLAY 'Test 2 is Wrong'.
+
+           IF FLD1 OR FLDX > FLD2 THEN
+                DISPLAY 'Test 2 is OK'
+           ELSE
+                DISPLAY 'Test 2 is Wrong'.
+
+           IF FLD1 > 2 AND FLDX > FLD2 THEN
+                DISPLAY 'Test 2 is OK'
+           ELSE
+                DISPLAY 'Test 2 is Wrong'.
+
+           IF FLD2 IS NUMERIC AND FLD1 THEN
+                DISPLAY 'Test 2 is OK'
+           ELSE
+                DISPLAY 'Test 2 is Wrong'.
+
+           IF FLDX > FLD2 AND FLD1 AND 8 THEN
+                DISPLAY 'Test 3 is OK ' FLDX ' > ' FLD2 ' & ' FLD1
+           ELSE
+                DISPLAY 'Test 3 is Wrong'.
+
+           IF FLDX > FLD2 OR FLD1 OR 8 THEN
+                DISPLAY 'Test 3 is OK'
+           ELSE
+                DISPLAY 'Test 3 is Wrong'.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:15: error: invalid conditional expression
+prog.cob:20: error: invalid conditional expression
+prog.cob:25: error: invalid conditional expression
+prog.cob:35: error: invalid expression
 ])
 
 AT_CLEANUP
@@ -4193,7 +4257,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:19: error: invalid expression: 1 OR 2
+[prog.cob:19: error: invalid conditional expression
 prog.cob:16: error: invalid expression
 prog.cob:29: error: wrong number of WHEN parameters
 ])

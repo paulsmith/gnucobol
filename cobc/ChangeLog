@@ -43,6 +43,11 @@
 	  on CANCEL of RECURSIVE programs" by adjusting generation of
 	  CANCEL callback
 
+2018-06-28  Ron Norman <rjn@inglenet.com>
+
+	* typeck.c (cb_build_expr): fix bug #526 - Check for properly formed
+	  'Abbreviated conditional expressions'
+
 2018-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* field.c (validate_usage): fixed SIGSEGV when PICTURE is missing
