@@ -2055,18 +2055,24 @@ static void
 output_emit_field (cb_tree x, const char *cmt)
 {
 	struct cb_field *f = cb_code_field (x);
-	int	i;
-	if(f
-	&& !(f->report_flag & COB_REPORT_REF_EMITTED)) {
-		if(f->step_count < f->size)
-			f->step_count = f->size;
+
+	if (!f) {
+		return;
+	}
+	
+	if (!(f->report_flag & COB_REPORT_REF_EMITTED)) {
+		int	i;
+
 		f->report_flag |= COB_REPORT_REF_EMITTED;
-		if(f->flag_occurs && f->occurs_max > 1) {
+		if (f->step_count < f->size) {
+			f->step_count = f->size;
+		}
+		if (f->flag_occurs && f->occurs_max > 1) {
 			output_local("\t\t/* col%3d %s OCCURS %d ", f->report_column, f->name, f->occurs_max);
 			if(cmt && strlen(cmt) > 0)
 				output_local(": %s ",cmt);
 			output_local("*/\n");
-			for(i=1; i <= f->occurs_max; i++) {
+			for (i=1; i <= f->occurs_max; i++) {
 				if(i == 1) {
 					output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD, f->id);
 				} else {
@@ -2123,8 +2129,8 @@ output_local_field_cache (struct cb_program *prog)
 	local_field_cache = list_cache_sort (local_field_cache,
 					     &field_cache_cmp);
 	for (field = local_field_cache; field; field = field->next) {
-		output ("static cob_field %s%d\t= ", CB_PREFIX_FIELD,
-			field->f->id);
+		output ("static cob_field %s%d\t= ",
+			CB_PREFIX_FIELD, field->f->id);
 
 		if (!field->f->flag_local
 		 && !field->f->flag_external) {
@@ -3520,7 +3526,7 @@ output_param (cb_tree x, int id)
 				fl->curr_prog = excp_current_program_id;
 				if (f->index_type != CB_INT_INDEX
 				    && (f->flag_is_global
-					|| current_prog->flag_file_global)) {
+					    || current_prog->flag_file_global)) {
 					fl->next = field_cache;
 					field_cache = fl;
 				} else {

@@ -3,6 +3,7 @@
 
 	* scanner.l: allow floating-point literals containing no digit after
 	  decimal point in significand (explicit specified in ACUCOBOL docs)
+	* reserved.c, parser.y, field.c, tree.h: added parsing for VOLATILE clause
 
 2018-07-18  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -11,8 +12,9 @@
 
 2018-07-18  Edward Hart <edward.dan.hart@gmail.com>
 
-	* typeck.c: added checks for (RE)WRITE FILE f FROM literal (bug #411).
-	* parser.y (file_control_entry): fixed regression caused when fixing bug #405.
+	* typeck.c: added checks for (RE)WRITE FILE f FROM literal (bug #411)
+	* parser.y (file_control_entry): fixed regression caused when fixing
+	  bug #405
 
 2018-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
@@ -26,8 +28,8 @@
 2018-07-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* tree.c (cb_build_picture): fixed calculation of number of decimal
-	  digits in PICs with floating +/- after decimal point, e.g. --.--. See
-	  bug #220.
+	  digits in PICs with floating +/- after decimal point, e.g. --.--.
+	  See bug #220
 
 2018-07-04  Ron Norman <rjn@inglenet.com>
 

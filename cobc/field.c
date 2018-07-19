@@ -521,7 +521,7 @@ same_level:
 			}
 		}
 		if (cb_relax_level_hierarchy
-		&& p /* <- silence warnings */) {
+		 && p /* <- silence warnings */) {
 			dummy_fill = cb_build_filler ();
 			field_fill = CB_FIELD (cb_build_field (dummy_fill));
 			cb_warning_x (COBC_WARN_FILLER, name,
@@ -554,6 +554,9 @@ same_level:
 		f->flag_sign_leading = f->parent->flag_sign_leading;
 		f->flag_sign_separate = f->parent->flag_sign_separate;
 		f->flag_is_global = f->parent->flag_is_global;
+		if (f->level <= 66) {
+			f->flag_volatile = f->parent->flag_volatile;
+		} 
 	}
 
 	return CB_TREE (f);

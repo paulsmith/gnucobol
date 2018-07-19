@@ -2793,6 +2793,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VIRTUAL-WIDTH",			0, 1, VIRTUAL_WIDTH,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "VOLATILE",			0, 0, VOLATILE,			/* IBM Extension */
+				0, 0
+  },
   { "VPADDING",			0, 1, VPADDING,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },

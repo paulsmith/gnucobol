@@ -2712,6 +2712,7 @@ check_validate_item (cb_tree x)
 %token VERTICAL
 %token VERY_HEAVY		"VERY-HEAVY"
 %token VIRTUAL_WIDTH	"VIRTUAL-WIDTH"
+%token VOLATILE
 %token VPADDING
 %token VSCROLL
 %token VSCROLL_BAR		"VSCROLL-BAR"
@@ -5674,7 +5675,7 @@ data_description:
 	if (set_current_field ($1, $2)) {
 		YYERROR;
 	}
-    save_tree = NULL;
+	save_tree = NULL;
   }
   _data_description_clause_sequence
   {
@@ -6017,6 +6018,7 @@ data_description_clause:
 | any_length_clause
 | external_form_clause
 | identified_by_clause
+| volatile_clause
 ;
 
 
@@ -6106,6 +6108,23 @@ global_clause:
 	} else {
 		current_field->flag_is_global = 1;
 	}
+  }
+;
+
+
+/* VOLATILE clause */
+
+volatile_clause:
+  VOLATILE
+  {
+	check_repeated ("VOLATILE", SYN_CLAUSE_24, &check_pic_duplicate);
+	/* note: there is no reason to check current_storage as we only parse
+	         volatile_clause and its parent tokens where applicable,
+	         same is true for level 66,78,88 */
+	/* missing part: always generate and initialize storage */
+	CB_UNFINISHED ("VOLATILE");
+	current_field->flag_volatile = 1;
+	/* TODO: set VOLATILE flag for all parent fields */
   }
 ;
 
@@ -6645,9 +6664,7 @@ based_clause:
   BASED
   {
 	check_repeated ("BASED", SYN_CLAUSE_11, &check_pic_duplicate);
-	if (current_storage != CB_STORAGE_WORKING &&
-	    current_storage != CB_STORAGE_LINKAGE &&
-	    current_storage != CB_STORAGE_LOCAL) {
+	if (current_storage == CB_STORAGE_FILE) {
 		cb_error (_("%s not allowed here"), "BASED");
 	} else if (current_field->level != 1 && current_field->level != 77) {
 		cb_error (_("%s only allowed at 01/77 level"), "BASED");

@@ -807,17 +807,17 @@ struct cb_field {
 	unsigned int flag_is_external_form : 1;		/* Is EXTERNAL-FORM */
 	unsigned int flag_filler	: 1;	/* Implicit/explicit filler */
 	unsigned int flag_synchronized	: 1;	/* SYNCHRONIZED */
-	unsigned int flag_invalid	: 1;	/* Is broken */
 
+	unsigned int flag_invalid	: 1;	/* Is broken */
 	unsigned int flag_field		: 1;	/* Has been internally cached */
 	unsigned int flag_chained	: 1;	/* CHAINING item */
 	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
-	unsigned int flag_indexed_by	: 1;	/* INDEXED BY item */
 	unsigned int flag_is_verified	: 1;	/* Has been verified */
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
 	unsigned int flag_is_pdiv_parm	: 1;	/* Is PROC DIV USING */
 	unsigned int flag_is_pdiv_opt	: 1;	/* Is PROC DIV USING OPTIONAL */
 
+	unsigned int flag_indexed_by	: 1;	/* INDEXED BY item */
 	unsigned int flag_local_alloced	: 1;	/* LOCAL storage is allocated */
 	unsigned int flag_no_init	: 1;	/* No initialize unless used */
 	unsigned int flag_vsize_done	: 1;	/* Variable size cached */
@@ -826,15 +826,15 @@ struct cb_field {
 							on size of a different (ODO) item */
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_all_debug	: 1;	/* DEBUGGING */
-	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */
 
+	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 	unsigned int flag_unbounded	: 1;	/* OCCURS UNBOUNDED */
-
 	unsigned int flag_constant	: 1;	/* Is 01 AS CONSTANT */
 	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
+	unsigned int flag_volatile	: 1;	/* VOLATILE */
 };
 
 #define CB_FIELD(x)		(CB_TREE_CAST (CB_TAG_FIELD, struct cb_field, x))

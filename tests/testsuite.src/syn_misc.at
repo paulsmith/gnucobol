@@ -2475,7 +2475,7 @@ prog2.cob:17: error: invalid symbol '|' - skipping word
 # note: for checking the result we actually either need to run the program
 #       or change it to string concatenation and raise a constant compile time warning
 #       we do (historically) the first (for now)
-#       
+#
 AT_CHECK([$COMPILE -fmfcomment prog.cob], [0], [],
 [])
 
@@ -5307,6 +5307,49 @@ prog.cob:18: error: 'invalid-6' ANY LENGTH has invalid definition
 AT_CLEANUP
 
 
+AT_SETUP([VOLATILE clause])
+AT_KEYWORDS([extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 DATA-COLLECTION.
+          03 DATA-ITEMS-A VOLATILE.
+             05 DATA-A1 PIC S9(9) BINARY.
+             05 DATA-A2 PIC S9(9) BINARY.
+          03 VOLATILE.
+             05 DATA-FILLER PIC S9(9) BINARY.
+          03 DATA-ITEMS-B.
+             05 DATA-B1 PIC S9(9).
+             05 DATA-B2 PIC S9(9) VOLATILE.
+          03 DATA-ITEMS-C.
+             05 DATA-C1 PIC S9(9).
+             05 DATA-C2 PIC S9(9).
+       01 STEP    PIC 9(8)  BINARY VALUE 0 EXTERNAL VOLATILE.
+      *01 WRONGY    PIC X.
+      *   88 TESTVAL-A VALUE 'A' VOLATILE.
+      *   88 TESTVAL-B VOLATILE VALUE 'B'.
+       LINKAGE SECTION.
+       01  XMYREC.
+          05  XFLD1   PIC 9(2) VOLATILE.
+       SCREEN SECTION.
+      *01  WRONG-SCREEN.
+      *   05  WRONG-FIELD   PIC X VOLATILE.
+      *
+       PROCEDURE DIVISION.
+           MOVE DATA-ITEMS-B TO DATA-ITEMS-C.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY -Wno-unfinished prog.cob], [0], [],
+[prog.cob:18: warning: initial VALUE clause ignored for EXTERNAL item 'STEP'
+])
+
+AT_CLEANUP
+
+
 AT_SETUP([SET SOURCEFORMAT syntax checks])
 AT_KEYWORDS([misc extensions directives])
 
@@ -5384,13 +5427,13 @@ AT_KEYWORDS([misc])
 AT_DATA([prog.cob], [
        IDENTIFICATION  DIVISION.
        PROGRAM-ID.     prog.
-       
+
        DATA            DIVISION.
        WORKING-STORAGE SECTION.
        01  x           PIC X.
        01  nat         PIC N.
        01  n           PIC 9.
-       
+
        PROCEDURE       DIVISION.
            MOVE X'' TO x
            MOVE H'' TO x
