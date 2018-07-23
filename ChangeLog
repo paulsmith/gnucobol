@@ -1,4 +1,9 @@
 
+2018-06-19  Ludwin Janvier
+
+	* configure.ac: remove -g from default options and remove removal of -g
+	  from CFLAGS.
+
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac [_WIN32]: only set GCC export and linker flag

@@ -210,6 +210,9 @@ AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
 
 # Basic capability tests
 
+# Default CFLAGS (removed -g set in AC_INIT for compatibility)
+: ${CFLAGS="-O2"} 
+
 AC_PROG_CC([gcc xlc cc])
 AC_PROG_CC_STDC
 
@@ -1147,11 +1150,6 @@ if test "$enable_cflags_setting" = "yes"; then
 fi
 
 unset enable_cflags_setting
-
-if test "$enable_debug" != "yes" -a "x$CFLAGS" != "x"; then
-	CFLAGS=`echo "$CFLAGS" | sed -e 's/-g3//' -e 's/-g //' -e 's/-g$//' \
-		-e 's/  */ /g' -e 's/^ //' -e 's/ $//'`
-fi
 
 if test "$COB_USES_GCC" = "yes"; then
 	if test "x$CFLAGS" != "x"; then
