@@ -143,6 +143,12 @@
 
 	* gnucobol.texi: Add Extended ACCEPT special keys section.
 
+2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* gnucobol.texi: added Index at end
+	* gnucobol.texi: new section "Extensions" to document FR #37
+	  WITH SIZE for ACCEPT/DISPLAY field
+
 2014-14-04  Philipp Böhme <phi.boehme@googlemail.com>
 
 	* gnucobol.texi: Added documentation for CBL_OC_GETOPT

@@ -447,6 +447,10 @@
 
 	* testsuite.src/run_misc.at: compile from stdin, run after compile
 
+2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
+
+	* testsuite.src/syn_misc.at: FR #37 ACCEPT/DISPLAY field WITH SIZE
+
 2015-05-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.src/run_functions.at : revised all tests from ACOS to LENGTH

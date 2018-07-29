@@ -3351,6 +3351,16 @@
 	* parser.y: bug #83 - added check for relative LINE/COLUMN clauses in
 	  screen section occurs items.
 
+2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
+
+	FR #37 - Added WITH SIZE to ACCEPT/DISPLAY field
+	* parser.y (accp_attr): added [PROTECTED] SIZE clause
+	* parser.y (disp_attr): added SIZE clause
+	* reserved.c: added context-sensitive PROTECTED
+	* tree.c, tree.h (cb_build_funcall): additional parameter,
+	  new macro CB_BUILD_FUNCALL_10
+	* typeck.c (cb_emit_accept, cb_emit_display): cater for new size attribute
+
 2015-05-29  Ron Norman <rjn@inglenet.com>
 
 	* parser.y fixed so UNSTRING works with identifier/literal/function

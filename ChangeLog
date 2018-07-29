@@ -293,22 +293,6 @@
 	  regenerated all Makefiles
 	* configure.ac: added AC_CONFIG_AUX_DIR([build_aux])
 
-2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
-
-	* Add WITH SIZE to extended ACCEPT and DISPLAY. (see wish list #37)
-	  Updated the info gnucobol and added Index at end.
-	* cobc/parser.y:
-	* cobc/reserved.c:
-	* cobc/tree.c:
-	* cobc/tree.h:
-	* cobc/typeck.c:
-	* doc/gnucobol.info:
-	* doc/gnucobol.texi:
-	* libcob/common.h:
-	* libcob/screenio.c:
-	* libcob/termio.c:
-	* tests/testsuite.src/syn_misc.at:
-
 2015-02-27  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* general: removed "Experimental" marker from CISAM/DISAM/VBISAM

@@ -1209,6 +1209,15 @@
 	  Alt-End, Home, Alt-Home, Left-arrow, Alt-Left-arrow,
 	  Right-arrow, Alt-Right-arrow.
 
+2015-06-08  Luke Smith <cobcoder@users.sourceforge.net>
+
+	FR #37 - Added WITH SIZE to extended ACCEPT and DISPLAY
+	* common.h (cob_field_accept, cob_field_display): new signature
+	* screenio.c (cob_field_accept, cob_field_display):
+	  additional parameter to specify size to use for ACCEPT/DISPLAY
+	* termio.c (cob_accept, cob_display): adjusted for new signature
+	  of cob_field_accept and cob_field_display
+
 2015-06-21  Edward Hart <edward.dan.hart@gmail.com>
 
 	* common.c: fixed segfault caught in updated SWITCH test by extending
