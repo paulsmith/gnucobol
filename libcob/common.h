@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
+   Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
+   Edward Hart
 
    This file is part of GnuCOBOL.
 
@@ -924,11 +925,15 @@ enum cob_exception_id {
 #define COB_STATUS_42_NOT_OPEN			42
 #define COB_STATUS_43_READ_NOT_DONE		43
 #define COB_STATUS_44_RECORD_OVERFLOW		44
+#define COB_STATUS_45_IDENTIFICATION_FAILURE	45	/* currently not implemented */
 #define COB_STATUS_46_READ_ERROR		46
 #define COB_STATUS_47_INPUT_DENIED		47
 #define COB_STATUS_48_OUTPUT_DENIED		48
 #define COB_STATUS_49_I_O_DENIED		49
 #define COB_STATUS_51_RECORD_LOCKED		51
+#define COB_STATUS_52_DEAD_LOCK			52	/* currently not implemented (patch available) */
+#define COB_STATUS_53_MAX_LOCKS			53	/* currently not implemented */
+#define COB_STATUS_54_MAX_LOCKS_FD		54	/* currently not implemented */
 #define COB_STATUS_57_I_O_LINAGE		57
 #define COB_STATUS_61_FILE_SHARING		61
 #define COB_STATUS_91_NOT_AVAILABLE		91

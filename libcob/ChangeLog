@@ -1,4 +1,9 @@
 
+2018-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.h: added defines for not yet implemented standard
+	  I-O status values
+
 2018-07-14  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c (get_screen_item_line_and_col): fixed bug #514, where
