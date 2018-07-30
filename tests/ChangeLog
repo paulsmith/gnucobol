@@ -1,4 +1,9 @@
 
+2018-07-30 Edward Hart <edward.dan.hart@gmail.com>
+
+	* testsuite.src/run_file.at, testsuite.src/syn_file.at: merge tests
+	  added by Joe Robbins in 2014 to the fileiorewrite branch.
+
 2018-06-21  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_functions.at: Test CONTENTS-OF and

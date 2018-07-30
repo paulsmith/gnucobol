@@ -6155,8 +6155,7 @@ AT_DATA([callsub.cob], [
        END PROGRAM callsub.
 ])
 
-AT_CHECK([$COMPILE_MODULE callsub.cob], [0], [],
-[])
+AT_CHECK([$COMPILE_MODULE callsub.cob], [0], [], [])
 
 
 AT_DATA([prog.cob], [
