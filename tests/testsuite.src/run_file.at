@@ -20,7 +20,7 @@
 ### GnuCOBOL Test Suite
 
 
-AT_SETUP([READ INTO data-item AT-END sequence])
+AT_SETUP([READ INTO data item AT-END sequence])
 AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
@@ -624,7 +624,7 @@ AT_CLEANUP
 
 
 AT_SETUP([File SORT, SEQUENTIAL variable records])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -812,7 +812,7 @@ AT_CLEANUP
 
 
 AT_SETUP([File SORT, LINE SEQUENTIAL variable records])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([file1],
 [A1XXXX
@@ -876,7 +876,7 @@ AT_CLEANUP
 
 
 AT_SETUP([File MERGE, LINE SEQUENTIAL variable records])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([file1],
 [A1XXXX
@@ -1002,7 +1002,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SORT with INPUT/OUTPUT PROCEDUREs])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -1092,7 +1092,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SORT with key1 ASCENDING, key2 DESCENDING])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([file1],
 [A1
@@ -1232,8 +1232,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([ASSIGN with BASED data-item])
-AT_KEYWORDS([runfile file status])
+AT_SETUP([ASSIGN with BASED data item])
+AT_KEYWORDS([runfile status])
 
 AT_DATA([TEST-FILE],
 [hello
@@ -1313,8 +1313,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog2], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([ASSIGN with data-item in LINKAGE])
-AT_KEYWORDS([runfile FILE-CONTROL file status])
+AT_SETUP([ASSIGN with data item in LINKAGE])
+AT_KEYWORDS([runfile-CONTROL file status])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3251,7 +3251,7 @@ AT_DATA([prog.cob], [
 
        WORKING-STORAGE SECTION.
        01  f-status PIC XX.
-       
+
        PROCEDURE DIVISION.
            DELETE FILE file1.
            OPEN INPUT file1.
@@ -3738,7 +3738,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Default file external name])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([fexists_signed.c], [
 
@@ -3844,7 +3844,7 @@ AT_CLEANUP
 
 
 AT_SETUP([LINE SEQUENTIAL basic I/O])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -3878,7 +3878,7 @@ AT_CLEANUP
 
 
 AT_SETUP([LINE SEQUENTIAL record truncation])
-AT_KEYWORDS([runfile file])
+AT_KEYWORDS([runfile])
 
 AT_DATA([TEST-FILE],
 [a
@@ -4111,7 +4111,7 @@ AT_DATA([prog.cob], [
                WRITE file1-rec
            END-PERFORM
            CLOSE file1
-           
+
            OPEN I-O file1
            SET eof TO FALSE
            PERFORM VARYING w-count FROM 1 BY 1
@@ -4143,7 +4143,7 @@ AT_DATA([prog.cob], [
                DISPLAY "FAIL 4"
            END-IF
            CLOSE file1
-           
+
            OPEN INPUT file1
            SET eof TO FALSE
            SET abort TO FALSE
