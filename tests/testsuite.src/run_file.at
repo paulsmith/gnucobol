@@ -2008,6 +2008,7 @@ AT_SETUP([INDEXED file sparse/split keys (2)])
 AT_KEYWORDS([runfile split key sparse suppress])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+## FIXME: This example works with reportwriter branch.
 AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [
@@ -4180,6 +4181,9 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0])
 
 AT_CLEANUP
 
+##
+## FIXME: All the SEQUENTIAL file locking tests pass in reportwriter.
+##
 
 AT_SETUP([SEQUENTIAL file with LOCK MODE EXCLUSIVE])
 AT_KEYWORDS([runfile])
@@ -5095,7 +5099,7 @@ AT_SETUP([INDEXED file with LOCK AUTOMATIC (1)])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_SKIP_IF(true)
+AT_XFAIL_IF([true])
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5173,7 +5177,6 @@ AT_SETUP([INDEXED file with LOCK AUTOMATIC (2)])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_SKIP_IF(true)
 
 AT_DATA([prog1.cob], [
        identification division.
@@ -5253,7 +5256,7 @@ AT_SETUP([INDEXED file with LOCK MANUAL])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-AT_SKIP_IF(true)
+AT_XFAIL_IF([true])
 
 AT_DATA([prog1.cob], [
        identification division.
