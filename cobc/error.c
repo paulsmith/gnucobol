@@ -547,7 +547,10 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
 		COBC_ABORT ();
 	/* LCOV_EXCL_STOP */
 	}
+#ifndef _MSC_VER
+	/* not reached */
 	return 0;
+#endif
 }
 
 /**

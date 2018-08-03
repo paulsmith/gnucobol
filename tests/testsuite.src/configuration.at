@@ -514,7 +514,7 @@ AT_CHECK([$COBCRUN --runtime-conf], [0], ignore, [])
 # into two lines
 AT_CHECK([$COBCRUN --runtime-conf | tr -d '\n ' | \
 grep "runtime_empty.cfg"], [0], ignore, [])
-AT_CHECK([export COB_RUNTIME_CONFIG=""; $COBCRUN --runtime-conf | tr -d '\n ' \
+AT_CHECK([COB_RUNTIME_CONFIG="" $COBCRUN --runtime-conf | tr -d '\n ' \
 | grep "runtime.cfg"],
 [0], ignore, [])
 
@@ -600,7 +600,7 @@ AT_DATA([test.cfg], [
 physical_cancel true
 ])
 
-AT_CHECK([export COB_PHYSICAL_CANCEL=false; $COBCRUN -c test.cfg --runtime-conf | \
+AT_CHECK([COB_PHYSICAL_CANCEL=false $COBCRUN -c test.cfg --runtime-conf | \
 grep "COB_PHYSICAL_CANCEL" | grep "false"], [0], ignore, [])
 
 AT_CLEANUP
@@ -744,7 +744,7 @@ AT_CHECK([echo "$PATHSEP"], [0], [;
 
 # Previous test "failed" --> PATHSEP isn't ;
 
-AT_CHECK([export COB_CONFIG_DIR="/temp:/tmp"; \
+AT_CHECK([COB_CONFIG_DIR="/temp:/tmp" \
 $COMPILE prog.cob], [1], [],
 [cobc: environment variable 'COB_CONFIG_DIR' is '/temp:/tmp'; should not contain ':'
 configuration error:
@@ -756,7 +756,7 @@ cobc: error: please check environment variables as noted above
 
 # Previous test "passed" --> PATHSEP is ;
 
-AT_CHECK([export COB_CONFIG_DIR="C:\temp;C:\tmp"; \
+AT_CHECK([COB_CONFIG_DIR="C:\temp;C:\tmp" \
 $COMPILE prog.cob], [1], [],
 [cobc: environment variable 'COB_CONFIG_DIR' is 'C:\temp;C:\tmp'; should not contain ';'
 configuration error:
