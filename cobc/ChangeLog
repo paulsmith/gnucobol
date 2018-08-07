@@ -3,11 +3,16 @@
 
 	* typeck.c (cb_build_identifier): added missing validation for
 	  depending item, fixing bug #544
-	* typeck.c (cb_emit_arithmetic): early check for valid field, reducing
+	* typeck.c (cb_emit_arithmetic): early check for valid field,
+	  provides better message for condition-names FR #339 and reduces
 	  the number of errors in numeric checks to the first invalid part
 	  of the statement
 	* typeck.c (cb_validate_one), parser.y (check_not_88_level):
-	  msgid change for invalid references
+	  FR #339 msgid change for invalid references
+	* typeck.c (cb_emit_string): added missing validation of delimiter
+	  and source items, fixing bug #543
+	* parser.y (check_not_88_level): invalidate wrong items to prevent
+	  multiple errors for same field
 
 2018-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

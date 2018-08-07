@@ -1662,19 +1662,28 @@ is_recursive_call (cb_tree target)
 	return !strcmp (target_name, current_program->orig_program_id);
 }
 
-static void
+static cb_tree
 check_not_88_level (cb_tree x)
 {
 	struct cb_field	*f;
 
-	if (x == cb_error_node || x->tag != CB_TAG_REFERENCE) {
-		return;
+	if (x == cb_error_node) {
+		return cb_error_node;
+	}
+	if (!CB_REF_OR_FIELD_P(x)) {
+		return x;
 	}
 
-	f = CB_FIELD (cb_ref (x));
+	f = CB_FIELD_PTR (x);
 
-	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
+	if (f->level == 88) {
 		cb_error (_("condition-name not allowed here: '%s'"), cb_name (x));
+		/* invalidate field to prevent same error in typeck.c (validate_one) */
+		/* FIXME: If we really need the additional check here then we missed
+		          a call to validate_one() somewhere */
+		return cb_error_node;
+	} else {
+		return x;
 	}
 }
 
@@ -7669,14 +7678,12 @@ screen_description:
 		current_field->flag_filler = 1;
 	}
 
-	if (likely (current_field)) {
-		if (!description_field) {
-			description_field = current_field;
-		}
-		if (current_field->flag_occurs
-		    && !has_relative_pos (current_field)) {
-			cb_error (_("relative LINE/COLUMN clause required with OCCURS"));
-		}
+	if (!description_field) {
+		description_field = current_field;
+	}
+	if (current_field->flag_occurs
+	 && !has_relative_pos (current_field)) {
+		cb_error (_("relative LINE/COLUMN clause required with OCCURS"));
 	}
   }
   /* ACUCOBOL-GT control definition */
@@ -7735,14 +7742,12 @@ screen_description:
 		current_field->flag_filler = 1;
 	}
 
-	if (likely (current_field)) {
-		if (!description_field) {
-			description_field = current_field;
-		}
-		if (current_field->flag_occurs
-		    && !has_relative_pos (current_field)) {
-			cb_error (_("relative LINE/COLUMN clause required with OCCURS"));
-		}
+	if (!description_field) {
+		description_field = current_field;
+	}
+	if (current_field->flag_occurs
+	 && !has_relative_pos (current_field)) {
+		cb_error (_("relative LINE/COLUMN clause required with OCCURS"));
 	}
 	cobc_cs_check = CB_CS_SCREEN;
   }
@@ -7970,11 +7975,11 @@ screen_option:
 | screen_occurs_clause
 | USING identifier
   {
-	check_not_88_level ($2);
+	$$ = check_not_88_level ($2);
 
 	check_repeated ("USING", SYN_CLAUSE_20, &check_pic_duplicate);
-	current_field->screen_from = $2;
-	current_field->screen_to = $2;
+	current_field->screen_from = $$;
+	current_field->screen_to = $$;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
   }
 | FROM from_parameter
@@ -7984,10 +7989,10 @@ screen_option:
   }
 | TO identifier
   {
-	check_not_88_level ($2);
+	$$ = check_not_88_level ($2);
 
 	check_repeated ("TO", SYN_CLAUSE_22, &check_pic_duplicate);
-	current_field->screen_to = $2;
+	current_field->screen_to = $$;
 	current_field->screen_flag |= COB_SCREEN_INPUT;
   }
 ;
@@ -15228,7 +15233,7 @@ simple_all_value:
 id_or_lit:
   identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | LITERAL
 ;
@@ -15236,7 +15241,7 @@ id_or_lit:
 id_or_lit_or_func:
   identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | LITERAL
 | function
@@ -15245,7 +15250,7 @@ id_or_lit_or_func:
 id_or_lit_or_length_or_func:
   identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | lit_or_length
 | function
@@ -15254,7 +15259,7 @@ id_or_lit_or_length_or_func:
 num_id_or_lit:
   sub_identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | integer
 | ZERO
@@ -15268,7 +15273,7 @@ num_id_or_lit:
 positive_id_or_lit:
   sub_identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | unsigned_pos_integer
 ;
@@ -15284,7 +15289,7 @@ pos_num_id_or_lit_or_zero:
 pos_num_id_or_lit:
   sub_identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | integer
 ;
@@ -15292,7 +15297,7 @@ pos_num_id_or_lit:
 from_parameter:
   identifier
   {
-	check_not_88_level ($1);
+	$$ = check_not_88_level ($1);
   }
 | literal
 | function

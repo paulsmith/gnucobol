@@ -1832,7 +1832,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 		/* Run-time check for ODO (including all the fields subordinate items) */
 		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->odo_level != 0) {
 			for (p = f; p; p = p->children) {
-				if (p->depending && !cb_validate_one (p->depending)) {
+				if (p->depending && p->depending != cb_error_node) {
 					e1 = CB_BUILD_FUNCALL_5 ("cob_check_odo",
 						 cb_build_cast_int (p->depending),
 						 cb_int (p->occurs_min),
@@ -1845,13 +1845,12 @@ cb_build_identifier (cb_tree x, const int subchk)
 		}
 
 		/* Subscript check along with setting of table offset */
-		if (r->subs) {
+		if (r->subs &&! cb_validate_list (r->subs)) {
 			l = r->subs;
 			for (p = f; p && l; p = p->parent) {
 				if (!p->flag_occurs) {
 					continue;
 				}
-
 				sub = cb_check_integer_value (CB_VALUE (l));
 				l = CB_CHAIN (l);
 				if (sub == cb_error_node) {
@@ -1869,7 +1868,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 
 				/* Run-time check for all non-literals */
 				if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
-					if (p->depending && !cb_validate_one (p->depending)) {
+					if (p->depending && p->depending != cb_error_node) {
 						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
 							 cb_build_cast_int (sub),
 							 cb_build_cast_int (p->depending),
@@ -3101,7 +3100,10 @@ cb_validate_program_data (struct cb_program *prog)
 			continue;
 		}
 		q = CB_FIELD_PTR (x);
-		if (cb_ref (q->depending) != cb_error_node) {
+		if (cb_validate_one (q->depending)) {
+			q->depending = cb_error_node;
+			depfld = NULL;
+		} else if (cb_ref (q->depending) != cb_error_node) {
 			depfld = CB_FIELD_PTR (q->depending);
 		} else {
 			depfld = NULL;
@@ -10833,11 +10835,18 @@ cb_emit_string (cb_tree items, cb_tree into, cb_tree pointer)
 		dlm = end ? CB_PAIR_X (CB_VALUE (end)) : NULL;
 		if (dlm == cb_int0) {
 			dlm = NULL;
+		} else {
+			if (cb_validate_one (dlm)) {
+				return;
+			}
 		}
 		cb_emit (CB_BUILD_FUNCALL_1 ("cob_string_delimited", dlm));
 
 		/* generate cob_string_append for all entries until delimiter */
 		for (l = start; l != end; l = CB_CHAIN (l)) {
+			if (cb_validate_one (CB_VALUE (l))) {
+				return;
+			}
 			cb_emit (CB_BUILD_FUNCALL_1 ("cob_string_append",
 						     CB_VALUE (l)));
 		}

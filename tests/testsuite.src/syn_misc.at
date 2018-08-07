@@ -5623,3 +5623,64 @@ prog.cob:14: warning: wrong number of CALL parameters for 'CBL_GC_FORK', 1 given
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([invalid use of condition-name])
+AT_KEYWORDS([misc MOVE STRING UNSTRING COMPUTE])
+# see Bug #543 "level 88 item not checked in all places for STRING"
+# and FR #339
+# Note: we actually check much more here, for example special data types
+#       like HANDLE, see "ACUCOBOL USAGE HANDLE";
+#       condition-name is also checked in syn_file.at "WRITE / REWRITE FROM clause"
+
+AT_DATA([prog.cob], [
+       identification   division.
+       program-id.      prog.
+       environment      division.
+       data             division.
+       working-storage  section.
+       01 val pic x(10).
+          88 val-i1 value 'some'.
+          88 val-i2 value 'val'.
+       77 val2     pic x(50).
+       77 target   pic x(50).
+       01 vnum     pic 9.
+          88 vnum-1 value  1.
+          88 vnum-2 values 2 thru 5.
+          88 vnum-9 value  9.
+       01 filler.
+          02 tentry pic x occurs 0 to 6 depending on vnum-1.
+       procedure        division.
+           string   val-i1 delimited by size  into target
+           string   val2   delimited by val-i2 into target
+           string   val2   delimited by size   into val-i1
+                           with pointer val-i2
+           unstring val-i1                     into target
+           unstring val2   delimited by val-i1 into target
+           unstring val2                       into val-i1
+                           with pointer val-i2
+           move val-i1
+             to val-i2, tentry (vnum-9)
+           compute vnum-1 = vnum
+           compute vnum    = vnum-1 /
+                             vnum-2
+           go to val-i1
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:17: error: condition-name not allowed here: 'vnum-1'
+prog.cob:19: error: condition-name not allowed here: 'val-i1'
+prog.cob:20: error: condition-name not allowed here: 'val-i2'
+prog.cob:21: error: condition-name not allowed here: 'val-i1'
+prog.cob:23: error: condition-name not allowed here: 'val-i1'
+prog.cob:24: error: condition-name not allowed here: 'val-i1'
+prog.cob:25: error: condition-name not allowed here: 'val-i1'
+prog.cob:28: error: condition-name not allowed here: 'vnum-9'
+prog.cob:27: error: condition-name not allowed here: 'val-i1'
+prog.cob:29: error: condition-name not allowed here: 'vnum-1'
+prog.cob:30: error: condition-name not allowed here: 'vnum-1'
+prog.cob:31: error: condition-name not allowed here: 'vnum-2'
+prog.cob:32: error: 'val-i1 (MAIN SECTION:)' is not a procedure name
+])
+AT_CLEANUP
