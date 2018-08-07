@@ -3,6 +3,9 @@
 
 	* typeck.c (cb_build_identifier): added missing validation for
 	  depending item, fixing bug #544
+	* typeck.c (cb_emit_arithmetic): early check for valid field, reducing
+	  the number of errors in numeric checks to the first invalid part
+	  of the statement
 
 2018-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
