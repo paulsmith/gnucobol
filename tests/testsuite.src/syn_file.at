@@ -923,7 +923,7 @@ AT_CLEANUP
 
 
 AT_SETUP([WRITE / REWRITE FROM clause and FILE])
-AT_KEYWORDS([file record 88])
+AT_KEYWORDS([file record condition-name level-88 88])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -969,12 +969,12 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:22: error: invalid use of 88 level item
+[prog.cob:22: error: condition-name not allowed here: 'SOME-VAL'
 prog.cob:23: error: WRITE subject does not refer to a record name
 prog.cob:26: error: WRITE requires a record name as subject
 prog.cob:27: error: 'TEST-REC' is not a file name
 prog.cob:28: error: WRITE FILE requires a FROM clause
-prog.cob:31: error: invalid use of 88 level item
+prog.cob:31: error: condition-name not allowed here: 'SOME-VAL'
 prog.cob:32: error: REWRITE subject does not refer to a record name
 prog.cob:35: error: REWRITE requires a record name as subject
 prog.cob:36: error: 'TEST-REC' is not a file name

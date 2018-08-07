@@ -3503,6 +3503,11 @@ AT_DATA([prog.cob], [
       *    Just to check that the handles are still recognized and usable:
            destroy neither-a-handle, control-handle
       *
+      *    check for invalid use
+           add  neither-a-handle to control-handle
+           compute mywindow = 0
+           string mydir delimited by size into filename
+      *
            STOP RUN.
 ])
 
@@ -3520,6 +3525,9 @@ prog.cob:44: warning: THREAD is not implemented
 prog.cob:46: warning: THREAD is not implemented
 prog.cob:45: error: HANDLE must be either a generic or a THREAD HANDLE
 prog.cob:51: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:54: error: HANDLE item not allowed here: 'neither-a-handle'
+prog.cob:55: error: HANDLE item not allowed here: 'mywindow'
+prog.cob:56: error: HANDLE item not allowed here: 'mydir'
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=rm-strict prog.cob], [1], [],

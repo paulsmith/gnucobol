@@ -1674,7 +1674,7 @@ check_not_88_level (cb_tree x)
 	f = CB_FIELD (cb_ref (x));
 
 	if (f != (struct cb_field *) cb_error_node && f->level == 88) {
-		cb_error (_("level %02d item '%s' may not be used here"), 88, cb_name (x));
+		cb_error (_("condition-name not allowed here: '%s'"), cb_name (x));
 	}
 }
 

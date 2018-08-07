@@ -581,7 +581,7 @@ cb_validate_one (cb_tree x)
 		if (CB_FIELD_P (y)) {
 			f = CB_FIELD (y);
 			if (f->level == 88) {
-				cb_error_x (x, _("invalid use of 88 level item"));
+				cb_error_x (x, _("condition-name not allowed here: '%s'"), f->name);
 				return 1;
 			}
 			if (f->flag_invalid) {
@@ -602,7 +602,8 @@ cb_validate_one (cb_tree x)
 					strcmp (current_statement->name, "DISPLAY") != 0 &&
 					strcmp (current_statement->name, "DESTROY") != 0 &&
 					strcmp (current_statement->name, "CLOSE WINDOW") != 0) {
-						cb_error_x (x, _("invalid use of HANDLE item"));
+						cb_error_x (x, _("%s item not allowed here: '%s'"),
+							"HANDLE", f->name);
 					return 1;
 				}
 			}
