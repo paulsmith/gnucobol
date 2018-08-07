@@ -1413,7 +1413,7 @@ substitute (const int offset, const int length, const int params,
 	field.size = calcsize;
 	make_field_entry (&field);
 
-        substitute_matches (original, matches, reps, numreps, cmp_func, curr_field->data);
+	substitute_matches (original, matches, reps, numreps, cmp_func, curr_field->data);
 
 	/* Output placed in curr_field */
 
@@ -1549,7 +1549,7 @@ get_min_and_max_of_args (const int num_args, va_list args, cob_field **min, cob_
 	int		i;
 	cob_field	*f;
 
-        *min = va_arg (args, cob_field *);
+	*min = va_arg (args, cob_field *);
 	*max = *min;
 
 	for (i = 1; i < num_args; ++i) {
@@ -2408,7 +2408,7 @@ copy_data_to_null_terminated_str (cob_field *f, char * const out_str,
 	size_t	chars_before_space = num_leading_nonspace ((char *)f->data,
 							   f->size);
 	size_t	length = cob_min_int (chars_before_space, out_str_max);
-	
+
 	strncpy (out_str, (char *)f->data, length);
 	out_str[length] = '\0';
 }
@@ -6346,7 +6346,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 					  COB_DATETIMESTR_MAX);
 	copy_data_to_null_terminated_str (datetime_field, formatted_datetime,
 					  COB_DATETIMESTR_MAX);
-	
+
 	/* Check whether date or time is present. */
 	if (cob_valid_date_format (datetime_format_str)) {
 		date_present = 1;
@@ -6403,7 +6403,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 		cob_alloc_set_field_uint (strlen (formatted_date) + 1U);
 		goto end_of_func;
 	}
-	if (time_present) {		
+	if (time_present) {
 		error_pos = test_formatted_time (parse_time_format_string (time_format_str),
 						 formatted_time, COB_MODULE_PTR->decimal_point);
 		if (error_pos != 0) {
@@ -6547,7 +6547,7 @@ cob_intr_content_length (cob_field *srcfield)
 }
 
 /**
-  FUNCTION CONTENTS-OF(pointer, [len]). ALPHANUMERIC, refmod allowed.
+  FUNCTION CONTENTS-OF (pointer, [len]). ALPHANUMERIC, ref-mod allowed.
 
   Retrieve the contents of a pointer indirection.
   Either for given length, or if omitted or 0, by NUL terminator scan.
@@ -6557,52 +6557,52 @@ cob_intr_content_length (cob_field *srcfield)
 cob_field *
 cob_intr_contents_of (const int offset, const int length, const int params, ...)
 {
-        size_t          size = 0;
-        unsigned char   *pointed;
-        unsigned int    request_len;
-        va_list         args;
-        cob_field       field;
-        cob_field       *srcfield;
-        cob_field       *lenfield;
+	size_t          size = 0;
+	unsigned char   *pointed;
+	unsigned int    request_len;
+	va_list         args;
+	cob_field       field;
+	cob_field       *srcfield;
+	cob_field       *lenfield;
 
-        va_start (args, params);
-        srcfield = va_arg(args, cob_field *);
-        if (params > 1) {
-                lenfield = va_arg (args, cob_field *);
-                request_len = cob_get_int (lenfield);
-        } else {
-                request_len = 0;
-        }
-        va_end (args);
+	va_start (args, params);
+	srcfield = va_arg(args, cob_field *);
+	if (params > 1) {
+		lenfield = va_arg (args, cob_field *);
+		request_len = cob_get_int (lenfield);
+	} else {
+		request_len = 0;
+	}
+	va_end (args);
 
-        if (srcfield && srcfield->data) {
-                pointed = *((unsigned char **)srcfield->data);
-                if (pointed && *pointed) {
-                        /* Fixed length or C nul terminated string */
-                        if (request_len > 0) {
-                                size = request_len;
-                        } else {
-                                size = strlen ((char *)pointed);
-                        }
-                }
-        }
-        if (size > 0) {
-                COB_FIELD_INIT (size, NULL, &const_alpha_attr);
-                make_field_entry (&field);
-                /* Testing for memory access permissions is canonically: */
-                /*   open fake pipe, use write and test for -1 and EFAULT */
-                /* Not used here, performance hit versus programmer error */
-                memcpy (curr_field->data, pointed, size);
-        } else {
-                COB_FIELD_INIT (1, NULL, &const_alpha_attr);
-                make_field_entry (&field);
-                curr_field->data[0] = ' ';
-                curr_field->size = 0;
-        }
-        if (unlikely(offset > 0)) {
-                calc_ref_mod (curr_field, offset, length);
-        }
-        return curr_field;
+	if (srcfield && srcfield->data) {
+		pointed = *((unsigned char **)srcfield->data);
+		if (pointed && *pointed) {
+			/* Fixed length or C NUL terminated string */
+			if (request_len > 0) {
+				size = request_len;
+			} else {
+				size = strlen ((char *)pointed);
+			}
+		}
+	}
+	if (size > 0) {
+		COB_FIELD_INIT (size, NULL, &const_alpha_attr);
+		make_field_entry (&field);
+		/* Testing for memory access permissions is canonically: */
+		/*   open fake pipe, use write and test for -1 and EFAULT */
+		/* Not used here, performance hit versus programmer error */
+		memcpy (curr_field->data, pointed, size);
+	} else {
+		COB_FIELD_INIT (1, NULL, &const_alpha_attr);
+		make_field_entry (&field);
+		curr_field->data[0] = ' ';
+		curr_field->size = 0;
+	}
+	if (unlikely(offset > 0)) {
+		calc_ref_mod (curr_field, offset, length);
+	}
+	return curr_field;
 }
 
 /* RXWRXW - To be implemented */

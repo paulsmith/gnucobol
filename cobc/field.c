@@ -556,7 +556,7 @@ same_level:
 		f->flag_is_global = f->parent->flag_is_global;
 		if (f->level <= 66) {
 			f->flag_volatile = f->parent->flag_volatile;
-		} 
+		}
 	}
 
 	return CB_TREE (f);
@@ -656,7 +656,7 @@ check_picture_item (struct cb_field *f)
 	  but guessing one if it doesn't exist.
 	*/
 	if (f->storage == CB_STORAGE_SCREEN) {
-	if (f->values) {
+		if (f->values) {
 			v = CB_VALUE (f->values);
 			if (CB_LITERAL_P (v)) {
 				size_implied = (int)CB_LITERAL (v)->size;
@@ -1024,7 +1024,7 @@ validate_pic (struct cb_field *f)
 	if (f->flag_comp_1 && cb_binary_comp_1) {
 		return 0;
 	}
-	
+
 	/* if picture is not needed it is an error to specify it
 	   note: we may have set the picture internal */
 	if (f->pic != NULL && !f->pic->flag_is_calculated && !need_picture) {
@@ -1041,10 +1041,10 @@ validate_usage (struct cb_field * const f)
 	cb_tree	x = CB_TREE (f);
 
 	if ((f->storage == CB_STORAGE_SCREEN
-	  || f->storage == CB_STORAGE_REPORT) 
+	  || f->storage == CB_STORAGE_REPORT)
 	 &&  f->usage   != CB_USAGE_DISPLAY
 	 &&  f->usage   != CB_USAGE_NATIONAL) {
-		cb_error_x (CB_TREE(f), 
+		cb_error_x (CB_TREE(f),
 			_("%s item '%s' should be USAGE DISPLAY"),
 			enum_explain_storage (f->storage), cb_name (x));
 		return 1;
@@ -1241,7 +1241,7 @@ static int
 warn_from_to_using_without_pic (const struct cb_field * const f)
 {
 	const cb_tree	x = CB_TREE (f);
-	
+
 	if ((f->screen_from || f->screen_to) && !f->pic) {
 		cb_warning_x (warningopt, x,
 			      _("'%s' has FROM, TO or USING without PIC; PIC will be implied"),
@@ -1467,16 +1467,16 @@ validate_elem_screen_clauses_xopen (struct cb_field *f)
 static void
 warn_has_no_useful_clause (const struct cb_field * const f)
 {
-        if (!(f->screen_column
-	      || f->screen_flag & COB_SCREEN_BELL
-	      || f->screen_flag & COB_SCREEN_BLANK_LINE
-	      || f->screen_flag & COB_SCREEN_BLANK_SCREEN
-	      || f->screen_flag & COB_SCREEN_ERASE_EOL
-	      || f->screen_flag & COB_SCREEN_ERASE_EOS
-	      || f->screen_from
-	      || f->screen_line
-	      || f->screen_to
-	      || f->values)) {
+	if (!(  f->screen_column
+	     || f->screen_flag & COB_SCREEN_BELL
+	     || f->screen_flag & COB_SCREEN_BLANK_LINE
+	     || f->screen_flag & COB_SCREEN_BLANK_SCREEN
+	     || f->screen_flag & COB_SCREEN_ERASE_EOL
+	     || f->screen_flag & COB_SCREEN_ERASE_EOS
+	     || f->screen_from
+	     || f->screen_line
+	     || f->screen_to
+	     || f->values)) {
 		cb_warning_x (COBC_WARN_FILLER, CB_TREE (f),
 			      _("'%s' does nothing"), cb_name (CB_TREE (f)));
 	}
@@ -2002,21 +2002,26 @@ static void
 set_report_field (struct cb_field *f)
 {
 	struct cb_field *c,*pp;
+
 	if(f->storage == CB_STORAGE_REPORT
-	&& f->report_column > 0) { 		
-		if(!(f->report_flag & COB_REPORT_COLUMN_PLUS)) {
+	&& f->report_column > 0) {
+		if (!(f->report_flag & COB_REPORT_COLUMN_PLUS)) {
 			f->offset = f->report_column - 1;		/* offset based on COLUMN value */
-		} else {
-			if((pp=f->parent) != NULL
-			&& pp->children == f) {
+			return;
+		}
+		pp = f->parent;
+		if (pp) {
+			if (pp->children == f) {
 				f->offset = f->report_column - 1;	/* First in line */
-			} else if(pp) {
-				for(c=pp->children; c; c = c->sister) {	/* Find previous field */
-					if(c->sister == f) {
-						if(c->occurs_max > 1) 
+			} else {
+				for (c = pp->children; c; c = c->sister) {	/* Find previous field */
+					if (c->sister == f) {
+						if (c->occurs_max > 1) {
 					 		f->offset = c->offset + c->size * c->occurs_max + f->report_column;
-						else
+						}
+						else {
 						 	f->offset = c->offset + c->size + f->report_column;
+						}
 						break;
 					}
 				}
