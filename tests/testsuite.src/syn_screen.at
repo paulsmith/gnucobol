@@ -351,6 +351,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Referencing 88-level])
+# see bug #178
 AT_KEYWORDS([screen])
 
 AT_DATA([prog.cob], [
@@ -372,9 +373,9 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:12: error: level 88 item 'blah' may not be used here
-prog.cob:12: error: level 88 item 'blah' may not be used here
-prog.cob:12: error: level 88 item 'blah' may not be used here
+[prog.cob:12: error: condition-name not allowed here: 'blah'
+prog.cob:12: error: condition-name not allowed here: 'blah'
+prog.cob:12: error: condition-name not allowed here: 'blah'
 ])
 
 AT_CLEANUP
