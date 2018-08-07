@@ -1,4 +1,9 @@
 
+2018-08-07  Brian Tiffin <btiffin@gnu.org>
+
+	* parser.y, reserved.c, tree.c, tree.h: CONTENTS-OF renamed to
+	  CONTENT-OF
+
 2018-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_build_identifier): added missing validation for

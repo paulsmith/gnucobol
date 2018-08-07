@@ -155,7 +155,7 @@ Extensions
 * ACCEPT special::              ACCEPT special keys.
 * Extended DISPLAY::            Extended DISPLAY statement.
 * FUNCTION CONTENT-LENGTH::     Length of NUL byte terminated pointer data.
-* FUNCTION CONTENTS-OF::        Contents of data at pointer, by length or NUL.
+* FUNCTION CONTENT-OF::         Content of data at pointer, by length or NUL.
 
 System Routines
 
@@ -1313,7 +1313,7 @@ run-time errors with source locations.
 * ACCEPT special::              @code{ACCEPT} special keys.
 * Extended DISPLAY::            Extended @code{DISPLAY} statement.
 * FUNCTION CONTENT-LENGTH::     Length of NUL byte terminated pointer data.
-* FUNCTION CONTENTS-OF::        Contents of data at pointer, by length or NUL.
+* FUNCTION CONTENT-OF::         Content of data at pointer, by length or NUL.
 @end menu
 
 
@@ -1785,11 +1785,11 @@ This is the same as @code{WITH BELL}.
 @end example
 
 
-@node FUNCTION CONTENTS-OF
-@section CONTENTS-OF
+@node FUNCTION CONTENT-OF
+@section CONTENT-OF
 @cindex @code{FUNCTION CONTENT-OF}
 
-@code{FUNCTION CONTENTS-OF} returns an alphanumeric field given a pointer and optional length:
+@code{FUNCTION CONTENT-OF} returns an alphanumeric field given a pointer and optional length:
 
 Data from pointer is returned as a COBOL field either by scanning for a NUL byte or using the
 optional length. Reference modification of result allowed.
@@ -1802,13 +1802,13 @@ optional length. Reference modification of result allowed.
        01 ptr   usage pointer.
        01 str   pic x(4) value z"abc".
 
-      *> Testing CONTENTS-OF
+      *> Testing CONTENT-OF
        procedure division.
 
        set ptr to address of str
-       display contents-of(ptr)
-       display contents-of(ptr, 2)
-       display contents-of(ptr)(2:2)
+       display content-of(ptr)
+       display content-of(ptr, 2)
+       display content-of(ptr)(2:2)
 
        goback.
        end program hosted.

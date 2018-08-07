@@ -2980,8 +2980,8 @@ static struct cb_intrinsic_table function_list[] = {
 					CB_FEATURE_ACTIVE,	1, 1,
 					CB_CATEGORY_NUMERIC, 0
   },
-  { "CONTENTS-OF",			"cob_intr_contents_of",
-					CB_INTR_CONTENTS_OF, CONTENTS_OF_FUNC,
+  { "CONTENT-OF",			"cob_intr_content_of",
+					CB_INTR_CONTENT_OF, CONTENT_OF_FUNC,
 					CB_FEATURE_ACTIVE,	2, 1,
 					CB_CATEGORY_ALPHANUMERIC, 1
   },

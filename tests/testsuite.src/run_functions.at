@@ -373,8 +373,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([FUNCTION CONTENTS-OF])
-AT_KEYWORDS([functions contents-of])
+AT_SETUP([FUNCTION CONTENT-OF])
+AT_KEYWORDS([functions content-of])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -385,11 +385,11 @@ AT_DATA([prog.cob], [
        01  X   PIC      X(4) VALUE Z"ABC".
        PROCEDURE        DIVISION.
            SET P TO ADDRESS OF X
-           IF FUNCTION CONTENTS-OF ( P ) NOT EQUAL 'ABC' THEN
-              DISPLAY 'CONTENTS-OF(ptr) wrong' END-DISPLAY
+           IF FUNCTION CONTENT-OF ( P ) NOT EQUAL 'ABC' THEN
+              DISPLAY 'CONTENT-OF(ptr) wrong' END-DISPLAY
            END-IF
-           IF FUNCTION CONTENTS-OF ( P, 2 ) NOT EQUAL 'AB' THEN
-              DISPLAY 'CONTENTS-OF(ptr, len) wrong' END-DISPLAY
+           IF FUNCTION CONTENT-OF ( P, 2 ) NOT EQUAL 'AB' THEN
+              DISPLAY 'CONTENT-OF(ptr, len) wrong' END-DISPLAY
            END-IF
            STOP RUN.
 ])

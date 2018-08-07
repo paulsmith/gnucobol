@@ -6547,15 +6547,15 @@ cob_intr_content_length (cob_field *srcfield)
 }
 
 /**
-  FUNCTION CONTENTS-OF (pointer, [len]). ALPHANUMERIC, ref-mod allowed.
+  FUNCTION CONTENT-OF (pointer, [len]). ALPHANUMERIC, ref-mod allowed.
 
-  Retrieve the contents of a pointer indirection.
+  Retrieve the content of a pointer indirection.
   Either for given length, or if omitted or 0, by NUL terminator scan.
   If the source pointer is null, points to null or an empty string,
   return a zero length space.
 **/
 cob_field *
-cob_intr_contents_of (const int offset, const int length, const int params, ...)
+cob_intr_content_of (const int offset, const int length, const int params, ...)
 {
 	size_t          size = 0;
 	unsigned char   *pointed;
@@ -6564,6 +6564,8 @@ cob_intr_contents_of (const int offset, const int length, const int params, ...)
 	cob_field       field;
 	cob_field       *srcfield;
 	cob_field       *lenfield;
+
+	cob_set_exception (0);
 
 	va_start (args, params);
 	srcfield = va_arg(args, cob_field *);
@@ -6584,7 +6586,14 @@ cob_intr_contents_of (const int offset, const int length, const int params, ...)
 			} else {
 				size = strlen ((char *)pointed);
 			}
+		} else {
+			cob_set_exception (COB_EC_DATA_PTR_NULL);
+			size = 0;
 		}
+	}
+	if (size > COB_MAX_UNBOUNDED_SIZE) {
+		cob_set_exception (COB_EC_SIZE_TRUNCATION);
+		size = COB_MAX_UNBOUNDED_SIZE;
 	}
 	if (size > 0) {
 		COB_FIELD_INIT (size, NULL, &const_alpha_attr);

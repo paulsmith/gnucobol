@@ -2158,7 +2158,7 @@ COB_EXPIMP cob_field *cob_intr_test_formatted_datetime	(cob_field *, cob_field *
 COB_EXPIMP cob_field *cob_intr_integer_of_formatted_date	(cob_field *,
 								 cob_field *);
 COB_EXPIMP cob_field *cob_intr_content_length		(cob_field *);
-COB_EXPIMP cob_field *cob_intr_contents_of		(const int, const int,
+COB_EXPIMP cob_field *cob_intr_content_of		(const int, const int,
 							 const int, ...);
 
 /*******************************/

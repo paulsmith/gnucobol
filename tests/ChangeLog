@@ -1,4 +1,8 @@
 
+2018-08-07  Brian Tiffin <btiffin@gnu.org>
+
+	* testsuite.src/run_functions.at: Rename CONTENTS-OF to CONTENT-OF
+
 2018-07-30 Edward Hart <edward.dan.hart@gmail.com>
 
 	* testsuite.src/run_file.at, testsuite.src/syn_file.at: merge tests

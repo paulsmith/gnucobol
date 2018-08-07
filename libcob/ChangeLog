@@ -1,4 +1,8 @@
 
+2018-06-21  Brian Tiffin <btiffin@gnu.org>
+
+	* common.h, intrinsic.c: CONTENTS-OF renamed to CONTENT-OF
+
 2018-07-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* common.h: added defines for not yet implemented standard
