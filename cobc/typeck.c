@@ -1831,7 +1831,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 		/* Run-time check for ODO (including all the fields subordinate items) */
 		if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT) && f->odo_level != 0) {
 			for (p = f; p; p = p->children) {
-				if (p->depending) {
+				if (p->depending && !cb_validate_one (p->depending)) {
 					e1 = CB_BUILD_FUNCALL_5 ("cob_check_odo",
 						 cb_build_cast_int (p->depending),
 						 cb_int (p->occurs_min),
@@ -1868,7 +1868,7 @@ cb_build_identifier (cb_tree x, const int subchk)
 
 				/* Run-time check for all non-literals */
 				if (CB_EXCEPTION_ENABLE (COB_EC_BOUND_SUBSCRIPT)) {
-					if (p->depending) {
+					if (p->depending && !cb_validate_one (p->depending)) {
 						e1 = CB_BUILD_FUNCALL_4 ("cob_check_subscript",
 							 cb_build_cast_int (sub),
 							 cb_build_cast_int (p->depending),

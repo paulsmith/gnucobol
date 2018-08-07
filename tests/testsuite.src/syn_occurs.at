@@ -307,6 +307,7 @@ AT_CLEANUP
 
 # 24) 
 # in COBOL 2014 this is rule 24, not sure about COBOL 2002.
+# for X3-Test, see also bug #544
 AT_SETUP([OCCURS with unmatched DEPENDING / TO phrases])
 AT_KEYWORDS([odo])
 
@@ -320,20 +321,28 @@ AT_DATA([prog.cob], [
           03 X  PIC X OCCURS 10 DEPENDING ON Y.
        01 XTAB2.
           03 X2 PIC X OCCURS 1 TO 10.
+       01 XTAB3.
+          03 X3 PIC X OCCURS 1 TO 10 DEPENDING ON MISSING.
+       PROCEDURE DIVISION.
+           MOVE 'A' TO X(1), X2(2), X3(3)
+           GOBACK.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
 [prog.cob:8: error: OCCURS DEPENDING ON without TO phrase does not conform to COBOL 2014
 prog.cob:10: error: TO phrase without DEPENDING phrase
+prog.cob:12: error: 'MISSING' is not defined
 ])
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: warning: OCCURS DEPENDING ON without TO phrase used
 prog.cob:10: error: TO phrase without DEPENDING phrase
+prog.cob:12: error: 'MISSING' is not defined
 ])
-AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [1], [],
 [prog.cob:8: warning: OCCURS DEPENDING ON without TO phrase used
 prog.cob:10: warning: TO phrase without DEPENDING phrase
 prog.cob:10: warning: maximum number of occurrences assumed to be exact number
+prog.cob:12: error: 'MISSING' is not defined
 ])
 
 AT_CLEANUP

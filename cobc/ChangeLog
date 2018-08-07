@@ -1,4 +1,9 @@
 
+2018-08-07  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_identifier): added missing validation for
+	  depending item, fixing bug #544
+
 2018-07-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* scanner.l: allow floating-point literals containing no digit after
