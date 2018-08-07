@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2005-2012, 2014-2018 Free Software Foundation, Inc.
-   Written by Roger While, Simon Sobisch, Edward Hart
+   Written by Roger While, Simon Sobisch, Edward Hart, Brian Tiffin
 
    This file is part of GnuCOBOL.
 
@@ -6555,7 +6555,7 @@ cob_intr_content_length (cob_field *srcfield)
   return a zero length space.
 **/
 cob_field *
-cob_intr_contents_of (const int offset, const int length, int params, ...)
+cob_intr_contents_of (const int offset, const int length, const int params, ...)
 {
         size_t          size = 0;
         unsigned char   *pointed;
