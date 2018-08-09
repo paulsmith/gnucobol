@@ -4763,12 +4763,13 @@ set_picture (struct cb_field *field, char *picture, int picture_len)
 
 	/* set picture for the rest */
 	if (field->usage == CB_USAGE_BINARY
-		   || field->usage == CB_USAGE_FLOAT
-		   || field->usage == CB_USAGE_DOUBLE
-		   || field->usage == CB_USAGE_PACKED
-		   || field->usage == CB_USAGE_COMP_5
-		   || field->usage == CB_USAGE_COMP_6
-		   || field->usage == CB_USAGE_COMP_X) {
+	 || field->usage == CB_USAGE_FLOAT
+	 || field->usage == CB_USAGE_DOUBLE
+	 || field->usage == CB_USAGE_PACKED
+	 || field->usage == CB_USAGE_COMP_5
+	 || field->usage == CB_USAGE_COMP_6
+	 || field->usage == CB_USAGE_COMP_X
+	 || field->usage == CB_USAGE_COMP_N) {
 		if (field->pic) {
 			strncpy (picture, field->pic->orig, picture_len - 1 - usage_len);
 			picture[CB_LIST_PICSIZE - 1] = 0;

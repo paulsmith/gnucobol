@@ -1012,6 +1012,7 @@ cb_tree_type (const cb_tree x, const struct cb_field *f)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 		case CB_USAGE_INDEX:
 		case CB_USAGE_HNDL:
 		case CB_USAGE_HNDL_WINDOW:
@@ -1126,6 +1127,7 @@ cb_fits_int (const cb_tree x)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 			if (f->pic->scale <= 0 && f->size <= (int)sizeof (int)) {
 				return 1;
 			}
@@ -1211,6 +1213,7 @@ cb_fits_long_long (const cb_tree x)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 			if (f->pic->scale <= 0 &&
 			    f->size <= (int)sizeof (cob_s64_t)) {
 				return 1;
@@ -4476,6 +4479,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 		  || (cb_binary_truncate
 		   && (f->usage == CB_USAGE_COMP_5
 	        || f->usage == CB_USAGE_COMP_X
+	        || f->usage == CB_USAGE_COMP_N
 	        || f->usage == CB_USAGE_BINARY)))
 		 && i == f->size) {
 #else

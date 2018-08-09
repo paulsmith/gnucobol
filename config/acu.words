@@ -167,10 +167,7 @@ reserved:	COMP-3
 reserved:	COMP-4
 reserved:	COMP-5
 reserved:	COMP-6
-reserved:	COMP-N		# currently not supported by GnuCOBOL,
-				# if byteorder is not important define as COMP-N=COMP-X
-				# and maybe set binary-byteorder to native
-				# see FR #219
+reserved:	COMP-N
 reserved:	COMP-X
 reserved:	COMPRESSION
 reserved:	COMPUTATIONAL

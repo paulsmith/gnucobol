@@ -2027,6 +2027,7 @@ check_validate_item (cb_tree x)
 %token COMP_4			"COMP-4"
 %token COMP_5			"COMP-5"
 %token COMP_6			"COMP-6"
+%token COMP_N			"COMP-N"
 %token COMP_X			"COMP-X"
 %token CONCATENATE_FUNC		"FUNCTION CONCATENATE"
 %token CONDITION
@@ -6219,6 +6220,10 @@ usage:
 | COMP_X
   {
 	check_and_set_usage (CB_USAGE_COMP_X);
+  }
+| COMP_N
+  {
+	check_and_set_usage (CB_USAGE_COMP_N);
   }
 | FLOAT_SHORT
   {

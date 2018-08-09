@@ -1074,6 +1074,7 @@ validate_usage (struct cb_field * const f)
 		break;
 	case CB_USAGE_COMP_5:
 	case CB_USAGE_COMP_X:
+	case CB_USAGE_COMP_N:
 		if (f->pic
 		 && f->pic->category != CB_CATEGORY_NUMERIC
 		 && f->pic->category != CB_CATEGORY_ALPHANUMERIC) {
@@ -1794,6 +1795,7 @@ setup_parameters (struct cb_field *f)
 			f->flag_real_binary = 1;
 			/* Fall-through */
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				if (f->pic->size > 8) {
 					strcpy (pic, "9(36)");
@@ -1805,6 +1807,9 @@ setup_parameters (struct cb_field *f)
 #ifndef WORDS_BIGENDIAN
 			if (f->usage == CB_USAGE_COMP_X &&
 			    cb_binary_byteorder == CB_BYTEORDER_BIG_ENDIAN) {
+				f->flag_binary_swap = 1;
+			}
+			if (f->usage == CB_USAGE_COMP_N) {
 				f->flag_binary_swap = 1;
 			}
 #endif
@@ -2130,6 +2135,7 @@ unbounded_again:
 					case CB_USAGE_BINARY:
 					case CB_USAGE_COMP_5:
 					case CB_USAGE_COMP_X:
+					case CB_USAGE_COMP_N:
 					case CB_USAGE_FLOAT:
 					case CB_USAGE_DOUBLE:
 					case CB_USAGE_LONG_DOUBLE:
@@ -2221,12 +2227,13 @@ unbounded_again:
 		f->size = (int) size_check;
 	} else if (!f->flag_is_external_form) {
 		/* Elementary item */
-		if(f->report_column > 0) { 		/* offset based on COLUMN value */
+		if (f->report_column > 0) { 		/* offset based on COLUMN value */
 			set_report_field(f);
 		}
 
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				break;
 			}
@@ -2673,6 +2680,8 @@ cb_get_usage_string (const enum cb_usage usage)
 		return "COMP-5";
 	case CB_USAGE_COMP_X:
 		return "COMP-X";
+	case CB_USAGE_COMP_N:
+		return "COMP-N";
 	case CB_USAGE_DISPLAY:
 		return "DISPLAY";
 	case CB_USAGE_FLOAT:

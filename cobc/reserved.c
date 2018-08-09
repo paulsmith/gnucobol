@@ -674,6 +674,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "COMP-6",			0, 0, COMP_6,			/* Extension */
 				0, 0
   },
+  { "COMP-N",			0, 0, COMP_N,			/* Extension */
+				0, 0
+  },
   { "COMP-X",			0, 0, COMP_X,			/* Extension */
 				0, 0
   },
@@ -696,6 +699,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "COMPUTATIONAL-6",		0, 0, COMP_6,			/* Extension */
+				0, 0
+  },
+  { "COMPUTATIONAL-N",		0, 0, COMP_N,			/* Extension */
 				0, 0
   },
   { "COMPUTATIONAL-X",		0, 0, COMP_X,			/* Extension */

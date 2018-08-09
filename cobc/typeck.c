@@ -4103,7 +4103,9 @@ build_store_option (cb_tree x, cb_tree round_opt)
 	}
 #endif
 
-	if (usage == CB_USAGE_COMP_5 || usage == CB_USAGE_COMP_X) {
+	if (usage == CB_USAGE_COMP_5
+	 || usage == CB_USAGE_COMP_X
+	 || usage == CB_USAGE_COMP_N) {
 		/* Do not check NOT ERROR case, so that we optimize */
 		if (current_statement->ex_handler) {
 			opt |= COB_STORE_KEEP_ON_OVERFLOW;
@@ -4355,20 +4357,21 @@ decimal_expand (cb_tree d, cb_tree x)
 		}
 		decimal_align ();
 
-		if ((f->usage == CB_USAGE_BINARY ||
-		    f->usage == CB_USAGE_COMP_5 ||
-		    f->usage == CB_USAGE_INDEX ||
-		    f->usage == CB_USAGE_HNDL ||
-		    f->usage == CB_USAGE_HNDL_WINDOW ||
-		    f->usage == CB_USAGE_HNDL_SUBWINDOW ||
-		    f->usage == CB_USAGE_HNDL_FONT ||
-		    f->usage == CB_USAGE_HNDL_THREAD ||
-		    f->usage == CB_USAGE_HNDL_MENU ||
-		    f->usage == CB_USAGE_HNDL_VARIANT ||
-		    f->usage == CB_USAGE_HNDL_LM ||
-		    f->usage == CB_USAGE_COMP_X) &&
-		    !f->pic->scale &&
-		    (f->size == 1 || f->size == 2 || f->size == 4 ||
+		if (  (f->usage == CB_USAGE_BINARY
+		    || f->usage == CB_USAGE_COMP_5
+			|| f->usage == CB_USAGE_INDEX
+			|| f->usage == CB_USAGE_HNDL
+			|| f->usage == CB_USAGE_HNDL_WINDOW
+			|| f->usage == CB_USAGE_HNDL_SUBWINDOW
+			|| f->usage == CB_USAGE_HNDL_FONT
+			|| f->usage == CB_USAGE_HNDL_THREAD
+			|| f->usage == CB_USAGE_HNDL_MENU
+			|| f->usage == CB_USAGE_HNDL_VARIANT
+			|| f->usage == CB_USAGE_HNDL_LM
+			|| f->usage == CB_USAGE_COMP_X
+			|| f->usage == CB_USAGE_COMP_N)
+		 && !f->pic->scale
+		 && (f->size == 1 || f->size == 2 || f->size == 4 ||
 		     f->size == 8)) {
 			if (f->pic->have_sign) {
 				dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_set_llint",
@@ -4656,9 +4659,11 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	struct cb_field	*fy;
 	if (CB_REF_OR_FIELD_P (p->y)) {
 		fy = CB_FIELD_PTR (p->y);
-		if (!fy->pic->have_sign && (fy->usage == CB_USAGE_BINARY ||
-		    fy->usage == CB_USAGE_COMP_5 ||
-		    fy->usage == CB_USAGE_COMP_X)) {
+		if (!fy->pic->have_sign
+		 && (fy->usage == CB_USAGE_BINARY
+		  || fy->usage == CB_USAGE_COMP_5
+		  || fy->usage == CB_USAGE_COMP_X
+		  || fy->usage == CB_USAGE_COMP_N)) {
 			return CB_BUILD_FUNCALL_2 ("cob_cmp_uint", p->x,
 						   cb_build_cast_int (p->y));
 		}
@@ -4716,18 +4721,19 @@ cb_build_optim_cond (struct cb_binary_op *p)
 		return CB_BUILD_FUNCALL_2 ("cob_cmp_llint", p->x,
 					    cb_build_cast_llint (p->y));
 	}
-	if (f->usage == CB_USAGE_BINARY ||
-	    f->usage == CB_USAGE_COMP_5 ||
-	    f->usage == CB_USAGE_INDEX ||
-		f->usage == CB_USAGE_HNDL ||
-		f->usage == CB_USAGE_HNDL_WINDOW ||
-		f->usage == CB_USAGE_HNDL_SUBWINDOW ||
-		f->usage == CB_USAGE_HNDL_FONT ||
-		f->usage == CB_USAGE_HNDL_THREAD ||
-		f->usage == CB_USAGE_HNDL_MENU ||
-		f->usage == CB_USAGE_HNDL_VARIANT ||
-		f->usage == CB_USAGE_HNDL_LM ||
-	    f->usage == CB_USAGE_COMP_X) {
+	if (f->usage == CB_USAGE_BINARY
+	 || f->usage == CB_USAGE_COMP_5
+	 || f->usage == CB_USAGE_INDEX
+	 ||	f->usage == CB_USAGE_HNDL
+	 ||	f->usage == CB_USAGE_HNDL_WINDOW
+	 ||	f->usage == CB_USAGE_HNDL_SUBWINDOW
+	 ||	f->usage == CB_USAGE_HNDL_FONT
+	 ||	f->usage == CB_USAGE_HNDL_THREAD
+	 ||	f->usage == CB_USAGE_HNDL_MENU
+	 ||	f->usage == CB_USAGE_HNDL_VARIANT
+	 ||	f->usage == CB_USAGE_HNDL_LM
+	 || f->usage == CB_USAGE_COMP_X
+	 || f->usage == CB_USAGE_COMP_N) {
 		n = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 			(16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
@@ -5149,9 +5155,11 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 						   cb_build_cast_int (n),
 						   cb_int0);
 		}
-		if (!f->pic->scale && (f->usage == CB_USAGE_BINARY ||
-		    f->usage == CB_USAGE_COMP_5 ||
-		    f->usage == CB_USAGE_COMP_X)) {
+		if ( !f->pic->scale
+		 && (f->usage == CB_USAGE_BINARY
+		  || f->usage == CB_USAGE_COMP_5
+		  || f->usage == CB_USAGE_COMP_X
+		  || f->usage == CB_USAGE_COMP_N)) {
 			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 				(16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
@@ -5219,9 +5227,11 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 
 	if (CB_REF_OR_FIELD_P (v)) {
 		f = CB_FIELD_PTR (v);
-		if (!f->pic->scale && (f->usage == CB_USAGE_BINARY ||
-		    f->usage == CB_USAGE_COMP_5 ||
-		    f->usage == CB_USAGE_COMP_X)) {
+		if ( !f->pic->scale
+		 && (f->usage == CB_USAGE_BINARY
+		  || f->usage == CB_USAGE_COMP_5
+		  || f->usage == CB_USAGE_COMP_X
+		  || f->usage == CB_USAGE_COMP_N)) {
 			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 				(16 * (f->flag_binary_swap ? 1 : 0));
 #if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
@@ -8416,6 +8426,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				 && fdst->pic->scale == 0
 			     && (   fdst->usage == CB_USAGE_COMP_5
 			         || fdst->usage == CB_USAGE_COMP_X
+			         || fdst->usage == CB_USAGE_COMP_N
 			         || fdst->usage == CB_USAGE_BINARY))) {
 				p = l->data;
 				for (i = 0; i < l->size; i++) {
@@ -8929,6 +8940,7 @@ cb_build_move_num_zero (cb_tree x)
 	case CB_USAGE_BINARY:
 	case CB_USAGE_COMP_5:
 	case CB_USAGE_COMP_X:
+	case CB_USAGE_COMP_N:
 		if (f->flag_binary_swap) {
 			return cb_build_memset (x, 0);
 		}
@@ -9335,10 +9347,12 @@ cb_build_move_literal (cb_tree src, cb_tree dst)
 					   CB_BUILD_CAST_LENGTH (dst));
 	}
 
-	if ((f->usage == CB_USAGE_BINARY ||
-	     f->usage == CB_USAGE_COMP_5 ||
-	     f->usage == CB_USAGE_COMP_X) &&
-	    cb_fits_int (src) && f->size <= 8) {
+	if ((f->usage == CB_USAGE_BINARY
+	  || f->usage == CB_USAGE_COMP_5
+	  || f->usage == CB_USAGE_COMP_X
+	  || f->usage == CB_USAGE_COMP_N)
+	 && cb_fits_int (src)
+	 && f->size <= 8) {
 		if (cb_binary_truncate) {
 			return CB_BUILD_FUNCALL_2 ("cob_move", src, dst);
 		}

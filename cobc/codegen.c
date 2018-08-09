@@ -2851,6 +2851,7 @@ output_integer (cb_tree x)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 			if (f->size == 1) {
 				output ("(*(");
 				if (!f->pic->have_sign) {
@@ -5089,6 +5090,7 @@ output_call_protocast (cb_tree x, cb_tree l)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 		case CB_USAGE_PACKED:
 		case CB_USAGE_DISPLAY:
 		case CB_USAGE_COMP_6:
@@ -5317,6 +5319,7 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 		case CB_USAGE_BINARY:
 		case CB_USAGE_COMP_5:
 		case CB_USAGE_COMP_X:
+		case CB_USAGE_COMP_N:
 		case CB_USAGE_PACKED:
 		case CB_USAGE_DISPLAY:
 		case CB_USAGE_COMP_6:
@@ -5326,9 +5329,9 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 				if (f->pic->have_sign) {
 					sign = 1;
 				}
-				if (f->usage == CB_USAGE_PACKED ||
-				    f->usage == CB_USAGE_DISPLAY ||
-				    f->usage == CB_USAGE_COMP_6) {
+				if (f->usage == CB_USAGE_PACKED
+				 || f->usage == CB_USAGE_DISPLAY
+				 || f->usage == CB_USAGE_COMP_6) {
 					sizes = f->pic->digits - f->pic->scale;
 				} else {
 					sizes = f->size;

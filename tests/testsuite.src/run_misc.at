@@ -4132,7 +4132,7 @@ AT_CLEANUP
 AT_SETUP([Computing of different USAGEs w/o decimal point])
 AT_KEYWORDS([runmisc
 BINARY-C-LONG BINARY-CHAR BINARY-DOUBLE BINARY-LONG
-COMP COMP-1 COMP-2 COMP-3 COMP-5 COMP-6
+COMP COMP-1 COMP-2 COMP-3 COMP-5 COMP-6 COMP-X COMP-N
 FLOAT-DECIMAL-16 FLOAT-DECIMAL-34 FLOAT-LONG FLOAT-SHORT])
 
 AT_DATA([prog.cob], [
@@ -4182,6 +4182,22 @@ AT_DATA([prog.cob], [
        77  C6-A    PIC  99 COMP-6           VALUE 1.
        77  C6-B    PIC  99 COMP-6           VALUE 10.
        77  C6-RES  PIC  99 COMP-6.
+      *
+       77  CN9-A   PIC  99 COMP-N           VALUE 1.
+       77  CN9-B   PIC  99 COMP-N           VALUE 10.
+       77  CN9-RES PIC  99 COMP-N.
+      *
+       77  CNX-A   PIC  X  COMP-N           VALUE 1.
+       77  CNX-B   PIC  X  COMP-N           VALUE 10.
+       77  CNX-RES PIC  X  COMP-N.
+      *
+       77  CX9-A   PIC  99 COMP-X           VALUE 1.
+       77  CX9-B   PIC  99 COMP-X           VALUE 10.
+       77  CX9-RES PIC  99 COMP-X.
+      *
+       77  CXX-A   PIC  X  COMP-X           VALUE 1.
+       77  CXX-B   PIC  X  COMP-X           VALUE 10.
+       77  CXX-RES PIC  X  COMP-X.
       *
        77  D-A     PIC  S99                 VALUE 1.
        77  D-B     PIC  S99                 VALUE 10.
@@ -4485,6 +4501,118 @@ AT_DATA([prog.cob], [
               END-DISPLAY
            END-IF.
       *
+           ADD  CN9-B  TO CN9-A END-ADD.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 11
+              DISPLAY 'ERROR COMP-N + COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 1     TO CN9-A.
+           ADD  10    TO CN9-A END-ADD.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 11
+              DISPLAY 'ERROR COMP-N + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CN9-A.
+           SUBTRACT CN9-B FROM CN9-A END-SUBTRACT.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 1
+              DISPLAY 'ERROR COMP-N - COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CN9-A.
+           SUBTRACT 10   FROM CN9-A END-SUBTRACT.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 1
+              DISPLAY 'ERROR COMP-N - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CNX-B  TO CNX-A END-ADD.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 11
+              DISPLAY 'ERROR COMP-N + COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 1     TO CNX-A.
+           ADD  10    TO CNX-A END-ADD.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 11
+              DISPLAY 'ERROR COMP-N + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CNX-A.
+           SUBTRACT CNX-B FROM CNX-A END-SUBTRACT.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 1
+              DISPLAY 'ERROR COMP-N - COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CNX-A.
+           SUBTRACT 10   FROM CNX-A END-SUBTRACT.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 1
+              DISPLAY 'ERROR COMP-N - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CX9-B  TO CX9-A END-ADD.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 11
+              DISPLAY 'ERROR COMP-X + COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 1     TO CX9-A.
+           ADD  10    TO CX9-A END-ADD.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 11
+              DISPLAY 'ERROR COMP-X + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CX9-A.
+           SUBTRACT CX9-B FROM CX9-A END-SUBTRACT.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 1
+              DISPLAY 'ERROR COMP-X - COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CX9-A.
+           SUBTRACT 10   FROM CX9-A END-SUBTRACT.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 1
+              DISPLAY 'ERROR COMP-X - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CXX-B  TO CXX-A END-ADD.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 11
+              DISPLAY 'ERROR COMP-X + COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 1     TO CXX-A.
+           ADD  10    TO CXX-A END-ADD.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 11
+              DISPLAY 'ERROR COMP-X + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CXX-A.
+           SUBTRACT CXX-B FROM CXX-A END-SUBTRACT.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 1
+              DISPLAY 'ERROR COMP-X - COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 11    TO CXX-A.
+           SUBTRACT 10   FROM CXX-A END-SUBTRACT.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 1
+              DISPLAY 'ERROR COMP-X - NUM'
+              END-DISPLAY
+           END-IF.
+      *
            ADD  D-B  TO D-A END-ADD.
            MOVE D-A  TO D-RES.
            IF D-RES NOT = 11
@@ -4640,7 +4768,7 @@ AT_CLEANUP
 AT_SETUP([Computing of different USAGEs w/- decimal point])
 AT_KEYWORDS([runmisc
 BINARY-C-LONG BINARY-CHAR BINARY-DOUBLE BINARY-LONG
-COMP COMP-1 COMP-2 COMP-3 COMP-5 COMP-6
+COMP COMP-1 COMP-2 COMP-3 COMP-5 COMP-6 COMP-N COMP-X
 FLOAT-DECIMAL-16 FLOAT-DECIMAL-34 FLOAT-LONG FLOAT-SHORT])
 
 AT_DATA([prog.cob], [
@@ -4649,7 +4777,6 @@ AT_DATA([prog.cob], [
        ENVIRONMENT DIVISION.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-
       *
        77  BCL-A           BINARY-C-LONG    VALUE 1.0.
        77  BCL-B           BINARY-C-LONG    VALUE 10.0.
@@ -4690,6 +4817,22 @@ AT_DATA([prog.cob], [
        77  C6-A    PIC  99 COMP-6           VALUE 1.0.
        77  C6-B    PIC  99 COMP-6           VALUE 10.0.
        77  C6-RES  PIC  99 COMP-6.
+      *
+       77  CN9-A   PIC  99 COMP-N           VALUE 1.
+       77  CN9-B   PIC  99 COMP-N           VALUE 10.
+       77  CN9-RES PIC  99 COMP-N.
+      *
+       77  CNX-A   PIC  X  COMP-N           VALUE 1.
+       77  CNX-B   PIC  X  COMP-N           VALUE 10.
+       77  CNX-RES PIC  X  COMP-N.
+      *
+       77  CX9-A   PIC  99 COMP-X           VALUE 1.
+       77  CX9-B   PIC  99 COMP-X           VALUE 10.
+       77  CX9-RES PIC  99 COMP-X.
+      *
+       77  CXX-A   PIC  X  COMP-X           VALUE 1.
+       77  CXX-B   PIC  X  COMP-X           VALUE 10.
+       77  CXX-RES PIC  X  COMP-X.
       *
        77  D-A     PIC  S99                 VALUE 1.0.
        77  D-B     PIC  S99                 VALUE 10.0.
@@ -4993,27 +5136,139 @@ AT_DATA([prog.cob], [
               END-DISPLAY
            END-IF.
       *
+           ADD  CN9-B  TO CN9-A END-ADD.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-N + COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 1.0    TO CN9-A.
+           ADD  10.0   TO CN9-A END-ADD.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-N + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CN9-A.
+           SUBTRACT CN9-B FROM CN9-A END-SUBTRACT.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-N - COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CN9-A.
+           SUBTRACT 10.0  FROM CN9-A END-SUBTRACT.
+           MOVE CN9-A  TO CN9-RES.
+           IF CN9-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-N - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CNX-B  TO CNX-A END-ADD.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-N + COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 1.0    TO CNX-A.
+           ADD  10.0   TO CNX-A END-ADD.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-N + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CNX-A.
+           SUBTRACT CNX-B FROM CNX-A END-SUBTRACT.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-N - COMP-N'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CNX-A.
+           SUBTRACT 10.0 FROM CNX-A END-SUBTRACT.
+           MOVE CNX-A  TO CNX-RES.
+           IF CNX-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-N - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CX9-B  TO CX9-A END-ADD.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-X + COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 1.0    TO CX9-A.
+           ADD  10.0   TO CX9-A END-ADD.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-X + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CX9-A.
+           SUBTRACT CX9-B FROM CX9-A END-SUBTRACT.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-X - COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CX9-A.
+           SUBTRACT 10.0 FROM CX9-A END-SUBTRACT.
+           MOVE CX9-A  TO CX9-RES.
+           IF CX9-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-X - NUM'
+              END-DISPLAY
+           END-IF.
+      *
+           ADD  CXX-B  TO CXX-A END-ADD.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-X + COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 1.0    TO CXX-A.
+           ADD  10.0   TO CXX-A END-ADD.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 11.0
+              DISPLAY 'ERROR COMP-X + NUM'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0    TO CXX-A.
+           SUBTRACT CXX-B FROM CXX-A END-SUBTRACT.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-X - COMP-X'
+              END-DISPLAY
+           END-IF.
+           MOVE 11.0   TO CXX-A.
+           SUBTRACT 10.0 FROM CXX-A END-SUBTRACT.
+           MOVE CXX-A  TO CXX-RES.
+           IF CXX-RES NOT = 1.0
+              DISPLAY 'ERROR COMP-X - NUM'
+              END-DISPLAY
+           END-IF.
+      *
            ADD  D-B  TO D-A END-ADD.
            MOVE D-A  TO D-RES.
            IF D-RES NOT = 11.0
               DISPLAY 'ERROR DISPLAY + DISPLAY'
               END-DISPLAY
            END-IF.
-           MOVE 1.0   TO D-A.
-           ADD  10.0  TO D-A END-ADD.
+           MOVE 1.0  TO D-A.
+           ADD  10.0 TO D-A END-ADD.
            MOVE D-A  TO D-RES.
            IF D-RES NOT = 11.0
               DISPLAY 'ERROR DISPLAY + NUM'
               END-DISPLAY
            END-IF.
-           MOVE 11.0  TO D-A.
+           MOVE 11.0 TO D-A.
            SUBTRACT D-B FROM D-A END-SUBTRACT.
            MOVE D-A  TO D-RES.
            IF D-RES NOT = 1.0
               DISPLAY 'ERROR DISPLAY - DISPLAY'
               END-DISPLAY
            END-IF.
-           MOVE 11.0  TO D-A.
+           MOVE 11.0 TO D-A.
            SUBTRACT 10.0 FROM D-A END-SUBTRACT.
            MOVE D-A  TO D-RES.
            IF D-RES NOT = 1.0
