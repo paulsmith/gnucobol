@@ -3979,21 +3979,21 @@ cb_build_expr (cb_tree list)
 					}
 				}
 			 } else
-			 if (op == '|' 
+			 if (op == '|'
 			  || op == '&') {
 				has_con = 1;
 				if (has_var && !has_rel) {
 					bad_cond = 1;
 				}
-			 } else 
-			 if (op == '>' 
+			 } else
+			 if (op == '>'
 			  || op == '<'
 			  || op == '='
 			  || op == '~'
 			  || op == '['
 			  || op == ']') {
 				has_rel = 1;
-			 } else 
+			 } else
 			 if (op == '!') {
 				has_rel = 1;
 			 }
@@ -9929,14 +9929,14 @@ error_if_invalid_file_from_clause_literal (cb_tree literal)
 	if (!(CB_CONST_P (literal) || CB_LITERAL_P (literal))) {
 		return 0;
 	}
-	
+
 	if (!(category == CB_CATEGORY_ALPHANUMERIC
 	      || category == CB_CATEGORY_NATIONAL
 	      || category == CB_CATEGORY_BOOLEAN)) {
 		cb_error_x (literal, _("literal in FROM clause must be alphanumeric, national or boolean"));
 		error = 1;
 	}
-	
+
 	if (cb_is_figurative_constant (literal)) {
 		cb_error_x (literal, _("figurative constants not allowed in FROM clause"));
 		error = 1;
@@ -9971,7 +9971,7 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		} else {
 			record = CB_TREE(f->record);
 		}
-		
+
 		if (error_if_invalid_file_from_clause_literal (from)) {
 			return;
 		}
@@ -10960,7 +10960,7 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 		} else {
 			record = CB_TREE(f->record);
 		}
-		
+
 		if (error_if_invalid_file_from_clause_literal (from)) {
 			return;
 		}
@@ -11261,7 +11261,7 @@ cb_emit_generate (cb_tree x)
 	}
 }
 
-/* GENERATE statement */
+/* SUPPRESS statement */
 
 void
 cb_emit_suppress (struct cb_field *f)

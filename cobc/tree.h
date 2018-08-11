@@ -318,12 +318,12 @@ enum cb_usage {
 	CB_USAGE_HNDL_WINDOW,		/* 30 */
 	CB_USAGE_HNDL_SUBWINDOW,	/* 31 */
 	CB_USAGE_HNDL_FONT,		/* 32 */
-	CB_USAGE_HNDL_THREAD,	/* 33 */
+	CB_USAGE_HNDL_THREAD,		/* 33 */
 	CB_USAGE_HNDL_MENU,		/* 34 */
-	CB_USAGE_HNDL_VARIANT,	/* 35 */
+	CB_USAGE_HNDL_VARIANT,		/* 35 */
 	CB_USAGE_HNDL_LM,		/* 36 */
 	CB_USAGE_COMP_N,		/* 37 */
-	CB_USAGE_ERROR		/* 38, allways last */
+	CB_USAGE_ERROR			/* 38, always last */
 };
 
 
@@ -517,7 +517,7 @@ struct cb_xref {
 
 struct cb_call_elem {
 	struct cb_call_elem	*next;
-	char		        *name;
+	char			*name;
 	struct cb_xref		xref;
 	int			is_identifier;
 	int			is_system;
@@ -669,7 +669,7 @@ struct cb_literal {
 
 struct cb_decimal {
 	struct cb_tree_common	common;		/* Common values */
-	unsigned int			id;		/* Id for this decimal */
+	unsigned int		id;		/* ID for this decimal */
 };
 
 #define CB_DECIMAL(x)	(CB_TREE_CAST (CB_TAG_DECIMAL, struct cb_decimal, x))
@@ -719,7 +719,7 @@ struct cb_field {
 	cb_tree			false_88;	/* 88 FALSE clause */
 	cb_tree			index_list;	/* INDEXED BY */
 	cb_tree			external_form_identifier;	/* target of IDENTIFIED BY
-												(CGI template) */
+								   (CGI template) */
 
 	struct cb_field		*parent;	/* Upper level field (if any) */
 	struct cb_field		*children;	/* Top of lower level fields */
@@ -730,7 +730,7 @@ struct cb_field {
 	struct cb_field		*index_qual;	/* INDEXED BY qualifier */
 	struct cb_file		*file;		/* FD section file name */
 	struct cb_cd		*cd;		/* CD name */
-	struct cb_key 		*keys;		/* SEARCH key */
+	struct cb_key		*keys;		/* SEARCH key */
 	struct cb_picture	*pic;		/* PICTURE */
 	struct cb_field		*vsize;		/* Variable size cache */
 	struct cb_label		*debug_section;	/* DEBUG section */
@@ -929,7 +929,7 @@ struct cb_alt_key {
 struct cb_file {
 	struct cb_tree_common	common;			/* Common values */
 	const char		*name;			/* Original name */
-	char	 		*cname;			/* Name used in C */
+	char			*cname;			/* Name used in C */
 	/* SELECT */
 	cb_tree			assign;			/* ASSIGN */
 	cb_tree			file_status;		/* FILE STATUS */
@@ -971,7 +971,7 @@ struct cb_file {
 	unsigned int		flag_delimiter	: 1;	/* RECORD DELIMITER */
 	unsigned int		flag_report	: 1;	/* Used by REPORT */
 	/* Implied RECORD VARYING limits need checking */
-	unsigned int	        flag_check_record_varying_limits	: 1;
+	unsigned int		flag_check_record_varying_limits	: 1;
 };
 
 #define CB_FILE(x)	(CB_TREE_CAST (CB_TAG_FILE, struct cb_file, x))
@@ -1419,8 +1419,8 @@ struct cb_program {
 
 	/* Program variables */
 	struct cb_program	*next_program;		/* Nested/contained */
-	struct cb_program	*next_program_ordered;		/* Nested/contained
-													when cb_correct_program_order is set */
+	struct cb_program	*next_program_ordered;	/* Nested/contained
+							   when cb_correct_program_order is set */
 	const char		*program_name;		/* Internal program-name */
 	const char		*program_id;		/* Demangled external PROGRAM-ID */
 	char			*source_name;		/* Source name */
@@ -1620,7 +1620,7 @@ extern cb_tree			cb_concat_literals (const cb_tree,
 
 extern cb_tree			cb_build_decimal (const unsigned int);
 extern cb_tree			cb_build_decimal_literal (const int);
-extern int 			cb_lookup_literal (cb_tree x, int make_decimal);
+extern int			cb_lookup_literal (cb_tree x, int make_decimal);
 
 extern cb_tree			cb_build_picture (const char *);
 extern cb_tree			cb_build_comment (const char *);
@@ -1728,10 +1728,10 @@ extern cb_tree			cb_list_append (cb_tree, cb_tree);
 extern cb_tree			cb_list_reverse (cb_tree);
 extern unsigned int		cb_list_length (cb_tree);
 
-extern struct cb_report	*build_report (cb_tree);
-extern void				finalize_report (struct cb_report *, struct cb_field *);
+extern struct cb_report		*build_report (cb_tree);
+extern void			finalize_report (struct cb_report *, struct cb_field *);
 extern void 			build_sum_counter(struct cb_report *r, struct cb_field *f);
-extern struct cb_field *get_sum_data_field(struct cb_report *r, struct cb_field *f);
+extern struct cb_field		*get_sum_data_field(struct cb_report *r, struct cb_field *f);
 
 extern void			cb_add_common_prog (struct cb_program *);
 extern void			cb_insert_common_prog (struct cb_program *,
@@ -2046,10 +2046,10 @@ extern cb_tree		cb_build_write_advancing_lines (cb_tree, cb_tree);
 extern cb_tree		cb_build_write_advancing_mnemonic (cb_tree, cb_tree);
 extern cb_tree		cb_build_write_advancing_page (cb_tree);
 extern cb_tree		cb_check_sum_field (cb_tree x);
-extern void			cb_emit_initiate (cb_tree rep);
-extern void			cb_emit_terminate (cb_tree rep);
-extern void			cb_emit_generate (cb_tree rep);
-extern void			cb_emit_suppress (struct cb_field *f);
+extern void		cb_emit_initiate (cb_tree rep);
+extern void		cb_emit_terminate (cb_tree rep);
+extern void		cb_emit_generate (cb_tree rep);
+extern void		cb_emit_suppress (struct cb_field *f);
 
 #ifdef	COB_TREE_DEBUG
 extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,

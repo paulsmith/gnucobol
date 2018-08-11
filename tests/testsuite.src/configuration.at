@@ -618,7 +618,7 @@ AT_DATA([defunc.cfg], [
 novar
 physical_cancel notwithme
 load_case  insensitive
-varseq_format big 
+varseq_format big
 sort_chunk 4K
 sort_memory 4G # too big by some byte
 setenv nothing
@@ -654,7 +654,7 @@ AT_DATA([defunc.cfg], [
 novar
 physical_cancel notwithme
 load_case  insensitive
-varseq_format big 
+varseq_format big
 sort_chunk 4K
 sort_memory 4G # too big by some byte
 setenv nothing

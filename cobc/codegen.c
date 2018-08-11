@@ -1219,17 +1219,17 @@ again:
 /* Generate goto label */
 
 static void
-perform_label(const char *toprefix, int tolbl, int callnum)
+perform_label (const char *to_prefix, int to_lbl, int call_num)
 {
 	struct label_list	*l;
 	if (!cb_flag_computed_goto) {
-		if(callnum > 0) {
-			for(l = label_cache; l && l->call_num != callnum; l = l->next);
+		if(call_num > 0) {
+			for(l = label_cache; l && l->call_num != call_num; l = l->next);
 			if(l == NULL) {
-				printf("Internal compiler error; Could not find Label for %d\n",callnum);
+				printf("Internal compiler error; Could not find Label for %d\n",call_num);
 			} else {
-				output ("\tframe_ptr->return_address_num = %d; /* %s%d */\n", callnum,CB_PREFIX_LABEL,l->id);
-				output ("\tgoto %s%d;\n", toprefix, tolbl);
+				output ("\tframe_ptr->return_address_num = %d; /* %s%d */\n", call_num,CB_PREFIX_LABEL,l->id);
+				output ("\tgoto %s%d;\n", to_prefix, to_lbl);
 				return;
 			}
 		}
@@ -1243,21 +1243,20 @@ perform_label(const char *toprefix, int tolbl, int callnum)
 		}
 		label_cache = l;
 		output ("\tframe_ptr->return_address_num = %d; /* %s%d */\n", l->call_num,CB_PREFIX_LABEL, cb_id);
-		output ("\tgoto %s%d;\n", toprefix, tolbl);
+		output ("\tgoto %s%d;\n", to_prefix, to_lbl);
 		output ("%s%d:\n", CB_PREFIX_LABEL, cb_id);
 	} else {
-		if(callnum >= 0)
-			output ("\tframe_ptr->return_address_ptr = &&%s%d;\n", CB_PREFIX_LABEL, callnum);
+		if(call_num >= 0)
+			output ("\tframe_ptr->return_address_ptr = &&%s%d;\n", CB_PREFIX_LABEL, call_num);
 		else
 			output ("\tframe_ptr->return_address_ptr = &&%s%d;\n", CB_PREFIX_LABEL, cb_id);
-		output ("\tgoto %s%d;\n", toprefix, tolbl);
+		output ("\tgoto %s%d;\n", to_prefix, to_lbl);
 		output ("%s%d:\n", CB_PREFIX_LABEL, cb_id);
 	}
 	cb_id++;
 }
 
 static int
-
 add_new_label()
 {
 	struct label_list	*l;
@@ -1275,7 +1274,7 @@ add_new_label()
 		return l->call_num;
 	}
 	output ("%s%d:\n", CB_PREFIX_LABEL, cb_id++);
-	return cb_id-1;
+	return cb_id - 1;
 }
 
 /*
@@ -1283,7 +1282,7 @@ add_new_label()
  * for GENERATE to execute
  */
 static void
-cb_emit_decl_case(struct cb_report *r, struct cb_field *f)
+cb_emit_decl_case (struct cb_report *r, struct cb_field *f)
 {
 	struct cb_field		*p;
 
@@ -1614,7 +1613,7 @@ static void
 output_gnucobol_defines (const char *formatted_date, struct tm *local_time)
 {
 	int	i;
-	
+
 	if (!strrchr (cb_source_file, '\\')
 	 && !strrchr (cb_source_file, '"')) {
 		output ("#define  COB_SOURCE_FILE\t\t\"%s\"\n", cb_source_file);
@@ -2059,7 +2058,7 @@ output_emit_field (cb_tree x, const char *cmt)
 	if (!f) {
 		return;
 	}
-	
+
 	if (!(f->report_flag & COB_REPORT_REF_EMITTED)) {
 		int	i;
 
@@ -8400,7 +8399,7 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 				output_report_def_fields (0,id,f,r,idx);
 			}
 			return;
-		} 
+		}
 
 		if (f->sister) {
 			output_report_def_fields (0,id,f->sister,r,0);
@@ -8409,26 +8408,26 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		&& f->storage == CB_STORAGE_REPORT
 		&& f->report == r) {
 			output_report_def_fields (0,id,f->children,r,0);
-		} 
+		}
 		if (f->report_source || f->report_control || (f->report_flag & COB_REPORT_PRESENT)) {
 			output_local("\t\t/* ");
 			if(f->report_source) {
 				struct cb_field *s = cb_code_field (f->report_source);
 				if(s) output_local("SOURCE %s; ",s->name);
-			} 
+			}
 			if((f->report_flag & COB_REPORT_PRESENT)) {
 				output_local("PRESENT ");
-				if((f->report_flag & COB_REPORT_BEFORE)) 
+				if((f->report_flag & COB_REPORT_BEFORE))
 					output_local("BEFORE ");
 				else
 					output_local("AFTER ");
-				if((f->report_flag & COB_REPORT_ALL)) 
+				if((f->report_flag & COB_REPORT_ALL))
 					output_local("ALL ");
-				if((f->report_flag & COB_REPORT_PAGE)) 
+				if((f->report_flag & COB_REPORT_PAGE))
 					output_local("PAGE ");
 				if(f->report_control) {
 					struct cb_field *s = cb_code_field (f->report_control);
-					if((f->report_flag & COB_REPORT_PAGE)) 
+					if((f->report_flag & COB_REPORT_PAGE))
 						output_local("OR ");
 					if(s) output_local("%s; ",s->name);
 				}
@@ -8471,15 +8470,15 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 		output_local("/*SUM*/");
 		output_param (f->report_sum_counter, 0);
 	} else {
-		output_local("NULL");	
+		output_local("NULL");
 	}
-	output_local(",");	
+	output_local(",");
 	if(f->report_control) {
 		output_param (f->report_control, 0);
 	} else {
-		output_local("NULL");	
+		output_local("NULL");
 	}
-	output_local(",");	
+	output_local(",");
 	if (f->values) {
 		value = CB_VALUE (f->values);
 
@@ -8511,10 +8510,10 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 			}
 			cobc_free((void*) val);
 		} else {
-			output_local("NULL,0,");	
+			output_local("NULL,0,");
 		}
 	} else {
-		output_local("NULL,0,");	
+		output_local("NULL,0,");
 	}
 	if(f->step_count < f->size)
 		f->step_count = f->size;
@@ -8664,14 +8663,14 @@ output_report_define_lines (int top, struct cb_field *f, struct cb_report *r)
 		output_local("NULL,");
 	else
 		output_local("&%s%d,",CB_PREFIX_REPORT_LINE,c->id);
-	if(fld_id != 0) 
+	if(fld_id != 0)
 		output_local("&%s%d,",CB_PREFIX_REPORT_FIELD,fld_id);
 	else
 		output_local("NULL,");
 	if(f->report_control) {
 		output_param (f->report_control, 0);
 	} else {
-		output_local("NULL");	
+		output_local("NULL");
 	}
 	output_local(",%d",f->report_decl_id);
 	if(f->report_decl_id)
@@ -10560,7 +10559,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 			sprintf(fdname,"FD %s",fl->name);
 			output_line ("/* Dump %s */",fdname);
 			output_line ("cob_dump_field (-1, \"%s\", NULL, 0, 0);", fdname);
-			output_line ("cob_dump_field (-2, (const char*)%s%s, NULL, 0, 0);", 
+			output_line ("cob_dump_field (-2, (const char*)%s%s, NULL, 0, 0);",
 							CB_PREFIX_FILE, fl->cname);
 			if (fl->record->sister
 			 && fl->record->sister->sister == NULL) {	/* Only one record layout */
@@ -10767,7 +10766,7 @@ output_function_entry_function (struct cb_program *prog, cb_tree entry,
 	cob_u32_t	parmnum = 0;
 	cob_u32_t	n;
 	cb_tree		l;
-	
+
 	entry_name = CB_LABEL (CB_PURPOSE (entry))->name;
 	using_list = CB_VALUE (CB_VALUE (entry));
 

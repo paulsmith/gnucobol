@@ -2250,9 +2250,9 @@ cobc_print_info (void)
 #endif
 
 #if defined(__MPIR_VERSION)
-	cobc_var_print (_("mathematical library"),		"MPIR - GMP", 0);
+	cobc_var_print (_("mathematical library"),	"MPIR - GMP", 0);
 #else
-	cobc_var_print (_("mathematical library"),		"GMP", 0);
+	cobc_var_print (_("mathematical library"),	"GMP", 0);
 #endif
 }
 
@@ -2448,7 +2448,7 @@ cobc_print_usage (char * prog)
 	cobc_print_config_flag ("reserved", _("word to be added to reserved words list as alias"), _("<word>:<alias>"));
 	cobc_print_config_flag ("not-register", _("special register to disable"), _("<word>"));
 	cobc_print_config_flag ("register", _("special register to enable"), _("<word>"));
-	
+
 	putchar ('\n');
 
 	putchar ('\n');
@@ -4071,7 +4071,7 @@ process (char *cmd)
 			optimize = 1;
 			break;
 		default:
-			/* rare issue only on OS400 where translation 
+			/* rare issue only on OS400 where translation
 			   may not even work - untranslated */
 			cobc_err_msg ("unknown option ignored:\t%s",
 				 token - 1);
@@ -6728,7 +6728,7 @@ print_replace_main (struct list_files *cfile, FILE *fd,
 					}
 				}
 				print_program (cur, 1);
-				
+
 				/* Delete the copybook reference when done */
 				cfile->copy_head = cur->next;
 				cleanup_copybook_reference (cur);
@@ -8011,7 +8011,7 @@ begin_setup_internal_and_compiler_env (void)
 	}
 #endif
 
-	/* Flag to emit Old style: cob_set_location, cob_trace_section */  
+	/* Flag to emit Old style: cob_set_location, cob_trace_section */
 	p = getenv ("COB_OLD_TRACE");
 	if (p && (*p == 'Y' || *p == 'y' || *p == '1')) {
 		cb_old_trace = 1;

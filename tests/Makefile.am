@@ -79,7 +79,7 @@ check-local: $(TESTSUITE)
 
 clean-local:
 	rm -rf *.dir *.log
-	
+
 ./run_prog_manual.sh: run_prog_manual.sh.in
 	@cp $(srcdir)/run_prog_manual.sh.in $@
 

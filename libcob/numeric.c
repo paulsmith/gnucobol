@@ -292,10 +292,16 @@ cob_binary_set_int64 (cob_field *f, cob_s64_t n)
 /* Decimal number */
 
 void
+cob_decimal_init2 (cob_decimal *d, mp_bitcnt_t initial_num_bits)
+{
+	mpz_init2 (d->value, initial_num_bits);
+	d->scale = 0;
+}
+
+void
 cob_decimal_init (cob_decimal *d)
 {
-	mpz_init2 (d->value, COB_MPZ_DEF);
-	d->scale = 0;
+	cob_decimal_init2 (d->value, COB_MPZ_DEF);
 }
 
 void

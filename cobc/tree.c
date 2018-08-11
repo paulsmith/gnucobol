@@ -1717,7 +1717,7 @@ cb_int (const int n)
 	   -fsyntax-only on 880 production code files (2,500,000 LOC)
 	   according to gcov we entered this function 629684 times with only 280 new
 	   entries but the loop produces a lot of comparisions:
-	   for: 122441668, if: 122441388 
+	   for: 122441668, if: 122441388
 	*/
 	/* CHECKME: optimization by alignment / otherwise? */
 
@@ -3293,7 +3293,7 @@ build_sum_counter(struct cb_report *r, struct cb_field *f)
 
 	/* Set up SUM COUNTER */
 	if(f->flag_filler) {
-		snprintf (buff, (size_t)COB_MINI_MAX, "SUM OF %s", 
+		snprintf (buff, (size_t)COB_MINI_MAX, "SUM OF %s",
 					CB_FIELD(CB_VALUE(f->report_sum_list))->name);
 	} else {
 		snprintf (buff, (size_t)COB_MINI_MAX, "SUM %s", f->name);
@@ -3374,7 +3374,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 					CB_TREE(r), _("no DETAIL line defined in report %s"),r->name);
 			} else if(!(r->first_detail >= r->heading)) {
 				cb_error_x (CB_TREE(r), _("PAGE LIMIT FIRST DETAIL should be >= HEADING"));
-			} 
+			}
 			if(r->footing > 0 && !(r->footing >= r->heading)) {
 				cb_error_x (CB_TREE(r), _("PAGE LIMIT FOOTING should be >= HEADING"));
 			} else if(r->last_detail > 0 && !(r->last_detail >= r->first_detail)) {
@@ -3405,7 +3405,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			}
 			r->line_ids[r->num_lines++] = p;
 			r->line_ids[r->num_lines] = NULL;	/* Clear next entry */
-		} 
+		}
 		/* report source field */
 		if (p->report_source
 		 && CB_REF_OR_FIELD_P (p->report_source)) {
@@ -3415,7 +3415,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 				fld->count++;
 			}
 			if (CB_TREE_TAG (p->report_source) == CB_TAG_REFERENCE) {
-				ref = CB_REFERENCE (p->report_source); 
+				ref = CB_REFERENCE (p->report_source);
 				if (ref->offset || ref->length || ref->subs || fld->flag_local) {
 					p->report_from = p->report_source;
 					p->report_source = cb_field_dup (fld, ref);
@@ -3714,7 +3714,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 		cb_error (_("file '%s': RECORD VARYING specified without limits, but implied limits are equal"),
 			  f->name);
 	}
-	
+
 	if (f->organization == COB_ORG_INDEXED) {
 		if (f->record_max > MAX_FD_RECORD_IDX) {
 			f->record_max = MAX_FD_RECORD_IDX;
@@ -4412,7 +4412,7 @@ compare_field_literal (cb_tree e, int swap, cb_tree x, int op, struct cb_literal
 	}
 
 
-	/* Check for numeric issues. 
+	/* Check for numeric issues.
 	 * note: the actual result may be different if non-numeric
 	 *       data is stored in the numeric fields - and may (later)
 	 *       be dependent on compiler configuration flags;
@@ -4731,7 +4731,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 		}
 
 		/* CHECKME: a call should also be possible when:
-		
+
 		    (f->usage == CB_USAGE_DISPLAY
 		  || (cb_binary_truncate
 		   && (f->usage == CB_USAGE_COMP_5
@@ -5562,7 +5562,7 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	}
 
 	/* FIXME: Some FUNCTIONS need a test for / adjustment depending on their arguments' category:
-	   * CONCATENATE/SUBSTITUTE/... 
+	   * CONCATENATE/SUBSTITUTE/...
 	     all should be of the same category alphanumeric/alphabetic vs. national
 	   * MAX/REVERSE/TRIM/...
 	     depending on the arguments' category the type of the function must be adjusted
@@ -5576,9 +5576,9 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 			fld = CB_FIELD_PTR (x);
 			if (!cb_field_variable_size (fld)
 			 && !fld->flag_any_length) {
-				if (!(fld->pic 
+				if (!(fld->pic
 				 && (fld->pic->category == CB_CATEGORY_NATIONAL
-				  || fld->pic->category == CB_CATEGORY_NATIONAL_EDITED))) 
+				  || fld->pic->category == CB_CATEGORY_NATIONAL_EDITED)))
 					return cb_build_length (x);
 			}
 		} else if (CB_LITERAL_P (x)) {

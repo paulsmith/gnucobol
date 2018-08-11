@@ -6739,16 +6739,11 @@ cob_init_intrinsic (cob_global *lptr)
 
 	mpz_init2 (cob_mexp, COB_MPZ_DEF);
 	mpz_init2 (cob_mpzt, COB_MPZ_DEF);
-	mpz_init2 (d1.value, 1536UL);
-	d1.scale = 0;
-	mpz_init2 (d2.value, 1536UL);
-	d2.scale = 0;
-	mpz_init2 (d3.value, 1536UL);
-	d3.scale = 0;
-	mpz_init2 (d4.value, 1536UL);
-	d4.scale = 0;
-	mpz_init2 (d5.value, 1536UL);
-	d5.scale = 0;
+	cob_decimal_init2 (&d1, 1536UL);
+	cob_decimal_init2 (&d2, 1536UL);
+	cob_decimal_init2 (&d3, 1536UL);
+	cob_decimal_init2 (&d4, 1536UL);
+	cob_decimal_init2 (&d5, 1536UL);
 
 	mpf_init2 (cob_mpft, COB_MPF_PREC);
 	mpf_init2 (cob_mpft2, COB_MPF_PREC);

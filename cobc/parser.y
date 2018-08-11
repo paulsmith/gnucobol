@@ -2300,6 +2300,7 @@ check_validate_item (cb_tree x)
 %token LENGTH_FUNC		"FUNCTION LENGTH/BYTE-LENGTH"
 %token LESS
 %token LESS_OR_EQUAL		"LESS OR EQUAL"
+%token LEVEL_NUMBER		"level-number"		/* 01 thru 49, 77 */
 %token LIMIT
 %token LIMITS
 %token LINAGE
@@ -2733,11 +2734,10 @@ check_validate_item (cb_tree x)
 %token WHEN
 %token WHEN_COMPILED_FUNC	"FUNCTION WHEN-COMPILED"
 %token WIDTH
-%token WIDTH_IN_CELLS	"WIDTH-IN-CELLS"
+%token WIDTH_IN_CELLS		"WIDTH-IN-CELLS"
 %token WINDOW
 %token WITH
 %token WORD			"Identifier"
-%token LEVEL_NUMBER			"level-number"		/* 01 thru 49, 77 */
 %token WORDS
 %token WORKING_STORAGE		"WORKING-STORAGE"
 %token WRAP
@@ -4560,13 +4560,11 @@ _suppress_clause:
   {
 	$$ = NULL;
   }
-|
-  SUPPRESS WHEN ALL basic_value
+| SUPPRESS WHEN ALL basic_value
   {
 	$$ = cb_int (literal_value ($4));
   }
-|
-  SUPPRESS WHEN space_or_zero
+| SUPPRESS WHEN space_or_zero
   {
 	$$ = cb_int (literal_value ($3));
   }

@@ -130,8 +130,8 @@ enum cb_format {
 #define	CB_CS_OBJECT_COMPUTER		(1U << 22)
 #define	CB_CS_DELIMITER			(1U << 23)
 #define	CB_CS_SCREEN			(1U << 24)	/* within SCREEN section */
-#define	CB_CS_INQUIRE_MODIFY			(1U << 25)	/* within INQUIRE or MODIFY statement */
-#define	CB_CS_GRAPHICAL_CONTROL			(1U << 26)	/* within ACUCOBOL-GT graphical control */
+#define	CB_CS_INQUIRE_MODIFY		(1U << 25)	/* within INQUIRE or MODIFY statement */
+#define	CB_CS_GRAPHICAL_CONTROL		(1U << 26)	/* within ACUCOBOL-GT graphical control */
 #define	CB_CS_SELECT			(1U << 27)	/* within SELECT */
 
 /* Support for cobc from stdin */
@@ -352,7 +352,7 @@ extern struct cb_exception	cb_exception_table[];
 #undef	CB_FLAG_RQ
 #undef	CB_FLAG_NQ
 
-/* Flag to emit Old style: cob_set_location, cob_trace_section */  
+/* Flag to emit Old style: cob_set_location, cob_trace_section */
 extern int cb_old_trace;
 
 #define	CB_WARNDEF(var,name,doc)	extern int var;

@@ -2826,7 +2826,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "WHEN",			0, 0, WHEN,			/* 2002 */
 				0, 0
   },
-  { "WIDTH",		0, 1, WIDTH,		/* ACU extension */
+  { "WIDTH",			0, 1, WIDTH,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "WIDTH-IN-CELLS",		0, 1, WIDTH_IN_CELLS,		/* ACU extension */
@@ -2844,16 +2844,16 @@ static struct cobc_reserved default_reserved_words[] = {
   { "WORKING-STORAGE",		0, 0, WORKING_STORAGE,		/* 2002 */
 				0, 0
   },
-  { "WRAP",			0, 1, WRAP,				/* Extension */
+  { "WRAP",			0, 1, WRAP,			/* Extension */
 				0, CB_CS_ACCEPT | CB_CS_DISPLAY
   },
   { "WRITE",			1, 0, WRITE,			/* 2002 */
 				0, 0
   },
-  { "X",		0, 1, X,		/* ACU extension */
+  { "X",			0, 1, X,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
-  { "Y",		0, 1, Y,		/* ACU extension */
+  { "Y",			0, 1, Y,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "YYYYDDD",			0, 1, YYYYDDD,			/* 2002 (C/S) */
@@ -4189,7 +4189,7 @@ struct cobc_reserved *
 lookup_reserved_word (const char *name)
 {
 	struct cobc_reserved	*p;
-	
+
 	initialize_reserved_words_if_needed ();
 
 	p = find_reserved_word (name, 1);
@@ -4258,10 +4258,10 @@ struct cb_intrinsic_table *
 lookup_intrinsic (const char *name, const int checkimpl)
 {
 	struct cb_intrinsic_table	*cbp;
-	static char		upper_name[43];
-	int name_len = strlen (name);
+	static char	upper_name[43];
+	int		name_len = strlen (name);
 
-	if (name_len > sizeof(upper_name) - 1) {
+	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;
 	}
 
@@ -4540,8 +4540,6 @@ lookup_system_name (const char *name, const int checkimpl)
 	}
 	return NULL;
 }
-
-
 
 static void
 set_system_name_mode (struct system_name_struct *system_name, enum cb_feature_mode mode)

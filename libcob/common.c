@@ -1800,16 +1800,16 @@ cob_trace_prep (void)
 	cob_current_program_id = COB_MODULE_PTR->module_name;
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
 	if (!cobsetptr->cob_trace_file) {
 		cob_check_trace_file ();
-		if (!cobsetptr->cob_trace_file) 
+		if (!cobsetptr->cob_trace_file)
 			return 1; 	/* silence warnings */
 	}
-	if (cob_source_file 
+	if (cob_source_file
 	 && (!cob_last_sfile || strcmp (cob_last_sfile, cob_source_file))) {
 		if (cob_last_sfile) {
 			cob_free ((void *)cob_last_sfile);
@@ -1822,7 +1822,7 @@ cob_trace_prep (void)
 	} else {
 		s = _("unknown");
 	}
-	if (!cob_last_progid 
+	if (!cob_last_progid
 	 || strcmp (cob_last_progid, s)) {
 		cob_last_progid = s;
 		if (COB_MODULE_PTR && COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
@@ -1910,7 +1910,7 @@ cob_trace_sect (const char *name)
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
@@ -1940,7 +1940,7 @@ cob_trace_para (const char *name)
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
@@ -1967,7 +1967,7 @@ cob_trace_entry (const char *name)
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
@@ -1994,7 +1994,7 @@ cob_trace_exit (const char *name)
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
@@ -2025,7 +2025,7 @@ cob_trace_stmt (const char *stmt)
 	if (COB_MODULE_PTR->module_stmt != 0
 	 && COB_MODULE_PTR->module_sources) {
 		cob_current_program_id = COB_MODULE_PTR->module_name;
-		cob_source_file = 
+		cob_source_file =
 			COB_MODULE_PTR->module_sources[COB_GET_FILE_NUM(COB_MODULE_PTR->module_stmt)];
 		cob_source_line = COB_GET_LINE_NUM(COB_MODULE_PTR->module_stmt);
 	}
@@ -3575,7 +3575,7 @@ check_current_date()
 				break;
 			}
 		}
-		
+
 		if (i != 2) {
 			if (cobsetptr->cob_date[j] == 'H') {
 				while(cobsetptr->cob_date[j] == 'H') j++;
@@ -3740,7 +3740,7 @@ check_current_date()
 	t = mktime (tmptr);
 
 	/* set datetime constant */
-	
+
 	if (hh != -1) {
 		cobsetptr->cob_time_constant.hour	= tmptr->tm_hour;
 	} else {
@@ -4812,7 +4812,7 @@ cob_sys_xf5 (const void *p1, void *p2)
 	return 0;
 }
 
-/* COBOL routine for different functions, including functions for 
+/* COBOL routine for different functions, including functions for
    the programmable COBOL SWITCHES:
    11: set  COBOL switches 0-7
    12: read COBOL switches 0-7
@@ -4913,7 +4913,7 @@ int
 cob_sys_oc_nanosleep (const void *data)
 {
 	cob_s64_t	nsecs;
-#ifdef	HAVE_NANO_SLEEP	
+#ifdef	HAVE_NANO_SLEEP
 	struct timespec	tsec;
 #else
 	unsigned int	msecs;
@@ -6035,10 +6035,10 @@ get_config_val (char *value, int pos, char *orgvalue)
 	} else if ((data_type & ENV_STR)) {	/* String stored as a string */
 		memcpy (&str, data, sizeof (char *));
 		if (data_loc == offsetof (cob_settings, cob_display_print_filename)
-		 && cobsetptr->cob_display_print_file) 
+		 && cobsetptr->cob_display_print_file)
 			strcpy (value, "set by cob_set_runtime_option");
 		else if (data_loc == offsetof (cob_settings, cob_trace_filename)
-		      && cobsetptr->external_trace_file) 
+		      && cobsetptr->external_trace_file)
 			strcpy (value, "set by cob_set_runtime_option");
 		else if (str == NULL)
 			sprintf (value, "%s", "not set");
@@ -6817,7 +6817,7 @@ cob_fatal_error (const int fatal_error)
 		if (cobglobptr->cob_error_file->assign
 		 && cobglobptr->cob_error_file->assign->data) {
 			err_cause = cob_malloc ((size_t)COB_FILE_BUFF);
-			/* FIXME: for OPEN: provide both assign name and 
+			/* FIXME: for OPEN: provide both assign name and
 			   full name (including COB_FILE_PATH / filename mapping)
 			 */
 			cob_field_to_string (cobglobptr->cob_error_file->assign,
@@ -6930,7 +6930,7 @@ print_version (void)
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
 	printf (_("Written by %s\n"), "Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart");
-	
+
 	/* TRANSLATORS: This msgid is indented as the "Packaged" msgid, %s expands to date and time */
 	printf (_("Built     %s"), cob_build_stamp);
 	putchar ('\n');
@@ -7657,7 +7657,7 @@ cob_get_runtime_option (enum cob_runtime_option_switch opt)
 /******************************/
 
 /* Check env var value and open log file */
-/* 
+/*
  * Env var is  COB_DEBUG_LOG
  * Env Var string is a series of keyword=value parameters where keywords:
  * L=x  - options: T for trace level, W for warnings, N for normal, A for ALL
@@ -7878,7 +7878,7 @@ cob_debug_dump (void *pMem, int len)
 	char	hex[dMaxHex+4],chr[dMaxPerLine+4];
 	int		adrs = 0;
 
-	if(cob_debug_file == NULL) 
+	if(cob_debug_file == NULL)
 		return 0;
 	memset(lastWord,0xFD, 4);
 	for(i=0; i < len; ) {
