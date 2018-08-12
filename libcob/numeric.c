@@ -301,7 +301,7 @@ cob_decimal_init2 (cob_decimal *d, mp_bitcnt_t initial_num_bits)
 void
 cob_decimal_init (cob_decimal *d)
 {
-	cob_decimal_init2 (d->value, COB_MPZ_DEF);
+	cob_decimal_init2 (d, COB_MPZ_DEF);
 }
 
 void
