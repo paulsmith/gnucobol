@@ -353,7 +353,7 @@ COB_HIDDEN void		cob_exit_strings	(void);
 COB_HIDDEN int		cob_real_get_sign	(cob_field *);
 COB_HIDDEN void		cob_real_put_sign	(cob_field *, const int);
 
-COB_HIDDEN void		cob_decimal_init2	(cob_decimal *, const mp_bitcnt_t);
+COB_HIDDEN void		cob_decimal_init2	(cob_decimal *, const cob_uli_t);
 COB_HIDDEN void		cob_decimal_setget_fld	(cob_field *, cob_field *,
 						 const int);
 COB_HIDDEN void		cob_decimal_move_temp	(cob_field *, cob_field *);

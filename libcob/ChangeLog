@@ -1,4 +1,8 @@
 
+2018-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning
+
 2018-06-21  Brian Tiffin <btiffin@gnu.org>
 
 	* common.h, intrinsic.c: CONTENTS-OF renamed to CONTENT-OF
