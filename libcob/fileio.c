@@ -1475,7 +1475,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	case COB_OPEN_I_O:
 		return COB_STATUS_37_PERMISSION_DENIED;
 	case COB_OPEN_EXTEND:
-		/* Problem with	VC (tested MSC_VER 15) if file isn't there: */
+		/* Problem on WIN32 (tested _MSC_VER 1500 and GCC build) if file isn't there: */
 		/* Both modes create the file and return a bad pointer */
 		/* Mode "a+"  sets EINVAL, further actions on the file do work */
 		/* Mode "ab+" doesn't set errno, but we don't want a binary file */

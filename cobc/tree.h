@@ -828,7 +828,7 @@ struct cb_field {
 	unsigned int flag_field_debug	: 1;	/* DEBUGGING */
 	unsigned int flag_all_debug	: 1;	/* DEBUGGING */
 
-	unsigned int flag_no_field	: 1;	/* SCREEN dummy field */
+	unsigned int flag_no_field	: 1;	/* SCREEN/REPORT dummy field */
 	unsigned int flag_any_numeric	: 1;	/* Is ANY NUMERIC */
 	unsigned int flag_is_returning	: 1;	/* Is RETURNING item */
 	unsigned int flag_unbounded	: 1;	/* OCCURS UNBOUNDED */

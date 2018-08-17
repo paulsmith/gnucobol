@@ -11252,7 +11252,7 @@ output_function_prototypes (struct cb_program *prog)
 
 	for (cp = prog; cp; cp = cp->next_program) {
 		/*
-		  Collect all items used as parameters in the procedure division
+		  Collect all items used as parameters in the PROCEDURE DIVISION
 		  header and ENTRY statements in the parameter list.
 		*/
 		for (entry = cp->entry_list; entry; entry = CB_CHAIN (entry)) {

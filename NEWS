@@ -265,6 +265,9 @@ NEWS - user visible changes				-*- outline -*-
 ** All files created by GnuCOBOL runtime use the same file permission settings
    now: COB_FILE_MODE which was changed to 0666
 
+** The maximum number of fields passed via CALL changed from hard-wired 64 fields
+   to a configuration option (defaulting to 192, current max. 252)
+
 ** changed unix package name from "gnu-cobol" to "gnucobol"
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
