@@ -67,6 +67,10 @@
 
 	* parser.y: accept both LENGTH and LENGTH OF in all places
 
+2018-07-03  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* codeoptim.c: removed inclusion of defaults.h (no definitions used)
+
 2018-06-29  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c (output_internal_function): fixed bug #98 "SIGSEGV
@@ -99,6 +103,8 @@
 	* parser.y: improved ACUCOBOL-GT parsing of USAGE HANDLE: allow
 	  HANDLE [OF] control-type (support pending), better error messages
 	  for unknown HANDLE types
+	* parser.y, reserved.c: added COMP-0 as PENDING
+	* parser.y: added Micosoft COBOL position specifier
 
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
