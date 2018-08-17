@@ -85,6 +85,11 @@
 2018-06-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* field.c (validate_usage): fixed SIGSEGV when PICTURE is missing
+	* field.c: renamed (check_picture_item) to (create_implicit_picture)
+	  and always define an implicit picture (even for fields with errors
+	  because of their references)
+	* field.c: renamed (check_picture_item, is_numeric_usage): define
+	  numeric implicit pictures for numeric USAGEs
 
 2018-06-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

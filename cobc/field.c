@@ -640,30 +640,45 @@ emit_incompatible_pic_and_usage_error (cb_tree item, const enum cb_usage usage)
 		    cb_get_usage_string (usage));
 }
 
+static COB_INLINE COB_A_INLINE int
+is_numeric_usage (const enum cb_usage usage)
+{
+	switch (usage) {
+	case CB_USAGE_DISPLAY:
+	case CB_USAGE_NATIONAL:
+	case CB_USAGE_OBJECT:
+		return 0;
+	/* case CB_USAGE_ERROR: assume numeric */
+	default:
+		return 1;
+	}
+}
+
+/* create an implicit picture for items that miss it but need one,
+   return 1 if not possible */
 static unsigned int
-check_picture_item (struct cb_field *f)
+create_implicit_picture (struct cb_field *f)
 {
 	cb_tree			x = CB_TREE (f);
-	cb_tree			v;
+	cb_tree			first_value;
 	char			*pp;
 	struct cb_literal	*lp;
-	int			size_implied;
+	int			size_implied = 1;
 	int			is_numeric;
+	int			ret;
 	char			pic[24];
 
-	/*
-	  TO-DO: Rename/split function. This is not just checking the PICTURE,
-	  but guessing one if it doesn't exist.
-	*/
-	if (f->storage == CB_STORAGE_SCREEN) {
-		if (f->values) {
-			v = CB_VALUE (f->values);
-			if (CB_LITERAL_P (v)) {
-				size_implied = (int)CB_LITERAL (v)->size;
-				is_numeric = CB_NUMERIC_LITERAL_P (v);
-			} else if (CB_CONST_P (v)) {
+	if (f->values) {
+		first_value = CB_VALUE (f->values);
+		if (first_value == cb_error_node) {
+			first_value = NULL;
+		} else {
+			if (CB_LITERAL_P (first_value)) {
+				size_implied = (int)CB_LITERAL (first_value)->size;
+				is_numeric = CB_NUMERIC_LITERAL_P (first_value);
+			} else if (CB_CONST_P (first_value)) {
 				size_implied = 1;
-				if (v == cb_zero) {
+				if (first_value == cb_zero) {
 					is_numeric = 1;
 				} else {
 					is_numeric = 0;
@@ -672,12 +687,29 @@ check_picture_item (struct cb_field *f)
 				/* ToDo: add appropriate message (untranslated) */
 				COBC_ABORT ();	/* LCOV_EXCL_LINE */
 			}
-		} else if (f->screen_from) {
+		}
+	} else {
+		first_value = NULL;
+	}
+
+	if (!first_value) {
+		/* FIXME: ensure this in another place */
+		if (f->flag_item_78) {
+			level_require_error (x, "VALUE");
+			return 1;
+		}
+		is_numeric = is_numeric_usage (f->usage);
+	}
+
+	if (f->storage == CB_STORAGE_SCREEN) {
+		if (f->screen_from) {
 			size_implied = (int)CB_FIELD_PTR (f->screen_from)->size;
 			is_numeric = CB_TREE_CATEGORY (f->screen_from) == CB_CATEGORY_NUMERIC;
 		} else if (f->screen_to) {
 			size_implied = (int)CB_FIELD_PTR (f->screen_to)->size;
 			is_numeric = CB_TREE_CATEGORY (f->screen_to) == CB_CATEGORY_NUMERIC;
+		} else if (first_value) {
+			/* done later*/
 		} else {
 			f->flag_no_field = 1;
 			f->pic = CB_PICTURE (cb_build_picture ("X"));
@@ -694,22 +726,22 @@ check_picture_item (struct cb_field *f)
 	}
 
 	if (f->storage == CB_STORAGE_REPORT) {
-		if (f->values) {
-			sprintf (pic, "X(%d)", (int)CB_LITERAL(CB_VALUE(f->values))->size);
+		if (first_value) {
+			sprintf (pic, "X(%d)", size_implied);
 		} else {
+			/* CHECKME: Where do we want to generate a not-field in the C code?
+			            instead of raising an error here? */
 			f->flag_no_field = 1;
-			strcpy (pic, "X(1)");
+			strcpy (pic, "X");
 		}
 		f->pic = CB_PICTURE (cb_build_picture (pic));
 		return 0;
 	}
 
 	if (f->flag_item_78) {
-		if (!f->values || CB_VALUE (f->values) == cb_error_node) {
-			level_require_error (x, "VALUE");
-			return 1;
-		}
+#if 0	/* CHECKME: Do we need this here? */
 		f->count++;
+#endif
 		lp = CB_LITERAL (CB_VALUE (f->values));
 		if (CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
 			memset (pic, 0, sizeof (pic));
@@ -740,30 +772,40 @@ check_picture_item (struct cb_field *f)
 		return 0;
 	}
 
-	if (f->level == 1 || f->level == 77) {
+	ret = 0;
+
+	if (f->level == 1 || f->level == 77 || !first_value) {
 		cb_error_x (x, _("PICTURE clause required for '%s'"),
 			    cb_name (x));
-		return 1;
+		ret = 1;
 	}
-	if (!f->values || CB_VALUE (f->values) == cb_error_node) {
-		cb_error_x (x, _("PICTURE clause required for '%s'"),
+
+	if (first_value && CB_NUMERIC_LITERAL_P (first_value)) {
+		if (!is_numeric_usage(f->usage)) {
+			cb_error_x (x, _("a non-numeric literal is expected for '%s'"),
 					cb_name (x));
-		return 1;
 		}
-	if (CB_NUMERIC_LITERAL_P (CB_VALUE (f->values))) {
-		cb_error_x (x, _("a non-numeric literal is expected for '%s'"),
+		if (!ret) {
+			cb_error_x (x, _("PICTURE clause required for '%s'"),
 					cb_name (x));
-		return 1;
+			ret = 1;
+		}
 	}
-	size_implied = (int)CB_LITERAL (CB_VALUE (f->values))->size;
+	
 	/* Checkme: should we raise an error for !cb_relaxed_syntax_checks? */
-	cb_warning_x (warningopt, x, _("defining implicit picture size %d for '%s'"),
-		    size_implied, cb_name (x));
+	if (!ret) {
+		cb_warning_x (warningopt, x, _("defining implicit picture size %d for '%s'"),
+			    size_implied, cb_name (x));
+	}
+	if (is_numeric) {
+		sprintf (pic, "9(%d)", size_implied);
+	} else {
 		sprintf (pic, "X(%d)", size_implied);
+	}
 	f->pic = CB_PICTURE (cb_build_picture (pic));
 	f->pic->category = CB_CATEGORY_ALPHANUMERIC;
 	f->usage = CB_USAGE_DISPLAY;
-	return 0;
+	return ret;
 }
 
 static unsigned int
@@ -1016,9 +1058,12 @@ validate_pic (struct cb_field *f)
 		break;
 	}
 
-	if (f->pic == NULL && need_picture && check_picture_item (f)) {
+	if (f->pic == NULL && need_picture) {
+		/* try to built an implicit picture, stop if not possible */
+		if (create_implicit_picture (f)) {
 			return 1;
 		}
+	}
 
 	/* ACUCOBOL/RM-COBOL-style COMP-1 ignores the PICTURE clause. */
 	if (f->flag_comp_1 && cb_binary_comp_1) {
