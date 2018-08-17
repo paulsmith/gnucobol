@@ -1,4 +1,9 @@
 
+2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* ltmain.sh [WIN32, !GCC]: local fix for libtool issue #109514 to
+	  support buildinf with configure using other Win32 compilers than MSC
+
 2018-02-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: ensure auxiliary scripts are executable before
