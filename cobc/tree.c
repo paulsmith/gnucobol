@@ -2098,7 +2098,7 @@ static COB_INLINE COB_A_INLINE int
 is_simple_insertion_char (const char c)
 {
 	return c == 'B' || c == '0' || c == '/'
-		|| c == current_program->numeric_separator;
+		|| (current_program && c == current_program->numeric_separator);
 }
 
 /*
@@ -2119,8 +2119,10 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 	*last = NULL;
 
 	for (; str->symbol != '\0'; ++str) {
-		if (!*first && (str->symbol == '+' || str->symbol == '-'
-		              || str->symbol == current_program->currency_symbol)) {
+		if (!*first
+		 && (str->symbol == '+'
+		  || str->symbol == '-'
+		  || (current_program && (str->symbol == current_program->currency_symbol)))) {
 			if (last_non_simple_insertion
 			    && last_non_simple_insertion->symbol == str->symbol) {
 				*first = last_non_simple_insertion;
@@ -2146,8 +2148,8 @@ find_floating_insertion_str (const cob_pic_symbol *str,
 	if (str->symbol == '\0' && *first) {
 		*last = str - 1;
 		return;
-	} else if (!(str->symbol == current_program->decimal_point
-	           || str->symbol == 'V')) {
+	} else if (! ( str->symbol == 'V'
+	            || (current_program && (str->symbol == current_program->decimal_point)))) {
 		return;
 	}
 
@@ -2458,7 +2460,7 @@ valid_char_order (const cob_pic_symbol *str, const int s_char_seen)
 			chars_seen[idx] = 1;
 
 			if (s->symbol == 'V'
-			    || s->symbol == current_program->decimal_point) {
+			 || (current_program && s->symbol == current_program->decimal_point)) {
 				before_decimal_point = 0;
 			}
 		}

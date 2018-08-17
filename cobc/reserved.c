@@ -2904,6 +2904,8 @@ static struct register_struct	register_list[] = {
 	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"SORT-RETURN", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
+	{"LIN", "PIC S9(4) USAGE COMP", CB_FEATURE_DISABLED},
+	{"COL", "PIC S9(4) USAGE COMP", CB_FEATURE_DISABLED},
 	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
 };
 
@@ -4410,7 +4412,6 @@ add_register (const char *name_and_definition, const char *fname, const int line
 	definition = strpbrk (name_and_definition, "\t:=");
 	if (definition) {
 		*definition++ = 0;
-		/* TODO: parse definition here (and start from first non-space) */
 	}
 
 	special_register = lookup_register (name, 1);
@@ -4420,8 +4421,11 @@ add_register (const char *name_and_definition, const char *fname, const int line
 				_("special register %s is unknown, needs a definition"), name);
 			return;
 		}
-		/* TODO: add register here */
+#if 0	/* must be extended and tested before use... */
+		cb_build_generic_register (name, definition);
+#else
 		configuration_error (fname, line, 1, _("special register %s is unknown"), name);
+#endif
 		return;
 	}
 	special_register->active = CB_FEATURE_ACTIVE;

@@ -1,4 +1,10 @@
 
+2018-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* reserved.c: added COL/LIN registers (default to disabled)
+	* typeck.c, parser.y, cobc.h, tree.c, tree.h, field.c: first approach
+	  on generic register creation (currently works only for TALLY/COL/LIN)
+
 2018-08-09  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	FR #219 Support for COMP-N (ACU compatibility)

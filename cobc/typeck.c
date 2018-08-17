@@ -1206,33 +1206,119 @@ cb_build_register_when_compiled (const char *name, const char *definition)
 		cb_build_alphanumeric_literal (buff, lit_size));
 }
 
-/* TALLY */
-/* TODO: change to generic function */
-static void
-cb_build_register_tally (const char *name, const char *definition)
+/* General register creation; used for TALLY, LIN, COL */
+/* TODO: complete change to generic function */
+int
+cb_build_generic_register (const char *name, const char *external_definition)
 {
-	cb_tree field;
+	cb_tree field_tree;
+	char	definition[COB_MINI_BUFF];
+	char	temp[COB_MINI_BUFF];
+	char *p, *r;
+	struct cb_field *field;
+	enum cb_usage	usage;
+	struct cb_picture	*picture;
 
-	if (!definition) {
-		definition = cb_get_register_definition (name);
-		if (!definition) {
-			return;
+	if (!external_definition) {
+		external_definition = cb_get_register_definition (name);
+		if (!external_definition) {
+			return 1;
 		}
 	}
 
-	/* take care of GLOBAL */
-	if (current_program->nested_level) {
-		return;
+	strncpy (definition, external_definition, COB_MINI_MAX);
+	
+	/* check for GLOBAL, leave if we don't need to define it again (nested program)*/
+	p = strstr (definition, "GLOBAL");
+	if (p) {
+		if (current_program && current_program->nested_level) {
+			return 0;
+		}
+		memset (p, ' ', 6);	/* remove from local copy */
 	}
 
-	field = cb_build_field (cb_build_reference (name));
-	CB_FIELD_PTR (field)->usage = CB_USAGE_BINARY;
-	CB_FIELD_PTR (field)->pic = CB_PICTURE (cb_build_picture ("9(5)"));
-	cb_validate_field (CB_FIELD_PTR (field));
-	CB_FIELD_PTR (field)->values = CB_LIST_INIT (cb_zero);
-	CB_FIELD_PTR (field)->flag_no_init = 1;
-	CB_FIELD_PTR (field)->flag_is_global = 1;
-	CB_FIELD_ADD (current_program->working_storage, CB_FIELD_PTR (field));
+	/* actual field generation */
+	field_tree = cb_build_field (cb_build_reference (name));
+	field = CB_FIELD_PTR (field_tree);
+	field->flag_is_global = (p != NULL);		/* any GLOBAL found ? */
+
+	/* handle USAGE */
+	usage = CB_USAGE_DISPLAY;
+	p = strstr (definition, "USAGE ");
+	if (p) {
+		memset (p, ' ', 5);
+		p += 6;
+		while (*p == ' ') p++;
+
+		if (strncmp (p, "DISPLAY", (size_t)7) == 0) {
+			memset (p, ' ', 7);
+		} else {
+			r = p;
+			while (*r != 0 && *r != ' ') r++;
+			strncpy (temp, p, r - p);
+			temp [r - p] = 0;
+			memset (p, ' ', r - p);
+			COB_UNUSED (temp);	/* FIXME: parse actual USAGE from temp */
+			usage = CB_USAGE_BINARY;
+		}
+	}
+	field->usage = usage;
+
+	/* handle PICTURE */
+	p = strstr (definition, "PIC ");
+	if (p) {
+		memset (p, ' ', 3);
+		p += 4;
+	} else {
+		p = strstr (definition, "PICTURE ");
+		if (p) {
+			memset (p, ' ', 7);
+			p += 8;
+		}
+	}
+	if (p) {
+		while (*p == ' ') p++;
+		r = p;
+		while (*r != 0 && *r != ' ') r++;
+		strncpy (temp, p, r - p);
+		temp [r - p] = 0;
+		memset (p, ' ', r - p);
+		picture = CB_PICTURE (cb_build_picture (temp));
+	} else {
+		picture = NULL;
+	}
+
+	field->pic = picture;
+
+	/* handle VALUE */
+	p = strstr (definition, "VALUE ");
+	if (p) {
+		memset (p, ' ', 5);
+		p += 6;
+	} else {
+		p = strstr (definition, "VALUES ");
+		if (p) {
+			memset (p, ' ', 6);
+			p += 7;
+		}
+	}
+	if (p) {
+		COB_UNUSED (p);	/* FIXME: parse actual VALUE */
+		field->values = CB_LIST_INIT (cb_zero);
+	}
+
+	/* TODO: check that the local definition is completely parsed -> spaces */
+
+	cb_validate_field (field);
+
+	field->flag_no_init = 1;
+	if (current_program) {
+		CB_FIELD_ADD (current_program->working_storage, field);
+	} else {
+		CB_FIELD_ADD (configuration_field, field);
+	}
+
+	return 0;
 }
 
 /* build a concrete register */
@@ -1270,8 +1356,10 @@ cb_build_single_register (const char *name, const char *definition)
 	}
 
 	/* "normal" registers */
-	if (!strcasecmp (name, "TALLY")) {
-		cb_build_register_tally (name, definition);
+	if (!strcasecmp (name, "TALLY")
+	 || !strcasecmp (name, "LIN")
+	 || !strcasecmp (name, "COL")) {
+		cb_build_generic_register (name, definition);
 		return;
 	}
 
@@ -1293,6 +1381,9 @@ cb_build_registers (void)
 		cb_build_single_register (name, definition);
 		name = cb_register_list_get_next (&definition);
 	}
+	
+	/* FIXME: don't add field->flag_is_global items in nested programs */
+	CB_FIELD_ADD (current_program->working_storage, configuration_field);
 }
 
 /*

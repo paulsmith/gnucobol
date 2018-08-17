@@ -127,6 +127,7 @@ struct cb_program		*current_program = NULL;
 struct cb_statement		*current_statement = NULL;
 struct cb_label			*current_section = NULL;
 struct cb_label			*current_paragraph = NULL;
+struct cb_field		*configuration_field;
 cb_tree				defined_prog_list = NULL;
 int				cb_exp_line = 0;
 
@@ -1453,7 +1454,7 @@ set_attr_with_conflict (const char *clause, const cob_flags_t bitval,
 	} else if (*flags & confl_bit) {
 		emit_conflicting_clause_message (clause, confl_clause);
 	} else {
-	*flags |= bitval;
+		*flags |= bitval;
 	}
 }
 

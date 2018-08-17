@@ -1591,10 +1591,11 @@ validate_elementary_item (struct cb_field *f)
 	/* TO-DO: This is not validation and should be elsewhere. */
 	switch (f->usage) {
 	case CB_USAGE_DISPLAY:
-		if (current_program->flag_trailing_separate &&
-		    f->pic &&
-		    f->pic->category == CB_CATEGORY_NUMERIC &&
-		    !f->flag_sign_leading) {
+		if (current_program
+		 && current_program->flag_trailing_separate
+		 && f->pic
+		 && f->pic->category == CB_CATEGORY_NUMERIC
+		 && !f->flag_sign_leading) {
 			f->flag_sign_separate = 1;
 		}
 		break;
