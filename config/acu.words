@@ -831,17 +831,17 @@ reserved:	ZEROS=ZERO
 # list of registers:
 not-register:	DIALECT-ALL
 register:	"ADDRESS\ OF"
-# CONDITION-CODE is only available in HPUX mode, not yet recognised by GnuCOBOL
-# CURRENT-DATE is only available in HPUX mode, not yet recognised by GnuCOBOL
+# CONDITION-CODE is only available in HPUX mode, not yet recognized by GnuCOBOL
+# CURRENT-DATE is only available in HPUX mode, not yet recognized by GnuCOBOL
 # register:	ENVIRONMENT-NAME
 # register:	FILE-PREFIX
 register:	"LENGTH\ OF"
 register:	RETURN-CODE
 # register:	RETURN-UNSIGNED
 # SORT-RETURN is only available in IBM mode
-# SORT-MESSAGE is only available in IBM mode, not yet recognised by GnuCOBOL
+# SORT-MESSAGE is only available in IBM mode, not yet recognized by GnuCOBOL
 # TALLY is only available in HPUX mode
-# TIME-OF-DAY is only available in HPUX mode, not yet recognised by GnuCOBOL
+# TIME-OF-DAY is only available in HPUX mode, not yet recognized by GnuCOBOL
 # WHEN-COMPILED is only available in HPUX mode
 # register:	XML-CODE
 # register:	XML-EVENT

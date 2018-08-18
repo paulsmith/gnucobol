@@ -1112,7 +1112,8 @@ struct cb_assign {
 enum cb_feature_mode {
 	CB_FEATURE_ACTIVE = 0,	/* 0 Feature is implemented and not disabled */
 	CB_FEATURE_DISABLED,		/* 1 Feature disabled */
-	CB_FEATURE_NOT_IMPLEMENTED	/* 2 Feature known but not yet implemented */
+	CB_FEATURE_MUST_BE_ENABLED,		/* 2 Feature disabled, if not explicit enabled */
+	CB_FEATURE_NOT_IMPLEMENTED	/* 3 Feature known but not yet implemented */
 };
 
 /* Intrinsic FUNCTION */
@@ -1839,6 +1840,7 @@ extern void		cb_set_dmax (int scale);
 
 extern void		cb_set_intr_when_compiled (void);
 extern void		cb_build_registers (void);
+extern void		cb_add_external_defined_registers (void);
 extern const char		*cb_register_list_get_first (const char **);
 extern const char		*cb_register_list_get_next (const char **);
 extern void		cb_build_debug_item (void);

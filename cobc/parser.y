@@ -127,7 +127,8 @@ struct cb_program		*current_program = NULL;
 struct cb_statement		*current_statement = NULL;
 struct cb_label			*current_section = NULL;
 struct cb_label			*current_paragraph = NULL;
-struct cb_field		*configuration_field;
+struct cb_field		*external_defined_fields_ws;
+struct cb_field		*external_defined_fields_global;
 cb_tree				defined_prog_list = NULL;
 int				cb_exp_line = 0;
 
@@ -1067,6 +1068,7 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 		build_nested_special (depth);
 		cb_set_intr_when_compiled ();
 		cb_build_registers ();
+		cb_add_external_defined_registers ();
 	} else {
 		first_prog = 0;
 	}
@@ -2876,6 +2878,7 @@ start:
 	current_program = cb_build_program (NULL, 0);
 	cb_set_intr_when_compiled ();
 	cb_build_registers ();
+	cb_add_external_defined_registers ();
   }
   compilation_group
   {

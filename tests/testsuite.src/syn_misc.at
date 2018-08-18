@@ -5447,6 +5447,8 @@ prog.cob:8: error: syntax error, unexpected Literal
 AT_CLEANUP
 
 
+# normal register extension,
+# active for lax and standard configurations
 AT_SETUP([WHEN-COMPILED register in dialect])
 AT_KEYWORDS([misc extensions])
 
@@ -5459,10 +5461,49 @@ AT_DATA([prog.cob], [
            .
 ])
 
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:6: error: 'WHEN-COMPILED' is not defined
+])
 AT_CHECK([$COMPILE_ONLY -std=ibm prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=mvs prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -std=rm prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -fregister=WHEN-COMPILED prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_ONLY -freserved=WHEN-COMPILED -fregister=WHEN-COMPILED prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+
+# rare/conflicting register extension,
+# active only if explicit requested
+AT_SETUP([LIN / COL register])
+AT_KEYWORDS([misc extensions])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       PROCEDURE DIVISION.
+           MOVE 1 TO LIN, COL
+           .
+])
+
+# "strict" configuration:
+AT_CHECK([$COMPILE_ONLY -std=cobol2014 prog.cob], [1], [],
+[prog.cob:6: error: 'LIN' is not defined
+prog.cob:6: error: syntax error, unexpected COL
+])
+# "lax" configuration:
+AT_CHECK([$COMPILE_ONLY -std=acu prog.cob], [1], [],
+[prog.cob:6: error: 'LIN' is not defined
+prog.cob:6: error: syntax error, unexpected COL
+])
+# standard configuration:
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:6: error: 'LIN' is not defined
+prog.cob:6: error: syntax error, unexpected COL
+])
+# explicit enabled
+AT_CHECK([$COMPILE_ONLY -fregister=LIN,COL prog.cob], [0], [], [])
 AT_CLEANUP
 
 

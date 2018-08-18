@@ -1314,8 +1314,10 @@ cb_build_generic_register (const char *name, const char *external_definition)
 	field->flag_no_init = 1;
 	if (current_program) {
 		CB_FIELD_ADD (current_program->working_storage, field);
+	} else if (field->flag_is_global) {
+		CB_FIELD_ADD (external_defined_fields_global, field);
 	} else {
-		CB_FIELD_ADD (configuration_field, field);
+		CB_FIELD_ADD (external_defined_fields_ws, field);
 	}
 
 	return 0;
@@ -1381,9 +1383,18 @@ cb_build_registers (void)
 		cb_build_single_register (name, definition);
 		name = cb_register_list_get_next (&definition);
 	}
-	
-	/* FIXME: don't add field->flag_is_global items in nested programs */
-	CB_FIELD_ADD (current_program->working_storage, configuration_field);
+}
+
+/* add registers defined externally (configuration/compiler option) */
+void
+cb_add_external_defined_registers (void)
+{
+	if (external_defined_fields_ws) {
+		CB_FIELD_ADD (current_program->working_storage, external_defined_fields_ws);
+	}
+	if (external_defined_fields_global && !current_program->nested_level) {
+		CB_FIELD_ADD (current_program->working_storage, external_defined_fields_global);
+	}
 }
 
 /*

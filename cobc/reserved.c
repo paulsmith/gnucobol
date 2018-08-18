@@ -2904,8 +2904,8 @@ static struct register_struct	register_list[] = {
 	{"RETURN-CODE", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"SORT-RETURN", "GLOBAL USAGE BINARY-LONG VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
-	{"LIN", "PIC S9(4) USAGE COMP", CB_FEATURE_DISABLED},
-	{"COL", "PIC S9(4) USAGE COMP", CB_FEATURE_DISABLED},
+	{"COL", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, normally conflicting --> must be explicit enabled */
+	{"LIN", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, only in combination with COL */
 	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
 };
 
@@ -4374,7 +4374,7 @@ lookup_register (const char *name, const int checkimpl)
 	for (i = 0; i < NUM_REGISTERS; ++i) {
 		/* For efficiency, we use strcmp instead of cb_strcasecmp. */
 		if (strcmp (register_list[i].name, upper_name) == 0) {
-			if (checkimpl || register_list[i].active != CB_FEATURE_DISABLED) {
+			if (checkimpl || register_list[i].active == CB_FEATURE_MUST_BE_ENABLED) {
 				return &register_list[i];
 			}
 			break;
@@ -4397,10 +4397,12 @@ add_register (const char *name_and_definition, const char *fname, const int line
 	/* Enable all registers, if requested. */
 	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_REGISTERS; ++i) {
-			/* TODO: add register here */
-			register_list[i].active = CB_FEATURE_ACTIVE;
-			/* Disable reserved word with same name. */
-			remove_reserved_word (register_list[i].name, fname, line);
+			if (register_list[i].active != CB_FEATURE_MUST_BE_ENABLED) {
+				/* TODO: add register here */
+				register_list[i].active = CB_FEATURE_ACTIVE;
+				/* Disable reserved word with same name. */
+				remove_reserved_word (register_list[i].name, fname, line);
+			}
 		}
 		return;
 	}
@@ -4445,12 +4447,14 @@ remove_register (const char *name, const char *fname, const int line)
 
 	if (cb_strcasecmp (name, "DIALECT-ALL") == 0) {
 		for (i = 0; i < NUM_REGISTERS; ++i) {
-			/* TODO: when user-defined registers are possible: do
-			   memory cleanup here */
-			register_list[i].active = CB_FEATURE_DISABLED;
-			/* Disable reserved word with same name. */
-			remove_reserved_word (register_list[i].name, fname,
-					      line);
+			if (register_list[i].active != CB_FEATURE_MUST_BE_ENABLED) {
+				/* TODO: when user-defined registers are possible: do
+				   memory cleanup here */
+				register_list[i].active = CB_FEATURE_DISABLED;
+				/* Disable reserved word with same name. */
+				remove_reserved_word (register_list[i].name, fname,
+					line);
+			}
 		}
 	} else {
 		special_register = lookup_register (name, 1);
