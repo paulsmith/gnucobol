@@ -26,7 +26,7 @@ NEWS - user visible changes				-*- outline -*-
    to set/get special runtime options (currently FILE * for trace and printer
    output) or to reload the runtime configuration after changing environment
 
-** XML GENERATE statement
+** XML GENERATE statement (note: runtime support needs additional library libxml2)
 
 * Changed cobc options:
 
@@ -68,8 +68,18 @@ NEWS - user visible changes				-*- outline -*-
   Note: You may want to adjust the test runner tests/run_prog_manual.sh which
   defaults to xterm in GUI environments and screen in terminal environments.
 
-* New configure option --enable-debug-log to allow internal
-  tracing of GnuCOBOL (intended for developers of GnuCOBOL only) 
+
+* New build features
+
+** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
+   and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
+
+** --with-xml2 / -without-xml2 to explicit force/disable XML runtime support,
+   otherwise it will be included if found as working
+
+** --enable-debug-log to allow internal tracing of GnuCOBOL
+   (intended for developers of GnuCOBOL only)
+  
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

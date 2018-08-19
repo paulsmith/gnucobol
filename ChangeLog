@@ -6,6 +6,8 @@
 	* configure.ac: included optional pkg-config (cross-compile aware),
 	  currently only used for libxml2 (and only if xml2-config not found);
 	  always check for existing header / linkable library for xml2
+	* configure.ac: check for libxml2, but don't abort if not available;
+	  prefer pkg-config over xml2-config
 
 2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
 

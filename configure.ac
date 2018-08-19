@@ -494,23 +494,27 @@ AC_ARG_WITH([xml2],
   [AS_HELP_STRING([--with-xml2],
     [(GnuCOBOL) Use libxml2 as XML handler (default)])],
   [],
-  [with_xml2=yes])
+  [with_xml2=check])
 
-AS_IF([test "$with_xml2" = "yes"], [
-    AC_CHECK_PROG(xml2_config_found, xml2-config, "yes")
-    AS_IF([test "$xml2_config_found" = "yes"], [
-	if test -z "$XML2_CFLAGS"; then
+AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
+    PKG_CHECK_MODULES([XML2], [libxml-2.0], [], [
+	if test -z "$XML2_CFLAGS" -o -z "$XML2_LIBS"; then
+	  AC_CHECK_PROG(xml2_config_found, xml2-config, "yes")
 	  XML2_CFLAGS="`xml2-config --cflags`"
-	fi
-	if test -z "$XML2_LIBS"; then
-	  XML2_LIBS="`xml2-config --libs`"
-	fi], [
-	PKG_CHECK_MODULES([XML2], [libxml-2.0])])
+      if test "$xml2_config_found" = "yes"; then
+	    if test -z "$XML2_CFLAGS"; then
+	      XML2_CFLAGS="`xml2-config --cflags`"
+	    fi
+	    if test -z "$XML2_LIBS"; then
+	      XML2_LIBS="`xml2-config --libs`"
+	    fi
+	  fi
+	fi])
+    curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
 	if test -n "$XML2_CFLAGS"; then
 	  CPPFLAGS="$CPPFLAGS $XML2_CFLAGS"
 	fi
 	if test -n "$XML2_LIBS"; then
-	  LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"
 	  LIBS="$LIBS $XML2_LIBS"
 	fi
 	AC_CHECK_HEADERS([libxml/uri.h libxml/xmlwriter.h], [],
@@ -520,9 +524,14 @@ AS_IF([test "$with_xml2" = "yes"], [
 	AC_MSG_CHECKING([if linking against libxml2 with "$XML2_LIBS" works])
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libxml/xmlwriter.h>]],
 	  [[xmlNewTextWriterFilename (NULL, 0);]])],
-	  [AC_DEFINE([WITH_XML2], [1]) AC_MSG_RESULT([yes])],
+	  [AC_DEFINE([WITH_XML2], [1]) AC_MSG_RESULT([yes])
+	   LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"],
 	  [AC_MSG_RESULT([no])
-	   AC_MSG_ERROR([[xml library is required, you may specify it with XML2_LIBS]])])
+	   if test "$with_xml2" = "yes"; then
+	     AC_MSG_ERROR([[xml library is required for --with-xml, you may adjust XML2_CFLAGS / XML2_LIBS]])
+       else
+	     with_xml2="no"; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+	   fi])
 ])
 
 

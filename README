@@ -66,7 +66,7 @@ for implementation of decimal arithmetic:
     BOTH runtime AND development components required.
 
   o GNU MP (libgmp) 4.1.2 or later
-    http://gmplib.org
+    https://gmplib.org
 
   OR
 
@@ -93,7 +93,7 @@ GnuCOBOL MAY require the following external libraries to be installed:
     ***
 
   o GNU Libtool (libltdl)
-    http://www.gnu.org/software/libtool/libtool.html
+    https://www.gnu.org/software/libtool/libtool.html
 
     libltdl is used to implement dynamic CALL statements.
 
@@ -109,8 +109,8 @@ The following libraries ARE required WHEN :
     One of the following:
 
   o Berkeley DB (libdb) 4.1 or later
-    http://www.oracle.com/
-    http://www.oracle.com/technology/products/berkeley-db/db/index.html
+    https://www.oracle.com/
+    https://www.oracle.com/technology/products/berkeley-db/db/index.html
 
     Berkeley DB is distributed under Oracles own open-source license.
     Note that if you linked your software with Berkeley DB,
@@ -118,7 +118,7 @@ The following libraries ARE required WHEN :
     software, or you have to pay royalty to Oracle.
 
   o VBISAM - ISAM file handler (libvbisam) 2.0 or later
-    http://sourceforge.net/projects/vbisam/
+    https://sourceforge.net/projects/vbisam/
 
     VBISAM is distributed under GNU Lesser General Public License.
 
@@ -135,14 +135,24 @@ The following libraries ARE required WHEN :
     One of the following:
 
   o Ncurses (ncurses or ncursesw) 5.2 or later
-    http://www.gnu.org/software/ncurses/ncurses.html
+    https://www.gnu.org/software/ncurses/ncurses.html
 
     Ncurses is distributed under a BSD style license.
 
+  o PDCurses (pdcurses) for MinGW/native windows ports
+    http://pdcurses.org/ or https://github.com/Bill-Gray/PDCurses/
+
+    PDCurses is distributed as Public Domain.
+
   o Unix curses
 
-  o PDCurses (pdcurses) for MinGW/native windows ports
-    http://pdcurses.sourceforge.net
+3) XML runtime support is used
+
+    BOTH runtime AND development components required.
+
+    libxml2 - http://xmlsoft.org
+
+    libxml2 is distributed under MIT License.
 
 ============
 
