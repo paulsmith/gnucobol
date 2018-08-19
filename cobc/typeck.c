@@ -705,7 +705,7 @@ cb_tree
 cb_check_numeric_value (cb_tree x)
 {
 	struct cb_field	*f, *sc;
-	if (cb_validate_one(x)) {
+	if (cb_validate_one (x)) {
 		return cb_error_node;
 	}
 
@@ -4703,6 +4703,11 @@ cb_emit_arithmetic (cb_tree vars, const int op, cb_tree val)
 		cb_list_map (cb_check_numeric_name, vars);
 	} else {
 		cb_list_map (cb_check_numeric_edited_name, vars);
+	}
+	for (l = vars; l; l = CB_CHAIN (l)) {
+		if (CB_VALUE (l) == cb_error_node) {
+		        return;
+		}
 	}
 
 	if (!CB_BINARY_OP_P (x)) {
