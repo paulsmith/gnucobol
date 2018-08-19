@@ -1537,7 +1537,9 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 
 	if (unlikely (f->flag_select_features & COB_SELECT_LINAGE)) {
 		if (file_linage_check (f)) {
-			fclose (fp);
+			if (fp) {
+				fclose (fp);
+			}
 			f->file = NULL;
 			f->fd = -1;
 			return COB_STATUS_57_I_O_LINAGE;
