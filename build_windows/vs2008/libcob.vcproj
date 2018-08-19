@@ -395,6 +395,10 @@
 				RelativePath="..\..\libcob\termio.c"
 				>
 			</File>
+			<File
+				RelativePath="..\..\libcob\xml.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

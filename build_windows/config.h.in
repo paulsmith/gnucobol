@@ -11,14 +11,22 @@
 #define NOCURSES 0
 #define PDCURSES 1
 
+#define NOXML  0
+#define XML2   1
+
 #define MATHLIB_MPIR  1
 #define MATHLIB_GMP   2
 
-/* Use the following global define to switch from VBISAM to another
-   ISAM configuration and/or from PDCURSES to "no curses", if needed */
+/* Use the following global define to adjust your configuration, if needed
+   * switch from VBISAM to another ISAM configuration
+   * switch from PDCURSES  to "no curses"
+   * switch from "no xml" to XML2" (needs additional libraries, see below)
+   * switch from MPIR (gmp-compat)  to GMP
+*/
 
 #define CONFIGURED_ISAM   VBISAM        /* see possible values above */
 #define CONFIGURED_CURSES PDCURSES      /* see possible values above */
+#define CONFIGURED_XML    NOXML         /* see possible values above */
 #define USED_MATHLIB      MATHLIB_MPIR  /* see possible values above */
 
 /* define if you want to use the fall-back to GetUserName
@@ -36,17 +44,17 @@
 #pragma comment(lib, "advapi32")
 #endif
 
-#if USED_MATHLIB == MATHLIB_MPIR 
+#if USED_MATHLIB == MATHLIB_MPIR
 #pragma comment(lib, "mpir")
 #elif USED_MATHLIB == MATHLIB_GMP
 #pragma comment(lib, "libgmp")
 #endif
 
-#if CONFIGURED_CURSES == PDCURSES 
+#if CONFIGURED_CURSES == PDCURSES
 #pragma comment(lib, "pdcurses")
 #endif
 
-#if CONFIGURED_ISAM == VBISAM 
+#if CONFIGURED_ISAM == VBISAM
 #pragma comment(lib, "libvbisam")
 #elif CONFIGURED_ISAM == DISAM
 #pragma comment(lib, "libdisam72")
@@ -60,11 +68,11 @@
 #endif
 #endif /* CONFIGURED_ISAM */
 
-#ifdef WITH_XML2
+#if CONFIGURED_XML == XML2
+#pragma comment(lib, "libxml2.dll.a")
 #pragma comment(lib, "libcharset.dll.a")
 #pragma comment(lib, "libiconv.dll.a")
 #pragma comment(lib, "libz.dll.a")
-#pragma comment(lib, "libxml2.dll.a")
 #endif
 
 #endif /* WITHIN_LIBCOB */
@@ -228,7 +236,7 @@
 #define HAVE_GMP_H 1
 
 /* Define if you have the iconv() function and it works. */
-#ifdef WITH_XML2
+#if CONFIGURED_XML == XML2
 #define HAVE_ICONV 1
 #endif
 
@@ -546,7 +554,11 @@
 #endif
 
 /* Use libxml2 as XML handler */
+#if CONFIGURED_XML == XML2
+#define WITH_XML2 1
+#else
 /* #undef WITH_XML2 */
+#endif
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -594,6 +606,9 @@
 #undef NOCURSES
 #undef PDCURSES
 #undef CONFIGURED_CURSES
+#undef NOXML
+#undef XML2
+#undef CONFIGURED_XML
 #undef MATHLIB_MPIR
 #undef MATHLIB_GMP
 #undef USED_MATHLIB
