@@ -7256,7 +7256,7 @@ emit_field_display_for_last (cb_tree values, cb_tree line_column, cb_tree fgc,
 				"emit_field_display_for_last", "values");
 			COBC_ABORT ();
 		}
-			/* LCOV_EXCL_STOP */
+		/* LCOV_EXCL_STOP */
 		last_elt = CB_VALUE (l);
 	}
 
@@ -11723,23 +11723,20 @@ syntax_check_xml_gen_count_in (cb_tree count)
 	return error;
 }
 
-#ifdef WITH_XML2
-
 static int
 is_valid_uri (const struct cb_literal * const namespace)
 {
 	char	*copy = cob_malloc (namespace->size + 1);
 	int	is_valid;
 
-        memcpy (copy, namespace->data, namespace->size);
+	memcpy (copy, namespace->data, namespace->size);
 	copy[namespace->size] = '\0';
 	is_valid = cob_is_valid_uri (copy);
-	free (copy);
+	cob_free (copy);
 
 	return is_valid;
 }
 
-#endif
 
 static int
 syntax_check_xml_gen_namespace (cb_tree namespace)
@@ -11759,12 +11756,10 @@ syntax_check_xml_gen_namespace (cb_tree namespace)
 	if (error_if_figurative_constant (namespace, "NAMESPACE")) {
 		error = 1;
 	} else {
-#ifdef WITH_XML2
 		if (CB_LITERAL_P (namespace) && !is_valid_uri (CB_LITERAL (namespace))) {
 			cb_error_x (namespace, _("NAMESPACE must be a valid URI"));
 			error = 1;
 		}
-#endif
 	}
 
 	return error;
@@ -11961,6 +11956,7 @@ syntax_check_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 	error |= syntax_check_xml_gen_receiving_item (out);
 	error |= syntax_check_xml_gen_input_rec (from);
 	error |= syntax_check_xml_gen_count_in (count);
+	COB_UNUSED (encoding);	/* TODO: check encoding */
 	if (namespace_and_prefix) {
 		error |= syntax_check_xml_gen_namespace (CB_PAIR_X (namespace_and_prefix));
 		error |= syntax_check_xml_gen_prefix (CB_PAIR_Y (namespace_and_prefix));

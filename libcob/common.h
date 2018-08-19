@@ -2043,8 +2043,8 @@ COB_EXPIMP void cob_report_suppress	(cob_report *r, cob_report_line *l);
 /**********************/
 
 COB_EXPIMP int	cob_is_valid_uri	(const char *);
-COB_EXPIMP int	cob_is_xml_namestartchar	(int);
-COB_EXPIMP int	cob_is_xml_namechar	(int);
+COB_EXPIMP int	cob_is_xml_namestartchar	(const int);
+COB_EXPIMP int	cob_is_xml_namechar	(const int);
 COB_EXPIMP void	cob_xml_generate	(cob_field *, cob_xml_tree *,
 					 cob_field *, const int, cob_field *,
 					 cob_field *);

@@ -380,6 +380,10 @@ if test "$COB_USES_GCC_NO_ICC" != yes -a "$enable_code_coverage" = "yes"; then
 fi
 
 
+# set PKG_CONFIG to use (cross-compile aware)
+PKG_PROG_PKG_CONFIG
+
+
 # Configure options part II (needing compilation)
 AC_ARG_WITH([curses],
   [AS_HELP_STRING([[--with-curses[=ARG]]],
@@ -492,27 +496,31 @@ AC_ARG_WITH([xml2],
   [],
   [with_xml2=yes])
 
-if test "$with_xml2" = "yes"; then
+AS_IF([test "$with_xml2" = "yes"], [
     AC_CHECK_PROG(xml2_config_found, xml2-config, "yes")
-    AC_CHECK_PROG(pkg_config_found, pkg-config, "yes")
-    if test "$xml2_config_found" = "yes"; then
-	LIBCOB_LIBS="$LIBCOB_LIBS `xml2-config --libs`"
-	CFLAGS="$CFLAGS `xml2-config --cflags`"
-        AC_DEFINE([WITH_XML2], [1])
-    elif test "$pkg_config_found" = "yes"; then
-	LIBCOB_LIBS="$LIBCOB_LIBS `pkg-config --libs libxml-2.0`"
-	CFLAGS="$CFLAGS `pkg-config --cflags`"
-        AC_DEFINE([WITH_XML2], [1])
-    else
-	AC_CHECK_HEADERS([libxml/uri.h], [],
-		 AC_MSG_ERROR([No header found for libxml2]))
+    AS_IF([test "$xml2_config_found" = "yes"], [
+	if test -z "$XML2_CFLAGS"; then
+	  XML2_CFLAGS="`xml2-config --cflags`"
+	fi
+	if test -n "$XML2_LIBS"; then
+	  XML2_LIBS="`xml2-config --libs`"
+	fi], [
+	PKG_CHECK_MODULES([XML2], [libxml-2.0])])
+	if test -n "$XML2_CFLAGS"; then
+	  CPPFLAGS="$CPPFLAGS $XML2_CFLAGS"
+	fi
+	if test -n "$XML2_LIBS"; then
+	  LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"
+	fi
+	AC_CHECK_HEADERS([libxml/uri.h libxml/xmlwriter.h], [],
+		 AC_MSG_ERROR([Headers for libxml2 missing]))
+	AX_CHECK_DEFINE([libxml/xmlwriter.h], [LIBXML_WRITER_ENABLED], [],
+		AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
 	AC_CHECK_LIB([xml2], [xmlNewTextWriterFilename],
 		[LIBCOB_LIBS="$LIBCOB_LIBS -lxml2"],
 		AC_MSG_ERROR([xml library is required as -lxml2]), [])
-	AC_CHECK_DEFINE([LIBXML_WRITER_ENABLED], [AC_DEFINE([WITH_XML2], [1])],
-		AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
-    fi
-fi
+    AC_DEFINE([WITH_XML2], [1])
+])
 
 
 AC_ARG_WITH([dl],

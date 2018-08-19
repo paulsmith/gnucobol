@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2018 Free Software Foundation, Inc.
-   Written by Edward Hart
+   Written by Edward Hart, Simon Sobisch
 
    This file is part of GnuCOBOL.
 
@@ -21,20 +21,22 @@
 
 #include "config.h"
 
-/* Force symbol exports */
-#define	COB_LIB_EXPIMP
-
-#if WITH_XML2
-#include <libxml/xmlwriter.h>
-#include <libxml/uri.h>
-#endif
-
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 
+/* Force symbol exports */
+#define	COB_LIB_EXPIMP
+
 #include "libcob.h"
 #include "coblocal.h"
+
+#if HAVE_LIBXML_XMLWRITER_H
+#include <libxml/xmlwriter.h>
+#endif
+#if HAVE_LIBXML_URI_H
+#include <libxml/uri.h>
+#endif
 
 /* Local variables */
 
@@ -531,22 +533,40 @@ cob_is_xml_namechar (const int c)
 		|| c == 0xb7;
 }
 
-#ifdef WITH_XML2
-
+/*
+   check if string is a valid URI
+   URI = scheme:[//authority]path[?query][#fragment]
+*/
 int
 cob_is_valid_uri (const char *str)
 {
-	xmlURIPtr	p;
+#ifdef WITH_XML2
 	int		is_valid;
+	xmlURIPtr	p;
 
 	p = xmlParseURI (str);
 	is_valid = !!p;
 	if (p) {
-	        xmlFreeURI (p);
+		xmlFreeURI (p);
 	}
 
 	return is_valid;
+#else
+	/* scheme must start with lower-strase */
+	if (!str || *str <= 'a' || *str >= 'z') return 0;
+
+	/* scheme strompletes with ":" */
+	str++;
+	while (*str && *str != ':') str++;
+
+	/* check for "any scheme" with any path */
+	if (*str == ':' && str[1]) return 1;
+
+	return 0;
+#endif
 }
+
+#ifdef WITH_XML2
 
 void
 cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
@@ -676,13 +696,6 @@ cob_exit_xmlio (void)
 }
 
 #else /* !WITH_XML2 */
-
-int
-cob_is_valid_uri (const char *str)
-{
-	COB_UNUSED (str);
-	return 0;
-}
 
 void
 cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,

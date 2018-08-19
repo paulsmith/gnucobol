@@ -5730,8 +5730,6 @@ AT_CLEANUP
 AT_SETUP([XML GENERATE syntax checks])
 AT_KEYWORDS([extensions])
 
-AT_SKIP_IF([test "$COB_HAS_XML2" = "no"])
-
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.

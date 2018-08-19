@@ -1,7 +1,15 @@
 
+2018-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* xml.c [!WITH_XML2] (cob_is_valid_uri): added minimal implementation,
+	  as this function is also used from within cobc
+	* xml.c: explicit check for the non-standard header files instead of
+	  the global WITH_XML definition
+	* xml.c, common.h: fixed compiler warnings
+
 2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
 
-	* xml.c: added XML GENERATE.
+	* xml.c: new file, added for XML GENERATE
 
 2018-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

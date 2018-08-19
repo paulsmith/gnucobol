@@ -282,6 +282,20 @@
 /* Define to 1 if you have the `rt' library (-lrt). */
 /* #undef HAVE_LIBRT */
 
+/* Define to 1 if you have the <libxml/uri.h,> header file. */
+#if CONFIGURED_XML == XML2
+#define HAVE_LIBXML_URI_H 1
+#else
+/* #undef HAVE_LIBXML_URI_H */
+#endif
+
+/* Define to 1 if you have the <libxml/xmlwriter.h> header file. */
+#if CONFIGURED_XML == XML2
+#define HAVE_LIBXML_XMLWRITER_H 1
+#else
+/* #undef HAVE_LIBXML_XMLWRITER_H */
+#endif
+
 /* Define to 1 if you have the `localeconv' function. */
 #define HAVE_LOCALECONV 1
 
