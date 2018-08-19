@@ -502,7 +502,7 @@ AS_IF([test "$with_xml2" = "yes"], [
 	if test -z "$XML2_CFLAGS"; then
 	  XML2_CFLAGS="`xml2-config --cflags`"
 	fi
-	if test -n "$XML2_LIBS"; then
+	if test -z "$XML2_LIBS"; then
 	  XML2_LIBS="`xml2-config --libs`"
 	fi], [
 	PKG_CHECK_MODULES([XML2], [libxml-2.0])])
@@ -511,15 +511,18 @@ AS_IF([test "$with_xml2" = "yes"], [
 	fi
 	if test -n "$XML2_LIBS"; then
 	  LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"
+	  LIBS="$LIBS $XML2_LIBS"
 	fi
 	AC_CHECK_HEADERS([libxml/uri.h libxml/xmlwriter.h], [],
 		 AC_MSG_ERROR([Headers for libxml2 missing]))
 	AX_CHECK_DEFINE([libxml/xmlwriter.h], [LIBXML_WRITER_ENABLED], [],
 		AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
-	AC_CHECK_LIB([xml2], [xmlNewTextWriterFilename],
-		[LIBCOB_LIBS="$LIBCOB_LIBS -lxml2"],
-		AC_MSG_ERROR([xml library is required as -lxml2]), [])
-    AC_DEFINE([WITH_XML2], [1])
+	AC_MSG_CHECKING([if linking against libxml2 with "$XML2_LIBS" works])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libxml/xmlwriter.h>]],
+	  [[xmlNewTextWriterFilename (NULL, 0);]])],
+	  [AC_DEFINE([WITH_XML2], [1]) AC_MSG_RESULT([yes])],
+	  [AC_MSG_RESULT([no])
+	   AC_MSG_ERROR([[xml library is required, you may specify it with XML2_LIBS]])])
 ])
 
 
