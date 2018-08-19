@@ -2,7 +2,10 @@
 2018-07-16  Brian Tiffin <btiffin@gnu.org>
 
 	* Makefile.am: add cob-config.1 to dist_man
-	* cob-config.1: added
+
+2018-06-16  Ludwin Janvier <lud.janvier@gmail.com>
+
+	* cob-config.1: added minimal manpage for cob-config
 
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

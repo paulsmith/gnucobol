@@ -5,10 +5,10 @@
 	* m4/m4_ax_check_define.m4: added AC_CHECK_DEFINE macro from the GNU
 	  Autoconf Archive.
 
-2018-06-19  Ludwin Janvier
+2018-06-19  Ludwin Janvier <lud.janvier@gmail.com>
 
-	* configure.ac: remove -g from default options and remove removal of -g
-	  from CFLAGS.
+	* configure.ac: remove -g from default options and remove removal
+	  of -g from CFLAGS
 
 2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
