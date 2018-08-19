@@ -10,8 +10,10 @@ very old compilers may lack support for this (like Visual C++ 2003 and older).
 How to build in native Windows environments:
 
 * get/build necessary prerequisites and place them in build_windows
-  Note: for convinience you can get them (MPIR, pdcurses, VBISAM, BDB) from 
-  https://sourceforge.net/projects/open-cobol/files/win_prerequisites/
+  Note: for convinience you can get the essential ones (MPIR, pdcurses, VBISAM,
+  BDB) from https://sourceforge.net/projects/open-cobol/files/win_prerequisites/
+  As of August 2018, libxml2 binaries (and its dependents) are available at
+  http://www.zlatkovic.com/libxml.en.html, courtesy of Igor Zlatkovic.
   For a manual approach:
   * headers        --> build_windows
   * link libraries --> build_windows or build_windows\$(Platform)\$(Configuration)
@@ -59,6 +61,9 @@ How to test the native builds:
 * if you've set MAKE_DIST in defaults.h copy the dist package to the place
   cobc --info says (for example to C:\GnuCOBOL_2.3)
 * start the VS command prompt that matches the version you want to test
+* do the following commands:
+ set COB_UNIX_LF=YES
+ set COB_MSG_FORMAT=GCC
 * start the GNU/Linux-like environment from within the VS command prompt
   (for example by dropping its shortcut on the cmd window and pressing ENTER)
 * do the following commands:
@@ -72,6 +77,10 @@ How to test the native builds:
   cd extras
   make -e
   cd ../tests
+  make check # but cancel after "autom4te --lang=autotest -o testsuite testsuite.at" has completed!
+* edit tests/testsuite, replacing the at_diff='diff (-u)' lines by at_diff='diff --strip-trailing-cr (-u)'
+* edit tests/testsuite, replacing every $COBCRUN_DIRECT ./prog with $COBCRUN_DIRECT ./prog.exe
+* do the following commands:
   make -j2 -e checkall # or make -j2 -e check if you don't want to run the NIST
                        # testsuite; instead of -j2 you may set -j7, depending on
                        # how many logical processors you have

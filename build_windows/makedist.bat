@@ -270,11 +270,13 @@ if exist "%copy_from%\libvbisam.dll" (
 )
 
 :: Copy the curses library.
-if exist "%copy_from%\pdcurses.dll" (
-   copy "%copy_from%\pdcurses.dll"		%copy_to_bin%\	1>nul
-) else ( 
-   echo No curses library found.
-)
+call :copy_lib_if_exists "pdcurses.dll" %copy_to_bin% "curses"
+
+:: Copy the XML libary (and its dependents)
+call :copy_lib_if_exists "libxml2-2.dll" %copy_to_bin% "XML"
+call :copy_lib_if_exists "libiconv-2.dll" %copy_to_bin% "iconv"
+call :copy_lib_if_exists "zlib1.dll" %copy_to_bin% "zlib"
+call :copy_lib_if_exists "libcharset-1.dll" %copy_to_bin% "charset"
 
 mkdir %copy_to_lib%
 copy "%copy_from%\libcob.lib"			%copy_to_lib%\	1>nul
@@ -307,4 +309,13 @@ if %1%=="Win32" (
    set platform=x64
    set platform_ext=_x64
 )
+goto :eof
+
+:copy_lib_if_exists
+if exist "%copy_from%\%~1%" (
+   copy "%copy_from%\%~1"	"%2%\"	1>nul
+) else (
+   echo No %~3 library found.	
+)
+echo off
 goto :eof

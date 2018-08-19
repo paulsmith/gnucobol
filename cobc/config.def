@@ -303,3 +303,9 @@ CB_CONFIG_SUPPORT (cb_missing_statement, "missing-statement",
 
 CB_CONFIG_SUPPORT (cb_zero_length_lit, "zero-length-literals",
 	_("zero-length literals, e.g. '' and \"\""))
+
+CB_CONFIG_SUPPORT (cb_xml_generate, "xml-generate",
+	_("XML GENERATE statement"))
+
+CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
+	_("XML GENERATE's phrases other than COUNT IN"))

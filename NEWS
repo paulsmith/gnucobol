@@ -26,6 +26,8 @@ NEWS - user visible changes				-*- outline -*-
    to set/get special runtime options (currently FILE * for trace and printer
    output) or to reload the runtime configuration after changing environment
 
+** XML GENERATE statement
+
 * Changed cobc options:
 
 ** The option -debug (runtime checks) no longer implies -ftrace (option to

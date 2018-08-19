@@ -1,4 +1,8 @@
 
+2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* xml.c: added XML GENERATE.
+
 2018-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* coblocal.h, numeric.c (cob_decimal_init2): fixed compiler warning

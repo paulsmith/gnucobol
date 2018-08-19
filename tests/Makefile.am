@@ -54,6 +54,7 @@ testsuite_sources = \
 	testsuite.src/run_reportwriter.at \
 	testsuite.src/run_returncode.at \
 	testsuite.src/run_subscripts.at \
+	testsuite.src/run_xml.at \
 	testsuite.src/data_binary.at \
 	testsuite.src/data_display.at \
 	testsuite.src/data_packed.at \

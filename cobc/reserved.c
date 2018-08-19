@@ -353,7 +353,10 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "ATTRIBUTE",		0, 1, ATTRIBUTE,		/* 2002 (C/S) */
-				0, CB_CS_SET
+				0, CB_CS_SET | CB_CS_XML_GENERATE
+  },
+  { "ATTRIBUTES",		0, 1, ATTRIBUTES,		/* IBM extension */
+				0, CB_CS_XML_GENERATE
   },
   { "AUTO",			0, 1, AUTO,			/* 2002 (C/S), extension */
 				0, CB_CS_ACCEPT | CB_CS_SCREEN | CB_CS_CALL
@@ -935,6 +938,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EGI",			0, 0, EGI,			/* Communication Section */
 				0, 0
   },
+  { "ELEMENT",			0, 1, ELEMENT,			/* IBM extension */
+				0, CB_CS_XML_GENERATE
+  },
   { "ELSE",			0, 0, ELSE,			/* 2002 */
 				0, 0
   },
@@ -943,6 +949,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ENABLE",			0, 0, ENABLE,			/* Communication Section */
 				0, 0
+  },
+  { "ENCODING",			0, 1, ENCODING,			/* IBM extension */
+				0, CB_CS_XML_GENERATE | CB_CS_XML_PARSE
   },
   { "END",			0, 0, END,			/* 2002 */
 				0, 0
@@ -1022,6 +1031,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "END-WRITE",		0, 0, END_WRITE,		/* 2002 */
 				0, 0
   },
+  { "END-XML",			0, 0, END_XML,			/* IBM extension */
+    				0, 0
+  },
   { "ENGRAVED",		0, 1, ENGRAVED,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -1087,6 +1099,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "EVENT-LIST",		0, 1, EVENT_LIST,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "EVERY",			0, 1, EVERY,			/* IBM extension */
+				0, CB_CS_XML_GENERATE
   },
   { "EXCEPTION",		0, 0, EXCEPTION,		/* 2002 */
 				0, 0
@@ -1712,7 +1727,13 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "NAME",			0, 1, NAME,			/* Extension */
-				0, CB_CS_FROM
+				0, CB_CS_FROM | CB_CS_XML_GENERATE
+  },
+  { "NAMESPACE",		0, 1, NAMESPACE,		/* IBM extension */
+				0, CB_CS_XML_GENERATE
+  },
+  { "NAMESPACE-PREFIX",		0, 1, NAMESPACE_PREFIX,		/* IBM extension */
+				0, CB_CS_XML_GENERATE
   },
   { "NATIONAL",			0, 0, NATIONAL,			/* 2002 */
 				0, 0
@@ -1791,6 +1812,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "NONE",			0, 1, -1,			/* 2002 (C/S) */
 				0, 0
+  },
+  { "NONNUMERIC",		0, 1, NONNUMERIC,		/* IBM extension */
+				0, CB_CS_XML_GENERATE
   },
   { "NORMAL",			0, 1, NORMAL,			/* 2002 (C/S) */
 				0, CB_CS_STOP
@@ -1935,6 +1959,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PARENT",			0, 1, PARENT,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "PARSE",			0, 1, PARSE,			/* IBM extension */
+    				0, 0
+  },
   { "PASSWORD",			0, 1, PASSWORD,			/* IBM extension */
 				0, CB_CS_SELECT
   },
@@ -2029,6 +2056,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "PROCEED",			0, 0, PROCEED,			/* 85 */
 				0, 0
+  },
+  { "PROCESSING",		0, 1, PROCESSING,		/* IBM extension */
+				0, CB_CS_XML_PARSE
   },
   { "PROGRAM",			0, 0, PROGRAM,			/* 2002 */
 				0, 0
@@ -2775,6 +2805,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VALIDATE-STATUS",		0, 0, -1,			/* 2002 */
 				0, 0
   },
+  { "VALIDATING",		0, 1, VALIDATING,		/* IBM extension */
+				0, CB_CS_XML_PARSE
+  },
   { "VALUE",			0, 0, VALUE,			/* 2002 */
 				0, 0
   },
@@ -2853,6 +2886,12 @@ static struct cobc_reserved default_reserved_words[] = {
   { "X",			0, 1, X,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "XML",			1, 0, XML,			/* IBM extension */
+    				0, 0
+  },
+  { "XML-DECLARATION",		0, 1, XML_DECLARATION,		/* IBM extension */
+    				0, CB_CS_XML_GENERATE
+  },
   { "Y",			0, 1, Y,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
@@ -2906,7 +2945,16 @@ static struct register_struct	register_list[] = {
 	{"TALLY", "GLOBAL PICTURE 9(5) USAGE BINARY VALUE ZERO", CB_FEATURE_ACTIVE},
 	{"COL", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, normally conflicting --> must be explicit enabled */
 	{"LIN", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, only in combination with COL */
-	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE}
+	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE},
+	{"XML-CODE", "GLOBAL PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE}
+	/* {"XML-EVENT", "USAGE DISPLAY PICTURE X(30) VALUE SPACE", CB_FEATURE_ACTIVE}, */
+	/* {"XML-INFORMATION", "PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE}, */
+	/* {"XML-NAMESPACE", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
+	/* {"XML-NAMESPACE-PREFIX", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
+	/* {"XML-NNAMESPACE", "PIC N ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
+	/* {"XML-NNAMESPACE-PREFIX", "PIC N ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
+	/* {"XML-NTEXT", "PIC N ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
+	/* {"XML-TEXT", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE} /\* FIXME: currently not handled the "normal" register way *\/ */
 };
 
 #define	NUM_REGISTERS	sizeof(register_list) / sizeof(struct register_struct)

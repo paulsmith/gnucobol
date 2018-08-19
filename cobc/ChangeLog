@@ -1,4 +1,9 @@
 
+2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added XML GENERATE statement.
+	* parser.y: added detection of XML PARSE statement.
+
 2018-08-17  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* reserved.c: added COL/LIN registers (default to disabled)

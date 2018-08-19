@@ -2820,3 +2820,9 @@ cb_is_figurative_constant (const cb_tree x)
 		|| (CB_REFERENCE_P (x)
 		    && CB_REFERENCE (x)->flag_all);
 }
+
+int
+cb_field_is_ignored_in_xml_gen (struct cb_field * const f)
+{
+	return f->flag_filler || f->redefines || f->rename_thru;
+}

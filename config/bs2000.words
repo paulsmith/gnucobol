@@ -545,7 +545,6 @@ reserved:	WORDS
 reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	XML
-reserved:	XML-CODE # note: this is a register, move as soon as supported
 reserved:	XML-EVENT # note: this is a register, move as soon as supported
 reserved:	XML-NAMESPACE # note: this is a register, move as soon as supported
 reserved:	XML-NAMESPACE-PREFIX # note: this is a register, move as soon as supported
@@ -577,7 +576,7 @@ register:	RETURN-CODE
 # register:	SORT-MODE-SIZE
 register:	SORT-RETURN
 register:	TALLY
-# register:	XML-CODE
+register:	XML-CODE
 # register:	XML-EVENT
 # register:	XML-NAMESPACE
 # register:	XML-NAMESPACE-PREFIX

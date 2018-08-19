@@ -77,6 +77,7 @@ AH_TEMPLATE([WITH_DB], [Use Berkeley DB library as emulation of ISAM handler])
 AH_TEMPLATE([WITH_CISAM], [Use CISAM as ISAM handler])
 AH_TEMPLATE([WITH_DISAM], [Use DISAM as ISAM handler])
 AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as ISAM handler])
+AH_TEMPLATE([WITH_XML2], [Use libxml2 as XML handler])
 
 AH_TEMPLATE([COB_EXPORT_DYN], [Compile/link option for exporting symbols])
 AH_TEMPLATE([COB_PIC_FLAGS], [Compile/link option for PIC code])
@@ -211,7 +212,7 @@ AC_DEFINE_UNQUOTED([MAX_CALL_FIELD_PARAMS], [$with_max_call_params])
 # Basic capability tests
 
 # Default CFLAGS (removed -g set in AC_INIT for compatibility)
-: ${CFLAGS="-O2"} 
+: ${CFLAGS="-O2"}
 
 AC_PROG_CC([gcc xlc cc])
 AC_PROG_CC_STDC
@@ -483,6 +484,36 @@ if test "$with_cisam" != "yes" -a "$with_disam" != "yes" -a "$with_vbisam" != "y
   [],
   [with_db=yes])
 fi
+
+
+AC_ARG_WITH([xml2],
+  [AS_HELP_STRING([--with-xml2],
+    [(GnuCOBOL) Use libxml2 as XML handler (default)])],
+  [],
+  [with_xml2=yes])
+
+if test "$with_xml2" = "yes"; then
+    AC_CHECK_PROG(xml2_config_found, xml2-config, "yes")
+    AC_CHECK_PROG(pkg_config_found, pkg-config, "yes")
+    if test "$xml2_config_found" = "yes"; then
+	LIBCOB_LIBS="$LIBCOB_LIBS `xml2-config --libs`"
+	CFLAGS="$CFLAGS `xml2-config --cflags`"
+        AC_DEFINE([WITH_XML2], [1])
+    elif test "$pkg_config_found" = "yes"; then
+	LIBCOB_LIBS="$LIBCOB_LIBS `pkg-config --libs libxml-2.0`"
+	CFLAGS="$CFLAGS `pkg-config --cflags`"
+        AC_DEFINE([WITH_XML2], [1])
+    else
+	AC_CHECK_HEADERS([libxml/uri.h], [],
+		 AC_MSG_ERROR([No header found for libxml2]))
+	AC_CHECK_LIB([xml2], [xmlNewTextWriterFilename],
+		[LIBCOB_LIBS="$LIBCOB_LIBS -lxml2"],
+		AC_MSG_ERROR([xml library is required as -lxml2]), [])
+	AC_CHECK_DEFINE([LIBXML_WRITER_ENABLED], [AC_DEFINE([WITH_XML2], [1])],
+		AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
+    fi
+fi
+
 
 AC_ARG_WITH([dl],
   [AS_HELP_STRING([--with-dl],
@@ -982,10 +1013,10 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 	{
 	void	*test_ptr;
 	test_ptr = &&lab;
-	
+
 	goto *test_ptr;
 	return 1;
-	
+
 	lab:
 	return 0;
 	}]])],
@@ -1388,6 +1419,12 @@ else
 	COB_HAS_CURSES=yes
 fi
 
+if test "$with_xml2" = "yes"; then
+	COB_HAS_XML2=yes
+else
+	COB_HAS_XML2=no
+fi
+
 unset COB_USES_GCC
 unset COB_USES_GCC_NO_ICC
 unset COB_USES_ICC_ONLY
@@ -1435,6 +1472,7 @@ AC_SUBST([COB_FIX_LIBTOOL])
 AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
 AC_SUBST([COB_HAS_CURSES])
+AC_SUBST([COB_HAS_XML2])
 AC_SUBST([COB_HAS_64_BIT_POINTER])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
 
@@ -1506,5 +1544,8 @@ elif test "$with_db" = "yes"; then
   AC_MSG_NOTICE([ Use Berkeley DB for ISAM I/O:                yes])
 else
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
+fi
+if test "$with_xml2" = "yes"; then
+  AC_MSG_NOTICE([ Use libxml2 for XML I/O                      ${COB_HAS_XML2}])
 fi
 unset DEFINE_DL

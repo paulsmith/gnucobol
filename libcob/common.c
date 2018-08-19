@@ -583,6 +583,7 @@ cob_terminate_routines (void)
 	cob_exit_common_modules ();
 	cob_exit_call ();
 	cob_exit_reportio ();
+	cob_exit_xmlio ();
 	cob_exit_common ();
 }
 
@@ -7064,6 +7065,12 @@ print_info (void)
 #else
 	var_print (_("mathematical library"), 		versbuff, "", 0);
 #endif
+
+#ifdef WITH_LIBXML2
+	var_print (_("XML library"), 		"libxml2", "", 0);
+#else
+	var_print (_("XML library"), 		_("disabled"), "", 0);
+#endif
 }
 
 
@@ -7390,6 +7397,7 @@ cob_init (const int argc, char **argv)
 	cob_init_call (cobglobptr, cobsetptr, check_mainhandle);
 	cob_init_termio (cobglobptr, cobsetptr);
 	cob_init_reportio (cobglobptr, cobsetptr);
+	cob_init_xmlio (cobglobptr);
 
 	/* Set up library routine stuff */
 	cobglobptr->cob_term_buff = cob_malloc ((size_t)COB_MEDIUM_BUFF);

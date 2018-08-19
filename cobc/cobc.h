@@ -133,6 +133,8 @@ enum cb_format {
 #define	CB_CS_INQUIRE_MODIFY		(1U << 25)	/* within INQUIRE or MODIFY statement */
 #define	CB_CS_GRAPHICAL_CONTROL		(1U << 26)	/* within ACUCOBOL-GT graphical control */
 #define	CB_CS_SELECT			(1U << 27)	/* within SELECT */
+#define	CB_CS_XML_GENERATE		(1U << 28)
+#define	CB_CS_XML_PARSE			(1U << 29)
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"
@@ -382,6 +384,8 @@ extern int			cb_pic_id;
 extern int			cb_attr_id;
 extern int			cb_literal_id;
 extern int			cb_field_id;
+extern int			cb_xml_attr_id;
+extern int			cb_xml_tree_id;
 extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
 

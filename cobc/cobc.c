@@ -257,6 +257,8 @@ int			cb_pic_id = 0;
 int			cb_attr_id = 0;
 int			cb_literal_id = 0;
 int			cb_field_id = 0;
+int			cb_xml_attr_id = 0;
+int			cb_xml_tree_id = 0;
 int			cobc_flag_main = 0;
 int			cb_flag_main = 0;
 int			cobc_wants_debug = 0;
@@ -745,6 +747,12 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "DECIMAL LITERAL";
 	case CB_TAG_REPORT_LINE:
 		return "REPORT LINE";
+	case CB_TAG_XML_SUPPRESS:
+		return "XML SUPPRESS CLAUSE";
+	case CB_TAG_XML_TREE:
+		return "XML OUTPUT TREE";
+	case CB_TAG_XML_SUPPRESS_CHECKS:
+		return "XML SUPPRESS CHECKS";
 	default:
 		break;
 	}
@@ -2253,6 +2261,12 @@ cobc_print_info (void)
 	cobc_var_print (_("mathematical library"),	"MPIR - GMP", 0);
 #else
 	cobc_var_print (_("mathematical library"),	"GMP", 0);
+#endif
+
+#ifdef WITH_XML2
+	cobc_var_print (_("XML library"),		"libxml2", 0);
+#else
+	cobc_var_print (_("XML library"),		_("disabled"), 0);
 #endif
 }
 
@@ -8112,6 +8126,8 @@ process_file (struct filename *fn, int status)
 	cb_attr_id = 1;
 	cb_literal_id = 1;
 	cb_field_id = 1;
+	cb_xml_attr_id = 1;
+	cb_xml_tree_id = 1;
 	demangle_name = fn->demangle_source;
 	memset (optimize_defs, 0, sizeof (optimize_defs));
 

@@ -76,7 +76,8 @@ do { \
 #define TERM_SUBTRACT		20U
 #define TERM_UNSTRING		21U
 #define TERM_WRITE		22U
-#define TERM_MAX		23U	/* Always last entry, used for array size */
+#define TERM_XML		23U
+#define TERM_MAX		24U	/* Always last entry, used for array size */
 
 #define	TERMINATOR_WARNING(x,z)	terminator_warning (x, TERM_##z, #z)
 #define	TERMINATOR_ERROR(x,z)	terminator_error (x, TERM_##z, #z)
@@ -143,6 +144,7 @@ unsigned int			cobc_in_repository = 0;
 unsigned int			cobc_force_literal = 0;
 unsigned int			cobc_cs_check = 0;
 unsigned int			cobc_allow_program_name = 0;
+unsigned int			cobc_in_xml_generate_body = 0;
 
 /* Local variables */
 
@@ -228,6 +230,13 @@ static int			is_first_display_item;
 static cb_tree			advancing_value;
 static cb_tree			upon_value;
 static cb_tree			line_column;
+
+static cb_tree			xml_suppress_list;
+static cb_tree			xml_encoding;
+static int			with_xml_dec;
+static int			with_attrs;
+
+static enum cb_xml_suppress_category	xml_suppress_category;
 
 static int			term_array[TERM_MAX];
 static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
@@ -911,6 +920,7 @@ clear_initial_values (void)
 	cobc_in_procedure = 0;
 	cobc_in_repository = 0;
 	cobc_force_literal = 0;
+	cobc_in_xml_generate_body = 0;
 	non_const_word = 0;
 	suppress_data_exceptions = 0;
 	same_area = 1;
@@ -1888,6 +1898,69 @@ check_validate_item (cb_tree x)
 	}
 }
 
+static void
+error_if_following_every_clause (void)
+{
+	if (xml_suppress_list
+	    && CB_XML_SUPPRESS (CB_VALUE (xml_suppress_list))->target == CB_XML_SUPPRESS_TYPE) {
+		cb_error (_("WHEN clause must follow EVERY clause"));
+	}
+}
+
+static void
+prepend_to_xml_suppress_list (cb_tree suppress_entry)
+{
+	cb_tree	new_list_head = CB_LIST_INIT (suppress_entry);
+	cb_list_append (new_list_head, xml_suppress_list);
+	xml_suppress_list = new_list_head;
+}
+
+static void
+add_identifier_to_xml_suppress_conds (cb_tree identifier)
+{
+	cb_tree suppress_id = cb_build_xml_suppress_clause ();
+	CB_XML_SUPPRESS (suppress_id)->target = CB_XML_SUPPRESS_IDENTIFIER;
+	CB_XML_SUPPRESS (suppress_id)->identifier = identifier;
+	prepend_to_xml_suppress_list (suppress_id);
+}
+
+static void
+add_when_to_xml_suppress_conds (cb_tree when_list)
+{
+	struct cb_xml_suppress_clause	*last_suppress_clause;
+	cb_tree	suppress_all;
+
+	/*
+	  If the preceding clause in SUPPRESS was an identifier, the WHEN
+	  belongs to the identifier. If EVERY was preceding, the WHEN belongs to
+	  the EVERY. Otherwise, the WHEN acts on the entire record.
+	*/
+	if (xml_suppress_list) {
+		last_suppress_clause = CB_XML_SUPPRESS (CB_VALUE (xml_suppress_list));
+		if ((last_suppress_clause->target == CB_XML_SUPPRESS_IDENTIFIER
+		     || last_suppress_clause->target == CB_XML_SUPPRESS_TYPE)
+		    && !last_suppress_clause->when_list) {
+			last_suppress_clause->when_list = when_list;
+			return;
+		}
+	}
+
+	suppress_all = cb_build_xml_suppress_clause ();
+	CB_XML_SUPPRESS (suppress_all)->when_list = when_list;
+	prepend_to_xml_suppress_list (suppress_all);
+}
+
+static void
+add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
+				enum cb_xml_type xml_type)
+{
+	cb_tree	suppress_type = cb_build_xml_suppress_clause ();
+	CB_XML_SUPPRESS (suppress_type)->target = CB_XML_SUPPRESS_TYPE;
+	CB_XML_SUPPRESS (suppress_type)->category = category;
+	CB_XML_SUPPRESS (suppress_type)->xml_type = xml_type;
+	prepend_to_xml_suppress_list (suppress_type);
+}
+
 %}
 
 %token TOKEN_EOF 0 "end of file"
@@ -1929,6 +2002,7 @@ check_validate_item (cb_tree x)
 %token ASSIGN
 %token AT
 %token ATTRIBUTE
+%token ATTRIBUTES
 %token AUTO
 %token AUTO_DECIMAL			"AUTO-DECIMAL"
 %token AUTO_SPIN			"AUTO-SPIN"
@@ -2111,8 +2185,10 @@ check_validate_item (cb_tree x)
 %token EGI
 %token EIGHTY_EIGHT		"level-number 88"
 %token ENABLE
+%token ELEMENT
 %token ELSE
 %token EMI
+%token ENCODING
 %token END
 %token END_ACCEPT		"END-ACCEPT"
 %token END_ADD  		"END-ADD"
@@ -2139,6 +2215,7 @@ check_validate_item (cb_tree x)
 %token END_SUBTRACT		"END-SUBTRACT"
 %token END_UNSTRING		"END-UNSTRING"
 %token END_WRITE		"END-WRITE"
+%token END_XML			"END-XML"
 %token ENGRAVED
 %token ENSURE_VISIBLE	"ENSURE-VISIBLE"
 %token ENTRY
@@ -2161,6 +2238,7 @@ check_validate_item (cb_tree x)
 %token EVENT
 %token EVENT_LIST		"EVENT-LIST"
 %token EVENT_STATUS		"EVENT STATUS"
+%token EVERY
 %token EXCEPTION
 %token EXCEPTION_CONDITION	"EXCEPTION CONDITION"
 %token EXCEPTION_VALUE		"EXCEPTION-VALUE"
@@ -2355,6 +2433,8 @@ check_validate_item (cb_tree x)
 %token MULTIPLE
 %token MULTIPLY
 %token NAME
+%token NAMESPACE
+%token NAMESPACE_PREFIX		"NAMESPACE-PREFIX"
 %token NATIONAL
 %token NATIONAL_EDITED		"NATIONAL-EDITED"
 %token NATIONAL_OF_FUNC		"FUNCTION NATIONAL-OF"
@@ -2384,6 +2464,7 @@ check_validate_item (cb_tree x)
 %token NO_KEY_LETTER	"NO-KEY-LETTER"
 %token NO_SEARCH		"NO-SEARCH"
 %token NO_UPDOWN		"NO-UPDOWN"
+%token NONNUMERIC
 %token NORMAL
 %token NOT
 %token NOTAB
@@ -2435,6 +2516,7 @@ check_validate_item (cb_tree x)
 %token PAGED
 %token PARAGRAPH
 %token PARENT
+%token PARSE
 %token PASSWORD
 %token PERFORM
 %token PERMANENT
@@ -2464,6 +2546,7 @@ check_validate_item (cb_tree x)
 %token PROCEDURE
 %token PROCEDURES
 %token PROCEED
+%token PROCESSING
 %token PROGRAM
 %token PROGRAM_ID		"PROGRAM-ID"
 %token PROGRAM_NAME		"program name"
@@ -2625,6 +2708,7 @@ check_validate_item (cb_tree x)
 %token SUBWINDOW
 %token SUM
 %token SUPPRESS
+%token SUPPRESS_XML		"SUPPRESS"
 %token SYMBOLIC
 %token SYNCHRONIZED
 %token SYSTEM_DEFAULT		"SYSTEM-DEFAULT"
@@ -2718,6 +2802,7 @@ check_validate_item (cb_tree x)
 %token USING
 %token V
 %token VALIDATE
+%token VALIDATING
 %token VALUE
 %token VALUE_FORMAT		"VALUE-FORMAT"
 %token VARIABLE
@@ -2736,6 +2821,7 @@ check_validate_item (cb_tree x)
 %token WEB_BROWSER		"WEB-BROWSER"
 %token WHEN
 %token WHEN_COMPILED_FUNC	"FUNCTION WHEN-COMPILED"
+%token WHEN_XML			"WHEN"
 %token WIDTH
 %token WIDTH_IN_CELLS		"WIDTH-IN-CELLS"
 %token WINDOW
@@ -2746,6 +2832,8 @@ check_validate_item (cb_tree x)
 %token WRAP
 %token WRITE
 %token X
+%token XML
+%token XML_DECLARATION		"XML-DECLARATION"
 %token Y
 %token YYYYDDD
 %token YYYYMMDD
@@ -2816,6 +2904,7 @@ check_validate_item (cb_tree x)
 %nonassoc UNSTRING
 %nonassoc VALIDATE
 %nonassoc WRITE
+%nonassoc XML
 
 %nonassoc NOT_END END
 %nonassoc NOT_EOP EOP
@@ -2849,6 +2938,7 @@ check_validate_item (cb_tree x)
 %nonassoc END_SUBTRACT
 %nonassoc END_UNSTRING
 %nonassoc END_WRITE
+%nonassoc END_XML
 
 %nonassoc PROGRAM_ID
 %nonassoc WHEN
@@ -9338,6 +9428,8 @@ statement:
 | unstring_statement
 | validate_statement
 | write_statement
+| xml_generate_statement
+| xml_parse_statement
 | %prec SHIFT_PREFER
   NEXT SENTENCE
   {
@@ -13683,7 +13775,7 @@ unstring_into:
 ;
 
 unstring_into_item:
-  identifier _unstring_into_delimiter _unstring_into_count
+  identifier _unstring_into_delimiter _count_in
   {
 	$$ = cb_build_unstring_into ($1, $2, $3);
   }
@@ -13692,11 +13784,6 @@ unstring_into_item:
 _unstring_into_delimiter:
   /* empty */			{ $$ = NULL; }
 | DELIMITER _in identifier	{ $$ = $3; }
-;
-
-_unstring_into_count:
-  /* empty */			{ $$ = NULL; }
-| COUNT _in identifier		{ $$ = $3; }
 ;
 
 _unstring_tallying:
@@ -14110,6 +14197,314 @@ _end_write:
   }
 ;
 
+/* XML GENERATE statement */
+
+xml_generate_statement:
+  XML GENERATE
+  {
+	begin_statement ("XML GENERATE", TERM_XML);
+	cb_verify (cb_xml_generate, _("XML GENERATE"));
+	cobc_in_xml_generate_body = 1;
+	cobc_cs_check = CB_CS_XML_GENERATE;
+  }
+  xml_generate_body
+  _end_xml
+;
+
+xml_generate_body:
+  identifier FROM identifier
+  _count_in
+  {
+	xml_encoding = NULL;
+	with_xml_dec = 0;
+	with_attrs = 0;
+	xml_suppress_list = NULL;
+  }
+  _with_encoding_xml_dec_and_attrs
+  _xml_gen_namespace
+  _name_of
+  _type_of
+  _xml_gen_suppress
+  {
+	cobc_in_xml_generate_body = 0;
+	cobc_cs_check = 0;
+  }
+  _xml_exception_phrases
+  {
+	cb_emit_xml_generate ($1, $3, $4, xml_encoding, with_xml_dec,
+			      with_attrs, $7, $8, $9, xml_suppress_list);
+  }
+;
+
+_with_encoding_xml_dec_and_attrs:
+  /* empty */
+| with_encoding_xml_dec_and_attrs
+;
+
+with_encoding_xml_dec_and_attrs:
+  with_encoding_xml_dec_and_attr
+| with_encoding_xml_dec_and_attrs with_encoding_xml_dec_and_attr
+;
+
+with_encoding_xml_dec_and_attr:
+  _with encoding_xml_dec_and_attr
+;
+
+encoding_xml_dec_and_attr:
+  ENCODING simple_value
+  {
+	xml_encoding = $2;
+	if (with_xml_dec) {
+		cb_error (_("ENCODING clause must come before XML-DECLARATION"));
+	} else if (with_attrs) {
+		cb_error (_("ENCODING clause must come before ATTRIBUTES"));
+	}
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE ENCODING clause"));
+        CB_PENDING ("XML GENERATE ENCODING");
+  }
+| XML_DECLARATION
+  {
+	with_xml_dec = 1;
+        if (with_attrs) {
+		cb_error (_("XML-DECLARATION clause must come before ATTRIBUTES"));
+	}
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE XML-DECLARATION clause"));
+  }
+| ATTRIBUTES
+  {
+	with_attrs = 1;
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE WITH ATTRIBUTES clause"));
+  }
+;
+
+_xml_gen_namespace:
+  /* empty */
+  {
+	 $$ = NULL;
+  }
+| NAMESPACE _is simple_value _xml_gen_namespace_prefix
+  {
+	$$ = CB_BUILD_PAIR ($3, $4);
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE NAMESPACE clause"));
+  }
+;
+
+_xml_gen_namespace_prefix:
+  /* empty */
+  {
+	$$ = cb_null;
+  }
+| NAMESPACE_PREFIX _is simple_value
+  {
+	$$ = $3;
+  }
+;
+
+_name_of:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| NAME _of identifier_name_list
+  {
+	$$ = $3;
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE NAME OF clause"));
+  }
+;
+
+identifier_name_list:
+  identifier_is_name
+  {
+	$$ = CB_LIST_INIT ($1);
+  }
+| identifier_name_list identifier_is_name
+  {
+	$$ = cb_list_add ($1, $2);
+  }
+;
+
+identifier_is_name:
+  identifier _is literal
+  {
+	$$ = CB_BUILD_PAIR ($1, $3);
+  }
+;
+
+_type_of:
+  /* empty */
+  {
+       $$ = NULL;
+  }
+| TYPE _of identifier_type_list
+  {
+       $$ = $3;
+       	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE TYPE OF clause"));
+  }
+;
+
+identifier_type_list:
+  identifier_is_type
+  {
+	$$ = CB_LIST_INIT ($1);
+  }
+| identifier_type_list identifier_is_type
+  {
+	$$ = cb_list_add ($1, $2);
+  }
+;
+
+identifier_is_type:
+  identifier _is xml_type
+  {
+	$$ = CB_BUILD_PAIR ($1, $3);
+  }
+;
+
+_xml_type:
+  /* empty */
+  {
+	$$ = cb_int ((int) CB_XML_ANY_TYPE);
+  }
+| xml_type
+;
+
+xml_type:
+  ATTRIBUTE	{ $$ = cb_int ((int) CB_XML_ATTRIBUTE); }
+| ELEMENT	{ $$ = cb_int ((int) CB_XML_ELEMENT); }
+| CONTENT	{ $$ = cb_int ((int) CB_XML_CONTENT); }
+;
+
+_xml_gen_suppress:
+  /* empty */
+| SUPPRESS_XML xml_suppress_list
+  {
+	cb_verify (cb_xml_generate_extra_phrases,
+		   _("XML GENERATE SUPPRESS clause"));
+  }
+;
+
+xml_suppress_list:
+  xml_suppress_entry
+| xml_suppress_list xml_suppress_entry
+;
+
+xml_suppress_entry:
+  identifier
+  {
+	error_if_following_every_clause ();
+	add_identifier_to_xml_suppress_conds ($1);
+  }
+| EVERY xml_suppress_generic_opt
+  {
+	error_if_following_every_clause ();
+	add_type_to_xml_suppress_conds (xml_suppress_category, (enum cb_xml_type) CB_INTEGER ($2)->val);
+  }
+| WHEN_XML xml_suppress_when_list
+  {
+	add_when_to_xml_suppress_conds ($2);
+  }
+;
+
+xml_suppress_generic_opt:
+  NUMERIC _xml_type
+  {
+	xml_suppress_category = CB_XML_SUPPRESS_CAT_NUMERIC;
+	$$ = $2;
+  }
+| NONNUMERIC _xml_type
+  {
+	xml_suppress_category = CB_XML_SUPPRESS_CAT_NONNUMERIC;
+	$$ = $2;
+  }
+| xml_type
+  {
+	xml_suppress_category = CB_XML_SUPPRESS_CAT_ANY;
+	$$ = $1;
+  }
+;
+
+xml_suppress_when_list:
+  zero_spaces_high_low_values
+  {
+	$$ = CB_LIST_INIT ($1);
+  }
+| xml_suppress_when_list OR zero_spaces_high_low_values
+  {
+       $$ = cb_list_add ($1, $3);
+  }
+;
+
+_end_xml:
+  /* empty */	%prec SHIFT_PREFER
+  {
+	TERMINATOR_WARNING ($-2, XML);
+  }
+| END_XML
+  {
+	TERMINATOR_CLEAR ($-2, XML);
+  }
+;
+
+
+/* XML PARSE statement */
+
+xml_parse_statement:
+  XML PARSE
+  {
+	begin_statement ("XML PARSE", TERM_XML);
+	/* TO-DO: Add xml-parse and xml-parse-extra-phrases config options. */
+	CB_PENDING (_("XML PARSE"));
+	cobc_cs_check = CB_CS_XML_PARSE;
+  }
+  xml_parse_body
+  _end_xml
+;
+
+xml_parse_body:
+  identifier
+  _with_encoding
+  _returning_national
+  _validating_with
+  PROCESSING PROCEDURE _is perform_procedure
+  {
+	cobc_cs_check = 0;
+  }
+  _xml_exception_phrases
+;
+
+_with_encoding:
+/* empty */
+| _with ENCODING simple_value
+;
+
+_returning_national:
+/* empty */
+| RETURNING NATIONAL
+;
+
+_validating_with:
+/* empty */
+| VALIDATING _with schema_file_or_record_name
+;
+
+schema_file_or_record_name:
+  record_name
+| TOK_FILE WORD
+  {
+	if (CB_FILE_P (cb_ref ($2))) {
+		$$ = $2;
+	} else {
+		cb_error_x ($2, _("'%s' is not a file name"), CB_NAME ($2));
+		$$ = cb_error_node;
+	}
+  }
+;
 
 /* Status handlers */
 
@@ -14210,6 +14605,50 @@ disp_not_on_exception:
   NOT_EXCEPTION statement_list
   {
 	current_statement->handler_type = DISPLAY_HANDLER;
+	current_statement->not_ex_handler = $2;
+  }
+;
+
+_xml_exception_phrases:
+  %prec SHIFT_PREFER
+| xml_on_exception _xml_not_on_exception
+| xml_not_on_exception _xml_on_exception
+  {
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception,
+			   _("NOT EXCEPTION before EXCEPTION"));
+	}
+  }
+;
+
+_xml_on_exception:
+  %prec SHIFT_PREFER
+  {
+	$$ = NULL;
+  }
+| xml_on_exception
+  {
+	$$ = cb_int1;
+  }
+;
+
+xml_on_exception:
+  EXCEPTION statement_list
+  {
+	current_statement->handler_type = XML_HANDLER;
+	current_statement->ex_handler = $2;
+  }
+;
+
+_xml_not_on_exception:
+  %prec SHIFT_PREFER
+| xml_not_on_exception
+;
+
+xml_not_on_exception:
+  NOT_EXCEPTION statement_list
+  {
+	current_statement->handler_type = XML_HANDLER;
 	current_statement->not_ex_handler = $2;
   }
 ;
@@ -14505,6 +14944,10 @@ _scroll_lines:
   }
 ;
 
+_count_in:
+  /* empty */			{ $$ = NULL; }
+| COUNT _in identifier		{ $$ = $3; }
+;
 
 /* Expressions */
 
@@ -15657,6 +16100,13 @@ basic_value:
 | TOK_NULL			{ $$ = cb_null; }
 ;
 
+zero_spaces_high_low_values:
+  SPACE				{ $$ = cb_space; }
+| ZERO				{ $$ = cb_zero; }
+| HIGH_VALUE			{ $$ = cb_high; }
+| LOW_VALUE			{ $$ = cb_low; }
+;
+
 /* Function */
 
 function:
@@ -16102,6 +16552,7 @@ verb:
 | UNLOCK
 | UNSTRING
 | WRITE
+| XML
 ;
 
 scope_terminator:
@@ -16127,6 +16578,7 @@ scope_terminator:
 | END_SUBTRACT
 | END_UNSTRING
 | END_WRITE
+| END_XML
 ;
 
 /* Mandatory/Optional keyword selection without actions */

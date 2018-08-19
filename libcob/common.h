@@ -781,6 +781,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define COB_FERROR_FILE		11
 #define COB_FERROR_FUNCTION	12
 #define COB_FERROR_FREE		13
+#define COB_FERROR_XML		14
 
 /* Exception identifier enumeration */
 
@@ -1194,6 +1195,16 @@ typedef struct __cob_module {
 	unsigned int		*module_ref_count;	/* Module ref count */
 	const char		**module_path;		/* Module path */
 
+	cob_field		*xml_code;		/* XML-CODE */
+	cob_field		*xml_event;		/* XML-EVENT */
+	cob_field		*xml_information;	/* XML-INFORMATION */
+	cob_field		*xml_namespace;		/* XML-NAMESPACE */
+	cob_field		*xml_nnamespace;	/* XML-NNAMESPACE */
+	cob_field		*xml_namespace_prefix;	/* XML-NAMESPACE-PREFIX */
+	cob_field		*xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
+	cob_field		*xml_ntext;		/* XML-NTEXT */
+	cob_field		*xml_text;		/* XML-TEXT */
+
 	unsigned int		module_active;		/* Module is active */
 	unsigned int		module_date;		/* Module num date */
 	unsigned int		module_time;		/* Module num time */
@@ -1448,6 +1459,24 @@ typedef struct __cob_report {
 	int			code_len;		/* Length to use for holding 'CODE IS' value */
 	char			*code_is;		/* Value of CODE IS for this report */
 } cob_report;
+
+/* XML tree structure */
+
+typedef struct __cob_xml_attr {
+	cob_field		*name;
+	cob_field		*value;
+	unsigned int		is_suppressed;
+	struct __cob_xml_attr	*sibling;
+} cob_xml_attr;
+
+typedef struct __cob_xml_tree {
+        cob_field		*name;
+	cob_xml_attr		*attrs;
+	cob_field		*content;
+	unsigned int		is_suppressed;
+	struct __cob_xml_tree	*children;
+	struct __cob_xml_tree	*sibling;
+} cob_xml_tree;
 
 /* Global variable structure */
 
@@ -2008,6 +2037,17 @@ COB_EXPIMP void cob_report_initiate	(cob_report *);
 COB_EXPIMP int  cob_report_terminate	(cob_report *, int);
 COB_EXPIMP int  cob_report_generate	(cob_report *, cob_report_line *, int);
 COB_EXPIMP void cob_report_suppress	(cob_report *r, cob_report_line *l);
+
+/**********************/
+/* Functions in xml.c */
+/**********************/
+
+COB_EXPIMP int	cob_is_valid_uri	(const char *);
+COB_EXPIMP int	cob_is_xml_namestartchar	(int);
+COB_EXPIMP int	cob_is_xml_namechar	(int);
+COB_EXPIMP void	cob_xml_generate	(cob_field *, cob_xml_tree *,
+					 cob_field *, const int, cob_field *,
+					 cob_field *);
 
 /****************************/
 /* Functions in intrinsic.c */

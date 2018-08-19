@@ -1,4 +1,10 @@
 
+2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* configure.ac: added detection of libxml2.
+	* m4/m4_ax_check_define.m4: added AC_CHECK_DEFINE macro from the GNU
+	  Autoconf Archive.
+
 2018-06-19  Ludwin Janvier
 
 	* configure.ac: remove -g from default options and remove removal of -g

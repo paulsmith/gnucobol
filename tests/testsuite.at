@@ -71,6 +71,7 @@ m4_include([run_reportwriter.at])		# REPORT WRITER
 m4_include([run_returncode.at])
 m4_include([run_functions.at])	# 15 Intrinsic Functions / 9.4 User-Defined Functions
 m4_include([run_extensions.at])
+m4_include([run_xml.at])
 
 ## Data Representation
 AT_BANNER([Data Representation])

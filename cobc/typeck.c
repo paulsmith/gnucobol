@@ -1323,6 +1323,33 @@ cb_build_generic_register (const char *name, const char *external_definition)
 	return 0;
 }
 
+static void
+cb_build_register_xml_code (const char *name, const char *definition)
+{
+	cb_tree field;
+
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
+		}
+	}
+
+	/* take care of GLOBAL */
+	if (current_program->nested_level) {
+		return;
+	}
+
+	field = cb_build_field (cb_build_reference (name));
+	CB_FIELD_PTR (field)->usage = CB_USAGE_BINARY;
+	CB_FIELD_PTR (field)->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
+	cb_validate_field (CB_FIELD_PTR (field));
+	CB_FIELD_PTR (field)->values = CB_LIST_INIT (cb_zero);
+	CB_FIELD_PTR (field)->flag_no_init = 1;
+	CB_FIELD_PTR (field)->flag_is_global = 1;
+	current_program->xml_code = field;
+}
+
 /* build a concrete register */
 static void
 cb_build_single_register (const char *name, const char *definition)
@@ -1354,6 +1381,10 @@ cb_build_single_register (const char *name, const char *definition)
 	}
 	if (!strcasecmp (name, "WHEN-COMPILED")) {
 		cb_build_register_when_compiled (name, definition);
+		return;
+	}
+	if (!strcasecmp (name, "XML-CODE")) {
+		cb_build_register_xml_code (name, definition);
 		return;
 	}
 
@@ -8314,6 +8345,19 @@ overlap_ret:
 	return 1;
 }
 
+static int
+is_floating_point_usage (const enum cb_usage usage)
+{
+	return usage == CB_USAGE_DOUBLE
+		|| usage == CB_USAGE_FLOAT
+		|| usage == CB_USAGE_LONG_DOUBLE
+		|| usage == CB_USAGE_FP_BIN32
+		|| usage == CB_USAGE_FP_BIN64
+		|| usage == CB_USAGE_FP_BIN128
+		|| usage == CB_USAGE_FP_DEC64
+		|| usage == CB_USAGE_FP_DEC128;
+}
+
 int
 validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_zero)
 {
@@ -8429,14 +8473,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			if (l->all) {
 				goto invalid;
 			}
-			if (fdst->usage == CB_USAGE_DOUBLE ||
-			    fdst->usage == CB_USAGE_FLOAT ||
-			    fdst->usage == CB_USAGE_LONG_DOUBLE ||
-			    fdst->usage == CB_USAGE_FP_BIN32 ||
-			    fdst->usage == CB_USAGE_FP_BIN64 ||
-			    fdst->usage == CB_USAGE_FP_BIN128 ||
-			    fdst->usage == CB_USAGE_FP_DEC64 ||
-			    fdst->usage == CB_USAGE_FP_DEC128) {
+			if (is_floating_point_usage (fdst->usage)) {
 				/* TODO: add check for exponent size */
 				break;
 			}
@@ -11379,4 +11416,597 @@ cb_emit_suppress (struct cb_field *f)
 	z = cb_build_reference (f->name);
 	CB_REFERENCE (z)->value = CB_TREE (f->report);
 	cb_emit (CB_BUILD_FUNCALL_2 ("$S", z, cb_int (f->id)));
+}
+
+/* XML GENERATE statement */
+
+static int
+error_if_not_alnum_or_national (cb_tree ref, const char *name)
+{
+	if (!(CB_TREE_CATEGORY (ref) == CB_CATEGORY_ALPHANUMERIC
+	      || CB_TREE_CATEGORY (ref) == CB_CATEGORY_NATIONAL)) {
+		cb_error_x (ref, _("%s must be alphanumeric or national"), name);
+	        return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+error_if_subscript_or_refmod (cb_tree ref, const char *name)
+{
+	int	error = 0;
+
+	if (CB_REFERENCE (ref)->subs) {
+		cb_error_x (ref, _("%s may not be subscripted"), name);
+		error = 1;
+	}
+	if (CB_REFERENCE (ref)->offset) {
+		cb_error_x (ref, _("%s may not be reference modified"), name);
+		error = 1;
+	}
+
+	return error;
+}
+
+static int
+error_if_figurative_constant (cb_tree ref, const char *name)
+{
+	if (cb_is_figurative_constant (ref)) {
+		cb_error_x (ref, _("%s may not be a figurative constant"), name);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+is_subordinate_to (cb_tree ref, cb_tree parent_ref)
+{
+	struct cb_field	*f = CB_FIELD (cb_ref (ref))->parent;
+	struct cb_field	*parent = CB_FIELD (cb_ref (parent_ref));
+
+	for (; f; f = f->parent) {
+		if (f == parent) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+error_if_not_child_of_input_record (cb_tree ref, cb_tree input_record,
+				    const char *name)
+{
+	if (!is_subordinate_to (ref, input_record)) {
+		cb_error_x (ref, _("%s must be a child of the input record"), name);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+is_ignored_child_in_xml_gen (cb_tree ref, cb_tree parent_ref)
+{
+	struct cb_field	*f = CB_FIELD (cb_ref (ref));
+	struct cb_field *parent = CB_FIELD (cb_ref (parent_ref));
+
+	for (; f && f != parent; f = f->parent) {
+		if (cb_field_is_ignored_in_xml_gen (f)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+error_if_ignored_in_xml_gen (cb_tree ref, cb_tree input_record, const char *name)
+{
+	if (is_ignored_child_in_xml_gen (ref, input_record)) {
+		cb_error_x (ref, _("%s may not be an ignored item in XML GENERATE"), name);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+error_if_not_elementary (cb_tree ref, const char *name)
+{
+	if (CB_FIELD (cb_ref (ref))->children) {
+		cb_error_x (ref, _("%s must be elementary"), name);
+	        return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+error_if_not_usage_display_or_national (cb_tree ref, const char *name)
+{
+	if (!(CB_FIELD (cb_ref (ref))->usage == CB_USAGE_DISPLAY
+	      || CB_FIELD (cb_ref (ref))->usage == CB_USAGE_NATIONAL)) {
+		cb_error_x (ref, _("%s must be USAGE DISPLAY or NATIONAL"), name);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+error_if_not_integer_ref (cb_tree ref, const char *name)
+{
+        struct cb_field	*field = CB_FIELD (cb_ref (ref));
+
+	if (CB_TREE_CATEGORY (field) == CB_CATEGORY_NUMERIC
+	    && field->pic && field->pic->scale > 0) {
+		cb_error_x (ref, _("%s must be an integer"), name);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int
+syntax_check_xml_gen_receiving_item (cb_tree out)
+{
+	int	error = 0;
+
+	if (cb_validate_one (out)) {
+		return 1;
+	}
+
+	error |= error_if_not_alnum_or_national (out, _("XML GENERATE receiving item"));
+
+	if (CB_FIELD (cb_ref (out))->flag_justified) {
+		cb_error_x (out, _("XML GENERATE receiving item may not have JUSTIFIED clause"));
+		error = 1;
+	}
+	error |= error_if_subscript_or_refmod (out, _("XML GENERATE receiving item"));
+
+	return error;
+}
+
+static int
+all_children_are_ignored (struct cb_field * const f)
+{
+        struct cb_field	*child;
+
+	for (child = f->children; child; child = child->sister) {
+		if (!cb_field_is_ignored_in_xml_gen (child)
+		    && !(child->children
+			 && all_children_are_ignored (child))) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+name_is_unique_when_qualified_by (struct cb_field * const f,
+				  struct cb_field * const qualifier)
+{
+	cb_tree	qual_ref = cb_build_field_reference (qualifier, NULL);
+	cb_tree	f_ref = cb_build_reference (f->name);
+	CB_REFERENCE (f_ref)->chain = qual_ref;
+
+        return cb_try_ref (f_ref) != cb_error_node;
+}
+
+static int
+all_children_ok_qualified_by_only (struct cb_field * const f,
+				   struct cb_field * const qualifier)
+{
+        struct cb_field	*child;
+
+	for (child = f->children; child; child = child->sister) {
+		if (child->flag_filler) {
+			continue;
+		}
+
+		if (!name_is_unique_when_qualified_by (child, qualifier)) {
+			return 0;
+		}
+		if (child->children
+		    && !all_children_ok_qualified_by_only (child, qualifier)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+
+static int
+contains_floating_point_item (const struct cb_field * const f, const int check_siblings)
+{
+	return is_floating_point_usage (f->usage)
+		|| (f->children && contains_floating_point_item (f->children, 1))
+		|| (check_siblings && f->sister
+		    && contains_floating_point_item (f->sister, 1));
+}
+
+static int
+contains_occurs_item (const struct cb_field * const f, const int check_siblings)
+{
+	return f->flag_occurs
+		|| (f->children && contains_occurs_item (f->children, 1))
+		|| (check_siblings && f->sister
+		    && contains_occurs_item (f->sister, 1));
+}
+
+static int
+syntax_check_xml_gen_input_rec (cb_tree from)
+{
+	int     	error = 0;
+	struct cb_field	*from_field;
+
+	if (cb_validate_one (from)) {
+		return 1;
+	}
+
+	if (CB_REFERENCE (from)->offset) {
+		cb_error_x (from, _("XML GENERATE input record may not be reference modified"));
+		error = 1;
+	}
+
+	from_field = CB_FIELD (cb_ref (from));
+	if (from_field->rename_thru) {
+		cb_error_x (from, _("XML GENERATE input record may not have RENAMES clause"));
+		error = 1;
+	}
+
+	if (from_field->children && all_children_are_ignored (from_field)) {
+		cb_error_x (from, _("all the children of '%s' are ignored in XML GENERATE"),
+			    cb_name (from));
+		error = 1;
+	}
+
+	if (!all_children_ok_qualified_by_only (from_field, from_field)) {
+		/* TO-DO: Output the name of the child with the nonunique name */
+		cb_error_x (from, _("XML GENERATE input record has subrecords with non-unique names"));
+		error = 1;
+	}
+
+	if (contains_floating_point_item (from_field, 0)) {
+		CB_PENDING (_("floating-point items in XML GENERATE"));
+	}
+
+	if (contains_occurs_item (from_field, 0)) {
+		CB_PENDING (_("OCCURS items in XML GENERATE"));
+	}
+
+	return error;
+}
+
+static int
+syntax_check_xml_gen_count_in (cb_tree count)
+{
+	int		error = 0;
+	enum cb_usage	usage;
+	int		scale;
+
+	if (!count) {
+		return 0;
+	}
+
+	if (cb_validate_one (count)) {
+		return 1;
+	}
+
+	usage = CB_FIELD (cb_ref (count))->usage;
+	/* TO-DO: Does a function exist to check if this an integer? */
+	if (CB_TREE_CATEGORY (count) != CB_CATEGORY_NUMERIC
+	    || is_floating_point_usage (usage)) {
+		cb_error_x (count, _("COUNT IN item must be numeric and an integer"));
+		error = 1;
+	} else if (CB_FIELD (cb_ref (count))->pic) {
+		scale = CB_FIELD (cb_ref (count))->pic->scale;
+		if (scale > 0) {
+			cb_error_x (count, _("COUNT IN item must be an integer"));
+			error = 1;
+		} else if (scale < 0) {
+			cb_error_x (count, _("COUNT IN item may not have PICTURE with P in it"));
+			error = 1;
+		}
+	}
+
+	return error;
+}
+
+#ifdef WITH_XML2
+
+static int
+is_valid_uri (const struct cb_literal * const namespace)
+{
+	char	*copy = cob_malloc (namespace->size + 1);
+	int	is_valid;
+
+        memcpy (copy, namespace->data, namespace->size);
+	copy[namespace->size] = '\0';
+	is_valid = cob_is_valid_uri (copy);
+	free (copy);
+
+	return is_valid;
+}
+
+#endif
+
+static int
+syntax_check_xml_gen_namespace (cb_tree namespace)
+{
+	int	error = 0;
+
+	if (!namespace) {
+		return 0;
+	}
+
+	if (cb_validate_one (namespace)) {
+		return 1;
+	}
+
+	error |= error_if_not_alnum_or_national (namespace, "NAMESPACE");
+
+	if (error_if_figurative_constant (namespace, "NAMESPACE")) {
+		error = 1;
+	} else {
+#ifdef WITH_XML2
+		if (CB_LITERAL_P (namespace) && !is_valid_uri (CB_LITERAL (namespace))) {
+			cb_error_x (namespace, _("NAMESPACE must be a valid URI"));
+			error = 1;
+		}
+#endif
+	}
+
+	return error;
+}
+
+static int
+is_valid_xml_name (const struct cb_literal * const name)
+{
+	int	i;
+
+	if (!cob_is_xml_namestartchar (name->data[0])) {
+		return 0;
+	}
+
+	for (i = 1; i < name->size; ++i) {
+		if (!cob_is_xml_namechar (name->data[i])) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
+syntax_check_xml_gen_prefix (cb_tree prefix)
+{
+	int	error = 0;
+
+	if (prefix == cb_null) {
+		return 0;
+	}
+
+	if (cb_validate_one (prefix)) {
+		return 1;
+	}
+
+	error |= error_if_not_alnum_or_national (prefix, "NAMESPACE-PREFIX");
+
+	if (error_if_figurative_constant (prefix, "NAMESPACE-PREFIX")) {
+		error = 1;
+	} else if (CB_LITERAL_P (prefix) && !is_valid_xml_name (CB_LITERAL (prefix))) {
+		cb_error_x (prefix, _("NAMESPACE-PREFIX must be a valid XML name"));
+		error = 1;
+	}
+
+	return error;
+}
+
+static int
+syntax_check_xml_gen_name_list (cb_tree name_list, cb_tree input)
+{
+	cb_tree	name_pair;
+	cb_tree	ref;
+	cb_tree	name;
+	int	error = 0;
+	cb_tree	l;
+
+	for (l = name_list; l; l = CB_CHAIN (l)) {
+		name_pair = CB_VALUE (l);
+	        ref = CB_PAIR_X (name_pair);
+		name = CB_PAIR_Y (name_pair);
+		if (cb_validate_one (ref)
+		    || cb_validate_one (name)) {
+			return 1;
+		}
+
+		error |= error_if_subscript_or_refmod (ref, _("NAME OF item"));
+
+		if (cb_ref (ref) != cb_ref (input)
+		    && !is_subordinate_to (ref, input)) {
+			cb_error_x (ref, _("NAME OF item must be the input record or a child of it"));
+			error = 1;
+		} else {
+			error |= error_if_ignored_in_xml_gen (ref, input, _("NAME OF item"));
+		}
+
+		if (!is_valid_xml_name (CB_LITERAL (name))) {
+			cb_error_x (ref, _("NAME OF name must be a valid XML name"));
+			error = 1;
+		}
+	}
+
+	return error;
+}
+
+static int
+syntax_check_xml_gen_type_list (cb_tree type_list, cb_tree input)
+{
+	cb_tree	l;
+	cb_tree	type_pair;
+        cb_tree	ref;
+	cb_tree	type;
+	int	error = 0;
+
+	for (l = type_list; l; l = CB_CHAIN (l)) {
+		type_pair = CB_VALUE (l);
+	        ref = CB_PAIR_X (type_pair);
+		type = CB_PAIR_Y (type_pair);
+		if (cb_validate_one (ref)
+		    || cb_validate_one (type)) {
+			return 1;
+		}
+
+		error |= error_if_subscript_or_refmod (ref, _("TYPE OF item"));
+		error |= error_if_not_elementary (ref, _("TYPE OF item"));
+
+		if (error_if_not_child_of_input_record (ref, input,
+							_("TYPE OF item"))) {
+			error = 1;
+		} else {
+			error |= error_if_ignored_in_xml_gen (ref, input,
+							      _("TYPE OF item"));
+		}
+	}
+
+	return error;
+}
+
+static int
+syntax_check_when_list (struct cb_xml_suppress_clause *suppress)
+{
+	cb_tree		l;
+	int		error = 0;
+	const char	*name;
+
+	for (l = suppress->when_list; l; l = CB_CHAIN (l)) {
+		/* TO-DO: Handle DISPLAY-1 if/when it is supported. */
+		if (CB_VALUE (l) == cb_space) {
+			error |= error_if_not_usage_display_or_national (suppress->identifier,
+									 _("SUPPRESS WHEN SPACE item"));
+		} else if (CB_VALUE (l) == cb_low || CB_VALUE (l) == cb_high) {
+			if (CB_VALUE (l) == cb_low) {
+				name = _("SUPPRESS WHEN LOW-VALUE item");
+			} else {
+				name = _("SUPPRESS WHEN HIGH-VALUE item");
+			}
+			error |= error_if_not_usage_display_or_national (suppress->identifier,
+									 name);
+			error |= error_if_not_integer_ref (suppress->identifier, name);
+		}
+	}
+
+	return error;
+}
+
+static int
+syntax_check_xml_gen_suppress_list (cb_tree suppress_list, cb_tree input)
+{
+	int	error = 0;
+	cb_tree	l;
+	struct cb_xml_suppress_clause	*suppress;
+
+	for (l = suppress_list; l; l = CB_CHAIN (l)) {
+		suppress = CB_XML_SUPPRESS (CB_VALUE (l));
+		if (!suppress->identifier) {
+			continue;
+		}
+
+		if (cb_validate_one (suppress->identifier)) {
+			return 1;
+		}
+
+		error |= error_if_subscript_or_refmod (suppress->identifier,
+						       _("SUPPRESS item"));
+
+		if (suppress->when_list) {
+			error |= error_if_not_elementary (suppress->identifier,
+							  _("SUPPRESS item with WHEN clause"));
+		}
+
+		if (error_if_not_child_of_input_record (suppress->identifier, input,
+							_("SUPPRESS item"))) {
+			error = 1;
+		} else {
+			error |= error_if_ignored_in_xml_gen (suppress->identifier,
+							      input, _("SUPPRESS item"));
+		}
+
+		error |= syntax_check_when_list (suppress);
+	}
+
+	return error;
+}
+
+static int
+syntax_check_xml_generate (cb_tree out, cb_tree from, cb_tree count,
+			   cb_tree encoding,
+			   cb_tree namespace_and_prefix,
+			   cb_tree name_list, cb_tree type_list,
+			   cb_tree suppress_list)
+{
+	int	error = 0;
+
+	error |= syntax_check_xml_gen_receiving_item (out);
+	error |= syntax_check_xml_gen_input_rec (from);
+	error |= syntax_check_xml_gen_count_in (count);
+	if (namespace_and_prefix) {
+		error |= syntax_check_xml_gen_namespace (CB_PAIR_X (namespace_and_prefix));
+		error |= syntax_check_xml_gen_prefix (CB_PAIR_Y (namespace_and_prefix));
+	}
+	error |= syntax_check_xml_gen_name_list (name_list, from);
+	error |= syntax_check_xml_gen_type_list (type_list, from);
+	error |= syntax_check_xml_gen_suppress_list (suppress_list, from);
+
+	/* TO-DO: Warn if out is probably too short */
+	/* TO-DO: Warn if count_in may overflow */
+
+	return error;
+}
+
+void
+cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
+		      cb_tree encoding,
+		      const int with_xml_dec,
+		      const int with_attrs,
+		      cb_tree namespace_and_prefix,
+		      cb_tree name_list, cb_tree type_list,
+		      cb_tree suppress_list)
+{
+	struct cb_xml_generate_tree	*tree;
+
+	if (syntax_check_xml_generate (out, from, count, encoding,
+				       namespace_and_prefix, name_list,
+				       type_list, suppress_list)) {
+		return;
+	}
+
+        tree = CB_XML_TREE (cb_build_xml_tree (CB_FIELD (cb_ref (from)),
+					       with_attrs, 0, name_list,
+					       type_list, suppress_list));
+
+	tree->sibling = current_program->xml_trees;
+	current_program->xml_trees = tree;
+
+	if (with_attrs && !tree->attrs) {
+		cb_warning (warningopt, _("WITH ATTRIBUTES specified, but no attributes can be generated"));
+	}
+
+	cb_emit (cb_build_xml_suppress_checks (tree));
+	if (namespace_and_prefix) {
+		cb_emit (CB_BUILD_FUNCALL_6 ("cob_xml_generate", out, CB_TREE (tree),
+					     count, cb_int (with_xml_dec),
+					     CB_PAIR_X (namespace_and_prefix),
+					     CB_PAIR_Y (namespace_and_prefix)));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_6 ("cob_xml_generate", out, CB_TREE (tree),
+					     count, cb_int (with_xml_dec),
+					     NULL, NULL));
+	}
 }

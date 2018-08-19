@@ -1,0 +1,711 @@
+/*
+   Copyright (C) 2018 Free Software Foundation, Inc.
+   Written by Edward Hart
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL runtime library is free software: you can redistribute it
+   and/or modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+#include "config.h"
+
+/* Force symbol exports */
+#define	COB_LIB_EXPIMP
+
+#if WITH_XML2
+#include <libxml/xmlwriter.h>
+#include <libxml/uri.h>
+#endif
+
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+
+#include "libcob.h"
+#include "coblocal.h"
+
+/* Local variables */
+
+/* de facto standard error codes */
+enum xml_code_status {
+	XML_OUT_FIELD_TOO_SMALL = 400,
+	XML_INVALID_NAMESPACE = 416,
+	XML_INVALID_CHAR_REPLACED = 417,
+	XML_INVALID_NAMESPACE_PREFIX = 419,
+	XML_INTERNAL_ERROR = 600
+};
+
+static cob_global		*cobglobptr;
+
+/* Local functions */
+
+#if WITH_XML2
+
+static void
+set_xml_code (const unsigned int code)
+{
+	cob_decimal	d;
+
+	mpz_init2 (d.value, COB_MPZ_DEF);
+	mpz_set_ui (d.value, code);
+	d.scale = 0;
+	cob_decimal_get_field (&d, COB_MODULE_PTR->xml_code, 0);
+	mpz_clear (d.value);
+}
+
+static int
+is_all_spaces (const cob_field * const f)
+{
+	int	i;
+
+	for (i = 0; i < f->size; ++i) {
+		if (f->data[i] != ' ') {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static xmlChar *
+get_trimmed_xml_data (const cob_field * const f)
+{
+	char	*str = (char *) f->data;
+	int	len = (int) f->size;
+
+	/* Trim leading/trailing spaces. If f is all spaces, leave one space. */
+	if (COB_FIELD_JUSTIFIED (f)) {
+		for (; *str == ' ' && len > 1; ++str, --len);
+	} else {
+		for (; str[len - 1] == ' ' && len > 1; --len);
+	}
+	return xmlCharStrndup (str, len);
+}
+
+/* Returns 1 if str contains invalid XML 1.0 chars, 0 otherwise. */
+static int
+has_invalid_xml_char (const cob_field * const f)
+{
+	int	i;
+
+	/*  Char       ::=      #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF] */
+	/* TO-DO: This assumes the data is already in UTF-8! */
+	for (i = 0; i < f->size; ++i) {
+		if (iscntrl (f->data[i])
+		    && f->data[i] != 0x09
+		    && f->data[i] != 0x0a
+		    && f->data[i] != 0x0d) {
+			return 1;
+		}
+
+	}
+
+	/* TO-DO: 2/3/4-byte characters. Will this need libicu? */
+
+	return 0;
+}
+
+static int
+is_valid_xml_name (const cob_field * const f)
+{
+	xmlChar	*str;
+	xmlChar	*c;
+	int	ret;
+
+	str = get_trimmed_xml_data (f);
+
+	if (!cob_is_xml_namestartchar (f->data[0])) {
+		ret = 0;
+		goto end;
+	}
+
+	for (c = str + 1; *c; ++c) {
+		if (!cob_is_xml_namechar (*c)) {
+			ret = 0;
+			goto end;
+		}
+	}
+
+	ret = 1;
+
+ end:
+	xmlFree (str);
+	return ret;
+}
+
+static xmlChar *
+get_xml_name (const cob_field * const f)
+{
+	xmlChar	*name;
+	xmlChar	*underscore;
+	xmlChar	*name_with_underscore;
+
+	name = get_trimmed_xml_data (f);
+
+	if (name && !cob_is_xml_namestartchar (name[0])) {
+		underscore = xmlCharStrdup ("_");
+		if (underscore) {
+			name_with_underscore = xmlStrcat (underscore, name);
+		} else {
+			name_with_underscore = NULL;
+		}
+
+		xmlFree (name);
+		return name_with_underscore;
+	} else {
+		return name;
+	}
+}
+
+#define IF_NEG_RETURN_ELSE_COUNT(func)			\
+	do {						\
+		int	status = (func);		\
+		if (status < 0) {			\
+			return status;			\
+		} else {				\
+			*count += status;		\
+		}					\
+	} ONCE_COB
+
+static int
+generate_from_tree (xmlTextWriterPtr, cob_xml_tree *, xmlChar *, xmlChar *,
+		    unsigned int *);
+
+static xmlChar *
+get_name_with_hex_prefix (const cob_field * const name)
+{
+	xmlChar	*hex_str;
+	xmlChar	*x_name;
+	xmlChar	*hex_name;
+
+	/*
+	  NB: hex_str must be allocated every time because xmlStrcat will
+	  realloc hex_str.
+	*/
+	hex_str = xmlCharStrdup ("hex.");
+
+	x_name = get_xml_name (name);
+	hex_name = xmlStrcat (hex_str, x_name);
+	xmlFree (x_name);
+
+	return hex_name;
+}
+
+static char
+int_to_hex (const int n)
+{
+	if (n < 10) {
+		return '0' + n;
+	} else {
+		return 'a' + (n - 10);
+	}
+}
+
+static xmlChar *
+get_hex_xml_data (const cob_field * const f)
+{
+	int		i;
+	xmlBufferPtr	buff;
+	char		hex_num[3] = { '\0' };
+	xmlChar		*hex_data;
+
+	buff = xmlBufferCreate ();
+	if (!buff) {
+		return NULL;
+	}
+
+	for (i = 0; i < f->size; ++i) {
+		hex_num[0] = int_to_hex (f->data[i] / 16);
+		hex_num[1] = int_to_hex (f->data[i] % 16);
+		xmlBufferWriteChar (buff, hex_num);
+	}
+
+	hex_data = xmlStrdup (xmlBufferContent (buff));
+	xmlBufferFree (buff);
+
+	return hex_data;
+}
+
+static int
+generate_hex_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+{
+	xmlChar	*hex_name;
+	xmlChar	*value;
+
+	hex_name = get_name_with_hex_prefix (attr->name);
+	value = get_hex_xml_data (attr->value);
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterWriteAttribute (writer, hex_name, value));
+	xmlFree (hex_name);
+	xmlFree (value);
+
+	return 0;
+}
+
+static int
+generate_normal_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+{
+	xmlChar	*name;
+	xmlChar	*value;
+
+	name = get_xml_name (attr->name);
+	value = get_trimmed_xml_data (attr->value);
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterWriteAttribute (writer, name, value));
+	xmlFree (name);
+	xmlFree (value);
+
+	return 0;
+}
+
+static int
+generate_attributes (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+{
+	int	status;
+
+	for (; attr; attr = attr->sibling) {
+		if (attr->is_suppressed) {
+			continue;
+		}
+
+		if (has_invalid_xml_char (attr->value)) {
+			set_xml_code (XML_INVALID_CHAR_REPLACED);
+			status = generate_hex_attribute (writer, attr, count);
+		} else {
+			status = generate_normal_attribute (writer, attr, count);
+		}
+
+		if (status < 0) {
+			return status;
+		}
+	}
+
+	return 0;
+}
+
+static int
+generate_hex_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+		      xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
+{
+	xmlChar		*hex_name;
+	int		status;
+	xmlChar		*hex_value;
+
+	hex_name = get_name_with_hex_prefix (tree->name);
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterStartElementNS (writer, x_ns_prefix,
+							       hex_name, x_ns));
+	xmlFree (hex_name);
+
+        status = generate_attributes (writer, tree->attrs, count);
+	if (status < 0) {
+		return status;
+	}
+
+	hex_value = get_hex_xml_data (tree->content);
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterWriteString (writer, hex_value));
+	xmlFree (hex_value);
+
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterEndElement (writer));
+
+	return 0;
+}
+
+
+static cob_pic_symbol *
+get_pic_for_xml_num_field (const size_t num_int_digits,
+			   const size_t num_dec_digits)
+{
+	size_t	num_pic_symbols = 2 + (2 * !!num_dec_digits) + 1;
+	cob_pic_symbol	*pic = cob_malloc (num_pic_symbols * sizeof (cob_pic_symbol));
+	cob_pic_symbol	*symbol = pic;
+
+	symbol->symbol = '-';
+	symbol->times_repeated = cob_max_int ((int) num_int_digits, 1);
+	++symbol;
+
+	symbol->symbol = '9';
+	symbol->times_repeated = 1;
+	++symbol;
+
+	if (num_dec_digits) {
+		symbol->symbol = COB_MODULE_PTR->decimal_point;
+		symbol->times_repeated = 1;
+		++symbol;
+
+		symbol->symbol = '9';
+		symbol->times_repeated = (int) num_dec_digits;
+		++symbol;
+	}
+
+	symbol->symbol = '\0';
+
+	return pic;
+}
+
+static xmlChar *
+get_xml_num (cob_field * const f)
+{
+	size_t		num_integer_digits
+		 = cob_max_int (0, COB_FIELD_DIGITS (f) - COB_FIELD_SCALE (f));
+	size_t		num_decimal_digits
+		 = cob_max_int (0, COB_FIELD_SCALE (f));
+	cob_field_attr	attr;
+	cob_field       edited_field;
+	xmlChar		*xml_num;
+
+	/* Initialize field attribute */
+	attr.type = COB_TYPE_NUMERIC_EDITED;
+	attr.flags = COB_FLAG_JUSTIFIED;
+	attr.scale = COB_FIELD_SCALE (f);
+	attr.digits = COB_FIELD_DIGITS (f);
+	attr.pic = get_pic_for_xml_num_field (num_integer_digits,
+					      num_decimal_digits);
+
+	/* Initialize field */
+	edited_field.attr = &attr;
+	edited_field.size = cob_max_int (2, (int) num_integer_digits + 1);
+	if (num_decimal_digits) {
+		edited_field.size += 1 + num_decimal_digits;
+	}
+	edited_field.data = cob_malloc (edited_field.size);
+
+	cob_move (f, &edited_field);
+	xml_num = get_trimmed_xml_data (&edited_field);
+
+	cob_free (edited_field.data);
+	cob_free ((void *) edited_field.attr->pic);
+
+	return xml_num;
+}
+
+static int
+generate_content (xmlTextWriterPtr writer, cob_xml_tree *tree, unsigned int *count)
+{
+	cob_field	*content = tree->content;
+	xmlChar		*x_content;
+
+	if (COB_FIELD_IS_FP (content)) {
+		/* TO-DO: Implement! */
+		/* TO-DO: Stop compilation if float in field */
+		cob_fatal_error (COB_FERROR_XML);
+	} else if (COB_FIELD_IS_NUMERIC (content)) {
+		x_content = get_xml_num (content);
+	} else {
+		x_content = get_trimmed_xml_data (content);
+	}
+
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterWriteString (writer, x_content));
+	xmlFree (x_content);
+
+	return 0;
+}
+
+
+static int
+generate_normal_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+			 xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
+{
+	int		status;
+	xmlChar		*x_name;
+	cob_xml_tree	*child;
+
+	/* Start element */
+	x_name = get_xml_name (tree->name);
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterStartElementNS (writer, x_ns_prefix,
+							       x_name, x_ns));
+	xmlFree (x_name);
+
+        status = generate_attributes (writer, tree->attrs, count);
+	if (status < 0) {
+		return status;
+	}
+
+	/* Output child elements or content. */
+	if (tree->children) {
+		for (child = tree->children; child; child = child->sibling) {
+			/*
+			  Note we only have a namespace attribute on the
+			  outermost element.
+			*/
+			status = generate_from_tree (writer, child, NULL,
+						     x_ns_prefix, count);
+			if (status < 0) {
+				return status;
+			}
+		}
+	} else if (tree->content) {
+		status = generate_content (writer, tree, count);
+		if (status < 0) {
+			return status;
+		}
+	}
+
+	/* Complete element */
+	IF_NEG_RETURN_ELSE_COUNT (xmlTextWriterEndElement (writer));
+
+	return 0;
+}
+
+static int
+generate_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+		  xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
+{
+	/* Check for invalid characters. */
+	if (tree->content
+	    && !COB_FIELD_IS_NUMERIC (tree->content)
+	    && has_invalid_xml_char (tree->content)) {
+		set_xml_code (XML_INVALID_CHAR_REPLACED);
+		return generate_hex_element (writer, tree, x_ns, x_ns_prefix,
+					     count);
+	} else {
+		return generate_normal_element (writer, tree, x_ns,
+						x_ns_prefix, count);
+	}
+}
+
+static int
+generate_from_tree (xmlTextWriterPtr writer, cob_xml_tree *tree,
+		    xmlChar *ns, xmlChar *ns_prefix, unsigned int *count)
+{
+	if (tree->is_suppressed) {
+		return 0;
+	}
+
+	if (tree->name) {
+		return generate_element (writer, tree, ns, ns_prefix, count);
+	} else {
+		return generate_content (writer, tree, count);
+	}
+}
+
+#undef IF_NEG_RETURN_ELSE_COUNT
+
+static void
+set_xml_exception (const unsigned int code)
+{
+	cob_set_exception (COB_EC_XML_IMP);
+	set_xml_code (code);
+}
+
+#endif
+
+/* Global functions */
+
+int
+cob_is_xml_namestartchar (const int c)
+{
+	/*
+	  From XML 1.0 spec (https://www.w3.org/TR/xml/):
+	  [4] NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6]
+                                    | [#xD8-#xF6] | [#xF8-#x2FF]
+			            | [#x370-#x37D] | [#x37F-#x1FFF]
+				    | [#x200C-#x200D] | [#x2070-#x218F]
+				    | [#x2C00-#x2FEF] | [#x3001-#xD7FF]
+				    | [#xF900-#xFDCF] | [#xFDF0-#xFFFD]
+				    | [#x10000-#xEFFFF]
+          [4a] NameChar ::= NameStartChar | "-" | "." | [0-9] | #xB7
+                                          | [#x0300-#x036F] | [#x203F-#x2040]
+	*/
+	/* TO-DO: Deal with 2/3/4-byte chars. */
+	return isalpha(c) || c == '_'
+		|| (c >= 0xc0 && c <= 0xd6)
+		|| (c >= 0xd8 && c <= 0xf6)
+		|| (c >= 0xf8);
+}
+
+int
+cob_is_xml_namechar (const int c)
+{
+	/* TO-DO: Deal with 2/3/4-byte chars. */
+	return cob_is_xml_namestartchar (c) || c == '-' || c == '.' || isdigit (c)
+		|| c == 0xb7;
+}
+
+#ifdef WITH_XML2
+
+int
+cob_is_valid_uri (const char *str)
+{
+	xmlURIPtr	p;
+	int		is_valid;
+
+	p = xmlParseURI (str);
+	is_valid = !!p;
+	if (p) {
+	        xmlFreeURI (p);
+	}
+
+	return is_valid;
+}
+
+void
+cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
+		  const int with_xml_dec, cob_field *ns, cob_field *ns_prefix)
+{
+	xmlBufferPtr		buff;
+	xmlTextWriterPtr	writer = NULL;
+	int			status;
+	unsigned int		chars_written = 0;
+	xmlChar			*x_ns = NULL;
+	xmlChar			*x_ns_prefix = NULL;
+	int			buff_len;
+	int			copy_len;
+	int			num_newlines = 0;
+
+	set_xml_code (0);
+
+	buff = xmlBufferCreate ();
+	if (buff == NULL) {
+		set_xml_exception (XML_INTERNAL_ERROR);
+		goto end;
+	}
+
+	writer = xmlNewTextWriterMemory (buff, 0);
+	if (writer == NULL) {
+		goto end;
+	}
+
+	if (with_xml_dec) {
+		/* TO-DO: Support encoding */
+		status = xmlTextWriterStartDocument (writer, NULL, NULL, NULL);
+		if (status < 0) {
+			set_xml_exception (XML_INTERNAL_ERROR);
+			goto end;
+		} else {
+			chars_written += status;
+		}
+	}
+
+	if (ns) {
+		if (is_all_spaces (ns)) {
+			x_ns = NULL;
+		} else if (has_invalid_xml_char (ns)) {
+			set_xml_exception (XML_INVALID_NAMESPACE);
+			goto end;
+		} else {
+		        x_ns = get_trimmed_xml_data (ns);
+			if (!cob_is_valid_uri ((const char *) x_ns)) {
+				set_xml_exception (XML_INVALID_NAMESPACE);
+				goto end;
+			}
+		}
+	}
+
+	if (ns_prefix) {
+		if (is_all_spaces (ns_prefix)) {
+			x_ns_prefix = NULL;
+		} else if (!is_valid_xml_name (ns_prefix)) {
+			set_xml_exception (XML_INVALID_NAMESPACE_PREFIX);
+			goto end;
+		} else {
+			x_ns_prefix = get_trimmed_xml_data (ns_prefix);
+		}
+	}
+
+        status = generate_from_tree (writer, tree, x_ns, x_ns_prefix,
+				     &chars_written);
+	if (status < 0) {
+		set_xml_exception (XML_INTERNAL_ERROR);
+		goto end;
+	}
+
+	status = xmlTextWriterEndDocument (writer);
+	if (status < 0) {
+		set_xml_exception (XML_INTERNAL_ERROR);
+		goto end;
+	} else {
+		chars_written += status;
+	}
+
+	/* Copy generated tree to output field */
+	buff_len = xmlBufferLength (buff);
+	copy_len = cob_min_int (buff_len, (int) out->size);
+	memcpy (out->data, xmlBufferContent (buff), copy_len);
+	memset (out->data + copy_len, ' ', out->size - copy_len);
+	/* Remove trailing newlines */
+	for (; copy_len > 0 && out->data[copy_len - 1] == '\n'; --copy_len) {
+		out->data[copy_len - 1] = ' ';
+		--chars_written;
+		++num_newlines;
+	}
+	/* Raise exception if output field is too small */
+	if (buff_len - num_newlines > copy_len) {
+		set_xml_exception (XML_OUT_FIELD_TOO_SMALL);
+		goto end;
+	}
+
+ end:
+	if (x_ns) {
+		xmlFree (x_ns);
+	}
+	if (x_ns_prefix) {
+		xmlFree (x_ns_prefix);
+	}
+	if (writer) {
+		xmlFreeTextWriter (writer);
+	}
+	if (buff) {
+		xmlBufferFree (buff);
+	}
+	if (count) {
+		cob_add_int (count, chars_written, 0);
+	}
+}
+
+void
+cob_init_xmlio (cob_global * const g)
+{
+	LIBXML_TEST_VERSION;
+	cobglobptr = g;
+}
+
+void
+cob_exit_xmlio (void)
+{
+	xmlCleanupParser ();
+}
+
+#else /* !WITH_XML2 */
+
+int
+cob_is_valid_uri (const char *str)
+{
+	COB_UNUSED (str);
+	return 0;
+}
+
+void
+cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
+		  const int with_xml_dec, cob_field *ns, cob_field *ns_prefix)
+{
+	COB_UNUSED (out);
+	COB_UNUSED (tree);
+	COB_UNUSED (count);
+	COB_UNUSED (with_xml_dec);
+	COB_UNUSED (ns);
+	COB_UNUSED (ns_prefix);
+}
+
+void
+cob_init_xmlio (cob_global * const g)
+{
+	cobglobptr = g;
+}
+
+void
+cob_exit_xmlio (void)
+{
+	;
+}
+
+#endif

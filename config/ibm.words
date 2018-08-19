@@ -57,11 +57,10 @@ reserved:	AREAS
 reserved:	ASCENDING
 reserved:	ASSIGN
 reserved:	AT
-#reserved:	ATTRIBUTE        not included in Language Reference for 4.2 and 6.1
-#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
-reserved:	ATTRIBUTES*      # note: not included in IBMs reserved words
+reserved:	ATTRIBUTE*       # note: not included in IBMs reserved words
          	                 #       list, but as a phrase to be parsed
          	                 #       for XML GENERATE
+reserved:	ATTRIBUTES*      # see above
 reserved:	AUTHOR
 reserved:	BASIS
 reserved:	BEFORE
@@ -161,8 +160,7 @@ reserved:	DYNAMIC
 reserved:	EGCS
 reserved:	EGI
 reserved:	EJECT
-#reserved:	ELEMENT*         not included in Language Reference for 4.2 and 6.1
-#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
+reserved:	ELEMENT*         # see note for XML-DECLARATION
 reserved:	ELSE
 reserved:	EMI
 reserved:	ENABLE
@@ -307,8 +305,7 @@ reserved:	NATIVE
 reserved:	NEGATIVE
 reserved:	NEXT
 reserved:	NO
-#reserved:	NONNUMERIC*      not included in Language Reference for 4.2 and 6.1
-#         	                 Is it integrated with EXEC SQL/SQLIMS coprocessor?
+reserved:	NONNUMERIC*      # see note for XML-DECLARATION
 reserved:	NOT
 reserved:	NULL
 reserved:	NULLS=NULL
@@ -507,7 +504,6 @@ reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	WRITE-ONLY
 reserved:	XML
-reserved:	XML-CODE              # note: this is a register, move as soon as supported
 reserved:	XML-DECLARATION*      # note: not included in IBMs reserved words
          	                      #       list, but as a phrase to be parsed
          	                      #       for XML GENERATE
@@ -545,7 +541,7 @@ register:	RETURN-CODE
 register:	SORT-RETURN
 register:	TALLY
 register:	WHEN-COMPILED
-# register:	XML-CODE
+register:	XML-CODE
 # register:	XML-EVENT
 # register:	XML-INFORMATION
 # register:	XML-NAMESPACE

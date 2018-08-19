@@ -733,6 +733,41 @@ H#[0-9A-Za-z]+ {
 	RETURN_TOK (EC);
 }
 
+"SUPPRESS"/[ .,;\n] {
+	count_lines (yytext);
+	if (cobc_in_xml_generate_body) {
+		/*
+		  Using the standard SUPPRESS token in XML GENERATE causes a
+		  shift/reduce error - the SUPPRESS could be the start of the
+		  SUPPRESS clause or the start of a SUPPRESS statement. While we
+		  could alter shift precedence to get the result we implement
+		  here (viz. assuming the SUPPRESS belongs to XML GENERATE), our
+		  current style is for bison to run with no errors.
+		*/
+		RETURN_TOK (SUPPRESS_XML);
+	} else {
+		RETURN_TOK (SUPPRESS);
+	}
+}
+
+"WHEN"/[ .,;\n] {
+	count_lines (yytext);
+	if (cobc_in_xml_generate_body) {
+		/*
+		  Using the standard WHEN token in XML GENERATE causes a
+		  shift/reduce error - the WHEN could be the start of the
+		  WHEN clause or the start of a WHEN statement. While we
+		  could alter shift precedence to get the result we implement
+		  here (viz. assuming the WHEN belongs to XML GENERATE), our
+		  current style is for bison to run with no errors.
+		*/
+		RETURN_TOK (WHEN_XML);
+	} else {
+		RETURN_TOK (WHEN);
+	}
+}
+
+
 "SWITCH"[ ]+([0-9][0-9]?|[A-Z])/[ .,;\n] {
 	/* ACUCOBOL extension: switch-names with space and with letter */
 	char suffix[3] = "";

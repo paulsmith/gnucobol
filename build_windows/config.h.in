@@ -60,6 +60,13 @@
 #endif
 #endif /* CONFIGURED_ISAM */
 
+#ifdef WITH_XML2
+#pragma comment(lib, "libcharset.dll.a")
+#pragma comment(lib, "libiconv.dll.a")
+#pragma comment(lib, "libz.dll.a")
+#pragma comment(lib, "libxml2.dll.a")
+#endif
+
 #endif /* WITHIN_LIBCOB */
 
 /* Define if building universal (internal helper macro) */
@@ -221,7 +228,9 @@
 #define HAVE_GMP_H 1
 
 /* Define if you have the iconv() function and it works. */
-/* #undef HAVE_ICONV */
+#ifdef WITH_XML2
+#define HAVE_ICONV 1
+#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -535,6 +544,9 @@
 #else
 /* #undef WITH_VBISAM */
 #endif
+
+/* Use libxml2 as XML handler */
+/* #undef WITH_XML2 */
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

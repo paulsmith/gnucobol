@@ -45,6 +45,8 @@
 #define CB_PREFIX_REPORT_CONTROL "rc_"	/* Report CONTROL (cob_report_control) */
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
+#define CB_PREFIX_XML_ATTR	"xa_"	/* XML GENERATE attribute */
+#define CB_PREFIX_XML_TREE	"xt_"	/* XML GENERATE tree */
 
 #define CB_CALL_BY_REFERENCE	1
 #define CB_CALL_BY_CONTENT	2
@@ -108,7 +110,10 @@ enum cb_tag {
 	CB_TAG_PROGRAM,		/* 37 Program */
 	CB_TAG_PROTOTYPE,	/* 38 Prototype */
 	CB_TAG_DECIMAL_LITERAL,	/* 39 Decimal Literal */
-	CB_TAG_REPORT_LINE  /* 40 Report line description */
+	CB_TAG_REPORT_LINE,	/* 40 Report line description */
+	CB_TAG_XML_SUPPRESS,	/* 41 XML GENERATE SUPPRESS clause */
+	CB_TAG_XML_TREE,	/* 42 XML GENERATE output tree */
+	CB_TAG_XML_SUPPRESS_CHECKS	/* 43 XML GENERATE SUPPRESS checks */
 	/* When adding a new entry, please remember to add it to
 	   cobc_enum_explain as well. */
 };
@@ -1283,7 +1288,8 @@ enum cb_handler_type {
 	OVERFLOW_HANDLER,
 	AT_END_HANDLER,
 	EOP_HANDLER,
-	INVALID_KEY_HANDLER
+	INVALID_KEY_HANDLER,
+	XML_HANDLER
 };
 
 /* Statement */
@@ -1406,7 +1412,43 @@ struct cb_report {
 	(CB_REFERENCE_P (x) ? CB_REPORT_P (cb_ref (x)) : CB_REPORT_P (x))
 
 #define CB_REPORT_PTR(x)		\
-	(CB_REFERENCE_P (x) ? CB_REPORT   (cb_ref (x)) : CB_REPORT (x))
+	(CB_REFERENCE_P (x) ? CB_REPORT	  (cb_ref (x)) : CB_REPORT (x))
+
+/* XML GENERATE output tree */
+
+enum cb_xml_type {
+	CB_XML_ATTRIBUTE,
+	CB_XML_ELEMENT,
+	CB_XML_CONTENT,
+	CB_XML_ANY_TYPE
+};
+
+struct cb_xml_generate_tree {
+	struct cb_tree_common		common;
+	/* Name of the XML element to generate */
+	cb_tree				name;
+	/* The type of the XML element to generate */
+	enum cb_xml_type		type;
+	/* The content of the XML element to generate */
+	cb_tree			        value;
+	/* The condition under which generation of the element is suppressed */
+	cb_tree				suppress_cond;
+	/* ID for this struct when output */
+	int				id;
+	/* Attributes for this element */
+	struct cb_xml_generate_tree	*attrs;
+	/* Parent XML element */
+	struct cb_xml_generate_tree	*parent;
+	/* Children XML elements */
+	struct cb_xml_generate_tree	*children;
+	/* Preceding XML elements */
+	struct cb_xml_generate_tree	*prev_sibling;
+	/* Following XML elements */
+	struct cb_xml_generate_tree	*sibling;
+};
+
+#define CB_XML_TREE(x)		(CB_TREE_CAST (CB_TAG_XML_TREE, struct cb_xml_generate_tree, x))
+#define CB_XML_TREE_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_TREE)
 
 /* Program */
 
@@ -1468,9 +1510,19 @@ struct cb_program {
 	cb_tree			classification;		/* CLASSIFICATION */
 	cb_tree			cursor_pos;		/* CURSOR */
 	cb_tree			crt_status;		/* CRT STATUS */
+	cb_tree			xml_code;		/* XML-CODE */
+	cb_tree			xml_event;		/* XML-EVENT */
+	cb_tree			xml_information;	/* XML-INFORMATION */
+	cb_tree			xml_namespace;		/* XML-NAMESPACE */
+	cb_tree			xml_nnamespace;		/* XML-NNAMESPACE */
+	cb_tree			xml_namespace_prefix;	/* XML-NAMESPACE-PREFIX */
+	cb_tree			xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
+	cb_tree			xml_ntext;		/* XML-NTEXT */
+	cb_tree			xml_text;		/* XML-TEXT */
 	cb_tree			returning;		/* RETURNING */
 	struct cb_label		*all_procedure;		/* DEBUGGING */
 	struct cb_call_xref	call_xref;		/* CALL Xref list */
+	struct cb_xml_generate_tree	*xml_trees;	/* XML GENERATE trees */
 
 	int			last_source_line;	/* Line of (implicit) END PROGRAM/FUNCTION */
 
@@ -1522,11 +1574,51 @@ struct cb_prototype {
 	const char		*name;
 	/* External name of the prototype/definition */
 	const char		*ext_name;
-	int		        type;
+	int			type;
 };
 
 #define CB_PROTOTYPE(x)		(CB_TREE_CAST (CB_TAG_PROTOTYPE, struct cb_prototype, x))
 #define CB_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_PROTOTYPE)
+
+/* XML GENERATE SUPPRESS clause */
+
+enum cb_xml_suppress_target {
+	CB_XML_SUPPRESS_IDENTIFIER,
+	CB_XML_SUPPRESS_ALL,
+	CB_XML_SUPPRESS_TYPE
+};
+
+enum cb_xml_suppress_category {
+	CB_XML_SUPPRESS_CAT_NUMERIC,
+	CB_XML_SUPPRESS_CAT_NONNUMERIC,
+	CB_XML_SUPPRESS_CAT_ANY
+};
+
+struct cb_xml_suppress_clause {
+	struct cb_tree_common		common;
+	/* What thing(s) the SUPPRESS clause applies to */
+	enum cb_xml_suppress_target	target;
+	/* If the target is IDENTIFIER, then the item targetted */
+	cb_tree				identifier;
+	/* What values the thing(s) should have to be SUPPRESSed */
+	cb_tree				when_list;
+	/* If the target is TYPE, then the type of XML elements to apply to */
+	enum cb_xml_type		xml_type;
+	/* If the target is TYPE, then the categories of items (of XML type
+	   xml_type) to apply to */
+	enum cb_xml_suppress_category	category;
+};
+
+#define CB_XML_SUPPRESS(x)	(CB_TREE_CAST (CB_TAG_XML_SUPPRESS, struct cb_xml_suppress_clause, x))
+#define CB_XML_SUPPRESS_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_SUPPRESS)
+
+struct cb_xml_suppress_checks {
+	struct cb_tree_common		common;
+	struct cb_xml_generate_tree	*tree;
+};
+
+#define CB_XML_SUPPRESS_CHECKS(x)	(CB_TREE_CAST (CB_TAG_SUPPRESS_CHECKS, struct cb_xml_suppress_checks, x))
+#define CB_XML_SUPPRESS_CHECKS_P(x)	(CB_TREE_TAG (x) == CB_TAG_SUPPRESS_CHECKS)
 
 /* DISPLAY type */
 
@@ -1671,6 +1763,7 @@ extern const char		*cb_define (cb_tree, cb_tree);
 extern char			*cb_to_cname (const char *);
 extern void			cb_set_system_names (void);
 extern cb_tree			cb_ref (cb_tree);
+extern cb_tree			cb_try_ref (cb_tree);
 
 extern cb_tree			cb_build_binary_op (cb_tree, const int,
 						    cb_tree);
@@ -1762,6 +1855,13 @@ extern const char	*cb_get_usage_string (const enum cb_usage);
 
 extern cb_tree		cb_field_dup (struct cb_field *f, struct cb_reference *ref);
 
+extern cb_tree		cb_build_xml_suppress_clause (void);
+extern cb_tree		cb_build_xml_tree (struct cb_field *, const int,
+					   const int, cb_tree, cb_tree,
+					   cb_tree);
+extern cb_tree		cb_build_xml_suppress_checks (struct cb_xml_generate_tree *);
+
+
 /* parser.y */
 extern cb_tree		cobc_printer_node;
 extern int		non_const_word;
@@ -1773,6 +1873,7 @@ extern unsigned int	cobc_in_repository;
 extern unsigned int	cobc_force_literal;
 extern unsigned int	cobc_cs_check;
 extern unsigned int	cobc_allow_program_name;
+extern unsigned int	cobc_in_xml_generate_body;
 
 /* reserved.c */
 extern int			is_reserved_word (const char *);
@@ -1821,6 +1922,7 @@ extern void		cb_validate_renames_item (struct cb_field *);
 extern struct cb_field	*cb_get_real_field (void);
 extern void		cb_clear_real_field (void);
 extern int		cb_is_figurative_constant (const cb_tree);
+extern int		cb_field_is_ignored_in_xml_gen (struct cb_field *);
 
 /* typeck.c */
 extern cb_tree		cb_debug_item;
@@ -2053,6 +2155,10 @@ extern void		cb_emit_initiate (cb_tree rep);
 extern void		cb_emit_terminate (cb_tree rep);
 extern void		cb_emit_generate (cb_tree rep);
 extern void		cb_emit_suppress (struct cb_field *f);
+extern void		cb_emit_xml_generate (cb_tree, cb_tree, cb_tree,
+					      cb_tree, const int, const int,
+					      cb_tree, cb_tree, cb_tree,
+					      cb_tree);
 
 #ifdef	COB_TREE_DEBUG
 extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,

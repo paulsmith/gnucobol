@@ -650,7 +650,6 @@ reserved:	WORKING-STORAGE
 reserved:	WRITE
 reserved:	WRITING
 reserved:	XML
-reserved:	XML-CODE # note: this is a register, move as soon as supported
 reserved:	XML-DECLARATION
 reserved:	XML-EVENT # note: this is a register, move as soon as supported
 reserved:	XML-INFORMATION # note: this is a register, move as soon as supported
@@ -693,7 +692,7 @@ register:	SORT-RETURN
 # register:	TALLY			# only available in OS/VS or VSC2 modes
 # register:	TIME-OF-DAY		# only available in OS/VS mode
 # register:	WHEN-COMPILED		# only available in OS/VS or VSC2 modes (note the format of the date differs with the mode!)
-# register:	XML-CODE
+register:	XML-CODE
 # register:	XML-EVENT
 # register:	XML-INFORMATION
 # register:	XML-NAMESPACE

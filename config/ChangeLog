@@ -1,4 +1,9 @@
 
+2018-08-07  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added xml-generate and xml-generate-extra-phrases options.
+	* general: marked XML-CODE as implemented.
+
 2018-07-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* ibm.words: updated to Enterprise COBOL 6.1 documentation,

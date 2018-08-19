@@ -1,4 +1,10 @@
 
+2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
+
+	* config.h.in: added WITH_XML2 and associated library pragma's.
+	* README.txt: updated with my experience trying to make check with
+	  MinGW.
+
 2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in: added COB_DEBUG_LOG (as undefined)

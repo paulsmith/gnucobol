@@ -152,6 +152,7 @@ static struct string_list	*string_cache = NULL;
 static struct string_list	*source_cache = NULL;
 static char			*string_buffer = NULL;
 static struct label_list	*label_cache = NULL;
+static struct xml_tree_list	*xml_tree_cache = NULL;
 
 
 static FILE			*output_target = NULL;
@@ -486,6 +487,7 @@ cb_init_codegen (void)
 	static_call_cache = NULL;
 	string_buffer = NULL;
 	string_cache = NULL;
+	xml_tree_cache = NULL;
 }
 
 /* Output routines */
@@ -3252,6 +3254,71 @@ output_index (cb_tree x)
 	}
 }
 
+/* XML output trees */
+
+static struct cb_xml_generate_tree *
+get_last_attr (const struct cb_xml_generate_tree * const s)
+{
+	struct cb_xml_generate_tree	*attr;
+
+	for (attr = s->attrs; attr->sibling; attr = attr->sibling);
+	return attr;
+}
+
+static struct cb_xml_generate_tree *
+get_last_child (const struct cb_xml_generate_tree * const s)
+{
+	struct cb_xml_generate_tree	*child;
+
+	for (child = s->children; child->sibling; child = child->sibling);
+
+	if (child->children) {
+		return get_last_child (child);
+	} else {
+		return child;
+	}
+}
+
+static struct cb_xml_generate_tree *
+get_prev_xml_tree_entry (const struct cb_xml_generate_tree * const s)
+{
+	if (s->prev_sibling) {
+		if (s->prev_sibling->children) {
+			return get_last_child (s->prev_sibling);
+		} else if (s->prev_sibling->attrs) {
+			return get_last_attr (s->prev_sibling);
+		} else {
+			return s->prev_sibling;
+		}
+	} else if (s->attrs) {
+		return get_last_attr (s->prev_sibling);
+	} else if (s->parent) {
+		return s->parent;
+	} else {
+		return NULL;
+	}
+}
+
+static void
+output_xml_attrs_definitions (struct cb_xml_generate_tree *attr)
+{
+	/* TO-DO: Where does xa_7 come from?? (See test.c.l.h) */
+	for (; attr; attr = attr->sibling) {
+		output_local ("static cob_xml_attr\t%s%d;\n",
+			      CB_PREFIX_XML_ATTR, attr->id);
+	}
+}
+
+static void
+output_xml_trees_definitions (struct cb_xml_generate_tree *tree)
+{
+	for (; tree; tree = tree->sibling) {
+		output_xml_attrs_definitions (tree->attrs);
+		output_xml_trees_definitions (tree->children);
+		output_local ("static cob_xml_tree\t%s%d;\n", CB_PREFIX_XML_TREE, tree->id);
+	}
+}
+
 /* Parameter */
 
 static void
@@ -3688,6 +3755,10 @@ output_param (cb_tree x, int id)
 		}
 		output (")");
 		break;
+	case CB_TAG_XML_TREE:
+		output ("&%s%d", CB_PREFIX_XML_TREE, CB_XML_TREE (x)->id);
+		break;
+
 	case CB_TAG_FUNCALL:
 		output_funcall (x);
 		break;
@@ -6782,6 +6853,113 @@ output_alter (struct cb_alter *p)
 	}
 }
 
+/* XML GENERATE suppress checks */
+
+static void
+output_xml_tree_suppress_cond (struct cb_xml_generate_tree *tree)
+{
+	output_prefix ();
+	if (tree->type == CB_XML_ATTRIBUTE) {
+		output ("%s%d.is_suppressed = ", CB_PREFIX_XML_ATTR, tree->id);
+	} else {
+		output ("%s%d.is_suppressed = ", CB_PREFIX_XML_TREE, tree->id);
+	}
+	output_cond (tree->suppress_cond, 0);
+	output (";\n");
+}
+
+static int
+one_tree_in_list_is_never_suppressed (struct cb_xml_generate_tree *tree)
+{
+	for (; tree; tree = tree->sibling) {
+		if (!tree->suppress_cond) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+one_child_or_attr_is_never_suppressed (struct cb_xml_generate_tree *tree)
+{
+	return one_tree_in_list_is_never_suppressed (tree->attrs)
+		|| one_tree_in_list_is_never_suppressed (tree->children);
+}
+
+static void
+output_all_tree_list_suppressed_cond (struct cb_xml_generate_tree *tree,
+				      const char *prefix,
+				      int * const cond_emitted)
+{
+	for (; tree; tree = tree->sibling) {
+		if (*cond_emitted) {
+			output (" && ");
+		} else {
+			*cond_emitted = 1;
+		}
+		output ("%s%d.is_suppressed", prefix, tree->id);
+	}
+
+}
+
+static void
+output_parent_tree_suppress_check (struct cb_xml_generate_tree *tree)
+{
+	int	child_check_emitted = 0;
+
+	if (one_child_or_attr_is_never_suppressed (tree)) {
+		/* In this case, tree is always emitted; no check is needed. */
+		return;
+	}
+
+	output_prefix ();
+	output ("%s%d.is_suppressed |= ", CB_PREFIX_XML_TREE, tree->id);
+	output_all_tree_list_suppressed_cond (tree->attrs, CB_PREFIX_XML_ATTR,
+					      &child_check_emitted);
+	output_all_tree_list_suppressed_cond (tree->children, CB_PREFIX_XML_TREE,
+					      &child_check_emitted);
+	output (";\n");
+
+}
+
+static void
+output_xml_suppress_checks (struct cb_xml_suppress_checks * const suppress_checks)
+{
+	struct cb_xml_generate_tree	*orig_tree = suppress_checks->tree;
+	struct cb_xml_generate_tree	*tree;
+
+	/*
+	  To resolve dependency problems, start from last child of last element.
+	*/
+	if (orig_tree->children) {
+		tree = get_last_child (orig_tree);
+	} else if (orig_tree->attrs) {
+		tree = get_last_attr (orig_tree);
+	} else {
+		tree = orig_tree;
+	}
+
+	for (;;) {
+		if (tree->suppress_cond) {
+			output_xml_tree_suppress_cond (tree);
+		}
+		/*
+		  Suppress the (non-root) element if all its children are
+		  suppressed.
+		*/
+		if ((tree->children || tree->attrs) && tree != orig_tree) {
+			output_parent_tree_suppress_check (tree);
+		}
+
+		if (tree == orig_tree) {
+			break;
+		} else {
+			tree = get_prev_xml_tree_entry (tree);
+		}
+	}
+}
+
 /* Output statement */
 
 static int
@@ -7057,6 +7235,10 @@ output_ec_condition_for_handler (const enum cb_handler_type handler_type)
 
 	case OVERFLOW_HANDLER:
 		output_level_2_ex_condition (COB_EC_OVERFLOW);
+		break;
+
+	case XML_HANDLER:
+		output_level_2_ex_condition (COB_EC_XML);
 		break;
 
 	/* LCOV_EXCL_START */
@@ -7705,6 +7887,9 @@ output_stmt (cb_tree x)
 		output_perform_call (CB_DEBUG_CALL(x)->target,
 				     CB_DEBUG_CALL(x)->target);
 		break;
+	case CB_TAG_XML_SUPPRESS_CHECKS:
+		output_xml_suppress_checks (CB_XML_SUPPRESS_CHECKS (x));
+		break;
 	/* LCOV_EXCL_START */
 	default:
 		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
@@ -8123,6 +8308,81 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	}
 	if (p->sister) {
 		output_screen_init (p->sister, p);
+	}
+}
+
+/* XML GENERATE trees */
+
+static void
+output_xml_attrs_init (struct cb_xml_generate_tree *attr)
+{
+	for (; attr; attr = attr->sibling) {
+		output_prefix ();
+		output ("cob_set_xml_attr (&%s%d, ", CB_PREFIX_XML_ATTR, attr->id);
+
+		output_param (attr->name, -1);
+		output (", ");
+
+		output_param (attr->value, -1);
+		output (", 0, ");
+
+		if (attr->sibling) {
+			output ("&%s%d", CB_PREFIX_XML_ATTR, attr->sibling->id);
+		} else {
+			output ("NULL");
+		}
+		output (");\n");
+	}
+}
+
+static void
+output_xml_elt_init (struct cb_xml_generate_tree *tree)
+{
+	output_prefix ();
+	output ("cob_set_xml_tree (&%s%d, ", CB_PREFIX_XML_TREE, tree->id);
+
+	output_param (tree->name, -1);
+
+	if (tree->attrs) {
+		output (", &%s%d, ", CB_PREFIX_XML_ATTR, tree->attrs->id);
+	} else {
+		output (", NULL, ");
+	}
+
+	if (tree->value) {
+		output_param (tree->value, -1);
+	} else {
+		output ("NULL");
+	}
+
+	output (", 0, ");
+
+	if (tree->children) {
+		output ("&%s%d, ", CB_PREFIX_XML_TREE, tree->children->id);
+	} else {
+		output ("NULL, ");
+	}
+
+	if (tree->sibling) {
+		output ("&%s%d", CB_PREFIX_XML_TREE, tree->sibling->id);
+	} else {
+		output ("NULL");
+	}
+
+	output (");\n");
+}
+
+static void
+output_xml_generate_init (struct cb_xml_generate_tree *tree)
+{
+	for (; tree; tree = tree->sibling) {
+		if (tree->attrs) {
+			output_xml_attrs_init (tree->attrs);
+		}
+		if (tree->children) {
+			output_xml_generate_init (tree->children);
+		}
+		output_xml_elt_init (tree);
 	}
 }
 
@@ -9339,6 +9599,25 @@ output_error_handler (struct cb_program *prog)
 }
 
 static void
+output_module_register_init (cb_tree reg, const char *name)
+{
+	if (reg) {
+		output_prefix ();
+		output ("module->%s = ", name);
+		if (CB_REFERENCE_P (reg)) {
+			output_param (cb_ref (reg), -1);
+		} else if (CB_FIELD_P (reg)) {
+			output_field (reg);
+		} else {
+			COBC_ABORT ();
+		}
+		output (";\n");
+	} else {
+		output_line ("module->%s = NULL;", name);
+	}
+}
+
+static void
 output_module_init (struct cb_program *prog)
 {
 	int	opt;
@@ -9377,14 +9656,8 @@ output_module_init (struct cb_program *prog)
 		output_line ("module->module_cancel.funcvoid = NULL;");
 	}
 
-	if (prog->collating_sequence) {
-		output_prefix ();
-		output ("module->collating_sequence = ");
-		output_param (cb_ref (prog->collating_sequence), -1);
-		output (";\n");
-	} else {
-		output_line ("module->collating_sequence = NULL;");
-	}
+	output_module_register_init (prog->collating_sequence, "collating_sequence");
+
 	if (prog->crt_status && cb_code_field (prog->crt_status)->count) {
 		output_prefix ();
 		output ("module->crt_status = ");
@@ -9393,14 +9666,22 @@ output_module_init (struct cb_program *prog)
 	} else {
 		output_line ("module->crt_status = NULL;");
 	}
-	if (prog->cursor_pos) {
-		output_prefix ();
-		output ("module->cursor_pos = ");
-		output_param (cb_ref (prog->cursor_pos), -1);
-		output (";\n");
-	} else {
-		output_line ("module->cursor_pos = NULL;");
+
+	output_module_register_init (prog->cursor_pos, "cursor_pos");
+
+	/* TO-DO: Fix! This isn't right. */
+	if (prog->xml_code) {
+		output_module_register_init (/* prog->xml_code */ cb_build_reference ("XML-CODE"), "xml_code");
 	}
+	/* output_module_register_init (prog->xml_event, "xml_event"); */
+	/* output_module_register_init (prog->xml_information, "xml_information"); */
+	/* output_module_register_init (prog->xml_namespace, "xml_namespace"); */
+	/* output_module_register_init (prog->xml_namespace_prefix, "xml_namespace_prefix"); */
+	/* output_module_register_init (prog->xml_nnamespace, "xml_nnamespace"); */
+	/* output_module_register_init (prog->xml_nnamespace_prefix, "xml_nnamespace_prefix"); */
+	/* output_module_register_init (prog->xml_ntext, "xml_ntext"); */
+	/* output_module_register_init (prog->xml_text, "xml_text"); */
+
 	if (!cobc_flag_main && non_nested_count > 1) {
 		output_line ("module->module_ref_count = &cob_reference_count;");
 	} else {
@@ -9481,7 +9762,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	const char		*s;
 	char			fdname[48];
 	char			key_ptr[64];
-	unsigned int	i;
+	unsigned int		i;
 	cob_u32_t		inc;
 	int			parmnum, nested_dump;
 	int			seen;
@@ -9732,6 +10013,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 
 	if (prog->report_storage) {
 		optimize_defs[COB_SET_REPORT] = 1;
+	}
+
+	if (prog->xml_trees) {
+		output_local ("\n/* XML GENERATE trees */\n");
+		output_xml_trees_definitions (prog->xml_trees);
 	}
 
 #if	0	/* RXWRXW - Any */
@@ -10518,6 +10804,14 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 				output_initial_values (rep->records);
 			}
 		}
+		output_newline ();
+	}
+
+	/* XML GENERATE trees */
+	if (prog->xml_trees) {
+		optimize_defs[COB_SET_XML_TREE] = 1;
+		output_line ("/* Initialize XML GENERATE output trees */");
+		output_xml_generate_init (prog->xml_trees);
 		output_newline ();
 	}
 

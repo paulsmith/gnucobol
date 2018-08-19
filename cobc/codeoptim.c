@@ -82,6 +82,31 @@ cob_gen_optim (const enum cb_optim val)
 		output_storage ("}");
 		return;
 
+	case COB_SET_XML_TREE:
+		output_storage ("static void COB_NOINLINE");
+		output_storage ("cob_set_xml_attr (cob_xml_attr *attr, cob_field *name,");
+		output_storage ("		cob_field *value, unsigned int is_suppressed,");
+		output_storage ("		cob_xml_attr *sibling)");
+		output_storage ("{");
+		output_storage ("	attr->name = name;");
+		output_storage ("	attr->value = value;");
+		output_storage ("	attr->is_suppressed = is_suppressed;");
+		output_storage ("	attr->sibling = sibling;");
+		output_storage ("}");
+		output_storage ("static void COB_NOINLINE");
+		output_storage ("cob_set_xml_tree (cob_xml_tree *tree, cob_field *name, cob_xml_attr *attrs,");
+		output_storage ("		cob_field *content, unsigned int is_suppressed,");
+		output_storage ("		cob_xml_tree *children, cob_xml_tree *sibling)");
+		output_storage ("{");
+		output_storage ("       tree->name = name;");
+		output_storage ("	tree->attrs = attrs;");
+		output_storage ("	tree->content = content;");
+		output_storage ("	tree->is_suppressed = is_suppressed;");
+		output_storage ("	tree->children = children;");
+		output_storage ("	tree->sibling = sibling;");
+		output_storage ("}");
+		return;		
+
 	case COB_POINTER_MANIP:
 		output_storage ("static void COB_NOINLINE");
 		output_storage ("cob_pointer_manip (cob_field *f1, cob_field *f2, const unsigned int addsub)");

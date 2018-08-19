@@ -585,6 +585,7 @@ reserved:	PRINT-PREVIEW*
 reserved:	PRIORITY
 reserved:	PROCEDURE
 reserved:	PROCEED
+reserved:	PROCESSING*
 reserved:	PROGRAM
 reserved:	PROGRAM-ID
 reserved:	PROGRESS*
@@ -816,7 +817,6 @@ reserved:	WORKING-STORAGE
 reserved:	WRAP
 reserved:	WRITE
 reserved:	WRITERS
-reserved:	XML-CODE  # note: this is a register, move as soon as supported
 reserved:	XML-EVENT # note: this is a register, move as soon as supported
 reserved:	XML-TEXT  # note: this is a register, move as soon as supported
 reserved:	X*
@@ -843,7 +843,7 @@ register:	RETURN-CODE
 # TALLY is only available in HPUX mode
 # TIME-OF-DAY is only available in HPUX mode, not yet recognized by GnuCOBOL
 # WHEN-COMPILED is only available in HPUX mode
-# register:	XML-CODE
+register:	XML-CODE
 # register:	XML-EVENT
 # register:	XML-TEXT
 
