@@ -1617,8 +1617,8 @@ struct cb_xml_suppress_checks {
 	struct cb_xml_generate_tree	*tree;
 };
 
-#define CB_XML_SUPPRESS_CHECKS(x)	(CB_TREE_CAST (CB_TAG_SUPPRESS_CHECKS, struct cb_xml_suppress_checks, x))
-#define CB_XML_SUPPRESS_CHECKS_P(x)	(CB_TREE_TAG (x) == CB_TAG_SUPPRESS_CHECKS)
+#define CB_XML_SUPPRESS_CHECKS(x)	(CB_TREE_CAST (CB_TAG_XML_SUPPRESS_CHECKS, struct cb_xml_suppress_checks, x))
+#define CB_XML_SUPPRESS_CHECKS_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_SUPPRESS_CHECKS)
 
 /* DISPLAY type */
 
