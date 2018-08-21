@@ -985,7 +985,7 @@ get_suppress_cond (cb_tree record, enum cb_xml_type type,
 	}
 
 	if (last_applicable_suppress_id) {
-		suppress_cond = build_condition_token_list (record, suppress_clause->when_list);
+		suppress_cond = build_condition_token_list (record, last_applicable_suppress_id->when_list);
 	} else {
 		/*
 		  If record is not the subject of a SUPPRESS-identifier phrase,
@@ -994,7 +994,7 @@ get_suppress_cond (cb_tree record, enum cb_xml_type type,
 		 */
 		for (l = suppress_list; l; l = CB_CHAIN (l)) {
 			suppress_clause = CB_XML_SUPPRESS (CB_VALUE (l));
-			if (!is_suppress_all_or_applicable_suppress_type (record, type, suppress_clause)) {
+			if (!suppress_clause || !is_suppress_all_or_applicable_suppress_type (record, type, suppress_clause)) {
 				continue;
 			}
 
