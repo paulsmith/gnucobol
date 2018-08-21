@@ -2946,7 +2946,7 @@ AT_CHECK([$COMPILE_ONLY -fliteral-length=1 -fnumeric-literal-length=1 -fword-len
 #])
 
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
-[prog2.cob:17: error: syntax error, unexpected -
+[prog2.cob:17: error: syntax error, unexpected -, expecting [(]
 prog2.cob:18: error: syntax error, unexpected -
 prog2.cob:23: error: syntax error, unexpected +
 prog2.cob:24: error: syntax error, unexpected +
@@ -2954,7 +2954,7 @@ prog2.cob:25: error: syntax error, unexpected +
 prog2.cob:26: error: syntax error, unexpected +
 ])
 AT_CHECK([$COMPILE_ONLY prog3.cob], [1], [],
-[prog3.cob:17: error: syntax error, unexpected -
+[prog3.cob:17: error: syntax error, unexpected -, expecting [(]
 prog3.cob:18: error: syntax error, unexpected -
 prog3.cob:23: error: syntax error, unexpected +
 prog3.cob:24: error: syntax error, unexpected +

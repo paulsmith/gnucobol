@@ -1,7 +1,7 @@
 NEWS - user visible changes				-*- outline -*-
 
  GnuCOBOL 3.0rc-1 to be released (20180422)
-
+ 
 * New GnuCOBOL features
 
 ** REPORTWRITER module added
@@ -11,6 +11,11 @@ NEWS - user visible changes				-*- outline -*-
 ** DISPLAY ... UPON PRINTER may be redirected to an external command
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
    (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
+
+** XML GENERATE statement (note: runtime support needs additional library libxml2)
+
+** Improved support for different compiler extensions (ACUCOBOL, RM/COBOL, Fujitsu,
+   Microsoft COBOL and more)
 
 ** Parser support for many features of different compilers, for example
    PIC 1 / USAGE BIT, ACUCOBOL extensions for graphical controls
@@ -25,8 +30,6 @@ NEWS - user visible changes				-*- outline -*-
 ** C interface: new functions cob_set_runtime_option / cob_get_runtime_option
    to set/get special runtime options (currently FILE * for trace and printer
    output) or to reload the runtime configuration after changing environment
-
-** XML GENERATE statement (note: runtime support needs additional library libxml2)
 
 * Changed cobc options:
 
@@ -47,7 +50,7 @@ NEWS - user visible changes				-*- outline -*-
    -fno-theader    suppress all headers from listing while keeping page breaks
    -fno-tmessages  suppress warning and error summary from listing
    -fno-tsource    suppress actual source from listing (for example to only
-   produce the cross-reference)
+                   produce the cross-reference)
 
 ** The option -fif-cutoff (option to change generated C sources to use
    a label + goto for nested if/else) was deactivated to allow the C compiler
@@ -68,7 +71,6 @@ NEWS - user visible changes				-*- outline -*-
   Note: You may want to adjust the test runner tests/run_prog_manual.sh which
   defaults to xterm in GUI environments and screen in terminal environments.
 
-
 * New build features
 
 ** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
@@ -79,7 +81,8 @@ NEWS - user visible changes				-*- outline -*-
 
 ** --enable-debug-log to allow internal tracing of GnuCOBOL
    (intended for developers of GnuCOBOL only)
-  
+
+* Lot's of bug fixes to list here (please check ChangeLogs for full details).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

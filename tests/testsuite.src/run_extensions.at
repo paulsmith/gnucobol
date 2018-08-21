@@ -3089,7 +3089,7 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [1], [],
 [prog.cob:6: error: syntax error, unexpected TERMINAL
 prog.cob:7: error: syntax error, unexpected SEND
-prog.cob:9: error: syntax error, unexpected TERMINAL
+prog.cob:9: error: syntax error, unexpected TERMINAL, expecting [(]
 ])
 AT_CHECK([$COMPILE -std=cobol2014 prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],

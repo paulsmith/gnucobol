@@ -1,4 +1,12 @@
 
+2018-08-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: implemented MS-COBOL position-specifier for DISPLAY/ACCEPT
+	  and DISPLAY ERASE
+	* parser.y, reserved.c: added COMP-0 as PENDING
+	* typeck.c: set reference for CRT-STATUS field on ACCEPT/DISPLAY
+	  for cross-reference in listing
+
 2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added XML GENERATE statement.

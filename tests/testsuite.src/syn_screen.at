@@ -739,3 +739,56 @@ prog.cob:30: warning: 'numeric-value-no-pic' has numeric VALUE without PIC; PIC 
 ])
 
 AT_CLEANUP
+
+
+AT_SETUP([MS-COBOL position-spec])
+AT_KEYWORDS([screen position LIN COL])
+
+# FIXME: WITH clause including a WITH COLUMN (both separate (working)
+#        and combined - error - must be added
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01 FIELD-A  PIC X(06) VALUE "ms-cob".
+       01 A        PIC X.
+       PROCEDURE        DIVISION.
+           DISPLAY ERASE
+           MOVE 10 TO LIN. MOVE 15 TO COL.
+           DISPLAY (LIN , COL - 3) FIELD-A.
+           DISPLAY (LIN + 1 , COL) FIELD-A.
+           ACCEPT  (   , 10) A.
+           DISPLAY (08 , 12) FIELD-A.
+           ACCEPT  (   , 08) A WITH NO-ECHO.
+           DISPLAY FIELD-A AT LINE 06  COLUMN 12.
+           ACCEPT  A       AT COLUMN 8.
+           SUBTRACT 2 FROM LIN.
+           SUBTRACT 3 FROM COL.
+           DISPLAY FIELD-A AT LINE LIN COLUMN COL.
+           ACCEPT  (   , 10) A.
+           DISPLAY ( 1 , 1 ) ERASE.
+           DISPLAY ( 2 , 1 ) "Field value : ", FIELD-A.
+           DISPLAY ( 3 , 1 ) A " --> A value"
+           DISPLAY ( 5 , 1 ) "Press ENTER to exit".
+           ACCEPT (11 , 1 ) A.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:10: error: 'LIN' is not defined
+prog.cob:10: error: syntax error, unexpected COL
+prog.cob:11: error: 'LIN' is not defined
+prog.cob:11: error: syntax error, unexpected COL, expecting Literal or [)] or Identifier
+prog.cob:12: error: 'LIN' is not defined
+prog.cob:12: error: syntax error, unexpected COL, expecting Literal or [)] or Identifier
+prog.cob:18: error: 'LIN' is not defined
+prog.cob:19: error: syntax error, unexpected COL
+prog.cob:20: error: 'LIN' is not defined
+prog.cob:20: error: syntax error, unexpected COL, expecting Literal or Identifier or ZERO
+])
+AT_CHECK([$COMPILE_ONLY -fregister=LIN,COL prog.cob], [0], [], [])
+
+AT_CLEANUP
+

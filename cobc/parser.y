@@ -2098,6 +2098,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token COMMUNICATION
 %token COMP
 %token COMPUTE
+%token COMP_0			"COMP-0"
 %token COMP_1			"COMP-1"
 %token COMP_2			"COMP-2"
 %token COMP_3			"COMP-3"
@@ -6280,6 +6281,11 @@ usage:
   {
 	check_and_set_usage (CB_USAGE_BINARY);
   }
+| COMP_0
+  {
+	/* see FR #310 */
+	CB_PENDING ("USAGE COMP-0");
+  }
 | COMP_1
   {
 	current_field->flag_comp_1 = 1;
@@ -9468,15 +9474,15 @@ accept_statement:
 accept_body:
   accp_identifier
   {
-	  check_duplicate = 0;
-	  check_line_col_duplicate = 0;
-	  line_column = NULL;
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
   }
   _accept_clauses _accept_exception_phrases
   {
 	/* Check for invalid use of screen clauses */
 	if (current_statement->attr_ptr
-	    || (!is_screen_field ($1) && line_column)) {
+	 || (!is_screen_field ($1) && line_column)) {
 		cb_verify_x ($1, cb_accept_display_extensions,
 			     _("non-standard ACCEPT"));
 	}
@@ -9502,9 +9508,9 @@ accept_body:
   }
 | identifier FROM SCREEN
   {
-	  check_duplicate = 0;
-	  check_line_col_duplicate = 0;
-	  line_column = NULL;
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
   }
   accept_from_screen_clauses
   {
@@ -9544,13 +9550,13 @@ accept_body:
 	cb_emit_accept_day_of_week ($1);
   }
   /* note: GnuCOBOL uses screenio.cpy 9(4) identifier,
-     MicroFocus/ACUCOBOL 99 */
+           MicroFocus/ACUCOBOL 99 */
 | identifier FROM ESCAPE KEY
   {
 	cb_emit_accept_escape_key ($1);
   }
   /* note: GnuCOBOL uses ISO X(4) identifier,
-     MicroFocus 9(3) */
+           MicroFocus 9(3) */
 | identifier FROM EXCEPTION STATUS
   {
 	cb_emit_accept_exception_status ($1);
@@ -9592,6 +9598,20 @@ accept_body:
   {
 	cb_emit_accept_name ($1, $3);
   }
+| field_with_pos_specifier _accept_clauses
+  {
+	cb_verify_x ($1, cb_accept_display_extensions,
+		     _("non-standard ACCEPT"));
+
+	if (cb_accept_update && !has_dispattr (COB_SCREEN_NO_UPDATE)) {
+		set_dispattr (COB_SCREEN_UPDATE);
+	}
+	if (cb_accept_auto && !has_dispattr (COB_SCREEN_TAB)) {
+		set_dispattr (COB_SCREEN_AUTO);
+	}
+	cobc_cs_check = 0;
+	cb_emit_accept ($1, line_column, current_statement->attr_ptr);
+  }
 | cd_name _message COUNT
   {
 	CB_PENDING ("ACCEPT MESSAGE COUNT");
@@ -9605,6 +9625,54 @@ accp_identifier:
 	$$ = cb_null;
   }
 ;
+
+field_with_pos_specifier:
+  {
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+  }
+  pos_specifier identifier
+  {
+	$$ = $3;
+  }
+;
+
+pos_specifier:
+  TOK_OPEN_PAREN pos_specifier_value COMMA_DELIM pos_specifier_value TOK_CLOSE_PAREN
+  {
+	line_column = CB_BUILD_PAIR ($2, $4);
+  }
+| TOK_OPEN_PAREN pos_specifier_value COMMA_DELIM TOK_CLOSE_PAREN
+  {
+	line_column = CB_BUILD_PAIR ($2, cb_int0);
+  }
+| TOK_OPEN_PAREN COMMA_DELIM pos_specifier_value TOK_CLOSE_PAREN
+  {
+	line_column = CB_BUILD_PAIR (cb_int0, $3);
+  }
+;
+
+pos_specifier_value:
+  identifier_or_numeric_literal	/* note: handles special register LIN/COL, too */
+  {
+	$$ = $1;
+  }
+| identifier_or_numeric_literal TOK_PLUS numeric_literal
+  {
+	$$ = cb_build_binary_op ($1, '+', $3);
+  }
+| identifier_or_numeric_literal TOK_MINUS numeric_literal
+  {
+	$$ = cb_build_binary_op ($1, '-', $3);
+  }
+;
+
+identifier_or_numeric_literal:
+  identifier
+| numeric_literal
+;
+
 
 _accept_clauses:
   /* empty */
@@ -10727,6 +10795,8 @@ display_body:
 	cb_emit_command_line ($1);
   }
 | screen_or_device_display _display_exception_phrases
+| display_erase	/* note: may also be part of display_pos_specifier */
+| display_pos_specifier
 | display_message_box
 | display_window
 | display_floating_window
@@ -10810,6 +10880,16 @@ disp_list:
   }
 ;
 
+_with_display_attr:
+  /* empty */
+| WITH display_attrs
+;
+
+display_attrs:
+  disp_attr
+| display_attrs disp_attr
+;
+
 display_clauses:
   display_clause
 | display_clauses display_clause
@@ -10856,6 +10936,66 @@ crt_under:
   CRT
 | CRT_UNDER
 ;
+
+display_erase:
+  ERASE
+  {
+	check_duplicate = SYN_CLAUSE_10;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+	set_dispattr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
+				    "ERASE EOL", COB_SCREEN_ERASE_EOL);
+  }
+  _with_display_attr
+  {
+	cb_emit_display (CB_LIST_INIT (cb_space), cb_null, cb_int1, line_column, NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+  }
+;
+
+display_pos_specifier:
+  /* FIXME: the actual correct version (according to MicroFocus "MS compiler" option)
+            would allow combination of multiple formats ...*/
+  field_or_literal_or_erase_with_pos_specifier _with_display_attr
+  {
+	cb_emit_display ($1, cb_null, cb_int1, line_column, NULL, 1, FIELD_ON_SCREEN_DISPLAY);
+  }
+;
+
+field_or_literal_or_erase_with_pos_specifier:
+  {
+	check_duplicate = 0;
+	check_line_col_duplicate = 0;
+	line_column = NULL;
+  }
+  pos_specifier field_or_literal_or_erase_list
+  {
+	$$ = $3;
+  }
+;
+
+field_or_literal_or_erase_list:
+  field_or_literal_or_erase
+  {
+	$$ = CB_LIST_INIT ($1);
+  }
+| field_or_literal_or_erase_list field_or_literal_or_erase
+  {
+	$$ = cb_list_add ($1, $2);
+  }
+;
+
+
+field_or_literal_or_erase:
+  identifier
+| basic_literal
+| ERASE
+  {
+	set_dispattr_with_conflict ("ERASE EOS", COB_SCREEN_ERASE_EOS,
+				    "ERASE EOL", COB_SCREEN_ERASE_EOL);
+	$$ = cb_space;
+  }
+;
+
 
 display_message_box:
   MESSAGE _box x_list
@@ -14261,12 +14401,12 @@ encoding_xml_dec_and_attr:
 	}
 	cb_verify (cb_xml_generate_extra_phrases,
 		   _("XML GENERATE ENCODING clause"));
-        CB_PENDING ("XML GENERATE ENCODING");
+	CB_PENDING ("XML GENERATE ENCODING");
   }
 | XML_DECLARATION
   {
 	with_xml_dec = 1;
-        if (with_attrs) {
+	if (with_attrs) {
 		cb_error (_("XML-DECLARATION clause must come before ATTRIBUTES"));
 	}
 	cb_verify (cb_xml_generate_extra_phrases,
@@ -15616,6 +15756,18 @@ arith_nonzero_x:
 | length_of_register function
   {
 	$$ = cb_build_length ($2);
+  }
+;
+
+numeric_literal:
+  LITERAL
+  {
+	if (CB_TREE_CATEGORY ($1) != CB_CATEGORY_NUMERIC) {
+		cb_error_x ($1, _("a numeric literal is expected here"));
+		$$ = cb_error_node;
+	} else {
+		$$ = $1;
+	}
   }
 ;
 

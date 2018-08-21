@@ -1227,6 +1227,7 @@ cb_build_generic_register (const char *name, const char *external_definition)
 	}
 
 	strncpy (definition, external_definition, COB_MINI_MAX);
+	definition[COB_MINI_MAX] = 0;
 	
 	/* check for GLOBAL, leave if we don't need to define it again (nested program)*/
 	p = strstr (definition, "GLOBAL");
@@ -5906,20 +5907,41 @@ valid_screen_pos (cb_tree pos)
 }
 
 static void
+get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line,
+	cb_tree * const column)
+{
+	if (!pos) {
+		*line = NULL;
+		*column = NULL;
+	} else if (CB_PAIR_P (pos)) {
+		*line = CB_PAIR_X (pos);
+		*column = CB_PAIR_Y (pos);
+		/* Note: This must not be done for column where we need the 0,
+		         otherwise screenio.c (extract_line_and_col_vals) would
+				 evaluate the field "line" as a combined position */
+		if (*line == cb_int0) {
+			*line = NULL;
+		}
+	} else if (valid_screen_pos (pos)) {
+		*line = pos;
+		*column = NULL;
+	}
+}
+
+static void
 cb_gen_field_accept (cb_tree var, cb_tree pos, cb_tree fgc, cb_tree bgc,
 		     cb_tree scroll, cb_tree timeout, cb_tree prompt,
 		     cb_tree size_is, cob_flags_t disp_attrs)
 {
-	cb_tree		line;
-	cb_tree		column;
+	cb_tree		line = NULL;
+	cb_tree		column = NULL;
 
 	if (!pos) {
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					      var, NULL, NULL, fgc, bgc, scroll,
 					      timeout, prompt, size_is, cb_flags_t (disp_attrs)));
 	} else if (CB_LIST_P (pos)) {
-		line = CB_PAIR_X (pos);
-		column = CB_PAIR_Y (pos);
+		get_line_and_column_from_pos (pos, &line, &column);
 		cb_emit (CB_BUILD_FUNCALL_10 ("cob_field_accept",
 					      var, line, column, fgc, bgc, scroll,
 					      timeout, prompt, size_is, cb_flags_t (disp_attrs)));
@@ -6016,9 +6038,13 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 #endif
 
 	if (current_program->flag_screen) {
-		/* Bump ref count to force CRT STATUS field generation */
+		/* Bump ref count to force CRT STATUS field generation
+		   and include it in cross-reference */
 		if (current_program->crt_status) {
 			CB_FIELD_PTR (current_program->crt_status)->count++;
+			if (cb_listing_xref) {
+				cobc_xref_set_receiving (current_program->crt_status);
+			}
 		}
 		if ((CB_REF_OR_FIELD_P (var)) &&
 		     CB_FIELD_PTR (var)->storage == CB_STORAGE_SCREEN) {
@@ -6059,9 +6085,13 @@ cb_emit_accept (cb_tree var, cb_tree pos, struct cb_attr_struct *attr_ptr)
 		}
 	} else if (pos || fgc || bgc || scroll || disp_attrs
 			|| timeout || prompt || size_is) {
-		/* Bump ref count to force CRT STATUS field generation */
+		/* Bump ref count to force CRT STATUS field generation
+		   and include it in cross-reference */
 		if (current_program->crt_status) {
 			CB_FIELD_PTR (current_program->crt_status)->count++;
+			if (cb_listing_xref) {
+				cobc_xref_set_receiving (current_program->crt_status);
+			}
 		}
 		if (var == cb_null) {
 			var = NULL;
@@ -7037,25 +7067,6 @@ increment_field_ref_counts (cb_tree value_list)
 		if (CB_FIELD_P (x)) {
 			CB_FIELD (cb_ref (x))->count++;
 		}
-	}
-}
-
-static void
-get_line_and_column_from_pos (const cb_tree pos, cb_tree * const line,
-			      cb_tree * const column)
-{
-	if (!pos) {
-		*line = NULL;
-		*column = NULL;
-	} else if (CB_PAIR_P (pos)) {
-		*line = CB_PAIR_X (pos);
-		*column = CB_PAIR_Y (pos);
-		if (*line == cb_int0) {
-			*line = NULL;
-		}
-	} else if (valid_screen_pos (pos)) {
-		*line = pos;
-		*column = NULL;
 	}
 }
 
