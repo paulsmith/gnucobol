@@ -171,6 +171,10 @@ static	int	prev_expr_tf[EXPR_WARN_PER_LINE] = {0,0,0,0,0,0,0,0};
 
 static struct cb_report *report_checked = NULL;
 
+/* function prototypes */
+COB_INLINE COB_A_INLINE cb_tree	cb_ref (cb_tree x);
+COB_INLINE COB_A_INLINE cb_tree	cb_try_ref (cb_tree x);
+
 /* Local functions */
 
 static int
@@ -4199,7 +4203,7 @@ cb_ref_internal (cb_tree x, const int emit_error)
 	struct cb_program	*prog;
 	struct cb_word		*w;
 	size_t			val;
-	size_t			ambiguous = 0;
+	size_t			ambiguous;
 	struct cb_label		*save_section;
 	struct cb_label		*save_paragraph;
 

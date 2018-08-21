@@ -1922,7 +1922,7 @@ extern void		cb_validate_renames_item (struct cb_field *);
 extern struct cb_field	*cb_get_real_field (void);
 extern void		cb_clear_real_field (void);
 extern int		cb_is_figurative_constant (const cb_tree);
-extern int		cb_field_is_ignored_in_xml_gen (struct cb_field *);
+extern int		cb_field_is_ignored_in_xml_gen (struct cb_field * const);
 
 /* typeck.c */
 extern cb_tree		cb_debug_item;

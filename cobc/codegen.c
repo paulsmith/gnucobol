@@ -3340,12 +3340,12 @@ output_param (cb_tree x, int id)
 	int			sav_stack_id;
 	char			fname[12];
 
-	param_id = id;
-
 	if (x == NULL) {
 		output ("NULL");
 		return;
 	}
+
+	param_id = id;
 
 	switch (CB_TREE_TAG (x)) {
 	case CB_TAG_CONST:
@@ -3471,9 +3471,13 @@ output_param (cb_tree x, int id)
 		}
 		break;
 	case CB_TAG_FIELD:
-		/* TODO: remove me */
+#if 0	/* TODO: remove me */
 		output_param (cb_build_field_reference (CB_FIELD (x), NULL), id);
 		break;
+#else	/* CHECKME: Is this actually used somewhere? */
+		x = cb_build_field_reference (CB_FIELD (x), NULL);
+		/* Fall through */
+#endif
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
 		if (CB_LOCALE_NAME_P (r->value)) {
@@ -9601,19 +9605,39 @@ output_error_handler (struct cb_program *prog)
 static void
 output_module_register_init (cb_tree reg, const char *name)
 {
-	if (reg) {
+	if (!reg) {
+		return;
+	}
+
+	/* LCOV_EXCL_START */
+	if (!CB_REF_OR_FIELD_P (reg)) {
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (reg));
+		COBC_ABORT ();
+	}
+	/* LCOV_EXCL_STOP */
+
+	if (CB_REFERENCE_P (reg)) {
+		cb_tree	ref = cb_ref (reg);
+		if (!CB_FIELD_P (ref)) {
+			output_prefix ();
+			output ("module->%s = ", name);
+			output_param (ref, -1);
+			output (";\n");
+			COBC_ABORT ();
+			return;
+		}
+		reg = ref;
+	}
+	
+	if (CB_FIELD_P (reg)) {
+		struct cb_field *field = CB_FIELD_PTR (reg);
+		if (!field->count) {
+			return;
+		}
 		output_prefix ();
 		output ("module->%s = ", name);
-		if (CB_REFERENCE_P (reg)) {
-			output_param (cb_ref (reg), -1);
-		} else if (CB_FIELD_P (reg)) {
-			output_field (reg);
-		} else {
-			COBC_ABORT ();
-		}
+		output_field (reg);
 		output (";\n");
-	} else {
-		output_line ("module->%s = NULL;", name);
 	}
 }
 
@@ -9668,19 +9692,6 @@ output_module_init (struct cb_program *prog)
 	}
 
 	output_module_register_init (prog->cursor_pos, "cursor_pos");
-
-	/* TO-DO: Fix! This isn't right. */
-	if (prog->xml_code) {
-		output_module_register_init (/* prog->xml_code */ cb_build_reference ("XML-CODE"), "xml_code");
-	}
-	/* output_module_register_init (prog->xml_event, "xml_event"); */
-	/* output_module_register_init (prog->xml_information, "xml_information"); */
-	/* output_module_register_init (prog->xml_namespace, "xml_namespace"); */
-	/* output_module_register_init (prog->xml_namespace_prefix, "xml_namespace_prefix"); */
-	/* output_module_register_init (prog->xml_nnamespace, "xml_nnamespace"); */
-	/* output_module_register_init (prog->xml_nnamespace_prefix, "xml_nnamespace_prefix"); */
-	/* output_module_register_init (prog->xml_ntext, "xml_ntext"); */
-	/* output_module_register_init (prog->xml_text, "xml_text"); */
 
 	if (!cobc_flag_main && non_nested_count > 1) {
 		output_line ("module->module_ref_count = &cob_reference_count;");
@@ -9740,6 +9751,19 @@ output_module_init (struct cb_program *prog)
 	} else {
 		output_line ("module->module_sources = NULL;");
 	}
+
+	/* Check for possible implementation without adding
+	   a multitude of module local registers to cob_module */
+	output_module_register_init (prog->xml_code, "xml_code");
+	output_module_register_init (prog->xml_event, "xml_event");
+	output_module_register_init (prog->xml_information, "xml_information");
+	output_module_register_init (prog->xml_namespace, "xml_namespace");
+	output_module_register_init (prog->xml_namespace_prefix, "xml_namespace_prefix");
+	output_module_register_init (prog->xml_nnamespace, "xml_nnamespace");
+	output_module_register_init (prog->xml_nnamespace_prefix, "xml_nnamespace_prefix");
+	output_module_register_init (prog->xml_ntext, "xml_ntext");
+	output_module_register_init (prog->xml_text, "xml_text");
+
 	output_newline ();
 }
 
