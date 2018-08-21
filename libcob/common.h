@@ -1181,6 +1181,10 @@ typedef struct __cob_screen {
 #define COB_MODULE_TYPE_PROGRAM		0
 #define COB_MODULE_TYPE_FUNCTION	1
 
+/*
+  For backwards compatibility of the libcob ABI, the size of existing members
+  and their positions must not change! Add new members at the end.
+ */
 typedef struct __cob_module {
 	struct __cob_module	*next;			/* Next pointer */
 	cob_field		**cob_procedure_params;	/* Arguments */
@@ -1194,16 +1198,6 @@ typedef struct __cob_module {
 	cob_field		*cursor_pos;		/* CURSOR */
 	unsigned int		*module_ref_count;	/* Module ref count */
 	const char		**module_path;		/* Module path */
-
-	cob_field		*xml_code;		/* XML-CODE */
-	cob_field		*xml_event;		/* XML-EVENT */
-	cob_field		*xml_information;	/* XML-INFORMATION */
-	cob_field		*xml_namespace;		/* XML-NAMESPACE */
-	cob_field		*xml_nnamespace;	/* XML-NNAMESPACE */
-	cob_field		*xml_namespace_prefix;	/* XML-NAMESPACE-PREFIX */
-	cob_field		*xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
-	cob_field		*xml_ntext;		/* XML-NTEXT */
-	cob_field		*xml_text;		/* XML-TEXT */
 
 	unsigned int		module_active;		/* Module is active */
 	unsigned int		module_date;		/* Module num date */
@@ -1241,6 +1235,15 @@ typedef struct __cob_module {
 	unsigned int		module_stmt;		/* Last statement executed */
 	const char		**module_sources;	/* Source module names compiled */
 
+	cob_field		*xml_code;		/* XML-CODE */
+	cob_field		*xml_event;		/* XML-EVENT */
+	cob_field		*xml_information;	/* XML-INFORMATION */
+	cob_field		*xml_namespace;		/* XML-NAMESPACE */
+	cob_field		*xml_nnamespace;	/* XML-NNAMESPACE */
+	cob_field		*xml_namespace_prefix;	/* XML-NAMESPACE-PREFIX */
+	cob_field		*xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
+	cob_field		*xml_ntext;		/* XML-NTEXT */
+	cob_field		*xml_text;		/* XML-TEXT */
 } cob_module;
 
 

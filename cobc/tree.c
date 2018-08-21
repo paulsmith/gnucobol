@@ -1029,6 +1029,7 @@ set_xml_attrs_and_children (struct cb_field *record, const int children_are_attr
 			    struct cb_xml_generate_tree * const * const tree)
 {
 	struct cb_field			*child;
+	cb_tree			        child_tree_or_null;
 	struct cb_xml_generate_tree	*child_tree;
 	struct cb_xml_generate_tree	*last_attr = NULL;
 	struct cb_xml_generate_tree	*last_child_tree = NULL;
@@ -1040,13 +1041,14 @@ set_xml_attrs_and_children (struct cb_field *record, const int children_are_attr
 			continue;
 		}
 
-		child_tree = CB_XML_TREE (cb_build_xml_tree (child, 0,
-							     children_are_attrs,
-							     name_list, type_list,
-							     suppress_list));
-		if (!child_tree) {
+		child_tree_or_null = cb_build_xml_tree (child, 0,
+							children_are_attrs,
+							name_list, type_list,
+							suppress_list);
+		if (!child_tree_or_null) {
 			continue;
 		}
+		child_tree = CB_XML_TREE (child_tree_or_null);
 		child_tree->parent = *tree;
 		child_tree->sibling = NULL;
 
