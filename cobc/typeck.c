@@ -3592,6 +3592,16 @@ cb_validate_program_body (struct cb_program *prog)
 	prog->exec_list = cb_list_reverse (prog->exec_list);
 }
 
+/* General */
+
+static COB_INLINE COB_A_INLINE void
+cb_copy_source_reference (cb_tree target, cb_tree x)
+{
+	target->source_file = x->source_file;
+	target->source_line = x->source_line;
+	target->source_column = x->source_column;
+}
+
 /* Expressions */
 
 static void
@@ -3761,6 +3771,17 @@ expr_reduce (int token)
 					TOKEN (-3) = 'x';
 					if (CB_TREE_CLASS (VALUE (-1)) != CB_CLASS_BOOLEAN) {
 						VALUE (-3) = cb_build_binary_op (expr_lh, op, VALUE (-1));
+#if 0					/* Note:   We loose the source reference here if
+						           the result is true/false, for example because of
+						           comparing 'A' = 'B'. As we now have cb_false
+						           in VALUE (-3) we should not add the reference there.
+						  CHECKME: Should we store the value as PAIR with a new
+						           cb_tree containing the reference and unpack it
+						           everywhere or is there a better option to find?
+					     See:     Test syn_misc.at - Constant Expressions (2)
+						*/
+						cb_copy_source_reference (VALUE (-3), expr_lh);
+#endif
 					} else {
 						VALUE (-3) = VALUE (-1);
 					}
@@ -4094,9 +4115,9 @@ cb_build_expr (cb_tree list)
 			has_rel = 1;
 			break;
 		default:
-			 if (op == 'x') {
+			v = CB_VALUE (l);
+			if (op == 'x') {
 				has_var = 1;
-				v = CB_VALUE (l);
 				if (CB_TREE_TAG (v) == CB_TAG_BINARY_OP) {
 					has_rel = 1;
 				} else
@@ -4149,7 +4170,7 @@ cb_build_expr (cb_tree list)
 						_("suggest parentheses around %s within %s"), "OR", "AND");
 				}
 			}
-			cb_expr_shift (op, CB_VALUE (l));
+			cb_expr_shift (op, v);
 			break;
 		}
 	}
@@ -4749,6 +4770,7 @@ build_cond_88 (cb_tree x)
 {
 	struct cb_field	*f;
 	const char	*real_statement;	/* bad hack... */
+
 	cb_tree		l;
 	cb_tree		t;
 	cb_tree		c1;
@@ -4784,6 +4806,7 @@ build_cond_88 (cb_tree x)
 			c1 = cb_build_binary_op (c1, '|', c2);
 		}
 	}
+
 	return c1;
 }
 
@@ -5039,6 +5062,7 @@ cb_build_cond (cb_tree x)
 	struct cb_binary_op	*p;
 	cb_tree			d1;
 	cb_tree			d2;
+	cb_tree			ret;
 	int			size1;
 	int			size2;
 
@@ -5076,7 +5100,9 @@ cb_build_cond (cb_tree x)
 		return x;
 	case CB_TAG_REFERENCE:
 		if (!CB_FIELD_P (cb_ref (x))) {
-			return cb_build_cond (cb_ref (x));
+			ret = cb_build_cond (cb_ref (x));
+			cb_copy_source_reference (ret, x);
+			return ret;
 		}
 
 		f = CB_FIELD_PTR (x);
@@ -5085,7 +5111,9 @@ cb_build_cond (cb_tree x)
 		if (f->level == 88) {
 			/* Build an 88 condition at every occurrence */
 			/* as it may be subscripted */
-			return cb_build_cond (build_cond_88 (x));
+			ret = cb_build_cond (build_cond_88 (x));
+			cb_copy_source_reference (ret, x);
+			return ret;
 		}
 
 		break;
@@ -5111,7 +5139,7 @@ cb_build_cond (cb_tree x)
 			||  CB_INDEX_OR_HANDLE_P (p->y)
 			||  CB_TREE_CLASS (p->x) == CB_CLASS_POINTER
 			||  CB_TREE_CLASS (p->y) == CB_CLASS_POINTER) {
-				x = cb_build_binary_op (p->x, '-', p->y);
+				ret = cb_build_binary_op (p->x, '-', p->y);
 			} else if (CB_BINARY_OP_P (p->x)
 				|| CB_BINARY_OP_P (p->y)) {
 				/* Decimal comparison */
@@ -5123,17 +5151,17 @@ cb_build_cond (cb_tree x)
 				dpush (CB_BUILD_FUNCALL_2 ("cob_decimal_cmp", d1, d2));
 				decimal_free ();
 				decimal_free ();
-				x = cb_list_reverse (decimal_stack);
+				ret = cb_list_reverse (decimal_stack);
 				decimal_stack = NULL;
 			} else {
 				/* DEBUG Bypass optimization for PERFORM */
 				if (current_program->flag_debugging) {
-					x = CB_BUILD_FUNCALL_2 ("cob_cmp", p->x, p->y);
+					ret = CB_BUILD_FUNCALL_2 ("cob_cmp", p->x, p->y);
 					break;
 				}
 				if (cb_check_num_cond (p->x, p->y)) {
 					size1 = cb_field_size (p->x);
-					x = CB_BUILD_FUNCALL_3 ("memcmp",
+					ret = CB_BUILD_FUNCALL_3 ("memcmp",
 						CB_BUILD_CAST_ADDRESS (p->x),
 						CB_BUILD_CAST_ADDRESS (p->y),
 						cb_int (size1));
@@ -5142,7 +5170,7 @@ cb_build_cond (cb_tree x)
 				if (CB_TREE_CLASS (p->x) == CB_CLASS_NUMERIC &&
 				    CB_TREE_CLASS (p->y) == CB_CLASS_NUMERIC &&
 				    cb_fits_long_long (p->y)) {
-					x = cb_build_optim_cond (p);
+					ret = cb_build_optim_cond (p);
 					break;
 				}
 
@@ -5154,7 +5182,7 @@ cb_build_cond (cb_tree x)
 				    !current_program->alphabet_name_list &&
 				    (p->y == cb_space || p->y == cb_low ||
 				     p->y == cb_high || p->y == cb_zero)) {
-					x = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
+					ret = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
 					break;
 				}
 				if (cb_check_alpha_cond (p->x) &&
@@ -5166,22 +5194,26 @@ cb_build_cond (cb_tree x)
 					size2 = 0;
 				}
 				if (size1 == 1 && size2 == 1) {
-					x = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
+					ret = CB_BUILD_FUNCALL_2 ("$G", p->x, p->y);
 				} else if (size1 != 0 && size1 == size2) {
-					x = CB_BUILD_FUNCALL_3 ("memcmp",
+					ret = CB_BUILD_FUNCALL_3 ("memcmp",
 						CB_BUILD_CAST_ADDRESS (p->x),
 						CB_BUILD_CAST_ADDRESS (p->y),
 						cb_int (size1));
 				} else {
 					if (CB_TREE_CLASS (p->x) == CB_CLASS_NUMERIC && p->y == cb_zero) {
-						x = cb_build_optim_cond (p);
+						ret = cb_build_optim_cond (p);
 					} else {
-						x = CB_BUILD_FUNCALL_2 ("cob_cmp", p->x, p->y);
+						ret = CB_BUILD_FUNCALL_2 ("cob_cmp", p->x, p->y);
 					}
 				}
 			}
 		}
-		return cb_build_binary_op (x, p->op, p->y);
+		ret = cb_build_binary_op (ret, p->op, p->y);
+		if (ret != cb_true && ret != cb_false) {
+			cb_copy_source_reference (ret, x);
+		}
+		return ret;
 	default:
 		break;
 	}
@@ -7585,8 +7617,18 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 	}
 
 	if (c1 == NULL) {
+		int old_line = cb_source_line;
+		const char *old_file = cb_source_file;
+
+		cb_source_line = stmt->source_line;
+		cb_source_file = stmt->source_file;
+
 		cb_emit (cb_build_comment ("WHEN OTHER"));
 		cb_emit (stmt);
+
+		cb_source_file = old_file;
+		cb_source_line = old_line;
+
 	} else {
 		c2 = stmt;
 		/* Check if last statement is GO TO */
@@ -7596,7 +7638,7 @@ build_evaluate (cb_tree subject_list, cb_tree case_list, cb_tree labid)
 			}
 		}
 		if (c3 && CB_VALUE (c3) && CB_STATEMENT_P (CB_VALUE (c3))) {
-			c3 = CB_STATEMENT(CB_VALUE(c3))->body;
+			c3 = CB_STATEMENT (CB_VALUE (c3))->body;
 			if (c3 && CB_VALUE (c3) && !CB_GOTO_P (CB_VALUE(c3))) {
 				/* Append the jump */
 				c2 = cb_list_add (stmt, labid);
@@ -7706,6 +7748,8 @@ cb_emit_if (cb_tree cond, cb_tree stmt1, cb_tree stmt2)
 {
 	cb_emit (cb_build_if (cond, stmt1, stmt2, 1));
 }
+
+/* SEARCH .. WHEN clause (internal IF statement) */
 
 cb_tree
 cb_build_if_check_break (cb_tree cond, cb_tree stmts)

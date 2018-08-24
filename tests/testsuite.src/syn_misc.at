@@ -88,7 +88,7 @@ AT_CLEANUP
 
 
 AT_SETUP([warn literal size])
-AT_KEYWORDS([misc numeric constant expressions])
+AT_KEYWORDS([misc numeric constant expression])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -353,7 +353,7 @@ AT_CLEANUP
 
 
 AT_SETUP([warn literal size in constant expr. (level 88)])
-AT_KEYWORDS([misc numeric constant expressions])
+AT_KEYWORDS([misc numeric constant expression])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -4953,7 +4953,12 @@ AT_CLEANUP
 
 
 AT_SETUP([Constant Expressions (1)])
-AT_KEYWORDS([conditions refmod IF EVALUATE])
+AT_KEYWORDS([condition expression refmod IF EVALUATE])
+
+# FIXME: EVALUATE is taken into account too late,
+#        especially for object FALSE and multiple objects
+
+AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -5068,9 +5073,9 @@ prog.cob:59: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:61: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:71: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:73: error: offset of 'var' out of bounds: -99
+prog.cob:71: warning: expression is always TRUE
+prog.cob:73: error (ignored): offset of 'var' out of bounds: -99
 prog.cob:74: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob:74: warning: expression is always TRUE
 prog.cob:74: warning: expression is always FALSE
 prog.cob:82: warning: expression '15' EQUALS '115' is always FALSE
 prog.cob:85: warning: expression '115' EQUALS '15' is always FALSE
@@ -5080,13 +5085,18 @@ AT_CLEANUP
 
 
 AT_SETUP([Constant Expressions (2)])
-AT_KEYWORDS([conditions refmod IF EVALUATE])
+AT_KEYWORDS([condition expression refmod IF EVALUATE])
 
-# we currently only get the last line of an expression when we compare two constants
+# We currently only get the last line of an expression when we compare
+# two constants like 'A' = 'B'. The reason is that internally we combine
+# both internal trees which have a source reference to cb_true/cb_false
+# which don't.
+# As soon as this information is missing we can only "guess" the position
+# from last parsed expression.
 
-# we currently do the comparison checks for EVALUATE from last WHEN to first one
-# to get the line numbers in order we'd need to have to postpone the check
-# until the list of WHENs is reversed
+# Furthermore we do the comparison checks for EVALUATE from last WHEN to first
+# one to get the line numbers in order we'd need to have to postpone the check
+# until the list of WHENs is reversed.
 
 AT_XFAIL_IF(true)
 
@@ -5141,7 +5151,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Constant Expressions (3)])
-AT_KEYWORDS([conditions refmod undefined])
+AT_KEYWORDS([condition expression refmod undefined])
 
 # verify that we do ignore undefined errors where possible
 AT_DATA([prog.cob], [
@@ -5190,7 +5200,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Constant Expressions (4)])
-AT_KEYWORDS([conditions refmod])
+AT_KEYWORDS([condition expression refmod])
 
 # verify that we do not ignore parsing errors as
 # these are likely to raise issues in codegen
@@ -5224,7 +5234,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Missing imperative statements])
-AT_KEYWORDS([conditions IF EVALUATE PERFORM])
+AT_KEYWORDS([condition expression IF EVALUATE PERFORM])
 
 # we currently don't do the necessary parsing steps for
 # WHEN / WHEN OTHER without statements to pass this test

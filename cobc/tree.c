@@ -160,9 +160,11 @@ cb_tree cb_standard_error_handler = NULL;
 
 unsigned int	gen_screen_ptr = 0;
 
+#if 0 /* TODO remove if not needed */
 static	int	save_expr_line = 0;
-static	cb_tree cb_zero_lit;
 static	char	*save_expr_file = NULL;
+#endif
+static	cb_tree cb_zero_lit;
 static	int	prev_expr_line = 0;
 static	int	prev_expr_pos = 0;
 #define EXPR_WARN_PER_LINE 8
@@ -214,18 +216,23 @@ copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 		e->source_file = y->source_file;
 		e->source_line = y->source_line;
 		e->source_column = y->source_column;
+#if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)y->source_file;
 		save_expr_line = y->source_line;
+#endif
 	} else if (!x && y && y->source_line) {
 		e->source_file = y->source_file;
 		e->source_line = y->source_line;
 		e->source_column = y->source_column;
+#if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
 		save_expr_line = e->source_line;
+#endif
 	} else if (x && x->source_line) {
 		e->source_file = x->source_file;
 		e->source_line = x->source_line;
 		e->source_column = x->source_column;
+#if 0 /* TODO remove if not needed */
 		save_expr_file = (char *)e->source_file;
 		save_expr_line = e->source_line;
 	} else if (y || x) {
@@ -234,6 +241,7 @@ copy_file_line (cb_tree e, cb_tree y, cb_tree x)
 	} else if (save_expr_line) {
 		e->source_file = save_expr_file;
 		e->source_line = save_expr_line;
+#endif
 	} else {
 		e->source_line = cb_exp_line;
 		e->source_file = cb_source_file;
@@ -5491,7 +5499,7 @@ cb_build_goto (const cb_tree target, const cb_tree depending)
 	return CB_TREE (p);
 }
 
-/* IF */
+/* IF / WHEN / PRESENT WHEN */
 
 cb_tree
 cb_build_if (const cb_tree test, const cb_tree stmt1, const cb_tree stmt2,

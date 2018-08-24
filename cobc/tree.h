@@ -93,7 +93,7 @@ enum cb_tag {
 	CB_TAG_SEARCH,		/* 21 SEARCH statement */
 	CB_TAG_CALL,		/* 22 CALL statement */
 	CB_TAG_GOTO,		/* 23 GO TO statement */
-	CB_TAG_IF,		/* 24 IF statement */
+	CB_TAG_IF,		/* 24 IF statement / WHEN clause / PRESENT WHEN clause */
 	CB_TAG_PERFORM,		/* 25 PERFORM statement */
 	CB_TAG_STATEMENT,	/* 26 General statement */
 	CB_TAG_CONTINUE,	/* 27 CONTINUE statement */
@@ -1227,14 +1227,14 @@ struct cb_goto {
 #define CB_GOTO(x)		(CB_TREE_CAST (CB_TAG_GOTO, struct cb_goto, x))
 #define CB_GOTO_P(x)		(CB_TREE_TAG (x) == CB_TAG_GOTO)
 
-/* IF and WHEN */
+/* IF and WHEN and PRESENT WHEN */
 
 struct cb_if {
 	struct cb_tree_common	common;		/* Common values */
 	cb_tree			test;		/* Condition */
 	cb_tree			stmt1;		/* Statement list */
 	cb_tree			stmt2;		/* ELSE/WHEN statement list */
-	unsigned int		is_if;		/* From IF */
+	unsigned int		is_if;		/* From IF (1), WHEN (0), PRESENT WHEN (3+4) */
 };
 
 #define CB_IF(x)		(CB_TREE_CAST (CB_TAG_IF, struct cb_if, x))

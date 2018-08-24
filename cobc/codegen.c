@@ -7656,13 +7656,28 @@ output_stmt (cb_tree x)
 					output_line ("/* WHEN is always %s */", bop->op == '!'?"FALSE":"TRUE");
 				} else if (w == cb_false) {
 					output_line ("/* WHEN is always %s */", bop->op != '!'?"FALSE":"TRUE");
-				} else if (w && w->source_line) {
+				} else if (ip->test->source_line || (w && w->source_line)) {
+					if (ip->test->source_line) {
+						w = ip->test;
+					} else {
+						w = w;
+					}
 					output_prefix ();
 					output ("/* Line: %-10d: %-19s", w->source_line, "WHEN");
 					if (w->source_file) {
 						output (": %s ", w->source_file);
 					}
 					output ("*/\n");
+					/* Output source location as code */
+					if (cb_flag_source_location
+					 || cb_flag_dump) {
+						if (last_line != w->source_line) {
+							output_line ("module->module_stmt = 0x%08X;",
+								COB_SET_LINE_FILE(w->source_line, lookup_source(w->source_file)));
+						}
+					} else {
+						lookup_source(w->source_file);
+					}
 					if (cb_flag_source_location
 					 && last_line != w->source_line) {
 						/* Output source location as code */

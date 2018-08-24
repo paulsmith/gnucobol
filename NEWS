@@ -55,8 +55,8 @@ NEWS - user visible changes				-*- outline -*-
 ** The option -fif-cutoff (option to change generated C sources to use
    a label + goto for nested if/else) was deactivated to allow the C compiler
    to fully control the program flow.
-   Please report if you have a need for this option as it will be removed
-   permanently in the next release of GnuCOBOL otherwise.
+   ** Please report if you have a need for this option as it will be **
+   ** removed permanently in the next release of GnuCOBOL otherwise. **
 
 * Changes in the runtime
 
@@ -176,6 +176,9 @@ NEWS - user visible changes				-*- outline -*-
 ** most of the COBOL 2014 spec Compiler Directive Facility is in
 
 ** optional: stricter syntax checks
+
+** Optimization: in cases where the condition in IF/WHEN is resolved down
+   to TRUE or FALSE at compile time cobc doesn't emit any code
 
 ** refactored and extended compiler and runtime messages with available
    translations (currently to Spanish, Portuguese and Dutch, partial to German)

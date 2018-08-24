@@ -6251,7 +6251,8 @@ AT_CHECK([$COBCRUN_DIRECT ./caller], [42], [+000000042], [])
 AT_CLEANUP
 
 
-# Checks both -ftrace(all) and -fsource-location (which is implied by -debug/g)
+# Checks both -ftrace(all), which needs to be manually set
+# and    -fsource-location, which is implied by -debug/g
 AT_SETUP([READY TRACE / RESET TRACE])
 AT_KEYWORDS([runmisc -ftrace -ftraceall -fsource-location
 COB_PHYSICAL_CANCEL COB_PRE_LOAD physical_cancel pre_load])
@@ -6270,6 +6271,8 @@ AT_DATA([caller.cob], [
            MOVE 2 TO RETURN-CODE
            CALL "callee1"
            END-CALL
+           CALL "callee1"
+           END-CALL
            CANCEL "callee1"
            MOVE 0 TO RETURN-CODE
            STOP RUN.
@@ -6279,11 +6282,35 @@ AT_DATA([callee1.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      callee1.
        PROCEDURE        DIVISION.
-           ADD 1 TO RETURN-CODE END-ADD
-           CALL "callee2" END-CALL
-           CANCEL "callee2"
-           CALL "callee2b" END-CALL
-           CANCEL "callee2b"
+           ADD 1 TO RETURN-CODE
+             NOT ON SIZE ERROR
+               IF RETURN-CODE = 1
+                 CONTINUE
+               ELSE IF RETURN-CODE = 2
+                 CONTINUE
+               ELSE
+                 CONTINUE
+           .
+           EVALUATE RETURN-CODE
+           WHEN 1
+             CONTINUE
+           WHEN 2
+           WHEN 3
+             CONTINUE
+           WHEN OTHER
+             CONTINUE
+           END-EVALUATE
+           EVALUATE TRUE
+           WHEN RETURN-CODE = 1
+             CONTINUE
+           WHEN RETURN-CODE = 2
+           WHEN RETURN-CODE = 3
+             CONTINUE
+           WHEN OTHER
+             CONTINUE
+           END-EVALUATE
+           CALL "callee2"  END-CALL
+           CANCEL "callee2"  CALL "callee2b" END-CALL  CANCEL "callee2b"
            SUBTRACT 1 FROM RETURN-CODE END-SUBTRACT
            EXIT PROGRAM.
 ])
@@ -6292,7 +6319,15 @@ AT_DATA([callee2.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      callee2.
        PROCEDURE        DIVISION.
-           COMPUTE RETURN-CODE = 1 + 2 END-COMPUTE.
+           COMPUTE RETURN-CODE
+                 = 1 + 1
+              ON SIZE ERROR
+                 MOVE -1 TO RETURN-CODE
+              NOT ON SIZE ERROR
+                 COMPUTE RETURN-CODE
+                       = 1 + 1
+                 END-COMPUTE
+           END-COMPUTE.
            CALL "callee2c" END-CALL
            CANCEL "callee2c"
            MOVE 0 TO RETURN-CODE.
@@ -6307,7 +6342,7 @@ AT_DATA([preload.cob], [
        SOME-PAR.
            PERFORM OTHER-SEC
            MOVE 0 TO RETURN-CODE.
-       ENTRY "LEAVE-ME".
+       ENTRY "LEAVE-ME".  
        END-PAR.
            EXIT PROGRAM.
        OTHER-SEC SECTION.
@@ -6351,7 +6386,17 @@ Program-Id: callee1          Entry:     callee1                Line: 4
 Program-Id: callee1          Section:   (None)                 Line: 5
 Program-Id: callee1          Paragraph: (None)                 Line: 5
 Program-Id: callee1          Statement: ADD                    Line: 5
-Program-Id: callee1          Statement: CALL                   Line: 6
+Program-Id: callee1          Statement: IF                     Line: 7
+Program-Id: callee1          Statement: IF                     Line: 9
+Program-Id: callee1          Statement: CONTINUE               Line: 12
+Program-Id: callee1          Statement: EVALUATE               Line: 14
+Program-Id: callee1          Statement: WHEN                   Line: 15
+Program-Id: callee1          Statement: CONTINUE               Line: 21
+Program-Id: callee1          Statement: EVALUATE               Line: 23
+Program-Id: callee1          Statement: WHEN                   Line: 24
+Program-Id: callee1          Statement: WHEN                   Line: 27
+Program-Id: callee1          Statement: CONTINUE               Line: 30
+Program-Id: callee1          Statement: CALL                   Line: 32
 Source :    'callee2c.cob'
 Program-Id: callee2c         Statement: PERFORM                Line: 7
 Program-Id: callee2c         Statement: COMPUTE                Line: 12
@@ -6359,8 +6404,8 @@ Program-Id: callee2c         Statement: EXIT                   Line: 13
 Program-Id: callee2c         Statement: MOVE                   Line: 8
 Program-Id: callee2c         Statement: EXIT PROGRAM           Line: 10
 Source :    'callee1.cob'
-Program-Id: callee1          Statement: CANCEL                 Line: 7
-Program-Id: callee1          Statement: CALL                   Line: 8
+Program-Id: callee1          Statement: CANCEL                 Line: 33
+Program-Id: callee1          Statement: CALL                   Line: 33
 Source:     'preload.cob'
 Program-Id: callee2b         Entry:     callee2b               Line: 4
 Program-Id: callee2b         Section:   SOME-SEC               Line: 5
@@ -6372,14 +6417,144 @@ Program-Id: callee2b         Entry:     LEAVE-ME               Line: 9
 Program-Id: callee2b         Paragraph: END-PAR                Line: 10
 Program-Id: callee2b         Exit:      callee2b
 Source :    'callee1.cob'
-Program-Id: callee1          Statement: CANCEL                 Line: 9
-Program-Id: callee1          Statement: SUBTRACT               Line: 10
-Program-Id: callee1          Statement: EXIT PROGRAM           Line: 11
+Program-Id: callee1          Statement: CANCEL                 Line: 33
+Program-Id: callee1          Statement: SUBTRACT               Line: 34
+Program-Id: callee1          Statement: EXIT PROGRAM           Line: 35
 Program-Id: callee1          Exit:      callee1
 Source :    'caller.cob'
-Program-Id: caller           Statement: CANCEL                 Line: 15
-Program-Id: caller           Statement: MOVE                   Line: 16
-Program-Id: caller           Statement: STOP RUN               Line: 17
+Program-Id: caller           Statement: CALL                   Line: 15
+Source:     'callee1.cob'
+Program-Id: callee1          Entry:     callee1                Line: 4
+Program-Id: callee1          Section:   (None)                 Line: 5
+Program-Id: callee1          Paragraph: (None)                 Line: 5
+Program-Id: callee1          Statement: ADD                    Line: 5
+Program-Id: callee1          Statement: IF                     Line: 7
+Program-Id: callee1          Statement: IF                     Line: 9
+Program-Id: callee1          Statement: CONTINUE               Line: 12
+Program-Id: callee1          Statement: EVALUATE               Line: 14
+Program-Id: callee1          Statement: WHEN                   Line: 15
+Program-Id: callee1          Statement: CONTINUE               Line: 21
+Program-Id: callee1          Statement: EVALUATE               Line: 23
+Program-Id: callee1          Statement: WHEN                   Line: 24
+Program-Id: callee1          Statement: WHEN                   Line: 27
+Program-Id: callee1          Statement: CONTINUE               Line: 30
+Program-Id: callee1          Statement: CALL                   Line: 32
+Source :    'callee2c.cob'
+Program-Id: callee2c         Statement: PERFORM                Line: 7
+Program-Id: callee2c         Statement: COMPUTE                Line: 12
+Program-Id: callee2c         Statement: EXIT                   Line: 13
+Program-Id: callee2c         Statement: MOVE                   Line: 8
+Program-Id: callee2c         Statement: EXIT PROGRAM           Line: 10
+Source :    'callee1.cob'
+Program-Id: callee1          Statement: CANCEL                 Line: 33
+Program-Id: callee1          Statement: CALL                   Line: 33
+Source:     'preload.cob'
+Program-Id: callee2b         Entry:     callee2b               Line: 4
+Program-Id: callee2b         Section:   SOME-SEC               Line: 5
+Program-Id: callee2b         Paragraph: SOME-PAR               Line: 6
+Program-Id: callee2b         Section:   OTHER-SEC              Line: 12
+Program-Id: callee2b         Paragraph: (None)                 Line: 12
+Program-Id: callee2b         Paragraph: EX                     Line: 14
+Program-Id: callee2b         Entry:     LEAVE-ME               Line: 9
+Program-Id: callee2b         Paragraph: END-PAR                Line: 10
+Program-Id: callee2b         Exit:      callee2b
+Source :    'callee1.cob'
+Program-Id: callee1          Statement: CANCEL                 Line: 33
+Program-Id: callee1          Statement: SUBTRACT               Line: 34
+Program-Id: callee1          Statement: EXIT PROGRAM           Line: 35
+Program-Id: callee1          Exit:      callee1
+Source :    'caller.cob'
+Program-Id: caller           Statement: CANCEL                 Line: 17
+Program-Id: caller           Statement: MOVE                   Line: 18
+Program-Id: caller           Statement: STOP RUN               Line: 19
+])
+
+AT_CHECK([$COBC -ftraceall callee1.cob], [0], [], [])
+AT_CHECK([$COBC callee2.cob], [0], [], [])
+AT_CHECK([$COBC -ftrace preload.cob], [0], [], [])
+AT_CHECK([$COBC -fsource-location callee2c.cob], [0], [], [])
+AT_CHECK([$COBC -x -o prog -ftraceall caller.cob], [0], [], [])
+AT_CHECK([COB_PHYSICAL_CANCEL=1 COB_PRE_LOAD=preload ./prog], [0], [],
+[Source: 'caller.cob'
+Program-Id:  caller
+Program-Id:  caller                      MOVE                            Line:      7
+Program-Id:  caller                      RESET TRACE                     Line:      8
+Program-Id:  caller                      MOVE                            Line:     12
+Program-Id:  caller                      CALL                            Line:     13
+Source: 'callee1.cob'
+Program-Id:  callee1
+Program-Id:  callee1              Entry: callee1                         Line:      4
+Program-Id:  callee1                     ADD                             Line:      5
+Program-Id:  callee1                     IF                              Line:      7
+Program-Id:  callee1                     IF                              Line:      9
+Program-Id:  callee1                     CONTINUE                        Line:     12
+Program-Id:  callee1                     EVALUATE                        Line:     14
+Program-Id:  callee1                     WHEN                            Line:     15
+Program-Id:  callee1                     CONTINUE                        Line:     21
+Program-Id:  callee1                     EVALUATE                        Line:     23
+Program-Id:  callee1                     WHEN                            Line:     24
+Program-Id:  callee1                     WHEN                            Line:     27
+Program-Id:  callee1                     CONTINUE                        Line:     30
+Program-Id:  callee1                     CALL                            Line:     32
+Program-Id:  callee1                     CANCEL                          Line:     33
+Program-Id:  callee1                     CALL                            Line:     33
+Source: 'preload.cob'
+Program-Id:  callee2b
+Program-Id:  callee2b             Entry: callee2b                        Line:      4
+Program-Id:  callee2b           Section: SOME-SEC                        Line:      5
+Program-Id:  callee2b         Paragraph: SOME-PAR                        Line:      6
+Program-Id:  callee2b           Section: OTHER-SEC                       Line:     12
+Program-Id:  callee2b         Paragraph: EX                              Line:     14
+Program-Id:  callee2b             Entry: LEAVE-ME                        Line:     14
+Program-Id:  callee2b         Paragraph: END-PAR                         Line:     10
+Program-Id:  callee2b              Exit: callee2b                        Line:     10
+Source: 'callee1.cob'
+Program-Id:  callee1
+Program-Id:  callee1                     CANCEL                          Line:     33
+Program-Id:  callee1                     SUBTRACT                        Line:     34
+Program-Id:  callee1                     EXIT PROGRAM                    Line:     35
+Program-Id:  callee1               Exit: callee1                         Line:     35
+Source: 'caller.cob'
+Program-Id:  caller
+Program-Id:  caller                      CALL                            Line:     15
+Source: 'callee1.cob'
+Program-Id:  callee1
+Program-Id:  callee1              Entry: callee1                         Line:      4
+Program-Id:  callee1                     ADD                             Line:      5
+Program-Id:  callee1                     IF                              Line:      7
+Program-Id:  callee1                     IF                              Line:      9
+Program-Id:  callee1                     CONTINUE                        Line:     12
+Program-Id:  callee1                     EVALUATE                        Line:     14
+Program-Id:  callee1                     WHEN                            Line:     15
+Program-Id:  callee1                     CONTINUE                        Line:     21
+Program-Id:  callee1                     EVALUATE                        Line:     23
+Program-Id:  callee1                     WHEN                            Line:     24
+Program-Id:  callee1                     WHEN                            Line:     27
+Program-Id:  callee1                     CONTINUE                        Line:     30
+Program-Id:  callee1                     CALL                            Line:     32
+Program-Id:  callee1                     CANCEL                          Line:     33
+Program-Id:  callee1                     CALL                            Line:     33
+Source: 'preload.cob'
+Program-Id:  callee2b
+Program-Id:  callee2b             Entry: callee2b                        Line:      4
+Program-Id:  callee2b           Section: SOME-SEC                        Line:      5
+Program-Id:  callee2b         Paragraph: SOME-PAR                        Line:      6
+Program-Id:  callee2b           Section: OTHER-SEC                       Line:     12
+Program-Id:  callee2b         Paragraph: EX                              Line:     14
+Program-Id:  callee2b             Entry: LEAVE-ME                        Line:     14
+Program-Id:  callee2b         Paragraph: END-PAR                         Line:     10
+Program-Id:  callee2b              Exit: callee2b                        Line:     10
+Source: 'callee1.cob'
+Program-Id:  callee1
+Program-Id:  callee1                     CANCEL                          Line:     33
+Program-Id:  callee1                     SUBTRACT                        Line:     34
+Program-Id:  callee1                     EXIT PROGRAM                    Line:     35
+Program-Id:  callee1               Exit: callee1                         Line:     35
+Source: 'caller.cob'
+Program-Id:  caller
+Program-Id:  caller                      CANCEL                          Line:     17
+Program-Id:  caller                      MOVE                            Line:     18
+Program-Id:  caller                      STOP RUN                        Line:     19
 ])
 
 AT_CLEANUP

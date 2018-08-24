@@ -1,4 +1,15 @@
 
+2018-08-24  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_build_cond): keep source-reference for trace/position
+	  code generation and compiler messages
+	* typeck.c (build_evaluate): store source-reference for WHEN OTHER
+	* tree.c (copy_file_line): disabled save/restore source-reference
+	  of expressions as the current code works identical without it
+	* codegen.c (output_stmt): use source-reference of expression for
+	  WHEN / WHEN OTHER, output its location to return correct position
+	  for runtime messages and tracing
+
 2018-08-21  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: implemented MS-COBOL position-specifier for DISPLAY/ACCEPT

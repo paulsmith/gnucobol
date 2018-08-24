@@ -11972,13 +11972,13 @@ _if_then:
 
 if_true:
   {
-	  cb_true_side ();
+	cb_true_side ();
   }
 ;
 
 if_false:
   {
-	  cb_false_side ();
+	cb_false_side ();
   }
 ;
 

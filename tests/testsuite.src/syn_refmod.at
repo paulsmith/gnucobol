@@ -93,7 +93,7 @@ AT_CLEANUP
 
 
 AT_SETUP([constant-folding out of bounds])
-AT_KEYWORDS([refmod conditions])
+AT_KEYWORDS([refmod expression])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
