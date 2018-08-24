@@ -1259,7 +1259,7 @@ perform_label (const char *to_prefix, int to_lbl, int call_num)
 }
 
 static int
-add_new_label()
+add_new_label ()
 {
 	struct label_list	*l;
 	if (!cb_flag_computed_goto) {
@@ -9623,7 +9623,6 @@ output_module_register_init (cb_tree reg, const char *name)
 			output ("module->%s = ", name);
 			output_param (ref, -1);
 			output (";\n");
-			COBC_ABORT ();
 			return;
 		}
 		reg = ref;

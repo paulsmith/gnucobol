@@ -4415,10 +4415,10 @@ static struct register_struct *
 lookup_register (const char *name, const int checkimpl)
 {
 	size_t		i;
-	static char		upper_name[43];
-	int name_len = strlen (name);
+	static char	upper_name[43];
+	int		name_len = strlen (name);
 
-	if (name_len > sizeof(upper_name) - 1) {
+	if (name_len > sizeof (upper_name) - 1) {
 		return NULL;
 	}
 
