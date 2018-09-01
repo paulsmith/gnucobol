@@ -2079,7 +2079,7 @@ output_emit_field (cb_tree x, const char *cmt)
 				} else {
 					output ("static cob_field %s%d_%d\t= ", CB_PREFIX_FIELD, f->id,i);
 				}
-				output_field_sub (x,i);
+				output_field_sub (x, i);
 				output_local(";\t/* col%3d %s [%d]", f->report_column + (f->size * (i-1)), f->name, i);
 				output_local("*/\n");
 			}
@@ -9632,27 +9632,21 @@ output_module_register_init (cb_tree reg, const char *name)
 	/* LCOV_EXCL_STOP */
 
 	if (CB_REFERENCE_P (reg)) {
-		cb_tree	ref = cb_ref (reg);
-		if (!CB_FIELD_P (ref)) {
-			output_prefix ();
-			output ("module->%s = ", name);
-			output_param (ref, -1);
-			output (";\n");
+		reg = cb_ref (reg);
+		if (CB_FIELD_P (reg) && !CB_FIELD (reg)->count) {
 			return;
 		}
-		reg = ref;
-	}
-	
-	if (CB_FIELD_P (reg)) {
-		struct cb_field *field = CB_FIELD_PTR (reg);
+	} else {
+		struct cb_field *field = CB_FIELD (reg);
 		if (!field->count) {
 			return;
 		}
-		output_prefix ();
-		output ("module->%s = ", name);
-		output_field (reg);
-		output (";\n");
+		reg = cb_build_field_reference (field, NULL);
 	}
+	output_prefix ();
+	output ("module->%s = ", name);
+	output_param (reg, -1);
+	output (";\n");
 }
 
 static void
@@ -9766,8 +9760,8 @@ output_module_init (struct cb_program *prog)
 		output_line ("module->module_sources = NULL;");
 	}
 
-	/* Check for possible implementation without adding
-	   a multitude of module local registers to cob_module */
+	/* Check for possible implementation without adding a multitude
+	   of module local registers to cob_module structure */
 	output_module_register_init (prog->xml_code, "xml_code");
 	output_module_register_init (prog->xml_event, "xml_event");
 	output_module_register_init (prog->xml_information, "xml_information");

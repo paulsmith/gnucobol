@@ -8,6 +8,8 @@
 	  if neither source-file nor source-line is set
 	* common.c (cob_runtime_warning): allow warnings before call to
 	  cob_init()
+	* xml.c (set_xml_code): partially fix bug #548: don't try to set XML-CODE
+	  if the module has no reference (and therefore no field) for it
 
 2018-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 

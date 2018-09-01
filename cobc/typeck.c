@@ -1327,7 +1327,8 @@ cb_build_generic_register (const char *name, const char *external_definition)
 static void
 cb_build_register_xml_code (const char *name, const char *definition)
 {
-	cb_tree field;
+	cb_tree tfield;
+	struct cb_field *field;
 
 	if (!definition) {
 		definition = cb_get_register_definition (name);
@@ -1341,14 +1342,15 @@ cb_build_register_xml_code (const char *name, const char *definition)
 		return;
 	}
 
-	field = cb_build_field (cb_build_reference (name));
-	CB_FIELD_PTR (field)->usage = CB_USAGE_BINARY;
-	CB_FIELD_PTR (field)->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
-	cb_validate_field (CB_FIELD_PTR (field));
-	CB_FIELD_PTR (field)->values = CB_LIST_INIT (cb_zero);
-	CB_FIELD_PTR (field)->flag_no_init = 1;
-	CB_FIELD_PTR (field)->flag_is_global = 1;
-	current_program->xml_code = field;
+	tfield = cb_build_field (cb_build_reference (name));
+	field = CB_FIELD (tfield);
+	field->usage = CB_USAGE_BINARY;
+	field->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
+	cb_validate_field (field);
+	field->values = CB_LIST_INIT (cb_zero);
+	field->flag_no_init = 1;
+	field->flag_is_global = 1;
+	current_program->xml_code = tfield;
 }
 
 /* build a concrete register */

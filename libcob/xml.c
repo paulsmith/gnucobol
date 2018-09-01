@@ -60,6 +60,12 @@ set_xml_code (const unsigned int code)
 {
 	cob_decimal	d;
 
+	/* if the COBOL module never checks the code it isn't generated,
+	   this also makes clear that we don't need to (and can't) set it */
+	if (!COB_MODULE_PTR->xml_code) {
+		return;
+	}
+
 	mpz_init2 (d.value, COB_MPZ_DEF);
 	mpz_set_ui (d.value, code);
 	d.scale = 0;
