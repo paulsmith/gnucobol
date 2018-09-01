@@ -1,4 +1,14 @@
 
+2018-09-01  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* common.c (cob_gettmpdir): check if the specified temporary location
+	  is actually an existing directory; otherwise warn and check the next
+	  environment variable; added check_valid_env_tmpdir, check_valid_dir
+	* common.c (output_source_location): removed extra space in warnings
+	  if neither source-file nor source-line is set
+	* common.c (cob_runtime_warning): allow warnings before call to
+	  cob_init()
+
 2018-08-19  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* xml.c [!WITH_XML2] (cob_is_valid_uri): added minimal implementation,

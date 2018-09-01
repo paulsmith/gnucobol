@@ -6234,8 +6234,8 @@ cob_srttmpfile (void)
 	int		fd;
 
 	filename = cob_malloc ((size_t)COB_FILE_BUFF);
-	cob_temp_name(filename, NULL);
-	cob_incr_temp_iteration();
+	cob_temp_name (filename, NULL);
+	cob_incr_temp_iteration ();
 #ifdef	_WIN32
 	fd = open (filename,
 		    _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY | _O_TEMPORARY,

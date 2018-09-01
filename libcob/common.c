@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #include <math.h>
@@ -4275,35 +4276,50 @@ cob_putenv (char *name)
 	return -1;
 }
 
+#define check_valid_dir(x)	\
+	(   strlen (x) > COB_NORMAL_MAX \
+	 || stat (x, &st) != 0 || !(S_ISDIR (st.st_mode)))
+
+static const char *
+check_valid_env_tmpdir (const char * envname)
+{
+	const char *dir;
+	struct stat		st;
+
+	dir = getenv (envname);
+	if (!dir || !dir[0]) {
+		return NULL;
+	}
+	if (check_valid_dir (dir)) {
+		cob_runtime_warning ("Temporary directory %s is invalid, adjust TMPDIR!", envname);
+		return NULL;
+	}
+	return dir;
+}
+
 static const char *
 cob_gettmpdir (void)
 {
 	const char	*tmpdir;
 	char	*tmp;
 
-	if ((tmpdir = getenv ("TMPDIR")) == NULL) {
+	if ((tmpdir = check_valid_env_tmpdir ("TMPDIR")) == NULL) {
 		tmp = NULL;
 #ifdef	_WIN32
-		if ((tmpdir = getenv ("TEMP")) == NULL &&
-		    (tmpdir = getenv ("TMP")) == NULL &&
-		    (tmpdir = getenv ("USERPROFILE")) == NULL) {
-			tmpdir = "";
-		}
+		if ((tmpdir = check_valid_env_tmpdir ("TEMP")) == NULL
+		 && (tmpdir = check_valid_env_tmpdir ("TMP")) == NULL
+		 && (tmpdir = check_valid_env_tmpdir ("USERPROFILE")) == NULL) {
 #else
-		if ((tmpdir = getenv ("TMP")) == NULL &&
-		    (tmpdir = getenv ("TEMP")) == NULL) {
-			tmp = cob_fast_malloc (5U);
-			strcpy (tmp, "/tmp");
-			tmpdir = tmp;
-		}
-#endif
-		if (strlen (tmpdir) > COB_NORMAL_MAX
-		 || !access (tmpdir, W_OK)) {
-#ifndef	_WIN32
-			if (tmp) {
-				cob_free ((void *)tmp);
-				tmpdir = NULL;
+		if ((tmpdir = check_valid_env_tmpdir ("TMP")) == NULL
+			&& (tmpdir = check_valid_env_tmpdir ("TEMP")) == NULL) {
+			struct stat		st;
+			if (!check_valid_dir ("/tmp")) {
+				tmp = cob_fast_malloc (5U);
+				strcpy (tmp, "/tmp");
+				tmpdir = tmp;
 			}
+		}
+		if (!tmpdir) {
 #endif
 			tmp = cob_fast_malloc (2U);
 			tmp[0] = '.';
@@ -6485,11 +6501,14 @@ output_source_location (void)
 	} else {
 		if (cob_source_file) {
 			fprintf (stderr, "%s:", cob_source_file);
+			if (!cob_source_line) {
+				fputc (' ', stderr);
+		}
 		}
 		if (cob_source_line) {
 			fprintf (stderr, "%u:", cob_source_line);
+			fputc (' ', stderr);
 		}
-		fputc (' ', stderr);
 	}
 }
 
@@ -6526,7 +6545,7 @@ cob_runtime_warning (const char *fmt, ...)
 {
 	va_list args;
 
-	if (!cobsetptr->cob_display_warn) {
+	if (cobsetptr && !cobsetptr->cob_display_warn) {
 		return;
 	}
 

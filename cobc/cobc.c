@@ -1981,14 +1981,14 @@ cobc_abort_msg (void)
 		} else {
 			prog_type = prog_id = (char *)_("unknown");
 		}
-			if (!cb_source_line) {
-				cobc_err_msg (_("aborting codegen for %s (%s: %s)"),
-					cb_source_file, prog_type, prog_id);
-			} else {
-				cobc_err_msg (_("aborting compile of %s at line %d (%s: %s)"),
-					cb_source_file, cb_source_line, prog_type, prog_id);
-			}
+		if (!cb_source_line) {
+			cobc_err_msg (_("aborting codegen for %s (%s: %s)"),
+				cb_source_file, prog_type, prog_id);
 		} else {
+			cobc_err_msg (_("aborting compile of %s at line %d (%s: %s)"),
+				cb_source_file, cb_source_line, prog_type, prog_id);
+		}
+	} else {
 		cobc_err_msg (_("aborting"));
 	}
 }
