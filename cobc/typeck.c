@@ -2176,7 +2176,6 @@ cb_build_const_length (cb_tree x)
 		return cb_error_node;
 	}
 
-	memset (buff, 0, sizeof (buff));
 	f = CB_FIELD (cb_ref (x));
 	cb_validate_field (f);
 	if (f->flag_any_length) {
@@ -2191,6 +2190,7 @@ cb_build_const_length (cb_tree x)
 		cb_error (_("variable length item not allowed here"));
 		return cb_error_node;
 	}
+	memset (buff, 0, sizeof (buff));
 	if (f->redefines) {
 		cb_validate_field (f->redefines);
 		if (f->rename_thru) {
@@ -11825,7 +11825,7 @@ syntax_check_xml_gen_namespace (cb_tree namespace)
 static int
 is_valid_xml_name (const struct cb_literal * const name)
 {
-	int	i;
+	unsigned int	i;
 
 	if (!cob_is_xml_namestartchar (name->data[0])) {
 		return 0;
