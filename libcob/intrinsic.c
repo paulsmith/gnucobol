@@ -6586,14 +6586,14 @@ cob_intr_content_of (const int offset, const int length, const int params, ...)
 			} else {
 				size = strlen ((char *)pointed);
 			}
+			if (size > COB_MAX_UNBOUNDED_SIZE) {
+				cob_set_exception (COB_EC_SIZE_TRUNCATION);
+				size = COB_MAX_UNBOUNDED_SIZE;
+			}
 		} else {
 			cob_set_exception (COB_EC_DATA_PTR_NULL);
 			size = 0;
 		}
-	}
-	if (size > COB_MAX_UNBOUNDED_SIZE) {
-		cob_set_exception (COB_EC_SIZE_TRUNCATION);
-		size = COB_MAX_UNBOUNDED_SIZE;
 	}
 	if (size > 0) {
 		COB_FIELD_INIT (size, NULL, &const_alpha_attr);
