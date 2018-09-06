@@ -8799,7 +8799,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			case CB_CATEGORY_ALPHABETIC:
 				for (i = 0; i < l->size; i++) {
 					if (!isalpha (l->data[i]) &&
-					    l->data[i] != ' ') {
+						l->data[i] != ' ') {
 						goto value_mismatch;
 					}
 				}
@@ -8855,7 +8855,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				/* check the real size */
 				fdst = CB_FIELD_PTR (dst);
 				if (fdst->flag_justified) {
-					/* right justified: trimm left */
+					/* right justified: trim left */
 					for (i = 0; i != l->size; i++) {
 						if (l->data[i] != ' ') {
 							break;
@@ -8863,7 +8863,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					}
 					i = l->size - i;
 				} else {
-					/* normal field: trimm right */
+					/* normal field: trim right */
 					for (i = l->size - 1; i != 0; i--) {
 						if (l->data[i] != ' ') {
 							break;
@@ -8874,6 +8874,10 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				if ((int)i > size) {
 					size = i;
 					goto size_overflow;
+				}
+				/* for VALUE: additional check without trim */
+				if (is_value && l->size > fdst->size) {
+					goto value_mismatch;
 				}
 			}
 		}
