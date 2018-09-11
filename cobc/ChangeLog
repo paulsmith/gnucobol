@@ -1,4 +1,16 @@
 
+2018-09-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (evaluate_other): partial implementation of FR #288
+	  WHEN OTHER without imperative statement
+	* codegen.c (output_stmt): disabled lookup_source calls that seem
+	  to be not needed
+	* parser.y (perform_body): partial implementation of FR #288
+	  check inline PERFORM without imperative statement against
+	  configuration "missing-statement"
+	* cobc.c (process_command_line): make sure cb_missing_statement
+	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
+
 2018-09-10  Ron Norman <rjn@inglenet.com>
 
 	* tree.c: removed redundant warnings about xyz 'is always' TRUE/FALSE

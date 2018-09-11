@@ -11529,7 +11529,11 @@ evaluate_subject:
 evaluate_condition_list:
   evaluate_case_list evaluate_other
   {
-	$$ = cb_list_add ($1, $2);
+	if ($2) {
+		$$ = cb_list_add ($1, $2);
+	} else {
+		$$ = $1;
+	}
   }
 | evaluate_case_list
   %prec SHIFT_PREFER
@@ -11559,6 +11563,25 @@ evaluate_other:
   {
 	$$ = CB_BUILD_CHAIN ($3, NULL);
 	eval_inc2 = 0;
+  }
+| WHEN OTHER END_EVALUATE
+  {
+	eval_inc2 = 0;
+	cb_verify (cb_missing_statement,
+		_("WHEN OTHER without imperative statement"));
+	/* Note: we don't clear the EVALUATE terminator here
+	         as we'd have to skip this later
+	         [side effect: possible warning about missing terminator] */
+	$$ = NULL;
+  }
+| WHEN OTHER TOK_DOT
+  {
+	eval_inc2 = 0;
+	cb_verify (cb_missing_statement,
+		_("WHEN OTHER without imperative statement"));
+	/* Put the dot token back into the stack for reparse */
+	cb_unput_dot ();
+	$$ = NULL;
   }
 ;
 
@@ -12514,14 +12537,14 @@ perform_body:
   _thread_start
   perform_procedure
   _thread_handle
-  perform_option
+  _perform_option
   {
 	cb_emit_perform ($4, $2, $1, $3);
 	start_debug = save_debug;
 	cobc_cs_check = 0;
   }
 | _thread_start
-  perform_option
+  _perform_option
   _thread_handle
   {
 	CB_ADD_TO_CHAIN ($2, perform_stack);
@@ -12535,8 +12558,12 @@ perform_body:
 	cb_emit_perform ($2, $5, $1, $3);
   }
 | _thread_start
-  perform_option
+  _perform_option
   _thread_handle
+  {
+	cb_verify (cb_missing_statement,
+		_("inline PERFORM without imperative statement"));
+  }
   end_perform_or_dot
   {
 	cb_emit_perform ($2, NULL, $1, $3);
@@ -12595,7 +12622,7 @@ perform_procedure:
   }
 ;
 
-perform_option:
+_perform_option:
   /* empty */
   {
 	$$ = cb_build_perform_once (NULL);

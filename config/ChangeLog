@@ -1,4 +1,8 @@
 
+2018-09-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* mf-strict.conf: set missing-statement to error (according to MF docs)
+
 2018-08-07  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added xml-generate and xml-generate-extra-phrases options.

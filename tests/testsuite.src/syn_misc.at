@@ -4632,7 +4632,7 @@ AT_DATA([prog.cob], [
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CHECK([$COMPILE_ONLY -fmissing-statement=ok prog.cob], [0], [], [])
 AT_CLEANUP
 
 
@@ -5382,24 +5382,32 @@ AT_DATA([prog.cob], [
                move var      to othervar
            END-EVALUATE
 
+           EVALUATE TRUE
+           WHEN  A = B
+               move var      to othervar
+           WHEN OTHER
+           .
+
+           EVALUATE TRUE
+           WHEN  A = B
+           WHEN  B = A
+           .
+
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:15: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:18: error: IF without imperative statement used
-prog.cob:20: warning: expression '115' GREATER THAN '16' is always TRUE
+AT_CHECK([$COMPILE_ONLY -Wno-constant-expression prog.cob], [1], [],
+[prog.cob:18: error: IF without imperative statement used
 prog.cob:23: error: IF without imperative statement used
-prog.cob:25: warning: expression '2' EQUALS '3' is always FALSE
-prog.cob:27: warning: expression '1' EQUALS '1' is always TRUE
-prog.cob:29: warning: expression '1' EQUALS '1' is always TRUE
 prog.cob:32: error: IF without imperative statement used
 prog.cob:33: error: IF without imperative statement used
 prog.cob:38: error: WHEN OTHER without imperative statement used
-prog.cob:41: warning: expression '1' NOT EQUAL '3' is always TRUE
 prog.cob:41: warning: PERFORM NEVER since UNTIL is always TRUE
+prog.cob:42: error: inline PERFORM without imperative statement used
 prog.cob:46: error: WHEN without imperative statement used
 prog.cob:52: error: WHEN without imperative statement used
+prog.cob:59: error: WHEN OTHER without imperative statement used
+prog.cob:64: error: WHEN without imperative statement used
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=acu -Wno-constant-expression prog.cob], [1], [],

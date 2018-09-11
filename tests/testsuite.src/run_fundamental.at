@@ -4956,7 +4956,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -fmissing-statement=ok prog.cob], [0], [], [])
 # TODO: validate against other compilers, especially the line 30;
 #       likely the second line should be 25 instead of 24:
 AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],

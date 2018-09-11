@@ -7378,8 +7378,10 @@ output_stmt (cb_tree x)
 					output_line ("module->module_stmt = 0x%08X;",
 						COB_SET_LINE_FILE(x->source_line, lookup_source(x->source_file)));
 				}
+#if 0 /* CHECKME: Do we need this? If yes: move */
 			} else {
 				lookup_source(x->source_file);
+#endif
 			}
 			if (cb_flag_source_location) {
 				/* Output source location as code */
@@ -7675,8 +7677,10 @@ output_stmt (cb_tree x)
 							output_line ("module->module_stmt = 0x%08X;",
 								COB_SET_LINE_FILE(w->source_line, lookup_source(w->source_file)));
 						}
+#if 0 /* CHECKME: Do we need this? If yes: move */
 					} else {
 						lookup_source(w->source_file);
+#endif
 					}
 					if (cb_flag_source_location
 					 && last_line != w->source_line) {

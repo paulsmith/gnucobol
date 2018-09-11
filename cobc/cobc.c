@@ -3490,6 +3490,9 @@ process_command_line (const int argc, char **argv)
 		if (cb_reference_out_of_declaratives > CB_WARNING) {
 			cb_reference_out_of_declaratives = CB_WARNING;
 		}
+		if (cb_missing_statement > CB_WARNING) {
+			cb_missing_statement = CB_WARNING;
+		}
 		/* FIXME - the warning was only raised if not relaxed */
 		cb_warn_ignored_initial_val = 0;
 	}
