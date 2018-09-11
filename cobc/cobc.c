@@ -3067,6 +3067,7 @@ process_command_line (const int argc, char **argv)
 			gflag_set = 1;
 			cb_flag_stack_check = 1;
 			cb_flag_source_location = 1;
+			cb_flag_remove_unreachable = 0;
 #ifndef	_MSC_VER
 			COBC_ADD_STR (cobc_cflags, " -g", NULL, NULL);
 #endif

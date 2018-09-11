@@ -5240,6 +5240,8 @@ cb_end_cond (cb_tree rslt)
 	} else {
 		cond_fixed = -1;
 	}
+	if (cb_flag_remove_unreachable == 0)	/* Do not remove the code */
+		cond_fixed = -1;
 }
 
 /* Save this 'condition' result */

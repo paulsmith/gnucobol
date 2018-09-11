@@ -5222,32 +5222,22 @@ AT_CHECK([$COMPILE prog.cob], [0], [],
 [prog.cob: in paragraph 'MAIN-LINE':
 prog.cob:47: warning: suggest parentheses around AND within OR
 prog.cob:53: warning: expression '9' GREATER THAN '2' is always TRUE
-prog.cob:53: warning: expression is always TRUE
+prog.cob:53: warning: expression '9' GREATER THAN '7' is always TRUE
 prog.cob:53: warning: expression '9' GREATER THAN '5' is always TRUE
-prog.cob:53: warning: expression is always TRUE
 prog.cob:53: warning: expression '9' GREATER THAN '1' is always TRUE
-prog.cob:53: warning: expression is always TRUE
 prog.cob:55: warning: expression '1' LESS THAN '2' is always TRUE
-prog.cob:55: warning: expression is always TRUE
+prog.cob:55: warning: expression '1' LESS THAN '5' is always TRUE
 prog.cob:55: warning: expression '1' LESS THAN '7' is always TRUE
-prog.cob:55: warning: expression is always TRUE
 prog.cob:55: warning: expression '1' LESS THAN '9' is always TRUE
-prog.cob:55: warning: expression is always TRUE
 prog.cob:57: warning: expression '5' LESS THAN '2' is always FALSE
-prog.cob:57: warning: expression is always FALSE
 prog.cob:57: warning: expression '5' LESS THAN '9' is always TRUE
-prog.cob:57: warning: expression is always TRUE
 prog.cob:57: warning: expression '5' LESS THAN '7' is always TRUE
-prog.cob:57: warning: expression is always TRUE
 prog.cob:59: warning: expression '5' GREATER THAN '1' is always TRUE
 prog.cob:59: warning: expression '5' LESS THAN '3' is always FALSE
-prog.cob:59: warning: expression is always FALSE
 prog.cob:59: warning: expression '5' LESS THAN '6' is always TRUE
-prog.cob:59: warning: expression is always TRUE
 ])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [***FINE***], [])
 
 AT_CLEANUP
-
 

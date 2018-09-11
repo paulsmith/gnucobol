@@ -75,13 +75,10 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY -w -Wconstant-expression prog.cob], [0], [],
 [prog.cob:5: warning: expression '3' EQUALS '1' is always FALSE
 prog.cob:6: warning: expression '3' EQUALS '2' is always FALSE
-prog.cob:6: warning: expression is always FALSE
 prog.cob:6: warning: expression '3' EQUALS '3' is always TRUE
-prog.cob:6: warning: expression is always TRUE
 prog.cob:10: warning: expression '3' EQUALS '1' is always FALSE
 prog.cob:11: warning: expression '3' EQUALS '2' is always FALSE
 prog.cob:11: warning: expression '3' EQUALS '3' is always TRUE
-prog.cob:11: warning: expression is always FALSE
 ])
 
 AT_CLEANUP
@@ -4955,11 +4952,6 @@ AT_CLEANUP
 AT_SETUP([Constant Expressions (1)])
 AT_KEYWORDS([condition expression refmod IF EVALUATE])
 
-# FIXME: EVALUATE is taken into account too late,
-#        especially for object FALSE and multiple objects
-
-AT_XFAIL_IF(true)
-
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
@@ -5073,10 +5065,8 @@ prog.cob:59: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:61: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
 prog.cob:71: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:71: warning: expression is always TRUE
-prog.cob:73: error (ignored): offset of 'var' out of bounds: -99
+prog.cob:73: error: offset of 'var' out of bounds: -99
 prog.cob:74: warning: expression '115' GREATER THAN '16' is always TRUE
-prog.cob:74: warning: expression is always FALSE
 prog.cob:82: warning: expression '15' EQUALS '115' is always FALSE
 prog.cob:85: warning: expression '115' EQUALS '15' is always FALSE
 ])
@@ -5089,10 +5079,9 @@ AT_KEYWORDS([condition expression refmod IF EVALUATE])
 
 # We currently only get the last line of an expression when we compare
 # two constants like 'A' = 'B'. The reason is that internally we combine
-# both internal trees which have a source reference to cb_true/cb_false
-# which don't.
+# both internal trees to cb_true/cb_false which don't have a source reference.
 # As soon as this information is missing we can only "guess" the position
-# from last parsed expression.
+# from the last parsed expression.
 
 # Furthermore we do the comparison checks for EVALUATE from last WHEN to first
 # one to get the line numbers in order we'd need to have to postpone the check
@@ -5138,10 +5127,8 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:13: warning: expression '115' EQUALS '200' is always FALSE
 prog.cob:14: warning: expression '200' EQUALS '115' is always FALSE
-prog.cob:14: warning: expression is always FALSE
 prog.cob:19: warning: expression '115' EQUALS '15' is always FALSE
 prog.cob:20: warning: expression '115' EQUALS '115' is always TRUE
-prog.cob:20: warning: expression is always TRUE
 prog.cob:22: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:24: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:25: warning: expression '115' GREATER THAN '16' is always TRUE
@@ -5228,6 +5215,106 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:14: error: syntax error, unexpected IF
 prog.cob:14: error: syntax error, unexpected .
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([Constant Expressions (5)])
+AT_KEYWORDS([condition expression unreachable])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  VAR       PIC X(200).
+       01  OTHERVAR  PIC X(115).
+       78  VAR-LEN   VALUE 115.
+
+       PROCEDURE DIVISION.
+       MAIN-10.
+           MOVE "Peek a boo" TO VAR.
+           EVALUATE TRUE 
+               ALSO FALSE
+               ALSO TRUE
+            WHEN    TRUE 
+               ALSO VAR-LEN > 16 AND VAR-LEN < 200
+               ALSO TRUE
+                  MOVE OTHERVAR (1 : VAR-LEN - 9)
+                    TO VAR (16 - VAR-LEN : VAR-LEN - 9)
+                  DISPLAY "A: Should NOT be executed"
+            WHEN  TRUE 
+               ALSO VAR-LEN < 16 
+               ALSO TRUE
+                  MOVE OTHERVAR TO VAR
+                  DISPLAY "A: OK VAR-LEN > 16 AND VAR-LEN < 200"
+            WHEN  TRUE 
+               ALSO VAR = SPACES 
+               ALSO TRUE
+                  MOVE OTHERVAR TO VAR
+                  DISPLAY "A: OK VAR IS SPACES"
+           END-EVALUATE.
+
+           MOVE "Peek a boo" TO VAR.
+           EVALUATE 3 EQUALS 7
+           WHEN  VAR = SPACES 
+               DISPLAY "B: OK VAR IS NOT SPACES"
+           WHEN  VAR NOT = SPACES 
+               DISPLAY "B: FALSE VAR IS SPACES"
+           END-EVALUATE.
+
+           MOVE SPACES       TO VAR.
+           EVALUATE FALSE
+           WHEN  VAR = SPACES 
+               DISPLAY "C: FALSE VAR IS SPACES"
+           WHEN  VAR NOT = SPACES 
+               DISPLAY "C: OK VAR IS SPACES"
+           END-EVALUATE.
+
+           MOVE "Peek a boo" TO VAR.
+           EVALUATE TRUE
+           WHEN  VAR = SPACES 
+               DISPLAY "D: BAD VAR IS SPACES"
+           WHEN  VAR NOT = SPACES 
+               DISPLAY "D: OK VAR IS NOT SPACES"
+           END-EVALUATE.
+
+           MOVE SPACES       TO VAR.
+           EVALUATE VAR-LEN ALSO VAR
+           WHEN  < 32 ALSO SPACES
+               DISPLAY "E: OK VAR IS SPACES"
+           WHEN  > 16 ALSO NOT SPACES 
+               DISPLAY "E: BAD VAR IS NOT SPACES"
+           WHEN OTHER
+               DISPLAY "E: OK OTHER option taken"
+           END-EVALUATE.
+
+           STOP RUN.
+])
+
+# Note: ideally this should not result in a difference compared to the next one
+
+AT_CHECK([$COMPILE_ONLY -C -fno-remove-unreachable prog.cob], [1], [],
+[prog.cob: in paragraph 'MAIN-10':
+prog.cob:17: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:17: warning: expression '115' LESS THAN '200' is always TRUE
+prog.cob:20: error: offset of 'VAR' out of bounds: -99
+prog.cob:23: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:35: warning: expression '3' EQUALS '7' is always FALSE
+prog.cob:60: warning: expression '115' LESS THAN '32' is always FALSE
+prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
+])
+
+AT_CHECK([$COMPILE_ONLY -C prog.cob], [0], [],
+[prog.cob: in paragraph 'MAIN-10':
+prog.cob:17: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:17: warning: expression '115' LESS THAN '200' is always TRUE
+prog.cob:20: error (ignored): offset of 'VAR' out of bounds: -99
+prog.cob:23: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:35: warning: expression '3' EQUALS '7' is always FALSE
+prog.cob:60: warning: expression '115' LESS THAN '32' is always FALSE
+prog.cob:62: warning: expression '115' GREATER THAN '16' is always TRUE
 ])
 
 AT_CLEANUP
