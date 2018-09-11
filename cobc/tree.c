@@ -5534,10 +5534,12 @@ cb_build_if (const cb_tree test, const cb_tree stmt1, const cb_tree stmt2,
 	p->test = test;
 	p->stmt1 = stmt1;
 	p->stmt2 = stmt2;
-	if (test == cb_true) {		/* Always TRUE so skip 'else code' */
-		p->stmt2 = NULL;
-	} else if (test == cb_false) {	/* Always FALSE, so skip 'true code' */
-		p->stmt1 = NULL;
+	if (cb_flag_remove_unreachable) {
+		if (test == cb_true) {		/* Always TRUE so skip 'else code' */
+			p->stmt2 = NULL;
+		} else if (test == cb_false) {	/* Always FALSE, so skip 'true code' */
+			p->stmt1 = NULL;
+		}
 	}
 	if (test
 	 && CB_TREE_TAG (test) == CB_TAG_BINARY_OP) {

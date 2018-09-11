@@ -7638,9 +7638,11 @@ output_stmt (cb_tree x)
 		}
 		if (!ip->is_if) {
 			output_newline ();
-			if (ip->test == cb_true) {
+			if (ip->test == cb_true
+			 && cb_flag_remove_unreachable) {
 				output_line ("/* WHEN is always TRUE */");
-			} else if (ip->test == cb_false) {
+			} else if (ip->test == cb_false
+				&& cb_flag_remove_unreachable) {
 				output_line ("/* WHEN is always FALSE */");
 			} else
 			if (ip->test
@@ -7758,7 +7760,8 @@ output_stmt (cb_tree x)
 			break;
 		}
 		if (ip->test == cb_false
-		 && ip->stmt1 == NULL) {
+		 && ip->stmt1 == NULL
+		 && cb_flag_remove_unreachable) {
 			output_line (" /* FALSE condition and code omitted */");
 			skip_else = 1;
 		} else {

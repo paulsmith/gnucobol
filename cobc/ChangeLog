@@ -11,13 +11,17 @@
 	* cobc.c (process_command_line): make sure cb_missing_statement
 	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
 
+2018-09-11  Ron Norman <rjn@inglenet.com>
+
+	* tree.c, codegen.c: added checks for cb_flag_remove_unreachable
+
 2018-09-10  Ron Norman <rjn@inglenet.com>
 
 	* tree.c: removed redundant warnings about xyz 'is always' TRUE/FALSE
 	* flag.def: new compile option: 'remove-unreachable' defaults to on
 	      So then -fno-remove-unreachable does not remove unreachable code
-	* typeck.c: Checks cb_flag_remove_unreachable
-	* cobc.c: If -g then clear cb_flag_remove_unreachable
+	* typeck.c: checks cb_flag_remove_unreachable
+	* cobc.c: if -g then clear cb_flag_remove_unreachable
 
 2018-09-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
