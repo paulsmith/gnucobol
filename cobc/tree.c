@@ -3597,13 +3597,13 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 	struct cb_file		*f;
 	struct cb_reference	*ref;
 
-	if(report_checked != r) {
+	if (report_checked != r) {
 		report_checked = r;
-		if(r->lines > 9999)
+		if (r->lines > 9999)
 			r->lines = 9999;
-		if(r->heading < 0)
+		if (r->heading < 0)
 			r->heading = 0;
-		if(r->first_detail < 1) {
+		if (r->first_detail < 1) {
 			if(r->first_detail <= 0
 			&& !r->has_detail
 			&& r->t_first_detail == NULL
@@ -3635,6 +3635,9 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 			} else if(!(r->lines >= r->footing)) {
 				cb_error_x (CB_TREE(r), _("PAGE LIMIT LINES should be >= FOOTING"));
 			}
+		}
+		if (r->file) {
+			r->file->flag_report = 1;
 		}
 	}
 
@@ -3708,7 +3711,9 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		 && p->report != NULL
 		 && p->report->file != NULL) {
 			f = p->report->file;
+#if 0 /* Should not be needed as done before */
 			f->flag_report = 1;
+#endif
 			for (ff = records; ff; ff = ff->sister) {
 				if (f->record_max > 0
 				&&  ff->size > f->record_max) {
@@ -3735,9 +3740,9 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_STOP */
-	if(r->file->record_max < r->rcsz)
+	if (r->file->record_max < r->rcsz)
 		r->file->record_max = r->rcsz;
-	if(r->rcsz < r->file->record_max)
+	if (r->rcsz < r->file->record_max)
 		r->rcsz = r->file->record_max;
 }
 
@@ -3894,8 +3899,18 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 
 	/* associate records to file (separate and first for being able
 	   to resolve references, for example in validate_indexed_key_field */
-	for (p = records; p; p = p->sister) {
-		p->file = f;
+	if (records) {
+		for (p = records; p; p = p->sister) {
+			p->file = f;
+		}
+	} else if (f->flag_report) {
+		/* in general: no record description needed for REPORTs, but RD entries
+		*/
+	} else {
+		/* Hack: if called without records this is no normal file (but a report)
+		   or no valid a file description was given */
+		cb_error_x (CB_TREE(f), _("missing file description for %s"),
+			cb_name(CB_TREE(f)));
 	}
 
 	/* Validate INDEXED key fields (RELATIVE keys can only be validated when

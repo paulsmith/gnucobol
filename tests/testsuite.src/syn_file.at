@@ -81,8 +81,6 @@ AT_CLEANUP
 AT_SETUP([Missing FD])
 AT_KEYWORDS([file])
 
-AT_XFAIL_IF(true)
-
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
@@ -96,19 +94,18 @@ AT_DATA([prog.cob], [
        FD file2.
        01 file2-rec PIC X.
        PROCEDURE DIVISION.
+           OPEN input file1
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: NOT DETECTED AT COMPILE TIME
+[prog.cob:7: error: missing file description for FILE file1
 ])
 AT_CLEANUP
 
 
 AT_SETUP([Duplicated FD])
 AT_KEYWORDS([file])
-
-AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -131,7 +128,7 @@ AT_DATA([prog.cob], [
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: NOT DETECTED AT COMPILE TIME
+[prog.cob:15: error: duplicate file description for FILE file1
 ])
 AT_CLEANUP
 
@@ -1002,6 +999,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:11: error: syntax error, unexpected Identifier, expecting DYNAMIC or RANDOM or SEQUENTIAL
+prog.cob:8: error: missing file description for FILE testfile
 prog.cob:13: warning: 'filename' will be implicitly defined
 ])
 AT_CLEANUP
@@ -1085,7 +1083,9 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:8: error: cannot use RELATIVE KEY clause on INDEXED files
 prog.cob:10: error: cannot use RECORD KEY clause on RELATIVE files
+prog.cob:7: error: missing file description for FILE file-1
 prog.cob:8: error: 'file-1-key' is not defined
+prog.cob:9: error: missing file description for FILE file-2
 prog.cob:10: error: 'file-2-key' is not defined
 ])
 
@@ -1350,19 +1350,15 @@ AT_DATA([prog.cob], [
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT f ASSIGN TO "ssad" LINE SEQUENTIAL.
+           SELECT f ASSIGN TO "ssad".
 
        DATA DIVISION.
        FILE SECTION.
-       FD  f REPORT f-rep.
+       FD  f.
        01  f-rec PIC 999999.
 
        WORKING-STORAGE SECTION.
        01  num PIC 9(6) VALUE 123456.
-
-       REPORT SECTION.
-       RD  f-rep.
-       01  f-rep-line TYPE DE PIC XXX.
 
        PROCEDURE DIVISION.
            OPEN OUTPUT f
@@ -1376,17 +1372,103 @@ AT_DATA([prog.cob], [
            .
 ])
 
+# FIXME: the references to ZERO should actually show one less
+
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:25: error: literal in FROM clause must be alphanumeric, national or boolean
-prog.cob:25: error: figurative constants not allowed in FROM clause
-prog.cob:25: error: literal in FROM clause must be alphanumeric, national or boolean
-prog.cob:26: error: WRITE not allowed on REPORT files
-prog.cob:28: error: literal in FROM clause must be alphanumeric, national or boolean
-prog.cob:28: error: figurative constants not allowed in FROM clause
-prog.cob:28: error: literal in FROM clause must be alphanumeric, national or boolean
-prog.cob:29: error: REWRITE not allowed on REPORT files
+[prog.cob:21: error: figurative constants not allowed in FROM clause
+prog.cob:21: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:22: warning: numeric value is expected
+prog.cob:13: warning: 'f-rec' defined here as PIC 999999
+prog.cob:24: error: figurative constants not allowed in FROM clause
+prog.cob:24: error: literal in FROM clause must be alphanumeric, national or boolean
+prog.cob:25: warning: numeric value is expected
+prog.cob:13: warning: 'f-rec' defined here as PIC 999999
+])
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [0], [],
+[prog.cob:22: warning: numeric value is expected
+prog.cob:13: warning: 'f-rec' defined here as PIC 999999
+prog.cob:25: warning: numeric value is expected
+prog.cob:13: warning: 'f-rec' defined here as PIC 999999
+])
+AT_CHECK([$COMPILE_ONLY -std=mf-strict prog.cob], [0], [],
+[prog.cob:22: warning: source is non-numeric - substituting zero
+prog.cob:25: warning: source is non-numeric - substituting zero
+])
+
+AT_CLEANUP
+
+
+
+AT_SETUP([WRITE / REWRITE on LINE SEQUENTIAL files])
+AT_KEYWORDS([file])
+
+# FIXME: this should be depending on a compilation flag,
+#        see reportwriter branch for this feature
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN TO "ssad" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f.
+       01  f-rec PIC X(05).
+
+       PROCEDURE DIVISION.
+           OPEN OUTPUT f
+           WRITE FILE f FROM "abc"
+           REWRITE FILE f FROM "abc"
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:18: error: REWRITE not allowed on LINE SEQUENTIAL files
 ])
 AT_CLEANUP
+
+
+
+AT_SETUP([WRITE / REWRITE on REPORT files])
+AT_KEYWORDS([file])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN TO "ssad" LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f REPORT f-rep.
+       01  f-rec PIC X(05).
+
+       REPORT SECTION.
+       RD  f-rep.
+       01  f-rep-line TYPE DE PIC XXX.
+
+       PROCEDURE DIVISION.
+           OPEN OUTPUT f
+           WRITE FILE f FROM "abc"
+           REWRITE FILE f FROM "abc"
+           CLOSE f
+           .
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:21: error: WRITE not allowed on REPORT files
+prog.cob:22: error: REWRITE not allowed on REPORT files
+])
+AT_CLEANUP
+
 
 
 AT_SETUP([SELECT without fd-name])

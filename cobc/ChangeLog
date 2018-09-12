@@ -1,4 +1,18 @@
 
+2018-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* parser.y (file_description_entry): unset current_file on error;
+	  check for duplicate file description
+	* tree.c (finalize_file): check for missing file description
+	* tree.c (finalize_report): early set of flag_report
+	* typeck.c (warning_destination): added missing check for tree tag
+	* typeck.c (move_warning): allow literals in all contexts other
+	  than SET to be used as source reference
+	* typeck.c (error_if_invalid_file_from_clause_literal):
+	  allow [RE]WRITE FILE FROM constant / numeric literal if
+	  cb_relaxed_syntax_checks is set as MicroFocus/ACUCOBOL allow this
+	  non-standard option; only raise either figurative or literal error
+
 2018-09-11  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (evaluate_other): partial implementation of FR #288

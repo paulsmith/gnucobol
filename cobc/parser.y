@@ -5134,12 +5134,18 @@ file_description_entry:
 			       COBC_HD_FILE_SECTION, 0, 0);
 	check_duplicate = 0;
 	if (CB_INVALID_TREE ($2)) {
+		current_file = NULL;
 		YYERROR;
 	}
 	current_file = CB_FILE (cb_ref ($2));
 	if (CB_VALID_TREE (current_file)) {
 		if ($1) {
 			current_file->organization = COB_ORG_SORT;
+		}
+		/* note: this is a HACK and should be moved */
+		if (current_file->flag_finalized) {
+			cb_error_x ($2, _("duplicate file description for %s"),
+				cb_name (CB_TREE (current_file)));
 		}
 	}
   }

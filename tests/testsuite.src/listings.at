@@ -2827,7 +2827,7 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [1], [],
 [prog.cob:21: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob:23: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob:30: warning: LABEL RECORDS is obsolete in GnuCOBOL
@@ -2836,6 +2836,7 @@ prog.cob:39: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob:41: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob:64: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob:66: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:11: error: missing file description for FILE PRT-VERSION
 ])
 
 
@@ -2855,6 +2856,7 @@ LINE    PG/LN  A...B............................................................
 000009             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
 000010                                 ORGANIZATION LINE SEQUENTIAL.
 000011             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
+error: missing file description for FILE PRT-VERSION
 000012                                 ORGANIZATION LINE SEQUENTIAL.
 000013             SELECT MODIFICATION ASSIGN TO "SYSIN1"
 000014                                 ORGANIZATION LINE SEQUENTIAL.
@@ -3051,9 +3053,10 @@ prog.cob:39: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob:41: warning: DATA RECORDS is obsolete in GnuCOBOL
 prog.cob:64: warning: LABEL RECORDS is obsolete in GnuCOBOL
 prog.cob:66: warning: DATA RECORDS is obsolete in GnuCOBOL
+prog.cob:11: error: missing file description for FILE PRT-VERSION
 
 8 warnings in compilation group
-0 errors in compilation group
+1 error in compilation group
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
@@ -4119,7 +4122,7 @@ AT_DATA([EDITOR.cob], [
        END PROGRAM EDITOR.                                              EDIT0343
 ])
 
-AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst -tlines=0 -tsymbols EDITOR.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -Xref -t prog.lst -tlines=0 -tsymbols EDITOR.cob], [1], [],
 [EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
@@ -4128,6 +4131,7 @@ EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:30: error: missing file description for FILE PRT-VERSION
 EDITOR.cob: in paragraph 'CHANGE-A-RECORD':
 EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
@@ -4174,6 +4178,7 @@ LINE    PG/LN  A...B............................................................
 000028             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"
 000029                                 ORGANIZATION LINE SEQUENTIAL.
 000030             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"
+error: missing file description for FILE PRT-VERSION
 000031                                 ORGANIZATION LINE SEQUENTIAL.
 000032             SELECT MODIFICATION ASSIGN TO "SYSIN1"
 000033                                 ORGANIZATION LINE SEQUENTIAL.
@@ -4704,6 +4709,7 @@ EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:30: error: missing file description for FILE PRT-VERSION
 EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
@@ -4711,13 +4717,13 @@ EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
-0 errors in compilation group
+1 error in compilation group
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 AT_CHECK([diff prog18.lst prog.lis], [0], [], [])
 
-AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols EDITOR.cob], [0], [],
+AT_CHECK([$COMPILE_ONLY -Xref -T prog.lst -tlines=0 -tsymbols EDITOR.cob], [1], [],
 [EDITOR.cob:42: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:44: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:51: warning: LABEL RECORDS is obsolete in GnuCOBOL
@@ -4726,6 +4732,7 @@ EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:30: error: missing file description for FILE PRT-VERSION
 EDITOR.cob: in paragraph 'CHANGE-A-RECORD':
 EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
@@ -4772,6 +4779,7 @@ LINE    PG/LN  A...B............................................................
 000028             SELECT NEW-VERSION  ASSIGN TO "SYSUT2"                       EDIT0031
 000029                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0032
 000030             SELECT PRT-VERSION  ASSIGN TO "SYSUT2"                       EDIT0033
+error: missing file description for FILE PRT-VERSION
 000031                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0034
 000032             SELECT MODIFICATION ASSIGN TO "SYSIN1"                       EDIT0035
 000033                                 ORGANIZATION LINE SEQUENTIAL.            EDIT0036
@@ -5288,6 +5296,7 @@ EDITOR.cob:60: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:62: warning: DATA RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:85: warning: LABEL RECORDS is obsolete in GnuCOBOL
 EDITOR.cob:87: warning: DATA RECORDS is obsolete in GnuCOBOL
+EDITOR.cob:30: error: missing file description for FILE PRT-VERSION
 EDITOR.cob:198: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:199: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:220: warning: ALTER is obsolete in GnuCOBOL
@@ -5295,7 +5304,7 @@ EDITOR.cob:221: warning: ALTER is obsolete in GnuCOBOL
 EDITOR.cob:254: warning: ALTER is obsolete in GnuCOBOL
 
 13 warnings in compilation group
-0 errors in compilation group
+1 error in compilation group
 ])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])

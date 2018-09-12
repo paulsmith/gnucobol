@@ -8086,16 +8086,21 @@ cb_build_inspect_region_start (void)
 static void
 warning_destination (cb_tree x)
 {
-	struct cb_reference	*r;
 	struct cb_field		*f;
-	cb_tree			loc;
-
-	r = CB_REFERENCE (x);
-	f = CB_FIELD (r->value);
-	loc = CB_TREE (f);
-
-	if (r->offset) {
-		return;
+	if (CB_REFERENCE_P(x)) {
+		struct cb_reference	*r = CB_REFERENCE (x);
+		if (r->offset) {
+			return;
+		}
+		f = CB_FIELD (r->value);
+		x = CB_TREE (f);
+	} else if (CB_FIELD_P(x)) {
+		f = CB_FIELD (x);
+	} else {
+		cobc_err_msg (_("call to '%s' with invalid parameter '%s'"),
+			"warning_destination", "x");
+		cobc_err_msg (_("unexpected tree tag: %d"), (int)CB_TREE_TAG (x));
+		COBC_ABORT ();
 	}
 
 	if (!strcmp (f->name, "RETURN-CODE") ||
@@ -8104,38 +8109,38 @@ warning_destination (cb_tree x)
 		cb_warning (COBC_WARN_FILLER, _("internal register '%s' defined as BINARY-LONG"),
 			    f->name);
 	} else if (f->flag_real_binary) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, f->pic->orig);
 	} else if (f->usage == CB_USAGE_FLOAT) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT");
 	} else if (f->usage == CB_USAGE_DOUBLE) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "DOUBLE");
 	} else if (f->usage == CB_USAGE_LONG_DOUBLE) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT EXTENDED");
 	} else if (f->usage == CB_USAGE_FP_BIN32) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-7");
 	} else if (f->usage == CB_USAGE_FP_BIN64) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-16");
 	} else if (f->usage == CB_USAGE_FP_BIN128) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-BINARY-34");
 	} else if (f->usage == CB_USAGE_FP_DEC64) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-DECIMAL-16");
 	} else if (f->usage == CB_USAGE_FP_DEC128) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as USAGE %s"),
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as USAGE %s"),
 			      f->name, "FLOAT-DECIMAL-34");
 	} else if (f->pic) {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as PIC %s"),
-			      cb_name (loc), f->pic->orig);
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as PIC %s"),
+			      cb_name (x), f->pic->orig);
 	} else {
-		cb_warning_x (COBC_WARN_FILLER, loc, _("'%s' defined here as a group of length %d"),
-			      cb_name (loc), f->size);
+		cb_warning_x (COBC_WARN_FILLER, x, _("'%s' defined here as a group of length %d"),
+			      cb_name (x), f->size);
 	}
 }
 
@@ -8148,7 +8153,11 @@ move_warning (cb_tree src, cb_tree dst, const unsigned int value_flag,
 	if (suppress_warn) {
 		return;
 	}
+#if 1 /* BAD hack, but works for now */
+	if (cobc_cs_check == CB_CS_SET || !src->source_line) {
+#else /* old version */
 	if (CB_LITERAL_P (src) || !src->source_line) {
+#endif
 		loc = dst;
 	} else {
 		loc = src;
@@ -10130,26 +10139,25 @@ cb_emit_reset_trace (void)
 static int
 error_if_invalid_file_from_clause_literal (cb_tree literal)
 {
-        enum cb_category	category = CB_TREE_CATEGORY (literal);
-	int	error = 0;
+	enum cb_category	category = CB_TREE_CATEGORY (literal);
 
-	if (!(CB_CONST_P (literal) || CB_LITERAL_P (literal))) {
+	if (cb_relaxed_syntax_checks || !(CB_CONST_P (literal) || CB_LITERAL_P (literal))) {
 		return 0;
+	}
+
+	if (cb_is_figurative_constant (literal)) {
+		cb_error_x (literal, _("figurative constants not allowed in FROM clause"));
+		return 1;
 	}
 
 	if (!(category == CB_CATEGORY_ALPHANUMERIC
 	      || category == CB_CATEGORY_NATIONAL
 	      || category == CB_CATEGORY_BOOLEAN)) {
 		cb_error_x (literal, _("literal in FROM clause must be alphanumeric, national or boolean"));
-		error = 1;
+		return 1;
 	}
 
-	if (cb_is_figurative_constant (literal)) {
-		cb_error_x (literal, _("figurative constants not allowed in FROM clause"));
-		error = 1;
-	}
-
-	return error;
+	return 0;
 }
 
 void
