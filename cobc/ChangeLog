@@ -10,10 +10,13 @@
 	  configuration "missing-statement"
 	* cobc.c (process_command_line): make sure cb_missing_statement
 	  is not stricter than CB_WARNING when cb_relaxed_syntax_checks is active
+	* scanner.l (copy_literal): check that passed argument is a literal
 
 2018-09-11  Ron Norman <rjn@inglenet.com>
 
 	* tree.c, codegen.c: added checks for cb_flag_remove_unreachable
+	* scanner.l: duplicate 78/CONSTANT and then assign line number
+	* tree.c: improved warnings to be more inclusive
 
 2018-09-10  Ron Norman <rjn@inglenet.com>
 

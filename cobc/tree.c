@@ -187,7 +187,7 @@ was_prev_warn (int linen, int tf)
 		prev_expr_line = cb_exp_line;
 		for (i = 0; i < EXPR_WARN_PER_LINE; i++) {
 			prev_expr_warn[i] = 0;
-			prev_expr_tf[i] = -99;
+			prev_expr_tf[i] = -9999;
 		}
 	}
 	for (i=0; i < EXPR_WARN_PER_LINE; i++) {
@@ -5042,7 +5042,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 				yval = atoll((const char*)yl->data);
 				switch (op) {
 				case '=':
-					warn_type = 51 + (xval+yval)%50;
+					warn_type = 51 + (xval * 2 + yval) % 5000;
 					if (xval == yval) {
 						relop = cb_true;
 					} else {
@@ -5050,7 +5050,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '~':
-					warn_type = 52 + (xval+yval)%50;
+					warn_type = 52 + (xval * 2 + yval) % 5000;
 					if (xval != yval) {
 						relop = cb_true;
 					} else {
@@ -5058,7 +5058,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '>':
-					warn_type = 53 + (xval+yval)%50;
+					warn_type = 53 + (xval * 2 + yval) % 5000;
 					if (xval > yval) {
 						relop = cb_true;
 					} else {
@@ -5066,7 +5066,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '<':
-					warn_type = 54 + (xval+yval)%50;
+					warn_type = 54 + (xval * 2 + yval) % 5000;
 					if (xval < yval) {
 						relop = cb_true;
 					} else {
@@ -5074,7 +5074,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case ']':
-					warn_type = 55 + (xval+yval)%50;
+					warn_type = 55 + (xval * 2 + yval) % 5000;
 					if (xval >= yval) {
 						relop = cb_true;
 					} else {
@@ -5082,7 +5082,7 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 					}
 					break;
 				case '[':
-					warn_type = 56 + (xval+yval)%50;
+					warn_type = 56 + (xval * 2 + yval) % 5000;
 					if (xval <= yval) {
 						relop = cb_true;
 					} else {
@@ -5265,13 +5265,13 @@ cb_build_binary_op (cb_tree x, const int op, cb_tree y)
 	if (relop == cb_false) {
 		if (cb_warn_constant_expr && warn_ok) {
 			if (rlit && llit) {
-				if (!was_prev_warn (e->source_line, 9)) {
+				if (!was_prev_warn (e->source_line, 9 + warn_type)) {
 					cb_warning_x (cb_warn_constant_expr, e,
 						_("expression '%.38s' %s '%.38s' is always FALSE"),
 						llit, explain_operator (op), rlit);
 				}
 			} else {
-				if (!was_prev_warn (e->source_line, -9)) {
+				if (!was_prev_warn (e->source_line, -(9 + warn_type))) {
 					cb_warning_x (cb_warn_constant_expr, e,
 						_("expression is always FALSE"));
 				}

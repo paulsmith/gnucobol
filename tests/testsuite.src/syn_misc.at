@@ -5075,19 +5075,7 @@ AT_CLEANUP
 
 
 AT_SETUP([Constant Expressions (2)])
-AT_KEYWORDS([condition expression refmod IF EVALUATE])
-
-# We currently only get the last line of an expression when we compare
-# two constants like 'A' = 'B'. The reason is that internally we combine
-# both internal trees to cb_true/cb_false which don't have a source reference.
-# As soon as this information is missing we can only "guess" the position
-# from the last parsed expression.
-
-# Furthermore we do the comparison checks for EVALUATE from last WHEN to first
-# one to get the line numbers in order we'd need to have to postpone the check
-# until the list of WHENs is reversed.
-
-AT_XFAIL_IF(true)
+AT_KEYWORDS([condition expression unreachable 78])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -5095,7 +5083,9 @@ AT_DATA([prog.cob], [
        DATA  DIVISION.
        WORKING-STORAGE SECTION.
        78  const1    value 115.
-       78  const2    value 200.
+       01  const2    CONSTANT 200.
+       78  const3    value const2.
+       78  const4    value const2 + const1.
        77  othervar  PIC X(const1).
        01  var       PIC X(const2).
 
@@ -5103,6 +5093,8 @@ AT_DATA([prog.cob], [
 
            IF const1 = const2
            OR const2 = const1
+           OR const3 = const4
+           OR const4 = const3
               DISPLAY 'no way' END-DISPLAY
            END-IF
 
@@ -5111,12 +5103,12 @@ AT_DATA([prog.cob], [
            WHEN 115
                display '1'
            WHEN  < 16
-               move othervar (1:const1 - 8)
-                 to var (17 - const1:const1 - 8)
+               move othervar (1:8)
+                 to var (17:8)
            WHEN  > 16
                display othervar
-       *> actually WHEN OTHER is also FALSE in this case (115 = 16),
-       *> but this is too complex to check
+      *> actually WHEN OTHER is also FALSE in this case (115 = 16),
+      *> but this is too complex to check
            WHEN OTHER
                display othervar
            END-EVALUATE
@@ -5124,14 +5116,15 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
-[prog.cob:13: warning: expression '115' EQUALS '200' is always FALSE
-prog.cob:14: warning: expression '200' EQUALS '115' is always FALSE
-prog.cob:19: warning: expression '115' EQUALS '15' is always FALSE
-prog.cob:20: warning: expression '115' EQUALS '115' is always TRUE
-prog.cob:22: warning: expression '115' LESS THAN '16' is always FALSE
-prog.cob:24: error (ignored): offset of 'var' out of bounds: -98
-prog.cob:25: warning: expression '115' GREATER THAN '16' is always TRUE
+AT_CHECK([$COMPILE_ONLY prog.cob ], [0], [],
+[prog.cob:15: warning: expression '115' EQUALS '200' is always FALSE
+prog.cob:16: warning: expression '200' EQUALS '115' is always FALSE
+prog.cob:17: warning: expression '200' EQUALS '315' is always FALSE
+prog.cob:18: warning: expression '315' EQUALS '200' is always FALSE
+prog.cob:26: warning: expression '115' LESS THAN '16' is always FALSE
+prog.cob:29: warning: expression '115' GREATER THAN '16' is always TRUE
+prog.cob:23: warning: expression '115' EQUALS '15' is always FALSE
+prog.cob:24: warning: expression '115' EQUALS '115' is always TRUE
 ])
 
 AT_CLEANUP
@@ -5321,10 +5314,10 @@ AT_CLEANUP
 
 
 AT_SETUP([Missing imperative statements])
-AT_KEYWORDS([condition expression IF EVALUATE PERFORM])
+AT_KEYWORDS([condition expression IF EVALUATE WHEN PERFORM])
 
 # we currently don't do the necessary parsing steps for
-# WHEN / WHEN OTHER without statements to pass this test
+# WHEN without statements to pass this test
 
 AT_XFAIL_IF(true)
 
