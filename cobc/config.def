@@ -47,7 +47,7 @@ CB_CONFIG_STRING (cb_reserved_words, "reserved-words", _("use of complete/fixed 
 
 /* Integer flags */
 CB_CONFIG_INT (cb_tab_width, "tab-width", 1, 12, CB_XRANGE(1,12),
-	_("set number of spaces that are asumed for tabs"))
+	_("set number of spaces that are assumed for tabs"))
 
 CB_CONFIG_INT (cb_config_text_column, "text-column", 72, 255, CB_XRANGE(72,255),
 	_("set right margin for source (fixed format only)"))
@@ -70,10 +70,10 @@ CB_CONFIG_ANY (unsigned int, cb_assign_clause, "assign-clause",
 	_("set way of interpreting ASSIGN"))
 
 CB_CONFIG_ANY (unsigned int, cb_binary_size, "binary-size",
-	_("binary byte size - defines the allocated bytes according to PIC"))
+	_("binary byte size - defines the allocated bytes according to PIC, may be one of: 2-4-8, 1-2-4-8, 1--8"))
 
 CB_CONFIG_ANY (unsigned int, cb_binary_byteorder, "binary-byteorder",
-	_("binary byte order"))
+	_("binary byte order, may be one of: native, big-endian"))
 
 CB_CONFIG_ANY (enum cb_std_def, cb_std_define, "standard-define", NULL) /* Used Standard (set via -std) */
 

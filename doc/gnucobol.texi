@@ -677,38 +677,33 @@ The last part of the listing file is the summary of warnings an error in the com
 Enable all run-time error checks.
 
 @item -g
-Produce debugging information in the output.
+Produce C debugging information in the output.
+
+@item -ftrace
+Generate trace code (log executed procedures, if tracing is enabled).
+
+@item -ftraceall
+Generate trace code (log executed procedures and statements,
+if tracing is enabled).
+
+@item -fsource-location
+Generate source location code (implied by @code{-debug} or @code{-g}).
+
+@item -fstack-check
+Enable @code{PERFORM} stack checking (implied by @code{-debug} or @code{-g}).
+
+@item -fdebugging-line
+Enable debugging lines (@code{D} in indicator column; >>D directive).
 
 @item -O
 Enable optimization of code size and execution speed.
-See @code{man gcc} for details.
+See your C compiler documentation, for example @code{man gcc} for details.
 
 @item -O2
 Optimize even more.
 
 @item -Os
 Optimize for size. Optimizer will favour code size over execution speed.
-
-@item -ftrace
-Generate trace code (log executed procedures).
-
-@item -ftraceall
-Generate trace code (log executed procedures and statements).
-
-@item -fsyntax-only
-Check syntax only; don't emit any output.
-
-@item -fdebugging-line
-Enable debugging lines (@code{D} in indicator column).
-
-@item -fsource-location
-Generate source location code (implied by @code{-debug} or @code{-g}).
-
-@item -fimplicit-init
-Do automatic initialization of the COBOL runtime system.
-
-@item -fstack-check
-Enable @code{PERFORM} stack checking (implied by @code{-debug} or @code{-g}).
 
 @item -fnotrunc
 Do not truncate binary fields according to PICTURE.
@@ -723,6 +718,9 @@ Do not truncate binary fields according to PICTURE.
 @comment{TODO: Clarify}
 Add default file extension.
 
+@item -fsyntax-only
+Check syntax only; don't emit any output.
+
 @item -fmfcomment
 Treat lines with @code{*} or @code{/} in column 1 as comment (fixed-format only).
 
@@ -736,8 +734,12 @@ Numeric display sign ASCII (default on ASCII machines).
 @item -fsign=EBCDIC
 Numeric display sign EBCDIC (default on EBCDIC machines).
 
-@item -ffunctions-all
-Allow use of intrinsic functions without @code{FUNCTION} keyword.
+@item -fintrinsics=[ALL|intrinsic function name(,name,...)]
+Allow use of all or specific intrinsic functions without @code{FUNCTION}
+keyword.
+
+Note: defining this within your source with
+@code{CONFIGURATION SECTION. REPOSITORY.} is preferred. 
 
 @item -ffold-copy=LOWER
 Fold @code{COPY} subject to lower case (default no transformation).
@@ -747,6 +749,9 @@ Fold @code{COPY} subject to upper case (default no transformation).
 
 @item -save-temps(=<dir>)
 Save intermediate files (by default, in current directory).
+
+@item -fimplicit-init
+Do automatic initialization of the COBOL runtime system.
 
 @end table
 

@@ -3811,6 +3811,13 @@
 	* MARK - Version 2.0
 	* Move to GPL/LGPL 3
 
+2010-0?-??  Roger While <simrw@sim-basis.de> ?
+
+	* flag.def, cobc.h, parser.y, scanner.l, tree.c: removed -ffunctions-all
+	* flag.def, cobc.h, scanner.l: added -fintrinsics=<val>, with
+	  <val>being [ALL|intrinsic function name(,name,...) to prevent reuse of
+	  user-defined names and to mimic CONFIGURATION SECTION. REPOSITORY.
+
 2010-05-??  Roger While <simrw@sim-basis.de> ?
 
 	* flag.def, cobc.c: remove compiler flags if-cutoff, extra-brace,

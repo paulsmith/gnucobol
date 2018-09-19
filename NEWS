@@ -1,6 +1,6 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL 3.0rc-1 to be released (20180422)
+ GnuCOBOL 3.0rc-2/final to be released (in 2018)
  
 * New GnuCOBOL features
 
@@ -238,9 +238,12 @@ NEWS - user visible changes				-*- outline -*-
 ** All compiler configuration flags may be set on command line
    to override a specific setting of the current -std, see cobc --help
 
-** All Warnings can be explicit enabled/disabled or even marked as error,
-   see cobc --help
-  -Wunreachable report on possible unreachable statements
+** All warnings can be explicit enabled/disabled or even marked as error,
+   see cobc --help, examples:
+  -Wunreachable         warn about likely unreachable statements
+  -Wno-dialect          do not warn about dialect specific issues
+  -Werror               treat all warnings as errors
+  -Werror=<warning>     treat specified <warning> as error
 
 ** Options for the C compiler/linker:
   -K <entry>, compile entry point as static (resolve at link time)
@@ -253,6 +256,15 @@ NEWS - user visible changes				-*- outline -*-
   -j -job=args, run job after compile
   input filename of '-' reads source from standard in
   For more: see cobc --help
+
+* Changed cobc options:
+
+** The option -ffunctions-all (allow use of intrinsic functions without
+   FUNCTION keyword) was replaced by -fintrinsics=ALL.
+   -fintrinsics allows to also specify that only specific functions may
+   be used without the FUNCTION keyword.
+   The preferred option is to not use these cobc options at all but to
+   specify this within the COBOL code (CONFIGURATION SECTION. REPOSITORY.)
 
 
 * New cobcrun options:
