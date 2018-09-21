@@ -6,7 +6,9 @@ NEWS - user visible changes				-*- outline -*-
 
 ** REPORTWRITER module added
 
-** INDEXED file support: added support for sparse and split keys
+** INDEXED file handling: added support for sparse and split keys
+
+** file handling: added support for [RE]WRITE FILE file FROM source
 
 ** DISPLAY ... UPON PRINTER may be redirected to an external command
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
@@ -133,7 +135,7 @@ NEWS - user visible changes				-*- outline -*-
   C$CALLEDBY                       return the name of the caller
   CBL_GC_FORK                      fork current process (not on Windows)
   CBL_GC_WAITPID                   wait for process to end
-  CBL_GC_GETOPT  (CBL_OC_GETOPT)   comand lineoption parser for COBOL
+  CBL_GC_GETOPT  (CBL_OC_GETOPT)   command line option parser for COBOL
   CBL_GC_PRINTABLE (C$PRINTABLE)   check if character is printable
   CBL_GC_HOSTED (CBL_OC_HOSTED)    provides access to C extern variables,
                                    like stdin, errno
