@@ -1,4 +1,9 @@
 
+2018-09-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* field.c (cb_validate_field): deactivated questionable incrementing
+	  if reference-counter for GLOBAL fields
+
 2018-09-12  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* parser.y (file_description_entry): unset current_file on error;

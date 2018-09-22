@@ -2477,11 +2477,17 @@ cb_validate_field (struct cb_field *f)
 
 	validate_field_value (f);
 	if (f->flag_is_global) {
+#if 0 /* CHECKME: Why should we adjust the field count here? */
 		f->count++;
 		for (c = f->children; c; c = c->sister) {
 			c->flag_is_global = 1;
 			c->count++;
 		}
+#else
+		for (c = f->children; c; c = c->sister) {
+			c->flag_is_global = 1;
+		}
+#endif
 	}
 
 	f->flag_is_verified = 1;
