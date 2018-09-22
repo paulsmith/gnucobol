@@ -1486,8 +1486,10 @@ libcob: prog2.cob:32: ASSIGN field with NULL address
 AT_CLEANUP
 
 
-AT_SETUP([INDEXED file sparse/split keys (1)])
-AT_KEYWORDS([runfile split key sparse suppress])
+AT_SETUP([INDEXED file sparse/split keys])
+AT_KEYWORDS([runfile split key sparse SUPPRESS])
+
+# FIXME: separate both test parts
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
@@ -2004,11 +2006,13 @@ Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6:
 AT_CLEANUP
 
 
-AT_SETUP([INDEXED file sparse/split keys (2)])
-AT_KEYWORDS([runfile split key sparse suppress])
+AT_SETUP([INDEXED file split keys WITH DUPLICATES])
+AT_KEYWORDS([runfile key])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-## FIXME: This example works with reportwriter branch.
+## Note: This example fails identical with reportwriter branch.
+##       The open issue is that a start on duplicates does not position
+##       on the first primary key.
 AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [

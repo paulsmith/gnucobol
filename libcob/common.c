@@ -6449,7 +6449,7 @@ cob_load_config (void)
 			conf_runtime_error (0, _("invalid value '%s' for configuration tag '%s'"), conf_file, "COB_CONFIG_DIR");
 			conf_runtime_error (1, _("should not contain '%c'"), PATHSEP_CHAR);
 			return -1;
-	}
+		}
 	}
 
 	sprintf (varseq_dflt, "%d", WITH_VARSEQ);		/* Default comes from config.h */
