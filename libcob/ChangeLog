@@ -1354,6 +1354,12 @@
 	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
 	  during runtime initialisation
 
+2015-03-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c updated to return correct status codes for WRITE/REWRITE
+	  related to duplicate keys being detected
+	  This was tested with BDB, D-ISAM and VB-ISAM 2.1.1
+
 2015-02-26  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* cobgetopt.c (cob_getopt_long_long): List all ambiguous possibilities,
