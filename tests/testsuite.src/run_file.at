@@ -2013,10 +2013,6 @@ AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 ## Note: The order in which secondary records with duplicate keys
 ##       are returnded is not guaranteed.
 
-# START < seems to be broken at least for BDB (more to check),
-# same result in rw-branch
-AT_XFAIL_IF([true])
-
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
@@ -2125,10 +2121,10 @@ AT_DATA([prog.cob], [
            END-START
 
            MOVE 0002      TO test-key-p2
-           MOVE ALL "Z"   TO test-key-p3
+           MOVE ALL "z"   TO test-key-p3
            START test-file KEY IS < test-key-2
                INVALID KEY
-                   DISPLAY "START < 0002/ZZZZ found no record"
+                   DISPLAY "START < 0002/zzzz found no record"
                NOT INVALID KEY
                    READ  test-file PREVIOUS
                        AT END
