@@ -3845,12 +3845,20 @@ validate_indexed_key_field (struct cb_file *f, struct cb_field *records,
 		     key_component != NULL;
 		     key_component = key_component->next) {
 			/* resolution of references in key components must be done here */
-			cb += cb_field_size(cb_ref(key_component->component));
+			key_ref = cb_ref (key_component->component);
+			if (key_ref == cb_error_node) {
+				cb_error_x (CB_TREE(f), _("invalid KEY item '%s', not in file '%s'"),
+					k->name, f->name);
+				return;
+			}
+			cb += cb_field_size(key_ref);
 		}
 		composite_key = (struct cb_field *)cb_ref(key);
 		memset (pic, 0, sizeof(pic));
 		sprintf (pic, "X(%d)", cb);
-		if (composite_key->pic != NULL) cobc_parse_free (composite_key->pic);
+		if (composite_key->pic != NULL) {
+			cobc_parse_free (composite_key->pic);
+		}
 		composite_key->pic = CB_PICTURE (cb_build_picture (pic));
 		cb_validate_field (composite_key);
 	} else {

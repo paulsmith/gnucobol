@@ -1,4 +1,9 @@
 
+2018-09-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+
+	* tree.c (validate_indexed_key_field): added missing checked for
+	  valid keys in files with split keys
+
 2018-09-22  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
 
 	* field.c (cb_validate_field): deactivated questionable incrementing
