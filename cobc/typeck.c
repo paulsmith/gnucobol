@@ -2461,20 +2461,19 @@ get_value (cb_tree x)
 	return CB_LITERAL (x)->data[0];
 }
 
-static void
-cb_validate_collating (struct cb_program *prog)
+static int
+cb_validate_collating (cb_tree collating_sequence)
 {
 	cb_tree		x;
 
-	x = cb_ref (prog->collating_sequence);
+	x = cb_ref (collating_sequence);
 	if (!CB_ALPHABET_NAME_P (x)) {
-		cb_error_x (prog->collating_sequence, _("'%s' is not an alphabet name"),
-			    cb_name (prog->collating_sequence));
-		prog->collating_sequence = NULL;
-		return;
+		cb_error_x (collating_sequence, _("'%s' is not an alphabet name"),
+			    cb_name (collating_sequence));
+		return 1;
 	}
 	if (CB_ALPHABET_NAME (x)->alphabet_type != CB_ALPHABET_CUSTOM) {
-		return;
+		return 0;
 	}
 	if (CB_ALPHABET_NAME (x)->low_val_char) {
 		cb_low = cb_build_alphanumeric_literal ("\0", (size_t)1);
@@ -2486,6 +2485,7 @@ cb_validate_collating (struct cb_program *prog)
 		CB_LITERAL(cb_high)->data[0] = (unsigned char)CB_ALPHABET_NAME (x)->high_val_char;
 		CB_LITERAL(cb_high)->all = 1;
 	}
+	return 0;
 }
 
 void
@@ -2860,9 +2860,16 @@ cb_validate_program_environment (struct cb_program *prog)
 			}
 		}
 
-	/* Resolve the program collating sequence */
+	/* Resolve the program collating sequences */
 	if (prog->collating_sequence) {
-		cb_validate_collating (prog);
+		if (cb_validate_collating (prog->collating_sequence)) {
+			prog->collating_sequence = NULL;
+		};
+	}
+	if (prog->collating_sequence_n) {
+		if (cb_validate_collating (prog->collating_sequence_n)) {
+			prog->collating_sequence_n = NULL;
+		};
 	}
 
 	/* Resolve the program classification */

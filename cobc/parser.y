@@ -3477,9 +3477,42 @@ object_computer_memory:
 ;
 
 object_computer_sequence:
-  prog_coll_sequence _is single_reference
+  _program _collating SEQUENCE prog_coll_sequence_values
+;
+
+prog_coll_sequence_values:
+  _is single_reference
   {
-	current_program->collating_sequence = $3;
+	current_program->collating_sequence = $2;
+  }
+| _is single_reference single_reference
+  {
+	current_program->collating_sequence = $2;
+	CB_PENDING_X ($3, "NATIONAL COLLATING SEQUENCE");
+	current_program->collating_sequence_n = $3;
+  }
+| _for ALPHANUMERIC _is single_reference
+  {
+	current_program->collating_sequence = $4;
+  }
+| _for NATIONAL _is single_reference
+  {
+	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
+	current_program->collating_sequence_n = $4;
+  }
+| _for ALPHANUMERIC _is single_reference
+  _for NATIONAL _is single_reference
+  {
+	current_program->collating_sequence = $4;
+	CB_PENDING_X ($8, "NATIONAL COLLATING SEQUENCE");
+	current_program->collating_sequence_n = $8;
+  }
+| _for NATIONAL _is single_reference
+  _for ALPHANUMERIC _is single_reference
+  {
+	CB_PENDING_X ($4, "NATIONAL COLLATING SEQUENCE");
+	current_program->collating_sequence_n = $4;
+	current_program->collating_sequence = $8;
   }
 ;
 
@@ -16783,6 +16816,7 @@ _box:		| BOX ;
 _by:		| BY ;
 _character:	| CHARACTER ;
 _characters:	| CHARACTERS ;
+_collating: | COLLATING ;
 _contains:	| CONTAINS ;
 _controls:	| CONTROLS ;
 _control:	| CONTROL ;
@@ -16860,12 +16894,6 @@ records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
 size_or_length:		SIZE | LENGTH ;
 with_dups:		WITH DUPLICATES | DUPLICATES ;
-
-prog_coll_sequence:
-  PROGRAM COLLATING SEQUENCE
-| COLLATING SEQUENCE
-| SEQUENCE
-;
 
 /* Mandatory R/W keywords */
 detail_keyword:		DETAIL | DE ;

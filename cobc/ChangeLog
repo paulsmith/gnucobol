@@ -3,6 +3,8 @@
 
 	* tree.c (validate_indexed_key_field): added missing checked for
 	  valid keys in files with split keys
+	* parser.y, tree.h, typeck.c: added NATIONAL COLLATING SEQUENCE
+	  as PENDING
 
 2018-09-22  Simon Sobisch <simonsobisch@gnu.org>
 

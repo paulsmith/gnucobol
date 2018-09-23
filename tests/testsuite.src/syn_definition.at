@@ -1478,9 +1478,33 @@ prog.cob:8: error: PICTURE clause not compatible with USAGE COMP-3
 AT_CLEANUP
 
 
-AT_SETUP([Alphabet definition])
+AT_SETUP([ALPHABET definition])
 AT_KEYWORDS([definition])
 
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET TESTME IS
+                    'A' THROUGH 'Z', x'00' thru x'05';
+                    x'41' ALSO x'42', ALSO x'00', x'C1' ALSO x'C2'.
+           ALPHABET FINE
+                    'A' also 'B' also 'C' also 'd' also 'e' ALSO 'f',
+                    'g' also 'G', '1' thru '9', x'00'.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:7: error: duplicate character values in alphabet 'TESTME': x'00', A, B
+])
+AT_CLEANUP
+
+
+AT_SETUP([PROGRAM COLLATING SEQUENCE])
+AT_KEYWORDS([definition ALPHABET])
+
+# check that a reference on the bad alphabet does not break cobc
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
@@ -1491,11 +1515,8 @@ AT_DATA([prog.cob], [
                         PROGRAM COLLATING SEQUENCE IS TESTME.
        SPECIAL-NAMES.
            ALPHABET TESTME IS
-                    'A' THROUGH 'Z', x'00' thru x'05';
-                    x'41' ALSO x'42', ALSO x'00'.
-           ALPHABET FINE IS
-                    'A' also 'B' also 'C' also 'd' also 'e' ALSO 'f',
-                    'g' also 'G', '1' thru '9'.
+                    x'00' thru x'05', 'A' THROUGH 'Z';
+                    x'41' ALSO x'42', ALSO x'00', x'C1' ALSO x'C2'.
 ])
 
 AT_DATA([prog2.cob], [
@@ -1506,10 +1527,142 @@ AT_DATA([prog2.cob], [
        SOURCE-COMPUTER. GNU-LINUX.
        OBJECT-COMPUTER. GC-MACHINE,
                         PROGRAM COLLATING SEQUENCE IS TESTNO.
+])
+
+AT_DATA([prog3.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        PROGRAM COLLATING SEQUENCE IS ALPHABET-1, 
+                                                      ALPHABET-2.
        SPECIAL-NAMES.
-           ALPHABET FINE IS
-                    'A' also 'B' also 'C' also 'd' also 'e' ALSO 'f',
-                    'g' also 'G', '1' thru '9'.
+           ALPHABET ALPHABET-1 IS
+                    'A' THROUGH 'Z', x'00' thru x'05'.
+           ALPHABET ALPHABET-2
+                    n'A' also n'B' ALSO n'f',
+                    n'g' also n'G', n'1' thru n'9'.
+       END PROGRAM prog3.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3b.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        PROGRAM           SEQUENCE IS ALPHABET-1, 
+                                                      ALPHABET-2.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS
+                    'A' THROUGH 'Z', x'00' thru x'05'.
+           ALPHABET ALPHABET-2 IS
+                    n'A' ALSO n'f',
+                    n'g' also n'G'.
+       END PROGRAM prog3b.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3c.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE, SEQUENCE ALPHABET-1, ALPHABET-2.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1    x'00' thru x'05'.
+           ALPHABET ALPHABET-2 IS n'g' also n'G', n'1' thru n'9'.
+       END PROGRAM prog3c.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3d.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE, SEQUENCE ALPHABET-1, ALPHABET-2.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS 'A' THROUGH 'Z'.
+           ALPHABET ALPHABET-2   n'A' also n'B', n'1' thru n'9'.
+       END PROGRAM prog3d.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3e.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE, SEQUENCE ALPHABET-1.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS 'Z', x'00'.
+       END PROGRAM prog3e.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3f.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        COLLATING SEQUENCE
+                          FOR ALPHANUMERIC IS ALPHABET-1.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS
+                    'A' THROUGH 'Z', x'00', x'05'.
+       END PROGRAM prog3f.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3g.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        SEQUENCE ALPHANUMERIC ALPHABET-1.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS
+                    'A' THROUGH 'D'.
+       END PROGRAM prog3g.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3h.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        COLLATING SEQUENCE
+                          FOR ALPHANUMERIC IS ALPHABET-1
+                              NATIONAL     IS ALPHABET-2.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS
+                    'A', 'C', x'05'.
+           ALPHABET ALPHABET-2
+                    n'A', n'1' thru n'9'.
+       END PROGRAM prog3h.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3i.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        COLLATING SEQUENCE
+                          NATIONAL     ALPHABET-2
+                          ALPHANUMERIC ALPHABET-1.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-1 IS
+                    'a' THROUGH 'z'.
+           ALPHABET ALPHABET-2
+                    n'B', n'C'; n'g' also n'G'.
+       END PROGRAM prog3i.
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog3j.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. GNU-LINUX.
+       OBJECT-COMPUTER. GC-MACHINE,
+                        COLLATING SEQUENCE
+                          NATIONAL     ALPHABET-2.
+       SPECIAL-NAMES.
+           ALPHABET ALPHABET-2
+                    n'B', n'C'; n'g' also n'G'.
+       END PROGRAM prog3j.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
@@ -1518,6 +1671,15 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CHECK([$COMPILE_ONLY prog2.cob], [1], [],
 [prog2.cob:8: error: 'TESTNO' is not defined
 prog2.cob:8: error: 'TESTNO' is not an alphabet name
+])
+AT_CHECK([$COMPILE_ONLY -Wno-unfinished prog3.cob], [0], [],
+[prog3.cob:9: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:25: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:39: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:50: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:99: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:114: warning: NATIONAL COLLATING SEQUENCE is not implemented
+prog3.cob:130: warning: NATIONAL COLLATING SEQUENCE is not implemented
 ])
 AT_CLEANUP
 
