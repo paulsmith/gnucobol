@@ -2010,9 +2010,11 @@ AT_SETUP([INDEXED file split keys WITH DUPLICATES])
 AT_KEYWORDS([runfile key])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
-## Note: This example fails identical with reportwriter branch.
-##       The open issue is that a start on duplicates does not position
-##       on the first primary key.
+## Note: The order in which secondary records with duplicate keys
+##       are returnded is not guaranteed.
+
+# START < seems to be broken at least for BDB (more to check),
+# same result in rw-branch
 AT_XFAIL_IF([true])
 
 AT_DATA([prog.cob], [
@@ -2041,12 +2043,16 @@ AT_DATA([prog.cob], [
            03  test-data   PIC X(4).
            03  test-key-p3 PIC X(4).
 
+       WORKING-STORAGE SECTION.
+       01  found        PIC X(03).
+
        PROCEDURE        DIVISION.
            OPEN OUTPUT test-file
            WRITE test-rec FROM "BBBB0001dat1aaaa"
            WRITE test-rec FROM "AAAA0001dat2aaaa"
            WRITE test-rec FROM "CCCC0002dat3aaaa"
            WRITE test-rec FROM "DDDD0002dat4bbbb"
+           WRITE test-rec FROM "EEEE0002dat5bbbb"
            CLOSE test-file
 
            OPEN INPUT test-file
@@ -2059,96 +2065,102 @@ AT_DATA([prog.cob], [
                    IF test-data NOT = "dat3"
                        DISPLAY "READ with wrong result: "
                            test-rec
-                   END-IF
            END-READ
+
+           MOVE SPACES   TO found
 
            MOVE 0001     TO test-key-p2
            MOVE "aaaa"   TO test-key-p3
            START test-file KEY >= test-key-2
                INVALID KEY
-                   DISPLAY "START >= 0001 found no record"
+                   DISPLAY "START >= 0001/aaaa found no record"
                NOT INVALID KEY
                    READ  test-file NEXT
                        AT END
                            DISPLAY "READ NEXT (1) found no record"
-                           GO TO end-par
                        NOT AT END
-                           IF test-data NOT = "dat2"
-                               DISPLAY "READ NEXT (1) "
-                                   "with wrong result: "
-                                   test-data
-                               GO TO end-par
-                           END-IF
+                           EVALUATE test-data
+                              WHEN "dat1"
+                                 MOVE 'X' TO found (1:1)
+                              WHEN "dat2"
+                                 MOVE 'X' TO found (2:1)
+                              WHEN OTHER
+                                 DISPLAY "READ NEXT (1) "
+                                     "with wrong result: "
+                                     test-data
                    END-READ
                    READ  test-file NEXT
                        AT END
                            DISPLAY "READ NEXT (2) found no record"
-                           GO TO end-par
                        NOT AT END
-                           IF test-data NOT = "dat1"
-                               DISPLAY "READ NEXT (2) "
-                                   "with wrong result: "
-                                   test-data
-                               GO TO end-par
-                           END-IF
+                           EVALUATE test-data
+                              WHEN "dat1"
+                                 MOVE 'X' TO found (1:1)
+                              WHEN "dat2"
+                                 MOVE 'X' TO found (2:1)
+                              WHEN OTHER
+                                 DISPLAY "READ NEXT (2) "
+                                     "with wrong result: "
+                                     test-data
                    END-READ
+                   IF found NOT = 'XX '
+                      DISPLAY "START >= + READ NEXT * 2 "
+                          "with wrong result: " found
            END-START
            MOVE 0001      TO test-key-p2
            MOVE "aaaa"    TO test-key-p3
            START test-file KEY > test-key-2
                INVALID KEY
-                   DISPLAY "START > 0001 found no record"
+                   DISPLAY "START > 0001/aaaa found no record"
                NOT INVALID KEY
                    READ  test-file NEXT
                        AT END
                            DISPLAY "READ NEXT (3) found no record"
-                           GO TO end-par
                        NOT AT END
                            IF test-data NOT = "dat3"
                                DISPLAY "READ NEXT (3) "
                                    "with wrong result: "
                                    test-data
-                               GO TO end-par
-                           END-IF
                    END-READ
            END-START
+
            MOVE 0002      TO test-key-p2
            MOVE ALL "Z"   TO test-key-p3
-           START test-file KEY IS <= test-key-2
+           START test-file KEY IS < test-key-2
                INVALID KEY
-                   DISPLAY "START <= 0002 found no record"
+                   DISPLAY "START < 0002/ZZZZ found no record"
                NOT INVALID KEY
                    READ  test-file PREVIOUS
                        AT END
                            DISPLAY "READ PREVIOUS (1) found no record"
-                           GO TO end-par
                        NOT AT END
-                           IF test-data NOT = "dat4"
-                               DISPLAY "READ PREVIOUS (1) "
-                                   "with wrong result: "
-                                   test-data
-                               GO TO end-par
-                           END-IF
+                           IF test-data NOT = "dat5"
+                              DISPLAY "READ PREVIOUS (1) "
+                                  "with wrong result: "
+                                  test-data
                    END-READ
                    READ  test-file PREVIOUS
                        AT END
                            DISPLAY "READ PREVIOUS (2) found no record"
-                           GO TO end-par
+                       NOT AT END
+                           IF test-data NOT = "dat4"
+                              DISPLAY "READ PREVIOUS (2) "
+                                  "with wrong result: "
+                                  test-data
+                   END-READ
+                   READ  test-file PREVIOUS
+                       AT END
+                           DISPLAY "READ PREVIOUS (3) found no record"
                        NOT AT END
                            IF test-data NOT = "dat3"
-                               DISPLAY "READ PREVIOUS (2) "
-                                   "with wrong result: "
-                                   test-data
-                               GO TO end-par
-                           END-IF
+                              DISPLAY "READ PREVIOUS (3) "
+                                  "with wrong result: "
+                                  test-data
                    END-READ
            END-START
-           .
-       end-par.
+
            CLOSE test-file
-           STOP RUN
-           .
-       END PROGRAM prog.
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
