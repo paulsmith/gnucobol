@@ -1,19 +1,19 @@
 
-2018-06-04  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2018-06-04  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ltmain.sh [WIN32, !GCC]: local fix for libtool issue #109514 to
 	  support buildinf with configure using other Win32 compilers than MSC
 
-2018-02-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2018-02-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: ensure auxiliary scripts are executable before
 	  running autoconf; only create tarstamp.h if missing
 
-2017-12-06  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-12-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: ensure auxiliary scripts are executable
 
-2017-12-08  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-12-08  Simon Sobisch <simonsobisch@gnu.org>
 
 	* compile, config.guess, config.sub, depcomp, install-sh, mdate-sh,
 	  texinfo.tex: updated to recent version from
@@ -22,23 +22,23 @@
 	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/
 	* missing: adjusted perl_URL and flex_URL
 
-2017-08-13  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-08-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: new script for creating missing files after checkout
 	* config.guess: updated to recent version
 
-2017-07-15  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-07-15  Simon Sobisch <simonsobisch@gnu.org>
 
 	* compile, config.guess, config.sub: updated to recent version from
 	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
 	* texinfo.tex: updated from https://ftp.gnu.org/gnu/texinfo
 
-2017-04-28  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2017-04-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ylwrap: updated to recent version from
 	  http://git.savannah.gnu.org/cgit/automake.git/tree/lib/ylwrap
 
-2016-08-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-08-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: updated to versions from automake 1.15
 	* ylwrap: added from automake 1.15
@@ -46,7 +46,7 @@
 	  git.savannah.gnu.org/gitweb/?p=config.git, backported support
 	  for "ancient" systems without uname(1)
 
-2015-07-10  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2015-07-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: moved additional build-scripts from rootdir to build_aux
 	* mdate-sh: added from automake 1.11.1

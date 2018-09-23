@@ -1,5 +1,5 @@
 
-2016-12-23  Simon 'sf-mensch/human' Sobisch <simonsobisch@gnu.org>
+2016-12-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.cpy: added COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
 	  COB-SCR-KEY-HOME, COB-SCR-KEY-END for ACCEPT OMITTED
