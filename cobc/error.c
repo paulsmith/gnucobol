@@ -52,7 +52,7 @@ print_error_prefix (const char *file, int line, const char *prefix)
 	if (file) {
 		if (line > 0) {
 			if (cb_msg_style == CB_MSG_STYLE_MSC) {
-				fprintf (stderr, "%s (%d): ", file, line);
+				fprintf (stderr, "%s(%d): ", file, line);
 			} else {
 				fprintf (stderr, "%s:%d: ", file, line);
 			}
