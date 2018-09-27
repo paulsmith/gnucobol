@@ -2585,6 +2585,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SYSTEM-DEFAULT",		0, 0, SYSTEM_DEFAULT,		/* 2002 */
 				0, 0
   },
+  { "SYSTEM-INFO",		0, 1, SYSTEM_INFO,		/* ACU extension */
+				0, CB_CS_ACCEPT
+  },
   { "SYSTEM-OFFSET",		0, 0, SYSTEM_OFFSET,		/* Extension */
 				0, 0
   },
@@ -2611,6 +2614,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "TERMINAL",			0, 0, TERMINAL,			/* Communication Section */
 				0, 0
+  },
+  { "TERMINAL-INFO",		0, 1, TERMINAL_INFO,		/* ACU extension */
+				0, CB_CS_ACCEPT
   },
   { "TERMINATE",		0, 0, TERMINATE,		/* 2002 */
 				0, 0

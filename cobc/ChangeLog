@@ -1,4 +1,10 @@
 
+2018-09-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, reserved.c: added ACUCOBOL-GT statements
+	  ACCEPT FROM TERMINAL-INFO / SYSTEM-INFO as PENDING
+	* parser.y: added parsing for explicit "NO" BELL
+
 2018-09-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (validate_indexed_key_field): added missing checked for

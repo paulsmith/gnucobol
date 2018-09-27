@@ -2713,6 +2713,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token SYMBOLIC
 %token SYNCHRONIZED
 %token SYSTEM_DEFAULT		"SYSTEM-DEFAULT"
+%token SYSTEM_INFO			"SYSTEM-INFO"
 %token SYSTEM_OFFSET		"SYSTEM-OFFSET"
 %token TAB
 %token TAB_TO_ADD			"TAB-TO-ADD"
@@ -2723,6 +2724,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token TAPE
 %token TERMINAL
 %token TERMINATE
+%token TERMINAL_INFO			"TERMINAL-INFO"
 %token TERMINATION_VALUE	"TERMINATION-VALUE"
 %token TEST
 %token TEXT
@@ -9564,6 +9566,18 @@ accept_body:
   {
 	cb_emit_accept_line_or_col ($1, 1);
   }
+| identifier FROM TERMINAL_INFO
+  {
+	/* information about terminal and its capabilities
+	cb_emit_accept_terminal_info ($1); */
+	CB_PENDING ("ACCEPT FROM TERMINAL INFO");
+  }
+| identifier FROM SYSTEM_INFO
+  {
+	/* information about OS and runtime features
+	cb_emit_accept_system_info ($1); */
+	CB_PENDING ("ACCEPT FROM SYSTEM INFO");
+  }
 | identifier FROM DATE YYYYMMDD
   {
 	cobc_cs_check = 0;
@@ -9599,6 +9613,12 @@ accept_body:
 | identifier FROM EXCEPTION STATUS
   {
 	cb_emit_accept_exception_status ($1);
+  }
+| identifier FROM INPUT STATUS
+  {
+	/* check is data from keyboard available? "1", else "0"
+	cb_emit_accept_input_status ($1); */
+	CB_PENDING ("ACCEPT FROM INPUT STATUS");
   }
 | identifier FROM TIME
   {
@@ -9835,6 +9855,12 @@ accp_attr:
   {
 	check_repeated ("BELL", SYN_CLAUSE_7, &check_duplicate);
 	set_dispattr (COB_SCREEN_BELL);
+  }
+| NO BELL
+  {
+	check_repeated ("BELL", SYN_CLAUSE_7, &check_duplicate);
+	/* FIXME: do we need a COB_NO_SCREEN_BELL here?
+	set_dispattr (COB_SCREEN_BELL); */
   }
 | BLINK
   {
