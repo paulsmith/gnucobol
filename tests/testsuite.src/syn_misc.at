@@ -2783,6 +2783,123 @@ prog3.cob:25: error: word length exceeds 59 characters: '10000000000000000000000
 AT_CLEANUP
 
 
+AT_SETUP([Segmentation Module])
+AT_KEYWORDS([misc])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       PROCEDURE        DIVISION.
+
+       DECLARATIVES.
+
+       DEC-1 SECTION 49.
+           CONTINUE.
+
+       DEC-2 SECTION 50.
+           CONTINUE.
+
+       END DECLARATIVES.
+
+       SEC-1 SECTION 00.
+           CONTINUE.
+
+       SEC-2 SECTION 01.
+           CONTINUE.
+
+       SEC-3 SECTION -00.
+           CONTINUE.
+
+       SEC-4 SECTION 100.
+           CONTINUE.
+
+       SEC-5 SECTION 49.
+           CONTINUE.
+
+       SEC-6 SECTION 50.
+           PERFORM SEC-1.
+
+       SEC-7 SECTION 99.
+           PERFORM SEC-1.
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: in section 'DEC-1':
+prog.cob:9: warning: SECTION segment ignored
+prog.cob: in section 'DEC-2':
+prog.cob:12: warning: SECTION segment ignored
+prog.cob: in section 'SEC-1':
+prog.cob:17: warning: SECTION segment ignored
+prog.cob: in section 'SEC-2':
+prog.cob:20: warning: SECTION segment ignored
+prog.cob: in section 'SEC-3':
+prog.cob:23: error: non-negative integer value expected
+prog.cob:23: warning: SECTION segment ignored
+prog.cob: in section 'SEC-4':
+prog.cob:26: warning: SECTION segment ignored
+prog.cob: in section 'SEC-5':
+prog.cob:29: warning: SECTION segment ignored
+prog.cob: in section 'SEC-6':
+prog.cob:32: warning: SECTION segment ignored
+prog.cob: in section 'SEC-7':
+prog.cob:35: warning: SECTION segment ignored
+])
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: in section 'DEC-1':
+prog.cob:9: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:9: warning: SECTION segment within DECLARATIVES is not implemented
+prog.cob: in section 'DEC-2':
+prog.cob:12: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:12: error: SECTION segment-number in DECLARATIVES must be less than 50
+prog.cob:12: warning: SECTION segment within DECLARATIVES is not implemented
+prog.cob: in section 'SEC-1':
+prog.cob:17: warning: SECTION segment is obsolete in COBOL 85
+prog.cob: in section 'SEC-2':
+prog.cob:20: warning: SECTION segment is obsolete in COBOL 85
+prog.cob: in section 'SEC-3':
+prog.cob:23: error: non-negative integer value expected
+prog.cob:23: warning: SECTION segment is obsolete in COBOL 85
+prog.cob: in section 'SEC-4':
+prog.cob:26: warning: SECTION segment is obsolete in COBOL 85
+prog.cob:26: error: SECTION segment-number must be less than or equal to 99
+prog.cob: in section 'SEC-5':
+prog.cob:29: warning: SECTION segment is obsolete in COBOL 85
+prog.cob: in section 'SEC-6':
+prog.cob:32: warning: SECTION segment is obsolete in COBOL 85
+prog.cob: in section 'SEC-7':
+prog.cob:35: warning: SECTION segment is obsolete in COBOL 85
+])
+AT_CLEANUP
+
+
+AT_SETUP([ACCEPT FROM ESCAPE KEY])
+AT_KEYWORDS([misc])
+
+# TODO: add function test to run_manual_screen.at
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       77 KEYNUM        PIC 9(04).
+       PROCEDURE        DIVISION.
+       
+           ACCEPT KEYNUM FROM ESCAPE KEY
+           DISPLAY "Key pressed: " KEYNUM
+           ACCEPT KEYNUM FROM ESCAPE
+           DISPLAY "Key pressed: " KEYNUM
+           ACCEPT OMITTED
+
+           STOP RUN.
+])
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
+AT_CLEANUP
+
+
 AT_SETUP([Numeric literals])
 AT_KEYWORDS([misc numeric-literal-length])
 
@@ -3291,98 +3408,6 @@ prog.cob:14: error: ACUCOBOL numeric literal does not conform to COBOL 2014
 AT_CLEANUP
 
 
-AT_SETUP([Segmentation Module])
-AT_KEYWORDS([misc])
-
-AT_DATA([prog.cob], [
-       IDENTIFICATION   DIVISION.
-       PROGRAM-ID.      prog.
-       DATA             DIVISION.
-       PROCEDURE        DIVISION.
-
-       DECLARATIVES.
-
-       DEC-1 SECTION 49.
-           CONTINUE.
-
-       DEC-2 SECTION 50.
-           CONTINUE.
-
-       END DECLARATIVES.
-
-       SEC-1 SECTION 00.
-           CONTINUE.
-
-       SEC-2 SECTION 01.
-           CONTINUE.
-
-       SEC-3 SECTION -00.
-           CONTINUE.
-
-       SEC-4 SECTION 100.
-           CONTINUE.
-
-       SEC-5 SECTION 49.
-           CONTINUE.
-
-       SEC-6 SECTION 50.
-           PERFORM SEC-1.
-
-       SEC-7 SECTION 99.
-           PERFORM SEC-1.
-
-           STOP RUN.
-])
-
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob: in section 'DEC-1':
-prog.cob:9: warning: SECTION segment ignored
-prog.cob: in section 'DEC-2':
-prog.cob:12: warning: SECTION segment ignored
-prog.cob: in section 'SEC-1':
-prog.cob:17: warning: SECTION segment ignored
-prog.cob: in section 'SEC-2':
-prog.cob:20: warning: SECTION segment ignored
-prog.cob: in section 'SEC-3':
-prog.cob:23: error: non-negative integer value expected
-prog.cob:23: warning: SECTION segment ignored
-prog.cob: in section 'SEC-4':
-prog.cob:26: warning: SECTION segment ignored
-prog.cob: in section 'SEC-5':
-prog.cob:29: warning: SECTION segment ignored
-prog.cob: in section 'SEC-6':
-prog.cob:32: warning: SECTION segment ignored
-prog.cob: in section 'SEC-7':
-prog.cob:35: warning: SECTION segment ignored
-])
-AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
-[prog.cob: in section 'DEC-1':
-prog.cob:9: warning: SECTION segment is obsolete in COBOL 85
-prog.cob:9: warning: SECTION segment within DECLARATIVES is not implemented
-prog.cob: in section 'DEC-2':
-prog.cob:12: warning: SECTION segment is obsolete in COBOL 85
-prog.cob:12: error: SECTION segment-number in DECLARATIVES must be less than 50
-prog.cob:12: warning: SECTION segment within DECLARATIVES is not implemented
-prog.cob: in section 'SEC-1':
-prog.cob:17: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: in section 'SEC-2':
-prog.cob:20: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: in section 'SEC-3':
-prog.cob:23: error: non-negative integer value expected
-prog.cob:23: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: in section 'SEC-4':
-prog.cob:26: warning: SECTION segment is obsolete in COBOL 85
-prog.cob:26: error: SECTION segment-number must be less than or equal to 99
-prog.cob: in section 'SEC-5':
-prog.cob:29: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: in section 'SEC-6':
-prog.cob:32: warning: SECTION segment is obsolete in COBOL 85
-prog.cob: in section 'SEC-7':
-prog.cob:35: warning: SECTION segment is obsolete in COBOL 85
-])
-AT_CLEANUP
-
-
 AT_SETUP([ACUCOBOL 32bit literal size])
 # ACUCOBOL literal max - the result is system dependent on size of unsigned long int
 AT_SKIP_IF(true)
@@ -3576,11 +3601,30 @@ AT_DATA([prog.cob], [
                ERASE SCREEN, POP-UP AREA IS myhandle
            END-DISPLAY
            DISPLAY "Some text for the floating window"
+           ACCEPT OMITTED
            CLOSE WINDOW myhandle
            DISPLAY FLOATING WINDOW,
                LINE 5, COLUMN 10, SIZE 20, LINES 2,
-               ERASE SCREEN, POP-UP AREA IS mythread
+               ERASE SCREEN, POP-UP AREA mythread
            END-DISPLAY
+           ACCEPT OMITTED
+           DESTROY WINDOW-HANDLE
+           DISPLAY WINDOW AT 1020 SIZE 36 LINES 15 BOXED
+              FOREGROUND-COLOR IS 7
+              BACKGROUND-COLOR IS 0
+              TOP CENTERED TITLE IS 'SOME TITLE'
+              pop-up area = WINDOW-HANDLE.
+           DISPLAY SUBWINDOW UPON WINDOW-HANDLE SHADOW
+              AT 0505 SIZE 25 LINES 10
+              BOTTOM LEFT TITLE = 'buttom left'
+              BACKGROUND-COLOR IS 10
+              FOREGROUND-COLOR IS 5.
+           DISPLAY WINDOW UPON WINDOW-HANDLE SHADOW
+              AT 0808 SIZE 18 LINES 5
+              RIGHT TITLE 'top right'
+              BACKGROUND-COLOR 1
+              FOREGROUND-COLOR 14.
+           ACCEPT OMITTED
            DESTROY WINDOW-HANDLE
       *
            STOP RUN.
@@ -3590,10 +3634,14 @@ AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
 [prog.cob: in paragraph 'MAIN':
 prog.cob:11: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:15: warning: GRAPHICAL WINDOW is not implemented
-prog.cob:20: warning: GRAPHICAL WINDOW is not implemented
 prog.cob:21: warning: GRAPHICAL WINDOW is not implemented
-prog.cob:23: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
-prog.cob:25: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:22: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:24: error: HANDLE must be either a generic or a WINDOW HANDLE or X(10)
+prog.cob:27: warning: GRAPHICAL CONTROL is not implemented
+prog.cob:28: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:33: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:38: warning: GRAPHICAL WINDOW is not implemented
+prog.cob:44: warning: GRAPHICAL CONTROL is not implemented
 ])
 
 AT_CLEANUP

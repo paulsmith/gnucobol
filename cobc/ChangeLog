@@ -1,4 +1,10 @@
 
+2018-09-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: ACCEPT x FROM ESCAPE _key
+	* parser.y, reserved.c: extended parsing for ACUCOBOL-GT
+	  DISPLAY WINDOW
+
 2018-09-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c: added ACUCOBOL-GT statements

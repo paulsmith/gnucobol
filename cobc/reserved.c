@@ -543,6 +543,9 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
 	/* FIXME + Check: 2014 Context-sensitive to COLUMN clause */
   },
+  { "CENTERED",		0, 0, CENTERED,		/* ACU extension */
+	  0, CB_CS_DISPLAY
+  },
   { "CENTERED-HEADINGS",		0, 1, CENTERED_HEADINGS,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },

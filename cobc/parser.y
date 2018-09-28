@@ -2059,6 +2059,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token CELL_FONT		"CELL-FONT"
 %token CELL_PROTECTION	"CELL-PROTECTION"
 %token CENTER
+%token CENTERED
 %token CENTERED_HEADINGS	"CENTERED-HEADINGS"
 %token CENTURY_DATE		"CENTURY-DATE"
 %token CF
@@ -9604,7 +9605,7 @@ accept_body:
   }
   /* note: GnuCOBOL uses screenio.cpy 9(4) identifier,
            MicroFocus/ACUCOBOL 99 */
-| identifier FROM ESCAPE KEY
+| identifier FROM ESCAPE _key
   {
 	cb_emit_accept_escape_key ($1);
   }
@@ -11160,6 +11161,7 @@ display_initial_window:
 	check_line_col_duplicate = 0;
 	line_column = NULL;
 	upon_value = NULL; /* Hack: stores the POP-UP AREA */
+	/* TODO: initialize attributes for SHADOW, BOTTOM */
   }
   display_window_clauses
   {
@@ -11240,20 +11242,36 @@ display_window_clause:
 	/* TODO: store */
   }
 | at_line_column
-| TITLE _is x
-| shadow_boxed
+| _top_or_bottom _left_or_centered_or_right TITLE _is_equal x
+| shadow
+| boxed
 | no_scroll_wrap
 | _with disp_attr
+;
+
+shadow:
+  SHADOW		{ /* TODO: set attribute */ }
+;
+boxed:
+  BOXED			{ /* TODO: set attribute */ }
+;
+
+_top_or_bottom:
+  /* empty */	{ $$ = cb_int0; }
+| TOP			{ $$ = cb_int0; }
+| BOTTOM		{ $$ = cb_int1; }
+;
+
+_left_or_centered_or_right:
+  LEFT			{ $$ = cb_int0; }
+| CENTERED		{ $$ = cb_int1; }
+| /* empty */	{ $$ = cb_int1; }
+| RIGHT  		{ $$ = cb_int2; }
 ;
 
 no_scroll_wrap:
   _with NO SCROLL
 | _with NO WRAP
-;
-
-shadow_boxed:
-  SHADOW
-| BOXED
 ;
 
 
@@ -11263,7 +11281,7 @@ pop_up_or_handle:
 ;
 
 pop_up_area:
-  POP_UP _area _is identifier
+  POP_UP _area _is_equal identifier
   {
 	if (upon_value) {
 		emit_duplicate_clause_message("POP-UP AREA");
@@ -11389,12 +11407,12 @@ disp_attr:
 	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
 	CB_PENDING ("COLOR");
   }
-| FOREGROUND_COLOR _is num_id_or_lit
+| FOREGROUND_COLOR _is_equal num_id_or_lit
   {
 	check_repeated ("FOREGROUND-COLOR", SYN_CLAUSE_17, &check_duplicate);
 	set_attribs ($3, NULL, NULL, NULL, NULL, NULL, 0);
   }
-| BACKGROUND_COLOR _is num_id_or_lit
+| BACKGROUND_COLOR _is_equal num_id_or_lit
   {
 	check_repeated ("BACKGROUND-COLOR", SYN_CLAUSE_18, &check_duplicate);
 	set_attribs (NULL, $3, NULL, NULL, NULL, NULL, 0);
