@@ -1266,10 +1266,6 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	int		fdmode;
 	int		fperms;
 	unsigned int	nonexistent;
-#ifdef	HAVE_FCNTL
-	int		ret;
-	struct flock	lock;
-#endif
 
 	/* Note filename points to file_open_name */
 	/* cob_chk_file_mapping manipulates file_open_name directly */
@@ -1367,6 +1363,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
 	if (memcmp (filename, "/dev/", (size_t)5)) {
+		struct flock	lock;
 		memset ((void *)&lock, 0, sizeof (struct flock));
 		if (mode != COB_OPEN_INPUT) {
 			lock.l_type = F_WRLCK;
@@ -1378,7 +1375,7 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 		lock.l_len = 0;
 		errno = 0;
 		if (fcntl (fd, F_SETLK, &lock) < 0) {
-			ret = errno;
+			int		ret = errno;
 			close (fd);
 			f->fd = -1;
 			switch (ret) {
@@ -1444,10 +1441,6 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	FILE			*fp;
 	const char		*fmode;
 	cob_linage		*lingptr;
-#ifdef	HAVE_FCNTL
-	int			ret;
-	struct flock		lock;
-#endif
 	unsigned int		nonexistent;
 
 	if (f->organization != COB_ORG_LINE_SEQUENTIAL) {
@@ -1563,6 +1556,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 #ifdef	HAVE_FCNTL
 	/* Lock the file */
 	if (memcmp (filename, "/dev/", (size_t)5)) {
+		struct flock		lock;
 		memset ((void *)&lock, 0, sizeof (struct flock));
 		if (mode != COB_OPEN_INPUT) {
 			lock.l_type = F_WRLCK;
@@ -1573,7 +1567,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 		lock.l_start = 0;
 		lock.l_len = 0;
 		if (fcntl (fileno (fp), F_SETLK, &lock) < 0) {
-			ret = errno;
+			int ret = errno;
 			fclose (fp);
 			switch (ret) {
 			case EACCES:
@@ -1602,9 +1596,6 @@ cob_file_close (cob_file *f, const int opt)
 #else
 
 	size_t	ret;
-#ifdef	HAVE_FCNTL
-	struct flock lock;
-#endif
 
 	switch (opt) {
 	case COB_CLOSE_NORMAL:
@@ -1624,12 +1615,13 @@ cob_file_close (cob_file *f, const int opt)
 		}
 #ifdef	HAVE_FCNTL
 		/* Unlock the file */
-		memset ((void *)&lock, 0, sizeof (struct flock));
-		lock.l_type = F_UNLCK;
-		lock.l_whence = SEEK_SET;
-		lock.l_start = 0;
-		lock.l_len = 0;
 		if (f->fd >= 0) {
+			struct flock lock;
+			memset ((void *)&lock, 0, sizeof (struct flock));
+			lock.l_type = F_UNLCK;
+			lock.l_whence = SEEK_SET;
+			lock.l_start = 0;
+			lock.l_len = 0;
 			fcntl (f->fd, F_SETLK, &lock);
 		}
 #endif
@@ -4840,18 +4832,6 @@ indexed_rewrite (cob_file *f, const int opt)
 static void
 cob_file_unlock (cob_file *f)
 {
-#ifdef	WITH_DB
-	struct indexed_file	*p;
-#elif	defined(WITH_ANY_ISAM)
-	struct indexfile	*fh;
-#endif
-
-#ifndef	WITH_SEQRA_EXTFH
-#ifdef	HAVE_FCNTL
-	struct flock		lock;
-#endif
-#endif
-
 	if (COB_FILE_SPECIAL(f)) {
 		return;
 	}
@@ -4869,12 +4849,13 @@ cob_file_unlock (cob_file *f)
 #ifdef	HAVE_FCNTL
 			if (!(f->lock_mode & COB_FILE_EXCLUSIVE)) {
 				/* Unlock the file */
-				memset ((void *)&lock, 0, sizeof (struct flock));
-				lock.l_type = F_UNLCK;
-				lock.l_whence = SEEK_SET;
-				lock.l_start = 0;
-				lock.l_len = 0;
 				if (f->fd >= 0) {
+					struct flock	lock;
+					memset ((void *)&lock, 0, sizeof (struct flock));
+					lock.l_type = F_UNLCK;
+					lock.l_whence = SEEK_SET;
+					lock.l_start = 0;
+					lock.l_len = 0;
 					fcntl (f->fd, F_SETLK, &lock);
 				}
 			}
@@ -4884,16 +4865,18 @@ cob_file_unlock (cob_file *f)
 		} else {
 #ifdef	WITH_INDEX_EXTFH
 			extfh_indexed_unlock (f);
-#elif	defined(WITH_DB)
-			p = f->file;
-			if (bdb_env != NULL && p) {
-				unlock_record (f);
-				bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
-			}
-#elif	defined(WITH_ANY_ISAM)
-			fh = f->file;
-			if (fh) {
+#elif	defined(WITH_DB) || defined(WITH_ANY_ISAM)
+			if (f->file) {
+#if	defined(WITH_DB)
+				if (bdb_env != NULL) {
+					struct indexed_file	*p = f->file;
+					unlock_record (f);
+					bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
+				}
+#else
+				struct indexfile	*fh = f->file;
 				isrelease (fh->isfd);
+#endif
 			}
 #endif
 		}
