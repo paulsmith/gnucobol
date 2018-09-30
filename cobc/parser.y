@@ -1979,6 +1979,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token ALIGNMENT
 %token ALL
 %token ALLOCATE
+%token ALLOWING
 %token ALPHABET
 %token ALPHABETIC
 %token ALPHABETIC_LOWER		"ALPHABETIC-LOWER"
@@ -2039,6 +2040,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token BOTTOM
 %token BOX
 %token BOXED
+%token BULK_ADDITION	"BULK-ADDITION"
 %token BUSY
 %token BUTTONS
 %token BY
@@ -2190,6 +2192,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token ELEMENT
 %token ELSE
 %token EMI
+%token ENCRYPTION
 %token ENCODING
 %token END
 %token END_ACCEPT		"END-ACCEPT"
@@ -2506,6 +2509,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token ORDER
 %token ORGANIZATION
 %token OTHER
+%token OTHERS
 %token OUTPUT
 %token OVERLAP_LEFT		"OVERLAP-LEFT"
 %token OVERLAP_TOP		"OVERLAP-TOP"
@@ -2569,6 +2573,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token RANDOM
 %token RD
 %token READ
+%token READERS
 %token READ_ONLY		"READ-ONLY"
 %token READY_TRACE		"READY TRACE"
 %token RECEIVE
@@ -2788,6 +2793,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token UNTIL
 %token UP
 %token UPDATE
+%token UPDATERS
 %token UPON
 %token UPON_ARGUMENT_NUMBER	"UPON ARGUMENT-NUMBER"
 %token UPON_COMMAND_LINE	"UPON COMMAND-LINE"
@@ -2835,6 +2841,7 @@ add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
 %token WORKING_STORAGE		"WORKING-STORAGE"
 %token WRAP
 %token WRITE
+%token WRITERS
 %token X
 %token XML
 %token XML_DECLARATION		"XML-DECLARATION"
@@ -4443,12 +4450,15 @@ select_clause:
 | record_delimiter_clause
 | access_mode_clause
 | relative_key_clause
-| lock_mode_clause
 | collating_sequence_clause
 | record_key_clause
 | alternative_record_key_clause
 | file_status_clause
+| lock_mode_clause
 | sharing_clause
+/* FXIME: disabled because of shift/reduce conflict
+| encryption_clause
+*/
 /* FXIME: disabled because of shift/reduce conflict
   (optional in [alternate] record key, could be moved here
    if the suppress_clause goes here too and both entries verify that
@@ -4456,7 +4466,7 @@ select_clause:
 | password_clause
   {
 	if (current_file->organization == COB_ORG_INDEXED) {
-		cb_error ("for indexed files, the PASSWORD phrase must follow KEY");
+		cb_error (_("for indexed files, the PASSWORD phrase must follow KEY"));
 	} else {
 		current_file->password = $1;
 	}
@@ -4632,7 +4642,15 @@ alternative_record_key_clause:
 	p = cobc_parse_malloc (sizeof (struct cb_alt_key));
 	p->key = $5;
 	p->component_list = NULL;
-	p->duplicates = CB_INTEGER ($7)->val;
+	if ($7) {
+		p->duplicates = CB_INTEGER ($7)->val;
+	} else {
+		/* note: we may add a compiler configuration here,
+		         as at least ICOBOL defaults to WITH DUPLICATES
+		         for ALTERNATE keys if not explicit deactivated
+		*/
+		p->duplicates = 0;
+	}
 	p->password = $8;
 	if ($9) {
 		p->tf_suppress = 1;
@@ -4685,6 +4703,20 @@ password_clause:
 	$$ = $4;
   }
 ;
+
+/* FXIME: disabled because of shift/reduce conflict
+encryption_clause:
+  _with ENCRYPTION
+  {
+	if (current_file->organization == COB_ORG_INDEXED) {
+		cb_error (_("%s only valid with ORGANIZATION %s"), "WITH ENCRYPTION", "INDEXED");
+	} else {
+		CB_PENDING ("WITH ENCRYPTION");
+		current_file->password = cb_int0;
+	}
+  }
+;
+*/
 
 _suppress_clause:
   /* empty */
@@ -4770,22 +4802,46 @@ lock_mode:
   {
 	current_file->lock_mode |= COB_LOCK_AUTOMATIC;
   }
-| EXCLUSIVE
+| EXCLUSIVE _with_mass_update
   {
 	current_file->lock_mode |= COB_LOCK_EXCLUSIVE;
   }
 ;
 
+/* FIXME: the following WITH is optional (shift/reduce conflict) */
 _lock_with:
-| WITH LOCK ON lock_records
-| WITH LOCK ON MULTIPLE lock_records
+| WITH _lock ON lock_records _with_rollback
+| WITH _lock ON MULTIPLE lock_records _with_rollback
   {
 	current_file->lock_mode |= COB_LOCK_MULTIPLE;
   }
-| WITH ROLLBACK
+| with_rollback
   {
 	current_file->lock_mode |= COB_LOCK_MULTIPLE;
+  }
+;
+
+_with_rollback:
+| with_rollback
+;
+
+with_rollback:
+_with ROLLBACK
+  {
 	CB_PENDING ("WITH ROLLBACK");
+  }
+;
+
+_with_mass_update:
+| _with MASS_UPDATE
+  {
+	if (current_file->organization == COB_ORG_INDEXED) {
+		current_file->lock_mode |= COB_LOCK_EXCLUSIVE;
+		/* TODO: pass extra flag to fileio */
+		CB_PENDING ("WITH MASS-UPDATE");
+	} else {
+		cb_error (_("%s only valid with ORGANIZATION %s"), "MASS-UPDATE", "INDEXED");
+	}
   }
 ;
 
@@ -4903,7 +4959,7 @@ record_delimiter_option:
 /* RECORD KEY clause */
 
 record_key_clause:
-  RECORD _key _is reference _split_keys _password_clause
+  RECORD _key _is reference _split_keys _password_clause flag_duplicates
   {
 	cb_tree composite_key;
 
@@ -4925,6 +4981,18 @@ record_key_clause:
 		}
 	}
 	current_file->password = $6;
+	if ($7) {
+		/* note: we *may* add a compiler configuration here,
+		         as most dialects do not allow this clause
+		         on primary keys */
+		if (CB_INTEGER ($7)->val) {
+			/* note: see ACUCOBOL docs for implementation notes, including [RE]WRITE rules
+			         and "if the underlying (file) system does not support them OPEN
+					 result in (sucessfull) io-status 0M" */
+			CB_PENDING (_("DUPLICATES for primary keys"));
+		};
+
+	}
   }
 ;
 
@@ -12544,6 +12612,7 @@ open_statement:
   OPEN
   {
 	begin_statement ("OPEN", 0);
+	cobc_cs_check = CB_CS_OPEN;
   }
   open_body
 ;
@@ -12554,28 +12623,36 @@ open_body:
 ;
 
 open_file_entry:
-  open_mode open_sharing _retry_phrase file_name_list open_option
+  _open_exclusive open_mode _open_sharing _retry_phrase file_name_list _open_option
   {
 	cb_tree l;
 	cb_tree x;
 
-	if ($2 && $5) {
+	if (($1 && $3) || ($1 && $6) || ($3 && $6)) {
 		cb_error_x (CB_TREE (current_statement),
 			    _("%s and %s are mutually exclusive"), "SHARING", _("LOCK clauses"));
 	}
-	if ($5) {
-		x = $5;
+	if ($6) {
+		x = $6;
+	} else if ($3) {
+		x = $3;
 	} else {
-		x = $2;
+		x = $1;
 	}
 
-	for (l = $4; l; l = CB_CHAIN (l)) {
+	for (l = $5; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
 			begin_implicit_statement ();
-			cb_emit_open (CB_VALUE (l), $1, x);
+			cb_emit_open (CB_VALUE (l), $2, x);
 		}
 	}
   }
+;
+
+/* RM/COBOL extension */
+_open_exclusive:
+  /* empty */			{ $$ = NULL; }
+| EXCLUSIVE			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
 ;
 
 open_mode:
@@ -12585,20 +12662,54 @@ open_mode:
 | EXTEND			{ $$ = cb_int (COB_OPEN_EXTEND); }
 ;
 
-open_sharing:
+_open_sharing:
   /* empty */			{ $$ = NULL; }
 | SHARING _with sharing_option	{ $$ = $3; }
 ;
 
-open_option:
+_open_option:
   /* empty */			{ $$ = NULL; }
 | _with NO REWIND		{ $$ = NULL; }
-| _with LOCK			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
+| lock_allowing		{ $$ = $1; }
 | REVERSED
   {
 	(void)cb_verify (CB_OBSOLETE, "REVERSED");
 	$$ = NULL;
   }
+;
+
+lock_allowing:
+  _with_for open_lock_option	{ $$ = $2; }
+| ALLOWING allowing_option	{ $$ = $2; }
+;
+
+open_lock_option:
+  LOCK			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
+| MASS_UPDATE
+  {
+	$$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE);
+	/* TODO: check for indexed; pass extra flag to fileio */
+	CB_PENDING ("WITH MASS-UPDATE");
+  }
+| BULK_ADDITION
+  {
+	$$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE);
+	/* TODO: check for indexed; pass extra flag to fileio */
+	CB_PENDING ("WITH BULK-ADDITION");
+  }
+;
+
+allowing_option:
+  NO _others			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
+| allowing_all		{ $$ = NULL; }
+| READERS		{ $$ = NULL; }	/* docs say: identical to EXCLUSIVE + OPEN INPUT, CHECKME */
+;
+
+/* strange, but according to ACUCOBOL docs they are all identical */
+allowing_all:
+  WRITERS
+| UPDATERS
+| ALL
 ;
 
 
@@ -13510,9 +13621,9 @@ _key_list:
 ;
 
 _sort_duplicates:
-| with_dups _in_order
+| _with DUPLICATES _in_order
   {
-	/* The OC sort is a stable sort. ie. Dups are per default in order */
+	/* The GnuCOBOL sort is a stable sort. ie. dups are per default in order */
 	/* Therefore nothing to do here */
   }
 ;
@@ -16605,8 +16716,9 @@ flag_all:
 ;
 
 flag_duplicates:
-  /* empty */			{ $$ = cb_int0; }
-| with_dups			{ $$ = cb_int1; }
+  /* empty */			{ $$ = NULL; }
+| _with NO DUPLICATES	{ $$ = cb_int0; }
+| _with DUPLICATES	{ $$ = cb_int1; }
 ;
 
 flag_initialized:
@@ -16886,6 +16998,7 @@ _line:		| LINE ;
 _line_or_lines:	| LINE | LINES ;
 _limits:	| LIMIT _is_are | LIMITS _is_are ;
 _lines:		| LINES ;
+_lock:		| LOCK ;
 _message:	| MESSAGE ;
 _mode:		| MODE ;
 _new:		| NEW ;
@@ -16897,6 +17010,7 @@ _on:		| ON ;
 _on_for:	| ON | FOR ;
 _onoff_status:	| STATUS IS | STATUS | IS ;
 _other:		| OTHER ;
+_others:		| OTHERS ;
 _procedure:	| PROCEDURE ;
 _program:	| PROGRAM ;
 _protected:	| PROTECTED ;
@@ -16919,6 +17033,7 @@ _to_using:	| TO | USING;
 _when:		| WHEN ;
 _when_set_to:	| WHEN SET TO ;
 _with:		| WITH ;
+_with_for:	| WITH | FOR ;
 
 /* Mandatory selection */
 
@@ -16937,7 +17052,6 @@ object_char_or_word_or_modules:	CHARACTERS | WORDS | MODULES;
 records:		RECORD _is_are | RECORDS _is_are ;
 reel_or_unit:		REEL | UNIT ;
 size_or_length:		SIZE | LENGTH ;
-with_dups:		WITH DUPLICATES | DUPLICATES ;
 
 /* Mandatory R/W keywords */
 detail_keyword:		DETAIL | DE ;

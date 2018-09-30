@@ -135,6 +135,7 @@ enum cb_format {
 #define	CB_CS_SELECT			(1U << 27)	/* within SELECT */
 #define	CB_CS_XML_GENERATE		(1U << 28)
 #define	CB_CS_XML_PARSE			(1U << 29)
+#define	CB_CS_OPEN			(1U << 30)	/* within OPEN */
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

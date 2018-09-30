@@ -283,7 +283,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ALLOCATE",			0, 0, ALLOCATE,			/* 2002 */
 				CB_CS_ALLOCATE, 0
   },
-  { "ALPHABET",			0, 0, ALPHABET,			/* 2002 */
+  { "ALLOWING",		0, 1, ALLOWING,		/* ACU extension */
+				0, CB_CS_OPEN
+  },
+  { "ALPHABET",			1, 0, ALPHABET,			/* 2002 */
 				CB_CS_ALPHABET, 0
   },
   { "ALPHABETIC",		0, 0, ALPHABETIC,		/* 2002 */
@@ -481,6 +484,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "BOXED",		0, 0, BOXED,		/* ACU extension */
 				0, CB_CS_DISPLAY
+  },
+  { "BULK-ADDITION",		0, 1, BULK_ADDITION,		/* ACU extension */
+				0, CB_CS_OPEN
   },
   { "BUSY",		0, 1, BUSY,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -961,6 +967,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "ENCODING",			0, 1, ENCODING,			/* IBM extension */
 				0, CB_CS_XML_GENERATE | CB_CS_XML_PARSE
+  },
+  { "ENCRYPTION",			0, 1, ENCRYPTION,			/* ACU extension */
+				0, CB_CS_SELECT
   },
   { "END",			0, 0, END,			/* 2002 */
 				0, 0
@@ -1672,7 +1681,7 @@ static struct cobc_reserved default_reserved_words[] = {
 	/* FIXME: 2014 Context-sensitive to LOCK MODE clause */
   },
   { "MASS-UPDATE",		0, 1, MASS_UPDATE,		/* ACU extension */
-				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY | CB_CS_SELECT | CB_CS_OPEN
   },
   { "MAX-LINES",		0, 1, MAX_LINES,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -1905,8 +1914,8 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
 	/* FIXME: 2014 Context-sensitive to Object-view, SHARING clause, SHARING phrase, and USAGE clause */
   },
-  { "OPEN",			0, 0, OPEN,			/* 2002 */
-				0, 0
+  { "OPEN",			1, 0, OPEN,			/* 2002 */
+				CB_CS_OPEN, 0
   },
   { "OPTIONAL",			0, 0, OPTIONAL,			/* 2002 */
 				0, 0
@@ -1925,6 +1934,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "OTHER",			0, 0, OTHER,			/* 2002 */
 				0, 0
+  },
+  { "OTHERS",		0, 1, OTHERS,		/* ACU extension */
+				0, CB_CS_OPEN
   },
   { "OUTPUT",			0, 0, OUTPUT,			/* 2002 */
 				0, 0
@@ -2138,6 +2150,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "READ",			1, 0, READ,			/* 2002 */
 				CB_CS_READ, 0
+  },
+  { "READERS",		0, 1, READERS,		/* ACU extension */
+				0, CB_CS_OPEN
   },
   { "READ-ONLY",			0, 1, READ_ONLY,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -2769,6 +2784,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "UPDATE",			0, 0, UPDATE,			/* Extension */
 				0, 0
   },
+  { "UPDATERS",		0, 1, UPDATERS,		/* ACU extension */
+				0, CB_CS_OPEN
+  },
   { "UPON",			0, 0, UPON,			/* 2002 */
 				0, 0
   },
@@ -2897,6 +2915,9 @@ static struct cobc_reserved default_reserved_words[] = {
   },
   { "WRITE",			1, 0, WRITE,			/* 2002 */
 				0, 0
+  },
+  { "WRITERS",		0, 1, WRITERS,		/* ACU extension */
+				0, CB_CS_OPEN
   },
   { "X",			0, 1, X,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -3983,8 +4004,16 @@ get_reserved_words_with_amendments (void)
 			reserved_words[i] = *p;
 			/*
 			  Note that we ignore if the user specified this word
-			  as context-sensitive.
+			  as context-sensitive, but need to check if a
+			  context-sensitive word has no context-sensitivity
+			  according to the user.
 			*/
+#if 0 /* FIXME - missing !!! */
+			if (p->context_sens && !user_specified_reserved_word->context_sens) {
+				reserved_words[i].context_sens = 0;
+				reserved_words[i].context_test = 0;
+			}
+#endif
 		} else {
 			reserved_words[i] = get_user_specified_reserved_word (*amendment_list);
 		}

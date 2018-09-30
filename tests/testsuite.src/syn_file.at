@@ -1736,6 +1736,8 @@ AT_DATA([prog.cob], [
            03  TESTKEY-P3 PIC X(4).
            03  TESTKEY-P4 PIC X(4).
            03  TESTKEY-P5 PIC X(4).
+       PROCEDURE DIVISION.
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY -std=mf prog.cob], [0], [], [])
@@ -1785,6 +1787,8 @@ AT_DATA([prog.cob], [
            03  TESTKEY-P2 PIC 9(4).
            03  TESTDATA   PIC X(4).
            03  TESTKEY-P3 PIC X(4).
+       PROCEDURE DIVISION.
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [], [])
@@ -1839,10 +1843,109 @@ AT_DATA([prog.cob], [
               RECORD     KEY  TESTKEY1
               ALTERNATE  KEY  TESTKEY2
               .
+       PROCEDURE DIVISION.
+           STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:12: error: 'RECORD' is mandatory here
 ])
 AT_CHECK([$COMPILE_ONLY -frelax-syntax prog.cob], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([SELECT/OPEN syntax extensions])
+AT_KEYWORDS([file SELECT OPEN MASS-UPDATE BULK-ADDITION LOCK])
+
+# FIXME: split tests, possibly add dialect configuration,
+#        add checks for "mutually exclusive" and ORGANIZATION
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE1
+              ASSIGN        "TESTFILE1"
+      *>      WITH ENCRYPTION    shift/reduce conflict ?
+              ORGANIZATION  INDEXED
+              ACCESS        DYNAMIC
+              RECORD KEY    TESTKEY-1P1
+                 WITH DUPLICATES
+              ALTERNATE RECORD KEY TESTKEY-1P2
+                 WITH NO DUPLICATES
+              LOCK EXCLUSIVE MASS-UPDATE
+              .
+       SELECT TEST-FILE2
+              ASSIGN        "TESTFILE2"
+      *>      ENCRYPTION         shift/reduce conflict ?
+              ORGANIZATION  INDEXED
+              ACCESS        DYNAMIC
+              RECORD KEY    TESTKEY-2P1
+                 WITH NO DUPLICATES
+              ALTERNATE RECORD KEY TESTKEY-2P2
+                 WITH DUPLICATES
+              .
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD  TEST-FILE1.
+       01  TEST-REC1.
+           03  TESTKEY-1P1 PIC X(4).
+           03  TESTKEY-1P2 PIC 9(4).
+           03  ENCRYPTION  PIC X(4).
+       FD  TEST-FILE2.
+       01  TEST-REC2.
+           03  TESTKEY-2P1 PIC X(4).
+           03  ALLOWING    PIC X(4).
+           03  TESTKEY-2P2 PIC 9(4).
+       PROCEDURE DIVISION.
+           OPEN EXCLUSIVE INPUT TEST-FILE2
+           CLOSE TEST-FILE2
+           OPEN I-O TEST-FILE1 TEST-FILE2 ALLOWING UPDATERS
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING UPDATERS
+           CLOSE TEST-FILE1
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING READERS
+           CLOSE TEST-FILE1
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING WRITERS
+           CLOSE TEST-FILE1
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING ALL
+           CLOSE TEST-FILE1
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING NO
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 ALLOWING NO OTHERS
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 FOR LOCK
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 LOCK
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 BULK-ADDITION
+           CLOSE TEST-FILE1
+           OPEN I-O TEST-FILE1 MASS-UPDATE
+           CLOSE TEST-FILE1
+      *
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:13: warning: DUPLICATES for primary keys is not implemented
+prog.cob:16: warning: WITH MASS-UPDATE is not implemented
+prog.cob:65: warning: WITH BULK-ADDITION is not implemented
+prog.cob:67: warning: WITH MASS-UPDATE is not implemented
+])
+# FIXME: a user-defined reserved word list currently
+#        does not remove context-sensivity, but should
+#AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+#[prog.cob:13: warning: DUPLICATES for primary keys is not implemented
+#prog.cob:16: warning: WITH MASS-UPDATE is not implemented
+#prog.cob:34: error: syntax error, unexpected ENCRYPTION
+#prog.cob:38: error: syntax error, unexpected ALLOWING
+#prog.cob:65: warning: WITH BULK-ADDITION is not implemented
+#prog.cob:67: warning: WITH MASS-UPDATE is not implemented
+#])
 AT_CLEANUP

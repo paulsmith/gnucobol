@@ -17,6 +17,9 @@
 	  valid keys in files with split keys
 	* parser.y, tree.h, typeck.c: added NATIONAL COLLATING SEQUENCE
 	  as PENDING
+	* cobc.h (CB_CS_OPEN), reserved.c: new context-sensitivity for OPEN
+	* parser.y: added extension duplicate clause on primary key as PENDING
+	  and extension WITH NO DUPLICATES
 
 2018-09-22  Simon Sobisch <simonsobisch@gnu.org>
 
