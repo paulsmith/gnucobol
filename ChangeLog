@@ -1,4 +1,8 @@
 
+2018-09-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* general: activated translated messages for COBOL runtime
+
 2018-09-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: fixed non-working auto-check for libxml2

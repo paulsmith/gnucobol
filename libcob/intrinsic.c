@@ -6595,7 +6595,7 @@ cob_intr_content_of (const int offset, const int length, const int params, ...)
 			size = 0;
 		}
 	}
-	if (size > 0) {
+	if (size != 0) {
 		COB_FIELD_INIT (size, NULL, &const_alpha_attr);
 		make_field_entry (&field);
 		/* Testing for memory access permissions is canonically: */

@@ -2943,6 +2943,8 @@ cob_exit_screen (void)
 	}
 	if (cobglobptr->cob_screen_initialized) {
 		if (pending_accept && cobsetptr->cob_exit_wait) {
+			/* FIXME: we likely should position to the last line since last cleanup before:
+			          DISPLAY AT 1010 DISPLAY AT 0909 GOBACK overrides first DISPLAY */
 			if (cobsetptr->cob_exit_msg[0] != 0) {
 				snprintf (exit_msg, COB_MINI_BUFF, "\n%s ", cobsetptr->cob_exit_msg);
 				cob_display_text (exit_msg);
@@ -3219,4 +3221,7 @@ cob_init_screenio (cob_global *lptr, cob_settings *sptr)
 {
 	cobglobptr = lptr;
 	cobsetptr  = sptr;
+	if (cobsetptr->cob_exit_msg) {
+		cobsetptr->cob_exit_msg = _("end of program, please press a key to exit");
+	}
 }

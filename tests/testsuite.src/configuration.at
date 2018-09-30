@@ -539,25 +539,25 @@ setenv COB_PHYSICAL_CANCEL=true
 ])
 
 
-# verify that default for physical cancel is still false
+# verify that default for physical cancel is still "no"
 AT_CHECK([$COBCRUN --runtime-conf | \
-grep "COB_PHYSICAL_CANCEL" | grep "false" | grep "default"], [0], ignore, [])
+grep "COB_PHYSICAL_CANCEL" | grep "no" | grep "default"], [0], ignore, [])
 
 # verify that override via -c works and if include works
 AT_CHECK([$COBCRUN -c test2.cfg --runtime-conf | \
-grep "physical_cancel" | grep "true"], [0], ignore, [])
+grep "physical_cancel" | grep "yes"], [0], ignore, [])
 AT_CHECK([$COBCRUN -c test.cfg --runtime-conf | \
-grep "physical_cancel" | grep "true"], [0], ignore, [])
+grep "physical_cancel" | grep "yes"], [0], ignore, [])
 AT_CHECK([$COBCRUN -c test3.cfg --runtime-conf | \
-grep "COB_PHYSICAL_CANCEL" | grep "true"], [0], ignore, [])
+grep "COB_PHYSICAL_CANCEL" | grep "yes"], [0], ignore, [])
 
 # verify that that long option works
 AT_CHECK([$COBCRUN --config=test3.cfg --runtime-conf | \
-grep "COB_PHYSICAL_CANCEL" | grep "true"], [0], ignore, [])
+grep "COB_PHYSICAL_CANCEL" | grep "yes"], [0], ignore, [])
 
 # verify that that environment setting works
 AT_CHECK([COB_RUNTIME_CONFIG=test3.cfg $COBCRUN --runtime-conf | \
-grep "COB_PHYSICAL_CANCEL" | grep "true"], [0], ignore, [])
+grep "COB_PHYSICAL_CANCEL" | grep "yes"], [0], ignore, [])
 
 # verify that configuration file loading with full path works
 AT_CHECK([$COBCRUN -c "$(_return_path "$(pwd)/test.cfg")" --runtime-conf],
@@ -603,7 +603,7 @@ physical_cancel true
 ])
 
 AT_CHECK([COB_PHYSICAL_CANCEL=false $COBCRUN -c test.cfg --runtime-conf | \
-grep "COB_PHYSICAL_CANCEL" | grep "false"], [0], ignore, [])
+grep "COB_PHYSICAL_CANCEL" | grep "no"], [0], ignore, [])
 
 AT_CLEANUP
 

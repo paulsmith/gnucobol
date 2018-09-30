@@ -60,13 +60,17 @@ NEWS - user visible changes				-*- outline -*-
    ** Please report if you have a need for this option as it will be **
    ** removed permanently in the next release of GnuCOBOL otherwise. **
 
-* Changes in the runtime
+* Changes in the COBOL runtime (libcob)
 
 ** updated exception handling, GnuCOBOL now only cleans raised exceptions when
    requested by SET LAST EXCEPTION TO OFF
 
 ** The standard-format for program tracing was changed and is now adjustable
    by the runtime configuration option COB_TRACE_FORMAT.
+
+** Messages from the COBOL runtime are also translated now (if installed).
+   To prevent this disable translations in general with using the configure
+   option --disable-nls (or by deactivating ENABLE_NLS in config.h).
 
 * New test suite for manual tests (especially SCREEN I/O),
   run with `make checkmanual`.

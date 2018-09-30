@@ -8894,7 +8894,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 					goto size_overflow;
 				}
 				/* for VALUE: additional check without trim */
-				if (is_value && l->size > fdst->size) {
+				if (is_value && l->size > (unsigned int)fdst->size) {
 					goto value_mismatch;
 				}
 			}

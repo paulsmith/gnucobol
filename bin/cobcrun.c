@@ -63,7 +63,7 @@ static const struct option long_options[] = {
 	{NULL, 0, NULL, 0}
 };
 
-#if	defined(ENABLE_NLS) && defined(COB_NLS_RUNTIME)
+#ifdef ENABLE_NLS
 #include "lib/gettext.h"
 #define _(s)		gettext(s)
 #define N_(s)		gettext_noop(s)
@@ -355,18 +355,10 @@ main (int argc, char **argv)
 {
 	cob_call_union	unifunc;
 
-#ifdef	_WIN32
-	/* Allows running tests under Win */
-	char *p = getenv ("COB_UNIX_LF");
-	if (p && (*p == 'Y' || *p == 'y' ||
-		*p == 'O' || *p == 'o' ||
-		*p == 'T' || *p == 't' ||
-		*p == '1')) {
-		(void)_setmode (_fileno (stdin), _O_BINARY);
-		(void)_setmode (_fileno (stdout), _O_BINARY);
-		(void)_setmode (_fileno (stderr), _O_BINARY);
-	}
-#endif
+	/* minimal initialization of the environment like binding textdomain,
+	   allowing test to be run under WIN32 (implied in cob_init(),
+	   no need to call outside of GnuCOBOL) */
+	cob_common_init (NULL);
 
 #ifdef	HAVE_SETLOCALE
 	setlocale (LC_ALL, "");

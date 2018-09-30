@@ -43,7 +43,7 @@
 #endif
 
 
-#if	defined(ENABLE_NLS) && defined(COB_NLS_RUNTIME)
+#ifdef ENABLE_NLS
 #include "lib/gettext.h"
 #define _(s)		gettext(s)
 #define N_(s)		gettext_noop(s)
