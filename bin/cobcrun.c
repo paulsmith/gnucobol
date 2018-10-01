@@ -355,14 +355,14 @@ main (int argc, char **argv)
 {
 	cob_call_union	unifunc;
 
+#ifdef	HAVE_SETLOCALE
+	setlocale (LC_ALL, "");
+#endif
+
 	/* minimal initialization of the environment like binding textdomain,
 	   allowing test to be run under WIN32 (implied in cob_init(),
 	   no need to call outside of GnuCOBOL) */
 	cob_common_init (NULL);
-
-#ifdef	HAVE_SETLOCALE
-	setlocale (LC_ALL, "");
-#endif
 
 	process_command_line (argc, argv);
 

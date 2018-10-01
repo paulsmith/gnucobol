@@ -7350,10 +7350,13 @@ cob_common_init (void *setptr)
 {
 #ifdef	ENABLE_NLS
 	{
+		struct stat	localest;
 		const char * localedir;
 
 		localedir = getenv ("LOCALEDIR");
-		if (localedir != NULL) {
+		if (localedir != NULL
+		 && !stat (localedir, &localest)
+		 && (S_ISDIR (localest.st_mode))) {
 			bindtextdomain (PACKAGE, localedir);
 		} else {
 			bindtextdomain (PACKAGE, LOCALEDIR);

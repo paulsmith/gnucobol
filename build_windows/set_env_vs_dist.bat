@@ -162,14 +162,14 @@ echo.
 :: Now the stuff for GnuCOBOL
 echo Setting environment for GnuCOBOL.
 
-:: Get the main dir from the batch's position (only works in NT environments)
+:: Get the main dir from the batch's position
 set "COB_MAIN_DIR=%~dp0"
 
 :: Set the necessary folders for cobc
 set "COB_CONFIG_DIR=%COB_MAIN_DIR%config"
 set "COB_COPY_DIR=%COB_MAIN_DIR%copy"
 
-set "LOCALEDIR=%COB_MAIN_DIR%po"
+set "LOCALEDIR=%COB_MAIN_DIR%locale"
 
 :: Set the necessary options for MSC compiler
 set "COB_CFLAGS=/I "%COB_MAIN_DIR%include""

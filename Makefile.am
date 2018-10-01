@@ -104,7 +104,7 @@ defaults.h: Makefile.am $(top_builddir)/config.status
 	  echo "#define COB_BLD_LD       \"$(LD)\"";			\
 	  echo "#define COB_BLD_LDFLAGS  \"$(LDFLAGS)\"";		\
 	  echo "#define COB_BLD_BUILD    \"$(build)\"";			\
-	  echo "#define LOCALEDIR        \"$(datadir)/locale\"";	\
+	  echo "#define LOCALEDIR        \"$(localedir)\"";	\
 	} > defaults.h
 
 

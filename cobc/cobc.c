@@ -7977,11 +7977,6 @@ finish_setup_compiler_env (void)
 static void
 begin_setup_internal_and_compiler_env (void)
 {
-#ifdef	ENABLE_NLS
-	struct stat	localest;
-	const char* localedir;
-#endif
-
 	char			*p;
 
 	/* register signal handlers from cobc */
@@ -8015,42 +8010,21 @@ begin_setup_internal_and_compiler_env (void)
 	cb_ebcdic_sign = 0;
 #endif
 
-#ifdef	_WIN32
-	/* Allows running tests under Win */
-	p = getenv ("COB_UNIX_LF");
-	if (p && (*p == 'Y' || *p == 'y' ||
-		*p == 'O' || *p == 'o' ||
-		*p == 'T' || *p == 't' ||
-		*p == '1')) {
-		cb_unix_lf = 1;
-		(void)_setmode (_fileno (stdin), _O_BINARY);
-		(void)_setmode (_fileno (stdout), _O_BINARY);
-		(void)_setmode (_fileno (stderr), _O_BINARY);
-	}
+#ifdef	HAVE_SETLOCALE
+	setlocale (LC_ALL, "");
+	setlocale (LC_NUMERIC, "C");
 #endif
+
+	/* minimal initialization of the environment like binding textdomain,
+	   allowing test to be run under WIN32 (implied in cob_init(),
+	   no need to call outside of GnuCOBOL) */
+	cob_common_init (NULL);
 
 	/* Flag to emit Old style: cob_set_location, cob_trace_section */
 	p = getenv ("COB_OLD_TRACE");
 	if (p && (*p == 'Y' || *p == 'y' || *p == '1')) {
 		cb_old_trace = 1;
 	}
-
-#ifdef	HAVE_SETLOCALE
-	setlocale (LC_ALL, "");
-	setlocale (LC_NUMERIC, "C");
-#endif
-
-#ifdef	ENABLE_NLS
-	localedir = getenv("LOCALEDIR");
-	if (localedir != NULL
-	&& !stat (localedir, &localest)
-	&& (S_ISDIR (localest.st_mode))) {
-		bindtextdomain (PACKAGE, localedir);
-	} else {
-		bindtextdomain (PACKAGE, LOCALEDIR);
-	}
-	textdomain (PACKAGE);
-#endif
 
 	/* Initialize variables */
 	begin_setup_compiler_env ();

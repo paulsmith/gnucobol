@@ -102,4 +102,10 @@
 #define COB_BLD_BUILD    "i686-pc-windows"
 // */
 
+#ifndef LOCALEDIR
+#ifdef MAKE_DIST
+#define LOCALEDIR        COB_MAIN_DIR "\\locale\""
+#else
 #define LOCALEDIR        "C:\\locale"
+#endif
+#endif

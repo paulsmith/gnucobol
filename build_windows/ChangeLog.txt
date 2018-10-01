@@ -1,4 +1,11 @@
 
+2018-10-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* makedist.bat: copy compiled msgid catalogs
+	* makedist.bat: copy libint.dll if existing
+	* set_env_vs_dist.bat, set_env_vs_dist_x64.bat, defaults.h.in:
+	  set reasonable standard localedir
+
 2018-08-19  Edward Hart <edward.dan.hart@gmail.com>
 
 	* config.h.in: added WITH_XML2 and associated library pragma's.

@@ -1,4 +1,8 @@
 
+2018-10-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: prefer user-specified localedir
+
 2018-09-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* general: activated translated messages for COBOL runtime
