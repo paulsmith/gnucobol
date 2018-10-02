@@ -2887,7 +2887,7 @@ AT_DATA([prog.cob], [
        WORKING-STORAGE  SECTION.
        77 KEYNUM        PIC 9(04).
        PROCEDURE        DIVISION.
-       
+
            ACCEPT KEYNUM FROM ESCAPE KEY
            DISPLAY "Key pressed: " KEYNUM
            ACCEPT KEYNUM FROM ESCAPE
@@ -4657,6 +4657,175 @@ prog.cob:24: error: 'tab2b-entry' is not numeric
 AT_CLEANUP
 
 
+AT_SETUP([USE FOR DEBUGGING invalid ref-mod / subscripts])
+AT_KEYWORDS([misc])
+
+# COBOL85 3.2.3 Syntax Rules 10+12 - "no subscripts. not reference-modified"
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SOURCE-COMPUTER.
+            whatever   WITH DEBUGGING MODE.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  i           PIC 9.
+       01  FILLER.
+           03 x OCCURS 2 PIC 9.
+
+       PROCEDURE DIVISION.
+       DECLARATIVES.
+       test-DEBUG SECTION.
+           USE FOR DEBUGGING ON ALL OF I (1:1).
+           DISPLAY DEBUG-LINE.
+       test-DEBUGo SECTION.
+           USE FOR DEBUGGING ON ALL OF X (1).
+           DISPLAY DEBUG-LINE.
+       END DECLARATIVES.
+
+       MAIN SECTION.
+           MOVE 1 TO i, x(2)
+           STOP RUN.
+])
+
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: in section 'test-DEBUG':
+prog.cob:19: error: DEBUGGING target may not be reference modified
+prog.cob: in section 'test-DEBUGo':
+prog.cob:22: error: DEBUGGING target may not be subscripted
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING duplicate targets])
+AT_KEYWORDS([misc])
+
+# TODO: add cd-names and file-names here
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SOURCE-COMPUTER.
+            whatever   WITH DEBUGGING MODE.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  i           PIC 9.
+       01  j           PIC 9.
+
+       PROCEDURE DIVISION.
+       DECLARATIVES.
+       test-DEBUG SECTION.
+           USE FOR DEBUGGING ON MAIN MAIN.
+           DISPLAY DEBUG-LINE.
+       test-DEBUG2 SECTION.
+           USE FOR DEBUGGING ON ALL I
+                                ALL REFERENCES OF J
+                                ALL PROCEDURES.
+           DISPLAY DEBUG-LINE.
+       test-DEBUG3 SECTION.
+           USE FOR DEBUGGING ON ALL PROCEDURES
+                                J
+                                ALL OF I.
+           DISPLAY DEBUG-LINE.
+       END DECLARATIVES.
+
+       MAIN SECTION.
+           MOVE 1 TO i
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: in section 'test-DEBUG3':
+prog.cob:26: error: duplicate USE DEBUGGING ON ALL PROCEDURES
+prog.cob:27: error: duplicate DEBUGGING target: 'j'
+prog.cob:28: error: duplicate DEBUGGING target: 'i'
+prog.cob: in section 'test-DEBUG':
+prog.cob:18: error: DEBUGGING target already specified with ALL PROCEDURES: 'MAIN'
+prog.cob:18: error: duplicate DEBUGGING target: 'MAIN'
+])
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING syntax-checks])
+AT_KEYWORDS([misc])
+
+# TODO: still need tests/checks (3.2.3 Syntax Rules 9+11):
+# 09 Identifier must not reference any data item defined in the Report
+# Section except sum counters.
+# 11 References to the special register DEBUG-ITEM are restricted to
+# references from within a debugging section.
+
+AT_XFAIL_IF(true)
+# we currently fail to detect references into DECLARATIVES and
+# references to debugging-procedures other than PERFORM --> both in prog2
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     prog.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SOURCE-COMPUTER.
+            whatever   WITH DEBUGGING MODE.
+
+       DATA            DIVISION.
+       WORKING-STORAGE SECTION.
+       01  i           PIC 9.
+       01  j           PIC 9.
+
+       PROCEDURE DIVISION.
+       DECLARATIVES.
+       test-DEBUG SECTION.
+           USE FOR DEBUGGING ON ALL REFERENCES OF I
+                                TEST-debug
+                                MAIN.
+           DISPLAY DEBUG-LINE.
+           PERFORM MAIN. PERFORM TEST-DEBUG2. GO TO TEST-DEBUG2.
+       test-DEBUG2 SECTION.
+           USE FOR DEBUGGING ON ALL OF I
+                                TEST-debug.
+           DISPLAY DEBUG-LINE.
+       END DECLARATIVES.
+
+       MAIN SECTION.
+           MOVE 1 TO i, j
+           PERFORM TesT-DebuG
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob: in section 'test-DEBUG':
+prog.cob:22: warning: 'MAIN' is not in DECLARATIVES
+prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
+prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
+prog.cob: in section 'TEST-DEBUG2':
+prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
+prog.cob: in section 'MAIN':
+prog.cob:31: warning: 'test-DEBUG' is in DECLARATIVES
+])
+AT_CHECK([$COMPILE_ONLY -std=cobol85 prog.cob], [1], [],
+[prog.cob: in section 'test-DEBUG':
+prog.cob:20: warning: USE FOR DEBUGGING is obsolete in COBOL 85
+prog.cob:22: error: 'MAIN' is not in DECLARATIVES
+prog.cob:22: error: 'TEST-DEBUG2' may only be referenced with PERFORM
+prog.cob:19: error: DEBUGGING target invalid: 'test-DEBUG'
+prog.cob: in section 'TEST-DEBUG2':
+prog.cob:25: error: DEBUGGING target invalid: 'test-DEBUG'
+prog.cob: in section 'MAIN':
+prog.cob:31: error: 'test-DEBUG' is in DECLARATIVES
+])
+AT_CLEANUP
+
+
 AT_SETUP([Empty PERFORM with DEBUGGING MODE])
 AT_KEYWORDS([misc])
 
@@ -5276,22 +5445,22 @@ AT_DATA([prog.cob], [
        PROCEDURE DIVISION.
        MAIN-10.
            MOVE "Peek a boo" TO VAR.
-           EVALUATE TRUE 
+           EVALUATE TRUE
                ALSO FALSE
                ALSO TRUE
-            WHEN    TRUE 
+            WHEN    TRUE
                ALSO VAR-LEN > 16 AND VAR-LEN < 200
                ALSO TRUE
                   MOVE OTHERVAR (1 : VAR-LEN - 9)
                     TO VAR (16 - VAR-LEN : VAR-LEN - 9)
                   DISPLAY "A: Should NOT be executed"
-            WHEN  TRUE 
-               ALSO VAR-LEN < 16 
+            WHEN  TRUE
+               ALSO VAR-LEN < 16
                ALSO TRUE
                   MOVE OTHERVAR TO VAR
                   DISPLAY "A: OK VAR-LEN > 16 AND VAR-LEN < 200"
-            WHEN  TRUE 
-               ALSO VAR = SPACES 
+            WHEN  TRUE
+               ALSO VAR = SPACES
                ALSO TRUE
                   MOVE OTHERVAR TO VAR
                   DISPLAY "A: OK VAR IS SPACES"
@@ -5299,25 +5468,25 @@ AT_DATA([prog.cob], [
 
            MOVE "Peek a boo" TO VAR.
            EVALUATE 3 EQUALS 7
-           WHEN  VAR = SPACES 
+           WHEN  VAR = SPACES
                DISPLAY "B: OK VAR IS NOT SPACES"
-           WHEN  VAR NOT = SPACES 
+           WHEN  VAR NOT = SPACES
                DISPLAY "B: FALSE VAR IS SPACES"
            END-EVALUATE.
 
            MOVE SPACES       TO VAR.
            EVALUATE FALSE
-           WHEN  VAR = SPACES 
+           WHEN  VAR = SPACES
                DISPLAY "C: FALSE VAR IS SPACES"
-           WHEN  VAR NOT = SPACES 
+           WHEN  VAR NOT = SPACES
                DISPLAY "C: OK VAR IS SPACES"
            END-EVALUATE.
 
            MOVE "Peek a boo" TO VAR.
            EVALUATE TRUE
-           WHEN  VAR = SPACES 
+           WHEN  VAR = SPACES
                DISPLAY "D: BAD VAR IS SPACES"
-           WHEN  VAR NOT = SPACES 
+           WHEN  VAR NOT = SPACES
                DISPLAY "D: OK VAR IS NOT SPACES"
            END-EVALUATE.
 
@@ -5325,7 +5494,7 @@ AT_DATA([prog.cob], [
            EVALUATE VAR-LEN ALSO VAR
            WHEN  < 32 ALSO SPACES
                DISPLAY "E: OK VAR IS SPACES"
-           WHEN  > 16 ALSO NOT SPACES 
+           WHEN  > 16 ALSO NOT SPACES
                DISPLAY "E: BAD VAR IS NOT SPACES"
            WHEN OTHER
                DISPLAY "E: OK OTHER option taken"

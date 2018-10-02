@@ -1,4 +1,16 @@
 
+2018-10-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_validate_program_environment, cb_validate_program_data,
+	  cb_validate_program_body): only use the specified parameter
+	  cb_program prog instead of current_program
+	* typeck.c (cb_validate_program_body): splitted cb_validate_labels()
+	  and cb_resolve_debug_refs() to own functions
+	* typeck.v (cb_resolve_debug_refs): added size handling for cd-names
+	* parser.y (debugging_target), typeck.c (cb_resolve_debug_refs):
+	  added check for duplicate reference of items in DEBUGGING procedures;
+	  allow subscripts/refmod during parse to provide a clean check later
+
 2018-09-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: ACCEPT x FROM ESCAPE _key

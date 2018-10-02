@@ -2466,6 +2466,10 @@ cb_validate_collating (cb_tree collating_sequence)
 {
 	cb_tree		x;
 
+	if (!collating_sequence) {
+		return 0;
+	}
+
 	x = cb_ref (collating_sequence);
 	if (!CB_ALPHABET_NAME_P (x)) {
 		cb_error_x (collating_sequence, _("'%s' is not an alphabet name"),
@@ -2516,7 +2520,7 @@ cb_validate_program_environment (struct cb_program *prog)
 
 	/* Check ALPHABET clauses */
 	/* Complicated by difference between code set and collating sequence */
-	for (l = current_program->alphabet_name_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->alphabet_name_list; l; l = CB_CHAIN (l)) {
 		ap = CB_ALPHABET_NAME (CB_VALUE (l));
 
 		/* Native */
@@ -2784,7 +2788,7 @@ cb_validate_program_environment (struct cb_program *prog)
 	cb_high = cb_norm_high;
 
 	/* Check and generate SYMBOLIC clauses */
-	for (l = current_program->symbolic_char_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->symbolic_char_list; l; l = CB_CHAIN (l)) {
 		if (CB_VALUE (l)) {
 			y = cb_ref (CB_VALUE (l));
 			if (y == cb_error_node) {
@@ -2801,7 +2805,7 @@ cb_validate_program_environment (struct cb_program *prog)
 	}
 
 	/* Check CLASS clauses */
-	for (l = current_program->class_name_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->class_name_list; l; l = CB_CHAIN (l)) {
 		cp = CB_CLASS_NAME (CB_VALUE (l));
 		/* LCOV_EXCL_START */
 		if (cp == NULL) {	/* keep the analyzer happy... */
@@ -2861,16 +2865,12 @@ cb_validate_program_environment (struct cb_program *prog)
 		}
 
 	/* Resolve the program collating sequences */
-	if (prog->collating_sequence) {
-		if (cb_validate_collating (prog->collating_sequence)) {
-			prog->collating_sequence = NULL;
-		};
-	}
-	if (prog->collating_sequence_n) {
-		if (cb_validate_collating (prog->collating_sequence_n)) {
-			prog->collating_sequence_n = NULL;
-		};
-	}
+	if (cb_validate_collating (prog->collating_sequence)) {
+		prog->collating_sequence = NULL;
+	};
+	if (cb_validate_collating (prog->collating_sequence_n)) {
+		prog->collating_sequence_n = NULL;
+	};
 
 	/* Resolve the program classification */
 	if (prog->classification && prog->classification != cb_int1) {
@@ -3106,9 +3106,9 @@ cb_validate_program_data (struct cb_program *prog)
 	char			buff[COB_MINI_BUFF];
 	unsigned int		odo_level;
 
-	current_program->report_list = cb_list_reverse (current_program->report_list);
+	prog->report_list = cb_list_reverse (prog->report_list);
 
-	for (l = current_program->report_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->report_list; l; l = CB_CHAIN (l)) {
 		/* Set up LINE-COUNTER / PAGE-COUNTER */
 		rep = CB_REPORT (CB_VALUE (l));
 		if (rep->line_counter == NULL) {
@@ -3120,7 +3120,7 @@ cb_validate_program_data (struct cb_program *prog)
 			CB_FIELD (x)->count++;
 			cb_validate_field (CB_FIELD (x));
 			rep->line_counter = cb_build_field_reference (CB_FIELD (x), NULL);
-			CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
+			CB_FIELD_ADD (prog->working_storage, CB_FIELD (x));
 		}
 		if (rep->page_counter == NULL) {
 			snprintf (buff, (size_t)COB_MINI_MAX,
@@ -3131,13 +3131,13 @@ cb_validate_program_data (struct cb_program *prog)
 			CB_FIELD (x)->count++;
 			cb_validate_field (CB_FIELD (x));
 			rep->page_counter = cb_build_field_reference (CB_FIELD (x), NULL);
-			CB_FIELD_ADD (current_program->working_storage, CB_FIELD (x));
+			CB_FIELD_ADD (prog->working_storage, CB_FIELD (x));
 		}
 	}
 
-	current_program->file_list = cb_list_reverse (current_program->file_list);
+	prog->file_list = cb_list_reverse (prog->file_list);
 
-	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 		file = CB_FILE (CB_VALUE (l));
 		if (!file->flag_finalized) {
 			finalize_file (file, NULL);
@@ -3146,13 +3146,13 @@ cb_validate_program_data (struct cb_program *prog)
 
 	/* Build undeclared assignment name now */
 	if (cb_assign_clause == CB_ASSIGN_MF) {
-		for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
+		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 			assign = CB_FILE (CB_VALUE (l))->assign;
 			if (!assign) {
 				continue;
 			}
 			if (CB_REFERENCE_P (assign)) {
-				for (x = current_program->file_list; x; x = CB_CHAIN (x)) {
+				for (x = prog->file_list; x; x = CB_CHAIN (x)) {
 					if (!strcmp (CB_FILE (CB_VALUE (x))->name,
 					     CB_NAME (assign))) {
 						redefinition_error (assign);
@@ -3173,14 +3173,14 @@ cb_validate_program_data (struct cb_program *prog)
 				}
 				x = cb_build_implicit_field (assign, COB_SMALL_BUFF);
 				CB_FIELD (x)->count++;
-				p = current_program->working_storage;
+				p = prog->working_storage;
 				if (p) {
 					while (p->sister) {
 						p = p->sister;
 					}
 					p->sister = CB_FIELD (x);
 				} else {
-					current_program->working_storage = CB_FIELD (x);
+					prog->working_storage = CB_FIELD (x);
 				}
 			}
 			if (CB_REFERENCE_P (assign)) {
@@ -3226,7 +3226,7 @@ cb_validate_program_data (struct cb_program *prog)
 		p->values = CB_LIST_INIT (cb_zero);
 		p->count++;
 		*/
-		CB_FIELD_ADD (current_program->working_storage, p);
+		CB_FIELD_ADD (prog->working_storage, p);
 		prog->crt_status = l;
 	}
 
@@ -3303,7 +3303,7 @@ cb_validate_program_data (struct cb_program *prog)
 	cb_needs_01 = 0;
 
 	/* file definition checks */
-	for (l = current_program->file_list; l; l = CB_CHAIN (l)) {
+	for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 		file = CB_FILE (CB_VALUE (l));
 		if (file->flag_external) {
 			if (CB_VALID_TREE (file->password)
@@ -3337,6 +3337,24 @@ cb_validate_program_data (struct cb_program *prog)
 	}
 }
 
+
+static int
+error_if_subscript_or_refmod (cb_tree ref, const char *name)
+{
+	int	error = 0;
+
+	if (CB_REFERENCE (ref)->subs) {
+		cb_error_x (ref, _("%s may not be subscripted"), name);
+		error = 1;
+	}
+	if (CB_REFERENCE (ref)->offset) {
+		cb_error_x (ref, _("%s may not be reference modified"), name);
+		error = 1;
+	}
+
+	return error;
+}
+
 static int
 has_sub_reference (struct cb_field *fld)
 {
@@ -3368,70 +3386,80 @@ has_sub_reference (struct cb_field *fld)
 	return 0;
 }
 
-void
-cb_validate_program_body (struct cb_program *prog)
+/* Resolve DEBUG references, return necessary size for DEBUG-CONTENTS */
+static int
+cb_resolve_debug_refs (struct cb_program *prog, int size)
+{
+	cb_tree		l;
+	cb_tree		x;
+	cb_tree		v;
+
+	/* For data items, we may need to adjust the size of DEBUG-CONTENTS directly,
+	   for file items from its maximum length */
+	for (l = prog->debug_list; l; l = CB_CHAIN (l)) {
+		x = CB_VALUE (l);
+		(void)cb_set_ignore_error (CB_REFERENCE (x)->flag_ignored);
+		v = cb_ref (x);
+		if (v == cb_error_node) {
+			continue;
+		}
+		current_section = CB_REFERENCE (x)->section;
+		current_paragraph = CB_REFERENCE (x)->paragraph;
+		switch (CB_TREE_TAG (v)) {
+		case CB_TAG_LABEL:
+			if (!CB_LABEL (v)->flag_real_label) {
+				cb_error_x (x, _("DEBUGGING target invalid: '%s'"),
+					    cb_name (x));
+			} else if (CB_LABEL (v)->flag_debugging_mode) {
+				cb_error_x (x, _("duplicate DEBUGGING target: '%s'"),
+					    cb_name (x));
+			} else if (prog->all_procedure) {
+				cb_error_x (x, _("DEBUGGING target already specified with ALL PROCEDURES: '%s'"),
+					    cb_name (x));
+				CB_LABEL (v)->flag_debugging_mode = 1;
+			} else {
+				CB_LABEL (v)->debug_section =
+					CB_REFERENCE (x)->debug_section;
+				CB_LABEL (v)->flag_debugging_mode = 1;
+			}
+			break;
+		case CB_TAG_FILE:
+			if (CB_FILE (v)->record_max > size) {
+				size = CB_FILE (v)->record_max;
+			}
+			break;
+		case CB_TAG_CD:
+			if (CB_CD (v)->record && CB_FIELD (CB_CD (v)->record)->size > size) {
+				size = CB_FIELD (v)->size;
+			}
+			break;
+		case CB_TAG_FIELD:
+			if (!error_if_subscript_or_refmod (x, _("DEBUGGING target"))) {
+				if (CB_FIELD (v)->size > size) {
+					size = CB_FIELD (v)->size;
+				}
+			}
+			break;
+		default:
+			cb_error_x (x, _("'%s' is not a valid DEBUGGING target"),
+				    cb_name (x));
+			break;
+		}
+	}
+	/* reset error handling */
+	cb_set_ignore_error (0);
+
+	return size;
+}
+
+/* Resolve all labels */
+static void
+cb_validate_labels (struct cb_program *prog)
 {
 	cb_tree			l;
 	cb_tree			x;
 	cb_tree			v;
-	struct cb_label		*save_section;
-	struct cb_label		*save_paragraph;
-	struct cb_alter_id	*aid;
-	struct cb_label		*l1;
-	struct cb_label		*l2;
-	struct cb_field		*f, *ret_fld;
-	int			size;
 
-	/* Validate entry points */
-
-	/* Check dangling LINKAGE items */
-	if (cb_warn_linkage
-	 && current_program->linkage_storage) {
-		if (current_program->returning
-		 &&	cb_ref (current_program->returning) != cb_error_node) {
-			ret_fld = CB_FIELD (cb_ref (current_program->returning));
-			if (ret_fld->redefines) {
-				/* error, but we check this in parser.y already and just go on here */
-				ret_fld = ret_fld->redefines;
-			}
-		} else {
-			ret_fld = NULL;
-		}
-		for (v = current_program->entry_list; v; v = CB_CHAIN (v)) {
-			for (f = current_program->linkage_storage; f; f = f->sister) {
-
-				/* ignore RETURNING fields and fields that REDEFINES */
-				if (f == ret_fld
-				 || f->redefines) {
-					continue;
-				}
-
-				/* ignore fields that are part of current entry USING */
-				for (l = CB_VALUE (CB_VALUE (v)); l; l = CB_CHAIN (l)) {
-					x = CB_VALUE (l);
-					if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
-						if (f == CB_FIELD (cb_ref (x))) {
-							break;
-						}
-					}
-				}
-				if (l) {
-					continue;
-				}
-
-				/* check if field or its cildren have any actual reference,
-				   otherwise the warning is useless */
-				if (has_sub_reference(f)) {
-					cb_warning_x (cb_warn_linkage, CB_TREE (f),
-						_("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
-				}
-			}
-		}
-	}
-
-	/* Resolve all labels */
-	save_section = current_section;
-	save_paragraph = current_paragraph;
 	for (l = cb_list_reverse (prog->label_list); l; l = CB_CHAIN (l)) {
 		x = CB_VALUE (l);
 		(void)cb_set_ignore_error (CB_REFERENCE (x)->flag_ignored);
@@ -3480,65 +3508,91 @@ cb_validate_program_body (struct cb_program *prog)
 			cb_error_x (x, _("'%s' is not a procedure name"), cb_name (x));
 		}
 	}
-
-	/* Resolve DEBUG references */
-	/* For data items, we may need to adjust the size of DEBUG-CONTENTS directly,
-	   for file items from its maximum length */
-	/* Basic size of DEBUG-CONTENTS is DFLT_DEBUG_CONTENTS_SIZE */
-	size = DFLT_DEBUG_CONTENTS_SIZE;
-	for (l = prog->debug_list; l; l = CB_CHAIN (l)) {
-		x = CB_VALUE (l);
-		(void)cb_set_ignore_error (CB_REFERENCE (x)->flag_ignored);
-		v = cb_ref (x);
-		if (v == cb_error_node) {
-			continue;
-		}
-		current_section = CB_REFERENCE (x)->section;
-		current_paragraph = CB_REFERENCE (x)->paragraph;
-		switch (CB_TREE_TAG (v)) {
-		case CB_TAG_LABEL:
-			if (current_program->all_procedure) {
-				cb_error_x (x, _("DEBUGGING target invalid with ALL PROCEDURES: '%s'"),
-					    cb_name (x));
-			} else if (!CB_LABEL (v)->flag_real_label) {
-				cb_error_x (x, _("DEBUGGING target invalid: '%s'"),
-					    cb_name (x));
-			}
-			CB_LABEL (v)->debug_section =
-				CB_REFERENCE (x)->debug_section;
-			CB_LABEL (v)->flag_debugging_mode = 1;
-			break;
-		case CB_TAG_FILE:
-			if (CB_FILE (v)->record_max > size) {
-				size = CB_FILE (v)->record_max;
-			}
-			break;
-		case CB_TAG_CD: /* Should this be allowed at all? */
-			break;
-		case CB_TAG_FIELD:
-			if (CB_FIELD (v)->size > size) {
-				size = CB_FIELD (v)->size;
-			}
-			break;
-		default:
-			cb_error_x (x, _("'%s' is not a valid DEBUGGING target"),
-				    cb_name (x));
-			break;
-		}
-	}
 	/* reset error handling */
 	cb_set_ignore_error (0);
+}
 
-	/* If necessary, adjust size of DEBUG-CONTENTS (and DEBUG-ITEM) */
-	if (current_program->flag_debugging) {
-		if (size != DFLT_DEBUG_CONTENTS_SIZE) {
+
+void
+cb_validate_program_body (struct cb_program *prog)
+{
+	cb_tree			l;
+	cb_tree			x;
+	cb_tree			v;
+	struct cb_label		*save_section;
+	struct cb_label		*save_paragraph;
+	struct cb_alter_id	*aid;
+	struct cb_label		*l1;
+	struct cb_label		*l2;
+	struct cb_field		*f, *ret_fld;
+
+	/* Validate entry points */
+
+	/* Check dangling LINKAGE items */
+	if (cb_warn_linkage
+	 && prog->linkage_storage) {
+		if (prog->returning
+		 &&	cb_ref (prog->returning) != cb_error_node) {
+			ret_fld = CB_FIELD (cb_ref (prog->returning));
+			if (ret_fld->redefines) {
+				/* error, but we check this in parser.y already and just go on here */
+				ret_fld = ret_fld->redefines;
+			}
+		} else {
+			ret_fld = NULL;
+		}
+		for (v = prog->entry_list; v; v = CB_CHAIN (v)) {
+			for (f = prog->linkage_storage; f; f = f->sister) {
+
+				/* ignore RETURNING fields and fields that REDEFINES */
+				if (f == ret_fld
+				 || f->redefines) {
+					continue;
+				}
+
+				/* ignore fields that are part of current entry USING */
+				for (l = CB_VALUE (CB_VALUE (v)); l; l = CB_CHAIN (l)) {
+					x = CB_VALUE (l);
+					if (CB_VALID_TREE (x) && cb_ref (x) != cb_error_node) {
+						if (f == CB_FIELD (cb_ref (x))) {
+							break;
+						}
+					}
+				}
+				if (l) {
+					continue;
+				}
+
+				/* check if field or its cildren have any actual reference,
+				   otherwise the warning is useless */
+				if (has_sub_reference(f)) {
+					cb_warning_x (cb_warn_linkage, CB_TREE (f),
+						_("LINKAGE item '%s' is not a PROCEDURE USING parameter"), f->name);
+				}
+			}
+		}
+	}
+
+	save_section = current_section;
+	save_paragraph = current_paragraph;
+
+	/* Resolve all labels */
+	cb_validate_labels (prog);
+
+	if (prog->flag_debugging) {
+		/* Resolve DEBUGGING references and calculate DEBUG-CONTENTS size */
+		/* Basic size of DEBUG-CONTENTS is DFLT_DEBUG_CONTENTS_SIZE */
+		int debug_contents_size = cb_resolve_debug_refs (prog, DFLT_DEBUG_CONTENTS_SIZE);
+
+		/* If necessary, adjust size of DEBUG-CONTENTS (and DEBUG-ITEM) */
+		if (debug_contents_size != DFLT_DEBUG_CONTENTS_SIZE) {
 			f = CB_FIELD_PTR (cb_debug_contents);
-			f->size = size;
-			f->memory_size = size;
-			size -= DFLT_DEBUG_CONTENTS_SIZE;
+			f->size = debug_contents_size;
+			f->memory_size = debug_contents_size;
+
 			f = CB_FIELD_PTR (cb_debug_item);
-			f->size += size;
-			f->memory_size += size;
+			f->size += debug_contents_size - DFLT_DEBUG_CONTENTS_SIZE;
+			f->memory_size += debug_contents_size - DFLT_DEBUG_CONTENTS_SIZE;
 		}
 	}
 
@@ -11513,23 +11567,6 @@ error_if_not_alnum_or_national (cb_tree ref, const char *name)
 	} else {
 		return 0;
 	}
-}
-
-static int
-error_if_subscript_or_refmod (cb_tree ref, const char *name)
-{
-	int	error = 0;
-
-	if (CB_REFERENCE (ref)->subs) {
-		cb_error_x (ref, _("%s may not be subscripted"), name);
-		error = 1;
-	}
-	if (CB_REFERENCE (ref)->offset) {
-		cb_error_x (ref, _("%s may not be reference modified"), name);
-		error = 1;
-	}
-
-	return error;
 }
 
 static int

@@ -14334,7 +14334,7 @@ debugging_list:
 ;
 
 debugging_target:
-  label
+  identifier_1	/* note: check for subscript/refmod in typeck.c */
   {
 	cb_tree		l;
 	cb_tree		x;
@@ -14349,29 +14349,44 @@ debugging_target:
 		current_program->debug_list =
 			cb_list_append (current_program->debug_list, z);
 		/* Check backward refs to file/data names */
-		/* Label refs will be checked later (forward/backward ref) */
 		if (CB_WORD_COUNT ($1) > 0) {
 			l = CB_VALUE (CB_WORD_ITEMS ($1));
 			switch (CB_TREE_TAG (l)) {
 			case CB_TAG_CD:
-				CB_CD (l)->debug_section = current_section;
-				CB_CD (l)->flag_field_debug = 1;
+				if (CB_CD (l)->flag_field_debug) {
+					cb_error_x ($1, _("duplicate DEBUGGING target: '%s'"),
+					    cb_name (l));
+				} else {
+					CB_CD (l)->debug_section = current_section;
+					CB_CD (l)->flag_field_debug = 1;
+				}
 				break;
 			case CB_TAG_FILE:
-				CB_FILE (l)->debug_section = current_section;
-				CB_FILE (l)->flag_fl_debug = 1;
+				if (CB_FILE (l)->flag_fl_debug) {
+					cb_error_x ($1, _("duplicate DEBUGGING target: '%s'"),
+					    cb_name (l));
+				} else {
+					CB_FILE (l)->debug_section = current_section;
+					CB_FILE (l)->flag_fl_debug = 1;
+				}
 				break;
 			case CB_TAG_FIELD:
 				x = cb_ref ($1);
 				if (CB_INVALID_TREE (x)) {
 					break;
 				}
-				needs_field_debug = 1;
-				CB_FIELD (x)->debug_section = current_section;
-				CB_FIELD (x)->flag_field_debug = 1;
-				CB_PURPOSE (z) = x;
+				if (CB_FIELD (x)->flag_field_debug) {
+					cb_error_x ($1, _("duplicate DEBUGGING target: '%s'"),
+					    cb_name (x));
+				} else {
+					needs_field_debug = 1;
+					CB_FIELD (x)->debug_section = current_section;
+					CB_FIELD (x)->flag_field_debug = 1;
+					CB_PURPOSE (z) = x;
+				}
 				break;
 			default:
+				/* Label refs will be checked later (forward/backward ref) */
 				break;
 			}
 		}
@@ -14387,7 +14402,7 @@ debugging_target:
 		}
 	}
   }
-| ALL _all_refs qualified_word
+| ALL _all_refs identifier_1	/* note: check for subscript/refmod in typeck.c */
   {
 	cb_tree		x;
 
@@ -14397,14 +14412,19 @@ debugging_target:
 		if (CB_INVALID_TREE (x) || !CB_FIELD_P (x)) {
 			cb_error (_("invalid target for %s"), "DEBUGGING ALL");
 		} else {
-			needs_field_debug = 1;
-			CB_FIELD (x)->debug_section = current_section;
-			CB_FIELD (x)->flag_field_debug = 1;
-			CB_FIELD (x)->flag_all_debug = 1;
-			CB_REFERENCE ($3)->debug_section = current_section;
-			CB_REFERENCE ($3)->flag_debug_code = 1;
-			CB_REFERENCE ($3)->flag_all_debug = 1;
-			CB_CHAIN_PAIR (current_program->debug_list, x, $3);
+			if (CB_FIELD (x)->flag_field_debug) {
+				cb_error_x ($3, _("duplicate DEBUGGING target: '%s'"),
+				    cb_name (x));
+			} else {
+				needs_field_debug = 1;
+				CB_FIELD (x)->debug_section = current_section;
+				CB_FIELD (x)->flag_field_debug = 1;
+				CB_FIELD (x)->flag_all_debug = 1;
+				CB_REFERENCE ($3)->debug_section = current_section;
+				CB_REFERENCE ($3)->flag_debug_code = 1;
+				CB_REFERENCE ($3)->flag_all_debug = 1;
+				CB_CHAIN_PAIR (current_program->debug_list, x, $3);
+			}
 		}
 	}
   }

@@ -5004,21 +5004,76 @@ AT_DATA([prog.cob], [
        DECLARATIVES.
        TEST-DEBUG SECTION.
            USE FOR DEBUGGING ON ALL REFERENCES OF DATA-FIELD.
-           DISPLAY DEBUG-ITEM "|" END-DISPLAY.
+           DISPLAY DEBUG-ITEM "|".
            MOVE "ABCD" TO DATA-FIELD.
-           DISPLAY DEBUG-ITEM "|" END-DISPLAY.
+           DISPLAY DEBUG-ITEM "|".
        END DECLARATIVES.
        SOME-PAR.
            MOVE QUOTE TO DATA-FIELD.
-           IF DATA-FIELD = QUOTE   DISPLAY "NO DEBUG" END-IF
+           IF DATA-FIELD = QUOTE DISPLAY "NO DEBUG" STOP RUN.
+           DISPLAY "DEBUG".
            STOP RUN.
 ])
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -Wno-terminator prog.cob], [0], [], [])
 AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
 [    19 DATA-FIELD                                       """"""""""""""""""""""""""""""""""""""""|
     19 DATA-FIELD                                       """"""""""""""""""""""""""""""""""""""""|
     20 DATA-FIELD                                       ABCD                                    |
     20 DATA-FIELD                                       ABCD                                    |
+DEBUG
+], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[NO DEBUG
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([USE FOR DEBUGGING, time of execution])
+AT_KEYWORDS([fundamental DEBUGGING])
+
+# FIXME: the debugging procedure is executed after the statement,
+#        which is generally fine, but not for "nested" statements
+#        where DEBUG-ITEM contains wrong data and the
+#        debugging procedure is called too late
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+           SOURCE-COMPUTER. mine WITH DEBUGGING MODE.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  DATA-FIELD   PIC X(40) VALUE "ABCD".
+       PROCEDURE        DIVISION.
+       DECLARATIVES.
+       TEST-DEBUG SECTION.
+           USE FOR DEBUGGING ON ALL REFERENCES OF DATA-FIELD.
+           DISPLAY DEBUG-ITEM "|".
+           MOVE "ABCD" TO DATA-FIELD.
+       END DECLARATIVES.
+       SOME-PAR.
+           MOVE QUOTE TO DATA-FIELD.
+           IF DATA-FIELD = QUOTE
+              DISPLAY "NO DEBUG"
+           ELSE
+              DISPLAY "DEBUG"
+              MOVE SPACES TO DATA-FIELD
+              CALL "NOTHERE" USING DATA-FIELD
+                 ON OVERFLOW
+                    DISPLAY "THIS IS FINE".
+           STOP RUN.
+])
+AT_CHECK([$COMPILE -w prog.cob], [0], [], [])
+AT_CHECK([COB_SET_DEBUG=1 $COBCRUN_DIRECT ./prog], [0],
+[    18 DATA-FIELD                                       """"""""""""""""""""""""""""""""""""""""|
+    19 DATA-FIELD                                       ABCD                                    |
+DEBUG
+    23 DATA-FIELD                                                                               |
+    24 DATA-FIELD                                       ABCD                                    |
+THIS IS FINE
 ], [])
 
 AT_CLEANUP

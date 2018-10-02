@@ -7387,6 +7387,10 @@ output_stmt (cb_tree x)
 				/* Output source location as code */
 				output_trace_info (x, p->name);
 			}
+			/* USE FOR DEBUGGING: pre-fill DEBUG-LINE
+			   FIXME: postpone to actual DEBUGGING procedure,
+			          using module->module_stmt there
+			*/
 			if (current_prog->flag_gen_debug &&
 			    !p->flag_in_debug) {
 				output_prefix ();
@@ -7418,8 +7422,14 @@ output_stmt (cb_tree x)
 			output_stmt (p->body);
 		}
 
-		/* Output field debugging statements */
+		/* USE FOR DEBUGGING: Output field debugging statements */
+		/* FIXME: for statements with body like IF / EVALUATE and
+		          DISPLAY / CALL [NOT] ON EXCEPTION this comes too late,
+		          should be included in all possible branches as first item */
 		if (current_prog->flag_gen_debug && p->debug_check) {
+			/* FIXME: codegen should generate a surrounding
+			          "if (cob_glob_ptr->cob_debugging_mode)"
+			          here */
 			output_stmt (p->debug_check);
 		}
 
