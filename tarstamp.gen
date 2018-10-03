@@ -1,0 +1,12 @@
+#!/bin/sh
+export LC_ALL=C
+
+while read name when
+do
+    printf "#define %s %s\n" $name "$when"
+done<<EOF
+COB_TAR_DATE "$(date -u +'%b %d %Y %T') UTC" 
+COB_NUM_TAR_DATE $(date -u +'%Y%m%d')
+COB_NUM_TAR_TIME $(date -u +'%H%M%S')
+EOF
+

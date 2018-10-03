@@ -18,6 +18,24 @@ for their database.
 
  - Look at C-ISAM replacements
 
+2.3 New option handling.
+
+A new configuration file, cobc.conf, is described in
+doc/man/cobc.conf.5.  Integrate that file with existing command-line
+parsing, allowing for overrides and warning-defeats as outlined in
+that document.  
+
+2.4 New preprocessor support.
+
+doc/man/cobc.conf.5 also defines configuration for preprocessors.  Add
+support for preprocessors to cobc.  Modify the -E option to be
+
+	-E [preprocessor]
+
+meaning that all preprocessors should be run up to and including the
+one named in the -E argument.  If no argument is provided, -E
+continues to work as currently.  
+
 3 Improvement of compiler internals
 
 3.1 Error checking

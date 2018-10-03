@@ -1,0 +1,280 @@
+.ds gnucobol GnuCOBOL
+.ds cobol COBOL
+.ds filename cobc.conf
+.
+.Dd October 2018 
+.Dt "COBC.CONF" \&5 \*[gnucobol]
+.Os Linux
+.Sh NAME
+.Nm cobc.conf
+.Nd cobc(1) configuration file
+.Sh DESCRIPTION
+Many compiler options described in the GNU Cobol manual are configurable, meaning that their defaults can be controlled by a configuration file
+.Pa /etc/gnucobol/\*[filename]
+The name and location of the configuration file can be changed with the command-line option
+.Fl conf Ns = Ns Ar filename
+where
+.Ar filename
+names either a file, or a directory containing a file named
+.Ql \*[filename] .
+.Pp
+Not every option makes sense to have a configurable default.  For example,
+.Em help
+options are meant to be used interactively. Options that do not appear in the list below are not configurable.  If a non-configurable option (or any other invalid string) appears in the file, a warning diagnostic is written to standard error. For a description of the effect of each option, see the reference manual. 
+.
+In addition to command-line option defaults, \*[gnucobol] has a configurable, user-extensible preprocessor framework.  Preprocessors for SQL, CICS, and DL/I are included, and others can be added.  Preprocessor configuration is described in this document after the command-line option configuration.  
+.
+.Sh Configuration File Syntax
+Comments begin with
+.Ql #
+and continue to end of line.
+Each configured option appears on a line, one to a line. 
+If a value is needed for an option, the syntax is
+.Dl option Oo = Oc value Ns 
+where 
+.Ql =
+may or may not be required, depending on the particular option. (Some options, such as
+.Ql -I
+for an include file directory, do not 
+take an
+.Ql =
+to assign a value.)
+Trailing whitespace, and any whitespace surrounding the
+.Ql =
+is ignored.  
+.Pp
+The options are appended to the command line just as though the user had typed them.  
+The system
+.Pp
+.Bl -enum -compact
+.It
+reads the option name and its value
+.It
+prepends
+.Ql --
+or
+.Ql - ,
+as appropriate
+to the option name
+.It 
+adds the name and value, if any, to the command-line invocation.
+.El
+.Pp
+Consider carefully which options you include in
+.Nm .
+There is no command-line syntax to
+.Em remove
+configured options.
+For example, if
+.Ar g
+(enable C compiler debug) appears in
+.Nm ,
+there's no way to prevent debug information from being emitted, except
+to modify the file or use a different one.  Options that take a value
+and may appear only once can be overridden from the command line by
+supplying a different value.  
+.
+.Sh CONFIGURABLE\ OPTIONS
+.
+.Sh Build target options 
+.Bl -tag -width foo -compact
+.It Sy I Ar directory
+.It Sy L Ar directory
+.It Sy l Ar lib
+.It Sy D Ar define
+.El
+.
+.Sh Source format
+.Bl -tag -width foo -compact
+.It Sy free
+.It Sy fixed
+.El
+.
+.Sh Warning options
+Classes of warnings may be enabled or, with the
+.Ar no-
+prefix, defeated.  For example, to enable parenthesis warnings, use
+.Dl W parenthesis 
+to disable them,
+.Dl W no-parenthesis
+Either form can be overridden on the command line.  That is,
+regardless of whether parenthesis warnings are enabled or disabled in the configuration file, a
+.D1 Fl W Li parenthesis
+or
+.D1 Fl W Li no-parenthesis
+option on the command line will override it.  
+.Bl -tag -width foo -compact
+.It Sy W
+.It Sy W Ar \& Oo no- Oc Ns all
+.It Sy W Ar \& Oo no- Oc Ns archaic
+.It Sy W Ar \& Oo no- Oc Ns call-params
+.It Sy W Ar \& Oo no- Oc Ns column-overflow
+.It Sy W Ar \& Oo no- Oc Ns constant
+.It Sy W Ar \& Oo no- Oc Ns implicit-define
+.It Sy W Ar \& Oo no- Oc Ns linkage
+.It Sy W Ar \& Oo no- Oc Ns obsolete
+.It Sy W Ar \& Oo no- Oc Ns parentheses
+.It Sy W Ar \& Oo no- Oc Ns redefinition
+.It Sy W Ar \& Oo no- Oc Ns strict-typing
+.It Sy W Ar \& Oo no- Oc Ns terminator
+.It Sy W Ar \& Oo no- Oc Ns truncate
+.It Sy W Ar \& Oo no- Oc Ns unreachable
+.El
+.
+.Sh Configuration options
+.Bl -tag -width foo -compact
+.It Sy std Ns = Ar dialect
+where
+.Ar dialect
+is one of
+.Bl -tag -width foo -compact
+.It Sy cobol85
+.It Sy xopen
+.It Sy cobol2002
+.It Sy cobol2014
+.It Sy ibm-strict
+.It Sy ibm
+.It Sy mvs-strict
+.It Sy mvs
+.It Sy mf-strict
+.It Sy mf
+.It Sy bs2000-strict
+.It Sy bs2000
+.It Sy acu-strict
+.It Sy acu
+.It Sy rm-strict
+.It Sy rm
+.El
+.El
+.
+.Sh Debug options
+.Bl -tag -width foo -compact
+.It Sy debug
+.It Sy g
+.It Sy O
+.It Sy O2
+.It Sy \&Os
+.It Sy ftrace
+.It Sy ftraceall
+.It Sy fdebugging-line
+.It Sy fsource-location
+.It Sy fimplicit-init
+.It Sy fstack-check
+.It Sy fnotrunc
+.El
+.
+.Sh Miscellaneous options
+.Bl -tag -width foo -compact
+.It Sy ext Ar extension
+.It Sy fmfcomment
+.It Sy acucomment
+.It Sy fsign = ASCII
+.It Sy fsign = EBCDIC
+.It Sy ffold-copy = LOWER
+.It Sy ffold-copy = UPPER
+.It Sy save-temps Op = Ar directory
+.El
+.
+.Sh Listing options
+.Bl -tag -width foo -compact
+.ig
+.It Sy t = Ar file
+.It Sy T = Ar file
+.It Sy P Op = Bro Ar dir | Ar file Brc
+..
+.It Sy tlines = Ar lines
+.It Sy ftsymbols
+.It Sy fno-theader
+.It Sy fno-tmessages
+.It Sy fno-tsource
+.It Sy Xref
+.El
+.
+.Sh PREPROCESSORS
+The \*[cobol] programmer frequently accesses subsystems with
+.Dl EXEC Ar subsystem Ns \0... END-EXEC
+syntax.  As a technical matter, those are
+.Dq reserved words
+in \*[cobol].
+They signal to the compiler that the enclosed text is to be handled by preprocessor
+.Ar subsystem ,
+which generates \*[cobol] code connecting the application to the subsystem.  \*[gnucobol] includes a variety of such preprocessors, and provides for the user to add others.  
+.
+.Sh Preprocessor Declaration
+The preprocessors that
+.Sy cobc
+can invoke, and the order in which they are invoked, are declared with
+.Dl Ar subsystem Ns \0= Ar pathname Op Ar options
+where
+.Ar subsystem
+is the keyword that appears after EXEC
+in the source \*[cobol] code that the preprocessor handles,
+.Ar pathname
+is the preprocessor filename, and
+.Ar options
+are any options that are to be passed to the preprocessor. 
+.Pp
+The order in which preprocessors are invoked is the same as the order in which they appear in the file.
+.
+.Sh Preprocessor Configuration Options
+Preprocessor options may be included after each declaration.
+The option names begin with the preprocessor name; the values are used only if the preprocessor is used.  The order in which they appear in
+.Nm
+is of no consequence. 
+.Bl -tag -width name
+.It Ar name Ns -COBCFLAGS =  Ar option Op Ar option\ ...
+options passed to
+.Sy cobc
+when preprocessor
+.Ar name
+is used
+.It Ar name Ns -CPPFLAGS = Ar option Op Ar option\ ...
+options passed to the C preprocessor (cpp) when preprocessor
+.Ar name
+is used
+.It Ar name Ns -LDFLAGS = Ar option Op Ar option\ ...
+options passed to the linker when preprocessor
+.Ar name
+is used
+.El
+.Pp
+Because some values consist of many strings, a line can be continued by ending it with
+.Ql \(rs
+(with no space after the backslash).
+.
+.Sh Preprocessor Invocation
+For each preprocessor, the compiler constructs input and output filenames by appending the name of the preprocessor to the suffix.  For example,
+.Ic cobc foo.cbl
+might result in the following commands:
+.Pp
+.Bl -diag -compact -offset 4n
+.It /usr/local/bin/dliply
+-o foo.cbl-sql foo.cbl 
+.It /usr/local/bin/cics-pre
+-o foo.cbl-cics foo.cbl-sql
+.It /usr/local/bin/cobc
+-o foo.so foo.cbl-cics
+.El
+.Pp
+Intermediate files are automatically removed if the preprocessor exits with a status code of zero.  
+.\" .Sh ENVIRONMENT
+.\" .Sh FILES
+.Sh EXAMPLES
+Below is an example preprocessor configuration for EXEC DLI:
+.Pp
+.Bd -literal -offset
+DLI = /usr/local/bin/dliply
+    # no PPFLAGS
+    # no COBCFLAGS
+    # no CPPFLAGS 
+DLI-LDFLAGS = -L /usr/local/lib -Wl,-rpath -Wl,/usr/local/lib -lprim-api
+.Ed
+.
+.\" .Sh SEE ALSO
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.\" .Sh AUTHORS
+.\" .Sh CAVEATS
+.\" .Sh BUGS
+.
+.\"  LocalWords:  preprocessor preprocessors whitespace
