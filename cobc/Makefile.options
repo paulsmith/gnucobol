@@ -1,0 +1,12 @@
+all: opt_parse.o options.o opt_scan.o
+
+CPPFLAGS = -I../build -I.. -D_POSIX_SOURCE
+CFLAGS = -g -std=c11
+
+options.o: options.h opt_parse.h
+
+opt_parse.h: opt_parse.y
+
+opt_parse.o: opt_parse.y
+	bison -d $^
+
