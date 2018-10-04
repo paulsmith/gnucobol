@@ -195,6 +195,7 @@
     <ClCompile Include="..\..\libcob\screenio.c" />
     <ClCompile Include="..\..\libcob\strings.c" />
     <ClCompile Include="..\..\libcob\termio.c" />
+    <ClCompile Include="..\..\libcob\xml.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\libcob\exception.def" />
