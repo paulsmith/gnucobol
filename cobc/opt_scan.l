@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2018 Free Software Foundation, Inc.
+   Written by James K. Lowden
 
    This file is part of GnuCOBOL.
 
@@ -21,9 +21,11 @@
 %option noyywrap warn debug
 %{
   #include "opt_parse.tab.h"
+  #include "options.h"
 
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wunused-parameter"
+
 %}
 
 I			"I"
@@ -105,37 +107,51 @@ UPPER		"UPPER"
 
 %%
 
-^[[:space:]]*{I}			{ return I; }
-^[[:space:]]*{LINK}			{ return LINK; }
-^[[:space:]]*{LIB} 			{ return LIB; }
-^[[:space:]]*{D} 			{ return D; }
-^[[:space:]]*{FREE} 		{ return FREE; }
-^[[:space:]]*{FIXED}		{ return FIXED; }
-^[[:space:]]*{STD} 		{ return STD; }
-^[[:space:]]*{DEBUG} 		{ return DEBUG; }
-^[[:space:]]*{G} 			{ return G; }
-^[[:space:]]*{O} 			{ return O; }
-^[[:space:]]*{O2} 		{ return O2; }
-^[[:space:]]*{OS} 		{ return OS; }
-^[[:space:]]*{FTRACE} 		{ return FTRACE; }
-^[[:space:]]*{FTRACEALL} 		{ return FTRACEALL; }
-^[[:space:]]*{FDEBUGGING_LINE} 	{ return FDEBUGGING_LINE; }
-^[[:space:]]*{FSOURCE_LOCATION} 	{ return FSOURCE_LOCATION; }
-^[[:space:]]*{FIMPLICIT_INIT} 	{ return FIMPLICIT_INIT; }
-^[[:space:]]*{FSTACK_CHECK} 	{ return FSTACK_CHECK; }
-^[[:space:]]*{FNOTRUNC} 		{ return FNOTRUNC; }
-^[[:space:]]*{EXT} 		{ return EXT; }
-^[[:space:]]*{FMFCOMMENT} 	{ return FMFCOMMENT; }
-^[[:space:]]*{ACUCOMMENT} 	{ return ACUCOMMENT; }
-^[[:space:]]*{FSIGN} 		{ return FSIGN; }
-^[[:space:]]*{FFOLD_COPY} 	{ return FFOLD_COPY; }
-^[[:space:]]*{SAVE_TEMPS} 	{ return SAVE_TEMPS; }
-^[[:space:]]*{TLINES} 		{ return TLINES; }
-^[[:space:]]*{FTSYMBOLS} 		{ return FTSYMBOLS; }
-^[[:space:]]*{FNO_THEADER} 	{ return FNO_THEADER; }
-^[[:space:]]*{FNO_TMESSAGES} 	{ return FNO_TMESSAGES; }
-^[[:space:]]*{FNO_TSOURCE} 	{ return FNO_TSOURCE; }
-^[[:space:]]*{XREF} 		{ return XREF; }
+^[[:space:]]*{I}		{ yylval = yytext; return I; }
+^[[:space:]]*{LINK}		{ yylval = yytext; return LINK; }
+^[[:space:]]*{LIB} 		{ yylval = yytext; return LIB; }
+^[[:space:]]*{D} 		{ yylval = yytext; return D; }
+^[[:space:]]*{FREE} 		{ yylval = yytext; return FREE; }
+^[[:space:]]*{FIXED}		{ yylval = yytext; return FIXED; }
+^[[:space:]]*{STD} 		{ yylval = yytext; return STD; }
+^[[:space:]]*{DEBUG} 		{ yylval = yytext; return DEBUG; }
+^[[:space:]]*{G} 		{ yylval = yytext; return G; }
+^[[:space:]]*{O} 		{ yylval = yytext; return O; }
+^[[:space:]]*{O2} 		{ yylval = yytext; return O2; }
+^[[:space:]]*{OS} 		{ yylval = yytext; return OS; }
+^[[:space:]]*{FTRACE} 		{ yylval = yytext; return FTRACE; }
+^[[:space:]]*{FTRACEALL}	{ yylval = yytext; 
+                                  return FTRACEALL; }
+^[[:space:]]*{FDEBUGGING_LINE} 	{ yylval = yytext;
+                                  return FDEBUGGING_LINE; }
+^[[:space:]]*{FSOURCE_LOCATION} { yylval = yytext;
+                                  return FSOURCE_LOCATION; }
+^[[:space:]]*{FIMPLICIT_INIT} 	{ yylval = yytext; 
+                                  return FIMPLICIT_INIT; }
+^[[:space:]]*{FSTACK_CHECK} 	{ yylval = yytext; 
+                                  return FSTACK_CHECK; }
+^[[:space:]]*{FNOTRUNC} 	{ yylval = yytext; 
+                                  return FNOTRUNC; }
+^[[:space:]]*{EXT} 		{ yylval = yytext; return EXT; }
+^[[:space:]]*{FMFCOMMENT} 	{ yylval = yytext; 
+                                  return FMFCOMMENT; }
+^[[:space:]]*{ACUCOMMENT} 	{ yylval = yytext; 
+                                  return ACUCOMMENT; }
+^[[:space:]]*{FSIGN} 		{ yylval = yytext; return FSIGN; }
+^[[:space:]]*{FFOLD_COPY} 	{ yylval = yytext; 
+                                  return FFOLD_COPY; }
+^[[:space:]]*{SAVE_TEMPS} 	{ yylval = yytext; 
+                                  return SAVE_TEMPS; }
+^[[:space:]]*{TLINES} 		{ yylval = yytext; return TLINES; }
+^[[:space:]]*{FTSYMBOLS} 	{ yylval = yytext; 
+                                  return FTSYMBOLS; }
+^[[:space:]]*{FNO_THEADER} 	{ yylval = yytext; 
+                                  return FNO_THEADER; }
+^[[:space:]]*{FNO_TMESSAGES} 	{ yylval = yytext; 
+                                  return FNO_TMESSAGES; }
+^[[:space:]]*{FNO_TSOURCE} 	{ yylval = yytext; 
+                                  return FNO_TSOURCE; }
+^[[:space:]]*{XREF} 		{ yylval = yytext; return XREF; }
 
 ^[[:space:]]*W 			{ return WARNING; }
 
@@ -143,46 +159,46 @@ UPPER		"UPPER"
 
 {EQ} 				{ return EQ; }
 
-{INTEGER}[[:space:]]*$         { return INTEGER; }
+{INTEGER}[[:space:]]*$          { yylval = yytext; return INTEGER; }
 
-{VALUE} 			{ return VALUE; }
+{VALUE} 			{ yylval = yytext; return VALUE; }
 
-{COBOL85}		{ return COBOL85; }
-{XOPEN}   	{ return XOPEN; }
-{COBOL2002}       { return COBOL2002; }
-{COBOL2014}       { return COBOL2014; }
-{IBM_STRICT}      { return IBM_STRICT; }
-{IBM}     	{ return IBM; }
-{MVS_STRICT}      { return MVS_STRICT; }
-{MVS}     	{ return MVS; }
-{MF_STRICT}       { return MF_STRICT; }
-{MF}      	{ return MF; }
-{BS2000_STRICT}   { return BS2000_STRICT; }
-{BS2000}		{ return BS2000; }
-{ACU_STRICT}	{ return ACU_STRICT; }
-{ACU}		{ return ACU; }
-{RM_STRICT}	{ return RM_STRICT; }
-{RM}		{ return RM; }
+{COBOL85}	{ yylval = yytext; return COBOL85; }
+{XOPEN}	   	{ yylval = yytext; return XOPEN; }
+{COBOL2002}     { yylval = yytext; return COBOL2002; }
+{COBOL2014}     { yylval = yytext; return COBOL2014; }
+{IBM_STRICT}    { yylval = yytext; return IBM_STRICT; }
+{IBM}		{ yylval = yytext; return IBM; }
+{MVS_STRICT}    { yylval = yytext; return MVS_STRICT; }
+{MVS}     	{ yylval = yytext; return MVS; }
+{MF_STRICT}     { yylval = yytext; return MF_STRICT; }
+{MF}      	{ yylval = yytext; return MF; }
+{BS2000_STRICT} { yylval = yytext; return BS2000_STRICT; }
+{BS2000}	{ yylval = yytext; return BS2000; }
+{ACU_STRICT}	{ yylval = yytext; return ACU_STRICT; }
+{ACU}		{ yylval = yytext; return ACU; }
+{RM_STRICT}	{ yylval = yytext; return RM_STRICT; }
+{RM}		{ yylval = yytext; return RM; }
 
-{ASCII}		{ return ASCII; }
-{EBCDIC}		{ return EBCDIC; }
-{LOWER}		{ return LOWER; }
-{UPPER}		{ return UPPER; }
+{ASCII}		{ yylval = yytext; return ASCII; }
+{EBCDIC}	{ yylval = yytext; return EBCDIC; }
+{LOWER}		{ yylval = yytext; return LOWER; }
+{UPPER}		{ yylval = yytext; return UPPER; }
 
-{ALL}			 { return ALL; }
-{ARCHAIC}		 { return ARCHAIC; }
-{CALL_PARAMS}		 { return CALL_PARAMS; }
-{COLUMN_OVERFLOW}	 { return COLUMN_OVERFLOW; }
-{CONSTANT}		 { return CONSTANT; }
-{IMPLICIT_DEFINE}	 { return IMPLICIT_DEFINE; }
-{LINKAGE}		 { return LINKAGE; }
-{OBSOLETE}		 { return OBSOLETE; }
-{PARENTHESES}		 { return PARENTHESES; }
-{REDEFINITION}		 { return REDEFINITION; }
-{STRICT_TYPING}		 { return STRICT_TYPING; }
-{TERMINATOR}		 { return TERMINATOR; }
-{TRUNCATE}		 { return TRUNCATE; }
-{UNREACHABLE}		 { return UNREACHABLE; }
+{ALL}			 { yylval = yytext; return ALL; }
+{ARCHAIC}		 { yylval = yytext; return ARCHAIC; }
+{CALL_PARAMS}		 { yylval = yytext; return CALL_PARAMS; }
+{COLUMN_OVERFLOW}	 { yylval = yytext; return COLUMN_OVERFLOW; }
+{CONSTANT}		 { yylval = yytext; return CONSTANT; }
+{IMPLICIT_DEFINE}	 { yylval = yytext; return IMPLICIT_DEFINE; }
+{LINKAGE}		 { yylval = yytext; return LINKAGE; }
+{OBSOLETE}		 { yylval = yytext; return OBSOLETE; }
+{PARENTHESES}		 { yylval = yytext; return PARENTHESES; }
+{REDEFINITION}		 { yylval = yytext; return REDEFINITION; }
+{STRICT_TYPING}		 { yylval = yytext; return STRICT_TYPING; }
+{TERMINATOR}		 { yylval = yytext; return TERMINATOR; }
+{TRUNCATE}		 { yylval = yytext; return TRUNCATE; }
+{UNREACHABLE}		 { yylval = yytext; return UNREACHABLE; }
 
 %%
-
+    

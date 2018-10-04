@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
-   Written by Keisuke Nishida, Roger While, Simon Sobisch
+   Copyright (C) 2018 Free Software Foundation, Inc.
+   Written by James K. Lowden
 
    This file is part of GnuCOBOL.
 
@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 #include "config.h"
 #include "defaults.h"
@@ -95,15 +94,40 @@ static struct warn_opt_t warn_opts[] = {
   { false, false, UNREACHABLE },
 };
 
+#if 0
+static char option_name[32];
+static char option_arg[PATH_MAX];
 
+bool
+option_stash( const char value[], int len ) {
+  if( sizeof(option_name) - 1 < len ) {
+    warnx("E2BIG: exceeds %zu bytes: '%s'", sizeof(option_name), value);
+    return false;
+  }
+  
+  memcpy(option_name, value, len);
+  return true;
+}
+
+bool
+option_arg_stash( const char value[], int len ) {
+  if( sizeof(option_arg) - 1 < len ) {
+    warnx("E2BIG: exceeds %zu bytes: '%s'", sizeof(option_arg), value);
+    return false;
+  }
+  
+  memcpy(option_arg, value, len);
+  return true;
+}
+#endif
 static int
 conf_opts_cmp( const void *K, const void *E ) {
   const struct conf_opt_t *k = K, *e = E;
   return k->type == e->type? 0 : 1;
 }
 
-bool
-option_set( enum yytokentype type, const char name[], const char value[] ) {
+static bool
+option_any_set( enum yytokentype type, const char name[], const char value[] ) {
   struct conf_opt_t *p, key = { .type = type };
   size_t n = COUNT_OF(conf_opts);
   
@@ -111,13 +135,38 @@ option_set( enum yytokentype type, const char name[], const char value[] ) {
     assert(I <= type && type <= XREF);
     return false;
   }
-  assert(strlen(name) < sizeof(p->name) - 1);
+
+  if( sizeof(p->name) - 1 < strlen(name) ) {
+    warnx("E2BIG: exceeds %zu bytes: '%s'", sizeof(p->name), name);
+    return false;
+  }
+
   strcpy(p->name, name);
-  strcpy(p->value, value != NULL? value : "");
+
+  if( value == NULL ) {
+    p->value[0] = '\0';
+    return p->configured = true;
+  }
+  
+  if( sizeof(p->value) - 1 < strlen(value) ) {
+    warnx("E2BIG: exceeds %zu bytes: '%s'", sizeof(p->value), value);
+    return false;
+  }
+
+  strcpy(p->value, value);
 
   return p->configured = true;
 }
 
+bool
+option_set( enum yytokentype type, const char name[] ) {
+  return option_any_set(type, name, NULL);
+}
+
+bool
+option_arg_set( enum yytokentype type, const char name[], const char value[] ) {
+  return option_any_set(type, name, value);
+}
 
 static int
 warn_opts_cmp( const void *K, const void *E ) {
@@ -126,7 +175,7 @@ warn_opts_cmp( const void *K, const void *E ) {
 }
 
 bool
-warning_set( enum yytokentype type, bool yn, const char name[] ) {
+warning_set( enum yytokentype type, const char name[] ) {
   struct warn_opt_t *p, key = { .type = type };
   size_t n = COUNT_OF(warn_opts);
   
@@ -135,8 +184,10 @@ warning_set( enum yytokentype type, bool yn, const char name[] ) {
     return false;
   }
 
-  p->yn = yn;
   assert(strlen(name) < sizeof(p->name) - 1);
   strcpy(p->name, name);
+
+  p->yn = strncmp(name, "no-", 3) == 0;
+    
   return p->configured = true;
 }

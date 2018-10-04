@@ -18,32 +18,26 @@
    along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _OPTIONS_H_
-#define _OPTIONS_H_
-
-#include <stdbool.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
-#include "opt_parse.tab.h"
+#include <mqueue.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+#include <unistd.h>
 
-#define COUNT_OF(x) (sizeof(x)/sizeof(x[0]))
+#include "options.h"
 
-struct conf_opt_t {
-  bool configured; // is present in configuration file
-  int  ndash;      // 1 or 2 dashes
-  enum yytokentype type; // option type token
-  char name[32]; 
-  char value[PATH_MAX];
-};
-
-struct warn_opt_t {
-  bool configured;       // is present in configuration file
-  bool yn;               // on or off
-  enum yytokentype type; // warning type token
-  char name[32]; 
-};
-
-bool option_set( enum yytokentype type, const char name[] );
-bool option_arg_set( enum yytokentype type, const char name[], const char value[] );
-bool warning_set( enum yytokentype type,  const char name[] );
-
-#endif
+int
+main(int argc, char *argv[])
+{
+  
+  return EXIT_SUCCESS;
+}

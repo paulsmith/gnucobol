@@ -1,3 +1,23 @@
+/*
+   Copyright (C) 2018 Free Software Foundation, Inc.
+   Written by James K. Lowden
+
+   This file is part of GnuCOBOL.
+
+   The GnuCOBOL compiler is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   GnuCOBOL is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 %token I LINK LIB D 
 %token FREE FIXED 
 %token STD
@@ -26,9 +46,17 @@
 %token ASCII EBCDIC
 %token LOWER UPPER
 
+%define parse.error verbose
+%define api.value.type {const char *}
+
 %{
+ #include <err.h>
  #include <limits.h>
- static char optarg[PATH_MAX];
+ #include "options.h"
+ int yylex(void);
+ static void yyerror( const char message[] );
+
+ enum yytokentype current_token;
 %}
 			
 %%
@@ -45,69 +73,46 @@ line:
 	|	warning COMMENT
 	;
 
-option:		FREE
-	| 	FIXED 
-	| 	DEBUG
-	| 	G
-	| 	O
-	| 	O2
-	| 	OS
-	| 	FTRACE
-	| 	FTRACEALL
-	| 	FDEBUGGING_LINE
-	| 	FSOURCE_LOCATION
-	| 	FIMPLICIT_INIT
-	| 	FSTACK_CHECK
-	| 	FNOTRUNC
-	|	FMFCOMMENT
-	|	ACUCOMMENT
-	|	FTSYMBOLS
-	| 	FNO_THEADER
-	|  	FNO_TMESSAGES
-	| 	FNO_TSOURCE
-	|	XREF
-		{
-		    if( !option_set($1, yytext, NULL) ) {
-			warnx("could not set option '%s'", yytext);
-		    }
-		}
-	;
-
+option:		FREE			{ option_set(FREE, $1); }
+	| 	FIXED 			{ option_set(FIXED, $1); }
+	| 	DEBUG			{ option_set(DEBUG, $1); }
+	| 	G			{ option_set(G, $1); }
+	| 	O			{ option_set(O, $1); }
+	| 	O2			{ option_set(O2, $1); }
+	| 	OS			{ option_set(OS, $1); }
+	| 	FTRACE			{ option_set(FTRACE, $1); }
+	| 	FTRACEALL		{ option_set(FTRACEALL, $1); }
+	| 	FDEBUGGING_LINE		{ option_set(FDEBUGGING_LINE, $1); }
+	| 	FSOURCE_LOCATION	{ option_set(FSOURCE_LOCATION, $1); }
+	| 	FIMPLICIT_INIT		{ option_set(FIMPLICIT_INIT, $1); }
+	| 	FSTACK_CHECK		{ option_set(FSTACK_CHECK, $1); }
+	| 	FNOTRUNC		{ option_set(FNOTRUNC, $1); }
+	|	FMFCOMMENT		{ option_set(FMFCOMMENT, $1); }
+	|	ACUCOMMENT		{ option_set(ACUCOMMENT, $1); }
+	|	FTSYMBOLS		{ option_set(FTSYMBOLS, $1); }
+	| 	FNO_THEADER		{ option_set(FNO_THEADER, $1); }
+	|  	FNO_TMESSAGES		{ option_set(FNO_TMESSAGES, $1); }
+	| 	FNO_TSOURCE		{ option_set(FNO_TSOURCE, $1); }
+	|	XREF			{ option_set(XREF, $1); }
+		;
 
 option_arg:
-		I option_arg_value
-	|	LINK option_arg_value
-	| 	LIB option_arg_value
-	| 	D option_arg_value
-	|	EXT option_arg_value
-		{
-		    if( !option_set($1, yytext, optarg) ) {
-			warnx("could not set option '%s'", yytext);
-		    }
-		}
-	;
+		I VALUE			{ option_arg_set(I, $1, $2); }
+	|	LINK VALUE		{ option_arg_set(LINK, $1, $2); }
+	| 	LIB VALUE		{ option_arg_set(LIB, $1, $2); }
+	| 	D VALUE			{ option_arg_set(D, $1, $2); }
+	|	EXT VALUE		{ option_arg_set(EXT, $1, $2); }
+		;
 
-option_arg_value:
-		VALUE
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-	;
 option_eq_arg:
-		STD std 
-	| 	FSIGN fsign
-	| 	FFOLD_COPY ffold_copy
-	|	SAVE_TEMPS save_temps
-	|	TLINES tlines
-		{
-		    if( !option_set($1, yytext, optarg) ) {
-			warnx("could not set option '%s'", yytext);
-		    }
-		}
-	;
+		STD EQ std		{ option_arg_set(STD , $1, $2); }
+	| 	FSIGN EQ fsign		{ option_arg_set(FSIGN, $1, $2); }
+	| 	FFOLD_COPY EQ ffold_copy { option_arg_set(FFOLD_COPY, $1, $2); }
+	|	SAVE_TEMPS EQ VALUE	{ option_arg_set(SAVE_TEMPS, $1, $2); }
+	|	TLINES EQ INTEGER	{ option_arg_set(TLINES, $1, $2); }
+		;
 
-std :
+std:
 		COBOL85
 	|  	XOPEN
 	|  	COBOL2002
@@ -124,51 +129,23 @@ std :
 	|  	ACU
 	|  	RM_STRICT
 	|  	RM
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-;
+		;
 
 fsign:
 		ASCII
 	| 	EBCDIC
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-		
 	;
 
 ffold_copy:
 		LOWER
 	| 	UPPER
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-
-	;
-
-save_temps:
-		VALUE
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-
-	;
-tlines:
-		INTEGER
-		{
-		    assert(strlen(yytext) < sizeof(optarg));
-		    strcpy(optarg, yytext);
-		}
-
 	;
 
 warning:
 		WARNING warning_type
+		{
+		    warning_set(WARNING, $1);
+		}
 		;
 
 warning_type:
@@ -186,16 +163,12 @@ warning_type:
 	| 	TERMINATOR
 	| 	TRUNCATE
 	| 	UNREACHABLE 
-		{
-		    bool yn = false;
-		    if( yytext == strstr("no-", yytext) ) {
-			yn = true;
-			yytext += 3;
-		    }
-		    if( !warning_set($1, yn, yytext) ) {
-			warnx("could not set warning '%s %s'",
-			      yytext, yn? "on" : "off");
-		    }
-		}
-		    
 	;
+%%
+
+static void
+yyerror (const char message[])
+{
+ warnx ("opt_parse: %s\n", message);
+}
+		
