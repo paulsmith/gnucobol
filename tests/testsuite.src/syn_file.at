@@ -359,24 +359,116 @@ AT_DATA([prog.cob], [
        ENVIRONMENT      DIVISION.
        INPUT-OUTPUT     SECTION.
        FILE-CONTROL.
+       SELECT TEST-FILE  ASSIGN       "./TEST-FILE"
+                         ORGANIZATION IS SEQUENTIAL.
+       SELECT TEST-FILE2 ASSIGN       "./TEST-FILE"
+                         ORGANIZATION IS LINE SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       FD TEST-FILE2.
+       01 TEST-REC2     PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  INPUT TEST-FILE TEST-FILE2
+           START TEST-FILE  KEY EQUAL TEST-REC
+           END-START
+           START TEST-FILE2 KEY EQUAL TEST-REC2
+           END-START
+           CLOSE TEST-FILE TEST-FILE2
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:19: error: START not allowed on SEQUENTIAL files
+prog.cob:21: error: START not allowed on SEQUENTIAL files
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([OPEN SEQUENTIAL file REVERSED])
+AT_KEYWORDS([file])
+
+# FIXME: only allowed for INPUT + sequential files (currently not checked).
+# If added we likely can allow this for LINE SEQUENTIAL, too.
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
        SELECT TEST-FILE ASSIGN       "./TEST-FILE"
-                        ORGANIZATION IS LINE SEQUENTIAL.
+                        ORGANIZATION IS SEQUENTIAL.
        DATA             DIVISION.
        FILE             SECTION.
        FD TEST-FILE.
        01 TEST-REC      PIC X(4).
        PROCEDURE        DIVISION.
-           OPEN  INPUT TEST-FILE.
-           START TEST-FILE KEY EQUAL TEST-REC
-           END-START.
-           CLOSE TEST-FILE.
+           OPEN  INPUT TEST-FILE
+           READ TEST-FILE NEXT
+           END-READ
+           CLOSE TEST-FILE
+           OPEN  INPUT TEST-FILE REVERSED
+           READ TEST-FILE NEXT
+           END-READ
+           CLOSE TEST-FILE
+           OPEN  INPUT TEST-FILE WITH LOCK REVERSED
+           READ TEST-FILE NEXT
+           END-READ
+           CLOSE TEST-FILE
            STOP RUN.
 ])
 
-## TO-DO: Change error to "only START FIRST or START LAST allowed on SEQUENTIAL
-## files".
-AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:15: error: START not allowed on SEQUENTIAL files
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:18: warning: OPEN REVERSED is not implemented
+prog.cob:22: warning: OPEN REVERSED is not implemented
+])
+
+# note: as soon as implemented: won't be obsolete in GnuCOBOL, but leave message for now...
+AT_CHECK([$COMPILE_ONLY -Werror=obsolete prog.cob], [1], [],
+[prog.cob:18: error [[-Werror]]: OPEN REVERSED is obsolete in GnuCOBOL
+prog.cob:22: error [[-Werror]]: OPEN REVERSED is obsolete in GnuCOBOL
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([OPEN SEQUENTIAL file NO REWIND])
+AT_KEYWORDS([file])
+
+# FIXME: only allowed for INPUT/OUTPUT sequential files (currently not checked).
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       ENVIRONMENT      DIVISION.
+       INPUT-OUTPUT     SECTION.
+       FILE-CONTROL.
+       SELECT TEST-FILE ASSIGN       "./TEST-FILE"
+                        ORGANIZATION IS SEQUENTIAL.
+       DATA             DIVISION.
+       FILE             SECTION.
+       FD TEST-FILE.
+       01 TEST-REC      PIC X(4).
+       PROCEDURE        DIVISION.
+           OPEN  OUTPUT TEST-FILE NO REWIND
+           WRITE TEST-REC FROM "tEsT"
+           END-WRITE
+           WRITE TEST-REC FROM "TeSt"
+           END-WRITE
+           CLOSE TEST-FILE WITH NO REWIND
+           OPEN  INPUT TEST-FILE WITH LOCK WITH NO REWIND
+           READ TEST-FILE NEXT  *> should get EOF
+           END-READ
+           CLOSE TEST-FILE
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:14: warning: OPEN WITH NO REWIND is not implemented
+prog.cob:20: warning: OPEN WITH NO REWIND is not implemented
 ])
 
 AT_CLEANUP

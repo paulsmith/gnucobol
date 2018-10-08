@@ -12669,13 +12669,12 @@ _open_sharing:
 
 _open_option:
   /* empty */			{ $$ = NULL; }
-| _with NO REWIND		{ $$ = NULL; }
 | lock_allowing		{ $$ = $1; }
-| REVERSED
-  {
-	(void)cb_verify (CB_OBSOLETE, "REVERSED");
-	$$ = NULL;
-  }
+| open_option_sequential { $$ = NULL; }
+/* note: RM/COBOL allow lock together with the other options,
+         most (all?) other dialects allow only one of them
+		 extra rule to possibly cater for this later */
+| lock_allowing open_option_sequential	{ $$ = $1; }
 ;
 
 lock_allowing:
@@ -12710,6 +12709,29 @@ allowing_all:
   WRITERS
 | UPDATERS
 | ALL
+;
+
+open_option_sequential:
+  _with NO REWIND
+  {
+	/* FIXME: only allow for sequential files */
+	/* FIXME: only allow with INPUT or OUTPUT */
+	CB_PENDING ("OPEN WITH NO REWIND");
+	$$ = NULL;
+  }
+| REVERSED
+  {
+	/* FIXME: only allow for sequential / line-sequential files */
+	/* FIXME: only allow with INPUT */
+	/* FIXME: add actual compiler configuration */
+	if (cb_warn_obsolete == COBC_WARN_AS_ERROR) {
+		(void)cb_verify (CB_OBSOLETE, "OPEN REVERSED");
+	} else {
+		/* FIXME: set file attribute */
+		CB_PENDING ("OPEN REVERSED");
+	};
+	$$ = NULL;
+  }
 ;
 
 

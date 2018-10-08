@@ -558,7 +558,6 @@ cb_verify_x (cb_tree x, const enum cb_support tag, const char *feature)
  * current position is used for raising warning/errors
  * \returns	1 = ok/warning/obsolete, 0 = skip/ignore/error/unconformable
  */
-
 unsigned int
 cb_verify (const enum cb_support tag, const char *feature)
 {
