@@ -3544,9 +3544,13 @@ AT_DATA([prog.cob], [           TITLE "GnuCOBOL lists IBM"
        DATA             DIVISION.
            SKIP3
        WORKING-STORAGE  SECTION.
+       01  TITLE-01          PIC X(2).
+       01  TITLE-02          PIC X(2).
            TITLE "here goes the code"
        PROCEDURE        DIVISION.
        EJECT
+           MOVE SPACE TO TITLE-01
+                         TITLE-02.
            STOP RUN.
 ])
 
@@ -3570,16 +3574,20 @@ LINE    PG/LN  A...B............................................................
 
 
 000008         WORKING-STORAGE  SECTION.
+000009         01  TITLE-01          PIC X(2).
+000010         01  TITLE-02          PIC X(2).
 here goes the code      prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0002
 
 LINE    PG/LN  A...B............................................................
 
-000010         PROCEDURE        DIVISION.
+000012         PROCEDURE        DIVISION.
 here goes the code      prog.cob             DDD MMM dd HH:MM:SS YYYY  Page 0003
 
 LINE    PG/LN  A...B............................................................
 
-000012             STOP RUN.
+000014             MOVE SPACE TO TITLE-01
+000015                           TITLE-02.
+000016             STOP RUN.
 
 
 0 warnings in compilation group

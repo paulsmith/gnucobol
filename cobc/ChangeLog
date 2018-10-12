@@ -1,4 +1,9 @@
 
+2018-10-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l: fixed TITLE being consumed as statement when actually starting
+	  a user defined word
+
 2018-10-08  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: warn about unimplemented OPEN REVERSED / WITH NO REWIND,

@@ -469,7 +469,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 	}
 }
 
-^[ ]*"TITLE"	{
+^[ ]*"TITLE"[ ,;\n]	{
 	/* This word can either be a listing-directive statement,
 	   a reserved word, or a user-defined word...
 	   some implementations (dis-)allow the (optional) "."
