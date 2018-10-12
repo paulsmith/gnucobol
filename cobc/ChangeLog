@@ -233,6 +233,11 @@
 	* parser.y, reserved.c, tree.c, tree.h: added intrinsic functions
 	  CONTENT-LENGTH and CONTENTS-OF
 
+2018-06-20  Ron Norman <rjn@inglenet.com>
+
+	* codgen.c: emit code for 'Default Error Handler' in nested
+	  subroutines when the main module has GLOBAL files, fixing bug #87
+
 2018-06-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c: added POS (only reserved for acu and default)

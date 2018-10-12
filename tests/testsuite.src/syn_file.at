@@ -2041,3 +2041,42 @@ prog.cob:67: warning: WITH MASS-UPDATE is not implemented
 #prog.cob:67: warning: WITH MASS-UPDATE is not implemented
 #])
 AT_CLEANUP
+
+
+AT_SETUP([GLOBAL FD nested progam])
+AT_KEYWORDS([GLOBAL-FD])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT f ASSIGN "foo.dat"
+               ORGANIZATION INDEXED
+               RECORD KEY f-key.
+       
+       DATA DIVISION.
+       FILE SECTION.
+       FD  f                                   GLOBAL.
+       01  f-rec                               GLOBAL.
+           03  f-key                           PIC 9.
+       
+       PROCEDURE DIVISION.
+           CALL "output-statement".
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. output-statement.
+       
+       PROCEDURE DIVISION.
+           WRITE f-rec.
+           END PROGRAM output-statement.
+       END PROGRAM prog.
+])
+
+# note: we actually want to check codegen -> C compilation here
+AT_CHECK([$COMPILE -std=cobol2002 prog.cob], [0], [], [])
+
+AT_CLEANUP
+

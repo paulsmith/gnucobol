@@ -166,6 +166,7 @@ static struct cb_label		*last_section = NULL;
 static unsigned char		*litbuff = NULL;
 static int			litsize = 0;
 
+static unsigned int		has_global_file = 0;
 static unsigned int		needs_exit_prog = 0;
 static unsigned int		needs_unifunc = 0;
 static unsigned int		need_save_exception = 0;
@@ -10654,7 +10655,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 	output (";\n");
 
 	/* Error handlers */
-	if (prog->file_list || prog->flag_gen_error) {
+	if (prog->file_list
+	 || prog->flag_gen_error
+	 || has_global_file) {
 		output_error_handler (prog);
 	}
 
@@ -11945,6 +11948,11 @@ codegen (struct cb_program *prog, const int subsequent_call)
 	if (prog->next_program) {
 		cp = current_program;
 		current_program = prog->next_program;
+		if (cp->flag_file_global && current_program->nested_level) {
+			has_global_file = 1;
+		} else {
+			has_global_file = 0;
+		}
 		codegen (prog->next_program, 1);
 		current_program = cp;
 		return;
