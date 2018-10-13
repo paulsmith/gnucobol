@@ -3429,7 +3429,7 @@ cb_resolve_debug_refs (struct cb_program *prog, int size)
 			}
 			break;
 		case CB_TAG_CD:
-			if (CB_CD (v)->record && CB_FIELD (CB_CD (v)->record)->size > size) {
+			if (CB_CD (v)->record && CB_CD (v)->record->size > size) {
 				size = CB_FIELD (v)->size;
 			}
 			break;
