@@ -703,10 +703,10 @@ create_implicit_picture (struct cb_field *f)
 
 	if (f->storage == CB_STORAGE_SCREEN) {
 		if (f->screen_from) {
-			size_implied = (int)CB_FIELD_PTR (f->screen_from)->size;
+			size_implied = cb_field_size (f->screen_from);
 			is_numeric = CB_TREE_CATEGORY (f->screen_from) == CB_CATEGORY_NUMERIC;
 		} else if (f->screen_to) {
-			size_implied = (int)CB_FIELD_PTR (f->screen_to)->size;
+			size_implied = cb_field_size (f->screen_to);
 			is_numeric = CB_TREE_CATEGORY (f->screen_to) == CB_CATEGORY_NUMERIC;
 		} else if (first_value) {
 			/* done later*/
@@ -714,6 +714,12 @@ create_implicit_picture (struct cb_field *f)
 			f->flag_no_field = 1;
 			f->pic = CB_PICTURE (cb_build_picture ("X"));
 			return 0;
+		}
+
+		if (size_implied == -1) {
+			cb_error_x (x, _("PICTURE clause required for '%s'"),
+				    cb_name (x));
+			return 1;
 		}
 
 		if (is_numeric) {
