@@ -7967,8 +7967,10 @@ screen_description:
   /* entry for error recovery */
 | level_number error TOK_DOT
   {
-	/* Free tree associated with level number */
-	cobc_parse_free ($1);
+	/*
+	  Tree associated with level number has already been freed; we don't
+	  need to do anything here.
+	*/
 	yyerrok;
 	cb_unput_dot ();
 	check_pic_duplicate = 0;
@@ -12806,14 +12808,14 @@ _end_perform:
 end_perform_or_dot:
   END_PERFORM
   {
-	TERMINATOR_CLEAR ($-4, PERFORM);
+	TERMINATOR_CLEAR ($-3, PERFORM);
   }
 | TOK_DOT
   {
 	if (cb_relaxed_syntax_checks) {
-		TERMINATOR_WARNING ($-4, PERFORM);
+		TERMINATOR_WARNING ($-3, PERFORM);
 	} else {
-		TERMINATOR_ERROR ($-4, PERFORM);
+		TERMINATOR_ERROR ($-3, PERFORM);
 	}
 	/* Put the dot token back into the stack for reparse */
 	cb_unput_dot ();

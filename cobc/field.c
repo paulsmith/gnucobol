@@ -703,9 +703,15 @@ create_implicit_picture (struct cb_field *f)
 
 	if (f->storage == CB_STORAGE_SCREEN) {
 		if (f->screen_from) {
+			if (f->screen_from == cb_error_node) {
+				return 1;
+			}
 			size_implied = cb_field_size (f->screen_from);
 			is_numeric = CB_TREE_CATEGORY (f->screen_from) == CB_CATEGORY_NUMERIC;
 		} else if (f->screen_to) {
+			if (f->screen_to == cb_error_node) {
+				return 1;
+			}
 			size_implied = cb_field_size (f->screen_to);
 			is_numeric = CB_TREE_CATEGORY (f->screen_to) == CB_CATEGORY_NUMERIC;
 		} else if (first_value) {

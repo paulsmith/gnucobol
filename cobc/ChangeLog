@@ -1,4 +1,12 @@
 
+2018-10-13  Edward Hart <edward.dan.hart@gmail.com>
+
+	* field.c (create_implicit_picture): handle case where f->screen_from or
+	  f->screen_to are error nodes.
+	* parser.y (screen_description): prevent double free of level-number
+	  field in error handling.
+	* parser.y (perform_body): fixed internal error with empty PERFORM.
+
 2018-10-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* pplex.l: fixed TITLE being consumed as statement when actually starting

@@ -792,3 +792,25 @@ AT_CHECK([$COMPILE_ONLY -fregister=LIN,COL prog.cob], [0], [], [])
 
 AT_CLEANUP
 
+AT_SETUP([Screen with invalid FROM clause])
+AT_KEYWORDS([screen])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       SCREEN SECTION.
+       01  bild.
+           05 LINE 24 COL 1 FROM message.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:8: error: syntax error, unexpected MESSAGE
+])
+AT_CHECK([$COMPILE_ONLY -fnot-reserved=MESSAGE prog.cob], [1], [],
+[prog.cob:8: error: 'message' is not defined, but is a reserved word in another dialect                                            
+prog.cob:8: warning: 'FILLER' has FROM, TO or USING without PIC; PIC will be implied                                              
+])
+
+AT_CLEANUP
