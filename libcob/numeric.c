@@ -218,11 +218,11 @@ cob_binary_get_sint64 (const cob_field * const f)
 		num_byte_memcpy ((unsigned char *)&n, f->data, f->size);
 		n = COB_BSWAP_64 (n);
 		/* Shift with sign */
-		n >>= 8 * fsiz;
+		n >>= (cob_s64_t)8 * fsiz;
 	} else {
 		num_byte_memcpy (((unsigned char *)&n) + fsiz, f->data, f->size);
 		/* Shift with sign */
-		n >>= 8 * fsiz;
+		n >>= (cob_s64_t)8 * fsiz;
 	}
 #else	/* WORDS_BIGENDIAN */
 	num_byte_memcpy ((unsigned char *)&n, f->data, f->size);
@@ -505,7 +505,7 @@ cob_decimal_get_ieee64dec (cob_decimal *d, cob_field *f, const int opt)
 		cob_set_exception (COB_EC_SIZE_OVERFLOW);
 		return cobglobptr->cob_exception_code;
 	}
-	expo = 398 - d->scale;
+	expo = (cob_u64_t)398 - d->scale;
 
 	data = 0;
 	mpz_export (&data, NULL, -1, (size_t)8, COB_MPZ_ENDIAN, (size_t)0, d->value);
@@ -624,7 +624,7 @@ cob_decimal_get_ieee128dec (cob_decimal *d, cob_field *f, const int opt)
 		cob_set_exception (COB_EC_SIZE_OVERFLOW);
 		return cobglobptr->cob_exception_code;
 	}
-	expo = 6176 - d->scale;
+	expo = (cob_u64_t)6176 - d->scale;
 
 	data[0] = 0;
 	data[1] = 0;

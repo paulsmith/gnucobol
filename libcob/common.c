@@ -5894,7 +5894,7 @@ set_config_val (char *value, int pos)
 	|| (data_type & ENV_SIZE) ) {				/* Size: integer with K, M, G */
 		for (; *ptr != 0 && (isdigit ((unsigned char)*ptr) || *ptr == ' '); ptr++) {
 			if (*ptr != ' ') {
-				numval = (numval * 10) + (*ptr - '0');
+				numval = (numval * 10) + ((cob_s64_t)*ptr - '0');
 			}
 		}
 		if ((data_type & ENV_SIZE)			/* Size: any K, M, G */
@@ -6144,6 +6144,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 			sprintf (value, "0x%02X", *(char *)data);
 		}
 	}
+	value[COB_MEDIUM_MAX] = 0;	/* fix warning */
 
 	if (gc_conf[pos].enums) {		/* Translate 'word' into alternate 'value' */
 		for (i = 0; gc_conf[pos].enums[i].match != NULL; i++) {
@@ -6155,6 +6156,7 @@ get_config_val (char *value, int pos, char *orgvalue)
 				strcpy (value, gc_conf[pos].enums[i].match);
 				if (strcmp (value, "not set") != 0) {
 					snprintf (value, COB_MEDIUM_MAX, _("not set"));
+					value[COB_MEDIUM_MAX] = 0;	/* fix warning */
 				}
 				break;
 			}

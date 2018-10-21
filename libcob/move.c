@@ -153,7 +153,7 @@ cob_binary_mget_sint64 (const cob_field * const f)
 			own_byte_memcpy ((unsigned char *)&n, f->data, f->size);
 			n = COB_BSWAP_64 (n);
 			/* Shift with sign */
-			n >>= 8 * fsiz;
+			n >>= (cob_s64_t)8 * fsiz;
 		} else {
 			own_byte_memcpy (((unsigned char *)&n) + fsiz, f->data, f->size);
 			n = COB_BSWAP_64 (n);
@@ -162,7 +162,7 @@ cob_binary_mget_sint64 (const cob_field * const f)
 		if (COB_FIELD_HAVE_SIGN (f)) {
 			own_byte_memcpy (((unsigned char *)&n) + fsiz, f->data, f->size);
 			/* Shift with sign */
-			n >>= 8 * fsiz;
+			n >>= (cob_s64_t)8 * fsiz;
 		} else {
 			own_byte_memcpy ((unsigned char *)&n, f->data, f->size);
 		}

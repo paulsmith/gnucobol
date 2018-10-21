@@ -2041,7 +2041,7 @@ relative_start (cob_file *f, const int cond, cob_field *k)
 		if (kindex < 0) {
 			break;
 		}
-		off = kindex * relsize;
+		off = (off_t)kindex * relsize;
 		if (off >= st.st_size) {
 			break;
 		}
@@ -2102,7 +2102,7 @@ relative_read (cob_file *f, cob_field *k, const int read_opts)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 	relsize = f->record_max + sizeof (f->record->size);
-	off = relnum * relsize;
+	off = (off_t)relnum * relsize;
 	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ||
 	    read (f->fd, &f->record->size, sizeof (f->record->size))
 		   != sizeof (f->record->size)) {
@@ -2144,7 +2144,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	relsize = f->record_max + sizeof (f->record->size);
+	relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
@@ -2255,7 +2255,7 @@ relative_write (cob_file *f, const int opt)
 		if (kindex < 0) {
 			return COB_STATUS_24_KEY_BOUNDARY;
 		}
-		off = (off_t) (relsize * kindex);
+		off = ((off_t)relsize * kindex);
 		if (lseek (f->fd, off, SEEK_SET) == (off_t)-1) {
 			return COB_STATUS_24_KEY_BOUNDARY;
 		}
@@ -2310,7 +2310,7 @@ relative_rewrite (cob_file *f, const int opt)
 		if (relnum < 0) {
 			return COB_STATUS_24_KEY_BOUNDARY;
 		}
-		off = relnum * relsize;
+		off = (off_t)relnum * relsize;
 		if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ||
 		    read (f->fd, &f->record->size, sizeof (f->record->size))
 			   != sizeof (f->record->size)) {
@@ -2344,7 +2344,7 @@ relative_delete (cob_file *f)
 		return COB_STATUS_24_KEY_BOUNDARY;
 	}
 	relsize = f->record_max + sizeof (f->record->size);
-	off = relnum * relsize;
+	off = (off_t)relnum * relsize;
 	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1
 	 || read (f->fd, &f->record->size, sizeof (f->record->size))
 		 != sizeof (f->record->size)) {
