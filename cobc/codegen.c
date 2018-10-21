@@ -7940,7 +7940,6 @@ output_stmt (cb_tree x)
 static int
 output_file_allocation (struct cb_file *f)
 {
-
 	if (f->flag_global) {
 #if	0	/* RXWRXW - Global status */
 		if (f->file_status) {
@@ -7973,6 +7972,16 @@ output_file_allocation (struct cb_file *f)
 			CB_PREFIX_FILE, f->cname);
 		output_local ("static unsigned char\t%s%s_status[4];\n",
 			CB_PREFIX_FILE, f->cname);
+	}
+	if (f->organization == COB_ORG_RELATIVE
+	 && f->key == NULL) {
+		int i = lookup_attr (COB_TYPE_NUMERIC_DISPLAY, 0, 0, 0, NULL, 0);
+		output_local ("static unsigned char\t%s%s_recnum[12+1] = \"000000000000\";\n",
+			CB_PREFIX_SEQUENCE, f->cname);
+		output_local ("static cob_field %s%s_recnum = { 12, (cob_u8_ptr)%s%s_recnum, &%s%d };\n",
+			CB_PREFIX_FIELD, f->cname,
+			CB_PREFIX_SEQUENCE, f->cname,
+			CB_PREFIX_ATTR, i);
 	}
 
 	if (f->code_set) {
@@ -8040,7 +8049,12 @@ output_file_initialization (struct cb_file *f)
 		nkeys = 1;
 		output_prefix ();
 		output ("%s%s->field = ", CB_PREFIX_KEYS, f->cname);
-		output_param (f->key, -1);
+		if (f->organization == COB_ORG_RELATIVE
+		 && f->key == NULL) {
+			output ("&%s%s_recnum", CB_PREFIX_FIELD, f->cname);
+		} else {
+			output_param (f->key, -1);
+		}
 		output (";\n");
 		output_prefix ();
 		output ("%s%s->tf_duplicates = 0;\n", CB_PREFIX_KEYS, f->cname);
@@ -8128,6 +8142,7 @@ output_file_initialization (struct cb_file *f)
 		     f->cname, f->record_min);
 	output_line ("%s%s->record_max = %d;", CB_PREFIX_FILE,
 		     f->cname, f->record_max);
+
 	if (f->organization == COB_ORG_RELATIVE
 	 || f->organization == COB_ORG_INDEXED) {
 		output_line ("%s%s->nkeys = %d;", CB_PREFIX_FILE,
@@ -8191,6 +8206,8 @@ output_file_initialization (struct cb_file *f)
 	output_line ("%s%s->open_mode = 0;", CB_PREFIX_FILE, f->cname);
 	output_line ("%s%s->flag_optional = %d;", CB_PREFIX_FILE, f->cname,
 		     f->optional);
+	output_line ("%s%s->flag_line_adv = %d;", CB_PREFIX_FILE, f->cname,
+		     f->flag_line_adv);
 	features = 0;
 	if (f->file_status) {
 		features |= COB_SELECT_FILE_STATUS;
@@ -11589,6 +11606,7 @@ static void
 output_function_prototypes (struct cb_program *prog)
 {
 	struct cb_program	*cp;
+	struct cb_file		*f;
 	cb_tree			entry;
 	cb_tree			entry_param;
 	cb_tree			prog_param;
@@ -11674,6 +11692,23 @@ output_function_prototypes (struct cb_program *prog)
 		}
 
 		output (");\n");
+
+		/* prototype for file specific extfh function */
+		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
+			f =  CB_FILE (CB_VALUE (l));
+			/* FIXME: add to an external call chain instead, multiple files
+			          may use the same but not-default function */
+			if (f->extfh
+			 && strcmp (cb_call_extfh, CB_CONST (f->extfh)->val) != 0) {
+				output ("extern int %s();\n", CB_CONST (f->extfh)->val);
+			}
+		}
+
+	}
+
+	/* prototype for general extfh function */
+	if (cb_call_extfh) {
+		output ("extern int %s();\n",cb_call_extfh);
 	}
 
 	output ("\n");

@@ -6846,8 +6846,13 @@ cb_emit_close (cb_tree file, cb_tree opt)
 				_("%s not allowed on %s files"), "CLOSE", "SORT");
 	}
 
-	cb_emit (CB_BUILD_FUNCALL_4 ("cob_close", file,
-				     f->file_status, opt, cb_int0));
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_5 ("cob_extfh_close", f->extfh, file,
+					     f->file_status, opt, cb_int0));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_4 ("cob_close", file,
+					     f->file_status, opt, cb_int0));
+	}
 
 	/* Check for file debugging */
 	if (current_program->flag_debugging &&
@@ -6912,8 +6917,13 @@ cb_emit_delete (cb_tree file)
 		current_statement->flag_callback = 1;
 	}
 
-	cb_emit (CB_BUILD_FUNCALL_2 ("cob_delete", file,
-				     f->file_status));
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_3 ("cob_extfh_delete", f->extfh, file,
+					     f->file_status));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_2 ("cob_delete", file,
+					     f->file_status));
+	}
 }
 
 void
@@ -9969,8 +9979,13 @@ cb_emit_open (cb_tree file, cb_tree mode, cb_tree sharing)
 		}
 	}
 
-	cb_emit (CB_BUILD_FUNCALL_4 ("cob_open", file, mode,
-		 sharing, f->file_status));
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_5 ("cob_extfh_open", f->extfh, file, mode,
+			 sharing, f->file_status));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_4 ("cob_open", file, mode,
+			 sharing, f->file_status));
+	}
 
 	/* Check for file debugging */
 	if (current_program->flag_debugging &&
@@ -10131,26 +10146,44 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 		if (key) {
 			cb_warning (COBC_WARN_FILLER, _("KEY ignored with sequential READ"));
 		}
-		cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
-			 f->file_status,
-			 cb_int (read_opts)));
+		if (f->extfh) {
+			cb_emit (CB_BUILD_FUNCALL_4 ("cob_extfh_read_next", f->extfh, file,
+				 f->file_status, cb_int (read_opts)));
+		} else {
+			cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
+				 f->file_status, cb_int (read_opts)));
+		}
 	} else {
 		/* READ */
 		/* DYNAMIC with [NOT] AT END */
 		if (f->access_mode == COB_ACCESS_DYNAMIC &&
 		    current_statement->handler_type == AT_END_HANDLER) {
 			read_opts |= COB_READ_NEXT;
-			cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
-				 f->file_status,
-				 cb_int (read_opts)));
+			if (f->extfh) {
+				cb_emit (CB_BUILD_FUNCALL_4 ("cob_extfh_read_next", f->extfh, file,
+					 f->file_status, cb_int (read_opts)));
+			} else {
+				cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
+					 f->file_status, cb_int (read_opts)));
+			}
 		} else if (key || f->key) {
-			cb_emit (CB_BUILD_FUNCALL_4 ("cob_read",
-				 file, key ? key : f->key,
-				 f->file_status, cb_int (read_opts)));
+			if (f->extfh) {
+				cb_emit (CB_BUILD_FUNCALL_5 ("cob_extfh_read", f->extfh,
+					 file, key ? key : f->key,
+					 f->file_status, cb_int (read_opts)));
+			} else {
+				cb_emit (CB_BUILD_FUNCALL_4 ("cob_read",
+					 file, key ? key : f->key,
+					 f->file_status, cb_int (read_opts)));
+			}
 		} else {
-			cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
-				 f->file_status,
-				 cb_int (read_opts)));
+			if (f->extfh) {
+				cb_emit (CB_BUILD_FUNCALL_4 ("cob_extfh_read_next", f->extfh, file,
+					 f->file_status, cb_int (read_opts)));
+			} else {
+				cb_emit (CB_BUILD_FUNCALL_3 ("cob_read_next", file,
+					 f->file_status, cb_int (read_opts)));
+			}
 		}
 	}
 	if (into) {
@@ -10316,8 +10349,13 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		cb_emit (cb_build_move (record, cb_debug_contents));
 		cb_emit (cb_build_debug_call (CB_FIELD_PTR (record)->debug_section));
 	}
-	cb_emit (CB_BUILD_FUNCALL_4 ("cob_rewrite", file, record,
-			cb_int (opts), f->file_status));
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_5 ("cob_extfh_rewrite", f->extfh, file, record,
+				cb_int (opts), f->file_status));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_4 ("cob_rewrite", file, record,
+				cb_int (opts), f->file_status));
+	}
 }
 
 /* RELEASE statement */
@@ -11064,8 +11102,13 @@ cb_emit_start (cb_tree file, cb_tree op, cb_tree key, cb_tree keylen)
 		current_statement->flag_callback = 1;
 	}
 
-	cb_emit (CB_BUILD_FUNCALL_5 ("cob_start", fl, op, cbtkey, keylen,
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_6 ("cob_extfh_start", f->extfh, fl, op, cbtkey, keylen,
 				     f->file_status));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_5 ("cob_start", fl, op, cbtkey, keylen,
+				     f->file_status));
+	}
 }
 
 /* STOP statement */
@@ -11315,8 +11358,13 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 	} else {
 		check_eop = cb_int0;
 	}
-	cb_emit (CB_BUILD_FUNCALL_5 ("cob_write", file, record, opt,
-				     f->file_status, check_eop));
+	if (f->extfh) {
+		cb_emit (CB_BUILD_FUNCALL_6 ("cob_extfh_write", f->extfh, file, record, opt,
+					     f->file_status, check_eop));
+	} else {
+		cb_emit (CB_BUILD_FUNCALL_5 ("cob_write", file, record, opt,
+					     f->file_status, check_eop));
+	}
 }
 
 cb_tree

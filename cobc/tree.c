@@ -3757,6 +3757,11 @@ build_file (cb_tree name)
 	p = make_tree (CB_TAG_FILE, CB_CATEGORY_UNKNOWN, sizeof (struct cb_file));
 	p->name = cb_define (name, CB_TREE (p));
 	p->cname = cb_to_cname (p->name);
+	if (cb_call_extfh) { 		/* Default EXTFH module to use */
+		p->extfh = make_constant (CB_CATEGORY_ALPHANUMERIC, cb_call_extfh);
+	} else {
+		p->extfh = NULL;
+	}
 
 	p->organization = COB_ORG_SEQUENTIAL;
 	p->access_mode = COB_ACCESS_SEQUENTIAL;

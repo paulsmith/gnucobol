@@ -3589,6 +3589,18 @@
 	* typeck.c (cb_emit_initialize): bug #84 check target for INITIALIZE,
 	  almost fixed as suggested by Edward Hard
 
+2015-04-14  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c: for RELATIVE files ACCESS SEQUENTIAL if no KEY is
+	  defined then an internal one is created. This was required as
+	  parts of fileio.c expect there to be a key field for RELATIVE
+	  files to hold the record number being processed.
+	* cobc.c, cobc.h, flag.def: new option -fcallfh (alias CIT compatibility:
+	  -use-extfh) with option function-name to include support for Micro Focus
+	  style EXTFH interface, see NEWS
+	* tree.c, tree.h (struct cb_file): added extfh parameter
+	* typeck.c: generate call to EXTFH depending on cb_file->extfh
+
 2015-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.c: load configuration file from COB_CONFIG_DIR if file cannot be

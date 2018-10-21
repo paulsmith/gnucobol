@@ -77,6 +77,13 @@
 
 	* common.h, intrinsic.c: Added CONTENT-LENGTH and CONTENTS-OF
 
+2018-06-18  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: Updates to the EXTFH logic 
+	   You can now actually compile using MF Visual COBOL and include the
+	   GnuCOBOL libcob as follows:
+	     cob -L/usr/local/lib -lcob -C "CALLFH=EXTFH" 
+
 2018-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: allow to override COB_EXPIMP, especially for allowing
@@ -641,6 +648,8 @@
 
 	* fileio.c (indexed_read) [WITH_DB]: check that the size of a record read
 	  is not larger than what the FD has defined, return status 43 to the READ.
+	* fileio.c: for the callable EXTFH interface, set f->file_version
+	  to COB_FILE_VERSION
 
 2017-04-18  Ron Norman <rjn@inglenet.com>
 
@@ -1045,6 +1054,12 @@
 	  LOCALE-TIME(-FROM-SECONDS).
 	* intrinsic.c: renamed "xqtyear" variables to "current_year".
 
+2016-03-07  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: fixed EXTFH to save/restore 'opts' value for some
+	  READ/WRITE operations. Without this it was not writing LF
+	  at end of line sequential records
+
 2016-02-21  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (set_config_val): removed use of cob_strcat for output of
@@ -1054,6 +1069,10 @@
 
 	* screenio.c (set_default_line_column): fixed bug #202 where screens
 	  were displayed at the cursor position when no LINE or COL was given.
+
+2016-02-01  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: fixed to call cob_set_exception for the EXTFH interface
 
 2016-01-31  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -1208,6 +1227,11 @@
 	* common.h: cast PATHSEPC PATHSEPS SLASH_INT SLASH_STR with appropriate type
 	  and rename the first three to PATHSEP_CHAR PATHSEP_STR SLASH_CHAR
 
+2015-09-16  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c: fixed coding error related to support for EXTFH
+	  It was returning the index number as 1 relative instead of 0 relative
+
 2015-08-21  Edward Hart <edward.dan.hart@gmail.com>
 
 	* screenio.c: implemented LOWLIGHT.
@@ -1323,6 +1347,13 @@
 	  Also REPORT: PLUS, STEP on OCCURS and multi COLUMN numbers
 	  Runtime option: col_just_lrc if set to false will disable
 	  justification of LEFT/RIGHT/CENTER data with the field
+
+2015-04-14  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c, common.h: updated to include support to a callable
+	  EXTFH interface provided by several compilers including Micro Focus
+	  This allows users to insert an external file handler while retaining
+	  all of the normal COBOL I/O functions.
 
 2015-04-14  Simon Sobisch <simonsobisch@gnu.org>
 

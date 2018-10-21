@@ -194,6 +194,7 @@ const char		*cb_source_file = NULL;
 const char		*cb_cobc_build_stamp = NULL;
 const char		*demangle_name = NULL;
 const char		*cb_storage_file_name = NULL;
+const char		*cb_call_extfh = NULL;
 struct cb_text_list	*cb_include_list = NULL;
 struct cb_text_list	*cb_intrinsic_list = NULL;
 struct cb_text_list	*cb_extension_list = NULL;
@@ -528,6 +529,7 @@ static const struct option long_options[] = {
 	{"A",			CB_RQ_ARG, NULL, 'A'},
 	{"P",			CB_OP_ARG, NULL, 'P'},
 	{"Xref",		CB_NO_ARG, NULL, 'X'},
+	{"use-extfh",		CB_RQ_ARG, NULL, 9},	/* This is used by COBOL-IT; Same is -fcallfh= */
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
@@ -3348,6 +3350,11 @@ process_command_line (const int argc, char **argv)
 
 		case 8:
 			cobc_def_dump_opts (cob_optarg);
+			break;
+
+		case 9:
+			/* -fcallfh=<func> : function for EXTFH */
+			cb_call_extfh = cobc_main_strdup (cob_optarg);
 			break;
 
 		case 10:

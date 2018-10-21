@@ -33,6 +33,15 @@ NEWS - user visible changes				-*- outline -*-
    to set/get special runtime options (currently FILE * for trace and printer
    output) or to reload the runtime configuration after changing environment
 
+** file handling: include support for a callable EXTFH interface also provided
+   by several compilers including Micro Focus
+   This allows users to insert an external file handler while retaining
+   all of the normal COBOL I/O functions with a possible callback to libcob.
+   To have the compiled program call `yourfh()` for file I/O use:
+   `cobc -fcallfh=yourfh`
+   In turn `yourfh()` may call `EXTFH()` to use I/O functions from GnuCOBOL.
+
+
 * Changed cobc options:
 
 ** The option -debug (runtime checks) no longer implies -ftrace (option to

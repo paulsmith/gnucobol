@@ -952,6 +952,7 @@ struct cb_file {
 	cb_tree			latfoot;		/* LINAGE FOOTING */
 	cb_tree			lattop;			/* LINAGE TOP */
 	cb_tree			latbot;			/* LINAGE BOTTOM */
+	cb_tree			extfh;			/* EXTFH module to call for I/O */
 	struct cb_label		*handler;		/* Error handler */
 	struct cb_program	*handler_prog;		/* Prog where defined */
 	struct cb_label		*debug_section;		/* DEBUG SECTION */
