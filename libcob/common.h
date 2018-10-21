@@ -2038,17 +2038,27 @@ typedef struct {
  *  structure unless required by changes to MF COBOL.
 ****************************/
 
-#if defined(__MINGW64__) || defined(__x86_64__) || defined(_LP64) || defined(__64BIT__) || defined(__LP64__) || defined(HPUX_IA64) || defined(__s390x__)
-#define PTRFILLER(n)
-#else
-#define PTRFILLER(n)  char n[4];
-#endif
-#
-/*******************************************************/
+#define pointer_8byte(type, name)	\
+	union {					\
+		type	*ptr_name;			\
+		char	filler[8];			\
+	} name
+
+/**********************************************************/
 /* Following is the 64-bit FCD (or also known as FCD3) */
-/* This is the only format used by MF Server Express   */
-/* for both 32 and 64 bit modes                        */
-/*******************************************************/
+/* This format is used at least for:                      */
+/* - MF Visual COBOL         (both 32 and 64 bit)         */
+/* - MF Developer Enterprise (both 32 and 64 bit)         */
+/* - MF Server Express       (64 bit)                     */
+/* - MF Studio Enterprise    (64 bit)                     */
+/*                                                        */
+/* The FCD2 format is currently not supported, it was     */
+/* used at least for                                      */
+/* - MF Server Express, Net Express  (32 bit)             */
+/* - MF Studio Enterprise            (32 bit)             */
+/*                                                        */
+/* MF says: FCD 1 is obsolete and should never be used    */
+/**********************************************************/
 typedef struct {
 	unsigned char	fileStatus[2];			/* I/O completion status */
 	unsigned char	fcdLen[2];			/* contains length of FCD */
@@ -2059,7 +2069,7 @@ typedef struct {
 #define ORG_SEQ			1
 #define ORG_INDEXED		2
 #define ORG_RELATIVE		3
-	unsigned char	accessFlags;			/* status byte & file access flags */
+	unsigned char	accessFlags;			/* status byte (bit 7) & file access flags (bits 0-6)*/
 #define ACCESS_USER_STAT	0x80	
 #define ACCESS_DYNAMIC		0x08
 #define ACCESS_RANDOM		0x04
@@ -2074,12 +2084,12 @@ typedef struct {
 #define REC_MODE_FIXED		0	
 #define REC_MODE_VARIABLE	1
 	unsigned char	fileFormat;			/* File format */
-#define MF_FF_DEFAULT		0x00
-#define MF_FF_CISAM		0x01
-#define MF_FF_LEVELII		0x02
-#define MF_FF_COBOL		0x03
-#define MF_FF_IDX4		0x04
-#define MF_FF_IDX8		0x08
+#define MF_FF_DEFAULT		0		/* Default format */
+#define MF_FF_CISAM		0x01		/* C-ISAM format */
+#define MF_FF_LEVELII		0x02	/* LEVEL II COBOL format */
+#define MF_FF_COBOL		0x03		/* IDXFORMAT"3" format */
+#define MF_FF_IDX4		0x04		/* IDXFORMAT"4" format */
+#define MF_FF_IDX8		0x08		/* IDXFORMAT"8" format */
 	unsigned char	deviceFlag;		
 	unsigned char	lockAction;		
 	unsigned char	compType;			/* data compression type */
@@ -2155,23 +2165,24 @@ typedef struct {
 	unsigned char	relByteAdrs[8];			/* 64-bit, relative byte address */
 	unsigned char	maxRelKey[8];			/* 64-bit, max relative key/Record num */
 	unsigned char	relKey[8];			/* 64-bit, (cur) relative key/Record num */
-	void		*fileHandle;			/* file handle */
-	PTRFILLER(fill1)
-	unsigned char	*recPtr;			/* Pointer to record area */
-	PTRFILLER(fill2)
-	char		*fnamePtr;			/* pointer to file name area */
-	PTRFILLER(fill3)
-	char		*idxNamePtr;			/* pointer to index name area */
-	PTRFILLER(fill4)
-	KDB		*kdbPtr;			/* pointer to key definition block */
-	PTRFILLER(fill5)
-	void		*colPtr;			/* pointer to colating sequence block */
-	PTRFILLER(fill6)
-	void		*fileDef;			/* pointer to filedef */
-	PTRFILLER(fill8)
-	void		*dfSortPtr;			/* pointer to DFSORT */
-	PTRFILLER(fill9)
+	pointer_8byte(void,	_fileHandle);			/* file handle */
+	pointer_8byte(unsigned char,	_recPtr);			/* pointer to record area */
+	pointer_8byte(char,	_fnamePtr);			/* pointer to file name area */
+	pointer_8byte(char,	_idxNamePtr);			/* pointer to index name area */
+	pointer_8byte(KDB,	_kdbPtr);			/* pointer to key definition block */
+	pointer_8byte(void,	_colPtr);			/* pointer to collating sequence block */
+	pointer_8byte(void,	_fileDef);			/* pointer to filedef */
+	pointer_8byte(void,	_dfSortPtr);			/* pointer to DFSORT */
 } FCD3;
+
+#define fileHandle	_fileHandle.ptr_name	/* EXTFH: file handle */
+#define recPtr		_recPtr.ptr_name	/* EXTFH: pointer to record area */
+#define fnamePtr	_fnamePtr.ptr_name		/* EXTFH: pointer to file name area */
+#define idxNamePtr	_idxNamePtr.ptr_name	/* EXTFH: pointer to index name area */
+#define kdbPtr		_kdbPtr.ptr_name 		/* EXTFH: pointer to key definition block */
+#define colPtr		_colPtr.ptr_name		/* EXTFH: pointer to collating sequence block */
+#define fileDef		_fileDef.ptr_name		/* EXTFH: pointer to filedef */
+#define dfSortPtr	_dfSortPtr.ptr_name		/* EXTFH: pointer to DFSORT */
 
 #define LSUCHAR(f)	((unsigned char*)(f))
 /* xxCOMPXn : Big Endian Binary data */
@@ -2264,41 +2275,6 @@ typedef struct {
 /*******************************/
 /* Functions in termio.c */
 
-COB_EXPIMP void cob_display(const int, const int, const int, ...);
-COB_EXPIMP void cob_dump_field (const int, const char *, cob_field *, const int, const int, ...);
-COB_EXPIMP void cob_print_field (FILE *, cob_field *, int, int );
-COB_EXPIMP void cob_accept(cob_field *);
-COB_EXPIMP void cob_field_int_display (cob_field *i, cob_field *f);
-
-/*******************************/
-/* Functions in fileio.c */
-
-COB_EXPIMP void cob_file_external_addr (const char *, 
-				 cob_file **, cob_file_key **, 
-				 const int nkeys, const int linage);
-COB_EXPIMP void cob_file_malloc (cob_file **, cob_file_key **, 
-				 const int nkeys, const int linage);
-COB_EXPIMP void cob_file_free   (cob_file **, cob_file_key **);
-
-COB_EXPIMP void cob_open(cob_file *, const int, const int, cob_field *);
-COB_EXPIMP void cob_close(cob_file *, cob_field *, const int, const int);
-COB_EXPIMP void cob_read(cob_file *, cob_field *, cob_field *, const int);
-COB_EXPIMP void cob_read_next(cob_file *, cob_field *, const int);
-COB_EXPIMP void cob_rewrite(cob_file *, cob_field *, const int, cob_field *);
-COB_EXPIMP void cob_delete(cob_file *, cob_field *);
-COB_EXPIMP void cob_start(cob_file *, const int, cob_field *,
-	cob_field *, cob_field *);
-COB_EXPIMP void cob_write(cob_file *, cob_field *, const int,
-	cob_field *, const unsigned int);
-
-COB_EXPIMP void cob_delete_file(cob_file *, cob_field *);
-COB_EXPIMP void cob_unlock_file(cob_file *, cob_field *);
-COB_EXPIMP void cob_commit(void);
-COB_EXPIMP void cob_rollback(void);
-
-/*******************************/
-/* Functions in termio.c */
-
 COB_EXPIMP void cob_display	(const int, const int, const int, ...);
 COB_EXPIMP void cob_dump_field	(const int, const char *, cob_field *, const int, const int, ...);
 COB_EXPIMP void cob_accept	(cob_field *);
@@ -2330,7 +2306,7 @@ COB_EXPIMP void cob_commit	(void);
 COB_EXPIMP void cob_rollback	(void);
 
 /*********************************************/
-/* Functions in fileio.c for EXTFH interface */
+/* EXTFH functions */
 
 COB_EXPIMP int	EXTFH		(unsigned char *opcode, FCD3 *fcd);
 COB_EXPIMP void	cob_extfh_open		(int (*callfh)(unsigned char *opcode, FCD3 *fcd),
