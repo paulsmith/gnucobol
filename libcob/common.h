@@ -1686,7 +1686,7 @@ COB_EXPIMP void	cob_set_location	(const char *, const unsigned int,
 					 const char *, const char *,
 					 const char *);
 COB_EXPIMP void	cob_trace_section	(const char *, const char *, const int);
-/* new functions from 2.3 on: */
+/* new functions from 3.0-dev on: */
 COB_EXPIMP void	cob_trace_sect		(const char *name);
 COB_EXPIMP void	cob_trace_para		(const char *name);
 COB_EXPIMP void	cob_trace_entry		(const char *name);

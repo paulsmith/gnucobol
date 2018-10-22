@@ -1712,7 +1712,7 @@ cob_cache_free (void *ptr)
 	}
 }
 
-/* cob_set_location is kept for backward compatibility, but should be eventually removed */
+/* cob_set_location is kept for backward compatibility (pre 3.0) */
 void
 cob_set_location (const char *sfile, const unsigned int sline,
 		  const char *csect, const char *cpara,
@@ -1780,7 +1780,7 @@ cob_trace_section (const char *para, const char *source, const int line)
 			cob_last_sfile = cob_strdup (source);
 			fprintf (cobsetptr->cob_trace_file, "Source:     '%s'\n", source);
 		}
-		if (COB_MODULE_PTR->module_name) {
+		if (COB_MODULE_PTR && COB_MODULE_PTR->module_name) {
 			s = COB_MODULE_PTR->module_name;
 		} else {
 			s = _("unknown");
@@ -1796,6 +1796,10 @@ cob_trace_section (const char *para, const char *source, const int line)
 }
 
 /* New routines for handling 'trace' follow */
+/* Note: As oposed to the old tracing these functions are only called
+         if the following vars are set:
+         COB_MODULE_PTR + ->module_stmt + ->module_sources
+*/
 static int
 cob_trace_prep (void)
 {
@@ -1828,7 +1832,7 @@ cob_trace_prep (void)
 	if (!cob_last_progid
 	 || strcmp (cob_last_progid, s)) {
 		cob_last_progid = s;
-		if (COB_MODULE_PTR && COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
+		if (COB_MODULE_PTR->module_type == COB_MODULE_TYPE_FUNCTION) {
 			fprintf (cobsetptr->cob_trace_file, "Function-Id: %s\n", cob_last_progid);
 		} else {
 			fprintf (cobsetptr->cob_trace_file, "Program-Id:  %s\n", cob_last_progid);

@@ -6,7 +6,7 @@
 2018-06-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobcinfo.sh: check that executables used actually do work
-	  efore using their output as content for the manual
+	  before using their output as content for the manual
 
 2018-06-21  Brian Tiffin <btiffin@gnu.org>
 
