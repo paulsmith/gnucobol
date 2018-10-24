@@ -1,4 +1,10 @@
 
+2018-10-22  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.guess, config.sub, install-sh, texinfo.tex:
+	  updated to recent version from
+	  http://git.savannah.gnu.org/cgit/gnulib.git/tree/build-aux/
+
 2018-06-04  Simon Sobisch <simonsobisch@gnu.org>
 
 	* ltmain.sh [WIN32, !GCC]: local fix for libtool issue #109514 to
