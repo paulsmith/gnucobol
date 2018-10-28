@@ -1,4 +1,8 @@
 
+2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.h.in, defaults.h.in: adjustments for OrangeC
+
 2018-10-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* makedist.bat: copy compiled msgid catalogs

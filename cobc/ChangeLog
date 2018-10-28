@@ -1,4 +1,8 @@
 
+2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c [__ORANGEC__]: adjustments of command line options
+
 2018-10-13  Edward Hart <edward.dan.hart@gmail.com>
 
 	* field.c (create_implicit_picture): handle case where f->screen_from or

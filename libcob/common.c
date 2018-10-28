@@ -378,6 +378,8 @@ static struct config_tbl gc_conf[] = {
 #define FUNC_NAME_IN_DEFAULT NUM_CONFIG + 1
 
 /* Local functions */
+static int		translate_boolean_to_int (const char* ptr);
+
 static int		set_config_val	(char *value, int pos);
 static char		*get_config_val	(char *value, int pos, char *orgvalue);
 static void		cob_dump_module (char *reason);
@@ -5847,6 +5849,33 @@ get_value (char *data, int len)
 	}
 }
 
+static int
+translate_boolean_to_int (const char* ptr)
+{
+	if (ptr == NULL || *ptr == 0) {
+		return 2;
+	}
+
+	if (*(ptr + 1) == 0 && isdigit ((unsigned char)*ptr)) {
+		return atoi (ptr);		/* 0 or 1 */
+	} else
+	if (strcasecmp (ptr, "true") == 0
+		|| strcasecmp (ptr, "t") == 0
+		|| strcasecmp (ptr, "on") == 0
+		|| strcasecmp (ptr, "yes") == 0
+		|| strcasecmp (ptr, "y") == 0) {
+		return 1;			/* True value */
+	} else
+	if (strcasecmp (ptr, "false") == 0
+		|| strcasecmp (ptr, "f") == 0
+		|| strcasecmp (ptr, "off") == 0
+		|| strcasecmp (ptr, "no") == 0
+		|| strcasecmp (ptr, "n") == 0) {
+		return 0;			/* False value */
+	}
+	return 2;
+}
+
 /* Set runtime setting with given value */
 static int					/* returns 1 if any error, else 0 */
 set_config_val (char *value, int pos)
@@ -5942,27 +5971,10 @@ set_config_val (char *value, int pos)
 		set_value (data, data_len, numval);
 
 	} else if ((data_type & ENV_BOOL)) {	/* Boolean: Yes/No, True/False,... */
-		numval = 2;
-		if (isdigit ((unsigned char)*ptr)) {
-			numval = atoi (ptr);		/* 0 or 1 */
-		} else
-		if (strcasecmp (ptr, "true") == 0
-		|| strcasecmp (ptr, "t") == 0
-		|| strcasecmp (ptr, "on") == 0
-		|| strcasecmp (ptr, "yes") == 0
-		|| strcasecmp (ptr, "y") == 0) {
-			numval = 1;			/* True value */
-		} else
-		if (strcasecmp (ptr, "false") == 0
-		|| strcasecmp (ptr, "f") == 0
-		|| strcasecmp (ptr, "off") == 0
-		|| strcasecmp (ptr, "no") == 0
-		|| strcasecmp (ptr, "n") == 0) {
-			numval = 0;			/* False value */
-		}
+		numval = translate_boolean_to_int (ptr);
 
 		if (numval != 1
-		&& numval != 0) {
+		 && numval != 0) {
 			conf_runtime_error_value (ptr, pos);
 			conf_runtime_error (1, _("should be one of the following values: %s"), "true, false");
 			return 1;
@@ -7132,18 +7144,18 @@ print_info (void)
 	major = 0, minor = 0, patch = 0;
 	(void)sscanf (gmp_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __GNU_MP_VERSION && minor == __GNU_MP_VERSION_MINOR) {
-		snprintf (versbuff, 55, "%s, version %d.%d%d", "GMP", major, minor, patch);
+		snprintf (versbuff, 55, "%s, version %d.%d.%d", "GMP", major, minor, patch);
 	} else {
-		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
+		snprintf (versbuff, 55, "%s, version %d.%d.%d (compiled with %d.%d)",
 			"GMP", major, minor, patch, __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
 	}
 #if defined (mpir_version)
 	major = 0, minor = 0, patch = 0;
 	(void)sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __MPIR_VERSION && minor == __MPIR_VERSION_MINOR) {
-		snprintf (versbuff2, 55, "%s, version %d.%d%d", "MPIR", major, minor, patch);
+		snprintf (versbuff2, 55, "%s, version %d.%d.%d", "MPIR", major, minor, patch);
 	} else {
-		snprintf (versbuff2, 55, "%s, version %d.%d%d (compiled with %d.%d)",
+		snprintf (versbuff2, 55, "%s, version %d.%d.%d (compiled with %d.%d)",
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
 	versbuff[55] = versbuff2[55] = 0; /* silence VS analyzer */

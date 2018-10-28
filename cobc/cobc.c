@@ -167,6 +167,12 @@ struct strcache {
 #define	CB_COPT_2	" -ox"
 #define	CB_COPT_3	" -ox -oh"
 #define	CB_COPT_S	" -os"
+#elif   defined(__ORANGEC__)
+#define	CB_COPT_0	" -O-"
+#define	CB_COPT_1	""
+#define	CB_COPT_2	""
+#define	CB_COPT_3	""
+#define	CB_COPT_S	""
 #elif   defined(__SUNPRO_C)
 #define	CB_COPT_0	" -xO1"	/* CHECKME: is -xO0 available? */
 #define	CB_COPT_1	" -xO1"
@@ -3071,7 +3077,11 @@ process_command_line (const int argc, char **argv)
 			cb_flag_source_location = 1;
 			cb_flag_remove_unreachable = 0;
 #ifndef	_MSC_VER
+#ifndef __ORANGEC__
 			COBC_ADD_STR (cobc_cflags, " -g", NULL, NULL);
+#else
+			COBC_ADD_STR (cobc_cflags, " +v", NULL, NULL);
+#endif
 #endif
 			break;
 
@@ -7273,6 +7283,7 @@ process_compile (struct filename *fn)
 			cobc_cflags, cobc_include, fn->translate);
 	return process (cobc_buffer);
 #else
+	/* TODO: check ORANGEC options */
 	if (!cb_flag_main) {
 		sprintf (cobc_buffer, "%s -S -o \"%s\" %s %s %s \"%s\"", cobc_cc, name,
 			cobc_cflags, cobc_include, COB_PIC_FLAGS, fn->translate);
@@ -7357,7 +7368,8 @@ process_assemble (struct filename *fn)
 
 }
 
-/* Create single-element loadable object without intermediate stages */
+/* Create single-element loadable object (as module)
+   without intermediate stages */
 
 static int
 process_module_direct (struct filename *fn)
@@ -7962,6 +7974,14 @@ finish_setup_compiler_env (void)
 		manilink = "/link /manifest /verbose";
 	}
 	manilink_len = strlen (manilink);
+#elif defined(__ORANGEC__)
+	if (verbose_output <= 1) {
+		COBC_ADD_STR (cobc_cflags,  " --nologo", NULL, NULL);
+		COBC_ADD_STR (cobc_ldflags, " --nologo", NULL, NULL);
+	} else {
+		COBC_ADD_STR (cobc_cflags, " -yy", NULL, NULL);
+		COBC_ADD_STR (cobc_ldflags, " -yy", NULL, NULL);
+	}
 #elif defined(__WATCOMC__)
 	if (verbose_output < 2) {
 		COBC_ADD_STR (cobc_cflags, " -q", NULL, NULL);

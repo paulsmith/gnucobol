@@ -1,6 +1,6 @@
 
 /* config.h, tested with x86/x64 VS2005-2017
-   and OrangeC 6.0.36 */
+   and OrangeC 6.0.37.1 (which ignores the lib comments) */
 
 #define NOISAM 0
 #define BDB    1
@@ -119,7 +119,11 @@
 #define COB_NO_SELFOPEN 1
 
 /* Object extension */
+#if defined(__ORANGEC__)
+#define COB_OBJECT_EXT "o"
+#else
 #define COB_OBJECT_EXT "obj"
+#endif
 
 /* Enable minimum parameter check for system libraries */
 /* #undef COB_PARAM_CHECK */
@@ -128,7 +132,12 @@
 #define COB_PIC_FLAGS ""
 
 /* Compile/link option for shared code */
+
+#if defined(__ORANGEC__)
+#define COB_SHARED_OPT "/Wd"
+#else
 #define COB_SHARED_OPT ""
+#endif
 
 /* Strip command */
 /* #undef COB_STRIP_CMD */
@@ -230,7 +239,11 @@
 /* #undef HAVE_GETTEXT */
 
 /* Define to 1 if you have the `gettimeofday' function. */
+#if defined(__ORANGEC__)
+#define HAVE_GETTIMEOFDAY 1
+#else
 /* #undef HAVE_GETTIMEOFDAY */
+#endif
 
 /* Define to 1 if you have the <gmp.h> header file. */
 #define HAVE_GMP_H 1
@@ -339,9 +352,7 @@
 /* #undef HAVE_PDCURSES_H */
 
 /* Define to 1 if you have the `popen' function. */
-#ifdef _MSC_VER
 #define HAVE_POPEN 1
-#endif
 
 /* Define to 1 if you have the `raise' function. */
 #define HAVE_RAISE 1
@@ -357,10 +368,9 @@
    But as the handling of the fallback `putenv' is different in POSIX and _MSC
    (POSIX stores no duplicate of `putenv', where _MSC does), we pretend to
    have support for `setenv' and define it in common.c using _putenv_s,
-   omitting the override parameter */
-#ifdef _MSC_VER
+   omitting the override parameter
+   ORANGEC provides the function */
 #define HAVE_SETENV 1
-#endif
 
 /* Define to 1 if you have the `setlocale' function. */
 #define HAVE_SETLOCALE 1

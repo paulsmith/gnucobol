@@ -4,14 +4,26 @@
 // define MAKE_DIST for using C:\\GnuCOBOL_Version:
 //#define MAKE_DIST 1
 
+#ifndef __ORANGEC__
 #define COB_CC           "cl.exe"
+#else
+#define COB_CC           "occ.exe"
+#endif
+
 #ifdef MAKE_DIST
 #define COB_MAIN_DIR     "C:\\" PACKAGE_NAME "_" PACKAGE_VERSION
 #define COB_CFLAGS       "-I \"" COB_MAIN_DIR "\\include\""
+
+#ifndef __ORANGEC__
 #ifdef _WIN64
 #define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\lib_x64\""
 #else
 #define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\lib\""
+#endif
+#else  /* __ORANGEC__ */
+#define COB_LDFLAGS      "/L\"" COB_MAIN_DIR "\\lib_x64\""
+#else
+#define COB_LDFLAGS      "/L\"" COB_MAIN_DIR "\\lib\""
 #endif
 
 #else  // no MAKE_DIST
@@ -32,10 +44,20 @@
 #define TARGET_CONFIG "release"
 #endif
 
+#ifndef __ORANGEC__
 #define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\build_windows\\" TARGET_PLATFORM "\\" TARGET_CONFIG "\""
+#else
+#define COB_LDFLAGS      "/L\"" COB_MAIN_DIR "\\build_windows\\" TARGET_PLATFORM "\\" TARGET_CONFIG "\""
+#endif
 
 #endif // no MAKE_DIST
+
+
+#ifndef __ORANGEC__
 #define COB_LIBS         "libcob.lib"
+#else
+#define COB_LIBS         "libcob.l"
+#endif
 
 // Do not put quotation marks here:
 #define COB_CONFIG_DIR   COB_MAIN_DIR "\\config"
@@ -44,6 +66,7 @@
 #define COB_LIBRARY_PATH "."
 
 // /* try to use compile defines for that:
+#ifndef __ORANGEC__
 #define COB_BLD_CC       "cl.exe"
 #define COB_BLD_CPPFLAGS ""
 #if defined (_MSC_VER)
@@ -97,9 +120,26 @@
 #define COB_BLD_CFLAGS   "unknown RELEASE generation"
 #endif
 #endif
+
 #define COB_BLD_LD       "link.exe"
 #define COB_BLD_LDFLAGS  ""
 #define COB_BLD_BUILD    "i686-pc-windows"
+
+#else  /* __ORANGEC__ */
+
+#define COB_BLD_CC       "occ.exe"
+#define COB_BLD_CPPFLAGS ""
+#ifdef _DEBUG
+#define COB_BLD_CFLAGS   "unknown OrangeC DEBUG generation"
+#else
+#define COB_BLD_CFLAGS   "unknown OrangeC RELEASE generation"
+#endif
+
+#define COB_BLD_LD       "olink.exe"
+#define COB_BLD_LDFLAGS  ""
+#define COB_BLD_BUILD    "i686-pc-windows"
+
+#endif  /* __ORANGEC__ */
 // */
 
 #ifndef LOCALEDIR

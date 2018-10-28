@@ -5806,8 +5806,6 @@ emit_display_external_form (cb_tree x)
 	cb_tree		f_ref, ext_form_id;
 	unsigned int	found = 0;
 
-	COB_UNUSED (ext_form_id);
-
 	for (f = CB_FIELD_PTR (x)->children; f; f = f->sister) {
 		if (f->redefines || f->flag_occurs) {
 			continue;

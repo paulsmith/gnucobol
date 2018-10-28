@@ -1,4 +1,11 @@
 
+2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info): fixed missing periods in GMP/MPIR version number
+	  between minor and patchlevel
+	* common.c: minor refactoring - separate translate_boolean_to_int()
+	* common.h [__ORANGEC__]: added to used WIN32 defines
+
 2018-10-21  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: exchanged system-specific PTRFILLER define for FCD3 by union

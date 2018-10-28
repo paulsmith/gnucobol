@@ -419,7 +419,8 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define	COB_A_FORMAT34
 #define	COB_A_FORMAT45
 
-#if defined	(_MSC_VER) || (defined (__BORLANDC__) && defined (_WIN32))
+#if defined	(_MSC_VER) || defined (__ORANGEC__) || \
+   (defined (__BORLANDC__) && defined (_WIN32))
 #define	DECLNORET	__declspec(noreturn)
 #else
 #define	DECLNORET
@@ -553,7 +554,8 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 
 
-#if	defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
+#if	defined(_MSC_VER) || defined(__ORANGEC__) || defined(__WATCOMC__) || \
+    defined(__BORLANDC__) || defined(__MINGW32__) || defined (__DJGPP__)
 #define PATHSEP_CHAR (char) ';'
 #define PATHSEP_STR (char *) ";"
 #else
@@ -1576,7 +1578,7 @@ COB_EXPIMP void	cob_module_enter		(cob_module **, cob_global **,
 						 const int);
 COB_EXPIMP void	cob_module_leave		(cob_module *);
 
-COB_EXPIMP void	cob_module_free(cob_module **);
+COB_EXPIMP void	cob_module_free	(cob_module **);
 
 DECLNORET COB_EXPIMP void	cob_stop_run	(const int) COB_A_NORETURN;
 DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
