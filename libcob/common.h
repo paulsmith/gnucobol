@@ -1115,6 +1115,7 @@ typedef struct __cob_fp_128 {
 	cob_u64_t	fpval[2];
 } cob_fp_128;
 
+#ifndef COB_WITHOUT_DECIMAL
 /* Internal representation of decimal numbers */
 /* n = value / 10 ^ scale */
 /* Decimal structure */
@@ -1123,6 +1124,7 @@ typedef struct __cob_decimal {
 	mpz_t		value;			/* GMP value definition */
 	int		scale;			/* Decimal scale */
 } cob_decimal;
+#endif
 
 /* Perform stack structure */
 struct cob_frame {
@@ -1848,6 +1850,7 @@ COB_EXPIMP void		cob_put_pointer(void *val, void *cbldata);
 /**************************/
 /* Functions in numeric.c */
 
+#ifndef COB_WITHOUT_DECIMAL
 COB_EXPIMP void	cob_decimal_init	(cob_decimal *);
 COB_EXPIMP void	cob_decimal_clear	(cob_decimal *);
 COB_EXPIMP void cob_decimal_set_llint	(cob_decimal *, const cob_s64_t);
@@ -1861,6 +1864,7 @@ COB_EXPIMP void	cob_decimal_div		(cob_decimal *, cob_decimal *);
 COB_EXPIMP void	cob_decimal_pow		(cob_decimal *, cob_decimal *);
 COB_EXPIMP int	cob_decimal_cmp		(cob_decimal *, cob_decimal *);
 COB_EXPIMP void	cob_decimal_align(cob_decimal *, const int);
+#endif
 
 COB_EXPIMP void	cob_add			(cob_field *, cob_field *, const int);
 COB_EXPIMP void	cob_sub			(cob_field *, cob_field *, const int);

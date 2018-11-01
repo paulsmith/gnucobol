@@ -1,4 +1,9 @@
 
+2018-11-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* libcob.h [COB_WITHOUT_DECIMAL]: allow include of libcob.h without
+	  gmp header (for link-only; providing compatibility to GnuCOBOL 1.1)
+
 2018-10-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: prefer user-specified localedir

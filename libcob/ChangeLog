@@ -1,4 +1,9 @@
 
+2018-11-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h [COB_WITHOUT_DECIMAL]: allow include of libcob.h without
+	  gmp header
+
 2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (print_info): fixed missing periods in GMP/MPIR version number
@@ -278,7 +283,7 @@
 
 2018-01-23  Ron Norman <rjn@inglenet.com>
 
-	* termio.c: Standardize display of -NaN and NaN for float/double
+	* termio.c: standardize display of -NaN and NaN for float/double
 
 2018-01-03  Simon Sobisch <simonsobisch@gnu.org>
 

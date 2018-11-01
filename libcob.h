@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2018 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While
 
    This file is part of GnuCOBOL.
@@ -22,7 +22,9 @@
 #ifndef COB_LIBCOB_H
 #define COB_LIBCOB_H
 
+#ifndef COB_WITHOUT_DECIMAL
 #include <gmp.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
