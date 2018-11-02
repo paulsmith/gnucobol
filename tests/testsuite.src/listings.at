@@ -2185,7 +2185,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 -tsymbols prog.cob], [0], [], [])
 
 AT_CHECK([$UNIFY_LISTING prog.lst prog.lis once], [0], [], [])
 
-AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
+AT_CHECK([test "$COB_HAS_64_BIT_POINTER" = "yes"], [0], [], [],
 
 # Previous test "failed" --> 32 bit
 

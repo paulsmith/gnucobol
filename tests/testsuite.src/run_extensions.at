@@ -2788,9 +2788,8 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-export TEST_ENV=OK
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog CHECKPAR], [0],
+AT_CHECK([TEST_ENV=OK $COBCRUN_DIRECT ./prog CHECKPAR], [0],
 [(OK  )
 (RXW )
 (CHECKPAR)

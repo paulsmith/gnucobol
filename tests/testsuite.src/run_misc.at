@@ -3048,7 +3048,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE callee.cob], [0], [], [])
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([export COB_PRE_LOAD=callee; ./caller], [0], [], [])
+AT_CHECK([COB_PRE_LOAD=callee ./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -3115,7 +3115,7 @@ AT_DATA([main-prog.cob], [
 AT_CHECK([$COMPILE_MODULE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE prog1.cob], [0], [], [])
 AT_CHECK([$COMPILE main-prog.cob], [0], [], [])
-AT_CHECK([export COB_PRE_LOAD="prog"$PATHSEP"prog1"; ./main-prog], [0], [12abc
+AT_CHECK([COB_PRE_LOAD="prog"$PATHSEP"prog1" $COBCRUN_DIRECT ./main-prog], [0], [12abc
 11
 xxxxx
 ], [])
@@ -3185,7 +3185,7 @@ AT_DATA([caller.cob], [
 
 AT_CHECK([$COMPILE_MODULE CALLEE.cob], [0], [], [])
 AT_CHECK([$COMPILE caller.cob], [0], [], [])
-AT_CHECK([export COB_LOAD_CASE=UPPER; ./caller], [0], [], [])
+AT_CHECK([COB_LOAD_CASE=UPPER ./caller], [0], [], [])
 
 AT_CLEANUP
 
@@ -10348,9 +10348,9 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([export ENVPONY=WHITE; $COMPILE prog.cob -fdefine-constant-directive=ok -DDPONY=Stallone], [0], [], [])
+AT_CHECK([ENVPONY=WHITE $COMPILE prog.cob -fdefine-constant-directive=ok -DDPONY=Stallone], [0], [], [])
 
-AT_CHECK([export ENVPONY=WHITE; ./prog], [0],
+AT_CHECK([ENVPONY=WHITE ./prog], [0],
 [ENVPONY env var set to WHITE       ;
 1st Dog's name is Pluto;
 2nd Dog's name is Piper;

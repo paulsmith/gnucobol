@@ -40,7 +40,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 
-AT_CHECK([test "$COB_HAS_64_BIT_POINTER" == "yes"], [0], [], [],
+AT_CHECK([test "$COB_HAS_64_BIT_POINTER" = "yes"], [0], [], [],
 
 # Previous test "failed" --> 32 bit
 

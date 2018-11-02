@@ -1758,7 +1758,7 @@ AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog.cob:8: attempt to CANCEL active program
 ])
-AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
+AT_CHECK([COB_PHYSICAL_CANCEL=1 ./prog], [1], [],
 [libcob: prog.cob:8: attempt to CANCEL active program
 ])
 
@@ -1798,7 +1798,7 @@ AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
 [libcob: prog2.cob:7: attempt to CANCEL active program
 ])
-AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [1], [],
+AT_CHECK([COB_PHYSICAL_CANCEL=1 ./prog], [1], [],
 [libcob: prog2.cob:7: attempt to CANCEL active program
 ])
 
@@ -1843,7 +1843,7 @@ AT_DATA([prog2.cob], [
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COMPILE_MODULE prog2.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [121NG], [])
-AT_CHECK([export COB_PHYSICAL_CANCEL=1; ./prog], [0], [121NG], [])
+AT_CHECK([COB_PHYSICAL_CANCEL=1 ./prog], [0], [121NG], [])
 
 AT_CLEANUP
 
