@@ -463,7 +463,7 @@ list_cache_sort (void *inlist, int (*cmpfunc)(const void *mp1, const void *mp2))
 			}
 			p = q;
 		}
-		tail->next = NULL;
+		if (tail) tail->next = NULL;
 		if (nmerges <= 1) {
 			return (void *)list;
 		}
