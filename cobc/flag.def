@@ -117,7 +117,7 @@ CB_FLAG (cb_flag_stack_on_heap, 0, "stack-on-heap",
 
 /* Normal flags */
 CB_FLAG_ON (cb_flag_remove_unreachable, 1, "remove-unreachable",
-	_(" -fno-remove-unreachable\tdisable remove of unreachable code"
+	_("  -fno-remove-unreachable\tdisable remove of unreachable code\n"
 	  "                        * turned off by -g"))
 
 CB_FLAG (cb_flag_trace, 1, "trace",
