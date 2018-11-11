@@ -1,4 +1,8 @@
 
+2018-11-11  Simon Sobisch <simonsobisch@gnu.org>
+
+	* atlocal_win: dynamically set COB_OBJECT_EXT and COB_EXE_EXT
+
 2018-08-07  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/run_functions.at: Rename CONTENTS-OF to CONTENT-OF

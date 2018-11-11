@@ -38,9 +38,6 @@ COMPILE="${COBC} -x ${FLAGS}"
 COMPILE_ONLY="${COBC} -fsyntax-only ${FLAGS}"
 COMPILE_MODULE="${COBC} -m ${FLAGS}"
 
-COB_OBJECT_EXT="obj"
-COB_EXE_EXT=".exe"
-
 # Fix for testcases where cobc uses win32 paths internally
 PATHSEP=";"
 
@@ -89,6 +86,8 @@ COB_LIBRARY_PATH="$(_return_path "$COB_WIN_BUILDPATH"):$(_return_path ":$COB_LIB
 COB_UNIX_LF=YES
 COB_MSG_FORMAT=GCC
 
+COB_OBJECT_EXT="$(cobc --info | grep COB_OBJECT_EXT | cut -d: -f2 | cut -b2-)"
+COB_EXE_EXT="$(cobc    --info | grep COB_EXE_EXT    | cut -d: -f2 | cut -b2-)"
 
 COB_HAS_64_BIT_POINTER=`$COBCRUN --info | grep "64bit-mode" | cut -d: -f2 | cut -b2-`
 if test $($COBC --info | grep -i -c "ISAM.*disabled") = 0; then
