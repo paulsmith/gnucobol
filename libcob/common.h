@@ -788,6 +788,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 /* Exception identifier enumeration */
 
 #undef	COB_EXCEPTION
+#ifndef COB_WITHOUT_EXCEPTIONS
 #define	COB_EXCEPTION(code,tag,name,critical)	tag,
 
 enum cob_exception_id {
@@ -797,7 +798,7 @@ enum cob_exception_id {
 };
 
 #undef	COB_EXCEPTION
-
+#endif
 
 /* File attributes */
 
