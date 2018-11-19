@@ -4220,11 +4220,22 @@ AT_DATA([prog1.cob], [
        1    file1-rec pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4275,11 +4286,22 @@ AT_DATA([prog1.cob], [
        1    file1-rec pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1 with lock.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4332,11 +4354,22 @@ AT_DATA([prog1.cob], [
        1    file1-rec pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4389,11 +4422,22 @@ AT_DATA([prog1.cob], [
        1    file1-rec pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4450,11 +4494,22 @@ AT_DATA([prog1.cob], [
        fd file1.
        1    file1-rec pic x.
        working-storage section.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4796,11 +4851,22 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4861,11 +4927,22 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1 with lock.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4927,11 +5004,22 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -4993,11 +5081,22 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -5063,11 +5162,22 @@ AT_DATA([prog1.cob], [
        1    file1-rec.
         2   file1-key pic x.
        working-storage section.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            close file1.
            open input file1.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -5135,6 +5245,10 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            move "X" to file1-key.
@@ -5147,7 +5261,14 @@ AT_DATA([prog1.cob], [
            read file1.
            if fs not = "00"
               display "FAILED 1::r fs=" fs.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -5212,6 +5333,10 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            move "X" to file1-key.
@@ -5227,7 +5352,14 @@ AT_DATA([prog1.cob], [
            rewrite file1-rec.
            if fs not = "00"
               display "FAILED 1::rw fs=" fs.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
@@ -5292,6 +5424,10 @@ AT_DATA([prog1.cob], [
         2   file1-key pic x.
        working-storage section.
        1    fs pic xx.
+       1    os-check   pic x(7).
+         88 os-is-windows-or-dos values 'WINDOWS' 'FREEDOS'.
+       78  callee       value "./prog2".
+       78  callee-wdos  value ".\prog2".
        procedure division.
            open output file1.
            move "X" to file1-key.
@@ -5304,7 +5440,14 @@ AT_DATA([prog1.cob], [
            read file1 with lock.
            if fs not = "00"
               display "FAILED 1::r fs=" fs.
-           call "system" using "./prog2".
+           accept os-check from environment "OS".
+           if os-check = spaces
+             accept os-check from environment "OS_NAME".
+           inspect os-check converting "werfdosin" to "WERFDOSIN".
+           if os-is-windows-or-dos
+             call "SYSTEM" using callee-wdos
+           else
+             call "SYSTEM" using callee.
            close file1.
            stop run.
 ])
