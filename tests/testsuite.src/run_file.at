@@ -5968,6 +5968,9 @@ AT_CLEANUP
 AT_SETUP([EXTFH (using ISAM callback)])
 AT_KEYWORDS([runfile])
 
+# FIXME / TODO: add aditional test with callback for sequential file
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
