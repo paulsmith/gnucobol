@@ -3761,6 +3761,10 @@ AT_DATA([fexists_signed.c], [
 #include <stdio.h>
 #include <malloc.h>
 
+#define COB_LIB_EXPIMP
+#include <libcob.h>
+COB_EXPIMP int fexists_signed (char *, char *, int);
+
 /*
  * Check file is present and correct by comparing
  * its content to a given signature.
@@ -3771,6 +3775,7 @@ fexists_signed (char *fid, char *signature, int signature_size)
 	char *bfr;
 	FILE *f;
 	int res = -1;
+
 	f = fopen (fid, "r");
 	if (f != NULL) {
 		 bfr = (char *) malloc (signature_size);
