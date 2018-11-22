@@ -1,7 +1,17 @@
 
+2018-11-22  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l, pparse.y: FR #344 Support copybook and library names
+	  as text-names (not literals) with periods, always upper-cased
+	  if not requested otherwise by FOLD-CALL=LOWER
+
 2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [__ORANGEC__]: adjustments of command line options
+
+2018-10-24  Simon Sobisch <simonsobisch@gnu.org>
+
+	* pplex.l: minor refactoring (creating ppecho_direct) and comments
 
 2018-10-13  Edward Hart <edward.dan.hart@gmail.com>
 

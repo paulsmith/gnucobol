@@ -623,10 +623,12 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token TERMINATOR	"end of line"
 
 %token <s> TOKEN		"Identifier or Literal"
+%token <s> TEXT_NAME	"Text-Name"
 %token <s> VARIABLE_NAME	"Variable"
 %token <s> LITERAL		"Literal"
 
 %type <s>	copy_in
+%type <s>	copy_source
 
 %type <l>	token_list
 %type <l>	identifier
@@ -1183,24 +1185,31 @@ condition_clause:
 ;
 
 copy_statement:
-  COPY TOKEN copy_in copy_suppress copy_replacing
+  COPY copy_source copy_in copy_suppress copy_replacing
   {
 	fputc ('\n', ppout);
-	$2 = fix_filename ($2);
-	if (cb_fold_copy == COB_FOLD_LOWER) {
-		$2 = fold_lower ($2);
-	} else if (cb_fold_copy == COB_FOLD_UPPER) {
-		$2 = fold_upper ($2);
-	}
-	if ($3) {
-		$3 = fix_filename ($3);
-		if (cb_fold_copy == COB_FOLD_LOWER) {
-			$3 = fold_lower ($3);
-		} else if (cb_fold_copy == COB_FOLD_UPPER) {
-			$3 = fold_upper ($3);
-		}
-	}
 	ppcopy ($2, $3, $5);
+  }
+;
+
+copy_source:
+  TOKEN
+  {
+	$$ = fix_filename ($1);
+	if (cb_fold_copy == COB_FOLD_LOWER) {
+		$$ = fold_lower ($$);
+	} else if (cb_fold_copy == COB_FOLD_UPPER) {
+		$$ = fold_upper ($$);
+	}
+  }
+| TEXT_NAME
+  {
+	$$ = $1;
+	if (cb_fold_copy == COB_FOLD_LOWER) {
+		$$ = fold_lower ($$);
+	} else {
+		$$ = fold_upper ($$);
+	}
   }
 ;
 
@@ -1209,7 +1218,7 @@ copy_in:
   {
 	$$ = NULL;
   }
-| in_or_of TOKEN
+| in_or_of copy_source
   {
 	$$ = $2;
   }

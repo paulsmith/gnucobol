@@ -154,6 +154,7 @@ static struct plex_stack	plex_cond_stack[PLEX_COND_DEPTH];
 static int	ppinput			(char *, const size_t);
 static void	ppecho			(const char *, const cob_u32_t,
 					 const int);
+static void	ppecho_direct			(const char *);
 static void	switch_to_buffer	(const int, const char *,
 					 const YY_BUFFER_STATE);
 static void	check_listing		(const char *, const unsigned int);
@@ -404,7 +405,7 @@ DEFNUM_LITERAL	[+-]?[0-9]*[\.]*[0-9]+
 
 "INCLUDE"		{
 	/* Note: ++INCLUDE/-INC (include only the data records,
-	   must be specified in column 8/1) are not implemented yet */
+	   must be specified in column 8/1) and are not implemented yet */
 	yy_push_state (COPY_STATE);
 	if (cb_src_list_file) {
 		get_new_listing_file ();
@@ -777,9 +778,17 @@ ENDIF_DIRECTIVE_STATE>{
 	cb_source_line++;
   }
   [,;]?[ ]+		{ /* ignore */ }
+  [_0-9A-Z\x80-\xFF-]+(\.[_0-9A-Z\x80-\xFF-]+)+		{
+	/* special case to allow copybook names with periods
+	   without a literal
+	   given the rule: not starting, not ending, not doubled
+	   *unlikely* to need a configuration option */
+	pplval.s = cobc_plex_strdup (yytext);
+	return TEXT_NAME;
+  }
   \. 			{
-	  yy_pop_state ();
-	  return DOT;
+	yy_pop_state ();
+	return DOT;
   }
   "=="			{ yy_push_state (PSEUDO_STATE); return EQEQ; }
   "("			{ return '('; }
@@ -798,7 +807,10 @@ ENDIF_DIRECTIVE_STATE>{
   {WORD} |
   {NUMRIC_LITERAL} |
   {ALNUM_LITERAL} |
-  .			{ pplval.s = cobc_plex_strdup (yytext); return TOKEN; }
+  .				{
+	pplval.s = cobc_plex_strdup (yytext);
+	return TOKEN;
+  }
 }
 
 <PSEUDO_STATE>{
@@ -1528,9 +1540,12 @@ start:
 			if ((*bp == '$' && bp[1] != ' ') || (*bp == '>' && bp[1] == '>')) {
 				/* Directive */
 				ipchar = 1;
-			} else if ((*bp == '*' && bp[1] == '>')
-			           || (cb_flag_acucomment && *bp == '|')) {
+			} else if (*bp == '*' && bp[1] == '>') {
 				/* Float comment */
+				newline_count++;
+				goto start;
+			} else if (cb_flag_acucomment && *bp == '|') {
+				/* ACU Float comment */
 				newline_count++;
 				goto start;
 			}
@@ -1641,9 +1656,8 @@ start:
 		}
 		newline_count++;
 		goto start;
-	case '*':
-	case '/':
-		/* Comment line */
+	case '*':	/* Comment line */
+	case '/':	/* Comment line requested page-break in listing */
 		newline_count++;
 		goto start;
 	default:
@@ -1841,6 +1855,9 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 	size_t				size;
 	size_t				size2;
 
+	/* ensure nothing is in the stream buffer */
+	fflush (ppout);
+
 	/* Check for replacement text before outputting */
 	if (alt_space) {
 		s = yytext;
@@ -1947,18 +1964,12 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 				}
 			}
 			for (lno = r->new_text; lno; lno = lno->next) {
-				fputs (lno->text, ppout);
-				if (cb_listing_file) {
-					check_listing (lno->text, 0);
-				}
+				ppecho_direct (lno->text);
 			}
 			if (r->lead_trail == CB_REPLACE_LEADING
 				&& save_queue /* <- silence warnings */) {
 				/* Non-matched part of original text */
-				fputs (save_queue->text + size, ppout);
-				if (cb_listing_file) {
-					check_listing (save_queue->text + size, 0);
-				}
+				ppecho_direct (save_queue->text + size);
 			}
 			text_queue = queue;
 			continue;
@@ -1967,10 +1978,7 @@ ppecho (const char *text, const cob_u32_t alt_space, const int textlen)
 
 	/* No match */
 	for (; text_queue; text_queue = text_queue->next) {
-		fputs (text_queue->text, ppout);
-		if (cb_listing_file) {
-			check_listing (text_queue->text, 0);
-		}
+		ppecho_direct (text_queue->text);
 	}
 	if (!save_ptr) {
 		current_replace_list = NULL;
@@ -2009,6 +2017,15 @@ display_finish (void)
 		display_msg[0] = 0;
 	}
 	unput ('\n');
+}
+
+static void
+ppecho_direct (const char *text)
+{
+	fputs (text, ppout);
+	if (cb_listing_file) {
+		check_listing (text, 0);
+	}
 }
 
 static void
