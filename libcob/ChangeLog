@@ -1,4 +1,13 @@
 
+2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* intrinsic.c (cob_intr_content_of): fixed unlikely case of empty *srcfield
+	  not raising EC-DATA-PTR-NULL
+	* intrinsic.c (cob_intr_content_length, cob_intr_content_of):
+	  minor refactoring
+	* intrinsic.c (decimal_places_for_seconds): changed parameter to
+	  unsigned int as it is enough and keeps the same types in callers
+
 2018-11-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h [COB_WITHOUT_EXCEPTIONS]: allow include of libcob.h without

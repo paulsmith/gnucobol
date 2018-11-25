@@ -1160,11 +1160,18 @@ cb_tree_category (cb_tree x)
 		break;
 	case CB_TAG_REFERENCE:
 		r = CB_REFERENCE (x);
+		x->category = cb_tree_category (r->value);
 		if (r->offset) {
-			/* CHECKME: may should be alphabetic/national depending on the content */
-			x->category = CB_CATEGORY_ALPHANUMERIC;
-		} else {
-			x->category = cb_tree_category (r->value);
+			switch (x->category) {
+			case CB_CATEGORY_ALPHANUMERIC:
+			case CB_CATEGORY_NATIONAL:
+				break;
+			case CB_CATEGORY_NATIONAL_EDITED:
+				x->category = CB_CATEGORY_NATIONAL;
+				break;
+			default:
+				x->category = CB_CATEGORY_ALPHANUMERIC;
+			}
 		}
 		break;
 	case CB_TAG_FIELD:

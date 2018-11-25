@@ -2189,10 +2189,10 @@ get_fractional_seconds (cob_field *time, cob_decimal *fraction)
 	cob_decimal_sub (fraction, whole_seconds);
 }
 
-static int
-decimal_places_for_seconds (const char *str, const ptrdiff_t point_pos)
+static unsigned int
+decimal_places_for_seconds (const char *str, const unsigned int point_pos)
 {
-	ptrdiff_t offset = point_pos;
+	unsigned int offset = point_pos;
 	int decimal_places = 0;
 
 	while (str[++offset] == 's') {
@@ -2299,7 +2299,7 @@ static struct time_format
 parse_time_format_string (const char *str)
 {
 	struct time_format	format;
-	ptrdiff_t		offset;
+	unsigned int		offset;
 
 	if (!strncmp (str, "hhmmss", 6)) {
 		format.with_colons = 0;
@@ -3408,7 +3408,7 @@ int
 cob_valid_time_format (const char *format, const char decimal_point)
 {
 	int		with_colons;
-	ptrdiff_t	format_offset;
+	unsigned int	format_offset;
 	unsigned int	decimal_places = 0;
 
 	if (!strncmp (format, "hhmmss", 6)) {
@@ -3425,7 +3425,8 @@ cob_valid_time_format (const char *format, const char decimal_point)
 	if (format[format_offset] == decimal_point) {
 		decimal_places = decimal_places_for_seconds (format, format_offset);
 		format_offset += decimal_places + 1;
-		if (!(1 <= decimal_places && decimal_places <= COB_TIMEDEC_MAX)) {
+		if (decimal_places == 0
+		 || decimal_places > COB_TIMEDEC_MAX) {
 			return 0;
 		}
 	}
@@ -5941,10 +5942,9 @@ cob_intr_highest_algebraic (cob_field *srcfield)
 	case COB_TYPE_NUMERIC_BINARY:
 		if (COB_FIELD_REAL_BINARY (srcfield) ||
 		    !COB_FIELD_BINARY_TRUNC (srcfield)) {
-			if (!COB_FIELD_HAVE_SIGN (srcfield)) {
-				expo = COB_FIELD_SIZE (srcfield) * 8U;
-			} else {
-				expo = (COB_FIELD_SIZE (srcfield) * 8U) - 1U;
+			expo = COB_FIELD_SIZE (srcfield) * 8U;
+			if (COB_FIELD_HAVE_SIGN (srcfield)) {
+				expo--;
 			}
 			mpz_ui_pow_ui (d1.value, 2UL, expo);
 			mpz_sub_ui (d1.value, d1.value, 1UL);
@@ -6384,7 +6384,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 
 	/* Set time offset */
 	if (date_present) {
-		time_part_offset = strlen (formatted_date) + 1;
+		time_part_offset = (int)strlen (formatted_date) + 1;
 	} else {
 		time_part_offset = 0;
 	}
@@ -6400,7 +6400,7 @@ cob_intr_test_formatted_datetime (cob_field *format_field,
 	}
 	if (date_present && time_present
 	    && formatted_datetime[strlen (formatted_date)] != 'T') {
-		cob_alloc_set_field_uint (strlen (formatted_date) + 1U);
+		cob_alloc_set_field_uint ((unsigned int)strlen (formatted_date) + 1U);
 		goto end_of_func;
 	}
 	if (time_present) {
@@ -6532,13 +6532,14 @@ cob_intr_content_length (cob_field *srcfield)
 	cob_u32_t	val = 0;
 
 	cob_set_exception (0);
-	if (srcfield && srcfield->data) {
+	if (srcfield) {
 		pointed = *((unsigned char **)srcfield->data);
-		if (pointed) {
-			val = (cob_u32_t)strlen ((char *)pointed);
-		} else {
-			cob_set_exception (COB_EC_DATA_PTR_NULL);
-		}
+	} else {
+		pointed = NULL;
+	}
+	/* check if the pointer is set and does not point to NULL */
+	if (pointed && *pointed) {
+		val = (cob_u32_t)strlen ((char *)pointed);
 	} else {
 		cob_set_exception (COB_EC_DATA_PTR_NULL);
 	}
@@ -6577,23 +6578,26 @@ cob_intr_content_of (const int offset, const int length, const int params, ...)
 	}
 	va_end (args);
 
-	if (srcfield && srcfield->data) {
+	if (srcfield) {
 		pointed = *((unsigned char **)srcfield->data);
-		if (pointed && *pointed) {
-			/* Fixed length or C NUL terminated string */
-			if (request_len > 0) {
-				size = request_len;
-			} else {
-				size = strlen ((char *)pointed);
-			}
-			if (size > COB_MAX_UNBOUNDED_SIZE) {
-				cob_set_exception (COB_EC_SIZE_TRUNCATION);
-				size = COB_MAX_UNBOUNDED_SIZE;
-			}
+	} else {
+		pointed = NULL;
+	}
+	/* check if the pointer is set and does not point to NULL */
+	if (pointed && *pointed) {
+		/* Fixed length (may include NUL) or C NUL terminated string */
+		if (request_len != 0) {
+			size = request_len;
 		} else {
-			cob_set_exception (COB_EC_DATA_PTR_NULL);
-			size = 0;
+			size = strlen ((char *)pointed);
 		}
+		if (size > COB_MAX_UNBOUNDED_SIZE) {
+			cob_set_exception (COB_EC_SIZE_TRUNCATION);
+			size = COB_MAX_UNBOUNDED_SIZE;
+		}
+	} else {
+		cob_set_exception (COB_EC_DATA_PTR_NULL);
+		size = 0;
 	}
 	if (size != 0) {
 		COB_FIELD_INIT (size, NULL, &const_alpha_attr);
