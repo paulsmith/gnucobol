@@ -1,4 +1,8 @@
 
+2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: only warn once about missing headers needed for libxml2
+
 2018-11-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* libcob.h [COB_WITHOUT_DECIMAL]: allow include of libcob.h without

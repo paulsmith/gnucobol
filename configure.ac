@@ -524,8 +524,7 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 		[if test "$with_xml2" = "yes"; then 
 		   AC_MSG_ERROR([Headers for libxml2 are required for --with-xml, you may adjust XML2_CFLAGS])
 		else
-		   AC_MSG_WARN([Headers for libxml2 missing, you may adjust XML2_CFLAGS])
-		   with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		   with_xml2=no
 		fi])
 	if test "$with_xml2" != "no"; then 
 		AC_MSG_CHECKING([if linking against libxml2 with "$XML2_LIBS" works])
@@ -541,6 +540,9 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 		     AC_MSG_WARN([xml library not found, you may adjust XML2_LIBS])
 		     with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 		   fi])
+	else
+		AC_MSG_WARN([Headers for libxml2 missing, you may adjust XML2_CFLAGS])
+		 with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 	fi
 ])
 

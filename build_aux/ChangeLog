@@ -1,4 +1,10 @@
 
+2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: added missing setting of LC_ALL for generating tarstamp.h,
+	  added parts (currently commented out) to update files in build-aux,
+	  refactoring
+
 2018-10-22  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.guess, config.sub, install-sh, texinfo.tex:

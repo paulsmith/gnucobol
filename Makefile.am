@@ -45,9 +45,9 @@ CODE_COVERAGE_BRANCH_COVERAGE=1
 @CODE_COVERAGE_RULES@
 
 dist-hook:
-	echo "#define COB_TAR_DATE \"`LC_ALL=C date -u +'%b %d %Y %T'` UTC\"" > $(distdir)/tarstamp.h
-	echo "#define COB_NUM_TAR_DATE `LC_ALL=C date -u +'%Y%m%d'`" >> $(distdir)/tarstamp.h
-	echo "#define COB_NUM_TAR_TIME `LC_ALL=C date -u +'%H%M%S'`" >> $(distdir)/tarstamp.h
+	echo "#define COB_TAR_DATE    \"`LC_ALL=C date -u +'%b %d %Y %T'` UTC\"" > $(distdir)/tarstamp.h
+	echo "#define COB_NUM_TAR_DATE ` LC_ALL=C date -u +'%Y%m%d'`"           >> $(distdir)/tarstamp.h
+	echo "#define COB_NUM_TAR_TIME ` LC_ALL=C date -u +'%H%M%S'`"           >> $(distdir)/tarstamp.h
 	find $(distdir) -type d -print | xargs chmod 755
 	find $(distdir) -type f -print | xargs chmod 644
 	touch $(distdir)/m4/*.m4
