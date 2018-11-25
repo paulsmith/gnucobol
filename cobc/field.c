@@ -1301,6 +1301,7 @@ warn_from_to_using_without_pic (const struct cb_field * const f)
 	const cb_tree	x = CB_TREE (f);
 
 	if ((f->screen_from || f->screen_to) && !f->pic) {
+		/* TO-DO: Change to dialect option */
 		cb_warning_x (warningopt, x,
 			      _("'%s' has FROM, TO or USING without PIC; PIC will be implied"),
 			      cb_name (x));

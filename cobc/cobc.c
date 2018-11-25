@@ -3095,6 +3095,7 @@ process_command_line (const int argc, char **argv)
 		case '%':
 			/* -f<tag>=<value> : Override configuration entry */
 			/* hint: -f[no-]<tag> sets the var directly */
+			/* including options -freserved=word / -fregister=word */
 			conf_label = cobc_main_malloc (COB_MINI_BUFF);
 			conf_entry = cobc_malloc (COB_MINI_BUFF - 2);
 			snprintf (conf_label, COB_MINI_MAX, "-%s=%s",
