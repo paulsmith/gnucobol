@@ -4623,6 +4623,9 @@ set_listing_header_symbols (void)
 static void
 set_listing_header_xref (const enum xref_type type)
 {
+	if (!cb_listing_with_header) {
+		return;
+	}
 	if (type == XREF_FUNCTION) {
 		strcpy (cb_listing_header, "FUNCTION");
 	} else if (type == XREF_LABEL) {
@@ -4713,7 +4716,6 @@ print_program_header (void)
 				 cb_listing_title,
 				 cb_listing_filename,
 				 cb_listing_date);
-		} else {
 		}
 	}
 	fputc ('\n', cb_src_list_file);
@@ -5397,7 +5399,9 @@ print_program_trailer (void)
 
 		/* Print file/symbol tables if requested */
 		if (cb_listing_symbols) {
-			set_listing_header_symbols();
+			if (cb_listing_with_header) {
+				set_listing_header_symbols ();
+			}
 			force_new_page_for_next_line ();
 			print_program_header ();
 
@@ -6671,7 +6675,6 @@ cleanup_copybook_reference (struct list_files *cur)
 		cobc_free ((void *)cur->name);
 	}
 	cobc_free (cur);
-	cur = NULL;
 }
 
 
@@ -6986,15 +6989,16 @@ print_program (struct list_files *cfile, int in_copy)
 	if (cb_listing_with_source) {
 		/* actual printing of program code, copybooks included */
 		print_program_code (cfile, in_copy);
+	} else {
+		/* Internal handling for copybooks (normally done within the source listing) */
+		while (cfile->copy_head) {
+			cur = cfile->copy_head;
+			print_program (cur, 1);
+			/* Delete the copybook reference when done */
+			cfile->copy_head = cur->next;
+			cleanup_copybook_reference (cur);
+		}
 	}
-	/* Free replace data (note: done before if source listing was done) */
-	if (cfile->copy_head) {
-		cur = cfile->copy_head;
-		print_program (cur, 1);
-		cfile->copy_head = cur->next;
-		cleanup_copybook_reference (cur);
-	}
-
 	/* Free replace data */
 	if (cfile->replace_head) {
 		free_replace_list (cfile->replace_head);

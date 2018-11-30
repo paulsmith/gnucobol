@@ -1,4 +1,10 @@
 
+2018-11-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c: fix listing issues when source is suppressed like printed
+	  headers without data and missing output of errors
+	* flag.def: renamed new listing options according to NEWS and docs
+
 2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c (cb_tree_category): correct category for reference-modified
