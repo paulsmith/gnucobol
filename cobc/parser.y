@@ -11708,6 +11708,25 @@ evaluate_case:
 	$$ = CB_BUILD_CHAIN ($2, $1);
 	eval_inc2 = 0;
   }
+| evaluate_when_list END_EVALUATE
+  {
+	eval_inc2 = 0;
+	cb_verify (cb_missing_statement,
+		_("WHEN without imperative statement"));
+	/* Note: we don't clear the EVALUATE terminator here
+	         as we'd have to skip this later
+	         [side effect: possible warning about missing terminator] */
+	$$ = CB_BUILD_CHAIN (CB_LIST_INIT (cb_build_continue ()), $1);
+  }
+| evaluate_when_list TOK_DOT
+  {
+	eval_inc2 = 0;
+	cb_verify (cb_missing_statement,
+		_("WHEN without imperative statement"));
+	/* Put the dot token back into the stack for reparse */
+	cb_unput_dot ();
+	$$ = CB_BUILD_CHAIN (CB_LIST_INIT (cb_build_continue ()), $1);
+  }
 ;
 
 evaluate_other:

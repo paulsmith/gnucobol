@@ -1,4 +1,10 @@
 
+2018-12-04  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: finishing FR# 244 missing-statement by allowing
+	  `WHEN expression` with missing imperative statement = followed by
+	  `END-EVALUATE` or a separator period
+
 2018-11-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: fix listing issues when source is suppressed like printed

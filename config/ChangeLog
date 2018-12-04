@@ -1,4 +1,9 @@
 
+2018-04-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* default.conf: set missing-statement (FR# 244) to warning as older
+	  GnuCOBOL versions allowed a partial subset of these
+
 2018-09-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* mf-strict.conf: set missing-statement to error (according to MF docs)

@@ -5533,11 +5533,6 @@ AT_CLEANUP
 AT_SETUP([Missing imperative statements])
 AT_KEYWORDS([condition expression IF EVALUATE WHEN PERFORM])
 
-# we currently don't do the necessary parsing steps for
-# WHEN without statements to pass this test
-
-AT_XFAIL_IF(true)
-
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
@@ -5588,12 +5583,6 @@ AT_DATA([prog.cob], [
 
            EVALUATE TRUE
            WHEN  A = B
-           WHEN OTHER
-               move var      to othervar
-           END-EVALUATE
-
-           EVALUATE TRUE
-           WHEN  A = B
                move var      to othervar
            WHEN OTHER
            .
@@ -5606,32 +5595,70 @@ AT_DATA([prog.cob], [
            STOP RUN.
 ])
 
-AT_CHECK([$COMPILE_ONLY -Wno-constant-expression prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -w -fmissing-statement=error prog.cob], [1], [],
 [prog.cob:18: error: IF without imperative statement used
 prog.cob:23: error: IF without imperative statement used
 prog.cob:32: error: IF without imperative statement used
 prog.cob:33: error: IF without imperative statement used
-prog.cob:38: error: WHEN OTHER without imperative statement used
-prog.cob:41: warning: PERFORM NEVER since UNTIL is always TRUE
+prog.cob:39: error: WHEN OTHER without imperative statement used
 prog.cob:42: error: inline PERFORM without imperative statement used
-prog.cob:46: error: WHEN without imperative statement used
-prog.cob:52: error: WHEN without imperative statement used
-prog.cob:59: error: WHEN OTHER without imperative statement used
-prog.cob:64: error: WHEN without imperative statement used
+prog.cob:47: error: WHEN without imperative statement used
+prog.cob:53: error: WHEN OTHER without imperative statement used
+prog.cob:58: error: WHEN without imperative statement used
 ])
 
-AT_CHECK([$COMPILE_ONLY -std=acu -Wno-constant-expression prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -fno-constant-folding -fmissing-statement=warning prog.cob], [0], [],
 [prog.cob:18: warning: IF without imperative statement used
 prog.cob:23: warning: IF without imperative statement used
 prog.cob:32: warning: IF without imperative statement used
 prog.cob:33: warning: IF without imperative statement used
-prog.cob:38: warning: WHEN OTHER without imperative statement used
-prog.cob:46: warning: WHEN without imperative statement used
-prog.cob:52: warning: WHEN without imperative statement used
+prog.cob:39: warning: WHEN OTHER without imperative statement used
+prog.cob:42: warning: inline PERFORM without imperative statement used
+prog.cob:47: warning: WHEN without imperative statement used
+prog.cob:53: warning: WHEN OTHER without imperative statement used
+prog.cob:58: warning: WHEN without imperative statement used
 ])
 
 AT_CLEANUP
 
+
+AT_SETUP([Fall-Through to WHEN OTHER])
+AT_KEYWORDS([condition expression EVALUATE WHEN])
+
+# we currently don't do the necessary parsing steps for
+# this test to pass - and likely need a different option
+# than frelax-syntax-checks..
+
+AT_XFAIL_IF(true)
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA  DIVISION.
+       WORKING-STORAGE SECTION.
+       01  A         PIC 9 VALUE 1.
+       01  B         PIC 9 VALUE 2.
+
+       PROCEDURE DIVISION.
+
+           EVALUATE TRUE
+           WHEN A = B
+           WHEN OTHER
+               DISPLAY 'other' END-DISPLAY
+           END-EVALUATE
+
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:12: error: fall-through to WHEN OTHER is not allowed
+])
+
+AT_CHECK([$COMPILE_ONLY -frelax-syntax-checks prog.cob], [1], [],
+[prog.cob:12: warning: fall-through to WHEN OTHER
+])
+
+AT_CLEANUP
 
 AT_SETUP([CONSTANT LENGTH / BYTE-LENGTH])
 AT_KEYWORDS([misc])
