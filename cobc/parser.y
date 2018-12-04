@@ -11892,7 +11892,7 @@ exit_body:
 	}
 	if ($2) {
 		if (!current_program->cb_return_code) {
-			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning sources"));
+			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning runtime elements"));
 		} else {
 			cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
 		}
@@ -12098,7 +12098,7 @@ goback_statement:
 	check_unreached = 1;
 	if ($2) {
 		if (!current_program->cb_return_code) {
-			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning sources"));
+			cb_error_x ($2, _("RETURNING/GIVING not allowed for non-returning runtime elements"));
 		} else {
 			cb_emit_move ($2, CB_LIST_INIT (current_program->cb_return_code));
 		}

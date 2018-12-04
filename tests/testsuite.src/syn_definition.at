@@ -1071,8 +1071,8 @@ AT_CHECK([$COMPILE prog1.cob prog2.cob prog3.cob prog4.cob prog5.cob],
 [0], [], [])
 AT_CHECK([$COMPILE -fnot-register=return-code \
 prog1.cob prog2.cob prog3.cob prog4.cob prog5.cob], [1], [],
-[prog1.cob:5: error: RETURNING/GIVING not allowed for non-returning sources
-prog2.cob:5: error: RETURNING/GIVING not allowed for non-returning sources
+[prog1.cob:5: error: RETURNING/GIVING not allowed for non-returning runtime elements
+prog2.cob:5: error: RETURNING/GIVING not allowed for non-returning runtime elements
 prog4.cob:5: error: 'RETURN-CODE' is not defined
 ])
 

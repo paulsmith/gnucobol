@@ -4,6 +4,7 @@
 	* cobc.c: fix listing issues when source is suppressed like printed
 	  headers without data and missing output of errors
 	* flag.def: renamed new listing options according to NEWS and docs
+	* parser.y: msgid change "runtime elements" instead of unclear "sources"
 
 2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
 
