@@ -546,27 +546,33 @@ static void
 cob_move_binary_to_binary (cob_field *f1, cob_field *f2)
 {
 	union {
-		cob_u64_t		val;
-		cob_s64_t		val2;
+		cob_u64_t		uval;
+		cob_s64_t		sval;
 	}		ul64;
 	unsigned int	sign;
 
 	sign = 0;
 	if (COB_FIELD_HAVE_SIGN (f1)) {
-		ul64.val2 = cob_binary_mget_sint64 (f1);
-		if (ul64.val2 < 0) {
+		ul64.sval = cob_binary_mget_sint64 (f1);
+		if (ul64.sval < 0) {
 			sign = 1;
 		}
+		if (COB_FIELD_BINARY_TRUNC (f2)) {
+			ul64.sval %= cob_exp10_ll[(int)COB_FIELD_DIGITS(f2)];
+		}
 	} else {
-		ul64.val = cob_binary_mget_uint64 (f1);
+		ul64.uval = cob_binary_mget_uint64 (f1);
+		if (COB_FIELD_BINARY_TRUNC (f2)) {
+			ul64.uval %= cob_exp10_ll[(int)COB_FIELD_DIGITS(f2)];
+		}
 	}
 	if (COB_FIELD_HAVE_SIGN (f2)) {
-		cob_binary_mset_sint64 (f2, ul64.val2);
+		cob_binary_mset_sint64 (f2, ul64.sval);
 	} else {
 		if (sign) {
-			cob_binary_mset_uint64 (f2, (cob_u64_t)(-ul64.val2));
+			cob_binary_mset_uint64 (f2, (cob_u64_t)(-ul64.sval));
 		} else {
-			cob_binary_mset_uint64 (f2, ul64.val);
+			cob_binary_mset_uint64 (f2, ul64.uval);
 		}
 	}
 }
@@ -596,8 +602,7 @@ cob_move_display_to_binary (cob_field *f1, cob_field *f2)
 		}
 	}
 
-	if (COB_FIELD_BINARY_TRUNC (f2) &&
-	    !COB_FIELD_REAL_BINARY(f2)) {
+	if (COB_FIELD_BINARY_TRUNC (f2)) {
 		val %= cob_exp10_ll[(int)COB_FIELD_DIGITS(f2)];
 	}
 
