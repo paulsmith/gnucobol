@@ -1,4 +1,10 @@
 
+2018-12-13  Ron Norman <rjn@inglenet.com>
+
+	fixing EXTFH bug #561
+	* fileio.c (update_file_to_fcd): adjustments for setting openMode
+	* fileio.c (copy_fcd_to_file): fixed coding error if file has no keys
+
 2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* intrinsic.c (cob_intr_content_of): fixed unlikely case of empty *srcfield

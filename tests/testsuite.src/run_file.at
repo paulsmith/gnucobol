@@ -5973,7 +5973,6 @@ AT_CLEANUP
 AT_SETUP([EXTFH (using ISAM callback)])
 AT_KEYWORDS([runfile])
 
-# FIXME / TODO: add aditional test with callback for sequential file
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
 
 AT_DATA([prog.cob], [
@@ -6586,39 +6585,7 @@ AT_DATA([cmod.c], [[
 #include <stdio.h>
 #include <libcob.h>
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-#define MIN(a,b) (a < b ? a : b)
-
 static char *txtOpCode(int opCode);
-
-/*************************************************************************
-   Replace filename with environment variable value, then open the file
-   This is required as MF Cobol seems to have pre-read the ENV Variables
-*************************************************************************/
-static int
-doOpenFile (
-   unsigned char  *opCodep,
-   FCD3  *fcd,
-   char  *opmsg)
-{
-   int      sts,oldlen,j,k;
-   char  *oldFptr,*env,wrk[64];
-   unsigned char  svOther;
-   unsigned int   opCode;
-
-   oldFptr = fcd->fnamePtr;            /* Save values */
-   oldlen  = LDCOMPX2(fcd->fnameLen);
-   fcd->otherFlags &= ~OTH_DOLSREAD;
-   svOther = fcd->otherFlags;
-
-   return EXTFH( opCodep, fcd );          /* No DD_, so use normal MF File Open */
-}
-
 /*********************************************************
  *  TSTFH - External File Handler entry point.
 *********************************************************/
@@ -6626,10 +6593,308 @@ int
 TSTFH (unsigned char *opCodep, FCD3 *fcd)
 {
    unsigned int   opCode;
-   char  *fname;
-   int      sts, ky, j, k;
 
-   if(*opCodep == 0xfa)
+   if (*opCodep == 0xfa)
+      opCode = 0xfa00 + opCodep[1];
+   else
+      opCode = opCodep[1];
+
+   if (fcd->fileOrg == ORG_LINE_SEQ
+    || fcd->fileOrg == ORG_SEQ
+    || fcd->fileOrg == ORG_INDEXED
+    || fcd->fileOrg == ORG_RELATIVE) {
+      switch (opCode) {
+      case OP_OPEN_OUTPUT:
+      case OP_OPEN_IO:
+      case OP_OPEN_EXTEND:
+      case OP_OPEN_OUTPUT_NOREWIND:
+         return EXTFH(opCodep, fcd);
+         break;
+
+      case OP_OPEN_INPUT:
+      case OP_OPEN_INPUT_NOREWIND:
+      case OP_OPEN_INPUT_REVERSED:
+         return EXTFH(opCodep, fcd);
+         break;
+
+      default:
+         break;
+      }
+
+   }
+
+   if (opCode == OP_CLOSE
+    && (fcd->openMode & OPEN_NOT_OPEN) ) {
+      return 0;
+   }
+
+   return EXTFH(opCodep, fcd);
+}
+]])
+
+AT_CHECK([$COMPILE -fcallfh=TSTFH prog.cob cmod.c], [0], [], [])
+
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[OK: Operations on empty file
+Loading sample data file.
+Sample data file load complete.
+LIST SAMPLE FILE
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+LIST SAMPLE FILE DESCENDING
+Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
+Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
+Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
+Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
+Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
+Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
+Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
+Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
+Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
+Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
+Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
+Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
+Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=8470    .
+Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
+  Write: GIB00000 got 22 as expected
+   Read: GAM00000 got 00 as expected 00075 terminals
+ReWrite: GAM00000 got 00/02 as expected 00080 terminals
+   Read: BET00000 got 00 as expected 00034 terminals
+ReWrite: GAM00000 got 00/02 as expected
+ReWrite: FOR00000 got 00/02 as expected
+Expected ERROR 39 opening TSTFILE, Record size different
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SEQUENTIAL with EXTFH])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL SEQFIX
+           ORGANIZATION SEQUENTIAL
+           FILE STATUS IS CUST-STAT .
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  CM-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  CM-TRAILER                      PICTURE X(8). 
+       
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+      
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+      
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+      
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Open Input when no file Sts:" CUST-STAT
+           OPEN EXTEND FLATFILE.
+           DISPLAY "Open Extend when no file Sts:" CUST-STAT 
+           CLOSE FLATFILE.
+           DISPLAY "Close when no open file Sts:" CUST-STAT 
+           OPEN OUTPUT FLATFILE.
+           CLOSE FLATFILE.
+           OPEN EXTEND FLATFILE.
+           DISPLAY "Open Extend when empty file Sts:" CUST-STAT 
+           CLOSE FLATFILE.
+
+           PERFORM LOADFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Open Sts:" CUST-STAT 
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           READ FLATFILE WITH LOCK
+           DISPLAY "Read " CM-CUST-NUM
+      *    DELETE FLATFILE 
+      *    DISPLAY "DELETE " CM-CUST-NUM " Sts " CUST-STAT.
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list File Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           OPEN EXTEND FLATFILE.
+           MOVE 2 TO SUB
+           PERFORM LOAD-RECORD
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "List File afer EXTEND Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           STOP RUN RETURNING 0.
+      
+       READ-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Status: " CUST-STAT
+           ELSE
+             DISPLAY "Read  " CM-CUST-NUM
+                     " Trms:" CM-NO-TERMINALS
+           END-IF.
+
+       LOADFILE.
+           DISPLAY "Loading sample data file.".
+      
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           DISPLAY "Sample data file load complete.".
+           CLOSE FLATFILE.
+      
+       LOAD-RECORD.
+      
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           MOVE 20070319                     TO CM-PK-DATE.
+           IF SUB = 1 OR 4 OR 6
+               MOVE -20070319                 TO CM-PK-DATE.
+      
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE TSPFL-RECORD.
+])
+
+AT_DATA([cmod.c], [[
+
+#include <stdio.h>
+#include <libcob.h>
+
+static char *txtOpCode(int opCode);
+
+static int
+doOpenFile(
+   unsigned char  *opCodep, 
+   FCD3  *fcd,
+   char  *opmsg) 
+{
+   int      sts;
+
+   sts = EXTFH( opCodep, fcd );
+   printf("EXFTH did %s; Status=%c%c; File now %s\n",
+       opmsg, fcd->fileStatus[0], fcd->fileStatus[1],
+       (fcd->openMode & OPEN_NOT_OPEN) ? "Closed" : "Open");
+   return sts;
+}
+
+/*********************************************************
+ *  TSTFH - External File Handler entry point.
+*********************************************************/
+int   
+TSTFH (unsigned char *opCodep, FCD3 *fcd) 
+{
+   unsigned int   opCode;
+   int      sts;
+
+   if (*opCodep == 0xfa)
       opCode = 0xfa00 + opCodep[1];
    else
       opCode = opCodep[1];
@@ -6652,6 +6917,10 @@ TSTFH (unsigned char *opCodep, FCD3 *fcd)
          return doOpenFile( opCodep, fcd, txtOpCode(opCode));
          break;
 
+      case OP_CLOSE:
+         return doOpenFile( opCodep, fcd, txtOpCode(opCode));
+         break;
+
       default:
          break;
       }
@@ -6663,7 +6932,9 @@ TSTFH (unsigned char *opCodep, FCD3 *fcd)
       return 0;
    }
 
-   sts = EXTFH( opCodep, fcd );
+   sts = EXTFH(opCodep, fcd);
+   printf("EXFTH did %s; Status=%c%c\n", txtOpCode(opCode),
+       fcd->fileStatus[0], fcd->fileStatus[1]);
    return sts;
 }
 
@@ -6722,52 +6993,95 @@ txtOpCode(int opCode)
    case OP_WRITE_AFTER_TAB:   return "WRITE_AFTER_TAB";
    case OP_WRITE_AFTER_PAGE:  return "WRITE_AFTER_PAGE";
    }
-   sprintf(tmp,"Func 0x%02X:",opCode);
+   sprintf(tmp, "Func 0x%02X:", opCode);
    return tmp;
 }
 ]])
 
-AT_CHECK([$COMPILE -fcallfh=TSTFH prog.cob cmod.c], [0], [], [])
+AT_CHECK([$COMPILE -w -fcallfh=TSTFH prog.cob cmod.c], [0], [], [])
 
-AT_CHECK([./prog], [0],
-[OK: Operations on empty file
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[EXFTH did OPEN_IN; Status=35; File now Closed
+Open Input when no file Sts:35
+EXFTH did OPEN_EXT; Status=35; File now Closed
+Open Extend when no file Sts:35
+EXFTH did CLOSE; Status=42; File now Closed
+Close when no open file Sts:42
+EXFTH did OPEN_OUT; Status=00; File now Open
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_EXT; Status=00; File now Open
+Open Extend when empty file Sts:00
+EXFTH did CLOSE; Status=00; File now Closed
 Loading sample data file.
+EXFTH did OPEN_OUT; Status=00; File now Open
+EXFTH did WRITE; Status=00
+EXFTH did WRITE; Status=00
+EXFTH did WRITE; Status=00
+EXFTH did WRITE; Status=00
+EXFTH did WRITE; Status=00
+EXFTH did WRITE; Status=00
 Sample data file load complete.
-LIST SAMPLE FILE
-Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
-Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
-Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
-Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
-Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
-Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
-Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
-Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
-Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
-Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
-Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
-LIST SAMPLE FILE DESCENDING
-Key: NEW00000 is NEW WAVE SURF SHOPS INC.  Disk=8470    .
-Key: MOR00000 is MORNINGSIDE CARPENTRY.    Disk=8470    .
-Key: LEW00000 is LEWISTON GRAPHICS LTD.    Disk=8470    .
-Key: KON00000 is KONFLAB PLASTIC PRODUCTS. Disk=8417    .
-Key: JOH00000 is JOHNSON BOATING SUPPLIES  Disk=8417    .
-Key: INC00000 is INCREMENTAL BACKUP CORP.  Disk=8417    .
-Key: H&J00000 is H & J PLUMBING SUPPLIES   Disk=8470    .
-Key: GIB00000 is GIBRALTER LIFE INSURANCE  Disk=8417    .
-Key: GAM00000 is GAMMA X-RAY TECHNOLOGY    Disk=8417    .
-Key: FOR00000 is FORTUNE COOKIE COMPANY    Disk=8470    .
-Key: EPS00000 is EPSILON EQUIPMENT SUPPLY  Disk=8417    .
-Got: BET00000 is BETA SHOE MFG. INC.       Disk=8470    .
-Nxt: DEL00000 is DELTA LUGGAGE REPAIRS     Disk=8470    .
-Ky2: GIB00000 is GIBRALTER LIFE INSURANCE  Mach=UNI-80/6.
-  Write: GIB00000 got 22 as expected
-   Read: GAM00000 got 00 as expected 00075 terminals
-ReWrite: GAM00000 got 00/02 as expected 00080 terminals
-   Read: BET00000 got 00 as expected 00034 terminals
-ReWrite: GAM00000 got 00/02 as expected
-ReWrite: FOR00000 got 00/02 as expected
-Expected ERROR 39 opening TSTFILE, Record size different
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_IN; Status=00; File now Open
+Open Sts:00
+EXFTH did READ_SEQ; Status=00
+Read ALP00000 Sts:00
+EXFTH did READ_SEQ; Status=00
+Read BET00000 Sts:00
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_IO; Status=00; File now Open
+EXFTH did READ_SEQ; Status=00
+Read ALP00000 Sts:00
+EXFTH did REWRITE; Status=00
+REWRITE ALP00000 Sts 00 Trms:0011
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_IO; Status=00; File now Open
+EXFTH did READ_SEQ; Status=00
+Read ALP00000 Sts:00
+EXFTH did REWRITE; Status=00
+REWRITE ALP00000 Sts 00 Trms:0012
+EXFTH did READ_SEQ; Status=00
+Read BET00000
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_IN; Status=00; File now Open
+Re-list File Open Sts:00
+EXFTH did READ_SEQ; Status=00
+Read  ALP00000 Trms:0012
+EXFTH did READ_SEQ; Status=00
+Read  BET00000 Trms:0013
+EXFTH did READ_SEQ; Status=00
+Read  GAM00000 Trms:0075
+EXFTH did READ_SEQ; Status=00
+Read  DEL00000 Trms:0010
+EXFTH did READ_SEQ; Status=00
+Read  EPS00000 Trms:0090
+EXFTH did READ_SEQ; Status=00
+Read  FOR00000 Trms:0254
+EXFTH did READ_SEQ; Status=10
+Read Status: 10
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_EXT; Status=00; File now Open
+EXFTH did WRITE; Status=00
+EXFTH did CLOSE; Status=00; File now Closed
+EXFTH did OPEN_IN; Status=00; File now Open
+List File afer EXTEND Open Sts:00
+EXFTH did READ_SEQ; Status=00
+Read  ALP00000 Trms:0012
+EXFTH did READ_SEQ; Status=00
+Read  BET00000 Trms:0013
+EXFTH did READ_SEQ; Status=00
+Read  GAM00000 Trms:0075
+EXFTH did READ_SEQ; Status=00
+Read  DEL00000 Trms:0010
+EXFTH did READ_SEQ; Status=00
+Read  EPS00000 Trms:0090
+EXFTH did READ_SEQ; Status=00
+Read  FOR00000 Trms:0254
+EXFTH did READ_SEQ; Status=00
+Read  BET00000 Trms:0013
+EXFTH did READ_SEQ; Status=10
+Read Status: 10
+EXFTH did CLOSE; Status=00; File now Closed
 ], [])
 
 AT_CLEANUP
-

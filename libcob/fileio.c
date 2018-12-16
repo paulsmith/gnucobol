@@ -7018,16 +7018,20 @@ update_file_to_fcd (cob_file *f, FCD3 *fcd, unsigned char *fnstatus)
 	if (f->open_mode == COB_OPEN_CLOSED)
 		fcd->openMode = OPEN_NOT_OPEN;
 	else if( f->open_mode == COB_OPEN_INPUT)
-		fcd->openMode = (fcd->openMode&OPEN_NOT_OPEN) | OPEN_INPUT;
+		fcd->openMode = OPEN_INPUT;
 	else if (f->open_mode == COB_OPEN_OUTPUT)
-		fcd->openMode = (fcd->openMode&OPEN_NOT_OPEN) | OPEN_OUTPUT;
+		fcd->openMode = OPEN_OUTPUT;
 	else if (f->open_mode == COB_OPEN_I_O)
-		fcd->openMode = (fcd->openMode&OPEN_NOT_OPEN) | OPEN_IO;
+		fcd->openMode = OPEN_IO;
 	else if (f->open_mode == COB_OPEN_EXTEND)
-		fcd->openMode = (fcd->openMode&OPEN_NOT_OPEN) | OPEN_EXTEND;
+		fcd->openMode = OPEN_EXTEND;
 	STCOMPX4(f->record_min,fcd->minRecLen);
-	STCOMPX4(f->record_min,fcd->curRecLen);
-	STCOMPX4(f->record_max,fcd->maxRecLen);
+	if (f->record) {
+		STCOMPX4(f->record->size, fcd->curRecLen);
+	} else {	/* CHECKME: is this correct? */
+		STCOMPX4(f->record_min, fcd->curRecLen);
+	}
+	STCOMPX4(f->record_max, fcd->maxRecLen);
 }
 
 /*
@@ -7195,10 +7199,9 @@ update_fcd_to_file (FCD3* fcd, cob_file *f, cob_field *fnstatus, int wasOpen)
  * Copy 'FCD' to 'cob_file' based information
  */
 static void
-copy_fcd_to_file(FCD3* fcd, cob_file *f)
+copy_fcd_to_file (FCD3* fcd, cob_file *f)
 {
 	int		k, p, parts, off;
-	char	fdname[48];
 	EXTKEY	*key;
 
 	if(fcd->accessFlags == ACCESS_SEQ)
@@ -7263,6 +7266,7 @@ copy_fcd_to_file(FCD3* fcd, cob_file *f)
 		f->assign->attr = &alnum_attr;
 	}
 	if (f->select_name == NULL) {
+		char	fdname[48];
 		f->select_name = (char*)f->assign->data;
 		for (k=0; k < f->assign->size; k++) {
 			if (f->assign->data[k] == '/') {
@@ -7276,9 +7280,9 @@ copy_fcd_to_file(FCD3* fcd, cob_file *f)
 		f->select_name = cob_strdup (fdname);
 	}
 	if (f->keys == NULL) {
-		f->nkeys = LDCOMPX2(fcd->kdbPtr->nkeys);
 		if (fcd->kdbPtr != NULL
-		 && f->nkeys > 0) { 	/* Copy Key information from FCD to cob_file */
+		 && fcd->kdbPtr->nkeys > 0) { 	/* Copy Key information from FCD to cob_file */
+			f->nkeys = LDCOMPX2(fcd->kdbPtr->nkeys);
 			f->keys = cob_malloc (sizeof(cob_file_key) * f->nkeys);
 			for (k=0; k < f->nkeys; k++) {
 				parts = LDCOMPX2(fcd->kdbPtr->key[k].count);
