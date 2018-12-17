@@ -3452,7 +3452,9 @@ AT_CLEANUP
 
 
 AT_SETUP([System routines for directories (2)])
-AT_KEYWORDS([runfile extensions CBL_CREATE_DIR CBL_CREATE_FILE CBL_CLOSE_FILE CBL_CHECK_FILE_EXIST CBL_DELETE_DIR CBL_PURGE_DIR])
+AT_KEYWORDS([runfile extensions
+CBL_CREATE_DIR CBL_CREATE_FILE CBL_CLOSE_FILE CBL_CHECK_FILE_EXIST
+CBL_DELETE_DIR CBL_PURGE_DIR])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION      DIVISION.
@@ -3749,9 +3751,6 @@ AT_CHECK([diff prog.cob prog3.cob], [0], [], [])
 AT_CLEANUP
 
 
-
-
-
 AT_SETUP([Default file external name])
 AT_KEYWORDS([runfile])
 
@@ -3759,7 +3758,7 @@ AT_DATA([fexists_signed.c], [
 
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #define COB_LIB_EXPIMP
 #include <libcob.h>

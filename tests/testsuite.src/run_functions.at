@@ -424,6 +424,7 @@ AT_DATA([prog.cob], [
               END-DISPLAY
            END-IF
            FREE B
+           SET  P      TO ADDRESS OF B
            MOVE 'BBBB' TO X
            STRING FUNCTION CONTENT-OF ( P )
                   DELIMITED BY SIZE
@@ -431,7 +432,7 @@ AT_DATA([prog.cob], [
            END-STRING
       *>   Note: result *should* depend on dialect option zero-length literals
            IF X NOT EQUAL 'BBBB' THEN
-              DISPLAY 'CONTENT-OF unallocated BASED item wrong: "' X "'"
+              DISPLAY 'CONTENT-OF unallocated BASED item wrong: "' X """"
               END-DISPLAY
            END-IF
            IF FUNCTION EXCEPTION-STATUS NOT = "EC-DATA-PTR-NULL" THEN
