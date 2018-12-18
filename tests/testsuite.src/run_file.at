@@ -3475,49 +3475,53 @@ AT_DATA([prog.cob], [
            CALL "CBL_CREATE_DIR" USING w-dirname-1.
            IF RETURN-CODE <> 0
               DISPLAY "FAILED 1: CBL_CREATE_DIR (res=" RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
            END-IF
 
            CALL "CBL_CREATE_DIR" USING w-dirname-2.
            IF RETURN-CODE <> 0
               DISPLAY "FAILED 2: CBL_CREATE_DIR (res=" RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
+           END-IF
+
+      *    Should fail because directory does NOT exists yet.
+           CALL "CBL_CREATE_FILE"
+              USING w-filename, 1, 0, 0, fh.
+           IF RETURN-CODE <> 35
+              DISPLAY "FAILED 3: CBL_CREATE_FILE expected fail (res="
+                      RETURN-CODE ")"
+              IF RETURN-CODE = ZERO
+                 CALL "CBL_CLOSE_FILE" USING fh
+              END-IF
            END-IF
 
            CALL "CBL_CREATE_DIR" USING w-dirname-3.
            IF RETURN-CODE <> 0
-              DISPLAY "FAILED 3: CBL_CREATE_DIR (res=" RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
+              DISPLAY "FAILED 4: CBL_CREATE_DIR (res=" RETURN-CODE ")"
            END-IF
 
            CALL "CBL_CREATE_FILE"
               USING w-filename, 1, 0, 0, fh.
            IF RETURN-CODE <> 0
-              DISPLAY "FAILED 4: CBL_CREATE_FILE (res="
+              DISPLAY "FAILED 5: CBL_CREATE_FILE (res="
                       RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
            END-IF
 
            CALL "CBL_CLOSE_FILE" USING fh.
            IF RETURN-CODE <> 0
-              DISPLAY "FAILED 5: CBL_CLOSE_FILE (res="
+              DISPLAY "FAILED 6: CBL_CLOSE_FILE (res="
                       RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
            END-IF
 
            CALL "CBL_CHECK_FILE_EXIST" USING w-filename, w-finfo.
            IF RETURN-CODE <> 0
-              DISPLAY "FAILED 6: CBL_CHECK_FILE_EXIST (res="
+              DISPLAY "FAILED 7: CBL_CHECK_FILE_EXIST (res="
                       RETURN-CODE ")"
-              STOP RUN ERROR RETURN-CODE
            END-IF
 
 
       *    Should fail because directory is NOT empty.
            CALL "CBL_DELETE_DIR" USING w-dirname-1.
            IF RETURN-CODE = 0
-              DISPLAY "FAILED 7: CBL_DELETE_DIR EXPECTED TO FAIL"
-              STOP RUN ERROR RETURN-CODE
+              DISPLAY "FAILED 8: CBL_DELETE_DIR EXPECTED TO FAIL"
            END-IF
       ***********************
       * TO-DO: IMPLEMENT CBL_PURGE_DIR? NOT IN MF OR ACU.
@@ -3525,15 +3529,13 @@ AT_DATA([prog.cob], [
       *    Remove all files (including sub-directories) in tmp1
       *    CALL "CBL_PURGE_DIR" USING w-dirname-1.
       *    IF RETURN-CODE <> 0
-      *        DISPLAY "FAILED 8: CBL_PURGE_DIR (res=" RETURN-CODE ")"
-      *        STOP RUN ERROR RETURN-CODE
+      *        DISPLAY "FAILED 9: CBL_PURGE_DIR (res=" RETURN-CODE ")"
       *  END-IF
       *
       *     Should succeed because directory is NOW empty.
       *     CALL "CBL_DELETE_DIR" USING w-dirname-1.
       *     IF RETURN-CODE <> 0
-      *         DISPLAY "FAILED 9: CBL_DELETE_DIR (res=" RETURN-CODE ")"
-      *         STOP RUN ERROR RETURN-CODE
+      *         DISPLAY "FAILED 10: CBL_DELETE_DIR (res=" RETURN-CODE ")"
       *     END-IF
 
            STOP RUN NORMAL
