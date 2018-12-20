@@ -1,7 +1,15 @@
 
+2018-12-19  Ron Norman <rjn@inglenet.com>
+
+	fixing EXTFH bug #561, part II
+	* fileio.c (lineseq_write): handle EXTFH with write options not set
+	* fileio.c (copy_file_to_fcd, copy_fcd_to_file): added code for
+	  LINE SEQUENTIAL flags for EXTFH interface
+	  *Note: deactivated until file_features are merged from rw-branch*
+
 2018-12-13  Ron Norman <rjn@inglenet.com>
 
-	fixing EXTFH bug #561
+	fixing EXTFH bug #561, part I
 	* fileio.c (update_file_to_fcd): adjustments for setting openMode
 	* fileio.c (copy_fcd_to_file): fixed coding error if file has no keys
 

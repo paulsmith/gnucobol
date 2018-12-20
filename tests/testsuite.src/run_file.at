@@ -5877,6 +5877,7 @@ AT_CLEANUP
 AT_SETUP([READ INPUT pipe & WRITE OUTPUT pipe])
 AT_KEYWORDS([runfile])
 
+# not implemented in 2.2+
 AT_XFAIL_IF([true])
 
 AT_DATA([test-data-in],
@@ -5971,7 +5972,7 @@ Country: FRANCE
 AT_CLEANUP
 
 
-AT_SETUP([EXTFH (using ISAM callback)])
+AT_SETUP([EXTFH: using ISAM callback])
 AT_KEYWORDS([runfile])
 
 AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
@@ -6574,15 +6575,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([cmod.c], [[
-/******************************************************************************
-*     2017, Ron Norman                                                        *
-*  Source for a Micro Focus COBOL External File Handler.                      *
-*                                                                             *
-* For GnuCOBOL add  -fcallfh=TSTFH              as a compile option           *
-*                                                                             *
-* This is a sample module for GnuCOBOL, but it does not do very much          *
-******************************************************************************/
-
 #include <stdio.h>
 #include <libcob.h>
 
@@ -6678,7 +6670,7 @@ Expected ERROR 39 opening TSTFILE, Record size different
 AT_CLEANUP
 
 
-AT_SETUP([SEQUENTIAL with EXTFH])
+AT_SETUP([EXTFH: SEQUENTIAL files])
 AT_KEYWORDS([runfile])
 
 AT_DATA([prog.cob], [
@@ -6694,7 +6686,7 @@ AT_DATA([prog.cob], [
            ORGANIZATION SEQUENTIAL
            FILE STATUS IS CUST-STAT .
 
-       DATA  DIVISION.
+       DATA DIVISION.
        FILE SECTION.
        FD  FLATFILE
            BLOCK CONTAINS 5 RECORDS.
@@ -6865,7 +6857,6 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([cmod.c], [[
-
 #include <stdio.h>
 #include <libcob.h>
 
@@ -6999,7 +6990,7 @@ txtOpCode(int opCode)
 }
 ]])
 
-AT_CHECK([$COMPILE -w -fcallfh=TSTFH prog.cob cmod.c], [0], [], [])
+AT_CHECK([$COMPILE -fcallfh=TSTFH prog.cob cmod.c], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [EXFTH did OPEN_IN; Status=35; File now Closed
@@ -7086,3 +7077,485 @@ EXFTH did CLOSE; Status=00; File now Closed
 ], [])
 
 AT_CLEANUP
+
+
+AT_SETUP([EXTFH: LINE SEQUENTIAL files, direct EXTFH])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+       DATA DIVISION.
+       FILE SECTION.
+       WORKING-STORAGE SECTION.
+
+       01  I                       PIC XX COMP-X.
+
+       01  WS-FCD-DDNAME           PIC X(8) VALUE SPACES.
+       01  WS-FCD-PTR              POINTER   VALUE NULL.
+
+       01  WS-FCD-SIZE             PIC 9(04) VALUE   0       COMP-5.
+       01  WS-FCD-FLAGS            PIC 9(04) VALUE   0       COMP-5.
+
+       01  DISPLAY-BYTE.
+          05  DISPLAY-XXX             PIC X(03).
+          05  DISPLAY-ZZ9             REDEFINES DISPLAY-XXX
+                                      PIC ZZ9.
+       01  ACTION-CODE                 pic x(2).
+          78  OP-OPEN-INPUT           value x"fa00".
+          78  OP-OPEN-OUTPUT          value x"fa01".
+          78  OP-OPEN-I-O             value x"fa02".
+          78  OP-WRITE                value x"faf3".
+          78  OP-RELEASE              value x"faf3".
+          78  OP-REWRITE              value x"faf4".
+          78  OP-READ-NEXT            value x"faf5".
+          78  OP-START-EQUAL          value x"fae9".
+          78  OP-CLOSE                value x"fa80".
+          78  OP-QUERY-FILE           value x"0006".
+
+       01  ACTION-CODE-WORK            redefines ACTION-CODE.
+          05  ACTION-CODE-1           PIC x(01)                 COMP-X.
+          05  ACTION-CODE-2           PIC x(01)                 COMP-X.
+
+       01  DISPLAY-A1-XXX              PIC X(03).
+       01  DISPLAY-A1-ZZ9              REDEFINES DISPLAY-A1-XXX
+                                      PIC ZZ9.
+       01  DISPLAY-A2-XXX              PIC X(03).
+       01  DISPLAY-A2-ZZ9              REDEFINES DISPLAY-A2-XXX
+                                       PIC ZZ9.
+
+       01  FCD-FILENAME               PIC X(80) value "test.out".
+       01  FCD-RECORD                 PIC X(512) value spaces.
+
+       LINKAGE SECTION.
+
+       01  FCD-MAP.
+      *    copy 'xfhfcd3.cpy'.
+
+          40  FCD-FILE-STATUS.
+             42 FCD-STATUS-KEY-1    pic x.
+             42 FCD-STATUS-KEY-2    pic x.
+             42 FCD-BINARY          redefines FCD-STATUS-KEY-2
+                                    pic x comp-x.
+
+          40  FCD-LENGTH            pic xx comp-x.
+          40  FCD-VERSION           pic x comp-x.
+             78 fcd--version-number           value 1.
+
+          40  FCD-ORGANIZATION      pic x comp-x.
+             78 fcd--line-sequential-org      value 0.
+             78 fcd--sequential-org           value 1.
+             78 fcd--indexed-org              value 2.
+             78 fcd--relative-org             value 3.
+             78 fcd--determine-org            value 255. *> see opcode 0006
+
+          40  FCD-ACCESS-MODE       pic x comp-x.
+             78 fcd--sequential-access        value 0.
+             78 fcd--dup-prime-access         value 1.
+             78 fcd--random-access            value 4.
+             78 fcd--dynamic-access           value 8.
+             78 fcd--status-defined           value h"80".
+
+          40  FCD-OPEN-MODE         pic x comp-x.     *> open mode
+             78 fcd--open-input               value 0.
+             78 fcd--open-output              value 1.
+             78 fcd--open-i-o                 value 2.
+             78 fcd--open-extend              value 3.
+             78 fcd--open-max                 value 3.
+             78 fcd--open-closed              value 128.
+
+          40  FCD-RECORDING-MODE    pic x comp-x.    *> Recording mode
+             78 fcd--recmode-fixed            value 0.
+             78 fcd--recmode-variable         value 1.
+
+          40  FCD-FILE-FORMAT       pic x comp-x.
+             78 fcd--format-liiv1             value 0.
+             78 fcd--format-cisam             value 1.
+             78 fcd--format-liiv2             value 2.
+             78 fcd--format-cobol2            value 3.
+             78 fcd--format-idx4              value 4.
+             78 fcd--format-btrieve-ansi      value 5.
+             78 fcd--format-btrieve-non-ansi  value 6.
+      *>      78 fcd--format-rlio              value 7.
+             78 fcd--format-big               value 8.
+             78 fcd--format-leafrec           value 9.
+             78 fcd--format-cst               value 10.
+             78 fcd--format-mvs-print         value 11.
+      *>      78                          value 13.
+             78 fcd--format-heap              value 14.
+             78 fcd--format-esds              value 15.
+             78 fcd--format-esds-big          value 16.
+             78 fcd--format-qsamv             value 255.
+             78 fcd--max-file-format value 17.    *> 1 greater than max permissible format
+
+          40  fcd-device-flag       pic x comp-x.
+             78 fcd--dev-normal               value 0.
+             78 fcd--dev-device               value 1.
+             78 fcd--dev-stdin                value 2.
+             78 fcd--dev-stdout               value 3.
+             78 fcd--dev-stderr               value 4.
+             78 fcd--dev-badname              value 5.
+             78 fcd--dev-input-pipe           value 6.
+             78 fcd--dev-output-pipe          value 7.
+             78 fcd--dev-i-o-pipe             value 8.
+             78 fcd--dev-library              value 9.
+             78 fcd--dev-disk-file            value 10.
+             78 fcd--dev-null                 value 11.
+             78 fcd--dev-disk-redir           value 12.
+             78 fcd--dev-no-map               value 13.
+
+          40  fcd-lock-action       pic x comp-x.
+      *> Used only in c-isam type calls...
+             78 fcd--getlock                  value 1.
+             78 fcd--nolock                   value 2.
+             78 fcd--ignorelock               value 3.
+
+          40  FCD-DATA-COMPRESS     pic x comp-x.
+
+          40  FCD-BLOCKING          pic x comp-x.
+          40  FCD-additional-status redefines FCD-blocking      
+                                    pic x    comp-x.  
+
+          40  FCD-IDXCACHE-SIZE     pic x comp-x.
+
+          40  FCD-PERCENT           pic x comp-x.
+          40  FCD-REC-COUNT-SET     redefines FCD-PERCENT
+                                    pic x comp-x.
+
+          40  FCD-BLOCK-SIZE        pic x comp-x.
+
+          40  FCD-FLAGS-1           pic x comp-x.
+             78 fcd--mainframe-compat         value h"80".
+             78 fcd--ansi-line-adv            value h"40".
+             78 fcd--return-key-only          value h"20".
+             78 fcd--bypass-esds              value h"10".
+             78 fcd--no-xfhname-mapping       value h"08".
+             78 fcd--dont-call-xfhtrace       value h"04".
+             78 fcd--call-xfhtrace            value h"02".
+             78 fcd--fcd-decl                 value h"01". *>declaratives exist
+
+          40  fcd-flags-2           pic x comp-x.
+             78  fcd--convert-dbspace         value h"01".
+
+          40  fcd-mvs-flags         pic x comp-x.     *> MVS flag bits
+             78  fcd--file-is-syspunch        value h"10".
+             78  fcd--file-is-indd            value h"08".
+             78  fcd--file-is-outdd           value h"04".
+             78  fcd--amode-31bit             value h"02".
+             78  fcd--amode-24bit             value h"01".
+             78  fcd--amode-bits
+                 value fcd--amode-31bit + fcd--amode-24bit.
+
+          40  FCD-STATUS-TYPE       pic x comp-x.
+             78 fcd--ans85-status             value h"80".
+             78 fcd--no-space-fill            value h"40".
+             78 fcd--no-strip-spaces          value h"20".
+             78 fcd--no-expand-tabs           value h"10".
+             78 fcd--rec-term-bit             value h"08".
+             78 fcd--insert-tabs              value h"04".
+             78 fcd--insert-nulls             value h"02".
+             78 fcd--cr-delimiter             value h"01".
+             78 fcd--modify-writes 
+                value fcd--insert-tabs + fcd--insert-nulls.
+
+          40  FCD-OTHER-FLAGS       pic x comp-x.
+             78 fcd--optional-file            value h"80".
+             78 fcd--nodetectlock-input       value h"40".
+             78 fcd--not-optional             value h"20".
+             78 fcd--external-name            value h"10".
+             78 fcd--get-info                 value h"08".
+             78 fcd--nodetectlock             value h"04".
+             78 fcd--multiple-reel            value h"02".
+             78 fcd--line-advancing           value h"01".
+             78 fcd--special-sequential  
+                 value fcd--optional-file 
+                 + fcd--multiple-reel + fcd--line-advancing.
+
+          40  FCD-TRANS-LOG         pic x comp-x.
+             78 fcd--open-input-shared        value h"80".
+             78 fcd--allow-input-locks        value h"40".
+             78 fcd--no-read-sema             value h"20".
+             78 fcd--expand-positioning-bit   value h"10".
+
+             78 fcd--no-seq-check             value h"08".
+             78 fcd--dat-term-bit             value h"04".
+             78 fcd--slow-read                value h"02".
+             78 fcd--suppress-adv             value h"01".
+
+          40  FCD-LOCKTYPES         pic x comp-x.
+             78 fcd--interlang-locking        value h"80".
+             78 fcd--allow-readers            value h"40".
+             78 fcd--separate-lock-file       value h"20".
+             78 fcd--single-open              value h"10".
+             78 fcd--nfs-file-lock            value h"08".
+             78 fcd--nfs-file-lock-hp         value h"04".
+             78 fcd--nfs-file-locks     
+                value fcd--nfs-file-lock + fcd--nfs-file-lock-hp.
+
+          40  FCD-FS-FLAGS          pic x comp-x.
+             78 fcd--transaction-processing-bit  value h"80".
+             78 fcd--recovery-run-b           value h"04".
+             78 fcd--fs-server-bit            value h"02".
+
+          40  FCD-CONFIG-FLAGS      pic x comp-x.
+             78 fcd--writethru-bit            value h"80".
+             78 fcd--relative-bit             value h"40".
+             78 fcd--set-crp-bit              value h"20".
+             78 fcd--bigfile-bit              value h"10".
+      *>      78 fcd--return-percent           value h"08".
+      *>      78 fcd--dont-call-xfhconv        value h"04".
+             78 fcd--call-cobfstatconv        value h"02".
+             78 fcd--ignorelock-bit           value h"01".
+
+          40  fcd-misc-flags        pic x comp-x.
+             78 fcd--mainframe-hostfd         value h"80".
+             78 fcd--set-idxdatbuf            value h"40".
+             78 fcd--load-onto-heap           value h"20".
+             78 fcd--usage-unknown            value h"10".  
+             78 fcd--recmode-s                value h"08".  
+             78 fcd--recmode-u                value h"04".
+             78 fcd--external-fcd             value h"02".
+             78 fcd--closed-with-lock         value h"01".
+
+          40  FCD-CONFIG-FLAGS2     pic x comp-x.
+             78 fcd--file-is-ebcdic           value h"80".
+             78 fcd--file-has-write-after     value h"40".
+             78 fcd--file-has-write-before    value h"20".
+             78 fcd--file-has-adv-specified   value h"10".
+             78 fcd--no-min-len-check         value h"08".
+             78 fcd--no-key-check             value h"04".
+             78 fcd--convert-to-ascii         value h"02".
+             78 fcd--rm-behaviour             value h"01".
+             78 fcd--file-has-before-or-after 
+                value fcd--file-has-write-before
+                    + fcd--file-has-write-after.
+
+          40  FCD-LOCK-MODE         pic x comp-x.
+             78 fcd--multilock-bit            value h"80".
+             78 fcd--writelock-bit            value h"40".
+             78 fcd--retry-open-bit           value h"20".
+             78 fcd--skip-lock-bit            value h"10".
+             78 fcd--retry-lock-bit           value h"08".
+             78 fcd--manual-lock-bit          value h"04".
+             78 fcd--auto-lock-bit            value h"02".
+             78 fcd--exclusive-bit            value h"01".
+             78 fcd--sharing-bits
+                value fcd--manual-lock-bit
+                    + fcd--auto-lock-bit.
+
+
+          40  fcd-shr2              pic x comp-x.
+             78 fcd--file-max-bit             value h"08".
+             78 fcd--file-pointer-bit         value h"04".
+             78 fcd--retry-time-bit           value h"02".
+             78 fcd--start-unlock             value h"01".
+
+          40  fcd-idxcache-buffs    pic x comp-x.
+
+      ***  40                         pic x(17).            *> x"1f"
+          40  fcd-internal-flags-1 pic x comp-x.         *> x"1f"                
+          40  fcd-internal-flags-2 pic x comp-x.         *> x"20"                
+          40                         pic x(15).            *> x"21"
+
+
+          40  fcd-nls-id            pic xx comp-x.   *> NLS id (else 0)
+          
+          40  FCD-FS-FILE-ID        pic xx comp-x.
+          
+          40  fcd-retry-open-count  pic xx comp-x.
+          
+          40  FCD-NAME-LENGTH       pic xx comp-x.
+          
+          40  fcd-idxname-length    pic xx comp-x.
+          40  fcd-retry-count       pic xx comp-x.
+
+          40  FCD-KEY-ID            pic xx comp-x.    *> Indexed key identifier
+
+          40  FCD-LINE-COUNT        pic xx comp-x.    *> Line count (seq files)
+
+          40  FCD-USE-FILES         pic x comp-x.
+          40  FCD-GIVE-FILES        pic x comp-x.
+          
+          40  FCD-KEY-LENGTH        pic xx comp-x.    *> Effective key length
+
+          40                        pic x(20).
+
+
+          40  FCD-CURRENT-REC-LEN   pic x(4) comp-x.    *> Current record length
+          
+          40  FCD-MIN-REC-LENGTH    pic x(4) comp-x.    *> Minimum record length
+
+          40  FCD-MAX-REC-LENGTH    pic x(4) comp-x.    *> Max record length
+
+          40  FCD-SESSION-ID        pic x(4) comp-x.
+
+          40                        pic x(24).
+      *>   40                        pic x(20).
+
+          40  FCD-RELADDR-OFFSET    pic x(8) comp-x.
+          40  FCD-RELADDR           redefines FCD-RELADDR-OFFSET
+                                    pic x(8) comp-x.
+          40  FCD-RELADDR-BIG       redefines FCD-RELADDR-OFFSET
+                                    pic x(8) comp-x.
+           78 fcd--max-reladdr        value h"1000000000000".
+
+          40  FCD-MAX-REL-KEY       pic x(8) comp-x.
+
+          40  FCD-RELATIVE-KEY      pic x(8) comp-x.
+
+          40  FCD-HANDLE            usage pointer.
+      *    40  FCD-HANDLE-NUM        redefines FCD-HANDLE
+      *                              pic x(4) comp-x.
+      *    40  redefines FCD-HANDLE  pic x(8).
+
+          40  FCD-RECORD-ADDRESS    usage pointer.    *> Pointer to record area
+      *    40  redefines FCD-RECORD-ADDRESS    pic x(8).
+
+          40  FCD-FILENAME-ADDRESS  usage pointer.    *> Pointer to file name
+      *    40  redefines FCD-FILENAME-ADDRESS  pic x(8).
+
+          40  FCD-IDXNAME-ADDRESS   usage pointer.    *> Pointer to file name
+          40  FCD-INDEX-NAME        redefines fcd-idxname-address
+                                    usage pointer.
+      *    40  redefines FCD-IDXNAME-ADDRESS   pic x(8).
+
+          40  FCD-KEY-DEF-ADDRESS   usage pointer.    *> Pointer to key def block
+      *    40  redefines FCD-KEY-DEF-ADDRESS   pic x(8).
+
+          40  FCD-COL-SEQ-ADDRESS   usage pointer.    *> Pointer to collating seq
+      *    40  redefines FCD-COL-SEQ-ADDRESS   pic x(8).
+
+          40  FCD-FILDEF-ADDRESS    usage pointer.    *> Pointer to using list
+      *    40  redefines FCD-FILDEF-ADDRESS    pic x(8).
+
+          40  FCD-DFSORT-ADDRESS    usage pointer.
+      *    40  redefines FCD-DFSORT-ADDRESS    pic x(8).
+
+      *================================================================*
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------*
+       000-MAIN.
+
+          PERFORM 100-OPEN.
+
+          PERFORM VARYING I FROM 1 BY 1 UNTIL I > 10
+            MOVE I TO DISPLAY-A1-ZZ9
+            MOVE DISPLAY-A1-ZZ9 TO FCD-RECORD
+            PERFORM 300-WRITE
+          END-PERFORM.
+
+          PERFORM 400-CLOSE.
+          STOP RUN.
+
+      *----------------------------------------------------------------*
+      *    Process the open request
+      *
+       100-OPEN.
+
+          MOVE "TESTOUT" TO WS-FCD-DDNAME
+
+          MOVE LENGTH OF FCD-MAP TO WS-FCD-SIZE
+          DISPLAY "FCD SIZE " WS-FCD-SIZE.
+
+          IF WS-FCD-PTR EQUAL NULL
+             ALLOCATE ws-fcd-size characters
+                                  returning WS-FCD-PTR
+
+             SET  ADDRESS OF FCD-MAP  TO WS-FCD-PTR
+             MOVE LOW-VALUES          TO FCD-MAP
+             MOVE WS-FCD-SIZE         TO FCD-LENGTH
+             move fcd--version-number TO FCD-VERSION
+             MOVE "00"                TO FCD-FILE-STATUS
+             move fcd--status-defined to FCD-ACCESS-MODE
+             move fcd--open-closed    to FCD-OPEN-MODE
+             move fcd--external-name  to FCD-OTHER-FLAGS
+             SET  FCD-HANDLE          TO NULL
+             MOVE 8                   TO FCD-NAME-LENGTH
+             SET  FCD-FILENAME-ADDRESS TO ADDRESS 
+                                       OF WS-FCD-DDNAME
+             SET  FCD-KEY-DEF-ADDRESS TO NULL
+             move fcd--allow-readers  to FCD-LOCKTYPES
+          ELSE
+             SET  ADDRESS OF FCD-MAP  TO WS-FCD-PTR
+             IF FCD-OPEN-MODE NOT = fcd--open-closed
+                DISPLAY "ERRROR - FILE ALREADY OPEN"
+                STOP RUN
+             END-IF
+          END-IF
+
+          move fcd--line-sequential-org to FCD-ORGANIZATION
+          move fcd--recmode-fixed       to FCD-RECORDING-MODE
+          move 10 to FCD-MIN-REC-LENGTH, FCD-MAX-REC-LENGTH
+          SET  FCD-RECORD-ADDRESS     TO ADDRESS OF FCD-RECORD
+
+      * Move fcd--cr-delimiter for CR LF after each record
+      *   move fcd--cr-delimiter        to FCD-STATUS-TYPE
+
+          move op-open-output to action-code
+
+          PERFORM 800-CALL-EXTFH
+          .
+
+      *----------------------------------------------------------------*
+      *    Process the write request
+      *
+       300-WRITE.
+
+          move 10 to FCD-CURRENT-REC-LEN
+          move op-write to action-code
+          PERFORM 800-CALL-EXTFH
+          .
+      *----------------------------------------------------------------*
+      *    Process the close request
+      *
+       400-CLOSE.
+          MOVE "00"                   TO FCD-FILE-STATUS
+          move op-close               to action-code
+          PERFORM 800-CALL-EXTFH
+          .
+      *----------------------------------------------------------------*
+      *    External file handler interface -- all I/O goes through here
+      *
+        800-CALL-EXTFH.
+
+            CALL "EXTFH" USING ACTION-CODE, FCD-MAP
+
+            IF FCD-STATUS-KEY-1 = "9" AND FCD-BINARY = 199
+               MOVE "10" TO FCD-FILE-STATUS
+            END-IF
+            .
+])
+
+# FIXME: by default comp-x should not be truncated (see rw-branch)
+AT_CHECK([$COMPILE -fnotrun prog.cob], [0], [], [])
+
+AT_CHECK([TESTOUT=TEST-OUT $COBCRUN_DIRECT ./prog], [0],
+[FCD SIZE 00216
+], [])
+
+
+AT_CAPTURE_FILE(./TEST-OUT)
+
+# note: currently with the same behaviour as MF
+#       (ignoring minimal record length for line-sequential)
+#       this may change in the future...
+AT_DATA([reference], [  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+])
+
+AT_CHECK([diff reference TEST-OUT], [0], [], [])
+
+AT_CLEANUP
+
