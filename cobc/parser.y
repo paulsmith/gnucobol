@@ -12386,10 +12386,9 @@ inspect_replacing:
 /* INSPECT CONVERTING */
 
 inspect_converting:
-  CONVERTING simple_display_value TO simple_display_all_value inspect_region
+  CONVERTING inspect_from TO inspect_to inspect_region
   {
-	cb_tree		x;
-	x = cb_build_converting ($2, $4, $5);
+	cb_tree		x = cb_build_converting ($2, $4, $5);
 	cb_emit_inspect ($0, x, CONVERTING_CLAUSE);
   }
 ;
@@ -12464,7 +12463,7 @@ rep_keyword:
 ;
 
 replacing_region:
-  simple_display_value BY simple_display_all_value inspect_region
+  inspect_from BY inspect_to inspect_region
   {
 	switch (inspect_keyword) {
 		case 1:
@@ -16105,6 +16104,22 @@ simple_display_all_value:
   }
 ;
 
+inspect_from:
+  display_identifier_or_alphabet_name
+| basic_literal
+  {
+	  error_if_not_usage_display_or_nonnumeric_lit ($1);
+  }
+;
+
+inspect_to:
+  display_identifier_or_alphabet_name
+| literal
+  {
+	  error_if_not_usage_display_or_nonnumeric_lit ($1);
+  }
+;
+
 simple_value:
   identifier
 | basic_literal
@@ -16224,15 +16239,14 @@ numeric_identifier:
 identifier_or_file_name:
   identifier_1
   {
-	int     reference_to_existing_object;
-
-	if (CB_REFERENCE_P ($1) && (CB_FIELD_P (cb_ref ($1))
-				    || CB_FILE_P (cb_ref ($1)))) {
+	cb_tree x = NULL;
+	if (CB_REFERENCE_P ($1)) {
+		x = cb_ref ($1);
+	}
+	if (x && (CB_FIELD_P (x) || CB_FILE_P (x))) {
 		$$ = cb_build_identifier ($1, 0);
 	} else {
-		reference_to_existing_object =
-			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
-		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
+		if (x != cb_error_node) {
 			cb_error_x ($1, _("'%s' is not a field or file"), cb_name ($1));
 		}
 		$$ = cb_error_node;
@@ -16243,14 +16257,14 @@ identifier_or_file_name:
 identifier:
   identifier_1
   {
-	int     reference_to_existing_object;
-
-	if (CB_REFERENCE_P ($1) && CB_FIELD_P (cb_ref ($1))) {
+	cb_tree x = NULL;
+	if (CB_REFERENCE_P ($1)) {
+		x = cb_ref ($1);
+	}
+	if (x && CB_FIELD_P (x)) {
 		$$ = cb_build_identifier ($1, 0);
 	} else {
-		reference_to_existing_object =
-			CB_REFERENCE_P ($1) && cb_ref ($1) != cb_error_node;
-		if (!CB_REFERENCE_P ($1) || reference_to_existing_object) {
+		if (x != cb_error_node) {
 			cb_error_x ($1, _("'%s' is not a field"), cb_name ($1));
 		}
 		$$ = cb_error_node;
@@ -16350,6 +16364,31 @@ target_identifier_1:
 	}
 	if (start_debug) {
 		cb_check_field_debug ($1);
+	}
+  }
+;
+
+display_identifier_or_alphabet_name:
+  qualified_word
+  {
+	cb_tree x = NULL;
+	$$ = $1;
+	if (start_debug) {
+		cb_check_field_debug ($1);
+	}
+	if (CB_REFERENCE_P ($1)) {
+		x = cb_ref ($1);
+	}
+	if (x && CB_FIELD_P (x)) {
+		$$ = cb_build_identifier ($1, 0);
+		error_if_not_usage_display_or_nonnumeric_lit ($1);
+	} else if (x && CB_ALPHABET_NAME_P (x)) {
+		$$ = cb_build_identifier ($1, 0);
+	} else {
+		if (x != cb_error_node) {
+			cb_error_x ($1, _("'%s' is not a field or alphabet"), cb_name ($1));
+		}
+		$$ = cb_error_node;
 	}
   }
 ;

@@ -1534,8 +1534,8 @@ AT_CLEANUP
 
 ## INSPECT
 
-AT_SETUP([INSPECT: REPLACING LEADING ZEROS BY SPACES])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT REPLACING LEADING ZEROS BY SPACES])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1558,8 +1558,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: No repeat conversion check])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT No repeat conversion check])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1582,8 +1582,43 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: CONVERTING TO figurative constant])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT CONVERTING alphabet])
+AT_KEYWORDS([runmisc ASCII EBCDIC])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. charset.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           ALPHABET ALPHA IS ASCII.
+           ALPHABET BETA  IS EBCDIC.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01 TESTHEX PIC X(10) VALUE X'C17BD6F2F0F1F8404040'.
+
+       procedure division.
+       sample-main.
+
+           INSPECT testhex CONVERTING BETA TO ALPHA
+           DISPLAY 'Converted: "' TESTHEX '"' WITH NO ADVANCING
+           
+           GOBACK.
+       END PROGRAM charset.
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
+[Converted: "A#O2018   "], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([INSPECT CONVERTING TO figurative constant])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1606,8 +1641,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: CONVERTING NULL])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT CONVERTING NULL])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1630,8 +1665,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: CONVERTING TO NULL])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT CONVERTING TO NULL])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1654,8 +1689,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: REPLACING figurative constant])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT REPLACING figurative constant])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1678,8 +1713,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: TALLYING BEFORE])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT TALLYING BEFORE])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1713,8 +1748,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: TALLYING AFTER])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT TALLYING AFTER])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1748,8 +1783,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: REPLACING TRAILING ZEROS BY SPACES])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT REPLACING TRAILING ZEROS BY SPACES])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -1772,8 +1807,8 @@ AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
 AT_CLEANUP
 
 
-AT_SETUP([INSPECT: REPLACING complex])
-AT_KEYWORDS([runmisc inspect])
+AT_SETUP([INSPECT REPLACING complex])
+AT_KEYWORDS([runmisc])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

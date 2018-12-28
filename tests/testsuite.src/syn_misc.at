@@ -843,11 +843,15 @@ AT_CLEANUP
 
 
 AT_SETUP([INSPECT invalid size])
-AT_KEYWORDS([misc])
+AT_KEYWORDS([misc]) 
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+       ALPHABET ALPHA IS ASCII.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
        01 X             PIC X(8).
@@ -858,14 +862,16 @@ AT_DATA([prog.cob], [
            INSPECT X CONVERTING SPACES TO "AA".
            INSPECT X CONVERTING "ABC"  TO "AA".
            INSPECT X CONVERTING "DEF"  TO SPACES.
+           INSPECT X CONVERTING "GHI"  TO ALPHA.
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:8: error: REPLACING operands differ in size
-prog.cob:9: error: REPLACING operands differ in size
-prog.cob:11: error: CONVERTING operands differ in size
-prog.cob:12: error: CONVERTING operands differ in size
+[prog.cob:12: error: REPLACING operands differ in size
+prog.cob:13: error: REPLACING operands differ in size
+prog.cob:15: error: CONVERTING operands differ in size
+prog.cob:16: error: CONVERTING operands differ in size
+prog.cob:18: error: CONVERTING operands differ in size 
 ])
 
 AT_CLEANUP

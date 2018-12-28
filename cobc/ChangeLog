@@ -1,7 +1,12 @@
 
+2018-12-28  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: fixed bug #564 by allowing INSPECT CONVERTING FROM/TO
+	  alphabet names
+
 2018-12-04  Simon Sobisch <simonsobisch@gnu.org>
 
-	* parser.y: finishing FR# 244 missing-statement by allowing
+	* parser.y: finishing FR #244 missing-statement by allowing
 	  `WHEN expression` with missing imperative statement = followed by
 	  `END-EVALUATE` or a separator period
 
