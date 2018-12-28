@@ -2090,7 +2090,7 @@ output_emit_field (cb_tree x, const char *cmt)
 			output_local(";\t/* ");
 			if(f->report_column > 0)
 				output_local("col%3d ", f->report_column);
-			if(memcmp(f->name,"FILLER ",7) != 0)
+			if(strncmp(f->name,"FILLER ",7) != 0)
 				output_local("%s ", f->name);
 			if((f->report_flag & COB_REPORT_COLUMN_RIGHT)) {
 				output_local("RIGHT ");
@@ -8909,7 +8909,7 @@ output_report_define_lines (int top, struct cb_field *f, struct cb_report *r)
 		return;
 	f->report_flag |= COB_REPORT_LINE_EMITTED;
 
-	if(memcmp(f->name,"FILLER ",7) == 0) {
+	if(strncmp(f->name,"FILLER ",7) == 0) {
 		if(f->report_flag & COB_REPORT_PAGE_HEADING) {
 			strcpy(fname,"PAGE HEADING");
 		} else if(f->report_flag & COB_REPORT_PAGE_FOOTING) {
@@ -9055,7 +9055,7 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 		return;
 	f->report_flag |= COB_REPORT_SUM_EMITTED;
 
-	if(memcmp(f->name,"FILLER ",7) == 0) {
+	if(strncmp(f->name,"FILLER ",7) == 0) {
 		if(f->report_flag & COB_REPORT_PAGE_HEADING) {
 			strcpy(fname,"PAGE HEADING");
 		} else if(f->report_flag & COB_REPORT_PAGE_FOOTING) {
@@ -9444,7 +9444,7 @@ output_field_display (struct cb_field *f, int offset, int idx)
 	int	i, svlocal;
 	char	*fname = (char*)f->name;
 
-	if (memcmp(fname,"FILLER ",7) == 0)
+	if (strncmp(fname,"FILLER ",7) == 0)
 		fname = (char*)"FILLER";
 	svlocal = f->flag_local;
 	f->flag_local = 0;

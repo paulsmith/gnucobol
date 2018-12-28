@@ -5025,7 +5025,7 @@ split_key:
   reference
   {
 	struct cb_key_component *c;
-	struct cb_key_component *comp = cobc_malloc (sizeof(struct cb_key_component));
+	struct cb_key_component *comp = cobc_main_malloc (sizeof(struct cb_key_component));
 	comp->next = NULL;
 	comp->component = $1;
 	if (key_component_list == NULL) {
