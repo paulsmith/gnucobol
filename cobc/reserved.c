@@ -4697,7 +4697,7 @@ cb_list_registers (void)
 {
 	size_t		i;
 	const char	*name, *t;
-	char name_display[COB_MAX_WORDLEN + 1];
+	char name_display[COB_MINI_BUFF];
 
 	/* TODO: implement creation from user-specified list (currently only enable/disable)
 	   Note: will still be able to be referenced if not implemented,
@@ -4722,7 +4722,7 @@ cb_list_registers (void)
 		 && strcmp (register_list[i].name, "ADDRESS OF") != 0) {
 			name = register_list[i].name;
 		} else {
-			snprintf (name_display, COB_MAX_WORDLEN, "'%s' phrase", register_list[i].name);
+			snprintf (name_display, COB_MINI_MAX, "'%s' phrase", register_list[i].name);
 			name = (const char *)&name_display;
 		}
 		printf ("%-32s%-16s%s\n", name, t, register_list[i].definition);
