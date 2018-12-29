@@ -4,10 +4,15 @@
 	* reserved.c: replaced the array reserved_words and the list
 	  amendment_list with hashmaps (see FR #295).
 
+2018-12-28  Edward Hart <edward.dan.hart@gmail.com>
+
+	* codegen.c: fixed heap overflow by using strncmp instead of memcmp
+	* parser.y (split_key): fixed memory leak
+
 2018-12-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fixed bug #564 by allowing INSPECT CONVERTING FROM/TO
-	  alphabet names
+	  alphabet names and removed functions from the possible list
 
 2018-12-04  Simon Sobisch <simonsobisch@gnu.org>
 

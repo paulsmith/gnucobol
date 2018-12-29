@@ -843,7 +843,7 @@ AT_CLEANUP
 
 
 AT_SETUP([INSPECT invalid size])
-AT_KEYWORDS([misc]) 
+AT_KEYWORDS([misc refmod]) 
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
@@ -854,24 +854,28 @@ AT_DATA([prog.cob], [
        ALPHABET ALPHA IS ASCII.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01 X             PIC X(8).
+       01.
+         02 X-POS       PIC 9 VALUE 3.
+         02 X           PIC X(8) OCCURS 2.
        PROCEDURE        DIVISION.
-           INSPECT X REPLACING ALL SPACES BY "AA".
-           INSPECT X REPLACING ALL "ABC"  BY "AA".
-           INSPECT X REPLACING ALL "DEF"  BY SPACES.
-           INSPECT X CONVERTING SPACES TO "AA".
-           INSPECT X CONVERTING "ABC"  TO "AA".
-           INSPECT X CONVERTING "DEF"  TO SPACES.
-           INSPECT X CONVERTING "GHI"  TO ALPHA.
+           INSPECT X(1) REPLACING ALL SPACES BY "AA".
+           INSPECT X(1) REPLACING ALL "ABC"  BY "AA".
+           INSPECT X(1) REPLACING ALL "DEF"  BY SPACES.
+           INSPECT X(1) CONVERTING SPACES TO "AA".
+           INSPECT X(1) CONVERTING "ABC"  TO "AA".
+           INSPECT X(1) (X-POS:2) CONVERTING "DEF"  TO SPACES.
+           INSPECT X(1) CONVERTING "GHI"  TO ALPHA.
+      *>   the following is allowed, see NC221A and ref-mod definition
+           INSPECT X(1) CONVERTING "DEF"  TO X(2) (X-POS:3).
            STOP RUN.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:12: error: REPLACING operands differ in size
-prog.cob:13: error: REPLACING operands differ in size
-prog.cob:15: error: CONVERTING operands differ in size
-prog.cob:16: error: CONVERTING operands differ in size
-prog.cob:18: error: CONVERTING operands differ in size 
+[prog.cob:14: error: REPLACING operands differ in size
+prog.cob:15: error: REPLACING operands differ in size
+prog.cob:17: error: CONVERTING operands differ in size
+prog.cob:18: error: CONVERTING operands differ in size
+prog.cob:20: error: CONVERTING operands differ in size
 ])
 
 AT_CLEANUP

@@ -16383,6 +16383,7 @@ display_identifier_or_alphabet_name:
 		$$ = cb_build_identifier ($1, 0);
 		error_if_not_usage_display_or_nonnumeric_lit ($1);
 	} else if (x && CB_ALPHABET_NAME_P (x)) {
+		/* TODO: add check for subscript/ ref-mod here [not allowed] */
 		$$ = cb_build_identifier ($1, 0);
 	} else {
 		if (x != cb_error_node) {
