@@ -867,6 +867,7 @@ AT_DATA([prog.cob], [
            INSPECT X(1) CONVERTING "GHI"  TO ALPHA.
       *>   the following is allowed, see NC221A and ref-mod definition
            INSPECT X(1) CONVERTING "DEF"  TO X(2) (X-POS:3).
+           INSPECT X(1) CONVERTING "DEF"  TO X(2) (X-POS:4).
            STOP RUN.
 ])
 
@@ -876,6 +877,7 @@ prog.cob:15: error: REPLACING operands differ in size
 prog.cob:17: error: CONVERTING operands differ in size
 prog.cob:18: error: CONVERTING operands differ in size
 prog.cob:20: error: CONVERTING operands differ in size
+prog.cob:23: error: CONVERTING operands differ in size
 ])
 
 AT_CLEANUP

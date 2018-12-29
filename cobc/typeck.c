@@ -7865,45 +7865,46 @@ cb_emit_initialize (cb_tree vars, cb_tree fillinit, cb_tree value,
 	}
 }
 
+static size_t calc_reference_size (cb_tree xr)
+{
+	cb_tree	ref = cb_ref (xr);
+	if (ref == cb_error_node) {
+		return 0;
+	}
+	if (CB_REF_OR_FIELD_P (ref)) {
+		struct cb_reference	*r = CB_REFERENCE (xr);
+		if (r->offset) {
+			if (r->length) {
+				if (CB_LITERAL_P (r->length)) {
+					return cb_get_int (r->length);
+				}
+			} else {
+				if (CB_LITERAL_P (r->offset)) {
+					return CB_FIELD_PTR (xr)->size
+						- cb_get_int (r->offset) + 1;
+				}
+			}
+		} else {
+			return CB_FIELD_PTR (xr)->size;
+		}
+	} else if (CB_ALPHABET_NAME_P (ref)) {
+		return 256;
+	}
+	return 0;
+}
+
+
 /* INSPECT statement */
 
 static void
 validate_inspect (cb_tree x, cb_tree y, const unsigned int replacing_or_converting)
 {
-	cb_tree			l;
-	struct cb_reference	*r;
-	size_t			size1;
-	size_t			size2;
-	int			offset;
+	size_t	size1;
+	size_t	size2;
 
-	size1 = 0;
-	size2 = 0;
 	switch (CB_TREE_TAG(x)) {
 	case CB_TAG_REFERENCE:
-		r = CB_REFERENCE (x);
-		l = cb_ref (x);
-		if (l == cb_error_node) {
-			return;
-		}
-		if (CB_REF_OR_FIELD_P (l)) {
-			size1 = CB_FIELD_PTR (x)->size;
-		} else if (CB_ALPHABET_NAME_P (l)) {
-			size1 = 256;
-		}
-		if (size1 && r->offset) {
-			if (!CB_LITERAL_P (r->offset)) {
-				return;
-			}
-			offset = cb_get_int (r->offset);
-			if (r->length) {
-				if (!CB_LITERAL_P (r->length)) {
-					return;
-				}
-				size1 = cb_get_int (r->length);
-			} else {
-				size1 -= (offset - 1);
-			}
-		}
+		size1 = calc_reference_size (x);
 		break;
 	case CB_TAG_LITERAL:
 		size1 = CB_LITERAL(x)->size;
@@ -7912,48 +7913,30 @@ validate_inspect (cb_tree x, cb_tree y, const unsigned int replacing_or_converti
 		size1 = 1;
 		break;
 	default:
+		size1 = 0;
 		break;
 	}
-	switch (CB_TREE_TAG(y)) {
-	case CB_TAG_REFERENCE:
-		r = CB_REFERENCE (y);
-		l = cb_ref (y);
-		if (l == cb_error_node) {
-			return;
+	if (size1) {
+		switch (CB_TREE_TAG(y)) {
+		case CB_TAG_REFERENCE:
+			size2 = calc_reference_size (y);
+			break;
+		case CB_TAG_LITERAL:
+			size2 = CB_LITERAL(y)->size;
+			break;
+		/* note: in case of CONST the original size is used */
+		default:
+			size2 = 0;
+			break;
 		}
-		if (CB_REF_OR_FIELD_P (l)) {
-			size2 = CB_FIELD_PTR (y)->size;
-		} else if (CB_ALPHABET_NAME_P (l)) {
-			size2 = 256;
-		}
-		if (size2 && r->offset) {
-			if (!CB_LITERAL_P (r->offset)) {
-				return;
-			}
-			offset = cb_get_int (r->offset);
-			if (r->length) {
-				if (!CB_LITERAL_P (r->length)) {
-					return;
-				}
-				size2 = cb_get_int (r->length);
+		if (size2 && size1 != size2) {
+			if (replacing_or_converting == 1) {
+				cb_error_x (CB_TREE (current_statement),
+						_("%s operands differ in size"), "REPLACING");
 			} else {
-				size2 -= (offset - 1);
+				cb_error_x (CB_TREE (current_statement),
+						_("%s operands differ in size"), "CONVERTING");
 			}
-		}
-		break;
-	case CB_TAG_LITERAL:
-		size2 = CB_LITERAL(y)->size;
-		break;
-	default:
-		break;
-	}
-	if (size1 && size2 && size1 != size2) {
-		if (replacing_or_converting == 1) {
-			cb_error_x (CB_TREE (current_statement),
-					_("%s operands differ in size"), "REPLACING");
-		} else {
-			cb_error_x (CB_TREE (current_statement),
-					_("%s operands differ in size"), "CONVERTING");
 		}
 	}
 }

@@ -1,4 +1,9 @@
 
+2018-12-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (validate_inspect): moved duplicate ref-mod size calculation to
+	  (calc_reference_size) and fixed it to never skip the specified length
+
 2018-12-29  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c: replaced the array reserved_words and the list
@@ -17,8 +22,8 @@
 2018-12-04  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: finishing FR #244 missing-statement by allowing
-	  `WHEN expression` with missing imperative statement = followed by
-	  `END-EVALUATE` or a separator period
+	  WHEN expression  with missing imperative statement (= directly
+	  followed by END-EVALUATE or a separator period)
 
 2018-11-26  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -489,7 +494,7 @@
 2018-03-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c [__TINYC__]: added Tiny C version info and verbose option
-	* cobc.c: change for command line option ´--version`/`-V`:
+	* cobc.c: change for command line option --version / -V:
 	  depending on verbose option additionally call C compiler
 	  for more version information
 
@@ -972,7 +977,7 @@
 	* pplex.l, cobc.c: removed superfluous memset to 0 after cobc_malloc
 	  in listing functions
 	* cobc.c, cobc.h: always store cb_source_format as enum cb_format,
-	  using getopt return values for `--fixed` / `--free` instead as
+	  using getopt return values for --fixed / --free instead as
 	  getopt assigns an integer which is not guaranteed to be sizeof(enum)
 	* cobc.c (cobc_xref_call): bug #463 - fixed memory leak in Xref code
 	* cobc.c: modularized cleanup code to (cleanup_copybook_reference)
@@ -985,7 +990,7 @@
 2017-11-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: removed artificial limit for -fmax-errors
-	* cobc.c: FR #255 new command line option `-O0` (short-opt: '0') for
+	* cobc.c: FR #255 new command line option -O0 (short-opt: '0') for
 	  disabling optimizations (new define CB_COPT_0),
 	  postpone addition for -O option group to cflags
 	* tree.c (cb_int, cb_build_label): set source position for integers
