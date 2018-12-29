@@ -186,7 +186,7 @@ static struct system_name_struct	system_name_table[] = {
 	{"UPSI-6",		CB_SWITCH_NAME,  CB_SWITCH_6, CB_FEATURE_DISABLED},
 	{"UPSI-7",		CB_SWITCH_NAME,  CB_SWITCH_7, CB_FEATURE_DISABLED},
 	{"UPSI-8",		CB_SWITCH_NAME,  CB_SWITCH_8, CB_FEATURE_DISABLED},
-	/* TO-DO: Figure out TSW switches differ from USW switches and add them. */
+	/* TO-DO: Figure out how TSW switches differ from USW switches and add them. */
 	{"USW-0",		CB_SWITCH_NAME,  CB_SWITCH_0, CB_FEATURE_DISABLED},
 	{"USW-1",		CB_SWITCH_NAME,  CB_SWITCH_1, CB_FEATURE_DISABLED},
 	{"USW-2",		CB_SWITCH_NAME,  CB_SWITCH_2, CB_FEATURE_DISABLED},
@@ -232,7 +232,8 @@ static struct system_name_struct *lookup_system_name (const char *, const int);
 /* Word # Statement has terminator # Is context sensitive (only for printing)
         # Token # Special context set # Special context test */
 
-static struct cobc_reserved *reserved_words;
+static struct cobc_reserved **reserved_word_map;
+static size_t	reserved_word_map_arr_size;
 
 static struct cobc_reserved default_reserved_words[] = {
   { "3-D",			0, 1, THREEDIMENSIONAL,			/* ACU extension */
@@ -1050,7 +1051,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "END-XML",			0, 0, END_XML,			/* IBM extension */
-    				0, 0
+   				0, 0
   },
   { "ENGRAVED",		0, 1, ENGRAVED,		/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -1981,7 +1982,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "PARSE",			0, 1, PARSE,			/* IBM extension */
-    				0, 0
+   				0, 0
   },
   { "PASSWORD",			0, 1, PASSWORD,			/* IBM extension */
 				0, CB_CS_SELECT
@@ -2151,11 +2152,11 @@ static struct cobc_reserved default_reserved_words[] = {
   { "READ",			1, 0, READ,			/* 2002 */
 				CB_CS_READ, 0
   },
-  { "READERS",		0, 1, READERS,		/* ACU extension */
-				0, CB_CS_OPEN
-  },
-  { "READ-ONLY",			0, 1, READ_ONLY,			/* ACU extension */
+  { "READ-ONLY",		0, 1, READ_ONLY,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
+  },
+  { "READERS",			0, 1, READERS,		/* ACU extension */
+				0, CB_CS_OPEN
   },
   { "RECEIVE",			1, 0, RECEIVE,			/* Communication Section */
 				0, 0
@@ -2923,10 +2924,10 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
   { "XML",			1, 0, XML,			/* IBM extension */
-    				0, 0
+   				0, 0
   },
   { "XML-DECLARATION",		0, 1, XML_DECLARATION,		/* IBM extension */
-    				0, CB_CS_XML_GENERATE
+   				0, CB_CS_XML_GENERATE
   },
   { "Y",			0, 1, Y,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
@@ -3191,7 +3192,7 @@ static struct cb_intrinsic_table function_list[] = {
   },
   { "FORMATTED-TIME",			"cob_intr_formatted_time",
 					CB_INTR_FORMATTED_TIME, FORMATTED_TIME_FUNC,
-    							/* including implicit SYSTEM-OFFSET arg */
+   							/* including implicit SYSTEM-OFFSET arg */
 					CB_FEATURE_ACTIVE,	4, 3,
 					CB_CATEGORY_ALPHANUMERIC, 1
 					/* Note: category changed to national depending on the content,
@@ -3607,6 +3608,11 @@ static const unsigned char	pcob_lower_tab[] = "abcdefghijklmnopqrstuvwxyz";
 static const unsigned char	pcob_lower_val[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 #endif
 
+struct list_reserved_line {
+        char *word_and_status;
+	char *aliases;
+};
+
 /* Local functions */
 
 static int
@@ -3792,16 +3798,6 @@ initialize_alias_for (const char *alias_for,
 	}
 }
 
-static size_t
-get_length_of_amendment_list (void)
-{
-	struct amendment_list	*l = amendment_list;
-	size_t			length;
-
-	for (length = 0; l; ++length, l = l->next);
-	return length;
-}
-
 static struct cobc_reserved *
 search_reserved_list (const char * const word, const int needs_uppercasing,
 		      const struct cobc_reserved * const list, size_t list_len)
@@ -3827,14 +3823,6 @@ search_reserved_list (const char * const word, const int needs_uppercasing,
 	to_find = create_dummy_reserved (sought_word);
 	return bsearch (&to_find, list, list_len, sizeof (struct cobc_reserved),
 			reserve_comp);
-}
-
-static struct cobc_reserved *
-find_reserved_word (const char * const word, const int needs_uppercasing)
-{
-	return search_reserved_list (word, needs_uppercasing,
-				     reserved_words,
-				     num_reserved_words);
 }
 
 static struct cobc_reserved *
@@ -3965,11 +3953,134 @@ reduce_amendment_list (void)
 }
 
 static void
+init_reserved_word_map (void)
+{
+	reserved_word_map_arr_size = 512;
+	num_reserved_words = 0;
+	reserved_word_map = cobc_main_malloc (reserved_word_map_arr_size * sizeof (void *));
+}
+
+static int
+reserved_word_hash (const cob_c8_t *word)
+{
+	cob_u32_t	result = 0x811c9dc5;
+
+	/* Perform 32-bit FNV1a hash */
+	for (; *word; ++word) {
+		result ^= toupper (*word);
+		result *= (cob_u32_t) 0x1677619;
+	}
+
+	return result % reserved_word_map_arr_size;
+}
+
+static COB_INLINE COB_A_INLINE int
+next_key (const int key)
+{
+	if (key < reserved_word_map_arr_size - 1) {
+		return key + 1;
+	} else {
+		return 0;
+	}
+ }
+
+static int
+find_key_for_word (const char * const word)
+{
+	int key;
+
+	for (key = reserved_word_hash (word);
+	     reserved_word_map[key] && cb_strcasecmp (reserved_word_map[key]->name, word);
+	     key = next_key (key));
+
+	return key;
+}
+
+static struct cobc_reserved *
+find_reserved_word (const char * const word, const int needs_uppercasing)
+{
+        return reserved_word_map[find_key_for_word (word)];
+}
+
+
+static void
+realloc_reserved_word_map (const size_t new_size)
+{
+	struct cobc_reserved	**new_map = cobc_main_malloc (new_size * sizeof(void *));
+	struct cobc_reserved	**old_map = reserved_word_map;
+	size_t	old_size = reserved_word_map_arr_size;
+	int	i;
+	int	key;
+
+	reserved_word_map_arr_size = new_size;
+	reserved_word_map = new_map;
+
+	for (i = 0; i < old_size; ++i) {
+		if (old_map[i]) {
+			key = find_key_for_word (old_map[i]->name);
+			reserved_word_map[key] = old_map[i];
+		}
+	}
+
+	cobc_main_free (old_map);
+}
+
+static void
+delete_word_with_key (const int key)
+{
+	cobc_main_free (reserved_word_map[key]);
+	reserved_word_map[key] = NULL;
+}
+
+static void
+remove_word_from_map (const char * const word)
+{
+	int	key = find_key_for_word (word);
+
+	if (reserved_word_map[key]) {
+		delete_word_with_key (key);
+	}
+}
+
+static void
+add_reserved_to_map (const struct cobc_reserved reserved, const int overwrite)
+{
+	int	key;
+
+	/*
+	  The "- 1" is there so there is always one NULL entry in the array. If
+	  there is not one and the array is full, find_reserved_word will not
+	  terminate when given a word which shares a hash with a different word.
+	*/
+	if (!reserved_word_map) {
+		init_reserved_word_map ();
+	}
+	if (num_reserved_words == reserved_word_map_arr_size - 1) {
+		realloc_reserved_word_map (reserved_word_map_arr_size * 2);
+	}
+
+	key = find_key_for_word (reserved.name);
+	if (reserved_word_map[key]) {
+		if (overwrite) {
+			delete_word_with_key (key);
+ 		} else {
+			return;
+		}
+	} else {
+		++num_reserved_words;
+	}
+
+	reserved_word_map[key] = cobc_main_malloc (sizeof (struct cobc_reserved));
+	*reserved_word_map[key] = reserved;
+}
+
+static void
 get_reserved_words_with_amendments (void)
 {
 	int	i;
-	struct amendment_list		*amendment;
-	struct cobc_reserved		*p;
+	struct amendment_list	*amendment;
+	struct cobc_reserved	reserved;
+	struct cobc_reserved	*p;
 
 	if (cb_reserved_words == NULL) {
 		/*
@@ -3990,18 +4101,14 @@ get_reserved_words_with_amendments (void)
 
 	reduce_amendment_list ();
 
-	num_reserved_words = get_length_of_amendment_list ();
-	reserved_words = cobc_main_malloc (num_reserved_words
-					   * sizeof (struct cobc_reserved));
-
 	/*
 	  Populate reserved_words array with data from default_reserved_words,
 	  where possible. Free each word once processed.
 	*/
-	for (i = 0; amendment_list; ++i) {
+	while (amendment_list) {
 		p = find_default_reserved_word (amendment_list->word, 0);
 		if (p && !amendment_list->alias_for) {
-			reserved_words[i] = *p;
+			reserved = *p;
 			/*
 			  Note that we ignore if the user specified this word
 			  as context-sensitive, but need to check if a
@@ -4010,35 +4117,37 @@ get_reserved_words_with_amendments (void)
 			*/
 #if 0 /* FIXME - missing !!! */
 			if (p->context_sens && !user_specified_reserved_word->context_sens) {
-				reserved_words[i].context_sens = 0;
-				reserved_words[i].context_test = 0;
+				reserved.context_sens = 0;
+				reserved.context_test = 0;
 			}
 #endif
 		} else {
-			reserved_words[i] = get_user_specified_reserved_word (*amendment_list);
+			reserved = get_user_specified_reserved_word (*amendment_list);
 		}
+		add_reserved_to_map (reserved, 0);
 
 		amendment = amendment_list->next;
 		free_amendment (amendment_list);
 		amendment_list = amendment;
 	}
-
-	/* Later code assumes the array is sorted. */
-	qsort (reserved_words, num_reserved_words,
-	       sizeof (struct cobc_reserved), reserve_comp);
 }
 
 static void
 get_reserved_words_from_default_list (void)
 {
-	reserved_words = default_reserved_words;
-	num_reserved_words = NUM_DEFAULT_RESERVED_WORDS;
+	int	i;
+
+	init_reserved_word_map ();
+
+	for (i = 0; i < NUM_DEFAULT_RESERVED_WORDS; ++i) {
+		add_reserved_to_map (default_reserved_words[i], 0);
+	}
 }
 
 static void
 initialize_reserved_words_if_needed (void)
 {
-	if (!reserved_words) {
+	if (!reserved_word_map) {
 		/* The default reserved words list should be sorted, but
 		   assuming so causes abstruse errors when a word is put in the
 		   wrong place (e.g. when dealing with EBCDIC or hyphens). */
@@ -4053,33 +4162,79 @@ initialize_reserved_words_if_needed (void)
 	}
 }
 
-static void
-list_aliases (const struct cobc_reserved * const word)
+static int
+list_line_cmp (const void *l, const void *r)
 {
-	size_t	i;
-	int	alias_found = 0;
+	return strcmp (((const struct list_reserved_line *)l)->word_and_status,
+		       ((const struct list_reserved_line *)r)->word_and_status);
+}
 
-	if (word->token <= 0) {
+static int
+strcmp_for_qsort (const void *l, const void *r)
+{
+	return strcmp ((const char *)l, (const char *)r);
+}
+
+static void
+get_aliases (const int key, struct list_reserved_line *line)
+{
+	int	given_token = reserved_word_map[key]->token;
+	int	i;
+	int	j;
+	size_t	num_aliases = 0;
+	size_t	aliases_str_len = 0;
+	char	(*aliases)[COB_MAX_WORDLEN + 1];
+	char	*aliases_str;
+
+	if (given_token <= 0) {
+		line->aliases = NULL;
 		return;
 	}
 
-	for (i = 0; i < num_reserved_words; ++i) {
-		if (&reserved_words[i] == word
-		    || reserved_words[i].token != word->token) {
-			continue;
+	/* Count number of aliases and their total length. */
+	for (i = 0; i < reserved_word_map_arr_size; ++i) {
+		if (i != key
+		    && reserved_word_map[i]
+		    && reserved_word_map[i]->token == given_token) {
+			++num_aliases;
+			aliases_str_len += strlen (reserved_word_map[i]->name);
 		}
-		if (!alias_found) {
-			fputs (" (aliased with ", stdout);
-			alias_found = 1;
-		} else {
-			fputs (", ", stdout);
-		}
-		fputs (reserved_words[i].name, stdout);
 	}
 
-	if (alias_found) {
-		putchar (')');
+	if (num_aliases == 0) {
+		return;
 	}
+
+	/* Create array of aliases, then sort it. */
+	aliases = cobc_malloc (num_aliases * (COB_MAX_WORDLEN + 1) * sizeof (char));
+	j = 0;
+	for (i = 0; i < reserved_word_map_arr_size; ++i) {
+		if (i != key
+		    && reserved_word_map[i]
+		    && reserved_word_map[i]->token == given_token) {
+			strncpy (aliases[j], reserved_word_map[i]->name,
+				 COB_MAX_WORDLEN);
+			++j;
+		}
+	}
+	qsort (aliases, num_aliases, COB_MAX_WORDLEN + 1, &strcmp_for_qsort);
+
+	/* Build aliases string */
+	aliases_str = cobc_malloc (strlen ("(aliased with ")
+				   + aliases_str_len
+				   + (num_aliases - 1) * strlen (", ")
+				   + strlen (")")
+				   + 1);
+	strcpy (aliases_str, "(aliased with ");
+	for (j = 0; j < num_aliases; ++j) {
+		if (j != 0) {
+			strcat (aliases_str, ", ");
+		}
+		strcat (aliases_str, aliases[j]);
+	}
+	strcat (aliases_str, ")");
+	cobc_free (aliases);
+	line->aliases = aliases_str;
 }
 
 /* Global functions */
@@ -4198,10 +4353,7 @@ remove_reserved_word (const char *word, const char *fname, const int line)
 void
 add_reserved_word_now (char * const word, char * const alias_for)
 {
-	size_t		offset;
-	struct cobc_reserved	*new_reserved_words;
 	struct amendment_list	amendment;
-	char		*p;
 
 	/* Nothing to do if the word is already reserved */
 	if (is_reserved_word (word)) {
@@ -4215,68 +4367,17 @@ add_reserved_word_now (char * const word, char * const alias_for)
 	}
 	/* LCOV_EXCL_STOP */
 
-	/* Find where to add new word */
-	for (offset = 0; offset < num_reserved_words; ++offset) {
-		if (cb_strcasecmp (word, reserved_words[offset].name) < 0) {
-			break;
-		}
-	}
-
-	/*
-	  Replace reserved_words with a bigger copy, with a gap for the new
-	  element to go in.
-	*/
-	new_reserved_words = cobc_main_malloc ((num_reserved_words + 1)
-					       * sizeof (struct cobc_reserved));
-	memcpy (new_reserved_words, reserved_words,
-		offset * sizeof (struct cobc_reserved));
-	memcpy (new_reserved_words + offset + 1, reserved_words + offset,
-		(num_reserved_words - offset) * sizeof (struct cobc_reserved));
-	++num_reserved_words;
-	cobc_main_free (reserved_words);
-	reserved_words = new_reserved_words;
-
-	/* Add word (in upper case) to list. */
 	amendment.word = word;
-	for (p = amendment.word; *p; ++p) {
-		if (cob_lower_tab[(int)*p]) {
-			*p = cob_lower_tab[(int)*p];
-		}
-	}
 	amendment.alias_for = alias_for;
 	amendment.is_context_sensitive = 0;
 	amendment.to_add = 1;
-	reserved_words[offset] = get_user_specified_reserved_word (amendment);
+	add_reserved_to_map (get_user_specified_reserved_word (amendment), 0);
 }
 
 void
 remove_reserved_word_now (char * const word)
 {
-
-	struct cobc_reserved	*entry_to_remove;
-	struct cobc_reserved	*new_reserved_words;
-	int			entry_offset;
-
-	/* If the word is not a reserved, there's nothing to do. */
-	entry_to_remove = find_reserved_word (word, 1);
-	if (!entry_to_remove) {
-		return;
-	}
-
-	/* Create copy of list without word. */
-	new_reserved_words = cobc_main_malloc ((num_reserved_words - 1)
-					       * sizeof (struct cobc_reserved));
-	entry_offset = entry_to_remove - reserved_words;
-	memcpy (new_reserved_words, reserved_words,
-		entry_offset * sizeof (struct cobc_reserved));
-	memcpy (new_reserved_words + entry_offset,
-		reserved_words + entry_offset + 1,
-		(num_reserved_words - entry_offset - 1) * sizeof (struct cobc_reserved));
-
-	/* Use it to replace old reserved word list. */
-	cobc_main_free (reserved_words);
-	reserved_words = new_reserved_words;
-	--num_reserved_words;
+	remove_word_from_map (word);
 }
 
 struct cobc_reserved *
@@ -4596,7 +4697,7 @@ cb_list_registers (void)
 {
 	size_t		i;
 	const char	*name, *t;
-	char name_display[COB_MINI_BUFF];
+	char name_display[COB_MAX_WORDLEN + 1];
 
 	/* TODO: implement creation from user-specified list (currently only enable/disable)
 	   Note: will still be able to be referenced if not implemented,
@@ -4621,7 +4722,7 @@ cb_list_registers (void)
 		 && strcmp (register_list[i].name, "ADDRESS OF") != 0) {
 			name = register_list[i].name;
 		} else {
-			snprintf (name_display, COB_MINI_MAX, "'%s' phrase", register_list[i].name);
+			snprintf (name_display, COB_MAX_WORDLEN, "'%s' phrase", register_list[i].name);
 			name = (const char *)&name_display;
 		}
 		printf ("%-32s%-16s%s\n", name, t, register_list[i].definition);
@@ -4733,34 +4834,62 @@ cb_list_system_names (void)
 void
 cb_list_reserved (void)
 {
+	struct list_reserved_line	*word_descriptions;
 	const char	*p;
 	size_t		i;
+	size_t		j;
 
 	initialize_reserved_words_if_needed ();
 
+	/* Output header */
 	putchar ('\n');
 	printf ("%-32s%s\n", _("Reserved Words"), _("Implemented"));
+
+	/* Build list of reserved words */
+	word_descriptions = cobc_malloc (num_reserved_words * sizeof (struct list_reserved_line));
+	j = -1;
 	for (i = 0; i < num_reserved_words; ++i) {
-		if (reserved_words[i].token > 0) {
-			if (reserved_words[i].context_sens) {
+		do {
+			++j;
+		} while (!reserved_word_map[j]);
+
+		if (reserved_word_map[j]->token > 0) {
+			if (reserved_word_map[j]->context_sens) {
 				p = _("Yes (Context sensitive)");
 			} else {
 				p = _("Yes");
 			}
 		} else {
-			if (reserved_words[i].context_sens) {
+			if (reserved_word_map[j]->context_sens) {
 				p = _("No (Context sensitive)");
 			} else {
 				p = _("No");
 			}
 		}
-		printf ("%-32s%s", reserved_words[i].name, p);
-		list_aliases (&reserved_words[i]);
+		word_descriptions[i].word_and_status = cobc_malloc (COB_MAX_WORDLEN + 1);
+		snprintf (word_descriptions[i].word_and_status, COB_MAX_WORDLEN,
+			  "%-32s%s", reserved_word_map[j]->name, p);
+		get_aliases (j, &word_descriptions[i]);
+	}
+
+	/* Display sorted list with aliases. */
+	qsort (word_descriptions, num_reserved_words,
+	       sizeof (struct list_reserved_line), &list_line_cmp);
+	for (int i = 0; i < num_reserved_words; ++i) {
+		printf ("%s", word_descriptions[i].word_and_status);
+		cobc_free (word_descriptions[i].word_and_status);
+		if (word_descriptions[i].aliases) {
+			printf (" %s", word_descriptions[i].aliases);
+			cobc_free (word_descriptions[i].aliases);
+		}
 		putchar ('\n');
 	}
+	cobc_free (word_descriptions);
+
+	/* Output other words and registers. */
 	putchar ('\n');
 	/* FIXME: handle these as normal context sensitive words by
-	          checking in scanner.l if these are reserved */
+		  checking in scanner.l if these are reserved */
 	puts (_("Extra (obsolete) context sensitive words"));
 	puts ("AUTHOR");
 	puts ("DATE-COMPILED");

@@ -1,4 +1,9 @@
 
+2018-12-29  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c: replaced the array reserved_words with a hashmap (see
+	  FR #295).
+
 2018-12-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: fixed bug #564 by allowing INSPECT CONVERTING FROM/TO
