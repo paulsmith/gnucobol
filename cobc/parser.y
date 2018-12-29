@@ -16369,7 +16369,7 @@ target_identifier_1:
 ;
 
 display_identifier_or_alphabet_name:
-  qualified_word
+  identifier_1
   {
 	cb_tree x = NULL;
 	$$ = $1;
