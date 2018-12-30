@@ -46,7 +46,7 @@ COB85DIR = "`cd $(srcdir) && pwd`"
 # MAKEFLAGS = --no-print-directory
 
 # targets that are only logical targets instead of files
-.PHONY: test diff-summary diff $(MODULES_RUN)
+.PHONY: test diff-summary diff $(MODULES_RUN) unpack-Z unpack-gz
 
 NC_RUN: NC
 	@cd NC && $(MAKE) -k
@@ -90,6 +90,7 @@ DBNOIX_RUN: DBNOIX
 CM_RUN: CM
 	@cd CM && $(MAKE) -k
 
+all: $(MODULES_ALL)
 
 test: $(MODULES_RUN)
 	@echo
@@ -115,18 +116,48 @@ endif
 	@echo
 
 newcob.val.Z:
-	@if ! test -f "newcob.val"; then \
-		echo "Trying to download newcob.val.Z...";  \
-		wget "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z";  \
-	fi
+	@echo "Trying to download newcob.val.Z..."
+	@wget -t1 "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"
 
-newcob.val: newcob.val.Z
-	@if ! test -f "newcob.val"; then \
-		if test "$(<D)" != "."; then \
-			echo "Copying $< to current directory..." && cp "$<" .; \
-		fi; \
-		echo "Unpacking newcob.val.Z..."; \
-		gunzip "$(<F)" || gzip -d "$(<F)" || uncompress "$(<F)"; \
+newcob.val.tar.gz:
+	@echo "Trying to download newcob.val.tar.gz..."
+	@wget -t1 -O $@ "https://sourceforge.net/projects/open-cobol/files/nist/newcob.val.tar.gz/download"
+
+unpack-Z: newcob.val.Z
+	@echo "Unpacking $@..."
+	@gunzip "$<" || gzip -d "$<" || uncompress "$<"
+
+unpack-gz: newcob.val.tar.gz
+	@echo "Unpacking $<..."
+	@tar -xf "$<"
+
+# always copy source / pack from srcdir, if possible
+newcob.val:
+	@if test -f "$(srcdir)/newcob.val"; then \
+		echo "Copying newcob.val to current directory..."; \
+		cp "$$(srcdir)/newcob.val" . ;                     \
+	else \
+		if test -f "$(srcdir)/newcob.val.tar.gz"; then      \
+			if test ! -f "$(abs_builddir)/newcob.val.tar.gz"; then \
+				export pack=newcob.val.tar.gz &&                 \
+				echo "Copying $$pack to current directory..." && \
+				cp "$(srcdir)/$$pack" . ;                        \
+			fi;                                             \
+			$(MAKE) unpack-gz;                              \
+		else \
+			if test -f "$(srcdir)/newcob.val.Z"; then            \
+				if test ! -f "$(abs_builddir)/newcob.val.Z"; then \
+					export pack=newcob.val.Z &&                      \
+					echo "Copying $$pack to current directory..." && \
+					cp "$(srcdir)/$$pack" . ;                        \
+				fi;                                             \
+				$(MAKE) unpack-Z; \
+			else \
+				($(MAKE) newcob.val.Z      && $(MAKE) unpack-Z) || \
+				(echo Fallback to sourceforge.net && \
+				 $(MAKE) newcob.val.tar.gz && $(MAKE) unpack-gz);  \
+			fi;  \
+		fi;  \
 	fi
 	@if ! test -f "newcob.val"; then \
 		echo "newcob.val missing, automatic download and uncompress did not work"; \
@@ -151,8 +182,11 @@ $(MODULES_ALL): newcob.val EXEC85$(EXEEXT) $(srcdir)/EXEC85.conf.in
 	. ../atconfig && . ../atlocal NIST_EXEC85_$@ && cd $@ && $$COBCRUN_DIRECT ../EXEC85$(EXEEXT)
 	@perl $(srcdir)/expand.pl $@/newcob.tmp $@
 #	@rm -f ./$@/newcob.tmp ./$@/newcob.log ./$@/EXEC85.conf
-	@sed -e 's/##MODULE##/'"$@"'/'            \
+	@export CBL_LIST="`  ls $@/*.CBL | cut -b4- | tr "\n" " "`"  && \
+	 sed -e 's/##MODULE##/'"$@"'/'            \
 	     -e 's|##COB85DIR##|'"$(COB85DIR)"'|' \
+	     -e 's|##TESTS##|'"` echo $$CBL_LIST | sed -e 's/\.CBL//g'`"'|' \
+	     -e 's|##TESTS_LOCAL##|'"`echo $$CBL_LIST | sed -e 's/\.CBL/-local/g'`"'|' \
 	    $(srcdir)/Makefile.module.in > $@/Makefile
 	@echo "Finished module directory $@."
 

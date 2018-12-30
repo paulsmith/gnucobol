@@ -180,26 +180,9 @@ To generate/install GnuCOBOL :
     ./configure
     make
 
- Here you may run
-    make check
- to run a series of GnuCOBOL test programs (must do!)
- This MUST succeed - If not, please report.
-
- You may optionally perform a series of COBOL85 tests.
-    make test
- It is recommended that you perform these tests.
-
-** NOTE **
-   The language interpreter "perl" is required to run COBOL85 tests.
-   If you build in Cygwin/MSYS you must use a Cygwin/MSYS version of perl.
- 
-** NOTE **
-   Running "make test" will try to download the COBOL85
-   testsuite if it is missing.
-   For details see tests/cobol85/README.
-
- If you want to run both tests you can run
-    make checkall 
+ Here you may run different tests with the version of GnuCOBOL that is
+ not installed yet, see "Tests" below.
+ This is *highly recommended* before installing.
 
  Install
     make install
@@ -207,7 +190,9 @@ To generate/install GnuCOBOL :
 ** NOTE **
    You generally need super-user privileges to execute "make install"
    unless you changed the installation directory with
-   "./configure --prefix=<dir>" and have full access to <dir>.
+   "./configure --prefix=<dir>" or install to a different location with
+   "make install DESTDIR=<dir>".
+   In those later cases you only need to have full access to <dir>.
 
 ** NOTE **
    On Linux systems, if you are installing for the
@@ -225,7 +210,7 @@ To generate/install GnuCOBOL :
 **************************************
 
 If you think you have a problem or just want to log
-the output of make, just redirect the output with :
+the output of make then redirect the output with :
     make 1>mymake.log 2>&1
     make install 1>myinstall.log 2>&1
 
@@ -235,6 +220,32 @@ You can get back to a clean installation status by running :
     make distclean
 
 **************************************
+
+
+============
+Tests
+============
+
+
+ To run the internal testsuite, simply do
+    make check
+ This MUST succeed - If not, please report.
+
+ You may optionally perform a series of COBOL85 tests.
+    make test
+ It is recommended that you also perform these tests.
+
+** NOTE **
+   The language interpreter "perl" is required to run COBOL85 tests.
+   If you build in Cygwin/MSYS you must use a Cygwin/MSYS version of perl.
+ 
+** NOTE **
+   Running "make test" will try to download the COBOL85
+   testsuite if it is missing.
+   For details see tests/cobol85/README.
+
+ If you want to run both testsuites you can run
+    make checkall 
 
 
 ============

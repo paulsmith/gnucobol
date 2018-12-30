@@ -14,10 +14,11 @@ NEWS - user visible changes				-*- outline -*-
    (new runtime configuration COB_DISPLAY_PRINT_PIPE) or appended to a file
    (new runtime configuration COB_DISPLAY_PRINT_FILE, which takes precedence)
 
-** XML GENERATE statement (note: runtime support needs additional library libxml2)
+** XML GENERATE statement
+   (note: runtime support needs additional library libxml2)
 
-** Improved support for different compiler extensions (ACUCOBOL, RM/COBOL, Fujitsu,
-   Microsoft COBOL and more)
+** Improved support for different compiler extensions (ACUCOBOL, RM/COBOL,
+   Fujitsu, Microsoft COBOL and more)
 
 ** Parser support for many features of different compilers, for example
    PIC 1 / USAGE BIT, ACUCOBOL extensions for graphical controls
@@ -40,6 +41,9 @@ NEWS - user visible changes				-*- outline -*-
    To have the compiled program call `yourfh()` for file I/O use:
    `cobc -fcallfh=yourfh`
    In turn `yourfh()` may call `EXTFH()` to use I/O functions from GnuCOBOL.
+   The external file handler can also be directly invoked from COBOL, too,
+   using `CALL "EXTFH"`.
+   ** Note: Not all flags contained in the FCD3 are handled already **
 
 
 * Changed cobc options:
@@ -81,21 +85,27 @@ NEWS - user visible changes				-*- outline -*-
    To prevent this disable translations in general with using the configure
    option --disable-nls (or by deactivating ENABLE_NLS in config.h).
 
-* New test suite for manual tests (especially SCREEN I/O),
-  run with `make checkmanual`.
-  Note: You may want to adjust the test runner tests/run_prog_manual.sh which
-  defaults to xterm in GUI environments and screen in terminal environments.
-
 * New build features
+
+** New test suite for manual tests (especially SCREEN I/O),
+   run with `make checkmanual`.
+   Note: You may want to adjust the test runner tests/run_prog_manual.sh which
+   defaults to xterm in GUI environments and screen in terminal environments.
+
+** The modules and test programs in the NIST COBOL-85 test suite (tests/cobol85)
+   may now be build and/or tested and/or the test results checked separately.
+   You now may also run the tests with a previous installed (or with
+   a temporary manual setup prepared) version of GnuCOBOL.
+   For details see tests/cobol85/README.
 
 ** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
    and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
 
-** --with-xml2 / -without-xml2 to explicit force/disable XML runtime support,
-   otherwise it will be included if found as working
+** new configure options --with-xml2 / -without-xml2 to explicit force/disable
+   XML runtime support, otherwise it will be included if found as working
 
-** --enable-debug-log to allow internal tracing of GnuCOBOL
-   (intended for developers of GnuCOBOL only)
+** new configure option --enable-debug-log to allow *internal* tracing
+   of GnuCOBOL (intended for developers of GnuCOBOL only)
 
 * Lot's of bug fixes to list here (please check ChangeLogs for full details).
 

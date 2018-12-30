@@ -1,4 +1,24 @@
 
+2018-12-30  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am (newcob.val.tar.gz) new target to download from sourceforge
+	* Makefile.am: newcob.val.tar.gz / newcob.val.Z are also copied from
+	  srcdir if existing there already
+	* fix for [bugs:#563] fall-back to download from sourceforge if download
+	  from NIST is not possible
+	* Makefile.am (all): new target extracting all tests
+	* Makefile.am: additional insert test names when generating the module
+	  specific Makefile
+	* Makefile.module.in (test-local, test-O-local): new targets to allow
+	  running the tests with a GnuCOBOL version that is locally installed
+	  instead of the version currently build
+	* Makefile.module.in (lib, lib-local): new targets to only compile
+	  the module specific libs
+	* Makefile.module.in: new targets for single tests
+	* report.pl: extracted functions compile_lib and run_test
+	* report.pl: allow to run a single test by passing the test name
+	  as parameter or compiling libs only by passing "lib"
+
 2018-06-05  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: split rules for EXEC85 and EXEC85.cob to prevent
