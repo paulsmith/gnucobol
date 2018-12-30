@@ -4,7 +4,7 @@
 	* Makefile.am (newcob.val.tar.gz) new target to download from sourceforge
 	* Makefile.am: newcob.val.tar.gz / newcob.val.Z are also copied from
 	  srcdir if existing there already
-	* fix for [bugs:#563] fall-back to download from sourceforge if download
+	* fix for Bug #563: fall-back to download from sourceforge if download
 	  from NIST is not possible
 	* Makefile.am (all): new target extracting all tests
 	* Makefile.am: additional insert test names when generating the module
