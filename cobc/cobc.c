@@ -183,7 +183,7 @@ struct strcache {
 #define	CB_COPT_0	" -O0"
 #define	CB_COPT_1	" -O"
 #define	CB_COPT_2	" -O2"
-#define	CB_COPT_2	" -O3"
+#define	CB_COPT_3	" -O3"
 #define	CB_COPT_S	" -O"
 #else
 #define	CB_COPT_0	" -O0"
