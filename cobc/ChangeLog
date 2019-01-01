@@ -5,6 +5,9 @@
 	  not globally
 	* pplex.l, ppparse.y, scanner.l, codegen.c: implement CALLFH
 	  directive (Micro Focus)
+	* reserved.c: fixed redefinition warning
+	* scanner.l (#LINE): removed unneeded temporary string duplication
+	* scanner.l (scan_x): minor refactoring and fixing compiler warning
 
 2018-12-29  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -269,7 +269,7 @@ static void *	copy_literal (cb_tree l);
 	char	*word;
 
 	copy_word_in_quotes (&word);
-        remove_reserved_word_now (word);
+	remove_reserved_word_now (word);
 	cobc_free (word);
 }
 
@@ -284,7 +284,7 @@ static void *	copy_literal (cb_tree l);
 
 	p1 = strchr (yytext, '"');
 	if (p1) {
-		p2 = cobc_strdup (p1 + 1);
+		p2 = p1 + 1;
 		p1 = strrchr (p2, '"');
 		if (p1) {
 			*p1 = 0;
@@ -294,7 +294,6 @@ static void *	copy_literal (cb_tree l);
 			          remove from configure.ac */
 			cb_source_line = (int)strtol (yytext + 5, NULL, 10) - 1;
 		}
-		cobc_free (p2);
 	}
 }
 
@@ -1263,23 +1262,21 @@ scan_x (const char *text, const char *type)
 	char		*p;
 	char		*e;
 	char		*dst;
-	size_t		currlen;
+	size_t		curr_len;
 	size_t		result_len;
-	int		high = 1;
 	int		c;
-	cob_u64_t	val = 0;
 
 	literal_error = 0;
 
 	/* Remark:
 	   The standard allows for 8,191 (normal/national/boolean) character positions */
 
-	/* currlen includes the terminating quote
+	/* curr_len includes the terminating quote
 	   and has to be adjusted according to type */
 
-	currlen = strlen (text);
-	currlen--;
-	if (currlen == 0) {
+	curr_len = strlen (text);
+	curr_len--;
+	if (curr_len == 0) {
 		cb_verify (cb_zero_length_lit, _("zero-length literal"));
 		plex_buff[0] = '\0';
 		plex_buff[1] = '\0';
@@ -1295,18 +1292,18 @@ scan_x (const char *text, const char *type)
 		RETURN_TOK (LITERAL);
 	}
 
-	if (unlikely (currlen + 1 > plex_size)) {
-		plex_size = currlen + 1;
+	if (unlikely (curr_len + 1 > plex_size)) {
+		plex_size = curr_len + 1;
 		plex_buff = cobc_realloc (plex_buff, plex_size);
 	}
-	memcpy (plex_buff, text, currlen);
+	memcpy (plex_buff, text, curr_len);
 	if (likely(type[0] == 'X')) {
-		result_len = currlen / 2; /* characters, two half-bytes (hex) = 1 byte */
+		result_len = curr_len / 2; /* characters, two half-bytes (hex) = 1 byte */
 	} else if (type[0] == 'B') {
 		if (!cb_verify (cb_hexadecimal_boolean, _("hexadecimal-boolean literal"))) {
 			goto error; /* early exit possible as complete literal is consumed */
 		}
-		result_len = currlen * 4; /* boolean characters B -> 1110 */
+		result_len = curr_len * 4; /* boolean characters B -> 1110 */
 		/* GnuCOBOL currently only support 64 bit booleans */
 		if (unlikely (result_len > 64)) {
 			snprintf (err_msg, COB_MINI_MAX,
@@ -1320,7 +1317,7 @@ scan_x (const char *text, const char *type)
 			goto error; /* early exit possible as complete literal is consumed */
 		}
 		CB_UNFINISHED (_("national literal"));
-		result_len = currlen / (2 * COB_NATIONAL_SIZE); /* national characters */
+		result_len = curr_len / (2 * COB_NATIONAL_SIZE); /* national characters */
 	}
 	if (unlikely (result_len > cb_lit_length)) {
 		snprintf (err_msg, COB_MINI_MAX,
@@ -1331,25 +1328,26 @@ scan_x (const char *text, const char *type)
 	}
 
 	p = (char *)text;
-	e = (char *)p + currlen;
+	e = (char *)p + curr_len;
 	dst = plex_buff;
 
 	if (unlikely(type[0] == 'B')) {
 		/* hexadecimal-boolean */
+		cob_u64_t	val = 0;
 		for (; *p != *e; p++) {
 			c = (int) *p;
 			if ('0' <= c && c <= '9') {
-				val = (val << 4) + (c - '0');
+				val = (val << 4) + ((cob_u64_t)c - '0');
 			} else if ('A' <= c && c <= 'F') {
-				val = (val << 4) + (c - 'A' + 10);
+				val = (val << 4) + ((cob_u64_t)c - 'A' + 10);
 			} else if ('a' <= c && c <= 'f') {
-				val = (val << 4) + (c - 'a' + 10);
+				val = (val << 4) + ((cob_u64_t)c - 'a' + 10);
 			} else {
 				snprintf (err_msg, COB_MINI_MAX,
 					_("literal contains invalid character '%c'"), c);
 				if (likely (literal_error == 0)) {
-					memcpy (plex_buff, text, currlen + 1);
-					plex_buff[currlen] = 0;
+					memcpy (plex_buff, text, curr_len + 1);
+					plex_buff[curr_len] = 0;
 				}
 				error_literal (type, plex_buff);
 				/* By not breaking immediately, we detect any following
@@ -1367,6 +1365,7 @@ scan_x (const char *text, const char *type)
 	} else {
 
 		/* hexadecimal */
+		int		high = 1;
 		for (; *p != *e; p++) {
 			c = (int) *p;
 			if ('0' <= c && c <= '9') {
@@ -1379,8 +1378,8 @@ scan_x (const char *text, const char *type)
 				snprintf (err_msg, COB_MINI_MAX,
 					_("literal contains invalid character '%c'"), c);
 				if (likely (literal_error == 0)) {
-					memcpy (plex_buff, text, currlen + 1);
-					plex_buff[currlen] = 0;
+					memcpy (plex_buff, text, curr_len + 1);
+					plex_buff[curr_len] = 0;
 				}
 				error_literal (type, plex_buff);
 				/* By not breaking immediately, we detect any following
@@ -1403,8 +1402,8 @@ scan_x (const char *text, const char *type)
 			snprintf (err_msg, COB_MINI_MAX,
 				_("literal does not have an even number of digits"));
 			if (likely (literal_error == 0)) {
-				memcpy (plex_buff, text, currlen + 1);
-				plex_buff[currlen] = 0;
+				memcpy (plex_buff, text, curr_len + 1);
+				plex_buff[curr_len] = 0;
 			}
 			error_literal (type, plex_buff);
 		}

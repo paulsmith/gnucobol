@@ -4909,7 +4909,7 @@ cb_list_reserved (void)
 	/* Display sorted list with aliases. */
 	qsort (word_descriptions, num_reserved_words,
 	       sizeof (struct list_reserved_line), &list_line_cmp);
-	for (int i = 0; i < num_reserved_words; ++i) {
+	for (i = 0; i < num_reserved_words; ++i) {
 		printf ("%s", word_descriptions[i].word_and_status);
 		cobc_free (word_descriptions[i].word_and_status);
 		if (word_descriptions[i].aliases) {
