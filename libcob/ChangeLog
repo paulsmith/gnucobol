@@ -1,4 +1,9 @@
 
+2018-12-30  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c (copy_file_to_fcd): Corrected memory allocation of EXTFH
+	  data structs
+
 2018-12-19  Ron Norman <rjn@inglenet.com>
 
 	fixing EXTFH bug #561, part II

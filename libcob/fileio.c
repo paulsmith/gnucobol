@@ -7116,26 +7116,25 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 		}
 		if (fcd->kdbPtr == NULL
 		 && f->nkeys > 0) {
-			kdblen = sizeof(KDB) + (sizeof(kdb->key) * (f->nkeys - 1)) + (sizeof(EXTKEY) * keycomp);
-			fcd->kdbPtr = kdb = cob_malloc(kdblen + sizeof(EXTKEY) + 14);
-			STCOMPX2(kdblen, kdb->kdbLen);
-			STCOMPX2(f->nkeys, kdb->nkeys);
 			nkeys = f->nkeys;
+			kdblen = sizeof(KDB) - sizeof(kdb->key) + (sizeof(kdb->key[0]) * nkeys) + (sizeof(EXTKEY) * keycomp);
+			fcd->kdbPtr = kdb = cob_malloc(kdblen + sizeof(EXTKEY));
+			STCOMPX2(kdblen, kdb->kdbLen);
+			STCOMPX2(nkeys, kdb->nkeys);
+		} else if (fcd->kdbPtr == NULL) {
+			nkeys = 0;
+			kdblen = sizeof(KDB) - sizeof(kdb->key) + (sizeof(kdb->key[0]) * nkeys) + (sizeof(EXTKEY) * keycomp);
+			fcd->kdbPtr = kdb = cob_malloc(kdblen + sizeof(EXTKEY));
+			STCOMPX2(kdblen, kdb->kdbLen);
+			STCOMPX2(nkeys, kdb->nkeys);
 		} else {
 			kdb = fcd->kdbPtr;
-			if (kdb) {
-				nkeys = LDCOMPX2(kdb->nkeys);
-				if (nkeys > f->nkeys) {
-					nkeys = f->nkeys;
-				}
-			} else {
-				/* CHECKME: Should likely not happen,
-				   if this is the case: LCOV_EXL + COBC_ABORT */
-				nkeys = 0;
+			nkeys = LDCOMPX2(kdb->nkeys);
+			if (nkeys > f->nkeys) {
+				nkeys = f->nkeys;
 			}
 		}
-		keypos = ((sizeof(kdb->key) * nkeys) + 14);
-		keypos = (16 * nkeys) + 14;
+		keypos = (sizeof(kdb->key[0]) * nkeys) + sizeof(KDB) - sizeof(kdb->key);
 		for(idx=0; idx < nkeys; idx++) {
 			key = (EXTKEY*)((char*)((char*)kdb) + keypos);
 			STCOMPX2(keypos, kdb->key[idx].offset);
