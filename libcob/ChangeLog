@@ -1,7 +1,8 @@
 
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
-	* fileio.c: check for definition of non-portable EDEADLK before using it
+	* fileio.c: check for definition of non-portable EDEADLK before using it,
+	  possibly using EDEADLOCK instead
 
 2018-12-30  Ron Norman <rjn@inglenet.com>
 
@@ -3711,7 +3712,7 @@
 	  (cob_init_call): Initialize 'dynamic_reloading'.
 
 
-Copyright 2002-2018 Free Software Foundation, Inc.
+Copyright 2002-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

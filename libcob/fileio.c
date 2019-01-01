@@ -105,6 +105,10 @@
 #include "libcob.h"
 #include "coblocal.h"
 
+#if !defined (EDEADLK) && defined (EDEADLOCK)
+#define EDEADLK EDEADLOCK
+#endif
+
 #ifdef	WITH_DB
 
 #include <db.h>
