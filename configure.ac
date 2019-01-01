@@ -2,7 +2,7 @@
 # Configure template for GnuCOBOL
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+# Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
 # Edward Hart
 #
@@ -679,11 +679,22 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
   [AC_DEFINE([HAVE_CLOCK_GETTIME], [1]) AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
-AC_MSG_CHECKING([for isfinite ])
+AC_MSG_CHECKING([for isfinite])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]],
   [[isfinite ( 1.0 );]])],
   [AC_DEFINE([HAVE_ISFINITE], [1]) AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
+  [AC_MSG_RESULT([no])]
+  # Check prototype for finite in math.h (alternative ieeefp.h)
+  AC_MSG_CHECKING([prototype for finite in <math.h>])
+  AC_EGREP_HEADER(finite, math.h, AC_MSG_RESULT([yes]),
+  	[AC_MSG_RESULT([no])
+  	AC_MSG_CHECKING([prototype for finite in <ieeefp.h>])
+  	AC_EGREP_HEADER(finite, ieeefp.h,
+  	[AC_DEFINE([HAVE_FINITE_IEEEFP_H], [1]) AC_MSG_RESULT([yes])],
+  	AC_MSG_ERROR([
+  		Declaration for finite function neither in math.h nor in ieeefp.h]))
+  	])
+)
 
 # Check for raise (optional) --> done via AC_CHECK_FUNCS
 #AC_MSG_CHECKING([for raise])
@@ -692,17 +703,6 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>]],
 #  [AC_DEFINE([HAVE_RAISE], [1]) AC_MSG_RESULT([yes])],
 #  [AC_MSG_RESULT([no])],
 #  [])
-
-# Check prototype for finite in math.h (alternative ieeefp.h)
-AC_MSG_CHECKING([prototype for finite in <math.h>])
-AC_EGREP_HEADER(finite, math.h, AC_MSG_RESULT([yes]),
-	[AC_MSG_RESULT([no])
-	AC_MSG_CHECKING([prototype for finite in <ieeefp.h>])
-	AC_EGREP_HEADER(finite, ieeefp.h,
-	[AC_DEFINE([HAVE_FINITE_IEEEFP_H], [1]) AC_MSG_RESULT([yes])],
-	AC_MSG_ERROR([
-		Declaration for finite function neither in math.h nor in ieeefp.h]))
-	])
 
 AC_CHECK_FUNCS([fdatasync sigaction])
 

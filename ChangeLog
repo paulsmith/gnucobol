@@ -1,4 +1,8 @@
 
+2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: only check for finite function if isfinite is not found
+
 2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: only warn once about missing headers needed for libxml2
@@ -1045,7 +1049,7 @@
 	* Version 0.9 released.
 
 
-Copyright 2002-2018 Free Software Foundation, Inc.
+Copyright 2002-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.
