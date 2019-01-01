@@ -50,7 +50,7 @@ Make Options
 
 - make NC       (or any other module instead of NC) generate COBOL test runner
                 EXEC85 and extract tests for the given module
-- make all      generate EXEC85 and extract COBOL tests for all modules
+- make modules  generate EXEC85 and extract COBOL tests for all modules
 - make test     run the test suite with the configured modules
                 (after implied make MODULE)
 - make diff     compare the expected results (*.txt) to the last reports

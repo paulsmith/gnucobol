@@ -1,4 +1,9 @@
 
+2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: renamed target all to modules as we don't want to
+	  auto-generate those
+
 2018-12-30  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am (newcob.val.tar.gz) new target to download from sourceforge
@@ -241,7 +246,7 @@
 	* SQ.txt, summary.txt : We now pass the LINAGE tests
 
 
-Copyright 2005-2010,2015-2017 Free Software Foundation, Inc.
+Copyright 2005-2010,2015-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.
