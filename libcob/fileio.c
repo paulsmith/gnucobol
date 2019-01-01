@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1381,7 +1381,9 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 			switch (ret) {
 			case EACCES:
 			case EAGAIN:
+#ifdef EDEADLK
 			case EDEADLK:
+#endif
 				return COB_STATUS_61_FILE_SHARING;
 			default:
 				return COB_STATUS_30_PERMANENT_ERROR;
@@ -1572,7 +1574,9 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 			switch (ret) {
 			case EACCES:
 			case EAGAIN:
+#ifdef EDEADLK
 			case EDEADLK:
+#endif
 				return COB_STATUS_61_FILE_SHARING;
 			default:
 				return COB_STATUS_30_PERMANENT_ERROR;

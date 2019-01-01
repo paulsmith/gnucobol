@@ -1,4 +1,8 @@
 
+2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
+
+	* fileio.c: check for definition of non-portable EDEADLK before using it
+
 2018-12-30  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (copy_file_to_fcd): Corrected memory allocation of EXTFH
