@@ -1,4 +1,11 @@
 
+2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.c, tree.h, codegen.c, cobc.h: use EXTFH call per program,
+	  not globally
+	* pplex.l, ppparse.y, scanner.l, codegen.c: implement CALLFH
+	  directive (Micro Focus)
+
 2018-12-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (validate_inspect): moved duplicate ref-mod size calculation to
