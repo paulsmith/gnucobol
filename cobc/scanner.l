@@ -203,6 +203,26 @@ static void *	copy_literal (cb_tree l);
 	}
 %}
 
+<*>^[ ]?"#CALLFH".*\n {
+	const char	*p1;
+	char		*p2;
+	if (current_program->extfh) {
+		cobc_parse_free ((void *)current_program->extfh);
+		current_program->extfh = NULL;
+	}
+	p1 = strchr (yytext, '"');
+	if (p1) {
+		++p1;
+		p2 = strrchr (p1, '"');
+		if (p2) {
+			*p2 = 0;
+			if (strcmp (p1, "EXTFH")) {
+				current_program->extfh = cobc_parse_strdup (p1);
+			}
+		}
+	}
+}
+
 
 <*>^[ ]?"#DEFLIT".*\n {
 	scan_define_options (yytext);

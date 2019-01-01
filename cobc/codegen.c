@@ -11693,22 +11693,24 @@ output_function_prototypes (struct cb_program *prog)
 
 		output (");\n");
 
-		/* prototype for file specific extfh function */
+		/* prototype for file specific EXTFH function */
 		for (l = prog->file_list; l; l = CB_CHAIN (l)) {
 			f =  CB_FILE (CB_VALUE (l));
 			/* FIXME: add to an external call chain instead, multiple files
 			          may use the same but not-default function */
 			if (f->extfh
-			 && strcmp (cb_call_extfh, CB_CONST (f->extfh)->val) != 0) {
-				output ("extern int %s();\n", CB_CONST (f->extfh)->val);
+			 && strcmp (prog->extfh, CB_CONST (f->extfh)->val) != 0
+			 && strcmp ("EXTFH", CB_CONST (f->extfh)->val) != 0) {
+				output ("extern int %s ();\n", CB_CONST (f->extfh)->val);
 			}
 		}
 
 	}
 
-	/* prototype for general extfh function */
-	if (cb_call_extfh) {
-		output ("extern int %s();\n",cb_call_extfh);
+	/* prototype for general EXTFH function */
+	if (prog->file_list && prog->extfh
+	 && strcmp ("EXTFH", prog->extfh) != 0) {
+		output ("extern int %s ();\n", prog->extfh);
 	}
 
 	output ("\n");

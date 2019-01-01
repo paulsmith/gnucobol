@@ -1684,6 +1684,8 @@ COB_EXPIMP int	cob_sys_calledby	(void *);
 COB_EXPIMP int	cob_sys_justify		(void *, ...);
 COB_EXPIMP int	cob_sys_printable	(void *, ...);
 
+COB_EXPIMP int	cob_sys_extfh		(const void *, void *);
+
 /* Utilities */
 
 /* compatibility functions up to GnuCOBOL 2.2 */
@@ -2011,24 +2013,26 @@ COB_EXPIMP int		cob_sys_set_csr_pos	(unsigned char *);
 ********************************************/
 #define MF_MAXKEYS	64
 typedef struct {
+	unsigned char	count[2];		/* Component count */
+	unsigned char	offset[2];		/* Offset to components */
+	unsigned char	keyFlags;
+#define	KEY_SPARSE		0x02
+#define	KEY_PRIMARY		0x10
+#define	KEY_DUPS		0x40
+	unsigned char	compFlags;
+#define KEY_COMP_DUPS		0x01
+#define KEY_COMP_LEADING	0x02
+#define KEY_COMP_TRAILING	0x04
+	unsigned char	sparse;			/* Character which defines SPARSE key */
+	unsigned char	reserved[9];
+} KDB_KEY;
+
+typedef struct {
 	unsigned char	kdbLen[2];
 	char		filler[4];
 	unsigned char	nkeys[2];
 	char		filler2[6];
-	struct {
-		unsigned char	count[2];		/* Component count */
-		unsigned char	offset[2];		/* Offset to components */
-		unsigned char	keyFlags;
-#define	KEY_SPARSE		0x02
-#define	KEY_PRIMARY		0x10
-#define	KEY_DUPS		0x40
-		unsigned char	compFlags;
-#define KEY_COMP_DUPS		0x01
-#define KEY_COMP_LEADING	0x02
-#define KEY_COMP_TRAILING	0x04
-		unsigned char	sparse;			/* Character which defines SPARSE key */
-		unsigned char	reserved[9];
-	} key[MF_MAXKEYS];
+	KDB_KEY	 key[MF_MAXKEYS];
 } KDB;
 
 typedef struct {
@@ -2076,27 +2080,29 @@ typedef struct {
 #define ORG_SEQ			1
 #define ORG_INDEXED		2
 #define ORG_RELATIVE		3
+#define ORG_DETERMINE		255		/* not really implemented yet */
 	unsigned char	accessFlags;			/* status byte (bit 7) & file access flags (bits 0-6)*/
-#define ACCESS_USER_STAT	0x80	
-#define ACCESS_DYNAMIC		0x08
-#define ACCESS_RANDOM		0x04
-#define ACCESS_SEQ		0x00
+#define ACCESS_SEQ			0
+#define ACCESS_DUP_PRIME		1	/* not implemented yet */
+#define ACCESS_RANDOM		4
+#define ACCESS_DYNAMIC		8
+#define ACCESS_USER_STAT	0x80
 	unsigned char	openMode;			/* open mode INPUT, I-O, etc. */
 #define OPEN_INPUT		0		
 #define OPEN_OUTPUT		1
 #define OPEN_IO			2
 #define OPEN_EXTEND		3
-#define OPEN_NOT_OPEN		0x80
+#define OPEN_NOT_OPEN	128
 	unsigned char	recordMode;			/* recording mode */
 #define REC_MODE_FIXED		0	
 #define REC_MODE_VARIABLE	1
 	unsigned char	fileFormat;			/* File format */
 #define MF_FF_DEFAULT		0		/* Default format */
-#define MF_FF_CISAM		0x01		/* C-ISAM format */
-#define MF_FF_LEVELII		0x02	/* LEVEL II COBOL format */
-#define MF_FF_COBOL		0x03		/* IDXFORMAT"3" format */
-#define MF_FF_IDX4		0x04		/* IDXFORMAT"4" format */
-#define MF_FF_IDX8		0x08		/* IDXFORMAT"8" format */
+#define MF_FF_CISAM		1		/* C-ISAM format */
+#define MF_FF_LEVELII		2	/* LEVEL II COBOL format */
+#define MF_FF_COBOL		3		/* IDXFORMAT"3" format (COBOL2) */
+#define MF_FF_IDX4		4		/* IDXFORMAT"4" format */
+#define MF_FF_IDX8		8		/* IDXFORMAT"8" format (BIG) */
 	unsigned char	deviceFlag;		
 	unsigned char	lockAction;		
 	unsigned char	compType;			/* data compression type */
@@ -2145,13 +2151,15 @@ typedef struct {
 #define FCD_LOCK_EXCL_LOCK	0x01
 	unsigned char	fsv2Flags;			/* Fileshare V2 flags */
 	unsigned char	idxCacheArea;			/* index cache buffers */
-	char		res3[16];	
-	unsigned char	gcFlags; 			/* Local GNUCobol feature only */
-#define MF_CALLFH_GNUCOBOL	0x80			/* GNUCobol is being used */
+	unsigned char	fcdInternal1;
+	unsigned char	fcdInternal2;
+	char		res3[14];	
+	unsigned char	gcFlags; 			/* was "res3"; Local GnuCOBOL feature only */
+#define MF_CALLFH_GNUCOBOL	0x80			/* GnuCOBOL is being used */
 #define MF_CALLFH_BYPASS	0x40			/* Stop passing this file to 'callfh' */
 #define MF_CALLFH_TRACE		0x20			/* Trace I/O for this file */
 #define MF_CALLFH_STATS		0x10			/* Record Stats for this file */
-	unsigned char	eop[2];				/* Was reserverd: Use for cob_write eop value */
+	unsigned char	nlsId[2];
 	char		fsv2FileId[2];			/* Fileshare V2 file id */
 	char		retryOpenCount[2];
 	unsigned char	fnameLen[2];			/* file name length */
@@ -2162,8 +2170,9 @@ typedef struct {
 	unsigned char	useFiles;	
 	unsigned char	giveFiles;	
 	unsigned char	effKeyLen[2];			/* effective key length */
-	char		res5[16];		
-	char		opt[4];				/* Was "res5": Use for cob_write opts value */
+	char		res5[14];		
+	unsigned char	eop[2];				/* was "res5"; Use for cob_write eop value */
+	char		opt[4];				/* was "res5"; Use for cob_write opts value */
 	unsigned char	curRecLen[4];			/* current record length in bytes */
 	unsigned char	minRecLen[4];			/* min. record length in bytes */
 	unsigned char	maxRecLen[4];			/* max. record length in bytes */

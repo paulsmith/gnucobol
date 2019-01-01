@@ -1,4 +1,9 @@
 
+2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* xfhfcd3.cpy: new copy for EXTFH call from COBOL
+	* xfhfcd.cpy: new wrapper for xfhfcd3.cpy
+
 2016-12-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.cpy: added COB-SCR-INSERT, COB-SCR-DELETE, COB-SCR-BACKSPACE,
@@ -42,7 +47,7 @@
 	* Add Makefile*, ChangeLog, sqlca.cpy, sqlda.cpy
 
 
-Copyright 2008-2010,2015,2016 Free Software Foundation, Inc.
+Copyright 2008-2010,2015,2016,2018 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

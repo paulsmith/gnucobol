@@ -641,11 +641,13 @@ CONTROL_STATEMENT_STATE>{
   "ADD-SYN"		{
 	return ADDSYN;
   }
+  "CALLFH"		{
+	return CALLFH;
+  }
   "COMP1" |
   "COMP-1"		{
 	return COMP1;
   }
-
   "CONSTANT"		{
 	return CONSTANT;
   }

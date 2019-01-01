@@ -1892,6 +1892,9 @@ cb_build_program (struct cb_program *last_program, const int nest_level)
 	p->decimal_point = '.';
 	p->currency_symbol = '$';
 	p->numeric_separator = ',';
+	if (cb_call_extfh) {
+		p->extfh = cobc_parse_strdup (cb_call_extfh);
+	}
 	/* Save current program as actual at it's level */
 	container_progs[nest_level] = p;
 	if (nest_level
@@ -3764,8 +3767,8 @@ build_file (cb_tree name)
 	p = make_tree (CB_TAG_FILE, CB_CATEGORY_UNKNOWN, sizeof (struct cb_file));
 	p->name = cb_define (name, CB_TREE (p));
 	p->cname = cb_to_cname (p->name);
-	if (cb_call_extfh) { 		/* Default EXTFH module to use */
-		p->extfh = make_constant (CB_CATEGORY_ALPHANUMERIC, cb_call_extfh);
+	if (current_program->extfh) { 		/* Default EXTFH module to use */
+		p->extfh = make_constant (CB_CATEGORY_ALPHANUMERIC, current_program->extfh);
 	} else {
 		p->extfh = NULL;
 	}

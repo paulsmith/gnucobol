@@ -584,6 +584,7 @@ ppparse_clear_vars (const struct cb_define_struct *p)
 %token SET_DIRECTIVE
 %token ADDRSV
 %token ADDSYN
+%token CALLFH
 %token COMP1
 %token CONSTANT
 %token FOLDCOPYNAME
@@ -741,6 +742,20 @@ set_choice:
 	      fprintf (ppout, "#ADDSYN %s %s\n", l->text, l->next->text);
       }
   }
+| CALLFH LITERAL
+  {
+	char	*p = $2;
+	/* Remove surrounding quotes/brackets */
+	size_t	size;
+	++p;
+	size = strlen (p) - 1;
+	p[size] = '\0';
+	fprintf (ppout, "#CALLFH \"%s\"\n", p);
+  }
+| CALLFH
+  {
+	fprintf (ppout, "#CALLFH \"EXTFH\"\n");
+  }
 | COMP1 LITERAL
   {
 	char	*p = $2;
@@ -818,8 +833,8 @@ set_choice:
 		cb_source_format = CB_FORMAT_FREE;
 	} else if (!strcasecmp (p, "VARIABLE")) {
 		cb_source_format = CB_FORMAT_FIXED;
-		/* This is an arbitrary value; perhaps change later? */
-		cb_text_column = 500;
+		/* This value matches most MF Visual COBOL 4.0 version. */
+		cb_text_column = 250;
 	} else {
 		ppp_error_invalid_option ("SOURCEFORMAT", p);
 	}

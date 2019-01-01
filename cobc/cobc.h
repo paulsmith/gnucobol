@@ -315,7 +315,7 @@ extern struct list_files	*cb_listing_files;
 extern struct list_files	*cb_current_file;
 
 extern enum cb_format		cb_source_format;
-extern int			cb_text_column;
+extern int			cb_text_column;	/* end of area B (in single-byte characters) */
 
 extern struct cb_exception	cb_exception_table[];
 

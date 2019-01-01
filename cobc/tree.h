@@ -1525,6 +1525,7 @@ struct cb_program {
 	struct cb_label		*all_procedure;		/* DEBUGGING */
 	struct cb_call_xref	call_xref;		/* CALL Xref list */
 	struct cb_xml_generate_tree	*xml_trees;	/* XML GENERATE trees */
+	const char		*extfh;		/* CALLFH for this program */
 
 	int			last_source_line;	/* Line of (implicit) END PROGRAM/FUNCTION */
 

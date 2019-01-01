@@ -4,6 +4,18 @@
 	* fileio.c: check for definition of non-portable EDEADLK before using it,
 	  possibly using EDEADLOCK instead
 
+2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
+
+	* system.def, common.h: new entry EXTFH / cob_sys_extfh
+	* fileio.c (cob_sys_extfh): new function used as COBOL wrapper for
+	  EXTFH entry to prevent warnings about FCD3 structure, linking issues
+	  and providing additional checks
+	* fileio.c (EXTFH): return file code 9/161 for different errors
+	* fileio.c (EXTFH), common.h: minimal implementation for ORG_DETERMINE
+	  (will only work if the same FCD was already used with the same file)
+	* common.h (FCD3): adjustment to xfhfcd3.cpy
+	* common.h (KDB): split KDB_KEY to separate definition
+
 2018-12-30  Ron Norman <rjn@inglenet.com>
 
 	* fileio.c (copy_file_to_fcd): Corrected memory allocation of EXTFH

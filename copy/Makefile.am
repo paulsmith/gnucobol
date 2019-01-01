@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/copy
 #
-# Copyright (C) 2008-2012 Free Software Foundation, Inc.
+# Copyright (C) 2008-2012, 2018 Free Software Foundation, Inc.
 # Written by Roger While
 #
 # This file is part of GnuCOBOL.
@@ -20,6 +20,6 @@
 # along with GnuCOBOL.  If not, see <http://www.gnu.org/licenses/>.
 
 copydir = @COB_COPY_DIR@
-copy_DATA = screenio.cpy sqlca.cpy sqlda.cpy
+copy_DATA = screenio.cpy sqlca.cpy sqlda.cpy xfhfcd.cpy xfhfcd3.cpy
 
 EXTRA_DIST = $(copy_DATA)
