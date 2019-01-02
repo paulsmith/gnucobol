@@ -780,7 +780,7 @@ struct cb_field {
 	int			report_num_col;	/* Number of COLUMNs defined */
 	int			report_decl_id;	/* Label id of USE FOR REPORTING */
 	int			step_count;	/* STEP in REPORT */
-	int			next_group_line;/* NEXT GROUP [PLUS] line# */
+	int			next_group_line;/* NEXT GROUP [PLUS] line */
 	unsigned int		vaddr;		/* Variable address cache */
 	unsigned int		odo_level;	/* ODO level (0 = no ODO item)
 						   could be direct ODO (check via depending)

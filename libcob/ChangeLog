@@ -1608,13 +1608,13 @@
 	* common.c: use (cob_sys_getpid) everywhere instead of (getpid);
 	  use (setenv) if available
 
-2014-06-17  Ron Norman (rjn@inglenet.com)
+2014-06-17  Ron Norman <rjn@inglenet.com>
 
-	* parser.y, tree.c, codegen.c Added check to verfiy PAGE LIMITS of report
+	* parser.y, tree.c, codegen.c: Added check to verify PAGE LIMITS of report
 
-2014-06-14  Ron Norman (rjn@inglenet.com)
+2014-06-14  Ron Norman <rjn@inglenet.com>
 
-	* parser.y Fixes for LINE|COL 0 to get error message
+	* parser.y: Fixes for LINE|COL 0 to get error message
 
 2014-05-20  Philipp Böhme <phi.boehme@googlemail.com>
 

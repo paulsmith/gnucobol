@@ -3287,12 +3287,12 @@ cb_build_constant (cb_tree name, cb_tree value)
 
 /* Add new field to hold data from given field */
 cb_tree
-cb_field_dup(struct cb_field *f, struct cb_reference *ref)
+cb_field_dup (struct cb_field *f, struct cb_reference *ref)
 {
 	cb_tree		x;
 	struct cb_field *s;
-	char		buff[COB_MINI_BUFF],pic[30];
-	int		dec,dig;
+	char		buff[COB_MINI_BUFF], pic[30];
+	int		dec, dig;
 
 	snprintf (buff, (size_t)COB_MINI_MAX, "COPY OF %s", f->name);
 	x = cb_build_field (cb_build_reference (buff));
@@ -3510,7 +3510,7 @@ struct cb_report *
 build_report (cb_tree name)
 {
 	struct cb_report *p;
-	cb_tree		x,y;
+	cb_tree		x, y;
 	char		buff[COB_MINI_BUFF];
 
 	p = make_tree (CB_TAG_REPORT, CB_CATEGORY_UNKNOWN, sizeof (struct cb_report));
@@ -3545,7 +3545,7 @@ build_report (cb_tree name)
 
 /* Add SUM counter to program */
 void
-build_sum_counter(struct cb_report *r, struct cb_field *f)
+build_sum_counter (struct cb_report *r, struct cb_field *f)
 {
 	cb_tree		x;
 	struct cb_field *s;
@@ -3553,20 +3553,21 @@ build_sum_counter(struct cb_report *r, struct cb_field *f)
 	int		dec,dig;
 
 	/* Set up SUM COUNTER */
-	if(f->flag_filler) {
+	if (f->flag_filler) {
 		snprintf (buff, (size_t)COB_MINI_MAX, "SUM OF %s",
 					CB_FIELD(CB_VALUE(f->report_sum_list))->name);
 	} else {
 		snprintf (buff, (size_t)COB_MINI_MAX, "SUM %s", f->name);
 	}
 	x = cb_build_field (cb_build_reference (buff));
-	if(f->pic->digits == 0)
+	if (f->pic->digits == 0) {
 		dig = 16;
-	else if(f->pic->digits > 17)
+	} else if(f->pic->digits > 17) {
 		dig = 18;
-	else
+	} else {
 		dig = f->pic->digits + 2;
-	if((dec = f->pic->scale) > 0) {
+	}
+	if ((dec = f->pic->scale) > 0) {
 		if((dig-dec) == 0) {
 			sprintf(pic,"SV9(%d)",dec);
 		} else if((dig-dec) < 0) {
@@ -3609,10 +3610,12 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 
 	if (report_checked != r) {
 		report_checked = r;
-		if (r->lines > 9999)
+		if (r->lines > 9999) {
 			r->lines = 9999;
-		if (r->heading < 0)
+		}
+		if (r->heading < 0) {
 			r->heading = 0;
+		}
 		if (r->first_detail < 1) {
 			if(r->first_detail <= 0
 			&& !r->has_detail
@@ -3712,10 +3715,12 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		}
 		if (p->storage == CB_STORAGE_REPORT
 		 && ((p->report_flag & COB_REPORT_LINE) || p->level == 1)) {
-			if(p->size < r->rcsz)
+			if (p->size < r->rcsz) {
 				p->size = r->rcsz;
-			if(p->memory_size < r->rcsz)
+			}
+			if (p->memory_size < r->rcsz) {
 				p->memory_size = r->rcsz;
+			}
 		}
 		if (p->level == 1
 		 && p->report != NULL
@@ -3726,7 +3731,7 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 #endif
 			for (ff = records; ff; ff = ff->sister) {
 				if (f->record_max > 0
-				&&  ff->size > f->record_max) {
+				 && ff->size > f->record_max) {
 					f->record_max = ff->size;
 				}
 			}
@@ -3750,10 +3755,12 @@ finalize_report (struct cb_report *r, struct cb_field *records)
 		COBC_ABORT ();
 	}
 	/* LCOV_EXCL_STOP */
-	if (r->file->record_max < r->rcsz)
+	if (r->file->record_max < r->rcsz) {
 		r->file->record_max = r->rcsz;
-	if (r->rcsz < r->file->record_max)
+	}
+	if (r->rcsz < r->file->record_max) {
 		r->rcsz = r->file->record_max;
+	}
 }
 
 
@@ -3955,7 +3962,7 @@ finalize_file (struct cb_file *f, struct cb_field *records)
 	if (f->flag_report) {
 		for (p = records; p; p = p->sister) {
 			if (f->record_max > 0
-			&&  p->size > f->record_max) {
+			 && p->size > f->record_max) {
 				f->record_max = p->size;
 			}
 		}

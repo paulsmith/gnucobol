@@ -9884,7 +9884,7 @@ cb_emit_move (cb_tree src, cb_tree dsts)
 	}
 
 	cb_check_data_incompat (src);
-	src = cb_check_sum_field(src);
+	src = cb_check_sum_field (src);
 
 	tempval = 0;
 	if (cb_list_length (dsts) > 1) {
@@ -11445,7 +11445,7 @@ cobc_init_typeck (void)
  */
 static int report_in_footing = 0;
 static void
-cb_emit_report_moves(struct cb_report *r, struct cb_field *f, int forterminate)
+cb_emit_report_moves (struct cb_report *r, struct cb_field *f, int forterminate)
 {
 	struct cb_field		*p;
 	for (p = f; p; p = p->sister) {

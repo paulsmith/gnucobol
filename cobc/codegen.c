@@ -7720,9 +7720,10 @@ output_stmt (cb_tree x)
 #endif
 		code = 0;
 		output_prefix ();
-		if(ip->is_if == 2
-		&& ip->stmt1 == NULL
-		&& ip->stmt2 != NULL) {	/* Really PRESENT WHEN for Report field */
+		/* Really PRESENT WHEN for Report field */
+		if (ip->is_if == 2    &&
+		    ip->stmt1 == NULL &&
+		    ip->stmt2 != NULL) {
 			p2 = (struct cb_field *)ip->stmt2;
 			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
@@ -7745,9 +7746,10 @@ output_stmt (cb_tree x)
 #endif
 			break;
 		}
-		if(ip->is_if == 3
-		&& ip->stmt1 == NULL
-		&& ip->stmt2 != NULL) {	/* Really PRESENT WHEN for Report line */
+		/* Really PRESENT WHEN for Report line */
+		if (ip->is_if == 3    &&
+		    ip->stmt1 == NULL &&
+		    ip->stmt2 != NULL) {
 			p2 = (struct cb_field *)ip->stmt2;
 			if((p2->report_flag & COB_REPORT_LINE)) {
 				px = (char*)CB_PREFIX_REPORT_LINE;
@@ -8445,8 +8447,11 @@ output_xml_generate_init (struct cb_xml_generate_tree *tree)
 static void
 compute_report_rcsz (struct cb_field *p)
 {
-    	if(p == NULL)
-	    return;
+#if 0 /* already checked: doesn't happen */
+	if (p == NULL) {
+		return;
+	}
+#endif
 	if (p->sister) {
 		compute_report_rcsz (p->sister);
 	}
@@ -8467,9 +8472,11 @@ output_report_data (struct cb_field *p)
 	struct cb_field *pp;
 	cb_tree	x, l;
 
+#if 0 /* already checked: doesn't happen */
 	if (p == NULL) {
 		return;
 	}
+#endif
 
 	if (p->storage == CB_STORAGE_REPORT) {
 		if (p->level == 1
@@ -8609,12 +8616,12 @@ output_report_summed_field (struct cb_field *p)
 /* Report definition */
 
 static void
-output_report_control(struct cb_report *p, int id, cb_tree ctl, cb_tree nx)
+output_report_control (struct cb_report *p, int id, cb_tree ctl, cb_tree nx)
 {
 	struct cb_field *s;
 	struct cb_field *f;
-	cb_tree	l,x;
-	int	i,bfound,prvid,seq;
+	cb_tree	l, x;
+	int	i, bfound, prvid, seq;
 
 	x = CB_VALUE (ctl);
 	s = cb_code_field(x);
@@ -8694,9 +8701,11 @@ output_report_def_fields (int bgn, int id, struct cb_field *f, struct cb_report 
 	unsigned int	i, j;
 	char		*val;
 
+#if 0 /* already checked: doesn't happen */
 	if (f == NULL) {
 		return;
 	}
+#endif
 	if(bgn == 1)
 		report_field_id = 0;
 
@@ -8955,7 +8964,7 @@ output_report_define_lines (int top, struct cb_field *f, struct cb_report *r)
 	output_local("*/\n");
 	fld_id = 0;
 	if((f->report_flag & COB_REPORT_LINE)
-	&& f->children != NULL) {
+	 && f->children != NULL) {
 		output_report_def_fields (1,f->id,f->children,r,0);
 		fld_id = f->children->id;
 	} else if(f->children == NULL) {
@@ -9001,14 +9010,16 @@ static int r_ctl_id = 0;
 
 /* Find data field for given internal SUM counter */
 struct cb_field *
-get_sum_data_field(struct cb_report *r, struct cb_field *f)
+get_sum_data_field (struct cb_report *r, struct cb_field *f)
 {
 	int	k;
-	for(k=0; k < r->num_sums; k++) {
-		if(r->sums[k*2 + 0] == f)
+	for (k=0; k < r->num_sums; k++) {
+		if (r->sums[k*2 + 0] == f) {
 			return r->sums[k*2 + 1];
-		if(r->sums[k*2 + 1] == f)
+		}
+		if (r->sums[k*2 + 1] == f) {
 			return r->sums[k*2 + 0];
+		}
 	}
 	return NULL;
 }
@@ -9020,13 +9031,16 @@ static void
 output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 {
 	struct cb_field *n, *c, *p, *z;
-	cb_tree	l,x;
+	cb_tree	l, x;
 	char	fname[64];
-	int	rsid,rsseq,rsprv;
-	int	ctl_foot,sub_ttl,cross_foot;
+	int	rsid, rsseq, rsprv;
+	int	ctl_foot, sub_ttl, cross_foot;
 
-    	if(f == NULL)
-	    return;
+#if 0 /* already checked: doesn't happen */
+	if (f == NULL) {
+		return;
+	}
+#endif
 	n = f->sister;
 	c = f->children;
 	if(n
@@ -9038,10 +9052,10 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 	if(c
 	&& c->storage != CB_STORAGE_REPORT)
 		c = NULL;
-	if(n) {
+	if (n) {
 		output_report_sum_counters(top, n, r);
 	}
-	if(c) {
+	if (c) {
 		output_report_sum_counters(0, c, r);
 	} else {
 		c = NULL;
@@ -9176,9 +9190,10 @@ output_report_definition (struct cb_report *p, struct cb_report *n)
 		output_local ("\n");
 	}
 	sum_prv = 0;
-	for(i= p->num_lines-1; i >= 0; i--) {
-		if(p->line_ids[i]->level == 1)
-			output_report_sum_counters(1,p->line_ids[i], p);
+	for (i= p->num_lines-1; i >= 0; i--) {
+		if (p->line_ids[i]->level == 1) {
+			output_report_sum_counters (1, p->line_ids[i], p);
+		}
 	}
 
 	output_local ("\n");

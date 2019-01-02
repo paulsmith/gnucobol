@@ -7409,7 +7409,7 @@ type_option:
 | cf_keyword _on_for _control_footing_final
 | detail_keyword
   {
-	if(current_report != NULL) {
+	if (current_report != NULL) {
 		current_report->has_detail = 1;
 	}
 	current_field->report_flag |= COB_REPORT_DETAIL;
@@ -7487,7 +7487,7 @@ next_group_plus:
 	} else {
 		current_field->report_flag |= COB_REPORT_NEXT_GROUP_LINE;
 	}
-	current_field->next_group_line = cb_get_int($1);
+	current_field->next_group_line = cb_get_int ($1);
   }
 | PLUS integer
   {
@@ -7516,7 +7516,7 @@ sum_clause_list:
   {
 	check_repeated ("SUM", SYN_CLAUSE_19, &check_pic_duplicate);
 	current_field->report_sum_list = $3;
-	build_sum_counter( current_report, current_field);
+	build_sum_counter (current_report, current_field);
   }
 ;
 
@@ -7629,7 +7629,7 @@ _line_clause_options:
 line_clause_option:
   line_clause_integer
   {
-	if(current_field->report_line == 0) {
+	if (current_field->report_line == 0) {
 		CB_PENDING ("LINE 0");
 	}
   }
@@ -7640,9 +7640,9 @@ line_clause_option:
 | PLUS report_integer
   {
 	current_field->report_flag |= COB_REPORT_LINE_PLUS;
-	current_field->report_line = cb_get_int($2);
-	if($2 != cb_int0
-	&& $2 != cb_int1) {
+	current_field->report_line = cb_get_int ($2);
+	if ($2 != cb_int0 &&
+	    $2 != cb_int1) {
 		if ((CB_LITERAL_P($2) && CB_LITERAL ($2)->sign < 0)
 		|| current_field->report_line < 0) {
 			cb_error (_("positive integer value expected"));
@@ -7655,7 +7655,7 @@ line_clause_option:
 | TOK_PLUS report_integer
   {
 	current_field->report_flag |= COB_REPORT_LINE_PLUS;
-	current_field->report_line = cb_get_int($2);
+	current_field->report_line = cb_get_int ($2);
 	if($2 != cb_int0
 	&& $2 != cb_int1) {
 		if ((CB_LITERAL_P($2) && CB_LITERAL ($2)->sign < 0)
@@ -7672,8 +7672,8 @@ line_clause_option:
 line_clause_integer:
   report_integer
   {
-	current_field->report_line = cb_get_int($1);
-	if($1 != cb_int0) {
+	current_field->report_line = cb_get_int ($1);
+	if ($1 != cb_int0) {
 		if (CB_LITERAL_P($1) && CB_LITERAL ($1)->sign > 0) {
 			current_field->report_flag |= COB_REPORT_LINE_PLUS;
 		} else if ((CB_LITERAL_P($1) && CB_LITERAL ($1)->sign < 0)
@@ -12066,7 +12066,7 @@ generate_body:
   {
 	begin_implicit_statement ();
 	if ($1 != cb_error_node) {
-		cb_emit_generate($1);
+		cb_emit_generate ($1);
 	}
   }
 ;
@@ -12293,14 +12293,14 @@ initiate_body:
   {
 	begin_implicit_statement ();
 	if ($1 != cb_error_node) {
-	    cb_emit_initiate($1);
+		cb_emit_initiate ($1);
 	}
   }
 | initiate_body report_name
   {
 	begin_implicit_statement ();
 	if ($2 != cb_error_node) {
-	    cb_emit_initiate($2);
+		cb_emit_initiate ($2);
 	}
   }
 ;
@@ -14520,7 +14520,7 @@ use_reporting:
 	} else {
 		control_field = f = CB_FIELD (x);
 		f->report_decl_id = current_section->id;
-		if((r = f->report) != NULL) {
+		if ((r = f->report) != NULL) {
 			r->has_declarative = 1;
 		}
 	}
@@ -15558,13 +15558,13 @@ line_linage_page_counter:
   }
 | LINE_COUNTER
   {
-	if (report_count > 1
-	&& current_report != NULL) {
-		$$ = current_report->line_counter;
-	} else
 	if (report_count > 1) {
-		cb_error (_("LINE-COUNTER must be qualified here"));
-		$$ = cb_error_node;
+		if (current_report != NULL) {
+			$$ = current_report->line_counter;
+		} else {
+			cb_error (_("LINE-COUNTER must be qualified here"));
+			$$ = cb_error_node;
+		}
 	} else if (report_count == 0) {
 		cb_error (_("invalid LINE-COUNTER usage"));
 		$$ = cb_error_node;
@@ -15583,13 +15583,13 @@ line_linage_page_counter:
   }
 | PAGE_COUNTER
   {
-	if (report_count > 1
-	&& current_report != NULL) {
-		$$ = current_report->page_counter;
-	} else
 	if (report_count > 1) {
-		cb_error (_("PAGE-COUNTER must be qualified here"));
-		$$ = cb_error_node;
+		if (current_report != NULL) {
+			$$ = current_report->page_counter;
+		} else {
+			cb_error (_("PAGE-COUNTER must be qualified here"));
+			$$ = cb_error_node;
+		}
 	} else if (report_count == 0) {
 		cb_error (_("invalid PAGE-COUNTER usage"));
 		$$ = cb_error_node;
