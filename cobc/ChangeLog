@@ -1,4 +1,10 @@
 
+2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* reserved.c (get_reserved_words_with_amendments): if a user reserves a
+	  default reserved word, context-sensitivity is now preserved only if
+	  they specify it.
+
 2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.c, tree.h, codegen.c, cobc.h: use EXTFH call per program,

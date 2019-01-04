@@ -4109,6 +4109,7 @@ get_reserved_words_with_amendments (void)
 			amendment->word = cobc_main_malloc (strlen (default_reserved_words[i].name) + 1);
 			strcpy (amendment->word, default_reserved_words[i].name);
 			amendment->to_add = 1;
+			amendment->is_context_sensitive = default_reserved_words[i].context_sens;
 
 			if (add_amendment_to_map (*amendment, 0)) {
 				key = find_key_for_amendment (amendment->word);
@@ -4132,18 +4133,14 @@ get_reserved_words_with_amendments (void)
 		p = find_default_reserved_word (amendment_map[i]->word, 0);
 		if (p && !amendment_map[i]->alias_for) {
 			reserved = *p;
-			/*
-			  Note that we ignore if the user specified this word
-			  as context-sensitive, but need to check if a
-			  context-sensitive word has no context-sensitivity
-			  according to the user.
-			*/
-#if 0 /* FIXME - missing !!! */
-			if (p->context_sens && !user_specified_reserved_word->context_sens) {
+			if (!amendment_map[i]->is_context_sensitive) {
+				/*
+				  We only preserve context-sensitivity if the
+				  user specifically asks for it.
+				*/
 				reserved.context_sens = 0;
 				reserved.context_test = 0;
 			}
-#endif
 		} else {
 			reserved = get_user_specified_reserved_word (*amendment_map[i]);
 		}

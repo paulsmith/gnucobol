@@ -3870,17 +3870,20 @@ AT_DATA([prog.cob], [
        01  foo         PIC X.
        01  bars        PIC X.
        01  file        PIC X.
+       01  background-color PIC X.
 
        PROCEDURE       DIVISION.
            CONTINUE
            .
 ])
 
-AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bars -fnot-reserved=file prog.cob], [1], [],
+AT_CHECK([$COMPILE_ONLY -freserved=hello,foo,bars,background-color -fnot-reserved=file prog.cob], [1], [],
 [prog.cob:7: error: 'hello' is a reserved word, but isn't supported
 prog.cob:8: error: 'foo' is a reserved word, but isn't supported
 prog.cob:9: error: 'bars' is a reserved word, but isn't supported
+prog.cob:11: error: syntax error, unexpected BACKGROUND-COLOR
 ])
+AT_CHECK([$COMPILE_ONLY -fnot-reserved=file prog.cob], [0], [])
 AT_CLEANUP
 
 
