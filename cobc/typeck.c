@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -11584,7 +11584,7 @@ cb_emit_suppress (struct cb_field *f)
 	cb_emit (CB_BUILD_FUNCALL_2 ("$S", z, cb_int (f->id)));
 }
 
-/* XML GENERATE statement */
+/* JSON/XML GENERATE statement */
 
 static int
 error_if_not_alnum_or_national (cb_tree ref, const char *name)
@@ -11637,13 +11637,13 @@ error_if_not_child_of_input_record (cb_tree ref, cb_tree input_record,
 }
 
 static int
-is_ignored_child_in_xml_gen (cb_tree ref, cb_tree parent_ref)
+is_ignored_child_in_ml_gen (cb_tree ref, cb_tree parent_ref)
 {
 	struct cb_field	*f = CB_FIELD (cb_ref (ref));
 	struct cb_field *parent = CB_FIELD (cb_ref (parent_ref));
 
 	for (; f && f != parent; f = f->parent) {
-		if (cb_field_is_ignored_in_xml_gen (f)) {
+		if (cb_field_is_ignored_in_ml_gen (f)) {
 			return 1;
 		}
 	}
@@ -11652,10 +11652,10 @@ is_ignored_child_in_xml_gen (cb_tree ref, cb_tree parent_ref)
 }
 
 static int
-error_if_ignored_in_xml_gen (cb_tree ref, cb_tree input_record, const char *name)
+error_if_ignored_in_ml_gen (cb_tree ref, cb_tree input_record, const char *name)
 {
-	if (is_ignored_child_in_xml_gen (ref, input_record)) {
-		cb_error_x (ref, _("%s may not be an ignored item in XML GENERATE"), name);
+	if (is_ignored_child_in_ml_gen (ref, input_record)) {
+		cb_error_x (ref, _("%s may not be an ignored item in JSON/XML GENERATE"), name);
 		return 1;
 	} else {
 		return 0;
@@ -11700,7 +11700,7 @@ error_if_not_integer_ref (cb_tree ref, const char *name)
 }
 
 static int
-syntax_check_xml_gen_receiving_item (cb_tree out)
+syntax_check_ml_gen_receiving_item (cb_tree out)
 {
 	int	error = 0;
 
@@ -11708,13 +11708,13 @@ syntax_check_xml_gen_receiving_item (cb_tree out)
 		return 1;
 	}
 
-	error |= error_if_not_alnum_or_national (out, _("XML GENERATE receiving item"));
+	error |= error_if_not_alnum_or_national (out, _("JSON/XML GENERATE receiving item"));
 
 	if (CB_FIELD (cb_ref (out))->flag_justified) {
-		cb_error_x (out, _("XML GENERATE receiving item may not have JUSTIFIED clause"));
+		cb_error_x (out, _("JSON/XML GENERATE receiving item may not have JUSTIFIED clause"));
 		error = 1;
 	}
-	error |= error_if_subscript_or_refmod (out, _("XML GENERATE receiving item"));
+	error |= error_if_subscript_or_refmod (out, _("JSON/XML GENERATE receiving item"));
 
 	return error;
 }
@@ -11725,7 +11725,7 @@ all_children_are_ignored (struct cb_field * const f)
         struct cb_field	*child;
 
 	for (child = f->children; child; child = child->sister) {
-		if (!cb_field_is_ignored_in_xml_gen (child)
+		if (!cb_field_is_ignored_in_ml_gen (child)
 		    && !(child->children
 			 && all_children_are_ignored (child))) {
 			return 0;
@@ -11789,7 +11789,7 @@ contains_occurs_item (const struct cb_field * const f, const int check_siblings)
 }
 
 static int
-syntax_check_xml_gen_input_rec (cb_tree from)
+syntax_check_ml_gen_input_rec (cb_tree from)
 {
 	int     	error = 0;
 	struct cb_field	*from_field;
@@ -11799,41 +11799,41 @@ syntax_check_xml_gen_input_rec (cb_tree from)
 	}
 
 	if (CB_REFERENCE (from)->offset) {
-		cb_error_x (from, _("XML GENERATE input record may not be reference modified"));
+		cb_error_x (from, _("JSON/XML GENERATE input record may not be reference modified"));
 		error = 1;
 	}
 
 	from_field = CB_FIELD (cb_ref (from));
 	if (from_field->rename_thru) {
-		cb_error_x (from, _("XML GENERATE input record may not have RENAMES clause"));
+		cb_error_x (from, _("JSON/XML GENERATE input record may not have RENAMES clause"));
 		error = 1;
 	}
 
 	if (from_field->children && all_children_are_ignored (from_field)) {
-		cb_error_x (from, _("all the children of '%s' are ignored in XML GENERATE"),
+		cb_error_x (from, _("all the children of '%s' are ignored in JSON/XML GENERATE"),
 			    cb_name (from));
 		error = 1;
 	}
 
 	if (!all_children_ok_qualified_by_only (from_field, from_field)) {
 		/* TO-DO: Output the name of the child with the nonunique name */
-		cb_error_x (from, _("XML GENERATE input record has subrecords with non-unique names"));
+		cb_error_x (from, _("JSON/XML GENERATE input record has subrecords with non-unique names"));
 		error = 1;
 	}
 
 	if (contains_floating_point_item (from_field, 0)) {
-		CB_PENDING (_("floating-point items in XML GENERATE"));
+		CB_PENDING (_("floating-point items in JSON/XML GENERATE"));
 	}
 
 	if (contains_occurs_item (from_field, 0)) {
-		CB_PENDING (_("OCCURS items in XML GENERATE"));
+		CB_PENDING (_("OCCURS items in JSON/XML GENERATE"));
 	}
 
 	return error;
 }
 
 static int
-syntax_check_xml_gen_count_in (cb_tree count)
+syntax_check_ml_gen_count_in (cb_tree count)
 {
 	int		error = 0;
 	enum cb_usage	usage;
@@ -11953,7 +11953,7 @@ syntax_check_xml_gen_prefix (cb_tree prefix)
 }
 
 static int
-syntax_check_xml_gen_name_list (cb_tree name_list, cb_tree input)
+syntax_check_ml_gen_name_list (cb_tree name_list, cb_tree input)
 {
 	cb_tree	name_pair;
 	cb_tree	ref;
@@ -11977,7 +11977,7 @@ syntax_check_xml_gen_name_list (cb_tree name_list, cb_tree input)
 			cb_error_x (ref, _("NAME OF item must be the input record or a child of it"));
 			error = 1;
 		} else {
-			error |= error_if_ignored_in_xml_gen (ref, input, _("NAME OF item"));
+			error |= error_if_ignored_in_ml_gen (ref, input, _("NAME OF item"));
 		}
 
 		if (!is_valid_xml_name (CB_LITERAL (name))) {
@@ -11990,7 +11990,7 @@ syntax_check_xml_gen_name_list (cb_tree name_list, cb_tree input)
 }
 
 static int
-syntax_check_xml_gen_type_list (cb_tree type_list, cb_tree input)
+syntax_check_ml_gen_type_list (cb_tree type_list, cb_tree input)
 {
 	cb_tree	l;
 	cb_tree	type_pair;
@@ -12014,7 +12014,7 @@ syntax_check_xml_gen_type_list (cb_tree type_list, cb_tree input)
 							_("TYPE OF item"))) {
 			error = 1;
 		} else {
-			error |= error_if_ignored_in_xml_gen (ref, input,
+			error |= error_if_ignored_in_ml_gen (ref, input,
 							      _("TYPE OF item"));
 		}
 	}
@@ -12023,7 +12023,7 @@ syntax_check_xml_gen_type_list (cb_tree type_list, cb_tree input)
 }
 
 static int
-syntax_check_when_list (struct cb_xml_suppress_clause *suppress)
+syntax_check_when_list (struct cb_ml_suppress_clause *suppress)
 {
 	cb_tree		l;
 	int		error = 0;
@@ -12050,14 +12050,14 @@ syntax_check_when_list (struct cb_xml_suppress_clause *suppress)
 }
 
 static int
-syntax_check_xml_gen_suppress_list (cb_tree suppress_list, cb_tree input)
+syntax_check_ml_gen_suppress_list (cb_tree suppress_list, cb_tree input)
 {
 	int	error = 0;
 	cb_tree	l;
-	struct cb_xml_suppress_clause	*suppress;
+	struct cb_ml_suppress_clause	*suppress;
 
 	for (l = suppress_list; l; l = CB_CHAIN (l)) {
-		suppress = CB_XML_SUPPRESS (CB_VALUE (l));
+		suppress = CB_ML_SUPPRESS (CB_VALUE (l));
 		if (!suppress->identifier) {
 			continue;
 		}
@@ -12078,8 +12078,8 @@ syntax_check_xml_gen_suppress_list (cb_tree suppress_list, cb_tree input)
 							_("SUPPRESS item"))) {
 			error = 1;
 		} else {
-			error |= error_if_ignored_in_xml_gen (suppress->identifier,
-							      input, _("SUPPRESS item"));
+			error |= error_if_ignored_in_ml_gen (suppress->identifier,
+							     input, _("SUPPRESS item"));
 		}
 
 		error |= syntax_check_when_list (suppress);
@@ -12089,25 +12089,25 @@ syntax_check_xml_gen_suppress_list (cb_tree suppress_list, cb_tree input)
 }
 
 static int
-syntax_check_xml_generate (cb_tree out, cb_tree from, cb_tree count,
-			   cb_tree encoding,
-			   cb_tree namespace_and_prefix,
-			   cb_tree name_list, cb_tree type_list,
-			   cb_tree suppress_list)
+syntax_check_ml_generate (cb_tree out, cb_tree from, cb_tree count,
+			  cb_tree encoding,
+			  cb_tree namespace_and_prefix,
+			  cb_tree name_list, cb_tree type_list,
+			  cb_tree suppress_list)
 {
 	int	error = 0;
 
-	error |= syntax_check_xml_gen_receiving_item (out);
-	error |= syntax_check_xml_gen_input_rec (from);
-	error |= syntax_check_xml_gen_count_in (count);
+	error |= syntax_check_ml_gen_receiving_item (out);
+	error |= syntax_check_ml_gen_input_rec (from);
+	error |= syntax_check_ml_gen_count_in (count);
 	COB_UNUSED (encoding);	/* TODO: check encoding */
 	if (namespace_and_prefix) {
 		error |= syntax_check_xml_gen_namespace (CB_PAIR_X (namespace_and_prefix));
 		error |= syntax_check_xml_gen_prefix (CB_PAIR_Y (namespace_and_prefix));
 	}
-	error |= syntax_check_xml_gen_name_list (name_list, from);
-	error |= syntax_check_xml_gen_type_list (type_list, from);
-	error |= syntax_check_xml_gen_suppress_list (suppress_list, from);
+	error |= syntax_check_ml_gen_name_list (name_list, from);
+	error |= syntax_check_ml_gen_type_list (type_list, from);
+	error |= syntax_check_ml_gen_suppress_list (suppress_list, from);
 
 	/* TO-DO: Warn if out is probably too short */
 	/* TO-DO: Warn if count_in may overflow */
@@ -12124,26 +12124,26 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 		      cb_tree name_list, cb_tree type_list,
 		      cb_tree suppress_list)
 {
-	struct cb_xml_generate_tree	*tree;
+	struct cb_ml_generate_tree	*tree;
 
-	if (syntax_check_xml_generate (out, from, count, encoding,
+	if (syntax_check_ml_generate (out, from, count, encoding,
 				       namespace_and_prefix, name_list,
 				       type_list, suppress_list)) {
 		return;
 	}
 
-        tree = CB_XML_TREE (cb_build_xml_tree (CB_FIELD (cb_ref (from)),
-					       with_attrs, 0, name_list,
-					       type_list, suppress_list));
+        tree = CB_ML_TREE (cb_build_ml_tree (CB_FIELD (cb_ref (from)),
+					     with_attrs, 0, name_list,
+					     type_list, suppress_list));
 
-	tree->sibling = current_program->xml_trees;
-	current_program->xml_trees = tree;
+	tree->sibling = current_program->ml_trees;
+	current_program->ml_trees = tree;
 
 	if (with_attrs && !tree->attrs) {
 		cb_warning (warningopt, _("WITH ATTRIBUTES specified, but no attributes can be generated"));
 	}
 
-	cb_emit (cb_build_xml_suppress_checks (tree));
+	cb_emit (cb_build_ml_suppress_checks (tree));
 	if (namespace_and_prefix) {
 		cb_emit (CB_BUILD_FUNCALL_6 ("cob_xml_generate", out, CB_TREE (tree),
 					     count, cb_int (with_xml_dec),

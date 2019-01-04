@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch,
    Edward Hart, Ron Norman, Dave Pitts
 
@@ -385,8 +385,8 @@ extern int			cb_pic_id;
 extern int			cb_attr_id;
 extern int			cb_literal_id;
 extern int			cb_field_id;
-extern int			cb_xml_attr_id;
-extern int			cb_xml_tree_id;
+extern int			cb_ml_attr_id;
+extern int			cb_ml_tree_id;
 extern int			cobc_flag_main;
 extern int			cb_flag_functions_all;
 

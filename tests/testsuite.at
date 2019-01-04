@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -71,7 +71,7 @@ m4_include([run_reportwriter.at])		# REPORT WRITER
 m4_include([run_returncode.at])
 m4_include([run_functions.at])	# 15 Intrinsic Functions / 9.4 User-Defined Functions
 m4_include([run_extensions.at])
-m4_include([run_xml.at])
+m4_include([run_ml.at])
 
 ## Data Representation
 AT_BANNER([Data Representation])

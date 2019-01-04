@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/tests
 #
-# Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -50,11 +50,11 @@ testsuite_sources = \
 	testsuite.src/run_fundamental.at \
 	testsuite.src/run_initialize.at \
 	testsuite.src/run_misc.at \
+	testsuite.src/run_ml.at \
 	testsuite.src/run_refmod.at \
 	testsuite.src/run_reportwriter.at \
 	testsuite.src/run_returncode.at \
 	testsuite.src/run_subscripts.at \
-	testsuite.src/run_xml.at \
 	testsuite.src/data_binary.at \
 	testsuite.src/data_display.at \
 	testsuite.src/data_packed.at \

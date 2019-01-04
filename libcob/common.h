@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -1470,23 +1470,23 @@ typedef struct __cob_report {
 	char			*code_is;		/* Value of CODE IS for this report */
 } cob_report;
 
-/* XML tree structure */
+/* ML tree structure */
 
-typedef struct __cob_xml_attr {
+typedef struct __cob_ml_attr {
 	cob_field		*name;
 	cob_field		*value;
 	unsigned int		is_suppressed;
-	struct __cob_xml_attr	*sibling;
-} cob_xml_attr;
+	struct __cob_ml_attr	*sibling;
+} cob_ml_attr;
 
-typedef struct __cob_xml_tree {
+typedef struct __cob_ml_tree {
         cob_field		*name;
-	cob_xml_attr		*attrs;
+	cob_ml_attr		*attrs;
 	cob_field		*content;
 	unsigned int		is_suppressed;
-	struct __cob_xml_tree	*children;
-	struct __cob_xml_tree	*sibling;
-} cob_xml_tree;
+	struct __cob_ml_tree	*children;
+	struct __cob_ml_tree	*sibling;
+} cob_ml_tree;
 
 /* Global variable structure */
 
@@ -2395,13 +2395,13 @@ COB_EXPIMP int  cob_report_generate	(cob_report *, cob_report_line *, int);
 COB_EXPIMP void cob_report_suppress	(cob_report *r, cob_report_line *l);
 
 /**********************/
-/* Functions in xml.c */
+/* Functions in mlio.c */
 /**********************/
 
 COB_EXPIMP int	cob_is_valid_uri	(const char *);
 COB_EXPIMP int	cob_is_xml_namestartchar	(const int);
 COB_EXPIMP int	cob_is_xml_namechar	(const int);
-COB_EXPIMP void	cob_xml_generate	(cob_field *, cob_xml_tree *,
+COB_EXPIMP void	cob_xml_generate	(cob_field *, cob_ml_tree *,
 					 cob_field *, const int, cob_field *,
 					 cob_field *);
 

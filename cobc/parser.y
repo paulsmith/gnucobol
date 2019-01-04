@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -231,12 +231,12 @@ static cb_tree			advancing_value;
 static cb_tree			upon_value;
 static cb_tree			line_column;
 
-static cb_tree			xml_suppress_list;
+static cb_tree			ml_suppress_list;
 static cb_tree			xml_encoding;
 static int			with_xml_dec;
 static int			with_attrs;
 
-static enum cb_xml_suppress_category	xml_suppress_category;
+static enum cb_ml_suppress_category	ml_suppress_category;
 
 static int			term_array[TERM_MAX];
 static cb_tree			eval_check[EVAL_DEPTH][EVAL_DEPTH];
@@ -1901,33 +1901,33 @@ check_validate_item (cb_tree x)
 static void
 error_if_following_every_clause (void)
 {
-	if (xml_suppress_list
-	    && CB_XML_SUPPRESS (CB_VALUE (xml_suppress_list))->target == CB_XML_SUPPRESS_TYPE) {
+	if (ml_suppress_list
+	    && CB_ML_SUPPRESS (CB_VALUE (ml_suppress_list))->target == CB_ML_SUPPRESS_TYPE) {
 		cb_error (_("WHEN clause must follow EVERY clause"));
 	}
 }
 
 static void
-prepend_to_xml_suppress_list (cb_tree suppress_entry)
+prepend_to_ml_suppress_list (cb_tree suppress_entry)
 {
 	cb_tree	new_list_head = CB_LIST_INIT (suppress_entry);
-	cb_list_append (new_list_head, xml_suppress_list);
-	xml_suppress_list = new_list_head;
+	cb_list_append (new_list_head, ml_suppress_list);
+	ml_suppress_list = new_list_head;
 }
 
 static void
-add_identifier_to_xml_suppress_conds (cb_tree identifier)
+add_identifier_to_ml_suppress_conds (cb_tree identifier)
 {
-	cb_tree suppress_id = cb_build_xml_suppress_clause ();
-	CB_XML_SUPPRESS (suppress_id)->target = CB_XML_SUPPRESS_IDENTIFIER;
-	CB_XML_SUPPRESS (suppress_id)->identifier = identifier;
-	prepend_to_xml_suppress_list (suppress_id);
+	cb_tree suppress_id = cb_build_ml_suppress_clause ();
+	CB_ML_SUPPRESS (suppress_id)->target = CB_ML_SUPPRESS_IDENTIFIER;
+	CB_ML_SUPPRESS (suppress_id)->identifier = identifier;
+	prepend_to_ml_suppress_list (suppress_id);
 }
 
 static void
-add_when_to_xml_suppress_conds (cb_tree when_list)
+add_when_to_ml_suppress_conds (cb_tree when_list)
 {
-	struct cb_xml_suppress_clause	*last_suppress_clause;
+	struct cb_ml_suppress_clause	*last_suppress_clause;
 	cb_tree	suppress_all;
 
 	/*
@@ -1935,30 +1935,30 @@ add_when_to_xml_suppress_conds (cb_tree when_list)
 	  belongs to the identifier. If EVERY was preceding, the WHEN belongs to
 	  the EVERY. Otherwise, the WHEN acts on the entire record.
 	*/
-	if (xml_suppress_list) {
-		last_suppress_clause = CB_XML_SUPPRESS (CB_VALUE (xml_suppress_list));
-		if ((last_suppress_clause->target == CB_XML_SUPPRESS_IDENTIFIER
-		     || last_suppress_clause->target == CB_XML_SUPPRESS_TYPE)
+	if (ml_suppress_list) {
+		last_suppress_clause = CB_ML_SUPPRESS (CB_VALUE (ml_suppress_list));
+		if ((last_suppress_clause->target == CB_ML_SUPPRESS_IDENTIFIER
+		     || last_suppress_clause->target == CB_ML_SUPPRESS_TYPE)
 		    && !last_suppress_clause->when_list) {
 			last_suppress_clause->when_list = when_list;
 			return;
 		}
 	}
 
-	suppress_all = cb_build_xml_suppress_clause ();
-	CB_XML_SUPPRESS (suppress_all)->when_list = when_list;
-	prepend_to_xml_suppress_list (suppress_all);
+	suppress_all = cb_build_ml_suppress_clause ();
+	CB_ML_SUPPRESS (suppress_all)->when_list = when_list;
+	prepend_to_ml_suppress_list (suppress_all);
 }
 
 static void
-add_type_to_xml_suppress_conds (enum cb_xml_suppress_category category,
-				enum cb_xml_type xml_type)
+add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
+			       enum cb_ml_type ml_type)
 {
-	cb_tree	suppress_type = cb_build_xml_suppress_clause ();
-	CB_XML_SUPPRESS (suppress_type)->target = CB_XML_SUPPRESS_TYPE;
-	CB_XML_SUPPRESS (suppress_type)->category = category;
-	CB_XML_SUPPRESS (suppress_type)->xml_type = xml_type;
-	prepend_to_xml_suppress_list (suppress_type);
+	cb_tree	suppress_type = cb_build_ml_suppress_clause ();
+	CB_ML_SUPPRESS (suppress_type)->target = CB_ML_SUPPRESS_TYPE;
+	CB_ML_SUPPRESS (suppress_type)->category = category;
+	CB_ML_SUPPRESS (suppress_type)->ml_type = ml_type;
+	prepend_to_ml_suppress_list (suppress_type);
 }
 
 %}
@@ -14641,7 +14641,7 @@ xml_generate_body:
 	xml_encoding = NULL;
 	with_xml_dec = 0;
 	with_attrs = 0;
-	xml_suppress_list = NULL;
+	ml_suppress_list = NULL;
   }
   _with_encoding_xml_dec_and_attrs
   _xml_gen_namespace
@@ -14655,7 +14655,7 @@ xml_generate_body:
   _xml_exception_phrases
   {
 	cb_emit_xml_generate ($1, $3, $4, xml_encoding, with_xml_dec,
-			      with_attrs, $7, $8, $9, xml_suppress_list);
+			      with_attrs, $7, $8, $9, ml_suppress_list);
   }
 ;
 
@@ -14783,7 +14783,7 @@ identifier_type_list:
 ;
 
 identifier_is_type:
-  identifier _is xml_type
+  identifier _is ml_type
   {
 	$$ = CB_BUILD_PAIR ($1, $3);
   }
@@ -14792,15 +14792,15 @@ identifier_is_type:
 _xml_type:
   /* empty */
   {
-	$$ = cb_int ((int) CB_XML_ANY_TYPE);
+	$$ = cb_int ((int) CB_ML_ANY_TYPE);
   }
-| xml_type
+| ml_type
 ;
 
-xml_type:
-  ATTRIBUTE	{ $$ = cb_int ((int) CB_XML_ATTRIBUTE); }
-| ELEMENT	{ $$ = cb_int ((int) CB_XML_ELEMENT); }
-| CONTENT	{ $$ = cb_int ((int) CB_XML_CONTENT); }
+ml_type:
+  ATTRIBUTE	{ $$ = cb_int ((int) CB_ML_ATTRIBUTE); }
+| ELEMENT	{ $$ = cb_int ((int) CB_ML_ELEMENT); }
+| CONTENT	{ $$ = cb_int ((int) CB_ML_CONTENT); }
 ;
 
 _xml_gen_suppress:
@@ -14821,33 +14821,33 @@ xml_suppress_entry:
   identifier
   {
 	error_if_following_every_clause ();
-	add_identifier_to_xml_suppress_conds ($1);
+	add_identifier_to_ml_suppress_conds ($1);
   }
 | EVERY xml_suppress_generic_opt
   {
 	error_if_following_every_clause ();
-	add_type_to_xml_suppress_conds (xml_suppress_category, (enum cb_xml_type) CB_INTEGER ($2)->val);
+	add_type_to_ml_suppress_conds (ml_suppress_category, (enum cb_ml_type) CB_INTEGER ($2)->val);
   }
 | WHEN_XML xml_suppress_when_list
   {
-	add_when_to_xml_suppress_conds ($2);
+	add_when_to_ml_suppress_conds ($2);
   }
 ;
 
 xml_suppress_generic_opt:
   NUMERIC _xml_type
   {
-	xml_suppress_category = CB_XML_SUPPRESS_CAT_NUMERIC;
+	ml_suppress_category = CB_ML_SUPPRESS_CAT_NUMERIC;
 	$$ = $2;
   }
 | NONNUMERIC _xml_type
   {
-	xml_suppress_category = CB_XML_SUPPRESS_CAT_NONNUMERIC;
+	ml_suppress_category = CB_ML_SUPPRESS_CAT_NONNUMERIC;
 	$$ = $2;
   }
-| xml_type
+| ml_type
   {
-	xml_suppress_category = CB_XML_SUPPRESS_CAT_ANY;
+	ml_suppress_category = CB_ML_SUPPRESS_CAT_ANY;
 	$$ = $1;
   }
 ;

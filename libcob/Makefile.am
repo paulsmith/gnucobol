@@ -1,7 +1,7 @@
 #
 # Makefile gnucobol/libcob
 #
-# Copyright (C) 2003-2012, 2014, 2017-2018 Free Software Foundation, Inc.
+# Copyright (C) 2003-2012, 2014, 2017-2019 Free Software Foundation, Inc.
 # Written by Keisuke Nishida, Roger While, Simon Sobisch
 #
 # This file is part of GnuCOBOL.
@@ -22,7 +22,7 @@
 lib_LTLIBRARIES = libcob.la
 libcob_la_SOURCES = common.c move.c numeric.c strings.c \
 	fileio.c call.c intrinsic.c termio.c screenio.c reportio.c cobgetopt.c \
-	xml.c
+	mlio.c
 #ToDo Man Page
 #dist_man_MANS = libcob.3
 #COBCRUN = $(top_builddir)/bin/cobcrun$(EXEEXT)

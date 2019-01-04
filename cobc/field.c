@@ -2841,7 +2841,7 @@ cb_is_figurative_constant (const cb_tree x)
 }
 
 int
-cb_field_is_ignored_in_xml_gen (struct cb_field * const f)
+cb_field_is_ignored_in_ml_gen (struct cb_field * const f)
 {
 	return f->flag_filler || f->redefines || f->rename_thru;
 }

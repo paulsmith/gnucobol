@@ -264,8 +264,8 @@ int			cb_pic_id = 0;
 int			cb_attr_id = 0;
 int			cb_literal_id = 0;
 int			cb_field_id = 0;
-int			cb_xml_attr_id = 0;
-int			cb_xml_tree_id = 0;
+int			cb_ml_attr_id = 0;
+int			cb_ml_tree_id = 0;
 int			cobc_flag_main = 0;
 int			cb_flag_main = 0;
 int			cobc_wants_debug = 0;
@@ -755,12 +755,12 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "DECIMAL LITERAL";
 	case CB_TAG_REPORT_LINE:
 		return "REPORT LINE";
-	case CB_TAG_XML_SUPPRESS:
-		return "XML SUPPRESS CLAUSE";
-	case CB_TAG_XML_TREE:
-		return "XML OUTPUT TREE";
-	case CB_TAG_XML_SUPPRESS_CHECKS:
-		return "XML SUPPRESS CHECKS";
+	case CB_TAG_ML_SUPPRESS:
+		return "ML SUPPRESS CLAUSE";
+	case CB_TAG_ML_TREE:
+		return "ML OUTPUT TREE";
+	case CB_TAG_ML_SUPPRESS_CHECKS:
+		return "ML SUPPRESS CHECKS";
 	default:
 		break;
 	}
@@ -8136,8 +8136,8 @@ process_file (struct filename *fn, int status)
 	cb_attr_id = 1;
 	cb_literal_id = 1;
 	cb_field_id = 1;
-	cb_xml_attr_id = 1;
-	cb_xml_tree_id = 1;
+	cb_ml_attr_id = 1;
+	cb_ml_tree_id = 1;
 	demangle_name = fn->demangle_source;
 	memset (optimize_defs, 0, sizeof (optimize_defs));
 

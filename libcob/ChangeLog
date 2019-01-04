@@ -1,4 +1,8 @@
 
+2019-01-03  Edward Hart <edward.dan.hart@gmail.com>
+
+	* xml.c: renamed file to mlio.c and cob_..._xmlio to cob_..._mlio.
+
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* fileio.c: check for definition of non-portable EDEADLK before using it,

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2018 Free Software Foundation, Inc.
+   Copyright (C) 2018-2019 Free Software Foundation, Inc.
    Written by Edward Hart, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -53,6 +53,89 @@ static cob_global		*cobglobptr;
 
 /* Local functions */
 
+static void *
+get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, int))
+{
+	char	*str = (char *) f->data;
+	int	len = (int) f->size;
+
+	/* Trim leading/trailing spaces. If f is all spaces, leave one space. */
+	if (COB_FIELD_JUSTIFIED (f)) {
+		for (; *str == ' ' && len > 1; ++str, --len);
+	} else {
+		for (; str[len - 1] == ' ' && len > 1; --len);
+	}
+
+	return (*strndup_func)(str, len);
+}
+
+static cob_pic_symbol *
+get_pic_for_num_field (const size_t num_int_digits, const size_t num_dec_digits)
+{
+	size_t	num_pic_symbols = 2 + (2 * !!num_dec_digits) + 1;
+	cob_pic_symbol	*pic = cob_malloc (num_pic_symbols * sizeof (cob_pic_symbol));
+	cob_pic_symbol	*symbol = pic;
+
+	symbol->symbol = '-';
+	symbol->times_repeated = cob_max_int ((int) num_int_digits, 1);
+	++symbol;
+
+	symbol->symbol = '9';
+	symbol->times_repeated = 1;
+	++symbol;
+
+	if (num_dec_digits) {
+		symbol->symbol = COB_MODULE_PTR->decimal_point;
+		symbol->times_repeated = 1;
+		++symbol;
+
+		symbol->symbol = '9';
+		symbol->times_repeated = (int) num_dec_digits;
+		++symbol;
+	}
+
+	symbol->symbol = '\0';
+
+	return pic;
+}
+
+static void *
+get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
+{
+	size_t		num_integer_digits
+		= cob_max_int (0, COB_FIELD_DIGITS (f) - COB_FIELD_SCALE (f));
+	size_t		num_decimal_digits
+		= cob_max_int (0, COB_FIELD_SCALE (f));
+	cob_field_attr	attr;
+	cob_field       edited_field;
+        void		*num;
+
+	/* Initialize field attribute */
+	attr.type = COB_TYPE_NUMERIC_EDITED;
+	attr.flags = COB_FLAG_JUSTIFIED;
+	attr.scale = COB_FIELD_SCALE (f);
+	attr.digits = COB_FIELD_DIGITS (f);
+	attr.pic = get_pic_for_num_field (num_integer_digits,
+					      num_decimal_digits);
+
+	/* Initialize field */
+	edited_field.attr = &attr;
+	edited_field.size = cob_max_int (2, (int) num_integer_digits + 1);
+	if (num_decimal_digits) {
+		edited_field.size += 1 + num_decimal_digits;
+	}
+	edited_field.data = cob_malloc (edited_field.size);
+
+	cob_move (f, &edited_field);
+	num = get_trimmed_data (&edited_field, strndup_func);
+
+	cob_free (edited_field.data);
+	cob_free ((void *) edited_field.attr->pic);
+
+	return num;
+
+}
+
 #if WITH_XML2
 
 static void
@@ -87,19 +170,16 @@ is_all_spaces (const cob_field * const f)
 	return 1;
 }
 
+static void *
+xmlCharStrndup_void (const char *str, const int size)
+{
+	return (void *)xmlCharStrndup (str, size);
+}
+
 static xmlChar *
 get_trimmed_xml_data (const cob_field * const f)
 {
-	char	*str = (char *) f->data;
-	int	len = (int) f->size;
-
-	/* Trim leading/trailing spaces. If f is all spaces, leave one space. */
-	if (COB_FIELD_JUSTIFIED (f)) {
-		for (; *str == ' ' && len > 1; ++str, --len);
-	} else {
-		for (; str[len - 1] == ' ' && len > 1; --len);
-	}
-	return xmlCharStrndup (str, len);
+	return (xmlChar *) get_trimmed_data (f, &xmlCharStrndup_void);
 }
 
 /* Returns 1 if str contains invalid XML 1.0 chars, 0 otherwise. */
@@ -188,8 +268,8 @@ get_xml_name (const cob_field * const f)
 	} ONCE_COB
 
 static int
-generate_from_tree (xmlTextWriterPtr, cob_xml_tree *, xmlChar *, xmlChar *,
-		    unsigned int *);
+generate_xml_from_tree (xmlTextWriterPtr, cob_ml_tree *, xmlChar *, xmlChar *,
+			unsigned int *);
 
 static xmlChar *
 get_name_with_hex_prefix (const cob_field * const name)
@@ -247,7 +327,7 @@ get_hex_xml_data (const cob_field * const f)
 }
 
 static int
-generate_hex_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+generate_hex_attribute (xmlTextWriterPtr writer, cob_ml_attr *attr, unsigned int *count)
 {
 	xmlChar	*hex_name;
 	xmlChar	*value;
@@ -262,7 +342,7 @@ generate_hex_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned in
 }
 
 static int
-generate_normal_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+generate_normal_attribute (xmlTextWriterPtr writer, cob_ml_attr *attr, unsigned int *count)
 {
 	xmlChar	*name;
 	xmlChar	*value;
@@ -277,7 +357,7 @@ generate_normal_attribute (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned
 }
 
 static int
-generate_attributes (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *count)
+generate_attributes (xmlTextWriterPtr writer, cob_ml_attr *attr, unsigned int *count)
 {
 	int	status;
 
@@ -302,7 +382,7 @@ generate_attributes (xmlTextWriterPtr writer, cob_xml_attr *attr, unsigned int *
 }
 
 static int
-generate_hex_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+generate_hex_element (xmlTextWriterPtr writer, cob_ml_tree *tree,
 		      xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
 {
 	xmlChar		*hex_name;
@@ -329,75 +409,14 @@ generate_hex_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
 }
 
 
-static cob_pic_symbol *
-get_pic_for_xml_num_field (const size_t num_int_digits,
-			   const size_t num_dec_digits)
-{
-	size_t	num_pic_symbols = 2 + (2 * !!num_dec_digits) + 1;
-	cob_pic_symbol	*pic = cob_malloc (num_pic_symbols * sizeof (cob_pic_symbol));
-	cob_pic_symbol	*symbol = pic;
-
-	symbol->symbol = '-';
-	symbol->times_repeated = cob_max_int ((int) num_int_digits, 1);
-	++symbol;
-
-	symbol->symbol = '9';
-	symbol->times_repeated = 1;
-	++symbol;
-
-	if (num_dec_digits) {
-		symbol->symbol = COB_MODULE_PTR->decimal_point;
-		symbol->times_repeated = 1;
-		++symbol;
-
-		symbol->symbol = '9';
-		symbol->times_repeated = (int) num_dec_digits;
-		++symbol;
-	}
-
-	symbol->symbol = '\0';
-
-	return pic;
-}
-
 static xmlChar *
 get_xml_num (cob_field * const f)
 {
-	size_t		num_integer_digits
-		 = cob_max_int (0, COB_FIELD_DIGITS (f) - COB_FIELD_SCALE (f));
-	size_t		num_decimal_digits
-		 = cob_max_int (0, COB_FIELD_SCALE (f));
-	cob_field_attr	attr;
-	cob_field       edited_field;
-	xmlChar		*xml_num;
-
-	/* Initialize field attribute */
-	attr.type = COB_TYPE_NUMERIC_EDITED;
-	attr.flags = COB_FLAG_JUSTIFIED;
-	attr.scale = COB_FIELD_SCALE (f);
-	attr.digits = COB_FIELD_DIGITS (f);
-	attr.pic = get_pic_for_xml_num_field (num_integer_digits,
-					      num_decimal_digits);
-
-	/* Initialize field */
-	edited_field.attr = &attr;
-	edited_field.size = cob_max_int (2, (int) num_integer_digits + 1);
-	if (num_decimal_digits) {
-		edited_field.size += 1 + num_decimal_digits;
-	}
-	edited_field.data = cob_malloc (edited_field.size);
-
-	cob_move (f, &edited_field);
-	xml_num = get_trimmed_xml_data (&edited_field);
-
-	cob_free (edited_field.data);
-	cob_free ((void *) edited_field.attr->pic);
-
-	return xml_num;
+	return get_num (f, &xmlCharStrndup_void);
 }
 
 static int
-generate_content (xmlTextWriterPtr writer, cob_xml_tree *tree, unsigned int *count)
+generate_content (xmlTextWriterPtr writer, cob_ml_tree *tree, unsigned int *count)
 {
 	cob_field	*content = tree->content;
 	xmlChar		*x_content;
@@ -420,12 +439,12 @@ generate_content (xmlTextWriterPtr writer, cob_xml_tree *tree, unsigned int *cou
 
 
 static int
-generate_normal_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+generate_normal_element (xmlTextWriterPtr writer, cob_ml_tree *tree,
 			 xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
 {
 	int		status;
 	xmlChar		*x_name;
-	cob_xml_tree	*child;
+	cob_ml_tree	*child;
 
 	/* Start element */
 	x_name = get_xml_name (tree->name);
@@ -445,8 +464,8 @@ generate_normal_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
 			  Note we only have a namespace attribute on the
 			  outermost element.
 			*/
-			status = generate_from_tree (writer, child, NULL,
-						     x_ns_prefix, count);
+			status = generate_xml_from_tree (writer, child, NULL,
+							 x_ns_prefix, count);
 			if (status < 0) {
 				return status;
 			}
@@ -465,7 +484,7 @@ generate_normal_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
 }
 
 static int
-generate_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
+generate_element (xmlTextWriterPtr writer, cob_ml_tree *tree,
 		  xmlChar *x_ns, xmlChar *x_ns_prefix, unsigned int *count)
 {
 	/* Check for invalid characters. */
@@ -482,8 +501,8 @@ generate_element (xmlTextWriterPtr writer, cob_xml_tree *tree,
 }
 
 static int
-generate_from_tree (xmlTextWriterPtr writer, cob_xml_tree *tree,
-		    xmlChar *ns, xmlChar *ns_prefix, unsigned int *count)
+generate_xml_from_tree (xmlTextWriterPtr writer, cob_ml_tree *tree,
+			xmlChar *ns, xmlChar *ns_prefix, unsigned int *count)
 {
 	if (tree->is_suppressed) {
 		return 0;
@@ -561,7 +580,7 @@ cob_is_valid_uri (const char *str)
 	/* scheme must start with lower-strase */
 	if (!str || *str <= 'a' || *str >= 'z') return 0;
 
-	/* scheme strompletes with ":" */
+	/* scheme completes with ":" */
 	str++;
 	while (*str && *str != ':') str++;
 
@@ -575,7 +594,7 @@ cob_is_valid_uri (const char *str)
 #ifdef WITH_XML2
 
 void
-cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
+cob_xml_generate (cob_field *out, cob_ml_tree *tree, cob_field *count,
 		  const int with_xml_dec, cob_field *ns, cob_field *ns_prefix)
 {
 	xmlBufferPtr		buff;
@@ -638,7 +657,7 @@ cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
 		}
 	}
 
-        status = generate_from_tree (writer, tree, x_ns, x_ns_prefix,
+        status = generate_xml_from_tree (writer, tree, x_ns, x_ns_prefix,
 				     &chars_written);
 	if (status < 0) {
 		set_xml_exception (XML_INTERNAL_ERROR);
@@ -688,23 +707,10 @@ cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
 	}
 }
 
-void
-cob_init_xmlio (cob_global * const g)
-{
-	LIBXML_TEST_VERSION;
-	cobglobptr = g;
-}
-
-void
-cob_exit_xmlio (void)
-{
-	xmlCleanupParser ();
-}
-
 #else /* !WITH_XML2 */
 
 void
-cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
+cob_xml_generate (cob_field *out, cob_ml_tree *tree, cob_field *count,
 		  const int with_xml_dec, cob_field *ns, cob_field *ns_prefix)
 {
 	COB_UNUSED (out);
@@ -715,16 +721,21 @@ cob_xml_generate (cob_field *out, cob_xml_tree *tree, cob_field *count,
 	COB_UNUSED (ns_prefix);
 }
 
+#endif
+
 void
-cob_init_xmlio (cob_global * const g)
+cob_init_mlio (cob_global * const g)
 {
+#ifdef WITH_XML2
+	LIBXML_TEST_VERSION;
+#endif
 	cobglobptr = g;
 }
 
 void
-cob_exit_xmlio (void)
+cob_exit_mlio (void)
 {
-	;
-}
-
+#ifdef WITH_XML2
+	xmlCleanupParser ();
 #endif
+}

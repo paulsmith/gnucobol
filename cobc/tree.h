@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -35,6 +35,8 @@
 #define CB_PREFIX_FILE		"h_"	/* File (cob_file) */
 #define CB_PREFIX_KEYS		"k_"	/* File keys (cob_file_key []) */
 #define CB_PREFIX_LABEL		"l_"	/* Label */
+#define CB_PREFIX_ML_ATTR	"ma_"	/* JSON/XML GENERATE attribute */
+#define CB_PREFIX_ML_TREE	"mt_"	/* JSON/XML GENERATE tree */
 #define CB_PREFIX_PIC		"p_"	/* PICTURE string */
 #define CB_PREFIX_SEQUENCE	"s_"	/* Collating sequence */
 #define CB_PREFIX_STRING	"st_"	/* String */
@@ -45,8 +47,6 @@
 #define CB_PREFIX_REPORT_CONTROL "rc_"	/* Report CONTROL (cob_report_control) */
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
-#define CB_PREFIX_XML_ATTR	"xa_"	/* XML GENERATE attribute */
-#define CB_PREFIX_XML_TREE	"xt_"	/* XML GENERATE tree */
 
 #define CB_CALL_BY_REFERENCE	1
 #define CB_CALL_BY_CONTENT	2
@@ -111,9 +111,9 @@ enum cb_tag {
 	CB_TAG_PROTOTYPE,	/* 38 Prototype */
 	CB_TAG_DECIMAL_LITERAL,	/* 39 Decimal Literal */
 	CB_TAG_REPORT_LINE,	/* 40 Report line description */
-	CB_TAG_XML_SUPPRESS,	/* 41 XML GENERATE SUPPRESS clause */
-	CB_TAG_XML_TREE,	/* 42 XML GENERATE output tree */
-	CB_TAG_XML_SUPPRESS_CHECKS	/* 43 XML GENERATE SUPPRESS checks */
+	CB_TAG_ML_SUPPRESS,	/* 41 JSON/XML GENERATE SUPPRESS clause */
+	CB_TAG_ML_TREE,	/* 42 JSON/XML GENERATE output tree */
+	CB_TAG_ML_SUPPRESS_CHECKS	/* 43 JSON/XML GENERATE SUPPRESS checks */
 	/* When adding a new entry, please remember to add it to
 	   cobc_enum_explain as well. */
 };
@@ -1415,41 +1415,41 @@ struct cb_report {
 #define CB_REPORT_PTR(x)		\
 	(CB_REFERENCE_P (x) ? CB_REPORT	  (cb_ref (x)) : CB_REPORT (x))
 
-/* XML GENERATE output tree */
+/* Mark-up Language output (JSON/XML GENERATE) tree */
 
-enum cb_xml_type {
-	CB_XML_ATTRIBUTE,
-	CB_XML_ELEMENT,
-	CB_XML_CONTENT,
-	CB_XML_ANY_TYPE
+enum cb_ml_type {
+	CB_ML_ATTRIBUTE,
+	CB_ML_ELEMENT,
+	CB_ML_CONTENT,
+	CB_ML_ANY_TYPE
 };
 
-struct cb_xml_generate_tree {
+struct cb_ml_generate_tree {
 	struct cb_tree_common		common;
-	/* Name of the XML element to generate */
+	/* Name of the ML element to generate */
 	cb_tree				name;
-	/* The type of the XML element to generate */
-	enum cb_xml_type		type;
-	/* The content of the XML element to generate */
+	/* The type of the ML element to generate */
+	enum cb_ml_type			type;
+	/* The content of the ML element to generate */
 	cb_tree			        value;
 	/* The condition under which generation of the element is suppressed */
 	cb_tree				suppress_cond;
 	/* ID for this struct when output */
 	int				id;
 	/* Attributes for this element */
-	struct cb_xml_generate_tree	*attrs;
-	/* Parent XML element */
-	struct cb_xml_generate_tree	*parent;
-	/* Children XML elements */
-	struct cb_xml_generate_tree	*children;
-	/* Preceding XML elements */
-	struct cb_xml_generate_tree	*prev_sibling;
-	/* Following XML elements */
-	struct cb_xml_generate_tree	*sibling;
+	struct cb_ml_generate_tree	*attrs;
+	/* Parent ML element */
+	struct cb_ml_generate_tree	*parent;
+	/* Children ML elements */
+	struct cb_ml_generate_tree	*children;
+	/* Preceding ML elements */
+	struct cb_ml_generate_tree	*prev_sibling;
+	/* Following ML elements */
+	struct cb_ml_generate_tree	*sibling;
 };
 
-#define CB_XML_TREE(x)		(CB_TREE_CAST (CB_TAG_XML_TREE, struct cb_xml_generate_tree, x))
-#define CB_XML_TREE_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_TREE)
+#define CB_ML_TREE(x)		(CB_TREE_CAST (CB_TAG_ML_TREE, struct cb_ml_generate_tree, x))
+#define CB_ML_TREE_P(x)	(CB_TREE_TAG (x) == CB_TAG_ML_TREE)
 
 /* Program */
 
@@ -1524,7 +1524,7 @@ struct cb_program {
 	cb_tree			returning;		/* RETURNING */
 	struct cb_label		*all_procedure;		/* DEBUGGING */
 	struct cb_call_xref	call_xref;		/* CALL Xref list */
-	struct cb_xml_generate_tree	*xml_trees;	/* XML GENERATE trees */
+	struct cb_ml_generate_tree	*ml_trees;	/* XML GENERATE trees */
 	const char		*extfh;		/* CALLFH for this program */
 
 	int			last_source_line;	/* Line of (implicit) END PROGRAM/FUNCTION */
@@ -1583,45 +1583,45 @@ struct cb_prototype {
 #define CB_PROTOTYPE(x)		(CB_TREE_CAST (CB_TAG_PROTOTYPE, struct cb_prototype, x))
 #define CB_PROTOTYPE_P(x)	(CB_TREE_TAG (x) == CB_TAG_PROTOTYPE)
 
-/* XML GENERATE SUPPRESS clause */
+/* JSON/XML GENERATE SUPPRESS clause */
 
-enum cb_xml_suppress_target {
-	CB_XML_SUPPRESS_IDENTIFIER,
-	CB_XML_SUPPRESS_ALL,
-	CB_XML_SUPPRESS_TYPE
+enum cb_ml_suppress_target {
+	CB_ML_SUPPRESS_IDENTIFIER,
+	CB_ML_SUPPRESS_ALL,
+	CB_ML_SUPPRESS_TYPE
 };
 
-enum cb_xml_suppress_category {
-	CB_XML_SUPPRESS_CAT_NUMERIC,
-	CB_XML_SUPPRESS_CAT_NONNUMERIC,
-	CB_XML_SUPPRESS_CAT_ANY
+enum cb_ml_suppress_category {
+	CB_ML_SUPPRESS_CAT_NUMERIC,
+	CB_ML_SUPPRESS_CAT_NONNUMERIC,
+	CB_ML_SUPPRESS_CAT_ANY
 };
 
-struct cb_xml_suppress_clause {
+struct cb_ml_suppress_clause {
 	struct cb_tree_common		common;
 	/* What thing(s) the SUPPRESS clause applies to */
-	enum cb_xml_suppress_target	target;
+	enum cb_ml_suppress_target	target;
 	/* If the target is IDENTIFIER, then the item targetted */
 	cb_tree				identifier;
 	/* What values the thing(s) should have to be SUPPRESSed */
 	cb_tree				when_list;
-	/* If the target is TYPE, then the type of XML elements to apply to */
-	enum cb_xml_type		xml_type;
-	/* If the target is TYPE, then the categories of items (of XML type
-	   xml_type) to apply to */
-	enum cb_xml_suppress_category	category;
+	/* If the target is TYPE, then the type of ML elements to apply to */
+	enum cb_ml_type		ml_type;
+	/* If the target is TYPE, then the categories of items (of ML type
+	   ml_type) to apply to */
+	enum cb_ml_suppress_category	category;
 };
 
-#define CB_XML_SUPPRESS(x)	(CB_TREE_CAST (CB_TAG_XML_SUPPRESS, struct cb_xml_suppress_clause, x))
-#define CB_XML_SUPPRESS_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_SUPPRESS)
+#define CB_ML_SUPPRESS(x)	(CB_TREE_CAST (CB_TAG_ML_SUPPRESS, struct cb_ml_suppress_clause, x))
+#define CB_ML_SUPPRESS_P(x)	(CB_TREE_TAG (x) == CB_TAG_ML_SUPPRESS)
 
-struct cb_xml_suppress_checks {
+struct cb_ml_suppress_checks {
 	struct cb_tree_common		common;
-	struct cb_xml_generate_tree	*tree;
+	struct cb_ml_generate_tree	*tree;
 };
 
-#define CB_XML_SUPPRESS_CHECKS(x)	(CB_TREE_CAST (CB_TAG_XML_SUPPRESS_CHECKS, struct cb_xml_suppress_checks, x))
-#define CB_XML_SUPPRESS_CHECKS_P(x)	(CB_TREE_TAG (x) == CB_TAG_XML_SUPPRESS_CHECKS)
+#define CB_ML_SUPPRESS_CHECKS(x)	(CB_TREE_CAST (CB_TAG_ML_SUPPRESS_CHECKS, struct cb_ml_suppress_checks, x))
+#define CB_ML_SUPPRESS_CHECKS_P(x)	(CB_TREE_TAG (x) == CB_TAG_ML_SUPPRESS_CHECKS)
 
 /* DISPLAY type */
 
@@ -1858,11 +1858,11 @@ extern const char	*cb_get_usage_string (const enum cb_usage);
 
 extern cb_tree		cb_field_dup (struct cb_field *f, struct cb_reference *ref);
 
-extern cb_tree		cb_build_xml_suppress_clause (void);
-extern cb_tree		cb_build_xml_tree (struct cb_field *, const int,
+extern cb_tree		cb_build_ml_suppress_clause (void);
+extern cb_tree		cb_build_ml_tree (struct cb_field *, const int,
 					   const int, cb_tree, cb_tree,
 					   cb_tree);
-extern cb_tree		cb_build_xml_suppress_checks (struct cb_xml_generate_tree *);
+extern cb_tree		cb_build_ml_suppress_checks (struct cb_ml_generate_tree *);
 
 
 /* parser.y */
@@ -1925,7 +1925,7 @@ extern void		cb_validate_renames_item (struct cb_field *);
 extern struct cb_field	*cb_get_real_field (void);
 extern void		cb_clear_real_field (void);
 extern int		cb_is_figurative_constant (const cb_tree);
-extern int		cb_field_is_ignored_in_xml_gen (struct cb_field * const);
+extern int		cb_field_is_ignored_in_ml_gen (struct cb_field * const);
 
 /* typeck.c */
 extern cb_tree		cb_debug_item;

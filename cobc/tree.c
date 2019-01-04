@@ -849,12 +849,12 @@ static int
 is_unconditionally_suppressed (const struct cb_field *record, cb_tree suppress_list)
 {
 	cb_tree	l;
-	struct cb_xml_suppress_clause	*suppress_clause;
+	struct cb_ml_suppress_clause	*suppress_clause;
 
 	for (l = suppress_list; l; l = CB_CHAIN (l)) {
-		suppress_clause = CB_XML_SUPPRESS (CB_VALUE (l));
+		suppress_clause = CB_ML_SUPPRESS (CB_VALUE (l));
 		if (!suppress_clause->when_list
-		    && suppress_clause->target == CB_XML_SUPPRESS_IDENTIFIER
+		    && suppress_clause->target == CB_ML_SUPPRESS_IDENTIFIER
 		    && cb_ref (suppress_clause->identifier) == CB_TREE (record)) {
 			/*
 			  This is indeed the only case we need to check - all
@@ -868,12 +868,12 @@ is_unconditionally_suppressed (const struct cb_field *record, cb_tree suppress_l
 }
 
 static cb_tree
-get_xml_name (cb_tree record, cb_tree name_list, enum cb_xml_type type)
+get_ml_name (cb_tree record, cb_tree name_list, enum cb_ml_type type)
 {
 	cb_tree	l;
 	cb_tree	name_pair;
 
-	if (type == CB_XML_CONTENT) {
+	if (type == CB_ML_CONTENT) {
 		return cb_null;
 	}
 
@@ -888,8 +888,8 @@ get_xml_name (cb_tree record, cb_tree name_list, enum cb_xml_type type)
 					      strlen (cb_name (record)));
 }
 
-static enum cb_xml_type
-get_xml_type (cb_tree record, cb_tree type_list, const int default_to_attr)
+static enum cb_ml_type
+get_ml_type (cb_tree record, cb_tree type_list, const int default_to_attr)
 {
 	cb_tree	l;
 	cb_tree	type_pair;
@@ -897,7 +897,7 @@ get_xml_type (cb_tree record, cb_tree type_list, const int default_to_attr)
 	for (l = type_list; l; l = CB_CHAIN (l)) {
 		type_pair = CB_VALUE (l);
 		if (cb_ref (CB_PAIR_X (type_pair)) == record) {
-		        return (enum cb_xml_type) CB_INTEGER ((CB_PAIR_Y (type_pair)))->val;
+		        return (enum cb_ml_type) CB_INTEGER ((CB_PAIR_Y (type_pair)))->val;
 		}
 	}
 
@@ -905,37 +905,37 @@ get_xml_type (cb_tree record, cb_tree type_list, const int default_to_attr)
 	    && (!CB_FIELD (record)->children
 		&& !CB_FIELD (record)->flag_filler
 		&& !CB_FIELD (record)->flag_occurs)) {
-		return CB_XML_ATTRIBUTE;
+		return CB_ML_ATTRIBUTE;
 	} else {
-		return CB_XML_ELEMENT;
+		return CB_ML_ELEMENT;
 	}
 }
 
 static int
-is_target_of_suppress_identifier (cb_tree record, struct cb_xml_suppress_clause *clause)
+is_target_of_suppress_identifier (cb_tree record, struct cb_ml_suppress_clause *clause)
 {
-	return clause->target == CB_XML_SUPPRESS_IDENTIFIER
+	return clause->target == CB_ML_SUPPRESS_IDENTIFIER
 		&& cb_ref (clause->identifier) == record;
 }
 
 static int
-is_target_of_suppress_type (cb_tree record, enum cb_xml_type type,
-			    struct cb_xml_suppress_clause *clause)
+is_target_of_suppress_type (cb_tree record, enum cb_ml_type type,
+			    struct cb_ml_suppress_clause *clause)
 {
-	if (clause->target != CB_XML_SUPPRESS_TYPE) {
+	if (clause->target != CB_ML_SUPPRESS_TYPE) {
 		return 0;
 	}
 
-	if (clause->xml_type != CB_XML_ANY_TYPE
-	    && clause->xml_type != type) {
+	if (clause->ml_type != CB_ML_ANY_TYPE
+	    && clause->ml_type != type) {
 		return 0;
 	}
 
-	if (clause->category == CB_XML_SUPPRESS_CAT_NUMERIC) {
+	if (clause->category == CB_ML_SUPPRESS_CAT_NUMERIC) {
 		return cb_tree_category (record) == CB_CATEGORY_NUMERIC;
-	} else if (clause->category == CB_XML_SUPPRESS_CAT_NONNUMERIC) {
+	} else if (clause->category == CB_ML_SUPPRESS_CAT_NONNUMERIC) {
 		return cb_tree_category (record) != CB_CATEGORY_NUMERIC;
-	} else { /* CB_XML_SUPPRESS_CAT_ANY */
+	} else { /* CB_ML_SUPPRESS_CAT_ANY */
 		return 1;
 	}
 }
@@ -963,20 +963,20 @@ build_condition_token_list (cb_tree record, cb_tree when_list)
 
 static int
 is_suppress_all_or_applicable_suppress_type (cb_tree record,
-					     enum cb_xml_type type,
-					     struct cb_xml_suppress_clause *suppress_clause)
+					     enum cb_ml_type type,
+					     struct cb_ml_suppress_clause *suppress_clause)
 {
-	return suppress_clause->target == CB_XML_SUPPRESS_ALL
+	return suppress_clause->target == CB_ML_SUPPRESS_ALL
 		|| is_target_of_suppress_type (record, type, suppress_clause);
 }
 
 static cb_tree
-get_suppress_cond (cb_tree record, enum cb_xml_type type,
+get_suppress_cond (cb_tree record, enum cb_ml_type type,
 		   cb_tree suppress_list)
 {
 	cb_tree	l;
-	struct cb_xml_suppress_clause	*suppress_clause;
-	struct cb_xml_suppress_clause	*last_applicable_suppress_id = NULL;
+	struct cb_ml_suppress_clause	*suppress_clause;
+	struct cb_ml_suppress_clause	*last_applicable_suppress_id = NULL;
 	cb_tree suppress_cond = NULL;
 
 	if (!record) {
@@ -990,7 +990,7 @@ get_suppress_cond (cb_tree record, enum cb_xml_type type,
 	  that if it exists.
 	*/
 	for (l = suppress_list; l; l = CB_CHAIN (l)) {
-		suppress_clause = CB_XML_SUPPRESS (CB_VALUE (l));
+		suppress_clause = CB_ML_SUPPRESS (CB_VALUE (l));
 		if (is_target_of_suppress_identifier (record, suppress_clause)) {
 			last_applicable_suppress_id = suppress_clause;
 		}
@@ -1005,7 +1005,7 @@ get_suppress_cond (cb_tree record, enum cb_xml_type type,
 		  phrases.
 		 */
 		for (l = suppress_list; l; l = CB_CHAIN (l)) {
-			suppress_clause = CB_XML_SUPPRESS (CB_VALUE (l));
+			suppress_clause = CB_ML_SUPPRESS (CB_VALUE (l));
 			if (!suppress_clause || !is_suppress_all_or_applicable_suppress_type (record, type, suppress_clause)) {
 				continue;
 			}
@@ -1024,9 +1024,9 @@ get_suppress_cond (cb_tree record, enum cb_xml_type type,
 }
 
 static void
-append_to_tree_list (struct cb_xml_generate_tree * * const head,
-		     struct cb_xml_generate_tree * * const tail,
-		     struct cb_xml_generate_tree *x)
+append_to_tree_list (struct cb_ml_generate_tree * * const head,
+		     struct cb_ml_generate_tree * * const tail,
+		     struct cb_ml_generate_tree *x)
 {
         if (*head) {
 		(*tail)->sibling = x;
@@ -1039,36 +1039,36 @@ append_to_tree_list (struct cb_xml_generate_tree * * const head,
 }
 
 static void
-set_xml_attrs_and_children (struct cb_field *record, const int children_are_attrs,
+set_ml_attrs_and_children (struct cb_field *record, const int children_are_attrs,
 			    cb_tree name_list, cb_tree type_list,
 			    cb_tree suppress_list,
-			    struct cb_xml_generate_tree * const * const tree)
+			    struct cb_ml_generate_tree * const * const tree)
 {
 	struct cb_field			*child;
 	cb_tree			        child_tree_or_null;
-	struct cb_xml_generate_tree	*child_tree;
-	struct cb_xml_generate_tree	*last_attr = NULL;
-	struct cb_xml_generate_tree	*last_child_tree = NULL;
+	struct cb_ml_generate_tree	*child_tree;
+	struct cb_ml_generate_tree	*last_attr = NULL;
+	struct cb_ml_generate_tree	*last_child_tree = NULL;
 
 	(*tree)->children = NULL;
 	(*tree)->attrs = NULL;
 	for (child = record->children; child; child = child->sister) {
-		if (cb_field_is_ignored_in_xml_gen (child)) {
+		if (cb_field_is_ignored_in_ml_gen (child)) {
 			continue;
 		}
 
-		child_tree_or_null = cb_build_xml_tree (child, 0,
+		child_tree_or_null = cb_build_ml_tree (child, 0,
 							children_are_attrs,
 							name_list, type_list,
 							suppress_list);
 		if (!child_tree_or_null) {
 			continue;
 		}
-		child_tree = CB_XML_TREE (child_tree_or_null);
+		child_tree = CB_ML_TREE (child_tree_or_null);
 		child_tree->parent = *tree;
 		child_tree->sibling = NULL;
 
-		if (child_tree->type == CB_XML_ATTRIBUTE) {
+		if (child_tree->type == CB_ML_ATTRIBUTE) {
 			append_to_tree_list (&((*tree)->attrs), &last_attr,
 					     child_tree);
 		} else {
@@ -6087,52 +6087,52 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	}
 }
 
-/* XML GENERATE */
+/* JSON/XML GENERATE */
 
 cb_tree
-cb_build_xml_suppress_clause (void)
+cb_build_ml_suppress_clause (void)
 {
-	struct cb_xml_suppress_clause *s;
+	struct cb_ml_suppress_clause *s;
 
-	s = make_tree (CB_TAG_XML_SUPPRESS, CB_CATEGORY_UNKNOWN,
-		       sizeof (struct cb_xml_suppress_clause));
-	s->target = CB_XML_SUPPRESS_ALL;
-	s->category = CB_XML_SUPPRESS_CAT_ANY;
-	s->xml_type = CB_XML_ANY_TYPE;
+	s = make_tree (CB_TAG_ML_SUPPRESS, CB_CATEGORY_UNKNOWN,
+		       sizeof (struct cb_ml_suppress_clause));
+	s->target = CB_ML_SUPPRESS_ALL;
+	s->category = CB_ML_SUPPRESS_CAT_ANY;
+	s->ml_type = CB_ML_ANY_TYPE;
 	return CB_TREE (s);
 }
 
 cb_tree
-cb_build_xml_tree (struct cb_field *record, const int children_are_attrs,
-		   const int default_to_attr, cb_tree name_list,
-		   cb_tree type_list, cb_tree suppress_list)
+cb_build_ml_tree (struct cb_field *record, const int children_are_attrs,
+		  const int default_to_attr, cb_tree name_list,
+		  cb_tree type_list, cb_tree suppress_list)
 {
-	struct cb_xml_generate_tree	*tree;
+	struct cb_ml_generate_tree	*tree;
 
 	if (is_unconditionally_suppressed (record, suppress_list)) {
 		return NULL;
 	}
 	
-	tree = make_tree (CB_TAG_XML_TREE, CB_CATEGORY_UNKNOWN,
-			  sizeof (struct cb_xml_generate_tree));
+	tree = make_tree (CB_TAG_ML_TREE, CB_CATEGORY_UNKNOWN,
+			  sizeof (struct cb_ml_generate_tree));
 	tree->sibling = NULL;
-	tree->type = get_xml_type (CB_TREE (record), type_list, default_to_attr);
-	tree->name = get_xml_name (CB_TREE (record), name_list, tree->type);
-	if (tree->type == CB_XML_ATTRIBUTE) {
-		tree->id = cb_xml_attr_id++;
+	tree->type = get_ml_type (CB_TREE (record), type_list, default_to_attr);
+	tree->name = get_ml_name (CB_TREE (record), name_list, tree->type);
+	if (tree->type == CB_ML_ATTRIBUTE) {
+		tree->id = cb_ml_attr_id++;
 	} else {
-		tree->id = cb_xml_tree_id++;
+		tree->id = cb_ml_tree_id++;
 	}
 
-	set_xml_attrs_and_children (record, children_are_attrs, name_list,
-				    type_list, suppress_list, &tree);
+	set_ml_attrs_and_children (record, children_are_attrs, name_list,
+				   type_list, suppress_list, &tree);
 
 	/*
 	  Note we test if the *record* has children. The tree may not have
 	  children, e.g. if all the record's children are ATTRIBUTES or
 	  are SUPPRESSed.
 	*/
-	if (record->children && tree->type == CB_XML_ELEMENT) {
+	if (record->children && tree->type == CB_ML_ELEMENT) {
 		tree->value = NULL;
 	} else {
 		tree->value = CB_TREE (record);
@@ -6145,11 +6145,11 @@ cb_build_xml_tree (struct cb_field *record, const int children_are_attrs,
 }
 
 cb_tree
-cb_build_xml_suppress_checks (struct cb_xml_generate_tree *tree)
+cb_build_ml_suppress_checks (struct cb_ml_generate_tree *tree)
 {
-	struct cb_xml_suppress_checks	*check
-		= make_tree (CB_TAG_XML_SUPPRESS_CHECKS, CB_CATEGORY_UNKNOWN,
-			     sizeof (struct cb_xml_suppress_checks));
+	struct cb_ml_suppress_checks	*check
+		= make_tree (CB_TAG_ML_SUPPRESS_CHECKS, CB_CATEGORY_UNKNOWN,
+			     sizeof (struct cb_ml_suppress_checks));
 	check->tree = tree;
 	return CB_TREE (check);
 }

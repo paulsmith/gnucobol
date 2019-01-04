@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -587,7 +587,7 @@ cob_terminate_routines (void)
 	cob_exit_common_modules ();
 	cob_exit_call ();
 	cob_exit_reportio ();
-	cob_exit_xmlio ();
+	cob_exit_mlio ();
 	cob_exit_common ();
 }
 
@@ -7535,7 +7535,7 @@ cob_init (const int argc, char **argv)
 	cob_init_call (cobglobptr, cobsetptr, check_mainhandle);
 	cob_init_termio (cobglobptr, cobsetptr);
 	cob_init_reportio (cobglobptr, cobsetptr);
-	cob_init_xmlio (cobglobptr);
+	cob_init_mlio (cobglobptr);
 
 	/* Set up library routine stuff */
 	cobglobptr->cob_term_buff = cob_malloc ((size_t)COB_MEDIUM_BUFF);

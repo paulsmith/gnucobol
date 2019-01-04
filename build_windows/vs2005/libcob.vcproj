@@ -375,6 +375,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcob\mlio.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libcob\move.c"
 				>
 			</File>
@@ -396,10 +400,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libcob\termio.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcob\xml.c"
 				>
 			</File>
 		</Filter>

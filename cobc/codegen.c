@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2018 Free Software Foundation, Inc.
+   Copyright (C) 2003-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch,
    Edward Hart
 
@@ -152,7 +152,7 @@ static struct string_list	*string_cache = NULL;
 static struct string_list	*source_cache = NULL;
 static char			*string_buffer = NULL;
 static struct label_list	*label_cache = NULL;
-static struct xml_tree_list	*xml_tree_cache = NULL;
+static struct ml_tree_list	*ml_tree_cache = NULL;
 
 
 static FILE			*output_target = NULL;
@@ -488,7 +488,7 @@ cb_init_codegen (void)
 	static_call_cache = NULL;
 	string_buffer = NULL;
 	string_cache = NULL;
-	xml_tree_cache = NULL;
+	ml_tree_cache = NULL;
 }
 
 /* Output routines */
@@ -3255,21 +3255,21 @@ output_index (cb_tree x)
 	}
 }
 
-/* XML output trees */
+/* ML output trees */
 
-static struct cb_xml_generate_tree *
-get_last_attr (const struct cb_xml_generate_tree * const s)
+static struct cb_ml_generate_tree *
+get_last_attr (const struct cb_ml_generate_tree * const s)
 {
-	struct cb_xml_generate_tree	*attr;
+	struct cb_ml_generate_tree	*attr;
 
 	for (attr = s->attrs; attr->sibling; attr = attr->sibling);
 	return attr;
 }
 
-static struct cb_xml_generate_tree *
-get_last_child (const struct cb_xml_generate_tree * const s)
+static struct cb_ml_generate_tree *
+get_last_child (const struct cb_ml_generate_tree * const s)
 {
-	struct cb_xml_generate_tree	*child;
+	struct cb_ml_generate_tree	*child;
 
 	for (child = s->children; child->sibling; child = child->sibling);
 
@@ -3280,8 +3280,8 @@ get_last_child (const struct cb_xml_generate_tree * const s)
 	}
 }
 
-static struct cb_xml_generate_tree *
-get_prev_xml_tree_entry (const struct cb_xml_generate_tree * const s)
+static struct cb_ml_generate_tree *
+get_prev_ml_tree_entry (const struct cb_ml_generate_tree * const s)
 {
 	if (s->prev_sibling) {
 		if (s->prev_sibling->children) {
@@ -3301,22 +3301,22 @@ get_prev_xml_tree_entry (const struct cb_xml_generate_tree * const s)
 }
 
 static void
-output_xml_attrs_definitions (struct cb_xml_generate_tree *attr)
+output_ml_attrs_definitions (struct cb_ml_generate_tree *attr)
 {
 	/* TO-DO: Where does xa_7 come from?? (See test.c.l.h) */
 	for (; attr; attr = attr->sibling) {
-		output_local ("static cob_xml_attr\t%s%d;\n",
-			      CB_PREFIX_XML_ATTR, attr->id);
+		output_local ("static cob_ml_attr\t%s%d;\n",
+			      CB_PREFIX_ML_ATTR, attr->id);
 	}
 }
 
 static void
-output_xml_trees_definitions (struct cb_xml_generate_tree *tree)
+output_ml_trees_definitions (struct cb_ml_generate_tree *tree)
 {
 	for (; tree; tree = tree->sibling) {
-		output_xml_attrs_definitions (tree->attrs);
-		output_xml_trees_definitions (tree->children);
-		output_local ("static cob_xml_tree\t%s%d;\n", CB_PREFIX_XML_TREE, tree->id);
+		output_ml_attrs_definitions (tree->attrs);
+		output_ml_trees_definitions (tree->children);
+		output_local ("static cob_ml_tree\t%s%d;\n", CB_PREFIX_ML_TREE, tree->id);
 	}
 }
 
@@ -3760,8 +3760,8 @@ output_param (cb_tree x, int id)
 		}
 		output (")");
 		break;
-	case CB_TAG_XML_TREE:
-		output ("&%s%d", CB_PREFIX_XML_TREE, CB_XML_TREE (x)->id);
+	case CB_TAG_ML_TREE:
+		output ("&%s%d", CB_PREFIX_ML_TREE, CB_ML_TREE (x)->id);
 		break;
 
 	case CB_TAG_FUNCALL:
@@ -6858,23 +6858,23 @@ output_alter (struct cb_alter *p)
 	}
 }
 
-/* XML GENERATE suppress checks */
+/* JSON/XML GENERATE suppress checks */
 
 static void
-output_xml_tree_suppress_cond (struct cb_xml_generate_tree *tree)
+output_ml_tree_suppress_cond (struct cb_ml_generate_tree *tree)
 {
 	output_prefix ();
-	if (tree->type == CB_XML_ATTRIBUTE) {
-		output ("%s%d.is_suppressed = ", CB_PREFIX_XML_ATTR, tree->id);
+	if (tree->type == CB_ML_ATTRIBUTE) {
+		output ("%s%d.is_suppressed = ", CB_PREFIX_ML_ATTR, tree->id);
 	} else {
-		output ("%s%d.is_suppressed = ", CB_PREFIX_XML_TREE, tree->id);
+		output ("%s%d.is_suppressed = ", CB_PREFIX_ML_TREE, tree->id);
 	}
 	output_cond (tree->suppress_cond, 0);
 	output (";\n");
 }
 
 static int
-one_tree_in_list_is_never_suppressed (struct cb_xml_generate_tree *tree)
+one_tree_in_list_is_never_suppressed (struct cb_ml_generate_tree *tree)
 {
 	for (; tree; tree = tree->sibling) {
 		if (!tree->suppress_cond) {
@@ -6886,14 +6886,14 @@ one_tree_in_list_is_never_suppressed (struct cb_xml_generate_tree *tree)
 }
 
 static int
-one_child_or_attr_is_never_suppressed (struct cb_xml_generate_tree *tree)
+one_child_or_attr_is_never_suppressed (struct cb_ml_generate_tree *tree)
 {
 	return one_tree_in_list_is_never_suppressed (tree->attrs)
 		|| one_tree_in_list_is_never_suppressed (tree->children);
 }
 
 static void
-output_all_tree_list_suppressed_cond (struct cb_xml_generate_tree *tree,
+output_all_tree_list_suppressed_cond (struct cb_ml_generate_tree *tree,
 				      const char *prefix,
 				      int * const cond_emitted)
 {
@@ -6909,7 +6909,7 @@ output_all_tree_list_suppressed_cond (struct cb_xml_generate_tree *tree,
 }
 
 static void
-output_parent_tree_suppress_check (struct cb_xml_generate_tree *tree)
+output_parent_tree_suppress_check (struct cb_ml_generate_tree *tree)
 {
 	int	child_check_emitted = 0;
 
@@ -6919,20 +6919,20 @@ output_parent_tree_suppress_check (struct cb_xml_generate_tree *tree)
 	}
 
 	output_prefix ();
-	output ("%s%d.is_suppressed |= ", CB_PREFIX_XML_TREE, tree->id);
-	output_all_tree_list_suppressed_cond (tree->attrs, CB_PREFIX_XML_ATTR,
+	output ("%s%d.is_suppressed |= ", CB_PREFIX_ML_TREE, tree->id);
+	output_all_tree_list_suppressed_cond (tree->attrs, CB_PREFIX_ML_ATTR,
 					      &child_check_emitted);
-	output_all_tree_list_suppressed_cond (tree->children, CB_PREFIX_XML_TREE,
+	output_all_tree_list_suppressed_cond (tree->children, CB_PREFIX_ML_TREE,
 					      &child_check_emitted);
 	output (";\n");
 
 }
 
 static void
-output_xml_suppress_checks (struct cb_xml_suppress_checks * const suppress_checks)
+output_ml_suppress_checks (struct cb_ml_suppress_checks * const suppress_checks)
 {
-	struct cb_xml_generate_tree	*orig_tree = suppress_checks->tree;
-	struct cb_xml_generate_tree	*tree;
+	struct cb_ml_generate_tree	*orig_tree = suppress_checks->tree;
+	struct cb_ml_generate_tree	*tree;
 
 	/*
 	  To resolve dependency problems, start from last child of last element.
@@ -6947,7 +6947,7 @@ output_xml_suppress_checks (struct cb_xml_suppress_checks * const suppress_check
 
 	for (;;) {
 		if (tree->suppress_cond) {
-			output_xml_tree_suppress_cond (tree);
+			output_ml_tree_suppress_cond (tree);
 		}
 		/*
 		  Suppress the (non-root) element if all its children are
@@ -6960,7 +6960,7 @@ output_xml_suppress_checks (struct cb_xml_suppress_checks * const suppress_check
 		if (tree == orig_tree) {
 			break;
 		} else {
-			tree = get_prev_xml_tree_entry (tree);
+			tree = get_prev_ml_tree_entry (tree);
 		}
 	}
 }
@@ -7926,8 +7926,8 @@ output_stmt (cb_tree x)
 		output_perform_call (CB_DEBUG_CALL(x)->target,
 				     CB_DEBUG_CALL(x)->target);
 		break;
-	case CB_TAG_XML_SUPPRESS_CHECKS:
-		output_xml_suppress_checks (CB_XML_SUPPRESS_CHECKS (x));
+	case CB_TAG_ML_SUPPRESS_CHECKS:
+		output_ml_suppress_checks (CB_ML_SUPPRESS_CHECKS (x));
 		break;
 	/* LCOV_EXCL_START */
 	default:
@@ -8367,14 +8367,14 @@ output_screen_init (struct cb_field *p, struct cb_field *previous)
 	}
 }
 
-/* XML GENERATE trees */
+/* JSON/XML GENERATE trees */
 
 static void
-output_xml_attrs_init (struct cb_xml_generate_tree *attr)
+output_ml_attrs_init (struct cb_ml_generate_tree *attr)
 {
 	for (; attr; attr = attr->sibling) {
 		output_prefix ();
-		output ("cob_set_xml_attr (&%s%d, ", CB_PREFIX_XML_ATTR, attr->id);
+		output ("cob_set_ml_attr (&%s%d, ", CB_PREFIX_ML_ATTR, attr->id);
 
 		output_param (attr->name, -1);
 		output (", ");
@@ -8383,7 +8383,7 @@ output_xml_attrs_init (struct cb_xml_generate_tree *attr)
 		output (", 0, ");
 
 		if (attr->sibling) {
-			output ("&%s%d", CB_PREFIX_XML_ATTR, attr->sibling->id);
+			output ("&%s%d", CB_PREFIX_ML_ATTR, attr->sibling->id);
 		} else {
 			output ("NULL");
 		}
@@ -8392,15 +8392,15 @@ output_xml_attrs_init (struct cb_xml_generate_tree *attr)
 }
 
 static void
-output_xml_elt_init (struct cb_xml_generate_tree *tree)
+output_ml_elt_init (struct cb_ml_generate_tree *tree)
 {
 	output_prefix ();
-	output ("cob_set_xml_tree (&%s%d, ", CB_PREFIX_XML_TREE, tree->id);
+	output ("cob_set_ml_tree (&%s%d, ", CB_PREFIX_ML_TREE, tree->id);
 
 	output_param (tree->name, -1);
 
 	if (tree->attrs) {
-		output (", &%s%d, ", CB_PREFIX_XML_ATTR, tree->attrs->id);
+		output (", &%s%d, ", CB_PREFIX_ML_ATTR, tree->attrs->id);
 	} else {
 		output (", NULL, ");
 	}
@@ -8414,13 +8414,13 @@ output_xml_elt_init (struct cb_xml_generate_tree *tree)
 	output (", 0, ");
 
 	if (tree->children) {
-		output ("&%s%d, ", CB_PREFIX_XML_TREE, tree->children->id);
+		output ("&%s%d, ", CB_PREFIX_ML_TREE, tree->children->id);
 	} else {
 		output ("NULL, ");
 	}
 
 	if (tree->sibling) {
-		output ("&%s%d", CB_PREFIX_XML_TREE, tree->sibling->id);
+		output ("&%s%d", CB_PREFIX_ML_TREE, tree->sibling->id);
 	} else {
 		output ("NULL");
 	}
@@ -8429,16 +8429,16 @@ output_xml_elt_init (struct cb_xml_generate_tree *tree)
 }
 
 static void
-output_xml_generate_init (struct cb_xml_generate_tree *tree)
+output_ml_generate_init (struct cb_ml_generate_tree *tree)
 {
 	for (; tree; tree = tree->sibling) {
 		if (tree->attrs) {
-			output_xml_attrs_init (tree->attrs);
+			output_ml_attrs_init (tree->attrs);
 		}
 		if (tree->children) {
-			output_xml_generate_init (tree->children);
+			output_ml_generate_init (tree->children);
 		}
-		output_xml_elt_init (tree);
+		output_ml_elt_init (tree);
 	}
 }
 
@@ -10097,9 +10097,9 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		optimize_defs[COB_SET_REPORT] = 1;
 	}
 
-	if (prog->xml_trees) {
-		output_local ("\n/* XML GENERATE trees */\n");
-		output_xml_trees_definitions (prog->xml_trees);
+	if (prog->ml_trees) {
+		output_local ("\n/* JSON/XML GENERATE trees */\n");
+		output_ml_trees_definitions (prog->ml_trees);
 	}
 
 #if	0	/* RXWRXW - Any */
@@ -10891,11 +10891,11 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_newline ();
 	}
 
-	/* XML GENERATE trees */
-	if (prog->xml_trees) {
-		optimize_defs[COB_SET_XML_TREE] = 1;
-		output_line ("/* Initialize XML GENERATE output trees */");
-		output_xml_generate_init (prog->xml_trees);
+	/* JSON/XML GENERATE trees */
+	if (prog->ml_trees) {
+		optimize_defs[COB_SET_ML_TREE] = 1;
+		output_line ("/* Initialize JSON/XML GENERATE output trees */");
+		output_ml_generate_init (prog->ml_trees);
 		output_newline ();
 	}
 

@@ -6244,18 +6244,18 @@ AT_DATA([prog.cob], [
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:12: warning: USAGE BIT is not implemented
 prog.cob:37: warning: USAGE BIT is not implemented
-prog.cob:49: error: XML GENERATE receiving item must be alphanumeric or national
-prog.cob:51: error: XML GENERATE receiving item may not have JUSTIFIED clause
-prog.cob:53: error: XML GENERATE receiving item may not be subscripted
-prog.cob:54: error: XML GENERATE receiving item may not be reference modified
+prog.cob:49: error: JSON/XML GENERATE receiving item must be alphanumeric or national
+prog.cob:51: error: JSON/XML GENERATE receiving item may not have JUSTIFIED clause
+prog.cob:53: error: JSON/XML GENERATE receiving item may not be subscripted
+prog.cob:54: error: JSON/XML GENERATE receiving item may not be reference modified
 prog.cob:57: error: syntax error, unexpected intrinsic function name, expecting Identifier
-prog.cob:59: error: XML GENERATE input record may not be reference modified
-prog.cob:61: error: XML GENERATE input record may not have RENAMES clause
-prog.cob:66: error: XML GENERATE input record has subrecords with non-unique names
-prog.cob:67: error: all the children of 'all-filler-rec' are ignored in XML GENERATE
+prog.cob:59: error: JSON/XML GENERATE input record may not be reference modified
+prog.cob:61: error: JSON/XML GENERATE input record may not have RENAMES clause
+prog.cob:66: error: JSON/XML GENERATE input record has subrecords with non-unique names
+prog.cob:67: error: all the children of 'all-filler-rec' are ignored in JSON/XML GENERATE
 prog.cob:70: error: COUNT IN item must be numeric and an integer
 prog.cob:72: error: COUNT IN item may not have PICTURE with P in it
-prog.cob:89: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:89: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:89: warning: WITH ATTRIBUTES specified, but no attributes can be generated
 prog.cob:89: error: NAMESPACE must be a valid URI
 prog.cob:92: error: NAMESPACE must be alphanumeric or national
@@ -6263,34 +6263,34 @@ prog.cob:92: error: NAMESPACE-PREFIX must be alphanumeric or national
 prog.cob:97: error: NAMESPACE may not be a figurative constant
 prog.cob:97: error: NAMESPACE-PREFIX may not be a figurative constant
 prog.cob:98: error: NAMESPACE-PREFIX must be a valid XML name
-prog.cob:104: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:104: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:102: error: NAME OF item must be the input record or a child of it
-prog.cob:107: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:107: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:105: error: NAME OF item may not be reference modified
-prog.cob:110: warning: OCCURS items in XML GENERATE is not implemented
-prog.cob:108: error: NAME OF item may not be an ignored item in XML GENERATE
-prog.cob:114: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:110: warning: OCCURS items in JSON/XML GENERATE is not implemented
+prog.cob:108: error: NAME OF item may not be an ignored item in JSON/XML GENERATE
+prog.cob:114: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:111: error: NAME OF name must be a valid XML name
-prog.cob:118: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:118: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:115: error: TYPE OF item must be elementary
 prog.cob:115: error: TYPE OF item must be a child of the input record
 prog.cob:116: error: TYPE OF item must be elementary
 prog.cob:116: error: TYPE OF item must be a child of the input record
-prog.cob:122: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:122: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:119: error: TYPE OF item may not be reference modified
 prog.cob:120: error: TYPE OF item may not be subscripted
-prog.cob:131: warning: OCCURS items in XML GENERATE is not implemented
-prog.cob:123: error: TYPE OF item may not be an ignored item in XML GENERATE
-prog.cob:135: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:131: warning: OCCURS items in JSON/XML GENERATE is not implemented
+prog.cob:123: error: TYPE OF item may not be an ignored item in JSON/XML GENERATE
+prog.cob:135: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:133: error: SUPPRESS item with WHEN clause must be elementary
 prog.cob:133: error: SUPPRESS item must be a child of the input record
-prog.cob:132: error: SUPPRESS item may not be an ignored item in XML GENERATE
+prog.cob:132: error: SUPPRESS item may not be an ignored item in JSON/XML GENERATE
 prog.cob:132: error: SUPPRESS item with WHEN clause must be elementary
 prog.cob:136: error: syntax error, unexpected intrinsic function name, expecting EVERY or WHEN or Identifier
-prog.cob:142: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:142: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:140: error: SUPPRESS item may not be subscripted
 prog.cob:139: error: SUPPRESS item may not be reference modified
-prog.cob:146: warning: OCCURS items in XML GENERATE is not implemented
+prog.cob:146: warning: OCCURS items in JSON/XML GENERATE is not implemented
 prog.cob:147: error: SUPPRESS WHEN SPACE item must be USAGE DISPLAY or NATIONAL
 prog.cob:153: error: SUPPRESS WHEN HIGH-VALUE item must be USAGE DISPLAY or NATIONAL
 prog.cob:153: error: SUPPRESS WHEN HIGH-VALUE item must be an integer
