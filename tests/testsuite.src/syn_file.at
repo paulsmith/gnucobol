@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014, 2016-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014, 2016-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Joe Robbins,
 ## Edward Hart
 ##
@@ -2030,16 +2030,14 @@ prog.cob:16: warning: WITH MASS-UPDATE is not implemented
 prog.cob:65: warning: WITH BULK-ADDITION is not implemented
 prog.cob:67: warning: WITH MASS-UPDATE is not implemented
 ])
-# FIXME: a user-defined reserved word list currently
-#        does not remove context-sensivity, but should
-#AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
-#[prog.cob:13: warning: DUPLICATES for primary keys is not implemented
-#prog.cob:16: warning: WITH MASS-UPDATE is not implemented
-#prog.cob:34: error: syntax error, unexpected ENCRYPTION
-#prog.cob:38: error: syntax error, unexpected ALLOWING
-#prog.cob:65: warning: WITH BULK-ADDITION is not implemented
-#prog.cob:67: warning: WITH MASS-UPDATE is not implemented
-#])
+AT_CHECK([$COMPILE_ONLY -std=acu-strict prog.cob], [1], [],
+[prog.cob:13: warning: DUPLICATES for primary keys is not implemented
+prog.cob:16: warning: WITH MASS-UPDATE is not implemented
+prog.cob:34: error: syntax error, unexpected ENCRYPTION
+prog.cob:38: error: syntax error, unexpected ALLOWING
+prog.cob:65: warning: WITH BULK-ADDITION is not implemented
+prog.cob:67: warning: WITH MASS-UPDATE is not implemented
+])
 AT_CLEANUP
 
 
