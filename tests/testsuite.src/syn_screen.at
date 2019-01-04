@@ -1,4 +1,4 @@
-## Copyright (C) 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2014-2019 Free Software Foundation, Inc.
 ## Written by Simon Sobisch, Edward Hart, Ron Norman
 ##
 ## This file is part of GnuCOBOL.
@@ -265,7 +265,6 @@ prog.cob:14: error: SCREEN SECTION item 'BAD3' should be USAGE DISPLAY
 AT_CLEANUP
 
 
-
 AT_SETUP([SCREEN SECTION clause numbers])
 AT_KEYWORDS([screen])
 
@@ -292,6 +291,7 @@ prog.cob:13: error: non-negative integer value expected
 ])
 
 AT_CLEANUP
+
 
 # ToDo: Add all clauses, maybe split into multiple tests
 AT_SETUP([Screen clauses])
@@ -792,25 +792,37 @@ AT_CHECK([$COMPILE_ONLY -fregister=LIN,COL prog.cob], [0], [], [])
 
 AT_CLEANUP
 
+
 AT_SETUP([Screen with invalid FROM clause])
-AT_KEYWORDS([screen])
+AT_KEYWORDS([screen constant])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. prog.
        
        DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  some-const CONSTANT AS '123'.
+
        SCREEN SECTION.
        01  bild.
+           05 from-constant-with-size   FROM some-const.
+           05 from-constant-without-pic FROM ZERO.
            05 LINE 24 COL 1 FROM message.
 ])
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
-[prog.cob:8: error: syntax error, unexpected MESSAGE
+[prog.cob:13: error: syntax error, unexpected MESSAGE
+prog.cob:11: warning: 'from-constant-with-size' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:12: warning: 'from-constant-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:12: error: PICTURE clause required for 'from-constant-without-pic'
 ])
 AT_CHECK([$COMPILE_ONLY -fnot-reserved=MESSAGE prog.cob], [1], [],
-[prog.cob:8: error: 'message' is not defined, but is a reserved word in another dialect                                            
-prog.cob:8: warning: 'FILLER' has FROM, TO or USING without PIC; PIC will be implied                                              
+[prog.cob:13: error: 'message' is not defined, but is a reserved word in another dialect                                            
+prog.cob:11: warning: 'from-constant-with-size' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:12: warning: 'from-constant-without-pic' has FROM, TO or USING without PIC; PIC will be implied
+prog.cob:12: error: PICTURE clause required for 'from-constant-without-pic'
+prog.cob:13: warning: 'FILLER' has FROM, TO or USING without PIC; PIC will be implied                                              
 ])
 
 AT_CLEANUP

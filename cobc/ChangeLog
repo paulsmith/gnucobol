@@ -8,6 +8,8 @@
 	  in listing, if active
 	* cobc.c (print_program_trailer): prevent printing of NULL file / prefix
 	  and respect cb_msg_style
+	* field.c (create_implicit_picture): fixed to not raise an abort for
+	  FROM figurative-constant without PICTURE
 
 2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -16,6 +18,12 @@
 	  they specify it.
 	* reserved.c (default_reserved_words): fixed context-sensitive words
 	  marked as not context-sensitive.
+
+2019-01-02  Simon Sobisch <simonsobisch@gnu.org>
+
+	* field.c (set_report_field): renamed to (set_report_field_offset)
+	* field.c: refactored static functions and their calls to reduce
+	  the number of calls and limited the scope of variables
 
 2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
 
