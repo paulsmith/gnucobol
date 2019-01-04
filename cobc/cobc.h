@@ -598,6 +598,7 @@ extern void		configuration_warning (const char *, const int,
 extern void		configuration_error (const char *, const int,
 					 const int, const char *, ...) COB_A_FORMAT45;
 extern char *		cb_get_strerror (void);
+extern void		cb_add_error_to_listing (const char *, int, const char *, char *);
 DECLNORET extern void		flex_fatal_error (const char *, const char *,
 					 const int) COB_A_NORETURN;
 extern unsigned int	cb_verify (const enum cb_support, const char *);

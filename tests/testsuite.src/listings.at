@@ -1213,7 +1213,7 @@ AT_CHECK([$COMPILE_ONLY -t prog.lst crud.cob], [1], [],
 AT_DATA([prog15.lst],
 [GnuCOBOL V.R.P          crud.cob             DDD MMM dd HH:MM:SS YYYY  Page 0001
 
-cobc: crud.cob: No such file or directory
+ cobc: crud.cob: No such file or directory
 
 
 0 warnings in compilation group
@@ -1304,12 +1304,12 @@ AT_DATA([prog.cob], [
        PROGRAM-ID.      prog.
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
-       01 TEST-VAR PIC 9(2) VALUE 12.
+       01 TEST-VAR PIC 9(2) VALUE 'A'.
        COPY 'CRUD.CPY'.
        PROCEDURE        DIVISION.
            DISPLAY TEST-VAR NO ADVANCING
            END-DISPLAY
-           MOVE 'AA' TO TEST-VAR
+           MOVE 12 TO TEST-VAR
            DISPLAY TEST-VAR NO ADVANCING
            END-DISPLAY
            STOP RUN.
@@ -1317,8 +1317,7 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY -t prog.lst -tlines=0 prog.cob], [1], [],
 [prog.cob:7: error: CRUD.CPY: No such file or directory
-prog.cob:11: warning: numeric value is expected
-prog.cob:6: warning: 'TEST-VAR' defined here as PIC 9(2)
+prog.cob:6: warning: numeric value is expected
 ])
 
 AT_DATA([prog16.lst],
@@ -1331,14 +1330,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-000006         01 TEST-VAR PIC 9(2) VALUE 12.
+000006         01 TEST-VAR PIC 9(2) VALUE 'A'.
+warning: numeric value is expected
 000007         COPY 'CRUD.CPY'.
 error: CRUD.CPY: No such file or directory
 000008         PROCEDURE        DIVISION.
 000009             DISPLAY TEST-VAR NO ADVANCING
 000010             END-DISPLAY
-000011             MOVE 'AA' TO TEST-VAR
-warning: numeric value is expected
+000011             MOVE 12 TO TEST-VAR
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
@@ -1348,7 +1347,7 @@ warning: numeric value is expected
 Error/Warning summary:
 
 prog.cob:7: error: CRUD.CPY: No such file or directory
-prog.cob:11: warning: numeric value is expected
+prog.cob:6: warning: numeric value is expected
 
 1 warning in compilation group
 1 error in compilation group
@@ -1374,13 +1373,14 @@ LINE    PG/LN  A...B............................................................
 000003         PROGRAM-ID.      prog.
 000004         DATA             DIVISION.
 000005         WORKING-STORAGE  SECTION.
-000006         01 TEST-VAR PIC 9(2) VALUE 12.
+000006         01 TEST-VAR PIC 9(2) VALUE 'A'.
 000007         COPY 'CRUD.CPY'.
 error: CRUD.CPY: No such file or directory
+cobc: too many errors
 000008         PROCEDURE        DIVISION.
 000009             DISPLAY TEST-VAR NO ADVANCING
 000010             END-DISPLAY
-000011             MOVE 'AA' TO TEST-VAR
+000011             MOVE 12 TO TEST-VAR
 000012             DISPLAY TEST-VAR NO ADVANCING
 000013             END-DISPLAY
 000014             STOP RUN.
@@ -1390,6 +1390,7 @@ error: CRUD.CPY: No such file or directory
 Error/Warning summary:
 
 prog.cob:7: error: CRUD.CPY: No such file or directory
+cobc: too many errors
 
 0 warnings in compilation group
 1 error in compilation group

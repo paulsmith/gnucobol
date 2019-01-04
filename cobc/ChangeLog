@@ -1,4 +1,14 @@
 
+2019-01-04  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_abort): increase error counter
+	* error.c, cobc.h (cb_add_error_to_listing): extracted from (print_error)
+	  and extended to display source reference if error message is not cached
+	* cobc.c (cobc_err_msg, cobc_abort_terminate): include error message
+	  in listing, if active
+	* cobc.c (print_program_trailer): prevent printing of NULL file / prefix
+	  and respect cb_msg_style
+
 2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
 
 	* reserved.c (get_reserved_words_with_amendments): if a user reserves a

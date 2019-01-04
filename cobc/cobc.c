@@ -863,6 +863,17 @@ cobc_err_msg (const char *fmt, ...)
 	fprintf (stderr, "cobc: ");
 	va_start (ap, fmt);
 	vfprintf (stderr, fmt, ap);
+
+	if (cb_src_list_file
+		&& cb_listing_file_struct
+		&& cb_listing_file_struct->name) {
+
+		char			errmsg[BUFSIZ];
+		vsprintf (errmsg, fmt, ap);
+
+		cb_add_error_to_listing (NULL, 0,
+			"cobc: ", errmsg);
+	}
 	va_end (ap);
 	putc ('\n', stderr);
 	fflush (stderr);
@@ -880,7 +891,10 @@ cobc_too_many_errors (void)
 void
 cobc_abort (const char * filename, const int line_num)
 {
-	cobc_err_msg (_("%s: %d: internal compiler error"), filename, line_num);
+	++errorcount;
+
+	cobc_err_msg ("%s: %d: %s", filename, line_num,
+		_("internal compiler error"));
 	cobc_abort_terminate (1);
 }
 /* LCOV_EXCL_STOP */
@@ -2010,13 +2024,22 @@ cobc_abort_terminate (int should_be_reported)
 	   "recognize" status 99 as failure (you cannot "expect" the return 99 */
 	const int ret_code = 97;
 
-	if (cb_src_list_file) {
+	if (!should_be_reported
+	 &&	cb_src_list_file
+	 && cb_listing_file_struct
+	 && cb_listing_file_struct->name) {
 		print_program_listing ();
 	}
 	putc ('\n', stderr);
 	cobc_abort_msg ();
+
 	if (should_be_reported) {
 		cobc_err_msg (_("Please report this!"));
+		if (cb_src_list_file
+		 && cb_listing_file_struct
+		 && cb_listing_file_struct->name) {
+			print_program_listing ();
+		}
 	}
 	cobc_clean_up (ret_code);
 	exit (ret_code);
@@ -5515,12 +5538,23 @@ print_program_trailer (void)
 		if (cb_listing_with_messages) {
 			err = cb_listing_error_head;
 			do {
-				if (err->line > 0) {
-					snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
-						err->file, err->line, err->prefix, err->msg);
+				const char *prefix = err->prefix ? err->prefix : "";
+				if (err->file) {
+					if (err->line > 0) {
+						if (cb_msg_style == CB_MSG_STYLE_MSC) {
+							snprintf (err_msg, BUFSIZ, "%s(%d): %s%s",
+								err->file, err->line, prefix, err->msg);
+						} else {
+							snprintf (err_msg, BUFSIZ, "%s:%d: %s%s",
+								err->file, err->line, prefix, err->msg);
+						}
+					} else {
+						snprintf (err_msg, BUFSIZ, "%s: %s%s",
+							err->file, prefix, err->msg);
+					}
 				} else {
-					snprintf (err_msg, BUFSIZ, "%s: %s%s",
-						err->file, err->prefix, err->msg);
+					snprintf (err_msg, BUFSIZ, "%s%s",
+						prefix, err->msg);
 				}
 				print_program_data (err_msg);
 				err = err->next;
