@@ -4,6 +4,8 @@
 	* reserved.c (get_reserved_words_with_amendments): if a user reserves a
 	  default reserved word, context-sensitivity is now preserved only if
 	  they specify it.
+	* reserved.c (default_reserved_words): fixed context-sensitive words
+	  marked as not context-sensitive.
 
 2018-12-31  Simon Sobisch <simonsobisch@gnu.org>
 

@@ -426,7 +426,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BINARY-LONG",		0, 0, BINARY_LONG,		/* 2002 */
 				0, 0
   },
-  { "BINARY-SEQUENTIAL",	0, 0, BINARY_SEQUENTIAL,	/* Extension */
+  { "BINARY-SEQUENTIAL",	0, 1, BINARY_SEQUENTIAL,	/* Extension */
 				0, CB_CS_DELIMITER
   },
   { "BINARY-SHORT",		0, 0, BINARY_SHORT,		/* 2002 */
@@ -477,10 +477,10 @@ static struct cobc_reserved default_reserved_words[] = {
   { "BOTTOM",			0, 0, BOTTOM,			/* 2002 */
 				0, 0
   },
-  { "BOX",		0, 0, BOX,		/* ACU extension */
+  { "BOX",		0, 1, BOX,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
-  { "BOXED",		0, 0, BOXED,		/* ACU extension */
+  { "BOXED",		0, 1, BOXED,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "BULK-ADDITION",		0, 1, BULK_ADDITION,		/* ACU extension */
@@ -547,7 +547,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
 	/* FIXME + Check: 2014 Context-sensitive to COLUMN clause */
   },
-  { "CENTERED",		0, 0, CENTERED,		/* ACU extension */
+  { "CENTERED",		0, 1, CENTERED,		/* ACU extension */
 	  0, CB_CS_DISPLAY
   },
   { "CENTERED-HEADINGS",		0, 1, CENTERED_HEADINGS,		/* ACU extension */
@@ -1155,7 +1155,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "EXTERNAL-FORM",			0, 0, EXTERNAL_FORM,			/* ACU CGI extension */
 				0, 0
   },
-  { "F",			0, 0, F,			/* Extension */
+  { "F",			0, 1, F,			/* Extension */
 				0, CB_CS_RECORDING
   },
   { "FACTORY",			0, 0, -1,			/* 2002 */
@@ -1336,7 +1336,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "GOBACK",			0, 0, GOBACK,			/* 2002 */
 				0, 0
   },
-  { "GRAPHICAL",		0, 0, GRAPHICAL,		/* ACU extension */
+  { "GRAPHICAL",		0, 1, GRAPHICAL,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "GREATER",			0, 0, GREATER,			/* 2002 */
@@ -1405,7 +1405,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "I-O-CONTROL",		0, 0, I_O_CONTROL,		/* 2002 */
 				0, 0
   },
-  { "ICON",			0, 0, ICON,			/* ACU extension */
+  { "ICON",			0, 1, ICON,			/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "ID",			0, 0, ID,			/* Extension */
@@ -1433,7 +1433,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "IN",			0, 0, IN,			/* 2002 */
 				0, 0
   },
-  { "INDEPENDENT",		0, 0, INDEPENDENT,		/* ACU extension */
+  { "INDEPENDENT",		0, 1, INDEPENDENT,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "INDEX",			0, 0, INDEX,			/* 2002 */
@@ -1454,7 +1454,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "INITIALIZE",		0, 0, INITIALIZE,		/* 2002 */
 				0, 0
   },
-  { "INITIALIZED",		0, 0, INITIALIZED,		/* 2002 */
+  { "INITIALIZED",		0, 1, INITIALIZED,		/* 2002 */
 				0, CB_CS_ALLOCATE | CB_CS_OCCURS
   },
   { "INITIATE",			0, 0, INITIATE,			/* 2002 */
@@ -1623,7 +1623,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LINE-COUNTER",		0, 0, LINE_COUNTER,		/* 2002 */
 				0, 0
   },
-  { "LINE-SEQUENTIAL",		0, 0, LINE_SEQUENTIAL,		/* Extension */
+  { "LINE-SEQUENTIAL",		0, 1, LINE_SEQUENTIAL,		/* Extension */
 				0, CB_CS_DELIMITER
   },
   { "LINES",			0, 0, LINES,			/* 2002 */
@@ -1641,7 +1641,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "LM-RESIZE",		0, 0, LM_RESIZE,		/* ACU extension */
 				0, 0				/* Checkme: likely context sensitive */
   },
-  { "LOC",		0, 0, LOC,		/* IBM extension (ignored) */
+  { "LOC",		0, 1, LOC,		/* IBM extension (ignored) */
 				0, CB_CS_ALLOCATE
   },
   { "LOCAL-STORAGE",		0, 0, LOCAL_STORAGE,		/* 2002 */
@@ -1726,7 +1726,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "MODIFY",			1, 0, MODIFY,			/* ACU extension */
 				CB_CS_INQUIRE_MODIFY, 0
   },
-  { "MODULES",			0, 0, MODULES,			/* 85 */
+  { "MODULES",			0, 1, MODULES,			/* 85 */
 				0, CB_CS_OBJECT_COMPUTER
   },
   { "MOVE",			0, 0, MOVE,			/* 2002 */
@@ -2018,7 +2018,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "POINTER",			0, 0, POINTER,			/* 2002 */
 				0, 0
   },
-  { "POP-UP",			0, 0, POP_UP,			/* ACU extension */
+  { "POP-UP",			0, 1, POP_UP,			/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "POS",			0, 0, POS,			/* ACU extension for AT POSITION */
@@ -2040,7 +2040,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PRESENT",			0, 0, PRESENT,			/* 2002 */
 				0, 0
   },
-  { "PREVIOUS",			0, 0, PREVIOUS,			/* 2002 (C/S) */
+  { "PREVIOUS",			0, 1, PREVIOUS,			/* 2002 (C/S) */
 				0, CB_CS_READ
   },
   { "PRINT",			0, 1, PRINT,			/* Extension */
@@ -2104,7 +2104,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "PROPERTY",			0, 0, PROPERTY,			/* 2002, ACU extension */
 				0, 0
   },
-  { "PROTECTED",		0, 0, PROTECTED,		/* Extension PROTECTED SIZE */
+  { "PROTECTED",		0, 1, PROTECTED,		/* Extension PROTECTED SIZE */
 				0, CB_CS_ACCEPT
   },
   { "PROTOTYPE",		0, 0, -1,			/* 2002 */
@@ -2417,7 +2417,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "SHADING",			0, 1, SHADING,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
-  { "SHADOW",		0, 0, SHADOW,		/* ACU extension */
+  { "SHADOW",		0, 1, SHADOW,		/* ACU extension */
 				0, CB_CS_DISPLAY
   },
   { "SHARING",			0, 0, SHARING,			/* 2002 */
@@ -2545,7 +2545,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "STDCALL",			0, 1, STDCALL,			/* Extension: implicit defined CALL-CONVENTION */
 				0, CB_CS_CALL | CB_CS_OPTIONS
   },
-  { "STEP",			0, 0, STEP,			/* 2002 (C/S) */
+  { "STEP",			0, 1, STEP,			/* 2002 (C/S) */
 				0, CB_CS_OCCURS
   },
   { "STOP",			0, 0, STOP,			/* 2002 */
@@ -2731,7 +2731,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "TYPEDEF",			0, 0, -1,			/* 2002 */
 				0, 0
   },
-  { "U",			0, 0, U,			/* Extension */
+  { "U",			0, 1, U,			/* Extension */
 				0, CB_CS_RECORDING
   },
   { "UCS-4",			0, 1, -1,			/* 2002 (C/S) */
@@ -2821,7 +2821,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "UTF-8",			0, 1, -1,			/* 2002 (C/S) */
 				0, CB_CS_ALPHABET
   },
-  { "V",			0, 0, V,			/* Extension */
+  { "V",			0, 1, V,			/* Extension */
 				0, CB_CS_RECORDING
   },
   { "VAL-STATUS",		0, 0, -1,			/* 2002 */
@@ -2845,7 +2845,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "VALUE-FORMAT",			0, 1, VALUE_FORMAT,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
-  { "VARIABLE",			0, 0, VARIABLE,			/* Extension */
+  { "VARIABLE",			0, 1, VARIABLE,			/* Extension */
 				0, CB_CS_RECORDING
   },
   { "VARIANT",			0, 0, VARIANT,			/* ACU extension */
