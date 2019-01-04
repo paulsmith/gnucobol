@@ -2327,7 +2327,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "RUN",			0, 0, RUN,			/* 2002 */
 				0, 0
   },
-  { "S",			0, 0, S,			/* Extension */
+  { "S",			0, 1, S,			/* Extension */
 				0, CB_CS_RECORDING
   },
   { "SAME",			0, 0, SAME,			/* 2002 */
