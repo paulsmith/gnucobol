@@ -3012,6 +3012,13 @@ format_current_date (const struct date_format date_fmt,
 			 fractional_second, offset_time, formatted_datetime);
 }
 
+static COB_A_NORETURN void
+error_not_implemented (void)
+{
+	cob_set_exception (COB_EC_IMP_FEATURE_MISSING);
+	cob_fatal_error (COB_FERROR_FUNCTION);
+}
+
 /* Global functions */
 
 /* Return switch value as field */
@@ -6626,7 +6633,7 @@ cob_intr_boolean_of_integer (cob_field *f1, cob_field *f2)
 	COB_UNUSED (f1);
 	COB_UNUSED (f2);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
@@ -6634,7 +6641,7 @@ cob_intr_char_national (cob_field *srcfield)
 {
 	COB_UNUSED (srcfield);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
@@ -6645,19 +6652,19 @@ cob_intr_display_of (const int offset, const int length,
 	COB_UNUSED (length);
 	COB_UNUSED (params);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
 cob_intr_exception_file_n (void)
 {
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
 cob_intr_exception_location_n (void)
 {
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
@@ -6665,7 +6672,7 @@ cob_intr_integer_of_boolean (cob_field *srcfield)
 {
 	COB_UNUSED (srcfield);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
@@ -6675,7 +6682,7 @@ cob_intr_national_of (const int offset, const int length, const int params, ...)
 	COB_UNUSED (length);
 	COB_UNUSED (params);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 cob_field *
@@ -6683,7 +6690,7 @@ cob_intr_standard_compare (const int params, ...)
 {
 	COB_UNUSED (params);
 
-	cob_fatal_error (COB_FERROR_FUNCTION);
+	error_not_implemented ();
 }
 
 /* Initialization/exit routines */

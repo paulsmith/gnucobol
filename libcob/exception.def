@@ -198,6 +198,14 @@ COB_EXCEPTION  (0602, COB_EC_IMP_DISPLAY,
 COB_EXCEPTION  (0603, COB_EC_IMP_UTC_UNKNOWN,
 		"EC-IMP-UTC-UNKNOWN", 1)
 
+/* Implementation-defined condition for features the runtime is not configured for */
+COB_EXCEPTION  (0604, COB_EC_IMP_FEATURE_DISABLED,
+        "EC-IMP-FEATURE-DISABLED", 0)
+
+/* Implementation-defined condition for features the runtime has no support for (yet) */
+COB_EXCEPTION  (0605, COB_EC_IMP_FEATURE_MISSING,
+        "EC-IMP-FEATURE-MISSING", 0)
+
 
 /* Any locale related exception */
 COB_EXCEPTION  (0700, COB_EC_LOCALE,
