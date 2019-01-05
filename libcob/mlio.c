@@ -612,7 +612,7 @@ generate_json_from_tree (cob_ml_tree *tree, cJSON *out)
 		if (COB_FIELD_IS_FP (tree->content)) {
 			/* TO-DO: Implement! */
 			/* TO-DO: Stop compilation if float in field */
-			cob_fatal_error (COB_FERROR_XML);
+			cob_fatal_error (COB_FERROR_JSON);
 		} else if (COB_FIELD_IS_NUMERIC (tree->content)) {
 			content = get_json_num (tree->content);
 			/*

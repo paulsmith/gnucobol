@@ -784,6 +784,7 @@ only usable with COB_USE_VC2013_OR_GREATER */
 #define COB_FERROR_FUNCTION	12
 #define COB_FERROR_FREE		13
 #define COB_FERROR_XML		14
+#define COB_FERROR_JSON		15
 
 /* Exception identifier enumeration */
 
