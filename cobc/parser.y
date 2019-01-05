@@ -14906,16 +14906,16 @@ ml_type:
 
 _xml_gen_suppress:
   /* empty */
-| SUPPRESS_XML ml_suppress_list
+| SUPPRESS_XML xml_suppress_list
   {
 	cb_verify (cb_xml_generate_extra_phrases,
 		   _("XML GENERATE SUPPRESS clause"));
   }
 ;
 
-ml_suppress_list:
+xml_suppress_list:
   xml_suppress_entry
-| ml_suppress_list xml_suppress_entry
+| xml_suppress_list xml_suppress_entry
 ;
 
 xml_suppress_entry:
