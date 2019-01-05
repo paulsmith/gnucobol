@@ -769,22 +769,24 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 /* Fatal error definitions */
 
-#define COB_FERROR_NONE		0
-#define COB_FERROR_CANCEL	1
-#define COB_FERROR_INITIALIZED	2
-#define COB_FERROR_CODEGEN	3
-#define COB_FERROR_CHAINING	4
-#define COB_FERROR_STACK	5
-#define COB_FERROR_GLOBAL	6
-#define COB_FERROR_MEMORY	7
-#define COB_FERROR_MODULE	8
-#define COB_FERROR_RECURSIVE	9
-#define COB_FERROR_SCR_INP	10
-#define COB_FERROR_FILE		11
-#define COB_FERROR_FUNCTION	12
-#define COB_FERROR_FREE		13
-#define COB_FERROR_XML		14
-#define COB_FERROR_JSON		15
+enum cob_fatal_error {
+	COB_FERROR_NONE = 0,
+	COB_FERROR_CANCEL,
+	COB_FERROR_INITIALIZED,
+	COB_FERROR_CODEGEN,
+	COB_FERROR_CHAINING,
+	COB_FERROR_STACK,
+	COB_FERROR_GLOBAL,
+	COB_FERROR_MEMORY,
+	COB_FERROR_MODULE,
+	COB_FERROR_RECURSIVE,
+	COB_FERROR_SCR_INP,
+	COB_FERROR_FILE,
+	COB_FERROR_FUNCTION,
+	COB_FERROR_FREE,
+	COB_FERROR_XML,
+	COB_FERROR_JSON
+};
 
 /* Exception identifier enumeration */
 
@@ -1588,7 +1590,7 @@ COB_EXPIMP void	cob_module_leave		(cob_module *);
 COB_EXPIMP void	cob_module_free	(cob_module **);
 
 DECLNORET COB_EXPIMP void	cob_stop_run	(const int) COB_A_NORETURN;
-DECLNORET COB_EXPIMP void	cob_fatal_error	(const int) COB_A_NORETURN;
+DECLNORET COB_EXPIMP void	cob_fatal_error	(const enum cob_fatal_error) COB_A_NORETURN;
 
 COB_EXPIMP void	*cob_malloc			(const size_t) COB_A_MALLOC;
 COB_EXPIMP void	*cob_realloc			(void *, const size_t, const size_t) COB_A_MALLOC;

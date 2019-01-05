@@ -6754,7 +6754,7 @@ cob_runtime_error (const char *fmt, ...)
 }
 
 void
-cob_fatal_error (const int fatal_error)
+cob_fatal_error (const enum cob_fatal_error fatal_error)
 {
 	const char	*msg;
 	unsigned char	*file_status;
@@ -6935,6 +6935,12 @@ cob_fatal_error (const int fatal_error)
 	case COB_FERROR_FUNCTION:
 		cob_runtime_error (_("attempt to use non-implemented function"));
 		break;
+        case COB_FERROR_XML:
+		cob_runtime_error (_("attempt to use non-implemented XML I/O"));
+		break;
+	case COB_FERROR_JSON:
+		cob_runtime_error (_("attempt to use non-implemented JSON I/O"));
+		break;		
 	default:
 		/* internal rare error, no need for translation */
 		cob_runtime_error ("unknown failure: %d", fatal_error);
