@@ -3707,12 +3707,18 @@ create_dummy_reserved (const char *word)
 }
 
 static void
-free_amendment (struct amendment_list *to_free)
+free_amendment_content (struct amendment_list *to_free)
 {
 	cobc_main_free (to_free->word);
 	if (to_free->alias_for) {
 		cobc_main_free (to_free->alias_for);
 	}
+}
+
+static void
+free_amendment (struct amendment_list *to_free)
+{
+	free_amendment_content (to_free);
 	cobc_main_free (to_free);
 }
 
@@ -4154,9 +4160,8 @@ get_reserved_words_with_amendments (void)
 		}
 		add_reserved_word_to_map (reserved, 0);
 
-		free_amendment (amendment_map[i]);
-		amendment_map[i] = NULL;
-	        /* delete_amendment_with_key (i); */
+		free_amendment_content (amendment_map[i]);
+	        delete_amendment_with_key (i);
 	}
 }
 
