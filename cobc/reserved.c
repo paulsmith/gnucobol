@@ -4046,25 +4046,25 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 	}								\
 									\
 	static int							\
-	add_##type##_to_map (const struct type_struct reserved, const int overwrite) \
+	add_##type##_to_map (const struct type_struct val, const int overwrite) \
 	{								\
 		int	key;						\
 		int	entry_already_there;				\
 									\
-		/*							\
-		  The "- 1" is there so there is always one NULL entry in the \
-		  array. If there is not one and the array is full,	\
-		  find_reserved_word will not terminate when given a word which \
-		  shares a hash with a different word.			\
-		*/							\
 		if (!type##_map) {					\
 			init_##type##_map ();				\
 		}							\
+		/*							\
+		  The "- 1" is there so there is always one NULL entry in the \
+		  array. If there is not one and the array is full,	\
+		  find_##type will not terminate when given a word which \
+		  shares a hash with a different word.			\
+		*/							\
 		if (num_##type##s == type##_map_arr_size - 1) {		\
 			realloc_##type##_map (type##_map_arr_size * 2); \
 		}							\
 									\
-		key = find_key_for_##type (reserved.word_member);	\
+		key = find_key_for_##type (val.word_member);		\
 		entry_already_there = !!type##_map[key];		\
 		if (entry_already_there) {				\
 			if (overwrite) {				\
@@ -4077,7 +4077,7 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 		}							\
 									\
 	        type##_map[key] = cobc_main_malloc (sizeof (struct type_struct)); \
-		*type##_map[key] = reserved;				\
+		*type##_map[key] = val;					\
 		return entry_already_there;				\
 	}
 
