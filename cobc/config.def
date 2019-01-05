@@ -309,3 +309,6 @@ CB_CONFIG_SUPPORT (cb_xml_generate, "xml-generate",
 
 CB_CONFIG_SUPPORT (cb_xml_generate_extra_phrases, "xml-generate-extra-phrases",
 	_("XML GENERATE's phrases other than COUNT IN"))
+
+CB_CONFIG_SUPPORT (cb_json_generate, "json-generate",
+	_("JSON GENERATE statement"))

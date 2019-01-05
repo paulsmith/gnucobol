@@ -1,7 +1,7 @@
 NEWS - user visible changes				-*- outline -*-
 
- GnuCOBOL 3.0rc-2/final to be released (in 2018)
- 
+ GnuCOBOL 3.0rc-2/final to be released (in 2019)
+
 * New GnuCOBOL features
 
 ** REPORTWRITER module added
@@ -17,6 +17,9 @@ NEWS - user visible changes				-*- outline -*-
 ** XML GENERATE statement
    (note: runtime support needs additional library libxml2)
 
+** JSON GENERATE statement
+   (note: runtime support needs additional library cJSON)
+
 ** Improved support for different compiler extensions (ACUCOBOL, RM/COBOL,
    Fujitsu, Microsoft COBOL and more)
 
@@ -26,7 +29,7 @@ NEWS - user visible changes				-*- outline -*-
    Most of them will be fully implemented in a later version...
 
 ** Option to dump (partial) data of modules on abort.
-   Use new cobc option -fdump=<scope> to prepare the module and optional 
+   Use new cobc option -fdump=<scope> to prepare the module and optional
    use new runtime configuration options COB_DUMP_FILE and COB_DUMP_WIDTH
    to adjust the dump.
 
@@ -183,7 +186,7 @@ NEWS - user visible changes				-*- outline -*-
       02 FILLER          PIC X VALUE SPACE.
       02 DEBUG-SUB-3     PIC S9(4).
       02 FILLER          PIC X VALUE SPACE.
-      02 DEBUG-CONTENTS  PIC X(n).  
+      02 DEBUG-CONTENTS  PIC X(n).
    With "n" being at least 30, size is increased if USE FOR DEBUGGING identifier
    is used and the identifier has a longer size.
    Note: COB_SET_DEBUG activates the specified debugging sections at runtime
@@ -305,7 +308,7 @@ NEWS - user visible changes				-*- outline -*-
   make test      downloads NIST testsuite if necessary
                  now usable with parallel builds (make -j4 test)
   make checkall  runs both the internal an NIST testsuite
-  
+
 ** testsuite defaults to coloured output
 
 ** Windows(tm) Visual Studio build support files added,

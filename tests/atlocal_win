@@ -100,6 +100,11 @@ if test $($COBC --info | grep -i -c "XML library.*disabled") = 0; then
 else
 	COB_HAS_XML2="no"
 fi
+if test $($COBC --info | grep -i -c "JSON library.*disabled") = 0; then
+	COB_HAS_CJSON="yes"
+else
+	COB_HAS_CJSON="no"
+fi
 COB_HAS_CURSES="no"
 #if test "x$MSYSTEM" != "x" -o "$OSTYPE" = "cygwin"; then
 	# running MSYS builds as not-visible child processes result in
@@ -118,7 +123,7 @@ export COB_CONFIG_DIR COB_RUNTIME_CONFIG COB_COPY_DIR
 export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH LIBPATH
 export COB_LIBRARY_PATH
 export COB_MSG_FORMAT COB_UNIX_LF
-export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CURSES COB_HAS_64_BIT_POINTER
+export COB_HAS_ISAM COB_HAS_XML2 COB_HAS_CJSON COB_HAS_CURSES COB_HAS_64_BIT_POINTER
 
 
 # For rare cases where cobc/libcob may need to know if they're running in test mode:

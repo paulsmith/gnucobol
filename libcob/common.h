@@ -1249,6 +1249,9 @@ typedef struct __cob_module {
 	cob_field		*xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
 	cob_field		*xml_ntext;		/* XML-NTEXT */
 	cob_field		*xml_text;		/* XML-TEXT */
+
+	cob_field		*json_code;		/* JSON-CODE */
+	cob_field		*json_status;		/* JSON-STATUS */
 } cob_module;
 
 
@@ -2404,6 +2407,9 @@ COB_EXPIMP int	cob_is_xml_namechar	(const int);
 COB_EXPIMP void	cob_xml_generate	(cob_field *, cob_ml_tree *,
 					 cob_field *, const int, cob_field *,
 					 cob_field *);
+COB_EXPIMP void cob_json_generate	(cob_field *, cob_ml_tree *,
+					 cob_field *);
+
 
 /****************************/
 /* Functions in intrinsic.c */

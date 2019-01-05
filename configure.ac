@@ -78,6 +78,7 @@ AH_TEMPLATE([WITH_CISAM], [Use CISAM as ISAM handler])
 AH_TEMPLATE([WITH_DISAM], [Use DISAM as ISAM handler])
 AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as ISAM handler])
 AH_TEMPLATE([WITH_XML2], [Use libxml2 as XML handler])
+AH_TEMPLATE([WITH_CJSON], [USe cJSON as JSON handler])
 
 AH_TEMPLATE([COB_EXPORT_DYN], [Compile/link option for exporting symbols])
 AH_TEMPLATE([COB_PIC_FLAGS], [Compile/link option for PIC code])
@@ -522,7 +523,7 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 		   AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
 		],
 		[if test "$with_xml2" = "yes"; then 
-		   AC_MSG_ERROR([Headers for libxml2 are required for --with-xml, you may adjust XML2_CFLAGS])
+		   AC_MSG_ERROR([Headers for libxml2 are required for --with-xml2, you may adjust XML2_CFLAGS])
 		else
 		   with_xml2=no
 		fi])
@@ -535,7 +536,7 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 		   LIBCOB_LIBS="$LIBCOB_LIBS $XML2_LIBS"],
 		  [AC_MSG_RESULT([no])
 		   if test "$with_xml2" = "yes"; then
-		     AC_MSG_ERROR([[xml library is required for --with-xml, you may adjust XML2_LIBS]])
+		     AC_MSG_ERROR([[xml library is required for --with-xml2, you may adjust XML2_LIBS]])
 		   else
 		     AC_MSG_WARN([xml library not found, you may adjust XML2_LIBS])
 		     with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
@@ -543,6 +544,50 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 	else
 		AC_MSG_WARN([Headers for libxml2 missing, you may adjust XML2_CFLAGS])
 		 with_xml2=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+	fi
+])
+
+
+AC_ARG_WITH([cjson],
+  [AS_HELP_STRING([--with-cjson],
+    [(GnuCOBOL) Use cJSON as JSON handler (default)])],
+  [],
+  [with_cjson=check])
+
+AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "check"], [
+	PKG_CHECK_MODULES([CJSON], [libcjson], [], [])
+	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
+	if test -n "$CJSON_CFLAGS"; then
+	  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"
+	fi
+	if test -z "$CJSON_LIBS"; then
+	  CJSON_LIBS="-lcjson"
+	fi
+	LIBS="$LIBS $CJSON_LIBS"
+	AC_CHECK_HEADERS([cjson/cJSON.h],
+		[],
+		[if test "$with_cjson" = "yes"; then 
+		   AC_MSG_ERROR([Headers for libcjson are required for --with-cjson, you may adjust CJSON_CFLAGS])
+		else
+		   with_cjson=no
+		fi])
+	if test "$with_cjson" != "no"; then 
+		AC_MSG_CHECKING([if linking against libcjson with "$CJSON_LIBS" works])
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <cjson/cJSON.h>]],
+		  [[cJSON_CreateNull ();]])],
+		  [AC_DEFINE([WITH_CJSON], [1]) AC_MSG_RESULT([yes])
+		   with_cjson=yes
+		   LIBCOB_LIBS="$LIBCOB_LIBS $CJSON_LIBS"],
+		  [AC_MSG_RESULT([no])
+		   if test "$with_cjson" = "yes"; then
+		     AC_MSG_ERROR([[cJSON library is required for --with-cjson, you may adjust CJSON_LIBS]])
+		   else
+		     AC_MSG_WARN([xml library not found, you may adjust CJSON_LIBS])
+		     with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
+		   fi])
+	else
+		AC_MSG_WARN([Headers for libcjson missing, you may adjust CJSON_CFLAGS])
+		 with_cjson=no; LIBS="$curr_libs"; CPPFLAGS="$curr_cppflags"
 	fi
 ])
 
@@ -1457,6 +1502,12 @@ else
 	COB_HAS_XML2=no
 fi
 
+if test "$with_cjson" = "yes"; then
+	COB_HAS_CJSON=yes
+else
+	COB_HAS_CJSON=no
+fi
+
 unset COB_USES_GCC
 unset COB_USES_GCC_NO_ICC
 unset COB_USES_ICC_ONLY
@@ -1505,6 +1556,7 @@ AC_SUBST([COB_KEYWORD_INLINE])
 AC_SUBST([COB_HAS_ISAM])
 AC_SUBST([COB_HAS_CURSES])
 AC_SUBST([COB_HAS_XML2])
+AC_SUBST([COB_HAS_CJSON])
 AC_SUBST([COB_HAS_64_BIT_POINTER])
 AC_SUBST([COB_PATCH_LEVEL], [$with_patch_level]) # needed for bin/cob-config
 
@@ -1578,4 +1630,5 @@ else
   AC_MSG_NOTICE([ ISAM I/O (no handler configured):            NO])
 fi
 AC_MSG_NOTICE([ Use libxml2 for XML I/O                      ${COB_HAS_XML2}])
+AC_MSG_NOTICE([ Use cJSON for JSON I/O                       ${COB_HAS_CJSON}])  
 unset DEFINE_DL

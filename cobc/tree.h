@@ -1290,7 +1290,8 @@ enum cb_handler_type {
 	AT_END_HANDLER,
 	EOP_HANDLER,
 	INVALID_KEY_HANDLER,
-	XML_HANDLER
+	XML_HANDLER,
+	JSON_HANDLER
 };
 
 /* Statement */
@@ -1521,6 +1522,8 @@ struct cb_program {
 	cb_tree			xml_nnamespace_prefix;	/* XML-NNAMESPACE-PREFIX */
 	cb_tree			xml_ntext;		/* XML-NTEXT */
 	cb_tree			xml_text;		/* XML-TEXT */
+	cb_tree			json_code;		/* JSON-CODE */
+	cb_tree			json_status;		/* JSON-STATUS */
 	cb_tree			returning;		/* RETURNING */
 	struct cb_label		*all_procedure;		/* DEBUGGING */
 	struct cb_call_xref	call_xref;		/* CALL Xref list */
@@ -1877,6 +1880,7 @@ extern unsigned int	cobc_force_literal;
 extern unsigned int	cobc_cs_check;
 extern unsigned int	cobc_allow_program_name;
 extern unsigned int	cobc_in_xml_generate_body;
+extern unsigned int	cobc_in_json_generate_body;
 
 /* reserved.c */
 extern int			is_reserved_word (const char *);
@@ -2162,6 +2166,8 @@ extern void		cb_emit_xml_generate (cb_tree, cb_tree, cb_tree,
 					      cb_tree, const int, const int,
 					      cb_tree, cb_tree, cb_tree,
 					      cb_tree);
+extern void		cb_emit_json_generate (cb_tree, cb_tree, cb_tree,
+					       cb_tree, cb_tree);
 
 #ifdef	COB_TREE_DEBUG
 extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,

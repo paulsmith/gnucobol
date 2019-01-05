@@ -1353,6 +1353,37 @@ cb_build_register_xml_code (const char *name, const char *definition)
 	current_program->xml_code = tfield;
 }
 
+/* TO-DO: Duplication! */
+static void
+cb_build_register_json_code (const char *name, const char *definition)
+{
+	cb_tree tfield;
+	struct cb_field *field;
+
+	if (!definition) {
+		definition = cb_get_register_definition (name);
+		if (!definition) {
+			return;
+		}
+	}
+
+	/* take care of GLOBAL */
+	if (current_program->nested_level) {
+		return;
+	}
+
+	tfield = cb_build_field (cb_build_reference (name));
+	field = CB_FIELD (tfield);
+	field->usage = CB_USAGE_BINARY;
+	field->pic = CB_PICTURE (cb_build_picture ("S9(9)"));
+	cb_validate_field (field);
+	field->values = CB_LIST_INIT (cb_zero);
+	field->flag_no_init = 1;
+	field->flag_is_global = 1;
+	current_program->json_code = tfield;
+}
+
+
 /* build a concrete register */
 static void
 cb_build_single_register (const char *name, const char *definition)
@@ -1370,6 +1401,10 @@ cb_build_single_register (const char *name, const char *definition)
 	}
 
 	/* registers that need a special handling / internal registration */
+	if (!strcasecmp (name, "JSON-CODE")) {
+		cb_build_register_json_code (name, definition);
+		return;
+	}
 	if (!strcasecmp (name, "RETURN-CODE")) {
 		cb_build_register_return_code (name, definition);
 		return;
@@ -12154,4 +12189,27 @@ cb_emit_xml_generate (cb_tree out, cb_tree from, cb_tree count,
 					     count, cb_int (with_xml_dec),
 					     NULL, NULL));
 	}
+}
+
+void
+cb_emit_json_generate (cb_tree out, cb_tree from, cb_tree count,
+		       cb_tree name_list, cb_tree suppress_list)
+{
+	struct cb_ml_generate_tree	*tree;
+
+	if (syntax_check_ml_generate (out, from, count, NULL,
+				      NULL, name_list, NULL,
+				      suppress_list)) {
+		return;
+	}
+
+        tree = CB_ML_TREE (cb_build_ml_tree (CB_FIELD (cb_ref (from)),
+					     0, 0, name_list,
+					     NULL, suppress_list));
+
+	tree->sibling = current_program->ml_trees;
+	current_program->ml_trees = tree;
+	
+	cb_emit (cb_build_ml_suppress_checks (tree));
+	cb_emit (CB_BUILD_FUNCALL_3 ("cob_json_generate", out, CB_TREE (tree), count));
 }

@@ -7246,6 +7246,10 @@ output_ec_condition_for_handler (const enum cb_handler_type handler_type)
 		output_level_2_ex_condition (COB_EC_XML);
 		break;
 
+	case JSON_HANDLER:
+		output_level_2_ex_condition (COB_EC_JSON);
+		break;
+		
 	/* LCOV_EXCL_START */
 	default:
 		cobc_err_msg (_("unexpected handler type: %d"), (int) handler_type);
@@ -9822,6 +9826,9 @@ output_module_init (struct cb_program *prog)
 	output_module_register_init (prog->xml_ntext, "xml_ntext");
 	output_module_register_init (prog->xml_text, "xml_text");
 
+	output_module_register_init (prog->json_code, "json_code");
+	output_module_register_init (prog->json_status, "json_status");
+	
 	output_newline ();
 }
 

@@ -7171,6 +7171,12 @@ print_info (void)
 #else
 	var_print (_("XML library"), 		_("disabled"), "", 0);
 #endif
+
+#ifdef WITH_CJSON
+	var_print (_("JSON library"), 		"cJSON", "", 0);
+#else
+	var_print (_("JSON library"), 		_("disabled"), "", 0);
+#endif
 }
 
 

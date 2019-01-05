@@ -755,14 +755,14 @@ H#[0-9A-Za-z]+ {
 
 "SUPPRESS"/[ .,;\n] {
 	count_lines (yytext);
-	if (cobc_in_xml_generate_body) {
+	if (cobc_in_xml_generate_body || cobc_in_json_generate_body) {
 		/*
-		  Using the standard SUPPRESS token in XML GENERATE causes a
-		  shift/reduce error - the SUPPRESS could be the start of the
+		  Using the standard SUPPRESS token in JSON/XML GENERATE causes
+                  a shift/reduce error - the SUPPRESS could be the start of the
 		  SUPPRESS clause or the start of a SUPPRESS statement. While we
 		  could alter shift precedence to get the result we implement
-		  here (viz. assuming the SUPPRESS belongs to XML GENERATE), our
-		  current style is for bison to run with no errors.
+		  here (viz. assuming the SUPPRESS belongs to JSON/XML GENERATE),
+                  our current style is for bison to run with no errors.
 		*/
 		RETURN_TOK (SUPPRESS_XML);
 	} else {
@@ -2158,7 +2158,7 @@ freevar:
 
 /*
   For yytext of the form '#directive "a-word"' or '#directive
-  (first-word) (second-word)', copy a-word into word.
+  (a-word)', copy a-word into word.
 */
 static void
 copy_word_in_quotes (char ** const word)

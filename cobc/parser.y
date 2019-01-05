@@ -63,21 +63,22 @@ do { \
 #define TERM_DIVIDE		7U
 #define TERM_EVALUATE		8U
 #define TERM_IF			9U
-#define TERM_MODIFY		10U
-#define TERM_MULTIPLY		11U
-#define TERM_PERFORM		12U
-#define TERM_READ		13U
-#define TERM_RECEIVE		14U
-#define TERM_RETURN		15U
-#define TERM_REWRITE		16U
-#define TERM_SEARCH		17U
-#define TERM_START		18U
-#define TERM_STRING		19U
-#define TERM_SUBTRACT		20U
-#define TERM_UNSTRING		21U
-#define TERM_WRITE		22U
-#define TERM_XML		23U
-#define TERM_MAX		24U	/* Always last entry, used for array size */
+#define TERM_JSON		10U
+#define TERM_MODIFY		11U
+#define TERM_MULTIPLY		12U
+#define TERM_PERFORM		13U
+#define TERM_READ		14U
+#define TERM_RECEIVE		15U
+#define TERM_RETURN		16U
+#define TERM_REWRITE		17U
+#define TERM_SEARCH		18U
+#define TERM_START		19U
+#define TERM_STRING		20U
+#define TERM_SUBTRACT		21U
+#define TERM_UNSTRING		22U
+#define TERM_WRITE		23U
+#define TERM_XML		24U
+#define TERM_MAX		25U	/* Always last entry, used for array size */
 
 #define	TERMINATOR_WARNING(x,z)	terminator_warning (x, TERM_##z, #z)
 #define	TERMINATOR_ERROR(x,z)	terminator_error (x, TERM_##z, #z)
@@ -145,6 +146,7 @@ unsigned int			cobc_force_literal = 0;
 unsigned int			cobc_cs_check = 0;
 unsigned int			cobc_allow_program_name = 0;
 unsigned int			cobc_in_xml_generate_body = 0;
+unsigned int			cobc_in_json_generate_body = 0;
 
 /* Local variables */
 
@@ -921,6 +923,7 @@ clear_initial_values (void)
 	cobc_in_repository = 0;
 	cobc_force_literal = 0;
 	cobc_in_xml_generate_body = 0;
+	cobc_in_json_generate_body = 0;
 	non_const_word = 0;
 	suppress_data_exceptions = 0;
 	same_area = 1;
@@ -2206,6 +2209,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token END_EVALUATE		"END-EVALUATE"
 %token END_FUNCTION		"END FUNCTION"
 %token END_IF			"END-IF"
+%token END_JSON			"END-JSON"
 %token END_MODIFY		"END-MODIFY"
 %token END_MULTIPLY		"END-MULTIPLY"
 %token END_PERFORM		"END-PERFORM"
@@ -2365,6 +2369,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token ITEM_VALUE		"ITEM-VALUE"
 %token I_O			"I-O"
 %token I_O_CONTROL		"I-O-CONTROL"
+%token JSON
 %token JUSTIFIED
 %token KEPT
 %token KEY
@@ -2884,6 +2889,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %nonassoc INITIATE
 %nonassoc INQUIRE
 %nonassoc INSPECT
+%nonassoc JSON
 %nonassoc MERGE
 %nonassoc MODIFY
 %nonassoc MOVE
@@ -2935,6 +2941,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %nonassoc END_EVALUATE
 %nonassoc END_FUNCTION
 %nonassoc END_IF
+%nonassoc END_JSON
 %nonassoc END_MODIFY
 %nonassoc END_MULTIPLY
 %nonassoc END_PERFORM
@@ -9514,6 +9521,8 @@ statement:
 | inquire_statement
 | inspect_statement
 /* | TODO: invoke_statement */
+| json_generate_statement
+| json_parse_statement
 | merge_statement
 | modify_statement
 | move_statement
@@ -12526,6 +12535,98 @@ inspect_after:
   }
 ;
 
+/* JSON GENERATE statement */
+
+json_generate_statement:
+  JSON GENERATE
+  {
+	begin_statement ("JSON GENERATE", TERM_JSON);
+	cb_verify (cb_json_generate, _("JSON GENERATE"));
+	cobc_in_json_generate_body = 1;
+	cobc_cs_check = CB_CS_JSON_GENERATE;
+  }
+  json_generate_body
+  _end_json
+;
+
+json_generate_body:
+  identifier FROM identifier
+  _count_in
+  {
+	ml_suppress_list = NULL;
+  }
+  _name_of
+  _json_suppress
+  {
+	cobc_in_json_generate_body = 0;
+	cobc_cs_check = 0;
+  }
+  _json_exception_phrases
+  {
+	cb_emit_json_generate ($1, $3, $4, $6, ml_suppress_list);
+  }
+;
+
+_json_suppress:
+  /* empty */
+  {
+	$$ = NULL;
+  }
+| SUPPRESS_XML json_suppress_list
+  {
+	$$ = $2;
+  }
+;
+
+json_suppress_list:
+  json_suppress_entry
+| json_suppress_list json_suppress_entry
+;
+
+json_suppress_entry:
+  identifier
+  {
+	error_if_following_every_clause ();
+	add_identifier_to_ml_suppress_conds ($1);
+  }
+;
+
+_end_json:
+  /* empty */	%prec SHIFT_PREFER
+  {
+	TERMINATOR_WARNING ($-2, JSON);
+  }
+| END_JSON
+  {
+	TERMINATOR_CLEAR ($-2, JSON);
+  }
+;
+
+/* JSON PARSE statement */
+
+json_parse_statement:
+  JSON PARSE
+  {
+	begin_statement ("JSON PARSE", TERM_JSON);
+	CB_PENDING (_("JSON PARSE"));
+  }
+  json_parse_body
+  _end_json
+;
+
+json_parse_body:
+  identifier INTO identifier
+  _with_detail
+  _name_of
+  _json_suppress
+  _json_exception_phrases
+;
+
+_with_detail:
+  /* empty */
+| _with DETAIL
+;
+
 /* MERGE statement */
 
 merge_statement:
@@ -14805,16 +14906,16 @@ ml_type:
 
 _xml_gen_suppress:
   /* empty */
-| SUPPRESS_XML xml_suppress_list
+| SUPPRESS_XML ml_suppress_list
   {
 	cb_verify (cb_xml_generate_extra_phrases,
 		   _("XML GENERATE SUPPRESS clause"));
   }
 ;
 
-xml_suppress_list:
+ml_suppress_list:
   xml_suppress_entry
-| xml_suppress_list xml_suppress_entry
+| ml_suppress_list xml_suppress_entry
 ;
 
 xml_suppress_entry:
@@ -15072,6 +15173,50 @@ xml_not_on_exception:
   NOT_EXCEPTION statement_list
   {
 	current_statement->handler_type = XML_HANDLER;
+	current_statement->not_ex_handler = $2;
+  }
+;
+
+_json_exception_phrases:
+  %prec SHIFT_PREFER
+| json_on_exception _json_not_on_exception
+| json_not_on_exception _json_on_exception
+  {
+	if ($2) {
+		cb_verify (cb_not_exception_before_exception,
+			   _("NOT EXCEPTION before EXCEPTION"));
+	}
+  }
+;
+
+_json_on_exception:
+  %prec SHIFT_PREFER
+  {
+	$$ = NULL;
+  }
+| json_on_exception
+  {
+	$$ = cb_int1;
+  }
+;
+
+json_on_exception:
+  EXCEPTION statement_list
+  {
+	current_statement->handler_type = JSON_HANDLER;
+	current_statement->ex_handler = $2;
+  }
+;
+
+_json_not_on_exception:
+  %prec SHIFT_PREFER
+| json_not_on_exception
+;
+
+json_not_on_exception:
+  NOT_EXCEPTION statement_list
+  {
+	current_statement->handler_type = JSON_HANDLER;
 	current_statement->not_ex_handler = $2;
   }
 ;

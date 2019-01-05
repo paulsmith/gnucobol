@@ -1,4 +1,8 @@
 
+2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added json-generate option.
+
 2018-04-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* default.conf: set missing-statement (FR# 244) to warning as older

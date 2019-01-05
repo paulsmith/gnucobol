@@ -1005,6 +1005,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "END-IF",			0, 0, END_IF,			/* 2002 */
 				0, 0
   },
+  { "END-JSON",			0, 0, END_JSON,			/* IBM extension */
+   				0, 0
+  },
   { "END-MODIFY",		0, 1, END_MODIFY,		/* ACU extension */
 				0, CB_CS_INQUIRE_MODIFY
   },
@@ -1521,6 +1524,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ITEM-VALUE",			0, 1, ITEM_VALUE,			/* ACU extension */
 				0, CB_CS_GRAPHICAL_CONTROL | CB_CS_INQUIRE_MODIFY
   },
+  { "JSON",			1, 0, JSON,			/* IBM extension */
+				0, 0
+  },
   { "JUST",			0, 0, JUSTIFIED,		/* 2002 */
 				0, 0
   },
@@ -1743,7 +1749,7 @@ static struct cobc_reserved default_reserved_words[] = {
 				0, 0
   },
   { "NAME",			0, 1, NAME,			/* Extension */
-				0, CB_CS_FROM | CB_CS_XML_GENERATE
+				0, CB_CS_FROM | CB_CS_XML_GENERATE | CB_CS_JSON_GENERATE
   },
   { "NAMESPACE",		0, 1, NAMESPACE,		/* IBM extension */
 				0, CB_CS_XML_GENERATE
@@ -2978,7 +2984,7 @@ static struct register_struct	register_list[] = {
 	{"COL", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, normally conflicting --> must be explicit enabled */
 	{"LIN", "PIC S9(4) USAGE COMP", CB_FEATURE_MUST_BE_ENABLED},	/* rare, only in combination with COL */
 	{"WHEN-COMPILED", "CONSTANT PICTURE X(16) USAGE DISPLAY", CB_FEATURE_ACTIVE},
-	{"XML-CODE", "GLOBAL PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE}
+	{"XML-CODE", "GLOBAL PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE},
 	/* {"XML-EVENT", "USAGE DISPLAY PICTURE X(30) VALUE SPACE", CB_FEATURE_ACTIVE}, */
 	/* {"XML-INFORMATION", "PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE}, */
 	/* {"XML-NAMESPACE", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
@@ -2987,6 +2993,8 @@ static struct register_struct	register_list[] = {
 	/* {"XML-NNAMESPACE-PREFIX", "PIC N ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
 	/* {"XML-NTEXT", "PIC N ANY LENGTH", CB_FEATURE_ACTIVE}, /\* FIXME: currently not handled the "normal" register way *\/ */
 	/* {"XML-TEXT", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE} /\* FIXME: currently not handled the "normal" register way *\/ */
+	{"JSON-CODE", "GLOBAL PICTURE S9(9) USAGE BINARY VALUE 0", CB_FEATURE_ACTIVE}
+	/* {"JSON-STATUS", "PIC X ANY LENGTH", CB_FEATURE_ACTIVE} /\* FIXME: currently not handled the "normal" register way *\/ */
 };
 
 #define	NUM_REGISTERS	sizeof(register_list) / sizeof(struct register_struct)
@@ -4125,7 +4133,7 @@ get_reserved_words_with_amendments (void)
 	*/
 	for (i = 0; i < amendment_map_arr_size; ++i) {
 		reduce_amendment_list (&amendment_map[i]);
-		
+
 		if (!amendment_map[i]) {
 			continue;
 		}
@@ -4146,9 +4154,9 @@ get_reserved_words_with_amendments (void)
 		}
 		add_reserved_word_to_map (reserved, 0);
 
-
 		free_amendment (amendment_map[i]);
-	        delete_amendment_with_key (i);
+		amendment_map[i] = NULL;
+	        /* delete_amendment_with_key (i); */
 	}
 }
 
@@ -4301,7 +4309,7 @@ append_amendment_at_word (struct amendment_list amendment)
 {
 	int	key;
 	struct amendment_list	*l;
-	
+
 	if (add_amendment_to_map (amendment, 0)) {
 		/*
 		  If there is already an amendment for this word, append the

@@ -248,6 +248,9 @@ AT_DATA([prog.cob], [
                     DISPLAY "Failed 5: EXCEPTION "
                         FUNCTION TRIM (normal-str)
                         " " XML-CODE
+                    END-DISPLAY
+                    *> The END-DISPLAY is important! Otherwise the DISPLAY will
+                    *> take the NOT ON EXCEPTION.
 
                 NOT ON EXCEPTION
                     IF XML-CODE <> 0
@@ -262,6 +265,7 @@ AT_DATA([prog.cob], [
                     DISPLAY "Failed 6: NOT EXCEPTION "
                         FUNCTION TRIM (normal-str)
                         " " XML-CODE
+                    END-DISPLAY
 
                 EXCEPTION
                     IF XML-CODE <> 400
@@ -410,6 +414,301 @@ AT_DATA([prog.cob], [
 
            XML GENERATE out FROM decimal-with-p
            IF out <> '<decimal-with-p>0.0004</decimal-with-p>'
+               DISPLAY "Failed 12: " FUNCTION TRIM (out)
+           END-IF
+           .
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([JSON GENERATE general])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF([test "$COB_HAS_CJSON" = "no"])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION       DIVISION.
+       PROGRAM-ID.          prog.
+
+       DATA                 DIVISION.
+       WORKING-STORAGE      SECTION.
+       01  out              PIC X(200).
+       01  rec.
+           03  a            PIC X(3) VALUE 'A'.
+           03  b            PIC X(3) VALUE ALL 'B'.
+           03  c.
+               05  d        PIC X(3) VALUE SPACES.
+
+       PROCEDURE            DIVISION.
+           JSON GENERATE out
+               FROM rec
+               NAME OF a IS 'alpha', d IS 'ABCDEF'
+               SUPPRESS c
+           IF out <> '{"rec":{"alpha":"A","b":"BBB"}}'
+               DISPLAY 'Test 1 failed: ' FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM d
+           IF out <> '{"d":" "}'
+               DISPLAY 'Test 2 failed: ' FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM c
+           IF out <> '{"c":{"d":" "}}'
+               DISPLAY 'Test 3 failed: ' FUNCTION TRIM (out)
+           END-IF
+
+           MOVE ALL QUOTES TO d
+           JSON GENERATE out FROM d
+           IF out <> '{"d":"\"\"\""}'
+               DISPLAY 'Test 4 failed: ' FUNCTION TRIM (out)
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([JSON GENERATE SUPPRESS])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF([test "$COB_HAS_CJSON" = "no"])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION       DIVISION.
+       PROGRAM-ID.          prog.
+
+       DATA                 DIVISION.
+       WORKING-STORAGE      SECTION.
+       01  a.
+           03  b            PIC X(3) VALUE SPACES.
+           03  c            PIC X(3) VALUE SPACES.
+
+       01  x.
+           03  y.
+               05  z        PIC X VALUE SPACE.
+
+       01  out              PIC X(100).
+
+       PROCEDURE            DIVISION.
+           JSON GENERATE out FROM a SUPPRESS b
+           IF out <> '{"a":{"c":" "}}'
+               DISPLAY 'Test 1 failed: ' out
+           END-IF
+
+           JSON GENERATE out FROM x SUPPRESS z
+           IF out <> '{"x":{}}'
+               DISPLAY 'Test 2 failed: ' out
+           END-IF
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([JSON GENERATE exceptions])
+AT_KEYWORDS([extensions JSON-CODE])
+
+AT_SKIP_IF([test "$COB_HAS_CJSON" = "no"])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  normal-str PIC X(200).
+
+       01  valid-rec.
+           03  a PIC XX VALUE "aa".
+           03  b PIC XX VALUE "bb".
+       01  short-str PIC X(5).
+       01  json-len   PIC 99.
+
+       PROCEDURE DIVISION.
+           JSON GENERATE short-str FROM valid-rec
+               COUNT IN json-len
+           IF short-str <> '{"val'
+                   OR json-len <> 33
+                   OR JSON-CODE <> 1
+               DISPLAY "Failed 1: " short-str " " json-len " " JSON-CODE
+           END-IF
+
+           JSON GENERATE normal-str FROM valid-rec
+                ON EXCEPTION
+                    DISPLAY "Failed 2: EXCEPTION "
+                        FUNCTION TRIM (normal-str)
+                        " " JSON-CODE
+                    END-DISPLAY
+
+                NOT ON EXCEPTION
+                    IF JSON-CODE <> 0
+                        DISPLAY "Failed 2: NOT EXCEPTION "
+                            FUNCTION TRIM (normal-str)
+                            " " JSON-CODE
+                    END-IF
+           END-JSON
+
+           JSON GENERATE short-str FROM valid-rec
+                NOT EXCEPTION
+                    DISPLAY "Failed 3: NOT EXCEPTION "
+                        FUNCTION TRIM (normal-str)
+                        " " JSON-CODE
+                    END-DISPLAY
+
+                EXCEPTION
+                    IF JSON-CODE <> 1
+                        DISPLAY "Failed 3: ON EXCEPTION "
+                            FUNCTION TRIM (normal-str)
+                            " " JSON-CODE
+                    END-IF
+           END-JSON
+           .
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([JSON GENERATE record selection])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF([test "$COB_HAS_CJSON" = "no"])
+
+# TO-DO: Add support for generating OCCURS items.
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  a.
+           03  b.
+               05 c1 PIC X(3) VALUE "abc".
+               05 c2 PIC 9(3) VALUE 0.
+           03  d REDEFINES b.
+               05  e PIC X(6).
+           03  f PIC X OCCURS 3 VALUE "f".
+
+       66  h RENAMES c1 THRU c2.
+
+       01  out PIC X(60).
+
+       PROCEDURE DIVISION.
+           *> JSON GENERATE out FROM a
+           *> IF out <> '<a><b><c1>abc</c1><c2>0</c2></b><f>f</f><f>f</f>'-
+           *>          '<f>f</f></a>'
+           *>    DISPLAY "Failed 1: " FUNCTION TRIM (out)
+           *> END-IF
+
+           JSON GENERATE out FROM d
+           IF out <> '{"d":{"e":"abc000"}}'
+               DISPLAY "Failed 2: " FUNCTION TRIM (out)
+           END-IF
+           .
+       END PROGRAM prog.
+])
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COBCRUN_DIRECT ./prog], [0], [], [])
+AT_CLEANUP
+
+
+AT_SETUP([JSON GENERATE trimming])
+AT_KEYWORDS([extensions])
+
+AT_SKIP_IF([test "$COB_HAS_CJSON" = "no"])
+
+# TO-DO: Add support for IBM/COBOL 2002 edited floating point (e.g. PIC 9(3)E+99).
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  str                     PIC X(3) VALUE "ab".
+       01  num-edited              PIC 99.99 VALUE "01.00".
+       01  leading-zeroes          PIC 9(5) VALUE 5.
+       01  decimal-num             PIC 99V999 PACKED-DECIMAL VALUE 0.12.
+       01  signed-decimal-num      PIC S999 COMP-X VALUE -1.
+       01  comp-5-item             PIC 9(10) COMP-5 VALUE 5.
+       01  index-item              INDEX.
+       01  float-short-item        FLOAT-SHORT VALUE 100.
+       01  float-long-item         FLOAT-LONG VALUE 123.0E-10.
+       01  just-item               PIC X(10) JUST.
+       01  integer-with-p          PIC 999PPP VALUE 10000.
+       01  decimal-with-p          PIC VPP99 VALUE 0.0004.
+
+       01  out                     PIC X(300).
+
+       PROCEDURE DIVISION.
+           JSON GENERATE out FROM str
+           IF out <> '{"str":"ab"}'
+               DISPLAY "Failed 1: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM num-edited
+           IF out <> '{"num-edited":"01.00"}'
+               DISPLAY "Failed 2: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM leading-zeroes
+           IF out <> '{"leading-zeroes":5}'
+               DISPLAY "Failed 3: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM decimal-num
+           IF out <> '{"decimal-num":0.120}'
+               DISPLAY "Failed 4: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM signed-decimal-num
+           IF out <> '{"signed-decimal-num":-1}'
+               DISPLAY "Failed 5: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM comp-5-item
+           IF out <> '{"comp-5-item":5}'
+               DISPLAY "Failed 6: " FUNCTION TRIM (out)
+           END-IF
+
+           SET index-item TO 500
+           JSON GENERATE out FROM index-item
+           IF out <> '{"index-item":500}'
+               DISPLAY "Failed 7: " FUNCTION TRIM (out)
+           END-IF
+
+           *> JSON GENERATE out FROM float-short-item
+           *> IF out <> '{"float-short-item":1E+02}'
+           *>     DISPLAY "Failed 8: " FUNCTION TRIM (out)
+           *> END-IF
+
+           *> JSON GENERATE out FROM float-long-item
+           *> IF out <> '{"float-long-item":123E-10}'
+           *>     DISPLAY "Failed 9: " FUNCTION TRIM (out)
+           *> END-IF
+
+           MOVE "blah " TO just-item
+           JSON GENERATE out FROM just-item
+           IF out <> '{"just-item":"blah "}'
+               DISPLAY "Failed 10: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM integer-with-p
+           IF out <> '{"integer-with-p":10000}'
+               DISPLAY "Failed 11: " FUNCTION TRIM (out)
+           END-IF
+
+           JSON GENERATE out FROM decimal-with-p
+           IF out <> '{"decimal-with-p":0.0004}'
                DISPLAY "Failed 12: " FUNCTION TRIM (out)
            END-IF
            .

@@ -38,6 +38,10 @@
 #include <libxml/uri.h>
 #endif
 
+#if WITH_CJSON
+#include <cjson/cJSON.h>
+#endif
+
 /* Local variables */
 
 /* de facto standard error codes */
@@ -48,6 +52,12 @@ enum xml_code_status {
 	XML_INVALID_NAMESPACE_PREFIX = 419,
 	XML_INTERNAL_ERROR = 600
 };
+
+enum json_code_status {
+	JSON_OUT_FIELD_TOO_SMALL = 1,
+	JSON_INTERNAL_ERROR = 500
+};
+
 
 static cob_global		*cobglobptr;
 
@@ -526,6 +536,115 @@ set_xml_exception (const unsigned int code)
 
 #endif
 
+#if WITH_CJSON
+
+static void
+set_json_code (const unsigned int code)
+{
+	cob_decimal	d;
+
+	/* if the COBOL module never checks the code it isn't generated,
+	   this also makes clear that we don't need to (and can't) set it */
+	if (!COB_MODULE_PTR->json_code) {
+		return;
+	}
+
+	/* TO-DO: Duplication! */
+	mpz_init2 (d.value, COB_MPZ_DEF);
+	mpz_set_ui (d.value, code);
+	d.scale = 0;
+	cob_decimal_get_field (&d, COB_MODULE_PTR->json_code, 0);
+	mpz_clear (d.value);
+}
+
+static void
+set_json_exception (const unsigned int code)
+{
+	cob_set_exception (COB_EC_JSON_IMP);
+	set_json_code (code);
+}
+
+static void *
+json_strndup (const char *str, const int size)
+{
+	char	*dup = cob_malloc (size + 1);
+	memcpy (dup, str, size);
+	return dup;
+}
+
+static char *
+get_trimmed_json_data (const cob_field * const f)
+{
+	return (char *) get_trimmed_data (f, &json_strndup);
+}
+
+static char *
+get_json_num (cob_field * const f)
+{
+	return (char *) get_num (f, &json_strndup);
+}
+
+static int
+generate_json_from_tree (cob_ml_tree *tree, cJSON *out)
+{
+	cob_ml_tree	*child;
+	cJSON		*children_json = NULL;
+	char		*name = NULL;
+	char		*content = NULL;
+	int		status = 0;
+
+	if (tree->is_suppressed) {
+		return 0;
+	}
+
+	name = get_trimmed_json_data (tree->name);
+	if (tree->children) {
+		children_json = cJSON_CreateObject ();
+		for (child = tree->children; child; child = child->sibling) {
+			status = generate_json_from_tree (child, children_json);
+			if (status < 0) {
+				cJSON_Delete (children_json);
+				goto end;
+			}
+		}
+		cJSON_AddItemToObject (out, name, children_json);
+	} else if (tree->content) {
+		if (COB_FIELD_IS_FP (tree->content)) {
+			/* TO-DO: Implement! */
+			/* TO-DO: Stop compilation if float in field */
+			cob_fatal_error (COB_FERROR_XML);
+		} else if (COB_FIELD_IS_NUMERIC (tree->content)) {
+			content = get_json_num (tree->content);
+			/*
+			  We use AddRaw instead of AddNumber because a PIC 9(32)
+			  may not be representable using the double AddNumber
+			  uses internally.
+			*/
+			if (!cJSON_AddRawToObject (out, name, content)) {
+				status = -1;
+				goto end;
+			}
+		} else {
+			content = (char *) get_trimmed_json_data (tree->content);
+			if (!cJSON_AddStringToObject (out, name, content)) {
+				status = -1;
+				goto end;
+			}
+		}
+	}
+
+ end:
+	if (content) {
+		cob_free (content);
+	}
+	if (name) {
+		cob_free (name);
+	}
+	return status;
+}
+
+#endif
+
 /* Global functions */
 
 int
@@ -719,6 +838,78 @@ cob_xml_generate (cob_field *out, cob_ml_tree *tree, cob_field *count,
 	COB_UNUSED (with_xml_dec);
 	COB_UNUSED (ns);
 	COB_UNUSED (ns_prefix);
+}
+
+#endif
+
+#if WITH_CJSON
+
+void
+cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
+{
+	xmlCleanupParser ();
+	cJSON	*json;
+	int	status = 0;
+	char	*printed_json;
+	unsigned int	print_len;
+	unsigned int	copy_len;
+	int	num_newlines = 0;
+
+	set_json_code (0);
+
+	json = cJSON_CreateObject ();
+	if (!json) {
+		set_json_exception (JSON_INTERNAL_ERROR);
+		goto end;
+	}
+
+	status = generate_json_from_tree (tree, json);
+	if (status < 0) {
+		set_json_exception (JSON_INTERNAL_ERROR);
+		goto end;
+	}
+
+	/* TO-DO: Set cJSON to use cob_free in InitHook? */
+	printed_json = cJSON_PrintUnformatted (json);
+	if (!printed_json) {
+		set_json_exception (JSON_INTERNAL_ERROR);
+		goto end;
+	}
+
+	/* TO-DO: Duplication! */
+	print_len = strlen (printed_json);
+	copy_len = cob_min_int (print_len, (int) out->size);
+	memcpy (out->data, printed_json, copy_len);
+	memset (out->data + copy_len, ' ', out->size - copy_len);
+	/* Remove trailing newlines */
+	for (; copy_len > 0 && out->data[copy_len - 1] == '\n'; --copy_len) {
+		out->data[copy_len - 1] = ' ';
+		--print_len;
+		++num_newlines;
+	}
+	/* Raise exception if output field is too small */
+	if (print_len - num_newlines > copy_len) {
+		set_json_exception (JSON_OUT_FIELD_TOO_SMALL);
+		goto end;
+	}
+
+ end:
+	if (json) {
+		cJSON_Delete (json);
+	}
+	if (count) {
+		cob_add_int (count, print_len, 0);
+	}
+}
+
+#else /* !WITH_CJSON */
+
+void
+cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
+{
+	COB_UNUSED (out);
+	COB_UNUSED (tree);
+	COB_UNUSED (count);
 }
 
 #endif

@@ -1,4 +1,8 @@
 
+2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* configure.ac: added detection of cJSON.
+
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* configure.ac: only check for finite function if isfinite is not found
