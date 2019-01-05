@@ -1,5 +1,5 @@
 
-2019-01-04  Edwrd Hart <edward.dan.hart@gmail.com>
+2019-01-05  Edwrd Hart <edward.dan.hart@gmail.com>
 
 	* mlio.c: added JSON GENERATE.
 	* common.h, common.c: replaced COB_FERROR_* #define's with

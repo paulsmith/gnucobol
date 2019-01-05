@@ -1,4 +1,9 @@
 
+2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
+
+	* general: added JSON GENERATE statement.
+	* parser.y: added detection of JSON PARSE statement.
+
 2019-01-04  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_abort): increase error counter
@@ -10,11 +15,6 @@
 	  and respect cb_msg_style
 	* field.c (create_implicit_picture): fixed to not raise an abort for
 	  FROM figurative-constant without PICTURE
-
-2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
-
-	* general: added JSON GENERATE statement.
-	* parser.y: added detection of JSON PARSE statement.
 
 2019-01-04  Edward Hart <edward.dan.hart@gmail.com>
 
