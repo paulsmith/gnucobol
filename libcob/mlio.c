@@ -849,7 +849,6 @@ cob_xml_generate (cob_field *out, cob_ml_tree *tree, cob_field *count,
 void
 cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
 {
-	xmlCleanupParser ();
 	cJSON	*json;
 	int	status = 0;
 	char	*printed_json;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2005-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2005-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Roger While, Simon Sobisch, Edward Hart, Brian Tiffin
 
    This file is part of GnuCOBOL.
@@ -3012,7 +3012,7 @@ format_current_date (const struct date_format date_fmt,
 			 fractional_second, offset_time, formatted_datetime);
 }
 
-static COB_A_NORETURN void
+static DECLNORET COB_A_NORETURN void
 error_not_implemented (void)
 {
 	cob_set_exception (COB_EC_IMP_FEATURE_MISSING);

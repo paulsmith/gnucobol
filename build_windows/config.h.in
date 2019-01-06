@@ -2,31 +2,37 @@
 /* config.h, tested with x86/x64 VS2005-2017
    and OrangeC 6.0.37.1 (which ignores the lib comments) */
 
-#define NOISAM 0
-#define BDB    1
-#define VBISAM 2
-#define CISAM  3
-#define DISAM  4
+#define NOISAM   0
+#define BDB      1
+#define VBISAM   2
+#define CISAM    3
+#define DISAM    4
 
 #define NOCURSES 0
 #define PDCURSES 1
 
-#define NOXML  0
-#define XML2   1
+#define NOXML    0
+#define XML2     1
 
-#define MATHLIB_MPIR  1
-#define MATHLIB_GMP   2
+#define NOJSON   0
+#define CJSON    1
+
+#define MATHLIB_MPIR 1
+#define MATHLIB_GMP  2
 
 /* Use the following global define to adjust your configuration, if needed
+   * adjust WITH_VARSEQ,  if you exactly know what the results will be
    * switch from VBISAM to another ISAM configuration
    * switch from PDCURSES  to "no curses"
-   * switch from "no xml" to XML2" (needs additional libraries, see below)
+   * switch from "no xml" to XML2"   (needs additional libraries, see below)
+   * switch from "no json" to CJSON" (needs additional libraries, see below)
    * switch from MPIR (gmp-compat)  to GMP
 */
 
 #define CONFIGURED_ISAM   VBISAM        /* see possible values above */
 #define CONFIGURED_CURSES PDCURSES      /* see possible values above */
 #define CONFIGURED_XML    NOXML         /* see possible values above */
+#define CONFIGURED_JSON   NOJSON        /* see possible values above */
 #define USED_MATHLIB      MATHLIB_MPIR  /* see possible values above */
 
 /* define if you want to use the fall-back to GetUserName
@@ -73,6 +79,10 @@
 #pragma comment(lib, "libcharset.dll.a")
 #pragma comment(lib, "libiconv.dll.a")
 #pragma comment(lib, "libz.dll.a")
+#endif
+
+#if CONFIGURED_JSON == CJSON
+#pragma comment(lib, "cjson.lib")
 #endif
 
 #endif /* WITHIN_LIBCOB */
@@ -162,6 +172,14 @@
 /* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
    the CoreFoundation framework. */
 /* #undef HAVE_CFPREFERENCESCOPYAPPVALUE */
+
+/* Define to 1 if you have the <cjson/cJSON.h> header file. */
+
+#if CONFIGURED_JSON == CJSON
+#define HAVE_CJSON_CJSON_H
+#else
+/* #undef HAVE_CJSON_CJSON_H */
+#endif
 
 /* Has clock_gettime function and CLOCK_REALTIME */
 /* #undef HAVE_CLOCK_GETTIME */
@@ -295,7 +313,7 @@
 /* Define to 1 if you have the `rt' library (-lrt). */
 /* #undef HAVE_LIBRT */
 
-/* Define to 1 if you have the <libxml/uri.h,> header file. */
+/* Define to 1 if you have the <libxml/uri.h> header file. */
 #if CONFIGURED_XML == XML2
 #define HAVE_LIBXML_URI_H 1
 #else
@@ -540,6 +558,13 @@
 /* #undef WITH_CISAM */
 #endif
 
+/* Use cJSON as JSON handler */
+#if CONFIGURED_JSON == CJSON
+#define WITH_CJSON 1
+#else
+/* #undef WITH_CJSON */
+#endif
+
 /* curses library for extended SCREEN I/O */
 #if CONFIGURED_CURSES == PDCURSES
 #define WITH_CURSES "pdcurses"
@@ -637,6 +662,9 @@
 #undef NOXML
 #undef XML2
 #undef CONFIGURED_XML
+#undef NOJSON
+#undef CJSON
+#undef CONFIGURED_JSON
 #undef MATHLIB_MPIR
 #undef MATHLIB_GMP
 #undef USED_MATHLIB
