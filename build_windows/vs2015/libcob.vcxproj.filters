@@ -48,7 +48,7 @@
     <ClCompile Include="..\..\libcob\termio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libcob\xml.c">
+    <ClCompile Include="..\..\libcob\mlio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
