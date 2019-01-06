@@ -78,7 +78,7 @@ AH_TEMPLATE([WITH_CISAM], [Use CISAM as ISAM handler])
 AH_TEMPLATE([WITH_DISAM], [Use DISAM as ISAM handler])
 AH_TEMPLATE([WITH_VBISAM], [Use VBISAM as ISAM handler])
 AH_TEMPLATE([WITH_XML2], [Use libxml2 as XML handler])
-AH_TEMPLATE([WITH_CJSON], [USe cJSON as JSON handler])
+AH_TEMPLATE([WITH_CJSON], [Use cJSON as JSON handler])
 
 AH_TEMPLATE([COB_EXPORT_DYN], [Compile/link option for exporting symbols])
 AH_TEMPLATE([COB_PIC_FLAGS], [Compile/link option for PIC code])
@@ -555,7 +555,7 @@ AC_ARG_WITH([cjson],
   [with_cjson=check])
 
 AS_IF([test "$with_cjson" = "yes" -o "$with_cjson" = "check"], [
-	PKG_CHECK_MODULES([CJSON], [libcjson], [], [])
+	PKG_CHECK_MODULES([CJSON], [libcjson], [], [#])
 	curr_libs="$LIBS"; curr_cppflags="$CPPFLAGS"
 	if test -n "$CJSON_CFLAGS"; then
 	  CPPFLAGS="$CPPFLAGS $CJSON_CFLAGS"

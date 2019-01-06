@@ -104,8 +104,14 @@ NEWS - user visible changes				-*- outline -*-
 ** To adjust configure to use libxml2 you may use the new variables XML2_CFLAGS
    and XML2_LIBS. If unset configure will use pkg-config / xml2-config.
 
+** To adjust configure to use libcjson you may use the new variables CJSON_CFLAGS
+   and CJSON_LIBS. If unset configure will use pkg-config.
+
 ** new configure options --with-xml2 / -without-xml2 to explicit force/disable
    XML runtime support, otherwise it will be included if found as working
+
+** new configure options --with-cjson / -without-cjson to explicit force/disable
+   JSON runtime support, otherwise it will be included if found as working
 
 ** new configure option --enable-debug-log to allow *internal* tracing
    of GnuCOBOL (intended for developers of GnuCOBOL only)

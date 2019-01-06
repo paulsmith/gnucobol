@@ -1,4 +1,10 @@
 
+2019-01-06  Simon Sobisch <simonsobisch@gnu.org>
+
+	* configure.ac: added action "comment" for PKG_CHECK_MODULES
+	  cJSON for action-not-found as the empty (default) action is
+	  to abort configure
+
 2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* configure.ac: added detection of cJSON.
