@@ -2260,6 +2260,8 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token EXTERNAL_FORM		"EXTERNAL-FORM"
 %token F
 %token FD
+%token FH__FCD		"FH--FCD"
+%token FH__KEYDEF		"FH--KEYDEF"
 %token FILE_CONTROL		"FILE-CONTROL"
 %token FILE_ID			"FILE-ID"
 %token FILE_NAME		"FILE-NAME"
@@ -16103,6 +16105,14 @@ x_common:
 | ADDRESS _of identifier_1
   {
 	$$ = cb_build_address ($3);
+  }
+| ADDRESS _of FH__FCD _of file_name
+  {
+	CB_PENDING ("EXTFH address");
+  }
+| ADDRESS _of FH__KEYDEF _of file_name
+  {
+	CB_PENDING ("EXTFH address");
   }
 | MNEMONIC_NAME
   {

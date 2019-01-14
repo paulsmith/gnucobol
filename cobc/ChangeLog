@@ -39,6 +39,8 @@
 	* reserved.c: fixed redefinition warning
 	* scanner.l (#LINE): removed unneeded temporary string duplication
 	* scanner.l (scan_x): minor refactoring and fixing compiler warning
+	* parser.y, reserved.c: added parsing for ADDRESS OF FH--FCD /
+	  FH--KEYDEF OF file-name (context-sensitive to SET)
 
 2018-12-29  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -6442,7 +6444,7 @@
 	* cobc.h (cobc_verbose_flag): Declared.
 
 
-Copyright 2002-2018 Free Software Foundation, Inc.
+Copyright 2002-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

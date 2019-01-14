@@ -1170,6 +1170,12 @@ static struct cobc_reserved default_reserved_words[] = {
   { "FD",			0, 0, FD,			/* 2002 */
 				0, 0
   },
+  { "FH--FCD",			0, 1, FH__FCD,			/* MF extension */
+				0, CB_CS_SET
+  },
+  { "FH--KEYDEF",			0, 1, FH__KEYDEF,			/* MF extension */
+				0, CB_CS_SET
+  },
   { "FILE",			0, 0, TOK_FILE,			/* 2002 */
 				0, 0
   },
