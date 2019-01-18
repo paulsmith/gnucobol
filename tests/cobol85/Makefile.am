@@ -42,6 +42,7 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 #CLEANFILES = EXEC85$(EXEEXT) summary.log
 
 COB85DIR = "`cd $(srcdir) && pwd`"
+WGETFLAGS = "-t1 -T5"
 
 # MAKEFLAGS = --no-print-directory
 
@@ -117,11 +118,11 @@ endif
 
 newcob.val.Z:
 	@echo "Trying to download newcob.val.Z..."
-	@wget -t1 "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"
+	@wget $(WGETFLAGS) "https://www.itl.nist.gov/div897/ctg/suites/newcob.val.Z"
 
 newcob.val.tar.gz:
 	@echo "Trying to download newcob.val.tar.gz..."
-	@wget -t1 -O $@ "https://sourceforge.net/projects/open-cobol/files/nist/newcob.val.tar.gz/download"
+	@wget $(WGETFLAGS) -O $@ "https://sourceforge.net/projects/open-cobol/files/nist/newcob.val.tar.gz/download"
 
 unpack-Z: newcob.val.Z
 	@echo "Unpacking $@..."

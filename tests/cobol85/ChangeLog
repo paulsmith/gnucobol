@@ -1,4 +1,9 @@
 
+2019-01-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: fix for Bug #563: new WGETFLAGS initialized to "-t1 -T5"
+	  to explicit specify the timeout and allow overriding these parameters
+
 2019-01-01  Simon Sobisch <simonsobisch@gnu.org>
 
 	* Makefile.am: renamed target all to modules as we don't want to
@@ -9,8 +14,8 @@
 	* Makefile.am (newcob.val.tar.gz) new target to download from sourceforge
 	* Makefile.am: newcob.val.tar.gz / newcob.val.Z are also copied from
 	  srcdir if existing there already
-	* fix for Bug #563: fall-back to download from sourceforge if download
-	  from NIST is not possible
+	* Makefile.am: fix for Bug #563: fall-back to download from sourceforge
+	  if download from NIST is not possible
 	* Makefile.am (all): new target extracting all tests
 	* Makefile.am: additional insert test names when generating the module
 	  specific Makefile
