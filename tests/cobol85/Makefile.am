@@ -42,7 +42,7 @@ EXTRA_DIST = EXEC85.conf.in expand.pl report.pl summary.pl summary.txt \
 #CLEANFILES = EXEC85$(EXEEXT) summary.log
 
 COB85DIR = "`cd $(srcdir) && pwd`"
-WGETFLAGS = "-t1 -T5"
+WGETFLAGS = -t1 -T5
 
 # MAKEFLAGS = --no-print-directory
 
