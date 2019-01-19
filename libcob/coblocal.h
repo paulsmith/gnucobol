@@ -256,7 +256,7 @@ typedef struct __cob_settings {
 	unsigned int	cob_timeout_scale;	/* timeout scale */
 	unsigned int	cob_insert_mode;	/* insert toggle, 0=off, 1=on */
 	unsigned int	cob_exit_wait;		/* wait on program exit if no ACCEPT came after last DISPLAY */
-	char			*cob_exit_msg;		/* message for cob_exit_wait */
+	const char		*cob_exit_msg;		/* message for cob_exit_wait */
 
 
 	/* reportio.c */

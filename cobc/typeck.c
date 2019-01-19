@@ -2936,17 +2936,17 @@ cb_build_debug_item (void)
 {
 	cb_tree			l;
 	cb_tree			x;
-	cb_tree			assign;
+	cb_tree			lvl01_tree;
 
 	/* Set up DEBUG-ITEM */
 	l = cb_build_reference ("DEBUG-ITEM");
-	assign = cb_build_field_tree (NULL, l, NULL, CB_STORAGE_WORKING,
+	lvl01_tree = cb_build_field_tree (NULL, l, NULL, CB_STORAGE_WORKING,
 				 NULL, 1);
-	CB_FIELD (assign)->values = CB_LIST_INIT (cb_space);
+	CB_FIELD (lvl01_tree)->values = CB_LIST_INIT (cb_space);
 	cb_debug_item = l;
 
 	l = cb_build_reference ("DEBUG-LINE");
-	x = cb_build_field_tree (NULL, l, CB_FIELD(assign),
+	x = cb_build_field_tree (NULL, l, CB_FIELD(lvl01_tree),
 				 CB_STORAGE_WORKING, NULL, 3);
 	CB_FIELD (x)->pic = CB_PICTURE (cb_build_picture ("X(6)"));
 	cb_validate_field (CB_FIELD (x));
@@ -3029,8 +3029,8 @@ cb_build_debug_item (void)
 	cb_validate_field (CB_FIELD (x));
 	cb_debug_contents = l;
 
-	cb_validate_field (CB_FIELD (assign));
-	CB_FIELD_ADD (current_program->working_storage, CB_FIELD (assign));
+	cb_validate_field (CB_FIELD (lvl01_tree));
+	CB_FIELD_ADD (current_program->working_storage, CB_FIELD (lvl01_tree));
 }
 
 static void

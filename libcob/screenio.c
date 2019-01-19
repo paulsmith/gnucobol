@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart
 
    This file is part of GnuCOBOL.
@@ -3221,7 +3221,7 @@ cob_init_screenio (cob_global *lptr, cob_settings *sptr)
 {
 	cobglobptr = lptr;
 	cobsetptr  = sptr;
-	if (cobsetptr->cob_exit_msg) {
-		cobsetptr->cob_exit_msg = _("end of program, please press a key to exit");
+	if (!cobsetptr->cob_exit_msg || !cobsetptr->cob_exit_msg[0]) {
+		cobsetptr->cob_exit_msg = cob_strdup (_("end of program, please press a key to exit"));
 	}
 }

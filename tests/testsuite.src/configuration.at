@@ -732,8 +732,20 @@ AT_CHECK([$COBCRUN -c defunc.cfg --runtime-conf], [0], ignore, [])
 AT_CLEANUP
 
 
-AT_SETUP([COB_CONFIG_DIR test])
-AT_KEYWORDS([environment variable])
+AT_SETUP([runtime configuration: strings and environment])
+AT_KEYWORDS([configuration environment variable])
+
+AT_CHECK([unset greet name && \
+TESTME="this is a test" COB_EXIT_MSG='${greet:Bye} ${name:-user}, ${TESTME}' $COBCRUN --runtime-conf | \
+grep "COB_EXIT_MSG" | grep "Bye user, this is a test"], [0], ignore, [])
+AT_CHECK([$COBCRUN --runtime-conf | \
+grep "COB_EXIT_MSG" | grep "end of program, please press a key to exit"], [0], ignore, [])
+
+AT_CLEANUP
+
+
+AT_SETUP([validation of COB_CONFIG_DIR])
+AT_KEYWORDS([runtime configuration environment variable])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

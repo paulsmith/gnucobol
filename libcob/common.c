@@ -305,7 +305,7 @@ static struct config_enum syncopts[] = {{"P", "1"}, {NULL, NULL}};
 static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"3", "3"}, {NULL, NULL}};
 static char	varseq_dflt[8] = "0";
 static char min_conf_length = 0;
-static char *not_set;
+static const char *not_set;
 
 /*
  * Table of possible environment variables and/or runtime.cfg parameters:
