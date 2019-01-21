@@ -518,7 +518,7 @@ AS_IF([test "$with_xml2" = "yes" -o "$with_xml2" = "check"], [
 	  XML2_LIBS="-lxml2"
 	fi
 	LIBS="$LIBS $XML2_LIBS"
-	AC_CHECK_HEADERS([libxml/uri.h libxml/xmlwriter.h],
+	AC_CHECK_HEADERS([libxml/xmlversion.h libxml/uri.h libxml/xmlwriter.h],
 		[AX_CHECK_DEFINE([libxml/xmlwriter.h], [LIBXML_WRITER_ENABLED], [],
 		   AC_MSG_ERROR([libxml2 is required to be configured with xmlWriter]))
 		],

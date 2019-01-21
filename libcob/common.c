@@ -91,6 +91,13 @@
 #elif defined (HAVE_CURSES_H)
 #include <curses.h>
 #endif
+
+#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
+#include <libxml/xmlversion.h>
+#endif
+#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
+#include <cjson/cJSON.h>
+#endif
 /* end of library headers */
 
 #include "lib/gettext.h"
@@ -4299,6 +4306,7 @@ check_valid_env_tmpdir (const char * envname)
 	}
 	if (check_valid_dir (dir)) {
 		cob_runtime_warning ("Temporary directory %s is invalid, adjust TMPDIR!", envname);
+		(void)cob_unsetenv (envname);
 		return NULL;
 	}
 	return dir;
@@ -7120,13 +7128,13 @@ print_info (void)
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	var_print (_("sequential handler"), 	_("EXTFH"), "", 0);
+	var_print (_("sequential handler"),	"EXTFH", "", 0);
 #else
-	var_print (_("sequential handler"), _("built-in"), "", 0);
+	var_print (_("sequential handler"),	_("built-in"), "", 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	var_print (_("ISAM handler"), 		_("EXTFH"), "", 0);
+	var_print (_("ISAM handler"), 		"EXTFH", "", 0);
 #elif defined	(WITH_DB)
 	major = 0, minor = 0, patch = 0;
 	db_version (&major, &minor, &patch);
@@ -7150,18 +7158,18 @@ print_info (void)
 	major = 0, minor = 0, patch = 0;
 	(void)sscanf (gmp_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __GNU_MP_VERSION && minor == __GNU_MP_VERSION_MINOR) {
-		snprintf (versbuff, 55, "%s, version %d.%d.%d", "GMP", major, minor, patch);
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d"), "GMP", major, minor, patch);
 	} else {
-		snprintf (versbuff, 55, "%s, version %d.%d.%d (compiled with %d.%d)",
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d (compiled with %d.%d)"),
 			"GMP", major, minor, patch, __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR);
 	}
 #if defined (mpir_version)
 	major = 0, minor = 0, patch = 0;
 	(void)sscanf (mpir_version, "%d.%d.%d", &major, &minor, &patch);
 	if (major == __MPIR_VERSION && minor == __MPIR_VERSION_MINOR) {
-		snprintf (versbuff2, 55, "%s, version %d.%d.%d", "MPIR", major, minor, patch);
+		snprintf (versbuff2, 55, _("%s, version %d.%d.%d"), "MPIR", major, minor, patch);
 	} else {
-		snprintf (versbuff2, 55, "%s, version %d.%d.%d (compiled with %d.%d)",
+		snprintf (versbuff2, 55, _("%s, version %d.%d.%d (compiled with %d.%d)"),
 			"MPIR", major, minor, patch, __MPIR_VERSION, __MPIR_VERSION_MINOR);
 	}
 	versbuff[55] = versbuff2[55] = 0; /* silence VS analyzer */
@@ -7172,19 +7180,33 @@ print_info (void)
 	var_print (_("mathematical library"), 		versbuff, "", 0);
 #endif
 
-#ifdef WITH_LIBXML2
-	var_print (_("XML library"), 		"libxml2", "", 0);
+#ifdef WITH_XML2
+	major = LIBXML_VERSION / 10000;
+	minor = LIBXML_VERSION / 100 - major * 100;
+	patch = LIBXML_VERSION - major * 10000 - minor * 100;
+	snprintf (versbuff, 55, _("%s, version %d.%d.%d"),
+		"libxml2", major, minor, patch);
+	var_print (_("XML library"), 		versbuff, "", 0);
+	LIBXML_TEST_VERSION
+	xmlCleanupParser ();
 #else
 	var_print (_("XML library"), 		_("disabled"), "", 0);
 #endif
 
 #ifdef WITH_CJSON
-	var_print (_("JSON library"), 		"cJSON", "", 0);
+	major = 0, minor = 0, patch = 0;
+	(void)sscanf (cJSON_Version(), "%d.%d.%d", &major, &minor, &patch);
+	if (major == CJSON_VERSION_MAJOR && minor == CJSON_VERSION_MINOR) {
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d"), "cJSON", major, minor, patch);
+	} else {
+		snprintf (versbuff, 55, _ ("%s, version %d.%d.%d (compiled with %d.%d)"),
+			"cJSON", major, minor, patch, CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR);
+	}
+	var_print (_("JSON library"), 		versbuff, "", 0);
 #else
 	var_print (_("JSON library"), 		_("disabled"), "", 0);
 #endif
 }
-
 
 void
 print_runtime_conf ()

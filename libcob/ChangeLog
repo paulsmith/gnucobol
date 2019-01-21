@@ -1,5 +1,13 @@
 
-2019-01-05  Edwrd Hart <edward.dan.hart@gmail.com>
+2019-01-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (check_valid_env_tmpdir): unset invalid TMPDIRs to prevent
+	  warning/error messages from used tools
+	* common.c (print_info): added version output for libxml2 + cJSON
+	* mlio.c (cob_json_generate): fix warning about use of unset var
+	* mlio.c: fix warnings and issues about defines not set / set to zero
+
+2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* mlio.c: added JSON GENERATE.
 	* common.h, common.c: replaced COB_FERROR_* #define's with

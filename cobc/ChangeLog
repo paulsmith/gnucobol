@@ -1,8 +1,12 @@
 
+2019-01-20  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_print_info): added note for cJSON
+
 2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
-	* general: added JSON GENERATE statement.
-	* parser.y: added detection of JSON PARSE statement.
+	* general: added JSON GENERATE statement
+	* parser.y: added detection of JSON PARSE statement
 
 2019-01-04  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -20,9 +24,9 @@
 
 	* reserved.c (get_reserved_words_with_amendments): if a user reserves a
 	  default reserved word, context-sensitivity is now preserved only if
-	  they specify it.
+	  they specify it
 	* reserved.c (default_reserved_words): fixed context-sensitive words
-	  marked as not context-sensitive.
+	  marked as not context-sensitive
 
 2019-01-02  Simon Sobisch <simonsobisch@gnu.org>
 

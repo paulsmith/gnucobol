@@ -9032,7 +9032,7 @@ get_sum_data_field (struct cb_report *r, struct cb_field *f)
  * Generate list of SUM counters
  */
 static void
-output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
+output_report_sum_counters (const int top, struct cb_field *f, struct cb_report *r)
 {
 	struct cb_field *n, *c, *p, *z;
 	cb_tree	l, x;
@@ -9061,8 +9061,6 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 	}
 	if (c) {
 		output_report_sum_counters(0, c, r);
-	} else {
-		c = NULL;
 	}
 	if(!top)
 		c = NULL;
@@ -9160,13 +9158,14 @@ output_report_sum_counters (int top, struct cb_field *f, struct cb_report *r)
 			break;
 		}
 	}
-	if(p == NULL) {
+	if (p == NULL) {
 		output_local("NULL, /* No CONTROL field */");
 	}
-	if(f->report_flag & COB_REPORT_RESET_FINAL)
+	if (f->report_flag & COB_REPORT_RESET_FINAL) {
 		output_local("1");
-	else
+	} else {
 		output_local("0");
+	}
 	output_local(",%d,%d,%d",ctl_foot,sub_ttl,cross_foot);
 	output_local ("};\n");
 	sum_prv = sum_nxt;

@@ -10,10 +10,10 @@ very old compilers may lack support for this (like Visual C++ 2003 and older).
 How to build in native Windows environments:
 
 * get/build necessary prerequisites and place them in build_windows
-  Note: for convinience you can get the essential ones (MPIR, pdcurses, VBISAM,
+  Note: for convenience you can get the essential ones (MPIR, pdcurses, VBISAM,
   BDB) from https://sourceforge.net/projects/open-cobol/files/win_prerequisites/
-  As of August 2018, libxml2 binaries (and its dependents) are available at
-  http://www.zlatkovic.com/libxml.en.html, courtesy of Igor Zlatkovic.
+  As of January 2019, libxml2 binaries (and its dependents) are available at
+  https://www.zlatkovic.com/libxml.en.html, courtesy of Igor Zlatkovic.
   For a manual approach:
   * headers        --> build_windows
   * link libraries --> build_windows or build_windows\$(Platform)\$(Configuration)
@@ -21,6 +21,7 @@ How to build in native Windows environments:
 * copy build_windows\config.h.in to build_windows\config.h and modify if needed:
   * if you don't want to build with VBISAM change CONFIGURED_ISAM
   * if you don't want to build with screenio (PDCurses) change CONFIGURED_CURSES
+  * if you want to build with additional support change the appropriate defines
   * you may want to change the PATCHLEVEL, too
 * copy build_windows\defaults.h.in to build_windows\defaults.h,
   change COB_MAIN_DIR according to your local path and/or set MAKE_DIST
@@ -68,7 +69,7 @@ How to test the native builds:
   (for example by dropping its shortcut on the cmd window and pressing ENTER)
 * do the following commands:
   cd $yourfolder
-  ./configure # add --without-db --without-curses if the binaries to test are not
+  ./configure # add --without-db --without-curses to limit dependencies
               # configured for ISAM/screenio
               # this will create the necessary Makefiles for you
 * rename tests/atlocal to tests/atlocal_gnu
@@ -77,9 +78,8 @@ How to test the native builds:
   cd extras
   make -e
   cd ../tests
-  make check # but cancel after "autom4te --lang=autotest -o testsuite testsuite.at" has completed!
-* edit tests/testsuite, replacing the at_diff='diff (-u)' lines by at_diff='diff --strip-trailing-cr (-u)'
-* edit tests/testsuite, replacing every $COBCRUN_DIRECT ./prog with $COBCRUN_DIRECT ./prog.exe
+  make check # but cancel after generating the testsuite has completed, check
+  # for "autom4te --lang=autotest -o testsuite testsuite.at" 
 * do the following commands:
   make -j2 -e checkall # or make -j2 -e check if you don't want to run the NIST
                        # testsuite; instead of -j2 you may set -j7, depending on

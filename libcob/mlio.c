@@ -31,14 +31,24 @@
 #include "libcob.h"
 #include "coblocal.h"
 
-#if HAVE_LIBXML_XMLWRITER_H
+#if !defined (WITH_XML2)
+#define WITH_XML2 0
+#endif
+#if !defined (WITH_CJSON)
+#define WITH_CJSON 0
+#endif
+
+#if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
+#include <libxml/xmlversion.h>
+#endif
+#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
 #endif
-#if HAVE_LIBXML_URI_H
+#if defined (HAVE_LIBXML_URI_H) && HAVE_LIBXML_URI_H
 #include <libxml/uri.h>
 #endif
 
-#if WITH_CJSON
+#if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
 #include <cjson/cJSON.h>
 #endif
 
@@ -62,6 +72,8 @@ enum json_code_status {
 static cob_global		*cobglobptr;
 
 /* Local functions */
+
+#if WITH_XML2 || WITH_CJSON
 
 static void *
 get_trimmed_data (const cob_field * const f, void * (*strndup_func)(const char *, int))
@@ -145,6 +157,7 @@ get_num (cob_field * const f, void * (*strndup_func)(const char *, int))
 	return num;
 
 }
+#endif
 
 #if WITH_XML2
 
@@ -686,7 +699,7 @@ cob_is_xml_namechar (const int c)
 int
 cob_is_valid_uri (const char *str)
 {
-#ifdef WITH_XML2
+#if WITH_XML2
 	int		is_valid;
 	xmlURIPtr	p;
 
@@ -712,7 +725,7 @@ cob_is_valid_uri (const char *str)
 #endif
 }
 
-#ifdef WITH_XML2
+#if WITH_XML2
 
 void
 cob_xml_generate (cob_field *out, cob_ml_tree *tree, cob_field *count,
@@ -852,7 +865,7 @@ cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
 	cJSON	*json;
 	int	status = 0;
 	char	*printed_json;
-	unsigned int	print_len;
+	unsigned int	print_len = 0;
 	unsigned int	copy_len;
 	int	num_newlines = 0;
 
@@ -898,7 +911,7 @@ cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
 	if (json) {
 		cJSON_Delete (json);
 	}
-	if (count) {
+	if (count && print_len) {
 		cob_add_int (count, print_len, 0);
 	}
 }
@@ -918,8 +931,8 @@ cob_json_generate (cob_field *out, cob_ml_tree *tree, cob_field *count)
 void
 cob_init_mlio (cob_global * const g)
 {
-#ifdef WITH_XML2
-	LIBXML_TEST_VERSION;
+#if WITH_XML2
+	LIBXML_TEST_VERSION
 #endif
 	cobglobptr = g;
 }
@@ -927,7 +940,7 @@ cob_init_mlio (cob_global * const g)
 void
 cob_exit_mlio (void)
 {
-#ifdef WITH_XML2
+#if WITH_XML2
 	xmlCleanupParser ();
 #endif
 }

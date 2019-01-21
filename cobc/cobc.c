@@ -2299,6 +2299,12 @@ cobc_print_info (void)
 #else
 	cobc_var_print (_("XML library"),		_("disabled"), 0);
 #endif
+
+#ifdef WITH_CJSON
+	cobc_var_print (_("JSON library"),		"cJSON", 0);
+#else
+	cobc_var_print (_("JSON library"),		_("disabled"), 0);
+#endif
 }
 
 static void
