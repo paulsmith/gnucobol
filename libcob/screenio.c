@@ -38,8 +38,6 @@
 #endif
 
 #ifdef	_WIN32
-/* Later pdcurses versions require define before the include for DLL build */
-#define	PDC_DLL_BUILD	1
 #include <io.h>
 #endif
 
@@ -105,8 +103,8 @@ static size_t			cob_has_color;
 static int			global_return;
 static int			cob_current_y;
 static int			cob_current_x;
-static short			fore_color;
-static short			back_color;
+static short			fore_color	/* "const" default foreground (pair 0 on init) */;
+static short			back_color	/* "const" default background (pair 0 on init) */;;
 static int			origin_y;
 static int			origin_x;
 static int			display_cursor_y;
@@ -215,6 +213,86 @@ cob_move_to_beg_of_last_line (void)
 	move (max_y, 0);
 }
 
+static short
+cob_to_curses_color (cob_field *f, const short default_color)
+{
+	if (!f) {
+		return default_color;
+	}
+	switch (cob_get_int (f)) {
+	case COB_SCREEN_BLACK:
+		return COLOR_BLACK;
+	case COB_SCREEN_BLUE:
+		return COLOR_BLUE;
+	case COB_SCREEN_GREEN:
+		return COLOR_GREEN;
+	case COB_SCREEN_CYAN:
+		return COLOR_CYAN;
+	case COB_SCREEN_RED:
+		return COLOR_RED;
+	case COB_SCREEN_MAGENTA:
+		return COLOR_MAGENTA;
+	case COB_SCREEN_YELLOW:
+		return COLOR_YELLOW;
+	case COB_SCREEN_WHITE:
+		return COLOR_WHITE;
+	default:
+		return default_color;
+	}
+}
+
+static short
+cob_get_color_pair (const short fg_color, const short bg_color)
+{
+	/* default color (defined from terminal, read during init ) */
+	if (fg_color == fore_color && bg_color == back_color) {
+		return 0;
+	}
+	/* reserved color "all black", defined during init */
+	if (fg_color == 0 && bg_color == 0) {
+		return 1;
+	}
+	
+	{
+		short	color_pair_number;
+		short	fg_defined, bg_defined;
+
+		for (color_pair_number = 2; color_pair_number < COLOR_PAIRS; color_pair_number++) {
+
+			pair_content (color_pair_number, &fg_defined, &bg_defined);
+
+			/* check if we've already defined this color pair */
+			if (fg_defined == fg_color && bg_defined == bg_color) {
+				return color_pair_number;
+			}
+
+			/* check if we found a spare pair, defined as requested  */
+			if (fg_defined == 0 && bg_defined == 0) {
+				init_pair (color_pair_number, fg_color, bg_color);
+				return color_pair_number;
+			}
+		}
+	}
+
+	/* none left - return default */
+	return 0;
+}
+
+static int
+cob_activate_color_pair (const short color_pair_number)
+{
+	int ret;
+
+#ifdef	HAVE_COLOR_SET
+	ret = color_set (color_pair_number, NULL);
+#else
+	ret = attrset (COLOR_PAIR(color_pair_number));
+#endif
+	bkgdset (COLOR_PAIR(color_pair_number));
+
+	return ret;
+}
+
 enum screen_statement {
 	ACCEPT_STATEMENT,
 	DISPLAY_STATEMENT
@@ -224,14 +302,9 @@ static void
 cob_screen_attr (cob_field *fgc, cob_field *bgc, const cob_flags_t attr,
 		 const enum screen_statement stmt)
 {
-	int		i;
-	int		styles = 0;
 	int		line;
 	int		column;
-	short		fgcolor;
-	short		bgcolor;
-	short		fgdef;
-	short		bgdef;
+	chtype		styles = A_NORMAL;
 
 	attrset (A_NORMAL);
 	if (attr & COB_SCREEN_REVERSE) {
@@ -253,90 +326,13 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const cob_flags_t attr,
 		attron (styles);
 	}
 	if (cob_has_color) {
-		fgcolor = fore_color;
-		bgcolor = back_color;
-		if (fgc) {
-			switch (cob_get_int (fgc)) {
-			case COB_SCREEN_BLACK:
-				fgcolor = COLOR_BLACK;
-				break;
-			case COB_SCREEN_BLUE:
-				fgcolor = COLOR_BLUE;
-				break;
-			case COB_SCREEN_GREEN:
-				fgcolor = COLOR_GREEN;
-				break;
-			case COB_SCREEN_CYAN:
-				fgcolor = COLOR_CYAN;
-				break;
-			case COB_SCREEN_RED:
-				fgcolor = COLOR_RED;
-				break;
-			case COB_SCREEN_MAGENTA:
-				fgcolor = COLOR_MAGENTA;
-				break;
-			case COB_SCREEN_YELLOW:
-				fgcolor = COLOR_YELLOW;
-				break;
-			case COB_SCREEN_WHITE:
-				fgcolor = COLOR_WHITE;
-				break;
-			default:
-				break;
-			}
-		}
-		if (bgc) {
-			switch (cob_get_int (bgc)) {
-			case COB_SCREEN_BLACK:
-				bgcolor = COLOR_BLACK;
-				break;
-			case COB_SCREEN_BLUE:
-				bgcolor = COLOR_BLUE;
-				break;
-			case COB_SCREEN_GREEN:
-				bgcolor = COLOR_GREEN;
-				break;
-			case COB_SCREEN_CYAN:
-				bgcolor = COLOR_CYAN;
-				break;
-			case COB_SCREEN_RED:
-				bgcolor = COLOR_RED;
-				break;
-			case COB_SCREEN_MAGENTA:
-				bgcolor = COLOR_MAGENTA;
-				break;
-			case COB_SCREEN_YELLOW:
-				bgcolor = COLOR_YELLOW;
-				break;
-			case COB_SCREEN_WHITE:
-				bgcolor = COLOR_WHITE;
-				break;
-			default:
-				break;
-			}
-		}
-		for (i = 0; i < (int)COLOR_PAIRS; i++) {
-			pair_content ((short)i, &fgdef, &bgdef);
-			if (fgdef == fgcolor && bgdef == bgcolor) {
-				break;
-			}
-			if (fgdef == 0 && bgdef == 0) {
-				init_pair ((short)i, fgcolor, bgcolor);
-				break;
-			}
-		}
-		if (i != (int)COLOR_PAIRS) {
-#ifdef	HAVE_COLOR_SET
-			color_set ((short)COLOR_PAIR(i), NULL);
-#else
-			attrset (COLOR_PAIR(i));
-#endif
-			bkgdset (COLOR_PAIR(i));
-		} else {
-			if (!styles) {
-				attrset (A_NORMAL);
-			}
-		}
+		short		fg_color;
+		short		bg_color;
+		short		color_pair_number;
+		fg_color = cob_to_curses_color (fgc, fore_color);
+		bg_color = cob_to_curses_color (bgc, back_color);
+		color_pair_number = cob_get_color_pair (fg_color, bg_color);
+		cob_activate_color_pair (color_pair_number);
 	}
 	/* BLANK SCREEN colors the whole screen. */
 	if (attr & COB_SCREEN_BLANK_SCREEN) {
@@ -368,10 +364,6 @@ cob_screen_attr (cob_field *fgc, cob_field *bgc, const cob_flags_t attr,
 static void
 cob_screen_init (void)
 {
-#ifdef	HAVE_LIBPDCURSES
-	size_t	i;
-#endif
-
 	if (cobglobptr->cob_screen_initialized) {
 		return;
 	}
@@ -444,15 +436,30 @@ cob_screen_init (void)
 	if (has_colors ()) {
 		start_color ();
 		pair_content ((short)0, &fore_color, &back_color);
+		/* fix bad settings of the terminal on start */
+		if (fore_color == back_color) {
+			if (fore_color == COLOR_BLACK) {
+				fore_color = COLOR_WHITE;
+			} else {
+				back_color = COLOR_BLACK;
+			}
+			init_pair ((short)0, fore_color, back_color);
+		}
 		if (COLOR_PAIRS) {
+			cob_has_color = 1;
+			/* explicit reserve pair 1 as all zero as we take this as "initialized" later on */
+			init_pair ((short)1, 0, 0);
 #ifdef	HAVE_LIBPDCURSES
-			/* pdcurses sets ALL pairs to default fg/bg */
-			/* IMHO a bug. */
-			for (i = 1; i < (size_t)COLOR_PAIRS; ++i) {
-				init_pair ((short)i, 0, 0);
+			/* pdcurses sets *ALL* pairs to default fg/bg, while ncurses initialize the to zero
+			   set all to zero here, allowing us to adjust them later */
+			{
+				short	color_pair_number;
+	
+				for (color_pair_number = 2; color_pair_number < COLOR_PAIRS; ++color_pair_number) {
+					init_pair (color_pair_number, 0, 0);
+				}
 			}
 #endif
-			cob_has_color = 1;
 		}
 	}
 	attrset (A_NORMAL);
@@ -2005,10 +2012,9 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 {
 	int	sline;
 	int	scolumn;
-	int	size_display;
+	int	size_display, fsize;
 	int	status;
 	char	fig_const;	/* figurative constant character */
-	int	i;
 
 	/* LCOV_EXCL_START */
 	if (unlikely (!f)) {
@@ -2021,16 +2027,17 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 	origin_y = 0;
 	origin_x = 0;
 
+	fsize = (int)f->size;
 	if (size_is) {
-		size_display = cob_get_int (size_is);
+		size_display = (unsigned int)cob_get_int (size_is);
 		/* SIZE ZERO is ignored */
 		if (size_display == 0) {
-			size_display = (int)f->size;
+			size_display = fsize;
 		}
 	} else if (fattr & COB_SCREEN_NO_DISP) {
 		size_display = 0;
 	} else {
-		size_display = (int)f->size;
+		size_display = fsize;
 	}
 
 	if (fscroll) {
@@ -2060,16 +2067,17 @@ field_display (cob_field *f, const int line, const int column, cob_field *fgc,
 				fig_const = f->data[0];
 				cob_addnch (size_display, fig_const);
 			} else {
-				for (i = 0; i < (size_display / f->size); ++i) {
-					cob_addnstr ((char *)f->data, f->size);
+				int i;
+				for (i = 0; i < (size_display / fsize); ++i) {
+					cob_addnstr ((char *)f->data, fsize);
 				}
-				cob_addnstr ((char *)f->data, size_display % f->size);
+				cob_addnstr ((char *)f->data, size_display % fsize);
 			}
 		} else {
-			cob_addnstr ((char *)f->data, cob_min_int (size_display, f->size));
-			if (size_display > f->size) {
+			cob_addnstr ((char *)f->data, cob_min_int (size_display, fsize));
+			if (size_display > fsize) {
 				/* WITH SIZE larger than field displays trailing spaces */
-				cob_addnch (size_display - f->size, COB_CH_SP);
+				cob_addnch (size_display - fsize, COB_CH_SP);
 			}
 		}
 	}
@@ -2101,9 +2109,9 @@ field_accept (cob_field *f, const int sline, const int scolumn, cob_field *fgc,
 	size_t		right_pos;
 	int		at_eof = 0;
 	unsigned char	move_char;      /* data shift character */
-	int		prompt_char;    /* prompt character */
 	int		get_timeout;
 	int		status;
+	chtype		prompt_char;    /* prompt character */
 	chtype		default_prompt_char;
 	size_t		size_accept = 0;	/* final size to accept */
 	cob_field	temp_field;

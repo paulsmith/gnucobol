@@ -1,4 +1,18 @@
 
+2019-01-22  Simon Sobisch <simonsobisch@gnu.org>
+
+	* screenio.c (cob_screen_init): fix background=foreground from terminal
+	* screenio.c (cob_screen_init, cob_screen_attr): explicit define and use
+	  color_pair 1 as "black on black" 
+	* screenio.c (cob_screen_attr): fix long standing bug in use of
+	  color_set (takes color_pair_number, not a COLOR_PAIR)
+	* screenio.c (cob_screen_attr): extracted (cob_to_curses_color,
+	  cob_get_color_pair, cob_activate_color_pair)
+	* screenio.c: fix compiler warnings and correctly use chtype
+	* common.c (print_info): extensive output of curses library including
+	  size for chtype, wide yes/no and forced UTF-8 for PDCurses
+	* common.c: use SLASH_CHAR where possible
+
 2019-01-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (check_valid_env_tmpdir): unset invalid TMPDIRs to prevent

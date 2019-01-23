@@ -6399,13 +6399,14 @@ cob_load_config_file (const char *config_file, int isoptional)
 			/* check for path of previous configuration file (for includes) */
 			filename[0] = 0;
 			if (cobsetptr->cob_config_cur != 0) {
+				size_t size;
 				strncpy (buff,
 					cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1],
 					(size_t)COB_FILE_MAX);
-				for (i = (int)strlen (buff); i != 0 && buff[i] != SLASH_CHAR; i--);
-				if (i != 0) {
-					buff[i] = 0;
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s", buff, SLASH_STR,
+				size = strlen (buff);
+				if (size != 0 && buff[size] == SLASH_CHAR) buff[--size] = 0;
+				if (size != 0) {
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%c%s", buff, SLASH_CHAR,
 						config_file);
 					if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 						config_file = filename;		/* Prefix last directory */
@@ -6418,11 +6419,11 @@ cob_load_config_file (const char *config_file, int isoptional)
 				/* check for COB_CONFIG_DIR (use default if not in environment) */
 				penv = getenv ("COB_CONFIG_DIR");
 				if (penv != NULL) {
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s",
-						penv, SLASH_STR, config_file);
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%c%s",
+						penv, SLASH_CHAR, config_file);
 				} else {
-					snprintf (filename, (size_t)COB_FILE_MAX, "%s%s%s",
-						COB_CONFIG_DIR, SLASH_STR, config_file);
+					snprintf (filename, (size_t)COB_FILE_MAX, "%s%c%s",
+						COB_CONFIG_DIR, SLASH_CHAR, config_file);
 				}
 				if (access (filename, F_OK) == 0) {	/* and prefixed file exist */
 					config_file = filename;		/* Prefix COB_CONFIG_DIR */
@@ -6527,9 +6528,9 @@ cob_load_config (void)
 	} else {
 		/* check for COB_CONFIG_DIR (use default if not in environment) */
 		if ((env = getenv ("COB_CONFIG_DIR")) != NULL && env[0]) {
-			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%s%s", env, SLASH_STR, "runtime.cfg");
+			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%c%s", env, SLASH_CHAR, "runtime.cfg");
 		} else {
-			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%s%s", COB_CONFIG_DIR, SLASH_STR, "runtime.cfg");
+			snprintf (conf_file, (size_t)COB_MEDIUM_MAX, "%s%c%s", COB_CONFIG_DIR, SLASH_CHAR, "runtime.cfg");
 		}
 		conf_file[COB_MEDIUM_MAX] = 0; /* fixing code analyser warning */
 		is_optional = 1;			/* If not present, then just use env vars */
@@ -7062,7 +7063,10 @@ print_info (void)
 	char	versbuff[56] = { '\0' };
 	char	*s;
 	int	major, minor, patch;
-#if defined (mpir_version)
+#if defined (__PDCURSES__)
+	int	opt1, opt2, opt3;
+#endif
+#if defined (mpir_version) || defined (__PDCURSES__) || defined (NCURSES_VERSION)
 	char	versbuff2[115] = { '\0' };
 #endif
 
@@ -7114,12 +7118,80 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
-#if defined (NCURSES_VERSION) || defined (__PDCURSES__)
-	snprintf (versbuff, 55, "%s: %s", WITH_CURSES, curses_version ());
-	var_print (_("extended screen I/O"), 	versbuff, "", 0);
-#else
-	var_print (_("extended screen I/O"), 	WITH_CURSES, "", 0);
+#if defined (__PDCURSES__)
+#if defined (PDC_VER_MAJOR)
+#define CURSES_CMP_MAJOR	PDC_VER_MAJOR
+#define CURSES_CMP_MINOR	PDC_VER_MINOR
+#if PDC_VER_MAJOR == 3 && PDC_BUILD >= 3703
+#define RESOLVED_PDC_VER
+	{
+		PDC_VERSION ver;
+		PDC_get_version (&ver);
+		major = ver.major;
+		minor = ver.minor;
+		patch = 0;
+		opt1 = ver.csize * 8;
+		opt2 = ver.flags & PDC_VFLAG_WIDE;
+		opt3 = ver.flags & PDC_VFLAG_UTF8;
+	}
+#elif defined (PDC_HAS_VERSION_INFO)
+#define RESOLVED_PDC_VER
+	{
+		major = PDC_version.ver_major;
+		minor = PDC_version.ver_minor;
+		patch = PDC_version.ver_change;
+		opt1 = PDC_version.chtype_size * 8;
+		opt2 = PDC_version.is_wide;
+		opt3 = PDC_version.is_forced_utf8;
+	}
 #endif
+#else
+#define CURSES_CMP_MAJOR	(PDC_BUILD / 1000)
+#define CURSES_CMP_MINOR	(PDC_BUILD - CURSES_CMP_MAJOR * 1000) / 100
+	COB_UNUSED (opt1);
+	COB_UNUSED (opt2);
+	COB_UNUSED (opt3);
+#endif
+#elif defined (NCURSES_VERSION)
+#define CURSES_CMP_MAJOR	NCURSES_VERSION_MAJOR
+#define CURSES_CMP_MINOR	NCURSES_VERSION_MINOR
+#endif
+
+#if defined (CURSES_CMP_MAJOR)
+#if !defined (RESOLVED_PDC_VER)
+	snprintf (versbuff2, 100, curses_version ());
+	major = 0, minor = 0, patch = 0;
+	if ((sscanf (versbuff2, "%s %s %d.%d.%d", (char *)&versbuff, (char *)&versbuff, &major, &minor, &patch) < 4)
+	 && (sscanf (versbuff2, "%s %d.%d.%d", (char *)&versbuff, &major, &minor, &patch) < 3)
+	 && (sscanf (versbuff2, "%d.%d.%d", &major, &minor, &patch) < 2)) {
+		major = 0, minor = 0;
+	}
+#endif
+	if (major == CURSES_CMP_MAJOR && minor == CURSES_CMP_MINOR) {
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d"), WITH_CURSES, major, minor, patch);
+	} else if (major != 0) {
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d (compiled with %d.%d)"),
+			WITH_CURSES, major, minor, patch, CURSES_CMP_MAJOR, CURSES_CMP_MINOR);
+	} else {
+		snprintf (versbuff, 55, _("%s, version %s"), WITH_CURSES, versbuff2);
+	}
+#else
+	snprintf (versbuff, 55, "%s", WITH_CURSES);
+#endif
+#if defined (PDC_WIDE) || defined (NCURSES_WIDECHAR)
+	patch = 1;
+#else
+	patch = 0;
+#endif
+#ifdef RESOLVED_PDC_VER
+	snprintf (versbuff2, 114, "%s CHTYPE=%d(%d), WIDE=%d(%d), UTF-8=%d", versbuff,
+		opt1, (int)sizeof (chtype) * 8, patch, opt2,  opt3);
+#undef RESOLVED_PDC_VER
+#else
+	snprintf (versbuff2, 114, "%s (CHTYPE=%d, WIDE=%d)", versbuff,
+		(int)sizeof (chtype) * 8, patch);
+#endif
+	var_print (_("extended screen I/O"), 	versbuff2, "", 0);
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);
 	var_print (_("variable format"), buff, "", 0);
@@ -7182,7 +7254,7 @@ print_info (void)
 
 #ifdef WITH_XML2
 	major = LIBXML_VERSION / 10000;
-	minor = LIBXML_VERSION / 100 - major * 100;
+	minor = (LIBXML_VERSION - major * 10000) / 100 ;
 	patch = LIBXML_VERSION - major * 10000 - minor * 100;
 	snprintf (versbuff, 55, _("%s, version %d.%d.%d"),
 		"libxml2", major, minor, patch);
@@ -7199,7 +7271,7 @@ print_info (void)
 	if (major == CJSON_VERSION_MAJOR && minor == CJSON_VERSION_MINOR) {
 		snprintf (versbuff, 55, _("%s, version %d.%d.%d"), "cJSON", major, minor, patch);
 	} else {
-		snprintf (versbuff, 55, _ ("%s, version %d.%d.%d (compiled with %d.%d)"),
+		snprintf (versbuff, 55, _("%s, version %d.%d.%d (compiled with %d.%d)"),
 			"cJSON", major, minor, patch, CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR);
 	}
 	var_print (_("JSON library"), 		versbuff, "", 0);
