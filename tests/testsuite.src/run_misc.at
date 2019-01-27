@@ -6599,6 +6599,10 @@ AT_CLEANUP
 AT_SETUP([Trace feature with subroutine])
 AT_KEYWORDS([Trace])
 
+# FIXME: check if the one above is enough and either
+#        remove this test or exchange by a non-IDX version
+AT_SKIP_IF([test "$COB_HAS_ISAM" = "no"])
+
 AT_DATA([callsub.cob], [
        IDENTIFICATION DIVISION.
        PROGRAM-ID. callsub.
