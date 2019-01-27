@@ -1,4 +1,8 @@
 
+2019-01-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c, reserved.c: fixed compiler warnings
+
 2019-01-20  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_info): added note for cJSON

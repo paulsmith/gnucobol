@@ -40,12 +40,12 @@
 
 #if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
 #include <libxml/xmlversion.h>
-#endif
 #if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 #include <libxml/xmlwriter.h>
 #endif
 #if defined (HAVE_LIBXML_URI_H) && HAVE_LIBXML_URI_H
 #include <libxml/uri.h>
+#endif
 #endif
 
 #if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
@@ -182,7 +182,7 @@ set_xml_code (const unsigned int code)
 static int
 is_all_spaces (const cob_field * const f)
 {
-	int	i;
+	size_t	i;
 
 	for (i = 0; i < f->size; ++i) {
 		if (f->data[i] != ' ') {
@@ -209,7 +209,7 @@ get_trimmed_xml_data (const cob_field * const f)
 static int
 has_invalid_xml_char (const cob_field * const f)
 {
-	int	i;
+	size_t	i;
 
 	/*  Char       ::=      #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF] */
 	/* TO-DO: This assumes the data is already in UTF-8! */
@@ -220,7 +220,6 @@ has_invalid_xml_char (const cob_field * const f)
 		    && f->data[i] != 0x0d) {
 			return 1;
 		}
-
 	}
 
 	/* TO-DO: 2/3/4-byte characters. Will this need libicu? */
@@ -327,8 +326,8 @@ int_to_hex (const int n)
 static xmlChar *
 get_hex_xml_data (const cob_field * const f)
 {
-	int		i;
 	xmlBufferPtr	buff;
+	size_t		i;
 	char		hex_num[3] = { '\0' };
 	xmlChar		*hex_data;
 

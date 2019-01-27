@@ -13,10 +13,10 @@ How to build in native Windows environments:
   Note: for convenience you can get the essential ones (MPIR, pdcurses, VBISAM,
   BDB) from https://sourceforge.net/projects/open-cobol/files/win_prerequisites/
   As of January 2019, libxml2 binaries (and its dependents) are available at
-  https://www.zlatkovic.com/libxml.en.html, courtesy of Igor Zlatkovic.
+  https://www.zlatkovic.com/pub/libxml/64bit/ (also for 32bit!), courtesy of Igor Zlatkovic.
   For a manual approach:
-  * headers        --> build_windows
-  * link libraries --> build_windows or build_windows\$(Platform)\$(Configuration)
+  * headers        --> build_windows (cJSON and libxml use sub-folders)
+  * link libraries --> build_windows or build_windows\$(Platform)[\$(Configuration)]
   * runtime dlls   --> build_windows\$(Platform)\$(Configuration)
 * copy build_windows\config.h.in to build_windows\config.h and modify if needed:
   * if you don't want to build with VBISAM change CONFIGURED_ISAM

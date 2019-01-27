@@ -21,9 +21,11 @@
 #define COB_LDFLAGS      "/incremental:no /LIBPATH:\"" COB_MAIN_DIR "\\lib\""
 #endif
 #else  /* __ORANGEC__ */
+#ifdef _WIN64 /*note: currently no x64 with OrangeC */
 #define COB_LDFLAGS      "/L\"" COB_MAIN_DIR "\\lib_x64\""
 #else
 #define COB_LDFLAGS      "/L\"" COB_MAIN_DIR "\\lib\""
+#endif
 #endif
 
 #else  // no MAKE_DIST

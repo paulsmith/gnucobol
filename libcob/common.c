@@ -6386,7 +6386,7 @@ cb_config_entry (char *buf, int line)
 static int
 cob_load_config_file (const char *config_file, int isoptional)
 {
-	char			buff[COB_FILE_BUFF], filename[COB_FILE_BUFF];
+	char			buff[COB_FILE_BUFF-10], filename[COB_FILE_BUFF];
 	char			*penv;
 	int			sub_ret, ret;
 	unsigned int	i;
@@ -6402,7 +6402,7 @@ cob_load_config_file (const char *config_file, int isoptional)
 				size_t size;
 				strncpy (buff,
 					cobsetptr->cob_config_file[cobsetptr->cob_config_cur - 1],
-					(size_t)COB_FILE_MAX);
+					(size_t)COB_FILE_MAX-10);
 				size = strlen (buff);
 				if (size != 0 && buff[size] == SLASH_CHAR) buff[--size] = 0;
 				if (size != 0) {

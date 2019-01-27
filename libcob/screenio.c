@@ -205,12 +205,12 @@ cob_move_to_beg_of_last_line (void)
 {
 	int	max_y;
 	int	max_x;
-
-	COB_UNUSED (max_x);
-
+    
 	getmaxyx (stdscr, max_y, max_x);
 	/* We don't need to check for exceptions here; it will always be fine */
 	move (max_y, 0);
+
+	COB_UNUSED (max_x);
 }
 
 static short
@@ -721,15 +721,15 @@ raise_ec_on_truncation (const int item_size)
 	int	max_y;
 	int	max_x;
 
-	COB_UNUSED (y);
-	COB_UNUSED (max_y);
-
 	getyx (stdscr, y, x);
 	getmaxyx (stdscr, max_y, max_x);
 
 	if (x + item_size - 1 > max_x) {
 		cob_set_exception (COB_EC_SCREEN_ITEM_TRUNCATED);
 	}
+
+	COB_UNUSED (y);
+	COB_UNUSED (max_y);
 }
 
 static void

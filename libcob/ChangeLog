@@ -1,4 +1,8 @@
 
+2019-01-27  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c, mlio.c, screenio.c: fixed compiler warnings
+
 2019-01-22  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (cob_screen_init): fix background=foreground from terminal

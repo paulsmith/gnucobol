@@ -3984,7 +3984,7 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 #define HASHMAP(type, type_struct, word_member)				\
 	static struct type_struct	**type##_map;			\
 	static size_t	type##_map_arr_size;				\
-	static size_t	num_##type##s;					\
+	static unsigned int	num_##type##s;					\
 									\
 	static void							\
 	init_##type##_map (void)					\
@@ -3995,13 +3995,13 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 	}								\
 									\
 	static COB_INLINE COB_A_INLINE int				\
-        type##_hash (const char *word)					\
+	type##_hash (const char *word)					\
 	{								\
 		return hash_word ((const cob_c8_t *) word, type##_map_arr_size); \
 	}								\
 									\
 	static COB_INLINE COB_A_INLINE int				\
-	next_##type##_key (const int key)				\
+	next_##type##_key (const unsigned int key)				\
 	{								\
 		if (key < type##_map_arr_size - 1) {			\
 			return key + 1;					\
@@ -4010,14 +4010,14 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 		}							\
 	}								\
 									\
-	static int							\
+	static unsigned int							\
 	find_key_for_##type (const char * const word)			\
 	{								\
-		int key;						\
+		unsigned int key;						\
 									\
 		for (key = type##_hash (word);				\
-		     type##_map[key] && cb_strcasecmp (type##_map[key]->word_member, word); \
-		     key = next_##type##_key (key));			\
+			type##_map[key] && cb_strcasecmp (type##_map[key]->word_member, word); \
+			key = next_##type##_key (key));			\
 									\
 		return key;						\
 	}								\
@@ -4028,16 +4028,16 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 		struct type_struct	**new_map = cobc_main_malloc (new_size * sizeof(void *)); \
 		struct type_struct	**old_map = type##_map;		\
 		size_t	old_size = type##_map_arr_size;			\
-		int	i;						\
-		int	key;						\
+		unsigned int	i;						\
+		unsigned int	key;						\
 									\
-	        type##_map_arr_size = new_size;				\
-	        type##_map = new_map;					\
+		type##_map_arr_size = new_size;				\
+		type##_map = new_map;					\
 									\
 		for (i = 0; i < old_size; ++i) {			\
 			if (old_map[i]) {				\
 				key = find_key_for_##type (old_map[i]->word_member); \
-			        type##_map[key] = old_map[i];		\
+				type##_map[key] = old_map[i];		\
 			}						\
 		}							\
 									\
@@ -4048,13 +4048,13 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 	delete_##type##_with_key (const int key)			\
 	{								\
 		cobc_main_free (type##_map[key]);			\
-	        type##_map[key] = NULL;					\
+		type##_map[key] = NULL;					\
 	}								\
 									\
 	static int							\
 	add_##type##_to_map (const struct type_struct val, const int overwrite) \
 	{								\
-		int	key;						\
+		unsigned int	key;						\
 		int	entry_already_there;				\
 									\
 		if (!type##_map) {					\
@@ -4082,7 +4082,7 @@ hash_word (const cob_c8_t *word, const cob_u32_t mod)
 			++num_##type##s;				\
 		}							\
 									\
-	        type##_map[key] = cobc_main_malloc (sizeof (struct type_struct)); \
+		type##_map[key] = cobc_main_malloc (sizeof (struct type_struct)); \
 		*type##_map[key] = val;					\
 		return entry_already_there;				\
 	}
@@ -4113,9 +4113,9 @@ HASHMAP(amendment, amendment_list, word)
 static void
 get_reserved_words_with_amendments (void)
 {
-	int	i;
+	unsigned int	i;
 	struct amendment_list	*amendment;
-	int	key;
+	unsigned int	key;
 	struct cobc_reserved	reserved;
 	struct cobc_reserved	*p;
 
@@ -4215,13 +4215,13 @@ strcmp_for_qsort (const void *l, const void *r)
 }
 
 static void
-get_aliases (const int key, struct list_reserved_line *line)
+get_aliases (const unsigned int key, struct list_reserved_line *line)
 {
-	int	given_token = reserved_word_map[key]->token;
-	int	i;
-	int	j;
-	size_t	num_aliases = 0;
-	size_t	aliases_str_len = 0;
+	unsigned int	given_token = reserved_word_map[key]->token;
+	unsigned int	i;
+	unsigned int	j;
+	unsigned int	num_aliases = 0;
+	unsigned int	aliases_str_len = 0;
 	char	(*aliases)[COB_MAX_WORDLEN + 1];
 	char	*aliases_str;
 

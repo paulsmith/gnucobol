@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2019 Free Software Foundation, Inc.
 
    Authors:
    Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Brian Tiffin,
@@ -2086,7 +2086,7 @@ cobc_print_version (void)
 {
 	printf ("cobc (%s) %s.%d\n",
 		PACKAGE_NAME, PACKAGE_VERSION, PATCH_LEVEL);
-	puts ("Copyright (C) 2018 Free Software Foundation, Inc.");
+	puts ("Copyright (C) 2019 Free Software Foundation, Inc.");
 	puts (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"));
 	puts (_("This is free software; see the source for copying conditions.  There is NO\n"
 	        "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."));
@@ -5879,7 +5879,8 @@ line_has_listing_statement (char *line, const enum cb_format source_format)
 		snprintf (print_data, size, "%s", statement_start);
 		size = terminate_str_at_first_trailing_space (print_data);
 		print_data[size] = 0;
-		snprintf (cb_listing_title, sizeof (cb_listing_title), "%s", print_data);
+		print_data[sizeof (cb_listing_title)] = 0;
+		strcpy (cb_listing_title, print_data);
 		force_new_page_for_next_line ();
 	} else {
 		if (!strncasecmp (statement_start, "EJECT", 5)) {
@@ -6412,8 +6413,8 @@ print_replace_text (struct list_files *cfile, FILE *fd,
 	int	overread = 0;
 	int	tokmatch = 0;
 	int	subword = 0;
-	int	ttix, ttlen, from_token_len;
-	int	newlinelen;
+	size_t	ttix, ttlen, from_token_len;
+	size_t	newlinelen;
 	char	lterm[2];
 	char	fterm[2];
 	char	ftoken[CB_LINE_LENGTH + 2];
