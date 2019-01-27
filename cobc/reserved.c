@@ -2955,7 +2955,7 @@ static struct cobc_reserved default_reserved_words[] = {
   }
 };
 
-static size_t	num_reserved_words;
+static unsigned int	num_reserved_words;
 #define NUM_DEFAULT_RESERVED_WORDS	\
 	sizeof (default_reserved_words) / sizeof (struct cobc_reserved)
 
