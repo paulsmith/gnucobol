@@ -2,6 +2,8 @@
 2019-01-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c, mlio.c, screenio.c: fixed compiler warnings
+	* common.c (print_info): fixed issues if curses is not available,
+	  introduced 2019-01-22
 
 2019-01-22  Simon Sobisch <simonsobisch@gnu.org>
 

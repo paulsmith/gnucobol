@@ -94,6 +94,9 @@
 
 #if defined (HAVE_LIBXML_XMLVERSION_H) && HAVE_LIBXML_XMLVERSION_H
 #include <libxml/xmlversion.h>
+#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
+#include <libxml/xmlwriter.h>
+#endif
 #endif
 #if defined (HAVE_CJSON_CJSON_H) && HAVE_CJSON_CJSON_H
 #include <cjson/cJSON.h>
@@ -7066,6 +7069,13 @@ print_info (void)
 #if defined (__PDCURSES__)
 	int	opt1, opt2, opt3;
 #endif
+#if defined (__PDCURSES__) || defined (NCURSES_VERSION)
+#if defined (PDC_WIDE) || defined (NCURSES_WIDECHAR)
+	const int wide = 1;
+#else
+	const int wide = 0;
+#endif
+#endif
 #if defined (mpir_version) || defined (__PDCURSES__) || defined (NCURSES_VERSION)
 	char	versbuff2[115] = { '\0' };
 #endif
@@ -7118,6 +7128,9 @@ print_info (void)
 	var_print ("BINARY-C-LONG", _("4 bytes"), "", 0);
 #endif
 
+#if !defined (__PDCURSES__) && !defined (NCURSES_VERSION)
+	var_print (_("extended screen I/O"), 	WITH_CURSES, "", 0);
+#else
 #if defined (__PDCURSES__)
 #if defined (PDC_VER_MAJOR)
 #define CURSES_CMP_MAJOR	PDC_VER_MAJOR
@@ -7156,8 +7169,6 @@ print_info (void)
 #define CURSES_CMP_MAJOR	NCURSES_VERSION_MAJOR
 #define CURSES_CMP_MINOR	NCURSES_VERSION_MINOR
 #endif
-
-#if defined (CURSES_CMP_MAJOR)
 #if !defined (RESOLVED_PDC_VER)
 	snprintf (versbuff2, 100, curses_version ());
 	major = 0, minor = 0, patch = 0;
@@ -7175,23 +7186,15 @@ print_info (void)
 	} else {
 		snprintf (versbuff, 55, _("%s, version %s"), WITH_CURSES, versbuff2);
 	}
-#else
-	snprintf (versbuff, 55, "%s", WITH_CURSES);
-#endif
-#if defined (PDC_WIDE) || defined (NCURSES_WIDECHAR)
-	patch = 1;
-#else
-	patch = 0;
-#endif
 #ifdef RESOLVED_PDC_VER
 	snprintf (versbuff2, 114, "%s CHTYPE=%d(%d), WIDE=%d(%d), UTF-8=%d", versbuff,
-		opt1, (int)sizeof (chtype) * 8, patch, opt2,  opt3);
+		opt1, (int)sizeof (chtype) * 8, wide, opt2,  opt3);
 #undef RESOLVED_PDC_VER
 #else
 	snprintf (versbuff2, 114, "%s (CHTYPE=%d, WIDE=%d)", versbuff,
-		(int)sizeof (chtype) * 8, patch);
+		(int)sizeof (chtype) * 8, wide);
 #endif
-	var_print (_("extended screen I/O"), 	versbuff2, "", 0);
+#endif
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);
 	var_print (_("variable format"), buff, "", 0);
@@ -7260,7 +7263,9 @@ print_info (void)
 		"libxml2", major, minor, patch);
 	var_print (_("XML library"), 		versbuff, "", 0);
 	LIBXML_TEST_VERSION
+#if defined (HAVE_LIBXML_XMLWRITER_H) && HAVE_LIBXML_XMLWRITER_H
 	xmlCleanupParser ();
+#endif
 #else
 	var_print (_("XML library"), 		_("disabled"), "", 0);
 #endif
