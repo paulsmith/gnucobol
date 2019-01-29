@@ -1,4 +1,11 @@
 
+2019-01-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* tree.h, reserved.c, typeck.c: added SYSPUNCH/SYSPCH as CB_DEVICE_SYSPCH
+	* reserved.c: added S01-S05, currently internally as CB_FEATURE_FORMFEED
+	* typeck.c (cb_build_display_name): don't warn about
+	  ACCEPT FROM / DISPLAY UPON device-name in IBM/MVS/MF mode
+
 2019-01-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c, reserved.c: fixed compiler warnings

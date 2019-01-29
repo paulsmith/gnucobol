@@ -191,6 +191,7 @@ enum cb_system_name_category {
 #define CB_DEVICE_SYSERR	2
 #define CB_DEVICE_CONSOLE	3
 #define CB_DEVICE_PRINTER	4
+#define CB_DEVICE_SYSPCH	5
 /* Switches (max. must match COB_SWITCH_MAX) */
 #define CB_SWITCH_0		0
 #define CB_SWITCH_1		1

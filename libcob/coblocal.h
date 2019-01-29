@@ -266,6 +266,12 @@ typedef struct __cob_settings {
 	char 		*cob_display_print_pipe;		/* DISPLAY UPON PRINTER destination */
 	char		*cob_display_print_filename;	/* File name for DISPLAY UPON PRINTER */
 
+	char		*cob_display_punch_filename;	/* File name for DISPLAY UPON SYSPUNCH/SYSPCH */
+	FILE		*cob_display_punch_file;	/* possibly external FILE* to write DISPLAY UPON SYSPUNCH information to
+											   cob_display_punch_filename is used to open the file
+											   on first DISPLAY UPON SYSPCH statement and closed
+											   on runtime exit */
+
 	/* common.c */
 	char		external_trace_file;	/* use external FILE * for TRACE[ALL] */
 	FILE		*cob_trace_file;		/* FILE* to write TRACE[ALL] information to */

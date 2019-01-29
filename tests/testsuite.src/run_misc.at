@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
 ## Ron Norman
 ##
@@ -10618,7 +10618,8 @@ AT_CLEANUP
 
 
 AT_SETUP([DISPLAY UPON])
-AT_KEYWORDS([CHAINING])
+AT_KEYWORDS([CHAINING PRINTER PIPE CONSOLE SYSERR SYSPCH SYSPUNCH
+COB_DISPLAY_PRINT_PIPE COB_DISPLAY_PRINT_FILE COB_DISPLAY_PUNCH_FILE])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION DIVISION.
@@ -10629,7 +10630,7 @@ AT_DATA([prog.cob], [
            PRINTER IS PRINTER.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-	   77 note PIC X(05).
+       77 note PIC X(05).
        PROCEDURE DIVISION CHAINING note.
        DISPLAY "This is sent to CONSOLE " note UPON CONSOLE.
        DISPLAY "This is sent to SYSERR  " note UPON SYSERR.
@@ -10637,10 +10638,14 @@ AT_DATA([prog.cob], [
        DISPLAY "This is also sent to CONSOLE " note UPON CONSOLE.
        DISPLAY "This is also sent to SYSERR  " note UPON SYSERR.
        DISPLAY "This is also sent to PRINTER " note UPON PRINTER.
+       DISPLAY "This is sent to SYSPUNCH " note UPON SYSPUNCH
+            ON EXCEPTION DISPLAY 'NO ...'        UPON SYSERR.
+       DISPLAY "This is also sent to SYSPUNCH " note UPON SYSPCH
+            ON EXCEPTION DISPLAY ' ... SYSPUNCH' UPON SYSERR.
        STOP RUN RETURNING 0.
 ])
 
-AT_CHECK([$COMPILE prog.cob], [0], [], [])
+AT_CHECK([$COMPILE -std=ibm prog.cob], [0], [], [])
 
 AT_CHECK([$COBCRUN_DIRECT ./prog PLAIN], [0],
 [This is sent to CONSOLE PLAIN
@@ -10650,9 +10655,13 @@ This is also sent to PRINTER PLAIN
 ],
 [This is sent to SYSERR  PLAIN
 This is also sent to SYSERR  PLAIN
+libcob: prog.cob:18: warning: COB_DISPLAY_PUNCH_FILE is invalid, output to SYSPUNCH skipped
+NO ...
+ ... SYSPUNCH
 ])
 
 AT_CHECK([COB_DISPLAY_PRINT_PIPE='cat >>prt.log' \
+COB_DISPLAY_PUNCH_FILE='punch.out' \
 $COBCRUN_DIRECT ./prog PIPE.], [0],
 [This is sent to CONSOLE PIPE.
 This is also sent to CONSOLE PIPE.
@@ -10662,6 +10671,7 @@ This is also sent to SYSERR  PIPE.
 ])
 
 AT_CHECK([COB_DISPLAY_PRINT_FILE='prt.log' \
+COB_DISPLAY_PUNCH_FILE='punch.out' \
 $COBCRUN_DIRECT ./prog PRINT], [0],
 [This is sent to CONSOLE PRINT
 This is also sent to CONSOLE PRINT
@@ -10686,6 +10696,15 @@ AT_CHECK([diff reference prt.log], [0], [], [],
 AT_CHECK([sed -e 's/PIPE.\r/PIPE./g' prt.log > prt2.log], [0], [], [])
 AT_CHECK([diff reference prt2.log], [0], [], [])
 )
+
+AT_CAPTURE_FILE(./punch.out)
+
+AT_DATA([reference],
+[This is sent to SYSPUNCH PRINT
+This is also sent to SYSPUNCH PRINT
+])
+
+AT_CHECK([diff reference punch.out], [0], [], [])
 
 AT_CLEANUP
 

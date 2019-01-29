@@ -20,8 +20,8 @@ NEWS - user visible changes				-*- outline -*-
 ** JSON GENERATE statement
    (note: runtime support needs additional library cJSON)
 
-** Improved support for different compiler extensions (ACUCOBOL, RM/COBOL,
-   Fujitsu, Microsoft COBOL and more)
+** Improved support for different compiler extensions (ACUCOBOL, IBM,
+   Fujitsu, MicroFocus COBOL, Microsoft COBOL, RM/COBOL and more)
 
 ** Parser support for many features of different compilers, for example
    PIC 1 / USAGE BIT, ACUCOBOL extensions for graphical controls
@@ -116,7 +116,7 @@ NEWS - user visible changes				-*- outline -*-
 ** new configure option --enable-debug-log to allow *internal* tracing
    of GnuCOBOL (intended for developers of GnuCOBOL only)
 
-* Lot's of bug fixes to list here (please check ChangeLogs for full details).
+* Too much bug fixes to list here (please check ChangeLogs for full details).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

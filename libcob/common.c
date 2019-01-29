@@ -377,6 +377,7 @@ static struct config_tbl gc_conf[] = {
 	{"COB_DISPLAY_PRINT_PIPE", "display_print_pipe",		NULL,	NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_display_print_pipe)},
 	{"COBPRINTER", "printer",		NULL,	NULL, GRP_HIDE, ENV_STR, SETPOS (cob_display_print_pipe)},
 	{"COB_DISPLAY_PRINT_FILE", "display_print_file",		NULL,	NULL, GRP_SCREEN, ENV_STR,SETPOS (cob_display_print_filename)},
+	{"COB_DISPLAY_PUNCH_FILE", "display_punch_file",		NULL,	NULL, GRP_SCREEN, ENV_STR,SETPOS (cob_display_punch_filename)},
 	{"COB_LEGACY", "legacy", 			NULL, 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_legacy)},
 	{"COB_EXIT_WAIT", "exit_wait", 		"1", 	NULL, GRP_SCREEN, ENV_BOOL, SETPOS (cob_exit_wait)},
 	{"COB_EXIT_MSG", "exit_msg", 		NULL, NULL, GRP_SCREEN, ENV_STR, SETPOS (cob_exit_msg)},	/* default set in cob_init_screenio() */
@@ -588,6 +589,13 @@ cob_terminate_routines (void)
 		fclose (cobsetptr->cob_trace_file);
 	}
 	cobsetptr->cob_trace_file = NULL;
+
+	/* close punch file if self-opened */
+	if (cobsetptr->cob_display_punch_file
+	 && cobsetptr->cob_display_punch_filename) {
+		fclose (cobsetptr->cob_display_punch_file);
+		cobsetptr->cob_display_punch_file = NULL;
+	}
 
 	cob_exit_screen ();
 	cob_exit_fileio ();
@@ -6136,7 +6144,10 @@ get_config_val (char *value, int pos, char *orgvalue)
 		if (data_loc == offsetof (cob_settings, cob_display_print_filename)
 		 && cobsetptr->cob_display_print_file) {
 			snprintf (value, COB_MEDIUM_MAX, _("set by %s"), "cob_set_runtime_option");
-		} else if (data_loc == offsetof (cob_settings, cob_trace_filename)
+		} else if (data_loc == offsetof (cob_settings, cob_display_punch_filename)
+		 && cobsetptr->cob_display_punch_file) {
+			snprintf (value, COB_MEDIUM_MAX, _("set by %s"), "cob_set_runtime_option");
+		} else if(data_loc == offsetof (cob_settings, cob_trace_filename)
 		      && cobsetptr->external_trace_file) {
 			snprintf (value, COB_MEDIUM_MAX, _("set by %s"), "cob_set_runtime_option");
 		} else if (str == NULL) {
@@ -7786,6 +7797,18 @@ cob_set_runtime_option (enum cob_runtime_option_switch opt, void *p)
 		/* note: if set cob_display_print_file is always external */
 		cobsetptr->cob_display_print_file = (FILE *)p;
 		break;
+	case COB_SET_RUNTIME_DISPLAY_PUNCH_FILE:
+		/* note: if set cob_display_punch_file is always external */
+		if (cobsetptr->cob_display_punch_filename != NULL) {
+			/* if previously opened by libcob: close and free pointer to filename */
+			if (cobsetptr->cob_display_punch_file != NULL) {
+				fclose (cobsetptr->cob_display_punch_file);
+			}
+			cob_free (cobsetptr->cob_display_punch_filename);
+			cobsetptr->cob_display_punch_filename = NULL;
+		}
+		cobsetptr->cob_display_punch_file = (FILE *)p;
+		break;
 	case COB_SET_RUNTIME_RESCAN_ENV:
 		cob_rescan_env_vals ();
 		break;
@@ -7902,6 +7925,12 @@ cob_get_runtime_option (enum cob_runtime_option_switch opt)
 		return (void*)cobsetptr->cob_trace_file;
 	case COB_SET_RUNTIME_DISPLAY_PRINTER_FILE:
 		return (void*)cobsetptr->cob_display_print_file;
+	case COB_SET_RUNTIME_DISPLAY_PUNCH_FILE:
+		/* only externalize if not aquired by libcob */
+		if (cobsetptr->cob_display_punch_filename != NULL) {
+			return NULL;
+		}
+		return (void*)cobsetptr->cob_display_punch_file;
 	default:
 		cob_runtime_error (_("%s called with unknown option: %d"),
 			"cob_get_runtime_option", opt);

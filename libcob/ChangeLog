@@ -1,4 +1,11 @@
 
+2019-01-29  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c, termio.c, coblocal.h: added COB_DISPLAY_PUNCH_FILE
+	* common.c (cob_set_runtime_option, cob_get_runtime_option),
+	  common.h (cob_runtime_option_switch):
+	  added COB_SET_RUNTIME_DISPLAY_PUNCH_FILE
+
 2019-01-27  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c, mlio.c, screenio.c: fixed compiler warnings

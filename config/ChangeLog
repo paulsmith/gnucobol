@@ -1,4 +1,8 @@
 
+2019-01-29 Simon Sobisch <simonsobisch@gnu.org>
+
+	* runtime.cfg: added COB_DISPLAY_PUNCH_FILE
+
 2019-01-05  Edward Hart <edward.dan.hart@gmail.com>
 
 	* general: added json-generate option.
@@ -332,7 +336,7 @@
 
 2015-07-07  Ron Norman <rjn@inglenet.com>
 
-	* runtime.cfg: oadded COBPRINTER and COB_DISPLAY_PRINTER
+	* runtime.cfg: added COBPRINTER and COB_DISPLAY_PRINTER
 
 2015-07-06  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -448,7 +452,7 @@
 	* default.inc, Makefile.am: New files.
 
 
-Copyright 2003,2005-2007-2010,2014-2018 Free Software Foundation, Inc.
+Copyright 2003,2005-2007-2010,2014-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

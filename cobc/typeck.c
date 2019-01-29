@@ -6461,7 +6461,11 @@ cb_emit_accept_name (cb_tree var, cb_tree name)
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSIN:
-			if (!cb_relaxed_syntax_checks) {
+			/* possibly others allow this, too, consider adding a config option */
+			if (cb_std_define != CB_STD_IBM
+			 && cb_std_define != CB_STD_MVS
+			 && cb_std_define != CB_STD_MF
+			 && !cb_relaxed_syntax_checks) {
 				cb_warning_x (COBC_WARN_FILLER, name,
 					_("'%s' is not defined in SPECIAL-NAMES"), CB_NAME (name));
 			}
@@ -7526,6 +7530,8 @@ cb_build_display_mnemonic (cb_tree x)
 		return cb_int1;
 	case CB_DEVICE_PRINTER:
 		return cb_int2;
+	case CB_DEVICE_SYSPCH:
+		return cb_int3;
 	default:
 		cb_error_x (x, _("'%s' is not an output device"), CB_NAME (x));
 		return cb_int0;
@@ -7548,26 +7554,31 @@ cb_build_display_name (cb_tree x)
 		switch (CB_SYSTEM_NAME (sys)->token) {
 		case CB_DEVICE_CONSOLE:
 		case CB_DEVICE_SYSOUT:
-			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (COBC_WARN_FILLER, x,
-					_("'%s' is not defined in SPECIAL-NAMES"), name);
-			}
-			return cb_int0;
+			sys = cb_int0;
+			break;
 		case CB_DEVICE_SYSERR:
-			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (COBC_WARN_FILLER, x,
-					_("'%s' is not defined in SPECIAL-NAMES"), name);
-			}
-			return cb_int1;
+			sys = cb_int1;
+			break;
 		case CB_DEVICE_PRINTER:
-			if (!cb_relaxed_syntax_checks) {
-				cb_warning_x (COBC_WARN_FILLER, x,
-					_("'%s' is not defined in SPECIAL-NAMES"), name);
-			}
-			return cb_int2;
+			sys = cb_int2;
+			break;
+		case CB_DEVICE_SYSPCH:
+			sys = cb_int3;
+			break;
 		default:
 			cb_error_x (x, _("'%s' is not an output device"), name);
+			return cb_error_node;
 		}
+		/* possibly others allow this, too, consider adding a config option */
+		if (cb_std_define != CB_STD_IBM
+		 && cb_std_define != CB_STD_MVS
+		 && cb_std_define != CB_STD_MF
+		 && !cb_relaxed_syntax_checks) {
+		 	/* ... especially as this is not allowed and therefore should raise an error... */
+			cb_warning_x (COBC_WARN_FILLER, x,
+				_("'%s' is not defined in SPECIAL-NAMES"), name);
+		}
+		return sys;
 	} else if (is_default_reserved_word (CB_NAME (x))) {
 		cb_error_x (x, _("unknown device '%s'; it may exist in another dialect"),
 				    name);
@@ -11411,7 +11422,7 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 	}
 	token = CB_SYSTEM_NAME (rtree)->token;
 	switch (token) {
-	case CB_FEATURE_FORMFEED:
+	case CB_FEATURE_FORMFEED:	/* including S01-S05 and CSP*/
 		opt = (pos == CB_BEFORE) ? COB_WRITE_BEFORE : COB_WRITE_AFTER;
 		return cb_int_hex (opt | COB_WRITE_PAGE);
 	case CB_FEATURE_C01:
@@ -11428,6 +11439,7 @@ cb_build_write_advancing_mnemonic (cb_tree pos, cb_tree mnemonic)
 	case CB_FEATURE_C12:
 		opt = (pos == CB_BEFORE) ? COB_WRITE_BEFORE : COB_WRITE_AFTER;
 		return cb_int_hex (opt | COB_WRITE_CHANNEL | COB_WRITE_PAGE | token);
+	/* case CB_FEATURE_AFP_5A: what to do here? */
 	default:
 		cb_error_x (mnemonic, _("invalid mnemonic name"));
 		return cb_int0;
