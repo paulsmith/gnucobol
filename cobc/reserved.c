@@ -4225,7 +4225,7 @@ strcmp_for_qsort (const void *l, const void *r)
 static void
 get_aliases (const unsigned int key, struct list_reserved_line *line)
 {
-	unsigned int	given_token = reserved_word_map[key]->token;
+	int	given_token = reserved_word_map[key]->token;
 	unsigned int	i;
 	unsigned int	j;
 	unsigned int	num_aliases = 0;
