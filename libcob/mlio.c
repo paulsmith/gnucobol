@@ -281,11 +281,11 @@ get_xml_name (const cob_field * const f)
 
 #define IF_NEG_RETURN_ELSE_COUNT(func)			\
 	do {						\
-		int	status = (func);		\
-		if (status < 0) {			\
-			return status;			\
+		int	macro_status = (func);		\
+		if (macro_status < 0) {			\
+			return macro_status;			\
 		} else {				\
-			*count += status;		\
+			*count += macro_status;		\
 		}					\
 	} ONCE_COB
 

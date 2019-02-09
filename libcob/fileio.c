@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2002-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -1606,8 +1606,12 @@ cob_file_close (cob_file *f, const int opt)
 	size_t	ret;
 
 	switch (opt) {
-	case COB_CLOSE_NORMAL:
 	case COB_CLOSE_LOCK:
+		/* meaning (not file-sharing related):
+		   file may not be opened in *this runtime unit* again */
+		/* TODO: set flag here */
+		/* fall-thru */
+	case COB_CLOSE_NORMAL:
 	case COB_CLOSE_NO_REWIND:
 		if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
 			if (f->flag_needs_nl &&

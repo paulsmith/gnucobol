@@ -101,13 +101,14 @@
 #if defined(_MSC_VER)
 
 /*
-_MSC_VER == 1400 (Visual Studio 2005, VS8) since OS-Version 2000
-_MSC_VER == 1500 (Visual Studio 2008, VS9) since OS-Version XP / 2003
-_MSC_VER == 1600 (Visual Studio 2010, VS10) since OS-Version XP / 2003
-_MSC_VER == 1700 (Visual Studio 2012, VS11) since OS-Version 7  / 2008 R2
-_MSC_VER == 1800 (Visual Studio 2013, VS12) since OS-Version 7  / 2008 R2
-_MSC_VER == 1900 (Visual Studio 2015, VS14) since OS-Version 7  / 2008 R2
-_MSC_VER == 1910 (Visual Studio 2017, VS15) since OS-Version 7  / 2012 R2
+_MSC_VER == 1400 (Visual Studio 2005, VS8 , MSVC 8) since OS-Version 2000
+_MSC_VER == 1500 (Visual Studio 2008, VS9 , MSVC 9) since OS-Version XP / 2003
+_MSC_VER == 1600 (Visual Studio 2010, VS10, MSVC10) since OS-Version XP / 2003
+_MSC_VER == 1700 (Visual Studio 2012, VS11, MSVC11) since OS-Version 7(XP) / 2008 R2(2003)
+_MSC_VER == 1800 (Visual Studio 2013, VS12, MSVC12) since OS-Version 7(XP) / 2008 R2(2003)
+_MSC_VER == 1900 (Visual Studio 2015, VS14, MSVC14) since OS-Version 7(XP) / 2008 R2(2003)
+_MSC_VER == 1910 (Visual Studio 2017, VS15, MSVC14.1) since OS-Version 7 / 2012 R2
+_MSC_VER == 1920 (Visual Studio 2019, VS16, MSVC14.2) since OS-Version 7 / 2012 R2
 
 Note: also defined together with __clang__ in both frontends:
    __llvm__ Clang LLVM frontend for Visual Studio by LLVM Project (via clang-cl.exe [cl build options])

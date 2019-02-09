@@ -1907,7 +1907,6 @@ extern unsigned int	cb_verify_x (cb_tree, const enum cb_support,
 				     const char *);
 extern void		listprint_suppress (void);
 extern void		listprint_restore (void);
-extern unsigned int	cb_verify_x (cb_tree, const enum cb_support, const char *);
 
 extern void		redefinition_error (cb_tree);
 extern void		redefinition_warning (cb_tree, cb_tree);
