@@ -1686,6 +1686,7 @@ extern enum cb_category		cb_tree_category (cb_tree);
 extern int			cb_tree_type (const cb_tree,
 					      const struct cb_field *);
 extern int			cb_category_is_alpha (cb_tree);
+extern int			cb_category_is_national (cb_tree);
 extern int			cb_fits_int (const cb_tree);
 extern int			cb_fits_long_long (const cb_tree);
 extern int			cb_get_int (const cb_tree);
@@ -1890,6 +1891,7 @@ extern void			remove_context_sensitivity (const char *,
 							    const int);
 extern struct cobc_reserved	*lookup_reserved_word (const char *);
 extern cb_tree			get_system_name (const char *);
+extern cb_tree			get_system_name_translated (cb_tree);
 extern const char		*cb_get_register_definition (const char *);
 extern void			cb_list_reserved (void);
 extern void			cb_list_intrinsics (void);

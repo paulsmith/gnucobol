@@ -3701,7 +3701,6 @@ special_name:
 mnemonic_name_clause:
   WORD
   {
-	char system_name[16];
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
@@ -3710,18 +3709,9 @@ mnemonic_name_clause:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 		save_tree = NULL;
 	} else {
-		/* get system name and revert word-combination of scanner.l,
-		   if necessary (e.g. SWITCH A <--> SWITCH_A) */
-		system_name[15] = 0;
-		strncpy(system_name, CB_NAME ($1), 15);
-		if (system_name [6] == '_') {
-			system_name [6] = ' ';
-		}
-		/* lookup system name */
-		save_tree = get_system_name (system_name);
-		if (!save_tree) {
-			cb_error_x ($1, _("invalid system-name '%s'"), system_name);
-		}
+		/* lookup system name with special translation
+		   note: result in NULL + raised error if not found */
+		save_tree = get_system_name_translated ($1);
 	}
   }
   mnemonic_choices
@@ -10504,6 +10494,11 @@ call_param:
 			if (cb_category_is_alpha ($3)) {
 				cb_warning_x (COBC_WARN_FILLER, $3,
 					      _("BY CONTENT assumed for alphanumeric item '%s'"),
+						  cb_name ($3));
+				call_mode = CB_CALL_BY_CONTENT;
+			} else if (cb_category_is_national ($3)) {
+				cb_warning_x (COBC_WARN_FILLER, $3,
+					      _("BY CONTENT assumed for national item '%s'"),
 						  cb_name ($3));
 				call_mode = CB_CALL_BY_CONTENT;
 			}

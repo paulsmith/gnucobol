@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2016-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2016-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Edward Hart, Simon Sobisch
 ##
 ## This file is part of GnuCOBOL.
@@ -974,6 +974,29 @@ AT_DATA([prog.cob], [
 
 AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
 [prog.cob:8: warning: BY CONTENT assumed for alphanumeric item 'X'
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([CALL BY VALUE national item (extension)])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION   DIVISION.
+       PROGRAM-ID.      prog.
+       DATA             DIVISION.
+       WORKING-STORAGE  SECTION.
+       01  N            PIC N(4).
+       PROCEDURE        DIVISION.
+           CALL "PROG2" USING BY VALUE N
+           END-CALL.
+           STOP RUN.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [0], [],
+[prog.cob:6: warning: handling of USAGE NATIONAL is unfinished; implementation is likely to be changed
+prog.cob:8: warning: BY CONTENT assumed for national item 'N'
 ])
 
 AT_CLEANUP

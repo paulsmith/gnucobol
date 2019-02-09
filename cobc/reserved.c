@@ -4313,7 +4313,6 @@ remove_context_sensitivity (const char *word, const int context)
 cb_tree
 get_system_name (const char *name)
 {
-
 	struct system_name_struct *system_name = lookup_system_name (name, 0);
 
 	if (system_name != NULL) {
@@ -4321,6 +4320,28 @@ get_system_name (const char *name)
 			system_name->token);
 	}
 	return NULL;
+}
+
+/* get system name, revert word-combination of scanner.l,
+   if necessary (e.g. SWITCH A <--> SWITCH_A) */
+cb_tree
+get_system_name_translated (cb_tree word)
+{
+	char system_name[COB_MAX_WORDLEN + 1];
+	cb_tree res;
+	
+	system_name[COB_MAX_WORDLEN] = 0;
+	strncpy(system_name, CB_NAME (word), COB_MAX_WORDLEN);
+	if (system_name [6] == '_') {
+		system_name [6] = ' ';
+	}
+
+	res = get_system_name(system_name);
+	if (!res) {
+		cb_error_x (word, _("invalid system-name '%s'"), system_name);
+	}
+
+	return res;
 }
 
 static void

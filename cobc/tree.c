@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2001-2018 Free Software Foundation, Inc.
+   Copyright (C) 2001-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
    Edward Hart
 
@@ -80,10 +80,25 @@ static int category_is_alphanumeric[] = {
 	1,	/* CB_CATEGORY_ALPHANUMERIC_EDITED */
 	0,	/* CB_CATEGORY_BOOLEAN */
 	0,	/* CB_CATEGORY_INDEX */
+	0,	/* CB_CATEGORY_NATIONAL */
+	0,	/* CB_CATEGORY_NATIONAL_EDITED */
+	0,	/* CB_CATEGORY_NUMERIC */
+	1,	/* CB_CATEGORY_NUMERIC_EDITED */
+	0,	/* CB_CATEGORY_OBJECT_REFERENCE */
+	0,	/* CB_CATEGORY_DATA_POINTER */
+	0	/* CB_CATEGORY_PROGRAM_POINTER */
+};
+static int category_is_national[] = {
+	0,	/* CB_CATEGORY_UNKNOWN */
+	0,	/* CB_CATEGORY_ALPHABETIC */
+	0,	/* CB_CATEGORY_ALPHANUMERIC */
+	0,	/* CB_CATEGORY_ALPHANUMERIC_EDITED */
+	0,	/* CB_CATEGORY_BOOLEAN */
+	0,	/* CB_CATEGORY_INDEX */
 	1,	/* CB_CATEGORY_NATIONAL */
 	1,	/* CB_CATEGORY_NATIONAL_EDITED */
 	0,	/* CB_CATEGORY_NUMERIC */
-	1,	/* CB_CATEGORY_NUMERIC_EDITED */
+	0,	/* CB_CATEGORY_NUMERIC_EDITED */
 	0,	/* CB_CATEGORY_OBJECT_REFERENCE */
 	0,	/* CB_CATEGORY_DATA_POINTER */
 	0	/* CB_CATEGORY_PROGRAM_POINTER */
@@ -1234,7 +1249,6 @@ cb_tree_category (cb_tree x)
 enum cb_class
 cb_tree_class (cb_tree x)
 {
-
 	return category_to_class_table[CB_TREE_CATEGORY (x)];
 }
 
@@ -1242,6 +1256,12 @@ int
 cb_category_is_alpha (cb_tree x)
 {
 	return category_is_alphanumeric[CB_TREE_CATEGORY (x)];
+}
+
+int
+cb_category_is_national (cb_tree x)
+{
+	return category_is_national[CB_TREE_CATEGORY (x)];
 }
 
 int
@@ -5817,13 +5837,13 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 		    const int isuser)
 {
 	struct cb_intrinsic_table	*cbp;
-	cb_tree				x;
+	cb_tree					x;
 	struct cb_field			*fld;
 	enum cb_category		catg;
 
 	int numargs = (int)cb_list_length (args);
 
-	if (unlikely(isuser)) {
+	if (unlikely (isuser)) {
 		if (refmod && CB_LITERAL_P(CB_PAIR_X(refmod)) &&
 		    cb_get_int (CB_PAIR_X(refmod)) < 1) {
 			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(name));

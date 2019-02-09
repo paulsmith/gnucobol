@@ -1,4 +1,14 @@
 
+2019-02-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, tree.h, reserved.c: moved translation "word to system name" from
+	  parser.y (mnemonic_name_clause) to reserved.c (get_system_name_translated)
+
+2019-02-05  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, tree.h, tree.c: splitted cb_category_is_national from
+	  cb_category_is_alphanumeric
+
 2019-01-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* tree.h, reserved.c, typeck.c: added SYSPUNCH/SYSPCH as CB_DEVICE_SYSPCH
