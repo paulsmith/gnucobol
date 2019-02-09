@@ -59,9 +59,6 @@
     <ClInclude Include="..\defaults.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cobc\tree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\libcob\cobgetopt.h">
       <Filter>Header Files</Filter>
     </ClInclude>

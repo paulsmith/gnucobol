@@ -197,17 +197,16 @@
     <ClCompile Include="..\..\libcob\termio.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\config.h" />
-    <ClInclude Include="..\defaults.h" />
-    <ClInclude Include="..\..\cobc\tree.h" />
-    <ClInclude Include="..\..\libcob\cobgetopt.h" />
-    <ClInclude Include="..\..\libcob\coblocal.h" />
-    <ClInclude Include="..\..\libcob\common.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\libcob\exception.def" />
     <None Include="..\..\libcob\system.def" />
     <None Include="..\..\libcob\ChangeLog" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\config.h" />
+    <ClInclude Include="..\defaults.h" />
+    <ClInclude Include="..\..\libcob\cobgetopt.h" />
+    <ClInclude Include="..\..\libcob\coblocal.h" />
+    <ClInclude Include="..\..\libcob\common.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\version_libcob.rc" />

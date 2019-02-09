@@ -1,0 +1,25 @@
+<CC386PROJECT>
+	<VERSION ID="5"/>
+	<WORKAREA NAME="..\ocide\GnuCOBOL.cwa"/>
+	<TARGET TITLE="libsupport">
+		<PROPERTIES>
+			<PROFILE NAME="WIN32" TYPE="DEBUG">
+				<PROP ID="DETAILBUILD">1</PROP>
+				<PROP ID="__PROJECTTYPE">3</PROP>
+			</PROFILE>
+			<PROFILE NAME="WIN32" TYPE="RELEASE">
+				<PROP ID="DETAILBUILD">1</PROP>
+				<PROP ID="__PROJECTTYPE">3</PROP>
+			</PROFILE>
+		</PROPERTIES>
+		<FILES>
+			<FOLDER TITLE="Include Files">
+				<FILE NAME="..\..\lib\gettext.h" TITLE="gettext.h" CLEAN="0"/>
+			</FOLDER>
+			<FOLDER TITLE="Source Files">
+				<FILE NAME="..\..\lib\dummymac.c" TITLE="dummymac.c" CLEAN="0"/>
+			</FOLDER>
+			<FILE NAME="..\..\lib\ChangeLog" TITLE="ChangeLog" CLEAN="0"/>
+		</FILES>
+	</TARGET>
+</CC386PROJECT>

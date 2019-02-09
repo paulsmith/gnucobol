@@ -1,0 +1,15 @@
+<OCCWORKAREA>
+	<VERSION ID="8"/>
+	<PROJECTS SELECTED="cobcrun">
+		<FILE NAME="..\ocide\cobc.exe" CLEAN="0">
+			<DEPENDENCY NAME="..\ocide\libcob.dll" />
+		</FILE>
+		<FILE NAME="..\ocide\cobcrun.exe" CLEAN="1">
+			<DEPENDENCY NAME="..\ocide\libcob.dll" />
+		</FILE>
+		<FILE NAME="..\ocide\libcob.dll" CLEAN="0">
+			<DEPENDENCY NAME="..\ocide\libsupport.l" />
+		</FILE>
+		<FILE NAME="..\ocide\libsupport.l" CLEAN="0"/>
+	</PROJECTS>
+</OCCWORKAREA>

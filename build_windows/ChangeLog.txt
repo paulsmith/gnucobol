@@ -1,4 +1,9 @@
 
+2019-02-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* ocide (OrangeC IDE), vs2019: added
+	* config.h.in [__ORANGEC__]: updated
+
 2019-01-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in: adjustments for CJSON
@@ -183,7 +188,7 @@
 	  version_libcob.rc, version_cobcrun.rc provided by Simon)
 
 
-Copyright 2014-2017 Free Software Foundation, Inc.
+Copyright 2014-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

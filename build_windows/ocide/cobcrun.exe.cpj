@@ -1,0 +1,39 @@
+<CC386PROJECT>
+	<VERSION ID="5"/>
+	<WORKAREA NAME="..\ocide\GnuCOBOL.cwa"/>
+	<TARGET TITLE="cobcrun">
+		<PROPERTIES>
+			<PROFILE NAME="WIN32" TYPE="DEBUG">
+				<PROP ID="__DEBUG_ARGUMENTS">ISAMTEST</PROP>
+				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">$(OUTPUTDIR)\libcob.l</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__DEBUG_WORKING_DIR">D:\Programme\Entwicklung\GnuCOBOL\own_tests\isamTest</PROP>
+				<PROP ID="__BREAK_DLL">1</PROP>
+				<PROP ID="__STOP_FIRST_CHANCE">1</PROP>
+			</PROFILE>
+			<PROFILE NAME="WIN32" TYPE="RELEASE">
+				<PROP ID="__DEBUG_ARGUMENTS">--info</PROP>
+				<PROP ID="__RCINCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="__LLIBS">$(OUTPUTDIR)\libcob.l</PROP>
+				<PROP ID="__INCLUDE">$(PROJECTDIR)\..\..;$(PROJECTDIR)\..</PROP>
+				<PROP ID="DETAILBUILD">1</PROP>
+			</PROFILE>
+		</PROPERTIES>
+		<FILES>
+			<FOLDER TITLE="Include Files">
+				<FILE NAME="..\..\libcob\cobgetopt.h" TITLE="cobgetopt.h" CLEAN="0"/>
+				<FILE NAME="..\..\libcob\common.h" TITLE="common.h" CLEAN="0"/>
+				<FILE NAME="..\..\..\gnucobol-merge-in\libcob.h" TITLE="libcob.h" CLEAN="0"/>
+				<FILE NAME="..\..\..\gnucobol-merge-in\tarstamp.h" TITLE="tarstamp.h" CLEAN="0"/>
+			</FOLDER>
+			<FOLDER TITLE="Resource Files">
+				<FILE NAME="..\..\build_windows\version_cobcrun.rc" TITLE="version_cobcrun.rc" CLEAN="0"/>
+			</FOLDER>
+			<FOLDER TITLE="Source Files">
+				<FILE NAME="..\..\bin\cobcrun.c" TITLE="cobcrun.c" CLEAN="0"/>
+			</FOLDER>
+			<FILE NAME="..\..\bin\ChangeLog" TITLE="ChangeLog" CLEAN="0"/>
+		</FILES>
+	</TARGET>
+</CC386PROJECT>

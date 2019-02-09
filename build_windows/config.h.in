@@ -1,6 +1,6 @@
 
-/* config.h, tested with x86/x64 VS2005-2017
-   and OrangeC 6.0.40.0 (which ignores the lib comments) */
+/* config.h, tested with x86/x64 VS2005-2019
+   and OrangeC 6.0.40.1 (which ignores the lib comments) */
 
 #define NOISAM   0
 #define BDB      1
@@ -482,7 +482,11 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <sys/wait.h> header file. */
+#if defined(__ORANGEC__)
+#define HAVE_SYS_WAIT_H 1
+#else
 /* #undef HAVE_SYS_WAIT_H */
+#endif
 
 /* Has timezone variable */
 #define HAVE_TIMEZONE 1
