@@ -3,6 +3,8 @@
 
 	* ocide (OrangeC IDE), vs2019: added
 	* config.h.in [__ORANGEC__]: updated
+	* config.h.in: fixes for BDB, MSC_VER < 1700;
+	  changed linker comments for libxml2 to default to self-build names
 
 2019-01-06  Simon Sobisch <simonsobisch@gnu.org>
 

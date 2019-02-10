@@ -85,10 +85,14 @@
 #endif /* CONFIGURED_ISAM */
 
 #if CONFIGURED_XML == XML2
-#pragma comment(lib, "libxml2.dll.a")
-#pragma comment(lib, "libcharset.dll.a")
-#pragma comment(lib, "libiconv.dll.a")
-#pragma comment(lib, "libz.dll.a")
+//#pragma comment(lib, "libxml2.dll.a")
+//#pragma comment(lib, "libcharset.dll.a")
+//#pragma comment(lib, "libiconv.dll.a")
+//#pragma comment(lib, "libz.dll.a")
+#pragma comment(lib, "libxml2")
+#pragma comment(lib, "libcharset")
+#pragma comment(lib, "libiconv")
+#pragma comment(lib, "zlib")
 #endif
 
 #if CONFIGURED_JSON == CJSON
@@ -283,7 +287,11 @@
 #endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
 #define HAVE_INTTYPES_H 1
+#else
+/* #undef HAVE_INTTYPES_H */
+#endif
 
 /* Define to 1 if you have the <isam.h> header file. */
 #if CONFIGURED_ISAM == CISAM
@@ -579,7 +587,7 @@
 #define VERSION "3.0-dev"
 
 /* Use CISAM as ISAM handler */
-#if CONFIGURED_ISAM == BDB
+#if CONFIGURED_ISAM == CISAM
 #define WITH_CISAM 1
 #else
 /* #undef WITH_CISAM */
