@@ -1898,7 +1898,7 @@ extern void			cb_list_intrinsics (void);
 extern void			cb_list_system_names (void);
 extern void			cb_list_registers (void);
 extern void			cb_list_system_routines (void);
-extern void			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
+extern int			cb_list_map (cb_tree (*) (cb_tree), cb_tree);
 
 /* error.c */
 extern void		cb_warning_x (int, cb_tree, const char *, ...) COB_A_FORMAT34;

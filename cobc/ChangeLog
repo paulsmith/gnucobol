@@ -3,6 +3,10 @@
 
 	* parser.y, tree.h, reserved.c: moved translation "word to system name" from
 	  parser.y (mnemonic_name_clause) to reserved.c (get_system_name_translated)
+	* tree.c (cb_list_map), tree.h: directly check for error node,
+	  return 1 if found
+	* typeck.c (cb_check_numeric_name, cb_check_numeric_edited_name): always
+	  check for error node outside these functions, minor refactoring
 
 2019-02-05  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -5596,7 +5600,7 @@
 2005-10-01  Roger While <simrw@sim-basis.de>
 
 	* Indent run on most source
-	* Start optimizing in typeck/codegen -
+	* typeck.c/codegen.c: Start optimizing -
 	  Unsigned numeric (Pic 9) field optimize
 	  Retrieval of binary-swap 2,4,8 byte fields
 	  Retrieval of 1 byte binary fields always optimized

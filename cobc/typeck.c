@@ -637,8 +637,9 @@ cb_check_group_name (cb_tree x)
 		if (y == cb_error_node) {
 			return cb_error_node;
 		}
-		if (CB_FIELD_P (y) && CB_FIELD (y)->children != NULL &&
-		    CB_REFERENCE (x)->offset == NULL) {
+		if (CB_FIELD_P (y)
+		 && CB_FIELD (y)->children != NULL
+		 && CB_REFERENCE (x)->offset == NULL) {
 			return x;
 		}
 	}
@@ -650,13 +651,15 @@ cb_check_group_name (cb_tree x)
 static cb_tree
 cb_check_numeric_name (cb_tree x)
 {
+#if 0 /* already checked before called */
 	if (x == cb_error_node) {
 		return cb_error_node;
 	}
+#endif
 
-	if (CB_REFERENCE_P (x) &&
-	    CB_FIELD_P (cb_ref (x)) &&
-	    CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC) {
+	if (CB_REFERENCE_P (x)
+	 && CB_FIELD_P (cb_ref (x))
+	 && CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC) {
 		return x;
 	}
 
@@ -667,15 +670,19 @@ cb_check_numeric_name (cb_tree x)
 static cb_tree
 cb_check_numeric_edited_name (cb_tree x)
 {
+#if 0 /* already checked before called */
 	if (x == cb_error_node) {
 		return cb_error_node;
 	}
+#endif
 
-	if (CB_REFERENCE_P (x) &&
-	    CB_FIELD_P (cb_ref (x)) &&
-	    (CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC ||
-	     CB_TREE_CATEGORY (x) == CB_CATEGORY_NUMERIC_EDITED)) {
-		return x;
+	if (CB_REFERENCE_P (x)
+	 && CB_FIELD_P (cb_ref (x))) {
+		enum cb_category cat = CB_TREE_CATEGORY(x);
+		if (cat == CB_CATEGORY_NUMERIC
+		 || cat == CB_CATEGORY_NUMERIC_EDITED) {
+			return x;
+		}
 	}
 
 	cb_error_x (x, _("'%s' is not a numeric or numeric-edited name"), cb_name (x));
@@ -4819,14 +4826,14 @@ cb_emit_arithmetic (cb_tree vars, const int op, cb_tree val)
 		return;
 	}
 
+
 	if (op) {
-		cb_list_map (cb_check_numeric_name, vars);
+		if (cb_list_map(cb_check_numeric_name, vars)) {
+			return;
+		}
 	} else {
-		cb_list_map (cb_check_numeric_edited_name, vars);
-	}
-	for (l = vars; l; l = CB_CHAIN (l)) {
-		if (CB_VALUE (l) == cb_error_node) {
-		        return;
+		if (cb_list_map (cb_check_numeric_edited_name, vars)) {
+			return;
 		}
 	}
 
@@ -7594,25 +7601,29 @@ void
 cb_emit_divide (cb_tree dividend, cb_tree divisor, cb_tree quotient,
 		cb_tree remainder)
 {
+	cb_tree quotient_field, remainder_field;
+
 	if (cb_validate_one (dividend)
 	 || cb_validate_one (divisor)) {
 		return;
 	}
-	CB_VALUE (quotient) = cb_check_numeric_edited_name (CB_VALUE (quotient));
-	CB_VALUE (remainder) = cb_check_numeric_edited_name (CB_VALUE (remainder));
 
-	if (cb_validate_one (CB_VALUE (quotient))
-	 || cb_validate_one (CB_VALUE (remainder))) {
+	if (cb_validate_one (CB_VALUE(quotient))
+	 || cb_validate_one (CB_VALUE(remainder))) {
+		return;
+	}
+	quotient_field = cb_check_numeric_edited_name (CB_VALUE(quotient));
+	remainder_field = cb_check_numeric_edited_name (CB_VALUE(remainder));
+
+	if (quotient_field == cb_error_node
+	 || remainder_field == cb_error_node) {
 		return;
 	}
 
 	cb_emit (CB_BUILD_FUNCALL_4 ("cob_div_quotient", dividend, divisor,
-				     CB_VALUE (quotient),
-				     build_store_option (CB_VALUE (quotient),
-							 CB_PURPOSE (quotient))));
-	cb_emit (CB_BUILD_FUNCALL_2 ("cob_div_remainder", CB_VALUE (remainder),
-				     build_store_option (CB_VALUE (remainder),
-							 cb_int0)));
+		quotient_field, build_store_option (quotient_field, CB_PURPOSE (quotient))));
+	cb_emit (CB_BUILD_FUNCALL_2 ("cob_div_remainder",
+		remainder_field, build_store_option (remainder_field, cb_int0)));
 }
 
 /* EVALUATE statement */

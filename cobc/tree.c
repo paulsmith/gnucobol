@@ -1840,12 +1840,16 @@ cb_list_length (cb_tree l)
 	return n;
 }
 
-void
+int
 cb_list_map (cb_tree (*func) (cb_tree x), cb_tree l)
 {
+	int ret = 0;
 	for (; l; l = CB_CHAIN (l)) {
-		CB_VALUE (l) = func (CB_VALUE (l));
+		if ((CB_VALUE (l) = func (CB_VALUE (l))) == cb_error_node) {
+			ret = 1;
+		}
 	}
+	return ret;
 }
 
 /* Link value into the reference */
