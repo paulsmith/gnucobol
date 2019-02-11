@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 
    This file is part of GnuCOBOL.
@@ -71,10 +71,6 @@ lt_dlsym (HMODULE hmod, const char *p)
 	modun.modaddr = GetProcAddress(hmod, p);
 	return modun.voidptr;
 }
-
-#if	0	/* RXWRXW - Win dlsym */
-#define lt_dlsym(x,y)	GetProcAddress(x, y)
-#endif
 
 #define lt_dlclose(x)	FreeLibrary(x)
 #define	lt_dlinit()

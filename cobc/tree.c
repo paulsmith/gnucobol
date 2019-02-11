@@ -5837,7 +5837,7 @@ cb_build_any_intrinsic (cb_tree args)
 }
 
 cb_tree
-cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
+cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 		    const int isuser)
 {
 	struct cb_intrinsic_table	*cbp;
@@ -5850,41 +5850,41 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	if (unlikely (isuser)) {
 		if (refmod && CB_LITERAL_P(CB_PAIR_X(refmod)) &&
 		    cb_get_int (CB_PAIR_X(refmod)) < 1) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(name));
+			cb_error_x (func, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(func));
 			return cb_error_node;
 		}
 		if (refmod && CB_PAIR_Y(refmod) &&
 		    CB_LITERAL_P(CB_PAIR_Y(refmod)) &&
 		    cb_get_int (CB_PAIR_Y(refmod)) < 1) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(name));
+			cb_error_x (func, _("FUNCTION '%s' has invalid reference modification"), CB_NAME(func));
 			return cb_error_node;
 		}
 		if (numargs > (int)current_program->max_call_param) {
 			current_program->max_call_param = numargs;
 		}
-		return make_intrinsic (name, &userbp, args, cb_int1, refmod, 1);
+		return make_intrinsic (func, &userbp, args, cb_int1, refmod, 1);
 	}
 
-	cbp = lookup_intrinsic (CB_NAME (name), 1);
+	cbp = lookup_intrinsic (CB_NAME (func), 1);
 	if (!cbp || cbp->active == CB_FEATURE_DISABLED) {
-		cb_error_x (name, _("FUNCTION '%s' unknown"), CB_NAME (name));
+		cb_error_x (func, _("FUNCTION '%s' unknown"), CB_NAME (func));
 		return cb_error_node;
 	}
 	if (cbp->active == CB_FEATURE_NOT_IMPLEMENTED) {
-		cb_error_x (name, _("FUNCTION '%s' is not implemented"),
+		cb_error_x (func, _("FUNCTION '%s' is not implemented"),
 			    cbp->name);
 		return cb_error_node;
 	}
 	if ((cbp->args == -1)) {
 		if (numargs < cbp->min_args) {
-			cb_error_x (name,
+			cb_error_x (func,
 				_("FUNCTION '%s' has wrong number of arguments"),
 				cbp->name);
 			return cb_error_node;
 		}
 	} else {
 		if (numargs > cbp->args || numargs < cbp->min_args) {
-			cb_error_x (name,
+			cb_error_x (func,
 					_("FUNCTION '%s' has wrong number of arguments"),
 					cbp->name);
 			return cb_error_node;
@@ -5892,24 +5892,24 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	}
 	if (refmod) {
 		if (!cbp->refmod) {
-			cb_error_x (name, _("FUNCTION '%s' cannot have reference modification"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' cannot have reference modification"), cbp->name);
 			return cb_error_node;
 		}
 		/* TODO: better check needed, see typeck.c (cb_build_identifier) */
 		if (CB_LITERAL_P(CB_PAIR_X(refmod)) &&
 		    cb_get_int (CB_PAIR_X(refmod)) < 1) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid reference modification"), cbp->name);
 			return cb_error_node;
 		}
 		if (CB_PAIR_Y(refmod) && CB_LITERAL_P(CB_PAIR_Y(refmod)) &&
 		    cb_get_int (CB_PAIR_Y(refmod)) < 1) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid reference modification"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid reference modification"), cbp->name);
 			return cb_error_node;
 		}
 	}
 
 	if (iso_8601_func (cbp->intr_enum)) {
-		if (!valid_const_date_time_args (name, cbp, args)) {
+		if (!valid_const_date_time_args (func, cbp, args)) {
 			return cb_error_node;
 		}
 	}
@@ -5941,16 +5941,17 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 			    && CB_TREE_CATEGORY (x) != CB_CATEGORY_NATIONAL))
 			return cb_build_length (x);
 		}
-		return make_intrinsic (name, cbp, args, NULL, NULL, 0);
+		return make_intrinsic (func, cbp, args, NULL, NULL, 0);
 
 	case CB_INTR_WHEN_COMPILED:
 		if (refmod) {
-			return make_intrinsic (name, cbp,
+			return make_intrinsic (func, cbp,
 				CB_LIST_INIT (cb_intr_whencomp), NULL, refmod, 0);
 		} else {
 			return cb_intr_whencomp;
 		}
 
+	/* single, numeric only parameter */
 	case CB_INTR_ABS:
 	case CB_INTR_ACOS:
 	case CB_INTR_ASIN:
@@ -5976,10 +5977,10 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	case CB_INTR_TEST_DAY_YYYYDDD:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_NUMERIC) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
 			return cb_error_node;
 		}
-		return make_intrinsic (name, cbp, args, NULL, refmod, 0);
+		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
 
 	case CB_INTR_ANNUITY:
 	case CB_INTR_BOOLEAN_OF_INTEGER:
@@ -5995,8 +5996,6 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	case CB_INTR_EXCEPTION_LOCATION_N:
 	case CB_INTR_EXCEPTION_STATUS:
 	case CB_INTR_EXCEPTION_STATEMENT:
-	case CB_INTR_FORMATTED_CURRENT_DATE:
-	case CB_INTR_FORMATTED_DATE:
 	case CB_INTR_INTEGER_OF_BOOLEAN:
 	case CB_INTR_INTEGER_OF_FORMATTED_DATE:
 	case CB_INTR_LOCALE_DATE:
@@ -6021,7 +6020,6 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	case CB_INTR_ORD:
 	case CB_INTR_PI:
 	case CB_INTR_REM:
-	case CB_INTR_REVERSE:
 	case CB_INTR_SECONDS_FROM_FORMATTED_TIME:
 	case CB_INTR_SECONDS_PAST_MIDNIGHT:
 	case CB_INTR_STORED_CHAR_LENGTH:
@@ -6029,84 +6027,100 @@ cb_build_intrinsic (cb_tree name, cb_tree args, cb_tree refmod,
 	case CB_INTR_TEST_NUMVAL:
 	case CB_INTR_TEST_NUMVAL_C:
 	case CB_INTR_TEST_NUMVAL_F:
+		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
+
+	/* category has to be adjusted depending on parameters */
+	case CB_INTR_FORMATTED_CURRENT_DATE:
+	case CB_INTR_FORMATTED_DATE:
+	case CB_INTR_FORMATTED_TIME:
+	case CB_INTR_FORMATTED_DATETIME:
+	case CB_INTR_REVERSE:
 	case CB_INTR_TRIM:
 	case CB_INTR_UPPER_CASE:
-		return make_intrinsic (name, cbp, args, NULL, refmod, 0);
+		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
 
 	case CB_INTR_HIGHEST_ALGEBRAIC:
 	case CB_INTR_LOWEST_ALGEBRAIC:
 		x = CB_VALUE (args);
 		if (!CB_REF_OR_FIELD_P (x)) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
 			return cb_error_node;
 		}
 		catg = cb_tree_category (x);
 		if (catg != CB_CATEGORY_NUMERIC &&
 		    catg != CB_CATEGORY_NUMERIC_EDITED) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
 			return cb_error_node;
 		}
-		return make_intrinsic (name, cbp, args, NULL, refmod, 0);
+		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
 
 	case CB_INTR_CONTENT_LENGTH:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
 			return cb_error_node;
 		}
-		return make_intrinsic (name, cbp, args, NULL, NULL, 0);
+		return make_intrinsic (func, cbp, args, NULL, NULL, 0);
 
 	case CB_INTR_CONTENT_OF:
 		x = CB_VALUE (args);
 		if (cb_tree_category (x) != CB_CATEGORY_DATA_POINTER) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid parameter"), cbp->name);
 			return cb_error_node;
 		}
-		return make_intrinsic (name, cbp, args, cb_int1, refmod, 0);
+		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
 
 	case CB_INTR_CONCATENATE:
 	case CB_INTR_DISPLAY_OF:
-	case CB_INTR_FORMATTED_DATETIME:
-	case CB_INTR_FORMATTED_TIME:
 	case CB_INTR_NATIONAL_OF:
-		return make_intrinsic (name, cbp, args, cb_int1, refmod, 0);
+		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
 
-	case CB_INTR_DATE_TO_YYYYMMDD:
-	case CB_INTR_DAY_TO_YYYYDDD:
-	case CB_INTR_LOCALE_COMPARE:
-	case CB_INTR_MAX:
+	/* mulitple, numeric only arguments */
 	case CB_INTR_MEAN:
 	case CB_INTR_MEDIAN:
 	case CB_INTR_MIDRANGE:
-	case CB_INTR_MIN:
-	case CB_INTR_ORD_MAX:
-	case CB_INTR_ORD_MIN:
 	case CB_INTR_PRESENT_VALUE:
-	case CB_INTR_RANDOM:
 	case CB_INTR_RANGE:
-	case CB_INTR_STANDARD_COMPARE:
 	case CB_INTR_STANDARD_DEVIATION:
 	case CB_INTR_SUM:
 	case CB_INTR_VARIANCE:
+		return make_intrinsic (func, cbp, args, cb_int1, NULL, 0);
+
+	/* mulitple, compatible only arguments */
+	case CB_INTR_MAX:
+	case CB_INTR_MIN:
+		return make_intrinsic (func, cbp, args, cb_int1, NULL, 0);
+
+	/* */
+	case CB_INTR_DATE_TO_YYYYMMDD:
+	case CB_INTR_DAY_TO_YYYYDDD:
+	case CB_INTR_LOCALE_COMPARE:
+	case CB_INTR_ORD_MAX:
+	case CB_INTR_ORD_MIN:
+	case CB_INTR_RANDOM:
+	case CB_INTR_STANDARD_COMPARE:
 	case CB_INTR_YEAR_TO_YYYY:
-		return make_intrinsic (name, cbp, args, cb_int1, NULL, 0);
+		return make_intrinsic (func, cbp, args, cb_int1, NULL, 0);
+
+	/* currently GnuCOBOL only extension (submitted to COBOL 202x),
+	   category adjusted depending on parameters */
 	case CB_INTR_SUBSTITUTE:
 	case CB_INTR_SUBSTITUTE_CASE:
 		if ((numargs % 2) == 0) {
-			cb_error_x (name, _("FUNCTION '%s' has wrong number of arguments"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has wrong number of arguments"), cbp->name);
 			return cb_error_node;
 		}
 #if	0	/* RXWRXW - Substitute param 1 */
 		x = CB_VALUE (args);
 		if (!CB_REF_OR_FIELD_P (x)) {
-			cb_error_x (name, _("FUNCTION '%s' has invalid first parameter"), cbp->name);
+			cb_error_x (func, _("FUNCTION '%s' has invalid first parameter"), cbp->name);
 			return cb_error_node;
 		}
 #endif
-		return make_intrinsic (name, cbp, args, cb_int1, refmod, 0);
+		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
 
 	default:
-		cb_error_x (name, _("FUNCTION '%s' unknown"), CB_NAME (name));
+		cb_error_x (func, _("FUNCTION '%s' unknown"), CB_NAME (func));
 		return cb_error_node;
 	}
 }
