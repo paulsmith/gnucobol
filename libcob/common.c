@@ -7181,7 +7181,7 @@ print_info (void)
 #define CURSES_CMP_MINOR	NCURSES_VERSION_MINOR
 #endif
 #if !defined (RESOLVED_PDC_VER)
-	snprintf (versbuff2, 100, curses_version ());
+	snprintf (versbuff2, 100, "%s", curses_version ());
 	major = 0, minor = 0, patch = 0;
 	if ((sscanf (versbuff2, "%s %s %d.%d.%d", (char *)&versbuff, (char *)&versbuff, &major, &minor, &patch) < 4)
 	 && (sscanf (versbuff2, "%s %d.%d.%d", (char *)&versbuff, &major, &minor, &patch) < 3)
