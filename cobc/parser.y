@@ -11862,6 +11862,7 @@ evaluate_object:
 | ANY				{ $$ = cb_any; eval_inc2++; }
 | TOK_TRUE			{ $$ = cb_true; eval_inc2++; }
 | TOK_FALSE			{ $$ = cb_false; eval_inc2++; }
+| error				{ $$ = cb_error_node; eval_inc2++; }
 ;
 
 _evaluate_thru_expr:
@@ -15520,6 +15521,11 @@ condition:
   expr
   {
 	$$ = cb_build_cond ($1);
+	cb_end_cond ($$);
+  }
+| error
+  {
+	$$ = cb_error_node;
 	cb_end_cond ($$);
   }
 ;

@@ -5335,6 +5335,12 @@ cb_end_cond (cb_tree rslt)
 	expr_nest = 0;
 	expr_line = -1;
 
+	if (cb_flag_remove_unreachable == 0) {
+		/* Do not remove the code */
+		cond_fixed = -1;
+		return;
+	}
+
 	if (rslt == cb_true) {
 		cond_fixed = 0;
 	} else
@@ -5343,8 +5349,6 @@ cb_end_cond (cb_tree rslt)
 	} else {
 		cond_fixed = -1;
 	}
-	if (cb_flag_remove_unreachable == 0)	/* Do not remove the code */
-		cond_fixed = -1;
 }
 
 /* Save this 'condition' result */
@@ -7647,6 +7651,9 @@ evaluate_test (cb_tree s, cb_tree o)
 	}
 	if (o == cb_false) {
 		return CB_BUILD_NEGATION (s);
+	}
+	if (o == cb_error_node) {
+		return cb_error_node;
 	}
 
 	flag = CB_PURPOSE_INT (o);

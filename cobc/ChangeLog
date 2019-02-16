@@ -1,4 +1,8 @@
 
+2019-02-16  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y, typeck.c: fixed bug #567 missing error recovery in conditions
+
 2019-02-09  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, tree.h, reserved.c: moved translation "word to system name" from

@@ -222,6 +222,78 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 AT_CLEANUP
 
 
+AT_SETUP([error handling in conditions])
+AT_KEYWORDS([definition])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 TESTME PIC X(1).
+
+       PROCEDURE DIVISION.
+
+          EVALUATE TRUE
+            WHEN TESTME IS NOT-DEFINED
+              CONTINUE
+            WHEN TESTME = 'A'
+              CONTINUE
+            WHEN OTHER
+              IF NOT TESTME IS NOT-DEFINED
+              THEN
+                CONTINUE
+              ELSE
+                CONTINUE
+              END-IF
+          END-EVALUATE
+          EVALUATE TRUE
+            WHEN TESTME IS 'ABC'
+              CONTINUE
+            WHEN TESTME = 'B'
+              CONTINUE
+          END-EVALUATE
+          EVALUATE TRUE
+            WHEN TESTME IS TESTME
+              CONTINUE
+            WHEN TESTME = 'C'
+              CONTINUE
+          END-EVALUATE
+          EVALUATE TRUE
+            WHEN TESTME NOT = NOT-DEFINED
+              CONTINUE
+            WHEN TESTME = 'D'
+              CONTINUE
+          END-EVALUATE
+          EVALUATE TRUE
+            WHEN TESTME ELSE NOT-DEFINED
+              CONTINUE
+            WHEN TESTME = 'E'
+              CONTINUE
+          END-EVALUATE
+          EVALUATE broken
+            WHEN NOT-DEFINED
+              continue
+          END-EVALUATE
+
+          GOBACK.
+])
+
+AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
+[prog.cob:11: error: syntax error, unexpected Identifier
+prog.cob:16: error: syntax error, unexpected Identifier
+prog.cob:24: error: syntax error, unexpected Literal
+prog.cob:30: error: syntax error, unexpected Identifier
+prog.cob:36: error: 'NOT-DEFINED' is not defined
+prog.cob:42: error: syntax error, unexpected ELSE
+prog.cob:42: error: syntax error, unexpected Identifier
+prog.cob:42: error: invalid expression
+prog.cob:47: error: 'broken' is not defined
+prog.cob:48: error: 'NOT-DEFINED' is not defined
+])
+AT_CLEANUP
+
+
 ## Same labels in different sections
 
 AT_SETUP([Same labels in different sections])
@@ -1009,7 +1081,7 @@ AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.
        PROGRAM-ID.      prog.
        PROCEDURE        DIVISION.
-           CALL "PROG2" USING BY VALUE 
+           CALL "PROG2" USING BY VALUE
                 low-value
                 high-value
                 space
@@ -1559,7 +1631,7 @@ AT_DATA([prog3.cob], [
        CONFIGURATION SECTION.
        SOURCE-COMPUTER. GNU-LINUX.
        OBJECT-COMPUTER. GC-MACHINE,
-                        PROGRAM COLLATING SEQUENCE IS ALPHABET-1, 
+                        PROGRAM COLLATING SEQUENCE IS ALPHABET-1,
                                                       ALPHABET-2.
        SPECIAL-NAMES.
            ALPHABET ALPHABET-1 IS
@@ -1575,7 +1647,7 @@ AT_DATA([prog3.cob], [
        CONFIGURATION SECTION.
        SOURCE-COMPUTER. GNU-LINUX.
        OBJECT-COMPUTER. GC-MACHINE,
-                        PROGRAM           SEQUENCE IS ALPHABET-1, 
+                        PROGRAM           SEQUENCE IS ALPHABET-1,
                                                       ALPHABET-2.
        SPECIAL-NAMES.
            ALPHABET ALPHABET-1 IS

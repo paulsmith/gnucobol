@@ -5439,7 +5439,6 @@ AT_CHECK([$COMPILE_ONLY prog.cob], [1], [],
 [prog.cob:11: warning: expression '115' LESS THAN '16' is always FALSE
 prog.cob:13: error (ignored): offset of 'var' out of bounds: -98
 prog.cob:14: error: syntax error, unexpected IF
-prog.cob:14: error: syntax error, unexpected .
 ])
 
 AT_CLEANUP
