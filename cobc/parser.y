@@ -868,14 +868,10 @@ check_conf_section_order (const cob_flags_t part)
 #undef MESSAGE_LEN
 
 static void
-build_nested_special (const int ndepth)
+build_words_for_nested_programs (void)
 {
 	cb_tree		x;
 	cb_tree		y;
-
-	if (!ndepth) {
-		return;
-	}
 
 	/* Inherit special name mnemonics from parent */
 	for (x = current_program->mnemonic_spec_list; x; x = CB_CHAIN (x)) {
@@ -1078,7 +1074,9 @@ setup_program (cb_tree id, cb_tree as_literal, const unsigned char type)
 
 		clear_initial_values ();
 		current_program = cb_build_program (current_program, depth);
-		build_nested_special (depth);
+		if (depth) {
+			build_words_for_nested_programs();
+		}
 		cb_set_intr_when_compiled ();
 		cb_build_registers ();
 		cb_add_external_defined_registers ();
@@ -4138,8 +4136,6 @@ _in_alphabet:
 locale_clause:
   LOCALE undefined_word _is LITERAL
   {
-	cb_tree	l;
-
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
@@ -4147,7 +4143,7 @@ locale_clause:
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
 		/* Returns null on error */
-		l = cb_build_locale_name ($2, $4);
+		cb_tree	l = cb_build_locale_name ($2, $4);
 		if (l) {
 			current_program->locale_list =
 				cb_list_add (current_program->locale_list, l);
@@ -4161,21 +4157,22 @@ locale_clause:
 currency_sign_clause:
   CURRENCY _sign _is LITERAL _with_pic_symbol
   {
-	unsigned char	*s = CB_LITERAL ($4)->data;
-	unsigned int	error_ind = 0;
-	unsigned int	char_seen = 0;
-
 	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
 			       COBC_HD_CONFIGURATION_SECTION,
 			       COBC_HD_SPECIAL_NAMES, 0);
 	if (current_program->nested_level) {
 		cb_error (_("%s not allowed in nested programs"), "SPECIAL-NAMES");
 	} else {
+		unsigned int	error_ind = 0;
+
 		/* FIXME: actual allowed (depending on dialect), see FR #246 */
 		check_repeated ("CURRENCY", SYN_CLAUSE_1, &check_duplicate);
 
 		/* checks of CURRENCY SIGN (being currency string) when separate */
 		if ($5) {
+			unsigned int	char_seen = 0;
+			unsigned char	*s = CB_LITERAL ($4)->data;
+
 			CB_PENDING_X ($4, _("separate currency symbol and currency string"));
 			while (*s) {
 				switch (*s) {
@@ -6704,7 +6701,7 @@ occurs_clause:
 	} else {
 		current_field->occurs_max = 0;
 	}
-	CB_PENDING("OCCURS DYNAMIC");
+	CB_PENDING ("OCCURS DYNAMIC");
   }
 ;
 
@@ -6967,7 +6964,7 @@ external_form_clause:
   _is EXTERNAL_FORM
   {
 	check_repeated ("EXTERNAL-FORM", SYN_CLAUSE_2, &check_pic_duplicate);
-	CB_PENDING("EXTERNAL-FORM");
+	CB_PENDING ("EXTERNAL-FORM");
 	if (current_storage != CB_STORAGE_WORKING) {
 		cb_error (_("%s not allowed here"), "EXTERNAL-FORM");
 	} else if (current_field->level != 1) {	/* docs say: at group level */
@@ -6991,7 +6988,7 @@ identified_by_clause:
   {
 	check_repeated ("IDENTIFIED BY", SYN_CLAUSE_3, &check_pic_duplicate);
 	if (!current_field->flag_is_external_form) {
-		CB_PENDING("EXTERNAL-FORM (IDENTIFIED BY)");
+		CB_PENDING ("EXTERNAL-FORM (IDENTIFIED BY)");
 		if (current_storage != CB_STORAGE_WORKING) {
 			cb_error (_("%s not allowed here"), "IDENTIFIED BY");
 		} else if (!qualifier) {
@@ -8030,7 +8027,7 @@ screen_option:
   }
 | STANDARD /* ACU extension to reset a group HIGH/LOW */
   {
-	CB_PENDING("STANDARD intensity");
+	CB_PENDING ("STANDARD intensity");
 #if 0 /* in general we could simply remove high/low, but for syntax checks
 	we still need a flag */
 	set_screen_attr_with_conflict ("LOWLIGHT", COB_SCREEN_LOWLIGHT,
@@ -8039,15 +8036,15 @@ screen_option:
   }
 | BACKGROUND_HIGH
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_LOW
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_STANDARD
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | reverse_video
   {
@@ -9975,25 +9972,25 @@ accp_attr:
 | SAME /* ACU (?) extension to use the video attributes
           currently present at the field's screen location. */
   {
-	CB_PENDING("SAME phrase");
+	CB_PENDING ("SAME phrase");
 	/* may not be specified along with the UNDERLINED, BLINK, REVERSED,
 	HIGH, LOW, STANDARD, COLOR, FOREGROUND-COLOR, or BACKGROUND-COLOR phrases */
   }
 | STANDARD /* ACU extension to reset a group HIGH/LOW */
   {
-	CB_PENDING("STANDARD intensity");
+	CB_PENDING ("STANDARD intensity");
   }
 | BACKGROUND_HIGH
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_LOW
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_STANDARD
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | no_echo
   {
@@ -11437,25 +11434,25 @@ disp_attr:
 | SAME /* ACU (?) extension to use the video attributes
           currently present at the field's screen location. */
   {
-	CB_PENDING("SAME phrase");
+	CB_PENDING ("SAME phrase");
 	/* may not be specified along with the UNDERLINED, BLINK, REVERSED,
 	HIGH, LOW, STANDARD, COLOR, FOREGROUND-COLOR, or BACKGROUND-COLOR phrases */
   }
 | STANDARD /* ACU extension to reset a group HIGH/LOW */
   {
-	CB_PENDING("STANDARD intensity");
+	CB_PENDING ("STANDARD intensity");
   }
 | BACKGROUND_HIGH
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_LOW
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | BACKGROUND_STANDARD
   {
-	CB_PENDING("BACKGROUND intensity");
+	CB_PENDING ("BACKGROUND intensity");
   }
 | OVERLINE
   {
