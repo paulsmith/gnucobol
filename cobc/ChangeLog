@@ -1,4 +1,9 @@
 
+2019-02-17  Simon Sobisch <simonsobisch@gnu.org>
+
+	* parser.y: renamed build_nested_special -> build_words_for_nested_programs
+	* parser.y: fixed bug #566 nested programs do not inherit class-names
+
 2019-02-16  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, typeck.c: fixed bug #567 missing error recovery in conditions

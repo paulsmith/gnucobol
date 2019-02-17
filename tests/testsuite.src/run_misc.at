@@ -4080,7 +4080,7 @@ AT_CLEANUP
 
 
 AT_SETUP([SYMBOLIC clause])
-AT_KEYWORDS([runmisc])
+AT_KEYWORDS([runmisc ALPHABET])
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

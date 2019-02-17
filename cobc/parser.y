@@ -882,6 +882,12 @@ build_words_for_nested_programs (void)
 			cb_build_constant (y, CB_VALUE(x));
 		}
 	}
+
+	/* Inherit class names from parent */
+	for (x = current_program->class_name_list; x; x = CB_CHAIN(x)) {
+		y = cb_build_reference (cb_name(CB_VALUE(x)));
+		cb_define (y, CB_VALUE(x));
+	}
 }
 
 static void

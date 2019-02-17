@@ -821,8 +821,6 @@ AT_DATA([prog.cob], [
             CLASS    CHECK-VALID    'a' THRU 'z'
                                     'A' THRU 'Z'
                                     'cdef'
-            NUMERIC SIGN TRAILING SEPARATE
-            DECIMAL-POINT IS COMMA
             .
        DATA             DIVISION.
        WORKING-STORAGE  SECTION.
