@@ -1,7 +1,11 @@
 
+2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: cleanup distribution rules
+
 2019-01-03  Edward Hart <edward.dan.hart@gmail.com>
 
-	* testsuite.src/run_xml.at: renamed to run_ml.at.
+	* testsuite.src/run_xml.at: renamed to run_ml.at
 
 2018-11-11  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -888,7 +892,7 @@
 	* redef.at, subref.at, runtime.at: New files.
 
 
-Copyright 2002-2018 Free Software Foundation, Inc.
+Copyright 2002-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

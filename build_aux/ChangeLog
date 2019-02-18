@@ -1,4 +1,9 @@
 
+2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* bootstrap: additional user hints,
+	  reading GCMAINPATH to get clean main path (adjusted in autogen.sh)
+
 2018-11-25  Simon Sobisch <simonsobisch@gnu.org>
 
 	* bootstrap: added missing setting of LC_ALL for generating tarstamp.h,
@@ -68,7 +73,7 @@
 	  without uname(1) [removed 2014-01-25] from old version
 
 
-Copyright 2015-2018 Free Software Foundation, Inc.
+Copyright 2015-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

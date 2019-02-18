@@ -23,6 +23,7 @@ SUBDIRS = cobol85
 
 TESTSUITE = $(srcdir)/testsuite
 TESTSUITE_MANUAL = $(srcdir)/testsuite_manual
+dist_check_SCRIPTS = listings-sed.sh
 
 testsuite_sources = \
 	testsuite.src/used_binaries.at \

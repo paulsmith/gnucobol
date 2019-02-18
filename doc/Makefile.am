@@ -61,7 +61,8 @@ cbhelp.tex cbchelp.tex cbrese.tex cbintr.tex cbsyst.tex cbmnem.tex: \
 	$(COBCINFOSH) "fixtimestamps"
 endif
 
-EXTRA_DIST = gnucobol.pdf cobcinfo.sh
+EXTRA_DIST = gnucobol.pdf
+dist_noinst_SCRIPTS = cobcinfo.sh
 
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 CLEANFILES = *.aux  *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.vrs

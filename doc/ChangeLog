@@ -1,4 +1,8 @@
 
+2019-02-18  Simon Sobisch <simonsobisch@gnu.org>
+
+	* Makefile.am: cleanup distribution rules
+
 2018-08-07  Brian Tiffin <btiffin@gnu.org>
 
 	* gnucobol.texi: CONTENTS-OF rename to CONTENT-OF
@@ -188,7 +192,7 @@
 	* open-cobol.texi (Customize): Add COB_LDADD, COB_CONFIG_FILE.
 
 
-Copyright 2002,2005,2009-2018 Free Software Foundation, Inc.
+Copyright 2002,2005,2009-2019 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification, are
 permitted provided the copyright notice and this notice are preserved.

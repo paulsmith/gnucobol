@@ -15,7 +15,7 @@ following extra packages need to be installed with versions equal or greater.
 
 If you build from VCS the tools in the first 4 lists are always needed.
 
-For running build_aux/bootstrap (necessary after VCS checkout) / reconfigure:
+For running autogen.sh (necessary after VCS checkout) / reconfigure:
   o autoconf 2.64
   o automake 1.10.1
   o libtool 2.2.6
