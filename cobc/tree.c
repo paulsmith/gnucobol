@@ -6032,12 +6032,13 @@ cb_build_intrinsic (cb_tree func, cb_tree args, cb_tree refmod,
 	/* category has to be adjusted depending on parameters */
 	case CB_INTR_FORMATTED_CURRENT_DATE:
 	case CB_INTR_FORMATTED_DATE:
-	case CB_INTR_FORMATTED_TIME:
-	case CB_INTR_FORMATTED_DATETIME:
 	case CB_INTR_REVERSE:
 	case CB_INTR_TRIM:
 	case CB_INTR_UPPER_CASE:
 		return make_intrinsic (func, cbp, args, NULL, refmod, 0);
+	case CB_INTR_FORMATTED_TIME:
+	case CB_INTR_FORMATTED_DATETIME:
+		return make_intrinsic (func, cbp, args, cb_int1, refmod, 0);
 
 	case CB_INTR_HIGHEST_ALGEBRAIC:
 	case CB_INTR_LOWEST_ALGEBRAIC:
