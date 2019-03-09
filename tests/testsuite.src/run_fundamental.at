@@ -1,5 +1,6 @@
-## Copyright (C) 2003-2012, 2014-2015, 2017-2018 Free Software Foundation, Inc.
-## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart, Ron Norman
+## Copyright (C) 2003-2012, 2014-2015, 2017-2019 Free Software Foundation, Inc.
+## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
+## Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -126,15 +127,14 @@ AT_KEYWORDS([fundamental])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 4; i++)
     printf ("%02x", data[[i]]);
-  puts ("");
   return 0;
 }
 ])
@@ -158,8 +158,7 @@ AT_CHECK([$COMPILE_MODULE dump.c], [0], [], [])
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
 AT_CHECK([$COBCRUN_DIRECT ./prog], [0],
 [123
-00010200
-])
+00010200])
 
 AT_CLEANUP
 
@@ -1233,10 +1232,10 @@ AT_DATA([prog.cob], [
 ])
 
 AT_DATA([module.c], [
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int some (void);
-int some (void)
+
+COB_EXT_EXPORT int
+some (void)
 {
   return 0;
 }
@@ -3814,10 +3813,10 @@ AT_KEYWORDS([fundamental add])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (char *);
-int dump (char *p)
+
+COB_EXT_EXPORT int
+dump (char *p)
 {
   printf ("%c%c", p[[0]], p[[1]]);
   return 0;

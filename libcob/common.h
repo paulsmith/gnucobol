@@ -386,15 +386,26 @@ only usable with COB_USE_VC2013_OR_GREATER */
 
 #include <setjmp.h>
 
-#ifndef COB_EXPIMP
+#ifndef	COB_EXT_EXPORT
 #if	((defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__))
-#ifdef	COB_LIB_EXPIMP
-	#define COB_EXPIMP	__declspec(dllexport) extern
+#define COB_EXT_EXPORT	__declspec(dllexport) extern
 #else
-	#define COB_EXPIMP	__declspec(dllimport) extern
+#define COB_EXT_EXPORT	extern
 #endif
+#endif
+#ifndef COB_EXT_IMPORT
+#if	((defined(_WIN32) || defined(__CYGWIN__)) && !defined(__clang__))
+#define COB_EXT_IMPORT	__declspec(dllimport) extern
 #else
-	#define COB_EXPIMP	extern
+#define COB_EXT_IMPORT	extern
+#endif
+#endif
+
+#ifndef COB_EXPIMP
+#ifdef	COB_LIB_EXPIMP
+	#define COB_EXPIMP	COB_EXT_EXPORT
+#else
+	#define COB_EXPIMP	COB_EXT_IMPORT
 #endif
 #endif
 

@@ -657,10 +657,10 @@ AT_KEYWORDS([runmisc])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   printf ("%02x%02x%02x", data[[0]], data[[1]], data[[2]]);
   return 0;
@@ -1485,10 +1485,10 @@ AT_KEYWORDS([runmisc])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (int *);
-int dump (int *p)
+
+COB_EXT_EXPORT int
+dump (int *p)
 {
   printf ("%8.8d\n", *p);
   return 0;
@@ -3569,8 +3569,8 @@ AT_DATA([prog.cob], [
 AT_DATA([cprog.c], [[
 #include <libcob.h>
 
-int
-cprog(void *cb)
+COB_EXT_EXPORT int
+cprog (void *cb)
 {
    char *p1;
    int  p2 = 42;
@@ -3635,8 +3635,8 @@ AT_DATA([prog.cob], [
 AT_DATA([cprog.c], [[
 #include <libcob.h>
 
-int
-cprog(void *cb)
+COB_EXT_EXPORT int
+cprog (void *cb)
 {
    char *p1;
    int  p2 = 42;
@@ -6194,9 +6194,10 @@ AT_DATA([prog.cob], [
 
 AT_DATA([cmod.c], [[
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 4; i++)
@@ -9573,7 +9574,7 @@ getType (int type)
    return wrk;
 }
 
-int
+COB_EXT_EXPORT int
 CAPI (void *p1, ...)
 {
    int      k,nargs,type,digits,scale,size,sign;
@@ -9887,7 +9888,8 @@ AT_DATA([prog.cob], [
 
 # Safe run with runtime checks
 AT_CHECK([$COMPILE prog.cob], [0], [], [])
-AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [], [libcob: prog.cob:23: subscript of 'TSTY' out of bounds: 0
+AT_CHECK([$COBCRUN_DIRECT ./prog], [1], [],
+[libcob: prog.cob:23: subscript of 'TSTY' out of bounds: 0
 ])
 
 # Runtime checks disable, subscript may be zero or even negative

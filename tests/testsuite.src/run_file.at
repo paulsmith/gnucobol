@@ -3823,16 +3823,13 @@ AT_DATA([fexists_signed.c], [
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int fexists_signed (char *, char *, int);
 
 /*
  * Check file is present and correct by comparing
  * its content to a given signature.
  */
-int
+COB_EXT_EXPORT int
 fexists_signed (char *fid, char *signature, int signature_size)
 {
 	char *bfr;
@@ -6641,10 +6638,12 @@ AT_DATA([cmod.c], [[
 #include <libcob.h>
 
 static char *txtOpCode(int opCode);
+
 /*********************************************************
  *  TSTFH - External File Handler entry point.
 *********************************************************/
-int
+
+COB_EXT_EXPORT int
 TSTFH (unsigned char *opCodep, FCD3 *fcd)
 {
    unsigned int   opCode;
@@ -6942,7 +6941,8 @@ doOpenFile(
 /*********************************************************
  *  TSTFH - External File Handler entry point.
 *********************************************************/
-int   
+
+COB_EXT_EXPORT int
 TSTFH (unsigned char *opCodep, FCD3 *fcd) 
 {
    unsigned int   opCode;

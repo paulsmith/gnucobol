@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman
 ## 
 ## This file is part of GnuCOBOL.
@@ -25,10 +25,10 @@ AT_KEYWORDS([binary])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)
@@ -212,10 +212,10 @@ else
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)
@@ -395,10 +395,10 @@ AT_KEYWORDS([binary])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)
@@ -581,10 +581,10 @@ else
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)
@@ -765,10 +765,10 @@ AT_KEYWORDS([binary])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)
@@ -951,10 +951,10 @@ else
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *);
-int dump (unsigned char *data)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data)
 {
   int i;
   for (i = 0; i < 8; i++)

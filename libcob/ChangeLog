@@ -1,4 +1,8 @@
 
+2019-02-26  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.h: define COB_EXT_EXPORT / COB_EXT_IMPORT
+
 2019-01-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c, termio.c, coblocal.h: added COB_DISPLAY_PUNCH_FILE

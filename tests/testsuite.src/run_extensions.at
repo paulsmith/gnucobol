@@ -1,4 +1,4 @@
-## Copyright (C) 2003-2012, 2014-2018 Free Software Foundation, Inc.
+## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Edward Hart,
 ## Ron Norman
 ##
@@ -27,10 +27,10 @@ AT_KEYWORDS([extensions literals])
 
 AT_DATA([dump.c], [
 #include <stdio.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int dump (unsigned char *, int *);
-int dump (unsigned char *data, int *p)
+
+COB_EXT_EXPORT int
+dump (unsigned char *data, int *p)
 {
   int i;
   if ( *p == 1 ) {
@@ -1414,9 +1414,10 @@ AT_KEYWORDS([extensions])
 AT_DATA([setfilename.c], [
 #include <stdio.h>
 #include <string.h>
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int setfilename (cob_file *f, unsigned char *name)
+
+COB_EXT_EXPORT int
+setfilename (cob_file *f, unsigned char *name)
 {
   memcpy (f->assign->data, name, strlen ((char *)name));
   return 0;
@@ -4237,11 +4238,9 @@ AT_DATA([test_errno.c], [
 #include <errno.h>
 #include <stdio.h>
 
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int test_errno(void);
 
-int
+COB_EXT_EXPORT int
 test_errno(void)
 {
     FILE *fail;
@@ -4258,11 +4257,8 @@ test_errno(void)
 AT_DATA([test_stdio.c], [
 #include <stdio.h>
 
-#define COB_LIB_EXPIMP
 #include <libcob.h>
-COB_EXPIMP int test_stdio(FILE *, FILE *, FILE *);
-
-int
+COB_EXT_EXPORT int
 test_stdio(FILE *si, FILE *so, FILE *se)
 {
     if (feof(si)) {
