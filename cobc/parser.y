@@ -2580,6 +2580,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token QUEUE
 %token QUOTE
 %token RADIO_BUTTON		"RADIO-BUTTON"
+%token RAISE
 %token RAISED
 %token RANDOM
 %token RD
@@ -2904,6 +2905,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %nonassoc OPEN
 %nonassoc PERFORM
 %nonassoc PURGE
+%nonassoc RAISE
 %nonassoc READ
 %nonassoc READY_TRACE
 %nonassoc RECEIVE
@@ -9525,7 +9527,7 @@ statement:
 | open_statement
 | perform_statement
 | purge_statement
-/* | TODO: raise_statement */
+| raise_statement
 | read_statement
 | ready_statement
 | receive_statement
@@ -13071,6 +13073,43 @@ purge_statement:
   }
   cd_name
   {
+  }
+;
+
+/* RAISE statement */
+
+raise_statement:
+  RAISE
+  {
+	begin_statement ("RAISE", 0);
+  }
+  raise_body
+;
+
+raise_body:
+  EXCEPTION exception_name
+  {
+	CB_PENDING ("RAISE statement");
+	/* TODO: check for level 3 error here */
+  }
+| identifier
+  {
+	/* easy cheating here as we don't have any OO in */
+	cb_error (_("must be an object-reference"));
+  }
+;
+
+
+
+exception_name:
+  WORD
+  {
+	/* TODO:
+	cb_tree exception = get_exception(CB_NAME($1));
+	if (!exception) {
+		cb_error (_("'%s' is not an exception-name"), CB_NAME($1)
+	}
+	*/
   }
 ;
 

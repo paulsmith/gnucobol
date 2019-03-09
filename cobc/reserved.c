@@ -2151,7 +2151,7 @@ static struct cobc_reserved default_reserved_words[] = {
   { "RADIO-BUTTON",		1, 1, RADIO_BUTTON,		/* ACU extension */
 				CB_CS_GRAPHICAL_CONTROL, CB_CS_DISPLAY | CB_CS_SCREEN
   },
-  { "RAISE",			0, 0, -1,			/* 2002 */
+  { "RAISE",			0, 0, RAISE,			/* 2002 */
 				0, 0
   },
   { "RAISED",			0, 1, RAISED,			/* ACU extension */
