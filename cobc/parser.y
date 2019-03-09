@@ -13095,7 +13095,7 @@ raise_body:
 | identifier
   {
 	/* easy cheating here as we don't have any OO in */
-	cb_error (_("must be an object-reference"));
+	cb_error(_("'%s' is not an object-reference"), cb_name ($1));
   }
 ;
 
@@ -13105,9 +13105,9 @@ exception_name:
   WORD
   {
 	/* TODO:
-	cb_tree exception = get_exception(CB_NAME($1));
+	cb_tree exception = get_exception (CB_NAME($1));
 	if (!exception) {
-		cb_error (_("'%s' is not an exception-name"), CB_NAME($1)
+		cb_error (_("'%s' is not an exception-name"), CB_NAME ($1));
 	}
 	*/
   }

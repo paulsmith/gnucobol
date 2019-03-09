@@ -4,6 +4,7 @@
 	* codegen.c: fixed freeing LOCAL-STORAGE memory using the wrong "free"
 	* codegen.c (output_function_prototypes): use expected declaration
 	  for EXTFH modules to possibly catch modules using different interface
+	* parser.y, reserved.c: added RAISE statement as PENDING
 
 2019-02-17  Simon Sobisch <simonsobisch@gnu.org>
 
