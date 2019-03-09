@@ -10591,7 +10591,7 @@ output_internal_function (struct cb_program *prog, cb_tree parameter_list)
 		output_line ("/* Deallocate LOCAL storage */");
 		if (local_mem) {
 			output_line ("if (cob_local_ptr) {");
-			output_line ("\tfree (cob_local_ptr);");
+			output_line ("\tcob_free (cob_local_ptr);");
 			output_line ("\tcob_local_ptr = NULL;");
 			if (current_prog->flag_global_use) {
 				output_line ("\tcob_local_save = NULL;");
@@ -11722,7 +11722,7 @@ output_function_prototypes (struct cb_program *prog)
 			if (f->extfh
 			 && strcmp (prog->extfh, CB_CONST (f->extfh)->val) != 0
 			 && strcmp ("EXTFH", CB_CONST (f->extfh)->val) != 0) {
-				output ("extern int %s ();\n", CB_CONST (f->extfh)->val);
+				output ("extern int %s (unsigned char *opcode, FCD3 *fcd);\n", CB_CONST (f->extfh)->val);
 			}
 		}
 
@@ -11731,7 +11731,7 @@ output_function_prototypes (struct cb_program *prog)
 	/* prototype for general EXTFH function */
 	if (prog->file_list && prog->extfh
 	 && strcmp ("EXTFH", prog->extfh) != 0) {
-		output ("extern int %s ();\n", prog->extfh);
+		output ("extern int %s (unsigned char *opcode, FCD3 *fcd);\n", prog->extfh);
 	}
 
 	output ("\n");

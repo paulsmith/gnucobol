@@ -1,4 +1,10 @@
 
+2019-03-09  Simon Sobisch <simonsobisch@gnu.org>
+
+	* codegen.c: fixed freeing LOCAL-STORAGE memory using the wrong "free"
+	* codegen.c (output_function_prototypes): use expected declaration
+	  for EXTFH modules to possibly catch modules using different interface
+
 2019-02-17  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y: renamed build_nested_special -> build_words_for_nested_programs
