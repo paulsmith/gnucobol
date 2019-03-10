@@ -137,6 +137,8 @@ enum cb_format {
 #define	CB_CS_XML_PARSE			(1U << 29)
 #define	CB_CS_OPEN			(1U << 30)	/* within OPEN */
 #define	CB_CS_JSON_GENERATE		(1U << 31)
+/* HACK: no more space - using minor one until re-written */
+#define	CB_CS_I_O_CONTROL		CB_CS_DAY
 
 /* Support for cobc from stdin */
 #define COB_DASH			"-"

@@ -1512,6 +1512,7 @@ struct cb_program {
 	cb_tree			collating_sequence;	/* COLLATING */
 	cb_tree			collating_sequence_n;	/* COLLATING FOR NATIONAL*/
 	cb_tree			classification;		/* CLASSIFICATION */
+	cb_tree			apply_commit;		/* APPLY COMMIT file- and data-items */
 	cb_tree			cursor_pos;		/* CURSOR */
 	cb_tree			crt_status;		/* CRT STATUS */
 	cb_tree			xml_code;		/* XML-CODE */

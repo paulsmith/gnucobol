@@ -3377,6 +3377,58 @@ cb_validate_program_data (struct cb_program *prog)
 			}
 		}
 	}
+
+	/* Resolve APPLY COMMIT  */
+	if (CB_VALID_TREE(prog->apply_commit)) {
+		for (l = prog->apply_commit; l; l = CB_CHAIN(l)) {
+			cb_tree		l2 = CB_VALUE (l);
+			x = cb_ref (l2);
+			for (l2 = prog->apply_commit; l2 != l; l2 = CB_CHAIN(l2)) {
+				if (cb_ref (CB_VALUE(l2)) == x) {
+					if (x != cb_error_node) {
+						cb_error_x (l,
+							_("duplicate APPLY COMMIT target: '%s'"),
+							cb_name (CB_VALUE(l)));
+						x = cb_error_node;
+						break;
+					}
+				}
+			}
+			if (x == cb_error_node) {
+				continue;
+			}
+			if (CB_FILE_P (x)) {
+				file = CB_FILE (x);
+				if (file->organization == COB_ORG_SORT) {
+					cb_error_x (l,
+						_("APPLY COMMIT statement invalid for SORT file"));
+				} else if (file->flag_report) {
+					cb_error_x (l,
+						_("APPLY COMMIT statement invalid for REPORT file"));
+				}
+			} else if (CB_FIELD_P (x)) {
+				field = CB_FIELD (x);
+				if (field->storage != CB_STORAGE_WORKING
+				 && field->storage != CB_STORAGE_LOCAL) {
+					cb_error_x (l,
+						_("APPLY COMMIT item '%s' should be defined in "
+							"WORKING-STORAGE or LOCAL-STORAGE"), field->name);
+				}
+				if (field->level != 01 && field->level != 77) {
+					cb_error_x (l, _("'%s' not level 01 or 77"), field->name);
+#if 0 /* currently not part of the rules */
+				} else if (field->flag_item_based || field->flag_external) {
+					cb_error_x (l, _("'%s' cannot be BASED/EXTERNAL"), field->name);
+#endif
+				} else if (field->redefines) {
+					cb_error_x (l, _("'%s' REDEFINES field not allowed here"),
+						field->name);
+				}
+			} else {
+				cb_error_x (l, _("item not allowed here: '%s'"), cb_name (x));
+			}
+		}
+	}
 }
 
 
@@ -9045,7 +9097,7 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 				break;
 				/* LCOV_EXCL_START */
 			default:
-				cobc_err_msg("unexpected overlap result: %d", overlapping);
+				cobc_err_msg("unexpected overlap result: %d", (int)overlapping);
 				COBC_ABORT();
 				/* LCOV_EXCL_STOP */
 			}

@@ -1998,6 +1998,7 @@ add_type_to_ml_suppress_conds (enum cb_ml_suppress_category category,
 %token ALTERNATE
 %token AND
 %token ANY
+%token APPLY
 %token ARE
 %token AREA
 %token AREAS
@@ -4358,7 +4359,6 @@ _input_output_section:
   _input_output_header
   _file_control_header
   _file_control_sequence
-  _i_o_control_header
   _i_o_control
 ;
 
@@ -5079,16 +5079,20 @@ sharing_option:
 
 /* I-O-CONTROL paragraph */
 
-_i_o_control_header:
-| I_O_CONTROL TOK_DOT
+_i_o_control:
+| i_o_control_header _i_o_control_entries
+;
+
+i_o_control_header:
+  I_O_CONTROL TOK_DOT
 {
-  check_headers_present(COBC_HD_ENVIRONMENT_DIVISION,
+	check_headers_present(COBC_HD_ENVIRONMENT_DIVISION,
 				 COBC_HD_INPUT_OUTPUT_SECTION, 0, 0);
-  header_check |= COBC_HD_I_O_CONTROL;
+	header_check |= COBC_HD_I_O_CONTROL;
 }
 ;
 
-_i_o_control:
+_i_o_control_entries:
 | i_o_control_list TOK_DOT
 | i_o_control_list error TOK_DOT
   {
@@ -5103,6 +5107,7 @@ i_o_control_list:
 
 i_o_control_clause:
   same_clause
+| apply_commit_clause
 | multiple_file_tape_clause
 ;
 
@@ -5141,6 +5146,16 @@ _same_option:
 | RECORD			{ $$ = cb_int1; }
 | SORT				{ $$ = cb_int2; }
 | SORT_MERGE			{ $$ = cb_int2; }
+;
+
+/* APPLY COMMIT clause */
+
+apply_commit_clause:
+  APPLY COMMIT _on reference_list
+  {
+	current_program->apply_commit = $4;
+	CB_PENDING("APPLY COMMIT");
+  }
 ;
 
 /* MULTIPLE FILE TAPE clause */

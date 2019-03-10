@@ -1,6 +1,10 @@
 
 2019-03-10  Simon Sobisch <simonsobisch@gnu.org>
 
+	* parser.y, reserved.c: added RAISE statement as PENDING
+	* parser.y: work on pending USE ON exception-name
+	* parser.y, reserved.c, cobc.h, tree.h, typeck.c: added APPLY COMMIT clause
+	  from 202x draft as PENDING (making I-O-CONTROL mandatory for its clauses)
 	* typeck.c (cb_check_overlapping): do only the check, logic and messages
 	  moved to (validate_move)
 	* parser.y: minor refactoring
@@ -10,8 +14,6 @@
 	* codegen.c: fixed freeing LOCAL-STORAGE memory using the wrong "free"
 	* codegen.c (output_function_prototypes): use expected declaration
 	  for EXTFH modules to possibly catch modules using different interface
-	* parser.y, reserved.c: added RAISE statement as PENDING
-	* parser.y: work on pending USE ON exception-name
 
 2019-02-17  Simon Sobisch <simonsobisch@gnu.org>
 

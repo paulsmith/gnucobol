@@ -328,6 +328,9 @@ static struct cobc_reserved default_reserved_words[] = {
   { "ANYCASE",			0, 0, -1,			/* 2002 */
 				0, 0
   },
+  { "APPLY",			0, 1, APPLY,			/* 202x pending (C/S) */
+				0, CB_CS_I_O_CONTROL
+  },
   { "ARE",			0, 0, ARE,			/* 2002 */
 				0, 0
   },
@@ -1419,8 +1422,8 @@ static struct cobc_reserved default_reserved_words[] = {
   { "I-O",			0, 0, I_O,			/* 2002 */
 				0, 0
   },
-  { "I-O-CONTROL",		0, 0, I_O_CONTROL,		/* 2002 */
-				0, 0
+  { "I-O-CONTROL",		1, 0, I_O_CONTROL,		/* 2002 */
+				CB_CS_I_O_CONTROL, 0
   },
   { "ICON",			0, 1, ICON,			/* ACU extension */
 				0, CB_CS_DISPLAY
