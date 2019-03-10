@@ -14393,7 +14393,7 @@ use_phrase:
 | use_debugging
 | use_start_end
 | use_reporting
-| use_exception
+| use_exception_list
 ;
 
 use_file_exception:
@@ -14677,12 +14677,30 @@ use_reporting:
   }
 ;
 
+use_exception_list:
+  use_exception
+| use_exception_list use_exception
+;
+
 use_exception:
-  use_ex_keyw
+  use_ex_keyw exception_name
   {
 	current_section->flag_real_label = 1;
 	emit_statement (cb_build_comment ("USE AFTER EXCEPTION CONDITION"));
 	CB_PENDING ("USE AFTER EXCEPTION CONDITION");
+  }
+| use_ex_keyw exception_name file_file_name_list
+  {
+	cb_tree		l;
+
+	for (l = $3; l; l = CB_CHAIN(l)) {
+		if (CB_VALID_TREE(CB_VALUE(l))) {
+			setup_use_file(CB_FILE(cb_ref(CB_VALUE(l))));
+		}
+	}
+	current_section->flag_real_label = 1;
+	emit_statement(cb_build_comment("USE AFTER EXCEPTION CONDITION"));
+	CB_PENDING("USE AFTER EXCEPTION CONDITION");
   }
 ;
 
@@ -15888,6 +15906,31 @@ file_name_list:
 		}
 		if (!l) {
 			$$ = cb_list_add ($1, $2);
+		}
+	}
+  }
+;
+
+file_file_name_list:
+  TOK_FILE file_name
+  {
+	$$ = CB_LIST_INIT ($2);
+  }
+| file_file_name_list TOK_FILE file_name
+  {
+	cb_tree		l;
+
+	if (CB_VALID_TREE ($3)) {
+		for (l = $1; l; l = CB_CHAIN (l)) {
+			if (CB_VALID_TREE (CB_VALUE (l)) &&
+			    !strcasecmp (CB_NAME ($3), CB_NAME (CB_VALUE (l)))) {
+				cb_error_x ($3, _("multiple reference to '%s' "),
+					    CB_NAME ($2));
+				break;
+			}
+		}
+		if (!l) {
+			$$ = cb_list_add ($1, $3);
 		}
 	}
   }
