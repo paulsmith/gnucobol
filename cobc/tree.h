@@ -963,8 +963,8 @@ struct cb_file {
 	int			record_min;		/* RECORD CONTAINS */
 	int			record_max;		/* RECORD CONTAINS */
 	int			optional;		/* OPTIONAL */
-	int			organization;		/* ORGANIZATION */
-	int			access_mode;		/* ACCESS MODE */
+	int			organization;		/* ORGANIZATION - FIXME: use enum */
+	int			access_mode;		/* ACCESS MODE - FIXME: use enum */
 	cob_flags_t		lock_mode;		/* LOCK MODE */
 	int			special;		/* Special file */
 	int			same_clause;		/* SAME clause */

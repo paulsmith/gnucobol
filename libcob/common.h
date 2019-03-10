@@ -833,7 +833,7 @@ enum cob_exception_id {
 
 #define COB_FILE_MODE		0666
 
-/* Organization */
+/* Organization, FIXME: change to enum */
 
 #define COB_ORG_SEQUENTIAL	0
 #define COB_ORG_LINE_SEQUENTIAL	1
@@ -843,7 +843,7 @@ enum cob_exception_id {
 #define COB_ORG_MAX		5
 #define COB_ORG_MESSAGE	6 /* only for syntax checks */
 
-/* Access mode */
+/* Access mode, FIXME: change to enum */
 
 #define COB_ACCESS_SEQUENTIAL	1
 #define COB_ACCESS_DYNAMIC	2

@@ -3129,7 +3129,15 @@ end_function:
 
 _program_body:
   _environment_division
+  {
+	cb_validate_program_environment (current_program);
+  }
   _data_division
+  {
+	/* note:
+	   we also validate all references we found so far here */
+	cb_validate_program_data (current_program);
+  }
   _procedure_division
 ;
 
@@ -3643,7 +3651,7 @@ repository_name:
   }
 | FUNCTION repository_name_list error
   {
-	  yyerrok;
+	yyerrok;
   }
 ;
 
@@ -4352,9 +4360,6 @@ _input_output_section:
   _file_control_sequence
   _i_o_control_header
   _i_o_control
-  {
-	cb_validate_program_environment (current_program);
-  }
 ;
 
 _input_output_header:
@@ -4365,6 +4370,8 @@ _input_output_header:
   }
 ;
 
+/* FILE-CONTROL paragraph */
+
 _file_control_header:
 | FILE_CONTROL TOK_DOT
   {
@@ -4373,17 +4380,6 @@ _file_control_header:
 	header_check |= COBC_HD_FILE_CONTROL;
   }
 ;
-
-_i_o_control_header:
-| I_O_CONTROL TOK_DOT
-  {
-	check_headers_present (COBC_HD_ENVIRONMENT_DIVISION,
-			       COBC_HD_INPUT_OUTPUT_SECTION, 0, 0);
-	header_check |= COBC_HD_I_O_CONTROL;
-  }
-;
-
-/* FILE-CONTROL paragraph */
 
 _file_control_sequence:
 | _file_control_sequence file_control_entry
@@ -4896,7 +4892,6 @@ padding_character_clause:
   }
 ;
 
-
 /* RECORD DELIMITER clause */
 
 record_delimiter_clause:
@@ -5052,7 +5047,6 @@ relative_key_clause:
   }
 ;
 
-
 /* RESERVE clause */
 
 reserve_clause:
@@ -5083,8 +5077,16 @@ sharing_option:
 | READ ONLY			{ $$ = NULL; }
 ;
 
-
 /* I-O-CONTROL paragraph */
+
+_i_o_control_header:
+| I_O_CONTROL TOK_DOT
+{
+  check_headers_present(COBC_HD_ENVIRONMENT_DIVISION,
+				 COBC_HD_INPUT_OUTPUT_SECTION, 0, 0);
+  header_check |= COBC_HD_I_O_CONTROL;
+}
+;
 
 _i_o_control:
 | i_o_control_list TOK_DOT
@@ -5188,9 +5190,6 @@ _data_division:
   _linkage_section
   _report_section
   _screen_section
-  {
-	cb_validate_program_data (current_program);
-  }
 ;
 
 _data_division_header:
@@ -5247,7 +5246,7 @@ file_description_entry:
 	}
 	current_file = CB_FILE (cb_ref ($2));
 	if (CB_VALID_TREE (current_file)) {
-		if ($1) {
+		if ($1 == cb_int1) {
 			current_file->organization = COB_ORG_SORT;
 		}
 		/* note: this is a HACK and should be moved */
@@ -5267,7 +5266,7 @@ file_description_entry:
 file_type:
   FD
   {
-	$$ = NULL;
+	$$ = cb_int0;
   }
 | SD
   {
@@ -14693,9 +14692,9 @@ use_exception:
   {
 	cb_tree		l;
 
-	for (l = $3; l; l = CB_CHAIN(l)) {
-		if (CB_VALID_TREE(CB_VALUE(l))) {
-			setup_use_file(CB_FILE(cb_ref(CB_VALUE(l))));
+	for (l = $3; l; l = CB_CHAIN (l)) {
+		if (CB_VALID_TREE (CB_VALUE (l))) {
+			setup_use_file (CB_FILE (cb_ref (CB_VALUE (l))));
 		}
 	}
 	current_section->flag_real_label = 1;

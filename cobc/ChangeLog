@@ -1,4 +1,10 @@
 
+2019-03-10  Simon Sobisch <simonsobisch@gnu.org>
+
+	* typeck.c (cb_check_overlapping): do only the check, logic and messages
+	  moved to (validate_move)
+	* parser.y: minor refactoring
+
 2019-03-09  Simon Sobisch <simonsobisch@gnu.org>
 
 	* codegen.c: fixed freeing LOCAL-STORAGE memory using the wrong "free"

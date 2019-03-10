@@ -8324,17 +8324,28 @@ count_pic_alphanumeric_edited (struct cb_field *field)
 	return count;
 }
 
-/* check if data of two fields may overlap */
+/* check if data of two fields may overlap;
+  returns:
+	0 = no overlapping
+	1 = possible overlapping, would need more checks for a warning
+	2 = possible overlapping, warn
+	3 = overlapping, warn
+
+  src_f, dst_f
+	fields to be checked
+  src, dst
+	references, may be NULL (no subscripts/references checked)
+
+*/
 static size_t
-cb_check_overlapping (cb_tree src, cb_tree dst,
-		      struct cb_field *src_f, struct cb_field *dst_f)
+cb_check_overlapping (struct cb_field *src_f, struct cb_field *dst_f,
+	cb_tree src, cb_tree dst)
 {
 	struct cb_field	*f1;
 	struct cb_field	*ff1;
 	struct cb_field	*ff2;
 	struct cb_reference *sr;
 	struct cb_reference *dr;
-	cb_tree		loc;
 	int		src_size;
 	int		dst_size;
 	int		src_off;
@@ -8352,9 +8363,6 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		dr = NULL;
 	}
 
-	if (cb_move_ibm) 		/* This MOVE result is exactly as on IBM */
-		return 0;
-
 	/* Check for identical field */
 	if (src_f == dst_f) {
 		if (!sr || !dr) {
@@ -8369,7 +8377,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 			   2: are all subs of source and dest literals with the same integer value ?
 			*/
 			if (...) {
-				goto pos_overlap_ret;
+				return 2;
 			} else {
 				return 0;
 			}
@@ -8412,7 +8420,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 
 		/* same fields, at least one without ref-mod -> overlapping */
 		if (!sr->offset || !dr->offset) {
-			goto overlap_ret;
+			return 3;
 		}
 
 	} else {
@@ -8420,12 +8428,12 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		/* Check basic overlapping */
 		for (f1 = src_f->children; f1; f1 = f1->sister) {
 			if (f1 == dst_f) {
-				goto overlap_ret;
+				return 3;
 			}
 		}
 		for (f1 = dst_f->children; f1; f1 = f1->sister) {
 			if (f1 == src_f) {
-				goto overlap_ret;
+				return 3;
 			}
 		}
 
@@ -8475,7 +8483,7 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		2: if at least one isn't an integer literal: check that all "upper" literals
 		   are either identical or numeric literals with the same integer value */
 		if (...) {
-			goto pos_overlap_ret;
+			return 2;
 		} else {
 			return 0;
 		}
@@ -8492,14 +8500,14 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 		/* field size -1 -> set via variable */
 		if (src_size == -1 ||
 			!CB_LITERAL_P (sr->offset)) {
-			goto pos_overlap_ret;
+			return 2;
 		}
 		src_off += cb_get_int (sr->offset) - 1;
 	}
 	if (dr->offset) {
 		if (dst_size == -1 ||
 			!CB_LITERAL_P (dr->offset)) {
-			goto pos_overlap_ret;
+			return 2;
 		}
 		dst_off += cb_get_int (dr->offset) - 1;
 	}
@@ -8512,26 +8520,12 @@ cb_check_overlapping (cb_tree src, cb_tree dst,
 	}
 
 	if (src_off >= dst_off && src_off < (dst_off + dst_size)) {
-		goto overlap_ret;
+		return 3;
 	}
 	if (src_off < dst_off && (src_off + src_size) > dst_off) {
-		goto overlap_ret;
+		return 3;
 	}
 	return 0;
-pos_overlap_ret:
-	loc = src->source_line ? src : dst;
-	if (cb_warn_pos_overlap && !suppress_warn) {
-		cb_warning_x (COBC_WARN_FILLER, loc,
-			_("overlapping MOVE may occur and produce unpredictable results"));
-	}
-	return 1;
-overlap_ret:
-	loc = src->source_line ? src : dst;
-	if ((cb_warn_overlap || cb_warn_pos_overlap) && !suppress_warn) {
-		cb_warning_x (COBC_WARN_FILLER, loc,
-			_("overlapping MOVE may produce unpredictable results"));
-	}
-	return 1;
 }
 
 static int
@@ -9025,8 +9019,37 @@ validate_move (cb_tree src, cb_tree dst, const unsigned int is_value, int *move_
 			size = fsrc->size;
 		}
 
-		/* Check basic overlapping */
-		overlapping = cb_check_overlapping (src, dst, fsrc, fdst);
+		if (cb_move_ibm) {
+			/* This MOVE result is exactly as on IBM, ignore overlapping */
+			overlapping = 0;
+		} else {
+			/* Check basic overlapping */
+			overlapping = cb_check_overlapping (fsrc, fdst, src, dst);
+			switch (overlapping) {
+			case 0:
+			case 1:
+				break;
+			case 2:
+				loc = src->source_line ? src : dst;
+				if (cb_warn_pos_overlap && !suppress_warn) {
+					cb_warning_x(COBC_WARN_FILLER, loc,
+						_("overlapping MOVE may occur and produce unpredictable results"));
+				}
+				break;
+			case 3:
+				loc = src->source_line ? src : dst;
+				if ((cb_warn_overlap || cb_warn_pos_overlap) && !suppress_warn) {
+					cb_warning_x (COBC_WARN_FILLER, loc,
+						_("overlapping MOVE may produce unpredictable results"));
+				}
+				break;
+				/* LCOV_EXCL_START */
+			default:
+				cobc_err_msg("unexpected overlap result: %d", overlapping);
+				COBC_ABORT();
+				/* LCOV_EXCL_STOP */
+			}
+		}
 
 		/* Non-elementary move */
 		if (fsrc->children || fdst->children) {
