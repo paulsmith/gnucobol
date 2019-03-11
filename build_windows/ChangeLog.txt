@@ -13,6 +13,8 @@
 2018-10-28  Simon Sobisch <simonsobisch@gnu.org>
 
 	* config.h.in, defaults.h.in: adjustments for OrangeC
+	* makebisonflex.bat: option to generate a single file only by
+	  giving it as command line option
 
 2018-10-01  Simon Sobisch <simonsobisch@gnu.org>
 
