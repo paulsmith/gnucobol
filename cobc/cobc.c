@@ -2263,29 +2263,33 @@ cobc_print_info (void)
 	cobc_var_print (_("extended screen I/O"),	WITH_CURSES, 0);
 
 	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
-	cobc_var_print (_("variable format"),	buff, 0);
+	cobc_var_print (_("variable file format"),	buff, 0);
 	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
 		cobc_var_print ("COB_VARSEQ_FORMAT", s, 1);
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	cobc_var_print (_("sequential handler"),	"EXTFH", 0);
+	cobc_var_print (_("sequential file handler"),	"EXTFH", 0);
 #else
-	cobc_var_print (_("sequential handler"),	_("built-in"), 0);
+	cobc_var_print (_("sequential file handler"),	_("built-in"), 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	cobc_var_print (_("ISAM handler"),		"EXTFH", 0);
+	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
-	cobc_var_print (_("ISAM handler"),		"BDB", 0);
+	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
 #elif defined	(WITH_CISAM)
-	cobc_var_print (_("ISAM handler"),		"C-ISAM", 0);
+	cobc_var_print (_("ISAM file handler"),		"C-ISAM", 0);
 #elif defined	(WITH_DISAM)
-	cobc_var_print (_("ISAM handler"),		"D-ISAM", 0);
+	cobc_var_print (_("ISAM file handler"),		"D-ISAM", 0);
 #elif defined	(WITH_VBISAM)
-	cobc_var_print (_("ISAM handler"),		"VBISAM", 0);
+#if defined	(VB_RTD)
+	cobc_var_print (_("ISAM file handler"),		"VBISAM (RTD)", 0);
 #else
-	cobc_var_print (_("ISAM handler"),		_("disabled"), 0);
+	cobc_var_print (_("ISAM file handler"),		"VBISAM", 0);
+#endif
+#else
+	cobc_var_print (_("ISAM file handler"),		_("disabled"), 0);
 #endif
 
 #if defined(__MPIR_VERSION)

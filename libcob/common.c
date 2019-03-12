@@ -7208,19 +7208,19 @@ print_info (void)
 #endif
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);
-	var_print (_("variable format"), buff, "", 0);
+	var_print (_("variable file format"), buff, "", 0);
 	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
 		var_print ("COB_VARSEQ_FORMAT", s, "", 1);
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	var_print (_("sequential handler"),	"EXTFH", "", 0);
+	var_print (_("sequential file handler"),	"EXTFH", "", 0);
 #else
-	var_print (_("sequential handler"),	_("built-in"), "", 0);
+	var_print (_("sequential file handler"),	_("built-in"), "", 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	var_print (_("ISAM handler"), 		"EXTFH", "", 0);
+	var_print (_("ISAM file handler"), 		"EXTFH", "", 0);
 #elif defined	(WITH_DB)
 	major = 0, minor = 0, patch = 0;
 	db_version (&major, &minor, &patch);
@@ -7230,15 +7230,19 @@ print_info (void)
 		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"BDB", major, minor, patch, DB_VERSION_MAJOR, DB_VERSION_MINOR);
 	}
-	var_print (_("ISAM handler"), 		versbuff, "", 0);
+	var_print (_("ISAM file handler"), 		versbuff, "", 0);
 #elif defined	(WITH_CISAM)
-	var_print (_("ISAM handler"), 		"C-ISAM" "", 0);
+	var_print (_("ISAM file handler"), 		"C-ISAM" "", 0);
 #elif defined	(WITH_DISAM)
-	var_print (_("ISAM handler"), 		"D-ISAM", "", 0);
+	var_print (_("ISAM file handler"), 		"D-ISAM", "", 0);
 #elif defined	(WITH_VBISAM)
-	var_print (_("ISAM handler"), 		"VBISAM", "", 0);
+#if defined	(VB_RTD)
+	var_print (_("ISAM file handler"), 		"VBISAM (RTD)", "", 0);
 #else
-	var_print (_("ISAM handler"), 		_("disabled"), "", 0);
+	var_print (_("ISAM file handler"), 		"VBISAM", "", 0);
+#endif
+#else
+	var_print (_("ISAM file handler"), 		_("disabled"), "", 0);
 #endif
 
 	major = 0, minor = 0, patch = 0;
