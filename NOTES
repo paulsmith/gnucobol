@@ -1,4 +1,6 @@
-cobc:
+Tue 12 Mar 2019 03:12:34 PM EDT
+Tried file-by-file merge first.  Too tedious and error-prone.
+Made following changes to 3 files: 
 
 cobc.h
 prefer trunk:
@@ -24,6 +26,12 @@ prefer trunk:
 	cob_flags_t
 
 cobc.c
+prefer trunk:
+       cobc_sig_handler, although messy
+       kept main() because seems newer and cleaner
+
+These files were not touched:
+
 codegen.c
 codeoptim.c
 codeoptim.def
@@ -63,3 +71,99 @@ screenio.c
 strings.c
 system.def
 termio.c
+
++++
+
+r506
+--- Merging r506 into '.':
+U    cobc/codegen.c
+U    cobc/codeoptim.c  (declined)
+U    cobc/typeck.c     (declined)
+
+r521
+r525
+r531
+r575
+r576
+r577
+r585
+r587
+r614
+r801
+r805
+r810
+r835
+r839
+r931
+r935
+r936
+r1253
+r1260
+r1276
+r1278
+r1313
+r1324
+r1395
+r1396
+r1398
+r1401
+r1402
+r1404
+r1405
+r1410
+r1411
+r1417
+r1418
+r1419
+r1491
+r1497
+r1508
+r1520
+r1547
+r1560
+r1565
+r1566
+r1605
+r1623
+r1624
+r1685
+r1686
+r1726
+r1727
+r1728
+r1739
+r1870
+r1991
+r2092
+r2110
+r2166
+r2221
+r2278
+r2364
+r2379
+r2468
+r2504
+r2513
+r2526
+r2574
+r2582
+r2585
+r2586
+r2587
+r2603
+r2606
+r2612
+r2614
+r2616
+r2617
+r2619
+r2641
+r2642
+r2644
+r2645
+r2646
+r2649
+r2650
+r2700
+r2827
+r2883
