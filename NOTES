@@ -1,0 +1,65 @@
+cobc:
+
+cobc.h
+prefer trunk:
+	CB_STD_GC = 0,
+	enum cb_format
+	enum cobc_name_type
+	
+	cb_warning
+	cb_error
+	cb_error_always
+	cb_perror
+	cb_plex_warning
+	cb_plex_error
+	cb_plex_verify
+	configuration_warning
+	configuration_error
+						
+	not used (afaict): 
+	extern struct reserved_word_list	*cob_user_res_list;
+
+tree.h
+prefer trunk:
+	cob_flags_t
+
+cobc.c
+codegen.c
+codeoptim.c
+codeoptim.def
+config.c
+config.def
+error.c
+field.c
+flag.def
+Makefile.am
+parser.y
+pplex.l
+ppparse.def
+ppparse.y
+reserved.c
+scanner.l
+tree.c
+typeck.c
+warning.def
+
+libcob:
+call.c
+ChangeLog
+cobgetopt.c
+cobgetopt.h
+coblocal.h
+common.c
+common.h
+exception.def
+fileio.c
+intrinsic.c
+Makefile.am
+mlio.c
+move.c
+numeric.c
+reportio.c
+screenio.c
+strings.c
+system.def
+termio.c
