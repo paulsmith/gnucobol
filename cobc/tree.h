@@ -22,26 +22,8 @@
 #ifndef CB_TREE_H
 #define CB_TREE_H
 
-#ifndef HAVE_ATOLL
-#ifdef  HAVE_STRTOLL
-#ifndef atoll
-#define atoll(x) strtoll(x, NULL, 10)
-#endif
-#endif
-#endif
-
-#ifndef HAVE_ATOL
-#ifdef  HAVE_STRTOL
-#ifndef atol
-#define atol(x) strtol(x, NULL, 10)
-#endif
-#endif
-#endif
-
 #define CB_BEFORE		cb_int0
 #define CB_AFTER		cb_int1
-
-#define COB_MAX_SUBSCRIPTS	16
 
 #define CB_PREFIX_ATTR		"a_"	/* Field attribute (cob_field_attr) */
 #define CB_PREFIX_BASE		"b_"	/* Base address (unsigned char *) */
@@ -65,9 +47,6 @@
 #define CB_PREFIX_REPORT_CONTROL "rc_"	/* Report CONTROL (cob_report_control) */
 #define CB_PREFIX_REPORT_REF	"rr_"	/* Report CONTROL reference (cob_report_control_ref) */
 #define CB_PREFIX_REPORT_SUM_CTR "rsc_"	/* Report SUM COUNTER */
-
-#define CB_PROGRAM_TYPE		0
-#define CB_FUNCTION_TYPE	1
 
 #define CB_CALL_BY_REFERENCE	1
 #define CB_CALL_BY_CONTENT	2
@@ -200,7 +179,6 @@ enum cb_system_name_category {
 	CB_CALL_CONVENTION_NAME,
 	CB_CODE_NAME,
 	CB_COMPUTER_NAME,
-	CB_ENTRY_CONVENTION_NAME,
 	CB_EXTERNAL_LOCALE_NAME,
 	CB_LIBRARY_NAME,
 	CB_TEXT_NAME
@@ -314,47 +292,46 @@ enum cb_storage {
 /* Field types */
 enum cb_usage {
 	CB_USAGE_BINARY = 0,		/* 0 */
-	CB_USAGE_BIT,			/*  1 */
-	CB_USAGE_COMP_5,		/*  2 */
-	CB_USAGE_COMP_6,		/*  3 */
-	CB_USAGE_COMP_N,		/*  4 */
-	CB_USAGE_COMP_X,		/*  5 */
-	CB_USAGE_DISPLAY,		/*  6 */
-	CB_USAGE_DOUBLE,		/*  7 */
-	CB_USAGE_FLOAT,			/*  8 */
-	CB_USAGE_FP_BIN128,		/*  9 */
-	CB_USAGE_FP_BIN32,		/* 10 */
-	CB_USAGE_FP_BIN64,		/* 11 */
-	CB_USAGE_FP_DEC128,		/* 12 */
-	CB_USAGE_FP_DEC64,		/* 13 */
-	CB_USAGE_HNDL,			/* 14 */
-	CB_USAGE_HNDL_FONT,		/* 15 */
-	CB_USAGE_HNDL_LM,		/* 16 */
-	CB_USAGE_HNDL_MENU,		/* 17 */
-	CB_USAGE_HNDL_SUBWINDOW,	/* 18 */
-	CB_USAGE_HNDL_THREAD,		/* 19 */
-	CB_USAGE_HNDL_VARIANT,		/* 20 */
-	CB_USAGE_HNDL_WINDOW,		/* 21 */
-	CB_USAGE_INDEX,			/* 22 */
-	CB_USAGE_LENGTH,		/* 23 */
-	CB_USAGE_LONG_DOUBLE,		/* 24 */
-	CB_USAGE_NATIONAL,		/* 25 */
-	CB_USAGE_OBJECT,		/* 26 */
-	CB_USAGE_PACKED,		/* 27 */
-	CB_USAGE_POINTER,		/* 28 */
-	CB_USAGE_PROGRAM,		/* 29 */
-	CB_USAGE_PROGRAM_POINTER,	/* 30 */
-	CB_USAGE_SIGNED_CHAR,		/* 31 */
-	CB_USAGE_SIGNED_INT,		/* 32 */
-	CB_USAGE_SIGNED_LONG,		/* 33 */
-	CB_USAGE_SIGNED_SHORT,		/* 34 */
-	CB_USAGE_UNSIGNED_CHAR,		/* 35 */
-	CB_USAGE_UNSIGNED_INT,		/* 36 */
-	CB_USAGE_UNSIGNED_LONG,		/* 37 */
-	CB_USAGE_UNSIGNED_SHORT,	/* 38 */
-
-	CB_USAGE_ERROR			/* 39, always last */
+	CB_USAGE_BIT,			/* 1 */
+	CB_USAGE_COMP_5,		/* 2 */
+	CB_USAGE_COMP_X,		/* 3 */
+	CB_USAGE_DISPLAY,		/* 4 */
+	CB_USAGE_FLOAT,			/* 5 */
+	CB_USAGE_DOUBLE,		/* 6 */
+	CB_USAGE_INDEX,			/* 7 */
+	CB_USAGE_NATIONAL,		/* 8 */
+	CB_USAGE_OBJECT,		/* 9 */
+	CB_USAGE_PACKED,		/* 10 */
+	CB_USAGE_POINTER,		/* 11 */
+	CB_USAGE_LENGTH,		/* 12 */
+	CB_USAGE_PROGRAM_POINTER,	/* 13 */
+	CB_USAGE_UNSIGNED_CHAR,		/* 14 */
+	CB_USAGE_SIGNED_CHAR,		/* 15 */
+	CB_USAGE_UNSIGNED_SHORT,	/* 16 */
+	CB_USAGE_SIGNED_SHORT,		/* 17 */
+	CB_USAGE_UNSIGNED_INT,		/* 18 */
+	CB_USAGE_SIGNED_INT,		/* 19 */
+	CB_USAGE_UNSIGNED_LONG,		/* 20 */
+	CB_USAGE_SIGNED_LONG,		/* 21 */
+	CB_USAGE_COMP_6,		/* 22 */
+	CB_USAGE_FP_DEC64,		/* 23 */
+	CB_USAGE_FP_DEC128,		/* 24 */
+	CB_USAGE_FP_BIN32,		/* 25 */
+	CB_USAGE_FP_BIN64,		/* 26 */
+	CB_USAGE_FP_BIN128,		/* 27 */
+	CB_USAGE_LONG_DOUBLE,		/* 28 */
+	CB_USAGE_HNDL,			/* 29 */
+	CB_USAGE_HNDL_WINDOW,		/* 30 */
+	CB_USAGE_HNDL_SUBWINDOW,	/* 31 */
+	CB_USAGE_HNDL_FONT,		/* 32 */
+	CB_USAGE_HNDL_THREAD,		/* 33 */
+	CB_USAGE_HNDL_MENU,		/* 34 */
+	CB_USAGE_HNDL_VARIANT,		/* 35 */
+	CB_USAGE_HNDL_LM,		/* 36 */
+	CB_USAGE_COMP_N,		/* 37 */
+	CB_USAGE_ERROR			/* 38, always last */
 };
+
 
 /* Cast type */
 enum cb_cast_type {
@@ -525,22 +502,10 @@ typedef struct cb_tree_common	*cb_tree;
 #define	CB_INVALID_TREE(x)	(!(x) || CB_TREE (x) == cb_error_node)
 
 #ifdef	COB_TREE_DEBUG
-//// rw branch
-# ifdef	COB_HAVE_STEXPR
-#  define CB_TREE_CAST(tg,ty,x)						\
-({									\
-	cb_tree _x = (x);						\
-	if (unlikely(!_x || CB_TREE_TAG (_x) != tg)) {			\
-		cobc_tree_cast_error (_x, __FILE__, __LINE__, tg);	\
-	}								\
-	((ty *) (_x));							\
-})
-# else
-#  define CB_TREE_CAST(tg,ty,x)	\
+#define CB_TREE_CAST(tg,ty,x)	\
 	((ty *)cobc_tree_cast_check (x, __FILE__, __LINE__, tg))
-# endif
 #else
-# define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
+#define CB_TREE_CAST(tg,ty,x)	((ty *) (x))
 #endif
 
 /* xref entries */
@@ -800,7 +765,6 @@ struct cb_field {
 	int			size;		/* Field size */
 	int			level;		/* Level number */
 	int			memory_size;	/* Memory size */
-	int			compx_size;	/* Original COMP-X byte size */
 	int			offset;		/* Byte offset from 01 level */
 	int			occurs_min;	/* OCCURS <min> */
 	int			occurs_max;	/* OCCURS [... TO] <max> */
@@ -854,7 +818,6 @@ struct cb_field {
 	unsigned int flag_invalid	: 1;	/* Is broken */
 	unsigned int flag_field		: 1;	/* Has been internally cached */
 	unsigned int flag_chained	: 1;	/* CHAINING item */
-	unsigned int flag_data_set	: 1;	/* The data address was set in entry code */
 	unsigned int flag_anylen_done	: 1;	/* ANY LENGTH is set up */
 	unsigned int flag_is_verified	: 1;	/* Has been verified */
 	unsigned int flag_is_c_long	: 1;	/* Is BINARY-C-LONG */
@@ -877,7 +840,6 @@ struct cb_field {
 	unsigned int flag_unbounded	: 1;	/* OCCURS UNBOUNDED */
 	unsigned int flag_constant	: 1;	/* Is 01 AS CONSTANT */
 	unsigned int flag_internal_constant	: 1;	/* Is an internally generated CONSTANT */
-	unsigned int flag_validated	: 1;	/* 'usage' was validated */
 	unsigned int flag_comp_1	: 1;	/* Is USAGE COMP-1 */
 	unsigned int flag_volatile	: 1;	/* VOLATILE */
 };
@@ -1338,7 +1300,6 @@ enum cb_handler_type {
 struct cb_statement {
 	struct cb_tree_common	common;			/* Common values */
 	const char		*name;			/* Statement name */
-	const char		*statement;		/* Statement line */
 	cb_tree			body;			/* Statement body */
 	cb_tree			file;			/* File reference */
 	cb_tree			ex_handler;		/* Exception handler */
@@ -1347,7 +1308,6 @@ struct cb_statement {
 	cb_tree			null_check;		/* NULL check */
 	cb_tree			debug_check;		/* Field DEBUG */
 	cb_tree			debug_nodups;		/* Field DEBUG dups */
-	cb_tree			retry;			/* RETRY expression */
 	struct cb_attr_struct	*attr_ptr;		/* Attributes */
 	enum cb_handler_type	handler_type;		/* Handler type */
 	unsigned int		flag_no_based	: 1;	/* Check BASED */
@@ -1355,11 +1315,6 @@ struct cb_statement {
 	unsigned int		flag_merge	: 1;	/* Is MERGE */
 	unsigned int		flag_callback	: 1;	/* DEBUG Callback */
 	unsigned int		flag_implicit	: 1;	/* Is an implicit statement */
-	unsigned int		flag_retry_times: 1;	/* RETRY exp TIMES */
-	unsigned int		flag_retry_seconds: 1;	/* RETRY exp SECONDS */
-	unsigned int		flag_retry_forever: 1;	/* RETRY FOREVER */
-	unsigned int		flag_advancing_lock: 1;	/* ADVANCING ON LOCK */
-	unsigned int		flag_ignore_lock: 1;	/* IGNORE LOCK */
 };
 
 #define CB_STATEMENT(x)		(CB_TREE_CAST (CB_TAG_STATEMENT, struct cb_statement, x))
@@ -1959,7 +1914,6 @@ extern void		redefinition_warning (cb_tree, cb_tree);
 extern void		undefined_error (cb_tree);
 extern void		ambiguous_error (cb_tree);
 extern void		group_error (cb_tree, const char *);
-extern void		level_redundant_error (cb_tree, const char *);
 extern void		level_require_error (cb_tree, const char *);
 extern void		level_except_error (cb_tree, const char *);
 extern int		cb_set_ignore_error (int state);
@@ -2217,9 +2171,6 @@ extern void		cb_emit_xml_generate (cb_tree, cb_tree, cb_tree,
 					      cb_tree);
 extern void		cb_emit_json_generate (cb_tree, cb_tree, cb_tree,
 					       cb_tree, cb_tree);
-DECLNORET extern void	cobc_tree_cast_error (const cb_tree, const char *,
-					      const int,
-					      const enum cb_tag) COB_A_NORETURN;
 
 #ifdef	COB_TREE_DEBUG
 extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
@@ -2229,8 +2180,6 @@ extern cb_tree		cobc_tree_cast_check (const cb_tree, const char *,
 
 /* codegen.c */
 extern void		codegen (struct cb_program *, const int);
-extern struct cb_field *chk_field_variable_size (struct cb_field *f);
-extern unsigned int	chk_field_variable_address (struct cb_field *fld);
 
 /* scanner.l */
 extern void		cb_unput_dot (void);
@@ -2306,7 +2255,7 @@ extern unsigned int		cb_correct_program_order;
 #define CB_BUILD_CAST_LENGTH(x)		cb_build_cast (CB_CAST_LENGTH, x)
 #define CB_BUILD_CAST_PPOINTER(x)	cb_build_cast (CB_CAST_PROGRAM_POINTER, x)
 
-#define CB_BUILD_PARENTHESIS(x)		cb_build_binary_op (x, '@', NULL)
+#define CB_BUILD_PARENTHESES(x)		cb_build_binary_op (x, '@', NULL)
 #define CB_BUILD_NEGATION(x)		cb_build_binary_op (x, '!', NULL)
 
 #define CB_BUILD_STRING0(str)		cb_build_string (str, strlen ((char *)(str)))

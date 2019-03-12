@@ -5542,7 +5542,7 @@ output_call_by_value_args (cb_tree x, cb_tree l)
 }
 
 static void
-output_bin_field (const cb_tree x, const cob_u32_t id, int opcd)
+output_bin_field (const cb_tree x, const cob_u32_t id)
 {
 	int		i;
 	cob_u32_t	size;
@@ -5566,17 +5566,8 @@ output_bin_field (const cb_tree x, const cob_u32_t id, int opcd)
 	}
 	aflags |= COB_FLAG_CONSTANT;
 	i = lookup_attr (COB_TYPE_NUMERIC_BINARY, digits, 0, aflags, NULL, 0);
-	if(opcd == 0) {
-		/* Some C compilers (SUN for one) will not accept 'content_%u.data' because
-			that is a local variable (RJN: 2015) */
-		output_line ("cob_field\tcontent_fb_%u = { %u, content_%u.data, &%s%d };",
-							 id, size, id, CB_PREFIX_ATTR, i);
-	} else if(opcd == 1) {
-		output_line ("cob_field\tcontent_fb_%u = { %u, NULL, &%s%d };", id, size, CB_PREFIX_ATTR, i);
-	} else {
-		/* Set the value via code rather than local variable initialization (RJN: 2015) */
-		output_line ("content_fb_%u.data = content_%u.data;", id, id);
-	}
+	output_line ("cob_field\tcontent_fb_%u = { %u, content_%u.data, &%s%d };",
+		     id, size, id, CB_PREFIX_ATTR, i);
 }
 
 static COB_INLINE COB_A_INLINE int
@@ -5710,11 +5701,7 @@ output_call (struct cb_call *p)
 					output_indent ("{");
 				}
 				output_line ("cob_content\tcontent_%u;", n);
-#if   defined(__SUNPRO_C)
-				output_bin_field (x, n, 1);
-#else
-				output_bin_field (x, n, 0);
-#endif
+				output_bin_field (x, n);
 			} else if (CB_CAST_P (x)) {
 				if (!need_brace) {
 					need_brace = 1;
@@ -5775,10 +5762,6 @@ output_call (struct cb_call *p)
 		switch (CB_PURPOSE_INT (l)) {
 		case CB_CALL_BY_REFERENCE:
 			if (CB_NUMERIC_LITERAL_P (x)) {
-#if   defined(__SUNPRO_C)
-				/* Set this after all variable declarations */
-				output_bin_field (x, n, 2);
-#endif
 				output_prefix ();
 				if (cb_fits_int (x)) {
 					output ("content_%u.dataint = ", n);
@@ -5815,10 +5798,6 @@ output_call (struct cb_call *p)
 				output (";\n");
 			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC) {
 				if (CB_NUMERIC_LITERAL_P (x)) {
-#if   defined(__SUNPRO_C)
-					/* Set this after all variable declarations */
-					output_bin_field (x, n, 2);
-#endif
 					output_prefix ();
 					if (cb_fits_int (x)) {
 						output ("content_%u.dataint = ", n);

@@ -32,7 +32,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -62,7 +61,6 @@
 
 #include "lib/gettext.h"
 
-#include "libcob.h"
 #include "libcob/cobgetopt.h"
 
 #if defined (COB_EXPERIMENTAL) || 1
@@ -258,8 +256,6 @@ struct tm		current_compile_tm = { 0 };
 char			*source_name = NULL;
 #endif
 
-struct noreserve	*cobc_nores_base = NULL;
-
 enum cb_format		cb_source_format = CB_FORMAT_FIXED;
 int			cb_text_column;
 int			cb_indicator_column;
@@ -281,7 +277,6 @@ int			cb_unix_lf = 0;
 int 		fatal_startup_error = 0;
 int			errorcount = 0;
 int			warningcount = 0;
-int			exit_option = 0;
 int			warningopt = 0;
 int			fatal_errors_flag = 0;
 int			no_physical_cancel = 0;
@@ -323,15 +318,11 @@ int	cb_old_trace = 0;
 
 /* Local variables */
 
-#if	defined(HAVE_SIGNAL_H) && defined(HAVE_SIG_ATOMIC_T)
-static volatile sig_atomic_t	sig_is_handled;
-#endif
+static struct cb_define_struct	*cb_define_list = NULL;
 
-static struct cb_define_struct	*cb_define_list;
-
-static struct cobc_mem_struct	*cobc_mainmem_base;
-static struct cobc_mem_struct	*cobc_parsemem_base;
-static struct cobc_mem_struct	*cobc_plexmem_base;
+static struct cobc_mem_struct	*cobc_mainmem_base = NULL;
+static struct cobc_mem_struct	*cobc_parsemem_base = NULL;
+static struct cobc_mem_struct	*cobc_plexmem_base = NULL;
 
 static const char	*cobc_cc;		/* C compiler */
 static char		*cobc_cflags;		/* C compiler flags */
@@ -356,13 +347,13 @@ static size_t		cobc_export_dyn_len;
 static size_t		cobc_shared_opt_len;
 static size_t		cobc_pic_flags_len;
 
-static char		*save_temps_dir;
+static char		*save_temps_dir = NULL;
 static struct strcache	*base_string;
 
-static char		*cobc_list_dir;
-static char		*cobc_list_file;
+static char		*cobc_list_dir = NULL;
+static char		*cobc_list_file = NULL;
 
-static char		*output_name;
+static char		*output_name = NULL;
 static char		*cobc_buffer;
 static char		*cobc_objects_buffer;
 static char		*output_name_buff;
@@ -374,29 +365,29 @@ static size_t		cobc_buffer_size;
 
 static struct filename	*file_list;
 
-static unsigned int	cb_compile_level;
+static unsigned int	cb_compile_level = 0;
 
 static int		iargs;
 
-static size_t		cobc_flag_module;
-static size_t		cobc_flag_library;
-static size_t		cobc_flag_run;
-static char		*cobc_run_args;
-static size_t		save_temps;
-static size_t		save_all_src;
-static size_t		save_c_src;
-static signed int	verbose_output;
-static size_t		cob_optimize;
+static size_t		cobc_flag_module = 0;
+static size_t		cobc_flag_library = 0;
+static size_t		cobc_flag_run = 0;
+static char		*cobc_run_args = NULL;
+static size_t		save_temps = 0;
+static size_t		save_all_src = 0;
+static size_t		save_c_src = 0;
+static signed int	verbose_output = 0;
+static size_t		cob_optimize = 0;
 
 static unsigned int		cb_listing_linecount;
-static int		cb_listing_eject;
+static int		cb_listing_eject = 0;
 static char		cb_listing_filename[FILENAME_MAX];
-static char		*cb_listing_outputfile;
+static char		*cb_listing_outputfile = NULL;
 static char		cb_listing_title[81];	/* Listing title (defaults to PACKAGE_NAME + Version */
 static char		cb_listing_header[133];	/* Listing header */
-static struct list_files	*cb_listing_file_struct;
-static struct list_error	*cb_listing_error_head;
-static struct list_error	*cb_listing_error_tail;
+static struct list_files	*cb_listing_file_struct = NULL;
+static struct list_error	*cb_listing_error_head = NULL;
+static struct list_error	*cb_listing_error_tail = NULL;
 
 #ifdef	_MSC_VER
 static const char	*manicmd;
@@ -405,9 +396,9 @@ static size_t		manilink_len;
 #define PATTERN_DELIM '|'
 #endif
 
-static size_t		strip_output;
-static size_t		gflag_set;
-static size_t		aflag_set;
+static size_t		strip_output = 0;
+static size_t		gflag_set = 0;
+static size_t		aflag_set = 0;
 
 static const char	*const cob_csyns[] = {
 #ifndef	COB_EBCDIC_MACHINE
@@ -532,7 +523,6 @@ static const struct option long_options[] = {
 	{"save-temps",		CB_OP_ARG, NULL, '_'},
 	{"std",			CB_RQ_ARG, NULL, '$'},
 	{"conf",		CB_RQ_ARG, NULL, '&'},
-	{"cb_conf",		CB_RQ_ARG, NULL, '%'},
 	{"debug",		CB_NO_ARG, NULL, 'd'},
 	{"ext",			CB_RQ_ARG, NULL, 'e'},
 	{"free",		CB_NO_ARG, NULL, 'F'},	/* note: not assigned directly as this is only valid for */
@@ -549,7 +539,6 @@ static const struct option long_options[] = {
 	{"Wall",		CB_NO_ARG, NULL, 'W'},
 	{"Werror",		CB_OP_ARG, NULL, 'Y'},
 	{"W",			CB_NO_ARG, NULL, 'Z'},
-	{"use-extfh",		CB_RQ_ARG, NULL, 7},	/* This is used by COBOL-IT; Same is -fcallfh= */
 	{"tlines", 		CB_RQ_ARG, NULL, '*'},
 	{"tsymbols", 		CB_NO_ARG, &cb_listing_symbols, 1},		/* kept for backwards-compatibility */
 
@@ -704,8 +693,6 @@ cobc_enum_explain (const enum cb_tag tag)
 		return "LITERAL";
 	case CB_TAG_DECIMAL:
 		return "DECIMAL";
-	case CB_TAG_DECIMAL_LITERAL:
-		return "DECIMAL_LITERAL";
 	case CB_TAG_FIELD:
 		return "FIELD";
 	case CB_TAG_FILE:
@@ -918,7 +905,7 @@ cobc_abort (const char * filename, const int line_num)
 DECLNORET static void	cobc_tree_cast_error (const cb_tree, const char *,
 	const int, const enum cb_tag) COB_A_NORETURN;
 
-static int cast_error_raised;
+static int cast_error_raised = 0;
 
 /* Output cobc source/line where a tree cast error occurs and exit */
 static void
@@ -1787,6 +1774,7 @@ cobc_add_str (char **var, size_t *cursize, const char *s1, const char *s2,
 static void
 cobc_check_action (const char *name)
 {
+	int ret;
 	if (!name || access (name, F_OK)) {
 		return;
 	}
@@ -1802,8 +1790,9 @@ cobc_check_action (const char *name)
 		temp_buff[COB_MEDIUM_MAX] = 0;
 		/* Remove possible target file - ignore return */
 		(void)unlink (temp_buff);
+		ret = rename (name, temp_buff);
 		/* LCOV_EXCL_START */
-		if (rename (name, temp_buff)) {
+		if (ret) {
 			cobc_err_msg (_("warning: could not move temporary file to %s"),
 					temp_buff);
 		}
@@ -1889,8 +1878,6 @@ static void
 cobc_clean_up (const int status)
 {
 	struct filename		*fn;
-	struct local_filename	*lf;
-	cob_u32_t		i;
 
 	if (cb_src_list_file) {
 		if (cb_src_list_file != stdout) {
@@ -1931,60 +1918,12 @@ cobc_clean_up (const int status)
 	ylex_clear_all ();
 
 	for (fn = file_list; fn; fn = fn->next) {
-		for (lf = fn->localfile; lf; lf = lf->next) {
-			if (unlikely(lf->local_fp)) {
-				fclose (lf->local_fp);
-				lf->local_fp = NULL;
-			}
-		}
 		if (fn->need_assemble &&
 		    (status || cb_compile_level > CB_LEVEL_ASSEMBLE ||
 		     (cb_compile_level == CB_LEVEL_ASSEMBLE && save_temps))) {
 			cobc_check_action (fn->object);
 		}
-#if 1 ||  pangaea
-		if (save_all_src) {
-			continue;
-		}
-		if (fn->need_preprocess &&
-		    (status || cb_compile_level > CB_LEVEL_PREPROCESS ||
-		     (cb_compile_level == CB_LEVEL_PREPROCESS && save_temps))) {
-			cobc_check_action (fn->preprocess);
-		}
-		if (save_c_src) {
-			continue;
-		}
-		if (fn->need_translate &&
-		    (status || cb_compile_level > CB_LEVEL_TRANSLATE ||
-		     (cb_compile_level == CB_LEVEL_TRANSLATE && save_temps))) {
-			cobc_check_action (fn->translate);
-			cobc_check_action (fn->trstorage);
-			if (fn->localfile) {
-				for (lf = fn->localfile; lf; lf = lf->next) {
-					cobc_check_action (lf->local_name);
-				}
-			} else if (fn->translate) {
-				/* If we get syntax errors, we do not
-				   know the number of local include files */
-				sprintf (cobc_buffer, "%s.l.h", fn->translate);
-				cobc_buffer[cobc_buffer_size] = 0;
-				for (i = 0; i < 30U; ++i) {
-					if (i) {
-						sprintf (cobc_buffer, "%s.l%u.h",
-							fn->translate, i);
-						cobc_buffer[cobc_buffer_size] = 0;
-					}
-					if (!access (cobc_buffer, F_OK)) {
-						unlink (cobc_buffer);
-					} else if (i) {
-						break;
-					}
-				}
-			}
-		}
-#else
 		clean_up_intermediates (fn, status);
-#endif // pangaea
 	}
 	cobc_free_mem ();
 	file_list = NULL;
@@ -2234,7 +2173,7 @@ cobc_var_print (const char *msg, const char *val, const unsigned int env)
 	n = 0;
 	token = strtok (p, " ");
 	for (; token; token = strtok (NULL, " ")) {
-		toklen = strlen (token) + 1;
+		toklen = (int)strlen (token) + 1;
 		if ((n + toklen) > CB_IVAL_SIZE) {
 			if (n) {
 				printf ("\n%*.*s", CB_IMSG_SIZE + 3,
@@ -2297,11 +2236,11 @@ cobc_print_info (void)
 	if ((s = getenv ("COBCPY")) != NULL) {
 		cobc_var_print ("COBCPY",	s, 1);
 	}
-	if (cb_msg_style == CB_MSG_STYLE_MSC) {
-		cobc_var_print ("COB_MSG_FORMAT",	"MSC", 0);
-	} else {
-		cobc_var_print ("COB_MSG_FORMAT",	"GCC", 0);
-	}
+#if defined (_MSC_VER)
+	cobc_var_print ("COB_MSG_FORMAT",	"MSC", 0);
+#else
+	cobc_var_print ("COB_MSG_FORMAT",	"GCC", 0);
+#endif
 	if ((s = getenv ("COB_MSG_FORMAT")) != NULL) {
 		cobc_var_print ("COB_MSG_FORMAT",	s, 1);
 	}
@@ -2324,34 +2263,29 @@ cobc_print_info (void)
 	cobc_var_print (_("extended screen I/O"),	WITH_CURSES, 0);
 
 	snprintf (buff, sizeof(buff), "%d", WITH_VARSEQ);
-	cobc_var_print (_("variable file format"),	buff, 0);
+	cobc_var_print (_("variable format"),	buff, 0);
 	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
 		cobc_var_print ("COB_VARSEQ_FORMAT", s, 1);
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	cobc_var_print (_("sequential file handler"),	"EXTFH", 0);
+	cobc_var_print (_("sequential handler"),	"EXTFH", 0);
 #else
-	cobc_var_print (_("sequential file handler"),	_("built-in"), 0);
+	cobc_var_print (_("sequential handler"),	_("built-in"), 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
+	cobc_var_print (_("ISAM handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
-	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
+	cobc_var_print (_("ISAM handler"),		"BDB", 0);
 #elif defined	(WITH_CISAM)
-	cobc_var_print (_("ISAM file handler"),		"C-ISAM", 0);
+	cobc_var_print (_("ISAM handler"),		"C-ISAM", 0);
 #elif defined	(WITH_DISAM)
-	cobc_var_print (_("ISAM file handler"),		"D-ISAM", 0);
+	cobc_var_print (_("ISAM handler"),		"D-ISAM", 0);
 #elif defined	(WITH_VBISAM)
-#if defined	(VB_RTD)
-	cobc_var_print (_("ISAM file handler"),		"VBISAM (RTD)", 0);
-# endif
+	cobc_var_print (_("ISAM handler"),		"VBISAM", 0);
 #else
-	cobc_var_print (_("ISAM file handler"),		"VBISAM", 0);
-#endif
-#else
-	cobc_var_print (_("ISAM file handler"),		_("disabled"), 0);
+	cobc_var_print (_("ISAM handler"),		_("disabled"), 0);
 #endif
 
 #if defined(__MPIR_VERSION)
@@ -2371,17 +2305,6 @@ cobc_print_info (void)
 #else
 	cobc_var_print (_("JSON library"),		_("disabled"), 0);
 #endif
-}
-
-static void
-cobc_print_warn (const char *name, const char *doc, const int wall)
-{
-	printf ("  -W%-19s %s", name, doc);
-	if (!wall) {
-		fputs ("\n\t\t\t", stdout);
-		fputs (_("- NOT set with -Wall"), stdout);
-	}
-	putchar ('\n');
 }
 
 static void
@@ -2782,23 +2705,6 @@ set_compile_level_from_file_extension (const char *filename)
 }
 
 /* process command line options */
-	/* Translate command line arguments from WIN to UNIX style */
-static void
-unix_style_switches (int argc, char *argv[])
-#if defined (_WIN32) || defined (__DJGPP__)
-{
-	int i;
-	
-	for (i=1; i < argc; i++) {
-		if (strrchr(argv[i], '/') == argv[i]) {
-			argv[i][0] = '-';
-		}
-	}
-}
-#else
-	{}	
-#endif
-
 static int
 process_command_line (const int argc, char **argv)
 {
@@ -2813,6 +2719,9 @@ process_command_line (const int argc, char **argv)
 	int			list_intrinsics = 0;
 	int			list_system_names = 0;
 	int			list_system_routines = 0;
+#if defined (_WIN32) || defined (__DJGPP__)
+	int 			argnum;
+#endif
 	enum cob_exception_id	i;
 	struct stat		st;
 	char			ext[COB_MINI_BUFF];
@@ -2822,27 +2731,27 @@ process_command_line (const int argc, char **argv)
 #if defined (_MSC_VER)
 	const char		*extension;
 #endif
+
 	int			conf_ret = 0;
 	int			error_all_warnings = 0;
 
-#if 0 && reportwriter
-	cb_mf_ibm_comp = -1;
-	cb_flag_arithmetic_osvs = -1;
-	cb_flag_move_ibm = -1;
-#endif
+#if defined (_WIN32) || defined (__DJGPP__)
 	/* Translate command line arguments from DOS/WIN to UNIX style */
-	unix_style_switches (argc, argv);
+	argnum = 1;
+	while (++argnum <= argc) {
+		if (strrchr(argv[argnum - 1], '/') == argv[argnum - 1]) {
+			argv[argnum - 1][0] = '-';
+		}
+	}
+#endif
 
 	/* First run of getopt: handle std/conf and all listing options
 	   We need to postpone single configuration flags as we need
-	   a full configuration to be loaded first */
+	   a full configuration to be loaded before */
 	cob_optind = 1;
 	while ((c = cob_getopt_long_long (argc, argv, short_options,
 					  long_options, &idx, 1)) >= 0) {
 		switch (c) {
-		case 0:
-			/* Defined flag */
-			break;
 
 		case '?':
 			/* Unknown option or ambiguous */
@@ -3601,23 +3510,6 @@ process_command_line (const int argc, char **argv)
 		cb_list_system_routines ();
 	}
 
-#if 0 && reportwriter //// pangaea
-	/* Output version information when running very verbose */
-	if (verbose_output > 1) {
-		cobc_print_version ();
-	}
-	/* debug: Turn on all exception conditions */
-	if (cobc_wants_debug) {
-		for (i = (enum cob_exception_id)1; i < COB_EC_MAX; ++i) {
-			CB_EXCEPTION_ENABLE (i) = 1;
-		}
-		if (verbose_output) {
-			fputs (_("All runtime checks are enabled"), stderr);
-			fputs ("\n", stderr);
-		}
-	}
-
-#endif
 	/* Exit if list options were specified */
 	if (exit_option) {
 		cobc_early_exit (0);
@@ -3639,31 +3531,6 @@ process_command_line (const int argc, char **argv)
 		cobc_main_free (output_name_buff);
 	}
 
-#if 0 && reportwriter //// pangaea
-	/* Load default configuration file if necessary */
-	if (cb_config_name == NULL) {
-		sub_ret = cb_load_std ("default.conf");
-		if (sub_ret != 0) {
-			if (verbose_output) {
-				configuration_error (1, "default.conf", 0,
-					_("Failed to load the initial config file"));
-			}
-			ret = sub_ret;
-		}
-	}
-	/* Do postponed override of configuration entries here */
-	if (cb_conf_override_list) {
-		for (covl = cb_conf_override_list; covl; covl = covl->next) {
-			sub_ret = cb_config_entry ((char *)covl->text, NULL, 0);
-			if (sub_ret != 0) ret = sub_ret;
-		}
-		/* Todo: free list */
-	}
-	/* Exit for configuration errors */
-	if (ret != 0) {
-		cobc_free_mem ();
-		exit (1);
-#endif	
 	/* Set relaxed syntax configuration options if requested */
 	/* part 1: relaxed syntax compiler configuration option */
 	if (cb_relaxed_syntax_checks) {
@@ -3760,18 +3627,8 @@ process_command_line (const int argc, char **argv)
 		cb_binary_size = CB_BINARY_SIZE_2_4_8;
 		cb_synchronized_clause = CB_OK;
 	}
-
-	if(cb_flag_arithmetic_osvs == 1) {	/* -f arithmetic-osvs overrides stdxxx.conf */
-		cb_arithmetic_osvs = 1;
-	} else if(cb_flag_arithmetic_osvs == 0) {
-		cb_arithmetic_osvs = 0;
-	}
-	if(cb_flag_move_ibm == 1) {		/* -f move-ibm overrides stdxxx.conf */
-		cb_move_ibm = 1;
-	} else if(cb_flag_move_ibm == 0) {
-		cb_move_ibm = 0;
-	}
 #endif
+
 	return cob_optind;
 }
 
@@ -4011,10 +3868,7 @@ process_filename (const char *filename)
 		fn->object_len = strlen (fn->object);
 		cobc_objects_len += fn->object_len + 8U;
 	} else {
-		fn->object = cobc_main_malloc(COB_FILE_MAX);
-		cob_temp_name ((char *)fn->object, "." COB_OBJECT_EXT);
-		fn->object_len = strlen (fn->object);
-		cobc_objects_len += fn->object_len + 8U;
+		fn->object_len = 0;
 	}
 
 	/* Set listing filename */
@@ -7238,7 +7092,6 @@ process_translate (struct filename *fn)
 	/* Initialize */
 	cb_source_file = NULL;
 	cb_source_line = 0;
-	errorcount = 0;
 
 	/* Open the input file */
 	yyin = fopen (fn->preprocess, "r");
@@ -7397,7 +7250,6 @@ process_translate (struct filename *fn)
 		}
 	}
 
-	errorcount = 0;
 	/* Translate to C */
 	current_section = NULL;
 	current_paragraph = NULL;
@@ -7495,6 +7347,9 @@ process_compile (struct filename *fn)
 static int
 process_assemble (struct filename *fn)
 {
+#ifndef _MSC_VER
+	int		ret;
+#endif
 	size_t		bufflen;
 #ifdef	__OS400__
 	char	*name;
@@ -7538,7 +7393,8 @@ process_assemble (struct filename *fn)
 			 cobc_cc, cobc_cflags, cobc_include,
 			 fn->object, fn->translate);
 	}
-	return process (cobc_buffer);
+	ret = process (cobc_buffer);
+	return ret;
 #else
 	if (cb_compile_level == CB_LEVEL_MODULE ||
 	    cb_compile_level == CB_LEVEL_LIBRARY ||
@@ -7552,7 +7408,8 @@ process_assemble (struct filename *fn)
 			 cobc_cc, cobc_cflags, cobc_include,
 			 fn->object, fn->translate);
 	}
-	return process(cobc_buffer);
+	ret = process (cobc_buffer);
+	return ret;
 #endif
 
 }
@@ -8514,9 +8371,6 @@ main (int argc, char **argv)
 	}
 
 	/* Process input files */
-	status = 0;
-	iparams = 0;
-	local_level = 0;
 
 	/* Set up file parameters, if any are missing: abort */
 	while (iargs < argc) {

@@ -9,10 +9,6 @@ pushd "%~dp0..\cobc"
 :: file prefix used for temporary files
 set tmp_prf=mbfbat
 
-:: limit on one file, must be specified as "ppparse", "pplex",
-:: or "parser.y", "scanner.l"
-set single_file=%*
-
 :: check executables
 call :exe_check "%BISON%" bison "GNU Bison" BISON
 call :exe_check "%FLEX%" flex "flex" FLEX
@@ -100,11 +96,6 @@ goto :eof
 
 
 :bisoncall
-if not "%single_file%"=="" ^
-if not "%single_file%"=="%1" ^
-if not "%single_file%"=="%1.y" (
-  goto :eof
-)
 echo generating %1.c, %1.h ...
 call :store_old %1.c
 call :store_old %1.h
@@ -123,11 +114,6 @@ call :print_separator
 goto :eof
 
 :flexcall
-if not "%single_file%"=="" ^
-if not "%single_file%"=="%1" ^
-if not "%single_file%"=="%1.l" (
-  goto :eof
-)
 echo generating %1.c ...
 call :store_old %1.c
 %FLEX%  -o "%1.c"   "%1.l"

@@ -60,7 +60,6 @@
 #endif
 
 #define COBC_ABORT()			cobc_abort(__FILE__, __LINE__)
-#define COBC_DUMB_ABORT()		cobc_dumb_abort(__FILE__, __LINE__)
 #define YY_FATAL_ERROR(msg)		\
 	flex_fatal_error (msg, __FILE__, __LINE__)
 
@@ -258,12 +257,6 @@ struct cb_exception {
 	int		enable;			/* If turned on */
 };
 
-/* Structure for reserved words that have been reverted */
-struct noreserve {
-	struct	noreserve	*next;			/* next pointer */
-	char			*noresword;
-};
-
 /* Basic memory structure */
 struct cobc_mem_struct {
 	struct	cobc_mem_struct	*next;			/* next pointer */
@@ -390,9 +383,6 @@ enum cb_optim {
 };
 #undef	CB_OPTIM_DEF
 
-/* Flag to emit Old style: cob_set_location, cob_trace_section */  
-extern int cb_old_trace;
-
 extern int			cb_id;
 extern int			cb_pic_id;
 extern int			cb_attr_id;
@@ -465,10 +455,7 @@ extern struct cb_field		*external_defined_fields_global;
 
 /* cobc.c */
 
-#if 1 || pangea
 extern struct reserved_word_list	*cob_user_res_list;
-extern struct noreserve		*cobc_nores_base;
-#endif
 
 extern void			*cobc_malloc (const size_t);
 extern void			cobc_free (void *);
@@ -494,7 +481,6 @@ extern void			cobc_err_msg (const char *, ...) COB_A_FORMAT12;
 DECLNORET extern void		cobc_abort (const char *,
 					    const int) COB_A_NORETURN;
 DECLNORET extern void		cobc_too_many_errors (void) COB_A_NORETURN;
-DECLNORET extern void		cobc_dumb_abort (const char *, const int);
 
 extern size_t			cobc_check_valid_name (const char *,
 						       const enum cobc_name_type);
@@ -526,8 +512,7 @@ extern int		cb_load_conf (const char *, const int);
 extern int		cb_load_words (void);
 
 #ifndef	HAVE_DESIGNATED_INITS
-/* Initialization routines in scanner.l, typeck.c, reserved.c */
-extern void		cobc_init_scanner (void);
+/* Initialization routines in typeck.c and reserved.c */
 extern void		cobc_init_typeck (void);
 extern void		cobc_init_reserved (void);
 #endif
@@ -559,8 +544,6 @@ extern void		plex_action_directive (const unsigned int,
 					       const unsigned int);
 
 /* parser (in scanner.l, parser.y) */
-extern char		*cobc_glob_line;
-
 #if	!defined (COB_IN_SCANNER ) && !defined (COB_IN_PPLEX) && \
 	!defined (COB_IN_PPPARSE)
 extern FILE		*yyin;

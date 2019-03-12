@@ -5299,20 +5299,7 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 	/*
 	 * Write data back to COBOL
 	 */
-#ifdef	WORDS_BIGENDIAN // r525
-	if (temp[3] == '?' || temp[3] == ':' || temp[3] == 'W' 
-		|| temp[3] == 0) exit_status = temp[3] & 0xFF;
-	else if(temp[3] == -1) exit_status = -1;
-	else exit_status = 3;
-	 /* cob_getopt_long_long sometimes returns and 'int' value and sometimes a 'x   ' in the int */
-	if(temp[0] == 0x00
-	&& temp[1] == 0x00
-	&& temp[2] == 0x00) {
-		temp[0] = temp[3];		/* Move option value to 1st byte and SPACE fill the 'int' */
-		temp[1] = temp[2] = temp[3] = ' ';
-	}
-#else
-	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W' 
+	if (temp[0] == '?' || temp[0] == ':' || temp[0] == 'W'
 		|| temp[0] == -1 || temp[0] == 0) exit_status = return_value;
 	else exit_status = 3;
 
@@ -5320,7 +5307,6 @@ cob_sys_getopt_long_long (void *so, void *lo, void *idx, const int long_only, vo
 		if (temp[i] == 0x00) temp[i] = 0x20;
 		else break;
 	}
-#endif
 
 	cob_set_int (COB_MODULE_PTR->cob_procedure_params[2], longind);
 	memcpy (return_char, &return_value, 4);
@@ -7222,19 +7208,19 @@ print_info (void)
 #endif
 
 	snprintf (buff, sizeof (buff), "%d", WITH_VARSEQ);
-	var_print (_("variable file format"), buff, "", 0);
+	var_print (_("variable format"), buff, "", 0);
 	if ((s = getenv ("COB_VARSEQ_FORMAT")) != NULL) {
 		var_print ("COB_VARSEQ_FORMAT", s, "", 1);
 	}
 
 #ifdef	WITH_SEQRA_EXTFH
-	var_print (_("sequential file handler"),	"EXTFH", "", 0);
+	var_print (_("sequential handler"),	"EXTFH", "", 0);
 #else
-	var_print (_("sequential file handler"),	_("built-in"), "", 0);
+	var_print (_("sequential handler"),	_("built-in"), "", 0);
 #endif
 
 #if defined	(WITH_INDEX_EXTFH)
-	var_print (_("ISAM file handler"), 		"EXTFH", "", 0);
+	var_print (_("ISAM handler"), 		"EXTFH", "", 0);
 #elif defined	(WITH_DB)
 	major = 0, minor = 0, patch = 0;
 	db_version (&major, &minor, &patch);
@@ -7244,19 +7230,15 @@ print_info (void)
 		snprintf (versbuff, 55, "%s, version %d.%d%d (compiled with %d.%d)",
 			"BDB", major, minor, patch, DB_VERSION_MAJOR, DB_VERSION_MINOR);
 	}
-	var_print (_("ISAM file handler"), 		versbuff, "", 0);
+	var_print (_("ISAM handler"), 		versbuff, "", 0);
 #elif defined	(WITH_CISAM)
-	var_print (_("ISAM file handler"), 		"C-ISAM" "", 0);
+	var_print (_("ISAM handler"), 		"C-ISAM" "", 0);
 #elif defined	(WITH_DISAM)
-	var_print (_("ISAM file handler"), 		"D-ISAM", "", 0);
+	var_print (_("ISAM handler"), 		"D-ISAM", "", 0);
 #elif defined	(WITH_VBISAM)
-#if defined	(VB_RTD)
-	var_print (_("ISAM file handler"), 		"VBISAM (RTD)", "", 0);
+	var_print (_("ISAM handler"), 		"VBISAM", "", 0);
 #else
-	var_print (_("ISAM file handler"), 		"VBISAM", "", 0);
-#endif
-#else
-	var_print (_("ISAM file handler"), 		_("disabled"), "", 0);
+	var_print (_("ISAM handler"), 		_("disabled"), "", 0);
 #endif
 
 	major = 0, minor = 0, patch = 0;
