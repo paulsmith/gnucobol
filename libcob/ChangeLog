@@ -1,4 +1,10 @@
 
+2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* common.c (print_info): changed msgid for "file handler" and
+	  already output if RTD-version of VB-ISAM is used (even if this
+	  wouldn't work currently), partially after Ron Norman
+
 2019-02-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: define COB_EXT_EXPORT / COB_EXT_IMPORT

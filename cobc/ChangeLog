@@ -1,4 +1,10 @@
 
+2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+
+	* cobc.c (cobc_print_info): changed msgid for "file handler" and
+	  already output if RTD-version of VB-ISAM is used (even if this
+	  wouldn't work currently), partially after Ron Norman
+
 2019-03-10  Simon Sobisch <simonsobisch@gnu.org>
 
 	* parser.y, reserved.c: added RAISE statement as PENDING
