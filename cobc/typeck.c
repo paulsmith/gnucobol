@@ -429,7 +429,7 @@ static const struct optim_table	bin_sub_funcs[] = {
 	{ "cob_subswp_s64",	COB_SUBSWP_S64 }
 };
 
-#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
+#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER) && defined(COB_ALLOW_UNALIGNED)
 static const struct optim_table	align_bin_compare_funcs[] = {
 	{ "cob_cmp_u8",			COB_CMP_U8 },
 	{ "cob_cmp_align_u16",		COB_CMP_ALIGN_U16 },
@@ -5055,7 +5055,7 @@ cb_build_optim_cond (struct cb_binary_op *p)
 	 || f->usage == CB_USAGE_COMP_N) {
 		n = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 			(16 * (f->flag_binary_swap ? 1 : 0));
-#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
+#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER) && defined(COB_ALLOW_UNALIGNED)
 		switch (f->size) {
 		case 2:
 #ifdef	COB_SHORT_BORK
@@ -5496,7 +5496,7 @@ cb_build_optim_add (cb_tree v, cb_tree n)
 		  || f->usage == CB_USAGE_COMP_N)) {
 			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 				(16 * (f->flag_binary_swap ? 1 : 0));
-#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
+#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER) && defined(COB_ALLOW_UNALIGNED)
 			switch (f->size) {
 			case 2:
 #ifdef	COB_SHORT_BORK
@@ -5568,7 +5568,7 @@ cb_build_optim_sub (cb_tree v, cb_tree n)
 		  || f->usage == CB_USAGE_COMP_N)) {
 			z = (f->size - 1) + (8 * (f->pic->have_sign ? 1 : 0)) +
 				(16 * (f->flag_binary_swap ? 1 : 0));
-#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER)
+#if	defined(COB_NON_ALIGNED) && !defined(_MSC_VER) && defined(COB_ALLOW_UNALIGNED)
 			switch (f->size) {
 			case 2:
 #ifdef	COB_SHORT_BORK

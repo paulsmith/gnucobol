@@ -7,10 +7,21 @@ r521
 --- Merging r521 into '.':
 C    cobc/codeoptim.c (declined)
 
-
-
-
 r525
+--- Merging r525 into '.':
+C    cobc/ChangeLog   merged
+C    cobc/codegen.c   declined
+U    cobc/codeoptim.c accepted
+C    cobc/tree.c      declined
+U    cobc/typeck.c    accepted
+C    libcob/ChangeLog merged
+C    libcob/common.c  merged
+C    libcob/common.h  declined
+C    libcob/fileio.c  declined
+
+
+
+
 r575
 r576
 r577

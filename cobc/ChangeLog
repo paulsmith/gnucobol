@@ -3794,6 +3794,14 @@
 
 	* codegen.c: added check of recursive CALL for INITIAL programs
 
+2015-03-03  Ron Norman
+	* codeoptim.c & typeck.c: fixes for systems which require aligned
+	  data but the C compile does not support __unaligned directive
+	  codegen.c: fix for C compilers (old SUN for one) that do not
+	  handle initializing a local variable with address of another
+	  local variable
+	  tree.c: Check for NULL passed to cb_get_int and report error
+
 2015-02-23  Ron Norman <rjn@inglenet.com>
 
 	* tree.c, tree.h, typeck.c: moved cb_field_size to tree.c

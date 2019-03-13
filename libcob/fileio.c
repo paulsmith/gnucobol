@@ -144,8 +144,9 @@
 
 #ifdef	WITH_VBISAM
 #include <vbisam.h>
-/* VB-ISAM does not set dup key status */
+#if	1	/* RXWRXW - Status 02 */
 #undef	COB_WITH_STATUS_02
+#endif
 #if defined(VB_RTD)
 /* Since VBISAM 2.1.1: access to isrecnum iserrno etc is no longer global */
 static	vb_rtd_t *vbisam_rtd = NULL;
@@ -2730,7 +2731,6 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 	} else {
 		flags = 0;
 	}
-	ret = COB_STATUS_00_SUCCESS;
 	if (p->write_cursor_open) {
 		close_cursor = 0;
 	} else {
@@ -2824,7 +2824,7 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 		p->cursor[0] = NULL;
 		p->write_cursor_open = 0;
 	}
-	return ret;
+	return COB_STATUS_00_SUCCESS;
 }
 
 static int
@@ -2973,7 +2973,7 @@ indexed_delete_internal (cob_file *f, const int rewrite)
 	struct indexed_file	*p;
 	int			i,len;
 	DBT			prim_key;
-	int			ret;
+	int			ret,sts;
 	cob_u32_t		flags;
 	int			close_cursor;
 
@@ -4708,7 +4708,7 @@ indexed_rewrite (cob_file *f, const int opt)
 	COB_UNUSED (opt);
 
 	fh = f->file;
-	ret = retdup = COB_STATUS_00_SUCCESS;
+	ret = COB_STATUS_00_SUCCESS;
 	if (f->flag_nonexistent) {
 		return COB_STATUS_49_I_O_DENIED;
 	}
@@ -5631,6 +5631,22 @@ cob_sys_open_file (unsigned char *file_name, unsigned char *file_access,
 	COB_UNUSED (file_lock);
 	COB_UNUSED (file_dev);
 
+#ifdef	WORDS_BIGENDIAN
+	 /* If value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
+	 if(file_access[0] == 0x00
+	 && file_access[1] == 0x00
+	 && file_access[2] == 0x00)
+		 file_access += 3;
+	 if(file_lock[0] == 0x00
+	 && file_lock[1] == 0x00
+	 && file_lock[2] == 0x00)
+		 file_lock += 3;
+	 if(file_dev[0] == 0x00
+	 && file_dev[1] == 0x00
+	 && file_dev[2] == 0x00)
+		 file_dev += 3;
+#endif
+
 	COB_CHK_PARMS (CBL_OPEN_FILE, 5);
 
 	return open_cbl_file (file_name, file_access, file_handle, 0);
@@ -5646,6 +5662,21 @@ cob_sys_create_file (unsigned char *file_name, unsigned char *file_access,
 	 * @param: file_lock : not implemented, set 0
 	 * @param: file_dev : not implemented, set 0
 	 */
+#ifdef	WORDS_BIGENDIAN
+	 /* If value is passed as numeric literal, it becomes an 'int' so value is in 4th byte */
+	 if(file_access[0] == 0x00
+	 && file_access[1] == 0x00
+	 && file_access[2] == 0x00)
+		 file_access += 3;
+	 if(file_lock[0] == 0x00
+	 && file_lock[1] == 0x00
+	 && file_lock[2] == 0x00)
+		 file_lock += 3;
+	 if(file_dev[0] == 0x00
+	 && file_dev[1] == 0x00
+	 && file_dev[2] == 0x00)
+		 file_dev += 3;
+#endif
 
 	if (*file_lock != 0) {
 		cob_runtime_warning (_("call to CBL_CREATE_FILE with wrong file_lock: %d"), *file_lock);

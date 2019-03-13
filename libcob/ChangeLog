@@ -5,6 +5,11 @@
 	  already output if RTD-version of VB-ISAM is used (even if this
 	  wouldn't work currently), partially after Ron Norman
 
+2015-03-03  Ron Norman
+
+	* fileio.c, common.c, common.h updated to resolve little endian
+	  versus big endian issues
+
 2019-02-26  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.h: define COB_EXT_EXPORT / COB_EXT_IMPORT

@@ -1560,13 +1560,8 @@ cb_get_int (const cb_tree x)
 	unsigned int	size, i;
 	int			val;
 
-	if(x == NULL)		return 0;
 	if(x == cb_int0)	return 0;
 	if(x == cb_int1)	return 1;
-	if(x == cb_int2)	return 2;
-	if(x == cb_int3)	return 3;
-	if(x == cb_int4)	return 4;
-	if(x == cb_int5)	return 5;
 
 	/* LCOV_EXCL_START */
 	if (!CB_LITERAL_P (x)) {
