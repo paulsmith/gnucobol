@@ -944,6 +944,22 @@
 	  configuration COB_EXIT_WAIT and COB_EXIT_MSG for waiting if
 	  extended ACCEPT after last extended DISPLAY (if any) is missing
 
+2016-12-24  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c,common.h,coblocal.h
+	  Extensive updates for fileio.c to handle OPEN SHARING 
+	  and RETRY clauses on all I/O statements.
+	  Relative files use sigaction/alarm/fcntl to wait for
+	  record locks.
+	  C/D/VB-ISAM files use the ISAM handle functions combined with
+	  a wait/retry loop. each loop happens at 125ms interval.
+	  BDB code updated to use none deprecated functions, use some
+	  subroutines instead of inline code and changes for SHARING/RETRY
+
+	* At present there are no test cases but these will come in a while
+	  I need to come up with a better way to synchronize separate
+	  processes so I can reliably recreate the test cases
+
 2016-12-23  Simon Sobisch <simonsobisch@gnu.org>
 
 	* screenio.c (field_accept): changes for ACCEPT OMITTED:

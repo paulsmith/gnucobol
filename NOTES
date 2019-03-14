@@ -175,11 +175,22 @@ C    libcob/common.h   declined
 U    libcob/fileio.c   ok
 C    tests/testsuite.src/run_file.at		accepted
 
-
-
-
-
 r1313
+--- Merging r1281 through r1313 into '.':
+   C tests/testsuite	  reverted
+C    cobc/ChangeLog	  merged
+C    cobc/cobc.c	  declined (use "ISAM", not "INDEXED")
+C    libcob/ChangeLog	  merged
+U    libcob/coblocal.h	  ok
+C    libcob/common.c	  merged, messy
+U    libcob/common.h	  ok
+C    libcob/fileio.c	  merged, tentatively
+C    tests/testsuite.src/run_file.at	declined, can't tell
+
+Build succeeds again after Simon repaired r575 merge. 
+
+
+
 r1324
 r1395
 r1396

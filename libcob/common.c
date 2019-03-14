@@ -576,10 +576,33 @@ cob_terminate_routines (void)
 		cobsetptr->cob_dump_file = NULL;
 	}
 
+#if 1 || reportwriter //// reject r1313
 	if (cobsetptr->cob_dump_file) {
 		fclose (cobsetptr->cob_dump_file);
 		cobsetptr->cob_dump_file = NULL;
 	}
+#else
+	if (cobsetptr->cob_trace_file 
+	&& !cobsetptr->external_trace_file
+	&& cobsetptr->cob_trace_file != stderr) {
+		fclose (cobsetptr->cob_trace_file);
+		cobsetptr->cob_trace_file = NULL;
+	}
+
+	cob_exit_screen ();
+	cob_exit_fileio ();
+	cob_exit_intrinsic ();
+	cob_exit_strings ();
+	cob_exit_numeric ();
+	cob_exit_call ();
+	cob_exit_reportio ();
+
+	if (cob_debug_file 
+	&& !cobsetptr->external_trace_file
+	&& cob_debug_file != cobsetptr->cob_trace_file) {
+		if(cob_debug_file_name != NULL
+		&& ftell(cob_debug_file) == 0) {
+#endif /* reportwriter r1313 not used */
 
 #ifdef COB_DEBUG_LOG
 	/* close debug log (delete file if empty) */
@@ -605,13 +628,18 @@ cob_terminate_routines (void)
 	}
 #endif
 
+#if 0 && reportwriter //// accept r1313, seems like an advance
 	if (cobsetptr->cob_trace_file
 	 && cobsetptr->cob_trace_file != stderr
 	 && !cobsetptr->external_trace_file	/* note: may include stdout */) {
 		fclose (cobsetptr->cob_trace_file);
 	}
+#else
+	cob_exit_common ();
+#endif
 	cobsetptr->cob_trace_file = NULL;
 
+	//// r1313: from here to end retained from trunk
 	/* close punch file if self-opened */
 	if (cobsetptr->cob_display_punch_file
 	 && cobsetptr->cob_display_punch_filename) {
@@ -5062,6 +5090,7 @@ cob_sys_fork (void)
 	int	pid;
 	if ((pid = fork ()) == 0 ) {
 		cob_process_id = 0;	/* reset cached value */
+		cob_fork_fileio(cobglobptr, cobsetptr);
 		return 0;		/* child process just returns */
 	}
 	if (pid < 0) {			/* Some error happened */

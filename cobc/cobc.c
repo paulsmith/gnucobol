@@ -2278,6 +2278,8 @@ cobc_print_info (void)
 	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
 	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
+#elif defined	(WITH_LMDB)
+	cobc_var_print (_("ISAM file handler"),		"LMDB", 0);
 #elif defined	(WITH_CISAM)
 	cobc_var_print (_("ISAM file handler"),		"C-ISAM", 0);
 #elif defined	(WITH_DISAM)

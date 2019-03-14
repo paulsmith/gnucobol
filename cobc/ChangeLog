@@ -2262,6 +2262,10 @@
 	* typeck.c: passing additional parameters for table name / flag for ODO
 	  in generation of cob_check_odo and cob_check_subscript
 
+2016-12-24  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c - Changed --info to say 'INDEXED file handler'
+
 2016-12-22  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (main): bugs #346 moved compiler specific COB_CFLAGS from
