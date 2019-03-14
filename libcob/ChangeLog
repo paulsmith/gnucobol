@@ -31,7 +31,7 @@
 
 	* screenio.c (cob_screen_init): fix background=foreground from terminal
 	* screenio.c (cob_screen_init, cob_screen_attr): explicit define and use
-	  color_pair 1 as "black on black" 
+	  color_pair 1 as "black on black"
 	* screenio.c (cob_screen_attr): fix long standing bug in use of
 	  color_set (takes color_pair_number, not a COLOR_PAIR)
 	* screenio.c (cob_screen_attr): extracted (cob_to_curses_color,
@@ -214,10 +214,10 @@
 
 2018-06-18  Ron Norman <rjn@inglenet.com>
 
-	* fileio.c: Updates to the EXTFH logic 
+	* fileio.c: Updates to the EXTFH logic
 	   You can now actually compile using MF Visual COBOL and include the
 	   GnuCOBOL libcob as follows:
-	     cob -L/usr/local/lib -lcob -C "CALLFH=EXTFH" 
+	     cob -L/usr/local/lib -lcob -C "CALLFH=EXTFH"
 
 2018-06-10  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -979,9 +979,16 @@
 	  third parameter which should be set if the result is assigned to one of
 	  the original strings
 
+2016-12-02  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.h
+	  Changes to use error status 51 for record locked and
+	  52 for DeadLock instead of 61 for both. 62 is used for
+	  file sharing errors on OPEN of the file
+
 2016-11-30  Ron Norman <rjn@inglenet.com>
 
-	* fileio.c,common.c,common.h,termio.c
+	* fileio.c,common.c,common.h
 	  Compiler updated for handling the SHARING, RETRY, ADVANCING LOCK
 	  and IGNORE LOCK phrases, Mainly for RELATIVE files now.
 	  This is a 'work in progress' and more updates will follow to include
@@ -1003,7 +1010,7 @@
 
 2016-11-15 Ron Norman <rjn@inglenet.com>
 
-	* fileio.c ((cob_sys_open_file, cob_sys_create_file)): 
+	* fileio.c ((cob_sys_open_file, cob_sys_create_file)):
 	  removed #ifdef WORDS_BIGENDIAN, as literal parameters are
 	  now passed as PIC S9(9) BINARY
 
@@ -1497,7 +1504,7 @@
 2015-04-30  Ron Norman
 
 	* common.h, change cob_file record_off to type cob_s64_t (from off_t)
-	  so that the size does not change depending on C comppiler 
+	  so that the size does not change depending on C comppiler
 	  This is most likely the cause of the previous issue.
 
 2015-04-29  Ron Norman <rjn@inglenet.com>
@@ -1510,7 +1517,7 @@
 2015-04-27  Ron Norman
 
 	* common.c fileio.c common.h
-	  updated to support Micro Focus format files. 
+	  updated to support Micro Focus format files.
 	  fileio.c also check for environment variable
 	  IO_filename that can speficy options for just the one file
 	  New runtime option (mf_files) to set all files to default

@@ -12767,8 +12767,8 @@ open_file_entry:
   {
 	cb_tree l;
 	cb_tree x;
-	cb_tree retry;
-	int	retry_times, retry_seconds, retry_forever;
+	cb_tree retry = 0; //// r1278, looks invalid: when is it set to any value?
+	int	retry_times=0, retry_seconds=0, retry_forever=0;
 
 	if (($1 && $3) || ($1 && $6) || ($3 && $6)) {
 		cb_error_x (CB_TREE (current_statement),
@@ -12781,8 +12781,6 @@ open_file_entry:
 	} else {
 		x = $1;
 	}
-	cb_tree retry;
-	int	retry_times, retry_seconds, retry_forever;
 
 	for (l = $5; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {

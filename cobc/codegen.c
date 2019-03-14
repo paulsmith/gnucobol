@@ -7468,7 +7468,7 @@ output_stmt (cb_tree x)
 			output_file_variable (fl->assign, fl, p, "assign", 0);
 		}
 
-#if 1 || reportwriter r1276
+#if 1 || reportwriter //// r1276
 		if(p->file) {
 			fl = CB_FILE (p->file);
 			if(p->flag_retry_forever) {

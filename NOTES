@@ -167,11 +167,18 @@ U    tests/testsuite.src/run_file.at   		ok
 C    tests/testsuite.src/run_misc.at		declined
 C    tests/testsuite.src/syn_subscripts.at	accepted
 
-
-
-
-
 r1278
+--- Merging r1278 into '.':
+   C tests/testsuite   reverted
+C    libcob/ChangeLog  merged
+C    libcob/common.h   declined
+U    libcob/fileio.c   ok
+C    tests/testsuite.src/run_file.at		accepted
+
+
+
+
+
 r1313
 r1324
 r1395

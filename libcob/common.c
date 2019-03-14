@@ -378,8 +378,10 @@ static struct config_tbl gc_conf[] = {
 	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
 	{"COB_LIBRARY_PATH","library_path",	NULL,	NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)}, /* default value set in cob_init_call() */
 	{"COB_MF_FILES","mf_files",		"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_files)},
+#if 0 && reportwriter //// r1250 or so
 	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_fixrel_type)},
 	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varrel_type)},
+#endif
 	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
 	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
 	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
