@@ -3684,6 +3684,10 @@
 	* codegen.c (output_size): Fix Bug #146 reference modification
 	  ignored ODO size
 
+2015-07-02  Ron Norman
+	* Fixes to tree.c, tree,h typeck.c field.c codegen.c to correctly
+	  handle COMP-X data fields. This now works the same as Micro Focus
+
 2015-06-12  Edward Hart <edward.dan.hart@gmail.com>
 
 	* codegen.c: bug #78 - changed location of initialization of

@@ -52,7 +52,7 @@ size_t			cb_needs_01 = 0;
 
 static struct cb_field	*last_real_field = NULL;
 static int		occur_align_size = 0;
-static const int	pic_digits[] = { 2, 4, 7, 9, 12, 14, 16, 18 };
+static const int	pic_digits[] = { 3, 5, 8, 10, 13, 15, 17, 19 };
 #define CB_MAX_OPS	16
 static int			op_pos = 1, op_val_pos;
 static char			op_type	[CB_MAX_OPS];
@@ -2283,6 +2283,12 @@ unbounded_again:
 
 		switch (f->usage) {
 		case CB_USAGE_COMP_X:
+			//// r614
+			if(f->compx_size > 0) {
+				size = f->compx_size;
+				break;
+			}
+			/* fallthrough (end r614) */
 		case CB_USAGE_COMP_N:
 			if (f->pic->category == CB_CATEGORY_ALPHANUMERIC) {
 				break;

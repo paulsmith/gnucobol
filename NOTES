@@ -81,11 +81,20 @@ C    cobc/ChangeLog merged
 U    libcob/common.h
 U    libcob/fileio.c
 
-
-
-
-
 r614
+--- Merging r614 into '.':
+C    cobc/ChangeLog merged
+U    cobc/codegen.c ok
+C    cobc/field.c   accepted	
+C    cobc/tree.c    merged
+U    cobc/tree.h    ok
+C    cobc/typeck.c  merged
+U    tests/testsuite.src/run_misc.at
+
+
+
+
+
 r801
 r805
 r810
