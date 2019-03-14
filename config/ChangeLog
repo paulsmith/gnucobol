@@ -334,6 +334,13 @@
 
 	* general: added numeric-boolean and acu-literals
 
+2015-07-07  Ron Norman
+
+	* DISPLAY ... UPON PRINTER can be redirected via
+	  the env var COBPRINTER similar to what Micro Focus supports
+	  In addtion COB_DISPLAY_PRINTER can be used as a file name and
+	  cob_display will do an fopen "a" and append to that file
+
 2015-07-07  Ron Norman <rjn@inglenet.com>
 
 	* runtime.cfg: added COBPRINTER and COB_DISPLAY_PRINTER

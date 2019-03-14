@@ -1468,6 +1468,12 @@
 	  by moving physical_cancel (defined in call.c and referenced via
 	  runtimeptr) to cobglobptr->cob_physical_cancel for check in COBOL modules
 
+2015-04-30  Ron Norman
+
+	* common.h, change cob_file record_off to type cob_s64_t (from off_t)
+	  so that the size does not change depending on C comppiler 
+	  This is most likely the cause of the previous issue.
+
 2015-04-29  Ron Norman <rjn@inglenet.com>
 
 	* reportio.c: change to allocate larger size data area for temp
@@ -1541,6 +1547,11 @@
 	  functions for loading a runtime configuration file
 	* call.c, common.c, intrinsic.c, numeric.c: fix segfault on early exit
 	  during runtime initialisation
+
+2015-03-03  Ron Norman
+
+	* fileio.c, common.c, common.h updated to resolve little endian
+	  versus big endian issues
 
 2015-03-01  Ron Norman <rjn@inglenet.com>
 

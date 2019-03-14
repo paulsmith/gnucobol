@@ -3619,6 +3619,12 @@
 
 	* cobc.h, moved COB_DASH defines out of ../configure.ac
 
+2015-08-30  Ron Norman
+
+	* In tree.c, for binary operations between integer constants, resolve 
+	  the value at compile time and reduce the expression down to the 
+	  computed value
+
 2015-08-25  Edward Hart <edward.dan.hart@gmail.com>
 
 	* parser.y: tightened AT clause definition.
@@ -3638,6 +3644,11 @@
 	  the cursor position as a single field so that the position is an
 	  integer with 6 digits or less than 4 digits.
 	* parser.y: improved error messages of integer and report_integer.
+
+2015-08-19  Ron Norman
+
+	* If -frelax-syntax then just give Warning when VALUEs in REDEFINES
+	  instead of an error. Some legacy COBOL code can be doing this.
 
 2015-08-19  Ron Norman <rjn@inglenet.com>
 
@@ -3685,8 +3696,13 @@
 	  ignored ODO size
 
 2015-07-02  Ron Norman
+
 	* Fixes to tree.c, tree,h typeck.c field.c codegen.c to correctly
 	  handle COMP-X data fields. This now works the same as Micro Focus
+
+2015-06-29  Ron Norman
+
+	* parser.y: fixed so unstring works with identifier/literal/function
 
 2015-06-12  Edward Hart <edward.dan.hart@gmail.com>
 
@@ -3737,9 +3753,15 @@
 	  so that the size does not change depending on C comppiler
 	  This is most likely the cause of the previous issue.
 
+2015-04-28  Ron Norman
+
+	* codegen.c: now emits extern <function prototype> ();
+	  for each subroutine called statically to avoid
+	  C compiler warnings
+
 2015-04-27  Ron Norman
 
-	* cobc.c codegen.c common.h typeck.c
+	* cobc.c, codegen.c, common.h, typeck.c:
 	  updated to handle more options for support of Micro Focus
 	  format files. New compile option -fmf-files sets all
 	  sequential/relative files to be MF compatible
