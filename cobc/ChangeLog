@@ -1,5 +1,9 @@
 
-2019-03-12  Simon Sobisch <simonsobisch@gnu.org>
+2019-03-14  Simon Sobisch <simonsobisch@gnu.org>
+
+	* config.c: hand-merged change 2015-04-27 with an option to go back
+
+2019-03-11  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c (cobc_print_info): changed msgid for "file handler" and
 	  already output if RTD-version of VB-ISAM is used (even if this
@@ -3779,7 +3783,7 @@
 	  for each subroutine called statically to avoid
 	  C compiler warnings
 
-2015-04-27  Ron Norman
+2015-04-27  Ron Norman <rjn@inglenet.com>
 
 	* cobc.c, codegen.c, common.h, typeck.c:
 	  updated to handle more options for support of Micro Focus
@@ -3792,6 +3796,8 @@
 	     binary-size: 2-4-8 & synchronized-clause: ok
 	  And compile option -fno-ibmcomp effectively sets:
 	     binary-size: 1--8 & synchronized-clause: ignore
+	* config.c: don't store configuration values additional to the setting
+
 
 2015-04-28  Ron Norman <rjn@inglenet.com>
 

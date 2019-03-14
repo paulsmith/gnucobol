@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2012, 2014-2017 Free Software Foundation, Inc.
+   Copyright (C) 2003-2012, 2014-2017, 2019 Free Software Foundation, Inc.
    Written by Keisuke Nishida, Roger While, Simon Sobisch
 
    This file is part of GnuCOBOL.
@@ -56,8 +56,16 @@ enum cb_config_type {
 #undef	CB_CONFIG_BOOLEAN
 #undef	CB_CONFIG_SUPPORT
 
+/* Previously done, but currently not actually used,
+   recheck this later (possible output on cobc --print-config) */
+#define COBC_STORES_CONFIG_VALUES 0  
+
 #define CB_CONFIG_ANY(type,var,name,doc)	, {CB_ANY, name, (void *)&var}
+#if COBC_STORES_CONFIG_VALUES
 #define CB_CONFIG_INT(var,name,min,max,odoc,doc)	, {CB_INT, name, (void *)&var, NULL, min, max}
+#else
+#define CB_CONFIG_INT(var,name,min,max,odoc,doc)	, {CB_INT, name, (void *)&var, 0, min, max}
+#endif
 #define CB_CONFIG_STRING(var,name,doc)	, {CB_STRING, name, (void *)&var}
 #define CB_CONFIG_BOOLEAN(var,name,doc)	, {CB_BOOLEAN, name, (void *)&var}
 #define CB_CONFIG_SUPPORT(var,name,doc)	, {CB_SUPPORT, name, (void *)&var}
@@ -68,7 +76,11 @@ static struct config_struct {
 	const enum cb_config_type	type;
 	const char			*name;		/* Print name set in compiler configuration */
 	void				*var;		/* Var name */
+#if COBC_STORES_CONFIG_VALUES
 	char				*val;		/* value from configuration / command line */
+#else
+	int					set;		/* value was set by configuration / command line */
+#endif
 #if 0 /* Currently not used */
 	const int			doc;		/* documented, 1 = yes */
 #endif
@@ -397,7 +409,11 @@ cb_load_conf (const char *fname, const int prefix_dir)
 
 	/* Initialize the configuration table */
 	for (i = 0; i < CB_CONFIG_SIZE; i++) {
+#if COBC_STORES_CONFIG_VALUES
 		config_table[i].val = NULL;
+#else
+		config_table[i].set = 0;
+#endif
 	}
 
 	/* Get the name for the configuration file */
@@ -414,7 +430,11 @@ cb_load_conf (const char *fname, const int prefix_dir)
 	/* Checks for missing definitions */
 	if (ret == 0) {
 		for (i = 10U; i < CB_CONFIG_SIZE; i++) {
+#if COBC_STORES_CONFIG_VALUES
 			if (config_table[i].val == NULL) {
+#else
+			if (config_table[i].set == 0) {
+#endif
 				/* as there are likely more than one definition missing group it */
 				if (ret == 0) {
 					configuration_error (fname, 0, 1, _("missing definitions:"));
@@ -746,10 +766,14 @@ cb_config_entry (char *buff, const char *fname, const int line)
 	/* LCOV_EXCL_STOP */
 	}
 
+#if COBC_STORES_CONFIG_VALUES
 	/* copy valid entries to config table */
 	if (config_table[i].val) {
 		cobc_main_free ((void *)config_table[i].val);
 	}
 	config_table[i].val = cobc_main_strdup (val);
+#else
+	config_table[i].set = 1;
+#endif
 	return 0;
 }
