@@ -50,6 +50,13 @@
 #include <fcntl.h>
 #endif
 
+#if defined(WITH_DB)
+#include <db.h>
+#endif
+#if defined(WITH_VBISAM)
+#include <vbisam.h>
+#endif
+
 #ifdef	HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -2277,7 +2284,11 @@ cobc_print_info (void)
 #if defined	(WITH_INDEX_EXTFH)
 	cobc_var_print (_("ISAM file handler"),		"EXTFH", 0);
 #elif defined	(WITH_DB)
+# if defined(DB_VERSION_STRING)
+	cobc_var_print (_("ISAM file handler"),	DB_VERSION_STRING, 0);
+# else
 	cobc_var_print (_("ISAM file handler"),		"BDB", 0);
+# endif
 #elif defined	(WITH_LMDB)
 	cobc_var_print (_("ISAM file handler"),		"LMDB", 0);
 #elif defined	(WITH_CISAM)
@@ -2285,11 +2296,11 @@ cobc_print_info (void)
 #elif defined	(WITH_DISAM)
 	cobc_var_print (_("ISAM file handler"),		"D-ISAM", 0);
 #elif defined	(WITH_VBISAM)
-#if defined	(VB_RTD)
+# if defined	(VB_RTD)
 	cobc_var_print (_("ISAM file handler"),		"VBISAM (RTD)", 0);
-#else
+# else
 	cobc_var_print (_("ISAM file handler"),		"VBISAM", 0);
-#endif
+# endif
 #else
 	cobc_var_print (_("ISAM file handler"),		_("disabled"), 0);
 #endif

@@ -2231,6 +2231,11 @@
 	* cobc.c, warning.def:
 	  renamed cb_warn_external_val to cb_warn_ignored_initial_val
 
+2016-12-30  Ron Norman <rjn@inglenet.com>
+
+	* cobc.c --info, Give BDB version when being used
+	  Also give VB-ISAM version info when used
+
 2016-12-29  Simon Sobisch <simonsobisch@gnu.org>
 
 	* cobc.c: changes for -verbose, optional argument for verbose level,

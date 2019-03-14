@@ -932,7 +932,7 @@ enum cob_exception_id {
 #define COB_ADVANCING_LOCK	(1U << 7)
 #define COB_IGNORE_LOCK		(1U << 8)
 
-#define COB_RETRY_PER_SECOND	8
+#define COB_RETRY_PER_SECOND	10
 
 /* Open mode */
 

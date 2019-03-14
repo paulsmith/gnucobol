@@ -189,9 +189,22 @@ C    tests/testsuite.src/run_file.at	declined, can't tell
 
 Build succeeds again after Simon repaired r575 merge. 
 
-
-
 r1324
+--- Merging r1320 through r1324 into '.':
+   C tests/testsuite	reverted
+C    cobc/ChangeLog	merged
+C    cobc/cobc.c	merged
+C    libcob/ChangeLog	merged
+U    libcob/common.h	ok
+C    libcob/fileio.c	declined
+C    tests/ChangeLog	merged
+C    tests/cobol85/report.pl	declined
+U    tests/testsuite.src/run_file.at	ok
+
+
+
+
+
 r1395
 r1396
 r1398

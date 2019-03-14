@@ -9136,3 +9136,1204 @@ REWROTE BET00000 Sts:00 Trms:0014
 
 AT_CLEANUP
 
+AT_SETUP([INDEXED File Locking])
+AT_KEYWORDS([FileIo])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+      
+       PROGRAM-ID. prog.
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT TSPFILE  ASSIGN TO "testisam"
+           ORGANIZATION INDEXED ACCESS DYNAMIC
+           LOCK MANUAL 
+      *    LOCK AUTOMATIC 
+           WITH LOCK ON MULTIPLE RECORDS
+      *    WITH LOCK ON RECORD 
+           SHARING WITH ALL OTHER
+           RECORD KEY IS PRIME-KEY
+           SOURCE IS CM-CUST-NUM
+
+           FILE STATUS IS CUST-STAT .
+
+           SELECT LOCKFILE ASSIGN EXTERNAL RELLCK
+           ORGANIZATION RELATIVE
+           ACCESS IS RANDOM RELATIVE KEY IS LCK-REC
+           FILE STATUS IS CUST-STAT.
+
+           SELECT OPTIONAL REPORTIT ASSIGN TO REPORT-FILE 
+           ORGANIZATION LINE SEQUENTIAL.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  LOCKFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  LCK-RECORD.
+           10  LCK-NUM                         PICTURE 9(3). 
+           10  LCK-TBL                         PICTURE X OCCURS 4 TIMES. 
+           10  LCK-MESSAGE                     PICTURE X(25). 
+
+       FD  REPORTIT
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  REPORT-RECORD                       PICTURE X(80).
+
+       FD  TSPFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+         05  TSPFL-REC. 
+           10  CM-CUST-NUM                     PICTURE X(8).
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4). 
+       
+       WORKING-STORAGE SECTION.
+      
+       01  WS-TIME-NOW.
+           05  WS-NOW-HH               PIC 9(02) VALUE 0.
+           05  WS-NOW-MM               PIC 9(02) VALUE 0.
+           05  WS-NOW-SS               PIC 9(02) VALUE 0.
+           05  WS-NOW-HS               PIC 9(02) VALUE 0.
+
+       01  CUST-STAT              PIC XX.
+       77  BYTE-1  PICTURE 9(3).
+       77  BYTE-2  PICTURE 9(3).
+       77  MAX-SUB           PICTURE 9(2)  VALUE 8.
+       77  REPORT-FILE       PICTURE X(32) VALUE "control.txt".
+       77  MSG               PICTURE X(70) VALUE SPACES.
+       77  CMD-LINE          PICTURE X(80) VALUE SPACES.
+       77  SEQ               PICTURE 99  VALUE 0.
+       77  LCK-REC           PICTURE 9(4) VALUE 1.
+      
+       01  SAVE-REC          PIC X(250).
+
+       01  TEST-DATA.
+         02  DATA-CUST-NUM-TBL.
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "CAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GIB00000".
+           05  FILLER PIC X(8) VALUE "HIJ00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 8.
+         02  DATA-COMPANY-TBL.
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "CAMERA X-RAY TECHNOLOGY  ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GIBRALTER LIFE INSURANCE ".
+           05  FILLER PIC X(25) VALUE "HECKLE PLUMBING SUPPLIES ".
+      
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 8.
+
+       01  WORK-AREA.
+           05  SLP-TIME        PICTURE 9(9) BINARY VALUE 1.
+           05  SLP-SHORT       PICTURE 9(18) BINARY VALUE  20000000.
+           05  SLP-LONG        PICTURE 9(18) BINARY VALUE 320000000.
+           05  LCK-IDX         PICTURE 9(4) BINARY VALUE 1.
+           05  REC-NUM         PICTURE 9(4) VALUE 0.
+           05  REC-MAX         PICTURE 9(5) COMP VALUE 10.
+           05  SUB             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD  VALUE 1 3 5 7 9 10 11.
+      
+           05  TSPFL-KEY       PICTURE X(8).
+           05  WMI             PICTURE X(8).
+      
+       PROCEDURE DIVISION.
+      
+       MAINFILE.
+           ACCEPT CMD-LINE FROM COMMAND-LINE.
+           CALL "C$TOUPPER" USING CMD-LINE BY VALUE LENGTH OF CMD-LINE.
+           MOVE SPACES TO REPORT-RECORD.
+           EVALUATE CMD-LINE
+           WHEN  SPACES
+               MOVE "control.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Control" TO WMI
+               PERFORM LOADFILE
+               PERFORM LOCK-INIT
+               CALL "SYSTEM" USING "./prog PARENT &"
+               CALL "SYSTEM" USING "./prog CHILD &"
+               PERFORM LOCK-WAIT-READY
+               MOVE "continue test " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-WAIT-COMPLETE 2 TIMES
+               MOVE "waiting step 1 completion " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-WAIT-COMPLETE 2 TIMES
+               PERFORM LOCK-INIT
+               CALL "SYSTEM" USING "./prog LOCK &"
+               CALL "SYSTEM" USING "./prog READADV &"
+               PERFORM LOCK-WAIT-READY
+               MOVE "waiting step 2 completion " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-WAIT-COMPLETE
+               PERFORM LOCK-INIT
+               CALL "SYSTEM" USING "./prog UPDT &"
+               CALL "SYSTEM" USING "./prog CHILDUP &"
+               PERFORM LOCK-WAIT-READY
+               MOVE "waiting step 3 completion " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-WAIT-COMPLETE
+           WHEN "PARENT"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE " PARENT" TO WMI
+               PERFORM LOCK-READY-AND-GO
+               PERFORM READ-FILE
+               PERFORM LOCK-COMPLETE-AND-GO
+               PERFORM READ-FILE-NO-SHARE
+               PERFORM LOCK-COMPLETE-AND-GO
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-COMPLETE-AND-GO
+               PERFORM READ-FILE-RETRY-SHORT
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN "CHILD"
+               MOVE 2         TO LCK-IDX
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "  CHILD" TO WMI
+               PERFORM LOCK-READY-AND-GO
+               PERFORM READ-FILE
+               PERFORM LOCK-COMPLETE-AND-GO
+               CALL "C$SLEEP" USING 1
+               PERFORM READ-FILE-NO-SHARE
+               PERFORM LOCK-COMPLETE-AND-GO
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-COMPLETE-AND-GO
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN "UPDT"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Par Upd" TO WMI
+               PERFORM LOCK-READY-AND-GO
+               CALL "C$SLEEP" USING 1
+               PERFORM UPDT-SHARE
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN "CHILDUP"
+               MOVE 2         TO LCK-IDX
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Cld Upd" TO WMI
+               PERFORM LOCK-READY-AND-GO
+               MOVE 2 TO SLP-TIME
+               PERFORM UPDT-SHARE
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN "LOCK"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Par Lck" TO WMI
+               PERFORM LOCK-READY-AND-GO
+               PERFORM READ-FILE-ADV
+               OPEN I-O SHARING ALL OTHER TSPFILE
+               MOVE DATA-CUST-NUM (1) TO CM-CUST-NUM
+               READ TSPFILE WITH LOCK
+               DELETE TSPFILE
+               STRING "Deleted " CM-CUST-NUM "           Sts:" 
+                      CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+               MOVE DATA-CUST-NUM (3) TO CM-CUST-NUM
+               READ TSPFILE WITH LOCK
+               STRING "Read    " CM-CUST-NUM " Locked    Sts:" 
+                      CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+               MOVE DATA-CUST-NUM (6) TO CM-CUST-NUM
+               READ TSPFILE WITH LOCK
+               MOVE DATA-CUST-NUM (6) TO CM-CUST-NUM
+               READ TSPFILE WITH LOCK
+               STRING "Read    " CM-CUST-NUM " Locked    Sts:" 
+                      CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+               CALL "C$SLEEP" USING 9
+               READ TSPFILE 
+               CLOSE TSPFILE
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN "READADV"
+               MOVE 2         TO LCK-IDX
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               PERFORM LOCK-READY-AND-GO
+               MOVE "Cld Adv" TO WMI
+               CALL "C$SLEEP" USING 2
+               PERFORM READ-FILE-ADV
+               MOVE "Cld Ign" TO WMI
+               PERFORM READ-FILE-IGN
+               PERFORM LOCK-MARK-COMPLETE
+           WHEN OTHER
+               DISPLAY "Bad cmd:" CMD-LINE
+           END-EVALUATE.
+           MOVE "ending " TO MSG
+           PERFORM DISPLAY-IT
+           CLOSE REPORTIT.
+           STOP RUN.
+      
+       LOADFILE.
+
+           MOVE "Loading test data file." TO MSG
+           PERFORM DISPLAY-IT.
+      
+           OPEN OUTPUT TSPFILE
+           IF CUST-STAT NOT = "00"
+               STRING "Error " CUST-STAT " opening 'testisam' file"
+                                INTO MSG
+               PERFORM DISPLAY-IT
+               STOP RUN
+           END-IF.
+      
+           PERFORM 1000-LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           CLOSE TSPFILE.
+      
+      *---------------------------------------------------------------*
+      *         LOAD A RECORD FROM DATA TABLES                        *
+      *---------------------------------------------------------------*
+      
+       1000-LOAD-RECORD.
+      
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE CM-CUST-NUM                  TO TSPFL-KEY.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE 10                           TO CM-NO-TERMINALS.
+      
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+      
+           WRITE TSPFL-RECORD.
+           IF CUST-STAT NOT = "00"
+           AND CUST-STAT NOT = "02"
+               STRING "Key: " TSPFL-KEY ", Status: " CUST-STAT 
+                                 INTO MSG
+               PERFORM DISPLAY-IT.
+
+       READ-FILE.
+           OPEN INPUT TSPFILE.
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 2 TIMES
+             PERFORM READ-NEXT
+             CALL "C$SLEEP" USING 1
+           END-PERFORM.
+           CLOSE TSPFILE.
+
+       READ-FILE-NO-SHARE.
+           OPEN INPUT SHARING NO OTHER TSPFILE.
+           STRING "OPEN NO SHARE              Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+           ELSE
+               PERFORM READ-NEXT
+           END-IF.
+           CALL "C$SLEEP" USING 2
+           CLOSE TSPFILE.
+
+       READ-FILE-RETRY-SHARE.
+           OPEN INPUT SHARING NO OTHER RETRY 15 SECONDS TSPFILE.
+           STRING "OPEN NO SHARE RETRY 15     Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+           ELSE
+               PERFORM READ-NEXT
+           END-IF.
+           CALL "C$SLEEP" USING 4
+           CLOSE TSPFILE.
+
+       READ-FILE-RETRY-SHORT.
+           CALL "C$SLEEP" USING 1.
+           OPEN INPUT SHARING NO OTHER RETRY 2 SECONDS TSPFILE.
+           STRING "OPEN NO SHARE RETRY 2      Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+           ELSE
+               PERFORM READ-NEXT
+           END-IF.
+           CLOSE TSPFILE.
+
+       UPDT-SHARE.
+           OPEN I-O SHARING ALL OTHER TSPFILE.
+           MOVE 3 TO REC-NUM.
+           MOVE DATA-CUST-NUM (REC-NUM) TO CM-CUST-NUM
+           READ TSPFILE WITH NO LOCK
+           STRING "Read    " CM-CUST-NUM " no lock   Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD RETRY 25 SECONDS WITH NO LOCK
+           STRING "REWRITE " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT.
+           CALL "C$SLEEP" USING SLP-TIME
+
+           READ TSPFILE RETRY 2 SECONDS WITH LOCK 
+           STRING "Read    " CM-CUST-NUM " with LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           IF CUST-STAT = "51"
+               READ TSPFILE RETRY 15 SECONDS WITH LOCK
+               STRING "Read    " CM-CUST-NUM " retry LCK Sts:"
+                       CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+           ELSE
+               CALL "C$SLEEP" USING 5
+           END-IF
+           READ TSPFILE WITH LOCK
+           STRING "Re-Read " CM-CUST-NUM " with LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           REWRITE TSPFL-RECORD WITH NO LOCK
+           STRING "REWRITE " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+
+           READ TSPFILE WITH LOCK
+           STRING "Read    " CM-CUST-NUM "  and LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+
+           MOVE 2 TO REC-NUM.
+           MOVE DATA-CUST-NUM (REC-NUM) TO CM-CUST-NUM
+           REWRITE TSPFL-RECORD RETRY 10 SECONDS WITH NO LOCK
+           STRING "REWRITE " CM-CUST-NUM " No read! "
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           CLOSE TSPFILE.
+
+       READ-NEXT.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ TSPFILE NEXT
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next                  Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Next    " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       READ-FILE-ADV.
+           OPEN INPUT SHARING ALL OTHER TSPFILE
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 4 TIMES
+             PERFORM READ-NEXT-ADV
+           END-PERFORM.
+           START TSPFILE LAST
+           PERFORM 4 TIMES
+             PERFORM READ-PREV-ADV
+           END-PERFORM.
+           CLOSE TSPFILE.
+
+       READ-NEXT-ADV.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ TSPFILE NEXT ADVANCING ON LOCK
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next adv              Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Nextadv " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       READ-PREV-ADV.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ TSPFILE PREVIOUS ADVANCING ON LOCK
+           IF CUST-STAT NOT = "00"
+             STRING "Read Prev adv              Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Prevadv " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       READ-FILE-IGN.
+           OPEN INPUT SHARING ALL OTHER TSPFILE
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 7 TIMES
+             PERFORM READ-NEXT-IGN
+           END-PERFORM.
+           CLOSE TSPFILE.
+
+       READ-NEXT-IGN.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ TSPFILE NEXT IGNORE LOCK
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next ign              Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Nextign " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                     INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       LOCK-INIT.
+           OPEN OUTPUT LOCKFILE.
+           MOVE SPACES TO LCK-RECORD.
+           MOVE ZERO TO LCK-NUM.
+           MOVE "Lock control" TO LCK-MESSAGE.
+           WRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-WAIT-READY.
+           OPEN I-O SHARING ALL OTHER RETRY FOREVER LOCKFILE.
+           PERFORM UNTIL LCK-TBL (1) = 'R'
+                     AND LCK-TBL (2) = 'R'
+               READ LOCKFILE
+               IF LCK-TBL (1) NOT = 'R'
+               OR LCK-TBL (2) NOT = 'R'
+                   CALL "CBL_GC_NANOSLEEP" USING SLP-SHORT
+               END-IF
+           END-PERFORM.
+           READ LOCKFILE RETRY FOREVER WITH LOCK
+           MOVE 'G'  TO LCK-TBL (1), LCK-TBL (2)
+           REWRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-WAIT-COMPLETE.
+           OPEN I-O SHARING ALL OTHER RETRY FOREVER LOCKFILE.
+           PERFORM UNTIL LCK-TBL (1) = 'C'
+                     AND LCK-TBL (2) = 'C'
+               READ LOCKFILE
+               IF LCK-TBL (1) NOT = 'C'
+               OR LCK-TBL (2) NOT = 'C'
+                   CALL "CBL_GC_NANOSLEEP" USING SLP-LONG
+               END-IF
+           END-PERFORM.
+           READ LOCKFILE RETRY FOREVER WITH LOCK
+           MOVE 'G'  TO LCK-TBL (1), LCK-TBL (2)
+           REWRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-WAIT-FOR-GO.
+           OPEN I-O SHARING ALL OTHER RETRY FOREVER LOCKFILE.
+           PERFORM UNTIL LCK-TBL (LCK-IDX) = 'G'
+               READ LOCKFILE
+               IF LCK-TBL (LCK-IDX) NOT = 'G'
+                   CALL "CBL_GC_NANOSLEEP" USING SLP-SHORT
+               END-IF
+           END-PERFORM.
+           READ LOCKFILE RETRY FOREVER WITH LOCK
+           MOVE 'X'  TO LCK-TBL (LCK-IDX)
+           REWRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-MARK-READY.
+           OPEN I-O SHARING ALL OTHER RETRY FOREVER LOCKFILE.
+           READ LOCKFILE RETRY FOREVER WITH LOCK
+           MOVE 'R'  TO LCK-TBL (LCK-IDX)
+           REWRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-MARK-COMPLETE.
+           OPEN I-O SHARING ALL OTHER RETRY FOREVER LOCKFILE.
+           READ LOCKFILE RETRY FOREVER WITH LOCK
+           MOVE 'C'  TO LCK-TBL (LCK-IDX)
+           REWRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+       LOCK-COMPLETE-AND-GO.
+           PERFORM LOCK-MARK-COMPLETE
+           PERFORM LOCK-WAIT-FOR-GO.
+
+       LOCK-READY-AND-GO.
+           PERFORM LOCK-MARK-READY
+           PERFORM LOCK-WAIT-FOR-GO.
+
+       DISPLAY-IT.
+           ADD 1 TO SEQ.
+           IF MSG (1:1) = '*'
+               ACCEPT WS-TIME-NOW FROM TIME
+               STRING WMI " :" SEQ ": " 
+                      WS-NOW-MM ":" WS-NOW-SS "." WS-NOW-HS " : "
+                      MSG (2:) INTO REPORT-RECORD
+           ELSE
+               STRING WMI " :" SEQ ": " MSG INTO REPORT-RECORD
+           END-IF.
+           WRITE REPORT-RECORD.
+           MOVE SPACES TO MSG.
+           MOVE SPACES TO REPORT-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./control.txt)
+
+AT_DATA([reference], [Control  :01: Loading test data file.
+Control  :02: continue test
+Control  :03: waiting step 1 completion
+Control  :04: waiting step 2 completion
+Control  :05: waiting step 3 completion
+Control  :06: ending
+])
+
+AT_CHECK([diff reference control.txt], [0], [], [])
+
+
+AT_CAPTURE_FILE(./parent.txt)
+
+AT_DATA([reference], [ PARENT  :01: READ Open                  Sts:00
+ PARENT  :02: Next    ALP00000 Trms:0010
+ PARENT  :03: Next    BET00000 Trms:0010
+ PARENT  :04: OPEN NO SHARE              Sts:00
+ PARENT  :05: Next    ALP00000 Trms:0010
+ PARENT  :06: Next    BET00000 Trms:0010
+ PARENT  :07: OPEN NO SHARE RETRY 15     Sts:00
+ PARENT  :08: Next    ALP00000 Trms:0010
+ PARENT  :09: Next    BET00000 Trms:0010
+ PARENT  :10: OPEN NO SHARE RETRY 2      Sts:61
+ PARENT  :11: Read Next                  Sts:47
+ PARENT  :12: ending
+Par Lck  :01: READ Open                  Sts:00
+Par Lck  :02: Nextadv ALP00000 Trms:0010
+Par Lck  :03: Nextadv BET00000 Trms:0010
+Par Lck  :04: Nextadv CAM00000 Trms:0010
+Par Lck  :05: Nextadv DEL00000 Trms:0010
+Par Lck  :06: Prevadv HIJ00000 Trms:0010
+Par Lck  :07: Prevadv GIB00000 Trms:0010
+Par Lck  :08: Prevadv FOR00000 Trms:0010
+Par Lck  :09: Prevadv EPS00000 Trms:0010
+Par Lck  :10: Deleted ALP00000           Sts:00
+Par Lck  :11: Read    CAM00000 Locked    Sts:00
+Par Lck  :12: Read    FOR00000 Locked    Sts:00
+Par Lck  :13: ending
+Par Upd  :01: Read    CAM00000 no lock   Sts:00
+Par Upd  :02: REWRITE CAM00000 Trms:0012 Sts:00
+Par Upd  :03: Read    CAM00000 with LOCK Sts:00
+Par Upd  :04: Re-Read CAM00000 with LOCK Sts:00
+Par Upd  :05: REWRITE CAM00000 Trms:0012 Sts:00
+Par Upd  :06: Read    CAM00000  and LOCK Sts:00
+Par Upd  :07: REWRITE BET00000 No read!  Sts:00
+Par Upd  :08: ending
+])
+
+AT_CHECK([diff reference parent.txt], [0], [], [])
+
+
+AT_CAPTURE_FILE(./child.txt)
+
+AT_DATA([reference], [  CHILD  :01: READ Open                  Sts:00
+  CHILD  :02: Next    ALP00000 Trms:0010
+  CHILD  :03: Next    BET00000 Trms:0010
+  CHILD  :04: OPEN NO SHARE              Sts:61
+  CHILD  :05: Read Next                  Sts:47
+  CHILD  :06: OPEN NO SHARE RETRY 15     Sts:00
+  CHILD  :07: Next    ALP00000 Trms:0010
+  CHILD  :08: Next    BET00000 Trms:0010
+  CHILD  :09: OPEN NO SHARE RETRY 15     Sts:00
+  CHILD  :10: Next    ALP00000 Trms:0010
+  CHILD  :11: Next    BET00000 Trms:0010
+  CHILD  :12: ending
+Cld Adv  :01: READ Open                  Sts:00
+Cld Adv  :02: Nextadv BET00000 Trms:0010
+Cld Adv  :03: Nextadv DEL00000 Trms:0010
+Cld Adv  :04: Nextadv EPS00000 Trms:0010
+Cld Adv  :05: Nextadv GIB00000 Trms:0010
+Cld Adv  :06: Prevadv HIJ00000 Trms:0010
+Cld Adv  :07: Prevadv GIB00000 Trms:0010
+Cld Adv  :08: Prevadv EPS00000 Trms:0010
+Cld Adv  :09: Prevadv DEL00000 Trms:0010
+Cld Ign  :10: READ Open                  Sts:00
+Cld Ign  :11: Nextign BET00000 Trms:0010
+Cld Ign  :12: Nextign CAM00000 Trms:0010
+Cld Ign  :13: Nextign DEL00000 Trms:0010
+Cld Ign  :14: Nextign EPS00000 Trms:0010
+Cld Ign  :15: Nextign FOR00000 Trms:0010
+Cld Ign  :16: Nextign GIB00000 Trms:0010
+Cld Ign  :17: Nextign HIJ00000 Trms:0010
+Cld Ign  :18: ending
+Cld Upd  :01: Read    CAM00000 no lock   Sts:00
+Cld Upd  :02: REWRITE CAM00000 Trms:0011 Sts:00
+Cld Upd  :03: Read    CAM00000 with LOCK Sts:51
+Cld Upd  :04: Read    CAM00000 retry LCK Sts:00
+Cld Upd  :05: Re-Read CAM00000 with LOCK Sts:00
+Cld Upd  :06: REWRITE CAM00000 Trms:0012 Sts:00
+Cld Upd  :07: Read    CAM00000  and LOCK Sts:00
+Cld Upd  :08: REWRITE BET00000 No read!  Sts:00
+Cld Upd  :09: ending
+])
+
+AT_CHECK([diff reference child.txt], [0], [], [])
+
+AT_CLEANUP
+
+AT_SETUP([RELATIVE File Locking])
+AT_KEYWORDS([FileIo])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS SEQUENTIAL RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+           SELECT FLATFILE2 ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS RANDOM RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+           SELECT LOCKFILE ASSIGN EXTERNAL RELLCK
+           ORGANIZATION RELATIVE
+           SHARING READ ONLY
+           ACCESS IS RANDOM RELATIVE KEY IS LCK-REC
+           FILE STATUS IS CUST-STAT.
+
+           SELECT OPTIONAL REPORTIT ASSIGN TO REPORT-FILE 
+           ORGANIZATION LINE SEQUENTIAL.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  REPORTIT
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  REPORT-RECORD   PIC X(80).
+
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4). 
+      
+       FD  FLATFILE2
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE S9(4). 
+
+       FD  LOCKFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  LCK-RECORD.
+           10  LCK-NUM                         PICTURE 9(3). 
+           10  LCK-TBL                         PICTURE X OCCURS 4 TIMES. 
+           10  LCK-MESSAGE                     PICTURE X(25). 
+
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB                     PICTURE 9(4) VALUE 6.
+       77  CUST-STAT                   PICTURE X(2).
+       77  REC-NUM                     PICTURE 9(4) VALUE 1.
+       77  LCK-REC                     PICTURE 9(4) VALUE 1.
+       77  SLP-TIME                    PICTURE 9(9) BINARY VALUE 1.
+       77  REPORT-FILE                 PICTURE X(32) VALUE "parent.txt".
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+       01  CMD-LINE     PIC X(64).
+       01  WMI          PIC X(7).
+       01  SEQ          PIC 9(2) VALUE 0.
+       01  MSG          PIC X(64) VALUE " ".
+      
+       PROCEDURE DIVISION.
+
+           ACCEPT CMD-LINE FROM COMMAND-LINE.
+           CALL "C$TOUPPER" USING CMD-LINE BY VALUE LENGTH OF CMD-LINE.
+           MOVE SPACES TO REPORT-RECORD.
+           EVALUATE CMD-LINE
+           WHEN  SPACES
+               MOVE "control.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Control" TO WMI
+               PERFORM LOADFILE
+               PERFORM LOCK-EXCLUSIVE
+               CALL "SYSTEM" USING "./prog  PARENT &"
+               CALL "SYSTEM" USING "./prog  CHILD &"
+               CALL "C$SLEEP" USING 2
+               MOVE "continue test " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 2
+               PERFORM LOCK-EXCLUSIVE
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 2
+               PERFORM LOCK-EXCLUSIVE
+               MOVE "waiting step 1 completion " TO MSG
+               PERFORM DISPLAY-IT
+               CALL "C$SLEEP" USING 1
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 2
+               PERFORM LOCK-EXCLUSIVE
+               CALL "C$SLEEP" USING 2
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 1
+               CALL "SYSTEM" USING "./prog  LOCK &"
+               CALL "SYSTEM" USING "./prog  READADV &"
+               CALL "C$SLEEP" USING 6
+               MOVE "waiting step 2 completion " TO MSG
+               PERFORM DISPLAY-IT
+               PERFORM LOCK-EXCLUSIVE
+               CALL "SYSTEM" USING "./prog  UPDT &"
+               CALL "SYSTEM" USING "./prog  CHILDUP &"
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 3
+               PERFORM LOCK-EXCLUSIVE
+               MOVE "waiting step 3 completion " TO MSG
+               PERFORM DISPLAY-IT
+               CALL "C$SLEEP" USING 1
+               PERFORM LOCK-RELEASE
+           WHEN "PARENT"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE " PARENT" TO WMI
+               PERFORM LOCK-SHARED
+               CALL "C$SLEEP" USING 1
+               PERFORM READ-FILE
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 3
+               PERFORM LOCK-SHARED
+               PERFORM READ-FILE-NO-SHARE
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 4
+               PERFORM LOCK-SHARED
+               PERFORM READ-FILE-RETRY-SHORT
+               PERFORM LOCK-RELEASE
+           WHEN "CHILD"
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "  CHILD" TO WMI
+               PERFORM LOCK-SHARED
+               CALL "C$SLEEP" USING 2
+               PERFORM READ-FILE
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 3
+               PERFORM LOCK-SHARED
+               PERFORM READ-FILE-NO-SHARE
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-RELEASE
+               CALL "C$SLEEP" USING 4
+               PERFORM LOCK-SHARED
+               PERFORM READ-FILE-RETRY-SHARE
+               PERFORM LOCK-RELEASE
+           WHEN "UPDT"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Par Upd" TO WMI
+               PERFORM LOCK-SHARED
+               PERFORM UPDT-SHARE
+               PERFORM LOCK-RELEASE
+           WHEN "CHILDUP"
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Cld Upd" TO WMI
+               MOVE 1 TO SLP-TIME
+               PERFORM LOCK-SHARED
+               PERFORM UPDT-SHARE
+               PERFORM LOCK-RELEASE
+           WHEN "LOCK"
+               MOVE "parent.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Par Lck" TO WMI
+               PERFORM READ-FILE-ADV
+               OPEN I-O SHARING ALL OTHER FLATFILE2
+               MOVE 1 TO REC-NUM
+               READ FLATFILE2 WITH LOCK
+               DELETE FLATFILE2
+               STRING "Deleted " C2-CUST-NUM "        1  Sts:" 
+                      CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+               MOVE 3 TO REC-NUM
+               READ FLATFILE2 WITH LOCK
+               STRING "Read    " C2-CUST-NUM " Locked 3  Sts:" 
+                      CUST-STAT INTO MSG
+               PERFORM DISPLAY-IT
+               CALL "C$SLEEP" USING 4
+               CLOSE FLATFILE2
+           WHEN "READADV"
+               MOVE "child.txt" TO REPORT-FILE
+               OPEN EXTEND REPORTIT
+               MOVE "Cld Adv" TO WMI
+               CALL "C$SLEEP" USING 2
+               PERFORM READ-FILE-ADV
+               MOVE "Cld Ign" TO WMI
+               PERFORM READ-FILE-IGN
+           END-EVALUATE.
+           MOVE "ending " TO MSG
+           PERFORM DISPLAY-IT
+           CLOSE REPORTIT.
+           STOP RUN.
+
+       READ-FILE.
+           OPEN INPUT FLATFILE.
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 2 TIMES
+             PERFORM READ-NEXT
+             CALL "C$SLEEP" USING 1
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+       READ-FILE-NO-SHARE.
+           OPEN INPUT SHARING NO OTHER FLATFILE.
+           STRING "NO SHARE Open              Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+               CLOSE FLATFILE
+           ELSE
+               PERFORM READ-NEXT
+               CALL "C$SLEEP" USING 1
+               CLOSE FLATFILE
+               CALL "C$SLEEP" USING 1
+           END-IF.
+
+       READ-FILE-RETRY-SHARE.
+           OPEN INPUT SHARING NO OTHER RETRY 10 SECONDS FLATFILE.
+           STRING "RETRY SHARE Open           Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           CALL "C$SLEEP" USING 2
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+               CALL "C$SLEEP" USING 2
+               CLOSE FLATFILE
+           ELSE
+               PERFORM READ-NEXT
+               CALL "C$SLEEP" USING 2
+               CLOSE FLATFILE
+               CALL "C$SLEEP" USING 1
+           END-IF.
+
+       READ-FILE-RETRY-SHORT.
+           OPEN INPUT SHARING NO OTHER RETRY 2 SECONDS FLATFILE.
+           STRING "RETRY SHORT Open           Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           IF  CUST-STAT  = "00"
+               PERFORM 2 TIMES
+                 PERFORM READ-NEXT
+                 CALL "C$SLEEP" USING 1
+               END-PERFORM
+               CLOSE FLATFILE
+           ELSE
+               PERFORM READ-NEXT
+               CALL "C$SLEEP" USING 1
+               CLOSE FLATFILE
+               CALL "C$SLEEP" USING 1
+           END-IF.
+
+       UPDT-SHARE.
+           OPEN I-O SHARING ALL OTHER FLATFILE2.
+           MOVE 3 TO REC-NUM.
+           CALL "C$SLEEP" USING SLP-TIME
+           READ FLATFILE2
+           STRING "Read    " C2-CUST-NUM " no lock   Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE FILE FLATFILE2 FROM TSP2-RECORD WITH NO LOCK
+      *    REWRITE TSP2-RECORD WITH NO LOCK
+           STRING "REWRITE " C2-CUST-NUM " Trms:" C2-NO-TERMINALS 
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+
+           READ FLATFILE2 WITH LOCK
+           STRING "Read    " C2-CUST-NUM " with LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           CALL "C$SLEEP" USING 2
+           READ FLATFILE2 WITH LOCK
+           STRING "Re-Read " C2-CUST-NUM " with LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+           REWRITE TSP2-RECORD WITH NO LOCK
+           STRING "REWRITE " C2-CUST-NUM " Trms:" C2-NO-TERMINALS 
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+
+           READ FLATFILE2 WITH LOCK
+           STRING "Read    " C2-CUST-NUM "  and LOCK Sts:" CUST-STAT 
+                  INTO MSG
+           PERFORM DISPLAY-IT.
+
+           MOVE 2 TO REC-NUM.
+           MOVE DATA-CUST-NUM (REC-NUM) TO C2-CUST-NUM
+           MOVE WMI   TO C2-CUST-NUM (3:6)
+           REWRITE TSP2-RECORD RETRY 10 SECONDS WITH NO LOCK
+           STRING "REWRITE " C2-CUST-NUM " No read! "
+                  " Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           CLOSE FLATFILE2.
+      
+       READ-NEXT.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE NEXT
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next                  Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Next    " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    " #" REC-NUM INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       READ-FILE-ADV.
+           OPEN INPUT SHARING ALL OTHER FLATFILE
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 4 TIMES
+             PERFORM READ-NEXT-ADV
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+       READ-NEXT-ADV.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE NEXT ADVANCING ON LOCK
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next adv              Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Nextadv " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    " #" REC-NUM INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       READ-FILE-IGN.
+           OPEN INPUT SHARING ALL OTHER FLATFILE
+           STRING "READ Open                  Sts:" CUST-STAT INTO MSG
+           PERFORM DISPLAY-IT
+           PERFORM 4 TIMES
+             PERFORM READ-NEXT-IGN
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+       READ-NEXT-IGN.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE NEXT IGNORE LOCK
+           IF CUST-STAT NOT = "00"
+             STRING "Read Next ign              Sts:" CUST-STAT
+                    INTO MSG
+           ELSE
+             STRING "Nextign " CM-CUST-NUM " Trms:" CM-NO-TERMINALS 
+                    " #" REC-NUM INTO MSG
+           END-IF.
+           PERFORM DISPLAY-IT.
+
+       DISPLAY-IT.
+           ADD 1 TO SEQ.
+           STRING WMI " :" SEQ ": " MSG INTO REPORT-RECORD.
+           WRITE REPORT-RECORD.
+           MOVE SPACES TO MSG.
+           MOVE SPACES TO REPORT-RECORD.
+
+       LOCK-EXCLUSIVE.
+           OPEN I-O SHARING NO OTHER RETRY FOREVER LOCKFILE.
+
+       LOCK-SHARED.
+           OPEN INPUT SHARING READ ONLY RETRY FOREVER LOCKFILE.
+
+       LOCK-RELEASE.
+           CLOSE LOCKFILE.
+
+       LOADFILE.
+           STRING WMI " .  . Loading sample program data file"
+                            INTO REPORT-RECORD.
+           WRITE REPORT-RECORD.
+           MOVE SPACES TO REPORT-RECORD.
+      
+           OPEN OUTPUT LOCKFILE.
+           MOVE SPACES TO LCK-RECORD.
+           MOVE ZERO TO LCK-NUM.
+           MOVE "Lock control" TO LCK-MESSAGE.
+           WRITE FILE LOCKFILE FROM LCK-RECORD
+      *    WRITE LCK-RECORD.
+           CLOSE LOCKFILE.
+
+           OPEN OUTPUT FLATFILE.
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           CLOSE FLATFILE.
+      
+       LOAD-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE 10                           TO CM-NO-TERMINALS.
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE TSPFL-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w -fmf-files prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [], [])
+
+
+AT_CAPTURE_FILE(./control.txt)
+
+AT_DATA([reference], [Control .  . Loading sample program data file
+Control :01: continue test
+Control :02: waiting step 1 completion
+Control :03: waiting step 2 completion
+Control :04: waiting step 3 completion
+Control :05: ending
+])
+
+AT_CHECK([diff reference control.txt], [0], [], [])
+
+
+AT_CAPTURE_FILE(./parent.txt)
+
+AT_DATA([reference], [ PARENT :01: READ Open                  Sts:00
+ PARENT :02: Next    ALP00000 Trms:0010 #0001
+ PARENT :03: Next    BET00000 Trms:0010 #0002
+ PARENT :04: NO SHARE Open              Sts:00
+ PARENT :05: Next    ALP00000 Trms:0010 #0001
+ PARENT :06: Next    BET00000 Trms:0010 #0002
+ PARENT :07: RETRY SHARE Open           Sts:00
+ PARENT :08: Next    ALP00000 Trms:0010 #0001
+ PARENT :09: Next    BET00000 Trms:0010 #0002
+ PARENT :10: RETRY SHORT Open           Sts:61
+ PARENT :11: Read Next                  Sts:47
+ PARENT :12: ending
+Par Lck :01: READ Open                  Sts:00
+Par Lck :02: Nextadv ALP00000 Trms:0010 #0001
+Par Lck :03: Nextadv BET00000 Trms:0010 #0002
+Par Lck :04: Nextadv DEL00000 Trms:0010 #0003
+Par Lck :05: Nextadv EPS00000 Trms:0010 #0004
+Par Lck :06: Deleted ALP00000        1  Sts:00
+Par Lck :07: Read    DEL00000 Locked 3  Sts:00
+Par Lck :08: ending
+Par Upd :01: Read    DEL00000 no lock   Sts:00
+Par Upd :02: REWRITE DEL00000 Trms:0011 Sts:00
+Par Upd :03: Read    DEL00000 with LOCK Sts:00
+Par Upd :04: Re-Read DEL00000 with LOCK Sts:00
+Par Upd :05: REWRITE DEL00000 Trms:0011 Sts:00
+Par Upd :06: Read    DEL00000  and LOCK Sts:00
+Par Upd :07: REWRITE BEPar Up No read!  Sts:00
+Par Upd :08: ending
+])
+
+AT_CHECK([diff reference parent.txt], [0], [], [])
+
+
+AT_CAPTURE_FILE(./child.txt)
+
+AT_DATA([reference], [  CHILD :01: READ Open                  Sts:00
+  CHILD :02: Next    ALP00000 Trms:0010 #0001
+  CHILD :03: Next    BET00000 Trms:0010 #0002
+  CHILD :04: NO SHARE Open              Sts:61
+  CHILD :05: Read Next                  Sts:47
+  CHILD :06: RETRY SHARE Open           Sts:00
+  CHILD :07: Next    ALP00000 Trms:0010 #0001
+  CHILD :08: Next    BET00000 Trms:0010 #0002
+  CHILD :09: RETRY SHARE Open           Sts:00
+  CHILD :10: Next    ALP00000 Trms:0010 #0001
+  CHILD :11: Next    BET00000 Trms:0010 #0002
+  CHILD :12: ending
+Cld Adv :01: READ Open                  Sts:00
+Cld Adv :02: Nextadv BET00000 Trms:0010 #0002
+Cld Adv :03: Nextadv EPS00000 Trms:0010 #0004
+Cld Adv :04: Nextadv FOR00000 Trms:0010 #0005
+Cld Adv :05: Nextadv GAM00000 Trms:0010 #0006
+Cld Ign :06: READ Open                  Sts:00
+Cld Ign :07: Nextign BET00000 Trms:0010 #0002
+Cld Ign :08: Nextign DEL00000 Trms:0010 #0003
+Cld Ign :09: Nextign EPS00000 Trms:0010 #0004
+Cld Ign :10: Nextign FOR00000 Trms:0010 #0005
+Cld Ign :11: ending
+Cld Upd :01: Read    DEL00000 no lock   Sts:00
+Cld Upd :02: REWRITE DEL00000 Trms:0012 Sts:51
+Cld Upd :03: Read    DEL00000 with LOCK Sts:51
+Cld Upd :04: Re-Read DEL00000 with LOCK Sts:00
+Cld Upd :05: REWRITE DEL00000 Trms:0011 Sts:00
+Cld Upd :06: Read    DEL00000  and LOCK Sts:00
+Cld Upd :07: REWRITE BECld Up No read!  Sts:00
+Cld Upd :08: ending
+])
+
+AT_CHECK([diff reference child.txt], [0], [], [])
+
+AT_CLEANUP
+

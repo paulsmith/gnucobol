@@ -235,6 +235,15 @@
 	* testsuite.at: minimized the output of testsuite --version while adding
 	  core authors to it
 
+2016-12-30  Ron Norman <rjn@inglenet.com>
+
+	* run_file.at: Add test cases for fiel SHARING/RETRY
+	  These test programs use SYSTEM with & to start two
+	  concurrent running copies of the test program to
+	  run concurrent test cases. There is also several C$SLEEP
+	  calls to setup the test scenarios.
+	  So these tests appear to run for a long time
+
 2016-12-06  Simon Sobisch <simonsobisch@gnu.org>
 
 	* testsuite.at: added cobcrun to tested programs
