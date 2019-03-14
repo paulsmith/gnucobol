@@ -10242,12 +10242,18 @@ cb_emit_read (cb_tree ref, cb_tree next, cb_tree into,
 		read_opts = COB_READ_LOCK;
 	} else if (lock_opts == cb_int2) {
 		read_opts = COB_READ_NO_LOCK;
-	} else if (lock_opts == cb_int3) {
+	} else if (lock_opts == cb_int3
+		|| current_statement->flag_ignore_lock) {
 		read_opts = COB_READ_IGNORE_LOCK;
+		current_statement->flag_ignore_lock = 0;
 	} else if (lock_opts == cb_int4) {
 		read_opts = COB_READ_WAIT_LOCK;
 	} else if (lock_opts == cb_int5) {
 		read_opts = COB_READ_LOCK | COB_READ_KEPT_LOCK;
+	} else if (lock_opts == cb_int6
+		|| current_statement->flag_advancing_lock) {
+		read_opts = COB_READ_ADVANCING_LOCK;
+		current_statement->flag_advancing_lock = 0;
 	}
 	file = cb_ref (ref);
 	if (file == cb_error_node) {
@@ -10469,6 +10475,8 @@ cb_emit_rewrite (cb_tree record, cb_tree from, cb_tree lockopt)
 		return;
 	} else if (lockopt == cb_int1) {
 		opts = COB_WRITE_LOCK;
+	} else if (lockopt == cb_int2) {
+		opts = COB_WRITE_NO_LOCK;
 	}
 
 	if (from && (!CB_FIELD_P(from) || (CB_FIELD_PTR (from) != CB_FIELD_PTR (record)))) {
@@ -11463,6 +11471,8 @@ cb_emit_write (cb_tree record, cb_tree from, cb_tree opt, cb_tree lockopt)
 			_("LOCK clause invalid here"));
 		} else if (lockopt == cb_int1) {
 			opt = cb_int (COB_WRITE_LOCK);
+		} else if (lockopt == cb_int2) {
+			opt = cb_int (COB_WRITE_NO_LOCK);
 		}
 	}
 

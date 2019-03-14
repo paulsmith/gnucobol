@@ -2310,6 +2310,14 @@
 
 	* parser.y, typeck.c: FR #170 implement WRITE|REWRITE FILE filename
 
+2016-11-30  Ron Norman <rjn@inglenet.com>
+
+	* parser.y,codegen.c,typeck.c,tree.h,tree.c:
+	  Compiler updated for handling the SHARING, RETRY, ADVANCING LOCK
+	  and IGNORE LOCK phrases, Mainly for RELATIVE files now.
+	  This is a 'work in progress' and more updates will follow to include
+	  support for INDEXED and SEQUENTIAL files
+
 2016-11-22  Dave Pitts <dpitts@cozx.com>
 
 	* cobc.c (print_program_code): Free replace text. Realloc replace text

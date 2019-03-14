@@ -375,15 +375,22 @@ static struct config_tbl gc_conf[] = {
 #if defined (_WIN32) && !defined (__MINGW32__)
 	{"OS", "ostype", 			NULL, 	NULL, GRP_SYSENV, ENV_STR, SETPOS (cob_sys_type)},
 #endif
-	{"COB_FILE_PATH", "file_path", 		NULL, 	NULL, GRP_FILE, ENV_PATH, SETPOS (cob_file_path)},
-	{"COB_LIBRARY_PATH", "library_path", 	NULL, 	NULL, GRP_CALL, ENV_PATH, SETPOS (cob_library_path)}, /* default value set in cob_init_call() */
-	{"COB_VARSEQ_FORMAT", "varseq_format", 	varseq_dflt, varseqopts, GRP_FILE, ENV_INT | ENV_ENUM, SETPOS (cob_varseq_type)},
-	{"COB_LS_FIXED", "ls_fixed", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_ls_fixed)},
-	{"STRIP_TRAILING_SPACES", "strip_trailing_spaces", 		NULL, 	NULL, GRP_HIDE, ENV_BOOL | ENV_NOT, SETPOS (cob_ls_fixed)},
-	{"COB_LS_NULLS", "ls_nulls", 		"0", 	NULL, GRP_FILE, ENV_BOOL, SETPOS (cob_ls_nulls)},
-	{"COB_SORT_CHUNK", "sort_chunk", 		"256K", 	NULL, GRP_FILE, ENV_SIZE, SETPOS (cob_sort_chunk), (128 * 1024), (16 * 1024 * 1024)},
-	{"COB_SORT_MEMORY", "sort_memory", 	"128M", 	NULL, GRP_FILE, ENV_SIZE, SETPOS (cob_sort_memory), (1024*1024), 4294967294 /* max. guaranteed - 1 */},
-	{"COB_SYNC", "sync", 			"0", 	syncopts, GRP_FILE, ENV_BOOL, SETPOS (cob_do_sync)},
+	{"COB_FILE_PATH","file_path",		NULL,	NULL,GRP_FILE,ENV_PATH,SETPOS(cob_file_path)},
+	{"COB_LIBRARY_PATH","library_path",	NULL,	NULL,GRP_CALL,ENV_PATH,SETPOS(cob_library_path)}, /* default value set in cob_init_call() */
+	{"COB_MF_FILES","mf_files",		"false",NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_mf_files)},
+	{"COB_FIXREL_FORMAT","fixrel_format",	fixrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_fixrel_type)},
+	{"COB_VARREL_FORMAT","varrel_format",	varrel_dflt,relopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varrel_type)},
+	{"COB_VARSEQ_FORMAT","varseq_format",	varseq_dflt,varseqopts,GRP_FILE,ENV_INT|ENV_ENUM,SETPOS(cob_varseq_type)},
+	{"COB_LS_FIXED","ls_fixed",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_fixed)},
+	{"STRIP_TRAILING_SPACES","strip_trailing_spaces",		NULL,	NULL,GRP_HIDE,ENV_BOOL|ENV_NOT,SETPOS(cob_ls_fixed)},
+	{"COB_LS_NULLS","ls_nulls",		"0",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_nulls)},
+	{"COB_LS_VALIDATE","ls_validate",	"true",	NULL,GRP_FILE,ENV_BOOL,SETPOS(cob_ls_validate)},
+	{"COB_GC_FILES","gc_files",		"false",NULL,GRP_HIDE,ENV_BOOL,SETPOS(cob_gc_files)},
+	{"COB_RETRY_TIMES","retry_times",	"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_times)},
+	{"COB_RETRY_SECONDS","retry_seconds",	"0",NULL,GRP_FILE,ENV_INT,SETPOS(cob_retry_seconds)},
+	{"COB_SORT_CHUNK","sort_chunk",		"256K",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_chunk),(128 * 1024),(16 * 1024 * 1024)},
+	{"COB_SORT_MEMORY","sort_memory",	"128M",	NULL,GRP_FILE,ENV_SIZE,SETPOS(cob_sort_memory),(1024*1024),4294967294 /* max. guaranteed - 1 */},
+	{"COB_SYNC","sync",			"false",syncopts,GRP_FILE,ENV_BOOL,SETPOS(cob_do_sync)},
 #ifdef  WITH_DB
 	{"DB_HOME", "db_home", 			NULL, 	NULL, GRP_FILE, ENV_FILE, SETPOS (bdb_home)},
 #endif
@@ -4284,6 +4291,32 @@ cob_free_alloc (unsigned char **ptr1, unsigned char *ptr2)
 		cob_set_exception (COB_EC_STORAGE_NOT_ALLOC);
 		return;
 	}
+}
+
+/*
+ * Sleep for given number of milliseconds, rounded up if needed
+ */
+void
+cob_sys_sleep_msec (unsigned int msecs)
+{
+#if	defined(HAVE_NANO_SLEEP)
+	struct timespec	tsec;
+#endif
+
+	if (msecs > 0) {
+#ifdef	_WIN32
+		Sleep (msecs);
+#elif	defined(__370__) || defined(__OS400__)
+		sleep ((msecs+1000-1)/1000);
+#elif	defined(HAVE_NANO_SLEEP)
+		tsec.tv_sec = msecs / 1000;
+		tsec.tv_nsec = (msecs % 1000) * 1000000;
+		nanosleep (&tsec, NULL);
+#else
+		sleep ((msecs+1000-1)/1000);
+#endif
+	}
+	return;
 }
 
 char *

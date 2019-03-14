@@ -4817,7 +4817,7 @@ _lock_with:
   }
 | with_rollback
   {
-	current_file->lock_mode |= COB_LOCK_MULTIPLE;
+	current_file->lock_mode |= (COB_LOCK_ROLLBACK|COB_LOCK_MULTIPLE);
   }
 ;
 
@@ -5072,9 +5072,9 @@ sharing_clause:
 ;
 
 sharing_option:
-  ALL _other			{ $$ = NULL; }
-| NO _other			{ $$ = cb_int (COB_LOCK_OPEN_EXCLUSIVE); }
-| READ ONLY			{ $$ = NULL; }
+  ALL _other			{ $$ = cb_int (COB_SHARE_ALL_OTHER); }
+| NO _other			{ $$ = cb_int (COB_SHARE_NO_OTHER); }
+| READ ONLY			{ $$ = cb_int (COB_SHARE_READ_ONLY); }
 ;
 
 /* I-O-CONTROL paragraph */
@@ -12767,6 +12767,8 @@ open_file_entry:
   {
 	cb_tree l;
 	cb_tree x;
+	cb_tree retry;
+	int	retry_times, retry_seconds, retry_forever;
 
 	if (($1 && $3) || ($1 && $6) || ($3 && $6)) {
 		cb_error_x (CB_TREE (current_statement),
@@ -12779,10 +12781,16 @@ open_file_entry:
 	} else {
 		x = $1;
 	}
+	cb_tree retry;
+	int	retry_times, retry_seconds, retry_forever;
 
 	for (l = $5; l; l = CB_CHAIN (l)) {
 		if (CB_VALID_TREE (CB_VALUE (l))) {
 			begin_implicit_statement ();
+			current_statement->retry = retry;
+			current_statement->flag_retry_times = retry_times;
+			current_statement->flag_retry_seconds = retry_seconds;
+			current_statement->flag_retry_forever = retry_forever;
 			cb_emit_open (CB_VALUE (l), $2, x);
 		}
 	}
@@ -13196,7 +13204,13 @@ _lock_phrases:
 
 ignoring_lock:
   IGNORING LOCK
+  {
+	current_statement->flag_ignore_lock = 1;
+  }
 | _with IGNORE LOCK
+  {
+	current_statement->flag_ignore_lock = 1;
+  }
 ;
 
 advancing_lock_or_retry:
@@ -13223,8 +13237,20 @@ retry_phrase:
 retry_options:
   /* HACK: added _for to fix shift/reduce conflict. */
   RETRY _for exp TIMES
+  {
+	current_statement->retry = $3;
+	current_statement->flag_retry_times = 1;
+  }
 | RETRY _for exp SECONDS
+  {
+	current_statement->retry = $3;
+	current_statement->flag_retry_seconds = 1;
+  }
 | RETRY FOREVER
+  {
+	current_statement->retry = NULL;
+	current_statement->flag_retry_forever = 1;
+  }
 ;
 
 _extended_with_lock:
@@ -13239,11 +13265,10 @@ extended_with_lock:
   }
 | _with KEPT LOCK
   {
-   $$ = cb_int5;
+	$$ = cb_int5;
   }
 | _with WAIT
   {
-	/* TO-DO: Merge with RETRY phrase */
 	$$ = cb_int4;
   }
 ;

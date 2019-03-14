@@ -1054,7 +1054,7 @@ cob_cache_file (cob_file *f)
 }
 
 /*
- * Set file format baed on defaults, runtime.cfg and IO_filename options
+ * Set file format based on defaults, runtime.cfg and IO_filename options
  */
 
 static void
@@ -1114,6 +1114,10 @@ set_file_format(cob_file *f)
 	 * IO_filename was found
 	*/
 	if(file_open_io_env != NULL) {		/* Special options for just this file */
+		f->dflt_share = 0;
+		f->dflt_retry = 0;
+		f->dflt_times = 0;
+		f->dflt_seconds = 0;
 		for(i=0; file_open_io_env[i] != 0; ) {
 			while(isspace(file_open_io_env[i])	/* Skip option separators */
 			|| file_open_io_env[i] == ','
@@ -1163,6 +1167,44 @@ set_file_format(cob_file *f)
 					f->file_features |= COB_FILE_SYNC;
 				else
 					f->file_features &= ~COB_FILE_SYNC;
+				continue;
+			}
+			if(strcasecmp(option,"retry_times") == 0) {
+				f->dflt_times = atoi(value);
+				f->dflt_retry |= COB_RETRY_TIMES;
+				continue;
+			}
+			if(strcasecmp(option,"retry_seconds") == 0) {
+				f->dflt_seconds = atoi(value);
+				f->dflt_retry |= COB_RETRY_SECONDS;
+				continue;
+			}
+			if(strcasecmp(option,"retry_forever") == 0) {
+				f->dflt_retry = COB_RETRY_FOREVER;
+				continue;
+			}
+			if(strcasecmp(option,"retry_never") == 0) {
+				f->dflt_retry = COB_RETRY_NEVER;
+				continue;
+			}
+			if(strcasecmp(option,"ignore_lock") == 0) {
+				f->dflt_retry |= COB_IGNORE_LOCK;
+				continue;
+			}
+			if(strcasecmp(option,"advancing_lock") == 0) {
+				f->dflt_retry |= COB_ADVANCING_LOCK;
+				continue;
+			}
+			if(strcasecmp(option,"share_all") == 0) {
+				f->dflt_share = COB_SHARE_ALL_OTHER;
+				continue;
+			}
+			if(strcasecmp(option,"share_read") == 0) {
+				f->dflt_share = COB_SHARE_READ_ONLY;
+				continue;
+			}
+			if(strcasecmp(option,"share_no") == 0) {
+				f->dflt_share = COB_SHARE_NO_OTHER;
 				continue;
 			}
 			if (f->organization == COB_ORG_LINE_SEQUENTIAL) {
@@ -1280,6 +1322,14 @@ set_file_format(cob_file *f)
 				}
 			}
 		}
+		/* IF SHARE or RETRY given, then override application choices */
+		if(f->dflt_share != 0)
+			f->share_mode = f->dflt_share;
+		if(f->dflt_retry != 0) {
+			f->retry_mode = f->dflt_retry;
+			f->retry_times = f->dflt_times;
+			f->retry_seconds = f->dflt_seconds;
+		}
 	}
 
 	f->record_off = -1;
@@ -1338,6 +1388,428 @@ set_file_format(cob_file *f)
 				f->record_slot = f->record_max + 1;
 			}
 		} 
+	}
+}
+
+#ifdef	HAVE_FCNTL
+#if defined(HAVE_SIGACTION) && defined(SIGALRM)
+static void catch_alarm(int sig) { }
+#endif
+
+/*
+ * Issue File/Record lock
+ */
+static int
+lock_record(
+	cob_file *f, 
+	unsigned int recnum, 
+	int 	forwrite, 
+	int 	*errsts)
+{
+#if defined(HAVE_SIGACTION) && defined(SIGALRM)
+	struct sigaction sigact, prvact;
+	int		wait_time;
+#endif
+	int		lock_type, retry, interval;
+	unsigned long	pos;
+	unsigned int	rcsz;
+	struct flock	lck;
+
+	lock_type = forwrite ? F_WRLCK : F_RDLCK;
+	retry = interval = 0;
+	if (f->retry_mode == 0) {
+		/* Nothing else to do */
+	} else 
+	if ((f->retry_mode & COB_RETRY_FOREVER)) {
+		retry = -1;
+	} else
+	if ((f->retry_mode & COB_RETRY_NEVER)) {
+		retry = 0;
+	} else
+	if ((f->retry_mode & COB_IGNORE_LOCK)) {
+		retry = 0;
+	} else
+	if ((f->retry_mode & COB_ADVANCING_LOCK)) {
+		retry = 0;
+	} else
+	if ((f->retry_mode & COB_RETRY_SECONDS)) {
+		retry = f->retry_times>0?f->retry_times:
+			(cobsetptr->cob_retry_times>0?cobsetptr->cob_retry_times:1);
+		interval = f->retry_seconds>0?f->retry_seconds:
+			(cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1);
+	} else
+	if ((f->retry_mode & COB_RETRY_TIMES)) {
+		retry = f->retry_times>0?f->retry_times:
+			(cobsetptr->cob_retry_times>0?cobsetptr->cob_retry_times:1);
+		interval = f->retry_seconds>0?f->retry_seconds:
+			(cobsetptr->cob_retry_seconds>0?cobsetptr->cob_retry_seconds:1);
+	}
+	if(recnum == 0) {			/* Lock entire file */
+		pos = 0;
+		rcsz = 0;
+		f->flag_file_lock = 0;
+	} else {
+		rcsz = (unsigned int)f->record_max;
+		if(rcsz <= 0)
+			rcsz = 2;
+		if(f->record_slot <= 0)
+			f->record_slot = rcsz + 1;
+		pos = (unsigned long)(f->file_header+((recnum-1)*f->record_slot));
+	}
+	memset(&lck,0,sizeof(struct flock));
+	lck.l_type = lock_type;
+	lck.l_whence = SEEK_SET;
+	lck.l_start = pos;
+	lck.l_len = rcsz;
+	if (fcntl (f->fd, F_SETLK, &lck) != -1) {
+		*errsts = 0;
+		if(recnum == 0
+		&& forwrite) 			/* File locked for Exclusive use */
+			f->flag_file_lock = 1;	
+		return 1;			/* Got the lock so all is good */
+	}
+	*errsts = errno;
+	if(retry == 0)	{			/* No RETRY, so return with no lock */
+		if(errno == EAGAIN) {
+			lck.l_type = lock_type;
+			lck.l_whence = SEEK_SET;
+			lck.l_start = pos;
+			lck.l_len = rcsz;
+			if (fcntl (f->fd, F_GETLK, &lck) == -1) {
+				if(lck.l_pid == cob_sys_getpid()) {	/* Is locked by me */
+					return 1;
+				}
+			}
+		}
+		return 0;
+	}
+	if(interval <= 0)
+		interval = 5;
+
+#if defined(HAVE_SIGACTION) && defined(SIGALRM)
+	if(retry > 0) {				/* Negative means wait forever */
+		memset(&prvact,0,sizeof(sigact));
+		prvact.sa_handler = SIG_DFL;
+		memset(&sigact,0,sizeof(sigact));
+		sigact.sa_handler = catch_alarm;
+		sigaction(SIGALRM, &sigact, &prvact);
+		wait_time = retry * interval;
+		alarm(wait_time);
+	}
+	if (fcntl (f->fd, F_SETLKW, &lck) != -1) {
+		if(retry > 0) {
+			sigaction(SIGALRM, &prvact, NULL);
+			alarm(0);
+		}
+		*errsts = 0;
+		if(recnum == 0
+		&& forwrite) 			/* File locked for Exclusive use */
+			f->flag_file_lock = 1;	
+		return 1;			/* Got the lock so all is good */
+	}
+	*errsts = errno;
+	if(retry > 0) {
+		sigaction(SIGALRM, &prvact, NULL);
+		alarm(0);
+		if(*errsts == EINTR)		/* Timed out, so return EAGAIN */
+			*errsts = EAGAIN;
+	}
+	return 0;				/* Record is not locked! */
+#else
+	if(retry > 0) {
+		retry = retry * 4;
+		interval = (interval * 1000) / 4;	
+		while(retry-- > 0) {
+			lck.l_type = lock_type;
+			lck.l_whence = SEEK_SET;
+			lck.l_start = pos;
+			lck.l_len = rcsz;
+			*errsts = 0;
+			if (fcntl (f->fd, F_SETLK, &lck) != -1) {
+				if(recnum == 0
+				&& forwrite) 	/* File locked for Exclusive use */
+					f->flag_file_lock = 1;	
+				return 1;	/* Got the lock so all is good */
+			}
+			*errsts = errno;
+			cob_sys_sleep_msec(interval);
+		}
+	} else {
+		while(1) {
+			lck.l_type = lock_type;
+			lck.l_whence = SEEK_SET;
+			lck.l_start = pos;
+			lck.l_len = rcsz;
+			*errsts = 0;
+			if (fcntl (f->fd, F_SETLK, &lck) != -1) {
+				if(recnum == 0
+				&& forwrite) 	/* File locked for Exclusive use */
+					f->flag_file_lock = 1;	
+				return 1;	/* Got the lock so all is good */
+			}
+			*errsts = errno;
+			cob_sys_sleep_msec(250);
+		}
+	}
+	return 0;				/* Record is not locked! */
+#endif
+}
+
+/*
+ * Un-Lock 'recnum' with system
+ */
+static int
+unlock_record(cob_file *f, unsigned int recnum)
+{
+	unsigned long pos;
+	unsigned int rcsz;
+	struct flock lck;
+
+	if(recnum == 0) {			/* Un-Lock entire file */
+		pos = 0;
+		rcsz = 0;
+		f->flag_file_lock = 0;
+	} else {
+		rcsz = (unsigned int)f->record_max;
+		if(rcsz <= 0)
+			rcsz = 2;
+		if(f->record_slot <= 0)
+			f->record_slot = rcsz + 1;
+		pos = (unsigned long)(f->file_header+((recnum-1)*f->record_slot));
+	}
+	lck.l_type = F_UNLCK;
+	lck.l_whence = SEEK_SET;
+	lck.l_start = pos;
+	lck.l_len = rcsz;
+	errno = 0;
+	if (fcntl (f->fd, F_SETLK, &lck) != -1) {
+		return 1;					/* Released the lock so all is good */
+	}
+	return 0;						/* Record is not locked! */
+}
+
+#if 0
+/*
+ * Check if 'recnum' is locked by me 
+ */
+static int					/* 1 if locked, else 0 */
+lock_check(cob_file *f, unsigned int recnum)
+{
+	unsigned long pos;
+	unsigned int rcsz;
+	struct flock lck;
+
+	if(recnum == 0) {			/* entire file */
+		pos = 0;
+		rcsz = 0;
+	} else {
+		rcsz = (unsigned int)f->record_max;
+		if(rcsz <= 0)
+			rcsz = 2;
+		if(f->record_slot <= 0)
+			f->record_slot = rcsz + 1;
+		pos = (unsigned long)(f->file_header+((recnum-1)*f->record_slot));
+	}
+	lck.l_type = F_WRLCK;
+	lck.l_whence = SEEK_SET;
+	lck.l_start = pos;
+	lck.l_len = rcsz;
+	lck.l_pid = 0;
+	errno = 0;
+	if (fcntl (f->fd, F_GETLK, &lck) == -1) {
+		if(lck.l_pid == cob_sys_getpid()) {	/* Is locked by me */
+			return 1;
+		}
+		return 0;				/* Record is locked by other! */
+	}
+	if(lck.l_type == F_UNLCK) {
+		return 0;
+	} 
+	if(lck.l_type == F_RDLCK) {
+		if(lck.l_pid == cob_sys_getpid()) {	/* Is locked by me */
+			return 1;
+		} else {
+			return 0;
+		}
+	} 
+	if(lck.l_type == F_WRLCK) {
+		if(lck.l_pid == cob_sys_getpid()) {	/* Is locked by me */
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	return 0;					/* Record is not locked! */
+}
+#endif
+
+#else
+	/* System does not even have 'fcntl' so no Record/File lock is used */
+static int
+lock_record(
+	cob_file *f, 
+	unsigned int recnum, 
+	int 	forwrite, 
+	int 	*errsts)
+{
+	COB_UNUSED (f);
+	COB_UNUSED (recnum);
+	COB_UNUSED (forwrite);
+	*errsts = 0;
+	return 1;
+}
+
+static int
+unlock_record(cob_file *f, unsigned int recnum) 
+{ 
+	COB_UNUSED (f);
+	COB_UNUSED (recnum);
+	return 1;
+}
+
+#if 0
+static int	
+lock_check(cob_file *f, unsigned int recnum)
+{
+	COB_UNUSED (f);
+	COB_UNUSED (recnum);
+	return 1;
+}
+#endif
+#endif
+
+/*
+ * Determine if file should be locked 
+ */
+static int
+set_file_lock(cob_file *f, const char *filename, int open_mode) 
+{
+	int	lock_mode, ret;
+
+	f->flag_record_lock = 0;
+	f->flag_file_lock = 0;
+	if (memcmp (filename, "/dev/", (size_t)5) == 0) 	/* Do not lock Devices */
+		return 0;
+
+	if ((f->share_mode & COB_SHARE_ALL_OTHER)
+	 && ((open_mode == COB_OPEN_INPUT) || (open_mode == COB_OPEN_I_O))) {/* File is SHARE ALL */
+		f->flag_record_lock = 1;
+		return 0;
+	} 
+
+	/* Lock the file */
+	if ((f->share_mode & COB_SHARE_ALL_OTHER)) {
+		if (open_mode == COB_OPEN_OUTPUT)
+			lock_mode = 1;
+		else
+			lock_mode = 0;
+	} else if ((open_mode != COB_OPEN_INPUT)
+		|| (f->share_mode & COB_SHARE_NO_OTHER)
+		|| (f->lock_mode & COB_FILE_EXCLUSIVE) ) {
+		lock_mode = 1;
+	} else {
+		lock_mode = 0;
+	}
+
+	lock_record (f, 0, lock_mode, &ret);
+	if (ret != 0) {
+		if(f->file)
+			fclose(f->file);
+		else
+			close (f->fd);
+		f->fd = -1;
+		f->file = NULL;
+		f->open_mode = COB_OPEN_CLOSED;
+		switch (ret) {
+		case EACCES:
+		case EAGAIN:
+		case EDEADLK:
+			return COB_STATUS_61_FILE_SHARING;
+		default:
+			return COB_STATUS_30_PERMANENT_ERROR;
+		}
+	}
+	if (!f->flag_file_lock) {
+		if ((open_mode != COB_OPEN_INPUT)
+		 && (f->share_mode & COB_SHARE_ALL_OTHER)) {
+			f->flag_record_lock = 1;
+		}
+	}
+	return 0;
+}
+
+/*
+ * Determine if current record should be locked and if previous lock to be released
+ */
+static void
+set_lock_opts(cob_file *f, unsigned int read_opts) 
+{
+	f->flag_lock_mode = 0;		/* READ lock */
+	if (f->retry_mode == 0 
+	 && f->dflt_retry != 0) {	/* Use IO_filename RETRY values */
+		f->retry_mode = f->dflt_retry;
+		f->retry_times = f->dflt_times;
+		f->retry_seconds = f->dflt_seconds;
+	}
+	if (f->flag_file_lock) {	/* File is EXCLUSIVE */
+		f->flag_lock_rec = 0;
+		f->flag_lock_rls = 0;
+		return;
+	}
+	if (!f->lock_mode) {
+		if (f->open_mode != COB_OPEN_INPUT) {
+			f->flag_lock_rec = 0;
+			f->flag_lock_rls = 0;
+		} else {
+			f->flag_lock_rec = 1;
+			f->flag_lock_rls = 1;
+		}
+	} else if ((f->lock_mode & COB_FILE_EXCLUSIVE)) {
+		f->flag_lock_rec = 0;
+		f->flag_lock_rls = 0;
+	} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) 
+		&& (f->open_mode != COB_OPEN_INPUT)) {
+		f->flag_lock_rec = 1;
+		if ((f->lock_mode & COB_LOCK_MULTIPLE)) {
+			f->flag_lock_rls = 0;
+		} else {
+			f->flag_lock_rls = 1;
+		}
+	} else {
+		f->flag_lock_rec = 1;
+		if ((f->lock_mode & COB_LOCK_MULTIPLE)) {
+			f->flag_lock_rls = 0;
+		} else {
+			f->flag_lock_rls = 1;
+		}
+	}
+
+	if ((read_opts & COB_READ_IGNORE_LOCK)
+	 || (f->retry_mode & COB_IGNORE_LOCK)) {
+		f->flag_lock_rec = 0;
+		f->flag_lock_rls = 0;
+		f->flag_lock_mode = 0;
+	} else
+	if ( (read_opts & COB_READ_LOCK) ) {
+		f->flag_lock_rec = 1;
+		f->flag_lock_mode = 1;
+	} else
+	if ( (read_opts & COB_READ_WAIT_LOCK) ) {
+		f->flag_lock_rec = 1;
+		f->flag_lock_mode = 1;
+	} else
+	if ( (read_opts & COB_READ_NO_LOCK) ) {
+		f->flag_lock_rec = 0;
+		f->flag_lock_rls = 0;
+	} else
+	if ( (read_opts & COB_READ_KEPT_LOCK) ) {
+		f->flag_lock_rec = 1;
+		f->flag_lock_rls = 0;
+	}
+
+	if (f->flag_lock_rls && f->prev_lock) {
+		unlock_record (f, f->prev_lock);
+		f->prev_lock = 0;
 	}
 }
 
@@ -1697,11 +2169,12 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	int		fdmode;
 	int		fperms;
 	unsigned int	nonexistent;
+	int		ret;
 
 	/* Note filename points to file_open_name */
 	/* cob_chk_file_mapping manipulates file_open_name directly */
 
-	COB_UNUSED (sharing);
+	f->share_mode = sharing;
 
 	cob_chk_file_mapping ();
 
@@ -1721,11 +2194,10 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	&&  (mode == COB_OPEN_INPUT || mode == COB_OPEN_I_O || mode == COB_OPEN_EXTEND) ) {
 		if(f->file_format == COB_FILE_IS_MF
 		&& f->record_min == f->record_max) {
-			/* Fixed size records so Not file header to check */
+			/* Fixed size records so No file header to check */
 		} else
 		if(f->file_format == COB_FILE_IS_MF
 		&& !check_mf_format(f, filename)) {
-			DEBUG_LOG("io",("File %s is not in MF format\n",f->select_name));
 			f->file_format = COB_FILE_IS_GCVS0;	/* Try GNU Cobol format */
 			f->record_prefix = 4;
 			f->file_header = 0;
@@ -1733,7 +2205,6 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 		} else
 		if(f->file_format != COB_FILE_IS_MF
 		&& check_mf_format(f, filename)) {
-			DEBUG_LOG("io",("File %s detected to be MF format\n",f->select_name));
 			f->file_format = COB_FILE_IS_MF;	/* Use Micro Focus format */
 		}
 	}
@@ -1741,9 +2212,16 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 	fdmode = O_BINARY;
 	fperms = 0;
 	f->fd = -1;
+	f->flag_file_lock = 0;
 	switch (mode) {
 	case COB_OPEN_INPUT:
-		fdmode |= O_RDONLY;
+		if ((f->share_mode & COB_SHARE_NO_OTHER)
+		 || (f->lock_mode & COB_FILE_EXCLUSIVE) ) {
+			/* fcntl with WRLCK requires file to be opened RDWR */
+			fdmode |= O_RDWR;
+		} else {
+			fdmode |= O_RDONLY;
+		}
 		break;
 	case COB_OPEN_OUTPUT:
 		nonexistent = 0;
@@ -1783,9 +2261,9 @@ cob_fd_file_open (cob_file *f, char *filename, const int mode, const int sharing
 
 	errno = 0;
 	fd = open (filename, fdmode, fperms);
-	f->fd = fd;
+	ret = errno;
 
-	switch (errno) {
+	switch (ret) {
 	case 0:
 		if (mode == COB_OPEN_EXTEND && fd >= 0) {
 			lseek (fd, (off_t) 0, SEEK_END);
@@ -1881,6 +2359,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 #ifdef	WITH_SEQRA_EXTFH
 	int		ret;
 
+	f->share_mode = sharing;
 	ret = extfh_seqra_locate (f, filename);
 	switch (ret) {
 	case COB_NOT_CONFIGURED:
@@ -1920,6 +2399,7 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	cob_linage		*lingptr;
 	unsigned int		nonexistent;
 
+	f->share_mode = sharing;
 	if (f->organization != COB_ORG_LINE_SEQUENTIAL) {
 		return cob_fd_file_open (f, filename, mode, sharing);
 	}
@@ -1940,6 +2420,10 @@ cob_file_open (cob_file *f, char *filename, const int mode, const int sharing)
 	/* Open the file */
 	switch (mode) {
 	case COB_OPEN_INPUT:
+		if ((f->share_mode & COB_SHARE_NO_OTHER)
+		 || (f->lock_mode & COB_FILE_EXCLUSIVE) ) {
+			fmode = "r+";
+		} else 
 		if (!cobsetptr->cob_unix_lf) {
 			fmode = "r";
 		} else {
@@ -2098,7 +2582,6 @@ cob_file_close (cob_file *f, const int opt)
 				COB_CHECKED_WRITE (f->fd, "\n", 1);
 			}
 		}
-#ifdef	HAVE_FCNTL
 		/* Unlock the file */
 		if (f->fd >= 0) {
 			struct flock lock;
@@ -2954,7 +3437,7 @@ static int
 relative_read (cob_file *f, cob_field *k, const int read_opts)
 {
 	off_t	off;
-	int	relnum;
+	int	relnum,errsts;
 	struct stat	st;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
@@ -2963,8 +3446,6 @@ relative_read (cob_file *f, cob_field *k, const int read_opts)
 	if (extfh_ret != COB_NOT_CONFIGURED) {
 		return extfh_ret;
 	}
-#else
-	COB_UNUSED (read_opts);
 #endif
 
 	if (unlikely (f->flag_operation != 0)) {
@@ -2982,6 +3463,20 @@ relative_read (cob_file *f, cob_field *k, const int read_opts)
 	}
 	if(off >= st.st_size)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
+	set_lock_opts (f, read_opts);
+	if(f->flag_lock_rec) {
+		lock_record (f, relnum+1, f->flag_lock_mode, &errsts);
+		if (errsts != 0) {
+			switch (errsts) {
+			case EACCES:
+			case EAGAIN:
+			case EDEADLK:
+				return COB_STATUS_61_FILE_SHARING;
+			default:
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		}
+	}
 	return relative_read_off(f, off);
 }
 
@@ -2992,6 +3487,7 @@ relative_read_next (cob_file *f, const int read_opts)
 	int		sts;
 	cob_u32_t	moveback;
 	struct stat	st;
+	int		relnum,errsts;
 
 #ifdef	WITH_SEQRA_EXTFH
 	int		extfh_ret;
@@ -3053,6 +3549,24 @@ relative_read_next (cob_file *f, const int read_opts)
 	for (;;) {
 		if(st.st_size <= curroff)
 			break;
+		set_lock_opts (f, read_opts);
+		if(f->flag_lock_rec) {
+			relnum = ((curroff - f->file_header) / f->record_slot) + 1;
+			lock_record (f, relnum, f->flag_lock_mode, &errsts);
+			if (errsts != 0) {
+				switch (errsts) {
+				case EACCES:
+				case EAGAIN:
+				case EDEADLK:
+					if ((f->retry_mode & COB_ADVANCING_LOCK)
+					 || (read_opts & COB_READ_ADVANCING_LOCK))
+						goto next_record;
+					return COB_STATUS_61_FILE_SHARING;
+				default:
+					return COB_STATUS_30_PERMANENT_ERROR;
+				}
+			}
+		}
 		sts = relative_read_off (f, curroff);
 
 		if (sts == COB_STATUS_00_SUCCESS) {
@@ -3064,6 +3578,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		||  sts == COB_STATUS_14_OUT_OF_KEY_RANGE) {
 			return sts;
 		}
+next_record:
 		if (moveback) {
 			if (curroff > (f->record_slot + f->file_header)) {
 				curroff -= (f->record_slot * 2);
@@ -3205,7 +3720,7 @@ relative_write (cob_file *f, const int opt)
 	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with NULs */
+	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with SPACES */
 
 	if (f->file_format == COB_FILE_IS_MF) {
 		if ((f->file_features & COB_FILE_LS_CRLF)) {	/* Windows format */
@@ -3230,7 +3745,7 @@ relative_rewrite (cob_file *f, const int opt)
 {
 	off_t	off;
 	size_t	relsize;
-	int	relnum,isdeleted=0;
+	int	relnum,isdeleted=0,errsts;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -3238,13 +3753,12 @@ relative_rewrite (cob_file *f, const int opt)
 	if (extfh_ret != COB_NOT_CONFIGURED) {
 		return extfh_ret;
 	}
-#else
-	COB_UNUSED (opt);
 #endif
 
 	f->flag_operation = 1;
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		off = (off_t)f->record_off;
+		relnum = (off - f->file_header) / f->record_slot;
 	} else {
 		relnum = cob_get_int (f->keys[0].field) - 1;
 		if (relnum < 0) {
@@ -3259,6 +3773,7 @@ relative_rewrite (cob_file *f, const int opt)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 
+	set_lock_opts (f, opt);
 	if (f->variable_record) {
 		f->record->size = (size_t)cob_get_int (f->variable_record);
 		if (unlikely(f->record->size > f->record_max)) {
@@ -3269,10 +3784,23 @@ relative_rewrite (cob_file *f, const int opt)
 	if (relsize < 0) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
+	if (f->flag_record_lock) {
+		lock_record (f, relnum+1, 1, &errsts);
+		if (errsts != 0) {
+			switch (errsts) {
+			case EACCES:
+			case EAGAIN:
+			case EDEADLK:
+				return COB_STATUS_61_FILE_SHARING;
+			default:
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		}
+	}
 	if (write (f->fd, f->record->data, f->record->size) != (int)f->record->size) {
 		return COB_STATUS_30_PERMANENT_ERROR;
 	}
-	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with NULs */
+	relative_padout(f, ' ', f->record_max - f->record->size); /* Pad out with SPACES */
 
 	if (f->file_format == COB_FILE_IS_MF) {
 		if(f->record_min == f->record_max) {	/* Fixed size */
@@ -3284,6 +3812,17 @@ relative_rewrite (cob_file *f, const int opt)
 	if (f->access_mode == COB_ACCESS_SEQUENTIAL) {
 		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Save current file position */
 	}
+	if (f->flag_record_lock) {
+		if ((f->lock_mode & COB_LOCK_MULTIPLE)) {
+			if ((opt & COB_WRITE_NO_LOCK)) {
+				unlock_record (f, relnum+1);
+			}
+		} else {
+			if (!(opt & COB_WRITE_LOCK)) {
+				unlock_record (f, relnum+1);
+			}
+		}
+	}
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -3293,7 +3832,7 @@ relative_delete (cob_file *f)
 	off_t	off;
 	size_t	relsize;
 	unsigned char rechdr[8];
-	int	relnum,isdeleted;
+	int	relnum,isdeleted,errsts;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
 
@@ -3316,10 +3855,24 @@ relative_delete (cob_file *f)
 		return COB_STATUS_23_KEY_NOT_EXISTS;
 	}
 
+	set_lock_opts (f, 0);
 	if (lseek (f->fd, off, SEEK_SET) == (off_t)-1 ) {
 		return -1;
 	}
 	f->record_off = off;
+	if (f->flag_record_lock) {
+		lock_record (f, relnum+1, 1, &errsts);
+		if (errsts != 0) {
+			switch (errsts) {
+			case EACCES:
+			case EAGAIN:
+			case EDEADLK:
+				return COB_STATUS_61_FILE_SHARING;
+			default:
+				return COB_STATUS_30_PERMANENT_ERROR;
+			}
+		}
+	}
 	if (f->record_prefix > 0) {
 		memset(rechdr,0,sizeof(rechdr));
 		switch (f->file_format) {
@@ -3367,6 +3920,9 @@ relative_delete (cob_file *f)
 		write (f->fd, rechdr, 1);	/* 0x00 means deleted record */
 	}
 	lseek (f->fd, (off_t) f->record_off, SEEK_SET);
+	if (f->flag_record_lock) {
+		unlock_record (f, relnum+1);
+	}
 	return COB_STATUS_00_SUCCESS;
 }
 
@@ -3574,7 +4130,7 @@ join_environment (void)
 }
 
 static int
-lock_record (cob_file *f, const char *key, const unsigned int keylen)
+lock_bdb_record (cob_file *f, const char *key, const unsigned int keylen)
 {
 	struct indexed_file	*p;
 	size_t			len;
@@ -3635,7 +4191,7 @@ test_record_lock (cob_file *f, const char *key, const unsigned int keylen)
 }
 
 static int
-unlock_record (cob_file *f)
+unlock_bdb_record (cob_file *f)
 {
 	struct indexed_file	*p;
 	int			ret;
@@ -3794,7 +4350,7 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 	if (opt & COB_WRITE_LOCK) {
 		if (bdb_env != NULL) {
 			bdb_setkey (f, 0);
-			if (lock_record (f, p->key.data, p->key.size)) {
+			if (lock_bdb_record (f, p->key.data, p->key.size)) {
 				if (close_cursor) {
 					p->cursor[0]->c_close (p->cursor[0]);
 					p->cursor[0] = NULL;
@@ -3916,7 +4472,7 @@ indexed_start_internal (cob_file *f, const int cond, cob_field *key,
 			}
 		}
 		if (read_opts & COB_READ_LOCK) {
-			ret = lock_record (f, p->key.data, p->key.size);
+			ret = lock_bdb_record (f, p->key.data, p->key.size);
 			if (ret) {
 				p->cursor[p->key_index]->c_close (p->cursor[p->key_index]);
 				p->cursor[p->key_index] = NULL;
@@ -3976,7 +4532,7 @@ indexed_delete_internal (cob_file *f, const int rewrite)
 		close_cursor = 1;
 	}
 	if (bdb_env != NULL) {
-		unlock_record (f);
+		unlock_bdb_record (f);
 	}
 	/* Find the primary key */
 	if (f->access_mode != COB_ACCESS_SEQUENTIAL) {
@@ -4170,6 +4726,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 #ifdef	WITH_INDEX_EXTFH
 	int		ret;
 
+	f->share_mode = sharing;
 	ret = extfh_indexed_locate (f, filename);
 	switch (ret) {
 	case COB_NOT_CONFIGURED:
@@ -4216,7 +4773,7 @@ indexed_open (cob_file *f, char *filename, const int mode, const int sharing)
 	struct keydesc		kd;
 	struct dictinfo		di;		/* Defined in (c|d|vb)isam.h */
 
-	COB_UNUSED (sharing);
+	f->share_mode = sharing;
 
 	cob_chk_file_mapping ();
 
@@ -4454,7 +5011,7 @@ dobuild:
 	int			checkvalue;
 #endif
 
-	COB_UNUSED (sharing);
+	f->share_mode = sharing;
 	if (cobsetptr->bdb_home != NULL
 	 && bdb_env == NULL) {		/* Join BDB, on first OPEN of INDEXED file */
 		join_environment ();
@@ -4479,9 +5036,10 @@ dobuild:
 
 	p = cob_malloc (sizeof (struct indexed_file));
 	if (bdb_env != NULL) {
-		if (mode == COB_OPEN_OUTPUT || mode == COB_OPEN_EXTEND ||
-		    (f->lock_mode & COB_FILE_EXCLUSIVE) ||
-		    (mode == COB_OPEN_I_O && !f->lock_mode)) {
+		if (mode == COB_OPEN_OUTPUT 
+		 || mode == COB_OPEN_EXTEND 
+		 || (f->lock_mode & COB_FILE_EXCLUSIVE) 
+		 || (mode == COB_OPEN_I_O && !f->lock_mode)) {
 			lock_mode = DB_LOCK_WRITE;
 		} else {
 			lock_mode = DB_LOCK_READ;
@@ -4763,7 +5321,7 @@ indexed_close (cob_file *f, const int opt)
 	cob_free (p->filename);
 	cob_free (p->cursor);
 	if (bdb_env != NULL) {
-		unlock_record (f);
+		unlock_bdb_record (f);
 		bdb_env->lock_put (bdb_env, &p->bdb_file_lock);
 		bdb_env->lock_id_free (bdb_env, p->bdb_lock_id);
 	}
@@ -4985,14 +5543,14 @@ indexed_read (cob_file *f, cob_field *key, const int read_opts)
 	test_lock = 0;
 	bdb_opts = read_opts;
 	if (bdb_env != NULL) {
-		if (f->open_mode != COB_OPEN_I_O ||
-		    (f->lock_mode & COB_FILE_EXCLUSIVE)) {
+		if (f->open_mode != COB_OPEN_I_O 
+		|| (f->lock_mode & COB_FILE_EXCLUSIVE)) {
 			bdb_opts &= ~COB_READ_LOCK;
-		} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) &&
-			   !(bdb_opts & COB_READ_NO_LOCK)) {
+		} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) 
+			&& !(bdb_opts & COB_READ_NO_LOCK)) {
 			bdb_opts |= COB_READ_LOCK;
 		}
-		unlock_record (f);
+		unlock_bdb_record (f);
 		test_lock = 1;
 	} else {
 		bdb_opts &= ~COB_READ_LOCK;
@@ -5292,14 +5850,14 @@ indexed_read_next (cob_file *f, const int read_opts)
 
 	bdb_opts = read_opts;
 	if (bdb_env != NULL) {
-		if (f->open_mode != COB_OPEN_I_O ||
-		    (f->lock_mode & COB_FILE_EXCLUSIVE)) {
+		if (f->open_mode != COB_OPEN_I_O 
+		|| (f->lock_mode & COB_FILE_EXCLUSIVE)) {
 			bdb_opts &= ~COB_READ_LOCK;
-		} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) &&
-			   !(bdb_opts & COB_READ_NO_LOCK)) {
+		} else if ((f->lock_mode & COB_LOCK_AUTOMATIC) 
+			&& !(bdb_opts & COB_READ_NO_LOCK)) {
 			bdb_opts |= COB_READ_LOCK;
 		}
-		unlock_record (f);
+		unlock_bdb_record (f);
 	} else {
 		bdb_opts &= ~COB_READ_LOCK;
 	}
@@ -5377,7 +5935,7 @@ indexed_read_next (cob_file *f, const int read_opts)
 				}
 			}
 			if (bdb_opts & COB_READ_LOCK) {
-				ret = lock_record (f, p->key.data, p->key.size);
+				ret = lock_bdb_record (f, p->key.data, p->key.size);
 				if (ret) {
 					p->cursor[p->key_index]->c_close (p->cursor[p->key_index]);
 					p->cursor[p->key_index] = NULL;
@@ -5505,7 +6063,7 @@ indexed_read_next (cob_file *f, const int read_opts)
 				}
 			}
 			if (bdb_opts & COB_READ_LOCK) {
-				ret = lock_record (f, p->key.data, p->key.size);
+				ret = lock_bdb_record (f, p->key.data, p->key.size);
 				if (ret) {
 					p->cursor[p->key_index]->c_close (p->cursor[p->key_index]);
 					p->cursor[p->key_index] = NULL;
@@ -5606,7 +6164,7 @@ indexed_write (cob_file *f, const int opt)
 	}
 	p = f->file;
 	if (bdb_env != NULL) {
-		unlock_record (f);
+		unlock_bdb_record (f);
 	}
 
 	/* Check record key */
@@ -5828,7 +6386,7 @@ indexed_rewrite (cob_file *f, const int opt)
 	p->db[0]->cursor (p->db[0], NULL, &p->cursor[0], flags);
 	p->write_cursor_open = 1;
 	if (bdb_env != NULL) {
-		unlock_record (f);
+		unlock_bdb_record (f);
 	}
 
 	/* Check duplicate alternate keys */
@@ -5884,8 +6442,7 @@ cob_file_unlock (cob_file *f)
 			if (f->fd >= 0) {
 				fdcobsync (f->fd);
 			}
-#ifdef	HAVE_FCNTL
-			if (!(f->lock_mode & COB_FILE_EXCLUSIVE)) {
+			if (f->flag_file_lock) {
 				/* Unlock the file */
 				if (f->fd >= 0) {
 					struct flock	lock;
@@ -5897,7 +6454,6 @@ cob_file_unlock (cob_file *f)
 					fcntl (f->fd, F_SETLK, &lock);
 				}
 			}
-#endif
 
 #endif
 		} else {
@@ -6038,7 +6594,7 @@ cob_open (cob_file *f, const int mode, const int sharing, cob_field *fnstatus)
 	f->flag_first_read = 2;
 	f->flag_operation = 0;
 	f->lock_mode &= ~COB_LOCK_OPEN_EXCLUSIVE;
-	f->lock_mode |= sharing;
+	f->share_mode = sharing;
 	f->record_off = 0;
 
 	if (unlikely (COB_FILE_STDIN (f))) {
@@ -8149,8 +8705,8 @@ copy_file_to_fcd (cob_file *f, FCD3 *fcd)
 	fcd->openMode |= OPEN_NOT_OPEN;
 	STCOMPX2(fnlen, fcd->fnameLen);
 	STCOMPX2(0, fcd->refKey);
-	if(f->lock_mode == COB_LOCK_EXCLUSIVE
-	|| f->lock_mode == COB_LOCK_OPEN_EXCLUSIVE)
+	if((f->lock_mode & COB_LOCK_EXCLUSIVE)
+	|| (f->lock_mode & COB_LOCK_OPEN_EXCLUSIVE))
 		fcd->lockMode = FCD_LOCK_EXCL_LOCK;
 	else if(f->lock_mode == COB_LOCK_MANUAL)
 		fcd->lockMode = FCD_LOCK_MANU_LOCK;
@@ -8527,9 +9083,8 @@ cob_extfh_open (
 	FCD3	*fcd;
 	int	sts;
 
-	COB_UNUSED (sharing);
-
 	fcd = find_fcd(f);
+	f->share_mode = sharing;
 	f->last_open_mode = mode;
 	if(mode == COB_OPEN_OUTPUT)
 		STCOMPX2(OP_OPEN_OUTPUT, opcode);

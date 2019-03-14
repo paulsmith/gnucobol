@@ -893,6 +893,7 @@ enum cob_exception_id {
 #define COB_LOCK_AUTOMATIC	(1U << 2)
 #define COB_LOCK_MULTIPLE	(1U << 3)
 #define COB_LOCK_OPEN_EXCLUSIVE	(1U << 4)
+#define COB_LOCK_ROLLBACK	(1U << 5)
 
 #define COB_FILE_EXCLUSIVE	(COB_LOCK_EXCLUSIVE | COB_LOCK_OPEN_EXCLUSIVE)
 
@@ -915,6 +916,21 @@ enum cob_exception_id {
 #define COB_FILE_LS_FIXED	(1 << 3)/* Do NUL insertion for LINE SEQUENTIAL */
 #define COB_FILE_LS_CRLF	(1 << 4)/* End LINE SEQUENTIAL records with CR LF */
 #define COB_FILE_LS_LF		(1 << 5)/* End LINE SEQUENTIAL records with LF */
+
+/* Sharing option */
+
+#define COB_SHARE_READ_ONLY	(1U << 0)
+#define COB_SHARE_ALL_OTHER	(1U << 1)
+#define COB_SHARE_NO_OTHER	(1U << 2)
+
+/* RETRY option */
+
+#define COB_RETRY_FOREVER	(1U << 3)
+#define COB_RETRY_TIMES		(1U << 4)
+#define COB_RETRY_SECONDS	(1U << 5)
+#define COB_RETRY_NEVER		(1U << 6)
+#define COB_ADVANCING_LOCK	(1U << 7)
+#define COB_IGNORE_LOCK		(1U << 8)
 
 /* Open mode */
 
@@ -957,6 +973,7 @@ enum cob_exception_id {
 #define COB_READ_KEPT_LOCK	(1 << 6)
 #define COB_READ_WAIT_LOCK	(1 << 7)
 #define COB_READ_IGNORE_LOCK	(1 << 8)
+#define COB_READ_ADVANCING_LOCK	(1 << 9)
 
 #define COB_READ_MASK		\
 	(COB_READ_NEXT | COB_READ_PREVIOUS | COB_READ_FIRST | COB_READ_LAST)
@@ -1392,6 +1409,22 @@ typedef struct __cob_file {
 	unsigned char		flag_read_done;		/* READ successful */
 	unsigned char		flag_needs_nl;		/* Needs NL at close */
 	unsigned char		flag_needs_top;		/* Linage needs top */
+	unsigned char		flag_file_lock;		/* Complete file is locked EXCLUSIVE use */
+	unsigned char		flag_record_lock;	/* Lock record before REWRITE|DELETE */
+	unsigned char		flag_lock_rec;		/* Issue lock on current record */
+	unsigned char		flag_lock_mode;		/* 0 - Read; 1 - Write */
+	unsigned char		flag_lock_rls;		/* Release previous record locks */
+	unsigned char		share_mode;		/* Active SHARING MODE */
+	unsigned char		dflt_share;		/* Default SHARING MODE */
+
+	unsigned short		retry_mode;		/* RETRY mode */
+	unsigned short		dflt_retry;		/* Default RETRY mode */
+	int			retry_times;		/* TIMES to RETRY I/O */
+	int			dflt_times;		/* Default TIMES to RETRY I/O */
+	int			retry_seconds;		/* SECONDS for RETRY */
+	int			dflt_seconds;		/* Default SECONDS for RETRY */
+	unsigned int		prev_lock;		/* Last record locked */
+
 } cob_file;
 
 
@@ -1729,6 +1762,7 @@ COB_EXPIMP int	cob_sys_return_args	(void *);
 COB_EXPIMP int	cob_sys_parameter_size	(void *);
 COB_EXPIMP int	cob_sys_fork	(void);
 COB_EXPIMP int	cob_sys_waitpid	(const void *);
+COB_EXPIMP void	cob_sys_sleep_msec(unsigned int);
 
 /*
  * cob_sys_getopt_long_long

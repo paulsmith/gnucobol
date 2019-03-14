@@ -244,6 +244,8 @@ typedef struct __cob_settings {
 	unsigned int	cob_fixrel_type;	/* Fixed Relative default file format */
 	unsigned int	cob_mf_files;		/* If TRUE, use Micro Focus file formats */
 	unsigned int	cob_gc_files;		/* If TRUE, revert back to old GNU Cobol file formats */
+	unsigned int	cob_retry_times;	/* Default: RETRY n TIMES value */
+	unsigned int	cob_retry_seconds;	/* Default: RETRY n SECONDS value */
 	char 		*cob_file_path;
 	char		*bdb_home;
 	size_t		cob_sort_memory;

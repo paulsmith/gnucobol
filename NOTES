@@ -148,10 +148,29 @@ C    tests/ChangeLog	merged
 C    tests/testsuite.src/run_extensions.at combined
 C    tests/testsuite.src/run_misc.at	   declined
 
-
-
-
 r1276
+--- Merging r1276 into '.':
+   C cobc/parser.c     reverted
+   C cobc/parser.h     reverted
+   C tests/testsuite   reverted
+C    cobc/ChangeLog	merged
+C    cobc/codegen.c	combined
+C    cobc/parser.y	declined: seems dealt with differently
+C    cobc/tree.h	combined
+U    cobc/typeck.c	ok
+C    libcob/ChangeLog	merged
+U    libcob/coblocal.h	ok
+C    libcob/common.c	accepted
+C    libcob/common.h	merged
+C    libcob/fileio.c	merged, mostly declined (trunk uses fcntl)
+U    tests/testsuite.src/run_file.at   		ok
+C    tests/testsuite.src/run_misc.at		declined
+C    tests/testsuite.src/syn_subscripts.at	accepted
+
+
+
+
+
 r1278
 r1313
 r1324

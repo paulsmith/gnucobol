@@ -979,6 +979,14 @@
 	  third parameter which should be set if the result is assigned to one of
 	  the original strings
 
+2016-11-30  Ron Norman <rjn@inglenet.com>
+
+	* fileio.c,common.c,common.h,termio.c
+	  Compiler updated for handling the SHARING, RETRY, ADVANCING LOCK
+	  and IGNORE LOCK phrases, Mainly for RELATIVE files now.
+	  This is a 'work in progress' and more updates will follow to include
+	  support for INDEXED and SEQUENTIAL files
+
 2016-11-19  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c (cob_sys_fork, cob_sys_waitpid): don't abort if necessary
