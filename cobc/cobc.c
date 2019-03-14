@@ -3633,9 +3633,9 @@ process_command_line (const int argc, char **argv)
 	}
 #endif
 
-	if(cb_flag_arithmetic_osvs == 1) {	/* -f arithmetic-osvs overrides stdxxx.conf */
+	if(cb_arithmetic_osvs == 1) {	/* -f arithmetic-osvs overrides stdxxx.conf */
 		cb_arithmetic_osvs = 1;
-	} else if(cb_flag_arithmetic_osvs == 0) {
+	} else if(cb_arithmetic_osvs == 0) {
 		cb_arithmetic_osvs = 0;
 	}
 

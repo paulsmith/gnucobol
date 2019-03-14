@@ -133,12 +133,33 @@ C    libcob/common.h	 combined
 C    libcob/ChangeLog	 merged
 U    libcob/fileio.c	 ok
 
-
-
-
-
 r1253
+--- Merging r1152 into 'cobc/cobc.c':
+C    cobc/cobc.c merged
+
+
+
+
+
+
+
+
+
+
 r1260
+--- Merging r1152 into 'cobc/cobc.c':
+C    cobc/cobc.c
+Summary of conflicts:
+  Text conflicts: 1
+svn: E155015: One or more conflicts were produced while merging r1151:1152 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+
+
+
+
 r1276
 r1278
 r1313
