@@ -54,10 +54,17 @@ svn: E155015: One or more conflicts were produced while merging r574:575 into
 '/home/jklowden/projects/3rd/cobol/branches/pangaea' --
 jkl: instead of rejecting the merge, included the text of both versions
 
-
-
-
 r577
+--- Merging r576 through r577 into '.':
+   C tests/testsuite rejected
+U    libcob/fileio.c
+U    tests/testsuite.src/run_file.at
+U    tests/testsuite.src/syn_definition.at
+
+
+
+
+
 r585
 r587
 r614

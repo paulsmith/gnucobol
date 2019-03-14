@@ -859,8 +859,8 @@ cob_chk_file_env (const char *src)
 		snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", "io_", s);
 		if ((file_open_io_env = getenv (file_open_env)) == NULL) {
 			for (i = 0; file_open_env[i] != 0; ++i) {	/* Try all Upper Case */
-				if(islower(file_open_env[i]))
-					file_open_env[i] = toupper(file_open_env[i]);
+				if(islower((unsigned char)file_open_env[i]))
+					file_open_env[i] = toupper((unsigned char)file_open_env[i]);
 			}
 			file_open_io_env = getenv (file_open_env);
 		}
@@ -876,8 +876,8 @@ cob_chk_file_env (const char *src)
 		for (i = 0; i < NUM_PREFIX; ++i) {
 			snprintf (file_open_env, (size_t)COB_FILE_MAX, "%s%s", prefix[i], s);
 			for (i = 0; file_open_env[i] != 0; ++i) {
-				if(islower(file_open_env[i]))
-					file_open_env[i] = toupper(file_open_env[i]);
+				if(islower((unsigned char)file_open_env[i]))
+					file_open_env[i] = toupper((unsigned char)file_open_env[i]);
 			}
 			if((p = getenv (file_open_env)) != NULL)
 				break;
@@ -1151,10 +1151,10 @@ set_file_format(cob_file *f)
 				}
 				value[j] = 0;
 				if(value[0] == '1'
-				|| toupper(value[0]) == 'T')
+				|| toupper((unsigned char)value[0]) == 'T')
 					settrue = 1;
 				if(value[0] == '0'
-				|| toupper(value[0]) == 'F')
+				|| toupper((unsigned char)value[0]) == 'F')
 					settrue = 0;
 			}
 			if(strcasecmp(option,"sync") == 0) {
@@ -2999,7 +2999,7 @@ relative_read_next (cob_file *f, const int read_opts)
 		lseek (f->fd, (off_t)0, SEEK_CUR);
 	}
 
-	relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
+	size_t relsize = f->record_max + (cob_s64_t)sizeof (f->record->size);
 	if (fstat (f->fd, &st) != 0 || st.st_size == 0) {
 		return COB_STATUS_10_END_OF_FILE;
 	}
@@ -3134,7 +3134,7 @@ static int
 relative_write (cob_file *f, const int opt)
 {
 	off_t	off;
-	size_t	relsize, ret;
+	size_t	relsize;
 	int	i,isdeleted=0;
 	int	kindex,rcsz;
 	struct stat	st;
@@ -3221,7 +3221,7 @@ static int
 relative_rewrite (cob_file *f, const int opt)
 {
 	off_t	off;
-	size_t	relsize, ret;
+	size_t	relsize;
 	int	relnum,isdeleted=0;
 #ifdef	WITH_SEQRA_EXTFH
 	int	extfh_ret;
@@ -3283,7 +3283,7 @@ static int
 relative_delete (cob_file *f)
 {
 	off_t	off;
-	size_t	relsize, ret;
+	size_t	relsize;
 	unsigned char rechdr[8];
 	int	relnum,isdeleted;
 #ifdef	WITH_SEQRA_EXTFH
@@ -3700,7 +3700,7 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 	cob_u32_t		i, len;
 	unsigned int		dupno;
 	cob_u32_t		flags;
-	int			close_cursor, ret;
+	int			close_cursor;
 
 	p = f->file;
 	if (bdb_env) {
@@ -3756,7 +3756,7 @@ indexed_write_internal (cob_file *f, const int rewrite, const int opt)
 			flags =  0;
 			dupno = get_dupno(f, i);
 			if (dupno > 1) {
-				ret = COB_STATUS_02_SUCCESS_DUPLICATE;
+				return COB_STATUS_02_SUCCESS_DUPLICATE;
 			}
 			dupno = COB_DUPSWAP (dupno);
 			len = bdb_savekey(f, p->temp_key, f->record->data, 0);
@@ -3950,7 +3950,7 @@ indexed_delete_internal (cob_file *f, const int rewrite)
 	struct indexed_file	*p;
 	int			i,len;
 	DBT			prim_key;
-	int			ret,sts;
+	int			ret;
 	cob_u32_t		flags;
 	int			close_cursor;
 

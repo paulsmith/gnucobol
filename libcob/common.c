@@ -317,14 +317,16 @@ static struct config_enum varseqopts[] = {{"0", "0"}, {"1", "1"}, {"2", "2"}, {"
 					  {"b4","4"},{"b32","4"},
 					  {"l4","6"},{"l32","6"},
 					  {NULL, NULL}};
+#if 0 && reportwriter
 /* Make sure the values here match up with those defined in common.h */
 static struct config_enum relopts[]	= {{"0","0"},{"gc","10"},{"mf","11"},
 					   {"b4","4"},{"b32","4"},{"b8","5"},{"b64","5"},
 					   {"l4","6"},{"l32","6"},{"l8","7"},{"l64","7"},
 					   {NULL,NULL}};
-static char	varseq_dflt[8] = "0";
 static char	varrel_dflt[8] = "gc";	/* Default Variable length Relative file format */
 static char	fixrel_dflt[8] = "gc";	/* Default Fixed length Relative file format */
+#endif
+static char	varseq_dflt[8] = "0";
 static char min_conf_length = 0;
 static const char *not_set;
 
