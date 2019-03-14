@@ -204,6 +204,7 @@ static int			gen_if_level = 0;
 static int			gen_init_working = 0;
 static int			need_plus_sign = 0;
 static int			odo_stop_now = 0;
+static int			gen_num_lit_big_end = 1;
 static unsigned int		nolitcast = 0;
 
 static unsigned int		inside_check = 0;
@@ -2689,6 +2690,42 @@ cb_lookup_literal (cb_tree x, int make_decimal)
 	literal_cache = l;
 
 	return cb_literal_id++;
+}
+
+/*
+ * Should numeric literal for truncated into a PIC S9(9) BINARY field, ignoring scale?
+ *  (This is the way that Micro Focus COBOL works; RJN Nov 2016)
+ */
+static int
+cb_fit_to_int (const cb_tree x)
+{
+	struct cb_literal	*l;
+	int			scale, sts;
+
+#ifndef WORDS_BIGENDIAN
+	if (cb_binary_byteorder == CB_BYTEORDER_BIG_ENDIAN) {
+		gen_num_lit_big_end = 1;
+	} else {
+		gen_num_lit_big_end = 0;
+	}
+#else
+	gen_num_lit_big_end = 1;
+#endif
+
+	if (CB_NUMERIC_LITERAL_P (x)) {
+		if (gen_num_lit_big_end) 
+			return 1;
+		l = CB_LITERAL (x);
+		if (l->scale > 0) {
+			scale = l->scale;
+			l->scale = 0;
+			sts = cb_fits_int ( x );
+			l->scale = scale;
+			return sts;
+		}
+	}
+
+	return cb_fits_int ( x );
 }
 
 /* Integer */
@@ -5558,10 +5595,15 @@ output_bin_field (const cb_tree x, const cob_u32_t id)
 		return;
 	}
 	aflags = COB_FLAG_REAL_BINARY;
-	if (cb_fits_int (x)) {
+	if (cb_fit_to_int (x)) {
 		size = 4;
 		digits = 9;
 		aflags = COB_FLAG_HAVE_SIGN;	/* Drop: COB_FLAG_REAL_BINARY */
+#ifndef WORDS_BIGENDIAN
+		if (cb_binary_byteorder == CB_BYTEORDER_BIG_ENDIAN) {
+			aflags |= COB_FLAG_BINARY_SWAP;
+		}
+#endif
 	} else {
 		size = 8;
 		digits = 18;
@@ -5768,9 +5810,9 @@ output_call (struct cb_call *p)
 		case CB_CALL_BY_REFERENCE:
 			if (CB_NUMERIC_LITERAL_P (x)) {
 				output_prefix ();
-				if (cb_fits_int (x)) {
-					output ("content_%u.dataint = ", n);
-					output ("%d", cb_get_int (x));
+				if (cb_fit_to_int (x)) {
+					unsigned int pval = (unsigned int)cb_get_int (x);
+					output ("cob_set_int(&content_fb_%d, %d)",n,pval);
 				} else {
 					if (CB_LITERAL (x)->sign >= 0) {
 						output ("content_%u.dataull = ", n);
@@ -5804,9 +5846,9 @@ output_call (struct cb_call *p)
 			} else if (CB_TREE_TAG (x) != CB_TAG_INTRINSIC) {
 				if (CB_NUMERIC_LITERAL_P (x)) {
 					output_prefix ();
-					if (cb_fits_int (x)) {
-						output ("content_%u.dataint = ", n);
-						output ("%d", cb_get_int (x));
+					if (cb_fit_to_int (x)) {
+						unsigned int pval = (unsigned int)cb_get_int (x);
+						output ("cob_set_int(&content_fb_%d, %d)",n,pval);
 					} else if (CB_LITERAL (x)->sign >= 0) {
 						output ("content_%u.dataull = ", n);
 						output (CB_FMT_LLU_F, cb_get_u_long_long (x));

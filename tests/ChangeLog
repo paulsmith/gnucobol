@@ -256,6 +256,13 @@
 
 	* testsuite.src/run_extensions.at: add CBL_GC_FORK & CBL_GC_WAITPID
 
+2016-11-15  Ron Norman <rjn@inglenet.com>
+
+	* run_misc.at:
+	  changed dump.c as numeric literals are now passed
+	  as PIC 9(9) BINARY format.
+	* run_extensions.at: Added test case for CALL USING numeric literals
+
 2016-11-12  Simon Sobisch <simonsobisch@gnu.org>
 
 	* atlocal.in, atlocal_win: added COB_IS_RUNNING_IN_TESTMODE

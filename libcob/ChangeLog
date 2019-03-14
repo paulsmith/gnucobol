@@ -993,6 +993,12 @@
 	  (wait for completion of another process)
 	* system.def: Add CBL_GC_xxx as alias for CBL_OC_xxx
 
+2016-11-15 Ron Norman <rjn@inglenet.com>
+
+	* fileio.c ((cob_sys_open_file, cob_sys_create_file)): 
+	  removed #ifdef WORDS_BIGENDIAN, as literal parameters are
+	  now passed as PIC S9(9) BINARY
+
 2016-11-13  Simon Sobisch <simonsobisch@gnu.org>
 
 	* common.c, coblocal.h, fileio.c: moved common code parts of fileio.c as

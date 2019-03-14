@@ -1490,6 +1490,9 @@ AT_DATA([dump.c], [
 COB_EXT_EXPORT int
 dump (int *p)
 {
+  if ( *p == 0 ) p++;
+  if ( *p == 0 ) p++;	/* Skip leading bytes for BIG Endian value */
+  if ( *p == 0 ) p++;
   printf ("%8.8d\n", *p);
   return 0;
 }
@@ -1528,6 +1531,44 @@ AT_CHECK([$COBCRUN_DIRECT ./prog2], [0],
 00000009
 00000004
 ])
+
+AT_CLEANUP
+
+
+AT_SETUP([CALL binary literal])
+AT_KEYWORDS([CALL])
+
+AT_DATA([prog.cob], [       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       
+       PROCEDURE DIVISION.
+           CALL "SUB" USING 1280 BY VALUE 15.
+           CALL "SUB" USING 2560 BY VALUE 16.
+           STOP RUN.
+        END PROGRAM prog.
+       
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. "SUB".
+       
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  x  PIC 9(9) COMP.
+       01  y  PIC 9(9) COMP-5.
+       
+       PROCEDURE DIVISION USING x, VALUE y.
+            DISPLAY "COBOL: X is " x " and Y is " y.
+       END PROGRAM "SUB".
+])
+
+AT_CHECK([$COMPILE prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0],
+[COBOL: X is 000001280 and Y is 000000015
+COBOL: X is 000002560 and Y is 000000016
+], [])
 
 AT_CLEANUP
 

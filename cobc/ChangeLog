@@ -2340,6 +2340,13 @@
 	* codegen.c (output_call_cache): fix bug #341 added generation of macro
 	  check in C function declarations for static CALLs
 
+2016-11-15  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c ((output_call, output_bin_field)):
+	  Numeric literals being passed BY REFERENCE or BY CONTENT
+	  will have the value passed as PIC S9(9) BINARY
+	  and now get the correct field attributes set.
+
 2016-11-14  Simon Sobisch <simonsobisch@gnu.org>
 
 	* typeck.c (cb_trim_program_id): change warning message for remove of
@@ -2350,6 +2357,11 @@
 	* parser.y, typeck.c (cb_trim_program_id), tree.h: added code to warn
 	  if SPACES are used in a PROGRAM-ID or CALL 'literal' plus the SPACES
 	  are removed
+
+2016-11-12  Ron Norman <rjn@inglenet.com>
+
+	* codegen.c ((output_call, output_bin_field)): Numeric literals being
+	  passed BY REFERENCE will now get the correct field attributes set.
 
 2016-11-12  Simon Sobisch <simonsobisch@gnu.org>
 
@@ -3621,8 +3633,8 @@
 
 2015-08-30  Ron Norman
 
-	* In tree.c, for binary operations between integer constants, resolve 
-	  the value at compile time and reduce the expression down to the 
+	* In tree.c, for binary operations between integer constants, resolve
+	  the value at compile time and reduce the expression down to the
 	  computed value
 
 2015-08-25  Edward Hart <edward.dan.hart@gmail.com>
