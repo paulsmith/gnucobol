@@ -102,12 +102,19 @@ C    config/ChangeLog	 merged
 C    libcob/ChangeLog	 merged
 C    tests/testsuite.src/run_misc.at declined
 
-
-
-
-
 r810
+--- Merging r810 into '.':
+C    config/runtime.cfg combined
+
 r835
+--- Merging r835 into '.':
+C    libcob/coblocal.h	declined: use new date struct
+U    libcob/fileio.c	declined: environment strings are signed char
+
+
+
+
+
 r839
 r931
 r935
