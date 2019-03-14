@@ -1085,7 +1085,8 @@ set_file_format(cob_file *f)
 				f->file_features |= COB_FILE_LS_FIXED;
 			else
 				f->file_features &= ~COB_FILE_LS_FIXED;
-			if(cobsetptr->cob_ls_validate)
+			if(cobsetptr->cob_ls_validate
+			&& !f->flag_line_adv)
 				f->file_features |= COB_FILE_LS_VALIDATE;
 			else
 				f->file_features &= ~COB_FILE_LS_VALIDATE;
@@ -1194,10 +1195,12 @@ set_file_format(cob_file *f)
 					continue;
 				}
 				if(strcasecmp(option,"lf") == 0) {
-					if(settrue)
+					if(settrue) {
+						f->file_features &= ~COB_FILE_LS_CRLF;
 						f->file_features |= COB_FILE_LS_LF;
-					else
+					} else {
 						f->file_features &= ~COB_FILE_LS_LF;
+					}
 					continue;
 				}
 				if(strcasecmp(option,"mf") == 0) {	/* LS file like MF would do */
@@ -2448,8 +2451,8 @@ lineseq_read (cob_file *f, const int read_opts)
 				return COB_STATUS_30_PERMANENT_ERROR;
 			}
 			if ((f->file_features & COB_FILE_LS_VALIDATE)
-			&& (unsigned char)n > 0x1f) {		/* Should be less than a space */
-				return COB_STATUS_30_PERMANENT_ERROR;
+			&& (unsigned char)n >= ' ') {		/* Should be less than a space */
+				return COB_STATUS_34_BOUNDARY_VIOLATION;
 			}
 			/* LCOV_EXCL_STOP */
 		} else {
@@ -2528,7 +2531,7 @@ lineseq_write (cob_file *f, const int opt)
 		if ((f->file_features & COB_FILE_LS_NULLS)) {
 			p = f->record->data;
 			for(i=j=0; j < (int)size; j++) {
-				if(p[j] <= 0x1f) {
+				if(p[j] < ' ') {
 					if(j-i > 0) {
 						if(fwrite(&p[i],j-i,1,(FILE*)f->file) <= 0)
 							return COB_STATUS_30_PERMANENT_ERROR;
@@ -2546,8 +2549,13 @@ lineseq_write (cob_file *f, const int opt)
 			if ((f->file_features & COB_FILE_LS_VALIDATE)) {
 				p = f->record->data;
 				for (i = 0; i < (int)size; ++i, ++p) {
-					if (*p <= 0x1F) 
-						return COB_STATUS_30_PERMANENT_ERROR;
+					if (*p < ' '
+					&&  *p != COB_CHAR_BS 
+					&&  *p != COB_CHAR_ESC 
+					&&  *p != COB_CHAR_FF 
+					&&  *p != COB_CHAR_SI 
+					&&  *p != COB_CHAR_TAB) 
+						return COB_STATUS_34_BOUNDARY_VIOLATION;
 				}
 			}
 			if (unlikely(fwrite (f->record->data, size, (size_t)1,
@@ -2629,7 +2637,7 @@ lineseq_rewrite (cob_file *f, const int opt)
 	psize = size;
 	if ((f->file_features & COB_FILE_LS_NULLS)) {
 		for(j=0; j < (int)size; j++) {
-			if(p[j] <= 0x1f) {
+			if(p[j] < ' ') {
 				psize++;
 			}
 		}
@@ -2647,7 +2655,7 @@ lineseq_rewrite (cob_file *f, const int opt)
 		if ((f->file_features & COB_FILE_LS_NULLS)) {
 			p = f->record->data;
 			for(i=j=0; j < (int)size; j++) {
-				if(p[j] <= 0x1f) {
+				if(p[j] < ' ') {
 					if(j-i > 0) {
 						if(fwrite(&p[i],j-i,1,(FILE*)f->file) <= 0)
 							return COB_STATUS_30_PERMANENT_ERROR;
@@ -2665,8 +2673,8 @@ lineseq_rewrite (cob_file *f, const int opt)
 			if ((f->file_features & COB_FILE_LS_VALIDATE)) {
 				p = f->record->data;
 				for (i = 0; i < (int)size; ++i, ++p) {
-					if (*p <= 0x1F) 
-						return COB_STATUS_30_PERMANENT_ERROR;
+					if (*p < ' ') 
+						return COB_STATUS_34_BOUNDARY_VIOLATION;
 				}
 			}
 			if (unlikely(fwrite (f->record->data, size, (size_t)1,
