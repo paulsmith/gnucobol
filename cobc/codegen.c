@@ -8044,9 +8044,16 @@ output_file_initialization (struct cb_file *f)
 		output_line ("if (cob_glob_ptr->cob_initial_external)");
 		output_indent ("{");
 	} else {
-		output_line ("cob_file_malloc (&%s%s, %s, %d, %d);",
-							CB_PREFIX_FILE, f->cname,
-							key_ptr, nkeys, f->linage?1:0);
+		output_line ("if (!%s%s)", CB_PREFIX_FILE, f->cname);
+		output_indent ("{");
+		/* 20 extra is allocated due to recent increase in size and possible problem
+		 * if an old common.h was lying around; RJN Apr 2015
+		 */
+		output_line ("%s%s = cob_cache_malloc (sizeof(cob_file)+20);", CB_PREFIX_FILE, f->cname);
+		if (f->linage) {
+			output_line ("%s%s->linorkeyptr = cob_cache_malloc (sizeof(cob_linage));", CB_PREFIX_FILE, f->cname);
+		}
+		output_indent ("}");
 	}
 	nkeys = 1;
 	/* Output RELATIVE/RECORD KEY's */
