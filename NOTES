@@ -38,16 +38,25 @@ C    libcob/common.h	conflicts resolved in favor of trunk
 C    libcob/fileio.c	merged
 C    tests/ChangeLog	merged
 C    tests/testsuite.src/run_file.at declined
-C    tests/testsuite.src/run_misc.at
+C    tests/testsuite.src/run_misc.at declined
 Summary of conflicts:
   Text conflicts: 14
   Tree conflicts: 2
 
-
-
-
-
 r576
+--- Merging r575 into 'tests/testsuite.src/run_file.at':
+C    tests/testsuite.src/run_file.at
+--- Merging r575 into 'tests/testsuite.src/run_misc.at':
+C    tests/testsuite.src/run_misc.at
+Summary of conflicts:
+  Text conflicts: 2
+svn: E155015: One or more conflicts were produced while merging r574:575 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+jkl: instead of rejecting the merge, included the text of both versions
+
+
+
+
 r577
 r585
 r587

@@ -1,6 +1,7 @@
 ## Copyright (C) 2003-2012, 2014-2019 Free Software Foundation, Inc.
 ## Written by Keisuke Nishida, Roger While, Simon Sobisch, Ron Norman,
 ## Brian Tiffin, Joe Robbins, Edward Hart
+## Copyright (C) 2015 Ron Norman
 ##
 ## This file is part of GnuCOBOL.
 ##
@@ -7319,6 +7320,1133 @@ AT_DATA([reference], [  1
 ])
 
 AT_CHECK([diff reference TEST-OUT], [0], [], [])
+
+AT_CLEANUP
+
+
+
+AT_SETUP([RELATIVE Multi-Record])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL RELVAR
+           ORGANIZATION RELATIVE 
+           ACCESS IS SEQUENTIAL
+           RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-TYPE                         PICTURE X. 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  CM-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  CM-TRAILER                      PICTURE X(251). 
+       
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-TYPE                         PICTURE X. 
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-ADDRESS                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
+       
+      
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  ZRO               VALUE  1          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+       77  REC-NUM           VALUE  1          PICTURE 9(4) COMP SYNC.
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+      
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+      
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+      
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Initial Re-Read Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           IF CUST-STAT = "30"
+               CLOSE FLATFILE
+	       STOP RUN
+           END-IF
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           DISPLAY "For Rewrite Open I-O Sts:" CUST-STAT 
+           PERFORM READ-RECORD
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE TSP2-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" C2-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           DISPLAY "For Rewrite/Delete Open I-O Sts:" CUST-STAT 
+           PERFORM READ-RECORD
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE TSP2-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" C2-NO-TERMINALS.
+           PERFORM READ-RECORD
+           DELETE FLATFILE 
+           DISPLAY "DELETE " CM-CUST-NUM " Sts " CUST-STAT.
+           CLOSE FLATFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+           OPEN EXTEND FLATFILE.
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > 2.
+           CLOSE FLATFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list afer Extend Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           STOP RUN RETURNING 0.
+      
+       LOADFILE.
+           DISPLAY "Loading sample program data file."
+                            UPON CONSOLE.
+      
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           DISPLAY "Sample program data file load complete."
+                            UPON CONSOLE.
+           CLOSE FLATFILE.
+      
+       READ-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE SPACES                       TO TSP2-RECORD.
+           READ FLATFILE
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Status: " CUST-STAT
+           ELSE
+           IF CM-TYPE = SPACES
+             DISPLAY "Read  " CM-CUST-NUM " #:" REC-NUM
+                     " Trms:" CM-NO-TERMINALS
+           ELSE
+             DISPLAY "Read2 " C2-CUST-NUM " #:" REC-NUM
+                     " Trms:" C2-NO-TERMINALS
+           END-IF.
+      
+       LOAD-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           MOVE 20070319                     TO CM-PK-DATE.
+           IF SUB = 1 OR 4 OR 6
+               MOVE -20070319                 TO CM-PK-DATE.
+      
+           IF ODD-RECORD
+               MOVE "8417"                   TO C2-DISK 
+               MOVE CM-CUST-NUM              TO C2-CUST-NUM
+               MOVE '2'                      TO C2-TYPE
+               MOVE CM-COMPANY               TO C2-COMPANY
+               MOVE CM-PK-DATE               TO C2-PK-DATE
+               MOVE CM-NO-TERMINALS          TO C2-NO-TERMINALS
+               MOVE DATA-ADDRESS (SUB)       TO C2-ADDRESS
+               WRITE TSP2-RECORD
+           ELSE
+               MOVE "8470"                   TO CM-DISK
+               MOVE ' '                      TO CM-TYPE
+               WRITE TSPFL-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [Loading sample program data file.
+Sample program data file load complete.
+Initial Re-Read Open Sts:00
+Read2 ALP00000 #:00001 Trms:00010
+Read  BET00000 #:00002 Trms:00013
+Read2 GAM00000 #:00003 Trms:00075
+Read  DEL00000 #:00004 Trms:00010
+Read2 EPS00000 #:00005 Trms:00090
+Read  FOR00000 #:00006 Trms:00254
+Read Status: 10
+For Rewrite Open I-O Sts:00
+Read2 ALP00000 #:00001 Trms:00010
+REWRITE ALP00000 Sts 00 Trms:00011
+For Rewrite/Delete Open I-O Sts:00
+Read2 ALP00000 #:00001 Trms:00011
+REWRITE ALP00000 Sts 00 Trms:00012
+Read  BET00000 #:00002 Trms:00013
+DELETE BET00000 Sts 00
+Re-list Open Sts:00
+Read2 ALP00000 #:00001 Trms:00012
+Read2 GAM00000 #:00003 Trms:00075
+Read  DEL00000 #:00004 Trms:00010
+Read2 EPS00000 #:00005 Trms:00090
+Read  FOR00000 #:00006 Trms:00254
+Read Status: 10
+Re-list afer Extend Open Sts:00
+Read2 ALP00000 #:00001 Trms:00012
+Read2 GAM00000 #:00003 Trms:00075
+Read  DEL00000 #:00004 Trms:00010
+Read2 EPS00000 #:00005 Trms:00090
+Read  FOR00000 #:00006 Trms:00254
+Read2 ALP00000 #:00007 Trms:00010
+Read  BET00000 #:00008 Trms:00013
+Read Status: 10
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([RELATIVE one Record])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS SEQUENTIAL RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+           SELECT FLATFILE2 ASSIGN EXTERNAL RELFIX
+           ORGANIZATION RELATIVE
+           ACCESS IS RANDOM RELATIVE KEY IS REC-NUM
+           FILE STATUS IS CUST-STAT.
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  CM-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  CM-TRAILER                      PICTURE X(252). 
+      
+       FD  FLATFILE2
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  C2-TRAILER                      PICTURE X(252). 
+
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+       77  REC-NUM           VALUE  1          PICTURE 9(4) COMP SYNC.
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+      
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+      
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Open Sts:" CUST-STAT 
+           PERFORM 4 TIMES
+             PERFORM READ-NEXT
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+           DISPLAY "*** Test Update of file ***".
+           OPEN I-O FLATFILE.
+           PERFORM READ-NEXT
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           READ FLATFILE WITH LOCK
+           DISPLAY "Read " CM-CUST-NUM
+           DELETE FLATFILE 
+           DISPLAY "DELETE " CM-CUST-NUM " Sts " CUST-STAT.
+           CLOSE FLATFILE.
+
+           DISPLAY "*** List file afer Update/Delete ***".
+           OPEN INPUT FLATFILE.
+           PERFORM 4 TIMES
+             READ FLATFILE
+             DISPLAY "Read " CM-CUST-NUM " Sts " CUST-STAT 
+                     " Trms:" CM-NO-TERMINALS
+           END-PERFORM.
+           CLOSE FLATFILE.
+           OPEN I-O FLATFILE2.
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE 5  TO REC-NUM.
+           PERFORM READ2.
+           MOVE 3  TO REC-NUM.
+           PERFORM READ2.
+           WRITE TSP2-RECORD.
+           DISPLAY "Write of " REC-NUM " Sts " CUST-STAT 
+           PERFORM READ2.
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE 2  TO REC-NUM.
+           READ FLATFILE2.
+           DISPLAY " Read of deleted " REC-NUM " Sts " CUST-STAT 
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE DATA-CUST-NUM      (2)       TO C2-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO C2-COMPANY.
+           MOVE DATA-NO-TERMINALS  (2)       TO C2-NO-TERMINALS.
+           MOVE 20070319                     TO C2-PK-DATE.
+           MOVE "8440"                       TO C2-DISK 
+           MOVE 2  TO REC-NUM.
+           REWRITE TSP2-RECORD.
+           DISPLAY "ReWrite deleted " C2-CUST-NUM " Sts " CUST-STAT 
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE DATA-CUST-NUM      (2)       TO C2-CUST-NUM.
+           MOVE DATA-COMPANY       (2)       TO C2-COMPANY.
+           MOVE DATA-NO-TERMINALS  (2)       TO C2-NO-TERMINALS.
+           MOVE 20070319                     TO C2-PK-DATE.
+           MOVE "8440"                       TO C2-DISK 
+           MOVE 2  TO REC-NUM.
+           WRITE TSP2-RECORD.
+           DISPLAY "Write of deleted " C2-CUST-NUM " Sts " CUST-STAT 
+           CLOSE FLATFILE2.
+
+           DISPLAY "*** List file afer Re-Add ***".
+           OPEN INPUT FLATFILE.
+           PERFORM 4 TIMES
+             PERFORM READ-RECORD
+           END-PERFORM.
+           PERFORM READ-PREV
+           PERFORM READ-PREV
+           PERFORM READ-PREV
+           PERFORM READ-PREV
+           START FLATFILE LAST
+           DISPLAY "Start Last Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-PREV
+           PERFORM READ-PREV
+           START FLATFILE FIRST
+           DISPLAY "Start First Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-NEXT
+           PERFORM READ-NEXT
+           MOVE 4 TO REC-NUM.
+           START FLATFILE KEY GREATER OR EQUAL REC-NUM.
+           DISPLAY "Start GE 4:" REC-NUM 
+                   " Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-NEXT
+           PERFORM READ-NEXT
+           MOVE 4 TO REC-NUM.
+           START FLATFILE KEY GREATER REC-NUM.
+           DISPLAY "Start GT 4:" REC-NUM 
+                   " Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-NEXT
+           PERFORM READ-NEXT
+           MOVE 5 TO REC-NUM.
+           START FLATFILE KEY LESS REC-NUM.
+           DISPLAY "Start LT 5: " REC-NUM 
+                   " Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-RECORD.
+           PERFORM READ-PREV
+           MOVE 5 TO REC-NUM.
+           START FLATFILE KEY LESS OR EQUAL REC-NUM.
+           DISPLAY "Start LE 5:" REC-NUM 
+                   " Sts " CUST-STAT " Rec#" REC-NUM.
+           PERFORM READ-RECORD.
+           PERFORM READ-PREV
+           CLOSE FLATFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+           OPEN EXTEND FLATFILE.
+           MOVE 2 TO SUB
+           PERFORM LOAD-RECORD .
+           CLOSE FLATFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list after Extend Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE2.
+             PERFORM READ2
+                        VARYING REC-NUM FROM 1 BY 1 
+                          UNTIL REC-NUM > MAX-SUB + 5
+                             OR CUST-STAT NOT = "00".
+           CLOSE FLATFILE2.
+           STOP RUN RETURNING 0.
+      
+       READ2.
+           MOVE SPACES                       TO TSP2-RECORD.
+           READ FLATFILE2
+                INVALID KEY
+                   DISPLAY "Invalid Read2 " REC-NUM 
+                           " Status: " CUST-STAT
+           END-READ
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read2 Status: " CUST-STAT
+           ELSE
+             DISPLAY "Read2 " C2-CUST-NUM 
+                     " #" REC-NUM
+                     " Trms:" C2-NO-TERMINALS
+           END-IF.
+
+       READ-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Status: " CUST-STAT
+           ELSE
+             DISPLAY "Read  " CM-CUST-NUM 
+                     " #" REC-NUM
+                     " Trms:" CM-NO-TERMINALS
+           END-IF.
+
+       READ-PREV.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE PREVIOUS
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Prev Status: " CUST-STAT
+           ELSE
+             DISPLAY "Prev  " CM-CUST-NUM 
+                     " #" REC-NUM
+                     " Trms:" CM-NO-TERMINALS
+           END-IF.
+
+       READ-NEXT.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE NEXT
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Next Status: " CUST-STAT
+           ELSE
+             DISPLAY "Next  " CM-CUST-NUM 
+                     " #" REC-NUM
+                     " Trms:" CM-NO-TERMINALS
+           END-IF.
+
+       LOADFILE.
+           DISPLAY "Loading sample program data file."
+                            UPON CONSOLE.
+      
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           DISPLAY "Sample program data file load complete."
+                            UPON CONSOLE.
+           CLOSE FLATFILE.
+      
+       LOAD-RECORD.
+      
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           MOVE 20070319                     TO CM-PK-DATE.
+           IF SUB = 1 OR 4 OR 6
+               MOVE -20070319                 TO CM-PK-DATE.
+      
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE TSPFL-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [Loading sample program data file.
+Sample program data file load complete.
+Open Sts:00
+Next  ALP00000 #00001 Trms:00010
+Next  BET00000 #00002 Trms:00013
+Next  DEL00000 #00003 Trms:00075
+Next  EPS00000 #00004 Trms:00010
+*** Test Update of file ***
+Next  ALP00000 #00001 Trms:00010
+REWRITE ALP00000 Sts 00 Trms:00011
+Read ALP00000 Sts:00
+REWRITE ALP00000 Sts 00 Trms:00012
+Read BET00000
+DELETE BET00000 Sts 00
+*** List file afer Update/Delete ***
+Read ALP00000 Sts 00 Trms:00012
+Read DEL00000 Sts 00 Trms:00075
+Read EPS00000 Sts 00 Trms:00010
+Read FOR00000 Sts 00 Trms:00090
+Read2 FOR00000 #00005 Trms:00090
+Read2 DEL00000 #00003 Trms:00075
+Write of 00003 Sts 22
+Read2 DEL00000 #00003 Trms:00075
+ Read of deleted 00002 Sts 23
+ReWrite deleted BET00000 Sts 23
+Write of deleted BET00000 Sts 00
+*** List file afer Re-Add ***
+Read  ALP00000 #00001 Trms:00012
+Read  BET00000 #00002 Trms:00013
+Read  DEL00000 #00003 Trms:00075
+Read  EPS00000 #00004 Trms:00010
+Prev  DEL00000 #00003 Trms:00075
+Prev  BET00000 #00002 Trms:00013
+Prev  ALP00000 #00001 Trms:00012
+Read Prev Status: 10
+Start Last Sts 00 Rec#00006
+Prev  GAM00000 #00006 Trms:00254
+Prev  FOR00000 #00005 Trms:00090
+Start First Sts 00 Rec#00001
+Next  ALP00000 #00001 Trms:00012
+Next  BET00000 #00002 Trms:00013
+Start GE 4:00004 Sts 00 Rec#00004
+Next  EPS00000 #00004 Trms:00010
+Next  FOR00000 #00005 Trms:00090
+Start GT 4:00005 Sts 00 Rec#00005
+Next  FOR00000 #00005 Trms:00090
+Next  GAM00000 #00006 Trms:00254
+Start LT 5: 00004 Sts 00 Rec#00004
+Read  EPS00000 #00004 Trms:00010
+Prev  DEL00000 #00003 Trms:00075
+Start LE 5:00005 Sts 00 Rec#00005
+Read  FOR00000 #00005 Trms:00090
+Prev  EPS00000 #00004 Trms:00010
+Re-list Open Sts:00
+Read  ALP00000 #00001 Trms:00012
+Read  BET00000 #00002 Trms:00013
+Read  DEL00000 #00003 Trms:00075
+Read  EPS00000 #00004 Trms:00010
+Read  FOR00000 #00005 Trms:00090
+Read  GAM00000 #00006 Trms:00254
+Read Status: 10
+Re-list after Extend Open Sts:00
+Read  ALP00000 #00001 Trms:00012
+Read  BET00000 #00002 Trms:00013
+Read  DEL00000 #00003 Trms:00075
+Read  EPS00000 #00004 Trms:00010
+Read  FOR00000 #00005 Trms:00090
+Read  GAM00000 #00006 Trms:00254
+Read  BET00000 #00007 Trms:00013
+Read Status: 10
+Read2 ALP00000 #00001 Trms:00012
+Read2 BET00000 #00002 Trms:00013
+Read2 DEL00000 #00003 Trms:00075
+Read2 EPS00000 #00004 Trms:00010
+Read2 FOR00000 #00005 Trms:00090
+Read2 GAM00000 #00006 Trms:00254
+Read2 BET00000 #00007 Trms:00013
+Invalid Read2 00008 Status: 23
+Read2 Status: 23
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SEQUENTIAL Multi-Record])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL SEQVAR
+           ORGANIZATION SEQUENTIAL
+           FILE STATUS IS CUST-STAT .
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-TYPE                         PICTURE X.
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  CM-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  CM-TRAILER                      PICTURE X(251). 
+       
+       01  TSP2-RECORD.
+           10  C2-CUST-NUM                     PICTURE X(8). 
+           10  C2-TYPE                         PICTURE X.
+           10  C2-COMPANY                      PICTURE X(25). 
+           10  C2-ADDRESS                      PICTURE X(25). 
+           10  C2-DISK                         PICTURE X(8). 
+           10  C2-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  C2-PK-DATE                      PICTURE S9(14) COMP-3.
+      
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  ZRO               VALUE  1          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+       77  REC-NUM           VALUE  1          PICTURE 9(8) COMP SYNC.
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+      
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+      
+           05  FILLER PIC 9(4) COMP-4 VALUE 10.
+           05  FILLER PIC 9(4) COMP-4 VALUE 13.
+           05  FILLER PIC 9(4) COMP-4 VALUE 75.
+           05  FILLER PIC 9(4) COMP-4 VALUE 10.
+           05  FILLER PIC 9(4) COMP-4 VALUE 90.
+           05  FILLER PIC 9(4) COMP-4 VALUE 254.
+      
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(4) COMP-4 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                     PICTURE 9(4) COMP SYNC RIGHT.
+               88  ODD-RECORD          VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Open Sts:" CUST-STAT 
+           PERFORM READ-RECORD
+           PERFORM READ-RECORD
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           PERFORM READ-RECORD
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE TSP2-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" C2-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           PERFORM READ-RECORD
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE TSP2-RECORD
+           DISPLAY "REWRITE " C2-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" C2-NO-TERMINALS.
+           PERFORM READ-RECORD
+      *    DELETE should cause compiler error
+      *    DELETE FLATFILE 
+      *    DISPLAY "DELETE " CM-CUST-NUM " Sts " CUST-STAT.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           PERFORM READ-RECORD.
+           PERFORM READ-RECORD.
+           ADD 1 TO C2-NO-TERMINALS
+           REWRITE TSP2-RECORD
+           DISPLAY "REWRITE2 " C2-CUST-NUM " Sts " CUST-STAT
+                     " Trms:" C2-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           PERFORM READ-RECORD.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT
+                     " Trms:" CM-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Reread file after updates Open Sts:" CUST-STAT.
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+
+           OPEN EXTEND FLATFILE.
+           MOVE 1 TO SUB
+           PERFORM LOAD-RECORD
+           CLOSE FLATFILE.
+
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list after extend Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           STOP RUN RETURNING 0.
+      
+       LOADFILE.
+           DISPLAY "Loading sample program data file."
+                            UPON CONSOLE.
+      
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           DISPLAY "Sample program data file load complete."
+                            UPON CONSOLE.
+           CLOSE FLATFILE.
+      
+       READ-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE SPACES                       TO TSP2-RECORD.
+           READ FLATFILE
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read status: " CUST-STAT
+           ELSE
+           IF CM-TYPE = SPACES
+             DISPLAY "Read  " CM-CUST-NUM
+                     " Trms:" CM-NO-TERMINALS
+           ELSE
+             DISPLAY "Read2 " C2-CUST-NUM
+                     " Trms:" C2-NO-TERMINALS
+           END-IF.
+
+       LOAD-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE SPACES                       TO TSP2-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           MOVE 20070319                     TO CM-PK-DATE.
+           IF SUB = 1 OR 4 OR 6
+               MOVE -20070319                 TO CM-PK-DATE.
+      
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           IF ODD-RECORD
+               MOVE CM-CUST-NUM              TO C2-CUST-NUM
+               MOVE CM-COMPANY               TO C2-COMPANY
+               MOVE CM-DISK                  TO C2-DISK   
+               MOVE CM-PK-DATE               TO C2-PK-DATE
+               MOVE CM-NO-TERMINALS          TO C2-NO-TERMINALS
+               MOVE DATA-ADDRESS (SUB)       TO C2-ADDRESS
+               MOVE '2'                      TO C2-TYPE
+               WRITE TSP2-RECORD
+           ELSE
+               WRITE TSPFL-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [Loading sample program data file.
+Sample program data file load complete.
+Open Sts:00
+Read2 ALP00000 Trms:00010
+Read  BET00000 Trms:00013
+Read2 ALP00000 Trms:00010
+REWRITE ALP00000 Sts 00 Trms:00011
+Read2 ALP00000 Trms:00011
+REWRITE ALP00000 Sts 00 Trms:00012
+Read  BET00000 Trms:00013
+Read2 ALP00000 Trms:00012
+Read  BET00000 Trms:00013
+REWRITE2 BET00000 Sts 44 Trms:08225
+Read2 ALP00000 Trms:00012
+REWRITE ALP00000 Sts 44 Trms:08225
+Reread file after updates Open Sts:00
+Read2 ALP00000 Trms:00012
+Read  BET00000 Trms:00013
+Read2 GAM00000 Trms:00075
+Read  DEL00000 Trms:00010
+Read2 EPS00000 Trms:00090
+Read  FOR00000 Trms:00254
+Read status: 10
+Re-list after extend Open Sts:00
+Read2 ALP00000 Trms:00012
+Read  BET00000 Trms:00013
+Read2 GAM00000 Trms:00075
+Read  DEL00000 Trms:00010
+Read2 EPS00000 Trms:00090
+Read  FOR00000 Trms:00254
+Read2 ALP00000 Trms:00010
+Read status: 10
+], [])
+
+AT_CLEANUP
+
+
+AT_SETUP([SEQUENTIAL one Record])
+AT_KEYWORDS([runfile])
+
+AT_DATA([prog.cob], [
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. prog.
+      
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+      
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT FLATFILE ASSIGN EXTERNAL SEQFIX
+           ORGANIZATION SEQUENTIAL
+           FILE STATUS IS CUST-STAT .
+
+       DATA  DIVISION.
+       FILE SECTION.
+       FD  FLATFILE
+           BLOCK CONTAINS 5 RECORDS.
+      
+       01  TSPFL-RECORD.
+           10  CM-CUST-NUM                     PICTURE X(8). 
+           10  CM-COMPANY                      PICTURE X(25). 
+           10  CM-DISK                         PICTURE X(8). 
+           10  CM-NO-TERMINALS                 PICTURE 9(4) COMP-4. 
+           10  CM-PK-DATE                      PICTURE S9(14) COMP-3.
+           10  CM-TRAILER                      PICTURE X(8). 
+       
+       WORKING-STORAGE SECTION.
+      
+       77  MAX-SUB           VALUE  6          PICTURE 9(4) COMP SYNC.
+       77  CUST-STAT                           PICTURE X(2).
+      
+       01  TEST-DATA.
+      
+         02  DATA-CUST-NUM-TBL.
+      
+           05  FILLER PIC X(8) VALUE "ALP00000".
+           05  FILLER PIC X(8) VALUE "BET00000".
+           05  FILLER PIC X(8) VALUE "GAM00000".
+           05  FILLER PIC X(8) VALUE "DEL00000".
+           05  FILLER PIC X(8) VALUE "EPS00000".
+           05  FILLER PIC X(8) VALUE "FOR00000".
+      
+         02  DATA-CUST-NUM REDEFINES DATA-CUST-NUM-TBL
+                                       PIC X(8) OCCURS 6.
+         02  DATA-COMPANY-TBL.
+      
+           05  FILLER PIC X(25) VALUE "ALPHA ELECTRICAL CO. LTD.".
+           05  FILLER PIC X(25) VALUE "BETA SHOE MFG. INC.      ".
+           05  FILLER PIC X(25) VALUE "GAMMA X-RAY TECHNOLOGY   ".
+           05  FILLER PIC X(25) VALUE "DELTA LUGGAGE REPAIRS    ".
+           05  FILLER PIC X(25) VALUE "EPSILON EQUIPMENT SUPPLY ".
+           05  FILLER PIC X(25) VALUE "FORTUNE COOKIE COMPANY   ".
+         02  DATA-COMPANY  REDEFINES DATA-COMPANY-TBL
+                                       PIC X(25) OCCURS 6.
+         02  DATA-ADDRESS-2-TBL.
+      
+           05  FILLER PIC X(10) VALUE "NEW YORK  ".
+           05  FILLER PIC X(10) VALUE "ATLANTA   ".
+           05  FILLER PIC X(10) VALUE "WASHINGTON".
+           05  FILLER PIC X(10) VALUE "TORONTO   ".
+           05  FILLER PIC X(10) VALUE "CALGARY   ".
+           05  FILLER PIC X(10) VALUE "WHITEPLAIN".
+      
+         02  DATA-ADDRESS   REDEFINES DATA-ADDRESS-2-TBL
+                                       PIC X(10) OCCURS 6.
+
+         02  DATA-NO-TERMINALS-TBL.
+      
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 13.
+           05  FILLER PIC 9(3) COMP-3 VALUE 75.
+           05  FILLER PIC 9(3) COMP-3 VALUE 10.
+           05  FILLER PIC 9(3) COMP-3 VALUE 90.
+           05  FILLER PIC 9(3) COMP-3 VALUE 254.
+      
+         02  DATA-NO-TERMINALS REDEFINES DATA-NO-TERMINALS-TBL
+                                       PIC 9(3) COMP-3 OCCURS 6.
+       01  WORK-AREA.
+           05  SUB                             PICTURE 9(4) COMP SYNC.
+               88  ODD-RECORD                  VALUE 1 3 5.
+      
+      
+       PROCEDURE DIVISION.
+
+           PERFORM LOADFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Open Sts:" CUST-STAT 
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           CLOSE FLATFILE.
+
+           OPEN I-O FLATFILE.
+           READ FLATFILE
+           DISPLAY "Read " CM-CUST-NUM " Sts:" CUST-STAT.
+           ADD 1 TO CM-NO-TERMINALS
+           REWRITE TSPFL-RECORD
+           DISPLAY "REWRITE " CM-CUST-NUM " Sts " CUST-STAT 
+                   " Trms:" CM-NO-TERMINALS.
+           READ FLATFILE WITH LOCK
+           DISPLAY "Read " CM-CUST-NUM
+      *    DELETE FLATFILE 
+      *    DISPLAY "DELETE " CM-CUST-NUM " Sts " CUST-STAT.
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "Re-list File Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           OPEN EXTEND FLATFILE.
+           MOVE 2 TO SUB
+           PERFORM LOAD-RECORD
+           CLOSE FLATFILE.
+           OPEN INPUT FLATFILE.
+           DISPLAY "List File afer EXTEND Open Sts:" CUST-STAT 
+           PERFORM UNTIL CUST-STAT NOT = "00"
+               PERFORM READ-RECORD
+           END-PERFORM.
+           CLOSE FLATFILE.
+           STOP RUN RETURNING 0.
+      
+       READ-RECORD.
+           MOVE SPACES                       TO TSPFL-RECORD.
+           READ FLATFILE
+           IF CUST-STAT NOT = "00"
+             DISPLAY "Read Status: " CUST-STAT
+           ELSE
+             DISPLAY "Read  " CM-CUST-NUM
+                     " Trms:" CM-NO-TERMINALS
+           END-IF.
+
+       LOADFILE.
+           DISPLAY "Loading sample data file.".
+      
+           OPEN OUTPUT FLATFILE.
+      
+           PERFORM LOAD-RECORD
+                        VARYING SUB FROM 1 BY 1 
+                          UNTIL SUB > MAX-SUB.
+      
+           DISPLAY "Sample data file load complete.".
+           CLOSE FLATFILE.
+      
+       LOAD-RECORD.
+      
+           MOVE SPACES                       TO TSPFL-RECORD.
+           MOVE DATA-CUST-NUM      (SUB)     TO CM-CUST-NUM.
+           MOVE DATA-COMPANY       (SUB)     TO CM-COMPANY.
+           MOVE DATA-NO-TERMINALS  (SUB)     TO CM-NO-TERMINALS.
+           MOVE 20070319                     TO CM-PK-DATE.
+           IF SUB = 1 OR 4 OR 6
+               MOVE -20070319                 TO CM-PK-DATE.
+      
+           IF  ODD-RECORD
+               MOVE "8417"                   TO CM-DISK 
+           ELSE
+               MOVE "8470"                   TO CM-DISK.
+           WRITE TSPFL-RECORD.
+])
+
+AT_CHECK([cobc -x -std=mf -w prog.cob], [0], [], [])
+
+AT_CHECK([./prog], [0], [Loading sample data file.
+Sample data file load complete.
+Open Sts:00
+Read ALP00000 Sts:00
+Read BET00000 Sts:00
+Read ALP00000 Sts:00
+REWRITE ALP00000 Sts 00 Trms:00011
+Read ALP00000 Sts:00
+REWRITE ALP00000 Sts 00 Trms:00012
+Read BET00000
+Re-list File Open Sts:00
+Read  ALP00000 Trms:00012
+Read  BET00000 Trms:00013
+Read  GAM00000 Trms:00075
+Read  DEL00000 Trms:00010
+Read  EPS00000 Trms:00090
+Read  FOR00000 Trms:00254
+Read Status: 10
+List File afer EXTEND Open Sts:00
+Read  ALP00000 Trms:00012
+Read  BET00000 Trms:00013
+Read  GAM00000 Trms:00075
+Read  DEL00000 Trms:00010
+Read  EPS00000 Trms:00090
+Read  FOR00000 Trms:00254
+Read  BET00000 Trms:00013
+Read Status: 10
+], [])
 
 AT_CLEANUP
 
