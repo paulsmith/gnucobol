@@ -2158,7 +2158,7 @@ sequential_read (cob_file *f, const int read_opts)
 		f->flag_operation = 0;
 	}
 	if(f->record_off == -1) {
-		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);/* Set current file position */
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET); /* Set current file position */
 	} else {
 		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
 	}
@@ -2261,7 +2261,7 @@ sequential_write (cob_file *f, const int opt)
 	}
 
 	if(f->record_off == -1) {
-		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET);/* Set current file position */
+		f->record_off = lseek (f->fd, (off_t)f->file_header, SEEK_SET); /* Set current file position */
 	} else {
 		f->record_off = lseek (f->fd, (off_t)0, SEEK_CUR);	/* Get current file position */
 	}
