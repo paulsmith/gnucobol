@@ -414,6 +414,11 @@
 
 	* testsuite.src/used_binaries.at: added tests for cobcrun -M <module>
 
+2016-05-01 Ron Norman <rjn@inglenet.com>
+	* run_misc.at removed check for 'NEW' as this is now a reserved word
+	  configuration.at updated to match compiler
+	  syn_definition.at updated to expect SYNC RIGHT to pass
+
 2016-04-23  Brian Tiffin <btiffin@gnu.org>
 
 	* testsuite.src/data_binary.at: added test for binary-double unsigned

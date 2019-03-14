@@ -839,7 +839,7 @@ AT_KEYWORDS([definition sync])
 
 # GC simply ignored RIGHT which seems to be wrong according to ISO (but right for MF).
 # The check / correction is TODO as the current warning shows up in the COBOL85 tests.
-AT_XFAIL_IF(true)
+#AT_XFAIL_IF(true)
 
 AT_DATA([prog.cob], [
        IDENTIFICATION   DIVISION.

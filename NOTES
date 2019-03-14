@@ -116,11 +116,23 @@ r839
 C    libcob/ChangeLog	 merged
 C    libcob/common.c	 merged
 
-
-
-
-
 r931
+--- Merging r858 into 'tests':
+C    tests/ChangeLog  merged
+C    tests/testsuite.src/configuration.at declined
+U    tests/testsuite.src/run_misc.at
+U    tests/testsuite.src/syn_definition.at
+Summary of conflicts:
+  Text conflicts: 2
+svn: E155015: One or more conflicts were produced while merging r857:858 into
+'/home/jklowden/projects/3rd/cobol/branches/pangaea' --
+resolve all conflicts and rerun the merge to apply the remaining
+unmerged revisions
+
+
+
+
+
 r935
 r936
 r1253
